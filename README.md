@@ -14,12 +14,12 @@ Click any badge below to open and run immediately in your browser. Selected chap
 
 ### Part I: Statistical Foundations
 
-| Chapter | Title | Colab Notebook |
-|---------|-------|----------------|
-| **1** | Analysis of Economics Data | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/quarcs-lab/metricsai/blob/main/notebooks_colab/ch01_Analysis_of_Economics_Data.ipynb) |
-| **2** | Univariate Data Summary | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/quarcs-lab/metricsai/blob/main/notebooks_colab/ch02_Univariate_Data_Summary.ipynb) |
-| **3** | The Sample Mean | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/quarcs-lab/metricsai/blob/main/notebooks_colab/ch03_The_Sample_Mean.ipynb) |
-| **4** | Statistical Inference for the Mean | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/quarcs-lab/metricsai/blob/main/notebooks_colab/ch04_Statistical_Inference_for_the_Mean.ipynb) |
+| Chapter | Title | Colab Notebook | Quiz |
+|---------|-------|----------------|------|
+| **1** | Analysis of Economics Data | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/quarcs-lab/metricsai/blob/main/notebooks_colab/ch01_Analysis_of_Economics_Data.ipynb) | [📝 Quiz](https://app.edcafe.ai/quizzes/69715fdb60956f50e60276b9) |
+| **2** | Univariate Data Summary | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/quarcs-lab/metricsai/blob/main/notebooks_colab/ch02_Univariate_Data_Summary.ipynb) | |
+| **3** | The Sample Mean | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/quarcs-lab/metricsai/blob/main/notebooks_colab/ch03_The_Sample_Mean.ipynb) | |
+| **4** | Statistical Inference for the Mean | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/quarcs-lab/metricsai/blob/main/notebooks_colab/ch04_Statistical_Inference_for_the_Mean.ipynb) | |
 
 ### Part II: Bivariate Regression
 
