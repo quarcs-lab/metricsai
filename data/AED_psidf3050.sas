@@ -1,0 +1,36 @@
+* I created November 2 2000
+* v32000=2 and v30809 ge 30 and v30809 le 50
+* So women between 30 and 50
+
+* SAS Data Definition Statements
+
+  The Panel Study of Income Dynamics
+
+  Subset created at 12:48 on 02NOV00 by the
+  PSID's World Wide Web based custom merging
+  and subsetting system;
+
+DATA PSID;
+INFILE "[DIRECTORY SPECIFICATIONS]p23108.dat" LRECL=25;
+INPUT
+V30001 1-4 
+V30002 5-7 
+V30809 8-9 
+V30820 10-11 
+V30821 12-17 
+V30823 18-21 
+V32000 22 
+V32022 23-24 
+V32049 25 
+;
+LABEL
+V30001="1968 INTERVIEW NUMBER" 
+V30002="PERSON NUMBER" 
+V30809="AGE OF INDIVIDUAL                     93" 
+V30820="G90 HIGHEST GRADE COMPLETED           93" 
+V30821="TOTAL LABOR INCOME                    93" 
+V30823="1992 ANNUAL WORK HOURS                93" 
+V32000="SEX OF INDIVIDUAL" 
+V32022="# LIVE BIRTHS TO THIS INDIVIDUAL" 
+V32049="LAST KNOWN MARITAL STATUS" 
+;
