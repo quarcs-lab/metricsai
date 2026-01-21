@@ -10,7 +10,7 @@ Designed as an interactive companion to Colin Cameron's textbook, [*Analysis of 
 
 ## 📓 Interactive Google Colab Notebooks
 
-Click any badge below to open and run immediately in your browser:
+Click any badge below to open and run immediately in your browser. Selected chapters include presentation slides and audio lectures available on the [project website](https://quarcs-lab.github.io/metricsai/).
 
 ### Part I: Statistical Foundations
 
