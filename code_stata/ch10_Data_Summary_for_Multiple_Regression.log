@@ -1,0 +1,499 @@
+
+. * ch10_Data_Summary_for_Multiple_Regression.do - January 2026 For Stata
+. * Updated for online execution portability
+. 
+. ********** OVERVIEW OF ch10_Data_Summary_for_Multiple_Regression.do *********
+> *
+. 
+. * STATA Program
+. * copyright C 2021 by A. Colin Cameron
+. * Used for "Analyis of Economics Data: An Introduction to Econometrics"
+. * by A. Colin Cameron (2021)
+. 
+. * To run you need file
+. *   AED_HOUSE.DTA
+. * in your directory
+. 
+. ********** SETUP **********
+. 
+. * Set random seed for reproducibility
+. set seed 42
+
+. 
+. * Clear all macros
+. macro drop _all
+
+. 
+. * GitHub data URL
+. global github_data_url "https://raw.githubusercontent.com/quarcs-lab/data-ope
+> n/master/AED/"
+
+. 
+. * Create output directories (optional - for saving figures and tables locally
+> )
+. cap mkdir "images"
+
+. cap mkdir "tables"
+
+. 
+. set more off
+
+. clear all
+
+. 
+. ************
+. 
+. * This STATA does analysis for Chapter 10
+. *  10.1 EXAMPLE: HOUSE PRICE AND CHARACTERISTICS
+. *  10.2 TWO-WAY SCATTERPLOTS
+. *  10.3 CORRELATION
+. *  10.4 REGRESSION LINE
+. *  10.5 ESTIMATED PARTIAL EFFECTS 
+. *  10.6 MODEL FIT
+. *  10.7 COMPUTER OUTPUT FOLLOWING MULTIPLE REGRESSION
+. *  10.8 INESTIMABLE MODELS
+. 
+. ********** DATA DESCRIPTION
+. 
+. * House sale price for 29 houses in Central Davis in 1999
+. *     29 observations on 9 variables 
+. 
+. ****  10.1 EXAMPLE: HOUSE PRICE AND CHARACTERISTICS
+. 
+. * Download and load data from GitHub
+. copy "${github_data_url}AED_HOUSE.DTA" "temp_data.dta", replace
+(file temp_data.dta not found)
+
+. use "temp_data.dta", clear
+(Data for A. Colin Cameron (2020): Analysis of Economics Data)
+
+. erase "temp_data.dta"
+
+. describe
+
+Contains data from temp_data.dta
+ Observations:            29                  Data for A. Colin Cameron
+                                                (2020): Analysis of Economics
+                                                Data
+    Variables:             8                  14 Jul 2020 18:06
+-------------------------------------------------------------------------------
+Variable      Storage   Display    Value
+    name         type    format    label      Variable label
+-------------------------------------------------------------------------------
+price           long    %12.0g                House sale price in dollars
+size            int     %8.0g                 House size in square feet
+bedrooms        byte    %8.0g                 Number of bedrooms
+bathrooms       float   %9.0g                 Number of Bathrooms
+lotsize         byte    %8.0g                 Size of lot: 1 > 2 > 3
+age             float   %9.0g                 House Age in Years
+monthsold       byte    %8.0g                 Month of year house was sold
+list            long    %12.0g                House list price in dollars
+-------------------------------------------------------------------------------
+Sorted by: price
+
+. 
+. * Table 10.1
+. summarize price size bedrooms bathroom lotsize age monthsold
+
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+       price |         29    253910.3    37390.71     204000     375000
+        size |         29    1882.759    398.2721       1400       3300
+    bedrooms |         29    3.793103    .6750296          3          6
+   bathrooms |         29    2.206897    .3411441          2          3
+     lotsize |         29    2.137931    .6930336          1          3
+-------------+---------------------------------------------------------
+         age |         29    36.41379    7.118975         23         51
+   monthsold |         29    5.965517    1.679344          3          8
+
+. 
+. * Table 10.2
+. list price size bedrooms bathroom lotsize age monthsold, clean
+
+        price   size   bedrooms   bathro~s   lotsize   age   months~d  
+  1.   204000   1400          3          2         1    31          7  
+  2.   212000   1600          3          3         2    33          5  
+  3.   213000   1800          3          2         2    51          4  
+  4.   220000   1600          3          2         1    49          4  
+  5.   224500   2100          4        2.5         2    47          6  
+  6.   229000   1700          4        2.5         2    35          3  
+  7.   230000   2100          4          2         2    34          8  
+  8.   233000   1700          3          2         1    40          6  
+  9.   235000   1700          4          2         2    29          7  
+ 10.   235000   1600          3          2         3    35          5  
+ 11.   236500   1600          3          2         3    23          8  
+ 12.   238000   1900          4          2         2    29          7  
+ 13.   239500   1600          3          2         3    34          6  
+ 14.   241000   1600          4          2         2    34          8  
+ 15.   244000   2000          4          2         1    29          7  
+ 16.   245000   1400          4          2         2    30          8  
+ 17.   249000   1900          4          3         3    37          6  
+ 18.   253000   2100          4          2         3    47          6  
+ 19.   255000   1500          4          2         3    47          7  
+ 20.   258500   1600          3          2         1    39          8  
+ 21.   270000   1800          4          2         3    31          3  
+ 22.   270000   2000          4        2.5         3    39          5  
+ 23.   272000   1800          4        2.5         2    46          3  
+ 24.   273000   1900          5          2         2    37          7  
+ 25.   278500   2600          6          2         3    38          8  
+ 26.   279900   2000          4          2         2    31          7  
+ 27.   310000   2300          4        2.5         2    28          5  
+ 28.   340000   2400          4          3         2    34          6  
+ 29.   375000   3300          4        2.5         2    39          3  
+
+. 
+. * Regression with and without control
+. regress price bedrooms
+
+      Source |       SS           df       MS      Number of obs   =        29
+-------------+----------------------------------   F(1, 27)        =      6.03
+       Model |  7.1466e+09         1  7.1466e+09   Prob > F        =    0.0208
+    Residual |  3.1999e+10        27  1.1852e+09   R-squared       =    0.1826
+-------------+----------------------------------   Adj R-squared   =    0.1523
+       Total |  3.9146e+10        28  1.3981e+09   Root MSE        =     34426
+
+------------------------------------------------------------------------------
+       price | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+    bedrooms |    23667.3   9637.976     2.46   0.021     3891.805    43442.79
+       _cons |   164137.8   37112.57     4.42   0.000     87989.13    240286.5
+------------------------------------------------------------------------------
+
+. regress price bedrooms size
+
+      Source |       SS           df       MS      Number of obs   =        29
+-------------+----------------------------------   F(2, 26)        =     21.03
+       Model |  2.4193e+10         2  1.2097e+10   Prob > F        =    0.0000
+    Residual |  1.4953e+10        26   575098535   R-squared       =    0.6180
+-------------+----------------------------------   Adj R-squared   =    0.5886
+       Total |  3.9146e+10        28  1.3981e+09   Root MSE        =     23981
+
+------------------------------------------------------------------------------
+       price | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+    bedrooms |   1553.458   7846.866     0.20   0.845    -14576.01    17682.92
+        size |   72.40815   13.29962     5.44   0.000     45.07039     99.7459
+       _cons |   111690.9   27589.07     4.05   0.000      54980.7      168401
+------------------------------------------------------------------------------
+
+. 
+. ****   10.2 TWO-WAY SCATTERPLOTS
+. 
+. * Figure 10.1
+. graph matrix price size bedrooms age
+
+. graph export "images/ch10_fig1.png", replace
+(file images/ch10_fig1.png not found)
+file images/ch10_fig1.png written in PNG format
+
+. 
+. ****  10.3 CORRELATION
+. 
+. * Table 10.3
+. correlate price size bedrooms bathroom lotsize age monthsold
+(obs=29)
+
+             |    price     size bedrooms bathro~s  lotsize      age months~d
+-------------+---------------------------------------------------------------
+       price |   1.0000
+        size |   0.7858   1.0000
+    bedrooms |   0.4273   0.5176   1.0000
+   bathrooms |   0.3298   0.3163   0.0374   1.0000
+     lotsize |   0.1535   0.1124   0.2922   0.1016   1.0000
+         age |  -0.0680   0.0769  -0.0261   0.0370  -0.0192   1.0000
+   monthsold |  -0.2100  -0.2145   0.1825  -0.3923  -0.0571  -0.3662   1.0000
+
+
+. pwcorr price size bedrooms bathroom lotsize age monthsold, sig star(.05)
+
+             |    price     size bedrooms bathro~s  lotsize      age months~d
+-------------+---------------------------------------------------------------
+       price |   1.0000 
+             |
+             |
+        size |   0.7858*  1.0000 
+             |   0.0000
+             |
+    bedrooms |   0.4273*  0.5176*  1.0000 
+             |   0.0208   0.0040
+             |
+   bathrooms |   0.3298   0.3163   0.0374   1.0000 
+             |   0.0806   0.0946   0.8471
+             |
+     lotsize |   0.1535   0.1124   0.2922   0.1016   1.0000 
+             |   0.4267   0.5614   0.1240   0.6001
+             |
+         age |  -0.0680   0.0769  -0.0261   0.0370  -0.0192   1.0000 
+             |   0.7259   0.6916   0.8929   0.8488   0.9212
+             |
+   monthsold |  -0.2100  -0.2145   0.1825  -0.3923* -0.0571  -0.3662   1.0000 
+             |   0.2743   0.2638   0.3433   0.0353   0.7684   0.0507
+             |
+
+. set textsize 150
+
+. 
+. ****  10.4 REGRESSION LINE
+. 
+. * Multivariate regression
+. regress price size bedrooms bathroom lotsize age monthsold
+
+      Source |       SS           df       MS      Number of obs   =        29
+-------------+----------------------------------   F(6, 22)        =      6.83
+       Model |  2.5466e+10         6  4.2444e+09   Prob > F        =    0.0003
+    Residual |  1.3679e+10        22   621790812   R-squared       =    0.6506
+-------------+----------------------------------   Adj R-squared   =    0.5552
+       Total |  3.9146e+10        28  1.3981e+09   Root MSE        =     24936
+
+------------------------------------------------------------------------------
+       price | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+        size |   68.36942   15.38947     4.44   0.000     36.45361    100.2852
+    bedrooms |   2685.315   9192.526     0.29   0.773    -16378.82    21749.45
+   bathrooms |    6832.88   15721.19     0.43   0.668    -25770.88    39436.64
+     lotsize |   2303.221   7226.535     0.32   0.753     -12683.7    17290.14
+         age |  -833.0386   719.3345    -1.16   0.259    -2324.847    658.7699
+   monthsold |  -2088.504   3520.898    -0.59   0.559    -9390.399    5213.392
+       _cons |   137791.1   61464.95     2.24   0.035     10320.56    265261.6
+------------------------------------------------------------------------------
+
+. 
+. * Demonstrate that can get from bivariate regression on a residual
+. regress size bedrooms bathroom lotsize age monthsold
+
+      Source |       SS           df       MS      Number of obs   =        29
+-------------+----------------------------------   F(5, 23)        =      3.18
+       Model |  1815970.91         5  363194.182   Prob > F        =    0.0251
+    Residual |   2625408.4        23  114148.191   R-squared       =    0.4089
+-------------+----------------------------------   Adj R-squared   =    0.2804
+       Total |  4441379.31        28   158620.69   Root MSE        =    337.86
+
+------------------------------------------------------------------------------
+        size | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+    bedrooms |   343.4187   101.9082     3.37   0.003     132.6055    554.2319
+   bathrooms |   241.7738   206.9573     1.17   0.255    -186.3499    669.8975
+     lotsize |  -53.44017   97.27735    -0.55   0.588    -254.6737    147.7934
+         age |  -.4500689   9.745927    -0.05   0.964    -20.61105    19.71092
+   monthsold |  -58.75824   46.10506    -1.27   0.215    -154.1338    36.61734
+       _cons |   527.7295   825.4966     0.64   0.529     -1179.94    2235.399
+------------------------------------------------------------------------------
+
+. predict res_size, resid
+
+. regress price res_size
+
+      Source |       SS           df       MS      Number of obs   =        29
+-------------+----------------------------------   F(1, 27)        =     12.33
+       Model |  1.2272e+10         1  1.2272e+10   Prob > F        =    0.0016
+    Residual |  2.6874e+10        27   995321377   R-squared       =    0.3135
+-------------+----------------------------------   Adj R-squared   =    0.2881
+       Total |  3.9146e+10        28  1.3981e+09   Root MSE        =     31549
+
+------------------------------------------------------------------------------
+       price | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+    res_size |   68.36942   19.47078     3.51   0.002     28.41869    108.3202
+       _cons |   253910.3   5858.449    43.34   0.000     241889.8    265930.9
+------------------------------------------------------------------------------
+
+. 
+. ****  10.5 ESTIMATED PARTIAL EFFECTS 
+. 
+. *****  10.6 MODEL FIT
+. 
+. regress price size bedrooms bathroom lotsize age monthsold
+
+      Source |       SS           df       MS      Number of obs   =        29
+-------------+----------------------------------   F(6, 22)        =      6.83
+       Model |  2.5466e+10         6  4.2444e+09   Prob > F        =    0.0003
+    Residual |  1.3679e+10        22   621790812   R-squared       =    0.6506
+-------------+----------------------------------   Adj R-squared   =    0.5552
+       Total |  3.9146e+10        28  1.3981e+09   Root MSE        =     24936
+
+------------------------------------------------------------------------------
+       price | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+        size |   68.36942   15.38947     4.44   0.000     36.45361    100.2852
+    bedrooms |   2685.315   9192.526     0.29   0.773    -16378.82    21749.45
+   bathrooms |    6832.88   15721.19     0.43   0.668    -25770.88    39436.64
+     lotsize |   2303.221   7226.535     0.32   0.753     -12683.7    17290.14
+         age |  -833.0386   719.3345    -1.16   0.259    -2324.847    658.7699
+   monthsold |  -2088.504   3520.898    -0.59   0.559    -9390.399    5213.392
+       _cons |   137791.1   61464.95     2.24   0.035     10320.56    265261.6
+------------------------------------------------------------------------------
+
+. 
+. * R-squared is squared correlation between yhat and y
+. regress price size bedrooms bathroom lotsize age monthsold
+
+      Source |       SS           df       MS      Number of obs   =        29
+-------------+----------------------------------   F(6, 22)        =      6.83
+       Model |  2.5466e+10         6  4.2444e+09   Prob > F        =    0.0003
+    Residual |  1.3679e+10        22   621790812   R-squared       =    0.6506
+-------------+----------------------------------   Adj R-squared   =    0.5552
+       Total |  3.9146e+10        28  1.3981e+09   Root MSE        =     24936
+
+------------------------------------------------------------------------------
+       price | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+        size |   68.36942   15.38947     4.44   0.000     36.45361    100.2852
+    bedrooms |   2685.315   9192.526     0.29   0.773    -16378.82    21749.45
+   bathrooms |    6832.88   15721.19     0.43   0.668    -25770.88    39436.64
+     lotsize |   2303.221   7226.535     0.32   0.753     -12683.7    17290.14
+         age |  -833.0386   719.3345    -1.16   0.259    -2324.847    658.7699
+   monthsold |  -2088.504   3520.898    -0.59   0.559    -9390.399    5213.392
+       _cons |   137791.1   61464.95     2.24   0.035     10320.56    265261.6
+------------------------------------------------------------------------------
+
+. display e(r2)
+.65055284
+
+. predict pprice
+(option xb assumed; fitted values)
+
+. correlate price pprice
+(obs=29)
+
+             |    price   pprice
+-------------+------------------
+       price |   1.0000
+      pprice |   0.8066   1.0000
+
+
+. display r(rho)^2
+.6505529
+
+. 
+. * Compute adjusted R-squared
+. display "Adjusted R-squared = " e(r2) - (e(df_m)/e(df_r))*(1-e(r2))
+Adjusted R-squared = .55524907
+
+. 
+. * Information criteria
+. estat ic
+
+Akaike's information criterion and Bayesian information criterion
+
+-----------------------------------------------------------------------------
+       Model |          N   ll(null)  ll(model)      df        AIC        BIC
+-------------+---------------------------------------------------------------
+           . |         29  -345.9865  -330.7412       7   675.4824   685.0535
+-----------------------------------------------------------------------------
+Note: BIC uses N = number of observations. See [R] IC note.
+
+. 
+. * Information criteria manually
+. display "AIC = " e(N)*ln(e(rss)/e(N)) + e(N)*(1+ln(2*_pi)) + 2*e(rank)
+AIC = 675.4824
+
+. display "BIC = " e(N)*ln(e(rss)/e(N)) + e(N)*(1+ln(2*_pi)) + e(rank)*ln(e(N))
+BIC = 685.05347
+
+. 
+. *****  10.7 COMPUTER OUTPUT FOLLOWING REGRESSION
+. 
+. * Table 10.4
+. regress price size bedrooms
+
+      Source |       SS           df       MS      Number of obs   =        29
+-------------+----------------------------------   F(2, 26)        =     21.03
+       Model |  2.4193e+10         2  1.2097e+10   Prob > F        =    0.0000
+    Residual |  1.4953e+10        26   575098535   R-squared       =    0.6180
+-------------+----------------------------------   Adj R-squared   =    0.5886
+       Total |  3.9146e+10        28  1.3981e+09   Root MSE        =     23981
+
+------------------------------------------------------------------------------
+       price | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+        size |   72.40815   13.29962     5.44   0.000     45.07039     99.7459
+    bedrooms |   1553.458   7846.866     0.20   0.845    -14576.01    17682.92
+       _cons |   111690.9   27589.07     4.05   0.000      54980.7      168401
+------------------------------------------------------------------------------
+
+. estimates store OUTPUT
+
+. estimates table OUTPUT, b(%11.2f) se(%11.2f) stats(r2 N)
+
+----------------------------
+    Variable |   OUTPUT     
+-------------+--------------
+        size |       72.41  
+             |       13.30  
+    bedrooms |     1553.46  
+             |     7846.87  
+       _cons |   111690.86  
+             |    27589.07  
+-------------+--------------
+          r2 |        0.62  
+           N |          29  
+----------------------------
+                Legend: b/se
+
+. estimates table OUTPUT, b(%11.2f) t(%11.2f) stats(r2 N)
+
+----------------------------
+    Variable |   OUTPUT     
+-------------+--------------
+        size |       72.41  
+             |        5.44  
+    bedrooms |     1553.46  
+             |        0.20  
+       _cons |   111690.86  
+             |        4.05  
+-------------+--------------
+          r2 |        0.62  
+           N |          29  
+----------------------------
+                 Legend: b/t
+
+. estimates table OUTPUT, b(%11.2f) p(%11.3f) stats(r2 N)
+
+----------------------------
+    Variable |   OUTPUT     
+-------------+--------------
+        size |       72.41  
+             |       0.000  
+    bedrooms |     1553.46  
+             |       0.845  
+       _cons |   111690.86  
+             |       0.000  
+-------------+--------------
+          r2 |        0.62  
+           N |          29  
+----------------------------
+                 Legend: b/p
+
+. estimates table OUTPUT, b(%11.2f) star(.10 .05 .01) stats(r2 N)
+
+-------------------------------
+    Variable |     OUTPUT      
+-------------+-----------------
+        size |       72.41***  
+    bedrooms |     1553.46     
+       _cons |   111690.86***  
+-------------+-----------------
+          r2 |        0.62     
+           N |          29     
+-------------------------------
+Legend: * p<.1; ** p<.05; *** p<.01
+
+. 
+. *****  10.8 INESTIMABLE MODELS
+. 
+. ********** CLOSE OUTPUT
+. 
+. display ""
+
+
+. display "Chapter 10 analysis complete."
+Chapter 10 analysis complete.
+
+. display "Figures saved to: images/"
+Figures saved to: images/
+
+. display "Tables saved to: tables/"
+Tables saved to: tables/
+
+. 
+end of do-file

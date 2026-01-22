@@ -1,0 +1,754 @@
+
+. * ch04_Statistical_Inference_for_the_Mean.do - January 2026 For Stata
+. * Updated for online execution portability
+. 
+. ********** OVERVIEW OF ch04_Statistical_Inference_for_the_Mean.do **********
+. 
+. * STATA Program
+. * copyright C 2021 by A. Colin Cameron
+. * Used for "Analyis of Economics Data: An Introduction to Econometrics"
+. * by A. Colin Cameron (2021)
+. 
+. * To run you need file
+. *   AED_EARNINGS.DTA
+. *   AED_GASPRICE.DTA
+. *   AED_EARNINGSMALE.DTA
+. *   AED_REALGDPPC.DTA
+. * in your directory
+. 
+. ********** SETUP **********
+. 
+. * Set random seed for reproducibility
+. set seed 42
+
+. 
+. * Clear all macros
+. macro drop _all
+
+. 
+. * GitHub data URL
+. global github_data_url "https://raw.githubusercontent.com/quarcs-lab/data-ope
+> n/master/AED/"
+
+. 
+. * Create output directories (optional - for saving figures and tables locally
+> )
+. cap mkdir "images"
+
+. cap mkdir "tables"
+
+. 
+. set more off
+
+. clear all
+
+. 
+. ************
+. 
+. * This STATA program does analysis for Chapter 4
+. *   4.1 EXAMPLE: MEAN ANNUAL EARNINGS
+. *   4.2 t STATISTIC AND t DISTRIBUTION
+. *   4.3 CONFIDENCE INTERVALS
+. *   4.4 TWO-SIDED HYPOTHESIS TESTS
+. *   4.5 TWO-SIDED HYPOTHESIS TEST EXAMPLES
+. *   4.6 ONE-SIDED DIRECTIONAL HYPOTHESIS TESTS
+. *   4.7 GENERALIZATIONS OF CONFIDENCE INTERVALS AND HYPOTHESIS TESTS
+. *   4.8 PROPORTIONS DATA
+. 
+. ********** DATA DESCRIPTION
+. 
+. *  (1) Annual Earnings for 171 women age 30 years in 2010 Full-time workers
+. *  (2) Gasloine price per gallon at 32 service stations
+. *  (3) Annual Earnings for 191 men age 30 years in 2010 Full-time workers
+. *  (4) Quarterly data on U.S. real GDP per capita from 1959Q1 to 2020Q1
+. 
+. **** 4.1 EXAMPLE: MEAN ANNUAL EARNINGS
+. 
+. * Download and load data from GitHub
+. clear
+
+. copy "${github_data_url}AED_EARNINGS.DTA" "temp_data.dta", replace
+(file temp_data.dta not found)
+
+. use "temp_data.dta", clear
+(Data for A. Colin Cameron (2020): Analysis of Economics Data)
+
+. erase "temp_data.dta"
+
+. describe
+
+Contains data from temp_data.dta
+ Observations:           171                  Data for A. Colin Cameron
+                                                (2020): Analysis of Economics
+                                                Data
+    Variables:             4                  14 Jul 2020 18:06
+-------------------------------------------------------------------------------
+Variable      Storage   Display    Value
+    name         type    format    label      Variable label
+-------------------------------------------------------------------------------
+earnings        long    %12.0g                Annual earnings (in dollars)
+education       byte    %8.0g                 Years of completed schooling
+age             byte    %8.0g                 Age in Years
+gender          float   %9.0g                 =0 if female and =1 if male
+-------------------------------------------------------------------------------
+Sorted by: 
+
+. summarize
+
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+    earnings |        171    41412.69    25527.05       1050     172000
+   education |        171    14.43275    2.735364          3         20
+         age |        171          30           0         30         30
+      gender |        171           0           0          0          0
+
+. 
+. * Summary statisitcs
+. summarize earnings
+
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+    earnings |        171    41412.69    25527.05       1050     172000
+
+. 
+. * 95% Confidence interval
+. mean earnings
+
+Mean estimation                            Number of obs = 171
+
+--------------------------------------------------------------
+             |       Mean   Std. err.     [95% conf. interval]
+-------------+------------------------------------------------
+    earnings |   41412.69   1952.103      37559.21    45266.17
+--------------------------------------------------------------
+
+. 
+. * Hypothesis test
+. ttest earnings = 40000
+
+One-sample t test
+------------------------------------------------------------------------------
+Variable |     Obs        Mean    Std. err.   Std. dev.   [95% conf. interval]
+---------+--------------------------------------------------------------------
+earnings |     171    41412.69    1952.103    25527.05    37559.21    45266.17
+------------------------------------------------------------------------------
+    mean = mean(earnings)                                         t =   0.7237
+H0: mean = 40000                                 Degrees of freedom =      170
+
+  Ha: mean < 40000             Ha: mean != 40000             Ha: mean > 40000
+ Pr(T < t) = 0.7649         Pr(|T| > |t|) = 0.4703          Pr(T > t) = 0.2351
+
+. 
+. ****  4.2 t Statistic and t DISTRIBUTION
+. 
+. * Plot densities of standard normal and t distributions with 4 and 30 degrees
+>  of freedom
+. 
+. * Figure 4.1 - use twoway function
+. graph twoway (function t5 = tden(5,x), range(-3.5 3.5)) ///
+>     (function z = normalden(x), range(-3.5 3.5) lpattern(dash))
+
+. graph twoway (function t50 = tden(50,x), range(-3.5 3.5)) ///
+>     (function z = normalden(x), range(-3.5 3.5) lpattern(dash))
+
+. graph export "images/ch04_fig1.png", replace
+(file images/ch04_fig1.png not found)
+file images/ch04_fig1.png written in PNG format
+
+. 
+. * Figure 4.2 requires generating a variable first in order to use area graph1
+. 
+. * Generate t(170) data
+. clear
+
+. global nobs = 1000
+
+. set obs $nobs
+Number of observations (_N) was 0, now 1,000.
+
+. generate x = -3.5 + _n/($nobs/7)
+
+. generate t170 = tden(170,x)
+
+. 
+. * Obtain the critical values
+. scalar tpoint05 = invttail(170,.05)
+
+. display "Critical value= " tpoint05
+Critical value= 1.6538663
+
+. scalar tpoint025 = invttail(170,.025)
+
+. display "Critical value= " tpoint025
+Critical value= 1.9740167
+
+. 
+. graph twoway (area t170 x if (x>tpoint05), color(gs9))  ///
+>     (line t170 x, lwidth(thick) lstyle(p1))
+
+. graph twoway (area t170 x if (x>tpoint025), color(gs9)) ///
+>     (area t170 x if (x<-tpoint025), color(gs9))         ///
+>     (line t170 x, lwidth(thick) lstyle(p1)), legend(off)
+
+. graph export "images/ch04_fig2.png", replace
+(file images/ch04_fig2.png not found)
+file images/ch04_fig2.png written in PNG format
+
+. 
+. **** 4.3 CONFIDENCE INTERVALS
+. 
+. * Download and load data from GitHub
+. clear
+
+. copy "${github_data_url}AED_EARNINGS.DTA" "temp_data.dta", replace
+(file temp_data.dta not found)
+
+. use "temp_data.dta", clear
+(Data for A. Colin Cameron (2020): Analysis of Economics Data)
+
+. erase "temp_data.dta"
+
+. summarize
+
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+    earnings |        171    41412.69    25527.05       1050     172000
+   education |        171    14.43275    2.735364          3         20
+         age |        171          30           0         30         30
+      gender |        171           0           0          0          0
+
+. 
+. * 95% Confidence interval
+. mean earnings
+
+Mean estimation                            Number of obs = 171
+
+--------------------------------------------------------------
+             |       Mean   Std. err.     [95% conf. interval]
+-------------+------------------------------------------------
+    earnings |   41412.69   1952.103      37559.21    45266.17
+--------------------------------------------------------------
+
+. 
+. * 90% and 99% confidence intervals
+. mean earnings, level(90)
+
+Mean estimation                            Number of obs = 171
+
+--------------------------------------------------------------
+             |       Mean   Std. err.     [90% conf. interval]
+-------------+------------------------------------------------
+    earnings |   41412.69   1952.103      38184.17    44641.21
+--------------------------------------------------------------
+
+. mean earnings, level(99)
+
+Mean estimation                            Number of obs = 171
+
+--------------------------------------------------------------
+             |       Mean   Std. err.     [99% conf. interval]
+-------------+------------------------------------------------
+    earnings |   41412.69   1952.103      36327.35    46498.03
+--------------------------------------------------------------
+
+. 
+. * Confidence interval manually
+. * This uses command summarize stores the number of observations in r(N)
+. * the mean in r(mean), and the standard deviation in r(sd)
+. quietly summarize earnings
+
+. scalar mean = r(mean)
+
+. scalar tcrit = invttail(r(N)-1,.025)
+
+. scalar sterror = r(sd)/sqrt(r(N))
+
+. scalar intwidth = tcrit*sterror
+
+. display "mean = " mean _n "t_.025;n-1 = " tcrit _n "standard error = " ///
+>     sterror _n "interval width = " intwidth ///
+>     " 95% confidence interval = (" mean-intwidth ", "  mean+intwidth ")"
+mean = 41412.69
+t_.025;n-1 = 1.9740167
+standard error = 1952.1026
+interval width = 3853.4831 95% confidence interval = (37559.207, 45266.173)
+
+. 
+. * 90% and 99% critical values
+. display "t_.05;n-1 = " invttail(r(N)-1,.05)
+t_.05;n-1 = 1.6538663
+
+. display "t_.005;n-1 = " invttail(r(N)-1,.005)
+t_.005;n-1 = 2.6050584
+
+. 
+. **** 4.4 TWO-SIDED HYPOTHESIS TEST
+. 
+. * Test H0: mu = 40000 against HA: mu not = 40000 using Stata command ttest
+. * This also does one-sided tests - in both directions.
+. ttest earnings = 40000
+
+One-sample t test
+------------------------------------------------------------------------------
+Variable |     Obs        Mean    Std. err.   Std. dev.   [95% conf. interval]
+---------+--------------------------------------------------------------------
+earnings |     171    41412.69    1952.103    25527.05    37559.21    45266.17
+------------------------------------------------------------------------------
+    mean = mean(earnings)                                         t =   0.7237
+H0: mean = 40000                                 Degrees of freedom =      170
+
+  Ha: mean < 40000             Ha: mean != 40000             Ha: mean > 40000
+ Pr(T < t) = 0.7649         Pr(|T| > |t|) = 0.4703          Pr(T > t) = 0.2351
+
+. 
+. * Same two-sided test done manually
+. * This uses command summarize stores the number of observations in r(N)
+. * the mean in r(mean), and the standard deviation in r(sd)
+. scalar mu0 = 40000
+
+. summarize earnings
+
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+    earnings |        171    41412.69    25527.05       1050     172000
+
+. scalar t = (r(mean)-mu0)/(r(sd)/sqrt(r(N)))
+
+. display "t = " t
+t = .72367615
+
+. * Compute the p-value
+. display "p value = " 2*ttail(r(N)-1,abs(t))
+p value = .4702592
+
+. * Compute the critical value at 5%
+. display invttail(r(N)-1,.025)
+1.9740167
+
+. 
+. * Figure 4.3 shows graphically
+. * Generate t(170) data
+. clear
+
+. global nobs = 1000
+
+. set obs $nobs
+Number of observations (_N) was 0, now 1,000.
+
+. generate x = -3.5 + _n/($nobs/7)
+
+. generate t = tden(170,x)
+
+. scalar tpoint025 = invttail(170,.025)
+
+. display "Case t=.723 and p=.470"
+Case t=.723 and p=.470
+
+. * P value approach
+. graph twoway (area t x if (x<-.723), color(gs9))              ///
+>     (area t x if (x>.724), color(gs9)) (line t x), legend(off)
+
+. * Critical value approach
+. graph twoway (area t x if (x>tpoint025), color(gs9))                ///
+>     (area t x if (x<-tpoint025), color(gs9)) (line t x), legend(off)
+
+.         
+. ****   4.5 TWO-SIDED HYPOTHESIS TEST EXAMPLES
+. 
+. * Gasoline data collected September 3 2013 good for September 2 2013
+. * from sactogasprices.com part of GasBuddy.com
+. * Download and load data from GitHub
+. clear
+
+. copy "${github_data_url}AED_GASPRICE.DTA" "temp_data.dta", replace
+(file temp_data.dta not found)
+
+. use "temp_data.dta", clear
+(Data for A. Colin Cameron (2020): Analysis of Economics Data)
+
+. erase "temp_data.dta"
+
+. describe
+
+Contains data from temp_data.dta
+ Observations:            32                  Data for A. Colin Cameron
+                                                (2020): Analysis of Economics
+                                                Data
+    Variables:             2                  14 Jul 2020 18:06
+-------------------------------------------------------------------------------
+Variable      Storage   Display    Value
+    name         type    format    label      Variable label
+-------------------------------------------------------------------------------
+city            str14   %14s                  City
+price           float   %9.0g                 Price unleaded gasoline ($ per
+                                                gal) Davis area 9/2/2013
+-------------------------------------------------------------------------------
+Sorted by: 
+
+. summarize
+
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+        city |          0
+       price |         32    3.669687    .1509643       3.49       4.09
+
+. ttest price = 3.81
+
+One-sample t test
+------------------------------------------------------------------------------
+Variable |     Obs        Mean    Std. err.   Std. dev.   [95% conf. interval]
+---------+--------------------------------------------------------------------
+   price |      32    3.669687     .026687    .1509643    3.615259    3.724116
+------------------------------------------------------------------------------
+    mean = mean(price)                                            t =  -5.2577
+H0: mean = 3.81                                  Degrees of freedom =       31
+
+   Ha: mean < 3.81             Ha: mean != 3.81               Ha: mean > 3.81
+ Pr(T < t) = 0.0000         Pr(|T| > |t|) = 0.0000          Pr(T > t) = 1.0000
+
+. scalar t = (3.6697-3.81)/(0.1510/sqrt(32))
+
+. display "t = " t " p = " 2*ttail(32,abs(t))
+t = -5.2560043 p = 9.435e-06
+
+. display invttail(31,.025)
+2.0395134
+
+. 
+. * Male Earnings
+. * Download and load data from GitHub
+. clear
+
+. copy "${github_data_url}AED_EARNINGSMALE.DTA" "temp_data.dta", replace
+(file temp_data.dta not found)
+
+. use "temp_data.dta", clear
+(Data for A. Colin Cameron (2020): Analysis of Economics Data)
+
+. erase "temp_data.dta"
+
+. describe
+
+Contains data from temp_data.dta
+ Observations:           191                  Data for A. Colin Cameron
+                                                (2020): Analysis of Economics
+                                                Data
+    Variables:             4                  14 Jul 2020 18:06
+-------------------------------------------------------------------------------
+Variable      Storage   Display    Value
+    name         type    format    label      Variable label
+-------------------------------------------------------------------------------
+earnings        long    %12.0g                Annual earnings (in dollars)
+education       byte    %8.0g                 Years of completed schooling
+age             byte    %8.0g                 Age in Years
+gender          float   %9.0g                 =1 if male and =0 if female
+-------------------------------------------------------------------------------
+Sorted by: 
+
+. summarize
+
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+    earnings |        191    52353.93    65034.74          1     498000
+   education |        191    13.43455    3.007825          0         20
+         age |        191          30           0         30         30
+      gender |        191           1           0          1          1
+
+. summarize, detail
+
+                Annual earnings (in dollars)
+-------------------------------------------------------------
+      Percentiles      Smallest
+ 1%         8000              1
+ 5%        13000           8000
+10%        17800           8000       Obs                 191
+25%        25000           9500       Sum of wgt.         191
+
+50%        38000                      Mean           52353.93
+                        Largest       Std. dev.      65034.74
+75%        60000         242000
+90%        81000         498000       Variance       4.23e+09
+95%       108000         498000       Skewness       5.349785
+99%       498000         498000       Kurtosis       35.75837
+
+                Years of completed schooling
+-------------------------------------------------------------
+      Percentiles      Smallest
+ 1%            0              0
+ 5%            9              0
+10%           12              3       Obs                 191
+25%           12              5       Sum of wgt.         191
+
+50%           13                      Mean           13.43455
+                        Largest       Std. dev.      3.007825
+75%           16             18
+90%           18             18       Variance        9.04701
+95%           18             20       Skewness      -1.130101
+99%           20             20       Kurtosis       7.026748
+
+                        Age in Years
+-------------------------------------------------------------
+      Percentiles      Smallest
+ 1%           30             30
+ 5%           30             30
+10%           30             30       Obs                 191
+25%           30             30       Sum of wgt.         191
+
+50%           30                      Mean                 30
+                        Largest       Std. dev.             0
+75%           30             30
+90%           30             30       Variance              0
+95%           30             30       Skewness              .
+99%           30             30       Kurtosis              .
+
+                 =1 if male and =0 if female
+-------------------------------------------------------------
+      Percentiles      Smallest
+ 1%            1              1
+ 5%            1              1
+10%            1              1       Obs                 191
+25%            1              1       Sum of wgt.         191
+
+50%            1                      Mean                  1
+                        Largest       Std. dev.             0
+75%            1              1
+90%            1              1       Variance              0
+95%            1              1       Skewness              .
+99%            1              1       Kurtosis              .
+
+. 
+. * Test H0: mu = 50000 against HA: mu not = 50000
+. ttest earnings = 50000
+
+One-sample t test
+------------------------------------------------------------------------------
+Variable |     Obs        Mean    Std. err.   Std. dev.   [95% conf. interval]
+---------+--------------------------------------------------------------------
+earnings |     191    52353.93    4705.748    65034.74    43071.71    61636.15
+------------------------------------------------------------------------------
+    mean = mean(earnings)                                         t =   0.5002
+H0: mean = 50000                                 Degrees of freedom =      190
+
+  Ha: mean < 50000             Ha: mean != 50000             Ha: mean > 50000
+ Pr(T < t) = 0.6913         Pr(|T| > |t|) = 0.6175          Pr(T > t) = 0.3087
+
+. scalar t = (52353.93-50000)/(65034.74/sqrt(191))
+
+. display "t = " t " p = " 2*ttail(191,abs(t))
+t = .50022434 p = .61749297
+
+. display invttail(190,.025)
+1.9725282
+
+. 
+. * Growth per capita
+. * Download and load data from GitHub
+. clear
+
+. copy "${github_data_url}AED_REALGDPPC.DTA" "temp_data.dta", replace
+(file temp_data.dta not found)
+
+. use "temp_data.dta", clear
+(Data for A. Colin Cameron (2020): Analysis of Economics Data)
+
+. erase "temp_data.dta"
+
+. describe
+
+Contains data from temp_data.dta
+ Observations:           245                  Data for A. Colin Cameron
+                                                (2020): Analysis of Economics
+                                                Data
+    Variables:            12                  14 Jul 2020 18:06
+-------------------------------------------------------------------------------
+Variable      Storage   Display    Value
+    name         type    format    label      Variable label
+-------------------------------------------------------------------------------
+gdpc1           double  %10.0g                Real GDP in Billions of 2012 $
+gdp             double  %10.0g                Nominal GDP in Billions of
+                                                current $
+gdpdef          double  %10.0g                GDP deflator 2012 = 100
+date            str10   %10s                  fed string date
+daten           float   %td                   Days from start 1960: 1960 Jan 1
+                                                = 0
+quarter         float   %9.0g                 Quarters from start 1960: 1960q1
+                                                = 0
+popthm          double  %10.0g                Population
+year            float   %9.0g                 Year
+realgdp         float   %9.0g                 Real GDP in billions of 2012 $
+gdppc           float   %9.0g                 GDP per capita in current $
+realgdppc       float   %9.0g                 Real GDP per capita in 2012 $
+growth          float   %9.0g                 Annual growth in real GDP per
+                                                capita
+-------------------------------------------------------------------------------
+Sorted by: quarter
+
+. sum
+
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+       gdpc1 |        245    9925.245    4814.025   3121.936   19221.97
+         gdp |        245    7401.456    6331.002     510.33   21729.12
+      gdpdef |        245    59.71762    31.19563     16.347    113.502
+        date |          0
+       daten |        245    10774.47    6471.275       -365      21915
+-------------+---------------------------------------------------------
+     quarter |        245         118     70.8696         -4        240
+      popthm |        245    253116.9    45611.79     176044     329527
+        year |        245    1989.127    17.71786       1959       2020
+     realgdp |        245    9925.241    4814.026   3121.857      19222
+       gdppc |        245    25841.47    19184.69   2898.856   66008.59
+-------------+---------------------------------------------------------
+   realgdppc |        245     37050.5    12089.68   17733.26   58392.45
+      growth |        241    1.990456    2.178097  -4.772172   7.630545
+
+. 
+. * Test H0: mu = 2.0 against HA: mu not = 2.0
+. ttest growth = 2.0
+
+One-sample t test
+------------------------------------------------------------------------------
+Variable |     Obs        Mean    Std. err.   Std. dev.   [95% conf. interval]
+---------+--------------------------------------------------------------------
+  growth |     241    1.990456    .1403036    2.178097    1.714073     2.26684
+------------------------------------------------------------------------------
+    mean = mean(growth)                                           t =  -0.0680
+H0: mean = 2.0                                   Degrees of freedom =      240
+
+   Ha: mean < 2.0               Ha: mean != 2.0               Ha: mean > 2.0
+ Pr(T < t) = 0.4729         Pr(|T| > |t|) = 0.9458          Pr(T > t) = 0.5271
+
+. scalar t = (1.9904-2.0)/(2.1781/sqrt(241))
+
+. display "t = " t " p = " 2*ttail(241,abs(t))
+t = -.06842297 p = .94550567
+
+. display invttail(240,.025)
+1.9698976
+
+. 
+. * For HAC standard errors see code for chapter 12.1 
+. 
+. **** 4.6 ONE-SIDED DIRECTIONAL HYPOTHESIS TESTS
+. 
+. * Figure 4.4 shows graphically one-sided test
+. * Generate t(170) data
+. clear
+
+. global nobs = 1000
+
+. set obs $nobs
+Number of observations (_N) was 0, now 1,000.
+
+. generate x = -3.5 + _n/($nobs/7)
+
+. generate t = tden(170,x)
+
+. scalar tpoint05 = invttail(170,.05)
+
+. display "Case t=.723 and p=.235"
+Case t=.723 and p=.235
+
+. * P value approach
+. graph twoway (area t x if (x>.724), color(gs9)) (line t x)
+
+. * Critical value approach
+. graph twoway (area t x if (x>tpoint05), color(gs9)) (line t x)
+
+. 
+. * One-sided test example
+. 
+. * Download and load data from GitHub
+. clear
+
+. copy "${github_data_url}AED_EARNINGS.DTA" "temp_data.dta", replace
+(file temp_data.dta not found)
+
+. use "temp_data.dta", clear
+(Data for A. Colin Cameron (2020): Analysis of Economics Data)
+
+. erase "temp_data.dta"
+
+. 
+. * Test H0: mu < 40000 against HA: mu >= 40000 using Stata command ttest
+. ttest earnings = 40000
+
+One-sample t test
+------------------------------------------------------------------------------
+Variable |     Obs        Mean    Std. err.   Std. dev.   [95% conf. interval]
+---------+--------------------------------------------------------------------
+earnings |     171    41412.69    1952.103    25527.05    37559.21    45266.17
+------------------------------------------------------------------------------
+    mean = mean(earnings)                                         t =   0.7237
+H0: mean = 40000                                 Degrees of freedom =      170
+
+  Ha: mean < 40000             Ha: mean != 40000             Ha: mean > 40000
+ Pr(T < t) = 0.7649         Pr(|T| > |t|) = 0.4703          Pr(T > t) = 0.2351
+
+. 
+. * Same one-sided test done manually
+. scalar mu0 = 40000
+
+. summarize earnings 
+
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+    earnings |        171    41412.69    25527.05       1050     172000
+
+. scalar t = (r(mean)-mu0)/(r(sd)/sqrt(r(N)))
+
+. display "t = " t
+t = .72367615
+
+. * Compute the p-value
+. display "p value = " ttail(r(N)-1,t)
+p value = .2351296
+
+. * Compute the critical value at 5% 
+. display invttail(r(N)-1,.05)
+1.6538663
+
+. 
+. *** 4.7 GENERALIZATIONS OF CONFIDENCE INTERVALS AND HYPOTHESIS TESTS
+. 
+. **** 4.8 PROPORTIONS DATA
+. 
+. clear
+
+. scalar mean = (480*1+441*0)/921
+
+. scalar sterror = sqrt( (mean*(1-mean)) / 921)
+
+. display "mean = " mean "  standard error = " sterror
+mean = .52117264  standard error = .01646078
+
+. display "95% CI = " mean-1.964*sterror " , " mean+1.964*sterror
+95% CI = .48884366 , .55350161
+
+. 
+. scalar sterrorH0 = sqrt( (0.5*(1-0.5)) / 921)
+
+. scalar t = (mean - 0.5) / sterrorH0
+
+. scalar p = 2*(1-normal(abs(t)))
+
+. display "t = " t " p = " p
+t = 1.2850937 p = .19875955
+
+. 
+. ********** CLOSE OUTPUT
+. 
+. display ""
+
+
+. display "Chapter 04 analysis complete."
+Chapter 04 analysis complete.
+
+. display "Figures saved to: images/"
+Figures saved to: images/
+
+. display "Tables saved to: tables/"
+Tables saved to: tables/
+
+. 
+end of do-file

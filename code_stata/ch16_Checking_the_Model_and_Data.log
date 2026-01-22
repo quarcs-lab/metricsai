@@ -1,0 +1,1163 @@
+
+. * ch16_Checking_the_Model_and_Data.do - January 2026 For Stata
+. * Updated for online execution portability
+. 
+. ********** OVERVIEW OF ch16_Checking_the_Model_and_Data.do **********
+. 
+. * STATA Program
+. * copyright C 2021 by A. Colin Cameron
+. * Used for "Analyis of Economics Data: An Introduction to Econometrics"
+. * by A. Colin Cameron (2021)
+. 
+. * To run you need file
+. *   AED_EARNINGS_COMPLETE.DTA
+. *   AED_DEMOCRACY.DTA
+. * in your directory
+. 
+. ********** SETUP **********
+. 
+. * Set random seed for reproducibility
+. set seed 42
+
+. 
+. * Clear all macros
+. macro drop _all
+
+. 
+. * GitHub data URL
+. global github_data_url "https://raw.githubusercontent.com/quarcs-lab/data-ope
+> n/master/AED/"
+
+. 
+. * Create output directories (optional - for saving figures and tables locally
+> )
+. cap mkdir "images"
+
+. cap mkdir "tables"
+
+. 
+. set more off
+
+. clear all
+
+. 
+. ************
+. 
+. * This STATA does analysis for Chapter 16
+. *  16.1 MULTICOLLINEAR DATA
+. *  16.2 FAILURE OF MODEL ASSUMPTIONS
+. *  16.3 INCORRECT POPULATION MDOEL
+. *  16.4 REGRESSORS CORRELATED WITH ERRORS
+. *  16.5 HETEROSKEDASTIC ERRORS
+. *  16.6 CORRELATED ERRORS
+. *  16.7 EXAMPLE: DEMOCRACY AND GROWTH 
+. *  16.8 DIAGNOSTICS
+. 
+. ************
+. 
+. **** 16.1 MULTICOLLINEARITY
+. 
+. * Download and load data from GitHub
+. clear
+
+. copy "${github_data_url}AED_EARNINGS_COMPLETE.DTA" "temp_data.dta", replace
+(file temp_data.dta not found)
+
+. use "temp_data.dta", clear
+(Data for A. Colin Cameron (2020): Analysis of Economics Data)
+
+. erase "temp_data.dta"
+
+. summarize
+
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+    earnings |        872    56368.69    51516.05       4000     504000
+  lnearnings |        872    10.69116    .6842475   8.294049   13.13033
+   dearnings |        872    .1639908    .3704797          0          1
+      gender |        872    .4334862    .4958406          0          1
+         age |        872    43.31078    10.67604         25         65
+-------------+---------------------------------------------------------
+       lnage |        872    3.736286    .2578886   3.218876   4.174387
+       agesq |        872    1989.671    935.6919        625       4225
+   education |        872    13.85321    2.884141          0         20
+ educsquared |        872    200.2202    73.90842          0        400
+   agebyeduc |        872      598.82    193.6906          0       1260
+-------------+---------------------------------------------------------
+ genderbyage |        872    19.04243    22.86976          0         65
+genderbyeduc |        872    6.082569    7.172634          0         20
+       hours |        872    44.34289    8.499103         35         99
+     lnhours |        872    3.777036    .1647675   3.555348    4.59512
+genderbyho~s |        872    18.56422    21.75979          0         80
+-------------+---------------------------------------------------------
+       dself |        872    .0905963    .2871989          0          1
+    dprivate |        872    .7603211    .4271325          0          1
+       dgovt |        872    .1490826    .3563742          0          1
+       state |          0
+    statefip |        872    27.47706    16.19427          1         56
+-------------+---------------------------------------------------------
+  stateunemp |        872    9.596904    1.649194        4.8       14.4
+stateincom~c |        872    40772.99    5558.626      31186      71044
+        year |        872        2010           0       2010       2010
+      pernum |        872    1.544725    .8915059          1          8
+       perwt |        872    145.7844    90.98781         14        626
+-------------+---------------------------------------------------------
+      relate |        872    2.095183    2.465165          1         12
+      region |        872     28.0906     10.3787         11         42
+       metro |        872    2.702982    1.215132          0          4
+       marst |        872    2.553899    2.053662          1          6
+        race |        872    1.698394    1.687285          1          8
+-------------+---------------------------------------------------------
+       raced |        872    171.3016    172.6004        100        867
+      hispan |        872    .2408257    .7796394          0          4
+    racesing |        872    1.325688    .8114455          1          5
+     hcovany |        872    1.868119    .3385552          1          2
+attainededuc |        872    7.771789    2.289492          0         11
+-------------+---------------------------------------------------------
+detailededuc |        872    79.95183     22.9472          2        116
+     empstat |        872    1.018349    .1649772          1          3
+    classwkr |        872     1.91055    .2855553          1          2
+   classwkrd |        872    22.05849    3.260595         13         29
+    wkswork2 |        872    5.989679    .1011252          5          6
+-------------+---------------------------------------------------------
+    workedyr |        872           3           0          3          3
+      inctot |        872     57718.7    53049.14       4000     548000
+     incwage |        872    52828.21    48915.23          0     498000
+    incbus00 |        872    3540.483    20495.13      -7500     285000
+     incearn |        872    56368.69    51516.05       4000     504000
+
+. describe
+
+Contains data from temp_data.dta
+ Observations:           872                  Data for A. Colin Cameron
+                                                (2020): Analysis of Economics
+                                                Data
+    Variables:            45                  15 Jul 2020 17:34
+-------------------------------------------------------------------------------
+Variable      Storage   Display    Value
+    name         type    format    label      Variable label
+-------------------------------------------------------------------------------
+earnings        float   %9.0g                 Annual earnings in $
+lnearnings      float   %9.0g                 Natural logarighm of earnings
+dearnings       float   %9.0g                 = 1 if earnings > 80000 and = 0
+                                                otherwise
+gender          byte    %8.0g                 = 1 if female and = 0 if male
+age             int     %36.0g                Age in years
+lnage           float   %9.0g                 Natural logarithm of age
+agesq           float   %9.0g                 Age squared
+education       float   %9.0g                 Educational attainment: years of
+                                                schooling
+educsquared     float   %9.0g                 Education squared
+agebyeduc       float   %9.0g                 Age times Education
+genderbyage     float   %9.0g                 Gender times age
+genderbyeduc    float   %9.0g                 Gender times education
+hours           byte    %8.0g                 Usual hours worked per week
+lnhours         float   %9.0g                 Natural logarithm of hours
+genderbyhours   float   %9.0g                 Gender times hours
+dself           float   %9.0g                 1 if self-employed, 0 otherwise
+dprivate        float   %9.0g                 1 if work for wages in private
+                                                sector, otherwise
+dgovt           float   %9.0g                 1 if work for wages in govt
+                                                sector
+state           str21   %21s                  State name
+statefip        byte    %57.0g     statefip_lbl
+                                              State (FIPS code)
+stateunemp      float   %9.0g                 State unemplyment rate in 2010
+stateincomepc   long    %12.0g                State income per capita in 2010
+year            int     %8.0g      year_lbl   Census year
+pernum          int     %8.0g                 Person number in sample unit
+perwt           float   %10.2f                Person weight
+relate          byte    %24.0g     relate_lbl
+                                              Relationship to household head
+                                                [general version]
+region          byte    %43.0g     region_lbl
+                                              Census region and division
+metro           byte    %36.0g     metro_lbl
+                                              Metropolitan status
+marst           byte    %23.0g     marst_lbl
+                                              Marital status
+race            byte    %32.0g     race_lbl   Race [general version]
+raced           int     %182.0g    raced_lbl
+                                              Race [detailed version]
+hispan          byte    %12.0g     hispan_lbl
+                                              Hispanic origin [general version]
+racesing        byte    %29.0g     racesing_lbl
+                                              Race: Single race identification
+                                                [general version]
+hcovany         byte    %30.0g     hcovany_lbl
+                                              Any health insurance coverage
+attainededuc    byte    %25.0g     educ_lbl   Educational attainment [general
+                                                version]
+detailededuc    int     %46.0g     educd_lbl
+                                              Educational attainment [detailed
+                                                version]
+empstat         byte    %18.0g     empstat_lbl
+                                              Employment status [general
+                                                version]
+classwkr        byte    %15.0g     classwkr_lbl
+                                              Class of worker [general version]
+classwkrd       byte    %31.0g     classwkrd_lbl
+                                              Class of worker [detailed
+                                                version]
+wkswork2        byte    %11.0g     wkswork2_lbl
+                                              Weeks worked last year,
+                                                intervalled
+workedyr        byte    %39.0g     workedyr_lbl
+                                              Worked last year
+inctot          long    %12.0g     inctot_lbl
+                                              Total personal income
+incwage         long    %12.0g     incwage_lbl
+                                              Wage and salary income
+incbus00        long    %12.0g                Business and farm income, 2000
+incearn         long    %12.0g     incearn_lbl
+                                              Total personal earned income
+-------------------------------------------------------------------------------
+Sorted by: 
+
+. 
+. regress earnings age education, vce(robust)
+
+Linear regression                               Number of obs     =        872
+                                                F(2, 869)         =      42.85
+                                                Prob > F          =     0.0000
+                                                R-squared         =     0.1150
+                                                Root MSE          =      48519
+
+------------------------------------------------------------------------------
+             |               Robust
+    earnings | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+         age |   524.9953   151.3874     3.47   0.001     227.8676    822.1231
+   education |   5811.367   641.5329     9.06   0.000     4552.232    7070.502
+       _cons |  -46875.36   11306.33    -4.15   0.000    -69066.27   -24684.45
+------------------------------------------------------------------------------
+
+. regress earnings age education agebyeduc, vce(robust)
+
+Linear regression                               Number of obs     =        872
+                                                F(3, 868)         =      31.80
+                                                Prob > F          =     0.0000
+                                                R-squared         =     0.1153
+                                                Root MSE          =      48539
+
+------------------------------------------------------------------------------
+             |               Robust
+    earnings | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+         age |   127.4922   719.2798     0.18   0.859    -1284.239    1539.223
+   education |   4514.987   2401.517     1.88   0.060    -198.4729    9228.446
+   agebyeduc |   29.03916   56.05204     0.52   0.605    -80.97421    139.0525
+       _cons |  -29089.38   30958.51    -0.94   0.348    -89851.67    31672.91
+------------------------------------------------------------------------------
+
+. test age agebyeduc
+
+ ( 1)  age = 0
+ ( 2)  agebyeduc = 0
+
+       F(  2,   868) =    6.49
+            Prob > F =    0.0016
+
+. test education agebyeduc
+
+ ( 1)  education = 0
+ ( 2)  agebyeduc = 0
+
+       F(  2,   868) =   43.00
+            Prob > F =    0.0000
+
+. correlate agebyeduc age education
+(obs=872)
+
+             | agebye~c      age educat~n
+-------------+---------------------------
+   agebyeduc |   1.0000
+         age |   0.7291   1.0000
+   education |   0.6360  -0.0382   1.0000
+
+
+. regress agebyeduc age education
+
+      Source |       SS           df       MS      Number of obs   =       872
+-------------+----------------------------------   F(2, 869)       =  15589.96
+       Model |  31790476.2         2  15895238.1   Prob > F        =    0.0000
+    Residual |  886016.493       869   1019.5817   R-squared       =    0.9729
+-------------+----------------------------------   Adj R-squared   =    0.9728
+       Total |  32676492.7       871  37516.0651   Root MSE        =    31.931
+
+------------------------------------------------------------------------------
+   agebyeduc | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+         age |   13.68852   .1014163   134.97   0.000     13.48947    13.88757
+   education |    44.6425   .3754065   118.92   0.000     43.90569    45.37931
+       _cons |  -612.4825   7.017959   -87.27   0.000    -626.2567   -598.7084
+------------------------------------------------------------------------------
+
+. 
+. **** 16.2 MODEL ASSUMPTIONS REVISITED
+. 
+. * No computations done
+. 
+. **** 16.3 INCORRECT POPULATION MDOEL
+. 
+. * No computations done
+. 
+. **** 16.4 REGRESSORS CORRELATED WITH ERRORS
+. 
+. * No computations done
+. 
+. **** 16.5 HETEROSKEDASTIC ERRORS
+. 
+. * Generate data with autocorrelated error
+. clear all
+
+. set obs 1000
+Number of observations (_N) was 0, now 1,000.
+
+. set seed 10101
+
+. * time period
+. gen t = _n
+
+. * e_t is underlying N(0,1) error
+. gen e=rnormal(0,1)
+
+. * Serially Correlated Errors u_t = 0.8*u_t-1 + e_t
+. gen u=rnormal(0,1)
+
+. replace u=0.8*u[_n-1]+e in 2/1000
+(999 real changes made)
+
+. * regressor
+. gen x = rnormal(0,1)
+
+. * y_1t with serially correlated error
+. gen y1 = 1 + 2*x + u
+
+. * y_2t is serially correlated but with i.i.d. error
+. * For this d.g.p. E[y2] = 1/(1-0.6) = 2.5 so initialize y2 = 2.5
+. gen y2 = 0
+
+. replace y2 = 1 + 0.6*y2[_n-1] + 2*x + e in 2/1000
+(999 real changes made)
+
+. * y_3t is serially correlated and the error is serially correlated
+. * For this d.g.p. E[y3] = 1/(1-0.6) = 2.5 so initialize y3 = 2.5
+. gen y3 = 0
+
+. replace y3 = 1 + 0.6*y3[_n-1] + 2*x + u in 2/1000
+(999 real changes made)
+
+. * If need to e.g. drop the first observation give command drop if t==1
+. summarize
+
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+           t |      1,000       500.5    288.8194          1       1000
+           e |      1,000    .0041711    1.013016  -4.119125   3.093716
+           u |      1,000    .0147102    1.705461  -6.715351   4.876789
+           x |      1,000    .0271982    1.006009  -3.282559   3.596714
+          y1 |      1,000    1.069107    2.623456  -6.762147   9.438103
+-------------+---------------------------------------------------------
+          y2 |      1,000    2.631039    2.749656  -5.334615   11.56139
+          y3 |      1,000    2.659829    4.320674  -12.01837   14.14254
+
+. correlate
+(obs=1,000)
+
+             |        t        e        u        x       y1       y2       y3
+-------------+---------------------------------------------------------------
+           t |   1.0000
+           e |  -0.0072   1.0000
+           u |  -0.0176   0.5998   1.0000
+           x |  -0.0268   0.0065  -0.0108   1.0000
+          y1 |  -0.0320   0.3949   0.6418   0.7599   1.0000
+          y2 |  -0.0447   0.3908   0.4325   0.6977   0.8162   1.0000
+          y3 |  -0.0425   0.2467   0.7588   0.4380   0.8292   0.7565   1.0000
+
+
+. * Some time series analysis requires tsset
+. tsset t
+
+Time variable: t, 1 to 1000
+        Delta: 1 unit
+
+. corrgram e, lags(10)
+
+                                          -1       0       1 -1       0       1
+ LAG       AC       PAC      Q     Prob>Q  [Autocorrelation]  [Partial autocor]
+-------------------------------------------------------------------------------
+1        0.0354   0.0354   1.2582  0.2620          |                  |        
+2       -0.0086  -0.0099   1.3323  0.5137          |                  |        
+3       -0.0340  -0.0334   2.4938  0.4764          |                  |        
+4        0.0062   0.0086    2.533  0.6387          |                  |        
+5        0.0039   0.0029   2.5484  0.7692          |                  |        
+6        0.0381   0.0371   4.0151  0.6746          |                  |        
+7       -0.0339  -0.0363   5.1747  0.6387          |                  |        
+8       -0.0043  -0.0018    5.193  0.7368          |                  |        
+9        0.0055   0.0076   5.2234  0.8144          |                  |        
+10      -0.0120  -0.0153    5.368  0.8653          |                  |        
+
+. corrgram u, lags(10)
+
+                                          -1       0       1 -1       0       1
+ LAG       AC       PAC      Q     Prob>Q  [Autocorrelation]  [Partial autocor]
+-------------------------------------------------------------------------------
+1        0.8044   0.8045   649.06  0.0000          |------            |------  
+2        0.6339  -0.0380   1052.5  0.0000          |-----             |        
+3        0.4989   0.0000   1302.6  0.0000          |---               |        
+4        0.4030   0.0307     1466  0.0000          |---               |        
+5        0.3245  -0.0054   1572.1  0.0000          |--                |        
+6        0.2611  -0.0008   1640.8  0.0000          |--                |        
+7        0.1952  -0.0432   1679.3  0.0000          |-                 |        
+8        0.1547   0.0284   1703.4  0.0000          |-                 |        
+9        0.1236   0.0014   1718.9  0.0000          |                  |        
+10       0.0962  -0.0096   1728.2  0.0000          |                  |        
+
+. corrgram y1, lags(10)
+
+                                          -1       0       1 -1       0       1
+ LAG       AC       PAC      Q     Prob>Q  [Autocorrelation]  [Partial autocor]
+-------------------------------------------------------------------------------
+1        0.3184   0.3184   101.68  0.0000          |--                |--      
+2        0.2304   0.1437   154.98  0.0000          |-                 |-       
+3        0.2183   0.1256   202.86  0.0000          |-                 |-       
+4        0.1946   0.0860   240.95  0.0000          |-                 |        
+5        0.1709   0.0594   270.37  0.0000          |-                 |        
+6        0.1324   0.0204   288.03  0.0000          |-                 |        
+7        0.0982  -0.0006   297.75  0.0000          |                  |        
+8        0.0710  -0.0110   302.85  0.0000          |                  |        
+9        0.0716   0.0119   308.04  0.0000          |                  |        
+10       0.0662   0.0139   312.47  0.0000          |                  |        
+
+. corrgram y3, lags(10)
+
+                                          -1       0       1 -1       0       1
+ LAG       AC       PAC      Q     Prob>Q  [Autocorrelation]  [Partial autocor]
+-------------------------------------------------------------------------------
+1        0.8262   0.8262    684.6  0.0000          |------            |------  
+2        0.6776  -0.0164   1145.5  0.0000          |-----             |        
+3        0.5708   0.0459     1473  0.0000          |----              |        
+4        0.4833   0.0063     1708  0.0000          |---               |        
+5        0.4058  -0.0081   1873.9  0.0000          |---               |        
+6        0.3329  -0.0245   1985.6  0.0000          |--                |        
+7        0.2698  -0.0120     2059  0.0000          |--                |        
+8        0.2201   0.0020     2108  0.0000          |-                 |        
+9        0.1873   0.0232   2143.4  0.0000          |-                 |        
+10       0.1627   0.0106   2170.2  0.0000          |-                 |        
+
+. * Regressions
+. * y_1t with serially correlated error
+. reg y1 x, vce(robust)
+
+Linear regression                               Number of obs     =      1,000
+                                                F(1, 998)         =    1387.29
+                                                Prob > F          =     0.0000
+                                                R-squared         =     0.5774
+                                                Root MSE          =     1.7062
+
+------------------------------------------------------------------------------
+             |               Robust
+          y1 | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+           x |   1.981649   .0532039    37.25   0.000     1.877244    2.086053
+       _cons |   1.015209   .0539353    18.82   0.000     .9093697    1.121049
+------------------------------------------------------------------------------
+
+. estimates store y1rob
+
+. predict u1hat, resid
+
+. corrgram u1hat, lags(10)
+
+                                          -1       0       1 -1       0       1
+ LAG       AC       PAC      Q     Prob>Q  [Autocorrelation]  [Partial autocor]
+-------------------------------------------------------------------------------
+1        0.8044   0.8044   648.99  0.0000          |------            |------  
+2        0.6338  -0.0380   1052.3  0.0000          |-----             |        
+3        0.4989   0.0005   1302.5  0.0000          |---               |        
+4        0.4033   0.0311   1466.1  0.0000          |---               |        
+5        0.3255  -0.0039   1572.8  0.0000          |--                |        
+6        0.2619  -0.0024   1641.9  0.0000          |--                |        
+7        0.1957  -0.0435   1680.6  0.0000          |-                 |        
+8        0.1548   0.0282   1704.8  0.0000          |-                 |        
+9        0.1239   0.0027   1720.3  0.0000          |                  |        
+10       0.0969  -0.0091   1729.8  0.0000          |                  |        
+
+. newey y1 x, lag(10)
+
+Regression with Newey–West standard errors      Number of obs     =      1,000
+Maximum lag = 10                                F(  1,       998) =    1832.64
+                                                Prob > F          =     0.0000
+
+------------------------------------------------------------------------------
+             |             Newey–West
+          y1 | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+           x |   1.981649   .0462901    42.81   0.000     1.890811    2.072486
+       _cons |   1.015209   .1279153     7.94   0.000     .7641955    1.266223
+------------------------------------------------------------------------------
+
+. estimates store y1HAC
+
+. * y_2t is serially correlated but with i.i.d. error
+. reg y2 l.y2 x, vce(robust)
+
+Linear regression                               Number of obs     =        999
+                                                F(2, 996)         =    3087.36
+                                                Prob > F          =     0.0000
+                                                R-squared         =     0.8643
+                                                Root MSE          =      1.014
+
+------------------------------------------------------------------------------
+             |               Robust
+          y2 | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+          y2 |
+         L1. |   .6115265   .0120334    50.82   0.000     .5879127    .6351403
+             |
+           x |   2.007562   .0307821    65.22   0.000     1.947156    2.067967
+       _cons |   .9732558   .0443062    21.97   0.000     .8863115      1.0602
+------------------------------------------------------------------------------
+
+. estimates store y2rob
+
+. predict u2hat, resid
+(1 missing value generated)
+
+. corrgram u2hat, lags(10)
+
+                                          -1       0       1 -1       0       1
+ LAG       AC       PAC      Q     Prob>Q  [Autocorrelation]  [Partial autocor]
+-------------------------------------------------------------------------------
+1        0.0234   0.0234   .54994  0.4583          |                  |        
+2       -0.0170  -0.0175   .83834  0.6576          |                  |        
+3       -0.0390  -0.0383   2.3681  0.4996          |                  |        
+4        0.0042   0.0058    2.386  0.6652          |                  |        
+5        0.0038   0.0025   2.4007  0.7914          |                  |        
+6        0.0385   0.0375   3.8973  0.6906          |                  |        
+7       -0.0347  -0.0360   5.1083  0.6468          |                  |        
+8       -0.0058  -0.0035   5.1424  0.7423          |                  |        
+9        0.0034   0.0053   5.1539  0.8207          |                  |        
+10      -0.0138  -0.0171   5.3466  0.8669          |                  |        
+
+. newey y2 l.y2 x, lag(10)
+
+Regression with Newey–West standard errors      Number of obs     =        999
+Maximum lag = 10                                F(  2,       996) =    3858.01
+                                                Prob > F          =     0.0000
+
+------------------------------------------------------------------------------
+             |             Newey–West
+          y2 | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+          y2 |
+         L1. |   .6115265   .0113919    53.68   0.000     .5891717    .6338814
+             |
+           x |   2.007562   .0274189    73.22   0.000     1.953756    2.061367
+       _cons |   .9732558   .0442577    21.99   0.000     .8864067    1.060105
+------------------------------------------------------------------------------
+
+. estimates store y2HAC
+
+. * y_3t is serially correlated and the error is serially correlated
+. reg y3 l.y3 x, vce(robust)
+
+Linear regression                               Number of obs     =        999
+                                                F(2, 996)         =    5060.47
+                                                Prob > F          =     0.0000
+                                                R-squared         =     0.9030
+                                                Root MSE          =     1.3473
+
+------------------------------------------------------------------------------
+             |               Robust
+          y3 | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+          y3 |
+         L1. |    .842709   .0092801    90.81   0.000     .8244983    .8609197
+             |
+           x |    2.01936   .0417701    48.34   0.000     1.937393    2.101328
+       _cons |   .3690666   .0493981     7.47   0.000     .2721303     .466003
+------------------------------------------------------------------------------
+
+. estimates store y3rob
+
+. predict u3hat, resid
+(1 missing value generated)
+
+. corrgram u3hat, lags(10)
+
+                                          -1       0       1 -1       0       1
+ LAG       AC       PAC      Q     Prob>Q  [Autocorrelation]  [Partial autocor]
+-------------------------------------------------------------------------------
+1        0.5642   0.5642   318.91  0.0000          |----              |----    
+2        0.2711  -0.0693   392.65  0.0000          |--                |        
+3        0.1148  -0.0158   405.89  0.0000          |                  |        
+4        0.0626   0.0265   409.83  0.0000          |                  |        
+5        0.0446   0.0106   411.83  0.0000          |                  |        
+6        0.0274  -0.0046   412.58  0.0000          |                  |        
+7       -0.0200  -0.0523   412.99  0.0000          |                  |        
+8       -0.0506  -0.0243   415.57  0.0000          |                  |        
+9       -0.0719  -0.0329   420.79  0.0000          |                  |        
+10      -0.0770  -0.0228   426.78  0.0000          |                  |        
+
+. newey y3 l.y3 x, lag(10)
+
+Regression with Newey–West standard errors      Number of obs     =        999
+Maximum lag = 10                                F(  2,       996) =    3282.03
+                                                Prob > F          =     0.0000
+
+------------------------------------------------------------------------------
+             |             Newey–West
+          y3 | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+          y3 |
+         L1. |    .842709   .0129608    65.02   0.000     .8172754    .8681426
+             |
+           x |    2.01936   .0365749    55.21   0.000     1.947588    2.091133
+       _cons |   .3690666   .0791797     4.66   0.000     .2136884    .5244449
+------------------------------------------------------------------------------
+
+. estimates store y3HAC
+
+. estimates table y1rob y1HAC y2rob y2HAC y3rob y3HAC, b(%8.4f) se stat(r2 N)
+
+---------------------------------------------------------------------
+    Variable |  y1rob      y1HAC      y2rob      y2HAC      y3rob    
+-------------+-------------------------------------------------------
+           x |   1.9816     1.9816     2.0076     2.0076     2.0194  
+             |   0.0532     0.0463     0.0308     0.0274     0.0418  
+             |
+          y2 |
+         L1. |                         0.6115     0.6115             
+             |                         0.0120     0.0114             
+             |
+          y3 |
+         L1. |                                               0.8427  
+             |                                               0.0093  
+             |
+       _cons |   1.0152     1.0152     0.9733     0.9733     0.3691  
+             |   0.0539     0.1279     0.0443     0.0443     0.0494  
+-------------+-------------------------------------------------------
+          r2 |   0.5774                0.8643                0.9030  
+           N |     1000       1000        999        999        999  
+---------------------------------------------------------------------
+                                                         Legend: b/se
+
+
+-------------------------
+    Variable |  y3HAC    
+-------------+-----------
+           x |   2.0194  
+             |   0.0366  
+             |
+          y2 |
+         L1. |           
+             |           
+             |
+          y3 |
+         L1. |   0.8427  
+             |   0.0130  
+             |
+       _cons |   0.3691  
+             |   0.0792  
+-------------+-----------
+          r2 |           
+           N |      999  
+-------------------------
+             Legend: b/se
+
+. 
+. **** 16.6 CORRELATED ERRORS
+. 
+. * No computations done
+. 
+. **** 16.7 EXAMPLE: DEMOCRACY AND GROWTH 
+. 
+. * Download and load data from GitHub
+. clear
+
+. copy "${github_data_url}AED_DEMOCRACY.DTA" "temp_data.dta", replace
+(file temp_data.dta not found)
+
+. use "temp_data.dta", clear
+
+. erase "temp_data.dta"
+
+. summarize
+
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+        code |          0
+     country |          0
+   democracy |        131    .6473282    .3310422          0          1
+      growth |        131    1.915591    1.107757  -.0887394     4.2531
+  constraint |        131     .372412    .3622382          0          1
+-------------+---------------------------------------------------------
+     indcent |        131    19.04397    .6773588         18      19.77
+    catholic |        131    .3055267     .355514          0       .969
+      muslim |        131    .2479115    .3706697          0       .997
+  protestant |        131    .1266641    .2129329          0   .9779999
+       other |        131    .3198977    .3203009       .001          1
+-------------+---------------------------------------------------------
+       world |        131           1           0          1          1
+      colony |        131    .6641221    .4741095          0          1
+     indyear |        131    1904.397    67.73588       1800       1977
+      logem4 |         79    4.660343    1.314506   .9360933   7.986165
+    lpd1500s |        125    1.102956    1.698409  -3.830918   5.642579
+-------------+---------------------------------------------------------
+       madid |        131    2623.137    1314.178       1001       5001
+
+. describe
+
+Contains data from temp_data.dta
+ Observations:           131                  
+    Variables:            16                  17 Jul 2020 09:55
+-------------------------------------------------------------------------------
+Variable      Storage   Display    Value
+    name         type    format    label      Variable label
+-------------------------------------------------------------------------------
+code            str5    %9s                   Country code
+country         str30   %30s                  Country name
+democracy       float   %9.0g                 500 year democracy change
+growth          float   %9.0g                 500 year change in log GDP per
+                                                capita
+constraint      float   %9.0g                 Constraint on the executive at
+                                                independence
+indcent         float   %9.0g                 Year of independence/100
+catholic        float   %9.0g                 catholics proportion of
+                                                population
+muslim          float   %9.0g                 muslim proportion of population
+protestant      float   %9.0g                 protestant proportion of
+                                                population
+other           float   %9.0g                 other religion proportion of
+                                                population
+world           byte    %8.0g                 Dummy for world sample
+colony          byte    %8.0g                 Dummy for former colony sample
+indyear         int     %8.0g                 Year of independence
+logem4          float   %9.0g                 Log settler mortality
+lpd1500s        float   %9.0g                 Log population density 1500
+madid           int     %8.0g                 Aggregation ID of extrapolation
+                                                for clustering
+-------------------------------------------------------------------------------
+Sorted by: 
+
+. 
+. * Table 16.1
+. describe democracy growth constraint indcent catholic muslim protestant other
+
+Variable      Storage   Display    Value
+    name         type    format    label      Variable label
+-------------------------------------------------------------------------------
+democracy       float   %9.0g                 500 year democracy change
+growth          float   %9.0g                 500 year change in log GDP per
+                                                capita
+constraint      float   %9.0g                 Constraint on the executive at
+                                                independence
+indcent         float   %9.0g                 Year of independence/100
+catholic        float   %9.0g                 catholics proportion of
+                                                population
+muslim          float   %9.0g                 muslim proportion of population
+protestant      float   %9.0g                 protestant proportion of
+                                                population
+other           float   %9.0g                 other religion proportion of
+                                                population
+
+. summarize democracy growth constraint indcent catholic muslim protestant othe
+> r
+
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+   democracy |        131    .6473282    .3310422          0          1
+      growth |        131    1.915591    1.107757  -.0887394     4.2531
+  constraint |        131     .372412    .3622382          0          1
+     indcent |        131    19.04397    .6773588         18      19.77
+    catholic |        131    .3055267     .355514          0       .969
+-------------+---------------------------------------------------------
+      muslim |        131    .2479115    .3706697          0       .997
+  protestant |        131    .1266641    .2129329          0   .9779999
+       other |        131    .3198977    .3203009       .001          1
+
+. correlate democracy growth constraint indcent catholic muslim protestant othe
+> r
+(obs=131)
+
+             | democr~y   growth constr~t  indcent catholic   muslim protes~t
+-------------+---------------------------------------------------------------
+   democracy |   1.0000
+      growth |   0.4377   1.0000
+  constraint |   0.2105   0.2141   1.0000
+     indcent |  -0.4539  -0.4591   0.2527   1.0000
+    catholic |   0.3622   0.1532  -0.1374  -0.4488   1.0000
+      muslim |  -0.5316  -0.2435  -0.1872   0.3545  -0.5010   1.0000
+  protestant |   0.3035   0.3014   0.2964  -0.0550  -0.1349  -0.3424   1.0000
+       other |   0.0114  -0.0885   0.1720   0.1245  -0.4404  -0.3735  -0.1187
+
+             |    other
+-------------+---------
+       other |   1.0000
+
+
+. 
+. * Bivariate regression
+. regress democracy growth
+
+      Source |       SS           df       MS      Number of obs   =       131
+-------------+----------------------------------   F(1, 129)       =     30.58
+       Model |  2.72971111         1  2.72971111   Prob > F        =    0.0000
+    Residual |  11.5168535       129  .089277934   R-squared       =    0.1916
+-------------+----------------------------------   Adj R-squared   =    0.1853
+       Total |  14.2465646       130  .109588958   Root MSE        =    .29879
+
+------------------------------------------------------------------------------
+   democracy | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+      growth |   .1308103   .0236568     5.53   0.000     .0840048    .1776158
+       _cons |   .3967492   .0522983     7.59   0.000     .2932756    .5002227
+------------------------------------------------------------------------------
+
+. regress democracy growth, vce(robust)
+
+Linear regression                               Number of obs     =        131
+                                                F(1, 129)         =      45.37
+                                                Prob > F          =     0.0000
+                                                R-squared         =     0.1916
+                                                Root MSE          =     .29879
+
+------------------------------------------------------------------------------
+             |               Robust
+   democracy | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+      growth |   .1308103   .0194205     6.74   0.000     .0923864    .1692343
+       _cons |   .3967492   .0461477     8.60   0.000     .3054448    .4880535
+------------------------------------------------------------------------------
+
+. 
+. * Figure 16.1 - Simple version
+. twoway (scatter democracy growth, msymbol(none) mlabel(code) mlabsize(vsmall)
+> ) ///
+>   (lfit democ growth)
+
+. 
+. * Multiple regression
+. regress democracy growth constraint indcent catholic muslim protestant
+
+      Source |       SS           df       MS      Number of obs   =       131
+-------------+----------------------------------   F(6, 124)       =     16.86
+       Model |  6.40021476         6  1.06670246   Prob > F        =    0.0000
+    Residual |  7.84634982       124  .063277015   R-squared       =    0.4492
+-------------+----------------------------------   Adj R-squared   =    0.4226
+       Total |  14.2465646       130  .109588958   Root MSE        =    .25155
+
+------------------------------------------------------------------------------
+   democracy | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+      growth |   .0467739   .0249657     1.87   0.063    -.0026401     .096188
+  constraint |   .1644846   .0724191     2.27   0.025     .0211468    .3078224
+     indcent |  -.1331219   .0447634    -2.97   0.004    -.2217212   -.0445225
+    catholic |   .1171386   .0824767     1.42   0.158     -.046106    .2803832
+      muslim |  -.2326624   .0814986    -2.85   0.005     -.393971   -.0713539
+  protestant |   .1800886   .1247197     1.44   0.151    -.0667666    .4269438
+       _cons |   3.030721    .869595     3.49   0.001     1.309549    4.751893
+------------------------------------------------------------------------------
+
+. regress democracy growth constraint indcent catholic muslim protestant, vce(r
+> obust)
+
+Linear regression                               Number of obs     =        131
+                                                F(6, 124)         =      23.41
+                                                Prob > F          =     0.0000
+                                                R-squared         =     0.4492
+                                                Root MSE          =     .25155
+
+------------------------------------------------------------------------------
+             |               Robust
+   democracy | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+      growth |   .0467739   .0254027     1.84   0.068    -.0035051    .0970529
+  constraint |   .1644846   .0724496     2.27   0.025     .0210865    .3078827
+     indcent |  -.1331219   .0500334    -2.66   0.009    -.2321519   -.0340918
+    catholic |   .1171386   .0885002     1.32   0.188    -.0580281    .2923053
+      muslim |  -.2326624    .101031    -2.30   0.023    -.4326311   -.0326938
+  protestant |   .1800886   .1039523     1.73   0.086    -.0256621    .3858392
+       _cons |   3.030721   .9748585     3.11   0.002     1.101203    4.960239
+------------------------------------------------------------------------------
+
+. 
+. **** 16.8 DIAGNOSTICS
+. 
+. quietly regress democracy growth constraint indcent catholic muslim protestan
+> t
+
+. predict yhat
+(option xb assumed; fitted values)
+
+. predict uhat, resid
+
+. 
+. * Figure 16.2 - simple
+. twoway (scatter democ yhat) (lfit democ yhat) (lowess uhat yhat)
+
+. twoway (scatter uhat yhat) (lowess uhat yhat), yline(0)
+
+. 
+. * Figure 16.3 using Stata commands
+. quietly regress democracy growth constraint indcent catholic muslim protestan
+> t
+
+. * First panel: Residual versus regressor plot
+. rvpplot growth, yline(0)
+
+. * Second panel: Component plus residual plot
+. cprplot growth, lowess
+
+. * Third panel: Added variable plot
+. avplot growth
+
+. 
+. * Figure 16.3 done manually
+. * Residual versus Regressor
+. twoway (scatter uhat growth) (lfit uhat growth) (lowess uhat growth)
+
+. * Component plus residual plot: crplot done manually
+. generate prgrowth = _b[growth]*growth + uhat
+
+. twoway (scatter prgrowth growth) (lfit prgrowth growth) (lowess prgrowth grow
+> th)
+
+. * Added variable plot: avplot done manually
+. * growth is dropped
+. regress democracy constraint indcent catholic muslim protestant
+
+      Source |       SS           df       MS      Number of obs   =       131
+-------------+----------------------------------   F(5, 125)       =     19.14
+       Model |  6.17810542         5  1.23562108   Prob > F        =    0.0000
+    Residual |  8.06845915       125  .064547673   R-squared       =    0.4337
+-------------+----------------------------------   Adj R-squared   =    0.4110
+       Total |  14.2465646       130  .109588958   Root MSE        =    .25406
+
+------------------------------------------------------------------------------
+   democracy | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+  constraint |    .208852   .0691215     3.02   0.003     .0720519    .3456521
+     indcent |  -.1749983   .0391711    -4.47   0.000    -.2525227   -.0974738
+    catholic |   .1211498   .0832727     1.45   0.148    -.0436571    .2859567
+      muslim |   -.219193   .0819919    -2.67   0.009    -.3814652   -.0569208
+  protestant |   .2326611   .1227361     1.90   0.060    -.0102488    .4755711
+       _cons |   3.890067   .7461706     5.21   0.000     2.413303    5.366831
+------------------------------------------------------------------------------
+
+. predict uhat1democ, resid
+
+. * growth is dependent variable
+. regress growth constraint indcent catholic muslim protestant
+
+      Source |       SS           df       MS      Number of obs   =       131
+-------------+----------------------------------   F(5, 125)       =     14.28
+       Model |  58.0045831         5  11.6009166   Prob > F        =    0.0000
+    Residual |  101.521856       125   .81217485   R-squared       =    0.3636
+-------------+----------------------------------   Adj R-squared   =    0.3381
+       Total |  159.526439       130  1.22712646   Root MSE        =    .90121
+
+------------------------------------------------------------------------------
+      growth | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+  constraint |   .9485509   .2451872     3.87   0.000     .4632949    1.433807
+     indcent |  -.8952942   .1389473    -6.44   0.000    -1.170288   -.6203003
+    catholic |   .0857575    .295384     0.29   0.772     -.498844    .6703591
+      muslim |   .2879687   .2908409     0.99   0.324    -.2876415     .863579
+  protestant |   1.123972   .4353683     2.58   0.011     .2623237    1.985619
+       _cons |   18.37234   2.646809     6.94   0.000     13.13397     23.6107
+------------------------------------------------------------------------------
+
+. predict uhat1growth, resid
+
+. twoway(scatter uhat1democ uhat1growth) (lfit uhat1democ uhat1growth) ///
+>     (lowess uhat1democ uhat1growth)
+
+.         
+. ** Influential Observations
+. 
+. * Outliers that effect yhat
+. quietly regress democracy growth constraint indcent catholic muslim protestan
+> t
+
+. predict dfits, dfits
+
+. summarize dfits, d
+
+                            DFITS
+-------------------------------------------------------------
+      Percentiles      Smallest
+ 1%     -.610584      -.7041223
+ 5%    -.4414939       -.610584
+10%     -.354893      -.5427028       Obs                 131
+25%    -.1352706       -.537774       Sum of wgt.         131
+
+50%     .0360905                      Mean          -.0089205
+                        Largest       Std. dev.      .2356616
+75%     .1675598       .4196537
+90%     .2618552       .4203864       Variance       .0555364
+95%      .341717       .4269444       Skewness       -.553769
+99%     .4269444       .4404682       Kurtosis        2.95288
+
+. scalar threshold = 2*sqrt((e(df_m)+1)/e(N))
+
+. display "dfits threshold = " %6.3f threshold
+dfits threshold =  0.462
+
+. summarize dfits if abs(dfits) > threshold
+
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+       dfits |          5   -.5752837    .0853801  -.7041223  -.4812355
+
+. generate dfitslarge = (abs(dfits) > threshold)
+
+. list country dfits democracy growth if abs(dfits) > threshold, clean
+
+                 country       dfits   democr~y     growth  
+ 22.               China   -.7041223        .15   1.742018  
+ 48.   Equatorial Guinea   -.4812355        .25   2.642492  
+ 80.             Myanmar   -.5427028        .15   .8677979  
+ 94.                Oman    -.610584        .05   2.496103  
+115.           Swaziland    -.537774        .05   1.839638  
+
+. 
+. * Effect of dropping outliers
+. quietly regress democracy growth constraint indcent catholic muslim ///
+>     protestant, vce(robust)
+
+. estimates store all
+
+. quietly regress democracy growth constraint indcent catholic muslim ///
+>     protestant if abs(dfits) < threshold,  vce(robust)
+
+. estimates store some
+
+. estimates table all some, b se stat(r2 N rmse)
+
+----------------------------------------
+    Variable |    all          some     
+-------------+--------------------------
+      growth |   .0467739    .04803028  
+             |  .02540268    .02516109  
+  constraint |  .16448459     .1345897  
+             |  .07244963    .06667344  
+     indcent | -.13312185   -.14179681  
+             |  .05003339     .0446829  
+    catholic |  .11713859    .04747989  
+             |  .08850019    .07910441  
+      muslim | -.23266241   -.28164537  
+             |    .101031    .09737373  
+  protestant |  .18008859    .12932741  
+             |  .10395226    .09833531  
+       _cons |   3.030721    3.2646049  
+             |  .97485852    .86610172  
+-------------+--------------------------
+          r2 |  .44924618    .49031941  
+           N |        131          126  
+        rmse |  .25154923    .23439241  
+----------------------------------------
+                            Legend: b/se
+
+. 
+. * Outliers that effect uhat
+. quietly regress democracy growth constraint indcent catholic muslim protestan
+> t
+
+. predict dfbgrowth, dfbeta(growth)
+
+. summarize dfbgrowth, d
+
+                       DFBETA, growth
+-------------------------------------------------------------
+      Percentiles      Smallest
+ 1%    -.2640058      -.2873588
+ 5%    -.1826234      -.2640058
+10%     -.109413      -.2269829       Obs                 131
+25%    -.0258608      -.2229309       Sum of wgt.         131
+
+50%     .0030226                      Mean           .0000199
+                        Largest       Std. dev.      .0933804
+75%     .0347287       .1898366
+90%     .1107308       .2225883       Variance       .0087199
+95%     .1592002       .2674599       Skewness      -.0580293
+99%     .2674599       .3266747       Kurtosis       5.060984
+
+. scalar threshold = 2*sqrt(1/e(N))
+
+. display "dfbeta threshold = "  %6.3f threshold
+dfbeta threshold =  0.175
+
+. list country dfbgrowth democracy growth if abs(dfbgrowth) > threshold, clean
+
+                    country   dfbgrowth   democr~y      growth  
+  3.   United Arab Emirates   -.2640058         .1    3.372619  
+ 11.             Bangladesh   -.1826234         .8    .4302096  
+ 48.      Equatorial Guinea   -.2873588        .25    2.642492  
+ 53.                  Haiti    .3266747         .4    .3584127  
+ 68.            Korea, Rep.    .1898366         .9    3.228899  
+ 71.                Liberia    .2674599         .5    .7157588  
+ 80.                Myanmar    .2225883        .15    .8677979  
+ 87.                  Niger   -.2091791         .7    .1942644  
+104.                  Qatar   -.2229309          0    2.650289  
+108.           Saudi Arabia   -.1908506          0     2.64533  
+111.              Singapore   -.2269829         .4    3.666049  
+112.           Sierra Leone    .1817638        .15   -.0887394  
+
+. 
+. * Effect of dropping outliers
+. quietly regress democracy growth constraint indcent catholic muslim ///
+>     protestant, vce(robust)
+
+. estimates store all
+
+. quietly regress democracy growth constraint indcent catholic muslim ///
+>     protestant if abs(dfbgrowth) < threshold,  vce(robust)
+
+. estimates store some
+
+. estimates table all some, b se stat(r2 N rmse)
+
+----------------------------------------
+    Variable |    all          some     
+-------------+--------------------------
+      growth |   .0467739    .06268719  
+             |  .02540268    .02758802  
+  constraint |  .16448459    .14820889  
+             |  .07244963    .07842139  
+     indcent | -.13312185   -.11336528  
+             |  .05003339    .05668469  
+    catholic |  .11713859    .10948373  
+             |  .08850019    .08996833  
+      muslim | -.23266241   -.25321516  
+             |    .101031    .10506401  
+  protestant |  .18008859    .13078404  
+             |  .10395226    .10155655  
+       _cons |   3.030721    2.6591208  
+             |  .97485852    1.1032498  
+-------------+--------------------------
+          r2 |  .44924618    .48257494  
+           N |        131          119  
+        rmse |  .25154923    .23666936  
+----------------------------------------
+                            Legend: b/se
+
+.         
+. 
+. ********** CLOSE OUTPUT
+. display ""
+
+
+. display "Chapter 16 analysis complete."
+Chapter 16 analysis complete.
+
+. display "Figures saved to: images/"
+Figures saved to: images/
+
+. display "Tables saved to: tables/"
+Tables saved to: tables/
+
+. 
+end of do-file

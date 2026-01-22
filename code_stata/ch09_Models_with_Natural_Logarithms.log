@@ -1,0 +1,383 @@
+
+. * ch09_Models_with_Natural_Logarithms.do - January 2026 For Stata
+. * Updated for online execution portability
+. 
+. ********** OVERVIEW OF ch09_Models_with_Natural_Logarithms.do **********
+. 
+. * STATA Program
+. * copyright C 2021 by A. Colin Cameron
+. * Used for "Analyis of Economics Data: An Introduction to Econometrics"
+. * by A. Colin Cameron (2021)
+. 
+. * To run you need file
+. *   AED_EARNINGS.DTA
+. *   AED_SP500INDEX
+. * in your directory
+. 
+. ********** SETUP **********
+. 
+. * Set random seed for reproducibility
+. set seed 42
+
+. 
+. * Clear all macros
+. macro drop _all
+
+. 
+. * GitHub data URL
+. global github_data_url "https://raw.githubusercontent.com/quarcs-lab/data-ope
+> n/master/AED/"
+
+. 
+. * Create output directories (optional - for saving figures and tables locally
+> )
+. cap mkdir "images"
+
+. cap mkdir "tables"
+
+. 
+. set more off
+
+. clear all
+
+. 
+. ************
+. 
+. * This STATA does analysis for Chapter 9
+. *  9.1 NATURAL LOGARITHM FUNCTION
+. *  9.2 SEMI-ELASTICITIS AND ELASTICITIES
+. *  9.3 LOG-LINEAR, LOG-LOG AND LINEAR-LOG MODELS
+. *  9.4 EXAMPLE: EARNINGS AND EDUCATION
+. *  9.5 FURTHER USES OF THE NATURAL LOGARITHM
+. *  9.6 EXPONENTIAL FUNCTION 
+. 
+. ****  9.1 NATURAL LOGARITHM FUNCTION
+. 
+. * Table 9.1
+. display "True dx/x  Approximation  Percent error"
+True dx/x  Approximation  Percent error
+
+. display %9.5f (101-100)/100 %12.5f ln(101)-ln(100) %12.3f  ///
+>     100*((ln(101)-ln(100)) - ((101-100)/100)) /((101-100)/100)
+  0.01000     0.00995      -0.497
+
+. display %9.5f (105-100)/100 %12.5f ln(105)-ln(100) %12.3f  ///
+>     100*((ln(105)-ln(100)) - ((105-100)/100)) /((105-100)/100)
+  0.05000     0.04879      -2.420
+
+. display %9.5f (110-100)/100 %12.5f ln(110)-ln(100) %12.3f  ///
+>     100*((ln(110)-ln(100)) - ((110-100)/100)) /((110-100)/100)
+  0.10000     0.09531      -4.690
+
+. display %9.5f (115-100)/100 %12.5f ln(115)-ln(100) %12.3f  ///
+>     100*((ln(115)-ln(100)) - ((115-100)/100)) /((115-100)/100)
+  0.15000     0.13976      -6.825
+
+. display %9.5f (120-100)/100 %12.5f ln(120)-ln(100) %12.3f  ///
+>     100*((ln(120)-ln(100)) - ((120-100)/100)) /((120-100)/100)
+  0.20000     0.18232      -8.839
+
+. 
+. ****  9.2 SEMI-ELASTICITIS AND ELASTICITIES
+. 
+. ****  9.3 LOG-LINEAR, LOG-LOG AND LINEAR-LOG MODELS
+. 
+. ****  9.4 EXAMPLE: EARNINGS AND EDUCATION
+. 
+. * Download and load data from GitHub
+. clear
+
+. copy "${github_data_url}AED_EARNINGS.DTA" "temp_data.dta", replace
+(file temp_data.dta not found)
+
+. use "temp_data.dta", clear
+(Data for A. Colin Cameron (2020): Analysis of Economics Data)
+
+. erase "temp_data.dta"
+
+. describe
+
+Contains data from temp_data.dta
+ Observations:           171                  Data for A. Colin Cameron
+                                                (2020): Analysis of Economics
+                                                Data
+    Variables:             4                  14 Jul 2020 18:06
+-------------------------------------------------------------------------------
+Variable      Storage   Display    Value
+    name         type    format    label      Variable label
+-------------------------------------------------------------------------------
+earnings        long    %12.0g                Annual earnings (in dollars)
+education       byte    %8.0g                 Years of completed schooling
+age             byte    %8.0g                 Age in Years
+gender          float   %9.0g                 =0 if female and =1 if male
+-------------------------------------------------------------------------------
+Sorted by: 
+
+. summarize
+
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+    earnings |        171    41412.69    25527.05       1050     172000
+   education |        171    14.43275    2.735364          3         20
+         age |        171          30           0         30         30
+      gender |        171           0           0          0          0
+
+. 
+. generate lnearn = ln(earnings)
+
+. generate lneduc = ln(education)
+
+. 
+. * Table 9.2
+. summarize earnings lnearn education lneduc
+
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+    earnings |        171    41412.69    25527.05       1050     172000
+      lnearn |        171    10.45764    .6220619   6.956545   12.05525
+   education |        171    14.43275    2.735364          3         20
+      lneduc |        171    2.647813    .2249787   1.098612   2.995732
+
+. 
+. * Table 9.3
+. * Linear Model
+. regress earnings education
+
+      Source |       SS           df       MS      Number of obs   =       171
+-------------+----------------------------------   F(1, 169)       =     68.86
+       Model |  3.2069e+10         1  3.2069e+10   Prob > F        =    0.0000
+    Residual |  7.8709e+10       169   465730862   R-squared       =    0.2895
+-------------+----------------------------------   Adj R-squared   =    0.2853
+       Total |  1.1078e+11       170   651630455   Root MSE        =     21581
+
+------------------------------------------------------------------------------
+    earnings | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+   education |   5021.123   605.1011     8.30   0.000     3826.593    6215.653
+       _cons |  -31055.91   8887.835    -3.49   0.001    -48601.39   -13510.44
+------------------------------------------------------------------------------
+
+. regress earnings education, vce(robust)
+
+Linear regression                               Number of obs     =        171
+                                                F(1, 169)         =      58.62
+                                                Prob > F          =     0.0000
+                                                R-squared         =     0.2895
+                                                Root MSE          =      21581
+
+------------------------------------------------------------------------------
+             |               Robust
+    earnings | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+   education |   5021.123   655.8142     7.66   0.000      3726.48    6315.766
+       _cons |  -31055.91   8940.194    -3.47   0.001    -48704.76   -13407.07
+------------------------------------------------------------------------------
+
+. * Log-linear Model
+. regress lnearn education
+
+      Source |       SS           df       MS      Number of obs   =       171
+-------------+----------------------------------   F(1, 169)       =     84.74
+       Model |  21.9697993         1  21.9697993   Prob > F        =    0.0000
+    Residual |  43.8135814       169  .259251961   R-squared       =    0.3340
+-------------+----------------------------------   Adj R-squared   =    0.3300
+       Total |  65.7833807       170  .386961063   Root MSE        =    .50917
+
+------------------------------------------------------------------------------
+      lnearn | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+   education |   .1314236   .0142765     9.21   0.000     .1032404    .1596069
+       _cons |   8.560834   .2096957    40.83   0.000     8.146873    8.974794
+------------------------------------------------------------------------------
+
+. * Log-log Model
+. regress lnearn lneduc
+
+      Source |       SS           df       MS      Number of obs   =       171
+-------------+----------------------------------   F(1, 169)       =     67.67
+       Model |  18.8088439         1  18.8088439   Prob > F        =    0.0000
+    Residual |  46.9745368       169  .277955839   R-squared       =    0.2859
+-------------+----------------------------------   Adj R-squared   =    0.2817
+       Total |  65.7833807       170  .386961063   Root MSE        =    .52722
+
+------------------------------------------------------------------------------
+      lnearn | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+      lneduc |   1.478479   .1797306     8.23   0.000     1.123673    1.833286
+       _cons |   6.542902   .4775978    13.70   0.000     5.600076    7.485728
+------------------------------------------------------------------------------
+
+. * Linear-log Model
+. regress earnings lneduc
+
+      Source |       SS           df       MS      Number of obs   =       171
+-------------+----------------------------------   F(1, 169)       =     50.57
+       Model |  2.5513e+10         1  2.5513e+10   Prob > F        =    0.0000
+    Residual |  8.5264e+10       169   504519866   R-squared       =    0.2303
+-------------+----------------------------------   Adj R-squared   =    0.2258
+       Total |  1.1078e+11       170   651630455   Root MSE        =     22462
+
+------------------------------------------------------------------------------
+    earnings | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+      lneduc |   54452.48   7657.259     7.11   0.000     39336.28    69568.68
+       _cons |  -102767.3   20347.62    -5.05   0.000    -142935.5   -62599.04
+------------------------------------------------------------------------------
+
+. 
+. * Figure 9.1 - first and second panels
+. graph twoway (scatter earnings education) (lfit earnings education)
+
+. graph export "images/ch09_fig1a.png", replace
+(file images/ch09_fig1a.png not found)
+file images/ch09_fig1a.png written in PNG format
+
+. graph twoway (scatter lnearn education) (lfit lnearn education)
+
+. graph export "images/ch09_fig1b.png", replace
+(file images/ch09_fig1b.png not found)
+file images/ch09_fig1b.png written in PNG format
+
+. 
+. ****  9.5 FURTHER USES OF THE NATURAL LOGARITHM
+. 
+. * Table 9.4
+. display "x        ln(1+x)"
+x        ln(1+x)
+
+. display %9.5f 0.01 %9.5f ln(1+0.01)
+  0.01000  0.00995
+
+. display %9.5f 0.05 %9.5f ln(1+0.05)
+  0.05000  0.04879
+
+. display %9.5f 0.10 %9.5f ln(1+0.10)
+  0.10000  0.09531
+
+. display %9.5f 0.15 %9.5f ln(1+0.15)
+  0.15000  0.13976
+
+. display %9.5f 0.20 %9.5f ln(1+0.20)
+  0.20000  0.18232
+
+. 
+. * Table 9.5
+. display "r    ln2/ln(1+r/100)   72/r"
+r    ln2/ln(1+r/100)   72/r
+
+. display %9.1f "1" %15.2f ln(2)/ln(1+1/100) %9.0f 72/1
+1          69.66       72
+
+. display %9.1f "2" %15.2f ln(2)/ln(1+2/100) %9.0f 72/2
+2          35.00       36
+
+. display %9.1f "3" %15.2f ln(2)/ln(1+3/100) %9.0f 72/3
+3          23.45       24
+
+. display %9.1f "4" %15.2f ln(2)/ln(1+4/100) %9.0f 72/4
+4          17.67       18
+
+. display %9.1f "6" %15.2f ln(2)/ln(1+6/100) %9.0f 72/6
+6          11.90       12
+
+. display %9.1f "8" %15.2f ln(2)/ln(1+8/100) %9.0f 72/8
+8           9.01        9
+
+. display %9.1f "9" %15.2f ln(2)/ln(1+9/100) %9.0f 72/9
+9           8.04        8
+
+. 
+. * Download and load data from GitHub
+. clear
+
+. copy "${github_data_url}AED_SP500INDEX.DTA" "temp_data.dta", replace
+(file temp_data.dta not found)
+
+. use "temp_data.dta", clear
+(Data for A. Colin Cameron (2020): Analysis of Economics Data)
+
+. erase "temp_data.dta"
+
+. describe
+
+Contains data from temp_data.dta
+ Observations:            93                  Data for A. Colin Cameron
+                                                (2020): Analysis of Economics
+                                                Data
+    Variables:             3                  14 Jul 2020 18:06
+-------------------------------------------------------------------------------
+Variable      Storage   Display    Value
+    name         type    format    label      Variable label
+-------------------------------------------------------------------------------
+year            float   %9.0g                 Year
+sp500           float   %9.0g                 S&P 500 Index
+lnsp500         float   %9.0g                 Natural logarithm of S&P 500
+                                                index
+-------------------------------------------------------------------------------
+Sorted by: year
+
+. summarize
+
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+        year |         93        1973    26.99074       1927       2019
+       sp500 |         93    473.6643    710.7519       6.92    3230.78
+     lnsp500 |         93    4.817428    1.801842   1.934416   8.080479
+
+. 
+. * To predict exponential growth in the graph in levels
+. regress lnsp500 year
+
+      Source |       SS           df       MS      Number of obs   =        93
+-------------+----------------------------------   F(1, 91)        =   2070.52
+       Model |   286.11565         1   286.11565   Prob > F        =    0.0000
+    Residual |  12.5748571        91  .138185243   R-squared       =    0.9579
+-------------+----------------------------------   Adj R-squared   =    0.9574
+       Total |  298.690507        92  3.24663595   Root MSE        =    .37173
+
+------------------------------------------------------------------------------
+     lnsp500 | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+        year |   .0653374   .0014359    45.50   0.000     .0624852    .0681897
+       _cons |  -124.0933    2.83328   -43.80   0.000    -129.7213   -118.4654
+------------------------------------------------------------------------------
+
+. predict plnsp500
+(option xb assumed; fitted values)
+
+. * Correct for retransformation bias - see chapter 15.6
+. generate psp500 = exp(plnsp500)*exp(e(rmse)^2/2)
+
+. 
+. ** Figure 9.2
+. graph twoway (line sp500 year) (line psp500 year)
+
+. graph export "images/ch09_fig2a.png", replace
+(file images/ch09_fig2a.png not found)
+file images/ch09_fig2a.png written in PNG format
+
+. graph twoway (line lnsp500 year) (lfit lnsp500 year)
+
+. graph export "images/ch09_fig2b.png", replace
+(file images/ch09_fig2b.png not found)
+file images/ch09_fig2b.png written in PNG format
+
+. 
+. ****  9.6 EXPONENTIAL FUNCTION 
+. 
+. ********** CLOSE OUTPUT
+. 
+. display ""
+
+
+. display "Chapter 09 analysis complete."
+Chapter 09 analysis complete.
+
+. display "Figures saved to: images/"
+Figures saved to: images/
+
+. display "Tables saved to: tables/"
+Tables saved to: tables/
+
+. 
+end of do-file

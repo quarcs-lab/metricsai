@@ -1,0 +1,557 @@
+
+. * ch12_Further_Topics_in_Multiple_Regression.do - January 2026 For Stata
+. * Updated for online execution portability
+. 
+. ********** OVERVIEW OF ch12_Further_Topics_in_Multiple_Regression.do ********
+> **
+. 
+. * STATA Program
+. * copyright C 2021 by A. Colin Cameron
+. * Used for "Analyis of Economics Data: An Introduction to Econometrics"
+. * by A. Colin Cameron (2021)
+. 
+. * To run you need file
+. *   AED_HOUSE.DTA
+. *   AED_REALGDPPC
+. * in your directory
+. 
+. ********** SETUP **********
+. 
+. * Set random seed for reproducibility
+. set seed 42
+
+. 
+. * Clear all macros
+. macro drop _all
+
+. 
+. * GitHub data URL
+. global github_data_url "https://raw.githubusercontent.com/quarcs-lab/data-ope
+> n/master/AED/"
+
+. 
+. * Create output directories (optional - for saving figures and tables locally
+> )
+. cap mkdir "images"
+
+. cap mkdir "tables"
+
+. 
+. set more off
+
+. 
+. ************
+. 
+. * This STATA program does analysis for Chapter 12
+. *  12.1 INFERENCE WITH ROBUST STANDARD ERRORS
+. *  12.2 PREDICTION 
+. *  12.3 NONREPRESENTATIVE SAMPLES
+. *  12.4 BEST ESTIMATION
+. *  12.5 BEST CONFIDENCE INTERVALS 
+. *  12.6 BEST TESTS
+. *  12.7 DATA SCIENCE AAND BIG DATA: AN OVERVIEW
+. *  12.8 BAYESIAN METHODS: AN OVERVIEW
+. *  12.9 A BRIEF HISTORY OF STATISTICS, REGRESSION AND ECONOMETRICS
+.  
+. ********** DATA DESCRIPTION
+. 
+. * (1) House sale price for 29 houses in Central Davis in 1999
+. *     29 observations on 9 variables
+. * (2) U.S. quarterly GDP and related data from 1959Q1 to 2020Q1
+. *     245 Observations on 11 variables
+. 
+. ****  12.1 INFERENCE WITH ROBUST STANDARD ERRORS
+. 
+. * Download and load data from GitHub
+. clear
+
+. copy "${github_data_url}AED_HOUSE.DTA" "temp_data.dta", replace
+(file temp_data.dta not found)
+
+. use "temp_data.dta", clear
+(Data for A. Colin Cameron (2020): Analysis of Economics Data)
+
+. erase "temp_data.dta"
+
+. describe
+
+Contains data from temp_data.dta
+ Observations:            29                  Data for A. Colin Cameron
+                                                (2020): Analysis of Economics
+                                                Data
+    Variables:             8                  14 Jul 2020 18:06
+-------------------------------------------------------------------------------
+Variable      Storage   Display    Value
+    name         type    format    label      Variable label
+-------------------------------------------------------------------------------
+price           long    %12.0g                House sale price in dollars
+size            int     %8.0g                 House size in square feet
+bedrooms        byte    %8.0g                 Number of bedrooms
+bathrooms       float   %9.0g                 Number of Bathrooms
+lotsize         byte    %8.0g                 Size of lot: 1 > 2 > 3
+age             float   %9.0g                 House Age in Years
+monthsold       byte    %8.0g                 Month of year house was sold
+list            long    %12.0g                House list price in dollars
+-------------------------------------------------------------------------------
+Sorted by: price
+
+. summarize
+
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+       price |         29    253910.3    37390.71     204000     375000
+        size |         29    1882.759    398.2721       1400       3300
+    bedrooms |         29    3.793103    .6750296          3          6
+   bathrooms |         29    2.206897    .3411441          2          3
+     lotsize |         29    2.137931    .6930336          1          3
+-------------+---------------------------------------------------------
+         age |         29    36.41379    7.118975         23         51
+   monthsold |         29    5.965517    1.679344          3          8
+        list |         29    257824.1    40860.26     199900     386000
+
+. 
+. * Table 12.2
+. regress price size bedrooms bathroom lotsize age monthsold, vce(robust)
+
+Linear regression                               Number of obs     =         29
+                                                F(6, 22)          =       6.41
+                                                Prob > F          =     0.0005
+                                                R-squared         =     0.6506
+                                                Root MSE          =      24936
+
+------------------------------------------------------------------------------
+             |               Robust
+       price | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+        size |   68.36942   15.35919     4.45   0.000     36.51641    100.2224
+    bedrooms |   2685.315   8285.528     0.32   0.749    -14497.82    19868.45
+   bathrooms |    6832.88   19283.79     0.35   0.726    -33159.25    46825.01
+     lotsize |   2303.221    5328.86     0.43   0.670    -8748.157     13354.6
+         age |  -833.0386   762.9295    -1.09   0.287    -2415.258    749.1804
+   monthsold |  -2088.504    3738.27    -0.56   0.582    -9841.202    5664.195
+       _cons |   137791.1   65545.23     2.10   0.047     1858.588    273723.5
+------------------------------------------------------------------------------
+
+. 
+. * HAC standard errors for the mean
+. * Download and load data from GitHub
+. clear
+
+. copy "${github_data_url}AED_REALGDPPC.DTA" "temp_data.dta", replace
+(file temp_data.dta not found)
+
+. use "temp_data.dta", clear
+(Data for A. Colin Cameron (2020): Analysis of Economics Data)
+
+. erase "temp_data.dta"
+
+. describe growth
+
+Variable      Storage   Display    Value
+    name         type    format    label      Variable label
+-------------------------------------------------------------------------------
+growth          float   %9.0g                 Annual growth in real GDP per
+                                                capita
+
+. summarize growth
+
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+      growth |        241    1.990456    2.178097  -4.772172   7.630545
+
+. mean growth
+
+Mean estimation                            Number of obs = 241
+
+--------------------------------------------------------------
+             |       Mean   Std. err.     [95% conf. interval]
+-------------+------------------------------------------------
+      growth |   1.990456   .1403036      1.714073     2.26684
+--------------------------------------------------------------
+
+. regress growth
+
+      Source |       SS           df       MS      Number of obs   =       241
+-------------+----------------------------------   F(0, 240)       =      0.00
+       Model |           0         0           .   Prob > F        =         .
+    Residual |  1138.58608       240  4.74410869   R-squared       =    0.0000
+-------------+----------------------------------   Adj R-squared   =    0.0000
+       Total |  1138.58608       240  4.74410869   Root MSE        =    2.1781
+
+------------------------------------------------------------------------------
+      growth | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+       _cons |   1.990456   .1403036    14.19   0.000     1.714073     2.26684
+------------------------------------------------------------------------------
+
+. * lag 1 autocorrelation manually
+. generate growthlag1 = growth[_n-1]
+(5 missing values generated)
+
+. correlate growth growthlag1
+(obs=240)
+
+             |   growth growth~1
+-------------+------------------
+      growth |   1.0000
+  growthlag1 |   0.8681   1.0000
+
+
+. * Autocorrelations using Stata commands
+. pwcorr growth l.growth l2.growth l3.growth l4.growth l5.growth
+
+             |   growth L.growth L2.gro~h L3.gro~h L4.gro~h L5.gro~h
+-------------+------------------------------------------------------
+      growth |   1.0000 
+    L.growth |   0.8681   1.0000 
+   L2.growth |   0.6601   0.8697   1.0000 
+   L3.growth |   0.4116   0.6608   0.8697   1.0000 
+   L4.growth |   0.1680   0.4121   0.6608   0.8697   1.0000 
+   L5.growth |   0.0296   0.1686   0.4122   0.6609   0.8698   1.0000 
+
+. corrgram growth, lag(10)
+
+                                          -1       0       1 -1       0       1
+ LAG       AC       PAC      Q     Prob>Q  [Autocorrelation]  [Partial autocor]
+-------------------------------------------------------------------------------
+1        0.8658   0.8696   182.92  0.0000          |------            |------  
+2        0.6572  -0.4025   288.76  0.0000          |-----          ---|        
+3        0.4093  -0.2111   329.99  0.0000          |---              -|        
+4        0.1663  -0.1091   336.82  0.0000          |-                 |        
+5        0.0291   0.3049   337.03  0.0000          |                  |--      
+6       -0.0465  -0.0772   337.57  0.0000          |                  |        
+7       -0.0744  -0.0786   338.96  0.0000          |                  |        
+8       -0.0687  -0.0192   340.14  0.0000          |                  |        
+9       -0.0443   0.1447   340.64  0.0000          |                  |-       
+10      -0.0458  -0.2012   341.17  0.0000          |                 -|        
+
+. * newey is the same as regress except HAC standard errors
+. newey growth, lag(0)
+
+Regression with Newey–West standard errors      Number of obs     =        241
+Maximum lag = 0                                 F(  0,       240) =          .
+                                                Prob > F          =          .
+
+------------------------------------------------------------------------------
+             |             Newey–West
+      growth | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+       _cons |   1.990456   .1403036    14.19   0.000     1.714073     2.26684
+------------------------------------------------------------------------------
+
+. newey growth, lag(5)
+
+Regression with Newey–West standard errors      Number of obs     =        241
+Maximum lag = 5                                 F(  0,       240) =          .
+                                                Prob > F          =          .
+
+------------------------------------------------------------------------------
+             |             Newey–West
+      growth | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+       _cons |   1.990456   .2752677     7.23   0.000     1.448207    2.532705
+------------------------------------------------------------------------------
+
+. 
+. ****  12.2 PREDICTION
+. 
+. *** Predict conditional mean for house size = 2000 and get confidence interva
+> l
+. * This uses Stata command lincom
+. * Download and load data from GitHub
+. clear
+
+. copy "${github_data_url}AED_HOUSE.DTA" "temp_data.dta", replace
+(file temp_data.dta not found)
+
+. use "temp_data.dta", clear
+(Data for A. Colin Cameron (2020): Analysis of Economics Data)
+
+. erase "temp_data.dta"
+
+. 
+. *** Figure 12.1 Simple version
+. * First panel - Confidence Interval for Conditional Mean
+. twoway (lfitci price size, stdp) (scatter price size)
+
+. * Second panel - Confidence Interval for Actual Value
+. twoway (lfitci price size, stdf) (scatter price size)
+
+. 
+. *** Predict conditional mean for house size = 2000
+. regress price size
+
+      Source |       SS           df       MS      Number of obs   =        29
+-------------+----------------------------------   F(1, 27)        =     43.58
+       Model |  2.4171e+10         1  2.4171e+10   Prob > F        =    0.0000
+    Residual |  1.4975e+10        27   554633395   R-squared       =    0.6175
+-------------+----------------------------------   Adj R-squared   =    0.6033
+       Total |  3.9146e+10        28  1.3981e+09   Root MSE        =     23551
+
+------------------------------------------------------------------------------
+       price | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+        size |   73.77104   11.17491     6.60   0.000     50.84202    96.70006
+       _cons |   115017.3   21489.36     5.35   0.000     70924.76    159109.8
+------------------------------------------------------------------------------
+
+. display _b[_cons] + _b[size]*2000
+262559.36
+
+. * Stata command lincom gives the standard error
+. lincom _cons + size*2000
+
+ ( 1)  2000*size + _cons = 0
+
+------------------------------------------------------------------------------
+       price | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+         (1) |   262559.4   4565.284    57.51   0.000     253192.2    271926.6
+------------------------------------------------------------------------------
+
+. 
+. *** Get confidence intervals for conditional mean and actual value
+. *   Do manually as was done in book
+. quietly summarize size
+
+. scalar xbar = r(mean)
+
+. scalar n = r(N)
+
+. scalar sumxminusxbarsq = (r(N)-1)*r(Var)
+
+. quietly regress price size
+
+. scalar b1 = _b[_cons]
+
+. scalar b2 = _b[size]
+
+. scalar s_e = e(rmse)
+
+. scalar y_cm = b1 + 2000*b2
+
+. scalar y_f = b1 + 2000*b2
+
+. scalar s_y_cm = s_e*sqrt(1/n+(2000-xbar)^2/sumxminusxbarsq)
+
+. scalar s_y_f = s_e*sqrt(1+1/n+(2000-xbar)^2/sumxminusxbarsq)
+
+. scalar tcrit = invttail(n-2,.025)
+
+. 
+. * Conditional mean at size = 2000
+. display "yhat = " y_cm _n "t critical value = " tcrit _n
+yhat = 262559.36
+t critical value = 2.0518305
+
+
+. display "Se for cond mean = " s_y_cm _n "CI width = " tcrit*s_y_cm _n
+Se for cond mean = 4565.2836
+CI width = 9367.1881
+
+
+. display "95% confidence interval: (" y_cm-tcrit*s_y_cm ", " y_cm+tcrit*s_y_cm
+>  ")"
+95% confidence interval: (253192.18, 271926.55)
+
+. 
+. * Actual value at size = 2000
+. display "yhat = " y_f _n "t critical value = " tcrit _n
+yhat = 262559.36
+t critical value = 2.0518305
+
+
+. display "Se for actual value = " s_y_f _n  "CI width = " tcrit*s_y_f
+Se for actual value = 23989.064
+CI width = 49221.494
+
+. display "95% confidence interval: (" y_f-tcrit*s_y_f ", " y_f+tcrit*s_y_f ")"
+95% confidence interval: (213337.87, 311780.86)
+
+. 
+. *** Predict for multiple regression
+. quietly regress price size bedrooms bathroom lotsize age monthsold
+
+. scalar s_e = e(rmse)
+
+. scalar n = e(N)
+
+. scalar k = e(rank)
+
+. lincom _cons + size*2000 + bedrooms*4 + bathroom*2 + lotsize*2 + age*40 + mon
+> thsold*6
+
+ ( 1)  2000*size + 4*bedrooms + 2*bathrooms + 2*lotsize + 40*age + 6*monthsold
+       + _cons = 0
+
+------------------------------------------------------------------------------
+       price | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+         (1) |   257690.8    6488.26    39.72   0.000       244235    271146.6
+------------------------------------------------------------------------------
+
+. display "Se for conditional mean = " r(se)
+Se for conditional mean = 6488.2598
+
+. scalar y_f = r(estimate)
+
+. scalar s_y_cm = r(se)
+
+. scalar s_y_f = sqrt(s_e^2 + s_y_cm^2)
+
+. scalar tcrit = invttail(n-k,.025)
+
+. display "y_f = " y_f _n "t critical value = " tcrit _n            ///
+>   "Se for actual value = " s_y_f _n  "CI width = " tcrit*s_y_f _n ///
+>   "95% confidence interval: (" y_f-tcrit*s_y_f ", " y_f+tcrit*s_y_f ")"
+y_f = 257690.8
+t critical value = 2.0738731
+Se for actual value = 25766.03
+CI width = 53435.477
+95% confidence interval: (204255.32, 311126.28)
+
+. 
+. * Repeat for het robust se's
+. * Just confidence interval for fitted mean
+. quietly regress price size bedrooms bathroom lotsize age monthsold, vce(robus
+> t)
+
+. lincom _cons + size*2000 + bedrooms*4 + bathroom*2 + lotsize*2 + age*40 + mon
+> thsold*6
+
+ ( 1)  2000*size + 4*bedrooms + 2*bathrooms + 2*lotsize + 40*age + 6*monthsold
+       + _cons = 0
+
+------------------------------------------------------------------------------
+       price | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+         (1) |   257690.8   6631.008    38.86   0.000     243938.9    271442.7
+------------------------------------------------------------------------------
+
+. display "heteroskedastic-robust se for conditional mean = " r(se)
+heteroskedastic-robust se for conditional mean = 6631.0082
+
+. display "heteroskedastic-robust Se for actual value = " sqrt(s_e^2 + r(se)^2)
+heteroskedastic-robust Se for actual value = 25802.346
+
+. 
+. **** 12.3 NONREPRESENTATIVE SAMPLES
+. 
+. * No computation
+. 
+. **** 12.4 BEST ESTIMATION
+. 
+. * No computation
+. 
+. **** 12.5 BEST CONFIDENCE INTERVALS 
+. 
+. * No computation
+. 
+. **** 12.6 BEST TESTS
+. 
+. * No computation
+. 
+. **** 12.7 DATA SCIENCE AAND BIG DATA: AN OVERVIEW
+. 
+. * No computation
+. 
+. ****  12.8 BAYESIAN METHODS: AN OVERVIEW
+. 
+. * Prior is uninformative here
+. generate pricenew = price/1000
+
+. bayes, rseed(10101): regress pricenew size
+
+Burn-in ...
+Simulation ...
+
+Model summary
+------------------------------------------------------------------------------
+Likelihood: 
+  pricenew ~ regress(xb_pricenew,{sigma2})
+
+Priors: 
+  {pricenew:size _cons} ~ normal(0,10000)                                  (1)
+               {sigma2} ~ igamma(.01,.01)
+------------------------------------------------------------------------------
+(1) Parameters are elements of the linear form xb_pricenew.
+
+Bayesian linear regression                       MCMC iterations  =     12,500
+Random-walk Metropolis–Hastings sampling         Burn-in          =      2,500
+                                                 MCMC sample size =     10,000
+                                                 Number of obs    =         29
+                                                 Acceptance rate  =      .3469
+                                                 Efficiency:  min =      .1331
+                                                              avg =      .1359
+Log marginal-likelihood = -149.33965                          max =        .14
+
+------------------------------------------------------------------------------
+             |                                                Equal-tailed
+             |      Mean   Std. dev.     MCSE     Median  [95% cred. interval]
+-------------+----------------------------------------------------------------
+pricenew     |
+        size |  .0766526   .0114685   .000306   .0765663   .0539839   .1002749
+       _cons |  109.4957    21.9805   .598941   109.4805   65.57492    151.939
+-------------+----------------------------------------------------------------
+      sigma2 |  598.5199   181.5454   4.97559   565.6209   343.4449   1040.866
+------------------------------------------------------------------------------
+Note: Default priors are used for model parameters.
+
+. 
+. * Prior turns out to be informative here
+. bayes, rseed(10101): regress price size
+
+Burn-in ...
+Simulation ...
+
+Model summary
+------------------------------------------------------------------------------
+Likelihood: 
+  price ~ regress(xb_price,{sigma2})
+
+Priors: 
+  {price:size _cons} ~ normal(0,10000)                                     (1)
+            {sigma2} ~ igamma(.01,.01)
+------------------------------------------------------------------------------
+(1) Parameters are elements of the linear form xb_price.
+
+Bayesian linear regression                       MCMC iterations  =     12,500
+Random-walk Metropolis–Hastings sampling         Burn-in          =      2,500
+                                                 MCMC sample size =     10,000
+                                                 Number of obs    =         29
+                                                 Acceptance rate  =      .6283
+                                                 Efficiency:  min =    .001333
+                                                              avg =     .07913
+Log marginal-likelihood =  -352.3978                          max =      .1397
+
+------------------------------------------------------------------------------
+             |                                                Equal-tailed
+             |      Mean   Std. dev.     MCSE     Median  [95% cred. interval]
+-------------+----------------------------------------------------------------
+price        |
+        size |  132.2839   3.080278   .082405   132.2389   126.3478   138.4568
+       _cons |  1.378345   100.5241   3.23875   4.127141  -198.4084   192.1648
+-------------+----------------------------------------------------------------
+      sigma2 |  1.08e+09   2.15e+08   5.9e+07   1.09e+09   6.84e+08   1.52e+09
+------------------------------------------------------------------------------
+Note: Default priors are used for model parameters.
+Note: There is a high autocorrelation after 500 lags.
+Note: Adaptation tolerance is not met in at least one of the blocks.
+
+. 
+. ********** CLOSE OUTPUT
+. 
+. display ""
+
+
+. display "Chapter 12 analysis complete."
+Chapter 12 analysis complete.
+
+. display "Figures saved to: images/"
+Figures saved to: images/
+
+. display "Tables saved to: tables/"
+Tables saved to: tables/
+
+. 
+end of do-file

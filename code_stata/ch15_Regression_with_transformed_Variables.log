@@ -1,0 +1,997 @@
+
+. * ch15_Regression_with_transformed_Variables.do - January 2026 For Stata
+. * Updated for online execution portability
+. 
+. ********** OVERVIEW OF ch15_Regression_with_transformed_Variables.do ********
+> **
+. 
+. * STATA Program
+. * copyright C 2021 by A. Colin Cameron
+. * Used for "Analyis of Economics Data: An Introduction to Econometrics"
+. * by A. Colin Cameron (2021)
+. 
+. * To run you need file
+. *   AED_EARNINGS_COMPLETE
+. * in your directory
+. 
+. ********** SETUP **********
+. 
+. * Set random seed for reproducibility
+. set seed 42
+
+. 
+. * Clear all macros
+. macro drop _all
+
+. 
+. * GitHub data URL
+. global github_data_url "https://raw.githubusercontent.com/quarcs-lab/data-ope
+> n/master/AED/"
+
+. 
+. * Create output directories (optional - for saving figures and tables locally
+> )
+. cap mkdir "images"
+
+. cap mkdir "tables"
+
+. 
+. set more off
+
+. clear all
+
+. 
+. ************
+. 
+. *  15.1 EXAMPLE: EARNINGS, GENDER, EDUCATION and TYPE OF WORKER
+. *  15.2 MARGINAL EFFECTS FOR NONLINEAR MODELS
+. *  15.3 QUADRATIC MODEL AND POLYNOMIAL MODELS
+. *  15.4 INTERACTED REGRESSORS
+. *  15.5 LOG-LINEAR AND LOG-LOG MODELS
+. *  15.6 PREDICTION FROM LOG-LINEAR AND LOG-LOG MODELS
+. *  15.7 MODELS WITH A MIX OF REGRESSOR TYPES 
+. 
+. ********** DATA DESCRIPTION
+. 
+. * Annual Earnings for 842 male and female full-time workers
+. * aged 25-65 years old in 2010
+. 
+. ****  15.1 EXAMPLE: EARNINGS, GENDER, EDUCATION and TYPE OF WORKER
+. 
+. * Table 15.1
+. * Download and load data from GitHub
+. clear
+
+. copy "${github_data_url}AED_EARNINGS_COMPLETE.DTA" "temp_data.dta", replace
+(file temp_data.dta not found)
+
+. use "temp_data.dta", clear
+(Data for A. Colin Cameron (2020): Analysis of Economics Data)
+
+. erase "temp_data.dta"
+
+. describe earnings lnearnings age agesq education agebyeduc lnage gender ///
+>     dself dprivate dgovt hours lnhours 
+
+Variable      Storage   Display    Value
+    name         type    format    label      Variable label
+-------------------------------------------------------------------------------
+earnings        float   %9.0g                 Annual earnings in $
+lnearnings      float   %9.0g                 Natural logarighm of earnings
+age             int     %36.0g                Age in years
+agesq           float   %9.0g                 Age squared
+education       float   %9.0g                 Educational attainment: years of
+                                                schooling
+agebyeduc       float   %9.0g                 Age times Education
+lnage           float   %9.0g                 Natural logarithm of age
+gender          byte    %8.0g                 = 1 if female and = 0 if male
+dself           float   %9.0g                 1 if self-employed, 0 otherwise
+dprivate        float   %9.0g                 1 if work for wages in private
+                                                sector, otherwise
+dgovt           float   %9.0g                 1 if work for wages in govt
+                                                sector
+hours           byte    %8.0g                 Usual hours worked per week
+lnhours         float   %9.0g                 Natural logarithm of hours
+
+. summarize earnings lnearnings age agesq education agebyeduc lnage gender ///
+>     dself dprivate dgovt hours lnhours 
+
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+    earnings |        872    56368.69    51516.05       4000     504000
+  lnearnings |        872    10.69116    .6842475   8.294049   13.13033
+         age |        872    43.31078    10.67604         25         65
+       agesq |        872    1989.671    935.6919        625       4225
+   education |        872    13.85321    2.884141          0         20
+-------------+---------------------------------------------------------
+   agebyeduc |        872      598.82    193.6906          0       1260
+       lnage |        872    3.736286    .2578886   3.218876   4.174387
+      gender |        872    .4334862    .4958406          0          1
+       dself |        872    .0905963    .2871989          0          1
+    dprivate |        872    .7603211    .4271325          0          1
+-------------+---------------------------------------------------------
+       dgovt |        872    .1490826    .3563742          0          1
+       hours |        872    44.34289    8.499103         35         99
+     lnhours |        872    3.777036    .1647675   3.555348    4.59512
+
+. 
+. ****  15.2 MARGINAL EFFECTS FOR NONLINEAR MODELS
+. 
+. ** Figure 15.1 - created using generated data
+. 
+. ****  15.3 QUADRATIC AND POLYNOMIAL MODELS
+. 
+. *** Figure 15.2 - generated data
+. clear
+
+. set obs 100
+Number of observations (_N) was 0, now 100.
+
+. generate x = 1 + 3*_n/100
+
+. generate y1 = 1 + 4*(x-2.5)^2
+
+. generate y2 = 1 + (x-4)^2
+
+. generate y3 = 1 + (x-1)^2
+
+. generate y4 = 10 - 4*(x-2.5)^2
+
+. generate y5 = 10 - (x-4)^2
+
+. generate y6 = 10 - (x-1)^2
+
+. twoway (line y1 x), scale(1.5) legend(off) xtitle(" ") ytitle(" ") ylabel(, a
+> ngle(0)) saving(graph1, replace)
+file graph1.gph saved
+
+. twoway (line y2 x), scale(1.5) legend(off) xtitle(" ") ytitle(" ") ylabel(, a
+> ngle(0)) saving(graph2, replace)
+file graph2.gph saved
+
+. twoway (line y3 x), scale(1.5) legend(off) xtitle(" ") ytitle(" ") ylabel(, a
+> ngle(0)) saving(graph3, replace)
+file graph3.gph saved
+
+. twoway (line y4 x), scale(1.5) legend(off) xtitle(" ") ytitle(" ") ylabel(, a
+> ngle(0)) saving(graph4, replace)
+(file graph4.gph not found)
+file graph4.gph saved
+
+. twoway (line y5 x), scale(1.5) legend(off) xtitle(" ") ytitle(" ") ylabel(, a
+> ngle(0)) saving(graph5, replace)
+(file graph5.gph not found)
+file graph5.gph saved
+
+. twoway (line y6 x), scale(1.5) legend(off) xtitle(" ") ytitle(" ") ylabel(, a
+> ngle(0)) saving(graph6, replace)
+(file graph6.gph not found)
+file graph6.gph saved
+
+. 
+. * Figure 15.2
+. graph combine graph1.gph graph2.gph graph3.gph graph4.gph graph5.gph graph6.g
+> ph, ///
+>   iscale(0.8) ysize(4) xsize(6) rows(2) ycommon xcommon title("Examples of Qu
+> adratic Model")
+
+. 
+. *** Quadratic Model for Earnings on Age with Education as a regressor as well
+. 
+. * Download and load data from GitHub
+. clear
+
+. copy "${github_data_url}AED_EARNINGS_COMPLETE.DTA" "temp_data.dta", replace
+(file temp_data.dta not found)
+
+. use "temp_data.dta", clear
+(Data for A. Colin Cameron (2020): Analysis of Economics Data)
+
+. erase "temp_data.dta"
+
+. describe
+
+Contains data from temp_data.dta
+ Observations:           872                  Data for A. Colin Cameron
+                                                (2020): Analysis of Economics
+                                                Data
+    Variables:            45                  15 Jul 2020 17:34
+-------------------------------------------------------------------------------
+Variable      Storage   Display    Value
+    name         type    format    label      Variable label
+-------------------------------------------------------------------------------
+earnings        float   %9.0g                 Annual earnings in $
+lnearnings      float   %9.0g                 Natural logarighm of earnings
+dearnings       float   %9.0g                 = 1 if earnings > 80000 and = 0
+                                                otherwise
+gender          byte    %8.0g                 = 1 if female and = 0 if male
+age             int     %36.0g                Age in years
+lnage           float   %9.0g                 Natural logarithm of age
+agesq           float   %9.0g                 Age squared
+education       float   %9.0g                 Educational attainment: years of
+                                                schooling
+educsquared     float   %9.0g                 Education squared
+agebyeduc       float   %9.0g                 Age times Education
+genderbyage     float   %9.0g                 Gender times age
+genderbyeduc    float   %9.0g                 Gender times education
+hours           byte    %8.0g                 Usual hours worked per week
+lnhours         float   %9.0g                 Natural logarithm of hours
+genderbyhours   float   %9.0g                 Gender times hours
+dself           float   %9.0g                 1 if self-employed, 0 otherwise
+dprivate        float   %9.0g                 1 if work for wages in private
+                                                sector, otherwise
+dgovt           float   %9.0g                 1 if work for wages in govt
+                                                sector
+state           str21   %21s                  State name
+statefip        byte    %57.0g     statefip_lbl
+                                              State (FIPS code)
+stateunemp      float   %9.0g                 State unemplyment rate in 2010
+stateincomepc   long    %12.0g                State income per capita in 2010
+year            int     %8.0g      year_lbl   Census year
+pernum          int     %8.0g                 Person number in sample unit
+perwt           float   %10.2f                Person weight
+relate          byte    %24.0g     relate_lbl
+                                              Relationship to household head
+                                                [general version]
+region          byte    %43.0g     region_lbl
+                                              Census region and division
+metro           byte    %36.0g     metro_lbl
+                                              Metropolitan status
+marst           byte    %23.0g     marst_lbl
+                                              Marital status
+race            byte    %32.0g     race_lbl   Race [general version]
+raced           int     %182.0g    raced_lbl
+                                              Race [detailed version]
+hispan          byte    %12.0g     hispan_lbl
+                                              Hispanic origin [general version]
+racesing        byte    %29.0g     racesing_lbl
+                                              Race: Single race identification
+                                                [general version]
+hcovany         byte    %30.0g     hcovany_lbl
+                                              Any health insurance coverage
+attainededuc    byte    %25.0g     educ_lbl   Educational attainment [general
+                                                version]
+detailededuc    int     %46.0g     educd_lbl
+                                              Educational attainment [detailed
+                                                version]
+empstat         byte    %18.0g     empstat_lbl
+                                              Employment status [general
+                                                version]
+classwkr        byte    %15.0g     classwkr_lbl
+                                              Class of worker [general version]
+classwkrd       byte    %31.0g     classwkrd_lbl
+                                              Class of worker [detailed
+                                                version]
+wkswork2        byte    %11.0g     wkswork2_lbl
+                                              Weeks worked last year,
+                                                intervalled
+workedyr        byte    %39.0g     workedyr_lbl
+                                              Worked last year
+inctot          long    %12.0g     inctot_lbl
+                                              Total personal income
+incwage         long    %12.0g     incwage_lbl
+                                              Wage and salary income
+incbus00        long    %12.0g                Business and farm income, 2000
+incearn         long    %12.0g     incearn_lbl
+                                              Total personal earned income
+-------------------------------------------------------------------------------
+Sorted by: 
+
+. summarize
+
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+    earnings |        872    56368.69    51516.05       4000     504000
+  lnearnings |        872    10.69116    .6842475   8.294049   13.13033
+   dearnings |        872    .1639908    .3704797          0          1
+      gender |        872    .4334862    .4958406          0          1
+         age |        872    43.31078    10.67604         25         65
+-------------+---------------------------------------------------------
+       lnage |        872    3.736286    .2578886   3.218876   4.174387
+       agesq |        872    1989.671    935.6919        625       4225
+   education |        872    13.85321    2.884141          0         20
+ educsquared |        872    200.2202    73.90842          0        400
+   agebyeduc |        872      598.82    193.6906          0       1260
+-------------+---------------------------------------------------------
+ genderbyage |        872    19.04243    22.86976          0         65
+genderbyeduc |        872    6.082569    7.172634          0         20
+       hours |        872    44.34289    8.499103         35         99
+     lnhours |        872    3.777036    .1647675   3.555348    4.59512
+genderbyho~s |        872    18.56422    21.75979          0         80
+-------------+---------------------------------------------------------
+       dself |        872    .0905963    .2871989          0          1
+    dprivate |        872    .7603211    .4271325          0          1
+       dgovt |        872    .1490826    .3563742          0          1
+       state |          0
+    statefip |        872    27.47706    16.19427          1         56
+-------------+---------------------------------------------------------
+  stateunemp |        872    9.596904    1.649194        4.8       14.4
+stateincom~c |        872    40772.99    5558.626      31186      71044
+        year |        872        2010           0       2010       2010
+      pernum |        872    1.544725    .8915059          1          8
+       perwt |        872    145.7844    90.98781         14        626
+-------------+---------------------------------------------------------
+      relate |        872    2.095183    2.465165          1         12
+      region |        872     28.0906     10.3787         11         42
+       metro |        872    2.702982    1.215132          0          4
+       marst |        872    2.553899    2.053662          1          6
+        race |        872    1.698394    1.687285          1          8
+-------------+---------------------------------------------------------
+       raced |        872    171.3016    172.6004        100        867
+      hispan |        872    .2408257    .7796394          0          4
+    racesing |        872    1.325688    .8114455          1          5
+     hcovany |        872    1.868119    .3385552          1          2
+attainededuc |        872    7.771789    2.289492          0         11
+-------------+---------------------------------------------------------
+detailededuc |        872    79.95183     22.9472          2        116
+     empstat |        872    1.018349    .1649772          1          3
+    classwkr |        872     1.91055    .2855553          1          2
+   classwkrd |        872    22.05849    3.260595         13         29
+    wkswork2 |        872    5.989679    .1011252          5          6
+-------------+---------------------------------------------------------
+    workedyr |        872           3           0          3          3
+      inctot |        872     57718.7    53049.14       4000     548000
+     incwage |        872    52828.21    48915.23          0     498000
+    incbus00 |        872    3540.483    20495.13      -7500     285000
+     incearn |        872    56368.69    51516.05       4000     504000
+
+. 
+. * Linear Model
+. regress earnings age education, vce(robust)
+
+Linear regression                               Number of obs     =        872
+                                                F(2, 869)         =      42.85
+                                                Prob > F          =     0.0000
+                                                R-squared         =     0.1150
+                                                Root MSE          =      48519
+
+------------------------------------------------------------------------------
+             |               Robust
+    earnings | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+         age |   524.9953   151.3874     3.47   0.001     227.8676    822.1231
+   education |   5811.367   641.5329     9.06   0.000     4552.232    7070.502
+       _cons |  -46875.36   11306.33    -4.15   0.000    -69066.27   -24684.45
+------------------------------------------------------------------------------
+
+. estimates store BASE
+
+. 
+. * Quadratic model
+. regress earnings age agesq education, vce(robust)
+
+Linear regression                               Number of obs     =        872
+                                                F(3, 868)         =      29.96
+                                                Prob > F          =     0.0000
+                                                R-squared         =     0.1191
+                                                Root MSE          =      48433
+
+------------------------------------------------------------------------------
+             |               Robust
+    earnings | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+         age |   3104.916   1087.323     2.86   0.004     970.8262    5239.006
+       agesq |  -29.65831   12.45598    -2.38   0.017    -54.10567   -5.210942
+   education |   5740.398   642.0236     8.94   0.000     4480.298    7000.498
+       _cons |  -98620.33   24524.12    -4.02   0.000    -146753.8   -50486.82
+------------------------------------------------------------------------------
+
+. estimates store QUAD
+
+. display "Turning point is at " -_b[age]/(2*_b[agesq])
+Turning point is at 52.344802
+
+. generate mequad = _b[age] + 2*_b[agesq]*age
+
+. summarize mequad
+
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+      mequad |        872    535.8676    633.2668  -750.6635   1622.001
+
+. summarize mequad if age == 25
+
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+      mequad |         27    1622.001           0   1622.001   1622.001
+
+. summarize mequad if age == 65
+
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+      mequad |          4   -750.6635           0  -750.6635  -750.6635
+
+. summarize age
+
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+         age |        872    43.31078    10.67604         25         65
+
+. display "MEM = " _b[age] + 2*_b[agesq]*r(mean)
+MEM = 535.86758
+
+. display "MER at age 25 = " _b[age] + 2*_b[agesq]*25
+MER at age 25 = 1622.001
+
+. test age agesq
+
+ ( 1)  age = 0
+ ( 2)  agesq = 0
+
+       F(  2,   868) =    9.29
+            Prob > F =    0.0001
+
+. 
+. * ME for age using margins and Stata's factor variable notation
+. regress earnings c.age##c.age education, vce(robust)
+
+Linear regression                               Number of obs     =        872
+                                                F(3, 868)         =      29.96
+                                                Prob > F          =     0.0000
+                                                R-squared         =     0.1191
+                                                Root MSE          =      48433
+
+------------------------------------------------------------------------------
+             |               Robust
+    earnings | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+         age |   3104.916   1087.323     2.86   0.004     970.8262    5239.006
+             |
+ c.age#c.age |  -29.65831   12.45598    -2.38   0.017    -54.10567   -5.210942
+             |
+   education |   5740.398   642.0236     8.94   0.000     4480.298    7000.498
+       _cons |  -98620.33   24524.12    -4.02   0.000    -146753.8   -50486.82
+------------------------------------------------------------------------------
+
+. * AME
+. margins, dydx(*)
+
+Average marginal effects                                   Number of obs = 872
+Model VCE: Robust
+
+Expression: Linear prediction, predict()
+dy/dx wrt:  age education
+
+------------------------------------------------------------------------------
+             |            Delta-method
+             |      dy/dx   std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+         age |   535.8676   150.5208     3.56   0.000     240.4404    831.2948
+   education |   5740.398   642.0236     8.94   0.000     4480.298    7000.498
+------------------------------------------------------------------------------
+
+. * MEM
+. margins, dydx(*) atmean
+
+Conditional marginal effects                               Number of obs = 872
+Model VCE: Robust
+
+Expression: Linear prediction, predict()
+dy/dx wrt:  age education
+At: age       = 43.31078 (mean)
+    education = 13.85321 (mean)
+
+------------------------------------------------------------------------------
+             |            Delta-method
+             |      dy/dx   std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+         age |   535.8676   150.5208     3.56   0.000     240.4404    831.2948
+   education |   5740.398   642.0236     8.94   0.000     4480.298    7000.498
+------------------------------------------------------------------------------
+
+. * MER marginal effect at a representative value e.g. age=25
+. margins, dydx(*) at(age=25)
+
+Average marginal effects                                   Number of obs = 872
+Model VCE: Robust
+
+Expression: Linear prediction, predict()
+dy/dx wrt:  age education
+At: age = 25
+
+------------------------------------------------------------------------------
+             |            Delta-method
+             |      dy/dx   std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+         age |   1622.001   478.3515     3.39   0.001     683.1402    2560.862
+   education |   5740.398   642.0236     8.94   0.000     4480.298    7000.498
+------------------------------------------------------------------------------
+
+. 
+. ****  15.4 INTERACTED REGRESSORS
+. 
+. * Regression with interactions
+. regress earnings age education agebyeduc, vce(robust)
+
+Linear regression                               Number of obs     =        872
+                                                F(3, 868)         =      31.80
+                                                Prob > F          =     0.0000
+                                                R-squared         =     0.1153
+                                                Root MSE          =      48539
+
+------------------------------------------------------------------------------
+             |               Robust
+    earnings | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+         age |   127.4922   719.2798     0.18   0.859    -1284.239    1539.223
+   education |   4514.987   2401.517     1.88   0.060    -198.4729    9228.446
+   agebyeduc |   29.03916   56.05204     0.52   0.605    -80.97421    139.0525
+       _cons |  -29089.38   30958.51    -0.94   0.348    -89851.67    31672.91
+------------------------------------------------------------------------------
+
+. estimates store INTERACT
+
+. 
+. * Joint test for statistical significance of age
+. test age agebyeduc
+
+ ( 1)  age = 0
+ ( 2)  agebyeduc = 0
+
+       F(  2,   868) =    6.49
+            Prob > F =    0.0016
+
+. * Joint test for statistical significance of education
+. test education agebyeduc
+
+ ( 1)  education = 0
+ ( 2)  agebyeduc = 0
+
+       F(  2,   868) =   43.00
+            Prob > F =    0.0000
+
+. 
+. * The regressors are highly correlated
+. correlate age education agebyeduc
+(obs=872)
+
+             |      age educat~n agebye~c
+-------------+---------------------------
+         age |   1.0000
+   education |  -0.0382   1.0000
+   agebyeduc |   0.7291   0.6360   1.0000
+
+
+. 
+. * ME for education using margins and Stata's factor variable notation
+. regress earnings c.education##c.age, vce(robust)
+
+Linear regression                               Number of obs     =        872
+                                                F(3, 868)         =      31.80
+                                                Prob > F          =     0.0000
+                                                R-squared         =     0.1153
+                                                Root MSE          =      48539
+
+------------------------------------------------------------------------------
+             |               Robust
+    earnings | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+   education |   4514.987   2401.517     1.88   0.060    -198.4729    9228.446
+         age |   127.4922   719.2798     0.18   0.859    -1284.239    1539.223
+             |
+ c.education#|
+       c.age |   29.03916   56.05204     0.52   0.605    -80.97421    139.0525
+             |
+       _cons |  -29089.38   30958.51    -0.94   0.348    -89851.67    31672.91
+------------------------------------------------------------------------------
+
+. * AME
+. margins, dydx(*)
+
+Average marginal effects                                   Number of obs = 872
+Model VCE: Robust
+
+Expression: Linear prediction, predict()
+dy/dx wrt:  education age
+
+------------------------------------------------------------------------------
+             |            Delta-method
+             |      dy/dx   std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+   education |   5772.695   626.6268     9.21   0.000     4542.814    7002.576
+         age |   529.7778   155.3266     3.41   0.001     224.9182    834.6374
+------------------------------------------------------------------------------
+
+. * MEM
+. margins, dydx(*) atmean
+
+Conditional marginal effects                               Number of obs = 872
+Model VCE: Robust
+
+Expression: Linear prediction, predict()
+dy/dx wrt:  education age
+At: education = 13.85321 (mean)
+    age       = 43.31078 (mean)
+
+------------------------------------------------------------------------------
+             |            Delta-method
+             |      dy/dx   std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+   education |   5772.695   626.6268     9.21   0.000     4542.814    7002.576
+         age |   529.7778   155.3266     3.41   0.001     224.9182    834.6374
+------------------------------------------------------------------------------
+
+. * MER marginal effect at a representative value e.g. age=25
+. margins, dydx(*) at(age=25)
+
+Average marginal effects                                   Number of obs = 872
+Model VCE: Robust
+
+Expression: Linear prediction, predict()
+dy/dx wrt:  education age
+At: age = 25
+
+------------------------------------------------------------------------------
+             |            Delta-method
+             |      dy/dx   std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+   education |   5240.966   1107.561     4.73   0.000     3067.155    7414.777
+         age |   529.7778   155.3266     3.41   0.001     224.9182    834.6374
+------------------------------------------------------------------------------
+
+. 
+. * ME for education done manually
+. quietly regress earnings age education agebyeduc, vce(robust)
+
+. * MEM
+. quietly summarize age
+
+. scalar meanage = r(mean)
+
+. lincom _b[education] + meanage*_b[agebyeduc]
+
+ ( 1)  education + 43.31078*agebyeduc = 0
+
+------------------------------------------------------------------------------
+    earnings | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+         (1) |   5772.695   626.6268     9.21   0.000     4542.814    7002.576
+------------------------------------------------------------------------------
+
+. display "MEM = " _b[education] + meanage*_b[agebyeduc]
+MEM = 5772.6953
+
+. * AME
+. generate ME_Ed = _b[education] + age*_b[agebyeduc]
+
+. mean ME_Ed
+
+Mean estimation                            Number of obs = 872
+
+--------------------------------------------------------------
+             |       Mean   Std. err.     [95% conf. interval]
+-------------+------------------------------------------------
+       ME_Ed |   5772.695   10.49872       5752.09    5793.301
+--------------------------------------------------------------
+
+. * MER
+. quietly regress earnings age education agebyeduc
+
+. display "ME of education at age 25 = " _b[education] + 25*_b[agebyeduc]
+ME of education at age 25 = 5240.9657
+
+. display "ME of education at age 65 = " _b[education] + 65*_b[agebyeduc]
+ME of education at age 65 = 6402.5321
+
+. 
+. estimates table BASE QUAD INTERACT, ///
+>     b(%11.0f) se(%11.0f) t(%11.2f) stfmt(%11.3f) stat(N r2 r2_a rmse F) 
+
+--------------------------------------------------------
+    Variable |    BASE          QUAD        INTERACT    
+-------------+------------------------------------------
+         age |         525          3105           127  
+             |         151          1087           719  
+             |        3.47          2.86          0.18  
+   education |        5811          5740          4515  
+             |         642           642          2402  
+             |        9.06          8.94          1.88  
+       agesq |                       -30                
+             |                        12                
+             |                     -2.38                
+   agebyeduc |                                      29  
+             |                                      56  
+             |                                    0.52  
+       _cons |      -46875        -98620        -29089  
+             |       11306         24524         30959  
+             |       -4.15         -4.02         -0.94  
+-------------+------------------------------------------
+           N |         872           872           872  
+          r2 |       0.115         0.119         0.115  
+        r2_a |       0.113         0.116         0.112  
+        rmse |   48519.466     48433.469     48538.541  
+           F |      42.849        29.959        31.802  
+--------------------------------------------------------
+                                          Legend: b/se/t
+
+. 
+. ****  15.5 LOG-LINEAR AND LOG-LOG MODELS
+. 
+. * Levels model
+. regress earnings age education, vce(robust)
+
+Linear regression                               Number of obs     =        872
+                                                F(2, 869)         =      42.85
+                                                Prob > F          =     0.0000
+                                                R-squared         =     0.1150
+                                                Root MSE          =      48519
+
+------------------------------------------------------------------------------
+             |               Robust
+    earnings | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+         age |   524.9953   151.3874     3.47   0.001     227.8676    822.1231
+   education |   5811.367   641.5329     9.06   0.000     4552.232    7070.502
+       _cons |  -46875.36   11306.33    -4.15   0.000    -69066.27   -24684.45
+------------------------------------------------------------------------------
+
+. predict pearnings
+(option xb assumed; fitted values)
+
+. 
+. * Log-linear model
+. regress lnearnings age education, vce(robust)
+
+Linear regression                               Number of obs     =        872
+                                                F(2, 869)         =      74.89
+                                                Prob > F          =     0.0000
+                                                R-squared         =     0.1904
+                                                Root MSE          =     .61637
+
+------------------------------------------------------------------------------
+             |               Robust
+  lnearnings | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+         age |   .0077587   .0020249     3.83   0.000     .0037845    .0117329
+   education |   .1005651   .0086076    11.68   0.000      .083671    .1174592
+       _cons |    8.96198   .1503037    59.63   0.000     8.666979     9.25698
+------------------------------------------------------------------------------
+
+. 
+. * Log-log model
+. regress lnearnings lnage education, vce(robust)
+
+Linear regression                               Number of obs     =        872
+                                                F(2, 869)         =      75.85
+                                                Prob > F          =     0.0000
+                                                R-squared         =     0.1927
+                                                Root MSE          =     .61549
+
+------------------------------------------------------------------------------
+             |               Robust
+  lnearnings | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+       lnage |   .3456586   .0820934     4.21   0.000     .1845341    .5067831
+   education |   .1003824   .0086052    11.67   0.000      .083493    .1172718
+       _cons |   8.009067   .3305526    24.23   0.000     7.360292    8.657842
+------------------------------------------------------------------------------
+
+. 
+. ****  15.6 PREDICTION FROM LOG-LINEAR AND LOG-LOG MODELS
+. 
+. * Retransformation bias in log-linear model
+. regress lnearnings age education, vce(robust)
+
+Linear regression                               Number of obs     =        872
+                                                F(2, 869)         =      74.89
+                                                Prob > F          =     0.0000
+                                                R-squared         =     0.1904
+                                                Root MSE          =     .61637
+
+------------------------------------------------------------------------------
+             |               Robust
+  lnearnings | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+         age |   .0077587   .0020249     3.83   0.000     .0037845    .0117329
+   education |   .1005651   .0086076    11.68   0.000      .083671    .1174592
+       _cons |    8.96198   .1503037    59.63   0.000     8.666979     9.25698
+------------------------------------------------------------------------------
+
+. predict plnearnings
+(option xb assumed; fitted values)
+
+. display "s_e = " e(rmse) " and exp(s_e^2/2) = " exp(e(rmse)^2/2)
+s_e = .61637136 and exp(s_e^2/2) = 1.2091974
+
+. generate biasedpearnings = exp(plnearnings)
+
+. generate correctedpearnings = exp(e(rmse)^2/2)*biasedpearnings
+
+. summarize earnings pearnings biasedpearnings correctedpearnings
+
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+    earnings |        872    56368.69    51516.05       4000     504000
+   pearnings |        872    56368.69    17469.14  -33750.48   102426.7
+biasedpear~s |        872    45838.14    13012.65   9470.602   95042.55
+correctedp~s |        872    55427.36    15734.87   11451.83   114925.2
+
+. correlate earnings pearnings correctedpearnings
+(obs=872)
+
+             | earnings pearni~s correc~s
+-------------+---------------------------
+    earnings |   1.0000
+   pearnings |   0.3391   1.0000
+correctedp~s |   0.3632   0.9622   1.0000
+
+
+. drop plnearnings biasedpearnings correctedpearnings
+
+. 
+. * Retransformation bias in log-log model
+. regress lnearnings lnage education, vce(robust)
+
+Linear regression                               Number of obs     =        872
+                                                F(2, 869)         =      75.85
+                                                Prob > F          =     0.0000
+                                                R-squared         =     0.1927
+                                                Root MSE          =     .61549
+
+------------------------------------------------------------------------------
+             |               Robust
+  lnearnings | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+       lnage |   .3456586   .0820934     4.21   0.000     .1845341    .5067831
+   education |   .1003824   .0086052    11.67   0.000      .083493    .1172718
+       _cons |   8.009067   .3305526    24.23   0.000     7.360292    8.657842
+------------------------------------------------------------------------------
+
+. predict plnearnings
+(option xb assumed; fitted values)
+
+. display "s_e = " e(rmse) " and exp(s_e^2/2) = " exp(e(rmse)^2/2)
+s_e = .61548607 and exp(s_e^2/2) = 1.2085382
+
+. generate biasedpearnings = exp(plnearnings)
+
+. generate correctedpearnings = exp(e(rmse)^2/2)*biasedpearnings
+
+. summarize earnings pearnings biasedpearnings correctedpearnings
+
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+    earnings |        872    56368.69    51516.05       4000     504000
+   pearnings |        872    56368.69    17469.14  -33750.48   102426.7
+biasedpear~s |        872    45861.18    13092.75    9151.74   93791.06
+correctedp~s |        872    55424.99    15823.09   11060.23   113350.1
+
+. correlate earnings pearnings biasedpearnings correctedpearnings
+(obs=872)
+
+             | earnings pearni~s biased~s correc~s
+-------------+------------------------------------
+    earnings |   1.0000
+   pearnings |   0.3391   1.0000
+biasedpear~s |   0.3659   0.9621   1.0000
+correctedp~s |   0.3659   0.9621   1.0000   1.0000
+
+
+. drop pearnings plnearnings biasedpearnings correctedpearnings
+
+. 
+. ****  15.7 MODELS WITH A MIX OF REGRESSOR TYPES
+. 
+. * Linear dependent variable
+. regress earnings gender age agesq education dself dgovt lnhours, vce(robust)
+
+Linear regression                               Number of obs     =        872
+                                                F(7, 864)         =      15.72
+                                                Prob > F          =     0.0000
+                                                R-squared         =     0.2056
+                                                Root MSE          =      46102
+
+------------------------------------------------------------------------------
+             |               Robust
+    earnings | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+      gender |  -14330.02   2696.808    -5.31   0.000    -19623.08   -9036.953
+         age |   3282.868   1064.806     3.08   0.002     1192.959    5372.777
+       agesq |  -31.57811   12.21366    -2.59   0.010    -55.55003    -7.60619
+   education |    5399.36   609.8615     8.85   0.000     4202.377    6596.344
+       dself |     9360.5   8711.602     1.07   0.283    -7737.879    26458.88
+       dgovt |   -291.136   2914.162    -0.10   0.920    -6010.801    5428.529
+     lnhours |   69963.73      16103     4.34   0.000     38358.16    101569.3
+       _cons |  -356631.6   66302.73    -5.38   0.000    -486764.9   -226498.4
+------------------------------------------------------------------------------
+
+. predict pearnings
+(option xb assumed; fitted values)
+
+. 
+. * Log-transformed dependent variable
+. regress lnearnings gender age agesq education dself dgovt lnhours, vce(robust
+> )
+
+Linear regression                               Number of obs     =        872
+                                                F(7, 864)         =      35.04
+                                                Prob > F          =     0.0000
+                                                R-squared         =     0.2813
+                                                Root MSE          =     .58242
+
+------------------------------------------------------------------------------
+             |               Robust
+  lnearnings | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+      gender |  -.1927532   .0394909    -4.88   0.000    -.2702625   -.1152439
+         age |   .0560939   .0158021     3.55   0.000     .0250788    .0871089
+       agesq |  -.0005485   .0001833    -2.99   0.003    -.0009084   -.0001887
+   education |   .0933591   .0083593    11.17   0.000     .0769522     .109766
+       dself |   -.117959   .1011256    -1.17   0.244    -.3164396    .0805215
+       dgovt |   .0698056   .0454961     1.53   0.125    -.0194901    .1591014
+     lnhours |   .9754287   .1417451     6.88   0.000     .6972238    1.253634
+       _cons |   4.459406   .6476959     6.89   0.000     3.188165    5.730648
+------------------------------------------------------------------------------
+
+. predict plnearnings
+(option xb assumed; fitted values)
+
+. display "s_e = " e(rmse) " and exp(s_e^2/2) = " exp(e(rmse)^2/2)
+s_e = .58241702 and exp(s_e^2/2) = 1.1848365
+
+. generate biasedpearnings = exp(plnearnings)
+
+. generate correctedpearnings = exp(e(rmse)^2/2)*biasedpearnings
+
+. summarize earnings pearnings biasedpearnings correctedpearnings
+
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+    earnings |        872    56368.69    51516.05       4000     504000
+   pearnings |        872    56368.69    23357.24  -36208.46     134977
+biasedpear~s |        872    46906.18    17449.53   8737.883   127692.9
+correctedp~s |        872    55576.15    20674.84   10352.96   151295.2
+
+. correlate earnings pearnings biasedpearnings correctedpearnings
+(obs=872)
+
+             | earnings pearni~s biased~s correc~s
+-------------+------------------------------------
+    earnings |   1.0000
+   pearnings |   0.4534   1.0000
+biasedpear~s |   0.4739   0.9352   1.0000
+correctedp~s |   0.4739   0.9352   1.0000   1.0000
+
+
+. 
+. * Levels dependent variable and standardized coefficients - option beta
+. regress earnings gender age agesq education dself dgovt lnhours, beta vce(rob
+> ust)
+
+Linear regression                               Number of obs     =        872
+                                                F(7, 864)         =      15.72
+                                                Prob > F          =     0.0000
+                                                R-squared         =     0.2056
+                                                Root MSE          =      46102
+
+------------------------------------------------------------------------------
+             |               Robust
+    earnings | Coefficient  std. err.      t    P>|t|                     Beta
+-------------+----------------------------------------------------------------
+      gender |  -14330.02   2696.808    -5.31   0.000                 -.137926
+         age |   3282.868   1064.806     3.08   0.002                 .6803324
+       agesq |  -31.57811   12.21366    -2.59   0.010                -.5735568
+   education |    5399.36   609.8615     8.85   0.000                 .3022847
+       dself |     9360.5   8711.602     1.07   0.283                 .0521842
+       dgovt |   -291.136   2914.162    -0.10   0.920                 -.002014
+     lnhours |   69963.73      16103     4.34   0.000                   .22377
+       _cons |  -356631.6   66302.73    -5.38   0.000                        .
+------------------------------------------------------------------------------
+
+. 
+. ********** CLOSE OUTPUT
+. 
+. display ""
+
+
+. display "Chapter 15 analysis complete."
+Chapter 15 analysis complete.
+
+. display "Figures saved to: images/"
+Figures saved to: images/
+
+. display "Tables saved to: tables/"
+Tables saved to: tables/
+
+. 
+end of do-file

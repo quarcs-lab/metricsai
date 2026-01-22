@@ -1,0 +1,1053 @@
+
+. * ch14_Regression_with_Indicator_Variables.do - January 2026 For Stata
+. * Updated for online execution portability
+. 
+. ********** OVERVIEW OF ch14_Regression_with_Indicator_Variables.do **********
+. 
+. * STATA Program
+. * copyright C 2021 by A. Colin Cameron
+. * Used for "Analyis of Economics Data: An Introduction to Econometrics"
+. * by A. Colin Cameron (2021)
+. 
+. * To run you need file
+. *   AED_EARNINGS_COMPLETE
+. * in your directory
+. 
+. ********** SETUP **********
+. 
+. * Set random seed for reproducibility
+. set seed 42
+
+. 
+. * Clear all macros
+. macro drop _all
+
+. 
+. * GitHub data URL
+. global github_data_url "https://raw.githubusercontent.com/quarcs-lab/data-ope
+> n/master/AED/"
+
+. 
+. * Create output directories (optional - for saving figures and tables locally
+> )
+. cap mkdir "images"
+
+. cap mkdir "tables"
+
+. 
+. set more off
+
+. clear all
+
+. 
+. ************
+. 
+. * This STATA does analysis for Chapter 14
+. *  14.1 EXAMPLE: EARNINGS, GENDER, EDUCATION and TYPE OF WORKER
+. *  14.2 REGRESSION ON JUST A SINGLE INDICATOR VARIABLE
+. *  14.3 REGRESSION ON A SINGLE INDICATOR VARIABLE AND ADDITIONAL REGERESSORS
+. *  14.4 REGRESSION ON SETS OF INDICATOR VARIABLES
+. 
+. ********** DATA DESCRIPTION
+. 
+. * Annual Earnings for 842 male and female full-time workers
+. * aged 25-65 years old in 2010
+. 
+. 
+. ****  14.1 EXAMPLE: EARNINGS, GENDER, EDUCATION and TYPE OF WORKER
+. 
+. * Download and load data from GitHub
+. clear
+
+. copy "${github_data_url}AED_EARNINGS_COMPLETE.DTA" "temp_data.dta", replace
+(file temp_data.dta not found)
+
+. use "temp_data.dta", clear
+(Data for A. Colin Cameron (2020): Analysis of Economics Data)
+
+. erase "temp_data.dta"
+
+. describe
+
+Contains data from temp_data.dta
+ Observations:           872                  Data for A. Colin Cameron
+                                                (2020): Analysis of Economics
+                                                Data
+    Variables:            45                  15 Jul 2020 17:34
+-------------------------------------------------------------------------------
+Variable      Storage   Display    Value
+    name         type    format    label      Variable label
+-------------------------------------------------------------------------------
+earnings        float   %9.0g                 Annual earnings in $
+lnearnings      float   %9.0g                 Natural logarighm of earnings
+dearnings       float   %9.0g                 = 1 if earnings > 80000 and = 0
+                                                otherwise
+gender          byte    %8.0g                 = 1 if female and = 0 if male
+age             int     %36.0g                Age in years
+lnage           float   %9.0g                 Natural logarithm of age
+agesq           float   %9.0g                 Age squared
+education       float   %9.0g                 Educational attainment: years of
+                                                schooling
+educsquared     float   %9.0g                 Education squared
+agebyeduc       float   %9.0g                 Age times Education
+genderbyage     float   %9.0g                 Gender times age
+genderbyeduc    float   %9.0g                 Gender times education
+hours           byte    %8.0g                 Usual hours worked per week
+lnhours         float   %9.0g                 Natural logarithm of hours
+genderbyhours   float   %9.0g                 Gender times hours
+dself           float   %9.0g                 1 if self-employed, 0 otherwise
+dprivate        float   %9.0g                 1 if work for wages in private
+                                                sector, otherwise
+dgovt           float   %9.0g                 1 if work for wages in govt
+                                                sector
+state           str21   %21s                  State name
+statefip        byte    %57.0g     statefip_lbl
+                                              State (FIPS code)
+stateunemp      float   %9.0g                 State unemplyment rate in 2010
+stateincomepc   long    %12.0g                State income per capita in 2010
+year            int     %8.0g      year_lbl   Census year
+pernum          int     %8.0g                 Person number in sample unit
+perwt           float   %10.2f                Person weight
+relate          byte    %24.0g     relate_lbl
+                                              Relationship to household head
+                                                [general version]
+region          byte    %43.0g     region_lbl
+                                              Census region and division
+metro           byte    %36.0g     metro_lbl
+                                              Metropolitan status
+marst           byte    %23.0g     marst_lbl
+                                              Marital status
+race            byte    %32.0g     race_lbl   Race [general version]
+raced           int     %182.0g    raced_lbl
+                                              Race [detailed version]
+hispan          byte    %12.0g     hispan_lbl
+                                              Hispanic origin [general version]
+racesing        byte    %29.0g     racesing_lbl
+                                              Race: Single race identification
+                                                [general version]
+hcovany         byte    %30.0g     hcovany_lbl
+                                              Any health insurance coverage
+attainededuc    byte    %25.0g     educ_lbl   Educational attainment [general
+                                                version]
+detailededuc    int     %46.0g     educd_lbl
+                                              Educational attainment [detailed
+                                                version]
+empstat         byte    %18.0g     empstat_lbl
+                                              Employment status [general
+                                                version]
+classwkr        byte    %15.0g     classwkr_lbl
+                                              Class of worker [general version]
+classwkrd       byte    %31.0g     classwkrd_lbl
+                                              Class of worker [detailed
+                                                version]
+wkswork2        byte    %11.0g     wkswork2_lbl
+                                              Weeks worked last year,
+                                                intervalled
+workedyr        byte    %39.0g     workedyr_lbl
+                                              Worked last year
+inctot          long    %12.0g     inctot_lbl
+                                              Total personal income
+incwage         long    %12.0g     incwage_lbl
+                                              Wage and salary income
+incbus00        long    %12.0g                Business and farm income, 2000
+incearn         long    %12.0g     incearn_lbl
+                                              Total personal earned income
+-------------------------------------------------------------------------------
+Sorted by: 
+
+. summarize
+
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+    earnings |        872    56368.69    51516.05       4000     504000
+  lnearnings |        872    10.69116    .6842475   8.294049   13.13033
+   dearnings |        872    .1639908    .3704797          0          1
+      gender |        872    .4334862    .4958406          0          1
+         age |        872    43.31078    10.67604         25         65
+-------------+---------------------------------------------------------
+       lnage |        872    3.736286    .2578886   3.218876   4.174387
+       agesq |        872    1989.671    935.6919        625       4225
+   education |        872    13.85321    2.884141          0         20
+ educsquared |        872    200.2202    73.90842          0        400
+   agebyeduc |        872      598.82    193.6906          0       1260
+-------------+---------------------------------------------------------
+ genderbyage |        872    19.04243    22.86976          0         65
+genderbyeduc |        872    6.082569    7.172634          0         20
+       hours |        872    44.34289    8.499103         35         99
+     lnhours |        872    3.777036    .1647675   3.555348    4.59512
+genderbyho~s |        872    18.56422    21.75979          0         80
+-------------+---------------------------------------------------------
+       dself |        872    .0905963    .2871989          0          1
+    dprivate |        872    .7603211    .4271325          0          1
+       dgovt |        872    .1490826    .3563742          0          1
+       state |          0
+    statefip |        872    27.47706    16.19427          1         56
+-------------+---------------------------------------------------------
+  stateunemp |        872    9.596904    1.649194        4.8       14.4
+stateincom~c |        872    40772.99    5558.626      31186      71044
+        year |        872        2010           0       2010       2010
+      pernum |        872    1.544725    .8915059          1          8
+       perwt |        872    145.7844    90.98781         14        626
+-------------+---------------------------------------------------------
+      relate |        872    2.095183    2.465165          1         12
+      region |        872     28.0906     10.3787         11         42
+       metro |        872    2.702982    1.215132          0          4
+       marst |        872    2.553899    2.053662          1          6
+        race |        872    1.698394    1.687285          1          8
+-------------+---------------------------------------------------------
+       raced |        872    171.3016    172.6004        100        867
+      hispan |        872    .2408257    .7796394          0          4
+    racesing |        872    1.325688    .8114455          1          5
+     hcovany |        872    1.868119    .3385552          1          2
+attainededuc |        872    7.771789    2.289492          0         11
+-------------+---------------------------------------------------------
+detailededuc |        872    79.95183     22.9472          2        116
+     empstat |        872    1.018349    .1649772          1          3
+    classwkr |        872     1.91055    .2855553          1          2
+   classwkrd |        872    22.05849    3.260595         13         29
+    wkswork2 |        872    5.989679    .1011252          5          6
+-------------+---------------------------------------------------------
+    workedyr |        872           3           0          3          3
+      inctot |        872     57718.7    53049.14       4000     548000
+     incwage |        872    52828.21    48915.23          0     498000
+    incbus00 |        872    3540.483    20495.13      -7500     285000
+     incearn |        872    56368.69    51516.05       4000     504000
+
+. 
+. * Table 14.1
+. describe earnings gender education genderbyeduc age genderbyage hours ///
+>    genderbyhours dself dprivate dgovt 
+
+Variable      Storage   Display    Value
+    name         type    format    label      Variable label
+-------------------------------------------------------------------------------
+earnings        float   %9.0g                 Annual earnings in $
+gender          byte    %8.0g                 = 1 if female and = 0 if male
+education       float   %9.0g                 Educational attainment: years of
+                                                schooling
+genderbyeduc    float   %9.0g                 Gender times education
+age             int     %36.0g                Age in years
+genderbyage     float   %9.0g                 Gender times age
+hours           byte    %8.0g                 Usual hours worked per week
+genderbyhours   float   %9.0g                 Gender times hours
+dself           float   %9.0g                 1 if self-employed, 0 otherwise
+dprivate        float   %9.0g                 1 if work for wages in private
+                                                sector, otherwise
+dgovt           float   %9.0g                 1 if work for wages in govt
+                                                sector
+
+. summarize earnings gender education genderbyeduc age genderbyage hours ///
+>    genderbyhours dself dprivate dgovt 
+
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+    earnings |        872    56368.69    51516.05       4000     504000
+      gender |        872    .4334862    .4958406          0          1
+   education |        872    13.85321    2.884141          0         20
+genderbyeduc |        872    6.082569    7.172634          0         20
+         age |        872    43.31078    10.67604         25         65
+-------------+---------------------------------------------------------
+ genderbyage |        872    19.04243    22.86976          0         65
+       hours |        872    44.34289    8.499103         35         99
+genderbyho~s |        872    18.56422    21.75979          0         80
+       dself |        872    .0905963    .2871989          0          1
+    dprivate |        872    .7603211    .4271325          0          1
+-------------+---------------------------------------------------------
+       dgovt |        872    .1490826    .3563742          0          1
+
+.    
+. ****  14.2 REGRESSION ON JUST A SINGLE INDICATOR VARIABLE
+. 
+. * Figure 14.1 code not included as for illustration
+. 
+. * Table 14.2 Summary statistics by gender
+. * female
+. summarize earnings if gender == 1
+
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+    earnings |        378    47079.89    31596.72       4000     322000
+
+. * male
+. summarize earnings if gender == 0
+
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+    earnings |        494    63476.32    61713.21       5000     504000
+
+. 
+. * OLS for difference in means - heteroskedastic-robust standard errors
+. regress earnings gender, vce(robust)
+
+Linear regression                               Number of obs     =        872
+                                                F(1, 870)         =      25.97
+                                                Prob > F          =     0.0000
+                                                R-squared         =     0.0249
+                                                Root MSE          =      50900
+
+------------------------------------------------------------------------------
+             |               Robust
+    earnings | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+      gender |  -16396.42   3217.429    -5.10   0.000    -22711.25   -10081.59
+       _cons |   63476.32   2776.983    22.86   0.000     58025.95    68926.69
+------------------------------------------------------------------------------
+
+. * Similar test using ttest and unequal variances
+. ttest earnings, by(gender) unequal
+
+Two-sample t test with unequal variances
+------------------------------------------------------------------------------
+   Group |     Obs        Mean    Std. err.   Std. dev.   [95% conf. interval]
+---------+--------------------------------------------------------------------
+       0 |     494    63476.32    2776.609    61713.21    58020.87    68931.76
+       1 |     378    47079.89     1625.16    31596.72    43884.38    50275.41
+---------+--------------------------------------------------------------------
+Combined |     872    56368.69    1744.554    51516.05    52944.67    59792.71
+---------+--------------------------------------------------------------------
+    diff |            16396.42    3217.251                10080.81    22712.04
+------------------------------------------------------------------------------
+    diff = mean(0) - mean(1)                                      t =   5.0964
+H0: diff = 0                     Satterthwaite's degrees of freedom =  770.407
+
+    Ha: diff < 0                 Ha: diff != 0                 Ha: diff > 0
+ Pr(T < t) = 1.0000         Pr(|T| > |t|) = 0.0000          Pr(T > t) = 0.0000
+
+. 
+. * Aside: with equal variances regress and ttest give exactly same results
+. regress earnings gender
+
+      Source |       SS           df       MS      Number of obs   =       872
+-------------+----------------------------------   F(1, 870)       =     22.22
+       Model |  5.7571e+10         1  5.7571e+10   Prob > F        =    0.0000
+    Residual |  2.2540e+12       870  2.5908e+09   R-squared       =    0.0249
+-------------+----------------------------------   Adj R-squared   =    0.0238
+       Total |  2.3116e+12       871  2.6539e+09   Root MSE        =     50900
+
+------------------------------------------------------------------------------
+    earnings | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+      gender |  -16396.42   3478.278    -4.71   0.000    -23223.22   -9569.628
+       _cons |   63476.32   2290.087    27.72   0.000     58981.58    67971.06
+------------------------------------------------------------------------------
+
+. ttest earnings, by(gender)
+
+Two-sample t test with equal variances
+------------------------------------------------------------------------------
+   Group |     Obs        Mean    Std. err.   Std. dev.   [95% conf. interval]
+---------+--------------------------------------------------------------------
+       0 |     494    63476.32    2776.609    61713.21    58020.87    68931.76
+       1 |     378    47079.89     1625.16    31596.72    43884.38    50275.41
+---------+--------------------------------------------------------------------
+Combined |     872    56368.69    1744.554    51516.05    52944.67    59792.71
+---------+--------------------------------------------------------------------
+    diff |            16396.42    3478.278                9569.628    23223.22
+------------------------------------------------------------------------------
+    diff = mean(0) - mean(1)                                      t =   4.7139
+H0: diff = 0                                     Degrees of freedom =      870
+
+    Ha: diff < 0                 Ha: diff != 0                 Ha: diff > 0
+ Pr(T < t) = 1.0000         Pr(|T| > |t|) = 0.0000          Pr(T > t) = 0.0000
+
+. 
+. ****  14.3 REGRESSION ON A SINGLE INDICATOR VARIABLE AND ADDITIONAL REGERESSO
+> RS
+. 
+. * Gender indicator only 
+. regress earnings gender, vce(robust)
+
+Linear regression                               Number of obs     =        872
+                                                F(1, 870)         =      25.97
+                                                Prob > F          =     0.0000
+                                                R-squared         =     0.0249
+                                                Root MSE          =      50900
+
+------------------------------------------------------------------------------
+             |               Robust
+    earnings | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+      gender |  -16396.42   3217.429    -5.10   0.000    -22711.25   -10081.59
+       _cons |   63476.32   2776.983    22.86   0.000     58025.95    68926.69
+------------------------------------------------------------------------------
+
+. estimates store D_ONLY
+
+. test gender 
+
+ ( 1)  gender = 0
+
+       F(  1,   870) =   25.97
+            Prob > F =    0.0000
+
+. 
+. * Add education 
+. regress earnings gender education, vce(robust)
+
+Linear regression                               Number of obs     =        872
+                                                F(2, 869)         =      41.77
+                                                Prob > F          =     0.0000
+                                                R-squared         =     0.1340
+                                                Root MSE          =      47997
+
+------------------------------------------------------------------------------
+             |               Robust
+    earnings | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+      gender |  -18258.09   3136.142    -5.82   0.000    -24413.39   -12102.79
+   education |   5907.291   654.0796     9.03   0.000      4623.53    7191.051
+       _cons |  -17551.62   7993.547    -2.20   0.028    -33240.53   -1862.703
+------------------------------------------------------------------------------
+
+. estimates store D_ED
+
+. test gender
+
+ ( 1)  gender = 0
+
+       F(  1,   869) =   33.89
+            Prob > F =    0.0000
+
+. 
+. * Interact education and gender  
+. regress earnings gender education genderbyeduc, vce(robust)
+
+Linear regression                               Number of obs     =        872
+                                                F(3, 868)         =      31.92
+                                                Prob > F          =     0.0000
+                                                R-squared         =     0.1395
+                                                Root MSE          =      47870
+
+------------------------------------------------------------------------------
+             |               Robust
+    earnings | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+      gender |    20218.8   15355.18     1.32   0.188    -9918.826    50356.42
+   education |    6920.64   946.1378     7.31   0.000     5063.654    8777.625
+genderbyeduc |   -2764.89   1168.325    -2.37   0.018    -5057.962   -471.8188
+       _cons |  -31451.32   11846.01    -2.66   0.008    -54701.49   -8201.157
+------------------------------------------------------------------------------
+
+. estimates store D_ED_DBYED
+
+. test gender genderbyeduc
+
+ ( 1)  gender = 0
+ ( 2)  genderbyeduc = 0
+
+       F(  2,   868) =   17.18
+            Prob > F =    0.0000
+
+. 
+. * Add additional controls education and gender  
+. regress earnings gender education genderbyeduc age hours, vce(robust)
+
+Linear regression                               Number of obs     =        872
+                                                F(5, 866)         =      23.32
+                                                Prob > F          =     0.0000
+                                                R-squared         =     0.1979
+                                                Root MSE          =      46272
+
+------------------------------------------------------------------------------
+             |               Robust
+    earnings | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+      gender |   19021.71   14994.36     1.27   0.205    -10407.82    48451.24
+   education |   6416.799   886.1241     7.24   0.000     4677.597    8156.001
+genderbyeduc |  -2456.291   1123.174    -2.19   0.029    -4660.754   -251.8292
+         age |   525.9931   145.0065     3.63   0.000     241.3879    810.5984
+       hours |   1324.514   352.5477     3.76   0.000     632.5663    2016.462
+       _cons |  -107343.6   22224.38    -4.83   0.000    -150963.6   -63723.68
+------------------------------------------------------------------------------
+
+. estimates store D_CONTROLS
+
+. test gender genderbyeduc
+
+ ( 1)  gender = 0
+ ( 2)  genderbyeduc = 0
+
+       F(  2,   866) =   15.22
+            Prob > F =    0.0000
+
+. 
+. * Fully interact
+. regress earnings gender genderbyeduc education age hours genderbyage ///
+>     genderbyhours, vce(robust)
+
+Linear regression                               Number of obs     =        872
+                                                F(7, 864)         =      21.25
+                                                Prob > F          =     0.0000
+                                                R-squared         =     0.2028
+                                                Root MSE          =      46183
+
+------------------------------------------------------------------------------
+             |               Robust
+    earnings | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+      gender |      57129   31917.14     1.79   0.074    -5515.212    119773.2
+genderbyeduc |  -2123.511   1096.425    -1.94   0.053    -4275.479    28.45592
+   education |   6314.673   878.6148     7.19   0.000     4590.204    8039.142
+         age |    549.475   227.6826     2.41   0.016     102.5993    996.3507
+       hours |   1620.814   503.8693     3.22   0.001     631.8631    2609.765
+ genderbyage |  -49.33262   270.2579    -0.18   0.855    -579.7714    481.1061
+genderbyho~s |  -929.5746   554.2467    -1.68   0.094    -2017.402    158.2528
+       _cons |  -120431.6   28847.15    -4.17   0.000    -177050.3   -63812.88
+------------------------------------------------------------------------------
+
+. estimates store D_FULL_INT
+
+. test gender genderbyeduc genderbyage genderbyhours
+
+ ( 1)  gender = 0
+ ( 2)  genderbyeduc = 0
+ ( 3)  genderbyage = 0
+ ( 4)  genderbyhours = 0
+
+       F(  4,   864) =    8.14
+            Prob > F =    0.0000
+
+. 
+. * Table 14.3
+. estimates table D_ONLY D_ED D_ED_DBYED D_CONTROLS D_FULL_INT, ///
+>     b(%11.0f) se(%11.0f) t(%11.2f) stfmt(%11.3f) stat(N r2 r2_a rmse F)
+
+----------------------------------------------------------------------
+    Variable |   D_ONLY         D_ED       D_ED_DBYED    D_CONTROLS   
+-------------+--------------------------------------------------------
+      gender |      -16396        -18258         20219         19022  
+             |        3217          3136         15355         14994  
+             |       -5.10         -5.82          1.32          1.27  
+   education |                      5907          6921          6417  
+             |                       654           946           886  
+             |                      9.03          7.31          7.24  
+genderbyeduc |                                   -2765         -2456  
+             |                                    1168          1123  
+             |                                   -2.37         -2.19  
+         age |                                                   526  
+             |                                                   145  
+             |                                                  3.63  
+       hours |                                                  1325  
+             |                                                   353  
+             |                                                  3.76  
+ genderbyage |                                                        
+             |                                                        
+             |                                                        
+genderbyho~s |                                                        
+             |                                                        
+             |                                                        
+       _cons |       63476        -17552        -31451       -107344  
+             |        2777          7994         11846         22224  
+             |       22.86         -2.20         -2.66         -4.83  
+-------------+--------------------------------------------------------
+           N |         872           872           872           872  
+          r2 |       0.025         0.134         0.140         0.198  
+        r2_a |       0.024         0.132         0.137         0.193  
+        rmse |   50899.717     47996.599     47870.197     46272.189  
+           F |      25.970        41.775        31.923        23.318  
+----------------------------------------------------------------------
+                                                        Legend: b/se/t
+
+
+----------------------------
+    Variable | D_FULL_INT   
+-------------+--------------
+      gender |       57129  
+             |       31917  
+             |        1.79  
+   education |        6315  
+             |         879  
+             |        7.19  
+genderbyeduc |       -2124  
+             |        1096  
+             |       -1.94  
+         age |         549  
+             |         228  
+             |        2.41  
+       hours |        1621  
+             |         504  
+             |        3.22  
+ genderbyage |         -49  
+             |         270  
+             |       -0.18  
+genderbyho~s |        -930  
+             |         554  
+             |       -1.68  
+       _cons |     -120432  
+             |       28847  
+             |       -4.17  
+-------------+--------------
+           N |         872  
+          r2 |       0.203  
+        r2_a |       0.196  
+        rmse |   46182.684  
+           F |      21.246  
+----------------------------
+              Legend: b/se/t
+
+. 
+. * Joint regression
+. regress earnings gender genderbyeduc education age hours genderbyage ///
+>     genderbyhours, vce(robust) noheader
+------------------------------------------------------------------------------
+             |               Robust
+    earnings | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+      gender |      57129   31917.14     1.79   0.074    -5515.212    119773.2
+genderbyeduc |  -2123.511   1096.425    -1.94   0.053    -4275.479    28.45592
+   education |   6314.673   878.6148     7.19   0.000     4590.204    8039.142
+         age |    549.475   227.6826     2.41   0.016     102.5993    996.3507
+       hours |   1620.814   503.8693     3.22   0.001     631.8631    2609.765
+ genderbyage |  -49.33262   270.2579    -0.18   0.855    -579.7714    481.1061
+genderbyho~s |  -929.5746   554.2467    -1.68   0.094    -2017.402    158.2528
+       _cons |  -120431.6   28847.15    -4.17   0.000    -177050.3   -63812.88
+------------------------------------------------------------------------------
+
+. * Separate regressions by gender
+. regress earnings gender education age hours if gender==1, vce(robust) noheade
+> r
+note: gender omitted because of collinearity.
+------------------------------------------------------------------------------
+             |               Robust
+    earnings | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+      gender |          0  (omitted)
+   education |   4191.162   656.3496     6.39   0.000     2900.564     5481.76
+         age |   500.1424   145.7056     3.43   0.001     213.6376    786.6472
+       hours |   691.2396   231.0431     2.99   0.003     236.9332    1145.546
+       _cons |  -63302.57    13667.9    -4.63   0.000    -90178.14      -36427
+------------------------------------------------------------------------------
+
+. regress earnings gender education age hours if gender==0, vce(robust) noheade
+> r
+note: gender omitted because of collinearity.
+------------------------------------------------------------------------------
+             |               Robust
+    earnings | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+      gender |          0  (omitted)
+   education |   6314.673   878.1377     7.19   0.000     4589.293    8040.053
+         age |    549.475   227.5589     2.41   0.016     102.3633    996.5867
+       hours |   1620.814   503.5957     3.22   0.001     631.3408    2610.288
+       _cons |  -120431.6   28831.48    -4.18   0.000    -177080.2   -63782.98
+------------------------------------------------------------------------------
+
+. 
+. ****  14.4 REGRESSION ON SETS OF INDICATOR VARIABLES
+. 
+. * regress on indicators with no intercept
+. regress earnings dself dprivate dgovt, noconstant vce(robust)
+
+Linear regression                               Number of obs     =        872
+                                                F(3, 869)         =     425.47
+                                                Prob > F          =     0.0000
+                                                R-squared         =     0.5496
+                                                Root MSE          =      51325
+
+------------------------------------------------------------------------------
+             |               Robust
+    earnings | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+       dself |   72306.33   9636.853     7.50   0.000      53392.1    91220.56
+    dprivate |   54521.27   1897.507    28.73   0.000     50797.04     58245.5
+       dgovt |   56105.38   2824.631    19.86   0.000     50561.49    61649.28
+------------------------------------------------------------------------------
+
+. regress earnings dself dprivate dgovt, noconstant
+
+      Source |       SS           df       MS      Number of obs   =       872
+-------------+----------------------------------   F(3, 869)       =    353.42
+       Model |  2.7931e+12         3  9.3102e+11   Prob > F        =    0.0000
+    Residual |  2.2892e+12       869  2.6343e+09   R-squared       =    0.5496
+-------------+----------------------------------   Adj R-squared   =    0.5480
+       Total |  5.0823e+12       872  5.8283e+09   Root MSE        =     51325
+
+------------------------------------------------------------------------------
+    earnings | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+       dself |   72306.33   5774.569    12.52   0.000      60972.6    83640.06
+    dprivate |   54521.27   1993.317    27.35   0.000     50608.99    58433.55
+       dgovt |   56105.38   4501.543    12.46   0.000     47270.22    64940.55
+------------------------------------------------------------------------------
+
+. mean earnings if dself==1
+
+Mean estimation                             Number of obs = 79
+
+--------------------------------------------------------------
+             |       Mean   Std. err.     [95% conf. interval]
+-------------+------------------------------------------------
+    earnings |   72306.33   9681.734      53031.48    91581.18
+--------------------------------------------------------------
+
+. mean earnings if dprivate==1
+
+Mean estimation                            Number of obs = 663
+
+--------------------------------------------------------------
+             |       Mean   Std. err.     [95% conf. interval]
+-------------+------------------------------------------------
+    earnings |   54521.27    1895.67      50799.02    58243.52
+--------------------------------------------------------------
+
+. mean earnings if dgovt==1
+
+Mean estimation                            Number of obs = 130
+
+--------------------------------------------------------------
+             |       Mean   Std. err.     [95% conf. interval]
+-------------+------------------------------------------------
+    earnings |   56105.38   2830.677      50504.82    61705.95
+--------------------------------------------------------------
+
+. 
+. * Base with no indicator variables
+. regress earnings age education, vce(robust)
+
+Linear regression                               Number of obs     =        872
+                                                F(2, 869)         =      42.85
+                                                Prob > F          =     0.0000
+                                                R-squared         =     0.1150
+                                                Root MSE          =      48519
+
+------------------------------------------------------------------------------
+             |               Robust
+    earnings | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+         age |   524.9953   151.3874     3.47   0.001     227.8676    822.1231
+   education |   5811.367   641.5329     9.06   0.000     4552.232    7070.502
+       _cons |  -46875.36   11306.33    -4.15   0.000    -69066.27   -24684.45
+------------------------------------------------------------------------------
+
+. estimates store NOINDIC
+
+. 
+. * Reference group is self-employed
+. regress earnings age education dprivate dgovt, vce(robust)
+
+Linear regression                               Number of obs     =        872
+                                                F(4, 867)         =      22.12
+                                                Prob > F          =     0.0000
+                                                R-squared         =     0.1246
+                                                Root MSE          =      48312
+
+------------------------------------------------------------------------------
+             |               Robust
+    earnings | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+         age |   487.6022   149.6477     3.26   0.001     193.8882    781.3163
+   education |   5865.192   652.2167     8.99   0.000     4585.084    7145.301
+    dprivate |  -17097.85    9341.98    -1.83   0.068    -35433.39    1237.695
+       dgovt |  -19122.92   9585.615    -1.99   0.046    -37936.65   -309.1982
+       _cons |  -30150.74   13139.58    -2.29   0.022    -55939.84   -4361.632
+------------------------------------------------------------------------------
+
+. estimates store NOSELF
+
+. test dprivate dgovt
+
+ ( 1)  dprivate = 0
+ ( 2)  dgovt = 0
+
+       F(  2,   867) =    2.01
+            Prob > F =    0.1351
+
+. 
+. * Reference group is private
+. regress earnings age education dself dgovt, vce(robust) 
+
+Linear regression                               Number of obs     =        872
+                                                F(4, 867)         =      22.12
+                                                Prob > F          =     0.0000
+                                                R-squared         =     0.1246
+                                                Root MSE          =      48312
+
+------------------------------------------------------------------------------
+             |               Robust
+    earnings | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+         age |   487.6022   149.6477     3.26   0.001     193.8882    781.3163
+   education |   5865.192   652.2167     8.99   0.000     4585.084    7145.301
+       dself |   17097.85    9341.98     1.83   0.068    -1237.695    35433.39
+       dgovt |  -2025.075   3098.983    -0.65   0.514    -8107.462    4057.312
+       _cons |  -47248.58   11377.07    -4.15   0.000     -69578.4   -24918.77
+------------------------------------------------------------------------------
+
+. estimates store NOPRIVATE
+
+. test dself dgovt
+
+ ( 1)  dself = 0
+ ( 2)  dgovt = 0
+
+       F(  2,   867) =    2.01
+            Prob > F =    0.1351
+
+. 
+. * Reference group is government
+. regress earnings age education dself dprivate, vce(robust) 
+
+Linear regression                               Number of obs     =        872
+                                                F(4, 867)         =      22.12
+                                                Prob > F          =     0.0000
+                                                R-squared         =     0.1246
+                                                Root MSE          =      48312
+
+------------------------------------------------------------------------------
+             |               Robust
+    earnings | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+         age |   487.6022   149.6477     3.26   0.001     193.8882    781.3163
+   education |   5865.192   652.2167     8.99   0.000     4585.084    7145.301
+       dself |   19122.92   9585.615     1.99   0.046     309.1982    37936.65
+    dprivate |   2025.075   3098.983     0.65   0.514    -4057.312    8107.462
+       _cons |  -49273.66   12312.08    -4.00   0.000    -73438.64   -25108.68
+------------------------------------------------------------------------------
+
+. estimates store NOGOVT
+
+. test dself dprivate
+
+ ( 1)  dself = 0
+ ( 2)  dprivate = 0
+
+       F(  2,   867) =    2.01
+            Prob > F =    0.1351
+
+. 
+. * No intercept
+. regress earnings age education dself dprivate dgovt, noconstant vce(robust)
+
+Linear regression                               Number of obs     =        872
+                                                F(5, 867)         =     313.06
+                                                Prob > F          =     0.0000
+                                                R-squared         =     0.6018
+                                                Root MSE          =      48312
+
+------------------------------------------------------------------------------
+             |               Robust
+    earnings | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+         age |   487.6022   149.6477     3.26   0.001     193.8882    781.3163
+   education |   5865.192   652.2167     8.99   0.000     4585.084    7145.301
+       dself |  -30150.74   13139.58    -2.29   0.022    -55939.84   -4361.632
+    dprivate |  -47248.58   11377.07    -4.15   0.000     -69578.4   -24918.77
+       dgovt |  -49273.66   12312.08    -4.00   0.000    -73438.64   -25108.68
+------------------------------------------------------------------------------
+
+. estimates store NOINT
+
+. test (dself=dprivate) (dself=dgovt)
+
+ ( 1)  dself - dprivate = 0
+ ( 2)  dself - dgovt = 0
+
+       F(  2,   867) =    2.01
+            Prob > F =    0.1351
+
+. test (dself=dprivate) (dprivate=dgovt)
+
+ ( 1)  dself - dprivate = 0
+ ( 2)  dprivate - dgovt = 0
+
+       F(  2,   867) =    2.01
+            Prob > F =    0.1351
+
+. 
+. * Table 14.4
+. estimates table NOINDIC NOSELF NOPRIVATE NOGOVT NOINT, ///
+>     keep(age education dself dprivate dgovt _cons)     ///
+>     b(%11.0f) se(%11.0f) t(%11.2f) stfmt(%11.3f) stat(N r2 r2_a rmse F) 
+
+----------------------------------------------------------------------
+    Variable |   NOINDIC       NOSELF       NOPRIVATE      NOGOVT     
+-------------+--------------------------------------------------------
+         age |         525           488           488           488  
+             |         151           150           150           150  
+             |        3.47          3.26          3.26          3.26  
+   education |        5811          5865          5865          5865  
+             |         642           652           652           652  
+             |        9.06          8.99          8.99          8.99  
+       dself |                                   17098         19123  
+             |                                    9342          9586  
+             |                                    1.83          1.99  
+    dprivate |                    -17098                        2025  
+             |                      9342                        3099  
+             |                     -1.83                        0.65  
+       dgovt |                    -19123         -2025                
+             |                      9586          3099                
+             |                     -1.99         -0.65                
+       _cons |      -46875        -30151        -47249        -49274  
+             |       11306         13140         11377         12312  
+             |       -4.15         -2.29         -4.15         -4.00  
+-------------+--------------------------------------------------------
+           N |         872           872           872           872  
+          r2 |       0.115         0.125         0.125         0.125  
+        r2_a |       0.113         0.121         0.121         0.121  
+        rmse |   48519.466     48312.216     48312.216     48312.216  
+           F |      42.849        22.117        22.117        22.117  
+----------------------------------------------------------------------
+                                                        Legend: b/se/t
+
+
+----------------------------
+    Variable |    NOINT     
+-------------+--------------
+         age |         488  
+             |         150  
+             |        3.26  
+   education |        5865  
+             |         652  
+             |        8.99  
+       dself |      -30151  
+             |       13140  
+             |       -2.29  
+    dprivate |      -47249  
+             |       11377  
+             |       -4.15  
+       dgovt |      -49274  
+             |       12312  
+             |       -4.00  
+       _cons |              
+             |              
+             |              
+-------------+--------------
+           N |         872  
+          r2 |       0.602  
+        r2_a |       0.600  
+        rmse |   48312.216  
+           F |     313.063  
+----------------------------
+              Legend: b/se/t
+
+. 
+. ** Difference in several means
+. 
+. * No regressors and drop self-employed
+. regress earnings dprivate dgovt, vce(robust)
+
+Linear regression                               Number of obs     =        872
+                                                F(2, 869)         =       1.68
+                                                Prob > F          =     0.1876
+                                                R-squared         =     0.0097
+                                                Root MSE          =      51325
+
+------------------------------------------------------------------------------
+             |               Robust
+    earnings | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+    dprivate |  -17785.06   9821.887    -1.81   0.071    -37062.46    1492.334
+       dgovt |  -16200.94   10042.28    -1.61   0.107    -35910.91    3509.024
+       _cons |   72306.33   9636.853     7.50   0.000      53392.1    91220.56
+------------------------------------------------------------------------------
+
+. estimates store NOREG1
+
+. 
+. * No regressors and drop intercept 
+. regress earnings dself dprivate dgovt, noconstant vce(robust)
+
+Linear regression                               Number of obs     =        872
+                                                F(3, 869)         =     425.47
+                                                Prob > F          =     0.0000
+                                                R-squared         =     0.5496
+                                                Root MSE          =      51325
+
+------------------------------------------------------------------------------
+             |               Robust
+    earnings | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+       dself |   72306.33   9636.853     7.50   0.000      53392.1    91220.56
+    dprivate |   54521.27   1897.507    28.73   0.000     50797.04     58245.5
+       dgovt |   56105.38   2824.631    19.86   0.000     50561.49    61649.28
+------------------------------------------------------------------------------
+
+. estimates store NOREG2
+
+. 
+. estimates table NOREG1 NOREG2, keep(dself dprivate dgovt _cons) ///
+>     b(%11.0f) se(%11.0f) t(%11.2f) stfmt(%11.3f) stat(N r2 r2_a rmse F) 
+
+------------------------------------------
+    Variable |   NOREG1        NOREG2     
+-------------+----------------------------
+       dself |                     72306  
+             |                      9637  
+             |                      7.50  
+    dprivate |      -17785         54521  
+             |        9822          1898  
+             |       -1.81         28.73  
+       dgovt |      -16201         56105  
+             |       10042          2825  
+             |       -1.61         19.86  
+       _cons |       72306                
+             |        9637                
+             |        7.50                
+-------------+----------------------------
+           N |         872           872  
+          r2 |       0.010         0.550  
+        r2_a |       0.007         0.548  
+        rmse |   51325.489     51325.489  
+           F |       1.676       425.474  
+------------------------------------------
+                            Legend: b/se/t
+
+. 
+. * ANOVA gives the same F statistic as with default standard errors
+. generate typeworker = 1*dself + 2*dprivate + 3*dgovt
+
+. bysort typeworker: summarize earnings
+
+-------------------------------------------------------------------------------
+-> typeworker = 1
+
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+    earnings |         79    72306.33    86053.13       4000     504000
+
+-------------------------------------------------------------------------------
+-> typeworker = 2
+
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+    earnings |        663    54521.27     48811.2       4300     498000
+
+-------------------------------------------------------------------------------
+-> typeworker = 3
+
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+    earnings |        130    56105.38    32274.68      10500     180000
+
+
+. anova earnings typeworker
+
+                         Number of obs =        872    R-squared     =  0.0097
+                         Root MSE      =    51325.5    Adj R-squared =  0.0074
+
+                  Source | Partial SS         df         MS        F    Prob>F
+              -----------+----------------------------------------------------
+                   Model |  2.234e+10          2   1.117e+10      4.24  0.0147
+                         |
+              typeworker |  2.234e+10          2   1.117e+10      4.24  0.0147
+                         |
+                Residual |  2.289e+12        869   2.634e+09  
+              -----------+----------------------------------------------------
+                   Total |  2.312e+12        871   2.654e+09  
+
+. 
+. ********** CLOSE OUTPUT
+. display ""
+
+
+. display "Chapter 14 analysis complete."
+Chapter 14 analysis complete.
+
+. display "Figures saved to: images/"
+Figures saved to: images/
+
+. display "Tables saved to: tables/"
+Tables saved to: tables/
+
+. 
+end of do-file

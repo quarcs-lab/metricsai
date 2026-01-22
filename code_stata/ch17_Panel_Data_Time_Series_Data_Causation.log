@@ -1,0 +1,2190 @@
+
+. * ch17_Panel_Data_Time_Series_Data_Causation.do - January 2026 For Stata
+. * Updated for online execution portability
+. * old aed21.do has a lot more detail
+. 
+. ********** OVERVIEW OF ch17_Panel_Data_Time_Series_Data_Causation.do ********
+> **
+. 
+. * STATA Program
+. * copyright C 2021 by A. Colin Cameron
+. * Used for "Analyis of Economics Data: An Introduction to Econometrics"
+. * by A. Colin Cameron (2021)
+. 
+. * To run you need file
+. *   AED_EARNINGS_COMPLETE
+. *   AED_NBA.DTA
+. *   AED_INTERESTRATES
+. * in your directory
+. 
+. ********** SETUP **********
+. 
+. * Set random seed for reproducibility
+. set seed 42
+
+. 
+. * Clear all macros
+. macro drop _all
+
+. 
+. * GitHub data URL
+. global github_data_url "https://raw.githubusercontent.com/quarcs-lab/data-ope
+> n/master/AED/"
+
+. 
+. * Create output directories (optional - for saving figures and tables locally
+> )
+. cap mkdir "images"
+
+. cap mkdir "tables"
+
+. 
+. set more off
+
+. clear all
+
+. 
+. ************
+. 
+. * This STATA does analysis for Chapter 17
+. *   17.1 CROSS-SECTION DATA
+. *   17.2 PANEL DATA
+. *   17.3 PANEL DATA EXAMPLE: NBA TEAM REVENUE 
+. *   17.4 CAUSALITY: AN OVERVIEW
+. *   17.5 NONLINEAR REGRESSION MODELS
+. *   17.6 TIME SERIES DATA
+. *   17.7 TIME SERIES EXAMPLE: U.S. TREASURY SECURITY INTEREST RATES
+. 
+. ********** DATA DESCRIPTION
+. 
+. * (1) Data on 29 NBA basketball teams over 10 seasons 2001-02 to 2010-11
+. 
+. **** 17.1 CROSS-SECTION DATA
+. 
+. * No computer analysis
+. 
+. **** 17.2 PANEL DATA
+. 
+. * No computer analysis
+. 
+. **** 17.3 PANEL DATA EXAMPLE: NBA TEAM REVENUE
+. 
+. * Download and load data from GitHub
+. clear
+
+. copy "${github_data_url}AED_NBA.DTA" "temp_data.dta", replace
+(file temp_data.dta not found)
+
+. use "temp_data.dta", clear
+
+. erase "temp_data.dta"
+
+. summarize
+
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+ teamandyear |          0
+        team |          0
+      teamid |        286    14.86014    8.354935          1         29
+      season |        286    5.541958    2.872126          1         10
+    seasonsq |        286    38.93357    32.48631          1        100
+-------------+---------------------------------------------------------
+     revenue |        286    95.71404    24.44207   58.49582   187.7212
+   lnrevenue |        286    4.532293    .2359855   4.068955   5.234958
+       value |        286    284.1903    80.28601   158.9404   692.4142
+     lnvalue |        286    5.614849    .2575733   5.068529   6.540184
+        wins |        286    41.03497    12.43758          9         67
+-------------+---------------------------------------------------------
+     playoff |        286    .5454545    .4988024          0          1
+       champ |        286     .034965    .1840132          0          1
+    allstars |        286    .8601399    .8713885          0          4
+   relocated |        286    .0769231    .2669364          0          1
+othfranchise |        286    2.800699    2.316713          0          8
+-------------+---------------------------------------------------------
+ newarenayr1 |        286     .020979    .1435652          0          1
+ newarenayr2 |        286    .0174825    .1312903          0          1
+ newarenayr3 |        286    .0384615    .1926448          0          1
+ newarenayr4 |        286     .048951    .2161439          0          1
+         cpi |        286    118.4309    8.078975      105.7     129.98
+-------------+---------------------------------------------------------
+     realgdp |        286    274674.3    272015.6      46808    1147917
+   realgdppc |        286    51339.47    8036.258      26681      72181
+     citypop |        286    5.149763    4.754586   .9848863   18.92005
+   lncitypop |        286    1.300508    .8005334  -.0152291   2.940222
+    gdpmetro |        286    278498.9    280178.5      43318    1280517
+-------------+---------------------------------------------------------
+  lngdpmetro |        286     12.1416    .8700275   10.67632   14.06277
+     season1 |        286    .0979021    .2977031          0          1
+     season2 |        286    .0979021    .2977031          0          1
+     season3 |        286    .0979021    .2977031          0          1
+     season4 |        286    .0979021    .2977031          0          1
+-------------+---------------------------------------------------------
+     season5 |        286    .1013986    .3023849          0          1
+     season6 |        286    .1013986    .3023849          0          1
+     season7 |        286    .1013986    .3023849          0          1
+     season8 |        286    .1013986    .3023849          0          1
+     season9 |        286    .1013986    .3023849          0          1
+-------------+---------------------------------------------------------
+    season10 |        286    .1013986    .3023849          0          1
+      dbucks |        286     .034965    .1840132          0          1
+  dgrizzlies |        286     .034965    .1840132          0          1
+      dhawks |        286     .034965    .1840132          0          1
+dtimberwol~s |        286     .034965    .1840132          0          1
+-------------+---------------------------------------------------------
+    dbobcats |        286     .020979    .1435652          0          1
+     dpacers |        286     .034965    .1840132          0          1
+    dhornets |        286     .034965    .1840132          0          1
+      dkings |        286     .034965    .1840132          0          1
+     dsixers |        286     .034965    .1840132          0          1
+-------------+---------------------------------------------------------
+    dnuggets |        286     .034965    .1840132          0          1
+   dclippers |        286     .034965    .1840132          0          1
+    dwizards |        286     .034965    .1840132          0          1
+  dcavaliers |        286     .034965    .1840132          0          1
+    dpistons |        286     .034965    .1840132          0          1
+-------------+---------------------------------------------------------
+       djazz |        286     .034965    .1840132          0          1
+     dsonics |        286     .034965    .1840132          0          1
+       dnets |        286     .034965    .1840132          0          1
+dtrailblaz~s |        286     .034965    .1840132          0          1
+      dmagic |        286     .034965    .1840132          0          1
+-------------+---------------------------------------------------------
+       dsuns |        286     .034965    .1840132          0          1
+      dspurs |        286     .034965    .1840132          0          1
+   dwarriors |        286     .034965    .1840132          0          1
+    drockets |        286     .034965    .1840132          0          1
+       dheat |        286     .034965    .1840132          0          1
+-------------+---------------------------------------------------------
+    dceltics |        286     .034965    .1840132          0          1
+  dmavericks |        286     .034965    .1840132          0          1
+      dbulls |        286     .034965    .1840132          0          1
+     dlakers |        286     .034965    .1840132          0          1
+     dknicks |        286     .034965    .1840132          0          1
+
+. 
+. * Table 17.1
+. describe revenue lnrevenue wins season playoff champ allstars lncitypop teami
+> d
+
+Variable      Storage   Display    Value
+    name         type    format    label      Variable label
+-------------------------------------------------------------------------------
+revenue         float   %8.0g                 Team revenue in millions of 1999
+                                                $
+lnrevenue       float   %9.0g                 Natural logarithm of team revenue
+wins            byte    %8.0g                 Wins in previous season including
+                                                playoff games
+season          byte    %8.0g                 1 to 10
+playoff         byte    %8.0g                 = 1 if made playoffs in previous
+                                                season, 0 otherwise
+champ           byte    %8.0g                 = 1 if won championship in
+                                                previous season, 0 otherwise
+allstars        byte    %8.0g                 Number of players on team voted
+                                                as all-stars that season
+lncitypop       float   %8.0g                 Natural logarithm of city
+                                                population
+teamid          byte    %8.0g                 1 to 29
+
+. summarize revenue lnrevenue wins season playoff champ allstars lncitypop team
+> id 
+
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+     revenue |        286    95.71404    24.44207   58.49582   187.7212
+   lnrevenue |        286    4.532293    .2359855   4.068955   5.234958
+        wins |        286    41.03497    12.43758          9         67
+      season |        286    5.541958    2.872126          1         10
+     playoff |        286    .5454545    .4988024          0          1
+-------------+---------------------------------------------------------
+       champ |        286     .034965    .1840132          0          1
+    allstars |        286    .8601399    .8713885          0          4
+   lncitypop |        286    1.300508    .8005334  -.0152291   2.940222
+      teamid |        286    14.86014    8.354935          1         29
+
+. xtset teamid 
+
+Panel variable: teamid (unbalanced)
+
+. xtsum revenue lnrevenue wins season playoff champ allstars lncitypop teamid
+
+Variable         |      Mean   Std. dev.       Min        Max |    Observations
+-----------------+--------------------------------------------+----------------
+revenue  overall |  95.71404   24.44207   58.49582   187.7212 |     N =     286
+         between |             22.46711   70.46149    162.244 |     n =      29
+         within  |             10.31907   59.06909   122.9428 | T-bar = 9.86207
+                 |                                            |
+lnreve~e overall |  4.532293   .2359855   4.068955   5.234958 |     N =     286
+         between |             .2126766   4.253718    5.08638 |     n =      29
+         within  |             .1084511   4.120964   4.831038 | T-bar = 9.86207
+                 |                                            |
+wins     overall |  41.03497   12.43758          9         67 |     N =     286
+         between |             7.043591   31.33333       57.3 |     n =      29
+         within  |             10.35637   8.534965   64.53497 | T-bar = 9.86207
+                 |                                            |
+season   overall |  5.541958   2.872126          1         10 |     N =     286
+         between |             .3713907        5.5        7.5 |     n =      29
+         within  |             2.857738   1.041958   10.04196 | T-bar = 9.86207
+                 |                                            |
+playoff  overall |  .5454545   .4988024          0          1 |     N =     286
+         between |             .2430591         .1          1 |     n =      29
+         within  |             .4390314  -.3545455   1.445455 | T-bar = 9.86207
+                 |                                            |
+champ    overall |   .034965   .1840132          0          1 |     N =     286
+         between |             .0936401          0         .4 |     n =      29
+         within  |             .1589439   -.365035    .934965 | T-bar = 9.86207
+                 |                                            |
+allstars overall |  .8601399   .8713885          0          4 |     N =     286
+         between |                .5243          0          2 |     n =      29
+         within  |             .7042062   -1.13986    3.46014 | T-bar = 9.86207
+                 |                                            |
+lncity~p overall |  1.300508   .8005334  -.0152291   2.940222 |     N =     286
+         between |             .8071756   .0462604   2.924752 |     n =      29
+         within  |             .0975241   .6229702   1.796362 | T-bar = 9.86207
+                 |                                            |
+teamid   overall |  14.86014   8.354935          1         29 |     N =     286
+         between |             8.514693          1         29 |     n =      29
+         within  |                    0   14.86014   14.86014 | T-bar = 9.86207
+
+. 
+. * Manually compute within and between for lnrevenue
+. * team means
+. bysort teamid: egen meanlnrev = mean(lnrevenue)
+
+. * Number each observation for a team
+. bysort teamid: gen obsnum = _n
+
+. * Between standard deviation next
+. * Summary stats for the first team mean
+. sum meanlnrev if obsnum == 1
+
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+   meanlnrev |         29    4.529644    .2126767   4.253717    5.08638
+
+. * Observation less team mean
+. gen mdifflnrev = lnrevenue - meanlnrev
+
+. * Between standard deviation next
+. sum lnrevenue mdifflnrev
+
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+   lnrevenue |        286    4.532293    .2359855   4.068955   5.234958
+  mdifflnrev |        286    3.83e-08    .1084511  -.4113283   .2987452
+
+. * Check
+. xtsum lnrevenue
+
+Variable         |      Mean   Std. dev.       Min        Max |    Observations
+-----------------+--------------------------------------------+----------------
+lnreve~e overall |  4.532293   .2359855   4.068955   5.234958 |     N =     286
+         between |             .2126766   4.253718    5.08638 |     n =      29
+         within  |             .1084511   4.120964   4.831038 | T-bar = 9.86207
+
+. 
+. * Figure 17.1
+. graph twoway (scatter lnrevenue wins, msize(small))                    ///
+>     (lfit lnrevenue wins, lstyle(p1) lwidth(medthick))
+
+. graph export "images/ch17_fig1.png", replace
+(file images/ch17_fig1.png not found)
+file images/ch17_fig1.png written in PNG format
+
+. 
+. * OLS regression in Figure 17.1
+. regress lnrevenue wins
+
+      Source |       SS           df       MS      Number of obs   =       286
+-------------+----------------------------------   F(1, 284)       =     41.19
+       Model |  2.01031954         1  2.01031954   Prob > F        =    0.0000
+    Residual |  13.8610928       284  .048806665   R-squared       =    0.1267
+-------------+----------------------------------   Adj R-squared   =    0.1236
+       Total |  15.8714124       285  .055689166   Root MSE        =    .22092
+
+------------------------------------------------------------------------------
+   lnrevenue | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+        wins |   .0067526   .0010522     6.42   0.000     .0046816    .0088237
+       _cons |   4.255198   .0451083    94.33   0.000     4.166409    4.343987
+------------------------------------------------------------------------------
+
+. 
+. * Correlation
+. correlate revenue lnrevenue wins season playoff champ allstars lncitypop
+(obs=286)
+
+             |  revenue lnreve~e     wins   season  playoff    champ allstars
+-------------+---------------------------------------------------------------
+     revenue |   1.0000
+   lnrevenue |   0.9895   1.0000
+        wins |   0.3155   0.3559   1.0000
+      season |   0.2062   0.2168  -0.0144   1.0000
+     playoff |   0.2735   0.3150   0.8040  -0.0062   1.0000
+       champ |   0.2399   0.2349   0.2678  -0.0028   0.1738   1.0000
+    allstars |   0.2808   0.3159   0.4673  -0.0061   0.4022   0.2057   1.0000
+   lncitypop |   0.5103   0.4833  -0.0674   0.0047  -0.0442   0.0900   0.0484
+
+             | lncity~p
+-------------+---------
+   lncitypop |   1.0000
+
+
+. 
+. * Declare the individual identifier and the time identifier
+. xtset teamid season
+
+Panel variable: teamid (unbalanced)
+ Time variable: season, 1 to 10
+         Delta: 1 unit
+
+. xtdescribe
+
+  teamid:  1, 2, ..., 29                                     n =         29
+  season:  1, 2, ..., 10                                     T =         10
+           Delta(season) = 1 unit
+           Span(season)  = 10 periods
+           (teamid*season uniquely identifies each observation)
+
+Distribution of T_i:   min      5%     25%       50%       75%     95%     max
+                         6      10      10        10        10      10      10
+
+     Freq.  Percent    Cum. |  Pattern
+ ---------------------------+------------
+       28     96.55   96.55 |  1111111111
+        1      3.45  100.00 |  ....111111
+ ---------------------------+------------
+       29    100.00         |  XXXXXXXXXX
+
+. xtsum lnrev wins season
+
+Variable         |      Mean   Std. dev.       Min        Max |    Observations
+-----------------+--------------------------------------------+----------------
+lnreve~e overall |  4.532293   .2359855   4.068955   5.234958 |     N =     286
+         between |             .2126766   4.253718    5.08638 |     n =      29
+         within  |             .1084511   4.120964   4.831038 | T-bar = 9.86207
+                 |                                            |
+wins     overall |  41.03497   12.43758          9         67 |     N =     286
+         between |             7.043591   31.33333       57.3 |     n =      29
+         within  |             10.35637   8.534965   64.53497 | T-bar = 9.86207
+                 |                                            |
+season   overall |  5.541958   2.872126          1         10 |     N =     286
+         between |             .3713907        5.5        7.5 |     n =      29
+         within  |             2.857738   1.041958   10.04196 | T-bar = 9.86207
+
+. xtsum revenue lnrevenue wins season playoff champ allstars lncitypop teamid
+
+Variable         |      Mean   Std. dev.       Min        Max |    Observations
+-----------------+--------------------------------------------+----------------
+revenue  overall |  95.71404   24.44207   58.49582   187.7212 |     N =     286
+         between |             22.46711   70.46149    162.244 |     n =      29
+         within  |             10.31907   59.06909   122.9428 | T-bar = 9.86207
+                 |                                            |
+lnreve~e overall |  4.532293   .2359855   4.068955   5.234958 |     N =     286
+         between |             .2126766   4.253718    5.08638 |     n =      29
+         within  |             .1084511   4.120964   4.831038 | T-bar = 9.86207
+                 |                                            |
+wins     overall |  41.03497   12.43758          9         67 |     N =     286
+         between |             7.043591   31.33333       57.3 |     n =      29
+         within  |             10.35637   8.534965   64.53497 | T-bar = 9.86207
+                 |                                            |
+season   overall |  5.541958   2.872126          1         10 |     N =     286
+         between |             .3713907        5.5        7.5 |     n =      29
+         within  |             2.857738   1.041958   10.04196 | T-bar = 9.86207
+                 |                                            |
+playoff  overall |  .5454545   .4988024          0          1 |     N =     286
+         between |             .2430591         .1          1 |     n =      29
+         within  |             .4390314  -.3545455   1.445455 | T-bar = 9.86207
+                 |                                            |
+champ    overall |   .034965   .1840132          0          1 |     N =     286
+         between |             .0936401          0         .4 |     n =      29
+         within  |             .1589439   -.365035    .934965 | T-bar = 9.86207
+                 |                                            |
+allstars overall |  .8601399   .8713885          0          4 |     N =     286
+         between |                .5243          0          2 |     n =      29
+         within  |             .7042062   -1.13986    3.46014 | T-bar = 9.86207
+                 |                                            |
+lncity~p overall |  1.300508   .8005334  -.0152291   2.940222 |     N =     286
+         between |             .8071756   .0462604   2.924752 |     n =      29
+         within  |             .0975241   .6229702   1.796362 | T-bar = 9.86207
+                 |                                            |
+teamid   overall |  14.86014   8.354935          1         29 |     N =     286
+         between |             8.514693          1         29 |     n =      29
+         within  |                    0   14.86014   14.86014 | T-bar = 9.86207
+
+. 
+. *** Pooled OLS estimation
+. 
+. * Table 17.2 - first column Pooled OLS with default standard errors
+. regress lnrev wins season
+
+      Source |       SS           df       MS      Number of obs   =       286
+-------------+----------------------------------   F(2, 283)       =     30.21
+       Model |  2.79244455         2  1.39622228   Prob > F        =    0.0000
+    Residual |  13.0789678       283  .046215434   R-squared       =    0.1759
+-------------+----------------------------------   Adj R-squared   =    0.1701
+       Total |  15.8714124       285  .055689166   Root MSE        =    .21498
+
+------------------------------------------------------------------------------
+   lnrevenue | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+        wins |   .0068132    .001024     6.65   0.000     .0047977    .0088288
+      season |   .0182414   .0044342     4.11   0.000     .0095132    .0269695
+       _cons |   4.151619   .0506031    82.04   0.000     4.052013    4.251225
+------------------------------------------------------------------------------
+
+. estimates store olsdef
+
+. * Table 17.2 - second column Pooled OLS with het-robust standard errors
+. regress lnrev wins season, vce(robust)
+
+Linear regression                               Number of obs     =        286
+                                                F(2, 283)         =      32.92
+                                                Prob > F          =     0.0000
+                                                R-squared         =     0.1759
+                                                Root MSE          =     .21498
+
+------------------------------------------------------------------------------
+             |               Robust
+   lnrevenue | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+        wins |   .0068132   .0009898     6.88   0.000      .004865    .0087615
+      season |   .0182414   .0045006     4.05   0.000     .0093825    .0271002
+       _cons |   4.151619   .0507485    81.81   0.000     4.051727    4.251512
+------------------------------------------------------------------------------
+
+. estimates store olshet
+
+. * Table 17.2 - third column Pooled OLS with cluster-robust standard errors
+. regress lnrev wins season, vce(cluster teamid)
+
+Linear regression                               Number of obs     =        286
+                                                F(2, 28)          =      22.38
+                                                Prob > F          =     0.0000
+                                                R-squared         =     0.1759
+                                                Root MSE          =     .21498
+
+                                (Std. err. adjusted for 29 clusters in teamid)
+------------------------------------------------------------------------------
+             |               Robust
+   lnrevenue | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+        wins |   .0068132   .0018965     3.59   0.001     .0029284    .0106981
+      season |   .0182414   .0033079     5.51   0.000     .0114655    .0250172
+       _cons |   4.151619   .0965789    42.99   0.000     3.953786    4.349452
+------------------------------------------------------------------------------
+
+. estimates store olsclu
+
+. * Table 17.2
+. estimates table olsdef olshet olsclu, b(%10.5f) se(%10.5f) t(%10.2f) ///
+>     stfmt(%10.4f) stat(r2 r2_a)
+
+-----------------------------------------------------
+    Variable |   olsdef       olshet       olsclu    
+-------------+---------------------------------------
+        wins |    0.00681      0.00681      0.00681  
+             |    0.00102      0.00099      0.00190  
+             |       6.65         6.88         3.59  
+      season |    0.01824      0.01824      0.01824  
+             |    0.00443      0.00450      0.00331  
+             |       4.11         4.05         5.51  
+       _cons |    4.15162      4.15162      4.15162  
+             |    0.05060      0.05075      0.09658  
+             |      82.04        81.81        42.99  
+-------------+---------------------------------------
+          r2 |     0.1759       0.1759       0.1759  
+        r2_a |     0.1701       0.1701       0.1701  
+-----------------------------------------------------
+                                       Legend: b/se/t
+
+. 
+. *** Pooled, Random effects and Fixed effects estimation
+. 
+. global xlistlong wins season playoff champ allstars lncitypop
+
+. 
+. * Table 17.3 - First column OLS with default standard errors
+. reg lnrev $xlistlong, vce(robust)
+
+Linear regression                               Number of obs     =        286
+                                                F(6, 279)         =      58.34
+                                                Prob > F          =     0.0000
+                                                R-squared         =     0.4564
+                                                Root MSE          =     .17585
+
+------------------------------------------------------------------------------
+             |               Robust
+   lnrevenue | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+        wins |   .0048652   .0014385     3.38   0.001     .0020334    .0076969
+      season |   .0180493   .0035243     5.12   0.000     .0111117    .0249869
+     playoff |    .030565   .0359256     0.85   0.396    -.0401546    .1012846
+       champ |   .1088688   .0330966     3.29   0.001      .043718    .1740196
+    allstars |   .0352905   .0126752     2.78   0.006     .0103394    .0602417
+   lncitypop |   .1439873   .0195676     7.36   0.000     .1054686    .1825061
+       _cons |   3.994532   .0494883    80.72   0.000     3.897114     4.09195
+------------------------------------------------------------------------------
+
+. estimates store olshet
+
+. * Table 17.3 - Second column OLS with cluster-robust standard errors
+. reg lnrev $xlistlong, vce(cluster teamid)
+
+Linear regression                               Number of obs     =        286
+                                                F(6, 28)          =      24.19
+                                                Prob > F          =     0.0000
+                                                R-squared         =     0.4564
+                                                Root MSE          =     .17585
+
+                                (Std. err. adjusted for 29 clusters in teamid)
+------------------------------------------------------------------------------
+             |               Robust
+   lnrevenue | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+        wins |   .0048652   .0014646     3.32   0.002      .001865    .0078653
+      season |   .0180493   .0033125     5.45   0.000      .011264    .0248346
+     playoff |    .030565   .0446834     0.68   0.500    -.0609648    .1220948
+       champ |   .1088688   .0472531     2.30   0.029     .0120752    .2056624
+    allstars |   .0352905   .0177751     1.99   0.057      -.00112    .0717011
+   lncitypop |   .1439873   .0598155     2.41   0.023     .0214608    .2665139
+       _cons |   3.994532   .0595877    67.04   0.000     3.872472    4.116592
+------------------------------------------------------------------------------
+
+. estimates store olsclu
+
+. * Table 17.3 - Third column Random effects with default standard errors
+. xtreg lnrev $xlistlong, re
+
+Random-effects GLS regression                   Number of obs     =        286
+Group variable: teamid                          Number of groups  =         29
+
+R-squared:                                      Obs per group:
+     Within  = 0.4918                                         min =          6
+     Between = 0.3340                                         avg =        9.9
+     Overall = 0.2806                                         max =         10
+
+                                                Wald chi2(6)      =     244.21
+corr(u_i, X) = 0 (assumed)                      Prob > chi2       =     0.0000
+
+------------------------------------------------------------------------------
+   lnrevenue | Coefficient  Std. err.      z    P>|z|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+        wins |   .0024285   .0007679     3.16   0.002     .0009234    .0039336
+      season |   .0187846   .0017418    10.78   0.000     .0153708    .0221985
+     playoff |   .0385326   .0176104     2.19   0.029     .0040168    .0730484
+       champ |   .0117708   .0315665     0.37   0.709    -.0500984    .0736401
+    allstars |   .0372402   .0074693     4.99   0.000     .0226007    .0518796
+   lncitypop |   .0195605   .0314514     0.62   0.534    -.0420831    .0812042
+       _cons |   4.247665   .0559834    75.87   0.000      4.13794    4.357391
+-------------+----------------------------------------------------------------
+     sigma_u |  .15829556
+     sigma_e |  .07922356
+         rho |  .79969356   (fraction of variance due to u_i)
+------------------------------------------------------------------------------
+
+. estimates store redef
+
+. * Table 17.3 - Fourth column Random effects with cluster-robust standard erro
+> rs
+. xtreg lnrev $xlistlong, re vce(robust)
+
+Random-effects GLS regression                   Number of obs     =        286
+Group variable: teamid                          Number of groups  =         29
+
+R-squared:                                      Obs per group:
+     Within  = 0.4918                                         min =          6
+     Between = 0.3340                                         avg =        9.9
+     Overall = 0.2806                                         max =         10
+
+                                                Wald chi2(6)      =     177.67
+corr(u_i, X) = 0 (assumed)                      Prob > chi2       =     0.0000
+
+                                (Std. err. adjusted for 29 clusters in teamid)
+------------------------------------------------------------------------------
+             |               Robust
+   lnrevenue | Coefficient  std. err.      z    P>|z|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+        wins |   .0024285   .0007802     3.11   0.002     .0008993    .0039576
+      season |   .0187846    .003266     5.75   0.000     .0123835    .0251858
+     playoff |   .0385326   .0199886     1.93   0.054    -.0006443    .0777095
+       champ |   .0117708   .0162957     0.72   0.470    -.0201681    .0437097
+    allstars |   .0372402   .0065823     5.66   0.000     .0243391    .0501413
+   lncitypop |   .0195605   .0871573     0.22   0.822    -.1512647    .1903857
+       _cons |   4.247665   .1075938    39.48   0.000     4.036785    4.458545
+-------------+----------------------------------------------------------------
+     sigma_u |  .15829556
+     sigma_e |  .07922356
+         rho |  .79969356   (fraction of variance due to u_i)
+------------------------------------------------------------------------------
+
+. estimates store rerob
+
+. * Table 17.3 - Fifth column Fixed effects with default standard errors
+. xtreg lnrev $xlistlong, fe
+
+Fixed-effects (within) regression               Number of obs     =        286
+Group variable: teamid                          Number of groups  =         29
+
+R-squared:                                      Obs per group:
+     Within  = 0.5300                                         min =          6
+     Between = 0.1899                                         avg =        9.9
+     Overall = 0.0416                                         max =         10
+
+                                                F(6, 251)         =      47.18
+corr(u_i, Xb) = -0.7310                         Prob > F          =     0.0000
+
+------------------------------------------------------------------------------
+   lnrevenue | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+        wins |   .0027161   .0007319     3.71   0.000     .0012746    .0041575
+      season |   .0200251   .0016641    12.03   0.000     .0167478    .0233024
+     playoff |   .0361872   .0167051     2.17   0.031     .0032871    .0690872
+       champ |   .0052405   .0299981     0.17   0.861    -.0538395    .0643205
+    allstars |   .0355788   .0071108     5.00   0.000     .0215744    .0495832
+   lncitypop |  -.2020894   .0491055    -4.12   0.000    -.2988007   -.1053782
+       _cons |   4.522155    .064912    69.67   0.000     4.394313    4.649996
+-------------+----------------------------------------------------------------
+     sigma_u |  .32571403
+     sigma_e |  .07922356
+         rho |  .94414349   (fraction of variance due to u_i)
+------------------------------------------------------------------------------
+F test that all u_i=0: F(28, 251) = 40.13                    Prob > F = 0.0000
+
+. estimates store fedef
+
+. * Table 17.3 - Sixth column Fixed effects with cluster-robust standard errors
+. xtreg lnrev $xlistlong, fe vce(robust) 
+
+Fixed-effects (within) regression               Number of obs     =        286
+Group variable: teamid                          Number of groups  =         29
+
+R-squared:                                      Obs per group:
+     Within  = 0.5300                                         min =          6
+     Between = 0.1899                                         avg =        9.9
+     Overall = 0.0416                                         max =         10
+
+                                                F(6, 28)          =      42.24
+corr(u_i, Xb) = -0.7310                         Prob > F          =     0.0000
+
+                                (Std. err. adjusted for 29 clusters in teamid)
+------------------------------------------------------------------------------
+             |               Robust
+   lnrevenue | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+        wins |   .0027161   .0006931     3.92   0.001     .0012963    .0041358
+      season |   .0200251   .0028536     7.02   0.000     .0141797    .0258706
+     playoff |   .0361872   .0209415     1.73   0.095    -.0067095    .0790838
+       champ |   .0052405   .0167433     0.31   0.757    -.0290566    .0395376
+    allstars |   .0355788   .0067829     5.25   0.000     .0216848    .0494729
+   lncitypop |  -.2020894   .0632009    -3.20   0.003    -.3315505   -.0726283
+       _cons |   4.522155   .0957222    47.24   0.000     4.326077    4.718233
+-------------+----------------------------------------------------------------
+     sigma_u |  .32571403
+     sigma_e |  .07922356
+         rho |  .94414349   (fraction of variance due to u_i)
+------------------------------------------------------------------------------
+
+. estimates store feclu
+
+. * Table 17.3 
+. estimates table olshet olsclu redef rerob fedef feclu, ///
+>     b(%10.4f) se(%10.4f) t(%10.2f) stat(r2)
+
+-------------------------------------------------------------------------------
+    Variable |   olshet       olsclu       redef        rerob        fedef     
+-------------+-----------------------------------------------------------------
+        wins |     0.0049       0.0049       0.0024       0.0024       0.0027  
+             |     0.0014       0.0015       0.0008       0.0008       0.0007  
+             |       3.38         3.32         3.16         3.11         3.71  
+      season |     0.0180       0.0180       0.0188       0.0188       0.0200  
+             |     0.0035       0.0033       0.0017       0.0033       0.0017  
+             |       5.12         5.45        10.78         5.75        12.03  
+     playoff |     0.0306       0.0306       0.0385       0.0385       0.0362  
+             |     0.0359       0.0447       0.0176       0.0200       0.0167  
+             |       0.85         0.68         2.19         1.93         2.17  
+       champ |     0.1089       0.1089       0.0118       0.0118       0.0052  
+             |     0.0331       0.0473       0.0316       0.0163       0.0300  
+             |       3.29         2.30         0.37         0.72         0.17  
+    allstars |     0.0353       0.0353       0.0372       0.0372       0.0356  
+             |     0.0127       0.0178       0.0075       0.0066       0.0071  
+             |       2.78         1.99         4.99         5.66         5.00  
+   lncitypop |     0.1440       0.1440       0.0196       0.0196      -0.2021  
+             |     0.0196       0.0598       0.0315       0.0872       0.0491  
+             |       7.36         2.41         0.62         0.22        -4.12  
+       _cons |     3.9945       3.9945       4.2477       4.2477       4.5222  
+             |     0.0495       0.0596       0.0560       0.1076       0.0649  
+             |      80.72        67.04        75.87        39.48        69.67  
+-------------+-----------------------------------------------------------------
+          r2 |     0.4564       0.4564                                 0.5300  
+-------------------------------------------------------------------------------
+                                                                 Legend: b/se/t
+
+
+---------------------------
+    Variable |   feclu     
+-------------+-------------
+        wins |     0.0027  
+             |     0.0007  
+             |       3.92  
+      season |     0.0200  
+             |     0.0029  
+             |       7.02  
+     playoff |     0.0362  
+             |     0.0209  
+             |       1.73  
+       champ |     0.0052  
+             |     0.0167  
+             |       0.31  
+    allstars |     0.0356  
+             |     0.0068  
+             |       5.25  
+   lncitypop |    -0.2021  
+             |     0.0632  
+             |      -3.20  
+       _cons |     4.5222  
+             |     0.0957  
+             |      47.24  
+-------------+-------------
+          r2 |     0.5300  
+---------------------------
+             Legend: b/se/t
+
+. 
+. **** 17.4 CAUSALITY: AN OVERVIEW
+. 
+. * Figure 17.2 - created elsewhere
+. 
+. * No computer analysis
+. * See Chapter 13 for several applications
+. 
+. **** 17.5 NONLINEAR REGRESSION MODELS
+. 
+. * Table 17.4 - text table
+. 
+. * Figure 17.3 - created elsewhere
+. 
+. * Logit example
+. * Download and load data from GitHub
+. clear
+
+. copy "${github_data_url}AED_EARNINGS_COMPLETE.DTA" "temp_data.dta", replace
+(file temp_data.dta not found)
+
+. use "temp_data.dta", clear
+(Data for A. Colin Cameron (2020): Analysis of Economics Data)
+
+. erase "temp_data.dta"
+
+. 
+. generate dbigearn = earnings > 60000
+
+. summarize dbigearn
+
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+    dbigearn |        872    .2729358    .4457238          0          1
+
+. logit dbigearn age education, vce(robust)
+
+Iteration 0:  Log pseudolikelihood = -511.12892  
+Iteration 1:  Log pseudolikelihood = -441.21432  
+Iteration 2:  Log pseudolikelihood = -437.14838  
+Iteration 3:  Log pseudolikelihood = -437.14594  
+Iteration 4:  Log pseudolikelihood = -437.14594  
+
+Logistic regression                                     Number of obs =    872
+                                                        Wald chi2(2)  = 115.10
+                                                        Prob > chi2   = 0.0000
+Log pseudolikelihood = -437.14594                       Pseudo R2     = 0.1447
+
+------------------------------------------------------------------------------
+             |               Robust
+    dbigearn | Coefficient  std. err.      z    P>|z|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+         age |   .0385309   .0079566     4.84   0.000     .0229363    .0541255
+   education |   .3742393   .0366256    10.22   0.000     .3024544    .4460241
+       _cons |  -8.065079   .6917517   -11.66   0.000    -9.420887    -6.70927
+------------------------------------------------------------------------------
+
+. margins, dydx(*)
+
+Average marginal effects                                   Number of obs = 872
+Model VCE: Robust
+
+Expression: Pr(dbigearn), predict()
+dy/dx wrt:  age education
+
+------------------------------------------------------------------------------
+             |            Delta-method
+             |      dy/dx   std. err.      z    P>|z|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+         age |   .0063581   .0012666     5.02   0.000     .0038757    .0088405
+   education |   .0617539   .0047438    13.02   0.000     .0524562    .0710517
+------------------------------------------------------------------------------
+
+. 
+. regress dbigearn age education, vce(robust)
+
+Linear regression                               Number of obs     =        872
+                                                F(2, 869)         =      70.71
+                                                Prob > F          =     0.0000
+                                                R-squared         =     0.1418
+                                                Root MSE          =     .41339
+
+------------------------------------------------------------------------------
+             |               Robust
+    dbigearn | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+         age |   .0064198   .0012773     5.03   0.000     .0039128    .0089268
+   education |   .0540363   .0050197    10.76   0.000     .0441842    .0638885
+       _cons |  -.7536881   .0854191    -8.82   0.000      -.92134   -.5860361
+------------------------------------------------------------------------------
+
+. 
+. **** 17.6 TIME SERIES DATA
+. 
+. **** 17.7 EXAMPLE: U.S. TREASURY SECURITY INTEREST RATES
+. 
+. * Download and load data from GitHub
+. clear
+
+. copy "${github_data_url}AED_INTERESTRATES.DTA" "temp_data.dta", replace
+(file temp_data.dta not found)
+
+. use "temp_data.dta", clear
+
+. erase "temp_data.dta"
+
+. describe
+
+Contains data from temp_data.dta
+ Observations:           397                  
+    Variables:            19                  20 Jul 2020 13:50
+-------------------------------------------------------------------------------
+Variable      Storage   Display    Value
+    name         type    format    label      Variable label
+-------------------------------------------------------------------------------
+date            str10   %10s                  fed string date
+daten           float   %tdCCYYMon            numeric (daily) date
+gs3m            double  %10.0g                3-Month Treasury Constant
+                                                Maturity Rate
+gs1             double  %10.0g                1-Year Treasury Constant Maturity
+                                                Rate
+gs2             double  %10.0g                2-Year Treasury Constant Maturity
+                                                Rate
+gs3             double  %10.0g                3-Year Treasury Constant Maturity
+                                                Rate
+gs5             double  %10.0g                5-Year Treasury Constant Maturity
+                                                Rate
+gs10            double  %10.0g                10-Year Treasury Constant
+                                                Maturity Rate
+gs20            double  %10.0g                20-Year Treasury Constant
+                                                Maturity Rate
+gs30            double  %10.0g                30-Year Treasury Constant
+                                                Maturity Rate
+fii10           double  %10.0g                10-Year Treasury
+                                                Inflation-Indexed Security,
+                                                Constant Maturity
+fedfunds        double  %10.0g                Effective Federal Funds Rate
+med1            double  %10.0g                1-Month Eurodollar Deposit Rate
+                                                (London)
+aaa             double  %10.0g                Moody's Seasoned Aaa Corporate
+                                                Bond Yield©
+baa             double  %10.0g                Moody's Seasoned Baa Corporate
+                                                Bond Yield©
+year            float   %9.0g                 Year
+time            float   %9.0g                 Minths since January 1982
+dgs1            float   %9.0g                 Change in 1-Year Treasury Rate
+dgs10           float   %9.0g                 Change in 10-Year Treasury Rate
+-------------------------------------------------------------------------------
+Sorted by: time
+
+. summarize
+
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+        date |          0
+       daten |        397     14061.8    3492.666       8036      20089
+        gs3m |        397    4.320982    3.116862        .01      14.28
+         gs1 |        397    4.691209    3.283398         .1      14.73
+         gs2 |        397    5.071889    3.351368        .21      14.82
+-------------+---------------------------------------------------------
+         gs3 |        397    5.296851    3.297421        .33      14.73
+         gs5 |        397     5.67937    3.145828        .62      14.65
+        gs10 |        397     6.18602    2.878117       1.53      14.59
+        gs20 |        316     6.22307    2.816651        2.2      14.57
+        gs30 |        350      6.8232    2.668733       2.46      14.22
+-------------+---------------------------------------------------------
+       fii10 |        145    1.282276    .9435819       -.77       2.89
+    fedfunds |        397     4.58063    3.306386        .07      14.94
+        med1 |        397    4.732897    3.304248        .17      15.52
+         aaa |        397    7.443023    2.521626        3.4      15.27
+         baa |        397    8.507204    2.709075       4.45      17.18
+-------------+---------------------------------------------------------
+        year |        397    1998.043    9.560054       1982       2015
+        time |        397         199    114.7483          1        397
+        dgs1 |        396   -.0356566    .2876114      -1.81        .76
+       dgs10 |        396    -.032096    .2740154      -1.43        .78
+
+. list in 1, clean
+
+             date     daten    gs3m     gs1     gs2     gs3     gs5    gs10    
+> gs20    gs30   fii10   fedfunds    med1     aaa    baa   year   time   dgs1  
+>  dgs10  
+  1.   1982-01-01   1982Jan   12.92   14.32   14.57   14.64   14.65   14.59   1
+> 4.57   14.22       .      13.22   13.68   15.18   17.1   1982      1      .  
+>      .  
+
+. 
+. * Table 17.5
+. summarize gs10 gs1 dgs10 dgs1
+
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+        gs10 |        397     6.18602    2.878117       1.53      14.59
+         gs1 |        397    4.691209    3.283398         .1      14.73
+       dgs10 |        396    -.032096    .2740154      -1.43        .78
+        dgs1 |        396   -.0356566    .2876114      -1.81        .76
+
+. 
+. * Levels on levels with a time trend - HAC robust ses
+. regress gs10 gs1 time
+
+      Source |       SS           df       MS      Number of obs   =       397
+-------------+----------------------------------   F(2, 394)       =   3511.82
+       Model |  3106.05031         2  1553.02515   Prob > F        =    0.0000
+    Residual |  174.238006       394   .44222844   R-squared       =    0.9469
+-------------+----------------------------------   Adj R-squared   =    0.9466
+       Total |  3280.28831       396  8.28355634   Root MSE        =      .665
+
+------------------------------------------------------------------------------
+        gs10 | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+         gs1 |   .5075503   .0221466    22.92   0.000       .46401    .5510907
+        time |  -.0105779   .0006337   -16.69   0.000    -.0118238   -.0093321
+       _cons |   5.910007   .2260166    26.15   0.000     5.465657    6.354356
+------------------------------------------------------------------------------
+
+. predict uhatgs10, resid
+
+. corrgram uhatgs10
+
+                                          -1       0       1 -1       0       1
+ LAG       AC       PAC      Q     Prob>Q  [Autocorrelation]  [Partial autocor]
+-------------------------------------------------------------------------------
+1        0.9534   0.9534   363.61  0.0000          |-------           |------- 
+2        0.8881  -0.2895    679.9  0.0000          |-------         --|        
+3        0.8295   0.1172   956.53  0.0000          |------            |        
+4        0.7694  -0.1130   1195.2  0.0000          |------            |        
+5        0.7088   0.0138   1398.2  0.0000          |-----             |        
+6        0.6511   0.0215   1569.9  0.0000          |-----             |        
+7        0.5962  -0.0183   1714.3  0.0000          |----              |        
+8        0.5380  -0.0754   1832.1  0.0000          |----              |        
+9        0.4776  -0.0887   1925.2  0.0000          |---               |        
+10       0.4247   0.0216     1999  0.0000          |---               |        
+11       0.3736  -0.0768   2056.3  0.0000          |--                |        
+12       0.3202  -0.0168   2098.5  0.0000          |--                |        
+13       0.2702   0.0084   2128.6  0.0000          |--                |        
+14       0.2294   0.0687   2150.4  0.0000          |-                 |        
+15       0.2002   0.0448     2167  0.0000          |-                 |        
+16       0.1763   0.0057   2179.9  0.0000          |-                 |        
+17       0.1567   0.0247   2190.1  0.0000          |-                 |        
+18       0.1449   0.0679   2198.9  0.0000          |-                 |        
+19       0.1358   0.0225   2206.7  0.0000          |-                 |        
+20       0.1298   0.0736   2213.7  0.0000          |-                 |        
+21       0.1255  -0.0350   2220.4  0.0000          |-                 |        
+22       0.1236   0.0400   2226.8  0.0000          |                  |        
+23       0.1205  -0.0488     2233  0.0000          |                  |        
+24       0.1139  -0.0333   2238.5  0.0000          |                  |        
+25       0.1083   0.0056   2243.5  0.0000          |                  |        
+26       0.1061   0.0326   2248.3  0.0000          |                  |        
+27       0.1021  -0.0135   2252.7  0.0000          |                  |        
+28       0.0986   0.0417   2256.9  0.0000          |                  |        
+29       0.0961   0.0444   2260.9  0.0000          |                  |        
+30       0.0921  -0.0539   2264.6  0.0000          |                  |        
+31       0.0850  -0.0021   2267.7  0.0000          |                  |        
+32       0.0835   0.0440   2270.7  0.0000          |                  |        
+33       0.0821  -0.0123   2273.6  0.0000          |                  |        
+34       0.0734  -0.0670     2276  0.0000          |                  |        
+35       0.0659   0.0852   2277.9  0.0000          |                  |        
+36       0.0560  -0.0795   2279.3  0.0000          |                  |        
+37       0.0426   0.0019   2280.1  0.0000          |                  |        
+38       0.0324   0.0554   2280.5  0.0000          |                  |        
+39       0.0216  -0.0450   2280.7  0.0000          |                  |        
+40       0.0087  -0.0192   2280.8  0.0000          |                  |        
+
+. drop uhatgs10
+
+. newey gs10 gs1 time, lag(24)
+
+Regression with Newey–West standard errors      Number of obs     =        397
+Maximum lag = 24                                F(  2,       394) =     188.25
+                                                Prob > F          =     0.0000
+
+------------------------------------------------------------------------------
+             |             Newey–West
+        gs10 | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+         gs1 |   .5075503   .0807578     6.28   0.000     .3487803    .6663204
+        time |  -.0105779   .0018265    -5.79   0.000    -.0141688   -.0069871
+       _cons |   5.910007   .6656937     8.88   0.000     4.601251    7.218763
+------------------------------------------------------------------------------
+
+. 
+. * Figure 17.4 - simple
+. twoway (tsline gs10) (tsline gs1)
+
+. twoway (scatter gs10 gs1) (lfit gs10 gs1)
+
+. 
+. * Table 17.6 - rows 1 and 2 (levels)
+. corrgram gs10
+
+                                          -1       0       1 -1       0       1
+ LAG       AC       PAC      Q     Prob>Q  [Autocorrelation]  [Partial autocor]
+-------------------------------------------------------------------------------
+1        0.9818   0.9874    385.6  0.0000          |-------           |------- 
+2        0.9613  -0.3309   756.22  0.0000          |-------         --|        
+3        0.9423   0.1207   1113.2  0.0000          |-------           |        
+4        0.9230  -0.0623   1456.6  0.0000          |-------           |        
+5        0.9046   0.0397   1787.2  0.0000          |-------           |        
+6        0.8845   0.0309   2104.2  0.0000          |-------           |        
+7        0.8660   0.0435   2408.8  0.0000          |------            |        
+8        0.8494  -0.0769   2702.5  0.0000          |------            |        
+9        0.8340   0.0017   2986.5  0.0000          |------            |        
+10       0.8226   0.0246   3263.5  0.0000          |------            |        
+11       0.8117  -0.0568   3533.9  0.0000          |------            |        
+12       0.8005   0.0158   3797.6  0.0000          |------            |        
+13       0.7903   0.0836   4055.2  0.0000          |------            |        
+14       0.7806   0.0905   4307.2  0.0000          |------            |        
+15       0.7722   0.0592   4554.4  0.0000          |------            |        
+16       0.7642   0.0086   4797.2  0.0000          |------            |        
+17       0.7569   0.0297   5036.1  0.0000          |------            |        
+18       0.7490   0.0685   5270.5  0.0000          |-----             |        
+19       0.7399   0.0592     5500  0.0000          |-----             |        
+20       0.7298   0.0693   5723.8  0.0000          |-----             |        
+21       0.7198  -0.0122     5942  0.0000          |-----             |        
+22       0.7109   0.1618   6155.5  0.0000          |-----             |-       
+23       0.7025  -0.0245   6364.5  0.0000          |-----             |        
+24       0.6936   0.0047   6568.9  0.0000          |-----             |        
+25       0.6850   0.0025   6768.7  0.0000          |-----             |        
+26       0.6753  -0.0133   6963.4  0.0000          |-----             |        
+27       0.6639   0.0203   7152.1  0.0000          |-----             |        
+28       0.6520   0.0946   7334.6  0.0000          |-----             |        
+29       0.6389   0.1003   7510.3  0.0000          |-----             |        
+30       0.6255  -0.0133   7679.2  0.0000          |-----             |        
+31       0.6123   0.0404   7841.4  0.0000          |----              |        
+32       0.6009   0.0361   7998.2  0.0000          |----              |        
+33       0.5900  -0.0326   8149.7  0.0000          |----              |        
+34       0.5796  -0.0020   8296.3  0.0000          |----              |        
+35       0.5706   0.0780   8438.7  0.0000          |----              |        
+36       0.5611  -0.0148   8576.9  0.0000          |----              |        
+37       0.5518   0.0592   8710.9  0.0000          |----              |        
+38       0.5422   0.0289   8840.6  0.0000          |----              |        
+39       0.5312  -0.0682   8965.4  0.0000          |----              |        
+40       0.5208  -0.0422   9085.8  0.0000          |----              |        
+
+. corrgram gs1
+
+                                          -1       0       1 -1       0       1
+ LAG       AC       PAC      Q     Prob>Q  [Autocorrelation]  [Partial autocor]
+-------------------------------------------------------------------------------
+1        0.9829   0.9876   386.44  0.0000          |-------           |------- 
+2        0.9616  -0.4084   757.23  0.0000          |-------        ---|        
+3        0.9404  -0.0069   1112.8  0.0000          |-------           |        
+4        0.9181  -0.0594   1452.5  0.0000          |-------           |        
+5        0.8967   0.0280   1777.4  0.0000          |-------           |        
+6        0.8728  -0.0962     2086  0.0000          |------            |        
+7        0.8508   0.1133     2380  0.0000          |------            |        
+8        0.8323  -0.1039   2662.1  0.0000          |------            |        
+9        0.8147   0.0387   2933.1  0.0000          |------            |        
+10       0.8000  -0.0862   3195.1  0.0000          |------            |        
+11       0.7854   0.0770   3448.2  0.0000          |------            |        
+12       0.7713  -0.0399     3693  0.0000          |------            |        
+13       0.7579   0.0530   3929.9  0.0000          |------            |        
+14       0.7442   0.0376     4159  0.0000          |-----             |        
+15       0.7303  -0.0444   4380.1  0.0000          |-----             |        
+16       0.7160  -0.0591   4593.3  0.0000          |-----             |        
+17       0.7018   0.0660   4798.6  0.0000          |-----             |        
+18       0.6862  -0.0028   4995.4  0.0000          |-----             |        
+19       0.6693   0.0123   5183.1  0.0000          |-----             |        
+20       0.6521   0.0467   5361.8  0.0000          |-----             |        
+21       0.6359  -0.0106   5532.2  0.0000          |-----             |        
+22       0.6213   0.1028   5695.2  0.0000          |----              |        
+23       0.6075   0.0659   5851.5  0.0000          |----              |        
+24       0.5938  -0.0545   6001.3  0.0000          |----              |        
+25       0.5805  -0.0154   6144.8  0.0000          |----              |        
+26       0.5666  -0.0389   6281.9  0.0000          |----              |        
+27       0.5514   0.0064     6412  0.0000          |----              |        
+28       0.5354   0.0130   6535.1  0.0000          |----              |        
+29       0.5184   0.0949   6650.7  0.0000          |----              |        
+30       0.5012   0.0101   6759.1  0.0000          |----              |        
+31       0.4841  -0.0526   6860.6  0.0000          |---               |        
+32       0.4679   0.0541   6955.6  0.0000          |---               |        
+33       0.4522  -0.0501   7044.6  0.0000          |---               |        
+34       0.4379   0.0055   7128.2  0.0000          |---               |        
+35       0.4262   0.0577   7207.7  0.0000          |---               |        
+36       0.4158   0.0359   7283.6  0.0000          |---               |        
+37       0.4065   0.0162   7356.3  0.0000          |---               |        
+38       0.3971  -0.0260   7425.9  0.0000          |---               |        
+39       0.3865  -0.0028   7491.9  0.0000          |---               |        
+40       0.3774  -0.0426   7555.2  0.0000          |---               |        
+
+. 
+. * Table 17.6 - rows 3 and 4 (levels and time trend)
+. regress gs10 time
+
+      Source |       SS           df       MS      Number of obs   =       397
+-------------+----------------------------------   F(1, 395)       =   2792.44
+       Model |  2873.78233         1  2873.78233   Prob > F        =    0.0000
+    Residual |  406.505985       395  1.02912908   R-squared       =    0.8761
+-------------+----------------------------------   Adj R-squared   =    0.8758
+       Total |  3280.28831       396  8.28355634   Root MSE        =    1.0145
+
+------------------------------------------------------------------------------
+        gs10 | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+        time |  -.0234765   .0004443   -52.84   0.000    -.0243499   -.0226031
+       _cons |   10.85784   .1020212   106.43   0.000     10.65727    11.05841
+------------------------------------------------------------------------------
+
+. predict uhatgs10, resid
+
+. corrgram uhatgs10
+
+                                          -1       0       1 -1       0       1
+ LAG       AC       PAC      Q     Prob>Q  [Autocorrelation]  [Partial autocor]
+-------------------------------------------------------------------------------
+1        0.9460   0.9463   357.97  0.0000          |-------           |------- 
+2        0.8685  -0.3521   660.46  0.0000          |------          --|        
+3        0.7956   0.0892   914.96  0.0000          |------            |        
+4        0.7212  -0.0931   1124.6  0.0000          |-----             |        
+5        0.6492   0.0063     1295  0.0000          |-----             |        
+6        0.5741  -0.0058   1428.5  0.0000          |----              |        
+7        0.5063   0.0104   1532.6  0.0000          |----              |        
+8        0.4438  -0.1079   1612.8  0.0000          |---               |        
+9        0.3845  -0.0312   1673.1  0.0000          |---               |        
+10       0.3392  -0.0033   1720.2  0.0000          |--                |        
+11       0.2945  -0.0869   1755.8  0.0000          |--                |        
+12       0.2474  -0.0170     1781  0.0000          |-                 |        
+13       0.2060   0.0523   1798.5  0.0000          |-                 |        
+14       0.1723   0.0620   1810.7  0.0000          |-                 |        
+15       0.1486   0.0356   1819.9  0.0000          |-                 |        
+16       0.1295  -0.0138   1826.9  0.0000          |-                 |        
+17       0.1135   0.0071   1832.3  0.0000          |                  |        
+18       0.0987   0.0452   1836.3  0.0000          |                  |        
+19       0.0837   0.0358   1839.3  0.0000          |                  |        
+20       0.0692   0.0462   1841.3  0.0000          |                  |        
+21       0.0580  -0.0317   1842.7  0.0000          |                  |        
+22       0.0573   0.1438   1844.1  0.0000          |                  |-       
+23       0.0604  -0.0410   1845.6  0.0000          |                  |        
+24       0.0617  -0.0123   1847.2  0.0000          |                  |        
+25       0.0642  -0.0145     1849  0.0000          |                  |        
+26       0.0634  -0.0311   1850.7  0.0000          |                  |        
+27       0.0557   0.0002     1852  0.0000          |                  |        
+28       0.0469   0.0740     1853  0.0000          |                  |        
+29       0.0382   0.0790   1853.6  0.0000          |                  |        
+30       0.0305  -0.0315     1854  0.0000          |                  |        
+31       0.0240   0.0225   1854.3  0.0000          |                  |        
+32       0.0247   0.0201   1854.5  0.0000          |                  |        
+33       0.0257  -0.0488   1854.8  0.0000          |                  |        
+34       0.0242  -0.0189   1855.1  0.0000          |                  |        
+35       0.0262   0.0615   1855.4  0.0000          |                  |        
+36       0.0271  -0.0295   1855.7  0.0000          |                  |        
+37       0.0282   0.0447     1856  0.0000          |                  |        
+38       0.0288   0.0149   1856.4  0.0000          |                  |        
+39       0.0230  -0.0823   1856.6  0.0000          |                  |        
+40       0.0151  -0.0566   1856.7  0.0000          |                  |        
+
+. drop uhatgs10
+
+. regress gs1 time
+
+      Source |       SS           df       MS      Number of obs   =       397
+-------------+----------------------------------   F(1, 395)       =   1475.29
+       Model |  3367.52355         1  3367.52355   Prob > F        =    0.0000
+    Residual |  901.635671       395  2.28262195   R-squared       =    0.7888
+-------------+----------------------------------   Adj R-squared   =    0.7883
+       Total |  4269.15922       396  10.7807051   Root MSE        =    1.5108
+
+------------------------------------------------------------------------------
+         gs1 | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+        time |  -.0254133   .0006616   -38.41   0.000    -.0267141   -.0241125
+       _cons |   9.748462   .1519402    64.16   0.000     9.449749    10.04717
+------------------------------------------------------------------------------
+
+. predict uhatgs1, resid
+
+. drop uhatgs1
+
+. 
+. * Table 17.6 - rows 5 and 6 (levels AR(1))
+. regress gs10 l.gs10
+
+      Source |       SS           df       MS      Number of obs   =       396
+-------------+----------------------------------   F(1, 394)       =  42994.42
+       Model |  3180.33853         1  3180.33853   Prob > F        =    0.0000
+    Residual |  29.1445555       394  .073970953   R-squared       =    0.9909
+-------------+----------------------------------   Adj R-squared   =    0.9909
+       Total |  3209.48308       395  8.12527363   Root MSE        =    .27198
+
+------------------------------------------------------------------------------
+        gs10 | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+        gs10 |
+         L1. |    .987449   .0047622   207.35   0.000     .9780865    .9968116
+             |
+       _cons |    .045681   .0325221     1.40   0.161    -.0182576    .1096197
+------------------------------------------------------------------------------
+
+. predict uhatgs10, resid
+(1 missing value generated)
+
+. corrgram uhatgs10
+
+                                          -1       0       1 -1       0       1
+ LAG       AC       PAC      Q     Prob>Q  [Autocorrelation]  [Partial autocor]
+-------------------------------------------------------------------------------
+1        0.3310   0.3324   43.718  0.0000          |--                |--      
+2        0.0004  -0.1230   43.718  0.0000          |                  |        
+3        0.0124   0.0609    43.78  0.0000          |                  |        
+4       -0.0114  -0.0413   43.833  0.0000          |                  |        
+5       -0.0516  -0.0347   44.905  0.0000          |                  |        
+6       -0.0681  -0.0453   46.777  0.0000          |                  |        
+7        0.0322   0.0774   47.196  0.0000          |                  |        
+8        0.0447  -0.0009   48.008  0.0000          |                  |        
+9       -0.0109  -0.0210   48.057  0.0000          |                  |        
+10       0.0391   0.0605   48.681  0.0000          |                  |        
+11       0.0360  -0.0130   49.211  0.0000          |                  |        
+12      -0.0686  -0.0810   51.144  0.0000          |                  |        
+13      -0.1373  -0.0880   58.899  0.0000         -|                  |        
+14      -0.1096  -0.0545   63.851  0.0000          |                  |        
+15      -0.0449  -0.0028   64.684  0.0000          |                  |        
+16      -0.0413  -0.0240   65.393  0.0000          |                  |        
+17      -0.0755  -0.0644   67.762  0.0000          |                  |        
+18      -0.0657  -0.0557   69.564  0.0000          |                  |        
+19      -0.0668  -0.0666   71.429  0.0000          |                  |        
+20      -0.0197   0.0172   71.592  0.0000          |                  |        
+21      -0.1296  -0.1562   78.652  0.0000         -|                 -|        
+22      -0.0782   0.0322    81.23  0.0000          |                  |        
+23       0.0025   0.0025   81.233  0.0000          |                  |        
+24       0.0015   0.0046   81.234  0.0000          |                  |        
+25       0.0207   0.0198   81.416  0.0000          |                  |        
+26       0.0299  -0.0155   81.796  0.0000          |                  |        
+27      -0.0342  -0.0900   82.295  0.0000          |                  |        
+28      -0.1106  -0.0963   87.537  0.0000          |                  |        
+29      -0.0455   0.0188   88.425  0.0000          |                  |        
+30       0.0011  -0.0342   88.426  0.0000          |                  |        
+31      -0.0295  -0.0277   88.802  0.0000          |                  |        
+32       0.0112   0.0403   88.856  0.0000          |                  |        
+33       0.0699   0.0097   90.979  0.0000          |                  |        
+34       0.0175  -0.0692   91.112  0.0000          |                  |        
+35       0.0226   0.0247   91.334  0.0000          |                  |        
+36       0.0061  -0.0481   91.351  0.0000          |                  |        
+37      -0.0168  -0.0170   91.475  0.0000          |                  |        
+38       0.0367   0.0784   92.068  0.0000          |                  |        
+39       0.0746   0.0523   94.526  0.0000          |                  |        
+40       0.0519  -0.0337    95.72  0.0000          |                  |        
+
+. estat bgodfrey, lags(12)
+
+Breusch–Godfrey LM test for autocorrelation
+---------------------------------------------------------------------------
+    lags(p)  |          chi2               df                 Prob > chi2
+-------------+-------------------------------------------------------------
+      12     |         57.704              12                   0.0000
+---------------------------------------------------------------------------
+                        H0: no serial correlation
+
+. drop uhatgs10
+
+. regress gs1 l.gs1
+
+      Source |       SS           df       MS      Number of obs   =       396
+-------------+----------------------------------   F(1, 394)       =  50992.07
+       Model |   4144.1906         1   4144.1906   Prob > F        =    0.0000
+    Residual |  32.0208812       394  .081271272   R-squared       =    0.9923
+-------------+----------------------------------   Adj R-squared   =    0.9923
+       Total |  4176.21148       395  10.5726873   Root MSE        =    .28508
+
+------------------------------------------------------------------------------
+         gs1 | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+         gs1 |
+         L1. |   .9875969   .0043735   225.81   0.000     .9789986    .9961952
+             |
+       _cons |   .0226699   .0250642     0.90   0.366    -.0266064    .0719462
+------------------------------------------------------------------------------
+
+. predict uhatgs1, resid
+(1 missing value generated)
+
+. corrgram uhatgs1
+
+                                          -1       0       1 -1       0       1
+ LAG       AC       PAC      Q     Prob>Q  [Autocorrelation]  [Partial autocor]
+-------------------------------------------------------------------------------
+1        0.4091   0.4091    66.77  0.0000          |---               |---     
+2        0.1766   0.0037   79.249  0.0000          |-                 |        
+3        0.1186   0.0549   84.889  0.0000          |                  |        
+4        0.0473  -0.0316   85.787  0.0000          |                  |        
+5        0.0807   0.0896   88.411  0.0000          |                  |        
+6       -0.0112  -0.1170   88.462  0.0000          |                  |        
+7        0.0527   0.1044   89.588  0.0000          |                  |        
+8        0.0414  -0.0394   90.284  0.0000          |                  |        
+9        0.0829   0.0892   93.086  0.0000          |                  |        
+10       0.0215  -0.0770   93.275  0.0000          |                  |        
+11       0.0111   0.0417   93.325  0.0000          |                  |        
+12      -0.0044  -0.0519   93.333  0.0000          |                  |        
+13      -0.0622  -0.0372   94.924  0.0000          |                  |        
+14      -0.0012   0.0454   94.924  0.0000          |                  |        
+15       0.0540   0.0594   96.132  0.0000          |                  |        
+16       0.0061  -0.0667   96.148  0.0000          |                  |        
+17      -0.0332  -0.0001   96.605  0.0000          |                  |        
+18      -0.0180  -0.0162    96.74  0.0000          |                  |        
+19      -0.0605  -0.0509   98.269  0.0000          |                  |        
+20      -0.0357   0.0091   98.804  0.0000          |                  |        
+21      -0.1137  -0.1044   104.24  0.0000          |                  |        
+22      -0.1622  -0.0677   115.32  0.0000         -|                  |        
+23      -0.0636   0.0536   117.03  0.0000          |                  |        
+24      -0.0081   0.0143   117.06  0.0000          |                  |        
+25       0.0209   0.0375   117.24  0.0000          |                  |        
+26       0.0105  -0.0098   117.29  0.0000          |                  |        
+27      -0.0203  -0.0174   117.47  0.0000          |                  |        
+28      -0.1122  -0.1006   122.86  0.0000          |                  |        
+29      -0.1139  -0.0147   128.43  0.0000          |                  |        
+30      -0.0334   0.0491   128.91  0.0000          |                  |        
+31      -0.0677  -0.0580   130.89  0.0000          |                  |        
+32      -0.0295   0.0473   131.26  0.0000          |                  |        
+33       0.0013  -0.0065   131.27  0.0000          |                  |        
+34      -0.0343  -0.0564   131.78  0.0000          |                  |        
+35      -0.0383  -0.0335   132.42  0.0000          |                  |        
+36      -0.0793  -0.0125   135.17  0.0000          |                  |        
+37      -0.0703   0.0288   137.34  0.0000          |                  |        
+38      -0.0388   0.0042      138  0.0000          |                  |        
+39      -0.0003   0.0461      138  0.0000          |                  |        
+40      -0.0624  -0.1230   139.72  0.0000          |                  |        
+
+. estat bgodfrey, lags(12)
+
+Breusch–Godfrey LM test for autocorrelation
+---------------------------------------------------------------------------
+    lags(p)  |          chi2               df                 Prob > chi2
+-------------+-------------------------------------------------------------
+      12     |         81.054              12                   0.0000
+---------------------------------------------------------------------------
+                        H0: no serial correlation
+
+. drop uhatgs1
+
+. 
+. * Table 17.6 - rows 7 and 8 (changes)
+. corrgram dgs10
+
+                                          -1       0       1 -1       0       1
+ LAG       AC       PAC      Q     Prob>Q  [Autocorrelation]  [Partial autocor]
+-------------------------------------------------------------------------------
+1        0.3346   0.3356   44.684  0.0000          |--                |--      
+2        0.0042  -0.1210   44.691  0.0000          |                  |        
+3        0.0166   0.0634   44.801  0.0000          |                  |        
+4       -0.0073  -0.0390   44.822  0.0000          |                  |        
+5       -0.0446  -0.0300   45.624  0.0000          |                  |        
+6       -0.0616  -0.0419   47.159  0.0000          |                  |        
+7        0.0354   0.0787   47.667  0.0000          |                  |        
+8        0.0455  -0.0009   48.509  0.0000          |                  |        
+9       -0.0144  -0.0240   48.593  0.0000          |                  |        
+10       0.0343   0.0576   49.074  0.0000          |                  |        
+11       0.0314  -0.0153   49.476  0.0000          |                  |        
+12      -0.0725  -0.0829   51.637  0.0000          |                  |        
+13      -0.1397  -0.0894   59.664  0.0000         -|                  |        
+14      -0.1130  -0.0579   64.931  0.0000          |                  |        
+15      -0.0490  -0.0071   65.925  0.0000          |                  |        
+16      -0.0451  -0.0280   66.768  0.0000          |                  |        
+17      -0.0773  -0.0664   69.256  0.0000          |                  |        
+18      -0.0659  -0.0563   71.066  0.0000          |                  |        
+19      -0.0656  -0.0658   72.863  0.0000          |                  |        
+20      -0.0199   0.0158   73.029  0.0000          |                  |        
+21      -0.1298  -0.1585   80.108  0.0000         -|                 -|        
+22      -0.0776   0.0299   82.644  0.0000          |                  |        
+23       0.0034   0.0002   82.649  0.0000          |                  |        
+24       0.0019   0.0023    82.65  0.0000          |                  |        
+25       0.0215   0.0180   82.847  0.0000          |                  |        
+26       0.0324  -0.0153   83.294  0.0000          |                  |        
+27      -0.0298  -0.0888   83.673  0.0000          |                  |        
+28      -0.1029  -0.0916   88.207  0.0000          |                  |        
+29      -0.0373   0.0238   88.806  0.0000          |                  |        
+30       0.0084  -0.0312   88.836  0.0000          |                  |        
+31      -0.0240  -0.0268   89.085  0.0000          |                  |        
+32       0.0163   0.0427     89.2  0.0000          |                  |        
+33       0.0741   0.0109   91.587  0.0000          |                  |        
+34       0.0202  -0.0694   91.765  0.0000          |                  |        
+35       0.0249   0.0240   92.035  0.0000          |                  |        
+36       0.0082  -0.0506   92.065  0.0000          |                  |        
+37      -0.0139  -0.0193    92.15  0.0000          |                  |        
+38       0.0408   0.0781   92.885  0.0000          |                  |        
+39       0.0775   0.0497   95.537  0.0000          |                  |        
+40       0.0527  -0.0375   96.767  0.0000          |                  |        
+
+. corrgram dgs1
+
+                                          -1       0       1 -1       0       1
+ LAG       AC       PAC      Q     Prob>Q  [Autocorrelation]  [Partial autocor]
+-------------------------------------------------------------------------------
+1        0.4156   0.4156    68.91  0.0000          |---               |---     
+2        0.1824   0.0054   82.219  0.0000          |-                 |        
+3        0.1254   0.0576   88.521  0.0000          |-                 |        
+4        0.0527  -0.0305    89.64  0.0000          |                  |        
+5        0.0891   0.0934   92.841  0.0000          |                  |        
+6       -0.0046  -0.1167    92.85  0.0000          |                  |        
+7        0.0526   0.1023   93.971  0.0000          |                  |        
+8        0.0396  -0.0411   94.608  0.0000          |                  |        
+9        0.0756   0.0847   96.934  0.0000          |                  |        
+10       0.0143  -0.0791   97.018  0.0000          |                  |        
+11       0.0034   0.0384   97.023  0.0000          |                  |        
+12      -0.0128  -0.0548    97.09  0.0000          |                  |        
+13      -0.0687  -0.0393   99.034  0.0000          |                  |        
+14      -0.0076   0.0428   99.058  0.0000          |                  |        
+15       0.0473   0.0572   99.985  0.0000          |                  |        
+16      -0.0002  -0.0683   99.985  0.0000          |                  |        
+17      -0.0361   0.0004   100.53  0.0000          |                  |        
+18      -0.0187  -0.0150   100.67  0.0000          |                  |        
+19      -0.0593  -0.0493   102.14  0.0000          |                  |        
+20      -0.0357   0.0090   102.67  0.0000          |                  |        
+21      -0.1141  -0.1044   108.14  0.0000          |                  |        
+22      -0.1614  -0.0668   119.11  0.0000         -|                  |        
+23      -0.0625   0.0543   120.77  0.0000          |                  |        
+24      -0.0080   0.0146   120.79  0.0000          |                  |        
+25       0.0216   0.0379   120.99  0.0000          |                  |        
+26       0.0137  -0.0080   121.07  0.0000          |                  |        
+27      -0.0155  -0.0147   121.17  0.0000          |                  |        
+28      -0.1035  -0.0966   125.76  0.0000          |                  |        
+29      -0.1032  -0.0098   130.33  0.0000          |                  |        
+30      -0.0231   0.0531   130.56  0.0000          |                  |        
+31      -0.0576  -0.0547   131.99  0.0000          |                  |        
+32      -0.0202   0.0504   132.17  0.0000          |                  |        
+33       0.0082  -0.0059    132.2  0.0000          |                  |        
+34      -0.0308  -0.0580   132.61  0.0000          |                  |        
+35      -0.0364  -0.0360   133.19  0.0000          |                  |        
+36      -0.0780  -0.0162   135.86  0.0000          |                  |        
+37      -0.0680   0.0261   137.88  0.0000          |                  |        
+38      -0.0344   0.0027    138.4  0.0000          |                  |        
+39       0.0013   0.0425   138.41  0.0000          |                  |        
+40      -0.0626  -0.1261   140.14  0.0000          |                 -|        
+
+. 
+. * Levels on levels with a time trend
+. regress gs10 gs1 time
+
+      Source |       SS           df       MS      Number of obs   =       397
+-------------+----------------------------------   F(2, 394)       =   3511.82
+       Model |  3106.05031         2  1553.02515   Prob > F        =    0.0000
+    Residual |  174.238006       394   .44222844   R-squared       =    0.9469
+-------------+----------------------------------   Adj R-squared   =    0.9466
+       Total |  3280.28831       396  8.28355634   Root MSE        =      .665
+
+------------------------------------------------------------------------------
+        gs10 | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+         gs1 |   .5075503   .0221466    22.92   0.000       .46401    .5510907
+        time |  -.0105779   .0006337   -16.69   0.000    -.0118238   -.0093321
+       _cons |   5.910007   .2260166    26.15   0.000     5.465657    6.354356
+------------------------------------------------------------------------------
+
+. predict uhatgs10, resid
+
+. corrgram uhatgs10
+
+                                          -1       0       1 -1       0       1
+ LAG       AC       PAC      Q     Prob>Q  [Autocorrelation]  [Partial autocor]
+-------------------------------------------------------------------------------
+1        0.9534   0.9534   363.61  0.0000          |-------           |------- 
+2        0.8881  -0.2895    679.9  0.0000          |-------         --|        
+3        0.8295   0.1172   956.53  0.0000          |------            |        
+4        0.7694  -0.1130   1195.2  0.0000          |------            |        
+5        0.7088   0.0138   1398.2  0.0000          |-----             |        
+6        0.6511   0.0215   1569.9  0.0000          |-----             |        
+7        0.5962  -0.0183   1714.3  0.0000          |----              |        
+8        0.5380  -0.0754   1832.1  0.0000          |----              |        
+9        0.4776  -0.0887   1925.2  0.0000          |---               |        
+10       0.4247   0.0216     1999  0.0000          |---               |        
+11       0.3736  -0.0768   2056.3  0.0000          |--                |        
+12       0.3202  -0.0168   2098.5  0.0000          |--                |        
+13       0.2702   0.0084   2128.6  0.0000          |--                |        
+14       0.2294   0.0687   2150.4  0.0000          |-                 |        
+15       0.2002   0.0448     2167  0.0000          |-                 |        
+16       0.1763   0.0057   2179.9  0.0000          |-                 |        
+17       0.1567   0.0247   2190.1  0.0000          |-                 |        
+18       0.1449   0.0679   2198.9  0.0000          |-                 |        
+19       0.1358   0.0225   2206.7  0.0000          |-                 |        
+20       0.1298   0.0736   2213.7  0.0000          |-                 |        
+21       0.1255  -0.0350   2220.4  0.0000          |-                 |        
+22       0.1236   0.0400   2226.8  0.0000          |                  |        
+23       0.1205  -0.0488     2233  0.0000          |                  |        
+24       0.1139  -0.0333   2238.5  0.0000          |                  |        
+25       0.1083   0.0056   2243.5  0.0000          |                  |        
+26       0.1061   0.0326   2248.3  0.0000          |                  |        
+27       0.1021  -0.0135   2252.7  0.0000          |                  |        
+28       0.0986   0.0417   2256.9  0.0000          |                  |        
+29       0.0961   0.0444   2260.9  0.0000          |                  |        
+30       0.0921  -0.0539   2264.6  0.0000          |                  |        
+31       0.0850  -0.0021   2267.7  0.0000          |                  |        
+32       0.0835   0.0440   2270.7  0.0000          |                  |        
+33       0.0821  -0.0123   2273.6  0.0000          |                  |        
+34       0.0734  -0.0670     2276  0.0000          |                  |        
+35       0.0659   0.0852   2277.9  0.0000          |                  |        
+36       0.0560  -0.0795   2279.3  0.0000          |                  |        
+37       0.0426   0.0019   2280.1  0.0000          |                  |        
+38       0.0324   0.0554   2280.5  0.0000          |                  |        
+39       0.0216  -0.0450   2280.7  0.0000          |                  |        
+40       0.0087  -0.0192   2280.8  0.0000          |                  |        
+
+. drop uhatgs10
+
+. 
+. * Changes on changes
+. regress dgs10 dgs1
+
+      Source |       SS           df       MS      Number of obs   =       396
+-------------+----------------------------------   F(1, 394)       =    524.11
+       Model |  16.9307639         1  16.9307639   Prob > F        =    0.0000
+    Residual |  12.7275962       394  .032303544   R-squared       =    0.5709
+-------------+----------------------------------   Adj R-squared   =    0.5698
+       Total |  29.6583601       395  .075084456   Root MSE        =    .17973
+
+------------------------------------------------------------------------------
+       dgs10 | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+        dgs1 |   .7198361   .0314427    22.89   0.000     .6580195    .7816526
+       _cons |  -.0064291   .0091012    -0.71   0.480     -.024322    .0114639
+------------------------------------------------------------------------------
+
+. predict uhatdgs10, resid
+(1 missing value generated)
+
+. corrgram uhatdgs10
+
+                                          -1       0       1 -1       0       1
+ LAG       AC       PAC      Q     Prob>Q  [Autocorrelation]  [Partial autocor]
+-------------------------------------------------------------------------------
+1        0.2548   0.2568   25.905  0.0000          |--                |--      
+2       -0.0387  -0.1125   26.505  0.0000          |                  |        
+3        0.0608   0.1102   27.988  0.0000          |                  |        
+4        0.0237  -0.0330   28.214  0.0000          |                  |        
+5       -0.0275  -0.0157    28.52  0.0000          |                  |        
+6       -0.0113  -0.0059   28.571  0.0001          |                  |        
+7        0.0428   0.0422   29.315  0.0001          |                  |        
+8        0.0811   0.0719   31.986  0.0001          |                  |        
+9       -0.0017  -0.0390   31.987  0.0002          |                  |        
+10      -0.0197   0.0019   32.146  0.0004          |                  |        
+11      -0.0044  -0.0207   32.154  0.0007          |                  |        
+12      -0.0145  -0.0076   32.241  0.0013          |                  |        
+13      -0.0873  -0.0866   35.381  0.0007          |                  |        
+14      -0.0753  -0.0279    37.72  0.0006          |                  |        
+15      -0.0237  -0.0152   37.953  0.0009          |                  |        
+16      -0.0472  -0.0416   38.877  0.0011          |                  |        
+17      -0.1031  -0.0767   43.297  0.0004          |                  |        
+18      -0.0368   0.0020   43.862  0.0006          |                  |        
+19      -0.0669  -0.0833   45.735  0.0005          |                  |        
+20      -0.0260   0.0351   46.017  0.0008          |                  |        
+21       0.0254   0.0278   46.287  0.0012          |                  |        
+22       0.0171   0.0193   46.411  0.0018          |                  |        
+23       0.0315   0.0356    46.83  0.0024          |                  |        
+24      -0.0195  -0.0420   46.991  0.0034          |                  |        
+25      -0.0939  -0.0782   50.737  0.0017          |                  |        
+26      -0.0244   0.0070    50.99  0.0024          |                  |        
+27      -0.0146  -0.0236   51.082  0.0034          |                  |        
+28      -0.0255  -0.0149   51.361  0.0045          |                  |        
+29       0.0328   0.0408   51.824  0.0057          |                  |        
+30       0.0717   0.0277   54.038  0.0046          |                  |        
+31      -0.0290  -0.0678   54.401  0.0058          |                  |        
+32      -0.0149   0.0055   54.498  0.0078          |                  |        
+33       0.0707   0.0677   56.669  0.0064          |                  |        
+34      -0.0525  -0.1132   57.869  0.0065          |                  |        
+35      -0.0201   0.0595   58.045  0.0085          |                  |        
+36       0.0214  -0.0232   58.246  0.0109          |                  |        
+37      -0.0778  -0.0863   60.901  0.0079          |                  |        
+38      -0.0526  -0.0158   62.119  0.0081          |                  |        
+39      -0.0282  -0.0354    62.47  0.0099          |                  |        
+40      -0.0303  -0.0103   62.878  0.0119          |                  |        
+
+. drop uhatdgs10
+
+. 
+. * DL(2) model in changes
+. newey dgs10 dgs1 l.dgs1 l2.dgs1, lag(3)
+
+Regression with Newey–West standard errors      Number of obs     =        394
+Maximum lag = 3                                 F(  3,       390) =      84.30
+                                                Prob > F          =     0.0000
+
+------------------------------------------------------------------------------
+             |             Newey–West
+       dgs10 | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+        dgs1 |
+         --. |   .7589864   .0498263    15.23   0.000     .6610245    .8569482
+         L1. |  -.0582621   .0411703    -1.42   0.158    -.1392056    .0226815
+         L2. |  -.0404707   .0385805    -1.05   0.295    -.1163226    .0353811
+             |
+       _cons |  -.0075233   .0102831    -0.73   0.465    -.0277406     .012694
+------------------------------------------------------------------------------
+
+. * gives r2 and se
+. regress dgs10 dgs1 l.dgs1 l2.dgs1
+
+      Source |       SS           df       MS      Number of obs   =       394
+-------------+----------------------------------   F(3, 390)       =    179.43
+       Model |  17.0201232         3  5.67337438   Prob > F        =    0.0000
+    Residual |  12.3314116       390  .031619004   R-squared       =    0.5799
+-------------+----------------------------------   Adj R-squared   =    0.5766
+       Total |  29.3515348       393  .074685839   Root MSE        =    .17782
+
+------------------------------------------------------------------------------
+       dgs10 | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+        dgs1 |
+         --. |   .7589864   .0348984    21.75   0.000     .6903739    .8275988
+         L1. |  -.0582621   .0374107    -1.56   0.120    -.1318139    .0152897
+         L2. |  -.0404707   .0342308    -1.18   0.238    -.1077707    .0268292
+             |
+       _cons |  -.0075233   .0090836    -0.83   0.408    -.0253822    .0103356
+------------------------------------------------------------------------------
+
+. 
+. * AR(2) model in changes
+. regress dgs10 l.dgs10 l2.dgs10
+
+      Source |       SS           df       MS      Number of obs   =       394
+-------------+----------------------------------   F(2, 391)       =     27.95
+       Model |  3.67118473         2  1.83559236   Prob > F        =    0.0000
+    Residual |    25.68035       391  .065678645   R-squared       =    0.1251
+-------------+----------------------------------   Adj R-squared   =    0.1206
+       Total |  29.3515348       393  .074685839   Root MSE        =    .25628
+
+------------------------------------------------------------------------------
+       dgs10 | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+       dgs10 |
+         L1. |   .3740277   .0500315     7.48   0.000     .2756632    .4723921
+         L2. |  -.1210315   .0500241    -2.42   0.016    -.2193815   -.0226816
+             |
+       _cons |  -.0225716    .013035    -1.73   0.084     -.048199    .0030557
+------------------------------------------------------------------------------
+
+. predict uhatgs10, resid
+(3 missing values generated)
+
+. corrgram uhatgs10
+
+                                          -1       0       1 -1       0       1
+ LAG       AC       PAC      Q     Prob>Q  [Autocorrelation]  [Partial autocor]
+-------------------------------------------------------------------------------
+1        0.0120   0.0121   .05756  0.8104          |                  |        
+2       -0.0301  -0.0304   .41899  0.8110          |                  |        
+3        0.0771   0.0786    2.788  0.4255          |                  |        
+4       -0.0106  -0.0170   2.8331  0.5861          |                  |        
+5       -0.0355  -0.0309   3.3372  0.6481          |                  |        
+6       -0.0830  -0.0912   6.1049  0.4115          |                  |        
+7        0.0210   0.0171   6.2822  0.5072          |                  |        
+8        0.0419   0.0408   6.9931  0.5374          |                  |        
+9       -0.0480  -0.0363   7.9254  0.5417          |                  |        
+10       0.0315   0.0340   8.3282  0.5968          |                  |        
+11       0.0438   0.0280   9.1092  0.6118          |                  |        
+12      -0.0590  -0.0604   10.532  0.5694          |                  |        
+13      -0.0999  -0.0946   14.618  0.3318          |                  |        
+14      -0.0761  -0.0881   16.993  0.2566          |                  |        
+15      -0.0105  -0.0109   17.038  0.3166          |                  |        
+16      -0.0135   0.0058   17.113  0.3783          |                  |        
+17      -0.0574  -0.0405   18.477  0.3593          |                  |        
+18      -0.0320  -0.0584   18.901  0.3979          |                  |        
+19      -0.0761  -0.1114   21.309  0.3200          |                  |        
+20       0.0509   0.0473   22.391  0.3197          |                  |        
+21      -0.1325  -0.1415    29.73  0.0975         -|                 -|        
+22      -0.0466  -0.0285    30.64  0.1037          |                  |        
+23       0.0301   0.0116   31.021  0.1223          |                  |        
+24      -0.0066   0.0110   31.039  0.1527          |                  |        
+25       0.0132   0.0152   31.113  0.1853          |                  |        
+26       0.0480   0.0265   32.088  0.1902          |                  |        
+27      -0.0051  -0.0521   32.099  0.2284          |                  |        
+28      -0.1023  -0.1340   36.563  0.1288          |                 -|        
+29      -0.0221  -0.0253   36.772  0.1522          |                  |        
+30       0.0262   0.0000   37.065  0.1753          |                  |        
+31      -0.0447  -0.0495   37.924  0.1828          |                  |        
+32      -0.0087   0.0029   37.957  0.2162          |                  |        
+33       0.0820   0.0525   40.863  0.1633          |                  |        
+34      -0.0192  -0.0791   41.023  0.1897          |                  |        
+35       0.0296   0.0102   41.403  0.2114          |                  |        
+36       0.0213  -0.0119     41.6  0.2400          |                  |        
+37      -0.0365  -0.0673   42.182  0.2569          |                  |        
+38       0.0226   0.0297   42.405  0.2868          |                  |        
+39       0.0519   0.0739   43.588  0.2825          |                  |        
+40       0.0276  -0.0045   43.924  0.3088          |                  |        
+
+. estat bgodfrey, lags(12)
+
+Breusch–Godfrey LM test for autocorrelation
+---------------------------------------------------------------------------
+    lags(p)  |          chi2               df                 Prob > chi2
+-------------+-------------------------------------------------------------
+      12     |         10.133              12                   0.6043
+---------------------------------------------------------------------------
+                        H0: no serial correlation
+
+. drop uhatgs10
+
+. regress gs1 l.gs1 l2.gs10
+
+      Source |       SS           df       MS      Number of obs   =       395
+-------------+----------------------------------   F(2, 392)       =  25312.08
+       Model |  4043.37974         2  2021.68987   Prob > F        =    0.0000
+    Residual |  31.3092614       392  .079870565   R-squared       =    0.9923
+-------------+----------------------------------   Adj R-squared   =    0.9923
+       Total |  4074.68901       394  10.3418503   Root MSE        =    .28261
+
+------------------------------------------------------------------------------
+         gs1 | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+         gs1 |
+         L1. |   1.015382   .0139667    72.70   0.000     .9879233    1.042841
+             |
+        gs10 |
+         L2. |  -.0346772   .0158046    -2.19   0.029    -.0657496   -.0036049
+             |
+       _cons |   .1064949   .0438547     2.43   0.016     .0202751    .1927148
+------------------------------------------------------------------------------
+
+. predict uhatgs1, resid
+(2 missing values generated)
+
+. corrgram uhatgs1
+
+                                          -1       0       1 -1       0       1
+ LAG       AC       PAC      Q     Prob>Q  [Autocorrelation]  [Partial autocor]
+-------------------------------------------------------------------------------
+1        0.4097   0.4097   66.815  0.0000          |---               |---     
+2        0.1731   0.0019   78.777  0.0000          |-                 |        
+3        0.1322   0.0767    85.77  0.0000          |-                 |        
+4        0.0337  -0.0697   86.225  0.0000          |                  |        
+5        0.0988   0.1384    90.15  0.0000          |                  |-       
+6        0.0187  -0.0781    90.29  0.0000          |                  |        
+7        0.0629   0.1036   91.889  0.0000          |                  |        
+8        0.0663   0.0014    93.67  0.0000          |                  |        
+9        0.0840   0.0647    96.54  0.0000          |                  |        
+10       0.0209  -0.0702   96.717  0.0000          |                  |        
+11       0.0117   0.0369   96.773  0.0000          |                  |        
+12      -0.0120  -0.0651   96.832  0.0000          |                  |        
+13      -0.0673  -0.0384    98.69  0.0000          |                  |        
+14      -0.0017   0.0411   98.691  0.0000          |                  |        
+15       0.0559   0.0612   99.983  0.0000          |                  |        
+16      -0.0095  -0.0997   100.02  0.0000          |                  |        
+17      -0.0444  -0.0129   100.84  0.0000          |                  |        
+18      -0.0226  -0.0181   101.05  0.0000          |                  |        
+19      -0.0534  -0.0231   102.24  0.0000          |                  |        
+20      -0.0230   0.0169   102.46  0.0000          |                  |        
+21      -0.1110  -0.1173   107.63  0.0000          |                  |        
+22      -0.1619  -0.0701   118.65  0.0000         -|                  |        
+23      -0.0558   0.0592   119.96  0.0000          |                  |        
+24      -0.0091   0.0133   119.99  0.0000          |                  |        
+25       0.0112   0.0183   120.05  0.0000          |                  |        
+26       0.0049  -0.0226   120.06  0.0000          |                  |        
+27      -0.0307  -0.0313   120.46  0.0000          |                  |        
+28      -0.1168  -0.1031   126.29  0.0000          |                  |        
+29      -0.1108  -0.0113   131.55  0.0000          |                  |        
+30      -0.0260   0.0585   131.84  0.0000          |                  |        
+31      -0.0624  -0.0545   133.52  0.0000          |                  |        
+32      -0.0161   0.0773   133.63  0.0000          |                  |        
+33       0.0222   0.0318   133.84  0.0000          |                  |        
+34      -0.0249  -0.0510   134.11  0.0000          |                  |        
+35      -0.0298  -0.0254    134.5  0.0000          |                  |        
+36      -0.0813  -0.0297   137.39  0.0000          |                  |        
+37      -0.0771   0.0137   139.99  0.0000          |                  |        
+38      -0.0225   0.0320   140.21  0.0000          |                  |        
+39       0.0171   0.0515   140.34  0.0000          |                  |        
+40      -0.0463  -0.1062   141.28  0.0000          |                  |        
+
+. estat bgodfrey, lags(12)
+
+Breusch–Godfrey LM test for autocorrelation
+---------------------------------------------------------------------------
+    lags(p)  |          chi2               df                 Prob > chi2
+-------------+-------------------------------------------------------------
+      12     |         87.383              12                   0.0000
+---------------------------------------------------------------------------
+                        H0: no serial correlation
+
+. drop uhatgs1
+
+. regress dgs10 l.dgs10 l2.dgs10, vce(robust)
+
+Linear regression                               Number of obs     =        394
+                                                F(2, 391)         =      20.01
+                                                Prob > F          =     0.0000
+                                                R-squared         =     0.1251
+                                                Root MSE          =     .25628
+
+------------------------------------------------------------------------------
+             |               Robust
+       dgs10 | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+       dgs10 |
+         L1. |   .3740277    .059639     6.27   0.000     .2567744    .4912809
+         L2. |  -.1210315   .0618699    -1.96   0.051    -.2426708    .0006078
+             |
+       _cons |  -.0225716    .012683    -1.78   0.076     -.047507    .0023637
+------------------------------------------------------------------------------
+
+. 
+. * ADL(2,2) model in changes
+. regress dgs10 l.dgs10 l2.dgs10 dgs1 l.dgs1 l2.dgs1, vce(robust)
+
+Linear regression                               Number of obs     =        394
+                                                F(5, 388)         =      72.03
+                                                Prob > F          =     0.0000
+                                                R-squared         =     0.6113
+                                                Root MSE          =     .17147
+
+------------------------------------------------------------------------------
+             |               Robust
+       dgs10 | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+       dgs10 |
+         L1. |   .2829793   .0547672     5.17   0.000     .1753018    .3906569
+         L2. |  -.1021296   .0550451    -1.86   0.064    -.2103537    .0060944
+             |
+        dgs1 |
+         --. |   .7396915   .0432646    17.10   0.000     .6546291    .8247539
+         L1. |  -.2587749   .0649063    -3.99   0.000    -.3863869    -.131163
+         L2. |   .0514586   .0559717     0.92   0.358    -.0585872    .1615043
+             |
+       _cons |  -.0066765   .0083762    -0.80   0.426     -.023145    .0097919
+------------------------------------------------------------------------------
+
+. * check that residuals are uncorrelated
+. predict uhat, resid
+(3 missing values generated)
+
+. corrgram uhat
+
+                                          -1       0       1 -1       0       1
+ LAG       AC       PAC      Q     Prob>Q  [Autocorrelation]  [Partial autocor]
+-------------------------------------------------------------------------------
+1        0.0076   0.0077   .02316  0.8790          |                  |        
+2       -0.0482  -0.0487   .94803  0.6225          |                  |        
+3        0.1058   0.1078   5.4153  0.1438          |                  |        
+4       -0.0008  -0.0056   5.4156  0.2473          |                  |        
+5       -0.0203  -0.0094   5.5803  0.3492          |                  |        
+6        0.0115   0.0018   5.6338  0.4654          |                  |        
+7       -0.0029  -0.0056   5.6372  0.5827          |                  |        
+8        0.0646   0.0715   7.3235  0.5022          |                  |        
+9       -0.0240  -0.0293    7.556  0.5794          |                  |        
+10      -0.0187  -0.0108   7.6984  0.6583          |                  |        
+11      -0.0105  -0.0289   7.7437  0.7361          |                  |        
+12       0.0152   0.0208   7.8386  0.7976          |                  |        
+13      -0.0939  -0.0935   11.451  0.5731          |                  |        
+14      -0.0627  -0.0574   13.066  0.5214          |                  |        
+15      -0.0058  -0.0174   13.079  0.5962          |                  |        
+16      -0.0385  -0.0325   13.692  0.6216          |                  |        
+17      -0.1142  -0.1012   19.089  0.3235          |                  |        
+18       0.0104   0.0075   19.133  0.3837          |                  |        
+19      -0.0780  -0.0871   21.667  0.3011          |                  |        
+20      -0.0244  -0.0016   21.915  0.3452          |                  |        
+21       0.0406   0.0439   22.604  0.3654          |                  |        
+22      -0.0122   0.0031   22.667  0.4207          |                  |        
+23       0.0244   0.0349   22.916  0.4657          |                  |        
+24       0.0053  -0.0080   22.928  0.5240          |                  |        
+25      -0.0965  -0.0860   26.867  0.3626          |                  |        
+26       0.0043  -0.0169   26.874  0.4159          |                  |        
+27       0.0143   0.0064   26.961  0.4659          |                  |        
+28      -0.0320  -0.0242   27.398  0.4967          |                  |        
+29       0.0123   0.0102   27.462  0.5468          |                  |        
+30       0.0588   0.0282   28.942  0.5206          |                  |        
+31      -0.0383  -0.0518   29.573  0.5394          |                  |        
+32      -0.0201  -0.0415   29.747  0.5810          |                  |        
+33       0.1183   0.1090   35.799  0.3384          |                  |        
+34      -0.0659  -0.0858   37.683  0.3044          |                  |        
+35      -0.0045   0.0247   37.692  0.3471          |                  |        
+36       0.0600   0.0191   39.262  0.3258          |                  |        
+37      -0.0797  -0.0733   42.037  0.2618          |                  |        
+38      -0.0118  -0.0174   42.098  0.2980          |                  |        
+39      -0.0081  -0.0364   42.127  0.3372          |                  |        
+40      -0.0230   0.0035    42.36  0.3695          |                  |        
+
+. drop uhat
+
+. 
+. * Figure 17.5 - brief
+. twoway (tsline dgs10) (tsline dgs1)
+
+. twoway (scatter dgs10 dgs1) (lfit dgs10 dgs1)
+
+. 
+. *** Spurious Regression detection
+. * One way is to regress in changes - already done
+. * Second way is lags in levels included
+. regress gs10 gs1 l.gs10 l.gs1
+
+      Source |       SS           df       MS      Number of obs   =       396
+-------------+----------------------------------   F(3, 392)       =  33197.17
+       Model |  3196.89984         3  1065.63328   Prob > F        =    0.0000
+    Residual |  12.5832488       392  .032100124   R-squared       =    0.9961
+-------------+----------------------------------   Adj R-squared   =    0.9960
+       Total |  3209.48308       395  8.12527363   Root MSE        =    .17917
+
+------------------------------------------------------------------------------
+        gs10 | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+         gs1 |   .7185691   .0316619    22.70   0.000     .6563207    .7808174
+             |
+        gs10 |
+         L1. |   .9781653   .0103936    94.11   0.000     .9577312    .9985995
+             |
+         gs1 |
+         L1. |  -.7011327   .0325648   -21.53   0.000    -.7651562   -.6371091
+             |
+       _cons |   .0468373   .0283678     1.65   0.100    -.0089348    .1026094
+------------------------------------------------------------------------------
+
+. newey gs10 gs1 l.gs10 l.gs1, lag(24)
+
+Regression with Newey–West standard errors      Number of obs     =        396
+Maximum lag = 24                                F(  3,       392) =   22416.65
+                                                Prob > F          =     0.0000
+
+------------------------------------------------------------------------------
+             |             Newey–West
+        gs10 | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+         gs1 |   .7185691   .0426429    16.85   0.000     .6347317    .8024064
+             |
+        gs10 |
+         L1. |   .9781653   .0088624   110.37   0.000     .9607415    .9955892
+             |
+         gs1 |
+         L1. |  -.7011327   .0427263   -16.41   0.000     -.785134   -.6171313
+             |
+       _cons |   .0468373    .031162     1.50   0.134    -.0144282    .1081028
+------------------------------------------------------------------------------
+
+. estimates store SPUHAC
+
+. predict uhat, resid
+(1 missing value generated)
+
+. corrgram uhat
+
+                                          -1       0       1 -1       0       1
+ LAG       AC       PAC      Q     Prob>Q  [Autocorrelation]  [Partial autocor]
+-------------------------------------------------------------------------------
+1        0.2623   0.2645   27.452  0.0000          |--                |--      
+2       -0.0295  -0.1072   27.799  0.0000          |                  |        
+3        0.0685   0.1156   29.681  0.0000          |                  |        
+4        0.0307  -0.0291   30.061  0.0000          |                  |        
+5       -0.0208  -0.0121   30.235  0.0000          |                  |        
+6       -0.0054  -0.0024   30.247  0.0000          |                  |        
+7        0.0474   0.0447   31.157  0.0001          |                  |        
+8        0.0852   0.0739   34.103  0.0000          |                  |        
+9        0.0026  -0.0377   34.106  0.0001          |                  |        
+10      -0.0150   0.0041   34.198  0.0002          |                  |        
+11      -0.0007  -0.0196   34.198  0.0003          |                  |        
+12      -0.0124  -0.0073   34.262  0.0006          |                  |        
+13      -0.0851  -0.0858   37.243  0.0004          |                  |        
+14      -0.0731  -0.0263   39.447  0.0003          |                  |        
+15      -0.0221  -0.0131   39.649  0.0005          |                  |        
+16      -0.0455  -0.0394   40.507  0.0007          |                  |        
+17      -0.1006  -0.0737   44.713  0.0003          |                  |        
+18      -0.0353   0.0048   45.231  0.0004          |                  |        
+19      -0.0650  -0.0800   46.996  0.0004          |                  |        
+20      -0.0243   0.0385   47.243  0.0005          |                  |        
+21       0.0257   0.0296   47.521  0.0008          |                  |        
+22       0.0177   0.0213   47.653  0.0012          |                  |        
+23       0.0318   0.0364   48.079  0.0016          |                  |        
+24      -0.0191  -0.0411   48.234  0.0024          |                  |        
+25      -0.0927  -0.0768   51.885  0.0012          |                  |        
+26      -0.0243   0.0080   52.137  0.0017          |                  |        
+27      -0.0156  -0.0232   52.241  0.0025          |                  |        
+28      -0.0270  -0.0149   52.553  0.0033          |                  |        
+29       0.0312   0.0413   52.972  0.0042          |                  |        
+30       0.0698   0.0273   55.068  0.0035          |                  |        
+31      -0.0297  -0.0672   55.448  0.0045          |                  |        
+32      -0.0162   0.0058   55.562  0.0060          |                  |        
+33       0.0679   0.0670   57.563  0.0051          |                  |        
+34      -0.0545  -0.1139   58.856  0.0051          |                  |        
+35      -0.0228   0.0586   59.083  0.0067          |                  |        
+36       0.0179  -0.0246   59.223  0.0087          |                  |        
+37      -0.0802  -0.0871   62.047  0.0061          |                  |        
+38      -0.0551  -0.0162   63.384  0.0060          |                  |        
+39      -0.0312  -0.0363   63.814  0.0073          |                  |        
+40      -0.0331  -0.0108   64.297  0.0087          |                  |        
+
+. drop uhat
+
+. 
+. * Impulse response function for ADL(2,2) model in changes
+. * regress dgs10 l.dgs10 l2.dgs10 dgs1 l.dgs1 l2.dgs1, vce(robust)
+. * First do two period ahead impulse response
+. * This just changes dependent variable to two periods forward
+. * The impulse response is the coefficient of dgs1
+. * Need to use newey with two lags as autocorrelation of two periods is induce
+> d
+. newey f2.dgs10 l.dgs10 l2.dgs10 dgs1 l.dgs1 l2.dgs1, lag(2)
+
+Regression with Newey–West standard errors      Number of obs     =        392
+Maximum lag = 2                                 F(  5,       386) =       0.38
+                                                Prob > F          =     0.8617
+
+------------------------------------------------------------------------------
+             |             Newey–West
+    F2.dgs10 | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+       dgs10 |
+         L1. |   .0197979    .094414     0.21   0.834    -.1658322    .2054279
+         L2. |   .0296305   .0764239     0.39   0.698    -.1206287    .1798898
+             |
+        dgs1 |
+         --. |   .0878809   .0915745     0.96   0.338    -.0921663    .2679282
+         L1. |  -.0441704   .1092402    -0.40   0.686    -.2589508    .1706099
+         L2. |  -.0440016   .0866248    -0.51   0.612    -.2143171    .1263139
+             |
+       _cons |  -.0285701    .016292    -1.75   0.080    -.0606023    .0034622
+------------------------------------------------------------------------------
+
+. display "Two-period impulse and standard error: " _b[dgs1] "  " _se[dgs1]
+Two-period impulse and standard error: .08788093  .09157449
+
+. 
+. * The following code does a loop that gets impulse up to four periods ahead
+. forvalues h = 0/4 {
+  2.         newey f(`h').dgs10 l(1/2).dgs10 l(0/2).dgs1, lag(4)
+  3.         estimates store impulse`h'
+  4.         }
+
+Regression with Newey–West standard errors      Number of obs     =        394
+Maximum lag = 4                                 F(  5,       388) =      78.70
+                                                Prob > F          =     0.0000
+
+------------------------------------------------------------------------------
+             |             Newey–West
+       dgs10 | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+       dgs10 |
+         L1. |   .2829793   .0457058     6.19   0.000     .1931173    .3728414
+         L2. |  -.1021296   .0523741    -1.95   0.052    -.2051021    .0008428
+             |
+        dgs1 |
+         --. |   .7396915   .0490845    15.07   0.000     .6431866    .8361964
+         L1. |  -.2587749   .0556851    -4.65   0.000    -.3682572   -.1492927
+         L2. |   .0514586   .0510494     1.01   0.314    -.0489096    .1518267
+             |
+       _cons |  -.0066765   .0087137    -0.77   0.444    -.0238086    .0104555
+------------------------------------------------------------------------------
+
+Regression with Newey–West standard errors      Number of obs     =        393
+Maximum lag = 4                                 F(  5,       387) =       9.14
+                                                Prob > F          =     0.0000
+
+------------------------------------------------------------------------------
+             |             Newey–West
+     F.dgs10 | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+       dgs10 |
+         L1. |  -.1960949   .0956372    -2.05   0.041    -.3841285   -.0080613
+         L2. |   .1348283   .0797812     1.69   0.092    -.0220307    .2916872
+             |
+        dgs1 |
+         --. |   .2931982   .0469379     6.25   0.000      .200913    .3854834
+         L1. |   .1073394   .1321961     0.81   0.417     -.152573    .3672518
+         L2. |  -.1510442    .077439    -1.95   0.052     -.303298    .0012096
+             |
+       _cons |  -.0235569   .0146699    -1.61   0.109    -.0523996    .0052858
+------------------------------------------------------------------------------
+
+Regression with Newey–West standard errors      Number of obs     =        392
+Maximum lag = 4                                 F(  5,       386) =       0.46
+                                                Prob > F          =     0.8089
+
+------------------------------------------------------------------------------
+             |             Newey–West
+    F2.dgs10 | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+       dgs10 |
+         L1. |   .0197979   .0953397     0.21   0.836    -.1676523     .207248
+         L2. |   .0296305   .0795318     0.37   0.710    -.1267393    .1860003
+             |
+        dgs1 |
+         --. |   .0878809   .0859369     1.02   0.307    -.0810821     .256844
+         L1. |  -.0441704   .1166974    -0.38   0.705    -.2736126    .1852717
+         L2. |  -.0440016   .0853649    -0.52   0.607      -.21184    .1238368
+             |
+       _cons |  -.0285701   .0166822    -1.71   0.088    -.0613695    .0042294
+------------------------------------------------------------------------------
+
+Regression with Newey–West standard errors      Number of obs     =        391
+Maximum lag = 4                                 F(  5,       385) =       1.32
+                                                Prob > F          =     0.2552
+
+------------------------------------------------------------------------------
+             |             Newey–West
+    F3.dgs10 | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+       dgs10 |
+         L1. |    .086975   .0833424     1.04   0.297    -.0768882    .2508382
+         L2. |  -.1399263   .0682309    -2.05   0.041    -.2740781   -.0057746
+             |
+        dgs1 |
+         --. |   .0210339   .0770509     0.27   0.785    -.1304593    .1725271
+         L1. |  -.1092184    .069938    -1.56   0.119    -.2467267    .0282899
+         L2. |   .1318887   .0824288     1.60   0.110    -.0301781    .2939556
+             |
+       _cons |  -.0320185   .0176806    -1.81   0.071     -.066781    .0027441
+------------------------------------------------------------------------------
+
+Regression with Newey–West standard errors      Number of obs     =        390
+Maximum lag = 4                                 F(  5,       384) =       1.38
+                                                Prob > F          =     0.2300
+
+------------------------------------------------------------------------------
+             |             Newey–West
+    F4.dgs10 | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+       dgs10 |
+         L1. |  -.1356026   .0734381    -1.85   0.066    -.2799938    .0087885
+         L2. |  -.0416946    .077743    -0.54   0.592    -.1945498    .1111606
+             |
+        dgs1 |
+         --. |  -.0526933   .0532357    -0.99   0.323    -.1573633    .0519767
+         L1. |   .1680457   .0893756     1.88   0.061    -.0076811    .3437725
+         L2. |    -.04181   .0828975    -0.50   0.614    -.2047999    .1211799
+             |
+       _cons |  -.0335066   .0180438    -1.86   0.064    -.0689836    .0019704
+------------------------------------------------------------------------------
+
+. estimates table impulse0 impulse1 impulse2 impulse3 impulse4, keep(dgs1) b se
+>  t
+
+-------------------------------------------------------------------------------
+    Variable |  impulse0     impulse1     impulse2     impulse3     impulse4   
+-------------+-----------------------------------------------------------------
+        dgs1 |  .73969152     .2931982    .08788093     .0210339   -.05269333  
+             |  .04908451    .04693789    .08593691    .07705089    .05323573  
+             |      15.07         6.25         1.02         0.27        -0.99  
+-------------------------------------------------------------------------------
+                                                                 Legend: b/se/t
+
+. 
+. ********** CLOSE OUTPUT
+. 
+. display ""
+
+
+. display "Chapter 17 analysis complete."
+Chapter 17 analysis complete.
+
+. display "Figures saved to: images/"
+Figures saved to: images/
+
+. display "Tables saved to: tables/"
+Tables saved to: tables/
+
+. 
+end of do-file

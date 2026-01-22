@@ -1,0 +1,716 @@
+
+. * ch02_Univariate_Data_Summary.do - January 2026 For Stata
+. * Updated for online execution portability
+. 
+. ********** OVERVIEW OF ch02_Univariate_Data_Summary.do **********
+. 
+. * STATA Program
+. * copyright C 2021 by A. Colin Cameron
+. * Used for "Analyis of Economics Data: An Introduction to Econometrics"
+. * by A. Colin Cameron (2021)
+. 
+. * To run you need file
+. *   AED_EARNINGS.DTA
+. *   AED_REALGDPPC.DTA
+. *   AED_HEALTHCATEGORIES.DTA
+. *   AED_FISHING.DTA
+. *   AED_MONTHLYHOMESALES.DTA
+. * in your directory
+. 
+. ********** SETUP **********
+. 
+. * Set random seed for reproducibility
+. set seed 42
+
+. 
+. * Clear all macros
+. macro drop _all
+
+. 
+. * GitHub data URL
+. global github_data_url "https://raw.githubusercontent.com/quarcs-lab/data-ope
+> n/master/AED/"
+
+. 
+. * Create output directories (optional - for saving figures and tables locally
+> )
+. cap mkdir "images"
+
+. cap mkdir "tables"
+
+. 
+. set more off
+
+. clear all
+
+. 
+. ************
+. 
+. * This STATA does analysis for Chapter 2
+. *   2.1 SUMMARY STATISTICS FOR NUMERICAL DATA 
+. *   2.2 CHARTS FOR NUMERICAL DATA
+. *   2.3 CHARTS FOR NUMERICAL DATA BY CATEGORY
+. *   2.4 SUMMARY AND CHARTS FOR CATEGORICAL DATA
+. *   2.5 DATA TRANSFORMATION
+. *   2.6 DATA TRANSFORMATION FOR TIME SERIES DATA
+.  
+. ********** DATA DESCRIPTION
+. 
+. * (1) Annual Earnings for 191 women aged 30 years in 2010 Full-time workers
+. *     191 observations on 4 variables
+. * (2) U.S. quarterly GDP and related data from 1959Q1 to 2020Q1
+. *     245 Observations on 11 variables
+. * (3) U.S. Health Expenditures in 2018
+. *     11 Observations on 2 variables
+. * (4) Fishing site data 
+. *     1182 observations on 17 variables
+. * (5) Monthly existing home sales in the U.S. 1999 - 2015 
+. *     193 observations on several variables
+. 
+. ****   2.1 SUMMARY STATISTICS FOR NUMERICAL DATA
+. 
+. * Download and load data from GitHub
+. clear
+
+. copy "${github_data_url}AED_EARNINGS.DTA" "temp_data.dta", replace
+(file temp_data.dta not found)
+
+. use "temp_data.dta", clear
+(Data for A. Colin Cameron (2020): Analysis of Economics Data)
+
+. erase "temp_data.dta"
+
+. describe
+
+Contains data from temp_data.dta
+ Observations:           171                  Data for A. Colin Cameron
+                                                (2020): Analysis of Economics
+                                                Data
+    Variables:             4                  14 Jul 2020 18:06
+-------------------------------------------------------------------------------
+Variable      Storage   Display    Value
+    name         type    format    label      Variable label
+-------------------------------------------------------------------------------
+earnings        long    %12.0g                Annual earnings (in dollars)
+education       byte    %8.0g                 Years of completed schooling
+age             byte    %8.0g                 Age in Years
+gender          float   %9.0g                 =0 if female and =1 if male
+-------------------------------------------------------------------------------
+Sorted by: 
+
+. summarize
+
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+    earnings |        171    41412.69    25527.05       1050     172000
+   education |        171    14.43275    2.735364          3         20
+         age |        171          30           0         30         30
+      gender |        171           0           0          0          0
+
+. 
+. * Table 2.1 
+. summarize earnings, detail
+
+                Annual earnings (in dollars)
+-------------------------------------------------------------
+      Percentiles      Smallest
+ 1%         9000           1050
+ 5%        12000           9000
+10%        17000          10000       Obs                 171
+25%        25000          10800       Sum of wgt.         171
+
+50%        36000                      Mean           41412.69
+                        Largest       Std. dev.      25527.05
+75%        50000         110000
+90%        80000         110000       Variance       6.52e+08
+95%        85000         140000       Skewness       1.712555
+99%       140000         172000       Kurtosis       7.316388
+
+. 
+. * Figure 2.1 - skip as lengthy code
+. 
+. * Figure 2.2
+. label variable earnings "Annual earnings (in dollars)"
+
+. graph box earnings
+
+. * increase scale makes easier to read
+. graph box earnings, scale(1.3)
+
+. graph export "images/ch02_fig2.png", replace
+file images/ch02_fig2.png written in PNG format
+
+. 
+. * Figure 2.3 - skip as lengthy code
+. 
+. **** 2.2  CHARTS FOR NUMERICAL DATA 
+. 
+. * Table 2.2
+. tabulate earnings
+
+     Annual |
+   earnings |
+        (in |
+   dollars) |      Freq.     Percent        Cum.
+------------+-----------------------------------
+       1050 |          1        0.58        0.58
+       9000 |          1        0.58        1.17
+      10000 |          1        0.58        1.75
+      10800 |          1        0.58        2.34
+      12000 |          5        2.92        5.26
+      13000 |          1        0.58        5.85
+      14000 |          1        0.58        6.43
+      14900 |          1        0.58        7.02
+      15000 |          2        1.17        8.19
+      15600 |          1        0.58        8.77
+      16000 |          2        1.17        9.94
+      17000 |          2        1.17       11.11
+      19000 |          2        1.17       12.28
+      20000 |          6        3.51       15.79
+      21100 |          1        0.58       16.37
+      21500 |          1        0.58       16.96
+      22000 |          2        1.17       18.13
+      23000 |          1        0.58       18.71
+      24000 |          8        4.68       23.39
+      24500 |          2        1.17       24.56
+      25000 |         10        5.85       30.41
+      26200 |          1        0.58       30.99
+      27000 |          5        2.92       33.92
+      28000 |          5        2.92       36.84
+      28800 |          1        0.58       37.43
+      29300 |          1        0.58       38.01
+      30000 |          9        5.26       43.27
+      31000 |          2        1.17       44.44
+      32000 |          5        2.92       47.37
+      33000 |          1        0.58       47.95
+      33720 |          1        0.58       48.54
+      34000 |          1        0.58       49.12
+      35000 |          1        0.58       49.71
+      36000 |          4        2.34       52.05
+      37000 |          1        0.58       52.63
+      37500 |          1        0.58       53.22
+      38000 |          4        2.34       55.56
+      39000 |          3        1.75       57.31
+      40000 |          8        4.68       61.99
+      40800 |          1        0.58       62.57
+      41000 |          3        1.75       64.33
+      42000 |          5        2.92       67.25
+      43000 |          1        0.58       67.84
+      44800 |          1        0.58       68.42
+      45000 |          6        3.51       71.93
+      45300 |          1        0.58       72.51
+      45500 |          1        0.58       73.10
+      47000 |          1        0.58       73.68
+      47700 |          1        0.58       74.27
+      48000 |          1        0.58       74.85
+      50000 |          3        1.75       76.61
+      53000 |          1        0.58       77.19
+      54000 |          2        1.17       78.36
+      55000 |          1        0.58       78.95
+      56000 |          1        0.58       79.53
+      58000 |          1        0.58       80.12
+      60000 |          2        1.17       81.29
+      62000 |          1        0.58       81.87
+      65000 |          3        1.75       83.63
+      67000 |          1        0.58       84.21
+      68000 |          2        1.17       85.38
+      71000 |          1        0.58       85.96
+      72000 |          1        0.58       86.55
+      75000 |          4        2.34       88.89
+      78000 |          1        0.58       89.47
+      80000 |          3        1.75       91.23
+      83000 |          2        1.17       92.40
+      84000 |          2        1.17       93.57
+      85000 |          4        2.34       95.91
+      90000 |          1        0.58       96.49
+      97000 |          1        0.58       97.08
+     105000 |          1        0.58       97.66
+     110000 |          2        1.17       98.83
+     140000 |          1        0.58       99.42
+     172000 |          1        0.58      100.00
+------------+-----------------------------------
+      Total |        171      100.00
+
+. generate earningsrange = int(earnings/15000)
+
+. tabulate earningsrange
+
+earningsran |
+         ge |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          0 |         12        7.02        7.02
+          1 |         53       30.99       38.01
+          2 |         52       30.41       68.42
+          3 |         20       11.70       80.12
+          4 |         11        6.43       86.55
+          5 |         16        9.36       95.91
+          6 |          2        1.17       97.08
+          7 |          3        1.75       98.83
+          9 |          1        0.58       99.42
+         11 |          1        0.58      100.00
+------------+-----------------------------------
+      Total |        171      100.00
+
+. 
+. * Figure 2.4
+. * default plotsd the density so area is one
+. histogram earnings
+(bin=13, start=1050, width=13150)
+
+. * instead plot the frequency
+. histogram earnings, frequency
+(bin=13, start=1050, width=13150)
+
+. * set bin width
+. histogram earnings, start(0) width(15000) frequency
+(bin=12, start=0, width=15000)
+
+. * set narrower bin width
+. histogram earnings, start(0) width(7500) frequency
+(bin=23, start=0, width=7500)
+
+. 
+. * Figure 2.5
+. * default window width
+. kdensity earnings
+
+. * set bin width
+. kdensity earnings, bwidth(5000) 
+
+. 
+. * Download and load data from GitHub for Figure 2.6
+. clear
+
+. copy "${github_data_url}AED_REALGDPPC.DTA" "temp_data.dta", replace
+(file temp_data.dta not found)
+
+. use "temp_data.dta", clear
+(Data for A. Colin Cameron (2020): Analysis of Economics Data)
+
+. erase "temp_data.dta"
+
+. describe
+
+Contains data from temp_data.dta
+ Observations:           245                  Data for A. Colin Cameron
+                                                (2020): Analysis of Economics
+                                                Data
+    Variables:            12                  14 Jul 2020 18:06
+-------------------------------------------------------------------------------
+Variable      Storage   Display    Value
+    name         type    format    label      Variable label
+-------------------------------------------------------------------------------
+gdpc1           double  %10.0g                Real GDP in Billions of 2012 $
+gdp             double  %10.0g                Nominal GDP in Billions of
+                                                current $
+gdpdef          double  %10.0g                GDP deflator 2012 = 100
+date            str10   %10s                  fed string date
+daten           float   %td                   Days from start 1960: 1960 Jan 1
+                                                = 0
+quarter         float   %9.0g                 Quarters from start 1960: 1960q1
+                                                = 0
+popthm          double  %10.0g                Population
+year            float   %9.0g                 Year
+realgdp         float   %9.0g                 Real GDP in billions of 2012 $
+gdppc           float   %9.0g                 GDP per capita in current $
+realgdppc       float   %9.0g                 Real GDP per capita in 2012 $
+growth          float   %9.0g                 Annual growth in real GDP per
+                                                capita
+-------------------------------------------------------------------------------
+Sorted by: quarter
+
+. summarize
+
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+       gdpc1 |        245    9925.245    4814.025   3121.936   19221.97
+         gdp |        245    7401.456    6331.002     510.33   21729.12
+      gdpdef |        245    59.71762    31.19563     16.347    113.502
+        date |          0
+       daten |        245    10774.47    6471.275       -365      21915
+-------------+---------------------------------------------------------
+     quarter |        245         118     70.8696         -4        240
+      popthm |        245    253116.9    45611.79     176044     329527
+        year |        245    1989.127    17.71786       1959       2020
+     realgdp |        245    9925.241    4814.026   3121.857      19222
+       gdppc |        245    25841.47    19184.69   2898.856   66008.59
+-------------+---------------------------------------------------------
+   realgdppc |        245     37050.5    12089.68   17733.26   58392.45
+      growth |        241    1.990456    2.178097  -4.772172   7.630545
+
+. 
+. * default gives number of quarters on horizontal axis
+. line realgdppc quarter
+
+. 
+. * Figure 2.6 - requires special Stata format command for horizontal axis
+. * This will just print the year
+. format quarter %tqCCYY
+
+. line realgdppc quarter, xtitle("Year")
+
+. 
+. * Equivalent using tsline which assumes data is Stata xtset
+. tsline realgdppc, xtitle("Year") 
+
+. 
+. **** 2.3  CHARTS FOR NUMERICAL DATA BY CATEGORY
+. 
+. * Download and load data from GitHub for Figure 2.7
+. clear
+
+. copy "${github_data_url}AED_HEALTHCATEGORIES.DTA" "temp_data.dta", replace
+(file temp_data.dta not found)
+
+. use "temp_data.dta", clear
+(Data for A. Colin Cameron (2020): Analysis of Economics Data)
+
+. erase "temp_data.dta"
+
+. summarize
+
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+    category |          0
+expenditures |         13         281    332.9712         48       1192
+   cat_short |          0
+   exp_short |          4       539.5    520.5801        104       1192
+
+. 
+. * Table 2.3
+. list
+
+     +------------------------------------------------------------+
+     |                 category   expend~s   cat_short   exp_sh~t |
+     |------------------------------------------------------------|
+  1. |                 Hospital       1192    Hospital       1192 |
+  2. |   Physician and clinical        726   Physician        726 |
+  3. |       Other Professional        104       Other        104 |
+  4. |                   Dental        136       Drugs        136 |
+  5. | Other Health & Personal         192                      . |
+     |------------------------------------------------------------|
+  6. |         Home Health Care        102                      . |
+  7. |             Nursing Care        169                      . |
+  8. |         Drugs & Supplies        456                      . |
+  9. |     Govt. Administration         48                      . |
+ 10. |       Net Cost Insurance        259                      . |
+     |------------------------------------------------------------|
+ 11. |      Govt. Public Health         94                      . |
+ 12. |   Noncommercial Research         53                      . |
+ 13. |   Structures & Equipment        122                      . |
+     +------------------------------------------------------------+
+
+. 
+. * Figure 2.7
+. * default is hard to read
+. graph bar expenditures, over(category)
+
+. graph bar expenditures, over(category, label(angle(45)) sort(expenditures) de
+> scending) ///
+>    ytitle("Expenditures (in $ billions)") 
+
+. 
+. * Figure 2.8 - more complicated as uses Stata spatial data commands
+. 
+. **** 2.4 SUMMARY AND CHARTS FOR CATEGORICAL DATA
+. 
+. * Download and load data from GitHub for Figure 2.9
+. clear
+
+. copy "${github_data_url}AED_FISHING.DTA" "temp_data.dta", replace
+(file temp_data.dta not found)
+
+. use "temp_data.dta", clear
+(Data for A. Colin Cameron (2020): Analysis of Economics Data)
+
+. erase "temp_data.dta"
+
+. describe
+
+Contains data from temp_data.dta
+ Observations:         1,182                  Data for A. Colin Cameron
+                                                (2020): Analysis of Economics
+                                                Data
+    Variables:            17                  14 Jul 2020 18:06
+-------------------------------------------------------------------------------
+Variable      Storage   Display    Value
+    name         type    format    label      Variable label
+-------------------------------------------------------------------------------
+mode            float   %9.0g      modetype   Fishing mode
+price           float   %9.0g                 price for chosen alternative
+crate           float   %9.0g                 catch rate for chosen alternative
+dbeach          float   %9.0g                 1 if beach mode chosen
+dpier           float   %9.0g                 1 if pier mode chosen
+dprivate        float   %9.0g                 1 if private boat mode chosen
+dcharter        float   %9.0g                 1 if charter boat mode chosen
+pbeach          float   %9.0g                 price for beach mode
+ppier           float   %9.0g                 price for pier mode
+pprivate        float   %9.0g                 price for private boat mode
+pcharter        float   %9.0g                 price for charter boat mode
+qbeach          float   %9.0g                 catch rate for beach mode
+qpier           float   %9.0g                 catch rate for pier mode
+qprivate        float   %9.0g                 catch rate for private boat mode
+qcharter        float   %9.0g                 catch rate for charter boat mode
+income          float   %9.0g                 monthly income in thousands $
+one             float   %9.0g                 Constant equal to 1
+-------------------------------------------------------------------------------
+Sorted by: 
+
+. summarize
+
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+        mode |      1,182    3.005076    .9936162          1          4
+       price |      1,182    52.08197    53.82997       1.29     666.11
+       crate |      1,182    .3893684    .5605964      .0002     2.3101
+      dbeach |      1,182    .1133672    .3171753          0          1
+       dpier |      1,182    .1505922    .3578023          0          1
+-------------+---------------------------------------------------------
+    dprivate |      1,182    .3536379    .4783008          0          1
+    dcharter |      1,182    .3824027    .4861799          0          1
+      pbeach |      1,182     103.422     103.641       1.29    843.186
+       ppier |      1,182     103.422     103.641       1.29    843.186
+    pprivate |      1,182    55.25657    62.71344       2.29     666.11
+-------------+---------------------------------------------------------
+    pcharter |      1,182    84.37924    63.54465      27.29     691.11
+      qbeach |      1,182    .2410113    .1907524      .0678      .5333
+       qpier |      1,182    .1622237    .1603898      .0014      .4522
+    qprivate |      1,182    .1712146    .2097885      .0002      .7369
+    qcharter |      1,182    .6293679    .7061142      .0021     2.3101
+-------------+---------------------------------------------------------
+      income |      1,182    4.099337    2.461964   .4166667       12.5
+         one |      1,182           1           0          1          1
+
+. 
+. * Table 2.4
+. tabulate mode
+
+    Fishing |
+       mode |      Freq.     Percent        Cum.
+------------+-----------------------------------
+      beach |        134       11.34       11.34
+       pier |        178       15.06       26.40
+    private |        418       35.36       61.76
+    charter |        452       38.24      100.00
+------------+-----------------------------------
+      Total |      1,182      100.00
+
+. 
+. * Figure 2.9
+. * default
+. graph pie one, over(mode)
+
+. graph pie one, over(mode) plabel(_all name) plabel(_all percent, gap(8))
+
+. 
+. **** 2.5 DATA TRANSFORMATION
+. 
+. * Download and load data from GitHub for Figure 2.10
+. clear
+
+. copy "${github_data_url}AED_EARNINGS.DTA" "temp_data.dta", replace
+(file temp_data.dta not found)
+
+. use "temp_data.dta", clear
+(Data for A. Colin Cameron (2020): Analysis of Economics Data)
+
+. erase "temp_data.dta"
+
+. generate lnearns = ln(earnings)
+
+. 
+. ** Figure 2.10
+. graph twoway (histogram earnings)
+
+. graph twoway (histogram lnearns)
+
+. 
+. histogram earnings
+(bin=13, start=1050, width=13150)
+
+. histogram earnings
+(bin=13, start=1050, width=13150)
+
+. 
+. * Following combines into one figure with two panels
+. graph twoway (histogram earnings), saving(graph1, replace)
+file graph1.gph saved
+
+. graph twoway (histogram lnearns), saving(graph2, replace)
+file graph2.gph saved
+
+. graph combine graph1.gph graph2.gph, iscale(1.2) ysize(2.5) xsize(6) rows(1)
+
+. 
+. **** 2.6 DATA TRANSFORMATIONS FOR TIME SERIES DATA 
+. 
+. * Download and load data from GitHub for Figure 2.11
+. clear
+
+. copy "${github_data_url}AED_MONTHLYHOMESALES.DTA" "temp_data.dta", replace
+(file temp_data.dta not found)
+
+. use "temp_data.dta", clear
+(Data for A. Colin Cameron (2020): Analysis of Economics Data)
+
+. erase "temp_data.dta"
+
+. describe
+
+Contains data from temp_data.dta
+ Observations:           193                  Data for A. Colin Cameron
+                                                (2020): Analysis of Economics
+                                                Data
+    Variables:             9                  14 Jul 2020 18:06
+-------------------------------------------------------------------------------
+Variable      Storage   Display    Value
+    name         type    format    label      Variable label
+-------------------------------------------------------------------------------
+date            str10   %10s                  fed string date
+daten           float   %td                   numeric (daily) date
+year            float   %9.0g                 
+month           float   %tmCCYY               
+exsales         double  %10.0g                Existing Home Sales, Not Seas.
+                                                Adj. Monthly Rate
+exsales_sa      float   %9.0g                 Existing Home Sales, Seas. Adj.
+                                                Monthly Rate
+exsales_ma11    float   %9.0g                 Existing Home Sales, 11 month
+                                                centered moving average
+construct       double  %10.0g                Total Construction Spending, Not
+                                                Seas. Adj. Monthly Rate $
+                                                Millions
+construct_sa    float   %9.0g                 Total Construction Spending,
+                                                Seas. Adj. Monthly Rate $
+                                                Millions
+-------------------------------------------------------------------------------
+Sorted by: month
+
+. summarize
+
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+        date |          0
+       daten |        193    17166.43    1700.215      14245      20089
+        year |        193    2006.544    4.650199       1999       2015
+       month |        193         564    55.85845        468        660
+     exsales |        193    438932.6    111148.6     218000     754000
+-------------+---------------------------------------------------------
+  exsales_sa |        193    439542.3    77753.32     287500     605000
+exsales_ma11 |        183    440587.2    77367.04   324818.2   608545.4
+   construct |        193    77250.03    14034.92      48746     110434
+construct_sa |        193    77302.06    11015.32   59068.17   101105.8
+
+. keep if year >= 2005
+(72 observations deleted)
+
+. 
+. ** Figure 2.11 
+. graph twoway (tsline exsales, lwidth(medthick)) (tsline exsales_ma11)
+
+. graph twoway (tsline exsales, lwidth(medthick))
+
+. 
+. * Download and load data from GitHub for Figure 2.12
+. clear
+
+. copy "${github_data_url}AED_REALGDPPC.DTA" "temp_data.dta", replace
+(file temp_data.dta not found)
+
+. use "temp_data.dta", clear
+(Data for A. Colin Cameron (2020): Analysis of Economics Data)
+
+. erase "temp_data.dta"
+
+. describe
+
+Contains data from temp_data.dta
+ Observations:           245                  Data for A. Colin Cameron
+                                                (2020): Analysis of Economics
+                                                Data
+    Variables:            12                  14 Jul 2020 18:06
+-------------------------------------------------------------------------------
+Variable      Storage   Display    Value
+    name         type    format    label      Variable label
+-------------------------------------------------------------------------------
+gdpc1           double  %10.0g                Real GDP in Billions of 2012 $
+gdp             double  %10.0g                Nominal GDP in Billions of
+                                                current $
+gdpdef          double  %10.0g                GDP deflator 2012 = 100
+date            str10   %10s                  fed string date
+daten           float   %td                   Days from start 1960: 1960 Jan 1
+                                                = 0
+quarter         float   %9.0g                 Quarters from start 1960: 1960q1
+                                                = 0
+popthm          double  %10.0g                Population
+year            float   %9.0g                 Year
+realgdp         float   %9.0g                 Real GDP in billions of 2012 $
+gdppc           float   %9.0g                 GDP per capita in current $
+realgdppc       float   %9.0g                 Real GDP per capita in 2012 $
+growth          float   %9.0g                 Annual growth in real GDP per
+                                                capita
+-------------------------------------------------------------------------------
+Sorted by: quarter
+
+. summarize
+
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+       gdpc1 |        245    9925.245    4814.025   3121.936   19221.97
+         gdp |        245    7401.456    6331.002     510.33   21729.12
+      gdpdef |        245    59.71762    31.19563     16.347    113.502
+        date |          0
+       daten |        245    10774.47    6471.275       -365      21915
+-------------+---------------------------------------------------------
+     quarter |        245         118     70.8696         -4        240
+      popthm |        245    253116.9    45611.79     176044     329527
+        year |        245    1989.127    17.71786       1959       2020
+     realgdp |        245    9925.241    4814.026   3121.857      19222
+       gdppc |        245    25841.47    19184.69   2898.856   66008.59
+-------------+---------------------------------------------------------
+   realgdppc |        245     37050.5    12089.68   17733.26   58392.45
+      growth |        241    1.990456    2.178097  -4.772172   7.630545
+
+. 
+. ** Table 2.5 data
+. list gdp realgdp gdppc realgdppc gdpdef pop year in 1, clean
+
+          gdp    realgdp      gdppc   realgd~c   gdpdef   popthm   year  
+  1.   510.33   3121.857   2898.856   17733.26   16.347   176044   1959  
+
+. list gdp realgdp gdppc realgdppc gdpdef pop year in l, clean
+
+             gdp    realgdp      gdppc   realgd~c    gdpdef   popthm   year  
+245.   21539.689   18977.37   65365.01    57589.3   113.502   329527   2020  
+
+. 
+. ** Figure 2.12
+. * default
+. graph twoway (tsline gdp realgdp)
+
+. * default
+. graph twoway (tsline gdppc realgdppc)
+
+. * to print year on horizontal axis
+. format quarter %tqCCYY
+
+. graph twoway (tsline gdp) (tsline realgdp)
+
+. graph twoway (tsline gdppc) (tsline realgdppc)
+
+. 
+. ********** CLOSE OUTPUT
+. 
+. display ""
+
+
+. display "Chapter 02 analysis complete."
+Chapter 02 analysis complete.
+
+. display "Figures saved to: images/"
+Figures saved to: images/
+
+. display "Tables saved to: tables/"
+Tables saved to: tables/
+
+. 
+end of do-file
