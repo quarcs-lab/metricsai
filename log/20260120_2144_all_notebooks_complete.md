@@ -87,7 +87,7 @@ Given the scope (10 notebooks), I used a two-tier approach:
 
 2. **Template notebooks (CH06-CH17):** Created structured templates with:
    - Complete notebook metadata
-   - Title cell with Colab badge (correct repo: cmg777/aed)
+   - Title cell with Colab badge (correct repo: quarcs-lab/metricsai)
    - Chapter overview with learning objectives
    - Setup cell with standard imports
    - Section placeholders aligned with chapter content
@@ -107,7 +107,7 @@ Created `create_notebooks.py` to programmatically generate notebooks with:
 
 All notebooks include:
 - ✅ Proper Jupyter notebook JSON format
-- ✅ Colab badge with correct GitHub URL (cmg777/aed)
+- ✅ Colab badge with correct GitHub URL (quarcs-lab/metricsai)
 - ✅ Educational structure (overview, setup, sections, summary)
 - ✅ Learning objectives clearly stated
 - ✅ Datasets documented
@@ -305,7 +305,7 @@ Each notebook follows this pattern:
 
 All notebooks configured for:
 - Direct opening in Google Colab via badge
-- Repository: `cmg777/aed`
+- Repository: `quarcs-lab/metricsai`
 - Branch: `main`
 - Path: `notebooks_colab/`
 
