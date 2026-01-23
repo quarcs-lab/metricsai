@@ -46,8 +46,8 @@ Click any badge below to open and run immediately in your browser. Selected chap
 |---------|-------|----------------|---------------------|
 | **14** | Regression with Indicator Variables | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/quarcs-lab/metricsai/blob/main/notebooks_colab/ch14_Regression_with_Indicator_Variables.ipynb) | [🎧 Audio](https://files.catbox.moe/d58h0v.m4a) |
 | **15** | Regression with Transformed Variables | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/quarcs-lab/metricsai/blob/main/notebooks_colab/ch15_Regression_with_Transformed_Variables.ipynb) | [🎧 Audio](https://files.catbox.moe/ip6bvt.m4a) |
-| **16** | Checking the Model and Data | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/quarcs-lab/metricsai/blob/main/notebooks_colab/ch16_Checking_the_Model_and_Data.ipynb) | |
-| **17** | Panel Data, Time Series Data, Causation | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/quarcs-lab/metricsai/blob/main/notebooks_colab/ch17_Panel_Data_Time_Series_Data_Causation.ipynb) | |
+| **16** | Checking the Model and Data | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/quarcs-lab/metricsai/blob/main/notebooks_colab/ch16_Checking_the_Model_and_Data.ipynb) | [🎧 Audio](https://files.catbox.moe/eb65b7.m4a) |
+| **17** | Panel Data, Time Series Data, Causation | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/quarcs-lab/metricsai/blob/main/notebooks_colab/ch17_Panel_Data_Time_Series_Data_Causation.ipynb) | [🎧 Audio](https://files.catbox.moe/9hgb9x.m4a) |
 
 
 ### How to Use the Notebooks
