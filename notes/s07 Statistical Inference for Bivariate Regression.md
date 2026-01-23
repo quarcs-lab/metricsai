@@ -1,30 +1,23 @@
 # Chapter 7: Statistical Inference for Bivariate Regression
 
-- **Recall univariate:**
-  - Sample mean $\bar{x}$ estimates population mean $\mu$
-  - Under suitable assumptions $t=\frac{\bar{x}-\mu}{\operatorname{se}(\bar{x})}$ is a draw from $T(n-1)$
-  - Use this as basis for confidence intervals and hypothesis tests on $\mu$
+## Learning Objectives
 
-- **Now for bivariate regression:**
-  - Sample slope coefficient $b_{2}$ estimates population slope coefficient $\beta_{2}$
-  - Under suitable assumptions $t=\frac{b_{2}-\beta_{2}}{se\left(b_{2}\right)}$ is a draw from $T(n-2)$
-  - Use this as basis for confidence interval and hypothesis tests on $\beta_{2}$
+By the end of this chapter, you will be able to:
 
+- Understand how the t-statistic for regression coefficients follows a T(n-2) distribution under standard assumptions
+- Calculate and interpret standard errors for the OLS slope coefficient se(b₂)
+- Construct confidence intervals for the population slope parameter β₂ using the formula b₂ ± t_{n-2,α/2} × se(b₂)
+- Conduct tests of statistical significance to determine whether a regressor has any relationship with the dependent variable
+- Perform two-sided hypothesis tests on β₂ using both p-value and critical value approaches
+- Execute one-sided directional hypothesis tests when testing specific claims about parameter values
+- Distinguish between statistical significance (based on t-statistics) and economic significance (based on coefficient magnitudes)
+- Understand the four key OLS assumptions and their role in statistical inference
+- Calculate and interpret heteroskedasticity-robust standard errors when assumption 3 (homoskedasticity) is violated
+- Apply the relationship between confidence intervals and hypothesis tests to evaluate null hypotheses
 
-## Outline
+---
 
-(1) Example: House Price and Size
-(2) The t Statistic
-(3) Confidence Intervals
-(4) Tests of Statistical Significance
-(5) Two-Sided Hypothesis Tests
-(6) One-Sided Hypothesis Tests
-(7) Robust Standard Errors
-(8) Examples
-
-Dataset: HOUSE.
-
-### 7.1 Example: House Price and Size
+## 7.1 Example: House Price and Size
 
 - Key regression output for statistical inference with $n=29$ :
 
@@ -42,7 +35,7 @@ Dataset: HOUSE.
 - (later: alternative heteroskedastic-robust standard errors).
 
 
-## Example (continued)
+### Example (continued)
 
 - We have with $n=29$ :
 
@@ -63,7 +56,7 @@ Dataset: HOUSE.
 - $p_{2}=\operatorname{Pr}\left[\left|T_{27}\right|>|6.60|\right]=0.00$.
 
 
-### 7.2 The t Statistic
+## 7.2 The t Statistic
 
 - The statistical inference problem
 - Sample: $\hat{y}=b_{1}+b_{2} \times$ where $b_{1}$ and $b_{2}$ are least squares estimates
@@ -77,7 +70,7 @@ $$
 T=\frac{\text { estimate }- \text { parameter }}{\text { standard error }}=\frac{b_{2}-\beta_{2}}{\operatorname{se}\left(b_{2}\right)} \sim T(n-2) .
 $$
 
-## Why use the $\mathrm{T}(\mathrm{n}-2)$ Distribution?
+### Why use the T(n-2) Distribution?
 
 - Make assumptions 1-4 given in the next slide.
 - then $\operatorname{Var}\left[b_{2}\right]=\sigma_{u}^{2} / \sum_{i=1}^{n}\left(x_{i}-\bar{x}\right)^{2}$.
@@ -90,7 +83,7 @@ $$
 - otherwise it is an approximation, one that computer packages use.
 
 
-## Model Assumptions
+### Model Assumptions
 
 - Data assumption is that there is variation in the sample regressors so that $\sum_{i=1}^{n}\left(x_{i}-\bar{x}\right)^{2}=0$.
 - Population assumptions 1-4
@@ -107,7 +100,7 @@ $$
 - Additional assumptions 3-4 yield the variance of estimators.
 
 
-### 7.3 Confidence Interval for the Slope Parameter
+## 7.3 Confidence Interval for the Slope Parameter
 
 - Recall: A 95 percent confidence interval is approximately
 
@@ -129,7 +122,7 @@ where
 - $t_{n-2 ; \alpha / 2}$ is the critical value in Stata using invttail( $\mathrm{n}-2, \alpha / 2$ ).
 
 
-## What Level of Confidence?
+### What Level of Confidence?
 
 - There is no best choice of confidence level
 - most common choice is 95\% (or 90\% or 99\%)
@@ -138,7 +131,7 @@ where
 - if we had many samples and in each sample formed a $95 \%$ confidence interval, then $95 \%$ of these confidence intervals will include the true unknown $\beta_{2}$.
 
 
-## Example: House Price and Size
+### Example: House Price and Size
 
 - For regress house price on house size a $95 \%$ confidence interval is
 
@@ -155,7 +148,7 @@ $$
 - This is directly given in computer output from regression.
 
 
-### 7.4 Tests of Statistical Significance
+## 7.4 Tests of Statistical Significance
 
 - A regressor $x$ has no relationship with $y$ if $\beta_{2}=0$.
 - A test of "statistical significance" is a two-sided test of whether $\beta_{2}=0$. So test
@@ -179,7 +172,7 @@ $$
 - This method generalizes to other formulas for $\operatorname{se}\left(b_{2}\right)$.
 
 
-## Example: House Price and Size
+### Example: House Price and Size
 
 - For regress house price on house size with $n=29$
 
@@ -194,7 +187,7 @@ $$
 - Conclude that house size is statistically significant at level 0.05 .
 
 
-## Economic Significance versus Statistical Significance
+### Economic Significance versus Statistical Significance
 
 - A regressor is of economic significance if its coefficient is of large enough value for it to matter in practice
 - economic significance depends directly on $b_{2}$ and the context
@@ -204,7 +197,7 @@ $$
 - even if $b_{2}$ is so small that it is of little economic significance.
 
 
-## Tests based on the Correlation Coefficient
+### Tests based on the Correlation Coefficient
 
 - An alternative way to measure statistical significance, used in many social sciences, uses the correlation coefficient $\left|r_{x y}\right|$.
 - Then reject the null hypothesis of no association if $\left|r_{x y}\right|$ is sufficiently large
@@ -215,7 +208,7 @@ $$
 - and it tells little about economic significance.
 
 
-### 7.5 Two-sided Hypothesis Tests
+## 7.5 Two-sided Hypothesis Tests
 
 - A two-sided test on the slope coefficient is a test of
 
@@ -235,7 +228,7 @@ $$
 - Use either p value approach or critical value approach.
 
 
-## Example: House Price and Size
+### Example: House Price and Size
 
 - For house price example with $\beta_{2}^{*}=90$
 
@@ -258,7 +251,7 @@ $$
 Two-sided test: critical value approach
 ![](https://cdn.mathpix.com/cropped/07ae1b4d-3d81-4f56-a70c-1c6790682a1f-18.jpg?height=391&width=580&top_left_y=357&top_left_x=647)
 
-## Rejection using p-values
+### Rejection using p-values
 
 - p-value approach (at level $\alpha=0.05$ )
 - Assume that $\beta_{2}=\beta_{2}^{*}$, i.e. $H_{0}$ is true.
@@ -267,7 +260,7 @@ Two-sided test: critical value approach
 - If $p<0.05$ then reject $H_{0}$
   - Reason: there was less than .05 chance of observing our $t$, given $\beta_{2}=\beta_{2}^{*}$
 
-## Rejection using Critical values
+### Rejection using Critical values
 
 - Critical value approach (at level $\alpha=0.05$ )
 - Assume that $\beta_{2}=\beta_{2}^{*}$, i.e. $H_{0}$ is true.
@@ -277,7 +270,7 @@ Two-sided test: critical value approach
   - Reason: there was less than .05 chance of observing our $t$, given $\beta_{2}=\beta_{2}^{*}$
 
 
-## Relationship of Tests to Confidence Interval
+### Relationship of Tests to Confidence Interval
 
 - For a two-sided test of $H_{0}: \beta_{2}=\beta_{2}^{*}$
 - if the null hypothesis value $\beta_{2}^{*}$ falls inside the $100(1-\alpha)$ percent confidence interval then do not reject $H_{0}$ at significance level $\alpha$.
@@ -287,7 +280,7 @@ Two-sided test: critical value approach
 - reject $H_{0}: \beta_{2}=0$ at level 0.05 as the $95 \%$ confidence interval does not include 0 .
 
 
-### 7.6 One-sided Directional Hypothesis Tests
+## 7.6 One-sided Directional Hypothesis Tests
 
 - One-sided test on the slope coefficient is a test of
 
@@ -314,7 +307,7 @@ $$
 \star p=\operatorname{Pr}\left[T_{n-2}<t\right] .
 $$
 
-## Example: House Price and Size
+### Example: House Price and Size
 
 - House price example suppose claim is that house price rises by less than $\$ 90$ per square foot, i.e. $\beta_{2}<90$.
 - Test $H_{0}: \beta_{2} \geq 90$ against $H_{a}: \beta_{2}<90$ (lower tailed alternative).
@@ -334,7 +327,7 @@ $\star$ where we have used the symmetry of the $t$ distribution.
 - note that the claim would be supported if we tested at level 0.10 .
 
 
-## Computer generated t -statistic
+### Computer generated t -statistic
 
 - Computer gives a $t$-statistic
 - this is $t=b_{2} / s e\left(b_{2}\right)$
@@ -350,7 +343,7 @@ $\star$ where we have used the symmetry of the $t$ distribution.
 - if $b_{2}<0$ we will not reject $H_{0}$ i.e. conclude $\beta_{2}$ is not greater than zero.
 
 
-### 7.7 Robust Standard Errors
+## 7.7 Robust Standard Errors
 
 - Default standard errors (and associated t statistics, p values and confidence intervals) make assumptions 1-4
 - called default because this is what computer automatically computes
@@ -365,7 +358,7 @@ $$
 t=\frac{b_{2}-\beta_{2}}{s e_{r o b}\left(b_{2}\right)}
 $$
 
-## Heteroskedastic Robust Standard Errors
+### Heteroskedastic Robust Standard Errors
 
 - Relax assumption 3 that all errors have the same variance
 - called the assumption of homoskedastic errors.
@@ -381,7 +374,7 @@ $$
 - Then $t=\left(b_{2}-\beta_{2}\right) /$ se $_{\text {het }}\left(b_{2}\right)$ is viewed as $T(n-2)$ distributed.
 
 
-## Example: House Price and Size
+### Example: House Price and Size
 
 - For the house price and size example
 - Default standard errors
@@ -397,7 +390,7 @@ $$
 t=\frac{b_{2}}{s e\left(b_{2}\right)}=\frac{73.77-0}{11.33}=6.51 \text { compared to } 6.60
 $$
 
-## Simulation Example of Heteroskedastic Errors
+### Simulation Example of Heteroskedastic Errors
 
 - Generate 100 observations as follows
 - size varies from 1700 to 3700 plus some random noise
@@ -417,7 +410,7 @@ generate price2 $=11500+74 *$ size + uheterosked
 scatter price2 size || lfit price size
 
 
-## Simulation Example (continued)
+### Simulation Example (continued)
 
 - First panel: homoskedastic errors are evenly distributed around the regression line.
 - Second panel: heteroskedastic errors scattering around the regression line varies with the level of the regressor
@@ -429,7 +422,7 @@ Homoskedastic errors
 Heteroskedastic errors
 ![](https://cdn.mathpix.com/cropped/07ae1b4d-3d81-4f56-a70c-1c6790682a1f-29.jpg?height=375&width=513&top_left_y=463&top_left_x=670)
 
-## Other Robust Standard Errors
+### Other Robust Standard Errors
 
 - For time series data where model errors may be correlated over time
 - use HAC robust.
@@ -441,7 +434,7 @@ Heteroskedastic errors
 - An essential part of any regression analysis is knowing which particular robust standard error method should be used.
 
 
-## Key Stata Commands
+### Key Stata Commands
 
 ```
 clear
@@ -454,7 +447,177 @@ regress price size, vce(robust)
 ```
 
 
-## Some in-class Exercises
+---
+
+## Key Takeaways
+
+**Example and Regression Output (Section 7.1):**
+- Regression output provides key information for statistical inference: coefficients, standard errors, t-statistics, p-values, and confidence intervals
+- House price example: regressing price on size with n=29 gives b₂ = 73.77, se(b₂) = 11.17
+- The coefficient b₂ = 73.77 estimates the population slope β₂ (price increase per square foot)
+- Standard error se(b₂) = 11.17 is the estimated standard deviation of b₂, measuring its precision
+- The 95% confidence interval (50.84, 96.70) provides a range of plausible values for β₂
+- The t-statistic t = 6.60 tests whether size has any relationship with price
+- The p-value 0.000 indicates strong evidence against the null hypothesis H₀: β₂ = 0
+- Larger standard errors indicate less precision; smaller standard errors indicate more precision
+
+**The t-Statistic and Its Distribution (Section 7.2):**
+- Statistical inference uses the t-statistic: T = (b₂ - β₂)/se(b₂) which follows a T(n-2) distribution
+- The sample regression ŷ = b₁ + b₂x estimates the population relationship E[y|x] = β₁ + β₂x
+- Under assumptions 1-4, the t-statistic follows the T(n-2) distribution (n-2 degrees of freedom for bivariate regression)
+- We use T(n-2) instead of N(0,1) because we estimate the error variance σ²ᵤ with s²ₑ
+- Replacing unknown σ²ᵤ with estimate s²ₑ introduces additional variability captured by the t distribution
+- The T(n-2) distribution has fatter tails than N(0,1), accounting for estimation uncertainty
+- T(n-2) is the exact distribution if errors are normally distributed; otherwise it's an approximation
+- As sample size increases, T(n-2) converges to N(0,1)
+
+**Four Key OLS Assumptions (Section 7.2):**
+- Assumption 1 (Correct model): The population model is y = β₁ + β₂x + u
+- Assumption 2 (Mean-zero error): E[uᵢ|xᵢ] = 0 for all i (errors uncorrelated with regressor)
+- Assumption 3 (Homoskedasticity): Var[uᵢ|xᵢ] = σ²ᵤ for all i (constant error variance)
+- Assumption 4 (Independence): uᵢ is independent of uⱼ for all i ≠ j (no autocorrelation)
+- Assumptions 1-2 are crucial: they imply E[y|x] = β₁ + β₂x and yield unbiased estimators
+- Assumptions 3-4 affect variance calculations and standard errors but not bias
+- Data assumption: there must be variation in regressors, Σ(xᵢ-x̄)² > 0
+- These assumptions can be relaxed using robust standard errors (Section 7.7)
+
+**Confidence Intervals for β₂ (Section 7.3):**
+- A 100(1-α)% confidence interval for β₂ is: b₂ ± t_{n-2,α/2} × se(b₂)
+- Approximate 95% CI: b₂ ± 2 × se(b₂) (since t_{n-2,0.025} ≈ 2 for moderate to large n)
+- The critical value t_{n-2,α/2} satisfies Pr[|T_{n-2}| ≤ t_{n-2,α/2}] = 1 - α
+- Common confidence levels: 90% (α=0.10), 95% (α=0.05), 99% (α=0.01)
+- Interpretation: if we constructed 95% CIs for infinite samples, 95% would contain the true β₂
+- We have only one sample, so we're "95% confident" our particular interval contains β₂
+- House price example: 95% CI = 73.77 ± 2.052 × 11.17 = (50.84, 96.70)
+- Wider intervals provide more confidence; narrow intervals provide more precision
+- There's no single "best" confidence level, though 95% is conventional
+
+**Tests of Statistical Significance (Section 7.4):**
+- A test of statistical significance tests H₀: β₂ = 0 against H_a: β₂ ≠ 0 (two-sided)
+- If β₂ = 0, then x has no linear relationship with y
+- Test statistic: t = b₂/se(b₂) ~ T(n-2) under H₀
+- Reject H₀ if |t| is large (evidence that b₂ is far from 0)
+- P-value approach: reject at level α if p = Pr[|T_{n-2}| > |t|] < α
+- Critical value approach: reject at level α if |t| > c where c = t_{n-2,α/2}
+- Both approaches give identical conclusions
+- House price example: t = 73.77/11.17 = 6.60, p = 0.000 < 0.05 → reject H₀
+- Conclude that house size is statistically significant at the 5% level
+- Computer output typically reports t-statistics and p-values for H₀: β₂ = 0
+
+**Economic vs. Statistical Significance (Section 7.4):**
+- Statistical significance: whether coefficient differs from zero (based on t-statistic)
+- Economic significance: whether coefficient is large enough to matter in practice (based on b₂ magnitude and context)
+- A coefficient can be statistically significant but economically insignificant (small b₂, large sample)
+- With large samples, se(b₂) → 0 as n → ∞, so even tiny coefficients become statistically significant
+- Always assess both: statistical significance tells us if an effect exists; economic significance tells us if it matters
+- Example: b₂ = 0.0001 might be highly significant (p < 0.001) in large sample but economically meaningless
+- Context determines economic significance: $1 price increase per square foot is meaningful for houses
+
+**Tests Using Correlation Coefficient (Section 7.4):**
+- Alternative approach: reject H₀ if correlation coefficient |r_{xy}| is sufficiently large
+- Gives similar results to t-tests when using default standard errors
+- Weaknesses: (1) cannot relax assumptions 3-4, (2) cannot extend to multiple regression, (3) tells little about economic significance
+- Regression-based t-tests are more flexible and informative
+- Prefer t-tests over correlation-based tests in econometric practice
+
+**Two-Sided Hypothesis Tests (Section 7.5):**
+- General two-sided test: H₀: β₂ = β₂* against H_a: β₂ ≠ β₂*
+- Test statistic: t = (b₂ - β₂*)/se(b₂) ~ T(n-2) under H₀
+- Reject if |t| is large (b₂ is far from hypothesized value β₂*)
+- P-value: p = Pr[|T_{n-2}| > |t|]
+- Critical value: c = t_{n-2,α/2}
+- Reject at level α if p < α or equivalently if |t| > c
+- House price example testing β₂ = 90: t = (73.77-90)/11.17 = -1.452, p = 0.158 > 0.05 → do not reject
+- Cannot conclude that price increases by $90 per square foot
+- Two tails used because alternative includes both β₂ > β₂* and β₂ < β₂*
+
+**Relationship Between Tests and Confidence Intervals (Section 7.5):**
+- For two-sided test of H₀: β₂ = β₂* at significance level α:
+- If β₂* falls inside the 100(1-α)% confidence interval → do not reject H₀
+- If β₂* falls outside the 100(1-α)% confidence interval → reject H₀
+- This provides a visual way to test hypotheses using confidence intervals
+- House price example: 95% CI is (50.84, 96.70); 0 is not in this interval → reject H₀: β₂ = 0
+- The value 90 is in the interval → do not reject H₀: β₂ = 90
+- This equivalence holds because both are based on the same t distribution
+
+**One-Sided Hypothesis Tests (Section 7.6):**
+- Upper one-tailed test: H₀: β₂ ≤ β₂* against H_a: β₂ > β₂* (claim β₂ is greater than β₂*)
+- Lower one-tailed test: H₀: β₂ ≥ β₂* against H_a: β₂ < β₂* (claim β₂ is less than β₂*)
+- The claim being tested is specified as the alternative hypothesis (requires strong evidence to support)
+- Same t-statistic as two-sided: t = (b₂ - β₂*)/se(b₂)
+- Different rejection regions: only one tail used
+- Upper tail: reject if t > c where c = t_{n-2,α} and p = Pr[T_{n-2} > t]
+- Lower tail: reject if t < -c where c = t_{n-2,α} and p = Pr[T_{n-2} < t]
+- Note: critical value is t_{n-2,α} not t_{n-2,α/2} (one tail not two)
+- House price example testing H₀: β₂ ≥ 90 vs. H_a: β₂ < 90: t = -1.452, p = Pr[T₂₇ < -1.452] = 0.079 > 0.05 → do not reject
+- Not enough evidence to support claim that β₂ < 90 at 5% level (but would reject at 10% level)
+
+**Using Computer Output for One-Sided Tests (Section 7.6):**
+- Computer reports t = b₂/se(b₂) and p-value for two-sided test of H₀: β₂ = 0
+- For one-sided test of statistical significance:
+- If b₂ has expected sign → halve the printed p-value
+- If b₂ has unexpected sign → do not reject (p > 0.5)
+- Example: expect β₂ > 0, computer gives two-sided p = 0.04
+  - If b₂ > 0: one-sided p = 0.04/2 = 0.02 < 0.05 → reject H₀: β₂ ≤ 0
+  - If b₂ < 0: do not reject H₀: β₂ ≤ 0 (wrong sign)
+- This shortcut only works for tests of H₀: β₂ = 0
+
+**Robust Standard Errors Overview (Section 7.7):**
+- Default standard errors assume all four OLS assumptions 1-4
+- Robust standard errors keep assumptions 1-2 but relax assumptions 3-4
+- Robust SEs are commonly used in modern econometric practice
+- They provide alternative formula for se(b₂), denoted se_{rob}(b₂)
+- Base inference on t = (b₂ - β₂)/se_{rob}(b₂) using T(n-2) distribution
+- Three main types: heteroskedasticity-robust, HAC robust (time series), cluster-robust (grouped data)
+- Choice of robust SE method depends on data structure and likely violations of assumptions
+
+**Heteroskedasticity-Robust Standard Errors (Section 7.7):**
+- Relax assumption 3: allow error variance to vary across observations
+- Homoskedastic errors: Var[uᵢ|xᵢ] = σ²ᵤ (constant) - Assumption 3
+- Heteroskedastic errors: Var[uᵢ|xᵢ] = σ²ᵢ (varies with i) - relaxed assumption
+- Heteroskedasticity is the standard assumption in modern econometrics
+- Heteroskedasticity-robust SE: se_{het}(b₂) = √[Σeᵢ²(xᵢ-x̄)²] / Σ(xᵢ-x̄)²
+- This differs from default SE: se(b₂) = sₑ / √[Σ(xᵢ-x̄)²]
+- Robust SEs account for different error variances across observations
+- Inference proceeds using t = (b₂ - β₂)/se_{het}(b₂) ~ T(n-2)
+
+**Heteroskedasticity Example (Section 7.7):**
+- House price example with default vs. robust SEs:
+  - Default SE: 11.17 for slope, 21,489 for intercept
+  - Heteroskedastic-robust SE: 11.33 for slope, 20,928 for intercept
+- 95% CI using robust SEs: 73.77 ± 2.052 × 11.33 = (50.33, 97.02) vs. default (50.84, 96.70)
+- t-statistic using robust SEs: t = 73.77/11.33 = 6.51 vs. default t = 6.60
+- In this example, robust and default SEs are similar (both lead to same conclusion)
+- Simulation example shows heteroskedastic errors have variance increasing with regressor level
+- Homoskedastic errors are evenly distributed around regression line
+- Heteroskedastic errors show increasing scatter as x increases
+
+**Other Types of Robust Standard Errors (Section 7.7):**
+- HAC robust (Heteroskedasticity and Autocorrelation Consistent): for time series data where errors may be correlated over time
+- Cluster-robust: for data in groups where errors are correlated within cluster but uncorrelated across clusters
+- Examples of clustered data: people in villages, students in schools, individuals in families, panel data (individuals over time)
+- Chapter 12.1 provides details on these robust SE methods
+- Essential to know which robust SE method is appropriate for your data structure
+- Using wrong SE method leads to incorrect inference (wrong confidence intervals and hypothesis test conclusions)
+
+**Software Implementation:**
+- Stata commands: `regress price size` (default SEs), `regress price size, vce(robust)` (heteroskedasticity-robust SEs)
+- Option `level(99)` specifies 99% confidence intervals instead of default 95%
+- Command `test size = 90` tests H₀: β₂ = 90 (gives F-statistic = t² and correct p-value)
+- Dataset: AED_HOUSE.DTA contains house price and size data with n=29
+
+**General Principles:**
+- Always assess both statistical and economic significance
+- Confidence intervals provide more information than hypothesis tests alone (show range of plausible values)
+- Two-sided tests are standard; one-sided tests should only be used when directionality is theoretically justified
+- Modern practice: use robust standard errors by default (especially heteroskedasticity-robust)
+- The choice of robust SE method depends on data structure (cross-section, time series, panel, clustered)
+- Statistical significance with small samples requires larger |t| values (fatter tails of t distribution)
+- As sample size increases, statistical significance becomes easier to achieve (se(b₂) → 0)
+
+---
+
+### Some in-class Exercises
 
 (1) We obtain fitted model $\hat{y}=\underset{(1.5)}{3.0}+\underset{(2.0)}{5.0} \times x, R^{2}=0.32, s_{e}=4.0$, $n=200$. Provide an approximate $95 \%$ confidence interval for the population slope parameter.
 (2) Test the claim that the population slope equals 2 at the $5 \%$ significance level.
