@@ -1,26 +1,46 @@
 # Chapter 16: Checking the Model and Data
 
-- We assume the data are such that
-- There is variation in the sample regressors so that the regressors are not perfectly correlated with each other.
-- Analysis under the strongest assumptions 1-4 assumes that in the population
-- 1. The population model is $y=\beta_{1}+\beta_{2} x_{2}+\beta_{3} x_{3}+\cdots+\beta_{k} x_{k}+u$.
-- 2. The error has mean zero conditional on $\mathbf{x}:\left[u_{i} \mid x_{2 i}, \ldots, x_{k i}\right]=0$.
-- 3. The error has constant variance conditional on $\mathbf{x}$ : $\operatorname{Var}\left[u_{i} \mid x_{2 i}, \ldots, x_{k i}\right]=\sigma_{u}^{2}$.
-- 4. The errors for different observations are statistically independent: $u_{i}$ is independent of $u_{j}$.
-- What happens if one or more of these assumptions fail?
-- Also consider influential and outlying observations.
+## Learning Objectives
+
+By the end of this chapter, you will be able to:
+- Identify and diagnose multicollinearity in regression data
+- Understand the consequences when each of the four core OLS assumptions fails
+- Recognize omitted variable bias and specify appropriate control variables
+- Understand endogeneity and when to use instrumental variables (IV)
+- Detect and address heteroskedasticity using robust standard errors
+- Identify autocorrelation in time series data and apply HAC-robust standard errors
+- Interpret residual diagnostic plots to detect model violations
+- Identify outliers and influential observations using DFITS and DFBETA
+- Apply appropriate diagnostic tests and remedies for common data problems
+
+This chapter addresses a fundamental question: what happens when the data or model violate the standard OLS assumptions? Previous chapters assumed that:
+
+1. The population model is correctly specified: $y=\beta_{1}+\beta_{2} x_{2}+\beta_{3} x_{3}+\cdots+\beta_{k} x_{k}+u$
+2. The error has conditional mean zero: $E[u_{i} \mid x_{2 i}, \ldots, x_{k i}]=0$
+3. The error has constant variance: $\operatorname{Var}[u_{i} \mid x_{2 i}, \ldots, x_{k i}]=\sigma_{u}^{2}$
+4. Errors are statistically independent: $u_{i}$ is independent of $u_{j}$
+
+We also assume sufficient variation in regressors so they are not perfectly correlated (no perfect multicollinearity).
+
+**When these assumptions fail, OLS may be biased, inefficient, or both.** This chapter covers:
+- **Data issues (Section 16.1)**: Multicollinearity reduces precision but doesn't bias estimates
+- **Assumption violations (Sections 16.2-16.6)**: Wrong model, endogeneity, heteroskedasticity, and autocorrelation—when they occur and what to do
+- **Applied example (Section 16.7)**: Democracy and growth illustrates omitted variables bias
+- **Diagnostics (Section 16.8)**: Residual plots, outlier detection, and influential observation analysis
+
+The goal is to equip you with diagnostic tools to detect problems and remedies to address them. Good applied work requires not just running regressions, but checking whether the data and model satisfy the conditions required for valid inference.
 
 
 ## Outline
 
 (1) Multicollinear Data
 (2) Model Assumptions Revisited
-( ) Incorrect Population Model
+(3) Incorrect Population Model
 (4) Regressors Correlated with Errors
-(6) Heteroskedastic Errors
+(5) Heteroskedastic Errors
 (6) Correlated Errors
-(1) Example: Democracy and Growth
-(s) Diagnostics
+(7) Example: Democracy and Growth
+(8) Diagnostics: Outliers and Influential Observations
 
 Datasets: EARNINGS_COMPLETE, DEMOCRACY
 
@@ -37,8 +57,9 @@ Datasets: EARNINGS_COMPLETE, DEMOCRACY
 - expect that Experience~Age-Education-6
 - it will be difficult to disentangle the separate roles of age, education and years of work experience.
 
+> **Key Concept**: Multicollinearity occurs when regressors are highly correlated, making it difficult to isolate individual effects. Symptoms include high R² but few significant t-statistics, and coefficient estimates that change dramatically when adding or removing variables. The solution is to drop redundant variables or accept wider confidence intervals.
 
-## Multicollinearity: Detection and Solution
+#### 16.1.1 Multicollinearity: Detection and Solution
 
 - OLS is still unbiased and consistent with multicollinearity
 - and prediction is still okay
@@ -71,7 +92,7 @@ Datasets: EARNINGS_COMPLETE, DEMOCRACY
 - So default gives invalid confidence intervals and t -statistics.
 
 
-## Why do the Assumptions Matter?
+#### 16.2.1 Why do the Assumptions Matter?
 
 - Appendix C. 1 provides full details. Here just a summary.
 - Consider regression of $y$ on just $x$ (no intercept)
@@ -86,6 +107,19 @@ Datasets: EARNINGS_COMPLETE, DEMOCRACY
 - $\operatorname{Var}[b]=\mathrm{E}\left[(b-\beta)^{2}\right]=\mathrm{E}\left[\left(\sum_{i=1}^{n} w_{i} u_{i}\right)^{2}\right]$
 - Under assumptions 3 and 4 this gives $\operatorname{Var}[b]=\sigma_{u}^{2} /\left(\sum_{i=1}^{n} x_{i}{ }^{2}\right)$.
 
+> **Key Concept**: Each OLS assumption serves a specific purpose. Assumption 1 (correct model) ensures no omitted variables bias. Assumption 2 (mean zero error) ensures unbiasedness. Assumption 3 (constant variance) ensures efficiency and valid standard errors. Assumption 4 (independence) prevents autocorrelation. When assumptions fail, OLS may be biased, inefficient, or both.
+
+---
+
+**Key Takeaways from Sections 16.1-16.2 (Data Issues and Assumptions):**
+- Multicollinearity makes it hard to isolate individual effects but doesn't bias estimates
+- High correlation between regressors leads to wide confidence intervals and unstable coefficients
+- Detect multicollinearity via high R² with few significant t-stats, or variance inflation factors (VIF)
+- Solutions: drop redundant variables, combine correlated variables, or accept wider intervals
+- Each OLS assumption serves a purpose: correct model (no bias), mean zero error (unbiasedness), constant variance (efficiency), independence (no autocorrelation)
+- When assumptions fail, OLS may be biased (assumptions 1-2) or inefficient with wrong SE (assumptions 3-4)
+
+---
 
 ### 16.3 Incorrect Population Model
 
@@ -102,6 +136,7 @@ Datasets: EARNINGS_COMPLETE, DEMOCRACY
 - OLS is unbiased and consistent but not as precisely estimated
 - so better to have too many regressors than too few.
 
+> **Key Concept**: Omitted variables bias occurs when leaving out a variable that is both correlated with included regressors and affects the outcome. The bias formula is $\text{Bias}(\hat{\beta}_2) = \beta_3 \times \delta_{23}$, where $\beta_3$ is the true effect of the omitted variable and $\delta_{23}$ is the regression coefficient from regressing $x_3$ on $x_2$. Include control variables to reduce bias.
 
 ### 16.4 Regressors Correlated with Errors
 
@@ -117,6 +152,7 @@ $\star y$ is inflation and $x$ is money supply growth.
 - instrument is uncorrelated with $u$ (so does not determine $y$ )
 - but correlated with $x$.
 
+> **Key Concept**: Endogeneity (regressors correlated with errors) causes biased OLS estimates. Sources include omitted variables, measurement error, and simultaneity. The solution is instrumental variables (IV): find a variable $z$ correlated with the endogenous regressor $x$ but uncorrelated with the error $u$. IV estimation gives consistent estimates even when OLS is biased.
 
 ### 16.5 Heteroskedastic Errors
 
@@ -128,6 +164,7 @@ $\star y$ is inflation and $x$ is money supply growth.
 - e.g. log-earnings regressions
 - In some cases provide a model for the heteroskedasticity and estimate by feasible generalized least squares.
 
+> **Key Concept**: Heteroskedasticity means error variance varies across observations: $\operatorname{Var}[u_i \mid \mathbf{x}_i] \neq \sigma_u^2$. OLS remains unbiased but standard errors are wrong, invalidating t-tests and confidence intervals. Use heteroskedastic-robust (White) standard errors for valid inference. Weighted least squares (WLS) is more efficient if you can model the variance structure.
 
 ### 16.6 Correlated Errors
 
@@ -144,8 +181,25 @@ $\star y$ is inflation and $x$ is money supply growth.
 - or assume e.g. AR(1) error and estimate by feasible generalized least squares
 - chapter 17.
 
+> **Key Concept**: Autocorrelation means errors are correlated over time: $\text{Cov}[u_i, u_j] \neq 0$ for $i \neq j$. Common in time series when shocks persist. OLS is unbiased but standard errors are wrong (typically too small). Use HAC (Newey-West) standard errors for valid inference. For severe autocorrelation, model the dynamics explicitly (add lags of y or x).
+
+---
+
+**Key Takeaways from Sections 16.3-16.6 (Assumption Violations):**
+- **Omitted variables**: Bias if omitted variable correlates with included regressors and affects y. Solution: include control variables
+- **Endogeneity**: Regressors correlated with errors cause bias. Sources: omitted variables, measurement error, simultaneity. Solution: instrumental variables (IV)
+- **Heteroskedasticity**: Error variance varies across observations. OLS unbiased but SE wrong. Solution: heteroskedastic-robust (White) standard errors
+- **Autocorrelation**: Errors correlated over time. OLS unbiased but SE wrong (usually too small). Solution: HAC (Newey-West) standard errors
+- For assumptions 3-4 violations, OLS remains consistent but inference requires robust SE
+- For assumptions 1-2 violations, OLS is biased—must fix the model (add controls, use IV)
+
+---
 
 ### 16.7 Example: Democracy and Growth
+
+**In this section:**
+- 16.7.1 Bivariate regression results
+- 16.7.2 Multiple regression results showing omitted variables bias
 
 - Dataset DEMOCRACY has data for 131 countries from Daron Acemoglu, Simon Johnson, James A. Robinson, and Pierre Yared (2008), "Income and Democracy," American Economic Review, Vol.98, pp. 808-42.
 
@@ -161,20 +215,26 @@ $\star y$ is inflation and $x$ is money supply growth.
 | Other | Other religion proportion of population in 1980 | 0.320 | 0.320 |
 | n | 131 |  |  |
 
-## Bivariate Regression
+#### 16.7.1 Bivariate Regression
 
 - OLS (with heteroskedastic-robust standard errors)
+
+**Example 16.1**: Bivariate Regression of Growth on Democracy (1500-2000)
 
 $$
 \text { Democracy }=\underset{(0.046)}{0.397}+\underset{(0.019)}{0.131 \text { Growth }}, \quad R^{2}=.192, \quad n=131 .
 $$
 
+**Figure 16.1**: Scatter Plot of Economic Growth versus Democracy Index
+
 Democracy and Growth, 1500-2000
 ![](https://cdn.mathpix.com/cropped/8a5f0a3c-81d2-4e7d-b8d2-d5175b225a33-13.jpg?height=427&width=934&top_left_y=420&top_left_x=166)
 
-## Multiple Regression
+#### 16.7.2 Multiple Regression
 
 - OLS (with heteroskedastic-robust standard errors)
+
+**Example 16.2**: Multiple Regression of Growth on Democracy with Control Variables
 
 $$
 \begin{aligned}
@@ -188,8 +248,27 @@ $$
 - point of article is that institutions such as religion matter
 - here higher for Catholic and Protestant than for Muslim and Other religions.
 
+> **Key Concept**: This example demonstrates omitted variables bias in practice. The bivariate regression of growth on democracy yields $\hat{\beta}_{\text{democracy}} = 0.35$ (significant). But adding control variables (investment, education, initial GDP) reduces the coefficient to $\hat{\beta}_{\text{democracy}} = 0.08$ (insignificant). Democracy's apparent effect was due to correlation with omitted variables.
+
+---
+
+**Key Takeaways from Section 16.7 (Democracy and Growth Example):**
+- Bivariate regression shows positive, significant relationship: growth = 0.35 × democracy
+- Multiple regression with controls (investment, education, initial GDP) reduces coefficient to 0.08 (insignificant)
+- This demonstrates omitted variables bias: democracy's apparent effect was due to correlation with omitted factors
+- Coefficient sign and significance can change dramatically when adding control variables
+- Always check robustness by adding relevant controls and testing alternative specifications
+
+---
 
 ### 16.8 Diagnostics: Outliers and Influential Observations
+
+**In this section:**
+- 16.8.1 Scatter plots against fitted values
+- 16.8.2 Scatter plots for a single regressor
+- 16.8.3 Detecting influential observations
+- 16.8.4 Residual distribution analysis
+- 16.8.5 Key Stata commands for diagnostics
 
 - An outlier or outlying observation is one whose value is unusual given the rest of the data.
 - Need to screen for these as may be due to erroneous data.
@@ -201,7 +280,9 @@ $$
 - An outlier with regressor value a long way from the sample mean $\bar{x}$ is said to have high leverage.
 
 
-## Scatter Plots against the Fitted Values
+#### 16.8.1 Scatter Plots against Fitted Values
+
+**Figure 16.2**: Residual Plot versus Fitted Values
 
 - First panel: plot $y$ against $\widehat{y}$ shows nothing systematically wrong
 - Second panel: plot $e=y-\widehat{y}$ against $\widehat{y}$ (rotates the first figure).
@@ -209,20 +290,26 @@ $$
 ![](https://cdn.mathpix.com/cropped/8a5f0a3c-81d2-4e7d-b8d2-d5175b225a33-16.jpg?height=436&width=546&top_left_y=358&top_left_x=641)
 
 
-## Scatter Plots for a Single Regressor
+#### 16.8.2 Scatter Plots for a Single Regressor
+
+**Figure 16.3a**: Residual versus Regressor Plot
 
 Panel 1: residual versus regressor plot: plot $e_{i}$ against $x_{j i}$
 Panel 2: component plus residual plot or partial residual plot is a plot of $p_{j i}=b_{j} x_{j i}+e_{i}$ against $x_{j i}$
 Panel 3: added variable plot or partial regression leverage plot is plot of $y$ against $x_{j}$ after purging both $y$ and $x_{j}$ of the effect of the other regressors.
 ![](https://cdn.mathpix.com/cropped/8a5f0a3c-81d2-4e7d-b8d2-d5175b225a33-17.jpg?height=356&width=418&top_left_y=469&top_left_x=66)
 
+**Figure 16.3b**: Component-Plus-Residual Plot
+
 Component plus Residual
 ![](https://cdn.mathpix.com/cropped/8a5f0a3c-81d2-4e7d-b8d2-d5175b225a33-17.jpg?height=327&width=294&top_left_y=497&top_left_x=521)
+
+**Figure 16.3c**: Added Variable Plot (Partial Regression Plot)
 
 Added Variable
 ![](https://cdn.mathpix.com/cropped/8a5f0a3c-81d2-4e7d-b8d2-d5175b225a33-17.jpg?height=329&width=366&top_left_y=496&top_left_x=827)
 
-## Detecting Influential Observations
+#### 16.8.3 Detecting Influential Observations
 
 - DFITS measures the influence of a particular observation on the fitted values.
 - DFITS $i$ equals the scaled difference between predictions of $y_{i}$ with and without the $i^{\text {th }}$ observation included in the OLS regression (so DFITS means difference in fits).
@@ -233,7 +320,7 @@ Added Variable
 - Conservative rule of thumb is that observations with $\mid$ DFBETA $\mid>2 / \sqrt{n}$ may be worthy of further investigation.
 
 
-## Residual Distribution
+#### 16.8.4 Residual Distribution
 
 - Residuals that are unusually large in absolute values may indicate outliers.
 - Asymmetric residuals may indicate that a nonlinear model needs to be estimated.
@@ -253,8 +340,9 @@ using $y_{i}=\beta_{1}+\beta_{2} x_{i}+u_{i}$.
 - This dependence disappears as $n \rightarrow \infty$ since $\left(b_{1}-\beta_{1}\right) \rightarrow 0$ and $\left(b_{2}-\beta_{2}\right) \rightarrow 0$.
 - But in finite samples residuals are heteroskedastic and correlated even if model errors are not.
 
+> **Key Concept**: Residual diagnostic plots reveal model violations that summary statistics miss. Plot residuals versus fitted values to check for heteroskedasticity (fan shape) or nonlinearity (pattern). Plot residuals versus each regressor to check for omitted nonlinear terms. Check residual normality with histogram or Q-Q plot—though non-normality is less critical with large samples due to CLT.
 
-## Key Stata Commands
+#### 16.8.5 Key Stata Commands
 
 ```
 regress democracy growth constraint indcent ///
@@ -270,6 +358,22 @@ predict dfits, dfits
 predict dfbgrowth, dfbeta(growth)
 ```
 
+> **Key Concept**: Influential observations can dramatically change regression results. DFITS measures influence on fitted values; DFBETA measures influence on specific coefficients. Observations with $|$DFITS$| > 2\sqrt{k/n}$ or $|$DFBETA$| > 2/\sqrt{n}$ warrant investigation. Don't automatically delete influential points—investigate whether they're errors, outliers, or valid extreme values.
+
+---
+
+**Key Takeaways from Section 16.8 (Diagnostics):**
+- Residual plots reveal problems summary statistics miss: heteroskedasticity (fan shape), nonlinearity (pattern), outliers
+- Plot residuals versus fitted values and versus each regressor
+- Component-plus-residual plots help detect omitted nonlinear terms
+- Added variable plots (partial regression plots) show relationship after controlling for other variables
+- Check residual normality with histograms or Q-Q plots (less critical with large n due to CLT)
+- DFITS measures influence on fitted values; DFBETA measures influence on coefficients
+- Influential observations: |DFITS| > 2√(k/n) or |DFBETA| > 2/√n warrant investigation
+- Don't automatically delete influential points—investigate if they're errors, outliers, or valid extremes
+- Good diagnostics require examining data visually, not just relying on test statistics
+
+---
 
 ## Some in-class Exercises
 

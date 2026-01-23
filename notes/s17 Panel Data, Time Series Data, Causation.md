@@ -1,9 +1,27 @@
 # Chapter 17: Panel Data, Time Series Data, Causation
 
-- Consider special issues that arise with cross-section data, panel data, and time series data
-- Consider the most commonly used nonlinear regression models
-- Provide a brief discussion of various methods to allow causal inference given observational data
-- Time series presentation is very dense - just provide a list of topics here
+## Learning Objectives
+
+By the end of this chapter, you will be able to:
+- Apply cluster-robust standard errors for cross-section data with grouped observations
+- Understand panel data methods including random effects and fixed effects estimators
+- Decompose panel data variation into within and between components
+- Use instrumental variables (IV) to address endogeneity problems
+- Understand the potential outcomes framework for causal inference
+- Apply difference-in-differences, regression discontinuity, and matching methods
+- Interpret results from logit and probit models for binary outcomes
+- Understand exponential regression models for nonnegative data
+- Recognize time series issues including autocorrelation and nonstationarity
+
+This chapter introduces advanced topics that extend the basic regression framework to handle more complex data structures and causal questions. The chapter covers three major areas:
+
+**Panel Data (Sections 17.1-17.3):** Methods for data with multiple observations per individual or cluster, including random effects and fixed effects estimators that control for unobserved heterogeneity.
+
+**Causal Inference (Sections 17.4-17.5):** Approaches for estimating causal effects from observational data, including instrumental variables, randomized control trials, difference-in-differences, regression discontinuity design, and matching methods.
+
+**Specialized Models (Sections 17.6-17.8):** Nonlinear regression models for binary and nonnegative outcomes, and an overview of time series methods for data collected over time.
+
+These advanced methods are essential for modern empirical work in economics, where simple OLS regression with default standard errors is often inadequate.
 
 
 ## Outline
@@ -35,8 +53,13 @@ Datasets: EARNINGS_COMPLETE, NBA, INTERESTRATES
 - can eliminate $\alpha_{g}$ and consistently estimate $\beta$ 's by OLS in model $y_{i g}-\bar{y}_{g}=\beta_{2}\left(x_{2 i g}-\bar{x}_{2 g}\right)+\cdots+\beta_{k}\left(x_{k i g}-\bar{x}_{k g}\right)+\left(\varepsilon_{i g}-\bar{\varepsilon}_{g}\right)$
 - advantage: allows regressors to be correlated with $\alpha_{g}$ so inconsistency only arises if regressors correlated with the $\varepsilon_{i g}$ component of the error.
 
+> **Key Concept**: When observations are clustered (e.g., students within schools, individuals within villages), errors are typically correlated within clusters. Cluster-robust standard errors account for this correlation and can be substantially larger than default or heteroskedastic-robust standard errors.
+
 
 ### 17.2 Panel Data
+
+**In this section:**
+- 17.2.1 Variation decomposition in panel data
 
 - Now have data for individual $i$ in years $t=1, \ldots T$
 - $y_{i t}=\beta_{1}+\beta_{2} x_{2 i t}+\cdots+\beta_{k} x_{k i t}+u_{i t}, i=1, \ldots, n$
@@ -52,7 +75,7 @@ Datasets: EARNINGS_COMPLETE, NBA, INTERESTRATES
 - more complicated.
 
 
-## Panel Data (continued)
+#### 17.2.1 Variation Decomposition in Panel Data
 
 - With panel data, variables potentially vary over both time and individuals.
 - This variation for a variable $z_{i t}$ can be decomposed as follows.
@@ -72,11 +95,19 @@ $$
 - OLS (and random effects) use both within and between variation.
 - The fixed effects estimator uses only within variation.
 
+> **Key Concept**: Panel data variation can be decomposed into within variation (over time for each individual) and between variation (across individuals). Fixed effects estimators use only within variation, while OLS and random effects use both. This distinction is crucial for understanding what each estimator identifies.
+
 
 ### 17.3 Panel Data Example: NBA Team Revenue
 
+**In this section:**
+- 17.3.1 Regression results: pooled OLS, random effects, fixed effects
+- 17.3.2 Interpretation of results
+
 - Dataset NBA has data on 29 teams for the 10 seasons 2001-02 to 2010-11
 - view as short panel dataset ( $T$ fixed and $n$ large).
+
+**Example 17.1**: Panel Data Summary Statistics for NBA Team Revenue
 
 | Variable | Definition | Mean | Standard deviation |  |  |
 | :--- | :--- | :--- | :--- | :--- | :--- |
@@ -91,9 +122,11 @@ $$
 | Teamid | Team identifier | 14.86 | 8.355 | 8.517 | 0.000 |
 | Season | Season identifier | 5.54 | 2.872 | 0.371 | 2.858 |
 
-## Panel Data Example: NBA Team Revenue (cont.)
+#### 17.3.1 Regression Results: Pooled OLS, Random Effects, Fixed Effects
 
 - Log-linear model: dependent variable is natural logarithm of team revenue.
+
+**Example 17.2**: Panel Data Regression Results (Pooled OLS, Random Effects, Fixed Effects)
 
 | Variable | Estimator, coefficients and standard errors |  |  |  |  |  |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
@@ -109,15 +142,32 @@ $$
 | Observations | 286 | 286 | 286 | 286 | 286 | 286 |
 
 [^0]
-## Panel Data Example: NBA Team Revenue (cont.)
+#### 17.3.2 Interpretation of Results
 
 - Pooled OLS, random effects and fixed effects estimators
 - use cluster-robust standard errors, not the default
 - asterisks: single for $10 \%$, double for $5 \%$, triple for $1 \%$.
 - The fixed effects slope estimate of 0.0027 means that one more win per season is associated with a $0.27 \%$ increase in team revenue, after controlling for city characteristics, some immediate past performance measures, and unobserved team characteristics $\left(\alpha_{i} m\right)$ that are time invariant.
 
+> **Key Concept**: Fixed effects control for unobserved time-invariant individual characteristics (like team quality, city appeal). The coefficient of 0.0027 means one more win increases team revenue by 0.27% after controlling for observable factors and unobservable team-specific effects.
+
+---
+
+**Key Takeaways from Sections 17.1-17.3 (Panel Data):**
+- Use cluster-robust standard errors when observations are grouped (students in schools, workers in firms)
+- Panel data methods include pooled OLS, random effects, and fixed effects estimators
+- Fixed effects control for unobserved time-invariant individual characteristics
+- Fixed effects use only within variation; random effects use both within and between variation
+- In the NBA example, one more win increases team revenue by 0.27% (fixed effects estimate)
+- Always use cluster-robust (not default) standard errors for clustered or panel data
+
+---
+
 
 ### 17.4 Instrumental Variables
+
+**In this section:**
+- 17.4.1 IV estimator and interpretation
 
 - Problem: in model $y=\beta_{1}+\beta_{2} x+u$ we have $\mathrm{E}[u \mid x]=0$
 - then $x$ is endogenous and OLS is inconsistent.
@@ -135,7 +185,7 @@ $$
 - Note: This is only possible if one can find a valid instrument.
 
 
-## Instrumental Variables (continued)
+#### 17.4.1 IV Estimator and Interpretation
 
 - The instrumental variables (IV) estimator of $\beta_{2}$ is
 
@@ -152,8 +202,30 @@ $$
 - Example: in log-wage model treat schooling as endogenous
 - use distance to closest college as an instrument.
 
+> **Key Concept**: Instrumental variables (IV) provide consistent estimates when a regressor is endogenous (correlated with the error). A valid instrument must be (1) correlated with the endogenous regressor and (2) uncorrelated with the error (exclusion restriction). The IV estimator can be interpreted as measuring the causal effect of x on y.
+
+---
+
+**Key Takeaways from Section 17.4 (Instrumental Variables):**
+- IV addresses endogeneity when a regressor is correlated with the error term
+- A valid instrument must be correlated with the endogenous regressor (relevance)
+- A valid instrument must be uncorrelated with the error (exclusion restriction)
+- The IV estimator provides a consistent causal estimate under these assumptions
+- Two-stage least squares (2SLS) extends IV to multiple endogenous regressors
+- Example: distance to college as an instrument for schooling in wage equations
+
+---
+
 
 ### 17.5 Causal Inference: An Overview
+
+**In this section:**
+- 17.5.1 Potential outcomes framework
+- 17.5.2 Randomized control trials and difference-in-differences
+- 17.5.3 Regression adjustment and control functions
+- 17.5.4 Regression discontinuity design
+- 17.5.5 Local average treatment effects (LATE)
+- 17.5.6 Inverse probability weighting and matching
 
 - Causal inference
 - goal is to get causal estimate of effect of $x$ on $z$ using observational data.
@@ -165,7 +237,7 @@ $$
 - each method has its own distinct assumptions and data requirements.
 
 
-## Causal Inference: Potential Outcomes Model
+#### 17.5.1 Potential Outcomes Framework
 
 - Potential outcomes model or Rubin causal model
 - standard framework that is used.
@@ -189,7 +261,9 @@ $$
 \mathrm{ATET}=E\left[\gamma_{i} \mid D_{i}=1\right]=E\left[\left(Y_{1 i}-Y_{0 i}\right) \mid D_{i}=1\right] .
 $$
 
-## Causal Inference: Differences-in-Differences
+> **Key Concept**: The potential outcomes framework formalizes causal inference by defining treatment effects as the difference between potential outcomes under treatment and control. Since we only observe one outcome per individual, we focus on average treatment effects (ATE) or average treatment effects on the treated (ATET).
+
+#### 17.5.2 Randomized Control Trials and Difference-in-Differences
 
 - A random controlled trial ( RCT ) is an experiment where randomly assign people to treatment and control.
 - then estimate ATE by the difference in means $\bar{y}_{1 i}-\bar{y}_{0 i}$
@@ -201,8 +275,10 @@ $$
 - $\widehat{\text { ATET }}=$ average change in $y$ over time for those treated in second period minus average change in $y$ over time for those not treated in second period.
 - example of a natural experiment.
 
+> **Key Concept**: Randomized control trials (RCTs) provide causal estimates by randomly assigning treatment, ensuring treatment is uncorrelated with potential outcomes. Difference-in-differences (DiD) estimates the treatment effect as the change over time for treated individuals minus the change for untreated individuals, controlling for time trends.
 
-## Causal Inference: Regression Adjustment
+
+#### 17.5.3 Regression Adjustment and Control Functions
 
 - Control function approach adds controls
 - $\widehat{\mathrm{ATE}}=\widehat{\gamma}$ from OLS of $y_{i}=\beta_{1}+\gamma d_{i}+\beta_{2} x_{2 i}+\cdots+\beta_{k} x_{k i}+u_{i}$
@@ -215,10 +291,12 @@ $$
 - $y_{i t}=\beta_{1}+\gamma d_{i t}+\beta_{2} x_{2 i t}+\cdots+\beta_{k} x_{k i t}+\alpha_{i}+\varepsilon_{i t}$
 - need to assume $d_{i t}$ and $\varepsilon_{i t}$ uncorrelated once the controls and $\alpha_{i}$ are added.
 
+> **Key Concept**: Regression adjustment adds control variables to make treatment assignment independent of potential outcomes conditional on the controls. Fixed effects models extend this by controlling for unobserved individual-specific effects that are constant over time.
 
-## Causal Inference: Regression Discontinuity Design
 
-## - Regression discontinuity design (RDD)
+#### 17.5.4 Regression Discontinuity Design
+
+- Regression discontinuity design (RDD)
 
 - a threshold variable determines treatment status
 - e.g. admission into treatment is based on a score denoted $s$, with scores above 100 , say, leading to treatment $(d=1)$.
@@ -236,8 +314,10 @@ $$
 - estimates are focused on observations close to the threshold
 - or nonparametric methods are used either side of the threshold.
 
+> **Key Concept**: Regression discontinuity design (RDD) exploits threshold-based treatment assignment. By comparing outcomes just above and below the threshold (where treatment changes discontinuously), RDD provides a local causal estimate for individuals near the threshold.
 
-## Causal Inference: Local Average Treatment Effects
+
+#### 17.5.5 Local Average Treatment Effects (LATE)
 
 - Instrumental variables (IV) estimator from chapter 17.4
 - IV estimator in model $y_{i}=\beta_{1}+\gamma d_{i}$ where $z_{i}$ is instrument for $x_{i}$.
@@ -252,7 +332,7 @@ $$
 - Then under the crucial and nontestable assumption that there are no defiers, also called the monotonicity assumption, the IV estimator
 
 
-## Causal Inference: IPW and Matching
+#### 17.5.6 Inverse Probability Weighting and Matching
 
 - Inverse probability weighting uses weighted averages of the outcome
 - binary treatment $d_{i}=1$ or $d_{i}=0$.
@@ -265,13 +345,35 @@ $\star$ and $\widehat{p}_{i}=\widehat{\operatorname{Pr}}\left(d_{i}=1 \mid\left(
 - nearest neighbor matching compare outcome for each treated observation to the average outcome of the $k$ observations whose values of $x_{2}, \ldots, x_{k}$ are closest to those for the treated observation.
 - propensity score matching instead compares outcomes with similar probability of treatment..
 
+> **Key Concept**: Inverse probability weighting (IPW) and matching methods estimate treatment effects by comparing treated and untreated individuals with similar characteristics. The propensity score—the probability of treatment given covariates—is key to both approaches.
+
+---
+
+**Key Takeaways from Section 17.5 (Causal Inference):**
+- The potential outcomes framework formalizes causal inference for observational data
+- Randomized control trials (RCTs) provide gold-standard causal estimates
+- Difference-in-differences compares changes over time for treated vs. untreated groups
+- Regression adjustment and fixed effects control for observed and unobserved confounders
+- Regression discontinuity exploits threshold-based treatment assignment
+- IV/LATE estimates causal effects for compliers (those induced to treatment by the instrument)
+- Matching and IPW estimate treatment effects by comparing similar treated and untreated units
+- Each method requires different assumptions; choose based on data structure and credibility
+
+---
+
 
 ### 17.6 Nonlinear Regression Models
+
+**In this section:**
+- 17.6.1 Probit model
+- 17.6.2 Exponential conditional mean model
 
 - Binary outcome $y_{i}=0$ or 1
 - model $\operatorname{Pr}\left[y_{i}=1 \mid\right.$ regressors $]$ using a logit model or probit model
 - maximum likelihood estimation by computer is straightforward, interpretation of estimates is more difficult.
 - The logit model specifies that
+
+**Example 17.3**: Logit Model Specification
 
 $$
 \begin{aligned}
@@ -284,10 +386,14 @@ $$
 - where $\widehat{p}$ is the predicted probability
 - $\mathrm{ME}_{j}\left|\leq 0.25 \times\left|b_{j}\right|\right.$ and sign of $b_{j}$ gives sign of ME.
 
+> **Key Concept**: For binary outcomes, logit and probit models estimate the probability of the outcome being 1 as a function of regressors. Unlike linear probability models, these ensure predicted probabilities lie between 0 and 1. Marginal effects (not coefficients) give the change in probability for a unit change in a regressor.
 
-## Nonlinear Regression Models (continued)
+
+#### 17.6.1 Probit Model
 
 - The probit model specifies that
+
+**Example 17.4**: Probit Model Specification
 
 $$
 \begin{aligned}
@@ -303,9 +409,11 @@ where $\Phi(\cdot)$ is the cumulative distribution function of the standard norm
 - $\mathrm{ME}_{j}\left|\leq 0.4 \times\left|b_{j}\right|\right.$ and sign of $b_{j}$ gives sign of ME.
 
 
-## Nonlinear Regression Models (continued)
+#### 17.6.2 Exponential Conditional Mean Model
 
 - Suppose the conditional mean is exponential, so that
+
+**Example 17.5**: Exponential Conditional Mean Model
 
 $$
 \mathrm{E}\left[y \mid x_{2}, \ldots, x_{k}\right]=\exp \left(\beta_{1}+\beta_{2} x_{2}+\cdots+\beta_{k} x_{k}\right) .
@@ -319,6 +427,20 @@ $$
 - where $\widehat{y}$ is the predicted value of $y$
 - and $\mathrm{AME}=\bar{y} b_{j}$.
 - Coefficients $b_{j}$ can be directly interpreted as semi-elasticities.
+
+> **Key Concept**: Exponential regression models are appropriate for nonnegative outcomes (like counts or expenditures). The exponential form ensures predictions are positive. Coefficients can be interpreted as semi-elasticities: a one-unit change in x changes y by approximately 100×β percent.
+
+---
+
+**Key Takeaways from Section 17.6 (Nonlinear Regression Models):**
+- Logit and probit models are appropriate for binary (0/1) outcomes
+- These models ensure predicted probabilities lie between 0 and 1
+- Marginal effects (not raw coefficients) give the change in probability for a unit change in x
+- Exponential regression models are appropriate for nonnegative data
+- Coefficients in exponential models are semi-elasticities
+- All these models are estimated by maximum likelihood, not OLS
+
+---
 
 
 ### 17.7 Time Series Data
@@ -342,6 +464,20 @@ $$
 
 - Dataset INTERESTRATES has monthly data from January 1982 to January 2015 on 1-year and 10-year treasury note constant maturity rates.
 - Application regresses 10 -year rate on 1 -year rate.
+
+---
+
+**Key Takeaways from Sections 17.7-17.8 (Time Series):**
+- Time series data requires special methods due to autocorrelation (correlation over time)
+- HAC standard errors account for both heteroskedasticity and autocorrelation
+- Stationarity is crucial: nonstationary series can lead to spurious regression
+- Autoregressive (AR) models include lagged dependent variables as regressors
+- Distributed lag models include current and lagged values of regressors
+- Unit root tests determine whether a series is stationary or nonstationary
+- Forecasting methods include AR, ARMA, and VAR models
+- Time series econometrics is a specialized field requiring careful treatment
+
+---
 
 
 [^0]:    (C) A. Colin Cameron Univ. of Calif. Davis

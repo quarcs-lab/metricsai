@@ -8,6 +8,17 @@
   - **Graphical methods**: box plot, histograms, smoothed histograms (kernel density estimates), line charts, bar charts, ...
 
 
+## Learning Objectives
+
+By the end of this chapter, you will be able to:
+- Calculate and interpret summary statistics (mean, median, standard deviation, quartiles)
+- Understand measures of data distribution (skewness, kurtosis)
+- Choose appropriate visualizations for different data types
+- Create and interpret histograms, box plots, and kernel density estimates
+- Apply data transformations (logarithms, z-scores, growth rates)
+- Recognize when to use different chart types (histograms, line charts, bar charts, pie charts)
+
+
 ## Outline
 
 (1) Summary Statistics for Numerical Data
@@ -21,6 +32,17 @@
 
 
 ### 2.1 Summary Statistics for Numerical Data
+
+**In this section:**
+- 2.1.1 Summary statistics example
+- 2.1.2 Measures of central tendency (mean, median)
+- 2.1.3 Standard deviation and variance
+- 2.1.4 Interpreting standard deviation
+- 2.1.5 Other dispersion measures (CV, IQR, MAD)
+- 2.1.6 Quartiles, deciles, and percentiles
+- 2.1.7 Skewness
+- 2.1.8 Kurtosis
+- 2.1.9 Box plots
 
 - Observations for a sample of size $n$ are denoted:
 
@@ -39,7 +61,9 @@ $$
 \bar{x}=\frac{x_{1}+x_{2}+\ldots+x_{n}}{n}=\frac{1}{n} \sum_{i=1}^{n} x_{i}
 $$
 
-#### Summary Statistics Example: Earnings
+#### 2.1.1 Summary Statistics Example: Earnings
+
+**Example 2.1**: Earnings of Full-Time Working Women
 
 Summary statistics, rounded to the nearest dollar, for the earnings data on full-time working women aged 30 in 2010:
 
@@ -57,7 +81,7 @@ Summary statistics, rounded to the nearest dollar, for the earnings data on full
 | Skewness | 1.71 |
 | Kurtosis | 7.32 |
 
-#### Central Tendency
+#### 2.1.2 Measures of Central Tendency
 
 - **Mean**: the average
 
@@ -65,7 +89,8 @@ $$
 \bar{x}=\left(x_{1}+x_{2}+\ldots+x_{n}\right) / n=\frac{1}{n} \sum_{i=1}^{n} x_{i}
 $$
 
-  - e.g., Sample $\{8,3,7,6\}$ then $\bar{x}=(8+3+7+6) / 4=6$
+**Example 2.2**: Calculating the Mean
+- Sample $\{8,3,7,6\}$ then $\bar{x}=(8+3+7+6) / 4=6$
 
 - **Median**: mid-point of the ordered observations
   - e.g., Sample $\{8,3,7,6\}$ when ordered is $\{3,6,7,8\}$
@@ -77,8 +102,10 @@ $$
 
 - Most often the mean is used
 
+> **Key Concept**: The mean is sensitive to outliers, while the median is robust. For skewed distributions, always report both measures.
 
-#### Data Dispersion or Spread: Standard Deviation
+
+#### 2.1.3 Standard Deviation and Variance
 
 - **Sample variance:**
 
@@ -89,16 +116,16 @@ $$
 - The divisor $(n-1)$ is called the degrees of freedom
   - Only $(n-1)$ terms in the sum can vary since the $x_{i}$ are linked by $\bar{x}=\frac{1}{n} \sum_{i=1}^{n} x_{i}$
 
-- **Example:**
-  - Sample $\{8,3,7,6\}$ has $n=4$ and $\bar{x}=6$
-  - $s^{2}=\frac{1}{3}\left[(8-6)^{2}+(3-6)^{2}+(7-6)^{2}+(6-6)^{2}\right]=14 / 3=4.66$
+**Example 2.3**: Calculating Variance and Standard Deviation
+- Sample $\{8,3,7,6\}$ has $n=4$ and $\bar{x}=6$
+- $s^{2}=\frac{1}{3}\left[(8-6)^{2}+(3-6)^{2}+(7-6)^{2}+(6-6)^{2}\right]=14 / 3=4.66$
 
 - **Sample standard deviation:** $s=\sqrt{s^{2}}$
   - Take square root to get back to same units as $x$
-  - e.g., Sample $\{8,3,7,6\}$ has $s=\sqrt{s^{2}}=\sqrt{4.66}=2.16$
+  - Sample $\{8,3,7,6\}$ has $s=\sqrt{s^{2}}=\sqrt{4.66}=2.16$
 
 
-#### Interpretation of Standard Deviation
+#### 2.1.4 Interpreting Standard Deviation
 
 - Standard deviation is difficult to understand physically
 - As a guide, use the fact that if data are normally distributed then 68%, 95%, 99.7% are within 1, 2 and 3 standard deviations of the mean
@@ -113,7 +140,10 @@ Two St. Devs.
 Three St. Devs.
 ![](https://cdn.mathpix.com/cropped/ce1742d8-4c04-44c0-9abd-85e107d473e1-08.jpg?height=298&width=375&top_left_y=516&top_left_x=839)
 
-#### Data Dispersion or Spread: Other Measures
+> **Key Concept**: Standard deviation measures the typical distance of observations from the mean. For normal distributions, approximately 68% of data falls within 1 standard deviation, 95% within 2 standard deviations.
+
+
+#### 2.1.5 Other Measures of Dispersion
 
 - We most often use the standard deviation
 
@@ -127,7 +157,7 @@ Three St. Devs.
   - Average absolute deviation about the mean
 
 
-#### Quartiles, Deciles and Percentiles
+#### 2.1.6 Quartiles, Deciles and Percentiles
 
 These provide summaries of ordered data (in addition to the median):
 
@@ -142,7 +172,7 @@ These provide summaries of ordered data (in addition to the median):
   - 99th percentile: 99% below and 1% above
 
 
-#### Skewness
+#### 2.1.7 Skewness
 
 - **Symmetry**
   - The density is the same when reflected about the mean
@@ -166,8 +196,10 @@ $$
 - With skewed data mean $\neq$ median
 - For very skewed data may wish to use the median in addition to, or in place of, the mean
 
+> **Key Concept**: Right-skewed data (positive skewness) is common in economics: earnings, prices, wealth. For highly skewed data, consider using the median or applying a log transformation.
 
-## Kurtosis
+
+#### 2.1.8 Kurtosis
 
 - Kurtosis statistic: Approximately
 
@@ -187,7 +219,7 @@ $$
 - financial returns data often have fat tails.
 
 
-## Box Plot
+#### 2.1.9 Box Plot
 
 - A box and whisker plot or, more simply, a box plot
 - provides in a simple graphic some of the key summary statistics.
@@ -200,10 +232,20 @@ $$
     - Lower bar is lower quartile minus 1.5 times the inter-quartile range
     - Dots are observations outside these bars
 
-
-## Box Plot Example: Earnings
-
 ![](https://cdn.mathpix.com/cropped/ce1742d8-4c04-44c0-9abd-85e107d473e1-15.jpg?height=587&width=770&top_left_y=189&top_left_x=245)
+
+---
+
+**Key Takeaways from Section 2.1:**
+- Summary statistics efficiently describe large datasets using measures of central tendency and dispersion
+- Choose the median over the mean for skewed data
+- Standard deviation quantifies typical deviation from the mean
+- Quartiles divide data into fourths and are robust to outliers
+- Skewness and kurtosis describe the shape of the distribution
+- Box plots provide a visual summary of key statistics
+
+---
+
 
 ### 2.2 Charts for Numerical Data
 
@@ -216,7 +258,7 @@ $$
 - Earnings are generally reported to the nearest hundred or thousand or ten thousand dollars.
 
 
-## Frequency Distribution (tabulation in ranges)
+#### 2.2.1 Frequency Distribution (Tabulation in Ranges)
 
 - Summary of data grouped into intervals of width $\$ 15,000$
 - e.g. 53 observations or $31 \%$ have earnings between $\$ 15,000$ and \$29,999.
@@ -236,7 +278,7 @@ $$
 | 150,000-164,999 | 0 | 0.0 |
 | 165,000-180,000 | 1 | 0.6 |
 
-## Histogram
+#### 2.2.2 Histogram
 
 - The preceding table summarizes the data grouped into intervals of width \$15,000
 - each interval is called a bin; here there are 13 bins $\simeq \sqrt{171}$.
@@ -248,15 +290,15 @@ $$
 - vertical axis: frequency or relative frequency or density (the relative frequency divided by the bin width)
 
 
-## Frequency Histogram for Two Bin Widths
+#### 2.2.3 Choosing Bin Width
 
 - Smaller bin width gives more detail
-- here compare $\$ 15,000$ to $\$ 7.500$ bin width.
+- Here we compare $\$ 15,000$ to $\$ 7,500$ bin width.
 ![](https://cdn.mathpix.com/cropped/ce1742d8-4c04-44c0-9abd-85e107d473e1-19.jpg?height=352&width=556&top_left_y=389&top_left_x=77)
 ![](https://cdn.mathpix.com/cropped/ce1742d8-4c04-44c0-9abd-85e107d473e1-19.jpg?height=353&width=570&top_left_y=388&top_left_x=641)
 
 
-## Smoothed Histogram (kernel density estimate)
+#### 2.2.4 Kernel Density Estimates (Smoothed Histogram)
 
 - Continuous data such as earnings data have an underlying continuous density
   - e.g., the normal distribution (a bell-shaped density)
@@ -270,14 +312,16 @@ $$
 - Can compare kernel density estimate to a proposed continuous density for the data such as normal
 
 
-## Kernel Density Estimate for Two Window Widths
+#### 2.2.5 Choosing Window Width
 
 - Larger window width or bin width leads to smoother estimate.
 ![](https://cdn.mathpix.com/cropped/ce1742d8-4c04-44c0-9abd-85e107d473e1-21.jpg?height=448&width=632&top_left_y=343&top_left_x=62)
 ![](https://cdn.mathpix.com/cropped/ce1742d8-4c04-44c0-9abd-85e107d473e1-21.jpg?height=441&width=456&top_left_y=343&top_left_x=778)
 
+> **Key Concept**: Kernel density estimates provide smooth approximations of the underlying distribution. Larger window widths create smoother estimates but may hide important features.
 
-## Line Chart for Ordered Data
+
+#### 2.2.6 Line Charts for Time Series
 
 - A standard chart for time series data is a line chart.
 - A line chart plots the successive values of the data against the successive index values.
@@ -289,10 +333,18 @@ $$
   - Per capita real GDP tripled over the sixty years
 - Also shows dips due to recessions
 
-
-## Line Chart Example: Real per capita U.S. GDP
-
 ![](https://cdn.mathpix.com/cropped/ce1742d8-4c04-44c0-9abd-85e107d473e1-23.jpg?height=593&width=772&top_left_y=188&top_left_x=252)
+
+---
+
+**Key Takeaways from Section 2.2:**
+- Histograms show the distribution of numerical data using bins
+- Bin width affects the level of detail: smaller bins show more detail but may be noisier
+- Kernel density estimates provide smooth approximations of the underlying distribution
+- Line charts are ideal for time series data to show trends over time
+
+---
+
 
 ### 2.3 Charts for Numerical Data by Category
 
@@ -315,7 +367,7 @@ $$
 | Noncommercial Research | 53 |
 | Structures and Equipment | 122 |
 
-## Bar Charts
+#### 2.3.1 Bar Charts and Column Charts
 
 - Bar charts are a standard chart for numerical categorical data.
 - A bar chart
@@ -328,12 +380,9 @@ $$
 - values on the horizontal axis
 - category on the vertical axis.
 
-
-## Column Chart Example
-
 ![](https://cdn.mathpix.com/cropped/ce1742d8-4c04-44c0-9abd-85e107d473e1-26.jpg?height=556&width=760&top_left_y=206&top_left_x=251)
 
-## Spatial Map
+#### 2.3.2 Spatial Maps
 
 - Plot data by geographic location against a geographic map.
 - Example is average family size in each U.S. state in 2010
@@ -355,7 +404,7 @@ Average family size 2010
 | Private Boat | 418 | 35.36 |
 | Charter Boat | 452 | 38.24 |
 
-## Pie Chart
+#### 2.4.1 Pie Charts
 
 - A pie chart splits a circle into slices
 - the area of each slice corresponds to the relative frequency of observations in each category.
@@ -364,21 +413,21 @@ Average family size 2010
 - giving the associated headings, in the same ordering, in a separate legend.
 - using color rather than black-and-white.
 
-
-## Pie Chart Example
-
 ![](https://cdn.mathpix.com/cropped/ce1742d8-4c04-44c0-9abd-85e107d473e1-30.jpg?height=541&width=704&top_left_y=221&top_left_x=277)
 
-### 2.5 Data Transformations: Natural Logarithm
+
+### 2.5 Data Transformations
+
+#### 2.5.1 Natural Logarithm Transformation
 
 - Many economic series are right-skewed: prices, income, wealth, ...
-- natural logarithm converts right-skewed data to a more symmetric distribution.
+- Natural logarithm converts right-skewed data to a more symmetric distribution.
 ![](https://cdn.mathpix.com/cropped/ce1742d8-4c04-44c0-9abd-85e107d473e1-31.jpg?height=348&width=544&top_left_y=372&top_left_x=91)
 ![](https://cdn.mathpix.com/cropped/ce1742d8-4c04-44c0-9abd-85e107d473e1-31.jpg?height=349&width=537&top_left_y=372&top_left_x=651)
 - Advantages of using natural logarithm are given in Chapter 9.
 
 
-## Standardized Scores
+#### 2.5.2 Standardized Scores (Z-Scores)
 
 - Standardized scores (or z-scores)
 - Consider sample with sample mean $\bar{x}$ and standard deviation $s$
@@ -394,8 +443,12 @@ $$
 - e.g. test scores on two different tests.
 - If e.g. $z_{i}=-3$ then $x_{i}$ was 3 standard deviations below the mean.
 
+> **Key Concept**: Z-scores standardize data to have mean 0 and standard deviation 1, enabling comparison across different scales. A z-score of ±2 or beyond indicates an unusual observation.
 
-### 2.6 Common Data Transformations for Time Series Data
+
+### 2.6 Data Transformations for Time Series
+
+#### 2.6.1 Moving Averages and Seasonal Adjustment
 
 - Moving averages: smooth by averaging over several successive periods.
 - Seasonal adjustment: smooth by adjusting for seasonal variation.
@@ -403,7 +456,7 @@ $$
 ![](https://cdn.mathpix.com/cropped/ce1742d8-4c04-44c0-9abd-85e107d473e1-33.jpg?height=358&width=558&top_left_y=411&top_left_x=635)
 
 
-## More Data Transformations for Time Series Data
+#### 2.6.2 Real and Per Capita Adjustments
 
 - Real and nominal data: adjust for price inflation.
 - Per capita data: adjust for population size.
@@ -411,24 +464,23 @@ $$
 ![](https://cdn.mathpix.com/cropped/ce1742d8-4c04-44c0-9abd-85e107d473e1-34.jpg?height=446&width=549&top_left_y=348&top_left_x=639)
 
 
-## Growth rates and percentage changes
+#### 2.6.3 Growth Rates and Percentage Changes
 
 - The one-period percentage change in $x_{t}$ is $100 \times \frac{x_{t}-x_{t-1}}{x_{t-1}}$.
-- this is often converted to an annualized rate
-${ }^{\star}$ e.g. for quarterly data the quarterly change is multiplied by four.
+- This is often converted to an annualized rate
+  - e.g., for quarterly data the quarterly change is multiplied by four.
 - Distinguish between percentage point change and percentage change
-- Suppose the growth rate increases from 3 percent to 5 percent
-- correct: the growth rate increased by two percentage points
-- incorrect: there is a 2 percent increase in the growth rate
-${ }^{\star}$ which means an increase from 3.0 percent to $3.0 \times 1.02=3.06$ percent.
+  - Suppose the growth rate increases from 3 percent to 5 percent
+  - Correct: the growth rate increased by two percentage points
+  - Incorrect: there is a 2 percent increase in the growth rate (which means an increase from 3.0 percent to $3.0 \times 1.02=3.06$ percent)
 - Very small changes are described in basis points
-- a basis point is one-hundredth of a percentage point.
-- An approximation (explained in chapter 9.1) is
-- proportionate change in $x=$ level change in natural log of $x$
-- so percentage change in $x_{t} \equiv 100 \times \frac{x_{t}-x_{t-1}}{x_{t-1}} \simeq 100 \times\left(\ln x_{t}-\ln x_{t-1}\right)$.
+  - A basis point is one-hundredth of a percentage point
+- An approximation (explained in Chapter 9.1) is
+  - Proportionate change in $x=$ level change in natural log of $x$
+  - So percentage change in $x_{t} \equiv 100 \times \frac{x_{t}-x_{t-1}}{x_{t-1}} \simeq 100 \times\left(\ln x_{t}-\ln x_{t-1}\right)$
 
 
-## Key Stata Commands
+### 2.7 Key Stata Commands
 
 ```
 clear
@@ -446,7 +498,7 @@ kdensity lnearns, normal
 ```
 
 
-## Some in-class Exercises
+### 2.8 Practice Exercises
 
 (1) Obtain $\sum_{i=1}^{3}\left(2+3 i^{2}\right)$.
 ( ) Obtain the mean, variance and standard deviation for a sample with values $5,2,2$.

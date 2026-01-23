@@ -1,30 +1,53 @@
 # Chapter 13: Case Studies for Multiple Regression
 
-(1) School Academic Performance Index
-(2) Cobb-Douglas Production Function (natural logarithms)
-(3) Phillips Curve (omitted variables bias)
-(4) Automobile Fuel Efficiency (natural logarithms; clustered errors)
-(5) Rand Health Insurance Experiment (randomized control trial)
-(6) Health Care Access and Outcomes (difference in differences)
-(7) Gains from Political Incumbency (regression discontinuity design)
-(8) Institutions and Country GDP (instrumental variables)
-(9) From Raw Data to Final Data
-Examples 5-8 provide causal estimates using methods summarized in chap. 17.5.
+## Learning Objectives
+
+By the end of this chapter, you will be able to:
+- Apply multiple regression to analyze school performance and socioeconomic factors
+- Use logarithmic transformations to estimate production functions
+- Understand and test for constant returns to scale
+- Identify and correct for omitted variables bias
+- Apply cluster-robust standard errors for grouped data
+- Understand randomized control trials and difference-in-differences methods
+- Apply regression discontinuity design to causal questions
+- Use instrumental variables to estimate causal effects
+- Navigate the data cleaning and preparation process
+
+This chapter demonstrates multiple regression analysis through nine diverse case studies spanning education policy, production economics, macroeconomics, and causal inference. The first three case studies provide detailed analyses with complete regression results. Case studies 4-8 introduce advanced methods for causal estimation (covered in Chapter 17). Case study 9 addresses practical data preparation challenges.
+
+The case studies cover:
+1. School Academic Performance Index - socioeconomic determinants of school performance
+2. Cobb-Douglas Production Function - estimating returns to scale using logarithms
+3. Phillips Curve - unemployment and inflation with omitted variables bias
+4. Automobile Fuel Efficiency - log-log models with cluster-robust standard errors
+5. Rand Health Insurance Experiment - randomized control trial for causal effects
+6. Health Care Access and Outcomes - difference-in-differences estimation
+7. Gains from Political Incumbency - regression discontinuity design
+8. Institutions and Country GDP - instrumental variables approach
+9. From Raw Data to Final Data - data cleaning and preparation workflow
 
 Datasets: API, COBBDOUGLAS, PHILLIPS, AUTOSMPG, HEALTHINSEXP, HEALTHACCESS, INCUMBENCY, INSTITUTIONS
 
 ### 13.1 Case Study 1: School Performance Index
 
-- How do we encourage schools to become better?
+**In this case study:**
+- 13.1.1 California Academic Performance Index data
+- 13.1.2 Univariate analysis
+- 13.1.3 Bivariate analysis
+- 13.1.4 Correlations among variables
+- 13.1.5 Multiple regression results
+- 13.1.6 Conclusion and implications
+
+How do we encourage schools to become better?
 - Many U.S. states score schools based on student performance on standardized tests
 - in key subjects such as math and English conducted each year.
 - Schools are expected to improve their scores over time.
 - failure to do so can lead to intervention by state authorities.
 
 
-## California Academic Performance Index
+#### 13.1.1 California Academic Performance Index
 
-- Dataset API99 has data for 807 high schools in California in 1999 on
+Dataset API99 has data for 807 high schools in California in 1999 on
 - API (Academic Performance Index) in range 200 to 1000
   - Goal is for API > 800
 - Socioeconomics variables Edparent, Meals and Englearn
@@ -41,22 +64,26 @@ Datasets: API, COBBDOUGLAS, PHILLIPS, AUTOSMPG, HEALTHINSEXP, HEALTHACCESS, INCU
 | Credteach | \% of teachers with full credentials | 89.84 | 8.44 | 33 | 100 |
 | Emerteach | \% of teachers with emergency creds | 10.47 | 8.21 | 0 | 56 |
 
-## Univariate Analysis
+#### 13.1.2 Univariate Analysis
 
-- Data are approximately normally distributed (by design)
+Data are approximately normally distributed (by design)
 ![](https://cdn.mathpix.com/cropped/305edb9b-4075-41ef-9523-a058e126c526-05.jpg?height=415&width=546&top_left_y=325&top_left_x=78)
 ![](https://cdn.mathpix.com/cropped/305edb9b-4075-41ef-9523-a058e126c526-05.jpg?height=419&width=547&top_left_y=322&top_left_x=642)
 
 
-## Bivariate Analysis
+#### 13.1.3 Bivariate Analysis
 
-- $\widehat{A p i}=-400.31+79.53 \times$ Edparent, $s_{e}=43.674, R^{2}=0.835$, (15.99) (1.22)
+**Example 13.1**: Bivariate Regression of API on Parent Education
+
+$\widehat{A p i}=-400.31+79.53 \times$ Edparent, $s_{e}=43.674, R^{2}=0.835$, (15.99) (1.22)
 $\bar{R}^{2}=0.834$ (heteroskedastic-robust se's in parentheses)
 - One more year of parent education associated with 80 more points!
 ![](https://cdn.mathpix.com/cropped/305edb9b-4075-41ef-9523-a058e126c526-06.jpg?height=528&width=693&top_left_y=341&top_left_x=287)
 
+> **Key Concept**: Parent education shows a strong positive association with school performance (API), with one additional year of parent education associated with approximately 80 more API points. However, this bivariate relationship doesn't account for other factors.
 
-## Correlations
+
+#### 13.1.4 Correlations
 
 - Pairwise correlations also moderate to high for several other variables
 
@@ -70,9 +97,11 @@ $\bar{R}^{2}=0.834$ (heteroskedastic-robust se's in parentheses)
 | Credteach | .46* | .40* | -.27* | -.26* | -.18* | 1 |  |
 | Emerteach | -.45* | -.37* | .22* | .20* | .09* | -.82* | 1 |
 
-## Multiple Regression
+#### 13.1.5 Multiple Regression Results
 
-- Regress API on other regressors with default se's
+**Example 13.2**: Multiple Regression of API on All Factors
+
+Regress API on other regressors with default se's
 - Edparent coefficient little change from 79.53 to 73.94
 - all six regressors jointly statistically significant $F=771.4$
 - subset of five regressors other than Edparent statistically significant $F=14.80$ has $p=0.000$
@@ -90,7 +119,10 @@ $\bar{R}^{2}=0.834$ (heteroskedastic-robust se's in parentheses)
 | $n=$ | $F(6,22)=$ | $R^{2}=$ | $\bar{R}^{2}=$ | $s_{e}=$ |  |  |
 | 807 | 771.4 | 853 | . 852 | 41.4 |  |  |
 
-## Conclusion
+> **Key Concept**: In multiple regression, the coefficient for parent education remains strong (73.94) even after controlling for other factors. The high correlation between socioeconomic variables makes it difficult to isolate the separate effects of other educational inputs like teacher quality.
+
+
+#### 13.1.6 Conclusion and Implications
 
 - Very strong association of API with socioeconomic characteristics
 here parental education.
@@ -99,8 +131,30 @@ here parental education.
 - California also produced a "similar schools" index
 - this controls for socioeconomic characteristics.
 
+---
+
+**Key Takeaways from Case Study 13.1:**
+- School performance is strongly associated with socioeconomic factors, particularly parent education
+- The bivariate relationship shows 80 API points per year of parent education
+- Multiple regression maintains a strong effect (74 points) after controlling for other factors
+- High correlations among socioeconomic variables make it challenging to isolate individual effects
+- Teacher quality measures show mixed significance when socioeconomic factors are controlled
+
+---
+
 
 ### 13.2 Cobb-Douglas Production Function
+
+**In this case study:**
+- 13.2.1 Natural logarithm transformation
+- 13.2.2 Original Cobb-Douglas study data
+- 13.2.3 Regression results
+- 13.2.4 Testing specified parameter values
+- 13.2.5 Testing constant returns to scale
+- 13.2.6 Predicted output
+- 13.2.7 Figures and visualization
+- 13.2.8 Fitted isoquants
+- 13.2.9 HAC-robust standard errors
 
 - Important issue for determining market structure is whether or not returns to scale are constant, increasing or decreasing.
 - e.g. with increasing returns to scale a natural monopoly may arise.
@@ -117,9 +171,9 @@ $$
 - versus increasing if $\beta_{2}+\beta_{3}>1$ and decreasing if $\beta_{2}+\beta_{3}<1$.
 
 
-## Natural Logarithm Transformation
+#### 13.2.1 Natural Logarithm Transformation
 
-- The model for $Q$ is nonlinear in $K$ and $L$
+The model for $Q$ is nonlinear in $K$ and $L$
 - so OLS multiple regression seems impossible.
 - But OLS is possible once take logs
 
@@ -137,8 +191,10 @@ where $\beta_{1}=\ln \alpha$.
 - This result uses the properties of natural logarithm that $\ln (a \times b)=\ln a+\ln b$ and $\ln a^{b}=b \ln a$.
 - So do OLS regression of $\ln Q$ on an intercept, $\ln K$ and $\ln L$.
 
+> **Key Concept**: Taking natural logarithms of the Cobb-Douglas production function transforms a nonlinear model into a linear model suitable for OLS regression. The resulting coefficients are elasticities that can be directly interpreted.
 
-## Example: Original Cobb-Douglas Study
+
+#### 13.2.2 Original Cobb-Douglas Study Data
 
 - Dataset COBBDOUGLAS has U.S. aggregate data on manufacturing for the 24 years from 1899 to 1922.
 - From C.W. Cobb and P.H. Douglas (1928), "A Theory of Production," American Economic Review," pages 139-165.
@@ -158,9 +214,11 @@ where $\beta_{1}=\ln \alpha$.
 | 1909 | 155 | 198 | 140 | 1921 | 179 | 417 | 147 |
 | 1910 | 159 | 208 | 144 | 1922 | 240 | 431 | 161 |
 
-## Regression Results
+#### 13.2.3 Regression Results
 
-- Regression results
+**Example 13.3**: Cobb-Douglas Production Function Estimation
+
+Regression results
 - HAC-robust standard errors (lag length 3 ) in parentheses
 
 $$
@@ -173,8 +231,10 @@ $$
 - The residuals are only slightly correlated with first three autocorrelations $0.11,-0.16$ and -0.16
 - use lag length $m=3$ as $0.75 \times 24^{1 / 3}=2.16$.
 
+> **Key Concept**: The estimated elasticities of capital (0.233) and labor (0.807) indicate that a 1% increase in capital increases output by 0.23%, while a 1% increase in labor increases output by 0.81%. Labor has a much stronger effect on production.
 
-## Test of Specified Parameter Values
+
+#### 13.2.4 Testing Specified Parameter Values
 
 - Cobb and Douglas did not estimate this model by linear regression
 - instead set $\beta_{2}=.25$ and $\beta_{3}=.75$.
@@ -188,17 +248,21 @@ ${ }^{\star}$ not statistically different from 0.75 at level $5 \%$.
 - the restrictions are not rejected at significance level 0.05.
 
 
-## Test Constant Returns to Scale
+#### 13.2.5 Testing Constant Returns to Scale
 
-- Constant returns to scale if $\beta_{2}+\beta_{3}=1$.
+Constant returns to scale if $\beta_{2}+\beta_{3}=1$.
 - $b_{2}+b_{3}=.233+.807=1.040$ is close to 1 .
 - Formal test of $H_{0}: \beta_{2}+\beta_{3}=1$ against $H_{0}: \beta_{2}+\beta_{3} \neq 1$
 - $F=0.23$ and $p=\operatorname{Pr}\left[F_{1,21}>0.23\right]=0.636$.
 - restrictions are not rejected at significance level 0.05 .
 - The data are consistent with constant returns to scale.
 
+> **Key Concept**: The test for constant returns to scale examines whether β₂ + β₃ = 1. The estimated sum is 1.040, and formal testing fails to reject constant returns to scale (p = 0.636), consistent with the theoretical prediction for competitive markets.
 
-## Predicted Output
+
+#### 13.2.6 Predicted Output
+
+**Example 13.4**: Predicting Output with Retransformation
 
 $-\widehat{\ln Q}=-.177+.233 \ln K+.807 \times \ln K$
 
@@ -217,7 +281,7 @@ $$
 - fit is quite good aside from final year.
 
 
-## Figures
+#### 13.2.7 Figures and Visualization
 
 - First panel plots actual $Q$ and predicted $Q$ against time.
 - Second panel gives isoquants obtained next.
@@ -225,9 +289,9 @@ $$
 ![](https://cdn.mathpix.com/cropped/305edb9b-4075-41ef-9523-a058e126c526-17.jpg?height=441&width=549&top_left_y=356&top_left_x=641)
 
 
-## Fitted Isoquants
+#### 13.2.8 Fitted Isoquants
 
-- Isoquants gives $K$ as function of $L$ for different values of $Q$
+Isoquants gives $K$ as function of $L$ for different values of $Q$
 
 $$
 \begin{aligned}
@@ -244,7 +308,7 @@ $\star$ small as $\exp \left(.0581^{2} / 2\right)=1.0017$ is close to 1.
 - As expected isoquants do not cross.
 
 
-## HAC-robust Standard Errors
+#### 13.2.9 HAC-Robust Standard Errors
 
 - For time series data concern about serially correlated errors.
 - Less of a problem here as residual autocorrelations $\widehat{\rho}_{1}=0.11$, $\widehat{\rho}_{2}=-0.16, \widehat{\rho}_{3}=-0.16$
@@ -254,8 +318,30 @@ $\star$ small as $\exp \left(.0581^{2} / 2\right)=1.0017$ is close to 1.
 - heteroskedastic-robust: 0.105 and 0.216
 - HAC $(m=3): 0.062$ and 0.134 .
 
+> **Key Concept**: For time series data, HAC (Heteroskedasticity and Autocorrelation Consistent) standard errors account for both changing error variances and correlation over time. They provide more reliable inference than default standard errors when these issues are present.
+
+---
+
+**Key Takeaways from Case Study 13.2:**
+- Natural logarithm transformation converts the Cobb-Douglas model to linear form suitable for OLS
+- Estimated capital elasticity is 0.233 and labor elasticity is 0.807
+- The data support constant returns to scale (elasticities sum to 1.040, not significantly different from 1)
+- Labor has a stronger effect on production than capital in U.S. manufacturing (1899-1922)
+- HAC-robust standard errors account for time series correlation in the error terms
+- The model provides good predictions even after accounting for retransformation bias
+
+---
+
 
 ### 13.3 Case Study 3: Phillips Curve
+
+**In this case study:**
+- 13.3.1 U.S. price inflation data
+- 13.3.2 Phillips curve pre-1970
+- 13.3.3 Phillips curve post-1970
+- 13.3.4 Augmented Phillips curve
+- 13.3.5 Figures and visualization
+- 13.3.6 Omitted variables bias analysis
 
 - Phillips curve plots price inflation against unemployment.
 - A. W. Phillips (1958) found a negative relationship
@@ -267,9 +353,9 @@ $\star$ small as $\exp \left(.0581^{2} / 2\right)=1.0017$ is close to 1.
 - but fierce debate as to whether this relationship holds in the long-run.
 
 
-## Example: U.S. Price Inflation
+#### 13.3.1 U.S. Price Inflation Data
 
-- Dataset PHILLIPS has annual U.S. data from 1949 to 2014
+Dataset PHILLIPS has annual U.S. data from 1949 to 2014
 - Inflation based on GDP implicit price deflator
 - Later analysis uses expectations of future price inflation
 - 1. Survey of Professional Forecasters from Federal Reserve Bank of Philadelphia
@@ -283,9 +369,11 @@ $\star$ small as $\exp \left(.0581^{2} / 2\right)=1.0017$ is close to 1.
 | Expinflation | Forecast of one-year ahead Inflation | 45 | 3.31 | 2.05 | 1.14 |
 | Pastinflation | Average of Inflation over past 4 years | 63 | 3.65 | 2.04 | 1.48 |
 
-## Phillips Curve pre-1970
+#### 13.3.2 Phillips Curve Pre-1970
 
-- OLS regression 1949 to 1969 looks good
+**Example 13.5**: Phillips Curve 1949-1969
+
+OLS regression 1949 to 1969 looks good
 - the predicted negative relationship between inflation and unemployment
 - t-statistics in paranetheses based on HAC standard errors with $m=3$.
 
@@ -296,7 +384,12 @@ $$
 ![](https://cdn.mathpix.com/cropped/305edb9b-4075-41ef-9523-a058e126c526-22.jpg?height=427&width=539&top_left_y=423&top_left_x=81)
 ![](https://cdn.mathpix.com/cropped/305edb9b-4075-41ef-9523-a058e126c526-22.jpg?height=432&width=543&top_left_y=423&top_left_x=644)
 
-## Phillips Curve post-1970
+> **Key Concept**: The original Phillips curve showed a negative relationship between unemployment and inflation pre-1970: higher unemployment was associated with lower inflation. This suggested a policy trade-off between unemployment and inflation.
+
+
+#### 13.3.3 Phillips Curve Post-1970
+
+**Example 13.6**: Phillips Curve 1970-2014
 
 - OLS regression 1970 to 2014 (HAC t-statistics with $m=5$ in parentheses) looks bad
 
@@ -307,8 +400,12 @@ $$
 - Positive though statistically insignificant relationship
 - "breakdown" of the Phillips curve.
 
+> **Key Concept**: The Phillips curve relationship broke down post-1970, showing a positive (though insignificant) relationship between unemployment and inflation. This breakdown suggests the simple model was misspecified.
 
-## Augmented Phillips Curve
+
+#### 13.3.4 Augmented Phillips Curve
+
+**Example 13.7**: Augmented Phillips Curve 1970-2014
 
 - The problem is that people's inflation expectations also matter
 - add this as a regressor
@@ -331,7 +428,10 @@ $$
 \end{aligned}
 $$
 
-## Figures
+> **Key Concept**: The augmented Phillips curve adds expected inflation as a regressor. With this addition, the unemployment coefficient returns to negative and inflation expectations have a coefficient near 1, resolving the apparent breakdown of the relationship.
+
+
+#### 13.3.5 Figures and Visualization
 
 - First panel shows time series plot
 - Second panel shows augmented curve for 3 expected inflation rates.
@@ -339,7 +439,7 @@ $$
 ![](https://cdn.mathpix.com/cropped/305edb9b-4075-41ef-9523-a058e126c526-25.jpg?height=436&width=547&top_left_y=358&top_left_x=641)
 
 
-## Omitted Variables Bias
+#### 13.3.6 Omitted Variables Bias Analysis
 
 - Observed sign reversal for the coefficient of Urate is a classic example of omitted variables bias.
 - True model: Inflation $=\beta_{1}+\beta_{2} \times$ Urate $+\beta_{3} \times$ Expinflation $+u_{t}$.
@@ -349,6 +449,20 @@ $$
 - here bivariate regression of Expinflation on Urate has slope of . 343.
 - Then $\widehat{\mathrm{E}\left[b_{2}\right]}=-.128+1.147 \times .343=0.266$
 - equals estimated coefficient of Urate from bivariate regression of Inflation on Urate.
+
+> **Key Concept**: The sign reversal for the unemployment coefficient is a classic example of omitted variables bias. When expected inflation is omitted, the unemployment coefficient captures both the true effect and a spurious correlation through expected inflation.
+
+---
+
+**Key Takeaways from Case Study 13.3:**
+- The Phillips curve showed a clear negative relationship pre-1970 but broke down post-1970
+- Adding expected inflation resolves the breakdown (augmented Phillips curve)
+- The apparent sign reversal is a classic example of omitted variables bias
+- Expected inflation has a coefficient near 1 in the augmented model
+- The omitted variables bias formula correctly predicts the biased coefficient
+- Policy implications differ: the augmented curve suggests limited long-run trade-off between unemployment and inflation
+
+---
 
 
 ### 13.4 Automobile Efficiency
@@ -429,4 +543,16 @@ $$
 - Third task: cleaning the data
 - entails recoding data and detecting data that are in error.
 - And in many places: check the data.
+
+---
+
+**Key Takeaways from Case Studies 13.4-13.9:**
+- **Automobile Efficiency (13.4)**: Log-log models with cluster-robust standard errors show efficiency gains were offset by larger vehicles
+- **Rand Experiment (13.5)**: Randomized control trials provide causal estimates; better insurance increases health spending
+- **Health Access (13.6)**: Difference-in-differences estimation shows improved health outcomes from clinic access
+- **Political Incumbency (13.7)**: Regression discontinuity finds 5-7% advantage from incumbency
+- **Institutions (13.8)**: Instrumental variables show better institutions causally increase GDP
+- **Data Preparation (13.9)**: Real analysis requires careful data cleaning, merging, and validation
+
+---
 
