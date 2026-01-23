@@ -1,33 +1,60 @@
 # Chapter 14: Regression with Indicator Variables
 
-- Regression when some regressors are indicator variables
-- also called categorical variables or dummy variables.
-- An indicator variable records whether or not an observation falls in a particular category
-- e.g. whether or not person is female
-- e.g. whether or not a person is unemployed
-- coded $d=1$ if in the category and $d=0$ if not in the category.
-- Warrants its own chapter as
-- frequently used in economics
-- interpretation is not always straightforward
+## Learning Objectives
 
-  - interactions of indicators with regressors
-  - for sets of mutually exclusive indicators omit one indicator
-${ }^{\star}$ do joint F tests for statistical significance.
+By the end of this chapter, you will be able to:
+- Understand indicator (dummy) variables and their role in regression analysis
+- Interpret regression coefficients when regressors are categorical variables
+- Use indicator variables to compare group means and test for differences
+- Understand the relationship between regression on indicators and t-tests/ANOVA
+- Incorporate indicator variables alongside continuous regressors to control for categories
+- Create and interpret interaction terms between indicators and continuous variables
+- Apply the dummy variable trap rule when using sets of mutually exclusive indicators
+- Choose appropriate base categories and interpret coefficients relative to the base
+- Conduct joint F-tests for the significance of sets of indicator variables
+- Apply indicator variable techniques to real earnings data
+
+Many economic variables are **categorical** rather than continuous. Examples include:
+- Gender (male or female)
+- Employment sector (private, public, self-employed)
+- Education level (high school, college, graduate)
+- Region (Northeast, South, Midwest, West)
+
+To include categorical variables in regression models, we use **indicator variables** (also called **dummy variables** or **categorical variables**). An indicator variable equals 1 if an observation falls in a particular category and 0 otherwise. For example, an indicator for female equals 1 for women and 0 for men.
+
+**Why indicator variables warrant their own chapter:**
+- They are ubiquitous in applied econometrics—nearly every empirical study uses them
+- Interpretation differs from continuous variables—coefficients represent group differences
+- Interactions between indicators and continuous variables enable slopes to vary by group
+- Sets of mutually exclusive indicators require special handling to avoid the "dummy variable trap"
+- Hypothesis testing requires joint F-tests when multiple indicators represent a single categorical variable
+
+This chapter covers four main topics:
+1. **Section 14.1**: Example data on earnings, gender, education, and worker type
+2. **Section 14.2**: Regression on a single indicator variable (equivalent to difference in means)
+3. **Section 14.3**: Adding indicators to regressions with continuous variables, including interactions
+4. **Section 14.4**: Working with sets of mutually exclusive indicators (employment sector example)
+
+By the end, you'll be able to incorporate categorical variables into regression models and interpret the results correctly.
 
 ## Outline
 
 (1) Example: Earnings, Gender, Education and Type of Worker
-(2) Regression on just a Single Indicator Variable
+(2) Regression on a Single Indicator Variable
 (3) Regression on an Indicator Variable and Additional Regressors
 (4) Regression with Sets of Indicator Variables
+(5) Key Stata Commands
+(6) Exercises
 
 Datasets: EARNINGS_COMPLETE
 
-## Example: Earnings, Education and Type of Worker
+### 14.1 Example: Earnings, Education and Type of Worker
 
 - Dataset EARNINGS_COMPLETE
 - 872 female and male full-time workers aged 25-65 years in 2000
 - indicators Gender, d1, d2, d3 and interactions such as Genderbyeduc.
+
+**Table 14.1**: Variable Definitions and Summary Statistics for EARNINGS_COMPLETE Dataset
 
 | Variable | Definition | Mean | Standard Deviation | Min | Max |
 | :--- | :--- | :--- | :--- | :--- | :--- |
@@ -45,15 +72,25 @@ Datasets: EARNINGS_COMPLETE
 | d2 or dpriv | $=1$ if private sector employee | 0.760 | 0.427 | 0 | 1 |
 | d3 or dgovt | $=1$ if govt. sector employee | 0.149 | 0.356 | 0 | 1 |
 
+> **Key Concept**: Indicator variables (dummy variables) are binary variables that equal 1 if an observation is in a specific category and 0 otherwise. They allow regression models to incorporate categorical information such as gender, employment type, or region. The dataset EARNINGS_COMPLETE includes indicators for Gender (1=female), and three employment types: d1 (self-employed), d2 (private sector), d3 (government sector).
+
 ### 14.2 Regression on a Single Indicator Variable
 
+**In this section:**
+- 14.2.1 Example: Earnings and gender regression
+- 14.2.2 Difference in means specialized methods (t-test equivalence)
+
 - Indicator variable takes just two values, for simplicity 0 and 1
+
+**Definition 14.1**: Indicator Variable
 
 $$
 d= \begin{cases}1 & \text { if in the category } \\ 0 & \text { otherwise }\end{cases}
 $$
 
 - Regress $y$ on just an intercept and the indicator variable
+
+**Equation 14.1**: Fitted Model for Regression on a Single Indicator
 
 $$
 \widehat{y}=b+a d .
@@ -67,6 +104,8 @@ $$
 
 - For OLS regression it can be shown that
 
+**Result 14.1**: OLS Estimates for Regression on a Single Indicator
+
 $$
 \begin{array}{cl}
 b=\bar{y}_{0} & \text { where } \bar{y}_{0} \text { is mean of } y \text { when } d=0 \\
@@ -78,9 +117,11 @@ $$
 - Inference is based on the population model $y=\beta+\alpha d+u$.
 
 
-## Example: Earnings and Gender
+#### 14.2.1 Example: Earnings and Gender
 
 - Earnings by gender (-1 if female)
+
+**Table 14.2**: Earnings by Gender: Summary Statistics
 
 | Gender | Sample size | Mean | Standard |  |  |
 | :--- | :---: | :---: | :---: | :---: | :---: |
@@ -89,6 +130,8 @@ $$
 | Female earnings (Gender $=1$ ) | 378 | 47080 | 31596 | 4000 | 322000 |
 
 - OLS regression with heteroskedastic-robust standard errors
+
+**Example 14.1**: Regression of Earnings on Gender Indicator
 
 $$
 \widehat{\text { Earnings }}=\underset{(2290)}{63476}-\underset{(3478)}{16396} \times \text { Gender } \quad R^{2}=0.025 .
@@ -99,8 +142,9 @@ $$
 - women earn $\$ 16,396$ less on average
 - statistically significant at $5 \%$ as $t=-16396 / 3478=-4.71$.
 
+> **Key Concept**: When regressing $y$ on just an intercept and a single indicator $d$, the fitted model is $\hat{y} = b + ad$. The intercept $b$ equals the mean of $y$ when $d=0$, and the slope $a$ equals the difference in means $(\bar{y}_1 - \bar{y}_0)$. Thus, regression on an indicator variable is equivalent to a difference in means test. Here, women earn \$16,396 less on average ($t=-4.71$, statistically significant).
 
-## Difference in Means Specialized Methods
+#### 14.2.2 Difference in Means: Specialized Methods
 
 - Many areas of statistics avoid regression
 - instead use a specialized method for difference in means
@@ -116,12 +160,32 @@ $$
 - $s e\left(\bar{y}_{1}-\bar{y}_{0}\right)=\sqrt{s e^{2}\left(\bar{y}_{0}\right)+s e^{2}\left(\bar{y}_{0}\right)}=\sqrt{\frac{s_{1}^{2}}{n_{1}}+\frac{s_{0}^{2}}{n 0}}$
 - Here $\operatorname{se}\left(\bar{y}_{1}-\bar{y}_{0}\right)=\sqrt{\left(31596^{2} / 378\right)+\left(61713^{2} / 494\right)}=3217$.
 
+> **Key Concept**: Specialized difference-in-means methods (like the t-test with `by(gender) unequal` option) and regression on an indicator give the same estimate but slightly different standard errors. Regression uses $se(\hat{a})$ from the regression model, while the t-test uses $se(\bar{y}_1 - \bar{y}_0) = \sqrt{s_1^2/n_1 + s_0^2/n_0}$. Both approaches are valid; regression is more flexible when adding control variables.
+
+---
+
+**Key Takeaways from Section 14.2 (Regression on a Single Indicator):**
+- Regressing $y$ on a single indicator $d$ yields: intercept = mean when $d=0$, slope = difference in means
+- Regression on an indicator is equivalent to a two-sample difference-in-means test
+- The t-statistic tests whether the two group means differ significantly
+- Specialized t-test methods (e.g., Stata's `ttest`) give same estimate but slightly different standard error
+- Example: Women earn \$16,396 less than men on average ($t=-4.71$, $p<0.001$)
+
+---
 
 ### 14.3 Regression on an Indicator Variable and Additional Regressors
+
+**In this section:**
+- 14.3.1 Interacted indicator variables (indicator × continuous regressor)
+- 14.3.2 Indicator variable versus indicator plus interaction (graphical comparison)
+- 14.3.3 Example: Earnings, gender, and education with interaction
+- 14.3.4 Indicator variable as a dependent variable (logit/probit preview)
 
 - The difference in $y$ across the two categories may be partly explained by other variables
 - e.g. earnings difference by gender is partly due to hours worked.
 - Now bring in additional regressors (for simplicity just one)
+
+**Equation 14.2**: Population Model with Indicator and Additional Regressors
 
 $$
 y=\beta_{1}+\beta_{2} x+\alpha d+u .
@@ -136,10 +200,12 @@ $$
 - Now a measures the difference in $y$ across categories after controlling for the additional variables.
 
 
-## Interacted Indicator Variables
+#### 14.3.1 Interacted Indicator Variables
 
 - An interacted indicator variable is a regressor that is the product of an indicator variable and another regressor.
 - Consider the model that adds the term $d \times x$.
+
+**Equation 14.3**: Model with Interacted Indicator Variable
 
 $$
 y=\beta_{1}+\beta_{2} x+\alpha_{1} d+\alpha_{2} d \times x+u
@@ -154,26 +220,38 @@ $$
 - An interacted indicator variable is a regressor that is the product of an indicator variable and another regressor.
 - This enables slope coefficients to vary according to the value of the indicator variable.
 
+> **Key Concept**: An **interacted indicator variable** is the product of an indicator and another regressor, such as $d \times x$. In the model $y = \beta_1 + \beta_2 x + \alpha_1 d + \alpha_2(d \times x) + u$, the coefficient $\alpha_2$ measures how the slope on $x$ differs between the two groups. If $d=1$, the slope is $(\beta_2 + \alpha_2)$; if $d=0$, the slope is $\beta_2$. This enables the relationship between $y$ and $x$ to vary by category.
 
-## Indicator Variable versus Indicator plus Interaction
+#### 14.3.2 Indicator Variable versus Indicator plus Interaction
 
 - First panel: $\widehat{y}=b_{1}+b_{2} x+a d$
 - indicator variable shifts intercept
 - Second panel: $\hat{y}=b_{1}+b_{2} x+a_{1} d+a_{2} d \times x$
 - additional interacted regressor $d \times x$ additionally shifts slope.
+
+**Figure 14.1a**: Indicator Variable (Intercept Shift Only)
+
 ![](https://cdn.mathpix.com/cropped/5767ee8c-1c99-4217-b73d-65d27c8e144b-10.jpg?height=430&width=551&top_left_y=412&top_left_x=84)
+
+**Figure 14.1b**: Indicator Plus Interaction (Intercept and Slope Shift)
+
 ![](https://cdn.mathpix.com/cropped/5767ee8c-1c99-4217-b73d-65d27c8e144b-10.jpg?height=430&width=566&top_left_y=412&top_left_x=646)
 
+> **Key Concept**: Including only an indicator variable $d$ (without interaction) shifts the intercept but keeps slopes parallel across groups. Adding an interaction term $d \times x$ additionally allows slopes to differ. The first panel shows parallel lines (same slope, different intercepts). The second panel shows non-parallel lines (different slopes and intercepts). Use joint F-tests to test whether the interaction is statistically significant.
 
-## Example
+#### 14.3.3 Example: Earnings, Gender, and Education with Interaction
 
 - Earnings on gender and education (with heteroskedastic-robust $t$ statistics)
+
+**Example 14.2**: Earnings on Gender and Education (No Interaction)
 
 $$
 \widehat{\text { Earnings }}=\underset{(-2.20)}{-17552}-\underset{(-5.82)}{18258} \times \text { Gender }+\underset{(-5.82)}{5907} \times \text { Education, } R^{2}=.134
 $$
 
 - Add interaction between gender and education
+
+**Example 14.3**: Earnings on Gender and Education (With Interaction)
 
 $$
 \begin{aligned}
@@ -186,8 +264,9 @@ $$
 - $H_{0}: \beta_{\text {gender }}=0, \beta_{\text {genderxeducation }}=0$ versus $H_{a}$ : at least one $\neq 0$
 - here $F=31.92$ with $p=0.000$ so statistically significant at $5 \%$.
 
+> **Key Concept**: When an indicator and its interaction with another variable are both included, test their **joint significance** using an F-test. Here, testing $H_0: \beta_{\text{gender}}=0, \beta_{\text{gender×education}}=0$ yields $F=31.92$ ($p=0.000$), strongly rejecting the null. Gender's effect on earnings varies with education level—the gender earnings gap is larger at lower education levels (coefficient on interaction is negative).
 
-## Indicator Variable is a Dependent Variable
+#### 14.3.4 Indicator Variable as a Dependent Variable
 
 - For example model employment decision
 - $y=1$ if person works and $y=0$ if does not work.
@@ -196,8 +275,31 @@ $$
 - It is better to use models specific to such data
 - logit model or probit model.
 
+> **Key Concept**: When the dependent variable $y$ is an indicator (e.g., $y=1$ if employed, $y=0$ if not), you can still use OLS, but heteroskedastic-robust standard errors are essential. However, specialized models like **logit** or **probit** are preferred because they ensure predicted probabilities lie between 0 and 1, unlike OLS which can predict values outside this range.
+
+---
+
+**Key Takeaways from Section 14.3 (Indicators with Additional Regressors):**
+- Adding indicators to models with continuous variables controls for categorical differences
+- Indicator coefficients measure group differences **after controlling for other variables**
+- **Interacted indicators** ($d \times x$) allow slopes to vary by group
+- Including only $d$: parallel lines (same slope, different intercepts)
+- Including $d$ and $d \times x$: non-parallel lines (different slopes and intercepts)
+- Use joint F-tests to test significance of indicator and its interaction together
+- Example: Gender's effect on earnings varies with education (interaction is significant, $F=31.92$)
+- If $y$ is an indicator, OLS works but logit/probit models are preferred
+
+---
 
 ### 14.4 Regression with Sets of Indicator Variables
+
+**In this section:**
+- 14.4.1 Example: Type of worker categories (3 mutually exclusive groups)
+- 14.4.2 Dummy variable trap (why you can't include all indicators)
+- 14.4.3 Base category interpretation
+- 14.4.4 Hypothesis testing with indicator sets (joint F-tests)
+- 14.4.5 Example: Earnings and type of worker regression results
+- 14.4.6 Difference in means across multiple groups (ANOVA equivalence)
 
 - A set of indicator variables is mutually exclusive if any individual in the sample falls into exactly one of the categories.
 - then for any individual observation only one indicator variables takes value 1
@@ -208,10 +310,12 @@ $$
 - ordered: such as small, medium, large.
 
 
-## Example: Type of Worker
+#### 14.4.1 Example: Type of Worker Categories
 
 - Type of worker that has three categories - self-employed, employed in the private sector and employed in the government sector.
 - Then three mutually exclusive indicator variables are defined as
+
+**Definition 14.2**: Three Mutually Exclusive Indicator Variables for Worker Type
 
 $$
 \begin{aligned}
@@ -224,11 +328,13 @@ $$
 \end{aligned}
 $$
 
-## Dummy Variable Trap
+#### 14.4.2 Dummy Variable Trap
 
 - Not all three indicators and an intercept can be included in the regression
 - erroneous inclusion of all is called the dummy variable trap.
 - Since $d 1+d 2+d 3=1$ we have $d 1=1-d 2-d 3$, so
+
+**Derivation 14.1**: Why the Dummy Variable Trap Occurs
 
 $$
 \begin{aligned}
@@ -242,8 +348,9 @@ $$
 - but have five parameters to estimate $\left(\beta_{1}, \beta_{2}, \alpha_{1}, \alpha_{2}\right.$ and $\left.\alpha_{2}\right)$.
 - Solution: drop one of the indicator variables or the intercept.
 
+> **Key Concept**: The **dummy variable trap** occurs when including all $C$ indicators from a set of mutually exclusive categories plus an intercept. Since $d_1 + d_2 + \cdots + d_C = 1$, perfect multicollinearity arises—you have $C+1$ parameters but can only identify $C$ coefficients. **Solution**: Drop one indicator (the "base category") or drop the intercept. Typically, we keep the intercept and drop one indicator.
 
-## Base Category
+#### 14.4.3 Base Category Interpretation
 
 - In current example $d 1$ is dropped
 - coefficient $\left(\alpha_{2}-\alpha_{1}\right)$ of $d 2$ measures difference between earnings for a private sector worker $(d 2=1)$ and a self-employed worker $(d 1=1)$ after controlling for the other regressors.
@@ -255,8 +362,9 @@ $$
 
 - The coefficient of an included indicator variable measures the marginal effect of being in that category compared to the base category, after controlling for the other regressors.
 
+> **Key Concept**: The **base category** (omitted category) is the reference group. Coefficients on included indicators measure the difference in $y$ between that category and the base category, **after controlling for other regressors**. For example, if self-employed ($d_1$) is the base, the coefficient on $d_2$ (private sector) is $(\alpha_2 - \alpha_1)$, the earnings difference between private sector and self-employed workers.
 
-## Hypothesis Testing
+#### 14.4.4 Hypothesis Testing with Indicator Sets
 
 - Care is needed in interpreting hypothesis tests.
 - e.g. when $d 1$ is the omitted category the coefficient of $d 2$ measures $\left(\alpha_{2}-\alpha_{1}\right)$, so a test of statistical significance of $d 2$ is a test of $H_{0}: \alpha_{2}=\alpha_{1}$ against $H_{a}: \alpha_{2} \neq \alpha_{1}$
@@ -266,10 +374,13 @@ $\star$ it is not a test of $H_{0}: \alpha_{2}=0$ against $H_{a}: \alpha_{2} \ne
 - An $F$ test of the joint statistical significance of the $\mathrm{C}-1$ included indicator variables tests whether the set of indicator variables is statistically significant.
 - This joint $F$ test leads to the same result regardless of the category that is dropped.
 
+> **Key Concept**: A **t-test on a single indicator** tests whether that category differs from the base category: $H_0: \alpha_j = \alpha_{\text{base}}$. An **F-test on all $C-1$ included indicators** tests whether the categorical variable matters at all: $H_0: \alpha_1 = \alpha_2 = \cdots = \alpha_C$. The F-test result is the same regardless of which category is dropped. Always use F-tests to evaluate the overall significance of a categorical variable.
 
-## Example: Earnings and Type of Worker
+#### 14.4.5 Example: Earnings and Type of Worker Regression
 
 - Regress earnings on all 3 categorical variables for type of worker and excluding the constant;
+
+**Example 14.4**: Regression on All Three Worker Type Indicators (No Intercept)
 
 $$
 \widehat{y}=\underset{(9636)}{72306} d 1+\underset{(1897)}{54521} d 2-\underset{(2825)}{56105} d 3 \quad R^{2}=0.550
@@ -286,6 +397,8 @@ where heteroskedastic-robust standard errors are given in parentheses.
 
 - Same results for $F$ test and coefficients of Age and Education regardless of what is dropped (heteroskedastic-robust $t^{\prime} s$ in [ ])
 
+**Table 14.3**: Comparison of Regression Results for Different Base Categories
+
 | Variable | No Indicators | Drop d1 | Drop d2 | Drop d3 | Drop intercept |
 | :--- | :--- | :--- | :--- | :--- | :--- |
 | Age | 525 [3.47] | 488 [3.26] | 488 [3.26] | 488 [3.26] | 488 [3.26] |
@@ -298,12 +411,14 @@ where heteroskedastic-robust standard errors are given in parentheses.
 | $\mathrm{F}(2, \mathrm{n}-\mathrm{k})$ for indicators $\mathrm{R}^{2}$ | . 115 | . 125 | . 125 | 125 | . 601 (!) |
 | Overall F | 42.85 | 22.12 | 22.12 | 22.12 | 313.06 |
 
-## Difference in Means
+#### 14.4.6 Difference in Means Across Multiple Groups
 
 - Test whether earnings vary across the type of worker, without inclusion of any controls.
 - In areas of applied statistics that do not use regression
 - test using analysis of variance (ANOVA) methods that extend $t$ test for difference in two means.
 - Equivalently test by regress earnings on an intercept, $d 2$ and $d 3$
+
+**Example 14.5**: Difference in Means Across Worker Types (No Controls)
 
 $$
 \widehat{y}=\underset{(7.50)}{72306}-\underset{(-1.81)}{17785} d 2-\underset{(-1.61)}{16201} d 3 \quad R^{2}=0.010
@@ -318,8 +433,24 @@ where heteroskedastic-robust $t$ statistics are given in parentheses.
 - $F$-statistic for joint statistical significance of $d 2$ and $d 3$ equals 1.68
 - since $p=0.188$ there is not a statistically significant difference in earnings across the three types of workers at significance level 0.05 .
 
+> **Key Concept**: Regressing $y$ on a set of mutually exclusive indicators (with no other controls) is equivalent to ANOVA (analysis of variance). Coefficients give group means or differences from the base mean. Here, the F-statistic $F=1.68$ ($p=0.188$) indicates no statistically significant difference in earnings across the three worker types at the 5% level—without controlling for age and education.
 
-## Key Stata Commands
+---
+
+**Key Takeaways from Section 14.4 (Sets of Indicator Variables):**
+- Mutually exclusive indicators: each observation falls into exactly one category
+- **Dummy variable trap**: Cannot include all $C$ indicators plus intercept (perfect multicollinearity)
+- **Solution**: Drop one indicator (base category) or drop the intercept; typically keep intercept
+- **Base category interpretation**: Coefficients measure differences from the omitted category
+- **t-tests** test whether a category differs from the base; **F-tests** test overall significance
+- F-test results are identical regardless of which category is dropped
+- Regression on indicators (no other controls) is equivalent to ANOVA
+- Example: No significant earnings differences across worker types without controls ($F=1.68$, $p=0.188$)
+- Adding controls (age, education) reveals significant differences ($F=2.01$)
+
+---
+
+### 14.5 Key Stata Commands
 
 ```
 use AED_EARNINGS_COMPLETE.DTA, clear
@@ -338,7 +469,7 @@ vce(robust)
 ```
 
 
-## Some in-class Exercises
+### 14.6 Exercises
 
 (1) OLS regression using all data yields $\widehat{y}=3+5 d$. Give $\bar{y}$ for the subsample with $d=0$ and $\bar{y}$ for the subsample with $d=1$.
 (2) Suppose $\bar{y}=30$ for the subsample with $d=1$ and $\bar{y}=20$ for the subsample with $d=0$. Give the fitted model from OLS regression of $y$ on an intercept and $d$ using the full sample.
