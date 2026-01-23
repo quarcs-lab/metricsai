@@ -12,36 +12,9 @@ By the end of this chapter, you will be able to:
 - Appreciate the role of data science and machine learning in modern econometrics
 - Understand the Bayesian approach to statistical inference as an alternative to classical methods
 
-This chapter extends the multiple regression framework to address practical issues that arise in applied work. The chapter covers five major areas:
+---
 
-**Robust Inference (Section 12.1):** When standard regression assumptions fail, we need robust standard errors. This section covers heteroskedastic-robust, cluster-robust, and HAC-robust standard errors for different data structures.
-
-**Prediction (Section 12.2):** Regression models are used for prediction, but the precision of predictions varies. We distinguish between predicting average outcomes (precise) and individual outcomes (imprecise), with detailed formulas for prediction intervals.
-
-**Best Estimation and Testing (Sections 12.3-12.6):** When standard errors are wrong, OLS may no longer be best. We discuss best estimators, best confidence intervals, test power, and nonrepresentative samples.
-
-**Modern Methods (Sections 12.7-12.8):** Overview of data science, machine learning, and Bayesian methods—approaches increasingly used alongside classical econometrics.
-
-**Historical Context (Section 12.9):** A brief history of statistics and regression, from the 1700s to modern robust methods.
-
-In practice, knowing which robust standard errors to use is as important as computing the OLS estimates themselves.
-
-
-## Outline
-
-(1) Inference with Robust Standard Errors
-(2) Prediction
-(3) Nonrepresentative Samples
-(4) Best Estimation
-(5) Best Confidence Intervals
-(6) Best Hypothesis Tests
-(7) Data Science and Big Data: An Overview
-(8) Bayesian Methods: An Overview
-(9) A Brief History of Statistics and Regression
-
-Datasets: HOUSE, REALGDPPC
-
-### 12.1 Inference with Robust Standard Errors
+## 12.1 Inference with Robust Standard Errors
 
 **In this section:**
 - 12.1.1 Overview of robust standard errors
@@ -66,7 +39,7 @@ Datasets: HOUSE, REALGDPPC
 | 2. Clustered: Errors in same cluster are correlated | Cluster robust | Some Cross section Most Short Panel |
 | 3. Autocorrelation: Errors correlated over time | Heteroskedasticity and autocorrelation (HAC) robust | Most Time Series Some Long Panel |
 
-#### 12.1.1 Overview of Robust Standard Errors
+### 12.1.1 Overview of Robust Standard Errors
 
 - For implementation, use the appropriate command in a statistical package
 - in Stata use regress command with the vce( ) option
@@ -82,7 +55,7 @@ Datasets: HOUSE, REALGDPPC
 > **Key Concept**: When regression assumptions 3-4 fail, default standard errors are wrong. Use heteroskedastic-robust SE for cross-section data, cluster-robust SE when observations are grouped, and HAC-robust SE for time series data. The OLS estimates remain unbiased, but inference requires correct standard errors.
 
 
-#### 12.1.2 Heteroskedastic-Robust Standard Errors
+### 12.1.2 Heteroskedastic-Robust Standard Errors
 
 - In many cross-section data applications
 - it may be reasonable to assume error independence across observations
@@ -98,7 +71,7 @@ Datasets: HOUSE, REALGDPPC
 - leading to different $t$-statistics and confidence intervals.
 
 
-#### 12.1.3 Example: House Price with Heteroskedastic-Robust SE
+### 12.1.3 Example: House Price with Heteroskedastic-Robust SE
 
 **Example 12.2**: House Price Regression with Heteroskedastic-Robust Standard Errors
 
@@ -117,7 +90,7 @@ Datasets: HOUSE, REALGDPPC
 | $\mathrm{R}^{2}$ | 0.651 |  |  |  |  |  |
 | St. error | 24936 |  |  |  |  |  |
 
-#### 12.1.4 Interpreting Heteroskedastic-Robust Results
+### 12.1.4 Interpreting Heteroskedastic-Robust Results
 
 - Same intercept and slope coefficient estimates (as still OLS).
 - For individual standard errors the biggest change is $30 \%$
@@ -133,7 +106,7 @@ Datasets: HOUSE, REALGDPPC
 > **Key Concept**: Heteroskedastic-robust standard errors typically differ from default SE by less than 30%, but can be larger or smaller. With robust SE, coefficient estimates are unchanged but t-statistics and confidence intervals change. Always use robust SE when heteroskedasticity is suspected.
 
 
-#### 12.1.5 Cluster-Robust Standard Errors: Theory
+### 12.1.5 Cluster-Robust Standard Errors: Theory
 
 - In many cross-section data and panel data applications
 - errors may be independent across clusters but correlated within cluster
@@ -148,7 +121,7 @@ Datasets: HOUSE, REALGDPPC
 - cluster-robust correct s for this reduced estimator precision!
 
 
-#### 12.1.6 Cluster-Robust Standard Errors: Implementation
+### 12.1.6 Cluster-Robust Standard Errors: Implementation
 
 - OLS is still unbiased but default standard errors are too small
 - Make the following changes to assumptions 1-4
@@ -161,7 +134,7 @@ Datasets: HOUSE, REALGDPPC
 - Implementation requires specifying a variable for the clusters
 
 
-#### 12.1.7 Cluster-Robust Standard Errors in Practice
+### 12.1.7 Cluster-Robust Standard Errors in Practice
 
 - Cluster-robust standard errors can be several times the default or heteroskedastic-robust standard errors.
 - The difference with default or heteroskedastic-robust se's gets greater
@@ -175,7 +148,7 @@ Datasets: HOUSE, REALGDPPC
 > **Key Concept**: Cluster-robust standard errors can be several times larger than default or heteroskedastic-robust SE. With N observations in G clusters, use G-1 (not N-k) degrees of freedom. The difference increases with more observations per cluster and higher within-cluster correlation.
 
 
-#### 12.1.8 HAC-Robust Standard Errors for Time Series
+### 12.1.8 HAC-Robust Standard Errors for Time Series
 
 - Time series models often have autocorrelated errors
 - an autocorrelated error is one that is correlated with errors in previous periods (e.g. $u_{t}=0.8 u_{t-1}$ ).
@@ -197,22 +170,7 @@ $$
 > **Key Concept**: HAC (heteroskedasticity and autocorrelation consistent) standard errors account for both heteroskedasticity and autocorrelation in time series data. The lag length m must be specified; a rule of thumb is m = 0.75 × T^(1/3).
 
 
----
-
-**Key Takeaways from Section 12.1 (Robust Standard Errors):**
-- Default SE assume homoskedasticity, independence, and (for time series) no autocorrelation
-- When these assumptions fail, use robust SE: heteroskedastic-robust (cross-section), cluster-robust (grouped data), or HAC (time series)
-- OLS estimates remain unbiased, but inference requires correct SE
-- Heteroskedastic-robust SE typically differ from default SE by < 30%
-- Cluster-robust SE can be several times larger than default SE
-- Always use cluster-robust SE for panel data (cluster on individual ID)
-- For cluster-robust inference, use G-1 (not n-k) degrees of freedom
-- HAC SE require specifying lag length m; use rule of thumb m = 0.75 × T^(1/3)
-
----
-
-
-### 12.2 Prediction
+## 12.2 Prediction
 
 **In this section:**
 - 12.2.1 Average outcome versus individual outcome
@@ -245,7 +203,7 @@ $$
 - it depends on whether we are predicting an average outcome or an individual outcome.
 
 
-#### 12.2.1 Average Outcome Versus Individual Outcome
+### 12.2.1 Average Outcome Versus Individual Outcome
 
 - Key distinction is between predict an average outcome and predict an individual outcome.
 - Average outcome or conditional mean
@@ -270,7 +228,7 @@ $$
 > **Key Concept**: Predicting an average outcome (conditional mean E[y|x*]) is more precise than predicting an individual outcome (y|x*). The forecast variance equals the conditional mean variance plus Var[u*], so Var(ŷ_f) ≥ Var(u*) always.
 
 
-#### 12.2.2 Visual Example of Prediction Intervals
+### 12.2.2 Visual Example of Prediction Intervals
 
 - Regress house Price on Size
 - predict house price at a range of house sizes
@@ -285,7 +243,7 @@ Prediction of Conditional mean
 Prediction of Actual value
 ![](https://cdn.mathpix.com/cropped/33ec9fd0-dc14-44a6-a045-853bc82cbb48-15.jpg?height=400&width=538&top_left_y=436&top_left_x=639)
 
-#### 12.2.3 Predicting the Conditional Mean
+### 12.2.3 Predicting the Conditional Mean
 
 - The conditional mean of $y$ is
 
@@ -305,7 +263,7 @@ $$
 - $\operatorname{Var}\left[\hat{y}_{c m}\right] \rightarrow 0$ and $\operatorname{se}\left(\hat{y}_{c m}\right) \rightarrow 0$ as the estimates $b_{1}, \ldots, b_{k}$ become more precise.
 
 
-#### 12.2.4 Forecasting Individual Outcomes
+### 12.2.4 Forecasting Individual Outcomes
 
 - The actual value or forecast value of $y$ for $x=x^{*}$ is
 
@@ -329,7 +287,7 @@ $$
 > **Key Concept**: Even with precise coefficient estimates, individual forecasts are imprecise because we cannot predict the error u*. The forecast standard error is at least as large as the standard error of regression (s_e), so 95% forecast intervals are at least ±1.96×s_e wide.
 
 
-#### 12.2.5 Why Forecasts Are Imprecise
+### 12.2.5 Why Forecasts Are Imprecise
 
 - Recall that in forecasting
 - we use $\widehat{y}_{f}=b_{1}+b_{2} x_{2}^{*}+\ldots+b_{k} x_{k}^{*}$
@@ -346,7 +304,7 @@ s_{e}^{2} & =\frac{1}{n-k} \sum_{i=1}^{n}\left(y_{i}-\widehat{y}_{i}\right)^{2} 
 \end{aligned}
 $$
 
-#### 12.2.6 Policy Implications of Imprecise Forecasts
+### 12.2.6 Policy Implications of Imprecise Forecasts
 
 - Econometric models of individual behavior can have low $R^{2}$
 - so the variance of the model error and $s_{e}$ are large, so $s e\left(\widehat{y}_{f}\right)$ is large.
@@ -361,7 +319,7 @@ $$
 > **Key Concept**: Low R² and imprecise individual forecasts don't make regression uninformative. Policy-makers base decisions on average outcomes (which can be precisely estimated), not individual forecasts. Education increases average earnings even though we can't predict any individual's earnings precisely.
 
 
-#### 12.2.7 Formulas for Conditional Mean Prediction
+### 12.2.7 Formulas for Conditional Mean Prediction
 
 - For bivariate regression under assumptions 1-4 the formula for $s e\left(\widehat{y}_{c m}\right)$ is
 
@@ -378,7 +336,7 @@ $$
 - When robust standard errors are used specialized software is needed to get confidence intervals.
 
 
-#### 12.2.8 Formulas for Individual Outcome Forecasts
+### 12.2.8 Formulas for Individual Outcome Forecasts
 
 - Again consider regression of $y$ on $x$ under assumptions 1-4.
 - Given homoskedastic errors $\operatorname{Var}\left(u^{*}\right)=\sigma_{u}^{2}$ so $s_{u^{*}}^{2}=s_{e}^{2}$ - then $\operatorname{se}\left(\widehat{y}_{f}\right)=\sqrt{s e^{2}\left(\widehat{y}_{C M}\right)+s_{e}^{2}}$
@@ -393,7 +351,7 @@ $$
 > **Key Concept**: For conditional mean prediction, se(ŷ_cm) → 0 as n → ∞. For individual forecasts, se(ŷ_f) ≥ s_e does not go to zero, even in infinite samples. This fundamental difference drives the distinction between predicting averages (precise) and individuals (imprecise).
 
 
-#### 12.2.9 Example: Multiple Regression Prediction (Default SE)
+### 12.2.9 Example: Multiple Regression Prediction (Default SE)
 
 - Predictions for a 2000 square foot house with medium lot size, four bedrooms, two bathrooms, forty-years old and sold in June.
 - The predicted value is
@@ -413,7 +371,7 @@ $\star 257691 \pm t_{22, .025} \times 6488=(\$ 244,235, \$ 271,146)$.
 $\star 257691 \pm t_{22, .025} \times 25766=(\$ 204,255, \$ 311,126)$.
 
 
-#### 12.2.10 Example: Multiple Regression Prediction (Robust SE)
+### 12.2.10 Example: Multiple Regression Prediction (Robust SE)
 
 - Now suppose instead that model errors are heteroskedastic.
 - Predict conditional mean
@@ -431,25 +389,7 @@ $$
 \star 257691 \pm t_{22, .025} \times 25803=(\$ 204,178, \$ 311,203) .
 $$
 
-
----
-
-**Key Takeaways from Section 12.2 (Prediction):**
-- Predicting average outcome E[y|x*] is more precise than predicting individual outcome y|x*
-- For conditional mean: Var(ŷ_cm) depends only on estimation uncertainty
-- For individual forecast: Var(ŷ_f) = Var(ŷ_cm) + Var(u*), so forecasts are always noisier
-- Even with precise estimates, se(ŷ_f) ≥ s_e, so forecast intervals are at least ±1.96×s_e wide
-- Conditional mean prediction gets more precise as n increases: se(ŷ_cm) → 0
-- Individual forecasts don't improve with sample size beyond reducing estimation uncertainty
-- Low R² and wide forecast intervals don't make regression uninformative
-- Policy-makers use average predictions (precise), not individual forecasts (imprecise)
-- With robust SE, use specialized software for prediction intervals
-- Prediction is most precise when x* is close to sample mean and sample variation in x is large
-
----
-
-
-### 12.3 Nonrepresentative Samples
+## 12.3 Nonrepresentative Samples
 
 - Many studies use survey data that may be nonrepresentative of the population.
 - If there is nonrandom sampling on variables other than the dependent variable $y$ then OLS can estimate population parameters if we include these variables as control variables in the regression
@@ -460,7 +400,7 @@ $$
 - then population weighted least squares can be used.
 
 
-### 12.4 Best Estimation
+## 12.4 Best Estimation
 
 - An estimator $b_{j}$ is unbiased for $\beta_{j}$ if $E\left[b_{j}\right]=\beta_{j}$.
 - An estimator $b_{j}$ is consistent if as $n \rightarrow \infty$ any bias in $b_{j} \rightarrow 0$ and $\operatorname{Var}\left[b_{j}\right] \rightarrow 0$.
@@ -476,7 +416,7 @@ $$
 > **Key Concept**: When assumptions 3-4 fail, OLS is no longer best (most efficient). Feasible generalized least squares (FGLS) is best but requires modeling error variances/covariances. In practice, most studies use OLS with robust SE, accepting a small loss in efficiency for greater simplicity.
 
 
-### 12.5 Best Confidence Intervals
+## 12.5 Best Confidence Intervals
 
 - Best confidence intervals are those with the shortest width at a given level of confidence.
 - For standard estimators the $95 \%$ confidence interval is of form
@@ -493,7 +433,7 @@ $$
 > **Key Concept**: Best confidence intervals are those with shortest width at a given confidence level. This requires the most efficient estimator (smallest SE). With robust SE, confidence intervals are wider than with default SE, but remain valid when assumptions fail.
 
 
-### 12.6 Best Tests: Type I and II errors
+## 12.6 Best Tests: Type I and II errors
 
 **In this section:**
 - 12.6.1 Test size and power
@@ -518,7 +458,7 @@ $$
 | Reject $H_{0}:$ | (false positive) |  |
 | Find disease |  |  |
 
-#### 12.6.1 Test Size and Power
+### 12.6.1 Test Size and Power
 
 - Test size is the probability of a type $\mathbf{I}$ error.
 - Test size is set at $\alpha$, the significance level of the test.
@@ -535,25 +475,7 @@ $$
 
 > **Key Concept**: Test size equals the probability of Type I error (false positive). Test power equals one minus the probability of Type II error (false negative). The most powerful test for given size uses the most precise estimator. Higher power means lower risk of failing to detect a true effect.
 
-
----
-
-**Key Takeaways from Sections 12.3-12.6 (Best Methods and Testing):**
-- Nonrepresentative samples can bias OLS if sampling depends on y
-- Include control variables if sampling depends on observed characteristics
-- Use sample weights (weighted least squares) to adjust for nonrepresentativeness
-- An estimator is best if it has smallest variance among unbiased (or consistent) estimators
-- When assumptions 3-4 fail, FGLS is best but requires modeling error structure
-- In practice, most use OLS with robust SE despite small efficiency loss
-- Best confidence intervals have shortest width at given confidence level
-- Test size = Pr[Type I error]; Test power = 1 - Pr[Type II error]
-- Most powerful test uses most efficient estimator
-- Trade-off: reducing Type I error increases Type II error
-
----
-
-
-### 12.7 Data Science and Big Data: An Overview
+## 12.7 Data Science and Big Data: An Overview
 
 **In this section:**
 - 12.7.1 Prediction using machine learning
@@ -568,7 +490,7 @@ $$
 - though big data methods may also be applied to smaller datasets.
 
 
-#### 12.7.1 Prediction Using Machine Learning
+### 12.7.1 Prediction Using Machine Learning
 
 - Often the goal of big data is prediction
 - machine learning methods can predict better than earlier methods such as OLS.
@@ -581,7 +503,7 @@ $$
 - e.g. a better model for digital ad clicks than competitors.
 
 
-#### 12.7.2 Causal Inference with Machine Learning
+### 12.7.2 Causal Inference with Machine Learning
 
 - Economists want to estimate models that are only partially specified
 - use the machine learner in part of the analysis
@@ -594,7 +516,7 @@ $$
 > **Key Concept**: Machine learning methods (lasso, random forests, neural networks) can predict better than OLS but don't provide standard errors for inference. Economists combine machine learning for variable selection with OLS for inference, controlling for the machine learning step to get valid standard errors.
 
 
-### 12.8 Bayesian Methods: An Overview
+## 12.8 Bayesian Methods: An Overview
 
 - An alternative to the "classical" inference approach of this book.
 - Base inference on the parameter(s) of interest $\theta$ using the posterior distribution which combines the distribution of $y$ given $\theta$ with a prior distribution for $\theta$
@@ -607,7 +529,7 @@ $$
 > **Key Concept**: Bayesian inference combines data with prior beliefs to form a posterior distribution for parameters. A 95% Bayesian credible interval can be directly interpreted as containing the parameter with probability 0.95. With large samples or uninformative priors, Bayesian and classical results converge.
 
 
-### 12.9 A Brief History of Statistics and Regression
+## 12.9 A Brief History of Statistics and Regression
 
 - 1733 Central limit theorem
 - 1805 Least squares (without statistical inference)
@@ -622,23 +544,98 @@ $$
 - 1980's Robust standard errors
 - 1984 Apple Macintosh computer (an early personal computer).
 
-
 ---
 
-**Key Takeaways from Sections 12.7-12.9 (Modern Methods and History):**
-- Data science and machine learning focus on prediction, not causal inference
-- Machine learning methods (lasso, trees, neural networks) can outpredict OLS
-- Economists combine machine learning for variable selection with OLS for valid inference
-- Big data enables better prediction but doesn't automatically solve causal inference problems
-- Bayesian methods combine data with prior beliefs to form posterior distributions
-- Bayesian credible intervals have direct probability interpretation
-- MCMC methods make Bayesian inference computationally feasible
-- With large samples or uninformative priors, Bayesian ≈ classical results
-- Statistics developed over 300+ years: CLT (1733), least squares (1805), regression (1885)
-- Robust standard errors are relatively recent (1980s), enabled by computing power
+## Key Takeaways
+
+**Robust Standard Errors for Different Data Structures:**
+
+- Default standard errors assume homoskedasticity, independence, and (for time series) no autocorrelation
+- When these assumptions fail, OLS estimates remain unbiased but inference requires robust SE
+- **Heteroskedastic-robust SE**: Use for cross-section data when error variance varies across observations
+- Heteroskedastic-robust SE typically differ from default SE by less than 30% (can be larger or smaller)
+- **Cluster-robust SE**: Use when observations are grouped (villages, firms, individuals over time)
+- Cluster-robust SE can be several times larger than default or heteroskedastic-robust SE
+- With N observations in G clusters, use G-1 (not N-k) degrees of freedom for cluster-robust inference
+- The difference with default SE increases with more observations per cluster and higher within-cluster correlation
+- **HAC-robust SE**: Use for time series data with autocorrelated errors
+- HAC (heteroskedasticity and autocorrelation consistent) SE require specifying lag length m
+- Rule of thumb for lag length: m = 0.75 × T^(1/3) where T is number of observations
+- Always use cluster-robust SE for panel data (cluster on individual ID)
+
+**Prediction: Average Outcomes vs. Individual Forecasts:**
+
+- Predicting an average outcome (conditional mean E[y|x*]) is more precise than predicting an individual outcome (y|x*)
+- For conditional mean: Var(ŷ_cm) depends only on estimation uncertainty from coefficient estimates
+- For individual forecast: Var(ŷ_f) = Var(ŷ_cm) + Var(u*), so forecasts are always noisier
+- Even with very precise coefficient estimates, se(ŷ_f) ≥ s_e does not go to zero
+- In large samples, 95% forecast intervals are at least ±1.96×s_e wide
+- Conditional mean prediction gets more precise as sample size increases: se(ŷ_cm) → 0 as n → ∞
+- Individual forecast precision does not improve beyond reducing estimation uncertainty
+- Prediction is most precise when x* is close to sample mean and sample variation in x is large
+- Low R² and wide individual forecast intervals don't make regression uninformative
+- Policy-makers base decisions on average predictions (which can be precise), not individual forecasts
+
+**Nonrepresentative Samples and Best Estimation:**
+
+- Nonrepresentative samples can bias OLS if sampling depends on the dependent variable y
+- Include control variables as regressors if sampling depends on observed characteristics
+- Use sample weights with weighted least squares to adjust for known nonrepresentativeness
+- An estimator is "best" (most efficient) if it has smallest variance among unbiased or consistent estimators
+- When assumptions 3-4 (homoskedasticity, no autocorrelation) fail, OLS is no longer best
+- Feasible generalized least squares (FGLS) is best but requires modeling the error variance/covariance structure
+- In practice, most studies use OLS with robust SE despite small efficiency loss for simplicity
+- Best confidence intervals have shortest width at a given confidence level (requires most efficient estimator)
+- With robust SE, confidence intervals are wider than with default SE, but remain valid when assumptions fail
+
+**Hypothesis Testing: Type I and Type II Errors:**
+
+- Type I error (false positive): Reject H₀ when H₀ is true
+- Type II error (false negative): Fail to reject H₀ when H₀ is false
+- Test size = Pr[Type I error], typically set at α = 0.05
+- Test power = 1 - Pr[Type II error]; higher power is better
+- Most powerful test for given size uses the most efficient estimator (smallest standard error)
+- Trade-off exists: reducing Type I error probability increases Type II error probability
+- In practice, test size is controlled (set at 5%), but Type II error probability can be high
+- Low power means high risk of failing to detect a true effect when it exists
+
+**Data Science, Machine Learning, and Big Data:**
+
+- Data science focuses on discerning patterns in data using algorithmic methods
+- Machine learning (lasso, regression trees, random forests, neural networks, deep learning) can predict better than OLS
+- Machine learning emphasizes prediction accuracy, not causal inference or statistical inference
+- Some predictions (e.g., license plate recognition) are very precise even at individual level
+- Other predictions (stock prices, ad clicks) are imprecise individually but profitable on average
+- Big data refers to enormously large datasets, though methods apply to smaller datasets too
+- Economists combine machine learning for variable selection with OLS for valid causal inference
+- Use machine learner to select subset of control variables, then do inference controlling for the selection step
+- Machine learning doesn't automatically solve causal inference problems—causality requires additional assumptions
+
+**Bayesian Methods: An Alternative to Classical Inference:**
+
+- Bayesian inference combines data with prior beliefs to form posterior distributions for parameters
+- Prior distribution can be informative (incorporating expert knowledge) or uninformative (letting data dominate)
+- A 95% Bayesian credible interval can be directly interpreted as containing the parameter with probability 0.95
+- Classical confidence intervals don't have this interpretation (they're based on repeated sampling)
+- Markov chain Monte Carlo (MCMC) methods make Bayesian inference computationally feasible
+- With large samples or uninformative priors, Bayesian results converge to classical results
+- Bayesian methods were rarely used until recently due to computational intractability
+
+**Historical Development of Statistics and Regression:**
+
+- Statistics developed over 300+ years of theoretical and computational advances
+- Central limit theorem (1733) provides foundation for inference
+- Least squares method (1805) predates modern statistical inference by nearly a century
+- Regression (1885) and correlation (1888) formalized by Francis Galton and Karl Pearson
+- The term "standard deviation" introduced in 1894
+- t distribution (1908) by William Gosset ("Student") enabled small-sample inference
+- F distribution (1924) by Ronald Fisher for testing multiple restrictions
+- ENIAC (1945) was the first electronic general-purpose digital computer
+- Kernel regression (1964) as early nonparametric method
+- Robust standard errors (1980s) are relatively recent, enabled by modern computing power
+- Apple Macintosh (1984) made personal computing accessible, accelerating statistical software development
 
 ---
-
 
 ## Key Stata Commands
 

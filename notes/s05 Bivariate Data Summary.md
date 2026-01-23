@@ -12,37 +12,9 @@ By the end of this chapter, you will be able to:
 - Understand the relationship between correlation and regression
 - Recognize the difference between association and causation
 
-Summarizing the relationship between two variables is fundamental to econometric analysis. This chapter introduces the core methods for bivariate data analysis that form the foundation for all regression techniques:
+---
 
-**Visualization and Association (Sections 5.1-5.4):** Methods for displaying and measuring relationships, including two-way tabulations, scatterplots, and the correlation coefficient.
-
-**Regression Analysis (Sections 5.5-5.7):** The regression line, least squares estimation, and interpretation of coefficients—the workhorse of applied econometrics.
-
-**Model Evaluation (Section 5.6):** Measures of model fit including R-squared and standard error of regression.
-
-**Advanced Topics (Sections 5.8-5.12):** Prediction, causation versus association, computational details, and nonparametric methods.
-
-Throughout the chapter, we use house price and size data to illustrate concepts. The methods learned here extend naturally to multiple regression in later chapters.
-
-
-## Outline
-
-(1) Example: House Price and Size
-(2) Two-way Tabulation
-(3) Two-way Scatter Plot
-(4) Correlation
-(5) Regression Line
-(6) Measures of Model Fit
-(7) Computer Output following OLS Regression
-(8) Prediction and Outlying Observations
-(9) Regression and Correlation
-(10) Causation
-(II) Computations for Correlation and Regression
-(12) Nonparametric Regression
-
-Dataset: HOUSE.
-
-### 5.1 Example: House Price and Size
+## 5.1 Example: House Price and Size
 
 - House price and size for sample of 29 houses
 - control for location by consider homogeneous housing market
@@ -102,7 +74,7 @@ $$
 > **Key Concept**: Visual inspection of data is the first step in bivariate analysis. The house price and size data show a clear positive relationship: larger houses tend to sell for higher prices. The correlation of 0.786 confirms this strong positive association.
 
 
-### 5.2 Two-way Tabulation
+## 5.2 Two-way Tabulation
 
 **In this section:**
 - 5.2.1 Two-way tabulation with row and column percentages
@@ -118,7 +90,7 @@ $$
 - sizerange: small (size $<1,800$ ), medium ( $1,800 \leq$ size $<2,400$ ) or large (size $\geq 2,400$ ).
 
 
-#### 5.2.1 Two-Way Tabulation with Row and Column Percentages
+### 5.2.1 Two-Way Tabulation with Row and Column Percentages
 
 - Main entry: \# observations with a given price-size combination - e.g. there were 11 houses of low price and small size.
 
@@ -139,7 +111,7 @@ $$
 - Can also include similarly constructed column percentages.
 
 
-#### 5.2.2 Expected Frequencies and Chi-Squared Test
+### 5.2.2 Expected Frequencies and Chi-Squared Test
 
 - A two-way tabulation can also include expected frequencies, assuming that the two variables are statistically independent.
 - Expected frequency $=$ (row total × column total) $/ \#$ obs.
@@ -164,14 +136,16 @@ $$
 > **Key Concept**: Two-way tabulations show the joint distribution of two categorical variables. Expected frequencies (calculated assuming independence) provide the basis for Pearson's chi-squared test of statistical independence.
 
 
-### 5.3 Two-way Scatterplot
+## 5.3 Two-way Scatterplot
 
 - Standard visual method is a two-way scatter plot first panel shows house price increases with house size.
 ![](https://cdn.mathpix.com/cropped/b9128ba4-0753-416f-b579-a2696694bddc-10.jpg?height=455&width=576&top_left_y=387&top_left_x=64)
 ![](https://cdn.mathpix.com/cropped/b9128ba4-0753-416f-b579-a2696694bddc-10.jpg?height=449&width=576&top_left_y=389&top_left_x=646)
 
+> **Key Concept**: Scatterplots provide visual evidence of relationships between two variables. The house price-size scatterplot shows a clear positive relationship: as size increases, price tends to increase. Scatterplots should always be examined before computing correlation or regression.
 
-### 5.4 Sample Correlation
+
+## 5.4 Sample Correlation
 
 **In this section:**
 - 5.4.1 Sample covariance
@@ -195,7 +169,7 @@ $$
 - For the house price and size data: $r_{x y}=0.786$.
 
 
-#### 5.4.1 Sample Covariance
+### 5.4.1 Sample Covariance
 
 - Recall sample variance $s_{x}^{2}=\frac{1}{n-1} \sum_{i=1}^{n}\left(x_{i}-\bar{x}\right)^{2}$.
 - The sample covariance between $x$ and $y$ is similarly defined:
@@ -218,7 +192,7 @@ $\star$ and $\left(y_{i}-\bar{y}\right)<0$ usually if $\left(x_{i}-\bar{x}\right
 - $s_{x y}<0$ if negative association.
 
 
-#### 5.4.2 Sample Correlation Coefficient
+### 5.4.2 Sample Correlation Coefficient
 
 - The sample correlation coefficient is defined by
 
@@ -236,7 +210,7 @@ $$
 > **Key Concept**: The correlation coefficient is a scale-free measure of linear association ranging from -1 (perfect negative) to +1 (perfect positive). A correlation of 0 indicates no linear relationship. For house price and size, r = 0.786 indicates strong positive correlation.
 
 
-#### 5.4.3 Interpreting Correlation Strength
+### 5.4.3 Interpreting Correlation Strength
 
 - (1) strong positive correlation; (2) moderate positive correlation; (3) almost zero correlation, and (4) moderate negative correlation.
 - Though no clear cutoffs for "weak", "moderate", "strong" correlation.
@@ -246,25 +220,15 @@ $$
 ![](https://cdn.mathpix.com/cropped/b9128ba4-0753-416f-b579-a2696694bddc-14.jpg?height=253&width=409&top_left_y=622&top_left_x=654)
 
 
-#### 5.4.4 Autocorrelations for Time Series Data
+### 5.4.4 Autocorrelations for Time Series Data
 
 - For time series data the autocorrelation at lag $j$ is the correlation between current data and the data lagged $j$ periods.
 - e.g. correlation between $y_{t}$ and $y_{t-j}$.
 
----
-
-**Key Takeaways from Sections 5.1-5.4 (Visualization and Correlation):**
-- Two-way tabulations and scatterplots are essential for visualizing bivariate relationships
-- The correlation coefficient (r) is a scale-free measure of linear association ranging from -1 to 1
-- Covariance measures the direction of association, but is not scale-free
-- Positive correlation means y tends to increase as x increases
-- The correlation for house price and size is 0.786, indicating strong positive association
-- Chi-squared tests can assess independence in categorical data
-
----
+> **Key Concept**: Correlation measures the strength and direction of linear association between two variables. It is scale-free (ranging from -1 to +1), making it useful for comparing relationships across different units. Autocorrelation extends correlation to time series, measuring how a variable relates to its own past values.
 
 
-### 5.5 Regression Line
+## 5.5 Regression Line
 
 **In this section:**
 - 5.5.1 The residual
@@ -289,7 +253,7 @@ where
 - $b_{2}$ is the estimated slope coefficient.
 
 
-#### 5.5.1 The Residual
+### 5.5.1 The Residual
 
 - Residual $e$ is the difference between actual value of $y$ and predicted value $\hat{y}$
 
@@ -301,7 +265,7 @@ $$
 ![](https://cdn.mathpix.com/cropped/b9128ba4-0753-416f-b579-a2696694bddc-17.jpg?height=523&width=733&top_left_y=373&top_left_x=247)
 
 
-#### 5.5.2 Least Squares Estimation
+### 5.5.2 Least Squares Estimation
 
 - For first observation the residual is $e_{1}=y_{1}-\widehat{y}_{1}$, for second observation the residual is $e_{2}=y_{2}-\widehat{y}_{2}$, and so on.
 - For $i^{\text {th }}$ observation
@@ -342,7 +306,7 @@ $$
 
 > **Key Concept**: The method of least squares chooses the regression line to minimize the sum of squared residuals. This yields formulas for the slope (b₂) and intercept (b₁) that can be computed from the data. The slope equals the covariance divided by the variance of x.
 
-#### 5.5.3 Interpretation of the Slope Coefficient
+### 5.5.3 Interpretation of the Slope Coefficient
 
 - The slope coefficient $b_{2}$ gives the slope:
 
@@ -359,7 +323,7 @@ $$
 > **Key Concept**: The slope coefficient measures the change in y associated with a one-unit change in x. For house prices, b₂ = 73.77 means each additional square foot of size is associated with a $73.77 increase in price. This is the most important interpretable quantity in regression analysis.
 
 
-#### 5.5.4 Example: House Price Regression
+### 5.5.4 Example: House Price Regression
 
 - Fitted regression
 
@@ -376,7 +340,7 @@ $$
 ![](https://cdn.mathpix.com/cropped/b9128ba4-0753-416f-b579-a2696694bddc-22.jpg?height=645&width=876&top_left_y=186&top_left_x=206)
 
 
-#### 5.5.5 Intercept-Only Regression and the Sample Mean
+### 5.5.5 Intercept-Only Regression and the Sample Mean
 
 - OLS regression of $y$ on just an intercept
 - minimize $\sum_{i=1}^{n}\left(y_{i}-b_{1}\right)^{2}$ yields $b_{1}=\bar{y}$.
@@ -384,8 +348,10 @@ $$
 - OLS regression is a natural extension of univariate statistics based on the sample mean
 - And univariate statistics based on the sample mean is just a special case of OLS regression.
 
+> **Key Concept**: The regression line ŷ = b₁ + b₂x is the foundation of econometric analysis. It summarizes the linear relationship between two variables and provides predictions. The slope b₂ is the most important parameter, measuring how much y changes for a one-unit change in x. The intercept b₁ is often less meaningful, representing the predicted y when x = 0.
 
-### 5.6 Measures of Model Fit
+
+## 5.6 Measures of Model Fit
 
 **In this section:**
 - 5.6.1 Standard error of the regression
@@ -410,7 +376,7 @@ $$
 - $R^{2}=$ the squared correlation between $y$ and fitted values $\widehat{y}$.
 
 
-#### 5.6.1 Standard Error of the Regression
+### 5.6.1 Standard Error of the Regression
 
 - The standard error of the regression is
 
@@ -426,7 +392,7 @@ $\star$ except that division is by $n-2$ rather than $n$.
 - but $s_{e}$ is not scale free.
 
 
-#### 5.6.2 Definition of R-Squared
+### 5.6.2 Definition of R-Squared
 
 - $R^{2}$ measures the fraction of the variation of $y$ (around the sample mean $\bar{y}$ ) that is explained by the regressors.
 - Total sum of squares: measures variability in $y$ around the sample mean $\bar{y}$
@@ -450,14 +416,14 @@ $$
 
 > **Key Concept**: R-squared measures the fraction of variation in y explained by the regression on x. It ranges from 0 (no explanatory power) to 1 (perfect fit). R² = 0.62 means 62% of house price variation is explained by size variation.
 
-#### 5.6.3 Visual Example of Total and Explained Variation
+### 5.6.3 Visual Example of Total and Explained Variation
 
 - Left panel is Total SS: the deviations $\left(y_{i}-\bar{y}\right)$ for five data points. Right panel is Explained SS: the deviations ( $\widehat{y}_{i}-\bar{y}$ ) for five data points.
 ![](https://cdn.mathpix.com/cropped/b9128ba4-0753-416f-b579-a2696694bddc-27.jpg?height=446&width=558&top_left_y=368&top_left_x=62)
 ![](https://cdn.mathpix.com/cropped/b9128ba4-0753-416f-b579-a2696694bddc-27.jpg?height=446&width=553&top_left_y=368&top_left_x=649)
 
 
-#### 5.6.4 Computing R-Squared from Sums of Squares
+### 5.6.4 Computing R-Squared from Sums of Squares
 
 - For data in previous figure
 
@@ -472,7 +438,7 @@ $$
 - $R^{2}=0.77$ means 77 percent of the variation in $y$ is explained by regression on $x$.
 
 
-#### 5.6.5 Alternative R-Squared Formula
+### 5.6.5 Alternative R-Squared Formula
 
 - Residual sum of squares measures variability in fitted value $\widehat{y}$ around $y$
 
@@ -495,7 +461,7 @@ $$
 - So least squares maximizes $R^{2}$ as it minimizes Residual SS.
 
 
-#### 5.6.6 R-Squared Equals Squared Correlation
+### 5.6.6 R-Squared Equals Squared Correlation
 
 - For regression of $y$ on $x$ that includes an intercept we have the following two results.
 - $R^{2}$ equals the squared correlation coefficient between $y$ and $x$
@@ -515,7 +481,7 @@ $$
 > **Key Concept**: For bivariate regression, R-squared equals the squared correlation coefficient (R² = r²ₓᵧ). This connects the two main measures of association: correlation (scale-free association) and R-squared (fraction of variance explained).
 
 
-#### 5.6.7 Interpreting R-Squared Values
+### 5.6.7 Interpreting R-Squared Values
 
 - Clearly $R^{2} \simeq 0$ is poor fit and $R^{2} \simeq 1$ is an excellent fit
 - but no rule for where $R^{2}$ becomes large enough that the fit moves from poor to good.
@@ -530,7 +496,7 @@ $$
 - but not to compare models with different dependent variable.
 
 
-#### 5.6.8 When Low R-Squared Is Acceptable
+### 5.6.8 When Low R-Squared Is Acceptable
 
 - Low values of $R^{2}$ do not mean that regression analysis is without merit.
 - Example: Regression of earnings on education
@@ -545,7 +511,7 @@ ${ }^{\star}$ e.g. one more year of education is associated with a $6 \%$ increa
 > **Key Concept**: Low R-squared does not mean regression is uninformative. Individual-level data often have low R², yet the regression coefficient may be statistically significant and economically important. What matters is whether the coefficient accurately measures the average relationship.
 
 
-#### 5.6.9 Computing R-Squared for House Price Data
+### 5.6.9 Computing R-Squared for House Price Data
 
 - Regression output will automatically include $R^{2}$, and often $\bar{R}^{2}$.
 - Here compute from formulas, using sums of squares that are given in "analysis of variance" table often included with regression output.
@@ -563,7 +529,7 @@ $$
 - Thus 61.75 percent of the variation in house price is associated with variation in house size
 
 [^0]
-### 5.7 Computer Output following OLS Regression
+## 5.7 Computer Output following OLS Regression
 
 **Example 5.7**: Computer Output from OLS Regression
 
@@ -585,20 +551,10 @@ $$
 | Adjusted $\mathrm{R}^{2}$ | 0.603 |  |  |  |  |  |
 | St. error of reg | 23551 |  |  |  |  |  |
 
----
+> **Key Concept**: Computer output from regression provides comprehensive information: coefficients and their standard errors, t-statistics and p-values for hypothesis testing, R-squared and adjusted R-squared for model fit, F-statistic for overall significance, and the ANOVA decomposition showing explained and residual variation. Understanding how to read regression output is essential for applied econometrics.
 
-**Key Takeaways from Sections 5.5-5.7 (Regression Analysis):**
-- The regression line ŷ = b₁ + b₂x is estimated by least squares (minimizes sum of squared residuals)
-- The slope b₂ measures the change in y for a one-unit change in x
-- For house prices, each additional square foot increases price by $73.77
-- The intercept b₁ is the predicted y when x = 0 (often not meaningful if x = 0 is outside the data range)
-- Residuals (e = y - ŷ) measure prediction errors for each observation
-- Regression of y on only an intercept yields the sample mean as the fitted value
-- Computer output includes coefficients, standard errors, t-statistics, p-values, and model fit statistics
 
----
-
-### 5.8 Prediction
+## 5.8 Prediction
 
 - For $x=x^{*}$ the prediction of $y$ is
 
@@ -619,17 +575,17 @@ $$
 - **Prediction of an individual outcome**
   - e.g., price for a particular house of 2000 square feet
 
-#### 5.8.1 Outlying Observations and Influential Points
+### 5.8.1 Outlying Observations and Influential Points
 
 - An outlier or outlying observation is one that is a relatively large distance from the bulk of the data.
 - A scatter plot is a useful visual tool.
 - An observation with a large value for $\left(x_{i}-\bar{x}\right)\left(y_{i}-\bar{y}\right)$ can have a big influence on $b_{2}$. This is the case for observations that are a long way from both $\bar{x}$ and $\bar{y}$.
 - An outlier may be due to miscoded data.
 
-> **Key Concept**: Outliers can strongly influence regression estimates, especially if they are far from both the mean of x and the mean of y. Always examine scatterplots to identify potential outliers, which may be data errors or genuinely unusual observations.
+> **Key Concept**: Predictions extrapolate the regression line to new values of x. In-sample predictions use observed x values (fitted values). Out-of-sample predictions use new x values, but can be unreliable if extrapolating far beyond the sample range. Outliers can strongly influence regression estimates, especially if they are far from both means, and should be examined via scatterplots.
 
 
-### 5.9 Regression and Correlation
+## 5.9 Regression and Correlation
 
 - Note: $\sum_{i=1}^{n}\left(x_{i}-\bar{x}\right)\left(y_{i}-\bar{y}\right)$ appears in definitions of both $b_{2}$ and $r_{x y}$.
 - In fact the slope coefficient
@@ -644,24 +600,10 @@ $$
 - so $r_{x y}$ measures the number of standard deviations that $y$ changes by as $x$ changes by one standard deviation.
 - e.g. $r_{x y}=0.5, s_{x}=2$ and $s_{y}=10$. Then a one standard deviation change in $x$ is associated with a 0.5 standard deviations change in $y$.
 
-> **Key Concept**: The regression slope equals the correlation times the ratio of standard deviations: b₂ = rₓᵧ × (sᵧ/sₓ). This shows that regression and correlation are closely related, though regression assigns a direction (y depends on x) while correlation is symmetric.
-
----
-
-**Key Takeaways from Section 5.6 (Model Fit) and Sections 5.8-5.9:**
-- R-squared measures the fraction of y variation explained by x (ranges from 0 to 1)
-- R² = (Explained SS) / (Total SS) = 1 - (Residual SS) / (Total SS)
-- For bivariate regression, R² = r²ₓᵧ (squared correlation)
-- Standard error of regression (sₑ) measures the typical size of residuals
-- Low R² doesn't mean the regression is uninformative—the coefficient can still be important
-- Regression can be used for prediction: ŷ = b₁ + b₂x*
-- Outliers can strongly influence regression estimates
-- The regression slope equals b₂ = rₓᵧ × (sᵧ/sₓ), connecting regression and correlation
-
----
+> **Key Concept**: The regression slope equals the correlation times the ratio of standard deviations: b₂ = rₓᵧ × (sᵧ/sₓ). This formula connects regression and correlation—they measure the same relationship but in different units. Regression assigns a direction (y depends on x), while correlation is symmetric.
 
 
-### 5.10 Causation
+## 5.10 Causation
 
 **In this section:**
 - 5.10.1 Association versus causation
@@ -678,7 +620,7 @@ $$
   - Cannot say that a one unit increase in $x$ causes a $b_{2}$ increase in $y$
 
 
-#### 5.10.1 Association Versus Causation
+### 5.10.1 Association Versus Causation
 
 - For example: a medical study might find that alcohol consumption is associated with depression.
 - but is it alcohol consumption that causes depression
@@ -692,7 +634,7 @@ $$
 > **Key Concept**: Regression measures association, not causation. A regression coefficient shows how much y changes when x changes, but does not prove that x causes y. Causation requires additional assumptions or experimental design (covered in Chapter 17).
 
 
-#### 5.10.2 Reverse Regression and Asymmetry
+### 5.10.2 Reverse Regression and Asymmetry
 
 - Regression of $y$ on $x: \widehat{y}=b_{1}+b_{2} x$
 - Reverse regression (of $x$ on $y$ ): $\widehat{x}=c_{1}+c_{2} y$.
@@ -703,9 +645,10 @@ $$
   - Reverse regression of house size on house price: $c_{2}=0.0084$
   - Whereas $1 / b_{2}=1 / 73.77=0.0136 \neq 0.0084$
 
-> **Key Concept**: Regression is directional: regressing y on x gives a different slope than regressing x on y. The slopes are NOT reciprocals of each other. This asymmetry reflects that regression treats y and x differently (y is the dependent variable).
+> **Key Concept**: Causation requires more than association. Regression shows that x and y are related, but doesn't prove x causes y. Confounding variables, reverse causality, or selection bias can create associations without causation. Establishing causation requires experimental design, natural experiments, or advanced techniques (Chapter 17). Regression is directional and asymmetric: regressing y on x gives a different slope than regressing x on y.
 
-### 5.11 Computations for Correlation and Regression
+
+## 5.11 Computations for Correlation and Regression
 
 **In this section:**
 - 5.11.1 Computing the fitted line
@@ -728,7 +671,7 @@ $$
 | Sum | 15 | 10 | 0 | 0 | 4 | 10 |
 | Mean | $\bar{x}=3$ | $\bar{y}=2$ |  |  |  |  |
 
-#### 5.11.1 Computing the Fitted Line
+### 5.11.1 Computing the Fitted Line
 
 - Slope, intercept and line:
 
@@ -744,7 +687,7 @@ $$
 - 1.2, 1.6, 2, 2.4, and 2.8.
 
 
-#### 5.11.2 Computing R-Squared
+### 5.11.2 Computing R-Squared
 
 - Sum of squared residuals
 
@@ -776,7 +719,7 @@ $$
 - Note that the explained sum of squares is $2.0-0.4=1.6$.
 
 
-#### 5.11.3 Computing the Correlation Coefficient
+### 5.11.3 Computing the Correlation Coefficient
 
 - Sample correlation coefficient
 
@@ -788,8 +731,10 @@ $$
 - so strong positive association between cars and household size.
 - As expected, $r_{x y}^{2}=(2 / \sqrt{5})^{2}=4 / 5=0.8$ which equals $R^{2}$.
 
+> **Key Concept**: The formulas for b₂, b₁, R², and r can be computed manually for small datasets, helping build intuition for how least squares works. In practice, statistical software performs these calculations. The key insight is that all quantities are based on sums of products and sums of squares of deviations from means.
 
-### 5.12 Nonparametric Regression
+
+## 5.12 Nonparametric Regression
 
 - A flexible method for exploratory data analysis
 - here the relationship appears to be linear
@@ -798,16 +743,53 @@ $$
 Nonparametric regression
 ![](https://cdn.mathpix.com/cropped/b9128ba4-0753-416f-b579-a2696694bddc-45.jpg?height=473&width=703&top_left_y=372&top_left_x=365)
 
+> **Key Concept**: Nonparametric regression (local linear, lowess) provides flexible alternatives to linear regression by not assuming a specific functional form. These methods are useful for exploratory analysis, checking whether the linear model is appropriate, and identifying nonlinear patterns in the data.
+
 ---
 
-**Key Takeaways from Sections 5.10-5.12 (Causation and Computation):**
+## Key Takeaways
+
+**Visualization and Correlation:**
+- Two-way tabulations, scatterplots, and correlation are essential first steps in bivariate analysis
+- Scatterplots provide visual evidence of relationships and help identify outliers and nonlinear patterns
+- Two-way tabulations with expected frequencies enable chi-squared tests of independence for categorical data
+- The correlation coefficient (r) is a scale-free measure of linear association ranging from -1 to +1
+- Covariance measures the direction of association but depends on the units of measurement
+- For house price and size, r = 0.786 indicates strong positive linear association
+- Autocorrelation extends correlation to time series, measuring how a variable relates to its own past values
+
+**Regression Analysis and Interpretation:**
+- The regression line ŷ = b₁ + b₂x is estimated by ordinary least squares (OLS), which minimizes the sum of squared residuals
+- The slope b₂ measures the change in y for a one-unit change in x and is the most important interpretable quantity
+- For house prices, b₂ = 73.77 means each additional square foot is associated with a $73.77 price increase
+- The intercept b₁ represents the predicted y when x = 0 (often not meaningful if x = 0 is outside the data range)
+- Residuals (e = y - ŷ) measure prediction errors; OLS makes the sum of squared residuals as small as possible
+- Regression of y on only an intercept yields the sample mean as the fitted value, showing OLS generalizes univariate statistics
+- The formulas b₂ = Σ(xᵢ - x̄)(yᵢ - ȳ) / Σ(xᵢ - x̄)² and b₁ = ȳ - b₂x̄ enable manual computation
+- The regression slope equals b₂ = rₓᵧ × (sᵧ/sₓ), connecting regression and correlation
+
+**Model Fit and Evaluation:**
+- R-squared measures the fraction of variation in y explained by x, ranging from 0 (no fit) to 1 (perfect fit)
+- R² = (Explained SS) / (Total SS) = 1 - (Residual SS) / (Total SS)
+- For bivariate regression, R² = r²ₓᵧ (squared correlation coefficient)
+- For house prices, R² = 0.618 means 62% of price variation is explained by size variation
+- Standard error of regression (sₑ) measures the typical size of residuals in the units of y
+- Low R² doesn't mean regression is uninformative—the coefficient can still be statistically significant and economically important
+- R² depends on data aggregation and choice of dependent variable; use it to compare models with the same dependent variable
+- Computer regression output provides coefficients, standard errors, t-statistics, p-values, F-statistics, and ANOVA decomposition
+
+**Prediction, Causation, and Extensions:**
+- Predictions use ŷ = b₁ + b₂x* to forecast y for a given x*
+- In-sample predictions use observed x values (fitted values); out-of-sample predictions use new x values
+- Extrapolation beyond the sample range of x can be unreliable
+- Outliers can strongly influence regression estimates, especially if far from both x̄ and ȳ
 - Association does not imply causation—regression measures correlation, not causal effects
-- Reverse regression (regressing x on y) yields a different slope than the original regression
-- The two slopes are NOT reciprocals of each other, reflecting the asymmetry of regression
-- Computation formulas show how to calculate b₂, b₁, R², and r by hand
-- These formulas are implemented in statistical software
-- Nonparametric regression (local linear, lowess) provides flexible alternatives to linear regression
-- Nonparametric methods are useful for exploratory analysis and checking linearity
+- Confounding variables, reverse causality, or selection bias can create associations without causation
+- Establishing causation requires experimental design, natural experiments, or advanced econometric techniques (Chapter 17)
+- Regression is directional and asymmetric: regressing y on x gives a different slope than regressing x on y
+- The two slopes are NOT reciprocals, reflecting that regression treats y and x differently
+- Nonparametric regression (local linear, lowess) provides flexible alternatives without assuming linearity
+- Nonparametric methods are useful for exploratory analysis and checking the appropriateness of linear models
 
 ---
 

@@ -12,31 +12,9 @@ By the end of this chapter, you will be able to:
 - Understand information criteria (AIC, BIC) for model selection
 - Recognize when regression coefficients cannot be estimated (perfect collinearity)
 
-Multiple regression extends bivariate regression to include several regressors simultaneously. This chapter introduces the core concepts for understanding multiple regression:
+---
 
-**Data Exploration (Sections 10.1-10.3):** Example data on house prices, two-way scatterplots, and correlation matrices for exploratory analysis.
-
-**Regression Estimation (Sections 10.4-10.5):** The regression line with multiple regressors, ordinary least squares (OLS) estimation, and interpretation of slope coefficients as partial effects.
-
-**Model Evaluation (Section 10.6):** Measures of model fit including R-squared, adjusted R-squared, and information criteria for model selection.
-
-**Technical Issues (Sections 10.7-10.8):** Reading computer output and understanding when models cannot be estimated due to perfect collinearity.
-
-Multiple regression is the workhorse of applied econometrics. While visual methods become less useful with many variables, the interpretation of coefficients as partial effects (controlling for other variables) is central to empirical work.
-
-
-## Outline
-
-(1) Example: House price and characteristics
-(2) Two-way Scatter Plots
-(3) Correlation
-(4) Regression line
-(5) Interpretation of Slope Coefficients
-(6) Model Fit
-(7) Computer Output Following Multiple Regression
-(8) Inestimable Models
-
-### 10.1 Example: House Price
+## 10.1 Example: House Price
 
 - HOUSE data: 29 houses sold in central Davis, California, in 1999.
 - lot size is 1 for small, 2 for medium and 3 for large
@@ -76,7 +54,7 @@ Multiple regression is the workhorse of applied econometrics. While visual metho
 | Adjusted $\mathrm{R}^{2}$ | 0.555 |  |  |  |  |  |
 | St. error | 24936 |  |  |  |  |  |
 
-### 10.2 Two-way Scatterplots
+## 10.2 Two-way Scatterplots
 
 - Can get multiple two-way scatterplots - next slide.
 - Some programs provide three-way surface plots
@@ -88,7 +66,7 @@ Multiple regression is the workhorse of applied econometrics. While visual metho
 
 ![](https://cdn.mathpix.com/cropped/87eb2a36-f476-4d35-b20d-3d6a18abe1e1-07.jpg?height=623&width=817&top_left_y=191&top_left_x=221)
 
-### 10.3 Correlation
+## 10.3 Correlation
 
 - Pairwise correlations are very useful for exploratory analysis
 - Price is most highly correlated with square feet, then bedrooms and bathrooms.
@@ -111,18 +89,7 @@ Multiple regression is the workhorse of applied econometrics. While visual metho
 
 > **Key Concept**: Correlation matrices reveal bivariate relationships, but can be misleading. For example, bedrooms correlate with price, but this may simply reflect that larger houses (higher square footage) have more bedrooms. Multiple regression isolates the effect of each variable.
 
----
-
-**Key Takeaways from Sections 10.1-10.3 (Data Exploration):**
-- Multiple regression extends bivariate regression to include several regressors simultaneously
-- Two-way scatterplots can show relationships but become unwieldy with many variables
-- Correlation matrices reveal pairwise associations among all variables
-- Strong correlations between regressors (multicollinearity) can make it difficult to isolate individual effects
-- Multiple regression measures each regressor's effect after controlling for other regressors
-
----
-
-### 10.4 Regression Line
+## 10.4 Regression Line
 
 **In this section:**
 - 10.4.1 Least squares estimation
@@ -143,7 +110,7 @@ where
 - $b_{1}, b_{2}, \ldots, b_{k}$ are estimated intercept and estimated slope parameters.
 
 
-#### 10.4.1 Least Squares Estimation
+### 10.4.1 Least Squares Estimation
 
 - The residual is
 
@@ -170,7 +137,7 @@ $$
 - and the residuals sum to zero if an intercept is included.
 
 
-#### 10.4.2 Computing OLS Estimates
+### 10.4.2 Computing OLS Estimates
 
 - Consider the coefficient $b_{j}$ of the $j^{t h}$ regressor $x_{j}$.
 - The OLS coefficient $b_{j}$ can be calculated by
@@ -187,7 +154,7 @@ $$
 
 > **Key Concept**: The OLS coefficient for regressor xⱼ measures the relationship between y and xⱼ after controlling for how other regressors jointly predict xⱼ. This "residualizing" interpretation is key to understanding partial effects.
 
-### 10.5 Interpretation of Slope Coefficients
+## 10.5 Interpretation of Slope Coefficients
 
 **In this section:**
 - 10.5.1 Partial effects versus total effects
@@ -210,7 +177,7 @@ $$
 \left.\frac{\Delta \widehat{y}}{\Delta x_{2}}\right|_{x_{3}, \ldots, x_{k}}=b_{2} .
 $$
 
-#### 10.5.1 Partial Effects Versus Total Effects
+### 10.5.1 Partial Effects Versus Total Effects
 
 - The total effect on $y_{2}$ lets other features of the house change as we change $x_{2}$.
 - Suppose $\widehat{y}=b_{1}+b_{2} x_{2}+b_{3} x_{3}$
@@ -227,7 +194,7 @@ $$
 
 > **Key Concept**: Partial effects measure the impact of changing one regressor while holding all others constant (∂y/∂xⱼ). Total effects allow other regressors to change as well (dy/dxⱼ). In most applications, we focus on partial effects to isolate the role of each variable.
 
-#### 10.5.2 Further Details on Partial Effects
+### 10.5.2 Further Details on Partial Effects
 
 - Partial effect versus total effect
 - Often interest lies in the partial effect of changing one key regressor after controlling for other variables
@@ -241,19 +208,7 @@ $$
 
 > **Key Concept**: Multiple regression measures association, not causation. We say that a one-unit change in xⱼ is associated with a bⱼ change in ŷ holding other regressors constant. Causal claims require additional assumptions (addressed in Chapter 17).
 
----
-
-**Key Takeaways from Sections 10.4-10.5 (Regression Estimation and Interpretation):**
-- Multiple regression: ŷ = b₁ + b₂x₂ + b₃x₃ + ... + bₖxₖ
-- OLS estimates minimize the sum of squared residuals
-- The coefficient bⱼ measures the partial effect of xⱼ: ∂ŷ/∂xⱼ holding other regressors constant
-- Partial effects differ from total effects (which allow other regressors to vary)
-- In most applications, we focus on partial effects to isolate each variable's role
-- Multiple regression measures association, not necessarily causation
-
----
-
-### 10.6 Model Fit: Standard Error of the Regression
+## 10.6 Model Fit: Standard Error of the Regression
 
 **In this section:**
 - 10.6.1 R-squared for multiple regression
@@ -272,7 +227,7 @@ $$
 - It is also sometimes called the standard error of the residual.
 
 
-#### 10.6.1 R-Squared for Multiple Regression
+### 10.6.1 R-Squared for Multiple Regression
 
 - Again Total $S S=$ Explained $S S+$ Residual $S S$.
 - $\mathbf{R}$-squared is same underlying formula as in bivariate case
@@ -292,7 +247,7 @@ $$
 
 > **Key Concept**: R-squared in multiple regression has the same interpretation as in bivariate regression: the fraction of variation in y explained by all regressors. It equals the squared correlation between y and ŷ (fitted values).
 
-#### 10.6.2 Adjusted R-Squared
+### 10.6.2 Adjusted R-Squared
 
 - $R^{2}$ necessarily increases as add regressors, since residual sum of squares decreases.
 - So also use adjusted $\mathbf{R}$-squared, denoted $\bar{R}^{2}$
@@ -313,7 +268,7 @@ $$
 
 > **Key Concept**: Adjusted R-squared penalizes model complexity by dividing sums of squares by degrees of freedom. Unlike R², adjusted R² can decrease when adding regressors if the new regressors add little explanatory power. Use adjusted R² to compare models with different numbers of regressors.
 
-#### 10.6.3 Information Criteria (AIC, BIC, HQIC)
+### 10.6.3 Information Criteria (AIC, BIC, HQIC)
 
 - Information criteria are a more advanced method that penalizes larger models.
 
@@ -322,7 +277,7 @@ $$
 - similar to $s_{e}^{2}$ except there is no degrees of freedom correction, so division is by $n$ rather than $n-k$.
 
 
-#### 10.6.4 Information Criteria Formulas
+### 10.6.4 Information Criteria Formulas
 
 Akaike IC
 Bayesian IC
@@ -345,20 +300,7 @@ $$
 
 > **Key Concept**: Information criteria (AIC, BIC, HQIC) penalize larger models more heavily than adjusted R². Smaller values are better. BIC is generally preferred as it has a stronger penalty for model size. These criteria are useful for model selection among non-nested models.
 
----
-
-**Key Takeaways from Section 10.6 (Model Fit):**
-- R-squared measures the fraction of y variation explained by all regressors
-- R² necessarily increases when adding regressors (residual SS decreases)
-- Adjusted R-squared penalizes model complexity using degrees of freedom
-- Adjusted R² can decrease when adding weak regressors, making it useful for model comparison
-- Information criteria (AIC, BIC, HQIC) provide alternative model selection tools
-- BIC is generally preferred (stronger penalty for model size than AIC)
-- Standard error of regression (sₑ) measures typical prediction error
-
----
-
-### 10.7 Computer Output Following Multiple Regression
+## 10.7 Computer Output Following Multiple Regression
 
 - Computer output usually has three components
 - 1. ANOVA table
@@ -370,7 +312,7 @@ $$
 - number of observations, R-squared, adjusted R-squared, Standard error of regression, overall F-statistic.
 
 
-### 10.8 Inestimable Models
+## 10.8 Inestimable Models
 
 - It is not always possible to estimate all $k$ regression coefficients in the regression of $y$ on an intercept and regressors $x_{2}, \ldots, x_{k}$.
 - e.g. bivariate regression cannot estimate $b_{2}$ if $\sum_{i=1}^{n}\left(x_{i}-\bar{x}\right)^{2}=0$.
@@ -387,13 +329,80 @@ $$
 
 ---
 
-**Key Takeaways from Sections 10.7-10.8 (Computer Output and Estimation Issues):**
-- Computer output typically includes: ANOVA table, coefficient estimates with inference, and summary statistics
-- ANOVA table provides sums of squares for computing R²
-- Coefficient estimates include standard errors, t-statistics, p-values, and confidence intervals
+## Key Takeaways
+
+**Data Exploration and Correlation:**
+
+- Multiple regression extends bivariate regression to include several regressors simultaneously
+- Summary statistics provide initial overview of variables (means, standard deviations, min/max values)
+- Two-way scatterplots can show relationships but become unwieldy with many variables
+- Correlation matrices reveal pairwise associations among all variables (e.g., price-size correlation of 0.79)
+- Strong correlations between regressors (multicollinearity) can make it difficult to isolate individual effects
+- Correlation can be misleading—bedrooms correlate with price but may reflect size, not independent bedroom effect
+- Multiple regression isolates each regressor's effect after controlling for others
+
+**Multiple Regression Model and OLS Estimation:**
+
+
+- Multiple regression model: ŷ = b₁ + b₂x₂ + b₃x₃ + ... + bₖxₖ
+- OLS estimates minimize the sum of squared residuals: Σ(yᵢ - ŷᵢ)²
+- Normal equations ensure each regressor is orthogonal to residuals: Σxⱼᵢeᵢ = 0
+- Residuals sum to zero when an intercept is included
+- The coefficient bⱼ can be computed by bivariate regression of y on x̃ⱼ (residuals from regressing xⱼ on other regressors)
+- This "residualizing" interpretation shows how OLS controls for other variables
+- Matrix algebra is typically used for computation (see Appendix C.4)
+
+**Partial Effects and Coefficient Interpretation:**
+
+
+- The coefficient bⱼ measures the partial effect of xⱼ: ∂ŷ/∂xⱼ holding other regressors constant
+- Partial effects differ from total effects (which allow other regressors to vary simultaneously)
+- Total effect: dy/dxⱼ = bⱼ + Σbₖ(dxₖ/dxⱼ) when other variables change with xⱼ
+- For OLS, total effect from multivariate regression equals bivariate regression slope coefficient
+- In most applications, we focus on partial effects to isolate each variable's role
+- Example: Size coefficient of 68.37 means $68.37 price increase per square foot, holding bedrooms, bathrooms, lot size, age, and month sold constant
+- Multiple regression measures association, not necessarily causation—use careful language ("associated with")
+
+**Model Fit and Evaluation:**
+
+
+- R-squared measures the fraction of y variation explained by all regressors: R² = Explained SS / Total SS
+- R² = 1 - (Residual SS / Total SS) equals squared correlation between y and ŷ (fitted values)
+- R² necessarily increases when adding regressors (residual SS cannot increase)
+- Adjusted R-squared penalizes model complexity: R̄² = 1 - [Residual SS/(n-k)] / [Total SS/(n-1)]
+- Adjusted R² can decrease when adding weak regressors, making it useful for model comparison
+- Example: Adding 5 regressors to size-only model increased R² from 0.618 to 0.651 but decreased R̄² from 0.603 to 0.555
+- Standard error of regression (sₑ) measures typical prediction error: sₑ = √[Σ(yᵢ-ŷᵢ)²/(n-k)]
+
+**Information Criteria and Model Selection:**
+
+
+- Information criteria (AIC, BIC, HQIC) penalize larger models more heavily than adjusted R²
+- Smaller values of each criterion are preferred (better models)
+- BIC is generally preferred as it has a stronger penalty for model size than AIC
+- BIC = n×ln(σ̂ₑ²) + n(1+ln(2π)) + k×ln(n), where k is number of regressors
+- Information criteria are useful for model selection among non-nested models
+- Different from hypothesis testing—focus on predictive performance rather than statistical significance
+
+**Computer Output and Practical Issues:**
+
+
+- Computer output typically includes three components: ANOVA table, coefficient estimates, and summary statistics
+- ANOVA table provides sums of squares for computing R² and overall F-statistic
+- Coefficient estimates include standard errors, t-statistics, p-values, and 95% confidence intervals
+- Summary statistics include n, R², adjusted R², and standard error of regression
+- Overall F-test evaluates joint significance of all regressors (covered in Chapter 11)
+
+**Perfect Collinearity and Inestimable Models:**
+
+
 - Perfect collinearity occurs when regressors have exact linear relationships
-- With perfect collinearity, some coefficients cannot be estimated (shown as "omitted")
-- Perfect collinearity can arise from inadequate data variation or model misspecification
+- With perfect collinearity, some coefficients cannot be estimated (not identified)
+- Computer output will show "omitted" or blank entries for affected regressors
+- Regressor data matrix is said to be of less than full rank
+- Perfect collinearity can arise from inadequate data variation in well-specified models
+- More commonly arises from model misspecification (e.g., including both a variable and its exact linear combination)
+- Example: Including both temperature in Fahrenheit and Celsius, or income and log(income) as separate regressors without interaction
 
 ---
 

@@ -1,28 +1,21 @@
 # Chapter 15: Regression with Transformed Variables
 
-- Regression often involves variables that have been transformed
-- e.g. quadratics, natural logarithm, interactions (products of variables)
-- e.g. $\hat{y}_{i}=b_{1}+b_{2} x_{2 i}+b_{3} x_{3 i}+b_{3} x_{2 i} \times x_{3 i}$.
-- OLS estimation remains fine if model is still linear in coefficients $b_{1}, \ldots, b_{k}$.
-- But interpreting results is more difficult when the model is nonlinear in the underlying variables
-- the marginal effect $\Delta \hat{y} / \Delta x$ is no longer the slope coefficient
-- plus there are different ways to compute $\Delta \hat{y} / \Delta x$
-- and if $y$ is transformed then prediction of $y$ becomes more difficult.
+## Learning Objectives
 
+By the end of this chapter, you will be able to:
 
-## Outline
+- Understand how variable transformations affect regression interpretation
+- Compute and interpret marginal effects for nonlinear models using calculus and finite difference methods
+- Distinguish between average marginal effects (AME), marginal effects at the mean (MEM), and marginal effects at representative values (MER)
+- Estimate and interpret quadratic and polynomial regression models
+- Work with interaction terms and test their joint significance
+- Apply natural logarithm transformations to create log-linear and log-log models
+- Make predictions from models with transformed dependent variables, avoiding retransformation bias
+- Combine multiple types of variable transformations in a single model
 
-(1) Example: Earnings, Gender, Education and Type of Worker
-(2) Marginal effects for Nonlinear Models
-(1) Quadratic Model and Polynomial Models
-(4) Interacted Regressors
-(6 Log-linear and Log-log models
-(6) Prediction from Log-linear and Log-log Models
-(1) Models with a Mix of Regressor Types
+---
 
-Datasets: EARNINGS_COMPLETE
-
-### 15.1 Example: Earnings, Gender, Education, Worker Type
+## 15.1 Example: Earnings, Gender, Education, Worker Type
 
 - Dataset EARNINGS_COMPLETE
 - 872 female and male full-time workers aged 25-65 years in 2000.
@@ -43,7 +36,7 @@ Datasets: EARNINGS_COMPLETE
 | Lnearnings | Natural logarithm of Earnings | 10.69 | 0.68 | 8.29 | 13.13 |
 | n | 872 |  |  |  |  |
 
-### 15.2 Marginal Effects for Nonlinear Models
+## 15.2 Marginal Effects for Nonlinear Models
 
 - Examples of nonlinear models
 - Quadratic: $\hat{y}=b_{1}+b_{2} x+b_{3} x^{2}$
@@ -96,6 +89,7 @@ $$
 
 - Most often use AME, with ME ${ }_{i}$ evaluated using calculus methods.
 
+> **Key Concept**: For nonlinear models, marginal effects vary across observations. The average marginal effect (AME) averages ME across all observations, the marginal effect at the mean (MEM) evaluates at sample means, and marginal effect at a representative value (MER) evaluates at a chosen point. AME is most commonly used.
 
 ## Computation of Marginal Effects
 
@@ -135,7 +129,7 @@ $$
 - when can't do a scatter plot of several regressors.
 
 
-### 15.3 Quadratic Model and Polynomial Models
+## 15.3 Quadratic Model and Polynomial Models
 
 - A quadratic model is the model $y=\beta_{1}+\beta_{2} x+\beta_{3} x^{2}+u$.
 - The figure gives various examples
@@ -191,6 +185,7 @@ $$
 - ME $=3105-59.32 x$ using calculus method
 - $\mathrm{AME}=\frac{1}{n} \sum_{i=1}^{n}\left(3105-59.32 x_{i}\right)=3105-59.32 \bar{x}= 3105-59.32 \times 43.31=536$
 
+> **Key Concept**: Quadratic models capture nonlinear relationships with a turning point at x = -b₂/(2b₃). The marginal effect is ME = b₂ + 2b₃x (calculus method), which varies with x. Always test whether the quadratic term is statistically significant before interpreting the nonlinear relationship.
 
 ## Polynomial Model
 
@@ -212,7 +207,7 @@ $$
 
 which again will vary with the point of evaluation $x$.
 
-### 15.4 Interacted Regressors
+## 15.4 Interacted Regressors
 
 - Example with $x \times z$ an interacted regressor is
 
@@ -263,6 +258,7 @@ $$
 
 - So the returns to education increase as one ages.
 
+> **Key Concept**: With interaction terms (x×z), the marginal effect of x depends on z: ME_x = b₂ + b₄z. Individual coefficients may be insignificant due to collinearity with the interaction term, so use joint F-tests to assess the overall significance of a variable and its interactions.
 
 ## Joint Hypothesis tests
 
@@ -280,7 +276,7 @@ $$
 - here standard errors of Age and Education more than triple from 151 and 641 to 719 with inclusion of variable AgebyEduc.
 
 
-### 15.5 Natural Logarithm Transformations
+## 15.5 Natural Logarithm Transformations
 
 - Consider models with $\ln y$ and/or $\ln x$.
 - Chapter 9 gave interpretation of coefficients
@@ -306,6 +302,7 @@ $$
 - always positive and increases with age since $\widehat{y} \uparrow$ with age.
 - simplest to evaluate at $\bar{y}$, then MEM of a year of aging is a $\$ 440$ increase in earnings $(=0.0078 \times 56369)$.
 
+> **Key Concept**: In log-linear models (ln y = β₁ + β₂x), the coefficient β₂ is a semi-elasticity: a one-unit change in x is associated with a 100×β₂ percent change in y. The marginal effect in levels is ME_x = β₂ŷ, which increases with the level of y.
 
 ## Log-log Models
 
@@ -321,8 +318,9 @@ $$
 - always positive and increases with age since $\widehat{y} \uparrow$ with age.
 - simplest to evaluate at $\bar{y}$ and $\bar{x}$, then MEM of a year of aging is a $\$ 450$ increase in earnings $(=0.346 \times 56369 / 43.41)$.
 
+> **Key Concept**: In log-log models (ln y = β₁ + β₂ ln x), the coefficient β₂ is an elasticity: a 1% change in x is associated with a β₂% change in y. The marginal effect in levels is ME_x = β₂ŷ/x, which varies with both x and y.
 
-### 15.6 Prediction from Log-linear and Log-log Models
+## 15.6 Prediction from Log-linear and Log-log Models
 
 - Consider log-linear model: $\widehat{\ln y}=b_{1}+b_{2} x+b_{3} z$.
 - A naive prediction in level is $\hat{y}=\exp (\widehat{\ln y})=\exp \left(b_{1}+b_{2} x+b_{3} z\right)$.
@@ -363,6 +361,7 @@ $$
 
 - then $\mathrm{E}[y \mid x]=\exp \left(\sigma_{u}^{2} / 2\right) \exp \left(\beta_{1}+\beta_{2} x\right)$.
 
+> **Key Concept**: Predicting y from a log-linear model requires accounting for retransformation bias. The naive prediction exp(ln ŷ) underestimates E[y|x]. With normal homoskedastic errors, multiply by exp(s_e²/2) where s_e is the standard error from the log regression.
 
 ## R-squared with Transformed Dependent Variable
 
@@ -373,7 +372,7 @@ $$
 - For persistent time series right-skewed data $R^{2}$ is usually higher in models for $y$ than for $\Delta y$.
 
 
-### 15.7 Models with a Mix of Regressor Types
+## 15.7 Models with a Mix of Regressor Types
 
 - Levels example with $R^{2}=.206, n=872$ is
 
@@ -415,6 +414,89 @@ $$
   - Though this comparison is statistically insignificant at $5 \%$
 - A $1 \%$ change in hours worked is associated with a $0.975 \%$ increase in earnings
 
+---
+
+## Key Takeaways
+
+**Marginal Effects for Nonlinear Models:**
+- In nonlinear models, the marginal effect ME_x = Δŷ/Δx is no longer equal to the slope coefficient
+- Marginal effects can be computed using calculus methods (derivatives, for very small Δx) or finite difference methods (Δx = 1)
+- Calculus method at x: ME = dŷ/dx; finite difference method: ME = [ŷ(x+1) - ŷ(x)]/1
+- Three common approaches for summarizing marginal effects across observations:
+- **AME (Average Marginal Effect)**: Compute ME for each observation and average: AME = (1/n)Σ ME_i
+- **MEM (Marginal Effect at the Mean)**: Evaluate ME at sample means: MEM = ME|_{x=x̄}
+- **MER (Marginal Effect at Representative value)**: Evaluate ME at a chosen representative value x*
+- AME is most commonly used in practice, typically with ME_i evaluated using calculus methods
+- Statistical packages often provide post-estimation commands to calculate AME, MEM, MER with standard errors
+
+**Quadratic and Polynomial Models:**
+- Quadratic model: y = β₁ + β₂x + β₃x² + u captures U-shaped or inverted U-shaped relationships
+- The turning point occurs at x = -β₂/(2β₃)
+- Marginal effect using calculus: ME_x = b₂ + 2b₃x, which varies with x
+- Average marginal effect: AME = b₂ + 2b₃x̄ (simplifies nicely for quadratic models)
+- Always test whether quadratic term is statistically significant before interpreting nonlinearity
+- Polynomial models of degree p include powers up to x^p, allowing up to p-1 turning points
+- Determine polynomial order progressively by adding terms until they become statistically insignificant
+- For polynomial of degree p, marginal effect: ME = b₂ + 2b₃x + 3b₄x² + ... + pb_{p+1}x^{p-1}
+- Example: Earnings peak at age 52.3 years in quadratic model with Age and Age²
+
+**Interaction Terms (Interacted Regressors):**
+- Model with interaction: y = β₁ + β₂x + β₃z + β₄(x×z) + u
+- Create interaction variable xz = x × z and include as additional regressor in OLS
+- The marginal effect of x depends on the level of z: ME_x = b₂ + b₄z
+- Similarly, marginal effect of z depends on x: ME_z = b₃ + b₄x
+- Individual coefficients on x, z, and x×z may be statistically insignificant due to high collinearity
+- Use joint F-test to assess overall significance: H₀: β₂ = 0, β₄ = 0 tests significance of x
+- Interaction terms are often highly correlated with their component variables (e.g., ρ̂ = 0.72, 0.64)
+- This multicollinearity inflates standard errors but doesn't invalidate the model
+- Example: Returns to education increase with age when Education×Age interaction is included
+
+**Natural Logarithm Transformations:**
+- OLS estimation works if model is linear in coefficients (e.g., ln y = β₁ + β₂x is okay)
+- **Log-linear model**: ln y = β₁ + β₂x + u
+  - Coefficient β₂ is a semi-elasticity: one-unit change in x → 100×β₂ percent change in y
+  - Marginal effect in levels: ME_x = β₂ŷ (increases with level of y)
+  - Example: b₂ = 0.0078 means one year of aging → 0.78% increase in earnings
+- **Log-log model**: ln y = β₁ + β₂ ln x + u
+  - Coefficient β₂ is an elasticity: 1% change in x → β₂% change in y
+  - Marginal effect in levels: ME_x = β₂ŷ/x
+  - Example: b₂ = 0.346 means 1% increase in age → 0.346% increase in earnings
+- **Linear-log model**: y = β₁ + β₂ ln x + u (less common)
+  - Marginal effect: ME_x = β₂/x
+- Log transformations often improve model fit for right-skewed data (higher R²)
+
+**Prediction from Log Models and Retransformation Bias:**
+- Naive prediction from ln y = β₁ + β₂x: ŷ = exp(b₁ + b₂x) **underestimates** E[y|x]
+- Problem: E[exp(u)|x] > 1 in general, so E[y|x] = exp(β₁ + β₂x) × E[exp(u)|x]
+- **Retransformation bias correction** with normal homoskedastic errors:
+  - ỹ = exp(s_e²/2) × exp(ln ŷ), where s_e is standard error from log regression
+  - E[exp(u)|x] = exp(σ_u²/2) when u|x ~ N(0, σ_u²)
+- Example: s_e = 0.4 requires rescaling by exp(0.4²/2) = exp(0.08) = 1.083 (8.3% adjustment)
+- Even small s_e can matter: s_e = 0.2 → exp(0.02) = 1.020 (2% adjustment)
+- Retransformation bias correction applies to log-linear, log-log, and other log-transformed models
+- Alternative: Duan's smearing estimator uses (1/n)Σexp(e_i) when errors not normal
+
+**R-squared with Transformed Dependent Variables:**
+- R² measures fraction of variation in the dependent variable explained by regressors
+- R² from regress y on x measures variation in y; R² from regress g(y) on x measures variation in g(y)
+- **Cannot compare R² across models with different dependent variable transformations**
+- For right-skewed data, R² usually higher for ln y than for y (better fit on log scale)
+- For time series, R² usually higher for y than for Δy (levels vs. changes)
+- Model selection based on R² only valid when dependent variable transformation is identical
+
+**Models with Mixed Regressor Types:**
+- Can combine levels, quadratics, interactions, dummies, and log transformations in one model
+- Example: Earnings = f(Gender, Age, Age², Education, Worker type dummies, ln Hours)
+- Interpretation requires care when mixing transformation types:
+  - Binary regressor (Gender): women earn $14,330 less (levels model) or 19.3% less (log model)
+  - Quadratic (Age, Age²): earnings peak at specific age, then decline
+  - Log regressor (ln Hours): 1% change in hours → 0.975% change in earnings (log model)
+  - Dummy variables: compare to omitted category (private sector workers)
+- Always control for other regressors when interpreting any single coefficient
+- Statistical significance patterns may differ between levels and log models
+- Choose transformation based on economic theory, data characteristics, and model diagnostics
+
+---
 
 ## Some in-class Exercises
 

@@ -1,26 +1,23 @@
 # Chapter 4: Statistical Inference for the Mean
 
-- Extrapolate from sample mean $\bar{x}$ to population mean $\mu$
-- Given the sample, confidence intervals give a range of values that $\mu$ is likely to fall into
-- Hypothesis tests are used to determine whether or not a specified value or range of values of $\mu$ is plausible, given the sample
-- While we focus on $\mu$, the methods generalize to inference on other parameters
+## Learning Objectives
 
+By the end of this chapter, you will be able to:
 
-## Outline
+- Understand how to extrapolate from sample mean x̄ to population mean μ using statistical inference
+- Construct confidence intervals to identify the range of plausible values for the population mean
+- Compute and interpret t-statistics and understand the t distribution
+- Conduct two-sided hypothesis tests to evaluate claims about the population mean
+- Calculate and interpret p-values for hypothesis tests
+- Distinguish between Type I and Type II errors and understand significance levels
+- Perform one-sided (directional) hypothesis tests and choose appropriate null and alternative hypotheses
+- Generalize confidence interval and hypothesis testing methods to other parameters beyond the mean
+- Apply statistical inference methods to proportions data and binary outcomes
+- Use statistical software (Stata, R, Excel) to implement confidence intervals and hypothesis tests
 
-(1) Example: Mean Annual Earnings
-(2) t Statistic and t Distribution
-(3) Confidence Intervals
-(4) Two-sided Hypothesis Tests
-(5) Two-sided Hypothesis Test Examples
-(6) One-sided Hypothesis Tests
-(7) Generalization of Confidence Intervals and Hypothesis Tests
-(8) Proportions Data
+---
 
-- Datasets: EARNINGS, GASPRICE, EARNINGSMALE, REALGDPPC.
-
-
-### 4.1 Example: Mean Annual Earnings
+## 4.1 Example: Mean Annual Earnings
 
 - Sample of 171 female full-time workers aged 30 in 2010.
 - Descriptive statistics obtained using Stata summarize command
@@ -35,8 +32,11 @@
 - Std. Dev.: standard error $s$ measures the precision of $\bar{x}$ as an estimate of $\mu$.
 - The next slides present methods for statistical inference on $\mu$ that are explained in detail in the remainder of the chapter.
 
+**Key Concept: Sample Mean as Estimator**
 
-## 95\% Confidence Interval for the Mean
+The sample mean x̄ is an unbiased estimator of the population mean μ: E[x̄] = μ. The standard error se(x̄) = s/√n measures the precision of x̄ as an estimate of μ. With sample size n=171 and standard deviation s=25,527, the standard error is 1,952, indicating moderate precision in our estimate of mean earnings.
+
+### 95\% Confidence Interval for the Mean
 
 - A $95 \%$ confidence interval for a parameter is a range of likely values that the parameter lies in with $95 \%$ confidence.
 - $95 \%$ Confidence interval for $\mu$ obtained using Stata mean command.
@@ -54,7 +54,7 @@ Number of obs $=171$
   - Std. Err: standard error measures the precision of $\bar{x}$ as an estimate of $\mu$
     - This equals $s / \sqrt{n}=25527.05 / \sqrt{171}=1952.1$
 
-## 95\% Confidence Interval Calculation
+### 95\% Confidence Interval Calculation
 
 - In general a confidence interval is
 
@@ -74,7 +74,7 @@ $$
 \bar{x} \pm c \times \operatorname{se}(\bar{x})=41412.69 \pm 1.974 \times 1952.1=(37559,45266) .
 $$
 
-## Critical Value for the Confidence Interval
+### Critical Value for the Confidence Interval
 
 - For $\mu$ use the $T$ distribution with $n-1$ degrees of freedom
 - very similar to standard normal distribution except with fatter tails.
@@ -86,7 +86,7 @@ $$
 Critical value for 95\% conf. int.
 ![](https://cdn.mathpix.com/cropped/fc949097-0aa0-4241-b263-6c42fd6c818c-07.jpg?height=414&width=603&top_left_y=477&top_left_x=406)
 
-## Hypothesis test on the Mean
+### Hypothesis test on the Mean
 
 - Hypothesis test using Stata ttest command
 - as illustrative example test whether or not $\mu=40,000$.
@@ -111,7 +111,7 @@ One-sample t test
 - Since $p>0.05$ we do not reject $H_{0}: \mu=40000$ at level 0.05 .
 
 
-## Hypothesis test calculation
+### Hypothesis test calculation
 
 - In general a $t$ test statistic is
 
@@ -129,6 +129,9 @@ $$
 - Here $p$ equals the probability that $\left|T_{170}\right| \geq 0.7237=0.4703$.
 - Since this probability exceeds 0.05 we do not reject $H_{0}$.
 
+**Key Concept: Confidence Intervals and Hypothesis Tests**
+
+A 95% confidence interval provides a range of plausible values for μ: estimate ± critical value × standard error. A hypothesis test uses the t-statistic t = (x̄ - μ₀)/se(x̄) to evaluate whether a hypothesized value μ₀ is consistent with the data. The p-value measures how extreme the observed t-statistic is under H₀. Here, with t=0.724 and p=0.470, we do not reject H₀: μ=40,000 at the 5% level.
 
 ## 4.2 t Statistic and t distribution
 
@@ -141,7 +144,7 @@ $$
 - this leads to use of the $t$-statistic and the $t$ distribution
 
 [^0]
-## Normal Distribution and the Central Limit Theorem
+### Normal Distribution and the Central Limit Theorem
 
 - We assume a simple random sample where
 - A. $X_{i}$ has common mean $\mu: \mathrm{E}\left[X_{i}\right]=\mu$ for all $i$.
@@ -155,7 +158,7 @@ $$
 Z=\frac{\bar{X}-\mu}{\sigma / \sqrt{n}} \sim N(0,1) \text { as } n \rightarrow \infty .
 $$
 
-## The t-statistic
+### The t-statistic
 
 - Now replace the unknown $\sigma^{2}$ by an estimator $S^{2}=\frac{1}{n-1} \sum_{i=1}^{n}\left(X_{i}-\bar{X}\right)^{2}$.
 
@@ -175,8 +178,11 @@ $$
 - $T \sim T(n-1)$ exactly in the very special case that $X_{i} s$ are normally distributed
 - otherwise $T$ is not $T(n-1)$ exactly but is the standard approximation.
 
+**Key Concept: The t Distribution**
 
-## The t -statistic (continued)
+The t distribution is similar to the standard normal N(0,1) but with fatter tails. The t-statistic T = (X̄ - μ)/(S/√n) follows a t distribution with (n-1) degrees of freedom. As n increases, the t distribution approaches the standard normal distribution. For n > 30, t_{n-1,0.025} ≈ 2, giving the "two-standard-error rule" for approximate 95% confidence intervals.
+
+### The t -statistic (continued)
 
 - In summary, inference on $\mu$ is based on the sample $t$-statistic is
 
@@ -190,7 +196,7 @@ $$
 - The statistic $t$ is viewed as a realization of the $T(n-1)$ distribution.
 
 
-## The t Distribution
+### The t Distribution
 
 - $t$ distribution has probability density function that is bell-shaped
 - $\operatorname{Pr}[a<T<b]$ is the area under the curve between $a$ and $b$
@@ -202,7 +208,7 @@ $$
 ![](https://cdn.mathpix.com/cropped/fc949097-0aa0-4241-b263-6c42fd6c818c-14.jpg?height=439&width=546&top_left_y=470&top_left_x=641)
 
 
-## Probabilities for the t Distribution
+### Probabilities for the t Distribution
 
 - Probabilities are the area under the $t$ probability density function.
 - e.g. $\operatorname{Pr}[a<T<b]$ is the area under the curve from $a$ to $b$
@@ -213,7 +219,7 @@ $$
 - e.g. $\operatorname{Pr}\left[T_{170}>0.724\right]=1-\mathrm{pt}(0.724,170)=0.235$.
 
 
-## Inverse Probabilities for the t Distribution
+### Inverse Probabilities for the t Distribution
 
 - For confidence intervals we need to find the inverse probability
 - called a critical value.
@@ -230,7 +236,7 @@ $$
 - The R function is $\mathrm{qt}(1-\mathrm{a}, \mathrm{v})$ e.g. $\mathrm{qt}(0.95,170)=1.654$.
 
 
-## Inverse probabilities (continued)
+### Inverse probabilities (continued)
 
 - Left panel: $\operatorname{Pr}\left[T_{170}>1.654\right]=0.05$, so $t_{170,05}=1.654$.
 - Right panel: $\operatorname{Pr}\left[-1.974<T_{170}<1.974\right]=0.05$
@@ -239,7 +245,7 @@ using $\operatorname{Pr}\left[T_{170}>1.974\right]=0.025$ and $t_{170, .025}=1.9
 ![](https://cdn.mathpix.com/cropped/fc949097-0aa0-4241-b263-6c42fd6c818c-17.jpg?height=394&width=536&top_left_y=398&top_left_x=640)
 
 
-### 4.3 Confidence Intervals
+## 4.3 Confidence Intervals
 
 - For simplicity focus on $95 \%$ confidence intervals.
 - A 95 percent confidence interval for the population mean is
@@ -256,7 +262,7 @@ $$
 - hence a $95 \%$ confidence interval.
 
 
-## Example: Mean Annual Earnings
+### Example: Mean Annual Earnings
 
 - Here $\bar{x}=41413, \operatorname{se}(\bar{x})=s / \sqrt{n}=1952, n=171$, and $t_{170, .025}=1.974$.
 - A $95 \%$ confidence interval $(\mathrm{Cl})$ is
@@ -274,7 +280,7 @@ $$
 - this was the result obtained earlier using the Stata mean command.
 
 
-## Derivation of a $95 \%$ Confidence Intervals
+### Derivation of a $95 \%$ Confidence Intervals
 
 - We derive a $95 \%$ confidence interval from first principles.
 - For simplicity consider a sample with $n=61$, in which case $n-1=60$ and $t_{60, .025}=2.0003$. Thus
@@ -300,7 +306,7 @@ $$
 \end{aligned}
 $$
 
-## Derivation (continued)
+### Derivation (continued)
 
 - Re-ordering the final inequality yields
 
@@ -315,7 +321,7 @@ $$
 - This is the confidence interval formula given earlier.
 
 
-## What Level of Confidence?
+### What Level of Confidence?
 
 - Ideally narrow confidence intervals with high level of confidence.
 - But trade-off: more confidence implies wider interval
@@ -333,7 +339,7 @@ $$
 - next most common are $90 \%(\alpha=0.10)$ and $99 \%(\alpha=0.01)$ confidence intervals
 
 
-## Critical t values
+### Critical t values
 
 - Table presents $t_{v, \alpha / 2}$ for various confidence levels ( $\alpha$ ) and $v=n-1$.
 - The $95 \%$ confidence intervals critical values are bolded
@@ -353,7 +359,7 @@ $$
 - the sample mean plus or minus two standard errors.
 
 
-## Interpretation
+### Interpretation
 
 - Interpretation of confidence intervals is conceptually difficult.
 - The correct interpretation of a 95 percent confidence interval is that if constructed for each of an infinite number of samples then it will include $\mu 95 \%$ of the time
@@ -368,7 +374,7 @@ $\star 50^{\text {th }}$ sample had $95 \%$ interval $(11.49,21.45)$
 - so here $98 \%$ of the samples had $95 \%$ confidence interval that included $\mu$ (versus theory $95 \%$ ).
 
 
-### 4.4 Two-Sided Hypothesis Tests
+## 4.4 Two-Sided Hypothesis Tests
 
 - A two-sided test or two-tailed test for the population mean is a test of the null hypothesis
 
@@ -387,7 +393,7 @@ $$
 - We need to either reject $H_{0}$ or not reject $H_{0}$.
 
 
-## Significance Level of a Test
+### Significance Level of a Test
 
 - A test either rejects or does not reject the null hypothesis.
 - The decision made may be in error.
@@ -396,8 +402,11 @@ $$
 - The significance level of a test, denoted $\alpha$, is the pre-specified maximum probability of a type I error that will be tolerated.
 - Often $\alpha=0.05$. A $5 \%$ chance of making a type I error.
 
+**Key Concept: Significance Level and Type I Error**
 
-## The t-test Statistic
+The significance level α is the pre-specified maximum probability of Type I error (rejecting H₀ when it's true) that we're willing to tolerate. Commonly α=0.05 (5% significance level), meaning we accept a 1-in-20 chance of incorrectly rejecting a true null hypothesis. Lower α reduces Type I errors but makes it harder to detect true effects (increases Type II errors).
+
+### The t-test Statistic
 
 - Obviously reject $H_{0}: \mu=\mu^{*}$ if $\bar{x}$ is a long way from $\mu^{*}$.
 - Transform to $t=\left(\bar{x}-\mu^{*}\right) / \operatorname{se}(\bar{x})$ as this has known distribution.
@@ -417,7 +426,7 @@ $$
 - The $t$-statistic is a draw from the $T(170)$ distribution, since $n=171$.
 
 
-## Rejection Using p-values
+### Rejection Using p-values
 
 - How likely are we to obtain a draw from $T(170)$ that is $\geq|0.724|$ ?
 - The $p$-value is the probability of observing a t-test statistic at least as large in absolute value as that obtained in the current sample.
@@ -438,7 +447,7 @@ $$
 Two-sided test: critical value approach
 ![](https://cdn.mathpix.com/cropped/fc949097-0aa0-4241-b263-6c42fd6c818c-29.jpg?height=359&width=534&top_left_y=345&top_left_x=641)
 
-## Rejection using Critical Regions
+### Rejection using Critical Regions
 
 - Alternative equivalent method is the following
 - base rejection directly on the value of the $t$-statistic
@@ -457,7 +466,7 @@ $$
 - The critical value is illustrated in right panel of the preceding figure.
 
 
-## Which Significance level?
+### Which Significance level?
 
 - Decreasing the significance level $\alpha$
 - decreases the area in the tails that defines the rejection region
@@ -470,14 +479,14 @@ $$
 - Further discussion under test power.
 
 
-## Relationship to Confidence Intervals
+### Relationship to Confidence Intervals
 
 - Two-sided tests can be implemented using confidence intervals.
 - If the $H_{0}$ value $\mu^{*}$ falls inside the $100(1-\alpha)$ percent confidence interval then do not reject $H_{0}$ at level $\alpha$.
 - Otherwise reject $H_{0}$ at significance level $\alpha$.
 
 
-## Summary
+### Summary
 
 - A summary of the preceding example is the following.
 
@@ -491,8 +500,11 @@ $$
 
 - The p -value and critical value approaches are alternative methods that lead to the same conclusion.
 
+**Key Concept: P-values and Hypothesis Testing**
 
-### 4.5 Hypothesis Testing Example 1: Gasoline Prices
+The p-value is the probability of observing a test statistic at least as extreme as the one obtained, assuming H₀ is true. For two-sided tests, p = Pr[|T_{n-1}| ≥ |t|]. Small p-values (p < α) provide strong evidence against H₀, leading to rejection. The p-value approach and critical value approach always give the same conclusion—they're just two equivalent ways to implement the same test.
+
+## 4.5 Hypothesis Testing Example 1: Gasoline Prices
 
 - Test at $\alpha=.05$ claim that the price of regular gasoline in Yolo County is neither higher nor lower than the norm for California.
 - one day's data from a website that provides daily data on gas prices
@@ -507,7 +519,7 @@ $$
 - Reject the claim that reject the claim that population mean Yolo County gas price equals the California state-average price.
 
 
-## Example 2: Male Earnings
+### Example 2: Male Earnings
 
 - Test at $\alpha=.05$ the claim that population mean annual earnings for 30 year-old U.S. men with earnings in 2010 exceed \$50,000
 - claim that > 50000 is set up as the alternative hypothesis
@@ -521,7 +533,7 @@ $$
 - Do not reject the claim that population mean earnings exceed $\$ 50,000$.
 
 
-## Example 3: Price Inflation
+### Example 3: Price Inflation
 
 - Test at $\alpha=.05$ claim that U.S. real GDP per capita grew on average at $2.0 \%$ over the period 1960 to 2020
 - use year-to-year percentage changes in U.S. real GDP per capita.
@@ -535,7 +547,7 @@ $$
 - Do not reject the claim that population mean growth was $2.0 \%$.
 
 
-### 4.6 One-sided Directional Hypothesis Tests
+## 4.6 One-sided Directional Hypothesis Tests
 
 - An upper one-tailed alternative test is a test of $H_{0}: \mu \leq \mu^{*}$ against $H_{a}: \mu>\mu^{*}$.
 - A lower one-tailed alternative test is a test of $H_{0}: \mu \geq \mu^{*}$ against $H_{a}: \mu<\mu^{*}$.
@@ -545,7 +557,7 @@ $$
 - test $H_{0}: \mu \leq 40000$ against $H_{a}: \mu>40000$.
 
 
-## P-Values and Critical Regions
+### P-Values and Critical Regions
 
 - Use the usual $t$-test statistic $t=\left(\bar{x}-\mu^{*}\right) / \operatorname{se}(\bar{x})$.
 - For an upper one-tailed alternative test
@@ -558,7 +570,7 @@ $$
 - $H_{0}$ if $p<\alpha$ or, equivalently, if $t<c$.
 
 
-## Example: Mean Annual Earnings
+### Example: Mean Annual Earnings
 
 - Evaluate the claim that the population mean exceeds $\$ 40,000$.
 - Test of $H_{0}: \mu \leq 40000$ against $H_{a}: \mu>40000$
@@ -577,7 +589,7 @@ $$
 One-sided test: critical v alue approach
 ![](https://cdn.mathpix.com/cropped/fc949097-0aa0-4241-b263-6c42fd6c818c-40.jpg?height=383&width=571&top_left_y=358&top_left_x=653)
 
-## Specifying the Null Hypothesis in One-sided Test
+### Specifying the Null Hypothesis in One-sided Test
 
 - Suppose claim is that population mean earnings exceed $\$ 40,000$.
 - Potential method 1: test $H_{0}: \mu \leq 40000$ against $H_{a}: \mu>40000$
@@ -592,8 +604,11 @@ One-sided test: critical v alue approach
 - the first specification is therefore used
 - the statement being tested is specified to be the alternative hypothesis.
 
+**Key Concept: One-sided vs. Two-sided Tests**
 
-### 4.7 Generalize Confidence Intervals and Hypothesis Tests
+One-sided tests have directional alternatives: H₀: μ ≤ μ* vs. H_a: μ > μ* (upper tail) or H₀: μ ≥ μ* vs. H_a: μ < μ* (lower tail). The claim being tested is always specified as the alternative hypothesis, requiring strong evidence to support it. One-sided tests use half the tail area: p = Pr[T_{n-1} ≥ t] for upper tail tests, with critical value c = t_{n-1,α} (not t_{n-1,α/2} as in two-sided tests).
+
+## 4.7 Generalize Confidence Intervals and Hypothesis Tests
 
 - Consider general case of an estimate of a parameter
 - with standard error the estimated standard deviation of the estimate
@@ -626,7 +641,7 @@ $$
 \text { Margin of error } \simeq 2 \times \text { Standard error. }
 $$
 
-## Generalization of Hypothesis Tests
+### Generalization of Hypothesis Tests
 
 - Two-sided test at significance level $\alpha$ of
 - $H_{0}$ : a parameter equals a hypothesized value against
@@ -644,7 +659,7 @@ $$
 - the two methods lead to the same conclusion.
 
 
-### 4.8 Proportions Data
+## 4.8 Proportions Data
 
 - Consider proportion of respondents voting Democrat.
 - Code data as $x_{i}=1$ if vote Democrat and $x_{i}=0$ if vote Republican
@@ -657,7 +672,7 @@ $$
 - $s^{2}=921 \times 0.5212 \times(1-0.5212) / 920=0.2498$.
 
 
-## Inference for Proportions Data
+### Inference for Proportions Data
 
 - View each outcome as result of random variable
 
@@ -679,7 +694,11 @@ $$
 t=\frac{\bar{x}-p^{*}}{\sqrt{p^{*}\left(1-p^{*}\right) / n}}
 $$
 
-## Key Stata Commands
+**Key Concept: Inference for Proportions**
+
+For binary data (x_i = 1 or 0), the sample mean x̄ equals the sample proportion. The sample variance has the special form s² = nx̄(1-x̄)/(n-1). For confidence intervals, use standard error se(x̄) = √[x̄(1-x̄)/n]. For hypothesis tests of H₀: p = p*, use se = √[p*(1-p*)/n], substituting the hypothesized proportion p* rather than the sample proportion.
+
+### Key Stata Commands
 
 ```
 use EARNINGSBOTH.DTA, clear
@@ -695,7 +714,7 @@ display invttail(170,0.025)
 ```
 
 
-## Computing the p -value and Critical Value
+### Computing the p -value and Critical Value
 
 - Example of computer commands to get $p$ and $c$
 - for $t=t$, degrees of freedom $v$, and test at level $\alpha$
@@ -704,8 +723,131 @@ display invttail(170,0.025)
 - R: $p=2 *(1-\mathrm{pt}(|t|, v))$ and $c=\mathrm{qt}(1-\alpha / 2, v)$
 - Excel: $p=\operatorname{TDIST}(|t|, v, 2)$ and $c=\operatorname{TINV}(2 \alpha, v)$
 
+---
 
-## Some in-class Exercises
+## Key Takeaways
+
+**Introduction to Statistical Inference (Section 4.1):**
+- Statistical inference extrapolates from sample statistics to population parameters
+- The sample mean x̄ is an unbiased estimator of the population mean μ: E[x̄] = μ
+- The standard error se(x̄) = s/√n measures the precision of x̄ as an estimate of μ
+- Confidence intervals provide a range of plausible values for μ given the sample data
+- Hypothesis tests evaluate whether specific values of μ are consistent with the data
+- Example: With n=171 female workers, x̄ = $41,413, s = $25,527, giving se(x̄) = $1,952
+- 95% confidence interval for mean earnings: ($37,559, $45,266)
+- Hypothesis test H₀: μ = $40,000 yields t = 0.724, p = 0.470 → do not reject H₀
+- Methods developed for the mean μ generalize to inference on other parameters
+
+**The t-statistic and t Distribution (Section 4.2):**
+- For simple random samples: x̄ ~ (μ, σ²/n), meaning x̄ has mean μ and variance σ²/n
+- The Central Limit Theorem: as n → ∞, the standardized variable Z = (x̄ - μ)/(σ/√n) ~ N(0,1)
+- Since σ is unknown, replace with sample estimate s to get the t-statistic: t = (x̄ - μ)/(s/√n)
+- The t-statistic follows the t distribution with (n-1) degrees of freedom: T ~ T(n-1)
+- The t distribution is bell-shaped like the standard normal but with fatter tails
+- As degrees of freedom increase, the t distribution converges to N(0,1)
+- For n > 30, t_{n-1,0.025} ≈ 2, giving the "two-standard-error rule" for approximate 95% CIs
+- The t(n-1) distribution is exact if data are normally distributed, otherwise it's an approximation
+- Stata function ttail(v, t) gives Pr[T_v > t]; invttail(v, α) gives critical value t_{v,α}
+- R functions: 1-pt(t, v) for probabilities, qt(1-α, v) for critical values
+
+**Confidence Intervals (Section 4.3):**
+- A 95% confidence interval for μ: x̄ ± t_{n-1,0.025} × se(x̄)
+- General form: estimate ± critical value × standard error
+- The critical value t_{n-1,α/2} satisfies Pr[|T_{n-1}| ≤ t_{n-1,α/2}] = 1 - α
+- For 95% CI, α = 0.05, so α/2 = 0.025, giving confidence level 100(1-0.05)% = 95%
+- Common confidence levels: 90% (α=0.10), 95% (α=0.05), 99% (α=0.01)
+- Tradeoff: higher confidence → wider interval; narrow interval → less confidence
+- 100% confidence gives useless interval (-∞, ∞)
+- Interpretation: If we constructed 95% CIs for infinite samples, 95% would contain μ
+- We only have one sample, so we're "95% confident" this particular interval contains μ
+- Example: 95% CI for mean earnings = $41,413 ± 1.974 × $1,952 = ($37,560, $45,266)
+- Margin of error ≈ 2 × standard error for 95% CIs (since t_{v,0.025} ≈ 2 for v > 30)
+
+**Two-Sided Hypothesis Tests (Section 4.4):**
+- Null hypothesis: H₀: μ = μ* tests whether μ equals a specified value μ*
+- Alternative hypothesis: H_a: μ ≠ μ* (two-sided because includes both μ > μ* and μ < μ*)
+- Test statistic: t = (x̄ - μ*)/se(x̄) = (x̄ - μ*)/(s/√n)
+- Under H₀, t follows the T(n-1) distribution
+- **Significance level α**: pre-specified maximum probability of Type I error (rejecting true H₀)
+- Type I error: rejecting H₀ when it's true (false positive)
+- Type II error: failing to reject H₀ when it's false (false negative, not controlled by α)
+- Common significance level: α = 0.05 (5% level), accepting 1-in-20 chance of Type I error
+- **P-value**: probability of observing test statistic at least as extreme as obtained, assuming H₀ true
+- For two-sided test: p = Pr[|T_{n-1}| ≥ |t|]
+- **P-value approach**: Reject H₀ if p < α; otherwise do not reject
+- **Critical value approach**: Reject H₀ if |t| > c where c = t_{n-1,α/2}
+- Both approaches give identical conclusions—they're equivalent methods
+- Relationship to CIs: if μ* falls inside the 100(1-α)% CI, do not reject H₀ at level α
+- Reporting p-values allows readers to test using their own preferred α
+
+**Hypothesis Testing Examples (Section 4.5):**
+- **Example 1 - Gasoline prices**: H₀: μ = $3.81, n=32, x̄=$3.67, s=$0.15, t=-5.256, p=0.000
+  - Reject H₀ at 5% level: strong evidence Yolo County prices differ from California average
+- **Example 2 - Male earnings**: H₀: μ ≤ $50,000 vs. H_a: μ > $50,000 (one-sided), n=191, t=0.500, p=0.310
+  - Do not reject H₀: insufficient evidence that mean male earnings exceed $50,000
+- **Example 3 - GDP growth**: H₀: μ = 2.0% vs. H_a: μ ≠ 2.0%, n=241, t=-0.068, p=0.946
+  - Do not reject H₀: data consistent with 2.0% average annual growth rate
+- These examples demonstrate typical applications across different contexts
+- Large |t| values (far from 0) and small p-values (p < 0.05) lead to rejection
+- Small |t| values (close to 0) and large p-values (p > 0.05) fail to reject H₀
+
+**One-Sided Hypothesis Tests (Section 4.6):**
+- **Upper one-tailed test**: H₀: μ ≤ μ* vs. H_a: μ > μ*
+- **Lower one-tailed test**: H₀: μ ≥ μ* vs. H_a: μ < μ*
+- The claim being tested is always specified as the alternative hypothesis (requires strong evidence)
+- For upper tail: p = Pr[T_{n-1} ≥ t]; reject if t > c where c = t_{n-1,α} (not α/2!)
+- For lower tail: p = Pr[T_{n-1} ≤ t]; reject if t < -c where c = t_{n-1,α}
+- One-sided tests use only one tail, so critical values differ from two-sided tests
+- Example: Testing μ > $40,000, t = 0.724, p = Pr[T_{170} ≥ 0.724] = 0.235 > 0.05 → do not reject
+- Why put claim in H_a? Statistics requires strong evidence to support a claim
+- Setting claim as H_a means we only accept it when evidence is compelling (low p-value)
+- One-sided tests have more power than two-sided tests for detecting effects in the specified direction
+
+**Generalization of Methods (Section 4.7):**
+- General t-statistic: t = (estimate - parameter value) / standard error
+- Under H₀, t ~ T(v) distribution where degrees of freedom v varies by setting
+- General 100(1-α)% confidence interval: estimate ± t_{v,α/2} × standard error
+- Approximate 95% CI: estimate ± 2 × standard error (for v > 30)
+- General two-sided test at level α:
+  - P-value approach: reject H₀ if p < α where p = Pr[|T_v| > |t|]
+  - Critical value approach: reject H₀ if |t| > c where c = t_{v,α/2}
+- These methods extend to regression coefficients, differences in means, correlation coefficients, etc.
+- Margin of error ≈ 2 × standard error for 95% confidence intervals
+
+**Inference for Proportions (Section 4.8):**
+- For binary data: x_i = 1 (success) or x_i = 0 (failure), with population proportion p
+- Sample mean x̄ equals the sample proportion: x̄ = (# successes)/n
+- Sample variance: s² = nx̄(1-x̄)/(n-1) in this special case
+- Random variable X has E[X] = p and Var[X] = p(1-p)
+- Sample mean x̄ has E[x̄] = p and Var[x̄] = p(1-p)/n
+- **For confidence intervals**: use se(x̄) = √[x̄(1-x̄)/n] (substitute x̄ for p in variance formula)
+- **For hypothesis tests** of H₀: p = p*: use se = √[p*(1-p*)/n] (substitute p* not x̄)
+- Example: 480 of 921 voters intend to vote Democrat: x̄ = 0.5212, s² = 0.2498
+- Methods for proportions apply to: election polling, quality control, medical trial success rates
+- All t-based inference methods (CIs, tests) apply to proportions data with appropriate standard errors
+
+**Software Implementation:**
+- Stata commands: `mean` for CIs, `ttest` for hypothesis tests, `ttail` and `invttail` for probabilities
+- R functions: `pt()` for probabilities, `qt()` for critical values
+- Excel functions: TDIST, TINV for t distribution calculations
+- Always report: sample size n, sample mean x̄, standard deviation s, standard error se(x̄)
+- For hypothesis tests, report: H₀ and H_a, significance level α, test statistic t, p-value, conclusion
+- For confidence intervals, report: confidence level, point estimate, CI bounds
+
+**Practical Guidelines:**
+- Larger samples give smaller standard errors and narrower confidence intervals
+- Standard error decreases with √n, so doubling precision requires quadrupling sample size
+- α = 0.05 is conventional but not sacred; adjust based on consequences of errors
+- Small p-values (p < 0.05) indicate statistical significance, not necessarily practical importance
+- "Do not reject H₀" ≠ "accept H₀"; it means insufficient evidence against H₀
+- Statistical significance vs. practical significance: large samples detect tiny, meaningless effects
+- Always report point estimates and confidence intervals, not just hypothesis test results
+- The t distribution is robust to moderate departures from normality, especially for large samples
+- For very small samples (n < 15), normality assumption becomes more critical
+
+---
+
+### Some in-class Exercises
 
 (1) Suppose observations in a sample of size 25 have mean 200 and standard deviation of 100 . Give the standard error of the sample mean.
 (2) Suppose $n=100, \bar{x}=500$ and $s=400$. Provide an approximate $95 \%$ confidence interval for the population mean.

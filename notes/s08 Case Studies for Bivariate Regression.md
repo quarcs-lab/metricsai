@@ -11,22 +11,9 @@ By the end of this chapter, you will be able to:
 - Make predictions using estimated regression models
 - Evaluate model fit using R-squared and other diagnostic measures
 
-This chapter applies the bivariate regression methods from previous chapters to four real-world case studies spanning health economics, finance, and macroeconomics. Each case study demonstrates how to:
-- Specify and estimate a regression model
-- Interpret coefficients in economic context
-- Evaluate model fit
-- Compute robust standard errors when needed
-- Use models for prediction
+---
 
-The case studies cover:
-1. Health outcomes and health spending (cross-country analysis)
-2. Health expenditures and GDP (cross-country analysis)
-3. Capital Asset Pricing Model - CAPM (financial market analysis)
-4. Okun's Law - Output and unemployment (macroeconomic time series)
-
-Datasets: HEALTH2009, CAPM, GDPUNEMPLOY
-
-### 8.1 Case Study 1: Health Outcomes across Countries
+## 8.1 Case Study 1: Health Outcomes across Countries
 
 **In this case study:**
 - 8.1.1 Life expectancy and health spending relationship
@@ -43,7 +30,7 @@ Dataset HEALTH2009 has 2009 data for the 34 wealthy and relatively wealthy natio
 | Lifeexp | Male life expectancy at birth (in years) | 76.7 | 2.94 | 69.8 | 79.9 |
 | InfMort | Infant mortality per 1,000 live births | 4.44 | 2.72 | 1.8 | 14.7 |
 
-#### 8.1.1 Life Expectancy and Health Spending
+### 8.1.1 Life Expectancy and Health Spending
 
 **Example 8.1**: Regression of Life Expectancy on Health Spending
 
@@ -65,7 +52,7 @@ where $t$-statistics based on default standard errors are given in parentheses.
 > **Key Concept**: The positive relationship between health spending and life expectancy suggests that countries investing more in healthcare tend to have better health outcomes. However, correlation does not imply causation—other factors like income, education, and lifestyle also matter.
 
 
-#### 8.1.2 Infant Mortality and Health Spending
+### 8.1.2 Infant Mortality and Health Spending
 
 **Example 8.2**: Regression of Infant Mortality on Health Spending
 
@@ -77,7 +64,7 @@ where $t$-statistics based on default standard errors are given in parentheses.
 > **Key Concept**: The negative relationship between health spending and infant mortality (higher spending → lower mortality) demonstrates the protective effect of healthcare investment on vulnerable populations. The strength of this relationship varies across income levels.
 
 
-#### 8.1.3 Further Details and Interpretation
+### 8.1.3 Further Details and Interpretation
 
 - For these cross-section data with independence across observations it is standard to use heteroskedastic-robust standard errors.
 - For life expectancy slope we obtain heteroskedastic-robust standard error 0.0004637 compared to default 0.000287
@@ -87,19 +74,8 @@ where $t$-statistics based on default standard errors are given in parentheses.
 - Bottom line: Country health outcomes improve on average with higher health spending
 - U.S. performs substantially worse than predicted.
 
----
 
-**Key Takeaways from Case Study 8.1:**
-- Health spending is positively associated with life expectancy across countries
-- Health spending is negatively associated with infant mortality
-- The strength of these relationships varies by income level
-- Bivariate regression provides initial evidence, but multivariate analysis is needed for causal claims
-- Both relationships show relatively high R-squared values, indicating good fit
-
----
-
-
-### 8.2 Case Study 2: Health Expenditures across Countries
+## 8.2 Case Study 2: Health Expenditures across Countries
 
 **In this case study:**
 - 8.2.1 Health spending and GDP relationship
@@ -114,7 +90,7 @@ where $t$-statistics based on default standard errors are given in parentheses.
 | Gdppc | GDP per capita (in US \$) | 33054 | 12918 | 13807 | 8290 |
 | H/thpc | Health expenditure per capita (in US \$) | 3256 | 1494 | 923 | 799 |
 
-#### 8.2.1 Health Spending and GDP Relationship
+### 8.2.1 Health Spending and GDP Relationship
 
 **Example 8.3**: Regression of Health Spending on GDP per Capita
 
@@ -141,7 +117,7 @@ where $t$-statistics based on default standard errors are given in parentheses.
 > **Key Concept**: Health spending rises with GDP, but the relationship is not proportional across all income levels. Wealthier countries tend to spend a larger share of their GDP on healthcare, reflecting both increased demand for health services and the ability to pay.
 
 
-#### 8.2.2 Heteroskedastic-Robust Standard Errors
+### 8.2.2 Heteroskedastic-Robust Standard Errors
 
 - For these cross-section data with independence across observations it is standard to use heteroskedastic-robust standard errors
 - For life expectancy slope we obtain heteroskedastic-robust standard error 0.0293 compared to default 0.0129
@@ -150,19 +126,8 @@ where $t$-statistics based on default standard errors are given in parentheses.
 
 > **Key Concept**: Heteroskedastic-robust standard errors adjust for the fact that prediction errors may vary across observations. When heteroskedasticity is present, robust standard errors provide more reliable inference than conventional standard errors.
 
----
 
-**Key Takeaways from Case Study 8.2:**
-- Health spending increases with GDP, but not proportionally across all income levels
-- The relationship is strong (high R-squared) and statistically significant
-- Heteroskedasticity is present in the data (prediction errors vary with GDP)
-- Robust standard errors provide more reliable inference when heteroskedasticity exists
-- The fitted model can be used to predict health spending for given GDP levels
-
----
-
-
-### 8.3 Case Study 3: Capital Asset Pricing Model
+## 8.3 Case Study 3: Capital Asset Pricing Model
 
 **In this case study:**
 - 8.3.1 Theory of CAPM
@@ -186,7 +151,7 @@ where $t$-statistics based on default standard errors are given in parentheses.
 | RTGT-RF | Excess Return on Target | . 0103 | . 0842 | -. 4841 | . 2629 |
 | RWMT-RF | Excess Return on Walmart | . 0121 | . 0702 | -. 2758 | . 2612 |
 
-#### 8.3.1 Theory of CAPM
+### 8.3.1 Theory of CAPM
 
 $R F$ is the risk-free interest rate (one-month U.S. Treasury bill).
 - $R M$ is the overall market return on stocks.
@@ -208,7 +173,7 @@ $$
 > **Key Concept**: CAPM posits that a stock's expected return depends on its systematic risk (beta), which measures how much the stock moves with the overall market. A beta > 1 means the stock is more volatile than the market; beta < 1 means less volatile.
 
 
-#### 8.3.2 Estimated CAPM Model
+### 8.3.2 Estimated CAPM Model
 
 **Example 8.4**: CAPM Beta Estimation
 
@@ -243,7 +208,7 @@ $$
 > **Key Concept**: The estimated beta coefficient quantifies systematic risk. For example, a beta of 1.2 means that when the market return increases by 1%, the stock's return is expected to increase by 1.2% on average.
 
 
-#### 8.3.3 Robust Standard Errors for CAPM
+### 8.3.3 Robust Standard Errors for CAPM
 
 - Default standard errors assume error independence over time and homoskedasticity.
 - For time series in general model errors may be correlated over time.
@@ -252,19 +217,10 @@ $$
 - The heteroskedastic-robust standard error of the slope coefficient is 0.0770 (compared to default se of 0.0644 ).
 - A HAC standard error that additionally controls for error correlation (see Chapter 12.1) is 0.0885 .
 
----
-
-**Key Takeaways from Case Study 8.3:**
-- CAPM provides a theoretical framework for pricing assets based on systematic risk
-- Beta measures how sensitive a stock's return is to market movements
-- Estimated betas vary across stocks, reflecting different risk profiles
-- Robust standard errors account for heteroskedasticity in returns
-- The model's R-squared indicates how much of stock return variation is explained by market returns
-
----
+> **Key Concept**: For time series data, heteroskedastic and autocorrelation consistent (HAC) standard errors account for both changing variance over time and correlation between observations. These robust standard errors provide more reliable inference than conventional standard errors for financial and macroeconomic data.
 
 
-### 8.4 Case Study 4: Output and Unemployment in the U.S.
+## 8.4 Case Study 4: Output and Unemployment in the U.S.
 
 **In this case study:**
 - 8.4.1 Okun's Law: theory and background
@@ -283,14 +239,14 @@ $$
 | URATEchange | Annual change in | -0.032 | 0.987 | -2.143 | 3.530 |
 |  | unemployment rate |  |  |  |  |
 
-#### 8.4.1 Okun's Law: Theory and Background
+### 8.4.1 Okun's Law: Theory and Background
 
 Okun's law is that each percentage point increase in the unemployment rate is associated with an approximate two percentage point decrease in the GDP growth rate.
 - called Okun's law after Okun who first proposed it in a 1962 journal article
 - better term is "Okun's rule-of-thumb" as it is an empirical relationship rather than an ironclad law.
 
 
-#### 8.4.2 Estimated Okun's Law Model
+### 8.4.2 Estimated Okun's Law Model
 
 **Example 8.5**: Okun's Law Estimation
 
@@ -311,7 +267,7 @@ where default standard errors are given in parentheses.
 > **Key Concept**: Okun's Law states that when economic growth (GDP) increases, unemployment tends to fall. The estimated coefficient tells us by how much: typically, a 1 percentage point increase in GDP growth is associated with about a 0.5 percentage point decrease in unemployment.
 
 
-#### 8.4.3 Prediction and Forecasting
+### 8.4.3 Prediction and Forecasting
 
 **Example 8.6**: Predicting Unemployment from GDP Growth
 
@@ -322,20 +278,53 @@ From second panel, output recovery from the 2008 global financial crisis is not 
 > **Key Concept**: Regression models can be used for prediction, but predictions come with uncertainty captured by prediction intervals. These intervals account for both uncertainty in the estimated coefficients and the inherent variability in the data.
 
 
-#### 8.4.4 Robust Standard Errors for Okun's Law
+### 8.4.4 Robust Standard Errors for Okun's Law
 
 - Default standard errors assume error independence over time and homoskedasticity.
 - For time series such as this model error is in general correlated over time.
 - A HAC standard error that additionally controls for error correlation (see Chapter 12.1) is 0.207 compared to the default standard error of 0.175.
 
+> **Key Concept**: Time series data often exhibits autocorrelation (errors correlated over time). For annual macroeconomic data like Okun's Law, HAC standard errors that account for this autocorrelation provide more reliable statistical inference than conventional standard errors.
+
 ---
 
-**Key Takeaways from Case Study 8.4:**
-- Okun's Law describes the negative relationship between GDP growth and unemployment
-- The estimated coefficient quantifies this trade-off empirically
-- The model can be used for prediction, with appropriate uncertainty intervals
-- Time series data requires special consideration (discussed further in later chapters)
-- Robust standard errors help address potential heteroskedasticity in the relationship
+## Key Takeaways
+
+**Health Economics Applications:**
+- Health spending is positively associated with life expectancy and negatively associated with infant mortality across countries
+- The relationships are economically and statistically significant, though causation requires multivariate analysis
+- Heteroskedastic-robust standard errors are essential for cross-country regressions due to varying error variances
+- The U.S. performs substantially worse than predicted on health outcomes despite high spending
+- Health expenditures increase with GDP per capita, but not proportionally across all income levels
+- Outliers (U.S. and Luxembourg) can strongly influence regression results and should be investigated
+- Log transformations may better capture nonlinear relationships in health data
+
+**Financial Applications (CAPM):**
+- The Capital Asset Pricing Model links individual stock returns to market returns through the beta coefficient
+- Beta measures systematic risk: beta > 1 means more volatile than market, beta < 1 means less volatile
+- Large companies like Coca-Cola typically have beta < 1, moving less than the overall market
+- Alpha measures risk-adjusted performance; the CAPM model predicts alpha = 0
+- For financial returns data, heteroskedastic-robust standard errors account for time-varying volatility
+- HAC standard errors additionally control for potential autocorrelation in returns
+- R-squared in CAPM regressions indicates how much stock return variation is explained by market movements
+
+**Macroeconomic Applications (Okun's Law):**
+- Okun's Law describes the negative relationship between GDP growth and unemployment changes
+- The estimated coefficient (-1.59) is close to but statistically different from Okun's original -2.0 prediction
+- Each percentage point increase in GDP growth is associated with about a 0.5 percentage point decrease in unemployment
+- The model can forecast unemployment based on GDP growth, with prediction intervals capturing uncertainty
+- Time series data requires HAC standard errors to account for autocorrelation in macroeconomic variables
+- The 2008 financial crisis recovery showed weaker GDP-unemployment relationship than historical patterns
+- Okun's Law is better described as a "rule of thumb" than an ironclad economic law
+
+**General Lessons from Case Studies:**
+- Bivariate regression provides initial evidence of relationships, but multivariate analysis is needed for causal claims
+- Robust standard errors (heteroskedastic-robust or HAC) are crucial for reliable inference with real-world data
+- Model fit (R-squared) varies widely across applications: health (0.32-0.93), CAPM (0.20), Okun's Law (0.59)
+- Scatterplots help identify outliers, nonlinearity, and heteroskedasticity before formal estimation
+- Predictions from regression models come with uncertainty that should be quantified
+- Context matters: cross-sectional, time series, and financial data each require different inferential approaches
+- Economic significance (magnitude of coefficients) is as important as statistical significance
 
 ---
 

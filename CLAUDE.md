@@ -57,3 +57,26 @@ The `./log/` directory contains progress logs that preserve conversation context
 - **Project Title:** metricsAI: An Introduction to Econometrics with Python and AI in the Cloud
 - **Primary Tools:** Python, Jupyter/Colab notebooks
 - **Authors:** Carlos Mendez
+
+---
+
+## Note Improvement Template
+
+The `./notes/` directory contains study notes for 17 chapters. A standard template has been established to maximize learning effectiveness.
+
+**Reference implementation:** `notes/s01 Analysis of Economics Data.md`
+
+**Template components:**
+1. **Learning Objectives** (opening) - Sets clear learning expectations
+2. **Content sections with Key Concept boxes** - Immediate reinforcement after each section
+3. **Consolidated Key Takeaways** (closing) - Comprehensive chapter review
+
+**See `notes/README.md` for complete template documentation.**
+
+**When improving notes:**
+- Follow the exact structure from Chapter 1
+- Maintain consistency across all chapters
+- No deletions (additive only)
+- Document changes in log files
+
+**Quality standard:** Each chapter should be ~9 KB, with 3 visual separators, Learning Objectives, Key Concepts after every section, and consolidated Key Takeaways at the end.
