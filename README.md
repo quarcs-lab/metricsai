@@ -26,28 +26,28 @@ Click any badge below to open and run immediately in your browser. Selected chap
 | Chapter | Title | Colab Notebook | Additional Resources |
 |---------|-------|----------------|---------------------|
 | **5** | Bivariate Data Summary | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/quarcs-lab/metricsai/blob/main/notebooks_colab/ch05_Bivariate_Data_Summary.ipynb) | [🎧 Audio](https://files.catbox.moe/out56j.m4a) |
-| **6** | The Least Squares Estimator | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/quarcs-lab/metricsai/blob/main/notebooks_colab/ch06_The_Least_Squares_Estimator.ipynb) | |
-| **7** | Statistical Inference for Bivariate Regression | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/quarcs-lab/metricsai/blob/main/notebooks_colab/ch07_Statistical_Inference_for_Bivariate_Regression.ipynb) | |
-| **8** | Case Studies for Bivariate Regression | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/quarcs-lab/metricsai/blob/main/notebooks_colab/ch08_Case_Studies_for_Bivariate_Regression.ipynb) | |
-| **9** | Models with Natural Logarithms | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/quarcs-lab/metricsai/blob/main/notebooks_colab/ch09_Models_with_Natural_Logarithms.ipynb) | |
+| **6** | The Least Squares Estimator | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/quarcs-lab/metricsai/blob/main/notebooks_colab/ch06_The_Least_Squares_Estimator.ipynb) | [🎧 Audio](https://files.catbox.moe/6yjcm1.m4a) |
+| **7** | Statistical Inference for Bivariate Regression | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/quarcs-lab/metricsai/blob/main/notebooks_colab/ch07_Statistical_Inference_for_Bivariate_Regression.ipynb) | [🎧 Audio](https://files.catbox.moe/36how1.m4a) |
+| **8** | Case Studies for Bivariate Regression | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/quarcs-lab/metricsai/blob/main/notebooks_colab/ch08_Case_Studies_for_Bivariate_Regression.ipynb) | [🎧 Audio](https://files.catbox.moe/5xvwuz.m4a) |
+| **9** | Models with Natural Logarithms | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/quarcs-lab/metricsai/blob/main/notebooks_colab/ch09_Models_with_Natural_Logarithms.ipynb) | [🎧 Audio](https://files.catbox.moe/qcsvth.m4a) |
 
 ### Part III: Multiple Regression
 
-| Chapter | Title | Colab Notebook |
-|---------|-------|----------------|
-| **10** | Data Summary for Multiple Regression | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/quarcs-lab/metricsai/blob/main/notebooks_colab/ch10_Data_Summary_for_Multiple_Regression.ipynb) |
-| **11** | Statistical Inference for Multiple Regression | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/quarcs-lab/metricsai/blob/main/notebooks_colab/ch11_Statistical_Inference_for_Multiple_Regression.ipynb) |
-| **12** | Further Topics in Multiple Regression | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/quarcs-lab/metricsai/blob/main/notebooks_colab/ch12_Further_Topics_in_Multiple_Regression.ipynb) |
-| **13** | Case Studies for Multiple Regression | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/quarcs-lab/metricsai/blob/main/notebooks_colab/ch13_Case_Studies_for_Multiple_Regression.ipynb) |
+| Chapter | Title | Colab Notebook | Additional Resources |
+|---------|-------|----------------|---------------------|
+| **10** | Data Summary for Multiple Regression | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/quarcs-lab/metricsai/blob/main/notebooks_colab/ch10_Data_Summary_for_Multiple_Regression.ipynb) | [🎧 Audio](https://files.catbox.moe/xuh1pj.m4a) |
+| **11** | Statistical Inference for Multiple Regression | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/quarcs-lab/metricsai/blob/main/notebooks_colab/ch11_Statistical_Inference_for_Multiple_Regression.ipynb) | [🎧 Audio](https://files.catbox.moe/599so2.m4a) |
+| **12** | Further Topics in Multiple Regression | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/quarcs-lab/metricsai/blob/main/notebooks_colab/ch12_Further_Topics_in_Multiple_Regression.ipynb) | [🎧 Audio](https://files.catbox.moe/11d7vb.m4a) |
+| **13** | Case Studies for Multiple Regression | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/quarcs-lab/metricsai/blob/main/notebooks_colab/ch13_Case_Studies_for_Multiple_Regression.ipynb) | [🎧 Audio](https://files.catbox.moe/ctcvg4.m4a) |
 
 ### Part IV: Advanced Topics
 
-| Chapter | Title | Colab Notebook |
-|---------|-------|----------------|
-| **14** | Regression with Indicator Variables | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/quarcs-lab/metricsai/blob/main/notebooks_colab/ch14_Regression_with_Indicator_Variables.ipynb) |
-| **15** | Regression with Transformed Variables | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/quarcs-lab/metricsai/blob/main/notebooks_colab/ch15_Regression_with_Transformed_Variables.ipynb) |
-| **16** | Checking the Model and Data | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/quarcs-lab/metricsai/blob/main/notebooks_colab/ch16_Checking_the_Model_and_Data.ipynb) |
-| **17** | Panel Data, Time Series Data, Causation | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/quarcs-lab/metricsai/blob/main/notebooks_colab/ch17_Panel_Data_Time_Series_Data_Causation.ipynb) |
+| Chapter | Title | Colab Notebook | Additional Resources |
+|---------|-------|----------------|---------------------|
+| **14** | Regression with Indicator Variables | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/quarcs-lab/metricsai/blob/main/notebooks_colab/ch14_Regression_with_Indicator_Variables.ipynb) | [🎧 Audio](https://files.catbox.moe/d58h0v.m4a) |
+| **15** | Regression with Transformed Variables | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/quarcs-lab/metricsai/blob/main/notebooks_colab/ch15_Regression_with_Transformed_Variables.ipynb) | [🎧 Audio](https://files.catbox.moe/ip6bvt.m4a) |
+| **16** | Checking the Model and Data | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/quarcs-lab/metricsai/blob/main/notebooks_colab/ch16_Checking_the_Model_and_Data.ipynb) | |
+| **17** | Panel Data, Time Series Data, Causation | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/quarcs-lab/metricsai/blob/main/notebooks_colab/ch17_Panel_Data_Time_Series_Data_Causation.ipynb) | |
 
 
 ### How to Use the Notebooks
