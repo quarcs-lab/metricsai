@@ -1,10 +1,4 @@
-# Analysis of Economics Data <br> Chapter 10: Data Summary with Multiple Regression 
-
-(c) A. Colin Cameron<br>Univ. of Calif. Davis
-
-October 2022
-
-## CHAPTER 10: Data Summary with Multiple Regression
+# Chapter 10: Data Summary for Multiple Regression
 
 - Consider the relationship between house price and several variables
 - size, number of bedrooms, ....
@@ -24,7 +18,7 @@ October 2022
 (4) Regression line
 (5) Interpretation of Slope Coefficients
 (6) Model Fit
-(1) Computer Output Following Multiple Regression
+(7) Computer Output Following Multiple Regression
 (8) Inestimable Models
 
 ### 10.1 Example: House Price

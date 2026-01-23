@@ -1,24 +1,20 @@
-# Analysis of Economics Data Chapter 6: The Least Squares Estimator 
+# Chapter 6: The Least Squares Estimator
 
-(C) A. Colin Cameron<br>Univ. of Calif. Davis
+- The sample leads to a fitted regression line $\widehat{y}=b_{1}+b_{2} x$
+- But different samples will lead to different fitted regression lines
+- Example: in a random sample individual earnings increase by 7% with an extra year of schooling
+  - What can we say about the increase in the entire population?
 
-November 2022
+- We suppose that there is an unknown population line $\beta_{1}+\beta_{2} x$
+  - Then the regression slope $b_{2}$ is an estimate of $\beta_{2}$
 
-## CHAPTER 6: The Least Squares Estimator
+- **This chapter:**
+  - Distribution of the regression estimates $b_{1}$ and $b_{2}$
 
-- The sample leads to a fitted regression line $\widehat{y}=b_{1}+b_{2} x$.
-- But different samples will lead to different fitted regression lines.
-- Example: in a random sample individual earnings increase by $7 \%$ with an extra year of schooling
+- **The subsequent chapter:**
+  - Confidence intervals and hypothesis tests for the slope parameter $\beta_{2}$
 
-★ what can we say about the increase in the entire population?
-
-- We suppose that there is an unknown population line $\beta_{1}+\beta_{2}$ x
-- then the regression slope $b_{2}$ is an estimate of $\beta_{2}$
-- This chapter
-- distribution of the regression estimates $b_{1}$ and $b_{2}$.
-- The subsequent chapter
-- confidence intervals and hypothesis tests for the slope parameter $\beta_{2}$.
-- Key regression output for statistical inference:
+- **Key regression output for statistical inference:**
 
 | Variable | Coefficient | Standard Error | t statistic | p value | $95 \%$ conf. interval |  |
 | :--- | :---: | :---: | :---: | :---: | :---: | :---: |
@@ -26,13 +22,14 @@ November 2022
 | Intercept | 115017.30 | 21489.36 | 5.35 | 0.000 | 70924.76 | 159109.8 |
 
 - The standard error of Size is an estimate of the precision of $b_{2}$ as an estimate of $\beta_{2}$
-- we need to explain how this is obtained
-- different assumptions lead to different standard errors
-- so important to go into details.
-- The remaining statistics are studied in Chapter 7
-- the confidence interval for Size is one for $\beta_{2}$.
-- the t statistic for Size is a test of $H_{0}: \beta_{2}=0$ against $H_{a}: \beta_{2} \neq 0$
-${ }^{\star}$ i.e. is there any relationship between Size and Price?
+  - We need to explain how this is obtained
+  - Different assumptions lead to different standard errors
+  - So important to go into details
+
+- The remaining statistics are studied in Chapter 7:
+  - The confidence interval for Size is one for $\beta_{2}$
+  - The t statistic for Size is a test of $H_{0}: \beta_{2}=0$ against $H_{a}: \beta_{2} \neq 0$
+  - i.e., is there any relationship between Size and Price?
 
 
 ## Outline
@@ -502,12 +499,11 @@ $\star$ e.g. rules out high $x$ being associated with high $u$
 - chapter 16 discusses failures
 - chapter 17 has some possible solutions.
 - Assumptions 3-4 can be relaxed
-- a crucial practical part of regression is choosing the correct variation of assumptions 3 and 4
-- this is necessary to get correct standard errors
+  - A crucial practical part of regression is choosing the correct variation of assumptions 3 and 4
+  - This is necessary to get correct standard errors
+  - And hence correct confidence intervals and hypothesis tests
 
-★ and hence correct confidence intervals and hypothesis tests
-
-- chapters 7.7 and 12.1 provide methods.
+- Chapters 7.7 and 12.1 provide methods
 
 
 ### 6.4 Estimators of Model Parameters
@@ -538,21 +534,20 @@ $$
 
 - A sufficient condition for a consistent estimator is that as $n \rightarrow \infty$
 - any bias disappears and the variance goes to zero.
-- So $b_{2}$ is consistent for $\beta_{2}$ as
-- $b_{2}$ is unbiased for $\beta_{2}$ given assumptions 1-2
-- $\operatorname{Var}\left[b_{2}\right] \rightarrow 0$ as $n \rightarrow \infty$ given assumptions 1-4
-
-★ note: assumptions $3-4$ can be relaxed and still get consistency.
+- So $b_{2}$ is consistent for $\beta_{2}$ as:
+  - $b_{2}$ is unbiased for $\beta_{2}$ given assumptions 1-2
+  - $\operatorname{Var}\left[b_{2}\right] \rightarrow 0$ as $n \rightarrow \infty$ given assumptions 1-4
+  - Note: assumptions 3-4 can be relaxed and still get consistency
 
 ## Minimum Variance Estimator
 
-- We want as precise an estimator as possible.
+- We want as precise an estimator as possible
 - OLS is the best linear unbiased estimator (BLUE) of $\beta_{2}$ under assumptions 1-4
-- lowest variance of all unbiased estimators that are a linear combination of the $y^{\prime} s$
-$\star$ recall $b_{2}=\sum_{i=1}^{n}\left(x_{i}-\bar{x}\right)\left(y_{i}-\bar{y}\right) / \sum_{i=1}^{n}\left(x_{i}-\bar{x}\right)^{2}=\sum_{i=1}^{n} w_{i} y_{i}$
-★ so linear in $y_{i}$.
+  - Lowest variance of all unbiased estimators that are a linear combination of the $y$'s
+  - Recall $b_{2}=\sum_{i=1}^{n}\left(x_{i}-\bar{x}\right)\left(y_{i}-\bar{y}\right) / \sum_{i=1}^{n}\left(x_{i}-\bar{x}\right)^{2}=\sum_{i=1}^{n} w_{i} y_{i}$
+  - So linear in $y_{i}$
 - OLS is the best unbiased estimator (BUE) of $\beta_{2}$ if additionally $u$ is normally distributed
-- so lowest variance of all unbiased estimators.
+  - So lowest variance of all unbiased estimators
 - OLS is the best consistent estimator (BUE) in standard settings under assumptions 1-4,
 - it has smallest variance among consistent estimators.
 

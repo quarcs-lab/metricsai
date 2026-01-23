@@ -1,29 +1,21 @@
-# Analysis of Economics Data <br> Chapter 4: Statistical Inference for the Mean 
+# Chapter 4: Statistical Inference for the Mean
 
-(C) A. Colin Cameron
-
-Univ. of Calif. Davis
-
-November 2022
-
-## CHAPTER 4: Statistical Inference
-
-- Extrapolate from sample mean $\bar{x}$ to population mean $\mu$.
-- Given the sample, confidence intervals give a range of values that $\mu$ is likely to full into.
-- Hypothesis tests are used to determine whether or not a specified value or range of values of $\mu$ is plausible, given the sample.
-- While we focus on $\mu$, the methods generalize to inference on other parameters.
+- Extrapolate from sample mean $\bar{x}$ to population mean $\mu$
+- Given the sample, confidence intervals give a range of values that $\mu$ is likely to fall into
+- Hypothesis tests are used to determine whether or not a specified value or range of values of $\mu$ is plausible, given the sample
+- While we focus on $\mu$, the methods generalize to inference on other parameters
 
 
 ## Outline
 
 (1) Example: Mean Annual Earnings
 (2) t Statistic and t Distribution
-( ) Confidence Intervals
+(3) Confidence Intervals
 (4) Two-sided Hypothesis Tests
-(() Two-sided Hypothesis Test Examples
+(5) Two-sided Hypothesis Test Examples
 (6) One-sided Hypothesis Tests
-(1) Generalization of Confidence Intervals and Hypothesis Tests
-( ( ) Proportions Data
+(7) Generalization of Confidence Intervals and Hypothesis Tests
+(8) Proportions Data
 
 - Datasets: EARNINGS, GASPRICE, EARNINGSMALE, REALGDPPC.
 
@@ -57,11 +49,10 @@ Number of obs $=171$
 | :--- | ---: | ---: | :--- | ---: |
 | earnings | 41412.69 | 1952.103 | 37559.21 | 45266.17 |
 
-- Key statistics:
-- Mean: sample mean $\bar{x}$ is the estimate of $\mu$
-- Std. Err: standard error measures the precision of $\bar{x}$ as an estimate of $\mu$
-
-★ this equals $s / \sqrt{n}=25527.05 / \sqrt{171}=1952.1$.
+- **Key statistics:**
+  - Mean: sample mean $\bar{x}$ is the estimate of $\mu$
+  - Std. Err: standard error measures the precision of $\bar{x}$ as an estimate of $\mu$
+    - This equals $s / \sqrt{n}=25527.05 / \sqrt{171}=1952.1$
 
 ## 95\% Confidence Interval Calculation
 
@@ -657,12 +648,11 @@ $$
 
 - Consider proportion of respondents voting Democrat.
 - Code data as $x_{i}=1$ if vote Democrat and $x_{i}=0$ if vote Republican
-- the sample mean $\bar{x}$ is the proportion voting Democrat.
-- the sample variance $s^{2}=n \bar{x}(1-\bar{x}) /(n-1)$
+- The sample mean $\bar{x}$ is the proportion voting Democrat
+- The sample variance $s^{2}=n \bar{x}(1-\bar{x}) /(n-1)$
+  - In this special case of binary data
 
-★ in this special case of binary data.
-
-- Example: 480 of 921 voters intend to vote Democrat (and 441 vote Republican)
+- **Example:** 480 of 921 voters intend to vote Democrat (and 441 vote Republican)
 - $\bar{x}=(480 \times 1+440 \times 0) / 921=0.5212$
 - $s^{2}=921 \times 0.5212 \times(1-0.5212) / 920=0.2498$.
 
@@ -722,5 +712,5 @@ display invttail(170,0.025)
 (1) Suppose observations in a sample of size 100 have mean 300 and standard deviation of 90 . Test the claim that the population mean equals 280 at the $5 \%$ significance level.
 
 
-[^0]:    ★ similar to the standard normal but with fatter tails.
+[^0]:    Similar to the standard normal but with fatter tails.
 

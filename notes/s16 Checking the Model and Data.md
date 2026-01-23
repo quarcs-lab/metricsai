@@ -1,12 +1,4 @@
-# Analysis of Economics Data Chapter 16: Checking the Model and Data 
-
-(C) A. Colin Cameron
-
-Univ. of Calif. Davis
-
-November 2022
-
-## CHAPTER 16: Checking the Model and Data
+# Chapter 16: Checking the Model and Data
 
 - We assume the data are such that
 - There is variation in the sample regressors so that the regressors are not perfectly correlated with each other.
@@ -54,9 +46,8 @@ Datasets: EARNINGS_COMPLETE, DEMOCRACY
 - Detection
 - Signs of multicollinearity are high standard errors, low t -statistics and "wrong" signs.
 - A simple diagnostic method is to regress one regressor on the remaining regressors
-
-★ if $R^{2}$ is very high then multicollinearity is a problem
-$\star$ if $R^{2}=1$ then there is perfect collinearity.
+  - If $R^{2}$ is very high then multicollinearity is a problem
+  - If $R^{2}=1$ then there is perfect collinearity
 
 - Note: can have multicollinearity even if pairwise correlations are small.
 - Solution

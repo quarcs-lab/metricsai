@@ -1,12 +1,4 @@
-# Analysis of Economics Data <br> Chapter 15: Regression with Transformed Variables 
-
-(C) A. Colin Cameron
-
-Univ. of Calif. Davis
-
-November 2022
-
-## CHAPTER 15: Regression with Transformed Variables
+# Chapter 15: Regression with Transformed Variables
 
 - Regression often involves variables that have been transformed
 - e.g. quadratics, natural logarithm, interactions (products of variables)
@@ -367,8 +359,7 @@ $$
 - Problem: We need to know $\mathrm{E}[\exp (u) \mid x]$.
 - in general $\mathrm{E}[\exp (u) \mid x]>1$
 - $\mathrm{E}[\exp (u) \mid x]=\exp \left(\sigma_{u}^{2} / 2\right)$ if $u \mid x \sim N\left(0, \sigma_{u}^{2}\right)$
-
-★ i.e. normal homoskedastic errors.
+  - i.e. normal homoskedastic errors
 
 - then $\mathrm{E}[y \mid x]=\exp \left(\sigma_{u}^{2} / 2\right) \exp \left(\beta_{1}+\beta_{2} x\right)$.
 
@@ -398,10 +389,8 @@ $$
 - Interpretation controlling for other regressors
 - ME of aging is $3283-63.16 \times$ Age
 - Self-employed workers on average earn $\$ 9,360$ more than private sector workers (the omitted category)
-
-★ though this comparison is statistically insignificant at $5 \%$
-
-- A $1 \%$ change in hours worked is associated with a $\$ 699$ increase in earnings.
+  - Though this comparison is statistically insignificant at $5 \%$
+- A $1 \%$ change in hours worked is associated with a $\$ 699$ increase in earnings
 
 
 ## Dependent Variable in Natural Logarithms
@@ -423,10 +412,8 @@ $$
 - women on average earn $19.3 \%$ less than men
 - earnings increase with age to 51.0 years $(=-.560 /(2 \times(-.000549))$ and then decrease
 - Self-employed workers on average earn $11.8 \%$ less than private sector workers (the omitted category)
-
-★ though this comparison is statistically insignificant at $5 \%$
-
-- A $1 \%$ change in hours worked is associated with a $0.975 \%$ increase in earnings.
+  - Though this comparison is statistically insignificant at $5 \%$
+- A $1 \%$ change in hours worked is associated with a $0.975 \%$ increase in earnings
 
 
 ## Some in-class Exercises

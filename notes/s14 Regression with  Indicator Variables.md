@@ -1,12 +1,4 @@
-# Analysis of Economics Data Chapter 14: Indicator Variables 
-
-(C) A. Colin Cameron
-
-Univ. of Calif. Davis
-
-November 2022
-
-## CHAPTER 14: Indicator Variables
+# Chapter 14: Regression with Indicator Variables
 
 - Regression when some regressors are indicator variables
 - also called categorical variables or dummy variables.
@@ -18,8 +10,8 @@ November 2022
 - frequently used in economics
 - interpretation is not always straightforward
 
-★ interactions of indicators with regressors
-★ for sets of mutually exclusive indicators omit one indicator
+  - interactions of indicators with regressors
+  - for sets of mutually exclusive indicators omit one indicator
 ${ }^{\star}$ do joint F tests for statistical significance.
 
 ## Outline
@@ -259,7 +251,7 @@ $$
 - Form a set of C mutually exclusive indicator variables $\mathrm{d} 1, \mathrm{~d} 2, \ldots, \mathrm{dC}$.
 - To avoid the dummy variable trap drop one of the indicator variables
 
-★ called the omitted category or base category.
+  - called the omitted category or base category.
 
 - The coefficient of an included indicator variable measures the marginal effect of being in that category compared to the base category, after controlling for the other regressors.
 

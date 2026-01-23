@@ -1,12 +1,4 @@
-# Analysis of Economics Data Chapter 8: Bivariate Case Studies 
-
-(C) A. Colin Cameron
-
-Univ. of Calif. Davis
-
-November 2022
-
-## CHAPTER 8: Bivariate Case Studies
+# Chapter 8: Case Studies for Bivariate Regression
 
 (1) Health Outcomes across Countries
 (2) Health Expenditures across Countries

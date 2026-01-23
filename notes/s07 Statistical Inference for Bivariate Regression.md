@@ -1,21 +1,14 @@
-# Analysis of Economics Data <br> Chapter 7: Statistical Inference for Bivariate Regression 
+# Chapter 7: Statistical Inference for Bivariate Regression
 
-(c) A. Colin Cameron
+- **Recall univariate:**
+  - Sample mean $\bar{x}$ estimates population mean $\mu$
+  - Under suitable assumptions $t=\frac{\bar{x}-\mu}{\operatorname{se}(\bar{x})}$ is a draw from $T(n-1)$
+  - Use this as basis for confidence intervals and hypothesis tests on $\mu$
 
-Univ. of Calif. Davis
-
-November 2022
-
-## CHAPTER 7: Statistical Inference for Bivariate Regression
-
-- Recall univariate
-- sample mean $\bar{x}$ estimates population mean $\mu$
-- under suitable assumptions $t=\frac{\bar{x}-\mu}{\operatorname{se}(\bar{x})}$ is a draw from $T(n-1)$
-- use this as basis for confidence intervals and hypothesis tests on $\mu$.
-- Now for bivariate regression
-- sample slope coefficient $b_{2}$ estimates population slope coefficient $\beta_{2}$
-- under suitable assumptions $t=\frac{b_{2}-\beta_{2}}{s e\left(b_{2}\right)}$ is a draw from $T(n-2)$
-- use this as basis for confidence interval and hypothesis tests on $\beta_{2}$.
+- **Now for bivariate regression:**
+  - Sample slope coefficient $b_{2}$ estimates population slope coefficient $\beta_{2}$
+  - Under suitable assumptions $t=\frac{b_{2}-\beta_{2}}{se\left(b_{2}\right)}$ is a draw from $T(n-2)$
+  - Use this as basis for confidence interval and hypothesis tests on $\beta_{2}$
 
 
 ## Outline
@@ -24,9 +17,9 @@ November 2022
 (2) The t Statistic
 (3) Confidence Intervals
 (4) Tests of Statistical Significance
-(( ) Two-Sided Hypothesis Tests
+(5) Two-Sided Hypothesis Tests
 (6) One-Sided Hypothesis Tests
-(1) Robust Standard Errors
+(7) Robust Standard Errors
 (8) Examples
 
 Dataset: HOUSE.
@@ -238,9 +231,7 @@ $$
 
 - Reject if $|t|$ is large as then $\left|b_{2}-\beta_{2}^{*}\right|$ is large
 - How large?
-
-★ Large enough that such a large $|t|$ is a low probability event.
-
+  - Large enough that such a large $|t|$ is a low probability event
 - Use either p value approach or critical value approach.
 
 
@@ -272,21 +263,18 @@ Two-sided test: critical value approach
 - p-value approach (at level $\alpha=0.05$ )
 - Assume that $\beta_{2}=\beta_{2}^{*}$, i.e. $H_{0}$ is true.
 - Obtain the p -value
-${ }^{\star}$ the probability (or significance level) of observing a $\left|T_{n-2}\right| \geq|t|$, where this probability is calculated under the assumption that $\beta_{2}=\beta_{2}^{*}$.
+  - The probability (or significance level) of observing a $\left|T_{n-2}\right| \geq|t|$, where this probability is calculated under the assumption that $\beta_{2}=\beta_{2}^{*}$
 - If $p<0.05$ then reject $H_{0}$
-
-★ reason there was less than .05 chance of observing our $t$, given $\beta_{2}=\beta_{2}^{*}$.
+  - Reason: there was less than .05 chance of observing our $t$, given $\beta_{2}=\beta_{2}^{*}$
 
 ## Rejection using Critical values
 
 - Critical value approach (at level $\alpha=0.05$ )
 - Assume that $\beta_{2}=\beta_{2}^{*}$, i.e. $H_{0}$ is true.
 - Find the critical value
-
-★ the value $c$ such that $\operatorname{Pr}\left[\left|T_{n-2}\right| \geq c\right]=0.05$
-
+  - The value $c$ such that $\operatorname{Pr}\left[\left|T_{n-2}\right| \geq c\right]=0.05$
 - If $|t|>c$ then reject $H_{0}$
-${ }^{\star}$ reason: there was less than .05 chance of observing our $t$, given $\beta_{2}=\beta_{2}^{*}$.
+  - Reason: there was less than .05 chance of observing our $t$, given $\beta_{2}=\beta_{2}^{*}$
 
 
 ## Relationship of Tests to Confidence Interval
@@ -396,13 +384,10 @@ $$
 ## Example: House Price and Size
 
 - For the house price and size example
-- default standard errors
-
-★ 11.17 and 21,489 for the slope and intercept
-
-- heteroskedastic-robust standard errors
-
-★ 11.33 and 20,928 for the slope and intercept
+- Default standard errors
+  - 11.17 and 21,489 for the slope and intercept
+- Heteroskedastic-robust standard errors
+  - 11.33 and 20,928 for the slope and intercept
 
 - Confidence interval using heteroskedastic-robust standard errors
 - $73.77 \pm t_{27, .025} \times 11.333=(50.33,97.02)$ compared t0 $(50.84,96.70)$
@@ -419,8 +404,7 @@ $$
 - price $=11500+74^{*}$ size + zero-mean error
 - (1) error is homoskedastic $u_{i} \sim N\left(0,23500^{2}\right)$
 - (2) error is heteroskedastic $u_{i} \sim \frac{\left(\text { size }_{i}-1700\right)}{1400} \times N\left(0,23500^{2}\right)$
-
-★ this error has variance $\left\{\frac{\left(\text { size }_{i}-1700\right)}{1400}\right\}^{2} \times 23500^{2}$ that differs across $i$
+  - This error has variance $\left\{\frac{\left(\text { size }_{i}-1700\right)}{1400}\right\}^{2} \times 23500^{2}$ that differs across $i$
 
 - Stata code
 set obs 100

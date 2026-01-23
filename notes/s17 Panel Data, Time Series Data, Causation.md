@@ -1,20 +1,9 @@
-# Analysis of Economics Data Chapter 17: Special Topics 
+# Chapter 17: Panel Data, Time Series Data, Causation
 
-(C) A. Colin Cameron
-
-Univ. of Calif. Davis
-
-November 2022
-
-## CHAPTER 17: Special Topics
-
-- Consider special issues that arise with
-- cross-section data
-- panel data
-- time series data.
-- Consider the most commonly used nonlinear regression models.
-- Provide a brief discussion of various methods to allow causal inference given observational data.
-- Time series presentation is very dense - just provide a list of topics here.
+- Consider special issues that arise with cross-section data, panel data, and time series data
+- Consider the most commonly used nonlinear regression models
+- Provide a brief discussion of various methods to allow causal inference given observational data
+- Time series presentation is very dense - just provide a list of topics here
 
 
 ## Outline

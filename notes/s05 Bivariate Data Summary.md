@@ -1,38 +1,33 @@
-# Analysis of Economics Data Chapter 5: Bivariate Data Summary 
+# Chapter 5: Bivariate Data Summary
 
-(C) A. Colin Cameron
+Summarize the relationship between two variables:
+- e.g., earnings and education
+- e.g., house price and house size
+- Notation is that variable $y$ is a function of variable $x$
 
-Univ. of Calif. Davis
-
-November 2022
-
-## CHAPTER 5: Bivariate Data Summary
-
-- Summarize the relationship between two variables:
-- e.g. earnings and education
-- e.g. house price and house size
-- notation is that variable $y$ is a function of variable $x$.
+**Key Questions:**
 - How do we measure the association?
-- correlation coefficient $-1 \leq r \leq 1$.
+  - Correlation coefficient $-1 \leq r \leq 1$
 - How do we summarize the relationship?
-- linear regression $\hat{y}=b_{1}+b_{2} x$.
+  - Linear regression $\hat{y}=b_{1}+b_{2} x$
 - How do we summarize the strength of this relationship?
-- $\mathbf{R}$-squared $0 \leq R^{2} \leq 1$.
-- standard error of the regression $s_{e}$.
-- This chapter provides details on these measures.
+  - R-squared $0 \leq R^{2} \leq 1$
+  - Standard error of the regression $s_{e}$
+
+This chapter provides details on these measures.
 
 
 ## Outline
 
 (1) Example: House Price and Size
 (2) Two-way Tabulation
-((1) Two-way Scatter Plot
+(3) Two-way Scatter Plot
 (4) Correlation
-(6) Regression Line
+(5) Regression Line
 (6) Measures of Model Fit
-(1) Computer Output following OLS Regression
-(6) Prediction and Outlying Observations
-(l) Regression and Correlation
+(7) Computer Output following OLS Regression
+(8) Prediction and Outlying Observations
+(9) Regression and Correlation
 (10) Causation
 (II) Computations for Correlation and Regression
 (12) Nonparametric Regression
@@ -527,13 +522,11 @@ $$
 - Out-of-sample prediction
 - predictions can be poor if extrapolate to values $x^{*}$ outside the sample range of $x$.
 - Distinguish between two different uses of a prediction
-- prediction of an average outcome
+- **Prediction of an average outcome**
+  - e.g., average price for a house of 2000 square feet
 
-★ e.g. average price for a house of 2000 square feet
-
-- prediction of an individual outcome
-
-★ e.g. price for a particular house of 2000 square feet
+- **Prediction of an individual outcome**
+  - e.g., price for a particular house of 2000 square feet
 
 ## Outlying Observations
 
@@ -561,16 +554,15 @@ $$
 
 ### 5.10 Causation
 
-- The correlation coefficient always treats $x$ and $y$ neutrally.
+- The correlation coefficient always treats $x$ and $y$ neutrally
 - Regression does not:
-- slope $b_{2}$ from regress $y$ on $x \neq$ inverse of slope $c_{2}$ from reverse regress $x$ on $y$
+  - Slope $b_{2}$ from regress $y$ on $x \neq$ inverse of slope $c_{2}$ from reverse regress $x$ on $y$
+  - Explained below
 
-★ explained below
-
-- the data alone cannot tell us which direction, if any, is appropriate.
-- If we estimate $y=b_{1}+b_{2} x$, without further information
-- can say that a one unit increase in $x$ is associated with a $b_{2}$ increase in $y$
-- cannot say that a one unit increase in $x$ causes a $b_{2}$ increase in $y$.
+- The data alone cannot tell us which direction, if any, is appropriate
+- If we estimate $y=b_{1}+b_{2} x$, without further information:
+  - Can say that a one unit increase in $x$ is associated with a $b_{2}$ increase in $y$
+  - Cannot say that a one unit increase in $x$ causes a $b_{2}$ increase in $y$
 
 
 ## Causation (continued)
@@ -591,11 +583,10 @@ $$
 - Reverse regression (of $x$ on $y$ ): $\widehat{x}=c_{1}+c_{2} y$.
 - Then $c_{1} \neq 1 / b_{1}$ !
 - In fact $c_{2}=b_{2} \times\left(s_{x}^{2} / s_{y}^{2}\right)$.
-- For the house data
-- regression of house price on house size: $b_{2}=73.77$
-- reverse regression of house size on house price: $c_{2}=0.0084$
-
-★ whereas $1 / b_{2}=1 / 73.77=0.0136 \neq 0.0084$.
+- For the house data:
+  - Regression of house price on house size: $b_{2}=73.77$
+  - Reverse regression of house size on house price: $c_{2}=0.0084$
+  - Whereas $1 / b_{2}=1 / 73.77=0.0136 \neq 0.0084$
 
 ### 5.11 Computations for Correlation and Regression
 

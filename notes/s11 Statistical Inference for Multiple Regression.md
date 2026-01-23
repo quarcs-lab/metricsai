@@ -1,12 +1,4 @@
-# Analysis of Economics Data <br> Chapter 11: Statistical Inference for Multiple Regression 
-
-(c) A. Colin Cameron
-
-Univ. of Calif. Davis
-
-November 2022
-
-## CHAPTER 11: Statistical Inference for Multiple Regression
+# Chapter 11: Statistical Inference for Multiple Regression
 
 - Consider statistical inference for the relationship between house price and several variables
 - size, number of bedrooms, ....
@@ -22,9 +14,9 @@ November 2022
 (2) Estimators of Model Parameters
 (3) Confidence Intervals
 (4) Hypothesis Tests on a Single Parameter
-(6) Joint Hypothesis Tests
+(5) Joint Hypothesis Tests
 (6) F Statistic under Assumptions 1-4
-(1) Presentation of Regression Results
+(7) Presentation of Regression Results
 
 ## Example for this Chapter with dependent variable price
 
@@ -122,8 +114,7 @@ and is independent over $i$.
 - model fit is good so $s_{e}$ is small
 - when there are many observations as then $\sum_{i=1}^{n} \widetilde{x}_{j i}{ }^{2}$ is big
 - when $\left|\widetilde{x}_{j i}\right|$ is big
-
-★ which is the case if there is big dispersion in the $j^{t h}$ regressor after controlling for the other regressors.
+  - Which is the case if there is big dispersion in the $j^{t h}$ regressor after controlling for the other regressors
 
 ## The t-Statistic
 
@@ -150,12 +141,9 @@ $$
 - $b_{j}$ is consistent for $\beta_{j}\left(b_{j} \rightarrow \beta_{j}\right.$ as $\left.n \rightarrow \infty\right)$ given assumptions 1-2 plus a little more to ensure $\operatorname{Var}\left[b_{j}\right] \rightarrow 0$ as $n \rightarrow \infty$.
 - Smallest variance
 - $b_{j}$ is best linear unbiased for $\beta_{j}$ given assumptions 1-4
-
-★ i.e. smallest variance among unbiased estimators that are a weighted average of $y_{i}, \sum_{i} a_{i} y_{i}$, with weights $a_{i}$ depending on the regressors.
-
+  - i.e. smallest variance among unbiased estimators that are a weighted average of $y_{i}, \sum_{i} a_{i} y_{i}$, with weights $a_{i}$ depending on the regressors
 - $b_{j}$ is best unbiased for $\beta_{j}$ given assumptions 1-4 and normally distributed errors
-
-★ i.e. minimum variance among unbiased estimators.
+  - i.e. minimum variance among unbiased estimators
 
 ### 11.3 Confidence Intervals
 
@@ -235,16 +223,16 @@ $$
 
 - Test of statistical significance of size for house price example
 - $t=\frac{b_{\text {Size }}}{s e\left(b_{\text {Size }}\right)}=\frac{68.37}{15.39}=4.44$
-- so for two-sided test
-${ }^{\star} p=2 *$ ttail $(22,4.44)=0.0002<0.05$ so reject $H_{0}$
-${ }^{\star}$ or $c=\operatorname{invttail}(22, .05)=1.717$ and $|t|=4.44>c$ so reject $H_{0}$
-- conclude that Size is statistically significance at level 0.05 .
+- So for two-sided test
+  - $p=2 *$ ttail $(22,4.44)=0.0002<0.05$ so reject $H_{0}$
+  - or $c=\operatorname{invttail}(22, .05)=1.717$ and $|t|=4.44>c$ so reject $H_{0}$
+- Conclude that Size is statistically significance at level 0.05
 - Test of $H_{0}: \beta_{2}=50$ against $H_{a}: \beta_{2} \neq 50$
-- $t=\frac{b_{\text {Size }}-50}{\operatorname{se}\left(b_{\text {Size }}\right)}=\frac{68.37-50}{15.39}=1.194$.
-- so for two-sided test
-${ }^{\star} p=2 *$ ttail $(22,1.194)=0.245>0.05$ so do not reject $H_{0}$
-${ }^{\star}$ or $c=\operatorname{invttail}(22, .05)=1.717$ and $|t|=1.194<c$ so do not reject $H_{0}$
-- conclude that Size is statistically significance at level 0.05 .
+- $t=\frac{b_{\text {Size }}-50}{\operatorname{se}\left(b_{\text {Size }}\right)}=\frac{68.37-50}{15.39}=1.194$
+- So for two-sided test
+  - $p=2 *$ ttail $(22,1.194)=0.245>0.05$ so do not reject $H_{0}$
+  - or $c=\operatorname{invttail}(22, .05)=1.717$ and $|t|=1.194<c$ so do not reject $H_{0}$
+- Conclude that Size is statistically significance at level 0.05
 
 
 ### 11.5 Joint Hypothesis Tests
@@ -330,7 +318,8 @@ $$
 - so reject $H_{0}$ at level 0.05.
 - conclude regressors are jointly statistically significant.
 - Test only says that the regressors are jointly statistically significant
-- it does not say which regressors are individually statistically significant ★ in this example only Size was individually statistically significant at $5 \%$.
+- It does not say which regressors are individually statistically significant
+  - In this example only Size was individually statistically significant at $5 \%$
 
 
 ## Test of Subsets of Regressors
@@ -367,11 +356,10 @@ $$
 ## Further Details
 
 - For test of a single restriction $F=t^{2}$
-- the $F$ test gives the same answer as a two-sided $t$ test
-- the $p$ value is the same
-- the critical value for $F$ equals that for $t$ squared
-
-★ in particular for large $n$ the $F(1, n-k)$ critical value is $1.96^{2}=3.84$.
+- The $F$ test gives the same answer as a two-sided $t$ test
+- The $p$ value is the same
+- The critical value for $F$ equals that for $t$ squared
+  - In particular for large $n$ the $F(1, n-k)$ critical value is $1.96^{2}=3.84$
 
 - Some packages report chisquared tests rather than $F$ tests
 - in large samples with $n \rightarrow \infty$
@@ -387,13 +375,11 @@ $$
 - The proceeding presentation of the $F$ test also applies following regression with robust standard errors.
 - Now specialize to default standard errors (assumptions 1-4)
 - then analysis simplifies and provides some insights.
-- Intuitively, reject restrictions if the restricted model has much poorer fit.
+- Intuitively, reject restrictions if the restricted model has much poorer fit
 - Reject restrictions if $R S S_{r}-R S S_{u}$ is large where
-
-★ $R S S_{r}$ is residual sum of squares in restricted model
-★ $R S S_{u}$ is residual sum of squares in unrestricted model
-
-- Under assumptions 1-4 the $F$ statistic is a function of $R S S_{r}-R S S_{u}$.
+  - $R S S_{r}$ is residual sum of squares in restricted model
+  - $R S S_{u}$ is residual sum of squares in unrestricted model
+- Under assumptions 1-4 the $F$ statistic is a function of $R S S_{r}-R S S_{u}$
 
 
 ## F Statistic under Assumptions 1-4
@@ -404,12 +390,12 @@ $$
 F=\frac{\left(R S S_{r}-R S S_{u}\right) / q}{R S S_{u} /(n-k)} \sim F(q, n-k)
 $$
 
-- This is a two-sided test - there is no one-sided test.
-- Reject $H_{0}$ when $F$ is large, since then restricted model fits much worse.
-- reject at level $\alpha$ if $p=\operatorname{Pr}\left[F_{k-1, n-k}>F\right]$ is $<\alpha$
-$\star$ Stata: $p=\operatorname{Ftail}(k-1, n-k, F)$
-- or reject at level $\alpha$ if $\mathrm{F}<c=F_{k-1, n-k ; \alpha}$
-$\star$ Stata: $c=\operatorname{invFtail}(k-1, n-k, \alpha)$.
+- This is a two-sided test - there is no one-sided test
+- Reject $H_{0}$ when $F$ is large, since then restricted model fits much worse
+- Reject at level $\alpha$ if $p=\operatorname{Pr}\left[F_{k-1, n-k}>F\right]$ is $<\alpha$
+  - Stata: $p=\operatorname{Ftail}(k-1, n-k, F)$
+- Or reject at level $\alpha$ if $\mathrm{F}<c=F_{k-1, n-k ; \alpha}$
+  - Stata: $c=\operatorname{invFtail}(k-1, n-k, \alpha)$
 
 
 ## Test Overall Statistical Significance under Assumptions 1-4

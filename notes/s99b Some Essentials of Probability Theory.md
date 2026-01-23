@@ -1,25 +1,16 @@
-# Analysis of Economics Data Appendix B: Some Essentials of Probability 
-
-(c) A. Colin Cameron Univ. of Calif. Davis
-
-November 2022
-
-## APPENDIX B: Some Essentials of Probability
+# Appendix B: Some Essentials of Probability Theory
 
 - Appendix B considers properties of random variables.
 - Probability theory for a single random variable
-- chapter 3 focused on a discrete random variable
-
-★ e.g. coin toss
-
-- appendix also considers continuous random variables
-$\star$ e.g. normal and $t$ distribution.
+- Chapter 3 focused on a discrete random variable
+  - e.g. coin toss
+- Appendix also considers continuous random variables
+  - e.g. normal and $t$ distribution
 - Probability theory for the Sample Mean
-- more detail than Chapter 3.
+- More detail than Chapter 3
 - Probability theory for two related random variables
-- define formally concepts used in Chapter 6
-
-★ conditional mean and conditional variance.
+- Define formally concepts used in Chapter 6
+  - Conditional mean and conditional variance
 
 - define the population analogs of sample covariance and sample correlation.
 
@@ -50,8 +41,7 @@ $\star$ e.g. normal and $t$ distribution.
 - $\mathrm{E}[b X]=b \mathrm{E}[X] \quad$ mean of $b$ times $X$ is $b$ times the mean
 - $\mathrm{E}[a+b X]=a+b \mathrm{E}[X] \quad$ combining
 - $\operatorname{Var}[b X]=b \operatorname{Var}[X] \quad$ variance of $b$ times $X$ is $b^{2}$ times the variance
-
-★ $\mathrm{E}\left[(b X-\mathrm{E}[b X])^{2}\right]=\mathrm{E}\left[\{b(X-\mathrm{E}[X])\}^{2}\right]$
+  - $\mathrm{E}\left[(b X-\mathrm{E}[b X])^{2}\right]=\mathrm{E}\left[\{b(X-\mathrm{E}[X])\}^{2}\right]$
 
 $$
 =b^{2} \mathrm{E}\left[(X-\mathrm{E}[X])^{2}\right]=b^{2} \operatorname{Var}[X]
@@ -84,12 +74,10 @@ $$
 - Compute $\operatorname{Pr}[a<X<b]$ as the area under the probability density function between $a$ and $b$ (this is an integral)
 - we cannot compute $\operatorname{Pr}[X=a]$ as it equals 0 for a continuous random variable.
 - Standard normal example
-- $\operatorname{Pr}[X<1.5]=\int_{-\infty}^{1.5} f(x) d x=\int_{-\infty}^{1.5} \frac{1}{\sqrt{2 \pi}} \exp \left(-x^{2} / 2\right) d x$.
+- $\operatorname{Pr}[X<1.5]=\int_{-\infty}^{1.5} f(x) d x=\int_{-\infty}^{1.5} \frac{1}{\sqrt{2 \pi}} \exp \left(-x^{2} / 2\right) d x$
 - $\operatorname{Pr}[X<1.5] \simeq 0.9332$ by numerical methods
-
-★ as the integral has no closed form solution.
-
-- $\operatorname{Pr}[0.5<X<1.5] \simeq 0.2317$ similarly.
+  - As the integral has no closed form solution
+- $\operatorname{Pr}[0.5<X<1.5] \simeq 0.2317$ similarly
 ![](https://cdn.mathpix.com/cropped/070e37de-18d9-475e-82a4-4f69e65ff8a3-06.jpg?height=280&width=443&top_left_y=594&top_left_x=261)
 ![](https://cdn.mathpix.com/cropped/070e37de-18d9-475e-82a4-4f69e65ff8a3-06.jpg?height=284&width=444&top_left_y=593&top_left_x=708)
 

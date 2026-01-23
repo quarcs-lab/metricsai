@@ -1,21 +1,12 @@
-# Analysis of Economics Data Chapter 2: Univariate Data Summary 
+# Chapter 2: Univariate Data Summary
 
-(c) A. Colin Cameron Univ. of Calif. Davis
+- Univariate data are a single series of data on a single variable
+  - e.g., annual earnings, individual income, ...
 
-November 2022
+- Summarize data features using:
+  - **Summary statistics**: mean, median, standard deviation, ...
+  - **Graphical methods**: box plot, histograms, smoothed histograms (kernel density estimates), line charts, bar charts, ...
 
-## CHAPTER 2: Univariate Data Summary
-
-- Univariate data are a single series of data on a single variable.
-- e.g. annual earnings, individual income, ...
-- Summarize data features using
-- summary statistics
-
-★ mean, median, standard deviation, ....
-
-- graphical methods
-
-★ box plot, histograms, smoothed histograms (kernel density estimates), line charts, bar charts, ..
 
 ## Outline
 
@@ -24,31 +15,33 @@ November 2022
 (3) Charts for Numerical Data by Category
 (4) Summary and Charts for Categorical Data
 (5) Data Transformation
-(C Data Transformation for Time Series
+(6) Data Transformation for Time Series
 
 - Datasets: EARNINGS, REALGDPPC, HEALTHCATEGORIES, FISHING, MONTHLYHOMESALES.
 
 
 ### 2.1 Summary Statistics for Numerical Data
 
-- Observations for a sample of size $n$ are denoted
+- Observations for a sample of size $n$ are denoted:
 
 $$
 x_{1}, x_{2}, \ldots, x_{n}
 $$
 
-- Notation: $x_{1}$ is the first observation, $\ldots . x_{n}$ is the $n^{\text {th }}$ observation
-- cross-section data: typical observation is the $i^{\text {th }}$, denoted $x_{i}$
-- time series data: more customary to use the subscript $t$.
-- Example: Sample mean or average
+- **Notation:**
+  - $x_{1}$ is the first observation, $\ldots, x_{n}$ is the $n^{\text{th}}$ observation
+  - Cross-section data: typical observation is the $i^{\text{th}}$, denoted $x_{i}$
+  - Time series data: more customary to use the subscript $t$
+
+- **Example: Sample mean or average**
 
 $$
-\bar{x}=\frac{x_{1}+x_{2}+\ldots+x_{n}}{n}=\frac{1}{n} \sum_{i=1}^{n} x_{i} .
+\bar{x}=\frac{x_{1}+x_{2}+\ldots+x_{n}}{n}=\frac{1}{n} \sum_{i=1}^{n} x_{i}
 $$
 
-## Summary Statistics Example: Earnings
+#### Summary Statistics Example: Earnings
 
-- Summary statistics, rounded to the nearest dollar, for the earnings data on full-time working women aged 30 in 2010.
+Summary statistics, rounded to the nearest dollar, for the earnings data on full-time working women aged 30 in 2010:
 
 | Statistic | Value |
 | :--- | ---: |
@@ -64,47 +57,52 @@ $$
 | Skewness | 1.71 |
 | Kurtosis | 7.32 |
 
-## Central Tendency
+#### Central Tendency
 
-- Mean: is the average
-
-$$
-\bar{x}=\left(x_{1}+x_{2}+\ldots+x_{n}\right) / n=\frac{1}{n} \sum_{i=1}^{n} x_{i} .
-$$
-
-- e.g. Sample $\{8,3,7,6\}$ then $\bar{x}=(8+3+7+6) / 4=6$
-- Median: mid-point of the ordered observations
-- e.g. Sample $\{8,3,7,6\}$ when ordered is $\{3,6,7,8\}$
-- median is average of the middle two values $=(6+7) / 2=6.5$.
-- Other measures
-- Mid-range: average of the smallest and largest values
-- Mode: most common value (not useful for continuous data).
-- Most often the mean is used.
-
-
-## Data Dispersion or Spread: Standard Deviation
-
-- Sample variance:
+- **Mean**: the average
 
 $$
-s^{2}=\frac{\left[\left(x_{1}-\bar{x}\right)^{2}+\ldots+\left(x_{n}-\bar{x}\right)^{2}\right]}{(n-1)}=\frac{1}{n-1} \sum_{i=1}^{n}\left(x_{i}-\bar{x}\right)^{2} .
+\bar{x}=\left(x_{1}+x_{2}+\ldots+x_{n}\right) / n=\frac{1}{n} \sum_{i=1}^{n} x_{i}
 $$
 
-- The divisor ( $n-1$ ) is called the degrees of freedom
-- only $(n-1)$ terms in the sum can vary since the $x_{i}$ are linked by $\bar{x}=\frac{1}{n} \sum_{i=1}^{n} x_{i}$.
-- Example:
-- Sample $\{8,3,7,6\}$ has $n=4$ and $\bar{x}=6$
-- $s^{2}=\frac{1}{3}\left[(8-6)^{2}+(3-6)^{2}+(7-6)^{2}+(6-6)^{2}\right]=14 / 3=4.66$.
-- Sample standard deviation: $s=\sqrt{s^{2}}$
-- Take square root to get back to same units as $x$.
-- e.g. Sample $\{8,3,7,6\}$ has $s=\sqrt{s^{2}}=\sqrt{4.66}=2.16$.
+  - e.g., Sample $\{8,3,7,6\}$ then $\bar{x}=(8+3+7+6) / 4=6$
+
+- **Median**: mid-point of the ordered observations
+  - e.g., Sample $\{8,3,7,6\}$ when ordered is $\{3,6,7,8\}$
+  - Median is average of the middle two values $=(6+7) / 2=6.5$
+
+- **Other measures:**
+  - Mid-range: average of the smallest and largest values
+  - Mode: most common value (not useful for continuous data)
+
+- Most often the mean is used
 
 
-## Interpretation of Standard Deviation
+#### Data Dispersion or Spread: Standard Deviation
 
-- Standard deviation is difficult to understand physically.
-- As a guide use the fact that if data are normally distributed then $68 \%, 95 \%, 99.7 \%$ within 1,2 and 3 standard deviations of the mean.
-- And for any distribution at least $75 \%$ are within 2 standard deviations of the mean.
+- **Sample variance:**
+
+$$
+s^{2}=\frac{\left[\left(x_{1}-\bar{x}\right)^{2}+\ldots+\left(x_{n}-\bar{x}\right)^{2}\right]}{(n-1)}=\frac{1}{n-1} \sum_{i=1}^{n}\left(x_{i}-\bar{x}\right)^{2}
+$$
+
+- The divisor $(n-1)$ is called the degrees of freedom
+  - Only $(n-1)$ terms in the sum can vary since the $x_{i}$ are linked by $\bar{x}=\frac{1}{n} \sum_{i=1}^{n} x_{i}$
+
+- **Example:**
+  - Sample $\{8,3,7,6\}$ has $n=4$ and $\bar{x}=6$
+  - $s^{2}=\frac{1}{3}\left[(8-6)^{2}+(3-6)^{2}+(7-6)^{2}+(6-6)^{2}\right]=14 / 3=4.66$
+
+- **Sample standard deviation:** $s=\sqrt{s^{2}}$
+  - Take square root to get back to same units as $x$
+  - e.g., Sample $\{8,3,7,6\}$ has $s=\sqrt{s^{2}}=\sqrt{4.66}=2.16$
+
+
+#### Interpretation of Standard Deviation
+
+- Standard deviation is difficult to understand physically
+- As a guide, use the fact that if data are normally distributed then 68%, 95%, 99.7% are within 1, 2 and 3 standard deviations of the mean
+- For any distribution, at least 75% are within 2 standard deviations of the mean
 
 One St. Dev.
 ![](https://cdn.mathpix.com/cropped/ce1742d8-4c04-44c0-9abd-85e107d473e1-08.jpg?height=298&width=373&top_left_y=516&top_left_x=57)
@@ -115,37 +113,42 @@ Two St. Devs.
 Three St. Devs.
 ![](https://cdn.mathpix.com/cropped/ce1742d8-4c04-44c0-9abd-85e107d473e1-08.jpg?height=298&width=375&top_left_y=516&top_left_x=839)
 
-## Data Dispersion or Spread: Other Measures
+#### Data Dispersion or Spread: Other Measures
 
-- We most often use the standard deviation.
-- Coefficient of variation: $\mathrm{CV}=s / \bar{x}$.
-- dispersion relative to the mean
-- Interquartile range
-- difference between upper and lower quartiles.
-- Mean absolute deviation: $\frac{1}{n} \sum_{i=1}^{n}\left|x_{i}-\bar{x}\right|$
-- average absolute deviation about the mean.
+- We most often use the standard deviation
 
+- **Coefficient of variation:** $\mathrm{CV}=s / \bar{x}$
+  - Dispersion relative to the mean
 
-## Quartiles, Deciles and Percentiles
+- **Interquartile range**
+  - Difference between upper and lower quartiles
 
-- These provide summaries of ordered data (in addition to the median).
-- Quartiles split ordered data into fourths
-- Lower quartile: one-quarter below and three-quarters above
-- Upper quartile: three-quarters below and one-quarter above.
-- Deciles split ordered data into tenths
-- Ninth decile: nine-tenths below and one-tenth above.
-- Percentiles split ordered data into hundredths
-- 99th percentile: 99\% below and 1\% above.
+- **Mean absolute deviation:** $\frac{1}{n} \sum_{i=1}^{n}\left|x_{i}-\bar{x}\right|$
+  - Average absolute deviation about the mean
 
 
-## Skewness
+#### Quartiles, Deciles and Percentiles
 
-- Symmetry
-- the density is the same when reflected about the mean
+These provide summaries of ordered data (in addition to the median):
 
-★ normal and t distributions are examples.
+- **Quartiles** split ordered data into fourths
+  - Lower quartile: one-quarter below and three-quarters above
+  - Upper quartile: three-quarters below and one-quarter above
 
-- Skewness: not symmetric.
+- **Deciles** split ordered data into tenths
+  - Ninth decile: nine-tenths below and one-tenth above
+
+- **Percentiles** split ordered data into hundredths
+  - 99th percentile: 99% below and 1% above
+
+
+#### Skewness
+
+- **Symmetry**
+  - The density is the same when reflected about the mean
+  - Normal and t distributions are examples
+
+- **Skewness**: not symmetric
 ![](https://cdn.mathpix.com/cropped/ce1742d8-4c04-44c0-9abd-85e107d473e1-11.jpg?height=353&width=369&top_left_y=482&top_left_x=60)
 ![](https://cdn.mathpix.com/cropped/ce1742d8-4c04-44c0-9abd-85e107d473e1-11.jpg?height=362&width=371&top_left_y=480&top_left_x=450)
 ![](https://cdn.mathpix.com/cropped/ce1742d8-4c04-44c0-9abd-85e107d473e1-11.jpg?height=356&width=369&top_left_y=482&top_left_x=841)
@@ -155,14 +158,13 @@ $$
 \text { Skew } \simeq \frac{1}{n} \sum_{i=1}^{n}\left(\frac{x_{i}-\bar{x}}{s}\right)^{3} .
 $$
 
-- the average of the z -score $\left(\frac{x_{i}-\bar{x}}{s}\right)$ raised to third power
+- The average of the z-score $\left(\frac{x_{i}-\bar{x}}{s}\right)$ raised to third power
+  - Where z-score is standardized to have mean 0 and variance 1
 
-★ where z -score is standardized to have mean 0 and variance 1
-
-- zero if no skewness
-- positive if right-skewed (e.g. prices, income) and negative if left-skewed.
-- With skewed data mean $\neq$ median.
-- For very skewed data may wish to use the median in addition to, or in place of, the mean.
+- Zero if no skewness
+- Positive if right-skewed (e.g., prices, income) and negative if left-skewed
+- With skewed data mean $\neq$ median
+- For very skewed data may wish to use the median in addition to, or in place of, the mean
 
 
 ## Kurtosis
@@ -192,11 +194,11 @@ $$
 - Median is the middle line.
 - Upper and lower quartiles are the lines surrounding the median.
 - Outer bars vary with the statistical package
-- sometimes the minimum and maximum
-- sometimes the following is used to indicate outliers
-${ }^{\star}$ upper bar is upper quartile plus 1.5 times the inter-quartile range
-${ }^{\star}$ lower bar is lower quartile minus 1.5 times the inter-quartile range
-★ dots are observations outside these bars.
+  - Sometimes the minimum and maximum
+  - Sometimes the following is used to indicate outliers:
+    - Upper bar is upper quartile plus 1.5 times the inter-quartile range
+    - Lower bar is lower quartile minus 1.5 times the inter-quartile range
+    - Dots are observations outside these bars
 
 
 ## Box Plot Example: Earnings
@@ -257,16 +259,15 @@ ${ }^{\star}$ lower bar is lower quartile minus 1.5 times the inter-quartile ran
 ## Smoothed Histogram (kernel density estimate)
 
 - Continuous data such as earnings data have an underlying continuous density
-- e.g. the normal distribution (a bell-shaped density)
+  - e.g., the normal distribution (a bell-shaped density)
+  - Probabilities are determined by areas under the curve
+  - Total area under a density is one; see Appendix 5.A
 
-★ probabilities are determined by areas under the curve
-★ total area under a density is one; see Appendix 5.A.
-
-- A kernel density estimate is a commonly-used estimate of a density.
-- It is a smoothed histogram that smooths in two ways
-- uses rolling bins (or windows) that overlap rather than being distinct
-- count the fraction of the sample within each bin with more weight given to observations at the window center and less to observations at the window ends.
-- Can compare kernel density estimate to a proposed continuous density for the data such as normal.
+- A kernel density estimate is a commonly-used estimate of a density
+- It is a smoothed histogram that smooths in two ways:
+  - Uses rolling bins (or windows) that overlap rather than being distinct
+  - Count the fraction of the sample within each bin with more weight given to observations at the window center and less to observations at the window ends
+- Can compare kernel density estimate to a proposed continuous density for the data such as normal
 
 
 ## Kernel Density Estimate for Two Window Widths
@@ -283,12 +284,10 @@ ${ }^{\star}$ lower bar is lower quartile minus 1.5 times the inter-quartile ran
 - Useful for numerical data where interest lies in how the data change from one observation to the next.
 - Leading application is to time series data
 - these have a natural ordering of the observations, namely time.
-- Next slide shows line chart for real gross domestic product (GDP) per capita in constant 2012 dollars from of data from 1959 to 2019.
-- indicates enormous improvement in living standards
-
-★ per capita real GDP tripled over the sixty years
-
-- also shows dips due to recessions.
+- Next slide shows line chart for real gross domestic product (GDP) per capita in constant 2012 dollars from 1959 to 2019
+- Indicates enormous improvement in living standards
+  - Per capita real GDP tripled over the sixty years
+- Also shows dips due to recessions
 
 
 ## Line Chart Example: Real per capita U.S. GDP

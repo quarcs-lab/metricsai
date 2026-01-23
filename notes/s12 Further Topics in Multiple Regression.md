@@ -1,21 +1,11 @@
-# Analysis of Economics Data <br> Chapter 12: Further Topics in Multiple Regression 
-
-(C) A. Colin Cameron
-
-Univ. of Calif. Davis
-
-November 2022
-
-## CHAPTER 12: Further Topics in Multiple Regression
+# Chapter 12: Further Topics in Multiple Regression
 
 - In most applications assumptions 3-4 on the regression model errors are too restrictive
-- then default standard errors for the OLS coefficients are wrong
-
-★ so subsequent confidence intervals and tests are wrong
-
-- instead we should use appropriate robust standard errors
-${ }^{\star}$ which ones vary with the particular data application
-${ }^{\star}$ this can require experience.
+- Then default standard errors for the OLS coefficients are wrong
+  - So subsequent confidence intervals and tests are wrong
+- Instead we should use appropriate robust standard errors
+  - Which ones vary with the particular data application
+  - This can require experience
 - For prediction it is important to distinguish between
 - predicting an average outcome
 - predicting an individual outcome (more difficult to do precisely).
@@ -25,13 +15,13 @@ ${ }^{\star}$ this can require experience.
 
 (1) Inference with Robust Standard Errors
 (2) Prediction
-( ) Nonrepresentative Samples
-(1) Best Estimation
+(3) Nonrepresentative Samples
+(4) Best Estimation
 (5) Best Confidence Intervals
 (6) Best Hypothesis Tests
-(1) Data Science and Big Data: An Overview
-(6) Bayesian Methods: An Overview
-(l) A Brief History of Statistics and Regression
+(7) Data Science and Big Data: An Overview
+(8) Bayesian Methods: An Overview
+(9) A Brief History of Statistics and Regression
 
 Datasets: HOUSE, REALGDPPC
 
@@ -126,19 +116,15 @@ Datasets: HOUSE, REALGDPPC
 
 ## Cluster-Robust Standard Errors
 
-- OLS is still unbiased but default standard errors are too small.
+- OLS is still unbiased but default standard errors are too small
 - Make the following changes to assumptions 1-4
 - change 3 to $3 \prime: \operatorname{Var}\left[u_{i} \mid x_{i}^{\prime} s\right]=\sigma_{i}^{2}$ (so heteroskedastic)
 - change 4 to 4': correlated errors for observations in same cluster
-
-★ and need $G \rightarrow \infty$ where $G$ is the number of clusters.
-
+  - And need $G \rightarrow \infty$ where $G$ is the number of clusters
 - The formula for $s e\left(b_{j}\right)$ changes to, say, $\operatorname{seclu}_{C l u}\left(b_{j}\right)$
-- inference uses $T(G-1)$
-
-★ note the much smaller degrees of freedom.
-
-- Implementation requires specifying a variable for the clusters.
+- Inference uses $T(G-1)$
+  - Note the much smaller degrees of freedom
+- Implementation requires specifying a variable for the clusters
 
 
 ## Cluster-Robust Standard Errors in Practice
@@ -211,9 +197,8 @@ $$
 
 - For both we use the same prediction $\widehat{y}=b_{1}+b_{2} x_{2}^{*}+\ldots+b_{k} x_{k}^{*}$.
 - But the precision of the prediction varies with use
-- for individual outcome we also need to predict $u^{*}$ leading to noisier prediction
-
-★ with variance necessarily at least $\operatorname{Var}\left[u^{*}\right]$.
+- For individual outcome we also need to predict $u^{*}$ leading to noisier prediction
+  - With variance necessarily at least $\operatorname{Var}\left[u^{*}\right]$
 
 - The following slide makes clear this distinction.
 
@@ -390,9 +375,7 @@ $$
 - When assumptions 3-4 do not hold OLS is no longer best.
 - Feasible generalized least squares (FGLS) is instead the best estimator
 - FGLS requires additionally specifying a model for the error variances and covariances and estimating this model
-
-★ this model varies with the model for the errors
-
+  - This model varies with the model for the errors
 - In practice for linear regression models
 - most studies just use OLS with appropriate robust standard errors
 - this loses some precision but the loss is often not great.
@@ -419,10 +402,8 @@ $$
 - Two errors can be made in hypothesis testing.
 - A type I error (or false positive)
 - $H_{0}$ is rejected when $H_{0}$ is true
-
-★ so find disease even though no disease is present
-
-- to date we have only considered type 1 error (see Chapter 4.4).
+  - So find disease even though no disease is present
+- To date we have only considered type 1 error (see Chapter 4.4)
 - A type II error (or false negative)
 - $H_{0}$ is not rejected when $H_{0}$ is false
 - so find no disease when disease is present.

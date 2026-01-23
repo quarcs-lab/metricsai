@@ -16,20 +16,20 @@ Click any badge below to open and run immediately in your browser. Selected chap
 
 | Chapter | Title | Colab Notebook | Additional Resources |
 |---------|-------|----------------|---------------------|
-| **1** | Analysis of Economics Data | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/quarcs-lab/metricsai/blob/main/notebooks_colab/ch01_Analysis_of_Economics_Data.ipynb) | [✨ AI Slides](https://www.canva.com/design/DAG_BKhFJ_Y/PVyYUpgMWIim-HUQQDLKIA/view) • [📊 Author Slides](https://cameron.econ.ucdavis.edu/aed/traedv1_01) • [📝 Quiz](https://app.edcafe.ai/quizzes/69715fdb60956f50e60276b9) • [🤖 AI Tutor](https://app.edcafe.ai/chatbots/6971625960956f50e6028155) • [🎧 Audio EN](https://files.catbox.moe/gx5v4y.m4a) • [🎧 Audio JP](https://files.catbox.moe/d2b02x.m4a) |
+| **1** | Analysis of Economics Data | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/quarcs-lab/metricsai/blob/main/notebooks_colab/ch01_Analysis_of_Economics_Data.ipynb) | [✨ AI Slides](https://www.canva.com/design/DAG_BKhFJ_Y/PVyYUpgMWIim-HUQQDLKIA/view) • [📊 Author Slides](https://cameron.econ.ucdavis.edu/aed/traedv1_01) • [📝 Quiz](https://app.edcafe.ai/quizzes/69715fdb60956f50e60276b9) • [🤖 AI Tutor](https://app.edcafe.ai/chatbots/6971625960956f50e6028155) • [🎧 Audio](https://files.catbox.moe/gx5v4y.m4a) |
 | **2** | Univariate Data Summary | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/quarcs-lab/metricsai/blob/main/notebooks_colab/ch02_Univariate_Data_Summary.ipynb) | [✨ AI Slides](https://www.canva.com/design/DAG_Cb9ChxI/Ghe9aWGgbiFGJIBc88_4aQ/view) • [📊 Author Slides](https://cameron.econ.ucdavis.edu/aed/traedv1_02) • [🎧 Audio](https://files.catbox.moe/dvy4xr.m4a) |
-| **3** | The Sample Mean | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/quarcs-lab/metricsai/blob/main/notebooks_colab/ch03_The_Sample_Mean.ipynb) | |
-| **4** | Statistical Inference for the Mean | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/quarcs-lab/metricsai/blob/main/notebooks_colab/ch04_Statistical_Inference_for_the_Mean.ipynb) | |
+| **3** | The Sample Mean | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/quarcs-lab/metricsai/blob/main/notebooks_colab/ch03_The_Sample_Mean.ipynb) | [🎧 Audio](https://files.catbox.moe/oh4so6.m4a) |
+| **4** | Statistical Inference for the Mean | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/quarcs-lab/metricsai/blob/main/notebooks_colab/ch04_Statistical_Inference_for_the_Mean.ipynb) | [🎧 Audio](https://files.catbox.moe/jb05t1.m4a) |
 
 ### Part II: Bivariate Regression
 
-| Chapter | Title | Colab Notebook |
-|---------|-------|----------------|
-| **5** | Bivariate Data Summary | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/quarcs-lab/metricsai/blob/main/notebooks_colab/ch05_Bivariate_Data_Summary.ipynb) |
-| **6** | The Least Squares Estimator | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/quarcs-lab/metricsai/blob/main/notebooks_colab/ch06_The_Least_Squares_Estimator.ipynb) |
-| **7** | Statistical Inference for Bivariate Regression | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/quarcs-lab/metricsai/blob/main/notebooks_colab/ch07_Statistical_Inference_for_Bivariate_Regression.ipynb) |
-| **8** | Case Studies for Bivariate Regression | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/quarcs-lab/metricsai/blob/main/notebooks_colab/ch08_Case_Studies_for_Bivariate_Regression.ipynb) |
-| **9** | Models with Natural Logarithms | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/quarcs-lab/metricsai/blob/main/notebooks_colab/ch09_Models_with_Natural_Logarithms.ipynb) |
+| Chapter | Title | Colab Notebook | Additional Resources |
+|---------|-------|----------------|---------------------|
+| **5** | Bivariate Data Summary | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/quarcs-lab/metricsai/blob/main/notebooks_colab/ch05_Bivariate_Data_Summary.ipynb) | [🎧 Audio](https://files.catbox.moe/out56j.m4a) |
+| **6** | The Least Squares Estimator | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/quarcs-lab/metricsai/blob/main/notebooks_colab/ch06_The_Least_Squares_Estimator.ipynb) | |
+| **7** | Statistical Inference for Bivariate Regression | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/quarcs-lab/metricsai/blob/main/notebooks_colab/ch07_Statistical_Inference_for_Bivariate_Regression.ipynb) | |
+| **8** | Case Studies for Bivariate Regression | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/quarcs-lab/metricsai/blob/main/notebooks_colab/ch08_Case_Studies_for_Bivariate_Regression.ipynb) | |
+| **9** | Models with Natural Logarithms | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/quarcs-lab/metricsai/blob/main/notebooks_colab/ch09_Models_with_Natural_Logarithms.ipynb) | |
 
 ### Part III: Multiple Regression
 

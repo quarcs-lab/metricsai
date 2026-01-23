@@ -1,10 +1,4 @@
-# Analysis of Economics Data Appendix C: Properties of OLS, IV and ML 
-
-(C) A. Colin Cameron<br>Univ. of Calif. Davis
-
-November 2022
-
-## APPENDIX C: Properties of OLS, IV and ML
+# Appendix C: Properties of OLS and IV Estimators
 
 - Appendix C considers properties of OLS and related estimator.
 - C. 1 OLS with Independent Homoskedastic Errors

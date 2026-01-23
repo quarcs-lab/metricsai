@@ -1,12 +1,4 @@
-# Analysis of Economics Data Chapter 9: Models with Natural Logarithms 
-
-(C) A. Colin Cameron
-
-Univ. of Calif. Davis
-
-November 2022
-
-## CHAPTER 9: Models with Natural Logarithms
+# Chapter 9: Models with Natural Logarithms
 
 - Economists are often interested in measuring proportionate changes
 - e.g. price elasticity of demand
@@ -22,7 +14,7 @@ November 2022
 
 (1) Natural Logarithm Function
 (2) Semi-elasticities and elasticities
-( ) Log-linear, Log-log and Linear-Log Models
+(3) Log-linear, Log-log and Linear-Log Models
 (4) Example: Earnings and Education
 (5) Further Uses of the Natural Logarithm
 (6) Exponential Function
@@ -290,9 +282,9 @@ $$
 
 - Standard and Poor 500 Index 1927-2019
 - no inflation adjustment and no dividends
-- left panel: exponential growth in level
-- right panel: linear growth in logs
-${ }^{\star}$ growth rate $\simeq \frac{7.8-1.8}{2019-1927}=\frac{6.0}{92}=0.065$ or $6.5 \%$ per annum
+- Left panel: exponential growth in level
+- Right panel: linear growth in logs
+  - Growth rate $\simeq \frac{7.8-1.8}{2019-1927}=\frac{6.0}{92}=0.065$ or $6.5 \%$ per annum
 ![](https://cdn.mathpix.com/cropped/7c64b055-6220-4bbe-a4f4-67774edc6d98-21.jpg?height=429&width=548&top_left_y=416&top_left_x=82)
 ![](https://cdn.mathpix.com/cropped/7c64b055-6220-4bbe-a4f4-67774edc6d98-21.jpg?height=429&width=550&top_left_y=416&top_left_x=644)
 

@@ -1,22 +1,14 @@
-# Analysis of Economics Data <br> Chapter 13: Multiple Regression Case Studies 
-
-(C) A. Colin Cameron
-
-Univ. of Calif. Davis
-
-November 2022
-
-## CHAPTER 13: Multiple Regression Case Studies
+# Chapter 13: Case Studies for Multiple Regression
 
 (1) School Academic Performance Index
 (2) Cobb-Douglas Production Function (natural logarithms)
-( ) Phillips Curve (omitted variables bias)
+(3) Phillips Curve (omitted variables bias)
 (4) Automobile Fuel Efficiency (natural logarithms; clustered errors)
 (5) Rand Health Insurance Experiment (randomized control trial)
 (6) Health Care Access and Outcomes (difference in differences)
-(1) Gains from Political Incumbency (regression discontinuity design)
+(7) Gains from Political Incumbency (regression discontinuity design)
 (8) Institutions and Country GDP (instrumental variables)
-((1) From Raw Data to Final Data
+(9) From Raw Data to Final Data
 Examples 5-8 provide causal estimates using methods summarized in chap. 17.5.
 
 Datasets: API, COBBDOUGLAS, PHILLIPS, AUTOSMPG, HEALTHINSEXP, HEALTHACCESS, INCUMBENCY, INSTITUTIONS
@@ -34,10 +26,8 @@ Datasets: API, COBBDOUGLAS, PHILLIPS, AUTOSMPG, HEALTHINSEXP, HEALTHACCESS, INCU
 
 - Dataset API99 has data for 807 high schools in California in 1999 on
 - API (Academic Performance Index) in range 200 to 1000
-
-★ goal is for API > 800
-
-- socioeconomics variables Edparent, Meals and Englearn
+  - Goal is for API > 800
+- Socioeconomics variables Edparent, Meals and Englearn
 - school variable Yearround
 - teacher variables Credteach and Emerteach.
 
@@ -269,11 +259,9 @@ $\star$ small as $\exp \left(.0581^{2} / 2\right)=1.0017$ is close to 1.
 
 - Phillips curve plots price inflation against unemployment.
 - A. W. Phillips (1958) found a negative relationship
-- an increase in money supply may stimulate the economy in the short-run
-
-★ leading to lower unemployment
-★ accompanied by some increase in prices
-
+- An increase in money supply may stimulate the economy in the short-run
+  - Leading to lower unemployment
+  - Accompanied by some increase in prices
 - Importance
 - can lower unemployment at the mild expense of somewhat higher price inflation.
 - but fierce debate as to whether this relationship holds in the long-run.
@@ -282,11 +270,11 @@ $\star$ small as $\exp \left(.0581^{2} / 2\right)=1.0017$ is close to 1.
 ## Example: U.S. Price Inflation
 
 - Dataset PHILLIPS has annual U.S. data from 1949 to 2014
-- inflation based on GDP implicit price deflator.
+- Inflation based on GDP implicit price deflator
 - Later analysis uses expectations of future price inflation
 - 1. Survey of Professional Forecasters from Federal Reserve Bank of Philadelphia
-- 2. ad hoc measure weighted average of inflation over past 4 years
-$\star \dot{p}_{t}^{e}=0.4 \dot{p}_{t-1}+0.3 \dot{p}_{t-2}+0.2 \dot{p}_{t-3}+0.1 \dot{p}_{t-1}$, where $\dot{p}_{t}$ is inflation rate in year $t$.
+- 2. Ad hoc measure weighted average of inflation over past 4 years
+  - $\dot{p}_{t}^{e}=0.4 \dot{p}_{t-1}+0.3 \dot{p}_{t-2}+0.2 \dot{p}_{t-3}+0.1 \dot{p}_{t-1}$, where $\dot{p}_{t}$ is inflation rate in year $t$
 
 | Variable | Definition | Obs | Mean | St.Dev. | Min |
 | :--- | :--- | :---: | :---: | :---: | :---: |
