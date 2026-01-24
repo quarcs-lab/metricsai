@@ -1,11 +1,14 @@
-# Chapter 2: Visualizing and Summarizing Data - Python Script Report
+# Chapter 2: Visualizing and Summarizing Data
 
-> **Data Science Report Template**
-> This template follows the **Code → Results → Interpretation** structure for educational data science reporting.
+![Chapter 2 Visual Summary](images/ch02_visual_summary.jpg)
+
+*This chapter teaches you how to explore, visualize, and summarize univariate data distributions using Python, covering descriptive statistics, box plots, histograms, kernel density estimates, and data transformations for earnings, GDP, and health expenditure data.*
+
+---
 
 ## Introduction
 
-This report demonstrates comprehensive techniques for visualizing and summarizing univariate (single variable) data using Python. Chapter 2 covers essential methods for understanding data distributions, central tendency, dispersion, and visual representation—foundational skills for any data analysis workflow.
+In this chapter, we explore comprehensive techniques for visualizing and summarizing univariate (single variable) data using Python. You'll learn essential methods for understanding data distributions, central tendency, dispersion, and visual representation—foundational skills for any data analysis workflow.
 
 We work with five different datasets to illustrate various types of data and analytical approaches:
 1. **Earnings data**: Annual earnings for women aged 30 (171 observations)
@@ -14,20 +17,22 @@ We work with five different datasets to illustrate various types of data and ana
 4. **Fishing data**: Recreation fishing site choices (1,182 observations)
 5. **Home sales**: Monthly U.S. home sales 1999-2015 (193 observations)
 
-**Learning Objectives:**
+**What You'll Learn:**
 
-- Compute and interpret summary statistics (mean, median, standard deviation, quartiles, skewness, kurtosis)
-- Create effective visualizations for numerical data (box plots, histograms, density plots)
-- Analyze categorical data using frequency tables and charts
-- Apply data transformations (logarithmic) to improve data properties
-- Work with time series data and transformations
-- Choose appropriate visualization techniques for different data types
+- How to compute and interpret summary statistics (mean, median, standard deviation, quartiles, skewness, kurtosis)
+- How to create effective visualizations for numerical data (box plots, histograms, density plots)
+- How to analyze categorical data using frequency tables and charts
+- How to apply data transformations (logarithmic) to improve data properties
+- How to work with time series data and transformations
+- How to choose appropriate visualization techniques for different data types
 
 ---
 
 ## 1. Setup and Data Loading
 
 ### 1.1 Code
+
+**Context:** In this section, we set up our Python environment and load the primary dataset—earnings data for 171 women aged 30. Proper data loading and initial inspection are critical first steps in any analysis because they allow us to understand the structure, data types, and completeness of our dataset before conducting any statistical analysis. We use pandas to stream data directly from a remote GitHub repository, demonstrating modern data science workflows that don't require local file storage.
 
 ```python
 # Import required libraries
@@ -92,6 +97,8 @@ The efficient data types (int8, int32, float32) minimize memory usage—importan
 ## 2. Summary Statistics for Numerical Data
 
 ### 2.1 Code
+
+**Context:** In this section, we compute comprehensive summary statistics for the earnings variable, including measures of central tendency (mean, median), dispersion (standard deviation, range, quartiles), and distribution shape (skewness, kurtosis). These statistics provide a quantitative foundation for understanding the earnings distribution—revealing not just the "average" worker but also the spread, inequality, and asymmetry in the data. This numerical summary complements the visual analysis we'll perform next.
 
 ```python
 # Basic summary statistics using pandas
@@ -187,11 +194,17 @@ for key, value in stats_dict.items():
 
 4. **Outliers**: The maximum ($172,000) is far above the 75th percentile ($49,000), suggesting potential outliers or a small number of very high earners (doctors, lawyers, executives).
 
+> **💡 Key Concept: Skewness and Distribution Shape**
+>
+> Skewness measures the asymmetry of a distribution. Positive skewness (right-skewed) means the distribution has a long right tail with a few very high values pulling the mean above the median—common in income, wealth, and firm size data. Negative skewness (left-skewed) means the tail extends to the left. For symmetric distributions like the normal distribution, skewness equals zero. When analyzing skewed data, the median is typically a better measure of central tendency than the mean because it's not influenced by extreme values.
+
 ---
 
 ## 3. Visualizing Numerical Data
 
 ### 3.1 Code
+
+**Context:** In this section, we create three complementary visualizations of the earnings distribution: a box plot showing quartiles and outliers, a histogram displaying the frequency distribution, and a kernel density estimate (KDE) providing a smooth probability density curve. While summary statistics give us numbers, visualizations reveal patterns that numbers alone might miss—such as multimodality, gaps, or unusual clustering. Each visualization type emphasizes different aspects of the distribution, and using multiple types together provides the most complete picture.
 
 **Box Plot:**
 ```python
@@ -298,6 +311,8 @@ All three visualizations consistently show:
 
 ### 4.1 Code
 
+**Context:** In this section, we shift from numerical data (earnings) to categorical data (fishing mode choices), demonstrating that different data types require different analytical approaches. For categorical variables, we use frequency tables to count observations in each category and pie charts or bar charts to visualize the distribution. Understanding how to handle categorical data is essential because many economic variables—such as industry, occupation, region, or consumer choices—are inherently categorical rather than continuous.
+
 ```python
 # Load fishing mode data (categorical)
 data_fishing = pd.read_stata(GITHUB_DATA_URL + 'AED_FISHING.DTA')
@@ -393,6 +408,8 @@ memory usage: 75.4 KB
 
 ### 5.1 Code
 
+**Context:** In this section, we apply a logarithmic transformation to the skewed earnings data to make the distribution more symmetric and closer to normal. Log transformations are one of the most important tools in econometrics because many economic variables (income, GDP, prices, firm size) are naturally right-skewed with multiplicative relationships. Transforming such variables often improves statistical properties, makes relationships more linear, and facilitates interpretation in terms of percentage changes rather than absolute changes.
+
 ```python
 # Create log transformation of earnings
 data_earnings['lnearnings'] = np.log(data_earnings['earnings'])
@@ -487,11 +504,17 @@ The logarithmic transformation is one of the most useful tools in econometrics a
 
 **Example interpretation**: If ln(earnings) = 10.49, then earnings = e^10.49 ≈ $36,000
 
+> **💡 Key Concept: Logarithmic Transformations**
+>
+> Logarithmic transformations convert multiplicative relationships into additive ones and compress right-skewed distributions toward normality. In econometrics, log transformations are particularly valuable because they allow us to interpret regression coefficients as percentage changes (elasticities) rather than absolute changes. For example, in a log-log model, a 1% increase in X is associated with a β% change in Y. The transformation only works for positive values, so variables with zeros or negatives require special treatment (such as log(x + 1) or inverse hyperbolic sine transformations).
+
 ---
 
 ## 6. Time Series Data
 
 ### 6.1 Code
+
+**Context:** In this section, we work with time series data—observations collected at regular intervals over time, such as quarterly GDP measurements. Time series analysis requires special consideration because consecutive observations are typically correlated (autocorrelation), violating the independence assumption of standard statistical methods. We'll visualize the GDP time series, apply log and growth rate transformations, and demonstrate how different transformations reveal different patterns in the data.
 
 ```python
 # Load GDP time series data
@@ -574,6 +597,8 @@ These properties require specialized analysis techniques (covered in Chapter 17)
 ## 7. Summary and Key Findings
 
 ### 7.1 Code
+
+**Context:** In this final section, we consolidate the analytical techniques and key findings from this chapter. Summarizing your analysis is an essential skill for communicating results to diverse audiences—whether presenting to colleagues, writing research papers, or creating data-driven reports for policymakers. This summary encapsulates the main methods we've covered and highlights their practical applications.
 
 ```python
 # Summary of key concepts
@@ -658,53 +683,33 @@ These techniques apply across many domains:
 
 ## Conclusion
 
-This chapter demonstrated comprehensive techniques for visualizing and summarizing univariate data—foundational skills for all data analysis. We covered:
+In this chapter, we've explored comprehensive techniques for visualizing and summarizing univariate data—foundational skills for all data analysis. We worked with five different datasets (earnings, GDP, health expenditures, fishing choices, and home sales) to demonstrate how the same analytical principles apply across diverse economic contexts.
 
-1. **Summary Statistics**: Computing measures of central tendency, dispersion, and shape
-2. **Numerical Data Visualization**: Box plots, histograms, and density estimates
-3. **Categorical Data Analysis**: Frequency tables and proportion visualizations
-4. **Data Transformations**: Logarithmic transformations to improve data properties
-5. **Time Series Data**: Plotting and understanding temporal patterns
+You've learned how to compute and interpret summary statistics that describe central tendency (mean, median), dispersion (standard deviation, quartiles), and distribution shape (skewness, kurtosis). More importantly, you've seen why these numbers matter—how skewness reveals income inequality, how the median-mean gap signals asymmetry, and how transformations can improve data properties.
 
-**Key Takeaways for Students**:
+The visualizations you've created—box plots, histograms, kernel density estimates, and time series plots—complement numerical summaries by revealing patterns that statistics alone might miss. You've also learned the crucial skill of matching your analytical approach to your data type, using different techniques for numerical, categorical, and time series data.
 
-- **Code Skills**: Proficiency with pandas for data manipulation, matplotlib for visualization, scipy for statistical measures
-- **Statistical Concepts**: Understanding when to use mean vs. median, how to interpret skewness and kurtosis, recognizing distribution shapes
-- **Data Science Thinking**: Always explore data visually before modeling, match analytical techniques to data types, transform data when appropriate
-- **Best Practices**: Use multiple visualization methods, save high-quality figures (300 DPI), document all analysis steps
+**What You've Learned**:
 
-**Next Steps**:
+- **Programming**: How to use pandas for data manipulation, matplotlib and seaborn for professional visualizations, and scipy for advanced statistical measures
+- **Statistics**: When to use mean versus median, how to interpret skewness and kurtosis, how to recognize and address distribution properties, and why transformations matter
+- **Economics**: How to analyze income inequality through distributional measures, interpret GDP growth patterns, and understand categorical choice data
+- **Methodology**: Why you should always visualize data before modeling, how to choose appropriate techniques for different data types, and when to apply transformations
 
-- **Chapter 3**: Probability distributions and theoretical foundations
-- **Chapter 4**: Statistical inference and hypothesis testing
-- **Extensions**: Try these techniques on your own datasets, experiment with different visualization styles, explore advanced transformations (Box-Cox, inverse transformations)
+**Looking Ahead**:
 
-**Practical Skills Gained**:
+In Chapter 3, we'll build on these descriptive techniques by introducing probability distributions and sampling theory—the theoretical foundations that connect our empirical observations to statistical inference. The skills you've developed here will serve as building blocks: understanding empirical distributions prepares you for theoretical distributions, and knowing how to compute sample statistics sets the stage for understanding their sampling distributions.
 
-Students can now:
-- Load and explore datasets efficiently
-- Compute comprehensive summary statistics
-- Create publication-quality visualizations
-- Identify when data transformations are needed
-- Interpret results in economic/business contexts
-- Choose appropriate techniques for different data types
-
-This foundational chapter provides the essential toolkit for understanding data distributions—skills used throughout econometrics, statistics, and data science. The univariate techniques learned here extend naturally to bivariate and multivariate analysis in subsequent chapters.
+Try extending your learning by applying these techniques to your own datasets. Experiment with different bin widths in histograms, explore alternative transformations (like Box-Cox), and practice interpreting results in domain-specific contexts. The more you practice, the more intuitive these essential data analysis skills will become.
 
 ---
 
 **References**:
 
-- Data source: Cameron, A.C. (2021). *Analysis of Economics Data: An Introduction to Econometrics*
+- Cameron, A.C. (2022). *Analysis of Economics Data: An Introduction to Econometrics*. <https://cameron.econ.ucdavis.edu/aed/index.html>
 - Python libraries: pandas, numpy, matplotlib, seaborn, scipy
 - Datasets: AED_EARNINGS.DTA, AED_REALGDPPC.DTA, AED_HEALTHCATEGORIES.DTA, AED_FISHING.DTA, AED_MONTHLYHOMESALES.DTA
 
-**Data Citations**:
+**Data**:
 
-- Earnings data: Full-time working women aged 30, U.S. 2010
-- GDP data: U.S. Bureau of Economic Analysis, 1959Q1-2020Q1
-- Health expenditures: U.S. Centers for Medicare & Medicaid Services, 2018
-- Fishing data: Recreational fishing mode choice study
-- Home sales: U.S. existing home sales, 1999-2015
-
-All data available at: https://github.com/quarcs-lab/data-open/tree/master/AED
+All datasets are available at: <https://cameron.econ.ucdavis.edu/aed/aeddata.html>
