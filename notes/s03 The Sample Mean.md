@@ -525,27 +525,6 @@ Simple random sampling assumes all observations come from the same distribution 
 - always set the seed (e.g. equal to 10101).
 
 
-### Example Stata Code to give 400 sample means
-
-- The following advanced Stata code obtains the 400 sample means in the coin toss example of Chapter 3.2
-- the program generates one sample of size 30 of $\times$ equal 1 or 0
-- the simulate command does this 400 times
-- this gives 400 observations on variable xbar.
-
-```
-program onesample, rclass
-    drop _all
-    set obs 30
-    generate u = runiform()
-    generate x = u > 0.5
-    summarize x
-    return scalar xbar = r(mean)
-end
-simulate xbar=r(xbar), seed(10101) reps(400): onesample
-summarize
-```
-
-
 ### Some in-class Exercises
 
 (1) Suppose $X=100$ with probability 0.8 and $X=600$ with probability 0.2 . Find the mean, variance and standard deviation of $X$.
@@ -668,7 +647,7 @@ summarize
 - Census simulation: divide [0,1] into $N$ equal intervals, each representing one person
 - Seed: starting value that determines the sequence of random numbers
 - Always set seed for reproducibility (e.g., seed = 10101)
-- Stata example: simulate 400 samples of size 30, compute mean for each, analyze distribution
+- Simulation example: simulate 400 samples of size 30, compute mean for each, analyze distribution
 
 **Summary: Seven Key Results (Section 3.4):**
 1. Sample values $x_1, \ldots, x_n$ are realizations of random variables $X_1, \ldots, X_n$

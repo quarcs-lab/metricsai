@@ -528,25 +528,6 @@ $$
 - it has smallest variance among consistent estimators.
 
 
-### Key Stata Commands
-
-```
-* Generated data
-clear
-set obs 5
-set rng kiss32 // uses old Stata random number generator
-generate x = _n // set x to equal the observation number
-generate Eygivenx = 1 + 2*x
-set seed 123456
-generate u = rnormal(0,2)
-generate y = Eygivenx + u
-list
-regress y x
-twoway (scatter y x) (lfit y x)
-twoway (scatter y x) (lfit ytrue x)
-```
-
-
 ### Some in-class Exercises
 
 (1) Suppose we know that $y=8+5 x+u$ where $E[u \mid x]=0$. Give the conditional mean of $y$ given $x$ and the error term for the observation $(x, y)=(5,30)$.
@@ -709,9 +690,9 @@ twoway (scatter y x) (lfit ytrue x)
 - Well-understood statistical properties make inference straightforward
 
 **Software Implementation:**
-- Stata: `regress y x` runs OLS regression
-- Generated data example uses `generate`, `set seed` for reproducibility
-- Visualization: `twoway (scatter y x) (lfit y x)` shows data and fitted line
+- Python: Use `statsmodels.OLS` or `scipy.stats.linregress` for OLS regression
+- Generated data example uses random seed for reproducibility
+- Visualization: scatter plots with fitted regression line show data and model
 - Can compare population line vs. fitted line when population model known
 
 ---

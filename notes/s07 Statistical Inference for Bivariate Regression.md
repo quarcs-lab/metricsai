@@ -119,7 +119,7 @@ where
 
 - $b_{2}$ is the slope estimate
 - $\operatorname{se}\left(b_{2}\right)$ is the standard error of $b_{2}$
-- $t_{n-2 ; \alpha / 2}$ is the critical value in Stata using invttail( $\mathrm{n}-2, \alpha / 2$ ).
+- $t_{n-2 ; \alpha / 2}$ is the critical value from the T(n-2) distribution.
 
 
 ### What Level of Confidence?
@@ -399,16 +399,6 @@ $$
 - (2) error is heteroskedastic $u_{i} \sim \frac{\left(\text { size }_{i}-1700\right)}{1400} \times N\left(0,23500^{2}\right)$
   - This error has variance $\left\{\frac{\left(\text { size }_{i}-1700\right)}{1400}\right\}^{2} \times 23500^{2}$ that differs across $i$
 
-- Stata code
-set obs 100
-generate size $=1700+20 * \_\mathrm{n}+$ runiform $(0,50)$
-generate uhomosked $=$ rnormal $(0,23500)$
-generate price $=11500+74$ *size + uhomosked
-scatter price size || lfit price size
-generate uheterosked $=(($ size -1500$) / 1400) *$ rnormal $(0,23500)$
-generate price2 $=11500+74 *$ size + uheterosked
-scatter price2 size || lfit price size
-
 
 ### Simulation Example (continued)
 
@@ -432,19 +422,6 @@ Heteroskedastic errors
 - use cluster robust.
 - These robust standard errors are presented in chapter 12.1.
 - An essential part of any regression analysis is knowing which particular robust standard error method should be used.
-
-
-### Key Stata Commands
-
-```
-clear
-use AED_HOUSE.DTA
-regress price size
-regress price size, level(99)
-* Following gives F = t-squared and correct p-value
-test size = 90
-regress price size, vce(robust)
-```
 
 
 ---
@@ -601,9 +578,9 @@ regress price size, vce(robust)
 - Using wrong SE method leads to incorrect inference (wrong confidence intervals and hypothesis test conclusions)
 
 **Software Implementation:**
-- Stata commands: `regress price size` (default SEs), `regress price size, vce(robust)` (heteroskedasticity-robust SEs)
-- Option `level(99)` specifies 99% confidence intervals instead of default 95%
-- Command `test size = 90` tests H₀: β₂ = 90 (gives F-statistic = t² and correct p-value)
+- Python/R: Standard regression packages provide options for default and heteroskedasticity-robust standard errors
+- Confidence level can be adjusted (e.g., 99% instead of default 95%)
+- Hypothesis tests can be conducted for any null hypothesis value (e.g., H₀: β₂ = 90)
 - Dataset: AED_HOUSE.DTA contains house price and size data with n=29
 
 **General Principles:**

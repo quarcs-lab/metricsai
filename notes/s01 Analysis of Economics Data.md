@@ -152,7 +152,7 @@ Relationship between house price ($y$) and house size in square feet ($x$) for 2
   - Do data examples using an econometrics or statistical package
   - Do chapter exercises and course assignments
 
-> **Key Concept**: Learning econometrics requires active engagement with data and software. Reading about statistical methods is insufficient—you must practice by running analyses, interpreting results, and completing exercises. Hands-on experience with econometric packages (Python, R, Stata) is essential for developing practical skills.
+> **Key Concept**: Learning econometrics requires active engagement with data and software. Reading about statistical methods is insufficient—you must practice by running analyses, interpreting results, and completing exercises. Hands-on experience with econometric packages (Python, R) is essential for developing practical skills.
 
 ---
 

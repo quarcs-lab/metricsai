@@ -116,8 +116,7 @@ $$
 
 - Many areas of statistics avoid regression
 - instead use a specialized method for difference in means
-- e.g. Stata: ttest earnings, by(gender) unequal
-- yields same estimate but slightly different standard error.
+- specialized t-tests yield same estimate but slightly different standard error.
 - Two samples
 - $d=1$ has mean $\bar{y}_{1}$, variance $s_{1}^{2}$ and $s e\left(\bar{y}_{1}\right)=s_{1} / \sqrt{n_{1}}$
 - $d=0$ has mean $\bar{y}_{0}$, variance $s_{0}^{2}$ and $\operatorname{se}\left(\bar{y}_{0}\right)=s_{0} / \sqrt{n_{0}}$
@@ -378,25 +377,6 @@ where heteroskedastic-robust $t$ statistics are given in parentheses.
 
 > **Key Concept**: Regressing $y$ on a set of mutually exclusive indicators (with no other controls) is equivalent to ANOVA (analysis of variance). Coefficients give group means or differences from the base mean. Here, the F-statistic $F=1.68$ ($p=0.188$) indicates no statistically significant difference in earnings across the three worker types at the 5% level—without controlling for age and education.
 
-## 14.5 Key Stata Commands
-
-```
-use AED_EARNINGS_COMPLETE.DTA, clear
-regress earnings
-mean earnings
-sum earnings if gender == 1
-sum earnings if gender == 0
-regress earnings gender, vce(robust)
-ttest earnings, by(gender) unequal
-regress earnings education gender, vce(robust)
-regress earnings education gender genderbyeduc, vce(robust)
-regress price size bedrooms bathroom lotsize age monthsold,
-vce(robust)
-regress earnings dself dprivate dgovt, noconstant
-vce(robust)
-```
-
-
 ## 14.6 Exercises
 
 (1) OLS regression using all data yields $\widehat{y}=3+5 d$. Give $\bar{y}$ for the subsample with $d=0$ and $\bar{y}$ for the subsample with $d=1$.
@@ -422,7 +402,7 @@ vce(robust)
 - The slope $a$ equals the difference in means: $a = \bar{y}_1 - \bar{y}_0$
 - Regression on an indicator is mathematically equivalent to a two-sample difference-in-means test
 - The t-statistic on the slope coefficient tests whether the two group means differ significantly
-- Specialized t-test methods (e.g., Stata's `ttest` with `by()` option) give same estimate but slightly different standard error
+- Specialized t-test methods give same estimate but slightly different standard error
 - Regression uses $se(\hat{a})$ from the model; t-test uses $se(\bar{y}_1 - \bar{y}_0) = \sqrt{s_1^2/n_1 + s_0^2/n_0}$
 - Example: Women earn \$16,396 less than men on average ($t=-4.71$, highly significant)
 - Both approaches are valid; regression is more flexible when adding control variables

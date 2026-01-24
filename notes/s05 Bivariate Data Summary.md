@@ -793,27 +793,6 @@ Nonparametric regression
 
 ---
 
-## Key Stata Commands
-
-```
-clear
-use AED_HOUSE.DTA
-sort size
-list price size
-correlate size price
-regress price size
-graph twoway (scatter price size) (line price size)
-display _b[_cons] + _b[size]*2000 // predict at size=2000
-predict double yhat // double precision is more accurate
-generate double resid = y - yhat
-summarize price yhat resid // residuals sum to zero
-* local linear regression
-lpoly price size, degree(1) bw(300)
-* lowess with default bandwidth
-lowess price size, generate(ylowess)
-```
-
-
 ## Some in-class Exercises
 
 (1) Suppose we have a sample with three observations with $(x, y)$ equal to $(1,5),(2,2)$ and $(3,2)$. Calculate $\sum_{i=1}^{3}\left(x_{i}-\bar{x}\right)\left(y_{i}-\bar{y}\right)$.

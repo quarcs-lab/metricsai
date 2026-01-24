@@ -406,13 +406,6 @@ $$
 
 ---
 
-## Key Stata Commands
-
-clear
-use AED_HOUSE.DTA
-correlate price size bedrooms bathroom lotsize age monthsold
-regress price size bedrooms bathroom lotsize age monthsold
-
 ## Some in-class Exercises
 
 (1) Regression leads to fitted line $\widehat{y}=2+3 x_{2}+4 x_{3}$. What is the residual for observation $\left(x_{2}, x_{3}, y\right)=(2,1,9)$ ?

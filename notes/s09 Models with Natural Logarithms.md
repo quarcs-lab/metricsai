@@ -354,24 +354,6 @@ $$
 - Here $(1+0.12 / n)^{n} \rightarrow \exp (0.12)=1.12750$ or $12.750 \%$.
 
 
-## Key Stata Commands
-
-```
-clear
-use AED_EARNINGS.DTA
-generate lnearn = ln(earnings)
-generate lneduc = ln(education)
-* Linear Model
-regress earnings education, vce(robust)
-* Log-linear Model
-regress lnearn education
-* Log-log Model
-regress lnearn lneduc
-* Linear-log Model
-regress earnings lneduc
-```
-
-
 ## Some in-class Exercises
 
 (1) Consider numbers $a$ and $b$ with $\ln a=3.20$ and $\ln b=3.25$. Using only this information, what is the approximate percentage change in going from $a$ to $b$ ?

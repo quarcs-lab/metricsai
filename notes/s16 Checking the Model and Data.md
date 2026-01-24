@@ -204,7 +204,6 @@ $$
 - 16.8.2 Scatter plots for a single regressor
 - 16.8.3 Detecting influential observations
 - 16.8.4 Residual distribution analysis
-- 16.8.5 Key Stata commands for diagnostics
 
 - An outlier or outlying observation is one whose value is unusual given the rest of the data.
 - Need to screen for these as may be due to erroneous data.
@@ -277,22 +276,6 @@ using $y_{i}=\beta_{1}+\beta_{2} x_{i}+u_{i}$.
 - But in finite samples residuals are heteroskedastic and correlated even if model errors are not.
 
 > **Key Concept**: Residual diagnostic plots reveal model violations that summary statistics miss. Plot residuals versus fitted values to check for heteroskedasticity (fan shape) or nonlinearity (pattern). Plot residuals versus each regressor to check for omitted nonlinear terms. Check residual normality with histogram or Q-Q plot—though non-normality is less critical with large samples due to CLT.
-
-### 16.8.5 Key Stata Commands
-
-```
-regress democracy growth constraint indcent ///
-    catholic muslim protestant
-* Residual versus a regressor plot
-rvpplot growth, yline(0)
-* Component plus residual plot
-cprplot growth, lowess
-* Added variable plot
-avplot growth
-* Influential observations
-predict dfits, dfits
-predict dfbgrowth, dfbeta(growth)
-```
 
 > **Key Concept**: Influential observations can dramatically change regression results. DFITS measures influence on fitted values; DFBETA measures influence on specific coefficients. Observations with $|$DFITS$| > 2\sqrt{k/n}$ or $|$DFBETA$| > 2/\sqrt{n}$ warrant investigation. Don't automatically delete influential points—investigate whether they're errors, outliers, or valid extreme values.
 

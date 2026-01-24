@@ -158,7 +158,6 @@ where
 - $b_{j}$ is the slope estimate
 - $\operatorname{se}\left(b_{j}\right)$ is the standard error of $b_{j}$
 - $t_{n-k, \alpha / 2}$ is the critical value
-- e.g. in Stata use invttail ( $n-k, \alpha / 2$ ).
 - A 95 percent confidence interval is approximately
 
 $$
@@ -265,9 +264,6 @@ $$
 - Some representative values
 - $5 \%$ and one restriction: $F_{1,30 ; .05}=4.17$ and $F_{1, \infty ; .05}=3.84$
 - $5 \%$ and ten restrictions: $F_{10,30 ; .05}=2.16$ and $F_{10, \infty ; .05}=1.83$.
-- Examples in Stata
-- probability: $\operatorname{Pr}\left[F_{10,30}>2\right]=\operatorname{Ftail}(10,30,2)$.
-- inverse probability: $F_{10,30 ; .05}=\operatorname{invFtail}(10,30, .05)$
 
 
 ### The F Statistic
@@ -392,9 +388,7 @@ $$
 - This is a two-sided test - there is no one-sided test
 - Reject $H_{0}$ when $F$ is large, since then restricted model fits much worse
 - Reject at level $\alpha$ if $p=\operatorname{Pr}\left[F_{k-1, n-k}>F\right]$ is $<\alpha$
-  - Stata: $p=\operatorname{Ftail}(k-1, n-k, F)$
 - Or reject at level $\alpha$ if $\mathrm{F}<c=F_{k-1, n-k ; \alpha}$
-  - Stata: $c=\operatorname{invFtail}(k-1, n-k, \alpha)$
 
 
 ### Test Overall Statistical Significance under Assumptions 1-4
@@ -480,18 +474,6 @@ $$
 | F(2,26) | 21.93 | 21.93 | 21.93 | 21.93 | 21.93 |
 | n | 29 | 29 | 29 | 29 | 29 |
 
-### Key Stata Commands
-
-```
-clear
-use AED_HOUSE.DTA
-regress price size bedrooms bathroom lotsize age
-    monthsold
-test size = 50
-test bedrooms bathroom lotsize age monthsold
-```
-
-
 ### Some in-class Exercises
 
 (1) We obtain fitted model $\hat{y}=\underset{(1.5)}{3.0}+\underset{(2.0)}{5.0} \times x_{2}+\underset{(2.0)}{7.0} \times x_{3}, n=200$, with standard errors given in parentheses. Provide an approximate $95 \%$ confidence interval for the population slope parameter.
@@ -576,7 +558,7 @@ test bedrooms bathroom lotsize age monthsold
 **Confidence Intervals for Multiple Regression (Section 11.3):**
 - General formula for 100(1-α)% confidence interval: bⱼ ± t_{n-k,α/2} × se(bⱼ)
 - Structure is "estimate ± critical value × standard error" (same as bivariate regression)
-- Critical value t_{n-k,α/2} is from the T(n-k) distribution (Stata: invttail(n-k, α/2))
+- Critical value t_{n-k,α/2} is from the T(n-k) distribution
 - For 95% confidence interval: approximately bⱼ ± 2 × se(bⱼ) when n is large
 - Example: 95% CI for house size coefficient with b_{SF}=68.37, se(b_{SF})=15.39, n=29, k=7 gives (36.45, 100.29)
 - Manual computation: 68.37 ± t_{22,.025} × 15.39 = 68.37 ± 2.074 × 15.39 = 68.37 ± 31.92 = (36.45, 100.29)
@@ -586,8 +568,8 @@ test bedrooms bathroom lotsize age monthsold
 **Tests on Individual Parameters (Section 11.4):**
 - Two-sided test of H₀: βⱼ = β*ⱼ against Hₐ: βⱼ ≠ β*ⱼ uses t = (bⱼ - β*ⱼ)/se(bⱼ) ~ T(n-k)
 - The test statistic follows the T(n-k) distribution under the null hypothesis
-- P-value approach: Calculate p = Pr[|T_{n-k}| ≥ |t|] and reject H₀ if p < α (Stata: 2*ttail(n-k, |t|))
-- Critical value approach: Find c = t_{n-k,α/2} and reject H₀ if |t| > c (Stata: invttail(n-k, α/2))
+- P-value approach: Calculate p = Pr[|T_{n-k}| ≥ |t|] and reject H₀ if p < α
+- Critical value approach: Find c = t_{n-k,α/2} and reject H₀ if |t| > c
 - One-sided tests are also possible: same structure as in bivariate regression but using T(n-k) distribution
 - Example: Testing H₀: β_{Size} = 50 gives t = (68.37-50)/15.39 = 1.194, p = 0.245 > 0.05, so do not reject H₀
 
@@ -618,16 +600,15 @@ test bedrooms bathroom lotsize age monthsold
 - Notation: F(v₁, v₂) or F_{v₁,v₂}
 - Critical values decrease as both v₁ and v₂ increase
 - Example critical values: F_{1,30;.05} = 4.17, F_{1,∞;.05} = 3.84, F_{10,30;.05} = 2.16, F_{10,∞;.05} = 1.83
-- Stata commands: probability = Ftail(v₁, v₂, F), critical value = invFtail(v₁, v₂, α)
 
 **F Tests and Test Procedures:**
 - F tests compare two nested models: unrestricted (complete) model with k regressors vs. restricted (reduced) model with q restrictions
 - Null hypothesis H₀: The q parameter restrictions are correct
 - Alternative hypothesis Hₐ: The q parameter restrictions are incorrect
 - F-statistic measures how much worse the restricted model fits compared to unrestricted model
-- P-value: p = Pr[F_{q,n-k} ≥ F] where F is the computed F-statistic (Stata: Ftail(q, n-k, F))
+- P-value: p = Pr[F_{q,n-k} ≥ F] where F is the computed F-statistic
 - Reject H₀ if p < α (restricted model fits significantly worse)
-- Critical value approach: Reject H₀ if F > c where c = F_{q,n-k;α} (Stata: invFtail(q, n-k, α))
+- Critical value approach: Reject H₀ if F > c where c = F_{q,n-k;α}
 - F tests are always two-sided (no one-sided F test)
 - In general the F-statistic formula is complicated and should be obtained from computer output
 - For a single restriction (q=1): F = t² and the F test gives same result as two-sided t test
@@ -710,12 +691,8 @@ test bedrooms bathroom lotsize age monthsold
 - Choose format based on audience and journal conventions
 
 **Software Implementation and Commands:**
-- Stata workflow: load data (use), run regression (regress), test hypotheses (test)
-- Example: `regress price size bedrooms bathroom lotsize age monthsold`
-- Test individual hypothesis: `test size = 50` (tests H₀: β_{size}=50)
-- Test joint hypothesis: `test bedrooms bathroom lotsize age monthsold` (tests H₀: all five coefficients = 0)
 - Regression output provides: coefficients, standard errors, t-statistics, p-values, confidence intervals, R², adjusted R², F-statistic
 - Modern practice: Use heteroskedasticity-robust standard errors by default (extends to multiple regression from Chapter 7)
-- Most software packages (Stata, R, Python) provide similar functionality with slightly different syntax
+- Most software packages (R, Python) provide similar functionality with slightly different syntax
 
 ---

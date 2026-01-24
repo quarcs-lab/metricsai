@@ -450,24 +450,6 @@ $$
 > **Key Concept**: Time series data often requires transformations: moving averages smooth short-term fluctuations, seasonal adjustment removes recurring patterns, real values adjust for inflation, per capita values adjust for population, and growth rates measure proportionate changes. These transformations reveal underlying trends and enable meaningful comparisons.
 
 
-## 2.7 Key Stata Commands
-
-```
-clear
-use AED_EARNINGS.DTA
-describe
-summarize
-list earnings in 1/5
-summarize earnings
-summarize earnings, detail
-histogram earnings, freq
-kdensity earnings
-histogram earnings, kdensity
-generate lnearns = ln(earnings)
-kdensity lnearns, normal
-```
-
-
 ## 2.8 Practice Exercises
 
 (1) Obtain $\sum_{i=1}^{3}\left(2+3 i^{2}\right)$.

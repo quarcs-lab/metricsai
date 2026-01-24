@@ -42,7 +42,7 @@ By the end of this chapter, you will be able to:
 ### 12.1.1 Overview of Robust Standard Errors
 
 - For implementation, use the appropriate command in a statistical package
-- in Stata use regress command with the vce( ) option
+- in Python use statsmodels with `cov_type='HC1'` or similar options
 - in R use the sandwich package
 - chapter 12.1.9 provides details.
 - Once the appropriate standard errors $s e_{r o b}\left(b_{j}\right)$ are obtained the rest follows as usual
@@ -636,24 +636,6 @@ $$
 - Apple Macintosh (1984) made personal computing accessible, accelerating statistical software development
 
 ---
-
-## Key Stata Commands
-
-* Heteroskedastic robust standard error use AED_HOUSE.DTA, clear regress price size bedrooms bathroom lotsize age monthsold, vce(robust)
-* HAC standard error (for the mean)
-use AED_REALGDPPC, clear
-pwcorr growth l.growth 12.growth 13.growth 14.growth
-
-15. growth
-newey growth, lag(5)
-
-* Predict conditional mean
-use AED_HOUSE.DTA, clear
-regress price size
-display _b[_cons] + 2000*_b[size]
-* $95 \%$ conf. interval for prediction of conditional mean
-lincom _cons + 2000*size
-
 
 ## Some in-class Exercises
 

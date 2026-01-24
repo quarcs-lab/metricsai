@@ -13,15 +13,14 @@ By the end of this chapter, you will be able to:
 - Perform one-sided (directional) hypothesis tests and choose appropriate null and alternative hypotheses
 - Generalize confidence interval and hypothesis testing methods to other parameters beyond the mean
 - Apply statistical inference methods to proportions data and binary outcomes
-- Use statistical software (Stata, R, Excel) to implement confidence intervals and hypothesis tests
+- Use statistical software (R, Python, Excel) to implement confidence intervals and hypothesis tests
 
 ---
 
 ## 4.1 Example: Mean Annual Earnings
 
 - Sample of 171 female full-time workers aged 30 in 2010.
-- Descriptive statistics obtained using Stata summarize command
-- summarize earnings
+- Descriptive statistics:
 
 | Variable | Obs | Mean | Std. Dev. | Min | Max |
 | ---: | ---: | ---: | ---: | ---: | ---: |
@@ -39,8 +38,7 @@ The sample mean x̄ is an unbiased estimator of the population mean μ: E[x̄] =
 ### 95\% Confidence Interval for the Mean
 
 - A $95 \%$ confidence interval for a parameter is a range of likely values that the parameter lies in with $95 \%$ confidence.
-- $95 \%$ Confidence interval for $\mu$ obtained using Stata mean command.
-- mean earnings
+- $95 \%$ Confidence interval for $\mu$:
 
 Mean estimation
 Number of obs $=171$
@@ -88,9 +86,7 @@ Critical value for 95\% conf. int.
 
 ### Hypothesis test on the Mean
 
-- Hypothesis test using Stata ttest command
-- as illustrative example test whether or not $\mu=40,000$.
-. ttest earnings $=40000$
+- As illustrative example test whether or not $\mu=40,000$.
 
 One-sample t test
 
@@ -213,10 +209,9 @@ $$
 - Probabilities are the area under the $t$ probability density function.
 - e.g. $\operatorname{Pr}[a<T<b]$ is the area under the curve from $a$ to $b$
 - Computing these probabilities requires a computer.
-- The Stata function ttail $(\mathrm{v}, \mathrm{t})$ gives $\operatorname{Pr}\left[T_{v}>t\right]$
-- e.g. $\operatorname{Pr}\left[T_{170}>0.724\right]=\operatorname{ttail}(170,0.724)=0.235$.
 - The R function $1-\mathrm{pt}(\mathrm{t}, \mathrm{v})$ gives $\operatorname{Pr}\left[T_{v}>t\right]$
 - e.g. $\operatorname{Pr}\left[T_{170}>0.724\right]=1-\mathrm{pt}(0.724,170)=0.235$.
+- Python: `1 - t.cdf(t, v)` using `scipy.stats` gives $\operatorname{Pr}\left[T_{v}>t\right]$
 
 
 ### Inverse Probabilities for the t Distribution
@@ -231,9 +226,8 @@ $$
 
 - i.e. the area in the right tail beyond $t_{v, \alpha}$ equals $\alpha$.
 - Example: $\operatorname{Pr}\left[T_{170}>1.654\right]=0.05$ so $c=t_{170, .05}=1.654$.
-- The Stata function invttail(v, a) gives a such that $\operatorname{Pr}\left[T_{v}>t\right]=\mathrm{a}$
-- e.g. $c=t_{170, .05}=\operatorname{invttail}(170, .05)=1.654$.
 - The R function is $\mathrm{qt}(1-\mathrm{a}, \mathrm{v})$ e.g. $\mathrm{qt}(0.95,170)=1.654$.
+- Python: `t.ppf(1-a, v)` using `scipy.stats` gives the critical value
 
 
 ### Inverse probabilities (continued)
@@ -277,7 +271,7 @@ $$
 
 - A $95 \%$ confidence interval for population mean earnings of thirty year-old female full-time workers is
 - (\$37,560, \$45,266)
-- this was the result obtained earlier using the Stata mean command.
+- this was the result obtained earlier.
 
 
 ### Derivation of a $95 \%$ Confidence Intervals
@@ -698,29 +692,13 @@ $$
 
 For binary data (x_i = 1 or 0), the sample mean x̄ equals the sample proportion. The sample variance has the special form s² = nx̄(1-x̄)/(n-1). For confidence intervals, use standard error se(x̄) = √[x̄(1-x̄)/n]. For hypothesis tests of H₀: p = p*, use se = √[p*(1-p*)/n], substituting the hypothesized proportion p* rather than the sample proportion.
 
-### Key Stata Commands
-
-```
-use EARNINGSBOTH.DTA, clear
-* Confidence interval
-mean earnings
-mean earnings, level(90)
-* Hypothesis test
-ttest earnings = 40
-* Upper tail probability
-display ttail(170,0.724)
-* Critical value or inverse tail probability
-display invttail(170,0.025)
-```
-
-
-### Computing the p -value and Critical Value
+### Computing the p-value and Critical Value
 
 - Example of computer commands to get $p$ and $c$
 - for $t=t$, degrees of freedom $v$, and test at level $\alpha$
 - Two-sided tests
-- Stata: $p=2 * \operatorname{ttail}(v,|t|)$ and $c=\operatorname{invttail}(v, \alpha / 2)$
 - R: $p=2 *(1-\mathrm{pt}(|t|, v))$ and $c=\mathrm{qt}(1-\alpha / 2, v)$
+- Python: `p = 2 * (1 - t.cdf(abs(t), v))` and `c = t.ppf(1 - alpha/2, v)` using `scipy.stats`
 - Excel: $p=\operatorname{TDIST}(|t|, v, 2)$ and $c=\operatorname{TINV}(2 \alpha, v)$
 
 ---
@@ -747,8 +725,8 @@ display invttail(170,0.025)
 - As degrees of freedom increase, the t distribution converges to N(0,1)
 - For n > 30, t_{n-1,0.025} ≈ 2, giving the "two-standard-error rule" for approximate 95% CIs
 - The t(n-1) distribution is exact if data are normally distributed, otherwise it's an approximation
-- Stata function ttail(v, t) gives Pr[T_v > t]; invttail(v, α) gives critical value t_{v,α}
 - R functions: 1-pt(t, v) for probabilities, qt(1-α, v) for critical values
+- Python functions: `scipy.stats.t.cdf(t, v)` for probabilities, `scipy.stats.t.ppf(1-α, v)` for critical values
 
 **Confidence Intervals (Section 4.3):**
 - A 95% confidence interval for μ: x̄ ± t_{n-1,0.025} × se(x̄)
@@ -827,7 +805,7 @@ display invttail(170,0.025)
 - All t-based inference methods (CIs, tests) apply to proportions data with appropriate standard errors
 
 **Software Implementation:**
-- Stata commands: `mean` for CIs, `ttest` for hypothesis tests, `ttail` and `invttail` for probabilities
+- Python: `scipy.stats.t` for probabilities and critical values, `ttest_1samp()` for hypothesis tests
 - R functions: `pt()` for probabilities, `qt()` for critical values
 - Excel functions: TDIST, TINV for t distribution calculations
 - Always report: sample size n, sample mean x̄, standard deviation s, standard error se(x̄)
