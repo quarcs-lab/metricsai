@@ -1,11 +1,14 @@
-# Chapter 8: Case Studies for Bivariate Regression - Python Script Report
+# Chapter 8: Case Studies for Bivariate Regression
 
-> **Data Science Report Template**
-> This template follows the **Code → Results → Interpretation** structure for educational data science reporting.
+![Chapter 8 Visual Summary](images/ch08_visual_summary.jpg)
+
+*This chapter demonstrates bivariate regression in action through four real-world case studies spanning health, finance, and macroeconomics, showing how the same statistical framework illuminates diverse economic questions.*
+
+---
 
 ## Introduction
 
-This report presents **four real-world case studies** that demonstrate the power and versatility of bivariate regression across diverse economic applications. While Chapters 6 and 7 focused on statistical properties and inference methods, Chapter 8 shows how to **apply these tools to answer substantive economic questions**.
+This chapter presents four real-world case studies that demonstrate the power and versatility of bivariate regression across diverse economic applications. While Chapters 6 and 7 focused on statistical properties and inference methods, Chapter 8 shows how to apply these tools to answer substantive economic questions.
 
 The case studies span multiple domains:
 - **Health economics**: How does health spending affect life expectancy and infant mortality?
@@ -20,24 +23,26 @@ Each case study illustrates different aspects of regression analysis:
 - Economic interpretation of regression coefficients
 - Use of robust standard errors for valid inference
 
-**Learning Objectives:**
+**What You'll Learn:**
 
-- Apply bivariate regression to diverse economic problems
-- Interpret regression coefficients in economic context (not just statistical significance)
-- Recognize and address outlier sensitivity in cross-country data
-- Understand CAPM beta coefficients and their financial interpretation
-- Apply Okun's Law to macroeconomic relationships
-- Use robust standard errors as default practice
-- Visualize relationships using both scatter plots and time series plots
-- Assess model fit and economic plausibility of results
-- Connect statistical findings to economic theory
-- Identify when simple bivariate models are adequate vs. when multiple regression is needed
+- How to apply bivariate regression to diverse economic problems
+- How to interpret regression coefficients in economic context (not just statistical significance)
+- How to recognize and address outlier sensitivity in cross-country data
+- How to understand CAPM beta coefficients and their financial interpretation
+- How to apply Okun's Law to macroeconomic relationships
+- How to use robust standard errors as default practice
+- How to visualize relationships using both scatter plots and time series plots
+- How to assess model fit and economic plausibility of results
+- How to connect statistical findings to economic theory
+- How to identify when simple bivariate models are adequate vs. when multiple regression is needed
 
 ---
 
 ## 1. Setup and Data Loading
 
 ### 1.1 Code
+
+**Context:** In this section, we establish the computational environment and prepare to load four different datasets that span diverse economic applications. Unlike previous chapters that focused on one dataset (house prices), Chapter 8 analyzes multiple datasets to showcase regression's broad applicability. We set up output directories for figures and tables, ensuring all results are properly organized and reproducible. The random seed ensures that any future extensions involving simulation will produce identical results.
 
 ```python
 # Import required libraries
@@ -143,6 +148,8 @@ This organizational structure supports **reproducible research**—other researc
 ## 2. Health Outcomes Across Countries
 
 ### 2.1 Code
+
+**Context:** In this section, we examine how health spending relates to population health outcomes across 34 OECD countries. We estimate two separate regressions: one predicting life expectancy and another predicting infant mortality. Both use health spending per capita as the explanatory variable. This cross-country analysis tests a fundamental question in health economics: does spending more on healthcare actually improve health outcomes? We use robust standard errors (HC1) because different countries may have different levels of variation in outcomes, a form of heteroskedasticity common in cross-country data.
 
 ```python
 # Read in the health data
@@ -372,11 +379,17 @@ Both regressions show **minimal difference** between standard and robust SEs:
 
 **Next step**: Multiple regression (Chapter 10+) would control for confounders like GDP, education, and inequality.
 
+> **💡 Key Concept: Cross-Sectional vs. Time Series Data**
+>
+> Cross-sectional data compares multiple units (countries, individuals, firms) at a single point in time. In this health analysis, we compare 34 countries in 2009. This design is ideal for studying differences across units but cannot establish temporal causation. Time series data tracks one unit over many time periods, revealing trends and dynamics. The choice between cross-sectional and time series designs depends on the research question: cross-sectional for "what differs across units?" and time series for "how do things change over time?"
+
 ---
 
 ## 3. Health Expenditures and National Income
 
 ### 3.1 Code
+
+**Context:** In this section, we flip the causal question from the previous analysis. Instead of asking "does health spending improve outcomes?", we ask "what determines health spending?" Specifically, we examine how national income (GDP per capita) predicts health expenditures. This is fundamentally a question about budget constraints and priorities: as countries get richer, how much more do they spend on healthcare? We conduct a sensitivity analysis by comparing results with and without two influential outliers (USA and Luxembourg) to assess whether our conclusions depend on extreme observations.
 
 ```python
 # Health expenditure regression
@@ -598,11 +611,17 @@ The coefficient (0.125) combined with mean health/GDP ratio (7.2%) suggests inco
 
 **Bottom line**: National income is the **dominant determinant** of health spending across countries, explaining >90% of variation. While outliers like the USA and Luxembourg have some influence, the core relationship is robust.
 
+> **💡 Key Concept: Income Elasticity**
+>
+> Income elasticity measures how demand for a good changes with income. If elasticity > 1, the good is a "luxury" (spending increases more than proportionally with income). If elasticity < 1, it's a "necessity" (spending increases less than proportionally). In this analysis, health spending has elasticity ≈ 1.73, making it a luxury good: as countries get richer, they devote an increasing share of their budget to healthcare. This has profound implications for fiscal policy in aging, wealthy societies.
+
 ---
 
 ## 4. CAPM Model for Stock Returns
 
 ### 4.1 Code
+
+**Context:** In this section, we shift from cross-country analysis to time series financial data, applying the Capital Asset Pricing Model (CAPM) to monthly stock returns. CAPM is a cornerstone of finance theory that relates individual stock returns to overall market returns through the "beta" coefficient. We analyze Coca-Cola stock returns over 708 months, testing whether its returns can be explained solely by market movements (supporting market efficiency) or whether it generates abnormal returns (alpha). The excess return formulation (returns minus risk-free rate) isolates the risk premium investors earn for bearing market risk.
 
 ```python
 # Read in the CAPM data
@@ -834,11 +853,17 @@ The same analysis applies to Target (TGT) and Walmart (WMT):
 
 **Bottom line**: CAPM regression provides a simple, powerful tool for quantifying **systematic risk** (beta). Coca-Cola's β = 0.74 indicates it's a defensive stock suitable for risk-averse investors.
 
+> **💡 Key Concept: Beta and Systematic Risk**
+>
+> Beta measures how much a stock moves relative to the overall market. β = 1 means the stock moves in lockstep with the market; β < 1 means it's less volatile (defensive); β > 1 means it's more volatile (aggressive). Beta captures systematic risk—risk that cannot be diversified away by holding multiple stocks. Only systematic risk matters for asset pricing because investors can eliminate idiosyncratic (firm-specific) risk through diversification. This is why CAPM predicts that expected returns depend only on beta, not total volatility.
+
 ---
 
 ## 5. Okun's Law: GDP Growth and Unemployment
 
 ### 5.1 Code
+
+**Context:** In this section, we apply regression to macroeconomic time series data, testing Okun's Law—one of the most robust empirical relationships in macroeconomics. Okun's Law states that GDP growth and unemployment changes move in opposite directions: when the economy grows rapidly, unemployment falls; when it contracts, unemployment rises. We use annual US data spanning more than five decades to estimate how much GDP growth changes for each percentage point change in unemployment. This relationship is crucial for policymakers who must forecast the employment consequences of economic growth or recession.
 
 ```python
 # Read in the GDP-Unemployment data
@@ -1085,76 +1110,66 @@ Okun originally estimated the coefficient as **-2** to **-3**. Our estimate (-1.
 
 **Bottom line**: Okun's Law is a **robust empirical regularity** in macroeconomics. The negative relationship between GDP growth and unemployment changes (β ≈ -1.85) is stable across time and countries, making it a useful tool for forecasting and policy analysis.
 
+> **💡 Key Concept: Heteroskedasticity in Time Series**
+>
+> Heteroskedasticity occurs when the variance of regression errors changes across observations. In time series data, volatility often clusters: calm periods have small errors while crisis periods have large errors (2008 financial crisis, COVID-19). Standard OLS standard errors assume constant variance, producing misleading inference when heteroskedasticity is present. Robust standard errors (HC1, HC3) correct for this by allowing variance to differ across observations, ensuring valid hypothesis tests and confidence intervals regardless of the variance pattern.
+
 ---
 
 ## Conclusion
 
-This chapter demonstrated the versatility of bivariate regression through four diverse case studies spanning health economics, international economics, financial economics, and macroeconomics. We covered:
+This chapter demonstrated the versatility of bivariate regression through four diverse case studies spanning health economics, international economics, financial economics, and macroeconomics. Each application revealed how the same statistical framework—fitting a line to data—can illuminate fundamentally different economic questions when combined with domain knowledge and careful interpretation.
 
-1. **Health outcomes across countries**: Health spending increases life expectancy (+1.2 years per $1,000) and reduces infant mortality (-0.8 per 100 births per $1,000)
-2. **Health expenditures and GDP**: National income is the dominant determinant of health spending (R² = 0.90), with income elasticity ≈ 1.73 (luxury good)
-3. **CAPM model for stock returns**: Coca-Cola has systematic risk β = 0.74 (defensive stock), with alpha ≈ 0 supporting efficient markets
+**What You've Learned**
+
+Through these four case studies, you've seen how bivariate regression applies to diverse economic problems:
+
+1. **Health outcomes across countries**: Health spending increases life expectancy (+1.2 years per $1,000) and reduces infant mortality (-0.8 per 100 births per $1,000), though correlation doesn't prove causation
+2. **Health expenditures and GDP**: National income is the dominant determinant of health spending (R² = 0.90), with income elasticity ≈ 1.73 making healthcare a luxury good
+3. **CAPM model for stock returns**: Coca-Cola has systematic risk β = 0.74 (defensive stock), with alpha ≈ 0 supporting market efficiency
 4. **Okun's Law for GDP and unemployment**: A 1 percentage point rise in unemployment is associated with a 1.85 percentage point decline in GDP growth
 
-**Key Takeaways for Students**:
+You've also developed practical skills that extend beyond mechanical regression:
+- **Economic interpretation**: Translating coefficients into policy-relevant magnitudes (cost per life-year, Okun coefficient) rather than just reporting significance
+- **Robustness checks**: Using robust standard errors and sensitivity analysis (excluding outliers) to ensure conclusions don't depend on fragile assumptions
+- **Data type awareness**: Recognizing when cross-sectional, time series, or panel data is appropriate for different research questions
+- **Theory integration**: Connecting regression results to established economic theories (CAPM, Okun's Law) to validate findings
+- **Critical evaluation**: Questioning causality, recognizing omitted variables, and understanding when simple bivariate models are adequate versus when multiple regression is needed
 
-- **Code Skills**: Proficiency with loading multiple datasets from URLs, fitting regression models to diverse data types (cross-sectional, time series), comparing standard and robust standard errors across all applications, conducting sensitivity analysis (excluding outliers), creating publication-quality figures (scatter plots, time series), interpreting regression output in economic context (not just statistical), and organizing analysis with clear sections and documentation
+The case studies revealed important patterns about R²: high R² (0.90 for health-GDP) indicates one factor dominates, while moderate R² (0.35 for CAPM, 0.51 for Okun's Law) suggests multiple factors matter. You learned that outliers can substantially affect estimates (USA and Luxembourg in health spending) and that heteroskedasticity is common in financial and macroeconomic time series, making robust standard errors essential.
 
-- **Statistical Concepts**: Understanding R² in context (high R² in health-GDP regression vs. moderate R² in CAPM), recognizing outlier sensitivity (USA and Luxembourg in health spending), interpreting coefficients as elasticities (income elasticity of health spending), assessing heteroskedasticity through robust SEs (time-varying volatility in finance), and connecting regression results to economic theory (CAPM, Okun's Law)
+**Looking Ahead**
 
-- **Economic Interpretation**: Translating coefficients into policy-relevant magnitudes (cost per life-year, Okun coefficient), distinguishing statistical significance from economic significance (small effects can be statistically significant with large samples), recognizing limitations of bivariate regression (omitted variables, causality concerns), and appreciating when simple models are adequate (Okun's Law) vs. when multiple regression is needed (health outcomes depend on many factors)
+While bivariate regression provides powerful insights, all four case studies revealed limitations that motivate extensions:
 
-- **Critical Thinking**: Questioning causality (does health spending improve health, or do healthy populations spend more?), recognizing when outliers matter (USA in health spending), understanding industry-specific applications (beta in finance, elasticity in health economics), and appreciating the value of robustness checks (standard vs. robust SEs, full vs. subset samples)
+**Chapter 9** introduces logarithmic transformations, allowing you to interpret coefficients as elasticities and handle nonlinear relationships. The log-log specification is particularly useful for estimating income elasticities (as we calculated informally for health spending).
 
-**Next Steps**:
+**Chapter 10 and beyond** cover multiple regression, addressing the omitted variable problem that plagued several analyses. For health outcomes, we could control for GDP, education, and inequality. For CAPM, we could add Fama-French factors (size, value) beyond beta. For Okun's Law, we could include productivity shocks and policy variables.
 
-- **Chapter 9**: Models with natural logarithms (log-linear, log-log specifications for elasticities)
-- **Chapter 10+**: Multiple regression (controlling for confounders, adding covariates)
-- **Extensions**: Panel data (combining cross-sectional and time series), instrumental variables (addressing endogeneity), and difference-in-differences (causal inference)
+**Advanced topics** extend the framework further: panel data combines cross-sectional and time series dimensions, instrumental variables address endogeneity and reverse causation, and difference-in-differences enables causal inference from natural experiments.
 
-**Practical Skills Gained**:
-
-Students can now:
-- Apply bivariate regression to real-world economic questions across diverse domains
-- Interpret regression coefficients in meaningful economic units (years of life, percentage points of GDP)
-- Recognize when to use robust standard errors (always as default practice)
-- Conduct sensitivity analysis to assess robustness of conclusions
-- Create compelling visualizations that communicate findings to non-technical audiences
-- Connect statistical results to established economic theories (CAPM, Okun's Law)
-- Identify limitations of simple bivariate models and when to extend to multiple regression
-- Report results professionally with proper context and interpretation
-
-This chapter demonstrates that bivariate regression, while simple, provides powerful insights into economic relationships. The case studies span micro (individual stocks) to macro (national GDP), showing that the same statistical tool applies across scales. The key is not just fitting regressions mechanically, but **interpreting results thoughtfully** in light of economic theory and institutional context.
+This chapter demonstrated that bivariate regression, while simple, provides powerful insights into economic relationships when applied thoughtfully. The key is not just fitting regressions mechanically, but interpreting results in light of economic theory, institutional context, and data limitations. As you progress to more complex methods, remember that the fundamental logic—relating one variable to another—remains the same.
 
 ---
 
-**References**:
+## References
 
-- Data sources:
-  - OECD Health Statistics (2009)
-  - CRSP (Center for Research in Security Prices)
-  - Bureau of Economic Analysis (US GDP data)
-  - Bureau of Labor Statistics (US unemployment data)
-- Python libraries: numpy, pandas, matplotlib, seaborn, statsmodels, scipy
-- Datasets:
-  - AED_HEALTH2009.DTA (34 OECD countries)
-  - AED_CAPM.DTA (708 monthly observations)
-  - AED_GDPUNEMPLOY.DTA (53 annual observations)
+**Primary Source:**
 
-**Key Economic Theories Tested**:
+Cameron, A.C. (2022). *Econometric Methods with Python*. Available at: https://pyecon.org
 
-- **Luxury good hypothesis**: Health spending income elasticity > 1
-- **CAPM (Sharpe-Lintner-Mossin, 1964-1966)**: E[rᵢ - rₑ] = βᵢ × E[rₘ - rₑ]
-- **Okun's Law (Okun, 1962)**: ΔY/Y ≈ -2 × Δu (output growth ≈ -2 × unemployment change)
+**Data Sources:**
 
-**Summary Statistics Across Case Studies**:
+- OECD Health Statistics (2009): https://www.oecd.org/health/health-data.htm
+- CRSP (Center for Research in Security Prices)
+- Bureau of Economic Analysis: https://www.bea.gov
+- Bureau of Labor Statistics: https://www.bls.gov
 
-| Case Study | n | R² | Key Coefficient | Economic Interpretation |
-|------------|---|-----|-----------------|-------------------------|
-| Life expectancy | 34 | 0.49 | +0.0012 | $1,000 → +1.2 years |
-| Infant mortality | 34 | 0.36 | -0.0008 | $1,000 → -0.8 deaths per 100 |
-| Health spending | 34 | 0.90 | +0.125 | $1 GDP → $0.125 health spending |
-| CAPM (Coca-Cola) | 708 | 0.35 | +0.74 | Beta = 0.74 (defensive stock) |
-| Okun's Law | 53 | 0.51 | -1.85 | 1% unemployment → -1.85% GDP |
+**Python Libraries:**
 
-**Robust Standard Errors**: All regressions report heteroskedasticity-robust (HC1) standard errors as best practice, with notable differences in financial and macroeconomic time series data.
+- numpy, pandas, matplotlib, seaborn, statsmodels, scipy
+
+**Economic Theories:**
+
+- Sharpe, W.F. (1964). "Capital Asset Prices: A Theory of Market Equilibrium"
+- Okun, A.M. (1962). "Potential GNP: Its Measurement and Significance"

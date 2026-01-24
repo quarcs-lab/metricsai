@@ -1,7 +1,10 @@
-# Chapter 7: Statistical Inference for Bivariate Regression - Python Script Report
+# Chapter 7: Statistical Inference for Bivariate Regression
 
-> **Data Science Report Template**
-> This template follows the **Code → Results → Interpretation** structure for educational data science reporting.
+![Chapter 7 Visual Summary](images/ch07_visual_summary.jpg)
+
+*This chapter demonstrates how to conduct statistical inference for regression coefficients, using hypothesis tests and confidence intervals to make statements about population parameters based on sample data from 29 house sales.*
+
+---
 
 ## Introduction
 
@@ -19,22 +22,24 @@ This chapter applies these tools to a real-world dataset analyzing the relations
 - Construct confidence intervals for unknown parameters
 - Handle heteroskedasticity with robust standard errors
 
-**Learning Objectives:**
+**What You'll Learn:**
 
-- Calculate and interpret t-statistics for regression coefficients
-- Construct confidence intervals and understand their probabilistic interpretation
-- Conduct two-sided hypothesis tests (H₀: β₁ = β₀ vs H₁: β₁ ≠ β₀)
-- Perform one-sided directional tests (H₀: β₁ ≤ β₀ vs H₁: β₁ > β₀)
-- Understand p-values and statistical significance
-- Recognize when to use heteroskedasticity-robust standard errors
-- Interpret regression output in context of statistical inference
-- Distinguish between statistical significance and practical significance
+- How to calculate and interpret t-statistics for regression coefficients
+- How to construct confidence intervals and understand their probabilistic interpretation
+- How to conduct two-sided hypothesis tests (H₀: β₁ = β₀ vs H₁: β₁ ≠ β₀)
+- How to perform one-sided directional tests (H₀: β₁ ≤ β₀ vs H₁: β₁ > β₀)
+- How to understand p-values and statistical significance
+- How to recognize when to use heteroskedasticity-robust standard errors
+- How to interpret regression output in context of statistical inference
+- How to distinguish between statistical significance and practical significance
 
 ---
 
 ## 1. Setup and Data Loading
 
 ### 1.1 Code
+
+**Context:** In this section, we establish the computational environment and load real housing market data. Unlike theoretical exercises, we use actual house sales data to demonstrate statistical inference in a realistic setting. By setting random seeds, we ensure reproducibility. This dataset of 29 house sales provides an excellent teaching example because the sample size is small enough to make statistical inference crucial—with only 29 observations, uncertainty quantification becomes essential for reliable conclusions.
 
 ```python
 # Import required libraries
@@ -160,6 +165,8 @@ This small sample makes statistical inference **essential**—we cannot simply r
 ## 2. Basic Regression and t-statistics
 
 ### 2.1 Code
+
+**Context:** We begin by estimating the relationship between house price and size using OLS. The key innovation in this chapter is extracting not just the coefficient estimate but also its standard error, t-statistic, and p-value. These statistics allow us to test hypotheses about the population parameter. The t-statistic, in particular, standardizes our estimate by dividing it by its standard error, creating a metric for assessing statistical significance.
 
 ```python
 # Table 7.1 - Basic regression
@@ -298,11 +305,17 @@ The regression output includes several diagnostic tests:
 - No obvious outliers or nonlinearity
 - Regression line fits the data well
 
+> **💡 Key Concept: t-Statistics and Hypothesis Testing**
+>
+> The t-statistic measures how many standard errors a coefficient estimate is from a hypothesized value (usually zero). It's calculated as t = (β̂₁ - β₁,₀) / SE(β̂₁). A large absolute t-value (typically |t| > 2) suggests the estimate is far from the null hypothesis value, providing evidence against the null. The t-distribution accounts for the uncertainty in estimating the error variance with small samples, making it more conservative than the normal distribution.
+
 ---
 
 ## 3. Confidence Intervals
 
 ### 3.1 Code
+
+**Context:** Confidence intervals provide a range of plausible values for the true population parameter, quantifying the uncertainty inherent in estimation. While the point estimate ($73.77 per square foot) is our best single guess, the confidence interval acknowledges sampling variability. Constructing confidence intervals requires understanding the t-distribution and critical values, which adjust for small sample sizes and produce valid inference under normality assumptions.
 
 ```python
 # 95% confidence intervals
@@ -441,11 +454,17 @@ This illustrates the **duality** between confidence intervals and hypothesis tes
 - If a value is **outside** the 95% CI, we reject H₀ at α = 0.05
 - If a value is **inside** the 95% CI, we fail to reject H₀ at α = 0.05
 
+> **💡 Key Concept: Confidence Intervals**
+>
+> A 95% confidence interval is a range constructed such that if we repeated our study many times, approximately 95% of the resulting intervals would contain the true population parameter. The interval width reflects estimation uncertainty: wider intervals indicate greater uncertainty (smaller samples or higher variability), while narrower intervals indicate more precise estimates. The confidence level (95%) represents our tolerance for error—we accept a 5% chance of constructing an interval that doesn't contain the true parameter.
+
 ---
 
 ## 4. Two-Sided Hypothesis Tests
 
 ### 4.1 Code
+
+**Context:** While testing whether a coefficient equals zero is most common, we often need to test whether it equals a specific non-zero value—for example, comparing our estimate to previous research or theoretical predictions. Two-sided tests check for any deviation from the null value (in either direction), making them appropriate when we have no strong prior about whether the true parameter is higher or lower than the hypothesized value.
 
 ```python
 # Test H₀: β₁ = 90 vs H₁: β₁ ≠ 90
@@ -608,6 +627,8 @@ This highlights that **statistical significance depends on sample size**, while 
 ## 5. One-Sided Directional Hypothesis Tests
 
 ### 5.1 Code
+
+**Context:** One-sided tests are appropriate when theory or context suggests deviations can only occur in one direction. For example, economic theory might predict a positive effect, making a test for "greater than zero" more powerful than a two-sided test. However, one-sided tests must be pre-specified before seeing the data to maintain proper Type I error control. We examine both upper-tailed (H₁: β₁ > β₀) and lower-tailed (H₁: β₁ < β₀) alternatives.
 
 ```python
 # Upper one-tailed test: H₀: β₁ ≤ 90 vs H₁: β₁ > 90
@@ -774,6 +795,8 @@ If we had a **specific research question** like "Is the market overpriced relati
 ## 6. Robust Standard Errors
 
 ### 6.1 Code
+
+**Context:** Standard OLS inference assumes homoskedasticity (constant error variance). When this assumption fails, standard errors are biased, invalidating hypothesis tests and confidence intervals. Heteroskedasticity-robust standard errors (HC1, also known as White standard errors) provide valid inference whether or not homoskedasticity holds, making them a safe default choice. By comparing standard and robust standard errors, we can diagnose heteroskedasticity and assess whether our inference is robust to this potential violation.
 
 ```python
 # Get heteroskedasticity-robust standard errors (HC1)
@@ -957,83 +980,41 @@ The similarity between standard and robust SEs suggests:
 
 This strengthens confidence in our findings.
 
+> **💡 Key Concept: Robust Standard Errors**
+>
+> Heteroskedasticity-robust standard errors (HC1, HC2, HC3) allow valid statistical inference even when error variances differ across observations. While OLS coefficient estimates remain unbiased under heteroskedasticity, the standard errors are biased, making hypothesis tests and confidence intervals unreliable. Robust standard errors correct this problem by allowing each observation to have its own error variance. Modern econometric practice increasingly uses robust standard errors as the default, providing insurance against heteroskedasticity at minimal cost.
+
 ---
 
 ## Conclusion
 
-This chapter demonstrated the practical implementation of statistical inference for bivariate regression using real housing market data. We covered:
+In this chapter, we've moved beyond simply estimating regression coefficients to making rigorous statistical statements about population parameters. Using data from 29 house sales in Central Davis, we demonstrated the complete toolkit for statistical inference: t-statistics quantified how far estimates deviate from hypothesized values, confidence intervals provided plausible ranges for true parameters, and hypothesis tests formalized decision-making about economic relationships.
 
-1. **Setup and data loading**: Importing house price data and conducting exploratory analysis
-2. **Basic regression and t-statistics**: Testing whether size affects price (H₀: β₁ = 0)
-3. **Confidence intervals**: Constructing ranges for the true price-per-square-foot effect
-4. **Two-sided hypothesis tests**: Testing whether β₁ equals a specific value (90)
-5. **One-sided directional tests**: Testing for effects in specific directions
-6. **Robust standard errors**: Protecting inference against heteroskedasticity
+The house price example illustrated a fundamental insight: while any single sample produces imperfect estimates, statistical inference allows us to quantify this uncertainty and make reliable conclusions despite it. We found overwhelming evidence that house size affects price (t = 6.60, p < 0.001), with each square foot adding between $51 and $97 to sale price (95% CI). By comparing standard and robust standard errors, we verified that our conclusions remain valid even if homoskedasticity fails.
 
-**Key Takeaways for Students**:
+**What You've Learned:**
 
-- **Code Skills**: Proficiency with OLS regression in Python using statsmodels, extracting and interpreting regression coefficients and standard errors, computing t-statistics and p-values manually, constructing confidence intervals using t-distributions, conducting two-sided and one-sided hypothesis tests, implementing heteroskedasticity-robust standard errors (HC1), creating publication-quality regression tables and plots, and performing diagnostic tests (residual plots, normality tests)
+- **Programming**: You can now extract regression statistics (coefficients, standard errors, t-values, p-values) from statsmodels output, compute confidence intervals using the t-distribution, conduct two-sided and one-sided hypothesis tests with proper interpretation, implement heteroskedasticity-robust standard errors (HC1), and create professional visualizations of regression results with confidence bands
 
-- **Statistical Concepts**: Deep understanding of t-statistics (standardized deviations from null hypotheses), confidence intervals (ranges likely to contain true parameters), p-values (probability of observing data as extreme as ours under H₀), hypothesis testing logic (null vs. alternative, Type I vs. Type II errors), significance levels (α = 0.05 convention and its interpretation), degrees of freedom (n - k for regression), robust standard errors (protection against heteroskedasticity), and the relationship between CIs and hypothesis tests (values outside 95% CI are rejected at α = 0.05)
+- **Statistical Inference**: You understand how t-statistics standardize coefficient estimates for hypothesis testing, why confidence intervals provide better information than point estimates alone, the relationship between p-values and statistical significance (p < 0.05 convention), when to use one-sided versus two-sided tests, how sample size affects precision (larger n produces narrower confidence intervals), and why robust standard errors provide insurance against heteroskedasticity
 
-- **Inference Thinking**: Recognizing that point estimates have uncertainty (sampling variability), understanding that statistical significance ≠ practical significance, appreciating the role of sample size in precision (larger n → smaller SEs), knowing when to use one-sided vs. two-sided tests, and interpreting results in economic context (not just statistical significance)
+- **Economic Interpretation**: You can translate statistical results into economic meaning (e.g., "$74 per square foot"), distinguish between statistical significance and practical significance, recognize when to report confidence intervals versus point estimates, and communicate uncertainty effectively to non-technical audiences
 
-- **Practical Skills**: Reporting regression results professionally (coefficients, SEs, p-values, CIs), choosing appropriate significance levels (α = 0.05 is conventional but not sacred), checking robustness (comparing standard vs. robust SEs), diagnosing model assumptions (residual plots for heteroskedasticity), and communicating uncertainty to non-technical audiences
+- **Critical Thinking**: You appreciate that "failing to reject" is not the same as "accepting" the null hypothesis, understand the role of Type I and Type II errors in decision-making, recognize that small samples require wider confidence intervals and more conservative inference, and know when assumptions (like homoskedasticity) matter for valid inference
 
-**Next Steps**:
+**Looking Ahead:**
 
-- **Chapter 8**: Case studies applying bivariate regression to diverse economic problems
-- **Chapter 9**: Models with natural logarithms (log-linear, log-log transformations)
-- **Extensions**: Multiple regression (adding control variables), interaction effects (does the effect of x depend on z?), and nonlinear specifications (quadratic and polynomial models)
+In Chapter 8, you'll apply these inference tools to diverse economic applications—wage determination, production functions, and demand estimation—seeing how the same statistical framework adapts to different research questions. Chapter 9 introduces logarithmic transformations, which allow you to interpret coefficients as percentage changes (elasticities), a common representation in economics.
 
-**Practical Skills Gained**:
-
-Students can now:
-- Fit bivariate regression models and conduct full statistical inference
-- Test specific hypotheses about regression coefficients (not just β₁ = 0)
-- Construct and interpret confidence intervals for population parameters
-- Choose between one-sided and two-sided tests based on research questions
-- Implement robust standard errors to guard against heteroskedasticity
-- Create residual plots to diagnose model assumptions
-- Report results professionally in tables and figures
-- Interpret economic significance alongside statistical significance
-
-This chapter bridges the gap between theory (Chapter 6: OLS properties) and practice (Chapter 8: real applications). The house price example illustrates how statistical inference helps researchers:
-- Quantify uncertainty in estimates (CIs)
-- Test economic theories (hypothesis tests)
-- Make robust conclusions (robust SEs)
-
-These skills are essential for empirical economics, data science, and evidence-based policy analysis.
+The skills you've developed here—hypothesis testing, confidence interval construction, and robust inference—form the foundation for all empirical work. Whether you're analyzing policy impacts, forecasting economic outcomes, or testing theoretical predictions, you'll use these tools repeatedly. The key is not just mechanical application but thoughtful interpretation: understanding what statistical significance means, recognizing its limitations, and communicating results clearly and honestly.
 
 ---
 
 **References**:
 
-- Data source: Cameron, A.C. (2021). *Analysis of Economics Data: An Introduction to Econometrics*
-- Python libraries: numpy, pandas, matplotlib, seaborn, statsmodels, scipy
-- Dataset: AED_HOUSE.DTA (29 houses with price, size, and other characteristics)
+- Cameron, A.C. (2022). *Analysis of Economics Data: An Introduction to Econometrics*. <https://cameron.econ.ucdavis.edu/aed/index.html>
+- Python libraries: pandas, numpy, statsmodels, matplotlib, seaborn, scipy
 
-**Key Formulas**:
+**Data**:
 
-- **OLS slope**: β̂₁ = Cov(x,y) / Var(x)
-- **OLS intercept**: β̂₀ = ȳ - β̂₁x̄
-- **Standard error**: SE(β̂₁) = σ̂ / √[Σ(xᵢ - x̄)²]
-- **t-statistic**: t = (β̂₁ - β₁,₀) / SE(β̂₁)
-- **Confidence interval**: β̂₁ ± t_{α/2,n-2} × SE(β̂₁)
-- **p-value (two-sided)**: P(|T| > |t|) where T ~ t_{n-2}
-- **p-value (one-sided)**: P(T > t) or P(T < t) where T ~ t_{n-2}
-- **Robust SE**: SE_robust(β̂₁) = √[Σ(xᵢ - x̄)² û²ᵢ] / [Σ(xᵢ - x̄)²]²
-
-**Statistical Tables Used**:
-
-- **t-distribution** with df = 27:
-  - t_{0.975,27} = 2.052 (two-sided, α = 0.05)
-  - t_{0.95,27} = 1.703 (one-sided, α = 0.05)
-- Compare to **normal distribution**: z_{0.975} = 1.96
-
-**Software Notes**:
-
-- **statsmodels**: Primary Python library for regression analysis
-- **HC1 robust SEs**: Degrees-of-freedom adjusted White (1980) estimator
-- **Plotting**: seaborn for aesthetics, matplotlib for customization
-- **Reproducibility**: Set random seeds for consistent results
+All datasets are available at: <https://cameron.econ.ucdavis.edu/aed/aeddata.html>

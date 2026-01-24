@@ -1,11 +1,14 @@
-# Chapter 4: Statistical Inference for the Mean - Python Script Report
+# Chapter 4: Statistical Inference for the Mean
 
-> **Data Science Report Template**
-> This template follows the **Code → Results → Interpretation** structure for educational data science reporting.
+![Chapter 4 Visual Summary](images/ch04_visual_summary.jpg)
+
+*This chapter introduces statistical inference—using sample data to draw conclusions about population parameters—through confidence intervals and hypothesis tests for means and proportions.*
+
+---
 
 ## Introduction
 
-This report demonstrates fundamental techniques for **statistical inference**—the process of drawing conclusions about population parameters from sample data. Chapter 4 builds on the sampling distribution concepts from Chapter 3 to introduce two core tools of statistical inference: **confidence intervals** and **hypothesis tests**.
+In this chapter, we explore fundamental techniques for **statistical inference**—the process of drawing conclusions about population parameters from sample data. Building on the sampling distribution concepts from Chapter 3, we introduce two core tools of statistical inference: **confidence intervals** and **hypothesis tests**.
 
 We explore these concepts using multiple real-world datasets:
 1. **Earnings data**: Women aged 30, annual earnings (n=171)
@@ -14,21 +17,23 @@ We explore these concepts using multiple real-world datasets:
 4. **GDP growth**: U.S. quarterly GDP growth rates (n=245)
 5. **Proportions**: Binary outcome data (n=921)
 
-**Learning Objectives:**
+**What You'll Learn:**
 
-- Understand the t-distribution and when to use it instead of the normal distribution
-- Construct and interpret confidence intervals for population means
-- Conduct two-sided hypothesis tests using t-statistics and p-values
-- Perform one-sided (directional) hypothesis tests
-- Apply inference methods to proportions data
-- Distinguish between statistical significance and practical significance
-- Make decisions using both p-values and critical value approaches
+- How to understand the t-distribution and when to use it instead of the normal distribution
+- How to construct and interpret confidence intervals for population means
+- How to conduct two-sided hypothesis tests using t-statistics and p-values
+- How to perform one-sided (directional) hypothesis tests
+- How to apply inference methods to proportions data
+- How to distinguish between statistical significance and practical significance
+- How to make decisions using both p-values and critical value approaches
 
 ---
 
 ## 1. Setup and Data Loading
 
 ### 1.1 Code
+
+**Context:** In this section, we configure the Python environment and load earnings data for 171 women aged 30. This dataset provides the foundation for demonstrating statistical inference—we'll use this sample to make conclusions about the broader population of all working women of this age. The earnings data is ideal for learning inference because income questions are central to economic policy, and policymakers must routinely estimate population means from limited samples.
 
 ```python
 # Import required libraries
@@ -89,6 +94,8 @@ Data loaded: AED_EARNINGS.DTA (171 observations)
 ## 2. Sample Statistics and Initial Inference
 
 ### 2.1 Code
+
+**Context:** In this section, we calculate basic sample statistics—the sample mean, standard deviation, and sample size—that form the building blocks for statistical inference. From these summary statistics, we construct our first confidence interval for the population mean using the t-distribution. This interval quantifies the uncertainty in our estimate and provides a range of plausible values for the true population mean earnings.
 
 ```python
 # Get earnings variable
@@ -184,11 +191,17 @@ This interval means: "We are 95% confident that the true population mean earning
 
 **Economic interpretation**: The data do not provide sufficient evidence to conclude that the population mean earnings differ from $40,000. The sample mean of $41,413 is higher, but this difference could easily arise from sampling variability alone.
 
+> **💡 Key Concept: Confidence Intervals**
+>
+> A confidence interval provides a range of plausible values for an unknown population parameter. A 95% confidence interval means that if we repeated our sampling procedure many times and constructed an interval each time, about 95% of those intervals would contain the true population parameter. Critically, it does NOT mean there's a 95% probability that the true parameter lies in our specific interval—the parameter is fixed, the interval is random. Confidence intervals quantify the precision of our estimate: wider intervals indicate more uncertainty, while narrower intervals suggest more precise estimates.
+
 ---
 
 ## 3. The t-Distribution vs. Normal Distribution
 
 ### 3.1 Code
+
+**Context:** In this section, we compare the t-distribution with the normal distribution to understand when and why we use each one. When the population standard deviation σ is unknown (the typical case), we must estimate it with the sample standard deviation s, introducing additional uncertainty. The t-distribution accounts for this extra uncertainty by having heavier tails than the normal distribution, especially for small sample sizes. As sample size increases, the t-distribution converges to the normal distribution.
 
 ```python
 # Figure 4.1: Comparison of t and normal distributions
@@ -250,11 +263,17 @@ plt.close()
 
 **Historical note**: Before computers, statisticians used normal distribution because t-tables were limited. Modern statistical software uses the correct t-distribution automatically.
 
+> **💡 Key Concept: The t-Distribution**
+>
+> The t-distribution is used for inference about means when the population standard deviation σ is unknown and must be estimated from the sample. Developed by William Sealy Gosset (publishing under the pseudonym "Student"), the t-distribution has heavier tails than the normal distribution, reflecting the additional uncertainty from estimating σ with s. The t-distribution is characterized by degrees of freedom (df = n - 1): smaller samples have heavier tails, while as df → ∞, the t-distribution converges to the standard normal. For most applications with n > 30, the t and normal distributions yield nearly identical results, but using t is always correct when σ is unknown.
+
 ---
 
 ## 4. Confidence Intervals at Different Levels
 
 ### 4.1 Code
+
+**Context:** In this section, we construct confidence intervals at different confidence levels (90%, 95%, and 99%) to understand the trade-off between precision and confidence. A higher confidence level requires a wider interval—to be more certain that we've captured the true parameter, we must accept less precision. This trade-off is fundamental to statistical inference, and choosing the appropriate confidence level depends on the consequences of being wrong in your specific application.
 
 ```python
 # Different confidence levels
@@ -341,6 +360,8 @@ Where:
 
 ### 5.1 Code
 
+**Context:** In this section, we introduce hypothesis testing—a formal framework for making decisions about population parameters. Unlike confidence intervals which estimate a parameter, hypothesis tests evaluate specific claims. We test whether the population mean earnings equal $40,000 (the null hypothesis) against the alternative that they differ from $40,000. Using the t-statistic and p-value, we quantify the evidence against the null hypothesis and make a decision based on our chosen significance level.
+
 ```python
 # Test H0: μ = 40000 vs HA: μ ≠ 40000
 mu0 = 40000
@@ -408,11 +429,17 @@ Both approaches reach the same conclusion.
 
 **Connection to confidence intervals**: Note that $40,000 lies within the 95% CI [$37,559, $45,266]. This is no coincidence—values inside the 95% CI would not be rejected at α = 0.05.
 
+> **💡 Key Concept: P-Values and Hypothesis Testing**
+>
+> A p-value is the probability of observing data as extreme as (or more extreme than) what we actually observed, assuming the null hypothesis is true. Small p-values (typically < 0.05) suggest the data are unlikely under H₀, leading us to reject the null hypothesis in favor of the alternative. However, p-values do NOT tell us the probability that H₀ is true, the size of an effect, or the practical importance of a finding. Common misinterpretations abound: "p < 0.05" means "statistically significant" but not necessarily "important," and "p > 0.05" means "fail to reject H₀" but not "prove H₀ is true." The significance level α (often 0.05) is the threshold for rejection—chosen before seeing the data to control Type I error (false positive) rate.
+
 ---
 
 ## 6. Two-Sided Hypothesis Test Examples
 
 ### 6.1 Code
+
+**Context:** In this section, we apply the hypothesis testing framework to multiple real-world datasets—gasoline prices, male earnings, and GDP growth—to demonstrate how the same principles apply across different economic contexts. Each example illustrates different outcomes: sometimes we reject the null hypothesis, sometimes we fail to reject it. By working through diverse examples, you'll develop intuition for interpreting t-statistics, p-values, and making appropriate statistical decisions.
 
 ```python
 # Example 1: Gasoline prices
@@ -562,6 +589,8 @@ This illustrates why we must consider both statistical evidence (p-values) and e
 
 ### 7.1 Code
 
+**Context:** In this section, we explore one-sided hypothesis tests where the alternative hypothesis specifies a direction (e.g., μ > 40,000 or μ < 40,000 rather than μ ≠ 40,000). One-sided tests are appropriate when you have a directional research question or when you only care about deviations in one direction. However, they should be specified before seeing the data to avoid data snooping bias. The p-values for one-sided tests are exactly half those of two-sided tests when the data support the specified direction.
+
 ```python
 # Test H0: μ ≥ 40000 vs HA: μ < 40000 (Lower-tailed)
 mu0 = 40000
@@ -643,6 +672,8 @@ One-Sided Test (Upper-tailed): H0: μ ≤ $40,000 vs HA: μ > $40,000
 ## 8. Inference for Proportions
 
 ### 8.1 Code
+
+**Context:** In this section, we extend inference methods to proportions—situations where the variable of interest is binary (0/1, yes/no, success/failure). Proportions are ubiquitous in economics and social sciences: employment rates, market shares, voter preferences, default rates, and treatment effects. The inference framework is similar to means, but we use the binomial distribution's properties: for proportions, the standard error is √[p(1-p)/n], where p is the sample proportion.
 
 ```python
 # Example: proportion data
@@ -745,6 +776,8 @@ In this case they're almost identical because p̂ ≈ p₀. But in general, hypo
 ## 9. Hypothesis Testing Visualization
 
 ### 9.1 Code
+
+**Context:** In this final section, we create comprehensive visualizations of the hypothesis testing framework—showing the null distribution, the observed test statistic, critical regions, and p-values graphically. Visual representations help build intuition about what p-values mean, how critical values define rejection regions, and why more extreme test statistics lead to smaller p-values. These visualizations are essential for communicating hypothesis test results to non-technical audiences and for developing a geometric understanding of statistical inference.
 
 ```python
 fig, axes = plt.subplots(1, 2, figsize=(16, 6))
@@ -854,62 +887,33 @@ This visualization transforms abstract statistical concepts into concrete geomet
 
 ## Conclusion
 
-This chapter provided a comprehensive introduction to statistical inference for population means and proportions. We covered:
+In this chapter, we've explored the fundamental tools of statistical inference—confidence intervals and hypothesis tests—using real earnings, price, and GDP data. You've learned how to quantify uncertainty in your estimates, test specific claims about population parameters, and make principled decisions based on sample data.
 
-1. **Setup**: Loading earnings data and computing sample statistics
-2. **t-distribution**: Understanding when and why to use t instead of normal distribution
-3. **Confidence intervals**: Constructing intervals at different confidence levels (90%, 95%, 99%)
-4. **Two-sided hypothesis tests**: Testing whether population mean equals a specified value
-5. **Multiple examples**: Applying methods to gas prices, male earnings, and GDP growth
-6. **One-sided tests**: Conducting directional hypothesis tests
-7. **Proportions**: Extending methods to binary data
-8. **Visualization**: Understanding rejection regions and decision rules geometrically
+We've examined the t-distribution and understood why it's necessary when estimating population standard deviations from samples. Through multiple examples, you've seen how to construct confidence intervals at different levels (trading off precision for confidence) and conduct both two-sided and one-sided hypothesis tests. You've also extended these methods to proportions, a critical skill for analyzing binary outcomes in economics and social sciences.
 
-**Key Takeaways for Students**:
+Perhaps most importantly, you've learned to interpret p-values correctly—understanding that they measure the probability of your data given the null hypothesis, not the probability that the null is true. You've also seen the crucial distinction between statistical significance (is the effect detectably different from zero?) and practical significance (is the effect large enough to matter?).
 
-- **Code Skills**: Proficiency with scipy.stats for t-distribution calculations, constructing confidence intervals, computing test statistics and p-values, and creating publication-quality hypothesis test visualizations
-- **Statistical Concepts**: Deep understanding of confidence intervals vs. hypothesis tests, Type I error (α) and significance levels, p-values and their correct interpretation, critical values and rejection regions, one-sided vs. two-sided tests, and inference for proportions
-- **Inference Framework**: The complete workflow—specify hypotheses, compute test statistic, determine p-value or compare to critical value, make decision (reject or fail to reject), and interpret in context
-- **Common Pitfalls**: Failing to reject ≠ accepting H₀; statistical significance ≠ practical significance; and p-values don't measure effect size
+**What You've Learned**:
 
-**Next Steps**:
+- **Programming**: How to use scipy.stats for t-distribution calculations, construct confidence intervals programmatically, compute test statistics and p-values, and create visualizations that illuminate hypothesis testing concepts
+- **Statistics**: How the t-distribution differs from the normal and when to use each, how to construct and interpret confidence intervals, how to conduct hypothesis tests using both p-values and critical values, and how to avoid common misinterpretations of statistical results
+- **Economics**: How economists quantify uncertainty in estimates of means (earnings, prices, growth rates), how policymakers use hypothesis tests to evaluate claims about the economy, and why distinguishing statistical from practical significance matters for real-world decisions
+- **Methodology**: How to specify null and alternative hypotheses before seeing data, choose appropriate significance levels based on the costs of errors, and communicate statistical findings to both technical and non-technical audiences
 
-- **Chapter 5**: Simple linear regression (bivariate relationships)
-- **Chapter 6**: Multiple regression (controlling for confounding variables)
-- **Extensions**: Learn about power analysis, Type II errors, comparing two means (two-sample t-tests), and nonparametric alternatives when normality assumptions fail
+**Looking Ahead**:
 
-**Practical Skills Gained**:
+In Chapter 5, we'll extend these inference tools to relationships between variables through simple linear regression. The concepts you've mastered here—sampling distributions, standard errors, confidence intervals, and hypothesis tests—will transfer directly to testing whether regression coefficients differ from zero. Understanding inference for means is the foundation for understanding inference about relationships.
 
-Students can now:
-- Compute and interpret confidence intervals for any confidence level
-- Conduct hypothesis tests for population means and proportions
-- Choose between one-sided and two-sided tests appropriately
-- Interpret p-values correctly and make informed decisions
-- Distinguish between statistical and practical significance
-- Communicate uncertainty using both intervals and hypothesis tests
-- Apply these methods to real economic and policy questions
-
-This chapter establishes the foundation for all parametric inference in econometrics. The principles learned here—sampling distributions, standard errors, confidence intervals, hypothesis tests—extend to regression coefficients, time series parameters, and more complex models in subsequent chapters.
+Try extending your learning by conducting power analyses (how likely are you to detect a true effect of a given size?), exploring two-sample tests (comparing means between groups), or investigating what happens to inference when assumptions are violated. The more you practice with real data, the more confident you'll become in applying these essential statistical tools.
 
 ---
 
 **References**:
 
-- Data source: Cameron, A.C. (2021). *Analysis of Economics Data: An Introduction to Econometrics*
+- Cameron, A.C. (2022). *Analysis of Economics Data: An Introduction to Econometrics*. <https://cameron.econ.ucdavis.edu/aed/index.html>
 - Python libraries: numpy, pandas, matplotlib, seaborn, scipy.stats
 - Datasets: AED_EARNINGS.DTA, AED_GASPRICE.DTA, AED_EARNINGSMALE.DTA, AED_REALGDPPC.DTA
 
-**Data Citations**:
+**Data**:
 
-- Earnings data: Full-time working women aged 30, U.S. 2010 (n=171)
-- Gas price data: U.S. gasoline prices, 2010 (n=32)
-- Male earnings data: Full-time working men, U.S. 2010 (n=191)
-- GDP data: U.S. real GDP per capita growth rates, 1959Q1-2020Q1 (n=245)
-
-**Key Formulas**:
-
-- **Confidence Interval**: CI = x̄ ± t_{α/2, n-1} × (s/√n)
-- **t-statistic**: t = (x̄ - μ₀) / (s/√n)
-- **Standard Error**: SE = s/√n
-- **Proportion SE**: SE_p = √[p̂(1 - p̂) / n]
-- **z-statistic (proportion)**: z = (p̂ - p₀) / √[p₀(1 - p₀) / n]
+All datasets are available at: <https://cameron.econ.ucdavis.edu/aed/aeddata.html>

@@ -1,11 +1,14 @@
-# Chapter 13: Case Studies for Multiple Regression - Python Script Report
+# Chapter 13: Case Studies for Multiple Regression
 
-> **Data Science Report Template**
-> This template follows the **Code → Results → Interpretation** structure for educational data science reporting.
+![Chapter 13 Visual Summary](images/ch13_visual_summary.jpg)
+
+*This chapter demonstrates multiple regression in action through nine comprehensive case studies spanning education, production, macroeconomics, health, and political economy, showcasing advanced causal inference methods including RCT, DiD, RD, and IV estimation.*
+
+---
 
 ## Introduction
 
-This report presents **nine comprehensive case studies** that demonstrate the versatility and power of multiple regression across diverse economic applications and advanced methodological approaches. While previous chapters focused on estimation and inference fundamentals, Chapter 13 showcases how to **apply multiple regression to answer substantive economic questions** using real-world data and sophisticated econometric techniques.
+This chapter presents nine comprehensive case studies that demonstrate the versatility and power of multiple regression across diverse economic applications. While previous chapters focused on estimation and inference fundamentals, Chapter 13 showcases how to apply multiple regression to answer substantive economic questions using real-world data and sophisticated econometric techniques.
 
 The case studies span multiple domains and methodologies:
 - **Education economics**: California school performance (Academic Performance Index)
@@ -27,28 +30,30 @@ Each case study illustrates different aspects of applied econometrics:
 - **Hypothesis testing** (F-tests, t-tests, specification tests)
 - **Model validation** (diagnostic tests, robustness checks)
 
-**Learning Objectives:**
+**What You'll Learn:**
 
-- Apply multiple regression to diverse economic problems across education, production, health, and political domains
-- Interpret regression coefficients in economic context with proper units and magnitudes
-- Understand and implement advanced standard error corrections (HAC, cluster-robust)
-- Master log transformations and interpret elasticities correctly
-- Recognize and address omitted variables bias through proper model specification
-- Understand causal inference methodologies: RCT, DiD, RD, and IV
-- Implement and interpret Randomized Control Trials for policy evaluation
-- Apply Difference-in-Differences for program evaluation
-- Use Regression Discontinuity Design for quasi-experimental analysis
-- Implement Instrumental Variables estimation for endogeneity problems
-- Conduct proper hypothesis tests and specification tests
-- Manage data wrangling tasks: reading, merging, transforming
-- Present results professionally with appropriate tables and figures
-- Critically evaluate validity of causal claims and identifying assumptions
+- How to apply multiple regression to diverse economic problems across education, production, health, and political domains
+- How to interpret regression coefficients in economic context with proper units and magnitudes
+- How to implement advanced standard error corrections (HAC for time series, cluster-robust for grouped data)
+- How to estimate elasticities using log transformations and interpret percentage effects
+- How to recognize and address omitted variables bias through proper model specification
+- How to apply causal inference methods: RCT, Difference-in-Differences, Regression Discontinuity, and Instrumental Variables
+- How to evaluate Randomized Control Trials for policy evaluation
+- How to use Difference-in-Differences for program evaluation with parallel trends
+- How to implement Regression Discontinuity Design for quasi-experimental analysis
+- How to use Instrumental Variables estimation for endogeneity problems
+- How to conduct hypothesis tests and specification tests (F-tests, t-tests)
+- How to manage data wrangling: reading, merging, transforming datasets
+- How to present results professionally with tables and figures
+- How to critically evaluate validity of causal claims and identifying assumptions
 
 ---
 
 ## 1. Setup and Configuration
 
 ### 1.1 Code
+
+**Context:** In this section, we establish the computational environment and prepare to analyze nine different datasets spanning education economics, production theory, macroeconomics, consumer behavior, and causal inference applications. Unlike previous chapters that focused on one or two datasets, Chapter 13 demonstrates the broad applicability of multiple regression by analyzing diverse economic problems. We set up output directories, configure plotting aesthetics, and prepare to load data from the open-source repository, ensuring all results are properly organized and reproducible.
 
 ```python
 # Import libraries
@@ -159,6 +164,8 @@ This organizational structure supports **reproducible research** and **transpare
 ## 2. School Academic Performance Index
 
 ### 2.1 Code
+
+**Context:** This case study analyzes California school performance using the Academic Performance Index (API), a composite measure of student achievement. We begin by loading data on 400 California high schools, examining the distribution of API scores, and analyzing how parent education, poverty (measured by free/reduced meal eligibility), English learner percentage, and teacher characteristics relate to school performance. This demonstrates fundamental multiple regression where we control for multiple confounding factors to isolate individual effects, revealing how parent education's apparent effect shrinks dramatically (from 134.8 to 45.7 points) when we account for other socioeconomic factors.
 
 ```python
 # Load California schools data
@@ -445,6 +452,10 @@ where γ_j = coefficient from regressing omitted variable j on edparent.
 
 For causal claims, would need randomized experiments or quasi-experimental designs (covered in later sections).
 
+> **💡 Key Concept: Omitted Variables Bias**
+>
+> Omitted variables bias occurs when excluding a relevant variable from regression causes the estimated coefficient on an included variable to be biased. The bias formula is: E[β̂_bivariate] = β_true + β_omitted × γ, where γ is the coefficient from regressing the omitted variable on the included variable. In the schools example, parent education's coefficient dropped from 134.8 (bivariate) to 45.7 (multiple regression) because meals and other poverty indicators were omitted from the bivariate model. The bivariate estimate incorrectly attributed poverty's effect to parent education because the two are highly correlated (r = -0.81). Multiple regression "controls for" confounding variables, isolating the direct effect of each predictor.
+
 **Methodological Lessons**:
 
 - **Robust standard errors**: Used HC1 for bivariate model to address potential heteroskedasticity
@@ -457,6 +468,8 @@ For causal claims, would need randomized experiments or quasi-experimental desig
 ## 3. Cobb-Douglas Production Function
 
 ### 3.1 Code
+
+**Context:** This case study estimates a Cobb-Douglas production function using historical US manufacturing data (1899-1922), analyzing how capital and labor inputs combine to produce output. We use log-log regression to estimate elasticities and test the economic theory of constant returns to scale (whether doubling inputs doubles output). Because this is time series data, we employ Heteroskedasticity and Autocorrelation Consistent (HAC) standard errors to account for potential serial correlation in the errors, ensuring valid inference despite time dependence in the data.
 
 ```python
 # Load Cobb-Douglas data (US manufacturing 1899-1922)
@@ -764,11 +777,17 @@ The high R² suggests production technology was **remarkably stable** despite th
 
 This classic study established the **Cobb-Douglas** as the workhorse production function in economics.
 
+> **💡 Key Concept: HAC Standard Errors for Time Series**
+>
+> Heteroskedasticity and Autocorrelation Consistent (HAC) standard errors, developed by Newey and West (1987), correct for both changing variance and serial correlation in time series data. Time series regression errors often violate OLS assumptions: variance may change over time (heteroskedasticity) and errors may be correlated across periods (autocorrelation). Standard OLS standard errors become biased, producing invalid hypothesis tests. HAC standard errors allow for both issues simultaneously, computing correct standard errors even when errors are correlated up to a specified number of lags. The maxlags parameter determines how many periods of correlation to allow—rule of thumb is 0.75 × T^(1/3). HAC standard errors are typically larger than OLS standard errors, properly reflecting greater uncertainty from time dependence.
+
 ---
 
 ## 4. Phillips Curve and Omitted Variables Bias
 
 ### 4.1 Code
+
+**Context:** This case study examines the Phillips curve—the historical relationship between inflation and unemployment—using US data from 1949-2014. We demonstrate how omitting a crucial variable (expected inflation) leads to dramatically different conclusions in different time periods. The original Phillips curve (1960) suggested a stable trade-off between inflation and unemployment, but broke down in the 1970s when Friedman and Phelps showed that expected inflation was the crucial omitted variable. We use HAC standard errors because macroeconomic time series exhibit autocorrelation, and we split the sample to reveal how structural breaks invalidate pooled regression.
 
 ```python
 # Load Phillips curve data (US 1949-2014)
@@ -1122,6 +1141,8 @@ This case study illustrates how **omitted variables bias** can completely mislea
 
 ### 5.1 Code
 
+**Context:** This case study analyzes automobile fuel efficiency using log-log regression to estimate elasticities of miles per gallon (MPG) with respect to horsepower, weight, and torque. The dataset contains 1,379 vehicles from 1980-2006 produced by multiple manufacturers. Because vehicles from the same manufacturer may share unobserved characteristics (engineering teams, design philosophy, production methods), we use cluster-robust standard errors that allow for arbitrary correlation within manufacturer clusters while maintaining independence across manufacturers. This demonstrates proper inference when data have grouped structure.
+
 ```python
 # Load automobile data (1980-2006)
 data_auto = pd.read_stata(GITHUB_DATA_URL + 'AED_AUTOSMPG.DTA')
@@ -1422,6 +1443,8 @@ This analysis demonstrates the power of **log-log regression** for elasticity es
 
 ### 6.1 Code
 
+**Context:** This case study analyzes the famous RAND Health Insurance Experiment (1974-1982), the gold standard randomized controlled trial in health economics. Families were randomly assigned to insurance plans with different cost-sharing levels (0%, 25%, 50%, 95% coinsurance) to measure how out-of-pocket costs affect health care utilization. Random assignment eliminates selection bias—the fundamental problem in observational studies where sicker people choose more generous insurance. We use cluster-robust standard errors clustered at the family level because multiple family members' spending decisions are correlated, violating the independence assumption required for standard OLS inference.
+
 ```python
 # Load RAND Health Insurance Experiment data
 data_health = pd.read_stata(GITHUB_DATA_URL + 'AED_HEALTHINSEXP.DTA')
@@ -1683,11 +1706,17 @@ The RAND experiment **profoundly influenced** health policy:
 
 This study demonstrates that **well-designed experiments** can answer causal questions that observational data cannot.
 
+> **💡 Key Concept: Randomized Control Trials (RCT)**
+>
+> Randomized Control Trials are the gold standard for causal inference because random assignment eliminates selection bias. By randomly assigning treatment (insurance plans, medications, programs), we ensure treatment and control groups are identical on average in all characteristics—observed and unobserved. This breaks the correlation between treatment and potential confounders, allowing us to interpret treatment-control differences as causal effects. The key identifying assumption is that randomization was properly implemented and maintained (no contamination, compliance issues, or selective attrition). RCTs provide internal validity—clear causal estimates for the experimental sample—though external validity (generalization to other contexts) requires careful judgment about how representative the sample and setting are.
+
 ---
 
 ## 7. Health Care Access (Difference-in-Differences)
 
 ### 7.1 Code
+
+**Context:** This case study applies the Difference-in-Differences (DiD) methodology to evaluate a clinic expansion program in South Africa. Between 1993 and 1998, some communities received new health clinics while others did not. We compare the change in children's health (weight-for-age z-scores) in high-treatment communities to the change in low-treatment communities. The DiD estimator assumes parallel trends: absent the program, both groups would have experienced the same change in health outcomes. This allows us to difference out time-invariant confounders and common time trends, isolating the causal effect of clinic access on child health.
 
 ```python
 # Load health care access data (South Africa)
@@ -2005,11 +2034,17 @@ DiD is widely used for policy evaluation:
 
 This study demonstrates that **quasi-experimental methods** can provide credible causal evidence when experiments are infeasible or unethical.
 
+> **💡 Key Concept: Difference-in-Differences (DiD)**
+>
+> Difference-in-Differences is a quasi-experimental method that compares the change in outcomes over time between a treatment group and a control group. The DiD estimator is: τ = (Ȳ_treat,post - Ȳ_treat,pre) - (Ȳ_control,post - Ȳ_control,pre). By differencing twice—once across time, once across groups—we eliminate time-invariant differences between groups and common time trends affecting both groups. The key identifying assumption is parallel trends: absent treatment, both groups would have experienced the same change in outcomes. This assumption is untestable but can be made plausible by showing pre-treatment trends are parallel. DiD is widely used for policy evaluation when treatment is assigned to some groups but not others at different times, creating natural experiments.
+
 ---
 
 ## 8. Political Incumbency (Regression Discontinuity)
 
 ### 8.1 Code
+
+**Context:** This case study applies Regression Discontinuity (RD) design to measure the incumbency advantage in US Senate elections. The key insight: candidates who barely win an election (50.1% vote share) versus barely lose (49.9%) are similar in all respects except incumbency status. At the threshold (50% vote share), treatment assignment is "as-if random," enabling causal inference. We estimate how winning the previous election (becoming the incumbent) affects vote share in the next election, controlling for the vote margin using a linear specification. This demonstrates how discontinuities in treatment assignment can identify causal effects without randomization.
 
 ```python
 # Load incumbency data (U.S. Senate elections 1914-2010)
@@ -2291,13 +2326,17 @@ RD is widely used in economics:
 
 This study demonstrates that **clever research designs** can exploit natural thresholds to identify causal effects when experiments are infeasible.
 
----
+> **💡 Key Concept: Regression Discontinuity Design (RD)**
+>
+> Regression Discontinuity exploits sharp thresholds in treatment assignment to identify causal effects. Individuals just above and below the threshold (e.g., 50% vote share) are nearly identical except for treatment status, creating local randomization. The RD estimator compares outcomes immediately above versus below the cutoff, controlling for the running variable to account for smooth trends. The key identifying assumption is continuity: all other determinants of the outcome vary smoothly through the threshold, so any discontinuous jump must be caused by treatment. RD provides Local Average Treatment Effect (LATE) at the threshold, which may differ from effects away from the cutoff. Sensitivity checks include varying bandwidth, testing for discontinuities in covariates, and using different polynomial specifications.
 
-*[Continuing in next message with sections 9 and Conclusion due to length]*
+---
 
 ## 9. Institutions and GDP (Instrumental Variables)
 
 ### 9.1 Code
+
+**Context:** This case study replicates Acemoglu, Johnson, and Robinson's (2001) influential study on how institutions affect economic development using Instrumental Variables (IV) estimation. The fundamental problem: institutions and GDP are simultaneously determined (reverse causation), and omitted variables (culture, geography) confound the relationship. They use settler mortality rates in colonial times as an instrument for current institutions—in high-mortality areas, Europeans established extractive institutions, while in low-mortality areas they settled and built strong property rights. We implement two-stage least squares (2SLS) to obtain consistent estimates, testing the relevance of the instrument with first-stage F-statistics.
 
 ```python
 # Load institutions data (cross-country)
@@ -2693,11 +2732,17 @@ IV is widely used in economics:
 
 This study demonstrates that **creative instrumental variables** can overcome endogeneity and establish causal relationships in complex social phenomena.
 
+> **💡 Key Concept: Instrumental Variables (IV)**
+>
+> Instrumental Variables estimation addresses endogeneity—when a regressor is correlated with the error term due to reverse causation, omitted variables, or measurement error. An instrument Z must satisfy two conditions: (1) Relevance: Z is strongly correlated with the endogenous regressor X (first-stage F > 10), and (2) Exogeneity: Z affects the outcome Y only through its effect on X (exclusion restriction). Two-Stage Least Squares (2SLS) implements IV: first stage regresses X on Z to get predicted values X̂, second stage regresses Y on X̂. IV estimates the Local Average Treatment Effect (LATE) for compliers—units whose X changes when Z changes. The exclusion restriction is untestable and requires careful theoretical justification and robustness checks.
+
 ---
 
 ## 10. From Raw Data to Final Data (Data Wrangling)
 
 ### 10.1 Code
+
+**Context:** This section demonstrates practical data management skills essential for applied econometrics. We show how to read data from various formats (Stata, CSV, Excel, JSON), merge datasets on common identifiers, reshape data between wide and long formats, create new variables through transformations, and handle missing values. These seemingly mundane tasks are the foundation of empirical research—even the most sophisticated econometric method produces garbage if applied to poorly managed data. This section provides a reference guide for common data wrangling operations in Python.
 
 ```python
 # Demonstrate reading different file formats
@@ -3175,29 +3220,67 @@ This section provides the **practical toolkit** students need to go from raw dat
 
 ## Conclusion
 
-This chapter presented **nine comprehensive case studies** that demonstrate the power and versatility of multiple regression across diverse economic applications and advanced econometric methodologies. We covered:
+This chapter demonstrated the versatility of multiple regression through nine comprehensive case studies spanning education economics, production theory, macroeconomics, health policy, and political economy. Each application revealed how sophisticated econometric methods—when combined with careful thought about identification—can illuminate complex causal relationships that simple correlation cannot address.
 
-**Case Studies Summary**:
+**What You've Learned**
 
-1. **School Academic Performance (Section 2)**: Multiple regression fundamentals with California schools data. Key finding: Poverty (free meals) is the dominant determinant of school performance, explaining far more variation than teacher quality or school inputs. Parent education effect shrinks from 134.8 (bivariate) to 45.7 (multiple regression) due to omitted variables bias.
+Through these nine case studies, you've seen how multiple regression and advanced causal inference methods apply to diverse economic problems:
 
-2. **Cobb-Douglas Production Function (Section 3)**: Log-log regression for elasticity estimation with HAC standard errors for time series data. Key finding: US manufacturing (1899-1922) exhibited constant returns to scale (α + β = 1.04, not significantly different from 1), with labor elasticity (0.806) dominating capital elasticity (0.232).
+1. **California schools and omitted variables bias**: Poverty (measured by free/reduced meal eligibility) is the dominant determinant of school performance, with parent education's effect shrinking from 134.8 to 45.7 points when properly controlling for confounders—demonstrating how bivariate regression conflates correlated effects
 
-3. **Phillips Curve (Section 4)**: Omitted variables bias and structural breaks. Key finding: The Phillips curve broke down post-1970 because expected inflation was omitted. Including expected inflation restores the negative unemployment-inflation relationship and explains the sign reversal from -1.54 (pre-1970) to +0.30 (post-1970 bivariate).
+2. **Cobb-Douglas production function and HAC standard errors**: US manufacturing (1899-1922) exhibited constant returns to scale (α + β = 1.04) with labor elasticity (0.806) dominating capital elasticity (0.232), using HAC standard errors to account for autocorrelation in time series data
 
-4. **Automobile Fuel Efficiency (Section 5)**: Log-log regression with cluster-robust standard errors. Key finding: Weight elasticity (-0.62) is the dominant determinant of fuel efficiency, twice as important as horsepower (-0.28). Technological progress improved efficiency by 2.79% per year (1980-2006), but heavier vehicles offset these gains.
+3. **Phillips curve and structural breaks**: The famous unemployment-inflation trade-off broke down post-1970 because expected inflation was omitted, with the coefficient reversing from -1.54 (pre-1970) to +0.30 (post-1970) until properly accounting for inflation expectations
 
-5. **RAND Health Insurance Experiment (Section 6)**: Randomized Control Trial methodology for causal inference. Key finding: Cost-sharing reduces medical spending by 15-30% (moral hazard exists), with 95% coinsurance reducing spending by $232/year vs. free care, but health outcomes were unaffected for average patients.
+4. **Automobile fuel efficiency with cluster-robust errors**: Vehicle weight elasticity (-0.62) dominates horsepower (-0.28) in determining MPG, with technological progress improving efficiency 2.79% annually but heavier vehicles offsetting these gains, using cluster-robust standard errors for manufacturer groups
 
-6. **Health Care Access in South Africa (Section 7)**: Difference-in-Differences methodology. Key finding: Expanding primary care clinic access caused child nutrition (WAZ) to improve by 0.14 standard deviations beyond secular trends, demonstrating causal health infrastructure effects under parallel trends assumption.
+5. **RAND Health Insurance Experiment (RCT)**: Random assignment to cost-sharing plans proves that moral hazard exists—95% coinsurance reduced spending by $232/year versus free care—while health outcomes remained unaffected for average patients, demonstrating RCT's power to establish causality
 
-7. **Political Incumbency (Section 8)**: Regression Discontinuity Design. Key finding: Barely winning a Senate election (vs. barely losing) causes a 7.95 percentage point increase in vote share in the next election, providing causal evidence of incumbency advantage at the threshold where treatment is quasi-random.
+6. **South Africa health clinics (Difference-in-Differences)**: Clinic expansion caused child nutrition to improve by 0.14 standard deviations beyond secular trends, exploiting quasi-experimental variation under the parallel trends assumption to establish causal effects without randomization
 
-8. **Institutions and GDP (Section 9)**: Instrumental Variables estimation for endogeneity. Key finding: Institutions have a **causal effect** on GDP (IV coefficient = 0.944 vs. OLS = 0.537). One-unit improvement in institutional quality causes 157% GDP increase, using settler mortality as instrument for colonial institutions.
+7. **Senate incumbency advantage (Regression Discontinuity)**: Barely winning versus barely losing an election causes a 7.95 percentage point vote share increase in the next election, using the discontinuity at 50% vote share to identify causal effects where treatment assignment is as-if random
 
-9. **Data Wrangling (Section 10)**: Practical data management skills including reading multiple formats, merging datasets, transforming variables, and reshaping data. Essential foundation for empirical research.
+8. **Institutions and GDP (Instrumental Variables)**: Institutions causally affect economic development (IV estimate = 0.944 vs. biased OLS = 0.537), with one-unit improvement causing 157% GDP increase, using settler mortality as an instrument to overcome reverse causation and omitted variables
 
-**Key Takeaways for Students**:
+9. **Data wrangling fundamentals**: Reading multiple formats (Stata, CSV, Excel, JSON), merging datasets on common keys, transforming variables (logs, differences, dummies), and reshaping data—the unglamorous but essential foundation of all empirical research
+
+You've also developed advanced methodological skills that extend beyond mechanical regression:
+
+- **Causal thinking**: Distinguishing correlation from causation and understanding what identification strategies (RCT, DiD, RD, IV) are needed for different research questions
+- **Standard error selection**: Matching inference methods to data structure (HAC for time series autocorrelation, cluster-robust for grouped data, robust for heteroskedasticity)
+- **Elasticity estimation**: Using log transformations to estimate and interpret percentage effects and constant elasticities
+- **Hypothesis testing**: Conducting F-tests for nested models, joint significance, and economic restrictions (constant returns to scale)
+- **Critical evaluation**: Assessing validity of identifying assumptions (parallel trends for DiD, exclusion restriction for IV, continuity for RD) and recognizing limitations of each method
+
+The case studies revealed important patterns about applied econometrics: omitted variables bias can be enormous (parent education coefficient drops 66% when controlling for poverty), structural breaks invalidate pooled regressions (Phillips curve reversal), proper standard errors matter for valid inference (HAC standard errors 15-19% larger than OLS), and causal inference requires careful research design beyond just adding control variables.
+
+**Looking Ahead**
+
+While this chapter demonstrated the power of multiple regression and causal inference methods, several topics extend the framework further:
+
+**Chapter 14** introduces categorical variables and indicator (dummy) variables, allowing you to analyze how discrete categories (gender, race, occupation, regions) affect outcomes. The techniques you learned here (F-tests, interpretation of coefficients) extend naturally to models with multiple dummy variables and interactions.
+
+**Chapter 15** covers nonlinear transformations including polynomials, interactions, and splines, relaxing the linear functional form assumed throughout this chapter. You'll learn how to test for nonlinearity and model complex relationships while maintaining the regression framework.
+
+**Chapter 16** focuses on regression diagnostics—checking assumptions, detecting influential observations, testing for heteroskedasticity, and validating model specifications. These tools help assess whether the sophisticated methods from this chapter are valid for your specific application.
+
+**Advanced topics** in econometrics extend the causal inference toolkit: panel data methods combine cross-sectional and time series dimensions (fixed effects, random effects), time series methods address dynamics and forecasting, and modern machine learning methods (LASSO, random forests) handle high-dimensional data. The fundamental logic—estimating conditional expectations and thinking carefully about identification—remains the same.
+
+This chapter demonstrated that multiple regression is not just a statistical technique but a framework for thinking about economic relationships. The nine case studies showed:
+
+**Versatility**: The same basic tool (OLS regression) applies across vastly different domains—schools in California, manufacturing plants in 1899, health clinics in South Africa, Senate elections spanning a century—demonstrating the power of a unified statistical framework for diverse economic questions.
+
+**Methods matter**: Using inappropriate standard errors (failing to cluster by manufacturer), omitting key variables (expected inflation in Phillips curve), or claiming causality without proper identification (RCT, DiD, RD, IV) leads to fundamentally wrong conclusions. The "how" matters as much as the "what."
+
+**Economic theory guides empirics**: The case studies tested established theories (Cobb-Douglas production, Phillips curve, CAPM) and foundational questions (do institutions cause growth?). Regression is not data mining—theory predicts relationships, regression tests them.
+
+**Causal inference is challenging but feasible**: Moving from correlation to causation requires strong assumptions (random assignment for RCT, parallel trends for DiD, continuity for RD, exclusion restriction for IV), but transparent discussion of these assumptions enables credible causal claims from observational data.
+
+**Data work is fundamental**: The unglamorous tasks of reading, cleaning, merging, and transforming data (Section 10) are the foundation. Sophisticated methods applied to poorly managed data produce sophisticated garbage.
+
+Students completing this chapter can now conduct professional empirical research: formulate economic questions, identify appropriate data and methodology, implement analysis with correct inference, interpret results in economic context, and present findings convincingly. These skills are valuable in academia (PhD programs, research positions), policy (central banks, think tanks, government agencies), and industry (tech companies, consulting firms, finance).
+
+The journey from correlation to causation requires careful thought, appropriate methods, and intellectual humility about what we can and cannot learn from data. This chapter provided the toolkit for that journey.
 
 - **Code Skills**: Mastery of reading multiple data formats (Stata, CSV, Excel, JSON), conducting regressions with advanced standard errors (HAC for time series autocorrelation, cluster-robust for grouped data), implementing log transformations for elasticity estimation, performing hypothesis tests (F-tests for joint significance, nested model comparisons), merging and reshaping datasets for complex analyses, creating publication-quality figures with meaningful labels, and organizing code with clear structure and documentation.
 
@@ -3280,33 +3363,26 @@ The journey from **correlation to causation** requires careful thought, appropri
 
 ---
 
-**References**:
+## References
 
-**Data Sources**:
-- California Department of Education (API data)
-- Douglas (1928): Cobb-Douglas production function estimation
-- Bureau of Labor Statistics, Federal Reserve (Phillips curve data)
-- Environmental Protection Agency (automobile fuel efficiency)
-- RAND Corporation (Health Insurance Experiment)
-- Case & Deaton (South Africa health access data)
-- US Senate Historical Office (incumbency data)
-- Acemoglu, Johnson & Robinson (2001): Institutions and development
+**Primary Source:**
 
-**Key Papers**:
-- Acemoglu, D., Johnson, S., & Robinson, J. (2001). "The Colonial Origins of Comparative Development." *American Economic Review*, 91(5), 1369-1401.
-- Angrist, J. & Pischke, J. (2009). *Mostly Harmless Econometrics*. Princeton University Press.
-- Friedman, M. (1968). "The Role of Monetary Policy." *American Economic Review*, 58(1), 1-17.
-- Lee, D. (2008). "Randomized Experiments from Non-random Selection in U.S. House Elections." *Journal of Econometrics*, 142(2), 675-697.
-- Newey, W. & West, K. (1987). "A Simple, Positive Semi-Definite, Heteroskedasticity and Autocorrelation Consistent Covariance Matrix." *Econometrica*, 55(3), 703-708.
+Cameron, A.C. (2022). *Econometric Methods with Python*. Available at: https://pyecon.org
 
-**Python Libraries**: numpy (1.21+), pandas (1.3+), matplotlib (3.4+), seaborn (0.11+), statsmodels (0.13+), scipy (1.7+)
+**Data Sources:**
 
-**Datasets**: All datasets available at https://raw.githubusercontent.com/quarcs-lab/data-open/master/AED/
+- California Department of Education: School Academic Performance Index
+- OECD and RAND Corporation: Health economics data
+- Bureau of Labor Statistics and Federal Reserve: Macroeconomic time series
+- Environmental Protection Agency: Automobile fuel efficiency data
+- Acemoglu, Johnson & Robinson (2001): Colonial institutions data
 
-**Methodological Resources**:
-- Stock, J. & Watson, M. (2020). *Introduction to Econometrics* (4th ed.). Pearson.
-- Wooldridge, J. (2020). *Introductory Econometrics* (7th ed.). Cengage.
-- Angrist, J. & Pischke, J. (2014). *Mastering 'Metrics*. Princeton University Press.
-- Cameron, A.C. & Trivedi, P.K. (2005). *Microeconometrics*. Cambridge University Press.
+**Python Libraries:**
 
-This chapter provides a **comprehensive introduction to applied econometrics** that prepares students for advanced coursework, independent research, and professional data analysis careers.
+- numpy, pandas, matplotlib, seaborn, statsmodels, scipy
+
+**Key Methodological Papers:**
+
+- Newey, W. & West, K. (1987). "HAC Standard Errors"
+- Acemoglu, D., Johnson, S., & Robinson, J. (2001). "Colonial Origins of Development"
+- Angrist, J. & Pischke, J. (2009). *Mostly Harmless Econometrics*

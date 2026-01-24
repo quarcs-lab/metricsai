@@ -1,7 +1,8 @@
-# Chapter 10: Data Summary for Multiple Regression - Python Script Report
+# Chapter 10: Introduction to Multiple Regression
 
-> **Data Science Report Template**
-> This template follows the **Code → Results → Interpretation** structure for educational data science reporting.
+![Chapter 10 Visual Summary](images/ch10_visual_summary.jpg)
+
+*This chapter extends simple regression to multiple regression, demonstrating how to model house prices using several predictors simultaneously and interpret partial effects while holding other variables constant.*
 
 ## Introduction
 
@@ -15,23 +16,25 @@ We analyze **house prices** using six characteristics (size, bedrooms, bathrooms
 
 The housing dataset provides an ideal application because price determination is inherently multidimensional—buyers value size, location, condition, and features jointly. Single-variable models cannot capture this complexity.
 
-**Learning Objectives:**
+**What You'll Learn:**
 
-- Understand the distinction between bivariate and multiple regression
-- Interpret regression coefficients as partial effects (ceteris paribus)
-- Create and interpret scatterplot matrices and correlation matrices
-- Estimate multiple regression models with several predictors
-- Understand how adding variables changes coefficient estimates
-- Evaluate model fit using R², adjusted R², AIC, and BIC
-- Detect multicollinearity using Variance Inflation Factors (VIF)
-- Recognize when models are inestimable due to perfect collinearity
-- Compare competing model specifications systematically
+- How to estimate multiple regression models with several predictors simultaneously
+- How to interpret regression coefficients as partial effects holding other variables constant
+- How to create and interpret scatterplot matrices and correlation heatmaps
+- How to understand omitted variable bias and why adding variables changes coefficients
+- How to evaluate model fit using R², adjusted R², AIC, and BIC
+- How to detect multicollinearity using Variance Inflation Factors (VIF)
+- How to compare competing model specifications systematically
+- How to apply the Frisch-Waugh-Lovell theorem to understand "ceteris paribus"
+- How to recognize when simple models outperform complex ones
 
 ---
 
 ## 1. Setup and Data Overview
 
 ### 1.1 Code
+
+**Context:** In this section, we load the housing dataset and establish the computational environment for multiple regression analysis. This dataset contains 29 houses with six characteristics (size, bedrooms, bathrooms, lot size, age, and months on market), providing an ideal teaching example because the small sample size allows us to examine individual observations while demonstrating how multiple predictors jointly determine prices. Understanding the data structure before modeling prevents errors and guides variable selection.
 
 ```python
 # Import required libraries
@@ -194,9 +197,17 @@ These exploratory analyses guide model specification and interpretation.
 
 ---
 
+> **💡 Key Concept: Omitted Variable Bias**
+>
+> When a predictor is correlated with both the outcome and other predictors, excluding it from the model creates omitted variable bias. For example, in a bivariate regression of price on bedrooms, the coefficient captures both the direct effect of bedrooms and the indirect effect through size (since larger houses have more bedrooms). Multiple regression eliminates this bias by including all correlated predictors simultaneously, allowing us to isolate the partial effect of each variable holding others constant.
+
+---
+
 ## 2. Bivariate vs. Multiple Regression
 
 ### 2.1 Code
+
+**Context:** This section demonstrates the dramatic impact of adding predictors to a regression model. We compare a simple regression (price on bedrooms only) against a multiple regression (price on bedrooms and size together). By comparing coefficients across models, we reveal omitted variable bias—how excluding correlated predictors distorts estimates. This comparison is fundamental to understanding why multiple regression is necessary for isolating causal effects in observational data.
 
 ```python
 # Bivariate regression: price ~ bedrooms
@@ -353,6 +364,8 @@ Section 3 visualizes these relationships using scatterplot matrices and correlat
 ## 3. Two-Way Scatterplots and Correlation
 
 ### 3.1 Code
+
+**Context:** Before estimating complex models, we examine bivariate relationships visually through scatterplot matrices and numerically through correlation matrices. These exploratory tools reveal which predictors correlate strongly with price (candidate predictors), which predictors correlate with each other (potential multicollinearity), and whether relationships are linear or nonlinear. This diagnostic step guides model specification and helps us anticipate how coefficients might change when variables are added or removed from regressions.
 
 ```python
 # Figure 10.1: Scatterplot matrix
@@ -542,9 +555,17 @@ Section 4 estimates the full multiple regression model with all six predictors s
 
 ---
 
+> **💡 Key Concept: Partial Effects (Ceteris Paribus)**
+>
+> In multiple regression, each coefficient measures the effect of one variable while holding all other variables constant—the ceteris paribus interpretation. For example, the size coefficient of $68.37 means that comparing two houses with the same number of bedrooms, bathrooms, lot size, age, and months on market, the house with one additional square foot sells for $68.37 more on average. This partial effect differs from the bivariate coefficient because it isolates size's unique contribution rather than confounding it with correlated attributes.
+
+---
+
 ## 4. Multiple Regression: Full Model
 
 ### 4.1 Code
+
+**Context:** In this section, we estimate the complete multiple regression model with all six predictors simultaneously. This full specification allows us to examine each variable's partial effect—its contribution to price after accounting for all other characteristics. By including multiple predictors together, we control for confounding and obtain more accurate estimates of how each attribute affects house prices. The regression output reveals which characteristics matter most and highlights challenges like multicollinearity.
 
 ```python
 # Full multiple regression with all predictors
@@ -741,6 +762,8 @@ This "residualized regression" provides insight into what "holding other variabl
 
 ### 5.1 Code
 
+**Context:** This section demonstrates the Frisch-Waugh-Lovell (FWL) theorem, which provides a mechanical interpretation of "holding other variables constant." We show that the coefficient on size from the full multiple regression equals the coefficient from a bivariate regression where we first remove from size all variation explained by other predictors. This equivalence demystifies partial effects and clarifies what multiple regression does algebraically—it orthogonalizes predictors to isolate each variable's unique contribution.
+
 ```python
 # Demonstration: Coefficient from multiple regression equals
 # coefficient from bivariate regression on residualized regressor
@@ -892,6 +915,8 @@ This demystifies multiple regression and clarifies what partial effects represen
 ## 6. Model Fit Statistics
 
 ### 6.1 Code
+
+**Context:** In this section, we examine measures of overall model performance—R², adjusted R², root MSE, AIC, and BIC. These statistics help us assess how well the model fits the data and compare models with different numbers of predictors. Understanding these fit statistics is crucial because adding more variables always increases R² even if they add no real explanatory power, so we need penalized measures (adjusted R², AIC, BIC) that account for model complexity when selecting specifications.
 
 ```python
 # R-squared and related statistics
@@ -1133,6 +1158,8 @@ We'd compute AIC and BIC for each, then choose the model with **lowest AIC/BIC**
 
 ### 7.1 Code
 
+**Context:** This section systematically compares the full model (six predictors) against a simple model (size only) to determine whether the added complexity is justified. We use multiple criteria—adjusted R², AIC, BIC, and F-tests—to evaluate whether the five additional variables improve fit enough to warrant their inclusion. Model comparison is essential for avoiding overfitting and finding the most parsimonious specification that balances explanatory power with interpretability.
+
 ```python
 # Compare full model vs. simple model
 model_small = ols('price ~ size', data=data_house).fit()
@@ -1349,9 +1376,17 @@ If we split data into training (20 houses) and test (9 houses):
 
 ---
 
+> **💡 Key Concept: Multicollinearity**
+>
+> Multicollinearity occurs when predictors are highly correlated with each other, making it difficult to isolate individual effects. While perfect collinearity (one variable is an exact linear combination of others) makes estimation impossible, imperfect multicollinearity inflates standard errors and creates unstable estimates. We diagnose multicollinearity using Variance Inflation Factors (VIF): values above 10 indicate problematic correlations. The solution is often to drop redundant variables, accepting that we cannot separately identify effects of highly correlated predictors.
+
+---
+
 ## 8. Multicollinearity and Inestimable Models
 
 ### 8.1 Code
+
+**Context:** In this section, we explore multicollinearity—when predictors are highly correlated with each other. We demonstrate perfect collinearity (which makes models inestimable) and calculate Variance Inflation Factors (VIF) to diagnose imperfect multicollinearity in our full model. Understanding multicollinearity is critical because it explains why some coefficients have huge standard errors despite good overall model fit, and it guides decisions about which variables to include or exclude.
 
 ```python
 # Example: Perfect multicollinearity
@@ -1607,94 +1642,44 @@ Where R²ⱼ is the R² from regressing x_j on all other predictors.
 
 ## Conclusion
 
-This chapter provided a comprehensive introduction to **multiple regression**—extending simple regression to models with several predictors. We covered data exploration, model estimation, interpretation, diagnostics, and model comparison using a real housing dataset.
+Multiple regression represents one of the most powerful and widely-used tools in econometrics. While simple regression can only examine one predictor at a time, multiple regression allows us to model complex relationships where outcomes depend on many factors simultaneously. This chapter has taken you through the complete workflow of multiple regression analysis using a real housing dataset.
 
-**Key Findings**:
+Our journey began with a puzzle: Why does the effect of bedrooms on price seem to vanish when we control for house size? The answer lies in understanding **partial effects**—the core concept that distinguishes multiple regression from simple correlations. When we estimate how bedrooms affect price while holding size constant, we discover that what appeared to be a bedroom effect was really a size effect in disguise. Bedrooms and size are correlated, so a simple regression confounds these two influences.
 
-1. **Size dominates**: Among six house characteristics, square footage (size) is the overwhelming determinant of price. Each additional square foot adds ~$68-74, and size alone explains 62% of price variation.
+**What You've Learned**:
 
-2. **Other characteristics matter little**: Once size is controlled, bedrooms, bathrooms, lot size, age, and time on market contribute negligibly to price prediction. Their coefficients are small and statistically insignificant.
+**Programming Skills**: You've mastered the mechanics of multiple regression in Python—using `ols()` with multiple predictors, creating scatterplot matrices with `sns.pairplot()`, generating correlation heatmaps with `sns.heatmap()`, extracting confidence intervals with `.conf_int()`, comparing models using R², AIC, and BIC, and calculating Variance Inflation Factors to diagnose multicollinearity.
 
-3. **Multicollinearity is pervasive**: All predictors have VIF > 10, indicating severe multicollinearity. This inflates standard errors and makes individual coefficients hard to interpret, even though the overall model fit is good (R² = 0.65).
+**Statistical Concepts**: You now understand partial effects (the ceteris paribus interpretation of holding other variables constant), omitted variable bias (how excluding correlated predictors distorts estimates), multicollinearity (why correlated predictors inflate standard errors), model selection (balancing fit and complexity), and the Frisch-Waugh-Lovell theorem (the mechanical meaning of statistical adjustment).
 
-4. **Simple model preferred**: Model selection criteria (Adjusted R², AIC, BIC) and F-tests all favor the simple model (price ~ size) over the full model with six predictors. Parsimony wins.
+**Economic Interpretation**: You can interpret coefficients as marginal effects (the price increase from one additional square foot, holding bedrooms constant), explain why coefficients change when variables are added or removed, distinguish between statistical significance (p-values) and economic significance (magnitude of effects), and recognize the trade-off between model complexity and interpretability.
 
-5. **Partial effects via FWL**: The Frisch-Waugh-Lovell theorem clarifies what "holding other variables constant" means mechanically—it's equivalent to regressing on residualized predictors, orthogonal to other covariates.
+**Critical Insights**: Through this housing analysis, you've discovered that:
+- **Size dominates**: Square footage is the overwhelming determinant of price, explaining 62% of variation alone
+- **Other characteristics matter little**: Once size is controlled, bedrooms, bathrooms, lot size, age, and months on market add negligible explanatory power
+- **Multicollinearity is pervasive**: All predictors have VIF > 10, inflating standard errors and explaining why only size remains significant
+- **Simple models often win**: The model with size alone outperforms the full model on adjusted R², AIC, and BIC—parsimony trumps complexity
+- **Partial effects differ from bivariate effects**: The bedroom coefficient collapses from $23,667 to $1,553 when size is included, revealing omitted variable bias
 
-**Key Takeaways for Students**:
+**Looking Ahead**:
 
-- **Code Skills**: Proficiency with multiple regression (`ols` with multiple predictors), scatterplot matrices (`sns.pairplot`), correlation matrices (`.corr()`), heatmaps (`sns.heatmap`), confidence intervals (`.conf_int()`), model comparison (comparing R², AIC, BIC across specifications), VIF calculation (`variance_inflation_factor`), and detecting multicollinearity (condition numbers, VIF > 10 threshold)
+This chapter has equipped you with the foundational tools for multiple regression. In Chapter 11, you'll learn statistical inference techniques for testing hypotheses about individual coefficients and groups of coefficients. Chapter 12 will introduce advanced topics like dummy variables, interaction effects, and nonlinear transformations. The principles you've learned here—controlling for confounders, diagnosing multicollinearity, comparing models—form the bedrock of all empirical work in economics.
 
-- **Statistical Concepts**: Deep understanding of partial effects (ceteris paribus interpretation), omitted variable bias (how excluding correlated variables biases coefficients), multicollinearity (correlated predictors inflate standard errors), model selection (balancing fit and complexity using Adjusted R², AIC, BIC), degrees of freedom (n-k limits inference precision), F-tests for nested models (testing joint significance of added variables), and the FWL theorem (mechanical interpretation of "holding variables constant")
+**Why This Matters**:
 
-- **Regression Interpretation**: Mastery of interpreting coefficients as marginal effects (∂y/∂x holding other x's constant), understanding why coefficients change when variables are added/removed (correlation among predictors), recognizing the difference between statistical significance (p-values) and economic significance (magnitude of effects), and appreciating the trade-off between model complexity and interpretability
+Multiple regression is ubiquitous in applied economics. Labor economists use it to estimate wage equations controlling for education, experience, and occupation. Health economists model disease risk with demographic and behavioral predictors. Marketing analysts predict customer lifetime value using purchase history and demographics. Financial economists estimate asset pricing models with multiple risk factors. The housing example is pedagogical, but the methods scale to big data with millions of observations and hundreds of predictors.
 
-- **Model Diagnostics**: Skills in using R² and Adjusted R² (with awareness that R² always increases with more variables), computing and interpreting AIC/BIC (lower is better, BIC penalizes complexity more), calculating VIF to detect multicollinearity (VIF > 10 is problematic), and conducting F-tests for nested model comparison
+Most importantly, you've learned that **correlation is not causation**. Our coefficients represent conditional associations—how price relates to size after adjusting for other included variables. To claim causality, we'd need randomization, instrumental variables, or other identification strategies. Multiple regression adjusts for observed confounders, but omitted variables (location quality, renovation history, neighborhood amenities) likely remain, potentially biasing our estimates.
 
-- **Critical Thinking**: Recognition that high R² doesn't guarantee coefficients are significant (multicollinearity can cause this paradox), understanding that simple models often outperform complex ones (parsimony principle), awareness that correlation ≠ causation (these are conditional associations, not causal effects), and appreciation that omitted variables (location, quality, etc.) likely bias estimates
-
-**Practical Skills Gained**:
-
-Students can now:
-- Estimate and interpret multiple regression models with several predictors
-- Create professional scatterplot matrices and correlation heatmaps for exploratory analysis
-- Compare competing model specifications using multiple criteria (R², AIC, BIC, F-tests)
-- Diagnose multicollinearity using VIF and correlation matrices
-- Understand when simple models are preferable to complex ones
-- Interpret regression output critically, considering both statistical and economic significance
-- Recognize the limitations of observational data for causal inference
-
-**Connections to Previous Chapters**:
-
-- **Chapter 5 (Bivariate Data Summary)**: Extended to multivariate relationships via scatterplot matrices and correlation matrices
-- **Chapter 6 (Least Squares Estimator)**: OLS mechanics generalize from one to multiple predictors; same estimation principles apply
-
-**Next Steps**:
-
-- **Chapter 11**: Statistical inference for multiple regression (hypothesis tests for individual/joint coefficients, confidence intervals, prediction intervals)
-- **Chapter 12**: Further topics (dummy variables, interaction effects, nonlinear transformations, model specification tests)
-- **Future extensions**: Panel data, instrumental variables, time series regression, machine learning approaches
-
-**Practical Applications**:
-
-This analysis demonstrates techniques applicable to:
-- **Real estate appraisal**: Automated valuation models (AVMs) use multiple regression with thousands of properties
-- **Labor economics**: Wage regressions controlling for education, experience, occupation, industry
-- **Public health**: Disease risk models with demographic, behavioral, and genetic predictors
-- **Marketing**: Customer lifetime value models with purchase history, demographics, engagement metrics
-- **Finance**: Stock return models with multiple risk factors (Fama-French models)
-
-The housing example is pedagogical, but the methods scale to big data applications with millions of observations and hundreds of predictors. The principles learned here—partial effects, multicollinearity, model selection—are fundamental to all applied regression analysis.
+The journey from simple to multiple regression represents a fundamental shift in how we think about relationships. Instead of asking "Do bedrooms affect price?" we now ask "Do bedrooms affect price, holding size constant?" This ceteris paribus perspective is the essence of econometric thinking—isolating causal effects by controlling for confounding factors. As you continue your studies, this framework will serve you in every empirical application you encounter.
 
 ---
 
 **References**:
 
-- Data source: Cameron, A.C. (2021). *Analysis of Economics Data: An Introduction to Econometrics*
-- Python libraries: numpy, pandas, matplotlib, seaborn, statsmodels, scipy
-- Dataset: AED_HOUSE.DTA (29 houses with price and characteristics)
+- Cameron, A.C. (2022). *Analysis of Economics Data: An Introduction to Econometrics*. <https://cameron.econ.ucdavis.edu/aed/index.html>
+- Python libraries: pandas, numpy, statsmodels, matplotlib, seaborn, scipy
 
-**Dataset Summary**:
-- **Outcome**: price (sale price in dollars)
-- **Predictors**: size (sq ft), bedrooms (count), bathrooms (count), lotsize (acres), age (years), monthsold (months on market)
-- **Sample size**: n = 29 houses (single neighborhood)
+**Data**:
 
-**Key Formulas**:
-
-- **Multiple regression**: y = β₀ + β₁x₁ + β₂x₂ + ... + βₖxₖ + ε
-- **OLS estimator**: β̂ = (X'X)⁻¹X'y
-- **R-squared**: R² = 1 - SSR/SST = corr(y, ŷ)²
-- **Adjusted R-squared**: R²_adj = 1 - (1-R²) × (n-1)/(n-k)
-- **AIC**: n×ln(SSR/n) + n×(1+ln(2π)) + 2k
-- **BIC**: n×ln(SSR/n) + n×(1+ln(2π)) + k×ln(n)
-- **VIF**: VIF_j = 1/(1-R²_j), where R²_j is from regressing x_j on other x's
-- **F-test**: F = [(R²_full - R²_nested)/(k_full - k_nested)] / [(1-R²_full)/(n-k_full)]
-
-**Model Comparison Results**:
-
-| Model  | Predictors | R²     | Adj R² | AIC    | BIC    | df  | Preferred? |
-|--------|------------|--------|--------|--------|--------|-----|------------|
-| Simple | size       | 0.618  | 0.603  | 668.06 | 671.44 | 27  | ✓ Yes      |
-| Full   | 6 vars     | 0.651  | 0.555  | 675.48 | 685.05 | 22  | ✗ No       |
-
-**Final Recommendation**: Use the simple model (price ~ size) for both prediction and inference. The added complexity of the full model is not justified by the modest improvement in fit.
+All datasets are available at: <https://cameron.econ.ucdavis.edu/aed/aeddata.html>
