@@ -243,7 +243,7 @@ $$
 - $c=t_{27 ; .025}=2.052$.
 - do not reject $H_{0}$ at level 0.05 as $|t|=1.452<c=2.052$.
 - In either case we do not reject $H_{0}: \beta_{2}=90$ against $H_{a}: \beta_{2} \neq 90$ at level 0.05.
-- conclude that house price does not increase by $\$ 90$ per square foot.
+- conclude that house price does not increase by \$90 per square foot.
 - p-value approach: Compute $p=\operatorname{Pr}\left[\left|T_{n-2}\right|>|t|\right]$.
 - critical value approach: compute $c$ so that reject if $|t|>c$.
 ![](https://cdn.mathpix.com/cropped/07ae1b4d-3d81-4f56-a70c-1c6790682a1f-18.jpg?height=423&width=573&top_left_y=323&top_left_x=61)
@@ -309,7 +309,7 @@ $$
 
 ### Example: House Price and Size
 
-- House price example suppose claim is that house price rises by less than $\$ 90$ per square foot, i.e. $\beta_{2}<90$.
+- House price example suppose claim is that house price rises by less than \$90 per square foot, i.e. $\beta_{2}<90$.
 - Test $H_{0}: \beta_{2} \geq 90$ against $H_{a}: \beta_{2}<90$ (lower tailed alternative).
 
 $$

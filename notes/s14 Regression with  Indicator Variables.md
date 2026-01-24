@@ -107,7 +107,7 @@ $$
 
 - Intercept $=$ mean male earnings $(d=0)=63,476$.
 - Slope $=$ Difference in means $=47080-47080=-16396$
-- women earn $\$ 16,396$ less on average
+- women earn \$16,396 less on average
 - statistically significant at $5 \%$ as $t=-16396 / 3478=-4.71$.
 
 > **Key Concept**: When regressing $y$ on just an intercept and a single indicator $d$, the fitted model is $\hat{y} = b + ad$. The intercept $b$ equals the mean of $y$ when $d=0$, and the slope $a$ equals the difference in means $(\bar{y}_1 - \bar{y}_0)$. Thus, regression on an indicator variable is equivalent to a difference in means test. Here, women earn \$16,396 less on average ($t=-4.71$, statistically significant).
@@ -332,7 +332,7 @@ where heteroskedastic-robust standard errors are given in parentheses.
 
 - For OLS estimation with all three mutually exclusive categories
 - the coefficients are just the sample averages for each category
-- e.g. average earnings for the self-employed are $\$ 72,306$ with a standard error of \$9,636.
+- e.g. average earnings for the self-employed are \$72,306 with a standard error of \$9,636.
 
 
 ## Example: Earnings and Type of Worker
@@ -370,7 +370,7 @@ where heteroskedastic-robust $t$ statistics are given in parentheses.
 
 - Then earnings
 - \$72,306 for self-employed workers, the omitted category
-- $\$ 17,785$ less than this for private sector workers
+- \$17,785 less than this for private sector workers
 - \$16,201 lower for government sector workers.
 - $F$-statistic for joint statistical significance of $d 2$ and $d 3$ equals 1.68
 - since $p=0.188$ there is not a statistically significant difference in earnings across the three types of workers at significance level 0.05 .

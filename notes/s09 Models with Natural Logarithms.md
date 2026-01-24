@@ -53,25 +53,23 @@ $$
 - We have
 
 $$
-\begin{array}{rlrl} 
-& & \frac{d \ln x}{d x} & =\frac{1}{x} \\
-\Rightarrow & & \text { from calculus } \\
-\Rightarrow & \frac{\Delta \ln x}{\Delta x} & \simeq \frac{1}{x} & \text { for small } \frac{\Delta x}{x} \\
-\Rightarrow & \Delta \ln x & \simeq \frac{\Delta x}{x} & \\
-& \text { rearranging }
-\end{array}
+\begin{aligned}
+& \frac{d \ln x}{d x} = \frac{1}{x} && \text{from calculus} \\
+\Rightarrow \quad & \frac{\Delta \ln x}{\Delta x} \simeq \frac{1}{x} && \text{for small } \frac{\Delta x}{x} \\
+\Rightarrow \quad & \Delta \ln x \simeq \frac{\Delta x}{x} && \text{rearranging}
+\end{aligned}
 $$
 
 - For small proportionate changes we use the approximation
 
 $$
-\Delta \ln \mathbf{x} \simeq \frac{\Delta \mathbf{x}}{\mathbf{x}} \quad \text { for small } \frac{\Delta x}{x}\left(\text { say } \frac{\Delta x}{x}<0.1\right) .
+\Delta \ln \mathbf{x} \simeq \frac{\Delta \mathbf{x}}{\mathbf{x}} \quad \text{for small } \frac{\Delta x}{x}\left(\text{say } \frac{\Delta x}{x}<0.1\right) .
 $$
 
 - Multiplying by 100 yields percentage changes, so equivalently
 
 $$
-\mathbf{1 0 0} \times \Delta \ln \mathbf{x} \simeq \text { Percentage change in } x \text {. }
+\mathbf{1 0 0} \times \Delta \ln \mathbf{x} \simeq \text{Percentage change in } x \text{.}
 $$
 
 - Example: Change from $x_{0}=40$ to $x_{1}=40.4$
@@ -87,7 +85,7 @@ For small proportionate changes, the change in the natural logarithm approximate
 - The semi-elasticity of $y$ with respect to $x$ is the ratio of the proportionate change in $y$ to the change in the level of $x$
 
 $$
-\text { Semi }- \text { elasticity }_{y x}=\frac{\Delta y / y}{\Delta x} .
+\text{Semi}- \text{elasticity}_{y x}=\frac{\Delta y / y}{\Delta x} .
 $$
 
 - Multiplying by 100 gives the percentage change in $y$ when $x$ changes by one unit.
@@ -98,7 +96,7 @@ $$
 - The elasticity of $y$ with respect to $x$ is the proportionate change of $y$ for a given proportionate change in $x$
 
 $$
-\text { Elasticity }_{y x}=\frac{\Delta y / y}{\Delta x / x}=\frac{\Delta y}{\Delta x} \times \frac{x}{y} .
+\text{Elasticity}_{y x}=\frac{\Delta y / y}{\Delta x / x}=\frac{\Delta y}{\Delta x} \times \frac{x}{y} .
 $$
 
 - Example price elasticity of demand for a good is -2
@@ -109,8 +107,8 @@ $$
 
 $$
 \begin{aligned}
-\text { Semi }- \text { elasticity }_{y x} & =\frac{\Delta y / y}{\Delta x} \simeq \frac{\Delta \ln y}{\Delta x} \\
-\text { Elasticity }_{y x} & =\frac{\Delta y / y}{\Delta x / x} \simeq \frac{\Delta \ln y}{\Delta \ln x}
+\text{Semi}- \text{elasticity}_{y x} & =\frac{\Delta y / y}{\Delta x} \simeq \frac{\Delta \ln y}{\Delta x} \\
+\text{Elasticity}_{y x} & =\frac{\Delta y / y}{\Delta x / x} \simeq \frac{\Delta \ln y}{\Delta \ln x}
 \end{aligned}
 $$
 
@@ -209,7 +207,7 @@ Different logarithmic transformations provide different insights. In the earning
 - So for small $x$ we have the approximation
 
 $$
-\ln (1+x) \simeq x, \quad \text { for, say, } x<0.1
+\ln (1+x) \simeq x, \quad \text{for, say, } x<0.1
 $$
 
 - Approximation good for small $x$, but $x$ increasingly overestimates $\ln (1+x)$
@@ -253,9 +251,9 @@ $$
 - Here $x_{0}$ is value at time 0
 - $x_{t}$ is value at time $t$
 - $r$ is the constant growth rate (or decay rate if $r<0$ ).
-- Example: $\$ 100$ invested at $3 \%$ annual interest rate for 10 years.
+- Example: \$100 invested at $3 \%$ annual interest rate for 10 years.
 - annual growth rate is $r=3 / 100=0.03$
-- investment worth $100 \times(1.03)^{10}$ or $\$ 134.39$ after ten years.
+- investment worth $100 \times(1.03)^{10}$ or \$134.39 after ten years.
 
 - Taking the natural logarithm of $x_{t}=x_{0} \times(1+r)^{t}$ yields
 
@@ -264,7 +262,7 @@ $$
 \ln x_{t} & =\ln \left(x_{0}(1+r)^{t}\right) \\
 & =\ln x_{0}+\ln (1+r)^{t} \\
 & =\ln x_{0}+\ln (1+r) \times t \\
-& \simeq \ln x_{0}+r \times t \text { for small } r .
+& \simeq \ln x_{0}+r \times t \text{for small } r .
 \end{aligned}
 $$
 
@@ -313,7 +311,7 @@ $\simeq 1+0.1+0.005+0.00016 \simeq 1.1052$.
 - So for small $x$
 
 $$
-e^{x} \simeq 1+x, \quad \text { for, say, } x<0.1 .
+e^{x} \simeq 1+x, \quad \text{for, say, } x<0.1 .
 $$
 
 - Approximation good for small $x$, but increasingly underestimates $e^{x}$ as $x$ increases.
@@ -336,19 +334,19 @@ The exponential function e^x is the inverse operation to the natural logarithm: 
 - Suppose compound monthly at $12 / 12=1 \%$ per month
 
 $$
-(1+0.01)^{12}=1.12683 \text { so APY }=12.683 \%
+(1+0.01)^{12}=1.12683 \text{so APY }=12.683 \%
 $$
 
 - Suppose compound daily at $12 / 365 \%$ per day
 
 $$
-(1+0.12 / 365)^{365}=1.127547 \text { so } \mathrm{APY}=12.747 \%
+(1+0.12 / 365)^{365}=1.127547 \text{so } \mathrm{APY}=12.747 \%
 $$
 
 - If continuously compound for progressively smaller intervals at rate $r$
 
 $$
-(1+r / n)^{n} \rightarrow e^{r} \text { as } n \rightarrow \infty
+(1+r / n)^{n} \rightarrow e^{r} \text{as } n \rightarrow \infty
 $$
 
 - Here $(1+0.12 / n)^{n} \rightarrow \exp (0.12)=1.12750$ or $12.750 \%$.

@@ -192,7 +192,7 @@ $$
 $$
 
 - Example: regress Price on just Size
-- Predict a 2000 square foot 4 -bedroom house will sell for $\$ 262,559$
+- Predict a 2000 square foot 4 -bedroom house will sell for \$262,559
 - since, using estimates reported in Section 10.4,
 
 $$

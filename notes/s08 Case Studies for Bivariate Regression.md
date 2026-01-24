@@ -43,7 +43,7 @@ $$
 where $t$-statistics based on default standard errors are given in parentheses.
 
 - The relationship is economically significant
-- A $\$ 1,000$ increase in per capita health spending, a two-thirds of a standard deviation change, is associated with an increase in life expectancy of 1.11 years.
+- A \$1,000 increase in per capita health spending, a two-thirds of a standard deviation change, is associated with an increase in life expectancy of 1.11 years.
 - The relationship is highly statistically significant, as $t=3.88$.
 - Here prior belief is that $\beta_{2}>0$ so do a one-sided test of $H_{0}: \beta_{2} \leq 0$ against $H_{a}: \beta_{2}>0$
 - $c=t_{32, .05}=1.69$ so reject $H_{0}$ at significance level 0.05 since $t=3.88>c$.
@@ -83,7 +83,7 @@ where $t$-statistics based on default standard errors are given in parentheses.
 
 - Again use dataset HEALTH2009.
 - Health expenditure is measured per capita, and income is measured using GDP per capita.
-- There is considerable variation in GDP per capita, measured in current US dollars at current exchange rates, ranging from \$13,807 for Mexico to $\$ 82,901$ for Luxembourg, a small European country with population of half a million.
+- There is considerable variation in GDP per capita, measured in current US dollars at current exchange rates, ranging from \$13,807 for Mexico to \$82,901 for Luxembourg, a small European country with population of half a million.
 
 | Variable | Definition | Mean | St. Dev. | Min | Ma |
 | :--- | :--- | :---: | :---: | :---: | :---: |
@@ -102,12 +102,12 @@ $$
 
 where $t$-statistics based on default standard errors are given in parentheses.
 
-- Slope coefficient estimate implies that an extra $\$ 1,000$ in GDP per capita is associated with an $\$ 89.90$ increase in per capita health expenditures.
+- Slope coefficient estimate implies that an extra \$1,000 in GDP per capita is associated with an \$89.90 increase in per capita health expenditures.
 - Relationship is highly statistically significant, as $t=6.99$.
 - Here prior belief is that $\beta_{2}>0$ so perform a one-sided test of $H_{0}: \beta_{2} \leq 0$ against $H_{a}: \beta_{2}>0$
 - again reject $H_{0}$.
 - The U.S. has unusually high health expenditures
-- much higher than other countries and roughly $\$ 4,000$ more than predicted by the line.
+- much higher than other countries and roughly \$4,000 more than predicted by the line.
 - Similarly Luxembourg seems to be an outlier.
 - The second panel drops the U.S. and Luxembourg
 - the slope coefficient increases from 0.0809 to 0.01267 and $R^{2}-0.928$..

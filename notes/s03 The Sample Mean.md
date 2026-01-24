@@ -64,7 +64,7 @@ $$
 
 $$
 \begin{aligned}
-\mu & =\sum_{x} \times \times \operatorname{Pr}[X=x] \\
+\mu & =\sum_{x} x \times \operatorname{Pr}[X=x] \\
 & =\operatorname{Pr}[X=0] \times 0+\operatorname{Pr}[X=1] \times 1 \\
 & =0.5 \times 0+0.5 \times 1 \\
 & =0.5

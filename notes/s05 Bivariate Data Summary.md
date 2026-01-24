@@ -38,8 +38,8 @@ By the end of this chapter, you will be able to:
 
 ## Summary Statistics
 
-- House sale price ranges from $\$ 204,000$ to $\$ 375,000$
-- mean $\$ 253,910$ and standard deviation $\$ 37,391$.
+- House sale price ranges from \$204,000 to \$375,000
+- mean \$253,910 and standard deviation \$37,391.
 - House size ranges from 1,400 to 3,300 square feet
 - mean 1,883 square feet and standard deviation 398 square feet.
 
@@ -69,7 +69,7 @@ $$
 \widehat{\text { Price }}=115,017+73.77 \times \text { Size. } \quad R^{2}=0.6175
 $$
 
-- An extra square foot of house is associated with a $\$ 73.77$ increase in house price.
+- An extra square foot of house is associated with a \$73.77 increase in house price.
 
 > **Key Concept**: Visual inspection of data is the first step in bivariate analysis. The house price and size data show a clear positive relationship: larger houses tend to sell for higher prices. The correlation of 0.786 confirms this strong positive association.
 
@@ -334,8 +334,8 @@ $$
 $$
 
 - The slope coefficient equals 73.77
-- one more square foot in size is associated with a $\$ 73.77$ increase in the house price
-- equivalently an additional small room of size ten feet by ten feet, or 100 square feet, is associated with a $100 \times \$ 73.77=\$ 7,377$ increase in house price.
+- one more square foot in size is associated with a \$73.77 increase in the house price
+- equivalently an additional small room of size ten feet by ten feet, or 100 square feet, is associated with a $100 \times \text{\$}73.77=\text{\$}7,377$ increase in house price.
 - Scatterplot and least squares regression line.
 ![](https://cdn.mathpix.com/cropped/b9128ba4-0753-416f-b579-a2696694bddc-22.jpg?height=645&width=876&top_left_y=186&top_left_x=206)
 
@@ -562,7 +562,7 @@ $$
 \widehat{y}=b_{1}+b_{2} x^{*} .
 $$
 
-- Example: House of size 2000 square feet predicted price is $\$ 263,000$
+- Example: House of size 2000 square feet predicted price is \$263,000
 - $\widehat{y}=115000+74 \times 2000=263000$.
 - In-sample prediction uses the sample $x_{i}$
 - then $\widehat{y}_{i}$ is called the fitted value.

@@ -300,7 +300,7 @@ $$
 - One year of aging, controlling for education, is associated with a 0.78 percent ( $=100 \times 0.0078$ ) increase in earnings.
 - The marginal effect of aging is $0.0078 \widehat{y}$
 - always positive and increases with age since $\widehat{y} \uparrow$ with age.
-- simplest to evaluate at $\bar{y}$, then MEM of a year of aging is a $\$ 440$ increase in earnings $(=0.0078 \times 56369)$.
+- simplest to evaluate at $\bar{y}$, then MEM of a year of aging is a \$440 increase in earnings $(=0.0078 \times 56369)$.
 
 > **Key Concept**: In log-linear models (ln y = β₁ + β₂x), the coefficient β₂ is a semi-elasticity: a one-unit change in x is associated with a 100×β₂ percent change in y. The marginal effect in levels is ME_x = β₂ŷ, which increases with the level of y.
 
@@ -316,7 +316,7 @@ $$
 - A one percent increase in age, controlling for education, is associated with a 0.346 percent increase in earnings.
 - The marginal effect of aging is $0.346 \hat{y} / x$
 - always positive and increases with age since $\widehat{y} \uparrow$ with age.
-- simplest to evaluate at $\bar{y}$ and $\bar{x}$, then MEM of a year of aging is a $\$ 450$ increase in earnings $(=0.346 \times 56369 / 43.41)$.
+- simplest to evaluate at $\bar{y}$ and $\bar{x}$, then MEM of a year of aging is a \$450 increase in earnings $(=0.346 \times 56369 / 43.41)$.
 
 > **Key Concept**: In log-log models (ln y = β₁ + β₂ ln x), the coefficient β₂ is an elasticity: a 1% change in x is associated with a β₂% change in y. The marginal effect in levels is ME_x = β₂ŷ/x, which varies with both x and y.
 
@@ -387,9 +387,9 @@ $$
 
 - Interpretation controlling for other regressors
 - ME of aging is $3283-63.16 \times$ Age
-- Self-employed workers on average earn $\$ 9,360$ more than private sector workers (the omitted category)
+- Self-employed workers on average earn \$9,360 more than private sector workers (the omitted category)
   - Though this comparison is statistically insignificant at $5 \%$
-- A $1 \%$ change in hours worked is associated with a $\$ 699$ increase in earnings
+- A $1 \%$ change in hours worked is associated with a \$699 increase in earnings
 
 
 ## Dependent Variable in Natural Logarithms

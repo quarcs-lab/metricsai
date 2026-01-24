@@ -166,7 +166,7 @@ These provide summaries of ordered data (in addition to the median):
 - Skewness statistic: Approximately
 
 $$
-\text { Skew } \simeq \frac{1}{n} \sum_{i=1}^{n}\left(\frac{x_{i}-\bar{x}}{s}\right)^{3} .
+\text{Skew} \simeq \frac{1}{n} \sum_{i=1}^{n}\left(\frac{x_{i}-\bar{x}}{s}\right)^{3} .
 $$
 
 - The average of the z-score $\left(\frac{x_{i}-\bar{x}}{s}\right)$ raised to third power
@@ -185,14 +185,14 @@ $$
 - Kurtosis statistic: Approximately
 
 $$
-\text { Kurt } \simeq \frac{1}{n} \sum_{i=1}^{n}\left(\frac{x_{i}-\bar{x}}{s}\right)^{4}
+\text{Kurt} \simeq \frac{1}{n} \sum_{i=1}^{n}\left(\frac{x_{i}-\bar{x}}{s}\right)^{4}
 $$
 
 - the average of the z -score $\left(\frac{x_{i}-\bar{x}}{s}\right)$ raised to fourth power.
 - Excess kurtosis measures kurtosis relative to the normal distribution which has Kurt $=3$
 
 $$
-\text { ExcessKurt }=\text { Kurt }-3 .
+\text{ExcessKurt}=\text{Kurt}-3 .
 $$
 
 - View positive excess kurtosis as fatter tails than normal.
@@ -225,14 +225,14 @@ $$
 - full-time is 35 or more hours per week and 48 or more weeks per year.
 - The first nine observations are
 - $25000,40000,25000,38000,28800,31000,25000,20000,83000$.
-- Earnings range from $\$ 1,050$ to $\$ 172,000$.
+- Earnings range from \$1,050 to \$172,000.
 - Earnings are generally reported to the nearest hundred or thousand or ten thousand dollars.
 
 
 ### 2.2.1 Frequency Distribution (Tabulation in Ranges)
 
-- Summary of data grouped into intervals of width $\$ 15,000$
-- e.g. 53 observations or $31 \%$ have earnings between $\$ 15,000$ and \$29,999.
+- Summary of data grouped into intervals of width \$15,000
+- e.g. 53 observations or $31 \%$ have earnings between \$15,000 and \$29,999.
 
 | Range (or bin) | Frequency | Relative frequency (\%) |
 | :--- | :--- | :--- |
@@ -253,7 +253,7 @@ $$
 
 - The preceding table summarizes the data grouped into intervals of width \$15,000
 - each interval is called a bin; here there are 13 bins $\simeq \sqrt{171}$.
-- each bin is of equal bin width of $\$ 15,000$.
+- each bin is of equal bin width of \$15,000.
 - frequency is the number of observations that fall into a given bin
 - relative frequency is the proportion (or percentage) that fall into a given bin
 - A histogram is a graph of the frequency distribution
@@ -264,7 +264,7 @@ $$
 ### 2.2.3 Choosing Bin Width
 
 - Smaller bin width gives more detail
-- Here we compare $\$ 15,000$ to $\$ 7,500$ bin width.
+- Here we compare \$15,000 to \$7,500 bin width.
 ![](https://cdn.mathpix.com/cropped/ce1742d8-4c04-44c0-9abd-85e107d473e1-19.jpg?height=352&width=556&top_left_y=389&top_left_x=77)
 ![](https://cdn.mathpix.com/cropped/ce1742d8-4c04-44c0-9abd-85e107d473e1-19.jpg?height=353&width=570&top_left_y=388&top_left_x=641)
 

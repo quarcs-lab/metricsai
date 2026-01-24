@@ -57,7 +57,7 @@ Number of obs $=171$
 - In general a confidence interval is
 
 $$
-\text { estimate } \pm \text { critical value } \text { × } \text { standard error }
+\text{estimate} \pm \text{critical value} \text{×} \text{standard error}
 $$
 
 - Here we consider the population mean $\mu$.
@@ -112,7 +112,7 @@ One-sample t test
 - In general a $t$ test statistic is
 
 $$
-t=\frac{\text { estimate }- \text { hypothesized value }}{\text { standard error }} .
+t=\frac{\text{estimate} - \text{hypothesized value}}{\text{standard error}} .
 $$
 
 - Here
@@ -151,7 +151,7 @@ A 95% confidence interval provides a range of plausible values for μ: estimate 
 - The central limit theorem (a remarkable result) states that if additionally the sample size is large $Z$ is normally distributed
 
 $$
-Z=\frac{\bar{X}-\mu}{\sigma / \sqrt{n}} \sim N(0,1) \text { as } n \rightarrow \infty .
+Z=\frac{\bar{X}-\mu}{\sigma / \sqrt{n}} \sim N(0,1) \text{as } n \rightarrow \infty .
 $$
 
 ### The t-statistic
@@ -294,9 +294,9 @@ $$
 $$
 \begin{aligned}
 \operatorname{Pr}\left[-2<\frac{\bar{X}-\mu}{S / \sqrt{n}}<2\right] & =0.95 \\
-\operatorname{Pr}[-2 S / \sqrt{n}<\bar{X}-\mu<2 S / \sqrt{n}] & =0.95 \text { times } S / \sqrt{n} \\
-\operatorname{Pr}[-\bar{X}-2 S / \sqrt{n}<-\mu<-\bar{X}+2 S / \sqrt{n}] & =0.95 \text { subtract } \bar{X} \\
-\operatorname{Pr}[\bar{X}+2 S / \sqrt{n}>\mu>\bar{X}-2 S / \sqrt{n}] & =0.95 \text { times }-1 .
+\operatorname{Pr}[-2 S / \sqrt{n}<\bar{X}-\mu<2 S / \sqrt{n}] & =0.95 \text{times } S / \sqrt{n} \\
+\operatorname{Pr}[-\bar{X}-2 S / \sqrt{n}<-\mu<-\bar{X}+2 S / \sqrt{n}] & =0.95 \text{subtract } \bar{X} \\
+\operatorname{Pr}[\bar{X}+2 S / \sqrt{n}>\mu>\bar{X}-2 S / \sqrt{n}] & =0.95 \text{times } -1 .
 \end{aligned}
 $$
 
@@ -450,7 +450,7 @@ Two-sided test: critical value approach
 - For a two-sided test of $H_{0}: \mu=\mu^{*}$ against $H_{a}: \mu \neq \mu^{*}$, and for specified $\alpha$, the critical value $c$ is such that
 
 $$
-\left.c=t_{n-1, \alpha / 2} \text { (so equivalently } \operatorname{Pr}\left[\left|T_{n-1}\right| \geq c\right]=\alpha\right)
+\left.c=t_{n-1, \alpha / 2} \text{(so equivalently } \operatorname{Pr}\left[\left|T_{n-1}\right| \geq c\right]=\alpha\right)
 $$
 
 - $H_{0}$ is rejected at significance level $\alpha$ if $|t|>c$, and is not rejected otherwise.
@@ -502,7 +502,7 @@ The p-value is the probability of observing a test statistic at least as extreme
 
 - Test at $\alpha=.05$ claim that the price of regular gasoline in Yolo County is neither higher nor lower than the norm for California.
 - one day's data from a website that provides daily data on gas prices
-- average California price that day was $\$ 3.81$
+- average California price that day was \$3.81
 - $H_{0}: \mu=3.81$ is tested against $H_{a}: \mu \neq 3.81$.
 - $n=32, \bar{x}=3.6697$ and $s=0.1510$.
 - $t=(3.6697-3.81) /(0.1510 / \sqrt{32})=-5.256$.
@@ -524,7 +524,7 @@ The p-value is the probability of observing a test statistic at least as extreme
 - do not reject $H_{0}$ at level .05 since $p>.05$.
 - Critical value method: $c=t_{190, .05}=1.653$.
 - do not reject $H_{0}$ at level .05 since $t=0.500>c=1.653$.
-- Do not reject the claim that population mean earnings exceed $\$ 50,000$.
+- Do not reject the claim that population mean earnings exceed \$50,000.
 
 
 ### Example 3: Price Inflation
@@ -547,7 +547,7 @@ The p-value is the probability of observing a test statistic at least as extreme
 - A lower one-tailed alternative test is a test of $H_{0}: \mu \geq \mu^{*}$ against $H_{a}: \mu<\mu^{*}$.
 - For one-sided tests the statement being tested is specified to be the alternative hypothesis.
 - And if a new theory is put forward to supplant an old, the new theory is specified to be the alternative hypothesis.
-- Example: Test claim that population mean earnings exceed $\$ 40,000$
+- Example: Test claim that population mean earnings exceed \$40,000
 - test $H_{0}: \mu \leq 40000$ against $H_{a}: \mu>40000$.
 
 
@@ -566,7 +566,7 @@ The p-value is the probability of observing a test statistic at least as extreme
 
 ### Example: Mean Annual Earnings
 
-- Evaluate the claim that the population mean exceeds $\$ 40,000$.
+- Evaluate the claim that the population mean exceeds \$40,000.
 - Test of $H_{0}: \mu \leq 40000$ against $H_{a}: \mu>40000$
 - the claim is specified to be the alternative hypothesis
 - a detailed explanation is given next
@@ -585,7 +585,7 @@ One-sided test: critical v alue approach
 
 ### Specifying the Null Hypothesis in One-sided Test
 
-- Suppose claim is that population mean earnings exceed $\$ 40,000$.
+- Suppose claim is that population mean earnings exceed \$40,000.
 - Potential method 1: test $H_{0}: \mu \leq 40000$ against $H_{a}: \mu>40000$
 - Reject $H_{0}$ if $\bar{x}$ quite a bit higher than 40000. e.g. 43,000.
 - Then claim that $\mu>40000$ is supported if $\bar{x}>43000$.
@@ -610,7 +610,7 @@ One-sided tests have directional alternatives: H₀: μ ≤ μ* vs. H_a: μ > μ
 - For the models and assumptions considered in this book
 
 $$
-t=\frac{\text { estimate }- \text { parameter }}{\text { standard error }} \sim T(v) \text { distribution }
+t=\frac{\text{estimate} - \text{parameter}}{\text{standard error}} \sim T(v) \text{distribution}
 $$
 
 where the degrees of freedom $v$ vary with the setting.
@@ -618,21 +618,21 @@ where the degrees of freedom $v$ vary with the setting.
 - The $100(1-\alpha) \%$ confidence interval for the unknown parameter is
 
 $$
-\text { estimate } \pm t_{v, \alpha / 2} \times \text { standard error. }
+\text{estimate} \pm t_{v, \alpha / 2} \times \text{standard error.}
 $$
 
 - Most often use $95 \%$ confidence level and $t_{v, .025} \simeq 2$ for $v>30$.
 - So an approximate $95 \% \mathrm{Cl}$ is a two-standard error interval
 
 $$
-\text { estimate } \pm 2 \times \text { standard error. }
+\text{estimate} \pm 2 \times \text{standard error.}
 $$
 
 - Margin of error in general is half the width of a confidence interval.
 - For $95 \%$ confidence intervals, since $t_{v, .025} \simeq 2$,
 
 $$
-\text { Margin of error } \simeq 2 \times \text { Standard error. }
+\text{Margin of error} \simeq 2 \times \text{Standard error.}
 $$
 
 ### Generalization of Hypothesis Tests
@@ -643,7 +643,7 @@ $$
 - Calculate the $t$-statistic
 
 $$
-t=\frac{\text { estimate }- \text { hypothesized parameter value }}{\text { standard error }} .
+t=\frac{\text{estimate} - \text{hypothesized parameter value}}{\text{standard error}} .
 $$
 
 - under $H_{0} t$ is the sample realization of a $T(v)$ random variable.
@@ -672,8 +672,8 @@ $$
 
 $$
 X=\left\{\begin{array}{lll}
-1 & \text { with probability } p & \text { if vote Democrat } \\
-0 & \text { with probability } 1-p & \text { if vote Republican }
+1 & \text{with probability } p & \text{if vote Democrat} \\
+0 & \text{with probability } 1-p & \text{if vote Republican}
 \end{array}\right.
 $$
 
