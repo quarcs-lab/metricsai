@@ -267,11 +267,285 @@ python ch01_Analysis_of_Economics_Data.py
 **In Google Colab:**
 Simply copy-paste any script into a Colab cell and run it. No setup or configuration needed!
 
+**Tip**: After running a script, you can document the analysis using the template described in [Generating Educational Reports](#generating-educational-reports).
+
 ### Output Locations
 
 - **Figures:** `images/chXX_*.png` (300 DPI PNG format, created in current directory)
 - **Tables:** `tables/chXX_*.csv` or `tables/chXX_*.txt` (optional, created in current directory)
 - **Console:** Printed output with detailed results and statistics
+
+**Note**: For creating comprehensive educational reports from script outputs, see [Generating Educational Reports](#generating-educational-reports) section below.
+
+## Generating Educational Reports
+
+### Overview
+
+Each Python script can be documented with an educational Markdown report using our **Data Science Report Template**. This template shows students exactly how analyses are performed, following a standardized **Code → Results → Interpretation** structure that combines:
+
+- **Code chunks**: The actual Python code executed
+- **Results**: Output tables, figures, and statistics
+- **Interpretation**: Educational explanations of what the code does and what the results mean
+
+**Example**: See `ch01_Analysis_of_Economics_Data.md` for a complete implementation of this template.
+
+### Report Structure Template
+
+Educational reports follow this consistent structure:
+
+#### 1. Introduction Section
+- Overview of the analysis
+- Learning objectives (bullet list)
+- Dataset description
+
+#### 2. Main Analysis Sections (typically 4-5 sections)
+
+Each section has three subsections:
+
+**X.1 Code**
+```python
+# Well-commented Python code
+# Shows exactly what students should run
+```
+
+**X.2 Results**
+- Tables formatted as Markdown
+- Figures embedded with relative paths
+- Console output in code blocks
+
+**X.3 Interpretation**
+- Explanation of what the code does
+- Interpretation of statistical results
+- Economic/practical meaning
+- Connection to theory
+
+#### 3. Conclusion Section
+- Summary of key findings
+- Takeaways for students
+- Next steps and extensions
+
+### Standard Section Topics
+
+For a typical econometric analysis, include these sections:
+
+1. **Setup and Data Loading**
+   - Library imports
+   - Data source configuration
+   - Loading and inspecting data
+
+2. **Descriptive Statistics**
+   - Summary statistics code
+   - Descriptive tables
+   - Interpretation of distributions
+
+3. **Main Analysis** (regression, hypothesis testing, etc.)
+   - Model specification
+   - Estimation results
+   - Statistical interpretation
+
+4. **Visualization**
+   - Plotting code
+   - Figures
+   - Visual assessment
+
+5. **Summary and Key Findings**
+   - Extract key metrics
+   - Formatted results
+   - Practical implications
+
+### Step-by-Step Process
+
+To create an educational report from a Python script:
+
+#### Step 1: Execute the Script
+
+```bash
+cd code_python
+python chXX_Chapter_Name.py
+```
+
+Verify that all outputs are generated:
+- Tables in `tables/` directory
+- Figures in `images/` directory
+- Console output captured
+
+#### Step 2: Extract Code Chunks
+
+Read the source Python script and identify:
+- **Setup code**: Imports, configuration, paths
+- **Data loading**: Reading data, initial inspection
+- **Analysis code**: Main statistical operations
+- **Visualization code**: Plotting and figure generation
+- **Results extraction**: Computing key metrics
+
+For each chunk:
+- Remove file path operations that aren't pedagogically relevant
+- Add clarifying comments
+- Keep code focused and digestible (10-30 lines per chunk)
+
+#### Step 3: Create Markdown Report
+
+**File naming**: Use same name as Python script with `.md` extension
+- Python script: `ch01_Analysis_of_Economics_Data.py`
+- Markdown report: `ch01_Analysis_of_Economics_Data.md`
+
+**Template structure**: See `REPORT_TEMPLATE.md` for our complete **Data Science Report Template** starter file.
+
+#### Step 4: Format Tables and Figures
+
+**Tables (CSV to Markdown)**:
+```markdown
+| Column 1 | Column 2 | Column 3 |
+|----------|----------|----------|
+| Value 1  | Value 2  | Value 3  |
+```
+
+**Figures (relative paths)**:
+```markdown
+![Figure Title](images/chXX_figure_name.png)
+```
+
+#### Step 5: Write Interpretations
+
+For each analysis section, include:
+
+**Statistical Interpretation:**
+- What the numbers mean
+- Statistical significance
+- Confidence intervals
+- Model fit metrics (R², p-values, etc.)
+
+**Economic/Practical Interpretation:**
+- Real-world meaning
+- Practical implications
+- Limitations and assumptions
+- Applications
+
+**Pedagogical Elements:**
+- Why this analysis matters
+- Connection to theory
+- Common pitfalls to avoid
+- Extensions students could try
+
+#### Step 6: Verify and Review
+
+**Quality checklist**:
+- [ ] All code chunks are syntactically correct Python
+- [ ] Code chunks properly formatted with \`\`\`python markers
+- [ ] Each major analysis has Code → Results → Interpretation
+- [ ] Tables formatted correctly as Markdown
+- [ ] Images display using relative paths
+- [ ] Interpretations are clear and educational
+- [ ] Document flows logically from simple to complex
+- [ ] File renders correctly in Markdown viewer
+- [ ] All learning objectives addressed in content
+
+### Markdown Formatting Best Practices
+
+**Code blocks**:
+- Use triple backticks with `python` language identifier
+- Include clarifying comments within code
+- Keep blocks focused (10-30 lines)
+
+**Headers**:
+- `# Title` - Chapter title only
+- `## Section` - Main sections
+- `### Subsection` - Code/Results/Interpretation
+
+**Emphasis**:
+- **Bold** for important terms and metrics
+- *Italic* for variable names and technical terms
+- `Code` for inline code references
+
+**Lists**:
+- Use `-` for unordered lists
+- Ensure blank lines before/after lists
+- Keep items concise (1-2 lines each)
+
+**Images**:
+- Use relative paths: `images/filename.png`
+- Include descriptive alt text
+- Reference images in interpretation text
+
+### Example: Chapter 1 Report
+
+The Chapter 1 report (`ch01_Analysis_of_Economics_Data.md`) demonstrates this template:
+
+**Structure**:
+- Introduction with learning objectives
+- 5 main sections (Setup, Descriptive Stats, Regression, Visualization, Summary)
+- Each section has Code → Results → Interpretation
+- Comprehensive interpretations linking statistics to economics
+- Conclusion with key takeaways
+
+**Size**: 509 lines, 22KB
+**Code blocks**: 5 Python code chunks
+**Tables**: 2 formatted tables
+**Figures**: 1 embedded image
+
+### Scalability to Other Chapters
+
+This template is designed to work for all chapter types:
+
+**Univariate analysis** (Chapters 2, 3):
+- Descriptive statistics
+- Probability distributions
+- Hypothesis testing
+
+**Bivariate regression** (Chapters 5-9):
+- Simple regression
+- Model diagnostics
+- Visualization
+
+**Multiple regression** (Chapters 10-13):
+- Multiple predictors
+- Model selection
+- Multicollinearity
+
+**Advanced topics** (Chapters 14-17):
+- Transformations
+- Dummy variables
+- Panel data
+
+Adapt section titles to match the specific analysis, but maintain the Code → Results → Interpretation pattern.
+
+### Benefits of This Approach
+
+**For Students**:
+- See exactly how to implement analyses in Python
+- Understand connection between code and results
+- Learn to interpret econometric output
+- Self-contained learning resources
+
+**For Instructors**:
+- Ready-to-use teaching materials
+- Consistent documentation across chapters
+- Easy to assign as readings or labs
+- Reproducible examples
+
+**For Researchers**:
+- Transparent methodology
+- Replicable analyses
+- Clear documentation of choices
+- Template for their own work
+
+### Related Files
+
+- **Python scripts**: `chXX_*.py` - Source code
+- **Markdown reports**: `chXX_*.md` - Educational documentation
+- **Output tables**: `tables/chXX_*.csv` - Data tables
+- **Output figures**: `images/chXX_*.png` - Visualizations
+- **Template file**: `REPORT_TEMPLATE.md` - Data Science Report Template for new reports
+
+### Next Steps
+
+To generate reports for remaining chapters:
+1. Copy `REPORT_TEMPLATE.md` (Data Science Report Template) as starting point
+2. Run the Python script to generate outputs
+3. Extract code chunks from the script
+4. Fill in the template with Code → Results → Interpretation
+5. Adjust section titles to match the analysis type
+6. Build a library of 16 educational reports (one per chapter)
 
 ## Data Requirements
 
