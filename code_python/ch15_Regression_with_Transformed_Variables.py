@@ -1,13 +1,6 @@
 """
 ch15_Regression_with_Transformed_Variables.py - January 2026 for Python
 
-Python Program
-Copyright (C) 2021 by A. Colin Cameron (original R/Stata code)
-Python translation: 2026
-
-Used for "Analysis of Economics Data: An Introduction to Econometrics"
-by A. Colin Cameron (2021)
-
 Chapter 15: REGRESSION WITH TRANSFORMED VARIABLES
 
 To run you need file:
@@ -22,8 +15,6 @@ Sections covered:
   15.5 LOG-LINEAR AND LOG-LOG MODELS
   15.6 PREDICTION FROM LOG-LINEAR AND LOG-LOG MODELS
   15.7 MODELS WITH A MIX OF REGRESSOR TYPES
-
-Translated from R and Stata code
 """
 
 # ========== SETUP ==========

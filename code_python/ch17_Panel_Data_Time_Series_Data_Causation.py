@@ -1,13 +1,6 @@
 """
 ch17_Panel_Data_Time_Series_Data_Causation.py - January 2026 for Python
 
-Python Program
-Copyright (C) 2021 by A. Colin Cameron (original Stata code)
-Python translation: 2026
-
-Used for "Analysis of Economics Data: An Introduction to Econometrics"
-by A. Colin Cameron (2021)
-
 Chapter 17: PANEL DATA, TIME SERIES DATA, CAUSATION
 
 To run you need files:
@@ -24,8 +17,6 @@ Sections covered:
   17.5 NONLINEAR REGRESSION MODELS
   17.6 TIME SERIES DATA (conceptual)
   17.7 TIME SERIES EXAMPLE: U.S. TREASURY SECURITY INTEREST RATES
-
-Translated from Stata code
 """
 
 # ========== SETUP ==========

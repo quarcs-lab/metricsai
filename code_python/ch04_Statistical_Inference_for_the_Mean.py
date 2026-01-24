@@ -1,13 +1,6 @@
 """
 ch04_Statistical_Inference_for_the_Mean.py - January 2026 for Python
 
-Python Program
-Copyright (C) 2021 by A. Colin Cameron (original R/Stata code)
-Python translation: 2026
-
-Used for "Analysis of Economics Data: An Introduction to Econometrics"
-by A. Colin Cameron (2021)
-
 Chapter 4: STATISTICAL INFERENCE FOR THE MEAN
 
 To run you need files:
@@ -26,8 +19,6 @@ Sections covered:
   4.6 ONE-SIDED DIRECTIONAL HYPOTHESIS TESTS
   4.7 GENERALIZATIONS OF CONFIDENCE INTERVALS AND HYPOTHESIS TESTS
   4.8 PROPORTIONS DATA
-
-Translated from R and Stata code
 """
 
 # ========== SETUP ==========

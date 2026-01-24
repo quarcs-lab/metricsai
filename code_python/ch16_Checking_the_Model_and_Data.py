@@ -1,13 +1,6 @@
 """
 ch16_Checking_the_Model_and_Data.py - January 2026 for Python
 
-Python Program
-Copyright (C) 2021 by A. Colin Cameron (original R/Stata code)
-Python translation: 2026
-
-Used for "Analysis of Economics Data: An Introduction to Econometrics"
-by A. Colin Cameron (2021)
-
 Chapter 16: CHECKING THE MODEL AND DATA
 
 To run you need files:
@@ -24,8 +17,6 @@ Sections covered:
   16.6 CORRELATED ERRORS
   16.7 EXAMPLE: DEMOCRACY AND GROWTH
   16.8 DIAGNOSTICS
-
-Translated from R and Stata code
 """
 
 # ========== SETUP ==========

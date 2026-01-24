@@ -1,13 +1,6 @@
 """
 ch06_The_Least_Squares_Estimator.py - January 2026 for Python
 
-Python Program
-Copyright (C) 2021 by A. Colin Cameron (original R/Stata code)
-Python translation: 2026
-
-Used for "Analysis of Economics Data: An Introduction to Econometrics"
-by A. Colin Cameron (2021)
-
 Chapter 6: THE LEAST SQUARES ESTIMATOR
 
 To run you need files:
@@ -21,8 +14,6 @@ Sections covered:
   6.2 EXAMPLES OF SAMPLING FROM A POPULATION
   6.3 PROPERTIES OF THE LEAST SQUARES ESTIMATOR
   6.4 ESTIMATORS OF MODEL PARAMETERS
-
-Translated from R and Stata code
 """
 
 # ========== SETUP ==========

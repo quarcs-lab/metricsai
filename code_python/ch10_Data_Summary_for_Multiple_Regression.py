@@ -1,13 +1,6 @@
 """
 ch10_Data_Summary_for_Multiple_Regression.py - January 2026 for Python
 
-Python Program
-Copyright (C) 2021 by A. Colin Cameron (original R/Stata code)
-Python translation: 2026
-
-Used for "Analysis of Economics Data: An Introduction to Econometrics"
-by A. Colin Cameron (2021)
-
 Chapter 10: DATA SUMMARY FOR MULTIPLE REGRESSION
 
 To run you need files:
@@ -23,8 +16,6 @@ Sections covered:
   10.6 MODEL FIT
   10.7 COMPUTER OUTPUT FOLLOWING MULTIPLE REGRESSION
   10.8 INESTIMABLE MODELS
-
-Translated from R and Stata code
 """
 
 # ========== SETUP ==========

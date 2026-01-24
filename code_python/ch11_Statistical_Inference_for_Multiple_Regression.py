@@ -1,13 +1,6 @@
 """
 ch11_Statistical_Inference_for_Multiple_Regression.py - January 2026 for Python
 
-Python Program
-Copyright (C) 2021 by A. Colin Cameron (original R/Stata code)
-Python translation: 2026
-
-Used for "Analysis of Economics Data: An Introduction to Econometrics"
-by A. Colin Cameron (2021)
-
 Chapter 11: STATISTICAL INFERENCE FOR MULTIPLE REGRESSION
 
 To run you need files:
@@ -22,8 +15,6 @@ Sections covered:
   11.5 JOINT HYPOTHESIS TESTS
   11.6 F STATISTIC UNDER ASSUMPTIONS 1-4
   11.7 PRESENTATION OF REGRESSION RESULTS
-
-Translated from R and Stata code
 """
 
 # ========== SETUP ==========

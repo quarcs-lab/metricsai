@@ -1,13 +1,6 @@
 """
 ch02_Univariate_Data_Summary.py - January 2026 for Python
 
-Python Program
-Copyright (C) 2021 by A. Colin Cameron (original R/Stata code)
-Python translation: 2026
-
-Used for "Analysis of Economics Data: An Introduction to Econometrics"
-by A. Colin Cameron (2021)
-
 Chapter 2: UNIVARIATE DATA SUMMARY
 
 To run you need files:
@@ -25,8 +18,6 @@ Sections covered:
   2.4 SUMMARY AND CHARTS FOR CATEGORICAL DATA
   2.5 DATA TRANSFORMATION
   2.6 DATA TRANSFORMATION FOR TIME SERIES DATA
-
-Translated from R and Stata code
 """
 
 # ========== SETUP ==========

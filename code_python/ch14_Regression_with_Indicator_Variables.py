@@ -1,13 +1,6 @@
 """
 ch14_Regression_with_Indicator_Variables.py - January 2026 for Python
 
-Python Program
-Copyright (C) 2021 by A. Colin Cameron (original Stata code)
-Python translation: 2026
-
-Used for "Analysis of Economics Data: An Introduction to Econometrics"
-by A. Colin Cameron (2021)
-
 Chapter 14: REGRESSION WITH INDICATOR VARIABLES
 
 To run you need file:
@@ -19,8 +12,6 @@ Sections covered:
   14.2 REGRESSION ON JUST A SINGLE INDICATOR VARIABLE
   14.3 REGRESSION ON A SINGLE INDICATOR VARIABLE AND ADDITIONAL REGRESSORS
   14.4 REGRESSION ON SETS OF INDICATOR VARIABLES
-
-Translated from Stata code
 """
 
 # ========== SETUP ==========

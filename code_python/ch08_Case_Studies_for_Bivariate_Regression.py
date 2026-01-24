@@ -1,13 +1,6 @@
 """
 ch08_Case_Studies_for_Bivariate_Regression.py - January 2026 for Python
 
-Python Program
-Copyright (C) 2021 by A. Colin Cameron (original R/Stata code)
-Python translation: 2026
-
-Used for "Analysis of Economics Data: An Introduction to Econometrics"
-by A. Colin Cameron (2021)
-
 Chapter 8: CASE STUDIES FOR BIVARIATE REGRESSION
 
 To run you need files:
@@ -21,8 +14,6 @@ Sections covered:
   8.2 HEALTH EXPENDITURES ACROSS COUNTRIES
   8.3 CAPM MODEL
   8.4 OUTPUT AND UNEMPLOYMENT IN THE U.S.
-
-Translated from R and Stata code
 """
 
 # ========== SETUP ==========

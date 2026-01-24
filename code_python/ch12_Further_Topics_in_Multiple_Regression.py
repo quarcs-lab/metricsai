@@ -1,13 +1,6 @@
 """
 ch12_Further_Topics_in_Multiple_Regression.py - January 2026 for Python
 
-Python Program
-Copyright (C) 2021 by A. Colin Cameron (original Stata code)
-Python translation: 2026
-
-Used for "Analysis of Economics Data: An Introduction to Econometrics"
-by A. Colin Cameron (2021)
-
 Chapter 12: FURTHER TOPICS IN MULTIPLE REGRESSION
 
 To run you need files:
@@ -25,8 +18,6 @@ Sections covered:
   12.7 DATA SCIENCE AND BIG DATA: AN OVERVIEW (conceptual)
   12.8 BAYESIAN METHODS: AN OVERVIEW (conceptual)
   12.9 A BRIEF HISTORY OF STATISTICS, REGRESSION AND ECONOMETRICS (conceptual)
-
-Translated from Stata code
 """
 
 # ========== SETUP ==========

@@ -1,13 +1,6 @@
 """
 ch07_Statistical_Inference_for_Bivariate_Regression.py - January 2026 for Python
 
-Python Program
-Copyright (C) 2021 by A. Colin Cameron (original R/Stata code)
-Python translation: 2026
-
-Used for "Analysis of Economics Data: An Introduction to Econometrics"
-by A. Colin Cameron (2021)
-
 Chapter 7: STATISTICAL INFERENCE FOR BIVARIATE REGRESSION
 
 To run you need files:
@@ -23,8 +16,6 @@ Sections covered:
   7.5 TWO-SIDED HYPOTHESIS TESTS
   7.6 ONE-SIDED DIRECTIONAL HYPOTHESIS TESTS
   7.7 ROBUST STANDARD ERRORS
-
-Translated from R and Stata code
 """
 
 # ========== SETUP ==========

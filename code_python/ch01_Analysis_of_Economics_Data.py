@@ -1,20 +1,11 @@
 """
 ch01_Analysis_of_Economics_Data.py - January 2026 for Python
 
-Python Program
-Copyright (C) 2021 by A. Colin Cameron (original R/Stata code)
-Python translation: 2026
-
-Used for "Analysis of Economics Data: An Introduction to Econometrics"
-by A. Colin Cameron (2021)
-
 Chapter 1: REGRESSION ANALYSIS
 
 To run you need file:
   AED_HOUSE.DTA
 in the data_stata/ directory
-
-Translated from R and Stata code
 """
 
 # ========== SETUP ==========

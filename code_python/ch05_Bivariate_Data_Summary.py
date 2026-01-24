@@ -1,13 +1,6 @@
 """
 ch05_Bivariate_Data_Summary.py - January 2026 for Python
 
-Python Program
-Copyright (C) 2021 by A. Colin Cameron (original R/Stata code)
-Python translation: 2026
-
-Used for "Analysis of Economics Data: An Introduction to Econometrics"
-by A. Colin Cameron (2021)
-
 Chapter 5: BIVARIATE DATA SUMMARY
 
 To run you need file:
@@ -26,8 +19,6 @@ Sections covered:
   5.9 REGRESSION AND CORRELATION
   5.10 CAUSATION
   5.11 NONPARAMETRIC REGRESSION
-
-Translated from R and Stata code
 """
 
 # ========== SETUP ==========
