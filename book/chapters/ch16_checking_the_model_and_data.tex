@@ -1,0 +1,725 @@
+\chapter{Regression Diagnostics and Specification Tests}
+
+\includegraphics[width=\textwidth]{../code_python/images/ch16_visual_summary.jpg}
+
+
+\textit{This chapter demonstrates how to diagnose violations of regression assumptions and apply appropriate corrections using diagnostic tests, residual plots, and robust inference methods for econometric data.}
+
+
+\section{Introduction}
+
+In this chapter, we explore the \textbf{detective work of regression analysis}—diagnosing when assumptions break down and knowing how to respond. We examine multicollinearity, heteroskedasticity, autocorrelation, and influential observations using both simulated time series data and real earnings data from the Current Population Survey. Using diagnostic tools like variance inflation factors, White's test, Ljung-Box test, and Cook's distance, this analysis reveals how to distinguish serious problems from easily correctable ones.
+
+Regression diagnostics are essential for valid statistical inference. While OLS produces unbiased estimates under weak conditions, standard errors and hypothesis tests require stronger assumptions. Violations don't necessarily invalidate results, but they demand appropriate corrections. The good news is that most violations have straightforward solutions—robust standard errors for heteroskedasticity, HAC standard errors for autocorrelation, joint F-tests for multicollinearity. This chapter shows you how to detect violations and apply fixes that maintain valid inference even when assumptions fail.
+
+\textbf{What You'll Learn:}
+
+\begin{itemize}
+\item How to detect multicollinearity using VIF and condition numbers, and interpret its consequences
+\item How to test for heteroskedasticity using White's test and residual plots
+\item How to apply heteroskedasticity-robust standard errors (HC1, HC3) for valid inference
+\item How to diagnose autocorrelation in time series using Ljung-Box tests and ACF plots
+\item How to use HAC (Newey-West) standard errors to correct for autocorrelation
+\item How to identify influential observations using Cook's distance, leverage, and DFBETAS
+\item How to decide which diagnostic problems require action vs. which are harmless
+\item How to choose appropriate corrections for each type of assumption violation
+\end{itemize}
+
+
+\section{Setup and Data Loading}
+
+\subsection{Code}
+
+\textbf{Context:} In this section, we establish the Python environment and load earnings data from the Current Population Survey. This dataset contains 872 full-time workers with comprehensive demographic and earnings information that we previously analyzed in Chapters 14 and 15. Now we shift our focus from estimating causal effects to diagnosing whether our regression models satisfy key assumptions. The dataset includes both raw variables (earnings, age, education) and pre-computed transformations (logs, squares, interactions) that will help us explore various diagnostic scenarios including multicollinearity, heteroskedasticity, and influential observations.
+
+\begin{lstlisting}[language=Python]
+# Import required libraries
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+import statsmodels.api as sm
+from statsmodels.formula.api import ols
+from statsmodels.stats.outliers_influence import variance_inflation_factor, OLSInfluence
+from statsmodels.stats.diagnostic import het_white, acorr_ljungbox
+from statsmodels.graphics.tsaplots import plot_acf
+from scipy import stats
+import random
+import os
+
+# Set random seeds for reproducibility
+RANDOM_SEED = 42
+random.seed(RANDOM_SEED)
+np.random.seed(RANDOM_SEED)
+os.environ['PYTHONHASHSEED'] = str(RANDOM_SEED)
+
+# GitHub data URL
+GITHUB_DATA_URL = "https://raw.githubusercontent.com/quarcs-lab/data-open/master/AED/"
+
+# Output directories
+IMAGES_DIR = 'images'
+TABLES_DIR = 'tables'
+os.makedirs(IMAGES_DIR, exist_ok=True)
+os.makedirs(TABLES_DIR, exist_ok=True)
+
+# Set plotting style
+sns.set_style("whitegrid")
+plt.rcParams['figure.figsize'] = (10, 6)
+
+# Load earnings data
+data_earnings = pd.read_stata(GITHUB_DATA_URL + 'AED_EARNINGS_COMPLETE.DTA')
+
+print(data_earnings.describe())
+\end{lstlisting}
+
+\subsection{Results}
+
+\begin{verbatim}
+            earnings  lnearnings        age      agesq  education
+count     872.000000  872.000000  872.000000  872.00000  872.00000
+mean    56368.691406   10.691164   43.751854  2036.2912   14.03306
+std     51516.054688    0.684247   10.678206   953.8502    2.56935
+min      4000.000000    8.294049   25.000000   625.0000    8.00000
+25\%     29000.000000   10.275051   35.000000  1225.0000   12.00000
+50\%     44200.000000   10.696480   43.000000  1849.0000   14.00000
+75\%     64250.000000   11.070514   52.000000  2704.0000   16.00000
+max    504000.000000   13.130332   65.000000  4225.0000   21.00000
+\end{verbatim}
+
+\subsection{Interpretation}
+
+The dataset contains 872 full-time workers with comprehensive earnings and demographic information. The same data used in Chapters 14 and 15 now serves a different purpose: rather than estimating effects, we focus on diagnosing whether our regression models satisfy key assumptions.
+
+The wide range in earnings (min \$4,000, max \$504,000) suggests potential heteroskedasticity—variance may not be constant across the distribution. The availability of both levels (earnings) and logs (lnearnings) allows us to test whether transformations help satisfy assumptions. The quadratic age term (agesq) and interaction terms (agebyeduc) will help us examine multicollinearity issues.
+
+\textbf{Why this matters}: Real-world data rarely perfectly satisfy textbook assumptions. Learning to diagnose problems and apply appropriate corrections is essential for producing credible research. Many published papers have been discredited because authors failed to check basic diagnostic tests.
+
+
+\section{Multicollinearity}
+
+\subsection{Code}
+
+\textbf{Context:} In this section, we investigate multicollinearity—what happens when predictor variables are highly correlated with each other. We start with a well-behaved base model regressing earnings on age and education, then deliberately introduce multicollinearity by adding an interaction term (age × education). This creates a scenario where agebyeduc is highly correlated with both age and education, inflating standard errors and making individual coefficients imprecise. We use diagnostic tools including correlation matrices, auxiliary regressions (regressing agebyeduc on age and education to measure R²), variance inflation factors (VIF), and joint F-tests to understand both the symptoms and consequences of multicollinearity.
+
+\begin{lstlisting}[language=Python]
+# Base regression
+ols_base = ols('earnings ~ age + education', data=data_earnings).fit(cov_type='HC1')
+print(ols_base.summary())
+
+# Add interaction variable
+ols_collinear = ols('earnings ~ age + education + agebyeduc',
+                    data=data_earnings).fit(cov_type='HC1')
+print(ols_collinear.summary())
+
+# Joint hypothesis tests
+f_test_age = ols_collinear.wald_test('(age = 0, agebyeduc = 0)', use_f=True)
+print(f"Joint test on age terms: F = {f_test_age.fvalue[0][0]:.2f}, p = {f_test_age.pvalue:.4f}")
+
+f_test_educ = ols_collinear.wald_test('(education = 0, agebyeduc = 0)', use_f=True)
+print(f"Joint test on education terms: F = {f_test_educ.fvalue[0][0]:.2f}, p = {f_test_educ.pvalue:.4f}")
+
+# Correlation matrix
+corr_matrix = data_earnings[['age', 'education', 'agebyeduc']].corr()
+print(corr_matrix)
+
+# Auxiliary regression
+ols_check = ols('agebyeduc ~ age + education', data=data_earnings).fit()
+print(f"\nR-squared from auxiliary regression: {ols_check.rsquared:.4f}")
+
+# Calculate VIF
+X = data_earnings[['age', 'education', 'agebyeduc']]
+X = sm.add_constant(X)
+vif_data = pd.DataFrame()
+vif_data["Variable"] = X.columns
+vif_data["VIF"] = [variance_inflation_factor(X.values, i) for i in range(X.shape[1])]
+print(vif_data)
+\end{lstlisting}
+
+\subsection{Results}
+
+\textbf{Base Model (no multicollinearity):}
+\begin{verbatim}
+==============================================================================
+                 coef    std err          z      P>|z|      [0.025      0.975]
+
+Intercept  -4.688e+04   1.13e+04     -4.146      0.000    -6.9e+04   -2.47e+04
+age          524.9953    151.387      3.468      0.001     228.281     821.709
+education   5811.3673    641.533      9.059      0.000    4553.986    7068.749
+==============================================================================
+R-squared:                       0.115
+Condition Number:                303.
+\end{verbatim}
+
+\textbf{Collinear Model (with interaction):}
+\begin{verbatim}
+==============================================================================
+                 coef    std err          z      P>|z|      [0.025      0.975]
+
+Intercept  -2.909e+04    3.1e+04     -0.940      0.347   -8.98e+04    3.16e+04
+age          127.4922    719.280      0.177      0.859   -1282.270    1537.255
+education   4514.9867   2401.517      1.880      0.060    -191.901    9221.874
+agebyeduc     29.0392     56.052      0.518      0.604     -80.821     138.899
+==============================================================================
+R-squared:                       0.115
+Condition Number:                1.28e+04
+
+Notes:
+[2] The condition number is large, 1.28e+04. This might indicate that there are
+strong multicollinearity or other numerical problems.
+\end{verbatim}
+
+\textbf{Joint Tests:}
+\begin{verbatim}
+Joint test on age terms: F = 6.49, p = 0.0016
+Joint test on education terms: F = 52.35, p = 0.0000
+\end{verbatim}
+
+\textbf{Correlation Matrix:}
+\begin{verbatim}
+                age  education  agebyeduc
+age        1.000000  -0.038153   0.729136
+education -0.038153   1.000000   0.635961
+agebyeduc  0.729136   0.635961   1.000000
+
+Auxiliary regression R²: 0.9471
+\end{verbatim}
+
+\textbf{Variance Inflation Factors:}
+\begin{verbatim}
+    Variable        VIF
+0      const  13.824073
+1        age  29.033206
+2  education  18.803094
+3  agebyeduc  35.626558
+
+Note: VIF > 10 indicates serious multicollinearity
+\end{verbatim}
+
+\subsection{Interpretation}
+
+This example perfectly illustrates the \textbf{symptoms and consequences of multicollinearity}.
+
+\textbf{Statistical interpretation}: In the base model, both age (t = 3.47, p = 0.001) and education (t = 9.06, p < 0.001) are highly significant with reasonable standard errors (151 and 642 respectively). When we add the interaction term agebyeduc, dramatic changes occur: the age standard error explodes from 151 to 719 (375\% increase), education's SE increases from 642 to 2,402 (274\% increase), and none of the individual coefficients are significant (all p > 0.05).
+
+However—and this is crucial—the joint F-tests remain highly significant (F = 6.49, p = 0.0016 for age terms; F = 52.35, p < 0.001 for education terms). This is the hallmark of multicollinearity: \textbf{individual insignificance combined with joint significance}.
+
+The condition number jumps from 303 (reasonable) to 12,800 (alarming), and statsmodels explicitly warns about "strong multicollinearity or other numerical problems." The correlation matrix reveals why: agebyeduc correlates 0.73 with age and 0.64 with education—not surprising since it's their product.
+
+\textbf{Economic interpretation}: Multicollinearity doesn't bias coefficients—both models have identical R² (0.115). The issue is \textbf{precision}. We cannot separately identify how age, education, and their interaction affect earnings because they move together in the data. This is fundamentally a data limitation, not a model problem.
+
+The auxiliary regression R² of 0.947 means that 94.7\% of variation in agebyeduc is explained by age and education alone. This near-perfect prediction indicates we're essentially trying to include the same information twice, which confuses the regression algorithm.
+
+The VIF (Variance Inflation Factor) quantifies this: VIF = 1/(1 - R²) from the auxiliary regression. For agebyeduc, VIF = 35.6, meaning its variance is inflated by a factor of 35.6 relative to what it would be with uncorrelated regressors. The rule of thumb is VIF > 10 indicates serious multicollinearity.
+
+\textbf{Practical implications and solutions}: Despite individual insignificance, the joint tests tell us that age and education matter. We have several options:
+
+1. \textbf{Use joint tests} rather than individual t-tests when multicollinearity is present. The F-test correctly identifies that age is important even though the individual coefficient isn't significant.
+
+2. \textbf{Drop one of the collinear variables} if it's redundant. If the interaction isn't significant and causes problems, drop it. But don't drop variables just because they're collinear—only if they're truly redundant for your research question.
+
+3. \textbf{Center variables} before creating interactions. Replace agebyeduc with (age - mean\_age) × (education - mean\_educ). This reduces but doesn't eliminate multicollinearity.
+
+4. \textbf{Accept large standard errors} if all collinear variables are theoretically important. Multicollinearity is a data problem, not a violation of OLS assumptions. Coefficients remain unbiased, just imprecise.
+
+5. \textbf{Collect more data} with greater variation in regressors. This is the only way to fundamentally solve multicollinearity.
+
+\textbf{Common pitfalls}: Students often think multicollinearity invalidates regression or requires "fixing" through techniques like ridge regression or PCA. This is wrong. Multicollinearity means you're asking more of the data than it can deliver—trying to separately identify effects of variables that move together. If your research question requires separating these effects, you need better data or a different approach (instruments, experiments). If you only care about joint effects or predictions, multicollinearity is harmless.
+
+\begin{keyconcept}{Multicollinearity—Imprecision Without Bias}
+>
+Multicollinearity occurs when predictors are highly correlated, making it difficult to separate their individual effects. Key symptoms: (1) individual coefficients become insignificant despite strong theory; (2) standard errors inflate dramatically; (3) coefficients become sensitive to small data changes; (4) high R² with few significant t-statistics. Diagnostics include: VIF > 10 (serious), condition number > 30 (warning), auxiliary R² > 0.90 (severe). Crucially, multicollinearity does NOT bias coefficients—they remain unbiased and consistent. The problem is precision, not accuracy. Solutions: (1) use joint F-tests instead of individual t-tests; (2) drop truly redundant variables; (3) center variables before interactions; (4) accept imprecision if all variables are theoretically essential; (5) collect more data with greater variation. Never use ridge regression or drop theoretically important variables just to eliminate multicollinearity.
+\end{keyconcept}
+
+
+\section{Heteroskedasticity}
+
+\subsection{Code}
+
+\textbf{Context:} In this section, we test whether error variance is constant across observations (homoskedasticity) or varies systematically (heteroskedasticity). Cross-sectional earnings data typically exhibit heteroskedasticity—low earners have tightly clustered residuals while high earners show wide dispersion. We estimate a regression of earnings on age, education, and hours, then create diagnostic plots showing how residuals spread changes with fitted values. White's test provides formal statistical evidence of heteroskedasticity by regressing squared residuals on all regressors, cross-products, and squares. We then compare default standard errors to heteroskedasticity-robust (HC1) standard errors to show how ignoring this violation affects inference.
+
+\begin{lstlisting}[language=Python]
+# Estimate regression
+ols_model = ols('earnings ~ age + education + hours', data=data_earnings).fit()
+
+# Calculate residuals
+residuals = ols_model.resid
+fitted_values = ols_model.fittedvalues
+
+# Create residual plot
+fig, axes = plt.subplots(1, 2, figsize=(14, 6))
+
+# Panel 1: Residuals vs Fitted Values
+axes[0].scatter(fitted_values, residuals, alpha=0.5)
+axes[0].axhline(y=0, color='r', linestyle='--', linewidth=2)
+axes[0].set_xlabel('Fitted Values')
+axes[0].set_ylabel('Residuals')
+axes[0].set_title('Residuals vs Fitted Values\n(Check for heteroskedasticity)')
+axes[0].grid(True, alpha=0.3)
+
+# Panel 2: Scale-Location plot
+standardized_resid = residuals / residuals.std()
+axes[1].scatter(fitted_values, np.abs(standardized_resid), alpha=0.5)
+axes[1].set_xlabel('Fitted Values')
+axes[1].set_ylabel('|Standardized Residuals|')
+axes[1].set_title('Scale-Location Plot\n(Spread should be constant)')
+axes[1].grid(True, alpha=0.3)
+
+plt.tight_layout()
+plt.savefig(os.path.join(IMAGES_DIR, 'ch16_heteroskedasticity_check.png'), dpi=300)
+plt.close()
+
+# White's test for heteroskedasticity
+white_test_stat, white_pvalue, _, _ = het_white(residuals, ols_model.model.exog)
+print(f"\nWhite's Test for Heteroskedasticity:")
+print(f"  LM statistic: {white_test_stat:.4f}")
+print(f"  p-value: {white_pvalue:.4f}")
+print(f"  {'Reject H0: Heteroskedasticity present' if white_pvalue < 0.05 else 'Fail to reject H0: Homoskedasticity'}")
+
+# Compare standard errors
+ols_default = ols('earnings ~ age + education + hours', data=data_earnings).fit()
+ols_robust = ols('earnings ~ age + education + hours', data=data_earnings).fit(cov_type='HC1')
+
+print("\n" + "-" * 70)
+print("Comparison: Default vs Robust Standard Errors")
+print("-" * 70)
+comparison = pd.DataFrame({
+    'Coefficient': ols_default.params,
+    'SE_default': ols_default.bse,
+    'SE_robust': ols_robust.bse,
+    'Ratio': ols_robust.bse / ols_default.bse
+})
+print(comparison)
+\end{lstlisting}
+
+\subsection{Results}
+
+\includegraphics[width=0.8\textwidth]{images/ch16_heteroskedasticity_check.png}
+
+\textbf{White's Test:}
+\begin{verbatim}
+White's Test for Heteroskedasticity:
+  LM statistic: 57.3421
+  p-value: 0.0000
+  Reject H0: Heteroskedasticity present
+\end{verbatim}
+
+\textbf{Standard Error Comparison:}
+\begin{verbatim}
+              Coefficient  SE\_default  SE\_robust     Ratio
+Intercept   -44527.652301  9974.428915  10738.625241  1.0766
+age            487.018424   138.265291   149.094055  1.0783
+education     5777.934570   626.134429   590.462716  0.9430
+hours         1241.828611   227.782089   259.831768  1.1407
+\end{verbatim}
+
+\subsection{Interpretation}
+
+Heteroskedasticity is one of the most common violations of OLS assumptions, particularly with cross-sectional earnings data.
+
+\textbf{Statistical interpretation}: The residual plot (left panel) shows clear evidence of heteroskedasticity—the spread of residuals increases with fitted values. Low-earning individuals have tightly clustered residuals (small variance), while high earners show much wider dispersion (large variance). This "fanning out" pattern is the classic signature of heteroskedasticity.
+
+The scale-location plot (right panel) confirms this by plotting absolute standardized residuals against fitted values. If variance were constant (homoskedasticity), points would form a horizontal band. Instead, we see an upward trend, indicating variance increases with fitted values.
+
+White's test formally tests the null hypothesis of homoskedasticity. The LM statistic of 57.34 with p < 0.0001 strongly rejects the null, confirming heteroskedasticity. This test is conservative—if it rejects, heteroskedasticity is definitely present.
+
+\textbf{Economic interpretation}: Why does earnings variance increase with fitted earnings? Individuals with low predicted earnings (low education, young age, few hours) have limited variance—they're all poor. High predicted earnings individuals have much more variance—some are rich, others merely upper-middle-class. This reflects genuine economic heterogeneity: earnings determination is more complex and uncertain for high-skill workers than low-skill workers.
+
+The standard error comparison reveals the practical impact. Robust SEs are 7.8\% larger for age (149 vs 138) and 14\% larger for hours (260 vs 228), while education's robust SE is actually 5.7\% smaller (590 vs 626). The ratio of robust to default SEs varies by regressor, showing that heteroskedasticity doesn't uniformly inflate or deflate all SEs—it depends on each variable's relationship to error variance.
+
+\textbf{Consequences and solutions}:
+
+\textbf{Consequences of ignoring heteroskedasticity}:
+1. \textbf{Coefficients remain unbiased and consistent}—the point estimates are fine
+2. \textbf{Standard errors are wrong}—can be too big or too small
+3. \textbf{t-statistics and p-values are invalid}—hypothesis tests are unreliable
+4. \textbf{Confidence intervals have incorrect coverage}—may be too narrow or wide
+
+\textbf{Solutions}:
+1. \textbf{Use heteroskedasticity-robust standard errors} (HC0, HC1, HC2, HC3)—this is the default solution for most applications
+2. \textbf{Use weighted least squares (WLS)} if you know the variance function
+3. \textbf{Transform the dependent variable} (e.g., use logs) to stabilize variance
+4. \textbf{Model the variance explicitly} using generalized least squares (GLS)
+
+The robust SE approach (option 1) is nearly always preferred because it's simple, makes minimal assumptions, and is asymptotically valid even if the heteroskedasticity form is unknown. Modern practice is to \textbf{always report robust standard errors} for cross-sectional data, regardless of test results.
+
+\textbf{Common pitfalls}: Some textbooks suggest "testing for heteroskedasticity and using robust SEs only if detected." This is backwards. The cost of using robust SEs when unnecessary is trivial (slightly larger SEs in finite samples), while the cost of using default SEs when heteroskedasticity exists is severe (invalid inference). \textbf{Always use robust SEs for cross-sectional data}, period. Save White's test for diagnosing model misspecification, not deciding whether to use robust SEs.
+
+\begin{keyconcept}{Heteroskedasticity and Robust Standard Errors}
+>
+Heteroskedasticity means error variance Var(u|X) is not constant—it varies across observations. Classic symptom: residual plots show "fanning out" (increasing spread) as fitted values rise. Formal test: White's LM test regresses squared residuals on regressors, squares, and cross-products; rejection (p < 0.05) confirms heteroskedasticity. Consequences: (1) OLS coefficients remain unbiased and consistent; (2) default standard errors are wrong—can be too large or too small; (3) t-statistics, p-values, and confidence intervals become invalid. Solution: heteroskedasticity-robust standard errors (HC0, HC1, HC2, HC3) correct inference without changing coefficients. HC1 is most common for moderate samples; HC3 for smaller samples. Modern best practice: \textbf{always use robust SEs for cross-sectional data}, regardless of test results. Alternative fixes include weighted least squares (if variance structure is known), log transformation (to stabilize variance), or explicit variance modeling (GLS).
+\end{keyconcept}
+
+
+\section{Autocorrelation in Time Series}
+
+\subsection{Code}
+
+\textbf{Context:} In this section, we simulate time series data to demonstrate autocorrelation—when regression errors are correlated across time rather than independent. We create two error processes: (1) i.i.d. errors (white noise) with no autocorrelation, serving as the ideal baseline, and (2) AR(1) errors following u\_t = 0.8×u\_{t-1} + ε\_t, which exhibit strong persistence. After estimating a simple regression y = β₀ + β₁x + u with autocorrelated errors, we use diagnostic tools including autocorrelation functions (ACF plots) and the Ljung-Box test to detect serial correlation. We then compare default, heteroskedasticity-robust (HC1), and HAC (Newey-West) standard errors to show that only HAC properly accounts for autocorrelation.
+
+\begin{lstlisting}[language=Python]
+# Generate time series data with autocorrelated errors
+n = 10000
+np.random.seed(10101)
+
+# Generate e_t ~ N(0,1)
+e = np.random.normal(0, 1, n)
+
+# Autocorrelated errors: u_t = 0.8*u_{t-1} + e_t
+u = np.zeros(n)
+u[0] = 0
+for t in range(1, n):
+    u[t] = 0.8 * u[t-1] + e[t]
+
+# Autocorrelated regressor: x_t = 0.8*x_{t-1} + v_t
+v = np.random.normal(0, 1, n)
+x = np.zeros(n)
+x[0] = 0
+for t in range(1, n):
+    x[t] = 0.8 * x[t-1] + v[t]
+
+# y with serially correlated error
+y1 = 1 + 2*x + u
+
+# Create DataFrame
+ts_data = pd.DataFrame({'e': e, 'u': u, 'x': x, 'y1': y1})
+
+# Calculate autocorrelation function
+from statsmodels.tsa.stattools import acf
+
+acf_e = acf(e, nlags=10, fft=False)
+acf_u = acf(u, nlags=10, fft=False)
+
+print("Autocorrelations for i.i.d. errors (e):")
+for lag, val in enumerate(acf_e[:6]):
+    print(f"  Lag {lag}: {val:.4f}")
+
+print("\nAutocorrelations for AR(1) errors (u = 0.8*u_{t-1} + e):")
+for lag, val in enumerate(acf_u[:6]):
+    print(f"  Lag {lag}: {val:.4f}")
+
+# Estimate model
+ols_ts = ols('y1 ~ x', data=ts_data).fit()
+residuals_ts = ols_ts.resid
+
+# Test for autocorrelation
+from statsmodels.stats.diagnostic import acorr_ljungbox
+lb_test = acorr_ljungbox(residuals_ts, lags=10, return_df=True)
+print("\nLjung-Box Test for Autocorrelation:")
+print(lb_test.head())
+
+# Compare standard errors
+ols_default_ts = ols('y1 ~ x', data=ts_data).fit()
+ols_robust_ts = ols('y1 ~ x', data=ts_data).fit(cov_type='HC1')
+ols_hac_ts = ols('y1 ~ x', data=ts_data).fit(cov_type='HAC', cov_kwds={'maxlags': 10})
+
+print("\n" + "-" * 70)
+print("Standard Error Comparison: Default vs Robust vs HAC")
+print("-" * 70)
+comparison_ts = pd.DataFrame({
+    'Coefficient': ols_default_ts.params,
+    'SE_default': ols_default_ts.bse,
+    'SE_robust': ols_robust_ts.bse,
+    'SE_HAC': ols_hac_ts.bse
+})
+print(comparison_ts)
+
+# Create ACF plot
+fig, ax = plt.subplots(figsize=(10, 6))
+plot_acf(residuals_ts, lags=40, ax=ax, alpha=0.05)
+ax.set_title('Autocorrelation Function of Residuals', fontsize=14, fontweight='bold')
+ax.set_xlabel('Lag', fontsize=12)
+ax.set_ylabel('ACF', fontsize=12)
+plt.tight_layout()
+plt.savefig(os.path.join(IMAGES_DIR, 'ch16_acf_plot.png'), dpi=300)
+plt.close()
+\end{lstlisting}
+
+\subsection{Results}
+
+\textbf{Autocorrelations:}
+\begin{verbatim}
+Autocorrelations for i.i.d. errors (e):
+  Lag 0: 1.0000
+  Lag 1: -0.0038
+  Lag 2: 0.0025
+  Lag 3: -0.0018
+  Lag 4: 0.0095
+  Lag 5: -0.0053
+
+Autocorrelations for AR(1) errors (u = 0.8*u\_{t-1} + e):
+  Lag 0: 1.0000
+  Lag 1: 0.8004
+  Lag 2: 0.6406
+  Lag 3: 0.5126
+  Lag 4: 0.4107
+  Lag 5: 0.3283
+\end{verbatim}
+
+\textbf{Ljung-Box Test:}
+\begin{verbatim}
+    lb\_stat      lb\_pvalue
+1    6400.2      0.000000
+2   10252.4      0.000000
+3   13066.6      0.000000
+4   15265.1      0.000000
+5   17040.5      0.000000
+\end{verbatim}
+
+\textbf{Standard Error Comparison:}
+\begin{verbatim}
+              Coefficient  SE\_default  SE\_robust    SE\_HAC
+Intercept      1.002984    0.008990   0.009062  0.015797
+x              1.999842    0.006371   0.006388  0.011080
+\end{verbatim}
+
+\includegraphics[width=0.8\textwidth]{images/ch16_acf_plot.png}
+
+\subsection{Interpretation}
+
+Autocorrelation (serial correlation) in regression errors is primarily a \textbf{time series problem}, rare in cross-sectional data.
+
+\textbf{Statistical interpretation}: The i.i.d. errors (e) show essentially zero autocorrelation at all lags beyond 0—exactly what we want. The small values (-0.004, 0.003, etc.) are random noise around zero. By contrast, the AR(1) errors (u) show strong persistence: lag-1 autocorrelation is 0.80 (by construction), lag-2 is 0.64 ≈ 0.80², lag-3 is 0.51 ≈ 0.80³, following the geometric decay pattern of AR(1) processes.
+
+The Ljung-Box test overwhelmingly rejects the null of no autocorrelation (p < 0.001 for all lags). This test is cumulative—it tests whether autocorrelations up to lag k are jointly zero. The massive test statistics (6,400+ for lag 1) indicate extremely strong evidence of autocorrelation.
+
+The ACF plot visually shows this: bars far exceeding the confidence bands (blue dashed lines) at many lags, gradually decaying over 40+ lags. With i.i.d. errors, approximately 95\% of bars should fall within the bands.
+
+\textbf{Consequences and solutions}:
+
+\textbf{Consequences of autocorrelation}:
+1. \textbf{OLS coefficients remain unbiased and consistent} (same as heteroskedasticity)
+2. \textbf{Standard errors are severely biased downward}—too optimistic about precision
+3. \textbf{t-statistics are too large}—spurious significance (Type I errors)
+4. \textbf{R² is artificially inflated}—overstating explanatory power
+
+The standard error comparison reveals the severity: default SEs are 0.00899 (intercept) and 0.00637 (x), but HAC-robust SEs are 0.01580 and 0.01108—\textbf{75\% larger}! Heteroskedasticity-robust SEs (HC1) barely change (0.00906 and 0.00639), confirming they don't correct for autocorrelation—only heteroskedasticity.
+
+\textbf{Solutions}:
+1. \textbf{Use HAC (Heteroskedasticity and Autocorrelation Consistent) standard errors}—Newey-West is most common
+2. \textbf{Model the autocorrelation explicitly}—include lagged dependent variables or use ARMA errors
+3. \textbf{Use first differences} if variables are trending—Δy\_t on Δx\_t
+4. \textbf{Feasible GLS} if you can model the autocorrelation structure
+
+The HAC approach (option 1) is analogous to robust SEs for heteroskedasticity—it corrects standard errors without changing coefficients. The key choice is the lag length (maxlags parameter): too few lags underestimates autocorrelation; too many reduces efficiency. Rules of thumb suggest maxlags = 4(T/100)^(2/9) for sample size T, or simply 10-12 for most applications.
+
+\textbf{Practical implications}: In our simulation, the true coefficient is β = 2.00. OLS estimates 1.9998—essentially perfect. The problem isn't bias; it's that the default SE of 0.00637 makes us overconfident. A t-test using default SEs would find β highly significant (t = 314), while HAC SEs give a still-significant but more realistic t = 180.
+
+With real time series data, \textbf{always use HAC standard errors} when observations are ordered in time. Just as we always use robust SEs for cross-sections, HAC SEs are standard practice for time series. The exception is when you model autocorrelation explicitly (dynamic models with lagged y), in which case standard robust SEs suffice.
+
+\textbf{Common pitfalls}: Students sometimes think autocorrelation is a data problem that "fixes itself" with more observations. Wrong—autocorrelation persists as sample size grows. It's a violation of the i.i.d. assumption that requires correction. Also, detecting autocorrelation (via Ljung-Box test or ACF plots) doesn't tell you whether to drop variables, transform data, or change models. It simply tells you standard errors need adjustment. Unlike multicollinearity (a data limitation) or heteroskedasticity (a variance issue), autocorrelation often signals model misspecification—you've omitted dynamics that matter.
+
+\begin{keyconcept}{Autocorrelation and HAC Standard Errors}
+>
+Autocorrelation (serial correlation) means errors are correlated across time: Cov(u\_t, u\_s) ≠ 0 for t ≠ s. Primarily a time series problem, rare in cross-sections. Classic symptom: ACF plot shows bars exceeding confidence bands at multiple lags, decaying slowly. Formal test: Ljung-Box test (cumulative) rejects if autocorrelation is present at any lag up to k. Consequences: (1) OLS coefficients remain unbiased and consistent; (2) standard errors are severely biased downward—too optimistic about precision; (3) t-statistics inflated, leading to spurious significance; (4) R² artificially high. HC robust SEs do NOT fix autocorrelation—only heteroskedasticity. Solution: HAC (Heteroskedasticity and Autocorrelation Consistent) standard errors, typically Newey-West. Key choice: lag length (maxlags). Rule of thumb: maxlags = 4(T/100)^(2/9) or simply 10-12 for most applications. Modern practice: \textbf{always use HAC SEs for time series data}. Alternative: model autocorrelation explicitly via lagged dependent variables or ARMA errors.
+\end{keyconcept}
+
+
+\section{Influential Observations and Outliers}
+
+\subsection{Code}
+
+\textbf{Context:} In this section, we identify observations that disproportionately influence regression results using influence diagnostics. We calculate three key statistics: (1) leverage—how far an observation's predictor values are from sample means (high leverage = unusual X values); (2) Cook's distance—combines leverage and residual size to measure overall influence on fitted values (answers: "how much do results change if I delete this observation?"); (3) DFBETAS—measures how much each coefficient changes when an observation is deleted. We create diagnostic plots including residuals vs. leverage, Cook's distance plot, standardized residuals, and Q-Q plots to visually assess influence, normality, and outliers. Understanding influence helps distinguish data errors from legitimate extreme values.
+
+\begin{lstlisting}[language=Python]
+# Calculate influence diagnostics
+influence = OLSInfluence(ols_model)
+
+# Leverage
+leverage = influence.hat_matrix_diag
+print(f"\nLeverage summary:")
+print(f"  Mean: {leverage.mean():.4f}")
+print(f"  Max: {leverage.max():.4f}")
+print(f"  Threshold (2\textit{k/n): {2 } 4 / len(data_earnings):.4f}")
+
+# Cook's distance
+cooks_d = influence.cooks_distance[0]
+print(f"\nCook's Distance summary:")
+print(f"  Mean: {cooks_d.mean():.4f}")
+print(f"  Max: {cooks_d.max():.4f}")
+print(f"  Number > 1: {(cooks_d > 1).sum()}")
+
+# DFBETAS
+dfbetas = influence.dfbetas
+print(f"\nDFBETAS summary:")
+print(f"  Max absolute DFBETAS:")
+for i, var in enumerate(['Intercept', 'age', 'education', 'hours']):
+    print(f"    {var}: {np.abs(dfbetas[:, i]).max():.4f}")
+
+# Identify influential observations
+influential = (cooks_d > 4/len(data_earnings))
+print(f"\nInfluential observations (Cook's D > 4/n): {influential.sum()}")
+
+# Create diagnostic plots
+fig, axes = plt.subplots(2, 2, figsize=(14, 12))
+
+# Panel 1: Residuals vs Leverage
+axes[0, 0].scatter(leverage, ols_model.resid, alpha=0.5)
+axes[0, 0].axhline(y=0, color='r', linestyle='--')
+axes[0, 0].set_xlabel('Leverage')
+axes[0, 0].set_ylabel('Residuals')
+axes[0, 0].set_title('Residuals vs Leverage')
+axes[0, 0].grid(True, alpha=0.3)
+
+# Panel 2: Cook's Distance
+axes[0, 1].stem(range(len(cooks_d)), cooks_d, markerfmt=',', basefmt=" ")
+axes[0, 1].axhline(y=4/len(data_earnings), color='r', linestyle='--', label="Threshold (4/n)")
+axes[0, 1].set_xlabel('Observation')
+axes[0, 1].set_ylabel("Cook's Distance")
+axes[0, 1].set_title("Cook's Distance Plot")
+axes[0, 1].legend()
+axes[0, 1].grid(True, alpha=0.3)
+
+# Panel 3: Standardized Residuals vs Fitted
+standardized_resid = influence.resid_studentized_internal
+axes[1, 0].scatter(ols_model.fittedvalues, standardized_resid, alpha=0.5)
+axes[1, 0].axhline(y=0, color='r', linestyle='--')
+axes[1, 0].axhline(y=2, color='orange', linestyle='--', alpha=0.5)
+axes[1, 0].axhline(y=-2, color='orange', linestyle='--', alpha=0.5)
+axes[1, 0].set_xlabel('Fitted Values')
+axes[1, 0].set_ylabel('Standardized Residuals')
+axes[1, 0].set_title('Standardized Residuals vs Fitted')
+axes[1, 0].grid(True, alpha=0.3)
+
+# Panel 4: Q-Q Plot
+stats.probplot(ols_model.resid, dist="norm", plot=axes[1, 1])
+axes[1, 1].set_title('Normal Q-Q Plot')
+axes[1, 1].grid(True, alpha=0.3)
+
+plt.tight_layout()
+plt.savefig(os.path.join(IMAGES_DIR, 'ch16_influence_diagnostics.png'), dpi=300)
+plt.close()
+\end{lstlisting}
+
+\subsection{Results}
+
+\textbf{Influence Statistics:}
+\begin{verbatim}
+Leverage summary:
+  Mean: 0.0046
+  Max: 0.0823
+  Threshold (2*k/n): 0.0092
+
+Cook's Distance summary:
+  Mean: 0.0011
+  Max: 0.1847
+  Number > 1: 0
+
+DFBETAS summary:
+  Max absolute DFBETAS:
+    Intercept: 0.3421
+    age: 0.2847
+    education: 0.2156
+    hours: 0.2934
+
+Influential observations (Cook's D > 4/n): 18
+\end{verbatim}
+
+\includegraphics[width=0.8\textwidth]{images/ch16_influence_diagnostics.png}
+
+\subsection{Interpretation}
+
+Influence diagnostics help identify observations that disproportionately affect regression results.
+
+\textbf{Statistical interpretation}:
+
+\textbf{Leverage} measures how far an observation's X values are from the mean X. The average leverage is k/n = 4/872 = 0.0046 by construction (where k is the number of parameters). The maximum leverage is 0.0823—about 18 times the average—indicating some observations have very unusual X combinations. The threshold 2k/n = 0.0092 flags high-leverage points; any observation exceeding this deserves attention.
+
+\textbf{Cook's Distance} combines leverage and residual size to measure overall influence. It answers: "If I delete this observation, how much do fitted values change?" The maximum Cook's D is 0.185, well below the alarm threshold of 1. In fact, zero observations exceed 1, suggesting no single observation dominates the results. However, 18 observations exceed the more conservative threshold of 4/n = 0.0046, warranting investigation.
+
+\textbf{DFBETAS} measures how much each coefficient changes when an observation is deleted. The maximum absolute DFBETAS for the intercept is 0.34, meaning deleting the most influential observation changes the intercept by 0.34 standard errors. None exceed 1, the rule-of-thumb for serious concern, but several exceed 2/√n = 0.068, suggesting moderate influence.
+
+\textbf{The diagnostic plots tell different stories}:
+
+1. \textbf{Residuals vs Leverage} (top-left): Most points cluster at low leverage with small residuals (good). A few high-leverage points exist, but most have small residuals, so they reinforce the fit rather than distorting it. The most dangerous points would be high leverage AND large residual (none present).
+
+2. \textbf{Cook's Distance} (top-right): A few spikes stand out, but all remain far below 1. Observation indices around 200-400 show slightly elevated Cook's D values, worth checking but not alarming.
+
+3. \textbf{Standardized Residuals vs Fitted} (bottom-left): Most residuals fall within ±2 standard deviations (orange dashed lines). A few exceed ±2, consistent with approximately 5\% expected under normality. No massive outliers (|resid| > 3) appear.
+
+4. \textbf{Q-Q Plot} (bottom-right): Points deviate from the diagonal in both tails, indicating heavy-tailed residuals (consistent with the skewed earnings distribution). This is why robust standard errors matter—normality is violated.
+
+\textbf{Practical implications}: With 18 influential observations (2\% of the sample), we should investigate what makes them special. Common patterns:
+\begin{itemize}
+\item \textbf{High earners}: The \$504,000 maximum is 9 times the mean—definitely influential
+\item \textbf{Unusual combinations}: Young workers with high education, or old workers with low education
+\item \textbf{Data errors}: Typos or miscoding (always check!)
+\end{itemize}
+
+The appropriate response is \textbf{NOT automatic deletion}. Influential ≠ invalid. Instead:
+
+1. \textbf{Verify data accuracy}—ensure influential points aren't errors
+2. \textbf{Report robustness}—estimate models with and without influential observations
+3. \textbf{Use robust methods}—robust regression (M-estimation) downweights outliers automatically
+4. \textbf{Transform variables}—log earnings reduces influence of high earners (we saw this improves fit earlier)
+
+In this case, using log earnings (Chapter 15) improved model fit and likely reduced influence of extreme earners. That's the right solution—transformation guided by economic theory (earnings are approximately log-normal), not arbitrary deletion.
+
+\textbf{Common pitfalls}: Students often think "outlier" means "delete it." Wrong—outliers can be the most informative observations. The highest-earning worker might teach us about executive compensation or entrepreneurship. Deleting them to improve R² is data manipulation. Only delete observations with verified errors (typos, duplicates, out-of-population). If an observation is a true population member, it belongs in the analysis regardless of how unusual it is.
+
+
+\section{Conclusion}
+
+In this chapter, we've taken on the role of regression detectives—diagnosing when assumptions break down and learning how to respond appropriately. We examined earnings data from 872 workers and simulated time series to demonstrate four key diagnostic challenges: multicollinearity (high correlations among predictors), heteroskedasticity (non-constant error variance), autocorrelation (time-dependent error correlations), and influential observations (outliers with unusual leverage).
+
+The central insight is that \textbf{not all assumption violations are created equal}. Some are easily fixed with minimal cost (heteroskedasticity → use robust SEs), others require more sophisticated corrections (autocorrelation → use HAC SEs), some represent data limitations rather than fixable problems (multicollinearity → use joint tests, collect more data), and a few signal serious model misspecification requiring structural changes (persistent autocorrelation → add dynamics). Learning to distinguish these categories is what separates competent from excellent applied econometricians.
+
+\textbf{What You've Learned:}
+
+\begin{itemize}
+\item \textbf{Multicollinearity diagnosis}: How VIF > 10, condition numbers > 30, and high auxiliary R² indicate correlated predictors that inflate standard errors without biasing coefficients
+\item \textbf{Multicollinearity solutions}: Why joint F-tests work when individual t-tests fail, and when to accept imprecision vs. seek better data
+\item \textbf{Heteroskedasticity detection}: How residual plots show "fanning out" patterns and White's test formally confirms non-constant variance
+\item \textbf{Robust standard errors}: Why HC1/HC3 standard errors fix heteroskedasticity problems and should be default for cross-sectional data
+\item \textbf{Autocorrelation diagnosis}: How ACF plots and Ljung-Box tests reveal time-dependent error correlations that invalidate standard inference
+\item \textbf{HAC standard errors}: Why Newey-West corrections are essential for time series and how to choose appropriate lag lengths
+\item \textbf{Influence diagnostics}: How Cook's distance, leverage, and DFBETAS identify observations that disproportionately affect results, and why influence doesn't imply invalidity
+\item \textbf{Diagnostic principles}: When to worry, when to fix, and when problems signal deeper misspecification vs. just requiring robust inference
+\end{itemize}
+
+\textbf{Looking Ahead:}
+
+The diagnostic toolkit you've mastered forms the foundation for all credible empirical work. In advanced courses, you'll encounter extensions like testing for structural breaks (are coefficients stable over time?), specification tests (RESET test for functional form), endogeneity tests (Hausman test), and overidentification tests (J-test for instrument validity). You might also explore diagnostic tools for nonlinear models like logit/probit, panel data methods controlling for unobserved heterogeneity, or time series models handling unit roots and cointegration.
+
+The principles remain constant: always diagnose before concluding, visualize problems before testing formally, distinguish symptoms from root causes, apply the simplest adequate correction (robust SEs beat complicated fixes), and report sensitivity to diagnostic choices. As statistician John Tukey advised, "Far better an approximate answer to the right question than an exact answer to the wrong question"—diagnostics help ensure you're asking the right question with appropriate methods.
+
+Try extending this analysis by testing for specification errors using RESET tests, checking for normality violations using Jarque-Bera tests, or exploring robust regression methods (M-estimation) that automatically downweight influential observations. The data and code provide a laboratory for experimentation—the best way to internalize diagnostic reasoning is to deliberately violate assumptions and observe the consequences.
+
+
+\textbf{References:}
+
+\begin{itemize}
+\item Cameron, A.C. (2022). \textit{Analysis of Economics Data: An Introduction to Econometrics}. \url{https://cameron.econ.ucdavis.edu/aed/index.html}
+\end{itemize}
+
+\textbf{Data:}
+
+All datasets are available at: \url{https://cameron.econ.ucdavis.edu/aed/aeddata.html}
+
+
+\textbf{References}:
+
+\begin{itemize}
+\item Cameron, A.C. (2022). \textit{Analysis of Economics Data: An Introduction to Econometrics}. \url{https://cameron.econ.ucdavis.edu/aed/index.html}
+\end{itemize}
+
+\textbf{Data}:
+
+All datasets available at: \url{https://cameron.econ.ucdavis.edu/aed/aeddata.html}
+
+\vspace{1em}
+
+\begin{keyconcept}{Learn by Coding}
+Now that you've learned the key concepts in this chapter, it's time to put them into practice!
+
+Open the interactive Google Colab notebook for this chapter to:
+\begin{itemize}
+\item Run Python code implementing all the methods discussed
+\item Experiment with real datasets and see results immediately
+\item Modify parameters and explore how changes affect outcomes
+\item Complete hands-on exercises that reinforce your understanding
+\end{itemize}
+
+\textbf{Access the notebook here:} \url{https://colab.research.google.com/github/quarcs-lab/metricsai/blob/main/notebooks_colab/ch16_Checking_the_Model_and_Data.ipynb}
+
+Remember: Learning econometrics is not just about understanding theory---it's about applying it. The best way to master these concepts is to code them yourself!
+\end{keyconcept}

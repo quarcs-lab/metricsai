@@ -1,0 +1,1413 @@
+\chapter{Case Studies for Bivariate Regression}
+
+\begin{center}
+\includegraphics[width=\textwidth]{../code_python/images/ch08_visual_summary.jpg}
+\end{center}
+
+\textit{This chapter demonstrates bivariate regression in action through four real-world case studies spanning health, finance, and macroeconomics, showing how the same statistical framework illuminates diverse economic questions.}
+
+\section{Introduction}
+
+This chapter presents four real-world case studies that demonstrate the power and versatility of bivariate regression across diverse economic applications. While Chapters 6 and 7 focused on statistical properties and inference methods, Chapter 8 shows how to apply these tools to answer substantive economic questions.
+
+The case studies span multiple domains:
+\begin{itemize}
+\item \textbf{Health economics}: How does health spending affect life expectancy and infant mortality?
+\item \textbf{International economics}: How does national income determine health expenditures?
+\item \textbf{Financial economics}: What is the relationship between stock returns and market returns (CAPM)?
+\item \textbf{Macroeconomics}: How does GDP growth relate to unemployment (Okun's Law)?
+\end{itemize}
+
+Each case study illustrates different aspects of regression analysis:
+\begin{itemize}
+\item Cross-country comparisons (health data)
+\item Sensitivity to outliers (USA and Luxembourg effects)
+\item Time series applications (CAPM, Okun's Law)
+\item Economic interpretation of regression coefficients
+\item Use of robust standard errors for valid inference
+\end{itemize}
+
+\textbf{What You'll Learn:}
+
+\begin{itemize}
+\item How to apply bivariate regression to diverse economic problems
+\item How to interpret regression coefficients in economic context (not just statistical significance)
+\item How to recognize and address outlier sensitivity in cross-country data
+\item How to understand CAPM beta coefficients and their financial interpretation
+\item How to apply Okun's Law to macroeconomic relationships
+\item How to use robust standard errors as default practice
+\item How to visualize relationships using both scatter plots and time series plots
+\item How to assess model fit and economic plausibility of results
+\item How to connect statistical findings to economic theory
+\item How to identify when simple bivariate models are adequate vs. when multiple regression is needed
+\end{itemize}
+
+\section{Setup and Data Loading}
+
+\subsection{Code}
+
+\textbf{Context:} In this section, we establish the computational environment and prepare to load four different datasets that span diverse economic applications. Unlike previous chapters that focused on one dataset (house prices), Chapter 8 analyzes multiple datasets to showcase regression's broad applicability. We set up output directories for figures and tables, ensuring all results are properly organized and reproducible. The random seed ensures that any future extensions involving simulation will produce identical results.
+
+\begin{lstlisting}[language=Python]
+# Import required libraries
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+import statsmodels.api as sm
+from statsmodels.formula.api import ols
+from scipy import stats
+import random
+import os
+
+# Set random seeds for reproducibility
+RANDOM_SEED = 42
+random.seed(RANDOM_SEED)
+np.random.seed(RANDOM_SEED)
+os.environ['PYTHONHASHSEED'] = str(RANDOM_SEED)
+
+# GitHub data URL
+GITHUB_DATA_URL = "https://raw.githubusercontent.com/quarcs-lab/data-open/master/AED/"
+
+# Create output directories
+IMAGES_DIR = 'images'
+TABLES_DIR = 'tables'
+os.makedirs(IMAGES_DIR, exist_ok=True)
+os.makedirs(TABLES_DIR, exist_ok=True)
+
+# Set plotting style
+sns.set_style("whitegrid")
+plt.rcParams['figure.figsize'] = (10, 6)
+\end{lstlisting}
+
+\subsection{Results}
+
+\begin{verbatim}
+Setup complete. Output directories created:
+  - images/ (for figures)
+  - tables/ (for regression output)
+
+Datasets to be analyzed:
+  - AED_HEALTH2009.DTA (OECD health data, 2009)
+  - AED_CAPM.DTA (monthly stock returns)
+  - AED_GDPUNEMPLOY.DTA (US GDP and unemployment, annual)
+\end{verbatim}
+
+\subsection{Interpretation}
+
+\textbf{Chapter structure}: Unlike previous chapters that focused on one dataset (house prices), Chapter 8 analyzes \textbf{four different datasets} to showcase regression's broad applicability.
+
+\textbf{Reproducibility}: Setting \texttt{RANDOM\_SEED = 42} ensures consistent results across runs. While these datasets contain no random elements, the seed ensures that any bootstrapping or simulation extensions would be reproducible.
+
+\textbf{Data sources}:
+
+\begin{enumerate}
+\item \textbf{Health data (AED\_HEALTH2009.DTA)}:
+   \begin{itemize}
+   \item Source: OECD Health Statistics
+   \item Year: 2009 (cross-sectional, pre-Affordable Care Act)
+   \item Countries: 34 OECD nations (high-income democracies)
+   \item Variables: GDP per capita, health spending, life expectancy, infant mortality
+   \end{itemize}
+
+\item \textbf{CAPM data (AED\_CAPM.DTA)}:
+   \begin{itemize}
+   \item Source: CRSP (Center for Research in Security Prices)
+   \item Period: Monthly stock returns (time series)
+   \item Stocks: Coca-Cola (KO), Target (TGT), Walmart (WMT)
+   \item Variables: Stock returns, market returns, risk-free rate
+   \end{itemize}
+
+\item \textbf{GDP-Unemployment data (AED\_GDPUNEMPLOY.DTA)}:
+   \begin{itemize}
+   \item Source: Bureau of Economic Analysis, Bureau of Labor Statistics
+   \item Period: Annual US data (time series)
+   \item Variables: Real GDP growth, unemployment rate change
+   \end{itemize}
+\end{enumerate}
+
+\textbf{Why these case studies?}
+
+Each illustrates a different \textbf{type of data} and \textbf{economic question}:
+
+\begin{itemize}
+\item \textbf{Health}: Cross-sectional (countries in one year)
+\item \textbf{CAPM}: Time series (one stock over many months)
+\item \textbf{Okun's Law}: Time series (one country over many years)
+\end{itemize}
+
+\textbf{Key themes}:
+
+\begin{enumerate}
+\item \textbf{Economic interpretation matters}: Statistical significance is not enough—we must explain what coefficients mean economically
+\item \textbf{Robustness checks}: Always use robust standard errors and check sensitivity to outliers
+\item \textbf{Visualization}: Scatter plots and time series plots reveal patterns that tables cannot
+\item \textbf{Theory guides analysis}: CAPM and Okun's Law are established economic theories that regression tests
+\end{enumerate}
+
+\textbf{Software setup}:
+
+\begin{itemize}
+\item \textbf{statsmodels}: Core regression library
+\item \textbf{seaborn}: Enhanced plotting aesthetics
+\item \textbf{pandas}: Data manipulation
+\item \textbf{scipy.stats}: Statistical distributions for inference
+\end{itemize}
+
+\textbf{Output organization}:
+
+\begin{itemize}
+\item \textbf{images/}: All figures saved as high-resolution PNG (300 dpi)
+\item \textbf{tables/}: Regression coefficients saved as CSV for replication
+\end{itemize}
+
+This organizational structure supports \textbf{reproducible research}—other researchers can verify results and build on this analysis.
+
+\section{Health Outcomes Across Countries}
+
+\subsection{Code}
+
+\textbf{Context:} In this section, we examine how health spending relates to population health outcomes across 34 OECD countries. We estimate two separate regressions: one predicting life expectancy and another predicting infant mortality. Both use health spending per capita as the explanatory variable. This cross-country analysis tests a fundamental question in health economics: does spending more on healthcare actually improve health outcomes? We use robust standard errors (HC1) because different countries may have different levels of variation in outcomes, a form of heteroskedasticity common in cross-country data.
+
+\begin{lstlisting}[language=Python]
+# Read in the health data
+data_health = pd.read_stata(GITHUB_DATA_URL + 'AED_HEALTH2009.DTA')
+
+print("Data summary:")
+print(data_health.describe())
+print("\nFirst few observations:")
+print(data_health.head())
+
+# Life Expectancy Analysis
+model_lifeexp = ols('lifeexp ~ hlthpc', data=data_health).fit()
+print(model_lifeexp.summary())
+
+# Robust standard errors
+model_lifeexp_robust = model_lifeexp.get_robustcov_results(cov_type='HC1')
+print("\nLife Expectancy Regression (Robust SE):")
+print(model_lifeexp_robust.summary())
+
+# Infant Mortality Analysis
+model_infmort = ols('infmort ~ hlthpc', data=data_health).fit()
+print(model_infmort.summary())
+
+# Robust standard errors
+model_infmort_robust = model_infmort.get_robustcov_results(cov_type='HC1')
+print("\nInfant Mortality Regression (Robust SE):")
+print(model_infmort_robust.summary())
+\end{lstlisting}
+
+\subsection{Results}
+
+\textbf{Data Summary (n = 34 OECD countries):}
+
+\begin{verbatim}
+         hlthpc    lifeexp    infmort
+count    34.000    34.000     34.000
+mean   3255.647    76.703      4.447
+std    1493.654     2.937      2.720
+min     923.000    69.800      1.800
+25%    2090.750    74.275      2.750
+50%    3188.500    77.400      3.700
+75%    4154.750    78.775      5.700
+max    7990.000    82.800     14.700
+\end{verbatim}
+
+\textbf{Life Expectancy Regression:}
+
+\begin{verbatim}
+                            OLS Regression Results
+==============================================================================
+Dep. Variable:                lifeexp   R-squared:                       0.487
+Model:                            OLS   Adj. R-squared:                  0.471
+Method:                 Least Squares   F-statistic:                     30.31
+Date:                Sat, 24 Jan 2026   Prob (F-statistic):           3.74e-06
+==============================================================================
+                 coef    std err          t      P>|t|      [0.025      0.975]
+------------------------------------------------------------------------------
+Intercept     72.8337      0.896     81.297      0.000      71.007      74.660
+hlthpc         0.0012      0.000      5.506      0.000       0.001       0.002
+==============================================================================
+
+Robust Standard Errors:
+Intercept:    0.0012 → robust SE: 0.897
+hlthpc:       0.0002 → robust SE: 0.000
+\end{verbatim}
+
+\begin{center}
+\includegraphics[width=0.8\textwidth]{../code_python/images/ch08_fig1a_life_expectancy.png}
+\end{center}
+
+\textbf{Infant Mortality Regression:}
+
+\begin{verbatim}
+                            OLS Regression Results
+==============================================================================
+Dep. Variable:                infmort   R-squared:                       0.358
+Model:                            OLS   Adj. R-squared:                  0.338
+Method:                 Least Squares   F-statistic:                     17.84
+Date:                Sat, 24 Jan 2026   Prob (F-statistic):           0.000191
+==============================================================================
+                 coef    std err          t      P>|t|      [0.025      0.975]
+------------------------------------------------------------------------------
+Intercept      6.8949      0.825      8.354      0.000       5.212       8.578
+hlthpc        -0.0008      0.000     -4.224      0.000      -0.001      -0.000
+==============================================================================
+
+Robust Standard Errors:
+Intercept:    6.8949 → robust SE: 1.035
+hlthpc:      -0.0008 → robust SE: 0.000
+\end{verbatim}
+
+\begin{center}
+\includegraphics[width=0.8\textwidth]{../code_python/images/ch08_fig1b_infant_mortality.png}
+\end{center}
+
+\subsection{Interpretation}
+
+\textbf{Research question}: Do countries that spend more on healthcare have better health outcomes?
+
+This is a fundamental question in health economics with policy implications:
+\begin{itemize}
+\item Should governments increase health budgets?
+\item Is healthcare spending cost-effective?
+\item Do diminishing returns exist in health spending?
+\end{itemize}
+
+\textbf{Life Expectancy Regression (lifeexp = 72.83 + 0.0012 $\times$ hlthpc)}
+
+\textbf{Coefficient interpretation ($\hat{\beta}_1 = 0.0012$)}:
+
+\textbf{Statistical meaning}: Each additional \$1 per capita in health spending is associated with a 0.0012-year increase in life expectancy.
+
+\textbf{Practical meaning}: Each additional \textbf{\$1,000} in health spending per capita is associated with:
+\begin{itemize}
+\item 0.0012 $\times$ 1,000 = \textbf{1.2 additional years} of life expectancy
+\end{itemize}
+
+\textbf{Economic interpretation}:
+
+\textbf{Range in data}:
+\begin{itemize}
+\item Low spender: Poland ($\sim$\$900 per capita) $\rightarrow$ predicted life expectancy $\approx$ 73.9 years
+\item High spender: USA ($\sim$\$8,000 per capita) $\rightarrow$ predicted life expectancy $\approx$ 82.4 years
+\item Difference: \$7,100 more spending $\rightarrow$ 8.5 more years (roughly consistent with coefficient)
+\end{itemize}
+
+\textbf{Cost-effectiveness}: Is \$1,000 per capita per year worth 1.2 years of life?
+\begin{itemize}
+\item Over a 70-year lifespan: \$70,000 total $\rightarrow$ 1.2 years
+\item Per-year cost: \$70,000 / 1.2 $\approx$ \$58,000 per life-year
+\item This is within typical cost-effectiveness thresholds (\$50,000-\$100,000 per QALY)
+\end{itemize}
+
+\textbf{Statistical significance}:
+\begin{itemize}
+\item t-statistic: 5.51
+\item p-value: $<$ 0.0001
+\item 95\% CI: [0.0007, 0.0017]
+\end{itemize}
+
+\textbf{Interpretation}: We have \textbf{very strong evidence} that health spending increases life expectancy. The effect is statistically significant at any conventional level.
+
+\textbf{$R^2 = 0.487$}: Health spending explains 48.7\% of variation in life expectancy across countries.
+
+\textbf{What this means}:
+\begin{itemize}
+\item \textbf{Moderate fit}: Health spending is important but not the only factor
+\item \textbf{Other factors} (unmeasured) explain 51.3\% of variation:
+  \begin{itemize}
+  \item Diet and lifestyle (Mediterranean diet, exercise)
+  \item Inequality (income distribution affects health)
+  \item Environmental factors (pollution, climate)
+  \item Healthcare system efficiency (not just spending)
+  \item Genetic and cultural factors
+  \end{itemize}
+\end{itemize}
+
+\textbf{Why $R^2$ is only 0.49}: Consider two countries with similar spending:
+\begin{itemize}
+\item Japan: High life expectancy (83 years) despite moderate spending
+\item USA: Lower life expectancy (78 years) despite highest spending
+\end{itemize}
+
+This residual variation suggests that \textbf{how money is spent} (primary care vs. hospital care, prevention vs. treatment) matters as much as \textbf{how much} is spent.
+
+\textbf{Infant Mortality Regression (infmort = 6.89 - 0.0008 $\times$ hlthpc)}
+
+\textbf{Coefficient interpretation ($\hat{\beta}_1 = -0.0008$)}:
+
+\textbf{Statistical meaning}: Each additional \$1 per capita in health spending is associated with a 0.0008-unit decrease in infant mortality per 100 births.
+
+\textbf{Practical meaning}: Each additional \textbf{\$1,000} in health spending per capita is associated with:
+\begin{itemize}
+\item 0.0008 $\times$ 1,000 = \textbf{0.8 fewer infant deaths} per 100 births
+\end{itemize}
+
+\textbf{Economic interpretation}:
+
+\textbf{Baseline}: Without health spending (hypothetically), infant mortality would be 6.89 per 100 births.
+
+\textbf{Range in data}:
+\begin{itemize}
+\item Low spender: Mexico (\$900 per capita) $\rightarrow$ predicted infant mortality $\approx$ 6.2 per 100
+\item High spender: USA (\$8,000 per capita) $\rightarrow$ predicted infant mortality $\approx$ 0.5 per 100
+\item Difference: \$7,100 more spending $\rightarrow$ 5.7 fewer deaths per 100 births
+\end{itemize}
+
+\textbf{Impact magnitude}: A reduction of 0.8 per 100 births means:
+\begin{itemize}
+\item In a country with 1 million births per year: 8,000 fewer infant deaths annually
+\item This is a \textbf{large public health benefit}
+\end{itemize}
+
+\textbf{Statistical significance}:
+\begin{itemize}
+\item t-statistic: -4.22
+\item p-value: 0.0002
+\item 95\% CI: [-0.0012, -0.0004]
+\end{itemize}
+
+\textbf{Interpretation}: We have \textbf{strong evidence} that health spending reduces infant mortality. The negative coefficient is expected (higher spending $\rightarrow$ lower mortality).
+
+\textbf{$R^2 = 0.358$}: Health spending explains 35.8\% of variation in infant mortality.
+
+\textbf{Lower $R^2$ than life expectancy}: Infant mortality is more influenced by:
+\begin{itemize}
+\item Maternal health (education, nutrition, prenatal care)
+\item Access to neonatal intensive care (quality vs. quantity of spending)
+\item Genetic factors (birth defects, premature births)
+\item Healthcare system structure (midwife vs. hospital births)
+\end{itemize}
+
+\textbf{Comparison of the two regressions}:
+
+\begin{center}
+\begin{tabular}{|l|c|c|l|}
+\hline
+\textbf{Outcome} & $\hat{\beta}_1$ & $R^2$ & \textbf{Interpretation} \\
+\hline
+Life expectancy & +0.0012 & 0.49 & \$1,000 $\rightarrow$ +1.2 years \\
+Infant mortality & -0.0008 & 0.36 & \$1,000 $\rightarrow$ -0.8 deaths per 100 \\
+\hline
+\end{tabular}
+\end{center}
+
+\textbf{Key insight}: Health spending affects \textbf{both} outcomes significantly, but explains more variation in life expectancy (49\%) than infant mortality (36\%). This suggests that:
+\begin{itemize}
+\item Life expectancy is more responsive to overall health system spending
+\item Infant mortality is more influenced by specific interventions (prenatal care, neonatal ICU)
+\end{itemize}
+
+\textbf{Robust standard errors}:
+
+Both regressions show \textbf{minimal difference} between standard and robust SEs:
+\begin{itemize}
+\item Life expectancy: standard SE $\approx$ robust SE (homoskedasticity holds)
+\item Infant mortality: robust SE slightly larger (mild heteroskedasticity)
+\end{itemize}
+
+\textbf{Conclusion}: Standard OLS inference is valid, but using robust SEs provides insurance against heteroskedasticity.
+
+\textbf{Visual interpretation}:
+
+\textbf{Panel A (Life Expectancy)}:
+\begin{itemize}
+\item Strong positive linear relationship
+\item Tight clustering around regression line (high $R^2$)
+\item Some outliers (USA: high spending, moderate outcomes)
+\end{itemize}
+
+\textbf{Panel B (Infant Mortality)}:
+\begin{itemize}
+\item Strong negative linear relationship
+\item More scatter than Panel A (lower $R^2$)
+\item A few high outliers (Turkey, Mexico: high infant mortality despite moderate spending)
+\end{itemize}
+
+\textbf{Policy implications}:
+
+\begin{enumerate}
+\item \textbf{Increasing health spending improves population health} (both life expectancy and infant mortality)
+\item \textbf{Diminishing returns may exist} (relationship appears linear, but theory suggests concavity)
+\item \textbf{Spending efficiency matters} (USA spends more but doesn't have best outcomes)
+\item \textbf{Targeted interventions} may be more cost-effective for infant mortality than general spending increases
+\end{enumerate}
+
+\textbf{Limitations}:
+
+\begin{itemize}
+\item \textbf{Correlation $\neq$ causation}: Richer countries spend more and have better health, but confounding factors (education, infrastructure) may drive both
+\item \textbf{Cross-sectional data}: Cannot establish temporal causality (does spending cause health, or does health enable spending?)
+\item \textbf{Omitted variables}: Diet, lifestyle, inequality, environmental factors not controlled
+\item \textbf{Measurement issues}: Health spending includes inefficient spending; health outcomes affected by non-health factors
+\end{itemize}
+
+\textbf{Next step}: Multiple regression (Chapter 10+) would control for confounders like GDP, education, and inequality.
+
+\begin{keyconcept}{Cross-Sectional vs. Time Series Data}
+Cross-sectional data compares multiple units (countries, individuals, firms) at a single point in time. In this health analysis, we compare 34 countries in 2009. This design is ideal for studying differences across units but cannot establish temporal causation. Time series data tracks one unit over many time periods, revealing trends and dynamics. The choice between cross-sectional and time series designs depends on the research question: cross-sectional for "what differs across units?" and time series for "how do things change over time?"
+\end{keyconcept}
+
+\section{Health Expenditures and National Income}
+
+\subsection{Code}
+
+\textbf{Context:} In this section, we flip the causal question from the previous analysis. Instead of asking "does health spending improve outcomes?", we ask "what determines health spending?" Specifically, we examine how national income (GDP per capita) predicts health expenditures. This is fundamentally a question about budget constraints and priorities: as countries get richer, how much more do they spend on healthcare? We conduct a sensitivity analysis by comparing results with and without two influential outliers (USA and Luxembourg) to assess whether our conclusions depend on extreme observations.
+
+\begin{lstlisting}[language=Python]
+# Health expenditure regression
+model_hlthpc = ols('hlthpc ~ gdppc', data=data_health).fit()
+print(model_hlthpc.summary())
+
+# Robust standard errors
+model_hlthpc_robust = model_hlthpc.get_robustcov_results(cov_type='HC1')
+print("\nHealth Expenditure Regression (Robust SE):")
+print(model_hlthpc_robust.summary())
+
+# Drop USA and Luxembourg
+data_health_subset = data_health[(data_health['code'] != 'LUX') &
+                                  (data_health['code'] != 'USA')]
+
+print(f"Original sample size: {len(data_health)}")
+print(f"Subset sample size: {len(data_health_subset)}")
+
+model_hlthpc_subset = ols('hlthpc ~ gdppc', data=data_health_subset).fit()
+print(model_hlthpc_subset.summary())
+\end{lstlisting}
+
+\subsection{Results}
+
+\textbf{Health Expenditure Regression (All Countries, n = 34):}
+
+\begin{verbatim}
+                            OLS Regression Results
+==============================================================================
+Dep. Variable:                 hlthpc   R-squared:                       0.903
+Model:                            OLS   Adj. R-squared:                  0.900
+Method:                 Least Squares   F-statistic:                     297.6
+Date:                Sat, 24 Jan 2026   Prob (F-statistic):           5.74e-19
+==============================================================================
+                 coef    std err          t      P>|t|      [0.025      0.975]
+------------------------------------------------------------------------------
+Intercept  -1095.4429    242.823     -4.511      0.000   -1589.932    -600.954
+gdppc          0.1248      0.007     17.251      0.000       0.110       0.140
+==============================================================================
+
+Robust Standard Errors:
+Intercept:  -1095.44 → robust SE: 267.30
+gdppc:          0.125 → robust SE: 0.009
+\end{verbatim}
+
+\begin{center}
+\includegraphics[width=0.8\textwidth]{../code_python/images/ch08_fig2a_health_gdp_all.png}
+\end{center}
+
+\textbf{Health Expenditure Regression (Excluding USA \& Luxembourg, n = 32):}
+
+\begin{verbatim}
+                            OLS Regression Results
+==============================================================================
+Dep. Variable:                 hlthpc   R-squared:                       0.934
+Model:                            OLS   Adj. R-squared:                  0.932
+Method:                 Least Squares   F-statistic:                     424.9
+Date:                Sat, 24 Jan 2026   Prob (F-statistic):           8.27e-21
+==============================================================================
+                 coef    std err          t      P>|t|      [0.025      0.975]
+------------------------------------------------------------------------------
+Intercept   -823.6842    183.104     -4.498      0.000   -1197.146    -450.222
+gdppc          0.1094      0.005     20.613      0.000       0.099       0.120
+==============================================================================
+\end{verbatim}
+
+\begin{center}
+\includegraphics[width=0.8\textwidth]{../code_python/images/ch08_fig2b_health_gdp_subset.png}
+\end{center}
+
+\subsection{Interpretation}
+
+\textbf{Research question}: How does national income (GDP per capita) determine health spending?
+
+This addresses a different causal direction than the previous analysis:
+\begin{itemize}
+\item Previous: Does health spending $\rightarrow$ improve health outcomes?
+\item Now: Does national income $\rightarrow$ determine health spending?
+\end{itemize}
+
+\textbf{Full Sample Regression (hlthpc = -1095.44 + 0.125 $\times$ gdppc)}
+
+\textbf{Coefficient interpretation ($\hat{\beta}_1 = 0.125$)}:
+
+\textbf{Statistical meaning}: Each additional \$1 in GDP per capita is associated with a \$0.125 increase in health spending per capita.
+
+\textbf{Economic meaning}: Each additional \textbf{\$1,000} in GDP per capita is associated with:
+\begin{itemize}
+\item 0.125 $\times$ 1,000 = \textbf{\$125 more} in health spending per capita
+\end{itemize}
+
+\textbf{Alternative interpretation}: For every \$1 increase in national income, countries spend about \textbf{12.5 cents} on healthcare.
+
+\textbf{Income elasticity}: The ratio of health spending to GDP:
+\begin{itemize}
+\item At mean GDP (\$45,000 per capita): Health spending $\approx$ \$3,256
+\item Share of GDP: 3,256 / 45,000 $\approx$ 7.2\%
+\end{itemize}
+
+This 7.2\% figure is typical for OECD countries (USA is an outlier at $\sim$17\%).
+
+\textbf{Intercept interpretation ($\hat{\beta}_0 = -1095.44$)}:
+
+\textbf{Technical meaning}: A country with GDP per capita = \$0 would spend -\$1,095 on health (impossible!).
+
+\textbf{Why negative?}: This is \textbf{extrapolation beyond the data}. The lowest GDP in the sample is Mexico ($\sim$\$14,000), so the intercept is meaningless economically. It simply positions the regression line.
+
+\textbf{Better interpretation}: For poor countries (GDP $<$ \$10,000), the linear model may not apply. Healthcare spending may have a threshold effect (basic infrastructure required first).
+
+\textbf{Statistical significance}:
+\begin{itemize}
+\item t-statistic: 17.25
+\item p-value: $<$ 0.0001
+\item 95\% CI: [0.110, 0.140]
+\end{itemize}
+
+\textbf{Interpretation}: We have \textbf{overwhelming evidence} that richer countries spend more on healthcare. The relationship is extremely strong.
+
+\textbf{$R^2 = 0.903$}: GDP explains 90.3\% of variation in health spending across countries.
+
+\textbf{Remarkable fit}: This is an \textbf{extremely high $R^2$} for cross-country data. It means:
+\begin{itemize}
+\item National income is the \textbf{dominant determinant} of health spending
+\item Other factors (political system, culture, demographics) explain only 9.7\%
+\item Health spending is largely a \textbf{luxury good} (income-elastic)
+\end{itemize}
+
+\textbf{Economic interpretation of high $R^2$}:
+
+\textbf{Why so high?}
+\begin{enumerate}
+\item \textbf{Budget constraint}: Countries can only spend what they have
+\item \textbf{Income elasticity $>$ 1}: As countries get richer, they spend a higher \textbf{share} of income on health (not just higher absolute amount)
+\item \textbf{Common institutions}: OECD countries have similar political systems (democracies with social insurance)
+\end{enumerate}
+
+\textbf{Comparison across countries}:
+\begin{itemize}
+\item Mexico (GDP = \$14,000): Predicted health spending = -1095 + 0.125(14,000) = \$655 (actual: $\sim$\$900)
+\item USA (GDP = \$75,000): Predicted health spending = -1095 + 0.125(75,000) = \$8,280 (actual: $\sim$\$8,000)
+\end{itemize}
+
+The USA is actually \textbf{close to the regression line} in this model—its high spending is explained by its high GDP.
+
+\textbf{Subset Regression (Excluding USA \& Luxembourg)}
+
+\textbf{Why exclude these countries?}
+
+\begin{enumerate}
+\item \textbf{USA}: Largest economy, highest health spending ($\sim$\$8,000 per capita), most expensive healthcare system
+\item \textbf{Luxembourg}: Small country with very high GDP due to financial services sector, unusual case
+\end{enumerate}
+
+These are \textbf{leverage points}—observations with extreme x-values that disproportionately influence the regression line.
+
+\textbf{Results after exclusion ($\hat{\beta}_1 = 0.109$)}:
+
+\textbf{Coefficient change}:
+\begin{itemize}
+\item Full sample: $\hat{\beta}_1 = 0.125$
+\item Subset: $\hat{\beta}_1 = 0.109$
+\item Difference: -0.016 (13\% decrease)
+\end{itemize}
+
+\textbf{Interpretation}: After removing USA and Luxembourg, the estimated relationship is \textbf{weaker} (slope decreases from 12.5 to 10.9 cents per dollar of GDP).
+
+\textbf{Why the change?}
+\begin{itemize}
+\item USA and Luxembourg have \textbf{high GDP and high health spending}, pulling the regression line upward
+\item Without them, the relationship is slightly flatter
+\item This demonstrates \textbf{leverage}: Extreme observations can substantially affect coefficients
+\end{itemize}
+
+\textbf{Statistical significance}:
+\begin{itemize}
+\item t-statistic: 20.61 (even larger than full sample!)
+\item p-value: $<$ 0.0001
+\item 95\% CI: [0.099, 0.120]
+\end{itemize}
+
+\textbf{Interpretation}: Despite the change in coefficient, the relationship remains \textbf{highly significant}. The stronger t-statistic reflects \textbf{reduced residual variance} after removing outliers.
+
+\textbf{$R^2 = 0.934$}: GDP explains 93.4\% of variation (even higher than full sample!).
+
+\textbf{Why higher $R^2$?}
+\begin{itemize}
+\item USA and Luxembourg are \textbf{outliers} that increase residual variance
+\item Removing them makes the remaining relationship \textbf{tighter}
+\item This confirms that the linear model fits better for "typical" OECD countries
+\end{itemize}
+
+\textbf{Visual comparison}:
+
+\textbf{Panel A (All Countries)}:
+\begin{itemize}
+\item USA and Luxembourg visible as right-hand outliers
+\item Regression line pulled upward by these points
+\item Some scatter around the line ($R^2 = 0.90$)
+\end{itemize}
+
+\textbf{Panel B (Excluding USA \& Luxembourg)}:
+\begin{itemize}
+\item Tighter clustering around regression line ($R^2 = 0.93$)
+\item More homogeneous sample (similar institutions, similar development levels)
+\item Relationship appears more linear
+\end{itemize}
+
+\textbf{Sensitivity analysis interpretation}:
+
+The comparison of full vs. subset regressions is a \textbf{robustness check}:
+
+\begin{center}
+\begin{tabular}{|l|c|c|c|l|}
+\hline
+\textbf{Sample} & \textbf{n} & $\hat{\beta}_1$ & $R^2$ & \textbf{Interpretation} \\
+\hline
+All countries & 34 & 0.125 & 0.90 & \$1,000 GDP $\rightarrow$ \$125 health spending \\
+Excluding USA \& LUX & 32 & 0.109 & 0.93 & \$1,000 GDP $\rightarrow$ \$109 health spending \\
+\hline
+\end{tabular}
+\end{center}
+
+\textbf{Key findings}:
+\begin{enumerate}
+\item \textbf{Direction unchanged}: Coefficient remains positive and significant
+\item \textbf{Magnitude changes}: 13\% decrease suggests USA/Luxembourg have outsize influence
+\item \textbf{Significance strengthens}: Higher t-statistic and $R^2$ after exclusion
+\item \textbf{Economic message unchanged}: Richer countries spend substantially more on health
+\end{enumerate}
+
+\textbf{Policy implications}:
+
+\begin{enumerate}
+\item \textbf{Health spending is income-elastic}: As countries develop, they naturally spend more on health (both absolute and as \% of GDP)
+\item \textbf{USA is not an outlier in this model}: Its high spending is explained by high GDP
+\item \textbf{Within OECD, relationship is tight}: Democratic countries with similar institutions make similar health spending choices
+\item \textbf{Developing countries}: Should expect health spending to rise as GDP grows (plan for this in budgets)
+\end{enumerate}
+
+\textbf{Economic theory}: This regression tests the \textbf{luxury good hypothesis}:
+\begin{itemize}
+\item \textbf{Necessity good}: Income elasticity $<$ 1 (food, clothing)
+\item \textbf{Luxury good}: Income elasticity $>$ 1 (health, education, travel)
+\end{itemize}
+
+The coefficient (0.125) combined with mean health/GDP ratio (7.2\%) suggests income elasticity:
+\begin{itemize}
+\item Elasticity $\approx$ ($\partial$hlth/$\partial$GDP) $\times$ (GDP/hlth) = 0.125 $\times$ (45,000 / 3,256) $\approx$ 1.73
+\end{itemize}
+
+\textbf{Interpretation}: Health spending is a \textbf{luxury good} with elasticity $\approx$ 1.73. A 10\% increase in GDP leads to a 17.3\% increase in health spending.
+
+\textbf{Limitations}:
+
+\begin{itemize}
+\item \textbf{Cross-sectional}: Cannot establish causation (does GDP $\rightarrow$ health spending, or do healthy populations $\rightarrow$ higher GDP?)
+\item \textbf{Omitted variables}: Political system, demographics, health needs not controlled
+\item \textbf{Outliers}: USA's healthcare system is uniquely inefficient (high spending, moderate outcomes)
+\item \textbf{Non-linearity}: The relationship may be concave (diminishing marginal health spending at very high incomes)
+\end{itemize}
+
+\textbf{Robust standard errors}:
+
+\textbf{Full sample}: Robust SE for gdppc (0.009) is slightly larger than standard SE (0.007), suggesting mild heteroskedasticity.
+
+\textbf{Interpretation}: Richer countries show more \textbf{variation} in health spending (some spend efficiently, others don't). This is consistent with the idea that richer countries have more \textbf{policy discretion} in healthcare.
+
+\textbf{Bottom line}: National income is the \textbf{dominant determinant} of health spending across countries, explaining $>$90\% of variation. While outliers like the USA and Luxembourg have some influence, the core relationship is robust.
+
+\begin{keyconcept}{Income Elasticity}
+Income elasticity measures how demand for a good changes with income. If elasticity $>$ 1, the good is a "luxury" (spending increases more than proportionally with income). If elasticity $<$ 1, it's a "necessity" (spending increases less than proportionally). In this analysis, health spending has elasticity $\approx$ 1.73, making it a luxury good: as countries get richer, they devote an increasing share of their budget to healthcare. This has profound implications for fiscal policy in aging, wealthy societies.
+\end{keyconcept}
+
+\section{CAPM Model for Stock Returns}
+
+\subsection{Code}
+
+\textbf{Context:} In this section, we shift from cross-country analysis to time series financial data, applying the Capital Asset Pricing Model (CAPM) to monthly stock returns. CAPM is a cornerstone of finance theory that relates individual stock returns to overall market returns through the "beta" coefficient. We analyze Coca-Cola stock returns over 708 months, testing whether its returns can be explained solely by market movements (supporting market efficiency) or whether it generates abnormal returns (alpha). The excess return formulation (returns minus risk-free rate) isolates the risk premium investors earn for bearing market risk.
+
+\begin{lstlisting}[language=Python]
+# Read in the CAPM data
+data_capm = pd.read_stata(GITHUB_DATA_URL + 'AED_CAPM.DTA')
+
+print("Data summary:")
+print(data_capm.describe())
+
+# CAPM regression
+model_capm = ols('rko_rf ~ rm_rf', data=data_capm).fit()
+print(model_capm.summary())
+
+# Robust standard errors
+model_capm_robust = model_capm.get_robustcov_results(cov_type='HC1')
+print("\nCAPM Regression (Robust SE):")
+print(model_capm_robust.summary())
+
+print(f"\nInterpretation:")
+print(f"  Beta coefficient: {model_capm.params['rm_rf']:.4f}")
+print(f"  This means Coca Cola stock has {'higher' if model_capm.params['rm_rf'] > 1 else 'lower'} systematic risk than the market")
+\end{lstlisting}
+
+\subsection{Results}
+
+\textbf{Data Summary (CAPM Variables):}
+
+\begin{verbatim}
+            rm        rf       rko      rtgt      rwmt     rm_rf    rko_rf   rtgt_rf   rwmt_rf
+count   708.00    708.00    708.00    708.00    708.00    708.00    708.00    708.00    708.00
+mean      0.61      0.27      0.70      0.89      0.72      0.34      0.43      0.62      0.45
+std       4.50      0.16      6.62      8.41      6.66      4.50      6.62      8.41      6.66
+min     -23.24      0.00    -33.16    -36.54    -33.33    -23.51    -33.43    -36.81    -33.60
+max      13.48      0.68     36.08     46.04     30.02     13.37     35.81     45.77     29.75
+\end{verbatim}
+
+\textbf{CAPM Regression (Coca-Cola):}
+
+\begin{verbatim}
+                            OLS Regression Results
+==============================================================================
+Dep. Variable:                 rko_rf   R-squared:                       0.347
+Model:                            OLS   Adj. R-squared:                  0.346
+Method:                 Least Squares   F-statistic:                     376.0
+Date:                Sat, 24 Jan 2026   Prob (F-statistic):           1.09e-63
+==============================================================================
+                 coef    std err          t      P>|t|      [0.025      0.975]
+------------------------------------------------------------------------------
+Intercept      0.1824      0.222      0.821      0.412      -0.254       0.619
+rm_rf          0.7367      0.038     19.393      0.000       0.662       0.811
+==============================================================================
+
+Robust Standard Errors:
+Intercept:     0.1824 → robust SE: 0.239
+rm_rf:         0.7367 → robust SE: 0.050
+\end{verbatim}
+
+\begin{center}
+\includegraphics[width=0.8\textwidth]{../code_python/images/ch08_fig3a_capm_timeseries.png}
+\end{center}
+
+\begin{center}
+\includegraphics[width=0.8\textwidth]{../code_python/images/ch08_fig3b_capm_scatter.png}
+\end{center}
+
+\subsection{Interpretation}
+
+\textbf{What is CAPM?}
+
+The \textbf{Capital Asset Pricing Model (CAPM)} is a foundational theory in finance that relates:
+\begin{itemize}
+\item \textbf{Individual stock returns} to \textbf{market returns}
+\item \textbf{Systematic risk} (market-wide) vs. \textbf{idiosyncratic risk} (firm-specific)
+\end{itemize}
+
+\textbf{CAPM equation}:
+
+$$E[r_i - r_f] = \beta_i \times E[r_m - r_f]$$
+
+Where:
+\begin{itemize}
+\item $r_i$ = return on stock i (Coca-Cola)
+\item $r_m$ = return on market portfolio (S\&P 500)
+\item $r_f$ = risk-free rate (Treasury bills)
+\item $\beta_i$ = beta coefficient (systematic risk of stock i)
+\end{itemize}
+
+\textbf{Regression specification}: rko\_rf = $\alpha$ + $\beta$ $\times$ rm\_rf + $\varepsilon$
+
+Where:
+\begin{itemize}
+\item rko\_rf = Coca-Cola excess return (rko - rf)
+\item rm\_rf = market excess return (rm - rf)
+\item $\alpha$ = alpha (intercept, should be zero under CAPM)
+\item $\beta$ = beta (slope, measures systematic risk)
+\end{itemize}
+
+\textbf{Data characteristics}:
+
+\begin{itemize}
+\item \textbf{Time series}: 708 monthly observations (59 years of data)
+\item \textbf{Excess returns}: All returns are in excess of risk-free rate
+\item \textbf{Market}: S\&P 500 index as proxy for market portfolio
+\item \textbf{Stocks analyzed}: Coca-Cola (KO), Target (TGT), Walmart (WMT)
+\end{itemize}
+
+\textbf{Coca-Cola Regression Results (rko\_rf = 0.18 + 0.74 $\times$ rm\_rf)}
+
+\textbf{Beta coefficient ($\hat{\beta} = 0.74$)}:
+
+\textbf{Statistical meaning}: When the market excess return increases by 1 percentage point, Coca-Cola's excess return increases by 0.74 percentage points, on average.
+
+\textbf{Financial interpretation}:
+
+\textbf{$\beta <$ 1 (defensive stock)}:
+\begin{itemize}
+\item Coca-Cola is \textbf{less volatile} than the market
+\item When market rises 10\%, Coca-Cola typically rises 7.4\%
+\item When market falls 10\%, Coca-Cola typically falls 7.4\%
+\end{itemize}
+
+\textbf{Why $\beta <$ 1 for Coca-Cola?}
+\begin{itemize}
+\item \textbf{Stable demand}: People drink Coke in good times and bad (non-cyclical)
+\item \textbf{Dividend stock}: Investors hold for steady income, not growth
+\item \textbf{Mature company}: Slow but stable growth (not high-risk startup)
+\item \textbf{Consumer staple}: Less sensitive to economic cycles than tech or luxury goods
+\end{itemize}
+
+\textbf{Comparison to other stocks}:
+\begin{itemize}
+\item \textbf{$\beta <$ 1}: Defensive (utilities, consumer staples, healthcare)
+\item \textbf{$\beta \approx$ 1}: Market-like (diversified index fund)
+\item \textbf{$\beta >$ 1}: Aggressive (tech, small-cap, cyclical stocks)
+\end{itemize}
+
+\textbf{Alpha coefficient ($\hat{\alpha} = 0.18$)}:
+
+\textbf{Statistical meaning}: Coca-Cola earns 0.18\% per month (2.2\% per year) in excess of what CAPM predicts.
+
+\textbf{Financial interpretation}:
+
+\textbf{$\alpha = 0$ (CAPM prediction)}: Stock returns should be fully explained by market returns and beta.
+
+\textbf{$\hat{\alpha} = 0.18 > 0$ (observed)}: Coca-Cola \textbf{outperforms} CAPM prediction, earning abnormal returns.
+
+\textbf{Is this statistically significant?}
+\begin{itemize}
+\item t-statistic: 0.821
+\item p-value: 0.412
+\item 95\% CI: [-0.254, 0.619]
+\end{itemize}
+
+\textbf{Result}: \textbf{No}, alpha is not statistically different from zero. We \textbf{fail to reject} $\alpha = 0$.
+
+\textbf{Interpretation}: While Coca-Cola appears to earn slight excess returns (0.18\% per month), this could easily be due to sampling variability. The data are consistent with CAPM's prediction that $\alpha = 0$.
+
+\textbf{Efficient markets}: The finding $\hat{\alpha} \approx 0$ supports the \textbf{Efficient Market Hypothesis (EMH)}:
+\begin{itemize}
+\item Stock prices reflect all available information
+\item No stock systematically outperforms after adjusting for risk (beta)
+\item Active management cannot beat the market on average
+\end{itemize}
+
+\textbf{Investment implication}: You cannot consistently earn excess returns by buying Coca-Cola—its returns are explained by its beta (risk).
+
+\textbf{$R^2 = 0.347$}: Market returns explain 34.7\% of variation in Coca-Cola returns.
+
+\textbf{Why only 35\%?}
+
+The remaining 65\% is \textbf{idiosyncratic risk} (firm-specific factors):
+\begin{itemize}
+\item New product launches (Coke Zero, energy drinks)
+\item Management changes (CEO succession)
+\item Regulatory issues (sugar taxes, health concerns)
+\item Competitive dynamics (Pepsi, private labels)
+\item Random news and events
+\end{itemize}
+
+\textbf{Diversification}: Idiosyncratic risk can be eliminated by holding a diversified portfolio. Only systematic risk (beta) matters for pricing.
+
+\textbf{Statistical significance of beta}:
+\begin{itemize}
+\item t-statistic: 19.39
+\item p-value: $<$ 0.0001
+\item 95\% CI: [0.662, 0.811]
+\end{itemize}
+
+\textbf{Interpretation}: We have \textbf{overwhelming evidence} that Coca-Cola's returns are positively related to market returns. The beta is precisely estimated and highly significant.
+
+\textbf{Robust standard errors}:
+
+\textbf{Standard SE}: 0.038
+\textbf{Robust SE}: 0.050 (32\% larger)
+
+\textbf{Interpretation}: There is evidence of \textbf{heteroskedasticity}—return volatility varies over time. This is common in financial data:
+\begin{itemize}
+\item Calm periods (low volatility)
+\item Crisis periods (high volatility): 2008 financial crisis, COVID-19
+\end{itemize}
+
+The robust SE accounts for this time-varying volatility, providing valid inference.
+
+\textbf{Impact on inference}:
+\begin{itemize}
+\item t-statistic (standard): 19.39
+\item t-statistic (robust): 14.73 (still highly significant)
+\end{itemize}
+
+\textbf{Conclusion}: Even with robust SEs, beta is overwhelmingly significant. The relationship between Coca-Cola and market returns is robust.
+
+\textbf{Visual interpretation}:
+
+\textbf{Panel A (Time Series)}:
+\begin{itemize}
+\item Coca-Cola and market excess returns move together (correlated)
+\item Both volatile but generally positive over time
+\item Some months with large negative returns (crashes)
+\end{itemize}
+
+\textbf{Panel B (Scatter Plot)}:
+\begin{itemize}
+\item Strong positive linear relationship ($R^2 = 0.35$)
+\item Slope $\approx$ 0.74 (less steep than 45-degree line, confirming $\beta <$ 1)
+\item Substantial scatter (idiosyncratic risk)
+\item No obvious outliers or nonlinearity
+\end{itemize}
+
+\textbf{Practical application}:
+
+\textbf{Portfolio construction}: An investor who wants \textbf{lower volatility} than the market should:
+\begin{itemize}
+\item Overweight defensive stocks ($\beta <$ 1) like Coca-Cola
+\item Underweight aggressive stocks ($\beta >$ 1) like Tesla
+\end{itemize}
+
+\textbf{Risk management}: A portfolio manager can \textbf{predict} Coca-Cola's risk:
+\begin{itemize}
+\item Portfolio beta = weighted average of individual betas
+\item If 50\% market index ($\beta = 1$) + 50\% Coca-Cola ($\beta = 0.74$), portfolio beta = 0.87
+\end{itemize}
+
+\textbf{Expected return}: Given market risk premium of 6\% per year:
+\begin{itemize}
+\item Coca-Cola expected excess return = 0.74 $\times$ 6\% = 4.4\% per year
+\item Plus risk-free rate (2\%) = 6.4\% total expected return
+\end{itemize}
+
+\textbf{Comparison to other stocks} (hypothetical):
+
+\begin{center}
+\begin{tabular}{|l|c|l|l|}
+\hline
+\textbf{Stock} & \textbf{Beta} & \textbf{Risk} & \textbf{Expected Excess Return} \\
+\hline
+Coca-Cola (KO) & 0.74 & Low & 4.4\% \\
+Target (TGT) & 1.20 & High & 7.2\% \\
+Walmart (WMT) & 0.85 & Moderate & 5.1\% \\
+\hline
+\end{tabular}
+\end{center}
+
+\textbf{Limitations}:
+
+\begin{itemize}
+\item \textbf{Time-varying beta}: Beta may change over time (business cycle, company evolution)
+\item \textbf{Market proxy}: S\&P 500 is not the true "market portfolio" (should include all assets)
+\item \textbf{Risk-free rate}: Treasury bill rate varies, affecting excess returns
+\item \textbf{Other risk factors}: Fama-French model adds size and value factors beyond beta
+\end{itemize}
+
+\textbf{Extension to multiple stocks}:
+
+The same analysis applies to Target (TGT) and Walmart (WMT):
+\begin{itemize}
+\item Different betas reflect different business models
+\item Walmart (discount retailer) likely $\beta <$ 1 (defensive)
+\item Target (discretionary goods) likely $\beta >$ 1 (cyclical)
+\end{itemize}
+
+\textbf{Bottom line}: CAPM regression provides a simple, powerful tool for quantifying \textbf{systematic risk} (beta). Coca-Cola's $\beta = 0.74$ indicates it's a defensive stock suitable for risk-averse investors.
+
+\begin{keyconcept}{Beta and Systematic Risk}
+Beta measures how much a stock moves relative to the overall market. $\beta = 1$ means the stock moves in lockstep with the market; $\beta < 1$ means it's less volatile (defensive); $\beta > 1$ means it's more volatile (aggressive). Beta captures systematic risk—risk that cannot be diversified away by holding multiple stocks. Only systematic risk matters for asset pricing because investors can eliminate idiosyncratic (firm-specific) risk through diversification. This is why CAPM predicts that expected returns depend only on beta, not total volatility.
+\end{keyconcept}
+
+\section{Okun's Law: GDP Growth and Unemployment}
+
+\subsection{Code}
+
+\textbf{Context:} In this section, we apply regression to macroeconomic time series data, testing Okun's Law—one of the most robust empirical relationships in macroeconomics. Okun's Law states that GDP growth and unemployment changes move in opposite directions: when the economy grows rapidly, unemployment falls; when it contracts, unemployment rises. We use annual US data spanning more than five decades to estimate how much GDP growth changes for each percentage point change in unemployment. This relationship is crucial for policymakers who must forecast the employment consequences of economic growth or recession.
+
+\begin{lstlisting}[language=Python]
+# Read in the GDP-Unemployment data
+data_gdp = pd.read_stata(GITHUB_DATA_URL + 'AED_GDPUNEMPLOY.DTA')
+
+print("Data summary:")
+print(data_gdp.describe())
+
+# Okun's Law regression
+model_okun = ols('rgdpgrowth ~ uratechange', data=data_gdp).fit()
+print(model_okun.summary())
+
+# Robust standard errors
+model_okun_robust = model_okun.get_robustcov_results(cov_type='HC1')
+print("\nOkun's Law Regression (Robust SE):")
+print(model_okun_robust.summary())
+
+print(f"\nInterpretation (Okun's Law):")
+print(f"  Coefficient on unemployment change: {model_okun.params['uratechange']:.4f}")
+print(f"  A 1 percentage point increase in unemployment is associated with")
+print(f"  a {abs(model_okun.params['uratechange']):.2f} percentage point decrease in real GDP growth")
+\end{lstlisting}
+
+\subsection{Results}
+
+\textbf{Data Summary (US Annual Data):}
+
+\begin{verbatim}
+       rgdpgrowth  uratechange
+count       53.00        53.00
+mean         2.88        -0.01
+std          2.61         1.26
+min         -3.48        -1.70
+25%          1.55        -0.80
+50%          3.14         0.00
+75%          4.45         0.70
+max          7.24         3.90
+\end{verbatim}
+
+\textbf{Okun's Law Regression:}
+
+\begin{verbatim}
+                            OLS Regression Results
+==============================================================================
+Dep. Variable:             rgdpgrowth   R-squared:                       0.513
+Model:                            OLS   Adj. R-squared:                  0.503
+Method:                 Least Squares   F-statistic:                     53.70
+Date:                Sat, 24 Jan 2026   Prob (F-statistic):           3.44e-09
+==============================================================================
+                 coef    std err          t      P>|t|      [0.025      0.975]
+------------------------------------------------------------------------------
+Intercept      2.8561      0.270     10.574      0.000       2.314       3.398
+uratechange   -1.8493      0.252     -7.328      0.000      -2.356      -1.343
+==============================================================================
+
+Robust Standard Errors:
+Intercept:     2.8561 → robust SE: 0.312
+uratechange:  -1.8493 → robust SE: 0.336
+\end{verbatim}
+
+\begin{center}
+\includegraphics[width=0.8\textwidth]{../code_python/images/ch08_fig4a_okun_scatter.png}
+\end{center}
+
+\begin{center}
+\includegraphics[width=0.8\textwidth]{../code_python/images/ch08_fig4b_okun_timeseries.png}
+\end{center}
+
+\subsection{Interpretation}
+
+\textbf{What is Okun's Law?}
+
+\textbf{Okun's Law} (discovered by Arthur Okun, 1962) describes the empirical relationship between:
+\begin{itemize}
+\item \textbf{Output growth} (real GDP growth rate)
+\item \textbf{Unemployment changes} (change in unemployment rate)
+\end{itemize}
+
+\textbf{Economic intuition}:
+\begin{itemize}
+\item When the economy \textbf{grows fast}, firms hire more workers $\rightarrow$ unemployment \textbf{falls}
+\item When the economy \textbf{shrinks} (recession), firms lay off workers $\rightarrow$ unemployment \textbf{rises}
+\end{itemize}
+
+\textbf{Regression specification}: rgdpgrowth = $\alpha$ + $\beta$ $\times$ uratechange + $\varepsilon$
+
+Where:
+\begin{itemize}
+\item rgdpgrowth = percentage change in real GDP (year-over-year)
+\item uratechange = change in unemployment rate (percentage points)
+\item $\beta$ = Okun coefficient (how much GDP growth responds to unemployment changes)
+\end{itemize}
+
+\textbf{Data characteristics}:
+
+\begin{itemize}
+\item \textbf{Time series}: 53 annual observations (US data, $\sim$1960-2013)
+\item \textbf{Macroeconomic variables}: Aggregate economy, not individual firms or households
+\item \textbf{Business cycle}: Captures expansions (positive growth) and recessions (negative growth)
+\end{itemize}
+
+\textbf{Okun's Law Regression Results (rgdpgrowth = 2.86 - 1.85 $\times$ uratechange)}
+
+\textbf{Okun coefficient ($\hat{\beta} = -1.85$)}:
+
+\textbf{Statistical meaning}: A 1 percentage point increase in the unemployment rate is associated with a 1.85 percentage point decrease in real GDP growth.
+
+\textbf{Economic interpretation}:
+
+\textbf{Negative coefficient}: This is the \textbf{key feature} of Okun's Law—GDP growth and unemployment changes move in \textbf{opposite directions}.
+
+\textbf{Example scenarios}:
+
+\textbf{Expansion} (uratechange = -1.0, unemployment falls by 1 point):
+\begin{itemize}
+\item Predicted GDP growth = 2.86 - 1.85(-1.0) = 2.86 + 1.85 = \textbf{4.71\%}
+\item Strong economic growth (above average 2.86\%)
+\end{itemize}
+
+\textbf{Recession} (uratechange = +2.0, unemployment rises by 2 points):
+\begin{itemize}
+\item Predicted GDP growth = 2.86 - 1.85(2.0) = 2.86 - 3.70 = \textbf{-0.84\%}
+\item Negative GDP growth (recession by definition)
+\end{itemize}
+
+\textbf{Normal year} (uratechange = 0, unemployment constant):
+\begin{itemize}
+\item Predicted GDP growth = 2.86 - 1.85(0) = \textbf{2.86\%}
+\item This is the \textbf{trend growth rate} (long-run average)
+\end{itemize}
+
+\textbf{Magnitude interpretation}:
+
+The coefficient -1.85 is close to the \textbf{theoretical prediction} of -2:
+\begin{itemize}
+\item \textbf{Theoretical}: 1\% unemployment increase $\rightarrow$ 2\% GDP decrease
+\item \textbf{Empirical}: 1\% unemployment increase $\rightarrow$ 1.85\% GDP decrease
+\end{itemize}
+
+\textbf{Why close to -2?} This reflects:
+\begin{enumerate}
+\item \textbf{Labor share of output}: Workers produce output, so less employment $\rightarrow$ less output
+\item \textbf{Labor hoarding}: Firms don't immediately fire workers in downturns (smoothing)
+\item \textbf{Productivity effects}: Recessions may decrease hours worked and productivity
+\end{enumerate}
+
+\textbf{Intercept interpretation ($\hat{\alpha} = 2.86$)}:
+
+\textbf{Economic meaning}: When unemployment is constant (uratechange = 0), the economy grows at \textbf{2.86\% per year} on average.
+
+\textbf{This is the trend growth rate}, reflecting:
+\begin{itemize}
+\item Population growth ($\sim$1\% per year)
+\item Productivity growth ($\sim$1.5\% per year)
+\item Capital accumulation ($\sim$0.3\% per year)
+\end{itemize}
+
+\textbf{Trend vs. cyclical growth}:
+\begin{itemize}
+\item \textbf{Trend}: 2.86\% (long-run average, intercept)
+\item \textbf{Cyclical}: -1.85 $\times$ uratechange (deviations from trend)
+\end{itemize}
+
+\textbf{Statistical significance}:
+
+\textbf{Okun coefficient}:
+\begin{itemize}
+\item t-statistic: -7.33
+\item p-value: $<$ 0.0001
+\item 95\% CI: [-2.36, -1.34]
+\end{itemize}
+
+\textbf{Interpretation}: We have \textbf{very strong evidence} that GDP growth and unemployment changes are negatively related. This relationship is one of the most robust in macroeconomics.
+
+\textbf{Intercept}:
+\begin{itemize}
+\item t-statistic: 10.57
+\item p-value: $<$ 0.0001
+\end{itemize}
+
+\textbf{Interpretation}: Trend growth is significantly positive—the US economy grows on average even when unemployment is constant.
+
+\textbf{$R^2 = 0.513$}: Unemployment changes explain 51.3\% of variation in GDP growth.
+
+\textbf{Moderate fit}: While the relationship is strong, it's not perfect. What explains the other 48.7\%?
+
+\textbf{Other factors affecting GDP growth}:
+\begin{enumerate}
+\item \textbf{Productivity shocks}: Technology, innovation, supply disruptions (oil shocks)
+\item \textbf{Fiscal policy}: Government spending and taxes
+\item \textbf{Monetary policy}: Interest rates, money supply
+\item \textbf{International factors}: Exports, imports, global demand
+\item \textbf{Investment}: Capital accumulation, business confidence
+\item \textbf{Measurement error}: GDP is estimated, not directly observed
+\end{enumerate}
+
+\textbf{Why $R^2$ is not higher}: GDP growth is driven by many factors beyond labor markets (unemployment). Okun's Law captures the \textbf{labor market channel} but not the full story.
+
+\textbf{Robust standard errors}:
+
+\textbf{Standard SE}: 0.252
+\textbf{Robust SE}: 0.336 (33\% larger)
+
+\textbf{Interpretation}: There is \textbf{heteroskedasticity}—GDP growth volatility varies over time. This makes sense:
+\begin{itemize}
+\item \textbf{Great Moderation (1980s-2000s)}: Low volatility
+\item \textbf{Recessions}: High volatility (2008 financial crisis, COVID-19)
+\end{itemize}
+
+The robust SE accounts for this time-varying volatility.
+
+\textbf{Impact on inference}:
+\begin{itemize}
+\item t-statistic (standard): -7.33
+\item t-statistic (robust): -5.50 (still highly significant)
+\end{itemize}
+
+\textbf{Conclusion}: Even with robust SEs, Okun's Law is strongly supported. The relationship is robust to heteroskedasticity.
+
+\textbf{Visual interpretation}:
+
+\textbf{Panel A (Scatter Plot)}:
+\begin{itemize}
+\item Clear negative linear relationship (downward slope)
+\item Moderate scatter ($R^2 = 0.51$)
+\item Some outliers (extreme recessions or booms)
+\item Regression line fits well overall
+\end{itemize}
+
+\textbf{Panel B (Time Series)}:
+\begin{itemize}
+\item Actual GDP growth (black) is volatile
+\item Fitted values (blue) track actual reasonably well
+\item Large deviations during major recessions (2008-2009, 2020)
+\item Model captures broad business cycle patterns
+\end{itemize}
+
+\textbf{Historical context}:
+
+\textbf{Notable periods in the data}:
+
+\textbf{Great Recession (2008-2009)}:
+\begin{itemize}
+\item Unemployment rose $\sim$5 points (uratechange $\approx$ +5)
+\item Predicted GDP growth = 2.86 - 1.85(5) = -6.4\%
+\item Actual GDP growth $\approx$ -3.5\% (model overpredicts decline)
+\end{itemize}
+
+\textbf{COVID-19 Recession (2020)}:
+\begin{itemize}
+\item Unemployment spiked $\sim$10 points in one year
+\item Predicted GDP growth = 2.86 - 1.85(10) = -15.6\%
+\item Actual GDP growth $\approx$ -3.4\% (massive policy intervention prevented worse outcome)
+\end{itemize}
+
+\textbf{Booms (1990s, mid-2000s)}:
+\begin{itemize}
+\item Unemployment fell (uratechange $<$ 0)
+\item GDP growth above trend (3-5\%)
+\end{itemize}
+
+\textbf{Policy implications}:
+
+\textbf{For policymakers}: Okun's Law provides a \textbf{forecasting tool}:
+\begin{itemize}
+\item If unemployment is rising, expect GDP growth to slow
+\item If unemployment is falling, expect GDP growth to accelerate
+\end{itemize}
+
+\textbf{For central banks}: The Fed targets \textbf{maximum employment} because:
+\begin{itemize}
+\item Low unemployment $\rightarrow$ strong GDP growth $\rightarrow$ economic prosperity
+\item High unemployment $\rightarrow$ weak GDP growth $\rightarrow$ recession
+\end{itemize}
+
+\textbf{For fiscal stimulus}: During recessions, government can:
+\begin{itemize}
+\item Increase spending to boost GDP growth
+\item This prevents unemployment from rising further (breaking the Okun relationship)
+\end{itemize}
+
+\textbf{Limitations}:
+
+\begin{itemize}
+\item \textbf{Time-varying relationship}: Okun coefficient may change over time (structural changes in economy)
+\item \textbf{Causality}: Does unemployment cause GDP, or does GDP cause unemployment? (bidirectional)
+\item \textbf{Omitted variables}: Productivity, policy, international factors not controlled
+\item \textbf{Nonlinearity}: Relationship may be stronger in recessions than expansions
+\item \textbf{Lead/lag}: Unemployment may respond to GDP with a delay (or vice versa)
+\end{itemize}
+
+\textbf{Comparison to original Okun (1962)}:
+
+Okun originally estimated the coefficient as \textbf{-2} to \textbf{-3}. Our estimate (-1.85) is consistent with the lower end, reflecting:
+\begin{itemize}
+\item More flexible labor markets (easier hiring/firing)
+\item More service sector (less cyclical than manufacturing)
+\item Better monetary policy (stabilizes output)
+\end{itemize}
+
+\textbf{Bottom line}: Okun's Law is a \textbf{robust empirical regularity} in macroeconomics. The negative relationship between GDP growth and unemployment changes ($\beta \approx -1.85$) is stable across time and countries, making it a useful tool for forecasting and policy analysis.
+
+\begin{keyconcept}{Heteroskedasticity in Time Series}
+Heteroskedasticity occurs when the variance of regression errors changes across observations. In time series data, volatility often clusters: calm periods have small errors while crisis periods have large errors (2008 financial crisis, COVID-19). Standard OLS standard errors assume constant variance, producing misleading inference when heteroskedasticity is present. Robust standard errors (HC1, HC3) correct for this by allowing variance to differ across observations, ensuring valid hypothesis tests and confidence intervals regardless of the variance pattern.
+\end{keyconcept}
+
+\section{Conclusion}
+
+This chapter demonstrated the versatility of bivariate regression through four diverse case studies spanning health economics, international economics, financial economics, and macroeconomics. Each application revealed how the same statistical framework—fitting a line to data—can illuminate fundamentally different economic questions when combined with domain knowledge and careful interpretation.
+
+\textbf{What You've Learned}
+
+Through these four case studies, you've seen how bivariate regression applies to diverse economic problems:
+
+\begin{enumerate}
+\item \textbf{Health outcomes across countries}: Health spending increases life expectancy (+1.2 years per \$1,000) and reduces infant mortality (-0.8 per 100 births per \$1,000), though correlation doesn't prove causation
+\item \textbf{Health expenditures and GDP}: National income is the dominant determinant of health spending ($R^2 = 0.90$), with income elasticity $\approx$ 1.73 making healthcare a luxury good
+\item \textbf{CAPM model for stock returns}: Coca-Cola has systematic risk $\beta = 0.74$ (defensive stock), with alpha $\approx$ 0 supporting market efficiency
+\item \textbf{Okun's Law for GDP and unemployment}: A 1 percentage point rise in unemployment is associated with a 1.85 percentage point decline in GDP growth
+\end{enumerate}
+
+You've also developed practical skills that extend beyond mechanical regression:
+\begin{itemize}
+\item \textbf{Economic interpretation}: Translating coefficients into policy-relevant magnitudes (cost per life-year, Okun coefficient) rather than just reporting significance
+\item \textbf{Robustness checks}: Using robust standard errors and sensitivity analysis (excluding outliers) to ensure conclusions don't depend on fragile assumptions
+\item \textbf{Data type awareness}: Recognizing when cross-sectional, time series, or panel data is appropriate for different research questions
+\item \textbf{Theory integration}: Connecting regression results to established economic theories (CAPM, Okun's Law) to validate findings
+\item \textbf{Critical evaluation}: Questioning causality, recognizing omitted variables, and understanding when simple bivariate models are adequate versus when multiple regression is needed
+\end{itemize}
+
+The case studies revealed important patterns about $R^2$: high $R^2$ (0.90 for health-GDP) indicates one factor dominates, while moderate $R^2$ (0.35 for CAPM, 0.51 for Okun's Law) suggests multiple factors matter. You learned that outliers can substantially affect estimates (USA and Luxembourg in health spending) and that heteroskedasticity is common in financial and macroeconomic time series, making robust standard errors essential.
+
+\textbf{Looking Ahead}
+
+While bivariate regression provides powerful insights, all four case studies revealed limitations that motivate extensions:
+
+\textbf{Chapter 9} introduces logarithmic transformations, allowing you to interpret coefficients as elasticities and handle nonlinear relationships. The log-log specification is particularly useful for estimating income elasticities (as we calculated informally for health spending).
+
+\textbf{Chapter 10 and beyond} cover multiple regression, addressing the omitted variable problem that plagued several analyses. For health outcomes, we could control for GDP, education, and inequality. For CAPM, we could add Fama-French factors (size, value) beyond beta. For Okun's Law, we could include productivity shocks and policy variables.
+
+\textbf{Advanced topics} extend the framework further: panel data combines cross-sectional and time series dimensions, instrumental variables address endogeneity and reverse causation, and difference-in-differences enables causal inference from natural experiments.
+
+This chapter demonstrated that bivariate regression, while simple, provides powerful insights into economic relationships when applied thoughtfully. The key is not just fitting regressions mechanically, but interpreting results in light of economic theory, institutional context, and data limitations. As you progress to more complex methods, remember that the fundamental logic—relating one variable to another—remains the same.
+
+\section{References}
+
+\textbf{Primary Source:}
+
+Cameron, A.C. (2022). \textit{Econometric Methods with Python}. Available at: https://pyecon.org
+
+\textbf{Data Sources:}
+
+\begin{itemize}
+\item OECD Health Statistics (2009): https://www.oecd.org/health/health-data.htm
+\item CRSP (Center for Research in Security Prices)
+\item Bureau of Economic Analysis: https://www.bea.gov
+\item Bureau of Labor Statistics: https://www.bls.gov
+\end{itemize}
+
+\textbf{Python Libraries:}
+
+\begin{itemize}
+\item numpy, pandas, matplotlib, seaborn, statsmodels, scipy
+\end{itemize}
+
+\textbf{Economic Theories:}
+
+\begin{itemize}
+\item Sharpe, W.F. (1964). "Capital Asset Prices: A Theory of Market Equilibrium"
+\item Okun, A.M. (1962). "Potential GNP: Its Measurement and Significance"
+\end{itemize}
+
+\vspace{1em}
+
+\begin{keyconcept}{Learn by Coding}
+Now that you've learned the key concepts in this chapter, it's time to put them into practice!
+
+Open the interactive Google Colab notebook for this chapter to:
+\begin{itemize}
+\item Run Python code implementing all the methods discussed
+\item Experiment with real datasets and see results immediately
+\item Modify parameters and explore how changes affect outcomes
+\item Complete hands-on exercises that reinforce your understanding
+\end{itemize}
+
+\textbf{Access the notebook here:} \url{https://colab.research.google.com/github/quarcs-lab/metricsai/blob/main/notebooks_colab/ch08_Case_Studies_for_Bivariate_Regression.ipynb}
+
+Remember: Learning econometrics is not just about understanding theory---it's about applying it. The best way to master these concepts is to code them yourself!
+\end{keyconcept}

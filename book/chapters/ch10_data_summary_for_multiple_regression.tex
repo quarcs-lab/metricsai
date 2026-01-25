@@ -1,0 +1,2070 @@
+\chapter{Data Summary for Multiple Regression}
+
+\begin{center}
+\includegraphics[width=\textwidth]{../code_python/images/ch10_visual_summary.jpg}
+\end{center}
+
+\textit{This chapter extends simple regression to multiple regression, demonstrating how to model house prices using several predictors simultaneously and interpret partial effects while holding other variables constant.}
+
+\section{Introduction}
+
+This report explores \textbf{multiple regression analysis}—the extension of simple linear regression from one to several explanatory variables. While previous chapters examined bivariate relationships (one outcome, one predictor), Chapter 10 demonstrates how to model complex real-world phenomena where outcomes depend on multiple factors simultaneously.
+
+We analyze \textbf{house prices} using six characteristics (size, bedrooms, bathrooms, lot size, age, and months on market) to illustrate fundamental concepts in multiple regression:
+\begin{itemize}
+\item \textbf{Partial effects}: Isolating the effect of one variable while holding others constant
+\item \textbf{Model comparison}: How adding variables changes coefficient estimates and fit
+\item \textbf{Multicollinearity}: Detecting and understanding correlated predictors
+\item \textbf{Model selection}: Using R², adjusted R², AIC, and BIC to compare specifications
+\end{itemize}
+
+The housing dataset provides an ideal application because price determination is inherently multidimensional—buyers value size, location, condition, and features jointly. Single-variable models cannot capture this complexity.
+
+\textbf{What You'll Learn:}
+
+\begin{itemize}
+\item How to estimate multiple regression models with several predictors simultaneously
+\item How to interpret regression coefficients as partial effects holding other variables constant
+\item How to create and interpret scatterplot matrices and correlation heatmaps
+\item How to understand omitted variable bias and why adding variables changes coefficients
+\item How to evaluate model fit using R², adjusted R², AIC, and BIC
+\item How to detect multicollinearity using Variance Inflation Factors (VIF)
+\item How to compare competing model specifications systematically
+\item How to apply the Frisch-Waugh-Lovell theorem to understand ``ceteris paribus''
+\item How to recognize when simple models outperform complex ones
+\end{itemize}
+
+\section{Setup and Data Overview}
+
+\subsection{Code}
+
+\textbf{Context:} In this section, we load the housing dataset and establish the computational environment for multiple regression analysis. This dataset contains 29 houses with six characteristics (size, bedrooms, bathrooms, lot size, age, and months on market), providing an ideal teaching example because the small sample size allows us to examine individual observations while demonstrating how multiple predictors jointly determine prices. Understanding the data structure before modeling prevents errors and guides variable selection.
+
+\begin{lstlisting}[language=Python]
+# Import required libraries
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+import statsmodels.api as sm
+from statsmodels.formula.api import ols
+from scipy import stats
+import random
+import os
+
+# Set random seeds for reproducibility
+RANDOM_SEED = 42
+random.seed(RANDOM_SEED)
+np.random.seed(RANDOM_SEED)
+os.environ['PYTHONHASHSEED'] = str(RANDOM_SEED)
+
+# GitHub data URL
+GITHUB_DATA_URL = "https://raw.githubusercontent.com/quarcs-lab/data-open/master/AED/"
+
+# Create output directories
+IMAGES_DIR = 'images'
+TABLES_DIR = 'tables'
+os.makedirs(IMAGES_DIR, exist_ok=True)
+os.makedirs(TABLES_DIR, exist_ok=True)
+
+# Set plotting style
+sns.set_style("whitegrid")
+plt.rcParams['figure.figsize'] = (10, 6)
+
+# Read in the house data
+data_house = pd.read_stata(GITHUB_DATA_URL + 'AED_HOUSE.DTA')
+
+# Display summary statistics
+print("\nData summary:")
+data_summary = data_house.describe()
+print(data_summary)
+
+# Table 10.1: Key variables
+table101_vars = ['price', 'size', 'bedrooms', 'bathrooms', 'lotsize',
+                 'age', 'monthsold']
+print("\nTable 10.1: House Characteristics Summary Statistics")
+print(data_house[table101_vars].describe())
+
+# Table 10.2: Sample observations
+print("\nTable 10.2: House Data (first 10 observations)")
+print(data_house[table101_vars].head(10))
+\end{lstlisting}
+
+\subsection{Results}
+
+\textbf{Table 10.1: House Characteristics Summary Statistics}
+
+\begin{center}
+\begin{tabular}{lrrrrrrr}
+\hline
+Statistic & price & size & bedrooms & bathrooms & lotsize & age & monthsold \\
+\hline
+count & 29.000000 & 29.000000 & 29.000000 & 29.000000 & 29.000000 & 29.000000 & 29.000000 \\
+mean & 253910.345 & 1882.759 & 3.793103 & 2.327586 & 2.137931 & 36.413792 & 5.965517 \\
+std & 37390.711 & 398.272 & 0.675030 & 0.541423 & 0.693034 & 7.118975 & 1.679344 \\
+min & 204000.000 & 1400.000 & 3.000000 & 2.000000 & 1.000000 & 23.000000 & 3.000000 \\
+25\% & 233000.000 & 1600.000 & 3.000000 & 2.000000 & 2.000000 & 31.000000 & 5.000000 \\
+50\% & 244000.000 & 1800.000 & 4.000000 & 2.000000 & 2.000000 & 35.000000 & 6.000000 \\
+75\% & 270000.000 & 2000.000 & 4.000000 & 2.500000 & 3.000000 & 39.000000 & 7.000000 \\
+max & 375000.000 & 3300.000 & 6.000000 & 3.000000 & 3.000000 & 51.000000 & 8.000000 \\
+\hline
+\end{tabular}
+\end{center}
+
+\textbf{Table 10.2: Sample Observations (first 10 houses)}
+
+\begin{verbatim}
+    price  size  bedrooms  bathrooms  lotsize   age  monthsold
+0  204000  1400         3        2.0        1  31.0          7
+1  212000  1600         3        3.0        2  33.0          5
+2  213000  1800         3        2.0        2  51.0          4
+3  220000  1600         3        2.0        1  49.0          4
+4  224500  2100         4        2.5        2  47.0          6
+5  229000  1700         4        2.5        2  35.0          3
+6  230000  2100         4        2.0        2  34.0          8
+7  233000  1700         3        2.0        1  40.0          6
+8  235000  1700         4        2.0        2  29.0          7
+9  235000  1600         3        2.0        3  35.0          5
+\end{verbatim}
+
+\subsection{Interpretation}
+
+\textbf{Dataset Overview}
+
+This dataset contains \textbf{29 houses} sold in a single neighborhood, with detailed information on prices and characteristics. The relatively small sample size (n=29) makes it ideal for teaching—students can examine individual observations and understand how outliers influence results.
+
+\textbf{Outcome Variable}: \textbf{price}
+\begin{itemize}
+\item Mean: \$253,910 (average sale price)
+\item Standard deviation: \$37,391 (substantial variation—about 15\% of mean)
+\item Range: \$204,000 to \$375,000 (spread of \$171,000, or 84\% of minimum price)
+\end{itemize}
+
+The price distribution shows considerable heterogeneity. The most expensive house (\$375,000) costs 1.84 times the cheapest (\$204,000). This variation creates opportunity for regression—if all houses cost roughly the same, there would be nothing to explain.
+
+\textbf{Key Predictors}:
+
+\begin{enumerate}
+\item \textbf{size} (square feet):
+   \begin{itemize}
+   \item Mean: 1,883 sq ft
+   \item Range: 1,400 to 3,300 sq ft
+   \item Interpretation: The largest house is 2.36$\times$ the smallest, representing substantial variation in living space
+   \end{itemize}
+
+\item \textbf{bedrooms}:
+   \begin{itemize}
+   \item Mean: 3.79 (mostly 3-4 bedroom homes)
+   \item Range: 3 to 6 bedrooms
+   \item Low variability (std = 0.68) suggests most houses are family-sized
+   \end{itemize}
+
+\item \textbf{bathrooms}:
+   \begin{itemize}
+   \item Mean: 2.33
+   \item Range: 2.0 to 3.0
+   \item Half-baths (e.g., 2.5) reflect partial facilities
+   \end{itemize}
+
+\item \textbf{lotsize} (acres):
+   \begin{itemize}
+   \item Mean: 2.14 acres
+   \item Range: 1 to 3 acres (categorical: small/medium/large lots)
+   \item Limited variation compared to size
+   \end{itemize}
+
+\item \textbf{age} (years):
+   \begin{itemize}
+   \item Mean: 36.4 years
+   \item Range: 23 to 51 years
+   \item All houses are relatively old (built 1960s-1980s), so age reflects depreciation
+   \end{itemize}
+
+\item \textbf{monthsold} (time on market):
+   \begin{itemize}
+   \item Mean: 6.0 months
+   \item Range: 3 to 8 months
+   \item Longer times might signal overpricing or market conditions
+   \end{itemize}
+\end{enumerate}
+
+\textbf{Why Multiple Regression?}
+
+House prices depend on \textbf{many attributes simultaneously}. A buyer values:
+\begin{itemize}
+\item \textbf{Space} (size, bedrooms): More rooms $\rightarrow$ higher price
+\item \textbf{Quality} (bathrooms): More/better facilities $\rightarrow$ higher price
+\item \textbf{Land} (lotsize): Larger lots $\rightarrow$ higher price (maybe)
+\item \textbf{Condition} (age): Older homes $\rightarrow$ lower price (depreciation)
+\item \textbf{Market dynamics} (monthsold): Longer listings $\rightarrow$ lower price (desperation)
+\end{itemize}
+
+Single-variable regressions (e.g., price $\sim$ bedrooms) confound these effects. For example:
+\begin{itemize}
+\item Large houses have more bedrooms AND more square footage
+\item If we regress price on bedrooms alone, we attribute the entire size effect to bedrooms
+\item Multiple regression \textbf{disentangles} these correlated features
+\end{itemize}
+
+\textbf{Practical Motivation}
+
+Real estate appraisal uses \textbf{hedonic pricing models}: Price = f(characteristics). Buyers don't value ``bedrooms'' per se—they value the bundle of services (space, privacy, flexibility) bedrooms provide. Multiple regression estimates the \textbf{marginal value} of each characteristic, holding others constant.
+
+\textbf{Data Quality Considerations}:
+\begin{itemize}
+\item \textbf{No missing values}: All 29 observations complete (rare in real datasets)
+\item \textbf{Homogeneous sample}: Single neighborhood limits unobserved heterogeneity (location)
+\item \textbf{Limited sample size}: n=29 is small, so standard errors will be large
+\item \textbf{Discrete variables}: bedrooms, bathrooms, lotsize have limited variation
+\end{itemize}
+
+\textbf{Next Steps}
+
+Before estimating regressions, we examine \textbf{bivariate relationships} (scatterplots, correlations) to understand:
+\begin{enumerate}
+\item Which predictors correlate strongly with price?
+\item Which predictors correlate with each other (multicollinearity)?
+\item Are relationships linear or nonlinear?
+\end{enumerate}
+
+These exploratory analyses guide model specification and interpretation.
+
+\begin{keyconcept}{Omitted Variable Bias}
+When a predictor is correlated with both the outcome and other predictors, excluding it from the model creates omitted variable bias. For example, in a bivariate regression of price on bedrooms, the coefficient captures both the direct effect of bedrooms and the indirect effect through size (since larger houses have more bedrooms). Multiple regression eliminates this bias by including all correlated predictors simultaneously, allowing us to isolate the partial effect of each variable holding others constant.
+\end{keyconcept}
+
+\section{Bivariate vs. Multiple Regression}
+
+\subsection{Code}
+
+\textbf{Context:} This section demonstrates the dramatic impact of adding predictors to a regression model. We compare a simple regression (price on bedrooms only) against a multiple regression (price on bedrooms and size together). By comparing coefficients across models, we reveal omitted variable bias—how excluding correlated predictors distorts estimates. This comparison is fundamental to understanding why multiple regression is necessary for isolating causal effects in observational data.
+
+\begin{lstlisting}[language=Python]
+# Bivariate regression: price ~ bedrooms
+model_one = ols('price ~ bedrooms', data=data_house).fit()
+print("\nBivariate regression: price ~ bedrooms")
+print(model_one.summary())
+
+# Multiple regression: price ~ bedrooms + size
+model_two = ols('price ~ bedrooms + size', data=data_house).fit()
+print("\nMultiple regression: price ~ bedrooms + size")
+print(model_two.summary())
+
+# Compare coefficients
+print(f"\nComparison of bedrooms coefficient:")
+print(f"  Bivariate model: {model_one.params['bedrooms']:.4f}")
+print(f"  Multiple regression: {model_two.params['bedrooms']:.4f}")
+print(f"  Change: {model_two.params['bedrooms'] - model_one.params['bedrooms']:.4f}")
+\end{lstlisting}
+
+\subsection{Results}
+
+\textbf{Bivariate Regression: price $\sim$ bedrooms}
+
+\begin{center}
+\begin{tabular}{lrrrrr}
+\hline
+Variable & Coefficient & Std Error & t-value & p-value & [95\% Conf. Interval] \\
+\hline
+Intercept & 164,072 & 37,101 & 4.423 & 0.000 & [88,000, 240,144] \\
+bedrooms & 23,667 & 9,638 & 2.456 & 0.021 & [3,892, 43,442] \\
+\hline
+\end{tabular}
+\end{center}
+
+\begin{itemize}
+\item R-squared: 0.183 (18.3\% of variation explained)
+\item Adjusted R²: 0.152
+\item F-statistic: 6.030 (p = 0.021)
+\end{itemize}
+
+\textbf{Multiple Regression: price $\sim$ bedrooms + size}
+
+\begin{center}
+\begin{tabular}{lrrrrr}
+\hline
+Variable & Coefficient & Std Error & t-value & p-value & [95\% Conf. Interval] \\
+\hline
+Intercept & 111,700 & 27,600 & 4.048 & 0.000 & [55,000, 168,400] \\
+bedrooms & 1,553 & 7,847 & 0.198 & 0.845 & [-14,600, 17,706] \\
+size & 72.41 & 13.30 & 5.444 & 0.000 & [45.07, 99.75] \\
+\hline
+\end{tabular}
+\end{center}
+
+\begin{itemize}
+\item R-squared: 0.618 (61.8\% of variation explained)
+\item Adjusted R²: 0.589
+\item F-statistic: 21.03 (p < 0.001)
+\end{itemize}
+
+\textbf{Coefficient Comparison}:
+\begin{itemize}
+\item Bivariate model: bedrooms = 23,667
+\item Multiple regression: bedrooms = 1,553
+\item Change: -22,114 (93\% reduction)
+\end{itemize}
+
+\subsection{Interpretation}
+
+\textbf{The Dramatic Shift in Bedrooms Coefficient}
+
+When we add \texttt{size} to the model, the coefficient on \texttt{bedrooms} \textbf{collapses} from \$23,667 to \$1,553—a reduction of 93\%. What happened?
+
+\textbf{Bivariate Model (Naive)}:
+
+$$\text{price} = 164,072 + 23,667 \times \text{bedrooms}$$
+
+Interpretation: Each additional bedroom is associated with a \textbf{\$23,667 increase} in price.
+
+\textbf{Problems with this interpretation}:
+\begin{enumerate}
+\item Houses with more bedrooms are also \textbf{larger} (more square footage)
+\item Houses with more bedrooms often have other desirable features (bathrooms, amenities)
+\item The bedrooms coefficient captures \textbf{all correlated attributes}, not just bedrooms
+\end{enumerate}
+
+This is \textbf{omitted variable bias}. The true causal effect of bedrooms is confounded by size.
+
+\textbf{Multiple Regression (Conditional)}:
+
+$$\text{price} = 111,700 + 1,553 \times \text{bedrooms} + 72.41 \times \text{size}$$
+
+Interpretation:
+\begin{itemize}
+\item \textbf{bedrooms coefficient (1,553)}: Holding size constant, each additional bedroom adds only \$1,553 to price
+\item \textbf{size coefficient (72.41)}: Holding bedrooms constant, each additional square foot adds \$72.41 to price
+\end{itemize}
+
+\textbf{Why the difference?}
+
+The correlation between bedrooms and size is \textbf{r = 0.518} (from Table 10.3). When we regress price on bedrooms alone:
+\begin{itemize}
+\item We estimate: $\partial$price/$\partial$bedrooms = 23,667
+\item True partial effect: $\partial$price/$\partial$bedrooms$|$size = 1,553
+\item Bias: 23,667 - 1,553 = 22,114
+\end{itemize}
+
+The bias equals the \textbf{indirect effect} of bedrooms working through size:
+\begin{itemize}
+\item More bedrooms $\rightarrow$ larger house $\rightarrow$ higher price
+\end{itemize}
+
+In the bivariate model, bedrooms ``takes credit'' for the size effect because they're correlated.
+
+\textbf{Statistical Significance Changes}:
+
+\textbf{Bivariate model}:
+\begin{itemize}
+\item bedrooms: t = 2.456, p = 0.021 (statistically significant at 5\% level)
+\end{itemize}
+
+\textbf{Multiple regression}:
+\begin{itemize}
+\item bedrooms: t = 0.198, p = 0.845 (not significant—cannot reject H$_0$: $\beta_{bedrooms}$ = 0)
+\item size: t = 5.444, p < 0.001 (highly significant)
+\end{itemize}
+
+Once we control for size, bedrooms becomes \textbf{statistically insignificant}. The apparent effect in the bivariate model was spurious—it reflected size, not bedrooms per se.
+
+\textbf{Economic Interpretation}
+
+Why is the partial effect of bedrooms so small (\$1,553)?
+
+\begin{enumerate}
+\item \textbf{Size dominates}: Buyers primarily value \textbf{total space} (square footage), not how it's divided into rooms
+\item \textbf{Substitution}: An extra bedroom from subdividing existing space (without adding square footage) adds little value
+\item \textbf{Diminishing returns}: Beyond 3-4 bedrooms, additional bedrooms may be viewed as redundant or costly to maintain
+\end{enumerate}
+
+Example:
+\begin{itemize}
+\item House A: 1,800 sq ft, 3 bedrooms $\rightarrow$ price $\approx$ \$242,138
+\item House B: 1,800 sq ft, 4 bedrooms $\rightarrow$ price $\approx$ \$243,691 (+\$1,553)
+\item House C: 2,200 sq ft, 4 bedrooms $\rightarrow$ price $\approx$ \$272,655 (+\$29,964 from size increase)
+\end{itemize}
+
+The extra bedroom in House B adds little value because it doesn't increase total space—it just partitions existing space differently. House C commands a premium because it has both more bedrooms AND more square footage.
+
+\textbf{Model Fit Improvement}
+
+\textbf{Bivariate model}:
+\begin{itemize}
+\item R² = 0.183 (bedrooms explains only 18.3\% of price variation)
+\end{itemize}
+
+\textbf{Multiple regression}:
+\begin{itemize}
+\item R² = 0.618 (bedrooms + size explain 61.8\% of price variation)
+\end{itemize}
+
+Adding size \textbf{triples the explanatory power} (from 18\% to 62\%). The Adjusted R² also increases dramatically (0.152 $\rightarrow$ 0.589), confirming that size meaningfully improves fit even after penalizing for the extra parameter.
+
+\textbf{F-test for Model Significance}:
+\begin{itemize}
+\item Bivariate: F = 6.030, p = 0.021 (marginally significant)
+\item Multiple: F = 21.03, p < 0.001 (highly significant)
+\end{itemize}
+
+The multiple regression model is vastly superior at explaining price variation.
+
+\textbf{Practical Implications}
+
+\begin{enumerate}
+\item \textbf{Appraisers should use size, not bedrooms}: The marginal value of bedrooms is negligible once size is controlled
+\item \textbf{Homeowners optimizing value}: Expanding square footage (addition, finishing basement) increases value more than subdividing existing space into more bedrooms
+\item \textbf{Policy analysis}: Zoning laws regulating minimum square footage have large price effects; regulations on bedroom counts have minimal effects
+\end{enumerate}
+
+\textbf{Confounding vs. Causality}
+
+This example illustrates \textbf{confounding}: bedrooms and size are correlated, so a bivariate regression conflates their effects. Multiple regression \textbf{adjusts} for confounding by estimating partial effects.
+
+\textbf{However}, this doesn't prove causality. The coefficient on size (72.41) is the \textbf{conditional association} of size with price, holding bedrooms constant. To claim causality, we'd need:
+\begin{itemize}
+\item Random assignment of size (impossible)
+\item Instrumental variables
+\item Careful consideration of omitted variables (location, school quality, etc.)
+\end{itemize}
+
+For now, we interpret coefficients as \textbf{associations conditional on included variables}, not causal effects.
+
+\textbf{Next Steps}
+
+Section 3 visualizes these relationships using scatterplot matrices and correlation tables to understand which variables drive price and which are collinear with each other.
+
+\section{Two-Way Scatterplots and Correlation}
+
+\subsection{Code}
+
+\textbf{Context:} Before estimating complex models, we examine bivariate relationships visually through scatterplot matrices and numerically through correlation matrices. These exploratory tools reveal which predictors correlate strongly with price (candidate predictors), which predictors correlate with each other (potential multicollinearity), and whether relationships are linear or nonlinear. This diagnostic step guides model specification and helps us anticipate how coefficients might change when variables are added or removed from regressions.
+
+\begin{lstlisting}[language=Python]
+# Figure 10.1: Scatterplot matrix
+print("\nGenerating scatterplot matrix...")
+plot_vars = ['price', 'size', 'bedrooms', 'age']
+
+# Create pairplot using seaborn
+g = sns.pairplot(data_house[plot_vars], diag_kind='kde',
+                 plot_kws={'alpha': 0.6, 's': 50})
+g.fig.suptitle('Figure 10.1: Simple Scatterplot Matrix',
+               fontsize=14, fontweight='bold', y=1.00)
+
+output_file = os.path.join(IMAGES_DIR, 'ch10_fig1_scatterplot_matrix.png')
+plt.tight_layout()
+plt.savefig(output_file, dpi=300, bbox_inches='tight')
+plt.close()
+
+# Table 10.3: Correlation matrix
+corr_vars = ['price', 'size', 'bedrooms', 'bathrooms', 'lotsize', 'age', 'monthsold']
+corr_matrix = data_house[corr_vars].corr()
+print("\nTable 10.3: Correlation Matrix")
+print(corr_matrix)
+corr_matrix.to_csv(os.path.join(TABLES_DIR, 'ch10_correlation_matrix.csv'))
+
+# Visualize correlation matrix with heatmap
+fig, ax = plt.subplots(figsize=(10, 8))
+sns.heatmap(corr_matrix, annot=True, fmt='.3f', cmap='coolwarm', center=0,
+            square=True, linewidths=1, cbar_kws={"shrink": 0.8})
+ax.set_title('Correlation Matrix Heatmap', fontsize=14, fontweight='bold')
+
+output_file = os.path.join(IMAGES_DIR, 'ch10_correlation_heatmap.png')
+plt.tight_layout()
+plt.savefig(output_file, dpi=300, bbox_inches='tight')
+plt.close()
+\end{lstlisting}
+
+\subsection{Results}
+
+\textbf{Figure 10.1: Scatterplot Matrix}
+
+\begin{center}
+\includegraphics[width=0.8\textwidth]{../code_python/images/ch10_fig1_scatterplot_matrix.png}
+\end{center}
+
+\textbf{Table 10.3: Correlation Matrix}
+
+\begin{center}
+\begin{tabular}{lrrrrrrr}
+\hline
+ & price & size & bedrooms & bathrooms & lotsize & age & monthsold \\
+\hline
+price & 1.000 & 0.786 & 0.427 & 0.330 & 0.153 & -0.068 & -0.210 \\
+size & 0.786 & 1.000 & 0.518 & 0.316 & 0.112 & 0.077 & -0.215 \\
+bedrooms & 0.427 & 0.518 & 1.000 & 0.037 & 0.292 & -0.026 & 0.183 \\
+bathrooms & 0.330 & 0.316 & 0.037 & 1.000 & 0.102 & 0.037 & -0.392 \\
+lotsize & 0.153 & 0.112 & 0.292 & 0.102 & 1.000 & -0.019 & -0.057 \\
+age & -0.068 & 0.077 & -0.026 & 0.037 & -0.019 & 1.000 & -0.366 \\
+monthsold & -0.210 & -0.215 & 0.183 & -0.392 & -0.057 & -0.366 & 1.000 \\
+\hline
+\end{tabular}
+\end{center}
+
+\textbf{Correlation Heatmap}
+
+\begin{center}
+\includegraphics[width=0.8\textwidth]{../code_python/images/ch10_correlation_heatmap.png}
+\end{center}
+
+\subsection{Interpretation}
+
+\textbf{Scatterplot Matrix Analysis}
+
+The scatterplot matrix displays \textbf{all pairwise bivariate relationships} among price, size, bedrooms, and age. Each off-diagonal cell shows a scatterplot of two variables; diagonal cells show density plots (distributions).
+
+\textbf{Key Patterns}:
+
+\begin{enumerate}
+\item \textbf{price vs. size} (top row, second column):
+   \begin{itemize}
+   \item \textbf{Strong positive linear relationship} (r = 0.786)
+   \item As size increases, price increases almost proportionally
+   \item Scatter is relatively tight, suggesting size is a strong predictor
+   \end{itemize}
+
+\item \textbf{price vs. bedrooms} (top row, third column):
+   \begin{itemize}
+   \item \textbf{Moderate positive relationship} (r = 0.427)
+   \item More scatter than price-size relationship
+   \item Clustering at 3-4 bedrooms (limited variation)
+   \end{itemize}
+
+\item \textbf{price vs. age} (top row, fourth column):
+   \begin{itemize}
+   \item \textbf{Weak negative relationship} (r = -0.068)
+   \item Almost no visible pattern in scatter
+   \item Age appears unrelated to price in this sample
+   \end{itemize}
+
+\item \textbf{size vs. bedrooms} (second row, third column):
+   \begin{itemize}
+   \item \textbf{Moderate positive correlation} (r = 0.518)
+   \item Larger houses tend to have more bedrooms
+   \item This creates \textbf{multicollinearity} when both are included as predictors
+   \end{itemize}
+\end{enumerate}
+
+\textbf{Correlation Matrix Interpretation}
+
+\textbf{Strongest Predictors of Price}:
+
+\begin{enumerate}
+\item \textbf{size} (r = 0.786): Very strong positive correlation
+   \begin{itemize}
+   \item 78.6\% linear association
+   \item Squared: r² = 0.618 (size alone explains 61.8\% of price variance)
+   \item This confirms size is the dominant determinant of price
+   \end{itemize}
+
+\item \textbf{bedrooms} (r = 0.427): Moderate positive correlation
+   \begin{itemize}
+   \item 42.7\% linear association
+   \item Squared: r² = 0.182 (bedrooms alone explains 18.2\% of price variance)
+   \item Much weaker than size, consistent with Section 2 findings
+   \end{itemize}
+
+\item \textbf{bathrooms} (r = 0.330): Weak positive correlation
+   \begin{itemize}
+   \item Bathrooms matter, but less than size/bedrooms
+   \end{itemize}
+
+\item \textbf{monthsold} (r = -0.210): Weak negative correlation
+   \begin{itemize}
+   \item Longer time on market associated with slightly lower prices
+   \item Could reflect overpricing or unobserved quality issues
+   \end{itemize}
+
+\item \textbf{lotsize} (r = 0.153): Very weak positive correlation
+   \begin{itemize}
+   \item Lot size matters little in this neighborhood
+   \item Perhaps buyers value house features over land
+   \end{itemize}
+
+\item \textbf{age} (r = -0.068): Almost zero correlation
+   \begin{itemize}
+   \item Surprisingly, age doesn't predict price
+   \item Perhaps age effects are offset by quality differences (older homes might be better built)
+   \end{itemize}
+\end{enumerate}
+
+\textbf{Multicollinearity Diagnostics}
+
+\textbf{Key Predictor Correlations}:
+
+\begin{enumerate}
+\item \textbf{size $\leftrightarrow$ bedrooms} (r = 0.518):
+   \begin{itemize}
+   \item Moderate positive correlation
+   \item Expected: larger houses have more bedrooms
+   \item Creates multicollinearity when both included
+   \item Explains why bedrooms coefficient changes dramatically in Section 2
+   \end{itemize}
+
+\item \textbf{size $\leftrightarrow$ bathrooms} (r = 0.316):
+   \begin{itemize}
+   \item Weak positive correlation
+   \item Less problematic than size-bedrooms
+   \end{itemize}
+
+\item \textbf{bedrooms $\leftrightarrow$ lotsize} (r = 0.292):
+   \begin{itemize}
+   \item Weak positive correlation
+   \item Larger lots accommodate bigger houses with more bedrooms
+   \end{itemize}
+
+\item \textbf{bathrooms $\leftrightarrow$ monthsold} (r = -0.392):
+   \begin{itemize}
+   \item Moderate negative correlation
+   \item Houses with fewer bathrooms stay on market longer
+   \item Interesting: suggests bathroom count signals quality
+   \end{itemize}
+
+\item \textbf{age $\leftrightarrow$ monthsold} (r = -0.366):
+   \begin{itemize}
+   \item Moderate negative correlation
+   \item Older homes sell faster (!)
+   \item Counterintuitive—may reflect survivorship bias (poorly built old homes demolished)
+   \end{itemize}
+\end{enumerate}
+
+\textbf{Multicollinearity Implications}
+
+When predictors are correlated (e.g., size and bedrooms), multiple regression faces challenges:
+\begin{enumerate}
+\item \textbf{Unstable coefficients}: Small changes in data $\rightarrow$ large changes in estimates
+\item \textbf{Large standard errors}: Harder to detect statistical significance
+\item \textbf{Sensitivity to specification}: Adding/removing variables changes coefficients dramatically
+\end{enumerate}
+
+The size-bedrooms correlation (0.518) is \textbf{moderate}, not extreme. VIF analysis in Section 8 quantifies whether this causes practical problems.
+
+\textbf{Surprising Finding: Age Doesn't Matter}
+
+Age has almost zero correlation with price (r = -0.068). This is counterintuitive—depreciation should lower prices for older homes.
+
+\textbf{Possible explanations}:
+\begin{enumerate}
+\item \textbf{Quality offset}: Older homes in this neighborhood may be better built (survivor bias)
+\item \textbf{Renovation}: Owners maintain older homes, offsetting depreciation
+\item \textbf{Style preferences}: Buyers value ``character'' of older homes
+\item \textbf{Limited range}: All homes are 23-51 years old (no new construction), limiting variation
+\end{enumerate}
+
+\textbf{Statistical vs. Economic Significance}
+
+While size has the strongest correlation (0.786), this doesn't necessarily mean it has the largest \textbf{economic impact}. We must consider:
+\begin{itemize}
+\item \textbf{Units}: Size varies by 1,900 sq ft (max-min); price varies by \$171,000
+\item \textbf{Standardized effects}: A 1-SD increase in size (398 sq ft) $\rightarrow$ ? change in price
+\item \textbf{Marginal effects}: What's the price impact of 1 additional sq ft vs. 1 additional bedroom?
+\end{itemize}
+
+Multiple regression (Section 4) answers these questions by estimating \textbf{partial effects} with proper units.
+
+\textbf{Data Visualization Best Practices}
+
+\textbf{Scatterplot matrix}:
+\begin{itemize}
+\item Pros: Shows all pairwise relationships simultaneously; easy to spot nonlinearities, outliers, clusters
+\item Cons: Gets unwieldy with many variables (n $\times$ n grid); doesn't show multivariate relationships
+\end{itemize}
+
+\textbf{Correlation heatmap}:
+\begin{itemize}
+\item Pros: Compact summary of all correlations; color coding highlights patterns
+\item Cons: Only captures linear relationships; doesn't show distributions or outliers
+\end{itemize}
+
+\textbf{Combined strategy}: Use scatterplots for exploration (identify nonlinearities, outliers), then correlation matrix for quantitative summary.
+
+\textbf{Next Steps}
+
+Section 4 estimates the full multiple regression model with all six predictors simultaneously, providing \textbf{partial effect} estimates that account for all correlations among predictors.
+
+\begin{keyconcept}{Partial Effects (Ceteris Paribus)}
+In multiple regression, each coefficient measures the effect of one variable while holding all other variables constant—the ceteris paribus interpretation. For example, the size coefficient of \$68.37 means that comparing two houses with the same number of bedrooms, bathrooms, lot size, age, and months on market, the house with one additional square foot sells for \$68.37 more on average. This partial effect differs from the bivariate coefficient because it isolates size's unique contribution rather than confounding it with correlated attributes.
+\end{keyconcept}
+
+\section{Multiple Regression: Full Model}
+
+\subsection{Code}
+
+\textbf{Context:} In this section, we estimate the complete multiple regression model with all six predictors simultaneously. This full specification allows us to examine each variable's partial effect—its contribution to price after accounting for all other characteristics. By including multiple predictors together, we control for confounding and obtain more accurate estimates of how each attribute affects house prices. The regression output reveals which characteristics matter most and highlights challenges like multicollinearity.
+
+\begin{lstlisting}[language=Python]
+# Full multiple regression with all predictors
+model_full = ols('price ~ size + bedrooms + bathrooms + lotsize + age + monthsold',
+                 data=data_house).fit()
+print("\nMultiple Regression: Full Model")
+print(model_full.summary())
+
+# Save regression coefficients to CSV
+coef_table = pd.DataFrame({
+    'coefficient': model_full.params,
+    'std_err': model_full.bse,
+    't_value': model_full.tvalues,
+    'p_value': model_full.pvalues
+})
+coef_table.to_csv(os.path.join(TABLES_DIR, 'ch10_regression_coefficients.csv'))
+
+# Display coefficients with 95% confidence intervals
+print("\nCoefficients with 95% Confidence Intervals")
+conf_int = model_full.conf_int(alpha=0.05)
+coef_table = pd.DataFrame({
+    'Coefficient': model_full.params,
+    'Std. Error': model_full.bse,
+    'CI Lower': conf_int.iloc[:, 0],
+    'CI Upper': conf_int.iloc[:, 1],
+    't-statistic': model_full.tvalues,
+    'p-value': model_full.pvalues
+})
+print(coef_table)
+\end{lstlisting}
+
+\subsection{Results}
+
+\textbf{Table: Full Multiple Regression Results}
+
+\begin{center}
+\begin{tabular}{lrrrrr}
+\hline
+Variable & Coefficient & Std. Error & t-statistic & p-value & [95\% Conf. Interval] \\
+\hline
+Intercept & 137,791 & 61,465 & 2.242 & 0.035 & [10,300, 265,282] \\
+size & 68.37 & 15.39 & 4.443 & 0.000 & [36.45, 100.28] \\
+bedrooms & 2,685 & 9,193 & 0.292 & 0.773 & [-16,400, 21,770] \\
+bathrooms & 6,833 & 15,721 & 0.435 & 0.668 & [-25,800, 39,466] \\
+lotsize & 2,303 & 7,227 & 0.319 & 0.753 & [-12,700, 17,306] \\
+age & -833 & 719 & -1.158 & 0.259 & [-2,325, 659] \\
+monthsold & -2,089 & 3,521 & -0.593 & 0.559 & [-9,390, 5,213] \\
+\hline
+\end{tabular}
+\end{center}
+
+\textbf{Model Fit Statistics}:
+\begin{itemize}
+\item \textbf{R-squared}: 0.651 (65.1\% of price variation explained)
+\item \textbf{Adjusted R²}: 0.555 (penalized for 6 predictors)
+\item \textbf{F-statistic}: 6.826 (p < 0.001)
+\item \textbf{Root MSE}: \$24,936 (average prediction error)
+\item \textbf{Sample size}: n = 29 observations
+\item \textbf{Degrees of freedom}: 22 (n - k, where k=7 parameters including intercept)
+\end{itemize}
+
+\subsection{Interpretation}
+
+\textbf{Model Equation}
+
+$$\text{price} = 137,791 + 68.37 \times \text{size} + 2,685 \times \text{bedrooms} + 6,833 \times \text{bathrooms} + 2,303 \times \text{lotsize} - 833 \times \text{age} - 2,089 \times \text{monthsold}$$
+
+\textbf{Coefficient Interpretations (Partial Effects)}
+
+\begin{enumerate}
+\item \textbf{size (68.37)}:
+   \begin{itemize}
+   \item \textbf{Interpretation}: Holding all other variables constant, each additional square foot increases price by \$68.37
+   \item \textbf{Significance}: Highly significant (p < 0.001), t = 4.443
+   \item \textbf{95\% CI}: [36.45, 100.28] (does not include zero)
+   \item \textbf{Practical impact}: A 400 sq ft increase (1 SD) $\rightarrow$ \$27,348 price increase
+   \item \textbf{Conclusion}: Size is the dominant driver of price
+   \end{itemize}
+
+\item \textbf{bedrooms (2,685)}:
+   \begin{itemize}
+   \item \textbf{Interpretation}: Holding size, bathrooms, lot, age, and months constant, each additional bedroom adds \$2,685 to price
+   \item \textbf{Significance}: Not significant (p = 0.773), t = 0.292
+   \item \textbf{95\% CI}: [-16,400, 21,770] (includes zero—we cannot rule out zero effect)
+   \item \textbf{Conclusion}: Once size is controlled, bedrooms add negligible value
+   \item \textbf{Caveat}: Large standard error (\$9,193) reflects multicollinearity with size
+   \end{itemize}
+
+\item \textbf{bathrooms (6,833)}:
+   \begin{itemize}
+   \item \textbf{Interpretation}: Each additional bathroom adds \$6,833, holding other factors constant
+   \item \textbf{Significance}: Not significant (p = 0.668)
+   \item \textbf{95\% CI}: [-25,800, 39,466] (very wide—high uncertainty)
+   \item \textbf{Conclusion}: Insufficient evidence of bathroom effect, though point estimate is positive
+   \end{itemize}
+
+\item \textbf{lotsize (2,303)}:
+   \begin{itemize}
+   \item \textbf{Interpretation}: Each additional acre adds \$2,303, ceteris paribus
+   \item \textbf{Significance}: Not significant (p = 0.753)
+   \item \textbf{Conclusion}: Lot size doesn't meaningfully affect price in this neighborhood
+   \item \textbf{Economic rationale}: Buyers may value house features over land
+   \end{itemize}
+
+\item \textbf{age (-833)}:
+   \begin{itemize}
+   \item \textbf{Interpretation}: Each additional year of age reduces price by \$833, holding other factors constant
+   \item \textbf{Significance}: Not significant (p = 0.259)
+   \item \textbf{95\% CI}: [-2,325, 659] (includes zero)
+   \item \textbf{Practical impact}: A 10-year age difference $\rightarrow$ \$8,330 price difference
+   \item \textbf{Conclusion}: Weak evidence of depreciation; effect is imprecisely estimated
+   \end{itemize}
+
+\item \textbf{monthsold (-2,089)}:
+   \begin{itemize}
+   \item \textbf{Interpretation}: Each additional month on market reduces price by \$2,089
+   \item \textbf{Significance}: Not significant (p = 0.559)
+   \item \textbf{Possible mechanisms}: Sellers lower prices over time; homes with longer listings have unobserved defects
+   \item \textbf{Conclusion}: Time on market doesn't robustly predict final sale price
+   \end{itemize}
+\end{enumerate}
+
+\textbf{Intercept (137,791)}:
+\begin{itemize}
+\item \textbf{Interpretation}: Predicted price for a house with zero size, zero bedrooms, etc.
+\item \textbf{Practical meaning}: None (extrapolation beyond data range)
+\item \textbf{Technical role}: Centers the regression line
+\end{itemize}
+
+\textbf{Statistical Significance Summary}
+
+\textbf{Only size is statistically significant} at conventional levels (p < 0.05). All other predictors have p-values > 0.25, indicating insufficient evidence to reject H$_0$: $\beta$ = 0.
+
+\textbf{Why so few significant coefficients?}
+\begin{enumerate}
+\item \textbf{Small sample size} (n=29): Limited statistical power
+\item \textbf{Multicollinearity}: Correlated predictors (size/bedrooms, bathrooms/monthsold) inflate standard errors
+\item \textbf{Limited variation}: Some variables (bedrooms, lotsize) have narrow ranges
+\item \textbf{Model overfit}: 7 parameters for 29 observations leaves only 22 degrees of freedom
+\end{enumerate}
+
+\textbf{Model Fit Assessment}
+
+\textbf{R² = 0.651}:
+\begin{itemize}
+\item 65.1\% of price variation is explained by the six predictors
+\item Substantial improvement over bivariate models (size alone: R² = 0.618)
+\item Adding 5 more variables beyond size increases R² by only 0.033 (3.3 percentage points)
+\end{itemize}
+
+\textbf{Adjusted R² = 0.555}:
+\begin{itemize}
+\item Penalizes for number of predictors: R²$_{adj}$ = 1 - (1-R²) $\times$ (n-1)/(n-k)
+\item Lower than R² because we have 6 predictors for only 29 observations
+\item Still reasonably high—model fits well after accounting for degrees of freedom
+\end{itemize}
+
+\textbf{Root MSE = \$24,936}:
+\begin{itemize}
+\item Average prediction error (in price units)
+\item Predictions are typically off by $\pm$\$25,000
+\item Relative to mean price (\$253,910), this is $\sim$10\% error
+\item Decent precision given small sample
+\end{itemize}
+
+\textbf{F-statistic = 6.826 (p < 0.001)}:
+\begin{itemize}
+\item Tests H$_0$: All coefficients (except intercept) are zero
+\item Strong rejection—at least one predictor significantly affects price
+\item Confirms model has explanatory power
+\end{itemize}
+
+\textbf{Confidence Intervals}
+
+\textbf{Only size has a CI excluding zero}: [36.45, 100.28]
+\begin{itemize}
+\item We are 95\% confident the true effect of size is between \$36 and \$100 per sq ft
+\item All other CIs include zero, consistent with insignificant p-values
+\end{itemize}
+
+\textbf{Wide CIs for other variables}:
+\begin{itemize}
+\item bedrooms: [-16,400, 21,770] (span of \$38,170!)
+\item bathrooms: [-25,800, 39,466] (span of \$65,266!)
+\end{itemize}
+
+These wide intervals reflect \textbf{high uncertainty} due to multicollinearity and small sample size.
+
+\textbf{Multicollinearity Effects}
+
+Notice:
+\begin{itemize}
+\item bedrooms SE = \$9,193 (coefficient = \$2,685) $\rightarrow$ SE/coef ratio = 3.4
+\item bathrooms SE = \$15,721 (coefficient = \$6,833) $\rightarrow$ SE/coef ratio = 2.3
+\end{itemize}
+
+High SE relative to coefficients suggests \textbf{multicollinearity} (predictors are correlated, making it hard to isolate individual effects). Section 8 quantifies this with VIF.
+
+\textbf{Economic Interpretation}
+
+\textbf{Size dominates all other characteristics}:
+\begin{itemize}
+\item Size: \$68/sq ft $\times$ 400 sq ft (1 SD) = \$27,200 impact
+\item Bedrooms: \$2,685 $\times$ 0.68 (1 SD) = \$1,826 impact
+\item Bathrooms: \$6,833 $\times$ 0.54 (1 SD) = \$3,690 impact
+\end{itemize}
+
+A one-standard-deviation increase in size has \textbf{15 times} the price impact of a one-SD increase in bedrooms.
+
+\textbf{Policy Implications}:
+\begin{enumerate}
+\item \textbf{Appraisers}: Focus on square footage; other characteristics add little marginal value
+\item \textbf{Homeowners}: Expanding living space (additions) increases value far more than adding bedrooms via subdivision
+\item \textbf{Developers}: Prioritize total square footage over room count
+\end{enumerate}
+
+\textbf{Omitted Variables}
+
+This model likely suffers from \textbf{omitted variable bias}:
+\begin{itemize}
+\item \textbf{Location}: All houses in same neighborhood, but within-neighborhood variation (corner lot, busy street) matters
+\item \textbf{Quality}: Construction quality, finishes, appliances not measured
+\item \textbf{Schools}: School district quality affects prices
+\item \textbf{Market timing}: Sales year/season might matter
+\end{itemize}
+
+The large residual variation (Root MSE = \$24,936) suggests important determinants are missing.
+
+\textbf{Next Steps}
+
+Section 5 demonstrates that \textbf{partial effects} from multiple regression can be obtained equivalently by:
+\begin{enumerate}
+\item Regressing y on all x's (direct approach)
+\item Regressing y on residuals from regressing x$_1$ on other x's (Frisch-Waugh-Lovell theorem)
+\end{enumerate}
+
+This ``residualized regression'' provides insight into what ``holding other variables constant'' means mechanically.
+
+\section{Estimated Partial Effects}
+
+\subsection{Code}
+
+\textbf{Context:} This section demonstrates the Frisch-Waugh-Lovell (FWL) theorem, which provides a mechanical interpretation of ``holding other variables constant.'' We show that the coefficient on size from the full multiple regression equals the coefficient from a bivariate regression where we first remove from size all variation explained by other predictors. This equivalence demystifies partial effects and clarifies what multiple regression does algebraically—it orthogonalizes predictors to isolate each variable's unique contribution.
+
+\begin{lstlisting}[language=Python]
+# Demonstration: Coefficient from multiple regression equals
+# coefficient from bivariate regression on residualized regressor
+
+# Step 1: Regress size on other variables (everything except price)
+model_size = ols('size ~ bedrooms + bathrooms + lotsize + age + monthsold',
+                 data=data_house).fit()
+resid_size = model_size.resid
+
+# Step 2: Regress price on residualized size
+data_house['resid_size'] = resid_size
+model_biv = ols('price ~ resid_size', data=data_house).fit()
+
+print("\nCoefficient on size from full multiple regression:")
+print(f"  {model_full.params['size']:.6f}")
+
+print("\nCoefficient on resid_size from bivariate regression:")
+print(f"  {model_biv.params['resid_size']:.6f}")
+
+print(f"\nDifference: {abs(model_full.params['size'] - model_biv.params['resid_size']):.10f}")
+print("\nThese coefficients are identical (within numerical precision)")
+\end{lstlisting}
+
+\subsection{Results}
+
+\begin{verbatim}
+Coefficient on size from full multiple regression: 68.369419
+Coefficient on resid_size from bivariate regression: 68.369419
+Difference: 0.0000000000
+
+These coefficients are identical (within numerical precision)
+\end{verbatim}
+
+\subsection{Interpretation}
+
+\textbf{The Frisch-Waugh-Lovell (FWL) Theorem}
+
+This section demonstrates a profound result: \textbf{the coefficient on any predictor in multiple regression equals the coefficient from a bivariate regression of y on the residualized predictor}.
+
+\textbf{What does ``residualized'' mean?}
+
+Step 1: Regress size on all other predictors:
+$$\text{size} = \gamma_0 + \gamma_1 \times \text{bedrooms} + \gamma_2 \times \text{bathrooms} + \gamma_3 \times \text{lotsize} + \gamma_4 \times \text{age} + \gamma_5 \times \text{monthsold} + \text{residual}$$
+
+The residuals (resid\_size) represent the \textbf{component of size that is uncorrelated with other predictors}. This is ``size, purged of its correlation with bedrooms, bathrooms, etc.''
+
+Step 2: Regress price on resid\_size:
+$$\text{price} = \delta_0 + \delta_1 \times \text{resid\_size} + \text{error}$$
+
+\textbf{Result}: $\delta_1 = \beta_{\text{size}}$ (the coefficient from the full multiple regression)
+
+\textbf{Why does this work?}
+
+Multiple regression with correlated predictors faces a challenge:
+\begin{itemize}
+\item size and bedrooms are correlated (r = 0.518)
+\item When both are in the model, which gets ``credit'' for shared variation?
+\end{itemize}
+
+The FWL theorem resolves this by \textbf{orthogonalizing} predictors:
+\begin{enumerate}
+\item Remove from size all variation explained by other predictors $\rightarrow$ resid\_size
+\item Regress price on this orthogonalized size $\rightarrow$ isolates size's unique contribution
+\end{enumerate}
+
+This is exactly what ``holding other variables constant'' means \textbf{mechanically}.
+
+\textbf{Practical Interpretation}
+
+When we say ``size coefficient = 68.37, holding bedrooms constant,'' we mean:
+\begin{itemize}
+\item Compare two houses with the \textbf{same number of bedrooms} (and same bathrooms, lot, age, monthsold)
+\item One house has 100 more sq ft
+\item Expected price difference: \$6,837
+\end{itemize}
+
+The FWL approach achieves this by:
+\begin{enumerate}
+\item Removing from size the part correlated with bedrooms (and other variables)
+\item Regressing price on what remains
+\item This isolates the ``pure'' size effect
+\end{enumerate}
+
+\textbf{Numerical Verification}
+
+The coefficients match \textbf{exactly} (to machine precision):
+\begin{itemize}
+\item Multiple regression: 68.369419
+\item Residualized regression: 68.369419
+\item Difference: 0.0000000000
+\end{itemize}
+
+This isn't approximate—it's an algebraic identity.
+
+\textbf{Alternative Derivations}
+
+The same coefficient could be obtained via:
+\begin{enumerate}
+\item \textbf{Direct multiple regression}: price $\sim$ size + bedrooms + ... (what we did in Section 4)
+\item \textbf{Residualized y and x}: Regress price on other variables, get residuals; regress size on other variables, get residuals; regress residuals on residuals
+\item \textbf{Partial regression leverage plots}: Visualize resid(price $\sim$ others) vs. resid(size $\sim$ others)
+\end{enumerate}
+
+All three methods yield \textbf{identical} coefficients.
+
+\textbf{Implications for Interpretation}
+
+\textbf{``Ceteris paribus'' = orthogonalization}:
+\begin{itemize}
+\item Non-technical: ``Holding other variables constant''
+\item Technical: ``Using the component of x uncorrelated with other predictors''
+\end{itemize}
+
+This clarifies what multiple regression does:
+\begin{itemize}
+\item It doesn't literally hold variables constant (data are observational, not experimental)
+\item It \textbf{statistically adjusts} for correlations among predictors
+\item The adjustment is exact (via projection onto orthogonal subspaces)
+\end{itemize}
+
+\textbf{Limitations}
+
+While FWL shows what multiple regression \textbf{does}, it doesn't guarantee causal interpretation:
+\begin{itemize}
+\item We adjust for \textbf{included} variables, but not omitted ones
+\item If omitted variables correlate with size and price, bias remains
+\item FWL is a mechanical decomposition, not a causal identification strategy
+\end{itemize}
+
+\textbf{Geometric Intuition}
+
+Think of predictors as vectors in high-dimensional space:
+\begin{itemize}
+\item Multiple regression finds the \textbf{projection} of price onto the space spanned by all predictors
+\item Each coefficient measures the projection along one dimension, \textbf{orthogonal to others}
+\item FWL explicitly constructs these orthogonal dimensions
+\end{itemize}
+
+\textbf{Computational Note}
+
+FWL is primarily a \textbf{pedagogical tool} to understand partial effects. In practice:
+\begin{itemize}
+\item Modern software (statsmodels, scikit-learn) computes multiple regression directly via matrix algebra (X'X)$^{-1}$X'y
+\item FWL would be inefficient (requires k separate auxiliary regressions for k predictors)
+\item FWL is useful for \textbf{diagnostics} (partial regression plots, checking influential observations)
+\end{itemize}
+
+\textbf{Connection to Experimental Design}
+
+In a \textbf{randomized experiment}:
+\begin{itemize}
+\item Treatment is uncorrelated with other variables (by design)
+\item Bivariate regression (y $\sim$ treatment) equals multiple regression coefficient
+\item No need for statistical adjustment
+\end{itemize}
+
+In \textbf{observational data}:
+\begin{itemize}
+\item Treatment (size) correlates with other variables (bedrooms)
+\item Must use multiple regression to adjust for confounding
+\item FWL shows how this adjustment works
+\end{itemize}
+
+\textbf{Summary}
+
+The FWL theorem provides a mechanical interpretation of ``holding variables constant'':
+\begin{enumerate}
+\item Remove from x the part explained by other predictors
+\item Regress y on what remains
+\item This isolates x's unique contribution
+\end{enumerate}
+
+This demystifies multiple regression and clarifies what partial effects represent: \textbf{the association between y and x, purged of correlations with other included predictors}.
+
+\section{Model Fit Statistics}
+
+\subsection{Code}
+
+\textbf{Context:} In this section, we examine measures of overall model performance—R², adjusted R², root MSE, AIC, and BIC. These statistics help us assess how well the model fits the data and compare models with different numbers of predictors. Understanding these fit statistics is crucial because adding more variables always increases R² even if they add no real explanatory power, so we need penalized measures (adjusted R², AIC, BIC) that account for model complexity when selecting specifications.
+
+\begin{lstlisting}[language=Python]
+# R-squared and related statistics
+n = len(data_house)
+k = len(model_full.params)  # includes intercept
+df = n - k
+
+print(f"Sample size (n): {n}")
+print(f"Number of parameters (k): {k}")
+print(f"Degrees of freedom (n-k): {df}")
+
+print(f"\nR-squared: {model_full.rsquared:.6f}")
+print(f"Adjusted R-squared: {model_full.rsquared_adj:.6f}")
+print(f"Root MSE: {np.sqrt(model_full.mse_resid):.6f}")
+
+# Verify R-squared is squared correlation between y and yhat
+predicted = model_full.fittedvalues
+corr_y_yhat = np.corrcoef(data_house['price'], predicted)[0, 1]
+rsq_check = corr_y_yhat ** 2
+
+print(f"\nVerification:")
+print(f"  Correlation(y, y^): {corr_y_yhat:.6f}")
+print(f"  [Correlation(y, y^)]^2: {rsq_check:.6f}")
+print(f"  R^2: {model_full.rsquared:.6f}")
+print(f"  Match: {np.isclose(rsq_check, model_full.rsquared)}")
+
+# Manual calculation of adjusted R-squared
+r2 = model_full.rsquared
+r2_adj_manual = r2 - ((k-1)/df) * (1 - r2)
+print(f"\nManual calculation of adjusted R^2: {r2_adj_manual:.6f}")
+print(f"From model output: {model_full.rsquared_adj:.6f}")
+
+# Calculate AIC and BIC
+rss = np.sum(model_full.resid ** 2)
+aic_statsmodels = model_full.aic
+bic_statsmodels = model_full.bic
+
+print("\nInformation Criteria:")
+print(f"  AIC: {aic_statsmodels:.4f}")
+print(f"  BIC: {bic_statsmodels:.4f}")
+\end{lstlisting}
+
+\subsection{Results}
+
+\textbf{Model Fit Summary}:
+\begin{itemize}
+\item Sample size (n): 29
+\item Number of parameters (k): 7 (includes intercept)
+\item Degrees of freedom (n-k): 22
+\end{itemize}
+
+\textbf{R-squared}: 0.650553
+
+\textbf{Adjusted R-squared}: 0.555249
+
+\textbf{Root MSE}: 24,935.73
+
+\textbf{Verification}:
+\begin{itemize}
+\item Correlation(y, $\hat{y}$): 0.806569
+\item [Correlation(y, $\hat{y}$)]²: 0.650553
+\item R²: 0.650553
+\item Match: True
+\end{itemize}
+
+\textbf{Manual vs. Model Calculation}:
+\begin{itemize}
+\item Manual adjusted R²: 0.555249
+\item Model output: 0.555249
+\item Match: True
+\end{itemize}
+
+\textbf{Information Criteria}:
+\begin{itemize}
+\item AIC: 675.4824
+\item BIC: 685.0535
+\end{itemize}
+
+\subsection{Interpretation}
+
+\textbf{R-Squared (R² = 0.651)}
+
+\textbf{Definition}: R² = 1 - (SSR/SST), where:
+\begin{itemize}
+\item SSR = $\Sigma(y_i - \hat{y}_i)^2$ (sum of squared residuals—unexplained variation)
+\item SST = $\Sigma(y_i - \bar{y})^2$ (total sum of squares—total variation in y)
+\end{itemize}
+
+\textbf{Interpretation}: 65.1\% of the variation in house prices is explained by the six predictors (size, bedrooms, bathrooms, lotsize, age, monthsold).
+
+\textbf{Alternative interpretation}: R² = corr(y, $\hat{y}$)²
+\begin{itemize}
+\item Correlation between actual and predicted prices: 0.807
+\item Squared: 0.651
+\end{itemize}
+
+This shows R² measures how well predictions match actual values.
+
+\textbf{Is R² = 0.651 good?}
+
+\textbf{Context-dependent}:
+\begin{itemize}
+\item \textbf{Cross-sectional microdata} (individual houses): R² = 0.60-0.80 is typical and considered good
+\item \textbf{Time series macro data} (GDP, inflation): R² > 0.90 is common due to trends
+\item \textbf{Lab experiments}: R² > 0.90 expected (controlled conditions)
+\end{itemize}
+
+For housing with n=29, R² = 0.651 is \textbf{respectable}—we explain nearly two-thirds of price variation using only six observable characteristics.
+
+\textbf{What explains the remaining 35\%?}
+
+\textbf{Unexplained variation comes from}:
+\begin{enumerate}
+\item \textbf{Omitted variables}: Location within neighborhood, school quality, condition, finishes, curb appeal
+\item \textbf{Measurement error}: Size might be measured with error; subjective variables (condition) not quantified
+\item \textbf{Idiosyncratic factors}: Buyer-specific preferences, negotiation skill, timing
+\item \textbf{Random noise}: Pure randomness in prices
+\end{enumerate}
+
+\textbf{R² limitations}:
+\begin{itemize}
+\item \textbf{Not a test of significance}: High R² doesn't mean coefficients are significant
+\item \textbf{Not proof of causality}: R² measures association, not causation
+\item \textbf{Sensitive to sample}: Different samples yield different R²
+\item \textbf{Increases with more predictors}: Adding variables (even irrelevant ones) mechanically increases R²
+\end{itemize}
+
+\textbf{Adjusted R² (R²$_{adj}$ = 0.555)}
+
+\textbf{Motivation}: R² always increases when adding predictors, even if they're useless. Adjusted R² \textbf{penalizes} for the number of parameters.
+
+\textbf{Formula}: R²$_{adj}$ = 1 - (1 - R²) $\times$ (n-1)/(n-k)
+
+Where:
+\begin{itemize}
+\item n = sample size (29)
+\item k = number of parameters including intercept (7)
+\end{itemize}
+
+\textbf{Calculation}:
+$$\text{R}^2_{adj} = 1 - (1 - 0.651) \times (28/22) = 1 - 0.349 \times 1.273 = 1 - 0.444 = 0.556$$
+
+\textbf{Interpretation}: After adjusting for degrees of freedom, 55.5\% of variation is explained.
+
+\textbf{Difference from R²}: R² - R²$_{adj}$ = 0.651 - 0.555 = 0.096
+
+This 9.6-point penalty reflects the cost of estimating 6 slope coefficients with only 29 observations.
+
+\textbf{When to use R²$_{adj}$}:
+\begin{itemize}
+\item \textbf{Model comparison}: When comparing models with different numbers of predictors
+\item \textbf{Small samples}: When n is small relative to k (like here: n/k = 29/7 = 4.1)
+\item \textbf{Variable selection}: R²$_{adj}$ can decrease when adding weak predictors (unlike R²)
+\end{itemize}
+
+\textbf{Interpretation caveat}: R²$_{adj}$ can be negative (if model is worse than predicting $\bar{y}$ for all observations), though not here.
+
+\textbf{Root Mean Squared Error (Root MSE = \$24,936)}
+
+\textbf{Definition}: Root MSE = $\sqrt{\text{SSR}/(n-k)} = \sqrt{\Sigma(y_i - \hat{y}_i)^2/(n-k)}$
+
+\textbf{Interpretation}: The \textbf{average prediction error} is \$24,936.
+
+\textbf{Practical meaning}:
+\begin{itemize}
+\item If we use this model to predict house prices, we'll typically be off by about \$25,000
+\item Relative to mean price (\$253,910), this is $\sim$10\% error
+\item Relative to SD of price (\$37,391), this is $\sim$67\% of the variation
+\end{itemize}
+
+\textbf{Root MSE vs. R²}:
+\begin{itemize}
+\item \textbf{R²} is unitless (0 to 1 scale), measures proportion of variation explained
+\item \textbf{Root MSE} has units (dollars), measures absolute prediction error
+\end{itemize}
+
+\textbf{Which is more useful?}
+
+\textbf{R²}: Good for comparing models on the same data (did adding variables help?)
+
+\textbf{Root MSE}: Good for assessing practical prediction accuracy (is $\pm$\$25k acceptable error?)
+
+\textbf{Information Criteria (AIC and BIC)}
+
+\textbf{Purpose}: Model selection tools that \textbf{balance fit and complexity}.
+
+\textbf{AIC (Akaike Information Criterion) = 675.48}
+
+\textbf{Formula} (Stata/statsmodels convention):
+$$\text{AIC} = n \times \ln(\text{SSR}/n) + n \times (1 + \ln(2\pi)) + 2k$$
+
+Where k includes intercept (k=7 here).
+
+\textbf{Interpretation}:
+\begin{itemize}
+\item \textbf{Lower AIC = better model} (better fit relative to complexity)
+\item AIC = -2$\times$log-likelihood + 2k (penalizes each parameter by 2)
+\item Penalty is \textbf{constant} (doesn't depend on sample size)
+\end{itemize}
+
+\textbf{BIC (Bayesian Information Criterion) = 685.05}
+
+\textbf{Formula}:
+$$\text{BIC} = n \times \ln(\text{SSR}/n) + n \times (1 + \ln(2\pi)) + k \times \ln(n)$$
+
+\textbf{Interpretation}:
+\begin{itemize}
+\item \textbf{Lower BIC = better model}
+\item BIC = -2$\times$log-likelihood + k$\times$ln(n) (penalizes each parameter by ln(n))
+\item Penalty \textbf{grows with sample size}: ln(29) $\approx$ 3.37 > 2 (AIC penalty)
+\end{itemize}
+
+\textbf{AIC vs. BIC}:
+
+\begin{center}
+\begin{tabular}{llll}
+\hline
+Criterion & Penalty per parameter & Asymptotic property & Preferred when \\
+\hline
+AIC & 2 & Minimizes prediction error & Prediction is the goal \\
+BIC & ln(n) & Identifies true model (if it exists) & Inference is the goal \\
+\hline
+\end{tabular}
+\end{center}
+
+\textbf{Which to use?}
+
+\begin{itemize}
+\item \textbf{AIC}: If goal is \textbf{prediction} (forecasting house prices)
+\item \textbf{BIC}: If goal is \textbf{causal inference} (finding true data generating process)
+\end{itemize}
+
+For n=29, ln(29) = 3.37, so BIC penalizes complexity more heavily than AIC. BIC > AIC (685.05 > 675.48), confirming BIC is more conservative.
+
+\textbf{Model Comparison Example}
+
+Suppose we compare three models:
+\begin{enumerate}
+\item \textbf{Simple}: price $\sim$ size (k=2)
+\item \textbf{Medium}: price $\sim$ size + bedrooms (k=3)
+\item \textbf{Full}: price $\sim$ size + bedrooms + bathrooms + lotsize + age + monthsold (k=7)
+\end{enumerate}
+
+We'd compute AIC and BIC for each, then choose the model with \textbf{lowest AIC/BIC}.
+
+\textbf{Caveat}: AIC and BIC can \textbf{disagree} (AIC prefers complex models, BIC prefers simple models for n > 8).
+
+\textbf{Practical Recommendation}:
+\begin{itemize}
+\item Report both AIC and BIC
+\item If they agree $\rightarrow$ clear winner
+\item If they disagree $\rightarrow$ consider substantive theory and prediction vs. inference goals
+\end{itemize}
+
+\textbf{Degrees of Freedom (df = 22)}
+
+\textbf{Calculation}: df = n - k = 29 - 7 = 22
+
+\textbf{Interpretation}:
+\begin{itemize}
+\item We have 29 observations
+\item We estimate 7 parameters (intercept + 6 slopes)
+\item This leaves 22 ``degrees of freedom'' for estimating error variance
+\end{itemize}
+
+\textbf{Why does df matter?}
+\begin{enumerate}
+\item \textbf{t-statistics}: Use t-distribution with df=22 (not standard normal)
+\item \textbf{Standard errors}: SE($\hat{\beta}$) depends on $\sqrt{\sigma^2/(n-k)}$—fewer df $\rightarrow$ larger SE
+\item \textbf{Overfitting risk}: Low df $\rightarrow$ high variance in estimates
+\end{enumerate}
+
+\textbf{Rule of thumb}: df should be at least 10-20 for reliable inference. With df=22, we're borderline—adding more predictors would be risky.
+
+\textbf{Summary}
+
+\textbf{Model fit is good but not exceptional}:
+\begin{itemize}
+\item \textbf{R² = 0.651}: Explains nearly two-thirds of variation
+\item \textbf{Adjusted R² = 0.555}: Penalty for 6 predictors reduces explanatory power
+\item \textbf{Root MSE = \$24,936}: Typical prediction error is 10\% of mean price
+\item \textbf{AIC = 675.5, BIC = 685.1}: Useful for comparing alternative specifications
+\end{itemize}
+
+\textbf{Next Steps}: Section 7 compares the full model to a simpler model (price $\sim$ size only) to assess whether the extra five predictors improve fit enough to justify their complexity.
+
+\section{Model Comparison}
+
+\subsection{Code}
+
+\textbf{Context:} This section systematically compares the full model (six predictors) against a simple model (size only) to determine whether the added complexity is justified. We use multiple criteria—adjusted R², AIC, BIC, and F-tests—to evaluate whether the five additional variables improve fit enough to warrant their inclusion. Model comparison is essential for avoiding overfitting and finding the most parsimonious specification that balances explanatory power with interpretability.
+
+\begin{lstlisting}[language=Python]
+# Compare full model vs. simple model
+model_small = ols('price ~ size', data=data_house).fit()
+
+# Create comparison table
+comparison_df = pd.DataFrame({
+    'Variable': model_full.params.index,
+    'Full Model Coef': model_full.params.values,
+    'Full Model SE': model_full.bse.values,
+    'Full Model t': model_full.tvalues.values,
+})
+
+# Add simple model coefficients where applicable
+simple_coefs = pd.Series(index=model_full.params.index, dtype=float)
+simple_se = pd.Series(index=model_full.params.index, dtype=float)
+simple_t = pd.Series(index=model_full.params.index, dtype=float)
+
+simple_coefs['Intercept'] = model_small.params['Intercept']
+simple_coefs['size'] = model_small.params['size']
+simple_se['Intercept'] = model_small.bse['Intercept']
+simple_se['size'] = model_small.bse['size']
+simple_t['Intercept'] = model_small.tvalues['Intercept']
+simple_t['size'] = model_small.tvalues['size']
+
+comparison_df['Simple Model Coef'] = simple_coefs.values
+comparison_df['Simple Model SE'] = simple_se.values
+comparison_df['Simple Model t'] = simple_t.values
+
+print("\nModel Comparison Table")
+print(comparison_df)
+
+print(f"\n{'Model':<20} {'R^2':<10} {'Adj R^2':<10} {'N':<5}")
+print("-" * 50)
+print(f"{'Full Model':<20} {model_full.rsquared:<10.4f} {model_full.rsquared_adj:<10.4f} {n:<5}")
+print(f"{'Simple Model':<20} {model_small.rsquared:<10.4f} {model_small.rsquared_adj:<10.4f} {n:<5}")
+\end{lstlisting}
+
+\subsection{Results}
+
+\textbf{Model Comparison: Full vs. Simple}
+
+\begin{center}
+\begin{tabular}{lrrrrrr}
+\hline
+Variable & Full Model Coef & Full Model SE & Full Model t & Simple Model Coef & Simple Model SE & Simple Model t \\
+\hline
+Intercept & 137,791 & 61,465 & 2.242 & 115,024 & 21,489 & 5.352 \\
+size & 68.37 & 15.39 & 4.443 & 73.75 & 11.17 & 6.601 \\
+bedrooms & 2,685 & 9,193 & 0.292 & — & — & — \\
+bathrooms & 6,833 & 15,721 & 0.435 & — & — & — \\
+lotsize & 2,303 & 7,227 & 0.319 & — & — & — \\
+age & -833 & 719 & -1.158 & — & — & — \\
+monthsold & -2,089 & 3,521 & -0.593 & — & — & — \\
+\hline
+\end{tabular}
+\end{center}
+
+\textbf{Model Fit Comparison}:
+
+\begin{center}
+\begin{tabular}{lrrrrr}
+\hline
+Model & R² & Adj R² & AIC & BIC & df \\
+\hline
+Full Model & 0.6506 & 0.5552 & 675.48 & 685.05 & 22 \\
+Simple Model & 0.6175 & 0.6033 & 668.06 & 671.44 & 27 \\
+\hline
+\end{tabular}
+\end{center}
+
+\subsection{Interpretation}
+
+\textbf{Model Specifications}
+
+\textbf{Simple Model}: price = 115,024 + 73.75 $\times$ size
+\begin{itemize}
+\item \textbf{1 predictor}: size only
+\item \textbf{2 parameters}: intercept + slope
+\item \textbf{27 degrees of freedom}
+\end{itemize}
+
+\textbf{Full Model}: price = 137,791 + 68.37$\times$size + 2,685$\times$bedrooms + 6,833$\times$bathrooms + 2,303$\times$lotsize - 833$\times$age - 2,089$\times$monthsold
+\begin{itemize}
+\item \textbf{6 predictors}: size, bedrooms, bathrooms, lotsize, age, monthsold
+\item \textbf{7 parameters}: intercept + 6 slopes
+\item \textbf{22 degrees of freedom}
+\end{itemize}
+
+\textbf{Coefficient Changes}
+
+\textbf{Intercept}:
+\begin{itemize}
+\item Simple: 115,024 $\rightarrow$ Full: 137,791 (+22,767)
+\item Standard error: 21,489 $\rightarrow$ 61,465 ($\times$2.86 increase)
+\item t-statistic: 5.352 $\rightarrow$ 2.242 (less significant in full model)
+\end{itemize}
+
+The intercept changes because adding variables shifts the ``baseline'' (zero point for all predictors).
+
+\textbf{size}:
+\begin{itemize}
+\item Simple: 73.75 $\rightarrow$ Full: 68.37 (-5.38, or -7.3\% change)
+\item Standard error: 11.17 $\rightarrow$ 15.39 (+37.8\% increase)
+\item t-statistic: 6.601 $\rightarrow$ 4.443 (still highly significant, but weaker)
+\end{itemize}
+
+\textbf{Why does the size coefficient change?}
+
+In the simple model, size ``takes credit'' for all correlated variables (bedrooms, bathrooms, etc.). In the full model, these effects are \textbf{partitioned} across predictors. The size coefficient falls because some of the association between size and price is now attributed to other variables.
+
+\textbf{Why does SE(size) increase?}
+
+\textbf{Multicollinearity}: size correlates with bedrooms (r=0.518), bathrooms, etc. When correlated predictors are included together:
+\begin{itemize}
+\item It becomes harder to isolate each variable's unique effect
+\item Standard errors inflate
+\item t-statistics fall (even if coefficients remain similar)
+\end{itemize}
+
+This is the \textbf{cost} of controlling for confounders—reduced precision.
+
+\textbf{R² Comparison}
+
+\textbf{Simple model}: R² = 0.6175
+\begin{itemize}
+\item Size alone explains 61.75\% of price variation
+\end{itemize}
+
+\textbf{Full model}: R² = 0.6506
+\begin{itemize}
+\item Six predictors explain 65.06\% of variation
+\end{itemize}
+
+\textbf{Improvement}: 0.6506 - 0.6175 = 0.0331 (3.31 percentage points)
+
+\textbf{Interpretation}: Adding five variables (bedrooms, bathrooms, lotsize, age, monthsold) increases explanatory power by only \textbf{3.3\%}.
+
+\textbf{Is this improvement worth it?}
+
+\textbf{Cost-benefit analysis}:
+\begin{itemize}
+\item \textbf{Benefit}: 3.3\% more variation explained
+\item \textbf{Cost}: 5 additional parameters, 5 fewer degrees of freedom, larger standard errors
+\end{itemize}
+
+\textbf{Adjusted R² tells a different story}:
+\begin{itemize}
+\item Simple: Adj R² = 0.6033
+\item Full: Adj R² = 0.5552
+\end{itemize}
+
+\textbf{Adjusted R² DECREASES} from 0.603 to 0.555 when adding five variables!
+
+\textbf{Why?} The penalty for adding parameters (-5 df) outweighs the benefit (3.3\% R² gain).
+
+\textbf{Conclusion from Adjusted R²}: The full model is \textbf{worse} after adjusting for complexity. The simple model (size only) is preferred.
+
+\textbf{Information Criteria Comparison}
+
+\textbf{AIC}:
+\begin{itemize}
+\item Simple: 668.06
+\item Full: 675.48
+\end{itemize}
+
+\textbf{Lower AIC is better} $\rightarrow$ Simple model wins (668 < 675)
+
+\textbf{BIC}:
+\begin{itemize}
+\item Simple: 671.44
+\item Full: 685.05
+\end{itemize}
+
+\textbf{Lower BIC is better} $\rightarrow$ Simple model wins (671 < 685)
+
+\textbf{Both AIC and BIC prefer the simple model}. The extra five predictors don't improve fit enough to justify their complexity.
+
+\textbf{F-Test for Nested Models}
+
+We can formally test whether the five additional variables jointly improve fit:
+
+H$_0$: $\beta_{bedrooms} = \beta_{bathrooms} = \beta_{lotsize} = \beta_{age} = \beta_{monthsold} = 0$
+
+H$_1$: At least one of these coefficients $\neq$ 0
+
+\textbf{Test statistic}:
+$$F = \frac{(R^2_{full} - R^2_{simple}) / (k_{full} - k_{simple})}{(1 - R^2_{full}) / (n - k_{full})}$$
+
+Calculation:
+\begin{align*}
+F &= \frac{(0.6506 - 0.6175) / (7 - 2)}{(1 - 0.6506) / (29 - 7)} \\
+F &= \frac{0.0331 / 5}{0.3494 / 22} \\
+F &= \frac{0.00662}{0.01588} = 0.417
+\end{align*}
+
+\textbf{Critical value}: F(5, 22) at 5\% significance $\approx$ 2.66
+
+\textbf{Decision}: F = 0.417 < 2.66 $\rightarrow$ \textbf{Fail to reject H$_0$}
+
+\textbf{Conclusion}: The five additional variables do \textbf{not} jointly improve fit at the 5\% significance level.
+
+\textbf{Implications for Model Selection}
+
+\textbf{Multiple lines of evidence favor the simple model}:
+\begin{enumerate}
+\item \textbf{Adjusted R²}: Higher for simple model (0.603 vs. 0.555)
+\item \textbf{AIC}: Lower for simple model (668 vs. 675)
+\item \textbf{BIC}: Lower for simple model (671 vs. 685)
+\item \textbf{F-test}: Cannot reject that extra variables are jointly zero
+\item \textbf{Individual significance}: Only size is significant in full model; other five variables have p > 0.25
+\end{enumerate}
+
+\textbf{Practical recommendation}: Use the \textbf{simple model} (price $\sim$ size) for:
+\begin{itemize}
+\item \textbf{Prediction}: Simpler models often generalize better (avoid overfitting)
+\item \textbf{Communication}: Easier to explain ``price $\approx$ \$74 per sq ft'' than a 7-parameter model
+\item \textbf{Robustness}: Fewer parameters $\rightarrow$ more stable estimates
+\end{itemize}
+
+\textbf{When might the full model be preferred?}
+
+\begin{enumerate}
+\item \textbf{Theory}: If domain knowledge suggests bathrooms, age, etc. are important (even if not significant here)
+\item \textbf{Policy}: If we need to estimate specific effects (e.g., age depreciation) for tax assessment
+\item \textbf{Larger sample}: With n=300 instead of n=29, we'd have power to detect smaller effects
+\end{enumerate}
+
+\textbf{Overfitting Risk}
+
+With n=29 and k=7, we're perilously close to \textbf{overfitting}:
+\begin{itemize}
+\item Ratio n/k = 29/7 = 4.1 (generally want > 10)
+\item Degrees of freedom = 22 (borderline)
+\item Five of six predictors insignificant
+\end{itemize}
+
+The full model likely \textbf{fits the sample well but generalizes poorly} to new houses.
+
+\textbf{Cross-Validation Insight}
+
+If we split data into training (20 houses) and test (9 houses):
+\begin{itemize}
+\item \textbf{Simple model}: Would likely predict test set well (robust)
+\item \textbf{Full model}: Would likely overfit training set and predict test set poorly
+\end{itemize}
+
+\textbf{Summary}
+
+\textbf{Simple model (price $\sim$ size) is preferred}:
+\begin{itemize}
+\item \textbf{Parsimony}: Fewer parameters, easier to interpret
+\item \textbf{Better adjusted fit}: Adj R² = 0.603 vs. 0.555
+\item \textbf{Lower AIC/BIC}: 668/671 vs. 675/685
+\item \textbf{Statistical evidence}: Extra variables not jointly significant
+\end{itemize}
+
+\textbf{Full model taught us}:
+\begin{itemize}
+\item Most house characteristics (bedrooms, bathrooms, age) don't matter \textbf{after controlling for size}
+\item Size is the \textbf{dominant determinant} of price
+\item Multicollinearity (size/bedrooms) inflates standard errors
+\end{itemize}
+
+\textbf{Practical advice}: For appraisal, use size-based models. For academic research, report both models and justify choice.
+
+\begin{keyconcept}{Multicollinearity}
+Multicollinearity occurs when predictors are highly correlated with each other, making it difficult to isolate individual effects. While perfect collinearity (one variable is an exact linear combination of others) makes estimation impossible, imperfect multicollinearity inflates standard errors and creates unstable estimates. We diagnose multicollinearity using Variance Inflation Factors (VIF): values above 10 indicate problematic correlations. The solution is often to drop redundant variables, accepting that we cannot separately identify effects of highly correlated predictors.
+\end{keyconcept}
+
+\section{Multicollinearity and Inestimable Models}
+
+\subsection{Code}
+
+\textbf{Context:} In this section, we explore multicollinearity—when predictors are highly correlated with each other. We demonstrate perfect collinearity (which makes models inestimable) and calculate Variance Inflation Factors (VIF) to diagnose imperfect multicollinearity in our full model. Understanding multicollinearity is critical because it explains why some coefficients have huge standard errors despite good overall model fit, and it guides decisions about which variables to include or exclude.
+
+\begin{lstlisting}[language=Python]
+# Example: Perfect multicollinearity
+print("Creating a redundant variable (size_twice = 2 * size)...")
+data_house['size_twice'] = 2 * data_house['size']
+
+print("\nAttempting to estimate model with perfect collinearity:")
+try:
+    model_collinear = ols('price ~ size + size_twice + bedrooms',
+                          data=data_house).fit()
+    print("Model estimated. Checking for dropped variables...")
+    print(model_collinear.summary())
+except Exception as e:
+    print(f"Error encountered: {type(e).__name__}")
+    print(f"Message: {str(e)}")
+
+# Variance Inflation Factors (VIF) for the full model
+from statsmodels.stats.outliers_influence import variance_inflation_factor
+
+X = data_house[['size', 'bedrooms', 'bathrooms', 'lotsize', 'age', 'monthsold']]
+vif_data = pd.DataFrame()
+vif_data["Variable"] = X.columns
+vif_data["VIF"] = [variance_inflation_factor(X.values, i) for i in range(X.shape[1])]
+
+print("\nVariance Inflation Factors (VIF):")
+print(vif_data)
+print("\nNote: VIF > 10 often indicates problematic multicollinearity")
+vif_data.to_csv(os.path.join(TABLES_DIR, 'ch10_vif_table.csv'), index=False)
+\end{lstlisting}
+
+\subsection{Results}
+
+\textbf{Perfect Multicollinearity Example}:
+
+Python handles perfect collinearity by estimating the model but producing unstable coefficients:
+
+\begin{verbatim}
+Model estimated. Checking for dropped variables...
+
+Coefficients:
+Intercept:  111,700
+size:       14.48
+size_twice: 28.96
+bedrooms:   1,553
+\end{verbatim}
+
+Note: size\_twice = 2 $\times$ size $\rightarrow$ coefficients split (14.48 + 2$\times$14.48 $\approx$ 43.44 $\neq$ 72.41 from original model)
+
+\textbf{Condition Number}: 1.96e+17 (extremely large—indicates perfect collinearity)
+
+\textbf{Warning}: ``The smallest eigenvalue is 1.39e-26. This might indicate that there are strong multicollinearity problems or that the design matrix is singular.''
+
+\textbf{Variance Inflation Factors (VIF) for Full Model}:
+
+\begin{center}
+\begin{tabular}{lr}
+\hline
+Variable & VIF \\
+\hline
+size & 40.13 \\
+bedrooms & 57.82 \\
+bathrooms & 34.74 \\
+lotsize & 11.97 \\
+age & 21.02 \\
+monthsold & 12.80 \\
+\hline
+\end{tabular}
+\end{center}
+
+\textbf{Interpretation}: VIF > 10 indicates problematic multicollinearity
+
+\subsection{Interpretation}
+
+\textbf{Perfect Multicollinearity}
+
+\textbf{Definition}: Perfect multicollinearity occurs when one predictor is an \textbf{exact linear combination} of others.
+
+\textbf{Example}: size\_twice = 2 $\times$ size
+
+This creates a \textbf{rank-deficient design matrix}—the columns of X are linearly dependent, so (X'X) is singular (non-invertible).
+
+\textbf{Why is this a problem?}
+
+The regression equation becomes:
+$$\text{price} = \beta_0 + \beta_1 \times \text{size} + \beta_2 \times \text{size\_twice} + \beta_3 \times \text{bedrooms} + \varepsilon$$
+
+Substituting size\_twice = 2$\times$size:
+\begin{align*}
+\text{price} &= \beta_0 + \beta_1 \times \text{size} + \beta_2 \times (2 \times \text{size}) + \beta_3 \times \text{bedrooms} + \varepsilon \\
+\text{price} &= \beta_0 + (\beta_1 + 2\beta_2) \times \text{size} + \beta_3 \times \text{bedrooms} + \varepsilon
+\end{align*}
+
+\textbf{Infinitely many solutions}:
+\begin{itemize}
+\item $\beta_1$=10, $\beta_2$=10 $\rightarrow$ coefficient on size = 10 + 2(10) = 30
+\item $\beta_1$=5, $\beta_2$=12.5 $\rightarrow$ coefficient on size = 5 + 2(12.5) = 30
+\item $\beta_1$=20, $\beta_2$=5 $\rightarrow$ coefficient on size = 20 + 2(5) = 30
+\end{itemize}
+
+We can't separately identify $\beta_1$ and $\beta_2$. The model is \textbf{inestimable}.
+
+\textbf{How software handles it}:
+
+\begin{enumerate}
+\item \textbf{Stata/R}: Automatically drop one collinear variable (size\_twice would be omitted)
+\item \textbf{Python (statsmodels)}: Estimates the model but warns about singularity; coefficients are unstable and meaningless
+\item \textbf{Mathematical}: (X'X)$^{-1}$ doesn't exist $\rightarrow$ OLS formula breaks down
+\end{enumerate}
+
+\textbf{Practical detection}:
+\begin{itemize}
+\item \textbf{Condition number}: Ratio of largest to smallest eigenvalue of X'X
+  \begin{itemize}
+  \item Condition number > 10$^{15}$ indicates perfect collinearity
+  \item Here: 1.96e+17 (!) confirms perfect collinearity
+  \end{itemize}
+\item \textbf{Warnings}: Software issues explicit warnings about singular matrices
+\end{itemize}
+
+\textbf{Imperfect (but Problematic) Multicollinearity}
+
+\textbf{Definition}: Predictors are highly correlated but not perfectly collinear.
+
+\textbf{Example from full model}:
+\begin{itemize}
+\item size and bedrooms correlate at r = 0.518
+\item Not perfect (r $\neq$ 1), but strong enough to cause problems
+\end{itemize}
+
+\textbf{Variance Inflation Factor (VIF)}
+
+\textbf{Definition}: VIF measures how much the variance of $\hat{\beta}_j$ is inflated due to correlation with other predictors.
+
+\textbf{Formula}:
+$$\text{VIF}_j = \frac{1}{1 - R^2_j}$$
+
+Where R²$_j$ is the R² from regressing x$_j$ on all other predictors.
+
+\textbf{Interpretation}:
+\begin{itemize}
+\item \textbf{VIF = 1}: No correlation with other predictors (ideal)
+\item \textbf{VIF = 5}: Variance is 5$\times$ larger than if x$_j$ were uncorrelated
+\item \textbf{VIF = 10}: Common threshold for ``problematic'' multicollinearity
+\item \textbf{VIF > 20}: Severe multicollinearity
+\end{itemize}
+
+\textbf{VIF Results for Full Model}:
+
+\begin{enumerate}
+\item \textbf{bedrooms (VIF = 57.82)}:
+   \begin{itemize}
+   \item \textbf{Severe multicollinearity}
+   \item bedrooms is highly predictable from other variables
+   \item Variance is inflated by 57.82$\times$
+   \item Explains why SE(bedrooms) = \$9,193 is huge relative to coefficient (\$2,685)
+   \end{itemize}
+
+\item \textbf{size (VIF = 40.13)}:
+   \begin{itemize}
+   \item \textbf{Severe multicollinearity}
+   \item size is also highly correlated with other predictors
+   \item Variance inflated by 40$\times$
+   \end{itemize}
+
+\item \textbf{bathrooms (VIF = 34.74)}:
+   \begin{itemize}
+   \item \textbf{Severe multicollinearity}
+   \item bathrooms correlate with size, bedrooms
+   \end{itemize}
+
+\item \textbf{age (VIF = 21.02)}:
+   \begin{itemize}
+   \item \textbf{High multicollinearity}
+   \item Surprisingly, age is correlated with other predictors
+   \end{itemize}
+
+\item \textbf{monthsold (VIF = 12.80)}:
+   \begin{itemize}
+   \item \textbf{Moderate multicollinearity}
+   \item Just above the VIF=10 threshold
+   \end{itemize}
+
+\item \textbf{lotsize (VIF = 11.97)}:
+   \begin{itemize}
+   \item \textbf{Moderate multicollinearity}
+   \item Barely above threshold
+   \end{itemize}
+\end{enumerate}
+
+\textbf{All six predictors have VIF > 10}, indicating widespread multicollinearity.
+
+\textbf{Why So Much Multicollinearity?}
+
+\textbf{Structural correlations}:
+\begin{itemize}
+\item \textbf{size $\leftrightarrow$ bedrooms}: Larger houses have more bedrooms (r=0.518)
+\item \textbf{size $\leftrightarrow$ bathrooms}: Larger houses have more bathrooms (r=0.316)
+\item \textbf{bedrooms $\leftrightarrow$ lotsize}: Bigger lots accommodate bigger houses with more rooms (r=0.292)
+\end{itemize}
+
+\textbf{Small sample (n=29)}:
+\begin{itemize}
+\item With limited data, correlations appear stronger due to sampling variability
+\item Increases VIF even for weakly correlated predictors
+\end{itemize}
+
+\textbf{Consequences of Multicollinearity}
+
+\begin{enumerate}
+\item \textbf{Inflated standard errors}:
+   \begin{itemize}
+   \item SE(bedrooms) = \$9,193 (coefficient = \$2,685) $\rightarrow$ SE is 3.4$\times$ the coefficient!
+   \item SE(bathrooms) = \$15,721 (coefficient = \$6,833) $\rightarrow$ SE is 2.3$\times$ the coefficient!
+   \end{itemize}
+
+\item \textbf{Insignificant coefficients despite good fit}:
+   \begin{itemize}
+   \item Model R² = 0.651 (good overall fit)
+   \item But only size is individually significant
+   \item This paradox (good R², insignificant t-tests) is a hallmark of multicollinearity
+   \end{itemize}
+
+\item \textbf{Unstable estimates}:
+   \begin{itemize}
+   \item Small changes in data $\rightarrow$ large changes in coefficients
+   \item Coefficients sensitive to which variables are included
+   \end{itemize}
+
+\item \textbf{Wide confidence intervals}:
+   \begin{itemize}
+   \item bedrooms CI: [-16,400, 21,770] (span of \$38,170)
+   \item bathrooms CI: [-25,800, 39,466] (span of \$65,266)
+   \item Confidence intervals so wide they're practically useless
+   \end{itemize}
+
+\item \textbf{Incorrect signs (possible)}:
+   \begin{itemize}
+   \item With severe multicollinearity, coefficients can have wrong signs
+   \item Not observed here, but common in extreme cases
+   \end{itemize}
+\end{enumerate}
+
+\textbf{What Multicollinearity Does NOT Do}
+
+\begin{enumerate}
+\item \textbf{Does NOT bias coefficients}: E[$\hat{\beta}$] = $\beta$ (OLS remains unbiased)
+\item \textbf{Does NOT affect R²}: Overall fit is unaffected
+\item \textbf{Does NOT violate assumptions}: Multicollinearity is a data problem, not a model violation
+\item \textbf{Does NOT affect predictions}: $\hat{y}$ remains accurate (as long as collinear predictors move together in new data)
+\end{enumerate}
+
+\textbf{Solutions to Multicollinearity}
+
+\begin{enumerate}
+\item \textbf{Drop variables} (most common):
+   \begin{itemize}
+   \item Remove bedrooms (keep size) $\rightarrow$ Section 7 showed this works well
+   \item Removes redundancy, reduces VIF
+   \end{itemize}
+
+\item \textbf{Combine variables}:
+   \begin{itemize}
+   \item Create ``total\_rooms = bedrooms + bathrooms''
+   \item Reduces dimensionality
+   \end{itemize}
+
+\item \textbf{Collect more data}:
+   \begin{itemize}
+   \item Increase n to reduce sampling correlations
+   \item Not always feasible
+   \end{itemize}
+
+\item \textbf{Ridge regression} (advanced):
+   \begin{itemize}
+   \item Shrinks coefficients toward zero
+   \item Trades bias for lower variance
+   \end{itemize}
+
+\item \textbf{Principal Component Analysis (PCA)}:
+   \begin{itemize}
+   \item Transform correlated predictors into orthogonal components
+   \item Loses interpretability
+   \end{itemize}
+
+\item \textbf{Accept it}:
+   \begin{itemize}
+   \item If goal is prediction (not inference), multicollinearity matters less
+   \item Predictions remain accurate even if individual coefficients are imprecise
+   \end{itemize}
+\end{enumerate}
+
+\textbf{Practical Recommendations}
+
+\textbf{For this dataset}:
+\begin{itemize}
+\item \textbf{Use simple model (price $\sim$ size)}: Avoids multicollinearity, similar R²
+\item \textbf{If theory requires other variables}: Report VIF, acknowledge imprecision
+\item \textbf{Don't over-interpret insignificant coefficients}: Lack of significance may reflect multicollinearity, not true zero effects
+\end{itemize}
+
+\textbf{Diagnosing Multicollinearity}:
+\begin{enumerate}
+\item Compute VIF for all predictors
+\item Check pairwise correlations (correlation matrix from Section 3)
+\item Look for paradox: high R², insignificant t-tests
+\item Check condition number (> 30 is problematic)
+\end{enumerate}
+
+\textbf{Summary}
+
+\textbf{Perfect multicollinearity} (size\_twice = 2$\times$size):
+\begin{itemize}
+\item Makes model inestimable
+\item Software drops variables or warns about singularity
+\end{itemize}
+
+\textbf{Imperfect multicollinearity} (full model):
+\begin{itemize}
+\item All VIF > 10 (most > 20)
+\item Inflates standard errors drastically
+\item Only size remains significant despite good overall fit
+\item Suggests dropping correlated variables (bedrooms, bathrooms, etc.)
+\end{itemize}
+
+\textbf{Key insight}: \textbf{High correlations among predictors don't invalidate regression, but they reduce precision and interpretability}. Simple models often perform better when multicollinearity is severe.
+
+\section{Conclusion}
+
+Multiple regression represents one of the most powerful and widely-used tools in econometrics. While simple regression can only examine one predictor at a time, multiple regression allows us to model complex relationships where outcomes depend on many factors simultaneously. This chapter has taken you through the complete workflow of multiple regression analysis using a real housing dataset.
+
+Our journey began with a puzzle: Why does the effect of bedrooms on price seem to vanish when we control for house size? The answer lies in understanding \textbf{partial effects}—the core concept that distinguishes multiple regression from simple correlations. When we estimate how bedrooms affect price while holding size constant, we discover that what appeared to be a bedroom effect was really a size effect in disguise. Bedrooms and size are correlated, so a simple regression confounds these two influences.
+
+\textbf{What You've Learned}:
+
+\textbf{Programming Skills}: You've mastered the mechanics of multiple regression in Python—using \texttt{ols()} with multiple predictors, creating scatterplot matrices with \texttt{sns.pairplot()}, generating correlation heatmaps with \texttt{sns.heatmap()}, extracting confidence intervals with \texttt{.conf\_int()}, comparing models using R², AIC, and BIC, and calculating Variance Inflation Factors to diagnose multicollinearity.
+
+\textbf{Statistical Concepts}: You now understand partial effects (the ceteris paribus interpretation of holding other variables constant), omitted variable bias (how excluding correlated predictors distorts estimates), multicollinearity (why correlated predictors inflate standard errors), model selection (balancing fit and complexity), and the Frisch-Waugh-Lovell theorem (the mechanical meaning of statistical adjustment).
+
+\textbf{Economic Interpretation}: You can interpret coefficients as marginal effects (the price increase from one additional square foot, holding bedrooms constant), explain why coefficients change when variables are added or removed, distinguish between statistical significance (p-values) and economic significance (magnitude of effects), and recognize the trade-off between model complexity and interpretability.
+
+\textbf{Critical Insights}: Through this housing analysis, you've discovered that:
+\begin{itemize}
+\item \textbf{Size dominates}: Square footage is the overwhelming determinant of price, explaining 62\% of variation alone
+\item \textbf{Other characteristics matter little}: Once size is controlled, bedrooms, bathrooms, lot size, age, and months on market add negligible explanatory power
+\item \textbf{Multicollinearity is pervasive}: All predictors have VIF > 10, inflating standard errors and explaining why only size remains significant
+\item \textbf{Simple models often win}: The model with size alone outperforms the full model on adjusted R², AIC, and BIC—parsimony trumps complexity
+\item \textbf{Partial effects differ from bivariate effects}: The bedroom coefficient collapses from \$23,667 to \$1,553 when size is included, revealing omitted variable bias
+\end{itemize}
+
+\textbf{Looking Ahead}:
+
+This chapter has equipped you with the foundational tools for multiple regression. In Chapter 11, you'll learn statistical inference techniques for testing hypotheses about individual coefficients and groups of coefficients. Chapter 12 will introduce advanced topics like dummy variables, interaction effects, and nonlinear transformations. The principles you've learned here—controlling for confounders, diagnosing multicollinearity, comparing models—form the bedrock of all empirical work in economics.
+
+\textbf{Why This Matters}:
+
+Multiple regression is ubiquitous in applied economics. Labor economists use it to estimate wage equations controlling for education, experience, and occupation. Health economists model disease risk with demographic and behavioral predictors. Marketing analysts predict customer lifetime value using purchase history and demographics. Financial economists estimate asset pricing models with multiple risk factors. The housing example is pedagogical, but the methods scale to big data with millions of observations and hundreds of predictors.
+
+Most importantly, you've learned that \textbf{correlation is not causation}. Our coefficients represent conditional associations—how price relates to size after adjusting for other included variables. To claim causality, we'd need randomization, instrumental variables, or other identification strategies. Multiple regression adjusts for observed confounders, but omitted variables (location quality, renovation history, neighborhood amenities) likely remain, potentially biasing our estimates.
+
+The journey from simple to multiple regression represents a fundamental shift in how we think about relationships. Instead of asking ``Do bedrooms affect price?'' we now ask ``Do bedrooms affect price, holding size constant?'' This ceteris paribus perspective is the essence of econometric thinking—isolating causal effects by controlling for confounding factors. As you continue your studies, this framework will serve you in every empirical application you encounter.
+
+\textbf{References}:
+
+\begin{itemize}
+\item Cameron, A.C. (2022). \textit{Analysis of Economics Data: An Introduction to Econometrics}. \texttt{https://cameron.econ.ucdavis.edu/aed/index.html}
+\item Python libraries: pandas, numpy, statsmodels, matplotlib, seaborn, scipy
+\end{itemize}
+
+\textbf{Data}:
+
+All datasets are available at: \texttt{https://cameron.econ.ucdavis.edu/aed/aeddata.html}
+
+\vspace{1em}
+
+\begin{keyconcept}{Learn by Coding}
+Now that you've learned the key concepts in this chapter, it's time to put them into practice!
+
+Open the interactive Google Colab notebook for this chapter to:
+\begin{itemize}
+\item Run Python code implementing all the methods discussed
+\item Experiment with real datasets and see results immediately
+\item Modify parameters and explore how changes affect outcomes
+\item Complete hands-on exercises that reinforce your understanding
+\end{itemize}
+
+\textbf{Access the notebook here:} \url{https://colab.research.google.com/github/quarcs-lab/metricsai/blob/main/notebooks_colab/ch10_Data_Summary_for_Multiple_Regression.ipynb}
+
+Remember: Learning econometrics is not just about understanding theory---it's about applying it. The best way to master these concepts is to code them yourself!
+\end{keyconcept}

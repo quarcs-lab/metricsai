@@ -1,0 +1,1190 @@
+\chapter{Statistical Inference for Bivariate Regression}
+
+\begin{center}
+\includegraphics[width=\textwidth]{../code_python/images/ch07_visual_summary.jpg}
+\end{center}
+
+\textit{This chapter demonstrates how to conduct statistical inference for regression coefficients, using hypothesis tests and confidence intervals to make statements about population parameters based on sample data from 29 house sales.}
+
+\section{Introduction}
+
+This report explores \textbf{statistical inference for bivariate regression}---the foundation for making statements about populations based on sample data. While Chapter 6 demonstrated that OLS is unbiased and normally distributed, Chapter 7 shows how to \textbf{use these properties for practical inference}.
+
+Statistical inference addresses the fundamental question: \textbf{Given that we observe only one sample, how confident can we be about our conclusions?} We use three main tools:
+
+\begin{itemize}
+\item \textbf{t-statistics}: Standardized measures of how far estimates deviate from hypothesized values
+\item \textbf{Confidence intervals}: Ranges that likely contain the true population parameter
+\item \textbf{Hypothesis tests}: Formal procedures for evaluating claims about parameters
+\end{itemize}
+
+This chapter applies these tools to a real-world dataset analyzing the relationship between house prices and house size, demonstrating how to:
+\begin{itemize}
+\item Test whether a regressor has any effect ($H_0: \beta_1 = 0$)
+\item Test whether the effect equals a specific value ($H_0: \beta_1 = 90$)
+\item Construct confidence intervals for unknown parameters
+\item Handle heteroskedasticity with robust standard errors
+\end{itemize}
+
+\textbf{What You'll Learn:}
+
+\begin{itemize}
+\item How to calculate and interpret t-statistics for regression coefficients
+\item How to construct confidence intervals and understand their probabilistic interpretation
+\item How to conduct two-sided hypothesis tests ($H_0: \beta_1 = \beta_0$ vs $H_1: \beta_1 \neq \beta_0$)
+\item How to perform one-sided directional tests ($H_0: \beta_1 \leq \beta_0$ vs $H_1: \beta_1 > \beta_0$)
+\item How to understand p-values and statistical significance
+\item How to recognize when to use heteroskedasticity-robust standard errors
+\item How to interpret regression output in context of statistical inference
+\item How to distinguish between statistical significance and practical significance
+\end{itemize}
+
+\section{Setup and Data Loading}
+
+\subsection{Code}
+
+\textbf{Context:} In this section, we establish the computational environment and load real housing market data. Unlike theoretical exercises, we use actual house sales data to demonstrate statistical inference in a realistic setting. By setting random seeds, we ensure reproducibility. This dataset of 29 house sales provides an excellent teaching example because the sample size is small enough to make statistical inference crucial---with only 29 observations, uncertainty quantification becomes essential for reliable conclusions.
+
+\begin{lstlisting}[language=Python]
+# Import required libraries
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+import statsmodels.api as sm
+from statsmodels.formula.api import ols
+from scipy import stats
+from statsmodels.stats.sandwich_covariance import cov_hc1
+import random
+import os
+
+# Set random seeds for reproducibility
+RANDOM_SEED = 42
+random.seed(RANDOM_SEED)
+np.random.seed(RANDOM_SEED)
+os.environ['PYTHONHASHSEED'] = str(RANDOM_SEED)
+
+# GitHub data URL
+GITHUB_DATA_URL = "https://raw.githubusercontent.com/quarcs-lab/data-open/master/AED/"
+
+# Create output directories
+IMAGES_DIR = 'images'
+TABLES_DIR = 'tables'
+os.makedirs(IMAGES_DIR, exist_ok=True)
+os.makedirs(TABLES_DIR, exist_ok=True)
+
+# Set plotting style
+sns.set_style("whitegrid")
+plt.rcParams['figure.figsize'] = (10, 6)
+
+# Read in the house data
+data_house = pd.read_stata(GITHUB_DATA_URL + 'AED_HOUSE.DTA')
+
+print("Data summary:")
+print(data_house.describe())
+print("\nFirst few observations:")
+print(data_house.head())
+\end{lstlisting}
+
+\subsection{Results}
+
+\begin{verbatim}
+Data summary:
+               price         size  ...  monthsold           list
+count      29.000000    29.000000  ...  29.000000      29.000000
+mean   253910.344828  1882.758621  ...   5.965517  257824.137931
+std     37390.710695   398.272130  ...   1.679344   40860.264099
+min    204000.000000  1400.000000  ...   3.000000  199900.000000
+25%    233000.000000  1600.000000  ...   5.000000  239000.000000
+50%    244000.000000  1800.000000  ...   6.000000  245000.000000
+75%    270000.000000  2000.000000  ...   7.000000  269000.000000
+max    375000.000000  3300.000000  ...   8.000000  386000.000000
+
+First few observations:
+    price  size  bedrooms  bathrooms  lotsize   age  monthsold    list
+0  204000  1400         3        2.0        1  31.0          7  199900
+1  212000  1600         3        3.0        2  33.0          5  212000
+2  213000  1800         3        2.0        2  51.0          4  219900
+3  220000  1600         3        2.0        1  49.0          4  229000
+4  224500  2100         4        2.5        2  47.0          6  224500
+\end{verbatim}
+
+\subsection{Interpretation}
+
+\textbf{Dataset}: AED\_HOUSE.DTA contains information on 29 houses sold in a specific market. This is a \textbf{cross-sectional dataset} (observations at one point in time) with variables:
+
+\textbf{Key variables}:
+\begin{itemize}
+\item \textbf{price}: Selling price in dollars (dependent variable, y)
+\item \textbf{size}: House size in square feet (independent variable, x)
+\item \textbf{bedrooms}: Number of bedrooms
+\item \textbf{bathrooms}: Number of bathrooms
+\item \textbf{lotsize}: Lot size category
+\item \textbf{age}: Age of house in years
+\item \textbf{monthsold}: Month sold (3-8)
+\item \textbf{list}: Original listing price
+\end{itemize}
+
+\textbf{Descriptive statistics}:
+
+\textbf{Price (dependent variable)}:
+\begin{itemize}
+\item Mean: \$253,910
+\item Standard deviation: \$37,391 (15\% coefficient of variation)
+\item Range: \$204,000 to \$375,000 (spread of \$171,000)
+\item Median: \$244,000 (close to mean, suggesting symmetric distribution)
+\end{itemize}
+
+\textbf{Size (regressor)}:
+\begin{itemize}
+\item Mean: 1,883 square feet
+\item Standard deviation: 398 sq ft (21\% coefficient of variation)
+\item Range: 1,400 to 3,300 sq ft (wide variation is good for regression precision)
+\item Median: 1,800 sq ft
+\end{itemize}
+
+\textbf{Data quality considerations}:
+\begin{itemize}
+\item \textbf{Sample size}: n = 29 is small by modern standards, leading to:
+  \begin{itemize}
+  \item Higher standard errors (less precise estimates)
+  \item Lower statistical power (harder to detect effects)
+  \item Greater sensitivity to outliers
+  \end{itemize}
+\item \textbf{Complete data}: No missing values observed in key variables
+\item \textbf{Outliers}: The maximum price (\$375,000) is 1.5x the mean, suggesting potential high-end outliers
+\end{itemize}
+
+\textbf{Why this dataset?}: Real estate is an ideal teaching example because:
+\begin{enumerate}
+\item The relationship (bigger houses cost more) is intuitive
+\item The economic interpretation is clear (price per square foot)
+\item Students can verify results against local market knowledge
+\item The scatter plot visually reinforces the linear relationship
+\end{enumerate}
+
+\textbf{Research question}: How does house size affect selling price? Specifically:
+\begin{itemize}
+\item What is the average price increase per additional square foot? ($\beta_1$)
+\item Is this relationship statistically significant? ($H_0: \beta_1 = 0$)
+\item What is the plausible range for the true effect? (confidence interval)
+\end{itemize}
+
+\textbf{Sample size implications}: With only n = 29 observations:
+\begin{itemize}
+\item We have df = 27 degrees of freedom for inference
+\item Critical t-value $\approx$ 2.05 (compared to 1.96 for large samples)
+\item Standard errors will be relatively large
+\item Confidence intervals will be wider than with larger samples
+\end{itemize}
+
+This small sample makes statistical inference \textbf{essential}---we cannot simply report $\hat{\beta}_1$ without quantifying uncertainty.
+
+\section{Basic Regression and t-statistics}
+
+\subsection{Code}
+
+\textbf{Context:} We begin by estimating the relationship between house price and size using OLS. The key innovation in this chapter is extracting not just the coefficient estimate but also its standard error, t-statistic, and p-value. These statistics allow us to test hypotheses about the population parameter. The t-statistic, in particular, standardizes our estimate by dividing it by its standard error, creating a metric for assessing statistical significance.
+
+\begin{lstlisting}[language=Python]
+# Table 7.1 - Basic regression
+model_basic = ols('price ~ size', data=data_house).fit()
+print(model_basic.summary())
+
+# Extract key statistics
+coef_size = model_basic.params['size']
+se_size = model_basic.bse['size']
+t_stat_size = model_basic.tvalues['size']
+p_value_size = model_basic.pvalues['size']
+
+print(f"\nDetailed statistics for 'size' coefficient:")
+print(f"  Coefficient: {coef_size:.4f}")
+print(f"  Standard Error: {se_size:.4f}")
+print(f"  t-statistic: {t_stat_size:.4f}")
+print(f"  p-value: {p_value_size:.6f}")
+\end{lstlisting}
+
+\subsection{Results}
+
+\textbf{Table 7.1: Regression of House Price on Size}
+
+\begin{verbatim}
+                            OLS Regression Results
+==============================================================================
+Dep. Variable:                  price   R-squared:                       0.617
+Model:                            OLS   Adj. R-squared:                  0.603
+Method:                 Least Squares   F-statistic:                     43.58
+Date:                Sat, 24 Jan 2026   Prob (F-statistic):           4.41e-07
+Time:                        11:27:46   Log-Likelihood:                -332.05
+No. Observations:                  29   AIC:                             668.1
+Df Residuals:                      27   BIC:                             670.8
+Df Model:                           1
+Covariance Type:            nonrobust
+==============================================================================
+                 coef    std err          t      P>|t|      [0.025      0.975]
+------------------------------------------------------------------------------
+Intercept    1.15e+05   2.15e+04      5.352      0.000    7.09e+04    1.59e+05
+size          73.7710     11.175      6.601      0.000      50.842      96.700
+==============================================================================
+\end{verbatim}
+
+\textbf{Detailed statistics for 'size' coefficient:}
+\begin{verbatim}
+  Coefficient: 73.7710
+  Standard Error: 11.1749
+  t-statistic: 6.6015
+  p-value: 0.000000
+\end{verbatim}
+
+\begin{center}
+\includegraphics[width=0.8\textwidth]{../code_python/images/ch07_fig1_house_price_size.png}
+\end{center}
+
+\subsection{Interpretation}
+
+\textbf{Estimated regression equation}:
+
+price = 115,017 + 73.77 $\times$ size
+
+\textbf{Coefficient interpretation ($\hat{\beta}_1 = 73.77$)}:
+
+\textbf{Economic meaning}: Each additional square foot of house size is associated with a \$73.77 increase in selling price, on average.
+
+\textbf{Practical significance}:
+\begin{itemize}
+\item A 100 sq ft increase $\rightarrow$ \$7,377 price increase
+\item A 500 sq ft increase (e.g., adding a room) $\rightarrow$ \$36,885 price increase
+\item From 1,400 to 3,300 sq ft (dataset range) $\rightarrow$ \$140,163 price difference
+\end{itemize}
+
+This seems \textbf{economically reasonable} for the housing market---not too high (suggesting overvaluation) and not too low (suggesting undervaluation).
+
+\textbf{Intercept interpretation ($\hat{\beta}_0 = 115,017$)}:
+
+\textbf{Technical meaning}: The predicted price for a house with size = 0 is \$115,017.
+
+\textbf{Caution}: This is \textbf{extrapolation}---the smallest house in the data is 1,400 sq ft, so we have no information about zero-size houses. The intercept should not be interpreted literally. It's better understood as a \textbf{reference point} that shifts the regression line up or down.
+
+\textbf{t-statistic for size (t = 6.60)}:
+
+The t-statistic tests $H_0: \beta_1 = 0$ (size has no effect on price) vs $H_1: \beta_1 \neq 0$ (size affects price).
+
+\textbf{Formula}: $t = (\hat{\beta}_1 - 0) / SE(\hat{\beta}_1) = (73.77 - 0) / 11.17 = 6.60$
+
+\textbf{Interpretation}: The estimated coefficient is \textbf{6.60 standard errors} away from zero. This is a \textbf{very large} deviation---under the null hypothesis, we would almost never observe such an extreme value by chance.
+
+\textbf{Critical value}: For df = 27 and $\alpha = 0.05$ (two-tailed), $t_{crit} = 2.05$. Since $|6.60| > 2.05$, we \textbf{reject $H_0$} at the 5\% level.
+
+\textbf{p-value (p < 0.0001)}:
+
+The p-value answers: ``If the true $\beta_1$ were zero, what's the probability of observing a t-statistic as extreme as 6.60?''
+
+\textbf{Result}: $p \approx 0.0000004$ (virtually zero)
+
+\textbf{Interpretation}: If size truly had no effect on price, the probability of observing such strong evidence of an effect is less than 0.0001\%. This provides \textbf{overwhelming evidence} that size affects price.
+
+\textbf{Significance levels}:
+\begin{itemize}
+\item p < 0.001: Highly significant (***) --- our case
+\item p < 0.01: Very significant (**)
+\item p < 0.05: Significant (*)
+\item p > 0.05: Not significant at conventional levels
+\end{itemize}
+
+\textbf{Standard error (SE = 11.17)}:
+
+The standard error measures \textbf{sampling variability} of $\hat{\beta}_1$. It tells us:
+\begin{itemize}
+\item If we collected many samples of 29 houses, the slope estimates would vary with standard deviation $\approx$ 11.17
+\item Approximately 68\% of estimates would fall within $73.77 \pm 11.17 = [62.60, 84.94]$
+\item Approximately 95\% of estimates would fall within $73.77 \pm 2(11.17) = [51.43, 96.11]$
+\end{itemize}
+
+\textbf{R-squared ($R^2 = 0.617$)}:
+
+\textbf{Interpretation}: Size explains 61.7\% of the variation in house prices.
+
+\textbf{What this means}:
+\begin{itemize}
+\item Total variation in price (sum of squared deviations from mean): SST
+\item Variation explained by size: SSR = 0.617 $\times$ SST
+\item Unexplained variation (residuals): SSE = 0.383 $\times$ SST
+\end{itemize}
+
+\textbf{Implication}: While size is clearly important (high $R^2$), other factors (location, age, condition) also matter. The 38.3\% unexplained variation suggests:
+\begin{itemize}
+\item The model is incomplete (omitted variables)
+\item Some houses are underpriced/overpriced relative to size
+\item Random factors (negotiation, timing) influence prices
+\end{itemize}
+
+\textbf{F-statistic (F = 43.58, p < 0.0001)}:
+
+For bivariate regression, $F = t^2 = 6.60^2 = 43.56 \approx 43.58$. This tests the overall model significance---here, it's identical to the t-test for $\beta_1$.
+
+\textbf{Model diagnostics}:
+
+The regression output includes several diagnostic tests:
+\begin{itemize}
+\item \textbf{Durbin-Watson (1.22)}: Tests for autocorrelation. Values near 2 suggest no autocorrelation. Our value (1.22) suggests slight positive autocorrelation, though this is less concerning for cross-sectional data.
+\item \textbf{Jarque-Bera (0.64, p = 0.73)}: Tests normality of residuals. We fail to reject normality---good for inference validity.
+\item \textbf{Condition Number (9.45e+03)}: Measures multicollinearity (not an issue in bivariate regression) or scaling issues. High value suggests variables are on different scales (size in hundreds, price in hundreds of thousands).
+\end{itemize}
+
+\textbf{Visual interpretation}: The scatter plot shows:
+\begin{itemize}
+\item Strong positive linear relationship (upward trend)
+\item Moderate scatter around the line ($R^2 = 0.62$, not perfect)
+\item No obvious outliers or nonlinearity
+\item Regression line fits the data well
+\end{itemize}
+
+\begin{keyconcept}{t-Statistics and Hypothesis Testing}
+The t-statistic measures how many standard errors a coefficient estimate is from a hypothesized value (usually zero). It's calculated as $t = (\hat{\beta}_1 - \beta_{1,0}) / SE(\hat{\beta}_1)$. A large absolute t-value (typically $|t| > 2$) suggests the estimate is far from the null hypothesis value, providing evidence against the null. The t-distribution accounts for the uncertainty in estimating the error variance with small samples, making it more conservative than the normal distribution.
+\end{keyconcept}
+
+\section{Confidence Intervals}
+
+\subsection{Code}
+
+\textbf{Context:} Confidence intervals provide a range of plausible values for the true population parameter, quantifying the uncertainty inherent in estimation. While the point estimate (\$73.77 per square foot) is our best single guess, the confidence interval acknowledges sampling variability. Constructing confidence intervals requires understanding the t-distribution and critical values, which adjust for small sample sizes and produce valid inference under normality assumptions.
+
+\begin{lstlisting}[language=Python]
+# 95% confidence intervals
+conf_int = model_basic.conf_int(alpha=0.05)
+print("\n95% Confidence Intervals:")
+print(conf_int)
+
+# Manual calculation of confidence interval for size
+n = len(data_house)
+df = n - 2
+t_crit = stats.t.ppf(0.975, df)
+
+ci_lower = coef_size - t_crit * se_size
+ci_upper = coef_size + t_crit * se_size
+
+print(f"\nManual calculation for 'size' coefficient:")
+print(f"  Sample size: {n}")
+print(f"  Degrees of freedom: {df}")
+print(f"  Critical t-value (alpha=0.05): {t_crit:.4f}")
+print(f"  95% CI: [{ci_lower:.4f}, {ci_upper:.4f}]")
+\end{lstlisting}
+
+\subsection{Results}
+
+\textbf{95\% Confidence Intervals:}
+
+\begin{verbatim}
+                      0              1
+Intercept  70924.758265  159109.806952
+size          50.842017      96.700064
+\end{verbatim}
+
+\textbf{Manual calculation for 'size' coefficient:}
+\begin{verbatim}
+  Sample size: 29
+  Degrees of freedom: 27
+  Critical t-value (alpha=0.05): 2.0518
+  95% CI: [50.8420, 96.7001]
+\end{verbatim}
+
+\begin{center}
+\includegraphics[width=0.8\textwidth]{../code_python/images/ch07_fig2_confidence_intervals.png}
+\end{center}
+
+\subsection{Interpretation}
+
+\textbf{What is a confidence interval?}
+
+A 95\% confidence interval is a range [L, U] constructed such that:
+\begin{itemize}
+\item \textbf{Frequentist interpretation}: If we repeated the study many times (collecting new samples of 29 houses), 95\% of the resulting intervals would contain the true $\beta_1$.
+\item \textbf{This particular interval}: We are 95\% confident that the true effect of size on price is between \$50.84 and \$96.70 per square foot.
+\end{itemize}
+
+\textbf{Common misinterpretation} (WRONG): ``There's a 95\% probability that $\beta_1$ is in [50.84, 96.70].''
+
+\textbf{Why wrong?} The true $\beta_1$ is a fixed (unknown) value---it either is or isn't in the interval. The randomness is in the \textbf{interval}, not the parameter. Before we collect data, the interval is random; after we collect data, it's fixed.
+
+\textbf{Correct interpretation}: ``If we repeated this study 100 times, about 95 of the resulting intervals would contain the true $\beta_1$.''
+
+\textbf{Formula for 95\% CI}:
+
+$[\hat{\beta}_1 - t_{0.975,27} \times SE(\hat{\beta}_1), \hat{\beta}_1 + t_{0.975,27} \times SE(\hat{\beta}_1)]$
+
+$= [73.77 - 2.052 \times 11.17, 73.77 + 2.052 \times 11.17]$
+
+$= [73.77 - 22.93, 73.77 + 22.93]$
+
+$= [50.84, 96.70]$
+
+\textbf{Components}:
+\begin{itemize}
+\item \textbf{Point estimate}: $\hat{\beta}_1 = 73.77$ (center of interval)
+\item \textbf{Critical value}: $t_{0.975,27} = 2.052$ (from t-distribution with 27 df)
+\item \textbf{Standard error}: $SE(\hat{\beta}_1) = 11.17$ (measure of sampling variability)
+\item \textbf{Margin of error}: $2.052 \times 11.17 = 22.93$ (half-width of interval)
+\end{itemize}
+
+\textbf{Why t-distribution instead of normal?}
+
+For small samples (n < 30), we use the t-distribution because:
+\begin{enumerate}
+\item We estimate $\sigma^2$ from the data (not known)
+\item The t-distribution has heavier tails (wider intervals) to account for this extra uncertainty
+\item As $n \rightarrow \infty$, t-distribution $\rightarrow$ normal distribution
+\end{enumerate}
+
+\textbf{Degrees of freedom (df = 27 = n - 2)}:
+\begin{itemize}
+\item We estimate 2 parameters ($\beta_0$, $\beta_1$), ``using up'' 2 degrees of freedom
+\item Larger df $\rightarrow$ t-distribution closer to normal $\rightarrow$ narrower intervals
+\item For df = 27: $t_{0.975} = 2.052$ (compare to $z_{0.975} = 1.96$ for normal)
+\end{itemize}
+
+\textbf{Practical interpretation for size coefficient}:
+
+\textbf{Point estimate}: \$73.77 per square foot
+
+\textbf{95\% CI}: [\$50.84, \$96.70]
+
+\textbf{What this tells us}:
+\begin{enumerate}
+\item \textbf{The effect is positive}: The entire interval is above zero, confirming size increases price
+\item \textbf{The effect is substantial}: Even the lower bound (\$50.84) represents a meaningful increase
+\item \textbf{Uncertainty exists}: The true effect could be as low as \$51 or as high as \$97---a 90\% range
+\item \textbf{Width reflects sample size}: With n = 29, the interval is wide; with n = 290, it would be much narrower
+\end{enumerate}
+
+\textbf{Economic implications}:
+
+\textbf{Lower bound scenario} ($\beta_1 = \$50.84$):
+\begin{itemize}
+\item 100 sq ft increase $\rightarrow$ \$5,084 price increase
+\item Conservative estimate for investment decisions
+\end{itemize}
+
+\textbf{Point estimate scenario} ($\beta_1 = \$73.77$):
+\begin{itemize}
+\item 100 sq ft increase $\rightarrow$ \$7,377 price increase
+\item Best single guess
+\end{itemize}
+
+\textbf{Upper bound scenario} ($\beta_1 = \$96.70$):
+\begin{itemize}
+\item 100 sq ft increase $\rightarrow$ \$9,670 price increase
+\item Optimistic estimate
+\end{itemize}
+
+\textbf{Policy/business use}: A developer considering building larger houses would use the \textbf{lower bound} for conservative financial planning (worst-case scenario).
+
+\textbf{Confidence interval for intercept}:
+
+\textbf{95\% CI}: [\$70,925, \$159,110]
+
+This interval is \textbf{very wide} (range of \$88,185) because:
+\begin{enumerate}
+\item The intercept is far from the data (extrapolation to size = 0)
+\item Intercepts are generally estimated less precisely than slopes
+\item The interval is still statistically significant (doesn't include 0)
+\end{enumerate}
+
+\textbf{Practical note}: We care less about the intercept in this application---the slope (price per sq ft) is the economically meaningful parameter.
+
+\textbf{Visual interpretation}: The confidence interval plot shows:
+\begin{itemize}
+\item \textbf{Size coefficient}: Interval is narrow relative to the estimate (good precision), entirely above zero (statistically significant)
+\item \textbf{Intercept}: Interval is wide (less precision), also above zero
+\item The vertical line at zero helps visualize whether intervals include zero (would suggest insignificance)
+\end{itemize}
+
+\textbf{Relationship to hypothesis testing}:
+
+Notice that the 95\% CI for $\beta_1$ is [50.84, 96.70]:
+\begin{itemize}
+\item \textbf{Does not contain 0} $\rightarrow$ We reject $H_0: \beta_1 = 0$ at $\alpha = 0.05$ \checkmark
+\item \textbf{Does not contain 90} $\rightarrow$ We would reject $H_0: \beta_1 = 90$ at $\alpha = 0.05$? (see next section)
+\end{itemize}
+
+This illustrates the \textbf{duality} between confidence intervals and hypothesis tests:
+\begin{itemize}
+\item If a value is \textbf{outside} the 95\% CI, we reject $H_0$ at $\alpha = 0.05$
+\item If a value is \textbf{inside} the 95\% CI, we fail to reject $H_0$ at $\alpha = 0.05$
+\end{itemize}
+
+\begin{keyconcept}{Confidence Intervals}
+A 95\% confidence interval is a range constructed such that if we repeated our study many times, approximately 95\% of the resulting intervals would contain the true population parameter. The interval width reflects estimation uncertainty: wider intervals indicate greater uncertainty (smaller samples or higher variability), while narrower intervals indicate more precise estimates. The confidence level (95\%) represents our tolerance for error---we accept a 5\% chance of constructing an interval that doesn't contain the true parameter.
+\end{keyconcept}
+
+\section{Two-Sided Hypothesis Tests}
+
+\subsection{Code}
+
+\textbf{Context:} While testing whether a coefficient equals zero is most common, we often need to test whether it equals a specific non-zero value---for example, comparing our estimate to previous research or theoretical predictions. Two-sided tests check for any deviation from the null value (in either direction), making them appropriate when we have no strong prior about whether the true parameter is higher or lower than the hypothesized value.
+
+\begin{lstlisting}[language=Python]
+# Test H_0: beta_1 = 90 vs H_1: beta_1 != 90
+null_value = 90
+t_stat_90 = (coef_size - null_value) / se_size
+p_value_90 = 2 * (1 - stats.t.cdf(abs(t_stat_90), df))
+t_crit_90 = stats.t.ppf(0.975, df)
+
+print(f"\nTest: H_0: beta_1 = {null_value} vs H_1: beta_1 != {null_value}")
+print(f"  t-statistic: {t_stat_90:.4f}")
+print(f"  p-value: {p_value_90:.6f}")
+print(f"  Critical value (alpha=0.05): +/-{t_crit_90:.4f}")
+
+if abs(t_stat_90) > t_crit_90:
+    print(f"Result: Reject H_0 (|t| = {abs(t_stat_90):.4f} > {t_crit_90:.4f})")
+else:
+    print(f"Result: Fail to reject H_0 (|t| = {abs(t_stat_90):.4f} < {t_crit_90:.4f})")
+
+# Using statsmodels hypothesis test
+hypothesis = f'size = {null_value}'
+t_test_result = model_basic.t_test(hypothesis)
+print(t_test_result)
+\end{lstlisting}
+
+\subsection{Results}
+
+\begin{verbatim}
+Test: H_0: beta_1 = 90 vs H_1: beta_1 != 90
+  t-statistic: -1.4523
+  p-value: 0.157950
+  Critical value (alpha=0.05): +/-2.0518
+Result: Fail to reject H_0 (|t| = 1.4523 < 2.0518)
+
+Hypothesis test using statsmodels:
+                             Test for Constraints
+==============================================================================
+                 coef    std err          t      P>|t|      [0.025      0.975]
+------------------------------------------------------------------------------
+c0            73.7710     11.175     -1.452      0.158      50.842      96.700
+==============================================================================
+\end{verbatim}
+
+\subsection{Interpretation}
+
+\textbf{Hypothesis test setup}:
+
+\textbf{Null hypothesis ($H_0$)}: $\beta_1 = 90$ (the true effect of size is exactly \$90 per sq ft)
+
+\textbf{Alternative hypothesis ($H_1$)}: $\beta_1 \neq 90$ (the true effect is not \$90 per sq ft)
+
+\textbf{Significance level}: $\alpha = 0.05$ (5\% risk of Type I error)
+
+\textbf{Type of test}: Two-sided (we're testing for any difference, not a specific direction)
+
+\textbf{Why test $\beta_1 = 90$?} This is not testing ``no effect'' (that's $\beta_1 = 0$). Instead, it's testing whether our data are consistent with a \textbf{specific economic theory or prior estimate}. For example:
+\begin{itemize}
+\item A previous study estimated \$90 per sq ft
+\item Industry standard suggests \$90 per sq ft
+\item A policy assumes \$90 per sq ft for tax assessment
+\end{itemize}
+
+\textbf{Test statistic calculation}:
+
+$t = (\hat{\beta}_1 - \beta_{1,0}) / SE(\hat{\beta}_1) = (73.77 - 90) / 11.17 = -16.23 / 11.17 = -1.452$
+
+\textbf{Interpretation of t = -1.452}:
+\begin{itemize}
+\item Our estimate (73.77) is \textbf{1.45 standard errors below} the hypothesized value (90)
+\item The negative sign indicates our estimate is \textbf{lower} than the null value
+\item The magnitude (1.45) indicates \textbf{moderate} deviation from the null
+\end{itemize}
+
+\textbf{Decision rules}:
+
+\textbf{Critical value approach}:
+\begin{itemize}
+\item Critical value: $t_{0.975,27} = \pm 2.052$
+\item Decision rule: Reject $H_0$ if $|t| > 2.052$
+\item Result: $|-1.452| = 1.452 < 2.052 \rightarrow$ \textbf{Fail to reject $H_0$}
+\end{itemize}
+
+\textbf{p-value approach}:
+\begin{itemize}
+\item p-value = 0.158
+\item Decision rule: Reject $H_0$ if p < 0.05
+\item Result: $0.158 > 0.05 \rightarrow$ \textbf{Fail to reject $H_0$}
+\end{itemize}
+
+\textbf{What ``fail to reject'' means}:
+
+\textbf{NOT} ``we accept $H_0$'' or ``$\beta_1 = 90$ is true''
+
+\textbf{Instead}: ``The data are consistent with $\beta_1 = 90$; we don't have strong enough evidence to rule it out.''
+
+\textbf{Analogy}: In a criminal trial, ``not guilty'' $\neq$ ``innocent.'' It means the evidence wasn't strong enough to prove guilt beyond reasonable doubt.
+
+\textbf{p-value interpretation (p = 0.158)}:
+
+\textbf{Precise meaning}: If the true $\beta_1$ were 90, there's a 15.8\% probability of observing a sample estimate as far from 90 as 73.77 (or farther).
+
+\textbf{Interpretation ladder}:
+\begin{itemize}
+\item p = 0.158 is \textbf{not small} (> 0.05)
+\item This is \textbf{not surprising} under $H_0$
+\item The data are \textbf{consistent} with $\beta_1 = 90$
+\item We \textbf{cannot reject} $\beta_1 = 90$ at conventional significance levels
+\end{itemize}
+
+\textbf{Why does this differ from $\beta_1 = 0$ test?}
+
+Recall the test for $\beta_1 = 0$:
+\begin{itemize}
+\item t = 6.60, p < 0.0001 $\rightarrow$ Strong evidence against $H_0: \beta_1 = 0$
+\end{itemize}
+
+For $\beta_1 = 90$:
+\begin{itemize}
+\item t = -1.45, p = 0.158 $\rightarrow$ Weak evidence against $H_0: \beta_1 = 90$
+\end{itemize}
+
+\textbf{Key insight}: Our estimate (73.77) is:
+\begin{itemize}
+\item \textbf{Far} from 0 (6.6 standard errors away) $\rightarrow$ Reject $H_0: \beta_1 = 0$
+\item \textbf{Moderately close} to 90 (1.45 standard errors away) $\rightarrow$ Fail to reject $H_0: \beta_1 = 90$
+\end{itemize}
+
+\textbf{Connection to confidence interval}:
+
+The 95\% CI for $\beta_1$ is [50.84, 96.70].
+
+\textbf{Observation}: 90 is \textbf{inside} this interval.
+
+\textbf{Rule}: If a null value is inside the 95\% CI, we fail to reject at $\alpha = 0.05$.
+
+\textbf{Verification}:
+\begin{itemize}
+\item $90 \in [50.84, 96.70]$ \checkmark
+\item Therefore, we should fail to reject $H_0: \beta_1 = 90$ at $\alpha = 0.05$ \checkmark
+\end{itemize}
+
+This confirms our t-test result!
+
+\textbf{Practical implications}:
+
+\textbf{Scenario 1}: A previous study estimated $\beta_1 = 90$, and we want to know if our data contradict this.
+\begin{itemize}
+\item \textbf{Conclusion}: No contradiction. Our estimate (73.77) is lower but not statistically significantly different.
+\item \textbf{Action}: We cannot claim the previous study is wrong based on our data.
+\end{itemize}
+
+\textbf{Scenario 2}: A policy assumes \$90 per sq ft for property tax assessment.
+\begin{itemize}
+\item \textbf{Conclusion}: Our data don't provide strong evidence against this assumption.
+\item \textbf{Action}: The policy seems reasonable given our data, though our point estimate suggests a lower value.
+\end{itemize}
+
+\textbf{Power and Type II error}:
+
+\textbf{Type II error ($\beta$)}: Probability of failing to reject $H_0$ when it's false.
+
+Our failure to reject might be due to:
+\begin{enumerate}
+\item \textbf{$H_0$ is actually true} ($\beta_1$ really is 90)
+\item \textbf{$H_0$ is false, but our sample is too small} (low power)
+\end{enumerate}
+
+With n = 29, we have limited power to detect small deviations from 90. The true $\beta_1$ might be 80 or 85, but our sample isn't large enough to confidently rule out 90.
+
+\textbf{What would increase power?}
+\begin{itemize}
+\item Larger sample size (n = 100 instead of 29)
+\item Lower error variance ($\sigma^2$)
+\item Larger true deviation from $H_0$ (e.g., if true $\beta_1 = 60$, we'd easily reject)
+\end{itemize}
+
+\textbf{Statistical vs. practical significance}:
+
+Even though we fail to reject $\beta_1 = 90$ statistically, the point estimate (73.77) suggests an economically meaningful difference:
+\begin{itemize}
+\item $90 - 73.77 = \$16.23$ per sq ft
+\item For a 2,000 sq ft house: \$32,460 difference
+\end{itemize}
+
+This highlights that \textbf{statistical significance depends on sample size}, while \textbf{practical significance depends on effect size}.
+
+\section{One-Sided Directional Hypothesis Tests}
+
+\subsection{Code}
+
+\textbf{Context:} One-sided tests are appropriate when theory or context suggests deviations can only occur in one direction. For example, economic theory might predict a positive effect, making a test for ``greater than zero'' more powerful than a two-sided test. However, one-sided tests must be pre-specified before seeing the data to maintain proper Type I error control. We examine both upper-tailed ($H_1: \beta_1 > \beta_0$) and lower-tailed ($H_1: \beta_1 < \beta_0$) alternatives.
+
+\begin{lstlisting}[language=Python]
+# Upper one-tailed test: H_0: beta_1 <= 90 vs H_1: beta_1 > 90
+p_value_upper = 1 - stats.t.cdf(t_stat_90, df)
+t_crit_upper = stats.t.ppf(0.95, df)
+
+print(f"\nUpper one-tailed test: H_0: beta_1 <= {null_value} vs H_1: beta_1 > {null_value}")
+print(f"  t-statistic: {t_stat_90:.4f}")
+print(f"  p-value (one-tailed): {p_value_upper:.6f}")
+print(f"  Critical value (alpha=0.05): {t_crit_upper:.4f}")
+
+if t_stat_90 > t_crit_upper:
+    print("Result: Reject H_0")
+else:
+    print("Result: Fail to reject H_0")
+
+# Lower one-tailed test: H_0: beta_1 >= 90 vs H_1: beta_1 < 90
+p_value_lower = stats.t.cdf(t_stat_90, df)
+
+print(f"\nLower one-tailed test: H_0: beta_1 >= {null_value} vs H_1: beta_1 < {null_value}")
+print(f"  t-statistic: {t_stat_90:.4f}")
+print(f"  p-value (one-tailed): {p_value_lower:.6f}")
+print(f"  Critical value (alpha=0.05): {-t_crit_upper:.4f}")
+
+if t_stat_90 < -t_crit_upper:
+    print("Result: Reject H_0")
+else:
+    print("Result: Fail to reject H_0")
+\end{lstlisting}
+
+\subsection{Results}
+
+\begin{verbatim}
+Upper one-tailed test: H_0: beta_1 <= 90 vs H_1: beta_1 > 90
+  t-statistic: -1.4523
+  p-value (one-tailed): 0.921025
+  Critical value (alpha=0.05): 1.7033
+Result: Fail to reject H_0
+
+Lower one-tailed test: H_0: beta_1 >= 90 vs H_1: beta_1 < 90
+  t-statistic: -1.4523
+  p-value (one-tailed): 0.078975
+  Critical value (alpha=0.05): -1.7033
+Result: Fail to reject H_0
+\end{verbatim}
+
+\subsection{Interpretation}
+
+\textbf{One-sided vs. two-sided tests}:
+
+\textbf{Two-sided test}: $H_0: \beta_1 = 90$ vs $H_1: \beta_1 \neq 90$
+\begin{itemize}
+\item Tests whether $\beta_1$ differs from 90 in \textbf{either direction} (higher or lower)
+\item Uses critical values $\pm 2.052$
+\item p-value includes both tails
+\end{itemize}
+
+\textbf{One-sided test}: $H_0: \beta_1 \leq 90$ vs $H_1: \beta_1 > 90$ (or vice versa)
+\begin{itemize}
+\item Tests whether $\beta_1$ differs from 90 in a \textbf{specific direction}
+\item Uses critical value 1.703 (or -1.703)
+\item p-value includes only one tail
+\end{itemize}
+
+\textbf{When to use one-sided tests?}
+
+Use one-sided tests when:
+\begin{enumerate}
+\item \textbf{Theory predicts a specific direction} (e.g., ``larger houses cost more, not less'')
+\item \textbf{Only one direction is economically meaningful} (e.g., ``we only care if the drug reduces symptoms, not increases them'')
+\item \textbf{Pre-specified in research design} (before seeing data)
+\end{enumerate}
+
+\textbf{Upper one-tailed test}:
+
+\textbf{Hypotheses}:
+\begin{itemize}
+\item $H_0: \beta_1 \leq 90$ (effect is at most \$90 per sq ft)
+\item $H_1: \beta_1 > 90$ (effect exceeds \$90 per sq ft)
+\end{itemize}
+
+\textbf{Example scenario}: A developer claims their houses sell for more than \$90 per sq ft (premium pricing). We want to test if our data support this claim.
+
+\textbf{Test statistic}: t = -1.45 (same as two-sided test)
+
+\textbf{Critical value}: $t_{0.95,27} = 1.703$ (note: lower than two-sided 2.052)
+
+\textbf{Decision rule}: Reject $H_0$ if t > 1.703
+
+\textbf{Result}: $-1.45 < 1.703 \rightarrow$ Fail to reject $H_0$
+
+\textbf{p-value interpretation}: p = 0.921 means:
+\begin{itemize}
+\item If $\beta_1 \leq 90$, there's a 92.1\% chance of observing $t \geq -1.45$
+\item This is \textbf{very high} (not at all surprising under $H_0$)
+\item Very weak evidence that $\beta_1 > 90$
+\end{itemize}
+
+\textbf{Conclusion}: We have no evidence that the effect exceeds \$90 per sq ft. In fact, our point estimate (73.77) suggests the opposite.
+
+\textbf{Lower one-tailed test}:
+
+\textbf{Hypotheses}:
+\begin{itemize}
+\item $H_0: \beta_1 \geq 90$ (effect is at least \$90 per sq ft)
+\item $H_1: \beta_1 < 90$ (effect is less than \$90 per sq ft)
+\end{itemize}
+
+\textbf{Example scenario}: A regulation assumes houses sell for at least \$90 per sq ft for zoning purposes. We want to test if this assumption is too high.
+
+\textbf{Test statistic}: t = -1.45
+
+\textbf{Critical value}: $t_{0.05,27} = -1.703$
+
+\textbf{Decision rule}: Reject $H_0$ if t < -1.703
+
+\textbf{Result}: $-1.45 > -1.703 \rightarrow$ Fail to reject $H_0$
+
+\textbf{p-value interpretation}: p = 0.079 means:
+\begin{itemize}
+\item If $\beta_1 \geq 90$, there's a 7.9\% chance of observing $t \leq -1.45$
+\item This is \textbf{moderately low} but not below the 5\% threshold
+\item Weak-to-moderate evidence that $\beta_1 < 90$
+\end{itemize}
+
+\textbf{Conclusion}: We have \textbf{suggestive but not conclusive} evidence that $\beta_1 < 90$. At $\alpha = 0.10$, we would reject $H_0$, but at $\alpha = 0.05$, we fail to reject.
+
+\textbf{Comparison of p-values}:
+
+\begin{center}
+\begin{tabular}{|l|l|l|c|l|}
+\hline
+Test Type & $H_0$ & $H_1$ & p-value & Interpretation \\
+\hline
+Two-sided & $\beta_1 = 90$ & $\beta_1 \neq 90$ & 0.158 & Moderate evidence against $H_0$ \\
+Upper one-sided & $\beta_1 \leq 90$ & $\beta_1 > 90$ & 0.921 & Very weak evidence for $H_1$ \\
+Lower one-sided & $\beta_1 \geq 90$ & $\beta_1 < 90$ & 0.079 & Weak evidence for $H_1$ \\
+\hline
+\end{tabular}
+\end{center}
+
+\textbf{Key observations}:
+\begin{enumerate}
+\item \textbf{Upper test has very high p-value} (0.921): Our data strongly contradict $H_1: \beta_1 > 90$
+\item \textbf{Lower test has lower p-value} (0.079): Our data are more consistent with $H_1: \beta_1 < 90$
+\item \textbf{Two-sided p-value (0.158) = $2 \times$ min(0.079, 0.921)}: This relationship always holds
+\end{enumerate}
+
+\textbf{Why the lower test is closer to significance}:
+
+Our point estimate (73.77) is \textbf{below} 90:
+\begin{itemize}
+\item This is \textbf{consistent} with $H_1: \beta_1 < 90$ (lower test)
+\item This is \textbf{inconsistent} with $H_1: \beta_1 > 90$ (upper test)
+\end{itemize}
+
+Therefore, the lower test has a smaller p-value (more evidence for $H_1$).
+
+\textbf{Critical value comparison}:
+
+\begin{center}
+\begin{tabular}{|l|c|c|l|}
+\hline
+Test & $\alpha$ & Critical Value & Rejection Region \\
+\hline
+Two-sided & 0.05 & $\pm 2.052$ & $|t| > 2.052$ \\
+One-sided & 0.05 & 1.703 or -1.703 & $t > 1.703$ or $t < -1.703$ \\
+\hline
+\end{tabular}
+\end{center}
+
+\textbf{Why one-sided critical values are smaller?}
+
+Because we're only looking in one direction, we can be more ``generous'' with rejections in that direction while maintaining overall $\alpha = 0.05$.
+
+\textbf{Caution on one-sided tests}:
+
+\begin{enumerate}
+\item \textbf{Don't choose after seeing data}: If you see $\hat{\beta}_1 = 73.77 < 90$ and then decide to do a lower one-sided test, you're \textbf{p-hacking} (inflating Type I error).
+\item \textbf{Pre-specify in research design}: Decide on one-sided vs. two-sided before analysis.
+\item \textbf{Justify theoretically}: There should be a strong theoretical reason for ruling out one direction.
+\item \textbf{Two-sided is default}: Unless you have a compelling reason, use two-sided tests (more conservative).
+\end{enumerate}
+
+\textbf{Practical recommendation for this example}:
+
+Given that we're exploring the relationship between size and price without strong prior beliefs:
+\begin{itemize}
+\item \textbf{Use two-sided test} ($H_1: \beta_1 \neq 90$)
+\item \textbf{Report p = 0.158}
+\item \textbf{Conclusion}: ``We cannot reject the hypothesis that $\beta_1 = 90$ at the 5\% level.''
+\end{itemize}
+
+If we had a \textbf{specific research question} like ``Is the market overpriced relative to \$90 per sq ft?'', we might justify a one-sided test.
+
+\section{Robust Standard Errors}
+
+\subsection{Code}
+
+\textbf{Context:} Standard OLS inference assumes homoskedasticity (constant error variance). When this assumption fails, standard errors are biased, invalidating hypothesis tests and confidence intervals. Heteroskedasticity-robust standard errors (HC1, also known as White standard errors) provide valid inference whether or not homoskedasticity holds, making them a safe default choice. By comparing standard and robust standard errors, we can diagnose heteroskedasticity and assess whether our inference is robust to this potential violation.
+
+\begin{lstlisting}[language=Python]
+# Get heteroskedasticity-robust standard errors (HC1)
+robust_results = model_basic.get_robustcov_results(cov_type='HC1')
+
+print("\nComparison of standard and robust standard errors:")
+comparison_df = pd.DataFrame({
+    'Coefficient': model_basic.params,
+    'Std. Error': model_basic.bse,
+    'Robust SE': robust_results.bse,
+    't-stat (standard)': model_basic.tvalues,
+    't-stat (robust)': robust_results.tvalues,
+    'p-value (standard)': model_basic.pvalues,
+    'p-value (robust)': robust_results.pvalues
+})
+print(comparison_df)
+
+print("\nRegression with robust standard errors:")
+print(robust_results.summary())
+
+# Robust confidence intervals
+robust_conf_int = robust_results.conf_int(alpha=0.05)
+print("\n95% Confidence Intervals (Robust):")
+print(robust_conf_int)
+\end{lstlisting}
+
+\subsection{Results}
+
+\textbf{Comparison of standard and robust standard errors:}
+
+\begin{verbatim}
+             Coefficient    Std. Error  Robust SE  t-stat (standard)  t-stat (robust)  p-value (standard)  p-value (robust)
+Intercept  115017.282609  21489.359861  20291.308       5.352196         5.666344        1.183545e-05      5.120101e-06
+size           73.771040     11.174911     11.330       6.601521         6.510962        4.408752e-07      5.564663e-07
+\end{verbatim}
+
+\textbf{95\% Confidence Intervals (Robust):}
+\begin{verbatim}
+                    0              1
+Intercept  73367.7813  156666.7840
+size          50.5245      97.0176
+\end{verbatim}
+
+\begin{center}
+\includegraphics[width=0.8\textwidth]{../code_python/images/ch07_fig3_residuals.png}
+\end{center}
+
+\subsection{Interpretation}
+
+\textbf{What are robust standard errors?}
+
+Standard OLS assumes \textbf{homoskedasticity}: $Var(u|x) = \sigma^2$ (constant variance)
+
+In reality, this assumption often fails:
+\begin{itemize}
+\item \textbf{Heteroskedasticity}: $Var(u|x)$ depends on x
+\item \textbf{Example}: Larger houses might have more variable prices
+\end{itemize}
+
+\textbf{Consequences of heteroskedasticity}:
+\begin{enumerate}
+\item \textbf{OLS estimates ($\hat{\beta}_0$, $\hat{\beta}_1$) remain unbiased} (good!)
+\item \textbf{Standard errors are biased} (could be too small or too large)
+\item \textbf{t-statistics, p-values, CIs are invalid} (inference is wrong)
+\end{enumerate}
+
+\textbf{Solution}: Use \textbf{heteroskedasticity-robust standard errors} (also called White standard errors, HC1, or sandwich estimators).
+
+\textbf{How robust SEs work}:
+
+Standard SE formula assumes homoskedasticity: $SE(\hat{\beta}_1) = \sigma / \sqrt{\sum(x_i - \bar{x})^2}$
+
+Robust SE formula allows heteroskedasticity: $SE_{robust}(\hat{\beta}_1) = \sqrt{\sum(x_i - \bar{x})^2 \hat{u}_i^2} / [\sum(x_i - \bar{x})^2]$
+
+The robust formula:
+\begin{itemize}
+\item Uses actual residuals ($\hat{u}_i$) instead of assuming constant $\sigma$
+\item Allows each observation to have different error variance
+\item Produces valid inference even with heteroskedasticity
+\end{itemize}
+
+\textbf{Comparison for size coefficient}:
+
+\textbf{Standard SE}: 11.175
+
+\textbf{Robust SE}: 11.330
+
+\textbf{Difference}: $11.330 - 11.175 = 0.155$ (+1.4\%)
+
+\textbf{Interpretation}: The robust SE is \textbf{slightly larger} than the standard SE, suggesting mild heteroskedasticity. However, the difference is very small (1.4\%), indicating that heteroskedasticity is not a major concern in this dataset.
+
+\textbf{Implications}:
+\begin{itemize}
+\item t-statistic (standard): 6.60
+\item t-statistic (robust): 6.51
+\item Difference: Negligible (0.09)
+\end{itemize}
+
+Both tests lead to the same conclusion: strong evidence that size affects price.
+
+\textbf{Comparison for intercept}:
+
+\textbf{Standard SE}: 21,489
+
+\textbf{Robust SE}: 20,291
+
+\textbf{Difference}: $20,291 - 21,489 = -1,198$ (-5.6\%)
+
+The robust SE is \textbf{smaller} than the standard SE. This can happen when heteroskedasticity has a specific pattern.
+
+\textbf{Confidence intervals}:
+
+\textbf{Standard 95\% CI}: [50.84, 96.70]
+
+\textbf{Robust 95\% CI}: [50.52, 97.02]
+
+\textbf{Difference}: Slightly wider (robust interval includes more uncertainty)
+
+\textbf{Width}:
+\begin{itemize}
+\item Standard: $96.70 - 50.84 = 45.86$
+\item Robust: $97.02 - 50.52 = 46.50$
+\item Difference: 0.64 wider (+1.4\%)
+\end{itemize}
+
+The minimal difference confirms that heteroskedasticity is not severe.
+
+\textbf{p-values}:
+
+\textbf{Standard}: p = 0.0000004
+
+\textbf{Robust}: p = 0.0000006
+
+\textbf{Both}: Highly significant (p < 0.001)
+
+\textbf{When to use robust SEs?}
+
+\textbf{Always use robust SEs} (default in modern econometrics):
+\begin{enumerate}
+\item \textbf{No cost if homoskedasticity holds}: Robust SEs $\approx$ standard SEs
+\item \textbf{Protection if heteroskedasticity exists}: Robust SEs are valid
+\item \textbf{Safer inference}: Robust SEs guard against model misspecification
+\end{enumerate}
+
+\textbf{When robust SEs differ substantially from standard SEs}:
+
+Large differences indicate:
+\begin{enumerate}
+\item \textbf{Heteroskedasticity is present}
+\item \textbf{Standard inference (t-stats, p-values, CIs) is unreliable}
+\item \textbf{Use robust SEs for all inference}
+\end{enumerate}
+
+\textbf{Visualizing heteroskedasticity}:
+
+The residual plot (Figure 7.3) helps diagnose heteroskedasticity:
+
+\textbf{Homoskedasticity (ideal)}:
+\begin{itemize}
+\item Residuals evenly scattered around 0
+\item No pattern in spread (constant variance)
+\end{itemize}
+
+\textbf{Heteroskedasticity (problem)}:
+\begin{itemize}
+\item Residuals spread out more for certain fitted values
+\item ``Funnel'' or ``cone'' shape (variance increases with x)
+\end{itemize}
+
+\textbf{Our plot}: The residuals appear \textbf{reasonably evenly scattered}, consistent with the small difference between standard and robust SEs.
+
+\textbf{Types of robust standard errors}:
+
+Modern software offers several variants:
+\begin{itemize}
+\item \textbf{HC0}: Original White (1980) estimator
+\item \textbf{HC1}: Degrees-of-freedom adjusted (more conservative)
+\item \textbf{HC2, HC3}: Further adjustments for leverage
+\item \textbf{HAC}: Accounts for both heteroskedasticity and autocorrelation
+\end{itemize}
+
+\textbf{We use HC1} (most common in econometrics): $HC1 = (n / (n - k)) \times HC0$, where k = number of parameters.
+
+\textbf{Practical workflow}:
+
+\textbf{Step 1}: Run OLS with standard SEs
+
+\textbf{Step 2}: Re-run with robust SEs (HC1)
+
+\textbf{Step 3}: Compare:
+\begin{itemize}
+\item If similar $\rightarrow$ report either (mention robustness check)
+\item If different $\rightarrow$ report robust (discuss heteroskedasticity)
+\end{itemize}
+
+\textbf{Step 4}: Examine residual plot for patterns
+
+\textbf{Reporting results}:
+
+\textbf{Good practice}: ``The coefficient on size is 73.77 (robust SE = 11.33), statistically significant at p < 0.001. Results are robust to heteroskedasticity (standard SE = 11.17 produces similar inference).''
+
+\textbf{Common mistake}: Only reporting standard SEs without checking robustness.
+
+\textbf{Advanced note}: Some researchers argue for \textbf{always reporting robust SEs} (even without testing for heteroskedasticity) because:
+\begin{enumerate}
+\item Tests for heteroskedasticity have low power
+\item Robust SEs provide insurance at low cost
+\item Simplifies workflow (no need for diagnostic tests)
+\end{enumerate}
+
+\textbf{Bottom line for this example}:
+
+The similarity between standard and robust SEs suggests:
+\begin{enumerate}
+\item \textbf{Homoskedasticity is approximately satisfied}
+\item \textbf{Standard OLS inference is valid}
+\item \textbf{Conclusions are robust to heteroskedasticity concerns}
+\end{enumerate}
+
+This strengthens confidence in our findings.
+
+\begin{keyconcept}{Robust Standard Errors}
+Heteroskedasticity-robust standard errors (HC1, HC2, HC3) allow valid statistical inference even when error variances differ across observations. While OLS coefficient estimates remain unbiased under heteroskedasticity, the standard errors are biased, making hypothesis tests and confidence intervals unreliable. Robust standard errors correct this problem by allowing each observation to have its own error variance. Modern econometric practice increasingly uses robust standard errors as the default, providing insurance against heteroskedasticity at minimal cost.
+\end{keyconcept}
+
+\section{Conclusion}
+
+In this chapter, we've moved beyond simply estimating regression coefficients to making rigorous statistical statements about population parameters. Using data from 29 house sales in Central Davis, we demonstrated the complete toolkit for statistical inference: t-statistics quantified how far estimates deviate from hypothesized values, confidence intervals provided plausible ranges for true parameters, and hypothesis tests formalized decision-making about economic relationships.
+
+The house price example illustrated a fundamental insight: while any single sample produces imperfect estimates, statistical inference allows us to quantify this uncertainty and make reliable conclusions despite it. We found overwhelming evidence that house size affects price (t = 6.60, p < 0.001), with each square foot adding between \$51 and \$97 to sale price (95\% CI). By comparing standard and robust standard errors, we verified that our conclusions remain valid even if homoskedasticity fails.
+
+\textbf{What You've Learned:}
+
+\begin{itemize}
+\item \textbf{Programming}: You can now extract regression statistics (coefficients, standard errors, t-values, p-values) from statsmodels output, compute confidence intervals using the t-distribution, conduct two-sided and one-sided hypothesis tests with proper interpretation, implement heteroskedasticity-robust standard errors (HC1), and create professional visualizations of regression results with confidence bands
+
+\item \textbf{Statistical Inference}: You understand how t-statistics standardize coefficient estimates for hypothesis testing, why confidence intervals provide better information than point estimates alone, the relationship between p-values and statistical significance (p < 0.05 convention), when to use one-sided versus two-sided tests, how sample size affects precision (larger n produces narrower confidence intervals), and why robust standard errors provide insurance against heteroskedasticity
+
+\item \textbf{Economic Interpretation}: You can translate statistical results into economic meaning (e.g., ``\$74 per square foot''), distinguish between statistical significance and practical significance, recognize when to report confidence intervals versus point estimates, and communicate uncertainty effectively to non-technical audiences
+
+\item \textbf{Critical Thinking}: You appreciate that ``failing to reject'' is not the same as ``accepting'' the null hypothesis, understand the role of Type I and Type II errors in decision-making, recognize that small samples require wider confidence intervals and more conservative inference, and know when assumptions (like homoskedasticity) matter for valid inference
+\end{itemize}
+
+\textbf{Looking Ahead:}
+
+In Chapter 8, you'll apply these inference tools to diverse economic applications---wage determination, production functions, and demand estimation---seeing how the same statistical framework adapts to different research questions. Chapter 9 introduces logarithmic transformations, which allow you to interpret coefficients as percentage changes (elasticities), a common representation in economics.
+
+The skills you've developed here---hypothesis testing, confidence interval construction, and robust inference---form the foundation for all empirical work. Whether you're analyzing policy impacts, forecasting economic outcomes, or testing theoretical predictions, you'll use these tools repeatedly. The key is not just mechanical application but thoughtful interpretation: understanding what statistical significance means, recognizing its limitations, and communicating results clearly and honestly.
+
+\textbf{References}:
+
+\begin{itemize}
+\item Cameron, A.C. (2022). \textit{Analysis of Economics Data: An Introduction to Econometrics}. \url{https://cameron.econ.ucdavis.edu/aed/index.html}
+\item Python libraries: pandas, numpy, statsmodels, matplotlib, seaborn, scipy
+\end{itemize}
+
+\textbf{Data}:
+
+All datasets are available at: \url{https://cameron.econ.ucdavis.edu/aed/aeddata.html}
+
+\vspace{1em}
+
+\begin{keyconcept}{Learn by Coding}
+Now that you've learned the key concepts in this chapter, it's time to put them into practice!
+
+Open the interactive Google Colab notebook for this chapter to:
+\begin{itemize}
+\item Run Python code implementing all the methods discussed
+\item Experiment with real datasets and see results immediately
+\item Modify parameters and explore how changes affect outcomes
+\item Complete hands-on exercises that reinforce your understanding
+\end{itemize}
+
+\textbf{Access the notebook here:} \url{https://colab.research.google.com/github/quarcs-lab/metricsai/blob/main/notebooks_colab/ch07_Statistical_Inference_for_Bivariate_Regression.ipynb}
+
+Remember: Learning econometrics is not just about understanding theory---it's about applying it. The best way to master these concepts is to code them yourself!
+\end{keyconcept}

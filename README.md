@@ -101,6 +101,28 @@ The enhanced template is documented in [`code_python/REPORT_TEMPLATE.md`](code_p
 
 All enhanced chapters are available in the [`code_python/`](code_python/) directory as standalone Python scripts with corresponding markdown reports following the enhanced template.
 
+## 📖 LaTeX Book Version
+
+**NEW:** All 17 chapters have been compiled into a professional LaTeX book!
+
+- **Status**: ✅ Complete - 437 pages, 16 MB PDF
+- **Location**: [`book/`](book/) directory
+- **Features**:
+  - Professional four-part structure with color-coded sections
+  - Enhanced key concept boxes with AI-powered styling
+  - Full-width chapter visual summaries
+  - Syntax-highlighted code listings
+  - Comprehensive preface explaining the AI-powered approach
+  - Print-optimized color scheme
+
+See [`book/README.md`](book/README.md) for complete documentation, compilation instructions, and technical details.
+
+The book version provides a traditional textbook format that complements the interactive notebooks, ideal for:
+- Offline reading and study
+- Printing for classroom use
+- Traditional textbook reference
+- Academic distribution
+
 ## 👥 Authors and Credits
 
 **Carlos Mendez** - Python implementation and educational notebook development
