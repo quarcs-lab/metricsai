@@ -1,6 +1,6 @@
 # Python Code for Applied Econometric Data Analysis
 
-This directory contains Python translations of the R and Stata scripts from Cameron & Trivedi's "Applied Econometric Data Analysis" (2021).
+This directory contains Python translations of the R and Stata scripts from Cameron's "Economic Data Analysis: An Introduction to Econometrics" (2022).
 
 ## Overview
 
