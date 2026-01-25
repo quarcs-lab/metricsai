@@ -22,9 +22,9 @@ We examine earnings differences across gender and worker types using 872 observa
 
 ---
 
-## 1. Setup and Data Loading
+## Setup and Data Loading
 
-### 1.1 Code
+### Code
 
 **Context:** In this section, we establish the Python environment and load the earnings dataset from the Current Population Survey (CPS). This dataset contains 872 workers with complete information on earnings, demographics, and employment characteristics. We set up robust standard errors from the start because earnings data typically exhibit heteroskedasticity—high earners have more variable incomes than low earners. Proper data loading and environment setup ensures reproducible results and prepares us for rigorous econometric analysis.
 
@@ -66,7 +66,7 @@ data = pd.read_stata(GITHUB_DATA_URL + 'AED_EARNINGS_COMPLETE.DTA')
 print(data.describe())
 ```
 
-### 1.2 Results
+### Results
 
 ```
             earnings  lnearnings  ...       perwt       incbus00
@@ -90,7 +90,7 @@ Key variables for this analysis:
 - **dprivate**: 1 = private sector, 0 = not (indicator)
 - **dgovt**: 1 = government worker, 0 = not (indicator)
 
-### 1.3 Interpretation
+### Interpretation
 
 The dataset contains **872 workers** from the Current Population Survey with complete information on earnings, demographics, and employment characteristics. The average annual earnings are $56,369 with substantial variation (standard deviation of $51,516), indicating considerable inequality in the labor market. The earnings distribution is highly right-skewed, as evidenced by the median ($44,200) being well below the mean, with maximum earnings reaching $504,000.
 
@@ -104,9 +104,9 @@ The indicator variables are coded as binary (0 or 1). For gender, 43.3% of the s
 
 ---
 
-## 2. Regression on a Single Indicator Variable
+## Regression on a Single Indicator Variable
 
-### 2.1 Code
+### Code
 
 **Context:** In this section, we examine the gender earnings gap using both summary statistics and regression analysis. We first compute mean earnings separately for males and females to see the raw difference. Then we estimate an OLS regression of earnings on gender, which provides the same difference but with formal statistical inference (standard errors, t-tests, confidence intervals). This demonstrates a fundamental principle: regression with a single indicator variable is equivalent to a difference-in-means test. We use robust standard errors (HC1) to account for heteroskedasticity in earnings data.
 
@@ -140,7 +140,7 @@ print(f"\nt-statistic: {t_stat:.4f}")
 print(f"p-value: {p_value:.6f}")
 ```
 
-### 2.2 Results
+### Results
 
 **Summary Statistics:**
 ```
@@ -200,7 +200,7 @@ t-statistic: -5.0964
 p-value: 0.000000
 ```
 
-### 2.3 Interpretation
+### Interpretation
 
 The regression results reveal a **statistically significant gender earnings gap** of $16,396. This is the fundamental insight of using indicator variables in regression: the coefficient on the indicator variable equals the difference in means between the two groups.
 
@@ -218,9 +218,9 @@ The regression results reveal a **statistically significant gender earnings gap*
 
 ---
 
-## 3. Adding Control Variables and Interactions
+## Adding Control Variables and Interactions
 
-### 3.1 Code
+### Code
 
 **Context:** In this section, we progressively add control variables (education, age, hours worked) and interaction terms to the gender earnings regression. This allows us to see how the gender coefficient changes as we account for observable differences between men and women. Interaction terms (like gender×education) test whether the relationship between a continuous variable and earnings differs by gender—for example, whether the return to education is the same for men and women. This progression reveals the sources of the gender earnings gap and demonstrates how controlling for confounders affects our estimates.
 
@@ -272,7 +272,7 @@ f_test_5 = model5.f_test('gender = 0, genderbyeduc = 0, genderbyage = 0, genderb
 print(f"\nModel 5 - Joint F-test (all gender terms): F = {f_test_5.fvalue[0][0]:.2f}, p = {f_test_5.pvalue:.4f}")
 ```
 
-### 3.2 Results
+### Results
 
 **Summary Table: All Five Models**
 ```
@@ -309,7 +309,7 @@ genderbyeduc -2765.1502   1150.042     -2.404      0.016   -5019.193    -511.107
 ==============================================================================
 ```
 
-### 3.3 Interpretation
+### Interpretation
 
 This progression of models reveals **how the gender coefficient changes** as we add controls and interactions, providing crucial insights into the sources of the gender earnings gap.
 
@@ -329,9 +329,9 @@ The flipped sign on the gender coefficient in Model 3 (+$20,219) doesn't mean wo
 
 ---
 
-## 4. Separate Regressions by Gender
+## Separate Regressions by Gender
 
-### 4.1 Code
+### Code
 
 **Context:** In this section, we estimate completely separate regression models for males and females instead of using interaction terms in a pooled model. This approach allows the entire earnings structure—intercept, all slopes, and error variance—to differ by gender. While mathematically equivalent to a fully interacted model, separate regressions emphasize that men and women may face fundamentally different earnings processes. Comparing coefficients across subsamples reveals how labor markets reward education, experience, and hours worked differently by gender.
 
@@ -357,7 +357,7 @@ comparison = pd.DataFrame({
 print(comparison)
 ```
 
-### 4.2 Results
+### Results
 
 **Female Subsample (N=378):**
 ```
@@ -402,7 +402,7 @@ age          500.142383     549.474999    -49.332616
 hours        691.239562    1620.814163   -929.574601
 ```
 
-### 4.3 Interpretation
+### Interpretation
 
 Separate regressions reveal **how the entire earnings structure differs by gender**, providing richer insights than a simple indicator variable.
 
@@ -418,9 +418,9 @@ The **hours coefficient difference** ($691 vs $1,621) is particularly striking. 
 
 ---
 
-## 5. Multiple Indicator Variables and Reference Categories
+## Multiple Indicator Variables and Reference Categories
 
-### 5.1 Code
+### Code
 
 **Context:** In this section, we analyze earnings differences across three worker types: self-employed, private sector, and government workers. With multiple categories, we must choose which category to omit as the reference group. We demonstrate three equivalent specifications with different reference categories and show that while coefficient values change, the overall model fit (R², predictions, joint F-tests) remains identical. We also show a model without an intercept that directly estimates mean earnings for each group. This illustrates a fundamental principle: reference category choice affects interpretation but not statistical inference about group differences.
 
@@ -451,7 +451,7 @@ f_test_private = model_ref_private.f_test('dself = 0, dgovt = 0')
 print(f"\nJoint F-test (dself, dgovt): F = {f_test_private.fvalue[0][0]:.2f}, p = {f_test_private.pvalue:.4f}")
 ```
 
-### 5.2 Results
+### Results
 
 **Model with No Intercept (Group Means):**
 ```
@@ -503,7 +503,7 @@ RMSE     48519.466161  48312.215673  48312.215673  48312.215673  48312.215673
 N          872.000000    872.000000    872.000000    872.000000    872.000000
 ```
 
-### 5.3 Interpretation
+### Interpretation
 
 This section demonstrates a crucial principle: **the choice of reference category affects coefficient interpretation but not model fit or predictions**.
 
@@ -521,9 +521,9 @@ The joint F-test results (F = 2.01, p = 0.135) indicate that worker type indicat
 
 ---
 
-## 6. ANOVA and Testing Equality of Means
+## ANOVA and Testing Equality of Means
 
-### 6.1 Code
+### Code
 
 **Context:** In this section, we use Analysis of Variance (ANOVA) to test whether mean earnings differ across the three worker types. ANOVA is a classical statistical method for comparing means across multiple groups. We show that ANOVA is mathematically equivalent to regression with indicator variables—the ANOVA F-statistic equals the F-statistic from regressing earnings on worker type indicators. This demonstrates that regression provides a unified framework encompassing traditional statistical tests like ANOVA, with the added flexibility to include control variables and test complex hypotheses.
 
@@ -557,7 +557,7 @@ print("\nDetailed ANOVA table:")
 print(anova_table)
 ```
 
-### 6.2 Results
+### Results
 
 **Means by Worker Type:**
 ```
@@ -578,7 +578,7 @@ C(typeworker)  2.233847e+10    2.0  4.239916  0.014708
 Residual       2.289212e+12  869.0       NaN       NaN
 ```
 
-### 6.3 Interpretation
+### Interpretation
 
 ANOVA provides a formal test of whether earnings differ across the three worker types, showing that **regression and ANOVA are deeply connected**.
 
@@ -596,9 +596,9 @@ The significant F-test (p = 0.015) tells us these differences are unlikely due t
 
 ---
 
-## 7. Visualization
+## Visualization
 
-### 7.1 Code
+### Code
 
 **Context:** In this section, we create visualizations to illustrate the group differences we've been analyzing through regression. Box plots show the distribution of earnings by gender and worker type, revealing not just mean differences but also variation, skewness, and outliers. A scatter plot with fitted regression lines shows how the education-earnings relationship differs by gender, providing visual evidence of the interaction effects we estimated earlier. Effective visualization makes abstract regression coefficients concrete and communicates findings to diverse audiences who may not be familiar with regression tables.
 
@@ -647,7 +647,7 @@ plt.savefig(os.path.join(IMAGES_DIR, 'ch14_earnings_education_gender.png'), dpi=
 plt.close()
 ```
 
-### 7.2 Results
+### Results
 
 ![Earnings by Groups](images/ch14_earnings_by_groups.png)
 
@@ -657,7 +657,7 @@ plt.close()
 
 **Figure 2**: Scatter plot with fitted regression lines showing the relationship between education and earnings, separately by gender. Blue points and line represent males, orange represents females.
 
-### 7.3 Interpretation
+### Interpretation
 
 The visualizations make abstract regression coefficients concrete and reveal distributional features that summary statistics miss.
 

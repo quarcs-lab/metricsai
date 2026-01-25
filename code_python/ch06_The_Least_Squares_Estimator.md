@@ -24,9 +24,9 @@ We explore the crucial distinction between population and sample regressions, de
 
 ---
 
-## 1. Setup and Data Generating Process
+## Setup and Data Generating Process
 
-### 1.1 Code
+### Code
 
 **Context:** In this section, we establish the computational environment and load artificially generated data with a known underlying relationship. Unlike real-world analysis, simulation allows us to know the true parameters, enabling us to verify that OLS estimators recover these parameters correctly. By setting random seeds, we ensure complete reproducibility—anyone running this code will see identical results, which is essential for teaching statistical concepts.
 
@@ -65,7 +65,7 @@ plt.rcParams['figure.figsize'] = (10, 6)
 data_gen = pd.read_stata(GITHUB_DATA_URL + 'AED_GENERATEDDATA.DTA')
 ```
 
-### 1.2 Results
+### Results
 
 ```
 Generated data loaded: AED_GENERATEDDATA.DTA (5 observations)
@@ -78,7 +78,7 @@ Data structure:
 - y: Observed outcome = Eygivenx + u
 ```
 
-### 1.3 Interpretation
+### Interpretation
 
 **Data generating process (DGP)**: This dataset was artificially created to illustrate core regression concepts. The true (population) relationship is:
 
@@ -113,9 +113,9 @@ The challenge: We only observe one sample (one realization of the random variabl
 
 ---
 
-## 2. Population vs. Sample Regression
+## Population vs. Sample Regression
 
-### 2.1 Code
+### Code
 
 **Context:** In this section, we compare the population regression line (the true relationship without noise) to a sample regression line (estimated from data with random errors). This comparison illustrates a fundamental challenge in econometrics: we never observe the population relationship directly, only noisy sample realizations. By fitting both regressions, we can see how sampling error causes estimates to deviate from truth.
 
@@ -165,7 +165,7 @@ print("\nSample regression results:")
 print(model_sample.summary())
 ```
 
-### 2.2 Results
+### Results
 
 **Population Regression (E[y|x] = 1 + 2x):**
 
@@ -189,7 +189,7 @@ R-squared: 0.769
 
 ![Figure 6.2 Panel B: Sample Regression](images/ch06_fig2b_sample_regression.png)
 
-### 2.3 Interpretation
+### Interpretation
 
 **Panel A: Population Regression** (Perfect Fit)
 
@@ -236,9 +236,9 @@ Despite being based on the true DGP, this small sample doesn't produce "statisti
 
 ---
 
-## 3. Three Samples from the Same DGP
+## Three Samples from the Same DGP
 
-### 3.1 Code
+### Code
 
 **Context:** In this section, we generate three independent samples from the same data generating process to illustrate sampling variability. Each "researcher" collects their own data (n=30 observations) and estimates the same underlying relationship. This thought experiment demonstrates that different samples produce different estimates, yet all are valid realizations from the sampling distribution of the OLS estimator.
 
@@ -284,7 +284,7 @@ print(f"  Intercept: {model3.params[0]:.4f}, Slope: {model3.params[1]:.4f}")
 print("\nTrue population parameters: Intercept = 1.0, Slope = 2.0")
 ```
 
-### 3.2 Results
+### Results
 
 ```
 Sample 1 - Regression coefficients:
@@ -299,7 +299,7 @@ Sample 3 - Regression coefficients:
 True population parameters: Intercept = 1.0, Slope = 2.0
 ```
 
-### 3.3 Interpretation
+### Interpretation
 
 **Thought experiment**: Imagine three different researchers independently collect data (n=30 each) from the same population. They're all studying the same DGP:
 
@@ -358,9 +358,9 @@ No single sample gives exactly 0.5, but the estimator is still unbiased because 
 
 ---
 
-## 4. Monte Carlo Simulation: 1,000 Samples
+## Monte Carlo Simulation: 1,000 Samples
 
-### 4.1 Code
+### Code
 
 **Context:** In this section, we conduct a Monte Carlo experiment with 1,000 independent samples to empirically verify OLS unbiasedness and normality. By generating many samples from a known DGP and estimating regression coefficients for each, we can construct the sampling distribution of the estimators. This simulation provides concrete evidence for theoretical properties that would be difficult to demonstrate with real data alone.
 
@@ -396,7 +396,7 @@ print(f"  Mean: {beta1_estimates.mean():.4f} (True value: 2.0)")
 print(f"  Std dev: {beta1_estimates.std():.4f}")
 ```
 
-### 4.2 Results
+### Results
 
 ```
 Simulation results (1000 replications):
@@ -412,7 +412,7 @@ Slope β₁:
 
 ![Sampling Distribution of OLS Estimators](images/ch06_simulation_ols_sampling_distributions.png)
 
-### 4.3 Interpretation
+### Interpretation
 
 **The Monte Carlo experiment**: We generated 1,000 independent samples, each with n=30 observations, from the same DGP (y = 1 + 2x + u). For each sample, we estimated β̂₀ and β̂₁ using OLS. This gives us 1,000 estimates of each parameter.
 

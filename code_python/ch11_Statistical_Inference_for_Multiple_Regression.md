@@ -32,9 +32,9 @@ Statistical inference provides the **evidentiary basis** for scientific claims. 
 
 ---
 
-## 1. Setup and OLS Properties
+## Setup and OLS Properties
 
-### 1.1 Code
+### Code
 
 **Context:** In this section, we establish the Python environment and review the fundamental assumptions underlying statistical inference in multiple regression. Understanding these assumptions is crucial because they determine whether our hypothesis tests and confidence intervals are valid. We demonstrate the Classical Linear Model (CLM) assumptions that enable us to conduct t-tests and F-tests, distinguishing between properties needed for unbiased estimation versus those required for valid inference.
 
@@ -85,7 +85,7 @@ print("  - Consistent: plim(β̂) = β")
 print("  - Efficient (BLUE under Gauss-Markov theorem)")
 ```
 
-### 1.2 Results
+### Results
 
 **Classical Linear Model (CLM) Assumptions:**
 
@@ -105,7 +105,7 @@ print("  - Efficient (BLUE under Gauss-Markov theorem)")
 - **Normality of estimators**: β̂ ~ N(β, Var(β̂)) (enables exact t and F tests)
 - **Valid inference**: Confidence intervals and hypothesis tests have correct coverage/size
 
-### 1.3 Interpretation
+### Interpretation
 
 **Why Assumptions Matter**
 
@@ -204,9 +204,9 @@ In applied work:
 
 ---
 
-## 2. Regression Estimation and Standard Errors
+## Regression Estimation and Standard Errors
 
-### 2.1 Code
+### Code
 
 **Context:** Here we estimate the full multiple regression model with all six predictors and examine the standard errors associated with each coefficient. Standard errors measure estimation uncertainty—they tell us how much our coefficient estimates would vary if we drew different samples from the same population. By computing these standard errors, we can construct confidence intervals and test hypotheses, moving from simple point estimates to rigorous statistical inference.
 
@@ -230,7 +230,7 @@ print(f"  Degrees of freedom: {df}")
 print(f"  Root MSE (σ̂): {np.sqrt(model_full.mse_resid):.6f}")
 ```
 
-### 2.2 Results
+### Results
 
 **Table 11.2: Multiple Regression Results**
 
@@ -253,7 +253,7 @@ print(f"  Root MSE (σ̂): {np.sqrt(model_full.mse_resid):.6f}")
 - **Degrees of freedom**: 22
 - **Root MSE**: $24,935.73
 
-### 2.3 Interpretation
+### Interpretation
 
 **Coefficient Estimates and Standard Errors**
 
@@ -392,9 +392,9 @@ For testing H₀: βⱼ = 0, we get t = β̂ⱼ / SE(β̂ⱼ).
 
 ---
 
-## 3. Confidence Intervals
+## Confidence Intervals
 
-### 3.1 Code
+### Code
 
 **Context:** This section constructs 95% confidence intervals for each regression coefficient, providing ranges of plausible values for the true parameters. Unlike point estimates (which give a single number), confidence intervals quantify uncertainty and allow us to assess whether effects are precisely estimated or highly uncertain. We demonstrate both automated calculation using statsmodels and manual computation to reveal the underlying formula: coefficient ± (critical t-value × standard error).
 
@@ -431,7 +431,7 @@ coef_table = pd.DataFrame({
 print(coef_table)
 ```
 
-### 3.2 Results
+### Results
 
 **95% Confidence Intervals:**
 
@@ -454,7 +454,7 @@ print(coef_table)
 
 ![Confidence Intervals](images/ch11_fig1_confidence_intervals.png)
 
-### 3.3 Interpretation
+### Interpretation
 
 **What is a Confidence Interval?**
 
@@ -609,9 +609,9 @@ The figure shows:
 
 ---
 
-## 4. Hypothesis Tests on Individual Coefficients
+## Hypothesis Tests on Individual Coefficients
 
-### 4.1 Code
+### Code
 
 **Context:** In this section, we conduct formal hypothesis tests about individual regression coefficients. While the default regression output tests whether each coefficient equals zero, we often want to test other hypotheses (e.g., does the size effect equal $50 per square foot?). We demonstrate the complete hypothesis testing framework: formulating null and alternative hypotheses, computing test statistics, finding p-values, and making decisions based on significance levels.
 
@@ -638,7 +638,7 @@ print("\nHypothesis test using statsmodels:")
 print(t_test_result)
 ```
 
-### 4.2 Results
+### Results
 
 **Test: H₀: β_size = 50 vs H₁: β_size ≠ 50**
 
@@ -655,7 +655,7 @@ print(t_test_result)
 - **p-value**: < 0.001
 - **Decision**: Reject H₀ at any conventional significance level
 
-### 4.3 Interpretation
+### Interpretation
 
 **The Logic of Hypothesis Testing**
 
@@ -798,9 +798,9 @@ print(t_test_result)
 
 ---
 
-## 5. Joint Hypothesis Tests (F-Tests)
+## Joint Hypothesis Tests (F-Tests)
 
-### 5.1 Code
+### Code
 
 **Context:** Here we move from testing individual coefficients (t-tests) to testing groups of coefficients simultaneously (F-tests). Joint hypothesis tests are essential for determining whether multiple variables are collectively significant, even if individually they appear insignificant due to multicollinearity. We demonstrate both the overall F-test (testing whether the model has any explanatory power) and subset F-tests (testing whether groups of variables can be excluded).
 
@@ -836,7 +836,7 @@ print(f"  This tests whether bedrooms, bathrooms, lotsize, age, and monthsold")
 print(f"  can jointly be excluded from the model (keeping only size)")
 ```
 
-### 5.2 Results
+### Results
 
 **Test 1: Overall Significance (All Slopes = 0)**
 
@@ -863,7 +863,7 @@ print(f"  can jointly be excluded from the model (keeping only size)")
 
 ![F-Distribution](images/ch11_f_distribution.png)
 
-### 5.3 Interpretation
+### Interpretation
 
 **Why Joint Tests?**
 
@@ -1031,9 +1031,9 @@ The figure shows:
 
 ---
 
-## 6. F-Statistic and Model Comparison
+## F-Statistic and Model Comparison
 
-### 6.1 Code
+### Code
 
 **Context:** This section reveals the mechanics behind F-tests by manually computing F-statistics from sums of squares. Understanding how F-statistics are constructed from the decomposition of total variation (TSS = ESS + RSS) provides deeper insight into what these tests measure. We demonstrate how to compare nested models formally using ANOVA tables, showing whether adding variables significantly improves model fit or merely overfits the data.
 
@@ -1092,7 +1092,7 @@ print("\nANOVA table comparison:")
 print(anova_results)
 ```
 
-### 6.2 Results
+### Results
 
 **Sum of Squares Decomposition:**
 
@@ -1128,7 +1128,7 @@ print(anova_results)
 1      22.0  1.367940e+10      5.0  1.295704e+09  0.416765  0.831976
 ```
 
-### 6.3 Interpretation
+### Interpretation
 
 **Sum of Squares Decomposition**
 
@@ -1280,9 +1280,9 @@ The ANOVA table shows:
 
 ---
 
-## 7. Model Comparison and Robust Standard Errors
+## Model Comparison and Robust Standard Errors
 
-### 7.1 Code
+### Code
 
 **Context:** In this final analytical section, we compare three nested model specifications (size-only, size plus bedrooms, and full model) to determine which provides the best balance of fit and parsimony. We also introduce heteroskedasticity-robust standard errors, which protect against violations of the constant variance assumption. By comparing standard and robust standard errors, we can assess whether heteroskedasticity affects our inferences and ensure our conclusions are statistically sound.
 
@@ -1328,7 +1328,7 @@ print("\nComparison of standard vs robust standard errors:")
 print(robust_comparison)
 ```
 
-### 7.2 Results
+### Results
 
 **Model Comparison:**
 
@@ -1352,7 +1352,7 @@ print(robust_comparison)
 
 ![Model Comparison](images/ch11_model_comparison.png)
 
-### 7.3 Interpretation
+### Interpretation
 
 **Model 1 (Simple): price ~ size**
 

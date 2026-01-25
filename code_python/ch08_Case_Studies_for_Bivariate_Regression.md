@@ -38,9 +38,9 @@ Each case study illustrates different aspects of regression analysis:
 
 ---
 
-## 1. Setup and Data Loading
+## Setup and Data Loading
 
-### 1.1 Code
+### Code
 
 **Context:** In this section, we establish the computational environment and prepare to load four different datasets that span diverse economic applications. Unlike previous chapters that focused on one dataset (house prices), Chapter 8 analyzes multiple datasets to showcase regression's broad applicability. We set up output directories for figures and tables, ensuring all results are properly organized and reproducible. The random seed ensures that any future extensions involving simulation will produce identical results.
 
@@ -76,7 +76,7 @@ sns.set_style("whitegrid")
 plt.rcParams['figure.figsize'] = (10, 6)
 ```
 
-### 1.2 Results
+### Results
 
 ```
 Setup complete. Output directories created:
@@ -89,7 +89,7 @@ Datasets to be analyzed:
   - AED_GDPUNEMPLOY.DTA (US GDP and unemployment, annual)
 ```
 
-### 1.3 Interpretation
+### Interpretation
 
 **Chapter structure**: Unlike previous chapters that focused on one dataset (house prices), Chapter 8 analyzes **four different datasets** to showcase regression's broad applicability.
 
@@ -145,9 +145,9 @@ This organizational structure supports **reproducible research**—other researc
 
 ---
 
-## 2. Health Outcomes Across Countries
+## Health Outcomes Across Countries
 
-### 2.1 Code
+### Code
 
 **Context:** In this section, we examine how health spending relates to population health outcomes across 34 OECD countries. We estimate two separate regressions: one predicting life expectancy and another predicting infant mortality. Both use health spending per capita as the explanatory variable. This cross-country analysis tests a fundamental question in health economics: does spending more on healthcare actually improve health outcomes? We use robust standard errors (HC1) because different countries may have different levels of variation in outcomes, a form of heteroskedasticity common in cross-country data.
 
@@ -179,7 +179,7 @@ print("\nInfant Mortality Regression (Robust SE):")
 print(model_infmort_robust.summary())
 ```
 
-### 2.2 Results
+### Results
 
 **Data Summary (n = 34 OECD countries):**
 
@@ -241,7 +241,7 @@ hlthpc:      -0.0008 → robust SE: 0.000
 
 ![Figure 8.1 Panel B: Infant Mortality vs Health Spending](images/ch08_fig1b_infant_mortality.png)
 
-### 2.3 Interpretation
+### Interpretation
 
 **Research question**: Do countries that spend more on healthcare have better health outcomes?
 
@@ -385,9 +385,9 @@ Both regressions show **minimal difference** between standard and robust SEs:
 
 ---
 
-## 3. Health Expenditures and National Income
+## Health Expenditures and National Income
 
-### 3.1 Code
+### Code
 
 **Context:** In this section, we flip the causal question from the previous analysis. Instead of asking "does health spending improve outcomes?", we ask "what determines health spending?" Specifically, we examine how national income (GDP per capita) predicts health expenditures. This is fundamentally a question about budget constraints and priorities: as countries get richer, how much more do they spend on healthcare? We conduct a sensitivity analysis by comparing results with and without two influential outliers (USA and Luxembourg) to assess whether our conclusions depend on extreme observations.
 
@@ -412,7 +412,7 @@ model_hlthpc_subset = ols('hlthpc ~ gdppc', data=data_health_subset).fit()
 print(model_hlthpc_subset.summary())
 ```
 
-### 3.2 Results
+### Results
 
 **Health Expenditure Regression (All Countries, n = 34):**
 
@@ -456,7 +456,7 @@ gdppc          0.1094      0.005     20.613      0.000       0.099       0.120
 
 ![Figure 8.2 Panel B: Health Spending vs GDP (Excluding USA & Luxembourg)](images/ch08_fig2b_health_gdp_subset.png)
 
-### 3.3 Interpretation
+### Interpretation
 
 **Research question**: How does national income (GDP per capita) determine health spending?
 
@@ -617,9 +617,9 @@ The coefficient (0.125) combined with mean health/GDP ratio (7.2%) suggests inco
 
 ---
 
-## 4. CAPM Model for Stock Returns
+## CAPM Model for Stock Returns
 
-### 4.1 Code
+### Code
 
 **Context:** In this section, we shift from cross-country analysis to time series financial data, applying the Capital Asset Pricing Model (CAPM) to monthly stock returns. CAPM is a cornerstone of finance theory that relates individual stock returns to overall market returns through the "beta" coefficient. We analyze Coca-Cola stock returns over 708 months, testing whether its returns can be explained solely by market movements (supporting market efficiency) or whether it generates abnormal returns (alpha). The excess return formulation (returns minus risk-free rate) isolates the risk premium investors earn for bearing market risk.
 
@@ -644,7 +644,7 @@ print(f"  Beta coefficient: {model_capm.params['rm_rf']:.4f}")
 print(f"  This means Coca Cola stock has {'higher' if model_capm.params['rm_rf'] > 1 else 'lower'} systematic risk than the market")
 ```
 
-### 4.2 Results
+### Results
 
 **Data Summary (CAPM Variables):**
 
@@ -682,7 +682,7 @@ rm_rf:         0.7367 → robust SE: 0.050
 
 ![Figure 8.3 Panel B: Coca Cola vs Market Excess Returns](images/ch08_fig3b_capm_scatter.png)
 
-### 4.3 Interpretation
+### Interpretation
 
 **What is CAPM?**
 
@@ -859,9 +859,9 @@ The same analysis applies to Target (TGT) and Walmart (WMT):
 
 ---
 
-## 5. Okun's Law: GDP Growth and Unemployment
+## Okun's Law: GDP Growth and Unemployment
 
-### 5.1 Code
+### Code
 
 **Context:** In this section, we apply regression to macroeconomic time series data, testing Okun's Law—one of the most robust empirical relationships in macroeconomics. Okun's Law states that GDP growth and unemployment changes move in opposite directions: when the economy grows rapidly, unemployment falls; when it contracts, unemployment rises. We use annual US data spanning more than five decades to estimate how much GDP growth changes for each percentage point change in unemployment. This relationship is crucial for policymakers who must forecast the employment consequences of economic growth or recession.
 
@@ -887,7 +887,7 @@ print(f"  A 1 percentage point increase in unemployment is associated with")
 print(f"  a {abs(model_okun.params['uratechange']):.2f} percentage point decrease in real GDP growth")
 ```
 
-### 5.2 Results
+### Results
 
 **Data Summary (US Annual Data):**
 
@@ -928,7 +928,7 @@ uratechange:  -1.8493 → robust SE: 0.336
 
 ![Figure 8.4 Panel B: Real GDP Change Over Time](images/ch08_fig4b_okun_timeseries.png)
 
-### 5.3 Interpretation
+### Interpretation
 
 **What is Okun's Law?**
 

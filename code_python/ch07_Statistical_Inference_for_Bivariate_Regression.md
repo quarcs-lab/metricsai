@@ -35,9 +35,9 @@ This chapter applies these tools to a real-world dataset analyzing the relations
 
 ---
 
-## 1. Setup and Data Loading
+## Setup and Data Loading
 
-### 1.1 Code
+### Code
 
 **Context:** In this section, we establish the computational environment and load real housing market data. Unlike theoretical exercises, we use actual house sales data to demonstrate statistical inference in a realistic setting. By setting random seeds, we ensure reproducibility. This dataset of 29 house sales provides an excellent teaching example because the sample size is small enough to make statistical inference crucial—with only 29 observations, uncertainty quantification becomes essential for reliable conclusions.
 
@@ -82,7 +82,7 @@ print("\nFirst few observations:")
 print(data_house.head())
 ```
 
-### 1.2 Results
+### Results
 
 ```
 Data summary:
@@ -105,7 +105,7 @@ First few observations:
 4  224500  2100         4        2.5        2  47.0          6  224500
 ```
 
-### 1.3 Interpretation
+### Interpretation
 
 **Dataset**: AED_HOUSE.DTA contains information on 29 houses sold in a specific market. This is a **cross-sectional dataset** (observations at one point in time) with variables:
 
@@ -162,9 +162,9 @@ This small sample makes statistical inference **essential**—we cannot simply r
 
 ---
 
-## 2. Basic Regression and t-statistics
+## Basic Regression and t-statistics
 
-### 2.1 Code
+### Code
 
 **Context:** We begin by estimating the relationship between house price and size using OLS. The key innovation in this chapter is extracting not just the coefficient estimate but also its standard error, t-statistic, and p-value. These statistics allow us to test hypotheses about the population parameter. The t-statistic, in particular, standardizes our estimate by dividing it by its standard error, creating a metric for assessing statistical significance.
 
@@ -186,7 +186,7 @@ print(f"  t-statistic: {t_stat_size:.4f}")
 print(f"  p-value: {p_value_size:.6f}")
 ```
 
-### 2.2 Results
+### Results
 
 **Table 7.1: Regression of House Price on Size**
 
@@ -220,7 +220,7 @@ size          73.7710     11.175      6.601      0.000      50.842      96.700
 
 ![Figure 7.1: House Price vs Size](images/ch07_fig1_house_price_size.png)
 
-### 2.3 Interpretation
+### Interpretation
 
 **Estimated regression equation**:
 
@@ -311,9 +311,9 @@ The regression output includes several diagnostic tests:
 
 ---
 
-## 3. Confidence Intervals
+## Confidence Intervals
 
-### 3.1 Code
+### Code
 
 **Context:** Confidence intervals provide a range of plausible values for the true population parameter, quantifying the uncertainty inherent in estimation. While the point estimate ($73.77 per square foot) is our best single guess, the confidence interval acknowledges sampling variability. Constructing confidence intervals requires understanding the t-distribution and critical values, which adjust for small sample sizes and produce valid inference under normality assumptions.
 
@@ -338,7 +338,7 @@ print(f"  Critical t-value (α=0.05): {t_crit:.4f}")
 print(f"  95% CI: [{ci_lower:.4f}, {ci_upper:.4f}]")
 ```
 
-### 3.2 Results
+### Results
 
 **95% Confidence Intervals:**
 
@@ -358,7 +358,7 @@ size          50.842017      96.700064
 
 ![Figure 7.2: Coefficient Estimates with 95% Confidence Intervals](images/ch07_fig2_confidence_intervals.png)
 
-### 3.3 Interpretation
+### Interpretation
 
 **What is a confidence interval?**
 
@@ -460,9 +460,9 @@ This illustrates the **duality** between confidence intervals and hypothesis tes
 
 ---
 
-## 4. Two-Sided Hypothesis Tests
+## Two-Sided Hypothesis Tests
 
-### 4.1 Code
+### Code
 
 **Context:** While testing whether a coefficient equals zero is most common, we often need to test whether it equals a specific non-zero value—for example, comparing our estimate to previous research or theoretical predictions. Two-sided tests check for any deviation from the null value (in either direction), making them appropriate when we have no strong prior about whether the true parameter is higher or lower than the hypothesized value.
 
@@ -489,7 +489,7 @@ t_test_result = model_basic.t_test(hypothesis)
 print(t_test_result)
 ```
 
-### 4.2 Results
+### Results
 
 ```
 Test: H₀: β₁ = 90 vs H₁: β₁ ≠ 90
@@ -507,7 +507,7 @@ c0            73.7710     11.175     -1.452      0.158      50.842      96.700
 ==============================================================================
 ```
 
-### 4.3 Interpretation
+### Interpretation
 
 **Hypothesis test setup**:
 
@@ -624,9 +624,9 @@ This highlights that **statistical significance depends on sample size**, while 
 
 ---
 
-## 5. One-Sided Directional Hypothesis Tests
+## One-Sided Directional Hypothesis Tests
 
-### 5.1 Code
+### Code
 
 **Context:** One-sided tests are appropriate when theory or context suggests deviations can only occur in one direction. For example, economic theory might predict a positive effect, making a test for "greater than zero" more powerful than a two-sided test. However, one-sided tests must be pre-specified before seeing the data to maintain proper Type I error control. We examine both upper-tailed (H₁: β₁ > β₀) and lower-tailed (H₁: β₁ < β₀) alternatives.
 
@@ -659,7 +659,7 @@ else:
     print("Result: Fail to reject H₀")
 ```
 
-### 5.2 Results
+### Results
 
 ```
 Upper one-tailed test: H₀: β₁ ≤ 90 vs H₁: β₁ > 90
@@ -675,7 +675,7 @@ Lower one-tailed test: H₀: β₁ ≥ 90 vs H₁: β₁ < 90
 Result: Fail to reject H₀
 ```
 
-### 5.3 Interpretation
+### Interpretation
 
 **One-sided vs. two-sided tests**:
 
@@ -792,9 +792,9 @@ If we had a **specific research question** like "Is the market overpriced relati
 
 ---
 
-## 6. Robust Standard Errors
+## Robust Standard Errors
 
-### 6.1 Code
+### Code
 
 **Context:** Standard OLS inference assumes homoskedasticity (constant error variance). When this assumption fails, standard errors are biased, invalidating hypothesis tests and confidence intervals. Heteroskedasticity-robust standard errors (HC1, also known as White standard errors) provide valid inference whether or not homoskedasticity holds, making them a safe default choice. By comparing standard and robust standard errors, we can diagnose heteroskedasticity and assess whether our inference is robust to this potential violation.
 
@@ -823,7 +823,7 @@ print("\n95% Confidence Intervals (Robust):")
 print(robust_conf_int)
 ```
 
-### 6.2 Results
+### Results
 
 **Comparison of standard and robust standard errors:**
 
@@ -842,7 +842,7 @@ size          50.5245      97.0176
 
 ![Figure 7.3: Residual Plot](images/ch07_fig3_residuals.png)
 
-### 6.3 Interpretation
+### Interpretation
 
 **What are robust standard errors?**
 

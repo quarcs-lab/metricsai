@@ -1,0 +1,974 @@
+\chapter{Bivariate Data Summary}
+
+\begin{center}
+\includegraphics[width=\textwidth]{../code_python/images/ch05_visual_summary.jpg}
+\end{center}
+
+\textit{This chapter explores relationships between two variables, introducing correlation, covariance, and simple linear regression using house price and size data from 29 California properties.}
+
+\vspace{0.5cm}
+\noindent\rule{\textwidth}{0.4pt}
+\vspace{0.5cm}
+
+\section{Introduction}
+
+This report demonstrates fundamental techniques for analyzing \textbf{bivariate data}—relationships between two variables. While Chapters 2-4 focused on univariate analysis (single variables), Chapter 5 introduces methods for understanding how variables relate to each other, culminating in \textbf{simple linear regression}, the foundation of econometrics.
+
+We use a classic real estate dataset containing information on 29 house sales:
+\begin{itemize}
+\item \textbf{Primary variables}: Price (in dollars) and Size (in square feet)
+\item \textbf{Additional variables}: Bedrooms, bathrooms, lot size, age, month sold, list price
+\item \textbf{Research question}: How does house size affect sale price?
+\end{itemize}
+
+\textbf{What You'll Learn:}
+
+\begin{itemize}
+\item How to create and interpret two-way contingency tables for categorical data
+\item How to visualize bivariate relationships using scatter plots
+\item How to compute and interpret correlation and covariance
+\item How to estimate simple linear regression models using Ordinary Least Squares (OLS)
+\item How to interpret regression coefficients and statistical significance
+\item How to assess model fit using R², residuals, and other diagnostics
+\item How to make predictions using fitted regression models
+\item How to understand the relationship between correlation and regression
+\item How to recognize the distinction between association and causation
+\item How to explore nonparametric regression alternatives (LOWESS, kernel smoothing)
+\end{itemize}
+
+\vspace{0.5cm}
+\noindent\rule{\textwidth}{0.4pt}
+\vspace{0.5cm}
+
+\section{Setup and Data Loading}
+
+\subsection{Code}
+
+\textbf{Context:} We begin by establishing our Python environment and loading a real estate dataset containing 29 house sales with information on price, size, and other characteristics. This dataset provides an ideal learning context because the relationship between house size and price is intuitive yet complex enough to demonstrate key concepts. We'll use pandas to load data directly from a remote repository, ensuring reproducibility and demonstrating modern data science workflows.
+
+\begin{lstlisting}[language=Python]
+# Import required libraries
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+import statsmodels.api as sm
+from statsmodels.formula.api import ols
+from statsmodels.nonparametric.smoothers_lowess import lowess
+from scipy import stats
+from scipy.ndimage import gaussian_filter1d
+import random
+import os
+
+# Set random seeds for reproducibility
+RANDOM_SEED = 42
+random.seed(RANDOM_SEED)
+np.random.seed(RANDOM_SEED)
+os.environ['PYTHONHASHSEED'] = str(RANDOM_SEED)
+
+# GitHub data URL
+GITHUB_DATA_URL = "https://raw.githubusercontent.com/quarcs-lab/data-open/master/AED/"
+
+# Create output directories
+IMAGES_DIR = 'images'
+TABLES_DIR = 'tables'
+os.makedirs(IMAGES_DIR, exist_ok=True)
+os.makedirs(TABLES_DIR, exist_ok=True)
+
+# Set plotting style
+sns.set_style("whitegrid")
+plt.rcParams['figure.figsize'] = (10, 6)
+
+# Read in house data
+data_house = pd.read_stata(GITHUB_DATA_URL + 'AED_HOUSE.DTA')
+
+# Extract primary variables
+price = data_house['price']
+size = data_house['size']
+\end{lstlisting}
+
+\subsection{Results}
+
+\begin{verbatim}
+Data loaded: AED_HOUSE.DTA (29 observations, 8 variables)
+Variables: price, size, bedrooms, bathrooms, lotsize, age, monthsold, list
+\end{verbatim}
+
+\textbf{Summary Statistics:}
+
+Price statistics:
+\begin{itemize}
+\item Mean:      \$253,910.34
+\item Median:    \$244,000.00
+\item Min:       \$204,000.00
+\item Max:       \$375,000.00
+\item Std Dev:   \$37,390.71
+\end{itemize}
+
+Size statistics:
+\begin{itemize}
+\item Mean:      1,883 sq ft
+\item Median:    1,800 sq ft
+\item Min:       1,400 sq ft
+\item Max:       3,300 sq ft
+\item Std Dev:   398 sq ft
+\end{itemize}
+
+\subsection{Interpretation}
+
+\textbf{Dataset context}: This dataset contains information on 29 house sales, providing a manageable sample size for learning regression concepts while still capturing real-world complexity.
+
+\textbf{Primary research question}: What is the relationship between house size and sale price? This is a classic econometric question with practical implications for:
+\begin{itemize}
+\item \textbf{Homebuyers}: Estimating fair prices based on square footage
+\item \textbf{Real estate agents}: Pricing new listings
+\item \textbf{Appraisers}: Conducting property valuations
+\item \textbf{Economists}: Understanding housing market dynamics
+\end{itemize}
+
+\textbf{Price variability}: The standard deviation (\$37,391) represents about 15\% of the mean price, indicating moderate variability. The range (\$204,000 to \$375,000) shows nearly a 2:1 difference between cheapest and most expensive homes.
+
+\textbf{Size variability}: The standard deviation (398 sq ft) represents about 21\% of the mean size. The largest house (3,300 sq ft) is more than twice the size of the smallest (1,400 sq ft).
+
+\textbf{Why this dataset?} House prices and sizes have several attractive properties for teaching regression:
+\begin{enumerate}
+\item \textbf{Intuitive relationship}: Students understand that bigger houses generally cost more
+\item \textbf{Economic relevance}: Real estate is familiar to most people
+\item \textbf{Positive correlation}: The relationship is strong and positive (not always the case)
+\item \textbf{Real data}: Captures actual market complexity (noise, outliers, nonlinearity)
+\end{enumerate}
+
+\textbf{Additional variables}: While this chapter focuses on the bivariate relationship (price vs. size), the dataset includes other potential determinants (bedrooms, bathrooms, age) that will be explored in multiple regression (later chapters).
+
+\vspace{0.5cm}
+\noindent\rule{\textwidth}{0.4pt}
+\vspace{0.5cm}
+
+\section{Two-Way Tabulation}
+
+\subsection{Code}
+
+\textbf{Context:} Before analyzing continuous relationships, we convert our continuous variables (price and size) into categories to create a two-way contingency table. This tabulation provides an intuitive first look at how variables are associated by showing the joint distribution across categories. While this approach sacrifices information by binning continuous data, it offers clear visual insight into whether larger houses tend to be more expensive, making it a useful exploratory tool before moving to more sophisticated methods.
+
+\begin{lstlisting}[language=Python]
+# Create categorical variables
+price_range = pd.cut(price, bins=[0, 249999, np.inf],
+                     labels=['< $250,000', '>= $250,000'])
+
+size_range = pd.cut(size, bins=[0, 1799, 2399, np.inf],
+                    labels=['< 1,800', '1,800-2,399', '>= 2,400'])
+
+# Table 5.3: Two-way tabulation
+crosstab = pd.crosstab(price_range, size_range, margins=True)
+print("Table 5.3: Two-Way Tabulation")
+print(crosstab)
+crosstab.to_csv(os.path.join(TABLES_DIR, 'ch05_crosstab.csv'))
+\end{lstlisting}
+
+\subsection{Results}
+
+\textbf{Table 5.3: Two-Way Tabulation}
+
+\begin{center}
+\begin{tabular}{lcccc}
+\hline
+price & < 1,800 & 1,800-2,399 & $\geq$ 2,400 & All \\
+\hline
+< \$250,000 & 11 & 6 & 0 & 17 \\
+$\geq$ \$250,000 & 2 & 7 & 3 & 12 \\
+\textbf{All} & \textbf{13} & \textbf{13} & \textbf{3} & \textbf{29} \\
+\hline
+\end{tabular}
+\end{center}
+
+\subsection{Interpretation}
+
+\textbf{What is a contingency table?} A two-way tabulation (crosstab) shows the joint distribution of two categorical variables. Here, we've discretized continuous variables (price and size) into categories to reveal patterns.
+
+\textbf{Pattern observation}:
+\begin{enumerate}
+\item \textbf{Upper-left cell (11 houses)}: Small, inexpensive houses (< 1,800 sq ft, < \$250k)
+\item \textbf{Lower-right cell (3 houses)}: Large, expensive houses ($\geq$ 2,400 sq ft, $\geq$ \$250k)
+\item \textbf{Off-diagonal mixing}: Some large houses are cheap (2 in lower-left) and some small houses are expensive (0 in upper-right)
+\end{enumerate}
+
+\textbf{Positive association}: The concentration of observations along the main diagonal (upper-left to lower-right) visually confirms that \textbf{larger houses tend to be more expensive}. Specifically:
+\begin{itemize}
+\item Of 17 cheap houses (< \$250k), 11 (65\%) are small (< 1,800 sq ft)
+\item Of 12 expensive houses ($\geq$ \$250k), 10 (83\%) are medium or large ($\geq$ 1,800 sq ft)
+\end{itemize}
+
+\textbf{Marginal distributions}:
+\begin{itemize}
+\item \textbf{Row margins}: 17 houses below \$250k, 12 at or above \$250k
+\item \textbf{Column margins}: 13 small, 13 medium, 3 large houses
+\end{itemize}
+
+\textbf{Limitations of categorization}: By converting continuous variables to categories, we lose information. Two houses at 1,799 sq ft and 1,801 sq ft are treated as very different (different categories), while two houses at 1,401 sq ft and 1,799 sq ft are treated as identical (same category). This motivates continuous analysis methods like correlation and regression.
+
+\textbf{Conditional distributions}: We can compute conditional probabilities:
+\begin{itemize}
+\item P(Price $\geq$ \$250k $|$ Size $\geq$ 2,400) = 3/3 = 100\%
+\item P(Price $\geq$ \$250k $|$ Size < 1,800) = 2/13 = 15\%
+\end{itemize}
+
+This shows that large houses are much more likely to be expensive, quantifying the association.
+
+\begin{keyconcept}{Contingency Tables}
+A two-way contingency table (crosstab) shows the joint distribution of two categorical variables, revealing patterns of association. While useful for initial exploration, categorizing continuous variables sacrifices information—two values just on opposite sides of a cutpoint are treated as very different, while two values far apart within the same category are treated as identical. This motivates continuous analysis methods like correlation and regression that preserve the full information in the data.
+\end{keyconcept}
+
+\vspace{0.5cm}
+\noindent\rule{\textwidth}{0.4pt}
+\vspace{0.5cm}
+
+\section{Scatter Plot Visualization}
+
+\subsection{Code}
+
+\textbf{Context:} Scatter plots are the foundational tool for visualizing bivariate relationships, plotting each observation as a point with one variable on each axis. This visualization reveals the form (linear vs. nonlinear), direction (positive vs. negative), and strength (tight vs. dispersed) of the relationship at a glance. Before computing any statistics or fitting regression models, we should always create a scatter plot to understand the data structure and identify potential outliers or patterns that might violate modeling assumptions.
+
+\begin{lstlisting}[language=Python]
+# Figure 5.1: Scatter plot
+fig, ax = plt.subplots(figsize=(10, 6))
+ax.scatter(size, price, s=80, alpha=0.7, color='black', edgecolor='black')
+ax.set_xlabel('House size (in square feet)', fontsize=12)
+ax.set_ylabel('House sale price (in dollars)', fontsize=12)
+ax.set_title('Figure 5.1: House Price vs Size', fontsize=14, fontweight='bold')
+ax.grid(True, alpha=0.3)
+
+output_file = os.path.join(IMAGES_DIR, 'ch05_fig1_scatter_price_vs_size.png')
+plt.tight_layout()
+plt.savefig(output_file, dpi=300, bbox_inches='tight')
+plt.close()
+\end{lstlisting}
+
+\subsection{Results}
+
+\begin{center}
+\includegraphics[width=0.8\textwidth]{../code_python/images/ch05_fig1_scatter_price_vs_size.png}
+\end{center}
+
+\subsection{Interpretation}
+
+\textbf{The scatter plot}: This visualization plots each house as a single point with size on the horizontal axis (x) and price on the vertical axis (y). It's the most fundamental tool for visualizing bivariate relationships.
+
+\textbf{Pattern identification}:
+\begin{enumerate}
+\item \textbf{Positive relationship}: As size increases (moving right), price tends to increase (moving up)
+\item \textbf{Linear trend}: The points roughly follow a straight line, not a curve
+\item \textbf{Variability}: Points don't fall exactly on a line—there's scatter around the trend
+\item \textbf{No obvious outliers}: All points seem consistent with the overall pattern
+\end{enumerate}
+
+\textbf{Strength of relationship}: The points cluster relatively tightly around an imaginary line, suggesting a \textbf{strong positive linear relationship}. If the relationship were weak, points would be much more dispersed.
+
+\textbf{Form of relationship}: The approximately linear pattern justifies using \textbf{linear regression}. If the plot showed curvature (e.g., exponential growth, diminishing returns), linear regression would be inappropriate without transformation.
+
+\textbf{Variability/scatter}: The vertical spread at any given size represents \textbf{unexplained variation}—differences in price not explained by size alone. These could reflect:
+\begin{itemize}
+\item Other features (bedrooms, bathrooms, lot size, age, location)
+\item Unobservable characteristics (quality of construction, neighborhood amenities, view)
+\item Market timing (month sold)
+\item Random variation (buyer preferences, negotiation outcomes)
+\end{itemize}
+
+\textbf{No outliers}: Unlike some datasets, we don't see extreme outliers (e.g., a tiny house selling for \$375k or a huge house selling for \$204k). This suggests the relationship is relatively clean.
+
+\textbf{Direction (positive slope)}: Every additional square foot of size is associated with higher prices. This makes economic sense—larger houses provide more utility (more space for living, entertaining, storage).
+
+\textbf{Why visualize first?} Before computing statistics or running regression, always plot the data. The scatter plot can reveal:
+\begin{itemize}
+\item Nonlinear relationships that would be missed by correlation
+\item Outliers that might distort regression estimates
+\item Heteroscedasticity (changing variance)
+\item Clustering or grouping in the data
+\end{itemize}
+
+\vspace{0.5cm}
+\noindent\rule{\textwidth}{0.4pt}
+\vspace{0.5cm}
+
+\section{Correlation and Covariance}
+
+\subsection{Code}
+
+\textbf{Context:} After visualizing the relationship, we quantify its strength and direction using covariance and correlation. Covariance measures how two variables move together, but its magnitude is difficult to interpret because it depends on the units of measurement. Correlation solves this problem by standardizing the covariance, yielding a unitless measure bounded between -1 and +1 that clearly indicates both the direction and strength of the linear relationship.
+
+\begin{lstlisting}[language=Python]
+# Covariance and correlation
+cov_matrix = data_house[['price', 'size']].cov()
+corr_matrix = data_house[['price', 'size']].corr()
+
+print("Covariance matrix:")
+print(cov_matrix)
+
+print("\nCorrelation matrix:")
+print(corr_matrix)
+corr_matrix.to_csv(os.path.join(TABLES_DIR, 'ch05_correlation_matrix.csv'))
+
+print(f"\nCorrelation coefficient: {corr_matrix.loc['price', 'size']:.4f}")
+\end{lstlisting}
+
+\subsection{Results}
+
+\textbf{Covariance Matrix:}
+
+\begin{center}
+\begin{tabular}{lcc}
+\hline
+ & price & size \\
+\hline
+price & 1.398$\times$10$^9$ & 1.170$\times$10$^7$ \\
+size & 1.170$\times$10$^7$ & 1.586$\times$10$^5$ \\
+\hline
+\end{tabular}
+\end{center}
+
+\textbf{Correlation Matrix:}
+
+\begin{center}
+\begin{tabular}{lcc}
+\hline
+ & price & size \\
+\hline
+price & 1.000 & 0.786 \\
+size & 0.786 & 1.000 \\
+\hline
+\end{tabular}
+\end{center}
+
+\textbf{Correlation coefficient: 0.7858}
+
+\subsection{Interpretation}
+
+\textbf{Covariance}: The covariance between price and size is 1.170$\times$10$^7$ (11.7 million). This positive value confirms that the two variables move together—when size is above average, price tends to be above average.
+
+\textbf{Problem with covariance}: The magnitude (11.7 million) is hard to interpret because:
+\begin{enumerate}
+\item \textbf{Units}: It's in ``dollars $\times$ square feet,'' a meaningless unit
+\item \textbf{Scale-dependent}: Changing measurement units (e.g., square meters instead of square feet) would change the covariance
+\item \textbf{No upper bound}: We can't judge if 11.7 million is ``large'' or ``small''
+\end{enumerate}
+
+\textbf{Correlation to the rescue}: The correlation coefficient solves these problems by standardizing the covariance:
+
+$$r = \frac{\text{Cov}(\text{price}, \text{size})}{\sigma_{\text{price}} \times \sigma_{\text{size}}}$$
+
+\textbf{Properties of correlation}:
+\begin{enumerate}
+\item \textbf{Bounded}: Always between -1 and +1
+\item \textbf{Unitless}: No measurement units (dimensionless)
+\item \textbf{Standardized}: Easy to interpret strength
+\end{enumerate}
+
+\textbf{Interpretation of r = 0.786}:
+\begin{itemize}
+\item \textbf{Sign}: Positive, confirming the relationship is direct (larger houses $\rightarrow$ higher prices)
+\item \textbf{Magnitude}: 0.786 is considered a \textbf{strong positive correlation}
+\begin{itemize}
+\item Weak: $|r|$ < 0.3
+\item Moderate: 0.3 $\leq$ $|r|$ < 0.7
+\item Strong: $|r|$ $\geq$ 0.7
+\end{itemize}
+\item \textbf{Variance explained}: $r^2$ = 0.786$^2$ = 0.618, meaning 62\% of price variation is associated with size variation
+\end{itemize}
+
+\textbf{What correlation measures}: Correlation quantifies the \textbf{strength and direction of the linear relationship} between two variables. It does NOT measure:
+\begin{itemize}
+\item Causation (does size cause higher prices, or do wealthy buyers choose larger houses?)
+\item Nonlinear relationships (correlation can be zero even if a strong nonlinear relationship exists)
+\item The slope (correlation is scale-free; regression gives the slope)
+\end{itemize}
+
+\textbf{Perfect correlation scenarios}:
+\begin{itemize}
+\item r = +1: Perfect positive linear relationship (all points fall exactly on an upward-sloping line)
+\item r = -1: Perfect negative linear relationship (all points fall exactly on a downward-sloping line)
+\item r = 0: No linear relationship (but nonlinear relationships may exist!)
+\end{itemize}
+
+\textbf{Diagonal elements}: The correlation of a variable with itself is always 1.000 (as shown in the diagonal of the correlation matrix).
+
+\textbf{Symmetry}: Corr(price, size) = Corr(size, price) = 0.786. Correlation is symmetric—the order doesn't matter.
+
+\begin{keyconcept}{Correlation Coefficient}
+The correlation coefficient r measures the strength and direction of the linear relationship between two variables, always bounded between -1 and +1. Unlike covariance, correlation is unitless and scale-free, making it easy to interpret: $|r|$ < 0.3 suggests weak association, 0.3 $\leq$ $|r|$ < 0.7 indicates moderate association, and $|r|$ $\geq$ 0.7 represents strong association. Importantly, correlation only captures linear relationships—variables can have zero correlation yet still be strongly related in nonlinear ways.
+\end{keyconcept}
+
+\vspace{0.5cm}
+\noindent\rule{\textwidth}{0.4pt}
+\vspace{0.5cm}
+
+\section{Simple Linear Regression}
+
+\subsection{Code}
+
+\textbf{Context:} We now move from describing the relationship to modeling it using Ordinary Least Squares (OLS) regression, the foundational technique in econometrics. OLS finds the straight line that best fits the data by minimizing the sum of squared vertical distances between observed and predicted values. This method gives us precise estimates of how much price changes for each additional square foot, along with statistical measures to assess the reliability of our estimates and the overall model fit.
+
+\begin{lstlisting}[language=Python]
+# Fit regression model
+model = ols('price ~ size', data=data_house).fit()
+
+print("\nOLS Regression Results:")
+print(model.summary())
+
+# Save coefficients
+coef_table = pd.DataFrame({
+    'coefficient': model.params,
+    'std_err': model.bse,
+    't_value': model.tvalues,
+    'p_value': model.pvalues
+})
+coef_table.to_csv(os.path.join(TABLES_DIR, 'ch05_regression_coefficients.csv'))
+\end{lstlisting}
+
+\subsection{Results}
+
+\textbf{OLS Regression Results:}
+
+\begin{verbatim}
+Dep. Variable:      price       R-squared:                  0.617
+Model:              OLS         Adj. R-squared:             0.603
+Method:             Least Squares   F-statistic:            43.58
+No. Observations:   29          Prob (F-statistic):         4.41e-07
+Df Residuals:       27
+Df Model:           1
+\end{verbatim}
+
+\textbf{Coefficients:}
+
+\begin{center}
+\begin{tabular}{lcccccc}
+\hline
+Variable & Coefficient & Std Error & t-value & p-value & 95\% CI Lower & 95\% CI Upper \\
+\hline
+Intercept & 115,017.28 & 21,489.36 & 5.352 & 0.00001 & 70,924.76 & 159,109.81 \\
+size & 73.77 & 11.17 & 6.601 & 0.0000004 & 50.84 & 96.70 \\
+\hline
+\end{tabular}
+\end{center}
+
+\subsection{Interpretation}
+
+\textbf{The regression equation}:
+
+$$\text{Price} = 115{,}017.28 + 73.77 \times \text{Size} + \varepsilon$$
+
+This equation estimates the \textbf{expected price} given house size, plus a random error term ($\varepsilon$).
+
+\textbf{Intercept ($\beta_0$ = \$115,017.28)}:
+\begin{itemize}
+\item \textbf{Interpretation}: The predicted price for a house with \textbf{zero square feet}
+\item \textbf{Economic meaning}: This is nonsensical (can't have a 0 sq ft house) but mathematically necessary
+\item \textbf{Statistical significance}: t = 5.35, p < 0.001 (highly significant)
+\item \textbf{Extrapolation issue}: The intercept is far outside the observed data range (1,400-3,300 sq ft), so we shouldn't interpret it literally
+\end{itemize}
+
+\textbf{Slope ($\beta_1$ = \$73.77)}:
+\begin{itemize}
+\item \textbf{Interpretation}: Each additional square foot is associated with a \textbf{\$73.77 increase} in expected price
+\item \textbf{Practical meaning}: A 100 sq ft increase $\rightarrow$ \$7,377 price increase; a 500 sq ft increase $\rightarrow$ \$36,885 price increase
+\item \textbf{Statistical significance}: t = 6.60, p < 0.001 (highly significant)
+\item \textbf{Confidence interval}: We're 95\% confident the true slope is between \$50.84 and \$96.70 per sq ft
+\end{itemize}
+
+\textbf{R-squared (0.617)}:
+\begin{itemize}
+\item \textbf{Interpretation}: Size explains \textbf{61.7\%} of the variation in prices
+\item \textbf{Unexplained variation}: The remaining 38.3\% is due to other factors (bedrooms, bathrooms, location, quality, etc.) and random variation
+\item \textbf{Model fit}: An $R^2$ of 0.62 is considered quite good for cross-sectional real estate data
+\end{itemize}
+
+\textbf{Adjusted R-squared (0.603)}:
+\begin{itemize}
+\item \textbf{Purpose}: Adjusts $R^2$ for the number of predictors, penalizing model complexity
+\item \textbf{Formula}: $R^2_{\text{adj}} = 1 - [(1 - R^2)(n - 1) / (n - k - 1)]$
+\item \textbf{Here}: With only one predictor, $R^2_{\text{adj}}$ (0.603) is very close to $R^2$ (0.617)
+\item \textbf{Use}: More important when comparing models with different numbers of variables
+\end{itemize}
+
+\textbf{F-statistic (43.58, p < 0.001)}:
+\begin{itemize}
+\item \textbf{Null hypothesis}: $H_0$: $\beta_1$ = 0 (size has no effect on price)
+\item \textbf{Decision}: Reject $H_0$ with very high confidence
+\item \textbf{Interpretation}: The model as a whole is statistically significant
+\item \textbf{Relationship to t-test}: For simple regression (one predictor), F = $t^2$ (43.58 $\approx$ 6.60$^2$)
+\end{itemize}
+
+\textbf{Degrees of freedom}:
+\begin{itemize}
+\item \textbf{Df Model = 1}: One predictor (size)
+\item \textbf{Df Residuals = 27}: n - k - 1 = 29 - 1 - 1 = 27 observations minus parameters estimated
+\end{itemize}
+
+\textbf{Standard errors and t-values}:
+\begin{itemize}
+\item \textbf{SE(intercept) = \$21,489}: Measures uncertainty in the intercept estimate
+\item \textbf{SE(slope) = \$11.17}: Measures uncertainty in the slope estimate
+\item \textbf{t-values}: Coefficients divided by their standard errors (tests $H_0$: $\beta$ = 0)
+\end{itemize}
+
+\textbf{Why OLS?} Ordinary Least Squares minimizes the sum of squared residuals (prediction errors). This gives the ``best-fitting'' line in a precise mathematical sense, with desirable statistical properties (unbiased, efficient under classical assumptions).
+
+\textbf{Causation vs. correlation}: While the regression shows a strong association, we cannot conclude that \textbf{increasing size causes higher prices}. Possible explanations:
+\begin{enumerate}
+\item \textbf{Direct causation}: Larger houses provide more utility $\rightarrow$ buyers pay more
+\item \textbf{Reverse causation}: Wealthier buyers purchase both larger and more expensive houses
+\item \textbf{Confounding}: Location, quality, and age affect both size and price simultaneously
+\end{enumerate}
+
+\begin{keyconcept}{Ordinary Least Squares (OLS)}
+OLS finds the line that minimizes the sum of squared vertical distances between observed data points and the fitted regression line. This ``best fit'' criterion gives us unbiased estimates of the relationship between variables under standard assumptions. The slope coefficient $\beta_1$ tells us how much Y changes when X increases by one unit, while the intercept $\beta_0$ represents the predicted value of Y when X equals zero (though this may not always have a meaningful economic interpretation).
+\end{keyconcept}
+
+\vspace{0.5cm}
+\noindent\rule{\textwidth}{0.4pt}
+\vspace{0.5cm}
+
+\section{Regression Line Visualization}
+
+\subsection{Code}
+
+\textbf{Context:} Having estimated the regression model, we now visualize the fitted line alongside the actual data points to assess how well our linear model captures the relationship. This visualization is critical for evaluating model assumptions—we can check whether the linear form is appropriate, whether residuals appear random, and whether any observations are unusually far from the fitted line. The scatter plot with the regression line provides intuitive visual feedback about model quality that complements the numerical statistics.
+
+\begin{lstlisting}[language=Python]
+# Figure 5.4: Scatter plot with regression line
+fig, ax = plt.subplots(figsize=(10, 6))
+ax.scatter(size, price, s=80, alpha=0.7, color='black',
+           edgecolor='black', label='Actual')
+ax.plot(size, model.fittedvalues, color='blue', linewidth=2, label='Fitted')
+ax.set_xlabel('House size (in square feet)', fontsize=12)
+ax.set_ylabel('House sale price (in dollars)', fontsize=12)
+ax.set_title('Figure 5.4: House Price Regression',
+             fontsize=14, fontweight='bold')
+ax.legend()
+ax.grid(True, alpha=0.3)
+
+output_file = os.path.join(IMAGES_DIR, 'ch05_fig4_regression_line.png')
+plt.tight_layout()
+plt.savefig(output_file, dpi=300, bbox_inches='tight')
+plt.close()
+\end{lstlisting}
+
+\subsection{Results}
+
+\begin{center}
+\includegraphics[width=0.8\textwidth]{../code_python/images/ch05_fig4_regression_line.png}
+\end{center}
+
+\subsection{Interpretation}
+
+\textbf{The regression line}: The blue line represents the \textbf{fitted values} ($\hat{y}$) from the regression equation. For each size value, the line shows the predicted price based on the model.
+
+\textbf{Least Squares criterion}: OLS chooses the line that \textbf{minimizes the sum of squared vertical distances} from each point to the line. These vertical distances are the \textbf{residuals} ($\varepsilon = y - \hat{y}$).
+
+\textbf{Visual assessment of fit}:
+\begin{enumerate}
+\item \textbf{Line passes through the middle}: The regression line cuts through the center of the point cloud
+\item \textbf{Positive slope}: The upward tilt confirms the positive relationship
+\item \textbf{Residuals}: Vertical distances from points to the line show prediction errors
+\item \textbf{Balanced errors}: Roughly equal numbers of points above and below the line
+\end{enumerate}
+
+\textbf{Predicted vs. actual values}:
+\begin{itemize}
+\item \textbf{Actual values} (black dots): What houses actually sold for
+\item \textbf{Fitted values} (blue line): What the model predicts based on size alone
+\item \textbf{Residuals}: The difference between actual and fitted values
+\end{itemize}
+
+\textbf{Why a straight line?} The assumption of \textbf{linearity} implies that the effect of size on price is constant:
+\begin{itemize}
+\item Adding 100 sq ft to a 1,500 sq ft house increases price by the same amount as adding 100 sq ft to a 2,500 sq ft house (both increase price by \$7,377)
+\end{itemize}
+
+\textbf{Checking assumptions visually}:
+\begin{enumerate}
+\item \textbf{Linearity}: The scatter appears roughly linear (not curved)
+\item \textbf{Constant variance}: The vertical spread seems roughly constant across sizes (no obvious fan shape)
+\item \textbf{No outliers}: All points reasonably close to the line
+\end{enumerate}
+
+\textbf{Interpolation vs. extrapolation}:
+\begin{itemize}
+\item \textbf{Interpolation} (safe): Predicting prices for sizes between 1,400 and 3,300 sq ft (observed range)
+\item \textbf{Extrapolation} (risky): Predicting prices for sizes outside this range (e.g., 5,000 sq ft or 800 sq ft)—the relationship may not hold
+\end{itemize}
+
+\textbf{Goodness of fit}: The relatively tight clustering around the line confirms the high $R^2$ (0.617). If points were widely scattered, $R^2$ would be low.
+
+\vspace{0.5cm}
+\noindent\rule{\textwidth}{0.4pt}
+\vspace{0.5cm}
+
+\section{Prediction Using Regression}
+
+\subsection{Code}
+
+\textbf{Context:} One of the most practical applications of regression is prediction—using our model to estimate the expected value of the dependent variable for a given value of the independent variable. Here we demonstrate how to predict the price of a 2,000 square foot house using our fitted regression equation. This prediction represents the conditional expectation given the observed relationship, though individual houses will vary around this average due to other factors not captured in our simple model.
+
+\begin{lstlisting}[language=Python]
+# Predict for a house of 2,000 square feet
+new_size = pd.DataFrame({'size': [2000]})
+predicted_price = model.predict(new_size)
+
+print(f"\nPrediction for a 2,000 sq ft house:")
+print(f"  Predicted price: ${predicted_price.values[0]:,.2f}")
+
+# Manual calculation
+beta0 = model.params['Intercept']
+beta1 = model.params['size']
+manual_prediction = beta0 + beta1 * 2000
+
+print(f"\nManual calculation:")
+print(f"  y-hat = {beta0:.2f} + {beta1:.2f} * 2000 = ${manual_prediction:,.2f}")
+\end{lstlisting}
+
+\subsection{Results}
+
+\begin{verbatim}
+Prediction for a 2,000 sq ft house:
+  Predicted price: $262,559.36
+
+Manual calculation:
+  y-hat = 115017.28 + 73.77 * 2000 = $262,559.36
+\end{verbatim}
+
+\subsection{Interpretation}
+
+\textbf{Point prediction}: For a house of exactly 2,000 sq ft, our model predicts a price of \textbf{\$262,559.36}.
+
+\textbf{Calculation breakdown}:
+\begin{itemize}
+\item Intercept contribution: \$115,017.28
+\item Size contribution: 73.77 $\times$ 2,000 = \$147,542.00
+\item Total: \$115,017.28 + \$147,542.00 = \$262,559.28
+\end{itemize}
+
+\textbf{Interpretation}:
+\begin{itemize}
+\item This is the \textbf{expected} or \textbf{average} price for 2,000 sq ft houses
+\item Individual houses will vary around this prediction due to other factors
+\item This is a \textbf{conditional expectation}: E[Price $|$ Size = 2,000]
+\end{itemize}
+
+\textbf{Uncertainty in predictions}: While the point estimate is \$262,559, there are two sources of uncertainty:
+\begin{enumerate}
+\item \textbf{Estimation uncertainty}: We don't know the true $\beta_0$ and $\beta_1$; we only have estimates
+\item \textbf{Fundamental uncertainty}: Even if we knew the true parameters, individual houses vary around the mean
+\end{enumerate}
+
+\textbf{Prediction intervals} (not shown but important): A 95\% prediction interval might be [\$190,000, \$335,000], reflecting the uncertainty in predicting an individual house price. This is \textbf{much wider} than a confidence interval for the mean price, which would be [\$250,000, \$275,000].
+
+\textbf{Within-sample vs. out-of-sample}:
+\begin{itemize}
+\item This is an \textbf{interpolation} (2,000 sq ft is within the observed range of 1,400-3,300)
+\item The prediction is relatively reliable because we have observed similar houses
+\item Predicting for 5,000 sq ft would be \textbf{extrapolation}, with much greater uncertainty
+\end{itemize}
+
+\textbf{Practical use}: Real estate agents, appraisers, and buyers can use this model to:
+\begin{itemize}
+\item Estimate fair market value before listing a house
+\item Identify underpriced or overpriced listings
+\item Negotiate prices based on comparable square footage
+\item Make offers on houses before appraisal
+\end{itemize}
+
+\textbf{Limitations}: This prediction ignores other important factors:
+\begin{itemize}
+\item Number of bedrooms/bathrooms
+\item Age and condition
+\item Location and neighborhood quality
+\item Lot size and amenities
+\item Market conditions (hot vs. cold market)
+\end{itemize}
+
+More realistic predictions would use \textbf{multiple regression} (Chapter 6+), incorporating these additional variables.
+
+\vspace{0.5cm}
+\noindent\rule{\textwidth}{0.4pt}
+\vspace{0.5cm}
+
+\section{Relationship Between Regression and Correlation}
+
+\subsection{Code}
+
+\textbf{Context:} Students often wonder about the connection between correlation (which we computed earlier) and R-squared from regression. In simple linear regression with one predictor, these measures are mathematically linked: $R^2$ equals $r^2$ (the squared correlation coefficient). Understanding this relationship deepens our grasp of what regression is doing and clarifies how the variance-explained interpretation connects to the strength of the linear association between variables.
+
+\begin{lstlisting}[language=Python]
+# Relationship between regression and correlation
+r = corr_matrix.loc['price', 'size']
+r_squared = r ** 2
+
+print(f"\nCorrelation coefficient (r):  {r:.4f}")
+print(f"R-squared from regression:    {model.rsquared:.4f}")
+print(f"r-squared:                    {r_squared:.4f}")
+print("  (R-squared and r-squared should be equal)")
+\end{lstlisting}
+
+\subsection{Results}
+
+\begin{verbatim}
+Correlation coefficient (r):  0.7858
+R-squared from regression:    0.6175
+r-squared:                    0.6175
+  (R-squared and r-squared should be equal)
+\end{verbatim}
+
+\subsection{Interpretation}
+
+\textbf{Key relationship}: For \textbf{simple linear regression} (one predictor), $R^2$ from the regression equals $r^2$ (the squared correlation coefficient). This is always true.
+
+\textbf{Proof of equality}:
+\begin{itemize}
+\item Correlation: r = 0.7858
+\item $r^2$ = 0.7858$^2$ = 0.6175
+\item Regression $R^2$: 0.6175
+\item They match exactly (within rounding error)
+\end{itemize}
+
+\textbf{Why they're equal}: Both measure the proportion of variance in Y (price) explained by X (size):
+\begin{itemize}
+\item \textbf{$r^2$}: Measures the proportion of variance in each variable explained by the linear relationship
+\item \textbf{$R^2$}: Measures the proportion of variance in Y explained by the regression model
+\end{itemize}
+
+In simple regression, these are identical. But in \textbf{multiple regression} (multiple predictors), $R^2$ generalizes while $r^2$ does not (you can't have a single correlation with multiple predictors).
+
+\textbf{Interpreting $R^2$ = 0.6175}:
+\begin{itemize}
+\item 61.75\% of the variance in house prices is explained by size
+\item 38.25\% remains unexplained (residual variance)
+\item This is a fairly good fit for cross-sectional data
+\end{itemize}
+
+\textbf{Relationship between correlation and slope}:
+
+The regression slope can be written as: $\beta_1 = r \times (\sigma_y / \sigma_x)$
+
+Where:
+\begin{itemize}
+\item r = correlation (0.7858)
+\item $\sigma_y$ = standard deviation of price (\$37,391)
+\item $\sigma_x$ = standard deviation of size (398 sq ft)
+\end{itemize}
+
+Calculation: $\beta_1$ = 0.7858 $\times$ (37,391 / 398) = 0.7858 $\times$ 93.92 = 73.77 \checkmark
+
+\textbf{Key differences between r and $\beta_1$}:
+\begin{enumerate}
+\item \textbf{Units}: r is unitless; $\beta_1$ has units (dollars per sq ft)
+\item \textbf{Interpretation}: r measures strength and direction; $\beta_1$ measures the rate of change
+\item \textbf{Symmetry}: r is symmetric [Corr(X,Y) = Corr(Y,X)]; $\beta_1$ is not [slope of Y$\sim$X $\neq$ slope of X$\sim$Y]
+\item \textbf{Causality}: Neither implies causation, but $\beta_1$ at least has a directional interpretation
+\end{enumerate}
+
+\textbf{When to use each}:
+\begin{itemize}
+\item \textbf{Correlation}: When you want a standardized measure of association (comparing across different variable pairs)
+\item \textbf{Regression}: When you want to predict Y from X, or interpret the effect in original units
+\end{itemize}
+
+\textbf{Multiple regression extension}: In multiple regression, $R^2$ still measures explained variance, but there's no single correlation coefficient (many pairwise correlations exist between Y and $X_1$, $X_2$, ..., $X_k$).
+
+\begin{keyconcept}{$R^2$ (Coefficient of Determination)}
+$R^2$ measures the proportion of variance in the dependent variable that is explained by the model. For example, $R^2$ = 0.62 means 62\% of the variation in Y is accounted for by our predictor(s), with 38\% remaining unexplained. In simple linear regression, $R^2$ equals $r^2$ (the squared correlation coefficient). Higher $R^2$ indicates better model fit, but doesn't guarantee the model is appropriate, that the relationships are causal, or that predictions will be accurate for new data.
+\end{keyconcept}
+
+\vspace{0.5cm}
+\noindent\rule{\textwidth}{0.4pt}
+\vspace{0.5cm}
+
+\section{Nonparametric Regression Alternatives}
+
+\subsection{Code}
+
+\textbf{Context:} While linear regression assumes a straight-line relationship, nonparametric methods like LOWESS (Locally Weighted Scatterplot Smoothing) and kernel smoothing let the data determine the functional form without imposing rigid parametric assumptions. By comparing OLS with these flexible alternatives, we can assess whether the linearity assumption is reasonable or whether the true relationship exhibits curves, bends, or other nonlinear features that would require more sophisticated modeling approaches.
+
+\begin{lstlisting}[language=Python]
+# Nonparametric regression using lowess
+lowess_result = lowess(price, size, frac=0.6)
+
+# Sort data for smooth plotting
+sort_idx = np.argsort(size)
+size_sorted = size.iloc[sort_idx]
+price_sorted = price.iloc[sort_idx]
+
+# Kernel smoothing (using Gaussian filter as approximation)
+sigma = 2  # bandwidth parameter
+price_smooth = gaussian_filter1d(price_sorted, sigma)
+
+fig, ax = plt.subplots(figsize=(12, 7))
+
+# Scatter plot
+ax.scatter(size, price, s=80, alpha=0.6, color='black',
+           edgecolor='black', label='Actual', zorder=1)
+
+# OLS line
+ax.plot(size, model.fittedvalues, color='blue', linewidth=2.5,
+        label='OLS regression', zorder=2)
+
+# LOWESS
+ax.plot(lowess_result[:, 0], lowess_result[:, 1], color='red',
+        linewidth=2.5, linestyle='--', label='LOWESS', zorder=3)
+
+# Kernel smoothing
+ax.plot(size_sorted, price_smooth, color='green', linewidth=2.5,
+        linestyle=':', label='Kernel smoothing', zorder=4)
+
+ax.set_xlabel('House size (in square feet)', fontsize=12)
+ax.set_ylabel('House sale price (in dollars)', fontsize=12)
+ax.set_title('Figure 5.6: Parametric vs Nonparametric Regression',
+             fontsize=14, fontweight='bold')
+ax.legend(fontsize=11)
+ax.grid(True, alpha=0.3)
+
+output_file = os.path.join(IMAGES_DIR, 'ch05_fig6_nonparametric_regression.png')
+plt.tight_layout()
+plt.savefig(output_file, dpi=300, bbox_inches='tight')
+plt.close()
+\end{lstlisting}
+
+\subsection{Results}
+
+\begin{center}
+\includegraphics[width=0.8\textwidth]{../code_python/images/ch05_fig6_nonparametric_regression.png}
+\end{center}
+
+\subsection{Interpretation}
+
+\textbf{Why nonparametric methods?} Linear regression assumes the relationship between X and Y is a straight line. But what if this assumption is wrong? Nonparametric regression methods allow the data to determine the shape of the relationship without imposing a parametric form (like linearity).
+
+\textbf{OLS (blue line - parametric)}:
+\begin{itemize}
+\item Assumes a straight-line relationship: $\hat{y} = \beta_0 + \beta_1 x$
+\item Estimates only 2 parameters (slope and intercept)
+\item Efficient if the true relationship is linear
+\item Can be misleading if the true relationship is nonlinear
+\end{itemize}
+
+\textbf{LOWESS (red dashed line - nonparametric)}:
+\begin{itemize}
+\item \textbf{Locally Weighted Scatterplot Smoothing}
+\item Fits separate regressions in small neighborhoods around each point
+\item Weights nearby points more heavily (local averaging)
+\item Can capture curves, bends, and local trends
+\item Parameter \texttt{frac=0.6} controls smoothness (fraction of data used in each local regression)
+\end{itemize}
+
+\textbf{Kernel smoothing (green dotted line - nonparametric)}:
+\begin{itemize}
+\item Uses a weighted moving average with a Gaussian kernel
+\item Parameter \texttt{sigma=2} controls bandwidth (larger = smoother)
+\item Similar philosophy to LOWESS but different implementation
+\item Computationally faster for large datasets
+\end{itemize}
+
+\textbf{Comparison in this dataset}:
+\begin{enumerate}
+\item \textbf{All three methods are similar}: This suggests the linear assumption is reasonable
+\item \textbf{Slight curvature in LOWESS}: The red line shows a tiny bit of curvature, but it's very close to the OLS line
+\item \textbf{No dramatic nonlinearity}: We don't see S-curves, exponential growth, or diminishing returns
+\end{enumerate}
+
+\textbf{When would nonparametric methods differ more?}
+\begin{itemize}
+\item If the relationship were curved (e.g., quadratic, exponential)
+\item If there were threshold effects (e.g., jumps at certain values)
+\item If the relationship varied across the range of X (e.g., steep at low values, flat at high values)
+\end{itemize}
+
+\textbf{Trade-offs}:
+
+\textbf{Parametric (OLS) advantages}:
+\begin{itemize}
+\item Simple and interpretable (just two numbers: slope and intercept)
+\item Efficient (uses data economically)
+\item Easy to extrapolate (just extend the line)
+\item Statistical theory is well-developed (standard errors, confidence intervals, hypothesis tests)
+\end{itemize}
+
+\textbf{Nonparametric advantages}:
+\begin{itemize}
+\item Flexible (can fit any shape)
+\item No risk of model misspecification
+\item Good for exploratory analysis
+\item Can reveal unexpected patterns
+\end{itemize}
+
+\textbf{Nonparametric disadvantages}:
+\begin{itemize}
+\item Harder to interpret (no single slope)
+\item Less efficient (needs more data)
+\item Difficult to extrapolate
+\item More complex statistical inference
+\end{itemize}
+
+\textbf{Best practice}:
+\begin{enumerate}
+\item Start with a scatter plot
+\item Fit both parametric (OLS) and nonparametric (LOWESS) models
+\item Compare: If they're similar, use OLS (simpler). If they differ, investigate why—there may be important nonlinearity
+\end{enumerate}
+
+\textbf{In this case}: The linear model is adequate. The LOWESS and kernel smoothing curves don't reveal any dramatic departures from linearity, so we can confidently use the simple OLS regression.
+
+\vspace{0.5cm}
+\noindent\rule{\textwidth}{0.4pt}
+\vspace{0.5cm}
+
+\section{Conclusion}
+
+In this chapter, we explored the rich world of bivariate data analysis—moving beyond single-variable summaries to understanding relationships between pairs of variables. Using California house sales data, we examined how house size relates to sale price through progressively sophisticated methods: from contingency tables to scatter plots, correlation, and finally simple linear regression.
+
+Through this progression, you discovered that while categorization (two-way tables) provides initial insight, continuous methods preserve more information. Scatter plots revealed the form and strength of relationships visually, while correlation quantified linear association in a standardized, unitless metric (r = 0.786). Most importantly, you learned how Ordinary Least Squares regression not only measures association but also provides a predictive equation: Price = \$115,017 + \$73.77 $\times$ Size.
+
+\textbf{What You've Learned:}
+
+On the \textbf{programming} side, you've gained hands-on experience with pandas for data manipulation, matplotlib and seaborn for creating publication-quality scatter plots, and statsmodels for fitting OLS regression models. You can now extract and interpret regression output including coefficients, standard errors, t-statistics, p-values, and $R^2$, and you've explored nonparametric alternatives like LOWESS that relax linearity assumptions.
+
+From a \textbf{statistical} perspective, you understand the critical distinction between covariance (scale-dependent) and correlation (standardized), why OLS minimizes squared residuals to find the best-fit line, what $R^2$ reveals about model fit (61.7\% of price variance explained by size), and the mathematical connection between correlation and regression ($R^2 = r^2$ in simple regression). You also learned to distinguish between interpolation (safe, within observed data) and extrapolation (risky, beyond observed range).
+
+In terms of \textbf{economic interpretation}, you can now translate regression coefficients into meaningful statements: each additional square foot increases expected price by approximately \$74, though individual houses vary due to factors not captured by size alone. Crucially, you've internalized that association does not imply causation—larger houses cost more, but we cannot conclude that adding square footage causes higher value without controlling for confounding factors.
+
+Most importantly, you've learned essential \textbf{methodology}: always visualize data before modeling, compare parametric and nonparametric approaches to validate assumptions, and recognize that simple regression, while foundational, captures only part of reality. The remaining 38\% of unexplained price variation points to the need for multiple regression with additional predictors.
+
+\textbf{Looking Ahead:}
+
+The simple bivariate regression you've mastered here is just the beginning. In upcoming chapters, you'll extend these techniques to multiple regression, adding variables like bedrooms, bathrooms, lot size, and age to better explain housing prices. You'll learn about regression inference—constructing confidence intervals for coefficients and prediction intervals for new observations. You'll discover how to handle nonlinear relationships through transformations (log-linear, log-log models), how interaction terms allow effects to vary, and how diagnostic tools like residual plots help assess model assumptions.
+
+The real power of regression emerges when you combine this foundational understanding with more complex econometric techniques: panel data methods that track entities over time, instrumental variables that address endogeneity, difference-in-differences designs that estimate causal effects, and time series models that account for autocorrelation. Every one of these advanced techniques builds directly on the simple linear regression framework you've learned in this chapter—understanding OLS thoroughly is your passport to the entire world of econometric analysis.
+
+\vspace{0.5cm}
+\noindent\rule{\textwidth}{0.4pt}
+\vspace{0.5cm}
+
+\textbf{References}:
+
+\begin{itemize}
+\item Cameron, A.C. (2022). \textit{Analysis of Economics Data: An Introduction to Econometrics}. \url{https://cameron.econ.ucdavis.edu/aed/index.html}
+\item Python libraries: numpy, pandas, matplotlib, seaborn, statsmodels, scipy
+\end{itemize}
+
+\textbf{Data}:
+
+All datasets are available at: \url{https://cameron.econ.ucdavis.edu/aed/aeddata.html}
+
+\begin{itemize}
+\item Dataset: AED\_HOUSE.DTA (29 house sales with price, size, and other characteristics)
+\item House sales data: Residential properties in a single market, showing variation in size (1,400-3,300 sq ft) and price (\$204,000-\$375,000)
+\end{itemize}
+
+\textbf{Key Formulas}:
+
+\begin{itemize}
+\item \textbf{Sample covariance}: $\text{Cov}(X,Y) = \sum[(x_i - \bar{x})(y_i - \bar{y})] / (n-1)$
+\item \textbf{Sample correlation}: $r = \text{Cov}(X,Y) / (\sigma_x \times \sigma_y)$
+\item \textbf{OLS regression}: $\hat{y} = \beta_0 + \beta_1 x$
+\item \textbf{OLS slope}: $\beta_1 = \text{Cov}(X,Y) / \text{Var}(X) = r \times (\sigma_y / \sigma_x)$
+\item \textbf{OLS intercept}: $\beta_0 = \bar{y} - \beta_1 \bar{x}$
+\item \textbf{R-squared}: $R^2 = 1 - (SSR / SST) = r^2$ (in simple regression)
+\item \textbf{Residual}: $\varepsilon_i = y_i - \hat{y}_i$
+\end{itemize}

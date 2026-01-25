@@ -49,9 +49,9 @@ Each case study illustrates different aspects of applied econometrics:
 
 ---
 
-## 1. Setup and Configuration
+## Setup and Configuration
 
-### 1.1 Code
+### Code
 
 **Context:** In this section, we establish the computational environment and prepare to analyze nine different datasets spanning education economics, production theory, macroeconomics, consumer behavior, and causal inference applications. Unlike previous chapters that focused on one or two datasets, Chapter 13 demonstrates the broad applicability of multiple regression by analyzing diverse economic problems. We set up output directories, configure plotting aesthetics, and prepare to load data from the open-source repository, ensuring all results are properly organized and reproducible.
 
@@ -89,7 +89,7 @@ plt.rcParams['figure.figsize'] = (10, 6)
 print("✓ Setup complete!")
 ```
 
-### 1.2 Results
+### Results
 
 ```
 ✓ Setup complete!
@@ -108,7 +108,7 @@ Datasets to be analyzed:
   - AED_INSTITUTIONS.DTA (Cross-country institutions and GDP)
 ```
 
-### 1.3 Interpretation
+### Interpretation
 
 **Chapter structure**: Unlike previous chapters that focused on methodological development, Chapter 13 analyzes **nine different datasets** spanning multiple economic domains to showcase the **broad applicability** of multiple regression and advanced econometric techniques.
 
@@ -161,9 +161,9 @@ This organizational structure supports **reproducible research** and **transpare
 
 ---
 
-## 2. School Academic Performance Index
+## School Academic Performance Index
 
-### 2.1 Code
+### Code
 
 **Context:** This case study analyzes California school performance using the Academic Performance Index (API), a composite measure of student achievement. We begin by loading data on 400 California high schools, examining the distribution of API scores, and analyzing how parent education, poverty (measured by free/reduced meal eligibility), English learner percentage, and teacher characteristics relate to school performance. This demonstrates fundamental multiple regression where we control for multiple confounding factors to isolate individual effects, revealing how parent education's apparent effect shrinks dramatically (from 134.8 to 45.7 points) when we account for other socioeconomic factors.
 
@@ -233,7 +233,7 @@ model_api_mult = ols('api99 ~ edparent + meals + englearn + yearround + credteac
 print(model_api_mult.summary())
 ```
 
-### 2.2 Results
+### Results
 
 **Data Summary (n = 400 California high schools):**
 
@@ -298,7 +298,7 @@ edparent     134.8050      5.786     23.299      0.000     123.435     146.175
 - **F-statistic**: 562.8 (p < 0.001)
 - **RMSE**: 45.7 points
 
-### 2.3 Interpretation
+### Interpretation
 
 **Research Question**: What school and student characteristics determine academic performance as measured by California's Academic Performance Index (API)?
 
@@ -465,9 +465,9 @@ For causal claims, would need randomized experiments or quasi-experimental desig
 
 ---
 
-## 3. Cobb-Douglas Production Function
+## Cobb-Douglas Production Function
 
-### 3.1 Code
+### Code
 
 **Context:** This case study estimates a Cobb-Douglas production function using historical US manufacturing data (1899-1922), analyzing how capital and labor inputs combine to produce output. We use log-log regression to estimate elasticities and test the economic theory of constant returns to scale (whether doubling inputs doubles output). Because this is time series data, we employ Heteroskedasticity and Autocorrelation Consistent (HAC) standard errors to account for potential serial correlation in the errors, ensuring valid inference despite time dependence in the data.
 
@@ -534,7 +534,7 @@ plt.savefig('images/ch13_cobb_douglas_prediction.png', dpi=300,
 plt.close()
 ```
 
-### 3.2 Results
+### Results
 
 **Data Summary (n = 24 years, 1899-1922):**
 
@@ -576,7 +576,7 @@ Sum of coefficients: 0.232 + 0.806 = 1.038
 
 ![Figure 13.4: Actual vs Predicted Output (1899-1922)](images/ch13_cobb_douglas_prediction.png)
 
-### 3.3 Interpretation
+### Interpretation
 
 **Research Question**: How do capital and labor combine to produce manufacturing output? Do U.S. industries exhibit constant, increasing, or decreasing returns to scale?
 
@@ -783,9 +783,9 @@ This classic study established the **Cobb-Douglas** as the workhorse production 
 
 ---
 
-## 4. Phillips Curve and Omitted Variables Bias
+## Phillips Curve and Omitted Variables Bias
 
-### 4.1 Code
+### Code
 
 **Context:** This case study examines the Phillips curve—the historical relationship between inflation and unemployment—using US data from 1949-2014. We demonstrate how omitting a crucial variable (expected inflation) leads to dramatically different conclusions in different time periods. The original Phillips curve (1960) suggested a stable trade-off between inflation and unemployment, but broke down in the 1970s when Friedman and Phelps showed that expected inflation was the crucial omitted variable. We use HAC standard errors because macroeconomic time series exhibit autocorrelation, and we split the sample to reveal how structural breaks invalidate pooled regression.
 
@@ -863,7 +863,7 @@ print(f"Actual b2 (bivariate): {model_post.params['urate']:.3f}")
 print("✓ Omitted variables bias explains the sign reversal!")
 ```
 
-### 4.2 Results
+### Results
 
 **Pre-1970 Regression (1949-1969, n=21):**
 
@@ -927,7 +927,7 @@ inflgdp1yr     0.8293      0.093      8.915      0.000       0.641       1.017
 - **Actual bivariate coefficient**: 0.296
 - **✓ Match!** Omitted variables bias explains sign reversal.
 
-### 4.3 Interpretation
+### Interpretation
 
 **Research Question**: Is there a stable trade-off between inflation and unemployment (the Phillips curve)? Why did this relationship break down after 1970?
 
@@ -1137,9 +1137,9 @@ This case study illustrates how **omitted variables bias** can completely mislea
 
 ---
 
-## 5. Automobile Fuel Efficiency
+## Automobile Fuel Efficiency
 
-### 5.1 Code
+### Code
 
 **Context:** This case study analyzes automobile fuel efficiency using log-log regression to estimate elasticities of miles per gallon (MPG) with respect to horsepower, weight, and torque. The dataset contains 1,379 vehicles from 1980-2006 produced by multiple manufacturers. Because vehicles from the same manufacturer may share unobserved characteristics (engineering teams, design philosophy, production methods), we use cluster-robust standard errors that allow for arbitrary correlation within manufacturer clusters while maintaining independence across manufacturers. This demonstrates proper inference when data have grouped structure.
 
@@ -1184,7 +1184,7 @@ print(f"Number of clusters: {data_auto['mfr'].nunique()}")
 print(f"Avg obs per cluster: {len(data_auto)/data_auto['mfr'].nunique():.0f}")
 ```
 
-### 5.2 Results
+### Results
 
 **Data Summary (n = 1,379 vehicles, 1980-2006):**
 
@@ -1238,7 +1238,7 @@ year          0.0279      0.005      5.646      0.000       0.018       0.038
 - **Torque**: +0.213 → 1% increase in torque → +0.21% increase in fuel efficiency
 - **Year trend**: +0.0279 → **2.79% efficiency improvement per year**
 
-### 5.3 Interpretation
+### Interpretation
 
 **Research Question**: How do vehicle characteristics (horsepower, weight, torque) affect fuel efficiency? How much has fuel efficiency improved over time due to technological progress?
 
@@ -1439,9 +1439,9 @@ This analysis demonstrates the power of **log-log regression** for elasticity es
 *[Due to length constraints, I'll continue with the remaining sections in the next message.]*
 
 
-## 6. RAND Health Insurance Experiment (RCT)
+## RAND Health Insurance Experiment (RCT)
 
-### 6.1 Code
+### Code
 
 **Context:** This case study analyzes the famous RAND Health Insurance Experiment (1974-1982), the gold standard randomized controlled trial in health economics. Families were randomly assigned to insurance plans with different cost-sharing levels (0%, 25%, 50%, 95% coinsurance) to measure how out-of-pocket costs affect health care utilization. Random assignment eliminates selection bias—the fundamental problem in observational studies where sicker people choose more generous insurance. We use cluster-robust standard errors clustered at the family level because multiple family members' spending decisions are correlated, violating the independence assumption required for standard OLS inference.
 
@@ -1478,7 +1478,7 @@ print(f"F-statistic: {ftest.fvalue:.2f}")
 print(f"p-value: {ftest.pvalue:.4f}")
 ```
 
-### 6.2 Results
+### Results
 
 **Mean Medical Spending by Insurance Plan:**
 
@@ -1519,7 +1519,7 @@ coinsindiv  -135.1969     50.165     -2.695      0.007    -233.551     -36.843
 - **Decision**: Reject H₀ at all conventional levels
 - **Conclusion**: Insurance plans significantly affect medical spending
 
-### 6.3 Interpretation
+### Interpretation
 
 **Research Question**: Does health insurance coverage (cost-sharing) affect medical utilization? Can we establish causality?
 
@@ -1712,9 +1712,9 @@ This study demonstrates that **well-designed experiments** can answer causal que
 
 ---
 
-## 7. Health Care Access (Difference-in-Differences)
+## Health Care Access (Difference-in-Differences)
 
-### 7.1 Code
+### Code
 
 **Context:** This case study applies the Difference-in-Differences (DiD) methodology to evaluate a clinic expansion program in South Africa. Between 1993 and 1998, some communities received new health clinics while others did not. We compare the change in children's health (weight-for-age z-scores) in high-treatment communities to the change in low-treatment communities. The DiD estimator assumes parallel trends: absent the program, both groups would have experienced the same change in health outcomes. This allows us to difference out time-invariant confounders and common time trends, isolating the causal effect of clinic access on child health.
 
@@ -1761,7 +1761,7 @@ print(f"\nDiD coefficient: {model_did.params['postXhigh']:.3f}")
 print(f"Causal interpretation: Clinic access improved nutrition by {model_did.params['postXhigh']:.2f} standard deviations")
 ```
 
-### 7.2 Results
+### Results
 
 **Mean Weight-for-Age Z-Score by Treatment and Time:**
 
@@ -1802,7 +1802,7 @@ postXhigh      0.1387      0.064      2.163      0.035       0.010       0.267
 - **Economic significance**: Clinic access improved child nutrition by 0.14 standard deviations
 - **Causal claim**: Under parallel trends assumption, this is the causal effect
 
-### 7.3 Interpretation
+### Interpretation
 
 **Research Question**: Did expanding primary health clinic access improve child nutrition in rural South Africa?
 
@@ -2040,9 +2040,9 @@ This study demonstrates that **quasi-experimental methods** can provide credible
 
 ---
 
-## 8. Political Incumbency (Regression Discontinuity)
+## Political Incumbency (Regression Discontinuity)
 
-### 8.1 Code
+### Code
 
 **Context:** This case study applies Regression Discontinuity (RD) design to measure the incumbency advantage in US Senate elections. The key insight: candidates who barely win an election (50.1% vote share) versus barely lose (49.9%) are similar in all respects except incumbency status. At the threshold (50% vote share), treatment assignment is "as-if random," enabling causal inference. We estimate how winning the previous election (becoming the incumbent) affects vote share in the next election, controlling for the vote margin using a linear specification. This demonstrates how discontinuities in treatment assignment can identify causal effects without randomization.
 
@@ -2076,7 +2076,7 @@ print(f"95% CI: [{model_rd.conf_int().loc['win', 0]:.3f}, {model_rd.conf_int().l
 print(f"\nInterpretation: Barely winning increases vote share in next election by {model_rd.params['win']:.1f}%")
 ```
 
-### 8.2 Results
+### Results
 
 **Summary Statistics (US Senate Elections):**
 
@@ -2112,7 +2112,7 @@ margin         0.3441      0.015     23.101      0.000       0.315       0.373
 
 **Interpretation**: Barely winning a Senate election (vs. barely losing) causes a **7.95 percentage point increase** in vote share in the next election.
 
-### 8.3 Interpretation
+### Interpretation
 
 **Research Question**: Does being an incumbent (holding office) provide an electoral advantage beyond candidate quality?
 
@@ -2332,9 +2332,9 @@ This study demonstrates that **clever research designs** can exploit natural thr
 
 ---
 
-## 9. Institutions and GDP (Instrumental Variables)
+## Institutions and GDP (Instrumental Variables)
 
-### 9.1 Code
+### Code
 
 **Context:** This case study replicates Acemoglu, Johnson, and Robinson's (2001) influential study on how institutions affect economic development using Instrumental Variables (IV) estimation. The fundamental problem: institutions and GDP are simultaneously determined (reverse causation), and omitted variables (culture, geography) confound the relationship. They use settler mortality rates in colonial times as an instrument for current institutions—in high-mortality areas, Europeans established extractive institutions, while in low-mortality areas they settled and built strong property rights. We implement two-stage least squares (2SLS) to obtain consistent estimates, testing the relevance of the instrument with first-stage F-statistics.
 
@@ -2381,7 +2381,7 @@ print(f"1-unit improvement in institutions → {model_second.params['avexpr_hat'
 print(f"Exponentiating: {np.exp(model_second.params['avexpr_hat']):.2f}x GDP level increase")
 ```
 
-### 9.2 Results
+### Results
 
 **Summary Statistics (64 countries):**
 
@@ -2450,7 +2450,7 @@ avexpr_hat     0.9442      0.159      5.936      0.000       0.627       1.262
 - 1-unit improvement in institutions → +0.94 increase in log GDP
 - Exponentiating: e^0.944 = **2.57× increase in GDP level** (157% increase)
 
-### 9.3 Interpretation
+### Interpretation
 
 **Research Question**: Do strong institutions cause economic development? Or does economic development enable strong institutions (reverse causation)?
 
@@ -2738,9 +2738,9 @@ This study demonstrates that **creative instrumental variables** can overcome en
 
 ---
 
-## 10. From Raw Data to Final Data (Data Wrangling)
+## From Raw Data to Final Data (Data Wrangling)
 
-### 10.1 Code
+### Code
 
 **Context:** This section demonstrates practical data management skills essential for applied econometrics. We show how to read data from various formats (Stata, CSV, Excel, JSON), merge datasets on common identifiers, reshape data between wide and long formats, create new variables through transformations, and handle missing values. These seemingly mundane tasks are the foundation of empirical research—even the most sophisticated econometric method produces garbage if applied to poorly managed data. This section provides a reference guide for common data wrangling operations in Python.
 
@@ -2854,7 +2854,7 @@ print("\nLong format:")
 print(df_long)
 ```
 
-### 10.2 Results
+### Results
 
 **Data Reading Examples:**
 
@@ -2965,7 +2965,7 @@ print(df_long)
 3      UK  2021   3000
 ```
 
-### 10.3 Interpretation
+### Interpretation
 
 **Goal**: This final section demonstrates **practical data management skills** essential for empirical research—the often-overlooked but critical step between **raw data** and **analysis-ready datasets**.
 

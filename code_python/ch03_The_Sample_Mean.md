@@ -26,9 +26,9 @@ We investigate three different sampling scenarios:
 
 ---
 
-## 1. Setup and Environment Configuration
+## Setup and Environment Configuration
 
-### 1.1 Code
+### Code
 
 **Context:** In this section, we configure the Python environment for conducting reproducible statistical simulations. Setting a fixed random seed is critical when studying sampling distributions because it ensures that our random draws produce consistent, verifiable results that match theoretical predictions. This reproducibility is essential for learning—allowing you to re-run the code and see exactly the same patterns—and for scientific communication—enabling others to verify your findings.
 
@@ -62,7 +62,7 @@ sns.set_style("whitegrid")
 plt.rcParams['figure.figsize'] = (10, 6)
 ```
 
-### 1.2 Results
+### Results
 
 ```
 Environment configured successfully:
@@ -72,7 +72,7 @@ Environment configured successfully:
 - Plotting style: whitegrid with 10x6 figure size
 ```
 
-### 1.3 Interpretation
+### Interpretation
 
 **Reproducibility**: Setting `RANDOM_SEED = 42` ensures that all random number generation (coin tosses, random samples) produces identical results every time the script runs. This is crucial for teaching, debugging, and scientific reproducibility.
 
@@ -84,9 +84,9 @@ Environment configured successfully:
 
 ---
 
-## 2. Coin Tosses - Single Sample
+## Coin Tosses - Single Sample
 
-### 2.1 Code
+### Code
 
 **Context:** In this section, we simulate a single sample of 30 coin tosses to illustrate the basic concept of sampling. A fair coin has probability p = 0.5 for heads, representing the simplest possible random process. By examining one sample, we see how the sample mean (proportion of heads) might differ from the true population mean (0.5) due to random chance. This introduces the fundamental question: how much does the sample mean vary from sample to sample?
 
@@ -118,7 +118,7 @@ plt.savefig(output_file, dpi=300, bbox_inches='tight')
 plt.close()
 ```
 
-### 2.2 Results
+### Results
 
 ```
 Single coin toss sample (n=30):
@@ -130,7 +130,7 @@ Sample std dev: 0.4983
 
 ![Figure 3.1 Panel A: Single Sample of 30 Coin Tosses](images/ch03_fig1a_single_coin_toss_sample.png)
 
-### 2.3 Interpretation
+### Interpretation
 
 **Sample vs. Population**: Even though the coin is fair (p = 0.5 for heads), this particular sample of 30 tosses yielded only 12 heads (40%), demonstrating **sampling variability**. The sample mean (0.40) differs from the true population mean (0.50).
 
@@ -145,9 +145,9 @@ Sample std dev: 0.4983
 
 ---
 
-## 3. Distribution of Sample Means - Coin Tosses
+## Distribution of Sample Means - Coin Tosses
 
-### 3.1 Code
+### Code
 
 **Context:** In this critical section, we shift from analyzing a single sample to investigating the sampling distribution—the distribution of sample means across many repeated samples. By generating 400 samples of 30 coin tosses each, we can visualize how sample means vary around the true population mean. This empirical demonstration of the sampling distribution is the foundation for understanding statistical inference, confidence intervals, and hypothesis testing.
 
@@ -195,7 +195,7 @@ print(f"Standard deviation of the 400 sample means: {xbar.std():.4f}")
 print(f"Theoretical: μ = 0.5, σ/√n = √(0.25/30) = {np.sqrt(0.25/30):.4f}")
 ```
 
-### 3.2 Results
+### Results
 
 **Summary Statistics for 400 Sample Means:**
 
@@ -218,7 +218,7 @@ Theoretical: μ = 0.5, σ/√n = √(0.25/30) = 0.0913
 
 ![Figure 3.1 Panel B: Distribution of Sample Means](images/ch03_fig1b_distribution_sample_means.png)
 
-### 3.3 Interpretation
+### Interpretation
 
 **Central Limit Theorem in action**: The histogram shows that the distribution of sample means is approximately normal, even though the underlying data (coin tosses) follow a Bernoulli distribution (decidedly non-normal). This demonstrates the **Central Limit Theorem**: for large enough sample sizes, the sampling distribution of the mean approaches normality.
 
@@ -240,9 +240,9 @@ Our empirical value (0.0863) is close to this theoretical prediction, with the s
 
 ---
 
-## 4. Census Data - Sampling from a Finite Population
+## Census Data - Sampling from a Finite Population
 
-### 4.1 Code
+### Code
 
 **Context:** In this section, we move from theoretical coin tosses to real-world data—sampling from the 1880 U.S. Census of inhabited places. Unlike the coin toss example where we know the population distribution (Bernoulli with p = 0.5), here we're sampling from an actual empirical distribution with unknown characteristics. This demonstrates how the Central Limit Theorem applies to real data, not just theoretical models, and how sampling distributions help us make inferences about populations from limited samples.
 
@@ -295,7 +295,7 @@ print(f"\nMean of sample means: {age_means.mean():.2f}")
 print(f"Standard deviation of sample means: {age_means.std():.2f}")
 ```
 
-### 4.2 Results
+### Results
 
 **Summary Statistics for 100 Census Sample Means:**
 
@@ -317,7 +317,7 @@ Standard deviation of sample means: 3.76
 
 ![Figure 3.3: Distribution of Sample Means from 1880 U.S. Census](images/ch03_fig3_census_age_means.png)
 
-### 4.3 Interpretation
+### Interpretation
 
 **Real-world data**: Unlike the coin toss example with a known population, the 1880 U.S. Census represents a **finite population** of real individuals. Each sample of n=25 is drawn without replacement from this historical dataset.
 
@@ -335,9 +335,9 @@ Standard deviation of sample means: 3.76
 
 ---
 
-## 5. Computer Generation of Random Samples
+## Computer Generation of Random Samples
 
-### 5.1 Code
+### Code
 
 **Context:** In this section, we demonstrate how to generate random samples from different theoretical distributions using Python's numpy library. Computer-generated random numbers are the foundation of Monte Carlo simulation, allowing us to verify theoretical results empirically. We'll draw samples from uniform, normal, and exponential distributions, showing that NumPy's pseudo-random number generator can accurately reproduce the statistical properties of these well-known distributions.
 
@@ -356,7 +356,7 @@ print(f"  Mean: {y_normal.mean():.4f}, Std: {y_normal.std():.4f}")
 print(f"  Theoretical: Mean = 5.0, Std = 2.0")
 ```
 
-### 5.2 Results
+### Results
 
 ```
 Single sample from Uniform(3, 9):
@@ -368,7 +368,7 @@ Single sample from Normal(5, 2):
   Theoretical: Mean = 5.0, Std = 2.0
 ```
 
-### 5.3 Interpretation
+### Interpretation
 
 **Uniform distribution**: The Uniform(3, 9) distribution assigns equal probability to all values between 3 and 9. The theoretical mean is (3+9)/2 = 6.0, and the theoretical standard deviation is (9-3)/√12 = 1.732. Our sample statistics (mean=6.18, std=1.80) are close but not identical—demonstrating sampling variability.
 
@@ -384,9 +384,9 @@ Single sample from Normal(5, 2):
 
 ---
 
-## 6. Simulation - 400 Coin Toss Samples
+## Simulation - 400 Coin Toss Samples
 
-### 6.1 Code
+### Code
 
 **Context:** In this comprehensive simulation, we generate 400 independent samples of coin tosses, systematically varying the sample size (n = 5, 30, 100, 400) to demonstrate how larger samples produce more precise estimates. This simulation illustrates two fundamental properties of the sample mean: (1) unbiasedness—the average of all sample means equals the population mean regardless of sample size, and (2) efficiency—the standard error decreases as √n increases. These properties are cornerstones of statistical theory.
 
@@ -441,7 +441,7 @@ plt.savefig(output_file, dpi=300, bbox_inches='tight')
 plt.close()
 ```
 
-### 6.2 Results
+### Results
 
 ```
 Simulation: 400 samples of 30 coin tosses
@@ -457,7 +457,7 @@ Theoretical values:
 
 ![Simulated Distribution of Sample Means](images/ch03_simulated_sample_means.png)
 
-### 6.3 Interpretation
+### Interpretation
 
 **Monte Carlo simulation**: This code demonstrates a **Monte Carlo simulation**—using computer-generated random samples to study statistical properties. The loop generates 400 independent samples, each containing 30 coin tosses, and computes the sample mean for each.
 
@@ -488,9 +488,9 @@ The slight discrepancy (0.0887 vs 0.0913) is due to **simulation error**—with 
 
 ---
 
-## 7. Summary and Key Findings
+## Summary and Key Findings
 
-### 7.1 Code
+### Code
 
 **Context:** In this final section, we consolidate the key statistical insights from our simulations and real data analysis. Summarizing results effectively is a critical skill—it allows us to communicate complex statistical concepts to diverse audiences. We'll extract the main numerical findings and highlight the theoretical principles they illustrate, bridging empirical evidence with statistical theory.
 
@@ -506,7 +506,7 @@ print("  - Computer simulation of random samples")
 print("  - Comparison of theoretical and empirical distributions")
 ```
 
-### 7.2 Results
+### Results
 
 ```
 ======================================================================
@@ -521,7 +521,7 @@ Key concepts demonstrated:
   - Comparison of theoretical and empirical distributions
 ```
 
-### 7.3 Interpretation
+### Interpretation
 
 **Foundation for inference**: The sample mean is the workhorse estimator in statistics. This chapter establishes three critical properties:
 

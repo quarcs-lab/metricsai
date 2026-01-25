@@ -25,9 +25,9 @@ Regression diagnostics are essential for valid statistical inference. While OLS 
 
 ---
 
-## 1. Setup and Data Loading
+## Setup and Data Loading
 
-### 1.1 Code
+### Code
 
 **Context:** In this section, we establish the Python environment and load earnings data from the Current Population Survey. This dataset contains 872 full-time workers with comprehensive demographic and earnings information that we previously analyzed in Chapters 14 and 15. Now we shift our focus from estimating causal effects to diagnosing whether our regression models satisfy key assumptions. The dataset includes both raw variables (earnings, age, education) and pre-computed transformations (logs, squares, interactions) that will help us explore various diagnostic scenarios including multicollinearity, heteroskedasticity, and influential observations.
 
@@ -71,7 +71,7 @@ data_earnings = pd.read_stata(GITHUB_DATA_URL + 'AED_EARNINGS_COMPLETE.DTA')
 print(data_earnings.describe())
 ```
 
-### 1.2 Results
+### Results
 
 ```
             earnings  lnearnings        age      agesq  education
@@ -85,7 +85,7 @@ min      4000.000000    8.294049   25.000000   625.0000    8.00000
 max    504000.000000   13.130332   65.000000  4225.0000   21.00000
 ```
 
-### 1.3 Interpretation
+### Interpretation
 
 The dataset contains 872 full-time workers with comprehensive earnings and demographic information. The same data used in Chapters 14 and 15 now serves a different purpose: rather than estimating effects, we focus on diagnosing whether our regression models satisfy key assumptions.
 
@@ -95,9 +95,9 @@ The wide range in earnings (min $4,000, max $504,000) suggests potential heteros
 
 ---
 
-## 2. Multicollinearity
+## Multicollinearity
 
-### 2.1 Code
+### Code
 
 **Context:** In this section, we investigate multicollinearity—what happens when predictor variables are highly correlated with each other. We start with a well-behaved base model regressing earnings on age and education, then deliberately introduce multicollinearity by adding an interaction term (age × education). This creates a scenario where agebyeduc is highly correlated with both age and education, inflating standard errors and making individual coefficients imprecise. We use diagnostic tools including correlation matrices, auxiliary regressions (regressing agebyeduc on age and education to measure R²), variance inflation factors (VIF), and joint F-tests to understand both the symptoms and consequences of multicollinearity.
 
@@ -135,7 +135,7 @@ vif_data["VIF"] = [variance_inflation_factor(X.values, i) for i in range(X.shape
 print(vif_data)
 ```
 
-### 2.2 Results
+### Results
 
 **Base Model (no multicollinearity):**
 ```
@@ -195,7 +195,7 @@ Auxiliary regression R²: 0.9471
 Note: VIF > 10 indicates serious multicollinearity
 ```
 
-### 2.3 Interpretation
+### Interpretation
 
 This example perfectly illustrates the **symptoms and consequences of multicollinearity**.
 
@@ -231,9 +231,9 @@ The VIF (Variance Inflation Factor) quantifies this: VIF = 1/(1 - R²) from the 
 
 ---
 
-## 3. Heteroskedasticity
+## Heteroskedasticity
 
-### 3.1 Code
+### Code
 
 **Context:** In this section, we test whether error variance is constant across observations (homoskedasticity) or varies systematically (heteroskedasticity). Cross-sectional earnings data typically exhibit heteroskedasticity—low earners have tightly clustered residuals while high earners show wide dispersion. We estimate a regression of earnings on age, education, and hours, then create diagnostic plots showing how residuals spread changes with fitted values. White's test provides formal statistical evidence of heteroskedasticity by regressing squared residuals on all regressors, cross-products, and squares. We then compare default standard errors to heteroskedasticity-robust (HC1) standard errors to show how ignoring this violation affects inference.
 
@@ -291,7 +291,7 @@ comparison = pd.DataFrame({
 print(comparison)
 ```
 
-### 3.2 Results
+### Results
 
 ![Heteroskedasticity Check](images/ch16_heteroskedasticity_check.png)
 
@@ -312,7 +312,7 @@ education     5777.934570   626.134429   590.462716  0.9430
 hours         1241.828611   227.782089   259.831768  1.1407
 ```
 
-### 3.3 Interpretation
+### Interpretation
 
 Heteroskedasticity is one of the most common violations of OLS assumptions, particularly with cross-sectional earnings data.
 
@@ -350,9 +350,9 @@ The robust SE approach (option 1) is nearly always preferred because it's simple
 
 ---
 
-## 4. Autocorrelation in Time Series
+## Autocorrelation in Time Series
 
-### 4.1 Code
+### Code
 
 **Context:** In this section, we simulate time series data to demonstrate autocorrelation—when regression errors are correlated across time rather than independent. We create two error processes: (1) i.i.d. errors (white noise) with no autocorrelation, serving as the ideal baseline, and (2) AR(1) errors following u_t = 0.8×u_{t-1} + ε_t, which exhibit strong persistence. After estimating a simple regression y = β₀ + β₁x + u with autocorrelated errors, we use diagnostic tools including autocorrelation functions (ACF plots) and the Ljung-Box test to detect serial correlation. We then compare default, heteroskedasticity-robust (HC1), and HAC (Newey-West) standard errors to show that only HAC properly accounts for autocorrelation.
 
@@ -434,7 +434,7 @@ plt.savefig(os.path.join(IMAGES_DIR, 'ch16_acf_plot.png'), dpi=300)
 plt.close()
 ```
 
-### 4.2 Results
+### Results
 
 **Autocorrelations:**
 ```
@@ -474,7 +474,7 @@ x              1.999842    0.006371   0.006388  0.011080
 
 ![ACF Plot](images/ch16_acf_plot.png)
 
-### 4.3 Interpretation
+### Interpretation
 
 Autocorrelation (serial correlation) in regression errors is primarily a **time series problem**, rare in cross-sectional data.
 
@@ -514,9 +514,9 @@ With real time series data, **always use HAC standard errors** when observations
 
 ---
 
-## 5. Influential Observations and Outliers
+## Influential Observations and Outliers
 
-### 5.1 Code
+### Code
 
 **Context:** In this section, we identify observations that disproportionately influence regression results using influence diagnostics. We calculate three key statistics: (1) leverage—how far an observation's predictor values are from sample means (high leverage = unusual X values); (2) Cook's distance—combines leverage and residual size to measure overall influence on fitted values (answers: "how much do results change if I delete this observation?"); (3) DFBETAS—measures how much each coefficient changes when an observation is deleted. We create diagnostic plots including residuals vs. leverage, Cook's distance plot, standardized residuals, and Q-Q plots to visually assess influence, normality, and outliers. Understanding influence helps distinguish data errors from legitimate extreme values.
 
@@ -590,7 +590,7 @@ plt.savefig(os.path.join(IMAGES_DIR, 'ch16_influence_diagnostics.png'), dpi=300)
 plt.close()
 ```
 
-### 5.2 Results
+### Results
 
 **Influence Statistics:**
 ```
@@ -616,7 +616,7 @@ Influential observations (Cook's D > 4/n): 18
 
 ![Influence Diagnostics](images/ch16_influence_diagnostics.png)
 
-### 5.3 Interpretation
+### Interpretation
 
 Influence diagnostics help identify observations that disproportionately affect regression results.
 

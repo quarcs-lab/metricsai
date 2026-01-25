@@ -28,9 +28,9 @@ Panel data methods offer powerful advantages by combining cross-sectional and ti
 
 ---
 
-## 1. Setup and Data Loading
+## Setup and Data Loading
 
-### 1.1 Code
+### Code
 
 **Context:** In this section, we set up our Python environment and load the NBA panel dataset containing revenue and performance data for 29 teams across 10 seasons. Understanding panel data structure is critical because it determines which estimation methods are appropriate and how we interpret results. We load the data directly from GitHub and create output directories for reproducible analysis, following professional data science workflows.
 
@@ -74,7 +74,7 @@ data_nba = pd.read_stata(GITHUB_DATA_URL + 'AED_NBA.DTA')
 print(data_nba.describe())
 ```
 
-### 1.2 Results
+### Results
 
 **NBA Panel Data Summary:**
 ```
@@ -106,7 +106,7 @@ Key variables:
 - **lncitypop**: Natural log of city population
 - **teamid**: Team identifier (1 to 29)
 
-### 1.3 Interpretation
+### Interpretation
 
 The panel structure gives us **286 team-season observations** from 29 NBA teams across approximately 10 seasons (1991-2000). The panel is nearly balanced but not perfectly—some teams have 6 observations while others have all 10, reflecting entry of new teams or data availability.
 
@@ -122,9 +122,9 @@ The log transformation of revenue (lnrevenue) has much smaller variation (SD = 0
 
 ---
 
-## 2. Within and Between Variation
+## Within and Between Variation
 
-### 2.1 Code
+### Code
 
 **Context:** In this section, we decompose the total variation in log revenue into two components: between-team variation (differences across teams) and within-team variation (changes over time for the same team). This decomposition is fundamental to understanding how different panel estimators work—pooled OLS uses both sources of variation, fixed effects uses only within variation, and random effects uses a weighted combination. Understanding which source dominates helps us choose the right estimator and interpret results correctly.
 
@@ -151,7 +151,7 @@ print(f"\nNote: Overall² ≈ Between² + Within²")
 print(f"  {overall_sd**2:.6f} ≈ {between_sd**2:.6f} + {within_sd**2:.6f}")
 ```
 
-### 2.2 Results
+### Results
 
 ```
 Between SD (from team means): 0.212677
@@ -162,7 +162,7 @@ Note: Overall² ≈ Between² + Within²
   0.055689 ≈ 0.045231 + 0.011762
 ```
 
-### 2.3 Interpretation
+### Interpretation
 
 This decomposition reveals that **most variation in log revenue is between teams, not within teams**.
 
@@ -182,9 +182,9 @@ When between variation dominates (as here), FE estimates will be less precise be
 
 ---
 
-## 3. Pooled OLS with Different Standard Errors
+## Pooled OLS with Different Standard Errors
 
-### 3.1 Code
+### Code
 
 **Context:** In this section, we estimate a simple pooled OLS regression of log revenue on wins and season, but we examine three different standard error calculations: default (assumes homoskedasticity and independence), heteroskedastic-robust (allows heteroskedasticity), and cluster-robust (allows arbitrary correlation within teams). Panel data violates the independence assumption because observations from the same team are correlated, making cluster-robust standard errors essential. Comparing these three approaches demonstrates why proper standard error correction matters critically for valid inference.
 
@@ -218,7 +218,7 @@ print("\nStandard Error Comparison:")
 print(se_comparison)
 ```
 
-### 3.2 Results
+### Results
 
 **Pooled OLS (default SEs):**
 ```
@@ -262,7 +262,7 @@ wins         0.001024   0.000990    0.001897
 season       0.004434   0.004501    0.003308
 ```
 
-### 3.3 Interpretation
+### Interpretation
 
 The choice of standard errors dramatically affects inference in panel data.
 
@@ -290,9 +290,9 @@ The fact that cluster SEs are much larger than default SEs (90% increase for win
 
 ---
 
-## 4. Fixed Effects Estimation
+## Fixed Effects Estimation
 
-### 4.1 Code
+### Code
 
 **Context:** In this section, we estimate and compare three panel data models: pooled OLS, random effects, and fixed effects. Each uses different sources of variation and makes different assumptions about unobserved heterogeneity. Pooled OLS treats all observations as independent, random effects assumes entity-specific effects are uncorrelated with regressors, and fixed effects allows arbitrary correlation between entity effects and regressors. Understanding the differences helps us choose the most appropriate estimator for causal inference.
 
@@ -328,7 +328,7 @@ print("\nCoefficient Comparison:")
 print(comparison)
 ```
 
-### 4.2 Results
+### Results
 
 **Pooled OLS (cluster-robust):**
 ```
@@ -398,7 +398,7 @@ allstars  0.0353    0.0372    0.0405
 lncitypop 0.1440    0.0196       NaN
 ```
 
-### 4.3 Interpretation
+### Interpretation
 
 The three estimators—Pooled OLS, Random Effects (RE), and Fixed Effects (FE)—use different sources of variation and make different assumptions.
 

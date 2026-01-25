@@ -19,9 +19,9 @@ In this chapter, we perform a simple bivariate regression analysis in Python usi
 
 ---
 
-## 1. Setup and Data Loading
+## Setup and Data Loading
 
-### 1.1 Code
+### Code
 
 **Context:** In this section, we establish the Python environment and load the housing dataset from a remote repository. Proper data loading is essential for any econometric analysis because it ensures we have clean, accessible data to work with. We use pandas' `read_stata()` function to directly import data in Stata format, allowing us to work with data from various econometric software packages seamlessly.
 
@@ -55,7 +55,7 @@ data_house = pd.read_stata(GITHUB_DATA_URL + 'AED_HOUSE.DTA')
 print(data_house.info())
 ```
 
-### 1.2 Results
+### Results
 
 ```
 <class 'pandas.core.frame.DataFrame'>
@@ -75,7 +75,7 @@ dtypes: float32(2), int16(1), int32(2), int8(3)
 memory usage: 737.0 bytes
 ```
 
-### 1.3 Interpretation
+### Interpretation
 
 The dataset contains **29 observations** (houses) and **8 variables**:
 
@@ -94,9 +94,9 @@ All variables are numeric with no missing values. The data uses efficient data t
 
 ---
 
-## 2. Descriptive Statistics
+## Descriptive Statistics
 
-### 2.1 Code
+### Code
 
 **Context:** Before fitting any statistical model, we compute descriptive statistics to understand our data's basic characteristics. This exploratory step reveals the central tendency, spread, and range of variables, helping us identify potential data quality issues and understand what relationships might exist. Descriptive statistics provide the foundation for interpreting regression results in context.
 
@@ -109,7 +109,7 @@ print(data_summary)
 data_summary.to_csv('tables/ch01_descriptive_stats.csv')
 ```
 
-### 2.2 Results
+### Results
 
 | Statistic | price | size | bedrooms | bathrooms | lotsize | age | monthsold | list |
 |-----------|---------|---------|----------|-----------|---------|-------|-----------|---------|
@@ -122,7 +122,7 @@ data_summary.to_csv('tables/ch01_descriptive_stats.csv')
 | 75% | 270,000.00 | 2,000.00 | 4.00 | 2.50 | 3.00 | 39.00 | 7.00 | 269,000.00 |
 | max | 375,000.00 | 3,300.00 | 6.00 | 3.00 | 3.00 | 51.00 | 8.00 | 386,000.00 |
 
-### 2.3 Interpretation
+### Interpretation
 
 The descriptive statistics reveal several important features of our dataset:
 
@@ -152,9 +152,9 @@ The descriptive statistics reveal several important features of our dataset:
 
 ---
 
-## 3. Regression Analysis
+## Regression Analysis
 
-### 3.1 Code
+### Code
 
 **Context:** In this section, we estimate the relationship between house price and size using Ordinary Least Squares (OLS) regression. OLS is the most fundamental econometric technique, providing unbiased estimates of how one variable affects another. By fitting this model, we can quantify the marginal effect of house size on price and test whether this relationship is statistically significant.
 
@@ -183,7 +183,7 @@ with open('tables/ch01_regression_summary.txt', 'w') as f:
 coef_table.to_csv('tables/ch01_regression_coefficients.csv')
 ```
 
-### 3.2 Results
+### Results
 
 #### Full Regression Summary
 
@@ -224,7 +224,7 @@ strong multicollinearity or other numerical problems.
 | Intercept | 115,017.28 | 21,489.36 | 5.352 | 0.0000118 | 70,924.76 | 159,109.81 |
 | size | 73.77 | 11.17 | 6.601 | 0.0000004 | 50.84 | 96.70 |
 
-### 3.3 Interpretation
+### Interpretation
 
 #### The Regression Equation
 
@@ -309,9 +309,9 @@ or in econometric notation: Ŷ = β̂₀ + β̂₁X
 
 ---
 
-## 4. Visualization
+## Visualization
 
-### 4.1 Code
+### Code
 
 **Context:** Visual analysis complements numerical regression results by revealing patterns, outliers, and the overall quality of model fit. A scatter plot with the fitted regression line allows us to assess whether the linear model is appropriate for our data and identify any observations that deviate substantially from the predicted relationship. Visualization is essential for communicating regression results effectively.
 
@@ -340,11 +340,11 @@ plt.savefig('images/ch01_fig1_house_price_vs_size.png', dpi=300, bbox_inches='ti
 plt.show()
 ```
 
-### 4.2 Results
+### Results
 
 ![House Price vs Size](images/ch01_fig1_house_price_vs_size.png)
 
-### 4.3 Interpretation
+### Interpretation
 
 The scatter plot reveals several important insights about the price-size relationship:
 
@@ -390,9 +390,9 @@ The scatter plot reveals several important insights about the price-size relatio
 
 ---
 
-## 5. Summary and Key Findings
+## Summary and Key Findings
 
-### 5.1 Code
+### Code
 
 **Context:** In this final section, we consolidate and present the key results from our regression analysis in a clear, accessible format. Summarizing findings is crucial for communicating econometric results to diverse audiences who may not need the full statistical detail but require the essential economic insights. This step bridges technical analysis and practical decision-making.
 
@@ -413,7 +413,7 @@ print(f"The model explains {model.rsquared*100:.2f}% of price variation")
 print("=" * 70)
 ```
 
-### 5.2 Results
+### Results
 
 ```
 ======================================================================
@@ -431,7 +431,7 @@ The model explains 61.75% of price variation
 ======================================================================
 ```
 
-### 5.3 Interpretation
+### Interpretation
 
 #### Summary of Findings
 

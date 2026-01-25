@@ -30,9 +30,9 @@ We use a classic real estate dataset containing information on 29 house sales:
 
 ---
 
-## 1. Setup and Data Loading
+## Setup and Data Loading
 
-### 1.1 Code
+### Code
 
 **Context:** We begin by establishing our Python environment and loading a real estate dataset containing 29 house sales with information on price, size, and other characteristics. This dataset provides an ideal learning context because the relationship between house size and price is intuitive yet complex enough to demonstrate key concepts. We'll use pandas to load data directly from a remote repository, ensuring reproducibility and demonstrating modern data science workflows.
 
@@ -77,7 +77,7 @@ price = data_house['price']
 size = data_house['size']
 ```
 
-### 1.2 Results
+### Results
 
 ```
 Data loaded: AED_HOUSE.DTA (29 observations, 8 variables)
@@ -100,7 +100,7 @@ Size statistics:
 - Max:       3,300 sq ft
 - Std Dev:   398 sq ft
 
-### 1.3 Interpretation
+### Interpretation
 
 **Dataset context**: This dataset contains information on 29 house sales, providing a manageable sample size for learning regression concepts while still capturing real-world complexity.
 
@@ -124,9 +124,9 @@ Size statistics:
 
 ---
 
-## 2. Two-Way Tabulation
+## Two-Way Tabulation
 
-### 2.1 Code
+### Code
 
 **Context:** Before analyzing continuous relationships, we convert our continuous variables (price and size) into categories to create a two-way contingency table. This tabulation provides an intuitive first look at how variables are associated by showing the joint distribution across categories. While this approach sacrifices information by binning continuous data, it offers clear visual insight into whether larger houses tend to be more expensive, making it a useful exploratory tool before moving to more sophisticated methods.
 
@@ -145,7 +145,7 @@ print(crosstab)
 crosstab.to_csv(os.path.join(TABLES_DIR, 'ch05_crosstab.csv'))
 ```
 
-### 2.2 Results
+### Results
 
 **Table 5.3: Two-Way Tabulation**
 
@@ -155,7 +155,7 @@ crosstab.to_csv(os.path.join(TABLES_DIR, 'ch05_crosstab.csv'))
 | ≥ $250,000    | 2       | 7           | 3       | 12  |
 | **All**       | **13**  | **13**      | **3**   | **29** |
 
-### 2.3 Interpretation
+### Interpretation
 
 **What is a contingency table?** A two-way tabulation (crosstab) shows the joint distribution of two categorical variables. Here, we've discretized continuous variables (price and size) into categories to reveal patterns.
 
@@ -186,9 +186,9 @@ This shows that large houses are much more likely to be expensive, quantifying t
 
 ---
 
-## 3. Scatter Plot Visualization
+## Scatter Plot Visualization
 
-### 3.1 Code
+### Code
 
 **Context:** Scatter plots are the foundational tool for visualizing bivariate relationships, plotting each observation as a point with one variable on each axis. This visualization reveals the form (linear vs. nonlinear), direction (positive vs. negative), and strength (tight vs. dispersed) of the relationship at a glance. Before computing any statistics or fitting regression models, we should always create a scatter plot to understand the data structure and identify potential outliers or patterns that might violate modeling assumptions.
 
@@ -207,11 +207,11 @@ plt.savefig(output_file, dpi=300, bbox_inches='tight')
 plt.close()
 ```
 
-### 3.2 Results
+### Results
 
 ![Figure 5.1: House Price vs Size](images/ch05_fig1_scatter_price_vs_size.png)
 
-### 3.3 Interpretation
+### Interpretation
 
 **The scatter plot**: This visualization plots each house as a single point with size on the horizontal axis (x) and price on the vertical axis (y). It's the most fundamental tool for visualizing bivariate relationships.
 
@@ -243,9 +243,9 @@ plt.close()
 
 ---
 
-## 4. Correlation and Covariance
+## Correlation and Covariance
 
-### 4.1 Code
+### Code
 
 **Context:** After visualizing the relationship, we quantify its strength and direction using covariance and correlation. Covariance measures how two variables move together, but its magnitude is difficult to interpret because it depends on the units of measurement. Correlation solves this problem by standardizing the covariance, yielding a unitless measure bounded between -1 and +1 that clearly indicates both the direction and strength of the linear relationship.
 
@@ -264,7 +264,7 @@ corr_matrix.to_csv(os.path.join(TABLES_DIR, 'ch05_correlation_matrix.csv'))
 print(f"\nCorrelation coefficient: {corr_matrix.loc['price', 'size']:.4f}")
 ```
 
-### 4.2 Results
+### Results
 
 **Covariance Matrix:**
 
@@ -282,7 +282,7 @@ print(f"\nCorrelation coefficient: {corr_matrix.loc['price', 'size']:.4f}")
 
 **Correlation coefficient: 0.7858**
 
-### 4.3 Interpretation
+### Interpretation
 
 **Covariance**: The covariance between price and size is 1.170×10⁷ (11.7 million). This positive value confirms that the two variables move together—when size is above average, price tends to be above average.
 
@@ -328,9 +328,9 @@ r = Cov(price, size) / (σ_price × σ_size)
 
 ---
 
-## 5. Simple Linear Regression
+## Simple Linear Regression
 
-### 5.1 Code
+### Code
 
 **Context:** We now move from describing the relationship to modeling it using Ordinary Least Squares (OLS) regression, the foundational technique in econometrics. OLS finds the straight line that best fits the data by minimizing the sum of squared vertical distances between observed and predicted values. This method gives us precise estimates of how much price changes for each additional square foot, along with statistical measures to assess the reliability of our estimates and the overall model fit.
 
@@ -351,7 +351,7 @@ coef_table = pd.DataFrame({
 coef_table.to_csv(os.path.join(TABLES_DIR, 'ch05_regression_coefficients.csv'))
 ```
 
-### 5.2 Results
+### Results
 
 **OLS Regression Results:**
 
@@ -371,7 +371,7 @@ Df Model:           1
 | Intercept | 115,017.28  | 21,489.36 | 5.352   | 0.00001  | 70,924.76    | 159,109.81   |
 | size      | 73.77       | 11.17     | 6.601   | 0.0000004| 50.84        | 96.70        |
 
-### 5.3 Interpretation
+### Interpretation
 
 **The regression equation**:
 
@@ -430,9 +430,9 @@ This equation estimates the **expected price** given house size, plus a random e
 
 ---
 
-## 6. Regression Line Visualization
+## Regression Line Visualization
 
-### 6.1 Code
+### Code
 
 **Context:** Having estimated the regression model, we now visualize the fitted line alongside the actual data points to assess how well our linear model captures the relationship. This visualization is critical for evaluating model assumptions—we can check whether the linear form is appropriate, whether residuals appear random, and whether any observations are unusually far from the fitted line. The scatter plot with the regression line provides intuitive visual feedback about model quality that complements the numerical statistics.
 
@@ -455,11 +455,11 @@ plt.savefig(output_file, dpi=300, bbox_inches='tight')
 plt.close()
 ```
 
-### 6.2 Results
+### Results
 
 ![Figure 5.4: House Price Regression](images/ch05_fig4_regression_line.png)
 
-### 6.3 Interpretation
+### Interpretation
 
 **The regression line**: The blue line represents the **fitted values** (ŷ) from the regression equation. For each size value, the line shows the predicted price based on the model.
 
@@ -492,9 +492,9 @@ plt.close()
 
 ---
 
-## 7. Prediction Using Regression
+## Prediction Using Regression
 
-### 7.1 Code
+### Code
 
 **Context:** One of the most practical applications of regression is prediction—using our model to estimate the expected value of the dependent variable for a given value of the independent variable. Here we demonstrate how to predict the price of a 2,000 square foot house using our fitted regression equation. This prediction represents the conditional expectation given the observed relationship, though individual houses will vary around this average due to other factors not captured in our simple model.
 
@@ -515,7 +515,7 @@ print(f"\nManual calculation:")
 print(f"  ŷ = {beta0:.2f} + {beta1:.2f} × 2000 = ${manual_prediction:,.2f}")
 ```
 
-### 7.2 Results
+### Results
 
 ```
 Prediction for a 2,000 sq ft house:
@@ -525,7 +525,7 @@ Manual calculation:
   ŷ = 115017.28 + 73.77 × 2000 = $262,559.36
 ```
 
-### 7.3 Interpretation
+### Interpretation
 
 **Point prediction**: For a house of exactly 2,000 sq ft, our model predicts a price of **$262,559.36**.
 
@@ -567,9 +567,9 @@ More realistic predictions would use **multiple regression** (Chapter 6+), incor
 
 ---
 
-## 8. Relationship Between Regression and Correlation
+## Relationship Between Regression and Correlation
 
-### 8.1 Code
+### Code
 
 **Context:** Students often wonder about the connection between correlation (which we computed earlier) and R-squared from regression. In simple linear regression with one predictor, these measures are mathematically linked: R² equals r² (the squared correlation coefficient). Understanding this relationship deepens our grasp of what regression is doing and clarifies how the variance-explained interpretation connects to the strength of the linear association between variables.
 
@@ -584,7 +584,7 @@ print(f"r²:                           {r_squared:.4f}")
 print("  (R² and r² should be equal)")
 ```
 
-### 8.2 Results
+### Results
 
 ```
 Correlation coefficient (r):  0.7858
@@ -593,7 +593,7 @@ r²:                           0.6175
   (R² and r² should be equal)
 ```
 
-### 8.3 Interpretation
+### Interpretation
 
 **Key relationship**: For **simple linear regression** (one predictor), R² from the regression equals r² (the squared correlation coefficient). This is always true.
 
@@ -643,9 +643,9 @@ Calculation: β₁ = 0.7858 × (37,391 / 398) = 0.7858 × 93.92 = 73.77 ✓
 
 ---
 
-## 9. Nonparametric Regression Alternatives
+## Nonparametric Regression Alternatives
 
-### 9.1 Code
+### Code
 
 **Context:** While linear regression assumes a straight-line relationship, nonparametric methods like LOWESS (Locally Weighted Scatterplot Smoothing) and kernel smoothing let the data determine the functional form without imposing rigid parametric assumptions. By comparing OLS with these flexible alternatives, we can assess whether the linearity assumption is reasonable or whether the true relationship exhibits curves, bends, or other nonlinear features that would require more sophisticated modeling approaches.
 
@@ -693,11 +693,11 @@ plt.savefig(output_file, dpi=300, bbox_inches='tight')
 plt.close()
 ```
 
-### 9.2 Results
+### Results
 
 ![Figure 5.6: Parametric vs Nonparametric Regression](images/ch05_fig6_nonparametric_regression.png)
 
-### 9.3 Interpretation
+### Interpretation
 
 **Why nonparametric methods?** Linear regression assumes the relationship between X and Y is a straight line. But what if this assumption is wrong? Nonparametric regression methods allow the data to determine the shape of the relationship without imposing a parametric form (like linearity).
 

@@ -29,9 +29,9 @@ We explore these concepts using multiple real-world datasets:
 
 ---
 
-## 1. Setup and Data Loading
+## Setup and Data Loading
 
-### 1.1 Code
+### Code
 
 **Context:** In this section, we configure the Python environment and load earnings data for 171 women aged 30. This dataset provides the foundation for demonstrating statistical inference—we'll use this sample to make conclusions about the broader population of all working women of this age. The earnings data is ideal for learning inference because income questions are central to economic policy, and policymakers must routinely estimate population means from limited samples.
 
@@ -68,14 +68,14 @@ plt.rcParams['figure.figsize'] = (10, 6)
 data_earnings = pd.read_stata(GITHUB_DATA_URL + 'AED_EARNINGS.DTA')
 ```
 
-### 1.2 Results
+### Results
 
 ```
 Environment configured successfully
 Data loaded: AED_EARNINGS.DTA (171 observations)
 ```
 
-### 1.3 Interpretation
+### Interpretation
 
 **Reproducibility**: Setting `RANDOM_SEED = 42` ensures consistent results across runs, though this chapter focuses on real data analysis rather than simulations.
 
@@ -91,9 +91,9 @@ Data loaded: AED_EARNINGS.DTA (171 observations)
 
 ---
 
-## 2. Sample Statistics and Initial Inference
+## Sample Statistics and Initial Inference
 
-### 2.1 Code
+### Code
 
 **Context:** In this section, we calculate basic sample statistics—the sample mean, standard deviation, and sample size—that form the building blocks for statistical inference. From these summary statistics, we construct our first confidence interval for the population mean using the t-distribution. This interval quantifies the uncertainty in our estimate and provides a range of plausible values for the true population mean earnings.
 
@@ -134,7 +134,7 @@ print(f"  p-value:      {p_value:.4f}")
 print(f"  Decision:     {'Reject H0' if p_value < 0.05 else 'Fail to reject H0'} at α=0.05")
 ```
 
-### 2.2 Results
+### Results
 
 **Descriptive Statistics:**
 
@@ -165,7 +165,7 @@ Hypothesis Test: H0: μ = $40,000
   Decision:     Fail to reject H0 at α=0.05
 ```
 
-### 2.3 Interpretation
+### Interpretation
 
 **Sample mean**: The average earnings in our sample is $41,412.69. This is our **point estimate** of the population mean (μ).
 
@@ -197,9 +197,9 @@ This interval means: "We are 95% confident that the true population mean earning
 
 ---
 
-## 3. The t-Distribution vs. Normal Distribution
+## The t-Distribution vs. Normal Distribution
 
-### 3.1 Code
+### Code
 
 **Context:** In this section, we compare the t-distribution with the normal distribution to understand when and why we use each one. When the population standard deviation σ is unknown (the typical case), we must estimate it with the sample standard deviation s, introducing additional uncertainty. The t-distribution accounts for this extra uncertainty by having heavier tails than the normal distribution, especially for small sample sizes. As sample size increases, the t-distribution converges to the normal distribution.
 
@@ -235,11 +235,11 @@ plt.savefig(output_file, dpi=300, bbox_inches='tight')
 plt.close()
 ```
 
-### 3.2 Results
+### Results
 
 ![Figure 4.1: t Distribution vs Standard Normal](images/ch04_fig1_t_vs_normal_distributions.png)
 
-### 3.3 Interpretation
+### Interpretation
 
 **Why the t-distribution?** When the population standard deviation (σ) is unknown—which is almost always the case—we must estimate it from the sample using s. This introduces additional uncertainty. The t-distribution accounts for this extra uncertainty by having **heavier tails** than the normal distribution.
 
@@ -269,9 +269,9 @@ plt.close()
 
 ---
 
-## 4. Confidence Intervals at Different Levels
+## Confidence Intervals at Different Levels
 
-### 4.1 Code
+### Code
 
 **Context:** In this section, we construct confidence intervals at different confidence levels (90%, 95%, and 99%) to understand the trade-off between precision and confidence. A higher confidence level requires a wider interval—to be more certain that we've captured the true parameter, we must accept less precision. This trade-off is fundamental to statistical inference, and choosing the appropriate confidence level depends on the consequences of being wrong in your specific application.
 
@@ -300,7 +300,7 @@ print(f"  Margin of error:   ${t_crit * se_earnings:,.2f}")
 print(f"  CI:                [${ci_lower:,.2f}, ${ci_upper:,.2f}]")
 ```
 
-### 4.2 Results
+### Results
 
 ```
 Confidence Intervals for Mean Earnings:
@@ -318,7 +318,7 @@ Manual Calculation (95% CI):
   CI:                [$36,327.35, $46,498.03]
 ```
 
-### 4.3 Interpretation
+### Interpretation
 
 **Confidence interval formula**:
 
@@ -356,9 +356,9 @@ Where:
 
 ---
 
-## 5. Two-Sided Hypothesis Tests
+## Two-Sided Hypothesis Tests
 
-### 5.1 Code
+### Code
 
 **Context:** In this section, we introduce hypothesis testing—a formal framework for making decisions about population parameters. Unlike confidence intervals which estimate a parameter, hypothesis tests evaluate specific claims. We test whether the population mean earnings equal $40,000 (the null hypothesis) against the alternative that they differ from $40,000. Using the t-statistic and p-value, we quantify the evidence against the null hypothesis and make a decision based on our chosen significance level.
 
@@ -377,7 +377,7 @@ print(f"  Critical value:    ±{t_crit_95:.4f}")
 print(f"  Decision:          {'Reject H0' if abs(t_stat) > t_crit_95 else 'Fail to reject H0'}")
 ```
 
-### 5.2 Results
+### Results
 
 ```
 Two-Sided Test: H0: μ = $40,000 vs HA: μ ≠ $40,000
@@ -388,7 +388,7 @@ Two-Sided Test: H0: μ = $40,000 vs HA: μ ≠ $40,000
   Decision:          Fail to reject H0
 ```
 
-### 5.3 Interpretation
+### Interpretation
 
 **Hypothesis testing framework**:
 
@@ -435,9 +435,9 @@ Both approaches reach the same conclusion.
 
 ---
 
-## 6. Two-Sided Hypothesis Test Examples
+## Two-Sided Hypothesis Test Examples
 
-### 6.1 Code
+### Code
 
 **Context:** In this section, we apply the hypothesis testing framework to multiple real-world datasets—gasoline prices, male earnings, and GDP growth—to demonstrate how the same principles apply across different economic contexts. Each example illustrates different outcomes: sometimes we reject the null hypothesis, sometimes we fail to reject it. By working through diverse examples, you'll develop intuition for interpreting t-statistics, p-values, and making appropriate statistical decisions.
 
@@ -512,7 +512,7 @@ print(f"  p-value:           {p_value_growth:.4f}")
 print(f"  Critical value:    ±{t_crit_growth:.4f}")
 ```
 
-### 6.2 Results
+### Results
 
 ```
 Example 1: Gasoline Prices
@@ -543,7 +543,7 @@ H0: μ = 2.0%
   Critical value:    ±1.9697
 ```
 
-### 6.3 Interpretation
+### Interpretation
 
 **Example 1: Gasoline Prices** (REJECT H₀)
 - **Context**: Testing whether mean gas price equals $3.81
@@ -585,9 +585,9 @@ This illustrates why we must consider both statistical evidence (p-values) and e
 
 ---
 
-## 7. One-Sided (Directional) Hypothesis Tests
+## One-Sided (Directional) Hypothesis Tests
 
-### 7.1 Code
+### Code
 
 **Context:** In this section, we explore one-sided hypothesis tests where the alternative hypothesis specifies a direction (e.g., μ > 40,000 or μ < 40,000 rather than μ ≠ 40,000). One-sided tests are appropriate when you have a directional research question or when you only care about deviations in one direction. However, they should be specified before seeing the data to avoid data snooping bias. The p-values for one-sided tests are exactly half those of two-sided tests when the data support the specified direction.
 
@@ -615,7 +615,7 @@ print(f"  Critical value:    {t_crit_upper:.4f}")
 print(f"  Decision:          {'Reject H0' if t_stat > t_crit_upper else 'Fail to reject H0'}")
 ```
 
-### 7.2 Results
+### Results
 
 ```
 One-Sided Test (Lower-tailed): H0: μ ≥ $40,000 vs HA: μ < $40,000
@@ -631,7 +631,7 @@ One-Sided Test (Upper-tailed): H0: μ ≤ $40,000 vs HA: μ > $40,000
   Decision:          Fail to reject H0
 ```
 
-### 7.3 Interpretation
+### Interpretation
 
 **When to use one-sided tests**: Directional tests are appropriate when theory or policy dictates that we only care about deviations in one direction.
 
@@ -669,9 +669,9 @@ One-Sided Test (Upper-tailed): H0: μ ≤ $40,000 vs HA: μ > $40,000
 
 ---
 
-## 8. Inference for Proportions
+## Inference for Proportions
 
-### 8.1 Code
+### Code
 
 **Context:** In this section, we extend inference methods to proportions—situations where the variable of interest is binary (0/1, yes/no, success/failure). Proportions are ubiquitous in economics and social sciences: employment rates, market shares, voter preferences, default rates, and treatment effects. The inference framework is similar to means, but we use the binomial distribution's properties: for proportions, the standard error is √[p(1-p)/n], where p is the sample proportion.
 
@@ -706,7 +706,7 @@ print(f"  p-value:           {p_value_prop:.4f}")
 print(f"  Decision:          {'Reject H0' if abs(z_stat) > 1.96 else 'Fail to reject H0'}")
 ```
 
-### 8.2 Results
+### Results
 
 ```
 Proportion Analysis:
@@ -722,7 +722,7 @@ Hypothesis Test: H0: p = 0.50
   Decision:          Fail to reject H0
 ```
 
-### 8.3 Interpretation
+### Interpretation
 
 **Binary data**: Proportions arise when the outcome is binary (yes/no, success/failure, vote/abstain). Examples:
 - **Political polling**: Proportion supporting a candidate
@@ -773,9 +773,9 @@ In this case they're almost identical because p̂ ≈ p₀. But in general, hypo
 
 ---
 
-## 9. Hypothesis Testing Visualization
+## Hypothesis Testing Visualization
 
-### 9.1 Code
+### Code
 
 **Context:** In this final section, we create comprehensive visualizations of the hypothesis testing framework—showing the null distribution, the observed test statistic, critical regions, and p-values graphically. Visual representations help build intuition about what p-values mean, how critical values define rejection regions, and why more extreme test statistics lead to smaller p-values. These visualizations are essential for communicating hypothesis test results to non-technical audiences and for developing a geometric understanding of statistical inference.
 
@@ -833,11 +833,11 @@ plt.savefig(output_file, dpi=300, bbox_inches='tight')
 plt.close()
 ```
 
-### 9.2 Results
+### Results
 
 ![Hypothesis Testing Visualization](images/ch04_hypothesis_testing_visualization.png)
 
-### 9.3 Interpretation
+### Interpretation
 
 **Panel A: Two-Sided Test**
 

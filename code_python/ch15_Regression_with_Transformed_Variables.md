@@ -24,9 +24,9 @@ Variable transformations are essential tools in econometric analysis. They allow
 
 ---
 
-## 1. Setup and Data Loading
+## Setup and Data Loading
 
-### 1.1 Code
+### Code
 
 **Context:** In this section, we establish the Python environment and load the complete earnings dataset from the Current Population Survey. This dataset includes pre-computed transformations (logarithms, squares, interactions) that enable us to estimate various functional forms without manual data manipulation. Having these transformations pre-computed ensures consistency across analyses and allows us to focus on interpretation rather than data engineering.
 
@@ -70,7 +70,7 @@ data_earnings = pd.read_stata(GITHUB_DATA_URL + 'AED_EARNINGS_COMPLETE.DTA')
 print(data_earnings.describe())
 ```
 
-### 1.2 Results
+### Results
 
 **Key Variables Summary:**
 ```
@@ -85,7 +85,7 @@ min      4000.000000    8.294049   25.000000   625.0000    8.00000    3.22   35.
 max    504000.000000   13.130332   65.000000  4225.0000   21.00000    4.17   99.0000    4.595
 ```
 
-### 1.3 Interpretation
+### Interpretation
 
 The dataset contains multiple transformed versions of key variables, enabling us to estimate various functional forms without manual data manipulation. The dataset includes:
 
@@ -101,9 +101,9 @@ The log-transformed variables have much smaller standard deviations than their l
 
 ---
 
-## 2. Quadratic and Polynomial Models
+## Quadratic and Polynomial Models
 
-### 2.1 Code
+### Code
 
 **Context:** In this section, we estimate quadratic models that capture the inverted U-shaped relationship between age and earnings—a fundamental pattern in labor economics known as the "age-earnings profile." Quadratic models add a squared term (age²) to the regression, allowing the marginal effect of age to vary by age itself. This specification reveals whether earnings increase early in careers, peak at middle age, then decline—a pattern that linear models cannot capture. We calculate marginal effects at different ages to show how the return to experience changes across the lifecycle.
 
@@ -148,7 +148,7 @@ ols_factor_quad = ols('earnings ~ age + I(age**2) + education',
 print(ols_factor_quad.summary())
 ```
 
-### 2.2 Results
+### Results
 
 **Linear Model Results:**
 ```
@@ -200,7 +200,7 @@ Joint Hypothesis Test: H0: age = 0 and agesq = 0
 F-statistic: 9.29, p-value: 0.0001
 ```
 
-### 2.3 Interpretation
+### Interpretation
 
 The quadratic model reveals an **inverted U-shaped relationship** between age and earnings, a fundamental pattern in labor economics known as the "age-earnings profile."
 
@@ -222,9 +222,9 @@ The Average Marginal Effect (AME = $536) represents the average effect across al
 
 ---
 
-## 3. Interaction Terms Between Continuous Variables
+## Interaction Terms Between Continuous Variables
 
-### 3.1 Code
+### Code
 
 **Context:** In this section, we introduce interaction terms that allow the effect of one variable (education) to depend on the value of another (age). This tests whether the return to education varies across the lifecycle—do young workers benefit more or less from additional schooling than older workers? We create an interaction term by multiplying age × education, then include it alongside the main effects. Interpreting interactions requires calculating marginal effects at different values, revealing how relationships are heterogeneous across individuals rather than constant for everyone.
 
@@ -266,7 +266,7 @@ ols_factor_interact = ols('earnings ~ age * education',
 print(ols_factor_interact.summary())
 ```
 
-### 3.2 Results
+### Results
 
 **Interaction Model Results:**
 ```
@@ -313,7 +313,7 @@ Marginal Effect at Mean (MEM) for education: 5772.6953
 Marginal Effect at Representative value (MER) for age=25: 5240.9657
 ```
 
-### 3.3 Interpretation
+### Interpretation
 
 Interaction terms reveal that **the return to education varies by age**, though the effect is not statistically significant in this specification.
 
@@ -335,9 +335,9 @@ However, the interaction term (29) is small relative to its standard error (56) 
 
 ---
 
-## 4. Log-Linear and Log-Log Models
+## Log-Linear and Log-Log Models
 
-### 4.1 Code
+### Code
 
 **Context:** In this section, we estimate logarithmic models that change our interpretation from absolute dollar changes to percentage changes. Taking the natural log of earnings transforms the right-skewed distribution into a more symmetric one, improving model fit and providing economically meaningful percentage effects. Log-linear models (log Y on level X) yield semi-elasticities—the percentage change in Y for a one-unit change in X. Log-log models (log Y on log X) yield elasticities—the percentage change in Y for a one-percent change in X. These specifications are standard in labor economics because percentage effects generalize better across income levels than dollar effects.
 
@@ -362,7 +362,7 @@ print(f"{'Log-Linear':<15} {ols_loglin.rsquared:<12.4f} {ols_loglin.rsquared_adj
 print(f"{'Log-Log':<15} {ols_loglog.rsquared:<12.4f} {ols_loglog.rsquared_adj:<15.4f}")
 ```
 
-### 4.2 Results
+### Results
 
 **Levels Model:**
 ```
@@ -409,7 +409,7 @@ Log-Linear      0.1904       0.1886
 Log-Log         0.1927       0.1909
 ```
 
-### 4.3 Interpretation
+### Interpretation
 
 Logarithmic transformations fundamentally change how we interpret regression coefficients, shifting from dollar amounts to percentages.
 
@@ -435,9 +435,9 @@ The log-log specification for age is less common because thinking about age in p
 
 ---
 
-## 5. Retransformation Bias and Predictions
+## Retransformation Bias and Predictions
 
-### 5.1 Code
+### Code
 
 **Context:** In this section, we address a subtle but crucial issue: when predicting outcomes from log models, simply exponentiating the predicted log values creates downward bias. This occurs because the exponential function is convex—Jensen's inequality tells us that exp(E[ln Y]) < E[Y]. To obtain unbiased predictions in levels, we must apply a bias correction factor: exp(RMSE²/2), where RMSE is the root mean squared error from the log regression. This adjustment is essential for accurate forecasting and policy evaluation, as naive exponentiation can underestimate outcomes by 20% or more.
 
@@ -478,7 +478,7 @@ adjustment_factor_loglog = np.exp(rmse_loglog**2 / 2)
 adjusted_predict_loglog = adjustment_factor_loglog * biased_predict_loglog
 ```
 
-### 5.2 Results
+### Results
 
 **Log-Linear Model Retransformation:**
 ```
@@ -515,7 +515,7 @@ mean    56368.691406    56368.693807    45861.176843      55424.985161
 std     51516.054688    17469.137956    13092.747124      15823.085342
 ```
 
-### 5.3 Interpretation
+### Interpretation
 
 Retransformation bias is a subtle but important issue when making predictions from log models.
 
@@ -537,9 +537,9 @@ The choice between models depends on goals: For **prediction**, log models with 
 
 ---
 
-## 6. Models with Mixed Regressor Types
+## Models with Mixed Regressor Types
 
-### 6.1 Code
+### Code
 
 **Context:** In this final estimation section, we combine everything learned into a comprehensive model with mixed regressor types—binary indicators (gender, self-employed, government worker), quadratic terms (age, age²), linear continuous variables (education), and log-transformed variables (hours worked). Real-world regression models rarely use a single functional form; they mix transformation types to capture different relationships simultaneously. This requires careful interpretation, as each variable type has its own rule for calculating marginal effects. We also compute standardized coefficients to compare effect sizes across variables with different scales.
 
@@ -577,7 +577,7 @@ for var, beta in standardized_coefs.items():
     print(f"  {var:<12}: {beta:>10.4f}")
 ```
 
-### 6.2 Results
+### Results
 
 **Linear Model with Mixed Regressors:**
 ```
@@ -630,7 +630,7 @@ lnhours        0.6123      0.110      5.576      0.000       0.397       0.828
   lnhours     :     0.0955
 ```
 
-### 6.3 Interpretation
+### Interpretation
 
 Mixed models combine different functional forms, requiring careful interpretation of each coefficient type.
 

@@ -35,9 +35,9 @@ This chapter covers four model specifications:
 
 ---
 
-## 1. Setup and Natural Logarithm Properties
+## Setup and Natural Logarithm Properties
 
-### 1.1 Code
+### Code
 
 **Context:** In this section, we establish the computational environment and explore the fundamental properties of natural logarithms. Understanding these mathematical properties is essential because they determine how we interpret regression coefficients in log-transformed models. By demonstrating key logarithm rules (product, quotient, and power rules), we build the foundation for understanding why log transformations convert multiplicative relationships into additive ones—a crucial insight for economic modeling.
 
@@ -90,7 +90,7 @@ print(f"  ln(2*5) = ln(2) + ln(5): {np.log(2*5):.4f} = {np.log(2) + np.log(5):.4
 print(f"  ln(10/2) = ln(10) - ln(2): {np.log(10/2):.4f} = {np.log(10) - np.log(2):.4f}")
 ```
 
-### 1.2 Results
+### Results
 
 **Table 9.1: Properties of Natural Logarithm**
 
@@ -111,7 +111,7 @@ Key properties:
   ln(10/2) = ln(10) - ln(2): 1.6094 = 1.6094
 ```
 
-### 1.3 Interpretation
+### Interpretation
 
 **What is the natural logarithm?**
 
@@ -208,9 +208,9 @@ This approximation is the **foundation** for interpreting log-linear regression 
 
 ---
 
-## 2. Semi-Elasticities and Elasticities
+## Semi-Elasticities and Elasticities
 
-### 2.1 Code
+### Code
 
 **Context:** In this section, we systematically compare four model specifications to understand how the choice of transformations affects coefficient interpretation. Each specification—linear, log-linear, log-log, and linear-log—answers a different economic question. By examining these interpretations side-by-side, we learn to match model specifications to research questions and recognize when percentage changes are more economically meaningful than absolute changes.
 
@@ -226,7 +226,7 @@ print("\n  Linear-log model: y = β₀ + β₁ln(x)")
 print("    Interpretation: Δy ≈ β₁(%Δx/100)")
 ```
 
-### 2.2 Results
+### Results
 
 ```
 Model interpretations:
@@ -243,7 +243,7 @@ Model interpretations:
     Interpretation: Δy ≈ β₁(%Δx/100)
 ```
 
-### 2.3 Interpretation
+### Interpretation
 
 **Four model specifications and their interpretations**:
 
@@ -374,9 +374,9 @@ For log-linear model: ln(y) = β₀ + β₁x
 
 ---
 
-## 3. Earnings and Education: Four Model Specifications
+## Earnings and Education: Four Model Specifications
 
-### 3.1 Code
+### Code
 
 **Context:** In this section, we estimate the returns to education using four different model specifications applied to the same dataset. This comparison is crucial for understanding how model choice affects economic interpretation—what appears as a fixed dollar return in one specification becomes a percentage return in another. By fitting all four models and comparing their R² values and interpretations, we learn evidence-based criteria for selecting the most appropriate specification for earnings-education relationships.
 
@@ -418,7 +418,7 @@ print(f"\nInterpretation: A 1% increase in education is associated with")
 print(f"${model_linlog.params['lneduc']/100:.2f} increase in annual earnings")
 ```
 
-### 3.2 Results
+### Results
 
 **Data Summary (n = 171 individuals, age 30):**
 
@@ -522,7 +522,7 @@ Linear-log     y ~ ln(x) 0.230719 54433.415866
 
 ![Four Models Comparison](images/ch09_four_models_comparison.png)
 
-### 3.3 Interpretation
+### Interpretation
 
 **Dataset**: AED_EARNINGS.DTA contains earnings and education data for 171 individuals, all aged 30.
 
@@ -731,9 +731,9 @@ Using the log-linear model:
 
 ---
 
-## 4. Exponential Growth: S&P 500 Stock Index
+## Exponential Growth: S&P 500 Stock Index
 
-### 4.1 Code
+### Code
 
 **Context:** In this section, we apply logarithmic transformation to estimate the long-run growth rate of the U.S. stock market from 1927 to 2019. Time series data on prices, GDP, and other economic aggregates typically exhibit exponential growth—values increase by a constant percentage rather than a constant amount. By regressing ln(price) on time, we convert this exponential trend into a linear relationship where the slope directly measures the compound annual growth rate, providing a powerful tool for analyzing economic trends.
 
@@ -770,7 +770,7 @@ plnsp500 = model_logs.fittedvalues
 psp500 = np.exp(plnsp500) * np.exp(MSE/2)
 ```
 
-### 4.2 Results
+### Results
 
 **S&P 500 Index data summary (1927-2019, n = 93):**
 
@@ -813,7 +813,7 @@ Retransformation bias correction:
 
 ![Figure 9.2 Panel B: Linear Trend in Natural Logarithms](images/ch09_fig2b_sp500_logs.png)
 
-### 4.3 Interpretation
+### Interpretation
 
 **Research question**: What is the long-run growth rate of the U.S. stock market?
 

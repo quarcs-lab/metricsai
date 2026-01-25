@@ -30,9 +30,9 @@ The housing dataset provides an ideal application because price determination is
 
 ---
 
-## 1. Setup and Data Overview
+## Setup and Data Overview
 
-### 1.1 Code
+### Code
 
 **Context:** In this section, we load the housing dataset and establish the computational environment for multiple regression analysis. This dataset contains 29 houses with six characteristics (size, bedrooms, bathrooms, lot size, age, and months on market), providing an ideal teaching example because the small sample size allows us to examine individual observations while demonstrating how multiple predictors jointly determine prices. Understanding the data structure before modeling prevents errors and guides variable selection.
 
@@ -86,7 +86,7 @@ print("\nTable 10.2: House Data (first 10 observations)")
 print(data_house[table101_vars].head(10))
 ```
 
-### 1.2 Results
+### Results
 
 **Table 10.1: House Characteristics Summary Statistics**
 
@@ -117,7 +117,7 @@ print(data_house[table101_vars].head(10))
 9  235000  1600         3        2.0        3  35.0          5
 ```
 
-### 1.3 Interpretation
+### Interpretation
 
 **Dataset Overview**
 
@@ -203,9 +203,9 @@ These exploratory analyses guide model specification and interpretation.
 
 ---
 
-## 2. Bivariate vs. Multiple Regression
+## Bivariate vs. Multiple Regression
 
-### 2.1 Code
+### Code
 
 **Context:** This section demonstrates the dramatic impact of adding predictors to a regression model. We compare a simple regression (price on bedrooms only) against a multiple regression (price on bedrooms and size together). By comparing coefficients across models, we reveal omitted variable bias—how excluding correlated predictors distorts estimates. This comparison is fundamental to understanding why multiple regression is necessary for isolating causal effects in observational data.
 
@@ -227,7 +227,7 @@ print(f"  Multiple regression: {model_two.params['bedrooms']:.4f}")
 print(f"  Change: {model_two.params['bedrooms'] - model_one.params['bedrooms']:.4f}")
 ```
 
-### 2.2 Results
+### Results
 
 **Bivariate Regression: price ~ bedrooms**
 
@@ -257,7 +257,7 @@ print(f"  Change: {model_two.params['bedrooms'] - model_one.params['bedrooms']:.
 - Multiple regression: bedrooms = 1,553
 - Change: -22,114 (93% reduction)
 
-### 2.3 Interpretation
+### Interpretation
 
 **The Dramatic Shift in Bedrooms Coefficient**
 
@@ -361,9 +361,9 @@ Section 3 visualizes these relationships using scatterplot matrices and correlat
 
 ---
 
-## 3. Two-Way Scatterplots and Correlation
+## Two-Way Scatterplots and Correlation
 
-### 3.1 Code
+### Code
 
 **Context:** Before estimating complex models, we examine bivariate relationships visually through scatterplot matrices and numerically through correlation matrices. These exploratory tools reveal which predictors correlate strongly with price (candidate predictors), which predictors correlate with each other (potential multicollinearity), and whether relationships are linear or nonlinear. This diagnostic step guides model specification and helps us anticipate how coefficients might change when variables are added or removed from regressions.
 
@@ -402,7 +402,7 @@ plt.savefig(output_file, dpi=300, bbox_inches='tight')
 plt.close()
 ```
 
-### 3.2 Results
+### Results
 
 **Figure 10.1: Scatterplot Matrix**
 
@@ -424,7 +424,7 @@ plt.close()
 
 ![Correlation Heatmap](images/ch10_correlation_heatmap.png)
 
-### 3.3 Interpretation
+### Interpretation
 
 **Scatterplot Matrix Analysis**
 
@@ -561,9 +561,9 @@ Section 4 estimates the full multiple regression model with all six predictors s
 
 ---
 
-## 4. Multiple Regression: Full Model
+## Multiple Regression: Full Model
 
-### 4.1 Code
+### Code
 
 **Context:** In this section, we estimate the complete multiple regression model with all six predictors simultaneously. This full specification allows us to examine each variable's partial effect—its contribution to price after accounting for all other characteristics. By including multiple predictors together, we control for confounding and obtain more accurate estimates of how each attribute affects house prices. The regression output reveals which characteristics matter most and highlights challenges like multicollinearity.
 
@@ -597,7 +597,7 @@ coef_table = pd.DataFrame({
 print(coef_table)
 ```
 
-### 4.2 Results
+### Results
 
 **Table: Full Multiple Regression Results**
 
@@ -619,7 +619,7 @@ print(coef_table)
 - **Sample size**: n = 29 observations
 - **Degrees of freedom**: 22 (n - k, where k=7 parameters including intercept)
 
-### 4.3 Interpretation
+### Interpretation
 
 **Model Equation**
 
@@ -758,9 +758,9 @@ This "residualized regression" provides insight into what "holding other variabl
 
 ---
 
-## 5. Estimated Partial Effects
+## Estimated Partial Effects
 
-### 5.1 Code
+### Code
 
 **Context:** This section demonstrates the Frisch-Waugh-Lovell (FWL) theorem, which provides a mechanical interpretation of "holding other variables constant." We show that the coefficient on size from the full multiple regression equals the coefficient from a bivariate regression where we first remove from size all variation explained by other predictors. This equivalence demystifies partial effects and clarifies what multiple regression does algebraically—it orthogonalizes predictors to isolate each variable's unique contribution.
 
@@ -787,7 +787,7 @@ print(f"\nDifference: {abs(model_full.params['size'] - model_biv.params['resid_s
 print("\nThese coefficients are identical (within numerical precision)")
 ```
 
-### 5.2 Results
+### Results
 
 ```
 Coefficient on size from full multiple regression: 68.369419
@@ -797,7 +797,7 @@ Difference: 0.0000000000
 These coefficients are identical (within numerical precision)
 ```
 
-### 5.3 Interpretation
+### Interpretation
 
 **The Frisch-Waugh-Lovell (FWL) Theorem**
 
@@ -912,9 +912,9 @@ This demystifies multiple regression and clarifies what partial effects represen
 
 ---
 
-## 6. Model Fit Statistics
+## Model Fit Statistics
 
-### 6.1 Code
+### Code
 
 **Context:** In this section, we examine measures of overall model performance—R², adjusted R², root MSE, AIC, and BIC. These statistics help us assess how well the model fits the data and compare models with different numbers of predictors. Understanding these fit statistics is crucial because adding more variables always increases R² even if they add no real explanatory power, so we need penalized measures (adjusted R², AIC, BIC) that account for model complexity when selecting specifications.
 
@@ -959,7 +959,7 @@ print(f"  AIC: {aic_statsmodels:.4f}")
 print(f"  BIC: {bic_statsmodels:.4f}")
 ```
 
-### 6.2 Results
+### Results
 
 **Model Fit Summary**:
 - Sample size (n): 29
@@ -985,7 +985,7 @@ print(f"  BIC: {bic_statsmodels:.4f}")
 - AIC: 675.4824
 - BIC: 685.0535
 
-### 6.3 Interpretation
+### Interpretation
 
 **R-Squared (R² = 0.651)**
 
@@ -1154,9 +1154,9 @@ We'd compute AIC and BIC for each, then choose the model with **lowest AIC/BIC**
 
 ---
 
-## 7. Model Comparison
+## Model Comparison
 
-### 7.1 Code
+### Code
 
 **Context:** This section systematically compares the full model (six predictors) against a simple model (size only) to determine whether the added complexity is justified. We use multiple criteria—adjusted R², AIC, BIC, and F-tests—to evaluate whether the five additional variables improve fit enough to warrant their inclusion. Model comparison is essential for avoiding overfitting and finding the most parsimonious specification that balances explanatory power with interpretability.
 
@@ -1197,7 +1197,7 @@ print(f"{'Full Model':<20} {model_full.rsquared:<10.4f} {model_full.rsquared_adj
 print(f"{'Simple Model':<20} {model_small.rsquared:<10.4f} {model_small.rsquared_adj:<10.4f} {n:<5}")
 ```
 
-### 7.2 Results
+### Results
 
 **Model Comparison: Full vs. Simple**
 
@@ -1218,7 +1218,7 @@ print(f"{'Simple Model':<20} {model_small.rsquared:<10.4f} {model_small.rsquared
 | Full Model   | 0.6506 | 0.5552 | 675.48 | 685.05 | 22  |
 | Simple Model | 0.6175 | 0.6033 | 668.06 | 671.44 | 27  |
 
-### 7.3 Interpretation
+### Interpretation
 
 **Model Specifications**
 
@@ -1382,9 +1382,9 @@ If we split data into training (20 houses) and test (9 houses):
 
 ---
 
-## 8. Multicollinearity and Inestimable Models
+## Multicollinearity and Inestimable Models
 
-### 8.1 Code
+### Code
 
 **Context:** In this section, we explore multicollinearity—when predictors are highly correlated with each other. We demonstrate perfect collinearity (which makes models inestimable) and calculate Variance Inflation Factors (VIF) to diagnose imperfect multicollinearity in our full model. Understanding multicollinearity is critical because it explains why some coefficients have huge standard errors despite good overall model fit, and it guides decisions about which variables to include or exclude.
 
@@ -1417,7 +1417,7 @@ print("\nNote: VIF > 10 often indicates problematic multicollinearity")
 vif_data.to_csv(os.path.join(TABLES_DIR, 'ch10_vif_table.csv'), index=False)
 ```
 
-### 8.2 Results
+### Results
 
 **Perfect Multicollinearity Example**:
 
@@ -1451,7 +1451,7 @@ Note: size_twice = 2 × size → coefficients split (14.48 + 2×14.48 ≈ 43.44 
 
 **Interpretation**: VIF > 10 indicates problematic multicollinearity
 
-### 8.3 Interpretation
+### Interpretation
 
 **Perfect Multicollinearity**
 

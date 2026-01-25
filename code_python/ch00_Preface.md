@@ -1,6 +1,6 @@
-# Preface
+# Preface 
 
-## 1. Introduction
+## Introduction 
 
 ### Welcome to Econometrics Powered by AI
 
@@ -38,7 +38,7 @@ This book is designed for a diverse audience of learners:
 
 **Instructors looking for modern teaching materials** will find ready-made computational notebooks, AI-generated slides, and assessment tools that can supplement traditional lectures. The materials are designed to be flexible, allowing instructors to adopt the entire framework or selectively incorporate individual components into their existing courses.
 
-## 2. Why This Book? Three Pillars of Learning
+## Why This Book? Three Pillars of Learning {.unnumbered}
 
 ### Pillar 1: Foundational Concepts
 
@@ -144,7 +144,7 @@ It's important to cross-reference AI-generated content with authoritative source
 
 All Python code in the notebooks has been carefully verified and tested for accuracy. When AI tools provide code explanations or suggestions, compare them against the tested code in the notebooks to ensure accuracy. The goal is to use AI tools to develop multiple learning pathways and deeper understanding—transparency about these tools' capabilities and limitations is essential to using them effectively.
 
-## 3. How to Use This Book
+## How to Use This Book {.unnumbered}
 
 ### Getting Started
 
@@ -177,7 +177,7 @@ To get the most out of each chapter, we recommend a multi-stage approach that co
 **Consult the AI tutor** whenever you need help. Whether you're stuck on a coding problem, confused about a statistical concept, or want a deeper explanation of a particular point, the NotebookLM and EdCafe AI tutors are available to provide personalized assistance.
 
 
-## 4. Acknowledgments
+## Acknowledgments {.unnumbered}
 
 ### A. Colin Cameron
 
@@ -215,6 +215,5 @@ Early adopters who used these materials in courses and self-study helped identif
 
 This book is ultimately for students—those learning econometrics now and those who will learn in the future. The goal has been to create materials that make that learning journey more accessible, more engaging, and more successful. If this book helps you understand econometrics better, apply it more confidently, and appreciate its power for answering important questions, then the effort has been worthwhile.
 
----
 
 Now, let's begin the journey into econometrics, powered by AI and brought to life through code.

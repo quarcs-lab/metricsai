@@ -31,9 +31,9 @@ This chapter bridges **classical econometrics** (Chapters 1-11) and **modern dat
 
 ---
 
-## 1. Heteroskedasticity-Robust Standard Errors
+## Heteroskedasticity-Robust Standard Errors
 
-### 1.1 Code
+### Code
 
 **Context:** In this section, we compute heteroskedasticity-robust standard errors for the housing price regression. Classical OLS assumes constant error variance (homoskedasticity), but real-world data often violate this assumption—larger houses may have more variable prices. Robust standard errors (HC1) correct for this violation, providing valid inference even when heteroskedasticity is present. We use statsmodels' `cov_type='HC1'` option to implement White's heteroskedasticity-consistent covariance matrix estimator.
 
@@ -93,7 +93,7 @@ print("\nComparison of Default vs HC1 Robust Standard Errors")
 print(comparison_table)
 ```
 
-### 1.2 Results
+### Results
 
 **Table 12.2: Multiple Regression with Heteroskedastic-Robust Standard Errors (HC1)**
 
@@ -117,7 +117,7 @@ print(comparison_table)
 - **Ratio > 1**: Robust SE larger than default (heteroskedasticity underestimated default SE)
 - **Ratio < 1**: Robust SE smaller than default (heteroskedasticity overestimated default SE)
 
-### 1.3 Interpretation
+### Interpretation
 
 **What Are Robust Standard Errors?**
 
@@ -278,9 +278,9 @@ Section 2 extends robust SEs to **time series data**, where errors are both hete
 
 ---
 
-## 2. HAC Standard Errors for Time Series
+## HAC Standard Errors for Time Series
 
-### 2.1 Code
+### Code
 
 **Context:** In this section, we analyze GDP growth time series data where observations are correlated over time (autocorrelation). Time series data violate the independence assumption—this quarter's growth is highly predictive of next quarter's growth. HAC (Heteroskedasticity and Autocorrelation Consistent) standard errors, developed by Newey and West (1987), correct for both heteroskedasticity and autocorrelation simultaneously. We examine autocorrelation patterns using correlograms and apply Newey-West correction with appropriate lag lengths to obtain valid standard errors.
 
@@ -346,7 +346,7 @@ print(f"  Mean: {model_hac5.params[0]:.6f}")
 print(f"  SE: {model_hac5.bse[0]:.6f}")
 ```
 
-### 2.2 Results
+### Results
 
 **GDP Growth Summary Statistics** (241 quarters):
 - **Mean**: 1.990456% per quarter
@@ -382,7 +382,7 @@ print(f"  SE: {model_hac5.bse[0]:.6f}")
 
 *(Note: Code warnings indicate Python version compatibility issues, but methodology is sound)*
 
-### 2.3 Interpretation
+### Interpretation
 
 **Time Series Data Challenges**
 
@@ -553,9 +553,9 @@ With **time series data**, always use **HAC (Newey-West) SEs** to account for au
 
 ---
 
-## 3. Prediction and Prediction Intervals
+## Prediction and Prediction Intervals
 
-### 3.1 Code
+### Code
 
 **Context:** In this section, we construct prediction intervals for forecasting house prices at specific sizes. Prediction intervals differ fundamentally from confidence intervals—they account for both parameter uncertainty (sampling variability in β̂) and individual randomness (the error term u). While confidence intervals answer "What is the average price for all houses of this size?", prediction intervals answer "What will this particular house sell for?". We compute both manually and using statsmodels' `get_prediction()` method to understand the mathematical foundations.
 
@@ -646,7 +646,7 @@ print(f"  SE for actual value: {s_y_f:.6f}")
 print(f"  95% PI: [{y_pred - tcrit*s_y_f:.2f}, {y_pred + tcrit*s_y_f:.2f}]")
 ```
 
-### 3.2 Results
+### Results
 
 **Simple Regression Model**: price = 115,017 + 73.77 × size
 
@@ -672,7 +672,7 @@ print(f"  95% PI: [{y_pred - tcrit*s_y_f:.2f}, {y_pred + tcrit*s_y_f:.2f}]")
 
 ![Prediction Intervals](images/ch12_fig1_prediction_intervals.png)
 
-### 3.3 Interpretation
+### Interpretation
 
 **Two Types of Prediction**
 
@@ -821,9 +821,9 @@ With **heteroskedastic-robust SEs**:
 
 ---
 
-## 4. Advanced Topics Overview
+## Advanced Topics Overview
 
-### 4.1 Conceptual Sections
+### Conceptual Sections
 
 Chapter 12 Sections 12.3-12.9 provide **conceptual overviews** of advanced topics without extensive computation. These sections bridge **classical econometrics** (Chapters 1-11) to **modern methods**.
 

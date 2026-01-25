@@ -1,0 +1,610 @@
+\chapter{Analysis of Economics Data}
+
+\begin{center}
+\includegraphics[width=\textwidth]{../code_python/images/ch01_visual_summary.jpg}
+\end{center}
+
+\textit{This chapter demonstrates simple linear regression analysis, examining how house size predicts sale price using real estate data from 29 houses in Central Davis, California.}
+\vspace{1em}
+
+\section{Introduction}
+
+In this chapter, we perform a simple bivariate regression analysis in Python using econometric data. We examine the relationship between house size and sale price using data from 29 houses sold in Central Davis, California in 1999. Through this analysis, you'll learn fundamental concepts in econometrics including data loading, descriptive statistics, ordinary least squares (OLS) regression, and visualization of regression results.
+
+\textbf{What You'll Learn:}
+\begin{itemize}
+\item How to load economic data from remote sources in Python
+\item How to compute and interpret descriptive statistics
+\item How to fit an OLS regression model using Python's statsmodels
+\item How to visualize regression relationships effectively
+\item How to interpret regression coefficients and model fit statistics in economic context
+\end{itemize}
+
+\vspace{1em}
+
+\section{Setup and Data Loading}
+
+\subsection{Code}
+
+\textbf{Context:} In this section, we establish the Python environment and load the housing dataset from a remote repository. Proper data loading is essential for any econometric analysis because it ensures we have clean, accessible data to work with. We use pandas' \texttt{read\_stata()} function to directly import data in Stata format, allowing us to work with data from various econometric software packages seamlessly.
+
+\begin{lstlisting}[language=Python]
+# Import required libraries
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+import statsmodels.api as sm
+from statsmodels.formula.api import ols
+import os
+
+# Set random seed for reproducibility
+# This ensures that any random operations produce consistent results
+RANDOM_SEED = 42
+np.random.seed(RANDOM_SEED)
+
+# Data source - streaming directly from GitHub
+GITHUB_DATA_URL = "https://raw.githubusercontent.com/quarcs-lab/data-open/master/AED/"
+
+# Create output directories for saving results
+IMAGES_DIR = 'images'
+TABLES_DIR = 'tables'
+os.makedirs(IMAGES_DIR, exist_ok=True)
+os.makedirs(TABLES_DIR, exist_ok=True)
+
+# Load the house price data from Stata format
+data_house = pd.read_stata(GITHUB_DATA_URL + 'AED_HOUSE.DTA')
+
+# Display basic information about the dataset
+print(data_house.info())
+\end{lstlisting}
+
+\subsection{Results}
+
+\begin{verbatim}
+<class 'pandas.core.frame.DataFrame'>
+RangeIndex: 29 entries, 0 to 28
+Data columns (total 8 columns):
+ #   Column     Non-Null Count  Dtype
+---  ------     --------------  -----
+ 0   price      29 non-null     int32
+ 1   size       29 non-null     int16
+ 2   bedrooms   29 non-null     int8
+ 3   bathrooms  29 non-null     float32
+ 4   lotsize    29 non-null     int8
+ 5   age        29 non-null     float32
+ 6   monthsold  29 non-null     int8
+ 7   list       29 non-null     int32
+dtypes: float32(2), int16(1), int32(2), int8(3)
+memory usage: 737.0 bytes
+\end{verbatim}
+
+\subsection{Interpretation}
+
+The dataset contains \textbf{29 observations} (houses) and \textbf{8 variables}:
+
+\begin{itemize}
+\item \textbf{price}: Sale price in dollars (dependent variable for our regression)
+\item \textbf{size}: House size in square feet (independent variable)
+\item \textbf{bedrooms}: Number of bedrooms
+\item \textbf{bathrooms}: Number of bathrooms
+\item \textbf{lotsize}: Lot size
+\item \textbf{age}: Age of the house in years
+\item \textbf{monthsold}: Month when sold
+\item \textbf{list}: Original listing price in dollars
+\end{itemize}
+
+All variables are numeric with no missing values. The data uses efficient data types (int8, int16, int32, float32) to minimize memory usage. By setting a random seed, we ensure reproducibility---anyone running this code will get identical results.
+
+\textbf{Why this matters}: Starting with clean, complete data is essential for reliable econometric analysis. Understanding the structure and content of your data before analysis prevents errors and helps in interpreting results.
+
+\vspace{1em}
+
+\section{Descriptive Statistics}
+
+\subsection{Code}
+
+\textbf{Context:} Before fitting any statistical model, we compute descriptive statistics to understand our data's basic characteristics. This exploratory step reveals the central tendency, spread, and range of variables, helping us identify potential data quality issues and understand what relationships might exist. Descriptive statistics provide the foundation for interpreting regression results in context.
+
+\begin{lstlisting}[language=Python]
+# Generate summary statistics for all variables
+data_summary = data_house.describe()
+print(data_summary)
+
+# Save descriptive statistics to CSV for reference
+data_summary.to_csv('tables/ch01_descriptive_stats.csv')
+\end{lstlisting}
+
+\subsection{Results}
+
+\begin{table}[h]
+\centering
+\small
+\begin{tabular}{lrrrrrrrr}
+\toprule
+Statistic & price & size & bedrooms & bathrooms & lotsize & age & monthsold & list \\
+\midrule
+count & 29.0 & 29.0 & 29.0 & 29.0 & 29.0 & 29.0 & 29.0 & 29.0 \\
+mean & 253,910.34 & 1,882.76 & 3.79 & 2.21 & 2.14 & 36.41 & 5.97 & 257,824.14 \\
+std & 37,390.71 & 398.27 & 0.68 & 0.34 & 0.69 & 7.12 & 1.68 & 40,860.26 \\
+min & 204,000.00 & 1,400.00 & 3.00 & 2.00 & 1.00 & 23.00 & 3.00 & 199,900.00 \\
+25\% & 233,000.00 & 1,600.00 & 3.00 & 2.00 & 2.00 & 31.00 & 5.00 & 239,000.00 \\
+50\% & 244,000.00 & 1,800.00 & 4.00 & 2.00 & 2.00 & 35.00 & 6.00 & 245,000.00 \\
+75\% & 270,000.00 & 2,000.00 & 4.00 & 2.50 & 3.00 & 39.00 & 7.00 & 269,000.00 \\
+max & 375,000.00 & 3,300.00 & 6.00 & 3.00 & 3.00 & 51.00 & 8.00 & 386,000.00 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Interpretation}
+
+The descriptive statistics reveal several important features of our dataset:
+
+\textbf{Sample Characteristics:}
+\begin{itemize}
+\item \textbf{Sample size}: 29 house sales provide a small but complete dataset for analysis
+\item \textbf{Average sale price}: \$253,910 (mean) with moderate variation (std dev = \$37,391)
+\item \textbf{Median price}: \$244,000, slightly below the mean, suggesting a slight right skew
+\item \textbf{Price range}: From \$204,000 to \$375,000 (range of \$171,000)
+\end{itemize}
+
+\textbf{House Size:}
+\begin{itemize}
+\item \textbf{Average size}: 1,883 square feet
+\item \textbf{Standard deviation}: 398 sq ft indicates moderate variation in house sizes
+\item \textbf{Size range}: From 1,400 to 3,300 square feet
+\item \textbf{Distribution}: The median (1,800 sq ft) is close to the mean (1,883 sq ft), suggesting relatively symmetric distribution
+\end{itemize}
+
+\textbf{Other Features:}
+\begin{itemize}
+\item Most houses have 3-4 bedrooms (mean = 3.79, median = 4)
+\item Typical house has 2 bathrooms (little variation: std dev = 0.34)
+\item Houses are relatively old, averaging 36 years (range: 23-51 years)
+\item Sale prices were generally close to listing prices (mean sale = \$253,910 vs mean list = \$257,824)
+\end{itemize}
+
+\textbf{Why these statistics matter for regression}:
+\begin{enumerate}
+\item The variation in both price and size (std dev > 0) means there's something to explain
+\item No extreme outliers are apparent (max values are reasonable)
+\item Both variables show sufficient spread for meaningful regression analysis
+\item The positive difference between means of price and size suggests a potential positive relationship
+\end{enumerate}
+
+\vspace{1em}
+
+\section{Regression Analysis}
+
+\subsection{Code}
+
+\textbf{Context:} In this section, we estimate the relationship between house price and size using Ordinary Least Squares (OLS) regression. OLS is the most fundamental econometric technique, providing unbiased estimates of how one variable affects another. By fitting this model, we can quantify the marginal effect of house size on price and test whether this relationship is statistically significant.
+
+\begin{lstlisting}[language=Python]
+# Fit OLS regression: price ~ size
+# Formula syntax similar to R: dependent_var ~ independent_var
+model = ols('price ~ size', data=data_house).fit()
+
+# Display complete regression summary
+print(model.summary())
+
+# Extract coefficient table with additional statistics
+coef_table = pd.DataFrame({
+    'coefficient': model.params,
+    'std_err': model.bse,
+    't_value': model.tvalues,
+    'p_value': model.pvalues,
+    'conf_lower': model.conf_int()[0],
+    'conf_upper': model.conf_int()[1]
+})
+print(coef_table)
+
+# Save regression outputs
+with open('tables/ch01_regression_summary.txt', 'w') as f:
+    f.write(model.summary().as_text())
+coef_table.to_csv('tables/ch01_regression_coefficients.csv')
+\end{lstlisting}
+
+\subsection{Results}
+
+\subsubsection{Full Regression Summary}
+
+\begin{verbatim}
+                            OLS Regression Results
+==============================================================================
+Dep. Variable:                  price   R-squared:                       0.617
+Model:                            OLS   Adj. R-squared:                  0.603
+Method:                 Least Squares   F-statistic:                     43.58
+Date:                Sat, 24 Jan 2026   Prob (F-statistic):           4.41e-07
+Time:                        10:34:54   Log-Likelihood:                -332.05
+No. Observations:                  29   AIC:                             668.1
+Df Residuals:                      27   BIC:                             670.8
+Df Model:                           1
+Covariance Type:            nonrobust
+==============================================================================
+                 coef    std err          t      P>|t|      [0.025      0.975]
+------------------------------------------------------------------------------
+Intercept    1.15e+05   2.15e+04      5.352      0.000    7.09e+04    1.59e+05
+size          73.7710     11.175      6.601      0.000      50.842      96.700
+==============================================================================
+Omnibus:                        0.576   Durbin-Watson:                   1.219
+Prob(Omnibus):                  0.750   Jarque-Bera (JB):                0.638
+Skew:                          -0.078   Prob(JB):                        0.727
+Kurtosis:                       2.290   Cond. No.                     9.45e+03
+==============================================================================
+
+Notes:
+[1] Standard Errors assume that the covariance matrix of the errors is correctly specified.
+[2] The condition number is large, 9.45e+03. This might indicate that there are
+strong multicollinearity or other numerical problems.
+\end{verbatim}
+
+\subsubsection{Coefficient Table}
+
+\begin{table}[h]
+\centering
+\begin{tabular}{lrrrrrr}
+\toprule
+Variable & Coefficient & Std Error & t-value & p-value & 95\% CI Lower & 95\% CI Upper \\
+\midrule
+Intercept & 115,017.28 & 21,489.36 & 5.352 & 0.0000118 & 70,924.76 & 159,109.81 \\
+size & 73.77 & 11.17 & 6.601 & 0.0000004 & 50.84 & 96.70 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Interpretation}
+
+\subsubsection{The Regression Equation}
+
+The estimated regression equation is:
+
+\textbf{Price = \$115,017.28 + \$73.77 $\times$ Size}
+
+or in econometric notation: $\hat{Y} = \hat{\beta}_0 + \hat{\beta}_1X$
+
+\textbf{Intercept ($\hat{\beta}_0 = \$115,017.28$)}:
+\begin{itemize}
+\item Represents the estimated price when size = 0 square feet
+\item While statistically significant (p < 0.001), this is economically meaningless since houses cannot have zero size
+\item This value is an extrapolation far outside our data range (minimum size = 1,400 sq ft)
+\item The intercept's primary purpose is to anchor the regression line, not for interpretation
+\end{itemize}
+
+\textbf{Slope ($\hat{\beta}_1 = \$73.77$)}:
+\begin{itemize}
+\item \textbf{Economic interpretation}: For every additional square foot of house size, the sale price increases by approximately \$73.77, on average
+\item \textbf{Statistical significance}: The p-value of 0.0000004 (< 0.001) provides overwhelming evidence that this relationship is not due to chance
+\item \textbf{Confidence interval}: We are 95\% confident that the true effect of size on price lies between \$50.84 and \$96.70 per square foot
+\item \textbf{Practical meaning}: A 100 sq ft increase in size is associated with a \$7,377 increase in price; a 500 sq ft increase relates to about \$36,885 higher price
+\end{itemize}
+
+\subsubsection{Model Fit and Statistical Significance}
+
+\textbf{R-squared ($R^2 = 0.617$)}:
+\begin{itemize}
+\item House size alone explains approximately \textbf{61.7\% of the variation} in sale prices
+\item This is a substantial proportion, indicating that size is a strong predictor of price
+\item However, \textbf{38.3\% of price variation remains unexplained}, likely due to other factors such as:
+\begin{itemize}
+\item Location/neighborhood quality
+\item House condition and age
+\item Number of bedrooms/bathrooms
+\item Lot size and amenities
+\item Market conditions
+\end{itemize}
+\end{itemize}
+
+\textbf{Adjusted R-squared (0.603)}:
+\begin{itemize}
+\item Adjusts for the number of predictors in the model
+\item Close to $R^2$, confirming that size is a meaningful predictor
+\end{itemize}
+
+\textbf{F-statistic (43.58, p < 0.001)}:
+\begin{itemize}
+\item Tests whether the overall model is statistically significant
+\item The extremely small p-value (4.41e-07) confirms the model is highly significant
+\item Rejects the null hypothesis that house size has no effect on price
+\end{itemize}
+
+\textbf{Standard Error of Regression}:
+\begin{itemize}
+\item Can be calculated from the residuals
+\item Represents the typical deviation of actual prices from predicted prices
+\item Useful for constructing prediction intervals
+\end{itemize}
+
+\subsubsection{Regression Diagnostics}
+
+\textbf{Normality Tests}:
+\begin{itemize}
+\item \textbf{Omnibus test} (p = 0.750): Fails to reject normality assumption---residuals appear normally distributed
+\item \textbf{Jarque-Bera test} (p = 0.727): Confirms normality of residuals
+\item \textbf{Skewness} (-0.078): Near zero, indicating symmetric residual distribution
+\item \textbf{Kurtosis} (2.29): Close to 3 (normal distribution), suggesting no heavy tails
+\end{itemize}
+
+\textbf{Autocorrelation}:
+\begin{itemize}
+\item \textbf{Durbin-Watson statistic} (1.219): Slightly below 2, suggesting possible mild positive autocorrelation
+\item For cross-sectional data (like house sales), this is less concerning than for time series
+\end{itemize}
+
+\textbf{Multicollinearity}:
+\begin{itemize}
+\item \textbf{Condition number} (9.45e+03): High value suggests some numerical instability
+\item In a bivariate regression, this likely reflects the scale difference between the intercept and size coefficient
+\item Not a concern for interpretation in this simple model
+\end{itemize}
+
+\subsubsection{Practical Implications}
+
+\begin{enumerate}
+\item \textbf{For Sellers}: Each additional square foot adds roughly \$74 to the house value. A 200 sq ft addition could increase value by approximately \$14,754.
+
+\item \textbf{For Buyers}: The model provides a benchmark for evaluating whether a house is fairly priced relative to its size.
+
+\item \textbf{For Appraisers}: Size is clearly a major determinant of value, but the $R^2$ of 0.62 indicates that a comprehensive appraisal should consider additional factors.
+
+\item \textbf{Limitations}:
+\begin{itemize}
+\item The model is specific to Central Davis in 1999
+\item Small sample size (n=29) limits generalizability
+\item Relationship assumed to be linear (may not hold for very large or small houses)
+\item Other important variables (location, condition, amenities) are omitted
+\end{itemize}
+\end{enumerate}
+
+\begin{keyconcept}{Ordinary Least Squares (OLS)}
+OLS finds the line that minimizes the sum of squared vertical distances between observed data points and the fitted regression line. This ``best fit'' criterion ensures that our estimates are unbiased and efficient under standard assumptions (linearity, no perfect multicollinearity, homoscedasticity, no autocorrelation, and normality of errors). The slope coefficient tells us the average change in Y when X increases by one unit, holding all else constant.
+\end{keyconcept}
+
+\vspace{1em}
+
+\section{Visualization}
+
+\subsection{Code}
+
+\textbf{Context:} Visual analysis complements numerical regression results by revealing patterns, outliers, and the overall quality of model fit. A scatter plot with the fitted regression line allows us to assess whether the linear model is appropriate for our data and identify any observations that deviate substantially from the predicted relationship. Visualization is essential for communicating regression results effectively.
+
+\begin{lstlisting}[language=Python]
+# Create scatter plot with fitted regression line
+fig, ax = plt.subplots(figsize=(10, 6))
+
+# Plot actual data points
+ax.scatter(data_house['size'], data_house['price'],
+           color='black', s=50, label='Actual data', alpha=0.7)
+
+# Plot fitted regression line
+ax.plot(data_house['size'], model.fittedvalues,
+        color='blue', linewidth=2, label='Fitted regression line')
+
+# Add labels and title
+ax.set_xlabel('House size (in square feet)', fontsize=12)
+ax.set_ylabel('House sale price (in dollars)', fontsize=12)
+ax.set_title('Figure 1.1: House Price vs Size', fontsize=14, fontweight='bold')
+ax.legend(loc='upper left')
+ax.grid(True, alpha=0.3)
+
+# Save figure at high resolution
+plt.tight_layout()
+plt.savefig('images/ch01_fig1_house_price_vs_size.png', dpi=300, bbox_inches='tight')
+plt.show()
+\end{lstlisting}
+
+\subsection{Results}
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.8\textwidth]{../code_python/images/ch01_fig1_house_price_vs_size.png}
+\caption{House Price vs Size}
+\end{figure}
+
+\subsection{Interpretation}
+
+The scatter plot reveals several important insights about the price-size relationship:
+
+\textbf{Visual Assessment of Model Fit}:
+\begin{itemize}
+\item \textbf{Positive relationship}: The upward-sloping pattern confirms that larger houses tend to sell for higher prices
+\item \textbf{Linear fit}: The straight blue line fits the data reasonably well, suggesting a linear relationship is appropriate
+\item \textbf{Data scatter}: Points are distributed around the fitted line, consistent with $R^2 = 0.617$
+\item \textbf{Residuals}: The vertical distance from each point to the line represents the prediction error (residual) for that house
+\end{itemize}
+
+\textbf{Key Observations}:
+
+\begin{enumerate}
+\item \textbf{Goodness of Fit}:
+\begin{itemize}
+\item Most data points lie relatively close to the regression line
+\item The spread of points around the line is fairly consistent across house sizes
+\item This validates our $R^2$ interpretation: the model captures the main trend but not all variation
+\end{itemize}
+
+\item \textbf{Outliers and Influential Points}:
+\begin{itemize}
+\item No extreme outliers are visible
+\item A few houses sell for notably more or less than predicted by size alone
+\item These deviations likely reflect other house characteristics (location, condition, amenities)
+\end{itemize}
+
+\item \textbf{Linearity}:
+\begin{itemize}
+\item The relationship appears linear throughout the range of observed sizes (1,400-3,300 sq ft)
+\item No obvious curvature suggesting that a linear model is appropriate
+\item For much larger or smaller houses (outside this range), the linear relationship might not hold
+\end{itemize}
+
+\item \textbf{Homoscedasticity}:
+\begin{itemize}
+\item The vertical spread of points appears roughly constant across different house sizes
+\item This suggests that the assumption of constant variance (homoscedasticity) is reasonable
+\item If variance increased with size, we'd see a fan-shaped pattern (not observed here)
+\end{itemize}
+\end{enumerate}
+
+\textbf{What the Plot Tells Us}:
+\begin{itemize}
+\item The visualization confirms what the regression statistics indicated: size is a strong but not perfect predictor of price
+\item Houses with similar sizes can have different prices (vertical variation at any given size)
+\item The linear model is a reasonable approximation for this data range
+\item To improve predictions, we would need to include additional variables (bedrooms, bathrooms, age, lot size, location)
+\end{itemize}
+
+\textbf{Why Visualization Matters}:
+\begin{itemize}
+\item Numbers alone ($R^2$, coefficients) can be misleading if assumptions are violated
+\item Plots reveal patterns, outliers, and non-linearities that statistics might miss
+\item Visual inspection is an essential diagnostic tool in regression analysis
+\item Helps communicate findings to non-technical audiences
+\end{itemize}
+
+\vspace{1em}
+
+\section{Summary and Key Findings}
+
+\subsection{Code}
+
+\textbf{Context:} In this final section, we consolidate and present the key results from our regression analysis in a clear, accessible format. Summarizing findings is crucial for communicating econometric results to diverse audiences who may not need the full statistical detail but require the essential economic insights. This step bridges technical analysis and practical decision-making.
+
+\begin{lstlisting}[language=Python]
+# Display key regression results
+print("=" * 70)
+print("KEY REGRESSION RESULTS")
+print("=" * 70)
+print(f"Intercept: ${model.params['Intercept']:,.2f}")
+print(f"Slope (price per sq ft): ${model.params['size']:,.2f}")
+print(f"R-squared: {model.rsquared:.4f}")
+print(f"Adjusted R-squared: {model.rsquared_adj:.4f}")
+print(f"Number of observations: {int(model.nobs)}")
+print()
+print("INTERPRETATION:")
+print(f"For every additional square foot, price increases by ${model.params['size']:,.2f}")
+print(f"The model explains {model.rsquared*100:.2f}% of price variation")
+print("=" * 70)
+\end{lstlisting}
+
+\subsection{Results}
+
+\begin{verbatim}
+======================================================================
+KEY REGRESSION RESULTS
+======================================================================
+Intercept: $115,017.28
+Slope (price per sq ft): $73.77
+R-squared: 0.6175
+Adjusted R-squared: 0.6033
+Number of observations: 29
+
+INTERPRETATION:
+For every additional square foot, price increases by $73.77
+The model explains 61.75% of price variation
+======================================================================
+\end{verbatim}
+
+\subsection{Interpretation}
+
+\subsubsection{Summary of Findings}
+
+This analysis demonstrates the fundamental principles of bivariate regression using real estate data. Our key findings are:
+
+\textbf{Main Result}:
+\begin{itemize}
+\item There is a \textbf{strong, positive, and statistically significant relationship} between house size and sale price
+\item Each additional square foot increases price by approximately \textbf{\$73.77} (95\% CI: \$50.84-\$96.70)
+\item This relationship is highly significant (p < 0.001) and not due to chance
+\end{itemize}
+
+\textbf{Model Performance}:
+\begin{itemize}
+\item Size alone explains \textbf{61.7\% of price variation}---a substantial proportion
+\item The remaining 38.3\% is attributable to other factors not captured in this simple model
+\item Model diagnostics (normality tests, residual plots) suggest no major violations of OLS assumptions
+\end{itemize}
+
+\textbf{Practical Implications}:
+
+\begin{enumerate}
+\item \textbf{For Real Estate Valuation}:
+\begin{itemize}
+\item Size is clearly a major price determinant in the Central Davis market (circa 1999)
+\item A benchmark value of \textasciitilde\$74 per square foot can guide pricing decisions
+\item However, price per square foot varies (confidence interval is \$51-\$97), so other factors matter
+\end{itemize}
+
+\item \textbf{For Homeowners/Buyers}:
+\begin{itemize}
+\item Adding square footage (e.g., through extensions) likely increases resale value
+\item A 500 sq ft addition might increase value by \textasciitilde\$37,000
+\item However, location, condition, and features also significantly affect value
+\end{itemize}
+
+\item \textbf{For Further Analysis}:
+\begin{itemize}
+\item The model could be improved by including additional predictors (bedrooms, bathrooms, lot size, age, location)
+\item Multiple regression would likely increase $R^2$ and provide more accurate predictions
+\item Might also consider non-linear relationships or interaction effects
+\end{itemize}
+\end{enumerate}
+
+\textbf{Methodological Insights}:
+
+This simple example illustrates several core econometric concepts:
+\begin{itemize}
+\item How to specify and estimate a regression model
+\item Interpreting coefficients (slope and intercept)
+\item Assessing model fit ($R^2$) and statistical significance (p-values, confidence intervals)
+\item Using visualization to validate model assumptions
+\item Recognizing model limitations (omitted variables, sample specificity)
+\end{itemize}
+
+\textbf{Limitations to Acknowledge}:
+
+\begin{enumerate}
+\item \textbf{Sample Size}: With only 29 observations, results may not generalize to broader markets
+\item \textbf{Time Specificity}: Data from 1999 may not reflect current price-size relationships
+\item \textbf{Location Specificity}: Central Davis market may differ from other regions
+\item \textbf{Omitted Variables}: Many price determinants are not included (location, condition, amenities)
+\item \textbf{Linear Assumption}: Relationship may be non-linear outside the observed size range (1,400-3,300 sq ft)
+\end{enumerate}
+
+\begin{keyconcept}{$R^2$ (Coefficient of Determination)}
+$R^2$ measures the proportion of variance in the dependent variable that is explained by the model. An $R^2$ of 0.617 means that 61.7\% of the variation in house prices is accounted for by house size, while 38.3\% remains unexplained. Higher $R^2$ indicates better model fit, but it doesn't guarantee that the model is appropriate, that the relationships are causal, or that predictions will be accurate for new data. A model can have high $R^2$ but still violate important assumptions.
+\end{keyconcept}
+
+\vspace{1em}
+
+\section{Conclusion}
+
+In this chapter, we've explored the relationship between house size and price using simple linear regression in Python. We examined data from 29 houses in Central Davis, California, and found a strong, positive relationship: each additional square foot increases price by approximately \$74. This relationship is highly statistically significant and explains about 62\% of the variation in house prices.
+
+Through this analysis, you've learned the complete workflow for econometric analysis: loading data, computing descriptive statistics, fitting OLS models, and interpreting results in economic terms. Most importantly, you've seen how to translate statistical findings into meaningful economic insights that can inform real-world decisions.
+
+\textbf{What You've Learned}:
+
+\begin{itemize}
+\item \textbf{Programming}: How to use pandas for data manipulation, statsmodels for regression estimation, and matplotlib for creating publication-quality visualizations
+\item \textbf{Statistics}: How to interpret regression coefficients, $R^2$, p-values, confidence intervals, and diagnostic tests
+\item \textbf{Economics}: How to connect statistical results to economic questions about pricing, valuation, and market relationships
+\item \textbf{Methodology}: Why it's essential to examine data before modeling, check assumptions, and use visualization to validate results
+\end{itemize}
+
+\textbf{Looking Ahead}:
+
+In the next chapters, we'll expand these foundations to more complex scenarios. You'll learn how to incorporate multiple predictors simultaneously, test hypotheses about economic relationships, and handle violations of standard OLS assumptions. You might also try extending this analysis by adding bedrooms, bathrooms, or age as additional explanatory variables to see if you can improve the model's predictive power.
+
+The principles you've learned here---careful data examination, proper model specification, rigorous interpretation, and effective communication---form the foundation for all empirical work in economics and data science. These skills will serve you throughout your studies and professional career.
+
+\vspace{1em}
+
+\textbf{References}:
+
+\begin{itemize}
+\item Cameron, A.C. (2022). \textit{Analysis of Economics Data: An Introduction to Econometrics}. \url{https://cameron.econ.ucdavis.edu/aed/index.html}
+\item Python libraries: pandas, numpy, statsmodels, matplotlib
+\end{itemize}
+
+\textbf{Data}:
+
+All datasets are available at: \url{https://cameron.econ.ucdavis.edu/aed/aeddata.html}

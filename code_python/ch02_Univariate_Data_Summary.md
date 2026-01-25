@@ -28,9 +28,9 @@ We work with five different datasets to illustrate various types of data and ana
 
 ---
 
-## 1. Setup and Data Loading
+## Setup and Data Loading
 
-### 1.1 Code
+### Code
 
 **Context:** In this section, we set up our Python environment and load the primary dataset—earnings data for 171 women aged 30. Proper data loading and initial inspection are critical first steps in any analysis because they allow us to understand the structure, data types, and completeness of our dataset before conducting any statistical analysis. We use pandas to stream data directly from a remote GitHub repository, demonstrating modern data science workflows that don't require local file storage.
 
@@ -63,7 +63,7 @@ data_earnings = pd.read_stata(GITHUB_DATA_URL + 'AED_EARNINGS.DTA')
 print(data_earnings.info())
 ```
 
-### 1.2 Results
+### Results
 
 ```
 <class 'pandas.core.frame.DataFrame'>
@@ -79,7 +79,7 @@ dtypes: float32(1), int32(1), int8(2)
 memory usage: 1.8 KB
 ```
 
-### 1.3 Interpretation
+### Interpretation
 
 The earnings dataset contains **171 observations** of women aged 30 in 2010, all working full-time. The dataset has 4 variables:
 
@@ -94,9 +94,9 @@ The efficient data types (int8, int32, float32) minimize memory usage—importan
 
 ---
 
-## 2. Summary Statistics for Numerical Data
+## Summary Statistics for Numerical Data
 
-### 2.1 Code
+### Code
 
 **Context:** In this section, we compute comprehensive summary statistics for the earnings variable, including measures of central tendency (mean, median), dispersion (standard deviation, range, quartiles), and distribution shape (skewness, kurtosis). These statistics provide a quantitative foundation for understanding the earnings distribution—revealing not just the "average" worker but also the spread, inequality, and asymmetry in the data. This numerical summary complements the visual analysis we'll perform next.
 
@@ -130,7 +130,7 @@ for key, value in stats_dict.items():
         print(f"{key:20s}: ${value:,.2f}")
 ```
 
-### 2.2 Results
+### Results
 
 **Basic Descriptive Statistics:**
 
@@ -160,7 +160,7 @@ for key, value in stats_dict.items():
 | Skewness | $1.71 |
 | Kurtosis | $4.32 |
 
-### 2.3 Interpretation
+### Interpretation
 
 #### Measures of Central Tendency
 
@@ -200,9 +200,9 @@ for key, value in stats_dict.items():
 
 ---
 
-## 3. Visualizing Numerical Data
+## Visualizing Numerical Data
 
-### 3.1 Code
+### Code
 
 **Context:** In this section, we create three complementary visualizations of the earnings distribution: a box plot showing quartiles and outliers, a histogram displaying the frequency distribution, and a kernel density estimate (KDE) providing a smooth probability density curve. While summary statistics give us numbers, visualizations reveal patterns that numbers alone might miss—such as multimodality, gaps, or unusual clustering. Each visualization type emphasizes different aspects of the distribution, and using multiple types together provides the most complete picture.
 
@@ -249,7 +249,7 @@ plt.savefig('images/ch02_fig5_earnings_kde.png', dpi=300)
 plt.show()
 ```
 
-### 3.2 Results
+### Results
 
 **Figure 2.2: Box Plot**
 ![Box Plot of Earnings](images/ch02_fig2_earnings_boxplot.png)
@@ -260,7 +260,7 @@ plt.show()
 **Figure 2.5: Kernel Density Estimate**
 ![KDE of Earnings](images/ch02_fig5_earnings_kde.png)
 
-### 3.3 Interpretation
+### Interpretation
 
 #### Box Plot Analysis
 
@@ -307,9 +307,9 @@ All three visualizations consistently show:
 
 ---
 
-## 4. Categorical Data Analysis
+## Categorical Data Analysis
 
-### 4.1 Code
+### Code
 
 **Context:** In this section, we shift from numerical data (earnings) to categorical data (fishing mode choices), demonstrating that different data types require different analytical approaches. For categorical variables, we use frequency tables to count observations in each category and pie charts or bar charts to visualize the distribution. Understanding how to handle categorical data is essential because many economic variables—such as industry, occupation, region, or consumer choices—are inherently categorical rather than continuous.
 
@@ -344,7 +344,7 @@ plt.savefig('images/ch02_fig9_fishing_modes_pie.png', dpi=300)
 plt.show()
 ```
 
-### 4.2 Results
+### Results
 
 **Data Structure:**
 ```
@@ -373,7 +373,7 @@ memory usage: 75.4 KB
 **Figure 2.9: Pie Chart**
 ![Fishing Modes Pie Chart](images/ch02_fig9_fishing_modes_pie.png)
 
-### 4.3 Interpretation
+### Interpretation
 
 #### Frequency Analysis
 
@@ -404,9 +404,9 @@ memory usage: 75.4 KB
 
 ---
 
-## 5. Data Transformations
+## Data Transformations
 
-### 5.1 Code
+### Code
 
 **Context:** In this section, we apply a logarithmic transformation to the skewed earnings data to make the distribution more symmetric and closer to normal. Log transformations are one of the most important tools in econometrics because many economic variables (income, GDP, prices, firm size) are naturally right-skewed with multiplicative relationships. Transforming such variables often improves statistical properties, makes relationships more linear, and facilitates interpretation in terms of percentage changes rather than absolute changes.
 
@@ -443,7 +443,7 @@ plt.savefig('images/ch02_fig10_earnings_log_transformation.png', dpi=300)
 plt.show()
 ```
 
-### 5.2 Results
+### Results
 
 **Comparison Statistics:**
 
@@ -461,7 +461,7 @@ plt.show()
 **Figure 2.10: Transformation Comparison**
 ![Log Transformation](images/ch02_fig10_earnings_log_transformation.png)
 
-### 5.3 Interpretation
+### Interpretation
 
 #### Why Transform Data?
 
@@ -510,9 +510,9 @@ The logarithmic transformation is one of the most useful tools in econometrics a
 
 ---
 
-## 6. Time Series Data
+## Time Series Data
 
-### 6.1 Code
+### Code
 
 **Context:** In this section, we work with time series data—observations collected at regular intervals over time, such as quarterly GDP measurements. Time series analysis requires special consideration because consecutive observations are typically correlated (autocorrelation), violating the independence assumption of standard statistical methods. We'll visualize the GDP time series, apply log and growth rate transformations, and demonstrate how different transformations reveal different patterns in the data.
 
@@ -536,7 +536,7 @@ plt.savefig('images/ch02_fig6_realgdp_timeseries.png', dpi=300)
 plt.show()
 ```
 
-### 6.2 Results
+### Results
 
 **GDP Data Summary:**
 
@@ -554,7 +554,7 @@ plt.show()
 **Figure 2.6: Time Series Plot**
 ![GDP Time Series](images/ch02_fig6_realgdp_timeseries.png)
 
-### 6.3 Interpretation
+### Interpretation
 
 #### Time Series Patterns
 
@@ -594,9 +594,9 @@ These properties require specialized analysis techniques (covered in Chapter 17)
 
 ---
 
-## 7. Summary and Key Findings
+## Summary and Key Findings
 
-### 7.1 Code
+### Code
 
 **Context:** In this final section, we consolidate the analytical techniques and key findings from this chapter. Summarizing your analysis is an essential skill for communicating results to diverse audiences—whether presenting to colleagues, writing research papers, or creating data-driven reports for policymakers. This summary encapsulates the main methods we've covered and highlights their practical applications.
 
@@ -614,7 +614,7 @@ print("  - Time series visualizations (line plots, moving averages, seasonal adj
 print("\nAll figures saved to: images/")
 ```
 
-### 7.2 Results
+### Results
 
 ```
 ======================================================================
@@ -631,7 +631,7 @@ Key concepts demonstrated:
 All figures saved to: images/
 ```
 
-### 7.3 Interpretation
+### Interpretation
 
 #### Summary of Analytical Techniques
 
