@@ -463,15 +463,15 @@ fig, axes = plt.subplots(1, 2, figsize=(14, 6))
 data['Gender'] = data['gender'].map({0: 'Male', 1: 'Female'})
 sns.boxplot(x='Gender', y='earnings', data=data, ax=axes[0])
 axes[0].set_ylabel('Earnings ($)')
-axes[0].set_title('Earnings Distribution by Gender')
-axes[0].grid(True, alpha=0.3)
+# axes[0].set_title('Earnings Distribution by Gender')  # Removed: redundant with LaTeX caption
+# axes[0].grid(True, alpha=0.3)  # Removed: redundant with LaTeX caption
 
 # Panel 2: Box plot by worker type
 data['Worker Type'] = data['typeworker'].map({1: 'Self-employed', 2: 'Private', 3: 'Government'})
 sns.boxplot(x='Worker Type', y='earnings', data=data, ax=axes[1])
 axes[1].set_ylabel('Earnings ($)')
-axes[1].set_title('Earnings Distribution by Worker Type')
-axes[1].tick_params(axis='x', rotation=45)
+# axes[1].set_title('Earnings Distribution by Worker Type')  # Removed: redundant with LaTeX caption
+# axes[1].tick_params(axis='x', rotation=45)  # Removed: redundant with LaTeX caption
 axes[1].grid(True, alpha=0.3)
 
 plt.tight_layout()
@@ -493,7 +493,7 @@ for gender, label in [(0, 'Male'), (1, 'Female')]:
 
 ax.set_xlabel('Years of Education')
 ax.set_ylabel('Earnings ($)')
-ax.set_title('Earnings vs Education by Gender')
+# ax.set_title('Earnings vs Education by Gender')  # Removed: redundant with LaTeX caption
 ax.legend()
 ax.grid(True, alpha=0.3)
 plt.tight_layout()

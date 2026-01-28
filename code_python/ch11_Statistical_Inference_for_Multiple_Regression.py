@@ -421,8 +421,8 @@ ax.set_yticklabels(params_no_int.index)
 ax.axvline(x=0, color='red', linestyle='--', linewidth=1.5, alpha=0.7,
            label='H₀: β = 0')
 ax.set_xlabel('Coefficient Value', fontsize=12)
-ax.set_title('Figure 11.1: Coefficient Estimates with 95% Confidence Intervals',
-             fontsize=14, fontweight='bold')
+# ax.set_title('Figure 11.1: Coefficient Estimates with 95% Confidence Intervals',
+#              fontsize=14, fontweight='bold')  # Removed: redundant with LaTeX caption
 ax.legend()
 ax.grid(True, alpha=0.3, axis='x')
 
@@ -452,8 +452,8 @@ ax.fill_between(x_reject, 0, f_reject, alpha=0.3, color='red',
 
 ax.set_xlabel('F-statistic', fontsize=12)
 ax.set_ylabel('Density', fontsize=12)
-ax.set_title('F-Distribution for Overall Significance Test',
-             fontsize=14, fontweight='bold')
+# ax.set_title('F-Distribution for Overall Significance Test',
+#              fontsize=14, fontweight='bold')  # Removed: redundant with LaTeX caption
 ax.legend()
 ax.grid(True, alpha=0.3)
 ax.set_xlim(0, max(8, f_stat + 1))
@@ -475,12 +475,12 @@ for i, (model, name) in enumerate(zip(models, model_names)):
                 'r--', linewidth=2)
     axes[i].set_xlabel('Actual Price', fontsize=11)
     axes[i].set_ylabel('Predicted Price', fontsize=11)
-    axes[i].set_title(f'{name}\nR² = {model.rsquared:.4f}',
-                     fontsize=11, fontweight='bold')
+    # axes[i].set_title(f'{name}\nR² = {model.rsquared:.4f}',
+#                      fontsize=11, fontweight='bold')  # Removed: redundant with LaTeX caption
     axes[i].grid(True, alpha=0.3)
 
-plt.suptitle('Model Comparison: Actual vs Predicted Prices',
-             fontsize=14, fontweight='bold', y=1.00)
+# plt.suptitle('Model Comparison: Actual vs Predicted Prices',
+#              fontsize=14, fontweight='bold', y=1.00)  # Removed: redundant with LaTeX caption
 output_file = os.path.join(IMAGES_DIR, 'ch11_model_comparison.png')
 plt.tight_layout()
 plt.savefig(output_file, dpi=300, bbox_inches='tight')

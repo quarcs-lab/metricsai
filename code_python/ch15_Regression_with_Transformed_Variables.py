@@ -410,8 +410,8 @@ bars = ax.barh(vars_plot, betas_plot, color=colors, alpha=0.7)
 ax.axvline(x=0, color='black', linestyle='-', linewidth=0.8)
 ax.set_xlabel('Standardized Coefficient', fontsize=12)
 ax.set_ylabel('Variable', fontsize=12)
-ax.set_title('Standardized Regression Coefficients\n(Effect of 1 SD change in X on Y, in SD units)',
-             fontsize=14, fontweight='bold')
+# ax.set_title('Standardized Regression Coefficients\n(Effect of 1 SD change in X on Y, in SD units)  # Removed: redundant with LaTeX caption',
+#              fontsize=14, fontweight='bold')  # Removed: redundant with LaTeX caption
 ax.grid(True, alpha=0.3, axis='x')
 
 output_file = os.path.join(IMAGES_DIR, 'ch15_standardized_coefficients.png')

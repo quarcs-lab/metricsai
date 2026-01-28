@@ -291,8 +291,8 @@ ax.plot(data_house['size'], model_basic.fittedvalues, color='blue',
         linewidth=2, label='Fitted regression line')
 ax.set_xlabel('Size (square feet)', fontsize=12)
 ax.set_ylabel('Price ($1000s)', fontsize=12)
-ax.set_title('Figure 7.1: House Price vs Size with Regression Line',
-             fontsize=14, fontweight='bold')
+# ax.set_title('Figure 7.1: House Price vs Size with Regression Line',
+#              fontsize=14, fontweight='bold')  # Removed: redundant with LaTeX caption
 ax.legend()
 ax.grid(True, alpha=0.3)
 
@@ -318,8 +318,8 @@ ax.set_yticks(y_pos)
 ax.set_yticklabels(coef_names)
 ax.axvline(x=0, color='red', linestyle='--', linewidth=1, alpha=0.5)
 ax.set_xlabel('Coefficient Value', fontsize=12)
-ax.set_title('Figure 7.2: Coefficient Estimates with 95% Confidence Intervals',
-             fontsize=14, fontweight='bold')
+# ax.set_title('Figure 7.2: Coefficient Estimates with 95% Confidence Intervals',
+#              fontsize=14, fontweight='bold')  # Removed: redundant with LaTeX caption
 ax.grid(True, alpha=0.3, axis='x')
 
 output_file = os.path.join(IMAGES_DIR, 'ch07_fig2_confidence_intervals.png')
@@ -334,7 +334,7 @@ ax.scatter(model_basic.fittedvalues, model_basic.resid, alpha=0.6, s=50, color='
 ax.axhline(y=0, color='red', linestyle='--', linewidth=2)
 ax.set_xlabel('Fitted values', fontsize=12)
 ax.set_ylabel('Residuals', fontsize=12)
-ax.set_title('Figure 7.3: Residual Plot', fontsize=14, fontweight='bold')
+# ax.set_title('Figure 7.3: Residual Plot', fontsize=14, fontweight='bold')  # Removed: redundant with LaTeX caption
 ax.grid(True, alpha=0.3)
 
 output_file = os.path.join(IMAGES_DIR, 'ch07_fig3_residuals.png')

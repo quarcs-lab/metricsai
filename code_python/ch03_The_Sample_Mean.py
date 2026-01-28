@@ -73,8 +73,8 @@ fig, ax = plt.subplots(figsize=(8, 6))
 ax.hist(x, bins=[-0.5, 0.5, 1.5], edgecolor='black', alpha=0.7, color='steelblue')
 ax.set_xlabel('Heads = 1 and Tails = 0', fontsize=12)
 ax.set_ylabel('Frequency', fontsize=12)
-ax.set_title('Figure 3.1 Panel A: Single Sample of 30 Coin Tosses',
-             fontsize=14, fontweight='bold')
+# ax.set_title('Figure 3.1 Panel A: Single Sample of 30 Coin Tosses',
+#              fontsize=14, fontweight='bold')  # Removed: redundant with LaTeX caption  # Removed: redundant with LaTeX caption
 ax.set_xticks([0, 1])
 ax.grid(True, alpha=0.3, axis='y')
 
@@ -114,8 +114,8 @@ ax.plot(xbar_range, normal_pdf, 'r-', linewidth=2,
 
 ax.set_xlabel('Sample mean from each of 400 samples', fontsize=12)
 ax.set_ylabel('Density', fontsize=12)
-ax.set_title('Figure 3.1 Panel B: Distribution of Sample Means (400 samples)',
-             fontsize=14, fontweight='bold')
+# ax.set_title('Figure 3.1 Panel B: Distribution of Sample Means (400 samples)  # Removed: redundant with LaTeX caption',
+#              fontsize=14, fontweight='bold')  # Removed: redundant with LaTeX caption
 ax.legend()
 ax.grid(True, alpha=0.3)
 
@@ -171,8 +171,8 @@ ax.plot(age_range, normal_pdf, 'b-', linewidth=2,
 
 ax.set_xlabel('Sample mean age from each of 100 samples', fontsize=12)
 ax.set_ylabel('Density', fontsize=12)
-ax.set_title('Figure 3.3: Distribution of Sample Means from 1880 U.S. Census',
-             fontsize=14, fontweight='bold')
+# ax.set_title('Figure 3.3: Distribution of Sample Means from 1880 U.S. Census',
+#              fontsize=14, fontweight='bold')  # Removed: redundant with LaTeX caption  # Removed: redundant with LaTeX caption
 ax.legend()
 ax.grid(True, alpha=0.3)
 
@@ -245,8 +245,8 @@ ax.plot(x_range, theoretical_pdf, 'r-', linewidth=2,
 
 ax.set_xlabel('Sample mean', fontsize=12)
 ax.set_ylabel('Density', fontsize=12)
-ax.set_title('Simulated Distribution of Sample Means (400 simulations)',
-             fontsize=14, fontweight='bold')
+# ax.set_title('Simulated Distribution of Sample Means (400 simulations)  # Removed: redundant with LaTeX caption',
+#              fontsize=14, fontweight='bold')  # Removed: redundant with LaTeX caption
 ax.legend()
 ax.grid(True, alpha=0.3)
 

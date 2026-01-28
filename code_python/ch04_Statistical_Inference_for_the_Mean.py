@@ -129,8 +129,8 @@ axes[0].plot(x, stats.norm.pdf(x), 'b--', linewidth=2, label='Standard Normal')
 axes[0].plot(x, stats.t.pdf(x, df=4), 'r-', linewidth=2, label='t(4)')
 axes[0].set_xlabel('x value', fontsize=12)
 axes[0].set_ylabel('Density', fontsize=12)
-axes[0].set_title('Panel A: t(4) and Standard Normal', fontsize=13, fontweight='bold')
-axes[0].legend()
+# axes[0].set_title('Panel A: t(4)  # Removed: redundant with LaTeX caption and Standard Normal', fontsize=13, fontweight='bold')  # Removed: redundant with LaTeX caption
+# axes[0].legend()  # Removed: redundant with LaTeX caption
 axes[0].grid(True, alpha=0.3)
 
 # Panel B: t(30) vs standard normal
@@ -138,12 +138,12 @@ axes[1].plot(x, stats.norm.pdf(x), 'b--', linewidth=2, label='Standard Normal')
 axes[1].plot(x, stats.t.pdf(x, df=30), 'r-', linewidth=2, label='t(30)')
 axes[1].set_xlabel('x value', fontsize=12)
 axes[1].set_ylabel('Density', fontsize=12)
-axes[1].set_title('Panel B: t(30) and Standard Normal', fontsize=13, fontweight='bold')
-axes[1].legend()
+# axes[1].set_title('Panel B: t(30)  # Removed: redundant with LaTeX caption and Standard Normal', fontsize=13, fontweight='bold')  # Removed: redundant with LaTeX caption
+# axes[1].legend()  # Removed: redundant with LaTeX caption
 axes[1].grid(True, alpha=0.3)
 
-plt.suptitle('Figure 4.1: t Distribution vs Standard Normal',
-             fontsize=14, fontweight='bold', y=1.0)
+# plt.suptitle('Figure 4.1: t Distribution vs Standard Normal',
+#              fontsize=14, fontweight='bold', y=1.0)  # Removed: redundant with LaTeX caption  # Removed: redundant with LaTeX caption
 output_file = os.path.join(IMAGES_DIR, 'ch04_fig1_t_vs_normal_distributions.png')
 plt.tight_layout()
 plt.savefig(output_file, dpi=300, bbox_inches='tight')
@@ -367,8 +367,8 @@ axes[0].fill_between(x_reject_upper, 0, stats.t.pdf(x_reject_upper, n-1),
 
 axes[0].set_xlabel('t-statistic', fontsize=12)
 axes[0].set_ylabel('Density', fontsize=12)
-axes[0].set_title('Panel A: Two-Sided Hypothesis Test', fontsize=13, fontweight='bold')
-axes[0].legend(fontsize=9)
+# axes[0].set_title('Panel A: Two-Sided Hypothesis Test', fontsize=13, fontweight='bold')  # Removed: redundant with LaTeX caption
+# axes[0].legend(fontsize=9)  # Removed: redundant with LaTeX caption
 axes[0].grid(True, alpha=0.3)
 
 # Panel B: One-sided test
@@ -385,12 +385,12 @@ axes[1].fill_between(x_reject, 0, stats.t.pdf(x_reject, n-1),
 
 axes[1].set_xlabel('t-statistic', fontsize=12)
 axes[1].set_ylabel('Density', fontsize=12)
-axes[1].set_title('Panel B: One-Sided Hypothesis Test (Upper-tailed)',
-                  fontsize=13, fontweight='bold')
+# axes[1].set_title('Panel B: One-Sided Hypothesis Test (Upper-tailed)  # Removed: redundant with LaTeX caption',
+#                   fontsize=13, fontweight='bold')  # Removed: redundant with LaTeX caption
 axes[1].legend(fontsize=9)
 axes[1].grid(True, alpha=0.3)
 
-plt.suptitle('Hypothesis Testing Visualization', fontsize=14, fontweight='bold', y=1.0)
+# plt.suptitle('Hypothesis Testing Visualization', fontsize=14, fontweight='bold', y=1.0)  # Removed: redundant with LaTeX caption
 output_file = os.path.join(IMAGES_DIR, 'ch04_hypothesis_testing_visualization.png')
 plt.tight_layout()
 plt.savefig(output_file, dpi=300, bbox_inches='tight')

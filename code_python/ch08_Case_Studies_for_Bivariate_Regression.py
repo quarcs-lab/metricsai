@@ -107,8 +107,8 @@ ax.plot(data_health['hlthpc'], model_lifeexp.fittedvalues, color='blue',
         linewidth=2, label='Fitted')
 ax.set_xlabel('Health Spending per capita (in $1000s)', fontsize=12)
 ax.set_ylabel('Life Expectancy (in years)', fontsize=12)
-ax.set_title('Figure 8.1 Panel A: Life Expectancy vs Health Spending',
-             fontsize=14, fontweight='bold')
+# ax.set_title('Figure 8.1 Panel A: Life Expectancy vs Health Spending',
+#              fontsize=14, fontweight='bold')  # Removed: redundant with LaTeX caption
 ax.legend()
 ax.grid(True, alpha=0.3)
 
@@ -141,8 +141,8 @@ ax.plot(data_health['hlthpc'], model_infmort.fittedvalues, color='blue',
         linewidth=2, label='Fitted')
 ax.set_xlabel('Health Spending per capita (in $1000s)', fontsize=12)
 ax.set_ylabel('Infant Mortality per 100 births', fontsize=12)
-ax.set_title('Figure 8.1 Panel B: Infant Mortality vs Health Spending',
-             fontsize=14, fontweight='bold')
+# ax.set_title('Figure 8.1 Panel B: Infant Mortality vs Health Spending',
+#              fontsize=14, fontweight='bold')  # Removed: redundant with LaTeX caption
 ax.legend()
 ax.grid(True, alpha=0.3)
 
@@ -188,8 +188,8 @@ ax.plot(data_health['gdppc'], model_hlthpc.fittedvalues, color='blue',
         linewidth=2, label='Fitted')
 ax.set_xlabel('GDP per capita (in $1000s)', fontsize=12)
 ax.set_ylabel('Health Spending per capita (in $1000s)', fontsize=12)
-ax.set_title('Figure 8.2 Panel A: Health Spending vs GDP (All Countries)',
-             fontsize=14, fontweight='bold')
+# ax.set_title('Figure 8.2 Panel A: Health Spending vs GDP (All Countries)  # Removed: redundant with LaTeX caption',
+#              fontsize=14, fontweight='bold')  # Removed: redundant with LaTeX caption
 ax.legend()
 ax.grid(True, alpha=0.3)
 
@@ -221,8 +221,8 @@ ax.plot(data_health_subset['gdppc'], model_hlthpc_subset.fittedvalues, color='bl
         linewidth=2, label='Fitted')
 ax.set_xlabel('GDP per capita (in $1000s)', fontsize=12)
 ax.set_ylabel('Health Spending per capita (in $1000s)', fontsize=12)
-ax.set_title('Figure 8.2 Panel B: Health Spending vs GDP (Excluding USA & Luxembourg)',
-             fontsize=14, fontweight='bold')
+# ax.set_title('Figure 8.2 Panel B: Health Spending vs GDP (Excluding USA & Luxembourg)  # Removed: redundant with LaTeX caption',
+#              fontsize=14, fontweight='bold')  # Removed: redundant with LaTeX caption
 ax.legend()
 ax.grid(True, alpha=0.3)
 
@@ -266,8 +266,8 @@ ax.plot(data_capm_recent['date'], data_capm_recent['rm_rf'],
         linewidth=1.5, linestyle='--', label='Market excess return', color='red')
 ax.set_xlabel('Month', fontsize=12)
 ax.set_ylabel('Excess returns', fontsize=12)
-ax.set_title('Figure 8.3 Panel A: Excess Returns Over Time',
-             fontsize=14, fontweight='bold')
+# ax.set_title('Figure 8.3 Panel A: Excess Returns Over Time',
+#              fontsize=14, fontweight='bold')  # Removed: redundant with LaTeX caption
 ax.legend()
 ax.grid(True, alpha=0.3)
 
@@ -304,8 +304,8 @@ ax.plot(data_capm['rm_rf'], model_capm.fittedvalues, color='blue',
         linewidth=2, label='Fitted')
 ax.set_xlabel('Market excess return', fontsize=12)
 ax.set_ylabel('Coca Cola excess return', fontsize=12)
-ax.set_title('Figure 8.3 Panel B: Coca Cola vs Market Excess Returns',
-             fontsize=14, fontweight='bold')
+# ax.set_title('Figure 8.3 Panel B: Coca Cola vs Market Excess Returns',
+#              fontsize=14, fontweight='bold')  # Removed: redundant with LaTeX caption
 ax.legend()
 ax.grid(True, alpha=0.3)
 
@@ -364,8 +364,8 @@ ax.plot(data_gdp['uratechange'], model_okun.fittedvalues, color='blue',
         linewidth=2, label='Fitted')
 ax.set_xlabel('Change in unemployment rate', fontsize=12)
 ax.set_ylabel('Percentage change in real GDP', fontsize=12)
-ax.set_title('Figure 8.4 Panel A: Okun\'s Law - GDP Growth vs Unemployment Change',
-             fontsize=14, fontweight='bold')
+# ax.set_title('Figure 8.4 Panel A: Okun\'s Law - GDP Growth vs Unemployment Change',
+#              fontsize=14, fontweight='bold')  # Removed: redundant with LaTeX caption
 ax.legend()
 ax.grid(True, alpha=0.3)
 
@@ -386,8 +386,8 @@ ax.plot(data_gdp['year'], predictions, linewidth=1.5, linestyle='--',
         label='Fitted', color='blue')
 ax.set_xlabel('Year', fontsize=12)
 ax.set_ylabel('Percentage change in real GDP', fontsize=12)
-ax.set_title('Figure 8.4 Panel B: Real GDP Change Over Time',
-             fontsize=14, fontweight='bold')
+# ax.set_title('Figure 8.4 Panel B: Real GDP Change Over Time',
+#              fontsize=14, fontweight='bold')  # Removed: redundant with LaTeX caption
 ax.legend()
 ax.grid(True, alpha=0.3)
 

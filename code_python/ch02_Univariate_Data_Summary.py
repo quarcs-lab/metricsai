@@ -123,7 +123,7 @@ bp = ax.boxplot(earnings, vert=False, patch_artist=True,
                 boxprops=dict(facecolor='lightblue', alpha=0.7),
                 medianprops=dict(color='red', linewidth=2))
 ax.set_xlabel('Annual earnings (in dollars)', fontsize=12)
-ax.set_title('Figure 2.2: Box Plot of Annual Earnings', fontsize=14, fontweight='bold')
+# ax.set_title('Figure 2.2: Box Plot of Annual Earnings', fontsize=14, fontweight='bold')  # Removed: redundant with LaTeX caption
 ax.grid(True, alpha=0.3)
 
 output_file = os.path.join(IMAGES_DIR, 'ch02_fig2_earnings_boxplot.png')
@@ -151,18 +151,18 @@ axes[0].hist(earnings, bins=range(0, int(earnings.max()) + 15000, 15000),
              edgecolor='black', alpha=0.7, color='steelblue')
 axes[0].set_xlabel('Annual Earnings (in dollars)', fontsize=11)
 axes[0].set_ylabel('Frequency', fontsize=11)
-axes[0].set_title('Panel A: Bin width = $15,000', fontsize=12, fontweight='bold')
-axes[0].grid(True, alpha=0.3)
+# axes[0].set_title('Panel A: Bin width = $15,000', fontsize=12, fontweight='bold')  # Removed: redundant with LaTeX caption
+# axes[0].grid(True, alpha=0.3)  # Removed: redundant with LaTeX caption
 
 # Panel B: Narrower bins (7500)
 axes[1].hist(earnings, bins=range(0, int(earnings.max()) + 7500, 7500),
              edgecolor='black', alpha=0.7, color='steelblue')
 axes[1].set_xlabel('Annual Earnings (in dollars)', fontsize=11)
 axes[1].set_ylabel('Frequency', fontsize=11)
-axes[1].set_title('Panel B: Bin width = $7,500', fontsize=12, fontweight='bold')
-axes[1].grid(True, alpha=0.3)
+# axes[1].set_title('Panel B: Bin width = $7,500', fontsize=12, fontweight='bold')  # Removed: redundant with LaTeX caption
+# axes[1].grid(True, alpha=0.3)  # Removed: redundant with LaTeX caption
 
-plt.suptitle('Figure 2.4: Histograms of Annual Earnings', fontsize=14, fontweight='bold', y=1.02)
+# plt.suptitle('Figure 2.4: Histograms of Annual Earnings', fontsize=14, fontweight='bold', y=1.02)  # Removed: redundant with LaTeX caption
 output_file = os.path.join(IMAGES_DIR, 'ch02_fig4_earnings_histograms.png')
 plt.tight_layout()
 plt.savefig(output_file, dpi=300, bbox_inches='tight')
@@ -174,7 +174,7 @@ fig, ax = plt.subplots(figsize=(10, 6))
 earnings.plot.kde(ax=ax, linewidth=2, color='darkblue', bw_method=0.3)
 ax.set_xlabel('Annual Earnings (in dollars)', fontsize=12)
 ax.set_ylabel('Density', fontsize=12)
-ax.set_title('Figure 2.5: Kernel Density Estimate of Earnings', fontsize=14, fontweight='bold')
+# ax.set_title('Figure 2.5: Kernel Density Estimate of Earnings', fontsize=14, fontweight='bold')  # Removed: redundant with LaTeX caption
 ax.grid(True, alpha=0.3)
 
 output_file = os.path.join(IMAGES_DIR, 'ch02_fig5_earnings_kde.png')
@@ -197,7 +197,7 @@ fig, ax = plt.subplots(figsize=(12, 6))
 ax.plot(data_gdp['daten'], data_gdp['realgdppc'], linewidth=2, color='darkblue')
 ax.set_xlabel('Year', fontsize=12)
 ax.set_ylabel('Real GDP per capita (in 2012 dollars)', fontsize=12)
-ax.set_title('Figure 2.6: U.S. Real GDP per Capita', fontsize=14, fontweight='bold')
+# ax.set_title('Figure 2.6: U.S. Real GDP per Capita', fontsize=14, fontweight='bold')  # Removed: redundant with LaTeX caption
 ax.grid(True, alpha=0.3)
 
 output_file = os.path.join(IMAGES_DIR, 'ch02_fig6_realgdp_timeseries.png')
@@ -229,8 +229,8 @@ bars = ax.bar(range(len(data_health_sorted)), data_health_sorted['expenditures']
 ax.set_xticks(range(len(data_health_sorted)))
 ax.set_xticklabels(data_health_sorted['category'], rotation=45, ha='right', fontsize=10)
 ax.set_ylabel('Expenditures (in $ billions)', fontsize=12)
-ax.set_title('Figure 2.7: U.S. Health Expenditures by Category (2018)',
-             fontsize=14, fontweight='bold')
+# ax.set_title('Figure 2.7: U.S. Health Expenditures by Category (2018)  # Removed: redundant with LaTeX caption',
+#              fontsize=14, fontweight='bold')  # Removed: redundant with LaTeX caption
 ax.grid(True, alpha=0.3, axis='y')
 
 output_file = os.path.join(IMAGES_DIR, 'ch02_fig7_health_expenditures.png')
@@ -275,8 +275,8 @@ wedges, texts, autotexts = ax.pie(mode_freq.values,
                                     colors=colors,
                                     startangle=90,
                                     textprops={'fontsize': 11})
-ax.set_title('Figure 2.9: Distribution of Fishing Modes',
-             fontsize=14, fontweight='bold', pad=20)
+# ax.set_title('Figure 2.9: Distribution of Fishing Modes',
+#              fontsize=14, fontweight='bold', pad=20)  # Removed: redundant with LaTeX caption  # Removed: redundant with LaTeX caption
 
 output_file = os.path.join(IMAGES_DIR, 'ch02_fig9_fishing_modes_pie.png')
 plt.tight_layout()
@@ -304,19 +304,19 @@ axes[0].hist(data_earnings['earnings'], bins=30,
              edgecolor='black', alpha=0.7, color='steelblue')
 axes[0].set_xlabel('Annual Earnings (in dollars)', fontsize=11)
 axes[0].set_ylabel('Frequency', fontsize=11)
-axes[0].set_title('Panel A: Earnings', fontsize=12, fontweight='bold')
-axes[0].grid(True, alpha=0.3)
+# axes[0].set_title('Panel A: Earnings', fontsize=12, fontweight='bold')  # Removed: redundant with LaTeX caption
+# axes[0].grid(True, alpha=0.3)  # Removed: redundant with LaTeX caption
 
 # Panel B: Log earnings
 axes[1].hist(data_earnings['lnearnings'], bins=30,
              edgecolor='black', alpha=0.7, color='coral')
 axes[1].set_xlabel('Log of Annual Earnings', fontsize=11)
 axes[1].set_ylabel('Frequency', fontsize=11)
-axes[1].set_title('Panel B: Log(Earnings)', fontsize=12, fontweight='bold')
-axes[1].grid(True, alpha=0.3)
+# axes[1].set_title('Panel B: Log(Earnings)  # Removed: redundant with LaTeX caption', fontsize=12, fontweight='bold')  # Removed: redundant with LaTeX caption
+# axes[1].grid(True, alpha=0.3)  # Removed: redundant with LaTeX caption
 
-plt.suptitle('Figure 2.10: Data Transformation - Log Transformation',
-             fontsize=14, fontweight='bold', y=1.02)
+# plt.suptitle('Figure 2.10: Data Transformation - Log Transformation',
+#              fontsize=14, fontweight='bold', y=1.02)  # Removed: redundant with LaTeX caption  # Removed: redundant with LaTeX caption
 output_file = os.path.join(IMAGES_DIR, 'ch02_fig10_earnings_log_transformation.png')
 plt.tight_layout()
 plt.savefig(output_file, dpi=300, bbox_inches='tight')
@@ -348,8 +348,8 @@ axes[0].plot(data_homesales_filtered['daten'], data_homesales_filtered['exsales_
             linewidth=2, linestyle='--', label='11-month Moving Average', color='red')
 axes[0].set_xlabel('Year', fontsize=11)
 axes[0].set_ylabel('Monthly Home Sales', fontsize=11)
-axes[0].set_title('Panel A: Original Series and Moving Average',
-                  fontsize=12, fontweight='bold')
+# axes[0].set_title('Panel A: Original Series and Moving Average',
+#                   fontsize=12, fontweight='bold')  # Removed: redundant with LaTeX caption  # Removed: redundant with LaTeX caption
 axes[0].legend()
 axes[0].grid(True, alpha=0.3)
 
@@ -360,13 +360,13 @@ axes[1].plot(data_homesales_filtered['daten'], data_homesales_filtered['exsales_
             linewidth=2, linestyle='--', label='Seasonally Adjusted', color='green')
 axes[1].set_xlabel('Year', fontsize=11)
 axes[1].set_ylabel('Monthly Home Sales', fontsize=11)
-axes[1].set_title('Panel B: Original Series and Seasonally Adjusted',
-                  fontsize=12, fontweight='bold')
+# axes[1].set_title('Panel B: Original Series and Seasonally Adjusted',
+#                   fontsize=12, fontweight='bold')  # Removed: redundant with LaTeX caption  # Removed: redundant with LaTeX caption
 axes[1].legend()
 axes[1].grid(True, alpha=0.3)
 
-plt.suptitle('Figure 2.11: Time Series Transformations for Home Sales',
-             fontsize=14, fontweight='bold', y=0.995)
+# plt.suptitle('Figure 2.11: Time Series Transformations for Home Sales',
+#              fontsize=14, fontweight='bold', y=0.995)  # Removed: redundant with LaTeX caption  # Removed: redundant with LaTeX caption
 output_file = os.path.join(IMAGES_DIR, 'ch02_fig11_homesales_transformations.png')
 plt.tight_layout()
 plt.savefig(output_file, dpi=300, bbox_inches='tight')
@@ -392,8 +392,8 @@ axes[0].plot(data_gdp['daten'], data_gdp['realgdp'],
             linewidth=2, linestyle='--', label='Real GDP (2012 dollars)', color='red')
 axes[0].set_xlabel('Year', fontsize=11)
 axes[0].set_ylabel('GDP (in $ billions)', fontsize=11)
-axes[0].set_title('Panel A: GDP and Real GDP', fontsize=12, fontweight='bold')
-axes[0].legend()
+# axes[0].set_title('Panel A: GDP and Real GDP', fontsize=12, fontweight='bold')  # Removed: redundant with LaTeX caption
+# axes[0].legend()  # Removed: redundant with LaTeX caption
 axes[0].grid(True, alpha=0.3)
 
 # Panel B: GDP per capita and Real GDP per capita
@@ -403,13 +403,13 @@ axes[1].plot(data_gdp['daten'], data_gdp['realgdppc'],
             linewidth=2, linestyle='--', label='Real GDP per capita (2012 dollars)', color='red')
 axes[1].set_xlabel('Year', fontsize=11)
 axes[1].set_ylabel('GDP per capita (in dollars)', fontsize=11)
-axes[1].set_title('Panel B: GDP per Capita and Real GDP per Capita',
-                  fontsize=12, fontweight='bold')
+# axes[1].set_title('Panel B: GDP per Capita and Real GDP per Capita',
+#                   fontsize=12, fontweight='bold')  # Removed: redundant with LaTeX caption  # Removed: redundant with LaTeX caption
 axes[1].legend()
 axes[1].grid(True, alpha=0.3)
 
-plt.suptitle('Figure 2.12: GDP Comparisons - Nominal vs Real',
-             fontsize=14, fontweight='bold', y=1.0)
+# plt.suptitle('Figure 2.12: GDP Comparisons - Nominal vs Real',
+#              fontsize=14, fontweight='bold', y=1.0)  # Removed: redundant with LaTeX caption  # Removed: redundant with LaTeX caption
 output_file = os.path.join(IMAGES_DIR, 'ch02_fig12_gdp_comparisons.png')
 plt.tight_layout()
 plt.savefig(output_file, dpi=300, bbox_inches='tight')

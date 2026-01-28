@@ -146,8 +146,8 @@ fig, ax = plt.subplots(figsize=(10, 6))
 plot_acf(data_gdp['growth'], lags=10, ax=ax, alpha=0.05)
 ax.set_xlabel('Lag')
 ax.set_ylabel('Autocorrelation')
-ax.set_title('Correlogram of GDP Growth')
-plt.tight_layout()
+# ax.set_title('Correlogram of GDP Growth')  # Removed: redundant with LaTeX caption
+# plt.tight_layout()  # Removed: redundant with LaTeX caption
 plt.savefig(os.path.join(IMAGES_DIR, 'ch12_correlogram_growth.png'), dpi=300, bbox_inches='tight')
 print(f"Saved: {os.path.join(IMAGES_DIR, 'ch12_correlogram_growth.png')}")
 plt.close()
@@ -207,8 +207,8 @@ axes[0].fill_between(size_range, pred_ci[:, 0], pred_ci[:, 1],
                      alpha=0.3, color='red', label='95% CI for E[Y|X]')
 axes[0].set_xlabel('Size (sq ft)')
 axes[0].set_ylabel('Price ($1000)')
-axes[0].set_title('Confidence Interval for Conditional Mean')
-axes[0].legend()
+# axes[0].set_title('Confidence Interval for Conditional Mean')  # Removed: redundant with LaTeX caption
+# axes[0].legend()  # Removed: redundant with LaTeX caption
 axes[0].grid(True, alpha=0.3)
 
 # Panel 2: Prediction Interval for Actual Value
@@ -218,8 +218,8 @@ axes[1].fill_between(size_range, pred_pi[:, 0], pred_pi[:, 1],
                      alpha=0.3, color='blue', label='95% PI for Y')
 axes[1].set_xlabel('Size (sq ft)')
 axes[1].set_ylabel('Price ($1000)')
-axes[1].set_title('Prediction Interval for Actual Value')
-axes[1].legend()
+# axes[1].set_title('Prediction Interval for Actual Value')  # Removed: redundant with LaTeX caption
+# axes[1].legend()  # Removed: redundant with LaTeX caption
 axes[1].grid(True, alpha=0.3)
 
 plt.tight_layout()

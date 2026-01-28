@@ -104,10 +104,10 @@ ax.scatter(data_house['size'], data_house['price'],
 ax.plot(data_house['size'], model.fittedvalues,
         color='blue', linewidth=2, label='Fitted')
 
-# Labels and title
+# Labels
 ax.set_xlabel('House size (in square feet)', fontsize=12)
 ax.set_ylabel('House sale price (in dollars)', fontsize=12)
-ax.set_title('Figure 1.1: House Price vs Size', fontsize=14, fontweight='bold')
+# ax.set_title('Figure 1.1: House Price vs Size', fontsize=14, fontweight='bold')  # Removed: redundant with LaTeX caption
 ax.legend(loc='upper left')
 ax.grid(True, alpha=0.3)
 

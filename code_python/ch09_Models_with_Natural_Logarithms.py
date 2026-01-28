@@ -197,8 +197,8 @@ ax.plot(data_earnings['education'], model_linear.fittedvalues, color='blue',
         linewidth=2, label='Fitted')
 ax.set_xlabel('Years of completed schooling', fontsize=12)
 ax.set_ylabel('Annual earnings (in dollars)', fontsize=12)
-ax.set_title('Figure 9.1 Panel A: Linear Model',
-             fontsize=14, fontweight='bold')
+# ax.set_title('Figure 9.1 Panel A: Linear Model',
+#              fontsize=14, fontweight='bold')  # Removed: redundant with LaTeX caption
 ax.legend()
 ax.grid(True, alpha=0.3)
 
@@ -216,8 +216,8 @@ ax.plot(data_earnings['education'], model_loglin.fittedvalues, color='blue',
         linewidth=2, label='Fitted')
 ax.set_xlabel('Years of completed schooling', fontsize=12)
 ax.set_ylabel('Log annual earnings', fontsize=12)
-ax.set_title('Figure 9.1 Panel B: Log-linear Model',
-             fontsize=14, fontweight='bold')
+# ax.set_title('Figure 9.1 Panel B: Log-linear Model',
+#              fontsize=14, fontweight='bold')  # Removed: redundant with LaTeX caption
 ax.legend()
 ax.grid(True, alpha=0.3)
 
@@ -237,7 +237,7 @@ axes[0, 0].plot(data_earnings['education'], model_linear.fittedvalues,
                 color='blue', linewidth=2)
 axes[0, 0].set_xlabel('Education (years)', fontsize=11)
 axes[0, 0].set_ylabel('Earnings ($)', fontsize=11)
-axes[0, 0].set_title('Linear Model: y = β₀ + β₁x', fontsize=12, fontweight='bold')
+# axes[0, 0].set_title('Linear Model: y = β₀ + β₁x', fontsize=12, fontweight='bold')  # Removed: redundant with LaTeX caption
 axes[0, 0].grid(True, alpha=0.3)
 
 # Log-linear model
@@ -247,7 +247,7 @@ axes[0, 1].plot(data_earnings['education'], model_loglin.fittedvalues,
                 color='blue', linewidth=2)
 axes[0, 1].set_xlabel('Education (years)', fontsize=11)
 axes[0, 1].set_ylabel('ln(Earnings)', fontsize=11)
-axes[0, 1].set_title('Log-linear Model: ln(y) = β₀ + β₁x', fontsize=12, fontweight='bold')
+# axes[0, 1].set_title('Log-linear Model: ln(y) = β₀ + β₁x', fontsize=12, fontweight='bold')  # Removed: redundant with LaTeX caption
 axes[0, 1].grid(True, alpha=0.3)
 
 # Log-log model
@@ -257,7 +257,7 @@ axes[1, 0].plot(data_earnings['lneduc'], model_loglog.fittedvalues,
                 color='blue', linewidth=2)
 axes[1, 0].set_xlabel('ln(Education)', fontsize=11)
 axes[1, 0].set_ylabel('ln(Earnings)', fontsize=11)
-axes[1, 0].set_title('Log-log Model: ln(y) = β₀ + β₁ln(x)', fontsize=12, fontweight='bold')
+# axes[1, 0].set_title('Log-log Model: ln(y) = β₀ + β₁ln(x)', fontsize=12, fontweight='bold')  # Removed: redundant with LaTeX caption
 axes[1, 0].grid(True, alpha=0.3)
 
 # Linear-log model
@@ -267,11 +267,11 @@ axes[1, 1].plot(data_earnings['lneduc'], model_linlog.fittedvalues,
                 color='blue', linewidth=2)
 axes[1, 1].set_xlabel('ln(Education)', fontsize=11)
 axes[1, 1].set_ylabel('Earnings ($)', fontsize=11)
-axes[1, 1].set_title('Linear-log Model: y = β₀ + β₁ln(x)', fontsize=12, fontweight='bold')
+# axes[1, 1].set_title('Linear-log Model: y = β₀ + β₁ln(x)', fontsize=12, fontweight='bold')  # Removed: redundant with LaTeX caption
 axes[1, 1].grid(True, alpha=0.3)
 
-plt.suptitle('Four Model Specifications: Earnings and Education',
-             fontsize=14, fontweight='bold', y=1.00)
+# plt.suptitle('Four Model Specifications: Earnings and Education',
+#              fontsize=14, fontweight='bold', y=1.00)  # Removed: redundant with LaTeX caption
 output_file = os.path.join(IMAGES_DIR, 'ch09_four_models_comparison.png')
 plt.tight_layout()
 plt.savefig(output_file, dpi=300, bbox_inches='tight')
@@ -330,8 +330,8 @@ ax.plot(data_sp500['year'], psp500, linewidth=2, linestyle='--',
         label='Fitted (with bias correction)', color='blue')
 ax.set_xlabel('Year', fontsize=12)
 ax.set_ylabel('S&P 500 Index', fontsize=12)
-ax.set_title('Figure 9.2 Panel A: Exponential Trend in Levels',
-             fontsize=14, fontweight='bold')
+# ax.set_title('Figure 9.2 Panel A: Exponential Trend in Levels',
+#              fontsize=14, fontweight='bold')  # Removed: redundant with LaTeX caption
 ax.legend()
 ax.grid(True, alpha=0.3)
 
@@ -349,8 +349,8 @@ ax.plot(data_sp500['year'], plnsp500, linewidth=2, linestyle='--',
         label='Fitted', color='blue')
 ax.set_xlabel('Year', fontsize=12)
 ax.set_ylabel('ln(S&P 500 Index)', fontsize=12)
-ax.set_title('Figure 9.2 Panel B: Linear Trend in Natural Logarithms',
-             fontsize=14, fontweight='bold')
+# ax.set_title('Figure 9.2 Panel B: Linear Trend in Natural Logarithms',
+#              fontsize=14, fontweight='bold')  # Removed: redundant with LaTeX caption
 ax.legend()
 ax.grid(True, alpha=0.3)
 
@@ -380,8 +380,8 @@ fig, ax = plt.subplots(figsize=(10, 6))
 ax.plot(x_vals, y_vals, linewidth=2, color='blue')
 ax.set_xlabel('x', fontsize=12)
 ax.set_ylabel('exp(x)', fontsize=12)
-ax.set_title('The Exponential Function: y = exp(x)',
-             fontsize=14, fontweight='bold')
+# ax.set_title('The Exponential Function: y = exp(x)  # Removed: redundant with LaTeX caption',
+#              fontsize=14, fontweight='bold')  # Removed: redundant with LaTeX caption
 ax.grid(True, alpha=0.3)
 
 output_file = os.path.join(IMAGES_DIR, 'ch09_exponential_function.png')

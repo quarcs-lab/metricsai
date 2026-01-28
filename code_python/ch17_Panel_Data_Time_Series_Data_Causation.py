@@ -176,7 +176,7 @@ ax.plot(wins_range, p(wins_range), 'r-', linewidth=2, label='OLS fit')
 
 ax.set_xlabel('Wins')
 ax.set_ylabel('Log Revenue')
-ax.set_title('NBA Team Revenue vs Wins')
+# ax.set_title('NBA Team Revenue vs Wins')  # Removed: redundant with LaTeX caption
 ax.legend()
 ax.grid(True, alpha=0.3)
 plt.tight_layout()
@@ -476,8 +476,8 @@ for i in range(11):
 # Plot correlogram
 fig, ax = plt.subplots(figsize=(10, 6))
 plot_acf(data_rates['uhatgs10'].dropna(), lags=24, ax=ax, alpha=0.05)
-ax.set_title('Correlogram: Residuals from Levels Regression')
-plt.tight_layout()
+# ax.set_title('Correlogram: Residuals from Levels Regression')  # Removed: redundant with LaTeX caption
+# plt.tight_layout()  # Removed: redundant with LaTeX caption
 plt.savefig(os.path.join(IMAGES_DIR, 'ch17_correlogram_levels_resid.png'), dpi=300, bbox_inches='tight')
 print(f"Saved: {os.path.join(IMAGES_DIR, 'ch17_correlogram_levels_resid.png')}")
 plt.close()
@@ -499,8 +499,8 @@ axes[0].plot(data_rates.index, data_rates['gs10'], label='10-year rate', linewid
 axes[0].plot(data_rates.index, data_rates['gs1'], label='1-year rate', linewidth=1.5)
 axes[0].set_xlabel('Observation')
 axes[0].set_ylabel('Interest Rate (%)')
-axes[0].set_title('Interest Rates (Levels)')
-axes[0].legend()
+# axes[0].set_title('Interest Rates (Levels)  # Removed: redundant with LaTeX caption')
+# axes[0].legend()  # Removed: redundant with LaTeX caption
 axes[0].grid(True, alpha=0.3)
 
 # Panel 2: Scatter plot
@@ -511,8 +511,8 @@ gs1_range = np.linspace(data_rates['gs1'].min(), data_rates['gs1'].max(), 100)
 axes[1].plot(gs1_range, p(gs1_range), 'r-', linewidth=2, label='OLS fit')
 axes[1].set_xlabel('1-year rate (%)')
 axes[1].set_ylabel('10-year rate (%)')
-axes[1].set_title('10-year vs 1-year Rate')
-axes[1].legend()
+# axes[1].set_title('10-year vs 1-year Rate')  # Removed: redundant with LaTeX caption
+# axes[1].legend()  # Removed: redundant with LaTeX caption
 axes[1].grid(True, alpha=0.3)
 
 plt.tight_layout()
@@ -689,8 +689,8 @@ axes[0].plot(data_rates.index, data_rates['dgs1'], label='Δ 1-year rate', linew
 axes[0].axhline(y=0, color='k', linestyle='--', linewidth=0.5)
 axes[0].set_xlabel('Observation')
 axes[0].set_ylabel('Change in Rate (pct points)')
-axes[0].set_title('Changes in Interest Rates')
-axes[0].legend()
+# axes[0].set_title('Changes in Interest Rates')  # Removed: redundant with LaTeX caption
+# axes[0].legend()  # Removed: redundant with LaTeX caption
 axes[0].grid(True, alpha=0.3)
 
 # Panel 2: Scatter plot of changes
@@ -705,8 +705,8 @@ axes[1].axhline(y=0, color='k', linestyle='--', linewidth=0.5)
 axes[1].axvline(x=0, color='k', linestyle='--', linewidth=0.5)
 axes[1].set_xlabel('Δ 1-year rate')
 axes[1].set_ylabel('Δ 10-year rate')
-axes[1].set_title('Change in 10-year vs 1-year Rate')
-axes[1].legend()
+# axes[1].set_title('Change in 10-year vs 1-year Rate')  # Removed: redundant with LaTeX caption
+# axes[1].legend()  # Removed: redundant with LaTeX caption
 axes[1].grid(True, alpha=0.3)
 
 plt.tight_layout()
@@ -796,7 +796,7 @@ ax.fill_between(impulse_df['Horizon'],
 ax.axhline(y=0, color='k', linestyle='--', linewidth=0.5)
 ax.set_xlabel('Horizon (periods ahead)')
 ax.set_ylabel('Response of Δ 10-year rate')
-ax.set_title('Impulse Response: Effect of 1 pct point increase in Δ 1-year rate')
+# ax.set_title('Impulse Response: Effect of 1 pct point increase in Δ 1-year rate')  # Removed: redundant with LaTeX caption
 ax.legend()
 ax.grid(True, alpha=0.3)
 plt.tight_layout()

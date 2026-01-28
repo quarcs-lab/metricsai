@@ -38,7 +38,7 @@ This chapter bridges \textbf{classical econometrics} (Chapters 1-11) and \textbf
 
 \subsection{Code}
 
-\textbf{Context:} In this section, we compute heteroskedasticity-robust standard errors for the housing price regression. Classical OLS assumes constant error variance (homoskedasticity), but real-world data often violate this assumption—larger houses may have more variable prices. Robust standard errors (HC1) correct for this violation, providing valid inference even when heteroskedasticity is present. We use statsmodels' \texttt{cov\_type='HC1'} option to implement White's heteroskedasticity-consistent covariance matrix estimator.
+In this section, we compute heteroskedasticity-robust standard errors for the housing price regression. Classical OLS assumes constant error variance (homoskedasticity), but real-world data often violate this assumption—larger houses may have more variable prices. Robust standard errors (HC1) correct for this violation, providing valid inference even when heteroskedasticity is present. We use statsmodels' \texttt{cov\_type='HC1'} option to implement White's heteroskedasticity-consistent covariance matrix estimator.
 
 \begin{lstlisting}[language=Python]
 # Import required libraries
@@ -98,8 +98,6 @@ print(comparison_table)
 
 \subsection{Results}
 
-\textbf{Table 12.2: Multiple Regression with Heteroskedastic-Robust Standard Errors (HC1)}
-
 | Variable  | Coefficient | SE (Default) | SE (HC1)  | SE Ratio | z-stat | p-value |
 |-----------|-------------|--------------|-----------|----------|--------|---------|
 | Intercept | 137,791     | 61,465       | 65,545    | 1.066    | 2.102  | 0.036   |
@@ -149,7 +147,7 @@ Classical OLS assumes \textbf{homoskedasticity}: Var(u|X) = σ² (constant error
 
 \textbf{Formula (HC1)}:
 
-Var(β̂)\_robust = (X'X)⁻¹ × [Σ eᵢ²xᵢxᵢ'] × (X'X)⁻¹ × n/(n-k)
+Var($\hat{\beta}$)\_robust = (X'X)⁻¹ × [Σ eᵢ²xᵢxᵢ'] × (X'X)⁻¹ × n/(n-k)
 
 Where:
 \begin{itemize}
@@ -257,7 +255,7 @@ Heteroskedasticity-robust standard errors (HC1) correct for varying error varian
 
 \textbf{Formal tests}:
 1. \textbf{Breusch-Pagan test}: Regress e² on X; test joint significance
-   - H₀: Homoskedasticity
+   - H_0: Homoskedasticity
    - Reject → heteroskedasticity
 
 2. \textbf{White test}: Regress e² on X, X², X×X; test joint significance
@@ -301,7 +299,7 @@ Heteroskedasticity-robust standard errors (HC1) correct for varying error varian
 \textbf{Connection to Sandwich Estimators}
 
 Robust covariance matrix has "sandwich" form:
-Var(β̂) = \textbf{Bread} × \textbf{Meat} × \textbf{Bread}
+Var($\hat{\beta}$) = \textbf{Bread} × \textbf{Meat} × \textbf{Bread}
 
 Where:
 \begin{itemize}
@@ -310,7 +308,7 @@ Where:
 \end{itemize}
 
 \textbf{Classical OLS} assumes \textbf{Meat} = σ²(X'X), simplifying to:
-Var(β̂)\_classical = σ²(X'X)⁻¹
+Var($\hat{\beta}$)\_classical = σ²(X'X)⁻¹
 
 \textbf{Robust estimator} uses actual residuals (eᵢ²) instead of assuming constant σ².
 
@@ -323,7 +321,7 @@ Section 2 extends robust SEs to \textbf{time series data}, where errors are both
 
 \subsection{Code}
 
-\textbf{Context:} In this section, we analyze GDP growth time series data where observations are correlated over time (autocorrelation). Time series data violate the independence assumption—this quarter's growth is highly predictive of next quarter's growth. HAC (Heteroskedasticity and Autocorrelation Consistent) standard errors, developed by Newey and West (1987), correct for both heteroskedasticity and autocorrelation simultaneously. We examine autocorrelation patterns using correlograms and apply Newey-West correction with appropriate lag lengths to obtain valid standard errors.
+In this section, we analyze GDP growth time series data where observations are correlated over time (autocorrelation). Time series data violate the independence assumption—this quarter's growth is highly predictive of next quarter's growth. HAC (Heteroskedasticity and Autocorrelation Consistent) standard errors, developed by Newey and West (1987), correct for both heteroskedasticity and autocorrelation simultaneously. We examine autocorrelation patterns using correlograms and apply Newey-West correction with appropriate lag lengths to obtain valid standard errors.
 
 \begin{lstlisting}[language=Python]
 # Load GDP growth data (time series)
@@ -423,7 +421,12 @@ print(f"  SE: {model_hac5.bse[0]:.6f}")
 
 \textbf{Correlogram}:
 
+\begin{figure}[h]
+\centering
 \includegraphics[width=0.8\textwidth]{images/ch12_correlogram_growth.png}
+\caption{Correlogram Showing Autocorrelation in GDP Growth Residuals}
+\label{fig:ch12:correlogram}
+\end{figure}
 
 \textbf{Newey-West HAC Standard Errors}:
 \begin{itemize}
@@ -441,22 +444,22 @@ print(f"  SE: {model_hac5.bse[0]:.6f}")
 \begin{itemize}
 \item Residual for house i unrelated to residual for house j
 \item Homoskedasticity: Var(uᵢ) = σ²
-\item No autocorrelation: Cov(uᵢ, uⱼ) = 0 for i ≠ j
+\item No autocorrelation: Cov(uᵢ, uⱼ) = 0 for i $\neq$ j
 \end{itemize}
 
 \textbf{Time series data} (GDP growth): Observations \textbf{not independent}
 \begin{itemize}
 \item This quarter's residual correlated with next quarter's
-\item \textbf{Autocorrelation} (serial correlation): Cov(uₜ, uₜ₋ₛ) ≠ 0 for s > 0
+\item \textbf{Autocorrelation} (serial correlation): Cov(uₜ, uₜ₋ₛ) $\neq$ 0 for s > 0
 \item Also often \textbf{heteroskedasticity}: Var(uₜ) varies over time
 \end{itemize}
 
 \textbf{Consequences of Autocorrelation}
 
 With autocorrelated errors:
-1. \textbf{OLS remains unbiased}: E[β̂] = β
+1. \textbf{OLS remains unbiased}: E[$\hat{\beta}$] = $\beta$
 2. \textbf{Standard errors are biased}: Usually too small (underestimate uncertainty)
-3. \textbf{t-statistics inflated}: May falsely reject H₀
+3. \textbf{t-statistics inflated}: May falsely reject H_0
 4. \textbf{Confidence intervals too narrow}: Don't achieve nominal coverage
 
 \textbf{Intuition}: Autocorrelation means \textbf{effective sample size < actual sample size}.
@@ -471,7 +474,7 @@ With autocorrelated errors:
 
 \textbf{Formula} (simplified):
 
-Var(β̂)\_HAC = (X'X)⁻¹ × [Σₜ eₜ²xₜxₜ' + Σₛ₌₁ᴸ wₛ Σₜ eₜeₜ₋ₛ(xₜxₜ₋ₛ' + xₜ₋ₛxₜ')] × (X'X)⁻¹
+Var($\hat{\beta}$)\_HAC = (X'X)⁻¹ × [Σₜ eₜ²xₜxₜ' + Σₛ₌_1ᴸ wₛ Σₜ eₜeₜ₋ₛ(xₜxₜ₋ₛ' + xₜ₋ₛxₜ')] × (X'X)⁻¹
 
 Where:
 \begin{itemize}
@@ -634,7 +637,7 @@ With \textbf{time series data}, always use \textbf{HAC (Newey-West) SEs} to acco
 
 \begin{keyconcept}{HAC Standard Errors}
 >
-HAC (Heteroskedasticity and Autocorrelation Consistent) standard errors extend robust standard errors to time series by accounting for correlation across time periods. The Newey-West estimator uses a weighted sum of autocovariances up to lag L: Var(β̂) = (X'X)⁻¹ [Σₜ eₜ²xₜxₜ' + Σₛ₌₁ᴸ wₛ Σₜ eₜeₜ₋ₛ(xₜxₜ₋ₛ' + xₜ₋ₛxₜ')] (X'X)⁻¹, where wₛ = 1 - s/(L+1) are Bartlett weights. Choose L using the rule of thumb L ≈ 0.75 × n^(1/3). HAC SEs are essential for valid inference in time series regression, preventing overconfident conclusions from autocorrelated data.
+HAC (Heteroskedasticity and Autocorrelation Consistent) standard errors extend robust standard errors to time series by accounting for correlation across time periods. The Newey-West estimator uses a weighted sum of autocovariances up to lag L: Var(β̂) = (X'X)⁻¹ [Σₜ eₜ²xₜxₜ' + Σₛ₌_1ᴸ wₛ Σₜ eₜeₜ₋ₛ(xₜxₜ₋ₛ' + xₜ₋ₛxₜ')] (X'X)⁻¹, where wₛ = 1 - s/(L+1) are Bartlett weights. Choose L using the rule of thumb L ≈ 0.75 × n^(1/3). HAC SEs are essential for valid inference in time series regression, preventing overconfident conclusions from autocorrelated data.
 \end{keyconcept}
 
 
@@ -642,13 +645,13 @@ HAC (Heteroskedasticity and Autocorrelation Consistent) standard errors extend r
 
 \subsection{Code}
 
-\textbf{Context:} In this section, we construct prediction intervals for forecasting house prices at specific sizes. Prediction intervals differ fundamentally from confidence intervals—they account for both parameter uncertainty (sampling variability in β̂) and individual randomness (the error term u). While confidence intervals answer "What is the average price for all houses of this size?", prediction intervals answer "What will this particular house sell for?". We compute both manually and using statsmodels' \texttt{get\_prediction()} method to understand the mathematical foundations.
+In this section, we construct prediction intervals for forecasting house prices at specific sizes. Prediction intervals differ fundamentally from confidence intervals—they account for both parameter uncertainty (sampling variability in β̂) and individual randomness (the error term u). While confidence intervals answer "What is the average price for all houses of this size?", prediction intervals answer "What will this particular house sell for?". We compute both manually and using statsmodels' \texttt{get\_prediction()} method to understand the mathematical foundations.
 
 \begin{lstlisting}[language=Python]
 # Simple regression: price on size
 model_simple = ols('price ~ size', data=data_house).fit()
 
-print("Simple regression: price = β₀ + β₁*size + u")
+print("Simple regression: price = $\\beta_0$ + $\\beta_1$*size + u")
 print(model_simple.summary())
 
 # Prepare prediction data over range of sizes
@@ -755,34 +758,39 @@ print(f"  95% PI: [{y_pred - tcrit\textit{s_y_f:.2f}, {y_pred + tcrit}s_y_f:.2f}
 
 \textbf{Key Observation}: Prediction interval (±\$49,221) is \textbf{5.2 times wider} than confidence interval (±\$9,367).
 
+\begin{figure}[h]
+\centering
 \includegraphics[width=0.8\textwidth]{images/ch12_fig1_prediction_intervals.png}
+\caption{Confidence and Prediction Intervals for House Price Regression}
+\label{fig:ch12:prediction-intervals}
+\end{figure}
 
 \subsection{Interpretation}
 
 \textbf{Two Types of Prediction}
 
-\textbf{1. Conditional Mean}: E[Y|X=x₀]
+\textbf{1. Conditional Mean}: E[Y|X=x_0]
 \begin{itemize}
 \item \textbf{Question}: "What is the \textbf{average price} for all 2000 sq ft houses?"
 \item \textbf{Use}: Estimating population average
-\item \textbf{Uncertainty source}: Sampling variability in β̂₀, β̂₁
+\item \textbf{Uncertainty source}: Sampling variability in $\hat{\beta}_0$, $\hat{\beta}_1$
 \end{itemize}
 
-\textbf{2. Actual Value}: Y at X=x₀
+\textbf{2. Actual Value}: Y at X=x_0
 \begin{itemize}
 \item \textbf{Question}: "What will the \textbf{price be} for this specific 2000 sq ft house I'm buying?"
 \item \textbf{Use}: Forecasting individual outcomes
-\item \textbf{Uncertainty sources}: (1) Sampling variability in β̂ AND (2) individual random error u
+\item \textbf{Uncertainty sources}: (1) Sampling variability in $\hat{\beta}$ AND (2) individual random error u
 \end{itemize}
 
 \textbf{Why Prediction Intervals Are Wider}
 
-\textbf{Conditional mean}: ŷ = β̂₀ + β̂₁x₀
+\textbf{Conditional mean}: ŷ = β̂_0 + β̂_1x_0
 \begin{itemize}
-\item \textbf{Variance}: Var(ŷ) = Var(β̂₀) + x₀²Var(β̂₁) + 2x₀Cov(β̂₀,β̂₁)
+\item \textbf{Variance}: Var(ŷ) = Var(β̂_0) + x_0²Var(β̂_1) + 2x_0Cov(β̂_0,β̂_1)
 \end{itemize}
 
-\textbf{Actual value}: Y = β̂₀ + β̂₁x₀ + u
+\textbf{Actual value}: Y = β̂_0 + β̂_1x_0 + u
 \begin{itemize}
 \item \textbf{Variance}: Var(Y) = Var(ŷ) + σ²
 \item \textbf{Extra term}: σ² (irreducible randomness)
@@ -791,10 +799,10 @@ print(f"  95% PI: [{y_pred - tcrit\textit{s_y_f:.2f}, {y_pred + tcrit}s_y_f:.2f}
 \textbf{Formulas}:
 
 \textbf{SE for conditional mean}:
-SE(E[Y|X=x₀]) = σ̂ √[1/n + (x₀ - x̄)²/Σ(xᵢ - x̄)²]
+SE(E[Y|X=x_0]) = σ̂ √[1/n + (x_0 - x̄)²/Σ(xᵢ - x̄)²]
 
 \textbf{SE for actual value}:
-SE(Y|X=x₀) = σ̂ √[1 + 1/n + (x₀ - x̄)²/Σ(xᵢ - x̄)²]
+SE(Y|X=x_0) = σ̂ √[1 + 1/n + (x_0 - x̄)²/Σ(xᵢ - x̄)²]
 
 \textbf{Key difference}: \textbf{"1 +"} in prediction interval formula accounts for individual error.
 
@@ -855,13 +863,13 @@ For size = 2000:
 
 \textbf{Why Width Varies with X}
 
-\textbf{Formula shows}: Intervals are \textbf{narrowest at x̄} (sample mean) and \textbf{wider} as x₀ moves away.
+\textbf{Formula shows}: Intervals are \textbf{narrowest at x̄} (sample mean) and \textbf{wider} as x_0 moves away.
 
 \textbf{For size}:
 \begin{itemize}
 \item \textbf{At x̄ = 1,883}: SE(ŷ) = σ̂/√n = \$23,551/√29 = \$4,374 (minimum)
-\item \textbf{At x₀ = 2,000}: SE(ŷ) = \$4,565 (slightly wider, x₀ near x̄)
-\item \textbf{At x₀ = 3,300} (max size): SE(ŷ) = \$9,214 (much wider, far from x̄)
+\item \textbf{At x_0 = 2,000}: SE(ŷ) = \$4,565 (slightly wider, x_0 near x̄)
+\item \textbf{At x_0 = 3,300} (max size): SE(ŷ) = \$9,214 (much wider, far from x̄)
 \end{itemize}
 
 \textbf{Extrapolation danger}: Predicting far outside the data range (e.g., size = 5,000 sq ft) yields \textbf{very wide intervals} and unreliable estimates.
@@ -888,10 +896,10 @@ For size = 2000:
 For \textbf{multiple regression} with k predictors:
 
 \textbf{SE for conditional mean}:
-SE(E[Y|X=x₀]) = √[x₀'(X'X)⁻¹x₀ × σ̂²]
+SE(E[Y|X=x_0]) = √[x_0'(X'X)⁻¹x_0 × σ̂²]
 
 \textbf{SE for actual value}:
-SE(Y|X=x₀) = √[(1 + x₀'(X'X)⁻¹x₀) × σ̂²]
+SE(Y|X=x_0) = √[(1 + x_0'(X'X)⁻¹x_0) × σ̂²]
 
 \textbf{Example} (from code):
 \begin{itemize}
@@ -930,7 +938,7 @@ With \textbf{heteroskedastic-robust SEs}:
 
 \begin{keyconcept}{Prediction Intervals vs. Confidence Intervals}
 >
-Prediction intervals and confidence intervals serve different purposes and have different formulas. A confidence interval for E[Y|X=x₀] uses SE = σ̂√[1/n + (x₀-x̄)²/Σ(xᵢ-x̄)²], estimating the average outcome for all units at x₀. A prediction interval for Y at X=x₀ uses SE = σ̂√[1 + 1/n + (x₀-x̄)²/Σ(xᵢ-x̄)²], adding the "+1" term for individual randomness. Prediction intervals are always wider because they must account for both parameter uncertainty and the irreducible error σ², which doesn't disappear as sample size increases. Use prediction intervals for forecasting, confidence intervals for population parameters.
+Prediction intervals and confidence intervals serve different purposes and have different formulas. A confidence interval for E[Y|X=x_0] uses SE = σ̂√[1/n + (x_0-x̄)²/Σ(xᵢ-x̄)²], estimating the average outcome for all units at x_0. A prediction interval for Y at X=x_0 uses SE = σ̂√[1 + 1/n + (x_0-x̄)²/Σ(xᵢ-x̄)²], adding the "+1" term for individual randomness. Prediction intervals are always wider because they must account for both parameter uncertainty and the irreducible error σ², which doesn't disappear as sample size increases. Use prediction intervals for forecasting, confidence intervals for population parameters.
 \end{keyconcept}
 
 \begin{keyconcept}{Adjusted R² and RMSE}
@@ -1018,7 +1026,7 @@ Chapter 12 Sections 12.3-12.9 provide \textbf{conceptual overviews} of advanced 
 \textbf{2. Bootstrap intervals}:
 \begin{itemize}
 \item \textbf{Resample data} with replacement many times (e.g., 1000)
-\item Compute β̂ for each resample
+\item Compute $\hat{\beta}$ for each resample
 \item Construct CI from bootstrap distribution
 \item \textbf{Advantages}: No distributional assumptions, valid for complex estimators
 \item \textbf{Disadvantages}: Computationally intensive
@@ -1027,7 +1035,7 @@ Chapter 12 Sections 12.3-12.9 provide \textbf{conceptual overviews} of advanced 
 \textbf{3. Bayesian credible intervals}:
 \begin{itemize}
 \item Based on posterior distribution
-\item Probability interpretation: "95\% probability β is in this interval"
+\item Probability interpretation: "95\% probability $\beta$ is in this interval"
 \item Requires prior distribution
 \end{itemize}
 
@@ -1120,14 +1128,14 @@ Posterior ∝ Prior × Likelihood
 
 \textbf{Example}:
 \begin{itemize}
-\item \textbf{Prior}: β ~ N(0, 100²) (vague prior)
-\item \textbf{Likelihood}: y|X, β ~ N(Xβ, σ²I)
-\item \textbf{Posterior}: β|y, X ~ N(β̂, V) (combines prior and data)
+\item \textbf{Prior}: $\beta$ ~ N(0, 100²) (vague prior)
+\item \textbf{Likelihood}: y|X, $\beta$ ~ N(X$\beta$, σ²I)
+\item \textbf{Posterior}: $\beta$|y, X ~ N($\hat{\beta}$, V) (combines prior and data)
 \end{itemize}
 
 \textbf{Advantages}:
 \begin{itemize}
-\item \textbf{Probability statements}: "95\% probability β > 0" (not allowed in frequentist)
+\item \textbf{Probability statements}: "95\% probability $\beta$ > 0" (not allowed in frequentist)
 \item \textbf{Prior information}: Incorporate expert knowledge
 \item \textbf{Hierarchical models}: Natural framework for multi-level data
 \end{itemize}

@@ -384,8 +384,8 @@ ax.plot(data_democracy['growth'], ols_bivariate.fittedvalues,
         color='blue', linewidth=2, label='Regression line')
 ax.set_xlabel('Change in Log GDP per capita', fontsize=12)
 ax.set_ylabel('Change in Democracy', fontsize=12)
-ax.set_title('Figure 16.1: Democracy and Growth, 1500-2000',
-             fontsize=14, fontweight='bold')
+# ax.set_title('Figure 16.1: Democracy and Growth, 1500-2000',
+#              fontsize=14, fontweight='bold')  # Removed: redundant with LaTeX caption
 ax.legend()
 ax.grid(True, alpha=0.3)
 
@@ -429,8 +429,8 @@ axes[0].plot(lowess_result[:, 0], lowess_result[:, 1],
 
 axes[0].set_xlabel('Predicted value of y', fontsize=11)
 axes[0].set_ylabel('Actual value of y', fontsize=11)
-axes[0].set_title('Panel A: Actual vs. Fitted', fontsize=12, fontweight='bold')
-axes[0].legend()
+# axes[0].set_title('Panel A: Actual vs. Fitted', fontsize=12, fontweight='bold')  # Removed: redundant with LaTeX caption
+# axes[0].legend()  # Removed: redundant with LaTeX caption
 axes[0].grid(True, alpha=0.3)
 
 # Panel B: Residual vs. Fitted
@@ -444,11 +444,11 @@ axes[1].plot(lowess_result[:, 0], lowess_result[:, 1],
 
 axes[1].set_xlabel('Predicted value of y', fontsize=11)
 axes[1].set_ylabel('OLS Residual', fontsize=11)
-axes[1].set_title('Panel B: Residual vs. Fitted', fontsize=12, fontweight='bold')
-axes[1].legend()
+# axes[1].set_title('Panel B: Residual vs. Fitted', fontsize=12, fontweight='bold')  # Removed: redundant with LaTeX caption
+# axes[1].legend()  # Removed: redundant with LaTeX caption
 axes[1].grid(True, alpha=0.3)
 
-plt.suptitle('Figure 16.2: Diagnostic Plots', fontsize=14, fontweight='bold', y=1.0)
+# plt.suptitle('Figure 16.2: Diagnostic Plots', fontsize=14, fontweight='bold', y=1.0)  # Removed: redundant with LaTeX caption
 output_file = os.path.join(IMAGES_DIR, 'ch16_fig2_diagnostics_basic.png')
 plt.tight_layout()
 plt.savefig(output_file, dpi=300, bbox_inches='tight')
@@ -473,8 +473,8 @@ axes[0].plot(lowess_result[:, 0], lowess_result[:, 1],
 
 axes[0].set_xlabel('Growth regressor', fontsize=11)
 axes[0].set_ylabel('Democracy Residual', fontsize=11)
-axes[0].set_title('Panel A: Residual vs. Regressor', fontsize=12, fontweight='bold')
-axes[0].legend()
+# axes[0].set_title('Panel A: Residual vs. Regressor', fontsize=12, fontweight='bold')  # Removed: redundant with LaTeX caption
+# axes[0].legend()  # Removed: redundant with LaTeX caption
 axes[0].grid(True, alpha=0.3)
 
 # Panel B: Component Plus Residual plot
@@ -498,8 +498,8 @@ axes[1].plot(lowess_result[:, 0], lowess_result[:, 1],
 
 axes[1].set_xlabel('Growth regressor', fontsize=11)
 axes[1].set_ylabel(f'Dem Res + {bgrowth:.3f}*Growth', fontsize=11)
-axes[1].set_title('Panel B: Component Plus Residual', fontsize=12, fontweight='bold')
-axes[1].legend()
+# axes[1].set_title('Panel B: Component Plus Residual', fontsize=12, fontweight='bold')  # Removed: redundant with LaTeX caption
+# axes[1].legend()  # Removed: redundant with LaTeX caption
 axes[1].grid(True, alpha=0.3)
 
 # Panel C: Added Variable plot
@@ -530,12 +530,12 @@ axes[2].plot(lowess_result[:, 0], lowess_result[:, 1],
 
 axes[2].set_xlabel('Growth regressor (partial)', fontsize=11)
 axes[2].set_ylabel('Democracy (partial)', fontsize=11)
-axes[2].set_title('Panel C: Added Variable', fontsize=12, fontweight='bold')
-axes[2].legend()
+# axes[2].set_title('Panel C: Added Variable', fontsize=12, fontweight='bold')  # Removed: redundant with LaTeX caption
+# axes[2].legend()  # Removed: redundant with LaTeX caption
 axes[2].grid(True, alpha=0.3)
 
-plt.suptitle('Figure 16.3: Diagnostic Plots for Growth Regressor',
-             fontsize=14, fontweight='bold', y=1.0)
+# plt.suptitle('Figure 16.3: Diagnostic Plots for Growth Regressor',
+#              fontsize=14, fontweight='bold', y=1.0)  # Removed: redundant with LaTeX caption
 output_file = os.path.join(IMAGES_DIR, 'ch16_fig3_diagnostics_growth.png')
 plt.tight_layout()
 plt.savefig(output_file, dpi=300, bbox_inches='tight')
@@ -565,7 +565,7 @@ ax.axhline(y=-threshold_dfits, color='red', linestyle='--', linewidth=2)
 ax.axhline(y=0, color='black', linestyle='-', linewidth=0.5)
 ax.set_xlabel('Observation Index', fontsize=12)
 ax.set_ylabel('DFITS', fontsize=12)
-ax.set_title('DFITS: Influential Observations', fontsize=14, fontweight='bold')
+# ax.set_title('DFITS: Influential Observations', fontsize=14, fontweight='bold')  # Removed: redundant with LaTeX caption
 ax.legend()
 ax.grid(True, alpha=0.3)
 
@@ -607,15 +607,15 @@ for i, param in enumerate(param_names):
         axes[i].axhline(y=0, color='black', linestyle='-', linewidth=0.5)
         axes[i].set_xlabel('Observation', fontsize=10)
         axes[i].set_ylabel('DFBETAS', fontsize=10)
-        axes[i].set_title(f'{param}', fontsize=11, fontweight='bold')
-        axes[i].grid(True, alpha=0.3)
+        # axes[i].set_title(f'{param}', fontsize=11, fontweight='bold')  # Removed: redundant with LaTeX caption
+#         axes[i].grid(True, alpha=0.3)  # Removed: redundant with LaTeX caption
 
 # Remove extra subplots if any
 for i in range(len(param_names), len(axes)):
     fig.delaxes(axes[i])
 
-plt.suptitle('DFBETAS: Influential Observations by Variable',
-             fontsize=14, fontweight='bold', y=1.0)
+# plt.suptitle('DFBETAS: Influential Observations by Variable',
+#              fontsize=14, fontweight='bold', y=1.0)  # Removed: redundant with LaTeX caption
 output_file = os.path.join(IMAGES_DIR, 'ch16_dfbetas.png')
 plt.tight_layout()
 plt.savefig(output_file, dpi=300, bbox_inches='tight')

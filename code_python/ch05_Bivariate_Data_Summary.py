@@ -129,7 +129,7 @@ fig, ax = plt.subplots(figsize=(10, 6))
 ax.scatter(size, price, s=80, alpha=0.7, color='black', edgecolor='black')
 ax.set_xlabel('House size (in square feet)', fontsize=12)
 ax.set_ylabel('House sale price (in dollars)', fontsize=12)
-ax.set_title('Figure 5.1: House Price vs Size', fontsize=14, fontweight='bold')
+# ax.set_title('Figure 5.1: House Price vs Size', fontsize=14, fontweight='bold')  # Removed: redundant with LaTeX caption
 ax.grid(True, alpha=0.3)
 
 output_file = os.path.join(IMAGES_DIR, 'ch05_fig1_scatter_price_vs_size.png')
@@ -186,11 +186,11 @@ for idx, (ax, (x_data, y_data, title), corr) in enumerate(zip(axes, datasets, co
     ax.scatter(x_data, y_data, s=60, alpha=0.7, color='black', edgecolor='black')
     ax.set_xlabel('x', fontsize=11)
     ax.set_ylabel('y', fontsize=11)
-    ax.set_title(f'{title}: r = {corr:.2f}', fontsize=12, fontweight='bold')
-    ax.grid(True, alpha=0.3)
+    # ax.set_title(f'{title}: r = {corr:.2f}', fontsize=12, fontweight='bold')  # Removed: redundant with LaTeX caption
+#     ax.grid(True, alpha=0.3)  # Removed: redundant with LaTeX caption
 
-plt.suptitle('Figure 5.2: Different Correlation Patterns',
-             fontsize=14, fontweight='bold', y=0.995)
+# plt.suptitle('Figure 5.2: Different Correlation Patterns',
+#              fontsize=14, fontweight='bold', y=0.995)  # Removed: redundant with LaTeX caption
 output_file = os.path.join(IMAGES_DIR, 'ch05_fig2_correlation_patterns.png')
 plt.tight_layout()
 plt.savefig(output_file, dpi=300, bbox_inches='tight')
@@ -228,8 +228,8 @@ ax.scatter(size, price, s=80, alpha=0.7, color='black',
 ax.plot(size, model.fittedvalues, color='blue', linewidth=2, label='Fitted')
 ax.set_xlabel('House size (in square feet)', fontsize=12)
 ax.set_ylabel('House sale price (in dollars)', fontsize=12)
-ax.set_title('Figure 5.4: House Price Regression',
-             fontsize=14, fontweight='bold')
+# ax.set_title('Figure 5.4: House Price Regression',
+#              fontsize=14, fontweight='bold')  # Removed: redundant with LaTeX caption
 ax.legend()
 ax.grid(True, alpha=0.3)
 
@@ -284,8 +284,8 @@ axes[0].axhline(y=y_sim.mean(), color='red', linewidth=2, linestyle='--',
                 label=f'Mean of y = {y_sim.mean():.2f}')
 axes[0].set_xlabel('x', fontsize=12)
 axes[0].set_ylabel('y', fontsize=12)
-axes[0].set_title('Panel A: Actual Values and Mean', fontsize=12, fontweight='bold')
-axes[0].legend()
+# axes[0].set_title('Panel A: Actual Values and Mean', fontsize=12, fontweight='bold')  # Removed: redundant with LaTeX caption
+# axes[0].legend()  # Removed: redundant with LaTeX caption
 axes[0].grid(True, alpha=0.3)
 
 # Panel B: Fitted values vs mean
@@ -295,12 +295,12 @@ axes[1].axhline(y=y_sim.mean(), color='red', linewidth=2, linestyle='--',
                 label=f'Mean of y = {y_sim.mean():.2f}')
 axes[1].set_xlabel('x', fontsize=12)
 axes[1].set_ylabel('ŷ', fontsize=12)
-axes[1].set_title('Panel B: Fitted Values and Mean', fontsize=12, fontweight='bold')
-axes[1].legend()
+# axes[1].set_title('Panel B: Fitted Values and Mean', fontsize=12, fontweight='bold')  # Removed: redundant with LaTeX caption
+# axes[1].legend()  # Removed: redundant with LaTeX caption
 axes[1].grid(True, alpha=0.3)
 
-plt.suptitle('Figure 5.5: Model Fit Illustration',
-             fontsize=14, fontweight='bold', y=1.0)
+# plt.suptitle('Figure 5.5: Model Fit Illustration',
+#              fontsize=14, fontweight='bold', y=1.0)  # Removed: redundant with LaTeX caption
 output_file = os.path.join(IMAGES_DIR, 'ch05_fig5_model_fit_illustration.png')
 plt.tight_layout()
 plt.savefig(output_file, dpi=300, bbox_inches='tight')
@@ -401,8 +401,8 @@ ax.plot(size_sorted, price_smooth, color='green', linewidth=2.5,
 
 ax.set_xlabel('House size (in square feet)', fontsize=12)
 ax.set_ylabel('House sale price (in dollars)', fontsize=12)
-ax.set_title('Figure 5.6: Parametric vs Nonparametric Regression',
-             fontsize=14, fontweight='bold')
+# ax.set_title('Figure 5.6: Parametric vs Nonparametric Regression',
+#              fontsize=14, fontweight='bold')  # Removed: redundant with LaTeX caption
 ax.legend(fontsize=11)
 ax.grid(True, alpha=0.3)
 

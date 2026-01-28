@@ -77,8 +77,8 @@ ax.plot(data_gen['x'], model_population.fittedvalues,
         color='blue', linewidth=2, label='Population line E[y|x]')
 ax.set_xlabel('Regressor x', fontsize=12)
 ax.set_ylabel('Dependent variable y', fontsize=12)
-ax.set_title('Figure 6.2 Panel A: Population Line E[y|x] = 1 + 2x',
-             fontsize=14, fontweight='bold')
+# ax.set_title('Figure 6.2 Panel A: Population Line E[y|x] = 1 + 2x',
+#              fontsize=14, fontweight='bold')  # Removed: redundant with LaTeX caption
 ax.legend()
 ax.grid(True, alpha=0.3)
 
@@ -109,8 +109,8 @@ ax.plot(data_gen['x'], model_sample.fittedvalues,
         color='red', linewidth=2, label=f'Sample line ŷ = {model_sample.params[0]:.2f} + {model_sample.params[1]:.2f}x')
 ax.set_xlabel('Regressor x', fontsize=12)
 ax.set_ylabel('Dependent variable y', fontsize=12)
-ax.set_title('Figure 6.2 Panel B: Sample Regression Line',
-             fontsize=14, fontweight='bold')
+# ax.set_title('Figure 6.2 Panel B: Sample Regression Line',
+#              fontsize=14, fontweight='bold')  # Removed: redundant with LaTeX caption
 ax.legend()
 ax.grid(True, alpha=0.3)
 
@@ -186,12 +186,12 @@ for idx, (ax, df, model, title) in enumerate(zip(axes,
             label='Population: y = 1 + 2x', alpha=0.7)
     ax.set_xlabel('x', fontsize=11)
     ax.set_ylabel('y', fontsize=11)
-    ax.set_title(title, fontsize=12, fontweight='bold')
-    ax.legend(fontsize=9)
+    # ax.set_title(title, fontsize=12, fontweight='bold')  # Removed: redundant with LaTeX caption
+#     ax.legend(fontsize=9)  # Removed: redundant with LaTeX caption
     ax.grid(True, alpha=0.3)
 
-plt.suptitle('Three Different Samples from the Same DGP: y = 1 + 2x + u',
-             fontsize=14, fontweight='bold', y=1.02)
+# plt.suptitle('Three Different Samples from the Same DGP: y = 1 + 2x + u',
+#              fontsize=14, fontweight='bold', y=1.02)  # Removed: redundant with LaTeX caption
 output_file = os.path.join(IMAGES_DIR, 'ch06_three_samples_same_dgp.png')
 plt.tight_layout()
 plt.savefig(output_file, dpi=300, bbox_inches='tight')
@@ -235,8 +235,8 @@ try:
 
         ax.set_xlabel('Estimated slope coefficient β̂₁', fontsize=12)
         ax.set_ylabel('Density', fontsize=12)
-        ax.set_title('Sampling Distribution of OLS Slope Estimator',
-                     fontsize=14, fontweight='bold')
+        # ax.set_title('Sampling Distribution of OLS Slope Estimator',
+#                      fontsize=14, fontweight='bold')  # Removed: redundant with LaTeX caption
         ax.legend()
         ax.grid(True, alpha=0.3)
 
@@ -297,8 +297,8 @@ axes[0].plot(x_range, stats.norm.pdf(x_range, beta0_estimates.mean(), beta0_esti
 axes[0].axvline(x=1.0, color='green', linewidth=2, linestyle='--', label='True β₀ = 1.0')
 axes[0].set_xlabel('Estimated intercept β̂₀', fontsize=11)
 axes[0].set_ylabel('Density', fontsize=11)
-axes[0].set_title('Sampling Distribution of Intercept', fontsize=12, fontweight='bold')
-axes[0].legend()
+# axes[0].set_title('Sampling Distribution of Intercept', fontsize=12, fontweight='bold')  # Removed: redundant with LaTeX caption
+# axes[0].legend()  # Removed: redundant with LaTeX caption
 axes[0].grid(True, alpha=0.3)
 
 # Beta1 distribution
@@ -310,12 +310,12 @@ axes[1].plot(x_range, stats.norm.pdf(x_range, beta1_estimates.mean(), beta1_esti
 axes[1].axvline(x=2.0, color='green', linewidth=2, linestyle='--', label='True β₁ = 2.0')
 axes[1].set_xlabel('Estimated slope β̂₁', fontsize=11)
 axes[1].set_ylabel('Density', fontsize=11)
-axes[1].set_title('Sampling Distribution of Slope', fontsize=12, fontweight='bold')
-axes[1].legend()
+# axes[1].set_title('Sampling Distribution of Slope', fontsize=12, fontweight='bold')  # Removed: redundant with LaTeX caption
+# axes[1].legend()  # Removed: redundant with LaTeX caption
 axes[1].grid(True, alpha=0.3)
 
-plt.suptitle(f'Simulation of OLS Sampling Distributions ({n_simulations} replications)',
-             fontsize=14, fontweight='bold', y=1.0)
+# plt.suptitle(f'Simulation of OLS Sampling Distributions ({n_simulations} replications)  # Removed: redundant with LaTeX caption',
+#              fontsize=14, fontweight='bold', y=1.0)  # Removed: redundant with LaTeX caption
 output_file = os.path.join(IMAGES_DIR, 'ch06_simulation_ols_sampling_distributions.png')
 plt.tight_layout()
 plt.savefig(output_file, dpi=300, bbox_inches='tight')

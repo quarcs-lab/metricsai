@@ -116,8 +116,8 @@ fig = plt.figure(figsize=(12, 12))
 
 # Create pairplot using seaborn
 g = sns.pairplot(data_house[plot_vars], diag_kind='kde', plot_kws={'alpha': 0.6, 's': 50})
-g.fig.suptitle('Figure 10.1: Simple Scatterplot Matrix', fontsize=14,
-               fontweight='bold', y=1.00)
+# g.fig.suptitle('Figure 10.1: Simple Scatterplot Matrix', fontsize=14,
+#                fontweight='bold', y=1.00)  # Removed: redundant with LaTeX caption
 
 output_file = os.path.join(IMAGES_DIR, 'ch10_fig1_scatterplot_matrix.png')
 plt.tight_layout()
@@ -146,8 +146,8 @@ print(f"Table saved to: {os.path.join(TABLES_DIR, 'ch10_correlation_matrix.csv')
 fig, ax = plt.subplots(figsize=(10, 8))
 sns.heatmap(corr_matrix, annot=True, fmt='.3f', cmap='coolwarm', center=0,
             square=True, linewidths=1, cbar_kws={"shrink": 0.8})
-ax.set_title('Correlation Matrix Heatmap', fontsize=14, fontweight='bold')
-
+# ax.set_title('Correlation Matrix Heatmap', fontsize=14, fontweight='bold')  # Removed: redundant with LaTeX caption
+# 
 output_file = os.path.join(IMAGES_DIR, 'ch10_correlation_heatmap.png')
 plt.tight_layout()
 plt.savefig(output_file, dpi=300, bbox_inches='tight')
@@ -380,7 +380,7 @@ ax.plot([data_house['price'].min(), data_house['price'].max()],
         'r--', linewidth=2, label='Perfect prediction')
 ax.set_xlabel('Actual Price ($1000s)', fontsize=12)
 ax.set_ylabel('Predicted Price ($1000s)', fontsize=12)
-ax.set_title('Actual vs Predicted House Prices', fontsize=14, fontweight='bold')
+# ax.set_title('Actual vs Predicted House Prices', fontsize=14, fontweight='bold')  # Removed: redundant with LaTeX caption
 ax.legend()
 ax.grid(True, alpha=0.3)
 
@@ -396,7 +396,7 @@ ax.scatter(model_full.fittedvalues, model_full.resid, alpha=0.6, s=50, color='bl
 ax.axhline(y=0, color='red', linestyle='--', linewidth=2)
 ax.set_xlabel('Fitted values', fontsize=12)
 ax.set_ylabel('Residuals', fontsize=12)
-ax.set_title('Residual Plot: Multiple Regression', fontsize=14, fontweight='bold')
+# ax.set_title('Residual Plot: Multiple Regression', fontsize=14, fontweight='bold')  # Removed: redundant with LaTeX caption
 ax.grid(True, alpha=0.3)
 
 output_file = os.path.join(IMAGES_DIR, 'ch10_residual_plot.png')
@@ -421,8 +421,8 @@ ax.set_yticks(y_pos)
 ax.set_yticklabels(params_no_int.index)
 ax.axvline(x=0, color='red', linestyle='--', linewidth=1, alpha=0.5)
 ax.set_xlabel('Coefficient Value', fontsize=12)
-ax.set_title('Coefficient Estimates with 95% Confidence Intervals',
-             fontsize=14, fontweight='bold')
+# ax.set_title('Coefficient Estimates with 95% Confidence Intervals',
+#              fontsize=14, fontweight='bold')  # Removed: redundant with LaTeX caption
 ax.grid(True, alpha=0.3, axis='x')
 
 output_file = os.path.join(IMAGES_DIR, 'ch10_coefficient_plot.png')
