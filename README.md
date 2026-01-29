@@ -146,6 +146,112 @@ The book version provides a traditional textbook format that complements the int
 - Traditional textbook reference
 - Academic distribution
 
+## 📄 Exporting Notebooks to PDF
+
+Individual Jupyter notebooks can be exported to high-quality PDF files for printing, sharing, or offline reading. The project includes a streamlined workflow that preserves all content including markdown text, code, mathematical equations, tables, and figures.
+
+### Quick Start
+
+**Export a single notebook:**
+
+```bash
+# 1. Convert notebook to HTML
+jupyter nbconvert --to html notebooks_colab/ch05_Bivariate_Data_Summary.ipynb \
+    --output-dir notebooks_pdf_ready
+
+# 2. Inject print-optimized CSS
+python3 inject_print_css.py \
+    notebooks_pdf_ready/ch05_Bivariate_Data_Summary.html \
+    notebooks_pdf_ready/ch05_printable.html
+
+# 3. Open in browser and print to PDF (Cmd+P → Save as PDF)
+open notebooks_pdf_ready/ch05_printable.html
+```
+
+**Export all 16 notebooks at once:**
+
+```bash
+./export_notebooks_to_pdf.sh
+```
+
+This creates print-ready HTML files in `notebooks_pdf_ready/` folder.
+
+### Features
+
+- **Portrait orientation** - Standard 8.5" × 11" letter size
+- **Optimized table sizing** - Regression tables fit on page with readable 9-10px font
+- **Preserved formatting** - Mathematical equations, code highlighting, figures
+- **Compact spacing** - 0.3" margins maximize content area
+- **Text wrapping** - Wide tables wrap intelligently
+- **Professional appearance** - Publication-quality output
+
+### Workflow Details
+
+The PDF export system uses three key files:
+
+1. **`notebook_pdf_styles.css`** - Custom CSS for print optimization
+   - Portrait page layout (8.5" × 11")
+   - Font sizes: 10px for tables, 9px for regression output
+   - Narrow margins (0.3in) for maximum content
+   - Text wrapping and page break controls
+
+2. **`inject_print_css.py`** - Python script to inject CSS into HTML
+   - Reads notebook HTML export
+   - Injects custom print styles
+   - Creates print-ready HTML file
+
+3. **`export_notebooks_to_pdf.sh`** - Batch processing script
+   - Converts all notebooks to HTML
+   - Applies print CSS to each
+   - Creates organized output folder
+
+### Customization
+
+Adjust table sizes by editing `notebook_pdf_styles.css`:
+
+```css
+/* Make tables larger (currently 10px) */
+table {
+    font-size: 11px !important;
+}
+
+/* Make tables smaller */
+table {
+    font-size: 9px !important;
+}
+```
+
+Switch to landscape orientation:
+
+```css
+@page {
+    size: letter landscape;  /* 11" × 8.5" */
+    margin: 0.5in;
+}
+```
+
+### Why Not Direct PDF Export?
+
+Jupyter's `nbconvert --to pdf` requires LaTeX and can fail on:
+- SVG images (Colab badges)
+- Complex mathematical notation
+- Special characters
+
+The HTML → Print to PDF approach:
+- Works reliably on all notebooks
+- No LaTeX installation needed (Pandoc only)
+- Better control over formatting
+- Handles SVG and complex content
+- Universal browser support
+
+### Use Cases
+
+- **Student distribution** - Share notebooks without requiring Python/Colab
+- **Print for offline study** - Read and annotate on paper
+- **Course materials** - Include in syllabus or reading packs
+- **Archival** - Preserve executed output with all figures
+- **Professional reports** - Generate client-ready documentation
+
 ## 👥 Authors and Credits
 
 **Carlos Mendez** - Python implementation and educational notebook development
