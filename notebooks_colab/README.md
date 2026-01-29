@@ -30,6 +30,42 @@ This directory contains interactive Jupyter notebooks that combine **explanatory
 
 **Quality Status:** All 16 notebooks now execute cleanly without errors in Google Colab ✅
 
+## 📄 PDF Generation
+
+All notebooks can be automatically exported to professional-quality PDF files using the Playwright-based workflow. PDFs are publication-ready with optimized formatting for printing and distribution.
+
+**Current Status:**
+
+- ✅ ch00_Preface.pdf (0.82 MB)
+- ✅ ch01_Analysis_of_Economics_Data.pdf (1.00 MB)
+- ✅ ch02_Univariate_Data_Summary.pdf (1.65 MB)
+- ⏳ ch03-ch17 (ready to generate on demand)
+
+**Key Features:**
+
+- Professional justified text alignment (book-style typography)
+- Full-width chapter visual summaries (7 inches)
+- Optimized regression tables with 7.5pt font (no overflow)
+- Uniform 0.75-inch margins on all sides
+- Clickable hyperlinks preserved
+- Brand-consistent color scheme
+- Letter format (8.5" × 11") portrait orientation
+
+**Quick Commands:**
+
+```bash
+# Generate single chapter PDF
+cd notebooks_colab && jupyter nbconvert --to html ch05_*.ipynb && cd ..
+python3 inject_print_css.py notebooks_colab/ch05_*.html notebooks_colab/ch05_*_printable.html
+python3 generate_pdf_playwright.py ch05
+
+# Generate all chapter PDFs
+cd notebooks_colab && for nb in ch*.ipynb; do jupyter nbconvert --to html "$nb"; done && cd ..
+python3 generate_pdf_playwright.py --all
+```
+
+**Complete Documentation:** See [../log/20260129_PDF_GENERATION_WORKFLOW.md](../log/20260129_PDF_GENERATION_WORKFLOW.md) for comprehensive workflow, troubleshooting, and technical details.
+
 ## Available Notebooks
 
 ### ✅ Chapter 1: Analysis of Economics Data

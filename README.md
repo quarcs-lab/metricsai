@@ -146,118 +146,123 @@ The book version provides a traditional textbook format that complements the int
 - Traditional textbook reference
 - Academic distribution
 
-## 📄 Exporting Notebooks to PDF
+## 📄 Automated PDF Generation
 
-Individual Jupyter notebooks can be exported to high-quality PDF files for printing, sharing, or offline reading. The project includes a streamlined workflow that preserves all content including markdown text, code, mathematical equations, tables, and figures.
+Individual Jupyter notebooks can be automatically exported to professional-quality PDF files using Playwright. The system preserves all content including markdown text, code, mathematical equations, tables, and figures with precise formatting control.
 
 ### Quick Start
 
-**Export a single notebook:**
+**Generate a single chapter PDF:**
 
 ```bash
-# 1. Convert notebook to HTML
-jupyter nbconvert --to html notebooks_colab/ch05_Bivariate_Data_Summary.ipynb \
-    --output-dir notebooks_pdf_ready
+# Step 1: Convert notebook to HTML
+cd notebooks_colab && jupyter nbconvert --to html ch05_*.ipynb && cd ..
 
-# 2. Inject print-optimized CSS
-python3 inject_print_css.py \
-    notebooks_pdf_ready/ch05_Bivariate_Data_Summary.html \
-    notebooks_pdf_ready/ch05_printable.html
+# Step 2: Inject CSS and generate PDF
+python3 inject_print_css.py notebooks_colab/ch05_*.html notebooks_colab/ch05_*_printable.html && \
+python3 generate_pdf_playwright.py ch05
 
-# 3. Open in browser and print to PDF (Cmd+P → Save as PDF)
-open notebooks_pdf_ready/ch05_printable.html
+# Step 3: View result
+open notebooks_colab/ch05_*.pdf
 ```
 
-**Export all 16 notebooks at once:**
+**Generate all chapters at once:**
 
 ```bash
-./export_notebooks_to_pdf.sh
+# Convert all notebooks to HTML
+cd notebooks_colab && for nb in ch*.ipynb; do jupyter nbconvert --to html "$nb"; done && cd ..
+
+# Generate all PDFs with Playwright
+python3 generate_pdf_playwright.py --all
+
+# Verify output
+ls -lh notebooks_colab/*.pdf
 ```
 
-This creates print-ready HTML files in `notebooks_pdf_ready/` folder.
+### Current Status
 
-### Features
+- ✅ ch00_Preface.pdf (0.82 MB)
+- ✅ ch01_Analysis_of_Economics_Data.pdf (1.00 MB)
+- ✅ ch02_Univariate_Data_Summary.pdf (1.65 MB)
+- ⏳ ch03-ch17 (ready to generate)
 
+### Professional Formatting Features
+
+- **Justified text alignment** - Professional book-style typography
+- **Full-width visual summaries** - Chapter opening images span full page width (7 inches)
+- **Optimized regression tables** - 7.5pt font size prevents text overflow and wrapping
+- **Uniform margins** - 0.75 inches on all sides
+- **No headers/footers** - Clean pages with maximum content space
+- **Clickable hyperlinks** - URLs remain interactive without printing as text
 - **Brand-consistent design** - Color hierarchy using project palette (Cyan, Purple, Pink, Navy)
-- **Modern typography** - Inter font for body text, JetBrains Mono for code
-- **Portrait orientation** - Standard 8.5" × 11" letter size
-- **Optimized table sizing** - Regression tables fit on page with readable fonts
-- **Enhanced visual hierarchy** - Color-coded headings with decorative borders
-- **Perfect spacing** - 20-22px padding from code block borders
-- **Styled tables** - Light headers with alternating row colors for readability
-- **Visual summary images** - Cyan borders with subtle shadows
-- **Preserved formatting** - Mathematical equations, code highlighting, figures
-- **Professional appearance** - Publication-quality, brand-consistent output
+- **Modern typography** - Inter font for body text (11pt), JetBrains Mono for code (9pt input, 7.5pt output)
+- **Professional appearance** - Publication-quality, print-ready output
 
-### Workflow Details
+### System Components
 
-The PDF export system uses three key files:
+1. **`generate_pdf_playwright.py`** (248 lines) - Primary PDF generator using Playwright
+   - Precise control over margins, fonts, and page layout
+   - Letter format (8.5" × 11") portrait orientation
+   - Handles font loading and CSS rendering
 
-1. **`notebook_pdf_styles.css`** - Enhanced CSS for beautiful print output
-   - **Brand color hierarchy**: ElectricCyan (#008CB7) for chapters, SynapsePurple (#7A209F) for sections, DataPink (#C21E72) for subsections
-   - **Modern typography**: Inter (body text), JetBrains Mono (code)
-   - **Perfect spacing**: 20px left padding for input cells, 22px for output cells
-   - **Styled tables**: Light blue headers, alternating row colors, compact regression output
-   - **Visual enhancements**: Bordered code blocks, rounded corners, subtle shadows
-   - Portrait page layout (8.5" × 11") with 0.5" margins
-   - Text wrapping and intelligent page break controls
+2. **`inject_print_css.py`** - CSS injection tool
+   - Injects custom styles into HTML files
+   - Creates "_printable.html" versions
 
-2. **`inject_print_css.py`** - Python script to inject CSS into HTML
-   - Reads notebook HTML export
-   - Injects custom print styles
-   - Creates print-ready HTML file
+3. **`notebook_pdf_styles.css`** (426 lines) - Master stylesheet
+   - All typography, colors, spacing, and layout rules
+   - Justified text with `@media print` rules
+   - Optimized font sizes for output blocks
 
-3. **`export_notebooks_to_pdf.sh`** - Batch processing script
-   - Converts all notebooks to HTML
-   - Applies print CSS to each
-   - Creates organized output folder
+4. **Supporting scripts** (optional):
+   - `verify_dollar_signs.py` - Verification tool for currency escaping
+   - `fix_currency_dollars.py` - Automated currency dollar sign escaping (already applied)
 
-### Customization
+### Prerequisites
 
-Adjust table sizes by editing `notebook_pdf_styles.css`:
+**Installation:**
 
-```css
-/* Make tables larger (currently 10px) */
-table {
-    font-size: 11px !important;
-}
+```bash
+# Install Playwright
+pip install playwright
 
-/* Make tables smaller */
-table {
-    font-size: 9px !important;
-}
+# Install Playwright browsers
+playwright install chromium
 ```
 
-Switch to landscape orientation:
+### Complete Documentation
 
-```css
-@page {
-    size: letter landscape;  /* 11" × 8.5" */
-    margin: 0.5in;
-}
-```
+For comprehensive workflow documentation, troubleshooting, and technical details, see:
 
-### Why Not Direct PDF Export?
+**[log/20260129_PDF_GENERATION_WORKFLOW.md](log/20260129_PDF_GENERATION_WORKFLOW.md)**
 
-Jupyter's `nbconvert --to pdf` requires LaTeX and can fail on:
-- SVG images (Colab badges)
-- Complex mathematical notation
-- Special characters
+This 600+ line document includes:
 
-The HTML → Print to PDF approach:
-- Works reliably on all notebooks
-- No LaTeX installation needed (Pandoc only)
-- Better control over formatting
-- Handles SVG and complex content
-- Universal browser support
+- Step-by-step workflow for single and batch processing
+- Complete formatting specifications
+- Troubleshooting guide with 7 common issues
+- Technical details with exact CSS line numbers
+- File structure and dependencies
+- Future update instructions
+
+### Why Playwright?
+
+The automated Playwright approach provides:
+
+- **Precise control** - Exact margins, no unwanted headers/footers
+- **Consistent output** - Reproducible results across all chapters
+- **Better CSS rendering** - Full support for modern CSS features
+- **Font loading** - Proper Google Fonts integration
+- **Automation** - Process all 18 chapters with one command
+- **Production ready** - Professional formatting suitable for distribution
 
 ### Use Cases
 
 - **Student distribution** - Share notebooks without requiring Python/Colab
-- **Print for offline study** - Read and annotate on paper
+- **Print for offline study** - Professional book-style formatting on paper
 - **Course materials** - Include in syllabus or reading packs
 - **Archival** - Preserve executed output with all figures
-- **Professional reports** - Generate client-ready documentation
+- **Professional reports** - Publication-quality documentation
 
 ## 👥 Authors and Credits
 

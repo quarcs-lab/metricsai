@@ -83,179 +83,231 @@ The `./notes/` directory contains study notes for 17 chapters. A standard templa
 
 ---
 
-## Exporting Notebooks to PDF
+## Generating PDFs from Notebooks
 
 ### Overview
 
-The project includes a complete workflow for exporting Jupyter notebooks to high-quality PDF files. This is useful for:
+The project uses an automated Playwright-based workflow to generate professional-quality PDFs from Jupyter notebooks. This workflow produces publication-ready PDFs with precise formatting control.
+
+**Use cases:**
+
 - Distributing to students without Python/Colab access
-- Printing for offline study
-- Creating archival versions with all outputs
-- Generating professional reports
+- Printing for offline study with book-style typography
+- Creating archival versions with all outputs preserved
+- Generating professional reports for distribution
 
-### Export Method: HTML → Browser Print → PDF
+### Automated PDF Generation Workflow
 
-**Why this approach?**
-- Direct `jupyter nbconvert --to pdf` fails on notebooks with SVG images (Colab badges)
-- LaTeX-based PDF export has complex dependencies and can fail
-- HTML → Print gives reliable, high-quality results
-- Full control over formatting via CSS
+**Why Playwright?**
+
+- **Precise control:** Exact margins, no unwanted headers/footers
+- **Consistent output:** Reproducible results across all chapters
+- **Better CSS rendering:** Full support for modern CSS features (justified text, full-width images)
+- **Font loading:** Proper Google Fonts integration (Inter, JetBrains Mono)
+- **Automation:** Process all 18 chapters with one command
+- **Production ready:** Professional formatting suitable for textbook distribution
 
 ### Quick Reference
 
-**Single notebook:**
+**Generate a single chapter:**
 ```bash
-jupyter nbconvert --to html notebooks_colab/NOTEBOOK.ipynb --output-dir notebooks_pdf_ready
-python3 inject_print_css.py notebooks_pdf_ready/NOTEBOOK.html notebooks_pdf_ready/NOTEBOOK_printable.html
-open notebooks_pdf_ready/NOTEBOOK_printable.html
-# Then: Cmd+P → Save as PDF
+# Step 1: Convert notebook to HTML
+cd notebooks_colab && jupyter nbconvert --to html ch05_*.ipynb && cd ..
+
+# Step 2: Inject CSS and generate PDF
+python3 inject_print_css.py notebooks_colab/ch05_*.html notebooks_colab/ch05_*_printable.html
+python3 generate_pdf_playwright.py ch05
+
+# Step 3: View result
+open notebooks_colab/ch05_*.pdf
 ```
 
-**All notebooks:**
+**Generate all chapters:**
 ```bash
-./export_notebooks_to_pdf.sh
+# Convert all notebooks to HTML
+cd notebooks_colab && for nb in ch*.ipynb; do jupyter nbconvert --to html "$nb"; done && cd ..
+
+# Generate all PDFs with Playwright
+python3 generate_pdf_playwright.py --all
+
+# Verify output
+ls -lh notebooks_colab/*.pdf
 ```
 
-### Key Files
+### Current Status (as of 2026-01-29)
 
-1. **`notebook_pdf_styles.css`** - Enhanced print optimization CSS with brand identity
-   - **Brand color hierarchy:** ElectricCyan (h1), SynapsePurple (h2), DataPink (h3), DeepNavy (h4)
-   - **Modern typography:** Inter (body text), JetBrains Mono (code)
-   - **Perfect spacing:** 20px padding for input cells, 22px for output cells
-   - **Enhanced visuals:** Visual summary images with borders/shadows, styled tables with alternating rows
-   - **Print optimized:** Portrait orientation (8.5" × 11"), 0.4-0.5" margins, font sizes 9-11pt
-   - **Professional design:** Color-coded headings, bordered code blocks, enhanced table headers
+- ✅ ch00_Preface.pdf (0.82 MB)
+- ✅ ch01_Analysis_of_Economics_Data.pdf (1.00 MB)
+- ✅ ch02_Univariate_Data_Summary.pdf (1.65 MB)
+- ⏳ ch03-ch17 (ready to generate on demand)
 
-2. **`inject_print_css.py`** - CSS injection script
-   - Reads HTML export
-   - Injects custom styles
-   - Creates print-ready file
+### Professional Formatting Features
 
-3. **`export_notebooks_to_pdf.sh`** - Batch processor
-   - Converts all notebooks to HTML
-   - Applies CSS to each
-   - Organizes in `notebooks_pdf_ready/` folder
+**Typography:**
 
-### CSS Customization
+- Justified text alignment (book-style, professional appearance)
+- Body text: 11pt Inter font
+- Input code: 9pt JetBrains Mono (readable for code cells)
+- Output code/tables: 7.5pt JetBrains Mono (prevents regression table overflow)
 
-**Brand color hierarchy (heading styles):**
+**Layout:**
+
+- Page format: Letter (8.5" × 11") portrait orientation
+- Uniform margins: 0.75 inches on all sides
+- No headers/footers: Clean pages with maximum content space
+- Full-width visual summaries: Chapter opening images span 7 inches (full page width within margins)
+
+**Visual Design:**
+
+- Brand color hierarchy: ElectricCyan (#008CB7), SynapsePurple (#7A209F), DataPink (#C21E72)
+- Visual summary images: Cyan borders with soft drop shadows
+- Code blocks: Light blue-gray background with cyan left border
+- Tables: Light blue headers with alternating row colors
+- Blockquotes: Purple left border with light purple background
+
+**Technical Quality:**
+
+- Clickable hyperlinks preserved (URLs don't print as text)
+- Regression tables fit without wrapping (7.5pt font prevents overflow)
+- Mathematical equations render correctly (LaTeX)
+- All figures and plots preserved at high resolution
+
+### Key System Files
+
+1. **`generate_pdf_playwright.py`** (248 lines) - Primary PDF generator
+   - Uses Playwright's Chromium for reliable PDF rendering
+   - Configures exact page settings (format, margins, headers/footers)
+   - Handles font loading and waits for complete rendering
+   - Supports single chapter (`ch05`) or batch mode (`--all`)
+
+2. **`inject_print_css.py`** - CSS injection tool
+   - Reads HTML files from `jupyter nbconvert`
+   - Injects custom print styles from `notebook_pdf_styles.css`
+   - Creates "_printable.html" versions ready for PDF generation
+
+3. **`notebook_pdf_styles.css`** (426 lines) - Master stylesheet
+   - All typography, colors, spacing, and layout rules
+   - Justified text via `@media print` rules with `!important` flags
+   - Font sizes: 11pt body, 9pt input code, 7.5pt output/tables
+   - Full-width visual summaries: `width: 100% !important;` overrides inline HTML
+   - Uniform 0.75in margins via `@page` rule
+
+4. **Supporting scripts** (optional):
+   - `verify_dollar_signs.py` - Verification tool for currency escaping
+   - `fix_currency_dollars.py` - Automated currency dollar sign escaping (already applied to all notebooks)
+
+### Prerequisites
+
+**Required software:**
+
+```bash
+# Install Playwright (Python package)
+pip install playwright
+
+# Install Playwright browsers
+playwright install chromium
+
+# Verify installation
+python3 -c "from playwright.sync_api import sync_playwright; print('Playwright OK')"
+```
+
+**Already installed:**
+
+- Python 3.x
+- Jupyter/JupyterLab (for `nbconvert`)
+
+### Critical CSS Settings
+
+**Justified text alignment** (lines 411-425 in `notebook_pdf_styles.css`):
 ```css
-/* H1: Chapter Title - ElectricCyan (#008CB7) with bottom border */
-h1 {
-    color: #008CB7;
-    border-bottom: 3px solid #008CB7;
-}
-
-/* H2: Section - SynapsePurple (#7A209F) with left border */
-h2 {
-    color: #7A209F;
-    border-left: 4px solid #7A209F;
-    padding-left: 12pt;
-}
-
-/* H3: Subsection - DataPink (#C21E72) */
-h3 {
-    color: #C21E72;
+@media print {
+    p { text-align: justify !important; }
+    .text_cell_render { text-align: justify !important; }
+    blockquote { text-align: justify !important; }
+    li { text-align: justify !important; }
 }
 ```
 
-**Perfect spacing for code cells:**
+**Full-width visual summaries** (line 208):
 ```css
-/* Input cells: 20px left padding */
-.input_area {
-    background-color: #f7fafc !important;
-    border-left: 3px solid #008CB7 !important;
-    padding: 10px 18px 10px 20px !important; /* top right bottom left */
-}
-
-/* Output cells: 22px left padding */
-.output pre,
-.output_area pre,
-.output_subarea pre {
-    padding: 10px 18px 10px 22px !important;
+img[alt*="Visual Summary"] {
+    width: 100% !important;  /* Override inline HTML width attributes */
 }
 ```
 
-**Enhanced table styling:**
+**Optimized output font sizes** (lines 100-101, 109-110, 188):
 ```css
-/* Table headers with brand colors */
-table thead {
-    background-color: #f7fafc;
-    border-bottom: 2px solid #008CB7;
+pre {
+    font-size: 7.5pt !important;  /* Reduced from 9pt to prevent table overflow */
+    line-height: 1.35 !important;
 }
 
-/* Alternating row colors for readability */
-table tbody tr:nth-child(even) {
-    background-color: #f7fafc;
+.output_text, .output_html {
+    font-size: 7.5pt !important;  /* Reduced from 10px for compact tables */
+    line-height: 1.3 !important;
 }
 
-/* Regression tables: compact 8pt font */
 .dataframe, .simpletable {
-    font-size: 8pt !important;
+    font-size: 7.5pt !important;  /* Regression tables fit without wrapping */
 }
 ```
 
-**Page orientation:**
+**Page margins** (line 330 in CSS and lines 62-67 in Python script):
 ```css
-/* Current: Portrait with narrow margins */
 @page {
     size: letter portrait;
-    margin: 0.5in 0.4in;
-}
-
-/* Alternative: Landscape (for very wide tables) */
-@page {
-    size: letter landscape;
-    margin: 0.5in;
+    margin: 0.75in;  /* Uniform margins on all sides */
 }
 ```
-
-### Formatting Guidelines
-
-**DO:**
-- Use brand color hierarchy for headings (ElectricCyan, SynapsePurple, DataPink, DeepNavy)
-- Maintain perfect spacing: 20px left padding for input cells, 22px for output cells
-- Keep tables at 9-10pt for readability (8pt for regression output)
-- Use portrait orientation (standard documents)
-- Enable text wrapping for wide content
-- Test print preview before batch export
-- Include visual summary images with borders and shadows
-- Use modern typography (Inter for body, JetBrains Mono for code)
-
-**DON'T:**
-- Make fonts too small (< 8pt unreadable)
-- Use very wide margins (wastes space)
-- Delete the CSS/script files (needed for future exports)
-- Modify source notebooks for PDF (export as-is)
-- Use dark backgrounds (wastes ink)
-- Remove brand color styling (maintains visual identity)
 
 ### Troubleshooting
 
-**Tables too wide:**
-- Reduce font size in CSS (try 8-9px)
-- Switch to landscape orientation
-- Adjust margins to 0.2in
+**Issue: Regression tables still wrap to multiple lines**
 
-**Tables too small:**
-- Increase font size in CSS (try 11-12px)
-- Verify in print preview before saving
+- **Cause:** Output font size too large
+- **Fix:** Verify `pre`, `.output_text`, and `.simpletable` are set to 7.5pt in CSS
 
-**Missing dependencies:**
-```bash
-# Install Jupyter nbconvert
-pip install nbconvert
+**Issue: Visual summary images not full width**
 
-# Install Pandoc (required for HTML conversion)
-brew install pandoc
-```
+- **Cause:** Missing CSS override or no `!important` flag
+- **Fix:** Verify line 208 in CSS has `width: 100% !important;`
 
-### Workflow Integration
+**Issue: Text not justified**
 
-This export method is now the standard for:
-- Creating distribution copies of notebooks
-- Generating course materials
-- Archiving executed notebooks
-- Producing professional reports
+- **Cause:** CSS rules not inside `@media print` section
+- **Fix:** Verify lines 411-425 have justified text rules with `!important` flags
 
-The files (`notebook_pdf_styles.css`, `inject_print_css.py`, `export_notebooks_to_pdf.sh`) are maintained in the repository root for easy access.
+**Issue: Headers/footers visible in PDF**
+
+- **Cause:** Outdated `generate_pdf_playwright.py`
+- **Fix:** Verify line 68 has `display_header_footer=False`
+
+**Issue: Playwright not installed**
+
+- **Fix:** Run `pip install playwright && playwright install chromium`
+
+### Complete Documentation
+
+For comprehensive workflow details, see:
+
+**[log/20260129_PDF_GENERATION_WORKFLOW.md](log/20260129_PDF_GENERATION_WORKFLOW.md)**
+
+This 600+ line document includes:
+
+- Step-by-step workflow for single and batch processing
+- Complete formatting specifications with line numbers
+- Troubleshooting guide with 7 common issues and solutions
+- Technical details (page setup, CSS critical sections, file structure)
+- Dependencies and verification commands
+- Future update instructions
+
+### Workflow Summary
+
+**When you need to regenerate PDFs after editing notebooks:**
+
+1. **Save edited notebooks** in Jupyter/Colab
+2. **Convert to HTML:** `cd notebooks_colab && jupyter nbconvert --to html ch##_*.ipynb && cd ..`
+3. **Inject CSS and generate PDF:** `python3 inject_print_css.py notebooks_colab/ch##_*.html notebooks_colab/ch##_*_printable.html && python3 generate_pdf_playwright.py ch##`
+4. **Verify results:** `open notebooks_colab/ch##_*.pdf`
+
+**All formatting features are preserved automatically** - no manual adjustments needed!
