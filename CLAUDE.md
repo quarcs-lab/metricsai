@@ -118,12 +118,13 @@ open notebooks_pdf_ready/NOTEBOOK_printable.html
 
 ### Key Files
 
-1. **`notebook_pdf_styles.css`** - Print optimization CSS
-   - Portrait orientation (8.5" × 11")
-   - Font sizes: 10px tables, 9px regression output
-   - 0.3" margins
-   - Text wrapping enabled
-   - Page break controls
+1. **`notebook_pdf_styles.css`** - Enhanced print optimization CSS with brand identity
+   - **Brand color hierarchy:** ElectricCyan (h1), SynapsePurple (h2), DataPink (h3), DeepNavy (h4)
+   - **Modern typography:** Inter (body text), JetBrains Mono (code)
+   - **Perfect spacing:** 20px padding for input cells, 22px for output cells
+   - **Enhanced visuals:** Visual summary images with borders/shadows, styled tables with alternating rows
+   - **Print optimized:** Portrait orientation (8.5" × 11"), 0.4-0.5" margins, font sizes 9-11pt
+   - **Professional design:** Color-coded headings, bordered code blocks, enhanced table headers
 
 2. **`inject_print_css.py`** - CSS injection script
    - Reads HTML export
@@ -137,23 +138,69 @@ open notebooks_pdf_ready/NOTEBOOK_printable.html
 
 ### CSS Customization
 
-**Table sizing:**
+**Brand color hierarchy (heading styles):**
 ```css
-/* Current: 10px for tables, 9px for regression */
-table {
-    font-size: 10px !important;
+/* H1: Chapter Title - ElectricCyan (#008CB7) with bottom border */
+h1 {
+    color: #008CB7;
+    border-bottom: 3px solid #008CB7;
 }
+
+/* H2: Section - SynapsePurple (#7A209F) with left border */
+h2 {
+    color: #7A209F;
+    border-left: 4px solid #7A209F;
+    padding-left: 12pt;
+}
+
+/* H3: Subsection - DataPink (#C21E72) */
+h3 {
+    color: #C21E72;
+}
+```
+
+**Perfect spacing for code cells:**
+```css
+/* Input cells: 20px left padding */
+.input_area {
+    background-color: #f7fafc !important;
+    border-left: 3px solid #008CB7 !important;
+    padding: 10px 18px 10px 20px !important; /* top right bottom left */
+}
+
+/* Output cells: 22px left padding */
+.output pre,
+.output_area pre,
+.output_subarea pre {
+    padding: 10px 18px 10px 22px !important;
+}
+```
+
+**Enhanced table styling:**
+```css
+/* Table headers with brand colors */
+table thead {
+    background-color: #f7fafc;
+    border-bottom: 2px solid #008CB7;
+}
+
+/* Alternating row colors for readability */
+table tbody tr:nth-child(even) {
+    background-color: #f7fafc;
+}
+
+/* Regression tables: compact 8pt font */
 .dataframe, .simpletable {
-    font-size: 9px !important;
+    font-size: 8pt !important;
 }
 ```
 
 **Page orientation:**
 ```css
-/* Current: Portrait */
+/* Current: Portrait with narrow margins */
 @page {
     size: letter portrait;
-    margin: 0.3in;
+    margin: 0.5in 0.4in;
 }
 
 /* Alternative: Landscape (for very wide tables) */
@@ -166,17 +213,22 @@ table {
 ### Formatting Guidelines
 
 **DO:**
-- Keep tables at 9-10px for readability
+- Use brand color hierarchy for headings (ElectricCyan, SynapsePurple, DataPink, DeepNavy)
+- Maintain perfect spacing: 20px left padding for input cells, 22px for output cells
+- Keep tables at 9-10pt for readability (8pt for regression output)
 - Use portrait orientation (standard documents)
-- Keep margins narrow (0.3in) to maximize content
 - Enable text wrapping for wide content
 - Test print preview before batch export
+- Include visual summary images with borders and shadows
+- Use modern typography (Inter for body, JetBrains Mono for code)
 
 **DON'T:**
-- Make fonts too small (< 8px unreadable)
+- Make fonts too small (< 8pt unreadable)
 - Use very wide margins (wastes space)
 - Delete the CSS/script files (needed for future exports)
 - Modify source notebooks for PDF (export as-is)
+- Use dark backgrounds (wastes ink)
+- Remove brand color styling (maintains visual identity)
 
 ### Troubleshooting
 

@@ -178,22 +178,29 @@ This creates print-ready HTML files in `notebooks_pdf_ready/` folder.
 
 ### Features
 
+- **Brand-consistent design** - Color hierarchy using project palette (Cyan, Purple, Pink, Navy)
+- **Modern typography** - Inter font for body text, JetBrains Mono for code
 - **Portrait orientation** - Standard 8.5" × 11" letter size
-- **Optimized table sizing** - Regression tables fit on page with readable 9-10px font
+- **Optimized table sizing** - Regression tables fit on page with readable fonts
+- **Enhanced visual hierarchy** - Color-coded headings with decorative borders
+- **Perfect spacing** - 20-22px padding from code block borders
+- **Styled tables** - Light headers with alternating row colors for readability
+- **Visual summary images** - Cyan borders with subtle shadows
 - **Preserved formatting** - Mathematical equations, code highlighting, figures
-- **Compact spacing** - 0.3" margins maximize content area
-- **Text wrapping** - Wide tables wrap intelligently
-- **Professional appearance** - Publication-quality output
+- **Professional appearance** - Publication-quality, brand-consistent output
 
 ### Workflow Details
 
 The PDF export system uses three key files:
 
-1. **`notebook_pdf_styles.css`** - Custom CSS for print optimization
-   - Portrait page layout (8.5" × 11")
-   - Font sizes: 10px for tables, 9px for regression output
-   - Narrow margins (0.3in) for maximum content
-   - Text wrapping and page break controls
+1. **`notebook_pdf_styles.css`** - Enhanced CSS for beautiful print output
+   - **Brand color hierarchy**: ElectricCyan (#008CB7) for chapters, SynapsePurple (#7A209F) for sections, DataPink (#C21E72) for subsections
+   - **Modern typography**: Inter (body text), JetBrains Mono (code)
+   - **Perfect spacing**: 20px left padding for input cells, 22px for output cells
+   - **Styled tables**: Light blue headers, alternating row colors, compact regression output
+   - **Visual enhancements**: Bordered code blocks, rounded corners, subtle shadows
+   - Portrait page layout (8.5" × 11") with 0.5" margins
+   - Text wrapping and intelligent page break controls
 
 2. **`inject_print_css.py`** - Python script to inject CSS into HTML
    - Reads notebook HTML export
