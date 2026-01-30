@@ -15,6 +15,8 @@ By the end of this chapter, you will be able to:
 
 ---
 
+We've spent most of this textbook learning regression with cross-section data—one observation per individual at a single point in time. But what if you have repeated observations on the same individuals over time? What if your data violates the independence assumption because observations are grouped together? And most importantly: how do we move beyond correlation to establish causation? This final chapter tackles these advanced topics. We'll learn panel data methods that control for unobserved individual characteristics, instrumental variables that address endogeneity, and modern causal inference techniques—difference-in-differences, regression discontinuity, matching—that economists use to answer "what if" questions. This chapter bridges econometrics and the broader world of program evaluation and policy analysis.
+
 ## 17.1 Cross-section Data
 
 - If independent errors use heteroskedastic-robust standard errors.
@@ -127,11 +129,13 @@ Within variance: s-sub-W squared equals one over n times T minus 1, times the do
 **In this section:**
 - 17.4.1 IV estimator and interpretation
 
-- Problem: in model y equals beta-one plus beta-two times x plus u, we have the expected value of u given x not equal to 0
-- then x is endogenous and OLS is inconsistent.
-- Solution: assume there exists an instrument z that
-- does not belong in the model for y (exclusion restriction)
-- is correlated with x.
+We introduced instrumental variables in Chapter 16 as a solution to endogeneity. Let's formalize the method here.
+
+**The problem**: In model y equals beta-one plus beta-two times x plus u, we have the expected value of u given x not equal to 0. Then x is endogenous and OLS is inconsistent.
+
+**The solution**: Assume there exists an instrument z that satisfies:
+1. **Exclusion restriction**: z does not belong in the model for y (affects y only through x)
+2. **Relevance**: z is correlated with x
 
 1. OLS consistent
 ![](https://cdn.mathpix.com/cropped/02e4f915-8a26-4777-8299-892404f92454-10.jpg?height=99&width=163&top_left_y=582&top_left_x=250)
@@ -160,6 +164,9 @@ b-sub-IV equals the sum over i of the quantity z-sub-i minus z-bar times the qua
 
 > **Key Concept**: Instrumental variables (IV) provide consistent estimates when a regressor is endogenous (correlated with the error). A valid instrument must be (1) correlated with the endogenous regressor and (2) uncorrelated with the error (exclusion restriction). The IV estimator can be interpreted as measuring the causal effect of x on y.
 
+**Quick Check**: You're estimating returns to education using wages on years of schooling. You worry schooling is endogenous because ability affects both wages and schooling. Someone suggests using "month of birth" as an instrument (some studies find children born earlier in the year get slightly more schooling). Is this a valid instrument? (Pause and think.) Answer: Check both requirements. (1) Relevance: Is month of birth correlated with schooling? Maybe—some evidence suggests yes, but the correlation is weak. (2) Exclusion restriction: Does month of birth affect wages only through schooling, not directly? This is questionable—maybe birth season affects health, which affects wages. Even if valid, a weak instrument (low correlation with schooling) gives imprecise and biased IV estimates. This illustrates why finding good instruments is hard.
+
+Instrumental variables are powerful, but finding a valid instrument is often impossible. What if there's no variable that affects treatment but not outcomes? This is where modern causal inference methods come in. Over the past 30 years, economists have developed a toolkit of techniques—randomized experiments, difference-in-differences, regression discontinuity, matching—that let us estimate causal effects under different assumptions. Each method exploits a different source of variation to approximate a randomized experiment. Let's survey this toolkit.
 
 ## 17.5 Causal Inference: An Overview
 
@@ -202,6 +209,8 @@ ATE equals the expected value of gamma-sub-i, which equals the expected value of
 ATET equals the expected value of gamma-sub-i given D-sub-i equals 1, which equals the expected value of the quantity Y-sub-1-i minus Y-sub-0-i, given D-sub-i equals 1.
 
 > **Key Concept**: The potential outcomes framework formalizes causal inference by defining treatment effects as the difference between potential outcomes under treatment and control. Since we only observe one outcome per individual, we focus on average treatment effects (ATE) or average treatment effects on the treated (ATET).
+
+> **Why This Matters**: Causal inference is the holy grail of applied economics. Knowing that education and earnings are correlated isn't enough—we want to know if forcing someone to get more education would increase their earnings. Does job training actually help unemployed workers find jobs? Do minimum wage hikes reduce employment? Do anti-poverty programs lift families out of poverty? The potential outcomes framework gives us the language to ask these questions precisely. And methods like RCTs, DiD, RDD, and IV give us tools to answer them—even without running experiments. This is why modern economics has shifted from "what's correlated with what?" to "what causes what?" The techniques in this section underpin nearly every major policy evaluation study today.
 
 ### 17.5.2 Randomized Control Trials and Difference-in-Differences
 
@@ -285,6 +294,7 @@ y-sub-i equals beta-one plus gamma times d-sub-i plus beta-two times s-sub-i plu
 
 > **Key Concept**: Inverse probability weighting (IPW) and matching methods estimate treatment effects by comparing treated and untreated individuals with similar characteristics. The propensity score—the probability of treatment given covariates—is key to both approaches.
 
+So far we've focused on continuous outcomes like earnings or GDP. But many economic outcomes are binary—did you find a job? Did you graduate? Did the firm go bankrupt? Or nonnegative—how many children do you have? How much did you spend on health care? For these outcomes, linear regression isn't ideal. We need models tailored to the structure of the data: logit and probit for binary outcomes, exponential models for nonnegative data.
 
 ## 17.6 Nonlinear Regression Models
 

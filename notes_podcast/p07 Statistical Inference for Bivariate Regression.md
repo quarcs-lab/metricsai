@@ -17,6 +17,8 @@ By the end of this chapter, you will be able to:
 
 ---
 
+In Chapter 5, you estimated that each extra square foot adds 73.77 dollars to house price. But here's the critical question: is this number real, or could it just be random noise? If you took a different sample of houses, would you get a similar answer, or something completely different? This chapter gives you the tools to answer these questions. You'll learn how to measure the uncertainty in your estimates, test whether relationships are genuine, and make confident statements about population parameters based on sample data. This is statistical inference—the heart of econometrics.
+
 ## 7.1 Example: House Price and Size
 
 - Key regression output for statistical inference with n equals 29:
@@ -51,12 +53,14 @@ Looking at the regression table: Size has Coefficient 73.77, Standard Error 11.1
 
 > **Key Concept**: Regression output provides all information needed for statistical inference. The coefficient b-two equals 73.77 estimates the population slope beta-two. The standard error se of b-two equals 11.17 measures precision. The t-statistic equals 6.60 tests whether size affects price. The p-value 0.000 provides strong evidence that beta-two differs from zero. The 95 percent confidence interval from 50.84 to 96.70 gives a range of plausible values for beta-two.
 
+The regression table shows you five key numbers: coefficient, standard error, t-statistic, p-value, and confidence interval. How do these pieces fit together? The answer lies in understanding the t-statistic—the workhorse of statistical inference in regression. Once you understand the t-statistic, everything else (confidence intervals, hypothesis tests, p-values) follows logically from it.
+
 ## 7.2 The t Statistic
 
 - The statistical inference problem
-- Sample: y-hat equals b-one plus b-two times x where b-one and b-two are least squares estimates
+- Sample: y-hat equals b-one plus b-two times x where b-one and b-two are least squares estimates (from Chapter 5)
 - Population: the expected value of y given x equals beta-one plus beta-two times x, and y equals beta-one plus beta-two times x, plus u.
-- Estimators: b-one and b-two are estimators of beta-one and beta-two.
+- Estimators: b-one and b-two are estimators of beta-one and beta-two (see Chapter 6 for properties).
 - Goal
 - inference on the slope parameter beta-two.
 - This is based on a T with n minus 2 degrees of freedom distributed statistic
@@ -67,17 +71,33 @@ T equals the quantity estimate minus parameter, divided by standard error, which
 
 ### Why use the T with n minus 2 degrees of freedom Distribution?
 
-- Make assumptions 1-4 given in the next slide.
-- then the variance of b-two equals sigma-u-squared divided by the sum from i equals 1 to n of the quantity x-sub-i minus x-bar, all squared.
-- But we don't know sigma-u-squared
-- we replace it with the estimate s-e-squared equals 1 over n minus 2, times the sum from i equals 1 to n of the quantity y-sub-i minus y-hat-sub-i, all squared.
-- This leads to noise in the standard error of b-two squared equals s-e-squared divided by the sum from i equals 1 to n of the quantity x-sub-i minus x-bar, all squared
-- so the statistic T equals the quantity b-two minus beta-two, divided by se of b-two, is better approximated by T with n minus 2 degrees of freedom than by normal with mean 0 and variance 1.
-- The T with n minus 2 degrees of freedom distribution
-- is the exact distribution if additionally the errors u-sub-i are normally distributed
-- otherwise it is an approximation, one that computer packages use.
+**The theoretical variance:**
+
+Under assumptions 1-4, the variance of b-two equals sigma-u-squared divided by the sum of x-deviations squared.
+
+**The problem:**
+
+We don't know sigma-u-squared. It's an unknown population parameter.
+
+**The solution:**
+
+We replace it with an estimate: s-e-squared equals 1 over n minus 2, times the sum of squared residuals.
+
+**The consequence:**
+
+This replacement introduces additional uncertainty into the standard error.
+
+The statistic T equals the quantity b-two minus beta-two, divided by se of b-two, is better approximated by T with n minus 2 degrees of freedom than by normal with mean 0 and variance 1.
+
+**When is it exact?**
+
+If errors u-sub-i are normally distributed, T with n minus 2 degrees of freedom is the exact distribution.
+
+Otherwise, it's an approximation that computer packages use.
 
 > **Key Concept**: We use the t distribution with n minus 2 degrees of freedom instead of the standard normal distribution because we estimate the unknown error variance sigma-u-squared with s-e-squared. This estimation introduces additional uncertainty. The t distribution accounts for this by having fatter tails than the normal distribution. If errors are normally distributed, T with n minus 2 degrees of freedom is the exact distribution; otherwise it's an approximation that works well in practice.
+
+**Why This Matters**: The choice between normal and t distribution has real consequences. With small samples (n equals 29 in the house price example), the t distribution is more conservative—it requires stronger evidence to reject null hypotheses because it has fatter tails. Using the normal distribution when you should use t would lead you to overstate the precision of your estimates and make false discoveries. This correction for estimation uncertainty is one of the most important refinements in classical statistics (recall Chapter 4 where we used t for the sample mean).
 
 ### Model Assumptions
 
@@ -94,6 +114,8 @@ The expected value of y given x equals beta-one plus beta-two times x.
 - Additional assumptions 3-4 yield the variance of estimators.
 
 > **Key Concept**: Four standard OLS assumptions underlie statistical inference: (1) correct linear model, (2) mean-zero errors, (3) constant error variance (homoskedasticity), and (4) independent errors. Assumptions 1-2 are crucial for unbiasedness, ensuring the expected value of y given x equals beta-one plus beta-two times x. Assumptions 3-4 determine variance formulas for the estimators. The data assumption requires variation in x to compute regression coefficients.
+
+Now that we understand the t-statistic and its distribution, we can use it to build confidence intervals. The logic is straightforward: our estimate b-two equals 73.77 is a single number from our sample. But the true population parameter beta-two could plausibly be anything in a range around 73.77. How wide should that range be? The t-distribution tells us.
 
 ## 7.3 Confidence Interval for the Slope Parameter
 
@@ -133,6 +155,8 @@ Starting with b-two plus or minus t-sub-n-minus-2-comma-alpha-over-2, times se o
 - This is directly given in computer output from regression.
 
 > **Key Concept**: For the house price example with n equals 29, the 95 percent confidence interval is calculated as 73.77 plus or minus 2.052 times 11.17, yielding the interval 50.84 to 96.70. The critical value t-sub-27-comma-0.025 equals 2.052 from the t distribution with 27 degrees of freedom. We're 95 percent confident that each additional square foot adds between 50.84 and 96.70 dollars to house price. Modern statistical software reports this confidence interval automatically.
+
+Confidence intervals tell us the range of plausible values for beta-two. But sometimes we have a specific claim to evaluate: "Does house size affect price at all?" or "Is the price increase at least 50 dollars per square foot?" These questions require hypothesis tests. A hypothesis test asks: is a specific value of beta-two consistent with the data, or should we reject it?
 
 ## 7.4 Tests of Statistical Significance
 
@@ -180,6 +204,8 @@ t equals b-two divided by se of b-two equals 73.77 divided by 11.17 equals 6.60
 
 > **Key Concept**: Statistical significance and economic significance are distinct concepts. Statistical significance asks whether an effect exists (is beta-two different from zero). Economic significance asks whether the effect is large enough to matter in practice. With large samples, se of b-two approaches zero, so even tiny coefficients become statistically significant despite being economically meaningless. Always assess both: a coefficient can be statistically significant but economically trivial, especially in large samples.
 
+**Why This Matters**: With modern "big data," researchers routinely work with millions of observations. In such datasets, almost everything is statistically significant—even a one-cent price increase per square foot would have p less than 0.001. But does one cent matter? Always ask: "Is this coefficient large enough to care about?" before celebrating statistical significance. Context determines economic significance: one dollar matters for houses, but one million dollars might be trivial for national GDP.
+
 ### Tests based on the Correlation Coefficient
 
 - An alternative way to measure statistical significance, used in many social sciences, uses the correlation coefficient, the absolute value of r-sub-x-y.
@@ -191,6 +217,10 @@ t equals b-two divided by se of b-two equals 73.77 divided by 11.17 equals 6.60
 - and it tells little about economic significance.
 
 > **Key Concept**: Testing using the correlation coefficient r-sub-x-y is an alternative approach to measure statistical significance, common in some social sciences. However, it has significant weaknesses compared to t-tests: it cannot accommodate robust standard errors (relaxing assumptions 3-4), cannot extend to multiple regression, and provides no information about economic significance. Regression-based t-tests are more flexible and informative, making them the preferred approach in econometrics.
+
+**Quick Check**: Before moving on, make sure you understand these core concepts: (1) What does a t-statistic of 6.60 tell you? (2) Why is p equals 0.000 strong evidence against the null hypothesis? (3) What's the difference between statistical and economic significance? (4) Can a coefficient be statistically significant but economically unimportant? These concepts are fundamental to all econometric inference.
+
+The tests we've discussed so far focus on beta-two equals zero—does the variable matter at all? But sometimes we want to test other values. Does beta-two equal 50? Does it equal 90? The logic is the same as testing zero, but we adjust the formula slightly.
 
 ## 7.5 Two-sided Hypothesis Tests
 
@@ -265,6 +295,8 @@ Two-sided test: critical value approach
 
 > **Key Concept**: There's an intimate connection between confidence intervals and hypothesis tests. For a two-sided test of H-zero: beta-two equals beta-two-star at significance level alpha, reject the null hypothesis if and only if beta-two-star falls outside the 100 times the quantity 1 minus alpha percent confidence interval. This provides a visual way to test multiple hypotheses: any value inside the confidence interval is a plausible value of beta-two, while values outside are rejected.
 
+Two-sided tests ask "Is beta-two equal to this specific value?" without caring whether it's higher or lower. But sometimes you have a directional claim: "I think beta-two is greater than 50" or "I believe beta-two is less than 90." For these directional questions, you need one-sided tests that look only in one tail of the distribution.
+
 ## 7.6 One-sided Directional Hypothesis Tests
 
 - One-sided test on the slope coefficient is a test of
@@ -323,6 +355,8 @@ t equals the quantity b-two minus 90, divided by se of b-two, equals the quantit
 
 > **Key Concept**: Computer output reports t equals b-two divided by se of b-two and the p-value for a two-sided test of beta-two equals zero. For one-sided tests of statistical significance, use this shortcut: if the coefficient has the expected sign, halve the printed two-sided p-value to get the one-sided p-value. If the coefficient has the wrong sign, do not reject (the one-sided p-value exceeds 0.5). This shortcut only works for tests of beta-two equals zero, not for other null hypotheses.
 
+Everything we've done so far rests on assumptions 1 through 4. But what if those assumptions fail? Real economic data often violates assumption 3 (constant error variance) or assumption 4 (independent errors). Does this invalidate all our inference? No—we can use robust standard errors that remain valid even when these assumptions fail. This is one of the most important practical advances in modern econometrics.
+
 ## 7.7 Robust Standard Errors
 
 - Default standard errors (and associated t statistics, p values and confidence intervals) make assumptions 1-4
@@ -340,18 +374,31 @@ t equals the quantity b-two minus beta-two, divided by se-sub-rob of b-two
 
 ### Heteroskedastic Robust Standard Errors
 
-- Relax assumption 3 that all errors have the same variance
-- called the assumption of homoskedastic errors.
-- Instead allow the variance of u-sub-i given x-sub-i equals sigma-sub-i-squared, which varies with i
-- called heteroskedastic errors.
-- This is the standard assumption in modern econometrics.
-- Then the heteroskedasticity-robust standard error for b-two is
+**Relax assumption 3:**
 
-se-sub-het of b-two equals the square root of the sum from i equals 1 to n of e-sub-i-squared times the quantity x-sub-i minus x-bar, all squared, divided by the sum from i equals 1 to n of the quantity x-sub-i minus x-bar, all squared. This does not equal s-e divided by the square root of the sum from i equals 1 to n of the quantity x-sub-i minus x-bar, all squared.
+Assumption 3 says all errors have the same variance (homoskedastic errors).
 
-- Then t equals the quantity b-two minus beta-two, divided by se-sub-het of b-two, is viewed as T with n minus 2 degrees of freedom distributed.
+Instead, allow the variance of u-sub-i given x-sub-i equals sigma-sub-i-squared, which varies with i.
+
+This is called heteroskedastic errors. It's the standard assumption in modern econometrics.
+
+**The robust formula:**
+
+The heteroskedasticity-robust standard error for b-two is:
+
+se-sub-het of b-two equals the square root of a weighted sum of squared residuals times squared deviations.
+
+Specifically: square root of the sum of e-sub-i-squared times the quantity x-sub-i minus x-bar, all squared, divided by the sum of the quantity x-sub-i minus x-bar, all squared.
+
+This differs from the default standard error: s-e divided by the square root of the sum of x-deviations squared.
+
+**Using the robust standard error:**
+
+Then t equals the quantity b-two minus beta-two, divided by se-sub-het of b-two, is viewed as T with n minus 2 degrees of freedom distributed.
 
 > **Key Concept**: Heteroskedasticity means error variance varies across observations: the variance of u-sub-i given x-sub-i equals sigma-sub-i-squared instead of constant sigma-u-squared. Heteroskedasticity-robust standard errors account for this by weighting residuals differently. The robust formula se-sub-het of b-two differs from the default se of b-two by using individual squared residuals e-sub-i-squared times squared deviations rather than pooling them. Modern econometrics treats heteroskedasticity as the default assumption, making robust standard errors standard practice.
+
+**Why This Matters**: In real economic data, heteroskedasticity is the rule, not the exception. Large firms have more variable profits than small firms. High-income households show more spending variability than low-income households. Expensive houses have more price variation than cheap houses. If you use default standard errors when heteroskedasticity is present, your confidence intervals will be wrong and your hypothesis tests invalid. Robust standard errors fix this problem at essentially zero cost—modern software computes them as easily as default standard errors. Always use them unless you have strong reason to believe assumption 3 holds exactly.
 
 ### Example: House Price and Size
 
@@ -402,7 +449,7 @@ Heteroskedastic errors
 - people in villages, students in schools, individuals in families,...
 - panel data on many individuals over time
 - use cluster robust.
-- These robust standard errors are presented in chapter 12.1.
+- These robust standard errors are presented in Chapter 12.1, where you'll learn when to use each type.
 - An essential part of any regression analysis is knowing which particular robust standard error method should be used.
 
 > **Key Concept**: Beyond heteroskedasticity-robust standard errors, two other robust methods address different data structures. HAC robust (Heteroskedasticity and Autocorrelation Consistent) standard errors handle time series data where errors are correlated across time periods. Cluster-robust standard errors handle grouped data where errors are correlated within clusters (like students in schools or individuals in families) but uncorrelated across clusters. Choosing the appropriate robust standard error method is essential for valid inference and depends on your data structure and likely violations of standard assumptions.

@@ -14,6 +14,8 @@ By the end of this chapter, you will be able to:
 
 ---
 
+You've learned to summarize individual variables using means, standard deviations, and histograms. But economics is rarely about one variable in isolation. Does education increase earnings? Do larger houses sell for higher prices? Does inflation affect unemployment? These questions all involve relationships between two variables. This chapter introduces the tools for measuring and visualizing these relationships: scatterplots, correlation, and regression—the foundation of all econometric analysis.
+
 ## 5.1 Example: House Price and Size
 
 - We examine house price and size for a sample of 29 houses
@@ -32,6 +34,8 @@ The dataset includes pairs of sale price and square feet for 29 houses. For exam
 **Example 5.2**: Summary Statistics for House Price and Size
 
 Looking at the summary statistics: For sale price, the mean is 253,910 dollars, standard deviation is 37,391 dollars, standard error is 6,943 dollars, maximum is 375,000 dollars, median is 244,000 dollars, minimum is 204,000 dollars, skewness is 1.56, and kurtosis is 5.61. For square feet, the mean is 1,883 square feet, standard deviation is 398 square feet, standard error is 74 square feet, maximum is 3,300 square feet, median is 1,800 square feet, minimum is 1,400 square feet, skewness is 1.73, and kurtosis is 6.74. Both variables show positive skewness, indicating right-skewed distributions.
+
+**Why This Matters**: In real estate markets, buyers care about both price and size simultaneously. Summary statistics for each variable separately tell us the typical price (253,910 dollars) and typical size (1,883 square feet), but they don't tell us the crucial relationship: how much more you pay for each extra square foot. That's where bivariate analysis—studying two variables together—becomes essential.
 
 ## Key methods for measuring relationship (this chapter)
 
@@ -85,6 +89,7 @@ The table presents both observed and expected frequencies. In each cell, the top
 
 > **Key Concept**: Two-way tabulations show the joint distribution of two categorical variables. Expected frequencies (calculated assuming independence) provide the basis for Pearson's chi-squared test of statistical independence. If observed frequencies differ substantially from expected frequencies, we have evidence that the variables are related.
 
+Two-way tabulations work well for categorical data with a few distinct values. But what about continuous variables like house price and size, which can take hundreds of different values? Tabulating every unique price-size combination would create an enormous, unreadable table. For continuous data, we need a visual approach: the scatterplot.
 
 ## 5.3 Two-way Scatterplot
 
@@ -94,6 +99,7 @@ The table presents both observed and expected frequencies. In each cell, the top
 
 > **Key Concept**: Scatterplots provide visual evidence of relationships between two variables. The house price-size scatterplot shows a clear positive relationship: as size increases, price tends to increase. Scatterplots should always be examined before computing correlation or regression to check for outliers, nonlinearity, and the strength of the relationship.
 
+Scatterplots let us see relationships visually. But we also need a numerical measure—a single number that summarizes the strength and direction of the relationship. This is where the correlation coefficient comes in. Correlation quantifies what the scatterplot shows qualitatively.
 
 ## 5.4 Sample Correlation
 
@@ -114,19 +120,32 @@ The table presents both observed and expected frequencies. In each cell, the top
 - Recall the sample variance: s-sub-x-squared equals one over n minus 1, times the sum from i equals 1 to n of the quantity x-sub-i minus x-bar, all squared.
 - The sample covariance between x and y is similarly defined: s-sub-x-y equals one over n minus 1, times the sum from i equals 1 to n of the quantity x-sub-i minus x-bar, times the quantity y-sub-i minus y-bar.
 
-- Suppose on average y increases as x increases.
-- Then the product of x-sub-i minus x-bar, times y-sub-i minus y-bar, is greater than zero most of the time, since y-sub-i minus y-bar is greater than zero usually if x-sub-i minus x-bar is greater than zero (so positive times positive equals positive), and y-sub-i minus y-bar is less than zero usually if x-sub-i minus x-bar is less than zero (so negative times negative equals positive).
-- It follows that s-sub-x-y is greater than zero.
-- An example is shown in the second panel on the earlier slide. Most observations are in the quadrants where the product of x-sub-i minus x-bar, times y-sub-i minus y-bar, is greater than zero, so the data are positively correlated (in fact s-sub-x-y equals 11,701,613.3).
-- Similarly s-sub-x-y is less than zero if y decreases as x increases.
-- Thus the sign of the covariance is easily interpreted: s-sub-x-y is greater than zero if there is positive association, and s-sub-x-y is less than zero if there is negative association.
+**Understanding the sign of covariance:**
+
+Suppose on average y increases as x increases. Consider what happens with each observation.
+
+When x-sub-i is greater than x-bar, y-sub-i is typically greater than y-bar. This gives positive times positive, which equals positive.
+
+When x-sub-i is less than x-bar, y-sub-i is typically less than y-bar. This gives negative times negative, which equals positive.
+
+It follows that s-sub-x-y is greater than zero when variables move together.
+
+An example is shown in the second panel on the earlier slide. Most observations are in quadrants where the product is positive. The data are positively correlated (s-sub-x-y equals 11,701,613.3).
+
+Similarly, s-sub-x-y is less than zero if y decreases as x increases.
+
+Thus the sign of covariance is easily interpreted. Positive covariance means positive association. Negative covariance means negative association.
 
 
 ### 5.4.2 Sample Correlation Coefficient
 
-The sample correlation coefficient is defined as: r-sub-x-y equals the covariance of x and y, divided by the product of the standard deviation of x times the standard deviation of y, which equals s-sub-x-y divided by s-sub-x times s-sub-y, which can also be written as the sum from i equals 1 to n of the quantity x-sub-i minus x-bar, times y-sub-i minus y-bar, divided by the square root of the sum from i equals 1 to n of the quantity x-sub-i minus x-bar, all squared, times the sum from i equals 1 to n of the quantity y-sub-i minus y-bar, all squared.
+The sample correlation coefficient is defined as: r-sub-x-y equals the covariance divided by the product of standard deviations.
 
-- The correlation coefficient is the covariance between the standardized versions of x and y. That is, r-sub-x-y equals the covariance of the quantity x minus x-bar divided by s-sub-x, and the quantity y minus y-bar divided by s-sub-y.
+That is, r-sub-x-y equals s-sub-x-y divided by s-sub-x times s-sub-y.
+
+Equivalently, r-sub-x-y equals the sum of products of deviations, divided by the square root of the sum of x-deviations squared times the sum of y-deviations squared.
+
+**Key insight:** The correlation coefficient is the covariance between standardized versions of x and y. That is, r-sub-x-y equals the covariance of the quantity x minus x-bar divided by s-sub-x, and the quantity y minus y-bar divided by s-sub-y.
 
 > **Key Concept**: The correlation coefficient is a scale-free measure of linear association ranging from negative 1 (perfect negative correlation) to positive 1 (perfect positive correlation). A correlation of 0 indicates no linear relationship. For house price and size, r equals 0.786 indicates strong positive correlation—as size increases, price tends to increase proportionally.
 
@@ -148,6 +167,7 @@ The sample correlation coefficient is defined as: r-sub-x-y equals the covarianc
 
 > **Key Concept**: Correlation measures the strength and direction of linear association between two variables. It is scale-free (ranging from negative 1 to positive 1), making it useful for comparing relationships across different units. Autocorrelation extends correlation to time series, measuring how a variable relates to its own past values—important for detecting patterns and persistence over time.
 
+Correlation tells us that house price and size are related (r equals 0.786). But it doesn't tell us how much price changes for each additional square foot. For that, we need regression—the most important tool in econometrics. Regression goes beyond correlation by giving us a formula: predicted price equals 115,017 plus 73.77 times size. This formula lets us make specific predictions and quantify the relationship.
 
 ## 5.5 Regression Line
 
@@ -178,18 +198,41 @@ where:
 
 ### 5.5.2 Least Squares Estimation
 
-- For the first observation the residual is e-one equals y-one minus y-hat-one, for the second observation the residual is e-two equals y-two minus y-hat-two, and so on.
-- For the i-th observation: e-sub-i equals y-sub-i minus y-hat-sub-i, which equals y-sub-i minus b-one minus b-two times x-sub-i.
+**Step 1: Define the residuals**
 
-- The least squares method chooses intercept b-one and slope b-two of the line to make as small as possible the sum of the squared residuals: e-one squared plus e-two squared plus dot-dot-dot plus e-n squared.
-- Thus b-one and b-two minimize the sum from i equals 1 to n of e-sub-i squared, which equals the sum from i equals 1 to n of the quantity y-sub-i minus y-hat-sub-i, all squared, which equals the sum from i equals 1 to n of the quantity y-sub-i minus b-one minus b-two times x-sub-i, all squared.
+For the first observation, the residual is e-one equals y-one minus y-hat-one.
 
-- This is a calculus problem: differentiate with respect to b-one and b-two, set the two derivatives equal to zero, and solve two equations in two unknowns for b-one and b-two. The algebra is skipped here.
-- The resulting formula for the least squares slope coefficient is: b-two equals the sum from i equals 1 to n of the quantity x-sub-i minus x-bar, times the quantity y-sub-i minus y-bar, divided by the sum from i equals 1 to n of the quantity x-sub-i minus x-bar, all squared.
+For the second observation, the residual is e-two equals y-two minus y-hat-two.
 
-- The least squares intercept is: b-one equals y-bar minus b-two times x-bar.
+For the i-th observation: e-sub-i equals y-sub-i minus y-hat-sub-i.
+
+This can be written as e-sub-i equals y-sub-i minus b-one minus b-two times x-sub-i.
+
+**Step 2: Choose the criterion**
+
+The least squares method chooses b-one and b-two to minimize the sum of squared residuals.
+
+That is, minimize e-one squared plus e-two squared plus dot-dot-dot plus e-n squared.
+
+Equivalently, minimize the sum from i equals 1 to n of the quantity y-sub-i minus b-one minus b-two times x-sub-i, all squared.
+
+**Step 3: Solve the minimization problem**
+
+This is a calculus problem. Differentiate with respect to b-one and b-two.
+
+Set both derivatives equal to zero. Solve the two equations for b-one and b-two.
+
+The algebra is skipped here, but the solution is straightforward.
+
+**The resulting formulas:**
+
+The least squares slope is: b-two equals the sum of products of deviations, divided by the sum of x-deviations squared.
+
+The least squares intercept is: b-one equals y-bar minus b-two times x-bar.
 
 > **Key Concept**: The method of least squares chooses the regression line to minimize the sum of squared residuals. This yields formulas for the slope (b-two) and intercept (b-one) that can be computed from the data. The slope equals the covariance divided by the variance of x. This is the most widely used estimation method in econometrics.
+
+**Why This Matters**: Among infinitely many possible lines through a scatterplot, least squares gives us one definitive "best fit" line—the one that makes prediction errors as small as possible in the squared error sense. This objective criterion means two economists analyzing the same data will always get the same regression line, making results reproducible and comparable across studies. This is why OLS (ordinary least squares) is the foundation of applied econometrics. Chapter 6 explores the statistical properties of the OLS estimator in greater depth.
 
 ### 5.5.3 Interpretation of the Slope Coefficient
 
@@ -222,11 +265,12 @@ Predicted Price equals 115,017 plus 73.77 times Size.
 
 - OLS regression of y on just an intercept—that is, minimizing the sum from i equals 1 to n of the quantity y-sub-i minus b-one, all squared—yields b-one equals y-bar.
 - So regression of y on only an intercept yields the sample mean y-bar
-- OLS regression is a natural extension of univariate statistics based on the sample mean
+- OLS regression is a natural extension of univariate statistics based on the sample mean (see Chapter 3)
 - And univariate statistics based on the sample mean is just a special case of OLS regression.
 
 > **Key Concept**: The regression line y-hat equals b-one plus b-two times x is the foundation of econometric analysis. It summarizes the linear relationship between two variables and provides predictions. The slope b-two is the most important parameter, measuring how much y changes for a one-unit change in x. The intercept b-one is often less meaningful, representing the predicted y when x equals 0, which may be outside the data range.
 
+We now have a regression line with slope 73.77 and intercept 115,017. But how good is this fit? Does size explain most of the variation in price, or only a small fraction? To answer these questions, we need measures of model fit—statistics that tell us how well the regression line captures the data.
 
 ## 5.6 Measures of Model Fit
 
@@ -262,12 +306,27 @@ The standard error of the regression is: s-sub-e-squared equals one over n minus
 
 ### 5.6.2 Definition of R-Squared
 
-- R-squared measures the fraction of the variation of y (around the sample mean y-bar) that is explained by the regressors.
-- Total sum of squares measures variability in y around the sample mean y-bar: Total SS equals the sum from i equals 1 to n of the quantity y-sub-i minus y-bar, all squared.
+R-squared measures the fraction of variation in y that is explained by the regression.
 
-- Explained sum of squares measures variability in fitted value y-hat around y-bar: Explained SS equals the sum from i equals 1 to n of the quantity y-hat-sub-i minus y-bar, all squared.
-- This is also called regression sum of squares or model sum of squares.
-- R-squared equals explained sum of squares as a fraction of the total sum of squares: R-squared equals Explained SS divided by Total SS, which equals the sum from i equals 1 to n of the quantity y-hat-sub-i minus y-bar, all squared, divided by the sum from i equals 1 to n of the quantity y-sub-i minus y-bar, all squared.
+**Step 1: Measure total variation in y**
+
+Total sum of squares measures variability in y around its mean.
+
+Total SS equals the sum from i equals 1 to n of the quantity y-sub-i minus y-bar, all squared.
+
+**Step 2: Measure explained variation**
+
+Explained sum of squares measures variability in fitted values around y-bar.
+
+Explained SS equals the sum from i equals 1 to n of the quantity y-hat-sub-i minus y-bar, all squared.
+
+This is also called regression sum of squares or model sum of squares.
+
+**Step 3: Calculate the fraction**
+
+R-squared equals Explained SS divided by Total SS.
+
+This gives the fraction of total variation explained by the regression.
 
 > **Key Concept**: R-squared measures the fraction of variation in y explained by the regression on x. It ranges from 0 (no explanatory power) to 1 (perfect fit). R-squared equals 0.62 means 62 percent of house price variation is explained by size variation—the remaining 38 percent is due to other factors not captured by size alone.
 
@@ -334,6 +393,8 @@ The calculations are: Explained SS equals 24,170,725,242, Residual SS equals 14,
 
 - Thus 61.75 percent of the variation in house price is associated with variation in house size. This is viewed as a good fit, though still with room for improvement.
 
+**Quick Check**: Before moving forward, make sure you can answer these questions: (1) What does R-squared equal 0.62 mean in plain English? (2) If two variables have correlation r equals 0.8, what is R-squared? (3) Can R-squared be negative? These connections between correlation and R-squared will appear repeatedly in econometrics.
+
 ## 5.7 Computer Output following OLS Regression
 
 **Example 5.7**: Computer Output from OLS Regression
@@ -344,7 +405,7 @@ The coefficient table shows: Size regressor with coefficient 73.77, standard err
 
 Summary statistics include: 29 observations, F with 1 and 27 degrees of freedom equals 43.58, p-value for F equals 0.0000, R-squared equals 0.618, Adjusted R-squared equals 0.603, Standard error of regression equals 23,551.
 
-> **Key Concept**: Computer output from regression provides comprehensive information: coefficients and their standard errors, t-statistics and p-values for hypothesis testing, R-squared and adjusted R-squared for model fit, F-statistic for overall significance, and the ANOVA decomposition showing explained and residual variation. Understanding how to read regression output is essential for applied econometrics.
+> **Key Concept**: Computer output from regression provides comprehensive information: coefficients and their standard errors, t-statistics and p-values for hypothesis testing, R-squared and adjusted R-squared for model fit, F-statistic for overall significance, and the ANOVA decomposition showing explained and residual variation. Understanding how to read regression output is essential for applied econometrics. Chapter 7 covers how to use these statistics for formal statistical inference about regression coefficients.
 
 
 ## 5.8 Prediction
@@ -357,6 +418,8 @@ Summary statistics include: 29 observations, F with 1 and 27 degrees of freedom 
 - We distinguish between two different uses of a prediction:
   - **Prediction of an average outcome** - for example, average price for a house of 2000 square feet
   - **Prediction of an individual outcome** - for example, price for a particular house of 2000 square feet
+
+**Why This Matters**: Regression isn't just an academic exercise—it's a prediction machine. Real estate agents use regressions like this to price homes. Banks use them to estimate property values for mortgages. City planners use them to forecast tax revenue. But the key limitation is extrapolation: predicting the price of a 5,000 square foot mansion based on data from 1,400-3,300 square foot homes is unreliable. Always check whether your prediction falls within the range of your data.
 
 ### 5.8.1 Outlying Observations and Influential Points
 
@@ -401,7 +464,7 @@ Summary statistics include: 29 observations, F with 1 and 27 degrees of freedom 
 - Many examples exist where the direction of causation is questionable.
 - Often it is due to a third variable that may be driving both y and x.
 - For example: higher education is positively associated with higher earnings, but this may be due solely to unobserved innate ability that leads to both higher earnings due to higher productivity and to higher education due to ability to study more advanced material.
-- Chapter 17 focuses on causality.
+- Establishing causation requires careful thinking about confounding variables, reverse causality, and selection bias—topics covered extensively in Chapter 17.
 
 > **Key Concept**: Regression measures association, not causation. A regression coefficient shows how much y changes when x changes, but does not prove that x causes y. Causation requires additional assumptions or experimental design (covered in Chapter 17). Correlation does not imply causation—it only tells us that variables move together.
 

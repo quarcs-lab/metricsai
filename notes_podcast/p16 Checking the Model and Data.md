@@ -15,12 +15,13 @@ By the end of this chapter, you will be able to:
 
 ---
 
+You've run your regression. The R-squared looks good, some coefficients are significant—but should you trust these results? What if your regressors are so correlated that you can't tell them apart? What if you've omitted a crucial variable? What if your errors are heteroskedastic, making all your t-statistics wrong? This chapter is about detective work: checking whether your model's assumptions hold, diagnosing problems in your data, and deciding what to do when things go wrong. We'll revisit the four OLS assumptions from Chapters 5-7, learn when they matter most, and master the art of residual diagnostics. By the end, you'll know how to check your work—and how to fix it when assumptions fail.
+
 ## 16.1 Multicollinear Data
 
-- We need sufficient variation in the regressors.
-- Extreme case is perfect collinearity
-- then not all coefficients can be estimated
-- e.g. dummy variable trap where d1 plus d2 plus d3 equals 1 and include all three.
+We need sufficient variation in the regressors to identify their separate effects.
+
+**Perfect collinearity** is the extreme case. When regressors are perfectly correlated, not all coefficients can be estimated. Example: the dummy variable trap from Chapter 14, where d1 plus d2 plus d3 equals 1 and you try to include all three plus an intercept.
 - More generally problem is there is very high correlation between the regressors
 - Then OLS is still unbiased and consistent
 - but individual coefficients may be very imprecisely estimated
@@ -50,7 +51,9 @@ By the end of this chapter, you will be able to:
 
 ## 16.2 Model Assumptions Revisited
 
-- Recall assumptions 1-4 (for bivariate model for simplicity)
+Let's revisit the four core OLS assumptions we introduced in Chapters 5-7. Understanding when and why these assumptions matter is crucial for regression diagnostics.
+
+For simplicity, we'll state them for the bivariate model:
 - 1. The population model is y-sub-i equals beta-one plus beta-two times x-sub-i plus u-sub-i for all i.
 - 2. The error for the i-th observation has mean zero conditional on x: the expected value of u-sub-i given x-sub-i equals 0 for all i.
 - 3. The error for the i-th observation has constant variance conditional on x: the variance of u-sub-i given x-sub-i equals sigma-sub-u squared for all i.
@@ -80,6 +83,8 @@ By the end of this chapter, you will be able to:
 
 > **Key Concept**: Each OLS assumption serves a specific purpose. Assumption 1 (correct model) ensures no omitted variables bias. Assumption 2 (mean zero error) ensures unbiasedness. Assumption 3 (constant variance) ensures efficiency and valid standard errors. Assumption 4 (independence) prevents autocorrelation. When assumptions fail, OLS may be biased, inefficient, or both.
 
+> **Why This Matters**: Not all assumption violations are equally serious. When assumptions 1 or 2 fail (wrong model, endogeneity), OLS is **biased and inconsistent**—your estimates are fundamentally wrong, no matter how much data you have. You must fix the model (add controls, use IV). But when only assumptions 3 or 4 fail (heteroskedasticity, autocorrelation), OLS estimates remain **unbiased and consistent**—your coefficients are still right on average. You just need better standard errors (use robust SE). This distinction is crucial: some problems ruin your estimates, others just ruin your inference.
+
 ## 16.3 Incorrect Population Model
 
 - The population model is no longer y equals beta-one plus beta-two times x-two plus beta-three times x-three plus dot-dot-dot plus beta-k times x-k plus u.
@@ -97,6 +102,8 @@ By the end of this chapter, you will be able to:
 
 > **Key Concept**: Omitted variables bias occurs when leaving out a variable that is both correlated with included regressors and affects the outcome. The bias formula is the bias of beta-hat-sub-2 equals beta-three times delta-sub-23, where beta-three is the true effect of the omitted variable and delta-sub-23 is the regression coefficient from regressing x-three on x-two. Include control variables to reduce bias.
 
+We've just seen that omitting variables causes bias when the omitted variable affects y and correlates with x. But omitted variables are just one source of a broader problem: endogeneity. Whenever a regressor is correlated with the error term—whether from omitted variables, measurement error, or reverse causation—OLS breaks down. We need stronger medicine than just adding controls. We need instrumental variables.
+
 ## 16.4 Regressors Correlated with Errors
 
 - Regressors are correlated with the errors
@@ -113,6 +120,8 @@ By the end of this chapter, you will be able to:
 
 > **Key Concept**: Endogeneity (regressors correlated with errors) causes biased OLS estimates. Sources include omitted variables, measurement error, and simultaneity. The solution is instrumental variables (IV): find a variable z correlated with the endogenous regressor x but uncorrelated with the error u. IV estimation gives consistent estimates even when OLS is biased.
 
+So far we've focused on assumptions 1 and 2—problems that bias our coefficient estimates. Now we shift to assumptions 3 and 4: heteroskedasticity and autocorrelation. These don't bias OLS—your coefficients are still right on average—but they wreck your standard errors, making your t-tests and confidence intervals unreliable. The good news? The fix is simple: use robust standard errors.
+
 ## 16.5 Heteroskedastic Errors
 
 - Now the variance of u-sub-i given x-sub-2-i through x-sub-k-i varies with i.
@@ -124,6 +133,8 @@ By the end of this chapter, you will be able to:
 - In some cases provide a model for the heteroskedasticity and estimate by feasible generalized least squares.
 
 > **Key Concept**: Heteroskedasticity means error variance varies across observations: the variance of u-sub-i given x-sub-i not equal to sigma-sub-u squared. OLS remains unbiased but standard errors are wrong, invalidating t-tests and confidence intervals. Use heteroskedastic-robust (White) standard errors for valid inference. Weighted least squares (WLS) is more efficient if you can model the variance structure.
+
+> **Why This Matters**: In applied work, heteroskedasticity is the norm, not the exception. Earnings regressions almost always show larger variance for high earners. Firm-level regressions show larger variance for bigger firms. If you use default standard errors when heteroskedasticity is present, your t-statistics are wrong—you might reject a null hypothesis when you shouldn't, or fail to reject when you should. The solution is simple: always use heteroskedastic-robust standard errors in cross-section data. They're valid whether or not heteroskedasticity exists, so there's no cost to using them. Think of robust SE as "insurance" against misspecification.
 
 ## 16.6 Correlated Errors
 
@@ -141,6 +152,8 @@ By the end of this chapter, you will be able to:
 - chapter 17.
 
 > **Key Concept**: Autocorrelation means errors are correlated over time: the covariance of u-sub-i and u-sub-j not equal to 0 for i not equal to j. Common in time series when shocks persist. OLS is unbiased but standard errors are wrong (typically too small). Use HAC (Newey-West) standard errors for valid inference. For severe autocorrelation, model the dynamics explicitly (add lags of y or x).
+
+**Quick Check**: You run a cross-section regression of earnings on education and get a coefficient of 5,000 with a default standard error of 1,000 (t equals 5.0). You suspect heteroskedasticity. Should you be worried about bias in the coefficient? What about the t-statistic? (Pause and think.) Answer: The coefficient is fine—heteroskedasticity doesn't bias OLS, so 5,000 is still the right estimate on average. But the t-statistic might be wrong because the standard error of 1,000 assumes constant variance. Compute heteroskedastic-robust standard errors. If the robust SE is 1,500, the true t-statistic is 5,000 divided by 1,500 equals 3.33, still significant but less dramatic than t equals 5.0. Always use robust SE for inference.
 
 ## 16.7 Example: Democracy and Growth
 

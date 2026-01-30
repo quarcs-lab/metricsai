@@ -16,6 +16,8 @@ By the end of this chapter, you will be able to:
 
 ---
 
+In Chapter 5, you learned that one more year of education is associated with a 5,021 dollar increase in earnings. But here's a better way to think about it: one more year of education is associated with a 13 percent increase in earnings. Why is percentage change more useful than dollar amounts? Because 5,021 dollars means very different things to someone earning 20,000 dollars versus someone earning 200,000 dollars. Logarithms let us work with percentage changes instead of absolute changes—and they unlock powerful techniques for analyzing growth rates, elasticities, and nonlinear relationships.
+
 ## 9.1 Natural Logarithm Function
 
 - A logarithmic function is the reverse operation to raising a number to a power
@@ -123,7 +125,7 @@ Comparing the four models: The Linear model has specification predicted y equals
 
 ## 9.4 Example: Earnings and Education
 
-- Dataset EARNINGS on 172 full-time male workers in 2010 aged 30 years.
+- Dataset EARNINGS on 172 full-time male workers in 2010 aged 30 years (same dataset as Chapter 5, now with logarithmic transformations).
 
 Looking at the summary statistics: The Earnings variable is Annual earnings in dollars, with Mean 41,413, Standard Deviation 25,527, Min 1,050, Max 172,000. Lnearn is the Natural logarithm of Earnings, with Mean 10.46, Standard Deviation 0.62, Min 6.96, Max 12.05. Education is Years of completed schooling, with Mean 14.43, Standard Deviation 2.73, Min 3, Max 20. Lneduc is the Natural logarithm of Education, with Mean 2.65, Standard Deviation 0.22, Min 1.10, Max 3.00. The sample size n equals 171.
 
@@ -154,6 +156,10 @@ Comparing four model specifications: The Linear model has estimates predicted y 
 - Linear-log: 1 percent increase in education is associated with a 544 dollars (equals 54,452 divided by 100) increase in earnings.
 
 > **Key Concept**: Different logarithmic transformations provide different insights. In the earnings-education example: the log-linear model (R-squared 0.334) suggests one more year of education is associated with a 13.1 percent increase in earnings. The log-log model (R-squared 0.286) suggests a 1 percent increase in education is associated with a 1.478 percent increase in earnings. The linear model gives absolute dollar changes (5,021 dollars per year), while log models give relative percentage changes.
+
+**Why This Matters**: Policy debates about education often focus on percentage returns. Telling policymakers that an extra year of education increases earnings by "13 percent" is far more compelling than saying it increases earnings by "5,021 dollars"—because the percentage applies regardless of your current earnings level. A 13 percent return is comparable to returns on other investments (stocks, bonds, real estate), helping policymakers decide whether education spending is worthwhile. This is why economists overwhelmingly prefer log models for analyzing earnings.
+
+We've seen how logs help us interpret regression coefficients as percentages. But there's more to the story. Logarithms have useful mathematical properties that make calculations easier and provide shortcuts for everyday problems like compound interest.
 
 ## 9.5 Approximating Natural Logarithm
 
@@ -188,6 +194,8 @@ Looking at the approximation table: For "Small" x: when x equals 0.05, the True 
 - More precisely can have rule of 70, or 69, or 69.3.
 
 > **Key Concept**: The Rule of 72 provides a quick way to estimate doubling time for compound growth: doubling time is approximately 72 divided by r, where r is the percentage growth rate. For example, at 4 percent annual growth, an investment doubles in approximately 72 divided by 4 equals 18 years. This rule works because it approximates the exact formula n equals ln of 2, divided by ln of the quantity 1 plus r, using the approximations ln of the quantity 1 plus r is approximately r and ln of 2 is approximately 0.72.
+
+**Why This Matters**: The Rule of 72 is one of the most practical applications of logarithms. Investors use it to compare investment options. At 8 percent annual return, your money doubles every 9 years (72 divided by 8). At 2 percent inflation, prices double every 36 years (72 divided by 2). Policy makers use it to assess economic growth: if GDP grows 3 percent annually, the economy doubles every 24 years. This simple rule—rooted in logarithms—helps you make quick mental calculations about compound growth without reaching for a calculator.
 
 ### Linearizing Exponential Growth
 
@@ -274,6 +282,8 @@ The quantity 1 plus r divided by n, raised to the power n, approaches e to the p
 - Here the quantity 1 plus 0.12 divided by n, raised to the power n, approaches exp of 0.12 equals 1.12750 or 12.750 percent.
 
 > **Key Concept**: The exponential function naturally arises in continuous compounding. As the compounding frequency increases, the quantity 1 plus r divided by n, raised to the power n, approaches e to the power r as n approaches infinity. For example, 12 percent compounded continuously gives an annual yield of e to the power 0.12 equals 1.12750 or 12.750 percent. Compounding more frequently increases the effective annual yield, with continuous compounding providing the mathematical limit.
+
+**Quick Check**: Before moving on, test your understanding: (1) If ln of y increases by 0.10, what's the approximate percentage change in y? (2) In a log-linear model (ln of y on x), what does the slope coefficient b-two measure? (3) In a log-log model (ln of y on ln of x), what does b-two measure? (4) Using the Rule of 72, how long does it take for GDP to double at 6 percent annual growth? (5) Why do we prefer log models over linear models for earnings data? If you can answer these, you've mastered the core concepts of logarithmic regression.
 
 ## Some in-class Exercises
 

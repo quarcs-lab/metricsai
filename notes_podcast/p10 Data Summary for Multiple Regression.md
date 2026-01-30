@@ -14,6 +14,8 @@ By the end of this chapter, you will be able to:
 
 ---
 
+In [Chapter 5](s05%20Bivariate%20Data%20Summary.md), you learned that each extra square foot adds about 74 dollars to house price. But houses aren't just square footage—they also have bedrooms, bathrooms, lot size, and age. Does an extra bedroom increase price beyond what square footage alone predicts? This is the question multiple regression answers. By including many variables simultaneously, we can isolate each variable's effect while holding all others constant. This is the most important extension in all of econometrics—moving from bivariate to multivariate analysis.
+
 ## 10.1 Example: House Price
 
 - HOUSE data: 29 houses sold in central Davis, California, in 1999.
@@ -33,6 +35,10 @@ Examining the summary statistics: Price (Sale Price in dollars) has Mean 253,910
 Looking at the regression results: Size has Coefficient 68.37, Standard Error 15.39, t statistic 4.44, p value 0.000, and 95 percent confidence interval from 36.45 to 101.29. Bedrooms has Coefficient 2,685, Standard Error 9,193, t statistic 0.29, p value 0.773, and 95 percent confidence interval from negative 16,379 to 21,749. Bathrooms has Coefficient 6,833, Standard Error 15,721, t statistic 0.43, p value 0.668, and 95 percent confidence interval from negative 25,771 to 39,437. Lot Size has Coefficient 2,303, Standard Error 7,227, t statistic 0.32, p value 0.753, and 95 percent confidence interval from negative 12,684 to 17,290. Age has Coefficient negative 833, Standard Error 719, t statistic negative 1.16, p value 0.259, and 95 percent confidence interval from negative 2,325 to 659. Month Sold has Coefficient negative 2,089, Standard Error 3,521, t statistic negative 0.59, p value 0.559, and 95 percent confidence interval from negative 9,390 to 5,213. Intercept has Coefficient 137,791, Standard Error 61,464, t statistic 2.24, p value 0.036, and 95 percent confidence interval from 10,321 to 265,261. Sample size n equals 29. F with 6 comma 22 degrees of freedom equals 6.83. p-value for F equals 0.0003. R-squared equals 0.651. Adjusted R-squared equals 0.555. Standard error equals 24,936.
 
 > **Key Concept**: The multiple regression shows that only Size is statistically significant (t equals 4.44, p equals 0.000). Each additional square foot is associated with a 68.37 dollar increase in price, holding all other variables constant. The model explains 65.1 percent of price variation (R-squared equals 0.651), though adjusted R-squared is lower at 0.555 due to the penalty for including many regressors.
+
+**Why This Matters**: Notice something surprising in the regression results—only Size is statistically significant! Bedrooms, bathrooms, lot size, age, and month sold all have p-values above 0.05. Why? Because once you control for square footage, these other features don't add much independent information. A larger house naturally has more bedrooms, so bedrooms don't matter beyond what size already tells us. This illustrates a key lesson: correlation doesn't equal causation, and simple bivariate relationships can be misleading.
+
+Before jumping into the math, let's explore our data visually to understand the relationships we're trying to model.
 
 ## 10.2 Two-way Scatterplots
 
@@ -60,6 +66,8 @@ Looking at the correlation matrix: Sale Price has correlation 1 with itself. Siz
 - Multiple regression measures role of each variable in predicting price, after controlling for the other variables.
 
 > **Key Concept**: Correlation matrices reveal bivariate relationships, but can be misleading. For example, bedrooms correlate with price, but this may simply reflect that larger houses (higher square footage) have more bedrooms. Multiple regression isolates the effect of each variable.
+
+Now that we've explored correlations, let's formalize how multiple regression estimates the relationship between price and all these variables simultaneously.
 
 ## 10.4 Regression Line
 
@@ -145,6 +153,8 @@ The total derivative of predicted y with respect to x-two equals b-two plus b-th
 
 > **Key Concept**: Partial effects measure the impact of changing one regressor while holding all others constant (partial derivative of y with respect to x-sub-j). Total effects allow other regressors to change as well (total derivative of y with respect to x-sub-j). In most applications, we focus on partial effects to isolate the role of each variable.
 
+**Why This Matters**: The distinction between partial and total effects is crucial for policy analysis. Suppose education increases earnings. The partial effect answers: "If we increase one person's education while everyone else stays the same, how much more do they earn?" The total effect answers: "If we increase everyone's education, accounting for equilibrium effects on labor markets, how much more does the average person earn?" These can be very different! Partial effects are what regression gives us—and they're what most policy questions require.
+
 ### 10.5.2 Further Details on Partial Effects
 
 - Partial effect versus total effect
@@ -157,7 +167,7 @@ The total derivative of predicted y with respect to x-two equals b-two plus b-th
 - OLS measures association but not necessarily causation.
 - so say that a one unit change in x-sub-j is associated with a b-sub-j change in predicted y holding all other regressors constant.
 
-> **Key Concept**: Multiple regression measures association, not causation. We say that a one-unit change in x-sub-j is associated with a b-sub-j change in predicted y holding other regressors constant. Causal claims require additional assumptions (addressed in Chapter 17).
+> **Key Concept**: Multiple regression measures association, not causation. We say that a one-unit change in x-sub-j is associated with a b-sub-j change in predicted y holding other regressors constant. Causal claims require additional assumptions (addressed in [Chapter 17](s17%20Panel%20Data%2C%20Time%20Series%20Data%2C%20Causation.md)).
 
 ## 10.6 Model Fit: Standard Error of the Regression
 
@@ -234,6 +244,10 @@ The formulas are: AIC equals n times ln of sigma-hat-e-squared, plus n times the
 - some statistical packages divide the above formulas by n.
 
 > **Key Concept**: Information criteria (AIC, BIC, HQIC) penalize larger models more heavily than adjusted R-squared. Smaller values are better. BIC is generally preferred as it has a stronger penalty for model size. These criteria are useful for model selection among non-nested models.
+
+**Quick Check**: Before moving on, make sure you understand these core concepts: (1) What does the coefficient b-two equals 68.37 mean in the house price regression with multiple regressors? (2) Why did adjusted R-squared decrease from 0.603 to 0.555 when we added five regressors? (3) What's the difference between partial and total effects? (4) Why is only Size statistically significant in the full model? Understanding these points is essential for interpreting multiple regression results—and they'll be crucial when we learn statistical inference for multiple regression in [Chapter 11](s11%20Statistical%20Inference%20for%20Multiple%20Regression.md).
+
+Now let's see how all these statistics appear in actual computer output when you run a multiple regression.
 
 ## 10.7 Computer Output Following Multiple Regression
 

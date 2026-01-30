@@ -17,6 +17,8 @@ By the end of this chapter, you will be able to:
 
 ---
 
+In [Chapter 10](s10%20Data%20Summary%20for%20Multiple%20Regression.md), you discovered that each extra square foot increases house price by 68.37 dollars—but how confident can you be in that number? Is it statistically different from zero? Could the true effect be anywhere from 30 to 100 dollars? And while Size is significant, are all six regressors together providing useful information? This chapter extends the statistical inference tools from [Chapter 7](s07%20Statistical%20Inference%20for%20Bivariate%20Regression.md) to answer these questions in multiple regression. You'll learn about t-statistics with n minus k degrees of freedom, confidence intervals for partial effects, and F-tests for evaluating joint hypotheses about multiple parameters.
+
 ### Example for this Chapter with dependent variable price
 
 Looking at the regression results: Size has Coefficient 68.37, Standard Error 15.39, t statistic 4.44, p value 0.000, and 95 percent confidence interval from 36.45 to 101.29. Bedrooms has Coefficient 2,685, Standard Error 9,193, t statistic 0.29, p value 0.773, and 95 percent confidence interval from negative 16,379 to 21,749. Bathrooms has Coefficient 6,833, Standard Error 15,721, t statistic 0.43, p value 0.668, and 95 percent confidence interval from negative 25,771 to 39,437. Lot Size has Coefficient 2,303, Standard Error 7,227, t statistic 0.32, p value 0.753, and 95 percent confidence interval from negative 12,684 to 17,290. Age has Coefficient negative 833, Standard Error 719, t statistic negative 1.16, p value 0.259, and 95 percent confidence interval from negative 2,325 to 659. Month Sold has Coefficient negative 2,089, Standard Error 3,521, t statistic negative 0.59, p value 0.559, and 95 percent confidence interval from negative 9,390 to 5,213. Intercept has Coefficient 137,791, Standard Error 61,464, t statistic 2.24, p value 0.036, and 95 percent confidence interval from 10,321 to 265,261. Sample size n equals 29. F with 6 comma 22 degrees of freedom equals 6.83. p-value for F equals 0.0003. R-squared equals 0.651. Adjusted R-squared equals 0.555. Standard error equals 24,936.
@@ -111,6 +113,10 @@ t-sub-j equals the quantity b-sub-j minus beta-sub-j, divided by se of b-sub-j, 
 
 > **Key Concept**: The t-statistic for multiple regression follows the T with n minus k degrees of freedom distribution (not T with n minus 2 degrees of freedom from bivariate regression). Fewer degrees of freedom (n minus k rather than n minus 2) means larger critical values and wider confidence intervals, reflecting the additional parameters estimated.
 
+**Why This Matters**: Degrees of freedom directly affect every confidence interval and hypothesis test you conduct. With n equals 29 observations and k equals 7 parameters, you have only 22 degrees of freedom—not 27. This means your t-critical value is 2.074 instead of 2.052, making confidence intervals about 1 percent wider. Add more regressors and degrees of freedom drop further, widening intervals even more. This is why parsimonious models (fewer regressors) are preferred when possible—you preserve degrees of freedom and get more precise inference.
+
+We've established that OLS estimates have the right distribution for inference. But what makes OLS the right estimator to use in the first place? Let's examine the optimality properties that justify using OLS.
+
 ## 11.2 Estimators of Model Parameters
 
 - We want OLS estimator b-sub-j for the coefficient j-th regressor x-sub-j to be
@@ -126,6 +132,8 @@ t-sub-j equals the quantity b-sub-j minus beta-sub-j, divided by se of b-sub-j, 
   - i.e. minimum variance among unbiased estimators
 
 > **Key Concept**: OLS estimators in multiple regression have three key properties: (1) unbiasedness (expected value equals true parameter) under assumptions 1-2, (2) consistency (converges to true parameter) under assumptions 1-2 plus regularity conditions, and (3) Best Linear Unbiased Estimator or BLUE property (minimum variance among linear unbiased estimators) under assumptions 1-4. With normal errors, OLS is best among all unbiased estimators.
+
+Now that we know OLS is the best estimator, let's use it to construct confidence intervals that quantify uncertainty about the true parameter values.
 
 ## 11.3 Confidence Intervals
 
@@ -155,6 +163,8 @@ b-sub-j plus or minus 2 times se of b-sub-j.
 Starting with b-sub-SF plus or minus t-sub-n-minus-k-comma-alpha-over-2, times se of b-sub-SF, this equals 68.37 plus or minus t-sub-22-comma-0.025, times 15.39. This equals 68.37 plus or minus 2.074 times 15.39. This equals 68.37 plus or minus 31.92. This gives the interval from 36.45 to 100.29.
 
 > **Key Concept**: For the house price example with n equals 29 and k equals 7, the 95 percent confidence interval for the Size coefficient is calculated as 68.37 plus or minus 2.074 times 15.39, yielding 36.45 to 100.29. The critical value t-sub-22-comma-0.025 equals 2.074 from the T distribution with 22 degrees of freedom. We're 95 percent confident this interval contains the true population coefficient.
+
+Confidence intervals tell us a range of plausible values. But often we want to test specific claims—like "Does Size have any effect at all?" or "Is the effect exactly 50 dollars per square foot?" Let's see how to conduct these hypothesis tests.
 
 ## 11.4 Tests on Individual Parameters
 
@@ -203,6 +213,8 @@ t equals b-sub-j divided by se of b-sub-j, which is distributed as T with n minu
 
 > **Key Concept**: For the Size coefficient, t equals 4.44 with p equals 0.0002, strongly rejecting H-zero: beta equals zero. However, testing H-zero: beta equals 50 yields t equals 1.194 with p equals 0.245, failing to reject. This shows Size is statistically significant (nonzero) but we cannot reject that its value is 50. Different null hypotheses can lead to different conclusions.
 
+Individual t-tests are powerful for testing one coefficient at a time. But what if you want to test whether multiple coefficients are simultaneously zero? Or whether several parameters satisfy a set of restrictions together? For these questions, we need a different tool.
+
 ## 11.5 Joint Hypothesis Tests
 
 - Suppose we wish to test more than one restriction on the parameters.
@@ -216,6 +228,8 @@ t equals b-sub-j divided by se of b-sub-j, which is distributed as T with n minu
 - for tests of a single restriction F equals t-squared.
 
 > **Key Concept**: Joint hypothesis tests evaluate multiple parameter restrictions simultaneously. Examples include testing whether several coefficients are jointly zero or whether linear combinations of parameters satisfy specific values. t-tests handle only one restriction at a time. F-tests extend to multiple restrictions, with F equals t-squared for single restrictions.
+
+**Why This Matters**: Imagine testing whether education, experience, and gender jointly affect wages. You could run three separate t-tests, but this doesn't answer the key question: "Do these three variables together add explanatory power?" The F-test answers this directly. It's also essential for model selection—if bedrooms, bathrooms, lot size, age, and month sold are jointly insignificant beyond Size, you should use the simpler model with only Size. F-tests let you rigorously compare nested models and avoid overfitting.
 
 ### 11.5 Joint Hypothesis Tests: F Distribution
 
@@ -309,6 +323,8 @@ H-zero: beta-g-plus-1 equals zero through beta-k equals zero, against H-a: At le
 
 > **Key Concept**: Testing subsets of regressors asks whether the last k minus g coefficients are jointly significant. For house price, testing whether bedrooms, bathrooms, lot size, age, and month sold add value beyond size alone yields F equals 0.417 with p equals 0.832. We fail to reject H-zero, concluding these five regressors are jointly insignificant. The best model includes only Size.
 
+**Quick Check**: Before moving on, test your understanding of joint hypothesis tests: (1) Why can't you use individual t-tests to evaluate whether five regressors are jointly significant? (2) What do the two degrees of freedom (v-one and v-two) represent in an F distribution? (3) For the house price example, the overall F-test rejects (F equals 6.83, p equals 0.0003) but the subset test does not reject (F equals 0.417, p equals 0.832)—how is this possible? (4) If adjusted R-squared increases when adding a regressor, does that mean the regressor is statistically significant at 5 percent? Understanding F-tests is crucial for model selection and avoiding overfitting.
+
 ### Further Details
 
 - For test of a single restriction F equals t-squared
@@ -326,6 +342,8 @@ H-zero: beta-g-plus-1 equals zero through beta-k equals zero, against H-a: At le
 - adjusting for multiple testing is beyond the scope of this text.
 
 > **Key Concept**: For a single restriction, F equals t-squared, so F-tests and two-sided t-tests are equivalent. The 5 percent critical value for F with 1 comma infinity degrees of freedom is 1.96-squared equals 3.84. Some packages report chi-squared tests: in large samples, q times F is distributed chi-squared with q degrees of freedom. Multiple testing increases Type I error probability but adjustments are beyond this text's scope.
+
+The F-tests we've seen so far work with any type of standard errors (including robust standard errors). But under the classical assumptions 1-4, the F-statistic has a particularly simple and intuitive form based on residual sums of squares.
 
 ## 11.6 F Statistic under Assumptions 1-4
 
@@ -394,6 +412,8 @@ F equals the quantity R-squared divided by k minus 1, all divided by the quantit
 - So including a regressor or regressors on the basis of increasing R-bar-squared is a much lower threshold than testing at 5 percent.
 
 > **Key Concept**: Adjusted R-squared increases when adding regressors if and only if F is greater than 1 (for multiple regressors) or the absolute value of t is greater than 1 (for single regressor). Since 5 percent significance typically requires t greater than 2 or F greater than 4, the adjusted R-squared criterion (requiring only F greater than 1) is a much lower threshold than formal significance testing.
+
+You now know how to conduct all the major statistical tests in multiple regression. But how should you present these results to others? Let's examine the standard formats for reporting regression output.
 
 ## 11.7 Presentation of Regression Results
 
@@ -645,7 +665,8 @@ Comparing five presentation formats for the same regression: Results 1 shows sta
 
 **Software Implementation and Commands:**
 - Regression output provides: coefficients, standard errors, t-statistics, p-values, confidence intervals, R-squared, adjusted R-squared, F-statistic
-- Modern practice: Use heteroskedasticity-robust standard errors by default (extends to multiple regression from Chapter 7)
+- Modern practice: Use heteroskedasticity-robust standard errors by default (extends to multiple regression from [Chapter 7](s07%20Statistical%20Inference%20for%20Bivariate%20Regression.md))
 - Most software packages (R, Python) provide similar functionality with slightly different syntax
+- For further topics like multicollinearity, interaction terms, and model specification tests, see [Chapter 12](s12%20Further%20Topics%20in%20Multiple%20Regression.md)
 
 ---

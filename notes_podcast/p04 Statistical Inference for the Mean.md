@@ -17,23 +17,30 @@ By the end of this chapter, you will be able to:
 
 ---
 
+Imagine you've calculated that the average earnings for 171 workers in your sample is 41,413 dollars. But here's the million-dollar question: What can you say about the average earnings for ALL workers in the population—the millions you didn't sample? Can you claim the population mean is exactly 41,413? Of course not! But can you say it's probably between 37,000 and 46,000? Yes—with statistical inference, you can make precisely that kind of statement, complete with a confidence level. This is the power we'll unlock in this chapter.
+
 ## 4.1 Example: Mean Annual Earnings
 
-- Sample of 171 female full-time workers aged 30 in 2010.
-- Descriptive statistics:
+Let's start with a concrete example that we'll use throughout this chapter.
+
+Sample: 171 female full-time workers aged 30 in 2010.
+
+Descriptive statistics:
 
 | Variable | Obs | Mean | Std. Dev. | Min | Max |
 | ---: | ---: | ---: | ---: | ---: | ---: |
 | earnings | 171 | 41412.69 | 25527.05 | 1050 | 172000 |
 
-- Key statistics:
-- Mean: sample mean x-bar
-- Std. Dev.: standard error s measures the precision of x-bar as an estimate of mu.
-- The next slides present methods for statistical inference on mu that are explained in detail in the remainder of the chapter.
+**Key statistics:**
+- **Mean**: Sample mean x-bar equals 41,413 dollars (our best guess for population mean)
+- **Standard deviation**: s equals 25,527 dollars (measures spread in the sample)
+- **Standard error**: se equals s divided by square root of n equals 1,952 dollars (measures precision of our estimate)
 
-**Key Concept: Sample Mean as Estimator**
+The standard error of 1,952 tells us something crucial: if we repeated this sampling many times, sample means would typically differ from the true population mean by about 1,952 dollars. This is moderate precision—not perfect, but useful!
 
-The sample mean x-bar is an unbiased estimator of the population mean mu: the expected value of x-bar equals mu. The standard error se of x-bar equals s divided by the square root of n, which measures the precision of x-bar as an estimate of mu. With sample size n equals 171 and standard deviation s equals 25,527, the standard error is 1,952, indicating moderate precision in our estimate of mean earnings.
+**Why This Matters**: We have 171 earnings observations, but we want to make claims about millions of workers we didn't sample. Statistical inference gives us the tools to do this responsibly. We can't say the population mean is exactly 41,413 dollars. But we CAN construct a range—say, 37,560 to 45,266 dollars—and say "we're 95% confident the true mean falls in this range." This confidence interval transforms one sample into a principled statement about the entire population.
+
+> **Key Concept**: The sample mean x-bar equals 41,413 is our estimate of the unknown population mean mu. The standard error se equals 1,952 measures how precise this estimate is. Smaller standard errors mean more precise estimates. With n equals 171 and s equals 25,527, our standard error is moderate, allowing useful but not pinpoint-precise inference about the population mean.
 
 ### 95% Confidence Interval for the Mean
 
@@ -54,19 +61,27 @@ Number of obs equals 171
 
 ### 95% Confidence Interval Calculation
 
-- In general a confidence interval is
+All confidence intervals follow the same recipe:
 
-estimate plus-or-minus critical value times standard error
+**estimate plus-or-minus critical value times standard error**
 
-- Here we consider the population mean mu.
-- The estimate is x-bar equals 41412.69
-- The standard error measures the precision of x-bar as an estimate of mu
-- se of x-bar equals s divided by the square root of n, which equals 25527.05 divided by the square root of 171, which equals 1952.1.
-- The 95 percent critical value is approximately 2
-- more precisely here c equals 1.974 as the probability that the absolute value of T-sub-170 is less than or equal to 1.974 equals 0.95.
-- The 95 percent confidence interval is then
+Let's apply this formula step by step for the population mean mu.
 
-x-bar plus-or-minus c times se of x-bar, which equals 41412.69 plus-or-minus 1.974 times 1952.1, which equals the interval from 37559 to 45266.
+**Step 1: The estimate**
+x-bar equals 41,413 dollars (our sample mean)
+
+**Step 2: The standard error**
+se equals s divided by square root of n equals 25,527 divided by square root of 171 equals 1,952 dollars
+
+**Step 3: The critical value**
+For a 95% confidence interval, the critical value is approximately 2. More precisely, c equals 1.974, chosen so that the probability that the absolute value of T-sub-170 is less than or equal to 1.974 equals 0.95.
+
+**Step 4: Calculate the interval**
+41,413 plus-or-minus 1.974 times 1,952 equals 41,413 plus-or-minus 3,853
+
+**Result**: The 95% confidence interval is 37,560 to 45,266 dollars.
+
+This means: we're 95% confident the true population mean earnings fall between 37,560 and 45,266 dollars.
 
 ### Critical Value for the Confidence Interval
 
@@ -117,9 +132,11 @@ t equals the quantity x-bar minus mu-naught, divided by se of x-bar, which equal
 - Here p equals the probability that the absolute value of T-sub-170 is greater than or equal to 0.7237, which equals 0.4703.
 - Since this probability exceeds 0.05 we do not reject H-naught.
 
-**Key Concept: Confidence Intervals and Hypothesis Tests**
+**Quick Check**: Our 95% confidence interval is 37,560 to 45,266 dollars. Someone claims the population mean is 40,000 dollars. Is this claim consistent with our data? [Pause] Yes! The value 40,000 falls inside our confidence interval, so it's a plausible value. We would NOT reject this claim.
 
-A 95% confidence interval provides a range of plausible values for mu: estimate plus-or-minus critical value times standard error. A hypothesis test uses the t-statistic t equals the quantity x-bar minus mu-naught, divided by se of x-bar, to evaluate whether a hypothesized value mu-naught is consistent with the data. The p-value measures how extreme the observed t-statistic is under H-naught. Here, with t equals 0.724 and p equals 0.470, we do not reject H-naught: mu equals 40,000 at the 5% level.
+> **Key Concept**: A 95% confidence interval provides a range of plausible values for mu. The formula is: estimate plus-or-minus critical value times standard error. A hypothesis test uses the t-statistic to evaluate whether a specific hypothesized value mu-naught is consistent with the data. The p-value measures how extreme the observed t-statistic is. Here, with t equals 0.724 and p equals 0.470, we do not reject H-naught: mu equals 40,000 at the 5% level—which makes sense since 40,000 falls in our confidence interval!
+
+We've seen confidence intervals and hypothesis tests in action. But where do these methods come from? To understand their foundation, we need to explore the t-statistic and t-distribution. Let's dig deeper.
 
 ## 4.2 t Statistic and t distribution
 
@@ -146,23 +163,29 @@ Z equals the quantity X-bar minus mu, divided by the quantity sigma over the squ
 
 ### The t-statistic
 
-- Now replace the unknown sigma-squared by an estimator S-squared equals 1 over n minus 1 times the sum from i equals 1 to n of the quantity X-sub-i minus X-bar, all squared.
+Here's the problem: We don't know sigma-squared (the population variance). We only have s-squared (the sample variance).
+
+**Solution:** Replace the unknown sigma-squared with our estimate S-squared.
+
+This gives us the **t-statistic**:
 
 T equals the quantity X-bar minus mu, divided by the quantity S over the square root of n
 
-- The distribution for T is complicated. The standard approximation is T has the t distribution with n minus 1 degrees of freedom
+**But there's a catch:** When we use s instead of sigma, we introduce additional uncertainty. The distribution of T is no longer exactly normal—it has fatter tails to account for this estimation uncertainty.
+
+**The approximation:** T follows a t-distribution with n minus 1 degrees of freedom.
 
 T is distributed as T of n minus 1
 
-- Comments
-- different degrees of freedom correspond to different t distributions
-- the term degrees of freedom is used because X-bar equals 1 over n times the sum from i equals 1 to n of X-sub-i implies that only n minus 1 terms in the sum are free to vary
-- T is distributed as T of n minus 1 exactly in the very special case that X-sub-i's are normally distributed
-- otherwise T is not T of n minus 1 exactly but is the standard approximation.
+**Key points:**
+- Different degrees of freedom (n minus 1) give different t-distributions
+- The term "degrees of freedom" reflects that only n minus 1 observations can vary independently once we've calculated the sample mean
+- T is distributed exactly as T of n minus 1 only when data are normally distributed
+- Otherwise, this is an approximation—but it's the standard one used in practice
 
-**Key Concept: The t Distribution**
+**Why This Matters**: In theory, we use the normal distribution when sigma is known. In practice, sigma is NEVER known! We always estimate it with s. This means we should always use the t-distribution, not the normal distribution, for inference about means. The t-distribution's fatter tails account for the extra uncertainty from estimating sigma. Fortunately, for large samples (n > 30), the difference between t and normal distributions becomes negligible.
 
-The t distribution is similar to the standard normal N of 0 comma 1 but with fatter tails. The t-statistic T equals the quantity X-bar minus mu, divided by the quantity S over the square root of n, follows a t distribution with n minus 1 degrees of freedom. As n increases, the t distribution approaches the standard normal distribution. For n greater than 30, t-sub-n-minus-1 comma 0.025 is approximately 2, giving the "two-standard-error rule" for approximate 95% confidence intervals.
+> **Key Concept**: The t-distribution resembles the standard normal but has fatter tails to account for estimating sigma. The t-statistic T equals the quantity X-bar minus mu, divided by S over the square root of n, follows a t-distribution with n minus 1 degrees of freedom. As sample size increases, the t-distribution approaches the normal distribution. For n greater than 30, the critical value is approximately 2, giving the convenient "two-standard-error rule" for 95% confidence intervals.
 
 ### The t -statistic (continued)
 

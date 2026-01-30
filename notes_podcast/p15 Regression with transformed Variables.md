@@ -15,6 +15,8 @@ By the end of this chapter, you will be able to:
 
 ---
 
+Do earnings increase linearly with age, or do they peak in mid-career and then decline? Does an extra year of education have the same payoff whether you're 25 or 55? Can we use our regression to predict someone's salary and not just the logarithm of their salary? Real economic relationships are rarely linear—they bend, interact, and often work better on percentage scales than dollar scales. In this chapter, we'll learn how to capture these nonlinear patterns using transformations: quadratic terms, interactions, and natural logarithms (building on Chapter 9). The key challenge? Coefficients no longer equal marginal effects, prediction requires care to avoid bias, and interpretation demands attention to whether we're working with levels, logs, or both.
+
 ## 15.1 Example: Earnings, Gender, Education, Worker Type
 
 - Dataset EARNINGS_COMPLETE
@@ -82,6 +84,8 @@ MER equals ME evaluated at x equals x-star, which equals the quantity change in 
 - Most often use AME, with ME-sub-i evaluated using calculus methods.
 
 > **Key Concept**: For nonlinear models, marginal effects vary across observations. The average marginal effect (AME) averages ME across all observations, the marginal effect at the mean (MEM) evaluates at sample means, and marginal effect at a representative value (MER) evaluates at a chosen point. AME is most commonly used.
+
+> **Why This Matters**: The choice between AME, MEM, and MER affects your policy conclusions. Suppose you're estimating how a minimum wage hike affects employment. MEM evaluates at the average wage and average employment level—but most workers aren't "average." AME captures the effect for low-wage workers (most affected), middle-wage workers (somewhat affected), and high-wage workers (unaffected), then averages them. This gives a more realistic picture. For nonlinear models, AME is the gold standard because it respects that a \$1 wage increase affects a \$10/hour worker differently than a \$50/hour worker.
 
 ## Computation of Marginal Effects
 
@@ -179,6 +183,8 @@ ME equals b-two plus 2 times b-three times x plus 3 times b-four times x-squared
 
 which again will vary with the point of evaluation x.
 
+Quadratic models let one variable's effect change with its own level—earnings rise with age, then fall. But what if we want one variable's effect to change with the level of a different variable? For example, does the payoff to education depend on how old you are? Do younger workers benefit more from schooling, or do older workers? To answer questions like these, we need interaction terms—and they'll reappear throughout econometrics (recall Chapter 14's gender-education interactions).
+
 ## 15.4 Interacted Regressors
 
 - Example with x times z an interacted regressor is
@@ -220,6 +226,8 @@ ME-sub-Ed equals 4515 plus 29 times Age.
 
 > **Key Concept**: With interaction terms (x times z), the marginal effect of x depends on z: ME-sub-x equals b-two plus b-four times z. Individual coefficients may be insignificant due to collinearity with the interaction term, so use joint F-tests to assess the overall significance of a variable and its interactions.
 
+**Quick Check**: You regress earnings on Age, Education, and Age times Education. The coefficient on Age is 127 (t equals 0.18, insignificant). Does this mean age doesn't matter for earnings? (Pause and think.) Answer: No! The marginal effect of age is 127 plus 29 times Education (if the interaction coefficient is 29). At Education equals 14 years, the age effect is 127 plus 29 times 14 equals 533 dollars per year—economically meaningful. The t-test on Age alone is misleading because Age is highly correlated with the interaction term. Always use a joint F-test on Age and Age times Education together (recall Chapter 11). Here, F equals 6.49 with p equals 0.002, confirming age is highly significant.
+
 ## Joint Hypothesis tests
 
 - Individual coefficients are statistically insignificant at 5 percent
@@ -235,14 +243,15 @@ ME-sub-Ed equals 4515 plus 29 times Age.
 - individual contributions are measured much less precisely
 - here standard errors of Age and Education more than triple from 151 and 641 to 719 with inclusion of variable AgebyEduc.
 
+We've now seen how quadratics and interactions capture different types of nonlinearity—curvature within one variable, and relationships that vary across variables. But there's another powerful transformation we introduced in Chapter 9: natural logarithms. Logs are especially useful for variables that vary widely (like earnings from \$4,000 to \$504,000) or when we care about percentage changes rather than level changes. Let's revisit log transformations, now with a focus on computing marginal effects and making predictions in original units.
 
 ## 15.5 Natural Logarithm Transformations
 
-- Consider models with ln y and/or ln x.
-- Chapter 9 gave interpretation of coefficients
-- semi-elasticity in log-linear model
-- elasticity in log-log model.
-- Now additionally consider marginal effects ME-sub-x equals change in y over change in x.
+We introduced log transformations in Chapter 9, where we learned two key interpretations:
+- In **log-linear models** (ln y equals beta-one plus beta-two times x), beta-two is a semi-elasticity
+- In **log-log models** (ln y equals beta-one plus beta-two times ln x), beta-two is an elasticity
+
+Now we'll go deeper. We'll compute marginal effects ME-sub-x equals change in y over change in x in original units, not just percentage changes.
 - For log-linear model ln y equals b-one plus b-two times x, use ME-sub-x equals b-two times predicted y
 - reason: change in ln y over change in x equals b-two, but change in ln y is approximately equal to change in y over y, so the quantity change in y over y, all divided by change in x equals b-two, and on solving, change in y over change in x equals b-two times y
 - Similarly for log-log model ln y equals b-one plus b-two times ln x, use ME-sub-x equals b-two times predicted y over x.
@@ -292,23 +301,33 @@ y-tilde equals the exponential of the quantity s-sub-e squared divided by 2, all
 
 ## Retransformation Bias Correction
 
-- Log-linear population model assumes the expected value of u given x equals 0 in
+**The setup**: Our log-linear population model assumes
 
-ln y equals beta-one plus beta-two times x plus u
+ln y equals beta-one plus beta-two times x plus u, where the expected value of u given x equals 0.
 
-- Taking the exponential on both sides: y equals the exponential of the quantity beta-one plus beta-two times x plus u.
-- So the conditional mean of y given x is
+**Taking exponentials**: Exponentiate both sides to get
 
-The expected value of y given x equals the expected value of the exponential of the quantity beta-one plus beta-two times x plus u, given x, which equals the exponential of the quantity beta-one plus beta-two times x, all times the expected value of the exponential of u, given x.
+y equals exp of the quantity beta-one plus beta-two times x plus u.
 
-- Problem: We need to know the expected value of the exponential of u, given x.
-- in general the expected value of the exponential of u given x is greater than 1
-- the expected value of the exponential of u given x equals the exponential of sigma-sub-u squared divided by 2, if u given x is distributed as normal with mean 0 and variance sigma-sub-u squared
-  - i.e. normal homoskedastic errors
+**Computing the conditional mean**: What's the expected value of y given x? Taking expectations:
 
-- then the expected value of y given x equals the exponential of sigma-sub-u squared divided by 2, all times the exponential of the quantity beta-one plus beta-two times x.
+The expected value of y given x equals the expected value of exp of the quantity beta-one plus beta-two times x plus u, given x.
+
+We can pull out constants, giving:
+
+The expected value of y given x equals exp of the quantity beta-one plus beta-two times x, times the expected value of exp of u, given x.
+
+**The problem**: We need the expected value of exp of u given x. In general, this is greater than 1, even though the expected value of u given x equals 0.
+
+**The solution** (when errors are normal and homoskedastic): If u given x is distributed as normal with mean 0 and variance sigma-sub-u squared, then
+
+The expected value of exp of u given x equals exp of sigma-sub-u squared divided by 2.
+
+**Putting it together**: The expected value of y given x equals exp of sigma-sub-u squared divided by 2, times exp of the quantity beta-one plus beta-two times x.
 
 > **Key Concept**: Predicting y from a log-linear model requires accounting for retransformation bias. The naive prediction exp(ln predicted y) underestimates the expected value of y given x. With normal homoskedastic errors, multiply by the exponential of s-sub-e squared divided by 2, where s-sub-e is the standard error from the log regression.
+
+> **Why This Matters**: Retransformation bias is one of the most common mistakes in applied economics. If you regress log earnings on education and naively exponentiate to predict someone's salary, you'll systematically underpredict—sometimes by 10-20 percent or more. This matters for policy: if you're designing a wage subsidy program and underestimate earnings by 15 percent, you'll underfund the program. Banks making loan decisions, governments projecting tax revenue, and researchers forecasting GDP all need to get this right. The fix is simple—multiply by exp of s-sub-e squared over 2—but forgetting it is costly.
 
 ## R-squared with Transformed Dependent Variable
 

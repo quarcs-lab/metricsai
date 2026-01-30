@@ -15,6 +15,8 @@ By the end of this chapter, you will be able to:
 
 ---
 
+You've learned the theory of multiple regression—OLS estimation, hypothesis tests, F-statistics, robust standard errors. But theory alone doesn't prepare you for the messy reality of applied work. Does parent education cause higher school performance, or do wealthy families simply choose better schools? Why did the Phillips curve work beautifully for 20 years then suddenly break down? How do you prove that political incumbency causes vote gains when you can't run randomized experiments? This chapter shows you regression in action through eight real case studies, from California schools to Cobb-Douglas production functions to causal inference methods like difference-in-differences and instrumental variables. You'll see how practitioners navigate omitted variables bias, choose appropriate standard errors, and transform raw data into insights—skills no amount of theory can teach alone.
+
 ## 13.1 Case Study 1: School Performance Index
 
 **In this case study:**
@@ -81,6 +83,7 @@ For the overall model: n equals 807, F-statistic with 6 and 22 degrees of freedo
 - This makes it difficult to calculate the separate role of other educational inputs such as teacher quality.
 - California also produced a "similar schools" index which controls for socioeconomic characteristics.
 
+The school performance case showed multiple regression with cross-sectional data. But what about nonlinear relationships? Can we use OLS when the model isn't linear? The Cobb-Douglas production function demonstrates how a simple logarithmic transformation unlocks powerful nonlinear analysis.
 
 ## 13.2 Cobb-Douglas Production Function
 
@@ -111,6 +114,7 @@ Taking the natural logarithm of both sides: ln of Q equals ln of the quantity al
 
 - This result uses the properties of natural logarithm that ln of a times b equals ln a plus ln b, and ln of a to the power b equals b times ln a.
 - So we do OLS regression of ln Q on an intercept, ln K and ln L.
+- For more on logarithmic transformations and their interpretation, see [Chapter 9](s09%20Models%20with%20Natural%20Logarithms.md).
 
 > **Key Concept**: Taking natural logarithms of the Cobb-Douglas production function transforms a nonlinear model into a linear model suitable for OLS regression. The resulting coefficients are elasticities that can be directly interpreted: beta-two is the capital elasticity (percentage change in output from a 1 percent change in capital), and beta-three is the labor elasticity.
 
@@ -197,7 +201,7 @@ Starting from Q equals alpha times K to the beta-two times L to the beta-three, 
 - We nonetheless used HAC standard errors with m equals 3.
 - Comparing robust standard errors for b-one and b-two: default standard errors are 0.064 and 0.145, heteroskedastic-robust are 0.105 and 0.216, and HAC with m equals 3 are 0.062 and 0.134.
 
-> **Key Concept**: For time series data, HAC (Heteroskedasticity and Autocorrelation Consistent) standard errors account for both changing error variances and correlation over time. They provide more reliable inference than default standard errors when these issues are present. In this case, the HAC standard errors are similar to default, suggesting serial correlation is not a major concern.
+> **Key Concept**: For time series data, HAC (Heteroskedasticity and Autocorrelation Consistent) standard errors account for both changing error variances and correlation over time. They provide more reliable inference than default standard errors when these issues are present. In this case, the HAC standard errors are similar to default, suggesting serial correlation is not a major concern. For comprehensive coverage of robust standard errors, see [Chapter 12](s12%20Further%20Topics%20in%20Multiple%20Regression.md) section 12.1.
 
 
 ## 13.3 Case Study 3: Phillips Curve
@@ -279,7 +283,7 @@ Inflation-hat equals 0.270 (t-statistic 0.43) minus 0.128 (t-statistic negative 
 - The observed sign reversal for the coefficient of Urate is a classic example of omitted variables bias.
 - The true model is: Inflation equals beta-one plus beta-two times Urate, plus beta-three times Expinflation, plus u-sub-t.
 - The incorrect bivariate model is: Inflation equals b-one plus b-two times Urate.
-- From chapter 16.3, omitted variables bias formula: the expected value of b-two equals beta-two plus beta-three times gamma.
+- From [Chapter 16](s16%20Checking%20the%20Model%20and%20Data.md) section 16.3, omitted variables bias formula: the expected value of b-two equals beta-two plus beta-three times gamma.
 - Gamma is the coefficient of Urate in a regression of Expinflation on Urate.
 - Here, a bivariate regression of Expinflation on Urate has slope of 0.343.
 - Then the estimated expected value of b-two equals negative 0.128 plus 1.147 times 0.343, which equals 0.266.
@@ -287,6 +291,9 @@ Inflation-hat equals 0.270 (t-statistic 0.43) minus 0.128 (t-statistic negative 
 
 > **Key Concept**: The sign reversal for the unemployment coefficient is a classic example of omitted variables bias. When expected inflation is omitted from the regression, the unemployment coefficient captures both the true negative effect of unemployment on inflation and a spurious positive correlation through expected inflation. The omitted variables bias formula perfectly predicts the magnitude of the biased coefficient.
 
+**Why This Matters**: The Phillips curve breakdown isn't just an academic curiosity—it reshaped macroeconomic policy worldwide. In the 1970s, central banks tried to exploit the apparent unemployment-inflation trade-off, tolerating higher inflation to boost employment. This failed spectacularly, leading to stagflation (high unemployment and high inflation simultaneously). The breakdown taught us that omitting a crucial variable (inflation expectations) can lead to catastrophically wrong policy conclusions. Modern central banking now focuses on anchoring inflation expectations—a direct lesson from this case study. Omitted variables bias isn't just a statistical nuance; it can derail entire economies.
+
+**Quick Check**: Before moving on, make sure you understand these key lessons from the first three case studies: (1) Why does high correlation among regressors make it hard to isolate individual effects in the school performance case? (2) How does taking natural logarithms transform the nonlinear Cobb-Douglas model into a linear OLS model? (3) What is the omitted variables bias formula, and why did omitting expected inflation reverse the unemployment coefficient's sign in the Phillips curve? (4) What's the difference between statistical significance and economic/policy significance? Understanding these points prepares you for the advanced causal methods in the remaining case studies.
 
 ## 13.4 Automobile Efficiency
 
@@ -297,6 +304,7 @@ Inflation-hat equals 0.270 (t-statistic 0.43) minus 0.128 (t-statistic negative 
 - We find that greatly increased fuel efficiency from 1980 to 2006 has been completely negated by heavier more powerful vehicles.
 - We use cluster-robust standard errors with clustering on car manufacturer because errors are correlated within manufacturer.
 
+The first four case studies used standard multiple regression to explore associations. But what if we want to make causal claims—to say that X causes Y, not just that they're correlated? The next four case studies demonstrate cutting-edge identification strategies that let us estimate causal effects from observational data and experiments.
 
 ## 13.5 Rand Health Insurance Experiment
 
@@ -341,6 +349,9 @@ Inflation-hat equals 0.270 (t-statistic 0.43) minus 0.128 (t-statistic negative 
 - The instrument is log settler mortality many years in the past.
 - We find that better institutions lead to higher GDP.
 
+**Why This Matters**: These four causal methods—randomized control trials, difference-in-differences, regression discontinuity, and instrumental variables—are the workhorses of modern applied economics. They've revolutionized development economics (RCTs for evaluating poverty programs), labor economics (difference-in-differences for minimum wage effects), political economy (regression discontinuity for electoral advantages), and institutional economics (IV for governance impacts). Each method solves a specific identification problem that simple OLS can't handle. Understanding when and how to apply these methods distinguishes sophisticated empirical work from naive correlational analysis. [Chapter 17](s17%20Panel%20Data%2C%20Time%20Series%20Data%2C%20Causation.md) covers these methods in depth.
+
+We've seen eight diverse applications of regression. But there's an unglamorous truth about empirical work: most of your time won't be spent running regressions or interpreting results. It'll be spent wrestling with raw data, cleaning errors, merging datasets, and checking everything obsessively. Let's discuss this crucial but often-overlooked phase.
 
 ## 13.9 From Raw Data to Final Data
 
@@ -349,6 +360,8 @@ Inflation-hat equals 0.270 (t-statistic 0.43) minus 0.128 (t-statistic negative 
 - The second task is combining data from multiple sources. Merging data requires care.
 - The third task is cleaning the data, which entails recoding data and detecting data that are in error.
 - And in many places throughout this process: check the data.
+
+**Why This Matters**: Data preparation isn't glamorous, but it's where most empirical projects succeed or fail. A single miscoded variable can invalidate an entire analysis. Merging datasets incorrectly can create spurious correlations. Failing to detect outliers can drive your entire regression. Experienced researchers know this: they budget 70-80% of project time for data work, not econometrics. The Cobb-Douglas production function case (13.2) used carefully curated historical data. The Phillips curve case (13.3) required merging inflation data from multiple sources. The health insurance experiment (13.5) involved cleaning 20,000+ observations across thousands of families. None of these analyses would be possible without meticulous data carpentry. Master data cleaning, and you'll be more productive than someone who knows every econometric method but can't wrangle real data.
 
 ---
 

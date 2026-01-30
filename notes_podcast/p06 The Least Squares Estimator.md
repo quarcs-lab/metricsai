@@ -17,138 +17,263 @@ By the end of this chapter, you will be able to:
 
 ---
 
+In Chapter 5, we learned to draw a regression line through our data. But a crucial question remains: How does this sample line relate to the true relationship in the population? If we drew a different sample, would we get a different line? (Yes!) And if so, how much would it vary? These questions lead us to the statistical theory of regression—understanding the OLS estimator as a random variable with predictable properties.
+
 ## 6.1 Population Model: Conditional Mean of y given x
 
-- The sample model is a line b-one plus b-two times x.
-- So we assume that the population model is also a line, denoted beta-one plus beta-two times x
-- where beta is "beta" and we use Greek letters for (unknown) parameters.
-- More formally the conditional mean of y is assumed to be linear in x
+When we fit a regression line to sample data, we get b-one plus b-two times x. This is our estimate. But what's the truth in the population?
+
+We assume the **population model** is also a line, but with unknown parameters:
+
+beta-one plus beta-two times x
+
+where beta (Greek letter) denotes unknown population parameters. Why Greek letters? By convention, we use Greek for population parameters (what we want to know) and Roman letters for sample estimates (what we calculate).
+
+**More formally**: We assume the **conditional mean** of y is linear in x:
 
 The expected value of Y given X equals x, equals beta-one plus beta-two times x.
 
-- The population conditional mean of Y given X equals x
-- is the probability-weighted average of all possible values of Y for a given value of x; e.g. earnings conditional on years of schooling
-- is denoted E of Y given X equals x
-- generalizes E of Y in chapter 3 that is the probability-weighted average of all possible values of Y.
+**What is this conditional mean?** It's the probability-weighted average of all possible y values for a given x value.
+
+**Example**: Earnings conditional on years of schooling. For people with 12 years of education, earnings vary—some earn 30,000 dollars, others 50,000, others 80,000. The conditional mean is the average earnings across all people with 12 years of education. We assume this average changes linearly as education changes.
+
+**How this extends Chapter 3**: In Chapter 3, we worked with the expected value of Y—the unconditional mean, averaging over all observations regardless of any other variable. Here, the expected value of Y given X equals x is a **conditional** mean—the average of Y for observations with a specific x value. This allows the mean to vary with x.
 
 
 ### Population Conditional Mean (continued)
 
-- We assume that the conditional mean is linear in x
+Our **key assumption**: The conditional mean is linear in x.
 
 The expected value of Y given X equals x, equals beta-one plus beta-two times x.
 
-- Commonly-used simpler notation is
+Or using simpler notation (mixing uppercase and lowercase):
 
 The expected value of y given x equals beta-one plus beta-two times x.
 
-- Note: In general the conditional mean need not be linear.
-- Case 1: E of Y given X equals 1 equals 5, E of Y given X equals 2 equals 7, E of Y given X equals 3 equals 9
-- This is linear since this implies E of Y given X equals x equals 3 plus 2 times x.
-- Case 2: E of Y given X equals 1 equals 5, E of Y given X equals 2 equals 7, E of Y given X equals 3 equals 12
-- This is nonlinear as the increase by 2 from X equals 1 to X equals 2 but increases by 5 from X equals 2 to X equals 3.
-- In Chapter 9 we consider nonlinear conditional means.
+**Important caveat**: Linearity is an assumption, not a mathematical fact. In general, conditional means need not be linear!
+
+**Example of a linear conditional mean** (Case 1):
+
+Suppose the conditional means are:
+- E of Y given X equals 1 equals 5
+- E of Y given X equals 2 equals 7
+- E of Y given X equals 3 equals 9
+
+Notice the pattern: each increase in X by 1 unit increases the conditional mean by 2 units. This is linear! We can write this as: E of Y given X equals x equals 3 plus 2 times x.
+
+**Example of a nonlinear conditional mean** (Case 2):
+
+Now suppose:
+- E of Y given X equals 1 equals 5
+- E of Y given X equals 2 equals 7 (increase of 2)
+- E of Y given X equals 3 equals 12 (increase of 5!)
+
+The increases aren't constant. This violates linearity. No straight line can fit this pattern perfectly.
+
+**What do we do about nonlinearity?** We'll tackle that in Chapter 9 using transformations like logarithms. For now, we assume linearity holds—or at least provides a good approximation.
 
 
 ### Error Term
 
-- y does not exactly equal beta-one plus beta-two times x
-- instead E of y given x equals beta-one plus beta-two times x.
-- The difference between y and E of y given x is called the error term u
+Here's a key insight: Individual observations don't fall exactly on the population line. We don't have:
 
-To define the error term u, we start with u equals y minus the expected value of y given x, which equals y minus the quantity beta-one plus beta-two times x.
+y equals beta-one plus beta-two times x (not exact!)
 
-- The error term u is not observed as beta-one and beta-two are unknown.
+Instead, we have:
 
+E of y given x equals beta-one plus beta-two times x (on average)
+
+**What's the difference?** Individual y values deviate from this conditional mean. We call this deviation the **error term** u.
+
+**Formal definition**:
+
+u equals y minus the expected value of y given x, which equals y minus the quantity beta-one plus beta-two times x.
+
+Rearranging:
+
+y equals beta-one plus beta-two times x, plus u
+
+**Why can't we see u?** Because beta-one and beta-two are unknown! We've never observed the entire population, so we don't know where the population line is. Without the population line, we can't calculate the errors relative to it.
 
 ### Error Term versus Residual - a crucial distinction
 
-- u is not observed - it is the difference between y and the unknown population line beta-one plus beta-two times x (the solid line)
-- e is observed - it is the difference between y and the known fitted line b-one plus b-two times x (the dashed line)
+This is one of the most important (and confusing!) conceptual distinctions in regression. Pay close attention:
+
+**Error term u** (unobserved):
+- The distance between y and the **unknown population line** (beta-one plus beta-two times x)
+- Shown as distance to the solid line in the left panel below
+- We can never see u because we don't know beta-one and beta-two
+
+**Residual e** (observed):
+- The distance between y and the **known fitted line** (b-one plus b-two times x)
+- Shown as distance to the dashed line in the right panel below
+- We CAN see e because we calculated b-one and b-two from our sample
+
 ![](https://cdn.mathpix.com/cropped/1db1a0ef-9c44-414f-9671-ab8a889b52b7-08.jpg?height=449&width=516&top_left_y=397&top_left_x=75)
 ![](https://cdn.mathpix.com/cropped/1db1a0ef-9c44-414f-9671-ab8a889b52b7-08.jpg?height=445&width=480&top_left_y=399&top_left_x=712)
+
+**Think of it this way**: Errors are theoretical (relative to the unknowable truth). Residuals are empirical (relative to our estimate from the data).
 
 
 ### Error Term is assumed to have mean zero
 
-- Since u equals y minus the quantity beta-one plus beta-two times x, we have
+We've established that:
 
 y equals beta-one plus beta-two times x, plus u
 
-- The error term is assumed to be zero on average for each x value
-- sometimes u-sub-i is greater than zero and so y-sub-i is above the population line
-- sometimes u-sub-i is less than zero and so y-sub-i is below the population line
-- but the long-run average of u-sub-i (at each value of x) is zero.
-- More precisely the error term has conditional mean zero
+But what properties should the error term u have? The most important assumption is that **errors average to zero at each x value**.
+
+**The assumption**:
 
 The expected value of u given x equals zero.
 
-- This ensures that the population line is indeed beta-one plus beta-two times x.
+**What this means intuitively**:
+- For any given x value (say, years of education equals 12), some observations will have positive errors (earnings above the line)
+- Other observations will have negative errors (earnings below the line)
+- But on average, across all people with education equals 12, the errors balance out to zero
 
-To show this: The expected value of y given x equals the expected value of the quantity beta-one plus beta-two times x, plus u, all given x. This equals beta-one plus beta-two times x, plus the expected value of u given x. Which equals beta-one plus beta-two times x, provided that the expected value of u given x equals zero.
+**Why this assumption matters**: It ensures the population line is truly centered at the conditional mean!
 
-> **Key Concept**: The conditional mean E of y given x equals beta-one plus beta-two times x defines the population regression line as how the average value of y varies with x. The error term u equals y minus this conditional mean captures deviations from the population line. The crucial assumption that the expected value of u given x equals zero ensures that errors average to zero at every x value, making the population line correctly centered. This zero conditional mean assumption is fundamental for unbiased estimation.
+**Here's the proof**:
+
+Start with: y equals beta-one plus beta-two times x, plus u
+
+Take expectations conditional on x:
+
+The expected value of y given x equals the expected value of the quantity beta-one plus beta-two times x, plus u, all given x.
+
+Since beta-one plus beta-two times x is not random (it's just a number once we condition on x), we can pull it outside:
+
+This equals beta-one plus beta-two times x, plus the expected value of u given x.
+
+Now use our assumption that the expected value of u given x equals zero:
+
+This equals beta-one plus beta-two times x, plus zero, which equals beta-one plus beta-two times x.
+
+**Conclusion**: The zero conditional mean assumption ensures the population regression line correctly represents the conditional mean of y given x. Without this assumption, our line would be systematically too high or too low!
+
+> **Key Concept**: The population regression line E of y given x equals beta-one plus beta-two times x describes how the average value of y varies with x. The error term u equals y minus E of y given x captures individual deviations from this average. The assumption that the expected value of u given x equals zero is crucial—it ensures errors balance out at every x value, making our regression line correctly centered. This zero conditional mean assumption is the foundation for unbiased OLS estimation.
 
 ### Population Conditional Variance of y given x
 
-- The variability of the error term around the line will determine in part the precision of our estimates
-- greater variability is greater noise so less precision.
-- We initially assume that the error variance is constant and does not vary with x
+We've established that errors have mean zero at each x value. But how spread out are they? This matters because **error variability determines the precision of our estimates**.
+
+Think of it this way: If observations are tightly clustered around the population line (small error variance), we can estimate the line precisely. If observations are scattered far from the line (large error variance), our estimates will be noisy and imprecise.
+
+**The homoskedasticity assumption**: We assume the error variance is **constant** across all x values:
 
 The variance of u given x equals sigma-u-squared
 
-- This is called the assumption of homoskedastic errors
-- "skedastic" based on the Greek word for scattering
-- "homos" is the Greek word for same
-- this assumption can be relaxed (and is often relaxed - later).
-- The error term provides the only variation in y around the population line so then
+This assumption has a fancy name: **homoskedasticity** (pronounced "homo-skeh-das-TIS-ity").
 
-The variance of y given x equals the variance of u given x, which equals sigma-u-squared
+**Etymology**:
+- "Homos" is Greek for "same"
+- "Skedastic" comes from the Greek word for "scattering" or "dispersing"
+- Together: "same scattering"—the errors scatter equally at all x values
 
-> **Key Concept**: Homoskedasticity means the error variance is constant across all x values: the variance of u given x equals sigma-u-squared for all x. This assumption of constant variance simplifies inference but can be relaxed in practice. When errors are homoskedastic, the variance of y given x also equals sigma-u-squared, since the error term is the only source of randomness in y conditional on x. Greater error variance means noisier data and less precise estimates.
+**What this means visually**: Imagine looking at a scatterplot with the population regression line. Homoskedasticity means the vertical spread of points around the line is the same whether x equals 1, x equals 10, or x equals 100. The "cloud" of points has constant width.
 
-### Summary
+**Can this assumption be relaxed?** Absolutely! In fact, it often IS relaxed in practice. Heteroskedasticity (varying error variance) is common in economic data. We'll learn how to handle this in later chapters using robust standard errors.
 
-- The bottom line:
-- Univariate analysis: y-one, dot-dot-dot, y-n is a simple random sample with
+**Why does variance of y equal variance of u?**
+
+Since y equals beta-one plus beta-two times x, plus u, and the only random component (given x) is u, all the variability in y comes from u. Therefore:
+
+The variance of y given x equals the variance of u given x, which equals sigma-u-squared.
+
+**Bottom line**: Greater error variance means noisier data, which leads to less precise estimates. This is why we care about sigma-u-squared—it directly affects the reliability of our regression coefficients.
+
+> **Key Concept**: Homoskedasticity assumes constant error variance across all x values: the variance of u given x equals sigma-u-squared for all x. This simplifies statistical formulas and is a standard assumption in introductory regression. The error term is the only source of randomness in y given x, so the variance of y given x also equals sigma-u-squared. Greater error variance means more noise and less precise estimates. While homoskedasticity is often violated in real data, we can use robust standard errors to account for this—a topic for later chapters.
+
+### Summary: From Univariate to Bivariate Analysis
+
+Let's connect this back to what we learned in Chapter 3. We're generalizing from one variable to two variables.
+
+**Univariate analysis** (Chapter 3):
+- We have a simple random sample: y-sub-1, y-sub-2, through y-sub-n
+- Each observation has the same distribution:
 
 Y-sub-i is distributed with mean mu and variance sigma-squared.
 
-- Regression analysis: the pairs x-one, y-one, through x-n, y-n, is a simple random sample that allows the mean to vary with x, so
+- The mean is constant—it doesn't depend on anything else
 
-y-sub-i given x-sub-i is distributed with mean beta-one plus beta-two times x, and variance sigma-u-squared.
+**Regression analysis** (this chapter):
+- We have pairs of observations: (x-sub-1, y-sub-1), (x-sub-2, y-sub-2), through (x-sub-n, y-sub-n)
+- Now the mean of y **depends on x**:
 
-> **Key Concept**: Regression generalizes univariate analysis by allowing the mean to depend on x. In univariate analysis, Y-sub-i has constant mean mu and variance sigma-squared. In regression, y-sub-i given x-sub-i has mean that varies with x (beta-one plus beta-two times x) but constant variance sigma-u-squared under homoskedasticity. This framework shows how regression describes the relationship between variables by modeling the conditional mean.
+y-sub-i given x-sub-i is distributed with mean beta-one plus beta-two times x-sub-i, and variance sigma-u-squared.
+
+**What changed?**
+- **Mean**: Was constant (mu), now varies with x (beta-one plus beta-two times x)
+- **Variance**: Still constant (sigma-u-squared) under homoskedasticity
+
+**Why this matters**: Regression lets us model how one variable (earnings) varies with another (education). Univariate analysis only tells us the average earnings across everyone. Regression tells us how average earnings change as education changes. This is the power of conditional analysis!
+
+> **Key Concept**: Regression extends univariate analysis by allowing the mean to vary with x. In univariate analysis, every Y-sub-i has the same mean mu. In regression, y-sub-i given x-sub-i has a mean that depends on x-sub-i through the linear function beta-one plus beta-two times x-sub-i. The variance remains constant at sigma-u-squared under homoskedasticity. This conditional framework lets us model relationships between variables—how y changes with x—rather than just describing y in isolation.
 
 ## 6.2 Examples of Sampling from a Population
 
-- We consider two examples of sampling from a population
-- regression generalizations of the two examples in chapter 4.
-- 1. Generate by computer 400 samples from an explicit model y equals beta-one plus beta-two times x, plus u.
-- 2. Select 400 samples from a finite population - the U.S. 1880 Census for males aged 60-69 years.
-- In both cases we run 400 regressions giving 400 estimates b-one and b-two and find
-- the average of the 400 slopes b-two is close to beta-two
-- the distribution of the 400 slopes b-two is approximately normal
-- similar results hold for the intercept b-one.
+We've established the theoretical framework. Now let's see it in action! Just as we did in Chapter 3 with the sample mean, we'll demonstrate OLS properties using simulation and real data.
+
+**Two complementary experiments**:
+
+**Experiment 1: Computer-generated data**
+- Generate 400 samples from a known model: y equals beta-one plus beta-two times x, plus u
+- Since we set beta-one and beta-two ourselves, we know the truth
+- Run regression on each sample to get 400 estimates of b-one and b-two
+- Compare these estimates to the known truth
+
+**Experiment 2: Real population data**
+- Draw 400 samples from the U.S. 1880 Census (males aged 60-69)
+- The full census gives us the population regression line (the truth)
+- Run regression on each sample
+- See how sample estimates vary around this population truth
+
+**What we'll discover** (spoiler alert!):
+- The average of the 400 slope estimates is very close to the true beta-two ✓ (unbiasedness)
+- The 400 slope estimates form an approximately normal distribution ✓ (Central Limit Theorem)
+- The same patterns hold for the intercept b-one
+
+These experiments mirror what we did in Chapter 3 for the sample mean, but now applied to regression coefficients. Let's dive in!
 
 
 ### Single Sample Generated from an Experiment
 
-- Example with n equals 5 is generate data from
+Let's start simple with just 5 observations. This lets us see exactly what's happening.
 
-y equals beta-one plus beta-two times x, plus u, which equals 1 plus 2 times x, plus u
-u is distributed normal with mean zero and variance sigma-u-squared equals 4
-x equals 1, 2, 3, 4, 5.
+**The true population model** (what we set up):
 
-- note: added the assumption that errors are normally distributed
-- Then a random normal generator for u yielded
+y equals 1 plus 2 times x, plus u
 
-For five observations, we have: Observation 1 has x equals 1, the expected value of y given x equals 1 plus 2 times 1 equals 3, u equals 1.689889, and y equals 1 plus 2 times x plus u equals 4.689889. Observation 2 has x equals 2, expected value 1 plus 2 times 2 equals 5, u equals negative 0.3187171, and y equals 4.681283. Observation 3 has x equals 3, expected value 1 plus 2 times 3 equals 7, u equals negative 2.506667, and y equals 4.493333. Observation 4 has x equals 4, expected value 1 plus 2 times 4 equals 9, u equals negative 1.63328, and y equals 7.366720. Observation 5 has x equals 5, expected value 1 plus 2 times 5 equals 11, u equals negative 2.390764, and y equals 8.609236.
+where:
+- beta-one equals 1 (true intercept)
+- beta-two equals 2 (true slope—each unit increase in x increases y by 2 on average)
+- u is distributed normal with mean zero and variance 4
+- x takes values: 1, 2, 3, 4, 5
 
-- Five generated observations
-- left panel: population regression line y equals beta-one plus beta-two times x equals 1 plus 2 times x
-- right panel: sample regression line y-hat equals b-one plus b-two times x equals 2.81 plus 1.05 times x
-- note that b-one does not equal beta-one and b-two does not equal beta-two.
+**Note**: We're adding the assumption that errors are normally distributed. This isn't required for unbiasedness, but it helps with exact (not just approximate) inference in small samples.
+
+**Generating one sample**:
+
+Using a random number generator, we drew 5 error terms. Here's what we got:
+
+| Obs | x | E(y|x) | u (error) | y (observed) |
+|-----|---|--------|-----------|--------------|
+| 1 | 1 | 3 | 1.69 | 4.69 |
+| 2 | 2 | 5 | -0.32 | 4.68 |
+| 3 | 3 | 7 | -2.51 | 4.49 |
+| 4 | 4 | 9 | -1.63 | 7.37 |
+| 5 | 5 | 11 | -2.39 | 8.61 |
+
+**What happened?** The expected values follow the line 1 plus 2 times x perfectly. But each observation gets a random error, pulling it above or below the line. Observation 1 got a positive error (1.69), pushing y above 3. Observation 3 got a negative error (-2.51), pulling y below 7.
+
+**Fitting the regression**:
+
+When we run OLS on these 5 points, we get:
+
+Sample regression line: y-hat equals 2.81 plus 1.05 times x
+
+**Crucial observation**: Our estimates (b-one equals 2.81, b-two equals 1.05) are NOT equal to the true parameters (beta-one equals 1, beta-two equals 2). This is sampling variability! We got unlucky with this particular sample—the negative errors for x equals 3, 4, 5 flattened our fitted slope.
 
 Population line
 ![](https://cdn.mathpix.com/cropped/1db1a0ef-9c44-414f-9671-ab8a889b52b7-14.jpg?height=395&width=537&top_left_y=426&top_left_x=81)
@@ -160,21 +285,30 @@ Regression line
 
 ### Many Samples Generated from an Experiment
 
-- Samples of size 30 from
+One sample showed us that estimates vary from the truth. But how much do they vary? And do they vary randomly or systematically? To answer this, we need many samples.
 
-y equals beta-one plus beta-two times x, plus u, which equals 1 plus 2 times x, plus u
-u is distributed normal with mean zero and variance sigma-u-squared equals 4
-x is distributed normal with mean zero and variance 1.
+**Updated experiment** (larger sample, random x):
 
-- This is the same model for y as above
-- except now regressors are draws from a standard normal distribution
-- and n equals 30.
-- Next slide gives results from three samples.
+Same population model:
 
+y equals 1 plus 2 times x, plus u
+
+where:
+- beta-one equals 1, beta-two equals 2 (same true parameters)
+- u is distributed normal with mean zero and variance 4 (same error distribution)
+- **New**: x is now drawn from a standard normal distribution (mean 0, variance 1)
+- **New**: Sample size is n equals 30 (instead of 5)
+
+**Why random x?** This makes the experiment more realistic. In economics, we rarely control x values—we observe them in the wild.
 
 ### Three Generated Samples yield three different lines
 
-- Scatterplots and regression lines from three samples of size 30 intercepts and slopes vary across samples.
+Before analyzing 400 samples, let's look at just three to build intuition.
+
+Below are scatterplots and fitted regression lines from three different samples, each with 30 observations. Notice what varies:
+- The scatter of points differs (different random errors)
+- The fitted lines have different intercepts and slopes
+- But all three fitted lines are reasonably close to the true line (1 plus 2 times x)
 
 Sample 1
 ![](https://cdn.mathpix.com/cropped/1db1a0ef-9c44-414f-9671-ab8a889b52b7-16.jpg?height=282&width=348&top_left_y=424&top_left_x=84)
@@ -189,99 +323,212 @@ Sample 3
 
 ### 400 Generated Samples of Size 30
 
-- 400 such samples were generated and fitted
-- left panel: beta-two equals 2 and average of 400 slopes equals 1.979.
-- right panel: beta-one equals 1 and average of 400 intercepts equals 1.039.
-- both histograms are approximately normal.
+Now for the full experiment! We generated 400 different samples, each with 30 observations, and ran regression on each. This gives us 400 different b-one estimates and 400 different b-two estimates.
+
+**The results are striking**:
+
+**Left panel - Distribution of 400 slope estimates**:
+- True parameter: beta-two equals 2.0
+- Average of 400 estimates: 1.979
+- **Difference**: Only 0.021! The estimates are centered almost perfectly on the truth.
+
+**Right panel - Distribution of 400 intercept estimates**:
+- True parameter: beta-one equals 1.0
+- Average of 400 estimates: 1.039
+- **Difference**: Only 0.039! Again, nearly perfect centering.
+
 ![](https://cdn.mathpix.com/cropped/1db1a0ef-9c44-414f-9671-ab8a889b52b7-17.jpg?height=402&width=529&top_left_y=407&top_left_x=89)
 
 Generated data: 400 Intercepts
 ![](https://cdn.mathpix.com/cropped/1db1a0ef-9c44-414f-9671-ab8a889b52b7-17.jpg?height=372&width=529&top_left_y=436&top_left_x=654)
 
-> **Key Concept**: With 400 samples, we see that the average of the 400 slope estimates (1.979) is very close to the true beta-two (2.0), and the average of the 400 intercept estimates (1.039) is very close to the true beta-one (1.0). This demonstrates unbiasedness: on average across many samples, the OLS estimates equal the true parameters. The approximately normal distributions of these estimates illustrate the Central Limit Theorem in action.
+**Three crucial observations**:
+
+**1. Unbiasedness confirmed**: Individual samples gave us estimates far from the truth (remember b-two equals 1.05 from our first sample?). But on average across many samples, we hit the target. This is exactly what unbiasedness means!
+
+**2. Approximate normality**: Both histograms look like bell curves—the normal distribution. This demonstrates the Central Limit Theorem. Even though individual errors are random, the **average behavior** of our estimates is predictable and normal.
+
+**3. Variability is real**: The estimates don't all equal 2.0 and 1.0. They vary! Some samples gave b-two around 1.7, others around 2.3. This sampling variability is unavoidable. But we can measure and account for it using standard errors (coming in Section 6.3).
+
+> **Key Concept**: Repeating the sampling process 400 times reveals the sampling distribution of OLS estimators. The average of 400 slope estimates (1.979) nearly equals the true beta-two (2.0), demonstrating unbiasedness—OLS is correct on average. The approximately normal shape of both distributions confirms the Central Limit Theorem applies to regression coefficients, not just sample means. Individual estimates vary due to different random samples, but this variation follows a predictable, normal pattern.
 
 ### Many Samples Generated from a Finite Population
 
-- Data from the 1880 Census
-- complete enumeration of the U.S. population in 1880.
-- Relationship between
-- y equals labforce equals labor force participation
-- 1 if in the labor force; 0 if not in the labor force
-- and x equals age equals 60 to 70 years.
-- Population is of size 1,058,475 (men aged 60 to 70 years)
-- Population mean of labforce is 0.8945
-- so 89.45% were in the labor force.
+Now let's move from computer-generated data to real population data—the 1880 U.S. Census.
 
+**The population**: A complete enumeration of everyone living in the United States in 1880.
+
+**Our focus**: Men aged 60 to 70 years (population size: 1,058,475 men)
+
+**The relationship we're studying**:
+- y equals labforce (labor force participation)
+  - Equals 1 if in the labor force
+  - Equals 0 if not in the labor force
+- x equals age (ranging from 60 to 70 years)
+
+**Population statistics**:
+- Overall labor force participation rate: 0.8945 (89.45% were working!)
+- This was 1880—no Social Security, no retirement pensions. Most older men had to keep working.
+
+**The question**: Does labor force participation decline with age even among these older workers? Let's find out.
 
 ### Population Regression Line
 
-- Population regression line is
+Since we have the **entire population** (all 1,058,475 men), we can calculate the true population regression line. This is rare! Usually we never know the population truth.
+
+**The population regression model**:
 
 labforce equals beta-one plus beta-two times age
 
-- Population regression line based on 1,058,475 observations is
+**Fitting this to all 1,058,475 observations**, we get:
 
 labforce equals 1.593 minus 0.0109 times age
 
-- so beta-one equals 1.593 and beta-two equals negative 0.0109
-- with each extra year the probability of being in the labor force falls by 0.0109 or by 1.09 percentage points.
+**Interpreting the coefficients**:
+- Intercept: beta-one equals 1.593 (hypothetical participation rate at age 0—not meaningful here)
+- **Slope: beta-two equals negative 0.0109** (this is what matters!)
 
-> **Key Concept**: Using the complete 1880 Census population of over one million men aged 60-70, we can calculate the true population regression line: labforce equals 1.593 minus 0.0109 times age. The slope beta-two equals negative 0.0109 means each additional year of age reduces labor force participation probability by 1.09 percentage points. This population line serves as the benchmark against which sample estimates will be compared.
+**What does the slope tell us?** Each additional year of age reduces the probability of labor force participation by 0.0109, or by **1.09 percentage points**.
+
+**Example**: Compare a 60-year-old to a 65-year-old:
+- 5-year age difference
+- Predicted participation drop: 5 times 0.0109 equals 0.0545 (about 5.5 percentage points lower)
+
+This negative relationship makes intuitive sense—even in 1880, as men aged from 60 to 70, some retired or became unable to work.
+
+> **Key Concept**: With the complete 1880 Census population of 1,058,475 men aged 60-70, we can calculate the true population regression line: labforce equals 1.593 minus 0.0109 times age. This gives us beta-two equals negative 0.0109, meaning each additional year reduces labor force participation probability by 1.09 percentage points. Having the full population lets us treat this as the benchmark "truth" against which sample estimates will be compared—just like we knew the true parameters in our computer simulation.
 
 ### 400 Samples of Size 200
 
-- Draw 400 samples of size 200; regress labforce on age in each sample
-- large sample sizes as regression fit is poor: R-squared is approximately 0.01.
-- left panel: beta-two equals negative 0.0109 and average of 400 slopes is negative 0.0115
-- right panel: beta-one equals 1.593 and average of 400 intercepts is 1.636
-- both histograms are approximately normal.
+Now the experiment! We randomly drew 400 samples of size 200 from this population of over one million men, and ran regression on each sample.
+
+**Why size 200?** Because the regression fit is poor (R-squared approximately 0.01)—age alone doesn't explain much variation in labor force participation. With weak relationships, we need larger samples to get stable estimates.
+
+**The results** (histograms of 400 estimates):
+
+**Left panel - Distribution of 400 slope estimates**:
+- True population parameter: beta-two equals negative 0.0109
+- Average of 400 sample estimates: negative 0.0115
+- **Difference**: Only 0.0006! Nearly perfect centering despite the weak relationship.
+
+**Right panel - Distribution of 400 intercept estimates**:
+- True population parameter: beta-one equals 1.593
+- Average of 400 sample estimates: 1.636
+- **Difference**: About 0.04—very close
+
 ![](https://cdn.mathpix.com/cropped/1db1a0ef-9c44-414f-9671-ab8a889b52b7-20.jpg?height=405&width=533&top_left_y=416&top_left_x=87)
 
 Census data: 400 Intercepts
 ![](https://cdn.mathpix.com/cropped/1db1a0ef-9c44-414f-9671-ab8a889b52b7-20.jpg?height=375&width=532&top_left_y=446&top_left_x=653)
 
-> **Key Concept**: Drawing 400 samples of size 200 from the Census population shows unbiasedness and approximate normality in a real-world setting. The average slope estimate (negative 0.0115) is close to the true beta-two (negative 0.0109), and the average intercept (1.636) is close to beta-one (1.593). The approximately normal distributions of these estimates confirm that the Central Limit Theorem applies even when the dependent variable is binary (labor force participation) and the fit is poor (R-squared approximately 0.01).
+**Key observations**:
+
+**1. Unbiasedness in real data**: Just like with computer-generated data, OLS is unbiased. The averages of our 400 estimates are very close to the population truth. This works even with messy real data!
+
+**2. Approximate normality with binary y**: Labor force participation is binary (0 or 1), not continuous. Yet the distributions of slope and intercept estimates still look approximately normal. The Central Limit Theorem is robust!
+
+**3. Works despite poor fit**: R-squared is only 0.01—age explains just 1% of the variation in labor force participation. Yet our estimates are still unbiased and approximately normal. OLS properties don't require a good fit!
+
+> **Key Concept**: Real-world validation with 1880 Census data confirms OLS properties. Drawing 400 samples of size 200 shows: (1) Unbiasedness—average estimates nearly equal population parameters despite weak relationship, (2) Approximate normality—both distributions are bell-shaped even though the outcome is binary (0 or 1), and (3) Robustness—these properties hold even when R-squared is tiny (0.01). This demonstrates that OLS theory applies broadly, not just to idealized settings with perfect data and strong relationships.
 
 ## 6.3 Properties of the Least Squares Estimator
 
-- Slope estimate is a random variable
+We've seen empirically that OLS works—estimates center on the truth and follow normal distributions. Now let's prove it mathematically. What are the theoretical properties of the OLS slope estimator?
 
-b-two equals the sum from i equals 1 to n of the quantity x-sub-i minus x-bar, times the quantity y-sub-i minus y-bar, all divided by the sum from i equals 1 to n of the quantity x-sub-i minus x-bar, all squared
+**Recall the OLS slope formula** from Chapter 5:
 
-- different samples have different data and hence different b-two values.
-- We want to find the expected value of b-two, the variance of b-two, and a distribution for inference.
-- If we assume the model is y-sub-i equals beta-one plus beta-two times x-sub-i, plus u-sub-i, then some algebra leads to the re-expression of the formula for b-two as
+b-two equals the sum from i equals 1 to n of the quantity x-sub-i minus x-bar, times the quantity y-sub-i minus y-bar, all divided by the sum from i equals 1 to n of the quantity x-sub-i minus x-bar, all squared.
+
+This looks like just arithmetic. But remember: y-sub-i is random (it contains the error u-sub-i). Different samples give different y values, hence different b-two values. So **b-two is a random variable**.
+
+**Our goal**: Characterize this random variable. Specifically, find:
+1. The expected value of b-two (Is it unbiased?)
+2. The variance of b-two (How much does it vary?)
+3. The distribution of b-two (Can we use normal-based inference?)
+
+### A Key Mathematical Result
+
+Here's a crucial algebraic trick. If we assume the population model is y-sub-i equals beta-one plus beta-two times x-sub-i, plus u-sub-i, we can rewrite the OLS formula as:
 
 b-two equals beta-two plus the sum from i equals 1 to n of the quantity x-sub-i minus x-bar, times u-sub-i, all divided by the sum from i equals 1 to n of the quantity x-sub-i minus x-bar, all squared.
 
-- Conditioning on the regressors x-sub-i, the only source of randomness is the errors u-sub-i.
-- It follows that the expected value of b-two and the variance of b-two depend crucially on assumptions about the error u-sub-i.
+**What does this mean?** The OLS estimate b-two equals the true parameter beta-two **plus** a weighted sum of the errors!
 
-> **Key Concept**: The OLS slope estimator b-two can be re-expressed as b-two equals beta-two plus a weighted sum of the errors. This decomposition shows that b-two equals the true parameter beta-two plus a term involving the errors u-sub-i. When we condition on the regressors x-sub-i, the only source of randomness is the errors. This means the statistical properties of b-two, including its expected value and variance, depend entirely on the properties we assume for the error term.
+**Why this matters**: When we condition on the x values (treat them as fixed), the **only source of randomness** is the errors u-sub-i. This means:
+- The expected value of b-two depends on the expected value of the errors
+- The variance of b-two depends on the variance of the errors
+- The distribution of b-two depends on the distribution of the errors
+
+So everything hinges on what we assume about u-sub-i. Let's state those assumptions clearly.
+
+> **Key Concept**: The OLS estimator can be decomposed as b-two equals beta-two plus a weighted sum of errors. This reveals that b-two is a random variable whose properties depend entirely on the error term u-sub-i. When we treat the regressors x-sub-i as fixed (conditioning on them), all randomness comes from errors. Understanding b-two's statistical properties therefore requires making assumptions about how errors behave.
 
 ### Data Assumptions
 
-- Always assume that there is variation in the regressors
-- we rule out the case x-sub-i equals x-bar for all i
-- this ensures the sum from i equals 1 to n of the quantity x-sub-i minus x-bar, all squared, is strictly greater than zero.
-- Otherwise cannot compute b-one and b-two.
-- Also at least 3 observations.
+Before we even get to error assumptions, we need basic requirements for the data itself.
+
+**Assumption D1: Variation in x**
+
+We must have variation in the regressor. Formally: the sum from i equals 1 to n of the quantity x-sub-i minus x-bar, all squared, must be strictly greater than zero.
+
+**What this means**: Not all x values can be the same. If x-sub-i equals x-bar for all i (everyone has the same education level, for example), we can't estimate how y changes with x. There's nothing to compare!
+
+**Why it matters**: The OLS formula has this sum in the denominator. If it equals zero, we'd be dividing by zero—undefined!
+
+**Assumption D2: Minimum sample size**
+
+We need at least 3 observations for bivariate regression. With only 2 points, any line fits perfectly (two points determine a line), leaving no residuals to estimate the error variance.
+
+**These are technical requirements**, not statistical assumptions. They just ensure the formulas work.
 
 
-### Population Assumptions
+### Population Assumptions: The Big Four
 
-- Standard assumptions are that:
-- 1. The population model is y-sub-i equals beta-one plus beta-two times x-sub-i, plus u-sub-i for all i.
-- 2. The error for the i-th observation has mean zero conditional on x: the expected value of u-sub-i given x-sub-i equals zero for all i.
-- 3. The error for the i-th observation has constant variance conditional on x: the variance of u-sub-i given x-sub-i equals sigma-u-squared for all i.
-- 4. The errors for different observations are statistically independent: u-sub-i is independent of u-sub-j for all i not equal to j.
-- Assumptions 1-2 are the crucial assumptions that ensure
+Now for the crucial assumptions about the population model and errors. Everything we prove depends on these.
 
-The expected value of y-sub-i given x-sub-i equals beta-one plus beta-two times x-sub-i
+**Assumption 1: Correct Linear Model**
 
-- Assumption 3 is called conditionally homoskedastic errors
+The population model is:
 
-> **Key Concept**: Four standard OLS assumptions are: (1) correct linear model specification, (2) zero conditional mean errors, (3) homoskedastic errors with constant variance sigma-u-squared, and (4) independent errors across observations. Assumptions 1-2 are essential for unbiasedness, ensuring the conditional mean is correctly specified as beta-one plus beta-two times x. Assumptions 3-4 affect the variance formulas and can be relaxed, but 1-2 are fundamental for consistent and unbiased estimation.
+y-sub-i equals beta-one plus beta-two times x-sub-i, plus u-sub-i for all i.
+
+**What this means**: The true relationship is linear, and we've specified it correctly. There are no missing variables, no wrong functional form.
+
+**Assumption 2: Zero Conditional Mean Error**
+
+The error has mean zero conditional on x:
+
+The expected value of u-sub-i given x-sub-i equals zero for all i.
+
+**What this means**: Errors average to zero at every x value. There's no correlation between x and u.
+
+**Why this matters**: Violations cause **bias**. If high-x observations tend to have positive errors, OLS will incorrectly attribute that pattern to the slope. This is the omitted variable problem!
+
+**Together, Assumptions 1-2 ensure**:
+
+The expected value of y-sub-i given x-sub-i equals beta-one plus beta-two times x-sub-i.
+
+These are the **essential** assumptions for unbiasedness. We'll maintain them throughout.
+
+**Assumption 3: Homoskedasticity**
+
+The error variance is constant across x values:
+
+The variance of u-sub-i given x-sub-i equals sigma-u-squared for all i.
+
+**What this means**: Error variability doesn't depend on x. The "scatter" around the line is the same whether x is small or large.
+
+**Assumption 4: Independence**
+
+Errors for different observations are independent:
+
+u-sub-i is independent of u-sub-j for all i not equal to j.
+
+**What this means**: One person's error doesn't affect another's. This is natural for cross-section data (person A's earnings surprise doesn't affect person B's).
+
+**About Assumptions 3-4**: These affect variance calculations and standard errors, but NOT unbiasedness. We can (and often do) relax them using robust standard errors. More on this in Section 6.3 and Chapters 7 and 12.
+
+> **Key Concept**: The four OLS assumptions form a hierarchy of importance. Assumptions 1-2 (correct linear model and zero conditional mean error) are **essential**—violations cause bias and inconsistency. Assumptions 3-4 (homoskedasticity and independence) are **helpful but not essential**—violations affect standard errors but not the slope estimates themselves. In practice, we maintain 1-2 strictly and relax 3-4 using robust methods. This is why omitted variables (violating Assumption 2) are so dangerous, while heteroskedasticity (violating Assumption 3) is merely inconvenient.
 
 ### Mean and Variance of the OLS Slope Coefficient
 
@@ -351,13 +598,59 @@ The standard error of b-two, all squared, equals s-e-squared divided by the sum 
 
 ### When is the Slope Coefficient Precisely Estimated?
 
-- The standard error of b-two is the standard error of b-two equals the square root of s-e-squared divided by the sum from i equals 1 to n of the quantity x-sub-i minus x-bar, all squared.
-- Better precision equals smaller standard error occurs if
-- 1. Model fits well (s-e-squared is smaller)
-- 2. Many observations (then the sum from i equals 1 to n of the quantity x-sub-i minus x-bar, all squared, is larger).
-- 3. Regressors are widely scattered (then the sum from i equals 1 to n of the quantity x-sub-i minus x-bar, all squared, is larger).
+This is one of the most practical questions in regression: What determines how precise our slope estimate is?
 
-> **Key Concept**: The precision of the OLS slope estimate, measured by its standard error, improves under three conditions: (1) better model fit with smaller residual variance s-e-squared, (2) larger sample size which increases the sum of squared x deviations, and (3) more widely scattered x values which also increases this sum. These insights guide data collection: when possible, gather more observations and ensure substantial variation in the explanatory variable to achieve more precise estimates.
+**The answer is in the formula**. Recall the standard error of b-two:
+
+The standard error of b-two equals the square root of s-e-squared divided by the sum from i equals 1 to n of the quantity x-sub-i minus x-bar, all squared.
+
+**Smaller standard error means better precision**. So we want to:
+- **Minimize the numerator** (s-e-squared)
+- **Maximize the denominator** (sum of squared x deviations)
+
+This gives us three actionable insights:
+
+**Factor 1: Model fit**
+
+**Better precision when**: s-e-squared is smaller (model fits well, residuals are small)
+
+**Intuition**: If observations cluster tightly around the regression line, we can pinpoint the slope precisely. If they're scattered far from the line, the slope is uncertain.
+
+**Example**: Regressing height on shoe size (strong relationship, small residuals) gives more precise slope estimates than regressing income on astrological sign (weak relationship, large residuals).
+
+**Factor 2: Sample size**
+
+**Better precision when**: n is larger (many observations)
+
+**Intuition**: More data means more information. With 1,000 observations, we can estimate the slope much more precisely than with 10.
+
+**How much better?** The sum from i equals 1 to n of the quantity x-sub-i minus x-bar squared grows roughly proportionally to n. So the standard error decreases roughly with one over the square root of n. To halve the standard error, you need **four times** the data!
+
+**Factor 3: Regressor variation**
+
+**Better precision when**: x values are widely scattered (high variance of x)
+
+**Intuition**: Compare two datasets, both with n equals 100:
+- **Dataset A**: Education ranges from 10 to 12 years (narrow range)
+- **Dataset B**: Education ranges from 0 to 20 years (wide range)
+
+Dataset B lets us see how earnings change across a much broader education spectrum, giving clearer evidence about the slope.
+
+**Think of it geometrically**: With x values tightly clustered, small changes in the fitted line barely affect fit. With x values spread out, the line is "anchored" at both ends, making the slope more stable.
+
+**Practical implications**:
+
+When **designing studies**, aim for:
+- Large samples (maximize n)
+- Wide variation in x (sample across the full range of the explanatory variable)
+- Good model specification (minimize unexplained variation)
+
+When **analyzing existing data**, recognize that:
+- Weak relationships (large s-e) yield imprecise estimates—don't over-interpret small coefficients
+- Small samples need extra caution—standard errors will be large
+- Limited variation in x (everyone has similar values) makes slope estimation difficult
+
+> **Key Concept**: Three factors determine OLS precision: (1) Model fit—smaller residuals (s-e) mean more precise estimates; (2) Sample size—larger n reduces standard errors by approximately one over the square root of n; and (3) Regressor variation—wider spread in x values provides more information about the slope. These factors are multiplicative: a small sample with weak fit and limited x variation produces very imprecise estimates, while a large sample with good fit and wide x variation yields highly precise slopes. When planning studies, maximize sample size and x variation; when analyzing data, report standard errors to communicate precision honestly.
 
 ### Normal Distribution and the Central Limit Theorem
 

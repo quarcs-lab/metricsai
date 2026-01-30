@@ -13,6 +13,8 @@ By the end of this chapter, you will be able to:
 
 ---
 
+You've learned the theory of regression—how to estimate coefficients, calculate standard errors, and test hypotheses. Now it's time to see these tools in action with real data from health economics, finance, and macroeconomics. This chapter presents four case studies that demonstrate how bivariate regression answers important questions: Does health spending improve life expectancy? How risky is Coca-Cola stock? What's the relationship between economic growth and unemployment? Each case study reveals both the power and limitations of regression analysis.
+
 ## 8.1 Case Study 1: Health Outcomes across Countries
 
 **In this case study:**
@@ -64,6 +66,9 @@ OLS regression yields the following results: Life expectancy equals 73.08 plus 0
 - Bottom line: Country health outcomes improve on average with higher health spending
 - The U.S. performs substantially worse than predicted.
 
+**Why This Matters**: Healthcare policy debates often center on whether spending more money actually improves health. This regression provides evidence that it does—countries spending more tend to have longer life expectancies and lower infant mortality. But the U.S. spends far more than any other country yet achieves worse outcomes than predicted, suggesting that how money is spent matters as much as how much is spent. This is a puzzle that requires deeper multivariate analysis to understand.
+
+The first case study examined health outcomes (life expectancy, infant mortality). Now let's flip the question: what drives health spending itself? Do wealthier countries simply spend more on healthcare because they can afford to?
 
 ## 8.2 Case Study 2: Health Expenditures across Countries
 
@@ -105,6 +110,7 @@ OLS regression yields the following results: Health spending per capita equals 2
 
 > **Key Concept**: Heteroskedastic-robust standard errors adjust for the fact that prediction errors may vary across observations. When heteroskedasticity is present—meaning the variance of errors differs across observations—robust standard errors provide more reliable inference than conventional standard errors. This adjustment is particularly important when dealing with outliers or when error variance increases with the level of the explanatory variable.
 
+We've seen regression applied to health economics with cross-sectional country data. Now let's shift to finance, where regression is used with time series data to measure risk. The Capital Asset Pricing Model (CAPM) is one of the most widely used applications of bivariate regression in finance—it appears in virtually every finance textbook and is used daily by investors worldwide.
 
 ## 8.3 Case Study 3: Capital Asset Pricing Model
 
@@ -168,6 +174,9 @@ The theoretical CAPM equation states that the expected value of the excess retur
 
 > **Key Concept**: For time series data, heteroskedastic and autocorrelation consistent (HAC) standard errors account for both changing variance over time and correlation between observations. These robust standard errors provide more reliable inference than conventional standard errors for financial and macroeconomic data, where volatility clustering and persistence are common features.
 
+**Why This Matters**: Every time you invest in a stock, you face a fundamental tradeoff between risk and return. CAPM quantifies this tradeoff using regression. The beta coefficient tells you how risky the stock is relative to the market—crucial information for portfolio construction. A portfolio manager might combine high-beta stocks (riskier, higher expected returns) with low-beta stocks (safer, lower expected returns) to achieve a desired risk profile. Without regression, measuring this risk would be impossible.
+
+From finance, we turn to macroeconomics. Our final case study examines Okun's Law, which links GDP growth to unemployment—one of the most important relationships in macroeconomic policy.
 
 ## 8.4 Case Study 4: Output and Unemployment in the U.S.
 
@@ -224,6 +233,8 @@ From the second panel, output recovery from the 2008 global financial crisis is 
 - A HAC standard error that additionally controls for error correlation (see Chapter 12.1) is 0.207 compared to the default standard error of 0.175.
 
 > **Key Concept**: Time series data often exhibits autocorrelation, meaning errors are correlated over time. For annual macroeconomic data like Okun's Law, HAC standard errors that account for this autocorrelation provide more reliable statistical inference than conventional standard errors. The increase from 0.175 to 0.207 reflects the adjustment needed to account for the persistence in economic shocks over time.
+
+**Quick Check**: Before moving on, reflect on these case studies: (1) Why does the U.S. spend so much on healthcare yet achieve worse outcomes than predicted? (2) What does a stock beta of 0.6 tell an investor about risk? (3) Why did Okun's Law predict coefficient negative 2.0, but we estimated negative 1.59? (4) Which type of robust standard errors should you use for cross-sectional data versus time series data? These questions highlight that regression is more than formulas—it's about understanding real-world relationships.
 
 ---
 

@@ -14,6 +14,8 @@ By the end of this chapter, you will be able to:
 
 ---
 
+In [Chapter 11](s11%20Statistical%20Inference%20for%20Multiple%20Regression.md), you learned to conduct hypothesis tests and build confidence intervals—but those methods assumed homoskedastic, independent errors. What if your data violate these assumptions? What if you're working with clustered data (students within schools) or time series (stock prices over time)? And once you've estimated a model, how do you use it to predict house prices or forecast next month's sales? This chapter tackles the practical challenges you'll face in real-world regression analysis: choosing the right standard errors, distinguishing conditional mean prediction from individual forecasts, handling nonrepresentative samples, and understanding modern tools like machine learning and Bayesian methods.
+
 ## 12.1 Inference with Robust Standard Errors
 
 **In this section:**
@@ -54,6 +56,7 @@ By the end of this chapter, you will be able to:
 
 > **Key Concept**: When regression assumptions 3-4 fail, default standard errors are wrong. Use heteroskedastic-robust SE for cross-section data, cluster-robust SE when observations are grouped, and HAC-robust SE for time series data. The OLS estimates remain unbiased, but inference requires correct standard errors.
 
+**Why This Matters**: Using the wrong standard errors can lead to dramatically incorrect conclusions. Suppose you're analyzing student test scores clustered by classroom. Default standard errors assume independence, but students in the same classroom share a teacher, curriculum, and environment—their errors are correlated! Cluster-robust standard errors can be three to five times larger than default SE. A coefficient that appears "highly significant" with default SE (t equals 4.0) might become insignificant with cluster-robust SE (t equals 1.5). Always match your standard errors to your data structure, or you risk publishing false discoveries.
 
 ### 12.1.2 Heteroskedastic-Robust Standard Errors
 
@@ -143,7 +146,7 @@ By the end of this chapter, you will be able to:
 - the more highly correlated the errors are within cluster.
 - It is essential to use cluster-robust standard errors if needed.
 - It can sometimes be difficult to know how to form the clusters.
-- data examples are given in chapters 13.4.4, 13.6.4 and 17.3.1.
+- data examples are given in [Chapter 13](s13%20Case%20Studies%20for%20Multiple%20Regression.md) sections 13.4.4, 13.6.4 and [Chapter 17](s17%20Panel%20Data%2C%20Time%20Series%20Data%2C%20Causation.md) section 17.3.1.
 
 > **Key Concept**: Cluster-robust standard errors can be several times larger than default or heteroskedastic-robust SE. With N observations in G clusters, use G-1 (not N-k) degrees of freedom. The difference increases with more observations per cluster and higher within-cluster correlation.
 
@@ -163,10 +166,12 @@ By the end of this chapter, you will be able to:
 
 A rule of thumb is m equals 0.75 times T to the power of one-third, where T equals the number of observations.
 
-- Data examples are given in chapters 13.2, 13.3 and 17.8.
+- Data examples are given in [Chapter 13](s13%20Case%20Studies%20for%20Multiple%20Regression.md) sections 13.2, 13.3 and [Chapter 17](s17%20Panel%20Data%2C%20Time%20Series%20Data%2C%20Causation.md) section 17.8.
+- Heteroskedastic-robust standard errors were first introduced in [Chapter 7](s07%20Statistical%20Inference%20for%20Bivariate%20Regression.md) for bivariate regression.
 
 > **Key Concept**: HAC (heteroskedasticity and autocorrelation consistent) standard errors account for both heteroskedasticity and autocorrelation in time series data. The lag length m must be specified; a rule of thumb is m = 0.75 × T^(1/3).
 
+Now that we know how to conduct valid inference with robust standard errors, let's turn to a different practical question: using regression models to make predictions.
 
 ## 12.2 Prediction
 
@@ -268,6 +273,7 @@ y given x-two-star through x-k-star is in the interval predicted y-sub-f plus or
 
 > **Key Concept**: Even with precise coefficient estimates, individual forecasts are imprecise because we cannot predict the error u*. The forecast standard error is at least as large as the standard error of regression (s_e), so 95% forecast intervals are at least ±1.96×s_e wide.
 
+**Why This Matters**: Understanding the distinction between conditional mean prediction and individual forecasts prevents costly mistakes in business and policy. A real estate company might predict the average price of 2,000-square-foot homes very precisely (±$10,000) but struggle to predict any single home's price (±$50,000). This isn't a failure of the model—it's the irreducible uncertainty from unobserved factors (view, condition, negotiation). Policy-makers can confidently predict that raising minimum wage by one dollar increases average earnings, even though we can't predict any individual worker's future income. Confusing these two types of prediction leads to unrealistic expectations and poor decisions.
 
 ### 12.2.5 Why Forecasts Are Imprecise
 
@@ -354,6 +360,8 @@ Predicted y equals b-one plus 2000 times b-two plus 2 times b-three plus 4 times
 - s-sub-e equals 24,936, se of predicted y-sub-cm equals 6631, so se of predicted y-sub-f equals the square root of 6488 squared plus 24,936 squared, which equals 25,803.
 - 95 percent confidence interval for the actual house price is 257,691 plus or minus t-sub-22-comma-0.025 times 25,803, which equals the interval from \$204,178 to \$311,203.
 
+**Quick Check**: Before moving on, make sure you understand prediction: (1) Why is predicting the conditional mean E[y|x*] more precise than forecasting an individual outcome y|x*? (2) For the house price example, the conditional mean 95% CI is $244,235 to $271,146 (width $26,911) but the forecast 95% CI is $204,255 to $311,126 (width $106,871)—what accounts for this fourfold difference? (3) Does se(ŷ_cm) go to zero as sample size increases? Does se(ŷ_f)? (4) If a regression has R² = 0.20 and s_e = 50,000, what's the minimum width of a 95% forecast interval? Understanding prediction uncertainty is crucial for realistic expectations and decision-making.
+
 ## 12.3 Nonrepresentative Samples
 
 - Many studies use survey data that may be nonrepresentative of the population.
@@ -364,6 +372,7 @@ Predicted y equals b-one plus 2000 times b-two plus 2 times b-three plus 4 times
 - Many surveys include sample weights that adjust for nonrepresentativeness
 - then population weighted least squares can be used.
 
+We've focused primarily on unbiased estimation. But unbiasedness isn't the only desirable property—efficiency (having the smallest variance) also matters for precise inference.
 
 ## 12.4 Best Estimation
 
@@ -438,6 +447,8 @@ beta-hat-sub-j plus or minus t-sub-n-minus-k-comma-alpha-over-2 times se of beta
 
 > **Key Concept**: Test size equals the probability of Type I error (false positive). Test power equals one minus the probability of Type II error (false negative). The most powerful test for given size uses the most precise estimator. Higher power means lower risk of failing to detect a true effect.
 
+The methods we've covered—OLS, robust standard errors, hypothesis tests—are classical econometric tools. But modern data science offers new approaches that complement traditional regression. Let's explore how machine learning fits into econometric analysis.
+
 ## 12.7 Data Science and Big Data: An Overview
 
 **In this section:**
@@ -478,6 +489,7 @@ beta-hat-sub-j plus or minus t-sub-n-minus-k-comma-alpha-over-2 times se of beta
 
 > **Key Concept**: Machine learning methods (lasso, random forests, neural networks) can predict better than OLS but don't provide standard errors for inference. Economists combine machine learning for variable selection with OLS for inference, controlling for the machine learning step to get valid standard errors.
 
+**Why This Matters**: Machine learning and econometrics solve different problems. If you want to predict whether a customer will click an ad, use machine learning—it optimizes prediction without needing causal interpretation. But if you want to know whether raising ad spending by one dollar causes more clicks (to decide your budget), you need econometrics with standard errors and hypothesis tests. Many modern applications combine both: use lasso to select which of 10,000 potential control variables to include, then use OLS with robust SE to estimate causal effects. The future of data analysis isn't choosing between machine learning and econometrics—it's using each for what it does best.
 
 ## 12.8 Bayesian Methods: An Overview
 
