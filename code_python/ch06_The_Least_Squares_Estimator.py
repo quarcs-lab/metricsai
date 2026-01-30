@@ -1,3 +1,4 @@
+# %%
 """
 ch06_The_Least_Squares_Estimator.py - January 2026 for Python
 
@@ -16,7 +17,7 @@ Sections covered:
   6.4 ESTIMATORS OF MODEL PARAMETERS
 """
 
-# ========== SETUP ==========
+# %% =========== SETUP ==========
 
 import numpy as np
 import pandas as pd
@@ -51,7 +52,7 @@ print("=" * 70)
 print("CHAPTER 6: THE LEAST SQUARES ESTIMATOR")
 print("=" * 70)
 
-# ========== 6.2 EXAMPLES OF SAMPLING FROM A POPULATION ==========
+# %% =========== 6.2 EXAMPLES OF SAMPLING FROM A POPULATION ==========
 
 print("\n" + "=" * 70)
 print("6.2 EXAMPLES OF SAMPLING FROM A POPULATION")
@@ -60,8 +61,12 @@ print("=" * 70)
 # Read in generated data
 data_gen = pd.read_stata(GITHUB_DATA_URL + 'AED_GENERATEDDATA.DTA')
 
+# %% Explore data structure
+
 print("\nGenerated data summary:")
 data_summary = data_gen.describe()
+
+# %% Calculate statistics
 print(data_summary)
 print("\nFirst 10 observations (Table 6.1):")
 print(data_gen.head(10))
@@ -69,6 +74,9 @@ data_summary.to_csv(os.path.join(TABLES_DIR, 'ch06_generated_data_descriptive_st
 print(f"Table saved to: {os.path.join(TABLES_DIR, 'ch06_generated_data_descriptive_stats.csv')}")
 
 # Figure 6.2: Panel A - Population regression line E[y|x] = 1 + 2x
+
+# %% Estimate regression model
+
 model_population = ols('Eygivenx ~ x', data=data_gen).fit()
 
 fig, ax = plt.subplots(figsize=(10, 6))
@@ -89,6 +97,9 @@ print(f"\nFigure 6.2 Panel A saved to: {output_file}")
 plt.close()
 
 print("\nPopulation regression results:")
+
+# %% Display regression results
+
 print(model_population.summary())
 # Save regression coefficients
 coef_table = pd.DataFrame({
@@ -101,6 +112,9 @@ coef_table.to_csv(os.path.join(TABLES_DIR, 'ch06_population_regression_coefficie
 print(f"Coefficients saved to: {os.path.join(TABLES_DIR, 'ch06_population_regression_coefficients.csv')}")
 
 # Figure 6.2: Panel B - Sample regression line
+
+# %% Estimate regression model
+
 model_sample = ols('y ~ x', data=data_gen).fit()
 
 fig, ax = plt.subplots(figsize=(10, 6))
@@ -121,9 +135,12 @@ print(f"Figure 6.2 Panel B saved to: {output_file}")
 plt.close()
 
 print("\nSample regression results:")
+
+# %% Display regression results
+
 print(model_sample.summary())
 
-# ========== THREE REGRESSIONS FROM THE SAME MODEL ==========
+# %% =========== THREE REGRESSIONS FROM THE SAME MODEL ==========
 
 print("\n" + "=" * 70)
 print("DEMONSTRATION: Three Regressions from the Same DGP")
@@ -154,8 +171,17 @@ df2 = pd.DataFrame({'x': x2, 'y': y2})
 df3 = pd.DataFrame({'x': x3, 'y': y3})
 
 # Fit regressions
+
+# %% Estimate regression model
+
 model1 = ols('y ~ x', data=df1).fit()
+
+# %% Estimate regression model
+
 model2 = ols('y ~ x', data=df2).fit()
+
+# %% Estimate regression model
+
 model3 = ols('y ~ x', data=df3).fit()
 
 print("\nSample 1 - Regression coefficients:")
@@ -198,7 +224,9 @@ plt.savefig(output_file, dpi=300, bbox_inches='tight')
 print(f"\nThree samples figure saved to: {output_file}")
 plt.close()
 
-# ========== 6.3 PROPERTIES OF THE LEAST SQUARES ESTIMATOR ==========
+# %% Continue analysis
+
+# %% =========== 6.3 PROPERTIES OF THE LEAST SQUARES ESTIMATOR ==========
 
 print("\n" + "=" * 70)
 print("6.3 PROPERTIES OF THE LEAST SQUARES ESTIMATOR")
@@ -207,6 +235,8 @@ print("=" * 70)
 # Read in regression data (if available)
 try:
     data_reg = pd.read_stata(GITHUB_DATA_URL + 'AED_GENERATEDREGRESSION.DTA')
+
+# %% Explore data structure
 
     print("\nGenerated regression data summary:")
     print(data_reg.describe())
@@ -249,7 +279,7 @@ try:
 except (FileNotFoundError, Exception) as e:
     print("\nNote: AED_GENERATEDREGRESSION.DTA not found, skipping this section")
 
-# ========== SIMULATION: SAMPLING DISTRIBUTION OF OLS ==========
+# %% =========== SIMULATION: SAMPLING DISTRIBUTION OF OLS ==========
 
 print("\n" + "=" * 70)
 print("SIMULATION: Sampling Distribution of OLS Estimator")
@@ -271,6 +301,9 @@ for i in range(n_simulations):
 
     # Fit OLS
     df = pd.DataFrame({'x': x, 'y': y})
+
+# %% Estimate regression model
+
     model = ols('y ~ x', data=df).fit()
 
     beta0_estimates[i] = model.params[0]
@@ -322,7 +355,9 @@ plt.savefig(output_file, dpi=300, bbox_inches='tight')
 print(f"\nSimulation figure saved to: {output_file}")
 plt.close()
 
-# ========== SUMMARY ==========
+# %% Continue analysis
+
+# %% =========== SUMMARY ==========
 
 print("\n" + "=" * 70)
 print("CHAPTER 6 ANALYSIS COMPLETE")

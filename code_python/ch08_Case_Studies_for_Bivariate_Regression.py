@@ -1,3 +1,4 @@
+# %%
 """
 ch08_Case_Studies_for_Bivariate_Regression.py - January 2026 for Python
 
@@ -16,7 +17,7 @@ Sections covered:
   8.4 OUTPUT AND UNEMPLOYMENT IN THE U.S.
 """
 
-# ========== SETUP ==========
+# %% =========== SETUP ==========
 
 import numpy as np
 import pandas as pd
@@ -51,7 +52,7 @@ print("=" * 70)
 print("CHAPTER 8: CASE STUDIES FOR BIVARIATE REGRESSION")
 print("=" * 70)
 
-# ========== 8.1 HEALTH OUTCOMES ACROSS COUNTRIES ==========
+# %% =========== 8.1 HEALTH OUTCOMES ACROSS COUNTRIES ==========
 
 print("\n" + "=" * 70)
 print("8.1 HEALTH OUTCOMES ACROSS COUNTRIES")
@@ -60,8 +61,12 @@ print("=" * 70)
 # Read in the health data
 data_health = pd.read_stata(GITHUB_DATA_URL + 'AED_HEALTH2009.DTA')
 
+# %% Explore data structure
+
 print("\nData summary:")
 data_summary = data_health.describe()
+
+# %% Calculate statistics
 print(data_summary)
 print("\nFirst few observations:")
 print(data_health.head())
@@ -75,12 +80,20 @@ print("-" * 70)
 table81_vars = ['hlthpc', 'lifeexp', 'infmort']
 print(data_health[table81_vars].describe())
 
+# %% Calculate statistics
+
 # Life Expectancy Analysis
 print("\n" + "-" * 70)
 print("Life Expectancy Regression")
 print("-" * 70)
 
+
+# %% Estimate regression model
+
 model_lifeexp = ols('lifeexp ~ hlthpc', data=data_health).fit()
+
+# %% Display regression results
+
 print(model_lifeexp.summary())
 # Save coefficients
 coef_table = pd.DataFrame({
@@ -97,6 +110,9 @@ model_lifeexp_robust = model_lifeexp.get_robustcov_results(cov_type='HC1')
 print("\n" + "-" * 70)
 print("Life Expectancy Regression (Robust SE):")
 print("-" * 70)
+
+# %% Display regression results
+
 print(model_lifeexp_robust.summary())
 
 # Figure 8.1 Panel A - Life Expectancy
@@ -123,7 +139,13 @@ print("\n" + "-" * 70)
 print("Infant Mortality Regression")
 print("-" * 70)
 
+
+# %% Estimate regression model
+
 model_infmort = ols('infmort ~ hlthpc', data=data_health).fit()
+
+# %% Display regression results
+
 print(model_infmort.summary())
 
 # Robust standard errors
@@ -131,6 +153,9 @@ model_infmort_robust = model_infmort.get_robustcov_results(cov_type='HC1')
 print("\n" + "-" * 70)
 print("Infant Mortality Regression (Robust SE):")
 print("-" * 70)
+
+# %% Display regression results
+
 print(model_infmort_robust.summary())
 
 # Figure 8.1 Panel B - Infant Mortality
@@ -152,7 +177,9 @@ plt.savefig(output_file, dpi=300, bbox_inches='tight')
 print(f"Figure saved to: {output_file}")
 plt.close()
 
-# ========== 8.2 HEALTH EXPENDITURES ACROSS COUNTRIES ==========
+# %% Continue analysis
+
+# %% =========== 8.2 HEALTH EXPENDITURES ACROSS COUNTRIES ==========
 
 print("\n" + "=" * 70)
 print("8.2 HEALTH EXPENDITURES ACROSS COUNTRIES")
@@ -165,12 +192,20 @@ print("-" * 70)
 table82_vars = ['gdppc', 'hlthpc']
 print(data_health[table82_vars].describe())
 
+# %% Calculate statistics
+
 # Health expenditure regression
 print("\n" + "-" * 70)
 print("Health Expenditure Regression")
 print("-" * 70)
 
+
+# %% Estimate regression model
+
 model_hlthpc = ols('hlthpc ~ gdppc', data=data_health).fit()
+
+# %% Display regression results
+
 print(model_hlthpc.summary())
 
 # Robust standard errors
@@ -178,6 +213,9 @@ model_hlthpc_robust = model_hlthpc.get_robustcov_results(cov_type='HC1')
 print("\n" + "-" * 70)
 print("Health Expenditure Regression (Robust SE):")
 print("-" * 70)
+
+# %% Display regression results
+
 print(model_hlthpc_robust.summary())
 
 # Figure 8.2 Panel A - All countries
@@ -210,7 +248,13 @@ data_health_subset = data_health[(data_health['code'] != 'LUX') &
 print(f"Original sample size: {len(data_health)}")
 print(f"Subset sample size: {len(data_health_subset)}")
 
+
+# %% Estimate regression model
+
 model_hlthpc_subset = ols('hlthpc ~ gdppc', data=data_health_subset).fit()
+
+# %% Display regression results
+
 print(model_hlthpc_subset.summary())
 
 # Figure 8.2 Panel B - Excluding USA and Luxembourg
@@ -232,7 +276,9 @@ plt.savefig(output_file, dpi=300, bbox_inches='tight')
 print(f"Figure saved to: {output_file}")
 plt.close()
 
-# ========== 8.3 CAPM MODEL ==========
+# %% Continue analysis
+
+# %% =========== 8.3 CAPM MODEL ==========
 
 print("\n" + "=" * 70)
 print("8.3 CAPM MODEL")
@@ -240,6 +286,8 @@ print("=" * 70)
 
 # Read in the CAPM data
 data_capm = pd.read_stata(GITHUB_DATA_URL + 'AED_CAPM.DTA')
+
+# %% Explore data structure
 
 print("\nData summary:")
 print(data_capm.describe())
@@ -253,6 +301,8 @@ print("-" * 70)
 table83_vars = ['rm', 'rf', 'rko', 'rtgt', 'rwmt', 'rm_rf',
                 'rko_rf', 'rtgt_rf', 'rwmt_rf']
 print(data_capm[table83_vars].describe())
+
+# %% Calculate statistics
 
 # Figure 8.3 Panel A - Time series plot (last 20% of data)
 # Take the last 20% of observations
@@ -282,7 +332,13 @@ print("\n" + "-" * 70)
 print("CAPM Regression: Coca Cola")
 print("-" * 70)
 
+
+# %% Estimate regression model
+
 model_capm = ols('rko_rf ~ rm_rf', data=data_capm).fit()
+
+# %% Display regression results
+
 print(model_capm.summary())
 
 # Robust standard errors
@@ -290,6 +346,9 @@ model_capm_robust = model_capm.get_robustcov_results(cov_type='HC1')
 print("\n" + "-" * 70)
 print("CAPM Regression (Robust SE):")
 print("-" * 70)
+
+# %% Display regression results
+
 print(model_capm_robust.summary())
 
 print(f"\nInterpretation:")
@@ -315,7 +374,9 @@ plt.savefig(output_file, dpi=300, bbox_inches='tight')
 print(f"Figure saved to: {output_file}")
 plt.close()
 
-# ========== 8.4 OUTPUT AND UNEMPLOYMENT IN THE U.S. ==========
+# %% Continue analysis
+
+# %% =========== 8.4 OUTPUT AND UNEMPLOYMENT IN THE U.S. ==========
 
 print("\n" + "=" * 70)
 print("8.4 OUTPUT AND UNEMPLOYMENT IN THE U.S.")
@@ -323,6 +384,8 @@ print("=" * 70)
 
 # Read in the GDP-Unemployment data
 data_gdp = pd.read_stata(GITHUB_DATA_URL + 'AED_GDPUNEMPLOY.DTA')
+
+# %% Explore data structure
 
 print("\nData summary:")
 print(data_gdp.describe())
@@ -336,12 +399,20 @@ print("-" * 70)
 table84_vars = ['rgdpgrowth', 'uratechange']
 print(data_gdp[table84_vars].describe())
 
+# %% Calculate statistics
+
 # Okun's Law regression
 print("\n" + "-" * 70)
 print("Okun's Law Regression")
 print("-" * 70)
 
+
+# %% Estimate regression model
+
 model_okun = ols('rgdpgrowth ~ uratechange', data=data_gdp).fit()
+
+# %% Display regression results
+
 print(model_okun.summary())
 
 # Robust standard errors
@@ -349,6 +420,9 @@ model_okun_robust = model_okun.get_robustcov_results(cov_type='HC1')
 print("\n" + "-" * 70)
 print("Okun's Law Regression (Robust SE):")
 print("-" * 70)
+
+# %% Display regression results
+
 print(model_okun_robust.summary())
 
 print(f"\nInterpretation (Okun's Law):")
@@ -397,7 +471,9 @@ plt.savefig(output_file, dpi=300, bbox_inches='tight')
 print(f"Figure saved to: {output_file}")
 plt.close()
 
-# ========== SUMMARY ==========
+# %% Continue analysis
+
+# %% =========== SUMMARY ==========
 
 print("\n" + "=" * 70)
 print("CHAPTER 8 ANALYSIS COMPLETE")

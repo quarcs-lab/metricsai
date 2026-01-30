@@ -1,3 +1,4 @@
+# %%
 """
 ch04_Statistical_Inference_for_the_Mean.py - January 2026 for Python
 
@@ -21,7 +22,7 @@ Sections covered:
   4.8 PROPORTIONS DATA
 """
 
-# ========== SETUP ==========
+# %% =========== SETUP ==========
 
 import numpy as np
 import pandas as pd
@@ -54,7 +55,7 @@ print("=" * 70)
 print("CHAPTER 4: STATISTICAL INFERENCE FOR THE MEAN")
 print("=" * 70)
 
-# ========== 4.1 EXAMPLE: MEAN ANNUAL EARNINGS ==========
+# %% =========== 4.1 EXAMPLE: MEAN ANNUAL EARNINGS ==========
 
 print("\n" + "=" * 70)
 print("4.1 EXAMPLE: MEAN ANNUAL EARNINGS")
@@ -63,8 +64,12 @@ print("=" * 70)
 # Read in earnings data
 data_earnings = pd.read_stata(GITHUB_DATA_URL + 'AED_EARNINGS.DTA')
 
+# %% Explore data structure
+
 print("\nData summary:")
 data_summary = data_earnings.describe()
+
+# %% Calculate statistics
 print(data_summary)
 data_summary.to_csv(os.path.join(TABLES_DIR, 'ch04_earnings_descriptive_stats.csv'))
 print(f"Table saved to: {os.path.join(TABLES_DIR, 'ch04_earnings_descriptive_stats.csv')}")
@@ -113,7 +118,7 @@ print(f"  t-statistic:  {t_stat:.4f}")
 print(f"  p-value:      {p_value:.4f}")
 print(f"  Decision:     {'Reject H0' if p_value < 0.05 else 'Fail to reject H0'} at α=0.05")
 
-# ========== 4.2 t STATISTIC AND t DISTRIBUTION ==========
+# %% =========== 4.2 t STATISTIC AND t DISTRIBUTION ==========
 
 print("\n" + "=" * 70)
 print("4.2 t STATISTIC AND t DISTRIBUTION")
@@ -150,7 +155,9 @@ plt.savefig(output_file, dpi=300, bbox_inches='tight')
 print(f"\nFigure 4.1 saved to: {output_file}")
 plt.close()
 
-# ========== 4.3 CONFIDENCE INTERVALS ==========
+# %% Continue analysis
+
+# %% =========== 4.3 CONFIDENCE INTERVALS ==========
 
 print("\n" + "=" * 70)
 print("4.3 CONFIDENCE INTERVALS")
@@ -179,7 +186,7 @@ print(f"  Critical value:     {t_crit:.4f}")
 print(f"  Margin of error:   ${t_crit * se_earnings:,.2f}")
 print(f"  CI:                [${ci_lower:,.2f}, ${ci_upper:,.2f}]")
 
-# ========== 4.4 TWO-SIDED HYPOTHESIS TESTS ==========
+# %% =========== 4.4 TWO-SIDED HYPOTHESIS TESTS ==========
 
 print("\n" + "=" * 70)
 print("4.4 TWO-SIDED HYPOTHESIS TESTS")
@@ -198,7 +205,7 @@ print(f"  p-value:           {p_value:.4f}")
 print(f"  Critical value:    ±{t_crit_95:.4f}")
 print(f"  Decision:          {'Reject H0' if abs(t_stat) > t_crit_95 else 'Fail to reject H0'}")
 
-# ========== 4.5 TWO-SIDED HYPOTHESIS TEST EXAMPLES ==========
+# %% =========== 4.5 TWO-SIDED HYPOTHESIS TEST EXAMPLES ==========
 
 print("\n" + "=" * 70)
 print("4.5 TWO-SIDED HYPOTHESIS TEST EXAMPLES")
@@ -279,7 +286,7 @@ print(f"  t-statistic:       {t_stat_growth:.4f}")
 print(f"  p-value:           {p_value_growth:.4f}")
 print(f"  Critical value:    ±{t_crit_growth:.4f}")
 
-# ========== 4.6 ONE-SIDED DIRECTIONAL HYPOTHESIS TESTS ==========
+# %% =========== 4.6 ONE-SIDED DIRECTIONAL HYPOTHESIS TESTS ==========
 
 print("\n" + "=" * 70)
 print("4.6 ONE-SIDED DIRECTIONAL HYPOTHESIS TESTS")
@@ -307,7 +314,7 @@ print(f"  p-value:           {p_value_upper:.4f}")
 print(f"  Critical value:    {t_crit_upper:.4f}")
 print(f"  Decision:          {'Reject H0' if t_stat > t_crit_upper else 'Fail to reject H0'}")
 
-# ========== 4.8 PROPORTIONS DATA ==========
+# %% =========== 4.8 PROPORTIONS DATA ==========
 
 print("\n" + "=" * 70)
 print("4.8 PROPORTIONS DATA")
@@ -342,7 +349,7 @@ print(f"  z-statistic:       {z_stat:.4f}")
 print(f"  p-value:           {p_value_prop:.4f}")
 print(f"  Decision:          {'Reject H0' if abs(z_stat) > 1.96 else 'Fail to reject H0'}")
 
-# ========== VISUALIZATION: HYPOTHESIS TESTING ==========
+# %% =========== VISUALIZATION: HYPOTHESIS TESTING ==========
 
 fig, axes = plt.subplots(1, 2, figsize=(16, 6))
 
@@ -397,7 +404,9 @@ plt.savefig(output_file, dpi=300, bbox_inches='tight')
 print(f"\nHypothesis testing visualization saved to: {output_file}")
 plt.close()
 
-# ========== SUMMARY ==========
+# %% Continue analysis
+
+# %% =========== SUMMARY ==========
 
 print("\n" + "=" * 70)
 print("CHAPTER 4 ANALYSIS COMPLETE")

@@ -1,3 +1,4 @@
+# %%
 """
 ch07_Statistical_Inference_for_Bivariate_Regression.py - January 2026 for Python
 
@@ -18,7 +19,7 @@ Sections covered:
   7.7 ROBUST STANDARD ERRORS
 """
 
-# ========== SETUP ==========
+# %% =========== SETUP ==========
 
 import numpy as np
 import pandas as pd
@@ -54,7 +55,7 @@ print("=" * 70)
 print("CHAPTER 7: STATISTICAL INFERENCE FOR BIVARIATE REGRESSION")
 print("=" * 70)
 
-# ========== 7.1 EXAMPLE: HOUSE PRICE AND SIZE ==========
+# %% =========== 7.1 EXAMPLE: HOUSE PRICE AND SIZE ==========
 
 print("\n" + "=" * 70)
 print("7.1 EXAMPLE: HOUSE PRICE AND SIZE")
@@ -63,8 +64,12 @@ print("=" * 70)
 # Read in the house data
 data_house = pd.read_stata(GITHUB_DATA_URL + 'AED_HOUSE.DTA')
 
+# %% Explore data structure
+
 print("\nData summary:")
 data_summary = data_house.describe()
+
+# %% Calculate statistics
 print(data_summary)
 print("\nFirst few observations:")
 print(data_house.head())
@@ -76,7 +81,13 @@ print("\n" + "-" * 70)
 print("Table 7.1: Regression of House Price on Size")
 print("-" * 70)
 
+
+# %% Estimate regression model
+
 model_basic = ols('price ~ size', data=data_house).fit()
+
+# %% Display regression results
+
 print(model_basic.summary())
 # Save regression summary
 with open(os.path.join(TABLES_DIR, 'ch07_regression_summary.txt'), 'w') as f:
@@ -91,7 +102,7 @@ coef_table = pd.DataFrame({
 coef_table.to_csv(os.path.join(TABLES_DIR, 'ch07_regression_coefficients.csv'))
 print(f"Coefficients saved to: {os.path.join(TABLES_DIR, 'ch07_regression_coefficients.csv')}")
 
-# ========== 7.2 THE T STATISTIC ==========
+# %% =========== 7.2 THE T STATISTIC ==========
 
 print("\n" + "=" * 70)
 print("7.2 THE T STATISTIC")
@@ -112,7 +123,7 @@ print(f"  Standard Error: {se_size:.4f}")
 print(f"  t-statistic: {t_stat_size:.4f}")
 print(f"  p-value: {p_value_size:.6f}")
 
-# ========== 7.3 CONFIDENCE INTERVALS ==========
+# %% =========== 7.3 CONFIDENCE INTERVALS ==========
 
 print("\n" + "=" * 70)
 print("7.3 CONFIDENCE INTERVALS")
@@ -146,7 +157,13 @@ x = np.array([1, 2, 3, 4, 5])
 y = np.array([1, 2, 2, 2, 3])
 df_artificial = pd.DataFrame({'x': x, 'y': y})
 
+
+# %% Estimate regression model
+
 model_artificial = ols('y ~ x', data=df_artificial).fit()
+
+# %% Display regression results
+
 print(model_artificial.summary())
 
 coef_x = model_artificial.params['x']
@@ -163,7 +180,7 @@ print(f"  Coefficient: {coef_x:.4f}")
 print(f"  Standard Error: {se_x:.4f}")
 print(f"  95% CI: [{ci_lower_art:.4f}, {ci_upper_art:.4f}]")
 
-# ========== 7.4 TESTS OF STATISTICAL SIGNIFICANCE ==========
+# %% =========== 7.4 TESTS OF STATISTICAL SIGNIFICANCE ==========
 
 print("\n" + "=" * 70)
 print("7.4 TESTS OF STATISTICAL SIGNIFICANCE")
@@ -179,7 +196,7 @@ if p_value_size < 0.05:
 else:
     print("Result: Fail to reject H₀ at 5% significance level")
 
-# ========== 7.5 TWO-SIDED HYPOTHESIS TESTS ==========
+# %% =========== 7.5 TWO-SIDED HYPOTHESIS TESTS ==========
 
 print("\n" + "=" * 70)
 print("7.5 TWO-SIDED HYPOTHESIS TESTS")
@@ -211,7 +228,7 @@ hypothesis = f'size = {null_value}'
 t_test_result = model_basic.t_test(hypothesis)
 print(t_test_result)
 
-# ========== 7.6 ONE-SIDED DIRECTIONAL HYPOTHESIS TESTS ==========
+# %% =========== 7.6 ONE-SIDED DIRECTIONAL HYPOTHESIS TESTS ==========
 
 print("\n" + "=" * 70)
 print("7.6 ONE-SIDED DIRECTIONAL HYPOTHESIS TESTS")
@@ -244,7 +261,7 @@ if t_stat_90 < -t_crit_upper:
 else:
     print("Result: Fail to reject H₀")
 
-# ========== 7.7 ROBUST STANDARD ERRORS ==========
+# %% =========== 7.7 ROBUST STANDARD ERRORS ==========
 
 print("\n" + "=" * 70)
 print("7.7 ROBUST STANDARD ERRORS")
@@ -270,6 +287,9 @@ print(f"Table saved to: {os.path.join(TABLES_DIR, 'ch07_robust_vs_standard_se.cs
 print("\n" + "-" * 70)
 print("Regression with robust standard errors:")
 print("-" * 70)
+
+# %% Display regression results
+
 print(robust_results.summary())
 
 # Robust confidence intervals
@@ -277,7 +297,7 @@ robust_conf_int = robust_results.conf_int(alpha=0.05)
 print("\n95% Confidence Intervals (Robust):")
 print(robust_conf_int)
 
-# ========== VISUALIZATION ==========
+# %% =========== VISUALIZATION ==========
 
 print("\n" + "=" * 70)
 print("GENERATING FIGURES")
@@ -301,6 +321,8 @@ plt.tight_layout()
 plt.savefig(output_file, dpi=300, bbox_inches='tight')
 print(f"\nFigure saved to: {output_file}")
 plt.close()
+
+# %% Continue analysis
 
 # Figure 7.2: Confidence interval visualization
 fig, ax = plt.subplots(figsize=(10, 6))
@@ -328,6 +350,8 @@ plt.savefig(output_file, dpi=300, bbox_inches='tight')
 print(f"Figure saved to: {output_file}")
 plt.close()
 
+# %% Continue analysis
+
 # Figure 7.3: Residual plot
 fig, ax = plt.subplots(figsize=(10, 6))
 ax.scatter(model_basic.fittedvalues, model_basic.resid, alpha=0.6, s=50, color='black')
@@ -343,7 +367,9 @@ plt.savefig(output_file, dpi=300, bbox_inches='tight')
 print(f"Figure saved to: {output_file}")
 plt.close()
 
-# ========== SUMMARY ==========
+# %% Continue analysis
+
+# %% =========== SUMMARY ==========
 
 print("\n" + "=" * 70)
 print("CHAPTER 7 ANALYSIS COMPLETE")

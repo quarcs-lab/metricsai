@@ -1,12 +1,13 @@
+# %%
 #!/usr/bin/env python3
 """
 Chapter 13: Case Studies for Multiple Regression
 Python script extracted from Jupyter notebook
 """
 
-# ============================================================================
+# %% =============================================================================
 # SETUP
-# ============================================================================
+# %% =============================================================================
 # Import libraries
 import numpy as np
 import pandas as pd
@@ -44,15 +45,17 @@ print("="*70)
 print("CHAPTER 13: CASE STUDIES FOR MULTIPLE REGRESSION")
 print("="*70)
 
-# ============================================================================
+# %% =============================================================================
 # 13.1 SCHOOL ACADEMIC PERFORMANCE INDEX
-# ============================================================================
+# %% =============================================================================
 print("\n" + "="*70)
 print("13.1 SCHOOL ACADEMIC PERFORMANCE INDEX")
 print("="*70)
 
 # Load API data
 data_api = pd.read_stata(GITHUB_DATA_URL + 'AED_API99.DTA')
+
+# %% Explore data structure
 print(f"Loaded {len(data_api)} California high schools")
 print(f"Variables: {list(data_api.columns)}")
 data_api.head()
@@ -63,6 +66,8 @@ print("SUMMARY STATISTICS")
 print("="*70)
 vars_api = ['api99', 'edparent', 'meals', 'englearn', 'yearround', 'credteach', 'emerteach']
 print(data_api[vars_api].describe())
+
+# %% Calculate statistics
 
 # Histogram of API scores
 plt.figure(figsize=(10, 6))
@@ -78,11 +83,19 @@ plt.grid(True, alpha=0.3)
 plt.savefig(os.path.join(IMAGES_DIR, 'ch13_api_distribution.png'), dpi=300, bbox_inches='tight')
 plt.close()
 
+# %% Continue analysis
+
 # Bivariate regression: API ~ Edparent
+
+# %% Estimate regression model
+
 model_api_biv = ols('api99 ~ edparent', data=data_api).fit(cov_type='HC1')
 print("="*70)
 print("BIVARIATE REGRESSION: API ~ EDPARENT")
 print("="*70)
+
+# %% Display regression results
+
 print(model_api_biv.summary())
 
 # Scatter plot with regression line
@@ -97,6 +110,8 @@ plt.legend()
 plt.grid(True, alpha=0.3)
 plt.savefig(os.path.join(IMAGES_DIR, 'ch13_api_vs_edparent.png'), dpi=300, bbox_inches='tight')
 plt.close()
+
+# %% Continue analysis
 
 # Correlation matrix
 corr_matrix = data_api[vars_api].corr()
@@ -114,19 +129,28 @@ plt.tight_layout()
 plt.savefig(os.path.join(IMAGES_DIR, 'ch13_api_correlation_matrix.png'), dpi=300, bbox_inches='tight')
 plt.close()
 
-# ============================================================================
+# %% =============================================================================
 # 13.2 COBB-DOUGLAS PRODUCTION FUNCTION
-# ============================================================================
+# %% =============================================================================
 print("\n" + "="*70)
 print("13.2 COBB-DOUGLAS PRODUCTION FUNCTION")
 print("="*70)
 
 # Multiple regression
+
+# %% Estimate regression model
+
 model_api_mult = ols('api99 ~ edparent + meals + englearn + yearround + credteach + emerteach',
+
+# %% Estimate regression model
+
                       data=data_api).fit()
 print("="*70)
 print("MULTIPLE REGRESSION")
 print("="*70)
+
+# %% Display regression results
+
 print(model_api_mult.summary())
 
 # Coefficient table
@@ -140,6 +164,8 @@ print("\n", coef_df)
 
 # Load Cobb-Douglas data
 data_cobb = pd.read_stata(GITHUB_DATA_URL + 'AED_COBBDOUGLAS.DTA')
+
+# %% Explore data structure
 print(f"Loaded {len(data_cobb)} years of US manufacturing data (1899-1922)")
 print(f"Variables: {list(data_cobb.columns)}")
 data_cobb.head(12)
@@ -152,11 +178,19 @@ data_cobb['lnl'] = np.log(data_cobb['l'])
 print("Summary statistics (original and log-transformed):")
 print(data_cobb[['q', 'k', 'l', 'lnq', 'lnk', 'lnl']].describe())
 
+# %% Calculate statistics
+
 # Estimate Cobb-Douglas with HAC standard errors
+
+# %% Estimate regression model
+
 model_cobb = ols('lnq ~ lnk + lnl', data=data_cobb).fit(cov_type='HAC', cov_kwds={'maxlags': 3})
 print("="*70)
 print("COBB-DOUGLAS REGRESSION: ln(Q) ~ ln(K) + ln(L)")
 print("="*70)
+
+# %% Display regression results
+
 print(model_cobb.summary())
 
 beta_k = model_cobb.params['lnk']
@@ -173,6 +207,9 @@ print(f"Estimated sum: {sum_betas:.3f}")
 # Restricted model: ln(Q/L) ~ ln(K/L)
 data_cobb['lnq_per_l'] = data_cobb['lnq'] - data_cobb['lnl']
 data_cobb['lnk_per_l'] = data_cobb['lnk'] - data_cobb['lnl']
+
+# %% Estimate regression model
+
 model_restricted = ols('lnq_per_l ~ lnk_per_l', data=data_cobb).fit()
 
 # F-test
@@ -185,9 +222,9 @@ print(f"F-statistic: {f_stat:.2f}")
 print(f"p-value: {p_value:.3f}")
 print(f"Conclusion: {'Reject' if p_value < 0.05 else 'Fail to reject'} H0 at 5% level")
 
-# ============================================================================
+# %% =============================================================================
 # 13.3 PHILLIPS CURVE AND OMITTED VARIABLES BIAS
-# ============================================================================
+# %% =============================================================================
 print("\n" + "="*70)
 print("13.3 PHILLIPS CURVE AND OMITTED VARIABLES BIAS")
 print("="*70)
@@ -211,18 +248,28 @@ plt.grid(True, alpha=0.3)
 plt.savefig(os.path.join(IMAGES_DIR, 'ch13_cobb_douglas_prediction.png'), dpi=300, bbox_inches='tight')
 plt.close()
 
+# %% Load next dataset
+
 # Load Phillips curve data
 data_phillips = pd.read_stata(GITHUB_DATA_URL + 'AED_PHILLIPS.DTA')
+
+# %% Explore data structure
 print(f"Loaded {len(data_phillips)} years of US data (1949-2014)")
 print(f"Variables: {list(data_phillips.columns)}")
 data_phillips.head()
 
 # Pre-1970 regression
 data_pre1970 = data_phillips[data_phillips['year'] < 1970]
+
+# %% Estimate regression model
+
 model_pre = ols('inflgdp ~ urate', data=data_pre1970).fit(cov_type='HAC', cov_kwds={'maxlags': 3})
 print("="*70)
 print("PHILLIPS CURVE PRE-1970 (1949-1969)")
 print("="*70)
+
+# %% Display regression results
+
 print(model_pre.summary())
 
 # Plot pre-1970
@@ -238,12 +285,20 @@ plt.grid(True, alpha=0.3)
 plt.savefig(os.path.join(IMAGES_DIR, 'ch13_phillips_pre1970.png'), dpi=300, bbox_inches='tight')
 plt.close()
 
+# %% Continue analysis
+
 # Post-1970 regression
 data_post1970 = data_phillips[data_phillips['year'] >= 1970]
+
+# %% Estimate regression model
+
 model_post = ols('inflgdp ~ urate', data=data_post1970).fit(cov_type='HAC', cov_kwds={'maxlags': 5})
 print("="*70)
 print("PHILLIPS CURVE POST-1970 (1970-2014)")
 print("="*70)
+
+# %% Display regression results
+
 print(model_post.summary())
 
 # Plot post-1970
@@ -263,6 +318,9 @@ plt.close()
 
 data_post1970_exp = data_post1970.dropna(subset=['inflgdp1yr'])
 
+
+# %% Estimate regression model
+
 model_augmented = ols('inflgdp ~ urate + inflgdp1yr', data=data_post1970_exp).fit(
 
     cov_type='HAC', cov_kwds={'maxlags': 5})
@@ -273,11 +331,14 @@ print("AUGMENTED PHILLIPS CURVE POST-1970")
 
 print("="*70)
 
+
+# %% Display regression results
+
 print(model_augmented.summary())
 
-# ============================================================================
+# %% =============================================================================
 # 13.4 AUTOMOBILE FUEL EFFICIENCY
-# ============================================================================
+# %% =============================================================================
 print("\n" + "="*70)
 print("13.4 AUTOMOBILE FUEL EFFICIENCY")
 print("="*70)
@@ -289,6 +350,9 @@ print("="*70)
 # Bivariate regression of Expinflation on Urate
 
 
+
+
+# %% Estimate regression model
 
 model_aux = ols('inflgdp1yr ~ urate', data=data_post1970_exp).fit()
 
@@ -362,6 +426,8 @@ print(f"\n✓ Omitted variables bias explains the sign reversal!")
 
 # Load automobile data
 data_auto = pd.read_stata(GITHUB_DATA_URL + 'AED_AUTOSMPG.DTA')
+
+# %% Explore data structure
 print(f"Loaded {len(data_auto)} vehicle observations (1980-2006)")
 print(f"\nKey variables: {['year', 'mfr', 'mpg', 'curbwt', 'hp', 'torque']}")
 print(f"\nNote: Dataset has pre-computed log transformations (lmpg, lcurbwt, lhp, ltorque)")
@@ -380,15 +446,18 @@ print("TOP 10 MANUFACTURERS BY OBSERVATIONS")
 print("="*70)
 print(data_auto['mfr'].value_counts().head(10))
 
-# ============================================================================
+# %% =============================================================================
 # 13.5 RAND HEALTH INSURANCE EXPERIMENT (RCT)
-# ============================================================================
+# %% =============================================================================
 print("\n" + "="*70)
 print("13.5 RAND HEALTH INSURANCE EXPERIMENT (RCT)")
 print("="*70)
 
 # Log-log regression with cluster-robust standard errors
 # Use pre-computed log variables
+
+# %% Estimate regression model
+
 model_auto = ols('lmpg ~ lhp + lcurbwt + ltorque + year', data=data_auto).fit(
     cov_type='cluster',
     cov_kwds={'groups': data_auto['mfr']}
@@ -397,6 +466,9 @@ model_auto = ols('lmpg ~ lhp + lcurbwt + ltorque + year', data=data_auto).fit(
 print("="*70)
 print("LOG-LOG REGRESSION: FUEL EFFICIENCY")
 print("="*70)
+
+# %% Display regression results
+
 print(model_auto.summary())
 
 # Interpretation
@@ -421,15 +493,17 @@ print(f"Average observations per cluster: {len(data_auto)/data_auto['mfr'].nuniq
 print(f"\nWhy cluster? Vehicles from same manufacturer likely have correlated errors")
 print(f"due to common technology, design philosophy, and engineering teams.")
 
-# ============================================================================
+# %% =============================================================================
 # 13.6 HEALTH CARE ACCESS (DIFFERENCE-IN-DIFFERENCES)
-# ============================================================================
+# %% =============================================================================
 print("\n" + "="*70)
 print("13.6 HEALTH CARE ACCESS (DIFFERENCE-IN-DIFFERENCES)")
 print("="*70)
 
 # Load health insurance experiment data
 data_health = pd.read_stata(GITHUB_DATA_URL + 'AED_HEALTHINSEXP.DTA')
+
+# %% Explore data structure
 
 # Use first year data only (as per textbook)
 data_health_y1 = data_health[data_health['year'] == 1]
@@ -450,6 +524,9 @@ spending_by_plan = data_health_y1.groupby('plan')['spending'].agg(['mean', 'std'
 print(spending_by_plan)
 
 # Regression with plan indicators
+
+# %% Estimate regression model
+
 model_rct = ols('spending ~ coins25 + coins50 + coins95 + coinsmixed + coinsindiv',
                 data=data_health_y1).fit(
     cov_type='cluster',
@@ -460,6 +537,9 @@ print("\n" + "="*70)
 print("RCT REGRESSION: SPENDING ON INSURANCE PLANS")
 print("="*70)
 print("Omitted category: Free Care (coins0)")
+
+# %% Display regression results
+
 print(model_rct.summary())
 
 # F-test for joint significance
@@ -481,15 +561,17 @@ print("✓ Random assignment eliminates selection bias")
 print("✓ Free care → highest spending (omitted baseline)")
 print("✓ Higher cost-sharing → lower spending")
 
-# ============================================================================
+# %% =============================================================================
 # 13.7 POLITICAL INCUMBENCY (REGRESSION DISCONTINUITY)
-# ============================================================================
+# %% =============================================================================
 print("\n" + "="*70)
 print("13.7 POLITICAL INCUMBENCY (REGRESSION DISCONTINUITY)")
 print("="*70)
 
 # Load health care access data (South Africa)
 data_access = pd.read_stata(GITHUB_DATA_URL + 'AED_HEALTHACCESS.DTA')
+
+# %% Explore data structure
 
 print(f"Loaded {len(data_access)} observations (South African children 0-4)")
 print(f"\nDifference-in-Differences Setup:")
@@ -520,6 +602,9 @@ print(f"  Treated change: {post_treat:.3f} - {pre_treat:.3f} = {post_treat - pre
 print(f"  DiD estimate: ({post_treat:.3f} - {pre_treat:.3f}) - ({post_control:.3f} - {pre_control:.3f}) = {did_estimate:.3f}")
 
 # DiD regression
+
+# %% Estimate regression model
+
 model_did = ols('waz ~ hightreat + post + postXhigh', data=data_access).fit(
     cov_type='cluster',
     cov_kwds={'groups': data_access['idcommunity']}
@@ -528,6 +613,9 @@ model_did = ols('waz ~ hightreat + post + postXhigh', data=data_access).fit(
 print("\n" + "="*70)
 print("DiD REGRESSION")
 print("="*70)
+
+# %% Display regression results
+
 print(model_did.summary())
 
 print("\n" + "="*70)
@@ -540,15 +628,17 @@ print(f"Clinic access improved child nutrition by {model_did.params['postXhigh']
 print(f"This is a {'statistically significant' if model_did.pvalues['postXhigh'] < 0.05 else 'not significant'} effect")
 print(f"\nCluster-robust SEs by community account for within-community correlation")
 
-# ============================================================================
+# %% =============================================================================
 # 13.8 INSTITUTIONS AND GDP (INSTRUMENTAL VARIABLES)
-# ============================================================================
+# %% =============================================================================
 print("\n" + "="*70)
 print("13.8 INSTITUTIONS AND GDP (INSTRUMENTAL VARIABLES)")
 print("="*70)
 
 # Load incumbency data (U.S. Senate elections)
 data_incumb = pd.read_stata(GITHUB_DATA_URL + 'AED_INCUMBENCY.DTA')
+
+# %% Explore data structure
 
 print(f"Loaded {len(data_incumb)} Senate elections (1914-2010)")
 print(f"\nRegression Discontinuity Setup:")
@@ -563,16 +653,24 @@ print("SUMMARY STATISTICS")
 print("="*70)
 print(data_incumb[['vote', 'margin', 'win']].describe())
 
+# %% Calculate statistics
+
 # Keep only elections with non-missing vote in t+1
 data_rd = data_incumb[data_incumb['vote'].notna()].copy()
 print(f"\nObservations with outcome data: {len(data_rd)}")
 
 # RD regression (linear)
+
+# %% Estimate regression model
+
 model_rd = ols('vote ~ win + margin', data=data_rd).fit(cov_type='HC1')
 
 print("\n" + "="*70)
 print("REGRESSION DISCONTINUITY ESTIMATION")
 print("="*70)
+
+# %% Display regression results
+
 print(model_rd.summary())
 
 print("\n" + "="*70)
@@ -595,15 +693,17 @@ print("  - Bin observations by margin")
 print("  - Plot mean vote in next election vs margin")
 print("  - Should see jump at margin=0")
 
-# ============================================================================
+# %% =============================================================================
 # 13.9 FROM RAW DATA TO FINAL DATA
-# ============================================================================
+# %% =============================================================================
 print("\n" + "="*70)
 print("13.9 FROM RAW DATA TO FINAL DATA")
 print("="*70)
 
 # Load institutions data (cross-country)
 data_inst = pd.read_stata(GITHUB_DATA_URL + 'AED_INSTITUTIONS.DTA')
+
+# %% Explore data structure
 
 print(f"Loaded {len(data_inst)} countries")
 print(f"\nInstrumental Variables Setup:")
@@ -620,22 +720,36 @@ print("SUMMARY STATISTICS")
 print("="*70)
 print(data_inst[['logpgp95', 'avexpr', 'logem4']].describe())
 
+# %% Calculate statistics
+
 # OLS (biased - endogeneity problem)
+
+# %% Estimate regression model
+
 model_ols = ols('logpgp95 ~ avexpr', data=data_inst).fit(cov_type='HC1')
 
 print("\n" + "="*70)
 print("OLS REGRESSION (BIASED)")
 print("="*70)
+
+# %% Display regression results
+
 print(model_ols.summary())
 print(f"\nOLS coefficient: {model_ols.params['avexpr']:.3f}")
 print("⚠️ This is biased due to endogeneity (omitted variables, reverse causation)")
 
 # First stage
+
+# %% Estimate regression model
+
 model_first = ols('avexpr ~ logem4', data=data_inst).fit(cov_type='HC1')
 
 print("\n" + "="*70)
 print("FIRST STAGE: INSTITUTIONS ~ SETTLER MORTALITY")
 print("="*70)
+
+# %% Display regression results
+
 print(model_first.summary())
 print(f"\nFirst stage F-statistic: {model_first.fvalue:.2f}")
 print(f"Rule of thumb: F > 10 for strong instrument")
@@ -650,9 +764,15 @@ print("="*70)
 data_inst['avexpr_hat'] = model_first.fittedvalues
 
 # Second stage (using predicted values)
+
+# %% Estimate regression model
+
 model_second = ols('logpgp95 ~ avexpr_hat', data=data_inst).fit(cov_type='HC1')
 
 print("\nSecond stage:")
+
+# %% Display regression results
+
 print(model_second.summary())
 
 print("\n" + "="*70)
@@ -683,9 +803,13 @@ print("="*70)
 print("\n1. Reading Stata files (.dta):")
 print("   data = pd.read_stata('file.dta')")
 
+# %% Explore data structure
+
 # CSV files
 print("\n2. Reading CSV files:")
 print("   data = pd.read_csv('file.csv')")
+
+# %% Explore data structure
 
 # Excel files
 print("\n3. Reading Excel files:")

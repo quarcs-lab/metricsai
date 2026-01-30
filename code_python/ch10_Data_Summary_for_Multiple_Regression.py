@@ -1,3 +1,4 @@
+# %%
 """
 ch10_Data_Summary_for_Multiple_Regression.py - January 2026 for Python
 
@@ -18,7 +19,7 @@ Sections covered:
   10.8 INESTIMABLE MODELS
 """
 
-# ========== SETUP ==========
+# %% =========== SETUP ==========
 
 import numpy as np
 import pandas as pd
@@ -53,7 +54,7 @@ print("=" * 70)
 print("CHAPTER 10: DATA SUMMARY FOR MULTIPLE REGRESSION")
 print("=" * 70)
 
-# ========== 10.1 EXAMPLE: HOUSE PRICE AND CHARACTERISTICS ==========
+# %% =========== 10.1 EXAMPLE: HOUSE PRICE AND CHARACTERISTICS ==========
 
 print("\n" + "=" * 70)
 print("10.1 EXAMPLE: HOUSE PRICE AND CHARACTERISTICS")
@@ -62,8 +63,12 @@ print("=" * 70)
 # Read in the house data
 data_house = pd.read_stata(GITHUB_DATA_URL + 'AED_HOUSE.DTA')
 
+# %% Explore data structure
+
 print("\nData summary:")
 data_summary = data_house.describe()
+
+# %% Calculate statistics
 print(data_summary)
 data_summary.to_csv(os.path.join(TABLES_DIR, 'ch10_house_descriptive_stats.csv'))
 print(f"Table saved to: {os.path.join(TABLES_DIR, 'ch10_house_descriptive_stats.csv')}")
@@ -88,13 +93,25 @@ print("Comparison: Bivariate vs Multiple Regression")
 print("-" * 70)
 
 # Bivariate regression
+
+# %% Estimate regression model
+
 model_one = ols('price ~ bedrooms', data=data_house).fit()
 print("\nBivariate regression: price ~ bedrooms")
+
+# %% Display regression results
+
 print(model_one.summary())
 
 # Multiple regression
+
+# %% Estimate regression model
+
 model_two = ols('price ~ bedrooms + size', data=data_house).fit()
 print("\nMultiple regression: price ~ bedrooms + size")
+
+# %% Display regression results
+
 print(model_two.summary())
 
 print(f"\nComparison of bedrooms coefficient:")
@@ -102,7 +119,7 @@ print(f"  Bivariate model: {model_one.params['bedrooms']:.4f}")
 print(f"  Multiple regression: {model_two.params['bedrooms']:.4f}")
 print(f"  Change: {model_two.params['bedrooms'] - model_one.params['bedrooms']:.4f}")
 
-# ========== 10.2 TWO-WAY SCATTERPLOTS ==========
+# %% =========== 10.2 TWO-WAY SCATTERPLOTS ==========
 
 print("\n" + "=" * 70)
 print("10.2 TWO-WAY SCATTERPLOTS")
@@ -125,7 +142,9 @@ plt.savefig(output_file, dpi=300, bbox_inches='tight')
 print(f"Figure saved to: {output_file}")
 plt.close()
 
-# ========== 10.3 CORRELATION ==========
+# %% Continue analysis
+
+# %% =========== 10.3 CORRELATION ==========
 
 print("\n" + "=" * 70)
 print("10.3 CORRELATION")
@@ -154,7 +173,9 @@ plt.savefig(output_file, dpi=300, bbox_inches='tight')
 print(f"\nCorrelation heatmap saved to: {output_file}")
 plt.close()
 
-# ========== 10.4 REGRESSION LINE ==========
+# %% Continue analysis
+
+# %% =========== 10.4 REGRESSION LINE ==========
 
 print("\n" + "=" * 70)
 print("10.4 REGRESSION LINE")
@@ -165,8 +186,17 @@ print("\n" + "-" * 70)
 print("Multiple Regression: Full Model")
 print("-" * 70)
 
+
+# %% Estimate regression model
+
 model_full = ols('price ~ size + bedrooms + bathrooms + lotsize + age + monthsold',
+
+# %% Estimate regression model
+
                  data=data_house).fit()
+
+# %% Display regression results
+
 print(model_full.summary())
 # Save regression summary
 with open(os.path.join(TABLES_DIR, 'ch10_regression_summary.txt'), 'w') as f:
@@ -196,7 +226,7 @@ coef_table = pd.DataFrame({
 })
 print(coef_table)
 
-# ========== 10.5 ESTIMATED PARTIAL EFFECTS ==========
+# %% =========== 10.5 ESTIMATED PARTIAL EFFECTS ==========
 
 print("\n" + "=" * 70)
 print("10.5 ESTIMATED PARTIAL EFFECTS")
@@ -206,12 +236,21 @@ print("\nDemonstration: Coefficient from multiple regression equals")
 print("coefficient from bivariate regression on residualized regressor")
 
 # Step 1: Regress size on other variables
+
+# %% Estimate regression model
+
 model_size = ols('size ~ bedrooms + bathrooms + lotsize + age + monthsold',
+
+# %% Estimate regression model
+
                  data=data_house).fit()
 resid_size = model_size.resid
 
 # Step 2: Regress price on residualized size
 data_house['resid_size'] = resid_size
+
+# %% Estimate regression model
+
 model_biv = ols('price ~ resid_size', data=data_house).fit()
 
 print(f"\nCoefficient on size from full multiple regression: {model_full.params['size']:.6f}")
@@ -219,7 +258,7 @@ print(f"Coefficient on resid_size from bivariate regression: {model_biv.params['
 print(f"Difference: {abs(model_full.params['size'] - model_biv.params['resid_size']):.10f}")
 print("\nThese coefficients are identical (within numerical precision)")
 
-# ========== 10.6 MODEL FIT ==========
+# %% =========== 10.6 MODEL FIT ==========
 
 print("\n" + "=" * 70)
 print("10.6 MODEL FIT")
@@ -280,7 +319,7 @@ bic_stata = n * np.log(rss/n) + n * (1 + np.log(2*np.pi)) + k*np.log(n)
 print(f"\nAIC (Stata convention): {aic_stata:.4f}")
 print(f"BIC (Stata convention): {bic_stata:.4f}")
 
-# ========== 10.7 COMPUTER OUTPUT FOLLOWING MULTIPLE REGRESSION ==========
+# %% =========== 10.7 COMPUTER OUTPUT FOLLOWING MULTIPLE REGRESSION ==========
 
 print("\n" + "=" * 70)
 print("10.7 COMPUTER OUTPUT FOLLOWING MULTIPLE REGRESSION")
@@ -292,6 +331,9 @@ print("Model Comparison Table")
 print("-" * 70)
 
 # Simple model
+
+# %% Estimate regression model
+
 model_small = ols('price ~ size', data=data_house).fit()
 
 # Create comparison table
@@ -325,7 +367,7 @@ print("-" * 50)
 print(f"{'Full Model':<20} {model_full.rsquared:<10.4f} {model_full.rsquared_adj:<10.4f} {n:<5}")
 print(f"{'Simple Model':<20} {model_small.rsquared:<10.4f} {model_small.rsquared_adj:<10.4f} {n:<5}")
 
-# ========== 10.8 INESTIMABLE MODELS ==========
+# %% =========== 10.8 INESTIMABLE MODELS ==========
 
 print("\n" + "=" * 70)
 print("10.8 INESTIMABLE MODELS")
@@ -339,9 +381,18 @@ data_house['size_twice'] = 2 * data_house['size']
 
 print("\nAttempting to estimate model with perfect collinearity:")
 try:
+
+# %% Estimate regression model
+
     model_collinear = ols('price ~ size + size_twice + bedrooms',
+
+# %% Estimate regression model
+
                           data=data_house).fit()
     print("Model estimated. Checking for dropped variables...")
+
+# %% Display regression results
+
     print(model_collinear.summary())
 except Exception as e:
     print(f"Error encountered: {type(e).__name__}")
@@ -366,7 +417,7 @@ print("\nNote: VIF > 10 often indicates problematic multicollinearity")
 vif_data.to_csv(os.path.join(TABLES_DIR, 'ch10_vif_table.csv'), index=False)
 print(f"Table saved to: {os.path.join(TABLES_DIR, 'ch10_vif_table.csv')}")
 
-# ========== VISUALIZATION ==========
+# %% =========== VISUALIZATION ==========
 
 print("\n" + "=" * 70)
 print("GENERATING ADDITIONAL FIGURES")
@@ -390,6 +441,8 @@ plt.savefig(output_file, dpi=300, bbox_inches='tight')
 print(f"\nFigure saved to: {output_file}")
 plt.close()
 
+# %% Continue analysis
+
 # Figure: Residual plot
 fig, ax = plt.subplots(figsize=(10, 6))
 ax.scatter(model_full.fittedvalues, model_full.resid, alpha=0.6, s=50, color='black')
@@ -404,6 +457,8 @@ plt.tight_layout()
 plt.savefig(output_file, dpi=300, bbox_inches='tight')
 print(f"Figure saved to: {output_file}")
 plt.close()
+
+# %% Continue analysis
 
 # Figure: Coefficient plot with confidence intervals
 fig, ax = plt.subplots(figsize=(10, 8))
@@ -431,7 +486,9 @@ plt.savefig(output_file, dpi=300, bbox_inches='tight')
 print(f"Figure saved to: {output_file}")
 plt.close()
 
-# ========== SUMMARY ==========
+# %% Continue analysis
+
+# %% =========== SUMMARY ==========
 
 print("\n" + "=" * 70)
 print("CHAPTER 10 ANALYSIS COMPLETE")

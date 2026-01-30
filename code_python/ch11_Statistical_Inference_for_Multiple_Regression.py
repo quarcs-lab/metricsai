@@ -1,3 +1,4 @@
+# %%
 """
 ch11_Statistical_Inference_for_Multiple_Regression.py - January 2026 for Python
 
@@ -17,7 +18,7 @@ Sections covered:
   11.7 PRESENTATION OF REGRESSION RESULTS
 """
 
-# ========== SETUP ==========
+# %% =========== SETUP ==========
 
 import numpy as np
 import pandas as pd
@@ -53,18 +54,22 @@ print("=" * 70)
 print("CHAPTER 11: STATISTICAL INFERENCE FOR MULTIPLE REGRESSION")
 print("=" * 70)
 
-# ========== DATA PREPARATION ==========
+# %% =========== DATA PREPARATION ==========
 
 # Read in the house data
 data_house = pd.read_stata(GITHUB_DATA_URL + 'AED_HOUSE.DTA')
 
+# %% Explore data structure
+
 print("\nData summary:")
 data_summary = data_house.describe()
+
+# %% Calculate statistics
 print(data_summary)
 data_summary.to_csv(os.path.join(TABLES_DIR, 'ch11_house_descriptive_stats.csv'))
 print(f"Table saved to: {os.path.join(TABLES_DIR, 'ch11_house_descriptive_stats.csv')}")
 
-# ========== 11.1 PROPERTIES OF THE LEAST SQUARES ESTIMATOR ==========
+# %% =========== 11.1 PROPERTIES OF THE LEAST SQUARES ESTIMATOR ==========
 
 print("\n" + "=" * 70)
 print("11.1 PROPERTIES OF THE LEAST SQUARES ESTIMATOR")
@@ -80,19 +85,28 @@ print("  - Unbiased: E[β̂] = β")
 print("  - Consistent: plim(β̂) = β")
 print("  - Efficient (BLUE under Gauss-Markov theorem)")
 
-# ========== 11.2 ESTIMATORS OF MODEL PARAMETERS ==========
+# %% =========== 11.2 ESTIMATORS OF MODEL PARAMETERS ==========
 
 print("\n" + "=" * 70)
 print("11.2 ESTIMATORS OF MODEL PARAMETERS")
 print("=" * 70)
 
 # Full multiple regression model
+
+# %% Estimate regression model
+
 model_full = ols('price ~ size + bedrooms + bathrooms + lotsize + age + monthsold',
+
+# %% Estimate regression model
+
                  data=data_house).fit()
 
 print("\n" + "-" * 70)
 print("Table 11.2: Multiple Regression Results")
 print("-" * 70)
+
+# %% Display regression results
+
 print(model_full.summary())
 # Save regression summary
 with open(os.path.join(TABLES_DIR, 'ch11_regression_summary.txt'), 'w') as f:
@@ -118,7 +132,7 @@ print(f"  Number of parameters: {k}")
 print(f"  Degrees of freedom: {df}")
 print(f"  Root MSE (σ̂): {np.sqrt(model_full.mse_resid):.6f}")
 
-# ========== 11.3 CONFIDENCE INTERVALS ==========
+# %% =========== 11.3 CONFIDENCE INTERVALS ==========
 
 print("\n" + "=" * 70)
 print("11.3 CONFIDENCE INTERVALS")
@@ -158,7 +172,7 @@ coef_table = pd.DataFrame({
 })
 print(coef_table)
 
-# ========== 11.4 HYPOTHESIS TESTS ON A SINGLE PARAMETER ==========
+# %% =========== 11.4 HYPOTHESIS TESTS ON A SINGLE PARAMETER ==========
 
 print("\n" + "=" * 70)
 print("11.4 HYPOTHESIS TESTS ON A SINGLE PARAMETER")
@@ -187,7 +201,7 @@ hypothesis = f'size = {null_value}'
 t_test_result = model_full.t_test(hypothesis)
 print(t_test_result)
 
-# ========== 11.5 JOINT HYPOTHESIS TESTS ==========
+# %% =========== 11.5 JOINT HYPOTHESIS TESTS ==========
 
 print("\n" + "=" * 70)
 print("11.5 JOINT HYPOTHESIS TESTS")
@@ -231,7 +245,7 @@ print(f"\nInterpretation:")
 print(f"  This tests whether bedrooms, bathrooms, lotsize, age, and monthsold")
 print(f"  can jointly be excluded from the model (keeping only size)")
 
-# ========== 11.6 F STATISTIC UNDER ASSUMPTIONS 1-4 ==========
+# %% =========== 11.6 F STATISTIC UNDER ASSUMPTIONS 1-4 ==========
 
 print("\n" + "=" * 70)
 print("11.6 F STATISTIC UNDER ASSUMPTIONS 1-4")
@@ -276,9 +290,15 @@ print("-" * 70)
 
 # Unrestricted model (already estimated as model_full)
 # Restricted model (only size as regressor)
+
+# %% Estimate regression model
+
 model_restricted = ols('price ~ size', data=data_house).fit()
 
 print("\nRestricted model (only size):")
+
+# %% Display regression results
+
 print(model_restricted.summary())
 
 # Calculate F-statistic for subset test
@@ -314,7 +334,7 @@ print("-" * 70)
 anova_results = anova_lm(model_restricted, model_full)
 print(anova_results)
 
-# ========== 11.7 PRESENTATION OF REGRESSION RESULTS ==========
+# %% =========== 11.7 PRESENTATION OF REGRESSION RESULTS ==========
 
 print("\n" + "=" * 70)
 print("11.7 PRESENTATION OF REGRESSION RESULTS")
@@ -326,9 +346,15 @@ print("Model Comparison: Three Specifications")
 print("-" * 70)
 
 # Model 1: Simple regression
+
+# %% Estimate regression model
+
 model1 = ols('price ~ size', data=data_house).fit()
 
 # Model 2: Two regressors
+
+# %% Estimate regression model
+
 model2 = ols('price ~ size + bedrooms', data=data_house).fit()
 
 # Model 3: Full model (already estimated as model_full)
@@ -376,7 +402,7 @@ for i, (name, model) in enumerate(zip(model_names, models), 1):
 
 print(coef_comparison.fillna('-'))
 
-# ========== ROBUST STANDARD ERRORS ==========
+# %% =========== ROBUST STANDARD ERRORS ==========
 
 print("\n" + "=" * 70)
 print("ROBUST STANDARD ERRORS (HC1)")
@@ -399,7 +425,7 @@ print(robust_comparison)
 robust_comparison.to_csv(os.path.join(TABLES_DIR, 'ch11_robust_vs_standard_se.csv'))
 print(f"Table saved to: {os.path.join(TABLES_DIR, 'ch11_robust_vs_standard_se.csv')}")
 
-# ========== VISUALIZATION ==========
+# %% =========== VISUALIZATION ==========
 
 print("\n" + "=" * 70)
 print("GENERATING FIGURES")
@@ -431,6 +457,8 @@ plt.tight_layout()
 plt.savefig(output_file, dpi=300, bbox_inches='tight')
 print(f"\nFigure saved to: {output_file}")
 plt.close()
+
+# %% Continue analysis
 
 # Figure: F-distribution visualization
 fig, ax = plt.subplots(figsize=(10, 6))
@@ -464,6 +492,8 @@ plt.savefig(output_file, dpi=300, bbox_inches='tight')
 print(f"Figure saved to: {output_file}")
 plt.close()
 
+# %% Continue analysis
+
 # Figure: Model comparison visualization
 fig, axes = plt.subplots(1, 3, figsize=(18, 5))
 
@@ -487,7 +517,9 @@ plt.savefig(output_file, dpi=300, bbox_inches='tight')
 print(f"Figure saved to: {output_file}")
 plt.close()
 
-# ========== SUMMARY ==========
+# %% Continue analysis
+
+# %% =========== SUMMARY ==========
 
 print("\n" + "=" * 70)
 print("CHAPTER 11 ANALYSIS COMPLETE")

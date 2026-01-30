@@ -1,3 +1,4 @@
+# %%
 """
 ch05_Bivariate_Data_Summary.py - January 2026 for Python
 
@@ -21,7 +22,7 @@ Sections covered:
   5.11 NONPARAMETRIC REGRESSION
 """
 
-# ========== SETUP ==========
+# %% =========== SETUP ==========
 
 import numpy as np
 import pandas as pd
@@ -58,7 +59,7 @@ print("=" * 70)
 print("CHAPTER 5: BIVARIATE DATA SUMMARY")
 print("=" * 70)
 
-# ========== 5.1 EXAMPLE: HOUSE PRICE AND SIZE ==========
+# %% =========== 5.1 EXAMPLE: HOUSE PRICE AND SIZE ==========
 
 print("\n" + "=" * 70)
 print("5.1 EXAMPLE: HOUSE PRICE AND SIZE")
@@ -67,8 +68,12 @@ print("=" * 70)
 # Read in house data
 data_house = pd.read_stata(GITHUB_DATA_URL + 'AED_HOUSE.DTA')
 
+# %% Explore data structure
+
 print("\nData summary:")
 data_summary = data_house.describe()
+
+# %% Calculate statistics
 print(data_summary)
 data_summary.to_csv(os.path.join(TABLES_DIR, 'ch05_house_descriptive_stats.csv'))
 print(f"Table saved to: {os.path.join(TABLES_DIR, 'ch05_house_descriptive_stats.csv')}")
@@ -98,7 +103,7 @@ print(f"  Min:       {size.min():,.0f} sq ft")
 print(f"  Max:       {size.max():,.0f} sq ft")
 print(f"  Std Dev:   {size.std():,.0f} sq ft")
 
-# ========== 5.2 TWO-WAY TABULATION ==========
+# %% =========== 5.2 TWO-WAY TABULATION ==========
 
 print("\n" + "=" * 70)
 print("5.2 TWO-WAY TABULATION")
@@ -118,7 +123,7 @@ print(crosstab)
 crosstab.to_csv(os.path.join(TABLES_DIR, 'ch05_crosstab.csv'))
 print(f"Table saved to: {os.path.join(TABLES_DIR, 'ch05_crosstab.csv')}")
 
-# ========== 5.3 TWO-WAY SCATTER PLOT ==========
+# %% =========== 5.3 TWO-WAY SCATTER PLOT ==========
 
 print("\n" + "=" * 70)
 print("5.3 TWO-WAY SCATTER PLOT")
@@ -138,7 +143,9 @@ plt.savefig(output_file, dpi=300, bbox_inches='tight')
 print(f"\nFigure 5.1 saved to: {output_file}")
 plt.close()
 
-# ========== 5.4 SAMPLE CORRELATION ==========
+# %% Continue analysis
+
+# %% =========== 5.4 SAMPLE CORRELATION ==========
 
 print("\n" + "=" * 70)
 print("5.4 SAMPLE CORRELATION")
@@ -197,16 +204,24 @@ plt.savefig(output_file, dpi=300, bbox_inches='tight')
 print(f"\nFigure 5.2 saved to: {output_file}")
 plt.close()
 
-# ========== 5.5 REGRESSION LINE ==========
+# %% Continue analysis
+
+# %% =========== 5.5 REGRESSION LINE ==========
 
 print("\n" + "=" * 70)
 print("5.5 REGRESSION LINE")
 print("=" * 70)
 
 # Fit regression model
+
+# %% Estimate regression model
+
 model = ols('price ~ size', data=data_house).fit()
 
 print("\nOLS Regression Results:")
+
+# %% Display regression results
+
 print(model.summary())
 # Save regression summary
 with open(os.path.join(TABLES_DIR, 'ch05_regression_summary.txt'), 'w') as f:
@@ -239,7 +254,12 @@ plt.savefig(output_file, dpi=300, bbox_inches='tight')
 print(f"\nFigure 5.4 saved to: {output_file}")
 plt.close()
 
+# %% Continue analysis
+
 # Intercept-only regression
+
+# %% Estimate regression model
+
 model_intercept = ols('price ~ 1', data=data_house).fit()
 
 print("\n" + "-" * 70)
@@ -248,7 +268,7 @@ print(f"  Coefficient: ${model_intercept.params[0]:,.2f}")
 print(f"  Sample mean: ${price.mean():,.2f}")
 print("  (These should be equal)")
 
-# ========== 5.6 MEASURES OF MODEL FIT ==========
+# %% =========== 5.6 MEASURES OF MODEL FIT ==========
 
 print("\n" + "=" * 70)
 print("5.6 MEASURES OF MODEL FIT")
@@ -261,6 +281,9 @@ epsilon = np.random.normal(0, 2, 5)
 y_sim = 1 + 2*x_sim + epsilon
 
 df_sim = pd.DataFrame({'x': x_sim, 'y': y_sim})
+
+# %% Estimate regression model
+
 model_sim = ols('y ~ x', data=df_sim).fit()
 
 print("\nSimulated Data for Model Fit Illustration:")
@@ -307,7 +330,9 @@ plt.savefig(output_file, dpi=300, bbox_inches='tight')
 print(f"\nFigure 5.5 saved to: {output_file}")
 plt.close()
 
-# ========== 5.8 PREDICTION AND OUTLYING OBSERVATIONS ==========
+# %% Continue analysis
+
+# %% =========== 5.8 PREDICTION AND OUTLYING OBSERVATIONS ==========
 
 print("\n" + "=" * 70)
 print("5.8 PREDICTION AND OUTLYING OBSERVATIONS")
@@ -328,7 +353,7 @@ manual_prediction = beta0 + beta1 * 2000
 print(f"\nManual calculation:")
 print(f"  ŷ = {beta0:.2f} + {beta1:.2f} × 2000 = ${manual_prediction:,.2f}")
 
-# ========== 5.9 REGRESSION AND CORRELATION ==========
+# %% =========== 5.9 REGRESSION AND CORRELATION ==========
 
 print("\n" + "=" * 70)
 print("5.9 REGRESSION AND CORRELATION")
@@ -343,13 +368,16 @@ print(f"R-squared from regression:    {model.rsquared:.4f}")
 print(f"r²:                           {r_squared:.4f}")
 print("  (R² and r² should be equal)")
 
-# ========== 5.10 CAUSATION ==========
+# %% =========== 5.10 CAUSATION ==========
 
 print("\n" + "=" * 70)
 print("5.10 CAUSATION")
 print("=" * 70)
 
 # Reverse regression: size ~ price
+
+# %% Estimate regression model
+
 reverse_model = ols('size ~ price', data=data_house).fit()
 
 print("\nReverse Regression (size ~ price):")
@@ -362,7 +390,7 @@ print(f"  Intercept: ${model.params['Intercept']:,.2f}")
 print(f"  Slope:     ${model.params['size']:,.2f}")
 print(f"  R-squared: {model.rsquared:.4f}")
 
-# ========== 5.11 NONPARAMETRIC REGRESSION ==========
+# %% =========== 5.11 NONPARAMETRIC REGRESSION ==========
 
 print("\n" + "=" * 70)
 print("5.11 NONPARAMETRIC REGRESSION")
@@ -412,7 +440,9 @@ plt.savefig(output_file, dpi=300, bbox_inches='tight')
 print(f"\nFigure 5.6 saved to: {output_file}")
 plt.close()
 
-# ========== SUMMARY ==========
+# %% Continue analysis
+
+# %% =========== SUMMARY ==========
 
 print("\n" + "=" * 70)
 print("CHAPTER 5 ANALYSIS COMPLETE")

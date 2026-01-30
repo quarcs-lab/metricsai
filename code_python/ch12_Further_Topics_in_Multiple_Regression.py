@@ -1,3 +1,4 @@
+# %%
 """
 ch12_Further_Topics_in_Multiple_Regression.py - January 2026 for Python
 
@@ -20,7 +21,7 @@ Sections covered:
   12.9 A BRIEF HISTORY OF STATISTICS, REGRESSION AND ECONOMETRICS (conceptual)
 """
 
-# ========== SETUP ==========
+# %% =========== SETUP ==========
 
 import numpy as np
 import pandas as pd
@@ -58,7 +59,7 @@ print("=" * 70)
 print("CHAPTER 12: FURTHER TOPICS IN MULTIPLE REGRESSION")
 print("=" * 70)
 
-# ========== 12.1 INFERENCE WITH ROBUST STANDARD ERRORS ==========
+# %% =========== 12.1 INFERENCE WITH ROBUST STANDARD ERRORS ==========
 
 print("\n" + "=" * 70)
 print("12.1 INFERENCE WITH ROBUST STANDARD ERRORS")
@@ -67,8 +68,12 @@ print("=" * 70)
 # Load house data
 data_house = pd.read_stata(GITHUB_DATA_URL + 'AED_HOUSE.DTA')
 
+# %% Explore data structure
+
 print("\nHouse Data Summary:")
 house_summary = data_house.describe()
+
+# %% Calculate statistics
 print(house_summary)
 house_summary.to_csv(os.path.join(TABLES_DIR, 'ch12_house_descriptive_stats.csv'))
 print(f"Table saved to: {os.path.join(TABLES_DIR, 'ch12_house_descriptive_stats.csv')}")
@@ -78,8 +83,14 @@ print("\n" + "-" * 70)
 print("Table 12.2: Multiple Regression with Heteroskedastic-Robust SEs")
 print("-" * 70)
 
+
+# %% Estimate regression model
+
 model_robust = ols('price ~ size + bedrooms + bathrooms + lotsize + age + monthsold',
                    data=data_house).fit(cov_type='HC1')
+
+
+# %% Display regression results
 
 print(model_robust.summary())
 
@@ -87,7 +98,13 @@ print("\nNote: HC1 robust standard errors adjust for heteroskedasticity")
 print("These are also called White's heteroskedastic-robust standard errors")
 
 # Compare default vs robust standard errors
+
+# %% Estimate regression model
+
 model_default = ols('price ~ size + bedrooms + bathrooms + lotsize + age + monthsold',
+
+# %% Estimate regression model
+
                     data=data_house).fit()
 
 comparison_table = pd.DataFrame({
@@ -112,8 +129,12 @@ print("-" * 70)
 # Load GDP data
 data_gdp = pd.read_stata(GITHUB_DATA_URL + 'AED_REALGDPPC.DTA')
 
+# %% Explore data structure
+
 print("\nGDP Growth Data Summary:")
 print(data_gdp['growth'].describe())
+
+# %% Calculate statistics
 
 # Mean of growth
 mean_growth = data_gdp['growth'].mean()
@@ -122,6 +143,9 @@ print(f"\nMean growth rate: {mean_growth:.6f}")
 # Regress growth on constant (to get mean and standard error)
 # Default standard errors
 X_const = sm.add_constant(np.ones(len(data_gdp)))
+
+# %% Estimate regression model
+
 model_mean = OLS(data_gdp['growth'], X_const).fit()
 
 print("\nRegression on constant (default SEs):")
@@ -170,16 +194,22 @@ print(f"  SE: {model_hac5.bse[0]:.6f}")
 print("\nNote: HAC (Newey-West) standard errors account for both")
 print("heteroskedasticity and autocorrelation in time series data")
 
-# ========== 12.2 PREDICTION ==========
+# %% =========== 12.2 PREDICTION ==========
 
 print("\n" + "=" * 70)
 print("12.2 PREDICTION")
 print("=" * 70)
 
 # Simple regression: price on size
+
+# %% Estimate regression model
+
 model_simple = ols('price ~ size', data=data_house).fit()
 
 print("\nSimple regression: price = β₀ + β₁*size + u")
+
+# %% Display regression results
+
 print(model_simple.summary())
 
 # Figure 12.1: Confidence intervals for conditional mean vs actual value
@@ -304,7 +334,13 @@ print("\n" + "-" * 70)
 print("Prediction for Multiple Regression")
 print("-" * 70)
 
+
+# %% Estimate regression model
+
 model_multi = ols('price ~ size + bedrooms + bathrooms + lotsize + age + monthsold',
+
+# %% Estimate regression model
+
                   data=data_house).fit()
 
 # Predict for specific values
@@ -348,6 +384,9 @@ print("\n" + "-" * 70)
 print("Prediction with Heteroskedastic-Robust SEs")
 print("-" * 70)
 
+
+# %% Estimate regression model
+
 model_multi_robust = ols('price ~ size + bedrooms + bathrooms + lotsize + age + monthsold',
                          data=data_house).fit(cov_type='HC1')
 
@@ -365,7 +404,7 @@ s_y_cm_robust = pred_multi_robust.se_mean[0]
 s_y_f_robust = np.sqrt(s_e_multi**2 + s_y_cm_robust**2)
 print(f"Robust SE for actual value: {s_y_f_robust:.6f}")
 
-# ========== 12.3-12.7 CONCEPTUAL SECTIONS ==========
+# %% =========== 12.3-12.7 CONCEPTUAL SECTIONS ==========
 
 print("\n" + "=" * 70)
 print("12.3 NONREPRESENTATIVE SAMPLES")
@@ -412,7 +451,7 @@ print("  - Machine learning vs econometrics")
 print("  - Prediction vs causal inference")
 print("  - Cross-validation and regularization")
 
-# ========== 12.8 BAYESIAN METHODS: AN OVERVIEW ==========
+# %% =========== 12.8 BAYESIAN METHODS: AN OVERVIEW ==========
 
 print("\n" + "=" * 70)
 print("12.8 BAYESIAN METHODS: AN OVERVIEW")
@@ -428,7 +467,13 @@ print("  - Choice of prior can affect results, especially with small samples")
 # Simple demonstration of the scale sensitivity
 data_house['pricenew'] = data_house['price'] / 1000
 
+
+# %% Estimate regression model
+
 model_original = ols('price ~ size', data=data_house).fit()
+
+# %% Estimate regression model
+
 model_scaled = ols('pricenew ~ size', data=data_house).fit()
 
 print("\nEffect of scaling dependent variable:")
@@ -443,7 +488,7 @@ print(f"  Slope: {model_scaled.params['size']:.6f}")
 print("\nNote: In Bayesian analysis with improper priors, scale matters!")
 print("With proper priors or large samples, Bayesian and frequentist results converge")
 
-# ========== 12.9 HISTORY ==========
+# %% =========== 12.9 HISTORY ==========
 
 print("\n" + "=" * 70)
 print("12.9 A BRIEF HISTORY OF STATISTICS, REGRESSION AND ECONOMETRICS")
@@ -457,7 +502,7 @@ print("  - 1940s-1960s: Econometrics foundations (Haavelmo, Cowles Commission)")
 print("  - 1970s-1980s: Robust methods, time series")
 print("  - 1990s-present: Panel data, causal inference, machine learning")
 
-# ========== SUMMARY ==========
+# %% =========== SUMMARY ==========
 
 print("\n" + "=" * 70)
 print("CHAPTER 12 SUMMARY")

@@ -1,3 +1,4 @@
+# %%
 """
 ch09_Models_with_Natural_Logarithms.py - January 2026 for Python
 
@@ -17,7 +18,7 @@ Sections covered:
   9.6 EXPONENTIAL FUNCTION
 """
 
-# ========== SETUP ==========
+# %% =========== SETUP ==========
 
 import numpy as np
 import pandas as pd
@@ -52,7 +53,7 @@ print("=" * 70)
 print("CHAPTER 9: MODELS WITH NATURAL LOGARITHMS")
 print("=" * 70)
 
-# ========== 9.1 NATURAL LOGARITHM FUNCTION ==========
+# %% =========== 9.1 NATURAL LOGARITHM FUNCTION ==========
 
 print("\n" + "=" * 70)
 print("9.1 NATURAL LOGARITHM FUNCTION")
@@ -79,7 +80,7 @@ print(f"  ln(e) = {np.log(np.e):.4f}")
 print(f"  ln(2*5) = ln(2) + ln(5): {np.log(2*5):.4f} = {np.log(2) + np.log(5):.4f}")
 print(f"  ln(10/2) = ln(10) - ln(2): {np.log(10/2):.4f} = {np.log(10) - np.log(2):.4f}")
 
-# ========== 9.2 SEMI-ELASTICITIES AND ELASTICITIES ==========
+# %% =========== 9.2 SEMI-ELASTICITIES AND ELASTICITIES ==========
 
 print("\n" + "=" * 70)
 print("9.2 SEMI-ELASTICITIES AND ELASTICITIES")
@@ -95,7 +96,7 @@ print("    Interpretation: %Δy ≈ β₁%Δx (elasticity)")
 print("\n  Linear-log model: y = β₀ + β₁ln(x)")
 print("    Interpretation: Δy ≈ β₁(%Δx/100)")
 
-# ========== 9.3 LOG-LINEAR, LOG-LOG AND LINEAR-LOG MODELS ==========
+# %% =========== 9.3 LOG-LINEAR, LOG-LOG AND LINEAR-LOG MODELS ==========
 
 print("\n" + "=" * 70)
 print("9.3 LOG-LINEAR, LOG-LOG AND LINEAR-LOG MODELS")
@@ -104,7 +105,7 @@ print("=" * 70)
 # This section demonstrates the different model specifications
 # Detailed examples follow in section 9.4
 
-# ========== 9.4 EXAMPLE: EARNINGS AND EDUCATION ==========
+# %% =========== 9.4 EXAMPLE: EARNINGS AND EDUCATION ==========
 
 print("\n" + "=" * 70)
 print("9.4 EXAMPLE: EARNINGS AND EDUCATION")
@@ -113,8 +114,12 @@ print("=" * 70)
 # Read in the earnings data
 data_earnings = pd.read_stata(GITHUB_DATA_URL + 'AED_EARNINGS.DTA')
 
+# %% Explore data structure
+
 print("\nData summary:")
 data_summary = data_earnings.describe()
+
+# %% Calculate statistics
 print(data_summary)
 print("\nFirst few observations:")
 print(data_earnings.head())
@@ -141,7 +146,13 @@ print("=" * 70)
 print("\n" + "-" * 70)
 print("Model 1: Linear - earnings = β₀ + β₁(education)")
 print("-" * 70)
+
+# %% Estimate regression model
+
 model_linear = ols('earnings ~ education', data=data_earnings).fit()
+
+# %% Display regression results
+
 print(model_linear.summary())
 print(f"\nInterpretation: One additional year of education is associated with")
 print(f"${model_linear.params['education']:.2f} increase in annual earnings")
@@ -150,7 +161,13 @@ print(f"${model_linear.params['education']:.2f} increase in annual earnings")
 print("\n" + "-" * 70)
 print("Model 2: Log-linear - ln(earnings) = β₀ + β₁(education)")
 print("-" * 70)
+
+# %% Estimate regression model
+
 model_loglin = ols('lnearn ~ education', data=data_earnings).fit()
+
+# %% Display regression results
+
 print(model_loglin.summary())
 print(f"\nInterpretation: One additional year of education is associated with")
 print(f"{100*model_loglin.params['education']:.2f}% increase in earnings")
@@ -159,7 +176,13 @@ print(f"{100*model_loglin.params['education']:.2f}% increase in earnings")
 print("\n" + "-" * 70)
 print("Model 3: Log-log - ln(earnings) = β₀ + β₁ln(education)")
 print("-" * 70)
+
+# %% Estimate regression model
+
 model_loglog = ols('lnearn ~ lneduc', data=data_earnings).fit()
+
+# %% Display regression results
+
 print(model_loglog.summary())
 print(f"\nInterpretation: A 1% increase in education is associated with")
 print(f"{model_loglog.params['lneduc']:.4f}% increase in earnings (elasticity)")
@@ -168,7 +191,13 @@ print(f"{model_loglog.params['lneduc']:.4f}% increase in earnings (elasticity)")
 print("\n" + "-" * 70)
 print("Model 4: Linear-log - earnings = β₀ + β₁ln(education)")
 print("-" * 70)
+
+# %% Estimate regression model
+
 model_linlog = ols('earnings ~ lneduc', data=data_earnings).fit()
+
+# %% Display regression results
+
 print(model_linlog.summary())
 print(f"\nInterpretation: A 1% increase in education is associated with")
 print(f"${model_linlog.params['lneduc']/100:.2f} increase in annual earnings")
@@ -208,6 +237,8 @@ plt.savefig(output_file, dpi=300, bbox_inches='tight')
 print(f"\nFigure saved to: {output_file}")
 plt.close()
 
+# %% Continue analysis
+
 # Figure 9.1 - Panel B: Log-linear Model
 fig, ax = plt.subplots(figsize=(10, 6))
 ax.scatter(data_earnings['education'], data_earnings['lnearn'], alpha=0.5, s=30,
@@ -226,6 +257,8 @@ plt.tight_layout()
 plt.savefig(output_file, dpi=300, bbox_inches='tight')
 print(f"Figure saved to: {output_file}")
 plt.close()
+
+# %% Create next figure
 
 # Combined figure showing all four models
 fig, axes = plt.subplots(2, 2, figsize=(16, 12))
@@ -278,7 +311,9 @@ plt.savefig(output_file, dpi=300, bbox_inches='tight')
 print(f"Figure saved to: {output_file}")
 plt.close()
 
-# ========== 9.5 FURTHER USES OF THE NATURAL LOGARITHM ==========
+# %% Continue analysis
+
+# %% =========== 9.5 FURTHER USES OF THE NATURAL LOGARITHM ==========
 
 print("\n" + "=" * 70)
 print("9.5 FURTHER USES OF THE NATURAL LOGARITHM")
@@ -287,8 +322,12 @@ print("=" * 70)
 # Read in the S&P 500 data
 data_sp500 = pd.read_stata(GITHUB_DATA_URL + 'AED_SP500INDEX.DTA')
 
+# %% Explore data structure
+
 print("\nS&P 500 Index data summary:")
 print(data_sp500.describe())
+
+# %% Calculate statistics
 print("\nFirst few observations:")
 print(data_sp500.head())
 
@@ -297,7 +336,13 @@ print("\n" + "-" * 70)
 print("Exponential Growth Model: ln(sp500) = β₀ + β₁(year)")
 print("-" * 70)
 
+
+# %% Estimate regression model
+
 model_logs = ols('lnsp500 ~ year', data=data_sp500).fit()
+
+# %% Display regression results
+
 print(model_logs.summary())
 
 print(f"\nInterpretation:")
@@ -341,6 +386,8 @@ plt.savefig(output_file, dpi=300, bbox_inches='tight')
 print(f"\nFigure saved to: {output_file}")
 plt.close()
 
+# %% Continue analysis
+
 # Figure 9.2 - Panel B: Linear trend in natural logarithms
 fig, ax = plt.subplots(figsize=(12, 6))
 ax.plot(data_sp500['year'], data_sp500['lnsp500'], linewidth=2,
@@ -360,7 +407,9 @@ plt.savefig(output_file, dpi=300, bbox_inches='tight')
 print(f"Figure saved to: {output_file}")
 plt.close()
 
-# ========== 9.6 EXPONENTIAL FUNCTION ==========
+# %% Continue analysis
+
+# %% =========== 9.6 EXPONENTIAL FUNCTION ==========
 
 print("\n" + "=" * 70)
 print("9.6 EXPONENTIAL FUNCTION")
@@ -390,7 +439,9 @@ plt.savefig(output_file, dpi=300, bbox_inches='tight')
 print(f"\nFigure saved to: {output_file}")
 plt.close()
 
-# ========== SUMMARY ==========
+# %% Continue analysis
+
+# %% =========== SUMMARY ==========
 
 print("\n" + "=" * 70)
 print("CHAPTER 9 ANALYSIS COMPLETE")

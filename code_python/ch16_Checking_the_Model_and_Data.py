@@ -1,3 +1,4 @@
+# %%
 """
 ch16_Checking_the_Model_and_Data.py - January 2026 for Python
 
@@ -19,7 +20,7 @@ Sections covered:
   16.8 DIAGNOSTICS
 """
 
-# ========== SETUP ==========
+# %% =========== SETUP ==========
 
 import numpy as np
 import pandas as pd
@@ -58,13 +59,13 @@ print("=" * 70)
 print("CHAPTER 16: CHECKING THE MODEL AND DATA")
 print("=" * 70)
 
-# ========== DATA DESCRIPTION ==========
+# %% =========== DATA DESCRIPTION ==========
 
 # (1) Annual Earnings for 842 male and female full-time workers
 #     aged 25-65 years old in 2010
 # (2) Democracy and growth data
 
-# ========== 16.1 MULTICOLLINEARITY ==========
+# %% =========== 16.1 MULTICOLLINEARITY ==========
 
 print("\n" + "=" * 70)
 print("16.1 MULTICOLLINEARITY")
@@ -73,11 +74,15 @@ print("=" * 70)
 # Read in the Stata data set
 data_earnings = pd.read_stata(GITHUB_DATA_URL + 'AED_EARNINGS_COMPLETE.DTA')
 
+# %% Explore data structure
+
 print("\nData structure:")
 print(data_earnings.info())
 
 print("\nData summary:")
 data_summary = data_earnings.describe()
+
+# %% Calculate statistics
 print(data_summary)
 data_summary.to_csv(os.path.join(TABLES_DIR, 'ch16_earnings_descriptive_stats.csv'))
 print(f"Table saved to: {os.path.join(TABLES_DIR, 'ch16_earnings_descriptive_stats.csv')}")
@@ -86,14 +91,26 @@ print(f"Table saved to: {os.path.join(TABLES_DIR, 'ch16_earnings_descriptive_sta
 print("\n" + "-" * 70)
 print("Base Model: earnings ~ age + education")
 print("-" * 70)
+
+# %% Estimate regression model
+
 ols_base = ols('earnings ~ age + education', data=data_earnings).fit(cov_type='HC1')
+
+# %% Display regression results
+
 print(ols_base.summary())
 
 # Add interaction variable
 print("\n" + "-" * 70)
 print("Collinear Model: earnings ~ age + education + agebyeduc")
 print("-" * 70)
+
+# %% Estimate regression model
+
 ols_collinear = ols('earnings ~ age + education + agebyeduc', data=data_earnings).fit(cov_type='HC1')
+
+# %% Display regression results
+
 print(ols_collinear.summary())
 
 # Joint hypothesis tests
@@ -124,7 +141,13 @@ print(f"Table saved to: {os.path.join(TABLES_DIR, 'ch16_correlation_matrix.csv')
 print("\n" + "-" * 70)
 print("Auxiliary Regression: agebyeduc ~ age + education")
 print("-" * 70)
+
+# %% Estimate regression model
+
 ols_check = ols('agebyeduc ~ age + education', data=data_earnings).fit()
+
+# %% Display regression results
+
 print(ols_check.summary())
 print(f"\nR-squared from auxiliary regression: {ols_check.rsquared:.4f}")
 print("High R² indicates strong multicollinearity")
@@ -143,7 +166,7 @@ print("\nNote: VIF > 10 indicates serious multicollinearity")
 vif_data.to_csv(os.path.join(TABLES_DIR, 'ch16_vif_table.csv'), index=False)
 print(f"Table saved to: {os.path.join(TABLES_DIR, 'ch16_vif_table.csv')}")
 
-# ========== 16.2 MODEL ASSUMPTIONS REVISITED ==========
+# %% =========== 16.2 MODEL ASSUMPTIONS REVISITED ==========
 
 print("\n" + "=" * 70)
 print("16.2 MODEL ASSUMPTIONS REVISITED")
@@ -156,7 +179,7 @@ print("  4. Zero conditional mean: E[u|x] = 0")
 print("  5. Homoskedasticity: Var(u|x) = σ²")
 print("  6. Normality of errors (for exact inference)")
 
-# ========== 16.3 INCORRECT POPULATION MODEL ==========
+# %% =========== 16.3 INCORRECT POPULATION MODEL ==========
 
 print("\n" + "=" * 70)
 print("16.3 INCORRECT POPULATION MODEL")
@@ -166,7 +189,7 @@ print("  - Omitted variable bias")
 print("  - Incorrect functional form")
 print("  - Measurement error in variables")
 
-# ========== 16.4 REGRESSORS CORRELATED WITH ERRORS ==========
+# %% =========== 16.4 REGRESSORS CORRELATED WITH ERRORS ==========
 
 print("\n" + "=" * 70)
 print("16.4 REGRESSORS CORRELATED WITH ERRORS")
@@ -177,7 +200,7 @@ print("  - Measurement error")
 print("  - Simultaneity")
 print("  - Sample selection")
 
-# ========== 16.5 HETEROSKEDASTIC ERRORS ==========
+# %% =========== 16.5 HETEROSKEDASTIC ERRORS ==========
 
 print("\n" + "=" * 70)
 print("16.5 HETEROSKEDASTIC ERRORS")
@@ -187,7 +210,7 @@ print("  - OLS estimators remain unbiased and consistent")
 print("  - Standard errors are incorrect")
 print("  - Use robust (heteroskedasticity-consistent) standard errors")
 
-# ========== 16.6 CORRELATED ERRORS ==========
+# %% =========== 16.6 CORRELATED ERRORS ==========
 
 print("\n" + "=" * 70)
 print("16.6 CORRELATED ERRORS")
@@ -268,6 +291,9 @@ print("\n" + "-" * 70)
 print("Model 1: y1 ~ x (serially correlated error)")
 print("-" * 70)
 
+
+# %% Estimate regression model
+
 ols_y1 = ols('y1 ~ x', data=ts_data).fit()
 u1hat = ols_y1.resid
 
@@ -279,22 +305,40 @@ for lag, val in enumerate(acf_u1[:11]):
 
 # Default standard errors
 print("\nDefault OLS standard errors:")
+
+# %% Display regression results
+
 print(ols_y1.summary())
 
 # Heteroskedasticity-robust standard errors
 print("\nHeteroskedasticity-robust (HC1) standard errors:")
+
+# %% Estimate regression model
+
 ols_y1_robust = ols('y1 ~ x', data=ts_data).fit(cov_type='HC1')
+
+# %% Display regression results
+
 print(ols_y1_robust.summary())
 
 # HAC-robust (Newey-West) standard errors
 print("\nHAC-robust (Newey-West) standard errors:")
+
+# %% Estimate regression model
+
 ols_y1_hac = ols('y1 ~ x', data=ts_data).fit(cov_type='HAC', cov_kwds={'maxlags': 10})
+
+# %% Display regression results
+
 print(ols_y1_hac.summary())
 
 # Model 2: y2 ~ y2lag + x
 print("\n" + "-" * 70)
 print("Model 2: y2 ~ y2lag + x (serially correlated but i.i.d. error)")
 print("-" * 70)
+
+
+# %% Estimate regression model
 
 ols_y2 = ols('y2 ~ y2lag + x', data=ts_data.dropna()).fit()
 u2hat = ols_y2.resid
@@ -307,18 +351,33 @@ for lag, val in enumerate(acf_u2[:11]):
 
 # Robust standard errors
 print("\nHeteroskedasticity-robust (HC1) standard errors:")
+
+# %% Estimate regression model
+
 ols_y2_robust = ols('y2 ~ y2lag + x', data=ts_data.dropna()).fit(cov_type='HC1')
+
+# %% Display regression results
+
 print(ols_y2_robust.summary())
 
 # HAC-robust standard errors
 print("\nHAC-robust (Newey-West) standard errors:")
+
+# %% Estimate regression model
+
 ols_y2_hac = ols('y2 ~ y2lag + x', data=ts_data.dropna()).fit(cov_type='HAC', cov_kwds={'maxlags': 10})
+
+# %% Display regression results
+
 print(ols_y2_hac.summary())
 
 # Model 3: y3 ~ y3lag + x
 print("\n" + "-" * 70)
 print("Model 3: y3 ~ y3lag + x (both y and u are serially correlated)")
 print("-" * 70)
+
+
+# %% Estimate regression model
 
 ols_y3 = ols('y3 ~ y3lag + x', data=ts_data.dropna()).fit()
 u3hat = ols_y3.resid
@@ -331,15 +390,27 @@ for lag, val in enumerate(acf_u3[:11]):
 
 # Robust standard errors
 print("\nHeteroskedasticity-robust (HC1) standard errors:")
+
+# %% Estimate regression model
+
 ols_y3_robust = ols('y3 ~ y3lag + x', data=ts_data.dropna()).fit(cov_type='HC1')
+
+# %% Display regression results
+
 print(ols_y3_robust.summary())
 
 # HAC-robust standard errors
 print("\nHAC-robust (Newey-West) standard errors:")
+
+# %% Estimate regression model
+
 ols_y3_hac = ols('y3 ~ y3lag + x', data=ts_data.dropna()).fit(cov_type='HAC', cov_kwds={'maxlags': 10})
+
+# %% Display regression results
+
 print(ols_y3_hac.summary())
 
-# ========== 16.7 EXAMPLE: DEMOCRACY AND GROWTH ==========
+# %% =========== 16.7 EXAMPLE: DEMOCRACY AND GROWTH ==========
 
 print("\n" + "=" * 70)
 print("16.7 EXAMPLE: DEMOCRACY AND GROWTH")
@@ -347,6 +418,8 @@ print("=" * 70)
 
 # Read in democracy data
 data_democracy = pd.read_stata(GITHUB_DATA_URL + 'AED_DEMOCRACY.DTA')
+
+# %% Explore data structure
 
 print("\nData structure:")
 print(data_democracy.info())
@@ -373,7 +446,13 @@ print(data_democracy[corr_vars].corr())
 print("\n" + "-" * 70)
 print("Bivariate Regression: democracy ~ growth")
 print("-" * 70)
+
+# %% Estimate regression model
+
 ols_bivariate = ols('democracy ~ growth', data=data_democracy).fit(cov_type='HC1')
+
+# %% Display regression results
+
 print(ols_bivariate.summary())
 
 # Figure 16.1: Democracy and Growth
@@ -400,11 +479,17 @@ print("\n" + "-" * 70)
 print("Multiple Regression:")
 print("democracy ~ growth + constraint + indcent + catholic + muslim + protestant")
 print("-" * 70)
+
+# %% Estimate regression model
+
 ols_multiple = ols('democracy ~ growth + constraint + indcent + catholic + muslim + protestant',
                    data=data_democracy).fit(cov_type='HC1')
+
+# %% Display regression results
+
 print(ols_multiple.summary())
 
-# ========== 16.8 DIAGNOSTICS ==========
+# %% =========== 16.8 DIAGNOSTICS ==========
 
 print("\n" + "=" * 70)
 print("16.8 DIAGNOSTICS")
@@ -455,6 +540,8 @@ plt.savefig(output_file, dpi=300, bbox_inches='tight')
 print(f"\nFigure 16.2 saved to: {output_file}")
 plt.close()
 
+# %% Continue analysis
+
 # Figure 16.3: Diagnostic plots for growth regressor
 print("\n" + "-" * 70)
 print("Figure 16.3: Diagnostic Plots for Growth Regressor")
@@ -484,9 +571,15 @@ prgrowth = bgrowth * data_democracy['growth'] + uhat
 axes[1].scatter(data_democracy['growth'], prgrowth, alpha=0.6, s=50, color='black')
 
 # Add regression line
+
+# %% Estimate regression model
+
 ols_compplusres = ols('prgrowth ~ growth', data=pd.DataFrame({
     'growth': data_democracy['growth'],
     'prgrowth': prgrowth
+
+# %% Estimate regression model
+
 })).fit()
 axes[1].plot(data_democracy['growth'], ols_compplusres.fittedvalues,
              'b-', linewidth=2, label='Regression line')
@@ -504,21 +597,39 @@ axes[1].grid(True, alpha=0.3)
 
 # Panel C: Added Variable plot
 # Regress democracy on all variables except growth
+
+# %% Estimate regression model
+
 ols_nogrowth = ols('democracy ~ constraint + indcent + catholic + muslim + protestant',
+
+# %% Estimate regression model
+
                    data=data_democracy).fit()
 uhat1democ = ols_nogrowth.resid
 
 # Regress growth on all other variables
+
+# %% Estimate regression model
+
 ols_growth = ols('growth ~ constraint + indcent + catholic + muslim + protestant',
+
+# %% Estimate regression model
+
                  data=data_democracy).fit()
 uhat1growth = ols_growth.resid
 
 axes[2].scatter(uhat1growth, uhat1democ, alpha=0.6, s=50, color='black')
 
 # Add regression line
+
+# %% Estimate regression model
+
 ols_addedvar = ols('uhat1democ ~ uhat1growth', data=pd.DataFrame({
     'uhat1growth': uhat1growth,
     'uhat1democ': uhat1democ
+
+# %% Estimate regression model
+
 })).fit()
 axes[2].plot(uhat1growth, ols_addedvar.fittedvalues,
              'b-', linewidth=2, label='Regression line')
@@ -622,7 +733,9 @@ plt.savefig(output_file, dpi=300, bbox_inches='tight')
 print(f"\nDFBETAS plot saved to: {output_file}")
 plt.close()
 
-# ========== SUMMARY ==========
+# %% Continue analysis
+
+# %% =========== SUMMARY ==========
 
 print("\n" + "=" * 70)
 print("CHAPTER 16 ANALYSIS COMPLETE")

@@ -1,3 +1,4 @@
+# %%
 """
 ch14_Regression_with_Indicator_Variables.py - January 2026 for Python
 
@@ -14,7 +15,7 @@ Sections covered:
   14.4 REGRESSION ON SETS OF INDICATOR VARIABLES
 """
 
-# ========== SETUP ==========
+# %% =========== SETUP ==========
 
 import numpy as np
 import pandas as pd
@@ -49,18 +50,22 @@ print("=" * 70)
 print("CHAPTER 14: REGRESSION WITH INDICATOR VARIABLES")
 print("=" * 70)
 
-# ========== DATA PREPARATION ==========
+# %% =========== DATA PREPARATION ==========
 
 # Load earnings data
 data = pd.read_stata(GITHUB_DATA_URL + 'AED_EARNINGS_COMPLETE.DTA')
 
+# %% Explore data structure
+
 print("\nData description:")
 data_summary = data.describe()
+
+# %% Calculate statistics
 print(data_summary)
 data_summary.to_csv(os.path.join(TABLES_DIR, 'ch14_earnings_descriptive_stats.csv'))
 print(f"Table saved to: {os.path.join(TABLES_DIR, 'ch14_earnings_descriptive_stats.csv')}")
 
-# ========== 14.1 EXAMPLE: EARNINGS, GENDER, EDUCATION and TYPE OF WORKER ==========
+# %% =========== 14.1 EXAMPLE: EARNINGS, GENDER, EDUCATION and TYPE OF WORKER ==========
 
 print("\n" + "=" * 70)
 print("14.1 EXAMPLE: EARNINGS, GENDER, EDUCATION and TYPE OF WORKER")
@@ -88,7 +93,7 @@ print(f"  dself: 1=self-employed, 0=not")
 print(f"  dprivate: 1=private sector, 0=not")
 print(f"  dgovt: 1=government, 0=not")
 
-# ========== 14.2 REGRESSION ON JUST A SINGLE INDICATOR VARIABLE ==========
+# %% =========== 14.2 REGRESSION ON JUST A SINGLE INDICATOR VARIABLE ==========
 
 print("\n" + "=" * 70)
 print("14.2 REGRESSION ON JUST A SINGLE INDICATOR VARIABLE")
@@ -102,8 +107,12 @@ print("-" * 70)
 print("\nFemale (gender=1):")
 print(data[data['gender'] == 1]['earnings'].describe())
 
+# %% Calculate statistics
+
 print("\nMale (gender=0):")
 print(data[data['gender'] == 0]['earnings'].describe())
+
+# %% Calculate statistics
 
 # Difference in means
 mean_female = data[data['gender'] == 1]['earnings'].mean()
@@ -120,7 +129,13 @@ print("\n" + "-" * 70)
 print("OLS Regression: earnings on gender indicator")
 print("-" * 70)
 
+
+# %% Estimate regression model
+
 model_gender = ols('earnings ~ gender', data=data).fit(cov_type='HC1')
+
+# %% Display regression results
+
 print(model_gender.summary())
 # Save regression coefficients
 coef_table = pd.DataFrame({
@@ -155,8 +170,14 @@ print("\n" + "-" * 70)
 print("Comparison: Default SEs vs Robust SEs")
 print("-" * 70)
 
+
+# %% Estimate regression model
+
 model_gender_default = ols('earnings ~ gender', data=data).fit()
 print("\nDefault (homoskedastic) SEs:")
+
+# %% Display regression results
+
 print(model_gender_default.summary())
 
 # Classical t-test (equal variances)
@@ -166,7 +187,7 @@ print(f"  t-statistic: {t_stat_eq:.4f}")
 print(f"  p-value: {p_value_eq:.6f}")
 print("\nNote: With equal variance assumption, regression and t-test give identical results")
 
-# ========== 14.3 REGRESSION ON A SINGLE INDICATOR VARIABLE AND ADDITIONAL REGRESSORS ==========
+# %% =========== 14.3 REGRESSION ON A SINGLE INDICATOR VARIABLE AND ADDITIONAL REGRESSORS ==========
 
 print("\n" + "=" * 70)
 print("14.3 REGRESSION ON A SINGLE INDICATOR VARIABLE AND ADDITIONAL REGRESSORS")
@@ -178,6 +199,9 @@ print("Table 14.3: Multiple Model Comparison")
 print("-" * 70)
 
 # Model 1: Gender indicator only
+
+# %% Estimate regression model
+
 model1 = ols('earnings ~ gender', data=data).fit(cov_type='HC1')
 print("\nModel 1: Gender only")
 print(f"  Gender coefficient: {model1.params['gender']:.0f}")
@@ -190,6 +214,9 @@ print(f"  R²: {model1.rsquared:.4f}")
 print(f"\nF-test on gender: F = {model1.tvalues['gender']**2:.2f}, p = {model1.pvalues['gender']:.4f}")
 
 # Model 2: Add education
+
+# %% Estimate regression model
+
 model2 = ols('earnings ~ gender + education', data=data).fit(cov_type='HC1')
 print("\nModel 2: Gender + Education")
 print(f"  Gender coefficient: {model2.params['gender']:.0f}")
@@ -197,6 +224,9 @@ print(f"  Education coefficient: {model2.params['education']:.0f}")
 print(f"  R²: {model2.rsquared:.4f}")
 
 # Model 3: Interact education and gender
+
+# %% Estimate regression model
+
 model3 = ols('earnings ~ gender + education + genderbyeduc', data=data).fit(cov_type='HC1')
 print("\nModel 3: Gender + Education + Interaction")
 print(f"  Gender coefficient: {model3.params['gender']:.0f}")
@@ -210,6 +240,9 @@ f_val_3 = f_test_3.fvalue[0][0] if hasattr(f_test_3.fvalue, '__getitem__') else 
 print(f"\nJoint F-test (gender, genderbyeduc): F = {f_val_3:.2f}, p = {f_test_3.pvalue:.4f}")
 
 # Model 4: Add additional controls
+
+# %% Estimate regression model
+
 model4 = ols('earnings ~ gender + education + genderbyeduc + age + hours',
              data=data).fit(cov_type='HC1')
 print("\nModel 4: Add age and hours controls")
@@ -226,6 +259,9 @@ f_val_4 = f_test_4.fvalue[0][0] if hasattr(f_test_4.fvalue, '__getitem__') else 
 print(f"\nJoint F-test (gender, genderbyeduc): F = {f_val_4:.2f}, p = {f_test_4.pvalue:.4f}")
 
 # Model 5: Fully interact all variables with gender
+
+# %% Estimate regression model
+
 model5 = ols('earnings ~ gender + education + genderbyeduc + age + hours + genderbyage + genderbyhours',
              data=data).fit(cov_type='HC1')
 print("\nModel 5: Full interactions with gender")
@@ -274,15 +310,27 @@ print("Separate Regressions by Gender")
 print("-" * 70)
 
 # Female regression
+
+# %% Estimate regression model
+
 model_female = ols('earnings ~ education + age + hours',
                    data=data[data['gender'] == 1]).fit(cov_type='HC1')
 print("\nFemale subsample:")
+
+# %% Display regression results
+
 print(model_female.summary())
 
 # Male regression
+
+# %% Estimate regression model
+
 model_male = ols('earnings ~ education + age + hours',
                  data=data[data['gender'] == 0]).fit(cov_type='HC1')
 print("\nMale subsample:")
+
+# %% Display regression results
+
 print(model_male.summary())
 
 # Compare coefficients
@@ -297,7 +345,7 @@ comparison = pd.DataFrame({
 })
 print(comparison)
 
-# ========== 14.4 REGRESSION ON SETS OF INDICATOR VARIABLES ==========
+# %% =========== 14.4 REGRESSION ON SETS OF INDICATOR VARIABLES ==========
 
 print("\n" + "=" * 70)
 print("14.4 REGRESSION ON SETS OF INDICATOR VARIABLES")
@@ -309,7 +357,13 @@ print("Regression with Indicator Variables (No Intercept)")
 print("-" * 70)
 
 # Model with no constant gives means for each group
+
+# %% Estimate regression model
+
 model_noconstant = ols('earnings ~ dself + dprivate + dgovt - 1', data=data).fit(cov_type='HC1')
+
+# %% Display regression results
+
 print(model_noconstant.summary())
 
 print("\nInterpretation:")
@@ -329,42 +383,69 @@ print("Table 14.4: Different Reference Categories")
 print("-" * 70)
 
 # Base model with no indicator variables (for comparison)
+
+# %% Estimate regression model
+
 model_noindic = ols('earnings ~ age + education', data=data).fit(cov_type='HC1')
 print("\nModel with no type of worker indicators:")
 print(f"  R²: {model_noindic.rsquared:.4f}")
 print(f"  RMSE: {np.sqrt(model_noindic.mse_resid):.2f}")
 
 # Reference group: self-employed (omit dself)
+
+# %% Estimate regression model
+
 model_ref_self = ols('earnings ~ age + education + dprivate + dgovt',
                      data=data).fit(cov_type='HC1')
 print("\nReference: Self-employed")
+
+# %% Display regression results
+
 print(model_ref_self.summary())
 f_test_self = model_ref_self.f_test('dprivate = 0, dgovt = 0')
 f_val_self = f_test_self.fvalue[0][0] if hasattr(f_test_self.fvalue, '__getitem__') else f_test_self.fvalue
 print(f"Joint F-test (dprivate, dgovt): F = {f_val_self:.2f}, p = {f_test_self.pvalue:.4f}")
 
 # Reference group: private sector (omit dprivate)
+
+# %% Estimate regression model
+
 model_ref_private = ols('earnings ~ age + education + dself + dgovt',
                         data=data).fit(cov_type='HC1')
 print("\nReference: Private sector")
+
+# %% Display regression results
+
 print(model_ref_private.summary())
 f_test_private = model_ref_private.f_test('dself = 0, dgovt = 0')
 f_val_private = f_test_private.fvalue[0][0] if hasattr(f_test_private.fvalue, '__getitem__') else f_test_private.fvalue
 print(f"Joint F-test (dself, dgovt): F = {f_val_private:.2f}, p = {f_test_private.pvalue:.4f}")
 
 # Reference group: government (omit dgovt)
+
+# %% Estimate regression model
+
 model_ref_govt = ols('earnings ~ age + education + dself + dprivate',
                      data=data).fit(cov_type='HC1')
 print("\nReference: Government")
+
+# %% Display regression results
+
 print(model_ref_govt.summary())
 f_test_govt = model_ref_govt.f_test('dself = 0, dprivate = 0')
 f_val_govt = f_test_govt.fvalue[0][0] if hasattr(f_test_govt.fvalue, '__getitem__') else f_test_govt.fvalue
 print(f"Joint F-test (dself, dprivate): F = {f_val_govt:.2f}, p = {f_test_govt.pvalue:.4f}")
 
 # No intercept (include all indicators)
+
+# %% Estimate regression model
+
 model_noint = ols('earnings ~ age + education + dself + dprivate + dgovt - 1',
                   data=data).fit(cov_type='HC1')
 print("\nNo intercept (all indicators included):")
+
+# %% Display regression results
+
 print(model_noint.summary())
 
 # Multiple F-tests with no intercept model
@@ -404,12 +485,18 @@ print("Testing Differences in Means Across Groups")
 print("-" * 70)
 
 # Model 1: Drop self-employed as reference
+
+# %% Estimate regression model
+
 model_means1 = ols('earnings ~ dprivate + dgovt', data=data).fit(cov_type='HC1')
 print("\nReference: Self-employed")
 print(f"  Private sector effect: {model_means1.params['dprivate']:.2f} (SE: {model_means1.bse['dprivate']:.2f})")
 print(f"  Government effect: {model_means1.params['dgovt']:.2f} (SE: {model_means1.bse['dgovt']:.2f})")
 
 # Model 2: No intercept
+
+# %% Estimate regression model
+
 model_means2 = ols('earnings ~ dself + dprivate + dgovt - 1', data=data).fit(cov_type='HC1')
 print("\nNo intercept (group means):")
 print(f"  Self-employed: {model_means2.params['dself']:.2f} (SE: {model_means2.bse['dself']:.2f})")
@@ -443,6 +530,9 @@ print(f"  F-statistic: {f_stat_anova:.2f}")
 print(f"  p-value: {p_value_anova:.6f}")
 
 # Using statsmodels for detailed ANOVA table
+
+# %% Estimate regression model
+
 model_anova = ols('earnings ~ C(typeworker)', data=data).fit()
 from statsmodels.stats.anova import anova_lm
 anova_table = anova_lm(model_anova, typ=2)
@@ -479,6 +569,8 @@ plt.savefig(os.path.join(IMAGES_DIR, 'ch14_earnings_by_groups.png'), dpi=300, bb
 print(f"Saved: {os.path.join(IMAGES_DIR, 'ch14_earnings_by_groups.png')}")
 plt.close()
 
+# %% Continue analysis
+
 # Figure: Earnings vs education by gender
 fig, ax = plt.subplots(figsize=(10, 6))
 for gender, label in [(0, 'Male'), (1, 'Female')]:
@@ -501,7 +593,9 @@ plt.savefig(os.path.join(IMAGES_DIR, 'ch14_earnings_education_gender.png'), dpi=
 print(f"Saved: {os.path.join(IMAGES_DIR, 'ch14_earnings_education_gender.png')}")
 plt.close()
 
-# ========== SUMMARY ==========
+# %% Continue analysis
+
+# %% =========== SUMMARY ==========
 
 print("\n" + "=" * 70)
 print("CHAPTER 14 SUMMARY")

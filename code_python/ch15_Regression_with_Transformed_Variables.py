@@ -1,3 +1,4 @@
+# %%
 """
 ch15_Regression_with_Transformed_Variables.py - January 2026 for Python
 
@@ -17,7 +18,7 @@ Sections covered:
   15.7 MODELS WITH A MIX OF REGRESSOR TYPES
 """
 
-# ========== SETUP ==========
+# %% =========== SETUP ==========
 
 import numpy as np
 import pandas as pd
@@ -54,12 +55,12 @@ print("=" * 70)
 print("CHAPTER 15: REGRESSION WITH TRANSFORMED VARIABLES")
 print("=" * 70)
 
-# ========== DATA DESCRIPTION ==========
+# %% =========== DATA DESCRIPTION ==========
 
 # Annual Earnings for 842 male and female full-time workers
 # aged 25-65 years old in 2010
 
-# ========== 15.1 EXAMPLE: EARNINGS, GENDER, EDUCATION and TYPE OF WORKER ==========
+# %% =========== 15.1 EXAMPLE: EARNINGS, GENDER, EDUCATION and TYPE OF WORKER ==========
 
 print("\n" + "=" * 70)
 print("15.1 EXAMPLE: EARNINGS, GENDER, EDUCATION and TYPE OF WORKER")
@@ -68,11 +69,15 @@ print("=" * 70)
 # Read in the Stata data set
 data_earnings = pd.read_stata(GITHUB_DATA_URL + 'AED_EARNINGS_COMPLETE.DTA')
 
+# %% Explore data structure
+
 print("\nData structure:")
 print(data_earnings.info())
 
 print("\nData summary:")
 data_summary = data_earnings.describe()
+
+# %% Calculate statistics
 print(data_summary)
 data_summary.to_csv(os.path.join(TABLES_DIR, 'ch15_earnings_descriptive_stats.csv'))
 print(f"Table saved to: {os.path.join(TABLES_DIR, 'ch15_earnings_descriptive_stats.csv')}")
@@ -85,7 +90,7 @@ table151vars = ["earnings", "lnearnings", "age", "agesq", "education", "agebyedu
                 "lnage", "gender", "dself", "dprivate", "dgovt", "hours", "lnhours"]
 print(data_earnings[table151vars].describe())
 
-# ========== 15.2 MARGINAL EFFECTS FOR NONLINEAR MODELS ==========
+# %% =========== 15.2 MARGINAL EFFECTS FOR NONLINEAR MODELS ==========
 
 print("\n" + "=" * 70)
 print("15.2 MARGINAL EFFECTS FOR NONLINEAR MODELS")
@@ -93,7 +98,7 @@ print("=" * 70)
 print("\nNote: Figures 15.1 and 15.2 use generated data (not reproduced here)")
 print("Marginal effects calculations are demonstrated in sections 15.3 and 15.4")
 
-# ========== 15.3 QUADRATIC AND POLYNOMIAL MODELS ==========
+# %% =========== 15.3 QUADRATIC AND POLYNOMIAL MODELS ==========
 
 print("\n" + "=" * 70)
 print("15.3 QUADRATIC AND POLYNOMIAL MODELS")
@@ -103,14 +108,26 @@ print("=" * 70)
 print("\n" + "-" * 70)
 print("Linear Model: earnings ~ age + education")
 print("-" * 70)
+
+# %% Estimate regression model
+
 ols_linear = ols('earnings ~ age + education', data=data_earnings).fit(cov_type='HC1')
+
+# %% Display regression results
+
 print(ols_linear.summary())
 
 # Quadratic model
 print("\n" + "-" * 70)
 print("Quadratic Model: earnings ~ age + agesq + education")
 print("-" * 70)
+
+# %% Estimate regression model
+
 ols_quad = ols('earnings ~ age + agesq + education', data=data_earnings).fit(cov_type='HC1')
+
+# %% Display regression results
+
 print(ols_quad.summary())
 
 # Turning point
@@ -126,6 +143,8 @@ print("-" * 70)
 mequad = bage + 2 * bagesq * data_earnings['age']
 print(f"\nMarginal effect summary statistics:")
 print(mequad.describe())
+
+# %% Calculate statistics
 
 AME_age = mequad.mean()
 print(f"\nAverage Marginal Effect (AME) for age: {AME_age:.4f}")
@@ -148,10 +167,16 @@ print(f_test)
 print("\n" + "-" * 70)
 print("Alternative: Using I(age**2) notation")
 print("-" * 70)
+
+# %% Estimate regression model
+
 ols_factor_quad = ols('earnings ~ age + I(age**2) + education', data=data_earnings).fit(cov_type='HC1')
+
+# %% Display regression results
+
 print(ols_factor_quad.summary())
 
-# ========== 15.4 INTERACTED REGRESSORS ==========
+# %% =========== 15.4 INTERACTED REGRESSORS ==========
 
 print("\n" + "=" * 70)
 print("15.4 INTERACTED REGRESSORS")
@@ -161,7 +186,13 @@ print("=" * 70)
 print("\n" + "-" * 70)
 print("Interaction Model: earnings ~ age + education + agebyeduc")
 print("-" * 70)
+
+# %% Estimate regression model
+
 ols_interact = ols('earnings ~ age + education + agebyeduc', data=data_earnings).fit(cov_type='HC1')
+
+# %% Display regression results
+
 print(ols_interact.summary())
 
 # Joint test for statistical significance of age
@@ -191,6 +222,8 @@ meinteract = beducation + bagebyeduc * data_earnings['age']
 print(f"\nMarginal effect summary statistics:")
 print(meinteract.describe())
 
+# %% Calculate statistics
+
 AME_educ = meinteract.mean()
 print(f"\nAverage Marginal Effect (AME) for education: {AME_educ:.4f}")
 
@@ -204,10 +237,16 @@ print(f"Marginal Effect at Representative value (MER) for age=25: {MER_educ_25:.
 print("\n" + "-" * 70)
 print("Alternative: Using age*education notation")
 print("-" * 70)
+
+# %% Estimate regression model
+
 ols_factor_interact = ols('earnings ~ age * education', data=data_earnings).fit(cov_type='HC1')
+
+# %% Display regression results
+
 print(ols_factor_interact.summary())
 
-# ========== 15.5 LOG-LINEAR AND LOG-LOG MODELS ==========
+# %% =========== 15.5 LOG-LINEAR AND LOG-LOG MODELS ==========
 
 print("\n" + "=" * 70)
 print("15.5 LOG-LINEAR AND LOG-LOG MODELS")
@@ -217,21 +256,39 @@ print("=" * 70)
 print("\n" + "-" * 70)
 print("Levels Model: earnings ~ age + education")
 print("-" * 70)
+
+# %% Estimate regression model
+
 ols_linear2 = ols('earnings ~ age + education', data=data_earnings).fit(cov_type='HC1')
+
+# %% Display regression results
+
 print(ols_linear2.summary())
 
 # Log-linear model
 print("\n" + "-" * 70)
 print("Log-Linear Model: lnearnings ~ age + education")
 print("-" * 70)
+
+# %% Estimate regression model
+
 ols_loglin = ols('lnearnings ~ age + education', data=data_earnings).fit(cov_type='HC1')
+
+# %% Display regression results
+
 print(ols_loglin.summary())
 
 # Log-log model
 print("\n" + "-" * 70)
 print("Log-Log Model: lnearnings ~ lnage + education")
 print("-" * 70)
+
+# %% Estimate regression model
+
 ols_loglog = ols('lnearnings ~ lnage + education', data=data_earnings).fit(cov_type='HC1')
+
+# %% Display regression results
+
 print(ols_loglog.summary())
 
 # Comparison table
@@ -244,7 +301,7 @@ print(f"{'Levels':<15} {ols_linear2.rsquared:<12.4f} {ols_linear2.rsquared_adj:<
 print(f"{'Log-Linear':<15} {ols_loglin.rsquared:<12.4f} {ols_loglin.rsquared_adj:<15.4f}")
 print(f"{'Log-Log':<15} {ols_loglog.rsquared:<12.4f} {ols_loglog.rsquared_adj:<15.4f}")
 
-# ========== 15.6 PREDICTION FROM LOG-LINEAR AND LOG-LOG MODELS ==========
+# %% =========== 15.6 PREDICTION FROM LOG-LINEAR AND LOG-LOG MODELS ==========
 
 print("\n" + "=" * 70)
 print("15.6 PREDICTION FROM LOG-LINEAR AND LOG-LOG MODELS")
@@ -254,6 +311,9 @@ print("=" * 70)
 print("\n" + "-" * 70)
 print("Predictions from Levels Model")
 print("-" * 70)
+
+# %% Estimate regression model
+
 ols_linear_pred = ols('earnings ~ age + education', data=data_earnings).fit(cov_type='HC1')
 linear_predict = ols_linear_pred.predict()
 
@@ -261,6 +321,9 @@ linear_predict = ols_linear_pred.predict()
 print("\n" + "-" * 70)
 print("Retransformation Bias in Log-Linear Model")
 print("-" * 70)
+
+# %% Estimate regression model
+
 ols_loglin_pred = ols('lnearnings ~ age + education', data=data_earnings).fit(cov_type='HC1')
 predict_log = ols_loglin_pred.predict()
 biased_predict = np.exp(predict_log)
@@ -294,6 +357,9 @@ print(comparison_df.corr())
 print("\n" + "-" * 70)
 print("Retransformation Bias in Log-Log Model")
 print("-" * 70)
+
+# %% Estimate regression model
+
 ols_loglog_pred = ols('lnearnings ~ lnage + education', data=data_earnings).fit(cov_type='HC1')
 predict_loglog = ols_loglog_pred.predict()
 biased_predict_loglog = np.exp(predict_loglog)
@@ -323,7 +389,7 @@ print("Correlations Between Actual and Predicted Values")
 print("-" * 70)
 print(comparison_df_loglog.corr())
 
-# ========== 15.7 MODELS WITH A MIX OF REGRESSOR TYPES ==========
+# %% =========== 15.7 MODELS WITH A MIX OF REGRESSOR TYPES ==========
 
 print("\n" + "=" * 70)
 print("15.7 MODELS WITH A MIX OF REGRESSOR TYPES")
@@ -334,8 +400,14 @@ print("\n" + "-" * 70)
 print("Linear Model with Mixed Regressors:")
 print("earnings ~ gender + age + agesq + education + dself + dgovt + lnhours")
 print("-" * 70)
+
+# %% Estimate regression model
+
 ols_linear_mix = ols('earnings ~ gender + age + agesq + education + dself + dgovt + lnhours',
                      data=data_earnings).fit(cov_type='HC1')
+
+# %% Display regression results
+
 print(ols_linear_mix.summary())
 linear_predict_mix = ols_linear_mix.predict()
 
@@ -344,8 +416,14 @@ print("\n" + "-" * 70)
 print("Log-Linear Model with Mixed Regressors:")
 print("lnearnings ~ gender + age + agesq + education + dself + dgovt + lnhours")
 print("-" * 70)
+
+# %% Estimate regression model
+
 ols_log_mix = ols('lnearnings ~ gender + age + agesq + education + dself + dgovt + lnhours',
                   data=data_earnings).fit(cov_type='HC1')
+
+# %% Display regression results
+
 print(ols_log_mix.summary())
 
 # Predictions with retransformation adjustment
@@ -420,7 +498,9 @@ plt.savefig(output_file, dpi=300, bbox_inches='tight')
 print(f"\nFigure saved to: {output_file}")
 plt.close()
 
-# ========== SUMMARY ==========
+# %% Continue analysis
+
+# %% =========== SUMMARY ==========
 
 print("\n" + "=" * 70)
 print("CHAPTER 15 ANALYSIS COMPLETE")

@@ -1,3 +1,4 @@
+# %%
 """
 ch01_Analysis_of_Economics_Data.py - January 2026 for Python
 
@@ -8,7 +9,7 @@ To run you need file:
 in the data_stata/ directory
 """
 
-# ========== SETUP ==========
+# %% ========== SETUP ==========
 
 import numpy as np
 import pandas as pd
@@ -33,21 +34,23 @@ TABLES_DIR = 'tables'
 os.makedirs(IMAGES_DIR, exist_ok=True)
 os.makedirs(TABLES_DIR, exist_ok=True)
 
-# ========== OVERVIEW ==========
+# %% ========== OVERVIEW ==========
 
 # This Python program does analysis for Chapter 1
 #  1.3 REGRESSION ANALYSIS
 
-# ========== DATA DESCRIPTION ==========
+# %% ========== DATA DESCRIPTION ==========
 
 # House sale price for 29 houses in Central Davis in 1999
 #     29 observations on 9 variables
 
-# ========== 1.3 REGRESSION ANALYSIS ==========
+# %% ========== 1.3 REGRESSION ANALYSIS ==========
 
 # Read in the Stata data set
 # Data is streamed directly from GitHub (reliable mirror)
 data_house = pd.read_stata(GITHUB_DATA_URL + 'AED_HOUSE.DTA')
+
+# %% Explore data structure
 
 # Display summary statistics
 print("=" * 70)
@@ -55,6 +58,8 @@ print("CHAPTER 1: ANALYSIS OF ECONOMICS DATA")
 print("=" * 70)
 print("\nData Summary:")
 data_summary = data_house.describe()
+
+# %% Calculate statistics
 print(data_summary)
 
 # Save descriptive statistics table
@@ -66,12 +71,18 @@ print(data_house.info())
 
 # Fit the regression line: price ~ size
 # Using statsmodels formula API (similar to R's lm)
+
+# %% Estimate regression model
+
 model = ols('price ~ size', data=data_house).fit()
 
 # Display regression results
 print("\n" + "=" * 70)
 print("OLS REGRESSION RESULTS: price ~ size")
 print("=" * 70)
+
+# %% Display regression results
+
 print(model.summary())
 
 # Save regression summary to text file
@@ -91,7 +102,7 @@ coef_table = pd.DataFrame({
 coef_table.to_csv(os.path.join(TABLES_DIR, 'ch01_regression_coefficients.csv'))
 print(f"Coefficients table saved to: {os.path.join(TABLES_DIR, 'ch01_regression_coefficients.csv')}")
 
-# ========== FIGURE 1.1: SCATTER PLOT WITH FITTED LINE ==========
+# %% ========== FIGURE 1.1: SCATTER PLOT WITH FITTED LINE ==========
 
 # Create the scatter plot with fitted regression line
 fig, ax = plt.subplots(figsize=(10, 6))
@@ -120,7 +131,7 @@ print(f"\nFigure saved to: {output_file}")
 # Display the plot
 plt.show()
 
-# ========== REGRESSION DIAGNOSTICS ==========
+# %% ========== REGRESSION DIAGNOSTICS ==========
 
 print("\n" + "=" * 70)
 print("REGRESSION COEFFICIENTS")
@@ -131,7 +142,7 @@ print(f"R-squared: {model.rsquared:.4f}")
 print(f"Adj. R-squared: {model.rsquared_adj:.4f}")
 print(f"Number of observations: {int(model.nobs)}")
 
-# ========== COMPARISON WITH STATA/R OUTPUT ==========
+# %% ========== COMPARISON WITH STATA/R OUTPUT ==========
 
 print("\n" + "=" * 70)
 print("INTERPRETATION")

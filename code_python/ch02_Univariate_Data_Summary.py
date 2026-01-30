@@ -1,3 +1,4 @@
+# %%
 """
 ch02_Univariate_Data_Summary.py - January 2026 for Python
 
@@ -20,7 +21,7 @@ Sections covered:
   2.6 DATA TRANSFORMATION FOR TIME SERIES DATA
 """
 
-# ========== SETUP ==========
+# %% ========== SETUP ==========
 
 import numpy as np
 import pandas as pd
@@ -49,7 +50,7 @@ os.makedirs(TABLES_DIR, exist_ok=True)
 sns.set_style("whitegrid")
 plt.rcParams['figure.figsize'] = (10, 6)
 
-# ========== DATA DESCRIPTIONS ==========
+# %% ========== DATA DESCRIPTIONS ==========
 
 # (1) Annual Earnings for 191 women aged 30 years in 2010 Full-time workers
 #     191 observations on 4 variables
@@ -66,7 +67,7 @@ print("=" * 70)
 print("CHAPTER 2: UNIVARIATE DATA SUMMARY")
 print("=" * 70)
 
-# ========== 2.1 SUMMARY STATISTICS FOR NUMERICAL DATA ==========
+# %% ========== 2.1 SUMMARY STATISTICS FOR NUMERICAL DATA ==========
 
 print("\n" + "=" * 70)
 print("2.1 SUMMARY STATISTICS FOR NUMERICAL DATA")
@@ -83,6 +84,8 @@ data_summary = data_earnings.describe()
 print(data_summary)
 data_summary.to_csv(os.path.join(TABLES_DIR, 'ch02_earnings_descriptive_stats.csv'))
 print(f"Table saved to: {os.path.join(TABLES_DIR, 'ch02_earnings_descriptive_stats.csv')}")
+
+# %% Calculate detailed earnings statistics
 
 # Table 2.1: Detailed statistics for earnings
 print("\n" + "-" * 70)
@@ -117,6 +120,8 @@ stats_df.columns = ['Value']
 stats_df.to_csv(os.path.join(TABLES_DIR, 'ch02_earnings_detailed_stats.csv'))
 print(f"Table saved to: {os.path.join(TABLES_DIR, 'ch02_earnings_detailed_stats.csv')}")
 
+# %% Create earnings box plot
+
 # Figure 2.2: Box plot of earnings
 fig, ax = plt.subplots(figsize=(8, 6))
 bp = ax.boxplot(earnings, vert=False, patch_artist=True,
@@ -132,7 +137,7 @@ plt.savefig(output_file, dpi=300, bbox_inches='tight')
 print(f"\nFigure 2.2 saved to: {output_file}")
 plt.close()
 
-# ========== 2.2 CHARTS FOR NUMERICAL DATA ==========
+# %% ========== 2.2 CHARTS FOR NUMERICAL DATA ==========
 
 print("\n" + "=" * 70)
 print("2.2 CHARTS FOR NUMERICAL DATA")
@@ -142,6 +147,8 @@ print("=" * 70)
 earnings_range = (earnings // 15000).astype(int)
 print("\nTable 2.2: Earnings Range Distribution")
 print(earnings_range.value_counts().sort_index())
+
+# %% Create earnings histograms with different bin widths
 
 # Figure 2.4: Histograms with different bin widths
 fig, axes = plt.subplots(1, 2, figsize=(14, 5))
@@ -169,6 +176,8 @@ plt.savefig(output_file, dpi=300, bbox_inches='tight')
 print(f"\nFigure 2.4 saved to: {output_file}")
 plt.close()
 
+# %% Create kernel density estimate plot
+
 # Figure 2.5: Kernel density estimate
 fig, ax = plt.subplots(figsize=(10, 6))
 earnings.plot.kde(ax=ax, linewidth=2, color='darkblue', bw_method=0.3)
@@ -183,6 +192,8 @@ plt.savefig(output_file, dpi=300, bbox_inches='tight')
 print(f"\nFigure 2.5 saved to: {output_file}")
 plt.close()
 
+# %% Load GDP per capita data
+
 # Figure 2.6: Time series plot - Real GDP per capita
 data_gdp = pd.read_stata(GITHUB_DATA_URL + 'AED_REALGDPPC.DTA')
 
@@ -192,6 +203,8 @@ gdp_summary = data_gdp.describe()
 print(gdp_summary)
 gdp_summary.to_csv(os.path.join(TABLES_DIR, 'ch02_gdp_descriptive_stats.csv'))
 print(f"Table saved to: {os.path.join(TABLES_DIR, 'ch02_gdp_descriptive_stats.csv')}")
+
+# %% Create GDP time series plot
 
 fig, ax = plt.subplots(figsize=(12, 6))
 ax.plot(data_gdp['daten'], data_gdp['realgdppc'], linewidth=2, color='darkblue')
@@ -206,7 +219,7 @@ plt.savefig(output_file, dpi=300, bbox_inches='tight')
 print(f"\nFigure 2.6 saved to: {output_file}")
 plt.close()
 
-# ========== 2.3 CHARTS FOR NUMERICAL DATA BY CATEGORY ==========
+# %% ========== 2.3 CHARTS FOR NUMERICAL DATA BY CATEGORY ==========
 
 print("\n" + "=" * 70)
 print("2.3 CHARTS FOR NUMERICAL DATA BY CATEGORY")
@@ -220,6 +233,8 @@ print("\nTable 2.3: Health Expenditure Categories")
 print(data_health)
 data_health.to_csv(os.path.join(TABLES_DIR, 'ch02_health_expenditures.csv'), index=False)
 print(f"Table saved to: {os.path.join(TABLES_DIR, 'ch02_health_expenditures.csv')}")
+
+# %% Create health expenditures bar chart
 
 # Figure 2.7: Bar chart of health expenditures
 fig, ax = plt.subplots(figsize=(12, 6))
@@ -239,7 +254,7 @@ plt.savefig(output_file, dpi=300, bbox_inches='tight')
 print(f"\nFigure 2.7 saved to: {output_file}")
 plt.close()
 
-# ========== 2.4 SUMMARY AND CHARTS FOR CATEGORICAL DATA ==========
+# %% ========== 2.4 SUMMARY AND CHARTS FOR CATEGORICAL DATA ==========
 
 print("\n" + "=" * 70)
 print("2.4 SUMMARY AND CHARTS FOR CATEGORICAL DATA")
@@ -266,6 +281,8 @@ print(mode_table)
 mode_table.to_csv(os.path.join(TABLES_DIR, 'ch02_fishing_mode_frequency.csv'))
 print(f"Table saved to: {os.path.join(TABLES_DIR, 'ch02_fishing_mode_frequency.csv')}")
 
+# %% Create fishing modes pie chart
+
 # Figure 2.9: Pie chart of fishing modes
 fig, ax = plt.subplots(figsize=(8, 8))
 colors = plt.cm.Set3(range(len(mode_freq)))
@@ -284,7 +301,7 @@ plt.savefig(output_file, dpi=300, bbox_inches='tight')
 print(f"\nFigure 2.9 saved to: {output_file}")
 plt.close()
 
-# ========== 2.5 DATA TRANSFORMATION ==========
+# %% ========== 2.5 DATA TRANSFORMATION ==========
 
 print("\n" + "=" * 70)
 print("2.5 DATA TRANSFORMATION")
@@ -295,6 +312,8 @@ data_earnings['lnearnings'] = np.log(data_earnings['earnings'])
 
 print("\nComparison of earnings and log(earnings):")
 print(data_earnings[['earnings', 'lnearnings']].describe())
+
+# %% Compare earnings vs log-earnings distributions
 
 # Figure 2.10: Histograms comparing earnings and log(earnings)
 fig, axes = plt.subplots(1, 2, figsize=(14, 5))
@@ -323,7 +342,7 @@ plt.savefig(output_file, dpi=300, bbox_inches='tight')
 print(f"\nFigure 2.10 saved to: {output_file}")
 plt.close()
 
-# ========== 2.6 DATA TRANSFORMATIONS FOR TIME SERIES DATA ==========
+# %% ========== 2.6 DATA TRANSFORMATIONS FOR TIME SERIES DATA ==========
 
 print("\n" + "=" * 70)
 print("2.6 DATA TRANSFORMATIONS FOR TIME SERIES DATA")
@@ -337,6 +356,8 @@ data_homesales_filtered = data_homesales[data_homesales['year'] >= 2005]
 
 print("\nHome sales data (2005 onwards):")
 print(data_homesales_filtered.describe())
+
+# %% Create time series transformation plots
 
 # Figure 2.11: Time series plots with moving average and seasonal adjustment
 fig, axes = plt.subplots(2, 1, figsize=(12, 10))
@@ -373,6 +394,8 @@ plt.savefig(output_file, dpi=300, bbox_inches='tight')
 print(f"\nFigure 2.11 saved to: {output_file}")
 plt.close()
 
+# %% Display GDP data observations
+
 # Table 2.5: First and last observations of GDP data
 print("\n" + "-" * 70)
 print("Table 2.5: First and Last Observations of GDP Data")
@@ -381,6 +404,8 @@ print("\nFirst observation:")
 print(data_gdp[['gdp', 'realgdp', 'gdppc', 'realgdppc', 'gdpdef', 'popthm', 'year']].head(1))
 print("\nLast observation:")
 print(data_gdp[['gdp', 'realgdp', 'gdppc', 'realgdppc', 'gdpdef', 'popthm', 'year']].tail(1))
+
+# %% Create GDP comparison plots
 
 # Figure 2.12: GDP comparisons
 fig, axes = plt.subplots(1, 2, figsize=(16, 6))
@@ -416,7 +441,7 @@ plt.savefig(output_file, dpi=300, bbox_inches='tight')
 print(f"\nFigure 2.12 saved to: {output_file}")
 plt.close()
 
-# ========== SUMMARY ==========
+# %% ========== SUMMARY ==========
 
 print("\n" + "=" * 70)
 print("CHAPTER 2 ANALYSIS COMPLETE")

@@ -1,3 +1,4 @@
+# %%
 """
 ch17_Panel_Data_Time_Series_Data_Causation.py - January 2026 for Python
 
@@ -19,7 +20,7 @@ Sections covered:
   17.7 TIME SERIES EXAMPLE: U.S. TREASURY SECURITY INTEREST RATES
 """
 
-# ========== SETUP ==========
+# %% =========== SETUP ==========
 
 import numpy as np
 import pandas as pd
@@ -66,7 +67,7 @@ print("=" * 70)
 print("CHAPTER 17: PANEL DATA, TIME SERIES DATA, CAUSATION")
 print("=" * 70)
 
-# ========== 17.1 CROSS-SECTION DATA ==========
+# %% =========== 17.1 CROSS-SECTION DATA ==========
 
 print("\n" + "=" * 70)
 print("17.1 CROSS-SECTION DATA")
@@ -77,7 +78,7 @@ print("  - Cross-sectional data: observations at a single point in time")
 print("  - Independence assumption: observations are independent")
 print("  - Standard OLS inference applies")
 
-# ========== 17.2 PANEL DATA ==========
+# %% =========== 17.2 PANEL DATA ==========
 
 print("\n" + "=" * 70)
 print("17.2 PANEL DATA")
@@ -90,7 +91,7 @@ print("  - Methods: Pooled OLS, Fixed Effects (FE), Random Effects (RE)")
 print("  - FE: Controls for time-invariant unobserved heterogeneity")
 print("  - RE: Assumes individual effects uncorrelated with regressors")
 
-# ========== 17.3 PANEL DATA EXAMPLE: NBA TEAM REVENUE ==========
+# %% =========== 17.3 PANEL DATA EXAMPLE: NBA TEAM REVENUE ==========
 
 print("\n" + "=" * 70)
 print("17.3 PANEL DATA EXAMPLE: NBA TEAM REVENUE")
@@ -99,8 +100,12 @@ print("=" * 70)
 # Load NBA data
 data_nba = pd.read_stata(GITHUB_DATA_URL + 'AED_NBA.DTA')
 
+# %% Explore data structure
+
 print("\nNBA Data Summary:")
 nba_summary = data_nba.describe()
+
+# %% Calculate statistics
 print(nba_summary)
 nba_summary.to_csv(os.path.join(TABLES_DIR, 'ch17_nba_descriptive_stats.csv'))
 print(f"Table saved to: {os.path.join(TABLES_DIR, 'ch17_nba_descriptive_stats.csv')}")
@@ -118,6 +123,8 @@ for var in variables:
     print(f"  {var}: {data_nba[var].dtype}")
 
 summary_stats = data_nba[variables].describe()
+
+# %% Calculate statistics
 print("\n", summary_stats)
 
 # Panel structure information
@@ -184,9 +191,17 @@ plt.savefig(os.path.join(IMAGES_DIR, 'ch17_fig1_nba_revenue_wins.png'), dpi=300,
 print(f"Saved: {os.path.join(IMAGES_DIR, 'ch17_fig1_nba_revenue_wins.png')}")
 plt.close()
 
+# %% Continue analysis
+
 # OLS regression (pooled)
+
+# %% Estimate regression model
+
 model_ols_simple = ols('lnrevenue ~ wins', data=data_nba).fit()
 print("\nPooled OLS: lnrevenue ~ wins")
+
+# %% Display regression results
+
 print(model_ols_simple.summary())
 # Save coefficients
 coef_table = pd.DataFrame({
@@ -216,19 +231,37 @@ print("-" * 70)
 # Model: lnrevenue ~ wins + season
 
 # Default standard errors
+
+# %% Estimate regression model
+
 model_ols_default = ols('lnrevenue ~ wins + season', data=data_nba).fit()
 print("\nPooled OLS (default SEs):")
+
+# %% Display regression results
+
 print(model_ols_default.summary())
 
 # Heteroskedastic-robust standard errors
+
+# %% Estimate regression model
+
 model_ols_robust = ols('lnrevenue ~ wins + season', data=data_nba).fit(cov_type='HC1')
 print("\nPooled OLS (heteroskedastic-robust SEs):")
+
+# %% Display regression results
+
 print(model_ols_robust.summary())
 
 # Cluster-robust standard errors (clustered by team)
+
+# %% Estimate regression model
+
 model_ols_cluster = ols('lnrevenue ~ wins + season', data=data_nba).fit(
     cov_type='cluster', cov_kwds={'groups': data_nba['teamid']})
 print("\nPooled OLS (cluster-robust SEs):")
+
+# %% Display regression results
+
 print(model_ols_cluster.summary())
 
 # Comparison table
@@ -270,6 +303,9 @@ if LINEARMODELS_AVAILABLE:
     print(model_pool_cluster)
 
     # Random Effects with default SEs
+
+# %% Estimate regression model
+
     model_re_default = RandomEffects(data_nba_panel['lnrevenue'], exog_pooled).fit()
     print("\nRandom Effects (default SEs):")
     print(model_re_default)
@@ -280,6 +316,9 @@ if LINEARMODELS_AVAILABLE:
     print(model_re_robust)
 
     # Fixed Effects with default SEs
+
+# %% Estimate regression model
+
     model_fe_default = PanelOLS(data_nba_panel['lnrevenue'], exog_pooled, entity_effects=True).fit()
     print("\nFixed Effects (default SEs):")
     print(model_fe_default)
@@ -337,15 +376,21 @@ else:
     # Fixed effects model (LSDV)
     formula_fe = 'lnrevenue ~ wins + season + playoff + champ + allstars + lncitypop + ' + \
                  ' + '.join(team_dummies.columns)
+
+# %% Estimate regression model
+
     model_fe_lsdv = ols(formula_fe, data=data_nba_fe).fit(cov_type='cluster',
                                                            cov_kwds={'groups': data_nba_fe['teamid']})
 
     print("\nFixed Effects (LSDV with cluster SEs):")
     # Print only main coefficients
     main_vars = ['Intercept', 'wins', 'season', 'playoff', 'champ', 'allstars', 'lncitypop']
+
+# %% Display regression results
+
     print(model_fe_lsdv.summary())
 
-# ========== 17.4 CAUSALITY: AN OVERVIEW ==========
+# %% =========== 17.4 CAUSALITY: AN OVERVIEW ==========
 
 print("\n" + "=" * 70)
 print("17.4 CAUSALITY: AN OVERVIEW")
@@ -360,7 +405,7 @@ print("  - Regression controls for observed confounders only")
 print("  - Omitted variable bias: E[u|X] ≠ 0")
 print("\nSee Chapter 13 for detailed applications of causal inference methods")
 
-# ========== 17.5 NONLINEAR REGRESSION MODELS ==========
+# %% =========== 17.5 NONLINEAR REGRESSION MODELS ==========
 
 print("\n" + "=" * 70)
 print("17.5 NONLINEAR REGRESSION MODELS")
@@ -368,6 +413,8 @@ print("=" * 70)
 
 # Logit example
 data_earnings = pd.read_stata(GITHUB_DATA_URL + 'AED_EARNINGS_COMPLETE.DTA')
+
+# %% Explore data structure
 
 # Create binary indicator
 data_earnings['dbigearn'] = (data_earnings['earnings'] > 60000).astype(int)
@@ -381,11 +428,17 @@ print("Logit Model")
 print("-" * 70)
 
 model_logit = logit('dbigearn ~ age + education', data=data_earnings).fit(cov_type='HC1')
+
+# %% Display regression results
+
 print(model_logit.summary())
 
 # Marginal effects
 marginal_effects = model_logit.get_margeff()
 print("\nMarginal Effects (at means):")
+
+# %% Display regression results
+
 print(marginal_effects.summary())
 
 # Linear Probability Model for comparison
@@ -393,7 +446,13 @@ print("\n" + "-" * 70)
 print("Linear Probability Model (for comparison)")
 print("-" * 70)
 
+
+# %% Estimate regression model
+
 model_lpm = ols('dbigearn ~ age + education', data=data_earnings).fit(cov_type='HC1')
+
+# %% Display regression results
+
 print(model_lpm.summary())
 
 print("\n" + "-" * 70)
@@ -410,7 +469,7 @@ print(comparison_logit_lpm)
 print("\nNote: Logit marginal effects and LPM coefficients are often similar")
 print("Logit ensures predicted probabilities are between 0 and 1")
 
-# ========== 17.6 TIME SERIES DATA ==========
+# %% =========== 17.6 TIME SERIES DATA ==========
 
 print("\n" + "=" * 70)
 print("17.6 TIME SERIES DATA")
@@ -423,7 +482,7 @@ print("  - Stationarity: statistical properties constant over time")
 print("  - Spurious regression: correlation without causal relationship")
 print("  - Methods: HAC standard errors, ARIMA, VAR, cointegration")
 
-# ========== 17.7 TIME SERIES EXAMPLE: U.S. TREASURY SECURITY INTEREST RATES ==========
+# %% =========== 17.7 TIME SERIES EXAMPLE: U.S. TREASURY SECURITY INTEREST RATES ==========
 
 print("\n" + "=" * 70)
 print("17.7 TIME SERIES EXAMPLE: U.S. TREASURY SECURITY INTEREST RATES")
@@ -431,6 +490,8 @@ print("=" * 70)
 
 # Load interest rates data
 data_rates = pd.read_stata(GITHUB_DATA_URL + 'AED_INTERESTRATES.DTA')
+
+# %% Explore data structure
 
 print("\nInterest Rates Data:")
 print(data_rates.describe())
@@ -461,7 +522,13 @@ print("-" * 70)
 # Create time variable
 data_rates['time'] = np.arange(len(data_rates))
 
+
+# %% Estimate regression model
+
 model_levels = ols('gs10 ~ gs1 + time', data=data_rates).fit()
+
+# %% Display regression results
+
 print(model_levels.summary())
 
 # Check residual autocorrelation
@@ -482,9 +549,17 @@ plt.savefig(os.path.join(IMAGES_DIR, 'ch17_correlogram_levels_resid.png'), dpi=3
 print(f"Saved: {os.path.join(IMAGES_DIR, 'ch17_correlogram_levels_resid.png')}")
 plt.close()
 
+# %% Continue analysis
+
 # HAC standard errors (Newey-West)
+
+# %% Estimate regression model
+
 model_levels_hac = ols('gs10 ~ gs1 + time', data=data_rates).fit(cov_type='HAC', cov_kwds={'maxlags': 24})
 print("\nRegression in Levels with HAC Standard Errors (24 lags):")
+
+# %% Display regression results
+
 print(model_levels_hac.summary())
 
 # Figure 17.4: Time series plots
@@ -520,6 +595,8 @@ plt.savefig(os.path.join(IMAGES_DIR, 'ch17_fig4_interest_rates_levels.png'), dpi
 print(f"Saved: {os.path.join(IMAGES_DIR, 'ch17_fig4_interest_rates_levels.png')}")
 plt.close()
 
+# %% Continue analysis
+
 # Table 17.6: Autocorrelations
 print("\n" + "-" * 70)
 print("Table 17.6: Autocorrelations")
@@ -540,7 +617,13 @@ for i in range(6):
 
 # Rows 3-4: Detrended (residuals from time trend)
 print("\nDetrended (residuals from time trend):")
+
+# %% Estimate regression model
+
 model_gs10_trend = ols('gs10 ~ time', data=data_rates).fit()
+
+# %% Estimate regression model
+
 model_gs1_trend = ols('gs1 ~ time', data=data_rates).fit()
 
 uhat_gs10_trend = model_gs10_trend.resid
@@ -559,7 +642,13 @@ for i in range(6):
 
 # Rows 5-6: AR(1) residuals
 print("\nAR(1) model residuals:")
+
+# %% Estimate regression model
+
 model_gs10_ar1 = ols('gs10 ~ gs10.shift(1)', data=data_rates).fit()
+
+# %% Estimate regression model
+
 model_gs1_ar1 = ols('gs1 ~ gs1.shift(1)', data=data_rates).fit()
 
 uhat_gs10_ar1 = model_gs10_ar1.resid
@@ -600,7 +689,13 @@ print("\n" + "-" * 70)
 print("Regression in Changes")
 print("-" * 70)
 
+
+# %% Estimate regression model
+
 model_changes = ols('dgs10 ~ dgs1', data=data_rates).fit()
+
+# %% Display regression results
+
 print(model_changes.summary())
 
 # Check residual autocorrelation
@@ -620,11 +715,20 @@ print("-" * 70)
 data_rates['dgs1_lag1'] = data_rates['dgs1'].shift(1)
 data_rates['dgs1_lag2'] = data_rates['dgs1'].shift(2)
 
+
+# %% Estimate regression model
+
 model_dl2 = ols('dgs10 ~ dgs1 + dgs1_lag1 + dgs1_lag2', data=data_rates).fit(
     cov_type='HAC', cov_kwds={'maxlags': 3})
+
+# %% Display regression results
+
 print(model_dl2.summary())
 
 # Also show with default SEs for R² and RMSE
+
+# %% Estimate regression model
+
 model_dl2_default = ols('dgs10 ~ dgs1 + dgs1_lag1 + dgs1_lag2', data=data_rates).fit()
 print(f"\nR²: {model_dl2_default.rsquared:.6f}")
 print(f"RMSE: {np.sqrt(model_dl2_default.mse_resid):.6f}")
@@ -637,7 +741,13 @@ print("-" * 70)
 data_rates['dgs10_lag1'] = data_rates['dgs10'].shift(1)
 data_rates['dgs10_lag2'] = data_rates['dgs10'].shift(2)
 
+
+# %% Estimate regression model
+
 model_ar2 = ols('dgs10 ~ dgs10_lag1 + dgs10_lag2', data=data_rates).fit()
+
+# %% Display regression results
+
 print(model_ar2.summary())
 
 # Check residuals
@@ -655,8 +765,14 @@ print(f"  LM statistic: {bg_test_ar2[0]:.4f}")
 print(f"  p-value: {bg_test_ar2[1]:.6f}")
 
 # With robust SEs
+
+# %% Estimate regression model
+
 model_ar2_robust = ols('dgs10 ~ dgs10_lag1 + dgs10_lag2', data=data_rates).fit(cov_type='HC1')
 print("\nAR(2) with robust SEs:")
+
+# %% Display regression results
+
 print(model_ar2_robust.summary())
 
 # ADL(2,2) model in changes
@@ -664,8 +780,14 @@ print("\n" + "-" * 70)
 print("ADL(2,2) Model in Changes")
 print("-" * 70)
 
+
+# %% Estimate regression model
+
 model_adl22 = ols('dgs10 ~ dgs10_lag1 + dgs10_lag2 + dgs1 + dgs1_lag1 + dgs1_lag2',
                   data=data_rates).fit(cov_type='HC1')
+
+# %% Display regression results
+
 print(model_adl22.summary())
 
 # Check residuals
@@ -723,14 +845,26 @@ print("-" * 70)
 data_rates['gs10_lag1'] = data_rates['gs10'].shift(1)
 data_rates['gs1_lag1'] = data_rates['gs1'].shift(1)
 
+
+# %% Estimate regression model
+
 model_levels_lags = ols('gs10 ~ gs1 + gs10_lag1 + gs1_lag1', data=data_rates).fit()
 print("\nLevels with lags:")
+
+# %% Display regression results
+
 print(model_levels_lags.summary())
 
 # With HAC standard errors
+
+# %% Estimate regression model
+
 model_levels_lags_hac = ols('gs10 ~ gs1 + gs10_lag1 + gs1_lag1', data=data_rates).fit(
     cov_type='HAC', cov_kwds={'maxlags': 24})
 print("\nLevels with lags (HAC SEs):")
+
+# %% Display regression results
+
 print(model_levels_lags_hac.summary())
 
 # Check residuals
@@ -756,10 +890,16 @@ impulse_results = []
 for h in range(5):
     if h == 0:
         # Contemporaneous
+
+# %% Estimate regression model
+
         model_impulse = ols('dgs10 ~ dgs10_lag1 + dgs10_lag2 + dgs1 + dgs1_lag1 + dgs1_lag2',
                            data=data_rates).fit(cov_type='HAC', cov_kwds={'maxlags': 4})
     else:
         # h periods ahead
+
+# %% Estimate regression model
+
         model_impulse = ols(f'dgs10_fwd{h} ~ dgs10_lag1 + dgs10_lag2 + dgs1 + dgs1_lag1 + dgs1_lag2',
                            data=data_rates).fit(cov_type='HAC', cov_kwds={'maxlags': h})
 
@@ -804,7 +944,9 @@ plt.savefig(os.path.join(IMAGES_DIR, 'ch17_impulse_response.png'), dpi=300, bbox
 print(f"\nSaved: {os.path.join(IMAGES_DIR, 'ch17_impulse_response.png')}")
 plt.close()
 
-# ========== SUMMARY ==========
+# %% Continue analysis
+
+# %% =========== SUMMARY ==========
 
 print("\n" + "=" * 70)
 print("CHAPTER 17 SUMMARY")
