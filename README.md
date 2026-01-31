@@ -16,8 +16,8 @@ Click any badge below to open and run immediately in your browser. Selected chap
 
 | Chapter | Title | Colab Notebook | Additional Resources |
 |---------|-------|----------------|---------------------|
-| **1** | Analysis of Economics Data | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/quarcs-lab/metricsai/blob/main/notebooks_colab/ch01_Analysis_of_Economics_Data.ipynb) | [✨ AI Slides](https://www.canva.com/design/DAG_BKhFJ_Y/PVyYUpgMWIim-HUQQDLKIA/view) • [📊 Author Slides](https://cameron.econ.ucdavis.edu/aed/traedv1_01) • [📝 Quiz](https://app.edcafe.ai/quizzes/69715fdb60956f50e60276b9) • [🤖 AI Tutor](https://app.edcafe.ai/chatbots/6971625960956f50e6028155) • [🎧 Audio](https://files.catbox.moe/1wbbbm.mp3) |
-| **2** | Univariate Data Summary | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/quarcs-lab/metricsai/blob/main/notebooks_colab/ch02_Univariate_Data_Summary.ipynb) | [✨ AI Slides](https://www.canva.com/design/DAG_Cb9ChxI/Ghe9aWGgbiFGJIBc88_4aQ/view) • [📊 Author Slides](https://cameron.econ.ucdavis.edu/aed/traedv1_02) • [🎧 Audio](https://files.catbox.moe/n5hlhx.mp3) |
+| **1** | Analysis of Economics Data <br/> *📊 NEW: Case Studies section with convergence clubs data* | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/quarcs-lab/metricsai/blob/main/notebooks_colab/ch01_Analysis_of_Economics_Data.ipynb) | [✨ AI Slides](https://www.canva.com/design/DAG_BKhFJ_Y/PVyYUpgMWIim-HUQQDLKIA/view) • [📊 Author Slides](https://cameron.econ.ucdavis.edu/aed/traedv1_01) • [📝 Quiz](https://app.edcafe.ai/quizzes/69715fdb60956f50e60276b9) • [🤖 AI Tutor](https://app.edcafe.ai/chatbots/6971625960956f50e6028155) • [🎧 Audio](https://files.catbox.moe/1wbbbm.mp3) |
+| **2** | Univariate Data Summary <br/> *📊 NEW: Case Studies section with labor productivity distribution analysis* | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/quarcs-lab/metricsai/blob/main/notebooks_colab/ch02_Univariate_Data_Summary.ipynb) | [✨ AI Slides](https://www.canva.com/design/DAG_Cb9ChxI/Ghe9aWGgbiFGJIBc88_4aQ/view) • [📊 Author Slides](https://cameron.econ.ucdavis.edu/aed/traedv1_02) • [🎧 Audio](https://files.catbox.moe/n5hlhx.mp3) |
 | **3** | The Sample Mean | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/quarcs-lab/metricsai/blob/main/notebooks_colab/ch03_The_Sample_Mean.ipynb) | [✨ AI Slides](https://carlos-mendez.my.canva.site/s03-the-sample-mean-pdf) • [🎧 Audio](https://files.catbox.moe/6t00pu.mp3) |
 | **4** | Statistical Inference for the Mean | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/quarcs-lab/metricsai/blob/main/notebooks_colab/ch04_Statistical_Inference_for_the_Mean.ipynb) | [✨ AI Slides](https://carlos-mendez.my.canva.site/s04-statistical-inference-for-the-mean-pdf) • [🎧 Audio](https://files.catbox.moe/f1ahfl.mp3) |
 
@@ -123,6 +123,115 @@ The enhanced template is documented in [`code_python/REPORT_TEMPLATE.md`](code_p
 - Best practices for educational content
 
 All enhanced chapters are available in the [`code_python/`](code_python/) directory as standalone Python scripts with corresponding markdown reports following the enhanced template.
+
+## 📊 Case Studies: Real Research Applications
+
+**NEW in Chapter 1**: Students can now apply econometric tools to authentic research data through hands-on case studies.
+
+### What's Included
+
+Chapter 1 now features a comprehensive **Case Studies section (1.11)** that bridges textbook theory with real economic research:
+
+**Featured Research**: [Economic Convergence Clubs](https://github.com/quarcs-lab/mendez2020-convergence-clubs-code-data) (Mendez, 2020)
+- **Research Question**: Do countries converge to similar development levels or form distinct "convergence clubs"?
+- **Data**: Panel dataset with 108 countries, 1990-2014, 27 economic variables
+- **Topics**: Labor productivity, capital accumulation, economic growth patterns
+
+### Structure
+
+Each case study includes:
+
+1. **Research Overview** (2-3 paragraphs)
+   - Background on the research question
+   - Economic theory and hypotheses
+   - Data description and source
+
+2. **Key Concept Boxes** (3 boxes in CH01)
+   - Economic convergence hypothesis
+   - Panel data structure
+   - Productivity-capital relationships
+
+3. **Progressive Tasks** (6 tasks in CH01)
+   - **Task 1-2**: Guided (data exploration, descriptive statistics)
+   - **Task 3-4**: Semi-guided (visualization, time series)
+   - **Task 5-6**: Independent (regression, comparative analysis)
+
+4. **Starter Code Provided**
+   - Students complete the analysis with structured guidance
+   - Comments indicate what to add
+   - Scaffolded from simple to complex
+
+### Learning Benefits
+
+**Apply Chapter Tools**: Students practice:
+- Loading and exploring panel data (multi-index structure)
+- Generating descriptive statistics across countries and time
+- Creating scatter plots and time series visualizations
+- Estimating simple OLS regressions
+- Comparing patterns between country groups
+- Distinguishing association from causation
+
+**Real Research Context**:
+- See how econometric methods answer important economic questions
+- Work with authentic data from published research
+- Understand empirical patterns that motivate advanced methods
+- Bridge gap between textbook examples and research practice
+
+**Progressive Skill Building**:
+- Tasks increase in difficulty (guided → independent)
+- Each task applies specific Chapter 1 tools
+- Critical thinking prompts throughout
+- Connection to future chapters
+
+### Data Access
+
+All data loads directly from GitHub (no downloads required):
+
+```python
+# Load convergence clubs data
+df1 = pd.read_csv(
+    "https://raw.githubusercontent.com/quarcs-lab/mendez2020-convergence-clubs-code-data/master/assets/dat.csv",
+    index_col=["country", "year"]
+).sort_index()
+
+# Load data dictionary
+df2 = pd.read_csv(
+    "https://raw.githubusercontent.com/quarcs-lab/mendez2020-convergence-clubs-code-data/master/assets/dat-definitions.csv"
+)
+```
+
+**Dataset Features**:
+- 2,700 observations (country-year pairs)
+- 108 countries across all income levels
+- 25 years of data (1990-2014)
+- Variables: GDP, productivity, capital, human capital, TFP
+
+### Extended Template
+
+Chapter 1 establishes the **canonical template** for all future chapters:
+
+**Standard Chapter Structure**:
+1. Learning Objectives
+2. Chapter Overview
+3. Setup & Imports
+4. Main Content Sections (1.1-1.9)
+5. Key Takeaways
+6. Practice Exercises (1.10)
+7. **Case Studies (1.11)** ← NEW standard component
+
+**Future Case Studies** (planned for other chapters):
+- **CH02-04**: Statistical inference applications (wage data, survey data)
+- **CH05-09**: Bivariate regression (education returns, labor economics)
+- **CH10-17**: Multiple regression (growth, development, policy evaluation)
+
+### Documentation
+
+Complete implementation details in:
+- **[Log file](log/20260131_CH01_CASE_STUDIES_IMPLEMENTATION.md)** - Comprehensive documentation
+- **[Chapter 1 notebook](notebooks_colab/ch01_Analysis_of_Economics_Data.ipynb)** - Live implementation
+- **Section 1.11** - Students can explore immediately in Google Colab
+
+---
 
 ## 📖 LaTeX Book Version
 
