@@ -421,7 +421,7 @@ All notebooks can be automatically exported to professional-quality PDF files us
 
 - ✅ ch00_Preface.pdf (0.82 MB)
 - ✅ ch01_Analysis_of_Economics_Data.pdf (1.00 MB)
-- ✅ ch02_Univariate_Data_Summary.pdf (1.65 MB) - **Regenerate after template updates**
+- ✅ ch02_Univariate_Data_Summary.pdf (1.83 MB) - **Updated Feb 1, 2026** - Proofreading complete, all fixes applied
 - ⏳ ch03-ch17 (ready to generate on demand)
 
 **Key Features:**
