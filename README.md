@@ -290,10 +290,17 @@ ls -lh notebooks_colab/*.pdf
 
 ### Current Status
 
+**Part I (Statistical Foundations) - Complete** ⭐⭐⭐⭐⭐
+
 - ✅ ch00_Preface.pdf (0.82 MB)
-- ✅ ch01_Analysis_of_Economics_Data.pdf (1.00 MB)
-- ✅ ch02_Univariate_Data_Summary.pdf (1.65 MB)
-- ⏳ ch03-ch17 (ready to generate)
+- ✅ ch01_Analysis_of_Economics_Data.pdf (1.22 MB) - Updated Feb 4, 2026
+- ✅ ch02_Univariate_Data_Summary.pdf (1.83 MB) - Reference template
+- ✅ ch03_The_Sample_Mean.pdf (1.30 MB) - Updated Feb 3, 2026
+- ✅ ch04_Statistical_Inference_for_the_Mean.pdf (1.70 MB) - Updated Feb 4, 2026
+
+**Part II-IV**
+
+- ⏳ ch05-ch17 (ready to generate)
 
 ### Professional Formatting Features
 
