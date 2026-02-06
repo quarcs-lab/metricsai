@@ -9724,6 +9724,269 @@ This validates both our code and the underlying theory.
 </div>
 </div>
 </div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<h2 id="3.9-Case-Studies">3.9 Case Studies<a class="anchor-link" href="#3.9-Case-Studies">¶</a></h2><p>Now that you've learned about the sample mean, sampling distributions, and the Central Limit Theorem, let's apply these concepts to real economic data using the <strong>Economic Convergence Clubs</strong> dataset.</p>
+<p><strong>Why case studies matter:</strong></p>
+<ul>
+<li>Bridge theory and practice: Move from abstract sampling concepts to real data analysis</li>
+<li>Build analytical skills: Practice computing sample statistics and understanding variability</li>
+<li>Develop statistical intuition: See how sample size affects precision and distribution shape</li>
+<li>Connect to research: Apply fundamental concepts to cross-country economic comparisons</li>
+</ul>
+<h3 id="Case-Study-1:-Sampling-Distributions-of-Labor-Productivity">Case Study 1: Sampling Distributions of Labor Productivity<a class="anchor-link" href="#Case-Study-1:-Sampling-Distributions-of-Labor-Productivity">¶</a></h3><p><strong>Research Question:</strong> How does average labor productivity vary across different samples of countries? How does sample size affect the precision of our estimates?</p>
+<p><strong>Background:</strong> In Chapter 1-2, you explored productivity levels across countries. Now we shift to understanding <strong>sampling variability</strong>—how sample means vary when we draw different samples from the population.</p>
+<p>This is fundamental to statistical inference: if we only observe a sample of countries (say, 20 out of 108), how confident can we be that our sample mean approximates the true population mean? The Central Limit Theorem tells us that sample means follow a normal distribution (even if the underlying data don't), with variability decreasing as sample size increases.</p>
+<p><strong>The Data:</strong> We'll use the convergence clubs dataset (Mendez, 2020) to explore sampling distributions:</p>
+<ul>
+<li><strong>Population:</strong> 108 countries observed from 1990-2014</li>
+<li><strong>Key variable:</strong> <code>lp</code> (labor productivity, output per worker)</li>
+<li><strong>Task:</strong> Draw multiple random samples, compute sample means, and observe the distribution</li>
+</ul>
+<p><strong>Your Task:</strong> Use Chapter 3's tools (sample mean, sample variance, Central Limit Theorem) to understand how sample statistics vary and how sample size affects precision.</p>
+<hr/>
+<blockquote>
+<p><strong>Key Concept: Sampling Distribution and the Central Limit Theorem</strong></p>
+<p>The <strong>sampling distribution of the mean</strong> shows how sample means $\bar{y}$ vary across different random samples drawn from the same population. Key properties:</p>
+<ol>
+<li><strong>Mean of sampling distribution = population mean</strong>: $E[\bar{y}] = \mu$</li>
+<li><strong>Standard error decreases with sample size</strong>: $SE(\bar{y}) = \sigma/\sqrt{n}$</li>
+<li><strong>Central Limit Theorem</strong>: For large $n$ (typically $n \geq 30$), $\bar{y}$ is approximately normally distributed, <strong>regardless</strong> of the population distribution</li>
+</ol>
+<p>This is why we can use normal-based inference methods even for non-normal economic data like earnings and wealth distributions.</p>
+</blockquote>
+<hr/>
+<h3 id="How-to-Use-These-Tasks">How to Use These Tasks<a class="anchor-link" href="#How-to-Use-These-Tasks">¶</a></h3><p><strong>Progressive difficulty:</strong></p>
+<ul>
+<li><strong>Tasks 1-2:</strong> Guided (detailed instructions, code provided)</li>
+<li><strong>Tasks 3-4:</strong> Semi-guided (moderate guidance, you write most code)</li>
+<li><strong>Tasks 5-6:</strong> Independent (minimal guidance, design your own analysis)</li>
+</ul>
+<p><strong>Work incrementally:</strong> Complete tasks in order. Each builds on previous concepts.</p>
+<hr/>
+<h4 id="Task-1:-Explore-the-Population-Distribution-(Guided)">Task 1: Explore the Population Distribution (Guided)<a class="anchor-link" href="#Task-1:-Explore-the-Population-Distribution-(Guided)">¶</a></h4><p><strong>Objective:</strong> Load the convergence clubs data and examine the population distribution of labor productivity.</p>
+<p><strong>Instructions:</strong> Run the code below to load data and visualize the population distribution.</p>
+<div class="highlight"><pre><span></span><span class="c1"># Import required libraries</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">scipy</span><span class="w"> </span><span class="kn">import</span> <span class="n">stats</span>
+
+<span class="c1"># Set random seed for reproducibility</span>
+<span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="mi">42</span><span class="p">)</span>
+
+<span class="c1"># Load convergence clubs dataset</span>
+<span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span>
+    <span class="s2">"https://raw.githubusercontent.com/quarcs-lab/mendez2020-convergence-clubs-code-data/master/assets/dat.csv"</span><span class="p">,</span>
+    <span class="n">index_col</span><span class="o">=</span><span class="p">[</span><span class="s2">"country"</span><span class="p">,</span> <span class="s2">"year"</span><span class="p">]</span>
+<span class="p">)</span><span class="o">.</span><span class="n">sort_index</span><span class="p">()</span>
+
+<span class="c1"># Extract 2014 data (most recent year) for cross-sectional analysis</span>
+<span class="n">df_2014</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[(</span><span class="nb">slice</span><span class="p">(</span><span class="kc">None</span><span class="p">),</span> <span class="mi">2014</span><span class="p">),</span> <span class="s1">'lp'</span><span class="p">]</span><span class="o">.</span><span class="n">dropna</span><span class="p">()</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Population size: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">df_2014</span><span class="p">)</span><span class="si">}</span><span class="s2"> countries"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Population mean: $</span><span class="si">{</span><span class="n">df_2014</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Population std dev: $</span><span class="si">{</span><span class="n">df_2014</span><span class="o">.</span><span class="n">std</span><span class="p">()</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+
+<span class="c1"># Visualize population distribution</span>
+<span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">6</span><span class="p">))</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">hist</span><span class="p">(</span><span class="n">df_2014</span><span class="p">,</span> <span class="n">bins</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">edgecolor</span><span class="o">=</span><span class="s1">'black'</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.7</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">axvline</span><span class="p">(</span><span class="n">df_2014</span><span class="o">.</span><span class="n">mean</span><span class="p">(),</span> <span class="n">color</span><span class="o">=</span><span class="s1">'red'</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="s1">'--'</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="sa">f</span><span class="s1">'Mean = $</span><span class="si">{</span><span class="n">df_2014</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span><span class="si">:</span><span class="s1">.2f</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">'Labor Productivity (thousands, 2011 USD PPP)'</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s1">'Frequency'</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s1">'Population Distribution of Labor Productivity (2014, 108 countries)'</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+
+<span class="c1"># Check normality</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="se">\n</span><span class="s2">Skewness: </span><span class="si">{</span><span class="n">stats</span><span class="o">.</span><span class="n">skew</span><span class="p">(</span><span class="n">df_2014</span><span class="p">)</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"Note: Population distribution is right-skewed (not normal)"</span><span class="p">)</span>
+</pre></div>
+<p><strong>What to observe:</strong></p>
+<ul>
+<li>Is the population distribution normal or skewed?</li>
+<li>What is the population mean and standard deviation?</li>
+<li>Note: Despite non-normality, the CLT will ensure sample means are approximately normal for large samples!</li>
+</ul>
+<hr/>
+<h4 id="Task-2:-Draw-a-Single-Sample-and-Compute-the-Sample-Mean-(Semi-guided)">Task 2: Draw a Single Sample and Compute the Sample Mean (Semi-guided)<a class="anchor-link" href="#Task-2:-Draw-a-Single-Sample-and-Compute-the-Sample-Mean-(Semi-guided)">¶</a></h4><p><strong>Objective:</strong> Draw a random sample of size $n=30$ and compute the sample mean.</p>
+<p><strong>Instructions:</strong></p>
+<ol>
+<li>Use <code>np.random.choice()</code> to draw a random sample of size 30 from the population</li>
+<li>Compute the sample mean using <code>.mean()</code></li>
+<li>Compare the sample mean to the population mean</li>
+<li>Repeat this process 2-3 times (with different random seeds) to see how the sample mean varies</li>
+</ol>
+<p><strong>Starter code:</strong></p>
+<div class="highlight"><pre><span></span><span class="c1"># Draw a random sample of size 30</span>
+<span class="n">n</span> <span class="o">=</span> <span class="mi">30</span>
+<span class="n">sample</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">df_2014</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">n</span><span class="p">,</span> <span class="n">replace</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+<span class="c1"># Compute sample mean</span>
+<span class="n">sample_mean</span> <span class="o">=</span> <span class="n">sample</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Sample size: </span><span class="si">{</span><span class="n">n</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Sample mean: $</span><span class="si">{</span><span class="n">sample_mean</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Population mean: $</span><span class="si">{</span><span class="n">df_2014</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Difference: $</span><span class="si">{</span><span class="n">sample_mean</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">df_2014</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+
+<span class="c1"># Question: How close is the sample mean to the population mean?</span>
+</pre></div>
+<p><strong>Questions:</strong></p>
+<ul>
+<li>How much does the sample mean differ from the population mean?</li>
+<li>If you draw another sample, will you get the same sample mean?</li>
+<li>What does this variability tell you about using samples for inference?</li>
+</ul>
+<hr/>
+<h4 id="Task-3:-Simulate-the-Sampling-Distribution-(Semi-guided)">Task 3: Simulate the Sampling Distribution (Semi-guided)<a class="anchor-link" href="#Task-3:-Simulate-the-Sampling-Distribution-(Semi-guided)">¶</a></h4><p><strong>Objective:</strong> Draw 1000 random samples of size $n=30$ and plot the distribution of sample means.</p>
+<p><strong>Instructions:</strong></p>
+<ol>
+<li>Use a loop to draw 1000 samples, each of size $n=30$</li>
+<li>For each sample, compute and store the sample mean</li>
+<li>Plot a histogram of the 1000 sample means</li>
+<li>Compare this sampling distribution to the theoretical prediction from the CLT</li>
+</ol>
+<p><strong>Hint:</strong> The CLT predicts that sample means should be normally distributed with:</p>
+<ul>
+<li>Mean = $\mu$ (population mean)</li>
+<li>Standard error = $\sigma/\sqrt{n}$ (population std / sqrt(sample size))</li>
+</ul>
+<p><strong>Example structure:</strong></p>
+<div class="highlight"><pre><span></span><span class="c1"># Simulate sampling distribution</span>
+<span class="n">n_samples</span> <span class="o">=</span> <span class="mi">1000</span>
+<span class="n">n</span> <span class="o">=</span> <span class="mi">30</span>
+<span class="n">sample_means</span> <span class="o">=</span> <span class="p">[]</span>
+
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_samples</span><span class="p">):</span>
+    <span class="n">sample</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">df_2014</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">n</span><span class="p">,</span> <span class="n">replace</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="n">sample_means</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">sample</span><span class="o">.</span><span class="n">mean</span><span class="p">())</span>
+
+<span class="n">sample_means</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">sample_means</span><span class="p">)</span>
+
+<span class="c1"># Plot sampling distribution</span>
+<span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">6</span><span class="p">))</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">hist</span><span class="p">(</span><span class="n">sample_means</span><span class="p">,</span> <span class="n">bins</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span> <span class="n">edgecolor</span><span class="o">=</span><span class="s1">'black'</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.7</span><span class="p">,</span> <span class="n">density</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">axvline</span><span class="p">(</span><span class="n">df_2014</span><span class="o">.</span><span class="n">mean</span><span class="p">(),</span> <span class="n">color</span><span class="o">=</span><span class="s1">'red'</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="s1">'--'</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">'Population mean'</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">axvline</span><span class="p">(</span><span class="n">sample_means</span><span class="o">.</span><span class="n">mean</span><span class="p">(),</span> <span class="n">color</span><span class="o">=</span><span class="s1">'blue'</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="s1">':'</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">'Mean of sample means'</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">'Sample Mean (thousands, 2011 USD PPP)'</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s1">'Density'</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="sa">f</span><span class="s1">'Sampling Distribution of the Mean (n=</span><span class="si">{</span><span class="n">n</span><span class="si">}</span><span class="s1">, </span><span class="si">{</span><span class="n">n_samples</span><span class="si">}</span><span class="s1"> samples)'</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+
+<span class="c1"># Compare empirical vs theoretical</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Population mean (μ): $</span><span class="si">{</span><span class="n">df_2014</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Mean of sample means: $</span><span class="si">{</span><span class="n">sample_means</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Theoretical SE (σ/√n): $</span><span class="si">{</span><span class="n">df_2014</span><span class="o">.</span><span class="n">std</span><span class="p">()</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">n</span><span class="p">)</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Empirical SE (std of sample means): $</span><span class="si">{</span><span class="n">sample_means</span><span class="o">.</span><span class="n">std</span><span class="p">()</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+</pre></div>
+<p><strong>Questions:</strong></p>
+<ul>
+<li>Does the distribution of sample means look approximately normal (even though the population distribution was skewed)?</li>
+<li>How close is the mean of sample means to the population mean?</li>
+<li>How close is the empirical standard error to the theoretical prediction?</li>
+</ul>
+<hr/>
+<blockquote>
+<p><strong>Key Concept: Standard Error and Precision</strong></p>
+<p>The <strong>standard error</strong> $SE(\bar{y}) = \sigma/\sqrt{n}$ measures the typical distance between a sample mean and the population mean. Key insights:</p>
+<ol>
+<li><strong>Decreases with sample size</strong>: Doubling the sample size reduces SE by factor of $\sqrt{2} \approx 1.41$</li>
+<li><strong>Trade-off</strong>: Larger samples cost more (time/money) but provide more precise estimates</li>
+<li><strong>Diminishing returns</strong>: Going from $n=25$ to $n=100$ reduces SE by half, but $n=100$ to $n=400$ also reduces by half</li>
+</ol>
+<p>In economic research, sample size is often limited by data availability, requiring careful attention to precision.</p>
+</blockquote>
+<hr/>
+<h4 id="Task-4:-Investigate-the-Effect-of-Sample-Size-(More-Independent)">Task 4: Investigate the Effect of Sample Size (More Independent)<a class="anchor-link" href="#Task-4:-Investigate-the-Effect-of-Sample-Size-(More-Independent)">¶</a></h4><p><strong>Objective:</strong> Compare sampling distributions for different sample sizes ($n = 10, 30, 50, 100$).</p>
+<p><strong>Instructions:</strong></p>
+<ol>
+<li>For each sample size, simulate 1000 samples and compute sample means</li>
+<li>Plot the four sampling distributions on the same graph (or use subplots)</li>
+<li>Compare the standard errors across sample sizes</li>
+<li>Verify that $SE$ decreases as $1/\sqrt{n}$</li>
+</ol>
+<p><strong>Key questions to answer:</strong></p>
+<ul>
+<li>How does the shape of the sampling distribution change with sample size?</li>
+<li>How much does precision improve when you quadruple the sample size (e.g., $n=25$ to $n=100$)?</li>
+<li>At what sample size does the distribution start to look clearly normal?</li>
+</ul>
+<hr/>
+<h4 id="Task-5:-Comparing-High-Income-vs-Developing-Countries-(Independent)">Task 5: Comparing High-Income vs Developing Countries (Independent)<a class="anchor-link" href="#Task-5:-Comparing-High-Income-vs-Developing-Countries-(Independent)">¶</a></h4><p><strong>Objective:</strong> Investigate whether sampling distributions differ for subpopulations (high-income vs developing countries).</p>
+<p><strong>Instructions:</strong></p>
+<ol>
+<li>Split the 2014 data by <code>hi1990</code> (high-income indicator)</li>
+<li>For each group, simulate the sampling distribution of the mean (use $n=20$, 1000 samples)</li>
+<li>Plot both sampling distributions on the same graph</li>
+<li>Compare means and standard errors between groups</li>
+</ol>
+<p><strong>Research question:</strong> Do high-income and developing countries have different average productivity levels? How confident can we be in this difference based on samples?</p>
+<p><strong>Hints:</strong></p>
+<ul>
+<li>Use <code>df.loc[(slice(None), 2014), ['lp', 'hi1990']].dropna()</code> to get both variables</li>
+<li>Filter by <code>hi1990 == 'yes'</code> and <code>hi1990 == 'no'</code></li>
+<li>Compare population means and sampling distribution characteristics</li>
+</ul>
+<hr/>
+<h4 id="Task-6:-Design-Your-Own-Sampling-Experiment-(Independent)">Task 6: Design Your Own Sampling Experiment (Independent)<a class="anchor-link" href="#Task-6:-Design-Your-Own-Sampling-Experiment-(Independent)">¶</a></h4><p><strong>Objective:</strong> Explore a question of your choice using sampling distributions.</p>
+<p><strong>Choose ONE of the following:</strong></p>
+<p><strong>Option A:</strong> Effect of outliers on sample means</p>
+<ul>
+<li>Remove the top 5% most productive countries (outliers)</li>
+<li>Compare sampling distributions with vs without outliers</li>
+<li>Question: How sensitive is the sample mean to extreme values?</li>
+</ul>
+<p><strong>Option B:</strong> Time trends in sampling distributions</p>
+<ul>
+<li>Compare sampling distributions for years 1990, 2000, 2010, 2014</li>
+<li>Question: Has average productivity increased over time? Has variability changed?</li>
+</ul>
+<p><strong>Option C:</strong> Regional sampling distributions</p>
+<ul>
+<li>Split countries by region (use <code>region</code> variable)</li>
+<li>Compare sampling distributions across regions</li>
+<li>Question: Which regions show the highest/lowest productivity? Most/least variability?</li>
+</ul>
+<p><strong>Your analysis should include:</strong></p>
+<ol>
+<li>Clear research question</li>
+<li>Appropriate sample size(s)</li>
+<li>Simulated sampling distribution(s) with visualizations</li>
+<li>Statistical summary (means, standard errors)</li>
+<li>Economic interpretation: What does this tell us about global productivity patterns?</li>
+</ol>
+<hr/>
+<h3 id="What-You've-Learned-from-This-Case-Study">What You've Learned from This Case Study<a class="anchor-link" href="#What-You've-Learned-from-This-Case-Study">¶</a></h3><p>Through this hands-on exploration of sampling distributions using cross-country productivity data, you've applied all Chapter 3 concepts:</p>
+<p>✅ <strong>Population vs sample</strong>: Understood the difference and why we use samples for inference</p>
+<p>✅ <strong>Sample mean</strong>: Computed point estimates from random samples</p>
+<p>✅ <strong>Sampling variability</strong>: Observed how sample means vary across different samples</p>
+<p>✅ <strong>Sampling distribution</strong>: Simulated and visualized the distribution of sample means</p>
+<p>✅ <strong>Central Limit Theorem</strong>: Verified that sample means are approximately normal even for skewed populations</p>
+<p>✅ <strong>Standard error</strong>: Quantified precision and understood how it decreases with sample size ($\sigma/\sqrt{n}$)</p>
+<p>✅ <strong>Effect of sample size</strong>: Compared sampling distributions for different $n$ values</p>
+<p>✅ <strong>Subpopulation analysis</strong>: Explored differences across country groups</p>
+<hr/>
+<p><strong>Connection to the Research:</strong> Understanding sampling distributions is fundamental to the convergence clubs analysis. When researchers estimate average productivity for a club, they're working with samples and must account for sampling variability. The tools you practiced here—computing sample means, quantifying precision, understanding the CLT—are essential for all statistical inference in economics.</p>
+<p><strong>Looking ahead:</strong></p>
+<ul>
+<li><strong>Chapter 4:</strong> Statistical inference (confidence intervals, hypothesis tests) builds directly on sampling distributions</li>
+<li><strong>Chapter 5-9:</strong> Regression analysis extends these concepts to relationships between variables</li>
+<li><strong>Chapter 10-17:</strong> Advanced methods for causal inference and panel data</li>
+</ul>
+<hr/>
+<p><strong>Congratulations!</strong> You've completed Chapter 3 and applied sampling theory to real cross-country data. Continue to Chapter 4 to learn how to use sampling distributions for statistical inference!</p>
+</div>
+</div>
+</div>
+</div>
 </main>
 </body>
 </html>
