@@ -133,11 +133,12 @@ def analyze_case_study(nb):
     for i, cell in enumerate(nb['cells']):
         if cell['cell_type'] == 'markdown':
             content = ''.join(cell['source'])
-            # Check for case study section header (singular or plural)
-            if re.search(r'##\s+\d+\.\d+\s+Case Stud(y|ies)', content, re.IGNORECASE):
+            # Check for case study section header (with or without section number)
+            # Matches: "## 5.12 Case Studies" OR "## Case Study: Title"
+            if re.search(r'##\s+(?:\d+\.\d+\s+)?Case Stud(?:y|ies)', content, re.IGNORECASE):
                 section_match = re.search(r'##\s+(\d+\.\d+)', content)
                 case_study['present'] = True
-                case_study['section_number'] = section_match.group(1) if section_match else 'Unknown'
+                case_study['section_number'] = section_match.group(1) if section_match else 'No section number'
                 case_study['start_cell'] = i
 
                 # Count tasks in remaining cells
@@ -172,28 +173,35 @@ def check_front_matter(nb):
     """Verify presence of standard front matter sections"""
     front_matter = {
         'title': False,
-        'learning_objectives': False,
-        'learning_objectives_count': 0,
         'chapter_overview': False,
+        'chapter_overview_has_learning_content': False,
+        'chapter_overview_has_datasets': False,
+        'chapter_overview_has_outline': False,
         'setup': False
     }
 
-    # Check first 5 cells for front matter
-    for i in range(min(5, len(nb['cells']))):
+    # Check first 6 cells for front matter
+    for i in range(min(6, len(nb['cells']))):
         if nb['cells'][i]['cell_type'] == 'markdown':
             content = ''.join(nb['cells'][i]['source'])
 
             if i == 0 and re.search(r'#\s+Chapter\s+\d+', content, re.IGNORECASE):
                 front_matter['title'] = True
 
-            if re.search(r'##\s+Learning Objectives', content, re.IGNORECASE):
-                front_matter['learning_objectives'] = True
-                # Count bullet points
-                bullets = re.findall(r'^\s*[-*]\s+', content, re.MULTILINE)
-                front_matter['learning_objectives_count'] = len(bullets)
-
             if re.search(r'##\s+Chapter Overview', content, re.IGNORECASE):
                 front_matter['chapter_overview'] = True
+
+                # Check for learning content ("What you'll learn", "By the end", etc.)
+                if re.search(r"What you'?ll learn|By the end of this chapter|learning objective", content, re.IGNORECASE):
+                    front_matter['chapter_overview_has_learning_content'] = True
+
+                # Check for datasets section
+                if re.search(r'dataset|data.*used', content, re.IGNORECASE):
+                    front_matter['chapter_overview_has_datasets'] = True
+
+                # Check for outline (section numbers like X.1, X.2)
+                if re.search(r'\d+\.\d+', content):
+                    front_matter['chapter_overview_has_outline'] = True
 
             if re.search(r'##\s+.*Setup', content, re.IGNORECASE) or '🔧' in content:
                 front_matter['setup'] = True
@@ -208,11 +216,13 @@ def check_closing_sections(nb):
         'practice_exercises': False,
         'practice_exercises_cell': None,
         'practice_exercises_count': 0,
-        'empty_closing_cell': False
+        'empty_closing_cell': False,
+        'case_studies_before_exercises': False  # NEW: track ordering issue
     }
 
-    # Check last 20 cells for closing sections
-    start_idx = max(0, len(nb['cells']) - 20)
+    # Check ALL cells for closing sections (not just last 20)
+    # These sections can appear before Case Studies in some chapters
+    start_idx = 0
 
     for i in range(start_idx, len(nb['cells'])):
         if nb['cells'][i]['cell_type'] == 'markdown':
@@ -361,14 +371,21 @@ def calculate_compliance_score(findings):
     """
     score = 100
 
-    # CRITICAL issues (-10 each, max -40)
+    # CRITICAL issues (-10 each, max -60)
     critical_deductions = 0
 
     if not findings['visual_summary']['present']:
         critical_deductions += 10
 
-    if not findings['front_matter']['learning_objectives']:
+    if not findings['front_matter']['chapter_overview']:
         critical_deductions += 10
+    elif not findings['front_matter']['chapter_overview_has_learning_content']:
+        critical_deductions += 10  # Chapter Overview must include learning content
+    elif not findings['front_matter']['chapter_overview_has_datasets'] or not findings['front_matter']['chapter_overview_has_outline']:
+        critical_deductions += 5  # Incomplete overview is MINOR, not CRITICAL
+
+    if not findings['case_study']['present']:
+        critical_deductions += 10  # Missing case study is CRITICAL
 
     if not findings['closing']['key_takeaways']:
         critical_deductions += 10
@@ -376,7 +393,7 @@ def calculate_compliance_score(findings):
     if not findings['closing']['practice_exercises']:
         critical_deductions += 10
 
-    score -= min(critical_deductions, 40)
+    score -= min(critical_deductions, 60)
 
     # MINOR issues (-5 each, max -25)
     minor_deductions = 0
@@ -403,6 +420,14 @@ def calculate_compliance_score(findings):
     if findings['transition_cells'] < 2:
         minor_deductions += 5
 
+    # Case Studies should come AFTER Practice Exercises
+    if findings['case_study']['present'] and findings['closing']['practice_exercises']:
+        case_study_cell = findings['case_study']['start_cell']
+        exercises_cell = findings['closing']['practice_exercises_cell']
+        if case_study_cell is not None and exercises_cell is not None:
+            if case_study_cell < exercises_cell:
+                minor_deductions += 5  # Wrong ordering
+
     score -= min(minor_deductions, 25)
 
     # SUGGESTIONS (-2 each, max -10)
@@ -415,10 +440,6 @@ def calculate_compliance_score(findings):
 
     # Empty closing cell missing
     if not findings['closing']['empty_closing_cell']:
-        suggestion_deductions += 2
-
-    # Learning Objectives count outside range
-    if findings['front_matter']['learning_objectives_count'] < 6 or findings['front_matter']['learning_objectives_count'] > 10:
         suggestion_deductions += 2
 
     # Practice Exercises count outside range
@@ -524,8 +545,16 @@ def generate_report(findings, output_format='markdown'):
         report.append(f"- **Case Study**: ✅ Present (Section {findings['case_study']['section_number']}, {findings['case_study']['tasks']} tasks)")
     else:
         report.append(f"- **Case Study**: ❌ Not found")
-    report.append(f"- **Learning Objectives**: {findings['front_matter']['learning_objectives_count']} bullets (target: 6-10)")
     report.append(f"- **Practice Exercises**: {findings['closing']['practice_exercises_count']} (target: 6-10)")
+
+    # Chapter Overview status
+    if findings['front_matter']['chapter_overview']:
+        overview_status = "✅ Present"
+        if not findings['front_matter']['chapter_overview_has_learning_content']:
+            overview_status += " (missing learning content)"
+        report.append(f"- **Chapter Overview**: {overview_status}")
+    else:
+        report.append(f"- **Chapter Overview**: ❌ Not found")
 
     return '\n'.join(report)
 
@@ -541,12 +570,43 @@ def collect_critical_issues(findings):
             'reference': 'See CH02 Cell 0 or TEMPLATE_REQUIREMENTS.md'
         })
 
-    if not findings['front_matter']['learning_objectives']:
+    if not findings['front_matter']['chapter_overview']:
         issues.append({
-            'title': 'Missing Learning Objectives section',
-            'description': 'No "## Learning Objectives" header found in first 5 cells',
-            'fix': 'Add Learning Objectives section with 6-10 action-oriented bullets',
-            'reference': 'See TEMPLATE_REQUIREMENTS.md'
+            'title': 'Missing Chapter Overview section',
+            'description': 'No "## Chapter Overview" header found',
+            'fix': 'Add Chapter Overview with: intro, learning content ("What you\'ll learn"), datasets used, chapter outline',
+            'reference': 'See CH01/CH02 Chapter Overview (CRITICAL - this is a required template component)'
+        })
+    elif not findings['front_matter']['chapter_overview_has_learning_content']:
+        issues.append({
+            'title': 'Chapter Overview missing learning content',
+            'description': 'Chapter Overview exists but does not include learning objectives/content',
+            'fix': 'Add "What you\'ll learn:" section with bullet points describing learning outcomes',
+            'reference': 'See CH01 Cell 2 or CH02 Cell 2 - both have "What you\'ll learn:" sections'
+        })
+    elif not findings['front_matter']['chapter_overview_has_datasets']:
+        issues.append({
+            'title': 'Chapter Overview missing datasets description',
+            'description': 'Chapter Overview exists but does not list datasets used',
+            'fix': 'Add "Datasets used:" section with dataset descriptions',
+            'reference': 'See CH01/CH02 Chapter Overview'
+        })
+    elif not findings['front_matter']['chapter_overview_has_outline']:
+        issues.append({
+            'title': 'Chapter Overview missing chapter outline',
+            'description': 'Chapter Overview exists but does not list chapter sections',
+            'fix': 'Add "Chapter outline:" listing all sections (X.1, X.2, etc.)',
+            'reference': 'See CH01/CH02 Chapter Overview'
+        })
+
+    if not findings['case_study']['present']:
+        # Check if this is an intentional exception (like CH03 - theoretical chapter)
+        # For now, flag as CRITICAL - user can document exceptions
+        issues.append({
+            'title': 'Missing Case Study section',
+            'description': 'No "## X.Y Case Studies" section found',
+            'fix': 'Add Case Study section with: research intro, 6 progressive tasks, wrap-up',
+            'reference': 'See CH02 Section 2.8 or MASTER_TEMPLATE_CHAPTER_STRUCTURE.md (If intentional, document exception)'
         })
 
     if not findings['closing']['key_takeaways']:
@@ -554,7 +614,7 @@ def collect_critical_issues(findings):
             'title': 'Missing Key Takeaways section',
             'description': 'No "## Key Takeaways" header found',
             'fix': 'Add Key Takeaways section with 5-7 thematic groups',
-            'reference': 'See CH02 Cell 57'
+            'reference': 'See CH02 Key Takeaways or TEMPLATE_REQUIREMENTS.md'
         })
 
     if not findings['closing']['practice_exercises']:
@@ -562,7 +622,7 @@ def collect_critical_issues(findings):
             'title': 'Missing Practice Exercises section',
             'description': 'No "## Practice Exercises" header found',
             'fix': 'Add Practice Exercises section with 6-10 exercises',
-            'reference': 'See CH02 Cell 58'
+            'reference': 'See CH02 Practice Exercises or TEMPLATE_REQUIREMENTS.md'
         })
 
     return issues
@@ -625,6 +685,19 @@ def collect_minor_issues(findings):
             'fix': 'Add transition notes between major section groups'
         })
 
+    # Case Studies should come AFTER Practice Exercises
+    if findings['case_study']['present'] and findings['closing']['practice_exercises']:
+        case_study_cell = findings['case_study']['start_cell']
+        exercises_cell = findings['closing']['practice_exercises_cell']
+        if case_study_cell is not None and exercises_cell is not None:
+            if case_study_cell < exercises_cell:
+                issues.append({
+                    'title': f'Case Studies section comes BEFORE Practice Exercises',
+                    'description': f'Case Studies at Cell {case_study_cell}, Practice Exercises at Cell {exercises_cell}',
+                    'fix': 'Move Case Studies section to AFTER Practice Exercises (correct order: Key Takeaways → Practice Exercises → Case Studies)',
+                    'reference': 'See CH01/CH02 structure: Case Studies is the last major section'
+                })
+
     # Case study task count
     if findings['case_study']['present'] and findings['case_study']['tasks'] != 6:
         issues.append({
@@ -667,19 +740,6 @@ def collect_suggestions(findings):
         suggestions.append({
             'title': 'No empty closing cell',
             'description': 'Add empty markdown cell at end for visual spacing'
-        })
-
-    # Learning Objectives count
-    lo_count = findings['front_matter']['learning_objectives_count']
-    if lo_count < 6:
-        suggestions.append({
-            'title': f'Learning Objectives count low: {lo_count} (target: 6-10)',
-            'description': 'Consider adding more learning objectives'
-        })
-    elif lo_count > 10:
-        suggestions.append({
-            'title': f'Learning Objectives count high: {lo_count} (target: 6-10)',
-            'description': 'Consider consolidating learning objectives'
         })
 
     # Practice Exercises count
