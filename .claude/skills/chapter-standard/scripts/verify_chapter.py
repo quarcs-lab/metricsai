@@ -389,7 +389,9 @@ def calculate_compliance_score(findings):
         critical_deductions += 5  # Incomplete overview is MINOR, not CRITICAL
 
     if not findings['case_study']['present']:
-        critical_deductions += 10  # Missing case study is CRITICAL
+        css = findings.get('case_study_structure', {})
+        if not (css.get('structure_type') == 'integrated' and css.get('documented')):
+            critical_deductions += 10  # Missing case study is CRITICAL
 
     if not findings['closing']['key_takeaways']:
         critical_deductions += 10
