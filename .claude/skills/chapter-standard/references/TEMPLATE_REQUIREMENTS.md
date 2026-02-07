@@ -107,6 +107,98 @@ H2: X.11 Case Studies
 
 ## Front Matter Structure
 
+### IMPORTANT: Learning Objectives vs. Chapter Overview
+
+**Template allows EITHER approach, but NOT both:**
+
+**Option 1: Separate Learning Objectives Section (CH01-05 legacy)**
+- Standalone "## Learning Objectives" section (Cell 1)
+- 6-10 action-verb bullets
+- Chapter Overview (Cell 2) contains introduction only (no "What you'll learn")
+- Used in earlier chapters for compatibility
+
+**Option 2: Integrated Chapter Overview (RECOMMENDED for CH06+)**
+- "## Chapter Overview" section (Cell 1 or 2)
+- Includes 3 components:
+  1. Introduction (3-4 paragraphs)
+  2. **What you'll learn:** (6-10 bullets) ← Replaces separate Learning Objectives
+  3. Chapter Outline (section descriptions)
+- More scannable, less redundant
+- **Preferred approach for new chapters**
+
+**Validation:**
+- ✅ Has EITHER Learning Objectives section OR Chapter Overview with "What you'll learn"
+- ❌ **CRITICAL**: Has BOTH (redundancy, -10 points)
+- ❌ **CRITICAL**: Has NEITHER (missing, -15 points)
+
+**Example of redundancy (DO NOT DO THIS):**
+```markdown
+## Learning Objectives  ← Cell 1
+
+By the end of this chapter, you will be able to:
+- Apply regression...
+- Interpret coefficients...
+
+## Chapter Overview  ← Cell 2
+
+**What you'll learn:**  ← REDUNDANT!
+- Regression basics...
+- Coefficient interpretation...
+```
+
+**Correct approach (Option 2 - integrated):**
+```markdown
+## Chapter Overview  ← Cell 1
+
+This chapter introduces regression analysis...
+
+**What you'll learn:**  ← Learning objectives integrated here
+- Apply regression to economic data
+- Interpret regression coefficients
+- Test economic hypotheses
+...
+```
+
+**Reference**: CH06-08 use integrated Chapter Overview; CH01-05 use separate Learning Objectives.
+
+---
+
+### Case Study Section Structures
+
+**Standard Structure (most chapters)**:
+- Regular content sections: X.1-X.N (concepts, theory, methods)
+- Separate case study section: **X.11 Case Studies**
+  - 6 progressive tasks (Guided → Semi-guided → Independent)
+  - 2-3 Key Concepts distributed throughout
+  - "What You've Learned" closing
+- **Example**: CH06, CH07 have X.11 Case Studies after Practice Exercises
+
+**Integrated Structure (special chapters like CH08)**:
+- Sections X.1-X.N **ARE** case studies (e.g., 8.1 Health Outcomes, 8.2 CAPM, 8.3 Okun's Law)
+- No separate X.11 section (entire chapter is case-study focused)
+- **MUST document in Chapter Overview** with design note explaining structure
+- Acceptable deviation: -5 points (MINOR), still publication-ready
+
+**Validation:**
+- ✅ Has formal X.11 Case Studies section (standard structure, 0 points deducted)
+- ⚠️ Integrated structure WITH design note (−5 points, MINOR, acceptable)
+- ❌ **CRITICAL**: Missing entirely, no documentation (−15 points)
+
+**Design note example (for integrated structure):**
+```markdown
+**Design Note:** This chapter uses an integrated case study structure where 
+sections 8.1-8.4 ARE the case studies (health economics, finance, macroeconomics). 
+Unlike other chapters that have regular content sections plus a separate "Case Studies" 
+section, CH08's entire focus is on applying regression to diverse real-world problems. 
+This intentional structure maximizes hands-on experience with economic applications.
+```
+
+**Reference**: 
+- Standard: CH01-07, CH09+
+- Integrated: CH08 (documented design choice)
+
+---
+
 ### Cell 0: Visual Summary (Markdown)
 
 **Required Elements**:

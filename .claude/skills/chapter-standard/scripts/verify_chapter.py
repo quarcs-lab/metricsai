@@ -285,6 +285,8 @@ def check_interpretation_placement(nb):
         List of potential misplacements with cell numbers, section context, and preview
     """
     issues = []
+
+
     current_section = None
     section_start_cell = None
 
@@ -334,6 +336,8 @@ def check_header_hierarchy(nb):
     Ensures no skipped levels and Case Studies use proper structure.
     """
     issues = []
+
+
     prev_level = 0
 
     for i, cell in enumerate(nb['cells']):
@@ -419,6 +423,8 @@ def calculate_compliance_score(findings):
     # Missing transition notes
     if findings['transition_cells'] < 2:
         minor_deductions += 5
+
+    
 
     # Case Studies should come AFTER Practice Exercises
     if findings['case_study']['present'] and findings['closing']['practice_exercises']:
@@ -560,7 +566,20 @@ def generate_report(findings, output_format='markdown'):
 
 def collect_critical_issues(findings):
     """Collect all CRITICAL issues from findings"""
+
     issues = []
+
+    # Learning Objectives redundancy (CRITICAL)
+    if findings.get('learning_obj_redundancy', {}).get('has_redundancy'):
+        lr = findings['learning_obj_redundancy']
+        issues.append({
+            'title': 'Redundant Learning Objectives section detected',
+            'description': f"Cell {lr['learning_obj_cell']} has separate Learning Objectives section, but Cell {lr['chapter_overview_cell']} Chapter Overview already contains 'What you\'ll learn' bullets",
+            'fix': 'Remove the standalone Learning Objectives section (template allows EITHER separate Learning Objectives OR integrated in Chapter Overview, NOT both)',
+            'reference': 'CH06 standardization removed redundant Learning Objectives'
+        })
+
+
 
     if not findings['visual_summary']['present']:
         issues.append({
@@ -598,16 +617,20 @@ def collect_critical_issues(findings):
             'fix': 'Add "Chapter outline:" listing all sections (X.1, X.2, etc.)',
             'reference': 'See CH01/CH02 Chapter Overview'
         })
-
+    # Check case study - but skip if integrated structure is documented
+    css = findings.get('case_study_structure', {})
     if not findings['case_study']['present']:
-        # Check if this is an intentional exception (like CH03 - theoretical chapter)
-        # For now, flag as CRITICAL - user can document exceptions
-        issues.append({
-            'title': 'Missing Case Study section',
-            'description': 'No "## X.Y Case Studies" section found',
-            'fix': 'Add Case Study section with: research intro, 6 progressive tasks, wrap-up',
-            'reference': 'See CH02 Section 2.8 or MASTER_TEMPLATE_CHAPTER_STRUCTURE.md (If intentional, document exception)'
-        })
+        # Skip CRITICAL error if this is a documented integrated case study structure
+        if css.get('structure_type') == 'integrated' and css.get('documented'):
+            # This is handled in MINOR issues as INFO
+            pass
+        else:
+            issues.append({
+                'title': 'Missing Case Study section',
+                'description': 'No "## X.Y Case Studies" section found',
+                'fix': 'Add Case Study section with: research intro, 6 progressive tasks, wrap-up (or document integrated structure in Chapter Overview)',
+                'reference': 'See CH02 Section 2.8 or MASTER_TEMPLATE_CHAPTER_STRUCTURE.md (If intentional, document exception)'
+            })
 
     if not findings['closing']['key_takeaways']:
         issues.append({
@@ -630,6 +653,33 @@ def collect_critical_issues(findings):
 def collect_minor_issues(findings):
     """Collect all MINOR issues from findings"""
     issues = []
+
+    # Case study structure (integrated vs standard) - MINOR
+    if findings.get('case_study_structure'):
+        css = findings['case_study_structure']
+        if css['structure_type'] == 'integrated' and not css['has_case_study_section']:
+            if css['documented']:
+                # Documented integrated structure - add as INFO
+                issues.append({
+                    'title': f'Integrated case study structure detected (documented)',
+                    'description': f'Sections are case studies (early section count: {css["early_section_count"]}). Design note documents this intentional deviation.',
+                    'fix': 'No action needed - documented design choice',
+                    'severity': 'INFO'
+                })
+            else:
+                # Integrated but not documented - MINOR
+                issues.append({
+                    'title': f'Integrated case study structure (not documented)',
+                    'description': f'Sections appear to be case studies (early section count: {css["early_section_count"]}), but no formal X.11 section and no design note explaining structure',
+                    'fix': 'Add design note to Chapter Overview explaining intentional integrated case study structure',
+                    'reference': 'CH08 uses documented integrated structure where sections 8.1-8.4 ARE the case studies'
+                })
+        elif not css['has_case_study_section'] and css['structure_type'] == 'unknown':
+            # Missing case studies entirely - keep as existing CRITICAL issue
+            pass
+
+    
+
 
     # Section numbering gaps
     if findings['section_gaps']:
@@ -773,6 +823,106 @@ def identify_auto_fixable(findings):
 
     return fixable
 
+
+def check_learning_objectives_redundancy(nb):
+    """
+    Detect if both Learning Objectives section AND Chapter Overview
+    with 'What you'll learn' exist (redundancy).
+
+    Template allows EITHER:
+    - Separate Learning Objectives section, OR
+    - Chapter Overview with integrated "What you'll learn" bullets
+
+    But NOT both.
+
+    Returns:
+        dict with 'has_redundancy', 'has_learning_objectives', 'has_chapter_overview_with_learning'
+    """
+    has_learning_objectives = False
+    has_chapter_overview_with_learning = False
+    learning_obj_cell = None
+    chapter_overview_cell = None
+
+    for i, cell in enumerate(nb['cells']):
+        if cell['cell_type'] == 'markdown':
+            source = ''.join(cell['source'])
+
+            # Check for standalone Learning Objectives section
+            if re.search(r'^##\s+Learning Objectives', source, re.MULTILINE):
+                has_learning_objectives = True
+                learning_obj_cell = i
+
+            # Check for Chapter Overview with "What you'll learn"
+            if re.search(r'^##\s+Chapter Overview', source, re.MULTILINE):
+                if "what you'll learn" in source.lower() or "what you will learn" in source.lower():
+                    has_chapter_overview_with_learning = True
+                    chapter_overview_cell = i
+
+    has_redundancy = has_learning_objectives and has_chapter_overview_with_learning
+
+    return {
+        'has_redundancy': has_redundancy,
+        'has_learning_objectives': has_learning_objectives,
+        'has_chapter_overview_with_learning': has_chapter_overview_with_learning,
+        'learning_obj_cell': learning_obj_cell,
+        'chapter_overview_cell': chapter_overview_cell
+    }
+
+def check_case_study_structure(nb, chapter_num):
+    """
+    Detect if chapter uses integrated case study structure
+    (like CH08) vs. standard structure with separate X.11 section.
+
+    Integrated structure: Sections X.1-X.N are themselves case studies
+    Standard structure: X.1-X.N content + X.11 Case Studies
+
+    Args:
+        nb: Notebook JSON
+        chapter_num: Chapter number (e.g., 8 for ch08)
+
+    Returns:
+        dict with 'structure_type', 'has_case_study_section', 'early_section_count', 'documented'
+    """
+    sections = []
+    has_design_note = False
+
+    for i, cell in enumerate(nb['cells']):
+        if cell['cell_type'] == 'markdown':
+            source = ''.join(cell['source'])
+
+            # Find all section headers (e.g., "## 8.1", "## 8.2")
+            matches = re.findall(rf'^##\s+{chapter_num}\.(\d+)', source, re.MULTILINE)
+            sections.extend(matches)
+
+            # Check for design note documenting integrated structure
+            if 'design note' in source.lower() and 'integrated case study' in source.lower():
+                has_design_note = True
+
+    # Check if has formal X.11 (or X.10-X.20) Case Studies section
+    has_case_study_section = any(
+        int(s) >= 10 for s in sections if s.isdigit()
+    )
+
+    # Check if sections 1-4 suggest integrated case studies
+    early_sections = [s for s in sections if s.isdigit() and int(s) <= 4]
+    integrated_case_studies = len(early_sections) >= 3
+
+    # Determine structure type
+    if has_case_study_section:
+        structure_type = 'standard'
+    elif integrated_case_studies:
+        structure_type = 'integrated'
+    else:
+        structure_type = 'unknown'
+
+    return {
+        'structure_type': structure_type,
+        'has_case_study_section': has_case_study_section,
+        'early_section_count': len(early_sections),
+        'documented': has_design_note,
+        'all_sections': sections
+    }
+
 def analyze_chapter(chapter_prefix):
     """
     Perform comprehensive analysis of a single chapter.
@@ -801,6 +951,8 @@ def analyze_chapter(chapter_prefix):
         'section_gaps': None,  # Computed below
         'key_concepts': count_key_concepts(nb),
         'case_study': analyze_case_study(nb),
+        'learning_obj_redundancy': check_learning_objectives_redundancy(nb),
+        'case_study_structure': check_case_study_structure(nb, int(chapter_prefix[2:])),
         'closing': check_closing_sections(nb),
         'transition_cells': count_transition_cells(nb),
         'header_hierarchy': check_header_hierarchy(nb),

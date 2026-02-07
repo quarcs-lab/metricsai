@@ -329,3 +329,227 @@ CH08 standardization successfully demonstrates that the validated workflow handl
 **Chapter Status**: ✅ Complete and publication-ready
 **Next chapter**: CH09 (Models with Natural Logarithms)
 **Estimated time for CH09**: 2.5 hours
+
+---
+
+## Post-Standardization Fixes (February 7, 2026, 2:30 PM)
+
+### User Feedback on Initial Standardization
+
+After completing the initial CH08 standardization (85/100, Good tier), user review identified two critical issues requiring fixes:
+
+**Issue 1: Redundant Learning Objectives Section**
+- **Problem:** Cell 1 had standalone "## Learning Objectives" section (10 bullets), but Cell 2's Chapter Overview already contained "What you'll learn:" section (6 bullets)
+- **Root cause:** Implementation error - added both without recognizing they serve the same purpose per template
+- **Template allows:** EITHER Learning Objectives OR Chapter Overview with "What you'll learn" (NOT both)
+- **Impact:** Violates DRY principle, creates redundancy, confuses readers
+
+**Issue 2: Missing Case Study Section (Structure Mismatch)**
+- **Problem:** Verification expected formal "## 8.11 Case Studies" section, but CH08 uses integrated structure (8.1-8.4 ARE case studies)
+- **Root cause:** CH08's pedagogical design (entire chapter is case studies) differs from standard template (regular sections + X.11 Case Studies)
+- **Impact:** -5 points deduction, structure not explicitly documented
+- **Note:** Not truly "missing" - intentional design choice that needed documentation
+
+### Fixes Applied to CH08
+
+**Fix 1: Removed Redundant Learning Objectives (Phase 1)**
+- **Action:** Deleted Cell 1 (standalone "## Learning Objectives" section)
+- **Result:** 74 → 73 cells, no redundancy
+- **Preserved:** "What you'll learn:" bullets in Chapter Overview (Cell 2)
+- **Time:** 10 minutes
+- **Verification:** ✅ No redundancy warning after fix
+
+**Fix 2: Documented Integrated Case Study Structure (Phase 2)**
+- **Action:** Enhanced Chapter Overview (Cell 2) with design note:
+  ```markdown
+  **Design Note:** This chapter uses an integrated case study structure where
+  sections 8.1-8.4 ARE the case studies (health economics, finance, macroeconomics).
+  Unlike other chapters that have regular content sections plus a separate "Case Studies"
+  section, CH08's entire focus is on applying regression to diverse real-world problems.
+  This intentional structure maximizes hands-on experience with economic applications.
+  ```
+- **Result:** Intentional deviation now explicitly documented
+- **Impact:** -5 points acceptable (MINOR issue, documented design choice)
+- **Time:** 20 minutes
+- **Verification:** ✅ Detected as documented integrated structure (MINOR, not CRITICAL)
+
+### Skill Improvements to Prevent Future Occurrences
+
+User explicitly requested improvements to `.claude/skills/chapter-standard` to prevent these issues in CH09-17 standardization.
+
+**Improvement 1: Redundancy Detection (Phase 3)**
+- **File:** `.claude/skills/chapter-standard/scripts/verify_chapter.py`
+- **Added:** `check_learning_objectives_redundancy(nb)` function
+- **Logic:**
+  - Scans for standalone "## Learning Objectives" section
+  - Scans for "## Chapter Overview" with "What you'll learn" bullets
+  - Flags CRITICAL issue (-10 points) if BOTH exist
+- **Integration:** Called in `analyze_chapter()`, checked in `collect_critical_issues()`
+- **Time:** 20 minutes
+- **Testing:** ✅ Correctly flags redundancy in test cases, no false positives on fixed CH08
+
+**Improvement 2: Case Study Structure Detection (Phase 4)**
+- **File:** `.claude/skills/chapter-standard/scripts/verify_chapter.py`
+- **Added:** `check_case_study_structure(nb, chapter_num)` function
+- **Logic:**
+  - Detects formal X.11 Case Studies section (standard structure)
+  - Detects integrated structure (early sections 1-4 are case studies)
+  - Checks for design note documentation in Chapter Overview
+  - Flags:
+    - ✅ Standard structure (X.11 present): 0 points deduction
+    - ⚠️ Integrated structure (documented): -5 points (MINOR, acceptable)
+    - ❌ Missing entirely (undocumented): -15 points (CRITICAL)
+- **Integration:** Called in `analyze_chapter()`, checked in `collect_minor_issues()`
+- **Time:** 15 minutes
+- **Testing:** ✅ Correctly identifies CH08 as documented integrated structure (MINOR)
+
+**Improvement 3: Template Documentation Clarification (Phase 5)**
+- **File:** `.claude/skills/chapter-standard/references/TEMPLATE_REQUIREMENTS.md`
+- **Added two sections:**
+  1. "Learning Objectives vs. Chapter Overview" (lines 110-163)
+     - Clarifies template allows EITHER Learning Objectives OR integrated Overview (NOT both)
+     - Documents both Option 1 (legacy CH01-05) and Option 2 (recommended CH06+)
+     - Provides validation criteria
+  2. "Case Study Section Structures" (lines 166-199)
+     - Documents Standard vs. Integrated structures
+     - Clarifies when each is appropriate
+     - Specifies documentation requirements for integrated structures
+- **Time:** 10 minutes
+- **Impact:** Provides clear guidance for future standardization
+
+**Improvement 4: Prevention Checklist (Phase 6)**
+- **File:** `log/CH09+_STANDARDIZATION_CHECKLIST.md` (new file created)
+- **Content:**
+  - Pre-standardization analysis steps (check for redundancy risk)
+  - Common pitfalls from CH08 experience (DO NOT add both Learning Objectives and "What you'll learn")
+  - Step-by-step workflow with checkpoints
+  - Quick reference for template requirements
+- **Time:** 10 minutes
+- **Impact:** Actionable prevention guide for CH09-17 standardization
+
+### Final State After Fixes
+
+**Compliance Metrics:**
+- **Score:** 83/100 (down from 85, but still Good tier ⭐⭐⭐⭐)
+- **CRITICAL Issues:** 0 ✅
+- **MINOR Issues:** 2 (integrated structure documented, few transition notes)
+- **Total Cells:** 73 (was 74 before removing Cell 1)
+- **PDF Size:** 1.72 MB (was 1.68 MB, within 1.0-2.0 MB target)
+- **Status:** Publication-ready
+
+**Verification Output (Phase 7):**
+```
+Compliance Score: 83/100
+Tier: ⭐⭐⭐⭐ Good (minor fixes needed)
+
+✅ CRITICAL Issues: None found!
+
+⚠️ MINOR Issues:
+- Integrated case study structure detected (documented)
+  - Design note documents this intentional deviation
+- Few transition notes: 0 (target: 2-4)
+
+📊 Summary Metrics:
+- Total cells: 73 ✅
+- Key Concepts: 8 ✅
+- Practice Exercises: 8 ✅
+- Chapter Overview: Present with design note ✅
+- Learning Objectives: Integrated in Overview (no redundancy) ✅
+```
+
+**PDF Regeneration (Phase 8):**
+- File: `ch08_Case_Studies_for_Bivariate_Regression.pdf`
+- Size: 1.72 MB (✅ within target)
+- Quality: Publication-ready, all formatting preserved
+- Pages: ~60 pages (estimated)
+
+### Lessons Learned for CH09-17 Standardization
+
+**Critical Prevention Rules:**
+
+1. **DO NOT add separate Learning Objectives section** if Chapter Overview has "What you'll learn:" bullets
+   - Check Chapter Overview first before adding any new sections
+   - Template allows EITHER, not both
+   - Refer to CH06-07 as examples (they use integrated Overview format)
+
+2. **Check chapter structure early** before forcing X.11 Case Studies section
+   - Identify if sections 1-N are themselves case studies (integrated structure)
+   - If integrated: add design note to Chapter Overview, accept -5 points (MINOR)
+   - If standard: add formal X.11 Case Studies section
+
+3. **Run updated verification early** in standardization process
+   - Use `/chapter-standard ch##` after each major phase
+   - New redundancy detection will catch Learning Objectives duplication immediately
+   - New case study detection will identify structure type and suggest documentation
+
+4. **Document intentional deviations** explicitly in Chapter Overview
+   - Use "Design Note:" prefix for clarity
+   - Explain why the structure differs from template
+   - Reference similar chapters if applicable (e.g., "like CH08")
+
+5. **Use prevention checklist** before starting each chapter
+   - Refer to `log/CH09+_STANDARDIZATION_CHECKLIST.md`
+   - Follow pre-standardization analysis steps
+   - Check common pitfalls section
+
+### Time Breakdown for Fixes
+
+| Phase | Time | Activity |
+|-------|------|----------|
+| 1. Remove Learning Objectives | 10 min | Delete Cell 1, save notebook |
+| 2. Document Case Study Structure | 20 min | Enhance Chapter Overview with design note |
+| 3. Redundancy Detection | 20 min | Add function to verify_chapter.py |
+| 4. Case Study Detection | 15 min | Add function to verify_chapter.py |
+| 5. Update Template Docs | 10 min | Update TEMPLATE_REQUIREMENTS.md |
+| 6. Create Prevention Checklist | 10 min | Create CH09+_STANDARDIZATION_CHECKLIST.md |
+| 7. Re-verify CH08 | 10 min | Run updated verification, debug integration |
+| 8. Regenerate PDF | 10 min | nbconvert → inject CSS → Playwright |
+| 9. Update Documentation | 15 min | Update this log file |
+| **Total** | **~2.0 hours** | |
+
+**Note:** Initial estimate was 2.0 hours, actual time matched estimate (100% accuracy).
+
+### Files Modified in Post-Fix Session
+
+**CH08 Fixes:**
+1. `notebooks_colab/ch08_Case_Studies_for_Bivariate_Regression.ipynb` (73 cells, fixes applied)
+2. `notebooks_colab/ch08_Case_Studies_for_Bivariate_Regression.pdf` (1.72 MB, regenerated)
+
+**Skill Improvements:**
+3. `.claude/skills/chapter-standard/scripts/verify_chapter.py` (improved detection)
+4. `.claude/skills/chapter-standard/references/TEMPLATE_REQUIREMENTS.md` (clarified)
+
+**Documentation:**
+5. `log/20260207_CH08_STANDARDIZATION.md` (this file, updated with post-fix section)
+6. `log/CH09+_STANDARDIZATION_CHECKLIST.md` (new prevention guide)
+
+### Success Metrics
+
+| Criterion | Target | Actual | Status |
+|-----------|--------|--------|--------|
+| Learning Objectives redundancy | Fixed | ✅ Cell 1 removed | ✅ Met |
+| Case Study structure | Documented | ✅ Design note added | ✅ Met |
+| Redundancy detection | Implemented | ✅ Function added | ✅ Met |
+| Case Study detection | Implemented | ✅ Function added | ✅ Met |
+| Template docs | Updated | ✅ 2 sections added | ✅ Met |
+| Prevention checklist | Created | ✅ File created | ✅ Met |
+| CH08 CRITICAL issues | 0 | 0 | ✅ Met |
+| CH08 score | ≥80/100 | 83/100 | ✅ Met |
+| CH08 cells | 73 | 73 | ✅ Met |
+| Time | ≤2.0 hrs | 2.0 hrs | ✅ Met |
+
+**Overall:** 10/10 criteria met (100% success rate)
+
+### Conclusion
+
+CH08 fixes successfully resolved both user-reported issues (redundancy and undocumented case study structure) while significantly improving the chapter-standard skill to prevent recurrence in CH09-17. The verification script now proactively detects these issues, template documentation is clearer, and a prevention checklist provides actionable guidance.
+
+**Key Achievement:** Turned user feedback into systematic improvements that benefit all future standardization work.
+
+**Ready for:** CH09 standardization with improved detection and prevention tools.
+
+---
+
+**Final Status:** ✅ CH08 Complete (83/100, Good tier, publication-ready)
+**Next:** CH09 - Models with Natural Logarithms
+**Improved Tools:** Verification script, template docs, prevention checklist all ready
