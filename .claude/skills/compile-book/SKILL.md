@@ -1,6 +1,6 @@
 ---
 name: compile-book
-description: Compiles all chapter PDFs into a single metricsAI book PDF. Detects modified chapters, regenerates their PDFs, then merges all chapters with cover page, Brief Contents, Detailed Contents, clickable TOC hyperlinks, page numbers, and section-level PDF bookmarks. Use after editing any chapter notebook.
+description: Compiles all chapter PDFs into a single metricsAI book PDF. Detects modified chapters, regenerates their PDFs, then merges all chapters with cover page, Brief Contents, Detailed Contents, Key Concepts TOC, clickable TOC hyperlinks, page numbers, and section-level PDF bookmarks. Use after editing any chapter notebook.
 argument-hint: [chapter-numbers...] [--compile-only] [--check] [--all]
 context: fork
 agent: Explore
@@ -12,7 +12,7 @@ Automates the end-to-end pipeline for compiling the metricsAI textbook: detects 
 
 ## Overview
 
-This skill manages the complete book compilation workflow. It detects which chapter notebooks have been modified since their last PDF generation, regenerates only those PDFs, then compiles everything into a single book with cover page, two tables of contents, page numbers, and hierarchical PDF bookmarks.
+This skill manages the complete book compilation workflow. It detects which chapter notebooks have been modified since their last PDF generation, regenerates only those PDFs, then compiles everything into a single book with cover page, three tables of contents (Brief Contents, Detailed Contents, Key Concepts), page numbers, and hierarchical PDF bookmarks.
 
 **Use this skill when:**
 - After editing any chapter notebook
@@ -23,11 +23,12 @@ This skill manages the complete book compilation workflow. It detects which chap
 **Key Features:**
 - Automatic detection of modified chapters (notebook mtime vs PDF mtime)
 - 3-step PDF regeneration pipeline (nbconvert, CSS injection, Playwright)
-- Book compilation with cover, Brief Contents, Detailed Contents
+- Book compilation with cover, Brief Contents, Detailed Contents, Key Concepts TOC
+- 165 numbered Key Concepts with short titles across 17 chapters
 - Page numbers on all content pages
 - Section-level PDF bookmarks (Preface > Parts > Chapters > Sections)
-- Clickable TOC hyperlinks (~324 links jump to chapters/sections from both TOC pages)
-- 803 pages, ~56 MB output
+- Clickable TOC hyperlinks (~870 links jump to chapters/sections/key concepts from all TOC pages)
+- 811 pages, ~57 MB output
 
 ---
 
@@ -150,7 +151,8 @@ python3 scripts/compile_book.py
 This produces `notebooks_colab/metricsAI_complete_book.pdf` with:
 - Cover page (navy blue background, `images/book1cover.jpg`)
 - Brief Contents (1 page, chapters grouped by Parts, clickable hyperlinks)
-- Detailed Contents (3-4 pages, all sections with page numbers, clickable hyperlinks)
+- Detailed Contents (4 pages, all sections with page numbers, clickable hyperlinks)
+- Key Concepts (4 pages, 165 concepts with page numbers, clickable hyperlinks)
 - All 18 chapters merged with page numbers
 - PDF bookmarks: Preface > Part I-IV > Chapters 1-17 > Sections
 - Clickable TOC hyperlinks: ~324 links on both TOC pages jump directly to chapters/sections
@@ -164,11 +166,12 @@ Display compilation summary:
 
 | Metric | Value |
 |--------|-------|
-| Total pages | 803 |
-| File size | 56.4 MB |
+| Total pages | 811 |
+| File size | 57.3 MB |
 | Chapters | 18 (CH00-CH17) |
+| Key concepts | 165 |
 | Sections in bookmarks | 110 |
-| Clickable TOC links | ~324 |
+| Clickable TOC links | ~870 |
 | Chapters regenerated | 2 |
 | Output | notebooks_colab/metricsAI_complete_book.pdf |
 ```
@@ -187,6 +190,7 @@ open notebooks_colab/metricsAI_complete_book.pdf
 - **Cover page**: Full-bleed image with navy blue background
 - **Brief Contents**: Chapter-level TOC grouped by Parts (no Preface), with clickable hyperlinks
 - **Detailed Contents**: Preface sections + all chapter sections with page numbers, with clickable hyperlinks
+- **Key Concepts**: 165 numbered Key Concepts (X.N format) with short titles, grouped by Parts and Chapters, with clickable hyperlinks
 
 ### Content (numbered from page 1)
 - **CH00**: Preface (15 pages)
@@ -204,9 +208,10 @@ Hierarchical navigation sidebar in PDF readers:
 - Part IV > Ch14 (3), Ch15 (4), Ch16 (5), Ch17 (6)
 
 ### Clickable TOC Hyperlinks
-Both TOC pages include clickable hyperlinks (~324 total) that jump directly to the target chapter or section page:
-- **Brief Contents**: Each chapter title and page number is a clickable link
-- **Detailed Contents**: Each Preface section, chapter title, section title, and page number is a clickable link
+All three TOC pages include clickable hyperlinks (~870 total) that jump directly to the target page:
+- **Brief Contents**: Each chapter title and page number is a clickable link (~51 links)
+- **Detailed Contents**: Each Preface section, chapter title, section title, and page number is a clickable link (~273 links)
+- **Key Concepts**: Each Key Concept number, title, and page number is a clickable link (~546 links)
 - Links are styled invisibly (no blue underlines) to preserve the professional TOC appearance
 - Links are automatically generated during compilation using a 3-phase approach:
   1. Placeholder URLs are embedded in TOC HTML (`https://internal.metricsai/page/{N}`)
@@ -314,4 +319,4 @@ jupyter nbconvert --version
 
 ---
 
-*Version: 1.1 | Updated: 2026-02-08 | Author: metricsAI project*
+*Version: 1.2 | Updated: 2026-02-08 | Author: metricsAI project*

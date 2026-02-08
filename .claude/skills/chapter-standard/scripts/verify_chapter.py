@@ -107,8 +107,8 @@ def count_key_concepts(nb):
             content = ''.join(cell['source'])
             # Look for Key Concept boxes (blockquote format)
             if re.search(r'>\s*\*\*Key Concept', content, re.IGNORECASE):
-                # Extract topic (first line after "Key Concept:")
-                topic_match = re.search(r'Key Concept:?\*?\*?\s*(.+)', content, re.IGNORECASE)
+                # Extract topic (handles both "Key Concept: Title" and "Key Concept X.N: Title")
+                topic_match = re.search(r'Key Concept(?:\s+\d+\.\d+)?:?\*?\*?\s*(.+)', content, re.IGNORECASE)
                 topic = topic_match.group(1).strip() if topic_match else 'Unknown'
                 key_concepts.append({
                     'cell': i,

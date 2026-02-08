@@ -7,6 +7,7 @@ Creates:
 - Brief Contents (chapter-level TOC)
 - Detailed Contents (section-level TOC with Preface)
 - All 18 chapters (CH00-CH17) merged
+- Key Concepts TOC (clickable, grouped by chapter)
 - Page numbers on every content page
 - PDF bookmarks with section-level navigation
 
@@ -533,6 +534,215 @@ def extract_toc_links(pdf_path):
 
 
 # ============================================================
+# Step 3b: Key Concepts TOC
+# ============================================================
+
+def extract_key_concepts(ch_id):
+    """Extract numbered Key Concept titles from a chapter notebook.
+
+    Returns list of (number_str, title) tuples, e.g. [("1.1", "Title"), ...].
+    """
+    nb_matches = sorted(NOTEBOOKS_DIR.glob(f'{ch_id}_*.ipynb'))
+    if not nb_matches:
+        return []
+
+    with open(nb_matches[0], 'r', encoding='utf-8') as f:
+        nb = json.load(f)
+
+    concepts = []
+    for cell in nb['cells']:
+        if cell['cell_type'] != 'markdown':
+            continue
+        source = ''.join(cell['source'])
+        # Find all Key Concept X.N: Title patterns
+        for m in re.finditer(r'>\s*\*\*Key Concept\s+(\d+\.\d+):\s*(.+?)\*\*', source):
+            number_str = m.group(1)
+            title = m.group(2).strip()
+            concepts.append((number_str, title))
+
+    return concepts
+
+
+def map_key_concepts_to_pdf_pages(concepts, pdf_path):
+    """Map Key Concept titles to page offsets within a chapter PDF.
+
+    Returns list of (number_str, title, page_offset) tuples.
+    """
+    reader = PdfReader(str(pdf_path))
+    n_pages = len(reader.pages)
+
+    page_texts = []
+    for i in range(n_pages):
+        try:
+            text = reader.pages[i].extract_text() or ''
+        except Exception:
+            text = ''
+        page_texts.append(' '.join(text.split()))
+
+    mapped = []
+    for number_str, title in concepts:
+        found = None
+        # Search for "Key Concept X.N" in page text
+        search_term = f'Key Concept {number_str}'
+        for i in range(n_pages):
+            if search_term in page_texts[i]:
+                found = i
+                break
+
+        if found is not None:
+            mapped.append((number_str, title, found))
+
+    return mapped
+
+
+def generate_key_concepts_toc_html(chapter_data, key_concept_data):
+    """Create HTML for Key Concepts TOC (grouped by chapter, clickable links).
+
+    Args:
+        chapter_data: list of chapter dicts with 'id', 'title', 'pages'
+        key_concept_data: dict of ch_id -> [(number_str, title, page_offset), ...]
+    """
+    # Build chapter-to-page mapping (content page numbers starting at 1)
+    offset = 1
+    ch_map = {}
+    for ch in chapter_data:
+        ch_map[ch['id']] = offset
+        offset += ch['pages']
+
+    toc_rows = []
+    for part_name, part_chapters in PARTS:
+        toc_rows.append(f'<tr class="part-row"><td colspan="3">{part_name}</td></tr>')
+        for ch_id in part_chapters:
+            if ch_id not in key_concept_data or not key_concept_data[ch_id]:
+                continue
+            ch = next(c for c in chapter_data if c['id'] == ch_id)
+            num = ch_id.replace('ch', '').lstrip('0')
+            # Chapter header row
+            ch_page = ch_map[ch_id]
+            ch_link = f'https://internal.metricsai/page/{ch_page}'
+            toc_rows.append(
+                f'<tr class="ch-row">'
+                f'<td class="ch-label">'
+                f'<a class="toc-link" href="{ch_link}">Chapter {num}:</a></td>'
+                f'<td class="ch-title">'
+                f'<a class="toc-link" href="{ch_link}">{ch["title"]}</a></td>'
+                f'<td class="ch-page">'
+                f'<a class="toc-link" href="{ch_link}">{ch_page}</a></td>'
+                f'</tr>'
+            )
+            # Key concept rows (number + title combined, matching Detailed TOC style)
+            for kc_num, kc_title, kc_offset in key_concept_data[ch_id]:
+                kc_page = ch_map[ch_id] + kc_offset
+                kc_link = f'https://internal.metricsai/page/{kc_page}'
+                toc_rows.append(
+                    f'<tr class="kc-row">'
+                    f'<td></td>'
+                    f'<td class="kc-title">'
+                    f'<a class="toc-link" href="{kc_link}">{kc_num}: {kc_title}</a></td>'
+                    f'<td class="kc-page">'
+                    f'<a class="toc-link" href="{kc_link}">{kc_page}</a></td>'
+                    f'</tr>'
+                )
+
+    rows_html = '\n'.join(toc_rows)
+
+    return f"""<!DOCTYPE html>
+<html>
+<head>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+
+  @page {{ size: letter portrait; margin: 0.75in; }}
+
+  a.toc-link {{ color: inherit; text-decoration: none; }}
+
+  body {{
+    font-family: 'Inter', sans-serif;
+    color: #1a1a2e;
+    font-size: 9pt;
+    line-height: 1.35;
+  }}
+
+  h1 {{
+    text-align: center;
+    font-size: 24pt;
+    font-weight: 700;
+    color: #008CB7;
+    margin-bottom: 0.3in;
+    letter-spacing: 1px;
+  }}
+
+  table {{
+    width: 100%;
+    border-collapse: collapse;
+  }}
+
+  tr.part-row td {{
+    font-weight: 700;
+    font-size: 10pt;
+    color: #7A209F;
+    padding-top: 12px;
+    padding-bottom: 3px;
+    border-bottom: 2px solid #7A209F;
+  }}
+
+  tr.ch-row td {{
+    padding-top: 6px;
+    padding-bottom: 2px;
+  }}
+
+  td.ch-label {{
+    width: 90px;
+    font-weight: 600;
+    font-size: 9.5pt;
+    color: #333;
+    white-space: nowrap;
+  }}
+
+  td.ch-title {{
+    font-weight: 600;
+    font-size: 9.5pt;
+    color: #1a1a2e;
+    padding-left: 4px;
+  }}
+
+  td.ch-page {{
+    width: 30px;
+    text-align: right;
+    font-weight: 600;
+    font-size: 9.5pt;
+    color: #008CB7;
+  }}
+
+  tr.kc-row td {{
+    padding: 1px 0;
+  }}
+
+  td.kc-title {{
+    padding-left: 24px;
+    color: #555;
+    font-size: 9pt;
+  }}
+
+  td.kc-page {{
+    width: 35px;
+    text-align: right;
+    color: #888;
+    font-size: 9pt;
+    padding: 1px 0;
+  }}
+</style>
+</head>
+<body>
+  <h1>Key Concepts</h1>
+  <table>
+    {rows_html}
+  </table>
+</body>
+</html>"""
+
+
+# ============================================================
 # Step 4 & 5: Merge and add page numbers
 # ============================================================
 
@@ -617,7 +827,7 @@ async def compile_book():
     # ----------------------------------------------------------
     # Step 1: Generate cover page PDF
     # ----------------------------------------------------------
-    print("\n[1/8] Generating cover page...")
+    print("\n[1/9] Generating cover page...")
     cover_html = generate_cover_html()
     cover_pdf = PROJECT_ROOT / 'tmp_cover.pdf'
     await html_to_pdf(
@@ -628,9 +838,9 @@ async def compile_book():
     print(f"  Cover page: {PdfReader(str(cover_pdf)).pages[0].mediabox}")
 
     # ----------------------------------------------------------
-    # Step 2: Count pages and extract sections
+    # Step 2: Count pages, extract sections, and extract key concepts
     # ----------------------------------------------------------
-    print("\n[2/8] Counting chapter pages and extracting sections...")
+    print("\n[2/9] Counting chapter pages and extracting sections...")
     chapter_data = count_pages()
     total_chapter_pages = sum(ch['pages'] for ch in chapter_data)
     print(f"  {len(chapter_data)} chapters, {total_chapter_pages} pages")
@@ -648,10 +858,25 @@ async def compile_book():
     total_sections = sum(len(v) for v in section_data.values())
     print(f"  Total: {total_sections} sections across {len(section_data)} chapters")
 
+    # Extract key concepts from notebooks and map to PDF pages
+    key_concept_data = {}  # ch_id -> [(number_str, title, page_offset), ...]
+    for ch in chapter_data:
+        ch_id = ch['id']
+        if ch_id == 'ch00':
+            continue  # Preface has no numbered key concepts
+        concepts = extract_key_concepts(ch_id)
+        if concepts:
+            mapped = map_key_concepts_to_pdf_pages(concepts, ch['pdf_path'])
+            if mapped:
+                key_concept_data[ch_id] = mapped
+
+    total_kc = sum(len(v) for v in key_concept_data.values())
+    print(f"  Total: {total_kc} key concepts across {len(key_concept_data)} chapters")
+
     # ----------------------------------------------------------
-    # Step 3: Generate Brief Contents and Detailed Contents
+    # Step 3: Generate Brief Contents, Detailed Contents, and Key Concepts TOC
     # ----------------------------------------------------------
-    print("\n[3/8] Generating Tables of Contents...")
+    print("\n[3/9] Generating Tables of Contents...")
 
     brief_pdf = PROJECT_ROOT / 'tmp_brief_toc.pdf'
     brief_html = generate_brief_toc_html(chapter_data)
@@ -665,17 +890,25 @@ async def compile_book():
     detailed_pages = len(PdfReader(str(detailed_pdf)).pages)
     print(f"  Detailed Contents: {detailed_pages} page(s)")
 
-    toc_total_pages = brief_pages + detailed_pages
+    # Generate Key Concepts TOC
+    kc_pdf = PROJECT_ROOT / 'tmp_kc_toc.pdf'
+    kc_html = generate_key_concepts_toc_html(chapter_data, key_concept_data)
+    await html_to_pdf(kc_html, kc_pdf, wait_ms=1000)
+    kc_pages = len(PdfReader(str(kc_pdf)).pages)
+    print(f"  Key Concepts: {kc_pages} page(s)")
+
+    toc_total_pages = brief_pages + detailed_pages + kc_pages
 
     # Extract link annotation rects from TOC PDFs (before merge)
     brief_links = extract_toc_links(brief_pdf)
     detailed_links = extract_toc_links(detailed_pdf)
-    print(f"  Extracted {len(brief_links)} brief + {len(detailed_links)} detailed TOC links")
+    kc_links = extract_toc_links(kc_pdf)
+    print(f"  Extracted {len(brief_links)} brief + {len(detailed_links)} detailed + {len(kc_links)} key concepts TOC links")
 
     # ----------------------------------------------------------
     # Step 4: Merge all PDFs
     # ----------------------------------------------------------
-    print("\n[4/8] Merging PDFs...")
+    print("\n[4/9] Merging PDFs...")
     writer = PdfWriter()
 
     # Add cover
@@ -696,6 +929,12 @@ async def compile_book():
         writer.add_page(page)
     print(f"  + Detailed Contents ({detailed_pages} pages)")
 
+    # Add Key Concepts TOC
+    kc_reader = PdfReader(str(kc_pdf))
+    for page in kc_reader.pages:
+        writer.add_page(page)
+    print(f"  + Key Concepts ({kc_pages} pages)")
+
     # Add chapters
     for ch in chapter_data:
         reader = PdfReader(str(ch['pdf_path']))
@@ -715,7 +954,7 @@ async def compile_book():
     # ----------------------------------------------------------
     # Step 5: Add page numbers
     # ----------------------------------------------------------
-    print("\n[5/8] Adding page numbers...")
+    print("\n[5/9] Adding page numbers...")
     numbers_pdf = PROJECT_ROOT / 'tmp_numbers.pdf'
     numbers_html = generate_page_numbers_html(total_pages, skip_pages=front_matter)
     await html_to_pdf(
@@ -741,7 +980,7 @@ async def compile_book():
     # ----------------------------------------------------------
     # Step 6: Add PDF bookmarks (outline) with sections
     # ----------------------------------------------------------
-    print("\n[6/8] Adding PDF bookmarks...")
+    print("\n[6/9] Adding PDF bookmarks...")
 
     # Build chapter offset map (0-indexed physical page in final PDF)
     ch_offsets = {}  # ch_id -> physical page index
@@ -791,7 +1030,7 @@ async def compile_book():
     # ----------------------------------------------------------
     # Step 7: Add clickable TOC links
     # ----------------------------------------------------------
-    print("\n[7/8] Adding clickable TOC links...")
+    print("\n[7/9] Adding clickable TOC links...")
 
     # Brief Contents links (pages start at index 1, after cover)
     for toc_page_idx, rect, content_page in brief_links:
@@ -807,12 +1046,20 @@ async def compile_book():
         link = Link(rect=rect, target_page_index=physical_page)
         final_writer.add_annotation(page_number=final_page, annotation=link)
 
-    print(f"  Added {len(brief_links) + len(detailed_links)} clickable links")
+    # Key Concepts links (pages start after cover + brief + detailed)
+    for toc_page_idx, rect, content_page in kc_links:
+        physical_page = front_matter + content_page - 1
+        final_page = 1 + brief_pages + detailed_pages + toc_page_idx
+        link = Link(rect=rect, target_page_index=physical_page)
+        final_writer.add_annotation(page_number=final_page, annotation=link)
+
+    total_links = len(brief_links) + len(detailed_links) + len(kc_links)
+    print(f"  Added {total_links} clickable links")
 
     # ----------------------------------------------------------
     # Step 8: Write final PDF
     # ----------------------------------------------------------
-    print("\n[8/8] Writing final PDF...")
+    print("\n[8/9] Writing final PDF...")
     with open(OUTPUT_PDF, 'wb') as f:
         final_writer.write(f)
 
@@ -823,10 +1070,11 @@ async def compile_book():
     print(f"  Size:   {file_size_mb:.1f} MB")
     print(f"  Pages:  {total_pages}")
     print(f"  Sections in bookmarks: {total_sections}")
+    print(f"  Key concepts: {total_kc}")
     print(f"{'=' * 60}")
 
     # Clean up temp files
-    for tmp in [cover_pdf, brief_pdf, detailed_pdf, merged_tmp, numbers_pdf]:
+    for tmp in [cover_pdf, brief_pdf, detailed_pdf, kc_pdf, merged_tmp, numbers_pdf]:
         if tmp.exists():
             tmp.unlink()
 

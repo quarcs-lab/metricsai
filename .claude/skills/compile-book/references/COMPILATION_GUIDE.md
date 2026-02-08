@@ -3,29 +3,31 @@
 ## Book Structure
 
 ```
-metricsAI_complete_book.pdf (803 pages, ~56 MB)
+metricsAI_complete_book.pdf (811 pages, ~57 MB)
 ├── Cover page (1 page, unnumbered)
 │   └── images/book1cover.jpg with navy blue (#0a1628) background
 ├── Brief Contents (1 page, unnumbered, clickable hyperlinks)
 │   └── Chapters 1-17 grouped by Parts (no Preface)
 ├── Detailed Contents (4 pages, unnumbered, clickable hyperlinks)
 │   └── Preface sections + all chapter sections with page numbers
-└── Content (797 pages, numbered 1-797)
+├── Key Concepts (4 pages, unnumbered, clickable hyperlinks)
+│   └── 165 numbered Key Concepts grouped by Parts and Chapters
+└── Content (801 pages, numbered 1-801)
     ├── CH00: Preface (15 pages)
     ├── Part I: Foundations
-    │   ├── CH01: Analysis of Economics Data (27 pages)
-    │   ├── CH02: Univariate Data Summary (53 pages)
+    │   ├── CH01: Analysis of Economics Data (28 pages)
+    │   ├── CH02: Univariate Data Summary (54 pages)
     │   ├── CH03: The Sample Mean (41 pages)
     │   └── CH04: Statistical Inference for the Mean (51 pages)
     ├── Part II: Bivariate Regression
     │   ├── CH05: Bivariate Data Summary (56 pages)
-    │   ├── CH06: The Least Squares Estimator (38 pages)
+    │   ├── CH06: The Least Squares Estimator (39 pages)
     │   ├── CH07: Statistical Inference for Bivariate Regression (66 pages)
     │   └── CH08: Case Studies for Bivariate Regression (41 pages)
     ├── Part III: Multiple Regression
     │   ├── CH09: Models with Natural Logarithms (37 pages)
     │   ├── CH10: Data Summary for Multiple Regression (32 pages)
-    │   ├── CH11: Statistical Inference for Multiple Regression (46 pages)
+    │   ├── CH11: Statistical Inference for Multiple Regression (47 pages)
     │   ├── CH12: Further Topics in Multiple Regression (40 pages)
     │   └── CH13: Case Studies for Multiple Regression (63 pages)
     └── Part IV: Advanced Topics
@@ -67,16 +69,16 @@ python3 generate_pdf_playwright.py --all
 
 **Script**: `scripts/compile_book.py`
 
-### 8-Step Process
+### 9-Step Process
 
 1. **Cover page**: Playwright renders `images/book1cover.jpg` on navy blue background (`#0a1628`) with `object-fit: contain` for full image display
-2. **Count pages + extract sections**: Reads all 18 PDFs, extracts `## X.Y Title` headers from notebooks, maps to PDF pages
-3. **Brief Contents**: Playwright renders 1-page HTML with chapters grouped by Parts (brand-styled, placeholder hyperlinks)
-4. **Detailed Contents**: Playwright renders 4-page HTML with Preface sections and all chapter sections (placeholder hyperlinks)
-5. **Merge PDFs**: pypdf merges cover + Brief + Detailed + 18 chapters
-6. **Page numbers**: Playwright renders transparent overlay with centered page numbers; pypdf merges onto content pages
-7. **PDF bookmarks**: pypdf adds hierarchical outline (Preface > Parts > Chapters > Sections)
-8. **Clickable TOC links**: Extracts placeholder URL annotations from TOC PDFs, converts to internal GoTo links pointing to correct final pages (~324 links)
+2. **Count pages + extract sections + extract Key Concepts**: Reads all 18 PDFs, extracts `## X.Y Title` headers and `Key Concept X.N: Title` from notebooks, maps to PDF pages
+3. **Tables of Contents**: Playwright renders Brief Contents (1 page), Detailed Contents (4 pages), and Key Concepts TOC (4 pages) with placeholder hyperlinks
+4. **Merge PDFs**: pypdf merges cover + Brief + Detailed + Key Concepts + 18 chapters
+5. **Page numbers**: Playwright renders transparent overlay with centered page numbers; pypdf merges onto content pages
+6. **PDF bookmarks**: pypdf adds hierarchical outline (Preface > Parts > Chapters > Sections)
+7. **Clickable TOC links**: Extracts placeholder URL annotations from all three TOC PDFs, converts to internal GoTo links pointing to correct final pages (~870 links)
+8. **Write final PDF**: Saves compiled book to `notebooks_colab/metricsAI_complete_book.pdf`
 
 ### Section Extraction
 
@@ -103,8 +105,9 @@ Mapping: Section titles searched in PDF page text (skipping first 2 pages to avo
 - Cover: unnumbered
 - Brief Contents: unnumbered
 - Detailed Contents: unnumbered
-- Content pages: numbered 1-797 (centered at bottom, 10pt Inter, #555)
-- Front matter count: 1 (cover) + 1 (brief) + 4 (detailed) = 6 pages
+- Key Concepts: unnumbered
+- Content pages: numbered 1-801 (centered at bottom, 10pt Inter, #555)
+- Front matter count: 1 (cover) + 1 (brief) + 4 (detailed) + 4 (key concepts) = 10 pages
 
 ## PDF Bookmark Hierarchy
 
@@ -134,7 +137,7 @@ Total: 132 bookmark entries (1 Preface + 4 Parts + 17 Chapters + 110 Sections)
 
 ## Clickable TOC Hyperlinks
 
-Both Brief Contents and Detailed Contents pages include clickable hyperlinks (~324 total) that jump directly to the target page in the PDF. These are generated automatically during compilation.
+All three TOC sections (Brief Contents, Detailed Contents, Key Concepts) include clickable hyperlinks (~870 total) that jump directly to the target page in the PDF. These are generated automatically during compilation.
 
 ### 3-Phase Approach
 
@@ -148,14 +151,18 @@ Both Brief Contents and Detailed Contents pages include clickable hyperlinks (~3
 
 - `generate_brief_toc_html()`: Wraps chapter titles and page numbers in placeholder `<a>` tags
 - `generate_detailed_toc_html()`: Wraps Preface sections, chapter titles, section titles, and page numbers in placeholder `<a>` tags
+- `extract_key_concepts(ch_id)`: Extracts numbered Key Concept titles from notebook JSON (`> **Key Concept X.N: Title**`)
+- `map_key_concepts_to_pdf_pages(concepts, pdf_path)`: Maps Key Concept titles to PDF page offsets by searching extracted text
+- `generate_key_concepts_toc_html()`: Wraps Key Concept numbers, titles, and page numbers in placeholder `<a>` tags, grouped by Parts and Chapters
 - `extract_toc_links(pdf_path)`: Reads a TOC PDF and extracts `(page_idx, rect, content_page)` tuples from URL annotations matching `internal.metricsai/page/`
-- `compile_book()` Step 8: Iterates over extracted links and adds `Link(rect, target_page_index)` annotations to the final PDF writer
+- `compile_book()` Step 7: Iterates over extracted links from all three TOC PDFs and adds `Link(rect, target_page_index)` annotations to the final PDF writer
 
 ### Link Counts
 
 - **Brief Contents**: ~51 links (chapter titles + page numbers)
 - **Detailed Contents**: ~273 links (Preface sections + chapter titles + section titles + page numbers)
-- **Total**: ~324 clickable links
+- **Key Concepts**: ~546 links (Key Concept numbers + titles + page numbers)
+- **Total**: ~870 clickable links
 
 ## Dependencies
 
