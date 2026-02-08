@@ -9553,6 +9553,478 @@ VARIABLE DEFINITIONS
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<h3 id="Case-Study-2:-Can-Satellites-See-Poverty?-Predicting-Local-Development-in-Bolivia">Case Study 2: Can Satellites See Poverty? Predicting Local Development in Bolivia<a class="anchor-link" href="#Case-Study-2:-Can-Satellites-See-Poverty?-Predicting-Local-Development-in-Bolivia">¶</a></h3><p><strong>Research Question</strong>: Can satellite data—nighttime lights and satellite image embeddings—predict local economic development across Bolivia's municipalities?</p>
+<p><strong>Background</strong>: Monitoring progress toward the United Nations Sustainable Development Goals (SDGs) requires timely, granular data on economic conditions. However, many developing countries lack comprehensive municipality-level statistics. Recent advances in remote sensing and machine learning offer a promising alternative: using satellite data to <em>predict</em> local development outcomes.</p>
+<p>Two types of satellite data have proven particularly useful:</p>
+<ol>
+<li><p><strong>Nighttime lights (NTL)</strong>: Satellite images of Earth at night reveal the intensity of artificial lighting. Brighter areas typically correspond to greater economic activity, electrification, and urbanization. NTL data is available globally and annually, making it a powerful proxy for economic development in data-scarce regions (<a href="https://doi.org/10.1257/aer.102.2.994">Henderson et al., 2012</a>).</p>
+</li>
+<li><p><strong>Satellite image embeddings</strong>: Deep learning models trained on daytime satellite imagery (Sentinel-2, Landsat) can extract 64-dimensional feature vectors that capture visual patterns—road networks, building density, vegetation cover, agricultural activity—without requiring manual labeling. These abstract features often correlate strongly with socioeconomic outcomes (<a href="https://doi.org/10.1126/science.aaf7894">Jean et al., 2016</a>).</p>
+</li>
+</ol>
+<p><strong>This Research</strong> (<a href="https://github.com/quarcs-lab/ds4bolivia">DS4Bolivia Project</a>): A comprehensive data science initiative that integrates satellite data with Bolivia's Municipal SDG Atlas (<a href="https://atlas.sdsnbolivia.org">Andersen et al., 2020</a>) to study geospatial development patterns across all <strong>339 municipalities</strong>. The project demonstrates how machine learning models can predict SDG indicators from satellite features, achieving meaningful predictive accuracy for poverty and energy access indicators.</p>
+<p><strong>The Data</strong>: Cross-sectional dataset covering 339 Bolivian municipalities with over 350 variables, including:</p>
+<ul>
+<li><strong>Development outcomes</strong>: Municipal Sustainable Development Index (IMDS, 0-100 composite), individual SDG indices (SDG 1-17)</li>
+<li><strong>Satellite data</strong>: Log nighttime lights per capita (2012-2020), 64 satellite embedding dimensions (2017)</li>
+<li><strong>Demographics</strong>: Population (2001-2020), municipality and department names</li>
+<li><strong>Socioeconomic indicators</strong>: Unsatisfied basic needs, literacy rates, electricity coverage, health outcomes</li>
+</ul>
+<p><strong>Your Task</strong>: Use the descriptive analysis and regression tools from Chapter 1 to explore the DS4Bolivia dataset. You'll investigate whether nighttime lights predict municipal development, visualize satellite-development relationships, and begin to assess how useful remote sensing data is for SDG monitoring. This case study introduces a dataset that we will revisit throughout the textbook, applying increasingly sophisticated econometric methods in each chapter.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<blockquote>
+<p><strong>Key Concept 1.9: Satellite Data as Economic Proxy</strong></p>
+<p><strong>Nighttime lights (NTL)</strong> captured by satellites measure the intensity of artificial illumination on Earth's surface. Because lighting requires electricity and economic activity, NTL intensity strongly correlates with GDP, income levels, and urbanization. The log of NTL per capita transforms the highly skewed raw luminosity into a more symmetric variable suitable for regression analysis.</p>
+<p><strong>Satellite embeddings</strong> are 64-dimensional feature vectors extracted by deep learning models from daytime satellite imagery. Each dimension captures abstract visual patterns (building density, road networks, vegetation) that correlate with socioeconomic conditions. Together, NTL and embeddings provide complementary information: NTL captures <em>nighttime economic activity</em> while embeddings capture <em>daytime physical infrastructure</em>.</p>
+</blockquote>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<h4 id="Load-the-DS4Bolivia-Data">Load the DS4Bolivia Data<a class="anchor-link" href="#Load-the-DS4Bolivia-Data">¶</a></h4><p>Let's load the comprehensive DS4Bolivia dataset directly from GitHub. This dataset integrates satellite data, SDG indicators, and demographic information for all 339 Bolivian municipalities.</p>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># Load the DS4Bolivia dataset</span>
+<span class="n">url_bol</span> <span class="o">=</span> <span class="s2">"https://raw.githubusercontent.com/quarcs-lab/ds4bolivia/master/ds4bolivia_v20250523.csv"</span>
+<span class="n">bol</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">url_bol</span><span class="p">)</span>
+
+<span class="c1"># Display basic information</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"="</span> <span class="o">*</span> <span class="mi">70</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"DS4BOLIVIA DATASET"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"="</span> <span class="o">*</span> <span class="mi">70</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Dataset shape: </span><span class="si">{</span><span class="n">bol</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2"> municipalities, </span><span class="si">{</span><span class="n">bol</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s2"> variables"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="se">\n</span><span class="s2">Departments: </span><span class="si">{</span><span class="n">bol</span><span class="p">[</span><span class="s1">'dep'</span><span class="p">]</span><span class="o">.</span><span class="n">nunique</span><span class="p">()</span><span class="si">}</span><span class="s2"> unique departments"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Department names: </span><span class="si">{</span><span class="nb">sorted</span><span class="p">(</span><span class="n">bol</span><span class="p">[</span><span class="s1">'dep'</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">())</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+
+<span class="c1"># Select key variables for this case study</span>
+<span class="n">key_vars</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'mun'</span><span class="p">,</span> <span class="s1">'dep'</span><span class="p">,</span> <span class="s1">'imds'</span><span class="p">,</span> <span class="s1">'ln_NTLpc2017'</span><span class="p">,</span> <span class="s1">'pop2017'</span><span class="p">,</span>
+            <span class="s1">'index_sdg1'</span><span class="p">,</span> <span class="s1">'index_sdg4'</span><span class="p">,</span> <span class="s1">'index_sdg8'</span><span class="p">,</span> <span class="s1">'sdg1_1_ubn'</span><span class="p">]</span>
+<span class="n">bol_key</span> <span class="o">=</span> <span class="n">bol</span><span class="p">[</span><span class="n">key_vars</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="se">\n</span><span class="s2">Key variables selected: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">key_vars</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"</span><span class="se">\n</span><span class="s2">"</span> <span class="o">+</span> <span class="s2">"="</span> <span class="o">*</span> <span class="mi">70</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"FIRST 10 MUNICIPALITIES"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"="</span> <span class="o">*</span> <span class="mi">70</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">bol_key</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="mi">10</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># Variable descriptions for this case study</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"="</span> <span class="o">*</span> <span class="mi">70</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"KEY VARIABLE DESCRIPTIONS"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"="</span> <span class="o">*</span> <span class="mi">70</span><span class="p">)</span>
+<span class="n">descriptions</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">'mun'</span><span class="p">:</span> <span class="s1">'Municipality name'</span><span class="p">,</span>
+    <span class="s1">'dep'</span><span class="p">:</span> <span class="s1">'Department (administrative region, 9 total)'</span><span class="p">,</span>
+    <span class="s1">'imds'</span><span class="p">:</span> <span class="s1">'Municipal Sustainable Development Index (0-100, composite of all SDGs)'</span><span class="p">,</span>
+    <span class="s1">'ln_NTLpc2017'</span><span class="p">:</span> <span class="s1">'Log of nighttime lights per capita (2017, satellite-based)'</span><span class="p">,</span>
+    <span class="s1">'pop2017'</span><span class="p">:</span> <span class="s1">'Population in 2017'</span><span class="p">,</span>
+    <span class="s1">'index_sdg1'</span><span class="p">:</span> <span class="s1">'SDG 1 Index: No Poverty (0-100)'</span><span class="p">,</span>
+    <span class="s1">'index_sdg4'</span><span class="p">:</span> <span class="s1">'SDG 4 Index: Quality Education (0-100)'</span><span class="p">,</span>
+    <span class="s1">'index_sdg8'</span><span class="p">:</span> <span class="s1">'SDG 8 Index: Decent Work and Economic Growth (0-100)'</span><span class="p">,</span>
+    <span class="s1">'sdg1_1_ubn'</span><span class="p">:</span> <span class="s1">'Unsatisfied Basic Needs (</span><span class="si">% o</span><span class="s1">f population, 2012)'</span><span class="p">,</span>
+<span class="p">}</span>
+<span class="k">for</span> <span class="n">var</span><span class="p">,</span> <span class="n">desc</span> <span class="ow">in</span> <span class="n">descriptions</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"  </span><span class="si">{</span><span class="n">var</span><span class="si">:</span><span class="s2">20s</span><span class="si">}</span><span class="s2"> — </span><span class="si">{</span><span class="n">desc</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<h4 id="Task-1:-Data-Exploration-(Guided)">Task 1: Data Exploration (Guided)<a class="anchor-link" href="#Task-1:-Data-Exploration-(Guided)">¶</a></h4><p><strong>Objective</strong>: Understand the DS4Bolivia dataset structure and key variables.</p>
+<p><strong>Instructions</strong>:</p>
+<ol>
+<li>Examine the output above: How many municipalities? How many departments?</li>
+<li>Check for missing values in the key variables</li>
+<li>Identify the range of the IMDS index (development measure)</li>
+<li>Explore the distribution of departments (how many municipalities per department?)</li>
+</ol>
+<p><strong>Key variables to focus on</strong>:</p>
+<ul>
+<li><code>imds</code>: Overall development index (our main dependent variable)</li>
+<li><code>ln_NTLpc2017</code>: Log nighttime lights per capita (our main predictor)</li>
+<li><code>dep</code>: Department (for regional comparisons)</li>
+<li><code>pop2017</code>: Population (for context)</li>
+</ul>
+<p>Run the code below to explore the data structure.</p>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># Your code here: Explore the DS4Bolivia dataset</span>
+<span class="c1">#</span>
+<span class="c1"># Suggested explorations:</span>
+<span class="c1"># 1. Check for missing values: bol_key.isnull().sum()</span>
+<span class="c1"># 2. Municipalities per department: bol_key['dep'].value_counts()</span>
+<span class="c1"># 3. Range of IMDS: bol_key['imds'].describe()</span>
+<span class="c1"># 4. Largest/smallest municipalities: bol_key.nlargest(5, 'pop2017')</span>
+
+<span class="c1"># Example: Check missing values</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"Missing values per variable:"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">bol_key</span><span class="o">.</span><span class="n">isnull</span><span class="p">()</span><span class="o">.</span><span class="n">sum</span><span class="p">())</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="se">\n</span><span class="s2">Total municipalities: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">bol_key</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Complete cases (no missing in key vars): </span><span class="si">{</span><span class="n">bol_key</span><span class="o">.</span><span class="n">dropna</span><span class="p">()</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<h4 id="Task-2:-Descriptive-Statistics-(Guided)">Task 2: Descriptive Statistics (Guided)<a class="anchor-link" href="#Task-2:-Descriptive-Statistics-(Guided)">¶</a></h4><p><strong>Objective</strong>: Generate summary statistics for key development and satellite variables.</p>
+<p><strong>Instructions</strong>:</p>
+<ol>
+<li>Calculate descriptive statistics for <code>imds</code>, <code>ln_NTLpc2017</code>, and <code>pop2017</code></li>
+<li>Identify the municipality with the highest and lowest IMDS</li>
+<li>Compare average IMDS across departments</li>
+<li>Discuss what the summary statistics reveal about inequality across municipalities</li>
+</ol>
+<p><strong>Apply what you learned in section 1.4</strong>: Use <code>.describe()</code> and <code>.groupby()</code> methods like we did with the house price data.</p>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># Your code here: Descriptive statistics for DS4Bolivia</span>
+<span class="c1">#</span>
+<span class="c1"># Steps:</span>
+<span class="c1"># 1. Summary statistics for key variables</span>
+<span class="c1"># 2. Identify top/bottom municipalities</span>
+<span class="c1"># 3. Compare departments</span>
+
+<span class="c1"># Example: Summary statistics</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"="</span> <span class="o">*</span> <span class="mi">70</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"DESCRIPTIVE STATISTICS: KEY VARIABLES"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"="</span> <span class="o">*</span> <span class="mi">70</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">bol_key</span><span class="p">[[</span><span class="s1">'imds'</span><span class="p">,</span> <span class="s1">'ln_NTLpc2017'</span><span class="p">,</span> <span class="s1">'pop2017'</span><span class="p">,</span> <span class="s1">'sdg1_1_ubn'</span><span class="p">]]</span><span class="o">.</span><span class="n">describe</span><span class="p">()</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">2</span><span class="p">))</span>
+
+<span class="c1"># Top and bottom municipalities by IMDS</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"</span><span class="se">\n</span><span class="s2">"</span> <span class="o">+</span> <span class="s2">"="</span> <span class="o">*</span> <span class="mi">70</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"TOP 5 MUNICIPALITIES BY DEVELOPMENT (IMDS)"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"="</span> <span class="o">*</span> <span class="mi">70</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">bol_key</span><span class="o">.</span><span class="n">nlargest</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="s1">'imds'</span><span class="p">)[[</span><span class="s1">'mun'</span><span class="p">,</span> <span class="s1">'dep'</span><span class="p">,</span> <span class="s1">'imds'</span><span class="p">,</span> <span class="s1">'ln_NTLpc2017'</span><span class="p">]]</span><span class="o">.</span><span class="n">to_string</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">))</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">"</span><span class="se">\n</span><span class="s2">"</span> <span class="o">+</span> <span class="s2">"="</span> <span class="o">*</span> <span class="mi">70</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"BOTTOM 5 MUNICIPALITIES BY DEVELOPMENT (IMDS)"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"="</span> <span class="o">*</span> <span class="mi">70</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">bol_key</span><span class="o">.</span><span class="n">nsmallest</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="s1">'imds'</span><span class="p">)[[</span><span class="s1">'mun'</span><span class="p">,</span> <span class="s1">'dep'</span><span class="p">,</span> <span class="s1">'imds'</span><span class="p">,</span> <span class="s1">'ln_NTLpc2017'</span><span class="p">]]</span><span class="o">.</span><span class="n">to_string</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<blockquote>
+<p><strong>Key Concept 1.10: Subnational Development Analysis</strong></p>
+<p>National-level statistics can mask enormous variation in development outcomes within a country. Bolivia's 339 municipalities span a wide range of development levels—from highly urbanized departmental capitals with strong infrastructure to remote rural communities with limited services. Municipality-level analysis reveals this <strong>within-country inequality</strong> and helps identify specific areas where SDG progress lags behind. Satellite data is particularly valuable for subnational analysis because it provides spatially granular measurements even where traditional surveys are scarce or infrequent.</p>
+</blockquote>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<h4 id="Task-3:-Visualize-the-NTL-Development-Relationship-(Semi-guided)">Task 3: Visualize the NTL-Development Relationship (Semi-guided)<a class="anchor-link" href="#Task-3:-Visualize-the-NTL-Development-Relationship-(Semi-guided)">¶</a></h4><p><strong>Objective</strong>: Create scatter plots to visualize the relationship between nighttime lights and development.</p>
+<p><strong>Instructions</strong>:</p>
+<ol>
+<li>Create a scatter plot of <code>ln_NTLpc2017</code> (x-axis) vs <code>imds</code> (y-axis)</li>
+<li>Add appropriate axis labels and title</li>
+<li>Optionally: Color-code points by department</li>
+<li>Interpret the pattern: Is there a positive relationship? How strong does it look?</li>
+</ol>
+<p><strong>Apply what you learned in section 1.5</strong>: Use matplotlib to create scatter plots like the house price visualization.</p>
+<p><strong>Hint</strong>: Drop missing values before plotting with <code>.dropna()</code></p>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># Your code here: Scatter plot of NTL vs Development</span>
+<span class="c1">#</span>
+<span class="c1"># Steps:</span>
+<span class="c1"># 1. Prepare data (drop missing values)</span>
+<span class="c1"># 2. Create scatter plot</span>
+<span class="c1"># 3. Add labels and formatting</span>
+<span class="c1"># 4. Interpret the pattern</span>
+
+<span class="c1"># Example structure:</span>
+<span class="c1"># plot_data = bol_key[['ln_NTLpc2017', 'imds']].dropna()</span>
+<span class="c1"># fig, ax = plt.subplots(figsize=(10, 6))</span>
+<span class="c1"># ax.scatter(plot_data['ln_NTLpc2017'], plot_data['imds'], alpha=0.5, color='navy')</span>
+<span class="c1"># ax.set_xlabel('Log Nighttime Lights per Capita (2017)')</span>
+<span class="c1"># ax.set_ylabel('Municipal Development Index (IMDS)')</span>
+<span class="c1"># ax.set_title('Can Satellites See Development? NTL vs IMDS in Bolivia')</span>
+<span class="c1"># plt.show()</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<h4 id="Task-4:-Simple-Regression-Analysis-(Semi-guided)">Task 4: Simple Regression Analysis (Semi-guided)<a class="anchor-link" href="#Task-4:-Simple-Regression-Analysis-(Semi-guided)">¶</a></h4><p><strong>Objective</strong>: Estimate the relationship between nighttime lights and development using OLS.</p>
+<p><strong>Research Question</strong>: How much does nighttime light intensity predict municipal development levels?</p>
+<p><strong>Instructions</strong>:</p>
+<ol>
+<li>Prepare regression data (drop missing values in key variables)</li>
+<li>Estimate OLS regression: <code>imds ~ ln_NTLpc2017</code></li>
+<li>Display the regression summary</li>
+<li>Interpret the slope coefficient: What does a 1-unit increase in log NTL mean for IMDS?</li>
+<li>Report and interpret R-squared: How much variation in development does NTL explain?</li>
+</ol>
+<p><strong>Apply what you learned in sections 1.6-1.7</strong>: Use <code>ols()</code> from statsmodels.</p>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># Your code here: OLS regression of IMDS on NTL</span>
+<span class="c1">#</span>
+<span class="c1"># Steps:</span>
+<span class="c1"># 1. Prepare data</span>
+<span class="c1"># 2. Estimate regression</span>
+<span class="c1"># 3. Display and interpret results</span>
+
+<span class="c1"># Example structure:</span>
+<span class="c1"># reg_data = bol_key[['imds', 'ln_NTLpc2017']].dropna()</span>
+<span class="c1"># model_bol = ols('imds ~ ln_NTLpc2017', data=reg_data).fit()</span>
+<span class="c1"># print(model_bol.summary())</span>
+<span class="c1">#</span>
+<span class="c1"># # Extract key statistics</span>
+<span class="c1"># print(f"\nSlope: {model_bol.params['ln_NTLpc2017']:.4f}")</span>
+<span class="c1"># print(f"R-squared: {model_bol.rsquared:.4f}")</span>
+<span class="c1"># print(f"\nInterpretation: A 1-unit increase in log NTL per capita")</span>
+<span class="c1"># print(f"is associated with a {model_bol.params['ln_NTLpc2017']:.2f}-point increase in IMDS")</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<h4 id="Task-5:-Regional-Comparison-(Independent)">Task 5: Regional Comparison (Independent)<a class="anchor-link" href="#Task-5:-Regional-Comparison-(Independent)">¶</a></h4><p><strong>Objective</strong>: Compare development and NTL patterns across Bolivia's nine departments.</p>
+<p><strong>Research Question</strong>: Do satellite-development patterns vary across Bolivia's regions?</p>
+<p><strong>Instructions</strong>:</p>
+<ol>
+<li>Calculate mean IMDS and mean NTL by department</li>
+<li>Create a bar chart or dot plot comparing department averages</li>
+<li>Identify which departments are the most and least developed</li>
+<li>Create scatter plots colored by department to see if the NTL-IMDS relationship differs by region</li>
+<li>Discuss what might explain regional differences (geography, urbanization, economic structure)</li>
+</ol>
+<p><strong>This extends Chapter 1 concepts</strong>: You're using grouping and comparative analysis to explore heterogeneity.</p>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># Your code here: Regional comparison</span>
+<span class="c1">#</span>
+<span class="c1"># Steps:</span>
+<span class="c1"># 1. Group by department: bol_key.groupby('dep')[['imds', 'ln_NTLpc2017']].mean()</span>
+<span class="c1"># 2. Create comparative bar chart</span>
+<span class="c1"># 3. Create scatter plot colored by department</span>
+<span class="c1"># 4. Identify top/bottom departments</span>
+
+<span class="c1"># Example structure:</span>
+<span class="c1"># dept_means = bol_key.groupby('dep')[['imds', 'ln_NTLpc2017']].mean().sort_values('imds')</span>
+<span class="c1"># print(dept_means.round(2))</span>
+<span class="c1">#</span>
+<span class="c1"># fig, ax = plt.subplots(figsize=(10, 6))</span>
+<span class="c1"># dept_means['imds'].plot(kind='barh', ax=ax, color='purple', alpha=0.7)</span>
+<span class="c1"># ax.set_xlabel('Mean IMDS')</span>
+<span class="c1"># ax.set_title('Average Municipal Development by Department')</span>
+<span class="c1"># plt.tight_layout()</span>
+<span class="c1"># plt.show()</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<h4 id="Task-6:-Policy-Brief-on-Satellite-Data-for-SDG-Monitoring-(Independent)">Task 6: Policy Brief on Satellite Data for SDG Monitoring (Independent)<a class="anchor-link" href="#Task-6:-Policy-Brief-on-Satellite-Data-for-SDG-Monitoring-(Independent)">¶</a></h4><p><strong>Objective</strong>: Write a 200-300 word policy brief summarizing your findings.</p>
+<p><strong>Your brief should address</strong>:</p>
+<ol>
+<li><strong>Key finding</strong>: What is the relationship between nighttime lights and municipal development in Bolivia?</li>
+<li><strong>Magnitude</strong>: How strong is the association? What does the R-squared tell us about predictive power?</li>
+<li><strong>Regional variation</strong>: Do some departments show higher development levels? Is there a geographic pattern?</li>
+<li><strong>Policy implications</strong>: How could satellite data be used for SDG monitoring in Bolivia?</li>
+<li><strong>Limitations</strong>: What can satellite data <em>not</em> tell us about development? What other data sources are needed?</li>
+</ol>
+<p><strong>Connection to Research</strong>: The DS4Bolivia project uses machine learning (Random Forest, XGBoost) to predict SDG indicators from satellite embeddings, achieving R² up to 0.57 for extreme energy poverty. Your simple OLS regression provides a baseline for understanding how much satellite data captures about development outcomes.</p>
+<p><strong>Looking ahead</strong>: In subsequent chapters, we will revisit this dataset to:</p>
+<ul>
+<li>Summarize the distribution of development indicators (Chapter 2)</li>
+<li>Test whether development differences are statistically significant (Chapter 4)</li>
+<li>Explore bivariate relationships between NTL and specific SDG outcomes (Chapter 5)</li>
+<li>Add multiple satellite features as predictors (Chapters 10-12)</li>
+<li>Test for regional structural differences (Chapter 14)</li>
+<li>Check model assumptions and diagnostics (Chapter 16)</li>
+<li>Analyze NTL panel data over time (Chapter 17)</li>
+</ul>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># Your code here: Additional analysis for the policy brief</span>
+<span class="c1">#</span>
+<span class="c1"># You might want to:</span>
+<span class="c1"># 1. Create a summary table of key results</span>
+<span class="c1"># 2. Generate a visualization that tells a compelling story</span>
+<span class="c1"># 3. Calculate specific statistics to cite in your brief</span>
+
+<span class="c1"># Example: Summary of key results</span>
+<span class="c1"># print("KEY RESULTS FOR POLICY BRIEF")</span>
+<span class="c1"># print(f"Sample: {len(reg_data)} municipalities")</span>
+<span class="c1"># print(f"NTL coefficient: {model_bol.params['ln_NTLpc2017']:.2f}")</span>
+<span class="c1"># print(f"R-squared: {model_bol.rsquared:.2%}")</span>
+<span class="c1"># print(f"Most developed department: {dept_means['imds'].idxmax()}")</span>
+<span class="c1"># print(f"Least developed department: {dept_means['imds'].idxmin()}")</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<h4 id="What-You've-Learned-from-This-Case-Study">What You've Learned from This Case Study<a class="anchor-link" href="#What-You've-Learned-from-This-Case-Study">¶</a></h4><p>Through this exploration of satellite data and municipal development in Bolivia, you've applied the Chapter 1 toolkit to a cutting-edge research application:</p>
+<ul>
+<li><strong>Data loading and exploration</strong>: Worked with a real geospatial dataset covering 339 municipalities</li>
+<li><strong>Descriptive statistics</strong>: Summarized development indicators and identified high/low performers</li>
+<li><strong>Visualization</strong>: Created scatter plots revealing the satellite-development relationship</li>
+<li><strong>Regression analysis</strong>: Quantified how nighttime lights predict development outcomes</li>
+<li><strong>Regional comparison</strong>: Explored how the relationship varies across Bolivia's departments</li>
+<li><strong>Critical thinking</strong>: Assessed the potential and limitations of satellite data for SDG monitoring</li>
+</ul>
+<p><strong>Connection to the research</strong>: The DS4Bolivia project extends this simple analysis by incorporating 64-dimensional satellite embeddings and advanced machine learning methods. Your OLS baseline provides the foundation for understanding what these more complex models improve upon.</p>
+<p><strong>This dataset returns throughout the textbook</strong>: Each subsequent chapter applies its specific econometric tools to the DS4Bolivia data, building progressively from univariate summaries (Chapter 2) through panel data analysis (Chapter 17). By the end of the book, you'll have a comprehensive econometric analysis of satellite-based development prediction.</p>
+<hr/>
+<p><strong>Well done!</strong> You've now explored two real-world datasets—cross-country convergence and Bolivian municipal development—using the fundamental tools of econometrics.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
 </div>
 </div>
 </div>

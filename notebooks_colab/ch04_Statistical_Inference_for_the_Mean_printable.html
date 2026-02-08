@@ -10057,7 +10057,7 @@ Conclusion: The proportion is NOT significantly different from 50%.
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h2 id="Case-Study:-Statistical-Inference-for-Labor-Productivity">Case Study: Statistical Inference for Labor Productivity<a class="anchor-link" href="#Case-Study:-Statistical-Inference-for-Labor-Productivity">¶</a></h2><p><strong>Research Question:</strong> "Has global labor productivity changed significantly over time, and do productivity levels differ significantly across regions?"</p>
+<h2 id="Case-Study-1:-Statistical-Inference-for-Labor-Productivity">Case Study 1: Statistical Inference for Labor Productivity<a class="anchor-link" href="#Case-Study-1:-Statistical-Inference-for-Labor-Productivity">¶</a></h2><p><strong>Research Question:</strong> "Has global labor productivity changed significantly over time, and do productivity levels differ significantly across regions?"</p>
 <p>This case study applies all the statistical inference methods from Chapter 4 to analyze real economic data on labor productivity across 108 countries over 25 years (1990-2014). You'll practice:</p>
 <ul>
 <li>Constructing and interpreting <strong>confidence intervals</strong> for population means</li>
@@ -10653,6 +10653,465 @@ Labor productivity samples:
 <li>Communicating results with precision</li>
 </ul>
 <p><strong>Well done!</strong></p>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<h3 id="Case-Study-2:-Is-Bolivia's-Development-Equal?-Testing-Differences-Across-Departments">Case Study 2: Is Bolivia's Development Equal? Testing Differences Across Departments<a class="anchor-link" href="#Case-Study-2:-Is-Bolivia's-Development-Equal?-Testing-Differences-Across-Departments">¶</a></h3><p><strong>Research Question</strong>: Are there statistically significant differences in development levels across Bolivia's nine departments?</p>
+<p>In Chapter 1, we introduced the DS4Bolivia project and explored satellite-development relationships across Bolivia's 339 municipalities. In this case study, we apply Chapter 4's statistical inference tools—confidence intervals and hypothesis tests—to test whether development levels differ significantly across Bolivia's departments.</p>
+<p><strong>The Data</strong>: Cross-sectional dataset covering 339 Bolivian municipalities from the <a href="https://github.com/quarcs-lab/ds4bolivia">DS4Bolivia Project</a>, including:</p>
+<ul>
+<li><strong>Development outcomes</strong>: Municipal Sustainable Development Index (IMDS, 0-100 composite)</li>
+<li><strong>Satellite data</strong>: Log nighttime lights per capita (2017)</li>
+<li><strong>Demographics</strong>: Population (2017), municipality and department names</li>
+</ul>
+<p><strong>Your Task</strong>: Use confidence intervals, one-sample tests, two-sample tests, and one-sided tests to evaluate whether Bolivia's departments differ significantly in development—and whether those differences are large enough to matter for policy.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<h4 id="Load-the-DS4Bolivia-Data">Load the DS4Bolivia Data<a class="anchor-link" href="#Load-the-DS4Bolivia-Data">¶</a></h4><p>Let's load the DS4Bolivia dataset and prepare the key variables for statistical inference.</p>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># Load the DS4Bolivia dataset</span>
+<span class="n">url_bol</span> <span class="o">=</span> <span class="s2">"https://raw.githubusercontent.com/quarcs-lab/ds4bolivia/master/ds4bolivia_v20250523.csv"</span>
+<span class="n">bol</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">url_bol</span><span class="p">)</span>
+
+<span class="c1"># Select key variables for this case study</span>
+<span class="n">key_vars</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'mun'</span><span class="p">,</span> <span class="s1">'dep'</span><span class="p">,</span> <span class="s1">'imds'</span><span class="p">,</span> <span class="s1">'ln_NTLpc2017'</span><span class="p">,</span> <span class="s1">'pop2017'</span><span class="p">]</span>
+<span class="n">bol_key</span> <span class="o">=</span> <span class="n">bol</span><span class="p">[</span><span class="n">key_vars</span><span class="p">]</span><span class="o">.</span><span class="n">dropna</span><span class="p">()</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">"="</span> <span class="o">*</span> <span class="mi">70</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"DS4BOLIVIA DATASET — STATISTICAL INFERENCE CASE STUDY"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"="</span> <span class="o">*</span> <span class="mi">70</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Municipalities: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">bol_key</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Departments:    </span><span class="si">{</span><span class="n">bol_key</span><span class="p">[</span><span class="s1">'dep'</span><span class="p">]</span><span class="o">.</span><span class="n">nunique</span><span class="p">()</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="se">\n</span><span class="s2">IMDS summary:"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">bol_key</span><span class="p">[</span><span class="s1">'imds'</span><span class="p">]</span><span class="o">.</span><span class="n">describe</span><span class="p">()</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">2</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="se">\n</span><span class="s2">Municipalities per department:"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">bol_key</span><span class="p">[</span><span class="s1">'dep'</span><span class="p">]</span><span class="o">.</span><span class="n">value_counts</span><span class="p">()</span><span class="o">.</span><span class="n">sort_index</span><span class="p">())</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<h4 id="Task-1:-Confidence-Interval-for-Mean-IMDS-(Guided)">Task 1: Confidence Interval for Mean IMDS (Guided)<a class="anchor-link" href="#Task-1:-Confidence-Interval-for-Mean-IMDS-(Guided)">¶</a></h4><p><strong>Learning Goal</strong>: Apply Section 4.3 methods to calculate and interpret a confidence interval for a population mean.</p>
+<p><strong>Economic Question</strong>: "What is the true average development level across all Bolivian municipalities?"</p>
+<p><strong>Instructions</strong>:</p>
+<ol>
+<li>Calculate the sample mean and standard error of <code>imds</code></li>
+<li>Construct a 95% confidence interval using <code>scipy.stats.t.interval()</code></li>
+<li>Print the sample mean, standard error, and CI bounds</li>
+<li>Interpret the result: "We are 95% confident that the true mean municipal development index lies between X and Y."</li>
+</ol>
+<p><strong>Apply what you learned in Section 4.3</strong>: The formula is $\bar{x} \pm t_{\alpha/2} \times SE$, where $SE = s/\sqrt{n}$.</p>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># Your code here: 95% Confidence Interval for national mean IMDS</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">scipy</span><span class="w"> </span><span class="kn">import</span> <span class="n">stats</span>
+
+<span class="c1"># Calculate sample statistics</span>
+<span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">bol_key</span><span class="p">[</span><span class="s1">'imds'</span><span class="p">])</span>
+<span class="n">x_bar</span> <span class="o">=</span> <span class="n">bol_key</span><span class="p">[</span><span class="s1">'imds'</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+<span class="n">se</span> <span class="o">=</span> <span class="n">bol_key</span><span class="p">[</span><span class="s1">'imds'</span><span class="p">]</span><span class="o">.</span><span class="n">std</span><span class="p">()</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+
+<span class="c1"># 95% confidence interval using t-distribution</span>
+<span class="n">ci_low</span><span class="p">,</span> <span class="n">ci_high</span> <span class="o">=</span> <span class="n">stats</span><span class="o">.</span><span class="n">t</span><span class="o">.</span><span class="n">interval</span><span class="p">(</span><span class="mf">0.95</span><span class="p">,</span> <span class="n">df</span><span class="o">=</span><span class="n">n</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">loc</span><span class="o">=</span><span class="n">x_bar</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="n">se</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">"="</span> <span class="o">*</span> <span class="mi">70</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"95% CONFIDENCE INTERVAL FOR MEAN IMDS"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"="</span> <span class="o">*</span> <span class="mi">70</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Sample size (n):       </span><span class="si">{</span><span class="n">n</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Sample mean:           </span><span class="si">{</span><span class="n">x_bar</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Standard error:        </span><span class="si">{</span><span class="n">se</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"95% CI:                [</span><span class="si">{</span><span class="n">ci_low</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">ci_high</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">]"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="se">\n</span><span class="s2">Interpretation: We are 95% confident that the true mean"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"municipal development index lies between </span><span class="si">{</span><span class="n">ci_low</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2"> and </span><span class="si">{</span><span class="n">ci_high</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">."</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<h4 id="Task-2:-Hypothesis-Test-%E2%80%94-National-Development-Target-(Guided)">Task 2: Hypothesis Test — National Development Target (Guided)<a class="anchor-link" href="#Task-2:-Hypothesis-Test-%E2%80%94-National-Development-Target-(Guided)">¶</a></h4><p><strong>Learning Goal</strong>: Apply Section 4.4 (two-sided test) to test a hypothesis about a population mean.</p>
+<p><strong>Economic Question</strong>: "Is the average municipality at the midpoint of the development scale?"</p>
+<p>A natural benchmark for the IMDS (which ranges from 0 to 100) is the midpoint of 50. If Bolivia's municipalities were, on average, at this midpoint, we would expect $\mu_{IMDS} = 50$.</p>
+<p><strong>Instructions</strong>:</p>
+<ol>
+<li>State the hypotheses: $H_0: \mu = 50$ vs $H_1: \mu \neq 50$</li>
+<li>Use <code>scipy.stats.ttest_1samp()</code> to conduct the test</li>
+<li>Report the t-statistic and p-value</li>
+<li>State your conclusion at $\alpha = 0.05$</li>
+<li>Discuss: Is the average municipality at the midpoint of the development scale?</li>
+</ol>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># Your code here: One-sample t-test — is mean IMDS = 50?</span>
+
+<span class="c1"># Hypothesis test: H0: mu = 50 vs H1: mu != 50</span>
+<span class="n">t_stat</span><span class="p">,</span> <span class="n">p_value</span> <span class="o">=</span> <span class="n">stats</span><span class="o">.</span><span class="n">ttest_1samp</span><span class="p">(</span><span class="n">bol_key</span><span class="p">[</span><span class="s1">'imds'</span><span class="p">],</span> <span class="n">popmean</span><span class="o">=</span><span class="mi">50</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">"="</span> <span class="o">*</span> <span class="mi">70</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"HYPOTHESIS TEST: IS MEAN IMDS = 50?"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"="</span> <span class="o">*</span> <span class="mi">70</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"H₀: μ = 50  vs  H₁: μ ≠ 50"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="se">\n</span><span class="s2">Sample mean:   </span><span class="si">{</span><span class="n">bol_key</span><span class="p">[</span><span class="s1">'imds'</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"t-statistic:   </span><span class="si">{</span><span class="n">t_stat</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"p-value:       </span><span class="si">{</span><span class="n">p_value</span><span class="si">:</span><span class="s2">.6f</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="se">\n</span><span class="s2">Conclusion at α = 0.05:"</span><span class="p">)</span>
+<span class="k">if</span> <span class="n">p_value</span> <span class="o">&lt;</span> <span class="mf">0.05</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"  Reject H₀ (p = </span><span class="si">{</span><span class="n">p_value</span><span class="si">:</span><span class="s2">.6f</span><span class="si">}</span><span class="s2"> &lt; 0.05)"</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"  The average IMDS is significantly different from 50."</span><span class="p">)</span>
+<span class="k">else</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"  Fail to reject H₀ (p = </span><span class="si">{</span><span class="n">p_value</span><span class="si">:</span><span class="s2">.6f</span><span class="si">}</span><span class="s2"> ≥ 0.05)"</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"  No significant evidence that mean IMDS differs from 50."</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<blockquote>
+<p><strong>Key Concept 4.12: Statistical Significance in Development</strong></p>
+<p>A statistically significant difference between departments does not automatically imply a <strong>policy-relevant</strong> gap. With 339 municipalities providing large sample sizes, even small differences can achieve statistical significance. Policy makers must evaluate the <strong>magnitude</strong> of differences alongside p-values. A 2-point difference in IMDS may be statistically significant but practically negligible for resource allocation decisions.</p>
+</blockquote>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<h4 id="Task-3:-Department-Level-Inference-(Semi-guided)">Task 3: Department-Level Inference (Semi-guided)<a class="anchor-link" href="#Task-3:-Department-Level-Inference-(Semi-guided)">¶</a></h4><p><strong>Learning Goal</strong>: Apply confidence intervals to compare subgroups.</p>
+<p><strong>Economic Question</strong>: "Which departments have significantly different development levels from one another?"</p>
+<p><strong>Instructions</strong>:</p>
+<ol>
+<li>Calculate the 95% confidence interval for mean <code>imds</code> in each of Bolivia's 9 departments</li>
+<li>Create a <strong>forest plot</strong> (horizontal error bars) showing the CI for each department</li>
+<li>Identify which departments' CIs overlap (suggesting no significant difference) and which don't</li>
+<li>Discuss what the pattern reveals about regional inequality</li>
+</ol>
+<p><strong>Hint</strong>: Use <code>groupby('dep')</code> to calculate department-level statistics, then <code>plt.errorbar()</code> or <code>plt.barh()</code> with error bars for the forest plot.</p>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># Your code here: Department-level 95% CIs and forest plot</span>
+
+<span class="c1"># Calculate department-level statistics</span>
+<span class="n">dept_stats</span> <span class="o">=</span> <span class="n">bol_key</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s1">'dep'</span><span class="p">)[</span><span class="s1">'imds'</span><span class="p">]</span><span class="o">.</span><span class="n">agg</span><span class="p">([</span><span class="s1">'mean'</span><span class="p">,</span> <span class="s1">'std'</span><span class="p">,</span> <span class="s1">'count'</span><span class="p">])</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="s1">'mean'</span><span class="p">)</span>
+<span class="n">dept_stats</span><span class="p">[</span><span class="s1">'se'</span><span class="p">]</span> <span class="o">=</span> <span class="n">dept_stats</span><span class="p">[</span><span class="s1">'std'</span><span class="p">]</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">dept_stats</span><span class="p">[</span><span class="s1">'count'</span><span class="p">])</span>
+<span class="n">dept_stats</span><span class="p">[</span><span class="s1">'ci_low'</span><span class="p">]</span> <span class="o">=</span> <span class="n">dept_stats</span><span class="p">[</span><span class="s1">'mean'</span><span class="p">]</span> <span class="o">-</span> <span class="mf">1.96</span> <span class="o">*</span> <span class="n">dept_stats</span><span class="p">[</span><span class="s1">'se'</span><span class="p">]</span>
+<span class="n">dept_stats</span><span class="p">[</span><span class="s1">'ci_high'</span><span class="p">]</span> <span class="o">=</span> <span class="n">dept_stats</span><span class="p">[</span><span class="s1">'mean'</span><span class="p">]</span> <span class="o">+</span> <span class="mf">1.96</span> <span class="o">*</span> <span class="n">dept_stats</span><span class="p">[</span><span class="s1">'se'</span><span class="p">]</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">"="</span> <span class="o">*</span> <span class="mi">70</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"95% CONFIDENCE INTERVALS FOR MEAN IMDS BY DEPARTMENT"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"="</span> <span class="o">*</span> <span class="mi">70</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">dept_stats</span><span class="p">[[</span><span class="s1">'mean'</span><span class="p">,</span> <span class="s1">'se'</span><span class="p">,</span> <span class="s1">'ci_low'</span><span class="p">,</span> <span class="s1">'ci_high'</span><span class="p">,</span> <span class="s1">'count'</span><span class="p">]]</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">to_string</span><span class="p">())</span>
+
+<span class="c1"># Forest plot</span>
+<span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">6</span><span class="p">))</span>
+<span class="n">departments</span> <span class="o">=</span> <span class="n">dept_stats</span><span class="o">.</span><span class="n">index</span>
+<span class="n">y_pos</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">departments</span><span class="p">))</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">errorbar</span><span class="p">(</span><span class="n">dept_stats</span><span class="p">[</span><span class="s1">'mean'</span><span class="p">],</span> <span class="n">y_pos</span><span class="p">,</span>
+            <span class="n">xerr</span><span class="o">=</span><span class="mf">1.96</span> <span class="o">*</span> <span class="n">dept_stats</span><span class="p">[</span><span class="s1">'se'</span><span class="p">],</span>
+            <span class="n">fmt</span><span class="o">=</span><span class="s1">'o'</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">'navy'</span><span class="p">,</span> <span class="n">capsize</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">capthick</span><span class="o">=</span><span class="mf">1.5</span><span class="p">,</span> <span class="n">markersize</span><span class="o">=</span><span class="mi">6</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_yticks</span><span class="p">(</span><span class="n">y_pos</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_yticklabels</span><span class="p">(</span><span class="n">departments</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">'Mean IMDS (with 95% CI)'</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s1">'Forest Plot: Municipal Development by Department'</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">axvline</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">bol_key</span><span class="p">[</span><span class="s1">'imds'</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">(),</span> <span class="n">color</span><span class="o">=</span><span class="s1">'red'</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="s1">'--'</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">'National mean'</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="s1">'x'</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.3</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<h4 id="Task-4:-One-Sided-Test-%E2%80%94-Is-the-Capital-Department-More-Developed?-(Semi-guided)">Task 4: One-Sided Test — Is the Capital Department More Developed? (Semi-guided)<a class="anchor-link" href="#Task-4:-One-Sided-Test-%E2%80%94-Is-the-Capital-Department-More-Developed?-(Semi-guided)">¶</a></h4><p><strong>Learning Goal</strong>: Apply Section 4.6 (one-sided tests) to a directional hypothesis.</p>
+<p><strong>Economic Question</strong>: "Is La Paz department's mean IMDS significantly greater than the national mean?"</p>
+<p><strong>Instructions</strong>:</p>
+<ol>
+<li>Extract IMDS values for La Paz department</li>
+<li>Test $H_0: \mu_{LP} \leq \mu_{national}$ vs $H_1: \mu_{LP} &gt; \mu_{national}$ using a one-sided t-test</li>
+<li>Calculate the one-sided p-value (divide the two-sided p-value by 2, checking direction)</li>
+<li>Report and interpret the result at $\alpha = 0.05$</li>
+<li>Discuss: Is the capital department significantly more developed?</li>
+</ol>
+<p><strong>Hint</strong>: Use <code>scipy.stats.ttest_1samp()</code> with the national mean as the test value, then adjust for a one-sided test.</p>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># Your code here: One-sided t-test for La Paz department</span>
+
+<span class="c1"># Extract La Paz IMDS values</span>
+<span class="n">la_paz</span> <span class="o">=</span> <span class="n">bol_key</span><span class="p">[</span><span class="n">bol_key</span><span class="p">[</span><span class="s1">'dep'</span><span class="p">]</span> <span class="o">==</span> <span class="s1">'La Paz'</span><span class="p">][</span><span class="s1">'imds'</span><span class="p">]</span>
+<span class="n">national_mean</span> <span class="o">=</span> <span class="n">bol_key</span><span class="p">[</span><span class="s1">'imds'</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+
+<span class="c1"># Two-sided test first</span>
+<span class="n">t_stat_lp</span><span class="p">,</span> <span class="n">p_two</span> <span class="o">=</span> <span class="n">stats</span><span class="o">.</span><span class="n">ttest_1samp</span><span class="p">(</span><span class="n">la_paz</span><span class="p">,</span> <span class="n">popmean</span><span class="o">=</span><span class="n">national_mean</span><span class="p">)</span>
+
+<span class="c1"># One-sided p-value: H1: mu_LP &gt; national_mean</span>
+<span class="c1"># If t &gt; 0, one-sided p = p_two / 2; if t &lt; 0, one-sided p = 1 - p_two / 2</span>
+<span class="n">p_one</span> <span class="o">=</span> <span class="n">p_two</span> <span class="o">/</span> <span class="mi">2</span> <span class="k">if</span> <span class="n">t_stat_lp</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">p_two</span> <span class="o">/</span> <span class="mi">2</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">"="</span> <span class="o">*</span> <span class="mi">70</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"ONE-SIDED TEST: LA PAZ &gt; NATIONAL MEAN?"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"="</span> <span class="o">*</span> <span class="mi">70</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"H₀: μ_LaPaz ≤ </span><span class="si">{</span><span class="n">national_mean</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">  vs  H₁: μ_LaPaz &gt; </span><span class="si">{</span><span class="n">national_mean</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="se">\n</span><span class="s2">La Paz municipalities:  </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">la_paz</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"La Paz mean IMDS:       </span><span class="si">{</span><span class="n">la_paz</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"National mean IMDS:     </span><span class="si">{</span><span class="n">national_mean</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"t-statistic:            </span><span class="si">{</span><span class="n">t_stat_lp</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"One-sided p-value:      </span><span class="si">{</span><span class="n">p_one</span><span class="si">:</span><span class="s2">.6f</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="se">\n</span><span class="s2">Conclusion at α = 0.05:"</span><span class="p">)</span>
+<span class="k">if</span> <span class="n">p_one</span> <span class="o">&lt;</span> <span class="mf">0.05</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"  Reject H₀ (p = </span><span class="si">{</span><span class="n">p_one</span><span class="si">:</span><span class="s2">.6f</span><span class="si">}</span><span class="s2"> &lt; 0.05)"</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"  La Paz's mean IMDS is significantly greater than the national mean."</span><span class="p">)</span>
+<span class="k">else</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"  Fail to reject H₀ (p = </span><span class="si">{</span><span class="n">p_one</span><span class="si">:</span><span class="s2">.6f</span><span class="si">}</span><span class="s2"> ≥ 0.05)"</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"  No significant evidence that La Paz exceeds the national mean."</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<blockquote>
+<p><strong>Key Concept 4.13: Subnational Inference Challenges</strong></p>
+<p>When testing hypotheses about departmental means, each department contains a different number of municipalities (ranging from ~10 to ~50+). Departments with fewer municipalities have <strong>wider confidence intervals</strong> and less statistical power. This means we may fail to detect real differences for smaller departments—not because the differences don't exist, but because we lack sufficient data to establish them conclusively.</p>
+</blockquote>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<h4 id="Task-5:-Comparing-Two-Departments-(Independent)">Task 5: Comparing Two Departments (Independent)<a class="anchor-link" href="#Task-5:-Comparing-Two-Departments-(Independent)">¶</a></h4><p><strong>Learning Goal</strong>: Apply two-sample t-tests to compare group means.</p>
+<p><strong>Economic Question</strong>: "Is the development gap between the most and least developed departments statistically significant?"</p>
+<p><strong>Instructions</strong>:</p>
+<ol>
+<li>Identify the departments with the highest and lowest mean IMDS (from Task 3 results)</li>
+<li>Use <code>scipy.stats.ttest_ind()</code> to perform a two-sample t-test comparing these departments</li>
+<li>Report the t-statistic and p-value</li>
+<li>Discuss both <strong>statistical significance</strong> (p-value) and <strong>practical significance</strong> (magnitude of the gap)</li>
+<li>What does this tell us about regional inequality in Bolivia?</li>
+</ol>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># Your code here: Two-sample t-test — highest vs lowest IMDS department</span>
+
+<span class="c1"># Identify highest and lowest departments</span>
+<span class="n">dept_means</span> <span class="o">=</span> <span class="n">bol_key</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s1">'dep'</span><span class="p">)[</span><span class="s1">'imds'</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+<span class="n">top_dept</span> <span class="o">=</span> <span class="n">dept_means</span><span class="o">.</span><span class="n">idxmax</span><span class="p">()</span>
+<span class="n">bot_dept</span> <span class="o">=</span> <span class="n">dept_means</span><span class="o">.</span><span class="n">idxmin</span><span class="p">()</span>
+
+<span class="c1"># Extract IMDS values for each</span>
+<span class="n">top_values</span> <span class="o">=</span> <span class="n">bol_key</span><span class="p">[</span><span class="n">bol_key</span><span class="p">[</span><span class="s1">'dep'</span><span class="p">]</span> <span class="o">==</span> <span class="n">top_dept</span><span class="p">][</span><span class="s1">'imds'</span><span class="p">]</span>
+<span class="n">bot_values</span> <span class="o">=</span> <span class="n">bol_key</span><span class="p">[</span><span class="n">bol_key</span><span class="p">[</span><span class="s1">'dep'</span><span class="p">]</span> <span class="o">==</span> <span class="n">bot_dept</span><span class="p">][</span><span class="s1">'imds'</span><span class="p">]</span>
+
+<span class="c1"># Two-sample t-test</span>
+<span class="n">t_stat_2s</span><span class="p">,</span> <span class="n">p_value_2s</span> <span class="o">=</span> <span class="n">stats</span><span class="o">.</span><span class="n">ttest_ind</span><span class="p">(</span><span class="n">top_values</span><span class="p">,</span> <span class="n">bot_values</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">"="</span> <span class="o">*</span> <span class="mi">70</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"TWO-SAMPLE T-TEST: </span><span class="si">{</span><span class="n">top_dept</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span><span class="si">}</span><span class="s2"> vs </span><span class="si">{</span><span class="n">bot_dept</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"="</span> <span class="o">*</span> <span class="mi">70</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="se">\n</span><span class="s2">Highest IMDS department: </span><span class="si">{</span><span class="n">top_dept</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"  Mean IMDS:   </span><span class="si">{</span><span class="n">top_values</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"  N:           </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">top_values</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="se">\n</span><span class="s2">Lowest IMDS department:  </span><span class="si">{</span><span class="n">bot_dept</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"  Mean IMDS:   </span><span class="si">{</span><span class="n">bot_values</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"  N:           </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">bot_values</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="se">\n</span><span class="s2">Difference in means:    </span><span class="si">{</span><span class="n">top_values</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">bot_values</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"t-statistic:            </span><span class="si">{</span><span class="n">t_stat_2s</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"p-value:                </span><span class="si">{</span><span class="n">p_value_2s</span><span class="si">:</span><span class="s2">.6f</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="se">\n</span><span class="s2">Conclusion at α = 0.05:"</span><span class="p">)</span>
+<span class="k">if</span> <span class="n">p_value_2s</span> <span class="o">&lt;</span> <span class="mf">0.05</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"  Reject H₀ (p = </span><span class="si">{</span><span class="n">p_value_2s</span><span class="si">:</span><span class="s2">.6f</span><span class="si">}</span><span class="s2"> &lt; 0.05)"</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"  The development gap of </span><span class="si">{</span><span class="n">top_values</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">bot_values</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2"> points is statistically significant."</span><span class="p">)</span>
+<span class="k">else</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"  Fail to reject H₀ (p = </span><span class="si">{</span><span class="n">p_value_2s</span><span class="si">:</span><span class="s2">.6f</span><span class="si">}</span><span class="s2"> ≥ 0.05)"</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"  No significant evidence of a development gap."</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="se">\n</span><span class="s2">Practical significance: A gap of </span><span class="si">{</span><span class="n">top_values</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">bot_values</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2"> points on a 0-100 scale"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"represents a </span><span class="si">{</span><span class="s1">'substantial'</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="nb">abs</span><span class="p">(</span><span class="n">top_values</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">bot_values</span><span class="o">.</span><span class="n">mean</span><span class="p">())</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">10</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="s1">'modest'</span><span class="si">}</span><span class="s2"> difference in development outcomes."</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<h4 id="Task-6:-Policy-Brief-on-Regional-Inequality-(Independent)">Task 6: Policy Brief on Regional Inequality (Independent)<a class="anchor-link" href="#Task-6:-Policy-Brief-on-Regional-Inequality-(Independent)">¶</a></h4><p><strong>Objective</strong>: Write a 200-300 word policy brief summarizing your statistical findings.</p>
+<p><strong>Your brief should address</strong>:</p>
+<ol>
+<li><strong>Are departmental differences statistically significant?</strong> Summarize results from Tasks 3-5.</li>
+<li><strong>Which departments need the most attention?</strong> Use the forest plot and CI analysis to identify lagging regions.</li>
+<li><strong>How confident are we in these conclusions?</strong> Discuss the confidence levels and what the CIs tell us.</li>
+<li><strong>What are the limitations of these tests?</strong> Consider sample sizes, assumptions, and what the tests cannot tell us.</li>
+</ol>
+<p><strong>Format</strong>: Write your brief in the markdown cell below. Support your arguments with specific numbers from your analysis (means, CIs, p-values).</p>
+<p><strong>Tip</strong>: Remember Key Concepts 4.12 and 4.13—distinguish between statistical significance and policy relevance, and consider how unequal sample sizes affect your conclusions.</p>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># Your code here: Additional analysis to support your policy brief</span>
+<span class="c1">#</span>
+<span class="c1"># Suggestions:</span>
+<span class="c1"># 1. Create a summary table of all department CIs and test results</span>
+<span class="c1"># 2. Calculate effect sizes (Cohen's d) for the two-sample comparison</span>
+<span class="c1"># 3. Visualize the national IMDS distribution with department means marked</span>
+
+<span class="c1"># Example: Summary statistics for the policy brief</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"="</span> <span class="o">*</span> <span class="mi">70</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"SUMMARY TABLE FOR POLICY BRIEF"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"="</span> <span class="o">*</span> <span class="mi">70</span><span class="p">)</span>
+<span class="n">dept_summary</span> <span class="o">=</span> <span class="n">bol_key</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s1">'dep'</span><span class="p">)[</span><span class="s1">'imds'</span><span class="p">]</span><span class="o">.</span><span class="n">agg</span><span class="p">([</span><span class="s1">'mean'</span><span class="p">,</span> <span class="s1">'std'</span><span class="p">,</span> <span class="s1">'count'</span><span class="p">])</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="s1">'mean'</span><span class="p">,</span> <span class="n">ascending</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="n">dept_summary</span><span class="p">[</span><span class="s1">'se'</span><span class="p">]</span> <span class="o">=</span> <span class="n">dept_summary</span><span class="p">[</span><span class="s1">'std'</span><span class="p">]</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">dept_summary</span><span class="p">[</span><span class="s1">'count'</span><span class="p">])</span>
+<span class="n">dept_summary</span><span class="p">[</span><span class="s1">'ci_95'</span><span class="p">]</span> <span class="o">=</span> <span class="n">dept_summary</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span>
+    <span class="k">lambda</span> <span class="n">r</span><span class="p">:</span> <span class="sa">f</span><span class="s2">"[</span><span class="si">{</span><span class="n">r</span><span class="p">[</span><span class="s1">'mean'</span><span class="p">]</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mf">1.96</span><span class="o">*</span><span class="n">r</span><span class="p">[</span><span class="s1">'se'</span><span class="p">]</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">r</span><span class="p">[</span><span class="s1">'mean'</span><span class="p">]</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mf">1.96</span><span class="o">*</span><span class="n">r</span><span class="p">[</span><span class="s1">'se'</span><span class="p">]</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2">]"</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">dept_summary</span><span class="p">[[</span><span class="s1">'mean'</span><span class="p">,</span> <span class="s1">'std'</span><span class="p">,</span> <span class="s1">'count'</span><span class="p">,</span> <span class="s1">'ci_95'</span><span class="p">]]</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">to_string</span><span class="p">())</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<h4 id="What-You've-Learned-from-This-Case-Study">What You've Learned from This Case Study<a class="anchor-link" href="#What-You've-Learned-from-This-Case-Study">¶</a></h4><p>Through this analysis of subnational development in Bolivia, you've applied the full Chapter 4 statistical inference toolkit:</p>
+<ul>
+<li><strong>Confidence intervals</strong> for mean development levels</li>
+<li><strong>One-sample and two-sample hypothesis tests</strong> to evaluate development benchmarks and compare groups</li>
+<li><strong>One-sided tests</strong> for directional hypotheses about specific departments</li>
+<li><strong>Forest plots</strong> for comparing group CIs visually</li>
+<li><strong>Statistical vs practical significance</strong> in a policy context</li>
+<li><strong>Critical thinking</strong> about sample size, statistical power, and inference limitations</li>
+</ul>
+<p><strong>Connection to research</strong>: The DS4Bolivia project uses these same statistical tools to evaluate whether satellite-predicted development indicators are significantly different from survey-based measures, providing evidence for the reliability of remote sensing approaches to SDG monitoring.</p>
+<p><strong>Looking ahead</strong>: In Chapter 5, we'll move beyond testing means to exploring <em>bivariate relationships</em>—how nighttime lights relate to specific development outcomes across Bolivia's municipalities.</p>
+<hr/>
+<p><strong>Well done!</strong> You've now tested development hypotheses for both cross-country convergence and Bolivian regional inequality using the tools of statistical inference.</p>
 </div>
 </div>
 </div>

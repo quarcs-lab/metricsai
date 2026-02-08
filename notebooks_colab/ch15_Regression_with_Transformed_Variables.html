@@ -10138,7 +10138,7 @@ INTERPRETATION OF COEFFICIENTS (controlling for other regressors)
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h2 id="Case-Studies">Case Studies<a class="anchor-link" href="#Case-Studies">¶</a></h2><h3 id="Case-Study:-Transformed-Variables-for-Cross-Country-Productivity-Analysis">Case Study: Transformed Variables for Cross-Country Productivity Analysis<a class="anchor-link" href="#Case-Study:-Transformed-Variables-for-Cross-Country-Productivity-Analysis">¶</a></h3><p>In this case study, you will apply variable transformation techniques to analyze cross-country labor productivity patterns and determine the best functional form for modeling productivity determinants.</p>
+<h2 id="Case-Studies">Case Studies<a class="anchor-link" href="#Case-Studies">¶</a></h2><h3 id="Case-Study-1:-Transformed-Variables-for-Cross-Country-Productivity-Analysis">Case Study 1: Transformed Variables for Cross-Country Productivity Analysis<a class="anchor-link" href="#Case-Study-1:-Transformed-Variables-for-Cross-Country-Productivity-Analysis">¶</a></h3><p>In this case study, you will apply variable transformation techniques to analyze cross-country labor productivity patterns and determine the best functional form for modeling productivity determinants.</p>
 <p><strong>Dataset:</strong> Mendez Convergence Clubs</p>
 <div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
@@ -10209,6 +10209,404 @@ INTERPRETATION OF COEFFICIENTS (controlling for other regressors)
 </ul>
 <hr/>
 <p><strong>What You've Learned:</strong> You have applied multiple variable transformation techniques to cross-country data, demonstrating that log specifications better capture productivity relationships, returns to human capital may be nonlinear, and regional interactions reveal important heterogeneity in development patterns.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<h3 id="Case-Study-2:-Nonlinear-Satellite-Development-Relationships">Case Study 2: Nonlinear Satellite-Development Relationships<a class="anchor-link" href="#Case-Study-2:-Nonlinear-Satellite-Development-Relationships">¶</a></h3><p><strong>Research Question</strong>: What is the best functional form for modeling the relationship between satellite nighttime lights and municipal development in Bolivia?</p>
+<p><strong>Background</strong>: In previous chapters, we estimated <em>linear</em> regressions of development on NTL. But the relationship may be nonlinear—additional nighttime lights may have diminishing effects on development. In this case study, we apply Chapter 15's <strong>transformation</strong> tools to explore functional form choices for the satellite-development relationship.</p>
+<p><strong>The Data</strong>: The DS4Bolivia dataset covers 339 Bolivian municipalities with satellite data, development indices, and socioeconomic indicators.</p>
+<p><strong>Key Variables</strong>:</p>
+<ul>
+<li><code>mun</code>: Municipality name</li>
+<li><code>dep</code>: Department (administrative region)</li>
+<li><code>imds</code>: Municipal Sustainable Development Index (0-100)</li>
+<li><code>ln_NTLpc2017</code>: Log nighttime lights per capita (2017)</li>
+<li><code>sdg7_1_ec</code>: Electricity coverage (SDG 7 indicator)</li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<h4 id="Load-the-DS4Bolivia-Data">Load the DS4Bolivia Data<a class="anchor-link" href="#Load-the-DS4Bolivia-Data">¶</a></h4>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># Load the DS4Bolivia dataset</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">statsmodels.formula.api</span><span class="w"> </span><span class="kn">import</span> <span class="n">ols</span>
+
+<span class="n">url_bol</span> <span class="o">=</span> <span class="s2">"https://raw.githubusercontent.com/quarcs-lab/ds4bolivia/master/ds4bolivia_v20250523.csv"</span>
+<span class="n">bol</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">url_bol</span><span class="p">)</span>
+
+<span class="c1"># Select key variables for this case study</span>
+<span class="n">key_vars</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'mun'</span><span class="p">,</span> <span class="s1">'dep'</span><span class="p">,</span> <span class="s1">'imds'</span><span class="p">,</span> <span class="s1">'ln_NTLpc2017'</span><span class="p">,</span> <span class="s1">'sdg7_1_ec'</span><span class="p">]</span>
+<span class="n">bol_cs</span> <span class="o">=</span> <span class="n">bol</span><span class="p">[</span><span class="n">key_vars</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+<span class="c1"># Create raw NTL variable from log</span>
+<span class="n">bol_cs</span><span class="p">[</span><span class="s1">'NTLpc2017_raw'</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">bol_cs</span><span class="p">[</span><span class="s1">'ln_NTLpc2017'</span><span class="p">])</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">"="</span> <span class="o">*</span> <span class="mi">70</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"DS4BOLIVIA: TRANSFORMED VARIABLES CASE STUDY"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"="</span> <span class="o">*</span> <span class="mi">70</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Observations: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">bol_cs</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="se">\n</span><span class="s2">Key variable summary:"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">bol_cs</span><span class="p">[[</span><span class="s1">'imds'</span><span class="p">,</span> <span class="s1">'ln_NTLpc2017'</span><span class="p">,</span> <span class="s1">'NTLpc2017_raw'</span><span class="p">,</span> <span class="s1">'sdg7_1_ec'</span><span class="p">]]</span><span class="o">.</span><span class="n">describe</span><span class="p">()</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">3</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<h4 id="Task-1:-Compare-Log-Specifications-(Guided)">Task 1: Compare Log Specifications (Guided)<a class="anchor-link" href="#Task-1:-Compare-Log-Specifications-(Guided)">¶</a></h4><p><strong>Objective</strong>: Estimate four regression specifications and compare functional forms.</p>
+<p><strong>Instructions</strong>:</p>
+<ol>
+<li>Estimate four models:<ul>
+<li>(a) <code>imds ~ ln_NTLpc2017</code> (level-log)</li>
+<li>(b) <code>np.log(imds) ~ ln_NTLpc2017</code> (log-log)</li>
+<li>(c) <code>imds ~ NTLpc2017_raw</code> (level-level)</li>
+<li>(d) <code>np.log(imds) ~ NTLpc2017_raw</code> (log-level)</li>
+</ul>
+</li>
+<li>Compare R² across specifications</li>
+<li>Interpret the coefficient in each model (elasticity, semi-elasticity, or marginal effect)</li>
+</ol>
+<p><strong>Note</strong>: R² values are not directly comparable across models with different dependent variables (levels vs. logs).</p>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># Your code here: Compare four functional form specifications</span>
+<span class="c1">#</span>
+<span class="c1"># Example structure:</span>
+<span class="c1"># bol_reg = bol_cs[['imds', 'ln_NTLpc2017', 'NTLpc2017_raw']].dropna()</span>
+<span class="c1"># bol_reg = bol_reg[bol_reg['imds'] &gt; 0]  # Ensure log is defined</span>
+<span class="c1">#</span>
+<span class="c1"># m_a = ols('imds ~ ln_NTLpc2017', data=bol_reg).fit(cov_type='HC1')</span>
+<span class="c1"># m_b = ols('np.log(imds) ~ ln_NTLpc2017', data=bol_reg).fit(cov_type='HC1')</span>
+<span class="c1"># m_c = ols('imds ~ NTLpc2017_raw', data=bol_reg).fit(cov_type='HC1')</span>
+<span class="c1"># m_d = ols('np.log(imds) ~ NTLpc2017_raw', data=bol_reg).fit(cov_type='HC1')</span>
+<span class="c1">#</span>
+<span class="c1"># print("Model (a) Level-Log  R²:", m_a.rsquared.round(4))</span>
+<span class="c1"># print("Model (b) Log-Log    R²:", m_b.rsquared.round(4))</span>
+<span class="c1"># print("Model (c) Level-Level R²:", m_c.rsquared.round(4))</span>
+<span class="c1"># print("Model (d) Log-Level  R²:", m_d.rsquared.round(4))</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<h4 id="Task-2:-Quadratic-NTL-(Guided)">Task 2: Quadratic NTL (Guided)<a class="anchor-link" href="#Task-2:-Quadratic-NTL-(Guided)">¶</a></h4><p><strong>Objective</strong>: Test whether the NTL-development relationship exhibits diminishing returns.</p>
+<p><strong>Instructions</strong>:</p>
+<ol>
+<li>Estimate <code>imds ~ ln_NTLpc2017 + I(ln_NTLpc2017**2)</code></li>
+<li>Test whether the quadratic term is statistically significant</li>
+<li>Plot the fitted curve against the scatter plot of the data</li>
+<li>Calculate the turning point: $NTL^* = -\beta_1 / (2\beta_2)$</li>
+<li>Discuss: Is there evidence of diminishing returns to luminosity?</li>
+</ol>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># Your code here: Quadratic specification</span>
+<span class="c1">#</span>
+<span class="c1"># Example structure:</span>
+<span class="c1"># m_quad = ols('imds ~ ln_NTLpc2017 + I(ln_NTLpc2017**2)', data=bol_reg).fit(cov_type='HC1')</span>
+<span class="c1"># print(m_quad.summary())</span>
+<span class="c1">#</span>
+<span class="c1"># # Turning point</span>
+<span class="c1"># b1 = m_quad.params['ln_NTLpc2017']</span>
+<span class="c1"># b2 = m_quad.params['I(ln_NTLpc2017 ** 2)']</span>
+<span class="c1"># print(f"\nTurning point: ln_NTLpc = {-b1/(2*b2):.2f}")</span>
+<span class="c1">#</span>
+<span class="c1"># # Plot fitted curve</span>
+<span class="c1"># x_range = np.linspace(bol_reg['ln_NTLpc2017'].min(), bol_reg['ln_NTLpc2017'].max(), 100)</span>
+<span class="c1"># y_hat = m_quad.params['Intercept'] + b1*x_range + b2*x_range**2</span>
+<span class="c1"># fig, ax = plt.subplots(figsize=(10, 6))</span>
+<span class="c1"># ax.scatter(bol_reg['ln_NTLpc2017'], bol_reg['imds'], alpha=0.4, label='Data')</span>
+<span class="c1"># ax.plot(x_range, y_hat, 'r-', linewidth=2, label='Quadratic fit')</span>
+<span class="c1"># ax.set_xlabel('Log NTL per Capita (2017)')</span>
+<span class="c1"># ax.set_ylabel('IMDS')</span>
+<span class="c1"># ax.set_title('Quadratic NTL-Development Relationship')</span>
+<span class="c1"># ax.legend()</span>
+<span class="c1"># plt.show()</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<blockquote>
+<p><strong>Key Concept 15.11: Diminishing Returns to Luminosity</strong></p>
+<p>A significant negative quadratic term for NTL suggests <strong>diminishing marginal returns</strong>: additional nighttime lights associate with progressively smaller development gains. In already-bright urban centers, more light reflects commercial excess rather than fundamental development improvement. This nonlinearity has practical implications: satellite-based predictions may be most accurate for municipalities in the middle of the luminosity distribution.</p>
+</blockquote>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<h4 id="Task-3:-Standardized-Coefficients-(Semi-guided)">Task 3: Standardized Coefficients (Semi-guided)<a class="anchor-link" href="#Task-3:-Standardized-Coefficients-(Semi-guided)">¶</a></h4><p><strong>Objective</strong>: Compare the relative importance of nighttime lights and electricity coverage for predicting development.</p>
+<p><strong>Instructions</strong>:</p>
+<ol>
+<li>Standardize <code>imds</code>, <code>ln_NTLpc2017</code>, and <code>sdg7_1_ec</code> to mean=0 and sd=1</li>
+<li>Estimate the regression on standardized variables</li>
+<li>Compare standardized coefficients: Which predictor has a larger effect in standard deviation terms?</li>
+</ol>
+<p><strong>Hint</strong>: Use <code>(x - x.mean()) / x.std()</code> to standardize each variable.</p>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># Your code here: Standardized coefficients</span>
+<span class="c1">#</span>
+<span class="c1"># Example structure:</span>
+<span class="c1"># bol_std = bol_cs[['imds', 'ln_NTLpc2017', 'sdg7_1_ec']].dropna()</span>
+<span class="c1"># for col in ['imds', 'ln_NTLpc2017', 'sdg7_1_ec']:</span>
+<span class="c1">#     bol_std[f'{col}_z'] = (bol_std[col] - bol_std[col].mean()) / bol_std[col].std()</span>
+<span class="c1">#</span>
+<span class="c1"># m_std = ols('imds_z ~ ln_NTLpc2017_z + sdg7_1_ec_z', data=bol_std).fit(cov_type='HC1')</span>
+<span class="c1"># print(m_std.summary())</span>
+<span class="c1"># print("\nStandardized coefficients (beta weights):")</span>
+<span class="c1"># print(f"  NTL:         {m_std.params['ln_NTLpc2017_z']:.4f}")</span>
+<span class="c1"># print(f"  Electricity: {m_std.params['sdg7_1_ec_z']:.4f}")</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<h4 id="Task-4:-Interaction:-NTL-x-Electricity-(Semi-guided)">Task 4: Interaction: NTL x Electricity (Semi-guided)<a class="anchor-link" href="#Task-4:-Interaction:-NTL-x-Electricity-(Semi-guided)">¶</a></h4><p><strong>Objective</strong>: Test whether the effect of nighttime lights on development depends on electricity coverage.</p>
+<p><strong>Instructions</strong>:</p>
+<ol>
+<li>Estimate <code>imds ~ ln_NTLpc2017 * sdg7_1_ec</code></li>
+<li>Interpret the interaction term: Does the NTL effect depend on electricity coverage?</li>
+<li>Calculate the marginal effect of NTL at low (25th percentile) vs. high (75th percentile) electricity levels</li>
+<li>Discuss: What does this interaction reveal about the satellite-development relationship?</li>
+</ol>
+<p><strong>Hint</strong>: The marginal effect of NTL is $\beta_{NTL} + \beta_{interaction} \times electricity$.</p>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># Your code here: Interaction model</span>
+<span class="c1">#</span>
+<span class="c1"># Example structure:</span>
+<span class="c1"># m_int = ols('imds ~ ln_NTLpc2017 * sdg7_1_ec', data=bol_reg_full).fit(cov_type='HC1')</span>
+<span class="c1"># print(m_int.summary())</span>
+<span class="c1">#</span>
+<span class="c1"># # Marginal effect at different electricity levels</span>
+<span class="c1"># elec_25 = bol_reg_full['sdg7_1_ec'].quantile(0.25)</span>
+<span class="c1"># elec_75 = bol_reg_full['sdg7_1_ec'].quantile(0.75)</span>
+<span class="c1"># me_low = m_int.params['ln_NTLpc2017'] + m_int.params['ln_NTLpc2017:sdg7_1_ec'] * elec_25</span>
+<span class="c1"># me_high = m_int.params['ln_NTLpc2017'] + m_int.params['ln_NTLpc2017:sdg7_1_ec'] * elec_75</span>
+<span class="c1"># print(f"\nMarginal effect of NTL at low electricity ({elec_25:.1f}%): {me_low:.4f}")</span>
+<span class="c1"># print(f"Marginal effect of NTL at high electricity ({elec_75:.1f}%): {me_high:.4f}")</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<blockquote>
+<p><strong>Key Concept 15.12: Elasticity of Development to Satellite Signals</strong></p>
+<p>In a log-log specification (log IMDS ~ log NTL), the coefficient directly estimates the <strong>elasticity</strong>: the percentage change in development associated with a 1% increase in nighttime lights per capita. An elasticity of, say, 0.15 means a 10% increase in NTL per capita is associated with a 1.5% increase in IMDS. Elasticities provide scale-free comparisons across different variables and contexts.</p>
+</blockquote>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<h4 id="Task-5:-Predictions-with-Retransformation-(Independent)">Task 5: Predictions with Retransformation (Independent)<a class="anchor-link" href="#Task-5:-Predictions-with-Retransformation-(Independent)">¶</a></h4><p><strong>Objective</strong>: Generate predictions from the log-log model and apply the Duan smearing correction.</p>
+<p><strong>Instructions</strong>:</p>
+<ol>
+<li>Estimate the log-log model: <code>np.log(imds) ~ ln_NTLpc2017</code></li>
+<li>Generate naive predictions: $\exp(\widehat{\ln(imds)})$</li>
+<li>Apply the Duan smearing correction: multiply predictions by $\bar{\exp(\hat{e})}$ (the mean of exponentiated residuals)</li>
+<li>Compare naive vs. corrected predictions</li>
+<li>Discuss: How much does the retransformation correction matter?</li>
+</ol>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># Your code here: Retransformation bias correction</span>
+<span class="c1">#</span>
+<span class="c1"># Example structure:</span>
+<span class="c1"># m_loglog = ols('np.log(imds) ~ ln_NTLpc2017', data=bol_reg).fit(cov_type='HC1')</span>
+<span class="c1">#</span>
+<span class="c1"># # Naive prediction</span>
+<span class="c1"># naive_pred = np.exp(m_loglog.fittedvalues)</span>
+<span class="c1">#</span>
+<span class="c1"># # Duan smearing correction</span>
+<span class="c1"># smearing_factor = np.exp(m_loglog.resid).mean()</span>
+<span class="c1"># corrected_pred = naive_pred * smearing_factor</span>
+<span class="c1">#</span>
+<span class="c1"># print(f"Smearing factor: {smearing_factor:.4f}")</span>
+<span class="c1"># print(f"Mean actual IMDS: {bol_reg['imds'].mean():.2f}")</span>
+<span class="c1"># print(f"Mean naive prediction: {naive_pred.mean():.2f}")</span>
+<span class="c1"># print(f"Mean corrected prediction: {corrected_pred.mean():.2f}")</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<h4 id="Task-6:-Functional-Form-Brief-(Independent)">Task 6: Functional Form Brief (Independent)<a class="anchor-link" href="#Task-6:-Functional-Form-Brief-(Independent)">¶</a></h4><p><strong>Objective</strong>: Write a 200-300 word brief summarizing your functional form analysis.</p>
+<p><strong>Your brief should address</strong>:</p>
+<ol>
+<li>Which specification best captures the satellite-development relationship?</li>
+<li>Is there evidence of nonlinearity (diminishing returns)?</li>
+<li>What are the elasticity estimates from the log-log model?</li>
+<li>Does the interaction with electricity coverage reveal important heterogeneity?</li>
+<li>How important is the retransformation correction for practical predictions?</li>
+<li>Policy implications: What do the functional form results imply for using satellite data to monitor SDG progress?</li>
+</ol>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># Your code here: Additional analysis for the brief</span>
+<span class="c1">#</span>
+<span class="c1"># You might want to:</span>
+<span class="c1"># 1. Create a summary comparison table of all specifications</span>
+<span class="c1"># 2. Plot fitted values from different models on the same graph</span>
+<span class="c1"># 3. Calculate and compare elasticities across specifications</span>
+<span class="c1"># 4. Summarize key statistics to cite in your brief</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<h4 id="What-You've-Learned-from-This-Case-Study">What You've Learned from This Case Study<a class="anchor-link" href="#What-You've-Learned-from-This-Case-Study">¶</a></h4><p>Through this exploration of functional forms for the satellite-development relationship, you've applied Chapter 15's transformation toolkit to real geospatial data:</p>
+<ul>
+<li><strong>Functional form comparison</strong>: Estimated level-level, level-log, log-level, and log-log specifications</li>
+<li><strong>Nonlinearity detection</strong>: Used quadratic terms to test for diminishing returns to luminosity</li>
+<li><strong>Standardized coefficients</strong>: Compared the relative importance of NTL and electricity coverage</li>
+<li><strong>Interaction effects</strong>: Examined how electricity coverage moderates the NTL-development relationship</li>
+<li><strong>Retransformation</strong>: Applied the Duan smearing correction to generate unbiased predictions from log models</li>
+<li><strong>Critical thinking</strong>: Assessed which functional form best represents satellite-development patterns</li>
+</ul>
+<p><strong>Connection</strong>: In Chapter 16, we apply <em>diagnostic tools</em> to check whether our satellite prediction models satisfy regression assumptions.</p>
+<hr/>
 </div>
 </div>
 </div>

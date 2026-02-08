@@ -9962,7 +9962,7 @@ Key concepts:
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h2 id="Case-Studies">Case Studies<a class="anchor-link" href="#Case-Studies">¶</a></h2><h3 id="Case-Study:-Robust-Inference-for-Cross-Country-Productivity">Case Study: Robust Inference for Cross-Country Productivity<a class="anchor-link" href="#Case-Study:-Robust-Inference-for-Cross-Country-Productivity">¶</a></h3><p>In this case study, you will apply robust inference methods to cross-country productivity data. You'll compare default and robust standard errors, make predictions for specific countries, and assess how methodological choices affect conclusions about productivity determinants.</p>
+<h2 id="Case-Studies">Case Studies<a class="anchor-link" href="#Case-Studies">¶</a></h2><h3 id="Case-Study-1:-Robust-Inference-for-Cross-Country-Productivity">Case Study 1: Robust Inference for Cross-Country Productivity<a class="anchor-link" href="#Case-Study-1:-Robust-Inference-for-Cross-Country-Productivity">¶</a></h3><p>In this case study, you will apply robust inference methods to cross-country productivity data. You'll compare default and robust standard errors, make predictions for specific countries, and assess how methodological choices affect conclusions about productivity determinants.</p>
 <p><strong>Dataset:</strong> Mendez Convergence Clubs Data</p>
 <ul>
 <li><strong>Source:</strong> Mendez (2020), 108 countries, 1990-2014</li>
@@ -10167,6 +10167,498 @@ Key concepts:
 <li>Connected robust inference methods to practical policy questions</li>
 </ul>
 <p>These tools ensure your empirical conclusions are reliable under realistic data conditions.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<h3 id="Case-Study-2:-Robust-Prediction-of-Municipal-Development">Case Study 2: Robust Prediction of Municipal Development<a class="anchor-link" href="#Case-Study-2:-Robust-Prediction-of-Municipal-Development">¶</a></h3><p>In Chapters 10-11, we estimated multiple regression models predicting municipal development from nighttime lights and satellite embeddings, and tested the statistical significance of these predictors. Now we apply Chapter 12's tools for <strong>robust inference</strong> and <strong>prediction</strong>---crucial for translating satellite models into practical SDG monitoring tools.</p>
+<p><strong>The Data</strong>: The <a href="https://github.com/quarcs-lab/ds4bolivia">DS4Bolivia project</a> provides a comprehensive dataset covering 339 Bolivian municipalities with over 350 variables, including the Municipal Sustainable Development Index (IMDS), nighttime lights per capita, and 64 satellite embedding dimensions. Here we focus on robust standard errors and prediction intervals for the satellite-development model.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<h4 id="Load-the-DS4Bolivia-Data">Load the DS4Bolivia Data<a class="anchor-link" href="#Load-the-DS4Bolivia-Data">¶</a></h4><p>Let's load the DS4Bolivia dataset and select the key variables for robust inference and prediction analysis.</p>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># Load the DS4Bolivia dataset</span>
+<span class="n">url_bol</span> <span class="o">=</span> <span class="s2">"https://raw.githubusercontent.com/quarcs-lab/ds4bolivia/master/ds4bolivia_v20250523.csv"</span>
+<span class="n">bol</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">url_bol</span><span class="p">)</span>
+
+<span class="c1"># Display basic information</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"="</span> <span class="o">*</span> <span class="mi">70</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"DS4BOLIVIA DATASET"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"="</span> <span class="o">*</span> <span class="mi">70</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Dataset shape: </span><span class="si">{</span><span class="n">bol</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2"> municipalities, </span><span class="si">{</span><span class="n">bol</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s2"> variables"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="se">\n</span><span class="s2">Departments: </span><span class="si">{</span><span class="n">bol</span><span class="p">[</span><span class="s1">'dep'</span><span class="p">]</span><span class="o">.</span><span class="n">nunique</span><span class="p">()</span><span class="si">}</span><span class="s2"> unique departments"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Department names: </span><span class="si">{</span><span class="nb">sorted</span><span class="p">(</span><span class="n">bol</span><span class="p">[</span><span class="s1">'dep'</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">())</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+
+<span class="c1"># Select key variables for this case study</span>
+<span class="n">key_vars</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'mun'</span><span class="p">,</span> <span class="s1">'dep'</span><span class="p">,</span> <span class="s1">'imds'</span><span class="p">,</span> <span class="s1">'ln_NTLpc2017'</span><span class="p">,</span>
+            <span class="s1">'A00'</span><span class="p">,</span> <span class="s1">'A10'</span><span class="p">,</span> <span class="s1">'A20'</span><span class="p">,</span> <span class="s1">'A30'</span><span class="p">,</span> <span class="s1">'A40'</span><span class="p">]</span>
+<span class="n">bol_key</span> <span class="o">=</span> <span class="n">bol</span><span class="p">[</span><span class="n">key_vars</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="se">\n</span><span class="s2">Key variables selected: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">key_vars</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"</span><span class="se">\n</span><span class="s2">"</span> <span class="o">+</span> <span class="s2">"="</span> <span class="o">*</span> <span class="mi">70</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"FIRST 10 MUNICIPALITIES"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"="</span> <span class="o">*</span> <span class="mi">70</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">bol_key</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span><span class="o">.</span><span class="n">to_string</span><span class="p">())</span>
+
+<span class="c1"># Variable descriptions</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"</span><span class="se">\n</span><span class="s2">"</span> <span class="o">+</span> <span class="s2">"="</span> <span class="o">*</span> <span class="mi">70</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"KEY VARIABLE DESCRIPTIONS"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"="</span> <span class="o">*</span> <span class="mi">70</span><span class="p">)</span>
+<span class="n">descriptions</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">'mun'</span><span class="p">:</span> <span class="s1">'Municipality name'</span><span class="p">,</span>
+    <span class="s1">'dep'</span><span class="p">:</span> <span class="s1">'Department (administrative region, 9 total)'</span><span class="p">,</span>
+    <span class="s1">'imds'</span><span class="p">:</span> <span class="s1">'Municipal Sustainable Development Index (0-100, composite of all SDGs)'</span><span class="p">,</span>
+    <span class="s1">'ln_NTLpc2017'</span><span class="p">:</span> <span class="s1">'Log of nighttime lights per capita (2017, satellite-based)'</span><span class="p">,</span>
+    <span class="s1">'A00-A40'</span><span class="p">:</span> <span class="s1">'Satellite image embedding dimensions (5 of 64 principal features)'</span><span class="p">,</span>
+<span class="p">}</span>
+<span class="k">for</span> <span class="n">var</span><span class="p">,</span> <span class="n">desc</span> <span class="ow">in</span> <span class="n">descriptions</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"  </span><span class="si">{</span><span class="n">var</span><span class="si">:</span><span class="s2">20s</span><span class="si">}</span><span class="s2"> --- </span><span class="si">{</span><span class="n">desc</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<h4 id="Task-1:-Default-vs-Robust-Standard-Errors-(Guided)">Task 1: Default vs Robust Standard Errors (Guided)<a class="anchor-link" href="#Task-1:-Default-vs-Robust-Standard-Errors-(Guided)">¶</a></h4><p><strong>Objective</strong>: Estimate the satellite-development model with both default and HC1 robust standard errors and compare the results.</p>
+<p><strong>Instructions</strong>:</p>
+<ol>
+<li>Estimate <code>imds ~ ln_NTLpc2017 + A00 + A10 + A20 + A30 + A40</code> with default standard errors</li>
+<li>Re-estimate with HC1 robust standard errors (<code>cov_type='HC1'</code>)</li>
+<li>Compare standard errors side-by-side for each coefficient</li>
+<li>Identify which coefficients have substantially different SEs under the two methods</li>
+</ol>
+<p><strong>Apply what you learned in section 12.2</strong>: Use <code>ols().fit()</code> for default SEs and <code>ols().fit(cov_type='HC1')</code> for robust SEs.</p>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># Task 1: Default vs Robust Standard Errors</span>
+<span class="c1"># ----------------------------------------------------------</span>
+
+<span class="c1"># Prepare regression data (drop missing values)</span>
+<span class="n">reg_vars</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'imds'</span><span class="p">,</span> <span class="s1">'ln_NTLpc2017'</span><span class="p">,</span> <span class="s1">'A00'</span><span class="p">,</span> <span class="s1">'A10'</span><span class="p">,</span> <span class="s1">'A20'</span><span class="p">,</span> <span class="s1">'A30'</span><span class="p">,</span> <span class="s1">'A40'</span><span class="p">]</span>
+<span class="n">reg_data</span> <span class="o">=</span> <span class="n">bol_key</span><span class="p">[</span><span class="n">reg_vars</span> <span class="o">+</span> <span class="p">[</span><span class="s1">'dep'</span><span class="p">]]</span><span class="o">.</span><span class="n">dropna</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Regression sample: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">reg_data</span><span class="p">)</span><span class="si">}</span><span class="s2"> municipalities (after dropping missing values)"</span><span class="p">)</span>
+
+<span class="c1"># Estimate with default standard errors</span>
+<span class="n">model_default</span> <span class="o">=</span> <span class="n">ols</span><span class="p">(</span><span class="s1">'imds ~ ln_NTLpc2017 + A00 + A10 + A20 + A30 + A40'</span><span class="p">,</span>
+                    <span class="n">data</span><span class="o">=</span><span class="n">reg_data</span><span class="p">)</span><span class="o">.</span><span class="n">fit</span><span class="p">()</span>
+
+<span class="c1"># Estimate with HC1 robust standard errors</span>
+<span class="n">model_hc1</span> <span class="o">=</span> <span class="n">ols</span><span class="p">(</span><span class="s1">'imds ~ ln_NTLpc2017 + A00 + A10 + A20 + A30 + A40'</span><span class="p">,</span>
+                <span class="n">data</span><span class="o">=</span><span class="n">reg_data</span><span class="p">)</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">cov_type</span><span class="o">=</span><span class="s1">'HC1'</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">"</span><span class="se">\n</span><span class="s2">"</span> <span class="o">+</span> <span class="s2">"="</span> <span class="o">*</span> <span class="mi">70</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"COMPARISON: DEFAULT vs HC1 ROBUST STANDARD ERRORS"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"="</span> <span class="o">*</span> <span class="mi">70</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="s1">'Variable'</span><span class="si">:</span><span class="s2">&lt;18</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="s1">'Coef'</span><span class="si">:</span><span class="s2">&gt;10</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="s1">'Default SE'</span><span class="si">:</span><span class="s2">&gt;12</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="s1">'HC1 SE'</span><span class="si">:</span><span class="s2">&gt;12</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="s1">'Ratio'</span><span class="si">:</span><span class="s2">&gt;8</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"-"</span> <span class="o">*</span> <span class="mi">62</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="n">model_default</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">index</span><span class="p">:</span>
+    <span class="n">coef</span> <span class="o">=</span> <span class="n">model_default</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="n">var</span><span class="p">]</span>
+    <span class="n">se_def</span> <span class="o">=</span> <span class="n">model_default</span><span class="o">.</span><span class="n">bse</span><span class="p">[</span><span class="n">var</span><span class="p">]</span>
+    <span class="n">se_hc1</span> <span class="o">=</span> <span class="n">model_hc1</span><span class="o">.</span><span class="n">bse</span><span class="p">[</span><span class="n">var</span><span class="p">]</span>
+    <span class="n">ratio</span> <span class="o">=</span> <span class="n">se_hc1</span> <span class="o">/</span> <span class="n">se_def</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">var</span><span class="si">:</span><span class="s2">&lt;18</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">coef</span><span class="si">:</span><span class="s2">&gt;10.4f</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">se_def</span><span class="si">:</span><span class="s2">&gt;12.4f</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">se_hc1</span><span class="si">:</span><span class="s2">&gt;12.4f</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">ratio</span><span class="si">:</span><span class="s2">&gt;8.3f</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="se">\n</span><span class="s2">R-squared: </span><span class="si">{</span><span class="n">model_default</span><span class="o">.</span><span class="n">rsquared</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Adj. R-squared: </span><span class="si">{</span><span class="n">model_default</span><span class="o">.</span><span class="n">rsquared_adj</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="se">\n</span><span class="s2">Note: Coefficients are identical --- only SEs change."</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"Ratios &gt; 1 suggest heteroskedasticity inflates default SEs' precision."</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<h4 id="Task-2:-Cluster-Robust-Standard-Errors-by-Department-(Guided)">Task 2: Cluster-Robust Standard Errors by Department (Guided)<a class="anchor-link" href="#Task-2:-Cluster-Robust-Standard-Errors-by-Department-(Guided)">¶</a></h4><p><strong>Objective</strong>: Re-estimate the model with cluster-robust standard errors grouped by department.</p>
+<p><strong>Instructions</strong>:</p>
+<ol>
+<li>Re-estimate using <code>cov_type='cluster'</code> with <code>cov_kwds={'groups': reg_data['dep']}</code></li>
+<li>Compare cluster-robust SEs with default and HC1 SEs</li>
+<li>Discuss: Why might municipalities within a department share unobserved characteristics?</li>
+</ol>
+<p><strong>Apply what you learned in section 12.2</strong>: Cluster-robust SEs account for within-group correlation of errors.</p>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># Task 2: Cluster-Robust Standard Errors by Department</span>
+<span class="c1"># ----------------------------------------------------------</span>
+
+<span class="c1"># Estimate with cluster-robust SEs by department</span>
+<span class="n">model_cluster</span> <span class="o">=</span> <span class="n">ols</span><span class="p">(</span><span class="s1">'imds ~ ln_NTLpc2017 + A00 + A10 + A20 + A30 + A40'</span><span class="p">,</span>
+                    <span class="n">data</span><span class="o">=</span><span class="n">reg_data</span><span class="p">)</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">cov_type</span><span class="o">=</span><span class="s1">'cluster'</span><span class="p">,</span>
+                                      <span class="n">cov_kwds</span><span class="o">=</span><span class="p">{</span><span class="s1">'groups'</span><span class="p">:</span> <span class="n">reg_data</span><span class="p">[</span><span class="s1">'dep'</span><span class="p">]})</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">"="</span> <span class="o">*</span> <span class="mi">70</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"COMPARISON: DEFAULT vs HC1 vs CLUSTER-ROBUST STANDARD ERRORS"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"="</span> <span class="o">*</span> <span class="mi">70</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="s1">'Variable'</span><span class="si">:</span><span class="s2">&lt;18</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="s1">'Coef'</span><span class="si">:</span><span class="s2">&gt;10</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="s1">'Default SE'</span><span class="si">:</span><span class="s2">&gt;12</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="s1">'HC1 SE'</span><span class="si">:</span><span class="s2">&gt;12</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="s1">'Cluster SE'</span><span class="si">:</span><span class="s2">&gt;12</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"-"</span> <span class="o">*</span> <span class="mi">66</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="n">model_default</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">index</span><span class="p">:</span>
+    <span class="n">coef</span> <span class="o">=</span> <span class="n">model_default</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="n">var</span><span class="p">]</span>
+    <span class="n">se_def</span> <span class="o">=</span> <span class="n">model_default</span><span class="o">.</span><span class="n">bse</span><span class="p">[</span><span class="n">var</span><span class="p">]</span>
+    <span class="n">se_hc1</span> <span class="o">=</span> <span class="n">model_hc1</span><span class="o">.</span><span class="n">bse</span><span class="p">[</span><span class="n">var</span><span class="p">]</span>
+    <span class="n">se_clust</span> <span class="o">=</span> <span class="n">model_cluster</span><span class="o">.</span><span class="n">bse</span><span class="p">[</span><span class="n">var</span><span class="p">]</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">var</span><span class="si">:</span><span class="s2">&lt;18</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">coef</span><span class="si">:</span><span class="s2">&gt;10.4f</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">se_def</span><span class="si">:</span><span class="s2">&gt;12.4f</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">se_hc1</span><span class="si">:</span><span class="s2">&gt;12.4f</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">se_clust</span><span class="si">:</span><span class="s2">&gt;12.4f</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+
+<span class="n">n_clusters</span> <span class="o">=</span> <span class="n">reg_data</span><span class="p">[</span><span class="s1">'dep'</span><span class="p">]</span><span class="o">.</span><span class="n">nunique</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="se">\n</span><span class="s2">Number of clusters (departments): </span><span class="si">{</span><span class="n">n_clusters</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Municipalities per department (avg): </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">reg_data</span><span class="p">)</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">n_clusters</span><span class="si">:</span><span class="s2">.0f</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"</span><span class="se">\n</span><span class="s2">Discussion: Municipalities within the same department share"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"geographic, institutional, and cultural characteristics that create"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"within-cluster correlation. Cluster-robust SEs account for this."</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<blockquote>
+<p><strong>Key Concept 12.11: Clustered Observations in Spatial Data</strong></p>
+<p>Municipalities within the same department share geographic, institutional, and cultural characteristics that create <strong>within-cluster correlation</strong>. Standard OLS assumes independent errors, but when municipalities in La Paz share unobserved factors that affect development, their errors are correlated. Cluster-robust standard errors account for this correlation, typically producing <em>larger</em> SEs than default or HC1, reflecting the reduced effective sample size.</p>
+</blockquote>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<h4 id="Task-3:-Predict-Conditional-Mean-(Semi-guided)">Task 3: Predict Conditional Mean (Semi-guided)<a class="anchor-link" href="#Task-3:-Predict-Conditional-Mean-(Semi-guided)">¶</a></h4><p><strong>Objective</strong>: Use <code>model.get_prediction()</code> to predict average IMDS for a municipality with median values of all predictors.</p>
+<p><strong>Instructions</strong>:</p>
+<ol>
+<li>Calculate the median value of each predictor variable</li>
+<li>Use <code>model_default.get_prediction()</code> to predict IMDS at the median predictor values</li>
+<li>Report the predicted value and its 95% confidence interval</li>
+<li>Interpret: "For a typical municipality, we predict IMDS between X and Y"</li>
+</ol>
+<p><strong>Apply what you learned in section 12.3</strong>: The confidence interval for the conditional mean reflects estimation uncertainty only.</p>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># Task 3: Predict Conditional Mean</span>
+<span class="c1"># ----------------------------------------------------------</span>
+
+<span class="c1"># Your code here: Predict IMDS for a municipality with median predictor values</span>
+<span class="c1">#</span>
+<span class="c1"># Steps:</span>
+<span class="c1"># 1. Calculate median values for each predictor</span>
+<span class="c1"># 2. Create a DataFrame with those values</span>
+<span class="c1"># 3. Use model_default.get_prediction() to get prediction and CI</span>
+<span class="c1"># 4. Report and interpret</span>
+
+<span class="c1"># Example structure:</span>
+<span class="c1"># pred_vars = ['ln_NTLpc2017', 'A00', 'A10', 'A20', 'A30', 'A40']</span>
+<span class="c1"># median_vals = reg_data[pred_vars].median()</span>
+<span class="c1"># pred_data = pd.DataFrame([median_vals])</span>
+<span class="c1">#</span>
+<span class="c1"># pred = model_default.get_prediction(pred_data)</span>
+<span class="c1"># pred_frame = pred.summary_frame(alpha=0.05)</span>
+<span class="c1"># print(pred_frame)</span>
+<span class="c1">#</span>
+<span class="c1"># print(f"\nPredicted IMDS: {pred_frame['mean'].values[0]:.2f}")</span>
+<span class="c1"># print(f"95% CI for E[IMDS|X]: [{pred_frame['mean_ci_lower'].values[0]:.2f}, "</span>
+<span class="c1">#       f"{pred_frame['mean_ci_upper'].values[0]:.2f}]")</span>
+<span class="c1"># print(f"\nInterpretation: For a typical municipality with median predictor")</span>
+<span class="c1"># print(f"values, we predict average IMDS between "</span>
+<span class="c1">#       f"{pred_frame['mean_ci_lower'].values[0]:.1f} and "</span>
+<span class="c1">#       f"{pred_frame['mean_ci_upper'].values[0]:.1f}.")</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<h4 id="Task-4:-Prediction-Interval-for-an-Individual-Municipality-(Semi-guided)">Task 4: Prediction Interval for an Individual Municipality (Semi-guided)<a class="anchor-link" href="#Task-4:-Prediction-Interval-for-an-Individual-Municipality-(Semi-guided)">¶</a></h4><p><strong>Objective</strong>: Compute the 95% prediction interval for an <em>individual</em> municipality (not just the mean) and compare it with the confidence interval.</p>
+<p><strong>Instructions</strong>:</p>
+<ol>
+<li>Use <code>model_default.get_prediction(...).summary_frame(alpha=0.05)</code> at the same median predictor values</li>
+<li>Report the prediction interval using <code>obs_ci_lower</code> and <code>obs_ci_upper</code></li>
+<li>Compare the width of the prediction interval with the confidence interval from Task 3</li>
+<li>Explain why the prediction interval is wider</li>
+</ol>
+<p><strong>Apply what you learned in section 12.3</strong>: Individual predictions must account for the irreducible error $u^*$, making them fundamentally less precise than conditional mean predictions.</p>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># Task 4: Prediction Interval for an Individual Municipality</span>
+<span class="c1"># ----------------------------------------------------------</span>
+
+<span class="c1"># Your code here: Compute prediction interval and compare with CI</span>
+<span class="c1">#</span>
+<span class="c1"># Steps:</span>
+<span class="c1"># 1. Use the same prediction from Task 3</span>
+<span class="c1"># 2. Extract obs_ci_lower and obs_ci_upper for the prediction interval</span>
+<span class="c1"># 3. Compare widths</span>
+<span class="c1"># 4. Discuss why PI is wider</span>
+
+<span class="c1"># Example structure:</span>
+<span class="c1"># pred_vars = ['ln_NTLpc2017', 'A00', 'A10', 'A20', 'A30', 'A40']</span>
+<span class="c1"># median_vals = reg_data[pred_vars].median()</span>
+<span class="c1"># pred_data = pd.DataFrame([median_vals])</span>
+<span class="c1">#</span>
+<span class="c1"># pred = model_default.get_prediction(pred_data)</span>
+<span class="c1"># pred_frame = pred.summary_frame(alpha=0.05)</span>
+<span class="c1">#</span>
+<span class="c1"># ci_width = pred_frame['mean_ci_upper'].values[0] - pred_frame['mean_ci_lower'].values[0]</span>
+<span class="c1"># pi_width = pred_frame['obs_ci_upper'].values[0] - pred_frame['obs_ci_lower'].values[0]</span>
+<span class="c1">#</span>
+<span class="c1"># print("=" * 70)</span>
+<span class="c1"># print("CONFIDENCE INTERVAL vs PREDICTION INTERVAL")</span>
+<span class="c1"># print("=" * 70)</span>
+<span class="c1"># print(f"Predicted IMDS: {pred_frame['mean'].values[0]:.2f}")</span>
+<span class="c1"># print(f"\n95% CI (conditional mean):  [{pred_frame['mean_ci_lower'].values[0]:.2f}, "</span>
+<span class="c1">#       f"{pred_frame['mean_ci_upper'].values[0]:.2f}]  width = {ci_width:.2f}")</span>
+<span class="c1"># print(f"95% PI (individual):        [{pred_frame['obs_ci_lower'].values[0]:.2f}, "</span>
+<span class="c1">#       f"{pred_frame['obs_ci_upper'].values[0]:.2f}]  width = {pi_width:.2f}")</span>
+<span class="c1"># print(f"\nPI/CI width ratio: {pi_width / ci_width:.1f}x wider")</span>
+<span class="c1"># print(f"\nThe prediction interval is wider because it includes the")</span>
+<span class="c1"># print(f"irreducible uncertainty from the individual error term u*.")</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<blockquote>
+<p><strong>Key Concept 12.12: Prediction Uncertainty for SDG Monitoring</strong></p>
+<p>Satellite-based prediction models can estimate <em>average</em> development patterns with reasonable precision (narrow confidence intervals for the conditional mean). However, predicting development for a <em>specific municipality</em> involves much greater uncertainty (wide prediction intervals) because individual municipalities deviate from the average relationship. For SDG monitoring, this means satellite predictions are more reliable for identifying broad patterns than for pinpointing the exact development level of any single municipality.</p>
+</blockquote>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<h4 id="Task-5:-Model-Robustness-Comparison-(Independent)">Task 5: Model Robustness Comparison (Independent)<a class="anchor-link" href="#Task-5:-Model-Robustness-Comparison-(Independent)">¶</a></h4><p><strong>Objective</strong>: Create a comprehensive comparison table showing coefficient estimates and standard errors under three specifications: default, HC1, and cluster-robust.</p>
+<p><strong>Instructions</strong>:</p>
+<ol>
+<li>Create a formatted comparison table with coefficients, SEs, and significance stars under all three SE specifications</li>
+<li>Identify whether any coefficients change sign or statistical significance across specifications</li>
+<li>Discuss what the comparison reveals about model reliability</li>
+<li>What does stability (or instability) across SE methods tell us about the trustworthiness of our satellite-development model?</li>
+</ol>
+<p><strong>This extends Chapter 12 concepts</strong>: You're systematically assessing how robust your conclusions are to different assumptions about the error structure.</p>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># Task 5: Model Robustness Comparison</span>
+<span class="c1"># ----------------------------------------------------------</span>
+
+<span class="c1"># Your code here: Create comprehensive comparison table</span>
+<span class="c1">#</span>
+<span class="c1"># Steps:</span>
+<span class="c1"># 1. Extract coefficients and SEs from all three models</span>
+<span class="c1"># 2. Compute t-statistics and significance levels for each</span>
+<span class="c1"># 3. Create a formatted comparison table</span>
+<span class="c1"># 4. Identify any changes in sign or significance</span>
+
+<span class="c1"># Example structure:</span>
+<span class="c1"># def sig_stars(pval):</span>
+<span class="c1">#     if pval &lt; 0.01: return '***'</span>
+<span class="c1">#     elif pval &lt; 0.05: return '**'</span>
+<span class="c1">#     elif pval &lt; 0.10: return '*'</span>
+<span class="c1">#     else: return ''</span>
+<span class="c1">#</span>
+<span class="c1"># print("=" * 90)</span>
+<span class="c1"># print("MODEL ROBUSTNESS: COEFFICIENT ESTIMATES AND STANDARD ERRORS")</span>
+<span class="c1"># print("=" * 90)</span>
+<span class="c1"># print(f"{'Variable':&lt;16} {'Coef':&gt;8} {'SE(Def)':&gt;10} {'SE(HC1)':&gt;10} {'SE(Clust)':&gt;10} "</span>
+<span class="c1">#       f"{'Sig(D)':&gt;7} {'Sig(H)':&gt;7} {'Sig(C)':&gt;7}")</span>
+<span class="c1"># print("-" * 90)</span>
+<span class="c1"># for var in model_default.params.index:</span>
+<span class="c1">#     coef = model_default.params[var]</span>
+<span class="c1">#     se_d = model_default.bse[var]</span>
+<span class="c1">#     se_h = model_hc1.bse[var]</span>
+<span class="c1">#     se_c = model_cluster.bse[var]</span>
+<span class="c1">#     sig_d = sig_stars(model_default.pvalues[var])</span>
+<span class="c1">#     sig_h = sig_stars(model_hc1.pvalues[var])</span>
+<span class="c1">#     sig_c = sig_stars(model_cluster.pvalues[var])</span>
+<span class="c1">#     print(f"{var:&lt;16} {coef:&gt;8.4f} {se_d:&gt;10.4f} {se_h:&gt;10.4f} {se_c:&gt;10.4f} "</span>
+<span class="c1">#           f"{sig_d:&gt;7} {sig_h:&gt;7} {sig_c:&gt;7}")</span>
+<span class="c1"># print("-" * 90)</span>
+<span class="c1"># print("Significance: *** p&lt;0.01, ** p&lt;0.05, * p&lt;0.10")</span>
+<span class="c1">#</span>
+<span class="c1"># print("\nDo any coefficients change sign or significance?")</span>
+<span class="c1"># print("What does this tell us about model reliability?")</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<h4 id="Task-6:-Prediction-Brief-(Independent)">Task 6: Prediction Brief (Independent)<a class="anchor-link" href="#Task-6:-Prediction-Brief-(Independent)">¶</a></h4><p><strong>Objective</strong>: Write a 200-300 word assessment of prediction uncertainty in satellite-based development models.</p>
+<p><strong>Your brief should address:</strong></p>
+<ol>
+<li>How much uncertainty exists in satellite-based development predictions?</li>
+<li>Are prediction intervals narrow enough to be useful for policy targeting?</li>
+<li>How does the confidence interval for the conditional mean compare with the prediction interval for individual municipalities?</li>
+<li>What additional data or methods might reduce prediction uncertainty?</li>
+<li>Should policymakers rely on satellite predictions for allocating development resources to specific municipalities?</li>
+</ol>
+<p><strong>Connection to Research</strong>: The DS4Bolivia project shows that satellite-based models achieve meaningful but imperfect predictive accuracy. Your analysis quantifies <em>how much uncertainty</em> remains and whether it is small enough for practical SDG monitoring applications.</p>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># Your code here: Additional analysis for the prediction brief</span>
+<span class="c1">#</span>
+<span class="c1"># You might want to:</span>
+<span class="c1"># 1. Compare prediction intervals at different predictor values</span>
+<span class="c1">#    (e.g., low-NTL vs high-NTL municipalities)</span>
+<span class="c1"># 2. Calculate how many municipalities fall outside prediction intervals</span>
+<span class="c1"># 3. Visualize actual vs predicted IMDS with confidence bands</span>
+<span class="c1">#</span>
+<span class="c1"># Example structure:</span>
+<span class="c1"># # Actual vs predicted comparison</span>
+<span class="c1"># reg_data['predicted'] = model_default.predict(reg_data)</span>
+<span class="c1"># reg_data['residual'] = reg_data['imds'] - reg_data['predicted']</span>
+<span class="c1">#</span>
+<span class="c1"># print("=" * 70)</span>
+<span class="c1"># print("PREDICTION ACCURACY SUMMARY")</span>
+<span class="c1"># print("=" * 70)</span>
+<span class="c1"># print(f"RMSE: {np.sqrt(model_default.mse_resid):.2f}")</span>
+<span class="c1"># print(f"Mean IMDS: {reg_data['imds'].mean():.2f}")</span>
+<span class="c1"># print(f"RMSE as % of mean: {100 * np.sqrt(model_default.mse_resid) / reg_data['imds'].mean():.1f}%")</span>
+<span class="c1"># print(f"\nLargest over-prediction: {reg_data['residual'].min():.2f}")</span>
+<span class="c1"># print(f"Largest under-prediction: {reg_data['residual'].max():.2f}")</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<h4 id="What-You've-Learned-from-This-Case-Study">What You've Learned from This Case Study<a class="anchor-link" href="#What-You've-Learned-from-This-Case-Study">¶</a></h4><p>Through this analysis of robust inference and prediction for Bolivia's satellite-development model, you've practiced:</p>
+<ul>
+<li><strong>Robust SE comparison</strong>: Compared default, HC1, and cluster-robust standard errors for the same model</li>
+<li><strong>Cluster-robust inference</strong>: Accounted for within-department correlation among municipalities</li>
+<li><strong>Conditional mean prediction</strong>: Predicted average IMDS with a narrow 95% confidence interval</li>
+<li><strong>Prediction intervals</strong>: Quantified the much larger uncertainty in predicting individual municipalities</li>
+<li><strong>Model robustness assessment</strong>: Evaluated whether conclusions change across different SE specifications</li>
+</ul>
+<p>These tools are essential for translating satellite-based models into credible SDG monitoring instruments. Robust inference ensures your significance conclusions hold under realistic data conditions, while prediction intervals honestly communicate the limits of individual-level forecasting.</p>
+<p><strong>Connection to future chapters</strong>: In Chapter 14, we add <em>indicator variables</em> for departments to explicitly model regional differences in the satellite-development relationship.</p>
+<hr/>
+<p><strong>Well done!</strong> You've now applied Chapter 12's advanced inference and prediction tools to the satellite-development model, quantifying both the reliability of your estimates and the precision of your predictions.</p>
 </div>
 </div>
 </div>

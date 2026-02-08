@@ -130,6 +130,68 @@ def generate_cover_html():
 
 
 # ============================================================
+# Step 1b: Copyright page
+# ============================================================
+
+def generate_copyright_html():
+    """Create HTML for centered copyright page."""
+    return """<!DOCTYPE html>
+<html>
+<head>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+
+  @page { size: letter portrait; margin: 0; }
+  * { margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    width: 8.5in;
+    height: 11in;
+    position: relative;
+  }
+
+  .content {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    width: 6in;
+    line-height: 2;
+  }
+
+  .title {
+    font-size: 14pt;
+    font-weight: 700;
+    color: #008CB7;
+    margin-bottom: 24px;
+    line-height: 1.4;
+  }
+
+  .info {
+    font-size: 11pt;
+    color: #1a1a2e;
+  }
+
+  .website a {
+    color: #008CB7;
+    text-decoration: none;
+  }
+</style>
+</head>
+<body>
+  <div class="content">
+    <div class="title">Econometrics Powered by AI:<br>An Introduction Using Cloud-based Python Notebooks</div>
+    <div class="info">&copy; Carlos Mendez, 2026.</div>
+    <div class="info">Graduate School of International Development, Nagoya University, Japan.</div>
+    <div class="info website">Companion website: <a href="https://quarcs-lab.github.io/metricsai">https://quarcs-lab.github.io/metricsai</a></div>
+  </div>
+</body>
+</html>"""
+
+
+# ============================================================
 # Step 2: Count pages and extract sections
 # ============================================================
 
@@ -837,6 +899,18 @@ async def compile_book():
     )
     print(f"  Cover page: {PdfReader(str(cover_pdf)).pages[0].mediabox}")
 
+    # Generate copyright page
+    print("  Generating copyright page...")
+    copyright_html = generate_copyright_html()
+    copyright_pdf = PROJECT_ROOT / 'tmp_copyright.pdf'
+    await html_to_pdf(
+        copyright_html, copyright_pdf,
+        margins={'top': '0', 'right': '0', 'bottom': '0', 'left': '0'},
+        wait_ms=1000,
+    )
+    copyright_pages = len(PdfReader(str(copyright_pdf)).pages)
+    print(f"  Copyright page: {copyright_pages} page(s)")
+
     # ----------------------------------------------------------
     # Step 2: Count pages, extract sections, and extract key concepts
     # ----------------------------------------------------------
@@ -917,6 +991,12 @@ async def compile_book():
         writer.add_page(page)
     print("  + Cover (1 page)")
 
+    # Add Copyright page
+    copyright_reader = PdfReader(str(copyright_pdf))
+    for page in copyright_reader.pages:
+        writer.add_page(page)
+    print(f"  + Copyright ({copyright_pages} page(s))")
+
     # Add Brief Contents
     brief_reader = PdfReader(str(brief_pdf))
     for page in brief_reader.pages:
@@ -943,7 +1023,7 @@ async def compile_book():
         print(f"  + {ch['id']}: {ch['title']} ({ch['pages']} pages)")
 
     total_pages = len(writer.pages)
-    front_matter = 1 + toc_total_pages  # cover + brief + detailed
+    front_matter = 1 + copyright_pages + toc_total_pages  # cover + copyright + brief + detailed + kc
     print(f"  Total: {total_pages} pages ({front_matter} front matter + {total_chapter_pages} content)")
 
     # Write unnumbered merged PDF to temp file
@@ -1032,24 +1112,24 @@ async def compile_book():
     # ----------------------------------------------------------
     print("\n[7/9] Adding clickable TOC links...")
 
-    # Brief Contents links (pages start at index 1, after cover)
+    # Brief Contents links (pages start after cover + copyright)
     for toc_page_idx, rect, content_page in brief_links:
         physical_page = front_matter + content_page - 1
-        final_page = 1 + toc_page_idx
+        final_page = 1 + copyright_pages + toc_page_idx
         link = Link(rect=rect, target_page_index=physical_page)
         final_writer.add_annotation(page_number=final_page, annotation=link)
 
-    # Detailed Contents links (pages start after cover + brief)
+    # Detailed Contents links (pages start after cover + copyright + brief)
     for toc_page_idx, rect, content_page in detailed_links:
         physical_page = front_matter + content_page - 1
-        final_page = 1 + brief_pages + toc_page_idx
+        final_page = 1 + copyright_pages + brief_pages + toc_page_idx
         link = Link(rect=rect, target_page_index=physical_page)
         final_writer.add_annotation(page_number=final_page, annotation=link)
 
-    # Key Concepts links (pages start after cover + brief + detailed)
+    # Key Concepts links (pages start after cover + copyright + brief + detailed)
     for toc_page_idx, rect, content_page in kc_links:
         physical_page = front_matter + content_page - 1
-        final_page = 1 + brief_pages + detailed_pages + toc_page_idx
+        final_page = 1 + copyright_pages + brief_pages + detailed_pages + toc_page_idx
         link = Link(rect=rect, target_page_index=physical_page)
         final_writer.add_annotation(page_number=final_page, annotation=link)
 
@@ -1074,7 +1154,7 @@ async def compile_book():
     print(f"{'=' * 60}")
 
     # Clean up temp files
-    for tmp in [cover_pdf, brief_pdf, detailed_pdf, kc_pdf, merged_tmp, numbers_pdf]:
+    for tmp in [cover_pdf, copyright_pdf, brief_pdf, detailed_pdf, kc_pdf, merged_tmp, numbers_pdf]:
         if tmp.exists():
             tmp.unlink()
 

@@ -3,38 +3,40 @@
 ## Book Structure
 
 ```
-metricsAI_complete_book.pdf (811 pages, ~57 MB)
+metricsAI_complete_book.pdf (900 pages, 62.3 MB)
 ├── Cover page (1 page, unnumbered)
 │   └── images/book1cover.jpg with navy blue (#0a1628) background
+├── Copyright page (1 page, unnumbered)
+│   └── Title, copyright, affiliation, companion website (centered)
 ├── Brief Contents (1 page, unnumbered, clickable hyperlinks)
 │   └── Chapters 1-17 grouped by Parts (no Preface)
 ├── Detailed Contents (4 pages, unnumbered, clickable hyperlinks)
 │   └── Preface sections + all chapter sections with page numbers
-├── Key Concepts (4 pages, unnumbered, clickable hyperlinks)
-│   └── 165 numbered Key Concepts grouped by Parts and Chapters
-└── Content (801 pages, numbered 1-801)
+├── Key Concepts (5 pages, unnumbered, clickable hyperlinks)
+│   └── 189 numbered Key Concepts grouped by Parts and Chapters
+└── Content (888 pages, numbered 1-888)
     ├── CH00: Preface (15 pages)
     ├── Part I: Foundations
-    │   ├── CH01: Analysis of Economics Data (28 pages)
-    │   ├── CH02: Univariate Data Summary (54 pages)
+    │   ├── CH01: Analysis of Economics Data (37 pages)
+    │   ├── CH02: Univariate Data Summary (62 pages)
     │   ├── CH03: The Sample Mean (41 pages)
-    │   └── CH04: Statistical Inference for the Mean (51 pages)
+    │   └── CH04: Statistical Inference for the Mean (58 pages)
     ├── Part II: Bivariate Regression
-    │   ├── CH05: Bivariate Data Summary (56 pages)
+    │   ├── CH05: Bivariate Data Summary (64 pages)
     │   ├── CH06: The Least Squares Estimator (39 pages)
-    │   ├── CH07: Statistical Inference for Bivariate Regression (66 pages)
+    │   ├── CH07: Statistical Inference for Bivariate Regression (72 pages)
     │   └── CH08: Case Studies for Bivariate Regression (41 pages)
     ├── Part III: Multiple Regression
     │   ├── CH09: Models with Natural Logarithms (37 pages)
-    │   ├── CH10: Data Summary for Multiple Regression (32 pages)
-    │   ├── CH11: Statistical Inference for Multiple Regression (47 pages)
-    │   ├── CH12: Further Topics in Multiple Regression (40 pages)
+    │   ├── CH10: Data Summary for Multiple Regression (40 pages)
+    │   ├── CH11: Statistical Inference for Multiple Regression (54 pages)
+    │   ├── CH12: Further Topics in Multiple Regression (48 pages)
     │   └── CH13: Case Studies for Multiple Regression (63 pages)
     └── Part IV: Advanced Topics
-        ├── CH14: Regression with Indicator Variables (39 pages)
-        ├── CH15: Regression with Transformed Variables (48 pages)
-        ├── CH16: Checking the Model and Data (51 pages)
-        └── CH17: Panel Data, Time Series Data, and Causation (53 pages)
+        ├── CH14: Regression with Indicator Variables (45 pages)
+        ├── CH15: Regression with Transformed Variables (54 pages)
+        ├── CH16: Checking the Model and Data (59 pages)
+        └── CH17: Panel Data, Time Series Data, and Causation (59 pages)
 ```
 
 ## PDF Generation Pipeline (Per Chapter)
@@ -71,18 +73,19 @@ python3 generate_pdf_playwright.py --all
 
 ### 9-Step Process
 
-1. **Cover page**: Playwright renders `images/book1cover.jpg` on navy blue background (`#0a1628`) with `object-fit: contain` for full image display
+1. **Cover page + Copyright page**: Playwright renders cover (`images/book1cover.jpg` on navy blue `#0a1628`) and copyright page (centered title, copyright, affiliation, website)
 2. **Count pages + extract sections + extract Key Concepts**: Reads all 18 PDFs, extracts `## X.Y Title` headers and `Key Concept X.N: Title` from notebooks, maps to PDF pages
-3. **Tables of Contents**: Playwright renders Brief Contents (1 page), Detailed Contents (4 pages), and Key Concepts TOC (4 pages) with placeholder hyperlinks
-4. **Merge PDFs**: pypdf merges cover + Brief + Detailed + Key Concepts + 18 chapters
+3. **Tables of Contents**: Playwright renders Brief Contents (1 page), Detailed Contents (4 pages), and Key Concepts TOC (5 pages) with placeholder hyperlinks
+4. **Merge PDFs**: pypdf merges cover + copyright + Brief + Detailed + Key Concepts + 18 chapters
 5. **Page numbers**: Playwright renders transparent overlay with centered page numbers; pypdf merges onto content pages
 6. **PDF bookmarks**: pypdf adds hierarchical outline (Preface > Parts > Chapters > Sections)
-7. **Clickable TOC links**: Extracts placeholder URL annotations from all three TOC PDFs, converts to internal GoTo links pointing to correct final pages (~870 links)
+7. **Clickable TOC links**: Extracts placeholder URL annotations from all three TOC PDFs, converts to internal GoTo links pointing to correct final pages (753 links)
 8. **Write final PDF**: Saves compiled book to `notebooks_colab/metricsAI_complete_book.pdf`
 
 ### Section Extraction
 
 Section titles extracted from notebook JSON (`## ` headers):
+
 - **CH00**: Descriptive headers (e.g., "Introduction", "Why This Book?")
 - **CH01-CH17**: Numbered headers in two formats:
   - `## 1.1 What is Regression Analysis?` (space after number)
@@ -95,7 +98,7 @@ Mapping: Section titles searched in PDF page text (skipping first 2 pages to avo
 
 | Color | Hex | Usage |
 |-------|-----|-------|
-| ElectricCyan | `#008CB7` | TOC title, page numbers |
+| ElectricCyan | `#008CB7` | TOC title, page numbers, copyright title |
 | SynapsePurple | `#7A209F` | Part headers, bookmark color |
 | Navy | `#0a1628` | Cover background |
 | DataPink | `#C21E72` | (reserved) |
@@ -103,11 +106,12 @@ Mapping: Section titles searched in PDF page text (skipping first 2 pages to avo
 ### Page Numbering
 
 - Cover: unnumbered
+- Copyright: unnumbered
 - Brief Contents: unnumbered
 - Detailed Contents: unnumbered
 - Key Concepts: unnumbered
-- Content pages: numbered 1-801 (centered at bottom, 10pt Inter, #555)
-- Front matter count: 1 (cover) + 1 (brief) + 4 (detailed) + 4 (key concepts) = 10 pages
+- Content pages: numbered 1-888 (centered at bottom, 10pt Inter, #555)
+- Front matter count: 1 (cover) + 1 (copyright) + 1 (brief) + 4 (detailed) + 5 (key concepts) = 12 pages
 
 ## PDF Bookmark Hierarchy
 
@@ -126,9 +130,9 @@ Part I: Foundations (bold, purple)
 ├── Chapter 3: The Sample Mean (7 sections)
 └── Chapter 4: Statistical Inference for the Mean (7 sections)
 Part II: Bivariate Regression (bold, purple)
-├── Chapter 5-8 with sections
+├── Chapter 5-9 with sections
 Part III: Multiple Regression (bold, purple)
-├── Chapter 9-13 with sections
+├── Chapter 10-13 with sections
 Part IV: Advanced Topics (bold, purple)
 ├── Chapter 14-17 with sections
 ```
@@ -137,7 +141,7 @@ Total: 132 bookmark entries (1 Preface + 4 Parts + 17 Chapters + 110 Sections)
 
 ## Clickable TOC Hyperlinks
 
-All three TOC sections (Brief Contents, Detailed Contents, Key Concepts) include clickable hyperlinks (~870 total) that jump directly to the target page in the PDF. These are generated automatically during compilation.
+All three TOC sections (Brief Contents, Detailed Contents, Key Concepts) include clickable hyperlinks (753 total) that jump directly to the target page in the PDF. These are generated automatically during compilation.
 
 ### 3-Phase Approach
 
@@ -145,10 +149,12 @@ All three TOC sections (Brief Contents, Detailed Contents, Key Concepts) include
 
 2. **Playwright preserves annotations**: When Playwright renders the HTML to PDF, it preserves `<a>` tags as PDF link annotations with exact coordinate rectangles (rects). These are extracted before the merge step using `extract_toc_links()`.
 
-3. **GoTo link conversion**: After the final PDF is assembled (merge + page numbers + bookmarks), `pypdf.annotations.Link(rect, target_page_index)` creates internal GoTo links. The content page numbers from the placeholder URLs are converted to physical page indices accounting for front matter offset.
+3. **GoTo link conversion**: After the final PDF is assembled (merge + page numbers + bookmarks), `pypdf.annotations.Link(rect, target_page_index)` creates internal GoTo links. The content page numbers from the placeholder URLs are converted to physical page indices accounting for front matter offset (12 pages).
 
 ### Key Functions
 
+- `generate_cover_html()`: Full-bleed cover page with navy blue background
+- `generate_copyright_html()`: Centered copyright page (title, copyright, affiliation, website)
 - `generate_brief_toc_html()`: Wraps chapter titles and page numbers in placeholder `<a>` tags
 - `generate_detailed_toc_html()`: Wraps Preface sections, chapter titles, section titles, and page numbers in placeholder `<a>` tags
 - `extract_key_concepts(ch_id)`: Extracts numbered Key Concept titles from notebook JSON (`> **Key Concept X.N: Title**`)
@@ -161,8 +167,8 @@ All three TOC sections (Brief Contents, Detailed Contents, Key Concepts) include
 
 - **Brief Contents**: ~51 links (chapter titles + page numbers)
 - **Detailed Contents**: ~273 links (Preface sections + chapter titles + section titles + page numbers)
-- **Key Concepts**: ~546 links (Key Concept numbers + titles + page numbers)
-- **Total**: ~870 clickable links
+- **Key Concepts**: ~429 links (Key Concept numbers + titles + page numbers)
+- **Total**: 753 clickable links
 
 ## Dependencies
 
@@ -172,4 +178,4 @@ All three TOC sections (Brief Contents, Detailed Contents, Key Concepts) include
 | pypdf | PDF merging, bookmarks, page overlay, clickable TOC links (`pypdf.annotations.Link`) | `pip install pypdf` |
 | jupyter | nbconvert (notebook to HTML) | `pip install jupyter` |
 
-*Last updated: 2026-02-08*
+*Version: 2.0 | Updated: 2026-02-08 | Author: metricsAI project*

@@ -1,6 +1,6 @@
 ---
 name: compile-book
-description: Compiles all chapter PDFs into a single metricsAI book PDF. Detects modified chapters, regenerates their PDFs, then merges all chapters with cover page, Brief Contents, Detailed Contents, Key Concepts TOC, clickable TOC hyperlinks, page numbers, and section-level PDF bookmarks. Use after editing any chapter notebook.
+description: Compiles all chapter PDFs into a single metricsAI book PDF. Detects modified chapters, regenerates their PDFs, then merges all chapters with cover page, copyright page, Brief Contents, Detailed Contents, Key Concepts TOC, clickable TOC hyperlinks, page numbers, and section-level PDF bookmarks. Use after editing any chapter notebook.
 argument-hint: [chapter-numbers...] [--compile-only] [--check] [--all]
 context: fork
 agent: Explore
@@ -12,7 +12,7 @@ Automates the end-to-end pipeline for compiling the metricsAI textbook: detects 
 
 ## Overview
 
-This skill manages the complete book compilation workflow. It detects which chapter notebooks have been modified since their last PDF generation, regenerates only those PDFs, then compiles everything into a single book with cover page, three tables of contents (Brief Contents, Detailed Contents, Key Concepts), page numbers, and hierarchical PDF bookmarks.
+This skill manages the complete book compilation workflow. It detects which chapter notebooks have been modified since their last PDF generation, regenerates only those PDFs, then compiles everything into a single book with cover page, copyright page, three tables of contents (Brief Contents, Detailed Contents, Key Concepts), page numbers, and hierarchical PDF bookmarks.
 
 **Use this skill when:**
 - After editing any chapter notebook
@@ -23,12 +23,12 @@ This skill manages the complete book compilation workflow. It detects which chap
 **Key Features:**
 - Automatic detection of modified chapters (notebook mtime vs PDF mtime)
 - 3-step PDF regeneration pipeline (nbconvert, CSS injection, Playwright)
-- Book compilation with cover, Brief Contents, Detailed Contents, Key Concepts TOC
-- 165 numbered Key Concepts with short titles across 17 chapters
+- Book compilation with cover, copyright page, Brief Contents, Detailed Contents, Key Concepts TOC
+- 189 numbered Key Concepts with short titles across 17 chapters
 - Page numbers on all content pages
 - Section-level PDF bookmarks (Preface > Parts > Chapters > Sections)
-- Clickable TOC hyperlinks (~870 links jump to chapters/sections/key concepts from all TOC pages)
-- 811 pages, ~57 MB output
+- Clickable TOC hyperlinks (753 links jump to chapters/sections/key concepts from all TOC pages)
+- 900 pages, 62.3 MB output
 
 ---
 
@@ -150,12 +150,13 @@ python3 scripts/compile_book.py
 
 This produces `notebooks_colab/metricsAI_complete_book.pdf` with:
 - Cover page (navy blue background, `images/book1cover.jpg`)
+- Copyright page (centered: title, copyright, affiliation, companion website)
 - Brief Contents (1 page, chapters grouped by Parts, clickable hyperlinks)
 - Detailed Contents (4 pages, all sections with page numbers, clickable hyperlinks)
-- Key Concepts (4 pages, 165 concepts with page numbers, clickable hyperlinks)
+- Key Concepts (5 pages, 189 concepts with page numbers, clickable hyperlinks)
 - All 18 chapters merged with page numbers
 - PDF bookmarks: Preface > Part I-IV > Chapters 1-17 > Sections
-- Clickable TOC hyperlinks: ~324 links on both TOC pages jump directly to chapters/sections
+- Clickable TOC hyperlinks: 753 links across all three TOC sections
 
 ### 6. Report Results
 
@@ -166,12 +167,12 @@ Display compilation summary:
 
 | Metric | Value |
 |--------|-------|
-| Total pages | 811 |
-| File size | 57.3 MB |
+| Total pages | 900 |
+| File size | 62.3 MB |
 | Chapters | 18 (CH00-CH17) |
-| Key concepts | 165 |
+| Key concepts | 189 |
 | Sections in bookmarks | 110 |
-| Clickable TOC links | ~870 |
+| Clickable TOC links | 753 |
 | Chapters regenerated | 2 |
 | Output | notebooks_colab/metricsAI_complete_book.pdf |
 ```
@@ -188,30 +189,31 @@ open notebooks_colab/metricsAI_complete_book.pdf
 
 ### Front Matter (unnumbered)
 - **Cover page**: Full-bleed image with navy blue background
+- **Copyright page**: Centered title, copyright (Carlos Mendez, 2026), affiliation (Nagoya University), companion website
 - **Brief Contents**: Chapter-level TOC grouped by Parts (no Preface), with clickable hyperlinks
 - **Detailed Contents**: Preface sections + all chapter sections with page numbers, with clickable hyperlinks
-- **Key Concepts**: 165 numbered Key Concepts (X.N format) with short titles, grouped by Parts and Chapters, with clickable hyperlinks
+- **Key Concepts**: 189 numbered Key Concepts (X.N format) with short titles, grouped by Parts and Chapters, with clickable hyperlinks
 
 ### Content (numbered from page 1)
 - **CH00**: Preface (15 pages)
-- **Part I: Foundations** (CH01-CH04, 172 pages)
-- **Part II: Bivariate Regression** (CH05-CH08, 201 pages)
-- **Part III: Multiple Regression** (CH09-CH13, 218 pages)
-- **Part IV: Advanced Topics** (CH14-CH17, 191 pages)
+- **Part I: Foundations** (CH01-CH04, 198 pages)
+- **Part II: Bivariate Regression** (CH05-CH09, 253 pages)
+- **Part III: Multiple Regression** (CH10-CH13, 205 pages)
+- **Part IV: Advanced Topics** (CH14-CH17, 217 pages)
 
 ### PDF Bookmarks
 Hierarchical navigation sidebar in PDF readers:
 - Preface > 4 sections
 - Part I > Ch1 (9 sections), Ch2 (6), Ch3 (7), Ch4 (7)
-- Part II > Ch5 (11), Ch6 (4), Ch7 (7), Ch8 (3)
-- Part III > Ch9 (4), Ch10 (8), Ch11 (7), Ch12 (6), Ch13 (9)
+- Part II > Ch5 (11), Ch6 (4), Ch7 (7), Ch8 (3), Ch9 (4)
+- Part III > Ch10 (8), Ch11 (7), Ch12 (6), Ch13 (9)
 - Part IV > Ch14 (3), Ch15 (4), Ch16 (5), Ch17 (6)
 
 ### Clickable TOC Hyperlinks
-All three TOC pages include clickable hyperlinks (~870 total) that jump directly to the target page:
+All three TOC sections include clickable hyperlinks (753 total) that jump directly to the target page:
 - **Brief Contents**: Each chapter title and page number is a clickable link (~51 links)
 - **Detailed Contents**: Each Preface section, chapter title, section title, and page number is a clickable link (~273 links)
-- **Key Concepts**: Each Key Concept number, title, and page number is a clickable link (~546 links)
+- **Key Concepts**: Each Key Concept number, title, and page number is a clickable link (~429 links)
 - Links are styled invisibly (no blue underlines) to preserve the professional TOC appearance
 - Links are automatically generated during compilation using a 3-phase approach:
   1. Placeholder URLs are embedded in TOC HTML (`https://internal.metricsai/page/{N}`)
@@ -271,9 +273,9 @@ jupyter nbconvert --version
 **Fix**: Run `/compile-book chXX` to generate the missing PDF.
 
 ### Large File Size
-**Symptom**: Book PDF exceeds 60 MB.
+**Symptom**: Book PDF exceeds 65 MB.
 **Cause**: High-resolution images or many plot outputs.
-**Note**: ~56 MB is expected for 803 pages with charts and plots.
+**Note**: ~62 MB is expected for 900 pages with charts and plots.
 
 ### Section Not Found in Bookmarks
 **Symptom**: Some chapter sections missing from PDF bookmarks.
@@ -309,7 +311,7 @@ jupyter nbconvert --version
 
 | File | Purpose |
 |------|---------|
-| `scripts/compile_book.py` | Book compilation script (merges PDFs, generates TOCs, adds bookmarks) |
+| `scripts/compile_book.py` | Book compilation script (merges PDFs, generates TOCs, adds bookmarks, copyright page) |
 | `generate_pdf_playwright.py` | Chapter PDF generator (Playwright-based) |
 | `inject_print_css.py` | CSS injection for printable HTML |
 | `notebook_pdf_styles.css` | Master stylesheet for PDF formatting |
@@ -319,4 +321,4 @@ jupyter nbconvert --version
 
 ---
 
-*Version: 1.2 | Updated: 2026-02-08 | Author: metricsAI project*
+*Version: 2.0 | Updated: 2026-02-08 | Author: metricsAI project*

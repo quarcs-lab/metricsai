@@ -10707,7 +10707,7 @@ Interpretation:
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h2 id="Case-Studies">Case Studies<a class="anchor-link" href="#Case-Studies">¶</a></h2><h3 id="Case-Study:-Regression-Diagnostics-for-Cross-Country-Productivity-Analysis">Case Study: Regression Diagnostics for Cross-Country Productivity Analysis<a class="anchor-link" href="#Case-Study:-Regression-Diagnostics-for-Cross-Country-Productivity-Analysis">¶</a></h3><p>In this case study, you will apply the diagnostic techniques from this chapter to analyze cross-country labor productivity using the Mendez convergence clubs dataset.</p>
+<h2 id="Case-Studies">Case Studies<a class="anchor-link" href="#Case-Studies">¶</a></h2><h3 id="Case-Study-1:-Regression-Diagnostics-for-Cross-Country-Productivity-Analysis">Case Study 1: Regression Diagnostics for Cross-Country Productivity Analysis<a class="anchor-link" href="#Case-Study-1:-Regression-Diagnostics-for-Cross-Country-Productivity-Analysis">¶</a></h3><p>In this case study, you will apply the diagnostic techniques from this chapter to analyze cross-country labor productivity using the Mendez convergence clubs dataset.</p>
 <p><strong>Dataset:</strong> Mendez (2020) convergence clubs data</p>
 <ul>
 <li><strong>Source:</strong> <code>https://raw.githubusercontent.com/quarcs-lab/mendez2020-convergence-clubs-code-data/master/assets/dat.csv</code></li>
@@ -10793,6 +10793,421 @@ Interpretation:
 </blockquote>
 <p><strong>What You've Learned:</strong>
 In this case study, you applied the complete diagnostic toolkit to cross-country productivity data. You detected multicollinearity among development indicators, compared standard and robust standard errors, created diagnostic plots, and identified influential countries. These skills ensure that your regression results are reliable and your conclusions are credible.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<h3 id="Case-Study-2:-Diagnosing-the-Satellite-Prediction-Model">Case Study 2: Diagnosing the Satellite Prediction Model<a class="anchor-link" href="#Case-Study-2:-Diagnosing-the-Satellite-Prediction-Model">¶</a></h3><p><strong>Research Question</strong>: How reliable are the satellite-development regression models we have estimated throughout this textbook? Do they satisfy the standard regression assumptions?</p>
+<p><strong>Background</strong>: We have estimated multiple satellite-development regression models throughout this textbook. But how reliable are these models? In this case study, we apply Chapter 16's <strong>diagnostic tools</strong> to check for multicollinearity, heteroskedasticity, influential observations, and other model violations.</p>
+<p><strong>The Data</strong>: The DS4Bolivia dataset covers 339 Bolivian municipalities with satellite data, development indices, and socioeconomic indicators.</p>
+<p><strong>Key Variables</strong>:</p>
+<ul>
+<li><code>mun</code>: Municipality name</li>
+<li><code>dep</code>: Department (administrative region)</li>
+<li><code>imds</code>: Municipal Sustainable Development Index (0-100)</li>
+<li><code>ln_NTLpc2017</code>: Log nighttime lights per capita (2017)</li>
+<li><code>A00</code>, <code>A10</code>, <code>A20</code>, <code>A30</code>, <code>A40</code>: Satellite image embedding dimensions</li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<h4 id="Load-the-DS4Bolivia-Data">Load the DS4Bolivia Data<a class="anchor-link" href="#Load-the-DS4Bolivia-Data">¶</a></h4>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># Load the DS4Bolivia dataset</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">statsmodels.formula.api</span><span class="w"> </span><span class="kn">import</span> <span class="n">ols</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">statsmodels.stats.outliers_influence</span><span class="w"> </span><span class="kn">import</span> <span class="n">variance_inflation_factor</span><span class="p">,</span> <span class="n">OLSInfluence</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">statsmodels.api</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sm</span>
+
+<span class="n">url_bol</span> <span class="o">=</span> <span class="s2">"https://raw.githubusercontent.com/quarcs-lab/ds4bolivia/master/ds4bolivia_v20250523.csv"</span>
+<span class="n">bol</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">url_bol</span><span class="p">)</span>
+
+<span class="c1"># Select key variables for this case study</span>
+<span class="n">key_vars</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'mun'</span><span class="p">,</span> <span class="s1">'dep'</span><span class="p">,</span> <span class="s1">'imds'</span><span class="p">,</span> <span class="s1">'ln_NTLpc2017'</span><span class="p">,</span> <span class="s1">'A00'</span><span class="p">,</span> <span class="s1">'A10'</span><span class="p">,</span> <span class="s1">'A20'</span><span class="p">,</span> <span class="s1">'A30'</span><span class="p">,</span> <span class="s1">'A40'</span><span class="p">]</span>
+<span class="n">bol_cs</span> <span class="o">=</span> <span class="n">bol</span><span class="p">[</span><span class="n">key_vars</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span><span class="o">.</span><span class="n">dropna</span><span class="p">()</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">"="</span> <span class="o">*</span> <span class="mi">70</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"DS4BOLIVIA: REGRESSION DIAGNOSTICS CASE STUDY"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"="</span> <span class="o">*</span> <span class="mi">70</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Observations (complete cases): </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">bol_cs</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="se">\n</span><span class="s2">Key variable summary:"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">bol_cs</span><span class="p">[[</span><span class="s1">'imds'</span><span class="p">,</span> <span class="s1">'ln_NTLpc2017'</span><span class="p">,</span> <span class="s1">'A00'</span><span class="p">,</span> <span class="s1">'A10'</span><span class="p">,</span> <span class="s1">'A20'</span><span class="p">,</span> <span class="s1">'A30'</span><span class="p">,</span> <span class="s1">'A40'</span><span class="p">]]</span><span class="o">.</span><span class="n">describe</span><span class="p">()</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">3</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<h4 id="Task-1:-Multicollinearity-Check-(Guided)">Task 1: Multicollinearity Check (Guided)<a class="anchor-link" href="#Task-1:-Multicollinearity-Check-(Guided)">¶</a></h4><p><strong>Objective</strong>: Assess whether satellite predictors suffer from multicollinearity.</p>
+<p><strong>Instructions</strong>:</p>
+<ol>
+<li>Compute the correlation matrix for the predictors (<code>ln_NTLpc2017</code>, <code>A00</code>, <code>A10</code>, <code>A20</code>, <code>A30</code>, <code>A40</code>)</li>
+<li>Calculate VIF for each variable using <code>variance_inflation_factor()</code> from statsmodels</li>
+<li>Flag variables with VIF &gt; 10</li>
+<li>Discuss: Are satellite embeddings multicollinear? Does multicollinearity affect the model's predictive power vs. individual coefficient interpretation?</li>
+</ol>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># Your code here: Multicollinearity diagnostics</span>
+<span class="c1">#</span>
+<span class="c1"># Example structure:</span>
+<span class="c1"># predictors = ['ln_NTLpc2017', 'A00', 'A10', 'A20', 'A30', 'A40']</span>
+<span class="c1">#</span>
+<span class="c1"># # Correlation matrix</span>
+<span class="c1"># print("CORRELATION MATRIX")</span>
+<span class="c1"># print(bol_cs[predictors].corr().round(3))</span>
+<span class="c1">#</span>
+<span class="c1"># # VIF calculation</span>
+<span class="c1"># X = bol_cs[predictors].copy()</span>
+<span class="c1"># X = sm.add_constant(X)</span>
+<span class="c1"># print("\nVARIANCE INFLATION FACTORS")</span>
+<span class="c1"># for i, col in enumerate(X.columns):</span>
+<span class="c1">#     vif = variance_inflation_factor(X.values, i)</span>
+<span class="c1">#     flag = " *** HIGH" if vif &gt; 10 and col != 'const' else ""</span>
+<span class="c1">#     print(f"  VIF({col}): {vif:.2f}{flag}")</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<blockquote>
+<p><strong>Key Concept 16.11: Multicollinearity in Satellite Features</strong></p>
+<p>Satellite embedding dimensions often correlate with each other because they capture <strong>overlapping visual patterns</strong> from the same images. When embeddings A00 and A10 both respond to building density, their collinearity inflates standard errors and makes individual coefficients unstable. The VIF (Variance Inflation Factor) quantifies this: a VIF above 10 signals problematic collinearity. Solutions include dropping redundant features, using principal components, or accepting imprecise individual estimates while maintaining valid joint inference.</p>
+</blockquote>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<h4 id="Task-2:-Standard-vs-Robust-SEs-(Guided)">Task 2: Standard vs Robust SEs (Guided)<a class="anchor-link" href="#Task-2:-Standard-vs-Robust-SEs-(Guided)">¶</a></h4><p><strong>Objective</strong>: Detect heteroskedasticity by comparing default and robust standard errors.</p>
+<p><strong>Instructions</strong>:</p>
+<ol>
+<li>Estimate the full model: <code>imds ~ ln_NTLpc2017 + A00 + A10 + A20 + A30 + A40</code></li>
+<li>Compare default (homoskedastic) and HC1 (robust) standard errors</li>
+<li>Compute the ratio of robust to default SEs for each coefficient</li>
+<li>Discuss: Large differences signal heteroskedasticity. Which coefficients are most affected?</li>
+</ol>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># Your code here: Compare standard and robust SEs</span>
+<span class="c1">#</span>
+<span class="c1"># Example structure:</span>
+<span class="c1"># model_default = ols('imds ~ ln_NTLpc2017 + A00 + A10 + A20 + A30 + A40',</span>
+<span class="c1">#                     data=bol_cs).fit()</span>
+<span class="c1"># model_robust = ols('imds ~ ln_NTLpc2017 + A00 + A10 + A20 + A30 + A40',</span>
+<span class="c1">#                    data=bol_cs).fit(cov_type='HC1')</span>
+<span class="c1">#</span>
+<span class="c1"># comparison = pd.DataFrame({</span>
+<span class="c1">#     'Default SE': model_default.bse,</span>
+<span class="c1">#     'Robust SE': model_robust.bse,</span>
+<span class="c1">#     'Ratio': model_robust.bse / model_default.bse</span>
+<span class="c1"># })</span>
+<span class="c1"># print("STANDARD ERROR COMPARISON")</span>
+<span class="c1"># print(comparison.round(4))</span>
+<span class="c1"># print(f"\nMean ratio: {(model_robust.bse / model_default.bse).mean():.3f}")</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<h4 id="Task-3:-Residual-Diagnostics-(Semi-guided)">Task 3: Residual Diagnostics (Semi-guided)<a class="anchor-link" href="#Task-3:-Residual-Diagnostics-(Semi-guided)">¶</a></h4><p><strong>Objective</strong>: Create diagnostic plots to assess model assumptions visually.</p>
+<p><strong>Instructions</strong>:</p>
+<ol>
+<li>Estimate the model with robust SEs</li>
+<li>Create three diagnostic plots:<ul>
+<li>(a) Fitted values vs. residuals (check for patterns/heteroskedasticity)</li>
+<li>(b) Q-Q plot of residuals (check for normality)</li>
+<li>(c) Histogram of residuals (check for skewness/outliers)</li>
+</ul>
+</li>
+<li>Interpret each plot: What do the patterns reveal about model adequacy?</li>
+</ol>
+<p><strong>Hint</strong>: Use <code>model.fittedvalues</code> and <code>model.resid</code> for the plots. For the Q-Q plot, use <code>from scipy import stats; stats.probplot(residuals, plot=ax)</code>.</p>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># Your code here: Residual diagnostic plots</span>
+<span class="c1">#</span>
+<span class="c1"># Example structure:</span>
+<span class="c1"># from scipy import stats</span>
+<span class="c1"># model = ols('imds ~ ln_NTLpc2017 + A00 + A10 + A20 + A30 + A40',</span>
+<span class="c1">#             data=bol_cs).fit(cov_type='HC1')</span>
+<span class="c1">#</span>
+<span class="c1"># fig, axes = plt.subplots(1, 3, figsize=(15, 5))</span>
+<span class="c1">#</span>
+<span class="c1"># # (a) Residuals vs Fitted</span>
+<span class="c1"># axes[0].scatter(model.fittedvalues, model.resid, alpha=0.4)</span>
+<span class="c1"># axes[0].axhline(0, color='red', linestyle='--')</span>
+<span class="c1"># axes[0].set_xlabel('Fitted Values')</span>
+<span class="c1"># axes[0].set_ylabel('Residuals')</span>
+<span class="c1"># axes[0].set_title('Residuals vs Fitted')</span>
+<span class="c1">#</span>
+<span class="c1"># # (b) Q-Q Plot</span>
+<span class="c1"># stats.probplot(model.resid, plot=axes[1])</span>
+<span class="c1"># axes[1].set_title('Q-Q Plot of Residuals')</span>
+<span class="c1">#</span>
+<span class="c1"># # (c) Histogram</span>
+<span class="c1"># axes[2].hist(model.resid, bins=30, edgecolor='black', alpha=0.7)</span>
+<span class="c1"># axes[2].set_xlabel('Residuals')</span>
+<span class="c1"># axes[2].set_title('Distribution of Residuals')</span>
+<span class="c1">#</span>
+<span class="c1"># plt.tight_layout()</span>
+<span class="c1"># plt.show()</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<h4 id="Task-4:-Influential-Municipalities-(Semi-guided)">Task 4: Influential Municipalities (Semi-guided)<a class="anchor-link" href="#Task-4:-Influential-Municipalities-(Semi-guided)">¶</a></h4><p><strong>Objective</strong>: Identify municipalities that disproportionately influence the regression results.</p>
+<p><strong>Instructions</strong>:</p>
+<ol>
+<li>Calculate DFITS for all observations</li>
+<li>Apply the threshold: $|DFITS| &gt; 2\sqrt{k/n}$ where $k$ = number of parameters and $n$ = sample size</li>
+<li>Identify the municipalities that exceed the threshold</li>
+<li>Calculate DFBETAS for the key coefficient (<code>ln_NTLpc2017</code>)</li>
+<li>Discuss: Are the influential municipalities capital cities or special cases?</li>
+</ol>
+<p><strong>Hint</strong>: Use <code>OLSInfluence(model)</code> from statsmodels to compute influence measures.</p>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># Your code here: Influential observation analysis</span>
+<span class="c1">#</span>
+<span class="c1"># Example structure:</span>
+<span class="c1"># model = ols('imds ~ ln_NTLpc2017 + A00 + A10 + A20 + A30 + A40',</span>
+<span class="c1">#             data=bol_cs).fit()</span>
+<span class="c1"># infl = OLSInfluence(model)</span>
+<span class="c1">#</span>
+<span class="c1"># # DFITS</span>
+<span class="c1"># dfits_vals = infl.dffits[0]</span>
+<span class="c1"># k = len(model.params)</span>
+<span class="c1"># n = len(bol_cs)</span>
+<span class="c1"># threshold = 2 * np.sqrt(k / n)</span>
+<span class="c1">#</span>
+<span class="c1"># influential = bol_cs.copy()</span>
+<span class="c1"># influential['dfits'] = dfits_vals</span>
+<span class="c1"># influential_muns = influential[np.abs(influential['dfits']) &gt; threshold]</span>
+<span class="c1">#</span>
+<span class="c1"># print(f"DFITS threshold: {threshold:.4f}")</span>
+<span class="c1"># print(f"Influential municipalities: {len(influential_muns)} out of {n}")</span>
+<span class="c1"># print("\nInfluential municipalities:")</span>
+<span class="c1"># print(influential_muns[['mun', 'dep', 'imds', 'ln_NTLpc2017', 'dfits']]</span>
+<span class="c1">#       .sort_values('dfits', key=abs, ascending=False).to_string(index=False))</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<blockquote>
+<p><strong>Key Concept 16.12: Spatial Outliers and Influential Observations</strong></p>
+<p>In municipality-level analysis, <strong>capital cities</strong> and special economic zones often appear as influential observations. These municipalities may have unusually high NTL (from concentrated economic activity) or unusual satellite patterns (dense urban cores). A single influential municipality can shift regression coefficients substantially. DFITS and DFBETAS identify such observations, allowing us to assess whether our conclusions depend on a few exceptional cases.</p>
+</blockquote>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<h4 id="Task-5:-Omitted-Variable-Analysis-(Independent)">Task 5: Omitted Variable Analysis (Independent)<a class="anchor-link" href="#Task-5:-Omitted-Variable-Analysis-(Independent)">¶</a></h4><p><strong>Objective</strong>: Assess potential omitted variable bias by adding department controls.</p>
+<p><strong>Instructions</strong>:</p>
+<ol>
+<li>Estimate models with and without department fixed effects (<code>C(dep)</code>)</li>
+<li>Compare the satellite coefficients across specifications</li>
+<li>Discuss: Do satellite coefficients change when adding department dummies?</li>
+<li>What is the direction of potential omitted variable bias?</li>
+<li>Consider: What unobserved factors might department dummies capture (geography, climate, policy)?</li>
+</ol>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># Your code here: Omitted variable analysis</span>
+<span class="c1">#</span>
+<span class="c1"># Example structure:</span>
+<span class="c1"># m_no_dept = ols('imds ~ ln_NTLpc2017 + A00 + A10', data=bol_cs).fit(cov_type='HC1')</span>
+<span class="c1"># m_with_dept = ols('imds ~ ln_NTLpc2017 + A00 + A10 + C(dep)', data=bol_cs).fit(cov_type='HC1')</span>
+<span class="c1">#</span>
+<span class="c1"># print("WITHOUT department controls:")</span>
+<span class="c1"># print(f"  NTL coef: {m_no_dept.params['ln_NTLpc2017']:.4f} (SE: {m_no_dept.bse['ln_NTLpc2017']:.4f})")</span>
+<span class="c1"># print(f"  R²: {m_no_dept.rsquared:.4f}")</span>
+<span class="c1">#</span>
+<span class="c1"># print("\nWITH department controls:")</span>
+<span class="c1"># print(f"  NTL coef: {m_with_dept.params['ln_NTLpc2017']:.4f} (SE: {m_with_dept.bse['ln_NTLpc2017']:.4f})")</span>
+<span class="c1"># print(f"  R²: {m_with_dept.rsquared:.4f}")</span>
+<span class="c1">#</span>
+<span class="c1"># print(f"\nCoefficient change: {m_with_dept.params['ln_NTLpc2017'] - m_no_dept.params['ln_NTLpc2017']:.4f}")</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<h4 id="Task-6:-Diagnostic-Report-(Independent)">Task 6: Diagnostic Report (Independent)<a class="anchor-link" href="#Task-6:-Diagnostic-Report-(Independent)">¶</a></h4><p><strong>Objective</strong>: Write a 200-300 word comprehensive model assessment.</p>
+<p><strong>Your report should address</strong>:</p>
+<ol>
+<li><strong>Multicollinearity</strong>: Summarize VIF results for satellite features. Are any problematic?</li>
+<li><strong>Heteroskedasticity</strong>: What does the SE comparison reveal? Should we use robust SEs?</li>
+<li><strong>Residual patterns</strong>: What do the diagnostic plots show about model specification?</li>
+<li><strong>Influential observations</strong>: Which municipalities are most influential? Do they represent special cases?</li>
+<li><strong>Omitted variables</strong>: How do department controls affect the satellite coefficients?</li>
+<li><strong>Recommendations</strong>: What corrections or modifications would you recommend for the satellite prediction model?</li>
+</ol>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># Your code here: Additional analysis for the diagnostic report</span>
+<span class="c1">#</span>
+<span class="c1"># You might want to:</span>
+<span class="c1"># 1. Create a summary table of diagnostic findings</span>
+<span class="c1"># 2. Re-estimate the model excluding influential observations</span>
+<span class="c1"># 3. Compare results with and without corrections</span>
+<span class="c1"># 4. Summarize key statistics for your report</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<h4 id="What-You've-Learned-from-This-Case-Study">What You've Learned from This Case Study<a class="anchor-link" href="#What-You've-Learned-from-This-Case-Study">¶</a></h4><p>Through this diagnostic analysis of the satellite prediction model, you've applied Chapter 16's complete toolkit to real geospatial data:</p>
+<ul>
+<li><strong>Multicollinearity assessment</strong>: Computed VIF for satellite features and identified correlated embeddings</li>
+<li><strong>Heteroskedasticity detection</strong>: Compared standard and robust SEs to assess variance assumptions</li>
+<li><strong>Residual diagnostics</strong>: Created visual diagnostic plots to check model assumptions</li>
+<li><strong>Influence analysis</strong>: Used DFITS and DFBETAS to identify municipalities that drive the results</li>
+<li><strong>Omitted variable assessment</strong>: Tested sensitivity of results to department controls</li>
+<li><strong>Critical thinking</strong>: Formulated recommendations for improving the satellite prediction model</li>
+</ul>
+<p><strong>Connection</strong>: In Chapter 17, we move to <em>panel data</em>—analyzing how nighttime lights evolve over time across municipalities, using fixed effects to control for time-invariant characteristics.</p>
+<hr/>
 </div>
 </div>
 </div>

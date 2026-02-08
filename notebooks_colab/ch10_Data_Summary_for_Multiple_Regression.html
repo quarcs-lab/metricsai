@@ -9143,7 +9143,7 @@ Warning: Maximum VIF = 57.82 indicates multicollinearity issues.
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h2 id="Case-Studies">Case Studies<a class="anchor-link" href="#Case-Studies">¶</a></h2><h3 id="Case-Study:-Multiple-Regression-for-Cross-Country-Productivity">Case Study: Multiple Regression for Cross-Country Productivity<a class="anchor-link" href="#Case-Study:-Multiple-Regression-for-Cross-Country-Productivity">¶</a></h3><p>In this case study, you will apply multiple regression techniques to investigate how human capital and physical capital jointly explain cross-country differences in labor productivity. Using data from 108 countries over 1990-2014, you will explore correlations, estimate multiple regression models, interpret partial effects, and compare model specifications.</p>
+<h2 id="Case-Studies">Case Studies<a class="anchor-link" href="#Case-Studies">¶</a></h2><h3 id="Case-Study-1:-Multiple-Regression-for-Cross-Country-Productivity">Case Study 1: Multiple Regression for Cross-Country Productivity<a class="anchor-link" href="#Case-Study-1:-Multiple-Regression-for-Cross-Country-Productivity">¶</a></h3><p>In this case study, you will apply multiple regression techniques to investigate how human capital and physical capital jointly explain cross-country differences in labor productivity. Using data from 108 countries over 1990-2014, you will explore correlations, estimate multiple regression models, interpret partial effects, and compare model specifications.</p>
 <p><strong>Dataset:</strong> Mendez Convergence Clubs Data</p>
 <ul>
 <li><strong>Source:</strong> Mendez (2020), 108 countries, 1990-2014</li>
@@ -9353,6 +9353,453 @@ Warning: Maximum VIF = 57.82 indicates multicollinearity issues.
 <li>Connected statistical findings to development policy questions</li>
 </ul>
 <p>These skills form the foundation for more advanced empirical analysis in the chapters ahead.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<h3 id="Case-Study-2:-Multiple-Satellite-Predictors-of-Development">Case Study 2: Multiple Satellite Predictors of Development<a class="anchor-link" href="#Case-Study-2:-Multiple-Satellite-Predictors-of-Development">¶</a></h3><p><strong>Research Question</strong>: Do satellite image embeddings improve our ability to predict municipal development beyond nighttime lights alone?</p>
+<p>In Chapter 1, we introduced the DS4Bolivia project and estimated a bivariate regression of development on nighttime lights. Now we extend this analysis using Chapter 10's <strong>multiple regression</strong> tools, adding satellite image embeddings as additional predictors to test whether they improve our ability to predict municipal development.</p>
+<p><strong>Background</strong>: Nighttime lights (NTL) are a well-established proxy for economic activity, but they capture only one dimension of a municipality's characteristics — nocturnal luminosity. Daytime satellite imagery contains far richer information: building density, road networks, agricultural patterns, vegetation cover. Deep learning models can extract this information as <strong>64-dimensional embedding vectors</strong>, where each dimension captures abstract visual patterns learned automatically from the data.</p>
+<p><strong>The key question for multiple regression</strong>: Does adding these satellite embeddings as extra regressors significantly improve explanatory power compared to NTL alone? And if so, which embeddings matter most?</p>
+<p><strong>Variables for this case study:</strong></p>
+<ul>
+<li><code>imds</code> — Municipal Sustainable Development Index (0-100, outcome variable)</li>
+<li><code>ln_NTLpc2017</code> — Log nighttime lights per capita (established predictor from Chapter 1)</li>
+<li><code>A00</code>, <code>A10</code>, <code>A20</code>, <code>A30</code>, <code>A40</code> — Selected satellite image embedding dimensions (new predictors)</li>
+<li><code>mun</code>, <code>dep</code> — Municipality and department identifiers</li>
+</ul>
+<p><strong>Your Task</strong>: Use correlation analysis, multiple regression, the FWL theorem, and model comparison tools from Chapter 10 to evaluate whether satellite embeddings add predictive value beyond nighttime lights.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<h4 id="Load-the-DS4Bolivia-Data">Load the DS4Bolivia Data<a class="anchor-link" href="#Load-the-DS4Bolivia-Data">¶</a></h4><p>Let's load the DS4Bolivia dataset and select the variables needed for our multiple regression analysis. We focus on the development index, nighttime lights, and five selected satellite embedding dimensions.</p>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># Load the DS4Bolivia dataset</span>
+<span class="n">url_bol</span> <span class="o">=</span> <span class="s2">"https://raw.githubusercontent.com/quarcs-lab/ds4bolivia/master/ds4bolivia_v20250523.csv"</span>
+<span class="n">bol</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">url_bol</span><span class="p">)</span>
+
+<span class="c1"># Select key variables for this case study</span>
+<span class="n">key_vars</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'mun'</span><span class="p">,</span> <span class="s1">'dep'</span><span class="p">,</span> <span class="s1">'imds'</span><span class="p">,</span> <span class="s1">'ln_NTLpc2017'</span><span class="p">,</span> <span class="s1">'A00'</span><span class="p">,</span> <span class="s1">'A10'</span><span class="p">,</span> <span class="s1">'A20'</span><span class="p">,</span> <span class="s1">'A30'</span><span class="p">,</span> <span class="s1">'A40'</span><span class="p">]</span>
+<span class="n">bol_sat</span> <span class="o">=</span> <span class="n">bol</span><span class="p">[</span><span class="n">key_vars</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">"="</span> <span class="o">*</span> <span class="mi">70</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"DS4BOLIVIA DATASET — SATELLITE PREDICTORS"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"="</span> <span class="o">*</span> <span class="mi">70</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Dataset shape: </span><span class="si">{</span><span class="n">bol_sat</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2"> municipalities, </span><span class="si">{</span><span class="n">bol_sat</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s2"> variables"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Departments: </span><span class="si">{</span><span class="n">bol</span><span class="p">[</span><span class="s1">'dep'</span><span class="p">]</span><span class="o">.</span><span class="n">nunique</span><span class="p">()</span><span class="si">}</span><span class="s2"> unique departments"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Complete cases: </span><span class="si">{</span><span class="n">bol_sat</span><span class="o">.</span><span class="n">dropna</span><span class="p">()</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"</span><span class="se">\n</span><span class="s2">"</span> <span class="o">+</span> <span class="s2">"="</span> <span class="o">*</span> <span class="mi">70</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"FIRST 10 MUNICIPALITIES"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"="</span> <span class="o">*</span> <span class="mi">70</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">bol_sat</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span><span class="o">.</span><span class="n">to_string</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<h4 id="Task-1:-Explore-Variables-(Guided)">Task 1: Explore Variables (Guided)<a class="anchor-link" href="#Task-1:-Explore-Variables-(Guided)">¶</a></h4><p><strong>Objective</strong>: Understand the satellite embedding variables and how they compare to nighttime lights.</p>
+<p><strong>Instructions</strong>:</p>
+<ol>
+<li>Generate summary statistics for all predictor variables using <code>describe()</code></li>
+<li>Compare the scale and distribution of NTL vs. embedding variables</li>
+<li>Check for missing values across all selected variables</li>
+<li>Consider: What are satellite embeddings? How do they differ from NTL?</li>
+</ol>
+<p><strong>Key insight</strong>: Unlike NTL (which has a clear physical interpretation — light intensity), embedding dimensions are <strong>abstract features</strong> extracted by neural networks. Dimension <code>A00</code> doesn't mean "vegetation" or "roads" — it captures a learned combination of visual patterns.</p>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># Your code here: Explore the satellite predictor variables</span>
+<span class="c1">#</span>
+<span class="c1"># Step 1: Summary statistics for all numeric variables</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"="</span> <span class="o">*</span> <span class="mi">70</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"DESCRIPTIVE STATISTICS: DEVELOPMENT AND SATELLITE PREDICTORS"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"="</span> <span class="o">*</span> <span class="mi">70</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">bol_sat</span><span class="p">[[</span><span class="s1">'imds'</span><span class="p">,</span> <span class="s1">'ln_NTLpc2017'</span><span class="p">,</span> <span class="s1">'A00'</span><span class="p">,</span> <span class="s1">'A10'</span><span class="p">,</span> <span class="s1">'A20'</span><span class="p">,</span> <span class="s1">'A30'</span><span class="p">,</span> <span class="s1">'A40'</span><span class="p">]]</span><span class="o">.</span><span class="n">describe</span><span class="p">()</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">3</span><span class="p">))</span>
+
+<span class="c1"># Step 2: Check for missing values</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"</span><span class="se">\n</span><span class="s2">"</span> <span class="o">+</span> <span class="s2">"="</span> <span class="o">*</span> <span class="mi">70</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"MISSING VALUES"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"="</span> <span class="o">*</span> <span class="mi">70</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">bol_sat</span><span class="o">.</span><span class="n">isnull</span><span class="p">()</span><span class="o">.</span><span class="n">sum</span><span class="p">())</span>
+
+<span class="c1"># Step 3: Compare variable ranges</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"</span><span class="se">\n</span><span class="s2">"</span> <span class="o">+</span> <span class="s2">"="</span> <span class="o">*</span> <span class="mi">70</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"VARIABLE RANGES"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"="</span> <span class="o">*</span> <span class="mi">70</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">'imds'</span><span class="p">,</span> <span class="s1">'ln_NTLpc2017'</span><span class="p">,</span> <span class="s1">'A00'</span><span class="p">,</span> <span class="s1">'A10'</span><span class="p">,</span> <span class="s1">'A20'</span><span class="p">,</span> <span class="s1">'A30'</span><span class="p">,</span> <span class="s1">'A40'</span><span class="p">]:</span>
+    <span class="n">col</span> <span class="o">=</span> <span class="n">bol_sat</span><span class="p">[</span><span class="n">var</span><span class="p">]</span><span class="o">.</span><span class="n">dropna</span><span class="p">()</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"  </span><span class="si">{</span><span class="n">var</span><span class="si">:</span><span class="s2">16s</span><span class="si">}</span><span class="s2">  range: [</span><span class="si">{</span><span class="n">col</span><span class="o">.</span><span class="n">min</span><span class="p">()</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">col</span><span class="o">.</span><span class="n">max</span><span class="p">()</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">]  std: </span><span class="si">{</span><span class="n">col</span><span class="o">.</span><span class="n">std</span><span class="p">()</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<h4 id="Task-2:-Correlation-Analysis-(Guided)">Task 2: Correlation Analysis (Guided)<a class="anchor-link" href="#Task-2:-Correlation-Analysis-(Guided)">¶</a></h4><p><strong>Objective</strong>: Compute and visualize the correlation structure among all predictors and the outcome variable.</p>
+<p><strong>Instructions</strong>:</p>
+<ol>
+<li>Compute the correlation matrix for <code>imds</code>, <code>ln_NTLpc2017</code>, and all five embedding variables</li>
+<li>Display the correlation matrix as a heatmap</li>
+<li>Identify: Which embeddings correlate most strongly with <code>imds</code>?</li>
+<li>Identify: Do the embeddings correlate with each other (potential multicollinearity)?</li>
+<li>Do the embeddings correlate with NTL, or do they capture different information?</li>
+</ol>
+<p><strong>Apply what you learned in section 10.3</strong>: Use <code>seaborn.heatmap()</code> with annotated correlation values.</p>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># Your code here: Correlation analysis of satellite predictors</span>
+<span class="c1">#</span>
+<span class="c1"># Step 1: Compute correlation matrix</span>
+<span class="n">corr_vars</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'imds'</span><span class="p">,</span> <span class="s1">'ln_NTLpc2017'</span><span class="p">,</span> <span class="s1">'A00'</span><span class="p">,</span> <span class="s1">'A10'</span><span class="p">,</span> <span class="s1">'A20'</span><span class="p">,</span> <span class="s1">'A30'</span><span class="p">,</span> <span class="s1">'A40'</span><span class="p">]</span>
+<span class="n">corr_sat</span> <span class="o">=</span> <span class="n">bol_sat</span><span class="p">[</span><span class="n">corr_vars</span><span class="p">]</span><span class="o">.</span><span class="n">dropna</span><span class="p">()</span><span class="o">.</span><span class="n">corr</span><span class="p">()</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">"="</span> <span class="o">*</span> <span class="mi">70</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"CORRELATION MATRIX: DEVELOPMENT AND SATELLITE PREDICTORS"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"="</span> <span class="o">*</span> <span class="mi">70</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">corr_sat</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">3</span><span class="p">))</span>
+
+<span class="c1"># Step 2: Visualize as heatmap</span>
+<span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">8</span><span class="p">))</span>
+<span class="n">sns</span><span class="o">.</span><span class="n">heatmap</span><span class="p">(</span><span class="n">corr_sat</span><span class="p">,</span> <span class="n">annot</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">fmt</span><span class="o">=</span><span class="s1">'.3f'</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="s1">'coolwarm'</span><span class="p">,</span> <span class="n">center</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+            <span class="n">square</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">linewidths</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">cbar_kws</span><span class="o">=</span><span class="p">{</span><span class="s2">"shrink"</span><span class="p">:</span> <span class="mf">0.8</span><span class="p">})</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s1">'Correlation Matrix: IMDS, NTL, and Satellite Embeddings'</span><span class="p">,</span>
+             <span class="n">fontsize</span><span class="o">=</span><span class="mi">14</span><span class="p">,</span> <span class="n">fontweight</span><span class="o">=</span><span class="s1">'bold'</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+
+<span class="c1"># Step 3: Highlight strongest correlations with IMDS</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"</span><span class="se">\n</span><span class="s2">Correlations with IMDS (development index):"</span><span class="p">)</span>
+<span class="n">imds_corr</span> <span class="o">=</span> <span class="n">corr_sat</span><span class="p">[</span><span class="s1">'imds'</span><span class="p">]</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="s1">'imds'</span><span class="p">)</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="nb">abs</span><span class="p">,</span> <span class="n">ascending</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">var</span><span class="p">,</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">imds_corr</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"  </span><span class="si">{</span><span class="n">var</span><span class="si">:</span><span class="s2">16s</span><span class="si">}</span><span class="s2">  r = </span><span class="si">{</span><span class="n">r</span><span class="si">:</span><span class="s2">+.3f</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<blockquote>
+<p><strong>Key Concept 10.12: High-Dimensional Satellite Features</strong></p>
+<p>Satellite embeddings are <strong>64 abstract features</strong> extracted by deep learning models (convolutional neural networks) from daytime satellite imagery. Unlike handcrafted variables (e.g., NDVI for vegetation), each embedding dimension captures complex visual patterns — road density, building structures, agricultural layouts — learned automatically from the data. These features are not directly interpretable (dimension A00 doesn't have a specific meaning), but they collectively encode rich information about a municipality's physical landscape.</p>
+</blockquote>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<h4 id="Task-3:-Multiple-Regression-(Semi-guided)">Task 3: Multiple Regression (Semi-guided)<a class="anchor-link" href="#Task-3:-Multiple-Regression-(Semi-guided)">¶</a></h4><p><strong>Objective</strong>: Estimate a multiple regression model with NTL and satellite embeddings as predictors.</p>
+<p><strong>Instructions</strong>:</p>
+<ol>
+<li>Estimate the full model: <code>imds ~ ln_NTLpc2017 + A00 + A10 + A20 + A30 + A40</code></li>
+<li>Display the regression summary</li>
+<li>Compare $R^2$ with the bivariate NTL-only model from Chapter 1</li>
+<li>Interpret: How much does adding embeddings improve explanatory power?</li>
+<li>Which embedding coefficients are statistically significant?</li>
+</ol>
+<p><strong>Apply what you learned in section 10.4</strong>: Use <code>ols()</code> from statsmodels and interpret partial effects.</p>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># Your code here: Multiple regression with satellite predictors</span>
+<span class="c1">#</span>
+<span class="c1"># Step 1: Prepare data (drop missing values)</span>
+<span class="n">reg_data</span> <span class="o">=</span> <span class="n">bol_sat</span><span class="p">[[</span><span class="s1">'imds'</span><span class="p">,</span> <span class="s1">'ln_NTLpc2017'</span><span class="p">,</span> <span class="s1">'A00'</span><span class="p">,</span> <span class="s1">'A10'</span><span class="p">,</span> <span class="s1">'A20'</span><span class="p">,</span> <span class="s1">'A30'</span><span class="p">,</span> <span class="s1">'A40'</span><span class="p">]]</span><span class="o">.</span><span class="n">dropna</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Regression sample: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">reg_data</span><span class="p">)</span><span class="si">}</span><span class="s2"> municipalities (complete cases)"</span><span class="p">)</span>
+
+<span class="c1"># Step 2: Bivariate model (NTL only — baseline from Chapter 1)</span>
+<span class="n">model_ntl</span> <span class="o">=</span> <span class="n">ols</span><span class="p">(</span><span class="s1">'imds ~ ln_NTLpc2017'</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">reg_data</span><span class="p">)</span><span class="o">.</span><span class="n">fit</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"</span><span class="se">\n</span><span class="s2">"</span> <span class="o">+</span> <span class="s2">"="</span> <span class="o">*</span> <span class="mi">70</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"MODEL 1: BIVARIATE — imds ~ ln_NTLpc2017"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"="</span> <span class="o">*</span> <span class="mi">70</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">model_ntl</span><span class="o">.</span><span class="n">summary</span><span class="p">())</span>
+
+<span class="c1"># Step 3: Multiple regression (NTL + all 5 embeddings)</span>
+<span class="n">model_full_sat</span> <span class="o">=</span> <span class="n">ols</span><span class="p">(</span><span class="s1">'imds ~ ln_NTLpc2017 + A00 + A10 + A20 + A30 + A40'</span><span class="p">,</span>
+                     <span class="n">data</span><span class="o">=</span><span class="n">reg_data</span><span class="p">)</span><span class="o">.</span><span class="n">fit</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"</span><span class="se">\n</span><span class="s2">"</span> <span class="o">+</span> <span class="s2">"="</span> <span class="o">*</span> <span class="mi">70</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"MODEL 2: MULTIPLE — imds ~ ln_NTLpc2017 + A00 + A10 + A20 + A30 + A40"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"="</span> <span class="o">*</span> <span class="mi">70</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">model_full_sat</span><span class="o">.</span><span class="n">summary</span><span class="p">())</span>
+
+<span class="c1"># Step 4: Compare R-squared</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"</span><span class="se">\n</span><span class="s2">"</span> <span class="o">+</span> <span class="s2">"="</span> <span class="o">*</span> <span class="mi">70</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"R-SQUARED COMPARISON"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"="</span> <span class="o">*</span> <span class="mi">70</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"NTL only:           R² = </span><span class="si">{</span><span class="n">model_ntl</span><span class="o">.</span><span class="n">rsquared</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"NTL + 5 embeddings: R² = </span><span class="si">{</span><span class="n">model_full_sat</span><span class="o">.</span><span class="n">rsquared</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Improvement:        ΔR² = </span><span class="si">{</span><span class="n">model_full_sat</span><span class="o">.</span><span class="n">rsquared</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">model_ntl</span><span class="o">.</span><span class="n">rsquared</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<h4 id="Task-4:-Partial-Effects-via-FWL-(Semi-guided)">Task 4: Partial Effects via FWL (Semi-guided)<a class="anchor-link" href="#Task-4:-Partial-Effects-via-FWL-(Semi-guided)">¶</a></h4><p><strong>Objective</strong>: Demonstrate the Frisch-Waugh-Lovell theorem by showing that the NTL coefficient in the multiple regression equals the coefficient from regressing residualized IMDS on residualized NTL.</p>
+<p><strong>Instructions</strong>:</p>
+<ol>
+<li>Regress <code>imds</code> on all embedding variables (<code>A00</code>, <code>A10</code>, <code>A20</code>, <code>A30</code>, <code>A40</code>), save residuals $e_y$</li>
+<li>Regress <code>ln_NTLpc2017</code> on all embedding variables, save residuals $e_x$</li>
+<li>Regress $e_y$ on $e_x$ (bivariate regression of residuals)</li>
+<li>Verify that the coefficient matches the NTL coefficient from the full multiple regression</li>
+</ol>
+<p><strong>Apply what you learned in section 10.5</strong>: This demonstrates that the partial effect of NTL is computed from the variation in NTL that is <em>independent</em> of the satellite embeddings.</p>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># Your code here: FWL theorem demonstration</span>
+<span class="c1">#</span>
+<span class="c1"># Step 1: Regress imds on embeddings only, save residuals e_y</span>
+<span class="n">model_y_on_emb</span> <span class="o">=</span> <span class="n">ols</span><span class="p">(</span><span class="s1">'imds ~ A00 + A10 + A20 + A30 + A40'</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">reg_data</span><span class="p">)</span><span class="o">.</span><span class="n">fit</span><span class="p">()</span>
+<span class="n">e_y</span> <span class="o">=</span> <span class="n">model_y_on_emb</span><span class="o">.</span><span class="n">resid</span>
+
+<span class="c1"># Step 2: Regress ln_NTLpc2017 on embeddings only, save residuals e_x</span>
+<span class="n">model_x_on_emb</span> <span class="o">=</span> <span class="n">ols</span><span class="p">(</span><span class="s1">'ln_NTLpc2017 ~ A00 + A10 + A20 + A30 + A40'</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">reg_data</span><span class="p">)</span><span class="o">.</span><span class="n">fit</span><span class="p">()</span>
+<span class="n">e_x</span> <span class="o">=</span> <span class="n">model_x_on_emb</span><span class="o">.</span><span class="n">resid</span>
+
+<span class="c1"># Step 3: Regress e_y on e_x</span>
+<span class="n">fwl_data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s1">'e_y'</span><span class="p">:</span> <span class="n">e_y</span><span class="p">,</span> <span class="s1">'e_x'</span><span class="p">:</span> <span class="n">e_x</span><span class="p">})</span>
+<span class="n">model_fwl</span> <span class="o">=</span> <span class="n">ols</span><span class="p">(</span><span class="s1">'e_y ~ e_x'</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">fwl_data</span><span class="p">)</span><span class="o">.</span><span class="n">fit</span><span class="p">()</span>
+
+<span class="c1"># Step 4: Compare coefficients</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"="</span> <span class="o">*</span> <span class="mi">70</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"FWL THEOREM DEMONSTRATION"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"="</span> <span class="o">*</span> <span class="mi">70</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"NTL coefficient from FULL multiple regression:  </span><span class="si">{</span><span class="n">model_full_sat</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s1">'ln_NTLpc2017'</span><span class="p">]</span><span class="si">:</span><span class="s2">.10f</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Coefficient from FWL residual regression:       </span><span class="si">{</span><span class="n">model_fwl</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s1">'e_x'</span><span class="p">]</span><span class="si">:</span><span class="s2">.10f</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Difference (numerical precision):                </span><span class="si">{</span><span class="nb">abs</span><span class="p">(</span><span class="n">model_full_sat</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s1">'ln_NTLpc2017'</span><span class="p">]</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">model_fwl</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s1">'e_x'</span><span class="p">])</span><span class="si">:</span><span class="s2">.15f</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"</span><span class="se">\n</span><span class="s2">The coefficients are identical — confirming the FWL theorem!"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"</span><span class="se">\n</span><span class="s2">Interpretation: The partial effect of NTL on IMDS is computed using"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"only the variation in NTL that is NOT explained by the satellite embeddings."</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<h4 id="Task-5:-Model-Comparison-(Independent)">Task 5: Model Comparison (Independent)<a class="anchor-link" href="#Task-5:-Model-Comparison-(Independent)">¶</a></h4><p><strong>Objective</strong>: Compare multiple model specifications using fit statistics and information criteria.</p>
+<p><strong>Your tasks</strong>:</p>
+<ol>
+<li>Estimate three models:<ul>
+<li><strong>Model 1</strong>: <code>imds ~ ln_NTLpc2017</code> (NTL only)</li>
+<li><strong>Model 2</strong>: <code>imds ~ ln_NTLpc2017 + A00 + A10</code> (NTL + 2 embeddings)</li>
+<li><strong>Model 3</strong>: <code>imds ~ ln_NTLpc2017 + A00 + A10 + A20 + A30 + A40</code> (NTL + 5 embeddings)</li>
+</ul>
+</li>
+<li>Create a comparison table reporting $R^2$, adjusted $R^2$, AIC, and BIC for each model</li>
+<li>Use <code>model.rsquared</code>, <code>model.rsquared_adj</code>, <code>model.aic</code>, <code>model.bic</code></li>
+<li>Which model is "best" by each criterion?</li>
+<li>Does the parsimony principle favor fewer or more embedding variables?</li>
+</ol>
+<p><em>Hint: Use <code>pd.DataFrame()</code> to create a clean comparison table.</em></p>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># Your code here: Model comparison</span>
+<span class="c1">#</span>
+<span class="c1"># Step 1: Estimate three models</span>
+<span class="c1"># model_1 = ols('imds ~ ln_NTLpc2017', data=reg_data).fit()</span>
+<span class="c1"># model_2 = ols('imds ~ ln_NTLpc2017 + A00 + A10', data=reg_data).fit()</span>
+<span class="c1"># model_3 = ols('imds ~ ln_NTLpc2017 + A00 + A10 + A20 + A30 + A40', data=reg_data).fit()</span>
+<span class="c1">#</span>
+<span class="c1"># Step 2: Create comparison table</span>
+<span class="c1"># comparison = pd.DataFrame({</span>
+<span class="c1">#     'Model': ['NTL only', 'NTL + 2 embeddings', 'NTL + 5 embeddings'],</span>
+<span class="c1">#     'R²': [model_1.rsquared, model_2.rsquared, model_3.rsquared],</span>
+<span class="c1">#     'Adj R²': [model_1.rsquared_adj, model_2.rsquared_adj, model_3.rsquared_adj],</span>
+<span class="c1">#     'AIC': [model_1.aic, model_2.aic, model_3.aic],</span>
+<span class="c1">#     'BIC': [model_1.bic, model_2.bic, model_3.bic],</span>
+<span class="c1">#     'N': [len(reg_data)] * 3</span>
+<span class="c1"># })</span>
+<span class="c1"># print(comparison.to_string(index=False))</span>
+<span class="c1">#</span>
+<span class="c1"># Step 3: Interpret — which model is preferred by each criterion?</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<blockquote>
+<p><strong>Key Concept 10.13: Incremental Predictive Power</strong></p>
+<p>When adding predictors to a regression model, $R^2$ can only increase or stay the same — it never decreases. This makes $R^2$ misleading for model comparison when models have different numbers of predictors. <strong>Adjusted $R^2$</strong> penalizes for additional variables, while <strong>AIC</strong> and <strong>BIC</strong> balance fit against complexity. In the satellite prediction context, adding all 64 embeddings would maximize $R^2$ but might overfit; information criteria help identify the most parsimonious model.</p>
+</blockquote>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<h4 id="Task-6:-Policy-Brief-on-Satellite-Prediction-(Independent)">Task 6: Policy Brief on Satellite Prediction (Independent)<a class="anchor-link" href="#Task-6:-Policy-Brief-on-Satellite-Prediction-(Independent)">¶</a></h4><p><strong>Objective</strong>: Write a 200-300 word policy brief summarizing the value of satellite embeddings for development prediction.</p>
+<p><strong>Your brief should address:</strong></p>
+<ol>
+<li><strong>Improvement</strong>: How much does adding satellite embeddings improve development prediction compared to NTL alone?</li>
+<li><strong>Complexity trade-off</strong>: Is the improvement worth the added model complexity? What do adjusted $R^2$, AIC, and BIC suggest?</li>
+<li><strong>Partial effects</strong>: After controlling for embeddings, does NTL remain a significant predictor? What does the FWL theorem reveal about NTL's independent contribution?</li>
+<li><strong>SDG monitoring implications</strong>: How could multi-source satellite data enhance SDG monitoring in data-scarce countries like Bolivia?</li>
+<li><strong>Limitations</strong>: What can satellite data <em>not</em> capture about development? What are the risks of relying on abstract embedding features for policy decisions?</li>
+</ol>
+<p><strong>Connection to Research</strong>: The DS4Bolivia project uses all 64 embedding dimensions plus machine learning methods (Random Forest, XGBoost) to predict SDG indicators, achieving meaningful predictive accuracy. Your multiple regression analysis provides a transparent, interpretable baseline for comparison.</p>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># Your code here: Additional analysis for the policy brief</span>
+<span class="c1">#</span>
+<span class="c1"># You might want to:</span>
+<span class="c1"># 1. Create a summary table of key results across models</span>
+<span class="c1"># 2. Generate a visualization comparing model fit</span>
+<span class="c1"># 3. Calculate the percentage improvement in R² from adding embeddings</span>
+<span class="c1"># 4. Discuss which embeddings contribute most to prediction</span>
+<span class="c1">#</span>
+<span class="c1"># Example:</span>
+<span class="c1"># print("KEY RESULTS FOR POLICY BRIEF")</span>
+<span class="c1"># print(f"NTL-only R²:          {model_1.rsquared:.4f}")</span>
+<span class="c1"># print(f"NTL + 5 embed R²:     {model_3.rsquared:.4f}")</span>
+<span class="c1"># print(f"R² improvement:       {(model_3.rsquared - model_1.rsquared) / model_1.rsquared * 100:.1f}%")</span>
+<span class="c1"># print(f"NTL coef (bivariate): {model_1.params['ln_NTLpc2017']:.4f}")</span>
+<span class="c1"># print(f"NTL coef (multiple):  {model_3.params['ln_NTLpc2017']:.4f}")</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<h4 id="What-You've-Learned-from-This-Case-Study">What You've Learned from This Case Study<a class="anchor-link" href="#What-You've-Learned-from-This-Case-Study">¶</a></h4><p>Through this analysis of multiple satellite predictors of Bolivian municipal development, you've applied the full Chapter 10 toolkit to a cutting-edge research application:</p>
+<ul>
+<li><strong>Correlation analysis</strong>: Explored the correlation structure among NTL, satellite embeddings, and development outcomes</li>
+<li><strong>Multiple regression</strong>: Estimated models with multiple satellite predictors and interpreted partial effects</li>
+<li><strong>FWL theorem</strong>: Demonstrated that the partial effect of NTL equals the coefficient from regressing residualized IMDS on residualized NTL</li>
+<li><strong>Model comparison</strong>: Evaluated competing specifications using $R^2$, adjusted $R^2$, AIC, and BIC</li>
+<li><strong>Critical assessment</strong>: Weighed the predictive gains from additional satellite features against model complexity</li>
+</ul>
+<p><strong>Connection to upcoming chapters</strong>: In Chapter 11, we'll test whether the satellite embeddings are <em>statistically</em> significant using F-tests for joint significance. In Chapter 12, we'll address robust inference and prediction intervals.</p>
+<p><strong>This dataset returns throughout the textbook</strong>: Each subsequent chapter applies its specific econometric tools to the DS4Bolivia data, building progressively toward a comprehensive satellite-based development prediction framework.</p>
+<hr/>
+<p><strong>Well done!</strong> You've now analyzed how multiple satellite data sources can predict development outcomes, moving from simple bivariate regression (Chapter 1) to the richer multiple regression framework of Chapter 10.</p>
 </div>
 </div>
 </div>

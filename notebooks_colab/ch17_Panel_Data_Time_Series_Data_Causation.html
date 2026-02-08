@@ -10122,7 +10122,7 @@ Practical Recommendations
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h2 id="Case-Studies">Case Studies<a class="anchor-link" href="#Case-Studies">¶</a></h2><h3 id="Case-Study:-Panel-Data-Analysis-of-Cross-Country-Productivity">Case Study: Panel Data Analysis of Cross-Country Productivity<a class="anchor-link" href="#Case-Study:-Panel-Data-Analysis-of-Cross-Country-Productivity">¶</a></h3><p>In this case study, you will apply panel data methods from this chapter to analyze labor productivity dynamics across countries using the Mendez convergence clubs dataset.</p>
+<h2 id="Case-Studies">Case Studies<a class="anchor-link" href="#Case-Studies">¶</a></h2><h3 id="Case-Study-1:-Panel-Data-Analysis-of-Cross-Country-Productivity">Case Study 1: Panel Data Analysis of Cross-Country Productivity<a class="anchor-link" href="#Case-Study-1:-Panel-Data-Analysis-of-Cross-Country-Productivity">¶</a></h3><p>In this case study, you will apply panel data methods from this chapter to analyze labor productivity dynamics across countries using the Mendez convergence clubs dataset.</p>
 <p><strong>Dataset:</strong> Mendez (2020) convergence clubs data</p>
 <ul>
 <li><strong>Source:</strong> <code>https://raw.githubusercontent.com/quarcs-lab/mendez2020-convergence-clubs-code-data/master/assets/dat.csv</code></li>
@@ -10202,6 +10202,423 @@ Practical Recommendations
 </blockquote>
 <p><strong>What You've Learned:</strong>
 In this case study, you applied the complete panel data toolkit to cross-country productivity analysis. You decomposed variation into within and between components, compared pooled OLS with fixed effects, examined cluster-robust standard errors, and explored regional heterogeneity. These methods are essential for any empirical analysis using panel data.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<h3 id="Case-Study-2:-Luminosity-and-Development-Over-Time:-A-Panel-Approach">Case Study 2: Luminosity and Development Over Time: A Panel Approach<a class="anchor-link" href="#Case-Study-2:-Luminosity-and-Development-Over-Time:-A-Panel-Approach">¶</a></h3><p><strong>Research Question</strong>: How does nighttime luminosity evolve across Bolivia's municipalities over time, and what does within-municipality variation reveal about development dynamics?</p>
+<p><strong>Background</strong>: Throughout this textbook, we have analyzed <em>cross-sectional</em> satellite-development relationships. But the DS4Bolivia dataset includes nighttime lights data for 2012-2020, creating a natural <strong>panel dataset</strong>. In this case study, we apply Chapter 17's panel data tools to track how luminosity evolves across municipalities over time, using fixed effects to control for time-invariant characteristics.</p>
+<p><strong>The Data</strong>: The DS4Bolivia dataset covers 339 Bolivian municipalities with annual nighttime lights and population data for 2012-2020, yielding a potential panel of 3,051 municipality-year observations.</p>
+<p><strong>Key Variables</strong>:</p>
+<ul>
+<li><code>mun</code>: Municipality name</li>
+<li><code>dep</code>: Department (administrative region)</li>
+<li><code>asdf_id</code>: Unique municipality identifier</li>
+<li><code>ln_NTLpc2012</code> through <code>ln_NTLpc2020</code>: Log nighttime lights per capita (annual)</li>
+<li><code>pop2012</code> through <code>pop2020</code>: Population (annual)</li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<h4 id="Load-the-DS4Bolivia-Data-and-Create-Panel-Structure">Load the DS4Bolivia Data and Create Panel Structure<a class="anchor-link" href="#Load-the-DS4Bolivia-Data-and-Create-Panel-Structure">¶</a></h4>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># Load the DS4Bolivia dataset</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">statsmodels.formula.api</span><span class="w"> </span><span class="kn">import</span> <span class="n">ols</span>
+
+<span class="n">url_bol</span> <span class="o">=</span> <span class="s2">"https://raw.githubusercontent.com/quarcs-lab/ds4bolivia/master/ds4bolivia_v20250523.csv"</span>
+<span class="n">bol</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">url_bol</span><span class="p">)</span>
+
+<span class="c1"># Display available NTL and population variables</span>
+<span class="n">ntl_vars</span> <span class="o">=</span> <span class="p">[</span><span class="n">c</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">bol</span><span class="o">.</span><span class="n">columns</span> <span class="k">if</span> <span class="n">c</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">'ln_NTLpc'</span><span class="p">)]</span>
+<span class="n">pop_vars</span> <span class="o">=</span> <span class="p">[</span><span class="n">c</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">bol</span><span class="o">.</span><span class="n">columns</span> <span class="k">if</span> <span class="n">c</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">'pop'</span><span class="p">)</span> <span class="ow">and</span> <span class="n">c</span><span class="p">[</span><span class="mi">3</span><span class="p">:]</span><span class="o">.</span><span class="n">isdigit</span><span class="p">()]</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">"="</span> <span class="o">*</span> <span class="mi">70</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"DS4BOLIVIA: PANEL DATA CASE STUDY"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"="</span> <span class="o">*</span> <span class="mi">70</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Cross-sectional units: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">bol</span><span class="p">)</span><span class="si">}</span><span class="s2"> municipalities"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="se">\n</span><span class="s2">NTL variables available: </span><span class="si">{</span><span class="n">ntl_vars</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Population variables available: </span><span class="si">{</span><span class="n">pop_vars</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<h4 id="Task-1:-Create-Panel-Dataset-(Guided)">Task 1: Create Panel Dataset (Guided)<a class="anchor-link" href="#Task-1:-Create-Panel-Dataset-(Guided)">¶</a></h4><p><strong>Objective</strong>: Reshape the wide-format DS4Bolivia data into a long panel dataset.</p>
+<p><strong>Instructions</strong>:</p>
+<ol>
+<li>Select municipality identifiers (<code>mun</code>, <code>dep</code>, <code>asdf_id</code>) and annual NTL/population variables</li>
+<li>Reshape from wide to long format using <code>pd.melt()</code> or manual reshaping</li>
+<li>Create columns: <code>municipality</code>, <code>year</code>, <code>ln_NTLpc</code>, <code>pop</code>, <code>ln_pop</code></li>
+<li>Verify the panel structure: 339 municipalities x 9 years = 3,051 observations</li>
+<li>Show <code>head()</code> and <code>describe()</code> for the panel dataset</li>
+</ol>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># Your code here: Reshape to panel format</span>
+<span class="c1">#</span>
+<span class="c1"># Example structure:</span>
+<span class="c1"># # Reshape NTL variables</span>
+<span class="c1"># ntl_cols = {f'ln_NTLpc{y}': y for y in range(2012, 2021)}</span>
+<span class="c1"># pop_cols = {f'pop{y}': y for y in range(2012, 2021)}</span>
+<span class="c1">#</span>
+<span class="c1"># # Melt NTL</span>
+<span class="c1"># ntl_long = bol[['mun', 'dep', 'asdf_id'] + list(ntl_cols.keys())].melt(</span>
+<span class="c1">#     id_vars=['mun', 'dep', 'asdf_id'],</span>
+<span class="c1">#     var_name='ntl_var', value_name='ln_NTLpc'</span>
+<span class="c1"># )</span>
+<span class="c1"># ntl_long['year'] = ntl_long['ntl_var'].str.extract(r'(\d{4})').astype(int)</span>
+<span class="c1">#</span>
+<span class="c1"># # Melt Population</span>
+<span class="c1"># pop_long = bol[['asdf_id'] + list(pop_cols.keys())].melt(</span>
+<span class="c1">#     id_vars=['asdf_id'],</span>
+<span class="c1">#     var_name='pop_var', value_name='pop'</span>
+<span class="c1"># )</span>
+<span class="c1"># pop_long['year'] = pop_long['pop_var'].str.extract(r'(\d{4})').astype(int)</span>
+<span class="c1">#</span>
+<span class="c1"># # Merge</span>
+<span class="c1"># panel = ntl_long.merge(pop_long[['asdf_id', 'year', 'pop']],</span>
+<span class="c1">#                        on=['asdf_id', 'year'], how='left')</span>
+<span class="c1"># panel['ln_pop'] = np.log(panel['pop'])</span>
+<span class="c1"># panel = panel.sort_values(['asdf_id', 'year']).reset_index(drop=True)</span>
+<span class="c1">#</span>
+<span class="c1"># print(f"Panel shape: {panel.shape}")</span>
+<span class="c1"># print(f"Municipalities: {panel['asdf_id'].nunique()}")</span>
+<span class="c1"># print(f"Years: {sorted(panel['year'].unique())}")</span>
+<span class="c1"># print(panel.head(18))  # Show 2 municipalities</span>
+<span class="c1"># print(panel[['ln_NTLpc', 'ln_pop', 'pop']].describe().round(3))</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<blockquote>
+<p><strong>Key Concept 17.10: Satellite Panel Data</strong></p>
+<p>Annual nighttime lights observations create <strong>panel datasets</strong> even where traditional economic surveys are unavailable or infrequent. For Bolivia's 339 municipalities over 2012-2020, the NTL panel provides 3,051 municipality-year observations. This temporal dimension allows us to move beyond cross-sectional associations and study <em>changes within municipalities over time</em>—a crucial step toward understanding development dynamics rather than just static patterns.</p>
+</blockquote>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<h4 id="Task-2:-Pooled-OLS-with-Cluster-Robust-SEs-(Guided)">Task 2: Pooled OLS with Cluster-Robust SEs (Guided)<a class="anchor-link" href="#Task-2:-Pooled-OLS-with-Cluster-Robust-SEs-(Guided)">¶</a></h4><p><strong>Objective</strong>: Estimate a pooled OLS regression of NTL on population with cluster-robust standard errors.</p>
+<p><strong>Instructions</strong>:</p>
+<ol>
+<li>Estimate <code>ln_NTLpc ~ ln_pop + year</code> using all panel observations</li>
+<li>Use cluster-robust standard errors clustered by municipality</li>
+<li>Compare default and cluster-robust SEs</li>
+<li>Interpret: How does population relate to NTL? Is there a significant time trend?</li>
+</ol>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># Your code here: Pooled OLS with cluster-robust SEs</span>
+<span class="c1">#</span>
+<span class="c1"># Example structure:</span>
+<span class="c1"># panel_reg = panel[['ln_NTLpc', 'ln_pop', 'year', 'mun', 'asdf_id']].dropna()</span>
+<span class="c1">#</span>
+<span class="c1"># model_pooled = ols('ln_NTLpc ~ ln_pop + year', data=panel_reg).fit(</span>
+<span class="c1">#     cov_type='cluster', cov_kwds={'groups': panel_reg['asdf_id']}</span>
+<span class="c1"># )</span>
+<span class="c1"># print("POOLED OLS WITH CLUSTER-ROBUST SEs")</span>
+<span class="c1"># print(model_pooled.summary())</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<h4 id="Task-3:-Fixed-Effects-(Semi-guided)">Task 3: Fixed Effects (Semi-guided)<a class="anchor-link" href="#Task-3:-Fixed-Effects-(Semi-guided)">¶</a></h4><p><strong>Objective</strong>: Estimate a fixed effects model controlling for time-invariant municipality characteristics.</p>
+<p><strong>Instructions</strong>:</p>
+<ol>
+<li>Add municipality fixed effects using <code>C(asdf_id)</code> or entity demeaning</li>
+<li>Compare FE coefficients with pooled OLS coefficients</li>
+<li>How does controlling for time-invariant municipality characteristics change the population-NTL relationship?</li>
+<li>Discuss: What unobserved factors do municipality fixed effects absorb (altitude, remoteness, climate)?</li>
+</ol>
+<p><strong>Hint</strong>: You can use <code>C(asdf_id)</code> in the formula, or manually demean variables by subtracting municipality means. For large datasets, demeaning is more computationally efficient.</p>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># Your code here: Fixed effects estimation</span>
+<span class="c1">#</span>
+<span class="c1"># Example structure (demeaning approach):</span>
+<span class="c1"># # Demean variables within each municipality</span>
+<span class="c1"># for col in ['ln_NTLpc', 'ln_pop']:</span>
+<span class="c1">#     panel_reg[f'{col}_dm'] = panel_reg.groupby('asdf_id')[col].transform(</span>
+<span class="c1">#         lambda x: x - x.mean()</span>
+<span class="c1">#     )</span>
+<span class="c1"># panel_reg['year_dm'] = panel_reg['year'] - panel_reg.groupby('asdf_id')['year'].transform('mean')</span>
+<span class="c1">#</span>
+<span class="c1"># model_fe = ols('ln_NTLpc_dm ~ ln_pop_dm + year_dm - 1', data=panel_reg).fit(</span>
+<span class="c1">#     cov_type='cluster', cov_kwds={'groups': panel_reg['asdf_id']}</span>
+<span class="c1"># )</span>
+<span class="c1"># print("FIXED EFFECTS (WITHIN ESTIMATOR)")</span>
+<span class="c1"># print(model_fe.summary())</span>
+<span class="c1">#</span>
+<span class="c1"># print("\nCOMPARISON:")</span>
+<span class="c1"># print(f"  Pooled OLS ln_pop coef: {model_pooled.params['ln_pop']:.4f}")</span>
+<span class="c1"># print(f"  Fixed Effects ln_pop coef: {model_fe.params['ln_pop_dm']:.4f}")</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<blockquote>
+<p><strong>Key Concept 17.11: Fixed Effects for Spatial Heterogeneity</strong></p>
+<p>Municipality fixed effects absorb all <strong>time-invariant characteristics</strong>: altitude, remoteness, climate, historical infrastructure, cultural factors. After removing these fixed differences, the remaining variation identifies how <em>changes</em> in population (or other time-varying factors) relate to <em>changes</em> in NTL within the same municipality. This within-municipality analysis is more credible for causal interpretation than cross-sectional regressions, because it eliminates bias from unobserved time-invariant confounders.</p>
+</blockquote>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<h4 id="Task-4:-Time-Trends-(Semi-guided)">Task 4: Time Trends (Semi-guided)<a class="anchor-link" href="#Task-4:-Time-Trends-(Semi-guided)">¶</a></h4><p><strong>Objective</strong>: Examine how nighttime lights evolve over time using year fixed effects.</p>
+<p><strong>Instructions</strong>:</p>
+<ol>
+<li>Replace the linear time trend with year dummy variables: <code>C(year)</code></li>
+<li>Test whether the year effects are jointly significant</li>
+<li>Plot the estimated year coefficients to visualize the NTL trajectory</li>
+<li>Discuss: Did NTL grow steadily, or were there jumps or declines?</li>
+</ol>
+<p><strong>Hint</strong>: Use one year as the reference category. The year coefficients show NTL changes relative to the base year.</p>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># Your code here: Year fixed effects</span>
+<span class="c1">#</span>
+<span class="c1"># Example structure:</span>
+<span class="c1"># # Estimate with year dummies (demeaned for municipality FE)</span>
+<span class="c1"># panel_reg['year_cat'] = panel_reg['year'].astype(str)</span>
+<span class="c1">#</span>
+<span class="c1"># # Simple approach: use year means of demeaned NTL</span>
+<span class="c1"># year_means = panel_reg.groupby('year')['ln_NTLpc'].mean()</span>
+<span class="c1"># year_means_dm = year_means - year_means.iloc[0]  # relative to base year</span>
+<span class="c1">#</span>
+<span class="c1"># fig, ax = plt.subplots(figsize=(10, 6))</span>
+<span class="c1"># ax.plot(year_means.index, year_means.values, 'o-', color='navy', linewidth=2)</span>
+<span class="c1"># ax.set_xlabel('Year')</span>
+<span class="c1"># ax.set_ylabel('Mean Log NTL per Capita')</span>
+<span class="c1"># ax.set_title('Average Municipal NTL Over Time (2012-2020)')</span>
+<span class="c1"># ax.grid(True, alpha=0.3)</span>
+<span class="c1"># plt.tight_layout()</span>
+<span class="c1"># plt.show()</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<h4 id="Task-5:-First-Differences-(Independent)">Task 5: First Differences (Independent)<a class="anchor-link" href="#Task-5:-First-Differences-(Independent)">¶</a></h4><p><strong>Objective</strong>: Estimate the relationship using first differences as an alternative to fixed effects.</p>
+<p><strong>Instructions</strong>:</p>
+<ol>
+<li>Compute first differences: $\Delta ln\_NTLpc = ln\_NTLpc_t - ln\_NTLpc_{t-1}$ and $\Delta ln\_pop = ln\_pop_t - ln\_pop_{t-1}$</li>
+<li>Estimate $\Delta ln\_NTLpc \sim \Delta ln\_pop$</li>
+<li>Compare the first-difference coefficient with the fixed effects estimate</li>
+<li>Discuss: When do FE and FD give different results? What assumptions does each require?</li>
+</ol>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># Your code here: First differences estimation</span>
+<span class="c1">#</span>
+<span class="c1"># Example structure:</span>
+<span class="c1"># panel_reg = panel_reg.sort_values(['asdf_id', 'year'])</span>
+<span class="c1"># panel_reg['d_ln_NTLpc'] = panel_reg.groupby('asdf_id')['ln_NTLpc'].diff()</span>
+<span class="c1"># panel_reg['d_ln_pop'] = panel_reg.groupby('asdf_id')['ln_pop'].diff()</span>
+<span class="c1">#</span>
+<span class="c1"># # Drop first year (no difference available)</span>
+<span class="c1"># fd_data = panel_reg.dropna(subset=['d_ln_NTLpc', 'd_ln_pop'])</span>
+<span class="c1">#</span>
+<span class="c1"># model_fd = ols('d_ln_NTLpc ~ d_ln_pop', data=fd_data).fit(</span>
+<span class="c1">#     cov_type='cluster', cov_kwds={'groups': fd_data['asdf_id']}</span>
+<span class="c1"># )</span>
+<span class="c1"># print("FIRST DIFFERENCES ESTIMATION")</span>
+<span class="c1"># print(model_fd.summary())</span>
+<span class="c1">#</span>
+<span class="c1"># print(f"\nFD coefficient on ln_pop: {model_fd.params['d_ln_pop']:.4f}")</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<h4 id="Task-6:-Panel-Brief-(Independent)">Task 6: Panel Brief (Independent)<a class="anchor-link" href="#Task-6:-Panel-Brief-(Independent)">¶</a></h4><p><strong>Objective</strong>: Write a 200-300 word brief summarizing your panel data analysis.</p>
+<p><strong>Your brief should address</strong>:</p>
+<ol>
+<li>What do within-municipality changes in NTL reveal about development dynamics?</li>
+<li>How does the FE population coefficient differ from the cross-sectional (pooled OLS) one?</li>
+<li>What time trends in NTL are visible across 2012-2020?</li>
+<li>How do FE and FD estimates compare? Which assumptions matter most?</li>
+<li>What are the advantages and limitations of satellite panel data for tracking municipal development over time?</li>
+<li>What additional time-varying variables would improve the analysis?</li>
+</ol>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># Your code here: Additional analysis for the panel brief</span>
+<span class="c1">#</span>
+<span class="c1"># You might want to:</span>
+<span class="c1"># 1. Decompose variance into between and within components</span>
+<span class="c1"># 2. Plot NTL trajectories for selected municipalities</span>
+<span class="c1"># 3. Compare growth rates across departments</span>
+<span class="c1"># 4. Create a summary table of all estimation results</span>
+<span class="c1">#</span>
+<span class="c1"># Example: Variance decomposition</span>
+<span class="c1"># overall_var = panel_reg['ln_NTLpc'].var()</span>
+<span class="c1"># between_var = panel_reg.groupby('asdf_id')['ln_NTLpc'].mean().var()</span>
+<span class="c1"># within_var = panel_reg.groupby('asdf_id')['ln_NTLpc'].apply(lambda x: x - x.mean()).var()</span>
+<span class="c1"># print(f"Overall variance: {overall_var:.4f}")</span>
+<span class="c1"># print(f"Between variance: {between_var:.4f}")</span>
+<span class="c1"># print(f"Within variance:  {within_var:.4f}")</span>
+<span class="c1"># print(f"Between share:    {between_var/overall_var:.1%}")</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<h4 id="What-You've-Learned-from-This-Case-Study">What You've Learned from This Case Study<a class="anchor-link" href="#What-You've-Learned-from-This-Case-Study">¶</a></h4><p>This is the final DS4Bolivia case study in the textbook. Across 12 chapters, you have applied the complete econometric toolkit—from simple descriptive statistics (Chapter 1) through panel data methods (Chapter 17)—to study how satellite data can predict and monitor local economic development. The DS4Bolivia project demonstrates that modern data science and econometrics, combined with freely available satellite imagery, can contribute to SDG monitoring even in data-scarce contexts.</p>
+<p>In this panel data analysis, you've applied Chapter 17's complete toolkit:</p>
+<ul>
+<li><strong>Panel construction</strong>: Reshaped cross-sectional data into a municipality-year panel</li>
+<li><strong>Pooled OLS</strong>: Estimated baseline relationships with cluster-robust standard errors</li>
+<li><strong>Fixed effects</strong>: Controlled for time-invariant municipality characteristics</li>
+<li><strong>Time trends</strong>: Examined the trajectory of nighttime lights across 2012-2020</li>
+<li><strong>First differences</strong>: Used an alternative estimation strategy and compared with FE</li>
+<li><strong>Critical thinking</strong>: Assessed what within-municipality variation reveals about development dynamics</li>
+</ul>
+<p><strong>Congratulations!</strong> You have now completed the full DS4Bolivia case study arc across the textbook.</p>
+<hr/>
 </div>
 </div>
 </div>
