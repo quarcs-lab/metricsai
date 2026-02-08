@@ -1,6 +1,6 @@
 ---
 name: compile-book
-description: Compiles all chapter PDFs into a single metricsAI book PDF. Detects modified chapters, regenerates their PDFs, then merges all chapters with cover page, Brief Contents, Detailed Contents, page numbers, and section-level PDF bookmarks. Use after editing any chapter notebook.
+description: Compiles all chapter PDFs into a single metricsAI book PDF. Detects modified chapters, regenerates their PDFs, then merges all chapters with cover page, Brief Contents, Detailed Contents, clickable TOC hyperlinks, page numbers, and section-level PDF bookmarks. Use after editing any chapter notebook.
 argument-hint: [chapter-numbers...] [--compile-only] [--check] [--all]
 context: fork
 agent: Explore
@@ -26,6 +26,7 @@ This skill manages the complete book compilation workflow. It detects which chap
 - Book compilation with cover, Brief Contents, Detailed Contents
 - Page numbers on all content pages
 - Section-level PDF bookmarks (Preface > Parts > Chapters > Sections)
+- Clickable TOC hyperlinks (~324 links jump to chapters/sections from both TOC pages)
 - 803 pages, ~56 MB output
 
 ---
@@ -148,10 +149,11 @@ python3 scripts/compile_book.py
 
 This produces `notebooks_colab/metricsAI_complete_book.pdf` with:
 - Cover page (navy blue background, `images/book1cover.jpg`)
-- Brief Contents (1 page, chapters grouped by Parts)
-- Detailed Contents (3-4 pages, all sections with page numbers)
+- Brief Contents (1 page, chapters grouped by Parts, clickable hyperlinks)
+- Detailed Contents (3-4 pages, all sections with page numbers, clickable hyperlinks)
 - All 18 chapters merged with page numbers
 - PDF bookmarks: Preface > Part I-IV > Chapters 1-17 > Sections
+- Clickable TOC hyperlinks: ~324 links on both TOC pages jump directly to chapters/sections
 
 ### 6. Report Results
 
@@ -166,6 +168,7 @@ Display compilation summary:
 | File size | 56.4 MB |
 | Chapters | 18 (CH00-CH17) |
 | Sections in bookmarks | 110 |
+| Clickable TOC links | ~324 |
 | Chapters regenerated | 2 |
 | Output | notebooks_colab/metricsAI_complete_book.pdf |
 ```
@@ -182,8 +185,8 @@ open notebooks_colab/metricsAI_complete_book.pdf
 
 ### Front Matter (unnumbered)
 - **Cover page**: Full-bleed image with navy blue background
-- **Brief Contents**: Chapter-level TOC grouped by Parts (no Preface)
-- **Detailed Contents**: Preface sections + all chapter sections with page numbers
+- **Brief Contents**: Chapter-level TOC grouped by Parts (no Preface), with clickable hyperlinks
+- **Detailed Contents**: Preface sections + all chapter sections with page numbers, with clickable hyperlinks
 
 ### Content (numbered from page 1)
 - **CH00**: Preface (15 pages)
@@ -199,6 +202,16 @@ Hierarchical navigation sidebar in PDF readers:
 - Part II > Ch5 (11), Ch6 (4), Ch7 (7), Ch8 (3)
 - Part III > Ch9 (4), Ch10 (8), Ch11 (7), Ch12 (6), Ch13 (9)
 - Part IV > Ch14 (3), Ch15 (4), Ch16 (5), Ch17 (6)
+
+### Clickable TOC Hyperlinks
+Both TOC pages include clickable hyperlinks (~324 total) that jump directly to the target chapter or section page:
+- **Brief Contents**: Each chapter title and page number is a clickable link
+- **Detailed Contents**: Each Preface section, chapter title, section title, and page number is a clickable link
+- Links are styled invisibly (no blue underlines) to preserve the professional TOC appearance
+- Links are automatically generated during compilation using a 3-phase approach:
+  1. Placeholder URLs are embedded in TOC HTML (`https://internal.metricsai/page/{N}`)
+  2. Playwright preserves these as PDF link annotations with exact coordinate rectangles
+  3. After merging, `extract_toc_links()` reads the rects and `pypdf.annotations.Link` creates internal GoTo links pointing to the correct final page
 
 ---
 
@@ -262,6 +275,11 @@ jupyter nbconvert --version
 **Cause**: Section title in notebook doesn't match PDF extracted text.
 **Note**: ~96% of sections are matched. Minor mismatches are expected.
 
+### TOC Links Not Working
+**Symptom**: Clicking a chapter or section title in the TOC does not jump to the page.
+**Cause**: The placeholder URL annotations may not have been preserved during PDF generation.
+**Fix**: Ensure Playwright is rendering the TOC HTML correctly. Recompile with `/compile-book --compile-only`. Check that `extract_toc_links()` finds annotations in the generated TOC PDFs.
+
 ---
 
 ## Integration with Other Skills
@@ -296,4 +314,4 @@ jupyter nbconvert --version
 
 ---
 
-*Version: 1.0 | Created: 2026-02-07 | Author: metricsAI project*
+*Version: 1.1 | Updated: 2026-02-08 | Author: metricsAI project*

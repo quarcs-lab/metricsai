@@ -23,6 +23,7 @@ from pathlib import Path
 
 from playwright.async_api import async_playwright
 from pypdf import PdfReader, PdfWriter
+from pypdf.annotations import Link
 
 
 # ============================================================
@@ -58,8 +59,8 @@ CHAPTERS = [
 # Part groupings for TOC and bookmarks
 PARTS = [
     ('Part I: Foundations', ['ch01', 'ch02', 'ch03', 'ch04']),
-    ('Part II: Bivariate Regression', ['ch05', 'ch06', 'ch07', 'ch08']),
-    ('Part III: Multiple Regression', ['ch09', 'ch10', 'ch11', 'ch12', 'ch13']),
+    ('Part II: Bivariate Regression', ['ch05', 'ch06', 'ch07', 'ch08', 'ch09']),
+    ('Part III: Multiple Regression', ['ch10', 'ch11', 'ch12', 'ch13']),
     ('Part IV: Advanced Topics', ['ch14', 'ch15', 'ch16', 'ch17']),
 ]
 
@@ -264,11 +265,13 @@ def generate_brief_toc_html(chapter_data):
             ch = next(c for c in chapter_data if c['id'] == ch_id)
             num = ch_id.replace('ch', '').lstrip('0') or '0'
             label = f'Chapter {num}:'
+            page_num = ch_map[ch_id]
+            link = f'https://internal.metricsai/page/{page_num}'
             toc_rows.append(
                 f'<tr>'
-                f'<td class="ch-label">{label}</td>'
-                f'<td class="ch-title">{ch["title"]}</td>'
-                f'<td class="ch-page">{ch_map[ch_id]}</td>'
+                f'<td class="ch-label"><a class="toc-link" href="{link}">{label}</a></td>'
+                f'<td class="ch-title"><a class="toc-link" href="{link}">{ch["title"]}</a></td>'
+                f'<td class="ch-page"><a class="toc-link" href="{link}">{page_num}</a></td>'
                 f'</tr>'
             )
 
@@ -281,6 +284,8 @@ def generate_brief_toc_html(chapter_data):
   @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
 
   @page {{ size: letter portrait; margin: 0.75in; }}
+
+  a.toc-link {{ color: inherit; text-decoration: none; }}
 
   body {{
     font-family: 'Inter', sans-serif;
@@ -358,21 +363,27 @@ def generate_detailed_toc_html(chapter_data, section_data):
     # Preface entry with sections
     ch00 = next((c for c in chapter_data if c['id'] == 'ch00'), None)
     if ch00:
+        preface_link = f'https://internal.metricsai/page/{ch_map["ch00"]}'
         toc_rows.append(
             f'<tr>'
-            f'<td class="ch-label" style="font-weight:700">Preface</td>'
+            f'<td class="ch-label" style="font-weight:700">'
+            f'<a class="toc-link" href="{preface_link}">Preface</a></td>'
             f'<td class="ch-title"></td>'
-            f'<td class="ch-page">{ch_map["ch00"]}</td>'
+            f'<td class="ch-page">'
+            f'<a class="toc-link" href="{preface_link}">{ch_map["ch00"]}</a></td>'
             f'</tr>'
         )
         if 'ch00' in section_data:
             for sec_title, sec_offset in section_data['ch00']:
                 sec_page = ch_map['ch00'] + sec_offset
+                sec_link = f'https://internal.metricsai/page/{sec_page}'
                 toc_rows.append(
                     f'<tr class="section-row">'
                     f'<td></td>'
-                    f'<td class="sec-title">{sec_title}</td>'
-                    f'<td class="sec-page">{sec_page}</td>'
+                    f'<td class="sec-title">'
+                    f'<a class="toc-link" href="{sec_link}">{sec_title}</a></td>'
+                    f'<td class="sec-page">'
+                    f'<a class="toc-link" href="{sec_link}">{sec_page}</a></td>'
                     f'</tr>'
                 )
 
@@ -383,21 +394,29 @@ def generate_detailed_toc_html(chapter_data, section_data):
             ch = next(c for c in chapter_data if c['id'] == ch_id)
             num = ch_id.replace('ch', '').lstrip('0') or '0'
             label = f'Chapter {num}:'
+            page_num = ch_map[ch_id]
+            ch_link = f'https://internal.metricsai/page/{page_num}'
             toc_rows.append(
                 f'<tr>'
-                f'<td class="ch-label">{label}</td>'
-                f'<td class="ch-title">{ch["title"]}</td>'
-                f'<td class="ch-page">{ch_map[ch_id]}</td>'
+                f'<td class="ch-label">'
+                f'<a class="toc-link" href="{ch_link}">{label}</a></td>'
+                f'<td class="ch-title">'
+                f'<a class="toc-link" href="{ch_link}">{ch["title"]}</a></td>'
+                f'<td class="ch-page">'
+                f'<a class="toc-link" href="{ch_link}">{page_num}</a></td>'
                 f'</tr>'
             )
             if ch_id in section_data:
                 for sec_title, sec_offset in section_data[ch_id]:
                     sec_page = ch_map[ch_id] + sec_offset
+                    sec_link = f'https://internal.metricsai/page/{sec_page}'
                     toc_rows.append(
                         f'<tr class="section-row">'
                         f'<td></td>'
-                        f'<td class="sec-title">{sec_title}</td>'
-                        f'<td class="sec-page">{sec_page}</td>'
+                        f'<td class="sec-title">'
+                        f'<a class="toc-link" href="{sec_link}">{sec_title}</a></td>'
+                        f'<td class="sec-page">'
+                        f'<a class="toc-link" href="{sec_link}">{sec_page}</a></td>'
                         f'</tr>'
                     )
 
@@ -410,6 +429,8 @@ def generate_detailed_toc_html(chapter_data, section_data):
   @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
 
   @page {{ size: letter portrait; margin: 0.75in; }}
+
+  a.toc-link {{ color: inherit; text-decoration: none; }}
 
   body {{
     font-family: 'Inter', sans-serif;
@@ -488,6 +509,27 @@ def generate_detailed_toc_html(chapter_data, section_data):
   </table>
 </body>
 </html>"""
+
+
+def extract_toc_links(pdf_path):
+    """Extract placeholder link annotations from a TOC PDF.
+
+    Returns list of (page_idx, rect, content_page_num) tuples.
+    """
+    reader = PdfReader(str(pdf_path))
+    links = []
+    for page_idx, page in enumerate(reader.pages):
+        for annot_ref in (page.get('/Annots') or []):
+            annot = annot_ref.get_object()
+            action = annot.get('/A', {})
+            if hasattr(action, 'get_object'):
+                action = action.get_object()
+            uri = str(action.get('/URI', ''))
+            if 'internal.metricsai/page/' in uri:
+                content_page = int(uri.split('/')[-1])
+                rect = tuple(float(x) for x in annot['/Rect'])
+                links.append((page_idx, rect, content_page))
+    return links
 
 
 # ============================================================
@@ -575,7 +617,7 @@ async def compile_book():
     # ----------------------------------------------------------
     # Step 1: Generate cover page PDF
     # ----------------------------------------------------------
-    print("\n[1/7] Generating cover page...")
+    print("\n[1/8] Generating cover page...")
     cover_html = generate_cover_html()
     cover_pdf = PROJECT_ROOT / 'tmp_cover.pdf'
     await html_to_pdf(
@@ -588,7 +630,7 @@ async def compile_book():
     # ----------------------------------------------------------
     # Step 2: Count pages and extract sections
     # ----------------------------------------------------------
-    print("\n[2/7] Counting chapter pages and extracting sections...")
+    print("\n[2/8] Counting chapter pages and extracting sections...")
     chapter_data = count_pages()
     total_chapter_pages = sum(ch['pages'] for ch in chapter_data)
     print(f"  {len(chapter_data)} chapters, {total_chapter_pages} pages")
@@ -609,7 +651,7 @@ async def compile_book():
     # ----------------------------------------------------------
     # Step 3: Generate Brief Contents and Detailed Contents
     # ----------------------------------------------------------
-    print("\n[3/7] Generating Tables of Contents...")
+    print("\n[3/8] Generating Tables of Contents...")
 
     brief_pdf = PROJECT_ROOT / 'tmp_brief_toc.pdf'
     brief_html = generate_brief_toc_html(chapter_data)
@@ -625,10 +667,15 @@ async def compile_book():
 
     toc_total_pages = brief_pages + detailed_pages
 
+    # Extract link annotation rects from TOC PDFs (before merge)
+    brief_links = extract_toc_links(brief_pdf)
+    detailed_links = extract_toc_links(detailed_pdf)
+    print(f"  Extracted {len(brief_links)} brief + {len(detailed_links)} detailed TOC links")
+
     # ----------------------------------------------------------
     # Step 4: Merge all PDFs
     # ----------------------------------------------------------
-    print("\n[4/7] Merging PDFs...")
+    print("\n[4/8] Merging PDFs...")
     writer = PdfWriter()
 
     # Add cover
@@ -668,7 +715,7 @@ async def compile_book():
     # ----------------------------------------------------------
     # Step 5: Add page numbers
     # ----------------------------------------------------------
-    print("\n[5/7] Adding page numbers...")
+    print("\n[5/8] Adding page numbers...")
     numbers_pdf = PROJECT_ROOT / 'tmp_numbers.pdf'
     numbers_html = generate_page_numbers_html(total_pages, skip_pages=front_matter)
     await html_to_pdf(
@@ -694,7 +741,7 @@ async def compile_book():
     # ----------------------------------------------------------
     # Step 6: Add PDF bookmarks (outline) with sections
     # ----------------------------------------------------------
-    print("\n[6/7] Adding PDF bookmarks...")
+    print("\n[6/8] Adding PDF bookmarks...")
 
     # Build chapter offset map (0-indexed physical page in final PDF)
     ch_offsets = {}  # ch_id -> physical page index
@@ -742,9 +789,30 @@ async def compile_book():
                     )
 
     # ----------------------------------------------------------
-    # Step 7: Write final PDF
+    # Step 7: Add clickable TOC links
     # ----------------------------------------------------------
-    print("\n[7/7] Writing final PDF...")
+    print("\n[7/8] Adding clickable TOC links...")
+
+    # Brief Contents links (pages start at index 1, after cover)
+    for toc_page_idx, rect, content_page in brief_links:
+        physical_page = front_matter + content_page - 1
+        final_page = 1 + toc_page_idx
+        link = Link(rect=rect, target_page_index=physical_page)
+        final_writer.add_annotation(page_number=final_page, annotation=link)
+
+    # Detailed Contents links (pages start after cover + brief)
+    for toc_page_idx, rect, content_page in detailed_links:
+        physical_page = front_matter + content_page - 1
+        final_page = 1 + brief_pages + toc_page_idx
+        link = Link(rect=rect, target_page_index=physical_page)
+        final_writer.add_annotation(page_number=final_page, annotation=link)
+
+    print(f"  Added {len(brief_links) + len(detailed_links)} clickable links")
+
+    # ----------------------------------------------------------
+    # Step 8: Write final PDF
+    # ----------------------------------------------------------
+    print("\n[8/8] Writing final PDF...")
     with open(OUTPUT_PDF, 'wb') as f:
         final_writer.write(f)
 

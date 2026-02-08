@@ -6,9 +6,9 @@
 metricsAI_complete_book.pdf (803 pages, ~56 MB)
 ├── Cover page (1 page, unnumbered)
 │   └── images/book1cover.jpg with navy blue (#0a1628) background
-├── Brief Contents (1 page, unnumbered)
+├── Brief Contents (1 page, unnumbered, clickable hyperlinks)
 │   └── Chapters 1-17 grouped by Parts (no Preface)
-├── Detailed Contents (4 pages, unnumbered)
+├── Detailed Contents (4 pages, unnumbered, clickable hyperlinks)
 │   └── Preface sections + all chapter sections with page numbers
 └── Content (797 pages, numbered 1-797)
     ├── CH00: Preface (15 pages)
@@ -67,15 +67,16 @@ python3 generate_pdf_playwright.py --all
 
 **Script**: `scripts/compile_book.py`
 
-### 7-Step Process
+### 8-Step Process
 
 1. **Cover page**: Playwright renders `images/book1cover.jpg` on navy blue background (`#0a1628`) with `object-fit: contain` for full image display
 2. **Count pages + extract sections**: Reads all 18 PDFs, extracts `## X.Y Title` headers from notebooks, maps to PDF pages
-3. **Brief Contents**: Playwright renders 1-page HTML with chapters grouped by Parts (brand-styled)
-4. **Detailed Contents**: Playwright renders 4-page HTML with Preface sections and all chapter sections
+3. **Brief Contents**: Playwright renders 1-page HTML with chapters grouped by Parts (brand-styled, placeholder hyperlinks)
+4. **Detailed Contents**: Playwright renders 4-page HTML with Preface sections and all chapter sections (placeholder hyperlinks)
 5. **Merge PDFs**: pypdf merges cover + Brief + Detailed + 18 chapters
 6. **Page numbers**: Playwright renders transparent overlay with centered page numbers; pypdf merges onto content pages
 7. **PDF bookmarks**: pypdf adds hierarchical outline (Preface > Parts > Chapters > Sections)
+8. **Clickable TOC links**: Extracts placeholder URL annotations from TOC PDFs, converts to internal GoTo links pointing to correct final pages (~324 links)
 
 ### Section Extraction
 
@@ -131,12 +132,37 @@ Part IV: Advanced Topics (bold, purple)
 
 Total: 132 bookmark entries (1 Preface + 4 Parts + 17 Chapters + 110 Sections)
 
+## Clickable TOC Hyperlinks
+
+Both Brief Contents and Detailed Contents pages include clickable hyperlinks (~324 total) that jump directly to the target page in the PDF. These are generated automatically during compilation.
+
+### 3-Phase Approach
+
+1. **Placeholder URLs in HTML**: TOC entries are wrapped in `<a class="toc-link" href="https://internal.metricsai/page/{N}">` tags, where `{N}` is the content page number. CSS hides the link styling: `a.toc-link { color: inherit; text-decoration: none; }`
+
+2. **Playwright preserves annotations**: When Playwright renders the HTML to PDF, it preserves `<a>` tags as PDF link annotations with exact coordinate rectangles (rects). These are extracted before the merge step using `extract_toc_links()`.
+
+3. **GoTo link conversion**: After the final PDF is assembled (merge + page numbers + bookmarks), `pypdf.annotations.Link(rect, target_page_index)` creates internal GoTo links. The content page numbers from the placeholder URLs are converted to physical page indices accounting for front matter offset.
+
+### Key Functions
+
+- `generate_brief_toc_html()`: Wraps chapter titles and page numbers in placeholder `<a>` tags
+- `generate_detailed_toc_html()`: Wraps Preface sections, chapter titles, section titles, and page numbers in placeholder `<a>` tags
+- `extract_toc_links(pdf_path)`: Reads a TOC PDF and extracts `(page_idx, rect, content_page)` tuples from URL annotations matching `internal.metricsai/page/`
+- `compile_book()` Step 8: Iterates over extracted links and adds `Link(rect, target_page_index)` annotations to the final PDF writer
+
+### Link Counts
+
+- **Brief Contents**: ~51 links (chapter titles + page numbers)
+- **Detailed Contents**: ~273 links (Preface sections + chapter titles + section titles + page numbers)
+- **Total**: ~324 clickable links
+
 ## Dependencies
 
 | Package | Purpose | Install |
 |---------|---------|---------|
 | playwright | PDF rendering via Chromium | `pip install playwright && playwright install chromium` |
-| pypdf | PDF merging, bookmarks, page overlay | `pip install pypdf` |
+| pypdf | PDF merging, bookmarks, page overlay, clickable TOC links (`pypdf.annotations.Link`) | `pip install pypdf` |
 | jupyter | nbconvert (notebook to HTML) | `pip install jupyter` |
 
-*Last updated: 2026-02-07*
+*Last updated: 2026-02-08*
