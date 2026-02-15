@@ -45,6 +45,10 @@
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
+    <!-- AOS Animate on Scroll -->
+    <link rel="stylesheet" href="https://unpkg.com/aos@2.3.4/dist/aos.css">
+    <script src="https://unpkg.com/aos@2.3.4/dist/aos.js"></script>
+
     <script>
         tailwind.config = {
             darkMode: 'class',
@@ -88,14 +92,66 @@
             border: 1px solid rgba(51, 65, 85, 0.5);
         }
         .gradient-text {
-            background: linear-gradient(135deg, #003d54 0%, #008CB7 100%);
+            background: linear-gradient(135deg, #008CB7 0%, #7A209F 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
         .dark .gradient-text {
-            background: linear-gradient(135deg, #2dabc4 0%, #62c7da 100%);
+            background: linear-gradient(135deg, #62c7da 0%, #c084fc 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
+        }
+        /* Hero pulsing glow */
+        @keyframes pulse-glow {
+            0%, 100% { opacity: 0.3; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(1.05); }
+        }
+        .hero-glow {
+            animation: pulse-glow 4s ease-in-out infinite;
+        }
+        /* Dot pattern for alternating sections */
+        .dot-pattern {
+            position: relative;
+        }
+        .dot-pattern::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            opacity: 0.04;
+            background-image: radial-gradient(circle, #64748b 1px, transparent 1px);
+            background-size: 24px 24px;
+            pointer-events: none;
+            z-index: 0;
+        }
+        .dark .dot-pattern::after {
+            opacity: 0.05;
+            background-image: radial-gradient(circle, #94a3b8 1px, transparent 1px);
+        }
+        /* Audio player container */
+        .audio-container {
+            background: #f0fafb;
+            border-radius: 0.75rem;
+            padding: 0.5rem 0.75rem;
+        }
+        .dark .audio-container {
+            background: rgba(0, 140, 183, 0.1);
+        }
+        audio::-webkit-media-controls-panel {
+            background: transparent;
+        }
+        /* Nav active state */
+        .nav-link-active {
+            color: #008CB7 !important;
+            border-bottom: 2px solid #008CB7;
+            padding-bottom: 2px;
+        }
+        .dark .nav-link-active {
+            color: #62c7da !important;
+            border-bottom-color: #2dabc4;
+        }
+        /* Back to top button */
+        #backToTopBtn {
+            transition: opacity 0.3s ease, transform 0.3s ease;
         }
     </style>
 </head>
@@ -110,13 +166,13 @@
                     <span class="font-bold text-xl tracking-tight text-slate-900 dark:text-white">metrics<span class="text-brand-600 dark:text-brand-400">AI</span></span>
                 </div>
                 <div class="hidden md:flex space-x-8">
-                    <a href="#about" class="text-slate-600 dark:text-slate-300 hover:text-brand-600 dark:hover:text-brand-400 font-medium transition-colors">About</a>
-                    <a href="#curriculum" class="text-slate-600 dark:text-slate-300 hover:text-brand-600 dark:hover:text-brand-400 font-medium transition-colors">Python Notebooks</a>
-                    <a href="#books" class="text-slate-600 dark:text-slate-300 hover:text-brand-600 dark:hover:text-brand-400 font-medium transition-colors">Books</a>
+                    <a href="#about" data-nav-link="about" class="text-slate-600 dark:text-slate-300 hover:text-brand-600 dark:hover:text-brand-400 font-medium transition-colors">About</a>
+                    <a href="#curriculum" data-nav-link="curriculum" class="text-slate-600 dark:text-slate-300 hover:text-brand-600 dark:hover:text-brand-400 font-medium transition-colors">Python Notebooks</a>
+                    <a href="#books" data-nav-link="books" class="text-slate-600 dark:text-slate-300 hover:text-brand-600 dark:hover:text-brand-400 font-medium transition-colors">Books</a>
                     <a href="https://youtube.com/playlist?list=PLeiP02y1tjyFfkGfQMgvsbVXHj7wCNDT4&si=LHhtAqeJUV6qpwcU" target="_blank" class="text-slate-600 dark:text-slate-300 hover:text-brand-600 dark:hover:text-brand-400 font-medium transition-colors">Videos</a>
                     <a href="https://open.spotify.com/show/2lN5pA3l10UdHe61ZCoHcF?si=IFFMpG3pROepG61o8qbnvg" target="_blank" class="text-slate-600 dark:text-slate-300 hover:text-brand-600 dark:hover:text-brand-400 font-medium transition-colors">Podcasts</a>
-                    <a href="#authors" class="text-slate-600 dark:text-slate-300 hover:text-brand-600 dark:hover:text-brand-400 font-medium transition-colors">Authors</a>
-                    <a href="#more-resources" class="text-slate-600 dark:text-slate-300 hover:text-brand-600 dark:hover:text-brand-400 font-medium transition-colors">More Resources</a>
+                    <a href="#authors" data-nav-link="authors" class="text-slate-600 dark:text-slate-300 hover:text-brand-600 dark:hover:text-brand-400 font-medium transition-colors">Authors</a>
+                    <a href="#more-resources" data-nav-link="more-resources" class="text-slate-600 dark:text-slate-300 hover:text-brand-600 dark:hover:text-brand-400 font-medium transition-colors">More Resources</a>
                 </div>
                 <div class="flex items-center gap-4">
                     <a href="https://cameron.econ.ucdavis.edu/aed/index.html" target="_blank"
@@ -206,16 +262,19 @@
                 <div class="lg:col-span-6 mt-12 lg:mt-0 relative flex justify-center lg:justify-end">
                     <div class="relative w-full max-w-lg lg:max-w-2xl perspective-1000 group">
                         <!-- Decorative glow -->
-                        <div class="absolute -inset-4 bg-gradient-to-r from-[#008CB7] to-[#7A209F] rounded-xl blur-2xl opacity-30 group-hover:opacity-50 transition duration-500"></div>
+                        <div class="absolute -inset-4 bg-gradient-to-r from-[#008CB7] to-[#7A209F] rounded-xl blur-2xl hero-glow"></div>
                         <!-- Main Image Container -->
                         <div class="relative bg-white dark:bg-slate-800 rounded-lg shadow-2xl transform transition duration-500 hover:scale-[1.02] overflow-hidden border border-slate-200 dark:border-slate-700">
                              <!-- 
                                 Updated to use the GitHub raw link provided
                              -->
-                            <img src="https://raw.githubusercontent.com/quarcs-lab/metricsai/main/images/cover.jpg" 
-                                 alt="Analysis of Economics Data Textbook Cover" 
+                            <img src="https://raw.githubusercontent.com/quarcs-lab/metricsai/main/images/cover.jpg"
+                                 alt="Analysis of Economics Data Textbook Cover"
                                  class="w-full h-auto object-cover block"
                                  onerror="this.onerror=null; this.src='https://placehold.co/600x800/203a54/ffffff?text=metricsAI+Cover';">
+                            <div class="absolute top-3 right-3 bg-brand-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg z-10">
+                                17 Chapters
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -228,14 +287,14 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-12">
                 <h2 class="text-3xl font-bold text-slate-900 dark:text-white">Why metricsAI?</h2>
-                <p class="mt-4 text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">
+                <p class="mt-4 text-lg font-light text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">
                     Learning econometrics should be a more accessible and interactive experience.
                 </p>
             </div>
             
             <div class="grid md:grid-cols-3 gap-8">
                 <!-- Feature 1 -->
-                <div class="p-6 rounded-2xl bg-slate-50 dark:bg-slate-700 border border-slate-100 dark:border-slate-600 hover:shadow-md transition-shadow">
+                <div data-aos="fade-up" class="p-6 rounded-2xl bg-slate-50 dark:bg-slate-700 border border-slate-100 dark:border-slate-600 hover:shadow-md transition-shadow">
                     <div class="w-12 h-12 bg-amber-100 dark:bg-amber-900/50 rounded-xl flex items-center justify-center mb-4 text-amber-600 dark:text-amber-400">
                         <i class="fa-solid fa-book-open text-2xl"></i>
                     </div>
@@ -246,7 +305,7 @@
                 </div>
 
                 <!-- Feature 2 -->
-                <div class="p-6 rounded-2xl bg-slate-50 dark:bg-slate-700 border border-slate-100 dark:border-slate-600 hover:shadow-md transition-shadow">
+                <div data-aos="fade-up" data-aos-delay="100" class="p-6 rounded-2xl bg-slate-50 dark:bg-slate-700 border border-slate-100 dark:border-slate-600 hover:shadow-md transition-shadow">
                     <div class="w-12 h-12 bg-[#008CB7]/10 dark:bg-[#008CB7]/20 rounded-xl flex items-center justify-center mb-4 text-[#008CB7] dark:text-cyan-300">
                         <i class="fa-brands fa-python text-2xl"></i>
                     </div>
@@ -257,7 +316,7 @@
                 </div>
 
                 <!-- Feature 3 -->
-                <div class="p-6 rounded-2xl bg-slate-50 dark:bg-slate-700 border border-slate-100 dark:border-slate-600 hover:shadow-md transition-shadow">
+                <div data-aos="fade-up" data-aos-delay="200" class="p-6 rounded-2xl bg-slate-50 dark:bg-slate-700 border border-slate-100 dark:border-slate-600 hover:shadow-md transition-shadow">
                     <div class="w-12 h-12 bg-[#7A209F]/10 dark:bg-[#7A209F]/20 rounded-xl flex items-center justify-center mb-4 text-[#7A209F] dark:text-purple-300">
                         <i class="fa-solid fa-robot text-2xl"></i>
                     </div>
@@ -319,12 +378,12 @@
     </section>
 
     <!-- Curriculum Section -->
-    <section id="curriculum" class="scroll-mt-20 py-20 bg-slate-50 dark:bg-slate-900">
-        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+    <section id="curriculum" class="scroll-mt-20 py-20 bg-slate-50 dark:bg-slate-900 dot-pattern relative">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
             <!-- Section Title -->
             <div class="text-center mb-12">
                 <h2 class="text-3xl font-bold text-slate-900 dark:text-white">Interactive AI-Powered Notebooks</h2>
-                <p class="mt-4 text-lg text-slate-600 dark:text-slate-400 max-w-4xl mx-auto"><a href="https://colab.research.google.com/notebooks/empty.ipynb" target="_blank" class="text-brand-600 hover:text-brand-700 dark:text-brand-400 dark:hover:text-brand-300 transition-colors">Google Colab notebooks</a> provide an interactive programming environment where AI tools generate code, explain errors, and provide conversational guidance to accelerate learning.</p>
+                <p class="mt-4 text-lg font-light text-slate-600 dark:text-slate-400 max-w-4xl mx-auto"><a href="https://colab.research.google.com/notebooks/empty.ipynb" target="_blank" class="text-brand-600 hover:text-brand-700 dark:text-brand-400 dark:hover:text-brand-300 transition-colors">Google Colab notebooks</a> provide an interactive programming environment where AI tools generate code, explain errors, and provide conversational guidance to accelerate learning.</p>
             </div>
 
             <!-- Video Introduction -->
@@ -357,18 +416,23 @@
 
             <!-- Part I -->
             <div class="mb-12">
-                <div class="flex items-center gap-4 mb-6">
-                    <div class="h-px bg-slate-300 dark:bg-slate-600 flex-1"></div>
+                <div class="flex items-center gap-4 mb-8" data-aos="fade-right">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-full bg-brand-500 text-white flex items-center justify-center font-bold text-lg shadow-md">1</div>
+                        <div class="h-px bg-gradient-to-r from-brand-500 to-transparent w-12"></div>
+                    </div>
                     <h3 class="text-2xl font-bold text-brand-900 dark:text-brand-300">Part I: Statistical Foundations</h3>
                     <div class="h-px bg-slate-300 dark:bg-slate-600 flex-1"></div>
                 </div>
                 <div class="grid gap-4 md:grid-cols-1 lg:grid-cols-2">
                     <!-- Cards -->
-                    <div class="bg-white dark:bg-slate-800 p-5 rounded-lg border border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-md transition-all">
+                    <div data-aos="fade-up" class="bg-white dark:bg-slate-800 p-5 rounded-lg border border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-md transition-shadow">
                         <div class="flex flex-col gap-3">
-                            <h4 class="text-sm text-slate-500 dark:text-slate-400">Chapter 1: Analysis of Economics Data</h4>
+                            <h4 class="text-base font-medium text-slate-700 dark:text-slate-300">Chapter 1: Analysis of Economics Data</h4>
                             <!-- Thumbnail -->
-                            <img src="https://raw.githubusercontent.com/quarcs-lab/metricsai/main/images/ch01_visual_summary.jpg" alt="Chapter 1 Visual Summary" class="w-full h-auto object-contain rounded-lg cursor-pointer hover:opacity-90 transition-opacity bg-slate-200 dark:bg-slate-700" loading="lazy" onload="this.classList.remove('bg-slate-200','dark:bg-slate-700')" onclick="openImageModal(this.src, this.alt)">
+                            <div class="aspect-[16/9] overflow-hidden rounded-lg">
+                                <img src="https://raw.githubusercontent.com/quarcs-lab/metricsai/main/images/ch01_visual_summary.jpg" alt="Chapter 1 Visual Summary" class="w-full h-full object-cover cursor-pointer hover:scale-[1.03] hover:shadow-lg transition-transform duration-300 bg-slate-200 dark:bg-slate-700 animate-pulse" loading="lazy" onload="this.classList.remove('bg-slate-200','dark:bg-slate-700','animate-pulse')" onclick="openImageModal(this.src, this.alt)">
+                            </div>
                             <a href="https://colab.research.google.com/github/quarcs-lab/metricsai/blob/main/notebooks_colab/ch01_Analysis_of_Economics_Data.ipynb" target="_blank" class="self-start">
                                 <img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab" class="h-8">
                             </a>
@@ -394,7 +458,7 @@
                                     AI Tutor
                                 </a>
                             </div>
-                            <div class="flex items-center gap-2">
+                            <div class="flex items-center gap-2 audio-container">
                                 <i class="fa-solid fa-headphones text-xs text-brand-600"></i>
                                 <audio controls class="flex-1 h-8">
                                     <source src="https://files.catbox.moe/1wbbbm.mp3" type="audio/mpeg">
@@ -406,11 +470,13 @@
                             </div>
                         </div>
                     </div>
-                    <div class="bg-white dark:bg-slate-800 p-5 rounded-lg border border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-md transition-all">
+                    <div data-aos="fade-up" class="bg-white dark:bg-slate-800 p-5 rounded-lg border border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-md transition-shadow">
                         <div class="flex flex-col gap-3">
-                            <h4 class="text-sm text-slate-500 dark:text-slate-400">Chapter 2: Univariate Data Summary</h4>
+                            <h4 class="text-base font-medium text-slate-700 dark:text-slate-300">Chapter 2: Univariate Data Summary</h4>
                             <!-- Thumbnail -->
-                            <img src="https://raw.githubusercontent.com/quarcs-lab/metricsai/main/images/ch02_visual_summary.jpg" alt="Chapter 2 Visual Summary" class="w-full h-auto object-contain rounded-lg cursor-pointer hover:opacity-90 transition-opacity bg-slate-200 dark:bg-slate-700" loading="lazy" onload="this.classList.remove('bg-slate-200','dark:bg-slate-700')" onclick="openImageModal(this.src, this.alt)">
+                            <div class="aspect-[16/9] overflow-hidden rounded-lg">
+                                <img src="https://raw.githubusercontent.com/quarcs-lab/metricsai/main/images/ch02_visual_summary.jpg" alt="Chapter 2 Visual Summary" class="w-full h-full object-cover cursor-pointer hover:scale-[1.03] hover:shadow-lg transition-transform duration-300 bg-slate-200 dark:bg-slate-700 animate-pulse" loading="lazy" onload="this.classList.remove('bg-slate-200','dark:bg-slate-700','animate-pulse')" onclick="openImageModal(this.src, this.alt)">
+                            </div>
                             <a href="https://colab.research.google.com/github/quarcs-lab/metricsai/blob/main/notebooks_colab/ch02_Univariate_Data_Summary.ipynb" target="_blank" class="self-start">
                                 <img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab" class="h-8">
                             </a>
@@ -436,7 +502,7 @@
                                     AI Tutor
                                 </a>
                             </div>
-                            <div class="flex items-center gap-2">
+                            <div class="flex items-center gap-2 audio-container">
                                 <i class="fa-solid fa-headphones text-xs text-brand-600"></i>
                                 <audio controls class="flex-1 h-8">
                                     <source src="https://files.catbox.moe/n5hlhx.mp3" type="audio/mpeg">
@@ -448,11 +514,13 @@
                             </div>
                         </div>
                     </div>
-                    <div class="bg-white dark:bg-slate-800 p-5 rounded-lg border border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-md transition-all">
+                    <div data-aos="fade-up" class="bg-white dark:bg-slate-800 p-5 rounded-lg border border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-md transition-shadow">
                         <div class="flex flex-col gap-3">
-                            <h4 class="text-sm text-slate-500 dark:text-slate-400">Chapter 3: The Sample Mean</h4>
+                            <h4 class="text-base font-medium text-slate-700 dark:text-slate-300">Chapter 3: The Sample Mean</h4>
                             <!-- Thumbnail -->
-                            <img src="https://raw.githubusercontent.com/quarcs-lab/metricsai/main/images/ch03_visual_summary.jpg" alt="Chapter 3 Visual Summary" class="w-full h-auto object-contain rounded-lg cursor-pointer hover:opacity-90 transition-opacity bg-slate-200 dark:bg-slate-700" loading="lazy" onload="this.classList.remove('bg-slate-200','dark:bg-slate-700')" onclick="openImageModal(this.src, this.alt)">
+                            <div class="aspect-[16/9] overflow-hidden rounded-lg">
+                                <img src="https://raw.githubusercontent.com/quarcs-lab/metricsai/main/images/ch03_visual_summary.jpg" alt="Chapter 3 Visual Summary" class="w-full h-full object-cover cursor-pointer hover:scale-[1.03] hover:shadow-lg transition-transform duration-300 bg-slate-200 dark:bg-slate-700 animate-pulse" loading="lazy" onload="this.classList.remove('bg-slate-200','dark:bg-slate-700','animate-pulse')" onclick="openImageModal(this.src, this.alt)">
+                            </div>
                             <a href="https://colab.research.google.com/github/quarcs-lab/metricsai/blob/main/notebooks_colab/ch03_The_Sample_Mean.ipynb" target="_blank" class="self-start">
                                 <img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab" class="h-8">
                             </a>
@@ -478,7 +546,7 @@
                                     AI Tutor
                                 </a>
                             </div>
-                            <div class="flex items-center gap-2">
+                            <div class="flex items-center gap-2 audio-container">
                                 <i class="fa-solid fa-headphones text-xs text-brand-600"></i>
                                 <audio controls class="flex-1 h-8">
                                     <source src="https://files.catbox.moe/6t00pu.mp3" type="audio/mpeg">
@@ -490,11 +558,13 @@
                             </div>
                         </div>
                     </div>
-                    <div class="bg-white dark:bg-slate-800 p-5 rounded-lg border border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-md transition-all">
+                    <div data-aos="fade-up" class="bg-white dark:bg-slate-800 p-5 rounded-lg border border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-md transition-shadow">
                         <div class="flex flex-col gap-3">
-                            <h4 class="text-sm text-slate-500 dark:text-slate-400">Chapter 4: Statistical Inference for the Mean</h4>
+                            <h4 class="text-base font-medium text-slate-700 dark:text-slate-300">Chapter 4: Statistical Inference for the Mean</h4>
                             <!-- Thumbnail -->
-                            <img src="https://raw.githubusercontent.com/quarcs-lab/metricsai/main/images/ch04_visual_summary.jpg" alt="Chapter 4 Visual Summary" class="w-full h-auto object-contain rounded-lg cursor-pointer hover:opacity-90 transition-opacity bg-slate-200 dark:bg-slate-700" loading="lazy" onload="this.classList.remove('bg-slate-200','dark:bg-slate-700')" onclick="openImageModal(this.src, this.alt)">
+                            <div class="aspect-[16/9] overflow-hidden rounded-lg">
+                                <img src="https://raw.githubusercontent.com/quarcs-lab/metricsai/main/images/ch04_visual_summary.jpg" alt="Chapter 4 Visual Summary" class="w-full h-full object-cover cursor-pointer hover:scale-[1.03] hover:shadow-lg transition-transform duration-300 bg-slate-200 dark:bg-slate-700 animate-pulse" loading="lazy" onload="this.classList.remove('bg-slate-200','dark:bg-slate-700','animate-pulse')" onclick="openImageModal(this.src, this.alt)">
+                            </div>
                             <a href="https://colab.research.google.com/github/quarcs-lab/metricsai/blob/main/notebooks_colab/ch04_Statistical_Inference_for_the_Mean.ipynb" target="_blank" class="self-start">
                                 <img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab" class="h-8">
                             </a>
@@ -520,7 +590,7 @@
                                     AI Tutor
                                 </a>
                             </div>
-                            <div class="flex items-center gap-2">
+                            <div class="flex items-center gap-2 audio-container">
                                 <i class="fa-solid fa-headphones text-xs text-brand-600"></i>
                                 <audio controls class="flex-1 h-8">
                                     <source src="https://files.catbox.moe/f1ahfl.mp3" type="audio/mpeg">
@@ -537,17 +607,22 @@
 
             <!-- Part II -->
             <div class="mb-12">
-                <div class="flex items-center gap-4 mb-6">
-                    <div class="h-px bg-slate-300 dark:bg-slate-600 flex-1"></div>
+                <div class="flex items-center gap-4 mb-8" data-aos="fade-right">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-full bg-brand-600 text-white flex items-center justify-center font-bold text-lg shadow-md">2</div>
+                        <div class="h-px bg-gradient-to-r from-brand-600 to-transparent w-12"></div>
+                    </div>
                     <h3 class="text-2xl font-bold text-brand-900 dark:text-brand-300">Part II: Bivariate Regression</h3>
                     <div class="h-px bg-slate-300 dark:bg-slate-600 flex-1"></div>
                 </div>
                 <div class="grid gap-4 md:grid-cols-1 lg:grid-cols-2">
-                    <div class="bg-white dark:bg-slate-800 p-5 rounded-lg border border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-md transition-all">
+                    <div data-aos="fade-up" class="bg-white dark:bg-slate-800 p-5 rounded-lg border border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-md transition-shadow">
                         <div class="flex flex-col gap-3">
-                            <h4 class="text-sm text-slate-500 dark:text-slate-400">Chapter 5: Bivariate Data Summary</h4>
+                            <h4 class="text-base font-medium text-slate-700 dark:text-slate-300">Chapter 5: Bivariate Data Summary</h4>
                             <!-- Thumbnail -->
-                            <img src="https://raw.githubusercontent.com/quarcs-lab/metricsai/main/images/ch05_visual_summary.jpg" alt="Chapter 5 Visual Summary" class="w-full h-auto object-contain rounded-lg cursor-pointer hover:opacity-90 transition-opacity bg-slate-200 dark:bg-slate-700" loading="lazy" onload="this.classList.remove('bg-slate-200','dark:bg-slate-700')" onclick="openImageModal(this.src, this.alt)">
+                            <div class="aspect-[16/9] overflow-hidden rounded-lg">
+                                <img src="https://raw.githubusercontent.com/quarcs-lab/metricsai/main/images/ch05_visual_summary.jpg" alt="Chapter 5 Visual Summary" class="w-full h-full object-cover cursor-pointer hover:scale-[1.03] hover:shadow-lg transition-transform duration-300 bg-slate-200 dark:bg-slate-700 animate-pulse" loading="lazy" onload="this.classList.remove('bg-slate-200','dark:bg-slate-700','animate-pulse')" onclick="openImageModal(this.src, this.alt)">
+                            </div>
                             <a href="https://colab.research.google.com/github/quarcs-lab/metricsai/blob/main/notebooks_colab/ch05_Bivariate_Data_Summary.ipynb" target="_blank" class="self-start">
                                 <img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab" class="h-8">
                             </a>
@@ -573,7 +648,7 @@
                                     AI Tutor
                                 </a>
                             </div>
-                            <div class="flex items-center gap-2">
+                            <div class="flex items-center gap-2 audio-container">
                                 <i class="fa-solid fa-headphones text-xs text-brand-600"></i>
                                 <audio controls class="flex-1 h-8">
                                     <source src="https://files.catbox.moe/1j2eem.mp3" type="audio/mpeg">
@@ -585,11 +660,13 @@
                             </div>
                         </div>
                     </div>
-                    <div class="bg-white dark:bg-slate-800 p-5 rounded-lg border border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-md transition-all">
+                    <div data-aos="fade-up" class="bg-white dark:bg-slate-800 p-5 rounded-lg border border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-md transition-shadow">
                         <div class="flex flex-col gap-3">
-                            <h4 class="text-sm text-slate-500 dark:text-slate-400">Chapter 6: The Least Squares Estimator</h4>
+                            <h4 class="text-base font-medium text-slate-700 dark:text-slate-300">Chapter 6: The Least Squares Estimator</h4>
                             <!-- Thumbnail -->
-                            <img src="https://raw.githubusercontent.com/quarcs-lab/metricsai/main/images/ch06_visual_summary.jpg" alt="Chapter 6 Visual Summary" class="w-full h-auto object-contain rounded-lg cursor-pointer hover:opacity-90 transition-opacity bg-slate-200 dark:bg-slate-700" loading="lazy" onload="this.classList.remove('bg-slate-200','dark:bg-slate-700')" onclick="openImageModal(this.src, this.alt)">
+                            <div class="aspect-[16/9] overflow-hidden rounded-lg">
+                                <img src="https://raw.githubusercontent.com/quarcs-lab/metricsai/main/images/ch06_visual_summary.jpg" alt="Chapter 6 Visual Summary" class="w-full h-full object-cover cursor-pointer hover:scale-[1.03] hover:shadow-lg transition-transform duration-300 bg-slate-200 dark:bg-slate-700 animate-pulse" loading="lazy" onload="this.classList.remove('bg-slate-200','dark:bg-slate-700','animate-pulse')" onclick="openImageModal(this.src, this.alt)">
+                            </div>
                             <a href="https://colab.research.google.com/github/quarcs-lab/metricsai/blob/main/notebooks_colab/ch06_The_Least_Squares_Estimator.ipynb" target="_blank" class="self-start">
                                 <img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab" class="h-8">
                             </a>
@@ -615,7 +692,7 @@
                                     AI Tutor
                                 </a>
                             </div>
-                            <div class="flex items-center gap-2">
+                            <div class="flex items-center gap-2 audio-container">
                                 <i class="fa-solid fa-headphones text-xs text-brand-600"></i>
                                 <audio controls class="flex-1 h-8">
                                     <source src="https://files.catbox.moe/hxtc79.mp3" type="audio/mpeg">
@@ -627,11 +704,13 @@
                             </div>
                         </div>
                     </div>
-                    <div class="bg-white dark:bg-slate-800 p-5 rounded-lg border border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-md transition-all">
+                    <div data-aos="fade-up" class="bg-white dark:bg-slate-800 p-5 rounded-lg border border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-md transition-shadow">
                         <div class="flex flex-col gap-3">
-                            <h4 class="text-sm text-slate-500 dark:text-slate-400">Chapter 7: Statistical Inference for Bivariate Regression</h4>
+                            <h4 class="text-base font-medium text-slate-700 dark:text-slate-300">Chapter 7: Statistical Inference for Bivariate Regression</h4>
                             <!-- Thumbnail -->
-                            <img src="https://raw.githubusercontent.com/quarcs-lab/metricsai/main/images/ch07_visual_summary.jpg" alt="Chapter 7 Visual Summary" class="w-full h-auto object-contain rounded-lg cursor-pointer hover:opacity-90 transition-opacity bg-slate-200 dark:bg-slate-700" loading="lazy" onload="this.classList.remove('bg-slate-200','dark:bg-slate-700')" onclick="openImageModal(this.src, this.alt)">
+                            <div class="aspect-[16/9] overflow-hidden rounded-lg">
+                                <img src="https://raw.githubusercontent.com/quarcs-lab/metricsai/main/images/ch07_visual_summary.jpg" alt="Chapter 7 Visual Summary" class="w-full h-full object-cover cursor-pointer hover:scale-[1.03] hover:shadow-lg transition-transform duration-300 bg-slate-200 dark:bg-slate-700 animate-pulse" loading="lazy" onload="this.classList.remove('bg-slate-200','dark:bg-slate-700','animate-pulse')" onclick="openImageModal(this.src, this.alt)">
+                            </div>
                             <a href="https://colab.research.google.com/github/quarcs-lab/metricsai/blob/main/notebooks_colab/ch07_Statistical_Inference_for_Bivariate_Regression.ipynb" target="_blank" class="self-start">
                                 <img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab" class="h-8">
                             </a>
@@ -657,7 +736,7 @@
                                     AI Tutor
                                 </a>
                             </div>
-                            <div class="flex items-center gap-2">
+                            <div class="flex items-center gap-2 audio-container">
                                 <i class="fa-solid fa-headphones text-xs text-brand-600"></i>
                                 <audio controls class="flex-1 h-8">
                                     <source src="https://files.catbox.moe/cn4rbf.mp3" type="audio/mpeg">
@@ -669,11 +748,13 @@
                             </div>
                         </div>
                     </div>
-                    <div class="bg-white dark:bg-slate-800 p-5 rounded-lg border border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-md transition-all">
+                    <div data-aos="fade-up" class="bg-white dark:bg-slate-800 p-5 rounded-lg border border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-md transition-shadow">
                         <div class="flex flex-col gap-3">
-                            <h4 class="text-sm text-slate-500 dark:text-slate-400">Chapter 8: Case Studies for Bivariate Regression</h4>
+                            <h4 class="text-base font-medium text-slate-700 dark:text-slate-300">Chapter 8: Case Studies for Bivariate Regression</h4>
                             <!-- Thumbnail -->
-                            <img src="https://raw.githubusercontent.com/quarcs-lab/metricsai/main/images/ch08_visual_summary.jpg" alt="Chapter 8 Visual Summary" class="w-full h-auto object-contain rounded-lg cursor-pointer hover:opacity-90 transition-opacity bg-slate-200 dark:bg-slate-700" loading="lazy" onload="this.classList.remove('bg-slate-200','dark:bg-slate-700')" onclick="openImageModal(this.src, this.alt)">
+                            <div class="aspect-[16/9] overflow-hidden rounded-lg">
+                                <img src="https://raw.githubusercontent.com/quarcs-lab/metricsai/main/images/ch08_visual_summary.jpg" alt="Chapter 8 Visual Summary" class="w-full h-full object-cover cursor-pointer hover:scale-[1.03] hover:shadow-lg transition-transform duration-300 bg-slate-200 dark:bg-slate-700 animate-pulse" loading="lazy" onload="this.classList.remove('bg-slate-200','dark:bg-slate-700','animate-pulse')" onclick="openImageModal(this.src, this.alt)">
+                            </div>
                             <a href="https://colab.research.google.com/github/quarcs-lab/metricsai/blob/main/notebooks_colab/ch08_Case_Studies_for_Bivariate_Regression.ipynb" target="_blank" class="self-start">
                                 <img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab" class="h-8">
                             </a>
@@ -699,7 +780,7 @@
                                     AI Tutor
                                 </a>
                             </div>
-                            <div class="flex items-center gap-2">
+                            <div class="flex items-center gap-2 audio-container">
                                 <i class="fa-solid fa-headphones text-xs text-brand-600"></i>
                                 <audio controls class="flex-1 h-8">
                                     <source src="https://files.catbox.moe/5e68ec.mp3" type="audio/mpeg">
@@ -711,11 +792,13 @@
                             </div>
                         </div>
                     </div>
-                    <div class="bg-white dark:bg-slate-800 p-5 rounded-lg border border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-md transition-all">
+                    <div data-aos="fade-up" class="bg-white dark:bg-slate-800 p-5 rounded-lg border border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-md transition-shadow">
                         <div class="flex flex-col gap-3">
-                            <h4 class="text-sm text-slate-500 dark:text-slate-400">Chapter 9: Models with Natural Logarithms</h4>
+                            <h4 class="text-base font-medium text-slate-700 dark:text-slate-300">Chapter 9: Models with Natural Logarithms</h4>
                             <!-- Thumbnail -->
-                            <img src="https://raw.githubusercontent.com/quarcs-lab/metricsai/main/images/ch09_visual_summary.jpg" alt="Chapter 9 Visual Summary" class="w-full h-auto object-contain rounded-lg cursor-pointer hover:opacity-90 transition-opacity bg-slate-200 dark:bg-slate-700" loading="lazy" onload="this.classList.remove('bg-slate-200','dark:bg-slate-700')" onclick="openImageModal(this.src, this.alt)">
+                            <div class="aspect-[16/9] overflow-hidden rounded-lg">
+                                <img src="https://raw.githubusercontent.com/quarcs-lab/metricsai/main/images/ch09_visual_summary.jpg" alt="Chapter 9 Visual Summary" class="w-full h-full object-cover cursor-pointer hover:scale-[1.03] hover:shadow-lg transition-transform duration-300 bg-slate-200 dark:bg-slate-700 animate-pulse" loading="lazy" onload="this.classList.remove('bg-slate-200','dark:bg-slate-700','animate-pulse')" onclick="openImageModal(this.src, this.alt)">
+                            </div>
                             <a href="https://colab.research.google.com/github/quarcs-lab/metricsai/blob/main/notebooks_colab/ch09_Models_with_Natural_Logarithms.ipynb" target="_blank" class="self-start">
                                 <img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab" class="h-8">
                             </a>
@@ -741,7 +824,7 @@
                                     AI Tutor
                                 </a>
                             </div>
-                            <div class="flex items-center gap-2">
+                            <div class="flex items-center gap-2 audio-container">
                                 <i class="fa-solid fa-headphones text-xs text-brand-600"></i>
                                 <audio controls class="flex-1 h-8">
                                     <source src="https://files.catbox.moe/jiso3g.mp3" type="audio/mpeg">
@@ -758,17 +841,22 @@
 
             <!-- Part III -->
             <div class="mb-12">
-                <div class="flex items-center gap-4 mb-6">
-                    <div class="h-px bg-slate-300 dark:bg-slate-600 flex-1"></div>
+                <div class="flex items-center gap-4 mb-8" data-aos="fade-right">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-full bg-[#7A209F] text-white flex items-center justify-center font-bold text-lg shadow-md">3</div>
+                        <div class="h-px bg-gradient-to-r from-[#7A209F] to-transparent w-12"></div>
+                    </div>
                     <h3 class="text-2xl font-bold text-brand-900 dark:text-brand-300">Part III: Multiple Regression</h3>
                     <div class="h-px bg-slate-300 dark:bg-slate-600 flex-1"></div>
                 </div>
                 <div class="grid gap-4 md:grid-cols-1 lg:grid-cols-2">
-                    <div class="bg-white dark:bg-slate-800 p-5 rounded-lg border border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-md transition-all">
+                    <div data-aos="fade-up" class="bg-white dark:bg-slate-800 p-5 rounded-lg border border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-md transition-shadow">
                         <div class="flex flex-col gap-3">
-                            <h4 class="text-sm text-slate-500 dark:text-slate-400">Chapter 10: Data Summary for Multiple Regression</h4>
+                            <h4 class="text-base font-medium text-slate-700 dark:text-slate-300">Chapter 10: Data Summary for Multiple Regression</h4>
                             <!-- Thumbnail -->
-                            <img src="https://raw.githubusercontent.com/quarcs-lab/metricsai/main/images/ch10_visual_summary.jpg" alt="Chapter 10 Visual Summary" class="w-full h-auto object-contain rounded-lg cursor-pointer hover:opacity-90 transition-opacity bg-slate-200 dark:bg-slate-700" loading="lazy" onload="this.classList.remove('bg-slate-200','dark:bg-slate-700')" onclick="openImageModal(this.src, this.alt)">
+                            <div class="aspect-[16/9] overflow-hidden rounded-lg">
+                                <img src="https://raw.githubusercontent.com/quarcs-lab/metricsai/main/images/ch10_visual_summary.jpg" alt="Chapter 10 Visual Summary" class="w-full h-full object-cover cursor-pointer hover:scale-[1.03] hover:shadow-lg transition-transform duration-300 bg-slate-200 dark:bg-slate-700 animate-pulse" loading="lazy" onload="this.classList.remove('bg-slate-200','dark:bg-slate-700','animate-pulse')" onclick="openImageModal(this.src, this.alt)">
+                            </div>
                             <a href="https://colab.research.google.com/github/quarcs-lab/metricsai/blob/main/notebooks_colab/ch10_Data_Summary_for_Multiple_Regression.ipynb" target="_blank" class="self-start">
                                 <img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab" class="h-8">
                             </a>
@@ -794,7 +882,7 @@
                                     AI Tutor
                                 </a>
                             </div>
-                            <div class="flex items-center gap-2">
+                            <div class="flex items-center gap-2 audio-container">
                                 <i class="fa-solid fa-headphones text-xs text-brand-600"></i>
                                 <audio controls class="flex-1 h-8">
                                     <source src="https://files.catbox.moe/af8916.mp3" type="audio/mpeg">
@@ -806,11 +894,13 @@
                             </div>
                         </div>
                     </div>
-                    <div class="bg-white dark:bg-slate-800 p-5 rounded-lg border border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-md transition-all">
+                    <div data-aos="fade-up" class="bg-white dark:bg-slate-800 p-5 rounded-lg border border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-md transition-shadow">
                         <div class="flex flex-col gap-3">
-                            <h4 class="text-sm text-slate-500 dark:text-slate-400">Chapter 11: Statistical Inference for Multiple Regression</h4>
+                            <h4 class="text-base font-medium text-slate-700 dark:text-slate-300">Chapter 11: Statistical Inference for Multiple Regression</h4>
                             <!-- Thumbnail -->
-                            <img src="https://raw.githubusercontent.com/quarcs-lab/metricsai/main/images/ch11_visual_summary.jpg" alt="Chapter 11 Visual Summary" class="w-full h-auto object-contain rounded-lg cursor-pointer hover:opacity-90 transition-opacity bg-slate-200 dark:bg-slate-700" loading="lazy" onload="this.classList.remove('bg-slate-200','dark:bg-slate-700')" onclick="openImageModal(this.src, this.alt)">
+                            <div class="aspect-[16/9] overflow-hidden rounded-lg">
+                                <img src="https://raw.githubusercontent.com/quarcs-lab/metricsai/main/images/ch11_visual_summary.jpg" alt="Chapter 11 Visual Summary" class="w-full h-full object-cover cursor-pointer hover:scale-[1.03] hover:shadow-lg transition-transform duration-300 bg-slate-200 dark:bg-slate-700 animate-pulse" loading="lazy" onload="this.classList.remove('bg-slate-200','dark:bg-slate-700','animate-pulse')" onclick="openImageModal(this.src, this.alt)">
+                            </div>
                             <a href="https://colab.research.google.com/github/quarcs-lab/metricsai/blob/main/notebooks_colab/ch11_Statistical_Inference_for_Multiple_Regression.ipynb" target="_blank" class="self-start">
                                 <img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab" class="h-8">
                             </a>
@@ -836,7 +926,7 @@
                                     AI Tutor
                                 </a>
                             </div>
-                            <div class="flex items-center gap-2">
+                            <div class="flex items-center gap-2 audio-container">
                                 <i class="fa-solid fa-headphones text-xs text-brand-600"></i>
                                 <audio controls class="flex-1 h-8">
                                     <source src="https://files.catbox.moe/ay6esx.mp3" type="audio/mpeg">
@@ -848,11 +938,13 @@
                             </div>
                         </div>
                     </div>
-                    <div class="bg-white dark:bg-slate-800 p-5 rounded-lg border border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-md transition-all">
+                    <div data-aos="fade-up" class="bg-white dark:bg-slate-800 p-5 rounded-lg border border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-md transition-shadow">
                         <div class="flex flex-col gap-3">
-                            <h4 class="text-sm text-slate-500 dark:text-slate-400">Chapter 12: Further Topics in Multiple Regression</h4>
+                            <h4 class="text-base font-medium text-slate-700 dark:text-slate-300">Chapter 12: Further Topics in Multiple Regression</h4>
                             <!-- Thumbnail -->
-                            <img src="https://raw.githubusercontent.com/quarcs-lab/metricsai/main/images/ch12_visual_summary.jpg" alt="Chapter 12 Visual Summary" class="w-full h-auto object-contain rounded-lg cursor-pointer hover:opacity-90 transition-opacity bg-slate-200 dark:bg-slate-700" loading="lazy" onload="this.classList.remove('bg-slate-200','dark:bg-slate-700')" onclick="openImageModal(this.src, this.alt)">
+                            <div class="aspect-[16/9] overflow-hidden rounded-lg">
+                                <img src="https://raw.githubusercontent.com/quarcs-lab/metricsai/main/images/ch12_visual_summary.jpg" alt="Chapter 12 Visual Summary" class="w-full h-full object-cover cursor-pointer hover:scale-[1.03] hover:shadow-lg transition-transform duration-300 bg-slate-200 dark:bg-slate-700 animate-pulse" loading="lazy" onload="this.classList.remove('bg-slate-200','dark:bg-slate-700','animate-pulse')" onclick="openImageModal(this.src, this.alt)">
+                            </div>
                             <a href="https://colab.research.google.com/github/quarcs-lab/metricsai/blob/main/notebooks_colab/ch12_Further_Topics_in_Multiple_Regression.ipynb" target="_blank" class="self-start">
                                 <img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab" class="h-8">
                             </a>
@@ -878,7 +970,7 @@
                                     AI Tutor
                                 </a>
                             </div>
-                            <div class="flex items-center gap-2">
+                            <div class="flex items-center gap-2 audio-container">
                                 <i class="fa-solid fa-headphones text-xs text-brand-600"></i>
                                 <audio controls class="flex-1 h-8">
                                     <source src="https://files.catbox.moe/xk3z7e.mp3" type="audio/mpeg">
@@ -890,11 +982,13 @@
                             </div>
                         </div>
                     </div>
-                    <div class="bg-white dark:bg-slate-800 p-5 rounded-lg border border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-md transition-all">
+                    <div data-aos="fade-up" class="bg-white dark:bg-slate-800 p-5 rounded-lg border border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-md transition-shadow">
                         <div class="flex flex-col gap-3">
-                            <h4 class="text-sm text-slate-500 dark:text-slate-400">Chapter 13: Case Studies for Multiple Regression</h4>
+                            <h4 class="text-base font-medium text-slate-700 dark:text-slate-300">Chapter 13: Case Studies for Multiple Regression</h4>
                             <!-- Thumbnail -->
-                            <img src="https://raw.githubusercontent.com/quarcs-lab/metricsai/main/images/ch13_visual_summary.jpg" alt="Chapter 13 Visual Summary" class="w-full h-auto object-contain rounded-lg cursor-pointer hover:opacity-90 transition-opacity bg-slate-200 dark:bg-slate-700" loading="lazy" onload="this.classList.remove('bg-slate-200','dark:bg-slate-700')" onclick="openImageModal(this.src, this.alt)">
+                            <div class="aspect-[16/9] overflow-hidden rounded-lg">
+                                <img src="https://raw.githubusercontent.com/quarcs-lab/metricsai/main/images/ch13_visual_summary.jpg" alt="Chapter 13 Visual Summary" class="w-full h-full object-cover cursor-pointer hover:scale-[1.03] hover:shadow-lg transition-transform duration-300 bg-slate-200 dark:bg-slate-700 animate-pulse" loading="lazy" onload="this.classList.remove('bg-slate-200','dark:bg-slate-700','animate-pulse')" onclick="openImageModal(this.src, this.alt)">
+                            </div>
                             <a href="https://colab.research.google.com/github/quarcs-lab/metricsai/blob/main/notebooks_colab/ch13_Case_Studies_for_Multiple_Regression.ipynb" target="_blank" class="self-start">
                                 <img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab" class="h-8">
                             </a>
@@ -920,7 +1014,7 @@
                                     AI Tutor
                                 </a>
                             </div>
-                            <div class="flex items-center gap-2">
+                            <div class="flex items-center gap-2 audio-container">
                                 <i class="fa-solid fa-headphones text-xs text-brand-600"></i>
                                 <audio controls class="flex-1 h-8">
                                     <source src="https://files.catbox.moe/x1e2b9.mp3" type="audio/mpeg">
@@ -937,17 +1031,22 @@
 
             <!-- Part IV -->
             <div class="mb-12">
-                <div class="flex items-center gap-4 mb-6">
-                    <div class="h-px bg-slate-300 dark:bg-slate-600 flex-1"></div>
+                <div class="flex items-center gap-4 mb-8" data-aos="fade-right">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-full bg-[#C21E72] text-white flex items-center justify-center font-bold text-lg shadow-md">4</div>
+                        <div class="h-px bg-gradient-to-r from-[#C21E72] to-transparent w-12"></div>
+                    </div>
                     <h3 class="text-2xl font-bold text-brand-900 dark:text-brand-300">Part IV: Advanced Topics</h3>
                     <div class="h-px bg-slate-300 dark:bg-slate-600 flex-1"></div>
                 </div>
                 <div class="grid gap-4 md:grid-cols-1 lg:grid-cols-2">
-                    <div class="bg-white dark:bg-slate-800 p-5 rounded-lg border border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-md transition-all">
+                    <div data-aos="fade-up" class="bg-white dark:bg-slate-800 p-5 rounded-lg border border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-md transition-shadow">
                         <div class="flex flex-col gap-3">
-                            <h4 class="text-sm text-slate-500 dark:text-slate-400">Chapter 14: Regression with Indicator Variables</h4>
+                            <h4 class="text-base font-medium text-slate-700 dark:text-slate-300">Chapter 14: Regression with Indicator Variables</h4>
                             <!-- Thumbnail -->
-                            <img src="https://raw.githubusercontent.com/quarcs-lab/metricsai/main/images/ch14_visual_summary.jpg" alt="Chapter 14 Visual Summary" class="w-full h-auto object-contain rounded-lg cursor-pointer hover:opacity-90 transition-opacity bg-slate-200 dark:bg-slate-700" loading="lazy" onload="this.classList.remove('bg-slate-200','dark:bg-slate-700')" onclick="openImageModal(this.src, this.alt)">
+                            <div class="aspect-[16/9] overflow-hidden rounded-lg">
+                                <img src="https://raw.githubusercontent.com/quarcs-lab/metricsai/main/images/ch14_visual_summary.jpg" alt="Chapter 14 Visual Summary" class="w-full h-full object-cover cursor-pointer hover:scale-[1.03] hover:shadow-lg transition-transform duration-300 bg-slate-200 dark:bg-slate-700 animate-pulse" loading="lazy" onload="this.classList.remove('bg-slate-200','dark:bg-slate-700','animate-pulse')" onclick="openImageModal(this.src, this.alt)">
+                            </div>
                             <a href="https://colab.research.google.com/github/quarcs-lab/metricsai/blob/main/notebooks_colab/ch14_Regression_with_Indicator_Variables.ipynb" target="_blank" class="self-start">
                                 <img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab" class="h-8">
                             </a>
@@ -973,7 +1072,7 @@
                                     AI Tutor
                                 </a>
                             </div>
-                            <div class="flex items-center gap-2">
+                            <div class="flex items-center gap-2 audio-container">
                                 <i class="fa-solid fa-headphones text-xs text-brand-600"></i>
                                 <audio controls class="flex-1 h-8">
                                     <source src="https://files.catbox.moe/v6c2ng.mp3" type="audio/mpeg">
@@ -985,11 +1084,13 @@
                             </div>
                         </div>
                     </div>
-                    <div class="bg-white dark:bg-slate-800 p-5 rounded-lg border border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-md transition-all">
+                    <div data-aos="fade-up" class="bg-white dark:bg-slate-800 p-5 rounded-lg border border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-md transition-shadow">
                         <div class="flex flex-col gap-3">
-                            <h4 class="text-sm text-slate-500 dark:text-slate-400">Chapter 15: Regression with Transformed Variables</h4>
+                            <h4 class="text-base font-medium text-slate-700 dark:text-slate-300">Chapter 15: Regression with Transformed Variables</h4>
                             <!-- Thumbnail -->
-                            <img src="https://raw.githubusercontent.com/quarcs-lab/metricsai/main/images/ch15_visual_summary.jpg" alt="Chapter 15 Visual Summary" class="w-full h-auto object-contain rounded-lg cursor-pointer hover:opacity-90 transition-opacity bg-slate-200 dark:bg-slate-700" loading="lazy" onload="this.classList.remove('bg-slate-200','dark:bg-slate-700')" onclick="openImageModal(this.src, this.alt)">
+                            <div class="aspect-[16/9] overflow-hidden rounded-lg">
+                                <img src="https://raw.githubusercontent.com/quarcs-lab/metricsai/main/images/ch15_visual_summary.jpg" alt="Chapter 15 Visual Summary" class="w-full h-full object-cover cursor-pointer hover:scale-[1.03] hover:shadow-lg transition-transform duration-300 bg-slate-200 dark:bg-slate-700 animate-pulse" loading="lazy" onload="this.classList.remove('bg-slate-200','dark:bg-slate-700','animate-pulse')" onclick="openImageModal(this.src, this.alt)">
+                            </div>
                             <a href="https://colab.research.google.com/github/quarcs-lab/metricsai/blob/main/notebooks_colab/ch15_Regression_with_Transformed_Variables.ipynb" target="_blank" class="self-start">
                                 <img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab" class="h-8">
                             </a>
@@ -1015,7 +1116,7 @@
                                     AI Tutor
                                 </a>
                             </div>
-                            <div class="flex items-center gap-2">
+                            <div class="flex items-center gap-2 audio-container">
                                 <i class="fa-solid fa-headphones text-xs text-brand-600"></i>
                                 <audio controls class="flex-1 h-8">
                                     <source src="https://files.catbox.moe/itjlr7.mp3" type="audio/mpeg">
@@ -1027,11 +1128,13 @@
                             </div>
                         </div>
                     </div>
-                    <div class="bg-white dark:bg-slate-800 p-5 rounded-lg border border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-md transition-all">
+                    <div data-aos="fade-up" class="bg-white dark:bg-slate-800 p-5 rounded-lg border border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-md transition-shadow">
                         <div class="flex flex-col gap-3">
-                            <h4 class="text-sm text-slate-500 dark:text-slate-400">Chapter 16: Checking the Model and Data</h4>
+                            <h4 class="text-base font-medium text-slate-700 dark:text-slate-300">Chapter 16: Checking the Model and Data</h4>
                             <!-- Thumbnail -->
-                            <img src="https://raw.githubusercontent.com/quarcs-lab/metricsai/main/images/ch16_visual_summary.jpg" alt="Chapter 16 Visual Summary" class="w-full h-auto object-contain rounded-lg cursor-pointer hover:opacity-90 transition-opacity bg-slate-200 dark:bg-slate-700" loading="lazy" onload="this.classList.remove('bg-slate-200','dark:bg-slate-700')" onclick="openImageModal(this.src, this.alt)">
+                            <div class="aspect-[16/9] overflow-hidden rounded-lg">
+                                <img src="https://raw.githubusercontent.com/quarcs-lab/metricsai/main/images/ch16_visual_summary.jpg" alt="Chapter 16 Visual Summary" class="w-full h-full object-cover cursor-pointer hover:scale-[1.03] hover:shadow-lg transition-transform duration-300 bg-slate-200 dark:bg-slate-700 animate-pulse" loading="lazy" onload="this.classList.remove('bg-slate-200','dark:bg-slate-700','animate-pulse')" onclick="openImageModal(this.src, this.alt)">
+                            </div>
                             <a href="https://colab.research.google.com/github/quarcs-lab/metricsai/blob/main/notebooks_colab/ch16_Checking_the_Model_and_Data.ipynb" target="_blank" class="self-start">
                                 <img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab" class="h-8">
                             </a>
@@ -1057,7 +1160,7 @@
                                     AI Tutor
                                 </a>
                             </div>
-                            <div class="flex items-center gap-2">
+                            <div class="flex items-center gap-2 audio-container">
                                 <i class="fa-solid fa-headphones text-xs text-brand-600"></i>
                                 <audio controls class="flex-1 h-8">
                                     <source src="https://files.catbox.moe/xmy1ij.mp3" type="audio/mpeg">
@@ -1069,11 +1172,13 @@
                             </div>
                         </div>
                     </div>
-                    <div class="bg-white dark:bg-slate-800 p-5 rounded-lg border border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-md transition-all">
+                    <div data-aos="fade-up" class="bg-white dark:bg-slate-800 p-5 rounded-lg border border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-md transition-shadow">
                         <div class="flex flex-col gap-3">
-                            <h4 class="text-sm text-slate-500 dark:text-slate-400">Chapter 17: Panel Data, Time Series Data, and Causation</h4>
+                            <h4 class="text-base font-medium text-slate-700 dark:text-slate-300">Chapter 17: Panel Data, Time Series Data, and Causation</h4>
                             <!-- Thumbnail -->
-                            <img src="https://raw.githubusercontent.com/quarcs-lab/metricsai/main/images/ch17_visual_summary.jpg" alt="Chapter 17 Visual Summary" class="w-full h-auto object-contain rounded-lg cursor-pointer hover:opacity-90 transition-opacity bg-slate-200 dark:bg-slate-700" loading="lazy" onload="this.classList.remove('bg-slate-200','dark:bg-slate-700')" onclick="openImageModal(this.src, this.alt)">
+                            <div class="aspect-[16/9] overflow-hidden rounded-lg">
+                                <img src="https://raw.githubusercontent.com/quarcs-lab/metricsai/main/images/ch17_visual_summary.jpg" alt="Chapter 17 Visual Summary" class="w-full h-full object-cover cursor-pointer hover:scale-[1.03] hover:shadow-lg transition-transform duration-300 bg-slate-200 dark:bg-slate-700 animate-pulse" loading="lazy" onload="this.classList.remove('bg-slate-200','dark:bg-slate-700','animate-pulse')" onclick="openImageModal(this.src, this.alt)">
+                            </div>
                             <a href="https://colab.research.google.com/github/quarcs-lab/metricsai/blob/main/notebooks_colab/ch17_Panel_Data_Time_Series_Data_Causation.ipynb" target="_blank" class="self-start">
                                 <img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab" class="h-8">
                             </a>
@@ -1099,7 +1204,7 @@
                                     AI Tutor
                                 </a>
                             </div>
-                            <div class="flex items-center gap-2">
+                            <div class="flex items-center gap-2 audio-container">
                                 <i class="fa-solid fa-headphones text-xs text-brand-600"></i>
                                 <audio controls class="flex-1 h-8">
                                     <source src="https://files.catbox.moe/wsqudl.mp3" type="audio/mpeg">
@@ -1122,12 +1227,12 @@
         <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-16">
                 <h2 class="text-3xl font-bold text-slate-900 dark:text-white">Books</h2>
-                <p class="mt-4 text-lg text-slate-600 dark:text-slate-400">The learning materials of metricsAI are based on the contents of these books.</p>
+                <p class="mt-4 text-lg font-light text-slate-600 dark:text-slate-400">The learning materials of metricsAI are based on the contents of these books.</p>
             </div>
 
             <div class="grid md:grid-cols-2 gap-12">
                 <!-- Book 1: Econometrics Powered by AI -->
-                <div class="flex flex-col items-center">
+                <div data-aos="fade-up" class="flex flex-col items-center">
                     <div class="relative w-full max-w-sm mb-6 group">
                         <div class="absolute -inset-2 bg-gradient-to-r from-[#008CB7] to-[#7A209F] rounded-lg blur-xl opacity-20 group-hover:opacity-40 transition duration-500"></div>
                         <div class="relative bg-white dark:bg-slate-700 rounded-lg shadow-lg overflow-hidden border border-slate-200 dark:border-slate-600 h-[500px] flex items-center justify-center">
@@ -1150,7 +1255,7 @@
                 </div>
 
                 <!-- Book 2: Analysis of Economics Data -->
-                <div class="flex flex-col items-center">
+                <div data-aos="fade-up" data-aos-delay="100" class="flex flex-col items-center">
                     <div class="relative w-full max-w-sm mb-6 group">
                         <div class="absolute -inset-2 bg-gradient-to-r from-[#008CB7] to-[#7A209F] rounded-lg blur-xl opacity-20 group-hover:opacity-40 transition duration-500"></div>
                         <div class="relative bg-white dark:bg-slate-700 rounded-lg shadow-lg overflow-hidden border border-slate-200 dark:border-slate-600 h-[500px] flex items-center justify-center">
@@ -1176,12 +1281,12 @@
     </section>
 
     <!-- Authors Section -->
-    <section id="authors" class="scroll-mt-20 py-16 bg-slate-50 dark:bg-slate-900 border-t border-slate-200 dark:border-slate-700">
-        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+    <section id="authors" class="scroll-mt-20 py-16 bg-slate-50 dark:bg-slate-900 border-t border-slate-200 dark:border-slate-700 dot-pattern relative">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
             <h2 class="text-3xl font-bold text-slate-900 dark:text-white mb-12">Authors & Credits</h2>
             
             <div class="grid md:grid-cols-2 gap-12">
-                <div class="flex flex-col items-center">
+                <div data-aos="fade-up" class="flex flex-col items-center">
                     <img src="https://carlos-mendez.org/authors/admin/avatar_hu789af5602b0564dea21bcf1e67237882_114840_270x270_fill_q75_lanczos_center.jpg"
                          alt="Carlos Mendez"
                          class="w-20 h-20 rounded-full mb-4 object-cover shadow-sm border border-slate-200 dark:border-slate-600">
@@ -1195,7 +1300,7 @@
                     </a>
                 </div>
 
-                <div class="flex flex-col items-center">
+                <div data-aos="fade-up" data-aos-delay="100" class="flex flex-col items-center">
                     <img src="https://cameron.econ.ucdavis.edu/colin.jpg"
                          alt="A. Colin Cameron"
                          class="w-20 h-20 rounded-full mb-4 object-cover shadow-sm border border-slate-200 dark:border-slate-600">
@@ -1218,13 +1323,13 @@
             <!-- Section Header -->
             <div class="text-center mb-16">
                 <h2 class="text-3xl font-bold text-slate-900 dark:text-white">More Resources</h2>
-                <p class="mt-4 text-lg text-slate-600 dark:text-slate-400">Additional materials to boost your learning journey</p>
+                <p class="mt-4 text-lg font-light text-slate-600 dark:text-slate-400">Additional materials to boost your learning journey</p>
             </div>
 
             <!-- Resource Cards Grid (2x2 layout on large screens) -->
             <div class="grid md:grid-cols-2 gap-8">
                 <!-- Card 1: How to start coding with Python -->
-                <div class="p-6 rounded-2xl bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 hover:shadow-lg transition-shadow">
+                <div data-aos="fade-up" class="p-6 rounded-2xl bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 hover:shadow-lg transition-shadow">
                     <div class="w-12 h-12 bg-[#008CB7]/10 dark:bg-[#008CB7]/20 rounded-xl flex items-center justify-center mb-4 text-[#008CB7] dark:text-cyan-300">
                         <i class="fa-brands fa-python text-2xl"></i>
                     </div>
@@ -1242,7 +1347,7 @@
                 </div>
 
                 <!-- Card 2: How to use computational notebooks in Google Colab -->
-                <div class="p-6 rounded-2xl bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 hover:shadow-lg transition-shadow">
+                <div data-aos="fade-up" data-aos-delay="100" class="p-6 rounded-2xl bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 hover:shadow-lg transition-shadow">
                     <div class="w-12 h-12 bg-amber-100 dark:bg-amber-900/50 rounded-xl flex items-center justify-center mb-4 text-amber-600 dark:text-amber-400">
                         <i class="fa-solid fa-code text-2xl"></i>
                     </div>
@@ -1264,7 +1369,7 @@
                 </div>
 
                 <!-- Card 3: How Python is being used in economics -->
-                <div class="p-6 rounded-2xl bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 hover:shadow-lg transition-shadow">
+                <div data-aos="fade-up" data-aos-delay="200" class="p-6 rounded-2xl bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 hover:shadow-lg transition-shadow">
                     <div class="w-12 h-12 bg-green-100 dark:bg-green-900/50 rounded-xl flex items-center justify-center mb-4 text-green-600 dark:text-green-400">
                         <i class="fa-solid fa-chart-line text-2xl"></i>
                     </div>
@@ -1290,7 +1395,7 @@
                 </div>
 
                 <!-- Card 4: How to use AI for learning, teaching and research in economics -->
-                <div class="p-6 rounded-2xl bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 hover:shadow-lg transition-shadow">
+                <div data-aos="fade-up" data-aos-delay="300" class="p-6 rounded-2xl bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 hover:shadow-lg transition-shadow">
                     <div class="w-12 h-12 bg-[#7A209F]/10 dark:bg-[#7A209F]/20 rounded-xl flex items-center justify-center mb-4 text-[#7A209F] dark:text-purple-300">
                         <i class="fa-solid fa-robot text-2xl"></i>
                     </div>
@@ -1319,11 +1424,12 @@
     </section>
 
     <!-- Footer -->
-    <footer class="bg-slate-900 text-slate-300 py-12">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <footer class="bg-slate-900 text-slate-300 pt-0 pb-12">
+        <div class="h-1 bg-gradient-to-r from-[#008CB7] via-[#7A209F] to-[#C21E72]"></div>
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-12">
 
             <!-- AI Content Disclaimer -->
-            <div class="mb-8 pb-8 border-b border-slate-700">
+            <div class="mb-8 bg-slate-800 rounded-xl p-6">
                 <h3 class="text-lg font-semibold text-white mb-4">
                     <i class="fa-solid fa-circle-info text-brand-500 mr-2"></i>AI Content Disclaimer
                 </h3>
@@ -1343,7 +1449,7 @@
                             <span><strong class="text-slate-300">Podcast:</strong> Created using NotebookLM.</span>
                         </div>
                         <div class="flex items-start">
-                            <i class="fa-solid fa-presentation-screen text-brand-500 mt-1 mr-2 flex-shrink-0"></i>
+                            <i class="fa-solid fa-chalkboard text-brand-500 mt-1 mr-2 flex-shrink-0"></i>
                             <span><strong class="text-slate-300">AI Slides:</strong> Generated using NotebookLM.</span>
                         </div>
                         <div class="flex items-start">
@@ -1363,7 +1469,7 @@
             </div>
 
             <!-- Help Improve This Project -->
-            <div class="mb-8 pb-8 border-b border-slate-700">
+            <div class="mb-8 bg-slate-800 rounded-xl p-6">
                 <h3 class="text-lg font-semibold text-white mb-4">
                     <i class="fa-brands fa-github text-brand-500 mr-2"></i>Help Improve This Project
                 </h3>
@@ -1409,6 +1515,11 @@
             </div>
         </div>
     </footer>
+
+    <!-- Back to Top Button -->
+    <button id="backToTopBtn" onclick="window.scrollTo({top:0,behavior:'smooth'})" class="fixed bottom-6 right-6 z-40 w-12 h-12 bg-brand-500 hover:bg-brand-600 text-white rounded-full shadow-lg flex items-center justify-center opacity-0 translate-y-4 pointer-events-none" title="Back to top">
+        <i class="fa-solid fa-arrow-up"></i>
+    </button>
 
     <!-- Image Modal -->
     <div id="imageModal" class="hidden fixed inset-0 bg-black bg-opacity-90 z-50 flex items-center justify-center p-4" onclick="closeImageModal()">
@@ -1508,6 +1619,56 @@
             }
             const icon = document.getElementById('darkModeIcon');
             if (icon) icon.className = isDark ? 'fa-solid fa-sun text-lg' : 'fa-solid fa-moon text-lg';
+        })();
+
+        // Initialize AOS scroll animations
+        AOS.init({
+            duration: 600,
+            easing: 'ease-out',
+            once: true,
+            offset: 80
+        });
+
+        // Back to top button show/hide
+        (function() {
+            var btn = document.getElementById('backToTopBtn');
+            if (!btn) return;
+            window.addEventListener('scroll', function() {
+                if (window.scrollY > 400) {
+                    btn.classList.remove('opacity-0', 'translate-y-4', 'pointer-events-none');
+                    btn.classList.add('opacity-100', 'translate-y-0');
+                } else {
+                    btn.classList.add('opacity-0', 'translate-y-4', 'pointer-events-none');
+                    btn.classList.remove('opacity-100', 'translate-y-0');
+                }
+            });
+        })();
+
+        // Nav active section tracking
+        (function() {
+            var sections = document.querySelectorAll('#about, #curriculum, #books, #authors, #more-resources');
+            var navLinks = document.querySelectorAll('[data-nav-link]');
+            if (!sections.length || !navLinks.length) return;
+
+            var observer = new IntersectionObserver(function(entries) {
+                entries.forEach(function(entry) {
+                    if (entry.isIntersecting) {
+                        var id = entry.target.id;
+                        navLinks.forEach(function(link) {
+                            if (link.getAttribute('data-nav-link') === id) {
+                                link.classList.add('nav-link-active');
+                            } else {
+                                link.classList.remove('nav-link-active');
+                            }
+                        });
+                    }
+                });
+            }, {
+                rootMargin: '-80px 0px -50% 0px',
+                threshold: 0
+            });
+
+            sections.forEach(function(section) { observer.observe(section); });
         })();
     </script>
 
