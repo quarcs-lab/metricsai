@@ -334,14 +334,16 @@ metricsai/
 │   ├── _quarto.yml             # Book config (chapters, format, theme)
 │   ├── index.qmd               # Book welcome page (cover image, PDF link)
 │   ├── custom.css              # Colab badge left-alignment
-│   ├── google-translate.html   # Google Translate widget (all pages)
+│   ├── notebooks_colab -> ../notebooks_colab  # Symlink to source notebooks
+│   ├── images -> ../images     # Symlink to images directory
 │   ├── _book/                  # Rendered HTML output (committed for GitHub Pages)
-│   ├── notebooks_colab/        # Rendered chapter HTML + figures (committed for GitHub Pages)
 │   └── .quarto/                # Quarto cache (gitignored)
 ├── notebooks_colab/            # Source notebooks (ch00–ch17)
 ├── images/                     # Cover images + visual summaries
 └── .gitignore                  # Ignores book/.quarto/, notebooks_colab/*_files/
 ```
+
+**Symlink architecture:** `book/notebooks_colab` and `book/images` are symlinks to the root-level directories. This makes Quarto see all sources as local to the `book/` project, ensuring all rendered output goes into `book/_book/` with correct relative paths to CSS/JS/images. Google Translate is inlined in `_quarto.yml` (not a separate file) to avoid path resolution issues with symlinked notebooks.
 
 ### Quick Reference
 
@@ -355,13 +357,13 @@ cd book && quarto render
 **Render a single chapter (faster iteration):**
 
 ```bash
-cd book && quarto render ../notebooks_colab/ch05_Bivariate_Data_Summary.ipynb
+cd book && quarto render notebooks_colab/ch05_Bivariate_Data_Summary.ipynb
 ```
 
 ### Path Conventions
 
-- **Notebook paths in `book/_quarto.yml`:** Use `../notebooks_colab/` prefix (relative to `book/`)
-- **Image paths in `book/index.qmd`:** Use `../images/` prefix (relative to `book/`)
+- **Notebook paths in `book/_quarto.yml`:** Use `notebooks_colab/` prefix (via symlink, no `../`)
+- **Image paths in `book/index.qmd`:** Use `images/` prefix (via symlink, no `../`)
 - **Notebook images (inside .ipynb):** Use absolute GitHub URLs (`https://raw.githubusercontent.com/quarcs-lab/metricsai/main/images/`)
 
 ### List Formatting
@@ -377,14 +379,15 @@ When adding new content to notebooks, always ensure a blank line precedes any li
 | `book/_quarto.yml` | Quarto config — 18 chapters in 4 parts, theme, format options |
 | `book/index.qmd` | Book welcome page — cover image, Leanpub PDF download link |
 | `book/custom.css` | CSS — left-aligns Colab badges, hides auto-generated figcaptions |
-| `book/google-translate.html` | Google Translate widget injected into every page |
+| `book/google-translate.html` | Google Translate widget (legacy file, now inlined in `_quarto.yml`) |
 | `index.html` | Project website — "Learn More" links to `book/_book/index.html` |
 
 ### Current Status (as of 2026-02-15)
 
 - All 19 pages render successfully (welcome + ch00–ch17)
 - 4 parts: Statistical Foundations, Bivariate Regression, Multiple Regression, Advanced Topics
-- Google Translate bar on every page
+- Google Translate bar on every page (inlined in `_quarto.yml`)
 - List formatting fixed across all notebooks (~460 fixes)
-- Codebase audited — all paths verified correct
-- See `log/20260215_HTML_BOOK_SETUP.md` for full setup details
+- Symlink architecture ensures all output renders into `book/_book/` with correct paths
+- Deployed to GitHub Pages: `https://quarcs-lab.github.io/metricsai/book/_book/index.html`
+- See `log/20260215_HTML_BOOK_SETUP.md` for initial setup details

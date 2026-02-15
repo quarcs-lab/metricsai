@@ -109,9 +109,33 @@ cd book && quarto render ../notebooks_colab/ch05_Bivariate_Data_Summary.ipynb
 open book/_book/index.html
 ```
 
-## Next Steps
+## Symlink Fix (2026-02-15, later session)
 
-- Commit all changes to git
-- Continue editing notebook content as needed
-- Re-render with `cd book && quarto render` after any notebook updates
-- Consider deploying to GitHub Pages
+### Problem
+
+After deploying to GitHub Pages, two issues appeared:
+
+1. **Cover image missing** — `_book/index.html` referenced `../images/book1cover.jpg` which resolved to `book/images/` (doesn't exist)
+2. **Chapter pages unstyled** — Chapter HTML files referenced CSS/JS at `../book/site_libs/` which resolved to `book/book/site_libs/` (doesn't exist)
+
+### Root Cause
+
+Quarto generates broken relative paths when source notebooks are referenced outside the project directory with `../` paths. Chapters rendered to `book/notebooks_colab/` (outside `_book/`) with incorrect asset paths.
+
+### Fix
+
+Created symlinks so Quarto sees sources as local to `book/`:
+
+- `book/notebooks_colab` → `../notebooks_colab` (symlink)
+- `book/images` → `../images` (symlink)
+- Updated `_quarto.yml` paths from `../notebooks_colab/` to `notebooks_colab/`
+- Updated `index.qmd` image path from `../images/` to `images/`
+- Inlined Google Translate HTML in `_quarto.yml` (Quarto couldn't resolve the include file path through symlinks)
+
+All 19 pages now render into `book/_book/` with correct paths. Deployed to GitHub Pages successfully.
+
+## Current Status
+
+- All changes committed and pushed to GitHub
+- Book deployed at: `https://quarcs-lab.github.io/metricsai/book/_book/index.html`
+- Workflow: edit notebooks → `cd book && quarto render` → commit `book/_book/` → push
