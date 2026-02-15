@@ -335,11 +335,12 @@ metricsai/
 │   ├── index.qmd               # Book welcome page (cover image, PDF link)
 │   ├── custom.css              # Colab badge left-alignment
 │   ├── google-translate.html   # Google Translate widget (all pages)
-│   ├── _book/                  # Rendered HTML output (gitignored)
+│   ├── _book/                  # Rendered HTML output (committed for GitHub Pages)
+│   ├── notebooks_colab/        # Rendered chapter HTML + figures (committed for GitHub Pages)
 │   └── .quarto/                # Quarto cache (gitignored)
 ├── notebooks_colab/            # Source notebooks (ch00–ch17)
 ├── images/                     # Cover images + visual summaries
-└── .gitignore                  # Ignores book/_book/, book/.quarto/, book/notebooks_colab/
+└── .gitignore                  # Ignores book/.quarto/, notebooks_colab/*_files/
 ```
 
 ### Quick Reference
