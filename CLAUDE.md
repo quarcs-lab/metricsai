@@ -26,7 +26,7 @@ Under no circumstances are you ever to DELETE any program files. Protected forma
 - **Add other formats as needed for your project**
 
 ### 3. STAY WITHIN THIS DIRECTORY
-Under no circumstances are you ever to GO UP OUT OF THIS ONE FOLDER called `aed_2026-01-20_08-57-26`. All work must remain within this project directory.
+Under no circumstances are you ever to GO UP OUT OF THIS ONE FOLDER called `metricsai`. All work must remain within this project directory.
 
 ### 4. MAINTAIN PROGRESS LOGS
 The `./log/` directory contains progress logs that preserve conversation context across sessions.
@@ -311,3 +311,79 @@ This 600+ line document includes:
 4. **Verify results:** `open notebooks_colab/ch##_*.pdf`
 
 **All formatting features are preserved automatically** - no manual adjustments needed!
+
+---
+
+## Generating the HTML Book (Quarto)
+
+### Overview
+
+The project has two separate web presences:
+
+- **Project website:** `index.html` (standalone HTML at root)
+- **Online HTML book:** `book/` directory (Quarto book project)
+
+The website's "Learn More" button links to the book at `book/_book/index.html`.
+
+### Project Structure
+
+```
+metricsai/
+├── index.html                  # Project website (standalone)
+├── book/                       # Quarto book project
+│   ├── _quarto.yml             # Book config (chapters, format, theme)
+│   ├── index.qmd               # Book welcome page (cover image, PDF link)
+│   ├── custom.css              # Colab badge left-alignment
+│   ├── google-translate.html   # Google Translate widget (all pages)
+│   ├── _book/                  # Rendered HTML output (gitignored)
+│   └── .quarto/                # Quarto cache (gitignored)
+├── notebooks_colab/            # Source notebooks (ch00–ch17)
+├── images/                     # Cover images + visual summaries
+└── .gitignore                  # Ignores book/_book/, book/.quarto/, book/notebooks_colab/
+```
+
+### Quick Reference
+
+**Re-render the entire book after editing notebooks:**
+
+```bash
+cd book && quarto render
+# Output: book/_book/index.html
+```
+
+**Render a single chapter (faster iteration):**
+
+```bash
+cd book && quarto render ../notebooks_colab/ch05_Bivariate_Data_Summary.ipynb
+```
+
+### Path Conventions
+
+- **Notebook paths in `book/_quarto.yml`:** Use `../notebooks_colab/` prefix (relative to `book/`)
+- **Image paths in `book/index.qmd`:** Use `../images/` prefix (relative to `book/`)
+- **Notebook images (inside .ipynb):** Use absolute GitHub URLs (`https://raw.githubusercontent.com/quarcs-lab/metricsai/main/images/`)
+
+### List Formatting
+
+Pandoc (Quarto's rendering engine) requires a **blank line before any markdown list**. This applies to dash (`- `), asterisk (`* `), numbered (`1. `), and indented lists. Without the blank line, lists render as plain text.
+
+When adding new content to notebooks, always ensure a blank line precedes any list.
+
+### Key Files
+
+| File | Purpose |
+|------|---------|
+| `book/_quarto.yml` | Quarto config — 18 chapters in 4 parts, theme, format options |
+| `book/index.qmd` | Book welcome page — cover image, Leanpub PDF download link |
+| `book/custom.css` | CSS — left-aligns Colab badges, hides auto-generated figcaptions |
+| `book/google-translate.html` | Google Translate widget injected into every page |
+| `index.html` | Project website — "Learn More" links to `book/_book/index.html` |
+
+### Current Status (as of 2026-02-15)
+
+- All 19 pages render successfully (welcome + ch00–ch17)
+- 4 parts: Statistical Foundations, Bivariate Regression, Multiple Regression, Advanced Topics
+- Google Translate bar on every page
+- List formatting fixed across all notebooks (~460 fixes)
+- Codebase audited — all paths verified correct
+- See `log/20260215_HTML_BOOK_SETUP.md` for full setup details
