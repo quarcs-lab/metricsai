@@ -1,0 +1,2090 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.8.27">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Chapter 6: The Least Squares Estimator – Econometrics Powered by AI</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../book/site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../book/site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../book/site_libs/clipboard/clipboard.min.js"></script>
+<script src="../book/site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../book/site_libs/quarto-search/fuse.min.js"></script>
+<script src="../book/site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../book/">
+<link href="../book/../notebooks_colab/ch07_Statistical_Inference_for_Bivariate_Regression.html" rel="next">
+<link href="../book/../notebooks_colab/ch05_Bivariate_Data_Summary.html" rel="prev">
+<script src="../book/site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../book/site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../book/site_libs/quarto-html/axe/axe-check.js" type="module"></script>
+<script src="../book/site_libs/quarto-html/popper.min.js"></script>
+<script src="../book/site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../book/site_libs/quarto-html/anchor.min.js"></script>
+<link href="../book/site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../book/site_libs/quarto-html/quarto-syntax-highlighting-ed96de9b727972fe78a7b5d16c58bf87.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../book/site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../book/site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../book/site_libs/bootstrap/bootstrap-27c261d06b905028a18691de25d09dde.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="../book/custom.css">
+</head>
+
+<body class="nav-sidebar floating quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../book/../notebooks_colab/ch05_Bivariate_Data_Summary.html">Bivariate Regression</a></li><li class="breadcrumb-item"><a href="../book/../notebooks_colab/ch06_The_Least_Squares_Estimator.html"><span class="chapter-title">Chapter 6: The Least Squares Estimator</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="../book/">Econometrics Powered by AI</a> 
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../book/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Welcome</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../book/../notebooks_colab/ch00_Preface.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Preface: Econometrics Powered by AI</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true">
+ <span class="menu-text">Statistical Foundations</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../book/../notebooks_colab/ch01_Analysis_of_Economics_Data.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Chapter 1: Analysis of Economics Data</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../book/../notebooks_colab/ch02_Univariate_Data_Summary.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Chapter 2: Univariate Data Summary</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../book/../notebooks_colab/ch03_The_Sample_Mean.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Chapter 3: The Sample Mean</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../book/../notebooks_colab/ch04_Statistical_Inference_for_the_Mean.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Chapter 4: Statistical Inference for the Mean</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true">
+ <span class="menu-text">Bivariate Regression</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../book/../notebooks_colab/ch05_Bivariate_Data_Summary.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Chapter 5: Bivariate Data Summary</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../book/../notebooks_colab/ch06_The_Least_Squares_Estimator.html" class="sidebar-item-text sidebar-link active"><span class="chapter-title">Chapter 6: The Least Squares Estimator</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../book/../notebooks_colab/ch07_Statistical_Inference_for_Bivariate_Regression.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Chapter 7: Statistical Inference for Bivariate Regression</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../book/../notebooks_colab/ch08_Case_Studies_for_Bivariate_Regression.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Chapter 8: Case Studies for Bivariate Regression</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../book/../notebooks_colab/ch09_Models_with_Natural_Logarithms.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Chapter 9: Models with Natural Logarithms</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true">
+ <span class="menu-text">Multiple Regression</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../book/../notebooks_colab/ch10_Data_Summary_for_Multiple_Regression.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Chapter 10: Data Summary for Multiple Regression</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../book/../notebooks_colab/ch11_Statistical_Inference_for_Multiple_Regression.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Chapter 11: Statistical Inference for Multiple Regression</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../book/../notebooks_colab/ch12_Further_Topics_in_Multiple_Regression.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Chapter 12: Further Topics in Multiple Regression</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../book/../notebooks_colab/ch13_Case_Studies_for_Multiple_Regression.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Chapter 13: Case Studies for Multiple Regression</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true">
+ <span class="menu-text">Advanced Topics</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../book/../notebooks_colab/ch14_Regression_with_Indicator_Variables.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Chapter 14: Regression with Indicator Variables</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../book/../notebooks_colab/ch15_Regression_with_Transformed_Variables.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Chapter 15: Regression with Transformed Variables</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../book/../notebooks_colab/ch16_Checking_the_Model_and_Data.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Chapter 16: Checking the Model and Data</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../book/../notebooks_colab/ch17_Panel_Data_Time_Series_Data_Causation.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Chapter 17: Panel Data, Time Series Data, Causation</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#chapter-overview" id="toc-chapter-overview" class="nav-link active" data-scroll-target="#chapter-overview">Chapter Overview</a>
+  <ul class="collapse">
+  <li><a href="#introduction" id="toc-introduction" class="nav-link" data-scroll-target="#introduction">Introduction</a></li>
+  <li><a href="#what-youll-learn" id="toc-what-youll-learn" class="nav-link" data-scroll-target="#what-youll-learn">What You’ll Learn</a></li>
+  <li><a href="#dataset-used" id="toc-dataset-used" class="nav-link" data-scroll-target="#dataset-used">Dataset Used</a></li>
+  <li><a href="#chapter-outline" id="toc-chapter-outline" class="nav-link" data-scroll-target="#chapter-outline">Chapter Outline</a></li>
+  </ul></li>
+  <li><a href="#setup" id="toc-setup" class="nav-link" data-scroll-target="#setup">Setup</a></li>
+  <li><a href="#population-and-sample-models" id="toc-population-and-sample-models" class="nav-link" data-scroll-target="#population-and-sample-models">6.1 Population and Sample Models</a></li>
+  <li><a href="#examples-of-sampling-from-a-population" id="toc-examples-of-sampling-from-a-population" class="nav-link" data-scroll-target="#examples-of-sampling-from-a-population">6.2 Examples of Sampling from a Population</a>
+  <ul class="collapse">
+  <li><a href="#example-1-generated-data-from-known-model" id="toc-example-1-generated-data-from-known-model" class="nav-link" data-scroll-target="#example-1-generated-data-from-known-model">Example 1: Generated Data from Known Model</a></li>
+  <li><a href="#figure-6.2-panel-a-population-regression-line" id="toc-figure-6.2-panel-a-population-regression-line" class="nav-link" data-scroll-target="#figure-6.2-panel-a-population-regression-line">Figure 6.2 Panel A: Population Regression Line</a></li>
+  </ul></li>
+  <li><a href="#interpreting-the-population-regression-results" id="toc-interpreting-the-population-regression-results" class="nav-link" data-scroll-target="#interpreting-the-population-regression-results">Interpreting the Population Regression Results</a>
+  <ul class="collapse">
+  <li><a href="#figure-6.2-panel-b-sample-regression-line" id="toc-figure-6.2-panel-b-sample-regression-line" class="nav-link" data-scroll-target="#figure-6.2-panel-b-sample-regression-line">Figure 6.2 Panel B: Sample Regression Line</a></li>
+  </ul></li>
+  <li><a href="#interpreting-the-sample-regression-results" id="toc-interpreting-the-sample-regression-results" class="nav-link" data-scroll-target="#interpreting-the-sample-regression-results">Interpreting the Sample Regression Results</a>
+  <ul class="collapse">
+  <li><a href="#demonstration-three-regressions-from-the-same-dgp" id="toc-demonstration-three-regressions-from-the-same-dgp" class="nav-link" data-scroll-target="#demonstration-three-regressions-from-the-same-dgp">Demonstration: Three Regressions from the Same DGP</a></li>
+  </ul></li>
+  <li><a href="#interpreting-the-three-sample-regressions" id="toc-interpreting-the-three-sample-regressions" class="nav-link" data-scroll-target="#interpreting-the-three-sample-regressions">Interpreting the Three Sample Regressions</a>
+  <ul class="collapse">
+  <li><a href="#visualization-three-different-samples-from-the-same-dgp" id="toc-visualization-three-different-samples-from-the-same-dgp" class="nav-link" data-scroll-target="#visualization-three-different-samples-from-the-same-dgp">Visualization: Three Different Samples from the Same DGP</a></li>
+  </ul></li>
+  <li><a href="#properties-of-the-least-squares-estimator" id="toc-properties-of-the-least-squares-estimator" class="nav-link" data-scroll-target="#properties-of-the-least-squares-estimator">6.3 Properties of the Least Squares Estimator</a>
+  <ul class="collapse">
+  <li><a href="#simulation-sampling-distribution-of-ols-estimator" id="toc-simulation-sampling-distribution-of-ols-estimator" class="nav-link" data-scroll-target="#simulation-sampling-distribution-of-ols-estimator">Simulation: Sampling Distribution of OLS Estimator</a></li>
+  </ul></li>
+  <li><a href="#interpreting-the-monte-carlo-simulation-results" id="toc-interpreting-the-monte-carlo-simulation-results" class="nav-link" data-scroll-target="#interpreting-the-monte-carlo-simulation-results">Interpreting the Monte Carlo Simulation Results</a>
+  <ul class="collapse">
+  <li><a href="#visualization-sampling-distributions-of-ols-estimators" id="toc-visualization-sampling-distributions-of-ols-estimators" class="nav-link" data-scroll-target="#visualization-sampling-distributions-of-ols-estimators">Visualization: Sampling Distributions of OLS Estimators</a></li>
+  </ul></li>
+  <li><a href="#interpreting-the-sampling-distribution-histograms" id="toc-interpreting-the-sampling-distribution-histograms" class="nav-link" data-scroll-target="#interpreting-the-sampling-distribution-histograms">Interpreting the Sampling Distribution Histograms</a></li>
+  <li><a href="#estimators-of-model-parameters" id="toc-estimators-of-model-parameters" class="nav-link" data-scroll-target="#estimators-of-model-parameters">6.4 Estimators of Model Parameters</a>
+  <ul class="collapse">
+  <li><a href="#example-manual-computation-of-standard-errors" id="toc-example-manual-computation-of-standard-errors" class="nav-link" data-scroll-target="#example-manual-computation-of-standard-errors">Example: Manual Computation of Standard Errors</a></li>
+  </ul></li>
+  <li><a href="#interpreting-the-manual-standard-error-calculations" id="toc-interpreting-the-manual-standard-error-calculations" class="nav-link" data-scroll-target="#interpreting-the-manual-standard-error-calculations">Interpreting the Manual Standard Error Calculations</a></li>
+  <li><a href="#interpreting-the-manual-standard-error-calculations-1" id="toc-interpreting-the-manual-standard-error-calculations-1" class="nav-link" data-scroll-target="#interpreting-the-manual-standard-error-calculations-1">Interpreting the Manual Standard Error Calculations</a>
+  <ul class="collapse">
+  <li><a href="#when-is-the-slope-coefficient-precisely-estimated" id="toc-when-is-the-slope-coefficient-precisely-estimated" class="nav-link" data-scroll-target="#when-is-the-slope-coefficient-precisely-estimated">When is the Slope Coefficient Precisely Estimated?</a></li>
+  </ul></li>
+  <li><a href="#summary-of-ols-properties" id="toc-summary-of-ols-properties" class="nav-link" data-scroll-target="#summary-of-ols-properties">Summary of OLS Properties</a></li>
+  <li><a href="#key-takeaways" id="toc-key-takeaways" class="nav-link" data-scroll-target="#key-takeaways">Key Takeaways</a>
+  <ul class="collapse">
+  <li><a href="#population-model-and-sampling-framework" id="toc-population-model-and-sampling-framework" class="nav-link" data-scroll-target="#population-model-and-sampling-framework">Population Model and Sampling Framework</a></li>
+  <li><a href="#error-term-properties-and-assumptions" id="toc-error-term-properties-and-assumptions" class="nav-link" data-scroll-target="#error-term-properties-and-assumptions">Error Term Properties and Assumptions</a></li>
+  <li><a href="#four-core-ols-assumptions" id="toc-four-core-ols-assumptions" class="nav-link" data-scroll-target="#four-core-ols-assumptions">Four Core OLS Assumptions</a></li>
+  <li><a href="#unbiasedness-and-consistency" id="toc-unbiasedness-and-consistency" class="nav-link" data-scroll-target="#unbiasedness-and-consistency">Unbiasedness and Consistency</a></li>
+  <li><a href="#variance-and-standard-errors" id="toc-variance-and-standard-errors" class="nav-link" data-scroll-target="#variance-and-standard-errors">Variance and Standard Errors</a></li>
+  <li><a href="#factors-affecting-precision" id="toc-factors-affecting-precision" class="nav-link" data-scroll-target="#factors-affecting-precision">Factors Affecting Precision</a></li>
+  <li><a href="#central-limit-theorem-and-asymptotic-normality" id="toc-central-limit-theorem-and-asymptotic-normality" class="nav-link" data-scroll-target="#central-limit-theorem-and-asymptotic-normality">Central Limit Theorem and Asymptotic Normality</a></li>
+  <li><a href="#efficiency-and-blue-property" id="toc-efficiency-and-blue-property" class="nav-link" data-scroll-target="#efficiency-and-blue-property">Efficiency and BLUE Property</a></li>
+  <li><a href="#monte-carlo-simulation-evidence" id="toc-monte-carlo-simulation-evidence" class="nav-link" data-scroll-target="#monte-carlo-simulation-evidence">Monte Carlo Simulation Evidence</a></li>
+  <li><a href="#practical-implications" id="toc-practical-implications" class="nav-link" data-scroll-target="#practical-implications">Practical Implications</a></li>
+  <li><a href="#statistical-concepts-and-tools" id="toc-statistical-concepts-and-tools" class="nav-link" data-scroll-target="#statistical-concepts-and-tools">Statistical Concepts and Tools</a></li>
+  <li><a href="#connection-to-statistical-inference" id="toc-connection-to-statistical-inference" class="nav-link" data-scroll-target="#connection-to-statistical-inference">Connection to Statistical Inference</a></li>
+  <li><a href="#software-implementation" id="toc-software-implementation" class="nav-link" data-scroll-target="#software-implementation">Software Implementation</a></li>
+  </ul></li>
+  <li><a href="#practice-exercises" id="toc-practice-exercises" class="nav-link" data-scroll-target="#practice-exercises">Practice Exercises</a></li>
+  <li><a href="#case-studies" id="toc-case-studies" class="nav-link" data-scroll-target="#case-studies">6.5 Case Studies</a>
+  <ul class="collapse">
+  <li><a href="#case-study-1-sampling-variability-in-productivity-regressions" id="toc-case-study-1-sampling-variability-in-productivity-regressions" class="nav-link" data-scroll-target="#case-study-1-sampling-variability-in-productivity-regressions">Case Study 1: Sampling Variability in Productivity Regressions</a></li>
+  <li><a href="#load-the-data" id="toc-load-the-data" class="nav-link" data-scroll-target="#load-the-data">Load the Data</a></li>
+  <li><a href="#what-youve-learned" id="toc-what-youve-learned" class="nav-link" data-scroll-target="#what-youve-learned">What You’ve Learned</a></li>
+  </ul></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+<div id="google_translate_element" style="padding: 8px 0;"></div>
+<script type="text/javascript">
+function googleTranslateElementInit() {
+  new google.translate.TranslateElement({
+    pageLanguage: 'en',
+    layout: google.translate.TranslateElement.InlineLayout.HORIZONTAL
+  }, 'google_translate_element');
+}
+</script>
+<script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../book/../notebooks_colab/ch05_Bivariate_Data_Summary.html">Bivariate Regression</a></li><li class="breadcrumb-item"><a href="../book/../notebooks_colab/ch06_The_Least_Squares_Estimator.html"><span class="chapter-title">Chapter 6: The Least Squares Estimator</span></a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title"><span class="chapter-title">Chapter 6: The Least Squares Estimator</span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p><strong>metricsAI: An Introduction to Econometrics with Python and AI in the Cloud</strong></p>
+<p><em><a href="https://carlos-mendez.org">Carlos Mendez</a></em></p>
+<p><img src="https://raw.githubusercontent.com/quarcs-lab/metricsai/main/images/ch06_visual_summary.jpg" alt="Chapter 06 Visual Summary" width="65%"></p>
+<p>This notebook provides an interactive introduction to the statistical properties of the OLS estimator. All code runs directly in Google Colab without any local setup.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><a href="https://colab.research.google.com/github/quarcs-lab/metricsai/blob/main/notebooks_colab/ch06_The_Least_Squares_Estimator.ipynb"><img src="https://colab.research.google.com/assets/colab-badge.svg" class="img-fluid figure-img"></a></p>
+<figcaption>Open In Colab</figcaption>
+</figure>
+</div>
+<section id="chapter-overview" class="level2">
+<h2 class="anchored" data-anchor-id="chapter-overview">Chapter Overview</h2>
+<section id="introduction" class="level3">
+<h3 class="anchored" data-anchor-id="introduction">Introduction</h3>
+<p>Understanding the properties of the Ordinary Least Squares (OLS) estimator is fundamental to econometric inference. While Chapter 5 showed <em>how</em> to estimate regression models, this chapter explains <em>why</em> OLS works and <em>when</em> we can trust its results. We examine the statistical properties that make OLS the standard estimation method in econometrics: unbiasedness, efficiency, and asymptotic normality.</p>
+<p>A crucial concept is the distinction between the <strong>population regression</strong> (the true relationship we want to learn about) and the <strong>sample regression</strong> (our estimate from limited data). Different samples yield different estimates—this sampling variability is inevitable but quantifiable. By understanding how OLS estimates vary across samples, we can construct confidence intervals and test hypotheses about economic relationships.</p>
+<p>This chapter uses Monte Carlo simulations and real-world examples to demonstrate OLS properties empirically, connecting abstract statistical theory to tangible patterns in data.</p>
+</section>
+<section id="what-youll-learn" class="level3">
+<h3 class="anchored" data-anchor-id="what-youll-learn">What You’ll Learn</h3>
+<p>In this chapter, you will: - Distinguish between the population regression line (β₁ + β₂x) and the sample regression line (b₁ + b₂x) - Understand the conditional mean E[y|x] and the error term u = y - E[y|x] - Differentiate between the unobserved error term (u) and the observed residual (e) - Apply the four key OLS assumptions: correct model, mean-zero errors, homoskedasticity, and independence - Calculate the variance and standard error of the OLS slope coefficient b₂ - Explain why b₂ is an unbiased estimator of β₂ under assumptions 1-2 - Compute the standard error of the regression (sₑ) and use it to estimate precision - Understand when OLS estimates are more precise (good fit, many observations, scattered regressors) - Apply the Central Limit Theorem to show b₂ is approximately normally distributed for large samples - Recognize that OLS is the Best Linear Unbiased Estimator (BLUE) under standard assumptions - Conduct Monte Carlo simulations to demonstrate sampling distributions - Interpret sampling variability and its implications for statistical inference</p>
+</section>
+<section id="dataset-used" class="level3">
+<h3 class="anchored" data-anchor-id="dataset-used">Dataset Used</h3>
+<p><strong>Primary dataset:</strong> - <strong>Convergence Clubs</strong> (Mendez 2020): 108 countries, 1990-2014 - Variables: Real GDP per capita (rgdppc), labor productivity, capital per worker (rk) - Used in Case Study: Sampling variability in productivity-capital regressions - Demonstrates OLS properties with real economic data</p>
+<p><strong>Supporting examples:</strong> - <strong>Generated data</strong>: Computer-simulated samples from known DGP (y = 1 + 2x + u) - <strong>1880 U.S. Census</strong>: Finite population sampling demonstration</p>
+</section>
+<section id="chapter-outline" class="level3">
+<h3 class="anchored" data-anchor-id="chapter-outline">Chapter Outline</h3>
+<p><strong>6.1 Population and Sample Models</strong> - Distinguish between population parameters (β₁, β₂) and sample estimates (b₁, b₂); understand error terms vs.&nbsp;residuals</p>
+<p><strong>6.2 Examples of Sampling from a Population</strong> - Generated data and census sampling demonstrations showing how estimates vary across samples</p>
+<p><strong>6.3 Properties of the Least Squares Estimator</strong> - Unbiasedness (E[b₂] = β₂), variance formulas, asymptotic normality, and BLUE property</p>
+<p><strong>6.4 Estimators of Model Parameters</strong> - Calculating standard errors, understanding degrees of freedom, factors affecting precision</p>
+<p><strong>6.5 Case Studies</strong> - Empirical investigation of sampling variability using convergence clubs data; Monte Carlo with real economic data</p>
+<p><strong>6.6 Key Takeaways</strong> - Comprehensive chapter summary organized by major themes</p>
+<p><strong>6.7 Practice Exercises</strong> - Hands-on problems reinforcing OLS properties, standard errors, and interpretation</p>
+<hr>
+</section>
+</section>
+<section id="setup" class="level2">
+<h2 class="anchored" data-anchor-id="setup">Setup</h2>
+<p>First, we import the necessary Python packages and configure the environment for reproducibility. All data will stream directly from GitHub.</p>
+<div id="cell-3" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Import required packages</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> seaborn <span class="im">as</span> sns</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> statsmodels.api <span class="im">as</span> sm</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> statsmodels.formula.api <span class="im">import</span> ols</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> scipy <span class="im">import</span> stats</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> random</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> os</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="co"># Set random seeds for reproducibility</span></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>RANDOM_SEED <span class="op">=</span> <span class="dv">42</span></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>random.seed(RANDOM_SEED)</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>np.random.seed(RANDOM_SEED)</span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>os.environ[<span class="st">'PYTHONHASHSEED'</span>] <span class="op">=</span> <span class="bu">str</span>(RANDOM_SEED)</span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a><span class="co"># GitHub data URL</span></span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>GITHUB_DATA_URL <span class="op">=</span> <span class="st">"https://raw.githubusercontent.com/quarcs-lab/data-open/master/AED/"</span></span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a><span class="co"># Set plotting style</span></span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>sns.set_style(<span class="st">"whitegrid"</span>)</span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>plt.rcParams[<span class="st">'figure.figsize'</span>] <span class="op">=</span> (<span class="dv">10</span>, <span class="dv">6</span>)</span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"="</span> <span class="op">*</span> <span class="dv">70</span>)</span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"CHAPTER 6: THE LEAST SQUARES ESTIMATOR"</span>)</span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"="</span> <span class="op">*</span> <span class="dv">70</span>)</span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"</span><span class="ch">\n</span><span class="st">Setup complete! Ready to explore OLS properties."</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>======================================================================
+CHAPTER 6: THE LEAST SQUARES ESTIMATOR
+======================================================================
+
+Setup complete! Ready to explore OLS properties.</code></pre>
+</div>
+</div>
+</section>
+<section id="population-and-sample-models" class="level2">
+<h2 class="anchored" data-anchor-id="population-and-sample-models">6.1 Population and Sample Models</h2>
+<p>Understanding the relationship between population and sample is crucial for statistical inference.</p>
+<p><strong>Population model:</strong></p>
+<p>The population conditional mean is assumed to be linear:</p>
+<p><span class="math display">\[E[y | x] = \beta_1 + \beta_2 x\]</span></p>
+<p>where: - <span class="math inline">\(\beta_1\)</span> and <span class="math inline">\(\beta_2\)</span> are <strong>unknown population parameters</strong> - <span class="math inline">\(E[y|x]\)</span> is the expected value of <span class="math inline">\(y\)</span> for a given value of <span class="math inline">\(x\)</span></p>
+<p><strong>Error term:</strong></p>
+<p>Individual observations deviate from the population line:</p>
+<p><span class="math display">\[y = \beta_1 + \beta_2 x + u\]</span></p>
+<p>where <span class="math inline">\(u\)</span> is the <strong>error term</strong> with: - <span class="math inline">\(E[u | x] = 0\)</span> (errors average to zero) - <span class="math inline">\(\text{Var}[u | x] = \sigma_u^2\)</span> (constant variance - homoskedasticity)</p>
+<p><strong>Sample model:</strong></p>
+<p>From a sample of data, we estimate:</p>
+<p><span class="math display">\[\hat{y} = b_1 + b_2 x\]</span></p>
+<p>where: - <span class="math inline">\(b_1\)</span> and <span class="math inline">\(b_2\)</span> are <strong>sample estimates</strong> of <span class="math inline">\(\beta_1\)</span> and <span class="math inline">\(\beta_2\)</span> - Different samples produce different estimates</p>
+<p><strong>Crucial distinction: Error vs.&nbsp;Residual</strong></p>
+<ul>
+<li><strong>Error</strong> (<span class="math inline">\(u\)</span>): Deviation from unknown population line (unobservable)</li>
+<li><strong>Residual</strong> (<span class="math inline">\(e\)</span>): Deviation from estimated sample line (observable)</li>
+</ul>
+<p><span class="math display">\[e_i = y_i - \hat{y}_i = y_i - (b_1 + b_2 x_i)\]</span></p>
+<p><strong>Key insight:</strong> The sample regression line <span class="math inline">\(\hat{y} = b_1 + b_2 x\)</span> is our best estimate of the population line <span class="math inline">\(E[y|x] = \beta_1 + \beta_2 x\)</span>, but <span class="math inline">\(b_1 \neq \beta_1\)</span> and <span class="math inline">\(b_2 \neq \beta_2\)</span> due to sampling variability.</p>
+<blockquote class="blockquote">
+<p><strong>Key Concept 6.1: Population Regression Model</strong></p>
+<p>The population regression model E[y|x] = β₁ + β₂x describes the true relationship with unknown parameters β₁ and β₂. The sample regression ŷ = b₁ + b₂x estimates this relationship from data. Different samples yield different estimates due to sampling variability, but on average, OLS estimates equal the true parameters (unbiasedness).</p>
+</blockquote>
+</section>
+<section id="examples-of-sampling-from-a-population" class="level2">
+<h2 class="anchored" data-anchor-id="examples-of-sampling-from-a-population">6.2 Examples of Sampling from a Population</h2>
+<p>We examine two examples to understand sampling variability:</p>
+<ol type="1">
+<li><strong>Generated data</strong>: Computer-simulated samples from an explicit model <span class="math inline">\(y = 1 + 2x + u\)</span></li>
+<li><strong>Census data</strong>: Samples from the 1880 U.S. Census (a finite population)</li>
+</ol>
+<p>In both cases: - We know the true population parameters - Different samples yield different estimates - The distribution of estimates is approximately normal - On average, estimates equal the true parameters (unbiasedness)</p>
+<blockquote class="blockquote">
+<p><strong>Key Concept 6.2: The Error Term</strong></p>
+<p>The error term u = y - E[y|x] is the deviation from the unknown population line and is unobservable. The residual e = y - ŷ is the deviation from the estimated sample line and is observable. This crucial distinction underlies all statistical inference: we use residuals (e) to learn about errors (u).</p>
+</blockquote>
+<section id="example-1-generated-data-from-known-model" class="level3">
+<h3 class="anchored" data-anchor-id="example-1-generated-data-from-known-model">Example 1: Generated Data from Known Model</h3>
+<p><strong>Data Generating Process (DGP):</strong></p>
+<p><span class="math display">\[y = 1 + 2x + u, \quad u \sim N(0, \sigma_u^2 = 4)\]</span></p>
+<p>This means:</p>
+<ul>
+<li>True intercept: <span class="math inline">\(\beta_1 = 1\)</span></li>
+<li>True slope: <span class="math inline">\(\beta_2 = 2\)</span></li>
+<li>Error standard deviation: <span class="math inline">\(\sigma_u = 2\)</span></li>
+</ul>
+<div id="cell-9" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"="</span> <span class="op">*</span> <span class="dv">70</span>)</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"6.2 EXAMPLES OF SAMPLING FROM A POPULATION"</span>)</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"="</span> <span class="op">*</span> <span class="dv">70</span>)</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Read in generated data</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>data_gen <span class="op">=</span> pd.read_stata(GITHUB_DATA_URL <span class="op">+</span> <span class="st">'AED_GENERATEDDATA.DTA'</span>)</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"</span><span class="ch">\n</span><span class="st">Generated data summary:"</span>)</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>data_summary <span class="op">=</span> data_gen.describe()</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(data_summary)</span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"</span><span class="ch">\n</span><span class="st">First 10 observations (Table 6.1):"</span>)</span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(data_gen.head(<span class="dv">10</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>======================================================================
+6.2 EXAMPLES OF SAMPLING FROM A POPULATION
+======================================================================
+
+Generated data summary:
+              x   Eygivenx         u         y
+count  5.000000   5.000000  5.000000  5.000000
+mean   3.000000   7.000000 -1.031908  5.968092
+std    1.581139   3.162278  1.753559  1.897129
+min    1.000000   3.000000 -2.506667  4.493333
+25%    2.000000   5.000000 -2.390764  4.681283
+50%    3.000000   7.000000 -1.633280  4.689889
+75%    4.000000   9.000000 -0.318717  7.366720
+max    5.000000  11.000000  1.689889  8.609236
+
+First 10 observations (Table 6.1):
+     x  Eygivenx         u         y
+0  1.0       3.0  1.689889  4.689889
+1  2.0       5.0 -0.318717  4.681283
+2  3.0       7.0 -2.506667  4.493333
+3  4.0       9.0 -1.633280  7.366720
+4  5.0      11.0 -2.390764  8.609236</code></pre>
+</div>
+</div>
+</section>
+<section id="figure-6.2-panel-a-population-regression-line" class="level3">
+<h3 class="anchored" data-anchor-id="figure-6.2-panel-a-population-regression-line">Figure 6.2 Panel A: Population Regression Line</h3>
+<p>The population regression line represents <span class="math inline">\(E[y|x] = 1 + 2x\)</span>. Points scatter around this line due to the error term <span class="math inline">\(u\)</span>.</p>
+<hr>
+<p><strong>Transition Note:</strong> We’ve established the theoretical distinction between population and sample regression models. Now we’ll see this distinction in action through simulations and real census data, demonstrating how OLS estimates vary across samples while remaining centered on true parameters.</p>
+</section>
+</section>
+<section id="interpreting-the-population-regression-results" class="level2">
+<h2 class="anchored" data-anchor-id="interpreting-the-population-regression-results">Interpreting the Population Regression Results</h2>
+<p><strong>What this tells us:</strong></p>
+<p>The population regression <strong>E[y|x] = 1 + 2x</strong> is perfectly estimated because we constructed the variable <code>Eygivenx</code> directly from this formula. Notice:</p>
+<ul>
+<li><strong>Intercept coefficient = 1.0000</strong> (exactly)</li>
+<li><strong>Slope coefficient = 2.0000</strong> (exactly)</li>
+<li><strong>R² = 1.000</strong> (perfect fit)</li>
+<li><strong>Standard errors ≈ 0</strong> (essentially zero)</li>
+</ul>
+<p>This represents the <strong>true</strong> relationship between x and y in the population, before any random error is added.</p>
+<p><strong>Key concept</strong>: The population regression line shows the <strong>expected value</strong> (average) of y for each value of x. Individual observations deviate from this line due to the random error term u, which has mean zero but individual realizations that are positive or negative.</p>
+<section id="figure-6.2-panel-b-sample-regression-line" class="level3">
+<h3 class="anchored" data-anchor-id="figure-6.2-panel-b-sample-regression-line">Figure 6.2 Panel B: Sample Regression Line</h3>
+<p>The sample regression line is our estimate from the observed data. Note that it differs from the population line due to sampling variability.</p>
+</section>
+</section>
+<section id="interpreting-the-sample-regression-results" class="level2">
+<h2 class="anchored" data-anchor-id="interpreting-the-sample-regression-results">Interpreting the Sample Regression Results</h2>
+<p><strong>What this tells us:</strong></p>
+<p>The sample regression estimates <strong>ŷ = 2.81 + 1.05x</strong> from the actual observed data (which includes random errors). Notice how this differs from the true population model:</p>
+<p><strong>Comparison: Sample vs.&nbsp;Population</strong></p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Population (True)</th>
+<th>Sample (Estimated)</th>
+<th>Difference</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Intercept</td>
+<td>β₁ = 1.00</td>
+<td>b₁ = 2.81</td>
+<td>+1.81</td>
+</tr>
+<tr class="even">
+<td>Slope</td>
+<td>β₂ = 2.00</td>
+<td>b₂ = 1.05</td>
+<td>-0.95</td>
+</tr>
+<tr class="odd">
+<td>R²</td>
+<td>1.000</td>
+<td>0.769</td>
+<td>-0.231</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Why do they differ?</strong></p>
+<ol type="1">
+<li><p><strong>Sampling variability</strong>: We only have n=5 observations. Different samples from the same population give different estimates.</p></li>
+<li><p><strong>Random errors</strong>: The actual y values include the error term u, which causes observations to scatter around the population line. Our sample happened to have errors that pulled the regression line away from the true values.</p></li>
+<li><p><strong>Small sample size</strong>: With only 5 observations, each individual data point has a large influence on the regression line. A larger sample would typically give estimates closer to the true values.</p></li>
+</ol>
+<p><strong>Key insight</strong>: This is <strong>not</strong> a failure of OLS estimation! The sample regression line is doing its job—finding the best linear fit to the observed data. The discrepancy between sample and population parameters is an inherent feature of statistical estimation that we must account for through standard errors and confidence intervals.</p>
+<p><strong>Unbiasedness property</strong>: While this particular sample overestimates the intercept and underestimates the slope, if we took many samples and averaged the estimates, they would converge to the true values (β₁ = 1, β₂ = 2). This is what we’ll demonstrate with Monte Carlo simulation later.</p>
+<section id="demonstration-three-regressions-from-the-same-dgp" class="level3">
+<h3 class="anchored" data-anchor-id="demonstration-three-regressions-from-the-same-dgp">Demonstration: Three Regressions from the Same DGP</h3>
+<p>To illustrate sampling variability, we generate three different samples from the same data-generating process.</p>
+<p><strong>Key observation:</strong> Each sample produces a different regression line, but all are centered around the true population line.</p>
+</section>
+</section>
+<section id="interpreting-the-three-sample-regressions" class="level2">
+<h2 class="anchored" data-anchor-id="interpreting-the-three-sample-regressions">Interpreting the Three Sample Regressions</h2>
+<p><strong>What this demonstrates:</strong></p>
+<p>We generated three independent samples from the <strong>same data-generating process</strong> (y = 1 + 2x + u), yet obtained three different regression lines:</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Sample</th>
+<th>Intercept</th>
+<th>Slope</th>
+<th>True Values</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Sample 1</td>
+<td>0.82</td>
+<td>1.81</td>
+<td>β₀ = 1.0, β₁ = 2.0</td>
+</tr>
+<tr class="even">
+<td>Sample 2</td>
+<td>1.75</td>
+<td>1.79</td>
+<td>β₀ = 1.0, β₁ = 2.0</td>
+</tr>
+<tr class="odd">
+<td>Sample 3</td>
+<td>2.01</td>
+<td>1.67</td>
+<td>β₀ = 1.0, β₁ = 2.0</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Key observations:</strong></p>
+<ol type="1">
+<li><p><strong>All estimates differ from the true values</strong>: None of the samples perfectly recovered β₀ = 1.0 or β₁ = 2.0, even though we know these are the true parameters.</p></li>
+<li><p><strong>Estimates vary across samples</strong>: The intercept ranges from 0.82 to 2.01, and the slope ranges from 1.67 to 2.01. This is <strong>sampling variability</strong> in action.</p></li>
+<li><p><strong>All estimates are “in the neighborhood”</strong>: While no single estimate equals the true value, they’re all reasonably close. None gave us absurd values like β₁ = 10 or β₁ = -5.</p></li>
+</ol>
+<p><strong>The fundamental statistical question</strong>:</p>
+<p>If we know the true parameter is β₁ = 2.0, why would we ever get estimates like 1.81, 1.79, or 1.67? The answer is <strong>random sampling variation</strong>. Each sample contains different realizations of the error term u, which causes the observations to scatter differently around the population line. OLS finds the best fit to each specific sample, leading to different regression lines.</p>
+<p><strong>Why this matters for econometrics</strong>:</p>
+<p>In real-world applications, we have only <strong>one sample</strong> and we <strong>don’t know the true parameters</strong>. These simulations show that:</p>
+<ul>
+<li>Our estimate is almost certainly not exactly equal to the true value</li>
+<li>Different samples would give different estimates</li>
+<li>We need a way to quantify this uncertainty (standard errors!)</li>
+</ul>
+<p>This is why we can’t simply report “the slope is 1.81” and claim we’ve discovered the truth. We must report “the slope is 1.81 with a standard error of X,” acknowledging that our estimate contains sampling error.</p>
+<section id="visualization-three-different-samples-from-the-same-dgp" class="level3">
+<h3 class="anchored" data-anchor-id="visualization-three-different-samples-from-the-same-dgp">Visualization: Three Different Samples from the Same DGP</h3>
+<p>Each panel shows:</p>
+<ul>
+<li>Black dots: observed data</li>
+<li>Red line: sample regression line (different for each sample)</li>
+<li>Blue dashed line: true population line (same for all)</li>
+</ul>
+<div id="cell-18" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Generate three samples from the same data generating process</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>np.random.seed(<span class="dv">12345</span>)</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>n <span class="op">=</span> <span class="dv">30</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Sample 1</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>x1 <span class="op">=</span> np.random.normal(<span class="dv">3</span>, <span class="dv">1</span>, n)</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>u1 <span class="op">=</span> np.random.normal(<span class="dv">0</span>, <span class="dv">2</span>, n)</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>y1 <span class="op">=</span> <span class="dv">1</span> <span class="op">+</span> <span class="dv">2</span><span class="op">*</span>x1 <span class="op">+</span> u1</span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Sample 2</span></span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>x2 <span class="op">=</span> np.random.normal(<span class="dv">3</span>, <span class="dv">1</span>, n)</span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>u2 <span class="op">=</span> np.random.normal(<span class="dv">0</span>, <span class="dv">2</span>, n)</span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>y2 <span class="op">=</span> <span class="dv">1</span> <span class="op">+</span> <span class="dv">2</span><span class="op">*</span>x2 <span class="op">+</span> u2</span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a><span class="co"># Sample 3</span></span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>x3 <span class="op">=</span> np.random.normal(<span class="dv">3</span>, <span class="dv">1</span>, n)</span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a>u3 <span class="op">=</span> np.random.normal(<span class="dv">0</span>, <span class="dv">2</span>, n)</span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a>y3 <span class="op">=</span> <span class="dv">1</span> <span class="op">+</span> <span class="dv">2</span><span class="op">*</span>x3 <span class="op">+</span> u3</span>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a><span class="co"># Create dataframes</span></span>
+<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a>df1 <span class="op">=</span> pd.DataFrame({<span class="st">'x'</span>: x1, <span class="st">'y'</span>: y1})</span>
+<span id="cb5-22"><a href="#cb5-22" aria-hidden="true" tabindex="-1"></a>df2 <span class="op">=</span> pd.DataFrame({<span class="st">'x'</span>: x2, <span class="st">'y'</span>: y2})</span>
+<span id="cb5-23"><a href="#cb5-23" aria-hidden="true" tabindex="-1"></a>df3 <span class="op">=</span> pd.DataFrame({<span class="st">'x'</span>: x3, <span class="st">'y'</span>: y3})</span>
+<span id="cb5-24"><a href="#cb5-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-25"><a href="#cb5-25" aria-hidden="true" tabindex="-1"></a><span class="co"># Fit regressions for each sample</span></span>
+<span id="cb5-26"><a href="#cb5-26" aria-hidden="true" tabindex="-1"></a>model1 <span class="op">=</span> ols(<span class="st">'y ~ x'</span>, data<span class="op">=</span>df1).fit()</span>
+<span id="cb5-27"><a href="#cb5-27" aria-hidden="true" tabindex="-1"></a>model2 <span class="op">=</span> ols(<span class="st">'y ~ x'</span>, data<span class="op">=</span>df2).fit()</span>
+<span id="cb5-28"><a href="#cb5-28" aria-hidden="true" tabindex="-1"></a>model3 <span class="op">=</span> ols(<span class="st">'y ~ x'</span>, data<span class="op">=</span>df3).fit()</span>
+<span id="cb5-29"><a href="#cb5-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-30"><a href="#cb5-30" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Three samples generated and regressions fitted:"</span>)</span>
+<span id="cb5-31"><a href="#cb5-31" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Sample 1 - Intercept: </span><span class="sc">{</span>model1<span class="sc">.</span>params[<span class="st">'Intercept'</span>]<span class="sc">:.2f}</span><span class="ss">, Slope: </span><span class="sc">{</span>model1<span class="sc">.</span>params[<span class="st">'x'</span>]<span class="sc">:.2f}</span><span class="ss">"</span>)</span>
+<span id="cb5-32"><a href="#cb5-32" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Sample 2 - Intercept: </span><span class="sc">{</span>model2<span class="sc">.</span>params[<span class="st">'Intercept'</span>]<span class="sc">:.2f}</span><span class="ss">, Slope: </span><span class="sc">{</span>model2<span class="sc">.</span>params[<span class="st">'x'</span>]<span class="sc">:.2f}</span><span class="ss">"</span>)</span>
+<span id="cb5-33"><a href="#cb5-33" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Sample 3 - Intercept: </span><span class="sc">{</span>model3<span class="sc">.</span>params[<span class="st">'Intercept'</span>]<span class="sc">:.2f}</span><span class="ss">, Slope: </span><span class="sc">{</span>model3<span class="sc">.</span>params[<span class="st">'x'</span>]<span class="sc">:.2f}</span><span class="ss">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Three samples generated and regressions fitted:
+Sample 1 - Intercept: 0.82, Slope: 1.81
+Sample 2 - Intercept: 1.75, Slope: 1.79
+Sample 3 - Intercept: 2.01, Slope: 1.67</code></pre>
+</div>
+</div>
+<div id="cell-19" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Visualize all three regressions</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>fig, axes <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">3</span>, figsize<span class="op">=</span>(<span class="dv">18</span>, <span class="dv">5</span>))</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> idx, (ax, df, model, title) <span class="kw">in</span> <span class="bu">enumerate</span>(<span class="bu">zip</span>(axes,</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>                                                   [df1, df2, df3],</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>                                                   [model1, model2, model3],</span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>                                                   [<span class="st">'Sample 1'</span>, <span class="st">'Sample 2'</span>, <span class="st">'Sample 3'</span>])):</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>    ax.scatter(df[<span class="st">'x'</span>], df[<span class="st">'y'</span>], alpha<span class="op">=</span><span class="fl">0.6</span>, s<span class="op">=</span><span class="dv">50</span>, color<span class="op">=</span><span class="st">'black'</span>, label<span class="op">=</span><span class="st">'Actual'</span>)</span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>    ax.plot(df[<span class="st">'x'</span>], model.fittedvalues, color<span class="op">=</span><span class="st">'red'</span>, linewidth<span class="op">=</span><span class="dv">2</span>,</span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>            label<span class="op">=</span><span class="ss">f'ŷ = </span><span class="sc">{</span>model<span class="sc">.</span>params[<span class="dv">0</span>]<span class="sc">:.2f}</span><span class="ss"> + </span><span class="sc">{</span>model<span class="sc">.</span>params[<span class="dv">1</span>]<span class="sc">:.2f}</span><span class="ss">x'</span>)</span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Add population line</span></span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>    x_range <span class="op">=</span> np.linspace(df[<span class="st">'x'</span>].<span class="bu">min</span>(), df[<span class="st">'x'</span>].<span class="bu">max</span>(), <span class="dv">100</span>)</span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>    y_pop <span class="op">=</span> <span class="dv">1</span> <span class="op">+</span> <span class="dv">2</span><span class="op">*</span>x_range</span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>    ax.plot(x_range, y_pop, color<span class="op">=</span><span class="st">'blue'</span>, linewidth<span class="op">=</span><span class="dv">2</span>, linestyle<span class="op">=</span><span class="st">'--'</span>,</span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>            label<span class="op">=</span><span class="st">'Population: y = 1 + 2x'</span>, alpha<span class="op">=</span><span class="fl">0.7</span>)</span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>    ax.set_xlabel(<span class="st">'x'</span>, fontsize<span class="op">=</span><span class="dv">11</span>)</span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a>    ax.set_ylabel(<span class="st">'y'</span>, fontsize<span class="op">=</span><span class="dv">11</span>)</span>
+<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a>    ax.set_title(title, fontsize<span class="op">=</span><span class="dv">12</span>, fontweight<span class="op">=</span><span class="st">'bold'</span>)</span>
+<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a>    ax.legend(fontsize<span class="op">=</span><span class="dv">9</span>)</span>
+<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a>    ax.grid(<span class="va">True</span>, alpha<span class="op">=</span><span class="fl">0.3</span>)</span>
+<span id="cb7-21"><a href="#cb7-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-22"><a href="#cb7-22" aria-hidden="true" tabindex="-1"></a>plt.suptitle(<span class="st">'Three Different Samples from the Same DGP: y = 1 + 2x + u'</span>,</span>
+<span id="cb7-23"><a href="#cb7-23" aria-hidden="true" tabindex="-1"></a>             fontsize<span class="op">=</span><span class="dv">14</span>, fontweight<span class="op">=</span><span class="st">'bold'</span>, y<span class="op">=</span><span class="fl">1.02</span>)</span>
+<span id="cb7-24"><a href="#cb7-24" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
+<span id="cb7-25"><a href="#cb7-25" aria-hidden="true" tabindex="-1"></a>plt.show()</span>
+<span id="cb7-26"><a href="#cb7-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-27"><a href="#cb7-27" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"</span><span class="ch">\n</span><span class="st">Key observation: Each sample produces a different regression line,"</span>)</span>
+<span id="cb7-28"><a href="#cb7-28" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"but all are close to the true population line (blue dashed)."</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>/var/folders/tq/t98kb27n6djgrh085g476yhc0000gn/T/ipykernel_56592/4130646466.py:10: FutureWarning: Series.__getitem__ treating keys as positions is deprecated. In a future version, integer keys will always be treated as labels (consistent with DataFrame behavior). To access a value by position, use `ser.iloc[pos]`
+  label=f'ŷ = {model.params[0]:.2f} + {model.params[1]:.2f}x')</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="ch06_The_Least_Squares_Estimator_files/figure-html/cell-5-output-2.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Key observation: Each sample produces a different regression line,
+but all are close to the true population line (blue dashed).</code></pre>
+</div>
+</div>
+<p><em>Having seen how sampling variability affects regression estimates, let’s formalize the key properties of the OLS estimator.</em></p>
+</section>
+</section>
+<section id="properties-of-the-least-squares-estimator" class="level2">
+<h2 class="anchored" data-anchor-id="properties-of-the-least-squares-estimator">6.3 Properties of the Least Squares Estimator</h2>
+<p>The OLS estimator has important statistical properties under certain assumptions.</p>
+<p><strong>Standard Assumptions (1-4):</strong></p>
+<ol type="1">
+<li><strong>Linearity</strong>: <span class="math inline">\(y_i = \beta_1 + \beta_2 x_i + u_i\)</span> for all <span class="math inline">\(i\)</span></li>
+<li><strong>Zero conditional mean</strong>: <span class="math inline">\(E[u_i | x_i] = 0\)</span> for all <span class="math inline">\(i\)</span></li>
+<li><strong>Homoskedasticity</strong>: <span class="math inline">\(\text{Var}[u_i | x_i] = \sigma_u^2\)</span> for all <span class="math inline">\(i\)</span> (constant variance)</li>
+<li><strong>Independence</strong>: Errors <span class="math inline">\(u_i\)</span> and <span class="math inline">\(u_j\)</span> are independent for all <span class="math inline">\(i \neq j\)</span></li>
+</ol>
+<p><strong>Properties of OLS under assumptions 1-2:</strong></p>
+<p><strong>Unbiasedness:</strong> <span class="math display">\[E[b_2] = \beta_2\]</span></p>
+<p>Interpretation: On average across many samples, the OLS estimate equals the true parameter.</p>
+<p><strong>Properties of OLS under assumptions 1-4:</strong></p>
+<p><strong>Variance of slope coefficient:</strong> <span class="math display">\[\text{Var}[b_2] = \sigma_{b_2}^2 = \frac{\sigma_u^2}{\sum_{i=1}^n (x_i - \bar{x})^2}\]</span></p>
+<p><strong>Standard error of slope coefficient:</strong> <span class="math display">\[se(b_2) = \sqrt{\frac{s_e^2}{\sum_{i=1}^n (x_i - \bar{x})^2}} = \frac{s_e}{\sqrt{\sum_{i=1}^n (x_i - \bar{x})^2}}\]</span></p>
+<p>where <span class="math inline">\(s_e^2 = \frac{1}{n-2}\sum_{i=1}^n (y_i - \hat{y}_i)^2\)</span> is the estimated error variance.</p>
+<p><strong>When is the slope coefficient precisely estimated?</strong></p>
+<p>Standard error is smaller when: 1. Model fits well (small <span class="math inline">\(s_e^2\)</span>) 2. Many observations (large <span class="math inline">\(n\)</span>) 3. Regressors are widely scattered (large <span class="math inline">\(\sum (x_i - \bar{x})^2\)</span>)</p>
+<p><strong>Asymptotic normality:</strong></p>
+<p>By the Central Limit Theorem: <span class="math display">\[\frac{b_2 - \beta_2}{\sigma_{b_2}} \xrightarrow{d} N(0, 1) \text{ as } n \rightarrow \infty\]</span></p>
+<p><strong>Best Linear Unbiased Estimator (BLUE):</strong></p>
+<p>Under assumptions 1-4, OLS has the smallest variance among all linear unbiased estimators (Gauss-Markov Theorem).</p>
+<section id="simulation-sampling-distribution-of-ols-estimator" class="level3">
+<h3 class="anchored" data-anchor-id="simulation-sampling-distribution-of-ols-estimator">Simulation: Sampling Distribution of OLS Estimator</h3>
+<p>To understand the sampling distribution, we simulate 1,000 regressions from the same DGP and examine the distribution of coefficient estimates.</p>
+<p><strong>What to expect:</strong></p>
+<ul>
+<li>Mean of estimates ≈ true parameter (unbiasedness)</li>
+<li>Distribution approximately normal (CLT)</li>
+<li>Spread determined by standard error formula</li>
+</ul>
+<blockquote class="blockquote">
+<p><strong>Key Concept 6.3: OLS Assumptions</strong></p>
+<p>The four core OLS assumptions are: (1) Correct model specification: y = β₁ + β₂x + u, (2) Mean-zero errors: E[u|x] = 0, (3) Homoskedasticity: Var[u|x] = σ²ᵤ, (4) Independence: errors uncorrelated across observations. Assumptions 1-2 are essential for unbiasedness; assumptions 3-4 affect variance and can be relaxed using robust standard errors.</p>
+</blockquote>
+</section>
+</section>
+<section id="interpreting-the-monte-carlo-simulation-results" class="level2">
+<h2 class="anchored" data-anchor-id="interpreting-the-monte-carlo-simulation-results">Interpreting the Monte Carlo Simulation Results</h2>
+<p><strong>What 1,000 simulations reveal about OLS properties:</strong></p>
+<p>We simulated 1,000 independent samples (each with n=30 observations) from the same DGP: y = 1 + 2x + u. Here are the results:</p>
+<p><strong>Intercept (β₀):</strong></p>
+<ul>
+<li><strong>True value</strong>: 1.0</li>
+<li><strong>Mean of 1,000 estimates</strong>: 0.9960</li>
+<li><strong>Standard deviation</strong>: 1.2069</li>
+<li><strong>Difference from true value</strong>: -0.004 (only 0.4% error)</li>
+</ul>
+<p><strong>Slope (β₁):</strong></p>
+<ul>
+<li><strong>True value</strong>: 2.0</li>
+<li><strong>Mean of 1,000 estimates</strong>: 1.9944</li>
+<li><strong>Standard deviation</strong>: 0.3836</li>
+<li><strong>Difference from true value</strong>: -0.0056 (only 0.3% error)</li>
+</ul>
+<p><strong>What this demonstrates:</strong></p>
+<ol type="1">
+<li><p><strong>Unbiasedness confirmed</strong>: The mean of the estimates (0.9960 for intercept, 1.9944 for slope) is extremely close to the true parameters (1.0 and 2.0). With 1,000 simulations, random errors average out, leaving us essentially at the true values. This is the <strong>unbiasedness property</strong> of OLS: E[b₂] = β₂.</p></li>
+<li><p><strong>Sampling variability quantified</strong>: Individual estimates varied substantially:</p>
+<ul>
+<li>The intercept estimates had a standard deviation of 1.21, meaning about 95% of estimates fell within 1.0 ± 2(1.21) = [-1.42, 3.42]</li>
+<li>The slope estimates had a standard deviation of 0.38, meaning about 95% fell within 2.0 ± 2(0.38) = [1.24, 2.76]</li>
+</ul></li>
+<li><p><strong>Why individual estimates differ from true values</strong>: Any single sample (like Sample 1, 2, or 3 we saw earlier) will contain random errors that cause the estimate to deviate from the true parameter. But these deviations are <strong>random</strong>—sometimes too high, sometimes too low—and average out to zero across many samples.</p></li>
+<li><p><strong>Standard deviation as a measure of precision</strong>: The standard deviation of the estimates (0.38 for slope) measures the <strong>sampling variability</strong>. This is closely related to the <strong>standard error</strong> you see in regression output, which estimates this variability from a single sample.</p></li>
+</ol>
+<p><strong>The big picture</strong>:</p>
+<p>This simulation proves mathematically that OLS “works” in a precise sense: if we could repeat our study infinitely many times, the average of all our estimates would equal the true parameter. Of course, in practice we only get <strong>one sample</strong>, so we use standard errors to acknowledge the uncertainty inherent in any single estimate.</p>
+<p><strong>Economic intuition</strong>: Imagine 1,000 different researchers each collecting their own sample of n=30 observations from the same population. Each would report a different regression coefficient. The simulation shows that:</p>
+<ul>
+<li>On average, they’d get the right answer (unbiasedness)</li>
+<li>But individual estimates would vary around the true value</li>
+<li>The variation would follow a predictable pattern (approximately normal, as we’ll visualize next)</li>
+</ul>
+<blockquote class="blockquote">
+<p><strong>Key Concept 6.4: Monte Carlo and Unbiasedness</strong></p>
+<p>Monte Carlo simulation demonstrates unbiasedness: the average of many OLS estimates equals the true parameter. The distribution of estimates is approximately normal (Central Limit Theorem), with spread measured by the standard error. This validates the theoretical properties of OLS in practice.</p>
+</blockquote>
+<hr>
+<p><strong>Transition Note:</strong> The simulations have shown empirically that OLS estimates center on true parameters and follow approximate normal distributions. Now we’ll formalize these observations by deriving the theoretical properties of OLS estimators: unbiasedness, variance formulas, and asymptotic normality.</p>
+<section id="visualization-sampling-distributions-of-ols-estimators" class="level3">
+<h3 class="anchored" data-anchor-id="visualization-sampling-distributions-of-ols-estimators">Visualization: Sampling Distributions of OLS Estimators</h3>
+<p>These histograms show the distribution of coefficient estimates across 1,000 simulated samples.</p>
+<p><strong>Key features:</strong></p>
+<ul>
+<li><strong>Green vertical line</strong>: True parameter value</li>
+<li><strong>Red curve</strong>: Normal distribution fit</li>
+<li><strong>Histogram</strong>: Actual distribution of estimates</li>
+</ul>
+<p>The close match confirms:</p>
+<ol type="1">
+<li>Unbiasedness (centered on true value)</li>
+<li>Approximate normality (CLT works well even with n=30)</li>
+</ol>
+</section>
+</section>
+<section id="interpreting-the-sampling-distribution-histograms" class="level2">
+<h2 class="anchored" data-anchor-id="interpreting-the-sampling-distribution-histograms">Interpreting the Sampling Distribution Histograms</h2>
+<p><strong>What these distributions reveal:</strong></p>
+<p>These histograms show the distribution of coefficient estimates from our 1,000 simulated samples. They visually confirm several crucial statistical properties:</p>
+<p><strong>1. Unbiasedness (visual confirmation):</strong></p>
+<ul>
+<li><strong>Green vertical line</strong> marks the true parameter value (β₀ = 1.0 for intercept, β₁ = 2.0 for slope)</li>
+<li>The histograms are <strong>centered exactly on the true values</strong></li>
+<li>This visual centering confirms E[b₀] = β₀ and E[b₁] = β₁</li>
+</ul>
+<p><strong>2. Approximate normality (Central Limit Theorem):</strong></p>
+<ul>
+<li><strong>Red curve</strong> shows the fitted normal distribution</li>
+<li>The histogram bars closely follow this curve</li>
+<li>Even with just n=30 observations per sample, the sampling distribution is approximately normal</li>
+<li>This confirms the <strong>Central Limit Theorem</strong> applies to OLS estimators</li>
+</ul>
+<p><strong>3. Different precision for different parameters:</strong></p>
+<ul>
+<li><strong>Intercept distribution</strong> (left panel): Wider spread (SD = 1.21)</li>
+<li><strong>Slope distribution</strong> (right panel): Narrower spread (SD = 0.38)</li>
+<li>The slope is estimated more precisely than the intercept in this case</li>
+</ul>
+<p><strong>Why the normal distribution matters:</strong></p>
+<p>The approximate normality of the sampling distribution is the foundation for statistical inference:</p>
+<ul>
+<li><strong>Confidence intervals</strong>: We can construct intervals like b₁ ± 1.96 × SE(b₁) to capture the true parameter 95% of the time</li>
+<li><strong>Hypothesis tests</strong>: We can use the normal distribution to calculate p-values</li>
+<li><strong>Prediction intervals</strong>: We can quantify uncertainty about predictions</li>
+</ul>
+<p><strong>Reading the histograms:</strong></p>
+<p>Looking at the slope distribution (right panel):</p>
+<ul>
+<li>Most estimates fall between 1.2 and 2.8 (about ±2 standard deviations from 2.0)</li>
+<li>Very few estimates are below 1.0 or above 3.0</li>
+<li>This tells us that even though individual samples vary, they rarely produce wildly incorrect estimates</li>
+</ul>
+<p><strong>The power of large numbers:</strong></p>
+<p>If we had run 10,000 or 100,000 simulations instead of 1,000:</p>
+<ul>
+<li>The mean would get even closer to the true value (0.9960 → 1.0000)</li>
+<li>The histogram would match the normal curve even more closely</li>
+<li>But the <strong>standard deviation</strong> would stay approximately the same (0.38), because it depends on the sample size <strong>within each simulation</strong> (n=30), not the number of simulations</li>
+</ul>
+<p><strong>Practical implication:</strong></p>
+<p>When you see a regression output reporting “slope = 1.85, SE = 0.35”, you should imagine a histogram like the one above:</p>
+<ul>
+<li>The estimate 1.85 is one draw from a sampling distribution</li>
+<li>The SE = 0.35 tells you the width of that distribution</li>
+<li>About 95% of the distribution falls within 1.85 ± 2(0.35) = [1.15, 2.55]</li>
+<li>If this interval excludes zero, the coefficient is statistically significant</li>
+</ul>
+<p><em>Now that we understand the theoretical properties of OLS estimators, let’s examine how to estimate the model parameters in practice.</em></p>
+</section>
+<section id="estimators-of-model-parameters" class="level2">
+<h2 class="anchored" data-anchor-id="estimators-of-model-parameters">6.4 Estimators of Model Parameters</h2>
+<p>In practice, we need to estimate not just the coefficients but also the error variance and standard errors.</p>
+<p><strong>Estimate of error variance:</strong></p>
+<p>The sample variance of residuals: <span class="math display">\[s_e^2 = \frac{1}{n-2}\sum_{i=1}^n (y_i - \hat{y}_i)^2 = \frac{1}{n-2}\sum_{i=1}^n e_i^2\]</span></p>
+<p><strong>Why divide by <span class="math inline">\((n-2)\)</span>?</strong> - We estimated 2 parameters (<span class="math inline">\(b_1\)</span> and <span class="math inline">\(b_2\)</span>) - This leaves <span class="math inline">\((n-2)\)</span> degrees of freedom - Division by <span class="math inline">\((n-2)\)</span> makes <span class="math inline">\(s_e^2\)</span> unbiased for <span class="math inline">\(\sigma_u^2\)</span></p>
+<p><strong>Standard error of the regression (Root MSE):</strong> <span class="math display">\[s_e = \sqrt{s_e^2}\]</span></p>
+<p>This is the typical size of residuals and appears in regression output.</p>
+<p><strong>Standard error of slope coefficient:</strong> <span class="math display">\[se(b_2) = \frac{s_e}{\sqrt{\sum_{i=1}^n (x_i - \bar{x})^2}}\]</span></p>
+<p><strong>Standard error of intercept coefficient:</strong> <span class="math display">\[se(b_1) = \sqrt{\frac{s_e^2 \sum_{i=1}^n x_i^2}{n \sum_{i=1}^n (x_i - \bar{x})^2}}\]</span></p>
+<blockquote class="blockquote">
+<p><strong>Key Concept 6.5: Degrees of Freedom in Regression</strong></p>
+<p>When calculating the standard error of the regression (sₑ), we divide the sum of squared residuals by (n-2) instead of n because we have estimated 2 parameters (b₁ and b₂). These 2 estimates “use up” 2 degrees of freedom, leaving (n-2) for estimating the error variance. This adjustment ensures that s²ₑ is an unbiased estimator of σ²ᵤ. More generally, degrees of freedom equal the sample size minus the number of estimated parameters.</p>
+</blockquote>
+<section id="example-manual-computation-of-standard-errors" class="level3">
+<h3 class="anchored" data-anchor-id="example-manual-computation-of-standard-errors">Example: Manual Computation of Standard Errors</h3>
+<p>Let’s manually compute standard errors for a simple example to understand the formulas.</p>
+<p><strong>Artificial data:</strong></p>
+<ul>
+<li><span class="math inline">\((y, x)\)</span> = <span class="math inline">\((1,1), (2,2), (2,3), (2,4), (3,5)\)</span></li>
+<li>From earlier analysis: <span class="math inline">\(\hat{y} = 0.8 + 0.4x\)</span></li>
+</ul>
+</section>
+</section>
+<section id="interpreting-the-manual-standard-error-calculations" class="level2">
+<h2 class="anchored" data-anchor-id="interpreting-the-manual-standard-error-calculations">Interpreting the Manual Standard Error Calculations</h2>
+<p><strong>What these calculations reveal:</strong></p>
+<p>Using the simple artificial dataset (x = [1, 2, 3, 4, 5], y = [1, 2, 2, 2, 3]), we can see exactly how standard errors are computed:</p>
+<p><strong>Step 1: Regression coefficients</strong></p>
+<ul>
+<li><strong>Estimated equation</strong>: ŷ = 0.8 + 0.4x</li>
+<li>These are obtained by OLS minimizing the sum of squared residuals</li>
+</ul>
+<p><strong>Step 2: Calculate residuals and RSS</strong></p>
+<p>Looking at the observation-level calculations, we can see:</p>
+<ul>
+<li>Each observation has a predicted value ŷ and a residual e = y - ŷ</li>
+<li>Residuals are both positive and negative (some points above the line, some below)</li>
+<li>Sum of squared residuals: RSS = Σe²</li>
+</ul>
+<p><strong>Step 3: Standard error of the regression (sₑ)</strong></p>
+<p>The formula is: <span class="math display">\[s_e = \sqrt{\frac{RSS}{n-2}} = \sqrt{\frac{\text{sum of squared residuals}}{\text{degrees of freedom}}}\]</span></p>
+<p><strong>Why divide by (n-2)?</strong></p>
+<ul>
+<li>We estimated 2 parameters (intercept and slope)</li>
+<li>This “uses up” 2 degrees of freedom</li>
+<li>Division by (n-2) makes s²ₑ an <strong>unbiased estimator</strong> of σ²ᵤ</li>
+</ul>
+<p><strong>Step 4: Standard error of the slope coefficient</strong></p>
+<p>The formula is: <span class="math display">\[se(b_2) = \frac{s_e}{\sqrt{\sum(x_i - \bar{x})^2}}\]</span></p>
+<p>This reveals what makes slope estimates more or less precise:</p>
+<ol type="1">
+<li><strong>Numerator (sₑ)</strong>: How well the model fits
+<ul>
+<li>Smaller residuals → smaller sₑ → smaller SE → more precise estimate</li>
+</ul></li>
+<li><strong>Denominator (√Σ(xᵢ - x̄)²)</strong>: How spread out the x values are
+<ul>
+<li>Wider spread in x → larger denominator → smaller SE → more precise estimate</li>
+<li>Clustered x values → small denominator → large SE → imprecise estimate</li>
+</ul></li>
+</ol>
+<p><strong>Why does spread in x matter?</strong></p>
+<p>Think geometrically: if all x values are clustered around the mean (say, x = 2.9, 3.0, 3.1), it’s hard to accurately estimate the slope—the line could pivot substantially without much change in fit. But if x values are widely spread (say, x = 1, 10, 20), the slope is well-identified—you can clearly see the relationship.</p>
+<p><strong>Step 5: Standard error of the intercept</strong></p>
+<p>The formula is more complex: <span class="math display">\[se(b_1) = \sqrt{\frac{s²_e \times \sum x²_i}{n \times \sum(x_i - \bar{x})^2}}\]</span></p>
+<p>Notice:</p>
+<ul>
+<li>Intercept SE depends on the <strong>squared values</strong> of x (Σx²ᵢ)</li>
+<li>If x values are far from zero, the intercept SE is large</li>
+<li>This reflects extrapolation uncertainty—we’re estimating y when x=0, which may be far from our data</li>
+</ul>
+<p><strong>Verification</strong>: Our manual calculations match the model output exactly, confirming:</p>
+<ul>
+<li>We understand where these numbers come from</li>
+<li>The formulas are correct</li>
+<li>Standard errors aren’t “magic”—they’re computed from the data using transparent formulas</li>
+</ul>
+<p><strong>Practical implication</strong>:</p>
+<p>When designing a study, you can <strong>control precision</strong> by:</p>
+<ul>
+<li>Increasing sample size n (reduces sₑ)</li>
+<li>Collecting data with wide variation in x (increases Σ(xᵢ - x̄)²)</li>
+<li>Reducing measurement error (reduces sₑ)</li>
+</ul>
+<p>Conversely, if you’re stuck with a small sample or clustered x values, expect large standard errors and wide confidence intervals.</p>
+</section>
+<section id="interpreting-the-manual-standard-error-calculations-1" class="level2">
+<h2 class="anchored" data-anchor-id="interpreting-the-manual-standard-error-calculations-1">Interpreting the Manual Standard Error Calculations</h2>
+<p><strong>What these calculations reveal:</strong></p>
+<p>Using the simple artificial dataset (x = [1, 2, 3, 4, 5], y = [1, 2, 2, 2, 3]), we can see exactly how standard errors are computed:</p>
+<p><strong>Step 1: Regression coefficients</strong></p>
+<ul>
+<li><strong>Estimated equation</strong>: ŷ = 0.8 + 0.4x</li>
+<li>These are obtained by OLS minimizing the sum of squared residuals</li>
+</ul>
+<p><strong>Step 2: Calculate residuals and RSS</strong></p>
+<p>Looking at the observation-level calculations, we can see:</p>
+<ul>
+<li>Each observation has a predicted value ŷ and a residual e = y - ŷ</li>
+<li>Residuals are both positive and negative (some points above the line, some below)</li>
+<li>Sum of squared residuals: RSS = Σe²</li>
+</ul>
+<p><strong>Step 3: Standard error of the regression (sₑ)</strong></p>
+<p>The formula is: <span class="math display">\[s_e = \sqrt{\frac{RSS}{n-2}} = \sqrt{\frac{\text{sum of squared residuals}}{\text{degrees of freedom}}}\]</span></p>
+<p><strong>Why divide by (n-2)?</strong></p>
+<ul>
+<li>We estimated 2 parameters (intercept and slope)</li>
+<li>This “uses up” 2 degrees of freedom</li>
+<li>Division by (n-2) makes s²ₑ an <strong>unbiased estimator</strong> of σ²ᵤ</li>
+</ul>
+<p><strong>Step 4: Standard error of the slope coefficient</strong></p>
+<p>The formula is: <span class="math display">\[se(b_2) = \frac{s_e}{\sqrt{\sum(x_i - \bar{x})^2}}\]</span></p>
+<p>This reveals what makes slope estimates more or less precise:</p>
+<ol type="1">
+<li><strong>Numerator (sₑ)</strong>: How well the model fits
+<ul>
+<li>Smaller residuals → smaller sₑ → smaller SE → more precise estimate</li>
+</ul></li>
+<li><strong>Denominator (√Σ(xᵢ - x̄)²)</strong>: How spread out the x values are
+<ul>
+<li>Wider spread in x → larger denominator → smaller SE → more precise estimate</li>
+<li>Clustered x values → small denominator → large SE → imprecise estimate</li>
+</ul></li>
+</ol>
+<p><strong>Why does spread in x matter?</strong></p>
+<p>Think geometrically: if all x values are clustered around the mean (say, x = 2.9, 3.0, 3.1), it’s hard to accurately estimate the slope—the line could pivot substantially without much change in fit. But if x values are widely spread (say, x = 1, 10, 20), the slope is well-identified—you can clearly see the relationship.</p>
+<p><strong>Step 5: Standard error of the intercept</strong></p>
+<p>The formula is more complex: <span class="math display">\[se(b_1) = \sqrt{\frac{s²_e  \times  \sum x²_i}{n  \times  \sum(x_i - \bar{x})^2}}\]</span></p>
+<p>Notice:</p>
+<ul>
+<li>Intercept SE depends on the <strong>squared values</strong> of x (Σx²ᵢ)</li>
+<li>If x values are far from zero, the intercept SE is large</li>
+<li>This reflects extrapolation uncertainty—we’re estimating y when x=0, which may be far from our data</li>
+</ul>
+<p><strong>Verification</strong>: Our manual calculations match the model output exactly, confirming:</p>
+<ul>
+<li>We understand where these numbers come from</li>
+<li>The formulas are correct</li>
+<li>Standard errors aren’t “magic”—they’re computed from the data using transparent formulas</li>
+</ul>
+<p><strong>Practical implication</strong>:</p>
+<p>When designing a study, you can <strong>control precision</strong> by:</p>
+<ul>
+<li>Increasing sample size n (reduces sₑ)</li>
+<li>Collecting data with wide variation in x (increases Σ(xᵢ - x̄)²)</li>
+<li>Reducing measurement error (reduces sₑ)</li>
+</ul>
+<p>Conversely, if you’re stuck with a small sample or clustered x values, expect large standard errors and wide confidence intervals.</p>
+<section id="when-is-the-slope-coefficient-precisely-estimated" class="level3">
+<h3 class="anchored" data-anchor-id="when-is-the-slope-coefficient-precisely-estimated">When is the Slope Coefficient Precisely Estimated?</h3>
+<p>From the formula <span class="math inline">\(se(b_2) = \frac{s_e}{\sqrt{\sum_{i=1}^n (x_i - \bar{x})^2}}\)</span>, we see that standard errors are smaller when:</p>
+<ol type="1">
+<li><strong>Good model fit</strong> (small <span class="math inline">\(s_e\)</span>)
+<ul>
+<li>Less unexplained variation</li>
+<li>Smaller residuals</li>
+</ul></li>
+<li><strong>Large sample size</strong> (large <span class="math inline">\(\sum (x_i - \bar{x})^2\)</span>)
+<ul>
+<li>More observations provide more information</li>
+<li>Standard errors shrink with <span class="math inline">\(\sqrt{n}\)</span></li>
+</ul></li>
+<li><strong>Wide spread in regressors</strong> (large <span class="math inline">\(\sum (x_i - \bar{x})^2\)</span>)
+<ul>
+<li>More variation in <span class="math inline">\(x\)</span> helps identify the slope</li>
+<li>Clustered <span class="math inline">\(x\)</span> values make slope hard to estimate</li>
+</ul></li>
+</ol>
+<p><strong>Practical implication:</strong> When designing experiments or collecting data, seek wide variation in the explanatory variable.</p>
+<hr>
+<p><strong>Transition Note:</strong> We’ve established that OLS has desirable theoretical properties under assumptions 1-4. Now we turn to practical implementation: how to estimate error variance, compute standard errors, and assess estimation precision using formulas that work with actual data.</p>
+<blockquote class="blockquote">
+<p><strong>Key Concept 6.6: Standard Error of Regression Coefficients</strong></p>
+<p>The standard error of b₂ is se(b₂) = sₑ / √[Σ(xᵢ - x̄)²]. Precision is better (smaller SE) when: (1) the model fits well (small sₑ), (2) sample size is large (large Σ(xᵢ - x̄)²), (3) regressors are widely scattered (large Σ(xᵢ - x̄)²). Standard errors quantify estimation uncertainty and are essential for inference.</p>
+</blockquote>
+<blockquote class="blockquote">
+<p><strong>Key Concept 6.7: The Gauss-Markov Theorem</strong></p>
+<p>Under assumptions 1-4, OLS is the Best Linear Unbiased Estimator (BLUE) by the Gauss-Markov Theorem. This means OLS has the smallest variance among all linear unbiased estimators. If errors are also normally distributed, OLS is the Best Unbiased Estimator (not just among linear estimators). This optimality property justifies the widespread use of OLS.</p>
+</blockquote>
+</section>
+</section>
+<section id="summary-of-ols-properties" class="level2">
+<h2 class="anchored" data-anchor-id="summary-of-ols-properties">Summary of OLS Properties</h2>
+<p><strong>Under assumptions 1-4:</strong></p>
+<ol type="1">
+<li><p><strong><span class="math inline">\(y_i\)</span> given <span class="math inline">\(x_i\)</span></strong> has conditional mean <span class="math inline">\(\beta_1 + \beta_2 x_i\)</span> and conditional variance <span class="math inline">\(\sigma_u^2\)</span></p></li>
+<li><p><strong>Slope coefficient <span class="math inline">\(b_2\)</span></strong> has:</p>
+<ul>
+<li>Mean: <span class="math inline">\(E[b_2] = \beta_2\)</span> (unbiased)</li>
+<li>Variance: <span class="math inline">\(\text{Var}[b_2] = \sigma_u^2 / \sum_{i=1}^n (x_i - \bar{x})^2\)</span></li>
+</ul></li>
+<li><p><strong>Standard error</strong> of <span class="math inline">\(b_2\)</span>: <span class="math inline">\(se(b_2) = s_e / \sqrt{\sum_{i=1}^n (x_i - \bar{x})^2}\)</span></p></li>
+<li><p><strong>Standardized statistic</strong>: <span class="math inline">\(Z = (b_2 - \beta_2) / \sigma_{b_2}\)</span> has mean 0 and variance 1</p></li>
+<li><p><strong>Asymptotic normality</strong>: As <span class="math inline">\(n \rightarrow \infty\)</span>, <span class="math inline">\(Z \sim N(0,1)\)</span> by the Central Limit Theorem</p></li>
+<li><p><strong>Efficiency</strong>: OLS is BLUE (Best Linear Unbiased Estimator) by the Gauss-Markov Theorem</p></li>
+</ol>
+<p><strong>Critical assumptions:</strong></p>
+<ul>
+<li>Assumptions 1-2 ensure unbiasedness and consistency</li>
+<li>Assumptions 3-4 can be relaxed (see Chapters 7 and 12 for robust methods)</li>
+<li>In practice, choosing correct standard errors is crucial for valid inference</li>
+</ul>
+</section>
+<section id="key-takeaways" class="level2">
+<h2 class="anchored" data-anchor-id="key-takeaways">Key Takeaways</h2>
+<section id="population-model-and-sampling-framework" class="level3">
+<h3 class="anchored" data-anchor-id="population-model-and-sampling-framework">Population Model and Sampling Framework</h3>
+<ul>
+<li>The <strong>population regression model</strong> E[y|x] = β₁ + β₂x describes the true relationship with unknown parameters β₁ and β₂</li>
+<li>The <strong>conditional mean</strong> E[y|x] generalizes the unconditional mean E[y] by allowing the average to vary with x</li>
+<li>The <strong>error term</strong> u = y - E[y|x] captures deviations from the population line; it is unobserved because β₁ and β₂ are unknown</li>
+<li><strong>Crucial distinction</strong>: Error u (deviation from unknown population line) vs.&nbsp;residual e (deviation from estimated sample line)</li>
+<li>The <strong>sample regression</strong> ŷ = b₁ + b₂x estimates the population relationship from data</li>
+<li>Different samples yield different estimates (b₁, b₂) due to sampling variability, but on average they equal the true parameters</li>
+</ul>
+</section>
+<section id="error-term-properties-and-assumptions" class="level3">
+<h3 class="anchored" data-anchor-id="error-term-properties-and-assumptions">Error Term Properties and Assumptions</h3>
+<ul>
+<li>The error term is assumed to have <strong>conditional mean zero</strong>: E[u|x] = 0 (errors average to zero at each x value)</li>
+<li>This assumption ensures the population line is indeed E[y|x] = β₁ + β₂x</li>
+<li><strong>Homoskedasticity assumption</strong>: Var[u|x] = σ²ᵤ (constant error variance across all x values)</li>
+<li>“Homoskedastic” derives from Greek: homos (same) + skedastic (scattering)</li>
+<li>The variance Var[y|x] = Var[u|x] = σ²ᵤ measures variability around the population line</li>
+<li>Greater error variance means greater noise, reducing precision of estimates</li>
+</ul>
+</section>
+<section id="four-core-ols-assumptions" class="level3">
+<h3 class="anchored" data-anchor-id="four-core-ols-assumptions">Four Core OLS Assumptions</h3>
+<ol type="1">
+<li><strong>Correct model</strong>: yᵢ = β₁ + β₂xᵢ + uᵢ for all i (linearity)</li>
+<li><strong>Mean-zero errors</strong>: E[uᵢ|xᵢ] = 0 for all i (no correlation between x and u)</li>
+<li><strong>Homoskedasticity</strong>: Var[uᵢ|xᵢ] = σ²ᵤ for all i (constant error variance)</li>
+<li><strong>Independence</strong>: uᵢ and u are independent for all i ≠ j (no autocorrelation)</li>
+</ol>
+<ul>
+<li><strong>Assumptions 1-2 are essential</strong> for unbiasedness and consistency (violations cause bias)</li>
+<li><strong>Assumptions 3-4 can be relaxed</strong> using robust standard errors (Chapter 7.7, 12.1)</li>
+<li>Assumption 2 rules out <strong>omitted variable bias</strong> (no correlation between x and u)</li>
+<li>Choosing correct standard errors is crucial for valid confidence intervals and hypothesis tests</li>
+</ul>
+</section>
+<section id="unbiasedness-and-consistency" class="level3">
+<h3 class="anchored" data-anchor-id="unbiasedness-and-consistency">Unbiasedness and Consistency</h3>
+<ul>
+<li>Under assumptions 1-2: <strong>E[b₂] = β₂</strong> (unbiasedness)</li>
+<li>If we obtained many samples, on average b₂ would equal β₂</li>
+<li>Unbiasedness is a <strong>finite-sample property</strong> (holds for any sample size n)</li>
+<li><strong>Consistency</strong>: As n → ∞, b₂ converges in probability to β₂</li>
+<li>Sufficient condition for consistency: bias → 0 and variance → 0 as n → ∞</li>
+<li>b₂ is consistent because: (1) unbiased under assumptions 1-2, (2) Var[b₂] → 0 as n → ∞ under assumptions 1-4</li>
+<li>Both b₁ and b₂ are unbiased and consistent under these assumptions</li>
+</ul>
+</section>
+<section id="variance-and-standard-errors" class="level3">
+<h3 class="anchored" data-anchor-id="variance-and-standard-errors">Variance and Standard Errors</h3>
+<ul>
+<li>Under assumptions 1-4: <strong>Var[b₂] = σ²ᵤ / Σ(xᵢ - x̄)²</strong></li>
+<li>Standard deviation of b₂: <strong>σ_b₂ = σᵤ / √[Σ(xᵢ - x̄)²]</strong></li>
+<li>Since σ²ᵤ is unknown, estimate it using <strong>standard error of regression</strong>: s²ₑ = (1/(n-2)) Σ(yᵢ - ŷᵢ)²</li>
+<li>Use <strong>(n-2) denominator</strong> because we estimated 2 coefficients, leaving (n-2) degrees of freedom</li>
+<li>This divisor ensures s²ₑ is unbiased for σ²ᵤ</li>
+<li><strong>Standard error of b₂</strong>: se(b₂) = sₑ / √[Σ(xᵢ - x̄)²]</li>
+<li>se(b₂) measures <strong>precision</strong> of b₂ as an estimate of β₂</li>
+</ul>
+</section>
+<section id="factors-affecting-precision" class="level3">
+<h3 class="anchored" data-anchor-id="factors-affecting-precision">Factors Affecting Precision</h3>
+<ul>
+<li><strong>Better precision</strong> (smaller se(b₂)) occurs when:</li>
+</ul>
+<ol type="1">
+<li><strong>Model fits well</strong> (s²ₑ is smaller) - less noise around regression line</li>
+<li><strong>Many observations</strong> (Σ(xᵢ - x̄)² is larger) - more data reduces sampling variability</li>
+<li><strong>Regressors widely scattered</strong> (Σ(xᵢ - x̄)² is larger) - more variation in x provides more information</li>
+</ol>
+<ul>
+<li>Precision improves with <strong>√n</strong>, so need <strong>4× observations to halve</strong> standard error</li>
+<li><strong>Trade-off</strong>: Can’t control regressor scatter in observational data, but can increase sample size</li>
+<li><strong>Wide spread in x matters geometrically</strong>: If x values clustered, slope is poorly identified; if scattered, slope is well-identified</li>
+</ul>
+</section>
+<section id="central-limit-theorem-and-asymptotic-normality" class="level3">
+<h3 class="anchored" data-anchor-id="central-limit-theorem-and-asymptotic-normality">Central Limit Theorem and Asymptotic Normality</h3>
+<ul>
+<li>Under assumptions 1-4: <strong>b₂ ~ (β₂, σ²_b₂)</strong> where σ²_b₂ = σ²ᵤ / Σ(xᵢ - x̄)²</li>
+<li>Standardized variable: <strong>Z = (b₂ - β₂) / σ_b₂</strong> has mean 0 and variance 1 by construction</li>
+<li><strong>CLT</strong>: As n → ∞, <strong>Z ~ N(0,1)</strong> (approximately normal for large samples)</li>
+<li>This implies <strong>b₂ ~ N(β₂, σ²_b₂) for large n</strong></li>
+<li>In practice, σ_b₂ is unknown (depends on unknown σᵤ)</li>
+<li>Replace σ_b₂ with se(b₂) leads to <strong>t distribution</strong> (Chapter 7)</li>
+<li>Normality justifies using <strong>normal-based inference</strong> for large samples</li>
+</ul>
+</section>
+<section id="efficiency-and-blue-property" class="level3">
+<h3 class="anchored" data-anchor-id="efficiency-and-blue-property">Efficiency and BLUE Property</h3>
+<ul>
+<li>Under assumptions 1-4, OLS is the <strong>Best Linear Unbiased Estimator (BLUE)</strong> by the <strong>Gauss-Markov Theorem</strong></li>
+<li><strong>“Linear”</strong> means estimator is a linear combination of y values: b₂ = Σwᵢyᵢ</li>
+<li><strong>“Best”</strong> means minimum variance among all linear unbiased estimators</li>
+<li>If additionally u is <strong>normally distributed</strong>: OLS is the <strong>Best Unbiased Estimator (BUE)</strong></li>
+<li>Lowest variance among <strong>ALL</strong> unbiased estimators (not just linear ones)</li>
+<li>OLS is also <strong>best consistent estimator</strong> in standard settings</li>
+<li><strong>Bottom line</strong>: Under assumptions 1-4, OLS is essentially the optimal estimator of β₁ and β₂</li>
+</ul>
+</section>
+<section id="monte-carlo-simulation-evidence" class="level3">
+<h3 class="anchored" data-anchor-id="monte-carlo-simulation-evidence">Monte Carlo Simulation Evidence</h3>
+<ul>
+<li><strong>Monte Carlo simulations</strong> demonstrate OLS properties empirically by generating many samples from a known model</li>
+<li>Two examples: (1) Generated data from y = 1 + 2x + u with u ~ N(0,4), (2) Samples from 1880 Census (1.06 million males aged 60-70)</li>
+<li><strong>Key findings</strong>: (1) Average of many OLS estimates equals true parameter (unbiasedness), (2) Distribution of estimates is approximately normal (CLT), (3) Similar results for intercept and slope</li>
+<li><strong>Single sample</strong>: b₁ ≠ β₁ and b₂ ≠ β₂ due to sampling variability</li>
+<li><strong>Multiple samples</strong>: Estimates vary across samples but center on true parameters</li>
+<li><strong>Sampling distribution</strong>: Distribution of b₂ across many samples is approximately N(β₂, σ²_b₂)</li>
+</ul>
+</section>
+<section id="practical-implications" class="level3">
+<h3 class="anchored" data-anchor-id="practical-implications">Practical Implications</h3>
+<ul>
+<li><strong>Sampling variability is inevitable</strong>: Any single sample will deviate from true parameters</li>
+<li><strong>Standard errors quantify uncertainty</strong>: They measure the typical deviation of b₂ from β₂ across hypothetical repeated samples</li>
+<li><strong>Confidence intervals account for uncertainty</strong>: A 95% CI constructed as b₂ ± 2×se(b₂) will contain β₂ in 95% of samples</li>
+<li><strong>Assumptions 1-2 are non-negotiable</strong> for unbiasedness; violations cause bias and inconsistency (Chapter 16 discusses, Chapter 17 presents solutions)</li>
+<li><strong>Assumptions 3-4 are often relaxed</strong> in practice using robust standard errors (Chapters 7.7, 12.1)</li>
+<li><strong>Correct standard errors are crucial</strong>: Incorrect SEs invalidate confidence intervals and hypothesis tests</li>
+<li><strong>Study design matters</strong>: Researchers can improve precision by increasing sample size and ensuring wide variation in explanatory variables</li>
+</ul>
+</section>
+<section id="statistical-concepts-and-tools" class="level3">
+<h3 class="anchored" data-anchor-id="statistical-concepts-and-tools">Statistical Concepts and Tools</h3>
+<ul>
+<li><strong>Population vs.&nbsp;sample distinction</strong>: Foundation of all statistical inference</li>
+<li><strong>Unbiasedness</strong>: E[b₂] = β₂ (finite-sample property)</li>
+<li><strong>Consistency</strong>: b₂ →ᵖ β₂ as n → ∞ (asymptotic property)</li>
+<li><strong>Efficiency</strong>: Minimum variance among a class of estimators</li>
+<li><strong>Sampling distribution</strong>: Distribution of estimator across repeated samples</li>
+<li><strong>Standard error</strong>: Estimated standard deviation of sampling distribution</li>
+<li><strong>Central Limit Theorem</strong>: Justifies normal-based inference for large samples</li>
+<li><strong>Gauss-Markov Theorem</strong>: Establishes BLUE property of OLS</li>
+</ul>
+</section>
+<section id="connection-to-statistical-inference" class="level3">
+<h3 class="anchored" data-anchor-id="connection-to-statistical-inference">Connection to Statistical Inference</h3>
+<ul>
+<li>This chapter establishes the <strong>theoretical foundation</strong> for inference (Chapter 7)</li>
+<li>Knowing that b₂ ~ N(β₂, σ²_b₂) allows us to construct <strong>confidence intervals</strong> and conduct <strong>hypothesis tests</strong></li>
+<li>Standard errors are the <strong>bridge</strong> between point estimates and interval estimates</li>
+<li>Understanding sampling distributions explains why we can make probabilistic statements about parameters</li>
+<li>The <strong>normal approximation</strong> (CLT) justifies using critical values from the normal or t distribution</li>
+</ul>
+</section>
+<section id="software-implementation" class="level3">
+<h3 class="anchored" data-anchor-id="software-implementation">Software Implementation</h3>
+<ul>
+<li><strong>Python tools</strong>: <code>statsmodels.OLS</code> for estimation, <code>numpy</code> for simulation, <code>matplotlib</code> for visualization</li>
+<li>Generated data example uses <strong>random seed</strong> for reproducibility</li>
+<li><strong>Visualization techniques</strong>: Scatter plots with fitted line, histograms of sampling distributions</li>
+<li>Can compare <strong>population line vs.&nbsp;fitted line</strong> when population model is known (simulations)</li>
+<li><strong>Monte Carlo methods</strong> are powerful for understanding theoretical properties empirically</li>
+</ul>
+<hr>
+<p><strong>Congratulations!</strong> You’ve completed Chapter 6 and now understand the fundamental statistical properties of the OLS estimator. You know why OLS works, when it works, and how to quantify estimation uncertainty. These concepts are the foundation for all statistical inference in econometrics. In Chapter 7, you’ll apply this knowledge to construct confidence intervals and test hypotheses about regression coefficients.</p>
+<hr>
+</section>
+</section>
+<section id="practice-exercises" class="level2">
+<h2 class="anchored" data-anchor-id="practice-exercises">Practice Exercises</h2>
+<p>Test your understanding of OLS properties and statistical inference with these exercises.</p>
+<p><strong>Exercise 1: Population vs.&nbsp;Sample</strong></p>
+<p>Suppose the true population model is y = 3 + 5x + u with E[u|x] = 0.</p>
+<ol type="a">
+<li><p>If a sample yields ŷ = 2 + 6x, does this mean OLS failed?</p></li>
+<li><p>What does unbiasedness tell us about the relationship between the sample estimate (b₂ = 6) and the population parameter (β₂ = 5)?</p></li>
+<li><p>If we collected 1,000 different samples and computed b₂ for each, what would be the average of these 1,000 estimates?</p></li>
+</ol>
+<hr>
+<p><strong>Exercise 2: Error Term vs.&nbsp;Residual</strong></p>
+<p>For the observation (x, y) = (4, 25) with population model y = 8 + 4x + u:</p>
+<ol type="a">
+<li><p>Calculate the population prediction E[y|x=4] and the error term u.</p></li>
+<li><p>If the sample regression gives ŷ = 7 + 4.5x, calculate the fitted value and residual for this observation.</p></li>
+<li><p>Why can we observe the residual but not the error term?</p></li>
+</ol>
+<hr>
+<p><strong>Exercise 3: Standard Error Calculation</strong></p>
+<p>You’re given: n = 30, Σ(xᵢ - x̄)² = 50, Σ(yᵢ - ŷᵢ)² = 112.</p>
+<ol type="a">
+<li><p>Calculate the standard error of the regression (sₑ).</p></li>
+<li><p>Calculate the standard error of the slope coefficient se(b₂).</p></li>
+<li><p>If Σ(xᵢ - x̄)² were 200 instead of 50 (wider spread in x), how would se(b₂) change?</p></li>
+</ol>
+<hr>
+<p><strong>Exercise 4: Factors Affecting Precision</strong></p>
+<p>Consider two datasets: - Dataset A: n = 50, sₑ = 10, Σ(xᵢ - x̄)² = 100 - Dataset B: n = 50, sₑ = 5, Σ(xᵢ - x̄)² = 100</p>
+<ol type="a">
+<li><p>Calculate se(b₂) for each dataset.</p></li>
+<li><p>Which dataset provides more precise estimates? Why?</p></li>
+<li><p>How many observations would Dataset A need to achieve the same precision as Dataset B?</p></li>
+</ol>
+<hr>
+<p><strong>Exercise 5: Hypothesis Testing Intuition</strong></p>
+<p>OLS regression yields b₂ = 15 with se(b₂) = 4.</p>
+<ol type="a">
+<li><p>Construct an approximate 95% confidence interval for β₂ (use ±2 SE rule).</p></li>
+<li><p>Does this interval include β₂ = 10? What does this suggest about the hypothesis H₀: β₂ = 10?</p></li>
+<li><p>If the true parameter is β₂ = 13, would you expect most 95% confidence intervals from repeated samples to contain 13?</p></li>
+</ol>
+<hr>
+<p><strong>Exercise 6: Interpreting Assumptions</strong></p>
+<p>For each scenario, identify which OLS assumption is violated:</p>
+<ol type="a">
+<li><p>The model is y = β₁ + β₂x + u, but the true relationship is y = β₁ + β₂x² + u (nonlinear).</p></li>
+<li><p>Error variance increases with x: Var[u|x=1] = 4, Var[u|x=2] = 9, Var[u|x=3] = 16.</p></li>
+<li><p>An important variable z is omitted, and z is correlated with x, causing E[u|x] ≠ 0.</p></li>
+<li><p>The data are time series and errors are autocorrelated: uₜ = 0.7uₜ₋₁ + εₜ.</p></li>
+</ol>
+<hr>
+<p><strong>Exercise 7: Monte Carlo Simulation Understanding</strong></p>
+<p>In a Monte Carlo study with 500 simulations from y = 2 + 3x + u: - Mean of 500 intercept estimates: 1.98 - Mean of 500 slope estimates: 2.95 - SD of 500 slope estimates: 0.40</p>
+<ol type="a">
+<li><p>Do these results support the claim that OLS is unbiased? Explain.</p></li>
+<li><p>What would happen to the mean estimates if we ran 10,000 simulations instead of 500?</p></li>
+<li><p>What would happen to the SD of estimates if we increased the sample size within each simulation from n=30 to n=120?</p></li>
+</ol>
+<hr>
+<p><strong>Exercise 8: Python Practice</strong></p>
+<p>Using Python and the generated data approach from this chapter:</p>
+<ol type="a">
+<li><p>Generate 100 samples of size n=50 from y = 1 + 2x + u with u ~ N(0, 4) and x ~ N(3, 1).</p></li>
+<li><p>Compute b₂ for each sample and create a histogram of the 100 estimates.</p></li>
+<li><p>Calculate the mean and standard deviation of the 100 b₂ estimates. How do they compare to the theoretical values?</p></li>
+<li><p>Test whether the distribution of estimates is approximately normal using a Q-Q plot.</p></li>
+<li><p>Repeat with n=200 instead of n=50. How does the standard deviation of estimates change?</p></li>
+</ol>
+<hr>
+<p><strong>Solutions to selected exercises:</strong></p>
+<ul>
+<li><strong>Exercise 2a</strong>: E[y|x=4] = 8 + 4(4) = 24, so u = 25 - 24 = 1</li>
+<li><strong>Exercise 3a</strong>: sₑ = √[112/(30-2)] = √4 = 2</li>
+<li><strong>Exercise 3b</strong>: se(b₂) = 2/√50 = 0.283</li>
+<li><strong>Exercise 4a</strong>: Dataset A: se(b₂) = 10/√100 = 1.0; Dataset B: se(b₂) = 5/√100 = 0.5</li>
+<li><strong>Exercise 5a</strong>: 95% CI ≈ 15 ± 2(4) = [7, 23]</li>
+</ul>
+<p>For complete solutions and additional practice problems, see the course website.</p>
+<hr>
+</section>
+<section id="case-studies" class="level2">
+<h2 class="anchored" data-anchor-id="case-studies">6.5 Case Studies</h2>
+<section id="case-study-1-sampling-variability-in-productivity-regressions" class="level3">
+<h3 class="anchored" data-anchor-id="case-study-1-sampling-variability-in-productivity-regressions">Case Study 1: Sampling Variability in Productivity Regressions</h3>
+<p><strong>Research Question:</strong> How does the regression of labor productivity on capital per worker vary across samples?</p>
+<p><strong>Background:</strong> In this chapter, we learned that OLS estimates vary across samples due to random sampling variation. While Monte Carlo simulations with generated data demonstrate this principle, it’s crucial to see it work with real economic data. We’ll use the convergence clubs dataset to explore how much productivity-capital regressions vary when we repeatedly sample from a “population” of 108 countries.</p>
+<p><strong>The Data:</strong> We use the convergence clubs dataset (Mendez 2020) covering 108 countries from 1990-2014. The cross-section for 2014 provides:</p>
+<ul>
+<li><strong>Labor productivity</strong> (rgdppc_2014): Real GDP per capita in thousands of 2011 USD</li>
+<li><strong>Capital per worker</strong> (rk_2014): Physical capital stock per worker in thousands of 2011 USD</li>
+<li>These variables allow us to estimate production function relationships and explore sampling variability</li>
+</ul>
+<blockquote class="blockquote">
+<p><strong>Key Concept 6.8: Sampling Variability in Econometrics</strong></p>
+<p>When we estimate a regression from sample data, the coefficients (b₁, b₂) are random variables that vary across samples. Understanding this variability is essential for statistical inference—it tells us how much confidence to place in our estimates and how to construct confidence intervals and hypothesis tests. The standard error measures the typical deviation of our estimate from the true parameter across hypothetical repeated samples.</p>
+</blockquote>
+<hr>
+</section>
+<section id="load-the-data" class="level3">
+<h3 class="anchored" data-anchor-id="load-the-data">Load the Data</h3>
+<p>We’ll work with the 2014 cross-section from the convergence clubs dataset. The full dataset of 108 countries will serve as our “population,” and we’ll draw samples from it to demonstrate sampling variability.</p>
+<div id="cell-45" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"="</span><span class="op">*</span><span class="dv">70</span>)</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"6.5 CASE STUDIES: SAMPLING VARIABILITY"</span>)</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"="</span><span class="op">*</span><span class="dv">70</span>)</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Load convergence clubs data</span></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>convergence_data <span class="op">=</span> pd.read_stata(GITHUB_DATA_URL <span class="op">+</span> <span class="st">"Convergence_clubs_2023.dta"</span>)</span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Extract 2014 cross-section</span></span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>data_2014 <span class="op">=</span> convergence_data[convergence_data[<span class="st">'year'</span>] <span class="op">==</span> <span class="dv">2014</span>].copy()</span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a><span class="co"># Create relevant variables</span></span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a>data_2014 <span class="op">=</span> data_2014[[<span class="st">'country'</span>, <span class="st">'rgdppc'</span>, <span class="st">'rk'</span>]].dropna()</span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a>data_2014.columns <span class="op">=</span> [<span class="st">'country'</span>, <span class="st">'productivity'</span>, <span class="st">'capital'</span>]</span>
+<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="ch">\n</span><span class="ss">Data loaded: </span><span class="sc">{</span><span class="bu">len</span>(data_2014)<span class="sc">}</span><span class="ss"> countries in 2014"</span>)</span>
+<span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"</span><span class="ch">\n</span><span class="st">Summary statistics:"</span>)</span>
+<span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(data_2014[[<span class="st">'productivity'</span>, <span class="st">'capital'</span>]].describe())</span>
+<span id="cb10-18"><a href="#cb10-18" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"</span><span class="ch">\n</span><span class="st">First 5 observations:"</span>)</span>
+<span id="cb10-19"><a href="#cb10-19" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(data_2014.head())</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<section id="task-1-estimate-the-population-regression-guided" class="level4">
+<h4 class="anchored" data-anchor-id="task-1-estimate-the-population-regression-guided">Task 1: Estimate the “Population” Regression (Guided)</h4>
+<p><strong>Instructions:</strong> We’ll treat the full dataset of 108 countries as our “population” and estimate the regression of productivity on capital. This will serve as our benchmark—the “true” relationship we’re trying to recover from samples.</p>
+<p><strong>Research question:</strong> What is the relationship between capital per worker and labor productivity across all 108 countries?</p>
+<p><strong>Your task:</strong></p>
+<ol type="1">
+<li>Estimate the regression: <code>productivity = β₁ + β₂ × capital + u</code></li>
+<li>Report the coefficients, standard errors, and R²</li>
+<li>Interpret the slope coefficient: What does β₂ tell us about the capital-productivity relationship?</li>
+</ol>
+<p><strong>Code template:</strong></p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Estimate full-sample ("population") regression</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>population_model <span class="op">=</span> ols(<span class="st">'productivity ~ capital'</span>, data<span class="op">=</span>data_2014).fit()</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(population_model.summary())</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Store population coefficients</span></span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>beta_1_pop <span class="op">=</span> population_model.params[<span class="st">'Intercept'</span>]</span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>beta_2_pop <span class="op">=</span> population_model.params[<span class="st">'capital'</span>]</span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="ch">\n</span><span class="ss">Population coefficients: β₁ = </span><span class="sc">{</span>beta_1_pop<span class="sc">:.4f}</span><span class="ss">, β₂ = </span><span class="sc">{</span>beta_2_pop<span class="sc">:.4f}</span><span class="ss">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><strong>Interpretation guide:</strong> A slope of β₂ = 0.05, for example, means that a $1,000 increase in capital per worker is associated with a $50 increase in GDP per capita (0.05 × 1000 = 50), on average across countries.</p>
+</section>
+<section id="task-2-draw-a-random-sample-and-estimate-regression-semi-guided" class="level4">
+<h4 class="anchored" data-anchor-id="task-2-draw-a-random-sample-and-estimate-regression-semi-guided">Task 2: Draw a Random Sample and Estimate Regression (Semi-guided)</h4>
+<p><strong>Instructions:</strong> Now draw a random sample of 50 countries from the full dataset and estimate the same regression. Compare the sample estimate to the population parameter.</p>
+<p><strong>Your task:</strong></p>
+<ol type="1">
+<li>Draw a random sample of n=50 countries (use <code>data_2014.sample(n=50, random_state=42)</code>)</li>
+<li>Estimate the regression on this sample</li>
+<li>Compare the sample coefficients (b₁, b₂) to the population parameters (β₁, β₂)</li>
+<li>Calculate the sampling error: b₂ - β₂</li>
+</ol>
+<p><strong>Hints:</strong></p>
+<ul>
+<li>The <code>random_state</code> parameter ensures reproducibility</li>
+<li>Sampling error = sample estimate - population parameter</li>
+<li>Even though this is random sampling, you likely won’t get b₂ exactly equal to β₂</li>
+</ul>
+<blockquote class="blockquote">
+<p><strong>Key Concept 6.9: Sample vs.&nbsp;Population Regression</strong></p>
+<p>The full dataset of 108 countries acts as our “population.” When we draw a sample of 50 countries, we’re simulating the real-world situation where researchers work with incomplete data. The difference between the population coefficient (β₂) and the sample coefficient (b₂) is the <strong>sampling error</strong>—an inevitable consequence of working with limited data. This error is random: sometimes b₂ &gt; β₂, sometimes b₂ &lt; β₂, but on average b₂ = β₂ (unbiasedness).</p>
+</blockquote>
+</section>
+<section id="task-3-simulate-the-sampling-distribution-semi-guided" class="level4">
+<h4 class="anchored" data-anchor-id="task-3-simulate-the-sampling-distribution-semi-guided">Task 3: Simulate the Sampling Distribution (Semi-guided)</h4>
+<p><strong>Instructions:</strong> To understand sampling variability, we need to see how b₂ varies across many samples. Run a Monte Carlo simulation: draw 1,000 random samples of n=50, estimate the regression for each, and collect all the b₂ estimates.</p>
+<p><strong>Your task:</strong></p>
+<ol type="1">
+<li>Create a loop that runs 1,000 iterations</li>
+<li>In each iteration: (a) draw a random sample of 50 countries, (b) estimate the regression, (c) store the slope coefficient b₂</li>
+<li>Create a histogram of the 1,000 b₂ estimates</li>
+<li>Calculate the mean and standard deviation of these estimates</li>
+<li>Compare the mean to the population parameter β₂</li>
+</ol>
+<p><strong>Code structure:</strong></p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Monte Carlo simulation</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>n_simulations <span class="op">=</span> <span class="dv">1000</span></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>sample_size <span class="op">=</span> <span class="dv">50</span></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>b2_estimates <span class="op">=</span> []</span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(n_simulations):</span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Draw random sample</span></span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>    sample <span class="op">=</span> data_2014.sample(n<span class="op">=</span>sample_size, replace<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Estimate regression</span></span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a>    model <span class="op">=</span> ols(<span class="st">'productivity ~ capital'</span>, data<span class="op">=</span>sample).fit()</span>
+<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Store slope coefficient</span></span>
+<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a>    b2_estimates.append(model.params[<span class="st">'capital'</span>])</span>
+<span id="cb12-15"><a href="#cb12-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-16"><a href="#cb12-16" aria-hidden="true" tabindex="-1"></a><span class="co"># Analyze sampling distribution</span></span>
+<span id="cb12-17"><a href="#cb12-17" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Mean of b₂ estimates: </span><span class="sc">{</span>np<span class="sc">.</span>mean(b2_estimates)<span class="sc">:.4f}</span><span class="ss">"</span>)</span>
+<span id="cb12-18"><a href="#cb12-18" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Std dev of b₂ estimates: </span><span class="sc">{</span>np<span class="sc">.</span>std(b2_estimates)<span class="sc">:.4f}</span><span class="ss">"</span>)</span>
+<span id="cb12-19"><a href="#cb12-19" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Population parameter β₂: </span><span class="sc">{</span>beta_2_pop<span class="sc">:.4f}</span><span class="ss">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><strong>Expected outcome:</strong> The mean of your 1,000 estimates should be very close to β₂ (confirming unbiasedness), and the histogram should look approximately normal (confirming the Central Limit Theorem).</p>
+</section>
+<section id="task-4-calculate-theoretical-vs.-empirical-standard-error-more-independent" class="level4">
+<h4 class="anchored" data-anchor-id="task-4-calculate-theoretical-vs.-empirical-standard-error-more-independent">Task 4: Calculate Theoretical vs.&nbsp;Empirical Standard Error (More Independent)</h4>
+<p><strong>Instructions:</strong> The standard error of b₂ can be calculated two ways: (1) using the theoretical formula with sample data, (2) using the standard deviation of estimates across many samples (Monte Carlo).</p>
+<p><strong>Your task:</strong></p>
+<ol type="1">
+<li><strong>Theoretical SE</strong>: Take any single sample of n=50, estimate the regression, and extract se(b₂) from the regression output</li>
+<li><strong>Empirical SE</strong>: Use the standard deviation of the 1,000 b₂ estimates from Task 3</li>
+<li>Compare the two: Are they similar? Why or why not?</li>
+</ol>
+<p><strong>Hints:</strong></p>
+<ul>
+<li>The theoretical SE comes from the formula: se(b₂) = sₑ / √[Σ(xᵢ - x̄)²]</li>
+<li>The empirical SE is: std(b₂ estimates from 1,000 samples)</li>
+<li>They should be close but not identical (theoretical SE is an estimate, empirical SE is the “true” sampling variability in this simulation)</li>
+</ul>
+<p><strong>Discussion questions:</strong></p>
+<ul>
+<li>In real-world research, do we have access to the empirical SE? Why or why not?</li>
+<li>Why is the theoretical SE useful if we can only draw one sample?</li>
+</ul>
+</section>
+<section id="task-5-investigate-the-effect-of-sample-size-independent" class="level4">
+<h4 class="anchored" data-anchor-id="task-5-investigate-the-effect-of-sample-size-independent">Task 5: Investigate the Effect of Sample Size (Independent)</h4>
+<p><strong>Instructions:</strong> Theory predicts that standard errors decrease with sample size n according to the relationship se(b₂) ∝ 1/√n.&nbsp;Test this prediction by comparing sampling distributions for different sample sizes.</p>
+<p><strong>Your task:</strong></p>
+<ol type="1">
+<li>Run Monte Carlo simulations (1,000 iterations each) for three sample sizes: n = 20, n = 50, n = 80</li>
+<li>For each sample size, calculate the standard deviation of b₂ estimates</li>
+<li>Create side-by-side histograms of the three sampling distributions</li>
+<li>Verify the theoretical relationship: Does se(b₂) decrease roughly as 1/√n?</li>
+</ol>
+<p><strong>Analysis questions:</strong></p>
+<ul>
+<li>If you double the sample size from n=50 to n=100, how much does the standard error decrease?</li>
+<li>What does this imply about the “cost” of precision in empirical research?</li>
+<li>Would you prefer a study with n=50 or n=80? How much more precise is the larger sample?</li>
+</ul>
+<blockquote class="blockquote">
+<p><strong>Key Concept 6.10: Standard Errors and Sample Size</strong></p>
+<p>Standard errors decrease with the square root of sample size: se(b₂) = σᵤ / √[n × Var(x)]. This means to halve the standard error, you need <strong>four times</strong> the sample size. This fundamental relationship guides study design—small increases in sample size yield diminishing returns in precision. The implication: going from n=100 to n=400 has the same effect on precision as going from n=25 to n=100.</p>
+</blockquote>
+</section>
+<section id="task-6-compare-sampling-variability-across-country-groups-independent" class="level4">
+<h4 class="anchored" data-anchor-id="task-6-compare-sampling-variability-across-country-groups-independent">Task 6: Compare Sampling Variability Across Country Groups (Independent)</h4>
+<p><strong>Instructions:</strong> Does sampling variability differ across subpopulations? Compare the capital-productivity relationship for high-income vs.&nbsp;developing countries.</p>
+<p><strong>Your task (student-designed analysis):</strong></p>
+<ol type="1">
+<li>Split the data into two groups: high-income (productivity &gt; median) vs.&nbsp;developing (productivity ≤ median)</li>
+<li>For each group, run a Monte Carlo simulation with 1,000 samples of n=30</li>
+<li>Compare the sampling distributions: Do they have different means? Different variances?</li>
+<li>Explain any differences you observe</li>
+</ol>
+<p><strong>Research questions to explore:</strong></p>
+<ul>
+<li>Is the capital-productivity relationship stronger in one group vs.&nbsp;the other?</li>
+<li>Is sampling variability higher in one group? Why might this be?</li>
+<li>What does this suggest about generalizing findings across different country contexts?</li>
+</ul>
+<p><strong>Extension:</strong> You could also explore other groupings (by region, by continent, by development indicators) to see how robust the capital-productivity relationship is across different contexts.</p>
+<hr>
+</section>
+</section>
+<section id="what-youve-learned" class="level3">
+<h3 class="anchored" data-anchor-id="what-youve-learned">What You’ve Learned</h3>
+<p>Through this case study, you’ve:</p>
+<ul>
+<li><strong>Experienced firsthand</strong> how OLS estimates vary across samples using real economic data (not just simulated data)</li>
+<li><strong>Verified empirically</strong> that the theoretical standard error formula accurately predicts sampling variability</li>
+<li><strong>Discovered</strong> how sample size affects estimation precision in practice (se ∝ 1/√n)</li>
+<li><strong>Explored</strong> whether sampling variability differs across subpopulations (high-income vs.&nbsp;developing countries)</li>
+<li><strong>Connected</strong> abstract statistical theory (unbiasedness, CLT, standard errors) to tangible empirical patterns</li>
+</ul>
+<p><strong>Key insights:</strong></p>
+<ol type="1">
+<li><strong>Unbiasedness in action</strong>: The average of many sample estimates equals the population parameter, even though individual estimates vary</li>
+<li><strong>Standard errors quantify uncertainty</strong>: The spread of the sampling distribution tells us how much confidence to place in any single estimate</li>
+<li><strong>Sample size matters</strong>: Larger samples yield more precise estimates, but with diminishing returns (√n relationship)</li>
+<li><strong>Context matters</strong>: Sampling variability may differ across subpopulations, affecting the generalizability of findings</li>
+</ol>
+<p><strong>Next steps:</strong> In Chapter 7, you’ll use these standard errors to construct confidence intervals and test hypotheses about regression coefficients—the foundation of statistical inference in econometrics.</p>
+<hr>
+
+
+</section>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+    const viewSource = window.document.getElementById('quarto-view-source') ||
+                       window.document.getElementById('quarto-code-tools-source');
+    if (viewSource) {
+      const sourceUrl = viewSource.getAttribute("data-quarto-source-url");
+      viewSource.addEventListener("click", function(e) {
+        if (sourceUrl) {
+          // rstudio viewer pane
+          if (/\bcapabilities=\b/.test(window.location)) {
+            window.open(sourceUrl);
+          } else {
+            window.location.href = sourceUrl;
+          }
+        } else {
+          const modal = new bootstrap.Modal(document.getElementById('quarto-embedded-source-code-modal'));
+          modal.show();
+        }
+        return false;
+      });
+    }
+    function toggleCodeHandler(show) {
+      return function(e) {
+        const detailsSrc = window.document.querySelectorAll(".cell > details > .sourceCode");
+        for (let i=0; i<detailsSrc.length; i++) {
+          const details = detailsSrc[i].parentElement;
+          if (show) {
+            details.open = true;
+          } else {
+            details.removeAttribute("open");
+          }
+        }
+        const cellCodeDivs = window.document.querySelectorAll(".cell > .sourceCode");
+        const fromCls = show ? "hidden" : "unhidden";
+        const toCls = show ? "unhidden" : "hidden";
+        for (let i=0; i<cellCodeDivs.length; i++) {
+          const codeDiv = cellCodeDivs[i];
+          if (codeDiv.classList.contains(fromCls)) {
+            codeDiv.classList.remove(fromCls);
+            codeDiv.classList.add(toCls);
+          } 
+        }
+        return false;
+      }
+    }
+    const hideAllCode = window.document.getElementById("quarto-hide-all-code");
+    if (hideAllCode) {
+      hideAllCode.addEventListener("click", toggleCodeHandler(false));
+    }
+    const showAllCode = window.document.getElementById("quarto-show-all-code");
+    if (showAllCode) {
+      showAllCode.addEventListener("click", toggleCodeHandler(true));
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="../book/../notebooks_colab/ch05_Bivariate_Data_Summary.html" class="pagination-link" aria-label="Chapter 5: Bivariate Data Summary">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-title">Chapter 5: Bivariate Data Summary</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="../book/../notebooks_colab/ch07_Statistical_Inference_for_Bivariate_Regression.html" class="pagination-link" aria-label="Chapter 7: Statistical Inference for Bivariate Regression">
+        <span class="nav-page-text"><span class="chapter-title">Chapter 7: Statistical Inference for Bivariate Regression</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+
+</body></html>
