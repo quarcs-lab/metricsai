@@ -76,6 +76,7 @@ format:
       text: |
         <script>
         document.addEventListener('DOMContentLoaded', function() {
+          /* ── Book cover image in right sidebar ── */
           var tocNav = document.getElementById('TOC');
           if (tocNav) {
             var coverDiv = document.createElement('div');
@@ -90,6 +91,115 @@ format:
             img.alt = 'Econometrics Powered by AI';
             coverDiv.appendChild(img);
             tocNav.parentNode.insertBefore(coverDiv, tocNav);
+          }
+
+          /* ── Mobile TOC: floating button + slide-in panel ── */
+          var toc = document.getElementById('TOC');
+          if (!toc) return;
+          var tocList = toc.querySelector('ul');
+          if (!tocList || tocList.children.length === 0) return;
+
+          /* Create floating action button */
+          var btn = document.createElement('button');
+          btn.className = 'mobile-toc-btn';
+          btn.setAttribute('aria-label', 'On this page');
+          btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><circle cx="3" cy="6" r="1" fill="currentColor"/><circle cx="3" cy="12" r="1" fill="currentColor"/><circle cx="3" cy="18" r="1" fill="currentColor"/></svg>';
+
+          /* Create overlay backdrop */
+          var overlay = document.createElement('div');
+          overlay.className = 'mobile-toc-overlay';
+
+          /* Create slide-in panel */
+          var panel = document.createElement('div');
+          panel.className = 'mobile-toc-panel';
+
+          /* Panel header with title and close button */
+          var header = document.createElement('div');
+          header.className = 'mobile-toc-header';
+          var title = document.createElement('h3');
+          title.textContent = 'On this page';
+          var closeBtn = document.createElement('button');
+          closeBtn.className = 'mobile-toc-close';
+          closeBtn.setAttribute('aria-label', 'Close');
+          closeBtn.innerHTML = '\u00d7';
+          header.appendChild(title);
+          header.appendChild(closeBtn);
+
+          /* Clone TOC content into panel */
+          var content = document.createElement('div');
+          content.className = 'mobile-toc-content';
+          var tocClone = tocList.cloneNode(true);
+          tocClone.classList.remove('collapse');
+          tocClone.style.display = 'block';
+          content.appendChild(tocClone);
+
+          panel.appendChild(header);
+          panel.appendChild(content);
+          document.body.appendChild(btn);
+          document.body.appendChild(overlay);
+          document.body.appendChild(panel);
+
+          /* Toggle functions */
+          function openPanel() {
+            panel.classList.add('active');
+            overlay.classList.add('active');
+            document.body.style.overflow = 'hidden';
+          }
+          function closePanel() {
+            panel.classList.remove('active');
+            overlay.classList.remove('active');
+            document.body.style.overflow = '';
+          }
+
+          btn.addEventListener('click', openPanel);
+          overlay.addEventListener('click', closePanel);
+          closeBtn.addEventListener('click', closePanel);
+
+          /* Close panel when a TOC link is clicked */
+          content.querySelectorAll('a').forEach(function(link) {
+            link.addEventListener('click', closePanel);
+          });
+
+          /* Close on Escape key */
+          document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && panel.classList.contains('active')) {
+              closePanel();
+            }
+          });
+
+          /* ── Desktop sidebar toggle buttons (floating chevrons) ── */
+          if (window.innerWidth >= 992) {
+            /* Restore saved states */
+            if (localStorage.getItem('left-collapsed') === 'true') {
+              document.body.classList.add('left-collapsed');
+            }
+            if (localStorage.getItem('toc-collapsed') === 'true') {
+              document.body.classList.add('toc-collapsed');
+            }
+
+            /* Left sidebar toggle */
+            var leftBtn = document.createElement('button');
+            leftBtn.className = 'sidebar-toggle sidebar-toggle-left';
+            leftBtn.setAttribute('aria-label', 'Toggle book navigation');
+            leftBtn.title = 'Toggle book navigation';
+            leftBtn.innerHTML = '<i class="bi bi-chevron-left"></i>';
+            document.body.appendChild(leftBtn);
+            leftBtn.addEventListener('click', function() {
+              document.body.classList.toggle('left-collapsed');
+              localStorage.setItem('left-collapsed', document.body.classList.contains('left-collapsed'));
+            });
+
+            /* Right sidebar toggle */
+            var rightBtn = document.createElement('button');
+            rightBtn.className = 'sidebar-toggle sidebar-toggle-right';
+            rightBtn.setAttribute('aria-label', 'Toggle table of contents');
+            rightBtn.title = 'Toggle table of contents';
+            rightBtn.innerHTML = '<i class="bi bi-chevron-right"></i>';
+            document.body.appendChild(rightBtn);
+            rightBtn.addEventListener('click', function() {
+              document.body.classList.toggle('toc-collapsed');
+              localStorage.setItem('toc-collapsed', document.body.classList.contains('toc-collapsed'));
+            });
           }
         });
         </script>
