@@ -384,7 +384,7 @@ When adding new content to notebooks, always ensure a blank line precedes any li
 
 ### Current Status (as of 2026-02-15)
 
-- All 19 pages render successfully (welcome + ch00–ch17)
+- All 18 pages render successfully (preface + ch01–ch17)
 - 4 parts: Statistical Foundations, Bivariate Regression, Multiple Regression, Advanced Topics
 - Google Translate bar on every page (inlined in `_quarto.yml`)
 - List formatting fixed across all notebooks (~460 fixes)
