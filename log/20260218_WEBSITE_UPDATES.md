@@ -46,6 +46,21 @@ Timestamp: "Tool versions as of February 2026."
 
 - AI content accuracy disclaimer with "Found an issue? Submit feedback on GitHub" cross-reference linking to the GitHub issues page.
 
+## Pinned Resources ("Must check" feature)
+
+Added a pinning system to the More Resources section. Pinned resources:
+- Always appear first in any filtered view (sorted above non-pinned)
+- Display an amber "Must check" badge with thumbtack icon next to the type badge
+- Are never hidden by the "Show More" button
+
+Pinned resources (4):
+1. **Using AI Tools Ethically in Research & Education** (ai/video)
+2. **AI Ethics** (ai/course)
+3. **AI for Economists** (ai/website)
+4. **Python Programming for Economics and Finance** (python/course)
+
+Implementation: `pinned: true` property on resource objects, sort in `renderResources()`, badge in `createResourceCard()`.
+
 ## Files Modified
 
-- `index.html` — 85 insertions, 26 deletions
+- `index.html` — resources, acknowledgments, and pinning feature
