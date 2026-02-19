@@ -50,6 +50,7 @@ metricsai/
 ├── data/               # .DTA datasets from AED textbook
 ├── log/                # Timestamped session logs
 ├── legacy/             # Archived files (R, Stata, Python originals)
+├── .venv/              # Python virtual environment (gitignored)
 ├── .claude/rules/      # Detailed workflow docs (PDF, Quarto)
 ├── .claude/skills/     # chapter-standard, compile-book, proofread
 ├── index.html          # Project website (standalone)
@@ -58,6 +59,18 @@ metricsai/
 ```
 
 ## Key Commands
+
+**Activate the virtual environment:**
+
+```bash
+source .venv/bin/activate
+```
+
+**Set up a new virtual environment:**
+
+```bash
+python3 -m venv .venv && source .venv/bin/activate && pip install -r requirements.txt
+```
 
 **Generate a single chapter PDF:**
 

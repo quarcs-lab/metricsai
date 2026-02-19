@@ -60,6 +60,22 @@ Click any badge below to open and run immediately in your browser. Selected chap
 
 **No installation, no downloads, no setup required!**
 
+## 🛠️ Local Development Setup
+
+For local development (not required for Colab usage):
+
+```bash
+# Clone and set up virtual environment
+git clone https://github.com/quarcs-lab/metricsai.git
+cd metricsai
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+
+# Install Playwright browser (for PDF generation only)
+playwright install chromium
+```
+
 ## 🎥 AI Video Lectures with Modal Player
 
 **NEW:** Selected chapters now feature AI-generated video lectures available directly on the [project website](https://quarcs-lab.github.io/metricsai/)!
