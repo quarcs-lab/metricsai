@@ -200,7 +200,7 @@ If `--apply` flag present:
    1. Review changes in Jupyter/VSCode
    2. Fill in Key Concept placeholder with actual content
    3. Run verification again to confirm fixes
-   4. Generate PDF: `python3 generate_pdf_playwright.py ch05`
+   4. Generate PDF: `python3 scripts/generate_pdf_playwright.py ch05`
    ```
 
 ### 5. Provide Recommendations
@@ -405,8 +405,8 @@ Always end with clear next steps:
 
 # 5. Generate PDF when compliance ≥ 90
 cd notebooks_colab && jupyter nbconvert --to html ch05_*.ipynb && cd ..
-python3 inject_print_css.py notebooks_colab/ch05_*.html notebooks_colab/ch05_*_printable.html
-python3 generate_pdf_playwright.py ch05
+python3 scripts/inject_print_css.py notebooks_colab/ch05_*.html notebooks_colab/ch05_*_printable.html
+python3 scripts/generate_pdf_playwright.py ch05
 
 # 6. Verify PDF
 open notebooks_colab/ch05_*.pdf
@@ -426,7 +426,7 @@ git add notebooks_colab/ch07_*.ipynb
 git commit -m "Standardize CH07 to template (compliance: 92/100)"
 
 # Generate PDF for commit
-python3 generate_pdf_playwright.py ch07
+python3 scripts/generate_pdf_playwright.py ch07
 git add notebooks_colab/ch07_*.pdf
 git commit -m "Add CH07 PDF (1.5MB, template compliant)"
 

@@ -60,29 +60,6 @@ The `./log/` directory contains progress logs that preserve conversation context
 
 ---
 
-## Note Improvement Template
-
-The `./notes/` directory contains study notes for 17 chapters. A standard template has been established to maximize learning effectiveness.
-
-**Reference implementation:** `notes/s01 Analysis of Economics Data.md`
-
-**Template components:**
-1. **Learning Objectives** (opening) - Sets clear learning expectations
-2. **Content sections with Key Concept boxes** - Immediate reinforcement after each section
-3. **Consolidated Key Takeaways** (closing) - Comprehensive chapter review
-
-**See `notes/README.md` for complete template documentation.**
-
-**When improving notes:**
-- Follow the exact structure from Chapter 1
-- Maintain consistency across all chapters
-- No deletions (additive only)
-- Document changes in log files
-
-**Quality standard:** Each chapter should be ~9 KB, with 3 visual separators, Learning Objectives, Key Concepts after every section, and consolidated Key Takeaways at the end.
-
----
-
 ## Generating PDFs from Notebooks
 
 ### Overview
@@ -115,8 +92,8 @@ The project uses an automated Playwright-based workflow to generate professional
 cd notebooks_colab && jupyter nbconvert --to html ch05_*.ipynb && cd ..
 
 # Step 2: Inject CSS and generate PDF
-python3 inject_print_css.py notebooks_colab/ch05_*.html notebooks_colab/ch05_*_printable.html
-python3 generate_pdf_playwright.py ch05
+python3 scripts/inject_print_css.py notebooks_colab/ch05_*.html notebooks_colab/ch05_*_printable.html
+python3 scripts/generate_pdf_playwright.py ch05
 
 # Step 3: View result
 open notebooks_colab/ch05_*.pdf
@@ -128,7 +105,7 @@ open notebooks_colab/ch05_*.pdf
 cd notebooks_colab && for nb in ch*.ipynb; do jupyter nbconvert --to html "$nb"; done && cd ..
 
 # Generate all PDFs with Playwright
-python3 generate_pdf_playwright.py --all
+python3 scripts/generate_pdf_playwright.py --all
 
 # Verify output
 ls -lh notebooks_colab/*.pdf
@@ -174,27 +151,23 @@ ls -lh notebooks_colab/*.pdf
 
 ### Key System Files
 
-1. **`generate_pdf_playwright.py`** (248 lines) - Primary PDF generator
+1. **`scripts/generate_pdf_playwright.py`** (248 lines) - Primary PDF generator
    - Uses Playwright's Chromium for reliable PDF rendering
    - Configures exact page settings (format, margins, headers/footers)
    - Handles font loading and waits for complete rendering
    - Supports single chapter (`ch05`) or batch mode (`--all`)
 
-2. **`inject_print_css.py`** - CSS injection tool
+2. **`scripts/inject_print_css.py`** - CSS injection tool
    - Reads HTML files from `jupyter nbconvert`
-   - Injects custom print styles from `notebook_pdf_styles.css`
+   - Injects custom print styles from `scripts/notebook_pdf_styles.css`
    - Creates "_printable.html" versions ready for PDF generation
 
-3. **`notebook_pdf_styles.css`** (426 lines) - Master stylesheet
+3. **`scripts/notebook_pdf_styles.css`** (426 lines) - Master stylesheet
    - All typography, colors, spacing, and layout rules
    - Justified text via `@media print` rules with `!important` flags
    - Font sizes: 11pt body, 9pt input code, 7.5pt output/tables
    - Full-width visual summaries: `width: 100% !important;` overrides inline HTML
    - Uniform 0.75in margins via `@page` rule
-
-4. **Supporting scripts** (optional):
-   - `verify_dollar_signs.py` - Verification tool for currency escaping
-   - `fix_currency_dollars.py` - Automated currency dollar sign escaping (already applied to all notebooks)
 
 ### Prerequisites
 
@@ -218,7 +191,7 @@ python3 -c "from playwright.sync_api import sync_playwright; print('Playwright O
 
 ### Critical CSS Settings
 
-**Justified text alignment** (lines 411-425 in `notebook_pdf_styles.css`):
+**Justified text alignment** (lines 411-425 in `scripts/notebook_pdf_styles.css`):
 ```css
 @media print {
     p { text-align: justify !important; }
@@ -279,7 +252,7 @@ pre {
 
 **Issue: Headers/footers visible in PDF**
 
-- **Cause:** Outdated `generate_pdf_playwright.py`
+- **Cause:** Outdated `scripts/generate_pdf_playwright.py`
 - **Fix:** Verify line 68 has `display_header_footer=False`
 
 **Issue: Playwright not installed**
@@ -307,7 +280,7 @@ This 600+ line document includes:
 
 1. **Save edited notebooks** in Jupyter/Colab
 2. **Convert to HTML:** `cd notebooks_colab && jupyter nbconvert --to html ch##_*.ipynb && cd ..`
-3. **Inject CSS and generate PDF:** `python3 inject_print_css.py notebooks_colab/ch##_*.html notebooks_colab/ch##_*_printable.html && python3 generate_pdf_playwright.py ch##`
+3. **Inject CSS and generate PDF:** `python3 scripts/inject_print_css.py notebooks_colab/ch##_*.html notebooks_colab/ch##_*_printable.html && python3 scripts/generate_pdf_playwright.py ch##`
 4. **Verify results:** `open notebooks_colab/ch##_*.pdf`
 
 **All formatting features are preserved automatically** - no manual adjustments needed!

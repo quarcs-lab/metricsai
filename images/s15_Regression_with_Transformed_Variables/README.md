@@ -1,1 +1,0 @@
-# Regression with Transformed Variables

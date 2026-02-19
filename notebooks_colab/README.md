@@ -47,7 +47,7 @@ This directory contains interactive Jupyter notebooks that combine **explanatory
 
 **Purpose:** Systematic enhancement of all chapter notebooks to match reference template structure for optimal pedagogical effectiveness.
 
-**Reference Template:** Based on `../notes/s01 Analysis of Economics Data.md` structure
+**Reference Template:** Based on CH01-04 gold standard structure
 
 ### Template Requirements Checklist
 
@@ -137,8 +137,8 @@ For each chapter notebook, ensure the following elements are present:
 - `notebooks_colab/ch02_Univariate_Data_Summary.ipynb`
 
 **Reference Files:**
-- Template structure: `../notes/s01 Analysis of Economics Data.md`
-- Content reference: `../notes/s02 Univariate Data Summary.md`
+- Template structure: CH01-04 gold standard
+- Content reference: CH02 reference implementation
 - Plan document: `~/.claude/plans/polished-launching-sutherland.md`
 
 ---
@@ -166,7 +166,7 @@ For each chapter notebook, ensure the following elements are present:
 - `notebooks_colab/ch03_The_Sample_Mean.ipynb`
 
 **Reference Files:**
-- Content reference: `../notes/s03 The Sample Mean.md`
+- Content reference: CH03 notebook
 
 ---
 
@@ -193,7 +193,7 @@ For each chapter notebook, ensure the following elements are present:
 - `notebooks_colab/ch04_Statistical_Inference_for_the_Mean.ipynb`
 
 **Reference Files:**
-- Content reference: `../notes/s04 Statistical Inference for the Mean.md`
+- Content reference: CH04 notebook
 
 ---
 
@@ -220,7 +220,7 @@ For each chapter notebook, ensure the following elements are present:
 - `notebooks_colab/ch05_Bivariate_Data_Summary.ipynb`
 
 **Reference Files:**
-- Content reference: `../notes/s05 Bivariate Data Summary.md`
+- Content reference: CH05 notebook
 
 **Key Concepts Added:**
 - Visual inspection and scatterplot importance
@@ -256,7 +256,7 @@ For each chapter notebook, ensure the following elements are present:
 - `notebooks_colab/ch06_The_Least_Squares_Estimator.ipynb`
 
 **Reference Files:**
-- Content reference: `../notes/s06 The Least Squares Estimator.md`
+- Content reference: CH06 notebook
 
 **Key Concepts Added:**
 - Population vs. sample regression distinction
@@ -313,7 +313,7 @@ import json
 7. CH14-CH17 (Special topics)
 
 **For Each Chapter:**
-1. Read corresponding notes file (e.g., `../notes/s03 The Sample Mean.md`)
+1. Review the existing chapter notebook content
 2. Identify current state vs. template requirements
 3. Create Learning Objectives from notes file
 4. Identify logical locations for Key Concept boxes (after major explanations)
@@ -455,12 +455,12 @@ All notebooks can be automatically exported to professional-quality PDF files us
 ```bash
 # Generate single chapter PDF
 cd notebooks_colab && jupyter nbconvert --to html ch05_*.ipynb && cd ..
-python3 inject_print_css.py notebooks_colab/ch05_*.html notebooks_colab/ch05_*_printable.html
-python3 generate_pdf_playwright.py ch05
+python3 scripts/inject_print_css.py notebooks_colab/ch05_*.html notebooks_colab/ch05_*_printable.html
+python3 scripts/generate_pdf_playwright.py ch05
 
 # Generate all chapter PDFs
 cd notebooks_colab && for nb in ch*.ipynb; do jupyter nbconvert --to html "$nb"; done && cd ..
-python3 generate_pdf_playwright.py --all
+python3 scripts/generate_pdf_playwright.py --all
 ```
 
 **Complete Documentation:** See [../log/20260129_PDF_GENERATION_WORKFLOW.md](../log/20260129_PDF_GENERATION_WORKFLOW.md) for comprehensive workflow, troubleshooting, and technical details.

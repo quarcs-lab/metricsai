@@ -315,8 +315,8 @@ The script maintains a dictionary of legitimate long words common in econometric
 
 # 6. Generate PDF when score >= 90
 cd notebooks_colab && jupyter nbconvert --to html ch08_*.ipynb && cd ..
-python3 inject_print_css.py notebooks_colab/ch08_*.html notebooks_colab/ch08_*_printable.html
-python3 generate_pdf_playwright.py ch08
+python3 scripts/inject_print_css.py notebooks_colab/ch08_*.html notebooks_colab/ch08_*_printable.html
+python3 scripts/generate_pdf_playwright.py ch08
 ```
 
 ### Batch Quality Check

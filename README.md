@@ -268,8 +268,8 @@ Individual Jupyter notebooks can be automatically exported to professional-quali
 cd notebooks_colab && jupyter nbconvert --to html ch05_*.ipynb && cd ..
 
 # Step 2: Inject CSS and generate PDF
-python3 inject_print_css.py notebooks_colab/ch05_*.html notebooks_colab/ch05_*_printable.html && \
-python3 generate_pdf_playwright.py ch05
+python3 scripts/inject_print_css.py notebooks_colab/ch05_*.html notebooks_colab/ch05_*_printable.html && \
+python3 scripts/generate_pdf_playwright.py ch05
 
 # Step 3: View result
 open notebooks_colab/ch05_*.pdf
@@ -282,7 +282,7 @@ open notebooks_colab/ch05_*.pdf
 cd notebooks_colab && for nb in ch*.ipynb; do jupyter nbconvert --to html "$nb"; done && cd ..
 
 # Generate all PDFs with Playwright
-python3 generate_pdf_playwright.py --all
+python3 scripts/generate_pdf_playwright.py --all
 
 # Verify output
 ls -lh notebooks_colab/*.pdf
@@ -316,23 +316,19 @@ ls -lh notebooks_colab/*.pdf
 
 ### System Components
 
-1. **`generate_pdf_playwright.py`** (248 lines) - Primary PDF generator using Playwright
+1. **`scripts/generate_pdf_playwright.py`** (248 lines) - Primary PDF generator using Playwright
    - Precise control over margins, fonts, and page layout
    - Letter format (8.5" × 11") portrait orientation
    - Handles font loading and CSS rendering
 
-2. **`inject_print_css.py`** - CSS injection tool
+2. **`scripts/inject_print_css.py`** - CSS injection tool
    - Injects custom styles into HTML files
    - Creates "_printable.html" versions
 
-3. **`notebook_pdf_styles.css`** (426 lines) - Master stylesheet
+3. **`scripts/notebook_pdf_styles.css`** (426 lines) - Master stylesheet
    - All typography, colors, spacing, and layout rules
    - Justified text with `@media print` rules
    - Optimized font sizes for output blocks
-
-4. **Supporting scripts** (optional):
-   - `verify_dollar_signs.py` - Verification tool for currency escaping
-   - `fix_currency_dollars.py` - Automated currency dollar sign escaping (already applied)
 
 ### Prerequisites
 

@@ -6,8 +6,11 @@ Usage: python inject_print_css.py input.html output.html
 
 import sys
 import re
+from pathlib import Path
 
-def inject_css(input_html, output_html, css_file='notebook_pdf_styles.css'):
+def inject_css(input_html, output_html, css_file=None):
+    if css_file is None:
+        css_file = str(Path(__file__).parent / 'notebook_pdf_styles.css')
     # Read the CSS
     with open(css_file, 'r') as f:
         css_content = f.read()

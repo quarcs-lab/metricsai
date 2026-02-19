@@ -130,10 +130,10 @@ For each chapter that needs regeneration, run the 3-step pipeline:
 cd notebooks_colab && jupyter nbconvert --to html chXX_*.ipynb && cd ..
 
 # Step 2: Inject print CSS
-python3 inject_print_css.py notebooks_colab/chXX_*.html notebooks_colab/chXX_*_printable.html
+python3 scripts/inject_print_css.py notebooks_colab/chXX_*.html notebooks_colab/chXX_*_printable.html
 
 # Step 3: Generate PDF via Playwright
-python3 generate_pdf_playwright.py chXX
+python3 scripts/generate_pdf_playwright.py chXX
 ```
 
 Report each chapter's PDF size after generation.
@@ -227,8 +227,8 @@ All three TOC sections include clickable hyperlinks (753 total) that jump direct
 Each chapter PDF is generated through a 3-step pipeline:
 
 1. **jupyter nbconvert --to html**: Converts `.ipynb` to raw HTML with all outputs
-2. **inject_print_css.py**: Injects `notebook_pdf_styles.css` for professional formatting (justified text, brand colors, optimized font sizes)
-3. **generate_pdf_playwright.py**: Renders HTML to PDF via Chromium with precise margin and layout control
+2. **scripts/inject_print_css.py**: Injects `scripts/notebook_pdf_styles.css` for professional formatting (justified text, brand colors, optimized font sizes)
+3. **scripts/generate_pdf_playwright.py**: Renders HTML to PDF via Chromium with precise margin and layout control
 
 ### Key Formatting
 - **Page**: Letter (8.5" x 11"), 0.75" margins
@@ -312,9 +312,9 @@ jupyter nbconvert --version
 | File | Purpose |
 |------|---------|
 | `scripts/compile_book.py` | Book compilation script (merges PDFs, generates TOCs, adds bookmarks, copyright page) |
-| `generate_pdf_playwright.py` | Chapter PDF generator (Playwright-based) |
-| `inject_print_css.py` | CSS injection for printable HTML |
-| `notebook_pdf_styles.css` | Master stylesheet for PDF formatting |
+| `scripts/generate_pdf_playwright.py` | Chapter PDF generator (Playwright-based) |
+| `scripts/inject_print_css.py` | CSS injection for printable HTML |
+| `scripts/notebook_pdf_styles.css` | Master stylesheet for PDF formatting |
 | `images/book1cover.jpg` | Cover image (1407x1916px) |
 | `notebooks_colab/metricsAI_complete_book.pdf` | Output: compiled book |
 | `notebooks_colab/chXX_*.pdf` | Individual chapter PDFs |

@@ -47,10 +47,10 @@ notebook.ipynb
     ▼ jupyter nbconvert --to html
 chXX_Title.html
     │
-    ▼ inject_print_css.py (injects notebook_pdf_styles.css)
+    ▼ scripts/inject_print_css.py (injects scripts/notebook_pdf_styles.css)
 chXX_Title_printable.html
     │
-    ▼ generate_pdf_playwright.py (Chromium rendering)
+    ▼ scripts/generate_pdf_playwright.py (Chromium rendering)
 chXX_Title.pdf (1.0-2.0 MB each)
 ```
 
@@ -59,12 +59,12 @@ chXX_Title.pdf (1.0-2.0 MB each)
 ```bash
 # Single chapter
 cd notebooks_colab && jupyter nbconvert --to html ch05_*.ipynb && cd ..
-python3 inject_print_css.py notebooks_colab/ch05_*.html notebooks_colab/ch05_*_printable.html
-python3 generate_pdf_playwright.py ch05
+python3 scripts/inject_print_css.py notebooks_colab/ch05_*.html notebooks_colab/ch05_*_printable.html
+python3 scripts/generate_pdf_playwright.py ch05
 
 # All chapters
 cd notebooks_colab && for nb in ch*.ipynb; do jupyter nbconvert --to html "$nb"; done && cd ..
-python3 generate_pdf_playwright.py --all
+python3 scripts/generate_pdf_playwright.py --all
 ```
 
 ## Book Compilation Script
