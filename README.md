@@ -153,6 +153,32 @@ The HTML book complements the interactive notebooks, ideal for:
 - Quick reference and navigation
 - Students who prefer a traditional book layout
 
+## 🔄 Jupytext: Dual-Format Notebooks
+
+All notebooks are maintained in two synchronized formats using [Jupytext](https://jupytext.readthedocs.io/):
+
+- **`.ipynb`** — Standard Jupyter notebook (runs in Colab, contains outputs)
+- **`.md`** — MyST Markdown source (text-based, ideal for version control)
+
+Edit either format — Jupytext synchronizes them automatically. Configuration is embedded in each notebook's metadata (no separate config files needed).
+
+### Benefits
+
+- **Better diffs** — Text-based `.md` files produce clean, readable git diffs
+- **Easy editing** — Edit notebooks in any text editor or IDE
+- **Reduced conflicts** — Merge conflicts are simpler to resolve in plain text
+- **Full compatibility** — `.ipynb` files work in Colab/Jupyter without Jupytext installed
+
+### Quick Reference
+
+```bash
+# Sync a single notebook after editing the .md file
+jupytext --sync notebooks_colab/ch05_*.md
+
+# Sync all notebooks
+jupytext --sync notebooks_colab/*.ipynb
+```
+
 ## 📄 Automated PDF Generation
 
 Individual Jupyter notebooks can be automatically exported to professional-quality PDF files using Playwright. The system preserves all content including markdown text, code, mathematical equations, tables, and figures with precise formatting control.

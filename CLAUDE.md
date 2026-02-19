@@ -43,7 +43,7 @@ The `./log/` directory preserves context across sessions. Chat sessions can die 
 
 ```text
 metricsai/
-├── notebooks_colab/    # 18 Jupyter notebooks (ch00–ch17)
+├── notebooks_colab/    # 18 chapters (.ipynb + .md via Jupytext)
 ├── scripts/            # PDF generation pipeline + utilities
 ├── book/               # Quarto HTML book (symlinks to notebooks_colab/ and images/)
 ├── images/             # Cover images + chapter visual summaries
@@ -86,12 +86,19 @@ cd book && quarto render
 cd book && quarto render notebooks_colab/ch05_Bivariate_Data_Summary.ipynb
 ```
 
+**Sync Jupytext formats after editing a notebook:**
+
+```bash
+jupytext --sync notebooks_colab/ch05_*.ipynb
+```
+
 ## Conventions
 
 - **Notebook naming:** `chNN_Title_With_Underscores.ipynb` (ch00–ch17)
 - **Images in notebooks:** Use absolute GitHub URLs (`https://raw.githubusercontent.com/quarcs-lab/metricsai/main/images/...`)
 - **Markdown lists:** Always leave a blank line before any list (Pandoc requirement for Quarto)
 - **Log entries:** `YYYYMMDD_HHMM.md` in `./log/`
+- **Jupytext sync:** Each notebook has paired `.ipynb` and `.md` (MyST) files — edit either, Jupytext syncs automatically
 - **Build artifacts:** HTML and PDF files in `notebooks_colab/` are gitignored
 
 ## Architecture
