@@ -229,7 +229,7 @@ Always end with clear next steps:
 - Full template: `.claude/skills/chapter-standard/references/TEMPLATE_REQUIREMENTS.md`
 - Checklist: `.claude/skills/chapter-standard/references/VERIFICATION_CHECKLIST.md`
 - CH02 example: `.claude/skills/chapter-standard/references/CH02_REFERENCE.md`
-- Master template: `notebooks_colab/MASTER_TEMPLATE_CHAPTER_STRUCTURE.md`
+- Master template: `legacy/docs/MASTER_TEMPLATE_CHAPTER_STRUCTURE.md`
 ```
 
 ---
@@ -295,7 +295,7 @@ Always end with clear next steps:
 
 ### Primary Source
 
-**File**: `notebooks_colab/MASTER_TEMPLATE_CHAPTER_STRUCTURE.md` (1,280 lines)
+**File**: `legacy/docs/MASTER_TEMPLATE_CHAPTER_STRUCTURE.md` (1,280 lines)
 - Version 2.0 (January 31, 2026)
 - Authoritative canonical template
 - Complete hierarchical structure
@@ -566,7 +566,7 @@ After using this skill, you should see:
 ## Support & Documentation
 
 **Questions about the template?**
-- Read: `notebooks_colab/MASTER_TEMPLATE_CHAPTER_STRUCTURE.md`
+- Read: `legacy/docs/MASTER_TEMPLATE_CHAPTER_STRUCTURE.md`
 - Reference: `.claude/skills/chapter-standard/references/TEMPLATE_REQUIREMENTS.md`
 - Example: `.claude/skills/chapter-standard/references/CH02_REFERENCE.md`
 
@@ -584,5 +584,5 @@ After using this skill, you should see:
 **Version**: 1.0
 **Created**: February 6, 2026
 **Based on**: CH01-04 Part I (compliance: 4.95/5)
-**Primary Template**: `notebooks_colab/MASTER_TEMPLATE_CHAPTER_STRUCTURE.md` (v2.0)
+**Primary Template**: `legacy/docs/MASTER_TEMPLATE_CHAPTER_STRUCTURE.md` (v2.0)
 **Skill Author**: AI-assisted implementation following best practices

@@ -2,14 +2,14 @@
 
 **Version**: 2.0 (Extracted from MASTER_TEMPLATE_CHAPTER_STRUCTURE.md)
 **Date**: February 6, 2026
-**Primary Source**: `notebooks_colab/MASTER_TEMPLATE_CHAPTER_STRUCTURE.md` (1,280 lines)
+**Primary Source**: `legacy/docs/MASTER_TEMPLATE_CHAPTER_STRUCTURE.md` (1,280 lines)
 **Purpose**: Quick reference for chapter standardization
 
 ---
 
 ## Primary Template Source
 
-**Authoritative Template**: `notebooks_colab/MASTER_TEMPLATE_CHAPTER_STRUCTURE.md`
+**Authoritative Template**: `legacy/docs/MASTER_TEMPLATE_CHAPTER_STRUCTURE.md`
 - Version 2.0 (January 31, 2026)
 - Complete hierarchical structure (H1→H2→H3→H4)
 - Two case study approaches (Markdown-only vs Code cells)
@@ -749,6 +749,6 @@ Skill flags:
 
 **Version**: 2.0
 **Created**: February 6, 2026
-**Based on**: `notebooks_colab/MASTER_TEMPLATE_CHAPTER_STRUCTURE.md` (v2.0)
+**Based on**: `legacy/docs/MASTER_TEMPLATE_CHAPTER_STRUCTURE.md` (v2.0)
 **For**: `chapter-standard` skill verification
 **Always refer to**: Master template for complete details

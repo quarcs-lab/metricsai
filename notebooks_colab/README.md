@@ -70,20 +70,21 @@ For each chapter notebook, ensure the following elements are present:
 | **CH02** | ✅ Complete | **✅ TEMPLATE** (Feb 4, 2026) | 74 cells, 9 Key Concepts, 1.83 MB PDF - **Reference** |
 | **CH03** | ✅ Complete | **✅ VERIFIED** (Feb 4, 2026) | 48 cells, 9 Key Concepts, 1.30 MB PDF - **Part I** |
 | **CH04** | ✅ Complete | **✅ VERIFIED** (Feb 4, 2026) | 65 cells, 11 Key Concepts, 1.70 MB PDF - **Part I** |
-| CH05 | ✅ Complete | **DONE** (Jan 30, 2026) | Option 2 applied - 50→62 cells |
-| CH06 | ✅ Complete | **DONE** (Jan 30, 2026) | Option 2 applied - 29→39 cells |
-| CH07 | ⚠️ Partial | Not Started | Needs full template compliance |
-| CH08 | ⚠️ Partial | Not Started | Recently fixed, needs template elements |
-| CH09 | ⚠️ Partial | Not Started | Has good content, needs Key Concepts |
-| CH10 | ⚠️ Partial | Not Started | Needs subsection numbering |
-| CH11 | ⚠️ Partial | Not Started | Needs template compliance |
-| CH12 | ⚠️ Partial | Not Started | Needs template compliance |
-| CH14 | ⚠️ Partial | Not Started | Needs template compliance |
-| CH15 | ⚠️ Partial | Not Started | Needs template compliance |
-| CH16 | ⚠️ Partial | Not Started | Needs template compliance |
-| CH17 | ⚠️ Partial | Not Started | Needs template compliance |
+| CH05 | ✅ Complete | **✅ VERIFIED** (Feb 2026) | Score: 95 |
+| CH06 | ✅ Complete | **✅ VERIFIED** (Feb 2026) | Score: 96 |
+| CH07 | ✅ Complete | **✅ VERIFIED** (Feb 2026) | Score: 93 |
+| CH08 | ✅ Complete | **✅ VERIFIED** (Feb 2026) | Score: 93 |
+| CH09 | ✅ Complete | **✅ VERIFIED** (Feb 2026) | Score: 96 |
+| CH10 | ✅ Complete | **✅ VERIFIED** (Feb 2026) | Score: 100 |
+| CH11 | ✅ Complete | **✅ VERIFIED** (Feb 2026) | Score: 95 |
+| CH12 | ✅ Complete | **✅ VERIFIED** (Feb 2026) | Score: 98 |
+| CH13 | ✅ Complete | **✅ VERIFIED** (Feb 2026) | Score: 93 (integrated case study) |
+| CH14 | ✅ Complete | **✅ VERIFIED** (Feb 2026) | Score: 100 |
+| CH15 | ✅ Complete | **✅ VERIFIED** (Feb 2026) | Score: 98 |
+| CH16 | ✅ Complete | **✅ VERIFIED** (Feb 2026) | Score: 98 |
+| CH17 | ✅ Complete | **✅ VERIFIED** (Feb 2026) | Score: 100 |
 
-**Progress:** 6 of 17 chapters fully compliant (35.3%)
+**Progress:** 17 of 17 chapters fully compliant (100%) — All chapters at 90+ standardization score
 **Part I Status:** ⭐⭐⭐⭐⭐ Exemplary - 4/4 chapters publication-ready (Feb 4, 2026)
 
 ### Recent Implementations
@@ -470,7 +471,7 @@ python3 scripts/generate_pdf_playwright.py --all
 ### ✅ Chapter 1: Analysis of Economics Data
 **File:** [ch01_Analysis_of_Economics_Data.ipynb](ch01_Analysis_of_Economics_Data.ipynb)
 
-**Open in Colab:** [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/cmg777/aed/blob/main/notebooks_colab/ch01_Analysis_of_Economics_Data.ipynb)
+**Open in Colab:** [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/quarcs-lab/metricsai/blob/main/notebooks_colab/ch01_Analysis_of_Economics_Data.ipynb)
 
 **Topics Covered:**
 - Introduction to regression analysis
@@ -497,7 +498,7 @@ python3 scripts/generate_pdf_playwright.py --all
 ### ✅ Chapter 2: Univariate Data Summary
 **File:** [ch02_Univariate_Data_Summary.ipynb](ch02_Univariate_Data_Summary.ipynb)
 
-**Open in Colab:** [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/cmg777/aed/blob/main/notebooks_colab/ch02_Univariate_Data_Summary.ipynb)
+**Open in Colab:** [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/quarcs-lab/metricsai/blob/main/notebooks_colab/ch02_Univariate_Data_Summary.ipynb)
 
 **Topics Covered:**
 - Summary statistics for numerical data (mean, median, standard deviation, quartiles, skewness, kurtosis)
@@ -533,7 +534,7 @@ python3 scripts/generate_pdf_playwright.py --all
 ### ✅ Chapter 4: Statistical Inference for the Mean
 **File:** [ch04_Statistical_Inference_for_the_Mean.ipynb](ch04_Statistical_Inference_for_the_Mean.ipynb)
 
-**Open in Colab:** [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/cmg777/aed/blob/main/notebooks_colab/ch04_Statistical_Inference_for_the_Mean.ipynb)
+**Open in Colab:** [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/quarcs-lab/metricsai/blob/main/notebooks_colab/ch04_Statistical_Inference_for_the_Mean.ipynb)
 
 **Topics Covered:**
 - t-distribution vs normal distribution
@@ -570,7 +571,7 @@ python3 scripts/generate_pdf_playwright.py --all
 ### ✅ Chapter 9: Models with Natural Logarithms
 **File:** [ch09_Models_with_Natural_Logarithms.ipynb](ch09_Models_with_Natural_Logarithms.ipynb)
 
-**Open in Colab:** [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/cmg777/aed/blob/main/notebooks_colab/ch09_Models_with_Natural_Logarithms.ipynb)
+**Open in Colab:** [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/quarcs-lab/metricsai/blob/main/notebooks_colab/ch09_Models_with_Natural_Logarithms.ipynb)
 
 **Topics Covered:**
 - Natural logarithm properties and approximations
@@ -605,7 +606,7 @@ python3 scripts/generate_pdf_playwright.py --all
 ### ✅ Chapter 3: The Sample Mean
 **File:** [ch03_The_Sample_Mean.ipynb](ch03_The_Sample_Mean.ipynb)
 
-**Open in Colab:** [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/cmg777/aed/blob/main/notebooks_colab/ch03_The_Sample_Mean.ipynb)
+**Open in Colab:** [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/quarcs-lab/metricsai/blob/main/notebooks_colab/ch03_The_Sample_Mean.ipynb)
 
 **Topics Covered:**
 - Random variables and their properties (mean, variance, standard deviation)
@@ -642,7 +643,7 @@ python3 scripts/generate_pdf_playwright.py --all
 ### ✅ Chapter 10: Data Summary for Multiple Regression
 **File:** [ch10_Data_Summary_for_Multiple_Regression.ipynb](ch10_Data_Summary_for_Multiple_Regression.ipynb)
 
-**Open in Colab:** [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/cmg777/aed/blob/main/notebooks_colab/ch10_Data_Summary_for_Multiple_Regression.ipynb)
+**Open in Colab:** [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/quarcs-lab/metricsai/blob/main/notebooks_colab/ch10_Data_Summary_for_Multiple_Regression.ipynb)
 
 **Topics Covered:**
 - Multiple regression with several explanatory variables
@@ -677,7 +678,7 @@ python3 scripts/generate_pdf_playwright.py --all
 ### ✅ Chapter 5: Bivariate Data Summary
 **File:** [ch05_Bivariate_Data_Summary.ipynb](ch05_Bivariate_Data_Summary.ipynb)
 
-**Open in Colab:** [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/cmg777/aed/blob/main/notebooks_colab/ch05_Bivariate_Data_Summary.ipynb)
+**Open in Colab:** [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/quarcs-lab/metricsai/blob/main/notebooks_colab/ch05_Bivariate_Data_Summary.ipynb)
 
 **Topics Covered:**
 - Two-way scatter plots and visualization
@@ -712,7 +713,7 @@ python3 scripts/generate_pdf_playwright.py --all
 ### ✅ Chapter 6: The Least Squares Estimator
 **File:** [ch06_The_Least_Squares_Estimator.ipynb](ch06_The_Least_Squares_Estimator.ipynb)
 
-**Open in Colab:** [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/cmg777/aed/blob/main/notebooks_colab/ch06_The_Least_Squares_Estimator.ipynb)
+**Open in Colab:** [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/quarcs-lab/metricsai/blob/main/notebooks_colab/ch06_The_Least_Squares_Estimator.ipynb)
 
 **Topics Covered:**
 - Population regression line vs sample regression line
@@ -743,7 +744,7 @@ python3 scripts/generate_pdf_playwright.py --all
 ### ✅ Chapter 7: Statistical Inference for Bivariate Regression
 **File:** [ch07_Statistical_Inference_for_Bivariate_Regression.ipynb](ch07_Statistical_Inference_for_Bivariate_Regression.ipynb)
 
-**Open in Colab:** [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/cmg777/aed/blob/main/notebooks_colab/ch07_Statistical_Inference_for_Bivariate_Regression.ipynb)
+**Open in Colab:** [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/quarcs-lab/metricsai/blob/main/notebooks_colab/ch07_Statistical_Inference_for_Bivariate_Regression.ipynb)
 
 **Topics Covered:**
 - t-distribution and t-statistics
@@ -775,7 +776,7 @@ python3 scripts/generate_pdf_playwright.py --all
 ### ✅ Chapter 8: Case Studies for Bivariate Regression
 **File:** [ch08_Case_Studies_for_Bivariate_Regression.ipynb](ch08_Case_Studies_for_Bivariate_Regression.ipynb)
 
-**Open in Colab:** [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/cmg777/aed/blob/main/notebooks_colab/ch08_Case_Studies_for_Bivariate_Regression.ipynb)
+**Open in Colab:** [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/quarcs-lab/metricsai/blob/main/notebooks_colab/ch08_Case_Studies_for_Bivariate_Regression.ipynb)
 
 **Topics Covered:**
 - Cross-country regression analysis
@@ -806,7 +807,7 @@ python3 scripts/generate_pdf_playwright.py --all
 ### ✅ Chapter 11: Statistical Inference for Multiple Regression
 **File:** [ch11_Statistical_Inference_for_Multiple_Regression.ipynb](ch11_Statistical_Inference_for_Multiple_Regression.ipynb)
 
-**Open in Colab:** [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/cmg777/aed/blob/main/notebooks_colab/ch11_Statistical_Inference_for_Multiple_Regression.ipynb)
+**Open in Colab:** [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/quarcs-lab/metricsai/blob/main/notebooks_colab/ch11_Statistical_Inference_for_Multiple_Regression.ipynb)
 
 **Topics Covered:**
 - Multiple regression model
@@ -838,7 +839,7 @@ python3 scripts/generate_pdf_playwright.py --all
 ### ✅ Chapter 12: Further Topics in Multiple Regression
 **File:** [ch12_Further_Topics_in_Multiple_Regression.ipynb](ch12_Further_Topics_in_Multiple_Regression.ipynb)
 
-**Open in Colab:** [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/cmg777/aed/blob/main/notebooks_colab/ch12_Further_Topics_in_Multiple_Regression.ipynb)
+**Open in Colab:** [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/quarcs-lab/metricsai/blob/main/notebooks_colab/ch12_Further_Topics_in_Multiple_Regression.ipynb)
 
 **Topics Covered:**
 - Heteroskedasticity-robust inference
@@ -870,7 +871,7 @@ python3 scripts/generate_pdf_playwright.py --all
 ### ✅ Chapter 14: Regression with Indicator Variables
 **File:** [ch14_Regression_with_Indicator_Variables.ipynb](ch14_Regression_with_Indicator_Variables.ipynb)
 
-**Open in Colab:** [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/cmg777/aed/blob/main/notebooks_colab/ch14_Regression_with_Indicator_Variables.ipynb)
+**Open in Colab:** [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/quarcs-lab/metricsai/blob/main/notebooks_colab/ch14_Regression_with_Indicator_Variables.ipynb)
 
 **Topics Covered:**
 - Dummy variables (0/1 indicators)
@@ -902,7 +903,7 @@ python3 scripts/generate_pdf_playwright.py --all
 ### ✅ Chapter 15: Regression with Transformed Variables
 **File:** [ch15_Regression_with_Transformed_Variables.ipynb](ch15_Regression_with_Transformed_Variables.ipynb)
 
-**Open in Colab:** [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/cmg777/aed/blob/main/notebooks_colab/ch15_Regression_with_Transformed_Variables.ipynb)
+**Open in Colab:** [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/quarcs-lab/metricsai/blob/main/notebooks_colab/ch15_Regression_with_Transformed_Variables.ipynb)
 
 **Topics Covered:**
 - Log-log models (elasticities)
@@ -934,7 +935,7 @@ python3 scripts/generate_pdf_playwright.py --all
 ### ✅ Chapter 16: Checking the Model and Data
 **File:** [ch16_Checking_the_Model_and_Data.ipynb](ch16_Checking_the_Model_and_Data.ipynb)
 
-**Open in Colab:** [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/cmg777/aed/blob/main/notebooks_colab/ch16_Checking_the_Model_and_Data.ipynb)
+**Open in Colab:** [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/quarcs-lab/metricsai/blob/main/notebooks_colab/ch16_Checking_the_Model_and_Data.ipynb)
 
 **Topics Covered:**
 - Residual analysis
@@ -968,7 +969,7 @@ python3 scripts/generate_pdf_playwright.py --all
 ### ✅ Chapter 17: Panel Data, Time Series Data, Causation
 **File:** [ch17_Panel_Data_Time_Series_Data_Causation.ipynb](ch17_Panel_Data_Time_Series_Data_Causation.ipynb)
 
-**Open in Colab:** [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/cmg777/aed/blob/main/notebooks_colab/ch17_Panel_Data_Time_Series_Data_Causation.ipynb)
+**Open in Colab:** [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/quarcs-lab/metricsai/blob/main/notebooks_colab/ch17_Panel_Data_Time_Series_Data_Causation.ipynb)
 
 **Topics Covered:**
 - Panel data structure
@@ -1052,8 +1053,9 @@ Each notebook follows a consistent pedagogical structure:
 ## Educational Design
 
 ### Content Sources
-- **Python code**: From validated scripts in `code_python/` (100% tested)
-- **Explanatory text**: Adapted from `slides_markdown/` presentations
+
+- **Python code**: From validated and tested notebook implementations
+- **Explanatory text**: Adapted from chapter presentations and textbook
 - **Economic interpretation**: Emphasized throughout
 
 ### Pedagogical Principles
@@ -1116,7 +1118,7 @@ Outputs are displayed directly in the notebook. Optionally, outputs can be saved
 
 **Q: Notebook won't open in Colab**
 - **A:** Make sure you're using the correct GitHub URL format:
-  `https://colab.research.google.com/github/cmg777/aed/blob/main/notebooks_colab/NOTEBOOK_NAME.ipynb`
+  `https://colab.research.google.com/github/quarcs-lab/metricsai/blob/main/notebooks_colab/NOTEBOOK_NAME.ipynb`
 
 **Q: "ModuleNotFoundError" in Colab**
 - **A:** Add a cell with: `!pip install PACKAGE_NAME` and run it first
@@ -1186,10 +1188,9 @@ Before committing new notebooks:
 Contributions welcome! To add a new notebook:
 
 1. Follow the CH01 template structure
-2. Use content from `code_python/` (code) and `slides_markdown/` (explanations)
-3. Test thoroughly in Google Colab
-4. Update this README with notebook details
-5. Submit pull request
+2. Test thoroughly in Google Colab
+3. Update this README with notebook details
+4. Submit pull request
 
 ## References
 
@@ -1197,13 +1198,9 @@ Contributions welcome! To add a new notebook:
 - Cameron, A. Colin (2021). "Analysis of Economics Data: An Introduction to Econometrics"
 - Website: https://cameron.econ.ucdavis.edu/aed/index.html
 
-**Python Scripts:**
-- Source: [`../code_python/`](../code_python/)
-- All scripts 100% tested (Jan 2026)
+**Legacy Code:**
 
-**Slide Presentations:**
-- Source: [`../slides_markdown/`](../slides_markdown/)
-- Quarto-format educational content
+- Original Python/R/Stata scripts archived in [`../legacy/`](../legacy/)
 
 ## Support
 
@@ -1223,7 +1220,7 @@ Python notebooks by Carlos Mendez (2026)
 
 ---
 
-**Last Updated:** January 20, 2026
-**Status:** 16 notebooks complete (CH01-CH04, CH05-CH08, CH09-CH12, CH14-CH17)
+**Last Updated:** February 19, 2026
+**Status:** 18 notebooks complete (CH00 Preface + CH01–CH17), all at 90+ standardization score
 **Quality:** All notebooks validated and tested in Google Colab
 **Coverage:** Complete coverage of core econometric methods from introductory to advanced topics

@@ -111,12 +111,10 @@ python3 scripts/generate_pdf_playwright.py --all
 ls -lh notebooks_colab/*.pdf
 ```
 
-### Current Status (as of 2026-01-29)
+### Current Status (as of 2026-02-08)
 
-- ✅ ch00_Preface.pdf (0.82 MB)
-- ✅ ch01_Analysis_of_Economics_Data.pdf (1.00 MB)
-- ✅ ch02_Univariate_Data_Summary.pdf (1.65 MB)
-- ⏳ ch03-ch17 (ready to generate on demand)
+- ✅ All 18 chapter PDFs generated (ch00–ch17, 0.9–2.0 MB each)
+- ✅ Compiled book: `notebooks_colab/metricsAI_complete_book.pdf` (62.3 MB, 900 pages)
 
 ### Professional Formatting Features
 

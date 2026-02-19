@@ -113,147 +113,45 @@ All 17 chapters have been transformed into professional, book-style educational 
 - **Consistent structure**: Same pedagogical pattern throughout
 - **Publication ready**: Professional formatting suitable for textbook use
 
-### Template Documentation
-
-The enhanced template is documented in [`code_python/REPORT_TEMPLATE.md`](code_python/REPORT_TEMPLATE.md) with:
-- Complete structure guidelines
-- Usage instructions
-- Quality standards
-- Example concept boxes for common topics
-- Best practices for educational content
-
-All enhanced chapters are available in the [`code_python/`](code_python/) directory as standalone Python scripts with corresponding markdown reports following the enhanced template.
-
 ## 📊 Case Studies: Real Research Applications
 
-**NEW in Chapter 1**: Students can now apply econometric tools to authentic research data through hands-on case studies.
+Each chapter includes hands-on case studies that bridge textbook theory with real economic research. Students apply econometric tools to authentic datasets with progressive tasks (guided → semi-guided → independent).
 
-### What's Included
+### Featured Datasets
 
-Chapter 1 now features a comprehensive **Case Studies section (1.11)** that bridges textbook theory with real economic research:
+**1. Economic Convergence Clubs** ([Mendez, 2020](https://github.com/quarcs-lab/mendez2020-convergence-clubs-code-data))
 
-**Featured Research**: [Economic Convergence Clubs](https://github.com/quarcs-lab/mendez2020-convergence-clubs-code-data) (Mendez, 2020)
-- **Research Question**: Do countries converge to similar development levels or form distinct "convergence clubs"?
-- **Data**: Panel dataset with 108 countries, 1990-2014, 27 economic variables
-- **Topics**: Labor productivity, capital accumulation, economic growth patterns
+- 108 countries, 1990–2014, panel data on GDP, productivity, capital, human capital, TFP
+- Used in CH01, CH02, CH04, CH07–CH12, CH14–CH17
 
-### Structure
+**2. Can Satellites See Development?** ([DS4Bolivia](https://github.com/quarcs-lab/ds4bolivia))
 
-Each case study includes:
+- 339 Bolivian municipalities, satellite nighttime lights + 64 embedding features, SDG indices
+- Used in CH01, CH02, CH04, CH05, CH07, CH10–CH12, CH14–CH17
 
-1. **Research Overview** (2-3 paragraphs)
-   - Background on the research question
-   - Economic theory and hypotheses
-   - Data description and source
-
-2. **Key Concept Boxes** (3 boxes in CH01)
-   - Economic convergence hypothesis
-   - Panel data structure
-   - Productivity-capital relationships
-
-3. **Progressive Tasks** (6 tasks in CH01)
-   - **Task 1-2**: Guided (data exploration, descriptive statistics)
-   - **Task 3-4**: Semi-guided (visualization, time series)
-   - **Task 5-6**: Independent (regression, comparative analysis)
-
-4. **Starter Code Provided**
-   - Students complete the analysis with structured guidance
-   - Comments indicate what to add
-   - Scaffolded from simple to complex
-
-### Learning Benefits
-
-**Apply Chapter Tools**: Students practice:
-- Loading and exploring panel data (multi-index structure)
-- Generating descriptive statistics across countries and time
-- Creating scatter plots and time series visualizations
-- Estimating simple OLS regressions
-- Comparing patterns between country groups
-- Distinguishing association from causation
-
-**Real Research Context**:
-- See how econometric methods answer important economic questions
-- Work with authentic data from published research
-- Understand empirical patterns that motivate advanced methods
-- Bridge gap between textbook examples and research practice
-
-**Progressive Skill Building**:
-- Tasks increase in difficulty (guided → independent)
-- Each task applies specific Chapter 1 tools
-- Critical thinking prompts throughout
-- Connection to future chapters
-
-### Data Access
-
-All data loads directly from GitHub (no downloads required):
-
-```python
-# Load convergence clubs data
-df1 = pd.read_csv(
-    "https://raw.githubusercontent.com/quarcs-lab/mendez2020-convergence-clubs-code-data/master/assets/dat.csv",
-    index_col=["country", "year"]
-).sort_index()
-
-# Load data dictionary
-df2 = pd.read_csv(
-    "https://raw.githubusercontent.com/quarcs-lab/mendez2020-convergence-clubs-code-data/master/assets/dat-definitions.csv"
-)
-```
-
-**Dataset Features**:
-- 2,700 observations (country-year pairs)
-- 108 countries across all income levels
-- 25 years of data (1990-2014)
-- Variables: GDP, productivity, capital, human capital, TFP
-
-### Extended Template
-
-Chapter 1 establishes the **canonical template** for all future chapters:
-
-**Standard Chapter Structure**:
-1. Learning Objectives
-2. Chapter Overview
-3. Setup & Imports
-4. Main Content Sections (1.1-1.9)
-5. Key Takeaways
-6. Practice Exercises (1.10)
-7. **Case Studies (1.11)** ← NEW standard component
-
-**Future Case Studies** (planned for other chapters):
-- **CH02-04**: Statistical inference applications (wage data, survey data)
-- **CH05-09**: Bivariate regression (education returns, labor economics)
-- **CH10-17**: Multiple regression (growth, development, policy evaluation)
-
-### Documentation
-
-Complete implementation details in:
-- **[Log file](log/20260131_CH01_CASE_STUDIES_IMPLEMENTATION.md)** - Comprehensive documentation
-- **[Chapter 1 notebook](notebooks_colab/ch01_Analysis_of_Economics_Data.ipynb)** - Live implementation
-- **Section 1.11** - Students can explore immediately in Google Colab
+All data loads directly from GitHub (no downloads required). See individual chapter notebooks for case study details.
 
 ---
 
-## 📖 LaTeX Book Version
+## 📖 Online HTML Book (Quarto)
 
-**NEW:** All 17 chapters have been compiled into a professional LaTeX book!
+All 18 chapters are published as an interactive online book using [Quarto](https://quarto.org/).
 
-- **Status**: ✅ Complete - 437 pages, 16 MB PDF
+- **Status**: ✅ Complete - 18 chapters in 4 parts
+- **URL**: [quarcs-lab.github.io/metricsai/book/_book/](https://quarcs-lab.github.io/metricsai/book/_book/index.html)
 - **Location**: [`book/`](book/) directory
 - **Features**:
-  - Professional four-part structure with color-coded sections
-  - Enhanced key concept boxes with AI-powered styling
-  - Full-width chapter visual summaries
-  - Syntax-highlighted code listings
-  - Comprehensive preface explaining the AI-powered approach
-  - Print-optimized color scheme
+  - Searchable full-text across all chapters
+  - Google Translate integration on every page
+  - Responsive design for desktop and mobile
+  - Four-part structure: Statistical Foundations, Bivariate Regression, Multiple Regression, Advanced Topics
 
-See [`book/README.md`](book/README.md) for complete documentation, compilation instructions, and technical details.
+The HTML book complements the interactive notebooks, ideal for:
 
-The book version provides a traditional textbook format that complements the interactive notebooks, ideal for:
-- Offline reading and study
-- Printing for classroom use
-- Traditional textbook reference
-- Academic distribution
+- Reading without needing Google Colab
+- Searching across all chapters
+- Quick reference and navigation
+- Students who prefer a traditional book layout
 
 ## 📄 Automated PDF Generation
 
@@ -290,17 +188,10 @@ ls -lh notebooks_colab/*.pdf
 
 ### Current Status
 
-**Part I (Statistical Foundations) - Complete** ⭐⭐⭐⭐⭐
+All 18 chapter PDFs generated (as of 2026-02-08):
 
-- ✅ ch00_Preface.pdf (0.82 MB)
-- ✅ ch01_Analysis_of_Economics_Data.pdf (1.22 MB) - Updated Feb 4, 2026
-- ✅ ch02_Univariate_Data_Summary.pdf (1.83 MB) - Reference template
-- ✅ ch03_The_Sample_Mean.pdf (1.30 MB) - Updated Feb 3, 2026
-- ✅ ch04_Statistical_Inference_for_the_Mean.pdf (1.70 MB) - Updated Feb 4, 2026
-
-**Part II-IV**
-
-- ⏳ ch05-ch17 (ready to generate)
+- ✅ ch00–ch17 complete (0.9–2.0 MB each, 15–72 pages each)
+- ✅ Compiled book: `notebooks_colab/metricsAI_complete_book.pdf` (62.3 MB, 900 pages)
 
 ### Professional Formatting Features
 
