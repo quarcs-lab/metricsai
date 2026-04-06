@@ -22,7 +22,7 @@ SCRIPT_DIR = Path(__file__).parent
 PROJECT_ROOT = SCRIPT_DIR.parent
 QUARTO_DIR = PROJECT_ROOT / "notebooks_quarto"
 COLAB_DIR = PROJECT_ROOT / "notebooks_colab"
-QUARTO_BIN = "/Users/carlosmendez/opt/bin/quarto"
+QUARTO_BIN = "/Applications/quarto/bin/quarto"
 
 
 def find_qmd(chapter_id: str) -> Path:

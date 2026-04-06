@@ -74,27 +74,26 @@ By the end of this chapter, you will be able to:
 ## Setup
 
 ```{python}
-# Import libraries
-import numpy as np
-import pandas as pd
-import matplotlib.pyplot as plt
-import seaborn as sns
-import statsmodels.api as sm
-from statsmodels.formula.api import ols
+# --- Libraries ---
+import numpy as np                        # numerical operations
+import pandas as pd                       # data manipulation
+import matplotlib.pyplot as plt           # plotting
+import seaborn as sns                     # statistical visualizations
+import statsmodels.api as sm              # statistical models
+from statsmodels.formula.api import ols   # OLS with formula syntax
 from statsmodels.stats.diagnostic import het_breuschpagan
 from statsmodels.stats.outliers_influence import variance_inflation_factor
-from scipy import stats
+from scipy import stats                   # statistical tests
 import warnings
 warnings.filterwarnings('ignore')
 
-# Random seed
+# --- Reproducibility ---
 np.random.seed(42)
 
-# Data URL
+# --- Data source ---
 GITHUB_DATA_URL = "https://raw.githubusercontent.com/quarcs-lab/data-open/master/AED/"
 
-# Plotting
-# Set plotting style (dark theme matching book design)
+# --- Plotting style (dark theme matching book design) ---
 plt.style.use('dark_background')
 sns.set_style("darkgrid")
 plt.rcParams.update({
@@ -149,7 +148,7 @@ data_api[vars_api].describe()
 ```{python}
 # Histogram of API scores
 plt.figure(figsize=(10, 6))
-plt.hist(data_api['api99'], bins=30, color='steelblue', alpha=0.7, edgecolor='#3a4a6b')
+plt.hist(data_api['api99'], bins=30, color='steelblue', alpha=0.7, edgecolor='#3a4a6b')  # bins = number of bars, alpha = transparency
 plt.axvline(data_api['api99'].mean(), color='red', linestyle='--', linewidth=2,
             label=f'Mean = {data_api["api99"].mean():.1f}')
 plt.axvline(800, color='green', linestyle='--', linewidth=2, label='Target = 800')
@@ -161,17 +160,33 @@ plt.grid(True, alpha=0.3)
 plt.show()
 ```
 
+**What to look for in this histogram:**
+
+- **Shape**: Roughly symmetric, slightly left-skewed -- most schools cluster around the middle of the API range
+- **Spread**: Scores range widely from below 400 to above 900, indicating large performance differences across schools
+- **Benchmarks**: The red dashed line (mean) and green dashed line (target of 800) show that most schools fall short of the state target
+
 ```{python}
 # Bivariate regression: API ~ Edparent
 model_api_biv = ols('api99 ~ edparent', data=data_api).fit(cov_type='HC1')
-# Bivariate Regression: Api ~ Edparent
+
+# Key results
+intercept_api = model_api_biv.params['Intercept']
+slope_api     = model_api_biv.params['edparent']
+r2_api        = model_api_biv.rsquared
+
+print(f"Estimated equation: API = {intercept_api:.1f} + {slope_api:.1f} x edparent")
+print(f"Slope: each additional year of parent education is associated with {slope_api:.1f} higher API")
+print(f"R-squared: {r2_api:.4f} ({r2_api*100:.1f}% of variation explained)")
+
+# Full regression output
 model_api_biv.summary()
 ```
 
 ```{python}
 # Scatter plot with regression line
 plt.figure(figsize=(10, 6))
-plt.scatter(data_api['edparent'], data_api['api99'], alpha=0.5, s=30, color='#22d3ee')
+plt.scatter(data_api['edparent'], data_api['api99'], alpha=0.5, s=30, color='#22d3ee')  # s = marker size, alpha = transparency
 plt.plot(data_api['edparent'], model_api_biv.fittedvalues, color='#c084fc', linewidth=2,
          label='Fitted line')
 plt.xlabel('Average Years of Parent Education')
@@ -181,6 +196,12 @@ plt.legend()
 plt.grid(True, alpha=0.3)
 plt.show()
 ```
+
+**What to look for in this scatter plot:**
+
+- **Direction**: Strong positive relationship -- higher parental education is associated with higher API scores
+- **Form**: Roughly linear -- the fitted line captures the trend well
+- **Scatter**: Considerable variation around the line, suggesting other factors also matter
 
 ```{python}
 # Correlation matrix
@@ -292,12 +313,20 @@ data_cobb[['q', 'k', 'l', 'lnq', 'lnk', 'lnl']].describe()
 ```{python}
 # Estimate Cobb-Douglas with HAC standard errors
 model_cobb = ols('lnq ~ lnk + lnl', data=data_cobb).fit(cov_type='HAC', cov_kwds={'maxlags': 3})
-# Cobb-Douglas regression: ln(Q) ~ ln(K) + ln(L)
-model_cobb.summary()
 
+# Key results
 beta_k = model_cobb.params['lnk']
 beta_l = model_cobb.params['lnl']
-print(f"\nSum of coefficients: {beta_k:.3f} + {beta_l:.3f} = {beta_k + beta_l:.3f}")
+r2_cobb = model_cobb.rsquared
+
+print(f"Estimated equation: ln(Q) = {model_cobb.params['Intercept']:.3f} + {beta_k:.3f} ln(K) + {beta_l:.3f} ln(L)")
+print(f"Capital elasticity: {beta_k:.3f} (1% increase in K raises output by {beta_k:.3f}%)")
+print(f"Labor elasticity: {beta_l:.3f} (1% increase in L raises output by {beta_l:.3f}%)")
+print(f"Sum of coefficients: {beta_k:.3f} + {beta_l:.3f} = {beta_k + beta_l:.3f}")
+print(f"R-squared: {r2_cobb:.4f}")
+
+# Full regression output
+model_cobb.summary()
 ```
 
 > **Key Concept 13.2: Logarithmic Transformation of Production Functions**
@@ -453,7 +482,7 @@ In the 1950s-60s, expected inflation was **stable and low** (around 2-3%). Since
 ```{python}
 # Plot pre-1970
 plt.figure(figsize=(10, 6))
-plt.scatter(data_pre1970['urate'], data_pre1970['inflgdp'], alpha=0.7, s=50, color='#22d3ee')
+plt.scatter(data_pre1970['urate'], data_pre1970['inflgdp'], alpha=0.7, s=50, color='#22d3ee')  # s = marker size, alpha = transparency
 plt.plot(data_pre1970['urate'], model_pre.fittedvalues, color='#c084fc', linewidth=2,
          label='Fitted line')
 plt.xlabel('Unemployment Rate (%)')
@@ -463,6 +492,12 @@ plt.legend()
 plt.grid(True, alpha=0.3)
 plt.show()
 ```
+
+**What to look for in this scatter plot:**
+
+- **Direction**: Negative slope -- higher unemployment is associated with lower inflation (the classic Phillips curve trade-off)
+- **Strength**: Reasonably tight clustering around the fitted line for this small sample (21 years)
+- **Context**: This downward-sloping pattern is what policymakers relied on in the 1950s-60s
 
 ```{python}
 # Post-1970 regression
@@ -499,7 +534,7 @@ Omitting expected inflation now causes **severe omitted variables bias** that re
 ```{python}
 # Plot post-1970
 plt.figure(figsize=(10, 6))
-plt.scatter(data_post1970['urate'], data_post1970['inflgdp'], alpha=0.7, s=50, color='#22d3ee')
+plt.scatter(data_post1970['urate'], data_post1970['inflgdp'], alpha=0.7, s=50, color='#22d3ee')  # s = marker size, alpha = transparency
 plt.plot(data_post1970['urate'], model_post.fittedvalues, color='red', linewidth=2,
          label='Fitted line')
 plt.xlabel('Unemployment Rate (%)')
@@ -509,6 +544,12 @@ plt.legend()
 plt.grid(True, alpha=0.3)
 plt.show()
 ```
+
+**What to look for in this scatter plot:**
+
+- **Direction**: Positive slope -- the relationship has **reversed** compared to pre-1970
+- **Scatter**: Much wider dispersion around the line, reflecting the turbulent 1970s-80s
+- **Implication**: The simple bivariate Phillips curve is misspecified post-1970 (omitted variables bias)
 
 ```{python}
 # Augmented Phillips curve (adding expected inflation)
@@ -598,8 +639,6 @@ In the 1970s:
 **The Lesson:**
 
 The Phillips curve didn't "disappear" - it was always conditional on expected inflation. Once we control for expectations, the negative relationship returns. This revolutionized central bank policy: to fight inflation, must manage expectations!
-
-*Having explored detailed case studies with full estimation and testing, we now survey additional applications demonstrating advanced econometric methods.*
 
 ## 13.4 Automobile Fuel Efficiency
 
@@ -973,8 +1012,6 @@ The fundamental trade-off remains:
 
 - Universal free care (equity) vs
 - Cost-sharing (efficiency)
-
-*Now that we've seen experimental data in the RAND study, let's explore quasi-experimental methods for causal inference.*
 
 ## 13.6 Health Care Access (Difference-in-Differences)
 
@@ -1449,8 +1486,6 @@ Institutions are not just correlated with prosperity—they **cause** it. Countr
 - Building democratic accountability
 
 **Caveat**: These results apply to former colonies. Institutional change is slow and difficult.
-
-*Having applied multiple causal inference strategies, we now turn to the practical foundation of any analysis — data preparation and cleaning.*
 
 ## 13.9 From Raw Data to Final Data
 

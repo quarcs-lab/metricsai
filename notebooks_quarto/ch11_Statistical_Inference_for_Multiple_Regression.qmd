@@ -73,28 +73,28 @@ By the end of this chapter, you will be able to:
 First, we import the necessary Python packages and configure the environment for reproducibility. All data will stream directly from GitHub.
 
 ```{python}
-# Import required packages
-import numpy as np
-import pandas as pd
-import matplotlib.pyplot as plt
-import seaborn as sns
-import statsmodels.api as sm
-from statsmodels.formula.api import ols
-from scipy import stats
-from statsmodels.stats.anova import anova_lm
+# --- Libraries ---
+import numpy as np                              # numerical operations
+import pandas as pd                             # data manipulation
+import matplotlib.pyplot as plt                 # plotting
+import seaborn as sns                           # statistical visualization
+import statsmodels.api as sm                    # statistical models
+from statsmodels.formula.api import ols         # OLS with formula syntax
+from scipy import stats                         # statistical distributions
+from statsmodels.stats.anova import anova_lm    # ANOVA for model comparison
 import random
 import os
 
-# Set random seeds for reproducibility
+# --- Reproducibility ---
 RANDOM_SEED = 42
 random.seed(RANDOM_SEED)
 np.random.seed(RANDOM_SEED)
 os.environ['PYTHONHASHSEED'] = str(RANDOM_SEED)
 
-# GitHub data URL
+# --- Data source ---
 GITHUB_DATA_URL = "https://raw.githubusercontent.com/quarcs-lab/data-open/master/AED/"
 
-# Set plotting style (dark theme matching book design)
+# --- Plotting style (dark theme matching book design) ---
 plt.style.use('dark_background')
 sns.set_style("darkgrid")
 plt.rcParams.update({
@@ -196,7 +196,17 @@ $$\text{price} = \beta_1 + \beta_2 \times \text{size} + \beta_3 \times \text{bed
 model_full = ols('price ~ size + bedrooms + bathrooms + lotsize + age + monthsold',
                  data=data_house).fit()
 
-# 11.2 ESTIMATORS OF MODEL PARAMETERS
+# Key results
+size_coef = model_full.params['size']
+size_pval = model_full.pvalues['size']
+r_squared = model_full.rsquared
+root_mse = np.sqrt(model_full.mse_resid)
+
+print(f"Size effect: ${size_coef:,.2f} per sq ft (p = {size_pval:.4f})")
+print(f"R-squared: {r_squared:.4f} ({r_squared*100:.1f}% of variation explained)")
+print(f"Root MSE: ${root_mse:,.2f} (typical prediction error)")
+
+# Full regression output
 print("\nFull Multiple Regression Results:")
 model_full.summary()
 ```
@@ -269,8 +279,6 @@ coef_table
 
 This pattern is common in small samples with correlated regressors (multicollinearity).
 
-Now that we understand the properties and interpretation of OLS estimates, let's quantify uncertainty through confidence intervals.
-
 ## 11.3: Confidence Intervals
 
 A confidence interval provides a range of plausible values for a population parameter.
@@ -331,7 +339,8 @@ Let's manually calculate the confidence interval for the size coefficient to und
 # Detailed confidence interval calculation for 'size'
 coef_size = model_full.params['size']
 se_size = model_full.bse['size']
-t_crit = stats.t.ppf(0.975, df)  # 97.5th percentile for two-sided 95% CI
+# 0.975 = upper tail for 95% two-sided CI (2.5% in each tail)
+t_crit = stats.t.ppf(0.975, df)
 
 ci_lower = coef_size - t_crit * se_size
 ci_upper = coef_size + t_crit * se_size
@@ -474,8 +483,6 @@ t_test_result
 
 ```
 
-Having tested individual coefficients, we now turn to joint hypothesis tests that evaluate multiple restrictions simultaneously.
-
 ## 11.5: Joint Hypothesis Tests
 
 Sometimes we want to test multiple restrictions simultaneously. Individual t-tests are insufficient for this purpose.
@@ -587,7 +594,7 @@ f_stat = model_full.fvalue
 f_pvalue = model_full.f_pvalue
 dfn = k - 1  # numerator df (excluding intercept)
 dfd = df     # denominator df
-f_crit = stats.f.ppf(0.95, dfn, dfd)
+f_crit = stats.f.ppf(0.95, dfn, dfd)  # one-sided F-test at 5% significance
 
 print(f"  H₀: All slope coefficients equal zero")
 print(f"  F-statistic: {f_stat:.4f}")
@@ -866,7 +873,8 @@ df_unrest = n - k_unrest
 
 F_subset = ((RSS_rest - RSS_unrest) / q) / (RSS_unrest / df_unrest)
 p_value_subset = 1 - stats.f.cdf(F_subset, q, df_unrest)
-f_crit_subset = stats.f.ppf(0.95, q, df_unrest)
+# 0.95 = one-sided F-test at 5% significance
+f_crit_subset = stats.f.ppf(0.95, q, df_unrest)  # one-sided F-test at 5% significance
 
 print("\nSubset F-test results:")
 print(f"  Number of restrictions (q): {q}")
@@ -899,8 +907,6 @@ print("\nThe ANOVA table confirms our manual F-test calculation.")
 > **Key Concept 11.7: Testing Subsets of Regressors**
 >
 > To test whether a subset of regressors belongs in the model, compare the restricted model (without those variables) to the unrestricted model (with them) using an F-test. If the F-statistic is small (large $p$-value), the additional regressors don't significantly improve fit and the simpler model is preferred.
-
-Now that we can compute and interpret F-statistics, let's learn how to present regression results professionally.
 
 ## 11.7: Presentation of Regression Results
 
@@ -1064,6 +1070,12 @@ plt.show()
 print("Coefficients whose CI crosses zero are not statistically significant at 5%.")
 ```
 
+**What to look for in this coefficient plot:**
+
+- **Zero crossing**: Coefficients whose error bars cross the red dashed line (zero) are not statistically significant at 5%
+- **Relative magnitude**: Compare the distance of each point estimate from zero relative to its error bar width
+- **Precision**: Narrower error bars indicate more precisely estimated coefficients; wider bars suggest multicollinearity or small sample effects
+
 ### Visualization: F-Distribution
 
 Visualize the F-distribution and show where our test statistic falls.
@@ -1111,7 +1123,7 @@ fig, axes = plt.subplots(1, 3, figsize=(18, 5))
 
 for i, (model, name) in enumerate(zip(models, model_names)):
     axes[i].scatter(data_house['price'], model.fittedvalues,
-                   alpha=0.6, s=50, color='#22d3ee')
+                   alpha=0.6, s=50, color='#22d3ee')  # alpha = transparency, s = marker size
     axes[i].plot([data_house['price'].min(), data_house['price'].max()],
                 [data_house['price'].min(), data_house['price'].max()],
                 'r--', linewidth=2)
@@ -1129,6 +1141,12 @@ plt.show()
 print("All three models show similar predictive performance.")
 print("The simplest model (Model 1) may be preferred for parsimony.")
 ```
+
+**What to look for in these actual vs. predicted plots:**
+
+- **Alignment with 45-degree line**: Points closer to the red dashed line indicate better predictions
+- **Consistency across models**: If all three panels look similar, the additional variables add little predictive value
+- **Outliers**: Points far from the line in all models suggest observations the model cannot explain regardless of specification
 
 ## Key Takeaways
 

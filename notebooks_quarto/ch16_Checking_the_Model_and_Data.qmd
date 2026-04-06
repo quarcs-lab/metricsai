@@ -148,6 +148,13 @@ data_earnings[['earnings', 'age', 'education', 'agebyeduc']].describe()
 # Base model without interaction
 # Base Model: earnings ~ age + education
 model_base = ols('earnings ~ age + education', data=data_earnings).fit(cov_type='HC1')
+
+# Key results
+print(f"Age coefficient:       {model_base.params['age']:,.2f} (SE: {model_base.bse['age']:,.2f})")
+print(f"Education coefficient: {model_base.params['education']:,.2f} (SE: {model_base.bse['education']:,.2f})")
+print(f"R-squared:             {model_base.rsquared:.4f}")
+
+# Full regression output
 model_base.summary()
 ```
 
@@ -175,8 +182,13 @@ ax.set_title('Correlation Matrix of Regressors', fontsize=14, fontweight='bold')
 plt.tight_layout()
 plt.show()
 
-print("\nHigh correlations (> 0.9) indicate multicollinearity.")
 ```
+
+**What to look for in this correlation heatmap:**
+
+- **Values close to +1 or -1** between regressors indicate high collinearity
+- **Values above 0.9** are a strong warning sign for multicollinearity
+- The interaction term (agebyeduc) will typically show high correlation with both main effects
 
 ```{python}
 # Calculate VIF for all regressors
@@ -341,16 +353,13 @@ hypotheses = '(education = 0, agebyeduc = 0)'
 f_test = model_collinear.wald_test(hypotheses, use_f=True)
 print(f_test)
 
-print("\nInterpretation:")
-# Joint tests are highly significant even though individual t-tests are weak.
-# This is the power of joint testing with multicollinear regressors.
 ```
+
+Joint tests are highly significant even though individual t-tests are weak. This is the power of joint testing with multicollinear regressors -- the F-test evaluates the combined contribution of correlated variables, avoiding the imprecision that plagues individual estimates.
 
 > **Key Concept 16.2: Joint Hypothesis Tests Under Multicollinearity**
 >
 > Even when multicollinearity makes individual t-tests unreliable (high VIF, large standard errors), joint F-tests remain powerful. Testing whether a group of collinear variables is jointly significant avoids the imprecision problem because the F-test evaluates the combined contribution. Always use joint tests for groups of correlated regressors rather than relying on individual significance.
-
-*Having explored multicollinearity as a data problem that inflates standard errors, we now examine the broader set of OLS assumptions and what happens when each one fails.*
 
 ## 16.2-16.4: Model Assumptions
 
@@ -591,14 +600,14 @@ e = np.random.normal(0, 1, n)
 u = np.zeros(n)
 u[0] = 0
 for t in range(1, n):
-    u[t] = 0.8 * u[t-1] + e[t]
+    u[t] = 0.8 * u[t-1] + e[t]  # 0.8 = AR(1) persistence parameter (high autocorrelation)
 
 # Generate AR(1) regressor
 v = np.random.normal(0, 1, n)
 x = np.zeros(n)
 x[0] = 0
 for t in range(1, n):
-    x[t] = 0.8 * x[t-1] + v[t]
+    x[t] = 0.8 * x[t-1] + v[t]  # 0.8 = AR(1) persistence for regressor
 
 # Generate y with autocorrelated error
 y1 = 1 + 2*x + u
@@ -631,8 +640,13 @@ ax.set_ylabel('ACF', fontsize=12)
 plt.tight_layout()
 plt.show()
 
-print("\nHigh ACF at multiple lags indicates autocorrelation.")
 ```
+
+**What to look for in the ACF plot:**
+
+- **Bars extending beyond the confidence band** (shaded region) indicate statistically significant autocorrelation at that lag
+- **Slowly decaying bars** suggest non-stationarity or strong persistence in the errors
+- **A single significant spike at lag 1** suggests an AR(1) process; multiple significant lags suggest higher-order autocorrelation
 
 > **Key Concept 16.5: Autocorrelation and HAC Standard Errors**
 >
@@ -772,8 +786,6 @@ In the interest rate example:
 - Even with correction, 10-year rate **strongly related** to 1-year rate
 - But not as precisely estimated as default SEs suggest!
 
-*Now that we understand the theoretical consequences of assumption violations, let's apply these concepts to a real-world example examining whether democracy promotes economic growth.*
-
 ## 16.7: Example - Democracy and Growth
 
 We analyze the relationship between democracy and economic growth using data from Acemoglu, Johnson, Robinson, and Yared (2008).
@@ -809,6 +821,12 @@ print(f"Time period: 1500-2000")
 # Bivariate regression: democracy ~ growth
 
 model_bivariate = ols('democracy ~ growth', data=data_democracy).fit(cov_type='HC1')
+
+# Key results
+print(f"Growth coefficient: {model_bivariate.params['growth']:.4f} (SE: {model_bivariate.bse['growth']:.4f})")
+print(f"R-squared:          {model_bivariate.rsquared:.4f}")
+
+# Full regression output
 model_bivariate.summary()
 
 # Visualize relationship
@@ -832,12 +850,24 @@ print(f"  Higher economic growth is associated with greater democratization.")
 print(f"  But this may reflect omitted institutional variables...")
 ```
 
+**What to look for in this scatter plot:**
+
+- **Direction**: Positive slope -- countries with more economic growth tend to have more democratization
+- **Scatter**: Substantial variation around the line -- growth explains only a fraction of democracy differences
+- **Potential confounders**: The positive association may partly reflect omitted institutional variables (religion, colonial history) rather than a direct causal effect
+
 ```{python}
 # Multiple regression: add institutional controls
 # Multiple Regression with Institutional Controls
 
 model_multiple = ols('democracy ~ growth + constraint + indcent + catholic + muslim + protestant',
                      data=data_democracy).fit(cov_type='HC1')
+
+# Key results
+print(f"Growth coefficient: {model_multiple.params['growth']:.4f} (SE: {model_multiple.bse['growth']:.4f})")
+print(f"R-squared:          {model_multiple.rsquared:.4f}")
+
+# Full regression output
 model_multiple.summary()
 
 print("\nKey findings:")
@@ -1013,7 +1043,7 @@ axes[0].scatter(yhat, data_democracy['democracy'], alpha=0.6, s=50, color='#22d3
 axes[0].plot([yhat.min(), yhat.max()], [yhat.min(), yhat.max()],
              '-', color='#c084fc', linewidth=2, label='45° line')
 
-lowess_result = lowess(data_democracy['democracy'], yhat, frac=0.3)
+lowess_result = lowess(data_democracy['democracy'], yhat, frac=0.3)  # frac=0.3: use 30% of data for each local fit (balances smoothness vs detail)
 axes[0].plot(lowess_result[:, 0], lowess_result[:, 1],
              'r--', linewidth=2, label='LOWESS smooth')
 
@@ -1042,10 +1072,12 @@ plt.suptitle('Figure 16.2: Basic Diagnostic Plots',
 plt.tight_layout()
 plt.show()
 
-print("\nInterpretation:")
-# Panel A: Points should cluster around 45° line
-# Panel B: Residuals should scatter randomly around zero
 ```
+
+**What to look for in these diagnostic plots:**
+
+- **Panel A (Actual vs Fitted)**: Points should cluster around the 45-degree line; LOWESS smooth should follow it closely
+- **Panel B (Residual vs Fitted)**: Residuals should scatter randomly around zero with constant spread; LOWESS should be flat and horizontal
 
 ```{python}
 # Figure 16.3: Diagnostic plots for growth regressor
@@ -1121,13 +1153,14 @@ plt.suptitle('Figure 16.3: Diagnostic Plots for Growth Regressor',
 plt.tight_layout()
 plt.show()
 
-print("\nInterpretation:")
-# Panel A: Check for patterns in residuals
-# Panel B: LOWESS close to regression line → linear relationship OK
-print("  Panel C: Slope equals coefficient in full model ({:.4f})".format(b_growth))
+print(f"\nPanel C: Slope equals coefficient in full model ({b_growth:.4f})")
 ```
 
-*Having examined residual diagnostic plots for visual detection of model problems, we now turn to numerical influence measures that quantify how much individual observations affect regression results.*
+**What to look for in these diagnostic plots:**
+
+- **Panel A (Residual vs Regressor)**: Check for patterns -- random scatter around zero means no issues; curvature suggests missing nonlinear terms
+- **Panel B (Component Plus Residual)**: LOWESS smooth close to the regression line confirms a linear relationship is appropriate
+- **Panel C (Added Variable)**: Slope equals the coefficient in the full model, showing the partial effect of growth after controlling for other variables
 
 > **Key Concept 16.7: Diagnostic Plots for Model Validation**
 >
@@ -1176,10 +1209,9 @@ ax.grid(True, alpha=0.3)
 plt.tight_layout()
 plt.show()
 
-print("\nInterpretation:")
-print("  Red points exceed threshold (potentially influential)")
-# Investigate these observations for data errors or unusual cases
 ```
+
+**Interpretation:** Red points exceed the threshold and are potentially influential. Investigate these observations for data errors or genuinely unusual cases before deciding whether to keep or exclude them.
 
 ---
 
@@ -1371,9 +1403,13 @@ plt.tight_layout()
 plt.show()
 
 print("\nInterpretation:")
-# Red points indicate observations with large influence on that coefficient.
-# Investigate whether these are data errors or genuinely unusual cases.
 ```
+
+**What to look for in the DFBETAS plots:**
+
+- **Red points** indicate observations with large influence on that specific coefficient
+- An observation might strongly affect one coefficient but not others
+- Investigate whether flagged cases are data errors or genuinely unusual cases
 
 > **Key Concept 16.8: Influential Observations -- DFITS and DFBETAS**
 >

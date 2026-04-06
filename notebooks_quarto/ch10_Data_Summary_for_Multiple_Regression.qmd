@@ -69,27 +69,27 @@ What is the effect of house size on price **after controlling** for other charac
 First, we import the necessary Python packages and configure the environment for reproducibility. All data will stream directly from GitHub.
 
 ```{python}
-# Import required packages
-import numpy as np
-import pandas as pd
-import matplotlib.pyplot as plt
-import seaborn as sns
-import statsmodels.api as sm
-from statsmodels.formula.api import ols
-from scipy import stats
+# --- Libraries ---
+import numpy as np                        # numerical operations
+import pandas as pd                       # data manipulation
+import matplotlib.pyplot as plt           # plotting
+import seaborn as sns                     # statistical visualization
+import statsmodels.api as sm              # statistical models
+from statsmodels.formula.api import ols   # OLS with formula syntax
+from scipy import stats                   # statistical distributions
 import random
 import os
 
-# Set random seeds for reproducibility
+# --- Reproducibility ---
 RANDOM_SEED = 42
 random.seed(RANDOM_SEED)
 np.random.seed(RANDOM_SEED)
 os.environ['PYTHONHASHSEED'] = str(RANDOM_SEED)
 
-# GitHub data URL
+# --- Data source ---
 GITHUB_DATA_URL = "https://raw.githubusercontent.com/quarcs-lab/data-open/master/AED/"
 
-# Set plotting style (dark theme matching book design)
+# --- Plotting style (dark theme matching book design) ---
 plt.style.use('dark_background')
 sns.set_style("darkgrid")
 plt.rcParams.update({
@@ -146,13 +146,19 @@ Let's compare a simple regression (price on bedrooms only) with a multiple regre
 # Bivariate regression: price ~ bedrooms
 model_bivariate = ols('price ~ bedrooms', data=data_house).fit()
 
-# BIVARIATE REGRESSION: price ~ bedrooms
+# Key results: bivariate
+print(f"Bivariate: bedrooms coef = ${model_bivariate.params['bedrooms']:,.2f}, R² = {model_bivariate.rsquared:.4f}")
+
+# Full regression output
 model_bivariate.summary()
 
 # Multiple regression: price ~ bedrooms + size
 model_multiple = ols('price ~ bedrooms + size', data=data_house).fit()
 
-# MULTIPLE REGRESSION: price ~ bedrooms + size
+# Key results: multiple
+print(f"Multiple: bedrooms coef = ${model_multiple.params['bedrooms']:,.2f}, R² = {model_multiple.rsquared:.4f}")
+
+# Full regression output
 model_multiple.summary()
 
 # Compare bedrooms coefficient
@@ -182,7 +188,8 @@ The diagonal shows the distribution of each variable using kernel density estima
 ```{python}
 # Create scatterplot matrix
 plot_vars = ['price', 'size', 'bedrooms', 'age']
-g = sns.pairplot(data_house[plot_vars], diag_kind='kde', plot_kws={'alpha': 0.6, 's': 50})
+g = sns.pairplot(data_house[plot_vars], diag_kind='kde',
+                 plot_kws={'alpha': 0.6, 's': 50})  # alpha = transparency, s = marker size
 g.fig.suptitle('Figure 10.1: Scatterplot Matrix - House Price Data', 
                fontsize=14, fontweight='bold', y=1.00)
 plt.tight_layout()
@@ -232,8 +239,6 @@ print(f"Size-Bedrooms correlation: {corr_matrix.loc['size', 'bedrooms']:.3f}")
 >
 > High bivariate correlation (e.g., bedrooms-price, $r = 0.43$) may diminish or vanish after controlling for confounders. In our data, bedrooms correlate with price largely because bigger houses have more bedrooms. Multiple regression isolates each variable's partial contribution, revealing that size — not bedrooms — drives most of the price variation.
 
-Having explored the data visually and through correlations, we now estimate the formal multiple regression model to quantify partial effects.
-
 ## 10.4: Multiple Regression Estimation
 
 Now we estimate the **full multiple regression model** with all available predictors. The regression equation is:
@@ -251,7 +256,17 @@ where $y_i$ is the actual price and $\widehat{y}_i$ is the predicted price.
 model_full = ols('price ~ size + bedrooms + bathrooms + lotsize + age + monthsold',
                  data=data_house).fit()
 
-# FULL MULTIPLE REGRESSION MODEL
+# Key results
+r_squared_full = model_full.rsquared
+adj_r_squared_full = model_full.rsquared_adj
+size_coef = model_full.params['size']
+
+print(f"Estimated equation: price = {model_full.params['Intercept']:,.0f} + {size_coef:.2f} x size + ...")
+print(f"Size effect: each additional sq ft is associated with ${size_coef:,.2f} higher price")
+print(f"R-squared: {r_squared_full:.4f} ({r_squared_full*100:.1f}% of variation explained)")
+print(f"Adjusted R-squared: {adj_r_squared_full:.4f}")
+
+# Full regression output
 model_full.summary()
 ```
 
@@ -321,8 +336,6 @@ print(f"Difference (numerical precision):                 {abs(model_full.params
 > **Key Concept 10.5: The Frisch-Waugh-Lovell (FWL) Theorem**
 >
 > The partial effect of $x_j$ in a multiple regression equals the slope from a bivariate regression of $y$ on $\widetilde{x}_j$, where $\widetilde{x}_j$ is the residual from regressing $x_j$ on all other regressors. Intuitively, $\widetilde{x}_j$ captures the variation in $x_j$ that is independent of the other variables — this is exactly what multiple regression uses to estimate partial effects.
-
-Now that we understand partial effects and the FWL theorem, let's evaluate how well the overall regression model fits the data.
 
 ## 10.6: Model Fit Statistics
 
@@ -449,8 +462,6 @@ print(f"Adj R² decreases from {model_simple.rsquared_adj:.3f} to {model_full.rs
 >
 > Simpler models are preferred unless additional variables meaningfully improve fit. In our house price example, adding five variables beyond size barely increased $R^2$ (0.618 $\to$ 0.651) while adjusted $R^2$ actually fell (0.603 $\to$ 0.555). Check adjusted $R^2$, AIC, and BIC — if they don't improve, the simpler model is preferred.
 
-Having compared models, we now turn to a critical pitfall: when regressors are too closely related to separate their individual effects.
-
 ## 10.8: Inestimable Models and Multicollinearity
 
 **Perfect multicollinearity** occurs when one regressor is an exact linear combination of others. In this case, OLS cannot estimate all coefficients (the model is "inestimable").
@@ -525,7 +536,7 @@ A plot of actual vs. predicted values helps visualize model fit. Points close to
 ```{python}
 # Create actual vs predicted plot
 fig, ax = plt.subplots(figsize=(10, 6))
-ax.scatter(data_house['price'], model_full.fittedvalues, alpha=0.6, s=50, color='#22d3ee')
+ax.scatter(data_house['price'], model_full.fittedvalues, alpha=0.6, s=50, color='#22d3ee')  # alpha = transparency, s = marker size
 ax.plot([data_house['price'].min(), data_house['price'].max()],
         [data_house['price'].min(), data_house['price'].max()],
         'r--', linewidth=2, label='Perfect prediction (45° line)')
@@ -540,6 +551,12 @@ plt.show()
 print("Points close to the red line indicate accurate predictions.")
 ```
 
+**What to look for in this actual vs. predicted plot:**
+
+- **Alignment with 45-degree line**: Points close to the red dashed line indicate accurate predictions
+- **Systematic deviations**: Clusters above or below the line suggest the model over- or under-predicts for certain price ranges
+- **Spread**: Wider scatter around the line means larger prediction errors
+
 ### Visualization: Residual Plot
 
 A **residual plot** (residuals vs. fitted values) helps diagnose model problems:
@@ -551,7 +568,7 @@ A **residual plot** (residuals vs. fitted values) helps diagnose model problems:
 ```{python}
 # Create residual plot
 fig, ax = plt.subplots(figsize=(10, 6))
-ax.scatter(model_full.fittedvalues, model_full.resid, alpha=0.6, s=50, color='#22d3ee')
+ax.scatter(model_full.fittedvalues, model_full.resid, alpha=0.6, s=50, color='#22d3ee')  # alpha = transparency, s = marker size
 ax.axhline(y=0, color='red', linestyle='--', linewidth=2, label='Zero residual line')
 ax.set_xlabel('Fitted values ($1000s)', fontsize=12)
 ax.set_ylabel('Residuals ($1000s)', fontsize=12)
@@ -563,6 +580,12 @@ plt.show()
 
 print("Random scatter around zero suggests model assumptions are reasonable.")
 ```
+
+**What to look for in this residual plot:**
+
+- **Random scatter**: Residuals should appear randomly distributed around the zero line (no pattern)
+- **Funnel shape**: A widening or narrowing pattern suggests heteroskedasticity (non-constant error variance)
+- **Outliers**: Points far from the zero line may indicate unusual observations worth investigating
 
 ### Visualization: Coefficient Plot with Confidence Intervals
 
@@ -598,6 +621,12 @@ plt.show()
 
 print("Coefficients whose CI crosses zero are not statistically significant.")
 ```
+
+**What to look for in this coefficient plot:**
+
+- **Zero crossing**: Coefficients whose error bars cross the red dashed line are not statistically significant at 5%
+- **Relative magnitude**: Size has the largest positive effect; other variables cluster near zero
+- **Precision**: Narrow error bars indicate more precisely estimated coefficients
 
 ## Key Takeaways
 

@@ -68,27 +68,27 @@ This chapter demonstrates bivariate regression analysis through four compelling 
 First, we import the necessary Python packages and configure the environment for reproducibility. All data will stream directly from GitHub.
 
 ```{python}
-# Import required packages
-import numpy as np
-import pandas as pd
-import matplotlib.pyplot as plt
-import seaborn as sns
-import statsmodels.api as sm
-from statsmodels.formula.api import ols
-from scipy import stats
+# --- Libraries ---
+import numpy as np                        # numerical operations
+import pandas as pd                       # data manipulation
+import matplotlib.pyplot as plt           # plotting
+import seaborn as sns                     # statistical visualizations
+import statsmodels.api as sm              # statistical models
+from statsmodels.formula.api import ols   # OLS with formula syntax
+from scipy import stats                   # statistical distributions
 import random
 import os
 
-# Set random seeds for reproducibility
+# --- Reproducibility ---
 RANDOM_SEED = 42
 random.seed(RANDOM_SEED)
 np.random.seed(RANDOM_SEED)
 os.environ['PYTHONHASHSEED'] = str(RANDOM_SEED)
 
-# GitHub data URL
+# --- Data source ---
 GITHUB_DATA_URL = "https://raw.githubusercontent.com/quarcs-lab/data-open/master/AED/"
 
-# Set plotting style (dark theme matching book design)
+# --- Plotting style (dark theme matching book design) ---
 plt.style.use('dark_background')
 sns.set_style("darkgrid")
 plt.rcParams.update({
@@ -173,6 +173,17 @@ $$\text{Lifeexp} = \beta_1 + \beta_2 \times \text{Hlthpc} + u$$
 ```{python}
 # Life expectancy regression
 model_lifeexp = ols('lifeexp ~ hlthpc', data=data_health).fit()
+
+# Key results
+intercept_life = model_lifeexp.params['Intercept']
+slope_life     = model_lifeexp.params['hlthpc']
+r2_life        = model_lifeexp.rsquared
+
+print(f"Estimated equation: lifeexp = {intercept_life:.2f} + {slope_life:.5f} x hlthpc")
+print(f"Slope: each additional $1,000 in spending is associated with {slope_life*1000:.2f} more years of life expectancy")
+print(f"R-squared: {r2_life:.4f} ({r2_life*100:.1f}% of variation explained)\n")
+
+# Full regression output
 model_lifeexp.summary()
 ```
 
@@ -208,7 +219,8 @@ The t-statistic of approximately 5.3 provides overwhelming evidence against the 
 ```{python}
 # Figure 8.1 Panel A - Life Expectancy
 fig, ax = plt.subplots(figsize=(10, 6))
-ax.scatter(data_health['hlthpc'], data_health['lifeexp'], alpha=0.6, s=50,
+ax.scatter(data_health['hlthpc'], data_health['lifeexp'],
+           alpha=0.6, s=50,  # alpha = transparency, s = marker size
            color='#22d3ee', label='Actual')
 ax.plot(data_health['hlthpc'], model_lifeexp.fittedvalues, color='#c084fc',
         linewidth=2, label='Fitted')
@@ -235,6 +247,17 @@ We expect $\beta_2 < 0$ (higher spending reduces infant mortality).
 ```{python}
 # Infant mortality regression
 model_infmort = ols('infmort ~ hlthpc', data=data_health).fit()
+
+# Key results
+intercept_inf = model_infmort.params['Intercept']
+slope_inf     = model_infmort.params['hlthpc']
+r2_inf        = model_infmort.rsquared
+
+print(f"Estimated equation: infmort = {intercept_inf:.2f} + ({slope_inf:.5f}) x hlthpc")
+print(f"Slope: each additional $1,000 in spending is associated with {slope_inf*1000:.2f} fewer infant deaths per 1,000 births")
+print(f"R-squared: {r2_inf:.4f} ({r2_inf*100:.1f}% of variation explained)\n")
+
+# Full regression output
 display(model_infmort.summary())
 
 # Robust standard errors
@@ -281,7 +304,8 @@ The R² suggests health spending explains only about 47% of variation in infant 
 ```{python}
 # Figure 8.1 Panel B - Infant Mortality
 fig, ax = plt.subplots(figsize=(10, 6))
-ax.scatter(data_health['hlthpc'], data_health['infmort'], alpha=0.6, s=50,
+ax.scatter(data_health['hlthpc'], data_health['infmort'],
+           alpha=0.6, s=50,  # alpha = transparency, s = marker size
            color='#22d3ee', label='Actual')
 ax.plot(data_health['hlthpc'], model_infmort.fittedvalues, color='#c084fc',
         linewidth=2, label='Fitted')
@@ -297,7 +321,7 @@ plt.show()
 # Note: The U.S. has much higher infant mortality than predicted.
 ```
 
-**Transition:** Having examined how health spending affects outcomes, we now investigate what drives health spending itself. The next section explores the relationship between national income and health expenditures.
+Having examined how health spending affects outcomes, we now investigate what drives health spending itself. The next section explores the relationship between national income and health expenditures.
 
 ## 8.2: Health Expenditures Across Countries
 
@@ -331,6 +355,16 @@ summary_gdp[['mean', 'std', 'min', 'max', 'range']]
 ```{python}
 # Health expenditure regression (all countries)
 model_hlthpc = ols('hlthpc ~ gdppc', data=data_health).fit()
+
+# Key results
+intercept_hlth = model_hlthpc.params['Intercept']
+slope_hlth     = model_hlthpc.params['gdppc']
+r2_hlth        = model_hlthpc.rsquared
+
+print(f"Estimated equation: hlthpc = {intercept_hlth:,.2f} + {slope_hlth:.4f} x gdppc")
+print(f"R-squared: {r2_hlth:.4f} ({r2_hlth*100:.1f}% of variation explained)\n")
+
+# Full regression output
 display(model_hlthpc.summary())
 
 # Robust standard errors
@@ -377,7 +411,8 @@ These outliers suggest the relationship may not be stable across all countries.
 ```{python}
 # Figure 8.2 Panel A - All countries
 fig, ax = plt.subplots(figsize=(10, 6))
-ax.scatter(data_health['gdppc'], data_health['hlthpc'], alpha=0.6, s=50,
+ax.scatter(data_health['gdppc'], data_health['hlthpc'],
+           alpha=0.6, s=50,  # alpha = transparency, s = marker size
            color='#22d3ee', label='Actual')
 ax.plot(data_health['gdppc'], model_hlthpc.fittedvalues, color='#c084fc',
         linewidth=2, label='Fitted')
@@ -409,6 +444,16 @@ print(f"Subset sample size: {len(data_health_subset)}")
 print()
 
 model_hlthpc_subset = ols('hlthpc ~ gdppc', data=data_health_subset).fit()
+
+# Key results (excluding USA & Luxembourg)
+intercept_sub = model_hlthpc_subset.params['Intercept']
+slope_sub     = model_hlthpc_subset.params['gdppc']
+r2_sub        = model_hlthpc_subset.rsquared
+
+print(f"Estimated equation: hlthpc = {intercept_sub:,.2f} + {slope_sub:.4f} x gdppc")
+print(f"R-squared: {r2_sub:.4f} ({r2_sub*100:.1f}% of variation explained)\n")
+
+# Full regression output
 display(model_hlthpc_subset.summary())
 
 # Robust standard errors
@@ -456,7 +501,8 @@ If you're advising a "typical" OECD country on expected health spending, the sub
 ```{python}
 # Figure 8.2 Panel B - Excluding USA and Luxembourg
 fig, ax = plt.subplots(figsize=(10, 6))
-ax.scatter(data_health_subset['gdppc'], data_health_subset['hlthpc'], alpha=0.6, s=50,
+ax.scatter(data_health_subset['gdppc'], data_health_subset['hlthpc'],
+           alpha=0.6, s=50,  # alpha = transparency, s = marker size
            color='#22d3ee', label='Actual')
 ax.plot(data_health_subset['gdppc'], model_hlthpc_subset.fittedvalues, color='#c084fc',
         linewidth=2, label='Fitted')
@@ -472,7 +518,7 @@ plt.show()
 # Much stronger linear relationship when outliers are excluded.
 ```
 
-**Transition:** Our health economics case studies revealed strong relationships but also highlighted outlier issues. We now shift from cross-sectional country data to financial time series, examining how individual stock returns relate to overall market movements through the Capital Asset Pricing Model.
+Our health economics case studies revealed strong relationships but also highlighted outlier issues. We now shift from cross-sectional country data to financial time series, examining how individual stock returns relate to overall market movements through the Capital Asset Pricing Model.
 
 ## 8.3: Capital Asset Pricing Model (CAPM)
 
@@ -565,11 +611,18 @@ plt.show()
 ```{python}
 # CAPM regression: Coca-Cola
 model_capm = ols('rko_rf ~ rm_rf', data=data_capm).fit()
-model_capm.summary()
 
-# Extract key parameters
+# Key results
 alpha = model_capm.params['Intercept']
 beta = model_capm.params['rm_rf']
+r2_capm = model_capm.rsquared
+
+print(f"Estimated equation: rko_rf = {alpha:.4f} + {beta:.4f} x rm_rf")
+print(f"Beta (systematic risk): {beta:.4f} — Coca-Cola is a defensive stock (beta < 1)")
+print(f"R-squared: {r2_capm:.4f} ({r2_capm*100:.1f}% of return variation explained by market)\n")
+
+# Full regression output
+model_capm.summary()
 alpha_se = model_capm.bse['Intercept']
 beta_se = model_capm.bse['rm_rf']
 alpha_t = model_capm.tvalues['Intercept']
@@ -628,7 +681,8 @@ The estimated alpha of 0.0039 (0.39% per month, or ~4.7% annually) is statistica
 ```{python}
 # Figure 8.3 Panel B - CAPM Scatter Plot
 fig, ax = plt.subplots(figsize=(10, 6))
-ax.scatter(data_capm['rm_rf'], data_capm['rko_rf'], alpha=0.4, s=30,
+ax.scatter(data_capm['rm_rf'], data_capm['rko_rf'],
+           alpha=0.4, s=30,  # alpha = transparency, s = marker size
            color='#22d3ee', label='Actual')
 ax.plot(data_capm['rm_rf'], model_capm.fittedvalues, color='#c084fc',
         linewidth=2, label='Fitted')
@@ -678,7 +732,7 @@ print(f"Beta (slope) = {model_capm.params['rm_rf']:.4f}")
 >
 > R² in the CAPM context. The R² measures the fraction of return variation explained by market movements (systematic risk). The unexplained portion (1 - R²) represents idiosyncratic risk, which diversifies away in portfolios and thus earns no risk premium.
 
-**Transition:** The CAPM demonstrated how financial returns co-move with market-wide factors. Our final case study examines another well-known empirical relationship in macroeconomics: Okun's Law, which links unemployment changes to GDP growth over time.
+The CAPM demonstrated how financial returns co-move with market-wide factors. Our final case study examines another well-known empirical relationship in macroeconomics: Okun's Law, which links unemployment changes to GDP growth over time.
 
 ## 8.4: Output and Unemployment in the U.S. (Okun's Law)
 
@@ -735,11 +789,17 @@ print(f"  - Sample period includes major recessions (1982, 2008-2009, 2020)")
 ```{python}
 # Okun's law regression
 model_okun = ols('rgdpgrowth ~ uratechange', data=data_gdp).fit()
-model_okun.summary()
 
-# Extract coefficients
+# Key results
 intercept_okun = model_okun.params['Intercept']
 slope_okun = model_okun.params['uratechange']
+r2_okun = model_okun.rsquared
+
+print(f"Estimated equation: GDP_growth = {intercept_okun:.2f} + ({slope_okun:.2f}) x URATEchange")
+print(f"R-squared: {r2_okun:.4f} ({r2_okun*100:.1f}% of variation explained)\n")
+
+# Full regression output
+model_okun.summary()
 slope_se_okun = model_okun.bse['uratechange']
 slope_t_okun = model_okun.tvalues['uratechange']
 ```
@@ -799,7 +859,8 @@ R² = 0.59 means unemployment changes explain 59% of GDP growth variation:
 ```{python}
 # Figure 8.4 Panel A - Okun's Law Scatter Plot
 fig, ax = plt.subplots(figsize=(10, 6))
-ax.scatter(data_gdp['uratechange'], data_gdp['rgdpgrowth'], alpha=0.6, s=50,
+ax.scatter(data_gdp['uratechange'], data_gdp['rgdpgrowth'],
+           alpha=0.6, s=50,  # alpha = transparency, s = marker size
            color='#22d3ee', label='Actual')
 ax.plot(data_gdp['uratechange'], model_okun.fittedvalues, color='#c084fc',
         linewidth=2, label='Fitted')

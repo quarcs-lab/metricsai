@@ -168,6 +168,14 @@ where $\tilde{x}_{ji}$ are residuals from regressing $x_j$ on other regressors, 
 model_default = ols('price ~ size + bedrooms + bathrooms + lotsize + age + monthsold',
                     data=data_house).fit()
 
+# Key results
+size_coef_default = model_default.params['size']
+size_pval_default = model_default.pvalues['size']
+r_squared = model_default.rsquared
+print(f"Size effect (default): ${size_coef_default:,.2f} per sq ft (p = {size_pval_default:.4f})")
+print(f"R-squared: {r_squared:.4f}")
+
+# Full regression output
 print("\nRegression with Default Standard Errors:")
 model_default.summary()
 ```
@@ -177,6 +185,12 @@ model_default.summary()
 model_robust = ols('price ~ size + bedrooms + bathrooms + lotsize + age + monthsold',
                    data=data_house).fit(cov_type='HC1')
 
+# Key results
+size_coef_robust = model_robust.params['size']
+size_pval_robust = model_robust.pvalues['size']
+print(f"Size effect (robust): ${size_coef_robust:,.2f} per sq ft (p = {size_pval_robust:.4f})")
+
+# Full regression output
 print("\nRegression with Heteroskedastic-Robust Standard Errors (HC1):")
 model_robust.summary()
 ```
@@ -280,6 +294,12 @@ print("The correlogram shows autocorrelation at various lags.")
 print("Blue shaded area = 95% confidence bands under null of no autocorrelation.")
 ```
 
+**What to look for in this correlogram:**
+
+- **Bars outside the shaded band**: Autocorrelations that exceed the 95% confidence bands are statistically significant, indicating persistent serial correlation
+- **Decay pattern**: Autocorrelations that decay slowly suggest strong persistence in the series; rapid decay suggests shocks are short-lived
+- **Lag 1 autocorrelation**: The most important lag -- a large positive value means today's growth predicts tomorrow's growth
+
 > **Key Concept 12.2: HAC Standard Errors for Time Series**
 >
 > In time series data, errors are often autocorrelated — today's shock persists into tomorrow. HAC (heteroskedasticity and autocorrelation consistent) standard errors, also called Newey-West SEs, account for both heteroskedasticity and autocorrelation. The lag length $m$ must be specified; a common rule of thumb is $m = 0.75 \times T^{1/3}$.
@@ -327,8 +347,6 @@ Autocorrelation creates **information overlap** between observations:
 - Overconfident inference (SEs too small)
 - Spurious significance (false discoveries)
 - Invalid hypothesis tests
-
-Having established how to conduct valid inference with robust standard errors, we now turn to prediction — estimating outcomes for specific values.
 
 ## 12.3: Prediction
 
@@ -818,8 +836,6 @@ Testing k hypotheses at α = 0.05:
 3. **Pre-registration**: Specify primary hypotheses before seeing data
 4. **Replication**: Confirm findings in independent samples
 
-Now that we understand how sample selection affects estimates, let's consider what happens when we seek the most efficient estimator.
-
 ## 12.5: Best Estimation Methods
 
 **When are OLS estimators "best"?**
@@ -1016,8 +1032,6 @@ A 95% CI is "best" if it:
 > **Key Concept 12.7: Bootstrap Confidence Intervals**
 >
 > The bootstrap resamples the original data (with replacement) many times to estimate the sampling distribution of a statistic. Bootstrap CIs don't rely on normality or large-sample approximations, making them especially useful with small samples, skewed distributions, or non-standard estimators where analytical formulas aren't available.
-
-Having discussed the best confidence intervals, we now examine what makes a hypothesis test optimal — balancing Type I and Type II errors.
 
 ## 12.7: Best Tests
 

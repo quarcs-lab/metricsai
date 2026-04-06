@@ -65,24 +65,24 @@ By the end of this chapter, you will be able to:
 First, we install and import the necessary Python packages and configure the environment for reproducibility. All data will stream directly from GitHub.
 
 ```{python}
-# Install linearmodels for panel data estimation
+# --- Package installation ---
 !pip install linearmodels -q
 
-# Import required packages
-import numpy as np
-import pandas as pd
-import matplotlib.pyplot as plt
-import seaborn as sns
-import statsmodels.api as sm
-from statsmodels.formula.api import ols, logit
-from scipy import stats
-from statsmodels.stats.diagnostic import acorr_breusch_godfrey
-from statsmodels.graphics.tsaplots import plot_acf
-from statsmodels.tsa.stattools import acf
+# --- Libraries ---
+import numpy as np                                    # numerical operations
+import pandas as pd                                   # data manipulation
+import matplotlib.pyplot as plt                       # plotting
+import seaborn as sns                                 # statistical plots
+import statsmodels.api as sm                          # statistical models
+from statsmodels.formula.api import ols, logit        # OLS/logit with formula syntax
+from scipy import stats                               # statistical distributions
+from statsmodels.stats.diagnostic import acorr_breusch_godfrey  # serial correlation test
+from statsmodels.graphics.tsaplots import plot_acf    # autocorrelation plots
+from statsmodels.tsa.stattools import acf             # autocorrelation function
 import random
 import os
 
-# Panel data tools
+# --- Panel data tools ---
 try:
     from linearmodels.panel import PanelOLS, RandomEffects
     LINEARMODELS_AVAILABLE = True
@@ -90,16 +90,16 @@ except ImportError:
     print("Warning: linearmodels not available")
     LINEARMODELS_AVAILABLE = False
 
-# Set random seeds for reproducibility
+# --- Reproducibility ---
 RANDOM_SEED = 42
 random.seed(RANDOM_SEED)
 np.random.seed(RANDOM_SEED)
 os.environ['PYTHONHASHSEED'] = str(RANDOM_SEED)
 
-# GitHub data URL
+# --- Data source ---
 GITHUB_DATA_URL = "https://raw.githubusercontent.com/quarcs-lab/data-open/master/AED/"
 
-# Set plotting style (dark theme matching book design)
+# --- Plotting style (dark theme matching book design) ---
 plt.style.use('dark_background')
 sns.set_style("darkgrid")
 plt.rcParams.update({
@@ -113,9 +113,6 @@ plt.rcParams.update({
     'ytick.color': 'white',
     'axes.edgecolor': '#1a2235',
 })
-
-# Chapter 17: Panel Data, Time Series Data, Causation
-# Setup complete! Ready to explore advanced econometric methods.
 ```
 
 ## 17.2: Panel Data Models
@@ -296,7 +293,7 @@ Let's visualize the relationship between team wins and revenue.
 ```{python}
 # Figure 17.1: Scatter plot with fitted line
 fig, ax = plt.subplots(figsize=(10, 6))
-ax.scatter(data_nba['wins'], data_nba['lnrevenue'], alpha=0.5, s=30)
+ax.scatter(data_nba['wins'], data_nba['lnrevenue'], alpha=0.5, s=30)  # alpha = transparency, s = marker size
 
 # Add OLS fit line
 z = np.polyfit(data_nba['wins'], data_nba['lnrevenue'], 1)
@@ -311,9 +308,13 @@ ax.legend()
 ax.grid(True, alpha=0.3)
 plt.tight_layout()
 plt.show()
-
-# Positive relationship: More wins associated with higher revenue.
 ```
+
+**What to look for in this scatter plot:**
+
+- **Direction**: Positive -- teams with more wins tend to have higher log revenue
+- **Scatter**: Substantial vertical spread at each win level, suggesting other factors (market size, brand) drive much of the revenue variation
+- **Fitted line**: The upward OLS line captures the overall association, but this pools across teams and time -- it may overstate the causal effect of winning because big-market teams both win more and earn more
 
 ### Pooled OLS with Different Standard Errors
 
@@ -810,12 +811,6 @@ if LINEARMODELS_AVAILABLE:
 
     print("\n", comparison_table)
 
-    # Interpretation
-    # - Pooled: Largest coefficient (confounded by team characteristics)
-    # - FE: Controls for time-invariant team effects (within-team variation)
-    # - RE: Between pooled and FE (uses both within and between variation)
-    # - FE preferred if team effects correlated with wins
-
 else:
     print("\nRandom effects estimation requires linearmodels package.")
     print("Install with: pip install linearmodels")
@@ -853,7 +848,14 @@ print(f"Proportion with high earnings: {data_earnings['dbigearn'].mean():.4f}")
 
 # Logit model
 model_logit = logit('dbigearn ~ age + education', data=data_earnings).fit(cov_type='HC1', disp=0)
-# Logit Model Results
+
+# Key results
+print(f"Logit coefficients:")
+print(f"  Age:       {model_logit.params['age']:.4f}")
+print(f"  Education: {model_logit.params['education']:.4f}")
+print(f"  Pseudo R-squared: {model_logit.prsquared:.4f}")
+
+# Full logit output
 model_logit.summary()
 
 # Marginal effects
@@ -869,8 +871,6 @@ print(f"Education coefficient: {model_lpm.params['education']:.6f} (SE: {model_l
 
 print("\nNote: Logit marginal effects and LPM coefficients are similar in magnitude.")
 ```
-
-*Having explored panel data methods for cross-sectional units observed over time, we now turn to pure time series analysis where the focus shifts to temporal dynamics, autocorrelation, and stationarity.*
 
 ## 17.5: Time Series Data
 
@@ -935,7 +935,7 @@ axes[0].legend()
 axes[0].grid(True, alpha=0.3)
 
 # Panel 2: Scatter plot
-axes[1].scatter(data_rates['gs1'], data_rates['gs10'], alpha=0.5, s=20)
+axes[1].scatter(data_rates['gs1'], data_rates['gs10'], alpha=0.5, s=20)  # alpha = transparency, s = marker size
 z = np.polyfit(data_rates['gs1'].dropna(), data_rates['gs10'].dropna(), 1)
 p = np.poly1d(z)
 gs1_range = np.linspace(data_rates['gs1'].min(), data_rates['gs1'].max(), 100)
@@ -948,10 +948,13 @@ axes[1].grid(True, alpha=0.3)
 
 plt.tight_layout()
 plt.show()
-
-# Both series show strong downward trend over time (non-stationary).
-# Strong positive correlation between 1-year and 10-year rates.
 ```
+
+**What to look for in these time series plots:**
+
+- **Top panel (Levels)**: Both rates trend downward from ~14% in 1982 to ~2% by 2015 -- this persistent trend signals non-stationarity, which can produce spurious regressions
+- **Top panel (Spread)**: The gap between 10-year and 1-year rates varies over time -- when the 1-year rate drops sharply (Fed easing), the spread widens
+- **Bottom panel (Scatter)**: The tight positive cluster confirms strong correlation, but this may partly reflect common trends rather than a true structural relationship
 
 ### Regression in Levels vs. Changes
 
@@ -970,15 +973,13 @@ print(f"  gs1 coef: {model_levels.params['gs1']:.6f}")
 print(f"  R²: {model_levels.rsquared:.6f}")
 
 # HAC standard errors (Newey-West)
-model_levels_hac = ols('gs10 ~ gs1 + time', data=data_rates).fit(cov_type='HAC', cov_kwds={'maxlags': 24})
+model_levels_hac = ols('gs10 ~ gs1 + time', data=data_rates).fit(cov_type='HAC', cov_kwds={'maxlags': 24})  # 2 years of monthly data
 print("\nLevels regression (HAC SEs with 24 lags):")
 print(f"  gs1 coef: {model_levels_hac.params['gs1']:.6f}")
 print(f"  gs1 SE (default): {model_levels.bse['gs1']:.6f}")
 print(f"  gs1 SE (HAC): {model_levels_hac.bse['gs1']:.6f}")
 print(f"\n  HAC SE is {model_levels_hac.bse['gs1'] / model_levels.bse['gs1']:.2f}x larger!")
 ```
-
-*Now that we have visualized the time series patterns and estimated regressions in levels, let's formally examine autocorrelation in the residuals and its consequences for inference.*
 
 ## 17.6: Autocorrelation
 
@@ -1032,9 +1033,13 @@ ax.set_xlabel('Lag', fontsize=12)
 ax.set_ylabel('Autocorrelation', fontsize=12)
 plt.tight_layout()
 plt.show()
-
-# Autocorrelations decay very slowly (characteristic of non-stationary series).
 ```
+
+**What to look for in this correlogram:**
+
+- **Slow decay**: Autocorrelations remain high even at long lags (lag 10 still above 0.4) -- this is the signature of a non-stationary or near-unit-root process
+- **Blue confidence bands**: Bars extending well beyond these bands confirm statistically significant autocorrelation at virtually every lag
+- **Implication**: Standard OLS inference is invalid because residuals are strongly dependent -- HAC standard errors or first differencing are needed
 
 ### First Differencing
 
@@ -1270,12 +1275,13 @@ axes[1].grid(True, alpha=0.3)
 
 plt.tight_layout()
 plt.show()
-
-print("Changes fluctuate around zero (stationary-looking).")
-print("Positive correlation between changes (rates move together).")
 ```
 
-*Having developed tools for handling panel data and time series, we now address the fundamental question of causality -- how to move from correlation to causal inference using econometric methods.*
+**What to look for in these change plots:**
+
+- **Top panel**: Changes fluctuate around zero with no visible trend -- this is the hallmark of a stationary series, unlike the trending levels above
+- **Bottom panel**: The positive scatter confirms that short-rate and long-rate changes move together, but the relationship is less than one-to-one (slope < 1)
+- **Volatility clustering**: Notice periods of larger swings (e.g., early 1980s) -- this heteroskedasticity motivates HAC standard errors
 
 ## 17.7: Causality and Instrumental Variables
 
@@ -1316,50 +1322,34 @@ $$\hat{\beta}_{IV} = \frac{Cov(z,y)}{Cov(z,x)}$$
 ```{python}
 # 17.7 Causality And Instrumental Variables
 
-# \nKey Points on Causality:
-# \n1. Correlation ≠ Causation
+print("Key Points on Causality:")
+print("1. Correlation ≠ Causation")
 print("   - Regression shows association, not necessarily causation")
 print("   - Need to rule out confounding, reverse causation, selection")
-
-# \n2. Randomized Controlled Trials (RCT)
-# - Gold standard: Randomly assign treatment
-# - Ensures treatment uncorrelated with potential outcomes
-# - Causal effect = difference in means
-
-# \n3. Observational Data Methods
-# - Instrumental Variables: Use variation from instrument
-# - Fixed Effects: Control for time-invariant unobservables
-# - Difference-in-Differences: Compare treatment vs control over time
-# - Regression Discontinuity: Exploit threshold for treatment
-
-# \n4. Potential Outcomes Framework
-# - Y₁ᵢ: Outcome if treated
-# - Y₀ᵢ: Outcome if not treated
-# - Individual treatment effect: Y₁ᵢ - Y₀ᵢ
-# - Problem: Only observe one potential outcome!
-# - ATE = E[Y₁ᵢ - Y₀ᵢ]: Average Treatment Effect
-
-# \n5. Instrumental Variables
-# - Requires valid instrument z:
-# (a) Relevant: Corr(z,x) ≠ 0
-# (b) Exogenous: Corr(z,u) = 0
-# - Example: Distance to college as IV for education
-# - Weak instruments: Large standard errors
-
-# \n6. Panel Data and Causality
-# - Fixed Effects: Controls for αᵢ (unobserved heterogeneity)
-# - Causal if: Conditional on αᵢ, X exogenous
-# - NBA example: FE controls for team characteristics
-# - Identifies within-team effect of wins on revenue
-
-# Practical Recommendations
-# 1. Always think about potential confounders
-# 2. Use robust/cluster standard errors
-# 3. Test multiple specifications
-# 4. Report both OLS and IV/FE when appropriate
-# 5. Be transparent about identification assumptions
-# 6. Causal claims require strong justification!
+print("2. Causal methods: RCT, IV, Fixed Effects, DiD, RD, Matching")
+print("3. Credible causal inference requires a convincing identification strategy")
 ```
+
+**The Potential Outcomes Framework:**
+
+- $Y_{1i}$: Outcome if treated; $Y_{0i}$: Outcome if not treated
+- Individual treatment effect: $Y_{1i} - Y_{0i}$ (only one is observed!)
+- **ATE** = $E[Y_{1i} - Y_{0i}]$: Average Treatment Effect
+
+**The Causal Inference Toolkit:**
+
+- **Randomized Controlled Trials (RCT)**: Gold standard -- random assignment ensures treatment is uncorrelated with potential outcomes
+- **Instrumental Variables**: Use an instrument $z$ that affects $x$ but not $y$ directly
+- **Fixed Effects**: Control for time-invariant unobservables (e.g., NBA team characteristics)
+- **Difference-in-Differences**: Compare treatment vs. control groups before and after an intervention
+- **Regression Discontinuity**: Exploit a threshold rule for treatment assignment
+
+**Practical Recommendations:**
+
+- Always think about potential confounders
+- Use robust/cluster standard errors
+- Test multiple specifications and report both OLS and IV/FE
+- Be transparent about identification assumptions -- causal claims require strong justification
 
 > **Key Concept 17.8: Instrumental Variables and Causal Inference**
 >

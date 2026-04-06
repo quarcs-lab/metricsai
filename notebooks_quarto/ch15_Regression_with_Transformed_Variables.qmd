@@ -72,27 +72,27 @@ By the end of this chapter, you will be able to:
 First, we import the necessary Python packages and configure the environment for reproducibility. All data will stream directly from GitHub.
 
 ```{python}
-# Import required packages
-import numpy as np
-import pandas as pd
-import matplotlib.pyplot as plt
-import seaborn as sns
-import statsmodels.api as sm
-from statsmodels.formula.api import ols
-from scipy import stats
+# --- Libraries ---
+import numpy as np                        # numerical operations
+import pandas as pd                       # data manipulation
+import matplotlib.pyplot as plt           # plotting
+import seaborn as sns                     # statistical plots
+import statsmodels.api as sm              # statistical models
+from statsmodels.formula.api import ols   # OLS with formula syntax
+from scipy import stats                   # statistical distributions
 import random
 import os
 
-# Set random seeds for reproducibility
+# --- Reproducibility ---
 RANDOM_SEED = 42
 random.seed(RANDOM_SEED)
 np.random.seed(RANDOM_SEED)
 os.environ['PYTHONHASHSEED'] = str(RANDOM_SEED)
 
-# GitHub data URL
+# --- Data source ---
 GITHUB_DATA_URL = "https://raw.githubusercontent.com/quarcs-lab/data-open/master/AED/"
 
-# Set plotting style (dark theme matching book design)
+# --- Plotting style (dark theme matching book design) ---
 plt.style.use('dark_background')
 sns.set_style("darkgrid")
 plt.rcParams.update({
@@ -106,8 +106,6 @@ plt.rcParams.update({
     'ytick.color': 'white',
     'axes.edgecolor': '#1a2235',
 })
-
-# Setup complete! Ready to explore regression with transformed variables.
 ```
 
 ## 15.1: Example - Earnings and Education
@@ -185,15 +183,30 @@ else:
 
 # Model 1: Levels Model - earnings ~ age + education
 ols_linear = ols('earnings ~ age + education', data=data_earnings).fit(cov_type='HC1')
-ols_linear.summary()
 
 # Model 2: Log-Linear Model - lnearnings ~ age + education
 ols_loglin = ols('lnearnings ~ age + education', data=data_earnings).fit(cov_type='HC1')
-ols_loglin.summary()
 
 # Model 3: Log-Log Model - lnearnings ~ lnage + education
 ols_loglog = ols('lnearnings ~ lnage + education', data=data_earnings).fit(cov_type='HC1')
-ols_loglog.summary()
+
+# Key results across all three specifications
+print("=== Model 1: Levels ===")
+print(f"  Equation: earnings = {ols_linear.params['Intercept']:,.0f} + {ols_linear.params['age']:.2f} x age + {ols_linear.params['education']:.2f} x education")
+print(f"  R-squared: {ols_linear.rsquared:.4f}")
+
+print("\n=== Model 2: Log-Linear ===")
+print(f"  Equation: ln(earnings) = {ols_loglin.params['Intercept']:.4f} + {ols_loglin.params['age']:.4f} x age + {ols_loglin.params['education']:.4f} x education")
+print(f"  Education return: ~{100*ols_loglin.params['education']:.1f}% per year (semi-elasticity)")
+print(f"  R-squared: {ols_loglin.rsquared:.4f}")
+
+print("\n=== Model 3: Log-Log ===")
+print(f"  Equation: ln(earnings) = {ols_loglog.params['Intercept']:.4f} + {ols_loglog.params['lnage']:.4f} x ln(age) + {ols_loglog.params['education']:.4f} x education")
+print(f"  Age elasticity: {ols_loglog.params['lnage']:.4f} (a 1% increase in age -> {ols_loglog.params['lnage']:.2f}% increase in earnings)")
+print(f"  R-squared: {ols_loglog.rsquared:.4f}")
+
+# Full regression output (Model 2 - the Mincer equation)
+ols_loglin.summary()
 ```
 
 > **Key Concept 15.1: Log Transformations and Coefficient Interpretation**
@@ -283,8 +296,6 @@ print("\nNote: R² values are NOT directly comparable across models with differe
 # dependent variables. For log models, R² measures fit to ln(earnings), not earnings.
 ```
 
-*Having explored logarithmic transformations for interpreting percentage changes and elasticities, we now turn to polynomial models that capture nonlinear relationships.*
-
 > **Key Concept 15.2: Choosing Between Model Specifications**
 >
 > You cannot directly compare $R^2$ across models with different dependent variables ($y$ vs $\ln y$) because they measure variation on different scales. Instead, compare models using **prediction accuracy** (e.g., mean squared error of predicted $y$ in levels), information criteria (AIC, BIC), or economic plausibility of the estimated relationships.
@@ -319,10 +330,19 @@ $$AME = \beta_2 + 2\beta_3 \bar{x}$$
 # Linear model (for comparison)
 # Linear Model: earnings ~ age + education
 ols_linear_age = ols('earnings ~ age + education', data=data_earnings).fit(cov_type='HC1')
-ols_linear_age.summary()
 
 # Quadratic Model: earnings ~ age + agesq + education
 ols_quad = ols('earnings ~ age + agesq + education', data=data_earnings).fit(cov_type='HC1')
+
+# Key results: Quadratic vs Linear
+print(f"Linear model R-squared:    {ols_linear_age.rsquared:.4f}")
+print(f"Quadratic model R-squared: {ols_quad.rsquared:.4f}")
+print(f"\nQuadratic coefficients:")
+print(f"  age:       {ols_quad.params['age']:,.2f}")
+print(f"  age-sq:    {ols_quad.params['agesq']:.4f}")
+print(f"  education: {ols_quad.params['education']:,.2f}")
+
+# Full regression output (quadratic model)
 ols_quad.summary()
 ```
 
@@ -458,7 +478,7 @@ educ_mean = data_earnings['education'].mean()
 linear_pred = ols_linear_age.params['Intercept'] + ols_linear_age.params['age']*age_range + ols_linear_age.params['education']*educ_mean
 quad_pred = ols_quad.params['Intercept'] + bage*age_range + bagesq*age_range**2 + beducation*educ_mean
 
-axes[0].scatter(data_earnings['age'], data_earnings['earnings'], alpha=0.3, s=20, color='gray', label='Actual data')
+axes[0].scatter(data_earnings['age'], data_earnings['earnings'], alpha=0.3, s=20, color='gray', label='Actual data')  # alpha = transparency, s = marker size
 axes[0].plot(age_range, linear_pred, '-', color='#c084fc', linewidth=2, label='Linear model')
 axes[0].plot(age_range, quad_pred, 'r-', linewidth=2, label='Quadratic model')
 axes[0].axvline(x=turning_point, color='green', linestyle='--', linewidth=1.5, alpha=0.7, label=f'Turning point ({turning_point:.1f} years)')
@@ -489,6 +509,12 @@ plt.show()
 
 # The quadratic model captures the inverted U-shape relationship between age and earnings.
 ```
+
+**What to look for in this quadratic visualization:**
+
+- **Left panel**: The quadratic (red) curve bends downward after the turning point, capturing the earnings decline at older ages that the linear model (purple) misses entirely
+- **Turning point**: The green dashed line marks the age where additional years stop increasing earnings -- a key policy-relevant quantity
+- **Right panel**: The marginal effect of age decreases steadily; the green/red shading shows where an extra year of age helps vs. hurts earnings
 
 ## 15.4: Standardized Variables
 
@@ -521,6 +547,13 @@ $$\beta^* = \beta \times \frac{s_x}{s_y}$$
 # earnings ~ gender + age + agesq + education + dself + dgovt + lnhours
 ols_linear_mix = ols('earnings ~ gender + age + agesq + education + dself + dgovt + lnhours',
                      data=data_earnings).fit(cov_type='HC1')
+
+# Key results
+print(f"R-squared: {ols_linear_mix.rsquared:.4f} ({ols_linear_mix.rsquared*100:.1f}% of variation explained)")
+print(f"Education: +${ols_linear_mix.params['education']:,.0f} per year of schooling")
+print(f"Gender: ${ols_linear_mix.params['gender']:,.0f} (negative = women earn less)")
+
+# Full regression output
 ols_linear_mix.summary()
 ```
 
@@ -672,11 +705,13 @@ ax.grid(True, alpha=0.3, axis='x')
 
 plt.tight_layout()
 plt.show()
-
-# Standardized coefficients allow direct comparison of relative importance.
 ```
 
-*Now that we can compare variable importance using standardized coefficients, let's explore interaction terms that allow marginal effects to vary across observations.*
+**What to look for in this standardized coefficient chart:**
+
+- **Longest bars**: The variables with the largest absolute standardized coefficients are the strongest predictors of earnings when measured on a common scale
+- **Direction (color)**: Cyan bars indicate positive effects; red bars indicate negative effects (e.g., gender penalty)
+- **Relative ranking**: Compare education vs. hours vs. age -- the raw coefficients may suggest a different ranking because those variables are measured in different units
 
 ## 15.5: Interaction Terms and Marginal Effects
 
@@ -703,10 +738,20 @@ $$ME_z = \beta_3 + \beta_4 x$$
 # Model without interaction (for comparison)
 # Model WITHOUT Interaction: earnings ~ age + education
 ols_no_interact = ols('earnings ~ age + education', data=data_earnings).fit(cov_type='HC1')
-ols_no_interact.summary()
 
 # Model WITH Interaction: earnings ~ age + education + agebyeduc
 ols_interact = ols('earnings ~ age + education + agebyeduc', data=data_earnings).fit(cov_type='HC1')
+
+# Key results: How returns to education vary with age
+b_educ = ols_interact.params['education']
+b_inter = ols_interact.params['agebyeduc']
+print(f"Interaction model: ME of education = {b_educ:,.0f} + {b_inter:.1f} x age")
+print(f"  At age 25: ${b_educ + b_inter*25:,.0f} per year of education")
+print(f"  At age 40: ${b_educ + b_inter*40:,.0f} per year of education")
+print(f"  At age 55: ${b_educ + b_inter*55:,.0f} per year of education")
+print(f"R-squared (with interaction): {ols_interact.rsquared:.4f}")
+
+# Full regression output
 ols_interact.summary()
 ```
 
@@ -1021,7 +1066,7 @@ In income tax revenue forecasting:
 fig, axes = plt.subplots(1, 3, figsize=(18, 5))
 
 # Plot 1: Levels model
-axes[0].scatter(data_earnings['earnings'], linear_predict, alpha=0.5, s=30)
+axes[0].scatter(data_earnings['earnings'], linear_predict, alpha=0.5, s=30)  # alpha = transparency, s = marker size
 axes[0].plot([0, 500000], [0, 500000], 'r--', linewidth=2)
 axes[0].set_xlabel('Actual Earnings ($)', fontsize=11)
 axes[0].set_ylabel('Predicted Earnings ($)', fontsize=11)
@@ -1046,11 +1091,13 @@ axes[2].grid(True, alpha=0.3)
 
 plt.tight_layout()
 plt.show()
-
-# The adjusted retransformation provides better predictions on average.
 ```
 
-*Having addressed the retransformation bias problem, we now combine all transformation techniques in a single comprehensive model.*
+**What to look for in these prediction plots:**
+
+- **Left panel (Levels model)**: Points cluster around the 45-degree line for moderate earnings but undershoot for high earners -- the linear model cannot capture the skewed earnings distribution
+- **Middle panel (Biased)**: The entire cloud sits below the 45-degree line, confirming systematic underprediction from naive retransformation
+- **Right panel (Adjusted)**: The correction factor shifts predictions upward so they center on the 45-degree line -- the mean prediction now matches the actual mean
 
 ## 15.7: Comprehensive Model with Mixed Regressors
 
@@ -1062,6 +1109,14 @@ plt.show()
 # lnearnings ~ gender + age + agesq + education + dself + dgovt + lnhours
 ols_log_mix = ols('lnearnings ~ gender + age + agesq + education + dself + dgovt + lnhours',
                   data=data_earnings).fit(cov_type='HC1')
+
+# Key results
+print(f"R-squared: {ols_log_mix.rsquared:.4f} ({ols_log_mix.rsquared*100:.1f}% of variation in ln(earnings) explained)")
+print(f"Education return: ~{100*ols_log_mix.params['education']:.1f}% per year")
+print(f"Gender gap: ~{100*ols_log_mix.params['gender']:.1f}%")
+print(f"Hours elasticity: {ols_log_mix.params['lnhours']:.3f}")
+
+# Full regression output
 ols_log_mix.summary()
 
 # INTERPRETATION OF COEFFICIENTS (controlling for other regressors)

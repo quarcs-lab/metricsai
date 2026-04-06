@@ -60,28 +60,28 @@ This chapter extends statistical inference from univariate to bivariate regressi
 First, we import the necessary Python packages and configure the environment for reproducibility. All data will stream directly from GitHub.
 
 ```{python}
-# Import required packages
-import numpy as np
-import pandas as pd
-import matplotlib.pyplot as plt
-import seaborn as sns
-import statsmodels.api as sm
-from statsmodels.formula.api import ols
-from scipy import stats
-from statsmodels.stats.sandwich_covariance import cov_hc1
+# --- Libraries ---
+import numpy as np                                       # numerical operations
+import pandas as pd                                      # data manipulation
+import matplotlib.pyplot as plt                          # plotting
+import seaborn as sns                                    # statistical visualizations
+import statsmodels.api as sm                             # statistical models
+from statsmodels.formula.api import ols                  # OLS with formula syntax
+from scipy import stats                                  # statistical distributions
+from statsmodels.stats.sandwich_covariance import cov_hc1  # robust standard errors
 import random
 import os
 
-# Set random seeds for reproducibility
+# --- Reproducibility ---
 RANDOM_SEED = 42
 random.seed(RANDOM_SEED)
 np.random.seed(RANDOM_SEED)
 os.environ['PYTHONHASHSEED'] = str(RANDOM_SEED)
 
-# GitHub data URL
+# --- Data source ---
 GITHUB_DATA_URL = "https://raw.githubusercontent.com/quarcs-lab/data-open/master/AED/"
 
-# Set plotting style (dark theme matching book design)
+# --- Plotting style (dark theme matching book design) ---
 plt.style.use('dark_background')
 sns.set_style("darkgrid")
 plt.rcParams.update({
@@ -144,6 +144,17 @@ We estimate the bivariate regression model using ordinary least squares (OLS).
 ```{python}
 # Table 7.1 - Basic regression
 model_basic = ols('price ~ size', data=data_house).fit()
+
+# Key results
+intercept = model_basic.params['Intercept']
+slope     = model_basic.params['size']
+r_squared = model_basic.rsquared
+
+print(f"Estimated equation: price = {intercept:,.2f} + {slope:.2f} x size")
+print(f"Slope: each additional sq ft is associated with ${slope:,.2f} higher price")
+print(f"R-squared: {r_squared:.4f} ({r_squared*100:.1f}% of variation explained)\n")
+
+# Full regression output
 model_basic.summary()
 ```
 
@@ -503,7 +514,8 @@ Let's manually calculate the confidence interval for the size coefficient to und
 # Manual calculation of confidence interval for size
 n = len(data_house)
 df = n - 2
-t_crit = stats.t.ppf(0.975, df)  # 97.5th percentile for two-sided 95% CI
+# 0.975 = upper tail for 95% two-sided CI (2.5% in each tail)
+t_crit = stats.t.ppf(0.975, df)
 
 ci_lower = coef_size - t_crit * se_size
 ci_upper = coef_size + t_crit * se_size
@@ -631,7 +643,7 @@ coef_x = model_artificial.params['x']
 se_x = model_artificial.bse['x']
 n_art = len(x)
 df_art = n_art - 2
-t_crit_art = stats.t.ppf(0.975, df_art)
+t_crit_art = stats.t.ppf(0.975, df_art)  # 0.975 = upper tail for 95% two-sided CI
 
 ci_lower_art = coef_x - t_crit_art * se_x
 ci_upper_art = coef_x + t_crit_art * se_x
@@ -980,7 +992,7 @@ $$t = \frac{73.77 - 90}{11.17} = -1.452$$
 null_value = 90
 t_stat_90 = (coef_size - null_value) / se_size
 p_value_90 = 2 * (1 - stats.t.cdf(abs(t_stat_90), df))
-t_crit_90 = stats.t.ppf(0.975, df)
+t_crit_90 = stats.t.ppf(0.975, df)  # 0.975 = upper tail for 95% two-sided CI
 
 print(f"\nTest: H₀: β₂ = {null_value} vs H₁: β₂ ≠ {null_value}")
 print(f"  t-statistic: {t_stat_90:.4f}")
@@ -1301,7 +1313,7 @@ Sometimes we have a directional hypothesis (greater than or less than).
 # 7.6 One-sided directional hypothesis tests
 # Upper one-tailed test: H₀: β₂ ≤ 90 vs H₁: β₂ > 90
 p_value_upper = 1 - stats.t.cdf(t_stat_90, df)
-t_crit_upper = stats.t.ppf(0.95, df)
+t_crit_upper = stats.t.ppf(0.95, df)  # one-sided test
 
 print(f"\nUpper one-tailed test: H₀: β₂ ≤ {null_value} vs H₁: β₂ > {null_value}")
 print(f"  t-statistic: {t_stat_90:.4f}")
@@ -1394,7 +1406,8 @@ Visual representation of the bivariate regression relationship.
 ```{python}
 # Figure 7.1: Scatter plot with regression line
 fig, ax = plt.subplots(figsize=(10, 6))
-ax.scatter(data_house['size'], data_house['price'], alpha=0.6, s=50,
+ax.scatter(data_house['size'], data_house['price'],
+           alpha=0.6, s=50,  # alpha = transparency, s = marker size
            color='#22d3ee', label='Actual observations')
 ax.plot(data_house['size'], model_basic.fittedvalues, color='#c084fc',
         linewidth=2, label='Fitted regression line')
@@ -1407,8 +1420,14 @@ ax.grid(True, alpha=0.3)
 plt.tight_layout()
 plt.show()
 
-print("The regression line captures the positive relationship between size and price.")
 ```
+
+**What to look for in this scatter plot:**
+
+- **Direction**: Positive -- larger houses tend to have higher prices
+- **Form**: Roughly linear -- the points follow an upward-sloping pattern consistent with our regression model
+- **Scatter**: Points do not lie exactly on the line -- this variation is the residual "error" that the model cannot explain
+- **Regression line**: The fitted line summarizes the average relationship, with the slope reflecting $73.77 per additional square foot
 
 ### Visualization: Confidence Intervals
 
@@ -1439,8 +1458,13 @@ ax.grid(True, alpha=0.3, axis='x')
 plt.tight_layout()
 plt.show()
 
-print("Both coefficients are statistically significant (CIs exclude zero).")
 ```
+
+**What to look for in this confidence interval plot:**
+
+- **Exclusion of zero**: If the confidence interval does not cross the red dashed line (zero), the coefficient is statistically significant at the 5% level
+- **Width**: Wider intervals indicate less precision in the estimate; narrower intervals indicate more certainty
+- **Both coefficients**: The intercept and size coefficient are both statistically significant since neither CI contains zero
 
 ### Visualization: Residual Plot
 
@@ -1449,7 +1473,8 @@ Check for patterns in residuals that might violate model assumptions.
 ```{python}
 # Figure 7.3: Residual plot
 fig, ax = plt.subplots(figsize=(10, 6))
-ax.scatter(model_basic.fittedvalues, model_basic.resid, alpha=0.6, s=50, color='#22d3ee')
+ax.scatter(model_basic.fittedvalues, model_basic.resid,
+           alpha=0.6, s=50, color='#22d3ee')  # alpha = transparency, s = marker size
 ax.axhline(y=0, color='red', linestyle='--', linewidth=2, label='Zero residual line')
 ax.set_xlabel('Fitted values', fontsize=12)
 ax.set_ylabel('Residuals', fontsize=12)
@@ -1458,9 +1483,14 @@ ax.legend()
 ax.grid(True, alpha=0.3)
 plt.tight_layout()
 plt.show()
-
-# Check for heteroskedasticity, outliers, non-linearity
 ```
+
+**What to look for in this residual plot:**
+
+- **Random scatter**: Residuals should appear randomly distributed around zero -- no discernible pattern
+- **Constant spread**: The vertical spread of residuals should be roughly the same across all fitted values (homoskedasticity)
+- **Funnel shape**: If the spread widens or narrows, this signals heteroskedasticity -- robust standard errors are needed
+- **Outliers**: Points far from zero may be influential observations worth investigating
 
 ## Key Takeaways
 

@@ -61,29 +61,29 @@ This notebook provides an interactive introduction to bivariate data analysis an
 First, we import the necessary Python packages and configure the environment for reproducibility. All data will stream directly from GitHub.
 
 ```{python}
-# Import required packages
-import numpy as np
-import pandas as pd
-import matplotlib.pyplot as plt
-import seaborn as sns
-import statsmodels.api as sm
-from statsmodels.formula.api import ols
-from statsmodels.nonparametric.smoothers_lowess import lowess
-from scipy import stats
-from scipy.ndimage import gaussian_filter1d
+# --- Libraries ---
+import numpy as np                                          # numerical operations
+import pandas as pd                                         # data manipulation
+import matplotlib.pyplot as plt                             # plotting
+import seaborn as sns                                       # statistical visualization
+import statsmodels.api as sm                                # statistical models
+from statsmodels.formula.api import ols                     # OLS with formula syntax
+from statsmodels.nonparametric.smoothers_lowess import lowess  # LOWESS smoothing
+from scipy import stats                                     # statistical distributions
+from scipy.ndimage import gaussian_filter1d                 # kernel smoothing
 import random
 import os
 
-# Set random seeds for reproducibility
+# --- Reproducibility ---
 RANDOM_SEED = 42
 random.seed(RANDOM_SEED)
 np.random.seed(RANDOM_SEED)
 os.environ['PYTHONHASHSEED'] = str(RANDOM_SEED)
 
-# GitHub data URL
+# --- Data source ---
 GITHUB_DATA_URL = "https://raw.githubusercontent.com/quarcs-lab/data-open/master/AED/"
 
-# Set plotting style (dark theme matching book design)
+# --- Plotting style ---
 plt.style.use('dark_background')
 sns.set_style("darkgrid")
 plt.rcParams.update({
@@ -207,13 +207,9 @@ size_range = pd.cut(size, bins=[0, 1799, 2399, np.inf],
 # Two-way tabulation of price and size
 crosstab = pd.crosstab(price_range, size_range, margins=True)
 crosstab
-
-# Interpretation:
-# - 11 houses are both low-priced and small
-# - 0 houses are both low-priced and large (>= 2,400 sq ft)
-# - 3 houses are both high-priced and large
-# - Pattern suggests positive association: larger houses tend to be more expensive
 ```
+
+**What to look for:** 11 houses are both low-priced and small; 0 houses are both low-priced and large (>= 2,400 sq ft); 3 houses are both high-priced and large. The pattern suggests positive association: larger houses tend to be more expensive.
 
 > **Key Concept 5.2: Two-Way Tabulations**
 >
@@ -270,20 +266,21 @@ A **scatter plot** is the primary visual tool for examining the relationship bet
 ```{python}
 # Scatter plot of price vs size
 fig, ax = plt.subplots(figsize=(10, 6))
-ax.scatter(size, price, s=80, alpha=0.7, color='#22d3ee', edgecolor='#3a4a6b')
+ax.scatter(size, price, s=80, alpha=0.7, color='#22d3ee', edgecolor='#3a4a6b')  # s = marker size, alpha = transparency
 ax.set_xlabel('House size (in square feet)', fontsize=12)
 ax.set_ylabel('House sale price (in dollars)', fontsize=12)
 ax.set_title('House Price vs Size', fontsize=14, fontweight='bold')
 ax.grid(True, alpha=0.3)
 plt.tight_layout()
 plt.show()
-
-# What the scatter plot shows:
-# - Positive relationship: Larger houses tend to have higher prices
-# - Roughly linear: Points follow an upward-sloping pattern
-# - Moderate scatter: Not all points lie exactly on a line
-# - No obvious outliers: All points fit the general pattern
 ```
+
+**What to look for in this scatter plot:**
+
+- **Direction**: Positive -- larger houses tend to have higher prices
+- **Form**: Roughly linear -- points follow an upward-sloping pattern
+- **Scatter**: Moderate -- not all points lie exactly on a line
+- **Outliers**: None obvious -- all points fit the general pattern
 
 > **Key Concept 5.3: Scatterplots and Relationships**
 >
@@ -468,13 +465,14 @@ plt.suptitle('Different Correlation Patterns',
              fontsize=14, fontweight='bold', y=0.995)
 plt.tight_layout()
 plt.show()
-
-# Key observations:
-# Panel A (r ~ 0.78): Points cluster tightly around an upward slope
-# Panel B (r ~ 0.44): More scatter, but still positive relationship
-# Panel C (r ~ 0.00): No systematic pattern
-# Panel D (r ~ -0.53): Points follow a downward slope
 ```
+
+**What to look for in each panel:**
+
+- **Panel A** (r ~ 0.78): Points cluster tightly around an upward slope
+- **Panel B** (r ~ 0.44): More scatter, but still positive relationship
+- **Panel C** (r ~ 0.00): No systematic pattern
+- **Panel D** (r ~ -0.53): Points follow a downward slope
 
 ## 5.5 Regression Line
 
@@ -497,13 +495,20 @@ $$b_2 = \frac{\sum_{i=1}^n (x_i - \bar{x})(y_i - \bar{y})}{\sum_{i=1}^n (x_i - \
 
 $$b_1 = \bar{y} - b_2 \bar{x}$$
 
-**Transition Note:** Correlation measures the strength of association, but doesn't provide a prediction equation. Now we turn to regression analysis, which fits a line to predict y from x and quantifies how much y changes per unit change in x.
+Correlation measures the strength of association, but doesn't provide a prediction equation. Now we turn to regression analysis, which fits a line to predict y from x and quantifies how much y changes per unit change in x.
 
 ```{python}
 # Fit OLS regression
 model = ols('price ~ size', data=data_house).fit()
 
-# Regression results: price ~ size
+# Key results
+intercept = model.params['Intercept']
+slope = model.params['size']
+r_squared = model.rsquared
+print(f"Estimated equation: price = {intercept:,.2f} + {slope:.4f} x size")
+print(f"R-squared: {r_squared:.4f} ({r_squared*100:.1f}% of variation explained)")
+
+# Full regression output
 model.summary()
 ```
 
@@ -603,10 +608,9 @@ ax.legend(loc='lower right')
 ax.grid(True, alpha=0.3)
 plt.tight_layout()
 plt.show()
-
-# The blue line is the 'line of best fit'.
-# It minimizes the sum of squared vertical distances from each point.
 ```
+
+The purple line is the "line of best fit." It minimizes the sum of squared vertical distances from each point to the line.
 
 ### Special Case: Intercept-Only Regression
 
@@ -676,7 +680,7 @@ print(f"  Match: {np.isclose(r_squared, r**2)}")
 >
 > R-squared measures the fraction of variation in y explained by the regression on x. It ranges from 0 (no explanatory power) to 1 (perfect fit). For bivariate regression, R² equals the squared correlation coefficient (R² = r²ₓᵧ). R² = 0.62 means 62% of house price variation is explained by size variation, while 38% is due to other factors.
 
-**Transition Note:** We've estimated the regression line. Now we assess how well this line fits the data using R-squared (proportion of variation explained) and the standard error of regression (typical prediction error).
+We've estimated the regression line. Now we assess how well this line fits the data using R-squared (proportion of variation explained) and the standard error of regression (typical prediction error).
 
 **Understanding R² = 0.617 and Standard Error = \$23,162**
 
@@ -802,11 +806,9 @@ plt.suptitle('Model Fit Illustration',
              fontsize=14, fontweight='bold', y=1.00)
 plt.tight_layout()
 plt.show()
-
-# Panel A shows Total SS: how far actual y values are from their mean
-# Panel B shows Explained SS: how far fitted values are from the mean
-# R-squared = (Explained SS) / (Total SS) measures the proportion explained
 ```
+
+**What to look for:** Panel A shows Total SS (how far actual y values are from their mean). Panel B shows Explained SS (how far fitted values are from the mean). R-squared = (Explained SS) / (Total SS) measures the proportion explained.
 
 **Practical Implications of R² in Economics:**
 
@@ -848,12 +850,13 @@ For now, remember: the standard error ($23,551) gives a rough sense of typical p
 ```{python}
 # Complete regression output
 model.summary()
-
-# Guide to regression output:
-# 1. TOP SECTION - Model Summary: Dep. Variable, No. Observations, R-squared, F-statistic
-# 2. MIDDLE SECTION - Coefficients Table: coef, std err, t, P>|t|, 95% CI
-# 3. BOTTOM SECTION - Diagnostic Tests: Omnibus, Durbin-Watson, Jarque-Bera, Cond. No.
 ```
+
+**Guide to reading regression output:**
+
+- **Top section** -- Model Summary: Dep. Variable, No. Observations, R-squared, F-statistic
+- **Middle section** -- Coefficients Table: coef, std err, t, P>|t|, 95% CI
+- **Bottom section** -- Diagnostic Tests: Omnibus, Durbin-Watson, Jarque-Bera, Cond. No.
 
 ## 5.8 Prediction and Outliers
 
@@ -1063,7 +1066,7 @@ These two regressions answer different questions and have different slopes!
 >
 > Regression measures association, not causation. A regression coefficient shows how much y changes when x changes, but does not prove that x causes y. Causation requires additional assumptions, experimental design, or advanced econometric techniques (Chapter 17). Regression is directional and asymmetric: regressing y on x gives a different slope than regressing x on y.
 
-**Transition Note:** We've learned how to measure and quantify relationships. Now we address a critical question: does association imply causation? This distinction is fundamental to interpreting regression results correctly.
+We've learned how to measure and quantify relationships. Now we address a critical question: does association imply causation? This distinction is fundamental to interpreting regression results correctly.
 
 ```{python}
 # Reverse regression: demonstrating non-symmetry
@@ -1235,14 +1238,14 @@ ax.legend(fontsize=11, loc='lower right')
 ax.grid(True, alpha=0.3)
 plt.tight_layout()
 plt.show()
-
-# Interpretation:
-# OLS (blue solid): Assumes linear relationship
-# LOWESS (red dashed): Flexible, data-driven curve
-# Kernel smoothing (green dotted): Another flexible method
-# For this data, all three methods are similar, suggesting
-# that the linear model is a reasonable approximation.
 ```
+
+**What to look for in this comparison:**
+
+- **OLS** (purple solid): Assumes a linear relationship
+- **LOWESS** (red dashed): Flexible, data-driven curve
+- **Kernel smoothing** (green dotted): Another flexible method
+- For this data, all three methods are similar, suggesting that the linear model is a reasonable approximation.
 
 **Comparing three approaches to fitting the data:**
 
