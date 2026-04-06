@@ -4,7 +4,7 @@
 
 - **Title:** metricsAI: An Introduction to Econometrics with Python and AI in the Cloud
 - **Author:** Carlos Mendez
-- **Tools:** Python, Jupyter/Colab notebooks, Quarto
+- **Tools:** Python, Quarto, Google Colab
 
 ## Critical Rules
 
@@ -43,9 +43,10 @@ The `./log/` directory preserves context across sessions. Chat sessions can die 
 
 ```text
 metricsai/
-├── notebooks_colab/    # 18 chapters (.ipynb + .md via Jupytext)
-├── scripts/            # PDF generation pipeline + utilities
-├── book/               # Quarto HTML book (symlinks to notebooks_colab/ and images/)
+├── notebooks_quarto/   # 18 chapters (.qmd) — SOURCE OF TRUTH
+├── notebooks_colab/    # 18 chapters (.ipynb) — generated for Colab
+├── scripts/            # PDF generation, conversion, and utilities
+├── book/               # Quarto HTML book (symlinks to notebooks_quarto/ and images/)
 ├── images/             # Cover images + chapter visual summaries
 ├── data/               # .DTA datasets from AED textbook
 ├── log/                # Timestamped session logs
@@ -72,21 +73,6 @@ source .venv/bin/activate
 python3 -m venv .venv && source .venv/bin/activate && pip install -r requirements.txt
 ```
 
-**Generate a single chapter PDF:**
-
-```bash
-cd notebooks_colab && jupyter nbconvert --to html ch05_*.ipynb && cd ..
-python3 scripts/inject_print_css.py notebooks_colab/ch05_*.html notebooks_colab/ch05_*_printable.html
-python3 scripts/generate_pdf_playwright.py ch05
-```
-
-**Generate all chapter PDFs:**
-
-```bash
-cd notebooks_colab && for nb in ch*.ipynb; do jupyter nbconvert --to html "$nb"; done && cd ..
-python3 scripts/generate_pdf_playwright.py --all
-```
-
 **Render the HTML book:**
 
 ```bash
@@ -96,27 +82,44 @@ cd book && quarto render
 **Render a single chapter in the book:**
 
 ```bash
-cd book && quarto render notebooks_colab/ch05_Bivariate_Data_Summary.ipynb
+cd book && quarto render notebooks_quarto/ch05_Bivariate_Data_Summary.qmd
 ```
 
-**Sync Jupytext formats after editing a notebook:**
+**Export .qmd chapters to Colab notebooks (.ipynb):**
 
 ```bash
-jupytext --sync notebooks_colab/ch05_*.ipynb
+python3 scripts/export_qmd_to_ipynb.py --all
+python3 scripts/export_qmd_to_ipynb.py ch05   # single chapter
+```
+
+**Generate a single chapter PDF:**
+
+```bash
+quarto render notebooks_quarto/ch05_*.qmd --to html --output-dir notebooks_colab
+python3 scripts/inject_print_css.py notebooks_colab/ch05_*.html notebooks_colab/ch05_*_printable.html
+python3 scripts/generate_pdf_playwright.py ch05
+```
+
+**Generate all chapter PDFs:**
+
+```bash
+python3 scripts/generate_pdf_playwright.py --all
 ```
 
 ## Conventions
 
-- **Notebook naming:** `chNN_Title_With_Underscores.ipynb` (ch00–ch17)
+- **Source files:** `chNN_Title_With_Underscores.qmd` in `notebooks_quarto/` (ch00–ch17) — edit these
+- **Colab notebooks:** `.ipynb` files in `notebooks_colab/` are generated via `scripts/export_qmd_to_ipynb.py`
 - **Images in notebooks:** Use absolute GitHub URLs (`https://raw.githubusercontent.com/quarcs-lab/metricsai/main/images/...`)
 - **Markdown lists:** Always leave a blank line before any list (Pandoc requirement for Quarto)
 - **Log entries:** `YYYYMMDD_HHMM.md` in `./log/`
-- **Jupytext sync:** Each notebook has paired `.ipynb` and `.md` (MyST) files — edit either, Jupytext syncs automatically
-- **Build artifacts:** HTML and PDF files in `notebooks_colab/` are gitignored
+- **Build artifacts:** HTML and PDF files in `notebooks_colab/` and `notebooks_quarto/` are gitignored
 
 ## Architecture
 
-- **PDF pipeline:** `jupyter nbconvert` → `scripts/inject_print_css.py` → `scripts/generate_pdf_playwright.py` (all 3 steps required in order)
-- **HTML book:** Quarto project in `book/` with symlinks (`book/notebooks_colab` → `../notebooks_colab`)
+- **Source of truth:** `.qmd` files in `notebooks_quarto/` — all editing happens here
+- **HTML book:** Quarto project in `book/` with symlinks (`book/notebooks_quarto` → `../notebooks_quarto`)
+- **Colab export:** `scripts/export_qmd_to_ipynb.py` converts `.qmd` → `.ipynb` for Google Colab
+- **PDF pipeline:** `quarto render` → `scripts/inject_print_css.py` → `scripts/generate_pdf_playwright.py`
 - **Skills:** `chapter-standard` (template compliance), `compile-book` (PDF compilation), `proofread` (content review)
 - **Detailed workflow docs:** `.claude/rules/pdf-generation.md` and `.claude/rules/quarto-book.md`

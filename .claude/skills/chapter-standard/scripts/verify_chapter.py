@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Chapter Standard Verification Script
-Verifies individual chapter notebooks against metricsAI template standard
+Verifies individual chapter .qmd files against metricsAI template standard
 Extended from verify_ch01_04_consistency.py with single-chapter mode
 """
 
@@ -12,15 +12,47 @@ import sys
 from pathlib import Path
 
 # ============================================================================
+# QMD PARSING
+# ============================================================================
+
+def parse_qmd(filepath):
+    """Parse .qmd file into a list of cells (markdown and code blocks).
+
+    Returns a dict with 'cells' (list of cell dicts) and 'yaml' (front matter string).
+    Each cell dict has 'cell_type' ('markdown' or 'code') and 'source' (list with one string).
+    """
+    content = Path(filepath).read_text(encoding='utf-8')
+
+    yaml_block = ''
+    # Strip YAML front matter
+    if content.startswith('---'):
+        end = content.find('---', 3)
+        if end != -1:
+            yaml_block = content[3:end].strip()
+            content = content[end + 3:].lstrip('\n')
+
+    cells = []
+    # Split on code fences: ```{python} ... ```
+    parts = re.split(r'(```\{python\}.*?```)', content, flags=re.DOTALL)
+    for part in parts:
+        if part.startswith('```{python}'):
+            code = part[len('```{python}'):].rstrip('`').strip('\n')
+            cells.append({'cell_type': 'code', 'source': [code]})
+        elif part.strip():
+            cells.append({'cell_type': 'markdown', 'source': [part]})
+
+    return {'cells': cells, 'yaml': yaml_block}
+
+# ============================================================================
 # EXISTING FUNCTIONS (from verify_ch01_04_consistency.py)
 # ============================================================================
 
 def find_notebook(chapter_prefix):
-    """Find notebook file matching chapter prefix"""
-    pattern = f'notebooks_colab/{chapter_prefix}_*.ipynb'
+    """Find .qmd file matching chapter prefix"""
+    pattern = f'notebooks_quarto/{chapter_prefix}_*.qmd'
     matches = glob.glob(pattern)
     if not matches:
-        raise FileNotFoundError(f"No notebook found for {chapter_prefix}")
+        raise FileNotFoundError(f"No .qmd file found for {chapter_prefix}")
     return matches[0]
 
 def check_visual_summary(cell):
@@ -426,7 +458,7 @@ def calculate_compliance_score(findings):
     if findings['transition_cells'] < 2:
         minor_deductions += 5
 
-    
+
 
     # Case Studies should come AFTER Practice Exercises
     if findings['case_study']['present'] and findings['closing']['practice_exercises']:
@@ -680,7 +712,6 @@ def collect_minor_issues(findings):
             # Missing case studies entirely - keep as existing CRITICAL issue
             pass
 
-    
 
 
     # Section numbering gaps
@@ -879,7 +910,7 @@ def check_case_study_structure(nb, chapter_num):
     Standard structure: X.1-X.N content + X.11 Case Studies
 
     Args:
-        nb: Notebook JSON
+        nb: Parsed .qmd structure (dict with 'cells')
         chapter_num: Chapter number (e.g., 8 for ch08)
 
     Returns:
@@ -935,15 +966,14 @@ def analyze_chapter(chapter_prefix):
     Returns:
         Dictionary of findings with all verification results
     """
-    notebook_path = find_notebook(chapter_prefix)
+    qmd_path = find_notebook(chapter_prefix)
 
-    with open(notebook_path, 'r', encoding='utf-8') as f:
-        nb = json.load(f)
+    nb = parse_qmd(qmd_path)
 
     # Run all checks
     findings = {
         'chapter_prefix': chapter_prefix,
-        'file': Path(notebook_path).name,
+        'file': Path(qmd_path).name,
         'total_cells': len(nb['cells']),
         'markdown_cells': sum(1 for c in nb['cells'] if c['cell_type'] == 'markdown'),
         'code_cells': sum(1 for c in nb['cells'] if c['cell_type'] == 'code'),
@@ -985,8 +1015,8 @@ def verify_single_chapter(chapter_prefix, output_format='markdown'):
         report = generate_report(findings, output_format)
         return report
     except FileNotFoundError as e:
-        error_msg = f"Error: {e}\n\nAvailable chapters in notebooks_colab/:\n"
-        pattern = 'notebooks_colab/ch*.ipynb'
+        error_msg = f"Error: {e}\n\nAvailable chapters in notebooks_quarto/:\n"
+        pattern = 'notebooks_quarto/ch*.qmd'
         matches = glob.glob(pattern)
         if matches:
             for match in sorted(matches):

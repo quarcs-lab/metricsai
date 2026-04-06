@@ -123,7 +123,7 @@ Extract chapter number and flags:
 - `--json` -> JSON output format
 - `--all` -> batch processing
 
-Validate chapter exists in `notebooks_colab/`.
+Validate chapter exists in `notebooks_quarto/`.
 
 ### 2. Run Detection Script
 
@@ -142,7 +142,7 @@ Collect findings across all markdown cells:
 Format and present findings by severity:
 
 ```markdown
-# Proofreading Report: ch08_Case_Studies_for_Bivariate_Regression.ipynb
+# Proofreading Report: ch08_Case_Studies_for_Bivariate_Regression.qmd
 
 **Proofreading Score**: 75/100
 **Quality**: Acceptable (several issues)
@@ -177,8 +177,8 @@ Format and present findings by severity:
 
 If `--fix` flag present:
 
-1. **Create backup** in `notebooks_colab/backups/`
-   - Timestamped: `ch08_backup_20260207_143000.ipynb`
+1. **Create backup** in `notebooks_quarto/backups/`
+   - Timestamped: `ch08_backup_20260207_143000.qmd`
 
 2. **Apply safe fixes**:
    - Remove doubled words
@@ -193,7 +193,7 @@ If `--fix` flag present:
    - Cell 15: Applied text fixes
    - Cell 22: Applied text fixes
 
-   Backup: notebooks_colab/backups/ch08_backup_20260207_143000.ipynb
+   Backup: notebooks_quarto/backups/ch08_backup_20260207_143000.qmd
    ```
 
 4. **NOT auto-fixed** (requires manual review):
@@ -314,7 +314,7 @@ The script maintains a dictionary of legitimate long words common in econometric
 /proofread ch08
 
 # 6. Generate PDF when score >= 90
-cd notebooks_colab && jupyter nbconvert --to html ch08_*.ipynb && cd ..
+quarto render notebooks_quarto/ch08_*.qmd --to html --output-dir notebooks_colab
 python3 scripts/inject_print_css.py notebooks_colab/ch08_*.html notebooks_colab/ch08_*_printable.html
 python3 scripts/generate_pdf_playwright.py ch08
 ```
@@ -351,7 +351,7 @@ python3 scripts/generate_pdf_playwright.py ch08
 **Issue**: Automated fixes alter content incorrectly
 
 **Solution**:
-1. Restore from backup in `notebooks_colab/backups/`
+1. Restore from backup in `notebooks_quarto/backups/`
 2. Run without `--fix` to review issues first
 3. Apply fixes manually for ambiguous cases
 

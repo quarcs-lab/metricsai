@@ -24,7 +24,7 @@ from collections import Counter
 # Configuration
 # ============================================================
 
-NOTEBOOK_DIR = "notebooks_colab"
+NOTEBOOK_DIR = "notebooks_quarto"
 
 # Common concatenation patterns (lowercase fragments that indicate missing spaces)
 CONCAT_PATTERNS = [
@@ -516,19 +516,19 @@ def _get_context(text, word, window=40):
 
 
 def find_notebook(chapter):
-    """Find notebook file for a given chapter identifier."""
-    pattern = os.path.join(NOTEBOOK_DIR, f'{chapter}_*.ipynb')
+    """Find .qmd file for a given chapter identifier."""
+    pattern = os.path.join(NOTEBOOK_DIR, f'{chapter}_*.qmd')
     matches = glob.glob(pattern)
     if not matches:
         # Try with 'ch' prefix
         if not chapter.startswith('ch'):
-            pattern = os.path.join(NOTEBOOK_DIR, f'ch{chapter}_*.ipynb')
+            pattern = os.path.join(NOTEBOOK_DIR, f'ch{chapter}_*.qmd')
             matches = glob.glob(pattern)
     if not matches:
         # Try with zero-padded number
         try:
             num = int(chapter.replace('ch', ''))
-            pattern = os.path.join(NOTEBOOK_DIR, f'ch{num:02d}_*.ipynb')
+            pattern = os.path.join(NOTEBOOK_DIR, f'ch{num:02d}_*.qmd')
             matches = glob.glob(pattern)
         except ValueError:
             pass
@@ -540,11 +540,24 @@ def find_notebook(chapter):
 # ============================================================
 
 def proofread_notebook(notebook_path, apply_fixes=False):
-    """Proofread a notebook and return issues found."""
-    with open(notebook_path) as f:
-        nb = json.load(f)
+    """Proofread a .qmd file and return issues found."""
+    content = open(notebook_path, encoding='utf-8').read()
 
-    cells = nb['cells']
+    # Strip YAML front matter
+    if content.startswith('---'):
+        end = content.find('---', 3)
+        if end != -1:
+            content = content[end + 3:]
+
+    # Parse into cells (markdown blocks and code fences)
+    cells = []
+    parts = re.split(r'(```\{python\}.*?```)', content, flags=re.DOTALL)
+    for part in parts:
+        if part.startswith('```{python}'):
+            cells.append({'cell_type': 'code', 'source': [part]})
+        elif part.strip():
+            cells.append({'cell_type': 'markdown', 'source': [part]})
+
     all_issues = []
 
     for i, cell in enumerate(cells):
@@ -569,67 +582,91 @@ def proofread_notebook(notebook_path, apply_fixes=False):
     # Apply fixes if requested
     fixes_applied = []
     if apply_fixes and all_issues:
-        fixes_applied = apply_safe_fixes(notebook_path, nb, all_issues)
+        fixes_applied = apply_safe_fixes(notebook_path, all_issues)
 
     return all_issues, fixes_applied, len(cells), sum(1 for c in cells if c['cell_type'] == 'markdown')
 
 
-def apply_safe_fixes(notebook_path, nb, issues):
-    """Apply safe automated fixes. Returns list of fixes applied."""
+def apply_safe_fixes(notebook_path, issues):
+    """Apply safe automated fixes to a .qmd file. Returns list of fixes applied."""
     # Create backup
     backup_dir = os.path.join(os.path.dirname(notebook_path), 'backups')
     os.makedirs(backup_dir, exist_ok=True)
     timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
-    backup_name = os.path.basename(notebook_path).replace('.ipynb', f'_backup_{timestamp}.ipynb')
+    backup_name = os.path.basename(notebook_path).replace('.qmd', f'_backup_{timestamp}.qmd')
     backup_path = os.path.join(backup_dir, backup_name)
     shutil.copy2(notebook_path, backup_path)
 
-    cells = nb['cells']
+    # Read the full .qmd content
+    full_content = open(notebook_path, encoding='utf-8').read()
+
+    # Preserve YAML front matter
+    front_matter = ''
+    body = full_content
+    if full_content.startswith('---'):
+        end = full_content.find('---', 3)
+        if end != -1:
+            front_matter = full_content[:end + 3]
+            body = full_content[end + 3:]
+
+    # Parse into parts (markdown blocks and code fences)
+    parts = re.split(r'(```\{python\}.*?```)', body, flags=re.DOTALL)
     fixes = []
 
-    for cell_idx in set(issue['cell'] for issue in issues):
-        cell = cells[cell_idx]
-        if cell['cell_type'] != 'markdown':
-            continue
+    # Collect cell indices that have issues and are markdown
+    issue_cells = set(issue['cell'] for issue in issues)
 
-        text = ''.join(cell.get('source', []))
-        original = text
+    # Build cell-to-part mapping: cells are only non-empty parts
+    cell_idx = 0
+    for part_idx, part in enumerate(parts):
+        if part.startswith('```{python}'):
+            cell_type = 'code'
+        elif part.strip():
+            cell_type = 'markdown'
+        else:
+            continue  # skip empty parts, no cell index assigned
 
-        # Fix doubled words (case-sensitive lowercase only to avoid "Title: Title" false positives)
-        text = re.sub(r'\b([a-z]+)\s+\1\b', r'\1', text)
+        if cell_type == 'markdown' and cell_idx in issue_cells:
+            text = part
+            original = text
 
-        # Fix missing space after period (lowercase.Uppercase), skip file extensions (.DTA, .CSV)
-        text = re.sub(r'([a-z])\.([A-Z])(?![A-Z]{1,4}\b)', r'\1. \2', text)
+            # Fix doubled words (case-sensitive lowercase only to avoid "Title: Title" false positives)
+            text = re.sub(r'\b([a-z]+)\s+\1\b', r'\1', text)
 
-        # Fix missing space after comma (lowercase,lowercase)
-        text = re.sub(r'([a-z]),([a-z])', r'\1, \2', text)
+            # Fix missing space after period (lowercase.Uppercase), skip file extensions (.DTA, .CSV)
+            text = re.sub(r'([a-z])\.([A-Z])(?![A-Z]{1,4}\b)', r'\1. \2', text)
 
-        # Fix common concatenation patterns using explicit word-boundary dictionary
-        for pattern_str, replacement in CONCAT_FIXES.items():
-            text = re.sub(
-                rf'(?<=[a-z]){pattern_str}(?=[a-z])',
-                replacement,
-                text,
-                flags=re.IGNORECASE
-            )
+            # Fix missing space after comma (lowercase,lowercase)
+            text = re.sub(r'([a-z]),([a-z])', r'\1, \2', text)
 
-        # Fix emoji remnants (preserve box-drawing/geometric characters)
-        if EMOJI_PATTERN.search(text):
-            def replace_emoji(m):
-                if BOX_DRAWING_PATTERN.fullmatch(m.group()):
-                    return m.group()  # Keep box-drawing chars
-                return ''
-            text = EMOJI_PATTERN.sub(replace_emoji, text)
-            text = re.sub(r'  +', ' ', text)
+            # Fix common concatenation patterns using explicit word-boundary dictionary
+            for pattern_str, replacement in CONCAT_FIXES.items():
+                text = re.sub(
+                    rf'(?<=[a-z]){pattern_str}(?=[a-z])',
+                    replacement,
+                    text,
+                    flags=re.IGNORECASE
+                )
 
-        if text != original:
-            cell['source'] = [text]
-            fixes.append(f'Cell {cell_idx}: Applied text fixes')
+            # Fix emoji remnants (preserve box-drawing/geometric characters)
+            if EMOJI_PATTERN.search(text):
+                def replace_emoji(m):
+                    if BOX_DRAWING_PATTERN.fullmatch(m.group()):
+                        return m.group()  # Keep box-drawing chars
+                    return ''
+                text = EMOJI_PATTERN.sub(replace_emoji, text)
+                text = re.sub(r'  +', ' ', text)
+
+            if text != original:
+                parts[part_idx] = text
+                fixes.append(f'Cell {cell_idx}: Applied text fixes')
+
+        cell_idx += 1
 
     if fixes:
-        nb['cells'] = cells
-        with open(notebook_path, 'w') as f:
-            json.dump(nb, f, indent=1, ensure_ascii=False)
+        new_body = ''.join(parts)
+        with open(notebook_path, 'w', encoding='utf-8') as f:
+            f.write(front_matter + new_body)
 
     return fixes
 
@@ -763,7 +800,7 @@ def main():
 
     if args.all:
         # Process all chapters
-        pattern = os.path.join(NOTEBOOK_DIR, 'ch*_*.ipynb')
+        pattern = os.path.join(NOTEBOOK_DIR, 'ch*_*.qmd')
         notebooks = sorted(glob.glob(pattern))
 
         print(f'# Proofreading All Chapters ({len(notebooks)} notebooks)')

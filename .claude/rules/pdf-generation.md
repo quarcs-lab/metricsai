@@ -9,7 +9,7 @@ globs:
 
 # PDF Generation Workflow
 
-The project uses an automated Playwright-based pipeline to generate professional-quality PDFs from Jupyter notebooks.
+The project uses an automated Playwright-based pipeline to generate professional-quality PDFs from Quarto documents (.qmd).
 
 ## Why Playwright?
 
@@ -22,8 +22,8 @@ The project uses an automated Playwright-based pipeline to generate professional
 ## Pipeline
 
 ```
-jupyter nbconvert --to html  →  inject_print_css.py  →  generate_pdf_playwright.py
-     (notebook.ipynb)           (adds custom CSS)         (renders PDF via Chromium)
+quarto render (.qmd → .html)  →  inject_print_css.py  →  generate_pdf_playwright.py
+     (chapter.qmd)                (adds custom CSS)         (renders PDF via Chromium)
 ```
 
 IMPORTANT: All 3 steps must run in order. Skipping `inject_print_css` produces PDFs with stale styling.
@@ -33,7 +33,7 @@ IMPORTANT: All 3 steps must run in order. Skipping `inject_print_css` produces P
 **Single chapter:**
 
 ```bash
-cd notebooks_colab && jupyter nbconvert --to html ch05_*.ipynb && cd ..
+quarto render notebooks_quarto/ch05_*.qmd --to html --output-dir notebooks_colab
 python3 scripts/inject_print_css.py notebooks_colab/ch05_*.html notebooks_colab/ch05_*_printable.html
 python3 scripts/generate_pdf_playwright.py ch05
 ```
@@ -41,7 +41,6 @@ python3 scripts/generate_pdf_playwright.py ch05
 **All chapters:**
 
 ```bash
-cd notebooks_colab && for nb in ch*.ipynb; do jupyter nbconvert --to html "$nb"; done && cd ..
 python3 scripts/generate_pdf_playwright.py --all
 ```
 

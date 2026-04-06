@@ -119,7 +119,7 @@ Extract chapter number and flags:
 - `--json` → JSON output format
 - `--all` → batch processing (future)
 
-Validate chapter exists in `notebooks_colab/`.
+Validate chapter exists in `notebooks_quarto/`.
 
 ### 2. Run Verification Script
 
@@ -179,8 +179,8 @@ Run: `/chapter-standard ch05 --apply`
 
 If `--apply` flag present:
 
-1. **Create backup** in `notebooks_colab/backups/`
-   - Timestamped: `ch05_backup_20260206_212530.ipynb`
+1. **Create backup** in `notebooks_quarto/backups/`
+   - Timestamped: `ch05_backup_20260206_212530.qmd`
 
 2. **Run apply script**:
    ```bash
@@ -194,7 +194,7 @@ If `--apply` flag present:
    ✅ Inserted Key Concept placeholder after Section 5.3
    ✅ Added empty closing cell
 
-   Backup: notebooks_colab/backups/ch05_backup_20260206_212530.ipynb
+   Backup: notebooks_quarto/backups/ch05_backup_20260206_212530.qmd
 
    NEXT STEPS:
    1. Review changes in Jupyter/VSCode
@@ -404,7 +404,7 @@ Always end with clear next steps:
 /chapter-standard ch05
 
 # 5. Generate PDF when compliance ≥ 90
-cd notebooks_colab && jupyter nbconvert --to html ch05_*.ipynb && cd ..
+quarto render notebooks_quarto/ch05_*.qmd --to html --output-dir notebooks_colab
 python3 scripts/inject_print_css.py notebooks_colab/ch05_*.html notebooks_colab/ch05_*_printable.html
 python3 scripts/generate_pdf_playwright.py ch05
 
@@ -419,10 +419,10 @@ open notebooks_colab/ch05_*.pdf
 /chapter-standard ch07 --apply
 
 # Review changes
-git diff notebooks_colab/ch07_*.ipynb
+git diff notebooks_quarto/ch07_*.qmd
 
 # Commit if satisfactory
-git add notebooks_colab/ch07_*.ipynb
+git add notebooks_quarto/ch07_*.qmd
 git commit -m "Standardize CH07 to template (compliance: 92/100)"
 
 # Generate PDF for commit
@@ -485,16 +485,16 @@ git push origin main
 **Issue**: Python script errors
 
 **Solutions**:
-1. Verify notebook exists: `ls notebooks_colab/ch05_*.ipynb`
+1. Verify notebook exists: `ls notebooks_quarto/ch05_*.qmd`
 2. Check Python 3 installed: `python3 --version`
 3. Verify script permissions: `chmod +x .claude/skills/chapter-standard/scripts/*.py`
 4. Test script directly: `python3 .claude/skills/chapter-standard/scripts/verify_chapter.py ch05`
 
 ### Backup Not Created
-**Issue**: No backup file in notebooks_colab/backups/
+**Issue**: No backup file in notebooks_quarto/backups/
 
 **Solutions**:
-1. Verify directory exists: `ls notebooks_colab/backups/`
+1. Verify directory exists: `ls notebooks_quarto/backups/`
 2. Check write permissions
 3. Ensure enough disk space
 4. Review apply_fixes.py logs
@@ -522,7 +522,7 @@ git push origin main
 Returns structured JSON:
 ```json
 {
-  "file": "ch05_Bivariate_Data_Summary.ipynb",
+  "file": "ch05_Bivariate_Data_Summary.qmd",
   "compliance_score": 85,
   "critical": [],
   "minor": [

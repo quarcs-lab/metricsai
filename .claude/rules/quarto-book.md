@@ -20,13 +20,14 @@ book/
 ├── _quarto.yml             # Book config (chapters, format, theme)
 ├── index.qmd               # Welcome page (cover image, PDF link)
 ├── custom.css              # Colab badge alignment, hide figcaptions
-├── notebooks_colab -> ../notebooks_colab  # Symlink to source
+├── notebooks_quarto -> ../notebooks_quarto  # Symlink to .qmd source
+├── notebooks_colab -> ../notebooks_colab    # Symlink (Colab notebooks)
 ├── images -> ../images     # Symlink to images
 ├── _book/                  # Rendered HTML (committed for GitHub Pages)
 └── .quarto/                # Cache (gitignored)
 ```
 
-**Symlink architecture:** `book/notebooks_colab` and `book/images` are symlinks to root-level directories. This makes Quarto see all sources as local to `book/`, ensuring correct relative paths in rendered output. Google Translate is inlined in `_quarto.yml` (not a separate file) to avoid path issues with symlinked notebooks.
+**Symlink architecture:** `book/notebooks_quarto`, `book/notebooks_colab`, and `book/images` are symlinks to root-level directories. This makes Quarto see all sources as local to `book/`, ensuring correct relative paths in rendered output. Google Translate is inlined in `_quarto.yml` (not a separate file) to avoid path issues with symlinked notebooks.
 
 ## Quick Reference
 
@@ -39,14 +40,14 @@ cd book && quarto render
 **Render single chapter (faster):**
 
 ```bash
-cd book && quarto render notebooks_colab/ch05_Bivariate_Data_Summary.ipynb
+cd book && quarto render notebooks_quarto/ch05_Bivariate_Data_Summary.qmd
 ```
 
 ## Path Conventions
 
-- **In `_quarto.yml`:** Use `notebooks_colab/` prefix (via symlink, no `../`)
+- **In `_quarto.yml`:** Use `notebooks_quarto/` prefix (via symlink, no `../`)
 - **In `index.qmd`:** Use `images/` prefix (via symlink, no `../`)
-- **Inside notebooks (.ipynb):** Use absolute GitHub URLs for images (`https://raw.githubusercontent.com/quarcs-lab/metricsai/main/images/`)
+- **Inside .qmd files:** Use absolute GitHub URLs for images (`https://raw.githubusercontent.com/quarcs-lab/metricsai/main/images/`)
 
 ## IMPORTANT: List Formatting
 

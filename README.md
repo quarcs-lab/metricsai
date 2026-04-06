@@ -169,30 +169,28 @@ The HTML book complements the interactive notebooks, ideal for:
 - Quick reference and navigation
 - Students who prefer a traditional book layout
 
-## 🔄 Jupytext: Dual-Format Notebooks
+## 🔄 Quarto-Based Workflow
 
-All notebooks are maintained in two synchronized formats using [Jupytext](https://jupytext.readthedocs.io/):
+All chapters are authored as **Quarto documents** (`.qmd`) in `notebooks_quarto/`. These are the source of truth for the book.
 
-- **`.ipynb`** — Standard Jupyter notebook (runs in Colab, contains outputs)
-- **`.md`** — MyST Markdown source (text-based, ideal for version control)
-
-Edit either format — Jupytext synchronizes them automatically. Configuration is embedded in each notebook's metadata (no separate config files needed).
+- **`.qmd`** — Quarto Markdown source in `notebooks_quarto/` (edit these)
+- **`.ipynb`** — Jupyter notebooks in `notebooks_colab/` (generated for Google Colab)
 
 ### Benefits
 
-- **Better diffs** — Text-based `.md` files produce clean, readable git diffs
-- **Easy editing** — Edit notebooks in any text editor or IDE
-- **Reduced conflicts** — Merge conflicts are simpler to resolve in plain text
-- **Full compatibility** — `.ipynb` files work in Colab/Jupyter without Jupytext installed
+- **Better diffs** — Text-based `.qmd` files produce clean, readable git diffs
+- **Easy editing** — Edit chapters in any text editor or IDE
+- **Native Quarto** — Book renders directly from `.qmd` without kernel execution
+- **Colab compatible** — Generated `.ipynb` files work in Colab without any extra setup
 
 ### Quick Reference
 
 ```bash
-# Sync a single notebook after editing the .md file
-jupytext --sync notebooks_colab/ch05_*.md
+# Export all .qmd chapters to Colab notebooks
+python3 scripts/export_qmd_to_ipynb.py --all
 
-# Sync all notebooks
-jupytext --sync notebooks_colab/*.ipynb
+# Export a single chapter
+python3 scripts/export_qmd_to_ipynb.py ch05
 ```
 
 ## 📄 Automated PDF Generation
@@ -204,8 +202,8 @@ Individual Jupyter notebooks can be automatically exported to professional-quali
 **Generate a single chapter PDF:**
 
 ```bash
-# Step 1: Convert notebook to HTML
-cd notebooks_colab && jupyter nbconvert --to html ch05_*.ipynb && cd ..
+# Step 1: Render .qmd to HTML
+quarto render notebooks_quarto/ch05_*.qmd --to html --output-dir notebooks_colab
 
 # Step 2: Inject CSS and generate PDF
 python3 scripts/inject_print_css.py notebooks_colab/ch05_*.html notebooks_colab/ch05_*_printable.html && \
@@ -218,9 +216,6 @@ open notebooks_colab/ch05_*.pdf
 **Generate all chapters at once:**
 
 ```bash
-# Convert all notebooks to HTML
-cd notebooks_colab && for nb in ch*.ipynb; do jupyter nbconvert --to html "$nb"; done && cd ..
-
 # Generate all PDFs with Playwright
 python3 scripts/generate_pdf_playwright.py --all
 

@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 """
 Chapter Standard Auto-Fix Script
-Applies safe, deterministic fixes to chapter notebooks
+Applies safe, deterministic fixes to chapter .qmd files
 Only performs additive changes - never deletes content
 """
 
-import json
+import re
 import shutil
 import sys
 import glob
@@ -13,11 +13,11 @@ from pathlib import Path
 from datetime import datetime
 
 def find_notebook(chapter_prefix):
-    """Find notebook file matching chapter prefix"""
-    pattern = f'notebooks_colab/{chapter_prefix}_*.ipynb'
+    """Find .qmd file matching chapter prefix"""
+    pattern = f'notebooks_quarto/{chapter_prefix}_*.qmd'
     matches = glob.glob(pattern)
     if not matches:
-        raise FileNotFoundError(f"No notebook found for {chapter_prefix}")
+        raise FileNotFoundError(f"No .qmd file found for {chapter_prefix}")
     return matches[0]
 
 def backup_notebook(notebook_path):
@@ -25,27 +25,111 @@ def backup_notebook(notebook_path):
     Create timestamped backup before modifications.
 
     Args:
-        notebook_path: Path to notebook file
+        notebook_path: Path to .qmd file
 
     Returns:
         Path to backup file
     """
-    backup_dir = Path('notebooks_colab/backups')
+    backup_dir = Path('notebooks_quarto/backups')
     backup_dir.mkdir(exist_ok=True)
 
     timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
     notebook_name = Path(notebook_path).stem
-    backup_path = backup_dir / f"{notebook_name}_backup_{timestamp}.ipynb"
+    backup_path = backup_dir / f"{notebook_name}_backup_{timestamp}.qmd"
 
     shutil.copy(notebook_path, backup_path)
     return backup_path
+
+def parse_qmd(filepath):
+    """
+    Parse a .qmd file into a cell-like structure compatible with fix functions.
+
+    Returns a dict with:
+        - 'cells': list of cell dicts with 'cell_type' and 'source' keys
+        - 'yaml_header': raw YAML front matter string (without delimiters)
+    """
+    text = Path(filepath).read_text(encoding='utf-8')
+
+    yaml_header = ''
+    body = text
+
+    # Extract YAML front matter if present
+    yaml_match = re.match(r'^---\n(.*?\n)---\n?', text, re.DOTALL)
+    if yaml_match:
+        yaml_header = yaml_match.group(1).rstrip('\n')
+        body = text[yaml_match.end():]
+
+    cells = []
+    # Split on code fences: ```{python} ... ```
+    # We use a regex that captures code blocks and the text between them
+    code_pattern = re.compile(r'```\{python\}\n(.*?)\n```', re.DOTALL)
+
+    last_end = 0
+    for match in code_pattern.finditer(body):
+        # Markdown content before this code block
+        md_text = body[last_end:match.start()]
+        if md_text.strip() or last_end == 0:
+            # Store source as list of lines (matching ipynb convention)
+            cells.append({
+                'cell_type': 'markdown',
+                'metadata': {},
+                'source': [line + '\n' for line in md_text.rstrip('\n').split('\n')] if md_text.strip() else ['\n']
+            })
+
+        # Code cell
+        code_text = match.group(1)
+        cells.append({
+            'cell_type': 'code',
+            'metadata': {},
+            'source': [line + '\n' for line in code_text.split('\n')]
+        })
+        last_end = match.end()
+
+    # Trailing markdown after last code block
+    trailing = body[last_end:]
+    if trailing.strip():
+        cells.append({
+            'cell_type': 'markdown',
+            'metadata': {},
+            'source': [line + '\n' for line in trailing.rstrip('\n').split('\n')]
+        })
+    elif last_end > 0 and trailing:
+        # Preserve trailing whitespace as an empty markdown cell
+        cells.append({
+            'cell_type': 'markdown',
+            'metadata': {},
+            'source': []
+        })
+
+    # If no cells were created (e.g., empty body), add one empty markdown cell
+    if not cells:
+        cells.append({
+            'cell_type': 'markdown',
+            'metadata': {},
+            'source': []
+        })
+
+    return {'cells': cells, 'yaml_header': yaml_header}
+
+def cells_to_qmd(cells, yaml_header=''):
+    """Convert cell structure back to .qmd format."""
+    parts = []
+    if yaml_header:
+        parts.append(f'---\n{yaml_header}\n---\n')
+    for cell in cells:
+        content = ''.join(cell['source'])
+        if cell['cell_type'] == 'code':
+            parts.append(f'```{{python}}\n{content}\n```')
+        else:
+            parts.append(content)
+    return '\n'.join(parts)
 
 def fix_visual_summary(nb, chapter_prefix):
     """
     Add missing visual summary image to Cell 0.
 
     Args:
-        nb: Notebook dictionary
+        nb: Notebook dictionary with 'cells' key
         chapter_prefix: Chapter identifier (e.g., 'ch05')
 
     Returns:
@@ -82,7 +166,7 @@ def add_key_concept_placeholder(nb, section_cell_idx):
     Insert placeholder Key Concept box after specified section.
 
     Args:
-        nb: Notebook dictionary
+        nb: Notebook dictionary with 'cells' key
         section_cell_idx: Cell index to insert after
 
     Returns:
@@ -108,7 +192,7 @@ def fix_empty_closing_cell(nb):
     Add empty closing cell if missing.
 
     Args:
-        nb: Notebook dictionary
+        nb: Notebook dictionary with 'cells' key
 
     Returns:
         True if empty cell added
@@ -134,7 +218,7 @@ def fix_spacing_after_headers(nb):
     Ensure blank lines after section headers.
 
     Args:
-        nb: Notebook dictionary
+        nb: Notebook dictionary with 'cells' key
 
     Returns:
         Number of cells fixed
@@ -172,7 +256,7 @@ def find_sections_needing_key_concepts(nb, current_kc_count):
     Identify sections that should have Key Concept boxes.
 
     Args:
-        nb: Notebook dictionary
+        nb: Notebook dictionary with 'cells' key
         current_kc_count: Current number of Key Concepts
 
     Returns:
@@ -189,7 +273,6 @@ def find_sections_needing_key_concepts(nb, current_kc_count):
         if cell['cell_type'] == 'markdown':
             content = ''.join(cell['source'])
             # Look for main section headers (## X.Y, not case study)
-            import re
             match = re.search(r'^##\s+(\d+\.\d+)\s+', content, re.MULTILINE)
             if match:
                 section_num = match.group(1)
@@ -223,7 +306,7 @@ def find_sections_needing_key_concepts(nb, current_kc_count):
 
 def apply_fixes(chapter_prefix, fix_list=None, dry_run=False):
     """
-    Apply specified fixes to chapter notebook.
+    Apply specified fixes to chapter .qmd file.
 
     Args:
         chapter_prefix: Chapter identifier (e.g., 'ch05')
@@ -234,13 +317,12 @@ def apply_fixes(chapter_prefix, fix_list=None, dry_run=False):
         Dictionary with:
             - applied: List of fixes applied
             - backup: Path to backup file
-            - modified: Whether notebook was modified
+            - modified: Whether file was modified
     """
     notebook_path = find_notebook(chapter_prefix)
     backup_path = None
 
-    with open(notebook_path, 'r', encoding='utf-8') as f:
-        nb = json.load(f)
+    nb = parse_qmd(notebook_path)
 
     applied = []
     modified = False
@@ -283,9 +365,9 @@ def apply_fixes(chapter_prefix, fix_list=None, dry_run=False):
         # Create backup first
         backup_path = backup_notebook(notebook_path)
 
-        # Save modified notebook
-        with open(notebook_path, 'w', encoding='utf-8') as f:
-            json.dump(nb, f, indent=1, ensure_ascii=False)
+        # Save modified .qmd file
+        qmd_text = cells_to_qmd(nb['cells'], nb.get('yaml_header', ''))
+        Path(notebook_path).write_text(qmd_text, encoding='utf-8')
 
     return {
         'applied': applied,
@@ -305,7 +387,7 @@ def main():
         print("  - Add empty closing cell")
         print("  - Fix spacing after headers")
         print("  - Add Key Concept placeholders (if needed)")
-        print("\nA backup is created automatically in notebooks_colab/backups/")
+        print("\nA backup is created automatically in notebooks_quarto/backups/")
         sys.exit(1)
 
     chapter = sys.argv[1]
@@ -341,7 +423,7 @@ def main():
             print("\n" + "="*70)
             print("NEXT STEPS:")
             print("="*70)
-            print("1. Review changes in Jupyter/VSCode")
+            print("1. Review changes in your editor")
             print("2. Fill in any TODO placeholders with actual content")
             print("3. Run verification: python verify_chapter.py " + chapter)
             print("4. If compliance ≥ 90, generate PDF")
@@ -350,8 +432,8 @@ def main():
 
     except FileNotFoundError as e:
         print(f"Error: {e}")
-        print("\nAvailable chapters in notebooks_colab/:")
-        pattern = 'notebooks_colab/ch*.ipynb'
+        print("\nAvailable chapters in notebooks_quarto/:")
+        pattern = 'notebooks_quarto/ch*.qmd'
         matches = glob.glob(pattern)
         if matches:
             for match in sorted(matches):

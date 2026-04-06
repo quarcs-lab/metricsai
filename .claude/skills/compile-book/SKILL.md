@@ -87,7 +87,7 @@ Extract chapter numbers and flags from the invocation:
 ### 2. Check PDF Freshness
 
 For each chapter (ch00-ch17), compare modification times:
-- **Notebook**: `notebooks_colab/chXX_*.ipynb`
+- **Notebook**: `notebooks_quarto/chXX_*.qmd`
 - **PDF**: `notebooks_colab/chXX_*.pdf`
 
 ```bash
@@ -127,7 +127,7 @@ For each chapter that needs regeneration, run the 3-step pipeline:
 
 ```bash
 # Step 1: Convert notebook to HTML
-cd notebooks_colab && jupyter nbconvert --to html chXX_*.ipynb && cd ..
+quarto render notebooks_quarto/chXX_*.qmd --to html --output-dir notebooks_colab
 
 # Step 2: Inject print CSS
 python3 scripts/inject_print_css.py notebooks_colab/chXX_*.html notebooks_colab/chXX_*_printable.html
@@ -226,7 +226,7 @@ All three TOC sections include clickable hyperlinks (753 total) that jump direct
 
 Each chapter PDF is generated through a 3-step pipeline:
 
-1. **jupyter nbconvert --to html**: Converts `.ipynb` to raw HTML with all outputs
+1. **quarto render --to html**: Converts `.qmd` to HTML with all content
 2. **scripts/inject_print_css.py**: Injects `scripts/notebook_pdf_styles.css` for professional formatting (justified text, brand colors, optimized font sizes)
 3. **scripts/generate_pdf_playwright.py**: Renders HTML to PDF via Chromium with precise margin and layout control
 
@@ -252,7 +252,7 @@ Verify installation:
 ```bash
 python3 -c "from playwright.sync_api import sync_playwright; print('Playwright OK')"
 python3 -c "from pypdf import PdfReader; print('pypdf OK')"
-jupyter nbconvert --version
+quarto --version
 ```
 
 ---
