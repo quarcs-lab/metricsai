@@ -1,7 +1,8 @@
 ---
 title: 12. Further Topics in Multiple Regression
 execute:
-  enabled: false
+  enabled: true
+  warning: false
 ---
 
 
@@ -124,10 +125,10 @@ We'll work with two datasets:
 data_house = pd.read_stata(GITHUB_DATA_URL + 'AED_HOUSE.DTA')
 
 print("House Data Summary:")
-print(data_house.describe())
+data_house.describe()
 
 print("\nFirst few observations:")
-print(data_house[['price', 'size', 'bedrooms', 'bathrooms', 'lotsize', 'age', 'monthsold']].head())
+data_house[['price', 'size', 'bedrooms', 'bathrooms', 'lotsize', 'age', 'monthsold']].head()
 ```
 
 ## 12.2: Inference with Robust Standard Errors
@@ -161,16 +162,14 @@ $$se_{het}(\hat{\beta}_j) = \sqrt{\frac{\sum_{i=1}^n \tilde{x}_{ji}^2 \hat{u}_i^
 where $\tilde{x}_{ji}$ are residuals from regressing $x_j$ on other regressors, and $\hat{u}_i$ are OLS residuals.
 
 ```{python}
-print("=" * 70)
-print("12.2 INFERENCE WITH ROBUST STANDARD ERRORS")
-print("=" * 70)
+# 12.2 INFERENCE WITH ROBUST STANDARD ERRORS
 
 # Estimate with default standard errors
 model_default = ols('price ~ size + bedrooms + bathrooms + lotsize + age + monthsold',
                     data=data_house).fit()
 
 print("\nRegression with Default Standard Errors:")
-print(model_default.summary())
+model_default.summary()
 ```
 
 ```{python}
@@ -179,7 +178,7 @@ model_robust = ols('price ~ size + bedrooms + bathrooms + lotsize + age + months
                    data=data_house).fit(cov_type='HC1')
 
 print("\nRegression with Heteroskedastic-Robust Standard Errors (HC1):")
-print(model_robust.summary())
+model_robust.summary()
 ```
 
 > **Key Concept 12.1: Heteroskedastic-Robust Standard Errors**
@@ -247,12 +246,10 @@ We can visualize this with a **correlogram**.
 # Load GDP growth data
 data_gdp = pd.read_stata(GITHUB_DATA_URL + 'AED_REALGDPPC.DTA')
 
-print("\n" + "=" * 70)
-print("HAC Standard Errors for Time Series Data")
-print("=" * 70)
+# HAC Standard Errors for Time Series Data
 
 print("\nGDP Growth Data Summary:")
-print(data_gdp['growth'].describe())
+data_gdp['growth'].describe()
 
 # Mean of growth
 mean_growth = data_gdp['growth'].mean()
@@ -266,10 +263,7 @@ acf_values = acf(data_gdp['growth'], nlags=5, fft=False)
 for i in range(6):
     print(f"  Lag {i}: {acf_values[i]:.6f}")
 
-print("\nInterpretation:")
-print("  - Lag 0 correlation is always 1.0 (correlation with itself)")
-print("  - Positive lag 1 correlation suggests persistence")
-print("  - Autocorrelation decays with lag length")
+# Positive lag 1 correlation suggests persistence
 ```
 
 ```{python}
@@ -371,9 +365,7 @@ $$se(\hat{y}_f) = s_e \sqrt{1 + \frac{1}{n} + \frac{(x^* - \bar{x})^2}{\sum(x_i 
 Note the "1 +" term for actual values - this reflects the irreducible uncertainty from $u^*$.
 
 ```{python}
-print("=" * 70)
-print("12.3 PREDICTION")
-print("=" * 70)
+# 12.3 PREDICTION
 
 # Simple regression: price on size
 model_simple = ols('price ~ size', data=data_house).fit()
@@ -567,9 +559,7 @@ Let's manually calculate the standard errors to understand the formulas.
 Now let's predict using the full multiple regression model.
 
 ```{python}
-print("\n" + "=" * 70)
-print("Prediction for Multiple Regression")
-print("=" * 70)
+# Prediction for Multiple Regression
 
 model_multi = ols('price ~ size + bedrooms + bathrooms + lotsize + age + monthsold',
                   data=data_house).fit()
@@ -621,9 +611,7 @@ print("But individual predictions still have large uncertainty.")
 When heteroskedasticity is present, we should use robust standard errors for prediction intervals too.
 
 ```{python}
-print("\n" + "=" * 70)
-print("Prediction with Heteroskedastic-Robust SEs")
-print("=" * 70)
+# Prediction with Heteroskedastic-Robust SEs
 
 model_multi_robust = ols('price ~ size + bedrooms + bathrooms + lotsize + age + monthsold',
                          data=data_house).fit(cov_type='HC1')
@@ -748,22 +736,9 @@ Often used together: Bootstrap with robust methods!
 5. Check convergence: Results shouldn't change much with different seeds
 
 ```{python}
-print("=" * 70)
-print("12.4 NONREPRESENTATIVE SAMPLES")
-print("=" * 70)
+# 12.4 NONREPRESENTATIVE SAMPLES
 
-print("\nConceptual discussion - no computation required")
-print("\nKey points:")
-print("  1. Sample selection can lead to biased estimates")
-print("  2. Selection on regressors: Include selection variables as controls")
-print("  3. Selection on outcome: Use sample weights or selection models")
-print("  4. Always verify sample representativeness")
-
-print("\nExample applications:")
-print("  - Wage surveys that exclude unemployed workers")
-print("  - Health studies with voluntary participation")
-print("  - Education data from selective schools")
-print("  - Financial data excluding bankrupt firms")
+# Key: sample selection can bias estimates; always verify representativeness
 ```
 
 > **Key Concept 12.5: Sample Selection Bias**
@@ -973,31 +948,29 @@ This power curve illustrates a fundamental truth:
 - For smaller effects, we'd need more data or reduced noise (lower σ)
 
 ```{python}
-print("=" * 70)
-print("12.5 BEST ESTIMATION METHODS")
-print("=" * 70)
+# 12.5 BEST ESTIMATION METHODS
 
 print("\nKey concepts:")
 print("\n1. Gauss-Markov Theorem:")
-print("   - Under assumptions 1-4, OLS is BLUE")
-print("   - BLUE = Best Linear Unbiased Estimator")
-print("   - 'Best' = minimum variance among linear unbiased estimators")
+# Under assumptions 1-4, OLS is BLUE
+# BLUE = Best Linear Unbiased Estimator
+# 'Best' = minimum variance among linear unbiased estimators
 
 print("\n2. When assumptions fail:")
-print("   - Heteroskedasticity → Weighted Least Squares (WLS)")
-print("   - Autocorrelation → GLS with AR errors")
-print("   - Both → Feasible GLS (FGLS)")
+# Heteroskedasticity → Weighted Least Squares (WLS)
+# Autocorrelation → GLS with AR errors
+# Both → Feasible GLS (FGLS)
 
 print("\n3. Practical considerations:")
-print("   - Efficiency gains often modest in practice")
-print("   - Misspecification of error structure can worsen estimates")
-print("   - Most studies use OLS + robust SEs (simpler, more robust)")
-print("   - Exception: Panel data methods model error components explicitly")
+# Efficiency gains often modest in practice
+# Misspecification of error structure can worsen estimates
+# Most studies use OLS + robust SEs (simpler, more robust)
+# Exception: Panel data methods model error components explicitly
 
 print("\n4. Maximum Likelihood:")
-print("   - If error distribution fully specified (e.g., normal)")
-print("   - MLE can be more efficient than OLS")
-print("   - Under normality, MLE = OLS for linear regression")
+# If error distribution fully specified (e.g., normal)
+# MLE can be more efficient than OLS
+# Under normality, MLE = OLS for linear regression
 ```
 
 > **Key Concept 12.6: Feasible Generalized Least Squares**
@@ -1258,12 +1231,12 @@ Compare default and heteroskedastic-robust standard errors.
 # Estimate model with default SEs
 model = ols('ln_lp ~ ln_rk + hc', data=dat_2014).fit()
 print("Default SEs:")
-print(model.summary())
+model.summary()
 
 # Estimate with HC1 robust SEs
 model_robust = model.get_robustcov_results(cov_type='HC1')
 print("\nRobust SEs:")
-print(model_robust.summary())
+model_robust.summary()
 ```
 
 **Questions:**
@@ -1279,7 +1252,7 @@ Estimate with cluster-robust standard errors grouped by geographic region.
 # Cluster-robust SEs by region
 model_cluster = model.get_robustcov_results(cov_type='cluster', groups=dat_2014['region'])
 print("Cluster-Robust SEs (by region):")
-print(model_cluster.summary())
+model_cluster.summary()
 
 # Compare all three SE types
 print("\nSE Comparison:")
@@ -1385,14 +1358,13 @@ In Chapters 10-11, we estimated multiple regression models predicting municipal 
 Let's load the DS4Bolivia dataset and select the key variables for robust inference and prediction analysis.
 
 ```{python}
+#| eval: false
 # Load the DS4Bolivia dataset
 url_bol = "https://raw.githubusercontent.com/quarcs-lab/ds4bolivia/master/ds4bolivia_v20250523.csv"
 bol = pd.read_csv(url_bol)
 
 # Display basic information
-print("=" * 70)
-print("DS4BOLIVIA DATASET")
-print("=" * 70)
+# DS4BOLIVIA DATASET
 print(f"Dataset shape: {bol.shape[0]} municipalities, {bol.shape[1]} variables")
 print(f"\nDepartments: {bol['dep'].nunique()} unique departments")
 print(f"Department names: {sorted(bol['dep'].unique())}")
@@ -1403,15 +1375,11 @@ key_vars = ['mun', 'dep', 'imds', 'ln_NTLpc2017',
 bol_key = bol[key_vars].copy()
 
 print(f"\nKey variables selected: {len(key_vars)}")
-print("\n" + "=" * 70)
-print("FIRST 10 MUNICIPALITIES")
-print("=" * 70)
-print(bol_key.head(10).to_string())
+# FIRST 10 MUNICIPALITIES
+bol_key.head(10).to_string()
 
 # Variable descriptions
-print("\n" + "=" * 70)
-print("KEY VARIABLE DESCRIPTIONS")
-print("=" * 70)
+# KEY VARIABLE DESCRIPTIONS
 descriptions = {
     'mun': 'Municipality name',
     'dep': 'Department (administrative region, 9 total)',
@@ -1437,6 +1405,7 @@ for var, desc in descriptions.items():
 **Apply what you learned in section 12.2**: Use `ols().fit()` for default SEs and `ols().fit(cov_type='HC1')` for robust SEs.
 
 ```{python}
+#| eval: false
 # Task 1: Default vs Robust Standard Errors
 # ----------------------------------------------------------
 
@@ -1453,11 +1422,8 @@ model_default = ols('imds ~ ln_NTLpc2017 + A00 + A10 + A20 + A30 + A40',
 model_hc1 = ols('imds ~ ln_NTLpc2017 + A00 + A10 + A20 + A30 + A40',
                 data=reg_data).fit(cov_type='HC1')
 
-print("\n" + "=" * 70)
-print("COMPARISON: DEFAULT vs HC1 ROBUST STANDARD ERRORS")
-print("=" * 70)
+# COMPARISON: DEFAULT vs HC1 ROBUST STANDARD ERRORS
 print(f"{'Variable':<18} {'Coef':>10} {'Default SE':>12} {'HC1 SE':>12} {'Ratio':>8}")
-print("-" * 62)
 for var in model_default.params.index:
     coef = model_default.params[var]
     se_def = model_default.bse[var]
@@ -1484,6 +1450,7 @@ print("Ratios > 1 suggest heteroskedasticity inflates default SEs' precision.")
 **Apply what you learned in section 12.2**: Cluster-robust SEs account for within-group correlation of errors.
 
 ```{python}
+#| eval: false
 # Task 2: Cluster-Robust Standard Errors by Department
 # ----------------------------------------------------------
 
@@ -1492,11 +1459,8 @@ model_cluster = ols('imds ~ ln_NTLpc2017 + A00 + A10 + A20 + A30 + A40',
                     data=reg_data).fit(cov_type='cluster',
                                       cov_kwds={'groups': reg_data['dep']})
 
-print("=" * 70)
-print("COMPARISON: DEFAULT vs HC1 vs CLUSTER-ROBUST STANDARD ERRORS")
-print("=" * 70)
+# COMPARISON: DEFAULT vs HC1 vs CLUSTER-ROBUST STANDARD ERRORS
 print(f"{'Variable':<18} {'Coef':>10} {'Default SE':>12} {'HC1 SE':>12} {'Cluster SE':>12}")
-print("-" * 66)
 for var in model_default.params.index:
     coef = model_default.params[var]
     se_def = model_default.bse[var]
@@ -1507,9 +1471,7 @@ for var in model_default.params.index:
 n_clusters = reg_data['dep'].nunique()
 print(f"\nNumber of clusters (departments): {n_clusters}")
 print(f"Municipalities per department (avg): {len(reg_data) / n_clusters:.0f}")
-print("\nDiscussion: Municipalities within the same department share")
-print("geographic, institutional, and cultural characteristics that create")
-print("within-cluster correlation. Cluster-robust SEs account for this.")
+
 ```
 
 > **Key Concept 12.11: Clustered Observations in Spatial Data**
@@ -1530,6 +1492,7 @@ print("within-cluster correlation. Cluster-robust SEs account for this.")
 **Apply what you learned in section 12.3**: The confidence interval for the conditional mean reflects estimation uncertainty only.
 
 ```{python}
+#| eval: false
 # Task 3: Predict Conditional Mean
 # ----------------------------------------------------------
 
@@ -1573,6 +1536,7 @@ print("within-cluster correlation. Cluster-robust SEs account for this.")
 **Apply what you learned in section 12.3**: Individual predictions must account for the irreducible error $u^*$, making them fundamentally less precise than conditional mean predictions.
 
 ```{python}
+#| eval: false
 # Task 4: Prediction Interval for an Individual Municipality
 # ----------------------------------------------------------
 
@@ -1595,9 +1559,9 @@ print("within-cluster correlation. Cluster-robust SEs account for this.")
 # ci_width = pred_frame['mean_ci_upper'].values[0] - pred_frame['mean_ci_lower'].values[0]
 # pi_width = pred_frame['obs_ci_upper'].values[0] - pred_frame['obs_ci_lower'].values[0]
 #
-# print("=" * 70)
+#
 # print("CONFIDENCE INTERVAL vs PREDICTION INTERVAL")
-# print("=" * 70)
+#
 # print(f"Predicted IMDS: {pred_frame['mean'].values[0]:.2f}")
 # print(f"\n95% CI (conditional mean):  [{pred_frame['mean_ci_lower'].values[0]:.2f}, "
 #       f"{pred_frame['mean_ci_upper'].values[0]:.2f}]  width = {ci_width:.2f}")
@@ -1626,6 +1590,7 @@ print("within-cluster correlation. Cluster-robust SEs account for this.")
 **This extends Chapter 12 concepts**: You're systematically assessing how robust your conclusions are to different assumptions about the error structure.
 
 ```{python}
+#| eval: false
 # Task 5: Model Robustness Comparison
 # ----------------------------------------------------------
 
@@ -1644,12 +1609,12 @@ print("within-cluster correlation. Cluster-robust SEs account for this.")
 #     elif pval < 0.10: return '*'
 #     else: return ''
 #
-# print("=" * 90)
+#
 # print("MODEL ROBUSTNESS: COEFFICIENT ESTIMATES AND STANDARD ERRORS")
-# print("=" * 90)
+#
 # print(f"{'Variable':<16} {'Coef':>8} {'SE(Def)':>10} {'SE(HC1)':>10} {'SE(Clust)':>10} "
 #       f"{'Sig(D)':>7} {'Sig(H)':>7} {'Sig(C)':>7}")
-# print("-" * 90)
+#
 # for var in model_default.params.index:
 #     coef = model_default.params[var]
 #     se_d = model_default.bse[var]
@@ -1660,7 +1625,7 @@ print("within-cluster correlation. Cluster-robust SEs account for this.")
 #     sig_c = sig_stars(model_cluster.pvalues[var])
 #     print(f"{var:<16} {coef:>8.4f} {se_d:>10.4f} {se_h:>10.4f} {se_c:>10.4f} "
 #           f"{sig_d:>7} {sig_h:>7} {sig_c:>7}")
-# print("-" * 90)
+#
 # print("Significance: *** p<0.01, ** p<0.05, * p<0.10")
 #
 # print("\nDo any coefficients change sign or significance?")
@@ -1682,6 +1647,7 @@ print("within-cluster correlation. Cluster-robust SEs account for this.")
 **Connection to Research**: The DS4Bolivia project shows that satellite-based models achieve meaningful but imperfect predictive accuracy. Your analysis quantifies *how much uncertainty* remains and whether it is small enough for practical SDG monitoring applications.
 
 ```{python}
+#| eval: false
 # Your code here: Additional analysis for the prediction brief
 #
 # You might want to:
@@ -1695,9 +1661,9 @@ print("within-cluster correlation. Cluster-robust SEs account for this.")
 # reg_data['predicted'] = model_default.predict(reg_data)
 # reg_data['residual'] = reg_data['imds'] - reg_data['predicted']
 #
-# print("=" * 70)
+#
 # print("PREDICTION ACCURACY SUMMARY")
-# print("=" * 70)
+#
 # print(f"RMSE: {np.sqrt(model_default.mse_resid):.2f}")
 # print(f"Mean IMDS: {reg_data['imds'].mean():.2f}")
 # print(f"RMSE as % of mean: {100 * np.sqrt(model_default.mse_resid) / reg_data['imds'].mean():.1f}%")

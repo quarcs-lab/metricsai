@@ -1,7 +1,8 @@
 ---
 title: 14. Regression with Indicator Variables
 execute:
-  enabled: false
+  enabled: true
+  warning: false
 ---
 
 
@@ -108,10 +109,8 @@ plt.rcParams.update({
     'axes.edgecolor': '#1a2235',
 })
 
-print("=" * 70)
-print("CHAPTER 14: REGRESSION WITH INDICATOR VARIABLES")
-print("=" * 70)
-print("\nSetup complete! Ready to explore regression with indicator variables.")
+# Chapter 14: Regression With Indicator Variables
+# Setup complete! Ready to explore regression with indicator variables.
 ```
 
 ### Data Preparation
@@ -148,13 +147,13 @@ for var in variables:
     print(f"  {var}: {data[var].dtype}")
 
 print("\nSummary statistics:")
-print(data[variables].describe())
+data[variables].describe()
 
 print("\nNote on indicator variables:")
-print("  gender: 1=female, 0=male")
-print("  dself: 1=self-employed, 0=not")
-print("  dprivate: 1=private sector, 0=not")
-print("  dgovt: 1=government, 0=not")
+# gender: 1=female, 0=male
+# dself: 1=self-employed, 0=not
+# dprivate: 1=private sector, 0=not
+# dgovt: 1=government, 0=not
 ```
 
 ## 14.1: Indicator Variables - Single Binary Variable
@@ -191,13 +190,10 @@ b & \text{if } d_i = 0
 Let's examine whether there's a gender earnings gap.
 
 ```{python}
-print("=" * 70)
-print("14.1: REGRESSION ON SINGLE INDICATOR VARIABLE")
-print("=" * 70)
+# 14.1: Regression On Single Indicator Variable
 
 # Summary statistics by gender
-print("\nTable 14.1: Earnings by Gender")
-print("-" * 70)
+# Table 14.1: Earnings by Gender
 
 print("\nFemale (gender=1):")
 female_stats = data[data['gender'] == 1]['earnings'].describe()
@@ -212,9 +208,7 @@ mean_female = data[data['gender'] == 1]['earnings'].mean()
 mean_male = data[data['gender'] == 0]['earnings'].mean()
 diff_means = mean_female - mean_male
 
-print("\n" + "-" * 70)
-print("Difference in Means")
-print("-" * 70)
+# Difference in Means
 print(f"  Mean earnings (Female): ${mean_female:,.2f}")
 print(f"  Mean earnings (Male): ${mean_male:,.2f}")
 print(f"  Difference: ${diff_means:,.2f}")
@@ -230,15 +224,12 @@ $$\text{earnings} = \beta_1 + \alpha \cdot \text{gender} + u$$
 We'll use **heteroskedasticity-robust standard errors** (HC1) for valid inference.
 
 ```{python}
-print("="*70)
-print("REGRESSION MODELS: Gender and Earnings")
-print("="*70)
+# Regression models: Gender and earnings
 
 # Model 1: Gender only
-print("\nModel 1: earnings ~ gender")
-print("-"*70)
+# Model 1: earnings ~ gender
 model1 = ols('earnings ~ gender', data=data).fit(cov_type='HC1')
-print(model1.summary())
+model1.summary()
 
 print(f"\nInterpretation:")
 print(f"  Intercept: ${model1.params['Intercept']:,.2f} (mean for males)")
@@ -288,9 +279,7 @@ Regression with a single indicator variable is equivalent to a two-sample t-test
 2. **Classical t-test** (equal variances): Identical to regression with default SEs
 
 ```{python}
-print("\n" + "=" * 70)
-print("Comparison with t-tests")
-print("=" * 70)
+# Comparison with t-tests
 
 # Extract earnings by gender
 female_earnings = data[data['gender'] == 1]['earnings']
@@ -298,7 +287,6 @@ male_earnings = data[data['gender'] == 0]['earnings']
 
 # Welch's t-test (unequal variances)
 print("\n1. Welch's t-test (unequal variances):")
-print("-" * 70)
 t_stat_welch, p_value_welch = stats.ttest_ind(female_earnings, male_earnings, equal_var=False)
 print(f"  t-statistic: {t_stat_welch:.4f}")
 print(f"  p-value: {p_value_welch:.6f}")
@@ -306,23 +294,20 @@ print(f"  Note: Similar to regression with robust SEs")
 
 # Classical t-test (equal variances)
 print("\n2. Classical t-test (equal variances):")
-print("-" * 70)
 t_stat_classical, p_value_classical = stats.ttest_ind(female_earnings, male_earnings, equal_var=True)
 print(f"  t-statistic: {t_stat_classical:.4f}")
 print(f"  p-value: {p_value_classical:.6f}")
 
 # Regression with default SEs
 print("\n3. Regression with default (homoskedastic) SEs:")
-print("-" * 70)
 model_gender_default = ols('earnings ~ gender', data=data).fit()
 print(f"  t-statistic: {model_gender_default.tvalues['gender']:.4f}")
 print(f"  p-value: {model_gender_default.pvalues['gender']:.6f}")
 print(f"  Note: IDENTICAL to classical t-test with equal variances")
 
-print("\n" + "-" * 70)
-print("Key insight:")
-print("  - Classical t-test = Regression with default SEs (assuming equal variances)")
-print("  - Welch's t-test ≈ Regression with robust SEs (allowing unequal variances)")
+# Key insight:
+# - Classical t-test = Regression with default SEs (assuming equal variances)
+# - Welch's t-test ≈ Regression with robust SEs (allowing unequal variances)
 ```
 
 *Having established the equivalence between regression on a single indicator and difference-in-means tests, we now add continuous control variables.*
@@ -359,44 +344,35 @@ We'll estimate five models of increasing complexity:
 5. Full interactions with all variables
 
 ```{python}
-print("="*70)
-print("PROGRESSIVE MODEL BUILDING")
-print("="*70)
+# Progressive Model Building
 
 # Model 2: Gender + Education
-print("\nModel 2: earnings ~ gender + education")
-print("-"*70)
+# Model 2: earnings ~ gender + education
 model2 = ols('earnings ~ gender + education', data=data).fit(cov_type='HC1')
-print(model2.summary())
+model2.summary()
 
 # Model 3: Gender + Education + Interaction
-print("\nModel 3: earnings ~ gender + education + genderbyeduc")
-print("-"*70)
+# Model 3: earnings ~ gender + education + genderbyeduc
 model3 = ols('earnings ~ gender + education + genderbyeduc', data=data).fit(cov_type='HC1')
-print(model3.summary())
+model3.summary()
 
 # Model 4: Add Age and Hours
-print("\nModel 4: earnings ~ gender + education + genderbyeduc + age + hours")
-print("-"*70)
+# Model 4: earnings ~ gender + education + genderbyeduc + age + hours
 model4 = ols('earnings ~ gender + education + genderbyeduc + age + hours', data=data).fit(cov_type='HC1')
-print(model4.summary())
+model4.summary()
 
 # Model 5: Full interactions
-print("\nModel 5: Full interactions")
-print("-"*70)
 model5 = ols('earnings ~ gender + education + genderbyeduc + age + genderbyage + hours + genderbyhours',
              data=data).fit(cov_type='HC1')
-print(model5.summary())
+model5.summary()
 
 # Joint F-test for all gender terms
-print("\n" + "="*70)
-print("Joint F-Test: All Gender Terms")
-print("="*70)
+# Joint F-Test: All Gender Terms
 hypotheses = '(gender = 0, genderbyeduc = 0, genderbyage = 0, genderbyhours = 0)'
 f_test = model5.wald_test(hypotheses, use_f=True)
 print(f_test)
 
-print("\nAll gender effects (level and interactions) are highly significant.")
+# All gender effects (level and interactions) are highly significant.
 ```
 
 > **Key Concept 14.3: Interaction Terms Between Indicators and Continuous Variables**
@@ -530,9 +506,7 @@ Let's create a comprehensive comparison of all five models.
 
 ```{python}
 # Summary table of all models
-print("\n" + "=" * 70)
-print("Summary Table: All Five Models")
-print("=" * 70)
+# Summary Table: All Five Models
 
 summary_df = pd.DataFrame({
     'Model 1': ['Gender only', model1.params.get('gender', np.nan),
@@ -552,12 +526,12 @@ summary_df = pd.DataFrame({
                 model5.nobs, model5.rsquared, model5.rsquared_adj, np.sqrt(model5.mse_resid)]
 }, index=['Description', 'Gender Coef', 'Robust SE', 't-stat', 'N', 'R²', 'Adj R²', 'RMSE'])
 
-print(summary_df.to_string())
+summary_df.to_string()
 
 print("\nKey observations:")
-print("  - Gender coefficient magnitude changes as we add controls")
-print("  - R² increases with additional variables")
-print("  - Interactions capture differential effects across groups")
+# - Gender coefficient magnitude changes as we add controls
+# - R² increases with additional variables
+# - Interactions capture differential effects across groups
 ```
 
 *Now that we can model different slopes via interaction terms, let's test whether the entire regression structure differs by group.*
@@ -585,12 +559,9 @@ The **Chow test** formally tests whether coefficients differ across groups:
 $$H_0: \beta^F = \beta^M \text{ (pooled model)} \quad \text{vs.} \quad H_a: \beta^F \neq \beta^M \text{ (separate models)}$$
 
 ```{python}
-print("\n" + "=" * 70)
-print("14.4: TESTING FOR STRUCTURAL CHANGE")
-print("=" * 70)
+# 14.4: TESTING FOR STRUCTURAL CHANGE
 
 print("\nSeparate Regressions by Gender")
-print("-" * 70)
 
 # Female regression
 model_female = ols('earnings ~ education + age + hours',
@@ -615,9 +586,7 @@ print(f"  Hours: {model_male.params['hours']:,.2f}")
 print(f"  R²: {model_male.rsquared:.4f}")
 
 # Compare coefficients
-print("\n" + "-" * 70)
-print("Comparison of Coefficients")
-print("-" * 70)
+# Comparison of Coefficients
 
 comparison = pd.DataFrame({
     'Female': model_female.params,
@@ -663,31 +632,24 @@ The coefficient of an included indicator measures the difference relative to the
 3. **Change which indicator is dropped** (changes interpretation, not fit)
 
 ```{python}
-print("="*70)
-print("SETS OF INDICATOR VARIABLES: Worker Type")
-print("="*70)
+# Sets of indicator variables: Worker type
 
 # Approach 1: Include intercept, drop one indicator (dprivate as reference)
-print("\nApproach 1: Intercept + dself + dgovt (dprivate is reference)")
-print("-"*70)
+# Approach 1: Intercept + dself + dgovt (dprivate is reference)
 model_worker1 = ols('earnings ~ dself + dgovt + education + age', data=data).fit(cov_type='HC1')
-print(model_worker1.summary())
+model_worker1.summary()
 
 # Approach 2: Drop intercept, include all indicators
-print("\nApproach 2: No intercept + all dummies (dself + dprivate + dgovt)")
-print("-"*70)
+# Approach 2: No intercept + all dummies (dself + dprivate + dgovt)
 model_worker2 = ols('earnings ~ dself + dprivate + dgovt + education + age - 1', data=data).fit(cov_type='HC1')
-print(model_worker2.summary())
+model_worker2.summary()
 
 # Approach 3: Different reference category (dself as reference)
-print("\nApproach 3: Intercept + dprivate + dgovt (dself is reference)")
-print("-"*70)
+# Approach 3: Intercept + dprivate + dgovt (dself is reference)
 model_worker3 = ols('earnings ~ dprivate + dgovt + education + age', data=data).fit(cov_type='HC1')
-print(model_worker3.summary())
+model_worker3.summary()
 
-print("\n" + "-"*70)
-print("Key Insight:")
-print("-"*70)
+# Key Insight:
 print(f"  All three models have IDENTICAL R²: {model_worker1.rsquared:.4f}")
 print(f"  Only the interpretation changes (different reference category)")
 print(f"  Fitted values and residuals are the same across all three")
@@ -765,9 +727,7 @@ $$H_0: \mu_1 = \mu_2 = \mu_3 \quad \text{vs.} \quad H_a: \text{at least one mean
 ANOVA is equivalent to an F-test in regression with indicator variables.
 
 ```{python}
-print("\n" + "=" * 70)
-print("ANOVA: Testing Equality of Means Across Worker Types")
-print("=" * 70)
+# ANOVA: Testing Equality of Means Across Worker Types
 
 # Create categorical variable for worker type
 data['typeworker'] = (1 * data['dself'] + 2 * data['dprivate'] + 3 * data['dgovt']).astype(int)
@@ -778,9 +738,7 @@ means_by_type.index = ['Self-employed', 'Private', 'Government']
 print(means_by_type)
 
 # One-way ANOVA using scipy
-print("\n" + "-" * 70)
-print("One-way ANOVA (scipy)")
-print("-" * 70)
+# One-way ANOVA (scipy)
 
 group1 = data[data['typeworker'] == 1]['earnings']
 group2 = data[data['typeworker'] == 2]['earnings']
@@ -797,9 +755,7 @@ else:
     print(f"\n  Result: Fail to reject H₀ - No significant difference in earnings")
 
 # Using statsmodels for detailed ANOVA table
-print("\n" + "-" * 70)
-print("Detailed ANOVA table (statsmodels)")
-print("-" * 70)
+# Detailed ANOVA table (statsmodels)
 
 model_anova = ols('earnings ~ C(typeworker)', data=data).fit()
 anova_table = anova_lm(model_anova, typ=2)
@@ -819,9 +775,7 @@ print("\nNote: ANOVA F-statistic matches the joint test from regression")
 Let's create informative visualizations to illustrate our findings.
 
 ```{python}
-print("\n" + "=" * 70)
-print("VISUALIZATIONS")
-print("=" * 70)
+# VISUALIZATIONS
 
 # Figure 1: Earnings by gender and worker type
 fig, axes = plt.subplots(1, 2, figsize=(14, 6))
@@ -856,7 +810,7 @@ axes[1].legend()
 plt.tight_layout()
 plt.show()
 
-print("Figure 14.1: Earnings distributions show variation by gender and worker type.")
+# Figure 14.1: Earnings distributions show variation by gender and worker type.
 ```
 
 ```{python}
@@ -884,8 +838,8 @@ ax.grid(True, alpha=0.3)
 plt.tight_layout()
 plt.show()
 
-print("\nThe different slopes indicate that returns to education vary by gender.")
-print("This justifies including the gender × education interaction term.")
+# The different slopes indicate that returns to education vary by gender.
+# This justifies including the gender × education interaction term.
 ```
 
 > **Key Concept 14.8: Visualizing Group Differences in Regression**
@@ -1087,7 +1041,7 @@ Regress log productivity on regional indicators (using one region as the base ca
 ```python
 import statsmodels.formula.api as smf
 model1 = smf.ols('ln_lp ~ C(region)', data=dat2014).fit(cov_type='HC1')
-print(model1.summary())
+model1.summary()
 ```
 
 **Questions:** Which region is the base category? How do you interpret the coefficients? Are the regional differences statistically significant?
@@ -1186,9 +1140,7 @@ bol = pd.read_csv(url_bol)
 # Select key variables
 bol_key = bol[['mun', 'dep', 'imds', 'ln_NTLpc2017']].dropna().copy()
 
-print("=" * 70)
-print("DS4BOLIVIA: DEPARTMENT INDICATORS AND GROUP MEANS")
-print("=" * 70)
+# Ds4Bolivia: Department Indicators And Group Means
 print(f"Observations: {len(bol_key)} municipalities")
 print(f"Departments: {bol_key['dep'].nunique()}")
 
@@ -1197,11 +1149,8 @@ dep_dummies = pd.get_dummies(bol_key['dep'])
 print(f"\nIndicator variables created: {list(dep_dummies.columns)}")
 
 # Mean IMDS by department
-print("\n" + "-" * 70)
-print("Mean IMDS by Department")
-print("-" * 70)
 dept_stats = bol_key.groupby('dep')['imds'].agg(['mean', 'count']).sort_values('mean', ascending=False)
-print(dept_stats.round(2))
+dept_stats.round(2)
 
 print(f"\nHighest mean IMDS: {dept_stats['mean'].idxmax()} ({dept_stats['mean'].max():.2f})")
 print(f"Lowest mean IMDS:  {dept_stats['mean'].idxmin()} ({dept_stats['mean'].min():.2f})")
@@ -1220,7 +1169,7 @@ print(f"Lowest mean IMDS:  {dept_stats['mean'].idxmin()} ({dept_stats['mean'].mi
 
 ```python
 model_dep = ols('imds ~ C(dep)', data=bol_key).fit(cov_type='HC1')
-print(model_dep.summary())
+model_dep.summary()
 ```
 
 ```{python}

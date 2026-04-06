@@ -1,7 +1,8 @@
 ---
 title: 7. Statistical Inference for Bivariate Regression
 execute:
-  enabled: false
+  enabled: true
+  warning: false
 ---
 
 
@@ -128,19 +129,12 @@ where:
 - The 95% confidence interval is [50.84, 96.70]
 
 ```{python}
-print("=" * 70)
-print("7.1 EXAMPLE: HOUSE PRICE AND SIZE")
-print("=" * 70)
-
-# Read in the house data
+# 7.1 Example: House price and size
 data_house = pd.read_stata(GITHUB_DATA_URL + 'AED_HOUSE.DTA')
 
-print("\nData summary:")
-data_summary = data_house.describe()
-print(data_summary)
+# Data summary
+data_house.describe()
 
-print("\nFirst few observations:")
-print(data_house.head())
 ```
 
 ### Basic Regression: Price on Size
@@ -149,12 +143,8 @@ We estimate the bivariate regression model using ordinary least squares (OLS).
 
 ```{python}
 # Table 7.1 - Basic regression
-print("=" * 70)
-print("Table 7.1: Regression of House Price on Size")
-print("=" * 70)
-
 model_basic = ols('price ~ size', data=data_house).fit()
-print(model_basic.summary())
+model_basic.summary()
 ```
 
 ### Coefficient Table
@@ -170,14 +160,8 @@ coef_table = pd.DataFrame({
     'p-value': model_basic.pvalues
 })
 
-print("\nCoefficient Table:")
-print(coef_table)
-
-print("\nInterpretation:")
-print("  - Slope (size): Each additional sq ft increases price by $73.77")
-print("  - Standard error: Measures uncertainty in the slope estimate")
-print("  - t-statistic: Tests whether slope differs from zero")
-print("  - p-value: Probability of observing such extreme values under H₀: β₂ = 0")
+# Coefficient table
+coef_table
 ```
 
 ## 7.2 The t Statistic
@@ -286,12 +270,8 @@ For our house price example:
 - If R² were 0.10, SE would be about 2.5 times larger
 
 ```{python}
-print("=" * 70)
-print("7.2 THE T STATISTIC")
-print("=" * 70)
-
-print("\nRegression coefficients and t-statistics:")
-print(model_basic.summary2().tables[1])
+# 7.2 The t statistic
+model_basic.summary2().tables[1]
 
 # Extract key statistics
 coef_size = model_basic.params['size']
@@ -299,14 +279,12 @@ se_size = model_basic.bse['size']
 t_stat_size = model_basic.tvalues['size']
 p_value_size = model_basic.pvalues['size']
 
-print(f"\nDetailed statistics for 'size' coefficient:")
-print(f"  Coefficient: ${coef_size:.4f}")
-print(f"  Standard Error: ${se_size:.4f}")
-print(f"  t-statistic: {t_stat_size:.4f}")
-print(f"  p-value: {p_value_size:.6f}")
-
-print("\nThe t-statistic formula:")
-print(f"  t = b₂ / se(b₂) = {coef_size:.4f} / {se_size:.4f} = {t_stat_size:.4f}")
+# Detailed statistics for 'size' coefficient
+print(f"Coefficient: ${coef_size:.4f}")
+print(f"Standard Error: ${se_size:.4f}")
+print(f"t-statistic: {t_stat_size:.4f}")
+print(f"p-value: {p_value_size:.6f}")
+print(f"t = b₂ / se(b₂) = {coef_size:.4f} / {se_size:.4f} = {t_stat_size:.4f}")
 ```
 
 > **Key Concept 7.1: The t-Distribution and Degrees of Freedom**
@@ -431,14 +409,11 @@ Confidence intervals are more informative than hypothesis tests because they sho
 - All null values that would not be rejected (values inside interval)
 
 ```{python}
-print("=" * 70)
-print("7.3 CONFIDENCE INTERVALS")
-print("=" * 70)
+# 7.3 Confidence intervals
+conf_int = model_basic.conf_int(alpha=0.05)
 
 # 95% confidence intervals
-conf_int = model_basic.conf_int(alpha=0.05)
-print("\n95% Confidence Intervals:")
-print(conf_int)
+conf_int
 ```
 
 ### The t-Distribution vs Normal Distribution: Why It Matters
@@ -533,16 +508,12 @@ t_crit = stats.t.ppf(0.975, df)  # 97.5th percentile for two-sided 95% CI
 ci_lower = coef_size - t_crit * se_size
 ci_upper = coef_size + t_crit * se_size
 
-print("Manual calculation for 'size' coefficient:")
-print(f"  Sample size: {n}")
-print(f"  Degrees of freedom: {df}")
-print(f"  Critical t-value (α=0.05): {t_crit:.4f}")
-print(f"  Margin of error: {t_crit * se_size:.4f}")
-print(f"  95% CI: [${ci_lower:.4f}, ${ci_upper:.4f}]")
-
-print("\nInterpretation:")
-print(f"  We are 95% confident that each additional square foot")
-print(f"  increases house price by between ${ci_lower:.2f} and ${ci_upper:.2f}.")
+# Manual calculation for 'size' coefficient
+print(f"Sample size: {n}")
+print(f"Degrees of freedom: {df}")
+print(f"Critical t-value (α=0.05): {t_crit:.4f}")
+print(f"Margin of error: {t_crit * se_size:.4f}")
+print(f"95% CI: [${ci_lower:.4f}, ${ci_upper:.4f}]")
 ```
 
 ### Example with Artificial Data
@@ -648,16 +619,13 @@ $$t = \frac{b_2}{se(b_2)} \sim T(n-2)$$
 > **Important:** If your data contradicts the predicted direction, you cannot reject H₀ with a one-sided test (p-value > 0.5).
 
 ```{python}
-print("=" * 70)
-print("Example with Artificial Data")
-print("=" * 70)
-
+# Example with artificial data
 x = np.array([1, 2, 3, 4, 5])
 y = np.array([1, 2, 2, 2, 3])
 df_artificial = pd.DataFrame({'x': x, 'y': y})
 
 model_artificial = ols('y ~ x', data=df_artificial).fit()
-print(model_artificial.summary())
+model_artificial.summary()
 
 coef_x = model_artificial.params['x']
 se_x = model_artificial.bse['x']
@@ -668,10 +636,10 @@ t_crit_art = stats.t.ppf(0.975, df_art)
 ci_lower_art = coef_x - t_crit_art * se_x
 ci_upper_art = coef_x + t_crit_art * se_x
 
-print(f"\nManual CI for artificial data:")
-print(f"  Coefficient: {coef_x:.4f}")
-print(f"  Standard Error: {se_x:.4f}")
-print(f"  95% CI: [{ci_lower_art:.4f}, {ci_upper_art:.4f}]")
+# Manual CI for artificial data
+print(f"Coefficient: {coef_x:.4f}")
+print(f"Standard Error: {se_x:.4f}")
+print(f"95% CI: [{ci_lower_art:.4f}, {ci_upper_art:.4f}]")
 ```
 
 ### Understanding Hypothesis Testing: The Complete Workflow
@@ -936,25 +904,16 @@ Use two-sided tests unless:
 3. You only care about deviations in one direction (rare in economics)
 
 ```{python}
-print("=" * 70)
-print("7.4 TESTS OF STATISTICAL SIGNIFICANCE")
-print("=" * 70)
-
-print("\nNull hypothesis: β₂ = 0 (size has no effect on price)")
+# 7.4 Tests of statistical significance
+# Null hypothesis: β₂ = 0 (size has no effect on price)
 print(f"t-statistic: {t_stat_size:.4f}")
 print(f"p-value: {p_value_size:.6f}")
 print(f"Critical value (α=0.05): ±{t_crit:.4f}")
 
 if p_value_size < 0.05:
-    print("\nResult: Reject H₀ at 5% significance level")
-    print("Conclusion: Size has a statistically significant effect on price")
+    print(f"\nResult: Reject H₀ at 5% significance level")
 else:
-    print("\nResult: Fail to reject H₀ at 5% significance level")
-
-print("\nNote: Statistical significance ≠ Economic significance")
-print("  - Statistical significance depends on t = b₂ / se(b₂)")
-print("  - Economic significance depends directly on the size of b₂")
-print("  - With large samples, even small b₂ can be statistically significant")
+    print(f"\nResult: Fail to reject H₀ at 5% significance level")
 ```
 
 > **Key Concept 7.6: Heteroskedasticity and Robust Standard Errors**
@@ -1016,10 +975,7 @@ $$t = \frac{73.77 - 90}{11.17} = -1.452$$
 - Since 90 is inside [50.84, 96.70], we do not reject
 
 ```{python}
-print("=" * 70)
-print("7.5 TWO-SIDED HYPOTHESIS TESTS")
-print("=" * 70)
-
+# 7.5 Two-sided hypothesis tests
 # Test H₀: β₂ = 90 vs H₁: β₂ ≠ 90
 null_value = 90
 t_stat_90 = (coef_size - null_value) / se_size
@@ -1307,16 +1263,10 @@ Think of robust SEs as the "safe" choice:
 It's like wearing a seatbelt: doesn't hurt if you don't crash, saves you if you do.
 
 ```{python}
-print("=" * 70)
-print("Hypothesis test using statsmodels:")
-print("=" * 70)
-
-# Alternative approach using t_test
+# Hypothesis test using statsmodels
 hypothesis = f'size = {null_value}'
 t_test_result = model_basic.t_test(hypothesis)
-print(t_test_result)
-
-print("\nThis confirms our manual calculation.")
+t_test_result
 ```
 
 ## 7.6 One-Sided Directional Hypothesis Tests
@@ -1348,10 +1298,7 @@ Sometimes we have a directional hypothesis (greater than or less than).
   - If $b_2$ has wrong sign, reject is not possible (p > 0.5)
 
 ```{python}
-print("=" * 70)
-print("7.6 ONE-SIDED DIRECTIONAL HYPOTHESIS TESTS")
-print("=" * 70)
-
+# 7.6 One-sided directional hypothesis tests
 # Upper one-tailed test: H₀: β₂ ≤ 90 vs H₁: β₂ > 90
 p_value_upper = 1 - stats.t.cdf(t_stat_90, df)
 t_crit_upper = stats.t.ppf(0.95, df)
@@ -1416,14 +1363,10 @@ $$se_{het}(b_2) = \frac{\sqrt{\sum_{i=1}^n e_i^2 (x_i - \bar{x})^2}}{\sum_{i=1}^
 - **Cluster robust**: For clustered data (students in schools, people in villages, etc.)
 
 ```{python}
-print("=" * 70)
-print("7.7 ROBUST STANDARD ERRORS")
-print("=" * 70)
-
-# Get heteroskedasticity-robust standard errors (HC1)
+# 7.7 Robust standard errors
 robust_results = model_basic.get_robustcov_results(cov_type='HC1')
 
-print("\nComparison of standard and robust standard errors:")
+# Comparison of standard and robust standard errors
 comparison_df = pd.DataFrame({
     'Coefficient': model_basic.params,
     'Std. Error': model_basic.bse,
@@ -1433,28 +1376,15 @@ comparison_df = pd.DataFrame({
     'p-value (standard)': model_basic.pvalues,
     'p-value (robust)': robust_results.pvalues
 })
-print(comparison_df)
+comparison_df
 ```
 
 ### Full Regression Output with Robust Standard Errors
 
 ```{python}
-print("=" * 70)
-print("Regression with Robust Standard Errors:")
-print("=" * 70)
-print(robust_results.summary())
+# Regression with robust standard errors
+robust_results.summary()
 
-# Robust confidence intervals
-robust_conf_int = robust_results.conf_int(alpha=0.05)
-print("\n95% Confidence Intervals (Robust):")
-print(robust_conf_int)
-
-print("\nInterpretation:")
-print("  - For this dataset, robust and standard SEs are similar")
-print("  - Robust SE for size: 11.33 vs standard SE: 11.17")
-print("  - Robust 95% CI: [50.33, 97.02] vs standard: [50.84, 96.70]")
-print("  - Statistical significance unchanged (both highly significant)")
-print("\nGeneral principle: Always report robust SEs for cross-sectional data")
 ```
 
 ### Visualization: Scatter Plot with Regression Line
@@ -1529,10 +1459,7 @@ ax.grid(True, alpha=0.3)
 plt.tight_layout()
 plt.show()
 
-print("Check for:")
-print("  - Heteroskedasticity: Non-constant variance (funnel shape)")
-print("  - Outliers: Points far from zero line")
-print("  - Non-linearity: Systematic patterns in residuals")
+# Check for heteroskedasticity, outliers, non-linearity
 ```
 
 ## Key Takeaways
@@ -1754,11 +1681,8 @@ $$\text{productivity}_i = \beta_1 + \beta_2 \times \text{capital}_i + u_i$$
 > **Our approach:** We examine the cross-sectional relationship between productivity and capital intensity to understand the fundamentals underlying convergence patterns.
 
 ```{python}
-print("=" * 70)
-print("CASE STUDY: TESTING CONVERGENCE HYPOTHESES")
-print("=" * 70)
-
-# Read convergence clubs data
+#| eval: false
+# Case study: Testing convergence hypotheses
 data_convergence = pd.read_stata(GITHUB_DATA_URL + 'AED_ConvergenceClubs.dta')
 
 # Filter to 2014 cross-section
@@ -1768,14 +1692,10 @@ data_2014 = data_convergence[data_convergence['year'] == 2014].copy()
 data_2014['productivity'] = data_2014['rgdppc'] / 1000  # GDP per capita in thousands
 data_2014['capital'] = data_2014['rk'] / 1000  # Capital per worker in thousands
 
-print(f"\nSample: {len(data_2014)} countries in 2014")
-print("\nVariable summary:")
-print(data_2014[['productivity', 'capital']].describe())
+print(f"Sample: {len(data_2014)} countries in 2014")
 
-# Show a few countries
-print("\nSample countries:")
-sample_countries = data_2014[['country', 'productivity', 'capital']].sort_values('productivity', ascending=False).head(10)
-print(sample_countries.to_string(index=False))
+# Variable summary
+data_2014[['productivity', 'capital']].describe()
 ```
 
 ### Task 1: Estimate the Productivity-Capital Relationship (Guided)
@@ -1791,12 +1711,12 @@ c) Is the effect statistically significant at the 5% level?
 d) Is the effect economically significant? (Consider that the average country has capital = 50 and productivity = 25)
 
 ```{python}
+#| eval: false
 # Task 1: Basic regression
 model_convergence = ols('productivity ~ capital', data=data_2014).fit()
 
-print("\nTask 1: Regression of Productivity on Capital")
-print("=" * 60)
-print(model_convergence.summary())
+# Task 1: Regression of Productivity on Capital
+model_convergence.summary()
 
 # Extract key statistics
 beta2 = model_convergence.params['capital']
@@ -1804,19 +1724,15 @@ se_beta2 = model_convergence.bse['capital']
 t_stat = model_convergence.tvalues['capital']
 p_value = model_convergence.pvalues['capital']
 
-print(f"\nKey Statistics:")
-print(f"  Coefficient (β₂): {beta2:.4f}")
-print(f"  Standard Error: {se_beta2:.4f}")
-print(f"  t-statistic: {t_stat:.2f}")
-print(f"  p-value: {p_value:.6f}")
+# Key statistics
+print(f"Coefficient (β₂): {beta2:.4f}")
+print(f"Standard Error: {se_beta2:.4f}")
+print(f"t-statistic: {t_stat:.2f}")
+print(f"p-value: {p_value:.6f}")
 
 # 95% Confidence Interval
 ci_95 = model_convergence.conf_int(alpha=0.05).loc['capital']
-print(f"\n95% Confidence Interval: [{ci_95[0]:.4f}, {ci_95[1]:.4f}]")
-
-print("\nInterpretation:")
-print(f"  Each additional $1,000 in capital per worker is associated with")
-print(f"  an increase of ${beta2:.2f}k in labor productivity (GDP per capita).")
+print(f"95% Confidence Interval: [{ci_95[0]:.4f}, {ci_95[1]:.4f}]")
 ```
 
 ### Task 2: Test Specific Hypotheses (Semi-guided)
@@ -1858,11 +1774,11 @@ t_test_pessimist = (beta2 - null_value) / se_beta2
 ```
 
 ```{python}
+#| eval: false
 # Task 2: Your hypothesis tests here
 
 # Part (a): Statistical significance test
-print("\nTask 2(a): Test H₀: β₂ = 0")
-print("=" * 60)
+# Task 2(a): Test H₀: β₂ = 0
 print(f"t-statistic: {t_stat:.2f}")
 print(f"p-value: {p_value:.6f}")
 if p_value < 0.05:
@@ -1871,8 +1787,7 @@ else:
     print("Conclusion: Fail to reject H₀ at 5% level.")
 
 # Part (b): Test β₂ = 0.5
-print("\nTask 2(b): Test H₀: β₂ = 0.5")
-print("=" * 60)
+# Task 2(b): Test H₀: β₂ = 0.5
 null_value_b = 0.5
 t_test_05 = (beta2 - null_value_b) / se_beta2
 p_value_05 = 2 * (1 - stats.t.cdf(abs(t_test_05), df=model_convergence.df_resid))
@@ -1884,8 +1799,7 @@ else:
     print(f"Conclusion: Fail to reject H₀. The data are consistent with β₂ = {null_value_b}.")
 
 # Part (c): One-sided test (pessimistic claim: β₂ < 0.30)
-print("\nTask 2(c): Test Pessimist's Claim (β₂ < 0.30)")
-print("=" * 60)
+# Task 2(c): Test Pessimist's Claim (β₂ < 0.30)
 null_value_c = 0.30
 print("H₀: β₂ ≥ 0.30 vs. Hₐ: β₂ < 0.30 (pessimist's claim)")
 t_test_pessimist = (beta2 - null_value_c) / se_beta2
@@ -1959,11 +1873,11 @@ d) Construct a 95% CI using robust standard errors:
    - Which should you report in a research paper?
 
 ```{python}
+#| eval: false
 # Task 3: Robust standard errors
 robust_model = model_convergence.get_robustcov_results(cov_type='HC1')
 
-print("\nTask 3: Robust Standard Errors Analysis")
-print("=" * 60)
+# Task 3: Robust Standard Errors Analysis
 
 # Extract robust statistics
 beta2_robust = robust_model.params['capital']
@@ -1972,17 +1886,17 @@ t_stat_robust = robust_model.tvalues['capital']
 p_value_robust = robust_model.pvalues['capital']
 
 # Comparison table
-print("\nComparison of Standard vs. Robust Standard Errors:")
+# Comparison of Standard vs. Robust Standard Errors
 comparison_df = pd.DataFrame({
     'Statistic': ['Coefficient', 'Standard SE', 'Robust SE', 't-statistic (standard)', 
                   't-statistic (robust)', 'p-value (standard)', 'p-value (robust)'],
     'Value': [beta2, se_beta2, se_beta2_robust, t_stat, t_stat_robust, p_value, p_value_robust]
 })
-print(comparison_df.to_string(index=False))
+comparison_df.to_string(index=False)
 
 # Percent change in SE
 pct_change = ((se_beta2_robust - se_beta2) / se_beta2) * 100
-print(f"\nRobust SE is {pct_change:+.1f}% different from standard SE")
+print(f"Robust SE is {pct_change:+.1f}% different from standard SE")
 
 if abs(pct_change) > 10:
     print("→ Substantial difference suggests heteroskedasticity is present")
@@ -1993,11 +1907,9 @@ else:
 
 # Robust confidence interval
 ci_95_robust = robust_model.conf_int(alpha=0.05).loc['capital']
-print(f"\n95% Confidence Intervals:")
+print(f"95% Confidence Intervals:")
 print(f"  Standard CI: [{ci_95[0]:.4f}, {ci_95[1]:.4f}]")
 print(f"  Robust CI:   [{ci_95_robust[0]:.4f}, {ci_95_robust[1]:.4f}]")
-
-print("\nRecommendation: Report robust standard errors in your analysis.")
 ```
 
 ### Task 4: Heterogeneity Across Income Groups (More Independent)
@@ -2040,6 +1952,7 @@ robust_dev = model_dev.get_robustcov_results(cov_type='HC1')
 ```
 
 ```{python}
+#| eval: false
 # Task 4: Your analysis here
 
 # Split the sample
@@ -2047,8 +1960,7 @@ threshold = 30
 high_income = data_2014[data_2014['productivity'] > threshold].copy()
 developing = data_2014[data_2014['productivity'] <= threshold].copy()
 
-print(f"\nTask 4: Income Group Analysis (threshold = ${threshold}k)")
-print("=" * 60)
+# Task 4: Income Group Analysis
 print(f"High-income countries: {len(high_income)}")
 print(f"Developing countries: {len(developing)}")
 
@@ -2070,12 +1982,10 @@ comparison_groups = pd.DataFrame({
     'p-value': [robust_high.pvalues['capital'], robust_dev.pvalues['capital'], p_value_robust]
 })
 
-print("\nRegression Results by Income Group:")
-print(comparison_groups.to_string(index=False))
+# Regression Results by Income Group
+comparison_groups.to_string(index=False)
 
 # Test β₂ = 0.5 for each group
-print("\n" + "=" * 60)
-print("Test H₀: β₂ = 0.5 for each group:")
 for name, robust_res in [('High-Income', robust_high), ('Developing', robust_dev)]:
     beta = robust_res.params['capital']
     se = robust_res.bse['capital']
@@ -2089,13 +1999,7 @@ for name, robust_res in [('High-Income', robust_high), ('Developing', robust_dev
     else:
         print(f"  Conclusion: Fail to reject H₀. Data consistent with β₂ = 0.5")
 
-print("\nInterpretation:")
-if comparison_groups.loc[0, 'β₂'] > comparison_groups.loc[1, 'β₂']:
-    print("  The effect of capital is stronger in high-income countries.")
-else:
-    print("  The effect of capital is stronger in developing countries.")
-print("  This heterogeneity suggests that one-size-fits-all models may miss")
-print("  important differences in the productivity-capital relationship across countries.")
+# Interpretation
 ```
 
 > **Key Concept 7.9: Economic Interpretation of Hypothesis Test Results**
@@ -2160,6 +2064,7 @@ c) Create a residual plot:
 **Challenge:** Can you create a single figure that tells the complete story of your analysis?
 
 ```{python}
+#| eval: false
 # Task 5: Your visualizations here
 
 # Figure 1: Scatter plot with regression lines by group
@@ -2224,11 +2129,7 @@ ax.grid(True, alpha=0.3, axis='x')
 plt.tight_layout()
 plt.show()
 
-print("\nFigure interpretation:")
-print("  - All three estimates are positive and statistically significant")
-print("  - Confidence intervals exclude zero but include 0.5 (theory prediction)")
-print("  - High-income countries show slightly stronger relationship")
-print("  - But confidence intervals overlap, suggesting difference may not be significant")
+# All three estimates are positive and statistically significant
 ```
 
 ### Task 6: Write a Research Summary (Independent)
@@ -2335,13 +2236,12 @@ key_vars = ['mun', 'dep', 'imds', 'ln_NTLpc2017']
 bol_key = bol[key_vars].copy()
 reg_data = bol_key[['imds', 'ln_NTLpc2017']].dropna()
 
-print("=" * 70)
-print("DS4BOLIVIA DATASET — REGRESSION SAMPLE")
-print("=" * 70)
+# DS4Bolivia dataset — regression sample
 print(f"Total municipalities: {len(bol_key)}")
 print(f"Complete cases for regression: {len(reg_data)}")
-print(f"\nDescriptive statistics:")
-print(reg_data.describe().round(3))
+
+# Descriptive statistics
+reg_data.describe().round(3)
 ```
 
 ### Task 1: Estimate and Test Slope (Guided)
@@ -2361,21 +2261,18 @@ print(reg_data.describe().round(3))
 
 # Estimate the model
 model = ols('imds ~ ln_NTLpc2017', data=reg_data).fit()
-print(model.summary())
+model.summary()
 
 # Extract t-statistic and p-value for the slope
 t_stat = model.tvalues['ln_NTLpc2017']
 p_value = model.pvalues['ln_NTLpc2017']
 
-print("\n" + "=" * 70)
-print("HYPOTHESIS TEST: H₀: β₁ = 0")
-print("=" * 70)
+# Hypothesis test: H₀: β₁ = 0
 print(f"Slope coefficient: {model.params['ln_NTLpc2017']:.4f}")
 print(f"Standard error:    {model.bse['ln_NTLpc2017']:.4f}")
 print(f"t-statistic:       {t_stat:.4f}")
 print(f"p-value:           {p_value:.6f}")
-print(f"\nConclusion: {'Reject' if p_value < 0.05 else 'Fail to reject'} H₀ at the 5% level.")
-print(f"The NTL-development relationship is {'statistically significant' if p_value < 0.05 else 'not statistically significant'}.")
+print(f"Conclusion: {'Reject' if p_value < 0.05 else 'Fail to reject'} H₀ at the 5% level.")
 ```
 
 ### Task 2: Confidence Interval for Slope (Guided)
@@ -2396,16 +2293,10 @@ ci = model.conf_int(alpha=0.05)
 ci_lower = ci.loc['ln_NTLpc2017', 0]
 ci_upper = ci.loc['ln_NTLpc2017', 1]
 
-print("=" * 70)
-print("95% CONFIDENCE INTERVAL FOR NTL COEFFICIENT")
-print("=" * 70)
+# 95% confidence interval for NTL coefficient
 print(f"Point estimate:  {model.params['ln_NTLpc2017']:.4f}")
 print(f"95% CI:          [{ci_lower:.4f}, {ci_upper:.4f}]")
-print(f"\nInterpretation: We are 95% confident that a 1-unit increase in")
-print(f"log NTL per capita is associated with between {ci_lower:.2f} and {ci_upper:.2f}")
-print(f"points of IMDS.")
-print(f"\nDoes the CI contain zero? {'Yes' if ci_lower <= 0 <= ci_upper else 'No'}")
-print(f"This is consistent with {'failing to reject' if ci_lower <= 0 <= ci_upper else 'rejecting'} H₀: β₁ = 0.")
+print(f"Does the CI contain zero? {'Yes' if ci_lower <= 0 <= ci_upper else 'No'}")
 ```
 
 ### Task 3: Robust Standard Errors (Semi-guided)
@@ -2428,17 +2319,13 @@ print(f"This is consistent with {'failing to reject' if ci_lower <= 0 <= ci_uppe
 model_robust = ols('imds ~ ln_NTLpc2017', data=reg_data).fit(cov_type='HC1')
 
 # Compare default vs robust results
-print("=" * 70)
-print("COMPARISON: DEFAULT vs ROBUST STANDARD ERRORS")
-print("=" * 70)
+# Comparison: default vs robust standard errors
 print(f"{'':30s} {'Default':>12s} {'Robust (HC1)':>12s}")
-print("-" * 55)
 print(f"{'Slope coefficient':30s} {model.params['ln_NTLpc2017']:12.4f} {model_robust.params['ln_NTLpc2017']:12.4f}")
 print(f"{'Standard error':30s} {model.bse['ln_NTLpc2017']:12.4f} {model_robust.bse['ln_NTLpc2017']:12.4f}")
 print(f"{'t-statistic':30s} {model.tvalues['ln_NTLpc2017']:12.4f} {model_robust.tvalues['ln_NTLpc2017']:12.4f}")
 print(f"{'p-value':30s} {model.pvalues['ln_NTLpc2017']:12.6f} {model_robust.pvalues['ln_NTLpc2017']:12.6f}")
-print(f"\nSE ratio (robust/default): {model_robust.bse['ln_NTLpc2017'] / model.bse['ln_NTLpc2017']:.3f}")
-print(f"\nNote: A ratio substantially different from 1.0 signals heteroskedasticity.")
+print(f"SE ratio (robust/default): {model_robust.bse['ln_NTLpc2017'] / model.bse['ln_NTLpc2017']:.3f}")
 ```
 
 > **Key Concept 7.12: Robust Inference with Spatial Data**
@@ -2473,17 +2360,14 @@ df = model_robust.df_resid
 t_manual = (beta_hat - beta_0_hyp) / se_robust
 p_two_sided = 2 * stats.t.sf(abs(t_manual), df=df)
 
-print("=" * 70)
-print(f"HYPOTHESIS TEST: H₀: β₁ = {beta_0_hyp}")
-print("=" * 70)
+# Hypothesis test: H₀: β₁ = beta_0_hyp
 print(f"Estimated slope:   {beta_hat:.4f}")
 print(f"Hypothesized value: {beta_0_hyp}")
 print(f"Robust SE:          {se_robust:.4f}")
 print(f"t-statistic:        {t_manual:.4f}")
 print(f"Degrees of freedom: {df}")
 print(f"Two-sided p-value:  {p_two_sided:.6f}")
-print(f"\nConclusion: {'Reject' if p_two_sided < 0.05 else 'Fail to reject'} H₀ at the 5% level.")
-print(f"{'The effect is significantly different from 5.' if p_two_sided < 0.05 else 'We cannot reject that the effect equals 5.'}") 
+print(f"Conclusion: {'Reject' if p_two_sided < 0.05 else 'Fail to reject'} H₀ at the 5% level.")
 ```
 
 ### Task 5: One-Sided Test (Independent)
@@ -2506,9 +2390,7 @@ print(f"{'The effect is significantly different from 5.' if p_two_sided < 0.05 e
 t_onesided = model_robust.tvalues['ln_NTLpc2017']
 p_onesided = stats.t.sf(t_onesided, df=model_robust.df_resid)
 
-print("=" * 70)
-print("ONE-SIDED TEST: H₀: β₁ ≤ 0 vs H₁: β₁ > 0")
-print("=" * 70)
+# One-sided test: H₀: β₁ ≤ 0 vs H₁: β₁ > 0
 print(f"Estimated slope:     {model_robust.params['ln_NTLpc2017']:.4f}")
 print(f"Robust SE:           {model_robust.bse['ln_NTLpc2017']:.4f}")
 print(f"t-statistic:         {t_onesided:.4f}")
@@ -2541,9 +2423,7 @@ imds_range = reg_data['imds'].max() - reg_data['imds'].min()
 imds_std = reg_data['imds'].std()
 beta = model_robust.params['ln_NTLpc2017']
 
-print("=" * 70)
-print("ECONOMIC vs STATISTICAL SIGNIFICANCE — KEY FACTS")
-print("=" * 70)
+# Economic vs statistical significance — key facts
 print(f"\nEstimated slope (robust): {beta:.4f}")
 print(f"Robust p-value:           {model_robust.pvalues['ln_NTLpc2017']:.6f}")
 print(f"\nIMDS range:     {reg_data['imds'].min():.1f} to {reg_data['imds'].max():.1f} (range = {imds_range:.1f})")
