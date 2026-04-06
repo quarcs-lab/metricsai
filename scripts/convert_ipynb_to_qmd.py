@@ -20,7 +20,8 @@ SCRIPT_DIR = Path(__file__).parent
 PROJECT_ROOT = SCRIPT_DIR.parent
 NOTEBOOKS_SRC = PROJECT_ROOT / "notebooks_colab"
 NOTEBOOKS_DST = PROJECT_ROOT / "notebooks_quarto"
-QUARTO_BIN = "/Users/carlosmendez/opt/bin/quarto"
+import shutil as _shutil
+QUARTO_BIN = _shutil.which("quarto") or "/Users/carlosmendez/opt/bin/quarto"
 
 
 def find_notebook(chapter_id: str) -> Path:

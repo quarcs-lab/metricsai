@@ -1376,7 +1376,7 @@ $$se_{het}(b_2) = \frac{\sqrt{\sum_{i=1}^n e_i^2 (x_i - \bar{x})^2}}{\sum_{i=1}^
 
 ```{python}
 # 7.7 Robust standard errors
-robust_results = model_basic.get_robustcov_results(cov_type='HC1')
+robust_results = ols('price ~ size', data=data_house).fit(cov_type='HC1')
 
 # Comparison of standard and robust standard errors
 comparison_df = pd.DataFrame({
@@ -1711,16 +1711,16 @@ $$\text{productivity}_i = \beta_1 + \beta_2 \times \text{capital}_i + u_i$$
 > **Our approach:** We examine the cross-sectional relationship between productivity and capital intensity to understand the fundamentals underlying convergence patterns.
 
 ```{python}
-#| eval: false
 # Case study: Testing convergence hypotheses
-data_convergence = pd.read_stata(GITHUB_DATA_URL + 'AED_ConvergenceClubs.dta')
+url_cc = "https://raw.githubusercontent.com/quarcs-lab/mendez2020-convergence-clubs-code-data/master/assets/dat.csv"
+data_convergence = pd.read_csv(url_cc)
 
 # Filter to 2014 cross-section
 data_2014 = data_convergence[data_convergence['year'] == 2014].copy()
 
-# Create productivity and capital variables (divide by 1000 for better scale)
-data_2014['productivity'] = data_2014['rgdppc'] / 1000  # GDP per capita in thousands
-data_2014['capital'] = data_2014['rk'] / 1000  # Capital per worker in thousands
+# Create productivity and capital variables
+data_2014['productivity'] = data_2014['lp']   # labor productivity
+data_2014['capital'] = data_2014['kl']         # capital per worker
 
 print(f"Sample: {len(data_2014)} countries in 2014")
 
@@ -1741,7 +1741,6 @@ c) Is the effect statistically significant at the 5% level?
 d) Is the effect economically significant? (Consider that the average country has capital = 50 and productivity = 25)
 
 ```{python}
-#| eval: false
 # Task 1: Basic regression
 model_convergence = ols('productivity ~ capital', data=data_2014).fit()
 
@@ -1762,7 +1761,7 @@ print(f"p-value: {p_value:.6f}")
 
 # 95% Confidence Interval
 ci_95 = model_convergence.conf_int(alpha=0.05).loc['capital']
-print(f"95% Confidence Interval: [{ci_95[0]:.4f}, {ci_95[1]:.4f}]")
+print(f"95% Confidence Interval: [{ci_95.iloc[0]:.4f}, {ci_95.iloc[1]:.4f}]")
 ```
 
 ### Task 2: Test Specific Hypotheses (Semi-guided)
@@ -1804,7 +1803,6 @@ t_test_pessimist = (beta2 - null_value) / se_beta2
 ```
 
 ```{python}
-#| eval: false
 # Task 2: Your hypothesis tests here
 
 # Part (a): Statistical significance test
@@ -1884,7 +1882,7 @@ Cross-country data often exhibits heteroskedasticity because larger/richer count
 
 a) Obtain heteroskedasticity-robust standard errors (HC1) using:
    ```python
-   robust_model = model_convergence.get_robustcov_results(cov_type='HC1')
+   robust_model = ols('productivity ~ capital', data=data_2014).fit(cov_type='HC1')
    ```
 
 b) Compare standard vs. robust standard errors:
@@ -1903,9 +1901,8 @@ d) Construct a 95% CI using robust standard errors:
    - Which should you report in a research paper?
 
 ```{python}
-#| eval: false
 # Task 3: Robust standard errors
-robust_model = model_convergence.get_robustcov_results(cov_type='HC1')
+robust_model = ols('productivity ~ capital', data=data_2014).fit(cov_type='HC1')
 
 # Task 3: Robust Standard Errors Analysis
 
@@ -1936,10 +1933,11 @@ else:
     print("→ Still best practice to use robust SEs")
 
 # Robust confidence interval
-ci_95_robust = robust_model.conf_int(alpha=0.05).loc['capital']
+ci_robust = robust_model.conf_int(alpha=0.05)
+ci_95_robust = ci_robust.loc['capital'] if 'capital' in ci_robust.index else ci_robust.iloc[1]
 print(f"95% Confidence Intervals:")
-print(f"  Standard CI: [{ci_95[0]:.4f}, {ci_95[1]:.4f}]")
-print(f"  Robust CI:   [{ci_95_robust[0]:.4f}, {ci_95_robust[1]:.4f}]")
+print(f"  Standard CI: [{ci_95.iloc[0]:.4f}, {ci_95.iloc[1]:.4f}]")
+print(f"  Robust CI:   [{ci_95_robust.iloc[0]:.4f}, {ci_95_robust.iloc[1]:.4f}]")
 ```
 
 ### Task 4: Heterogeneity Across Income Groups (More Independent)
@@ -1950,7 +1948,7 @@ print(f"  Robust CI:   [{ci_95_robust[0]:.4f}, {ci_95_robust[1]:.4f}]")
 
 a) **Split the sample:**  
 
-   - Create two subsamples: high-income countries (productivity > 30) and developing countries (productivity ≤ 30)
+   - Create two subsamples: high-income countries (productivity above the median) and developing countries (below the median)
    - How many countries in each group?
 
 b) **Estimate separate regressions:**  
@@ -1968,25 +1966,21 @@ c) **Compare the results:**
 
 **Hints:**
 ```python
-# Split data
-high_income = data_2014[data_2014['productivity'] > 30]
-developing = data_2014[data_2014['productivity'] <= 30]
+# Split data at the median
+threshold = data_2014['productivity'].median()
+high_income = data_2014[data_2014['productivity'] > threshold]
+developing = data_2014[data_2014['productivity'] <= threshold]
 
-# Run regressions
-model_high = ols('productivity ~ capital', data=high_income).fit()
-model_dev = ols('productivity ~ capital', data=developing).fit()
-
-# Get robust SEs
-robust_high = model_high.get_robustcov_results(cov_type='HC1')
-robust_dev = model_dev.get_robustcov_results(cov_type='HC1')
+# Run regressions with robust SEs
+model_high = ols('productivity ~ capital', data=high_income).fit(cov_type='HC1')
+model_dev = ols('productivity ~ capital', data=developing).fit(cov_type='HC1')
 ```
 
 ```{python}
-#| eval: false
 # Task 4: Your analysis here
 
-# Split the sample
-threshold = 30
+# Split the sample at the median
+threshold = data_2014['productivity'].median()
 high_income = data_2014[data_2014['productivity'] > threshold].copy()
 developing = data_2014[data_2014['productivity'] <= threshold].copy()
 
@@ -1994,13 +1988,9 @@ developing = data_2014[data_2014['productivity'] <= threshold].copy()
 print(f"High-income countries: {len(high_income)}")
 print(f"Developing countries: {len(developing)}")
 
-# Estimate separate regressions
-model_high = ols('productivity ~ capital', data=high_income).fit()
-model_dev = ols('productivity ~ capital', data=developing).fit()
-
-# Get robust results
-robust_high = model_high.get_robustcov_results(cov_type='HC1')
-robust_dev = model_dev.get_robustcov_results(cov_type='HC1')
+# Estimate separate regressions with robust SEs
+robust_high = ols('productivity ~ capital', data=high_income).fit(cov_type='HC1')
+robust_dev = ols('productivity ~ capital', data=developing).fit(cov_type='HC1')
 
 # Create comparison table
 comparison_groups = pd.DataFrame({
@@ -2094,7 +2084,6 @@ c) Create a residual plot:
 **Challenge:** Can you create a single figure that tells the complete story of your analysis?
 
 ```{python}
-#| eval: false
 # Task 5: Your visualizations here
 
 # Figure 1: Scatter plot with regression lines by group
@@ -2121,9 +2110,9 @@ ax2.scatter(developing['capital'], developing['productivity'],
 # Add regression lines
 high_income_sorted = high_income.sort_values('capital')
 developing_sorted = developing.sort_values('capital')
-ax2.plot(high_income_sorted['capital'], model_high.predict(high_income_sorted),
+ax2.plot(high_income_sorted['capital'], robust_high.predict(high_income_sorted),
         color='#4ade80', linewidth=2, linestyle='--', label='High-income fit')
-ax2.plot(developing_sorted['capital'], model_dev.predict(developing_sorted),
+ax2.plot(developing_sorted['capital'], robust_dev.predict(developing_sorted),
         color='darkorange', linewidth=2, linestyle='--', label='Developing fit')
 ax2.set_xlabel('Capital per Worker ($1000s)')
 ax2.set_ylabel('Labor Productivity ($1000s)')
