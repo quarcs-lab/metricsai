@@ -33,6 +33,7 @@ from pypdf.annotations import Link
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 NOTEBOOKS_DIR = PROJECT_ROOT / 'notebooks_colab'
+QUARTO_DIR = PROJECT_ROOT / 'notebooks_quarto'
 COVER_IMAGE = PROJECT_ROOT / 'images' / 'book1cover.jpg'
 OUTPUT_PDF = NOTEBOOKS_DIR / 'metricsAI_complete_book.pdf'
 
@@ -220,42 +221,49 @@ def count_pages():
 
 
 def extract_chapter_sections(ch_id):
-    """Extract content section titles from a chapter notebook.
+    """Extract content section titles from a chapter source file.
+
+    Reads from .qmd (Quarto) files in notebooks_quarto/.
+    Falls back to .ipynb (Jupyter) files in notebooks_colab/ if .qmd not found.
 
     For CH00 (Preface): All ## headers except back matter/structural
     For CH01-CH17: Only numbered ## X.Y headers
     """
-    nb_matches = sorted(NOTEBOOKS_DIR.glob(f'{ch_id}_*.ipynb'))
-    if not nb_matches:
-        return []
-
-    with open(nb_matches[0], 'r', encoding='utf-8') as f:
-        nb = json.load(f)
+    # Try .qmd first (new source of truth), fall back to .ipynb
+    qmd_matches = sorted(QUARTO_DIR.glob(f'{ch_id}_*.qmd'))
+    if qmd_matches:
+        content = qmd_matches[0].read_text(encoding='utf-8')
+    else:
+        nb_matches = sorted(NOTEBOOKS_DIR.glob(f'{ch_id}_*.ipynb'))
+        if not nb_matches:
+            return []
+        with open(nb_matches[0], 'r', encoding='utf-8') as f:
+            nb = json.load(f)
+        content = '\n'.join(
+            ''.join(cell['source'])
+            for cell in nb['cells']
+            if cell['cell_type'] == 'markdown'
+        )
 
     sections = []
-    for cell in nb['cells']:
-        if cell['cell_type'] != 'markdown':
+    for line in content.split('\n'):
+        line = line.strip()
+        if not line.startswith('## '):
             continue
-        source = ''.join(cell['source'])
+        title = line[3:].strip()
 
-        for line in source.split('\n'):
-            line = line.strip()
-            if not line.startswith('## '):
-                continue
-            title = line[3:].strip()
+        # Strip section numbers for back matter check
+        # Handles both "1.1 Title" and "8.1: Title" formats
+        base_title = re.sub(r'^\d+\.\d+:?\s*', '', title)
+        if base_title in BACK_MATTER_HEADERS:
+            continue
 
-            # Strip section numbers for back matter check
-            # Handles both "1.1 Title" and "8.1: Title" formats
-            base_title = re.sub(r'^\d+\.\d+:?\s*', '', title)
-            if base_title in BACK_MATTER_HEADERS:
-                continue
-
-            if ch_id == 'ch00':
+        if ch_id == 'ch00':
+            sections.append(title)
+        else:
+            # Only numbered sections (e.g., "1.1 Title" or "8.1: Title")
+            if re.match(r'\d+\.\d+[:\s]', title):
                 sections.append(title)
-            else:
-                # Only numbered sections (e.g., "1.1 Title" or "8.1: Title")
-                if re.match(r'\d+\.\d+[:\s]', title):
-                    sections.append(title)
 
     return sections
 
