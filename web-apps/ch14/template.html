@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chapter 14 — Regression with Indicator Variables · metricsAI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.plot.ly/plotly-2.35.2.min.js" charset="utf-8"></script>
+<style>
+:root{--cyan:#008CB7;--cyan-soft:#22d3ee;--purple:#7A209F;--purple-soft:#c084fc;--pink:#C21E72;--pink-soft:#f472b6;--bg:#f5f8fb;--panel:#fff;--panel-2:#f0f4f9;--text:#0b1021;--text-soft:#475569;--text-muted:#64748b;--border:#d9e2ec;--accent:var(--cyan);--accent-2:var(--purple);--accent-3:var(--pink);--shadow:0 2px 10px rgba(11,16,33,.06),0 12px 30px rgba(11,16,33,.05);--grid:#e3e8ef;--code-bg:#eef3f8}
+html[data-theme="dark"]{--bg:#0c1024;--panel:#151a33;--panel-2:#1b2142;--text:#e2e8f0;--text-soft:#b5c0d0;--text-muted:#8a98ae;--border:#2a3156;--accent:var(--cyan-soft);--accent-2:var(--purple-soft);--accent-3:var(--pink-soft);--shadow:0 2px 10px rgba(0,0,0,.25),0 12px 30px rgba(0,0,0,.35);--grid:#2a3156;--code-bg:#0f1530}
+*{box-sizing:border-box}html,body{margin:0;padding:0}
+body{font-family:'Inter',system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);line-height:1.55;transition:background-color .25s ease,color .25s ease}
+code,.mono{font-family:'JetBrains Mono',ui-monospace,monospace}
+header.page{position:relative;padding:2.4rem 1.5rem 2rem;background:radial-gradient(1200px 400px at 85% -10%,rgba(122,32,159,.15),transparent),radial-gradient(1000px 400px at 10% 0%,rgba(0,140,183,.18),transparent),var(--panel);border-bottom:1px solid var(--border)}
+.page-inner{max-width:1120px;margin:0 auto}
+.chapter-badge{display:inline-block;font-size:.72rem;letter-spacing:.15em;text-transform:uppercase;color:var(--accent);font-weight:600;margin-bottom:.5rem}
+h1.title{font-size:clamp(1.6rem,3.4vw,2.4rem);margin:0 0 .35rem;background:linear-gradient(90deg,var(--accent),var(--accent-2));-webkit-background-clip:text;background-clip:text;color:transparent;font-weight:700;letter-spacing:-.01em}
+p.subtitle{margin:0 0 .8rem;color:var(--text-soft);font-size:1.05rem;max-width:720px}
+.theme-toggle{position:absolute;top:1.4rem;right:1.5rem;background:var(--panel-2);color:var(--text);border:1px solid var(--border);padding:.4rem .8rem;border-radius:999px;cursor:pointer;font-size:.85rem;font-weight:500;display:inline-flex;align-items:center;gap:.35rem;transition:all .2s ease}
+.theme-toggle:hover{border-color:var(--accent);color:var(--accent)}
+nav.anchors{position:sticky;top:0;z-index:20;background:color-mix(in srgb,var(--panel) 92%,transparent);backdrop-filter:saturate(150%) blur(8px);-webkit-backdrop-filter:saturate(150%) blur(8px);border-bottom:1px solid var(--border)}
+nav.anchors ul{display:flex;gap:.25rem;overflow-x:auto;list-style:none;padding:.55rem 1.5rem;margin:0 auto;max-width:1120px;scrollbar-width:thin}
+nav.anchors a{display:block;padding:.35rem .75rem;border-radius:8px;color:var(--text-soft);text-decoration:none;font-size:.85rem;font-weight:500;white-space:nowrap;transition:all .15s ease}
+nav.anchors a:hover{color:var(--accent);background:var(--panel-2)}
+main{max-width:1120px;margin:1.2rem auto 3rem;padding:0 1.5rem}
+section.widget{background:var(--panel);border:1px solid var(--border);border-radius:16px;padding:1.5rem 1.4rem 1.3rem;margin-bottom:1.5rem;box-shadow:var(--shadow)}
+.section-tag{display:inline-block;font-family:'JetBrains Mono',monospace;font-size:.72rem;color:var(--accent);background:color-mix(in srgb,var(--accent) 12%,transparent);padding:.2rem .55rem;border-radius:6px;margin-bottom:.6rem;font-weight:500}
+.widget h2{margin:0 0 .2rem;font-size:1.35rem;font-weight:600;color:var(--accent-2);letter-spacing:-.005em}
+.widget .lede{margin:0 0 1rem;color:var(--text-soft);font-size:.97rem;max-width:780px}
+.controls{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:.9rem 1.2rem;padding:.9rem 1rem;background:var(--panel-2);border-radius:10px;margin-bottom:1rem}
+.ctrl{display:flex;flex-direction:column;gap:.3rem}
+.ctrl label{font-size:.78rem;font-weight:500;color:var(--text-soft);text-transform:uppercase;letter-spacing:.05em}
+.ctrl select,.ctrl input[type="range"]{font-family:inherit;font-size:.9rem;padding:.4rem .55rem;border-radius:8px;border:1px solid var(--border);background:var(--panel);color:var(--text)}
+.ctrl input[type="range"]{padding:.2rem 0;accent-color:var(--accent)}
+.ctrl .val{font-family:'JetBrains Mono',monospace;font-size:.82rem;color:var(--accent);font-weight:500}
+.toggle-group{display:inline-flex;gap:.25rem;background:var(--panel);padding:3px;border-radius:10px;border:1px solid var(--border)}
+.toggle-group button{background:transparent;border:none;color:var(--text-soft);padding:.32rem .75rem;border-radius:7px;font-family:inherit;font-size:.85rem;cursor:pointer;transition:all .15s ease}
+.toggle-group button.active{background:var(--accent);color:white;font-weight:500}
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(100px,1fr));gap:.6rem;margin:.5rem 0 1rem}
+.stat{background:var(--panel-2);padding:.65rem .75rem;border-radius:10px;border-left:3px solid var(--accent)}
+.stat .label{font-size:.7rem;text-transform:uppercase;letter-spacing:.06em;color:var(--text-muted)}
+.stat .value{font-family:'JetBrains Mono',monospace;font-size:1.05rem;font-weight:500;color:var(--text);margin-top:.15rem}
+.stat.mean{border-left-color:var(--accent)}.stat.median{border-left-color:var(--accent-3)}.stat.spread{border-left-color:var(--accent-2)}
+.callout{background:color-mix(in srgb,var(--accent-2) 8%,transparent);border-left:3px solid var(--accent-2);padding:.7rem .9rem;border-radius:8px;font-size:.9rem;color:var(--text-soft);margin:.9rem 0 .2rem}
+.callout strong{color:var(--accent-2)}
+.try-this{background:color-mix(in srgb,var(--accent) 8%,transparent);border-left:3px solid var(--accent);padding:.7rem .9rem;border-radius:8px;font-size:.9rem;color:var(--text-soft);margin:.7rem 0 .2rem}
+.try-this .try-title{font-weight:600;color:var(--accent);font-size:.78rem;letter-spacing:.08em;text-transform:uppercase;margin-bottom:.3rem}
+.try-this ol{margin:0;padding-left:1.25rem}.try-this li{margin:.2rem 0}
+.widget-head{display:flex;align-items:flex-start;justify-content:space-between;gap:.5rem;margin-bottom:.2rem}
+.widget-head>div{flex:1;min-width:0}
+.reset-btn{background:transparent;color:var(--text-muted);border:1px solid var(--border);padding:.3rem .7rem;border-radius:8px;font-family:inherit;font-size:.8rem;cursor:pointer;white-space:nowrap;transition:all .15s ease}
+.reset-btn:hover{color:var(--accent);border-color:var(--accent)}
+.chart{width:100%;min-height:340px}.chart.tall{min-height:420px}.chart.short{min-height:280px}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+@media(max-width:720px){.two-col{grid-template-columns:1fr}}
+.coef-table{width:100%;border-collapse:collapse;font-size:.88rem;margin:.5rem 0 1rem}
+.coef-table th,.coef-table td{padding:.45rem .6rem;text-align:right;border-bottom:1px solid var(--border)}
+.coef-table th{font-size:.72rem;text-transform:uppercase;letter-spacing:.05em;color:var(--text-muted);font-weight:500;text-align:right}
+.coef-table th:first-child,.coef-table td:first-child{text-align:left}
+.coef-table td{font-family:'JetBrains Mono',monospace;font-size:.85rem;color:var(--text)}
+.coef-table tr.highlight td{background:color-mix(in srgb,var(--accent-3) 10%,transparent);font-weight:600}
+.coef-table tr.r2-row td{border-top:2px solid var(--border);font-weight:600}
+.coef-table .sig{color:var(--accent-3);font-weight:600}
+footer.page{max-width:1120px;margin:1rem auto 3rem;padding:0 1.5rem;color:var(--text-muted);font-size:.88rem;text-align:center}
+footer.page a{color:var(--accent);text-decoration:none}footer.page a:hover{text-decoration:underline}
+.scroll-top{display:inline-block;font-size:.78rem;color:var(--text-muted);text-decoration:none;margin-top:.4rem}.scroll-top:hover{color:var(--accent)}
+</style>
+</head>
+<body>
+
+<header class="page">
+  <div class="page-inner">
+    <span class="chapter-badge">Chapter 14 of 18 · Interactive Dashboard</span>
+    <h1 class="title">Regression with Indicator Variables</h1>
+    <p class="subtitle">Explore the gender earnings gap, interaction effects, the dummy variable trap, and worker-type differences using the same dataset and models as the book.</p>
+  </div>
+  <button id="theme-toggle" class="theme-toggle" type="button" aria-label="Toggle color theme"><span id="theme-icon">🌙</span><span id="theme-label">Dark</span></button>
+</header>
+
+<nav class="anchors" aria-label="Sections">
+  <ul>
+    <li><a href="#gender-gap">Gender Gap</a></li>
+    <li><a href="#interaction">Interactions</a></li>
+    <li><a href="#model-compare">Model Comparison</a></li>
+    <li><a href="#dummy-trap">Dummy Trap</a></li>
+    <li><a href="#worker-type">Worker Types</a></li>
+    <li><a href="#scatter-gender">Scatter by Gender</a></li>
+  </ul>
+</nav>
+
+<main>
+
+<!-- ==================== WIDGET 1: Gender Earnings Gap ==================== -->
+<section class="widget" id="gender-gap">
+  <div class="widget-head">
+    <div>
+      <span class="section-tag">§14.1 – §14.2</span>
+      <h2>Gender Earnings Gap Explorer</h2>
+      <p class="lede">The raw gender gap is &minus;$16,396. But how much shrinks when we control for education, age, and hours? Each model adds controls — watch the gap change.</p>
+    </div>
+    <button class="reset-btn" data-reset="gendergap">Reset</button>
+  </div>
+  <div class="controls">
+    <div class="ctrl">
+      <label>Model</label>
+      <select id="gg-model">
+        <option value="0">Model 1: Gender only</option>
+        <option value="1">Model 2: + Education</option>
+        <option value="2">Model 3: + Gender×Education</option>
+        <option value="3">Model 4: + Age + Hours</option>
+      </select>
+    </div>
+  </div>
+  <div class="stats-grid">
+    <div class="stat mean"><div class="label">Gender coef</div><div class="value" id="gg-stat-coef">—</div></div>
+    <div class="stat spread"><div class="label">t-statistic</div><div class="value" id="gg-stat-t">—</div></div>
+    <div class="stat median"><div class="label">p-value</div><div class="value" id="gg-stat-p">—</div></div>
+    <div class="stat mean"><div class="label">R²</div><div class="value" id="gg-stat-r2">—</div></div>
+  </div>
+  <div id="chart-gender-gap" class="chart short"></div>
+  <div class="callout">
+    <strong>Key Concept 14.1:</strong> Regressing earnings on a gender indicator is equivalent to a difference-in-means test. The intercept equals the male mean ($63,476) and the gender coefficient equals the gap (&minus;$16,396). Adding controls reveals how much of the raw gap is explained by observable differences.
+  </div>
+  <div class="try-this">
+    <div class="try-title">Try This</div>
+    <ol>
+      <li>Start with Model 1 (gender only). The gap is &minus;$16,396 — the raw difference in means. R² is only 2.5% — gender alone explains very little of earnings variation.</li>
+      <li>Switch to Model 2 (+ education). The gap changes to &minus;$18,258. It <em>increased</em>! Why? Because women have slightly more education on average, so controlling for education makes the residual gap larger.</li>
+      <li>Switch to Model 4 (full controls). How much of the original gap remains after controlling for education, age, and hours?</li>
+    </ol>
+  </div>
+</section>
+
+<!-- ==================== WIDGET 2: Interaction Slope Visualizer ==================== -->
+<section class="widget" id="interaction">
+  <div class="widget-head">
+    <div>
+      <span class="section-tag">§14.3</span>
+      <h2>Interaction Effects: Do Returns to Education Differ by Gender?</h2>
+      <p class="lede">Without an interaction term, both genders get the same slope (parallel lines). Toggle the interaction to allow different returns to education for men and women.</p>
+    </div>
+    <button class="reset-btn" data-reset="interaction">Reset</button>
+  </div>
+  <div class="controls">
+    <div class="ctrl">
+      <label>Interaction term</label>
+      <div class="toggle-group" id="int-toggle">
+        <button class="active" data-val="off">Off (parallel)</button>
+        <button data-val="on">On (non-parallel)</button>
+      </div>
+    </div>
+  </div>
+  <div class="stats-grid">
+    <div class="stat mean"><div class="label">Male slope</div><div class="value" id="int-stat-male">—</div></div>
+    <div class="stat median"><div class="label">Female slope</div><div class="value" id="int-stat-female">—</div></div>
+    <div class="stat spread"><div class="label">Interaction coef</div><div class="value" id="int-stat-inter">—</div></div>
+    <div class="stat mean"><div class="label">R²</div><div class="value" id="int-stat-r2">—</div></div>
+  </div>
+  <div id="chart-interaction" class="chart tall"></div>
+  <div class="callout">
+    <strong>Key Concept 14.3:</strong> An interaction term Gender&times;Education allows the slope of education to differ by gender. Without it, the model forces parallel regression lines. The interaction coefficient measures how much the female slope differs from the male slope.
+  </div>
+  <div class="try-this">
+    <div class="try-title">Try This</div>
+    <ol>
+      <li>With interaction <strong>OFF</strong>, both genders share the same slope ($5,907/year). The lines are perfectly parallel — only the intercept differs.</li>
+      <li>Toggle interaction <strong>ON</strong>. Now males get $6,921/year and females get $6,921 &minus; $2,765 = $4,156/year. Are the lines still parallel?</li>
+      <li>Follow the lines to high education (20 years). Is the gender gap larger or smaller at higher education? What does this mean economically?</li>
+    </ol>
+  </div>
+</section>
+
+<!-- ==================== WIDGET 3: Model Comparison Table ==================== -->
+<section class="widget" id="model-compare">
+  <div class="widget-head">
+    <div>
+      <span class="section-tag">§14.2 – §14.4</span>
+      <h2>Model Comparison</h2>
+      <p class="lede">Track how coefficients and R² evolve as controls are added. Each column is a progressively richer model — the gender coefficient tells a different story in each.</p>
+    </div>
+    <button class="reset-btn" data-reset="modelcompare">Reset</button>
+  </div>
+  <div style="overflow-x:auto">
+    <table class="coef-table" id="model-table">
+      <thead><tr><th>Variable</th><th>Model 1</th><th>Model 2</th><th>Model 3</th><th>Model 4</th><th>Model 5</th></tr></thead>
+      <tbody id="model-table-body"></tbody>
+    </table>
+  </div>
+  <div class="callout">
+    <strong>Key Concept 14.4:</strong> When a model includes both an indicator and its interactions, individual t-tests on each piece may not be significant — but the set of gender-related terms may be <em>jointly</em> significant. Always use an F-test for joint significance.
+  </div>
+  <div class="try-this">
+    <div class="try-title">Try This</div>
+    <ol>
+      <li>Compare the <strong>gender</strong> row across all 5 models. The coefficient changes sign from Model 1 to Model 3! Why? (Hint: the interaction term absorbs part of the effect.)</li>
+      <li>Look at R². How much does each additional variable contribute? Is the jump from Model 1 to Model 2 (adding education) larger than Model 4 to Model 5?</li>
+      <li>In Model 5, the gender coefficient is $57,129. Does this mean women earn <em>more</em>? No — you must evaluate the total gender effect at specific values of education, age, and hours.</li>
+    </ol>
+  </div>
+</section>
+
+<!-- ==================== WIDGET 4: Dummy Variable Trap ==================== -->
+<section class="widget" id="dummy-trap">
+  <div class="widget-head">
+    <div>
+      <span class="section-tag">§14.5</span>
+      <h2>The Dummy Variable Trap</h2>
+      <p class="lede">With 3 job types, you can only include 2 indicators (one is the <em>base category</em>). Changing the base changes the coefficients but NOT the predictions. Try it.</p>
+    </div>
+    <button class="reset-btn" data-reset="dummytrap">Reset</button>
+  </div>
+  <div class="controls">
+    <div class="ctrl">
+      <label>Base (omitted) category</label>
+      <div class="toggle-group" id="dt-base">
+        <button class="active" data-val="private">Private</button>
+        <button data-val="self">Self-employed</button>
+        <button data-val="govt">Government</button>
+      </div>
+    </div>
+  </div>
+  <div style="overflow-x:auto">
+    <table class="coef-table" id="dt-table">
+      <thead><tr><th>Variable</th><th>Coefficient</th><th>SE</th><th>t</th></tr></thead>
+      <tbody id="dt-table-body"></tbody>
+    </table>
+  </div>
+  <div class="stats-grid">
+    <div class="stat mean"><div class="label">R²</div><div class="value" id="dt-stat-r2">—</div></div>
+    <div class="stat mean"><div class="label">Pred: Self-emp</div><div class="value" id="dt-pred-self">—</div></div>
+    <div class="stat median"><div class="label">Pred: Private</div><div class="value" id="dt-pred-priv">—</div></div>
+    <div class="stat spread"><div class="label">Pred: Govt</div><div class="value" id="dt-pred-govt">—</div></div>
+  </div>
+  <div class="callout">
+    <strong>Key Concept 14.6:</strong> Including all k indicators plus an intercept creates perfect multicollinearity (the dummy variable trap). Drop one category to make the model estimable. The coefficients on the remaining indicators measure differences <em>from the base</em>.
+  </div>
+  <div class="try-this">
+    <div class="try-title">Try This</div>
+    <ol>
+      <li>With <strong>Private</strong> as base, the coefficients on dself and dgovt show differences from the private sector mean.</li>
+      <li>Switch to <strong>Self-employed</strong> as base. The coefficients change completely — but look at the predicted means (bottom row). They are <strong>identical</strong>.</li>
+      <li>Switch to <strong>Government</strong>. Same R², same predictions. Only the interpretation changes: each coefficient now measures the difference from government workers.</li>
+    </ol>
+  </div>
+</section>
+
+<!-- ==================== WIDGET 5: Worker Type Bar Chart ==================== -->
+<section class="widget" id="worker-type">
+  <div class="widget-head">
+    <div>
+      <span class="section-tag">§14.5</span>
+      <h2>Worker Type Comparison</h2>
+      <p class="lede">Mean annual earnings by employment type, with 95% confidence intervals. These group means are exactly what the indicator-variable regression recovers.</p>
+    </div>
+    <button class="reset-btn" data-reset="workertype">Reset</button>
+  </div>
+  <div id="chart-worker-type" class="chart short"></div>
+  <div class="callout">
+    <strong>Key Concept 14.7:</strong> ANOVA (analysis of variance) is equivalent to regressing the outcome on a set of indicator variables. The F-test for joint significance of the indicators tests whether all group means are equal.
+  </div>
+  <div class="try-this">
+    <div class="try-title">Try This</div>
+    <ol>
+      <li>Which job type has the highest mean earnings? Note the wide confidence interval for self-employed — the small sample (n=79) and high variance make the estimate less precise.</li>
+      <li>Do the confidence intervals for private and government overlap? If so, the difference may not be statistically significant.</li>
+      <li>The self-employed mean ($72,306) looks highest, but its CI is very wide. A few high earners pull it up — this is common with self-employment income.</li>
+    </ol>
+  </div>
+</section>
+
+<!-- ==================== WIDGET 6: Scatter by Gender ==================== -->
+<section class="widget" id="scatter-gender">
+  <div class="widget-head">
+    <div>
+      <span class="section-tag">§14.3 – §14.4</span>
+      <h2>Earnings vs Education by Gender</h2>
+      <p class="lede">Separate regression lines for men and women reveal whether returns to education differ — and how the gender gap varies across education levels.</p>
+    </div>
+    <button class="reset-btn" data-reset="scattergender">Reset</button>
+  </div>
+  <div class="controls">
+    <div class="ctrl">
+      <label>Show</label>
+      <div class="toggle-group" id="sg-show">
+        <button class="active" data-val="both">Both</button>
+        <button data-val="male">Male only</button>
+        <button data-val="female">Female only</button>
+      </div>
+    </div>
+  </div>
+  <div class="stats-grid">
+    <div class="stat mean"><div class="label">Male slope</div><div class="value" id="sg-stat-male">—</div></div>
+    <div class="stat median"><div class="label">Female slope</div><div class="value" id="sg-stat-female">—</div></div>
+    <div class="stat spread"><div class="label">Gap at Educ=12</div><div class="value" id="sg-stat-gap12">—</div></div>
+    <div class="stat spread"><div class="label">Gap at Educ=16</div><div class="value" id="sg-stat-gap16">—</div></div>
+  </div>
+  <div id="chart-scatter-gender" class="chart tall"></div>
+  <div class="callout">
+    <strong>Key Concept 14.8:</strong> Plotting separate regression lines by group is the visual counterpart of an interaction model. If the lines are not parallel, returns to education differ by gender — and the gender gap changes across the education distribution.
+  </div>
+  <div class="try-this">
+    <div class="try-title">Try This</div>
+    <ol>
+      <li>Look at both regression lines. Are they parallel? If not, the interaction term (Gender&times;Education) is needed in the model.</li>
+      <li>Compare the gap at 12 years vs 16 years of education. Does the gap grow or shrink with more education?</li>
+      <li>Toggle to <strong>Male only</strong>, then <strong>Female only</strong>. Notice the different spreads — male earnings have more outliers at the top.</li>
+    </ol>
+  </div>
+</section>
+
+</main>
+
+<footer class="page">
+  <p>Part of <a href="https://quarcs-lab.github.io/metricsai/book/_book/index.html"><strong>metricsAI</strong></a> · Chapter 14: Regression with Indicator Variables · by Carlos Mendez · <a href="https://github.com/quarcs-lab/metricsai">GitHub</a></p>
+  <p>Data: AED_EARNINGS_COMPLETE.DTA (872 full-time workers aged 25–65, 2000)</p>
+  <a class="scroll-top" href="#top">&uarr; Back to top</a>
+</footer>
+
+<script type="application/json" id="ch-data">{{DATA_JSON}}</script>
+
+<script>
+"use strict";
+var DATA=JSON.parse(document.getElementById("ch-data").textContent);
+
+// ==================== HELPERS ====================
+function fmt(v,d){d=d!==undefined?d:2;if(v===null||v===undefined||isNaN(v))return"\u2014";return v.toFixed(d);}
+function fmtMoney(v){return v===null?"\u2014":"$"+Math.round(v).toLocaleString();}
+function fmtPct(v,d){return v===null?"\u2014":(v*100).toFixed(d||1)+"%";}
+function sigStars(p){if(p<0.001)return"***";if(p<0.01)return"**";if(p<0.05)return"*";return"";}
+var THEME_KEY="metricsai-theme";
+function getCSS(v){return getComputedStyle(document.documentElement).getPropertyValue(v).trim();}
+function themeColors(){return{text:getCSS("--text"),textSoft:getCSS("--text-soft"),grid:getCSS("--grid"),panel:getCSS("--panel"),cyan:getCSS("--accent"),purple:getCSS("--accent-2"),pink:getCSS("--accent-3")};}
+function baseLayout(o){var c=themeColors();return Object.assign({paper_bgcolor:"rgba(0,0,0,0)",plot_bgcolor:"rgba(0,0,0,0)",font:{family:"Inter, system-ui, sans-serif",color:c.text,size:12},margin:{l:56,r:18,t:30,b:46},xaxis:{gridcolor:c.grid,linecolor:c.grid,zerolinecolor:c.grid,tickfont:{color:c.textSoft}},yaxis:{gridcolor:c.grid,linecolor:c.grid,zerolinecolor:c.grid,tickfont:{color:c.textSoft}},hoverlabel:{bgcolor:c.panel,bordercolor:c.grid,font:{color:c.text}},legend:{font:{color:c.text},bgcolor:"rgba(0,0,0,0)"}},o||{});}
+var PLOTLY_CONFIG={displayModeBar:false,responsive:true};
+function getActiveVal(id){var b=document.querySelector("#"+id+" button.active");return b?b.dataset.val:null;}
+function bindToggles(id,fn){document.querySelectorAll("#"+id+" button").forEach(function(b){b.addEventListener("click",function(){this.parentNode.querySelectorAll("button").forEach(function(x){x.classList.remove("active");});this.classList.add("active");fn();});});}
+
+// ==================== WIDGET 1: Gender Gap Explorer ====================
+(function(){
+  var chartEl=document.getElementById("chart-gender-gap");
+  var MV=DATA.mean_vals;
+  function predictMeans(mi){
+    var m=DATA.models[mi];
+    var c=m.coef,v=m.vars;
+    // Evaluate at mean values of continuous vars
+    var male=c[0],female=c[0];
+    for(var i=1;i<v.length;i++){
+      var val=0;
+      if(v[i]==="gender")val=0; // male
+      else if(v[i]==="education")val=MV.education;
+      else if(v[i]==="gender\u00d7educ")val=0;
+      else if(v[i]==="age")val=MV.age;
+      else if(v[i]==="hours")val=MV.hours;
+      male+=c[i]*val;
+    }
+    for(var i=1;i<v.length;i++){
+      var val=0;
+      if(v[i]==="gender")val=1;
+      else if(v[i]==="education")val=MV.education;
+      else if(v[i]==="gender\u00d7educ")val=1*MV.education;
+      else if(v[i]==="age")val=MV.age;
+      else if(v[i]==="hours")val=MV.hours;
+      female+=c[i]*val;
+    }
+    return{male:male,female:female};
+  }
+  function render(){
+    var c=themeColors();
+    var mi=parseInt(document.getElementById("gg-model").value);
+    var m=DATA.models[mi];
+    var gi=m.vars.indexOf("gender");
+    document.getElementById("gg-stat-coef").textContent=fmtMoney(m.coef[gi]);
+    document.getElementById("gg-stat-t").textContent=fmt(m.t[gi],4);
+    document.getElementById("gg-stat-p").textContent=m.p[gi]<0.0001?"< 0.0001":fmt(m.p[gi],4);
+    document.getElementById("gg-stat-r2").textContent=fmt(m.r2,4);
+    var pred=predictMeans(mi);
+    var traces=[{x:["Male","Female"],y:[pred.male,pred.female],type:"bar",marker:{color:[c.cyan+"88",c.pink+"88"],line:{color:[c.cyan,c.pink],width:2}},text:[fmtMoney(pred.male),fmtMoney(pred.female)],textposition:"outside",textfont:{family:"JetBrains Mono",size:13,color:c.text}}];
+    var layout=baseLayout({yaxis:{title:"Predicted Earnings ($)",gridcolor:c.grid,linecolor:c.grid,zerolinecolor:c.grid,tickfont:{color:c.textSoft},range:[0,Math.max(pred.male,pred.female)*1.2]},xaxis:{tickfont:{color:c.textSoft,size:13}},showlegend:false,margin:{l:70,r:18,t:10,b:46}});
+    Plotly.react(chartEl,traces,layout,PLOTLY_CONFIG);
+  }
+  document.getElementById("gg-model").addEventListener("change",render);
+  window.__rerender_gendergap=render;
+  render();
+})();
+
+// ==================== WIDGET 2: Interaction Slope Visualizer ====================
+(function(){
+  var chartEl=document.getElementById("chart-interaction");
+  var ed=DATA.scatter.education,earn=DATA.scatter.earnings,gen=DATA.scatter.gender;
+  function render(){
+    var c=themeColors();
+    var interOn=getActiveVal("int-toggle")==="on";
+    var m=interOn?DATA.models[2]:DATA.models[1];
+    var ci=m.coef,vi=m.vars;
+    var eduIdx=vi.indexOf("education");
+    var genIdx=vi.indexOf("gender");
+    var intIdx=vi.indexOf("gender\u00d7educ");
+    var maleSlope=ci[eduIdx];
+    var femaleSlope=interOn?ci[eduIdx]+ci[intIdx]:ci[eduIdx];
+    var interCoef=interOn?ci[intIdx]:0;
+    document.getElementById("int-stat-male").textContent=fmtMoney(maleSlope)+"/yr";
+    document.getElementById("int-stat-female").textContent=fmtMoney(femaleSlope)+"/yr";
+    document.getElementById("int-stat-inter").textContent=interOn?fmtMoney(interCoef):"\u2014";
+    document.getElementById("int-stat-r2").textContent=fmt(m.r2,4);
+    // Scatter
+    var maleEd=[],maleEarn=[],femEd=[],femEarn=[];
+    for(var i=0;i<ed.length;i++){
+      if(gen[i]===0){maleEd.push(ed[i]);maleEarn.push(earn[i]);}
+      else{femEd.push(ed[i]);femEarn.push(earn[i]);}
+    }
+    var traces=[
+      {x:maleEd,y:maleEarn,type:"scatter",mode:"markers",marker:{color:c.cyan+"44",size:5},name:"Male",hovertemplate:"Educ: %{x}<br>Earnings: $%{y:,.0f}"},
+      {x:femEd,y:femEarn,type:"scatter",mode:"markers",marker:{color:c.pink+"44",size:5},name:"Female",hovertemplate:"Educ: %{x}<br>Earnings: $%{y:,.0f}"}
+    ];
+    // Regression lines
+    var xr=[0,22];
+    function pred(g,x){var s=ci[0];for(var j=1;j<vi.length;j++){if(vi[j]==="gender")s+=ci[j]*g;else if(vi[j]==="education")s+=ci[j]*x;else if(vi[j]==="gender\u00d7educ")s+=ci[j]*g*x;}return s;}
+    traces.push({x:xr,y:[pred(0,xr[0]),pred(0,xr[1])],type:"scatter",mode:"lines",line:{color:c.cyan,width:3},name:"Male fit",hoverinfo:"skip"});
+    traces.push({x:xr,y:[pred(1,xr[0]),pred(1,xr[1])],type:"scatter",mode:"lines",line:{color:c.pink,width:3},name:"Female fit",hoverinfo:"skip"});
+    var layout=baseLayout({xaxis:{title:"Years of Education",range:[0,22],gridcolor:c.grid,linecolor:c.grid,zerolinecolor:c.grid,tickfont:{color:c.textSoft}},yaxis:{title:"Earnings ($)",gridcolor:c.grid,linecolor:c.grid,zerolinecolor:c.grid,tickfont:{color:c.textSoft},range:[-50000,250000]},showlegend:true,legend:{x:0.02,y:0.98,xanchor:"left",yanchor:"top",font:{color:c.text},bgcolor:"rgba(0,0,0,0)"}});
+    Plotly.react(chartEl,traces,layout,PLOTLY_CONFIG);
+  }
+  bindToggles("int-toggle",render);
+  window.__rerender_interaction=render;
+  render();
+})();
+
+// ==================== WIDGET 3: Model Comparison Table ====================
+(function(){
+  var allVars=["const","gender","education","gender\u00d7educ","age","gender\u00d7age","hours","gender\u00d7hours"];
+  var labels={"const":"Intercept","gender":"Gender (Female)","education":"Education","gender\u00d7educ":"Gender \u00d7 Educ","age":"Age","gender\u00d7age":"Gender \u00d7 Age","hours":"Hours","gender\u00d7hours":"Gender \u00d7 Hours"};
+  function render(){
+    var tbody=document.getElementById("model-table-body");
+    var rows="";
+    for(var vi=0;vi<allVars.length;vi++){
+      var v=allVars[vi];
+      var isGender=v==="gender";
+      rows+="<tr"+(isGender?' class="highlight"':"")+">";
+      rows+="<td>"+(labels[v]||v)+"</td>";
+      for(var mi=0;mi<5;mi++){
+        var m=DATA.models[mi];
+        var idx=m.vars.indexOf(v);
+        if(idx>=0){
+          var stars=sigStars(m.p[idx]);
+          rows+="<td>"+fmtMoney(m.coef[idx])+(stars?' <span class="sig">'+stars+"</span>":"")+"</td>";
+        } else {
+          rows+="<td>\u2014</td>";
+        }
+      }
+      rows+="</tr>";
+    }
+    // R² row
+    rows+='<tr class="r2-row"><td>R\u00B2</td>';
+    for(var mi=0;mi<5;mi++) rows+="<td>"+fmt(DATA.models[mi].r2,4)+"</td>";
+    rows+="</tr>";
+    // N row
+    rows+="<tr><td>N</td>";
+    for(var mi=0;mi<5;mi++) rows+="<td>"+DATA.models[mi].n+"</td>";
+    rows+="</tr>";
+    tbody.innerHTML=rows;
+  }
+  window.__rerender_modelcompare=render;
+  render();
+})();
+
+// ==================== WIDGET 4: Dummy Variable Trap ====================
+(function(){
+  var GM=DATA.group_means;
+  function render(){
+    var base=getActiveVal("dt-base");
+    var wm=DATA.worker_models[base];
+    var tbody=document.getElementById("dt-table-body");
+    var rows="";
+    for(var i=0;i<wm.vars.length;i++){
+      var label=wm.vars[i]==="const"?"Intercept":wm.vars[i]==="dself"?"Self-employed":wm.vars[i]==="dprivate"?"Private sector":wm.vars[i]==="dgovt"?"Government":wm.vars[i];
+      var stars=sigStars(wm.p[i]);
+      rows+="<tr><td>"+label+"</td><td>"+fmtMoney(wm.coef[i])+(stars?' <span class="sig">'+stars+"</span>":"")+"</td><td>"+fmtMoney(wm.se[i])+"</td><td>"+fmt(wm.t[i],2)+"</td></tr>";
+    }
+    tbody.innerHTML=rows;
+    document.getElementById("dt-stat-r2").textContent=fmt(wm.r2,4);
+    document.getElementById("dt-pred-self").textContent=fmtMoney(GM.self_employed.mean);
+    document.getElementById("dt-pred-priv").textContent=fmtMoney(GM.private.mean);
+    document.getElementById("dt-pred-govt").textContent=fmtMoney(GM.government.mean);
+  }
+  bindToggles("dt-base",render);
+  window.__rerender_dummytrap=render;
+  render();
+})();
+
+// ==================== WIDGET 5: Worker Type Bar Chart ====================
+(function(){
+  var chartEl=document.getElementById("chart-worker-type");
+  var GM=DATA.group_means;
+  function render(){
+    var c=themeColors();
+    var types=["self_employed","private","government"];
+    var labels=["Self-employed\n(n="+GM.self_employed.n+")","Private sector\n(n="+GM.private.n+")","Government\n(n="+GM.government.n+")"];
+    var means=[GM.self_employed.mean,GM.private.mean,GM.government.mean];
+    var ses=[GM.self_employed.se,GM.private.se,GM.government.se];
+    var traces=[{x:labels,y:means,type:"bar",marker:{color:[c.cyan+"77",c.purple+"77",c.pink+"77"],line:{color:[c.cyan,c.purple,c.pink],width:2}},error_y:{type:"data",array:ses.map(function(s){return 1.96*s;}),visible:true,color:c.text,thickness:2,width:6},text:means.map(function(v){return fmtMoney(v);}),textposition:"outside",textfont:{family:"JetBrains Mono",size:12,color:c.text}}];
+    var layout=baseLayout({yaxis:{title:"Mean Earnings ($)",gridcolor:c.grid,linecolor:c.grid,zerolinecolor:c.grid,tickfont:{color:c.textSoft},range:[0,Math.max.apply(null,means)*1.35]},xaxis:{tickfont:{color:c.textSoft,size:11}},showlegend:false,margin:{l:70,r:18,t:10,b:70}});
+    Plotly.react(chartEl,traces,layout,PLOTLY_CONFIG);
+  }
+  window.__rerender_workertype=render;
+  render();
+})();
+
+// ==================== WIDGET 6: Scatter by Gender ====================
+(function(){
+  var chartEl=document.getElementById("chart-scatter-gender");
+  var ed=DATA.scatter.education,earn=DATA.scatter.earnings,gen=DATA.scatter.gender;
+  var GR=DATA.gender_reg;
+  function render(){
+    var c=themeColors();
+    var show=getActiveVal("sg-show");
+    document.getElementById("sg-stat-male").textContent=fmtMoney(GR.male.slope)+"/yr";
+    document.getElementById("sg-stat-female").textContent=fmtMoney(GR.female.slope)+"/yr";
+    var gap12=(GR.male.intercept+GR.male.slope*12)-(GR.female.intercept+GR.female.slope*12);
+    var gap16=(GR.male.intercept+GR.male.slope*16)-(GR.female.intercept+GR.female.slope*16);
+    document.getElementById("sg-stat-gap12").textContent=fmtMoney(gap12);
+    document.getElementById("sg-stat-gap16").textContent=fmtMoney(gap16);
+    var maleEd=[],maleEarn=[],femEd=[],femEarn=[];
+    for(var i=0;i<ed.length;i++){if(gen[i]===0){maleEd.push(ed[i]);maleEarn.push(earn[i]);}else{femEd.push(ed[i]);femEarn.push(earn[i]);}}
+    var traces=[];
+    if(show==="both"||show==="male"){
+      traces.push({x:maleEd,y:maleEarn,type:"scatter",mode:"markers",marker:{color:c.cyan+"44",size:5},name:"Male (n="+GR.male.n+")",hovertemplate:"Educ: %{x}<br>Earnings: $%{y:,.0f}"});
+    }
+    if(show==="both"||show==="female"){
+      traces.push({x:femEd,y:femEarn,type:"scatter",mode:"markers",marker:{color:c.pink+"44",size:5},name:"Female (n="+GR.female.n+")",hovertemplate:"Educ: %{x}<br>Earnings: $%{y:,.0f}"});
+    }
+    var xr=[0,22];
+    if(show==="both"||show==="male"){
+      traces.push({x:xr,y:[GR.male.intercept,GR.male.intercept+GR.male.slope*22],type:"scatter",mode:"lines",line:{color:c.cyan,width:3},name:"Male fit (R\u00B2="+fmt(GR.male.r2,3)+")",hoverinfo:"skip"});
+    }
+    if(show==="both"||show==="female"){
+      traces.push({x:xr,y:[GR.female.intercept,GR.female.intercept+GR.female.slope*22],type:"scatter",mode:"lines",line:{color:c.pink,width:3},name:"Female fit (R\u00B2="+fmt(GR.female.r2,3)+")",hoverinfo:"skip"});
+    }
+    var layout=baseLayout({xaxis:{title:"Years of Education",range:[0,22],gridcolor:c.grid,linecolor:c.grid,zerolinecolor:c.grid,tickfont:{color:c.textSoft}},yaxis:{title:"Earnings ($)",gridcolor:c.grid,linecolor:c.grid,zerolinecolor:c.grid,tickfont:{color:c.textSoft},range:[-50000,250000]},showlegend:true,legend:{x:0.02,y:0.98,xanchor:"left",yanchor:"top",font:{color:c.text},bgcolor:"rgba(0,0,0,0)"}});
+    Plotly.react(chartEl,traces,layout,PLOTLY_CONFIG);
+  }
+  bindToggles("sg-show",render);
+  window.__rerender_scattergender=render;
+  render();
+})();
+
+// ==================== RESET + URL HASH STATE ====================
+(function(){
+  var REG={
+    gendergap:[{id:"gg-model",kind:"select",def:"0"}],
+    interaction:[{group:"int-toggle",kind:"toggle",def:"off"}],
+    modelcompare:[],
+    dummytrap:[{group:"dt-base",kind:"toggle",def:"private"}],
+    workertype:[],
+    scattergender:[{group:"sg-show",kind:"toggle",def:"both"}]
+  };
+  function getVal(c){if(c.kind==="toggle"){var b=document.querySelector("#"+c.group+" button.active");return b?b.dataset.val:c.def;}return document.getElementById(c.id).value;}
+  function setVal(c,val,fire){if(c.kind==="toggle"){var g=document.getElementById(c.group);if(!g)return;var b=g.querySelector('button[data-val="'+val+'"]');if(b&&!b.classList.contains("active"))b.click();}else{var el=document.getElementById(c.id);if(!el)return;if(el.value!==String(val)){el.value=val;if(fire)el.dispatchEvent(new Event(c.kind==="select"?"change":"input",{bubbles:true}));}}}
+  function resetWidget(w){var ctrls=REG[w]||[];for(var i=0;i<ctrls.length;i++)setVal(ctrls[i],ctrls[i].def,true);var fn=window["__rerender_"+w];if(fn)fn();writeHash();}
+  function writeHash(){var parts=[];for(var w in REG){var ctrls=REG[w];for(var i=0;i<ctrls.length;i++){var c=ctrls[i];var v=String(getVal(c));if(v!==String(c.def)){var key=c.id||c.group;parts.push(key+"="+encodeURIComponent(v));}}}var want=parts.length?"#"+parts.join("&"):"";if(want===""&&location.hash.match(/=/))history.replaceState(null,"",location.pathname+location.search);else if(want!==""&&location.hash!==want)history.replaceState(null,"",location.pathname+location.search+want);}
+  function readHash(){var hash=location.hash.slice(1);if(!hash||!hash.includes("="))return;var params={};var pairs=hash.split("&");for(var i=0;i<pairs.length;i++){var eq=pairs[i].indexOf("=");if(eq<0)continue;params[pairs[i].slice(0,eq)]=decodeURIComponent(pairs[i].slice(eq+1));}for(var w in REG){var ctrls=REG[w];for(var j=0;j<ctrls.length;j++){var c=ctrls[j];var key=c.id||c.group;if(key in params)setVal(c,params[key],true);}}}
+  document.querySelectorAll(".reset-btn[data-reset]").forEach(function(btn){btn.addEventListener("click",function(){resetWidget(btn.dataset.reset);});});
+  document.addEventListener("input",function(e){if(e.target.matches("input[type=range], select"))writeHash();});
+  document.addEventListener("change",function(e){if(e.target.matches("select"))writeHash();});
+  document.querySelectorAll(".toggle-group button").forEach(function(b){b.addEventListener("click",function(){setTimeout(writeHash,0);});});
+  readHash();
+})();
+
+// ==================== THEME TOGGLE ====================
+(function(){
+  var btn=document.getElementById("theme-toggle"),iconEl=document.getElementById("theme-icon"),labelEl=document.getElementById("theme-label");
+  function apply(theme){document.documentElement.dataset.theme=theme;iconEl.textContent=theme==="dark"?"\u2600\uFE0F":"\uD83C\uDF19";labelEl.textContent=theme==="dark"?"Light":"Dark";for(var key in window){if(key.startsWith("__rerender_")&&typeof window[key]==="function")window[key]();}}
+  var saved=localStorage.getItem(THEME_KEY);var prefersDark=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches;apply(saved||(prefersDark?"dark":"light"));
+  btn.addEventListener("click",function(){var next=document.documentElement.dataset.theme==="dark"?"light":"dark";localStorage.setItem(THEME_KEY,next);apply(next);});
+})();
+window.addEventListener("resize",function(){document.querySelectorAll(".chart").forEach(function(el){if(el.data)Plotly.Plots.resize(el);});});
+</script>
+</body>
+</html>
