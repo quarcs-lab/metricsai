@@ -1,0 +1,1212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chapter 01 — Analysis of Economics Data · metricsAI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.plot.ly/plotly-2.35.2.min.js" charset="utf-8"></script>
+<style>
+:root {
+  --cyan: #008CB7;
+  --cyan-soft: #22d3ee;
+  --purple: #7A209F;
+  --purple-soft: #c084fc;
+  --pink: #C21E72;
+  --pink-soft: #f472b6;
+
+  --bg: #f5f8fb;
+  --panel: #ffffff;
+  --panel-2: #f0f4f9;
+  --text: #0b1021;
+  --text-soft: #475569;
+  --text-muted: #64748b;
+  --border: #d9e2ec;
+  --accent: var(--cyan);
+  --accent-2: var(--purple);
+  --accent-3: var(--pink);
+  --shadow: 0 2px 10px rgba(11, 16, 33, 0.06), 0 12px 30px rgba(11, 16, 33, 0.05);
+  --grid: #e3e8ef;
+  --code-bg: #eef3f8;
+}
+html[data-theme="dark"] {
+  --bg: #0c1024;
+  --panel: #151a33;
+  --panel-2: #1b2142;
+  --text: #e2e8f0;
+  --text-soft: #b5c0d0;
+  --text-muted: #8a98ae;
+  --border: #2a3156;
+  --accent: var(--cyan-soft);
+  --accent-2: var(--purple-soft);
+  --accent-3: var(--pink-soft);
+  --shadow: 0 2px 10px rgba(0, 0, 0, 0.25), 0 12px 30px rgba(0, 0, 0, 0.35);
+  --grid: #2a3156;
+  --code-bg: #0f1530;
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.55;
+  transition: background-color .25s ease, color .25s ease;
+}
+code, .mono { font-family: 'JetBrains Mono', ui-monospace, monospace; }
+
+header.page {
+  position: relative;
+  padding: 2.4rem 1.5rem 2rem;
+  background:
+    radial-gradient(1200px 400px at 85% -10%, rgba(122, 32, 159, 0.15), transparent),
+    radial-gradient(1000px 400px at 10% 0%, rgba(0, 140, 183, 0.18), transparent),
+    var(--panel);
+  border-bottom: 1px solid var(--border);
+}
+.page-inner { max-width: 1120px; margin: 0 auto; }
+.chapter-badge {
+  display: inline-block;
+  font-size: 0.72rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--accent);
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+h1.title {
+  font-size: clamp(1.6rem, 3.4vw, 2.4rem);
+  margin: 0 0 0.35rem;
+  background: linear-gradient(90deg, var(--accent), var(--accent-2));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+p.subtitle {
+  margin: 0 0 0.8rem;
+  color: var(--text-soft);
+  font-size: 1.05rem;
+  max-width: 720px;
+}
+.theme-toggle {
+  position: absolute;
+  top: 1.4rem;
+  right: 1.5rem;
+  background: var(--panel-2);
+  color: var(--text);
+  border: 1px solid var(--border);
+  padding: 0.4rem 0.8rem;
+  border-radius: 999px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  transition: all .2s ease;
+}
+.theme-toggle:hover { border-color: var(--accent); color: var(--accent); }
+
+nav.anchors {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background: color-mix(in srgb, var(--panel) 92%, transparent);
+  backdrop-filter: saturate(150%) blur(8px);
+  -webkit-backdrop-filter: saturate(150%) blur(8px);
+  border-bottom: 1px solid var(--border);
+}
+nav.anchors ul {
+  display: flex;
+  gap: 0.25rem;
+  overflow-x: auto;
+  list-style: none;
+  padding: 0.55rem 1.5rem;
+  margin: 0 auto;
+  max-width: 1120px;
+  scrollbar-width: thin;
+}
+nav.anchors a {
+  display: block;
+  padding: 0.35rem 0.75rem;
+  border-radius: 8px;
+  color: var(--text-soft);
+  text-decoration: none;
+  font-size: 0.85rem;
+  font-weight: 500;
+  white-space: nowrap;
+  transition: all .15s ease;
+}
+nav.anchors a:hover { color: var(--accent); background: var(--panel-2); }
+
+main { max-width: 1120px; margin: 1.2rem auto 3rem; padding: 0 1.5rem; }
+
+section.widget {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 1.5rem 1.4rem 1.3rem;
+  margin-bottom: 1.5rem;
+  box-shadow: var(--shadow);
+}
+.section-tag {
+  display: inline-block;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.72rem;
+  color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+  padding: 0.2rem 0.55rem;
+  border-radius: 6px;
+  margin-bottom: 0.6rem;
+  font-weight: 500;
+}
+.widget h2 {
+  margin: 0 0 0.2rem;
+  font-size: 1.35rem;
+  font-weight: 600;
+  color: var(--accent-2);
+  letter-spacing: -0.005em;
+}
+.widget .lede {
+  margin: 0 0 1rem;
+  color: var(--text-soft);
+  font-size: 0.97rem;
+  max-width: 780px;
+}
+
+.controls {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 0.9rem 1.2rem;
+  padding: 0.9rem 1rem;
+  background: var(--panel-2);
+  border-radius: 10px;
+  margin-bottom: 1rem;
+}
+.ctrl { display: flex; flex-direction: column; gap: 0.3rem; }
+.ctrl label {
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: var(--text-soft);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.ctrl select, .ctrl input[type="range"], .ctrl input[type="number"] {
+  font-family: inherit;
+  font-size: 0.9rem;
+  padding: 0.4rem 0.55rem;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--panel);
+  color: var(--text);
+}
+.ctrl input[type="range"] { padding: 0.2rem 0; accent-color: var(--accent); }
+.ctrl .val {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.82rem;
+  color: var(--accent);
+  font-weight: 500;
+}
+.toggle-group { display: inline-flex; gap: 0.25rem; background: var(--panel); padding: 3px; border-radius: 10px; border: 1px solid var(--border); }
+.toggle-group button {
+  background: transparent;
+  border: none;
+  color: var(--text-soft);
+  padding: 0.32rem 0.75rem;
+  border-radius: 7px;
+  font-family: inherit;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all .15s ease;
+}
+.toggle-group button.active { background: var(--accent); color: white; font-weight: 500; }
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+  gap: 0.6rem;
+  margin: 0.5rem 0 1rem;
+}
+.stat {
+  background: var(--panel-2);
+  padding: 0.65rem 0.75rem;
+  border-radius: 10px;
+  border-left: 3px solid var(--accent);
+}
+.stat .label { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-muted); }
+.stat .value { font-family: 'JetBrains Mono', monospace; font-size: 1.05rem; font-weight: 500; color: var(--text); margin-top: 0.15rem; }
+.stat.mean   { border-left-color: var(--accent); }
+.stat.median { border-left-color: var(--accent-3); }
+.stat.spread { border-left-color: var(--accent-2); }
+
+.callout {
+  background: color-mix(in srgb, var(--accent-2) 8%, transparent);
+  border-left: 3px solid var(--accent-2);
+  padding: 0.7rem 0.9rem;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  color: var(--text-soft);
+  margin: 0.9rem 0 0.2rem;
+}
+.callout strong { color: var(--accent-2); }
+
+.try-this {
+  background: color-mix(in srgb, var(--accent) 8%, transparent);
+  border-left: 3px solid var(--accent);
+  padding: 0.7rem 0.9rem;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  color: var(--text-soft);
+  margin: 0.7rem 0 0.2rem;
+}
+.try-this .try-title {
+  font-weight: 600; color: var(--accent); font-size: 0.78rem;
+  letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 0.3rem;
+}
+.try-this ol { margin: 0; padding-left: 1.25rem; }
+.try-this li { margin: 0.2rem 0; }
+
+.widget-head {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  gap: 0.5rem; margin-bottom: 0.2rem;
+}
+.widget-head > div { flex: 1; min-width: 0; }
+.reset-btn {
+  background: transparent;
+  color: var(--text-muted);
+  border: 1px solid var(--border);
+  padding: 0.3rem 0.7rem;
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 0.8rem;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all .15s ease;
+}
+.reset-btn:hover { color: var(--accent); border-color: var(--accent); }
+
+.delta-row {
+  display: flex; flex-wrap: wrap; gap: 0.6rem 1.2rem;
+  margin: 0.2rem 0 0.9rem; padding: 0.55rem 0.85rem;
+  background: var(--panel-2); border-radius: 10px;
+  font-family: 'JetBrains Mono', monospace; font-size: 0.88rem;
+  color: var(--text-soft); border-left: 3px solid var(--accent-3);
+}
+.delta-row .label { color: var(--text-muted); margin-right: 0.35rem; }
+.delta-row .delta-mean { color: var(--accent); font-weight: 500; }
+.delta-row .delta-median { color: var(--accent-3); font-weight: 500; }
+.delta-row.hidden { display: none; }
+
+h3.subhead {
+  margin: 1.6rem 0 0.4rem;
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--accent-2);
+  letter-spacing: -0.005em;
+}
+.subhead-tag {
+  display: inline-block;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.68rem;
+  color: var(--accent);
+  margin-right: 0.4rem;
+  font-weight: 500;
+  letter-spacing: 0.05em;
+}
+
+.outlier-list {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.85rem;
+  background: var(--code-bg);
+  padding: 0.6rem 0.85rem;
+  border-radius: 8px;
+  color: var(--text-soft);
+  max-height: 90px;
+  overflow-y: auto;
+}
+
+.chart { width: 100%; min-height: 340px; }
+.chart.tall { min-height: 420px; }
+.chart.short { min-height: 280px; }
+
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+@media (max-width: 720px) { .two-col { grid-template-columns: 1fr; } }
+
+footer.page {
+  max-width: 1120px;
+  margin: 1rem auto 3rem;
+  padding: 0 1.5rem;
+  color: var(--text-muted);
+  font-size: 0.88rem;
+  text-align: center;
+}
+footer.page a { color: var(--accent); text-decoration: none; }
+footer.page a:hover { text-decoration: underline; }
+
+.scroll-top {
+  display: inline-block;
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  text-decoration: none;
+  margin-top: 0.4rem;
+}
+.scroll-top:hover { color: var(--accent); }
+</style>
+</head>
+<body>
+
+<header class="page">
+  <div class="page-inner">
+    <span class="chapter-badge">Chapter 01 of 18 · Interactive Dashboard</span>
+    <h1 class="title">Analysis of Economics Data</h1>
+    <p class="subtitle">Explore house-price data from Central Davis, CA to build intuition for scatter plots, regression lines, slope interpretation, R², and the difference between association and causation.</p>
+  </div>
+  <button id="theme-toggle" class="theme-toggle" type="button" aria-label="Toggle color theme"><span id="theme-icon">🌙</span><span id="theme-label">Dark</span></button>
+</header>
+
+<nav class="anchors" aria-label="Sections">
+  <ul>
+    <li><a href="#stats">Summary stats</a></li>
+    <li><a href="#scatter">Scatter &amp; regression</a></li>
+    <li><a href="#predict">Prediction explorer</a></li>
+    <li><a href="#r2">R² explained</a></li>
+    <li><a href="#compare">Multi-predictor</a></li>
+  </ul>
+</nav>
+
+<main>
+
+<!-- ===================== 1. SUMMARY STATS ===================== -->
+<section class="widget" id="stats">
+  <div class="widget-head">
+    <div>
+      <span class="section-tag">§ 1.1 · Key Concept 1.1</span>
+      <h2>Data at a glance — descriptive statistics</h2>
+    </div>
+    <button type="button" class="reset-btn" data-reset="stats">↺ Reset</button>
+  </div>
+  <p class="lede">Before running any regression, understand the raw data. Pick a variable from the 29 houses in Central Davis, CA and scan its centre, spread, and shape.</p>
+  <div class="controls">
+    <div class="ctrl">
+      <label for="stats-var">Variable</label>
+      <select id="stats-var">
+        <option value="price">Sale price ($)</option>
+        <option value="size">Size (sq ft)</option>
+        <option value="bedrooms">Bedrooms</option>
+      </select>
+    </div>
+  </div>
+  <div class="stats-grid" id="stats-grid"></div>
+  <div class="chart short" id="stats-chart"></div>
+  <div class="callout" id="stats-callout"></div>
+  <div class="try-this">
+    <div class="try-title">Try this</div>
+    <ol>
+      <li>Select <em>Sale price</em>. Mean = $253,910, median = $244,000. The mean sits above the median — what does that tell you about the tail?</li>
+      <li>Switch to <em>Size</em>. The range is 1,400–3,300 sq ft. Std dev is $398. Are houses more or less variable in size than in price?</li>
+      <li>Switch to <em>Bedrooms</em>. The distribution is discrete — 3, 4, 5, or 6. How does that affect the histogram?</li>
+    </ol>
+  </div>
+</section>
+
+<!-- ===================== 2. SCATTER + REGRESSION ===================== -->
+<section class="widget" id="scatter">
+  <div class="widget-head">
+    <div>
+      <span class="section-tag">§ 1.3 – § 1.4 · Key Concepts 1.3 &amp; 1.4</span>
+      <h2>Scatter plot &amp; regression line — seeing the relationship</h2>
+    </div>
+    <button type="button" class="reset-btn" data-reset="scatter">↺ Reset</button>
+  </div>
+  <p class="lede">A scatter plot reveals the direction, form, and strength of a relationship before any numbers are calculated. Toggle the fitted regression line and the residuals to see how the OLS line summarizes the cloud of points.</p>
+  <div class="controls">
+    <div class="ctrl">
+      <label>Regression line</label>
+      <div class="toggle-group" id="scatter-line">
+        <button type="button" data-val="on" class="active">On</button>
+        <button type="button" data-val="off">Off</button>
+      </div>
+    </div>
+    <div class="ctrl">
+      <label>Residuals</label>
+      <div class="toggle-group" id="scatter-resid">
+        <button type="button" data-val="off" class="active">Off</button>
+        <button type="button" data-val="on">On</button>
+      </div>
+    </div>
+  </div>
+  <div class="chart" id="scatter-chart"></div>
+  <div class="callout" id="scatter-callout"></div>
+  <div class="try-this">
+    <div class="try-title">Try this</div>
+    <ol>
+      <li>Turn the regression line <em>off</em>. Can you mentally draw a line through the cloud? Where would you put it?</li>
+      <li>Turn it back <em>on</em>. The OLS line minimizes the sum of squared residuals — not eye-balled, computed.</li>
+      <li>Toggle residuals <em>on</em>. Find the house with the tallest vertical bar — it's the worst-predicted house. What might explain the gap? (Condition? Age? Location?)</li>
+    </ol>
+  </div>
+</section>
+
+<!-- ===================== 3. PREDICTION EXPLORER ===================== -->
+<section class="widget" id="predict">
+  <div class="widget-head">
+    <div>
+      <span class="section-tag">§ 1.5 · Key Concepts 1.5 &amp; 1.9</span>
+      <h2>Prediction explorer — what does the slope mean?</h2>
+    </div>
+    <button type="button" class="reset-btn" data-reset="predict">↺ Reset</button>
+  </div>
+  <p class="lede">The slope coefficient says: "for each additional square foot, the predicted price increases by $73.77." Drag the size slider to see predictions move along the fitted line. Then experiment with the what-if slope slider to feel how coefficient uncertainty translates into prediction uncertainty.</p>
+  <div class="controls">
+    <div class="ctrl" style="min-width:280px">
+      <label for="predict-size">House size (sq ft) <span class="val" id="predict-size-val"></span></label>
+      <input type="range" id="predict-size" min="1000" max="4000" step="50" value="2000">
+    </div>
+    <div class="ctrl">
+      <label>Predicted price</label>
+      <div class="mono" id="predict-price" style="font-size:1.4rem;color:var(--accent);font-weight:600"></div>
+    </div>
+    <div class="ctrl" style="min-width:240px">
+      <label for="predict-slope">What-if slope ($/sq ft) <span class="val" id="predict-slope-val"></span></label>
+      <input type="range" id="predict-slope" min="50" max="100" step="0.5" value="73.77">
+    </div>
+  </div>
+  <div class="chart" id="predict-chart"></div>
+  <div class="callout" id="predict-callout"></div>
+  <div class="try-this">
+    <div class="try-title">Try this</div>
+    <ol>
+      <li>Set size to 2,000 sq ft (the chapter's example). Predicted price should be ~$262,559. Does it match?</li>
+      <li>Increase by 100 sq ft. The price goes up by exactly $slope × 100. That is the marginal effect.</li>
+      <li>Drag size below 1,400 or above 3,300 (the data range). You are now <em>extrapolating</em> — the line may not hold there.</li>
+      <li>Drag the slope slider to $60/sqft, then to $90. For a 2,000 sq ft house, the prediction range is ~$40,000 wide. That is estimation uncertainty in action.</li>
+    </ol>
+  </div>
+</section>
+
+<!-- ===================== 4. R² VISUALIZER ===================== -->
+<section class="widget" id="r2">
+  <div class="widget-head">
+    <div>
+      <span class="section-tag">§ 1.5 · Key Concept 1.5</span>
+      <h2>R² — how much variation does the regression explain?</h2>
+    </div>
+    <button type="button" class="reset-btn" data-reset="r2">↺ Reset</button>
+  </div>
+  <p class="lede">R² decomposes the total variation in price: how much is "explained" by the regression line (variation of predicted values) versus "unexplained" (residual scatter). Toggle the view to see both components on the scatter plot.</p>
+  <div class="controls">
+    <div class="ctrl">
+      <label>Show</label>
+      <div class="toggle-group" id="r2-show">
+        <button type="button" data-val="all" class="active">Scatter + line</button>
+        <button type="button" data-val="explained">Explained</button>
+        <button type="button" data-val="residual">Residual</button>
+      </div>
+    </div>
+  </div>
+  <div class="chart" id="r2-chart"></div>
+  <div class="callout" id="r2-callout"></div>
+  <div class="try-this">
+    <div class="try-title">Try this</div>
+    <ol>
+      <li>Click <em>Explained</em>. The vertical cyan segments show how far each prediction deviates from the mean price. This is the variation the model "explains."</li>
+      <li>Click <em>Residual</em>. The pink segments show how far each actual price deviates from the prediction. This is the variation left over.</li>
+      <li>R² = 0.6175 means 61.75% is explained. Is that good? For 29 houses with one predictor, it is respectable — but 38% is still unexplained.</li>
+    </ol>
+  </div>
+</section>
+
+<!-- ===================== 5. MULTI-PREDICTOR COMPARISON ===================== -->
+<section class="widget" id="compare">
+  <div class="widget-head">
+    <div>
+      <span class="section-tag">§ 1.6 · Key Concept 1.6</span>
+      <h2>Multiple predictors — association is not causation</h2>
+    </div>
+    <button type="button" class="reset-btn" data-reset="compare">↺ Reset</button>
+  </div>
+  <p class="lede">Pick any of the five available predictors and see how the regression changes. Each produces a different slope and R² — but none of them prove that the predictor <em>causes</em> the price. Omitted variables (condition, location, school district) could be driving both.</p>
+  <div class="controls">
+    <div class="ctrl">
+      <label for="compare-var">Predictor (x-axis)</label>
+      <select id="compare-var">
+        <option value="size">Size (sq ft)</option>
+        <option value="bedrooms">Bedrooms</option>
+        <option value="bathrooms">Bathrooms</option>
+        <option value="lotsize">Lot size</option>
+        <option value="age">Age (years)</option>
+      </select>
+    </div>
+  </div>
+  <div class="stats-grid" id="compare-stats"></div>
+  <div class="chart" id="compare-chart"></div>
+  <div class="callout" id="compare-callout"></div>
+  <div class="try-this">
+    <div class="try-title">Try this</div>
+    <ol>
+      <li>Start with <em>Size</em> (R² ≈ 0.62). Switch to <em>Bedrooms</em>. R² drops. Larger houses have more bedrooms — could bedrooms just be a proxy for size?</li>
+      <li>Try <em>Age</em>. Is the slope positive or negative? What does that tell you about newer vs. older homes in this neighbourhood?</li>
+      <li>Five regressions, five different fits. If size "explains" 62% but age explains much less, does that mean size <em>causes</em> higher prices? No — an omitted variable like location could confound both.</li>
+    </ol>
+  </div>
+</section>
+
+</main>
+
+<footer class="page">
+  <p>Part of <a href="https://quarcs-lab.github.io/metricsai/book/_book/index.html"><strong>metricsAI</strong></a> · Chapter 01: Analysis of Economics Data · by Carlos Mendez · <a href="https://github.com/quarcs-lab/metricsai">GitHub</a></p>
+  
+  <a class="scroll-top" href="#top">↑ Back to top</a>
+</footer>
+
+<script type="application/json" id="ch-data">{{DATA_JSON}}</script>
+
+<script>
+"use strict";
+
+const DATA = JSON.parse(document.getElementById("ch-data").textContent);
+
+// ---------- Stats helpers ----------
+const mean = a => a.reduce((s, v) => s + v, 0) / a.length;
+const sortedCopy = a => [...a].sort((x, y) => x - y);
+function quantile(sorted, p) {
+  const idx = p * (sorted.length - 1);
+  const lo = Math.floor(idx), hi = Math.ceil(idx);
+  if (lo === hi) return sorted[lo];
+  return sorted[lo] + (idx - lo) * (sorted[hi] - sorted[lo]);
+}
+function std(a, m) {
+  m = m ?? mean(a);
+  let s = 0;
+  for (const v of a) s += (v - m) * (v - m);
+  return Math.sqrt(s / (a.length - 1));
+}
+function skewness(a) {
+  const m = mean(a), s = std(a, m);
+  if (s === 0) return 0;
+  let sum = 0;
+  for (const v of a) sum += ((v - m) / s) ** 3;
+  return sum / a.length;
+}
+function kurtosisExcess(a) {
+  const m = mean(a), s = std(a, m);
+  if (s === 0) return 0;
+  let sum = 0;
+  for (const v of a) sum += ((v - m) / s) ** 4;
+  return sum / a.length - 3;
+}
+function summary(values) {
+  const arr = values.filter(v => v !== null && !isNaN(v));
+  const sorted = sortedCopy(arr);
+  const m = mean(arr);
+  const sd = std(arr, m);
+  return {
+    n: arr.length,
+    mean: m,
+    median: quantile(sorted, 0.5),
+    std: sd,
+    min: sorted[0],
+    max: sorted[sorted.length - 1],
+    q1: quantile(sorted, 0.25),
+    q3: quantile(sorted, 0.75),
+    skew: skewness(arr),
+    kurt: kurtosisExcess(arr)
+  };
+}
+function linspace(a, b, n) {
+  const out = new Array(n);
+  const step = (b - a) / (n - 1);
+  for (let i = 0; i < n; i++) out[i] = a + i * step;
+  return out;
+}
+function silvermanBW(values) {
+  const s = std(values);
+  return 1.06 * s * Math.pow(values.length, -1/5);
+}
+function gaussianKDE(values, xs, bw) {
+  const n = values.length;
+  const k = 1 / Math.sqrt(2 * Math.PI);
+  return xs.map(x => {
+    let sum = 0;
+    for (let i = 0; i < n; i++) {
+      const z = (x - values[i]) / bw;
+      sum += k * Math.exp(-0.5 * z * z);
+    }
+    return sum / (n * bw);
+  });
+}
+function movingAverage(values, window) {
+  const out = new Array(values.length).fill(null);
+  const half = Math.floor(window / 2);
+  const start = window % 2 === 0 ? half - 1 : half;
+  for (let i = 0; i < values.length; i++) {
+    let sum = 0, count = 0;
+    for (let j = i - start; j <= i - start + window - 1; j++) {
+      if (j >= 0 && j < values.length && values[j] !== null) {
+        sum += values[j];
+        count++;
+      }
+    }
+    if (count === window) out[i] = sum / count;
+  }
+  return out;
+}
+function linfit(xs, ys) {
+  const n = xs.length, mx = mean(xs), my = mean(ys);
+  let num = 0, den = 0;
+  for (let i = 0; i < n; i++) {
+    num += (xs[i] - mx) * (ys[i] - my);
+    den += (xs[i] - mx) ** 2;
+  }
+  const slope = num / den;
+  const intercept = my - slope * mx;
+  return { slope, intercept, fitted: xs.map(x => intercept + slope * x) };
+}
+function correlation(xs, ys) {
+  const n = xs.length, mx = mean(xs), my = mean(ys);
+  let num = 0, dx = 0, dy = 0;
+  for (let i = 0; i < n; i++) {
+    num += (xs[i] - mx) * (ys[i] - my);
+    dx += (xs[i] - mx) ** 2;
+    dy += (ys[i] - my) ** 2;
+  }
+  return num / Math.sqrt(dx * dy);
+}
+
+// ---------- Formatting ----------
+function fmt(v, decimals = 2) {
+  if (v === null || v === undefined || isNaN(v)) return "—";
+  const abs = Math.abs(v);
+  if (abs >= 1e6) return (v / 1e6).toFixed(decimals) + "M";
+  if (abs >= 1e3) return v.toLocaleString(undefined, { maximumFractionDigits: 0 });
+  return v.toFixed(decimals);
+}
+function fmtMoney(v) { return v === null ? "—" : "$" + Math.round(v).toLocaleString(); }
+function fmtInt(v) { return v === null ? "—" : Math.round(v).toLocaleString(); }
+function fmtPct(v, d=1) { return v === null ? "—" : (v*100).toFixed(d) + "%"; }
+
+// ---------- Theme ----------
+const THEME_KEY = "metricsai-theme";
+function getCSS(varName) {
+  return getComputedStyle(document.documentElement).getPropertyValue(varName).trim();
+}
+function themeColors() {
+  return {
+    text: getCSS("--text"),
+    textSoft: getCSS("--text-soft"),
+    grid: getCSS("--grid"),
+    panel: getCSS("--panel"),
+    cyan: getCSS("--accent"),
+    purple: getCSS("--accent-2"),
+    pink: getCSS("--accent-3")
+  };
+}
+function baseLayout(overrides = {}) {
+  const c = themeColors();
+  return Object.assign({
+    paper_bgcolor: "rgba(0,0,0,0)",
+    plot_bgcolor: "rgba(0,0,0,0)",
+    font: { family: "Inter, system-ui, sans-serif", color: c.text, size: 12 },
+    margin: { l: 56, r: 18, t: 30, b: 46 },
+    xaxis: { gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft } },
+    yaxis: { gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft } },
+    hoverlabel: { bgcolor: c.panel, bordercolor: c.grid, font: { color: c.text } },
+    legend: { font: { color: c.text }, bgcolor: "rgba(0,0,0,0)" }
+  }, overrides);
+}
+const PLOTLY_CONFIG = { displayModeBar: false, responsive: true };
+
+// ==================== WIDGET 1: SUMMARY STATS ====================
+(function() {
+  const VARS = {
+    price:    { arr: () => DATA.price,                   label: "Sale price ($)",  fmt: fmtMoney },
+    size:     { arr: () => DATA.predictors.size,         label: "Size (sq ft)",    fmt: fmtInt },
+    bedrooms: { arr: () => DATA.predictors.bedrooms,     label: "Bedrooms",        fmt: v => String(v) }
+  };
+  const select = document.getElementById("stats-var");
+  const gridEl = document.getElementById("stats-grid");
+  const callout = document.getElementById("stats-callout");
+
+  function render() {
+    const v = VARS[select.value];
+    const s = summary(v.arr());
+    const cells = [
+      ["n", fmt(s.n, 0), ""], ["Mean", v.fmt(s.mean), "mean"],
+      ["Median", v.fmt(s.median), "median"], ["Std dev", v.fmt(s.std), "spread"],
+      ["Min", v.fmt(s.min), ""], ["Q1", v.fmt(s.q1), ""],
+      ["Q3", v.fmt(s.q3), ""], ["Max", v.fmt(s.max), ""],
+      ["IQR", v.fmt(s.q3 - s.q1), "spread"], ["Skewness", s.skew.toFixed(2), ""]
+    ];
+    gridEl.innerHTML = cells.map(([l, val, cls]) =>
+      `<div class="stat ${cls}"><div class="label">${l}</div><div class="value">${val}</div></div>`
+    ).join("");
+
+    const c = themeColors();
+    Plotly.react("stats-chart", [{
+      type: "box", x: v.arr(), orientation: "h", name: v.label,
+      boxpoints: "all", jitter: 0.5, pointpos: 0,
+      marker: { color: c.cyan, size: 5, opacity: 0.6 },
+      line: { color: c.purple }, fillcolor: "rgba(122,32,159,0.12)", hoverinfo: "x"
+    }], baseLayout({
+      height: 260,
+      xaxis: Object.assign({}, baseLayout().xaxis, { title: { text: v.label, font: { color: c.textSoft } } }),
+      yaxis: Object.assign({}, baseLayout().yaxis, { showticklabels: false }),
+      shapes: [
+        { type: "line", yref: "paper", y0: 0, y1: 1, x0: s.mean, x1: s.mean, line: { color: c.cyan, width: 2 } },
+        { type: "line", yref: "paper", y0: 0, y1: 1, x0: s.median, x1: s.median, line: { color: c.pink, width: 2, dash: "dot" } }
+      ],
+      annotations: [
+        { yref: "paper", y: 1.0, x: s.mean, text: "mean", showarrow: false, yanchor: "bottom", font: { color: c.cyan, size: 11 } },
+        { yref: "paper", y: 1.08, x: s.median, text: "median", showarrow: false, yanchor: "bottom", font: { color: c.pink, size: 11 } }
+      ]
+    }), PLOTLY_CONFIG);
+
+    const gap = s.mean - s.median;
+    const skLabel = Math.abs(s.skew) < 0.5 ? "approximately symmetric"
+                  : Math.abs(s.skew) < 1 ? "moderately skewed" : "highly skewed";
+    callout.innerHTML = `<strong>Read:</strong> n = ${s.n}, ${skLabel} (skewness ${s.skew.toFixed(2)}). Mean − median = ${v.fmt(Math.abs(gap))}.`;
+  }
+
+  select.addEventListener("change", render);
+  window.__rerender_stats = render;
+  render();
+})();
+
+// ==================== WIDGET 2: SCATTER + REGRESSION =====================
+(function() {
+  const lineGroup = document.getElementById("scatter-line");
+  const residGroup = document.getElementById("scatter-resid");
+  let showLine = "on", showResid = "off";
+
+  function render() {
+    const c = themeColors();
+    const x = DATA.predictors.size;
+    const y = DATA.price;
+    const reg = DATA.regressions.size;
+    const xRange = linspace(Math.min(...x) - 50, Math.max(...x) + 50, 100);
+    const yFit = xRange.map(v => reg.intercept + reg.slope * v);
+
+    const traces = [{
+      type: "scatter", mode: "markers", x, y,
+      marker: { color: c.cyan, size: 9, line: { color: c.panel, width: 1.5 } },
+      name: "Houses", hovertemplate: "%{x:,} sq ft<br>$%{y:,}<extra></extra>"
+    }];
+
+    if (showLine === "on") {
+      traces.push({
+        type: "scatter", mode: "lines", x: xRange, y: yFit,
+        line: { color: c.purple, width: 2.5 }, name: "OLS fit",
+        hovertemplate: "%{x:,.0f} sq ft<br>ŷ = $%{y:,.0f}<extra>OLS</extra>"
+      });
+    }
+
+    const shapes = [];
+    if (showResid === "on" && showLine === "on") {
+      for (let i = 0; i < x.length; i++) {
+        const predicted = reg.intercept + reg.slope * x[i];
+        shapes.push({
+          type: "line", x0: x[i], x1: x[i], y0: predicted, y1: y[i],
+          line: { color: c.pink, width: 1.5, dash: "dot" }
+        });
+      }
+    }
+
+    const layout = baseLayout({
+      height: 380,
+      xaxis: Object.assign({}, baseLayout().xaxis, { title: { text: "Size (sq ft)", font: { color: c.textSoft } } }),
+      yaxis: Object.assign({}, baseLayout().yaxis, { title: { text: "Sale price ($)", font: { color: c.textSoft } } }),
+      shapes,
+      annotations: showLine === "on" ? [{
+        x: 0.98, xref: "paper", y: 0.04, yref: "paper", xanchor: "right", showarrow: false,
+        text: `ŷ = $${reg.intercept.toLocaleString()} + $${reg.slope.toFixed(2)} × size<br>R² = ${reg.r2.toFixed(4)}`,
+        font: { color: c.purple, size: 11, family: "JetBrains Mono" }, align: "right"
+      }] : []
+    });
+    Plotly.react("scatter-chart", traces, layout, PLOTLY_CONFIG);
+
+    const calloutEl = document.getElementById("scatter-callout");
+    calloutEl.innerHTML = showLine === "on"
+      ? `<strong>OLS fit:</strong> Price = $${reg.intercept.toLocaleString()} + $${reg.slope.toFixed(2)} × size. R² = ${(reg.r2 * 100).toFixed(2)}%.`
+      : `<strong>No line yet.</strong> Look at the cloud — is the trend positive, negative, or flat? Where would you draw a line?`;
+  }
+
+  lineGroup.querySelectorAll("button").forEach(b => b.addEventListener("click", () => {
+    lineGroup.querySelectorAll("button").forEach(x => x.classList.remove("active"));
+    b.classList.add("active"); showLine = b.dataset.val; render();
+  }));
+  residGroup.querySelectorAll("button").forEach(b => b.addEventListener("click", () => {
+    residGroup.querySelectorAll("button").forEach(x => x.classList.remove("active"));
+    b.classList.add("active"); showResid = b.dataset.val; render();
+  }));
+  window.__rerender_scatter = render;
+  render();
+})();
+
+// ==================== WIDGET 3: PREDICTION EXPLORER ====================
+(function() {
+  const sizeSlider = document.getElementById("predict-size");
+  const sizeVal = document.getElementById("predict-size-val");
+  const slopeSlider = document.getElementById("predict-slope");
+  const slopeVal = document.getElementById("predict-slope-val");
+  const priceEl = document.getElementById("predict-price");
+  const callout = document.getElementById("predict-callout");
+  const trueSlope = DATA.regressions.size.slope;
+  const trueIntercept = DATA.regressions.size.intercept;
+
+  function render() {
+    const c = themeColors();
+    const sz = parseInt(sizeSlider.value, 10);
+    const sl = parseFloat(slopeSlider.value);
+    sizeVal.textContent = sz.toLocaleString() + " sq ft";
+    slopeVal.textContent = "$" + sl.toFixed(2) + "/sqft";
+    const intercept = mean(DATA.price) - sl * mean(DATA.predictors.size);
+    const predicted = intercept + sl * sz;
+    const truePred = trueIntercept + trueSlope * sz;
+    priceEl.textContent = fmtMoney(predicted);
+
+    const x = DATA.predictors.size;
+    const y = DATA.price;
+    const xRange = linspace(900, 4100, 100);
+    const yFitTrue = xRange.map(v => trueIntercept + trueSlope * v);
+    const yFitWhat = xRange.map(v => intercept + sl * v);
+    const isDefault = Math.abs(sl - trueSlope) < 0.01;
+    const dataMin = Math.min(...x);
+    const dataMax = Math.max(...x);
+    const extrapolating = sz < dataMin || sz > dataMax;
+
+    const traces = [
+      { type: "scatter", mode: "markers", x, y,
+        marker: { color: c.cyan, size: 8, opacity: 0.5, line: { color: c.panel, width: 1 } },
+        name: "Data", hoverinfo: "skip" }
+    ];
+
+    if (!isDefault) {
+      traces.push({
+        type: "scatter", mode: "lines", x: xRange, y: yFitTrue,
+        line: { color: c.purple, width: 1.5, dash: "dot" }, name: "True OLS", hoverinfo: "skip"
+      });
+    }
+    traces.push({
+      type: "scatter", mode: "lines", x: xRange, y: yFitWhat,
+      line: { color: isDefault ? c.purple : c.pink, width: 2.5 },
+      name: isDefault ? "OLS fit" : "What-if fit", hoverinfo: "skip"
+    });
+    traces.push({
+      type: "scatter", mode: "markers", x: [sz], y: [predicted],
+      marker: { color: c.pink, size: 14, symbol: "diamond", line: { color: "white", width: 2 } },
+      name: "Prediction", hovertemplate: `${sz.toLocaleString()} sq ft<br>$${Math.round(predicted).toLocaleString()}<extra></extra>`
+    });
+
+    const shapes = [];
+    if (extrapolating) {
+      shapes.push(
+        { type: "line", x0: dataMin, x1: dataMin, yref: "paper", y0: 0, y1: 1, line: { color: c.grid, width: 1, dash: "dash" } },
+        { type: "line", x0: dataMax, x1: dataMax, yref: "paper", y0: 0, y1: 1, line: { color: c.grid, width: 1, dash: "dash" } }
+      );
+    }
+
+    Plotly.react("predict-chart", traces, baseLayout({
+      height: 380,
+      xaxis: Object.assign({}, baseLayout().xaxis, { title: { text: "Size (sq ft)", font: { color: c.textSoft } } }),
+      yaxis: Object.assign({}, baseLayout().yaxis, { title: { text: "Predicted price ($)", font: { color: c.textSoft } } }),
+      shapes,
+      showlegend: !isDefault
+    }), PLOTLY_CONFIG);
+
+    let msg = `<strong>Predicted price at ${sz.toLocaleString()} sq ft:</strong> ${fmtMoney(predicted)}.`;
+    if (!isDefault) {
+      const diff = predicted - truePred;
+      msg += ` (True OLS would predict ${fmtMoney(truePred)} — a $${Math.abs(Math.round(diff)).toLocaleString()} ${diff > 0 ? "higher" : "lower"} estimate.)`;
+    }
+    if (extrapolating) {
+      msg += ` <em>Warning: ${sz.toLocaleString()} sq ft is outside the data range (${dataMin.toLocaleString()}–${dataMax.toLocaleString()}). You are extrapolating.</em>`;
+    }
+    callout.innerHTML = msg;
+  }
+
+  sizeSlider.addEventListener("input", render);
+  slopeSlider.addEventListener("input", render);
+  window.__rerender_predict = render;
+  render();
+})();
+
+// ==================== WIDGET 4: R² VISUALIZER ====================
+(function() {
+  const showGroup = document.getElementById("r2-show");
+  let mode = "all";
+
+  function render() {
+    const c = themeColors();
+    const x = DATA.predictors.size;
+    const y = DATA.price;
+    const reg = DATA.regressions.size;
+    const ybar = mean(y);
+    const yhat = x.map(v => reg.intercept + reg.slope * v);
+
+    const traces = [{
+      type: "scatter", mode: "markers", x, y,
+      marker: { color: c.cyan, size: 8, opacity: mode === "all" ? 0.7 : 0.35, line: { color: c.panel, width: 1 } },
+      name: "Houses", hovertemplate: "%{x:,} sq ft<br>$%{y:,}<extra></extra>"
+    }];
+
+    const xRange = linspace(Math.min(...x) - 50, Math.max(...x) + 50, 100);
+    traces.push({
+      type: "scatter", mode: "lines", x: xRange, y: xRange.map(v => reg.intercept + reg.slope * v),
+      line: { color: c.purple, width: 2 }, name: "OLS fit", hoverinfo: "skip"
+    });
+
+    const shapes = [];
+    if (mode === "explained") {
+      for (let i = 0; i < x.length; i++) {
+        shapes.push({
+          type: "line", x0: x[i], x1: x[i], y0: ybar, y1: yhat[i],
+          line: { color: c.cyan, width: 2 }
+        });
+      }
+      shapes.push({ type: "line", xref: "paper", x0: 0, x1: 1, y0: ybar, y1: ybar,
+        line: { color: c.grid, width: 1, dash: "dash" } });
+    } else if (mode === "residual") {
+      for (let i = 0; i < x.length; i++) {
+        shapes.push({
+          type: "line", x0: x[i], x1: x[i], y0: yhat[i], y1: y[i],
+          line: { color: c.pink, width: 2 }
+        });
+      }
+    }
+
+    const layout = baseLayout({
+      height: 380,
+      xaxis: Object.assign({}, baseLayout().xaxis, { title: { text: "Size (sq ft)", font: { color: c.textSoft } } }),
+      yaxis: Object.assign({}, baseLayout().yaxis, { title: { text: "Sale price ($)", font: { color: c.textSoft } } }),
+      shapes,
+      annotations: [{
+        x: 0.98, xref: "paper", y: 0.04, yref: "paper", xanchor: "right", showarrow: false,
+        text: `R² = ${reg.r2.toFixed(4)} (${(reg.r2 * 100).toFixed(2)}% explained)`,
+        font: { color: c.purple, size: 12, family: "JetBrains Mono" }
+      }]
+    });
+    Plotly.react("r2-chart", traces, layout, PLOTLY_CONFIG);
+
+    const calloutEl = document.getElementById("r2-callout");
+    if (mode === "explained") {
+      calloutEl.innerHTML = `<strong>Explained variation:</strong> the cyan segments measure how far each prediction (ŷ) is from the mean price ($${Math.round(ybar).toLocaleString()}). Their squared sum = ESS. Larger ESS relative to TSS means higher R².`;
+    } else if (mode === "residual") {
+      calloutEl.innerHTML = `<strong>Residual variation:</strong> the pink segments measure prediction errors (y − ŷ). Their squared sum = RSS. R² = 1 − RSS/TSS = ${reg.r2.toFixed(4)}.`;
+    } else {
+      calloutEl.innerHTML = `<strong>Total decomposition:</strong> TSS = ESS + RSS. Of the total price variation, ${(reg.r2 * 100).toFixed(1)}% is "explained" by size and ${((1 - reg.r2) * 100).toFixed(1)}% remains unexplained.`;
+    }
+  }
+
+  showGroup.querySelectorAll("button").forEach(b => b.addEventListener("click", () => {
+    showGroup.querySelectorAll("button").forEach(x => x.classList.remove("active"));
+    b.classList.add("active"); mode = b.dataset.val; render();
+  }));
+  window.__rerender_r2 = render;
+  render();
+})();
+
+// ==================== WIDGET 5: MULTI-PREDICTOR ====================
+(function() {
+  const select = document.getElementById("compare-var");
+  const statsEl = document.getElementById("compare-stats");
+  const callout = document.getElementById("compare-callout");
+
+  function render() {
+    const c = themeColors();
+    const key = select.value;
+    const xArr = DATA.predictors[key];
+    const y = DATA.price;
+    const reg = DATA.regressions[key];
+    const label = DATA.predictor_labels[key];
+
+    const cells = [
+      ["Slope", `${reg.slope >= 0 ? "+" : ""}${reg.slope.toFixed(2)}`, "mean"],
+      ["Intercept", fmtMoney(reg.intercept), ""],
+      ["R²", (reg.r2 * 100).toFixed(2) + "%", "spread"],
+      ["SE(slope)", reg.se_slope.toFixed(2), ""]
+    ];
+    statsEl.innerHTML = cells.map(([l, v, cls]) =>
+      `<div class="stat ${cls}"><div class="label">${l}</div><div class="value">${v}</div></div>`
+    ).join("");
+
+    const xRange = linspace(Math.min(...xArr) - 0.5, Math.max(...xArr) + 0.5, 100);
+    const yFit = xRange.map(v => reg.intercept + reg.slope * v);
+
+    Plotly.react("compare-chart", [
+      { type: "scatter", mode: "markers", x: xArr, y,
+        marker: { color: c.cyan, size: 9, line: { color: c.panel, width: 1.5 } },
+        name: "Houses", hovertemplate: `${label}: %{x}<br>$%{y:,}<extra></extra>` },
+      { type: "scatter", mode: "lines", x: xRange, y: yFit,
+        line: { color: c.purple, width: 2.5 }, name: "OLS fit", hoverinfo: "skip" }
+    ], baseLayout({
+      height: 380,
+      xaxis: Object.assign({}, baseLayout().xaxis, { title: { text: label, font: { color: c.textSoft } } }),
+      yaxis: Object.assign({}, baseLayout().yaxis, { title: { text: "Sale price ($)", font: { color: c.textSoft } } }),
+      annotations: [{
+        x: 0.98, xref: "paper", y: 0.04, yref: "paper", xanchor: "right", showarrow: false,
+        text: `slope = ${reg.slope >= 0 ? "+" : ""}${reg.slope.toFixed(2)}  ·  R² = ${(reg.r2 * 100).toFixed(1)}%`,
+        font: { color: c.purple, size: 11, family: "JetBrains Mono" }
+      }]
+    }), PLOTLY_CONFIG);
+
+    const sizeR2 = DATA.regressions.size.r2;
+    const r2Pct = (reg.r2 * 100).toFixed(1);
+    const dir = reg.slope > 0 ? "positive" : reg.slope < 0 ? "negative" : "no";
+    callout.innerHTML = `<strong>${DATA.predictor_short[key]}:</strong> ${dir} association with price (slope = ${reg.slope >= 0 ? "+" : ""}${reg.slope.toFixed(2)}, R² = ${r2Pct}%).
+      ${key === "size" ? "" : `Compare to Size (R² = ${(sizeR2 * 100).toFixed(1)}%). `}
+      Remember: <em>association does not prove causation</em>. Omitted variables (condition, location, school district) could confound any of these relationships.`;
+  }
+
+  select.addEventListener("change", render);
+  window.__rerender_compare = render;
+  render();
+})();
+
+// ==================== RESET + URL HASH STATE ====================
+(function() {
+  // Per-widget control registry.
+  const REG = {
+    stats: [
+      { id: "stats-var", kind: "select", def: "price" }
+    ],
+    scatter: [
+      { group: "scatter-line", kind: "toggle", def: "on" },
+      { group: "scatter-resid", kind: "toggle", def: "off" }
+    ],
+    predict: [
+      { id: "predict-size", kind: "range", def: "2000" },
+      { id: "predict-slope", kind: "range", def: "73.77" }
+    ],
+    r2: [
+      { group: "r2-show", kind: "toggle", def: "all" }
+    ],
+    compare: [
+      { id: "compare-var", kind: "select", def: "size" }
+    ]
+  };
+
+  function getVal(c) {
+    if (c.kind === "toggle") {
+      const btn = document.querySelector("#" + c.group + " button.active");
+      return btn ? btn.dataset.val : c.def;
+    }
+    return document.getElementById(c.id).value;
+  }
+
+  function setVal(c, val, fireEvents) {
+    if (c.kind === "toggle") {
+      const group = document.getElementById(c.group);
+      if (!group) return;
+      const btn = group.querySelector('button[data-val="' + val + '"]');
+      if (btn && !btn.classList.contains("active")) btn.click();
+    } else {
+      const el = document.getElementById(c.id);
+      if (!el) return;
+      if (el.value !== String(val)) {
+        el.value = val;
+        if (fireEvents) el.dispatchEvent(new Event(c.kind === "select" ? "change" : "input", { bubbles: true }));
+      }
+    }
+  }
+
+  function resetWidget(widget) {
+    const ctrls = REG[widget] || [];
+    for (const c of ctrls) setVal(c, c.def, true);
+    const fn = window["__rerender_" + widget];
+    if (fn) fn();
+    writeHash();
+  }
+
+  function writeHash() {
+    const parts = [];
+    for (const [widget, ctrls] of Object.entries(REG)) {
+      for (const c of ctrls) {
+        const v = String(getVal(c));
+        if (v !== String(c.def)) {
+          const key = c.id || c.group;
+          parts.push(key + "=" + encodeURIComponent(v));
+        }
+      }
+    }
+    const want = parts.length ? "#" + parts.join("&") : "";
+    if (want === "" && location.hash.match(/=/)) {
+      history.replaceState(null, "", location.pathname + location.search);
+    } else if (want !== "" && location.hash !== want) {
+      history.replaceState(null, "", location.pathname + location.search + want);
+    }
+  }
+
+  function readHash() {
+    const hash = location.hash.slice(1);
+    if (!hash || !hash.includes("=")) return;
+    const params = {};
+    for (const pair of hash.split("&")) {
+      const eq = pair.indexOf("=");
+      if (eq < 0) continue;
+      params[pair.slice(0, eq)] = decodeURIComponent(pair.slice(eq + 1));
+    }
+    for (const ctrls of Object.values(REG)) {
+      for (const c of ctrls) {
+        const key = c.id || c.group;
+        if (key in params) setVal(c, params[key], true);
+      }
+    }
+  }
+
+  document.querySelectorAll(".reset-btn[data-reset]").forEach(btn => {
+    btn.addEventListener("click", () => resetWidget(btn.dataset.reset));
+  });
+  document.addEventListener("input", e => {
+    if (e.target.matches("input[type=range], select")) writeHash();
+  });
+  document.addEventListener("change", e => {
+    if (e.target.matches("select")) writeHash();
+  });
+  document.querySelectorAll(".toggle-group button").forEach(b => {
+    b.addEventListener("click", () => setTimeout(writeHash, 0));
+  });
+  readHash();
+})();
+
+// ==================== THEME TOGGLE ====================
+(function() {
+  const btn = document.getElementById("theme-toggle");
+  const iconEl = document.getElementById("theme-icon");
+  const labelEl = document.getElementById("theme-label");
+
+  function apply(theme) {
+    document.documentElement.dataset.theme = theme;
+    iconEl.textContent = theme === "dark" ? "☀️" : "🌙";
+    labelEl.textContent = theme === "dark" ? "Light" : "Dark";
+    // Re-render all widgets so Plotly picks up new CSS colors
+    for (const key in window) {
+      if (key.startsWith("__rerender_") && typeof window[key] === "function") window[key]();
+    }
+  }
+
+  const saved = localStorage.getItem(THEME_KEY);
+  const prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+  apply(saved || (prefersDark ? "dark" : "light"));
+
+  btn.addEventListener("click", () => {
+    const next = document.documentElement.dataset.theme === "dark" ? "light" : "dark";
+    localStorage.setItem(THEME_KEY, next);
+    apply(next);
+  });
+})();
+
+// ==================== Resize handling ====================
+window.addEventListener("resize", () => {
+  document.querySelectorAll(".chart").forEach(el => {
+    if (el.data) Plotly.Plots.resize(el);
+  });
+});
+</script>
+
+</body>
+</html>

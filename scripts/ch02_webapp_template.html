@@ -1,0 +1,1718 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chapter 2 — Univariate Data Summary · metricsAI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.plot.ly/plotly-2.35.2.min.js" charset="utf-8"></script>
+<style>
+:root {
+  --cyan: #008CB7;
+  --cyan-soft: #22d3ee;
+  --purple: #7A209F;
+  --purple-soft: #c084fc;
+  --pink: #C21E72;
+  --pink-soft: #f472b6;
+
+  --bg: #f5f8fb;
+  --panel: #ffffff;
+  --panel-2: #f0f4f9;
+  --text: #0b1021;
+  --text-soft: #475569;
+  --text-muted: #64748b;
+  --border: #d9e2ec;
+  --accent: var(--cyan);
+  --accent-2: var(--purple);
+  --accent-3: var(--pink);
+  --shadow: 0 2px 10px rgba(11, 16, 33, 0.06), 0 12px 30px rgba(11, 16, 33, 0.05);
+  --grid: #e3e8ef;
+  --code-bg: #eef3f8;
+}
+html[data-theme="dark"] {
+  --bg: #0c1024;
+  --panel: #151a33;
+  --panel-2: #1b2142;
+  --text: #e2e8f0;
+  --text-soft: #b5c0d0;
+  --text-muted: #8a98ae;
+  --border: #2a3156;
+  --accent: var(--cyan-soft);
+  --accent-2: var(--purple-soft);
+  --accent-3: var(--pink-soft);
+  --shadow: 0 2px 10px rgba(0, 0, 0, 0.25), 0 12px 30px rgba(0, 0, 0, 0.35);
+  --grid: #2a3156;
+  --code-bg: #0f1530;
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.55;
+  transition: background-color .25s ease, color .25s ease;
+}
+code, .mono { font-family: 'JetBrains Mono', ui-monospace, monospace; }
+
+header.page {
+  position: relative;
+  padding: 2.4rem 1.5rem 2rem;
+  background:
+    radial-gradient(1200px 400px at 85% -10%, rgba(122, 32, 159, 0.15), transparent),
+    radial-gradient(1000px 400px at 10% 0%, rgba(0, 140, 183, 0.18), transparent),
+    var(--panel);
+  border-bottom: 1px solid var(--border);
+}
+.page-inner { max-width: 1120px; margin: 0 auto; }
+.chapter-badge {
+  display: inline-block;
+  font-size: 0.72rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--accent);
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+h1.title {
+  font-size: clamp(1.6rem, 3.4vw, 2.4rem);
+  margin: 0 0 0.35rem;
+  background: linear-gradient(90deg, var(--accent), var(--accent-2));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+p.subtitle {
+  margin: 0 0 0.8rem;
+  color: var(--text-soft);
+  font-size: 1.05rem;
+  max-width: 720px;
+}
+.theme-toggle {
+  position: absolute;
+  top: 1.4rem;
+  right: 1.5rem;
+  background: var(--panel-2);
+  color: var(--text);
+  border: 1px solid var(--border);
+  padding: 0.4rem 0.8rem;
+  border-radius: 999px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  transition: all .2s ease;
+}
+.theme-toggle:hover { border-color: var(--accent); color: var(--accent); }
+
+nav.anchors {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background: color-mix(in srgb, var(--panel) 92%, transparent);
+  backdrop-filter: saturate(150%) blur(8px);
+  -webkit-backdrop-filter: saturate(150%) blur(8px);
+  border-bottom: 1px solid var(--border);
+}
+nav.anchors ul {
+  display: flex;
+  gap: 0.25rem;
+  overflow-x: auto;
+  list-style: none;
+  padding: 0.55rem 1.5rem;
+  margin: 0 auto;
+  max-width: 1120px;
+  scrollbar-width: thin;
+}
+nav.anchors a {
+  display: block;
+  padding: 0.35rem 0.75rem;
+  border-radius: 8px;
+  color: var(--text-soft);
+  text-decoration: none;
+  font-size: 0.85rem;
+  font-weight: 500;
+  white-space: nowrap;
+  transition: all .15s ease;
+}
+nav.anchors a:hover { color: var(--accent); background: var(--panel-2); }
+
+main { max-width: 1120px; margin: 1.2rem auto 3rem; padding: 0 1.5rem; }
+
+section.widget {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 1.5rem 1.4rem 1.3rem;
+  margin-bottom: 1.5rem;
+  box-shadow: var(--shadow);
+}
+.section-tag {
+  display: inline-block;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.72rem;
+  color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+  padding: 0.2rem 0.55rem;
+  border-radius: 6px;
+  margin-bottom: 0.6rem;
+  font-weight: 500;
+}
+.widget h2 {
+  margin: 0 0 0.2rem;
+  font-size: 1.35rem;
+  font-weight: 600;
+  color: var(--accent-2);
+  letter-spacing: -0.005em;
+}
+.widget .lede {
+  margin: 0 0 1rem;
+  color: var(--text-soft);
+  font-size: 0.97rem;
+  max-width: 780px;
+}
+
+.controls {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 0.9rem 1.2rem;
+  padding: 0.9rem 1rem;
+  background: var(--panel-2);
+  border-radius: 10px;
+  margin-bottom: 1rem;
+}
+.ctrl { display: flex; flex-direction: column; gap: 0.3rem; }
+.ctrl label {
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: var(--text-soft);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.ctrl select, .ctrl input[type="range"], .ctrl input[type="number"] {
+  font-family: inherit;
+  font-size: 0.9rem;
+  padding: 0.4rem 0.55rem;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--panel);
+  color: var(--text);
+}
+.ctrl input[type="range"] { padding: 0.2rem 0; accent-color: var(--accent); }
+.ctrl .val {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.82rem;
+  color: var(--accent);
+  font-weight: 500;
+}
+.toggle-group { display: inline-flex; gap: 0.25rem; background: var(--panel); padding: 3px; border-radius: 10px; border: 1px solid var(--border); }
+.toggle-group button {
+  background: transparent;
+  border: none;
+  color: var(--text-soft);
+  padding: 0.32rem 0.75rem;
+  border-radius: 7px;
+  font-family: inherit;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all .15s ease;
+}
+.toggle-group button.active { background: var(--accent); color: white; font-weight: 500; }
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+  gap: 0.6rem;
+  margin: 0.5rem 0 1rem;
+}
+.stat {
+  background: var(--panel-2);
+  padding: 0.65rem 0.75rem;
+  border-radius: 10px;
+  border-left: 3px solid var(--accent);
+}
+.stat .label { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-muted); }
+.stat .value { font-family: 'JetBrains Mono', monospace; font-size: 1.05rem; font-weight: 500; color: var(--text); margin-top: 0.15rem; }
+.stat.mean   { border-left-color: var(--accent); }
+.stat.median { border-left-color: var(--accent-3); }
+.stat.spread { border-left-color: var(--accent-2); }
+
+.callout {
+  background: color-mix(in srgb, var(--accent-2) 8%, transparent);
+  border-left: 3px solid var(--accent-2);
+  padding: 0.7rem 0.9rem;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  color: var(--text-soft);
+  margin: 0.9rem 0 0.2rem;
+}
+.callout strong { color: var(--accent-2); }
+
+.try-this {
+  background: color-mix(in srgb, var(--accent) 8%, transparent);
+  border-left: 3px solid var(--accent);
+  padding: 0.7rem 0.9rem 0.7rem 0.9rem;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  color: var(--text-soft);
+  margin: 0.7rem 0 0.2rem;
+}
+.try-this .try-title {
+  font-weight: 600; color: var(--accent); font-size: 0.78rem;
+  letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 0.3rem;
+}
+.try-this ol { margin: 0; padding-left: 1.25rem; }
+.try-this li { margin: 0.2rem 0; }
+
+.widget-head {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  gap: 0.5rem; margin-bottom: 0.2rem;
+}
+.widget-head > div { flex: 1; min-width: 0; }
+.reset-btn {
+  background: transparent;
+  color: var(--text-muted);
+  border: 1px solid var(--border);
+  padding: 0.3rem 0.7rem;
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 0.8rem;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all .15s ease;
+}
+.reset-btn:hover { color: var(--accent); border-color: var(--accent); }
+
+.delta-row {
+  display: flex; flex-wrap: wrap; gap: 0.6rem 1.2rem;
+  margin: 0.2rem 0 0.9rem; padding: 0.55rem 0.85rem;
+  background: var(--panel-2); border-radius: 10px;
+  font-family: 'JetBrains Mono', monospace; font-size: 0.88rem;
+  color: var(--text-soft); border-left: 3px solid var(--accent-3);
+}
+.delta-row .label { color: var(--text-muted); margin-right: 0.35rem; }
+.delta-row .delta-mean { color: var(--accent); font-weight: 500; }
+.delta-row .delta-median { color: var(--accent-3); font-weight: 500; }
+.delta-row.hidden { display: none; }
+
+h3.subhead {
+  margin: 1.6rem 0 0.4rem;
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--accent-2);
+  letter-spacing: -0.005em;
+}
+.subhead-tag {
+  display: inline-block;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.68rem;
+  color: var(--accent);
+  margin-right: 0.4rem;
+  font-weight: 500;
+  letter-spacing: 0.05em;
+}
+
+.outlier-list {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.85rem;
+  background: var(--code-bg);
+  padding: 0.6rem 0.85rem;
+  border-radius: 8px;
+  color: var(--text-soft);
+  max-height: 90px;
+  overflow-y: auto;
+}
+
+.chart { width: 100%; min-height: 340px; }
+.chart.tall { min-height: 420px; }
+.chart.short { min-height: 280px; }
+
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+@media (max-width: 720px) { .two-col { grid-template-columns: 1fr; } }
+
+footer.page {
+  max-width: 1120px;
+  margin: 1rem auto 3rem;
+  padding: 0 1.5rem;
+  color: var(--text-muted);
+  font-size: 0.88rem;
+  text-align: center;
+}
+footer.page a { color: var(--accent); text-decoration: none; }
+footer.page a:hover { text-decoration: underline; }
+
+.scroll-top {
+  display: inline-block;
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  text-decoration: none;
+  margin-top: 0.4rem;
+}
+.scroll-top:hover { color: var(--accent); }
+</style>
+</head>
+<body>
+
+<header class="page">
+  <div class="page-inner">
+    <span class="chapter-badge">Chapter 2 of 18 · Interactive Dashboard</span>
+    <h1 class="title">Univariate Data Summary</h1>
+    <p class="subtitle">Slide, toggle, and compare to build intuition for summary statistics, histograms, box plots, transformations, and time-series smoothing — using the same datasets and examples as the chapter.</p>
+  </div>
+  <button id="theme-toggle" class="theme-toggle" type="button" aria-label="Toggle color theme"><span id="theme-icon">🌙</span><span id="theme-label">Dark</span></button>
+</header>
+
+<nav class="anchors" aria-label="Sections">
+  <ul>
+    <li><a href="#stats">Summary statistics</a></li>
+    <li><a href="#hist">Histogram &amp; KDE</a></li>
+    <li><a href="#box">Box plot &amp; outliers</a></li>
+    <li><a href="#ts">Time series</a></li>
+    <li><a href="#cat">Categorical</a></li>
+    <li><a href="#log">Log transform</a></li>
+    <li><a href="#z">Z-score</a></li>
+    <li><a href="#ma">Moving average</a></li>
+  </ul>
+</nav>
+
+<main>
+
+<!-- ===================== 1. SUMMARY STATS ===================== -->
+<section class="widget" id="stats">
+  <div class="widget-head">
+    <div>
+      <span class="section-tag">§ 2.1 · Key Concept 2.1</span>
+      <h2>Summary statistics &amp; the mean–median gap</h2>
+    </div>
+    <button type="button" class="reset-btn" data-reset="stats">↺ Reset</button>
+  </div>
+  <p class="lede">For symmetric data, the mean and median nearly coincide. For skewed data, the mean gets pulled toward the long tail. Pick a dataset and watch both move. Then drag the <em>outlier</em> slider on the earnings series to see how the mean chases a single extreme observation while the median barely notices.</p>
+  <div class="controls">
+    <div class="ctrl">
+      <label for="stats-dataset">Dataset</label>
+      <select id="stats-dataset">
+        <option value="earnings">Earnings — women age 30 (n=171)</option>
+        <option value="gdp">U.S. real GDP per capita (quarterly)</option>
+        <option value="home_sales">U.S. monthly home sales</option>
+      </select>
+    </div>
+    <div class="ctrl" id="stats-outlier-wrap">
+      <label for="stats-outlier">Add synthetic high earner <span class="val" id="stats-outlier-val">off</span></label>
+      <input type="range" id="stats-outlier" min="0" max="500" step="10" value="0">
+    </div>
+  </div>
+  <div class="stats-grid" id="stats-grid"></div>
+  <div class="delta-row hidden" id="stats-delta"></div>
+  <div class="chart short" id="stats-chart"></div>
+  <div class="callout" id="stats-callout"></div>
+  <div class="try-this">
+    <div class="try-title">Try this</div>
+    <ol>
+      <li>On the earnings dataset, drag the outlier slider to $500k. Which moved further from its baseline — the mean or the median?</li>
+      <li>Switch to real GDP per capita. The mean–median gap is tiny. What does that tell you about how GDP is distributed over time?</li>
+      <li>Switch to monthly home sales. The mean is again above the median. Why might housing markets have a right tail?</li>
+    </ol>
+  </div>
+</section>
+
+<!-- ===================== 2. HISTOGRAM + KDE ===================== -->
+<section class="widget" id="hist">
+  <div class="widget-head">
+    <div>
+      <span class="section-tag">§ 2.2 · Key Concept 2.2</span>
+      <h2>Histograms &amp; kernel density — bin width matters</h2>
+    </div>
+    <button type="button" class="reset-btn" data-reset="hist">↺ Reset</button>
+  </div>
+  <p class="lede">Histograms summarize shape, but bin width changes the story. Narrow bins expose noise and clustering; wide bins paper over it. A kernel density estimate smooths across every choice of bin edge at once. Compare them side by side.</p>
+  <div class="controls">
+    <div class="ctrl">
+      <label for="hist-dataset">Dataset</label>
+      <select id="hist-dataset">
+        <option value="earnings">Earnings ($)</option>
+        <option value="gdp">Real GDP per capita ($)</option>
+        <option value="home_sales">Monthly home sales (units)</option>
+      </select>
+    </div>
+    <div class="ctrl">
+      <label for="hist-binwidth">Bin width <span class="val" id="hist-binwidth-val"></span></label>
+      <input type="range" id="hist-binwidth" min="0" max="100" step="1" value="30">
+    </div>
+    <div class="ctrl">
+      <label>Overlay</label>
+      <div class="toggle-group" id="hist-overlay">
+        <button type="button" data-val="none" class="active">None</button>
+        <button type="button" data-val="kde">KDE</button>
+      </div>
+    </div>
+    <div class="ctrl">
+      <label>Markers</label>
+      <div class="toggle-group" id="hist-markers">
+        <button type="button" data-val="on" class="active">Mean &amp; median</button>
+        <button type="button" data-val="off">Off</button>
+      </div>
+    </div>
+  </div>
+  <div class="chart" id="hist-chart"></div>
+  <div class="callout" id="hist-callout"></div>
+  <div class="try-this">
+    <div class="try-title">Try this</div>
+    <ol>
+      <li>Slide the bin width to its minimum. What fine-scale structure appears that was hidden at a wider setting?</li>
+      <li>Slide to the maximum. What does oversmoothing cost you — where do peaks and gaps disappear?</li>
+      <li>Turn on the KDE overlay. Because it doesn't depend on a bin choice, it's a good sanity check: are the histogram's peaks real or an artifact of where bin edges fell?</li>
+    </ol>
+  </div>
+</section>
+
+<!-- ===================== 3. BOX PLOT & OUTLIERS ===================== -->
+<section class="widget" id="box">
+  <div class="widget-head">
+    <div>
+      <span class="section-tag">§ 2.2</span>
+      <h2>Box plot &amp; the IQR-rule for outliers</h2>
+    </div>
+    <button type="button" class="reset-btn" data-reset="box">↺ Reset</button>
+  </div>
+  <p class="lede">The convention is to flag any point farther than 1.5 × IQR from the nearest quartile as an outlier — but 1.5 is a choice, not a law. Drag the multiplier and see how the set of "outliers" shrinks or grows.</p>
+  <div class="controls">
+    <div class="ctrl">
+      <label for="box-dataset">Dataset</label>
+      <select id="box-dataset">
+        <option value="earnings">Earnings ($)</option>
+        <option value="gdp">Real GDP per capita ($)</option>
+        <option value="home_sales">Monthly home sales (units)</option>
+      </select>
+    </div>
+    <div class="ctrl">
+      <label for="box-mult">IQR multiplier <span class="val" id="box-mult-val">1.5</span></label>
+      <input type="range" id="box-mult" min="1" max="3" step="0.1" value="1.5">
+    </div>
+  </div>
+  <div class="chart short" id="box-chart"></div>
+  <div class="callout" id="box-callout"></div>
+  <div style="margin-top:.5rem"><div class="outlier-list" id="box-list"></div></div>
+  <div class="try-this">
+    <div class="try-title">Try this</div>
+    <ol>
+      <li>Hold the earnings dataset. At multiplier 1.5 the flagged points are the familiar "outliers." At 3.0, most disappear. Are those observations less unusual, or did you just redefine the rule?</li>
+      <li>Switch to real GDP per capita. Very few points are flagged. What is it about a smooth time series that produces so few outliers under this rule?</li>
+      <li>An observation flagged at 1.5×IQR but not at 3×IQR is a judgement call, not a clean fact. How would you report it?</li>
+    </ol>
+  </div>
+</section>
+
+<!-- ===================== 4. TIME SERIES ===================== -->
+<section class="widget" id="ts">
+  <div class="widget-head">
+    <div>
+      <span class="section-tag">§ 2.2 · Key Concept 2.3</span>
+      <h2>Time-series line chart — trend, cycles, and recessions</h2>
+    </div>
+    <button type="button" class="reset-btn" data-reset="ts">↺ Reset</button>
+  </div>
+  <p class="lede">Time-ordered data is different: neighbouring values are related. U.S. real GDP per capita roughly tripled between 1959 and 2020, but not smoothly — oil shocks, the dot-com bust, the Great Recession, and COVID all leave visible scars. Toggle the shading to overlay official NBER recession periods.</p>
+  <div class="controls">
+    <div class="ctrl">
+      <label>View</label>
+      <div class="toggle-group" id="ts-view">
+        <button type="button" data-val="level" class="active">Level</button>
+        <button type="button" data-val="log">Log</button>
+        <button type="button" data-val="growth">Growth</button>
+      </div>
+    </div>
+    <div class="ctrl">
+      <label>Recession shading</label>
+      <div class="toggle-group" id="ts-shading">
+        <button type="button" data-val="on" class="active">On</button>
+        <button type="button" data-val="off">Off</button>
+      </div>
+    </div>
+  </div>
+  <div class="chart tall" id="ts-chart"></div>
+  <div class="callout"><strong>Level</strong> tells the growth story · <strong>Log</strong> shows whether growth is steady (straight line) or shifting · <strong>Growth</strong> tells the volatility story. They're three complementary views of the same quarterly data.</div>
+  <div class="try-this">
+    <div class="try-title">Try this</div>
+    <ol>
+      <li>Switch between <em>Level</em> and <em>Log</em>. Over this 1959–2020 sample, both look close to a straight line — growth was already roughly steady. The dramatic hockey stick happened before 1959 (see the log widget below for the 200-year view).</li>
+      <li>Switch to <em>Growth</em>. The same series now speaks of volatility: the 2008 Great Recession and the 2020-Q2 COVID crash are the deepest downward spikes in the sample.</li>
+      <li>Turn <em>Recession shading</em> on in any view. NBER-dated recessions line up with the dips. Try the log view with shading on — the log line briefly flattens during every shaded period.</li>
+    </ol>
+  </div>
+</section>
+
+<!-- ===================== 5. CATEGORICAL ===================== -->
+<section class="widget" id="cat">
+  <div class="widget-head">
+    <div>
+      <span class="section-tag">§ 2.3 – § 2.4 · Key Concepts 2.4 &amp; 2.5</span>
+      <h2>Charts for categorical data — bar vs. pie, sorted vs. alphabetical</h2>
+    </div>
+    <button type="button" class="reset-btn" data-reset="cat">↺ Reset</button>
+  </div>
+  <p class="lede">Categorical data has no intrinsic ordering, so <em>you</em> impose one. A bar chart sorted by value makes comparisons effortless; a pie chart forces the eye to compare angles, which it does poorly for anything past three slices. Try both.</p>
+  <div class="controls">
+    <div class="ctrl">
+      <label for="cat-dataset">Dataset</label>
+      <select id="cat-dataset">
+        <option value="health">U.S. health expenditures, 2018 (13 categories, $B)</option>
+        <option value="fishing">Fishing site choice (n=1,182)</option>
+      </select>
+    </div>
+    <div class="ctrl">
+      <label>Chart type</label>
+      <div class="toggle-group" id="cat-type">
+        <button type="button" data-val="bar" class="active">Bar</button>
+        <button type="button" data-val="pie">Pie</button>
+      </div>
+    </div>
+    <div class="ctrl">
+      <label>Sort</label>
+      <div class="toggle-group" id="cat-sort">
+        <button type="button" data-val="value" class="active">By value</button>
+        <button type="button" data-val="alpha">Alphabetical</button>
+      </div>
+    </div>
+  </div>
+  <div class="chart" id="cat-chart"></div>
+  <div class="callout" id="cat-callout"></div>
+  <div class="try-this">
+    <div class="try-title">Try this</div>
+    <ol>
+      <li>On health expenditures (13 categories), compare bar vs. pie. Which lets you see quickly that Hospital is about 60% larger than Physician?</li>
+      <li>Switch sort to alphabetical. The data is identical but ranking is now harder. Sort order is a design choice, not a math fact.</li>
+      <li>Try the fishing dataset (4 categories). With few slices a pie is still legible — the number of categories matters.</li>
+    </ol>
+  </div>
+</section>
+
+<!-- ===================== 6. LOG TRANSFORM ===================== -->
+<section class="widget" id="log">
+  <div class="widget-head">
+    <div>
+      <span class="section-tag">§ 2.5 · Key Concept 2.6</span>
+      <h2>Log transformation — taming skew and linearizing exponential growth</h2>
+    </div>
+  </div>
+  <p class="lede">The natural log does two things economists love. On a cross-section it compresses the big values and stretches the small ones, turning a right-skewed distribution into something close to symmetric. On a time series it turns exponential growth into a straight line, so the slope reads directly as the growth rate.</p>
+
+  <h3 class="subhead"><span class="subhead-tag">A ·</span>Cross-section: earnings before and after ln()</h3>
+  <div class="two-col">
+    <div><div class="chart short" id="log-raw"></div></div>
+    <div><div class="chart short" id="log-log"></div></div>
+  </div>
+  <div class="callout" id="log-callout"></div>
+
+  <h3 class="subhead"><span class="subhead-tag">B ·</span>Time series: U.S. real GDP per capita (the hockey stick)</h3>
+  <div class="two-col">
+    <div><div class="chart short" id="log-ts-raw"></div></div>
+    <div><div class="chart short" id="log-ts-log"></div></div>
+  </div>
+  <div class="callout" id="log-ts-callout"></div>
+
+  <div class="try-this">
+    <div class="try-title">Try this</div>
+    <ol>
+      <li><strong>Cross-section:</strong> compare the skewness numbers on the two earnings histograms. 1.70 → roughly zero is the textbook before/after.</li>
+      <li><strong>Time series, linear:</strong> find where the series visibly lifts off the flat baseline. It's around the 1870s — the Industrial Revolution. Before that, U.S. GDP per capita barely moved for 50 years.</li>
+      <li><strong>Time series, log:</strong> the same data is now nearly a straight line. The slope of that line is the average annual growth rate (~1.5–1.8%). A straight log line means constant percentage growth — the hockey stick on the raw chart is what constant compounding looks like.</li>
+      <li>Look for the kink where the log slope visibly steepens — that's the onset of modern growth. The linear chart hides this signal; the log chart makes it obvious.</li>
+    </ol>
+  </div>
+</section>
+
+<!-- ===================== 7. Z-SCORE ===================== -->
+<section class="widget" id="z">
+  <div class="widget-head">
+    <div>
+      <span class="section-tag">§ 2.5 · Key Concept 2.6</span>
+      <h2>Z-scores — how unusual is this observation?</h2>
+    </div>
+    <button type="button" class="reset-btn" data-reset="z">↺ Reset</button>
+  </div>
+  <p class="lede">Standardization expresses every observation as a distance from the mean, measured in standard deviations: <code>z = (x − mean) / sd</code>. Roughly 68% of a bell-shaped distribution falls within ±1, 95% within ±2, and 99.7% within ±3. Drag the slider to pick an earnings value and read off its z-score.</p>
+  <div class="controls">
+    <div class="ctrl" style="min-width:260px">
+      <label for="z-val">Earnings value <span class="val" id="z-val-display"></span></label>
+      <input type="range" id="z-val" min="0" max="1" step="0.001" value="0.21">
+    </div>
+    <div class="ctrl">
+      <label>Z-score</label>
+      <div class="mono" id="z-score-display" style="font-size:1.4rem;color:var(--accent);font-weight:500"></div>
+    </div>
+    <div class="ctrl">
+      <label>Interpretation</label>
+      <div id="z-interp" style="font-size:.92rem;color:var(--text-soft)"></div>
+    </div>
+  </div>
+  <div class="chart short" id="z-chart"></div>
+  <div class="try-this">
+    <div class="try-title">Try this</div>
+    <ol>
+      <li>Drag to $36,000 (the median). The z-score should be close to zero.</li>
+      <li>Drag to $100,000. Interpretation: this observation is rare on the high side — roughly how many SD above the mean?</li>
+      <li>Drag to the maximum ($172,000). Does it exceed the 2σ rule of thumb? Would you call this an outlier, and why or why not?</li>
+    </ol>
+  </div>
+</section>
+
+<!-- ===================== 8. MOVING AVERAGE ===================== -->
+<section class="widget" id="ma">
+  <div class="widget-head">
+    <div>
+      <span class="section-tag">§ 2.6 · Key Concept 2.7</span>
+      <h2>Moving averages &amp; seasonal adjustment — finding the trend</h2>
+    </div>
+    <button type="button" class="reset-btn" data-reset="ma">↺ Reset</button>
+  </div>
+  <p class="lede">Monthly home sales look like noise: seasonal peaks every summer, troughs every winter. A centred moving average smooths the seasonal cycle and reveals the underlying trend — including the 2007–2011 housing bust. Try widening the window to see the trade-off between smoothing and responsiveness.</p>
+  <div class="controls">
+    <div class="ctrl">
+      <label for="ma-window">Moving-average window (months) <span class="val" id="ma-window-val">11</span></label>
+      <input type="range" id="ma-window" min="1" max="24" step="1" value="11">
+    </div>
+    <div class="ctrl">
+      <label>Seasonally-adjusted series</label>
+      <div class="toggle-group" id="ma-sa">
+        <button type="button" data-val="off" class="active">Off</button>
+        <button type="button" data-val="on">On</button>
+      </div>
+    </div>
+    <div class="ctrl">
+      <label>Recession shading</label>
+      <div class="toggle-group" id="ma-recession">
+        <button type="button" data-val="on" class="active">On</button>
+        <button type="button" data-val="off">Off</button>
+      </div>
+    </div>
+  </div>
+  <div class="chart tall" id="ma-chart"></div>
+  <div class="callout" id="ma-callout"></div>
+  <div class="try-this">
+    <div class="try-title">Try this</div>
+    <ol>
+      <li>Set the window to 1. That's the raw monthly series — seasonal noise dominates the picture.</li>
+      <li>Set the window to 11. One full seasonal cycle cancels out. The 2007–2011 bust now leaps out.</li>
+      <li>Set the window to 24. Oversmoothed: the start of the housing crash is blurred. More smoothing isn't always better — there's an optimal window given the frequency you want to remove.</li>
+    </ol>
+  </div>
+</section>
+
+</main>
+
+<footer class="page">
+  <p>Part of <a href="https://quarcs-lab.github.io/metricsai/book/_book/index.html"><strong>metricsAI</strong></a> · Chapter 2: Univariate Data Summary · by Carlos Mendez · <a href="https://github.com/quarcs-lab/metricsai">GitHub</a></p>
+  <p style="font-size:0.8rem;margin-top:0.4rem">Long-run GDP data: Bolt, J. &amp; van Zanden, J. L. (2024), "Maddison style estimates of the evolution of the world economy: A new 2023 update," <em>Journal of Economic Surveys</em>. <a href="https://www.rug.nl/ggdc/historicaldevelopment/maddison/releases/maddison-project-database-2023">Maddison Project Database 2023</a>.</p>
+  <a class="scroll-top" href="#stats">↑ Back to top</a>
+</footer>
+
+<script type="application/json" id="ch02-data">{{DATA_JSON}}</script>
+
+<script>
+"use strict";
+
+const DATA = JSON.parse(document.getElementById("ch02-data").textContent);
+
+// ---------- Stats helpers ----------
+const mean = a => a.reduce((s, v) => s + v, 0) / a.length;
+const sortedCopy = a => [...a].sort((x, y) => x - y);
+function quantile(sorted, p) {
+  const idx = p * (sorted.length - 1);
+  const lo = Math.floor(idx), hi = Math.ceil(idx);
+  if (lo === hi) return sorted[lo];
+  return sorted[lo] + (idx - lo) * (sorted[hi] - sorted[lo]);
+}
+function std(a, m) {
+  m = m ?? mean(a);
+  let s = 0;
+  for (const v of a) s += (v - m) * (v - m);
+  return Math.sqrt(s / (a.length - 1));
+}
+function skewness(a) {
+  const m = mean(a), s = std(a, m);
+  if (s === 0) return 0;
+  let sum = 0;
+  for (const v of a) sum += ((v - m) / s) ** 3;
+  return sum / a.length;
+}
+function kurtosisExcess(a) {
+  const m = mean(a), s = std(a, m);
+  if (s === 0) return 0;
+  let sum = 0;
+  for (const v of a) sum += ((v - m) / s) ** 4;
+  return sum / a.length - 3;
+}
+function summary(values) {
+  const arr = values.filter(v => v !== null && !isNaN(v));
+  const sorted = sortedCopy(arr);
+  const m = mean(arr);
+  const sd = std(arr, m);
+  return {
+    n: arr.length,
+    mean: m,
+    median: quantile(sorted, 0.5),
+    std: sd,
+    min: sorted[0],
+    max: sorted[sorted.length - 1],
+    q1: quantile(sorted, 0.25),
+    q3: quantile(sorted, 0.75),
+    skew: skewness(arr),
+    kurt: kurtosisExcess(arr)
+  };
+}
+function linspace(a, b, n) {
+  const out = new Array(n);
+  const step = (b - a) / (n - 1);
+  for (let i = 0; i < n; i++) out[i] = a + i * step;
+  return out;
+}
+function silvermanBW(values) {
+  const s = std(values);
+  return 1.06 * s * Math.pow(values.length, -1/5);
+}
+function gaussianKDE(values, xs, bw) {
+  const n = values.length;
+  const k = 1 / Math.sqrt(2 * Math.PI);
+  return xs.map(x => {
+    let sum = 0;
+    for (let i = 0; i < n; i++) {
+      const z = (x - values[i]) / bw;
+      sum += k * Math.exp(-0.5 * z * z);
+    }
+    return sum / (n * bw);
+  });
+}
+function movingAverage(values, window) {
+  const out = new Array(values.length).fill(null);
+  const half = Math.floor(window / 2);
+  const start = window % 2 === 0 ? half - 1 : half;
+  for (let i = 0; i < values.length; i++) {
+    let sum = 0, count = 0;
+    for (let j = i - start; j <= i - start + window - 1; j++) {
+      if (j >= 0 && j < values.length && values[j] !== null) {
+        sum += values[j];
+        count++;
+      }
+    }
+    if (count === window) out[i] = sum / count;
+  }
+  return out;
+}
+
+// ---------- Formatting ----------
+function fmt(v, decimals = 2) {
+  if (v === null || v === undefined || isNaN(v)) return "—";
+  const abs = Math.abs(v);
+  if (abs >= 1e6) return (v / 1e6).toFixed(decimals) + "M";
+  if (abs >= 1e3) return v.toLocaleString(undefined, { maximumFractionDigits: 0 });
+  return v.toFixed(decimals);
+}
+function fmtMoney(v) { return v === null ? "—" : "$" + Math.round(v).toLocaleString(); }
+function fmtInt(v) { return v === null ? "—" : Math.round(v).toLocaleString(); }
+
+// ---------- Theme ----------
+const THEME_KEY = "metricsai-theme";
+function getCSS(varName) {
+  return getComputedStyle(document.documentElement).getPropertyValue(varName).trim();
+}
+function themeColors() {
+  return {
+    text: getCSS("--text"),
+    textSoft: getCSS("--text-soft"),
+    grid: getCSS("--grid"),
+    panel: getCSS("--panel"),
+    cyan: getCSS("--accent"),
+    purple: getCSS("--accent-2"),
+    pink: getCSS("--accent-3")
+  };
+}
+function baseLayout(overrides = {}) {
+  const c = themeColors();
+  return Object.assign({
+    paper_bgcolor: "rgba(0,0,0,0)",
+    plot_bgcolor: "rgba(0,0,0,0)",
+    font: { family: "Inter, system-ui, sans-serif", color: c.text, size: 12 },
+    margin: { l: 56, r: 18, t: 30, b: 46 },
+    xaxis: { gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft } },
+    yaxis: { gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft } },
+    hoverlabel: { bgcolor: c.panel, bordercolor: c.grid, font: { color: c.text } },
+    legend: { font: { color: c.text }, bgcolor: "rgba(0,0,0,0)" }
+  }, overrides);
+}
+const PLOTLY_CONFIG = { displayModeBar: false, responsive: true };
+
+// ---------- Dataset registry ----------
+const DATASETS = {
+  earnings: {
+    label: "earnings ($)",
+    axisLabel: "Earnings ($)",
+    values: () => DATA.earnings,
+    binRange: [1000, 15000],
+    defaultBin: 5000,
+    fmt: fmtMoney
+  },
+  gdp: {
+    label: "real GDP per capita ($)",
+    axisLabel: "Real GDP per capita ($)",
+    values: () => DATA.gdp.values,
+    binRange: [1000, 8000],
+    defaultBin: 3000,
+    fmt: fmtMoney
+  },
+  home_sales: {
+    label: "home sales (units)",
+    axisLabel: "Monthly home sales (units)",
+    values: () => DATA.home_sales.original.filter(v => v !== null),
+    binRange: [10000, 80000],
+    defaultBin: 30000,
+    fmt: fmtInt
+  }
+};
+
+// ==================== WIDGET 1: SUMMARY STATS ====================
+(function() {
+  const select = document.getElementById("stats-dataset");
+  const outlier = document.getElementById("stats-outlier");
+  const outlierVal = document.getElementById("stats-outlier-val");
+  const outlierWrap = document.getElementById("stats-outlier-wrap");
+  const gridEl = document.getElementById("stats-grid");
+  const callout = document.getElementById("stats-callout");
+  const deltaEl = document.getElementById("stats-delta");
+
+  function render() {
+    const key = select.value;
+    const ds = DATASETS[key];
+    const values = [...ds.values()];
+    const baseline = summary(ds.values());
+    const canOutlier = key === "earnings";
+    outlierWrap.style.opacity = canOutlier ? "1" : "0.4";
+    outlier.disabled = !canOutlier;
+    if (canOutlier && outlier.value > 0) {
+      values.push(Number(outlier.value) * 1000);
+      outlierVal.textContent = "$" + Math.round(outlier.value) + "k added";
+    } else {
+      outlierVal.textContent = "off";
+    }
+    const s = summary(values);
+
+    // Delta row: only visible on earnings when an outlier is in play
+    if (canOutlier && outlier.value > 0) {
+      const dMean = s.mean - baseline.mean;
+      const dMedian = s.median - baseline.median;
+      const sign = v => v > 0 ? "+" : (v < 0 ? "−" : "");
+      deltaEl.classList.remove("hidden");
+      deltaEl.innerHTML =
+        `<span><span class="label">Δ mean vs baseline:</span><span class="delta-mean">${sign(dMean)}${ds.fmt(Math.abs(dMean))}</span></span>` +
+        `<span><span class="label">Δ median vs baseline:</span><span class="delta-median">${sign(dMedian)}${ds.fmt(Math.abs(dMedian))}</span></span>` +
+        `<span><span class="label">mean moved</span><span class="delta-mean">${(Math.abs(dMean) / Math.max(Math.abs(dMedian), 1e-9)).toFixed(1)}×</span><span class="label">more than median</span></span>`;
+    } else {
+      deltaEl.classList.add("hidden");
+      deltaEl.innerHTML = "";
+    }
+    const cells = [
+      ["n", fmt(s.n, 0), ""],
+      ["Mean", ds.fmt(s.mean), "mean"],
+      ["Median", ds.fmt(s.median), "median"],
+      ["Std dev", ds.fmt(s.std), "spread"],
+      ["Min", ds.fmt(s.min), ""],
+      ["Q1", ds.fmt(s.q1), ""],
+      ["Q3", ds.fmt(s.q3), ""],
+      ["Max", ds.fmt(s.max), ""],
+      ["IQR", ds.fmt(s.q3 - s.q1), "spread"],
+      ["Skewness", s.skew.toFixed(2), ""],
+      ["Excess kurt.", s.kurt.toFixed(2), ""]
+    ];
+    gridEl.innerHTML = cells.map(([l, v, cls]) =>
+      `<div class="stat ${cls}"><div class="label">${l}</div><div class="value">${v}</div></div>`
+    ).join("");
+
+    const gap = s.mean - s.median;
+    const gapPct = (gap / s.mean * 100);
+    const skewLabel = Math.abs(s.skew) < 0.5 ? "approximately symmetric"
+                    : Math.abs(s.skew) < 1 ? "moderately " + (s.skew > 0 ? "right-skewed" : "left-skewed")
+                    : "highly " + (s.skew > 0 ? "right-skewed" : "left-skewed");
+    callout.innerHTML = `<strong>Read:</strong> the distribution is <em>${skewLabel}</em>
+      (skewness ${s.skew.toFixed(2)}). The mean exceeds the median by ${ds.fmt(Math.abs(gap))}
+      (${Math.abs(gapPct).toFixed(1)}% of the mean) — when that gap is large, the median is usually a better summary of the "typical" value.`;
+
+    const c = themeColors();
+    const trace1 = {
+      type: "box", x: values, name: ds.label, orientation: "h",
+      boxpoints: "all", jitter: 0.5, pointpos: 0, marker: { color: c.cyan, size: 4, opacity: 0.55 },
+      line: { color: c.purple }, fillcolor: "rgba(122,32,159,0.12)", hoverinfo: "x"
+    };
+    const layout = baseLayout({
+      height: 300,
+      xaxis: Object.assign({}, baseLayout().xaxis, { title: { text: ds.axisLabel, font: { color: c.textSoft } } }),
+      yaxis: Object.assign({}, baseLayout().yaxis, { showticklabels: false }),
+      shapes: [
+        { type: "line", yref: "paper", y0: 0, y1: 1, x0: s.mean, x1: s.mean, line: { color: c.cyan, width: 2, dash: "solid" } },
+        { type: "line", yref: "paper", y0: 0, y1: 1, x0: s.median, x1: s.median, line: { color: c.pink, width: 2, dash: "dot" } }
+      ],
+      annotations: [
+        { yref: "paper", y: 1.0, x: s.mean, text: "mean", showarrow: false, yanchor: "bottom", font: { color: c.cyan, size: 11 }, bgcolor: c.panel, borderpad: 2 },
+        { yref: "paper", y: 1.08, x: s.median, text: "median", showarrow: false, yanchor: "bottom", font: { color: c.pink, size: 11 }, bgcolor: c.panel, borderpad: 2 }
+      ]
+    });
+    Plotly.react("stats-chart", [trace1], layout, PLOTLY_CONFIG);
+  }
+
+  select.addEventListener("change", () => { outlier.value = 0; render(); });
+  outlier.addEventListener("input", render);
+  window.__rerender_stats = render;
+  render();
+})();
+
+// ==================== WIDGET 2: HISTOGRAM + KDE ====================
+(function() {
+  const select = document.getElementById("hist-dataset");
+  const bwSlider = document.getElementById("hist-binwidth");
+  const bwVal = document.getElementById("hist-binwidth-val");
+  const overlayGroup = document.getElementById("hist-overlay");
+  const markerGroup = document.getElementById("hist-markers");
+  const callout = document.getElementById("hist-callout");
+  let overlayMode = "none", markerMode = "on";
+
+  function sliderToBin(key) {
+    const [lo, hi] = DATASETS[key].binRange;
+    const frac = bwSlider.value / 100;
+    return Math.round(lo + frac * (hi - lo));
+  }
+  function binToSlider(key, bw) {
+    const [lo, hi] = DATASETS[key].binRange;
+    return Math.round((bw - lo) / (hi - lo) * 100);
+  }
+
+  function render() {
+    const key = select.value;
+    const ds = DATASETS[key];
+    const values = ds.values();
+    const binWidth = sliderToBin(key);
+    bwVal.textContent = ds.fmt(binWidth);
+    const c = themeColors();
+    const s = summary(values);
+
+    const traces = [{
+      type: "histogram", x: values,
+      xbins: { size: binWidth },
+      marker: { color: c.cyan, line: { color: c.panel, width: 1 } },
+      opacity: 0.85, name: "Count", hovertemplate: "%{x}<br>count: %{y}<extra></extra>"
+    }];
+
+    const shapes = [];
+    const annotations = [];
+    if (markerMode === "on") {
+      shapes.push(
+        { type: "line", x0: s.mean, x1: s.mean, yref: "paper", y0: 0, y1: 1, line: { color: c.cyan, width: 2 } },
+        { type: "line", x0: s.median, x1: s.median, yref: "paper", y0: 0, y1: 1, line: { color: c.pink, width: 2, dash: "dot" } }
+      );
+      annotations.push(
+        { x: s.mean, yref: "paper", y: 1.02, text: "mean", showarrow: false, font: { color: c.cyan, size: 11 } },
+        { x: s.median, yref: "paper", y: 1.08, text: "median", showarrow: false, font: { color: c.pink, size: 11 } }
+      );
+    }
+
+    if (overlayMode === "kde") {
+      const lo = Math.min(...values);
+      const hi = Math.max(...values);
+      const xs = linspace(lo, hi, 200);
+      const bw = silvermanBW(values);
+      const dens = gaussianKDE(values, xs, bw);
+      // scale density to histogram count units: density * n * binWidth
+      const scaled = dens.map(d => d * values.length * binWidth);
+      traces.push({
+        type: "scatter", mode: "lines", x: xs, y: scaled,
+        line: { color: c.purple, width: 2.5 },
+        name: "KDE", hovertemplate: "%{x}<extra>KDE</extra>"
+      });
+    }
+
+    const layout = baseLayout({
+      height: 360,
+      barmode: "overlay",
+      xaxis: Object.assign({}, baseLayout().xaxis, { title: { text: ds.axisLabel, font: { color: c.textSoft } } }),
+      yaxis: Object.assign({}, baseLayout().yaxis, { title: { text: "Count", font: { color: c.textSoft } } }),
+      showlegend: overlayMode === "kde",
+      legend: { x: 0.98, y: 0.98, xanchor: "right", yanchor: "top", font: { color: c.text } },
+      shapes, annotations
+    });
+    Plotly.react("hist-chart", traces, layout, PLOTLY_CONFIG);
+    callout.innerHTML = `<strong>Try this:</strong> narrow bins expose roughness and clustering; wide bins smooth them out. Skewness is ${s.skew.toFixed(2)} — the mean (${ds.fmt(s.mean)}) sits ${s.mean > s.median ? "above" : "below"} the median (${ds.fmt(s.median)}).`;
+  }
+
+  select.addEventListener("change", () => {
+    bwSlider.value = binToSlider(select.value, DATASETS[select.value].defaultBin);
+    render();
+  });
+  bwSlider.addEventListener("input", render);
+  overlayGroup.querySelectorAll("button").forEach(b => b.addEventListener("click", () => {
+    overlayGroup.querySelectorAll("button").forEach(x => x.classList.remove("active"));
+    b.classList.add("active");
+    overlayMode = b.dataset.val;
+    render();
+  }));
+  markerGroup.querySelectorAll("button").forEach(b => b.addEventListener("click", () => {
+    markerGroup.querySelectorAll("button").forEach(x => x.classList.remove("active"));
+    b.classList.add("active");
+    markerMode = b.dataset.val;
+    render();
+  }));
+  bwSlider.value = binToSlider("earnings", DATASETS.earnings.defaultBin);
+  window.__rerender_hist = render;
+  render();
+})();
+
+// ==================== WIDGET 3: BOX PLOT + IQR OUTLIERS ====================
+(function() {
+  const select = document.getElementById("box-dataset");
+  const mult = document.getElementById("box-mult");
+  const multVal = document.getElementById("box-mult-val");
+  const callout = document.getElementById("box-callout");
+  const listEl = document.getElementById("box-list");
+
+  function render() {
+    const key = select.value;
+    const ds = DATASETS[key];
+    const values = ds.values();
+    const s = summary(values);
+    const iqr = s.q3 - s.q1;
+    const m = parseFloat(mult.value);
+    multVal.textContent = m.toFixed(1);
+    const lowFence = s.q1 - m * iqr;
+    const highFence = s.q3 + m * iqr;
+    const outliers = values.filter(v => v < lowFence || v > highFence).sort((a, b) => b - a);
+
+    const c = themeColors();
+    const trace = {
+      type: "box", x: values, orientation: "h", name: ds.label,
+      boxpoints: "outliers", marker: { color: c.pink, size: 5, outliercolor: c.pink },
+      line: { color: c.purple }, fillcolor: "rgba(0,140,183,0.12)",
+      // custom whiskers via multiplier: Plotly's native IQR multiplier is the `boxpoints` default (1.5),
+      // but we can expose it by drawing a shaded fence manually and keeping outliers as markers.
+      hoverinfo: "x+name"
+    };
+
+    // Draw the fence region as a semi-transparent band
+    const layout = baseLayout({
+      height: 240,
+      xaxis: Object.assign({}, baseLayout().xaxis, { title: { text: ds.axisLabel, font: { color: c.textSoft } } }),
+      yaxis: Object.assign({}, baseLayout().yaxis, { showticklabels: false }),
+      shapes: [
+        { type: "line", x0: lowFence, x1: lowFence, yref: "paper", y0: 0, y1: 1, line: { color: c.pink, width: 1.5, dash: "dash" } },
+        { type: "line", x0: highFence, x1: highFence, yref: "paper", y0: 0, y1: 1, line: { color: c.pink, width: 1.5, dash: "dash" } }
+      ],
+      annotations: [
+        { x: lowFence, yref: "paper", y: 1.05, text: "−" + m.toFixed(1) + "·IQR", showarrow: false, font: { color: c.pink, size: 10 } },
+        { x: highFence, yref: "paper", y: 1.05, text: "+" + m.toFixed(1) + "·IQR", showarrow: false, font: { color: c.pink, size: 10 } }
+      ]
+    });
+    Plotly.react("box-chart", [trace], layout, PLOTLY_CONFIG);
+
+    callout.innerHTML = `<strong>At ${m.toFixed(1)}× IQR:</strong> ${outliers.length} point${outliers.length === 1 ? "" : "s"} flagged as outlier${outliers.length === 1 ? "" : "s"}.
+      Fences: [${ds.fmt(lowFence)}, ${ds.fmt(highFence)}]. IQR = ${ds.fmt(iqr)}.`;
+    listEl.innerHTML = outliers.length
+      ? "Flagged: " + outliers.slice(0, 20).map(ds.fmt).join(", ") + (outliers.length > 20 ? ` … (+${outliers.length - 20} more)` : "")
+      : "No observations outside the fences at this multiplier.";
+  }
+
+  select.addEventListener("change", render);
+  mult.addEventListener("input", render);
+  window.__rerender_box = render;
+  render();
+})();
+
+// ==================== WIDGET 4: GDP TIME SERIES ====================
+(function() {
+  const viewGroup = document.getElementById("ts-view");
+  const shadingGroup = document.getElementById("ts-shading");
+  let view = "level", shading = "on";
+
+  function render() {
+    const c = themeColors();
+    const { dates, values, recessions } = DATA.gdp;
+    let y, yTitle, color, hoverFmt, name;
+    if (view === "level") {
+      y = values;
+      yTitle = "Real GDP per capita ($)";
+      color = c.cyan;
+      name = "Real GDP per capita";
+      hoverFmt = "%{x|%Y-Q%q}<br>$%{y:,.0f}<extra></extra>";
+    } else if (view === "log") {
+      y = values.map(v => Math.log(v));
+      yTitle = "ln(Real GDP per capita)";
+      color = c.purple;
+      name = "ln(GDP per capita)";
+      hoverFmt = "%{x|%Y-Q%q}<br>ln = %{y:.3f}<extra></extra>";
+    } else {
+      // growth: quarter-on-quarter % change
+      y = [null];
+      for (let i = 1; i < values.length; i++) {
+        y.push(values[i - 1] ? (values[i] / values[i - 1] - 1) * 100 : null);
+      }
+      yTitle = "QoQ growth rate (%)";
+      color = c.pink;
+      name = "QoQ growth (%)";
+      hoverFmt = "%{x|%Y-Q%q}<br>%{y:.2f}%<extra></extra>";
+    }
+
+    const traces = [{
+      type: "scatter", mode: "lines", x: dates, y,
+      line: { color, width: 2.2 }, name, hovertemplate: hoverFmt
+    }];
+
+    const shapes = [];
+    if (shading === "on") {
+      for (const [s0, s1] of recessions) {
+        shapes.push({ type: "rect", xref: "x", yref: "paper",
+          x0: s0, x1: s1, y0: 0, y1: 1,
+          fillcolor: c.pink, opacity: 0.12, line: { width: 0 } });
+      }
+    }
+    if (view === "growth") {
+      shapes.push({ type: "line", xref: "paper", yref: "y", x0: 0, x1: 1, y0: 0, y1: 0,
+        line: { color: c.grid, width: 1 } });
+    }
+
+    const layout = baseLayout({
+      height: 400,
+      xaxis: Object.assign({}, baseLayout().xaxis, { title: { text: "Quarter", font: { color: c.textSoft } } }),
+      yaxis: Object.assign({}, baseLayout().yaxis, { title: { text: yTitle, font: { color: c.textSoft } } }),
+      shapes
+    });
+    Plotly.react("ts-chart", traces, layout, PLOTLY_CONFIG);
+  }
+
+  viewGroup.querySelectorAll("button").forEach(b => b.addEventListener("click", () => {
+    viewGroup.querySelectorAll("button").forEach(x => x.classList.remove("active"));
+    b.classList.add("active"); view = b.dataset.val; render();
+  }));
+  shadingGroup.querySelectorAll("button").forEach(b => b.addEventListener("click", () => {
+    shadingGroup.querySelectorAll("button").forEach(x => x.classList.remove("active"));
+    b.classList.add("active"); shading = b.dataset.val; render();
+  }));
+  window.__rerender_ts = render;
+  render();
+})();
+
+// ==================== WIDGET 5: CATEGORICAL ====================
+(function() {
+  const select = document.getElementById("cat-dataset");
+  const typeGroup = document.getElementById("cat-type");
+  const sortGroup = document.getElementById("cat-sort");
+  const callout = document.getElementById("cat-callout");
+  let chartType = "bar", sortMode = "value";
+
+  function render() {
+    const c = themeColors();
+    const key = select.value;
+    let labels, values, unitLabel;
+    if (key === "health") {
+      labels = DATA.health.short.slice();
+      values = DATA.health.values.slice();
+      unitLabel = "Expenditure ($ billions, 2018)";
+    } else {
+      labels = DATA.fishing.modes.slice();
+      values = DATA.fishing.counts.slice();
+      unitLabel = "Count (n = 1,182)";
+    }
+    const idx = labels.map((_, i) => i);
+    if (sortMode === "value") idx.sort((a, b) => values[b] - values[a]);
+    else idx.sort((a, b) => labels[a].localeCompare(labels[b]));
+    labels = idx.map(i => labels[i]);
+    values = idx.map(i => values[i]);
+    const total = values.reduce((a, b) => a + b, 0);
+
+    let traces, layout;
+    if (chartType === "bar") {
+      traces = [{
+        type: "bar", x: labels, y: values,
+        marker: {
+          color: values.map((v, i) => [c.cyan, c.purple, c.pink, "#1aa6c4", "#933cb8", "#d73f88", "#00a3d1", "#8f39b3"][i % 8])
+        },
+        hovertemplate: "%{x}<br>%{y:,.0f} (%{customdata:.1f}%)<extra></extra>",
+        customdata: values.map(v => (v / total) * 100)
+      }];
+      layout = baseLayout({
+        height: 360,
+        xaxis: Object.assign({}, baseLayout().xaxis, { automargin: true, tickangle: -30 }),
+        yaxis: Object.assign({}, baseLayout().yaxis, { title: { text: unitLabel, font: { color: c.textSoft } } })
+      });
+    } else {
+      const palette = [c.cyan, c.purple, c.pink, "#1aa6c4", "#933cb8", "#d73f88", "#00a3d1", "#8f39b3", "#56c3dc", "#b36bd1", "#e06aa5", "#0798c4", "#7a3fa3"];
+      traces = [{
+        type: "pie", labels, values,
+        marker: { colors: labels.map((_, i) => palette[i % palette.length]), line: { color: c.panel, width: 2 } },
+        textinfo: "label+percent", textposition: "outside",
+        hovertemplate: "%{label}<br>%{value:,.0f} (%{percent})<extra></extra>",
+        hole: 0.35, sort: false
+      }];
+      layout = baseLayout({ height: 400, margin: { l: 20, r: 20, t: 30, b: 20 } });
+    }
+    Plotly.react("cat-chart", traces, layout, PLOTLY_CONFIG);
+
+    const top = labels[0];
+    const topShare = (values[0] / total * 100).toFixed(1);
+    callout.innerHTML = `<strong>${top}</strong> accounts for ${topShare}% of the total. Bar charts use the most sensitive visual dimension — length along a common axis — so small differences are easy to see. Pie charts work best with ≤ 3 slices.`;
+  }
+
+  select.addEventListener("change", render);
+  typeGroup.querySelectorAll("button").forEach(b => b.addEventListener("click", () => {
+    typeGroup.querySelectorAll("button").forEach(x => x.classList.remove("active"));
+    b.classList.add("active"); chartType = b.dataset.val; render();
+  }));
+  sortGroup.querySelectorAll("button").forEach(b => b.addEventListener("click", () => {
+    sortGroup.querySelectorAll("button").forEach(x => x.classList.remove("active"));
+    b.classList.add("active"); sortMode = b.dataset.val; render();
+  }));
+  window.__rerender_cat = render;
+  render();
+})();
+
+// ==================== WIDGET 6: LOG TRANSFORM ====================
+(function() {
+  const callout = document.getElementById("log-callout");
+  const tsCallout = document.getElementById("log-ts-callout");
+
+  function linfit(xs, ys) {
+    const n = xs.length;
+    const mx = mean(xs), my = mean(ys);
+    let num = 0, den = 0;
+    for (let i = 0; i < n; i++) {
+      num += (xs[i] - mx) * (ys[i] - my);
+      den += (xs[i] - mx) ** 2;
+    }
+    const slope = num / den;
+    const intercept = my - slope * mx;
+    return { slope, intercept, fitted: xs.map(x => intercept + slope * x) };
+  }
+
+  function render() {
+    const c = themeColors();
+    const raw = DATA.earnings;
+    const logv = raw.map(v => Math.log(v));
+    const sR = summary(raw);
+    const sL = summary(logv);
+
+    const layoutRaw = baseLayout({
+      height: 300,
+      title: { text: "Raw earnings", font: { color: c.cyan, size: 13 } },
+      xaxis: Object.assign({}, baseLayout().xaxis, { title: { text: "Earnings ($)", font: { color: c.textSoft } } }),
+      yaxis: Object.assign({}, baseLayout().yaxis, { title: { text: "Count", font: { color: c.textSoft } } }),
+      shapes: [
+        { type: "line", x0: sR.mean, x1: sR.mean, yref: "paper", y0: 0, y1: 1, line: { color: c.cyan, width: 2 } },
+        { type: "line", x0: sR.median, x1: sR.median, yref: "paper", y0: 0, y1: 1, line: { color: c.pink, width: 2, dash: "dot" } }
+      ],
+      annotations: [
+        { x: 0.98, xref: "paper", y: 0.95, yref: "paper", xanchor: "right", showarrow: false,
+          text: `skew = ${sR.skew.toFixed(2)}<br>kurt = ${sR.kurt.toFixed(2)}`,
+          font: { color: c.purple, size: 11, family: "JetBrains Mono" }, align: "right" }
+      ]
+    });
+    const layoutLog = baseLayout({
+      height: 300,
+      title: { text: "Log-transformed earnings", font: { color: c.purple, size: 13 } },
+      xaxis: Object.assign({}, baseLayout().xaxis, { title: { text: "ln(Earnings)", font: { color: c.textSoft } } }),
+      yaxis: Object.assign({}, baseLayout().yaxis, { title: { text: "Count", font: { color: c.textSoft } } }),
+      shapes: [
+        { type: "line", x0: sL.mean, x1: sL.mean, yref: "paper", y0: 0, y1: 1, line: { color: c.cyan, width: 2 } },
+        { type: "line", x0: sL.median, x1: sL.median, yref: "paper", y0: 0, y1: 1, line: { color: c.pink, width: 2, dash: "dot" } }
+      ],
+      annotations: [
+        { x: 0.98, xref: "paper", y: 0.95, yref: "paper", xanchor: "right", showarrow: false,
+          text: `skew = ${sL.skew.toFixed(2)}<br>kurt = ${sL.kurt.toFixed(2)}`,
+          font: { color: c.purple, size: 11, family: "JetBrains Mono" }, align: "right" }
+      ]
+    });
+
+    Plotly.react("log-raw", [{
+      type: "histogram", x: raw, nbinsx: 25,
+      marker: { color: c.cyan, line: { color: c.panel, width: 1 } }, opacity: 0.85
+    }], layoutRaw, PLOTLY_CONFIG);
+
+    Plotly.react("log-log", [{
+      type: "histogram", x: logv, nbinsx: 25,
+      marker: { color: c.purple, line: { color: c.panel, width: 1 } }, opacity: 0.85
+    }], layoutLog, PLOTLY_CONFIG);
+
+    callout.innerHTML = `<strong>Before:</strong> skewness ${sR.skew.toFixed(2)} (highly right-skewed); mean $${Math.round(sR.mean).toLocaleString()} well above median $${Math.round(sR.median).toLocaleString()}.
+      <strong>After ln():</strong> skewness ${sL.skew.toFixed(2)} (nearly symmetric); mean and median almost coincide (${sL.mean.toFixed(2)} vs ${sL.median.toFixed(2)}).
+      That is why economists model log earnings rather than raw dollars.`;
+
+    // --- Time-series view: long-run U.S. GDP per capita (Maddison 1820–2022) ---
+    const years = DATA.gdp_long.years;
+    const gdpv = DATA.gdp_long.values;
+    const logGdp = gdpv.map(v => Math.log(v));
+    const fitLevel = linfit(years, gdpv);
+    const fitLog = linfit(years, logGdp);
+    const annualGrowthPct = fitLog.slope * 100;
+    const totalYears = years[years.length - 1] - years[0];
+    const cagr = (Math.pow(gdpv[gdpv.length - 1] / gdpv[0], 1 / totalYears) - 1) * 100;
+    const y0 = years[0], yN = years[years.length - 1];
+    const v0 = gdpv[0], vN = gdpv[gdpv.length - 1];
+
+    const mkXAxis = () => Object.assign({}, baseLayout().xaxis, { title: { text: "Year", font: { color: c.textSoft } } });
+    const sourceTag = { x: 0.02, xref: "paper", y: -0.18, yref: "paper", xanchor: "left", showarrow: false,
+      text: "Data: Maddison Project 2023", font: { color: c.textSoft, size: 9 } };
+
+    const layoutTsRaw = baseLayout({
+      height: 320,
+      title: { text: `U.S. real GDP per capita (${y0}–${yN}) — level`, font: { color: c.cyan, size: 13 } },
+      xaxis: mkXAxis(),
+      yaxis: Object.assign({}, baseLayout().yaxis, { title: { text: "GDP per capita ($, 2011 PPP)", font: { color: c.textSoft } } }),
+      showlegend: true,
+      legend: { x: 0.02, y: 0.98, font: { color: c.text, size: 10 }, bgcolor: "rgba(0,0,0,0)" },
+      margin: { l: 62, r: 18, t: 40, b: 58 },
+      annotations: [
+        { x: 0.98, xref: "paper", y: 0.06, yref: "paper", xanchor: "right", showarrow: false,
+          text: `$${Math.round(v0).toLocaleString()} → $${Math.round(vN).toLocaleString()}<br>~${(vN / v0).toFixed(0)}× over ${totalYears} years`,
+          font: { color: c.textSoft, size: 10, family: "JetBrains Mono" }, align: "right" },
+        sourceTag
+      ]
+    });
+    Plotly.react("log-ts-raw", [
+      { type: "scatter", mode: "lines", x: years, y: gdpv,
+        line: { color: c.cyan, width: 2.2 }, name: "GDP per capita",
+        hovertemplate: "%{x}<br>$%{y:,.0f}<extra></extra>" },
+      { type: "scatter", mode: "lines", x: years, y: fitLevel.fitted,
+        line: { color: c.pink, width: 1.4, dash: "dash" }, name: "Linear fit",
+        hoverinfo: "skip" }
+    ], layoutTsRaw, PLOTLY_CONFIG);
+
+    const layoutTsLog = baseLayout({
+      height: 320,
+      title: { text: `ln(U.S. GDP per capita) (${y0}–${yN})`, font: { color: c.purple, size: 13 } },
+      xaxis: mkXAxis(),
+      yaxis: Object.assign({}, baseLayout().yaxis, { title: { text: "ln(GDP per capita)", font: { color: c.textSoft } } }),
+      showlegend: true,
+      legend: { x: 0.02, y: 0.98, font: { color: c.text, size: 10 }, bgcolor: "rgba(0,0,0,0)" },
+      margin: { l: 62, r: 18, t: 40, b: 58 },
+      annotations: [
+        { x: 0.98, xref: "paper", y: 0.06, yref: "paper", xanchor: "right", showarrow: false,
+          text: `fitted slope = ${annualGrowthPct.toFixed(2)}% / year<br>(≈ long-run growth rate)`,
+          font: { color: c.purple, size: 10, family: "JetBrains Mono" }, align: "right" },
+        sourceTag
+      ]
+    });
+    Plotly.react("log-ts-log", [
+      { type: "scatter", mode: "lines", x: years, y: logGdp,
+        line: { color: c.purple, width: 2.2 }, name: "ln(GDP per capita)",
+        hovertemplate: "%{x}<br>ln = %{y:.3f}<extra></extra>" },
+      { type: "scatter", mode: "lines", x: years, y: fitLog.fitted,
+        line: { color: c.pink, width: 1.4, dash: "dash" }, name: "Linear fit",
+        hoverinfo: "skip" }
+    ], layoutTsLog, PLOTLY_CONFIG);
+
+    tsCallout.innerHTML = `<strong>Read:</strong> over ${totalYears} years, U.S. real GDP per capita rose from
+      $${Math.round(v0).toLocaleString()} to $${Math.round(vN).toLocaleString()} — roughly ${(vN / v0).toFixed(0)}×.
+      On the raw (linear) scale, constant percentage growth compounds into an upward-curving hockey stick.
+      On the log scale, the same series is close to a straight line whose slope is the growth rate.
+      Fitted slope: <strong>${annualGrowthPct.toFixed(2)}% per year</strong> (sample CAGR: ${cagr.toFixed(2)}%).
+      Look at the log line between 1820 and 1870 versus 1870 onwards: the visible steepening marks the onset of the Industrial Revolution
+      in the United States — a real regime change, not an artifact of the plot.`;
+  }
+
+  window.__rerender_log = render;
+  render();
+})();
+
+// ==================== WIDGET 7: Z-SCORE ====================
+(function() {
+  const slider = document.getElementById("z-val");
+  const valDisplay = document.getElementById("z-val-display");
+  const zDisplay = document.getElementById("z-score-display");
+  const interp = document.getElementById("z-interp");
+  const earnings = DATA.earnings;
+  const sStat = summary(earnings);
+  const vmin = sStat.min, vmax = sStat.max;
+
+  function render() {
+    const c = themeColors();
+    const frac = parseFloat(slider.value);
+    const x = vmin + frac * (vmax - vmin);
+    const z = (x - sStat.mean) / sStat.std;
+    valDisplay.textContent = "$" + Math.round(x).toLocaleString();
+    zDisplay.textContent = (z >= 0 ? "+" : "") + z.toFixed(2);
+    const abs = Math.abs(z);
+    let msg;
+    if (abs < 1) msg = "Within 1 SD of the mean — inside the middle ~68% of a bell-shaped distribution.";
+    else if (abs < 2) msg = "Between 1 and 2 SD away — in the outer ~27%.";
+    else if (abs < 3) msg = "Between 2 and 3 SD away — in the outer ~5%: notably unusual.";
+    else msg = "More than 3 SD away — in the outer ~0.3%: very unusual.";
+    interp.textContent = msg;
+
+    // density of standardized earnings
+    const zArr = earnings.map(v => (v - sStat.mean) / sStat.std);
+    const xs = linspace(Math.min(...zArr) - 0.3, Math.max(...zArr) + 0.3, 200);
+    const bw = silvermanBW(zArr);
+    const ys = gaussianKDE(zArr, xs, bw);
+
+    const layout = baseLayout({
+      height: 280,
+      xaxis: Object.assign({}, baseLayout().xaxis, { title: { text: "Z-score (standard deviations from mean)", font: { color: c.textSoft } }, zeroline: true, zerolinecolor: c.grid }),
+      yaxis: Object.assign({}, baseLayout().yaxis, { title: { text: "Density", font: { color: c.textSoft } } }),
+      shapes: [
+        { type: "line", x0: z, x1: z, yref: "paper", y0: 0, y1: 1, line: { color: c.pink, width: 3 } },
+        { type: "rect", x0: -1, x1: 1, yref: "paper", y0: 0, y1: 1, fillcolor: c.cyan, opacity: 0.07, line: { width: 0 } }
+      ],
+      annotations: [
+        { x: z, y: 1.02, yref: "paper", text: `z = ${z.toFixed(2)}`, showarrow: false, font: { color: c.pink, size: 11 } },
+        { x: 0, y: 0.04, yref: "paper", text: "±1 SD (~68%)", showarrow: false, font: { color: c.cyan, size: 10 } }
+      ]
+    });
+    Plotly.react("z-chart", [{
+      type: "scatter", mode: "lines", x: xs, y: ys,
+      line: { color: c.purple, width: 2.5 }, fill: "tozeroy",
+      fillcolor: "rgba(122,32,159,0.12)", name: "Density"
+    }], layout, PLOTLY_CONFIG);
+  }
+
+  // initialise slider at median earnings
+  const medianFrac = (sStat.median - vmin) / (vmax - vmin);
+  slider.value = medianFrac.toFixed(3);
+  slider.addEventListener("input", render);
+  window.__rerender_z = render;
+  render();
+})();
+
+// ==================== WIDGET 8: MOVING AVERAGE ====================
+(function() {
+  const winSlider = document.getElementById("ma-window");
+  const winVal = document.getElementById("ma-window-val");
+  const saGroup = document.getElementById("ma-sa");
+  const recGroup = document.getElementById("ma-recession");
+  const callout = document.getElementById("ma-callout");
+  let saMode = "off", recMode = "on";
+
+  function render() {
+    const c = themeColors();
+    const { dates, original, sa } = DATA.home_sales;
+    const w = parseInt(winSlider.value, 10);
+    winVal.textContent = w + (w === 1 ? " month (no smoothing)" : " months");
+    const smoothed = movingAverage(original.map(v => v === null ? NaN : v).map(v => isNaN(v) ? null : v), w);
+
+    const traces = [{
+      type: "scatter", mode: "lines", x: dates, y: original,
+      line: { color: c.cyan, width: 1.1 }, opacity: 0.45,
+      name: "Original (monthly)", hovertemplate: "%{x|%b %Y}<br>%{y:,.0f} units<extra></extra>"
+    }];
+    if (w > 1) {
+      traces.push({
+        type: "scatter", mode: "lines", x: dates, y: smoothed,
+        line: { color: c.purple, width: 2.6 },
+        name: `${w}-month moving average`, hovertemplate: "%{x|%b %Y}<br>%{y:,.0f} units<extra></extra>"
+      });
+    }
+    if (saMode === "on") {
+      traces.push({
+        type: "scatter", mode: "lines", x: dates, y: sa,
+        line: { color: c.pink, width: 1.8, dash: "dot" },
+        name: "Seasonally adjusted", hovertemplate: "%{x|%b %Y}<br>%{y:,.0f} units<extra></extra>"
+      });
+    }
+
+    const shapes = [];
+    if (recMode === "on") {
+      const [s0, s1] = ["2007-12-01", "2009-06-01"];
+      shapes.push({ type: "rect", xref: "x", yref: "paper", x0: s0, x1: s1, y0: 0, y1: 1, fillcolor: c.pink, opacity: 0.11, line: { width: 0 } });
+    }
+
+    const layout = baseLayout({
+      height: 420,
+      xaxis: Object.assign({}, baseLayout().xaxis, { title: { text: "Month", font: { color: c.textSoft } } }),
+      yaxis: Object.assign({}, baseLayout().yaxis, { title: { text: "New home sales (units)", font: { color: c.textSoft } } }),
+      legend: { x: 0.01, y: 0.99, font: { color: c.text }, bgcolor: "rgba(0,0,0,0)" },
+      shapes
+    });
+    Plotly.react("ma-chart", traces, layout, PLOTLY_CONFIG);
+
+    callout.innerHTML = `<strong>Trade-off:</strong> a wider window kills the seasonal noise faster but also smears over sharp turning points (watch what happens to the 2007–09 collapse as you increase the window). The 11-month MA matches the textbook choice — exactly long enough to cancel a full seasonal cycle.`;
+  }
+
+  winSlider.addEventListener("input", render);
+  saGroup.querySelectorAll("button").forEach(b => b.addEventListener("click", () => {
+    saGroup.querySelectorAll("button").forEach(x => x.classList.remove("active"));
+    b.classList.add("active"); saMode = b.dataset.val; render();
+  }));
+  recGroup.querySelectorAll("button").forEach(b => b.addEventListener("click", () => {
+    recGroup.querySelectorAll("button").forEach(x => x.classList.remove("active"));
+    b.classList.add("active"); recMode = b.dataset.val; render();
+  }));
+  window.__rerender_ma = render;
+  render();
+})();
+
+// ==================== RESET + URL HASH STATE ====================
+(function() {
+  // Per-widget control registry. `id` is an <input>/<select>, `group` is a toggle-group container.
+  // `def` is the chapter-default value (string). For the z-slider the default is computed from data.
+  const sEarn = summary(DATA.earnings);
+  const Z_DEF = ((sEarn.median - sEarn.min) / (sEarn.max - sEarn.min)).toFixed(3);
+
+  const REG = {
+    stats: [
+      { id: "stats-dataset", kind: "select", def: "earnings" },
+      { id: "stats-outlier", kind: "range", def: "0" }
+    ],
+    hist: [
+      { id: "hist-dataset", kind: "select", def: "earnings" },
+      { id: "hist-binwidth", kind: "range", def: "30" },
+      { group: "hist-overlay", kind: "toggle", def: "none" },
+      { group: "hist-markers", kind: "toggle", def: "on" }
+    ],
+    box: [
+      { id: "box-dataset", kind: "select", def: "earnings" },
+      { id: "box-mult", kind: "range", def: "1.5" }
+    ],
+    ts: [
+      { group: "ts-view", kind: "toggle", def: "level" },
+      { group: "ts-shading", kind: "toggle", def: "on" }
+    ],
+    cat: [
+      { id: "cat-dataset", kind: "select", def: "health" },
+      { group: "cat-type", kind: "toggle", def: "bar" },
+      { group: "cat-sort", kind: "toggle", def: "value" }
+    ],
+    z: [
+      { id: "z-val", kind: "range", def: Z_DEF }
+    ],
+    ma: [
+      { id: "ma-window", kind: "range", def: "11" },
+      { group: "ma-sa", kind: "toggle", def: "off" },
+      { group: "ma-recession", kind: "toggle", def: "on" }
+    ]
+  };
+
+  function getVal(c) {
+    if (c.kind === "toggle") {
+      const btn = document.querySelector("#" + c.group + " button.active");
+      return btn ? btn.dataset.val : c.def;
+    }
+    return document.getElementById(c.id).value;
+  }
+
+  function setVal(c, val, fireEvents) {
+    if (c.kind === "toggle") {
+      const group = document.getElementById(c.group);
+      const btn = group.querySelector('button[data-val="' + val + '"]');
+      if (btn && !btn.classList.contains("active")) btn.click(); // widget listens to click
+    } else {
+      const el = document.getElementById(c.id);
+      if (el.value !== String(val)) {
+        el.value = val;
+        if (fireEvents) el.dispatchEvent(new Event(c.kind === "select" ? "change" : "input", { bubbles: true }));
+      }
+    }
+  }
+
+  function resetWidget(widget) {
+    const ctrls = REG[widget] || [];
+    for (const c of ctrls) setVal(c, c.def, true);
+    // A dataset change on hist triggers its own bin-width reset logic via the widget's listener; ensure final render
+    const fn = window["__rerender_" + widget];
+    if (fn) fn();
+    writeHash();
+  }
+
+  function writeHash() {
+    const parts = [];
+    for (const [widget, ctrls] of Object.entries(REG)) {
+      for (const c of ctrls) {
+        const v = String(getVal(c));
+        if (v !== String(c.def)) {
+          const key = c.id || c.group;
+          parts.push(key + "=" + encodeURIComponent(v));
+        }
+      }
+    }
+    const want = parts.length ? "#" + parts.join("&") : "";
+    // Only rewrite if state differs; preserve anchor-only hashes (e.g. "#stats") by allowing them too
+    if (want === "" && location.hash.match(/=/)) {
+      history.replaceState(null, "", location.pathname + location.search);
+    } else if (want !== "" && location.hash !== want) {
+      history.replaceState(null, "", location.pathname + location.search + want);
+    }
+  }
+
+  function readHash() {
+    const hash = location.hash.slice(1);
+    if (!hash || !hash.includes("=")) return; // plain anchor like "#stats" — ignore
+    const params = {};
+    for (const pair of hash.split("&")) {
+      const eq = pair.indexOf("=");
+      if (eq < 0) continue;
+      params[pair.slice(0, eq)] = decodeURIComponent(pair.slice(eq + 1));
+    }
+    for (const ctrls of Object.values(REG)) {
+      for (const c of ctrls) {
+        const key = c.id || c.group;
+        if (key in params) setVal(c, params[key], true);
+      }
+    }
+  }
+
+  // Wire reset buttons
+  document.querySelectorAll(".reset-btn[data-reset]").forEach(btn => {
+    btn.addEventListener("click", () => resetWidget(btn.dataset.reset));
+  });
+
+  // Write URL hash after any user interaction with a widget control
+  document.addEventListener("input", e => {
+    if (e.target.matches("input[type=range], select")) writeHash();
+  });
+  document.addEventListener("change", e => {
+    if (e.target.matches("select")) writeHash();
+  });
+  document.querySelectorAll(".toggle-group button").forEach(b => {
+    b.addEventListener("click", () => setTimeout(writeHash, 0));
+  });
+
+  // Restore state from URL on load
+  readHash();
+})();
+
+// ==================== THEME TOGGLE ====================
+(function() {
+  const btn = document.getElementById("theme-toggle");
+  const iconEl = document.getElementById("theme-icon");
+  const labelEl = document.getElementById("theme-label");
+
+  function apply(theme) {
+    document.documentElement.dataset.theme = theme;
+    iconEl.textContent = theme === "dark" ? "☀️" : "🌙";
+    labelEl.textContent = theme === "dark" ? "Light" : "Dark";
+    // Re-render all charts so they pick up new theme colors
+    for (const key of ["stats", "hist", "box", "ts", "cat", "log", "z", "ma"]) {
+      const fn = window["__rerender_" + key];
+      if (typeof fn === "function") fn();
+    }
+  }
+
+  const saved = localStorage.getItem(THEME_KEY);
+  const prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+  apply(saved || (prefersDark ? "dark" : "light"));
+
+  btn.addEventListener("click", () => {
+    const next = document.documentElement.dataset.theme === "dark" ? "light" : "dark";
+    localStorage.setItem(THEME_KEY, next);
+    apply(next);
+  });
+})();
+
+// ==================== Resize handling ====================
+window.addEventListener("resize", () => {
+  for (const id of ["stats-chart", "hist-chart", "box-chart", "ts-chart", "cat-chart", "log-raw", "log-log", "log-ts-raw", "log-ts-log", "z-chart", "ma-chart"]) {
+    const el = document.getElementById(id);
+    if (el && el.data) Plotly.Plots.resize(el);
+  }
+});
+</script>
+
+</body>
+</html>

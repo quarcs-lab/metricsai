@@ -50,6 +50,17 @@ Click any badge below to open and run immediately in your browser. Every chapter
 | **17** | Panel Data, Time Series Data, Causation | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/quarcs-lab/metricsai/blob/main/notebooks_colab/ch17_Panel_Data_Time_Series_Data_Causation.ipynb) | [🎬 AI Video](https://www.youtube.com/watch?v=ZtjIHX6JYyM) • [✨ AI Slides](https://carlos-mendez.my.canva.site/s17-panel-data-time-series-data-causation-pdf) • [📊 Author Slides](https://cameron.econ.ucdavis.edu/aed/traedv1_17) • [📝 Quiz](https://app.edcafe.ai/quizzes/69786c262f5d08069e04e9a8) • [🤖 AI Tutor](https://app.edcafe.ai/chatbots/6978a3772f5d08069e0723a7) • [🎧 Audio](https://files.catbox.moe/wsqudl.mp3) |
 
 
+## Interactive Web Apps
+
+Selected chapters feature self-contained interactive dashboards where students manipulate sliders, toggles, and dropdowns to build intuition for key concepts. Each app uses the same datasets as the chapter and works offline after first load.
+
+| Chapter | Web App |
+|---------|---------|
+| **1** | [![Open Web App](images/webapp-badge.svg)](https://quarcs-lab.github.io/metricsai/web-apps/ch01/dashboard.html) — Scatter plots, regression lines, R², prediction explorer, multi-predictor comparison |
+| **2** | [![Open Web App](images/webapp-badge.svg)](https://quarcs-lab.github.io/metricsai/web-apps/ch02/dashboard.html) — Histograms, KDE, box plots, time series, log transforms, z-scores, moving averages |
+
+More chapters coming. Use `/web-app chNN` in Claude Code to generate a new chapter dashboard.
+
 ### How to Use the Notebooks
 
 1. **Click any "Open in Colab" badge** above

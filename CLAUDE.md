@@ -45,7 +45,8 @@ The `./log/` directory preserves context across sessions. Chat sessions can die 
 metricsai/
 ├── notebooks_quarto/   # 18 chapters (.qmd) — SOURCE OF TRUTH
 ├── notebooks_colab/    # 18 chapters (.ipynb) — generated for Colab
-├── scripts/            # PDF generation, conversion, and utilities
+├── scripts/            # PDF generation, conversion, web-app builders, and utilities
+├── web-apps/           # Interactive HTML dashboards (one folder per chapter)
 ├── book/               # Quarto HTML book (symlinks to notebooks_quarto/ and images/)
 ├── images/             # Cover images + chapter visual summaries
 ├── data/               # .DTA datasets from AED textbook
@@ -53,7 +54,7 @@ metricsai/
 ├── legacy/             # Archived files (R, Stata, Python originals)
 ├── .venv/              # Python virtual environment (gitignored)
 ├── .claude/rules/      # Detailed workflow docs (PDF, Quarto)
-├── .claude/skills/     # chapter-standard, compile-book, proofread
+├── .claude/skills/     # chapter-standard, compile-book, proofread, web-app
 ├── index.html          # Project website (standalone)
 ├── requirements.txt    # Python dependencies
 └── README.md           # Project documentation
@@ -106,6 +107,24 @@ python3 scripts/generate_pdf_playwright.py ch05
 python3 scripts/generate_pdf_playwright.py --all
 ```
 
+**Scaffold a new chapter web app:**
+
+```bash
+python3 .claude/skills/web-app/scripts/scaffold_chapter.py ch05 "Bivariate Data Summary"
+```
+
+**Build a chapter web app:**
+
+```bash
+python3 scripts/build_ch02_webapp.py
+```
+
+**Verify a chapter web app:**
+
+```bash
+python3 .claude/skills/web-app/scripts/verify_app.py web-apps/ch02/dashboard.html
+```
+
 ## Conventions
 
 - **Source files:** `chNN_Title_With_Underscores.qmd` in `notebooks_quarto/` (ch00–ch17) — edit these
@@ -121,5 +140,6 @@ python3 scripts/generate_pdf_playwright.py --all
 - **HTML book:** Quarto project in `book/` with symlinks (`book/notebooks_quarto` → `../notebooks_quarto`)
 - **Colab export:** `scripts/export_qmd_to_ipynb.py` converts `.qmd` → `.ipynb` for Google Colab
 - **PDF pipeline:** `quarto render` → `scripts/inject_print_css.py` → `scripts/generate_pdf_playwright.py`
-- **Skills:** `chapter-standard` (template compliance), `compile-book` (PDF compilation), `proofread` (content review)
+- **Skills:** `chapter-standard` (template compliance), `compile-book` (PDF compilation), `proofread` (content review), `web-app` (interactive dashboards)
+- **Web apps:** Single-file Plotly.js dashboards in `web-apps/chNN/dashboard.html`, built by `scripts/build_chNN_webapp.py` from templates in `.claude/skills/web-app/templates/`
 - **Detailed workflow docs:** `.claude/rules/pdf-generation.md` and `.claude/rules/quarto-book.md`
