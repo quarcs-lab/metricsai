@@ -59,6 +59,7 @@ Selected chapters feature self-contained interactive dashboards where students m
 | **1** | [![Open Web App](images/webapp-badge.svg)](https://quarcs-lab.github.io/metricsai/web-apps/ch01/dashboard.html) — Scatter plots, regression lines, R², prediction explorer, multi-predictor comparison |
 | **2** | [![Open Web App](images/webapp-badge.svg)](https://quarcs-lab.github.io/metricsai/web-apps/ch02/dashboard.html) — Histograms, KDE, box plots, time series, log transforms, z-scores, moving averages |
 | **3** | [![Open Web App](images/webapp-badge.svg)](https://quarcs-lab.github.io/metricsai/web-apps/ch03/dashboard.html) — Sampling distributions, sample size & SE, Central Limit Theorem, estimator properties, weighted means |
+| **4** | [![Open Web App](images/webapp-badge.svg)](https://quarcs-lab.github.io/metricsai/web-apps/ch04/dashboard.html) — SE & sample size, t-distribution, confidence intervals, two-sided & one-sided hypothesis tests, gas price test, proportions |
 
 More chapters coming. Use `/web-app chNN` in Claude Code to generate a new chapter dashboard.
 

@@ -1,0 +1,735 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chapter 04 — Statistical Inference for the Mean · metricsAI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.plot.ly/plotly-2.35.2.min.js" charset="utf-8"></script>
+<style>
+:root{--cyan:#008CB7;--cyan-soft:#22d3ee;--purple:#7A209F;--purple-soft:#c084fc;--pink:#C21E72;--pink-soft:#f472b6;--bg:#f5f8fb;--panel:#fff;--panel-2:#f0f4f9;--text:#0b1021;--text-soft:#475569;--text-muted:#64748b;--border:#d9e2ec;--accent:var(--cyan);--accent-2:var(--purple);--accent-3:var(--pink);--shadow:0 2px 10px rgba(11,16,33,.06),0 12px 30px rgba(11,16,33,.05);--grid:#e3e8ef;--code-bg:#eef3f8}
+html[data-theme="dark"]{--bg:#0c1024;--panel:#151a33;--panel-2:#1b2142;--text:#e2e8f0;--text-soft:#b5c0d0;--text-muted:#8a98ae;--border:#2a3156;--accent:var(--cyan-soft);--accent-2:var(--purple-soft);--accent-3:var(--pink-soft);--shadow:0 2px 10px rgba(0,0,0,.25),0 12px 30px rgba(0,0,0,.35);--grid:#2a3156;--code-bg:#0f1530}
+*{box-sizing:border-box}html,body{margin:0;padding:0}
+body{font-family:'Inter',system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);line-height:1.55;transition:background-color .25s ease,color .25s ease}
+code,.mono{font-family:'JetBrains Mono',ui-monospace,monospace}
+header.page{position:relative;padding:2.4rem 1.5rem 2rem;background:radial-gradient(1200px 400px at 85% -10%,rgba(122,32,159,.15),transparent),radial-gradient(1000px 400px at 10% 0%,rgba(0,140,183,.18),transparent),var(--panel);border-bottom:1px solid var(--border)}
+.page-inner{max-width:1120px;margin:0 auto}
+.chapter-badge{display:inline-block;font-size:.72rem;letter-spacing:.15em;text-transform:uppercase;color:var(--accent);font-weight:600;margin-bottom:.5rem}
+h1.title{font-size:clamp(1.6rem,3.4vw,2.4rem);margin:0 0 .35rem;background:linear-gradient(90deg,var(--accent),var(--accent-2));-webkit-background-clip:text;background-clip:text;color:transparent;font-weight:700;letter-spacing:-.01em}
+p.subtitle{margin:0 0 .8rem;color:var(--text-soft);font-size:1.05rem;max-width:720px}
+.theme-toggle{position:absolute;top:1.4rem;right:1.5rem;background:var(--panel-2);color:var(--text);border:1px solid var(--border);padding:.4rem .8rem;border-radius:999px;cursor:pointer;font-size:.85rem;font-weight:500;display:inline-flex;align-items:center;gap:.35rem;transition:all .2s ease}
+.theme-toggle:hover{border-color:var(--accent);color:var(--accent)}
+nav.anchors{position:sticky;top:0;z-index:20;background:color-mix(in srgb,var(--panel) 92%,transparent);backdrop-filter:saturate(150%) blur(8px);-webkit-backdrop-filter:saturate(150%) blur(8px);border-bottom:1px solid var(--border)}
+nav.anchors ul{display:flex;gap:.25rem;overflow-x:auto;list-style:none;padding:.55rem 1.5rem;margin:0 auto;max-width:1120px;scrollbar-width:thin}
+nav.anchors a{display:block;padding:.35rem .75rem;border-radius:8px;color:var(--text-soft);text-decoration:none;font-size:.85rem;font-weight:500;white-space:nowrap;transition:all .15s ease}
+nav.anchors a:hover{color:var(--accent);background:var(--panel-2)}
+main{max-width:1120px;margin:1.2rem auto 3rem;padding:0 1.5rem}
+section.widget{background:var(--panel);border:1px solid var(--border);border-radius:16px;padding:1.5rem 1.4rem 1.3rem;margin-bottom:1.5rem;box-shadow:var(--shadow)}
+.section-tag{display:inline-block;font-family:'JetBrains Mono',monospace;font-size:.72rem;color:var(--accent);background:color-mix(in srgb,var(--accent) 12%,transparent);padding:.2rem .55rem;border-radius:6px;margin-bottom:.6rem;font-weight:500}
+.widget h2{margin:0 0 .2rem;font-size:1.35rem;font-weight:600;color:var(--accent-2);letter-spacing:-.005em}
+.widget .lede{margin:0 0 1rem;color:var(--text-soft);font-size:.97rem;max-width:780px}
+.controls{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:.9rem 1.2rem;padding:.9rem 1rem;background:var(--panel-2);border-radius:10px;margin-bottom:1rem}
+.ctrl{display:flex;flex-direction:column;gap:.3rem}
+.ctrl label{font-size:.78rem;font-weight:500;color:var(--text-soft);text-transform:uppercase;letter-spacing:.05em}
+.ctrl select,.ctrl input[type="range"],.ctrl input[type="number"]{font-family:inherit;font-size:.9rem;padding:.4rem .55rem;border-radius:8px;border:1px solid var(--border);background:var(--panel);color:var(--text)}
+.ctrl input[type="range"]{padding:.2rem 0;accent-color:var(--accent)}
+.ctrl .val{font-family:'JetBrains Mono',monospace;font-size:.82rem;color:var(--accent);font-weight:500}
+.toggle-group{display:inline-flex;gap:.25rem;background:var(--panel);padding:3px;border-radius:10px;border:1px solid var(--border)}
+.toggle-group button{background:transparent;border:none;color:var(--text-soft);padding:.32rem .75rem;border-radius:7px;font-family:inherit;font-size:.85rem;cursor:pointer;transition:all .15s ease}
+.toggle-group button.active{background:var(--accent);color:white;font-weight:500}
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(100px,1fr));gap:.6rem;margin:.5rem 0 1rem}
+.stat{background:var(--panel-2);padding:.65rem .75rem;border-radius:10px;border-left:3px solid var(--accent)}
+.stat .label{font-size:.7rem;text-transform:uppercase;letter-spacing:.06em;color:var(--text-muted)}
+.stat .value{font-family:'JetBrains Mono',monospace;font-size:1.05rem;font-weight:500;color:var(--text);margin-top:.15rem}
+.stat.mean{border-left-color:var(--accent)}.stat.median{border-left-color:var(--accent-3)}.stat.spread{border-left-color:var(--accent-2)}
+.callout{background:color-mix(in srgb,var(--accent-2) 8%,transparent);border-left:3px solid var(--accent-2);padding:.7rem .9rem;border-radius:8px;font-size:.9rem;color:var(--text-soft);margin:.9rem 0 .2rem}
+.callout strong{color:var(--accent-2)}
+.try-this{background:color-mix(in srgb,var(--accent) 8%,transparent);border-left:3px solid var(--accent);padding:.7rem .9rem;border-radius:8px;font-size:.9rem;color:var(--text-soft);margin:.7rem 0 .2rem}
+.try-this .try-title{font-weight:600;color:var(--accent);font-size:.78rem;letter-spacing:.08em;text-transform:uppercase;margin-bottom:.3rem}
+.try-this ol{margin:0;padding-left:1.25rem}.try-this li{margin:.2rem 0}
+.widget-head{display:flex;align-items:flex-start;justify-content:space-between;gap:.5rem;margin-bottom:.2rem}
+.widget-head>div{flex:1;min-width:0}
+.reset-btn{background:transparent;color:var(--text-muted);border:1px solid var(--border);padding:.3rem .7rem;border-radius:8px;font-family:inherit;font-size:.8rem;cursor:pointer;white-space:nowrap;transition:all .15s ease}
+.reset-btn:hover{color:var(--accent);border-color:var(--accent)}
+.decision-badge{display:inline-block;padding:.25rem .7rem;border-radius:8px;font-family:'JetBrains Mono',monospace;font-size:.85rem;font-weight:600;margin:.4rem 0}
+.decision-badge.reject{background:color-mix(in srgb,var(--accent-3) 15%,transparent);color:var(--accent-3);border:1px solid var(--accent-3)}
+.decision-badge.fail{background:color-mix(in srgb,var(--accent) 12%,transparent);color:var(--accent);border:1px solid var(--accent)}
+.chart{width:100%;min-height:340px}.chart.tall{min-height:420px}.chart.short{min-height:280px}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+@media(max-width:720px){.two-col{grid-template-columns:1fr}}
+footer.page{max-width:1120px;margin:1rem auto 3rem;padding:0 1.5rem;color:var(--text-muted);font-size:.88rem;text-align:center}
+footer.page a{color:var(--accent);text-decoration:none}footer.page a:hover{text-decoration:underline}
+.scroll-top{display:inline-block;font-size:.78rem;color:var(--text-muted);text-decoration:none;margin-top:.4rem}.scroll-top:hover{color:var(--accent)}
+</style>
+</head>
+<body>
+
+<header class="page">
+  <div class="page-inner">
+    <span class="chapter-badge">Chapter 04 of 18 · Interactive Dashboard</span>
+    <h1 class="title">Statistical Inference for the Mean</h1>
+    <p class="subtitle">Explore confidence intervals, hypothesis testing, and the t-distribution through interactive controls — using the same datasets and examples as the book.</p>
+  </div>
+  <button id="theme-toggle" class="theme-toggle" type="button" aria-label="Toggle color theme"><span id="theme-icon">🌙</span><span id="theme-label">Dark</span></button>
+</header>
+
+<nav class="anchors" aria-label="Sections">
+  <ul>
+    <li><a href="#se-sample-size">SE &amp; Sample Size</a></li>
+    <li><a href="#t-dist">t-Distribution</a></li>
+    <li><a href="#confidence">Confidence Intervals</a></li>
+    <li><a href="#hyp-two">Two-Sided Test</a></li>
+    <li><a href="#hyp-one">One-Sided Test</a></li>
+    <li><a href="#gas-test">Gas Price Test</a></li>
+    <li><a href="#proportions">Proportions</a></li>
+  </ul>
+</nav>
+
+<main>
+
+<!-- ==================== WIDGET 1: SE & Sample Size ==================== -->
+<section class="widget" id="se-sample-size">
+  <div class="widget-head">
+    <div>
+      <span class="section-tag">§4.1</span>
+      <h2>Standard Error &amp; Sample Size</h2>
+      <p class="lede">The standard error SE = s/&radic;n measures the precision of X&#772; as an estimate of &mu;. Drag the slider to see how precision improves with more data — but with diminishing returns.</p>
+    </div>
+    <button class="reset-btn" data-reset="sesamplesize">Reset</button>
+  </div>
+  <div class="controls">
+    <div class="ctrl">
+      <label>Sample size (n)</label>
+      <input type="range" id="se-n" min="10" max="500" step="5" value="171">
+      <span class="val" id="se-n-val">n = 171</span>
+    </div>
+  </div>
+  <div class="stats-grid">
+    <div class="stat mean"><div class="label">n</div><div class="value" id="se-stat-n">171</div></div>
+    <div class="stat spread"><div class="label">SD (s)</div><div class="value" id="se-stat-sd">—</div></div>
+    <div class="stat median"><div class="label">SE (s/&radic;n)</div><div class="value" id="se-stat-se">—</div></div>
+    <div class="stat mean"><div class="label">Approx 95% CI width</div><div class="value" id="se-stat-ciw">—</div></div>
+  </div>
+  <div id="chart-se" class="chart"></div>
+  <div class="callout">
+    <strong>Key Concept 4.1:</strong> se(X&#772;) = s/&radic;n. Quadrupling the sample size halves the SE. The curve above follows a 1/&radic;n shape — precision improves rapidly at small n but yields diminishing returns at larger n.
+  </div>
+  <div class="try-this">
+    <div class="try-title">Try This</div>
+    <ol>
+      <li>Set n = 171 (the book's sample). SE &asymp; $1,952 and the approximate 95% CI width is ~$7,808. Now set n = 684 (4&times;171). Does SE drop to roughly half (~$976)?</li>
+      <li>Set n = 50. SE jumps to ~$3,611. How much wider is the 95% CI compared to n = 171? Is the loss of precision acceptable?</li>
+      <li>Set n = 400. How much more precise are we compared to n = 171? Is the improvement worth collecting 229 more observations?</li>
+    </ol>
+  </div>
+</section>
+
+<!-- ==================== WIDGET 2: t-Distribution Explorer ==================== -->
+<section class="widget" id="t-dist">
+  <div class="widget-head">
+    <div>
+      <span class="section-tag">§4.2</span>
+      <h2>t-Distribution Explorer</h2>
+      <p class="lede">When &sigma; is unknown and estimated from the sample, the test statistic follows a t-distribution with fatter tails than the normal. As df grows, the t converges to N(0, 1).</p>
+    </div>
+    <button class="reset-btn" data-reset="tdist">Reset</button>
+  </div>
+  <div class="controls">
+    <div class="ctrl">
+      <label>Degrees of freedom</label>
+      <div class="toggle-group" id="t-dist-df">
+        <button data-val="4">df = 4</button>
+        <button data-val="10">df = 10</button>
+        <button class="active" data-val="30">df = 30</button>
+        <button data-val="100">df = 100</button>
+      </div>
+    </div>
+    <div class="ctrl">
+      <label>Show Normal N(0,1)</label>
+      <div class="toggle-group" id="t-dist-normal">
+        <button class="active" data-val="on">On</button>
+        <button data-val="off">Off</button>
+      </div>
+    </div>
+  </div>
+  <div class="stats-grid">
+    <div class="stat mean"><div class="label">df</div><div class="value" id="td-stat-df">30</div></div>
+    <div class="stat spread"><div class="label">t-crit (5%, two-sided)</div><div class="value" id="td-stat-tcrit">—</div></div>
+    <div class="stat median"><div class="label">z-crit (Normal)</div><div class="value" id="td-stat-zcrit">1.960</div></div>
+    <div class="stat mean"><div class="label">Tail area beyond &plusmn;1.96</div><div class="value" id="td-stat-tail">—</div></div>
+  </div>
+  <div id="chart-t-dist" class="chart"></div>
+  <div class="callout">
+    <strong>Key Concept 4.2:</strong> The t-distribution has fatter tails than the normal, reflecting extra uncertainty from estimating &sigma;. At df = 4, the 5% critical value is 2.78 (much larger than 1.96). By df = 100, it is nearly indistinguishable from N(0, 1).
+  </div>
+  <div class="try-this">
+    <div class="try-title">Try This</div>
+    <ol>
+      <li>Set df = 4. How much fatter are the tails compared to the normal? Note the t-critical value: 2.78 vs 1.96.</li>
+      <li>Set df = 30. The t-critical is now ~2.04 — close to 1.96. The rule of thumb &ldquo;n &ge; 30 is large enough&rdquo; makes sense visually.</li>
+      <li>Set df = 100. Can you even tell the difference from the normal? Look at the tail area beyond &plusmn;1.96 — it is nearly 5%.</li>
+    </ol>
+  </div>
+</section>
+
+<!-- ==================== WIDGET 3: Confidence Intervals ==================== -->
+<section class="widget" id="confidence">
+  <div class="widget-head">
+    <div>
+      <span class="section-tag">§4.3</span>
+      <h2>Confidence Interval Visualizer</h2>
+      <p class="lede">A confidence interval gives a range of plausible values for &mu;. Drag the confidence level to see the precision-confidence trade-off: higher confidence means wider intervals.</p>
+    </div>
+    <button class="reset-btn" data-reset="confidence">Reset</button>
+  </div>
+  <div class="controls">
+    <div class="ctrl">
+      <label>Confidence level</label>
+      <input type="range" id="ci-level" min="80" max="99" step="1" value="95">
+      <span class="val" id="ci-level-val">95%</span>
+    </div>
+    <div class="ctrl">
+      <label>Dataset</label>
+      <div class="toggle-group" id="ci-dataset">
+        <button class="active" data-val="earnings">Female Earnings</button>
+        <button data-val="gas">Gas Prices</button>
+      </div>
+    </div>
+  </div>
+  <div class="stats-grid">
+    <div class="stat mean"><div class="label">X&#772;</div><div class="value" id="ci-stat-mean">—</div></div>
+    <div class="stat spread"><div class="label">t-critical</div><div class="value" id="ci-stat-tcrit">—</div></div>
+    <div class="stat median"><div class="label">Margin of error</div><div class="value" id="ci-stat-moe">—</div></div>
+    <div class="stat mean"><div class="label">CI Lower</div><div class="value" id="ci-stat-lo">—</div></div>
+    <div class="stat median"><div class="label">CI Upper</div><div class="value" id="ci-stat-hi">—</div></div>
+    <div class="stat spread"><div class="label">Width</div><div class="value" id="ci-stat-width">—</div></div>
+  </div>
+  <div id="chart-ci" class="chart short"></div>
+  <div class="callout">
+    <strong>Key Concept 4.3:</strong> CI = X&#772; &plusmn; t<sub>&alpha;/2</sub> &times; SE. A 95% CI means: if we repeated the sampling many times, approximately 95% of the resulting intervals would contain the true &mu;. The book's 95% CI for female earnings is [$37,559, $45,266].
+  </div>
+  <div class="try-this">
+    <div class="try-title">Try This</div>
+    <ol>
+      <li>At 95%, the CI for female earnings is about [$37,559, $45,266] — width $7,707. Switch to 99%. How much wider does it get? (Hint: about $10,171.)</li>
+      <li>Switch to 90%. The CI narrows to ~$6,457. You gain precision but lose confidence — there is a higher chance the true &mu; falls outside.</li>
+      <li>Switch to <strong>Gas Prices</strong>. The CI is much tighter because the data has lower variability and smaller SE. Does $3.81 (the CA average) fall inside the 95% CI?</li>
+    </ol>
+  </div>
+</section>
+
+<!-- ==================== WIDGET 4: Two-Sided Hypothesis Test ==================== -->
+<section class="widget" id="hyp-two">
+  <div class="widget-head">
+    <div>
+      <span class="section-tag">§4.4</span>
+      <h2>Two-Sided Hypothesis Test</h2>
+      <p class="lede">Test H<sub>0</sub>: &mu; = &mu;<sub>0</sub> vs H<sub>a</sub>: &mu; &ne; &mu;<sub>0</sub>. Drag the hypothesized value and watch the t-statistic, p-value, and decision update in real time.</p>
+    </div>
+    <button class="reset-btn" data-reset="hyptwo">Reset</button>
+  </div>
+  <div class="controls">
+    <div class="ctrl">
+      <label>Hypothesized value &mu;<sub>0</sub></label>
+      <input type="range" id="ht-mu0" min="30000" max="55000" step="500" value="40000">
+      <span class="val" id="ht-mu0-val">$40,000</span>
+    </div>
+  </div>
+  <div class="stats-grid">
+    <div class="stat mean"><div class="label">X&#772;</div><div class="value" id="ht-stat-xbar">—</div></div>
+    <div class="stat spread"><div class="label">SE</div><div class="value" id="ht-stat-se">—</div></div>
+    <div class="stat median"><div class="label">t-statistic</div><div class="value" id="ht-stat-t">—</div></div>
+    <div class="stat spread"><div class="label">p-value</div><div class="value" id="ht-stat-p">—</div></div>
+    <div class="stat mean"><div class="label">&plusmn;t-crit (5%)</div><div class="value" id="ht-stat-tcrit">—</div></div>
+  </div>
+  <div id="ht-decision" class="decision-badge fail">—</div>
+  <div id="chart-hyp-two" class="chart"></div>
+  <div class="callout">
+    <strong>Key Concept 4.4:</strong> t = (X&#772; &minus; &mu;<sub>0</sub>) / SE. The p-value is the probability of observing a result at least as extreme, assuming H<sub>0</sub> is true. At &mu;<sub>0</sub> = $40,000 the book gets t = 0.72 and p = 0.470 — not enough evidence to reject.
+  </div>
+  <div class="try-this">
+    <div class="try-title">Try This</div>
+    <ol>
+      <li>Set &mu;<sub>0</sub> = $40,000 (the book's example). The t-stat is ~0.72 and p &asymp; 0.470. The shaded rejection regions are far from the t-stat marker. We fail to reject.</li>
+      <li>Drag &mu;<sub>0</sub> down to $35,000. Now the t-stat moves further from zero. At what &mu;<sub>0</sub> does p first drop below 0.05? That boundary is the 95% CI endpoint.</li>
+      <li>Set &mu;<sub>0</sub> = $50,000. Now t is strongly negative. Rejection is clear. The p-value is tiny.</li>
+    </ol>
+  </div>
+</section>
+
+<!-- ==================== WIDGET 5: One-Sided Hypothesis Test ==================== -->
+<section class="widget" id="hyp-one">
+  <div class="widget-head">
+    <div>
+      <span class="section-tag">§4.6</span>
+      <h2>One-Sided Hypothesis Test</h2>
+      <p class="lede">One-sided tests concentrate the rejection region in one tail, making them more powerful for detecting effects in the predicted direction. Compare the p-value to the two-sided version.</p>
+    </div>
+    <button class="reset-btn" data-reset="hypone">Reset</button>
+  </div>
+  <div class="controls">
+    <div class="ctrl">
+      <label>Hypothesized value &mu;<sub>0</sub></label>
+      <input type="range" id="ho-mu0" min="30000" max="55000" step="500" value="40000">
+      <span class="val" id="ho-mu0-val">$40,000</span>
+    </div>
+    <div class="ctrl">
+      <label>Alternative hypothesis</label>
+      <div class="toggle-group" id="ho-direction">
+        <button class="active" data-val="greater">H&#x2090;: &mu; &gt; &mu;&#x2080;</button>
+        <button data-val="less">H&#x2090;: &mu; &lt; &mu;&#x2080;</button>
+      </div>
+    </div>
+  </div>
+  <div class="stats-grid">
+    <div class="stat mean"><div class="label">t-statistic</div><div class="value" id="ho-stat-t">—</div></div>
+    <div class="stat median"><div class="label">p-value (one-sided)</div><div class="value" id="ho-stat-p1">—</div></div>
+    <div class="stat spread"><div class="label">p-value (two-sided)</div><div class="value" id="ho-stat-p2">—</div></div>
+    <div class="stat mean"><div class="label">t-crit (one-sided, 5%)</div><div class="value" id="ho-stat-tcrit">—</div></div>
+  </div>
+  <div id="ho-decision" class="decision-badge fail">—</div>
+  <div id="chart-hyp-one" class="chart"></div>
+  <div class="callout">
+    <strong>Key Concept 4.8:</strong> The one-sided p-value is exactly half the two-sided p-value (when the effect is in the predicted direction). Critical values are smaller: 1.65 vs &plusmn;1.97 for &alpha; = 0.05 with df = 170.
+  </div>
+  <div class="try-this">
+    <div class="try-title">Try This</div>
+    <ol>
+      <li>Set &mu;<sub>0</sub> = $40,000, H<sub>a</sub>: &mu; &gt; $40,000. The one-sided p-value is 0.235 — half of the two-sided 0.470. Still not significant.</li>
+      <li>Now set &mu;<sub>0</sub> = $38,000. The one-sided test rejects, but the two-sided does not. This illustrates the power advantage of directional tests.</li>
+      <li>Toggle to H<sub>a</sub>: &mu; &lt; &mu;<sub>0</sub>. What happens when the t-stat is positive but you are testing in the wrong direction?</li>
+    </ol>
+  </div>
+</section>
+
+<!-- ==================== WIDGET 6: Gas Price Test ==================== -->
+<section class="widget" id="gas-test">
+  <div class="widget-head">
+    <div>
+      <span class="section-tag">§4.5</span>
+      <h2>Gasoline Prices: Statistical vs Practical Significance</h2>
+      <p class="lede">Is the average gas price in Yolo County different from the California state average? With n = 32 stations, even a $0.14 difference is highly significant — but does it matter practically?</p>
+    </div>
+    <button class="reset-btn" data-reset="gastest">Reset</button>
+  </div>
+  <div class="controls">
+    <div class="ctrl">
+      <label>CA state average (H<sub>0</sub>)</label>
+      <input type="range" id="gas-mu0" min="3.40" max="4.10" step="0.01" value="3.81">
+      <span class="val" id="gas-mu0-val">$3.81</span>
+    </div>
+  </div>
+  <div class="stats-grid">
+    <div class="stat mean"><div class="label">Sample mean</div><div class="value" id="gas-stat-mean">—</div></div>
+    <div class="stat spread"><div class="label">SE</div><div class="value" id="gas-stat-se">—</div></div>
+    <div class="stat median"><div class="label">t-statistic</div><div class="value" id="gas-stat-t">—</div></div>
+    <div class="stat spread"><div class="label">p-value</div><div class="value" id="gas-stat-p">—</div></div>
+  </div>
+  <div id="gas-decision" class="decision-badge reject">—</div>
+  <div id="chart-gas" class="chart"></div>
+  <div class="callout">
+    <strong>Key Concept 4.5:</strong> At &mu;<sub>0</sub> = $3.81, t = &minus;5.26 and p &lt; 0.0001. The difference ($0.14/gallon) is <em>statistically</em> significant because the SE is tiny ($0.027). But is $0.14 <em>practically</em> significant? That depends on context — a commuter filling 15 gallons saves only $2.10.
+  </div>
+  <div class="try-this">
+    <div class="try-title">Try This</div>
+    <ol>
+      <li>At H<sub>0</sub> = $3.81 (the book's CA average), the t-stat is &minus;5.26. Move H<sub>0</sub> closer to the sample mean ($3.67). At what value does the test stop rejecting?</li>
+      <li>Set H<sub>0</sub> = $3.67 (the sample mean itself). The t-stat is ~0 and p &asymp; 1.0. The rejection region is empty. Of course we cannot reject that &mu; equals X&#772;.</li>
+      <li>Notice how the histogram clusters tightly around $3.50–$3.90. The small spread (SD &asymp; $0.15) means even small departures from H<sub>0</sub> are detectable.</li>
+    </ol>
+  </div>
+</section>
+
+<!-- ==================== WIDGET 7: Proportions Inference ==================== -->
+<section class="widget" id="proportions">
+  <div class="widget-head">
+    <div>
+      <span class="section-tag">§4.7</span>
+      <h2>Inference for Proportions</h2>
+      <p class="lede">Proportions (like vote shares or employment rates) are just means of binary 0/1 data. All inference methods — SE, CIs, hypothesis tests — extend naturally. Adjust p&#770; and n to explore.</p>
+    </div>
+    <button class="reset-btn" data-reset="proportions">Reset</button>
+  </div>
+  <div class="controls">
+    <div class="ctrl">
+      <label>Sample proportion (p&#770;)</label>
+      <input type="range" id="prop-phat" min="0.30" max="0.70" step="0.01" value="0.52">
+      <span class="val" id="prop-phat-val">p&#770; = 0.52</span>
+    </div>
+    <div class="ctrl">
+      <label>Sample size (n)</label>
+      <input type="range" id="prop-n" min="50" max="5000" step="50" value="921">
+      <span class="val" id="prop-n-val">n = 921</span>
+    </div>
+    <div class="ctrl">
+      <label>Hypothesized proportion (p<sub>0</sub>)</label>
+      <input type="range" id="prop-p0" min="0.30" max="0.70" step="0.01" value="0.50">
+      <span class="val" id="prop-p0-val">p&#x2080; = 0.50</span>
+    </div>
+  </div>
+  <div class="stats-grid">
+    <div class="stat mean"><div class="label">SE</div><div class="value" id="prop-stat-se">—</div></div>
+    <div class="stat mean"><div class="label">95% CI Lower</div><div class="value" id="prop-stat-lo">—</div></div>
+    <div class="stat median"><div class="label">95% CI Upper</div><div class="value" id="prop-stat-hi">—</div></div>
+    <div class="stat spread"><div class="label">z-statistic</div><div class="value" id="prop-stat-z">—</div></div>
+    <div class="stat spread"><div class="label">p-value</div><div class="value" id="prop-stat-p">—</div></div>
+  </div>
+  <div id="prop-decision" class="decision-badge fail">—</div>
+  <div id="chart-prop" class="chart short"></div>
+  <div class="callout">
+    <strong>Key Concept 4.9:</strong> se(p&#770;) = &radic;(p&#770;(1&minus;p&#770;)/n). The book's voter-intent example: 480/921 = 52.1% Democrats, SE = 0.0165, 95% CI = [48.9%, 55.3%]. Since 50% is inside the CI, we cannot reject H<sub>0</sub>: p = 0.50.
+  </div>
+  <div class="try-this">
+    <div class="try-title">Try This</div>
+    <ol>
+      <li>Default: p&#770; = 0.52, n = 921. The 95% CI includes 0.50, so the test fails to reject. This matches the book's voter example (z = 1.29, p = 0.199).</li>
+      <li>Keep p&#770; = 0.52 but increase n to 2,500. Now the CI tightens and 0.50 falls outside — the same proportion becomes significant with a larger sample.</li>
+      <li>Set p&#770; = 0.50 exactly. The z-stat is 0 and p = 1. The CI is perfectly centered on the hypothesized value.</li>
+    </ol>
+  </div>
+</section>
+
+</main>
+
+<footer class="page">
+  <p>Part of <a href="https://quarcs-lab.github.io/metricsai/book/_book/index.html"><strong>metricsAI</strong></a> · Chapter 04: Statistical Inference for the Mean · by Carlos Mendez · <a href="https://github.com/quarcs-lab/metricsai">GitHub</a></p>
+  <p>Data: AED_EARNINGS.DTA (n=171) · AED_GASPRICE.DTA (n=32) · AED_EARNINGSMALE.DTA (n=191) · AED_REALGDPPC.DTA (n=241)</p>
+  <a class="scroll-top" href="#top">&uarr; Back to top</a>
+</footer>
+
+<script type="application/json" id="ch-data">{{DATA_JSON}}</script>
+
+<script>
+"use strict";
+
+var DATA = JSON.parse(document.getElementById("ch-data").textContent);
+
+// ==================== STATS HELPERS ====================
+var mean = function(a){ var s=0; for(var i=0;i<a.length;i++) s+=a[i]; return s/a.length; };
+var sortedCopy = function(a){ return a.slice().sort(function(x,y){return x-y;}); };
+function quantile(sorted,p){var idx=p*(sorted.length-1),lo=Math.floor(idx),hi=Math.ceil(idx);if(lo===hi)return sorted[lo];return sorted[lo]+(idx-lo)*(sorted[hi]-sorted[lo]);}
+function std(a,m){m=m!==undefined?m:mean(a);var s=0;for(var i=0;i<a.length;i++)s+=(a[i]-m)*(a[i]-m);return Math.sqrt(s/(a.length-1));}
+function summary(values){var arr=values.filter(function(v){return v!==null&&!isNaN(v);});var sorted=sortedCopy(arr);var m=mean(arr);var sd=std(arr,m);return{n:arr.length,mean:m,median:quantile(sorted,0.5),std:sd,se:sd/Math.sqrt(arr.length),min:sorted[0],max:sorted[sorted.length-1]};}
+function linspace(a,b,n){var out=new Array(n);var step=(b-a)/(n-1);for(var i=0;i<n;i++)out[i]=a+i*step;return out;}
+
+// ==================== t-DISTRIBUTION ====================
+function lnGamma(x){var cof=[76.18009172947146,-86.50532032941678,24.01409824083091,-1.231739572450155,0.001208650973866179,-5.395239384953e-6];var y=x,tmp=x+5.5;tmp-=(x+0.5)*Math.log(tmp);var ser=1.000000000190015;for(var j=0;j<6;j++)ser+=cof[j]/++y;return -tmp+Math.log(2.5066282746310005*ser/x);}
+function betaCF(a,b,x){var MAXIT=200,EPS=3e-12,qab=a+b,qap=a+1,qam=a-1;var c=1,d=1-qab*x/qap;if(Math.abs(d)<1e-30)d=1e-30;d=1/d;var h=d;for(var m=1;m<=MAXIT;m++){var m2=2*m;var aa=m*(b-m)*x/((qam+m2)*(a+m2));d=1+aa*d;if(Math.abs(d)<1e-30)d=1e-30;c=1+aa/c;if(Math.abs(c)<1e-30)c=1e-30;d=1/d;h*=d*c;aa=-(a+m)*(qab+m)*x/((a+m2)*(qap+m2));d=1+aa*d;if(Math.abs(d)<1e-30)d=1e-30;c=1+aa/c;if(Math.abs(c)<1e-30)c=1e-30;d=1/d;var del=d*c;h*=del;if(Math.abs(del-1)<EPS)break;}return h;}
+function betaInc(a,b,x){if(x===0||x===1)return x;var bt=Math.exp(lnGamma(a+b)-lnGamma(a)-lnGamma(b)+a*Math.log(x)+b*Math.log(1-x));if(x<(a+1)/(a+b+2))return bt*betaCF(a,b,x)/a;return 1-bt*betaCF(b,a,1-x)/b;}
+function tCDF(t,df){var x=df/(df+t*t);var p=0.5*betaInc(df/2,0.5,x);return t>=0?1-p:p;}
+function tPDF(t,df){return Math.exp(lnGamma((df+1)/2)-lnGamma(df/2))/(Math.sqrt(df*Math.PI))*Math.pow(1+t*t/df,-(df+1)/2);}
+function tQuantile(p,df){var lo=-15,hi=15;for(var i=0;i<80;i++){var mid=(lo+hi)/2;if(tCDF(mid,df)<p)lo=mid;else hi=mid;}return(lo+hi)/2;}
+function normalPDF(x,mu,sigma){if(sigma===undefined){sigma=mu||1;mu=mu!==undefined?0:0;}var z=(x-(mu||0))/(sigma||1);return Math.exp(-0.5*z*z)/((sigma||1)*Math.sqrt(2*Math.PI));}
+function normalCDF(x){var t=1/(1+0.2316419*Math.abs(x));var d=0.3989422804014327;var p=d*Math.exp(-x*x/2)*(t*(0.319381530+t*(-0.356563782+t*(1.781477937+t*(-1.821255978+t*1.330274429)))));return x>0?1-p:p;}
+
+// ==================== FORMATTING ====================
+function fmt(v,d){d=d!==undefined?d:2;if(v===null||v===undefined||isNaN(v))return"\u2014";return v.toFixed(d);}
+function fmtMoney(v){return v===null?"\u2014":"$"+Math.round(v).toLocaleString();}
+function fmtPct(v,d){return v===null?"\u2014":(v*100).toFixed(d||1)+"%";}
+
+// ==================== THEME ====================
+var THEME_KEY="metricsai-theme";
+function getCSS(v){return getComputedStyle(document.documentElement).getPropertyValue(v).trim();}
+function themeColors(){return{text:getCSS("--text"),textSoft:getCSS("--text-soft"),grid:getCSS("--grid"),panel:getCSS("--panel"),cyan:getCSS("--accent"),purple:getCSS("--accent-2"),pink:getCSS("--accent-3")};}
+function baseLayout(o){var c=themeColors();return Object.assign({paper_bgcolor:"rgba(0,0,0,0)",plot_bgcolor:"rgba(0,0,0,0)",font:{family:"Inter, system-ui, sans-serif",color:c.text,size:12},margin:{l:56,r:18,t:30,b:46},xaxis:{gridcolor:c.grid,linecolor:c.grid,zerolinecolor:c.grid,tickfont:{color:c.textSoft}},yaxis:{gridcolor:c.grid,linecolor:c.grid,zerolinecolor:c.grid,tickfont:{color:c.textSoft}},hoverlabel:{bgcolor:c.panel,bordercolor:c.grid,font:{color:c.text}},legend:{font:{color:c.text},bgcolor:"rgba(0,0,0,0)"}},o||{});}
+var PLOTLY_CONFIG={displayModeBar:false,responsive:true};
+
+function getActiveVal(id){var b=document.querySelector("#"+id+" button.active");return b?b.dataset.val:null;}
+function bindToggles(id,fn){document.querySelectorAll("#"+id+" button").forEach(function(b){b.addEventListener("click",function(){this.parentNode.querySelectorAll("button").forEach(function(x){x.classList.remove("active");});this.classList.add("active");fn();});});}
+function bindSlider(id,vid,ffn,rfn){var el=document.getElementById(id);var ve=document.getElementById(vid);el.addEventListener("input",function(){ve.textContent=ffn(this.value);rfn();});}
+
+// ==================== precomputed stats ====================
+var EARN = summary(DATA.earnings);
+var GAS = summary(DATA.gas.prices);
+
+// ==================== WIDGET 1: SE & Sample Size ====================
+(function(){
+  var chartEl=document.getElementById("chart-se");
+  var sd=EARN.std;
+  function render(){
+    var c=themeColors();
+    var n=parseInt(document.getElementById("se-n").value);
+    var se=sd/Math.sqrt(n);
+    var ciw=2*tQuantile(0.975,n-1)*se;
+    document.getElementById("se-stat-n").textContent=n;
+    document.getElementById("se-stat-sd").textContent=fmtMoney(sd);
+    document.getElementById("se-stat-se").textContent=fmtMoney(se);
+    document.getElementById("se-stat-ciw").textContent=fmtMoney(ciw);
+    var ns=linspace(10,500,200);
+    var ses=ns.map(function(x){return sd/Math.sqrt(x);});
+    var traces=[
+      {x:ns,y:ses,type:"scatter",mode:"lines",line:{color:c.cyan,width:2.5},name:"SE = s/\u221An"},
+      {x:[n],y:[se],type:"scatter",mode:"markers",marker:{color:c.pink,size:12,line:{color:"white",width:2}},name:"Current n = "+n}
+    ];
+    if(n<=250){
+      var n4=n*4;
+      if(n4<=500){
+        var se4=sd/Math.sqrt(n4);
+        traces.push({x:[n4],y:[se4],type:"scatter",mode:"markers",marker:{color:c.purple,size:10,symbol:"diamond",line:{color:"white",width:1.5}},name:"4\u00D7n = "+n4+" (SE halved)"});
+        traces.push({x:[n,n4],y:[se,se],type:"scatter",mode:"lines",line:{color:c.purple,width:1,dash:"dot"},showlegend:false,hoverinfo:"skip"});
+        traces.push({x:[n4,n4],y:[se,se4],type:"scatter",mode:"lines",line:{color:c.purple,width:1,dash:"dot"},showlegend:false,hoverinfo:"skip"});
+      }
+    }
+    var layout=baseLayout({xaxis:{title:"Sample size (n)",gridcolor:c.grid,linecolor:c.grid,zerolinecolor:c.grid,tickfont:{color:c.textSoft}},yaxis:{title:"Standard Error ($)",gridcolor:c.grid,linecolor:c.grid,zerolinecolor:c.grid,tickfont:{color:c.textSoft}},showlegend:true,legend:{x:0.5,y:0.98,xanchor:"center",yanchor:"top",font:{color:c.text},bgcolor:"rgba(0,0,0,0)"}});
+    Plotly.react(chartEl,traces,layout,PLOTLY_CONFIG);
+  }
+  bindSlider("se-n","se-n-val",function(v){return "n = "+v;},render);
+  window.__rerender_sesamplesize=render;
+  render();
+})();
+
+// ==================== WIDGET 2: t-Distribution Explorer ====================
+(function(){
+  var chartEl=document.getElementById("chart-t-dist");
+  function render(){
+    var c=themeColors();
+    var df=parseInt(getActiveVal("t-dist-df"));
+    var showNorm=getActiveVal("t-dist-normal")==="on";
+    var tcrit=tQuantile(0.975,df);
+    var tailArea=2*(1-tCDF(1.96,df));
+    document.getElementById("td-stat-df").textContent=df;
+    document.getElementById("td-stat-tcrit").textContent="\u00B1"+fmt(tcrit,3);
+    document.getElementById("td-stat-tail").textContent=fmtPct(tailArea,2);
+    var xs=linspace(-5,5,400);
+    var traces=[];
+    var ys=xs.map(function(x){return tPDF(x,df);});
+    traces.push({x:xs,y:ys,type:"scatter",mode:"lines",line:{color:c.cyan,width:2.5},name:"t("+df+")"});
+    if(showNorm){
+      var yn=xs.map(function(x){return normalPDF(x,0,1);});
+      traces.push({x:xs,y:yn,type:"scatter",mode:"lines",line:{color:c.purple,width:2,dash:"dash"},name:"N(0, 1)"});
+    }
+    var xLeft=linspace(-5,-tcrit,60);var yLeft=xLeft.map(function(x){return tPDF(x,df);});
+    traces.push({x:xLeft.concat([-tcrit,-5]),y:yLeft.concat([0,0]),fill:"toself",fillcolor:c.pink+"22",line:{width:0},showlegend:false,hoverinfo:"skip"});
+    var xRight=linspace(tcrit,5,60);var yRight=xRight.map(function(x){return tPDF(x,df);});
+    traces.push({x:xRight.concat([5,tcrit]),y:yRight.concat([0,0]),fill:"toself",fillcolor:c.pink+"22",line:{width:0},name:"5% rejection",hoverinfo:"skip"});
+    var layout=baseLayout({xaxis:{title:"t",gridcolor:c.grid,linecolor:c.grid,zerolinecolor:c.grid,tickfont:{color:c.textSoft}},yaxis:{title:"Density",gridcolor:c.grid,linecolor:c.grid,zerolinecolor:c.grid,tickfont:{color:c.textSoft}},showlegend:true,legend:{x:0.02,y:0.98,xanchor:"left",yanchor:"top",font:{color:c.text},bgcolor:"rgba(0,0,0,0)"},shapes:[{type:"line",xref:"x",yref:"paper",x0:-tcrit,x1:-tcrit,y0:0,y1:1,line:{color:c.pink,width:1.5,dash:"dash"}},{type:"line",xref:"x",yref:"paper",x0:tcrit,x1:tcrit,y0:0,y1:1,line:{color:c.pink,width:1.5,dash:"dash"}}]});
+    Plotly.react(chartEl,traces,layout,PLOTLY_CONFIG);
+  }
+  bindToggles("t-dist-df",render);
+  bindToggles("t-dist-normal",render);
+  window.__rerender_tdist=render;
+  render();
+})();
+
+// ==================== WIDGET 3: Confidence Intervals ====================
+(function(){
+  var chartEl=document.getElementById("chart-ci");
+  function render(){
+    var c=themeColors();
+    var level=parseInt(document.getElementById("ci-level").value)/100;
+    var ds=getActiveVal("ci-dataset");
+    var vals=ds==="earnings"?DATA.earnings:DATA.gas.prices;
+    var s=summary(vals);
+    var df=s.n-1;
+    var alpha=1-level;
+    var tcrit=tQuantile(1-alpha/2,df);
+    var moe=tcrit*s.se;
+    var lo=s.mean-moe,hi=s.mean+moe;
+    var isMoney=ds==="earnings";
+    var f=isMoney?fmtMoney:function(v){return "$"+fmt(v,4);};
+    document.getElementById("ci-stat-mean").textContent=f(s.mean);
+    document.getElementById("ci-stat-tcrit").textContent=fmt(tcrit,3);
+    document.getElementById("ci-stat-moe").textContent=f(moe);
+    document.getElementById("ci-stat-lo").textContent=f(lo);
+    document.getElementById("ci-stat-hi").textContent=f(hi);
+    document.getElementById("ci-stat-width").textContent=f(hi-lo);
+    var pad=(hi-lo)*0.6;
+    var traces=[
+      {x:[lo,hi],y:[0.5,0.5],type:"scatter",mode:"lines",line:{color:c.cyan,width:6},name:Math.round(level*100)+"% CI",hoverinfo:"x"},
+      {x:[lo],y:[0.5],type:"scatter",mode:"markers",marker:{color:c.cyan,size:14,symbol:"line-ns-open",line:{width:3,color:c.cyan}},showlegend:false,hoverinfo:"x"},
+      {x:[hi],y:[0.5],type:"scatter",mode:"markers",marker:{color:c.cyan,size:14,symbol:"line-ns-open",line:{width:3,color:c.cyan}},showlegend:false,hoverinfo:"x"},
+      {x:[s.mean],y:[0.5],type:"scatter",mode:"markers",marker:{color:c.pink,size:12,line:{color:"white",width:2}},name:"X\u0304 = "+f(s.mean),hoverinfo:"x"}
+    ];
+    var layout=baseLayout({xaxis:{title:isMoney?"Earnings ($)":"Price ($)",range:[s.mean-pad-moe,s.mean+pad+moe],gridcolor:c.grid,linecolor:c.grid,zerolinecolor:c.grid,tickfont:{color:c.textSoft}},yaxis:{visible:false,range:[0,1]},showlegend:true,legend:{x:0.5,y:1.1,xanchor:"center",orientation:"h",font:{color:c.text},bgcolor:"rgba(0,0,0,0)"},margin:{l:56,r:18,t:50,b:46},annotations:[{x:lo,y:0.25,text:f(lo),showarrow:false,font:{color:c.text,size:11,family:"JetBrains Mono"}},{x:hi,y:0.25,text:f(hi),showarrow:false,font:{color:c.text,size:11,family:"JetBrains Mono"}}]});
+    Plotly.react(chartEl,traces,layout,PLOTLY_CONFIG);
+  }
+  bindSlider("ci-level","ci-level-val",function(v){return v+"%";},render);
+  bindToggles("ci-dataset",render);
+  window.__rerender_confidence=render;
+  render();
+})();
+
+// ==================== WIDGET 4: Two-Sided Hypothesis Test ====================
+(function(){
+  var chartEl=document.getElementById("chart-hyp-two");
+  function render(){
+    var c=themeColors();
+    var mu0=parseInt(document.getElementById("ht-mu0").value);
+    var df=EARN.n-1;
+    var tstat=(EARN.mean-mu0)/EARN.se;
+    var pval=2*(1-tCDF(Math.abs(tstat),df));
+    var tcrit=tQuantile(0.975,df);
+    var reject=pval<0.05;
+    document.getElementById("ht-stat-xbar").textContent=fmtMoney(EARN.mean);
+    document.getElementById("ht-stat-se").textContent=fmtMoney(EARN.se);
+    document.getElementById("ht-stat-t").textContent=fmt(tstat,4);
+    document.getElementById("ht-stat-p").textContent=pval<0.0001?"< 0.0001":fmt(pval,4);
+    document.getElementById("ht-stat-tcrit").textContent="\u00B1"+fmt(tcrit,3);
+    var badge=document.getElementById("ht-decision");
+    badge.textContent=reject?"Reject H\u2080":"Fail to reject H\u2080";
+    badge.className="decision-badge "+(reject?"reject":"fail");
+    var xs=linspace(-5,5,400);
+    var ys=xs.map(function(x){return tPDF(x,df);});
+    var traces=[{x:xs,y:ys,type:"scatter",mode:"lines",line:{color:c.cyan,width:2},name:"t("+df+")"}];
+    var xL=linspace(-5,-tcrit,50),yL=xL.map(function(x){return tPDF(x,df);});
+    traces.push({x:xL.concat([-tcrit,-5]),y:yL.concat([0,0]),fill:"toself",fillcolor:c.pink+"22",line:{width:0},showlegend:false,hoverinfo:"skip"});
+    var xR=linspace(tcrit,5,50),yR=xR.map(function(x){return tPDF(x,df);});
+    traces.push({x:xR.concat([5,tcrit]),y:yR.concat([0,0]),fill:"toself",fillcolor:c.pink+"22",line:{width:0},name:"\u03B1/2 rejection",hoverinfo:"skip"});
+    var tClamped=Math.max(-4.8,Math.min(4.8,tstat));
+    traces.push({x:[tClamped],y:[tPDF(tClamped,df)*1.15],type:"scatter",mode:"markers+text",marker:{color:reject?c.pink:c.cyan,size:14,symbol:"triangle-down"},text:["t = "+fmt(tstat,2)],textposition:"top center",textfont:{color:reject?c.pink:c.cyan,size:11,family:"JetBrains Mono"},name:"Observed t",showlegend:false});
+    var layout=baseLayout({xaxis:{title:"t",gridcolor:c.grid,linecolor:c.grid,zerolinecolor:c.grid,tickfont:{color:c.textSoft}},yaxis:{title:"Density",gridcolor:c.grid,linecolor:c.grid,zerolinecolor:c.grid,tickfont:{color:c.textSoft}},showlegend:true,legend:{x:0.02,y:0.98,xanchor:"left",yanchor:"top",font:{color:c.text},bgcolor:"rgba(0,0,0,0)"},shapes:[{type:"line",xref:"x",yref:"paper",x0:-tcrit,x1:-tcrit,y0:0,y1:1,line:{color:c.pink,width:1.5,dash:"dash"}},{type:"line",xref:"x",yref:"paper",x0:tcrit,x1:tcrit,y0:0,y1:1,line:{color:c.pink,width:1.5,dash:"dash"}}]});
+    Plotly.react(chartEl,traces,layout,PLOTLY_CONFIG);
+  }
+  bindSlider("ht-mu0","ht-mu0-val",function(v){return "$"+parseInt(v).toLocaleString();},render);
+  window.__rerender_hyptwo=render;
+  render();
+})();
+
+// ==================== WIDGET 5: One-Sided Hypothesis Test ====================
+(function(){
+  var chartEl=document.getElementById("chart-hyp-one");
+  function render(){
+    var c=themeColors();
+    var mu0=parseInt(document.getElementById("ho-mu0").value);
+    var dir=getActiveVal("ho-direction");
+    var df=EARN.n-1;
+    var tstat=(EARN.mean-mu0)/EARN.se;
+    var p1=dir==="greater"?(1-tCDF(tstat,df)):tCDF(tstat,df);
+    var p2=2*(1-tCDF(Math.abs(tstat),df));
+    var tcrit1=dir==="greater"?tQuantile(0.95,df):tQuantile(0.05,df);
+    var reject=p1<0.05;
+    document.getElementById("ho-stat-t").textContent=fmt(tstat,4);
+    document.getElementById("ho-stat-p1").textContent=p1<0.0001?"< 0.0001":fmt(p1,4);
+    document.getElementById("ho-stat-p2").textContent=p2<0.0001?"< 0.0001":fmt(p2,4);
+    document.getElementById("ho-stat-tcrit").textContent=fmt(tcrit1,3);
+    var badge=document.getElementById("ho-decision");
+    badge.textContent=reject?"Reject H\u2080":"Fail to reject H\u2080";
+    badge.className="decision-badge "+(reject?"reject":"fail");
+    var xs=linspace(-5,5,400);
+    var ys=xs.map(function(x){return tPDF(x,df);});
+    var traces=[{x:xs,y:ys,type:"scatter",mode:"lines",line:{color:c.cyan,width:2},name:"t("+df+")"}];
+    if(dir==="greater"){
+      var tcritAbs=tQuantile(0.95,df);
+      var xR=linspace(tcritAbs,5,50),yR=xR.map(function(x){return tPDF(x,df);});
+      traces.push({x:xR.concat([5,tcritAbs]),y:yR.concat([0,0]),fill:"toself",fillcolor:c.pink+"22",line:{width:0},name:"\u03B1 rejection",hoverinfo:"skip"});
+    } else {
+      var tcritNeg=tQuantile(0.05,df);
+      var xL=linspace(-5,tcritNeg,50),yL=xL.map(function(x){return tPDF(x,df);});
+      traces.push({x:xL.concat([tcritNeg,-5]),y:yL.concat([0,0]),fill:"toself",fillcolor:c.pink+"22",line:{width:0},name:"\u03B1 rejection",hoverinfo:"skip"});
+    }
+    var tClamped=Math.max(-4.8,Math.min(4.8,tstat));
+    traces.push({x:[tClamped],y:[tPDF(tClamped,df)*1.15],type:"scatter",mode:"markers+text",marker:{color:reject?c.pink:c.cyan,size:14,symbol:"triangle-down"},text:["t = "+fmt(tstat,2)],textposition:"top center",textfont:{color:reject?c.pink:c.cyan,size:11,family:"JetBrains Mono"},name:"Observed t",showlegend:false});
+    var layout=baseLayout({xaxis:{title:"t",gridcolor:c.grid,linecolor:c.grid,zerolinecolor:c.grid,tickfont:{color:c.textSoft}},yaxis:{title:"Density",gridcolor:c.grid,linecolor:c.grid,zerolinecolor:c.grid,tickfont:{color:c.textSoft}},showlegend:true,legend:{x:0.02,y:0.98,xanchor:"left",yanchor:"top",font:{color:c.text},bgcolor:"rgba(0,0,0,0)"},shapes:[{type:"line",xref:"x",yref:"paper",x0:tcrit1,x1:tcrit1,y0:0,y1:1,line:{color:c.pink,width:1.5,dash:"dash"}}]});
+    Plotly.react(chartEl,traces,layout,PLOTLY_CONFIG);
+  }
+  bindSlider("ho-mu0","ho-mu0-val",function(v){return "$"+parseInt(v).toLocaleString();},render);
+  bindToggles("ho-direction",render);
+  window.__rerender_hypone=render;
+  render();
+})();
+
+// ==================== WIDGET 6: Gas Price Test ====================
+(function(){
+  var chartEl=document.getElementById("chart-gas");
+  function render(){
+    var c=themeColors();
+    var mu0=parseFloat(document.getElementById("gas-mu0").value);
+    var df=GAS.n-1;
+    var tstat=(GAS.mean-mu0)/GAS.se;
+    var pval=2*(1-tCDF(Math.abs(tstat),df));
+    var reject=pval<0.05;
+    document.getElementById("gas-stat-mean").textContent="$"+fmt(GAS.mean,4);
+    document.getElementById("gas-stat-se").textContent="$"+fmt(GAS.se,4);
+    document.getElementById("gas-stat-t").textContent=fmt(tstat,4);
+    document.getElementById("gas-stat-p").textContent=pval<0.0001?"< 0.0001":fmt(pval,4);
+    var badge=document.getElementById("gas-decision");
+    badge.textContent=reject?"Reject H\u2080 (\u03B1 = 0.05)":"Fail to reject H\u2080";
+    badge.className="decision-badge "+(reject?"reject":"fail");
+    var traces=[];
+    traces.push({x:DATA.gas.prices,type:"histogram",marker:{color:c.cyan+"55",line:{color:c.cyan,width:1.5}},name:"Gas prices",nbinsx:12});
+    var layout=baseLayout({xaxis:{title:"Price per gallon ($)",gridcolor:c.grid,linecolor:c.grid,zerolinecolor:c.grid,tickfont:{color:c.textSoft}},yaxis:{title:"Count",gridcolor:c.grid,linecolor:c.grid,zerolinecolor:c.grid,tickfont:{color:c.textSoft}},showlegend:false,shapes:[{type:"line",xref:"x",yref:"paper",x0:GAS.mean,x1:GAS.mean,y0:0,y1:1,line:{color:c.pink,width:2.5}},{type:"line",xref:"x",yref:"paper",x0:mu0,x1:mu0,y0:0,y1:1,line:{color:c.purple,width:2.5,dash:"dash"}}],annotations:[{x:GAS.mean,y:1.03,yref:"paper",text:"X\u0304 = $"+fmt(GAS.mean,2),showarrow:false,font:{color:c.pink,size:11,family:"JetBrains Mono"}},{x:mu0,y:1.09,yref:"paper",text:"H\u2080: $"+fmt(mu0,2),showarrow:false,font:{color:c.purple,size:11,family:"JetBrains Mono"}}]});
+    Plotly.react(chartEl,traces,layout,PLOTLY_CONFIG);
+  }
+  bindSlider("gas-mu0","gas-mu0-val",function(v){return "$"+parseFloat(v).toFixed(2);},render);
+  window.__rerender_gastest=render;
+  render();
+})();
+
+// ==================== WIDGET 7: Proportions Inference ====================
+(function(){
+  var chartEl=document.getElementById("chart-prop");
+  function render(){
+    var c=themeColors();
+    var phat=parseFloat(document.getElementById("prop-phat").value);
+    var n=parseInt(document.getElementById("prop-n").value);
+    var p0=parseFloat(document.getElementById("prop-p0").value);
+    var se=Math.sqrt(phat*(1-phat)/n);
+    var lo=phat-1.96*se,hi=phat+1.96*se;
+    var zstat=(phat-p0)/se;
+    var pval=2*(1-normalCDF(Math.abs(zstat)));
+    var reject=pval<0.05;
+    document.getElementById("prop-stat-se").textContent=fmt(se,4);
+    document.getElementById("prop-stat-lo").textContent=fmtPct(lo);
+    document.getElementById("prop-stat-hi").textContent=fmtPct(hi);
+    document.getElementById("prop-stat-z").textContent=fmt(zstat,4);
+    document.getElementById("prop-stat-p").textContent=pval<0.0001?"< 0.0001":fmt(pval,4);
+    var badge=document.getElementById("prop-decision");
+    badge.textContent=reject?"Reject H\u2080: p = "+fmt(p0,2):"Fail to reject H\u2080: p = "+fmt(p0,2);
+    badge.className="decision-badge "+(reject?"reject":"fail");
+    var pad=(hi-lo)*0.8;
+    var traces=[
+      {x:[lo,hi],y:[0.5,0.5],type:"scatter",mode:"lines",line:{color:c.cyan,width:6},name:"95% CI",hoverinfo:"x"},
+      {x:[lo],y:[0.5],type:"scatter",mode:"markers",marker:{color:c.cyan,size:14,symbol:"line-ns-open",line:{width:3,color:c.cyan}},showlegend:false,hoverinfo:"x"},
+      {x:[hi],y:[0.5],type:"scatter",mode:"markers",marker:{color:c.cyan,size:14,symbol:"line-ns-open",line:{width:3,color:c.cyan}},showlegend:false,hoverinfo:"x"},
+      {x:[phat],y:[0.5],type:"scatter",mode:"markers",marker:{color:c.pink,size:12,line:{color:"white",width:2}},name:"p\u0302 = "+fmtPct(phat),hoverinfo:"x"},
+      {x:[p0],y:[0.5],type:"scatter",mode:"markers",marker:{color:c.purple,size:12,symbol:"diamond",line:{color:"white",width:2}},name:"p\u2080 = "+fmtPct(p0),hoverinfo:"x"}
+    ];
+    var layout=baseLayout({xaxis:{title:"Proportion",range:[Math.min(lo,p0)-pad,Math.max(hi,p0)+pad],gridcolor:c.grid,linecolor:c.grid,zerolinecolor:c.grid,tickfont:{color:c.textSoft},tickformat:".0%"},yaxis:{visible:false,range:[0,1]},showlegend:true,legend:{x:0.5,y:1.1,xanchor:"center",orientation:"h",font:{color:c.text},bgcolor:"rgba(0,0,0,0)"},margin:{l:56,r:18,t:50,b:46},annotations:[{x:lo,y:0.25,text:fmtPct(lo),showarrow:false,font:{color:c.text,size:11,family:"JetBrains Mono"}},{x:hi,y:0.25,text:fmtPct(hi),showarrow:false,font:{color:c.text,size:11,family:"JetBrains Mono"}}]});
+    Plotly.react(chartEl,traces,layout,PLOTLY_CONFIG);
+  }
+  bindSlider("prop-phat","prop-phat-val",function(v){return "p\u0302 = "+parseFloat(v).toFixed(2);},render);
+  bindSlider("prop-n","prop-n-val",function(v){return "n = "+v;},render);
+  bindSlider("prop-p0","prop-p0-val",function(v){return "p\u2080 = "+parseFloat(v).toFixed(2);},render);
+  window.__rerender_proportions=render;
+  render();
+})();
+
+// ==================== RESET + URL HASH STATE ====================
+(function(){
+  var REG={
+    sesamplesize:[{id:"se-n",kind:"range",def:"171"}],
+    tdist:[{group:"t-dist-df",kind:"toggle",def:"30"},{group:"t-dist-normal",kind:"toggle",def:"on"}],
+    confidence:[{id:"ci-level",kind:"range",def:"95"},{group:"ci-dataset",kind:"toggle",def:"earnings"}],
+    hyptwo:[{id:"ht-mu0",kind:"range",def:"40000"}],
+    hypone:[{id:"ho-mu0",kind:"range",def:"40000"},{group:"ho-direction",kind:"toggle",def:"greater"}],
+    gastest:[{id:"gas-mu0",kind:"range",def:"3.81"}],
+    proportions:[{id:"prop-phat",kind:"range",def:"0.52"},{id:"prop-n",kind:"range",def:"921"},{id:"prop-p0",kind:"range",def:"0.50"}]
+  };
+  function getVal(c){if(c.kind==="toggle"){var b=document.querySelector("#"+c.group+" button.active");return b?b.dataset.val:c.def;}return document.getElementById(c.id).value;}
+  function setVal(c,val,fire){if(c.kind==="toggle"){var g=document.getElementById(c.group);if(!g)return;var b=g.querySelector('button[data-val="'+val+'"]');if(b&&!b.classList.contains("active"))b.click();}else{var el=document.getElementById(c.id);if(!el)return;if(el.value!==String(val)){el.value=val;if(fire)el.dispatchEvent(new Event(c.kind==="select"?"change":"input",{bubbles:true}));}}}
+  function resetWidget(w){var ctrls=REG[w]||[];for(var i=0;i<ctrls.length;i++)setVal(ctrls[i],ctrls[i].def,true);var fn=window["__rerender_"+w];if(fn)fn();writeHash();}
+  function writeHash(){var parts=[];for(var w in REG){var ctrls=REG[w];for(var i=0;i<ctrls.length;i++){var c=ctrls[i];var v=String(getVal(c));if(v!==String(c.def)){var key=c.id||c.group;parts.push(key+"="+encodeURIComponent(v));}}}var want=parts.length?"#"+parts.join("&"):"";if(want===""&&location.hash.match(/=/))history.replaceState(null,"",location.pathname+location.search);else if(want!==""&&location.hash!==want)history.replaceState(null,"",location.pathname+location.search+want);}
+  function readHash(){var hash=location.hash.slice(1);if(!hash||!hash.includes("="))return;var params={};var pairs=hash.split("&");for(var i=0;i<pairs.length;i++){var eq=pairs[i].indexOf("=");if(eq<0)continue;params[pairs[i].slice(0,eq)]=decodeURIComponent(pairs[i].slice(eq+1));}for(var w in REG){var ctrls=REG[w];for(var j=0;j<ctrls.length;j++){var c=ctrls[j];var key=c.id||c.group;if(key in params)setVal(c,params[key],true);}}}
+  document.querySelectorAll(".reset-btn[data-reset]").forEach(function(btn){btn.addEventListener("click",function(){resetWidget(btn.dataset.reset);});});
+  document.addEventListener("input",function(e){if(e.target.matches("input[type=range], select"))writeHash();});
+  document.addEventListener("change",function(e){if(e.target.matches("select"))writeHash();});
+  document.querySelectorAll(".toggle-group button").forEach(function(b){b.addEventListener("click",function(){setTimeout(writeHash,0);});});
+  readHash();
+})();
+
+// ==================== THEME TOGGLE ====================
+(function(){
+  var btn=document.getElementById("theme-toggle"),iconEl=document.getElementById("theme-icon"),labelEl=document.getElementById("theme-label");
+  function apply(theme){document.documentElement.dataset.theme=theme;iconEl.textContent=theme==="dark"?"\u2600\uFE0F":"\uD83C\uDF19";labelEl.textContent=theme==="dark"?"Light":"Dark";for(var key in window){if(key.startsWith("__rerender_")&&typeof window[key]==="function")window[key]();}}
+  var saved=localStorage.getItem(THEME_KEY);var prefersDark=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches;apply(saved||(prefersDark?"dark":"light"));
+  btn.addEventListener("click",function(){var next=document.documentElement.dataset.theme==="dark"?"light":"dark";localStorage.setItem(THEME_KEY,next);apply(next);});
+})();
+
+// ==================== Resize handling ====================
+window.addEventListener("resize",function(){document.querySelectorAll(".chart").forEach(function(el){if(el.data)Plotly.Plots.resize(el);});});
+</script>
+
+</body>
+</html>
