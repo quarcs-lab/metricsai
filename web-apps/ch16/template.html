@@ -604,10 +604,13 @@ function olsMultiple(X, y) {
       for (m = 0; m < k; m++) XtX[j][m] += X[i][j] * X[i][m];
     }
   }
+  // Augment: [XtX | Xty | I_k] to get both beta and (X'X)^{-1}
+  var ncols = 2 * k + 1;
   var aug = [];
   for (i = 0; i < k; i++) {
     aug.push(XtX[i].slice());
     aug[i].push(Xty[i]);
+    for (j = 0; j < k; j++) aug[i].push(i === j ? 1 : 0);
   }
   for (i = 0; i < k; i++) {
     var maxRow = i;
@@ -617,11 +620,11 @@ function olsMultiple(X, y) {
     var tmp = aug[i]; aug[i] = aug[maxRow]; aug[maxRow] = tmp;
     var pivot = aug[i][i];
     if (Math.abs(pivot) < 1e-12) continue;
-    for (j = i; j <= k; j++) aug[i][j] /= pivot;
+    for (j = i; j < ncols; j++) aug[i][j] /= pivot;
     for (j = 0; j < k; j++) {
       if (j === i) continue;
       var factor = aug[j][i];
-      for (m = i; m <= k; m++) aug[j][m] -= factor * aug[i][m];
+      for (m = i; m < ncols; m++) aug[j][m] -= factor * aug[i][m];
     }
   }
   var beta = [];
@@ -640,7 +643,9 @@ function olsMultiple(X, y) {
   }
   var R2 = SST > 0 ? 1 - RSS / SST : 0;
   var se = Math.sqrt(RSS / (n - k));
-  return { beta: beta, yhat: yhat, resid: resid, R2: R2, n: n, k: k, RSS: RSS, se: se };
+  var seCoefs = [];
+  for (i = 0; i < k; i++) seCoefs.push(se * Math.sqrt(Math.max(0, aug[i][k + 1 + i])));
+  return { beta: beta, yhat: yhat, resid: resid, R2: R2, n: n, k: k, RSS: RSS, se: se, seCoefs: seCoefs };
 }
 
 // ==================== THEME ====================
@@ -1133,10 +1138,7 @@ function getToggleVal(groupId) {
       var result = olsMultiple(X, y);
       coef = result.beta[1];
       r2 = result.R2;
-      var xbar = mean(growth);
-      var SSx = 0;
-      for (var i = 0; i < n; i++) SSx += (growth[i] - xbar) * (growth[i] - xbar);
-      se = result.se / Math.sqrt(SSx);
+      se = result.seCoefs[1];
     }
 
     var bivCoef = DEM.bivariate.b1;
