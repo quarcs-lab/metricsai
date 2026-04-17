@@ -1,7 +1,7 @@
 """Build the Chapter 1 interactive dashboard.
 
 Reads AED_HOUSE.DTA, pre-computes OLS regressions for each predictor,
-and injects the payload into scripts/ch01_webapp_template.html.
+and injects the payload into template.html.
 """
 
 from __future__ import annotations
@@ -12,11 +12,11 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-ROOT = Path(__file__).resolve().parent.parent
+HERE = Path(__file__).resolve().parent
+ROOT = HERE.parent.parent
 DATA_DIR = ROOT / "data"
-TEMPLATE = Path(__file__).resolve().parent / "ch01_webapp_template.html"
-OUT_DIR = ROOT / "web-apps" / "ch01"
-OUT_FILE = OUT_DIR / "dashboard.html"
+TEMPLATE = HERE / "template.html"
+OUT_FILE = HERE / "dashboard.html"
 
 
 def summary_stats(values: list[float]) -> dict:
@@ -110,7 +110,6 @@ def main() -> None:
     if "{{DATA_JSON}}" not in template:
         raise SystemExit("Placeholder {{DATA_JSON}} not found in template")
 
-    OUT_DIR.mkdir(parents=True, exist_ok=True)
     rendered = template.replace("{{DATA_JSON}}", data_json)
     OUT_FILE.write_text(rendered, encoding="utf-8")
 

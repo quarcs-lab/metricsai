@@ -116,7 +116,7 @@ python3 .claude/skills/web-app/scripts/scaffold_chapter.py ch05 "Bivariate Data 
 **Build a chapter web app:**
 
 ```bash
-python3 scripts/build_ch02_webapp.py
+python3 web-apps/ch02/build.py
 ```
 
 **Verify a chapter web app:**
@@ -141,5 +141,5 @@ python3 .claude/skills/web-app/scripts/verify_app.py web-apps/ch02/dashboard.htm
 - **Colab export:** `scripts/export_qmd_to_ipynb.py` converts `.qmd` → `.ipynb` for Google Colab
 - **PDF pipeline:** `quarto render` → `scripts/inject_print_css.py` → `scripts/generate_pdf_playwright.py`
 - **Skills:** `chapter-standard` (template compliance), `compile-book` (PDF compilation), `proofread` (content review), `web-app` (interactive dashboards)
-- **Web apps:** Single-file Plotly.js dashboards in `web-apps/chNN/dashboard.html`, built by `scripts/build_chNN_webapp.py` from templates in `.claude/skills/web-app/templates/`
+- **Web apps:** Single-file Plotly.js dashboards in `web-apps/chNN/dashboard.html`, built by `web-apps/chNN/build.py` from `web-apps/chNN/template.html`
 - **Detailed workflow docs:** `.claude/rules/pdf-generation.md` and `.claude/rules/quarto-book.md`

@@ -4,7 +4,7 @@ Sign off every item before merging a chapter app. If an item fails, fix it rathe
 
 ## Build
 
-- [ ] `python3 scripts/build_chNN_webapp.py` runs without errors.
+- [ ] `python3 web-apps/chNN/build.py` runs without errors.
 - [ ] Output file size under 200 KB (soft cap; investigate if larger).
 - [ ] Build script prints at least one sanity-check value that matches a number quoted in the chapter.
 

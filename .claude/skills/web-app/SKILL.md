@@ -67,9 +67,9 @@ python3 .claude/skills/web-app/scripts/scaffold_chapter.py chNN "<Chapter Title>
 
 This creates (without content):
 
-- `scripts/build_chNN_webapp.py` — from `templates/build_webapp.py`
-- `scripts/chNN_webapp_template.html` — from `templates/base.html`
-- `web-apps/chNN/` directory (empty until build)
+- `web-apps/chNN/build.py` — from `templates/build_webapp.py`
+- `web-apps/chNN/template.html` — from `templates/base.html`
+- `web-apps/chNN/PLAN.md` — empty plan
 
 ### Phase 4 — Implement
 
@@ -81,8 +81,8 @@ Per widget, in this order:
 4. Author the Try-this block: 2–4 numbered imperative experiments specific to this dataset. Not generic. Specific.
 5. Register the widget's controls in `REG` inside the reset/hash layer (widget-head `data-reset` attribute, per-control `id`/`group` with sensible chapter-default).
 6. Add a nav anchor link.
-7. In `build_chNN_webapp.py`, write the dataset loader and add to the JSON payload.
-8. Run `python3 scripts/build_chNN_webapp.py`.
+7. In `web-apps/chNN/build.py`, write the dataset loader and add to the JSON payload.
+8. Run `python3 web-apps/chNN/build.py`.
 9. Sanity-check printed summary stats against the chapter's quoted numbers.
 10. Repeat for next widget.
 
@@ -114,17 +114,15 @@ Open the dashboard in a browser for visual confirmation. Commit.
 
 These are hard-earned from Chapter 2. Do not deviate without explicit user discussion.
 
-- **Stack**: Plotly.js 2.35 via CDN, Inter + JetBrains Mono from Google Fonts, vanilla JavaScript (no framework). No build step beyond `build_chNN_webapp.py`.
+- **Stack**: Plotly.js 2.35 via CDN, Inter + JetBrains Mono from Google Fonts, vanilla JavaScript (no framework). No build step beyond `build.py`.
 - **Palette**: ElectricCyan `#008CB7`, SynapsePurple `#7A209F`, DataPink `#C21E72`. See `docs/branding.md`.
 - **File layout**:
 
   ```
-  scripts/
-    build_chNN_webapp.py           # build script
-    chNN_webapp_template.html      # HTML template with {{DATA_JSON}}
-    fetch_<source>.py              # (optional) external data fetchers
   web-apps/
     chNN/
+      build.py                     # build script (reads data, injects JSON)
+      template.html                # HTML template with {{DATA_JSON}}
       dashboard.html               # built artifact (committed)
       PLAN.md                      # chapter-specific plan + sign-off
   data/
@@ -143,7 +141,7 @@ These are hard-earned from Chapter 2. Do not deviate without explicit user discu
 Four dimensions:
 
 1. **New widget types.** When a chapter needs a pattern not in `templates/widgets/`, invent it for that chapter. Then save it back to the catalog as `templates/widgets/<name>.md` so the next chapter can reuse it. Update `docs/widget_catalog.md`.
-2. **New data sources.** Add `scripts/fetch_<source>.py` as needed. Keep the build script offline (reads committed CSV/DTA).
+2. **New data sources.** Add data-fetching scripts as needed. Keep the build script offline (reads committed CSV/DTA).
 3. **Narrative concepts.** Not every Key Concept needs interactivity. A widget may have no controls, just a labelled static illustration. Document the reasoning in `PLAN.md`.
 4. **Shared widgets across chapters.** Many widgets (histogram, boxplot, scatter, regression) appear in multiple chapters. Reuse snippets; do not author new ones for the same pattern.
 

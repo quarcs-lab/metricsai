@@ -1,0 +1,1369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chapter 03 — The Sample Mean · metricsAI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.plot.ly/plotly-2.35.2.min.js" charset="utf-8"></script>
+<style>
+:root {
+  --cyan: #008CB7;
+  --cyan-soft: #22d3ee;
+  --purple: #7A209F;
+  --purple-soft: #c084fc;
+  --pink: #C21E72;
+  --pink-soft: #f472b6;
+
+  --bg: #f5f8fb;
+  --panel: #ffffff;
+  --panel-2: #f0f4f9;
+  --text: #0b1021;
+  --text-soft: #475569;
+  --text-muted: #64748b;
+  --border: #d9e2ec;
+  --accent: var(--cyan);
+  --accent-2: var(--purple);
+  --accent-3: var(--pink);
+  --shadow: 0 2px 10px rgba(11, 16, 33, 0.06), 0 12px 30px rgba(11, 16, 33, 0.05);
+  --grid: #e3e8ef;
+  --code-bg: #eef3f8;
+}
+html[data-theme="dark"] {
+  --bg: #0c1024;
+  --panel: #151a33;
+  --panel-2: #1b2142;
+  --text: #e2e8f0;
+  --text-soft: #b5c0d0;
+  --text-muted: #8a98ae;
+  --border: #2a3156;
+  --accent: var(--cyan-soft);
+  --accent-2: var(--purple-soft);
+  --accent-3: var(--pink-soft);
+  --shadow: 0 2px 10px rgba(0, 0, 0, 0.25), 0 12px 30px rgba(0, 0, 0, 0.35);
+  --grid: #2a3156;
+  --code-bg: #0f1530;
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.55;
+  transition: background-color .25s ease, color .25s ease;
+}
+code, .mono { font-family: 'JetBrains Mono', ui-monospace, monospace; }
+
+header.page {
+  position: relative;
+  padding: 2.4rem 1.5rem 2rem;
+  background:
+    radial-gradient(1200px 400px at 85% -10%, rgba(122, 32, 159, 0.15), transparent),
+    radial-gradient(1000px 400px at 10% 0%, rgba(0, 140, 183, 0.18), transparent),
+    var(--panel);
+  border-bottom: 1px solid var(--border);
+}
+.page-inner { max-width: 1120px; margin: 0 auto; }
+.chapter-badge {
+  display: inline-block;
+  font-size: 0.72rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--accent);
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+h1.title {
+  font-size: clamp(1.6rem, 3.4vw, 2.4rem);
+  margin: 0 0 0.35rem;
+  background: linear-gradient(90deg, var(--accent), var(--accent-2));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+p.subtitle {
+  margin: 0 0 0.8rem;
+  color: var(--text-soft);
+  font-size: 1.05rem;
+  max-width: 720px;
+}
+.theme-toggle {
+  position: absolute;
+  top: 1.4rem;
+  right: 1.5rem;
+  background: var(--panel-2);
+  color: var(--text);
+  border: 1px solid var(--border);
+  padding: 0.4rem 0.8rem;
+  border-radius: 999px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  transition: all .2s ease;
+}
+.theme-toggle:hover { border-color: var(--accent); color: var(--accent); }
+
+nav.anchors {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background: color-mix(in srgb, var(--panel) 92%, transparent);
+  backdrop-filter: saturate(150%) blur(8px);
+  -webkit-backdrop-filter: saturate(150%) blur(8px);
+  border-bottom: 1px solid var(--border);
+}
+nav.anchors ul {
+  display: flex;
+  gap: 0.25rem;
+  overflow-x: auto;
+  list-style: none;
+  padding: 0.55rem 1.5rem;
+  margin: 0 auto;
+  max-width: 1120px;
+  scrollbar-width: thin;
+}
+nav.anchors a {
+  display: block;
+  padding: 0.35rem 0.75rem;
+  border-radius: 8px;
+  color: var(--text-soft);
+  text-decoration: none;
+  font-size: 0.85rem;
+  font-weight: 500;
+  white-space: nowrap;
+  transition: all .15s ease;
+}
+nav.anchors a:hover { color: var(--accent); background: var(--panel-2); }
+
+main { max-width: 1120px; margin: 1.2rem auto 3rem; padding: 0 1.5rem; }
+
+section.widget {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 1.5rem 1.4rem 1.3rem;
+  margin-bottom: 1.5rem;
+  box-shadow: var(--shadow);
+}
+.section-tag {
+  display: inline-block;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.72rem;
+  color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+  padding: 0.2rem 0.55rem;
+  border-radius: 6px;
+  margin-bottom: 0.6rem;
+  font-weight: 500;
+}
+.widget h2 {
+  margin: 0 0 0.2rem;
+  font-size: 1.35rem;
+  font-weight: 600;
+  color: var(--accent-2);
+  letter-spacing: -0.005em;
+}
+.widget .lede {
+  margin: 0 0 1rem;
+  color: var(--text-soft);
+  font-size: 0.97rem;
+  max-width: 780px;
+}
+
+.controls {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 0.9rem 1.2rem;
+  padding: 0.9rem 1rem;
+  background: var(--panel-2);
+  border-radius: 10px;
+  margin-bottom: 1rem;
+}
+.ctrl { display: flex; flex-direction: column; gap: 0.3rem; }
+.ctrl label {
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: var(--text-soft);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.ctrl select, .ctrl input[type="range"], .ctrl input[type="number"] {
+  font-family: inherit;
+  font-size: 0.9rem;
+  padding: 0.4rem 0.55rem;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--panel);
+  color: var(--text);
+}
+.ctrl input[type="range"] { padding: 0.2rem 0; accent-color: var(--accent); }
+.ctrl .val {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.82rem;
+  color: var(--accent);
+  font-weight: 500;
+}
+.toggle-group { display: inline-flex; gap: 0.25rem; background: var(--panel); padding: 3px; border-radius: 10px; border: 1px solid var(--border); }
+.toggle-group button {
+  background: transparent;
+  border: none;
+  color: var(--text-soft);
+  padding: 0.32rem 0.75rem;
+  border-radius: 7px;
+  font-family: inherit;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all .15s ease;
+}
+.toggle-group button.active { background: var(--accent); color: white; font-weight: 500; }
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+  gap: 0.6rem;
+  margin: 0.5rem 0 1rem;
+}
+.stat {
+  background: var(--panel-2);
+  padding: 0.65rem 0.75rem;
+  border-radius: 10px;
+  border-left: 3px solid var(--accent);
+}
+.stat .label { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-muted); }
+.stat .value { font-family: 'JetBrains Mono', monospace; font-size: 1.05rem; font-weight: 500; color: var(--text); margin-top: 0.15rem; }
+.stat.mean   { border-left-color: var(--accent); }
+.stat.median { border-left-color: var(--accent-3); }
+.stat.spread { border-left-color: var(--accent-2); }
+
+.callout {
+  background: color-mix(in srgb, var(--accent-2) 8%, transparent);
+  border-left: 3px solid var(--accent-2);
+  padding: 0.7rem 0.9rem;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  color: var(--text-soft);
+  margin: 0.9rem 0 0.2rem;
+}
+.callout strong { color: var(--accent-2); }
+
+.try-this {
+  background: color-mix(in srgb, var(--accent) 8%, transparent);
+  border-left: 3px solid var(--accent);
+  padding: 0.7rem 0.9rem;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  color: var(--text-soft);
+  margin: 0.7rem 0 0.2rem;
+}
+.try-this .try-title {
+  font-weight: 600; color: var(--accent); font-size: 0.78rem;
+  letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 0.3rem;
+}
+.try-this ol { margin: 0; padding-left: 1.25rem; }
+.try-this li { margin: 0.2rem 0; }
+
+.widget-head {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  gap: 0.5rem; margin-bottom: 0.2rem;
+}
+.widget-head > div { flex: 1; min-width: 0; }
+.reset-btn {
+  background: transparent;
+  color: var(--text-muted);
+  border: 1px solid var(--border);
+  padding: 0.3rem 0.7rem;
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 0.8rem;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all .15s ease;
+}
+.reset-btn:hover { color: var(--accent); border-color: var(--accent); }
+
+.resim-btn {
+  background: transparent;
+  color: var(--accent-2);
+  border: 1px solid var(--accent-2);
+  padding: 0.3rem 0.7rem;
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 0.8rem;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all .15s ease;
+}
+.resim-btn:hover { background: var(--accent-2); color: white; }
+
+.delta-row {
+  display: flex; flex-wrap: wrap; gap: 0.6rem 1.2rem;
+  margin: 0.2rem 0 0.9rem; padding: 0.55rem 0.85rem;
+  background: var(--panel-2); border-radius: 10px;
+  font-family: 'JetBrains Mono', monospace; font-size: 0.88rem;
+  color: var(--text-soft); border-left: 3px solid var(--accent-3);
+}
+.delta-row .label { color: var(--text-muted); margin-right: 0.35rem; }
+.delta-row .delta-val { color: var(--accent-2); font-weight: 500; }
+.delta-row.hidden { display: none; }
+
+.chart { width: 100%; min-height: 340px; }
+.chart.tall { min-height: 420px; }
+.chart.short { min-height: 280px; }
+
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+@media (max-width: 720px) { .two-col { grid-template-columns: 1fr; } }
+
+footer.page {
+  max-width: 1120px;
+  margin: 1rem auto 3rem;
+  padding: 0 1.5rem;
+  color: var(--text-muted);
+  font-size: 0.88rem;
+  text-align: center;
+}
+footer.page a { color: var(--accent); text-decoration: none; }
+footer.page a:hover { text-decoration: underline; }
+
+.scroll-top {
+  display: inline-block;
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  text-decoration: none;
+  margin-top: 0.4rem;
+}
+.scroll-top:hover { color: var(--accent); }
+</style>
+</head>
+<body>
+
+<header class="page">
+  <div class="page-inner">
+    <span class="chapter-badge">Chapter 03 of 18 · Interactive Dashboard</span>
+    <h1 class="title">The Sample Mean</h1>
+    <p class="subtitle">Explore sampling distributions, the Central Limit Theorem, standard error, and estimator properties through interactive simulations.</p>
+  </div>
+  <button id="theme-toggle" class="theme-toggle" type="button" aria-label="Toggle color theme"><span id="theme-icon">🌙</span><span id="theme-label">Dark</span></button>
+</header>
+
+<nav class="anchors" aria-label="Sections">
+  <ul>
+    <li><a href="#sampling-dist">Sampling Distribution</a></li>
+    <li><a href="#sample-size">Sample Size &amp; SE</a></li>
+    <li><a href="#clt">Central Limit Theorem</a></li>
+    <li><a href="#estimator">Estimator Properties</a></li>
+    <li><a href="#weighted">Weighted Means</a></li>
+  </ul>
+</nav>
+
+<main>
+
+<!-- ==================== WIDGET 1: Sampling Distribution ==================== -->
+<section class="widget" id="sampling-dist">
+  <div class="widget-head">
+    <div>
+      <span class="section-tag">§3.2 – §3.3</span>
+      <h2>Sampling Distribution of the Mean</h2>
+      <p class="lede">Each dot in this histogram is the mean of a single sample. Repeated sampling builds the <strong>sampling distribution</strong> of X&#772; — the key object in statistical inference.</p>
+    </div>
+    <button class="reset-btn" data-reset="samplingdist">Reset</button>
+  </div>
+
+  <div class="controls">
+    <div class="ctrl">
+      <label>Dataset</label>
+      <div class="toggle-group" id="sampling-dist-data">
+        <button class="active" data-val="coin">Coin Toss (400 samples)</button>
+        <button data-val="census">Census Ages (100 samples)</button>
+      </div>
+    </div>
+    <div class="ctrl">
+      <label>Normal Overlay</label>
+      <div class="toggle-group" id="sampling-dist-normal">
+        <button class="active" data-val="on">On</button>
+        <button data-val="off">Off</button>
+      </div>
+    </div>
+    <div class="ctrl">
+      <label>SE Bands</label>
+      <div class="toggle-group" id="sampling-dist-se">
+        <button class="active" data-val="off">Off</button>
+        <button data-val="1se">&plusmn;1 SE</button>
+        <button data-val="2se">&plusmn;2 SE</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="stats-grid">
+    <div class="stat mean"><div class="label">Samples</div><div class="value" id="sd-stat-nsamples">—</div></div>
+    <div class="stat mean"><div class="label">Mean of X&#772;</div><div class="value" id="sd-stat-mean">—</div></div>
+    <div class="stat spread"><div class="label">SD of X&#772;</div><div class="value" id="sd-stat-sd">—</div></div>
+    <div class="stat median"><div class="label">Theoretical SE</div><div class="value" id="sd-stat-theose">—</div></div>
+  </div>
+
+  <div id="chart-sampling-dist" class="chart"></div>
+
+  <div class="delta-row hidden" id="sd-bands-info">
+    <span><span class="label">Within &plusmn;1 SE:</span> <span class="delta-val" id="sd-within1">—</span></span>
+    <span><span class="label">Within &plusmn;2 SE:</span> <span class="delta-val" id="sd-within2">—</span></span>
+  </div>
+
+  <div class="callout">
+    <strong>Key Concept 3.2–3.3:</strong> The sample mean X&#772; is itself a random variable. Its distribution has mean E[X&#772;] = &mu; and standard deviation &sigma;/&radic;n, which shrinks as the sample size n grows.
+  </div>
+
+  <div class="try-this">
+    <div class="try-title">Try This</div>
+    <ol>
+      <li>Turn on <strong>&plusmn;2 SE</strong> bands. What fraction of the 400 coin-toss means falls within 2 standard errors of 0.5? Compare to the theoretical 95%.</li>
+      <li>Switch to <strong>Census Ages</strong>. The population is right-skewed (ages 0–100+), yet the 100 sample means look roughly bell-shaped. That is the CLT at work.</li>
+      <li>Toggle the <strong>Normal Overlay</strong> on both datasets. How well does the theoretical curve fit the histogram?</li>
+    </ol>
+  </div>
+</section>
+
+<!-- ==================== WIDGET 2: Sample Size & SE ==================== -->
+<section class="widget" id="sample-size">
+  <div class="widget-head">
+    <div>
+      <span class="section-tag">§3.3</span>
+      <h2>How Sample Size Affects Precision</h2>
+      <p class="lede">The standard error SE = &sigma;/&radic;n tells you how precise X&#772; is. Move the slider to see the sampling distribution narrow as n grows — but note the diminishing returns.</p>
+    </div>
+    <div style="display:flex;gap:0.4rem;align-items:flex-start;">
+      <button class="resim-btn" id="sample-size-resim">Resimulate</button>
+      <button class="reset-btn" data-reset="samplesize">Reset</button>
+    </div>
+  </div>
+
+  <div class="controls">
+    <div class="ctrl">
+      <label>Sample size (n)</label>
+      <input type="range" id="sample-size-n" min="5" max="500" step="5" value="30">
+      <span class="val" id="sample-size-n-val">n = 30</span>
+    </div>
+  </div>
+
+  <div class="stats-grid">
+    <div class="stat mean"><div class="label">n</div><div class="value" id="ss-stat-n">30</div></div>
+    <div class="stat spread"><div class="label">Empirical SE</div><div class="value" id="ss-stat-empse">—</div></div>
+    <div class="stat median"><div class="label">Theoretical SE</div><div class="value" id="ss-stat-theose">—</div></div>
+    <div class="stat mean"><div class="label">Mean of means</div><div class="value" id="ss-stat-meanmeans">—</div></div>
+  </div>
+
+  <div id="chart-sample-size" class="chart"></div>
+
+  <div class="callout">
+    <strong>Key Concept 3.4:</strong> The standard error se(X&#772;) = s/&radic;n measures how precisely the sample mean estimates the population mean. To halve the SE, you must <em>quadruple</em> the sample size.
+  </div>
+
+  <div class="try-this">
+    <div class="try-title">Try This</div>
+    <ol>
+      <li>Set n = 10 and note the SE (~0.158). Set n = 40 (4&times; larger). Did the SE drop to roughly half (~0.079)? That is the &radic;n rule.</li>
+      <li>Set n = 100. The SE is ~0.05 — very tight. Now set n = 400. How much further does the SE shrink? Is the improvement worth 4&times; more data?</li>
+      <li>Click <strong>Resimulate</strong> several times at n = 30. The histogram changes each time — that is sampling variability — but the bell shape and width remain consistent.</li>
+    </ol>
+  </div>
+</section>
+
+<!-- ==================== WIDGET 3: Central Limit Theorem ==================== -->
+<section class="widget" id="clt">
+  <div class="widget-head">
+    <div>
+      <span class="section-tag">§3.4</span>
+      <h2>Central Limit Theorem in Action</h2>
+      <p class="lede">No matter how the population is shaped, the distribution of sample means approaches a normal distribution as n grows. Choose a non-normal population and watch the CLT unfold.</p>
+    </div>
+    <div style="display:flex;gap:0.4rem;align-items:flex-start;">
+      <button class="resim-btn" id="clt-resim">Resimulate</button>
+      <button class="reset-btn" data-reset="clt">Reset</button>
+    </div>
+  </div>
+
+  <div class="controls">
+    <div class="ctrl">
+      <label>Population Shape</label>
+      <select id="clt-population">
+        <option value="bernoulli">Bernoulli (p = 0.5)</option>
+        <option value="uniform">Uniform (0 to 6)</option>
+        <option value="skewed" selected>Right-Skewed (Exponential)</option>
+        <option value="bimodal">Bimodal (two peaks)</option>
+        <option value="census">Census-like (right-skewed ages)</option>
+      </select>
+    </div>
+    <div class="ctrl">
+      <label>Sample size (n)</label>
+      <input type="range" id="clt-n" min="2" max="100" step="1" value="5">
+      <span class="val" id="clt-n-val">n = 5</span>
+    </div>
+  </div>
+
+  <div class="stats-grid">
+    <div class="stat mean"><div class="label">Pop &mu;</div><div class="value" id="clt-stat-mu">—</div></div>
+    <div class="stat spread"><div class="label">Pop &sigma;</div><div class="value" id="clt-stat-sigma">—</div></div>
+    <div class="stat mean"><div class="label">Mean of X&#772;s</div><div class="value" id="clt-stat-meanmeans">—</div></div>
+    <div class="stat median"><div class="label">SE (empirical)</div><div class="value" id="clt-stat-se">—</div></div>
+    <div class="stat median"><div class="label">SE (theoretical)</div><div class="value" id="clt-stat-theose">—</div></div>
+  </div>
+
+  <div class="two-col">
+    <div>
+      <h3 style="margin:0 0 0.3rem;font-size:0.95rem;color:var(--text-soft);">Population Distribution</h3>
+      <div id="chart-clt-pop" class="chart short"></div>
+    </div>
+    <div>
+      <h3 style="margin:0 0 0.3rem;font-size:0.95rem;color:var(--text-soft);">Distribution of 500 Sample Means</h3>
+      <div id="chart-clt-means" class="chart short"></div>
+    </div>
+  </div>
+
+  <div class="callout">
+    <strong>Key Concept 3.5:</strong> The Central Limit Theorem states that Z = (X&#772; &minus; &mu;) / (&sigma;/&radic;n) converges to N(0, 1) as n grows — regardless of the population shape, as long as it has finite mean and variance.
+  </div>
+
+  <div class="try-this">
+    <div class="try-title">Try This</div>
+    <ol>
+      <li>Select <strong>Right-Skewed</strong> and set n = 2. The sample means are still skewed. Slowly increase n to 5, 10, 30. At what n does the bell shape emerge?</li>
+      <li>Select <strong>Bimodal</strong> — clearly non-normal. Set n = 50. Is the right-hand histogram approximately normal? The CLT says yes.</li>
+      <li>Select <strong>Census-like</strong> ages (right-skewed, &mu; &asymp; 24, &sigma; &asymp; 19). Even at n = 25 (the book's census example), the means look normal.</li>
+    </ol>
+  </div>
+</section>
+
+<!-- ==================== WIDGET 4: Estimator Properties ==================== -->
+<section class="widget" id="estimator">
+  <div class="widget-head">
+    <div>
+      <span class="section-tag">§3.5</span>
+      <h2>Estimator Properties</h2>
+      <p class="lede">A good estimator is unbiased, efficient, and consistent. Compare the sample mean against the median and trimmed mean — which is best, and when?</p>
+    </div>
+    <div style="display:flex;gap:0.4rem;align-items:flex-start;">
+      <button class="resim-btn" id="estimator-resim">Resimulate</button>
+      <button class="reset-btn" data-reset="estimator">Reset</button>
+    </div>
+  </div>
+
+  <div class="controls">
+    <div class="ctrl">
+      <label>Estimator</label>
+      <div class="toggle-group" id="estimator-type">
+        <button class="active" data-val="mean">Mean</button>
+        <button data-val="median">Median</button>
+        <button data-val="trimmed">Trimmed 10%</button>
+      </div>
+    </div>
+    <div class="ctrl">
+      <label>Sample size (n)</label>
+      <input type="range" id="estimator-n" min="10" max="200" step="5" value="30">
+      <span class="val" id="estimator-n-val">n = 30</span>
+    </div>
+    <div class="ctrl">
+      <label>Outlier contamination</label>
+      <input type="range" id="estimator-contam" min="0" max="20" step="1" value="0">
+      <span class="val" id="estimator-contam-val">0%</span>
+    </div>
+  </div>
+
+  <div class="stats-grid">
+    <div class="stat mean"><div class="label">True &mu;</div><div class="value" id="est-stat-mu">50</div></div>
+    <div class="stat mean"><div class="label">Avg Estimate</div><div class="value" id="est-stat-avg">—</div></div>
+    <div class="stat median"><div class="label">Bias</div><div class="value" id="est-stat-bias">—</div></div>
+    <div class="stat spread"><div class="label">Variance</div><div class="value" id="est-stat-var">—</div></div>
+    <div class="stat spread"><div class="label">MSE</div><div class="value" id="est-stat-mse">—</div></div>
+  </div>
+
+  <div id="chart-estimator" class="chart"></div>
+
+  <div class="callout">
+    <strong>Key Concept 3.7:</strong> An estimator is <em>unbiased</em> if E[&theta;&#770;] = &theta;, <em>consistent</em> if it converges to &theta; as n &rarr; &infin;, and <em>efficient</em> if it has the smallest variance among unbiased estimators. The sample mean is all three for normal data.
+  </div>
+
+  <div class="try-this">
+    <div class="try-title">Try This</div>
+    <ol>
+      <li>With 0% contamination, compare <strong>Mean</strong> vs <strong>Median</strong>. Which has smaller variance? (Mean — it is the most efficient estimator for normal data.)</li>
+      <li>Set contamination to <strong>15%</strong>. Compare again. The median has smaller MSE now — it is more robust to outliers even though it is less efficient for clean data.</li>
+      <li>Increase n from 30 to 200. Watch the variance shrink for all estimators. This is <strong>consistency</strong> — convergence to the true value as n grows.</li>
+    </ol>
+  </div>
+</section>
+
+<!-- ==================== WIDGET 5: Weighted Means ==================== -->
+<section class="widget" id="weighted">
+  <div class="widget-head">
+    <div>
+      <span class="section-tag">§3.7</span>
+      <h2>Weighted vs Unweighted Means</h2>
+      <p class="lede">When samples are not representative, the simple sample mean is biased. Inverse probability weighting corrects for unequal sampling probabilities.</p>
+    </div>
+    <button class="reset-btn" data-reset="weighted">Reset</button>
+  </div>
+
+  <div class="controls">
+    <div class="ctrl">
+      <label>Group A Mean</label>
+      <input type="range" id="weighted-mu-a" min="30" max="80" step="1" value="60">
+      <span class="val" id="weighted-mu-a-val">$60k</span>
+    </div>
+    <div class="ctrl">
+      <label>Group B Mean</label>
+      <input type="range" id="weighted-mu-b" min="30" max="80" step="1" value="50">
+      <span class="val" id="weighted-mu-b-val">$50k</span>
+    </div>
+    <div class="ctrl">
+      <label>Population fraction A</label>
+      <input type="range" id="weighted-pop-frac" min="10" max="90" step="5" value="50">
+      <span class="val" id="weighted-pop-frac-val">50%</span>
+    </div>
+    <div class="ctrl">
+      <label>Sample fraction A</label>
+      <input type="range" id="weighted-sample-frac" min="10" max="90" step="5" value="80">
+      <span class="val" id="weighted-sample-frac-val">80%</span>
+    </div>
+  </div>
+
+  <div class="stats-grid">
+    <div class="stat mean"><div class="label">True Pop Mean</div><div class="value" id="wt-stat-true">—</div></div>
+    <div class="stat median"><div class="label">Unweighted</div><div class="value" id="wt-stat-unwt">—</div></div>
+    <div class="stat mean"><div class="label">Weighted</div><div class="value" id="wt-stat-wt">—</div></div>
+    <div class="stat spread"><div class="label">Bias</div><div class="value" id="wt-stat-bias">—</div></div>
+  </div>
+
+  <div id="chart-weighted" class="chart short"></div>
+
+  <div class="callout">
+    <strong>Key Concept 3.8:</strong> When each observation has unequal probability &pi;<sub>i</sub> of being included, use inverse probability weights w<sub>i</sub> = 1/&pi;<sub>i</sub>. The weighted mean X&#772;<sub>w</sub> = &Sigma;w<sub>i</sub>x<sub>i</sub> / &Sigma;w<sub>i</sub> corrects for the nonrepresentative sample.
+  </div>
+
+  <div class="try-this">
+    <div class="try-title">Try This</div>
+    <ol>
+      <li>Default settings: Group A earns $60k, Group B earns $50k, but the sample over-represents A (80% vs 50% in population). The unweighted mean overestimates. The weighted mean corrects it exactly.</li>
+      <li>Set sample fraction to <strong>50%</strong> (matching population). The bias disappears — weighting is unnecessary when the sample is representative.</li>
+      <li>Make groups more different (A = $80k, B = $30k). How does the bias grow? Formula: Bias = (f<sub>A</sub> &minus; &pi;<sub>A</sub>) &times; (&mu;<sub>A</sub> &minus; &mu;<sub>B</sub>).</li>
+    </ol>
+  </div>
+</section>
+
+</main>
+
+<footer class="page">
+  <p>Part of <a href="https://quarcs-lab.github.io/metricsai/book/_book/index.html"><strong>metricsAI</strong></a> · Chapter 03: The Sample Mean · by Carlos Mendez · <a href="https://github.com/quarcs-lab/metricsai">GitHub</a></p>
+  <p>Data: AED_COINTOSSMEANS.DTA (400 coin-toss sample means, n=30) · AED_CENSUSAGEMEANS.DTA (100 census age sample means, n=25)</p>
+  <a class="scroll-top" href="#top">&uarr; Back to top</a>
+</footer>
+
+<script type="application/json" id="ch-data">{"coin":{"xbar":[0.333333,0.5,0.533333,0.566667,0.5,0.633333,0.333333,0.5,0.533333,0.466667,0.533333,0.5,0.4,0.6,0.433333,0.733333,0.666667,0.633333,0.466667,0.6,0.433333,0.433333,0.566667,0.533333,0.466667,0.5,0.6,0.533333,0.633333,0.4,0.566667,0.533333,0.466667,0.5,0.633333,0.5,0.466667,0.533333,0.333333,0.466667,0.433333,0.566667,0.4,0.466667,0.5,0.5,0.333333,0.633333,0.566667,0.433333,0.566667,0.433333,0.466667,0.533333,0.533333,0.333333,0.433333,0.433333,0.5,0.566667,0.433333,0.633333,0.566667,0.5,0.6,0.5,0.7,0.466667,0.7,0.366667,0.433333,0.366667,0.533333,0.533333,0.466667,0.6,0.6,0.366667,0.6,0.433333,0.6,0.566667,0.466667,0.566667,0.333333,0.633333,0.533333,0.5,0.366667,0.466667,0.466667,0.433333,0.633333,0.533333,0.5,0.466667,0.4,0.4,0.533333,0.5,0.633333,0.6,0.533333,0.433333,0.5,0.6,0.533333,0.5,0.333333,0.366667,0.466667,0.5,0.5,0.6,0.666667,0.5,0.533333,0.366667,0.566667,0.533333,0.5,0.466667,0.466667,0.5,0.466667,0.533333,0.433333,0.366667,0.433333,0.566667,0.533333,0.433333,0.433333,0.466667,0.4,0.566667,0.4,0.533333,0.433333,0.466667,0.433333,0.5,0.5,0.533333,0.566667,0.566667,0.6,0.533333,0.566667,0.466667,0.333333,0.5,0.5,0.333333,0.533333,0.533333,0.433333,0.466667,0.666667,0.4,0.333333,0.433333,0.5,0.433333,0.566667,0.4,0.433333,0.466667,0.433333,0.333333,0.5,0.666667,0.466667,0.4,0.633333,0.4,0.566667,0.5,0.466667,0.433333,0.5,0.566667,0.466667,0.5,0.5,0.5,0.466667,0.466667,0.433333,0.7,0.433333,0.433333,0.633333,0.4,0.4,0.466667,0.5,0.666667,0.5,0.466667,0.3,0.5,0.633333,0.5,0.533333,0.5,0.366667,0.4,0.533333,0.533333,0.5,0.533333,0.466667,0.5,0.6,0.633333,0.5,0.466667,0.533333,0.566667,0.466667,0.466667,0.566667,0.5,0.566667,0.366667,0.666667,0.533333,0.566667,0.333333,0.366667,0.366667,0.466667,0.5,0.533333,0.666667,0.433333,0.3,0.533333,0.566667,0.566667,0.4,0.533333,0.533333,0.5,0.533333,0.466667,0.5,0.466667,0.466667,0.5,0.566667,0.466667,0.5,0.566667,0.533333,0.266667,0.466667,0.433333,0.5,0.6,0.666667,0.3,0.533333,0.6,0.4,0.566667,0.366667,0.566667,0.433333,0.6,0.5,0.466667,0.633333,0.566667,0.333333,0.566667,0.466667,0.5,0.633333,0.466667,0.633333,0.6,0.566667,0.433333,0.5,0.6,0.6,0.4,0.6,0.466667,0.5,0.5,0.533333,0.433333,0.6,0.4,0.533333,0.4,0.4,0.533333,0.533333,0.4,0.533333,0.466667,0.7,0.366667,0.5,0.366667,0.4,0.6,0.566667,0.4,0.5,0.6,0.6,0.566667,0.533333,0.6,0.5,0.6,0.533333,0.666667,0.5,0.5,0.433333,0.433333,0.466667,0.533333,0.366667,0.466667,0.533333,0.6,0.3,0.566667,0.366667,0.466667,0.466667,0.633333,0.533333,0.433333,0.533333,0.466667,0.433333,0.433333,0.4,0.566667,0.533333,0.533333,0.466667,0.6,0.466667,0.466667,0.433333,0.3,0.5,0.533333,0.4,0.5,0.6,0.466667,0.5,0.366667,0.333333,0.633333,0.466667,0.533333,0.466667,0.466667,0.5,0.666667,0.6,0.5,0.366667,0.466667,0.533333,0.6,0.566667,0.533333,0.7,0.566667,0.6,0.366667,0.6,0.433333,0.633333,0.4,0.433333,0.566667,0.533333,0.466667,0.6,0.433333,0.533333,0.433333,0.433333,0.5,0.466667,0.633333,0.433333],"stdev":[0.479463,0.508548,0.507416,0.504007,0.508548,0.490133,0.479463,0.508548,0.507416,0.507416,0.507416,0.508548,0.498273,0.498273,0.504007,0.449776,0.479463,0.490133,0.507416,0.498273,0.504007,0.504007,0.504007,0.507416,0.507416,0.508548,0.498273,0.507416,0.490133,0.498273,0.504007,0.507416,0.507416,0.508548,0.490133,0.508548,0.507416,0.507416,0.479463,0.507416,0.504007,0.504007,0.498273,0.507416,0.508548,0.508548,0.479463,0.490133,0.504007,0.504007,0.504007,0.504007,0.507416,0.507416,0.507416,0.479463,0.504007,0.504007,0.508548,0.504007,0.504007,0.490133,0.504007,0.508548,0.498273,0.508548,0.466092,0.507416,0.466092,0.490133,0.504007,0.490133,0.507416,0.507416,0.507416,0.498273,0.498273,0.490133,0.498273,0.504007,0.498273,0.504007,0.507416,0.504007,0.479463,0.490133,0.507416,0.508548,0.490133,0.507416,0.507416,0.504007,0.490133,0.507416,0.508548,0.507416,0.498273,0.498273,0.507416,0.508548,0.490133,0.498273,0.507416,0.504007,0.508548,0.498273,0.507416,0.508548,0.479463,0.490133,0.507416,0.508548,0.508548,0.498273,0.479463,0.508548,0.507416,0.490133,0.504007,0.507416,0.508548,0.507416,0.507416,0.508548,0.507416,0.507416,0.504007,0.490133,0.504007,0.504007,0.507416,0.504007,0.504007,0.507416,0.498273,0.504007,0.498273,0.507416,0.504007,0.507416,0.504007,0.508548,0.508548,0.507416,0.504007,0.504007,0.498273,0.507416,0.504007,0.507416,0.479463,0.508548,0.508548,0.479463,0.507416,0.507416,0.504007,0.507416,0.479463,0.498273,0.479463,0.504007,0.508548,0.504007,0.504007,0.498273,0.504007,0.507416,0.504007,0.479463,0.508548,0.479463,0.507416,0.498273,0.490133,0.498273,0.504007,0.508548,0.507416,0.504007,0.508548,0.504007,0.507416,0.508548,0.508548,0.508548,0.507416,0.507416,0.504007,0.466092,0.504007,0.504007,0.490133,0.498273,0.498273,0.507416,0.508548,0.479463,0.508548,0.507416,0.466092,0.508548,0.490133,0.508548,0.507416,0.508548,0.490133,0.498273,0.507416,0.507416,0.508548,0.507416,0.507416,0.508548,0.498273,0.490133,0.508548,0.507416,0.507416,0.504007,0.507416,0.507416,0.504007,0.508548,0.504007,0.490133,0.479463,0.507416,0.504007,0.479463,0.490133,0.490133,0.507416,0.508548,0.507416,0.479463,0.504007,0.466092,0.507416,0.504007,0.504007,0.498273,0.507416,0.507416,0.508548,0.507416,0.507416,0.508548,0.507416,0.507416,0.508548,0.504007,0.507416,0.508548,0.504007,0.507416,0.449776,0.507416,0.504007,0.508548,0.498273,0.479463,0.466092,0.507416,0.498273,0.498273,0.504007,0.490133,0.504007,0.504007,0.498273,0.508548,0.507416,0.490133,0.504007,0.479463,0.504007,0.507416,0.508548,0.490133,0.507416,0.490133,0.498273,0.504007,0.504007,0.508548,0.498273,0.498273,0.498273,0.498273,0.507416,0.508548,0.508548,0.507416,0.504007,0.498273,0.498273,0.507416,0.498273,0.498273,0.507416,0.507416,0.498273,0.507416,0.507416,0.466092,0.490133,0.508548,0.490133,0.498273,0.498273,0.504007,0.498273,0.508548,0.498273,0.498273,0.504007,0.507416,0.498273,0.508548,0.498273,0.507416,0.479463,0.508548,0.508548,0.504007,0.504007,0.507416,0.507416,0.490133,0.507416,0.507416,0.498273,0.466092,0.504007,0.490133,0.507416,0.507416,0.490133,0.507416,0.504007,0.507416,0.507416,0.504007,0.504007,0.498273,0.504007,0.507416,0.507416,0.507416,0.498273,0.507416,0.507416,0.504007,0.466092,0.508548,0.507416,0.498273,0.508548,0.498273,0.507416,0.508548,0.490133,0.479463,0.490133,0.507416,0.507416,0.507416,0.507416,0.508548,0.479463,0.498273,0.508548,0.490133,0.507416,0.507416,0.498273,0.504007,0.507416,0.466092,0.504007,0.498273,0.490133,0.498273,0.504007,0.490133,0.498273,0.504007,0.504007,0.507416,0.507416,0.498273,0.504007,0.507416,0.504007,0.504007,0.508548,0.507416,0.490133,0.504007],"n":30,"pop_mean":0.5,"pop_sd":0.5},"census":{"mean":[27.84,19.4,23.280001,26.84,26.559999,25.32,21.6,24.799999,23.32,23.719999,26.84,30.76,25.360001,26.440001,23.08,23.639999,27.16,21.32,28.52,15.04,19.24,27.32,28.040001,24.440001,26.0,25.92,27.08,22.559999,24.24,19.0,24.4,16.959999,26.280001,22.52,28.559999,22.16,25.0,16.0,22.040001,24.52,23.6,21.639999,20.0,26.719999,24.200001,17.719999,23.360001,22.16,18.16,17.440001,32.68,27.08,18.879999,20.4,28.639999,22.24,21.959999,23.200001,24.120001,23.4,15.72,33.439999,27.68,26.08,23.0,24.6,23.440001,27.6,22.76,23.92,18.559999,25.120001,23.0,22.440001,30.799999,20.559999,24.200001,24.280001,23.52,14.6,30.68,21.040001,24.76,26.16,22.879999,21.040001,24.120001,20.68,23.719999,16.639999,31.200001,23.559999,24.639999,27.639999,23.24,26.6,26.040001,25.280001,18.440001,23.799999],"stdev":[20.707647,16.0,19.020866,20.50951,20.192986,18.384142,16.869598,21.397039,19.644169,14.222986,21.448931,18.462303,17.885935,18.207325,19.148369,18.75251,16.321459,14.343175,19.583412,17.775169,18.106813,19.119623,22.902838,18.36455,12.919623,17.320316,21.470755,18.296356,16.179411,13.228757,21.637159,13.154467,19.940578,20.422863,22.679066,19.656805,15.542952,16.573071,16.642015,13.751122,18.046236,16.033506,14.27994,21.655485,16.943533,13.436642,20.59911,15.574231,18.785366,12.362847,22.61585,13.735355,12.689629,17.561796,19.7355,16.956512,19.681803,16.755596,19.622097,15.771811,15.896855,25.306587,18.406792,22.976292,15.903354,19.416489,14.06556,21.463146,20.376211,19.302244,20.302052,20.767202,16.678329,16.196913,20.45116,18.53618,19.446508,19.692469,17.953922,13.829317,21.42374,15.254726,16.055321,18.997105,20.561533,17.384092,21.591511,17.499332,19.550192,12.41934,21.476732,18.81728,20.513979,22.501629,18.954508,24.300205,23.226206,17.479797,13.994285,15.903354],"n":25,"pop_mean":24.13,"pop_sd":18.61},"summary":{"coin_xbar":{"n":400,"mean":0.499417,"median":0.5,"std":0.086307,"min":0.266667,"max":0.733333,"q1":0.433333,"q3":0.566667,"skew":-0.0188,"kurt":-0.2714},"census_mean":{"n":100,"mean":23.782,"median":23.759999,"std":3.760694,"min":14.6,"max":33.439999,"q1":22.020001,"q3":26.19,"skew":-0.1268,"kurt":0.1424}},"meta":{"chapter":"Chapter 3: The Sample Mean","book":"metricsAI: An Introduction to Econometrics with Python and AI in the Cloud","author":"Carlos Mendez"}}</script>
+
+<script>
+"use strict";
+
+const DATA = JSON.parse(document.getElementById("ch-data").textContent);
+
+// ==================== STATS HELPERS ====================
+const mean = a => a.reduce((s, v) => s + v, 0) / a.length;
+const sortedCopy = a => [...a].sort((x, y) => x - y);
+function quantile(sorted, p) {
+  const idx = p * (sorted.length - 1);
+  const lo = Math.floor(idx), hi = Math.ceil(idx);
+  if (lo === hi) return sorted[lo];
+  return sorted[lo] + (idx - lo) * (sorted[hi] - sorted[lo]);
+}
+function std(a, m) {
+  m = m ?? mean(a);
+  let s = 0;
+  for (const v of a) s += (v - m) * (v - m);
+  return Math.sqrt(s / (a.length - 1));
+}
+function summary(values) {
+  const arr = values.filter(v => v !== null && !isNaN(v));
+  const sorted = sortedCopy(arr);
+  const m = mean(arr);
+  const sd = std(arr, m);
+  return { n: arr.length, mean: m, median: quantile(sorted, 0.5), std: sd, min: sorted[0], max: sorted[sorted.length - 1], q1: quantile(sorted, 0.25), q3: quantile(sorted, 0.75) };
+}
+function linspace(a, b, n) {
+  const out = new Array(n);
+  const step = (b - a) / (n - 1);
+  for (let i = 0; i < n; i++) out[i] = a + i * step;
+  return out;
+}
+function trimmedMean(arr, frac) {
+  const sorted = sortedCopy(arr);
+  const trim = Math.floor(sorted.length * frac);
+  const trimmed = sorted.slice(trim, sorted.length - trim);
+  return mean(trimmed);
+}
+
+// ==================== FORMATTING ====================
+function fmt(v, decimals) {
+  if (decimals === undefined) decimals = 2;
+  if (v === null || v === undefined || isNaN(v)) return "\u2014";
+  return v.toFixed(decimals);
+}
+function fmtPct(v, d) { return v === null ? "\u2014" : (v * 100).toFixed(d || 1) + "%"; }
+
+// ==================== PRNG & SAMPLING ====================
+function mulberry32(a) {
+  return function() {
+    a |= 0; a = a + 0x6D2B79F5 | 0;
+    var t = Math.imul(a ^ a >>> 15, 1 | a);
+    t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+    return ((t ^ t >>> 14) >>> 0) / 4294967296;
+  };
+}
+
+function boxMuller(rng) {
+  const u1 = rng(), u2 = rng();
+  return Math.sqrt(-2 * Math.log(u1)) * Math.cos(2 * Math.PI * u2);
+}
+
+function normalPDF(x, mu, sigma) {
+  const z = (x - mu) / sigma;
+  return Math.exp(-0.5 * z * z) / (sigma * Math.sqrt(2 * Math.PI));
+}
+
+function gammaSample(shape, rng) {
+  if (shape < 1) {
+    return gammaSample(shape + 1, rng) * Math.pow(rng(), 1 / shape);
+  }
+  const d = shape - 1 / 3;
+  const c = 1 / Math.sqrt(9 * d);
+  while (true) {
+    let x, v;
+    do {
+      x = boxMuller(rng);
+      v = 1 + c * x;
+    } while (v <= 0);
+    v = v * v * v;
+    const u = rng();
+    if (u < 1 - 0.0331 * x * x * x * x) return d * v;
+    if (Math.log(u) < 0.5 * x * x + d * (1 - v + Math.log(v))) return d * v;
+  }
+}
+
+const POPULATIONS = {
+  bernoulli: { mu: 0.5, sigma: 0.5, label: "Bernoulli (p = 0.5)",
+    sample: function(rng) { return rng() < 0.5 ? 1 : 0; },
+    pdf: function(xs) { return xs.map(x => (x === 0 || x === 1) ? 0.5 : 0); }
+  },
+  uniform: { mu: 3, sigma: Math.sqrt(3), label: "Uniform (0, 6)",
+    sample: function(rng) { return rng() * 6; },
+    pdf: function(xs) { return xs.map(x => (x >= 0 && x <= 6) ? 1/6 : 0); }
+  },
+  skewed: { mu: 2, sigma: 2, label: "Exponential (\u03bb = 0.5)",
+    sample: function(rng) { return -2 * Math.log(rng()); },
+    pdf: function(xs) { return xs.map(x => x >= 0 ? 0.5 * Math.exp(-0.5 * x) : 0); }
+  },
+  bimodal: { mu: 50, sigma: Math.sqrt(425), label: "Bimodal (peaks at 30, 70)",
+    sample: function(rng) { return (rng() < 0.5 ? 30 : 70) + boxMuller(rng) * 5; },
+    pdf: function(xs) { return xs.map(x => 0.5 * normalPDF(x, 30, 5) + 0.5 * normalPDF(x, 70, 5)); }
+  },
+  census: { mu: 24.13, sigma: 18.61, label: "Census-like (right-skewed ages)",
+    sample: function(rng) {
+      var shape = (24.13 / 18.61) * (24.13 / 18.61);
+      var scale = (18.61 * 18.61) / 24.13;
+      return gammaSample(shape, rng) * scale;
+    },
+    pdf: null
+  }
+};
+
+function simulateMeans(nSim, sampleSize, sampleFn, rng) {
+  const means = new Array(nSim);
+  for (let i = 0; i < nSim; i++) {
+    let sum = 0;
+    for (let j = 0; j < sampleSize; j++) sum += sampleFn(rng);
+    means[i] = sum / sampleSize;
+  }
+  return means;
+}
+
+// ==================== THEME ====================
+const THEME_KEY = "metricsai-theme";
+function getCSS(varName) {
+  return getComputedStyle(document.documentElement).getPropertyValue(varName).trim();
+}
+function themeColors() {
+  return {
+    text: getCSS("--text"),
+    textSoft: getCSS("--text-soft"),
+    grid: getCSS("--grid"),
+    panel: getCSS("--panel"),
+    cyan: getCSS("--accent"),
+    purple: getCSS("--accent-2"),
+    pink: getCSS("--accent-3")
+  };
+}
+function baseLayout(overrides) {
+  const c = themeColors();
+  return Object.assign({
+    paper_bgcolor: "rgba(0,0,0,0)",
+    plot_bgcolor: "rgba(0,0,0,0)",
+    font: { family: "Inter, system-ui, sans-serif", color: c.text, size: 12 },
+    margin: { l: 56, r: 18, t: 30, b: 46 },
+    xaxis: { gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft } },
+    yaxis: { gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft } },
+    hoverlabel: { bgcolor: c.panel, bordercolor: c.grid, font: { color: c.text } },
+    legend: { font: { color: c.text }, bgcolor: "rgba(0,0,0,0)" }
+  }, overrides || {});
+}
+const PLOTLY_CONFIG = { displayModeBar: false, responsive: true };
+
+function getActiveVal(groupId) {
+  const btn = document.querySelector("#" + groupId + " button.active");
+  return btn ? btn.dataset.val : null;
+}
+
+function bindToggles(groupId, renderFn) {
+  document.querySelectorAll("#" + groupId + " button").forEach(function(btn) {
+    btn.addEventListener("click", function() {
+      this.parentNode.querySelectorAll("button").forEach(function(b) { b.classList.remove("active"); });
+      this.classList.add("active");
+      renderFn();
+    });
+  });
+}
+
+function bindSlider(id, valId, formatFn, renderFn) {
+  var el = document.getElementById(id);
+  var valEl = document.getElementById(valId);
+  el.addEventListener("input", function() {
+    valEl.textContent = formatFn(this.value);
+    renderFn();
+  });
+}
+
+// ==================== WIDGET 1: Sampling Distribution ====================
+(function() {
+  var coinXbar = DATA.coin.xbar;
+  var censusXbar = DATA.census.mean;
+  var chartEl = document.getElementById("chart-sampling-dist");
+
+  function render() {
+    var c = themeColors();
+    var dataset = getActiveVal("sampling-dist-data");
+    var showNormal = getActiveVal("sampling-dist-normal") === "on";
+    var seBands = getActiveVal("sampling-dist-se");
+
+    var xbar = dataset === "coin" ? coinXbar : censusXbar;
+    var popMu = dataset === "coin" ? DATA.coin.pop_mean : DATA.census.pop_mean;
+    var popSd = dataset === "coin" ? DATA.coin.pop_sd : DATA.census.pop_sd;
+    var n = dataset === "coin" ? DATA.coin.n : DATA.census.n;
+    var theoSE = popSd / Math.sqrt(n);
+    var s = summary(xbar);
+
+    document.getElementById("sd-stat-nsamples").textContent = s.n;
+    document.getElementById("sd-stat-mean").textContent = fmt(s.mean, 4);
+    document.getElementById("sd-stat-sd").textContent = fmt(s.std, 4);
+    document.getElementById("sd-stat-theose").textContent = fmt(theoSE, 4);
+
+    var traces = [];
+    traces.push({
+      x: xbar, type: "histogram", histnorm: "probability density",
+      marker: { color: c.cyan + "55", line: { color: c.cyan, width: 1 } },
+      name: "Sample means", nbinsx: dataset === "coin" ? 25 : 18
+    });
+
+    if (showNormal) {
+      var xs = linspace(popMu - 4 * theoSE, popMu + 4 * theoSE, 200);
+      var ys = xs.map(function(x) { return normalPDF(x, popMu, theoSE); });
+      traces.push({
+        x: xs, y: ys, type: "scatter", mode: "lines",
+        line: { color: c.pink, width: 2.5 },
+        name: "N(" + fmt(popMu, 2) + ", " + fmt(theoSE, 4) + "\u00B2)"
+      });
+    }
+
+    var shapes = [];
+    shapes.push({
+      type: "line", xref: "x", yref: "paper",
+      x0: popMu, x1: popMu, y0: 0, y1: 1,
+      line: { color: c.pink, width: 2, dash: "dash" }
+    });
+
+    if (seBands === "2se") {
+      shapes.push({
+        type: "rect", xref: "x", yref: "paper",
+        x0: popMu - 2 * theoSE, x1: popMu + 2 * theoSE, y0: 0, y1: 1,
+        fillcolor: c.purple + "12", line: { width: 0 }
+      });
+    }
+    if (seBands === "1se" || seBands === "2se") {
+      shapes.push({
+        type: "rect", xref: "x", yref: "paper",
+        x0: popMu - theoSE, x1: popMu + theoSE, y0: 0, y1: 1,
+        fillcolor: c.purple + "20", line: { width: 0 }
+      });
+    }
+
+    var within1 = xbar.filter(function(x) { return Math.abs(x - popMu) <= theoSE; }).length;
+    var within2 = xbar.filter(function(x) { return Math.abs(x - popMu) <= 2 * theoSE; }).length;
+    if (seBands !== "off") {
+      document.getElementById("sd-within1").textContent = within1 + "/" + xbar.length + " (" + (within1 / xbar.length * 100).toFixed(1) + "%)";
+      document.getElementById("sd-within2").textContent = within2 + "/" + xbar.length + " (" + (within2 / xbar.length * 100).toFixed(1) + "%)";
+      document.getElementById("sd-bands-info").classList.remove("hidden");
+    } else {
+      document.getElementById("sd-bands-info").classList.add("hidden");
+    }
+
+    var xTitle = dataset === "coin" ? "Sample Mean (proportion of heads)" : "Sample Mean Age (years)";
+    var layout = baseLayout({
+      xaxis: { title: xTitle, gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft } },
+      yaxis: { title: "Density", gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft } },
+      shapes: shapes, barmode: "overlay", showlegend: true,
+      legend: { x: 0.02, y: 0.98, xanchor: "left", yanchor: "top", font: { color: c.text }, bgcolor: "rgba(0,0,0,0)" }
+    });
+    Plotly.react(chartEl, traces, layout, PLOTLY_CONFIG);
+  }
+
+  bindToggles("sampling-dist-data", render);
+  bindToggles("sampling-dist-normal", render);
+  bindToggles("sampling-dist-se", render);
+  window.__rerender_samplingdist = render;
+  render();
+})();
+
+// ==================== WIDGET 2: Sample Size & SE ====================
+(function() {
+  var chartEl = document.getElementById("chart-sample-size");
+  var NSIM = 500;
+  var seed = 42;
+
+  function render() {
+    var c = themeColors();
+    var n = parseInt(document.getElementById("sample-size-n").value);
+    var rng = mulberry32(seed + n);
+    var theoSE = 0.5 / Math.sqrt(n);
+    var means = simulateMeans(NSIM, n, function(rng) { return rng() < 0.5 ? 1 : 0; }, rng);
+    var s = summary(means);
+
+    document.getElementById("ss-stat-n").textContent = n;
+    document.getElementById("ss-stat-empse").textContent = fmt(s.std, 4);
+    document.getElementById("ss-stat-theose").textContent = fmt(theoSE, 4);
+    document.getElementById("ss-stat-meanmeans").textContent = fmt(s.mean, 4);
+
+    var traces = [];
+    traces.push({
+      x: means, type: "histogram", histnorm: "probability density",
+      marker: { color: c.cyan + "55", line: { color: c.cyan, width: 1 } },
+      name: "Simulated means", nbinsx: 30
+    });
+
+    var xs = linspace(0.5 - 4 * theoSE, 0.5 + 4 * theoSE, 200);
+    var ys = xs.map(function(x) { return normalPDF(x, 0.5, theoSE); });
+    traces.push({
+      x: xs, y: ys, type: "scatter", mode: "lines",
+      line: { color: c.pink, width: 2.5 },
+      name: "N(0.5, " + fmt(theoSE, 4) + "\u00B2)"
+    });
+
+    var layout = baseLayout({
+      xaxis: { title: "Sample Mean (proportion of heads)", gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft } },
+      yaxis: { title: "Density", gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft } },
+      shapes: [{ type: "line", xref: "x", yref: "paper", x0: 0.5, x1: 0.5, y0: 0, y1: 1, line: { color: c.pink, width: 2, dash: "dash" } }],
+      barmode: "overlay", showlegend: true,
+      legend: { x: 0.02, y: 0.98, xanchor: "left", yanchor: "top", font: { color: c.text }, bgcolor: "rgba(0,0,0,0)" }
+    });
+    Plotly.react(chartEl, traces, layout, PLOTLY_CONFIG);
+  }
+
+  bindSlider("sample-size-n", "sample-size-n-val", function(v) { return "n = " + v; }, render);
+  document.getElementById("sample-size-resim").addEventListener("click", function() { seed += 1000; render(); });
+  window.__rerender_samplesize = render;
+  render();
+})();
+
+// ==================== WIDGET 3: Central Limit Theorem ====================
+(function() {
+  var chartPopEl = document.getElementById("chart-clt-pop");
+  var chartMeansEl = document.getElementById("chart-clt-means");
+  var NSIM = 500;
+  var seed = 100;
+
+  function render() {
+    var c = themeColors();
+    var popKey = document.getElementById("clt-population").value;
+    var n = parseInt(document.getElementById("clt-n").value);
+    var pop = POPULATIONS[popKey];
+    var rng = mulberry32(seed + n * 7 + popKey.length * 31);
+
+    var theoSE = pop.sigma / Math.sqrt(n);
+    var means = simulateMeans(NSIM, n, pop.sample, rng);
+    var sMeans = summary(means);
+
+    document.getElementById("clt-stat-mu").textContent = fmt(pop.mu, 2);
+    document.getElementById("clt-stat-sigma").textContent = fmt(pop.sigma, 2);
+    document.getElementById("clt-stat-meanmeans").textContent = fmt(sMeans.mean, 3);
+    document.getElementById("clt-stat-se").textContent = fmt(sMeans.std, 3);
+    document.getElementById("clt-stat-theose").textContent = fmt(theoSE, 3);
+
+    // Left panel: population distribution
+    var popTraces = [];
+    if (popKey === "bernoulli") {
+      popTraces.push({
+        x: [0, 1], y: [0.5, 0.5], type: "bar",
+        marker: { color: [c.purple + "88", c.purple + "88"], line: { color: c.purple, width: 1.5 } },
+        name: "P(X)", width: 0.3
+      });
+    } else {
+      var rng2 = mulberry32(seed + 77);
+      var popSamples = [];
+      for (var i = 0; i < 2000; i++) popSamples.push(pop.sample(rng2));
+      popTraces.push({
+        x: popSamples, type: "histogram", histnorm: "probability density",
+        marker: { color: c.purple + "44", line: { color: c.purple, width: 1 } },
+        name: "Population", nbinsx: 40
+      });
+      if (pop.pdf) {
+        var pMin = Math.min.apply(null, popSamples);
+        var pMax = Math.max.apply(null, popSamples);
+        var pxs = linspace(Math.max(pMin, 0), pMax, 200);
+        var pys = pop.pdf(pxs);
+        popTraces.push({
+          x: pxs, y: pys, type: "scatter", mode: "lines",
+          line: { color: c.purple, width: 2 }, name: "PDF"
+        });
+      }
+    }
+
+    var popLayout = baseLayout({
+      xaxis: { title: popKey === "bernoulli" ? "Outcome" : "X", gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft } },
+      yaxis: { title: popKey === "bernoulli" ? "Probability" : "Density", gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft } },
+      showlegend: false, margin: { l: 50, r: 12, t: 20, b: 42 },
+      shapes: [{ type: "line", xref: "x", yref: "paper", x0: pop.mu, x1: pop.mu, y0: 0, y1: 1, line: { color: c.pink, width: 2, dash: "dash" } }]
+    });
+    Plotly.react(chartPopEl, popTraces, popLayout, PLOTLY_CONFIG);
+
+    // Right panel: sampling distribution of means
+    var meansTraces = [];
+    meansTraces.push({
+      x: means, type: "histogram", histnorm: "probability density",
+      marker: { color: c.cyan + "55", line: { color: c.cyan, width: 1 } },
+      name: "Sample means", nbinsx: 25
+    });
+
+    var mxs = linspace(sMeans.mean - 4 * theoSE, sMeans.mean + 4 * theoSE, 200);
+    var mys = mxs.map(function(x) { return normalPDF(x, pop.mu, theoSE); });
+    meansTraces.push({
+      x: mxs, y: mys, type: "scatter", mode: "lines",
+      line: { color: c.pink, width: 2.5 }, name: "N(\u03BC, SE\u00B2)"
+    });
+
+    var meansLayout = baseLayout({
+      xaxis: { title: "Sample Mean", gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft } },
+      yaxis: { title: "Density", gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft } },
+      showlegend: false, margin: { l: 50, r: 12, t: 20, b: 42 },
+      shapes: [{ type: "line", xref: "x", yref: "paper", x0: pop.mu, x1: pop.mu, y0: 0, y1: 1, line: { color: c.pink, width: 2, dash: "dash" } }],
+      barmode: "overlay"
+    });
+    Plotly.react(chartMeansEl, meansTraces, meansLayout, PLOTLY_CONFIG);
+  }
+
+  document.getElementById("clt-population").addEventListener("change", render);
+  bindSlider("clt-n", "clt-n-val", function(v) { return "n = " + v; }, render);
+  document.getElementById("clt-resim").addEventListener("click", function() { seed += 1000; render(); });
+  window.__rerender_clt = render;
+  render();
+})();
+
+// ==================== WIDGET 4: Estimator Properties ====================
+(function() {
+  var chartEl = document.getElementById("chart-estimator");
+  var NSIM = 500;
+  var TRUE_MU = 50;
+  var TRUE_SD = 10;
+  var OUTLIER_MU = 150;
+  var seed = 200;
+
+  function render() {
+    var c = themeColors();
+    var estType = getActiveVal("estimator-type");
+    var n = parseInt(document.getElementById("estimator-n").value);
+    var contam = parseInt(document.getElementById("estimator-contam").value) / 100;
+    var rng = mulberry32(seed + n * 3 + Math.round(contam * 100) * 7);
+
+    var estimates = new Array(NSIM);
+    for (var i = 0; i < NSIM; i++) {
+      var sample = new Array(n);
+      for (var j = 0; j < n; j++) {
+        if (contam > 0 && rng() < contam) {
+          sample[j] = OUTLIER_MU + boxMuller(rng) * TRUE_SD;
+        } else {
+          sample[j] = TRUE_MU + boxMuller(rng) * TRUE_SD;
+        }
+      }
+      if (estType === "mean") {
+        estimates[i] = mean(sample);
+      } else if (estType === "median") {
+        var sorted = sortedCopy(sample);
+        estimates[i] = quantile(sorted, 0.5);
+      } else {
+        estimates[i] = trimmedMean(sample, 0.1);
+      }
+    }
+
+    var avgEst = mean(estimates);
+    var bias = avgEst - TRUE_MU;
+    var variance = std(estimates, avgEst);
+    variance = variance * variance;
+    var mse = variance + bias * bias;
+
+    document.getElementById("est-stat-mu").textContent = TRUE_MU;
+    document.getElementById("est-stat-avg").textContent = fmt(avgEst, 2);
+    document.getElementById("est-stat-bias").textContent = fmt(bias, 3);
+    document.getElementById("est-stat-var").textContent = fmt(variance, 2);
+    document.getElementById("est-stat-mse").textContent = fmt(mse, 2);
+
+    var traces = [];
+    traces.push({
+      x: estimates, type: "histogram", histnorm: "probability density",
+      marker: { color: c.cyan + "55", line: { color: c.cyan, width: 1 } },
+      name: estType.charAt(0).toUpperCase() + estType.slice(1), nbinsx: 30
+    });
+
+    var sEst = summary(estimates);
+    var xs = linspace(sEst.mean - 4 * sEst.std, sEst.mean + 4 * sEst.std, 200);
+    var ys = xs.map(function(x) { return normalPDF(x, sEst.mean, sEst.std); });
+    traces.push({
+      x: xs, y: ys, type: "scatter", mode: "lines",
+      line: { color: c.pink, width: 2, dash: "dot" }, name: "Normal fit"
+    });
+
+    var layout = baseLayout({
+      xaxis: { title: "Estimate", gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft } },
+      yaxis: { title: "Density", gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft } },
+      shapes: [{ type: "line", xref: "x", yref: "paper", x0: TRUE_MU, x1: TRUE_MU, y0: 0, y1: 1, line: { color: c.purple, width: 2.5, dash: "dash" } }],
+      barmode: "overlay", showlegend: true,
+      annotations: [{ x: TRUE_MU, y: 1.02, yref: "paper", text: "\u03BC = " + TRUE_MU, showarrow: false, font: { color: c.purple, size: 12, family: "JetBrains Mono" } }],
+      legend: { x: 0.02, y: 0.98, xanchor: "left", yanchor: "top", font: { color: c.text }, bgcolor: "rgba(0,0,0,0)" }
+    });
+    Plotly.react(chartEl, traces, layout, PLOTLY_CONFIG);
+  }
+
+  bindToggles("estimator-type", render);
+  bindSlider("estimator-n", "estimator-n-val", function(v) { return "n = " + v; }, render);
+  bindSlider("estimator-contam", "estimator-contam-val", function(v) { return v + "%"; }, render);
+  document.getElementById("estimator-resim").addEventListener("click", function() { seed += 1000; render(); });
+  window.__rerender_estimator = render;
+  render();
+})();
+
+// ==================== WIDGET 5: Weighted Means ====================
+(function() {
+  var chartEl = document.getElementById("chart-weighted");
+
+  function render() {
+    var c = themeColors();
+    var muA = parseFloat(document.getElementById("weighted-mu-a").value);
+    var muB = parseFloat(document.getElementById("weighted-mu-b").value);
+    var popFrac = parseFloat(document.getElementById("weighted-pop-frac").value) / 100;
+    var sampleFrac = parseFloat(document.getElementById("weighted-sample-frac").value) / 100;
+
+    var trueMean = popFrac * muA + (1 - popFrac) * muB;
+    var unweighted = sampleFrac * muA + (1 - sampleFrac) * muB;
+    var weighted = trueMean;
+    var bias = unweighted - trueMean;
+
+    document.getElementById("wt-stat-true").textContent = "$" + fmt(trueMean, 1) + "k";
+    document.getElementById("wt-stat-unwt").textContent = "$" + fmt(unweighted, 1) + "k";
+    document.getElementById("wt-stat-wt").textContent = "$" + fmt(weighted, 1) + "k";
+    document.getElementById("wt-stat-bias").textContent = (bias >= 0 ? "+" : "") + fmt(bias, 1) + "k";
+
+    var barColors = [c.cyan, c.pink, c.purple];
+    var traces = [{
+      x: ["True Population Mean", "Unweighted Sample Mean", "Weighted Sample Mean"],
+      y: [trueMean, unweighted, weighted],
+      type: "bar",
+      marker: { color: barColors.map(function(col) { return col + "77"; }), line: { color: barColors, width: 2 } },
+      text: ["$" + fmt(trueMean, 1) + "k", "$" + fmt(unweighted, 1) + "k", "$" + fmt(weighted, 1) + "k"],
+      textposition: "outside",
+      textfont: { family: "JetBrains Mono", size: 13, color: c.text }
+    }];
+
+    var layout = baseLayout({
+      xaxis: { tickfont: { color: c.textSoft, size: 11 }, gridcolor: c.grid, linecolor: c.grid },
+      yaxis: { title: "Income ($k)", gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft },
+               range: [0, Math.max(muA, muB) * 1.25] },
+      shapes: [{
+        type: "line", xref: "paper", yref: "y",
+        x0: 0, x1: 1, y0: trueMean, y1: trueMean,
+        line: { color: c.cyan, width: 2, dash: "dash" }
+      }],
+      showlegend: false, margin: { l: 56, r: 18, t: 10, b: 80 }
+    });
+    Plotly.react(chartEl, traces, layout, PLOTLY_CONFIG);
+  }
+
+  bindSlider("weighted-mu-a", "weighted-mu-a-val", function(v) { return "$" + v + "k"; }, render);
+  bindSlider("weighted-mu-b", "weighted-mu-b-val", function(v) { return "$" + v + "k"; }, render);
+  bindSlider("weighted-pop-frac", "weighted-pop-frac-val", function(v) { return v + "%"; }, render);
+  bindSlider("weighted-sample-frac", "weighted-sample-frac-val", function(v) { return v + "%"; }, render);
+  window.__rerender_weighted = render;
+  render();
+})();
+
+// ==================== RESET + URL HASH STATE ====================
+(function() {
+  // Per-widget control registry
+  var REG = {
+    samplingdist: [
+      { group: "sampling-dist-data", kind: "toggle", def: "coin" },
+      { group: "sampling-dist-normal", kind: "toggle", def: "on" },
+      { group: "sampling-dist-se", kind: "toggle", def: "off" }
+    ],
+    samplesize: [
+      { id: "sample-size-n", kind: "range", def: "30" }
+    ],
+    clt: [
+      { id: "clt-population", kind: "select", def: "skewed" },
+      { id: "clt-n", kind: "range", def: "5" }
+    ],
+    estimator: [
+      { group: "estimator-type", kind: "toggle", def: "mean" },
+      { id: "estimator-n", kind: "range", def: "30" },
+      { id: "estimator-contam", kind: "range", def: "0" }
+    ],
+    weighted: [
+      { id: "weighted-mu-a", kind: "range", def: "60" },
+      { id: "weighted-mu-b", kind: "range", def: "50" },
+      { id: "weighted-pop-frac", kind: "range", def: "50" },
+      { id: "weighted-sample-frac", kind: "range", def: "80" }
+    ]
+  };
+
+  function getVal(c) {
+    if (c.kind === "toggle") {
+      var btn = document.querySelector("#" + c.group + " button.active");
+      return btn ? btn.dataset.val : c.def;
+    }
+    return document.getElementById(c.id).value;
+  }
+
+  function setVal(c, val, fireEvents) {
+    if (c.kind === "toggle") {
+      var group = document.getElementById(c.group);
+      if (!group) return;
+      var btn = group.querySelector('button[data-val="' + val + '"]');
+      if (btn && !btn.classList.contains("active")) btn.click();
+    } else {
+      var el = document.getElementById(c.id);
+      if (!el) return;
+      if (el.value !== String(val)) {
+        el.value = val;
+        if (fireEvents) el.dispatchEvent(new Event(c.kind === "select" ? "change" : "input", { bubbles: true }));
+      }
+    }
+  }
+
+  function resetWidget(widget) {
+    var ctrls = REG[widget] || [];
+    for (var i = 0; i < ctrls.length; i++) setVal(ctrls[i], ctrls[i].def, true);
+    var fn = window["__rerender_" + widget];
+    if (fn) fn();
+    writeHash();
+  }
+
+  function writeHash() {
+    var parts = [];
+    for (var widget in REG) {
+      var ctrls = REG[widget];
+      for (var i = 0; i < ctrls.length; i++) {
+        var c = ctrls[i];
+        var v = String(getVal(c));
+        if (v !== String(c.def)) {
+          var key = c.id || c.group;
+          parts.push(key + "=" + encodeURIComponent(v));
+        }
+      }
+    }
+    var want = parts.length ? "#" + parts.join("&") : "";
+    if (want === "" && location.hash.match(/=/)) {
+      history.replaceState(null, "", location.pathname + location.search);
+    } else if (want !== "" && location.hash !== want) {
+      history.replaceState(null, "", location.pathname + location.search + want);
+    }
+  }
+
+  function readHash() {
+    var hash = location.hash.slice(1);
+    if (!hash || !hash.includes("=")) return;
+    var params = {};
+    var pairs = hash.split("&");
+    for (var i = 0; i < pairs.length; i++) {
+      var eq = pairs[i].indexOf("=");
+      if (eq < 0) continue;
+      params[pairs[i].slice(0, eq)] = decodeURIComponent(pairs[i].slice(eq + 1));
+    }
+    for (var widget in REG) {
+      var ctrls = REG[widget];
+      for (var j = 0; j < ctrls.length; j++) {
+        var c = ctrls[j];
+        var key = c.id || c.group;
+        if (key in params) setVal(c, params[key], true);
+      }
+    }
+  }
+
+  document.querySelectorAll(".reset-btn[data-reset]").forEach(function(btn) {
+    btn.addEventListener("click", function() { resetWidget(btn.dataset.reset); });
+  });
+  document.addEventListener("input", function(e) {
+    if (e.target.matches("input[type=range], select")) writeHash();
+  });
+  document.addEventListener("change", function(e) {
+    if (e.target.matches("select")) writeHash();
+  });
+  document.querySelectorAll(".toggle-group button").forEach(function(b) {
+    b.addEventListener("click", function() { setTimeout(writeHash, 0); });
+  });
+  readHash();
+})();
+
+// ==================== THEME TOGGLE ====================
+(function() {
+  var btn = document.getElementById("theme-toggle");
+  var iconEl = document.getElementById("theme-icon");
+  var labelEl = document.getElementById("theme-label");
+
+  function apply(theme) {
+    document.documentElement.dataset.theme = theme;
+    iconEl.textContent = theme === "dark" ? "\u2600\uFE0F" : "\uD83C\uDF19";
+    labelEl.textContent = theme === "dark" ? "Light" : "Dark";
+    for (var key in window) {
+      if (key.startsWith("__rerender_") && typeof window[key] === "function") window[key]();
+    }
+  }
+
+  var saved = localStorage.getItem(THEME_KEY);
+  var prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+  apply(saved || (prefersDark ? "dark" : "light"));
+
+  btn.addEventListener("click", function() {
+    var next = document.documentElement.dataset.theme === "dark" ? "light" : "dark";
+    localStorage.setItem(THEME_KEY, next);
+    apply(next);
+  });
+})();
+
+// ==================== Resize handling ====================
+window.addEventListener("resize", function() {
+  document.querySelectorAll(".chart").forEach(function(el) {
+    if (el.data) Plotly.Plots.resize(el);
+  });
+});
+</script>
+
+</body>
+</html>

@@ -7,14 +7,17 @@ Self-contained HTML dashboards that let students manipulate the key concepts of 
 ```
 web-apps/
 ├── README.md           ← this file
-├── ch02/
-│   ├── dashboard.html  ← open in a browser
+├── ch01/
+│   ├── build.py        ← build script (reads data, injects JSON)
+│   ├── template.html   ← HTML/CSS/JS template with {{DATA_JSON}}
+│   ├── dashboard.html  ← generated — open in a browser
 │   └── PLAN.md         ← design notes for this chapter's app
-├── ch03/ … (future)
+├── ch02/ …
+├── ch03/ …
 └── chNN/ …
 ```
 
-One folder per chapter. Each folder holds the rendered `dashboard.html` and a copy of the implementation plan (`PLAN.md`) so anyone returning later can see what decisions were made and why.
+One folder per chapter. Each folder holds the build script, template, rendered `dashboard.html`, and a design plan (`PLAN.md`) so anyone returning later can see what decisions were made and why.
 
 ## Opening an app
 
@@ -27,23 +30,24 @@ The dashboards require only an internet connection on first load (to fetch the P
 
 ## Regenerating / editing an app
 
-Source files for each chapter dashboard live under `scripts/`:
+Each chapter's build files live inside its own directory:
 
-- `scripts/build_chNN_webapp.py` — reads the chapter's datasets, computes summary stats, injects a JSON blob into the template.
-- `scripts/chNN_webapp_template.html` — HTML + CSS + JavaScript with a `{{DATA_JSON}}` placeholder. This is where you edit widgets, styling, and copy.
+- `web-apps/chNN/build.py` — reads the chapter's datasets, computes summary stats, injects a JSON blob into the template.
+- `web-apps/chNN/template.html` — HTML + CSS + JavaScript with a `{{DATA_JSON}}` placeholder. This is where you edit widgets, styling, and copy.
 
 Rebuild a chapter's dashboard with:
 
 ```bash
 source .venv/bin/activate
-python3 scripts/build_ch02_webapp.py
+python3 web-apps/ch02/build.py
 ```
 
 ## Adding a dashboard for a new chapter
 
-1. Copy `scripts/build_ch02_webapp.py` → `scripts/build_chNN_webapp.py` and update the dataset loaders + `OUT_DIR`.
-2. Copy `scripts/ch02_webapp_template.html` → `scripts/chNN_webapp_template.html` and adjust widgets for the chapter's concepts.
-3. `mkdir web-apps/chNN/`, run the build script, and commit the generated `dashboard.html` alongside a chapter-specific `PLAN.md`.
+1. Create `web-apps/chNN/` with `build.py` and `template.html` (use an existing chapter as reference).
+2. Update the dataset loaders in `build.py` for the chapter's data.
+3. Adjust widgets in `template.html` for the chapter's concepts.
+4. Run the build script and commit the generated `dashboard.html` alongside a `PLAN.md`.
 
 ## Supplementary data
 

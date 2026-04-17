@@ -15,8 +15,8 @@ Design decisions confirmed with the user:
 
 ## Deliverables
 
-1. `scripts/build_ch02_webapp.py` — reads source datasets, computes derived fields, injects a JSON blob into an HTML template, writes final dashboard.
-2. `scripts/ch02_webapp_template.html` — HTML + CSS + JS template with a `{{DATA_JSON}}` placeholder.
+1. `web-apps/ch02/build.py` — reads source datasets, computes derived fields, injects a JSON blob into an HTML template, writes final dashboard.
+2. `web-apps/ch02/template.html` — HTML + CSS + JS template with a `{{DATA_JSON}}` placeholder.
 3. `web-apps/ch02/dashboard.html` — single self-contained file, distributable as-is.
 4. `web-apps/ch02/PLAN.md` — this plan, preserved alongside the app for future reference.
 5. `web-apps/README.md` — brief note on directory layout and how to add future chapter apps.

@@ -4,8 +4,8 @@ Usage:
     python3 .claude/skills/web-app/scripts/scaffold_chapter.py chNN "Chapter Title"
 
 Produces:
-    scripts/build_chNN_webapp.py
-    scripts/chNN_webapp_template.html
+    web-apps/chNN/build.py
+    web-apps/chNN/template.html
     web-apps/chNN/PLAN.md  (starter)
 
 Won't overwrite existing files. Run with --force to overwrite.
@@ -107,15 +107,17 @@ def main() -> None:
         "{{ATTRIBUTION}}": "",  # fill in later if supplementary data is added
     }
 
+    app_dir = PROJECT_ROOT / "web-apps" / slug
+
     render_template(
         TEMPLATES / "base.html",
-        PROJECT_ROOT / "scripts" / f"{slug}_webapp_template.html",
+        app_dir / "template.html",
         repl,
         args.force,
     )
     render_template(
         TEMPLATES / "build_webapp.py",
-        PROJECT_ROOT / "scripts" / f"build_{slug}_webapp.py",
+        app_dir / "build.py",
         repl,
         args.force,
     )
@@ -133,9 +135,9 @@ def main() -> None:
     print(f"  1. Read the chapter (notebooks_quarto/{slug}_*.qmd) and identify Key Concepts.")
     print(f"  2. Edit web-apps/{slug}/PLAN.md with your widget list + target concepts.")
     print(f"  3. Paste widget patterns from .claude/skills/web-app/templates/widgets/*.md")
-    print(f"     into scripts/{slug}_webapp_template.html.")
-    print(f"  4. Fill in scripts/build_{slug}_webapp.py with dataset loaders.")
-    print(f"  5. Build: python3 scripts/build_{slug}_webapp.py")
+    print(f"     into web-apps/{slug}/template.html.")
+    print(f"  4. Fill in web-apps/{slug}/build.py with dataset loaders.")
+    print(f"  5. Build: python3 web-apps/{slug}/build.py")
     print(f"  6. Verify: python3 .claude/skills/web-app/scripts/verify_app.py web-apps/{slug}/dashboard.html")
     print(f"  7. Walk through .claude/skills/web-app/docs/checklist.md before committing.")
 
