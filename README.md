@@ -50,9 +50,9 @@ Click any badge below to open and run immediately in your browser. Every chapter
 | **17** | Panel Data, Time Series Data, Causation | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/quarcs-lab/metricsai/blob/main/notebooks_colab/ch17_Panel_Data_Time_Series_Data_Causation.ipynb) | [🎬 AI Video](https://www.youtube.com/watch?v=ZtjIHX6JYyM) • [✨ AI Slides](https://carlos-mendez.my.canva.site/s17-panel-data-time-series-data-causation-pdf) • [📊 Author Slides](https://cameron.econ.ucdavis.edu/aed/traedv1_17) • [📝 Quiz](https://app.edcafe.ai/quizzes/69786c262f5d08069e04e9a8) • [🤖 AI Tutor](https://app.edcafe.ai/chatbots/6978a3772f5d08069e0723a7) • [🎧 Audio](https://files.catbox.moe/wsqudl.mp3) |
 
 
-## Interactive Web Apps
+## Learning Apps
 
-Selected chapters feature self-contained interactive dashboards where students manipulate sliders, toggles, and dropdowns to build intuition for key concepts. Each app uses the same datasets as the chapter and works offline after first load.
+Every chapter features a self-contained interactive dashboard where students manipulate sliders, toggles, and dropdowns to build intuition for key concepts — no coding required. Each app uses the same datasets as the chapter and works offline after first load.
 
 | Chapter | Web App |
 |---------|---------|
@@ -60,11 +60,19 @@ Selected chapters feature self-contained interactive dashboards where students m
 | **2** | [![Open Web App](images/webapp-badge.svg)](https://quarcs-lab.github.io/metricsai/web-apps/ch02/dashboard.html) — Histograms, KDE, box plots, time series, log transforms, z-scores, moving averages |
 | **3** | [![Open Web App](images/webapp-badge.svg)](https://quarcs-lab.github.io/metricsai/web-apps/ch03/dashboard.html) — Sampling distributions, sample size & SE, Central Limit Theorem, estimator properties, weighted means |
 | **4** | [![Open Web App](images/webapp-badge.svg)](https://quarcs-lab.github.io/metricsai/web-apps/ch04/dashboard.html) — SE & sample size, t-distribution, confidence intervals, two-sided & one-sided hypothesis tests, gas price test, proportions |
+| **5** | [![Open Web App](images/webapp-badge.svg)](https://quarcs-lab.github.io/metricsai/web-apps/ch05/dashboard.html) — Bivariate data summary, correlation, scatter plots, simple regression, fitted values & residuals |
+| **6** | [![Open Web App](images/webapp-badge.svg)](https://quarcs-lab.github.io/metricsai/web-apps/ch06/dashboard.html) — Population vs. sample regression, OLS assumptions, Monte Carlo unbiasedness, SE anatomy, Gauss-Markov, sampling variability |
+| **7** | [![Open Web App](images/webapp-badge.svg)](https://quarcs-lab.github.io/metricsai/web-apps/ch07/dashboard.html) — t-distribution explorer, confidence interval simulator, hypothesis testing, p-values, economic vs. statistical significance, robust SEs |
+| **8** | [![Open Web App](images/webapp-badge.svg)](https://quarcs-lab.github.io/metricsai/web-apps/ch08/dashboard.html) — Health outcomes, health vs. GDP, outlier impact, CAPM betas, CAPM residuals, Okun's Law, time series analysis |
+| **9** | [![Open Web App](images/webapp-badge.svg)](https://quarcs-lab.github.io/metricsai/web-apps/ch09/dashboard.html) — Log approximation, four model specifications, semi-elasticity, elasticity, exponential growth & Rule of 72, cross-country models |
+| **10** | [![Open Web App](images/webapp-badge.svg)](https://quarcs-lab.github.io/metricsai/web-apps/ch10/dashboard.html) — Multiple regression data summary, partial correlations, 3D scatter, multicollinearity diagnostics |
 | **11** | [![Open Web App](images/webapp-badge.svg)](https://quarcs-lab.github.io/metricsai/web-apps/ch11/dashboard.html) — Confidence intervals, t-tests, multicollinearity & SE inflation, joint F-tests, model comparison, robust standard errors |
+| **12** | [![Open Web App](images/webapp-badge.svg)](https://quarcs-lab.github.io/metricsai/web-apps/ch12/dashboard.html) — Robust SE selector, prediction vs. confidence intervals, Type I/II errors & power, autocorrelation ACF, bootstrap simulation |
+| **13** | [![Open Web App](images/webapp-badge.svg)](https://quarcs-lab.github.io/metricsai/web-apps/ch13/dashboard.html) — Multiple regression case studies, model comparison, specification testing, real-world applications |
 | **14** | [![Open Web App](images/webapp-badge.svg)](https://quarcs-lab.github.io/metricsai/web-apps/ch14/dashboard.html) — Gender earnings gap, interaction effects, model comparison, dummy variable trap, worker types, scatter by gender |
 | **15** | [![Open Web App](images/webapp-badge.svg)](https://quarcs-lab.github.io/metricsai/web-apps/ch15/dashboard.html) — Log transformations, quadratic models & turning points, standardized coefficients, interaction marginal effects, retransformation bias, residuals |
-
-More chapters coming. Use `/web-app chNN` in Claude Code to generate a new chapter dashboard.
+| **16** | [![Open Web App](images/webapp-badge.svg)](https://quarcs-lab.github.io/metricsai/web-apps/ch16/dashboard.html) — VIF explorer, robust vs. standard SEs, autocorrelation diagnostics, diagnostic plots, influential observations, omitted variable bias |
+| **17** | [![Open Web App](images/webapp-badge.svg)](https://quarcs-lab.github.io/metricsai/web-apps/ch17/dashboard.html) — Panel data, time series methods, causal inference, advanced regression diagnostics |
 
 ### How to Use the Notebooks
 
