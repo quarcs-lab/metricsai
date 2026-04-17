@@ -60,6 +60,7 @@ Selected chapters feature self-contained interactive dashboards where students m
 | **2** | [![Open Web App](images/webapp-badge.svg)](https://quarcs-lab.github.io/metricsai/web-apps/ch02/dashboard.html) — Histograms, KDE, box plots, time series, log transforms, z-scores, moving averages |
 | **3** | [![Open Web App](images/webapp-badge.svg)](https://quarcs-lab.github.io/metricsai/web-apps/ch03/dashboard.html) — Sampling distributions, sample size & SE, Central Limit Theorem, estimator properties, weighted means |
 | **4** | [![Open Web App](images/webapp-badge.svg)](https://quarcs-lab.github.io/metricsai/web-apps/ch04/dashboard.html) — SE & sample size, t-distribution, confidence intervals, two-sided & one-sided hypothesis tests, gas price test, proportions |
+| **11** | [![Open Web App](images/webapp-badge.svg)](https://quarcs-lab.github.io/metricsai/web-apps/ch11/dashboard.html) — Confidence intervals, t-tests, multicollinearity & SE inflation, joint F-tests, model comparison, robust standard errors |
 | **14** | [![Open Web App](images/webapp-badge.svg)](https://quarcs-lab.github.io/metricsai/web-apps/ch14/dashboard.html) — Gender earnings gap, interaction effects, model comparison, dummy variable trap, worker types, scatter by gender |
 | **15** | [![Open Web App](images/webapp-badge.svg)](https://quarcs-lab.github.io/metricsai/web-apps/ch15/dashboard.html) — Log transformations, quadratic models & turning points, standardized coefficients, interaction marginal effects, retransformation bias, residuals |
 

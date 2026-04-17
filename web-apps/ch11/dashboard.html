@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chapter 11 — Statistical Inference for Multiple Regression · metricsAI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.plot.ly/plotly-2.35.2.min.js" charset="utf-8"></script>
+<style>
+:root{--cyan:#008CB7;--cyan-soft:#22d3ee;--purple:#7A209F;--purple-soft:#c084fc;--pink:#C21E72;--pink-soft:#f472b6;--bg:#f5f8fb;--panel:#fff;--panel-2:#f0f4f9;--text:#0b1021;--text-soft:#475569;--text-muted:#64748b;--border:#d9e2ec;--accent:var(--cyan);--accent-2:var(--purple);--accent-3:var(--pink);--shadow:0 2px 10px rgba(11,16,33,.06),0 12px 30px rgba(11,16,33,.05);--grid:#e3e8ef;--code-bg:#eef3f8}
+html[data-theme="dark"]{--bg:#0c1024;--panel:#151a33;--panel-2:#1b2142;--text:#e2e8f0;--text-soft:#b5c0d0;--text-muted:#8a98ae;--border:#2a3156;--accent:var(--cyan-soft);--accent-2:var(--purple-soft);--accent-3:var(--pink-soft);--shadow:0 2px 10px rgba(0,0,0,.25),0 12px 30px rgba(0,0,0,.35);--grid:#2a3156;--code-bg:#0f1530}
+*{box-sizing:border-box}html,body{margin:0;padding:0}
+body{font-family:'Inter',system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);line-height:1.55;transition:background-color .25s ease,color .25s ease}
+code,.mono{font-family:'JetBrains Mono',ui-monospace,monospace}
+header.page{position:relative;padding:2.4rem 1.5rem 2rem;background:radial-gradient(1200px 400px at 85% -10%,rgba(122,32,159,.15),transparent),radial-gradient(1000px 400px at 10% 0%,rgba(0,140,183,.18),transparent),var(--panel);border-bottom:1px solid var(--border)}
+.page-inner{max-width:1120px;margin:0 auto}
+.chapter-badge{display:inline-block;font-size:.72rem;letter-spacing:.15em;text-transform:uppercase;color:var(--accent);font-weight:600;margin-bottom:.5rem}
+h1.title{font-size:clamp(1.6rem,3.4vw,2.4rem);margin:0 0 .35rem;background:linear-gradient(90deg,var(--accent),var(--accent-2));-webkit-background-clip:text;background-clip:text;color:transparent;font-weight:700;letter-spacing:-.01em}
+p.subtitle{margin:0 0 .8rem;color:var(--text-soft);font-size:1.05rem;max-width:720px}
+.theme-toggle{position:absolute;top:1.4rem;right:1.5rem;background:var(--panel-2);color:var(--text);border:1px solid var(--border);padding:.4rem .8rem;border-radius:999px;cursor:pointer;font-size:.85rem;font-weight:500;display:inline-flex;align-items:center;gap:.35rem;transition:all .2s ease}
+.theme-toggle:hover{border-color:var(--accent);color:var(--accent)}
+nav.anchors{position:sticky;top:0;z-index:20;background:color-mix(in srgb,var(--panel) 92%,transparent);backdrop-filter:saturate(150%) blur(8px);-webkit-backdrop-filter:saturate(150%) blur(8px);border-bottom:1px solid var(--border)}
+nav.anchors ul{display:flex;gap:.25rem;overflow-x:auto;list-style:none;padding:.55rem 1.5rem;margin:0 auto;max-width:1120px;scrollbar-width:thin}
+nav.anchors a{display:block;padding:.35rem .75rem;border-radius:8px;color:var(--text-soft);text-decoration:none;font-size:.85rem;font-weight:500;white-space:nowrap;transition:all .15s ease}
+nav.anchors a:hover{color:var(--accent);background:var(--panel-2)}
+main{max-width:1120px;margin:1.2rem auto 3rem;padding:0 1.5rem}
+section.widget{background:var(--panel);border:1px solid var(--border);border-radius:16px;padding:1.5rem 1.4rem 1.3rem;margin-bottom:1.5rem;box-shadow:var(--shadow)}
+.section-tag{display:inline-block;font-family:'JetBrains Mono',monospace;font-size:.72rem;color:var(--accent);background:color-mix(in srgb,var(--accent) 12%,transparent);padding:.2rem .55rem;border-radius:6px;margin-bottom:.6rem;font-weight:500}
+.widget h2{margin:0 0 .2rem;font-size:1.35rem;font-weight:600;color:var(--accent-2);letter-spacing:-.005em}
+.widget .lede{margin:0 0 1rem;color:var(--text-soft);font-size:.97rem;max-width:780px}
+.controls{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:.9rem 1.2rem;padding:.9rem 1rem;background:var(--panel-2);border-radius:10px;margin-bottom:1rem}
+.ctrl{display:flex;flex-direction:column;gap:.3rem}
+.ctrl label{font-size:.78rem;font-weight:500;color:var(--text-soft);text-transform:uppercase;letter-spacing:.05em}
+.ctrl select,.ctrl input[type="range"]{font-family:inherit;font-size:.9rem;padding:.4rem .55rem;border-radius:8px;border:1px solid var(--border);background:var(--panel);color:var(--text)}
+.ctrl input[type="range"]{padding:.2rem 0;accent-color:var(--accent)}
+.ctrl .val{font-family:'JetBrains Mono',monospace;font-size:.82rem;color:var(--accent);font-weight:500}
+.toggle-group{display:inline-flex;gap:.25rem;background:var(--panel);padding:3px;border-radius:10px;border:1px solid var(--border)}
+.toggle-group button{background:transparent;border:none;color:var(--text-soft);padding:.32rem .75rem;border-radius:7px;font-family:inherit;font-size:.85rem;cursor:pointer;transition:all .15s ease}
+.toggle-group button.active{background:var(--accent);color:white;font-weight:500}
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(100px,1fr));gap:.6rem;margin:.5rem 0 1rem}
+.stat{background:var(--panel-2);padding:.65rem .75rem;border-radius:10px;border-left:3px solid var(--accent)}
+.stat .label{font-size:.7rem;text-transform:uppercase;letter-spacing:.06em;color:var(--text-muted)}
+.stat .value{font-family:'JetBrains Mono',monospace;font-size:1.05rem;font-weight:500;color:var(--text);margin-top:.15rem}
+.stat.mean{border-left-color:var(--accent)}.stat.median{border-left-color:var(--accent-3)}.stat.spread{border-left-color:var(--accent-2)}
+.callout{background:color-mix(in srgb,var(--accent-2) 8%,transparent);border-left:3px solid var(--accent-2);padding:.7rem .9rem;border-radius:8px;font-size:.9rem;color:var(--text-soft);margin:.9rem 0 .2rem}
+.callout strong{color:var(--accent-2)}
+.try-this{background:color-mix(in srgb,var(--accent) 8%,transparent);border-left:3px solid var(--accent);padding:.7rem .9rem;border-radius:8px;font-size:.9rem;color:var(--text-soft);margin:.7rem 0 .2rem}
+.try-this .try-title{font-weight:600;color:var(--accent);font-size:.78rem;letter-spacing:.08em;text-transform:uppercase;margin-bottom:.3rem}
+.try-this ol{margin:0;padding-left:1.25rem}.try-this li{margin:.2rem 0}
+.widget-head{display:flex;align-items:flex-start;justify-content:space-between;gap:.5rem;margin-bottom:.2rem}
+.widget-head>div{flex:1;min-width:0}
+.reset-btn{background:transparent;color:var(--text-muted);border:1px solid var(--border);padding:.3rem .7rem;border-radius:8px;font-family:inherit;font-size:.8rem;cursor:pointer;white-space:nowrap;transition:all .15s ease}
+.reset-btn:hover{color:var(--accent);border-color:var(--accent)}
+.decision-badge{display:inline-block;padding:.25rem .7rem;border-radius:8px;font-family:'JetBrains Mono',monospace;font-size:.85rem;font-weight:600;margin:.4rem 0}
+.decision-badge.reject{background:color-mix(in srgb,var(--accent-3) 15%,transparent);color:var(--accent-3);border:1px solid var(--accent-3)}
+.decision-badge.fail{background:color-mix(in srgb,var(--accent) 12%,transparent);color:var(--accent);border:1px solid var(--accent)}
+.coef-table{width:100%;border-collapse:collapse;font-size:.88rem;margin:.5rem 0 1rem}
+.coef-table th,.coef-table td{padding:.45rem .6rem;text-align:right;border-bottom:1px solid var(--border)}
+.coef-table th{font-size:.72rem;text-transform:uppercase;letter-spacing:.05em;color:var(--text-muted);font-weight:500}
+.coef-table th:first-child,.coef-table td:first-child{text-align:left}
+.coef-table td{font-family:'JetBrains Mono',monospace;font-size:.85rem;color:var(--text)}
+.coef-table tr.highlight td{background:color-mix(in srgb,var(--accent-3) 10%,transparent);font-weight:600}
+.coef-table tr.r2-row td{border-top:2px solid var(--border);font-weight:600}
+.coef-table .sig{color:var(--accent-3);font-weight:600}
+.chart{width:100%;min-height:340px}.chart.tall{min-height:420px}.chart.short{min-height:280px}
+footer.page{max-width:1120px;margin:1rem auto 3rem;padding:0 1.5rem;color:var(--text-muted);font-size:.88rem;text-align:center}
+footer.page a{color:var(--accent);text-decoration:none}footer.page a:hover{text-decoration:underline}
+.scroll-top{display:inline-block;font-size:.78rem;color:var(--text-muted);text-decoration:none;margin-top:.4rem}.scroll-top:hover{color:var(--accent)}
+</style>
+</head>
+<body>
+
+<header class="page">
+  <div class="page-inner">
+    <span class="chapter-badge">Chapter 11 of 18 · Interactive Dashboard</span>
+    <h1 class="title">Statistical Inference for Multiple Regression</h1>
+    <p class="subtitle">Explore confidence intervals, hypothesis tests, multicollinearity, F-tests, and robust standard errors — using the Davis housing dataset from the book.</p>
+  </div>
+  <button id="theme-toggle" class="theme-toggle" type="button" aria-label="Toggle color theme"><span id="theme-icon">🌙</span><span id="theme-label">Dark</span></button>
+</header>
+
+<nav class="anchors" aria-label="Sections">
+  <ul>
+    <li><a href="#ci-explorer">Confidence Intervals</a></li>
+    <li><a href="#t-test">t-Test</a></li>
+    <li><a href="#multicollinearity">Multicollinearity</a></li>
+    <li><a href="#f-test">F-Test</a></li>
+    <li><a href="#model-compare">Model Comparison</a></li>
+    <li><a href="#robust-se">Robust SEs</a></li>
+  </ul>
+</nav>
+
+<main>
+
+<!-- ==================== WIDGET 1: CI Explorer ==================== -->
+<section class="widget" id="ci-explorer">
+  <div class="widget-head">
+    <div>
+      <span class="section-tag">§11.3</span>
+      <h2>Confidence Interval Explorer</h2>
+      <p class="lede">A 95% CI for the size coefficient in the full model is [$36.44, $100.30]. Drag the confidence level to see the precision-confidence trade-off. If the CI excludes zero, the coefficient is significant.</p>
+    </div>
+    <button class="reset-btn" data-reset="ciexplorer">Reset</button>
+  </div>
+  <div class="controls">
+    <div class="ctrl">
+      <label>Confidence level</label>
+      <input type="range" id="ci-level" min="80" max="99" step="1" value="95">
+      <span class="val" id="ci-level-val">95%</span>
+    </div>
+    <div class="ctrl">
+      <label>Variable</label>
+      <select id="ci-var"></select>
+    </div>
+  </div>
+  <div class="stats-grid">
+    <div class="stat mean"><div class="label">Coefficient</div><div class="value" id="ci-stat-coef">—</div></div>
+    <div class="stat spread"><div class="label">SE</div><div class="value" id="ci-stat-se">—</div></div>
+    <div class="stat median"><div class="label">t-critical</div><div class="value" id="ci-stat-tcrit">—</div></div>
+    <div class="stat mean"><div class="label">CI Lower</div><div class="value" id="ci-stat-lo">—</div></div>
+    <div class="stat median"><div class="label">CI Upper</div><div class="value" id="ci-stat-hi">—</div></div>
+    <div class="stat spread"><div class="label">Contains 0?</div><div class="value" id="ci-stat-zero">—</div></div>
+  </div>
+  <div id="chart-ci" class="chart short"></div>
+  <div class="callout">
+    <strong>Key Concept 11.3:</strong> CI = b<sub>j</sub> &plusmn; t<sub>n&minus;k, &alpha;/2</sub> &times; se(b<sub>j</sub>). If the CI excludes zero, the coefficient is significant at the &alpha; level. Wider CIs give more confidence but less precision.
+  </div>
+  <div class="try-this">
+    <div class="try-title">Try This</div>
+    <ol>
+      <li>Select <strong>size</strong> at 95%. The CI is [$36.44, $100.30] — it excludes zero, so size is significant. Now try <strong>bedrooms</strong>: the CI includes zero.</li>
+      <li>Change the confidence level to 90%. The CIs narrow. Does bedrooms become significant? (No — its CI still includes zero.)</li>
+      <li>Set 99%. All CIs widen. At what level does the size coefficient's CI first include zero? (It stays significant even at 99%.)</li>
+    </ol>
+  </div>
+</section>
+
+<!-- ==================== WIDGET 2: t-Test ==================== -->
+<section class="widget" id="t-test">
+  <div class="widget-head">
+    <div>
+      <span class="section-tag">§11.4</span>
+      <h2>Hypothesis Test for a Single Coefficient</h2>
+      <p class="lede">Test H<sub>0</sub>: &beta;<sub>size</sub> = &beta;<sub>0</sub>. The t-statistic measures how many standard errors the estimate is from the hypothesized value. Drag to explore.</p>
+    </div>
+    <button class="reset-btn" data-reset="ttest">Reset</button>
+  </div>
+  <div class="controls">
+    <div class="ctrl">
+      <label>Hypothesized value &beta;<sub>0</sub></label>
+      <input type="range" id="tt-beta0" min="0" max="120" step="1" value="0">
+      <span class="val" id="tt-beta0-val">$0/sqft</span>
+    </div>
+  </div>
+  <div class="stats-grid">
+    <div class="stat mean"><div class="label">b<sub>size</sub></div><div class="value" id="tt-stat-coef">—</div></div>
+    <div class="stat spread"><div class="label">SE</div><div class="value" id="tt-stat-se">—</div></div>
+    <div class="stat median"><div class="label">t-statistic</div><div class="value" id="tt-stat-t">—</div></div>
+    <div class="stat spread"><div class="label">p-value</div><div class="value" id="tt-stat-p">—</div></div>
+  </div>
+  <div id="tt-decision" class="decision-badge reject">—</div>
+  <div id="chart-t-test" class="chart"></div>
+  <div class="callout">
+    <strong>Key Concept 11.4:</strong> t = (b<sub>j</sub> &minus; &beta;<sub>0</sub>) / se(b<sub>j</sub>). At &beta;<sub>0</sub> = 0 (the standard test), t = 4.44 with p = 0.0002. The triangle marker shows where the observed t falls on the t(22) distribution.
+  </div>
+  <div class="try-this">
+    <div class="try-title">Try This</div>
+    <ol>
+      <li>At &beta;<sub>0</sub> = 0: t = 4.44, p &lt; 0.001. Size is highly significant — the triangle is deep in the rejection region.</li>
+      <li>Drag &beta;<sub>0</sub> toward 68 (the coefficient value). The t-stat approaches zero and p approaches 1.0. We cannot reject that &beta; equals its own estimate.</li>
+      <li>At what &beta;<sub>0</sub> does p first exceed 0.05? That value is the lower bound of the 95% CI (~$36).</li>
+    </ol>
+  </div>
+</section>
+
+<!-- ==================== WIDGET 3: Multicollinearity ==================== -->
+<section class="widget" id="multicollinearity">
+  <div class="widget-head">
+    <div>
+      <span class="section-tag">§11.2</span>
+      <h2>Multicollinearity &amp; SE Inflation</h2>
+      <p class="lede">Adding correlated variables inflates standard errors without improving fit. Watch the SE on <em>size</em> grow as bedrooms (r = 0.52 with size) and other variables are added.</p>
+    </div>
+    <button class="reset-btn" data-reset="multicollinearity">Reset</button>
+  </div>
+  <div class="controls">
+    <div class="ctrl">
+      <label>Model</label>
+      <div class="toggle-group" id="mc-model">
+        <button class="active" data-val="0">Size only</button>
+        <button data-val="1">+ Bedrooms</button>
+        <button data-val="2">Full (6 vars)</button>
+      </div>
+    </div>
+  </div>
+  <div class="stats-grid">
+    <div class="stat mean"><div class="label">b<sub>size</sub></div><div class="value" id="mc-stat-coef">—</div></div>
+    <div class="stat spread"><div class="label">SE(size)</div><div class="value" id="mc-stat-se">—</div></div>
+    <div class="stat median"><div class="label">t(size)</div><div class="value" id="mc-stat-t">—</div></div>
+    <div class="stat mean"><div class="label">R²</div><div class="value" id="mc-stat-r2">—</div></div>
+    <div class="stat spread"><div class="label">Adj R²</div><div class="value" id="mc-stat-adjr2">—</div></div>
+  </div>
+  <div id="chart-multicollinearity" class="chart short"></div>
+  <div class="callout">
+    <strong>Key Concept 11.2:</strong> Adding bedrooms barely changes R² (0.618 &rarr; 0.618) but inflates SE(size) from $11.17 to $13.30. In the full model, SE grows to $15.39. More variables &ne; better precision — correlated regressors increase uncertainty.
+  </div>
+  <div class="try-this">
+    <div class="try-title">Try This</div>
+    <ol>
+      <li><strong>Size only</strong>: SE = $11.17, R² = 0.618. A clean, precise estimate.</li>
+      <li><strong>+ Bedrooms</strong>: SE jumps to $13.30 but R² barely moves (0.618). Bedrooms adds noise, not signal.</li>
+      <li><strong>Full model</strong>: SE = $15.39 (38% larger!), R² = 0.651. The extra 3.3 percentage points of R² come at a steep cost in precision.</li>
+    </ol>
+  </div>
+</section>
+
+<!-- ==================== WIDGET 4: F-Test ==================== -->
+<section class="widget" id="f-test">
+  <div class="widget-head">
+    <div>
+      <span class="section-tag">§11.5 – §11.6</span>
+      <h2>Joint F-Test</h2>
+      <p class="lede">Individual t-tests cannot answer &ldquo;Are bedrooms, bathrooms, lotsize, age, and monthsold <em>jointly</em> significant?&rdquo; The F-test can — and here the answer is no (F = 0.42, p = 0.83).</p>
+    </div>
+    <button class="reset-btn" data-reset="ftest">Reset</button>
+  </div>
+  <div class="controls">
+    <div class="ctrl">
+      <label>Test type</label>
+      <div class="toggle-group" id="ft-type">
+        <button class="active" data-val="overall">Overall F (all vars)</button>
+        <button data-val="subset">Subset F (drop 5 vars)</button>
+      </div>
+    </div>
+  </div>
+  <div class="stats-grid">
+    <div class="stat mean"><div class="label">F-statistic</div><div class="value" id="ft-stat-f">—</div></div>
+    <div class="stat spread"><div class="label">df<sub>1</sub>, df<sub>2</sub></div><div class="value" id="ft-stat-df">—</div></div>
+    <div class="stat median"><div class="label">p-value</div><div class="value" id="ft-stat-p">—</div></div>
+  </div>
+  <div id="ft-decision" class="decision-badge reject">—</div>
+  <div id="chart-f-test" class="chart"></div>
+  <div class="callout">
+    <strong>Key Concept 11.5:</strong> The overall F-test (F = 6.83, p &lt; 0.001) rejects that ALL coefficients are zero — at least one variable matters. But the subset F-test (F = 0.42, p = 0.83) says the 5 extra variables beyond size are jointly insignificant. Size alone suffices.
+  </div>
+  <div class="try-this">
+    <div class="try-title">Try This</div>
+    <ol>
+      <li><strong>Overall F</strong>: F = 6.83 with df = (6, 22). The F-statistic is in the right tail — we reject that all coefficients are zero.</li>
+      <li>Switch to <strong>Subset F</strong>: F = 0.42 with df = (5, 22). Now the F-statistic is near zero — we cannot reject that the 5 extra variables are all zero.</li>
+      <li>This reconciles a puzzle: the overall model is significant, but the extra variables add nothing beyond size. Parsimony wins.</li>
+    </ol>
+  </div>
+</section>
+
+<!-- ==================== WIDGET 5: Model Comparison ==================== -->
+<section class="widget" id="model-compare">
+  <div class="widget-head">
+    <div>
+      <span class="section-tag">§11.7</span>
+      <h2>Model Comparison: R² vs Parsimony</h2>
+      <p class="lede">R² always increases with more variables, but Adjusted R² penalizes complexity. Compare the three models — does adding variables improve the model or just add noise?</p>
+    </div>
+    <button class="reset-btn" data-reset="modelcompare">Reset</button>
+  </div>
+  <div style="overflow-x:auto">
+    <table class="coef-table" id="mc-table">
+      <thead><tr><th>Variable</th><th>Model 1</th><th>Model 2</th><th>Model 3</th></tr></thead>
+      <tbody id="mc-table-body"></tbody>
+    </table>
+  </div>
+  <div class="callout">
+    <strong>Key Concept 11.7:</strong> R² rises from 0.618 to 0.651 (+3.3pp) but Adjusted R² <em>drops</em> from 0.603 to 0.555 (&minus;4.8pp). The full model overfits: it adds parameters that hurt out-of-sample prediction. Adjusted R² rewards parsimony.
+  </div>
+  <div class="try-this">
+    <div class="try-title">Try This</div>
+    <ol>
+      <li>Compare R² across the three models. It never decreases — this is guaranteed mathematically.</li>
+      <li>Now look at Adjusted R². Model 1 (0.603) beats Model 3 (0.555). The 5 extra variables are penalized for their lack of explanatory power.</li>
+      <li>Look at the F-statistic row. Model 1's F (43.58) is much larger than Model 3's (6.83). Fewer variables, but each one pulls its weight.</li>
+    </ol>
+  </div>
+</section>
+
+<!-- ==================== WIDGET 6: Robust SEs ==================== -->
+<section class="widget" id="robust-se">
+  <div class="widget-head">
+    <div>
+      <span class="section-tag">§11.8</span>
+      <h2>Robust vs Standard Errors</h2>
+      <p class="lede">Standard SEs assume homoskedasticity. Robust (HC1) SEs are valid even when error variance changes with X. Compare them — do your conclusions change?</p>
+    </div>
+    <button class="reset-btn" data-reset="robustse">Reset</button>
+  </div>
+  <div class="controls">
+    <div class="ctrl">
+      <label>SE type</label>
+      <div class="toggle-group" id="rb-type">
+        <button class="active" data-val="standard">Standard</button>
+        <button data-val="robust">Robust (HC1)</button>
+      </div>
+    </div>
+  </div>
+  <div style="overflow-x:auto">
+    <table class="coef-table" id="rb-table">
+      <thead><tr><th>Variable</th><th>Coef</th><th>SE</th><th>t</th><th>p</th></tr></thead>
+      <tbody id="rb-table-body"></tbody>
+    </table>
+  </div>
+  <div class="callout">
+    <strong>Key Concept 11.8:</strong> Heteroskedasticity-robust SEs protect against incorrect variance assumptions. In this small dataset, the differences are modest — but in applied work, always report robust SEs as a robustness check. The key question: do any conclusions flip?
+  </div>
+  <div class="try-this">
+    <div class="try-title">Try This</div>
+    <ol>
+      <li>Compare <strong>Standard</strong> vs <strong>Robust</strong>. For size, the SE barely changes ($15.39 &rarr; $15.36). Conclusions are identical.</li>
+      <li>Look at bathrooms: standard SE = $15,721, robust SE = $19,284. The robust SE is 23% larger — heteroskedasticity inflates this variable's uncertainty.</li>
+      <li>Does any variable change significance? In this case, no. But in larger datasets with more heteroskedasticity, robust SEs can flip conclusions.</li>
+    </ol>
+  </div>
+</section>
+
+</main>
+
+<footer class="page">
+  <p>Part of <a href="https://quarcs-lab.github.io/metricsai/book/_book/index.html"><strong>metricsAI</strong></a> · Chapter 11: Statistical Inference for Multiple Regression · by Carlos Mendez · <a href="https://github.com/quarcs-lab/metricsai">GitHub</a></p>
+  <p>Data: AED_HOUSE.DTA (29 houses sold in Central Davis, CA, 1999)</p>
+  <a class="scroll-top" href="#top">&uarr; Back to top</a>
+</footer>
+
+<script type="application/json" id="ch-data">{"scatter":{"price":[204000.0,212000.0,213000.0,220000.0,224500.0,229000.0,230000.0,233000.0,235000.0,235000.0,236500.0,238000.0,239500.0,241000.0,244000.0,245000.0,249000.0,253000.0,255000.0,258500.0,270000.0,270000.0,272000.0,273000.0,278500.0,279900.0,310000.0,340000.0,375000.0],"size":[1400.0,1600.0,1800.0,1600.0,2100.0,1700.0,2100.0,1700.0,1700.0,1600.0,1600.0,1900.0,1600.0,1600.0,2000.0,1400.0,1900.0,2100.0,1500.0,1600.0,1800.0,2000.0,1800.0,1900.0,2600.0,2000.0,2300.0,2400.0,3300.0],"bedrooms":[3.0,3.0,3.0,3.0,4.0,4.0,4.0,3.0,4.0,3.0,3.0,4.0,3.0,4.0,4.0,4.0,4.0,4.0,4.0,3.0,4.0,4.0,4.0,5.0,6.0,4.0,4.0,4.0,4.0],"bathrooms":[2.0,3.0,2.0,2.0,2.5,2.5,2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0,3.0,2.0,2.0,2.0,2.0,2.5,2.5,2.0,2.0,2.0,2.5,3.0,2.5],"lotsize":[1.0,2.0,2.0,1.0,2.0,2.0,2.0,1.0,2.0,3.0,3.0,2.0,3.0,2.0,1.0,2.0,3.0,3.0,3.0,1.0,3.0,3.0,2.0,2.0,3.0,2.0,2.0,2.0,2.0],"age":[31.0,33.0,51.0,49.0,47.0,35.0,34.0,40.0,29.0,35.0,23.0,29.0,34.0,34.0,29.0,30.0,37.0,47.0,47.0,39.0,31.0,39.0,46.0,37.0,38.0,31.0,28.0,34.0,39.0],"monthsold":[7.0,5.0,4.0,4.0,6.0,3.0,8.0,6.0,7.0,5.0,8.0,7.0,6.0,8.0,7.0,8.0,6.0,6.0,7.0,8.0,3.0,5.0,3.0,7.0,8.0,7.0,5.0,6.0,3.0]},"models":[{"vars":["const","size"],"coef":[115017.28,73.77],"se":[21489.36,11.17],"se_robust":[20298.7,11.33],"t":[5.3523,6.6015],"t_robust":[5.6662,6.5113],"p":[1.2e-05,0.0],"p_robust":[0.0,0.0],"r2":0.6175,"r2_adj":0.6033,"f_stat":43.5796,"f_pvalue":0.0,"n":29,"k":2,"df_resid":27,"rss":14975101654.5,"name":"Size only"},{"vars":["const","size","bedrooms"],"coef":[111690.86,72.41,1553.46],"se":[27589.07,13.3,7846.87],"se_robust":[27725.37,13.54,7912.92],"t":[4.0484,5.4444,0.198],"t_robust":[4.0285,5.349,0.1963],"p":[0.000412,1e-05,0.844607],"p_robust":[5.6e-05,0.0,0.84436],"r2":0.618,"r2_adj":0.5886,"f_stat":21.034,"f_pvalue":4e-06,"n":29,"k":3,"df_resid":26,"rss":14952561919.37,"name":"Size + Bedrooms"},{"vars":["const","size","bedrooms","bathrooms","lotsize","age","monthsold"],"coef":[137791.07,68.37,2685.32,6832.88,2303.22,-833.04,-2088.5],"se":[61464.95,15.39,9192.53,15721.19,7226.54,719.33,3520.9],"se_robust":[65545.23,15.36,8285.53,19283.79,5328.86,762.93,3738.27],"t":[2.2418,4.4426,0.2921,0.4346,0.3187,-1.1581,-0.5932],"t_robust":[2.1022,4.4514,0.3241,0.3543,0.4322,-1.0919,-0.5587],"p":[0.035387,0.000205,0.772932,0.668065,0.752947,0.259254,0.559114],"p_robust":[0.035533,9e-06,0.745865,0.723089,0.665584,0.274879,0.576379],"r2":0.6506,"r2_adj":0.5552,"f_stat":6.8261,"f_pvalue":0.000342,"n":29,"k":7,"df_resid":22,"rss":13679397854.73,"name":"Full model"}],"subset_ftest":{"q":5,"df_resid":22,"f_stat":0.4168,"rss_restricted":14975101654.5,"rss_unrestricted":13679397854.73},"correlations":{"bedrooms__size":0.5176,"bedrooms__lotsize":0.2922,"bedrooms__monthsold":0.1825,"bathrooms__size":0.3163,"bathrooms__bedrooms":0.0374,"bathrooms__lotsize":0.1016,"bathrooms__monthsold":-0.3923,"lotsize__size":0.1124,"lotsize__monthsold":-0.0571,"age__size":0.0769,"age__bedrooms":-0.0261,"age__bathrooms":0.037,"age__lotsize":-0.0192,"age__monthsold":-0.3662,"monthsold__size":-0.2145},"meta":{"chapter":"Chapter 11: Statistical Inference for Multiple Regression","book":"metricsAI: An Introduction to Econometrics with Python and AI in the Cloud","author":"Carlos Mendez"}}</script>
+
+<script>
+"use strict";
+var DATA=JSON.parse(document.getElementById("ch-data").textContent);
+
+// ==================== HELPERS ====================
+function fmt(v,d){d=d!==undefined?d:2;if(v===null||v===undefined||isNaN(v))return"\u2014";return v.toFixed(d);}
+function fmtMoney(v){return v===null?"\u2014":"$"+Math.round(v).toLocaleString();}
+function sigStars(p){if(p<0.001)return"***";if(p<0.01)return"**";if(p<0.05)return"*";return"";}
+function linspace(a,b,n){var out=new Array(n);var step=(b-a)/(n-1);for(var i=0;i<n;i++)out[i]=a+i*step;return out;}
+var THEME_KEY="metricsai-theme";
+function getCSS(v){return getComputedStyle(document.documentElement).getPropertyValue(v).trim();}
+function themeColors(){return{text:getCSS("--text"),textSoft:getCSS("--text-soft"),grid:getCSS("--grid"),panel:getCSS("--panel"),cyan:getCSS("--accent"),purple:getCSS("--accent-2"),pink:getCSS("--accent-3")};}
+function baseLayout(o){var c=themeColors();return Object.assign({paper_bgcolor:"rgba(0,0,0,0)",plot_bgcolor:"rgba(0,0,0,0)",font:{family:"Inter, system-ui, sans-serif",color:c.text,size:12},margin:{l:56,r:18,t:30,b:46},xaxis:{gridcolor:c.grid,linecolor:c.grid,zerolinecolor:c.grid,tickfont:{color:c.textSoft}},yaxis:{gridcolor:c.grid,linecolor:c.grid,zerolinecolor:c.grid,tickfont:{color:c.textSoft}},hoverlabel:{bgcolor:c.panel,bordercolor:c.grid,font:{color:c.text}},legend:{font:{color:c.text},bgcolor:"rgba(0,0,0,0)"}},o||{});}
+var PLOTLY_CONFIG={displayModeBar:false,responsive:true};
+function getActiveVal(id){var b=document.querySelector("#"+id+" button.active");return b?b.dataset.val:null;}
+function bindToggles(id,fn){document.querySelectorAll("#"+id+" button").forEach(function(b){b.addEventListener("click",function(){this.parentNode.querySelectorAll("button").forEach(function(x){x.classList.remove("active");});this.classList.add("active");fn();});});}
+function bindSlider(id,vid,ffn,rfn){var el=document.getElementById(id);var ve=document.getElementById(vid);el.addEventListener("input",function(){ve.textContent=ffn(this.value);rfn();});}
+
+// ==================== t-distribution ====================
+function lnGamma(x){var cof=[76.18009172947146,-86.50532032941678,24.01409824083091,-1.231739572450155,0.001208650973866179,-5.395239384953e-6];var y=x,tmp=x+5.5;tmp-=(x+0.5)*Math.log(tmp);var ser=1.000000000190015;for(var j=0;j<6;j++)ser+=cof[j]/++y;return -tmp+Math.log(2.5066282746310005*ser/x);}
+function betaCF(a,b,x){var MAXIT=200,EPS=3e-12,qab=a+b,qap=a+1,qam=a-1;var c=1,d=1-qab*x/qap;if(Math.abs(d)<1e-30)d=1e-30;d=1/d;var h=d;for(var m=1;m<=MAXIT;m++){var m2=2*m;var aa=m*(b-m)*x/((qam+m2)*(a+m2));d=1+aa*d;if(Math.abs(d)<1e-30)d=1e-30;c=1+aa/c;if(Math.abs(c)<1e-30)c=1e-30;d=1/d;h*=d*c;aa=-(a+m)*(qab+m)*x/((a+m2)*(qap+m2));d=1+aa*d;if(Math.abs(d)<1e-30)d=1e-30;c=1+aa/c;if(Math.abs(c)<1e-30)c=1e-30;d=1/d;var del=d*c;h*=del;if(Math.abs(del-1)<EPS)break;}return h;}
+function betaInc(a,b,x){if(x===0||x===1)return x;var bt=Math.exp(lnGamma(a+b)-lnGamma(a)-lnGamma(b)+a*Math.log(x)+b*Math.log(1-x));if(x<(a+1)/(a+b+2))return bt*betaCF(a,b,x)/a;return 1-bt*betaCF(b,a,1-x)/b;}
+function tCDF(t,df){var x=df/(df+t*t);var p=0.5*betaInc(df/2,0.5,x);return t>=0?1-p:p;}
+function tPDF(t,df){return Math.exp(lnGamma((df+1)/2)-lnGamma(df/2))/(Math.sqrt(df*Math.PI))*Math.pow(1+t*t/df,-(df+1)/2);}
+function tQuantile(p,df){var lo=-15,hi=15;for(var i=0;i<80;i++){var mid=(lo+hi)/2;if(tCDF(mid,df)<p)lo=mid;else hi=mid;}return(lo+hi)/2;}
+function fCDF(x,d1,d2){if(x<=0)return 0;return betaInc(d1/2,d2/2,d1*x/(d1*x+d2));}
+function fPDF(x,d1,d2){if(x<=0)return 0;return Math.exp(lnGamma((d1+d2)/2)-lnGamma(d1/2)-lnGamma(d2/2)+(d1/2)*Math.log(d1/d2)+(d1/2-1)*Math.log(x)-(d1+d2)/2*Math.log(1+d1*x/d2));}
+
+var M3=DATA.models[2]; // full model
+var DF=M3.df_resid; // 22
+
+// ==================== WIDGET 1: CI Explorer ====================
+(function(){
+  var chartEl=document.getElementById("chart-ci");
+  var sel=document.getElementById("ci-var");
+  // Populate variable dropdown (skip const)
+  for(var i=1;i<M3.vars.length;i++){
+    var o=document.createElement("option");o.value=i;o.textContent=M3.vars[i];
+    if(M3.vars[i]==="size")o.selected=true;
+    sel.appendChild(o);
+  }
+  function render(){
+    var c=themeColors();
+    var level=parseInt(document.getElementById("ci-level").value)/100;
+    var vi=parseInt(sel.value);
+    var coef=M3.coef[vi],se=M3.se[vi];
+    var tcrit=tQuantile(1-(1-level)/2,DF);
+    var moe=tcrit*se;
+    var lo=coef-moe,hi=coef+moe;
+    var containsZero=lo<=0&&hi>=0;
+    document.getElementById("ci-stat-coef").textContent="$"+fmt(coef,2);
+    document.getElementById("ci-stat-se").textContent="$"+fmt(se,2);
+    document.getElementById("ci-stat-tcrit").textContent=fmt(tcrit,3);
+    document.getElementById("ci-stat-lo").textContent="$"+fmt(lo,2);
+    document.getElementById("ci-stat-hi").textContent="$"+fmt(hi,2);
+    document.getElementById("ci-stat-zero").textContent=containsZero?"Yes (not sig.)":"No (significant)";
+    var pad=(hi-lo)*0.5;
+    var traces=[
+      {x:[lo,hi],y:[0.5,0.5],type:"scatter",mode:"lines",line:{color:containsZero?c.pink:c.cyan,width:6},name:Math.round(level*100)+"% CI",hoverinfo:"x"},
+      {x:[lo],y:[0.5],type:"scatter",mode:"markers",marker:{color:containsZero?c.pink:c.cyan,size:14,symbol:"line-ns-open",line:{width:3}},showlegend:false,hoverinfo:"x"},
+      {x:[hi],y:[0.5],type:"scatter",mode:"markers",marker:{color:containsZero?c.pink:c.cyan,size:14,symbol:"line-ns-open",line:{width:3}},showlegend:false,hoverinfo:"x"},
+      {x:[coef],y:[0.5],type:"scatter",mode:"markers",marker:{color:c.purple,size:12,line:{color:"white",width:2}},name:"b = $"+fmt(coef,2),hoverinfo:"x"}
+    ];
+    var shapes=[];
+    if(Math.abs(lo)<pad*3&&Math.abs(hi)<pad*3){
+      shapes.push({type:"line",xref:"x",yref:"paper",x0:0,x1:0,y0:0,y1:1,line:{color:c.pink,width:2,dash:"dash"}});
+    }
+    var layout=baseLayout({xaxis:{title:M3.vars[vi],gridcolor:c.grid,linecolor:c.grid,range:[Math.min(lo,0)-pad,Math.max(hi,0)+pad],tickfont:{color:c.textSoft}},yaxis:{visible:false,range:[0,1]},showlegend:true,legend:{x:0.5,y:1.15,xanchor:"center",orientation:"h",font:{color:c.text}},margin:{l:56,r:18,t:50,b:46},shapes:shapes,annotations:[{x:lo,y:0.2,text:"$"+fmt(lo,1),showarrow:false,font:{color:c.text,size:11,family:"JetBrains Mono"}},{x:hi,y:0.2,text:"$"+fmt(hi,1),showarrow:false,font:{color:c.text,size:11,family:"JetBrains Mono"}}]});
+    Plotly.react(chartEl,traces,layout,PLOTLY_CONFIG);
+  }
+  bindSlider("ci-level","ci-level-val",function(v){return v+"%";},render);
+  sel.addEventListener("change",render);
+  window.__rerender_ciexplorer=render;
+  render();
+})();
+
+// ==================== WIDGET 2: t-Test ====================
+(function(){
+  var chartEl=document.getElementById("chart-t-test");
+  var sizeIdx=1;
+  function render(){
+    var c=themeColors();
+    var beta0=parseFloat(document.getElementById("tt-beta0").value);
+    var coef=M3.coef[sizeIdx],se=M3.se[sizeIdx];
+    var tstat=(coef-beta0)/se;
+    var pval=2*(1-tCDF(Math.abs(tstat),DF));
+    var tcrit=tQuantile(0.975,DF);
+    var reject=pval<0.05;
+    document.getElementById("tt-stat-coef").textContent="$"+fmt(coef,2);
+    document.getElementById("tt-stat-se").textContent="$"+fmt(se,2);
+    document.getElementById("tt-stat-t").textContent=fmt(tstat,4);
+    document.getElementById("tt-stat-p").textContent=pval<0.0001?"< 0.0001":fmt(pval,4);
+    var badge=document.getElementById("tt-decision");
+    badge.textContent=reject?"Reject H\u2080":"Fail to reject H\u2080";
+    badge.className="decision-badge "+(reject?"reject":"fail");
+    var xs=linspace(-6,6,400);
+    var ys=xs.map(function(x){return tPDF(x,DF);});
+    var traces=[{x:xs,y:ys,type:"scatter",mode:"lines",line:{color:c.cyan,width:2},name:"t("+DF+")"}];
+    var xL=linspace(-6,-tcrit,50),yL=xL.map(function(x){return tPDF(x,DF);});
+    traces.push({x:xL.concat([-tcrit,-6]),y:yL.concat([0,0]),fill:"toself",fillcolor:c.pink+"22",line:{width:0},showlegend:false,hoverinfo:"skip"});
+    var xR=linspace(tcrit,6,50),yR=xR.map(function(x){return tPDF(x,DF);});
+    traces.push({x:xR.concat([6,tcrit]),y:yR.concat([0,0]),fill:"toself",fillcolor:c.pink+"22",line:{width:0},name:"\u03B1/2 rejection",hoverinfo:"skip"});
+    var tc=Math.max(-5.5,Math.min(5.5,tstat));
+    traces.push({x:[tc],y:[tPDF(tc,DF)*1.15],type:"scatter",mode:"markers+text",marker:{color:reject?c.pink:c.cyan,size:14,symbol:"triangle-down"},text:["t="+fmt(tstat,2)],textposition:"top center",textfont:{color:reject?c.pink:c.cyan,size:11,family:"JetBrains Mono"},name:"Observed t",showlegend:false});
+    var layout=baseLayout({xaxis:{title:"t",gridcolor:c.grid,linecolor:c.grid,tickfont:{color:c.textSoft}},yaxis:{title:"Density",gridcolor:c.grid,linecolor:c.grid,tickfont:{color:c.textSoft}},showlegend:true,legend:{x:0.02,y:0.98,xanchor:"left",yanchor:"top",font:{color:c.text}},shapes:[{type:"line",xref:"x",yref:"paper",x0:-tcrit,x1:-tcrit,y0:0,y1:1,line:{color:c.pink,width:1.5,dash:"dash"}},{type:"line",xref:"x",yref:"paper",x0:tcrit,x1:tcrit,y0:0,y1:1,line:{color:c.pink,width:1.5,dash:"dash"}}]});
+    Plotly.react(chartEl,traces,layout,PLOTLY_CONFIG);
+  }
+  bindSlider("tt-beta0","tt-beta0-val",function(v){return "$"+v+"/sqft";},render);
+  window.__rerender_ttest=render;
+  render();
+})();
+
+// ==================== WIDGET 3: Multicollinearity ====================
+(function(){
+  var chartEl=document.getElementById("chart-multicollinearity");
+  function render(){
+    var c=themeColors();
+    var mi=parseInt(getActiveVal("mc-model"));
+    var m=DATA.models[mi];
+    var si=m.vars.indexOf("size");
+    document.getElementById("mc-stat-coef").textContent="$"+fmt(m.coef[si],2);
+    document.getElementById("mc-stat-se").textContent="$"+fmt(m.se[si],2);
+    document.getElementById("mc-stat-t").textContent=fmt(m.t[si],2);
+    document.getElementById("mc-stat-r2").textContent=fmt(m.r2,4);
+    document.getElementById("mc-stat-adjr2").textContent=fmt(m.r2_adj,4);
+    // Bar chart: coefficient ± 1.96*SE for each model
+    var labels=["Model 1\n(size only)","Model 2\n(+bedrooms)","Model 3\n(full)"];
+    var coefs=[],ses=[];
+    for(var i=0;i<3;i++){var mm=DATA.models[i];var idx=mm.vars.indexOf("size");coefs.push(mm.coef[idx]);ses.push(mm.se[idx]);}
+    var colors=labels.map(function(_,i){return i===mi?c.cyan+"aa":c.cyan+"33";});
+    var borders=labels.map(function(_,i){return i===mi?c.cyan:c.cyan+"66";});
+    var traces=[{x:labels,y:coefs,type:"bar",marker:{color:colors,line:{color:borders,width:2}},error_y:{type:"data",array:ses.map(function(s){return 1.96*s;}),visible:true,color:c.text,thickness:2,width:6},text:coefs.map(function(v){return "$"+fmt(v,1);}),textposition:"outside",textfont:{family:"JetBrains Mono",size:11,color:c.text}}];
+    var layout=baseLayout({yaxis:{title:"Size coefficient ($/sqft)",gridcolor:c.grid,linecolor:c.grid,tickfont:{color:c.textSoft},range:[0,130]},xaxis:{tickfont:{color:c.textSoft,size:11}},showlegend:false,margin:{l:70,r:18,t:10,b:70}});
+    Plotly.react(chartEl,traces,layout,PLOTLY_CONFIG);
+  }
+  bindToggles("mc-model",render);
+  window.__rerender_multicollinearity=render;
+  render();
+})();
+
+// ==================== WIDGET 4: F-Test ====================
+(function(){
+  var chartEl=document.getElementById("chart-f-test");
+  function render(){
+    var c=themeColors();
+    var type=getActiveVal("ft-type");
+    var fstat,d1,d2,pval;
+    if(type==="overall"){
+      fstat=M3.f_stat;d1=M3.k-1;d2=M3.df_resid;pval=M3.f_pvalue;
+    } else {
+      var sf=DATA.subset_ftest;
+      fstat=sf.f_stat;d1=sf.q;d2=sf.df_resid;pval=1-fCDF(fstat,d1,d2);
+    }
+    var reject=pval<0.05;
+    document.getElementById("ft-stat-f").textContent=fmt(fstat,4);
+    document.getElementById("ft-stat-df").textContent=d1+", "+d2;
+    document.getElementById("ft-stat-p").textContent=pval<0.0001?"< 0.0001":fmt(pval,4);
+    var badge=document.getElementById("ft-decision");
+    badge.textContent=reject?"Reject H\u2080 (jointly significant)":"Fail to reject H\u2080 (not jointly significant)";
+    badge.className="decision-badge "+(reject?"reject":"fail");
+    var xmax=Math.max(fstat*1.5,8);
+    var xs=linspace(0.01,xmax,400);
+    var ys=xs.map(function(x){return fPDF(x,d1,d2);});
+    var traces=[{x:xs,y:ys,type:"scatter",mode:"lines",line:{color:c.cyan,width:2},name:"F("+d1+", "+d2+")"}];
+    var fcrit=-1;
+    // Find 95% critical value by bisection
+    var lo2=0,hi2=100;for(var i=0;i<80;i++){var mid=(lo2+hi2)/2;if(fCDF(mid,d1,d2)<0.95)lo2=mid;else hi2=mid;}fcrit=(lo2+hi2)/2;
+    var xRej=linspace(fcrit,xmax,60);var yRej=xRej.map(function(x){return fPDF(x,d1,d2);});
+    traces.push({x:xRej.concat([xmax,fcrit]),y:yRej.concat([0,0]),fill:"toself",fillcolor:c.pink+"22",line:{width:0},name:"5% rejection",hoverinfo:"skip"});
+    var fc=Math.min(fstat,xmax*0.95);
+    traces.push({x:[fc],y:[fPDF(fc,d1,d2)*1.15],type:"scatter",mode:"markers+text",marker:{color:reject?c.pink:c.cyan,size:14,symbol:"triangle-down"},text:["F="+fmt(fstat,2)],textposition:"top center",textfont:{color:reject?c.pink:c.cyan,size:11,family:"JetBrains Mono"},name:"Observed F",showlegend:false});
+    var layout=baseLayout({xaxis:{title:"F",range:[0,xmax],gridcolor:c.grid,linecolor:c.grid,tickfont:{color:c.textSoft}},yaxis:{title:"Density",gridcolor:c.grid,linecolor:c.grid,tickfont:{color:c.textSoft}},showlegend:true,legend:{x:0.5,y:0.98,xanchor:"center",yanchor:"top",font:{color:c.text}},shapes:[{type:"line",xref:"x",yref:"paper",x0:fcrit,x1:fcrit,y0:0,y1:1,line:{color:c.pink,width:1.5,dash:"dash"}}]});
+    Plotly.react(chartEl,traces,layout,PLOTLY_CONFIG);
+  }
+  bindToggles("ft-type",render);
+  window.__rerender_ftest=render;
+  render();
+})();
+
+// ==================== WIDGET 5: Model Comparison Table ====================
+(function(){
+  var allVars=["const","size","bedrooms","bathrooms","lotsize","age","monthsold"];
+  function render(){
+    var tbody=document.getElementById("mc-table-body");
+    var rows="";
+    for(var vi=0;vi<allVars.length;vi++){
+      var v=allVars[vi];
+      var isSize=v==="size";
+      rows+="<tr"+(isSize?' class="highlight"':"")+">";
+      rows+="<td>"+v+"</td>";
+      for(var mi=0;mi<3;mi++){
+        var m=DATA.models[mi];
+        var idx=m.vars.indexOf(v);
+        if(idx>=0){
+          var stars=sigStars(m.p[idx]);
+          rows+="<td>$"+fmt(m.coef[idx],2)+(stars?' <span class="sig">'+stars+"</span>":"")+"<br><small style=\"color:var(--text-muted)\">("+fmt(m.se[idx],2)+")</small></td>";
+        } else {
+          rows+="<td>\u2014</td>";
+        }
+      }
+      rows+="</tr>";
+    }
+    rows+='<tr class="r2-row"><td>R\u00B2</td>';
+    for(var mi=0;mi<3;mi++)rows+="<td>"+fmt(DATA.models[mi].r2,4)+"</td>";
+    rows+="</tr><tr><td>Adj R\u00B2</td>";
+    for(var mi=0;mi<3;mi++)rows+="<td>"+fmt(DATA.models[mi].r2_adj,4)+"</td>";
+    rows+="</tr><tr><td>F-stat</td>";
+    for(var mi=0;mi<3;mi++)rows+="<td>"+fmt(DATA.models[mi].f_stat,2)+"</td>";
+    rows+="</tr><tr><td>N</td>";
+    for(var mi=0;mi<3;mi++)rows+="<td>"+DATA.models[mi].n+"</td>";
+    rows+="</tr>";
+    tbody.innerHTML=rows;
+  }
+  window.__rerender_modelcompare=render;
+  render();
+})();
+
+// ==================== WIDGET 6: Robust SEs ====================
+(function(){
+  function render(){
+    var c=themeColors();
+    var isRobust=getActiveVal("rb-type")==="robust";
+    var tbody=document.getElementById("rb-table-body");
+    var rows="";
+    for(var i=0;i<M3.vars.length;i++){
+      var v=M3.vars[i];
+      var coef=M3.coef[i];
+      var se=isRobust?M3.se_robust[i]:M3.se[i];
+      var t=isRobust?M3.t_robust[i]:M3.t[i];
+      var p=isRobust?M3.p_robust[i]:M3.p[i];
+      var stars=sigStars(p);
+      var isSize=v==="size";
+      rows+="<tr"+(isSize?' class="highlight"':"")+">";
+      rows+="<td>"+v+"</td>";
+      rows+="<td>$"+fmt(coef,2)+"</td>";
+      rows+="<td>$"+fmt(se,2)+"</td>";
+      rows+="<td>"+fmt(t,2)+(stars?' <span class="sig">'+stars+"</span>":"")+"</td>";
+      rows+="<td>"+fmt(p,4)+"</td>";
+      rows+="</tr>";
+    }
+    tbody.innerHTML=rows;
+  }
+  bindToggles("rb-type",render);
+  window.__rerender_robustse=render;
+  render();
+})();
+
+// ==================== RESET + URL HASH STATE ====================
+(function(){
+  var REG={
+    ciexplorer:[{id:"ci-level",kind:"range",def:"95"},{id:"ci-var",kind:"select",def:"1"}],
+    ttest:[{id:"tt-beta0",kind:"range",def:"0"}],
+    multicollinearity:[{group:"mc-model",kind:"toggle",def:"0"}],
+    ftest:[{group:"ft-type",kind:"toggle",def:"overall"}],
+    modelcompare:[],
+    robustse:[{group:"rb-type",kind:"toggle",def:"standard"}]
+  };
+  function getVal(c){if(c.kind==="toggle"){var b=document.querySelector("#"+c.group+" button.active");return b?b.dataset.val:c.def;}return document.getElementById(c.id).value;}
+  function setVal(c,val,fire){if(c.kind==="toggle"){var g=document.getElementById(c.group);if(!g)return;var b=g.querySelector('button[data-val="'+val+'"]');if(b&&!b.classList.contains("active"))b.click();}else{var el=document.getElementById(c.id);if(!el)return;if(el.value!==String(val)){el.value=val;if(fire)el.dispatchEvent(new Event(c.kind==="select"?"change":"input",{bubbles:true}));}}}
+  function resetWidget(w){var ctrls=REG[w]||[];for(var i=0;i<ctrls.length;i++)setVal(ctrls[i],ctrls[i].def,true);var fn=window["__rerender_"+w];if(fn)fn();writeHash();}
+  function writeHash(){var parts=[];for(var w in REG){var ctrls=REG[w];for(var i=0;i<ctrls.length;i++){var c=ctrls[i];var v=String(getVal(c));if(v!==String(c.def)){var key=c.id||c.group;parts.push(key+"="+encodeURIComponent(v));}}}var want=parts.length?"#"+parts.join("&"):"";if(want===""&&location.hash.match(/=/))history.replaceState(null,"",location.pathname+location.search);else if(want!==""&&location.hash!==want)history.replaceState(null,"",location.pathname+location.search+want);}
+  function readHash(){var hash=location.hash.slice(1);if(!hash||!hash.includes("="))return;var params={};var pairs=hash.split("&");for(var i=0;i<pairs.length;i++){var eq=pairs[i].indexOf("=");if(eq<0)continue;params[pairs[i].slice(0,eq)]=decodeURIComponent(pairs[i].slice(eq+1));}for(var w in REG){var ctrls=REG[w];for(var j=0;j<ctrls.length;j++){var c=ctrls[j];var key=c.id||c.group;if(key in params)setVal(c,params[key],true);}}}
+  document.querySelectorAll(".reset-btn[data-reset]").forEach(function(btn){btn.addEventListener("click",function(){resetWidget(btn.dataset.reset);});});
+  document.addEventListener("input",function(e){if(e.target.matches("input[type=range], select"))writeHash();});
+  document.addEventListener("change",function(e){if(e.target.matches("select"))writeHash();});
+  document.querySelectorAll(".toggle-group button").forEach(function(b){b.addEventListener("click",function(){setTimeout(writeHash,0);});});
+  readHash();
+})();
+
+// ==================== THEME TOGGLE ====================
+(function(){
+  var btn=document.getElementById("theme-toggle"),iconEl=document.getElementById("theme-icon"),labelEl=document.getElementById("theme-label");
+  function apply(theme){document.documentElement.dataset.theme=theme;iconEl.textContent=theme==="dark"?"\u2600\uFE0F":"\uD83C\uDF19";labelEl.textContent=theme==="dark"?"Light":"Dark";for(var key in window){if(key.startsWith("__rerender_")&&typeof window[key]==="function")window[key]();}}
+  var saved=localStorage.getItem(THEME_KEY);var prefersDark=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches;apply(saved||(prefersDark?"dark":"light"));
+  btn.addEventListener("click",function(){var next=document.documentElement.dataset.theme==="dark"?"light":"dark";localStorage.setItem(THEME_KEY,next);apply(next);});
+})();
+window.addEventListener("resize",function(){document.querySelectorAll(".chart").forEach(function(el){if(el.data)Plotly.Plots.resize(el);});});
+</script>
+</body>
+</html>
