@@ -157,3 +157,25 @@ Three short paragraphs: what the directory is, how to regenerate `web-apps/ch02/
 - **New:** `web-apps/ch02/PLAN.md` (copy of this plan)
 - **New:** `web-apps/README.md`
 - **Read-only references:** `notebooks_colab/ch02_Univariate_Data_Summary.md`, `notebooks_quarto/ch02_Univariate_Data_Summary.qmd`, `book/custom.css`, `index.html`, `data/AED_*.DTA`
+
+## Readability revision — 2026-04-17
+
+The original template led with a terse `.lede` paragraph and a small `section-tag` badge. That worked for fluent readers but left beginners unsure which concept they were about to learn and why they should care. The template was rewritten so every widget now reads in this order:
+
+1. **Heading** (unchanged).
+2. **Motivation paragraph** (`.motivation`) — one or two short, question-framed sentences on why the tool matters. Uses the pink brand accent to stand out.
+3. **Key Concept callout** (`.key-concept`) — purple-bordered box with the exact concept wording from the chapter. Students see the concept *before* they interact with it.
+4. **"What you can do here"** (`.widget-howto`) — 2–4 bullets describing the controls in plain language.
+5. **Controls + chart** (unchanged).
+6. **Try-this with reveals** — each experiment now ends with an *insight* sentence, not just a directive. Bolded action, italicized or plain reveal.
+7. **Take-away** (`.takeaway`) — one-sentence summary plus an arrow link to the corresponding chapter section.
+
+Additional changes:
+
+- **Global intro card** (`.howto-card`) at the top of `<main>` explains the six-part structure before the first widget.
+- **Closing "Keep learning" card** at the bottom of `<main>` links to the full chapter and notes that case studies (Key Concepts 2.8–2.11) are not in the dashboard.
+- **Box-plot widget** now carries the `Key Concept 2.2` tag (previously missing).
+- **Log-transform widget** lede no longer says "try widening the window" (there is no slider); the how-to list clarifies that it is observational.
+- **No JS or data changes.** All interactive behavior is preserved; only prose scaffolding and CSS were updated.
+
+**Rationale for future chapter apps:** this is the reference pattern. When building dashboards for chapters 1, 3–17, each widget should follow the same six-part structure so students can transfer their reading habits from one chapter to the next.
