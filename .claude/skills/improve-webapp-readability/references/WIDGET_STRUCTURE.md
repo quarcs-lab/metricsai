@@ -203,3 +203,102 @@ Its CSS (only if used):
 - **Do not** write `.takeaway` text longer than one sentence. If you need two sentences, the first belongs in `.motivation` and the second is the take-away.
 - **Do not** change the `id` of any widget or the `data-reset` attribute of its Reset button. JS depends on both.
 - **Do not** move any `<div class="chart" id="…">` placeholder — Plotly mounts into those by id.
+- **Do not** inject MathJax or KaTeX. The dashboards are standalone single-file apps; they have no math renderer. Any math must be HTML entities and tags (see next section).
+
+---
+
+## Math and symbols — CRITICAL
+
+The web apps **do not load MathJax or KaTeX**. Anything wrapped in `$...$` or `$$...$$` renders as literal dollar-signs and LaTeX source. Likewise, raw backslash commands (`\bar`, `\mu`, `\sigma`, `\sqrt`, `\cdots`, `\hat`) render as their source. Every mathematical symbol in prose — motivation, key-concept, widget-howto, callouts, try-this, take-away — must be expressed with HTML entities or tags.
+
+Chapter 2 (`web-apps/ch02/template.html`) is the authoritative reference. When in doubt, grep there for the symbol you need.
+
+### Lookup table — LaTeX → HTML
+
+| What you want | LaTeX you'd write in the `.qmd` | HTML to use in the web app | Renders as |
+|---|---|---|---|
+| Population mean | `$\mu$` | `&mu;` | μ |
+| Population variance | `$\sigma^2$` | `&sigma;<sup>2</sup>` | σ² |
+| Population SD | `$\sigma$` | `&sigma;` | σ |
+| Sample size root | `$\sqrt{n}$` | `&radic;n` | √n |
+| Sample mean | `$\bar{X}$` or `$\bar{x}$` | `X&#772;` or `x&#772;` | X̄ / x̄ |
+| Regression coefficient | `$\beta_1$` | `&beta;<sub>1</sub>` | β₁ |
+| Intercept | `$\beta_0$` | `&beta;<sub>0</sub>` | β₀ |
+| Fitted value | `$\hat{y}$` | `ŷ` (U+0177) | ŷ |
+| Estimator | `$\hat{\theta}$` | `&theta;&#770;` | θ̂ |
+| Error term | `$\varepsilon$` | `&epsilon;` | ε |
+| Summation | `$\sum_i$` | `&Sigma;<sub>i</sub>` | Σᵢ |
+| Product | `$\prod_i$` | `&Pi;<sub>i</sub>` | Πᵢ |
+| Infinity | `$\infty$` | `&infin;` | ∞ |
+| Approximately equal | `$\approx$` | `&asymp;` | ≈ |
+| Plus/minus | `$\pm$` | `&plusmn;` | ± |
+| Midline ellipsis | `$\cdots$` | `&#x22EF;` | ⋯ |
+| Not equal | `$\neq$` | `&ne;` | ≠ |
+| Implies | `$\Rightarrow$` | `&rArr;` | ⇒ |
+| Element of | `$\in$` | `&isin;` | ∈ |
+| For all | `$\forall$` | `&forall;` | ∀ |
+| Arrow (tends to) | `$\rightarrow$` | `&rarr;` | → |
+| Subscript | `$x_i$` | `x<sub>i</sub>` | xᵢ |
+| Superscript | `$x^2$` | `x<sup>2</sup>` | x² |
+| Italic variable | `$x$`, `$y$` | `<em>x</em>`, `<em>y</em>` | *x*, *y* |
+| Bolded anchor term | (inline prose) | `<strong>mean</strong>` | **mean** |
+| Standard error | `$\text{SE}$` | `SE` (plain text) | SE |
+| R-squared | `$R^2$` | `R&sup2;` | R² |
+| Inclusion probability | `$\pi_i$` | `&pi;<sub>i</sub>` | πᵢ |
+| Weight | `$w_i$` | `w<sub>i</sub>` | wᵢ |
+
+The combining-macron entity `&#772;` attaches to the character immediately before it, so `X&#772;` renders as X̄ and `x&#772;` as x̄. Use this whenever you need a bar over any letter.
+
+### Do / Don't
+
+**Don't — slips that will render as garbage text:**
+
+```html
+<!-- BAD: $ delimiters render literally -->
+Regression estimates the per-unit effect of $x$ on $y$.
+
+<!-- BAD: raw LaTeX macros are not HTML -->
+Every observed $\bar{x}$ is one realization of $\bar{X} = (X_1 + \cdots + X_n)/n$.
+
+<!-- BAD: \sqrt and \sigma have no meaning in HTML -->
+The standard error shrinks with $\sigma / \sqrt{n}$.
+```
+
+**Do — HTML that renders correctly everywhere:**
+
+```html
+<!-- GOOD: italic variables via <em>, no dollar signs -->
+Regression estimates the per-unit effect of <em>x</em> on <em>y</em>.
+
+<!-- GOOD: combining macron + <sub> + numeric entity for the ellipsis -->
+Every observed x&#772; is one realization of X&#772; = (X<sub>1</sub> + &#x22EF; + X<sub>n</sub>) / n.
+
+<!-- GOOD: Greek letter entities + the √ entity -->
+The standard error shrinks with &sigma; / &radic;n.
+```
+
+### When `$` is legitimate in prose
+
+The only time `$` is allowed in widget prose is when it means a literal dollar sign — currency, not math:
+
+- `$73.77 per square foot` ✓
+- `a $40k swing` ✓
+- `Predicted price: $262,559` ✓
+
+These do not need to be escaped.
+
+### Auto-fix detection
+
+When scanning a template for stray LaTeX, search for:
+
+- `\$[a-zA-Z\\{]` — inline math like `$x$`, `$\bar{X}$` (excludes `$5` currency)
+- `\$\$` — display math delimiters
+- `\\bar|\\mu|\\sigma|\\sqrt|\\cdots|\\hat|\\beta|\\varepsilon|\\theta|\\pi|\\sum|\\prod` — loose backslash commands
+
+Exclude matches inside:
+
+- JavaScript template literals (`${...}` inside backticks)
+- HTML option labels that reference currency (e.g. `<option>...($B)</option>`)
+- Data values embedded in the `<script type="application/json">` island
+
+If you are unsure whether a `$` is math or currency, look at the context: math `$`s come in pairs around a symbol; currency `$`s are followed by digits.

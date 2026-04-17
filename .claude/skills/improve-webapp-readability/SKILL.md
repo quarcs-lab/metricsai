@@ -53,6 +53,7 @@ Do not invoke this skill to add new widgets, change chart behavior, or edit chap
 - The number of widgets or their interactive behavior.
 - Any file outside `web-apps/chNN/`.
 - Any chapter `.qmd` file (it is the source of truth, read-only here).
+- **Never inject MathJax, KaTeX, or any math engine.** The web apps are standalone single-file dashboards that do not load a math renderer. All math must be expressed with HTML entities and tags (see "Math and symbols" below).
 
 ## Inputs this skill needs
 
@@ -103,6 +104,7 @@ Each widget can earn up to 100 points. Deduct:
 | Passive / formula-first opener instead of beginner-friendly motivation | -5 |
 | Prose contradicts the chapter's numerical example | -15 (hard flag) |
 | Missing a Reset button where the widget has interactive controls | -5 |
+| Raw LaTeX in prose (`$x$`, `$\bar{X}$`, `\sqrt{n}`, etc.) that no math engine will render | -5 per offending widget (cap -15) |
 
 Global deductions (applied once to the whole app):
 
@@ -137,6 +139,7 @@ Perform the mechanical rewrites **first**, then propose stubs for the judgment c
 - For each widget, if `.key-concept` is missing, insert a scaffolded callout populated from the chapter's `.qmd` Key Concept body (wording copied, lightly tightened — never invented).
 - For each widget, if `.widget-howto` is missing, generate bullets by scanning `.controls > .ctrl > label` and rewriting each label as a plain-language sentence ("**Slide the bin width** from narrow to wide.").
 - For each widget, if `.takeaway` is missing, insert a stub `<p class="takeaway"><strong>Take-away:</strong> …<a href="…chapter anchor…">Read §N.M in the chapter →</a></p>`. Mark the body with `⚠ TODO` so the author sees it.
+- **Scan for raw LaTeX in prose** (inline `$...$`, display `$$...$$`, or backslash commands like `\bar`, `\mu`, `\sigma`, `\sqrt`, `\cdots`, `\hat`) in the widget-facing prose — motivation, key-concept, widget-howto, callouts, try-this, take-away. Convert to the HTML entities in `references/WIDGET_STRUCTURE.md` → "Math and symbols" (e.g. `$\bar{X}$` → `X&#772;`, `$\sigma/\sqrt{n}$` → `&sigma;/&radic;n`, `$x$` → `<em>x</em>`). Never inject `<script>` tags for MathJax or KaTeX. Ignore `$` inside JS template literals, data values, and HTML option labels (e.g. `$100k`, `${reg.slope}`) — those are not math.
 
 **Requires-judgment (propose, do not force):**
 
@@ -182,6 +185,7 @@ Follow these when drafting motivation, key-concept, how-to, try-this, or take-aw
 - **One take-away per widget.** Not two sentences. Not a paragraph. One clean sentence plus the chapter link.
 - **No emojis.** The brand palette + typography carries the tone.
 - **No new colors.** Use `--cyan`, `--purple`, `--pink`, `--panel`, `--text`, `--text-soft`, `--text-muted`, `--border` only.
+- **Math: never raw LaTeX in prose.** The web apps do not load MathJax or KaTeX — `$x$` renders as the three characters `$`, `x`, `$`; `$\bar{X}$` renders as the eight characters of its source. Use HTML entities and tags instead (full lookup in `references/WIDGET_STRUCTURE.md` → "Math and symbols"): `&mu;`, `&sigma;`, `&radic;n`, `&Sigma;`, `X&#772;` for X̄, `<em>x</em>` / `<em>y</em>` for italic variable names, `<sub>i</sub>` for subscripts, `&#x22EF;` for midline ellipsis (⋯). Chapter 2's app is the reference — grep `web-apps/ch02/template.html` for any symbol you're unsure about. The only place `$` is allowed in prose is when it means a literal dollar sign (e.g. `$73.77/sq ft`).
 
 ## Reference files
 
@@ -206,7 +210,8 @@ The chapter `.qmd` is upstream of all web-app work. If the chapter's Key Concept
 
 ---
 
-**Version:** 1.0
+**Version:** 1.1
 **Created:** 2026-04-17
+**Updated:** 2026-04-17 — Added math-rendering convention. Web apps do not load MathJax/KaTeX, so the skill now bans raw LaTeX `$...$` in prose, scores it in Phase 3, auto-converts common tokens to HTML entities in Phase 5, and documents the full entity lookup in `references/WIDGET_STRUCTURE.md`.
 **Prerequisite:** Web app exists (`web-apps/chNN/template.html` + `build.py`). Chapter Key Concepts defined in the `.qmd`.
 **Audience:** Beginner econometrics students.
