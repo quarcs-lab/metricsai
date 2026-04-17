@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chapter 15 — Regression with Transformed Variables · metricsAI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.plot.ly/plotly-2.35.2.min.js" charset="utf-8"></script>
+<style>
+:root{--cyan:#008CB7;--cyan-soft:#22d3ee;--purple:#7A209F;--purple-soft:#c084fc;--pink:#C21E72;--pink-soft:#f472b6;--bg:#f5f8fb;--panel:#fff;--panel-2:#f0f4f9;--text:#0b1021;--text-soft:#475569;--text-muted:#64748b;--border:#d9e2ec;--accent:var(--cyan);--accent-2:var(--purple);--accent-3:var(--pink);--shadow:0 2px 10px rgba(11,16,33,.06),0 12px 30px rgba(11,16,33,.05);--grid:#e3e8ef;--code-bg:#eef3f8}
+html[data-theme="dark"]{--bg:#0c1024;--panel:#151a33;--panel-2:#1b2142;--text:#e2e8f0;--text-soft:#b5c0d0;--text-muted:#8a98ae;--border:#2a3156;--accent:var(--cyan-soft);--accent-2:var(--purple-soft);--accent-3:var(--pink-soft);--shadow:0 2px 10px rgba(0,0,0,.25),0 12px 30px rgba(0,0,0,.35);--grid:#2a3156;--code-bg:#0f1530}
+*{box-sizing:border-box}html,body{margin:0;padding:0}
+body{font-family:'Inter',system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);line-height:1.55;transition:background-color .25s ease,color .25s ease}
+code,.mono{font-family:'JetBrains Mono',ui-monospace,monospace}
+header.page{position:relative;padding:2.4rem 1.5rem 2rem;background:radial-gradient(1200px 400px at 85% -10%,rgba(122,32,159,.15),transparent),radial-gradient(1000px 400px at 10% 0%,rgba(0,140,183,.18),transparent),var(--panel);border-bottom:1px solid var(--border)}
+.page-inner{max-width:1120px;margin:0 auto}
+.chapter-badge{display:inline-block;font-size:.72rem;letter-spacing:.15em;text-transform:uppercase;color:var(--accent);font-weight:600;margin-bottom:.5rem}
+h1.title{font-size:clamp(1.6rem,3.4vw,2.4rem);margin:0 0 .35rem;background:linear-gradient(90deg,var(--accent),var(--accent-2));-webkit-background-clip:text;background-clip:text;color:transparent;font-weight:700;letter-spacing:-.01em}
+p.subtitle{margin:0 0 .8rem;color:var(--text-soft);font-size:1.05rem;max-width:720px}
+.theme-toggle{position:absolute;top:1.4rem;right:1.5rem;background:var(--panel-2);color:var(--text);border:1px solid var(--border);padding:.4rem .8rem;border-radius:999px;cursor:pointer;font-size:.85rem;font-weight:500;display:inline-flex;align-items:center;gap:.35rem;transition:all .2s ease}
+.theme-toggle:hover{border-color:var(--accent);color:var(--accent)}
+nav.anchors{position:sticky;top:0;z-index:20;background:color-mix(in srgb,var(--panel) 92%,transparent);backdrop-filter:saturate(150%) blur(8px);-webkit-backdrop-filter:saturate(150%) blur(8px);border-bottom:1px solid var(--border)}
+nav.anchors ul{display:flex;gap:.25rem;overflow-x:auto;list-style:none;padding:.55rem 1.5rem;margin:0 auto;max-width:1120px;scrollbar-width:thin}
+nav.anchors a{display:block;padding:.35rem .75rem;border-radius:8px;color:var(--text-soft);text-decoration:none;font-size:.85rem;font-weight:500;white-space:nowrap;transition:all .15s ease}
+nav.anchors a:hover{color:var(--accent);background:var(--panel-2)}
+main{max-width:1120px;margin:1.2rem auto 3rem;padding:0 1.5rem}
+section.widget{background:var(--panel);border:1px solid var(--border);border-radius:16px;padding:1.5rem 1.4rem 1.3rem;margin-bottom:1.5rem;box-shadow:var(--shadow)}
+.section-tag{display:inline-block;font-family:'JetBrains Mono',monospace;font-size:.72rem;color:var(--accent);background:color-mix(in srgb,var(--accent) 12%,transparent);padding:.2rem .55rem;border-radius:6px;margin-bottom:.6rem;font-weight:500}
+.widget h2{margin:0 0 .2rem;font-size:1.35rem;font-weight:600;color:var(--accent-2);letter-spacing:-.005em}
+.widget .lede{margin:0 0 1rem;color:var(--text-soft);font-size:.97rem;max-width:780px}
+.controls{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:.9rem 1.2rem;padding:.9rem 1rem;background:var(--panel-2);border-radius:10px;margin-bottom:1rem}
+.ctrl{display:flex;flex-direction:column;gap:.3rem}
+.ctrl label{font-size:.78rem;font-weight:500;color:var(--text-soft);text-transform:uppercase;letter-spacing:.05em}
+.ctrl select,.ctrl input[type="range"]{font-family:inherit;font-size:.9rem;padding:.4rem .55rem;border-radius:8px;border:1px solid var(--border);background:var(--panel);color:var(--text)}
+.ctrl input[type="range"]{padding:.2rem 0;accent-color:var(--accent)}
+.ctrl .val{font-family:'JetBrains Mono',monospace;font-size:.82rem;color:var(--accent);font-weight:500}
+.toggle-group{display:inline-flex;gap:.25rem;background:var(--panel);padding:3px;border-radius:10px;border:1px solid var(--border)}
+.toggle-group button{background:transparent;border:none;color:var(--text-soft);padding:.32rem .75rem;border-radius:7px;font-family:inherit;font-size:.85rem;cursor:pointer;transition:all .15s ease}
+.toggle-group button.active{background:var(--accent);color:white;font-weight:500}
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(100px,1fr));gap:.6rem;margin:.5rem 0 1rem}
+.stat{background:var(--panel-2);padding:.65rem .75rem;border-radius:10px;border-left:3px solid var(--accent)}
+.stat .label{font-size:.7rem;text-transform:uppercase;letter-spacing:.06em;color:var(--text-muted)}
+.stat .value{font-family:'JetBrains Mono',monospace;font-size:1.05rem;font-weight:500;color:var(--text);margin-top:.15rem}
+.stat.mean{border-left-color:var(--accent)}.stat.median{border-left-color:var(--accent-3)}.stat.spread{border-left-color:var(--accent-2)}
+.callout{background:color-mix(in srgb,var(--accent-2) 8%,transparent);border-left:3px solid var(--accent-2);padding:.7rem .9rem;border-radius:8px;font-size:.9rem;color:var(--text-soft);margin:.9rem 0 .2rem}
+.callout strong{color:var(--accent-2)}
+.try-this{background:color-mix(in srgb,var(--accent) 8%,transparent);border-left:3px solid var(--accent);padding:.7rem .9rem;border-radius:8px;font-size:.9rem;color:var(--text-soft);margin:.7rem 0 .2rem}
+.try-this .try-title{font-weight:600;color:var(--accent);font-size:.78rem;letter-spacing:.08em;text-transform:uppercase;margin-bottom:.3rem}
+.try-this ol{margin:0;padding-left:1.25rem}.try-this li{margin:.2rem 0}
+.widget-head{display:flex;align-items:flex-start;justify-content:space-between;gap:.5rem;margin-bottom:.2rem}
+.widget-head>div{flex:1;min-width:0}
+.reset-btn{background:transparent;color:var(--text-muted);border:1px solid var(--border);padding:.3rem .7rem;border-radius:8px;font-family:inherit;font-size:.8rem;cursor:pointer;white-space:nowrap;transition:all .15s ease}
+.reset-btn:hover{color:var(--accent);border-color:var(--accent)}
+.chart{width:100%;min-height:340px}.chart.tall{min-height:420px}.chart.short{min-height:280px}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+@media(max-width:720px){.two-col{grid-template-columns:1fr}}
+footer.page{max-width:1120px;margin:1rem auto 3rem;padding:0 1.5rem;color:var(--text-muted);font-size:.88rem;text-align:center}
+footer.page a{color:var(--accent);text-decoration:none}footer.page a:hover{text-decoration:underline}
+.scroll-top{display:inline-block;font-size:.78rem;color:var(--text-muted);text-decoration:none;margin-top:.4rem}.scroll-top:hover{color:var(--accent)}
+</style>
+</head>
+<body>
+
+<header class="page">
+  <div class="page-inner">
+    <span class="chapter-badge">Chapter 15 of 18 · Interactive Dashboard</span>
+    <h1 class="title">Regression with Transformed Variables</h1>
+    <p class="subtitle">Explore log transformations, quadratic models, standardized coefficients, interaction effects, and retransformation bias — using the same earnings dataset as the book.</p>
+  </div>
+  <button id="theme-toggle" class="theme-toggle" type="button" aria-label="Toggle color theme"><span id="theme-icon">🌙</span><span id="theme-label">Dark</span></button>
+</header>
+
+<nav class="anchors" aria-label="Sections">
+  <ul>
+    <li><a href="#log-transform">Log Transformation</a></li>
+    <li><a href="#quadratic">Quadratic &amp; Turning Point</a></li>
+    <li><a href="#standardized">Standardized Coefs</a></li>
+    <li><a href="#interaction-me">Interaction Effects</a></li>
+    <li><a href="#retransform">Retransformation</a></li>
+    <li><a href="#residuals">Residual Distribution</a></li>
+  </ul>
+</nav>
+
+<main>
+
+<!-- ==================== WIDGET 1: Log Transformation Explorer ==================== -->
+<section class="widget" id="log-transform">
+  <div class="widget-head">
+    <div>
+      <span class="section-tag">§15.1</span>
+      <h2>Log Transformation Explorer</h2>
+      <p class="lede">The same regression — earnings on education — tells a different story depending on the functional form. In levels, the coefficient is dollars per year. In logs, it is a percentage return.</p>
+    </div>
+    <button class="reset-btn" data-reset="logtransform">Reset</button>
+  </div>
+  <div class="controls">
+    <div class="ctrl">
+      <label>Model specification</label>
+      <div class="toggle-group" id="lt-model">
+        <button class="active" data-val="levels">Levels ($ per year)</button>
+        <button data-val="log">Log-linear (% per year)</button>
+      </div>
+    </div>
+  </div>
+  <div class="stats-grid">
+    <div class="stat mean"><div class="label">Education coef</div><div class="value" id="lt-stat-coef">—</div></div>
+    <div class="stat spread"><div class="label">Interpretation</div><div class="value" id="lt-stat-interp">—</div></div>
+    <div class="stat median"><div class="label">R²</div><div class="value" id="lt-stat-r2">—</div></div>
+    <div class="stat mean"><div class="label">t-statistic</div><div class="value" id="lt-stat-t">—</div></div>
+  </div>
+  <div id="chart-log-transform" class="chart"></div>
+  <div class="callout">
+    <strong>Key Concept 15.1:</strong> In a log-linear model (ln y = &beta;<sub>0</sub> + &beta;<sub>1</sub>x), the coefficient &beta;<sub>1</sub> is approximately the percentage change in y for a one-unit increase in x. In a levels model (y = &beta;<sub>0</sub> + &beta;<sub>1</sub>x), the coefficient is the dollar change.
+  </div>
+  <div class="try-this">
+    <div class="try-title">Try This</div>
+    <ol>
+      <li>In <strong>Levels</strong>, each year of education adds ~$5,737 to earnings. In <strong>Log-linear</strong>, it adds ~10%. Which is more useful for comparing across income levels?</li>
+      <li>Compare R²: the log model (0.176) fits better than levels (0.103). Why? Because earnings have a right-skewed distribution, and logs compress it.</li>
+      <li>Look at the scatter: in levels, the fitted line badly misses high earners. In logs, the fit is more even across the range.</li>
+    </ol>
+  </div>
+</section>
+
+<!-- ==================== WIDGET 2: Quadratic Model & Turning Point ==================== -->
+<section class="widget" id="quadratic">
+  <div class="widget-head">
+    <div>
+      <span class="section-tag">§15.3 – §15.4</span>
+      <h2>Quadratic Model &amp; Turning Point</h2>
+      <p class="lede">The relationship between age and earnings is not linear — it rises, peaks, and then declines. A quadratic model captures this inverted-U shape and identifies the peak age.</p>
+    </div>
+    <button class="reset-btn" data-reset="quadratic">Reset</button>
+  </div>
+  <div class="controls">
+    <div class="ctrl">
+      <label>Model</label>
+      <div class="toggle-group" id="quad-model">
+        <button data-val="linear">Linear</button>
+        <button class="active" data-val="quadratic">Quadratic</button>
+      </div>
+    </div>
+    <div class="ctrl">
+      <label>Evaluate marginal effect at age</label>
+      <input type="range" id="quad-age" min="25" max="65" step="1" value="40">
+      <span class="val" id="quad-age-val">Age = 40</span>
+    </div>
+  </div>
+  <div class="stats-grid">
+    <div class="stat mean"><div class="label">Turning point</div><div class="value" id="quad-stat-tp">—</div></div>
+    <div class="stat spread"><div class="label">Marginal effect</div><div class="value" id="quad-stat-me">—</div></div>
+    <div class="stat median"><div class="label">R²</div><div class="value" id="quad-stat-r2">—</div></div>
+  </div>
+  <div id="chart-quadratic" class="chart"></div>
+  <div class="callout">
+    <strong>Key Concept 15.3:</strong> The turning point x* = &minus;&beta;<sub>1</sub> / (2&beta;<sub>2</sub>) is where the marginal effect changes sign. Below x*, additional age increases earnings. Above x*, earnings decline. The marginal effect at any age is ME = &beta;<sub>1</sub> + 2&beta;<sub>2</sub> &times; age.
+  </div>
+  <div class="try-this">
+    <div class="try-title">Try This</div>
+    <ol>
+      <li>Toggle to <strong>Linear</strong>. The line slopes upward everywhere — it cannot capture the decline. Toggle back to <strong>Quadratic</strong>. The curve peaks and then falls.</li>
+      <li>Slide age to the <strong>turning point</strong> (~49.5 years). The marginal effect should be approximately $0 — one more year of age neither helps nor hurts.</li>
+      <li>Slide age to 60. The marginal effect is negative: earnings <em>decrease</em> with additional age beyond the peak.</li>
+    </ol>
+  </div>
+</section>
+
+<!-- ==================== WIDGET 3: Standardized Coefficients ==================== -->
+<section class="widget" id="standardized">
+  <div class="widget-head">
+    <div>
+      <span class="section-tag">§15.5</span>
+      <h2>Standardized Coefficients</h2>
+      <p class="lede">Raw coefficients have different units (years, 0/1, log-hours). Standardized coefficients (&beta;* = &beta; &times; s<sub>x</sub>/s<sub>y</sub>) measure the effect in standard deviations — making variables comparable.</p>
+    </div>
+    <button class="reset-btn" data-reset="standardized">Reset</button>
+  </div>
+  <div class="controls">
+    <div class="ctrl">
+      <label>Display</label>
+      <div class="toggle-group" id="std-display">
+        <button class="active" data-val="raw">Raw coefficients</button>
+        <button data-val="std">Standardized (&beta;*)</button>
+      </div>
+    </div>
+  </div>
+  <div id="chart-standardized" class="chart"></div>
+  <div class="callout">
+    <strong>Key Concept 15.5:</strong> A standardized coefficient of 0.40 means a one-standard-deviation increase in x is associated with a 0.40 SD increase in y. This lets you compare the relative importance of education (years) vs. gender (0/1) vs. hours (log) on the same scale.
+  </div>
+  <div class="try-this">
+    <div class="try-title">Try This</div>
+    <ol>
+      <li>In <strong>Raw</strong> mode, lnhours has the largest coefficient (0.94) and gender has &minus;0.19. But these numbers are not comparable because the variables have different scales.</li>
+      <li>Switch to <strong>Standardized</strong>. Now education (&beta;* = 0.40) is the strongest predictor. lnhours drops to 0.23 because hours have low variance in this sample.</li>
+      <li>Gender (&beta;* = &minus;0.13) looks small in standardized units. Does this mean the gender gap is unimportant? Not necessarily — a 13% of a standard deviation is still ~$7,000.</li>
+    </ol>
+  </div>
+</section>
+
+<!-- ==================== WIDGET 4: Interaction Marginal Effects ==================== -->
+<section class="widget" id="interaction-me">
+  <div class="widget-head">
+    <div>
+      <span class="section-tag">§15.6</span>
+      <h2>Interaction Marginal Effects</h2>
+      <p class="lede">When education and age interact, the return to education depends on your age. Drag the slider to see how the marginal effect of one more year of education varies across the life cycle.</p>
+    </div>
+    <button class="reset-btn" data-reset="interactionme">Reset</button>
+  </div>
+  <div class="controls">
+    <div class="ctrl">
+      <label>Age</label>
+      <input type="range" id="ime-age" min="25" max="65" step="1" value="40">
+      <span class="val" id="ime-age-val">Age = 40</span>
+    </div>
+  </div>
+  <div class="stats-grid">
+    <div class="stat mean"><div class="label">Education coef</div><div class="value" id="ime-stat-educ">—</div></div>
+    <div class="stat spread"><div class="label">Interaction coef</div><div class="value" id="ime-stat-inter">—</div></div>
+    <div class="stat median"><div class="label">ME at this age</div><div class="value" id="ime-stat-me">—</div></div>
+    <div class="stat mean"><div class="label">R²</div><div class="value" id="ime-stat-r2">—</div></div>
+  </div>
+  <div id="chart-interaction-me" class="chart"></div>
+  <div class="callout">
+    <strong>Key Concept 15.6:</strong> In earnings = &beta;<sub>0</sub> + &beta;<sub>1</sub>educ + &beta;<sub>2</sub>age + &beta;<sub>3</sub>(educ &times; age), the marginal effect of education is ME = &beta;<sub>1</sub> + &beta;<sub>3</sub> &times; age. This means the return to education increases with experience.
+  </div>
+  <div class="try-this">
+    <div class="try-title">Try This</div>
+    <ol>
+      <li>At age 25, each year of education adds ~$5,241. At age 55, it adds ~$6,112. The interaction term ($29/year of age) means education pays off more for experienced workers.</li>
+      <li>The marginal effect line slopes upward. This makes economic sense: education and experience are complementary — more education is worth more when combined with more experience.</li>
+      <li>Is the interaction economically large? From age 25 to 55, the return increases by ~$871/year ($29 &times; 30). That is a modest but meaningful difference.</li>
+    </ol>
+  </div>
+</section>
+
+<!-- ==================== WIDGET 5: Retransformation Bias ==================== -->
+<section class="widget" id="retransform">
+  <div class="widget-head">
+    <div>
+      <span class="section-tag">§15.7</span>
+      <h2>Retransformation Bias</h2>
+      <p class="lede">When you predict in logs and convert back with exp(), you systematically underpredict. The smearing correction factor exp(&sigma;²/2) fixes this — compare naive vs. corrected predictions.</p>
+    </div>
+    <button class="reset-btn" data-reset="retransform">Reset</button>
+  </div>
+  <div class="controls">
+    <div class="ctrl">
+      <label>Prediction method</label>
+      <div class="toggle-group" id="rt-method">
+        <button class="active" data-val="both">Compare both</button>
+        <button data-val="naive">Naive only</button>
+        <button data-val="corrected">Corrected only</button>
+      </div>
+    </div>
+  </div>
+  <div class="stats-grid">
+    <div class="stat mean"><div class="label">Actual mean</div><div class="value" id="rt-stat-actual">—</div></div>
+    <div class="stat median"><div class="label">Naive mean</div><div class="value" id="rt-stat-naive">—</div></div>
+    <div class="stat mean"><div class="label">Corrected mean</div><div class="value" id="rt-stat-corrected">—</div></div>
+    <div class="stat spread"><div class="label">Smearing factor</div><div class="value" id="rt-stat-smearing">—</div></div>
+  </div>
+  <div id="chart-retransform" class="chart short"></div>
+  <div class="callout">
+    <strong>Key Concept 15.7:</strong> Jensen&rsquo;s inequality means E[exp(ln &ycirc;)] &ne; exp(E[ln &ycirc;]). The naive retransformation exp(ln &ycirc;) underpredicts the mean by a factor of exp(&sigma;²/2). For this model, the smearing factor is ~1.18, meaning naive predictions are ~18% too low.
+  </div>
+  <div class="try-this">
+    <div class="try-title">Try This</div>
+    <ol>
+      <li>Look at the <strong>Compare both</strong> view. The naive bar underpredicts the actual mean by ~$9,500 (18%). The corrected bar is much closer.</li>
+      <li>The smearing factor is exp(0.34/2) &asymp; 1.18. This means every naive prediction must be multiplied by 1.18 to remove the downward bias.</li>
+      <li>Even after correction, the predicted mean ($55,501) does not exactly equal the actual ($56,369). Why? The smearing correction assumes normally distributed errors, which is approximate.</li>
+    </ol>
+  </div>
+</section>
+
+<!-- ==================== WIDGET 6: Residual Distribution ==================== -->
+<section class="widget" id="residuals">
+  <div class="widget-head">
+    <div>
+      <span class="section-tag">§15.2</span>
+      <h2>Residual Distribution: Levels vs. Log</h2>
+      <p class="lede">One reason to use log transformations: the residuals from a levels model are right-skewed, while those from a log model are more symmetric — closer to the normality assumption.</p>
+    </div>
+    <button class="reset-btn" data-reset="residuals">Reset</button>
+  </div>
+  <div class="controls">
+    <div class="ctrl">
+      <label>Model</label>
+      <div class="toggle-group" id="res-model">
+        <button class="active" data-val="levels">Levels residuals</button>
+        <button data-val="log">Log residuals</button>
+      </div>
+    </div>
+  </div>
+  <div class="stats-grid">
+    <div class="stat mean"><div class="label">Mean</div><div class="value" id="res-stat-mean">—</div></div>
+    <div class="stat spread"><div class="label">SD</div><div class="value" id="res-stat-sd">—</div></div>
+    <div class="stat median"><div class="label">Skewness</div><div class="value" id="res-stat-skew">—</div></div>
+  </div>
+  <div id="chart-residuals" class="chart"></div>
+  <div class="callout">
+    <strong>Key Concept 15.2:</strong> Choosing between levels and logs is partly about which specification produces better-behaved residuals. Right-skewed residuals suggest that a log transformation may improve the model. The skewness statistic quantifies this: closer to 0 is better.
+  </div>
+  <div class="try-this">
+    <div class="try-title">Try This</div>
+    <ol>
+      <li>Look at the <strong>Levels</strong> residuals. The histogram has a long right tail — positive residuals (underpredictions) are much larger than negative ones.</li>
+      <li>Switch to <strong>Log</strong> residuals. The distribution is much more symmetric. The skewness value drops substantially.</li>
+      <li>This is why economists often use ln(earnings) rather than earnings: it produces residuals that are closer to the normal distribution assumed by OLS inference.</li>
+    </ol>
+  </div>
+</section>
+
+</main>
+
+<footer class="page">
+  <p>Part of <a href="https://quarcs-lab.github.io/metricsai/book/_book/index.html"><strong>metricsAI</strong></a> · Chapter 15: Regression with Transformed Variables · by Carlos Mendez · <a href="https://github.com/quarcs-lab/metricsai">GitHub</a></p>
+  <p>Data: AED_EARNINGS_COMPLETE.DTA (872 full-time workers aged 25–65, 2000)</p>
+  <a class="scroll-top" href="#top">&uarr; Back to top</a>
+</footer>
+
+<script type="application/json" id="ch-data">{{DATA_JSON}}</script>
+
+<script>
+"use strict";
+var DATA=JSON.parse(document.getElementById("ch-data").textContent);
+
+// ==================== HELPERS ====================
+var mean=function(a){var s=0;for(var i=0;i<a.length;i++)s+=a[i];return s/a.length;};
+function std(a,m){m=m!==undefined?m:mean(a);var s=0;for(var i=0;i<a.length;i++)s+=(a[i]-m)*(a[i]-m);return Math.sqrt(s/(a.length-1));}
+function skewness(a){var m=mean(a),s=std(a,m);if(s===0)return 0;var sum=0;for(var i=0;i<a.length;i++)sum+=Math.pow((a[i]-m)/s,3);return sum/a.length;}
+function linspace(a,b,n){var out=new Array(n);var step=(b-a)/(n-1);for(var i=0;i<n;i++)out[i]=a+i*step;return out;}
+function fmt(v,d){d=d!==undefined?d:2;if(v===null||v===undefined||isNaN(v))return"\u2014";return v.toFixed(d);}
+function fmtMoney(v){return v===null?"\u2014":"$"+Math.round(v).toLocaleString();}
+var THEME_KEY="metricsai-theme";
+function getCSS(v){return getComputedStyle(document.documentElement).getPropertyValue(v).trim();}
+function themeColors(){return{text:getCSS("--text"),textSoft:getCSS("--text-soft"),grid:getCSS("--grid"),panel:getCSS("--panel"),cyan:getCSS("--accent"),purple:getCSS("--accent-2"),pink:getCSS("--accent-3")};}
+function baseLayout(o){var c=themeColors();return Object.assign({paper_bgcolor:"rgba(0,0,0,0)",plot_bgcolor:"rgba(0,0,0,0)",font:{family:"Inter, system-ui, sans-serif",color:c.text,size:12},margin:{l:56,r:18,t:30,b:46},xaxis:{gridcolor:c.grid,linecolor:c.grid,zerolinecolor:c.grid,tickfont:{color:c.textSoft}},yaxis:{gridcolor:c.grid,linecolor:c.grid,zerolinecolor:c.grid,tickfont:{color:c.textSoft}},hoverlabel:{bgcolor:c.panel,bordercolor:c.grid,font:{color:c.text}},legend:{font:{color:c.text},bgcolor:"rgba(0,0,0,0)"}},o||{});}
+var PLOTLY_CONFIG={displayModeBar:false,responsive:true};
+function getActiveVal(id){var b=document.querySelector("#"+id+" button.active");return b?b.dataset.val:null;}
+function bindToggles(id,fn){document.querySelectorAll("#"+id+" button").forEach(function(b){b.addEventListener("click",function(){this.parentNode.querySelectorAll("button").forEach(function(x){x.classList.remove("active");});this.classList.add("active");fn();});});}
+function bindSlider(id,vid,ffn,rfn){var el=document.getElementById(id);var ve=document.getElementById(vid);el.addEventListener("input",function(){ve.textContent=ffn(this.value);rfn();});}
+
+// ==================== WIDGET 1: Log Transformation Explorer ====================
+(function(){
+  var chartEl=document.getElementById("chart-log-transform");
+  var ed=DATA.scatter.education,earn=DATA.scatter.earnings,lnearn=DATA.scatter.lnearnings;
+  function render(){
+    var c=themeColors();
+    var mode=getActiveVal("lt-model");
+    var m=mode==="levels"?DATA.models.levels_educ:DATA.models.log_educ;
+    var yData=mode==="levels"?earn:lnearn;
+    var ei=m.vars.indexOf("education");
+    document.getElementById("lt-stat-coef").textContent=mode==="levels"?fmtMoney(m.coef[ei]):fmt(m.coef[ei],4);
+    document.getElementById("lt-stat-interp").textContent=mode==="levels"?fmtMoney(m.coef[ei])+"/yr":fmt(m.coef[ei]*100,1)+"%/yr";
+    document.getElementById("lt-stat-r2").textContent=fmt(m.r2,4);
+    document.getElementById("lt-stat-t").textContent=fmt(m.t[ei],2);
+    var traces=[{x:ed,y:yData,type:"scatter",mode:"markers",marker:{color:c.cyan+"33",size:4},name:"Data",hovertemplate:"Educ: %{x}<br>"+( mode==="levels"?"$%{y:,.0f}":"%{y:.3f}")}];
+    var xr=[0,22];
+    var yfit=xr.map(function(x){return m.coef[0]+m.coef[ei]*x;});
+    traces.push({x:xr,y:yfit,type:"scatter",mode:"lines",line:{color:c.pink,width:3},name:"Fitted line"});
+    var layout=baseLayout({xaxis:{title:"Years of Education",range:[0,22],gridcolor:c.grid,linecolor:c.grid,zerolinecolor:c.grid,tickfont:{color:c.textSoft}},yaxis:{title:mode==="levels"?"Earnings ($)":"ln(Earnings)",gridcolor:c.grid,linecolor:c.grid,zerolinecolor:c.grid,tickfont:{color:c.textSoft}},showlegend:true,legend:{x:0.02,y:0.98,xanchor:"left",yanchor:"top",font:{color:c.text},bgcolor:"rgba(0,0,0,0)"}});
+    Plotly.react(chartEl,traces,layout,PLOTLY_CONFIG);
+  }
+  bindToggles("lt-model",render);
+  window.__rerender_logtransform=render;
+  render();
+})();
+
+// ==================== WIDGET 2: Quadratic & Turning Point ====================
+(function(){
+  var chartEl=document.getElementById("chart-quadratic");
+  var ages=DATA.scatter.age,earn=DATA.scatter.earnings;
+  function render(){
+    var c=themeColors();
+    var isQuad=getActiveVal("quad-model")==="quadratic";
+    var evalAge=parseInt(document.getElementById("quad-age").value);
+    var m=isQuad?DATA.models.quad_age:DATA.models.lin_age;
+    var tp=isQuad?DATA.turning_points.quad_age:null;
+    var me;
+    if(isQuad){me=m.coef[1]+2*m.coef[2]*evalAge;}
+    else{me=m.coef[1];}
+    document.getElementById("quad-stat-tp").textContent=tp!==null?fmt(tp,1)+" yrs":"\u2014 (linear)";
+    document.getElementById("quad-stat-me").textContent=fmtMoney(me)+"/yr";
+    document.getElementById("quad-stat-r2").textContent=fmt(m.r2,4);
+    var traces=[{x:ages,y:earn,type:"scatter",mode:"markers",marker:{color:c.cyan+"33",size:4},name:"Data",hovertemplate:"Age: %{x}<br>$%{y:,.0f}"}];
+    var xs=linspace(25,65,200);
+    var ys;
+    if(isQuad){ys=xs.map(function(x){return m.coef[0]+m.coef[1]*x+m.coef[2]*x*x;});}
+    else{ys=xs.map(function(x){return m.coef[0]+m.coef[1]*x;});}
+    traces.push({x:xs,y:ys,type:"scatter",mode:"lines",line:{color:c.pink,width:3},name:isQuad?"Quadratic fit":"Linear fit"});
+    var shapes=[];
+    if(isQuad&&tp>=25&&tp<=65){
+      var ytp=m.coef[0]+m.coef[1]*tp+m.coef[2]*tp*tp;
+      traces.push({x:[tp],y:[ytp],type:"scatter",mode:"markers",marker:{color:c.purple,size:12,symbol:"diamond",line:{color:"white",width:2}},name:"Peak: age "+fmt(tp,1)});
+    }
+    // Evaluate point
+    var yEval=isQuad?m.coef[0]+m.coef[1]*evalAge+m.coef[2]*evalAge*evalAge:m.coef[0]+m.coef[1]*evalAge;
+    traces.push({x:[evalAge],y:[yEval],type:"scatter",mode:"markers",marker:{color:c.pink,size:10,line:{color:"white",width:2}},name:"ME at age "+evalAge,showlegend:false});
+    var layout=baseLayout({xaxis:{title:"Age",range:[23,67],gridcolor:c.grid,linecolor:c.grid,zerolinecolor:c.grid,tickfont:{color:c.textSoft}},yaxis:{title:"Earnings ($)",gridcolor:c.grid,linecolor:c.grid,zerolinecolor:c.grid,tickfont:{color:c.textSoft}},showlegend:true,legend:{x:0.02,y:0.98,xanchor:"left",yanchor:"top",font:{color:c.text},bgcolor:"rgba(0,0,0,0)"}});
+    Plotly.react(chartEl,traces,layout,PLOTLY_CONFIG);
+  }
+  bindToggles("quad-model",render);
+  bindSlider("quad-age","quad-age-val",function(v){return "Age = "+v;},render);
+  window.__rerender_quadratic=render;
+  render();
+})();
+
+// ==================== WIDGET 3: Standardized Coefficients ====================
+(function(){
+  var chartEl=document.getElementById("chart-standardized");
+  var labels={"education":"Education","age":"Age","agesq":"Age²","gender":"Gender","lnhours":"ln(Hours)"};
+  function render(){
+    var c=themeColors();
+    var isStd=getActiveVal("std-display")==="std";
+    var items=DATA.standardized.slice().sort(function(a,b){
+      var va=isStd?Math.abs(a.std):Math.abs(a.raw);
+      var vb=isStd?Math.abs(b.std):Math.abs(b.raw);
+      return vb-va;
+    });
+    var names=items.map(function(d){return labels[d.var]||d.var;});
+    var vals=items.map(function(d){return isStd?d.std:d.raw;});
+    var colors=vals.map(function(v){return v>=0?c.cyan+"77":c.pink+"77";});
+    var borders=vals.map(function(v){return v>=0?c.cyan:c.pink;});
+    var traces=[{y:names,x:vals,type:"bar",orientation:"h",marker:{color:colors,line:{color:borders,width:2}},text:vals.map(function(v){return isStd?fmt(v,3):fmt(v,4);}),textposition:"outside",textfont:{family:"JetBrains Mono",size:11,color:c.text}}];
+    var layout=baseLayout({xaxis:{title:isStd?"Standardized coefficient (\u03B2*)":"Raw coefficient",gridcolor:c.grid,linecolor:c.grid,zerolinecolor:c.grid,tickfont:{color:c.textSoft}},yaxis:{automargin:true,tickfont:{color:c.textSoft,size:12}},showlegend:false,margin:{l:90,r:60,t:10,b:46},shapes:[{type:"line",xref:"x",yref:"paper",x0:0,x1:0,y0:0,y1:1,line:{color:c.grid,width:1.5}}]});
+    Plotly.react(chartEl,traces,layout,PLOTLY_CONFIG);
+  }
+  bindToggles("std-display",render);
+  window.__rerender_standardized=render;
+  render();
+})();
+
+// ==================== WIDGET 4: Interaction Marginal Effects ====================
+(function(){
+  var chartEl=document.getElementById("chart-interaction-me");
+  var m=DATA.models.interact;
+  var eduIdx=m.vars.indexOf("education");
+  var intIdx=m.vars.indexOf("educ\u00d7age");
+  function render(){
+    var c=themeColors();
+    var evalAge=parseInt(document.getElementById("ime-age").value);
+    var me=m.coef[eduIdx]+m.coef[intIdx]*evalAge;
+    document.getElementById("ime-stat-educ").textContent=fmtMoney(m.coef[eduIdx]);
+    document.getElementById("ime-stat-inter").textContent="$"+fmt(m.coef[intIdx],2)+"/yr×yr";
+    document.getElementById("ime-stat-me").textContent=fmtMoney(me)+"/yr";
+    document.getElementById("ime-stat-r2").textContent=fmt(m.r2,4);
+    var ages=linspace(25,65,200);
+    var mes=ages.map(function(a){return m.coef[eduIdx]+m.coef[intIdx]*a;});
+    var traces=[
+      {x:ages,y:mes,type:"scatter",mode:"lines",line:{color:c.cyan,width:3},name:"ME of education"},
+      {x:[evalAge],y:[me],type:"scatter",mode:"markers+text",marker:{color:c.pink,size:12,line:{color:"white",width:2}},text:[fmtMoney(me)],textposition:"top center",textfont:{color:c.pink,size:12,family:"JetBrains Mono"},name:"At age "+evalAge,showlegend:false}
+    ];
+    var layout=baseLayout({xaxis:{title:"Age",range:[23,67],gridcolor:c.grid,linecolor:c.grid,zerolinecolor:c.grid,tickfont:{color:c.textSoft}},yaxis:{title:"Marginal effect of education ($/yr)",gridcolor:c.grid,linecolor:c.grid,zerolinecolor:c.grid,tickfont:{color:c.textSoft}},showlegend:true,legend:{x:0.02,y:0.98,xanchor:"left",yanchor:"top",font:{color:c.text},bgcolor:"rgba(0,0,0,0)"}});
+    Plotly.react(chartEl,traces,layout,PLOTLY_CONFIG);
+  }
+  bindSlider("ime-age","ime-age-val",function(v){return "Age = "+v;},render);
+  window.__rerender_interactionme=render;
+  render();
+})();
+
+// ==================== WIDGET 5: Retransformation Bias ====================
+(function(){
+  var chartEl=document.getElementById("chart-retransform");
+  var RT=DATA.retransformation;
+  function render(){
+    var c=themeColors();
+    var mode=getActiveVal("rt-method");
+    document.getElementById("rt-stat-actual").textContent=fmtMoney(RT.actual_mean);
+    document.getElementById("rt-stat-naive").textContent=fmtMoney(RT.naive_mean);
+    document.getElementById("rt-stat-corrected").textContent=fmtMoney(RT.corrected_mean);
+    document.getElementById("rt-stat-smearing").textContent=fmt(RT.smearing_factor,4);
+    var labels=[],vals=[],colors=[],borders=[];
+    labels.push("Actual Mean");vals.push(RT.actual_mean);colors.push(c.cyan+"77");borders.push(c.cyan);
+    if(mode==="both"||mode==="naive"){labels.push("Naive exp(\u0177)");vals.push(RT.naive_mean);colors.push(c.pink+"77");borders.push(c.pink);}
+    if(mode==="both"||mode==="corrected"){labels.push("Corrected");vals.push(RT.corrected_mean);colors.push(c.purple+"77");borders.push(c.purple);}
+    var traces=[{x:labels,y:vals,type:"bar",marker:{color:colors,line:{color:borders,width:2}},text:vals.map(function(v){return fmtMoney(v);}),textposition:"outside",textfont:{family:"JetBrains Mono",size:13,color:c.text}}];
+    var layout=baseLayout({yaxis:{title:"Mean Earnings ($)",gridcolor:c.grid,linecolor:c.grid,zerolinecolor:c.grid,tickfont:{color:c.textSoft},range:[0,RT.actual_mean*1.25]},xaxis:{tickfont:{color:c.textSoft,size:12}},showlegend:false,margin:{l:70,r:18,t:10,b:60},shapes:[{type:"line",xref:"paper",yref:"y",x0:0,x1:1,y0:RT.actual_mean,y1:RT.actual_mean,line:{color:c.cyan,width:2,dash:"dash"}}]});
+    Plotly.react(chartEl,traces,layout,PLOTLY_CONFIG);
+  }
+  bindToggles("rt-method",render);
+  window.__rerender_retransform=render;
+  render();
+})();
+
+// ==================== WIDGET 6: Residual Distribution ====================
+(function(){
+  var chartEl=document.getElementById("chart-residuals");
+  function render(){
+    var c=themeColors();
+    var mode=getActiveVal("res-model");
+    var resid=mode==="levels"?DATA.residuals.levels:DATA.residuals.log;
+    var m=mean(resid),s=std(resid,m),sk=skewness(resid);
+    document.getElementById("res-stat-mean").textContent=mode==="levels"?fmtMoney(m):fmt(m,4);
+    document.getElementById("res-stat-sd").textContent=mode==="levels"?fmtMoney(s):fmt(s,4);
+    document.getElementById("res-stat-skew").textContent=fmt(sk,3);
+    var traces=[{x:resid,type:"histogram",marker:{color:c.cyan+"55",line:{color:c.cyan,width:1}},name:"Residuals",nbinsx:35}];
+    var layout=baseLayout({xaxis:{title:mode==="levels"?"Residual ($)":"Residual (log)",gridcolor:c.grid,linecolor:c.grid,zerolinecolor:c.grid,tickfont:{color:c.textSoft}},yaxis:{title:"Count",gridcolor:c.grid,linecolor:c.grid,zerolinecolor:c.grid,tickfont:{color:c.textSoft}},showlegend:false,annotations:[{x:0.98,y:0.95,xref:"paper",yref:"paper",text:"Skewness = "+fmt(sk,3),showarrow:false,font:{color:c.purple,size:13,family:"JetBrains Mono"},xanchor:"right"}]});
+    Plotly.react(chartEl,traces,layout,PLOTLY_CONFIG);
+  }
+  bindToggles("res-model",render);
+  window.__rerender_residuals=render;
+  render();
+})();
+
+// ==================== RESET + URL HASH STATE ====================
+(function(){
+  var REG={
+    logtransform:[{group:"lt-model",kind:"toggle",def:"levels"}],
+    quadratic:[{group:"quad-model",kind:"toggle",def:"quadratic"},{id:"quad-age",kind:"range",def:"40"}],
+    standardized:[{group:"std-display",kind:"toggle",def:"raw"}],
+    interactionme:[{id:"ime-age",kind:"range",def:"40"}],
+    retransform:[{group:"rt-method",kind:"toggle",def:"both"}],
+    residuals:[{group:"res-model",kind:"toggle",def:"levels"}]
+  };
+  function getVal(c){if(c.kind==="toggle"){var b=document.querySelector("#"+c.group+" button.active");return b?b.dataset.val:c.def;}return document.getElementById(c.id).value;}
+  function setVal(c,val,fire){if(c.kind==="toggle"){var g=document.getElementById(c.group);if(!g)return;var b=g.querySelector('button[data-val="'+val+'"]');if(b&&!b.classList.contains("active"))b.click();}else{var el=document.getElementById(c.id);if(!el)return;if(el.value!==String(val)){el.value=val;if(fire)el.dispatchEvent(new Event(c.kind==="select"?"change":"input",{bubbles:true}));}}}
+  function resetWidget(w){var ctrls=REG[w]||[];for(var i=0;i<ctrls.length;i++)setVal(ctrls[i],ctrls[i].def,true);var fn=window["__rerender_"+w];if(fn)fn();writeHash();}
+  function writeHash(){var parts=[];for(var w in REG){var ctrls=REG[w];for(var i=0;i<ctrls.length;i++){var c=ctrls[i];var v=String(getVal(c));if(v!==String(c.def)){var key=c.id||c.group;parts.push(key+"="+encodeURIComponent(v));}}}var want=parts.length?"#"+parts.join("&"):"";if(want===""&&location.hash.match(/=/))history.replaceState(null,"",location.pathname+location.search);else if(want!==""&&location.hash!==want)history.replaceState(null,"",location.pathname+location.search+want);}
+  function readHash(){var hash=location.hash.slice(1);if(!hash||!hash.includes("="))return;var params={};var pairs=hash.split("&");for(var i=0;i<pairs.length;i++){var eq=pairs[i].indexOf("=");if(eq<0)continue;params[pairs[i].slice(0,eq)]=decodeURIComponent(pairs[i].slice(eq+1));}for(var w in REG){var ctrls=REG[w];for(var j=0;j<ctrls.length;j++){var c=ctrls[j];var key=c.id||c.group;if(key in params)setVal(c,params[key],true);}}}
+  document.querySelectorAll(".reset-btn[data-reset]").forEach(function(btn){btn.addEventListener("click",function(){resetWidget(btn.dataset.reset);});});
+  document.addEventListener("input",function(e){if(e.target.matches("input[type=range], select"))writeHash();});
+  document.addEventListener("change",function(e){if(e.target.matches("select"))writeHash();});
+  document.querySelectorAll(".toggle-group button").forEach(function(b){b.addEventListener("click",function(){setTimeout(writeHash,0);});});
+  readHash();
+})();
+
+// ==================== THEME TOGGLE ====================
+(function(){
+  var btn=document.getElementById("theme-toggle"),iconEl=document.getElementById("theme-icon"),labelEl=document.getElementById("theme-label");
+  function apply(theme){document.documentElement.dataset.theme=theme;iconEl.textContent=theme==="dark"?"\u2600\uFE0F":"\uD83C\uDF19";labelEl.textContent=theme==="dark"?"Light":"Dark";for(var key in window){if(key.startsWith("__rerender_")&&typeof window[key]==="function")window[key]();}}
+  var saved=localStorage.getItem(THEME_KEY);var prefersDark=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches;apply(saved||(prefersDark?"dark":"light"));
+  btn.addEventListener("click",function(){var next=document.documentElement.dataset.theme==="dark"?"light":"dark";localStorage.setItem(THEME_KEY,next);apply(next);});
+})();
+window.addEventListener("resize",function(){document.querySelectorAll(".chart").forEach(function(el){if(el.data)Plotly.Plots.resize(el);});});
+</script>
+</body>
+</html>

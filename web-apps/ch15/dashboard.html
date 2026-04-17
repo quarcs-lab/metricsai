@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chapter 15 — Regression with Transformed Variables · metricsAI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.plot.ly/plotly-2.35.2.min.js" charset="utf-8"></script>
+<style>
+:root{--cyan:#008CB7;--cyan-soft:#22d3ee;--purple:#7A209F;--purple-soft:#c084fc;--pink:#C21E72;--pink-soft:#f472b6;--bg:#f5f8fb;--panel:#fff;--panel-2:#f0f4f9;--text:#0b1021;--text-soft:#475569;--text-muted:#64748b;--border:#d9e2ec;--accent:var(--cyan);--accent-2:var(--purple);--accent-3:var(--pink);--shadow:0 2px 10px rgba(11,16,33,.06),0 12px 30px rgba(11,16,33,.05);--grid:#e3e8ef;--code-bg:#eef3f8}
+html[data-theme="dark"]{--bg:#0c1024;--panel:#151a33;--panel-2:#1b2142;--text:#e2e8f0;--text-soft:#b5c0d0;--text-muted:#8a98ae;--border:#2a3156;--accent:var(--cyan-soft);--accent-2:var(--purple-soft);--accent-3:var(--pink-soft);--shadow:0 2px 10px rgba(0,0,0,.25),0 12px 30px rgba(0,0,0,.35);--grid:#2a3156;--code-bg:#0f1530}
+*{box-sizing:border-box}html,body{margin:0;padding:0}
+body{font-family:'Inter',system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);line-height:1.55;transition:background-color .25s ease,color .25s ease}
+code,.mono{font-family:'JetBrains Mono',ui-monospace,monospace}
+header.page{position:relative;padding:2.4rem 1.5rem 2rem;background:radial-gradient(1200px 400px at 85% -10%,rgba(122,32,159,.15),transparent),radial-gradient(1000px 400px at 10% 0%,rgba(0,140,183,.18),transparent),var(--panel);border-bottom:1px solid var(--border)}
+.page-inner{max-width:1120px;margin:0 auto}
+.chapter-badge{display:inline-block;font-size:.72rem;letter-spacing:.15em;text-transform:uppercase;color:var(--accent);font-weight:600;margin-bottom:.5rem}
+h1.title{font-size:clamp(1.6rem,3.4vw,2.4rem);margin:0 0 .35rem;background:linear-gradient(90deg,var(--accent),var(--accent-2));-webkit-background-clip:text;background-clip:text;color:transparent;font-weight:700;letter-spacing:-.01em}
+p.subtitle{margin:0 0 .8rem;color:var(--text-soft);font-size:1.05rem;max-width:720px}
+.theme-toggle{position:absolute;top:1.4rem;right:1.5rem;background:var(--panel-2);color:var(--text);border:1px solid var(--border);padding:.4rem .8rem;border-radius:999px;cursor:pointer;font-size:.85rem;font-weight:500;display:inline-flex;align-items:center;gap:.35rem;transition:all .2s ease}
+.theme-toggle:hover{border-color:var(--accent);color:var(--accent)}
+nav.anchors{position:sticky;top:0;z-index:20;background:color-mix(in srgb,var(--panel) 92%,transparent);backdrop-filter:saturate(150%) blur(8px);-webkit-backdrop-filter:saturate(150%) blur(8px);border-bottom:1px solid var(--border)}
+nav.anchors ul{display:flex;gap:.25rem;overflow-x:auto;list-style:none;padding:.55rem 1.5rem;margin:0 auto;max-width:1120px;scrollbar-width:thin}
+nav.anchors a{display:block;padding:.35rem .75rem;border-radius:8px;color:var(--text-soft);text-decoration:none;font-size:.85rem;font-weight:500;white-space:nowrap;transition:all .15s ease}
+nav.anchors a:hover{color:var(--accent);background:var(--panel-2)}
+main{max-width:1120px;margin:1.2rem auto 3rem;padding:0 1.5rem}
+section.widget{background:var(--panel);border:1px solid var(--border);border-radius:16px;padding:1.5rem 1.4rem 1.3rem;margin-bottom:1.5rem;box-shadow:var(--shadow)}
+.section-tag{display:inline-block;font-family:'JetBrains Mono',monospace;font-size:.72rem;color:var(--accent);background:color-mix(in srgb,var(--accent) 12%,transparent);padding:.2rem .55rem;border-radius:6px;margin-bottom:.6rem;font-weight:500}
+.widget h2{margin:0 0 .2rem;font-size:1.35rem;font-weight:600;color:var(--accent-2);letter-spacing:-.005em}
+.widget .lede{margin:0 0 1rem;color:var(--text-soft);font-size:.97rem;max-width:780px}
+.controls{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:.9rem 1.2rem;padding:.9rem 1rem;background:var(--panel-2);border-radius:10px;margin-bottom:1rem}
+.ctrl{display:flex;flex-direction:column;gap:.3rem}
+.ctrl label{font-size:.78rem;font-weight:500;color:var(--text-soft);text-transform:uppercase;letter-spacing:.05em}
+.ctrl select,.ctrl input[type="range"]{font-family:inherit;font-size:.9rem;padding:.4rem .55rem;border-radius:8px;border:1px solid var(--border);background:var(--panel);color:var(--text)}
+.ctrl input[type="range"]{padding:.2rem 0;accent-color:var(--accent)}
+.ctrl .val{font-family:'JetBrains Mono',monospace;font-size:.82rem;color:var(--accent);font-weight:500}
+.toggle-group{display:inline-flex;gap:.25rem;background:var(--panel);padding:3px;border-radius:10px;border:1px solid var(--border)}
+.toggle-group button{background:transparent;border:none;color:var(--text-soft);padding:.32rem .75rem;border-radius:7px;font-family:inherit;font-size:.85rem;cursor:pointer;transition:all .15s ease}
+.toggle-group button.active{background:var(--accent);color:white;font-weight:500}
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(100px,1fr));gap:.6rem;margin:.5rem 0 1rem}
+.stat{background:var(--panel-2);padding:.65rem .75rem;border-radius:10px;border-left:3px solid var(--accent)}
+.stat .label{font-size:.7rem;text-transform:uppercase;letter-spacing:.06em;color:var(--text-muted)}
+.stat .value{font-family:'JetBrains Mono',monospace;font-size:1.05rem;font-weight:500;color:var(--text);margin-top:.15rem}
+.stat.mean{border-left-color:var(--accent)}.stat.median{border-left-color:var(--accent-3)}.stat.spread{border-left-color:var(--accent-2)}
+.callout{background:color-mix(in srgb,var(--accent-2) 8%,transparent);border-left:3px solid var(--accent-2);padding:.7rem .9rem;border-radius:8px;font-size:.9rem;color:var(--text-soft);margin:.9rem 0 .2rem}
+.callout strong{color:var(--accent-2)}
+.try-this{background:color-mix(in srgb,var(--accent) 8%,transparent);border-left:3px solid var(--accent);padding:.7rem .9rem;border-radius:8px;font-size:.9rem;color:var(--text-soft);margin:.7rem 0 .2rem}
+.try-this .try-title{font-weight:600;color:var(--accent);font-size:.78rem;letter-spacing:.08em;text-transform:uppercase;margin-bottom:.3rem}
+.try-this ol{margin:0;padding-left:1.25rem}.try-this li{margin:.2rem 0}
+.widget-head{display:flex;align-items:flex-start;justify-content:space-between;gap:.5rem;margin-bottom:.2rem}
+.widget-head>div{flex:1;min-width:0}
+.reset-btn{background:transparent;color:var(--text-muted);border:1px solid var(--border);padding:.3rem .7rem;border-radius:8px;font-family:inherit;font-size:.8rem;cursor:pointer;white-space:nowrap;transition:all .15s ease}
+.reset-btn:hover{color:var(--accent);border-color:var(--accent)}
+.chart{width:100%;min-height:340px}.chart.tall{min-height:420px}.chart.short{min-height:280px}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+@media(max-width:720px){.two-col{grid-template-columns:1fr}}
+footer.page{max-width:1120px;margin:1rem auto 3rem;padding:0 1.5rem;color:var(--text-muted);font-size:.88rem;text-align:center}
+footer.page a{color:var(--accent);text-decoration:none}footer.page a:hover{text-decoration:underline}
+.scroll-top{display:inline-block;font-size:.78rem;color:var(--text-muted);text-decoration:none;margin-top:.4rem}.scroll-top:hover{color:var(--accent)}
+</style>
+</head>
+<body>
+
+<header class="page">
+  <div class="page-inner">
+    <span class="chapter-badge">Chapter 15 of 18 · Interactive Dashboard</span>
+    <h1 class="title">Regression with Transformed Variables</h1>
+    <p class="subtitle">Explore log transformations, quadratic models, standardized coefficients, interaction effects, and retransformation bias — using the same earnings dataset as the book.</p>
+  </div>
+  <button id="theme-toggle" class="theme-toggle" type="button" aria-label="Toggle color theme"><span id="theme-icon">🌙</span><span id="theme-label">Dark</span></button>
+</header>
+
+<nav class="anchors" aria-label="Sections">
+  <ul>
+    <li><a href="#log-transform">Log Transformation</a></li>
+    <li><a href="#quadratic">Quadratic &amp; Turning Point</a></li>
+    <li><a href="#standardized">Standardized Coefs</a></li>
+    <li><a href="#interaction-me">Interaction Effects</a></li>
+    <li><a href="#retransform">Retransformation</a></li>
+    <li><a href="#residuals">Residual Distribution</a></li>
+  </ul>
+</nav>
+
+<main>
+
+<!-- ==================== WIDGET 1: Log Transformation Explorer ==================== -->
+<section class="widget" id="log-transform">
+  <div class="widget-head">
+    <div>
+      <span class="section-tag">§15.1</span>
+      <h2>Log Transformation Explorer</h2>
+      <p class="lede">The same regression — earnings on education — tells a different story depending on the functional form. In levels, the coefficient is dollars per year. In logs, it is a percentage return.</p>
+    </div>
+    <button class="reset-btn" data-reset="logtransform">Reset</button>
+  </div>
+  <div class="controls">
+    <div class="ctrl">
+      <label>Model specification</label>
+      <div class="toggle-group" id="lt-model">
+        <button class="active" data-val="levels">Levels ($ per year)</button>
+        <button data-val="log">Log-linear (% per year)</button>
+      </div>
+    </div>
+  </div>
+  <div class="stats-grid">
+    <div class="stat mean"><div class="label">Education coef</div><div class="value" id="lt-stat-coef">—</div></div>
+    <div class="stat spread"><div class="label">Interpretation</div><div class="value" id="lt-stat-interp">—</div></div>
+    <div class="stat median"><div class="label">R²</div><div class="value" id="lt-stat-r2">—</div></div>
+    <div class="stat mean"><div class="label">t-statistic</div><div class="value" id="lt-stat-t">—</div></div>
+  </div>
+  <div id="chart-log-transform" class="chart"></div>
+  <div class="callout">
+    <strong>Key Concept 15.1:</strong> In a log-linear model (ln y = &beta;<sub>0</sub> + &beta;<sub>1</sub>x), the coefficient &beta;<sub>1</sub> is approximately the percentage change in y for a one-unit increase in x. In a levels model (y = &beta;<sub>0</sub> + &beta;<sub>1</sub>x), the coefficient is the dollar change.
+  </div>
+  <div class="try-this">
+    <div class="try-title">Try This</div>
+    <ol>
+      <li>In <strong>Levels</strong>, each year of education adds ~$5,737 to earnings. In <strong>Log-linear</strong>, it adds ~10%. Which is more useful for comparing across income levels?</li>
+      <li>Compare R²: the log model (0.176) fits better than levels (0.103). Why? Because earnings have a right-skewed distribution, and logs compress it.</li>
+      <li>Look at the scatter: in levels, the fitted line badly misses high earners. In logs, the fit is more even across the range.</li>
+    </ol>
+  </div>
+</section>
+
+<!-- ==================== WIDGET 2: Quadratic Model & Turning Point ==================== -->
+<section class="widget" id="quadratic">
+  <div class="widget-head">
+    <div>
+      <span class="section-tag">§15.3 – §15.4</span>
+      <h2>Quadratic Model &amp; Turning Point</h2>
+      <p class="lede">The relationship between age and earnings is not linear — it rises, peaks, and then declines. A quadratic model captures this inverted-U shape and identifies the peak age.</p>
+    </div>
+    <button class="reset-btn" data-reset="quadratic">Reset</button>
+  </div>
+  <div class="controls">
+    <div class="ctrl">
+      <label>Model</label>
+      <div class="toggle-group" id="quad-model">
+        <button data-val="linear">Linear</button>
+        <button class="active" data-val="quadratic">Quadratic</button>
+      </div>
+    </div>
+    <div class="ctrl">
+      <label>Evaluate marginal effect at age</label>
+      <input type="range" id="quad-age" min="25" max="65" step="1" value="40">
+      <span class="val" id="quad-age-val">Age = 40</span>
+    </div>
+  </div>
+  <div class="stats-grid">
+    <div class="stat mean"><div class="label">Turning point</div><div class="value" id="quad-stat-tp">—</div></div>
+    <div class="stat spread"><div class="label">Marginal effect</div><div class="value" id="quad-stat-me">—</div></div>
+    <div class="stat median"><div class="label">R²</div><div class="value" id="quad-stat-r2">—</div></div>
+  </div>
+  <div id="chart-quadratic" class="chart"></div>
+  <div class="callout">
+    <strong>Key Concept 15.3:</strong> The turning point x* = &minus;&beta;<sub>1</sub> / (2&beta;<sub>2</sub>) is where the marginal effect changes sign. Below x*, additional age increases earnings. Above x*, earnings decline. The marginal effect at any age is ME = &beta;<sub>1</sub> + 2&beta;<sub>2</sub> &times; age.
+  </div>
+  <div class="try-this">
+    <div class="try-title">Try This</div>
+    <ol>
+      <li>Toggle to <strong>Linear</strong>. The line slopes upward everywhere — it cannot capture the decline. Toggle back to <strong>Quadratic</strong>. The curve peaks and then falls.</li>
+      <li>Slide age to the <strong>turning point</strong> (~49.5 years). The marginal effect should be approximately $0 — one more year of age neither helps nor hurts.</li>
+      <li>Slide age to 60. The marginal effect is negative: earnings <em>decrease</em> with additional age beyond the peak.</li>
+    </ol>
+  </div>
+</section>
+
+<!-- ==================== WIDGET 3: Standardized Coefficients ==================== -->
+<section class="widget" id="standardized">
+  <div class="widget-head">
+    <div>
+      <span class="section-tag">§15.5</span>
+      <h2>Standardized Coefficients</h2>
+      <p class="lede">Raw coefficients have different units (years, 0/1, log-hours). Standardized coefficients (&beta;* = &beta; &times; s<sub>x</sub>/s<sub>y</sub>) measure the effect in standard deviations — making variables comparable.</p>
+    </div>
+    <button class="reset-btn" data-reset="standardized">Reset</button>
+  </div>
+  <div class="controls">
+    <div class="ctrl">
+      <label>Display</label>
+      <div class="toggle-group" id="std-display">
+        <button class="active" data-val="raw">Raw coefficients</button>
+        <button data-val="std">Standardized (&beta;*)</button>
+      </div>
+    </div>
+  </div>
+  <div id="chart-standardized" class="chart"></div>
+  <div class="callout">
+    <strong>Key Concept 15.5:</strong> A standardized coefficient of 0.40 means a one-standard-deviation increase in x is associated with a 0.40 SD increase in y. This lets you compare the relative importance of education (years) vs. gender (0/1) vs. hours (log) on the same scale.
+  </div>
+  <div class="try-this">
+    <div class="try-title">Try This</div>
+    <ol>
+      <li>In <strong>Raw</strong> mode, lnhours has the largest coefficient (0.94) and gender has &minus;0.19. But these numbers are not comparable because the variables have different scales.</li>
+      <li>Switch to <strong>Standardized</strong>. Now education (&beta;* = 0.40) is the strongest predictor. lnhours drops to 0.23 because hours have low variance in this sample.</li>
+      <li>Gender (&beta;* = &minus;0.13) looks small in standardized units. Does this mean the gender gap is unimportant? Not necessarily — a 13% of a standard deviation is still ~$7,000.</li>
+    </ol>
+  </div>
+</section>
+
+<!-- ==================== WIDGET 4: Interaction Marginal Effects ==================== -->
+<section class="widget" id="interaction-me">
+  <div class="widget-head">
+    <div>
+      <span class="section-tag">§15.6</span>
+      <h2>Interaction Marginal Effects</h2>
+      <p class="lede">When education and age interact, the return to education depends on your age. Drag the slider to see how the marginal effect of one more year of education varies across the life cycle.</p>
+    </div>
+    <button class="reset-btn" data-reset="interactionme">Reset</button>
+  </div>
+  <div class="controls">
+    <div class="ctrl">
+      <label>Age</label>
+      <input type="range" id="ime-age" min="25" max="65" step="1" value="40">
+      <span class="val" id="ime-age-val">Age = 40</span>
+    </div>
+  </div>
+  <div class="stats-grid">
+    <div class="stat mean"><div class="label">Education coef</div><div class="value" id="ime-stat-educ">—</div></div>
+    <div class="stat spread"><div class="label">Interaction coef</div><div class="value" id="ime-stat-inter">—</div></div>
+    <div class="stat median"><div class="label">ME at this age</div><div class="value" id="ime-stat-me">—</div></div>
+    <div class="stat mean"><div class="label">R²</div><div class="value" id="ime-stat-r2">—</div></div>
+  </div>
+  <div id="chart-interaction-me" class="chart"></div>
+  <div class="callout">
+    <strong>Key Concept 15.6:</strong> In earnings = &beta;<sub>0</sub> + &beta;<sub>1</sub>educ + &beta;<sub>2</sub>age + &beta;<sub>3</sub>(educ &times; age), the marginal effect of education is ME = &beta;<sub>1</sub> + &beta;<sub>3</sub> &times; age. This means the return to education increases with experience.
+  </div>
+  <div class="try-this">
+    <div class="try-title">Try This</div>
+    <ol>
+      <li>At age 25, each year of education adds ~$5,241. At age 55, it adds ~$6,112. The interaction term ($29/year of age) means education pays off more for experienced workers.</li>
+      <li>The marginal effect line slopes upward. This makes economic sense: education and experience are complementary — more education is worth more when combined with more experience.</li>
+      <li>Is the interaction economically large? From age 25 to 55, the return increases by ~$871/year ($29 &times; 30). That is a modest but meaningful difference.</li>
+    </ol>
+  </div>
+</section>
+
+<!-- ==================== WIDGET 5: Retransformation Bias ==================== -->
+<section class="widget" id="retransform">
+  <div class="widget-head">
+    <div>
+      <span class="section-tag">§15.7</span>
+      <h2>Retransformation Bias</h2>
+      <p class="lede">When you predict in logs and convert back with exp(), you systematically underpredict. The smearing correction factor exp(&sigma;²/2) fixes this — compare naive vs. corrected predictions.</p>
+    </div>
+    <button class="reset-btn" data-reset="retransform">Reset</button>
+  </div>
+  <div class="controls">
+    <div class="ctrl">
+      <label>Prediction method</label>
+      <div class="toggle-group" id="rt-method">
+        <button class="active" data-val="both">Compare both</button>
+        <button data-val="naive">Naive only</button>
+        <button data-val="corrected">Corrected only</button>
+      </div>
+    </div>
+  </div>
+  <div class="stats-grid">
+    <div class="stat mean"><div class="label">Actual mean</div><div class="value" id="rt-stat-actual">—</div></div>
+    <div class="stat median"><div class="label">Naive mean</div><div class="value" id="rt-stat-naive">—</div></div>
+    <div class="stat mean"><div class="label">Corrected mean</div><div class="value" id="rt-stat-corrected">—</div></div>
+    <div class="stat spread"><div class="label">Smearing factor</div><div class="value" id="rt-stat-smearing">—</div></div>
+  </div>
+  <div id="chart-retransform" class="chart short"></div>
+  <div class="callout">
+    <strong>Key Concept 15.7:</strong> Jensen&rsquo;s inequality means E[exp(ln &ycirc;)] &ne; exp(E[ln &ycirc;]). The naive retransformation exp(ln &ycirc;) underpredicts the mean by a factor of exp(&sigma;²/2). For this model, the smearing factor is ~1.18, meaning naive predictions are ~18% too low.
+  </div>
+  <div class="try-this">
+    <div class="try-title">Try This</div>
+    <ol>
+      <li>Look at the <strong>Compare both</strong> view. The naive bar underpredicts the actual mean by ~$9,500 (18%). The corrected bar is much closer.</li>
+      <li>The smearing factor is exp(0.34/2) &asymp; 1.18. This means every naive prediction must be multiplied by 1.18 to remove the downward bias.</li>
+      <li>Even after correction, the predicted mean ($55,501) does not exactly equal the actual ($56,369). Why? The smearing correction assumes normally distributed errors, which is approximate.</li>
+    </ol>
+  </div>
+</section>
+
+<!-- ==================== WIDGET 6: Residual Distribution ==================== -->
+<section class="widget" id="residuals">
+  <div class="widget-head">
+    <div>
+      <span class="section-tag">§15.2</span>
+      <h2>Residual Distribution: Levels vs. Log</h2>
+      <p class="lede">One reason to use log transformations: the residuals from a levels model are right-skewed, while those from a log model are more symmetric — closer to the normality assumption.</p>
+    </div>
+    <button class="reset-btn" data-reset="residuals">Reset</button>
+  </div>
+  <div class="controls">
+    <div class="ctrl">
+      <label>Model</label>
+      <div class="toggle-group" id="res-model">
+        <button class="active" data-val="levels">Levels residuals</button>
+        <button data-val="log">Log residuals</button>
+      </div>
+    </div>
+  </div>
+  <div class="stats-grid">
+    <div class="stat mean"><div class="label">Mean</div><div class="value" id="res-stat-mean">—</div></div>
+    <div class="stat spread"><div class="label">SD</div><div class="value" id="res-stat-sd">—</div></div>
+    <div class="stat median"><div class="label">Skewness</div><div class="value" id="res-stat-skew">—</div></div>
+  </div>
+  <div id="chart-residuals" class="chart"></div>
+  <div class="callout">
+    <strong>Key Concept 15.2:</strong> Choosing between levels and logs is partly about which specification produces better-behaved residuals. Right-skewed residuals suggest that a log transformation may improve the model. The skewness statistic quantifies this: closer to 0 is better.
+  </div>
+  <div class="try-this">
+    <div class="try-title">Try This</div>
+    <ol>
+      <li>Look at the <strong>Levels</strong> residuals. The histogram has a long right tail — positive residuals (underpredictions) are much larger than negative ones.</li>
+      <li>Switch to <strong>Log</strong> residuals. The distribution is much more symmetric. The skewness value drops substantially.</li>
+      <li>This is why economists often use ln(earnings) rather than earnings: it produces residuals that are closer to the normal distribution assumed by OLS inference.</li>
+    </ol>
+  </div>
+</section>
+
+</main>
+
+<footer class="page">
+  <p>Part of <a href="https://quarcs-lab.github.io/metricsai/book/_book/index.html"><strong>metricsAI</strong></a> · Chapter 15: Regression with Transformed Variables · by Carlos Mendez · <a href="https://github.com/quarcs-lab/metricsai">GitHub</a></p>
+  <p>Data: AED_EARNINGS_COMPLETE.DTA (872 full-time workers aged 25–65, 2000)</p>
+  <a class="scroll-top" href="#top">&uarr; Back to top</a>
+</footer>
+
+<script type="application/json" id="ch-data">{"scatter":{"education":[16.0,16.0,16.0,14.0,18.0,16.0,18.0,12.0,16.0,14.0,13.0,16.0,16.0,12.0,12.0,20.0,16.0,12.0,12.0,12.0,16.0,12.0,16.0,13.0,14.0,12.0,13.0,18.0,12.0,12.0,16.0,14.0,13.0,12.0,10.0,13.0,13.0,14.0,16.0,16.0,12.0,16.0,16.0,8.0,16.0,12.0,12.0,13.0,16.0,18.0,12.0,12.0,12.0,12.0,13.0,18.0,12.0,12.0,9.0,18.0,12.0,13.0,13.0,12.0,16.0,12.0,0.0,13.0,12.0,16.0,12.0,16.0,18.0,13.0,16.0,13.0,13.0,12.0,16.0,12.0,14.0,16.0,12.0,12.0,13.0,12.0,16.0,16.0,16.0,20.0,12.0,13.0,16.0,18.0,12.0,6.0,0.0,16.0,12.0,16.0,14.0,16.0,12.0,14.0,14.0,13.0,14.0,13.0,12.0,13.0,18.0,16.0,13.0,18.0,12.0,12.0,14.0,12.0,14.0,6.0,12.0,16.0,12.0,0.0,14.0,12.0,13.0,14.0,13.0,18.0,16.0,16.0,18.0,16.0,12.0,12.0,18.0,12.0,16.0,12.0,13.0,12.0,18.0,18.0,18.0,16.0,6.0,12.0,11.0,13.0,13.0,14.0,13.0,13.0,16.0,12.0,20.0,16.0,12.0,12.0,18.0,12.0,18.0,18.0,16.0,18.0,16.0,12.0,18.0,16.0,16.0,18.0,16.0,12.0,16.0,16.0,14.0,18.0,12.0,16.0,14.0,13.0,18.0,13.0,18.0,12.0,16.0,12.0,12.0,16.0,12.0,14.0,16.0,16.0,16.0,12.0,16.0,12.0,12.0,14.0,12.0,20.0,12.0,10.0,12.0,16.0,12.0,12.0,12.0,12.0,12.0,16.0,13.0,12.0,16.0,14.0,13.0,12.0,12.0,14.0,14.0,13.0,12.0,12.0,7.0,14.0,12.0,18.0,13.0,16.0,9.0,12.0,14.0,12.0,18.0,12.0,16.0,16.0,13.0,12.0,12.0,13.0,16.0,16.0,12.0,12.0,16.0,14.0,16.0,12.0,16.0,12.0,13.0,12.0,14.0,13.0,13.0,13.0,12.0,12.0,16.0,12.0,16.0,12.0,12.0,12.0,12.0,13.0,12.0,13.0,18.0,6.0,12.0,18.0,13.0,12.0,9.0,14.0,12.0,18.0,12.0,16.0,16.0,12.0,18.0,18.0,16.0,16.0,16.0,20.0,18.0,13.0,10.0,12.0,12.0,13.0,18.0,12.0,18.0,13.0,12.0,12.0,14.0,16.0,12.0,12.0,14.0,16.0,13.0,13.0,20.0,12.0,16.0,16.0,4.0,16.0,16.0,16.0,12.0,18.0,12.0,14.0,13.0,12.0,13.0,18.0,12.0,13.0,16.0,16.0,12.0,14.0,14.0,14.0,12.0,13.0,13.0,12.0,12.0,12.0,14.0,12.0,16.0,11.0,14.0,12.0,16.0,12.0,12.0,12.0,12.0,16.0,12.0,13.0,12.0,12.0,14.0,12.0,16.0,16.0,13.0,12.0,18.0,13.0,16.0,20.0,12.0,12.0,18.0,0.0,12.0,18.0,12.0,16.0,13.0,16.0,16.0,13.0,12.0,18.0,12.0,18.0,12.0,13.0,13.0,16.0,12.0,16.0,12.0,16.0,16.0,14.0,18.0,18.0,16.0,12.0,16.0,18.0,16.0,16.0,16.0,16.0,20.0,18.0,16.0,13.0,16.0,16.0,18.0,13.0,18.0,16.0,16.0,13.0,16.0,16.0,18.0,13.0,12.0,12.0,14.0,14.0,16.0,12.0,12.0,16.0,14.0,14.0,13.0,14.0,0.0,14.0,18.0,16.0,13.0,12.0,12.0,12.0,14.0,20.0,12.0,14.0,16.0,14.0,18.0,12.0,16.0,12.0,14.0,13.0,12.0,12.0,13.0,13.0,12.0,12.0,13.0,12.0,16.0,11.0,16.0,18.0,12.0,16.0,14.0,16.0,16.0,16.0,16.0,16.0,13.0,12.0,16.0,10.0,12.0,13.0,12.0,13.0,12.0,12.0,10.0,16.0,12.0,12.0,16.0,16.0,13.0,13.0,16.0,11.0,12.0,14.0,18.0,18.0,13.0,16.0,12.0,16.0,16.0,12.0,14.0,12.0,20.0,12.0,12.0,14.0,18.0,13.0,13.0,16.0,14.0,12.0,13.0,16.0,12.0,12.0,18.0,0.0,12.0,16.0,16.0,12.0,16.0,14.0,12.0,12.0,16.0,16.0,13.0,13.0,12.0,12.0,16.0,14.0,16.0,12.0,12.0,14.0,13.0,18.0,18.0,13.0,20.0,12.0,0.0,12.0,18.0,13.0,13.0,12.0,18.0,12.0,13.0,18.0,12.0,18.0,18.0,1.0,13.0,13.0,12.0,18.0,14.0,12.0,13.0,12.0,12.0,12.0,13.0,12.0,14.0,12.0,18.0,11.0,16.0,12.0,18.0,13.0,12.0,20.0,13.0,12.0,12.0,16.0,13.0,13.0,0.0,18.0,18.0,18.0,13.0,12.0,13.0,13.0,13.0,13.0,18.0,18.0,12.0,20.0,16.0,12.0,16.0,9.0,18.0,16.0,12.0,13.0,16.0,14.0,12.0,13.0,16.0,14.0,12.0,13.0,18.0,12.0,12.0,12.0,13.0,18.0,16.0,18.0,12.0,14.0,10.0,12.0,16.0,18.0,14.0,16.0,12.0,14.0,16.0,9.0,18.0,12.0,18.0,13.0,13.0,14.0,14.0,12.0,18.0,16.0,14.0,18.0,18.0,13.0,16.0,16.0,16.0,18.0,14.0,16.0,16.0,11.0,12.0,12.0,12.0,12.0,12.0,12.0,12.0,12.0,16.0,12.0,16.0,12.0,18.0,12.0,12.0,12.0,12.0,16.0,16.0,16.0,12.0,16.0,18.0,16.0,13.0,9.0,12.0,16.0,14.0,12.0,16.0,14.0,12.0,13.0,13.0,13.0,10.0,14.0,16.0,18.0,16.0,13.0,11.0,12.0,13.0,14.0,16.0,18.0,14.0,16.0,12.0,13.0,12.0,16.0,16.0,14.0,13.0,12.0,14.0,13.0,16.0,12.0,18.0,12.0,13.0,12.0,18.0,13.0,14.0,11.0,16.0,18.0,13.0,11.0,18.0,12.0,12.0,13.0,18.0,12.0,9.0,12.0,16.0,16.0,13.0,14.0,13.0,12.0,16.0,13.0,10.0,18.0,12.0,0.0,12.0,16.0,18.0,14.0,16.0,9.0,20.0,12.0,18.0,13.0,16.0,12.0,12.0,12.0,9.0,12.0,14.0,14.0,12.0,16.0,16.0,16.0,9.0,6.0,16.0,10.0,12.0,9.0,13.0,18.0,6.0,13.0,18.0,16.0,18.0,12.0,13.0,13.0,16.0,12.0,12.0,12.0,16.0,16.0,18.0,16.0,14.0,12.0,12.0,12.0,16.0,16.0,12.0,16.0,14.0,12.0,12.0,14.0,18.0,16.0,12.0,13.0,12.0,13.0,14.0,16.0,12.0,16.0,12.0,18.0,12.0,14.0,13.0,13.0,13.0,13.0,12.0,12.0,12.0,12.0,12.0,16.0,18.0,18.0,12.0,12.0,14.0,16.0,14.0,12.0,12.0,13.0,13.0,12.0,13.0,16.0,12.0,12.0,13.0,14.0,12.0,12.0,16.0,8.0,12.0,14.0,16.0,13.0,18.0,12.0,12.0,18.0,14.0,12.0,18.0,13.0,16.0,14.0,14.0,16.0],"earnings":[120000.0,23000.0,20000.0,55000.0,43200.0,110000.0,44000.0,120000.0,65000.0,7200.0,20000.0,120000.0,65000.0,38000.0,65000.0,115000.0,48000.0,45000.0,130000.0,36000.0,52000.0,36400.0,125000.0,36000.0,24000.0,48000.0,30000.0,89000.0,38000.0,12000.0,85000.0,50000.0,30500.0,50000.0,219000.0,135000.0,15000.0,30000.0,30800.0,36000.0,24000.0,318000.0,35000.0,25000.0,44900.0,18000.0,37000.0,19000.0,100000.0,65000.0,25000.0,44200.0,110000.0,70000.0,50000.0,70000.0,36000.0,50000.0,23000.0,25000.0,79000.0,60000.0,32000.0,40000.0,75000.0,52000.0,48500.0,6700.0,31200.0,55000.0,48000.0,110000.0,48000.0,45000.0,50000.0,60000.0,80000.0,20000.0,26200.0,130000.0,26600.0,63000.0,20000.0,20000.0,75000.0,60000.0,80000.0,180000.0,80000.0,105000.0,65000.0,117000.0,45000.0,53000.0,127000.0,20000.0,4000.0,42000.0,40000.0,55000.0,100000.0,63000.0,37000.0,50000.0,6000.0,8400.0,45000.0,75000.0,12000.0,72000.0,285000.0,100000.0,105000.0,90000.0,51000.0,8500.0,100000.0,28000.0,92000.0,18400.0,17000.0,50000.0,50000.0,10000.0,40000.0,26000.0,120000.0,62000.0,72000.0,80000.0,85000.0,85000.0,103000.0,90000.0,30000.0,35000.0,103000.0,12000.0,74000.0,39000.0,65000.0,50000.0,93000.0,222000.0,70000.0,98000.0,32000.0,26000.0,30000.0,45000.0,50000.0,23400.0,45000.0,55000.0,62000.0,50000.0,93000.0,41800.0,26400.0,44000.0,30000.0,45000.0,150000.0,375000.0,31600.0,130000.0,60000.0,38000.0,140000.0,72000.0,36800.0,45000.0,55000.0,65000.0,52000.0,50000.0,42000.0,85000.0,55000.0,50000.0,17000.0,20000.0,175000.0,75000.0,40000.0,29000.0,50000.0,24700.0,24000.0,60000.0,40000.0,45000.0,72000.0,50000.0,18000.0,38000.0,25000.0,24800.0,15000.0,40000.0,26100.0,83000.0,22000.0,35000.0,18000.0,90000.0,24200.0,95000.0,5400.0,35000.0,35000.0,35000.0,30000.0,35600.0,55000.0,4300.0,30000.0,5000.0,23000.0,10000.0,38000.0,106000.0,40600.0,50000.0,20000.0,42000.0,59000.0,120000.0,48000.0,52000.0,25000.0,23000.0,43000.0,31500.0,70000.0,30000.0,34000.0,20000.0,33000.0,48000.0,42000.0,15600.0,40000.0,30300.0,31000.0,13000.0,47100.0,65000.0,17200.0,31200.0,40000.0,48700.0,17000.0,40000.0,32000.0,38000.0,22000.0,39800.0,62000.0,52000.0,110000.0,20000.0,58000.0,36000.0,30000.0,30000.0,56000.0,12000.0,38000.0,50000.0,43000.0,30000.0,35000.0,47000.0,42000.0,70000.0,15000.0,30000.0,21000.0,40000.0,30000.0,60000.0,28000.0,23100.0,120000.0,40000.0,40000.0,82000.0,115000.0,60000.0,71400.0,376000.0,10500.0,50000.0,55000.0,30600.0,31000.0,64000.0,55000.0,34000.0,100000.0,35500.0,70000.0,61000.0,46000.0,30700.0,74000.0,22000.0,60000.0,29000.0,80000.0,60000.0,49000.0,296000.0,30000.0,20200.0,52000.0,50000.0,50000.0,130000.0,35000.0,39300.0,50000.0,35000.0,25000.0,60000.0,63000.0,36000.0,100000.0,62000.0,18000.0,30000.0,32000.0,28000.0,30000.0,17000.0,25000.0,24000.0,28000.0,30600.0,45000.0,40000.0,53000.0,25000.0,21000.0,20000.0,55000.0,13000.0,10000.0,26000.0,29000.0,44000.0,27300.0,10000.0,22000.0,40500.0,28000.0,50000.0,53000.0,28000.0,52000.0,50000.0,85000.0,54000.0,103000.0,115000.0,75000.0,84000.0,60000.0,40000.0,10000.0,44000.0,35000.0,58000.0,75000.0,42000.0,46000.0,60000.0,30000.0,65000.0,51000.0,140000.0,42000.0,52000.0,50000.0,50000.0,40000.0,115000.0,32000.0,54000.0,39000.0,52000.0,48000.0,45000.0,59000.0,14700.0,55000.0,125000.0,75000.0,60000.0,40000.0,225000.0,48000.0,120000.0,125000.0,46900.0,91000.0,50000.0,35000.0,30000.0,57000.0,90000.0,27000.0,23500.0,42400.0,65000.0,68000.0,25000.0,40000.0,32000.0,42000.0,120000.0,80000.0,100000.0,18000.0,294000.0,40000.0,54000.0,20600.0,36000.0,23000.0,55000.0,81000.0,70000.0,37000.0,19000.0,38200.0,40000.0,50000.0,150000.0,98000.0,40000.0,62000.0,24000.0,42000.0,50000.0,50000.0,20000.0,50000.0,21000.0,40000.0,60000.0,18000.0,25000.0,27000.0,34000.0,24000.0,37000.0,41700.0,36400.0,79000.0,6500.0,242000.0,17000.0,35000.0,40000.0,41000.0,73000.0,60000.0,77000.0,15000.0,32000.0,87000.0,32000.0,22000.0,27000.0,45000.0,28000.0,45000.0,38000.0,19700.0,75000.0,41000.0,25000.0,10000.0,90000.0,41000.0,25000.0,87000.0,24000.0,47700.0,18000.0,230000.0,24000.0,22000.0,80000.0,38000.0,116000.0,90000.0,50000.0,50000.0,70000.0,60000.0,70000.0,30000.0,60000.0,85000.0,45000.0,45000.0,118000.0,52800.0,36000.0,27100.0,52000.0,17000.0,30000.0,103000.0,52000.0,37000.0,80000.0,498000.0,29000.0,85000.0,36000.0,41000.0,12000.0,80000.0,48000.0,40000.0,60000.0,40000.0,25000.0,125000.0,45000.0,50000.0,60000.0,60000.0,50000.0,17700.0,185000.0,60000.0,34000.0,120000.0,24000.0,40000.0,27000.0,55000.0,38000.0,15600.0,35000.0,60000.0,12000.0,81000.0,65000.0,80000.0,110000.0,498000.0,22000.0,55000.0,21900.0,20000.0,52000.0,31200.0,14100.0,7500.0,41000.0,49500.0,75000.0,22300.0,20000.0,90000.0,55000.0,42500.0,34000.0,20000.0,203000.0,51000.0,65000.0,20000.0,130000.0,21000.0,30000.0,25000.0,36800.0,41000.0,40000.0,27000.0,65000.0,40000.0,53000.0,33600.0,50000.0,19000.0,8400.0,38000.0,59000.0,63000.0,40000.0,36400.0,60000.0,65000.0,24500.0,62000.0,22000.0,80000.0,61000.0,39000.0,35000.0,54000.0,35000.0,49600.0,35000.0,60000.0,50000.0,12000.0,57000.0,56000.0,28000.0,53000.0,29000.0,50000.0,41000.0,55000.0,61000.0,110000.0,72000.0,20000.0,11000.0,74000.0,65000.0,84000.0,60000.0,20000.0,36000.0,62000.0,34000.0,100000.0,85000.0,80500.0,28600.0,30000.0,80000.0,40000.0,20000.0,133000.0,48000.0,25000.0,301000.0,72000.0,15000.0,21000.0,52000.0,29000.0,95000.0,30000.0,91000.0,76000.0,32200.0,53000.0,70000.0,24000.0,110000.0,24000.0,55000.0,53000.0,22000.0,125000.0,18000.0,24000.0,24800.0,55000.0,42000.0,64000.0,50000.0,29100.0,70000.0,99000.0,20000.0,35000.0,46000.0,168000.0,55000.0,14400.0,22500.0,30000.0,84000.0,149000.0,25000.0,14600.0,48000.0,50000.0,24000.0,62000.0,34700.0,35000.0,37000.0,41000.0,56000.0,125000.0,50000.0,22000.0,32000.0,50000.0,27000.0,60000.0,281000.0,60000.0,102000.0,42000.0,26400.0,130000.0,76000.0,32000.0,118000.0,10000.0,50000.0,40000.0,48000.0,30000.0,24000.0,40000.0,90000.0,50000.0,10000.0,160000.0,95000.0,98000.0,16000.0,49200.0,52000.0,36000.0,17700.0,52000.0,12000.0,35500.0,40000.0,63000.0,80000.0,9000.0,15700.0,30000.0,100000.0,20000.0,28000.0,56000.0,30000.0,70000.0,16000.0,23000.0,24900.0,28000.0,16000.0,42000.0,43000.0,25000.0,40000.0,100000.0,60000.0,60000.0,31200.0,165000.0,30000.0,58000.0,20000.0,32000.0,33000.0,14000.0,47000.0,37000.0,21000.0,28000.0,60000.0,65000.0,68000.0,25000.0,40000.0,36800.0,23000.0,40000.0,30000.0,90000.0,74000.0,17000.0,24000.0,140000.0,60000.0,52000.0,322000.0,40000.0,45000.0,100000.0,20000.0,23000.0,100000.0,38000.0,46000.0,174001.0,26600.0,28500.0,7500.0,80000.0,32100.0,20000.0,42000.0,50000.0,504000.0,30000.0,80000.0,45000.0,34200.0,45000.0,110000.0,170000.0,45000.0,55000.0,25000.0,36000.0,39700.0,113000.0,25000.0,40000.0,120000.0,22700.0,40000.0,40000.0,28000.0,30000.0,29000.0,60000.0,56000.0,23000.0,80000.0,12800.0,316000.0,85000.0,180000.0,10000.0,50000.0,55000.0,48000.0,64000.0,126000.0,20000.0,24000.0,26000.0,30000.0,38000.0,63000.0,30000.0,33000.0,150000.0,27000.0,58000.0,24000.0,129000.0,18000.0,65000.0,19100.0,50000.0,78000.0,60000.0,40000.0,58000.0,49000.0,65000.0,44200.0,84000.0,89000.0,45000.0,95000.0,42000.0,19000.0],"lnearnings":[11.6952,10.0432,9.9035,10.9151,10.6736,11.6082,10.6919,11.6952,11.0821,8.8818,9.9035,11.6952,11.0821,10.5453,11.0821,11.6527,10.779,10.7144,11.7753,10.4913,10.859,10.5023,11.7361,10.4913,10.0858,10.779,10.309,11.3964,10.5453,9.3927,11.3504,10.8198,10.3255,10.8198,12.2968,11.813,9.6158,10.309,10.3353,10.4913,10.0858,12.6698,10.4631,10.1266,10.7122,9.7981,10.5187,9.8522,11.5129,11.0821,10.1266,10.6965,11.6082,11.1563,10.8198,11.1563,10.4913,10.8198,10.0432,10.1266,11.2772,11.0021,10.3735,10.5966,11.2252,10.859,10.7893,8.8099,10.3482,10.9151,10.779,11.6082,10.779,10.7144,10.8198,11.0021,11.2898,9.9035,10.1735,11.7753,10.1887,11.0509,9.9035,9.9035,11.2252,11.0021,11.2898,12.1007,11.2898,11.5617,11.0821,11.6699,10.7144,10.878,11.7519,9.9035,8.294,10.6454,10.5966,10.9151,11.5129,11.0509,10.5187,10.8198,8.6995,9.036,10.7144,11.2252,9.3927,11.1844,12.5602,11.5129,11.5617,11.4076,10.8396,9.0478,11.5129,10.24,11.4295,9.8201,9.741,10.8198,10.8198,9.2103,10.5966,10.1659,11.6952,11.0349,11.1844,11.2898,11.3504,11.3504,11.5425,11.4076,10.309,10.4631,11.5425,9.3927,11.2118,10.5713,11.0821,10.8198,11.4404,12.3104,11.1563,11.4927,10.3735,10.1659,10.309,10.7144,10.8198,10.0605,10.7144,10.9151,11.0349,10.8198,11.4404,10.6407,10.1811,10.6919,10.309,10.7144,11.9184,12.8347,10.3609,11.7753,11.0021,10.5453,11.8494,11.1844,10.5133,10.7144,10.9151,11.0821,10.859,10.8198,10.6454,11.3504,10.9151,10.8198,9.741,9.9035,12.0725,11.2252,10.5966,10.2751,10.8198,10.1146,10.0858,11.0021,10.5966,10.7144,11.1844,10.8198,9.7981,10.5453,10.1266,10.1186,9.6158,10.5966,10.1697,11.3266,9.9988,10.4631,9.7981,11.4076,10.0941,11.4616,8.5942,10.4631,10.4631,10.4631,10.309,10.4801,10.9151,8.3664,10.309,8.5172,10.0432,9.2103,10.5453,11.5712,10.6115,10.8198,9.9035,10.6454,10.9853,11.6952,10.779,10.859,10.1266,10.0432,10.669,10.3577,11.1563,10.309,10.4341,9.9035,10.4043,10.779,10.6454,9.655,10.5966,10.3189,10.3417,9.4727,10.76,11.0821,9.7527,10.3482,10.5966,10.7934,9.741,10.5966,10.3735,10.5453,9.9988,10.5916,11.0349,10.859,11.6082,9.9035,10.9682,10.4913,10.309,10.309,10.9331,9.3927,10.5453,10.8198,10.669,10.309,10.4631,10.7579,10.6454,11.1563,9.6158,10.309,9.9523,10.5966,10.309,11.0021,10.24,10.0476,11.6952,10.5966,10.5966,11.3145,11.6527,11.0021,11.1761,12.8373,9.2591,10.8198,10.9151,10.3288,10.3417,11.0666,10.9151,10.4341,11.5129,10.4773,11.1563,11.0186,10.7364,10.332,11.2118,9.9988,11.0021,10.2751,11.2898,11.0021,10.7996,12.5981,10.309,9.9134,10.859,10.8198,10.8198,11.7753,10.4631,10.579,10.8198,10.4631,10.1266,11.0021,11.0509,10.4913,11.5129,11.0349,9.7981,10.309,10.3735,10.24,10.309,9.741,10.1266,10.0858,10.24,10.3288,10.7144,10.5966,10.878,10.1266,9.9523,9.9035,10.9151,9.4727,9.2103,10.1659,10.2751,10.6919,10.2146,9.2103,9.9988,10.6091,10.24,10.8198,10.878,10.24,10.859,10.8198,11.3504,10.8967,11.5425,11.6527,11.2252,11.3386,11.0021,10.5966,9.2103,10.6919,10.4631,10.9682,11.2252,10.6454,10.7364,11.0021,10.309,11.0821,10.8396,11.8494,10.6454,10.859,10.8198,10.8198,10.5966,11.6527,10.3735,10.8967,10.5713,10.859,10.779,10.7144,10.9853,9.5956,10.9151,11.7361,11.2252,11.0021,10.5966,12.3239,10.779,11.6952,11.7361,10.7558,11.4186,10.8198,10.4631,10.309,10.9508,11.4076,10.2036,10.0648,10.6549,11.0821,11.1273,10.1266,10.5966,10.3735,10.6454,11.6952,11.2898,11.5129,9.7981,12.5913,10.5966,10.8967,9.933,10.4913,10.0432,10.9151,11.3022,11.1563,10.5187,9.8522,10.5506,10.5966,10.8198,11.9184,11.4927,10.5966,11.0349,10.0858,10.6454,10.8198,10.8198,9.9035,10.8198,9.9523,10.5966,11.0021,9.7981,10.1266,10.2036,10.4341,10.0858,10.5187,10.6383,10.5023,11.2772,8.7796,12.3967,9.741,10.4631,10.5966,10.6213,11.1982,11.0021,11.2516,9.6158,10.3735,11.3737,10.3735,9.9988,10.2036,10.7144,10.24,10.7144,10.5453,9.8884,11.2252,10.6213,10.1266,9.2103,11.4076,10.6213,10.1266,11.3737,10.0858,10.7727,9.7981,12.3458,10.0858,9.9988,11.2898,10.5453,11.6613,11.4076,10.8198,10.8198,11.1563,11.0021,11.1563,10.309,11.0021,11.3504,10.7144,10.7144,11.6784,10.8743,10.4913,10.2073,10.859,9.741,10.309,11.5425,10.859,10.5187,11.2898,13.1184,10.2751,11.3504,10.4913,10.6213,9.3927,11.2898,10.779,10.5966,11.0021,10.5966,10.1266,11.7361,10.7144,10.8198,11.0021,11.0021,10.8198,9.7813,12.1281,11.0021,10.4341,11.6952,10.0858,10.5966,10.2036,10.9151,10.5453,9.655,10.4631,11.0021,9.3927,11.3022,11.0821,11.2898,11.6082,13.1184,9.9988,10.9151,9.9942,9.9035,10.859,10.3482,9.5539,8.9227,10.6213,10.8097,11.2252,10.0123,9.9035,11.4076,10.9151,10.6573,10.4341,9.9035,12.221,10.8396,11.0821,9.9035,11.7753,9.9523,10.309,10.1266,10.5133,10.6213,10.5966,10.2036,11.0821,10.5966,10.878,10.4223,10.8198,9.8522,9.036,10.5453,10.9853,11.0509,10.5966,10.5023,11.0021,11.0821,10.1064,11.0349,9.9988,11.2898,11.0186,10.5713,10.4631,10.8967,10.4631,10.8117,10.4631,11.0021,10.8198,9.3927,10.9508,10.9331,10.24,10.878,10.2751,10.8198,10.6213,10.9151,11.0186,11.6082,11.1844,9.9035,9.3057,11.2118,11.0821,11.3386,11.0021,9.9035,10.4913,11.0349,10.4341,11.5129,11.3504,11.296,10.2612,10.309,11.2898,10.5966,9.9035,11.7981,10.779,10.1266,12.6149,11.1844,9.6158,9.9523,10.859,10.2751,11.4616,10.309,11.4186,11.2385,10.3797,10.878,11.1563,10.0858,11.6082,10.0858,10.9151,10.878,9.9988,11.7361,9.7981,10.0858,10.1186,10.9151,10.6454,11.0666,10.8198,10.2785,11.1563,11.5029,9.9035,10.4631,10.7364,12.0317,10.9151,9.575,10.0213,10.309,11.3386,11.9117,10.1266,9.5888,10.779,10.8198,10.0858,11.0349,10.4545,10.4631,10.5187,10.6213,10.9331,11.7361,10.8198,9.9988,10.3735,10.8198,10.2036,11.0021,12.5461,11.0021,11.5327,10.6454,10.1811,11.7753,11.2385,10.3735,11.6784,9.2103,10.8198,10.5966,10.779,10.309,10.0858,10.5966,11.4076,10.8198,9.2103,11.9829,11.4616,11.4927,9.6803,10.8036,10.859,10.4913,9.7813,10.859,9.3927,10.4773,10.5966,11.0509,11.2898,9.105,9.6614,10.309,11.5129,9.9035,10.24,10.9331,10.309,11.1563,9.6803,10.0432,10.1226,10.24,9.6803,10.6454,10.669,10.1266,10.5966,11.5129,11.0021,11.0021,10.3482,12.0137,10.309,10.9682,9.9035,10.3735,10.4043,9.5468,10.7579,10.5187,9.9523,10.24,11.0021,11.0821,11.1273,10.1266,10.5966,10.5133,10.0432,10.5966,10.309,11.4076,11.2118,9.741,10.0858,11.8494,11.0021,10.859,12.6823,10.5966,10.7144,11.5129,9.9035,10.0432,11.5129,10.5453,10.7364,12.0668,10.1887,10.2577,8.9227,11.2898,10.3766,9.9035,10.6454,10.8198,13.1303,10.309,11.2898,10.7144,10.44,10.7144,11.6082,12.0436,10.7144,10.9151,10.1266,10.4913,10.5891,11.6351,10.1266,10.5966,11.6952,10.0301,10.5966,10.5966,10.24,10.309,10.2751,11.0021,10.9331,10.0432,11.2898,9.4572,12.6635,11.3504,12.1007,9.2103,10.8198,10.9151,10.779,11.0666,11.744,9.9035,10.0858,10.1659,10.309,10.5453,11.0509,10.309,10.4043,11.9184,10.2036,10.9682,10.0858,11.7676,9.7981,11.0821,9.8574,10.8198,11.2645,11.0021,10.5966,10.9682,10.7996,11.0821,10.6965,11.3386,11.3964,10.7144,11.4616,10.6454,9.8522],"age":[45,61,58,58,34,59,25,50,27,28,44,35,28,49,50,56,26,47,50,50,36,55,50,38,26,44,49,51,34,56,44,44,49,49,43,52,26,36,37,56,28,34,52,50,45,45,30,28,40,35,30,52,42,61,60,40,30,47,39,50,61,49,57,25,41,32,62,56,52,36,64,42,54,53,51,48,45,26,30,51,52,37,43,30,60,44,30,51,41,46,38,46,36,37,26,31,65,34,32,26,62,26,59,33,65,34,54,47,36,64,59,49,56,39,47,64,59,62,58,38,45,29,26,55,30,25,50,55,49,32,30,54,38,53,54,27,58,36,38,49,45,51,38,44,46,40,53,48,42,36,29,31,28,28,31,43,36,47,30,55,60,59,41,52,58,48,48,43,41,50,49,26,26,54,31,47,34,42,53,30,55,33,53,36,38,29,25,47,61,39,33,35,36,55,48,58,51,32,59,41,47,44,56,61,40,48,58,61,57,32,36,34,25,44,35,35,49,27,44,39,28,34,25,49,32,35,49,46,43,44,35,45,60,42,32,38,33,53,34,54,42,34,45,42,42,42,38,49,47,32,40,43,40,35,55,38,36,28,25,42,36,51,57,56,35,39,48,31,55,27,27,42,39,33,32,45,46,28,53,30,42,45,56,47,37,44,26,29,37,53,59,43,46,46,43,46,38,62,34,35,52,53,27,49,52,64,45,30,42,29,41,60,25,40,25,61,37,28,56,51,37,26,46,45,33,37,43,58,56,59,42,25,39,39,51,32,37,31,27,46,35,40,43,46,52,39,27,25,25,53,28,44,34,25,47,32,51,26,52,47,47,45,37,40,44,63,41,48,46,49,48,46,58,41,64,61,34,42,56,31,46,42,59,47,32,62,49,49,29,45,30,39,31,32,48,42,28,56,33,28,43,41,29,53,27,60,36,50,45,61,36,43,25,27,30,38,56,33,30,60,39,56,43,56,38,40,52,29,31,53,35,51,52,34,48,27,49,31,52,60,35,45,64,31,42,25,37,51,44,45,39,50,53,27,41,42,32,62,43,50,50,31,35,51,36,38,35,48,39,40,25,48,51,33,46,27,46,33,52,58,59,61,35,55,29,27,26,65,45,28,57,39,46,59,53,50,46,31,32,55,29,36,62,63,47,63,36,57,28,47,32,56,49,33,50,54,49,55,62,48,28,54,35,39,51,58,27,43,46,36,39,39,55,25,25,47,46,49,57,32,36,47,55,36,25,32,51,33,27,39,47,37,59,30,33,47,54,44,48,60,57,36,33,49,44,42,31,55,45,37,55,34,45,58,29,55,32,42,44,58,53,40,61,30,36,49,54,44,39,45,50,50,39,31,61,36,61,32,43,51,44,33,58,35,43,56,59,25,55,45,47,32,53,33,35,53,51,25,57,54,65,26,28,56,32,62,27,33,45,36,33,37,37,31,34,28,56,33,39,55,30,48,57,54,46,30,28,47,50,26,42,35,31,64,54,44,54,43,48,57,49,49,38,28,63,56,49,25,49,28,29,35,51,47,50,56,63,52,32,48,36,30,53,56,61,33,42,46,61,33,26,43,43,61,62,49,38,38,45,31,46,50,32,45,31,41,57,58,41,48,56,64,36,60,44,44,56,43,39,49,47,52,37,42,47,31,54,37,59,54,51,37,42,41,63,25,32,51,37,58,28,47,25,26,53,60,25,51,47,61,56,49,25,39,53,40,32,38,47,29,55,27,36,47,44,55,32,55,52,52,51,57,39,37,26,44,55,34,45,46,54,50,30,36,45,55,48,60,61,42,38,35,26,44,44,56,44,57,49,57,50,32,29,35,47,55,35,57,42,31,27,40,57,26,35,45,44,33,38,37,31,38,37,49,38,35,37,39,50,51,48,63,61,36,47,51,38,60,28,28,51,47,45,48,34,44,54,56,63,38,48,43,44,50,43,32,44,46,37,44,49,51,50,25,42,48,45,54,39,36,55,61],"gender":[0,0,0,1,1,0,1,1,0,1,1,0,1,1,0,0,1,0,0,1,0,0,0,0,0,0,1,1,0,1,0,1,1,1,0,0,0,0,1,0,0,0,1,0,0,0,0,0,0,1,1,1,0,0,1,0,0,0,0,1,0,0,0,1,0,0,1,1,0,0,1,1,1,0,1,1,0,1,1,0,0,0,0,0,0,1,1,1,0,0,0,1,0,1,0,0,1,0,0,0,0,0,0,1,0,0,1,0,0,0,0,0,1,1,1,0,1,1,0,0,0,0,1,0,0,0,1,1,1,1,0,1,1,1,0,0,1,0,1,0,1,0,0,1,1,1,0,1,0,0,0,1,0,0,1,1,0,1,0,0,1,1,0,0,0,0,1,1,0,0,1,0,0,0,1,0,0,0,0,0,1,0,0,0,0,1,0,0,0,1,0,1,1,1,0,1,1,1,1,0,1,0,0,1,0,1,1,0,1,0,1,1,0,1,0,1,1,0,1,0,1,0,1,0,0,1,0,1,0,1,0,1,1,0,1,0,1,1,1,0,0,0,1,0,1,1,0,1,0,0,1,0,1,0,1,1,1,1,0,0,1,1,0,0,1,1,1,1,0,0,1,0,0,1,1,0,0,0,1,1,1,0,0,0,1,0,0,0,0,1,1,0,1,0,1,1,1,1,0,0,0,0,0,0,1,1,0,0,0,1,1,0,1,0,0,1,0,0,1,1,0,0,1,0,0,1,0,0,0,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,1,1,1,0,1,1,1,1,1,1,1,0,1,1,1,0,0,0,1,0,0,0,0,0,0,1,0,1,0,0,0,1,0,1,1,1,1,0,1,1,0,0,1,1,1,0,1,1,0,0,1,1,1,0,0,0,1,0,0,1,1,0,1,1,1,0,0,0,0,0,1,0,0,1,0,1,1,0,0,0,0,0,0,1,0,1,0,1,0,0,1,0,0,0,1,0,0,0,0,0,1,0,0,1,1,1,0,0,1,0,1,0,1,1,1,0,0,0,0,0,1,0,1,1,1,0,1,0,0,0,0,0,1,0,0,1,1,0,0,0,0,0,0,0,0,0,1,0,0,0,1,1,1,0,0,0,0,1,0,0,0,1,0,0,0,1,0,0,1,1,1,0,0,0,1,1,0,0,0,0,1,1,0,1,0,0,0,0,0,1,1,1,0,1,1,0,0,0,0,0,0,0,0,0,0,1,0,0,1,1,0,0,0,1,0,0,0,1,1,1,0,0,0,0,1,1,0,1,0,1,0,0,1,0,0,0,1,1,1,0,0,1,0,0,1,0,1,1,1,1,0,0,1,0,0,0,1,1,1,0,0,1,0,1,1,1,0,1,1,0,0,1,1,0,0,0,1,0,0,1,0,0,0,1,0,0,1,1,1,1,1,0,0,1,0,0,1,1,0,0,0,1,1,0,0,1,1,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,0,1,0,1,1,0,0,0,0,1,0,1,1,1,0,0,1,1,0,0,0,1,0,0,0,1,0,1,0,0,1,1,0,0,0,1,0,0,1,0,0,1,0,1,0,1,1,0,1,0,0,0,1,0,1,0,1,1,0,0,1,0,1,1,1,1,1,1,1,0,1,0,1,1,0,0,1,1,0,1,0,1,0,0,0,0,1,1,0,1,0,0,1,0,1,0,0,1,1,0,0,0,0,0,1,0,1,0,0,0,1,1,1,0,0,0,0,1,0,1,1,1,0,1,0,1,0,0,0,1,0,0,1,0,0,0,0,0,0,0,1,0,1,1,1,0,0,1,1,1,0,1,0,0,0,0,0,1,1,1,0,0,1,1,1,1,0,0,0,0,0,0,1,1,0,1,1,1,0,0,1,1,0,0,1,1,0,1,0,0,0,0,1,1,1,0,0,1,0,1,1,0,1,0,0,1]},"models":{"levels_educ":{"vars":["const","education"],"coef":[-23110.27766,5737.223768],"se":[8358.422593,645.658364],"t":[-2.7649,8.8859],"p":[0.005694,0.0],"r2":0.1032,"n":872,"name":"Levels","dv":"earnings"},"log_educ":{"vars":["const","education"],"coef":[9.313195,0.099469],"se":[0.122605,0.008615],"t":[75.9608,11.5467],"p":[0.0,0.0],"r2":0.1758,"n":872,"name":"Log-linear","dv":"lnearnings"},"quad_age":{"vars":["const","age","agesq"],"coef":[-32686.419376,3835.775292,-38.737716],"se":[23555.459441,1135.840658,13.024998],"t":[-1.3876,3.377,-2.9741],"p":[0.165248,0.000733,0.002938],"r2":0.0164,"n":872,"name":"Quadratic (age)"},"lin_age":{"vars":["const","age"],"coef":[36224.94373,465.097839],"se":[6655.107176,156.290874],"t":[5.4432,2.9758],"p":[0.0,0.002922],"r2":0.0093,"n":872,"name":"Linear (age)"},"mincer":{"vars":["const","education","age","agesq"],"coef":[8.021836,0.099276,0.054633,-0.000539],"se":[0.365141,0.008539,0.016492,0.000191],"t":[21.9691,11.6265,3.3127,-2.8139],"p":[0.0,0.0,0.000924,0.004894],"r2":0.1982,"n":872,"name":"Mincer","dv":"lnearnings"},"full_log":{"vars":["const","education","age","agesq","gender","lnhours"],"coef":[4.56208,0.09432,0.056782,-0.000559,-0.185293,0.941269],"se":[0.638512,0.008408,0.015939,0.000185,0.040325,0.138352],"t":[7.1449,11.2175,3.5625,-3.0161,-4.5949,6.8034],"p":[0.0,0.0,0.000367,0.002561,4e-06,0.0],"r2":0.2772,"n":872,"name":"Full log model","dv":"lnearnings"},"interact":{"vars":["const","education","age","educ×age"],"coef":[-29089.382231,4514.986652,127.492154,29.03916],"se":[30958.50813,2401.517176,719.279772,56.052036],"t":[-0.9396,1.8801,0.1772,0.5181],"p":[0.34741,0.0601,0.859312,0.604406],"r2":0.1153,"n":872,"name":"Interaction (levels)"}},"turning_points":{"quad_age":49.5,"mincer":50.7},"standardized":[{"var":"education","raw":0.09432,"std":0.3976},{"var":"age","raw":0.056782,"std":0.8859},{"var":"agesq","raw":-0.000559,"std":-0.7644},{"var":"gender","raw":-0.185293,"std":-0.1343},{"var":"lnhours","raw":0.941269,"std":0.2267}],"retransformation":{"resid_var":0.338476,"smearing_factor":1.184402,"naive_mean":46861.25,"corrected_mean":55502.54,"actual_mean":56368.69,"naive_preds":[98115.44,68740.92,57365.59,39466.2,50589.53,70164.66,50372.47,43049.25,43010.52,30372.72,36022.54,69293.06,36680.48,33577.11,59278.38,84821.13,38855.31,40158.93,40473.39,33627.52,52234.58,40094.72,72816.66,45351.57,34662.03,39450.42,36901.22,59242.83,42655.01,33136.81,78968.16,67030.3,36901.22,33577.11,32402.8,44457.99,46198.38,43252.05,38890.29,58162.73,30272.65,73850.64,49020.8,37455.17,57942.13,35038.4,31783.42,29336.86,96182.24,87238.41],"corrected_preds":[116208.09,81416.87,67943.91,46743.84,59918.33,83103.14,59661.24,50987.6,50941.73,35973.5,42665.15,82070.82,43444.42,39768.79,70209.42,100462.3,46020.29,47564.3,47936.75,39828.49,61866.73,47488.26,86244.17,53714.47,41053.76,46725.15,43705.87,70167.31,50520.67,39247.29,93530.02,79390.8,43705.87,39768.79,38377.93,52656.12,54717.44,51227.81,46061.73,68888.03,35854.98,87468.83,58060.32,44361.97,68626.76,41499.55,37644.34,34746.63,113918.41,103325.32]},"residuals":{"levels":[51314.7,-45685.3,-48685.3,-2210.86,-36959.75,41314.7,-36159.75,74263.59,-3685.3,-50010.86,-31473.63,51314.7,-3685.3,-7736.41,19263.59,23365.8,-20685.3,-736.41,84263.59,-9736.41,-16685.3,-9336.41,56314.7,-15473.63,-33210.86,2263.59,-21473.63,8840.25,-7736.41,-33736.41,16314.7,-7210.86,-20973.63,4263.59,184738.04,83526.37,-36473.63,-27210.86,-37885.3,-32685.3,-21736.41,249314.7,-33685.3,2212.49,-23785.3,-27736.41,-8736.41,-32473.63,31314.7,-15159.75,-20736.41,-1536.41,64263.59,24263.59,-1473.63,-10159.75,-9736.41,4263.59,-5524.74,-55159.75,33263.59,8526.37,-19473.63,-5736.41,6314.7,6263.59,71610.28,-44773.63,-14536.41,-13685.3,2263.59,41314.7,-32159.75,-6473.63,-18685.3,8526.37,28526.37,-25736.41,-42485.3,84263.59,-30610.86,-5685.3,-25736.41,-25736.41,23526.37,14263.59,11314.7,111314.7,11314.7,13365.8,19263.59,65526.37,-23685.3,-27159.75,81263.59,8686.94,27110.28,-26685.3,-5736.41,-13685.3,42789.14,-5685.3,-8736.41,-7210.86,-51210.86,-43073.63,-12210.86,23526.37,-33736.41,20526.37,204840.25,31314.7,53526.37,9840.25,5263.59,-37236.41,42789.14,-17736.41,34789.14,7086.94,-28736.41,-18685.3,4263.59,33110.28,-17210.86,-19736.41,68526.37,4789.14,20526.37,-159.75,16314.7,16314.7,22840.25,21314.7,-15736.41,-10736.41,22840.25,-33736.41,5314.7,-6736.41,13526.37,4263.59,12840.25,141840.25,-10159.75,29314.7,20686.94,-19736.41,-9999.18,-6473.63,-1473.63,-33810.86,-6473.63,3526.37,-6685.3,4263.59,1365.8,-26885.3,-19336.41,-1736.41,-50159.75,-736.41,69840.25,294840.25,-37085.3,49840.25,-8685.3,-7736.41,59840.25,3314.7,-31885.3,-35159.75,-13685.3,19263.59,-16685.3,-18685.3,-15210.86,4840.25,9263.59,-18685.3,-40210.86,-31473.63,94840.25,23526.37,-40159.75,-16736.41,-18685.3,-21036.41,-21736.41,-8685.3,-5736.41,-12210.86,3314.7,-18685.3,-50685.3,-7736.41,-43685.3,-20936.41,-30736.41,-17210.86,-19636.41,-8634.2,-23736.41,738.04,-27736.41,21314.7,-21536.41,49263.59,-40336.41,-10736.41,-10736.41,-33685.3,-21473.63,-10136.41,-13685.3,-52910.86,-21473.63,-40736.41,-22736.41,-47210.86,-19210.86,54526.37,-5136.41,4263.59,2949.71,-15210.86,13263.59,39840.25,-3473.63,-16685.3,-3524.74,-22736.41,-14210.86,-14236.41,-10159.75,-15736.41,-34685.3,-48685.3,-18473.63,2263.59,-3736.41,-35873.63,-28685.3,-38385.3,-14736.41,-32736.41,-21585.3,7789.14,-51485.3,-14536.41,-28685.3,2963.59,-34473.63,-5736.41,-25210.86,-13473.63,-29473.63,-11673.63,16263.59,6263.59,41314.7,-25736.41,-10685.3,-9736.41,-15736.41,-15736.41,10263.59,-39473.63,-7736.41,-1473.63,-37159.75,18686.94,-10736.41,-33159.75,-9473.63,24263.59,-13524.74,-27210.86,-24736.41,-40159.75,-15736.41,-8685.3,-40685.3,-22636.41,39840.25,-40159.75,-28685.3,13314.7,46314.7,-31634.2,-8759.75,324526.37,-23761.96,4263.59,9263.59,-20873.63,-49159.75,18263.59,-25159.75,-17473.63,54263.59,-10236.41,12789.14,-7685.3,263.59,-15036.41,16789.14,-46685.3,8526.37,-22473.63,-11634.2,14263.59,-19685.3,227314.7,30161.38,-48485.3,-16685.3,-18685.3,4263.59,49840.25,-10736.41,-17910.86,-1473.63,-10736.41,-26473.63,-20159.75,17263.59,-15473.63,31314.7,-6685.3,-27736.41,-27210.86,-25210.86,-29210.86,-15736.41,-34473.63,-26473.63,-21736.41,-17736.41,-15136.41,-12210.86,-5736.41,-15685.3,-14999.18,-36210.86,-25736.41,-13685.3,-32736.41,-35736.41,-19736.41,-16736.41,-24685.3,-18436.41,-41473.63,-23736.41,-5236.41,-29210.86,4263.59,-15685.3,-40685.3,526.37,4263.59,4840.25,2526.37,34314.7,23365.8,29263.59,38263.59,-20159.75,63110.28,-35736.41,-36159.75,-10736.41,-10685.3,23526.37,-26685.3,-22685.3,8526.37,-15736.41,-15159.75,5263.59,59840.25,-3736.41,526.37,-1473.63,-18685.3,-5736.41,46314.7,-13736.41,-14685.3,-29685.3,-5210.86,-32159.75,-35159.75,-9685.3,-31036.41,-13685.3,44840.25,6314.7,-8685.3,-28685.3,156314.7,-43634.2,39840.25,56314.7,-4573.63,22314.7,-18685.3,-45159.75,-21473.63,-23159.75,21314.7,-41685.3,-27973.63,-26285.3,-3685.3,-12159.75,-26473.63,-5736.41,-13736.41,-15210.86,62789.14,11314.7,54263.59,-27736.41,225314.7,-17210.86,-3210.86,-30873.63,-21210.86,46110.28,-2210.86,840.25,1314.7,-14473.63,-26736.41,-7536.41,-5736.41,-7210.86,58365.8,52263.59,-17210.86,-6685.3,-33210.86,-38159.75,4263.59,-18685.3,-25736.41,-7210.86,-30473.63,-5736.41,14263.59,-33473.63,-26473.63,-18736.41,-11736.41,-27473.63,-8736.41,-26985.3,-3599.18,10314.7,-73659.75,196263.59,-51685.3,-22210.86,-28685.3,-27685.3,4314.7,-8685.3,8314.7,-36473.63,-13736.41,18314.7,-2261.96,-23736.41,-24473.63,-736.41,-23473.63,-736.41,-7736.41,-14561.96,6314.7,-4736.41,-20736.41,-58685.3,21314.7,-10473.63,-26473.63,18314.7,-15999.18,1963.59,-39210.86,149840.25,-56159.75,-29473.63,11314.7,-7736.41,47314.7,21314.7,4263.59,-7210.86,24263.59,-31634.2,24263.59,-15736.41,2789.14,4840.25,-6473.63,-6473.63,49314.7,-4410.86,-9736.41,-24373.63,-16685.3,-28736.41,-15736.41,22840.25,75110.28,-8736.41,11314.7,429314.7,-16736.41,16314.7,-21210.86,-4736.41,-33736.41,11314.7,-20685.3,-11473.63,8526.37,-5736.41,-20736.41,56314.7,-12210.86,-18685.3,14263.59,14263.59,-7210.86,-33773.63,104840.25,-20159.75,-17473.63,28365.8,-21736.41,63110.28,-18736.41,-25159.75,-13473.63,-35873.63,-10736.41,-20159.75,-33736.41,29526.37,-15159.75,34263.59,29840.25,417840.25,39373.05,3526.37,-29573.63,-25736.41,-28159.75,-26010.86,-31636.41,-43973.63,-4736.41,3763.59,29263.59,-29173.63,-25736.41,32789.14,9263.59,-37659.75,-5999.18,-48685.3,157263.59,-29159.75,13526.37,-25736.41,38365.8,-30473.63,-15736.41,-20736.41,-31885.3,-10473.63,-11473.63,50110.28,-15159.75,-40159.75,-27159.75,-17873.63,4263.59,-32473.63,-43073.63,-13473.63,7526.37,-17159.75,-40159.75,-9336.41,-31634.2,-3685.3,-21236.41,-6685.3,-6524.74,-159.75,-7685.3,-6736.41,-16473.63,-14685.3,-22210.86,3863.59,-16473.63,-8685.3,-7210.86,-33736.41,5526.37,-24159.75,-17736.41,7263.59,-16736.41,-1473.63,-39159.75,-13685.3,-19159.75,64263.59,14789.14,-14261.96,-34736.41,5314.7,-15159.75,26789.14,-8685.3,-25736.41,-21210.86,-6685.3,5475.26,19840.25,39263.59,340.25,-22873.63,-21473.63,22789.14,-17210.86,-25736.41,52840.25,-20685.3,-32210.86,220840.25,-8159.75,-36473.63,-47685.3,-16685.3,-39685.3,14840.25,-27210.86,22314.7,7314.7,-7799.18,7263.59,24263.59,-21736.41,64263.59,-21736.41,9263.59,7263.59,-23736.41,56314.7,-27736.41,-44685.3,-20936.41,-25159.75,-3736.41,18263.59,4263.59,-16636.41,1314.7,30314.7,-48685.3,-10736.41,-22685.3,87840.25,-13685.3,-37073.63,-6024.74,-15736.41,15314.7,91789.14,-20736.41,-54085.3,-9210.86,4263.59,-27473.63,10526.37,-16773.63,738.04,-20210.86,-27685.3,-24159.75,56314.7,-1473.63,-17999.18,-13736.41,-1473.63,-30210.86,-8685.3,200840.25,2789.14,33314.7,-3736.41,-25073.63,84263.59,7314.7,-36685.3,60789.14,-41473.63,4263.59,-17210.86,-3473.63,-38685.3,-21736.41,-40159.75,44263.59,-1473.63,-35736.41,79840.25,43526.37,40789.14,-23999.18,-19485.3,-28159.75,-15473.63,-22299.18,-28159.75,-33736.41,-10236.41,-11473.63,-17159.75,34263.59,-19524.74,-30036.41,-38685.3,31314.7,-31473.63,-29210.86,4526.37,-15736.41,1314.7,-35473.63,-11261.96,-55259.75,-17736.41,39110.28,-3736.41,-25685.3,-55159.75,-17210.86,31314.7,31475.26,-31634.2,-14536.41,84840.25,-21473.63,-10685.3,-25736.41,-13736.41,-12736.41,-14524.74,1263.59,-20210.86,-36210.86,-17736.41,-8685.3,-3685.3,-685.3,-3524.74,28686.94,-31885.3,-11261.96,-5736.41,1475.26,38526.37,-6159.75,5686.94,-27473.63,59840.25,-8685.3,-28159.75,276263.59,-11473.63,-6473.63,31314.7,-25736.41,-22736.41,54263.59,-30685.3,-22685.3,93841.25,-42085.3,-28710.86,-38236.41,34263.59,-13636.41,-48685.3,-26685.3,4263.59,435314.7,-27210.86,34263.59,-736.41,-23010.86,-35159.75,41314.7,124263.59,-6473.63,9263.59,-26473.63,-21210.86,-28985.3,67263.59,-43685.3,-5736.41,39840.25,-23036.41,-17210.86,-11473.63,-23473.63,-21473.63,-22473.63,14263.59,10263.59,-22736.41,34263.59,-32936.41,247314.7,4840.25,99840.25,-35736.41,4263.59,-2210.86,-20685.3,6789.14,80263.59,-25736.41,-27473.63,-25473.63,-15736.41,-13473.63,-5685.3,-15736.41,-12736.41,98526.37,-30210.86,12263.59,-21736.41,60314.7,-4787.51,19263.59,-38110.86,-18685.3,26526.37,-20159.75,-5736.41,12263.59,-31159.75,7789.14,-1536.41,3840.25,37526.37,-23685.3,37789.14,-15210.86,-49685.3],"log":[0.79,-0.86,-1.0,0.21,-0.43,0.7,-0.41,1.19,0.18,-1.82,-0.7,0.79,0.18,0.04,0.58,0.35,-0.13,0.21,1.27,-0.02,-0.05,-0.0,0.83,-0.12,-0.62,0.27,-0.3,0.29,0.04,-1.11,0.45,0.11,-0.28,0.31,1.99,1.21,-0.99,-0.4,-0.57,-0.41,-0.42,1.77,-0.44,0.02,-0.19,-0.71,0.01,-0.75,0.61,-0.02,-0.38,0.19,1.1,0.65,0.21,0.05,-0.02,0.31,-0.17,-0.98,0.77,0.4,-0.23,0.09,0.32,0.35,1.48,-1.8,-0.16,0.01,0.27,0.7,-0.32,0.11,-0.08,0.4,0.68,-0.6,-0.73,1.27,-0.52,0.15,-0.6,-0.6,0.62,0.5,0.39,1.2,0.39,0.26,0.58,1.06,-0.19,-0.23,1.25,-0.01,-1.02,-0.26,0.09,0.01,0.81,0.15,0.01,0.11,-2.01,-1.57,0.01,0.62,-1.11,0.58,1.46,0.61,0.96,0.3,0.33,-1.46,0.81,-0.27,0.72,-0.09,-0.77,-0.08,0.31,-0.1,-0.11,-0.34,1.09,0.33,0.58,0.19,0.45,0.45,0.44,0.5,-0.2,-0.04,0.44,-1.11,0.31,0.06,0.48,0.31,0.34,1.21,0.05,0.59,0.46,-0.34,-0.1,0.11,0.21,-0.65,0.11,0.31,0.13,0.31,0.14,-0.26,-0.33,0.19,-0.79,0.21,0.81,1.73,-0.54,0.67,0.1,0.04,0.75,0.28,-0.39,-0.39,0.01,0.58,-0.05,-0.08,-0.06,0.25,0.41,-0.08,-0.96,-0.7,0.97,0.62,-0.51,-0.23,-0.08,-0.39,-0.42,0.1,0.09,0.01,0.28,-0.08,-1.11,0.04,-0.78,-0.39,-0.89,-0.11,-0.34,0.02,-0.51,0.16,-0.71,0.5,-0.41,0.95,-1.91,-0.04,-0.04,-0.44,-0.3,-0.03,0.01,-2.34,-0.3,-1.99,-0.46,-1.5,-0.16,0.96,0.1,0.31,-0.11,-0.06,0.48,0.59,0.17,-0.05,-0.08,-0.46,-0.04,-0.15,0.05,-0.2,-0.47,-1.0,-0.2,0.27,0.14,-0.95,-0.31,-0.59,-0.17,-1.03,-0.14,0.38,-1.15,-0.16,-0.31,0.29,-0.87,0.09,-0.33,-0.06,-0.61,-0.01,0.53,0.35,0.7,-0.6,0.06,-0.02,-0.2,-0.2,0.43,-1.21,0.04,0.21,-0.43,0.4,-0.04,-0.35,0.04,0.65,-0.59,-0.4,-0.55,-0.51,-0.2,0.1,-0.66,-0.46,0.59,-0.51,-0.31,0.41,0.75,-0.3,0.07,2.23,-1.05,0.31,0.41,-0.28,-0.76,0.56,-0.19,-0.17,1.01,-0.03,0.45,0.11,0.23,-0.17,0.51,-0.91,0.4,-0.33,-0.01,0.5,-0.11,1.69,0.6,-0.99,-0.05,-0.08,0.31,0.67,-0.04,-0.13,0.21,-0.04,-0.48,-0.1,0.54,-0.12,0.61,0.13,-0.71,-0.4,-0.33,-0.47,-0.2,-0.87,-0.48,-0.42,-0.27,-0.18,0.01,0.09,-0.03,-0.28,-0.75,-0.6,0.01,-1.03,-1.3,-0.34,-0.23,-0.21,-0.29,-1.4,-0.51,0.1,-0.47,0.31,-0.03,-0.66,0.25,0.31,0.25,0.29,0.64,0.35,0.72,0.83,-0.1,1.28,-1.3,-0.41,-0.04,0.06,0.62,-0.26,-0.17,0.4,-0.2,-0.02,0.33,0.75,0.14,0.25,0.21,-0.08,0.09,0.75,-0.13,-0.01,-0.33,0.15,-0.32,-0.39,0.08,-0.91,0.01,0.63,0.32,0.1,-0.31,1.42,-0.52,0.59,0.83,0.15,0.51,-0.08,-0.64,-0.3,-0.15,0.5,-0.7,-0.54,-0.25,0.18,0.02,-0.48,0.09,-0.13,-0.06,0.99,0.39,1.01,-0.71,1.69,-0.11,0.19,-0.67,-0.21,0.73,0.21,0.2,0.25,-0.09,-0.65,0.04,0.09,0.11,0.62,0.99,-0.11,0.13,-0.62,-0.46,0.31,-0.08,-0.6,0.11,-0.65,0.09,0.5,-0.81,-0.48,-0.3,-0.07,-0.52,0.01,-0.27,0.09,0.37,-2.32,1.89,-1.16,-0.24,-0.31,-0.28,0.29,0.1,0.35,-0.99,-0.13,0.47,0.07,-0.51,-0.4,0.21,-0.37,0.21,0.04,-0.42,0.32,0.11,-0.38,-1.69,0.5,0.02,-0.48,0.47,-0.32,0.27,-0.91,1.24,-1.02,-0.61,0.39,0.04,0.76,0.5,0.31,0.11,0.65,-0.3,0.65,-0.2,0.3,0.25,0.11,0.11,0.77,0.17,-0.02,-0.4,-0.05,-0.77,-0.2,0.44,1.55,0.01,0.39,2.21,-0.23,0.45,-0.21,0.11,-1.11,0.39,-0.13,-0.01,0.4,0.09,-0.38,0.83,0.01,-0.08,0.5,0.5,0.11,-0.82,1.02,-0.1,-0.17,0.39,-0.42,1.28,-0.3,-0.19,-0.06,-0.95,-0.04,-0.1,-1.11,0.7,-0.02,0.78,0.5,2.01,0.59,0.31,-0.61,-0.6,-0.24,-0.36,-0.95,-1.68,0.11,0.3,0.72,-0.59,-0.6,0.7,0.41,-0.45,0.03,-1.0,1.71,-0.26,0.48,-0.6,0.47,-0.65,-0.2,-0.38,-0.39,0.02,-0.01,0.89,-0.02,-0.51,-0.23,-0.18,0.31,-0.75,-1.57,-0.06,0.38,-0.05,-0.51,-0.0,-0.3,0.18,-0.4,0.13,-0.21,0.19,0.11,0.06,-0.14,-0.01,-0.24,0.3,-0.14,0.1,0.11,-1.11,0.34,-0.17,-0.27,0.37,-0.23,0.21,-0.48,0.01,-0.09,1.1,0.48,-0.4,-1.2,0.31,-0.02,0.63,0.1,-0.6,-0.21,0.13,0.23,0.41,0.84,0.19,-0.35,-0.3,0.58,-0.11,-0.6,0.69,-0.13,-0.58,1.51,0.08,-0.99,-0.95,-0.05,-0.63,0.36,-0.4,0.51,0.33,-0.03,0.37,0.65,-0.42,1.1,-0.42,0.41,0.37,-0.51,0.83,-0.71,-0.82,-0.39,-0.19,0.14,0.56,0.31,-0.23,0.25,0.6,-1.0,-0.04,-0.17,0.93,0.01,-1.03,-0.19,-0.2,0.43,1.21,-0.38,-1.32,0.07,0.31,-0.52,0.43,-0.15,0.16,-0.19,-0.28,-0.17,0.83,0.21,-0.41,-0.13,0.21,-0.5,0.1,1.44,0.3,0.63,0.14,-0.43,1.27,0.33,-0.53,0.97,-1.4,0.31,-0.11,0.17,-0.6,-0.42,-0.51,0.9,0.21,-1.3,0.88,0.86,0.79,-0.73,-0.1,-0.24,-0.12,-0.63,-0.24,-1.11,-0.03,-0.01,-0.05,0.78,-1.1,-0.85,-0.6,0.61,-0.7,-0.47,0.33,-0.2,0.25,-0.93,-0.26,-0.98,-0.27,0.37,0.14,-0.24,-0.98,-0.11,0.61,0.79,-0.3,-0.16,0.91,-0.3,0.06,-0.6,-0.13,-0.1,-0.66,0.25,-0.19,-0.75,-0.27,0.1,0.18,0.22,-0.08,0.69,-0.39,-0.26,0.09,0.1,0.8,0.11,-0.17,-0.52,0.75,0.1,-0.24,2.18,-0.01,0.11,0.61,-0.6,-0.46,1.01,-0.36,-0.17,0.96,-0.72,-0.45,-1.58,0.78,-0.13,-1.0,-0.26,0.31,2.23,-0.4,0.78,0.21,-0.27,-0.39,0.7,1.54,0.11,0.41,-0.48,-0.21,-0.32,1.13,-0.78,0.09,0.59,-0.48,-0.11,-0.01,-0.37,-0.3,-0.33,0.5,0.43,-0.46,0.78,-1.05,1.76,0.25,1.0,-1.3,0.31,0.21,-0.13,0.36,1.24,-0.6,-0.52,-0.44,-0.2,-0.06,0.15,-0.2,-0.1,1.31,-0.5,0.46,-0.42,0.86,-0.31,0.58,-0.85,-0.08,0.66,-0.1,0.09,0.46,-0.3,0.38,0.19,0.23,0.79,-0.19,0.76,-0.06,-1.05]},"mean_vals":{"education":13.85,"age":43.31,"earnings":56368.69},"meta":{"chapter":"Chapter 15: Regression with Transformed Variables","book":"metricsAI: An Introduction to Econometrics with Python and AI in the Cloud","author":"Carlos Mendez"}}</script>
+
+<script>
+"use strict";
+var DATA=JSON.parse(document.getElementById("ch-data").textContent);
+
+// ==================== HELPERS ====================
+var mean=function(a){var s=0;for(var i=0;i<a.length;i++)s+=a[i];return s/a.length;};
+function std(a,m){m=m!==undefined?m:mean(a);var s=0;for(var i=0;i<a.length;i++)s+=(a[i]-m)*(a[i]-m);return Math.sqrt(s/(a.length-1));}
+function skewness(a){var m=mean(a),s=std(a,m);if(s===0)return 0;var sum=0;for(var i=0;i<a.length;i++)sum+=Math.pow((a[i]-m)/s,3);return sum/a.length;}
+function linspace(a,b,n){var out=new Array(n);var step=(b-a)/(n-1);for(var i=0;i<n;i++)out[i]=a+i*step;return out;}
+function fmt(v,d){d=d!==undefined?d:2;if(v===null||v===undefined||isNaN(v))return"\u2014";return v.toFixed(d);}
+function fmtMoney(v){return v===null?"\u2014":"$"+Math.round(v).toLocaleString();}
+var THEME_KEY="metricsai-theme";
+function getCSS(v){return getComputedStyle(document.documentElement).getPropertyValue(v).trim();}
+function themeColors(){return{text:getCSS("--text"),textSoft:getCSS("--text-soft"),grid:getCSS("--grid"),panel:getCSS("--panel"),cyan:getCSS("--accent"),purple:getCSS("--accent-2"),pink:getCSS("--accent-3")};}
+function baseLayout(o){var c=themeColors();return Object.assign({paper_bgcolor:"rgba(0,0,0,0)",plot_bgcolor:"rgba(0,0,0,0)",font:{family:"Inter, system-ui, sans-serif",color:c.text,size:12},margin:{l:56,r:18,t:30,b:46},xaxis:{gridcolor:c.grid,linecolor:c.grid,zerolinecolor:c.grid,tickfont:{color:c.textSoft}},yaxis:{gridcolor:c.grid,linecolor:c.grid,zerolinecolor:c.grid,tickfont:{color:c.textSoft}},hoverlabel:{bgcolor:c.panel,bordercolor:c.grid,font:{color:c.text}},legend:{font:{color:c.text},bgcolor:"rgba(0,0,0,0)"}},o||{});}
+var PLOTLY_CONFIG={displayModeBar:false,responsive:true};
+function getActiveVal(id){var b=document.querySelector("#"+id+" button.active");return b?b.dataset.val:null;}
+function bindToggles(id,fn){document.querySelectorAll("#"+id+" button").forEach(function(b){b.addEventListener("click",function(){this.parentNode.querySelectorAll("button").forEach(function(x){x.classList.remove("active");});this.classList.add("active");fn();});});}
+function bindSlider(id,vid,ffn,rfn){var el=document.getElementById(id);var ve=document.getElementById(vid);el.addEventListener("input",function(){ve.textContent=ffn(this.value);rfn();});}
+
+// ==================== WIDGET 1: Log Transformation Explorer ====================
+(function(){
+  var chartEl=document.getElementById("chart-log-transform");
+  var ed=DATA.scatter.education,earn=DATA.scatter.earnings,lnearn=DATA.scatter.lnearnings;
+  function render(){
+    var c=themeColors();
+    var mode=getActiveVal("lt-model");
+    var m=mode==="levels"?DATA.models.levels_educ:DATA.models.log_educ;
+    var yData=mode==="levels"?earn:lnearn;
+    var ei=m.vars.indexOf("education");
+    document.getElementById("lt-stat-coef").textContent=mode==="levels"?fmtMoney(m.coef[ei]):fmt(m.coef[ei],4);
+    document.getElementById("lt-stat-interp").textContent=mode==="levels"?fmtMoney(m.coef[ei])+"/yr":fmt(m.coef[ei]*100,1)+"%/yr";
+    document.getElementById("lt-stat-r2").textContent=fmt(m.r2,4);
+    document.getElementById("lt-stat-t").textContent=fmt(m.t[ei],2);
+    var traces=[{x:ed,y:yData,type:"scatter",mode:"markers",marker:{color:c.cyan+"33",size:4},name:"Data",hovertemplate:"Educ: %{x}<br>"+( mode==="levels"?"$%{y:,.0f}":"%{y:.3f}")}];
+    var xr=[0,22];
+    var yfit=xr.map(function(x){return m.coef[0]+m.coef[ei]*x;});
+    traces.push({x:xr,y:yfit,type:"scatter",mode:"lines",line:{color:c.pink,width:3},name:"Fitted line"});
+    var layout=baseLayout({xaxis:{title:"Years of Education",range:[0,22],gridcolor:c.grid,linecolor:c.grid,zerolinecolor:c.grid,tickfont:{color:c.textSoft}},yaxis:{title:mode==="levels"?"Earnings ($)":"ln(Earnings)",gridcolor:c.grid,linecolor:c.grid,zerolinecolor:c.grid,tickfont:{color:c.textSoft}},showlegend:true,legend:{x:0.02,y:0.98,xanchor:"left",yanchor:"top",font:{color:c.text},bgcolor:"rgba(0,0,0,0)"}});
+    Plotly.react(chartEl,traces,layout,PLOTLY_CONFIG);
+  }
+  bindToggles("lt-model",render);
+  window.__rerender_logtransform=render;
+  render();
+})();
+
+// ==================== WIDGET 2: Quadratic & Turning Point ====================
+(function(){
+  var chartEl=document.getElementById("chart-quadratic");
+  var ages=DATA.scatter.age,earn=DATA.scatter.earnings;
+  function render(){
+    var c=themeColors();
+    var isQuad=getActiveVal("quad-model")==="quadratic";
+    var evalAge=parseInt(document.getElementById("quad-age").value);
+    var m=isQuad?DATA.models.quad_age:DATA.models.lin_age;
+    var tp=isQuad?DATA.turning_points.quad_age:null;
+    var me;
+    if(isQuad){me=m.coef[1]+2*m.coef[2]*evalAge;}
+    else{me=m.coef[1];}
+    document.getElementById("quad-stat-tp").textContent=tp!==null?fmt(tp,1)+" yrs":"\u2014 (linear)";
+    document.getElementById("quad-stat-me").textContent=fmtMoney(me)+"/yr";
+    document.getElementById("quad-stat-r2").textContent=fmt(m.r2,4);
+    var traces=[{x:ages,y:earn,type:"scatter",mode:"markers",marker:{color:c.cyan+"33",size:4},name:"Data",hovertemplate:"Age: %{x}<br>$%{y:,.0f}"}];
+    var xs=linspace(25,65,200);
+    var ys;
+    if(isQuad){ys=xs.map(function(x){return m.coef[0]+m.coef[1]*x+m.coef[2]*x*x;});}
+    else{ys=xs.map(function(x){return m.coef[0]+m.coef[1]*x;});}
+    traces.push({x:xs,y:ys,type:"scatter",mode:"lines",line:{color:c.pink,width:3},name:isQuad?"Quadratic fit":"Linear fit"});
+    var shapes=[];
+    if(isQuad&&tp>=25&&tp<=65){
+      var ytp=m.coef[0]+m.coef[1]*tp+m.coef[2]*tp*tp;
+      traces.push({x:[tp],y:[ytp],type:"scatter",mode:"markers",marker:{color:c.purple,size:12,symbol:"diamond",line:{color:"white",width:2}},name:"Peak: age "+fmt(tp,1)});
+    }
+    // Evaluate point
+    var yEval=isQuad?m.coef[0]+m.coef[1]*evalAge+m.coef[2]*evalAge*evalAge:m.coef[0]+m.coef[1]*evalAge;
+    traces.push({x:[evalAge],y:[yEval],type:"scatter",mode:"markers",marker:{color:c.pink,size:10,line:{color:"white",width:2}},name:"ME at age "+evalAge,showlegend:false});
+    var layout=baseLayout({xaxis:{title:"Age",range:[23,67],gridcolor:c.grid,linecolor:c.grid,zerolinecolor:c.grid,tickfont:{color:c.textSoft}},yaxis:{title:"Earnings ($)",gridcolor:c.grid,linecolor:c.grid,zerolinecolor:c.grid,tickfont:{color:c.textSoft}},showlegend:true,legend:{x:0.02,y:0.98,xanchor:"left",yanchor:"top",font:{color:c.text},bgcolor:"rgba(0,0,0,0)"}});
+    Plotly.react(chartEl,traces,layout,PLOTLY_CONFIG);
+  }
+  bindToggles("quad-model",render);
+  bindSlider("quad-age","quad-age-val",function(v){return "Age = "+v;},render);
+  window.__rerender_quadratic=render;
+  render();
+})();
+
+// ==================== WIDGET 3: Standardized Coefficients ====================
+(function(){
+  var chartEl=document.getElementById("chart-standardized");
+  var labels={"education":"Education","age":"Age","agesq":"Age²","gender":"Gender","lnhours":"ln(Hours)"};
+  function render(){
+    var c=themeColors();
+    var isStd=getActiveVal("std-display")==="std";
+    var items=DATA.standardized.slice().sort(function(a,b){
+      var va=isStd?Math.abs(a.std):Math.abs(a.raw);
+      var vb=isStd?Math.abs(b.std):Math.abs(b.raw);
+      return vb-va;
+    });
+    var names=items.map(function(d){return labels[d.var]||d.var;});
+    var vals=items.map(function(d){return isStd?d.std:d.raw;});
+    var colors=vals.map(function(v){return v>=0?c.cyan+"77":c.pink+"77";});
+    var borders=vals.map(function(v){return v>=0?c.cyan:c.pink;});
+    var traces=[{y:names,x:vals,type:"bar",orientation:"h",marker:{color:colors,line:{color:borders,width:2}},text:vals.map(function(v){return isStd?fmt(v,3):fmt(v,4);}),textposition:"outside",textfont:{family:"JetBrains Mono",size:11,color:c.text}}];
+    var layout=baseLayout({xaxis:{title:isStd?"Standardized coefficient (\u03B2*)":"Raw coefficient",gridcolor:c.grid,linecolor:c.grid,zerolinecolor:c.grid,tickfont:{color:c.textSoft}},yaxis:{automargin:true,tickfont:{color:c.textSoft,size:12}},showlegend:false,margin:{l:90,r:60,t:10,b:46},shapes:[{type:"line",xref:"x",yref:"paper",x0:0,x1:0,y0:0,y1:1,line:{color:c.grid,width:1.5}}]});
+    Plotly.react(chartEl,traces,layout,PLOTLY_CONFIG);
+  }
+  bindToggles("std-display",render);
+  window.__rerender_standardized=render;
+  render();
+})();
+
+// ==================== WIDGET 4: Interaction Marginal Effects ====================
+(function(){
+  var chartEl=document.getElementById("chart-interaction-me");
+  var m=DATA.models.interact;
+  var eduIdx=m.vars.indexOf("education");
+  var intIdx=m.vars.indexOf("educ\u00d7age");
+  function render(){
+    var c=themeColors();
+    var evalAge=parseInt(document.getElementById("ime-age").value);
+    var me=m.coef[eduIdx]+m.coef[intIdx]*evalAge;
+    document.getElementById("ime-stat-educ").textContent=fmtMoney(m.coef[eduIdx]);
+    document.getElementById("ime-stat-inter").textContent="$"+fmt(m.coef[intIdx],2)+"/yr×yr";
+    document.getElementById("ime-stat-me").textContent=fmtMoney(me)+"/yr";
+    document.getElementById("ime-stat-r2").textContent=fmt(m.r2,4);
+    var ages=linspace(25,65,200);
+    var mes=ages.map(function(a){return m.coef[eduIdx]+m.coef[intIdx]*a;});
+    var traces=[
+      {x:ages,y:mes,type:"scatter",mode:"lines",line:{color:c.cyan,width:3},name:"ME of education"},
+      {x:[evalAge],y:[me],type:"scatter",mode:"markers+text",marker:{color:c.pink,size:12,line:{color:"white",width:2}},text:[fmtMoney(me)],textposition:"top center",textfont:{color:c.pink,size:12,family:"JetBrains Mono"},name:"At age "+evalAge,showlegend:false}
+    ];
+    var layout=baseLayout({xaxis:{title:"Age",range:[23,67],gridcolor:c.grid,linecolor:c.grid,zerolinecolor:c.grid,tickfont:{color:c.textSoft}},yaxis:{title:"Marginal effect of education ($/yr)",gridcolor:c.grid,linecolor:c.grid,zerolinecolor:c.grid,tickfont:{color:c.textSoft}},showlegend:true,legend:{x:0.02,y:0.98,xanchor:"left",yanchor:"top",font:{color:c.text},bgcolor:"rgba(0,0,0,0)"}});
+    Plotly.react(chartEl,traces,layout,PLOTLY_CONFIG);
+  }
+  bindSlider("ime-age","ime-age-val",function(v){return "Age = "+v;},render);
+  window.__rerender_interactionme=render;
+  render();
+})();
+
+// ==================== WIDGET 5: Retransformation Bias ====================
+(function(){
+  var chartEl=document.getElementById("chart-retransform");
+  var RT=DATA.retransformation;
+  function render(){
+    var c=themeColors();
+    var mode=getActiveVal("rt-method");
+    document.getElementById("rt-stat-actual").textContent=fmtMoney(RT.actual_mean);
+    document.getElementById("rt-stat-naive").textContent=fmtMoney(RT.naive_mean);
+    document.getElementById("rt-stat-corrected").textContent=fmtMoney(RT.corrected_mean);
+    document.getElementById("rt-stat-smearing").textContent=fmt(RT.smearing_factor,4);
+    var labels=[],vals=[],colors=[],borders=[];
+    labels.push("Actual Mean");vals.push(RT.actual_mean);colors.push(c.cyan+"77");borders.push(c.cyan);
+    if(mode==="both"||mode==="naive"){labels.push("Naive exp(\u0177)");vals.push(RT.naive_mean);colors.push(c.pink+"77");borders.push(c.pink);}
+    if(mode==="both"||mode==="corrected"){labels.push("Corrected");vals.push(RT.corrected_mean);colors.push(c.purple+"77");borders.push(c.purple);}
+    var traces=[{x:labels,y:vals,type:"bar",marker:{color:colors,line:{color:borders,width:2}},text:vals.map(function(v){return fmtMoney(v);}),textposition:"outside",textfont:{family:"JetBrains Mono",size:13,color:c.text}}];
+    var layout=baseLayout({yaxis:{title:"Mean Earnings ($)",gridcolor:c.grid,linecolor:c.grid,zerolinecolor:c.grid,tickfont:{color:c.textSoft},range:[0,RT.actual_mean*1.25]},xaxis:{tickfont:{color:c.textSoft,size:12}},showlegend:false,margin:{l:70,r:18,t:10,b:60},shapes:[{type:"line",xref:"paper",yref:"y",x0:0,x1:1,y0:RT.actual_mean,y1:RT.actual_mean,line:{color:c.cyan,width:2,dash:"dash"}}]});
+    Plotly.react(chartEl,traces,layout,PLOTLY_CONFIG);
+  }
+  bindToggles("rt-method",render);
+  window.__rerender_retransform=render;
+  render();
+})();
+
+// ==================== WIDGET 6: Residual Distribution ====================
+(function(){
+  var chartEl=document.getElementById("chart-residuals");
+  function render(){
+    var c=themeColors();
+    var mode=getActiveVal("res-model");
+    var resid=mode==="levels"?DATA.residuals.levels:DATA.residuals.log;
+    var m=mean(resid),s=std(resid,m),sk=skewness(resid);
+    document.getElementById("res-stat-mean").textContent=mode==="levels"?fmtMoney(m):fmt(m,4);
+    document.getElementById("res-stat-sd").textContent=mode==="levels"?fmtMoney(s):fmt(s,4);
+    document.getElementById("res-stat-skew").textContent=fmt(sk,3);
+    var traces=[{x:resid,type:"histogram",marker:{color:c.cyan+"55",line:{color:c.cyan,width:1}},name:"Residuals",nbinsx:35}];
+    var layout=baseLayout({xaxis:{title:mode==="levels"?"Residual ($)":"Residual (log)",gridcolor:c.grid,linecolor:c.grid,zerolinecolor:c.grid,tickfont:{color:c.textSoft}},yaxis:{title:"Count",gridcolor:c.grid,linecolor:c.grid,zerolinecolor:c.grid,tickfont:{color:c.textSoft}},showlegend:false,annotations:[{x:0.98,y:0.95,xref:"paper",yref:"paper",text:"Skewness = "+fmt(sk,3),showarrow:false,font:{color:c.purple,size:13,family:"JetBrains Mono"},xanchor:"right"}]});
+    Plotly.react(chartEl,traces,layout,PLOTLY_CONFIG);
+  }
+  bindToggles("res-model",render);
+  window.__rerender_residuals=render;
+  render();
+})();
+
+// ==================== RESET + URL HASH STATE ====================
+(function(){
+  var REG={
+    logtransform:[{group:"lt-model",kind:"toggle",def:"levels"}],
+    quadratic:[{group:"quad-model",kind:"toggle",def:"quadratic"},{id:"quad-age",kind:"range",def:"40"}],
+    standardized:[{group:"std-display",kind:"toggle",def:"raw"}],
+    interactionme:[{id:"ime-age",kind:"range",def:"40"}],
+    retransform:[{group:"rt-method",kind:"toggle",def:"both"}],
+    residuals:[{group:"res-model",kind:"toggle",def:"levels"}]
+  };
+  function getVal(c){if(c.kind==="toggle"){var b=document.querySelector("#"+c.group+" button.active");return b?b.dataset.val:c.def;}return document.getElementById(c.id).value;}
+  function setVal(c,val,fire){if(c.kind==="toggle"){var g=document.getElementById(c.group);if(!g)return;var b=g.querySelector('button[data-val="'+val+'"]');if(b&&!b.classList.contains("active"))b.click();}else{var el=document.getElementById(c.id);if(!el)return;if(el.value!==String(val)){el.value=val;if(fire)el.dispatchEvent(new Event(c.kind==="select"?"change":"input",{bubbles:true}));}}}
+  function resetWidget(w){var ctrls=REG[w]||[];for(var i=0;i<ctrls.length;i++)setVal(ctrls[i],ctrls[i].def,true);var fn=window["__rerender_"+w];if(fn)fn();writeHash();}
+  function writeHash(){var parts=[];for(var w in REG){var ctrls=REG[w];for(var i=0;i<ctrls.length;i++){var c=ctrls[i];var v=String(getVal(c));if(v!==String(c.def)){var key=c.id||c.group;parts.push(key+"="+encodeURIComponent(v));}}}var want=parts.length?"#"+parts.join("&"):"";if(want===""&&location.hash.match(/=/))history.replaceState(null,"",location.pathname+location.search);else if(want!==""&&location.hash!==want)history.replaceState(null,"",location.pathname+location.search+want);}
+  function readHash(){var hash=location.hash.slice(1);if(!hash||!hash.includes("="))return;var params={};var pairs=hash.split("&");for(var i=0;i<pairs.length;i++){var eq=pairs[i].indexOf("=");if(eq<0)continue;params[pairs[i].slice(0,eq)]=decodeURIComponent(pairs[i].slice(eq+1));}for(var w in REG){var ctrls=REG[w];for(var j=0;j<ctrls.length;j++){var c=ctrls[j];var key=c.id||c.group;if(key in params)setVal(c,params[key],true);}}}
+  document.querySelectorAll(".reset-btn[data-reset]").forEach(function(btn){btn.addEventListener("click",function(){resetWidget(btn.dataset.reset);});});
+  document.addEventListener("input",function(e){if(e.target.matches("input[type=range], select"))writeHash();});
+  document.addEventListener("change",function(e){if(e.target.matches("select"))writeHash();});
+  document.querySelectorAll(".toggle-group button").forEach(function(b){b.addEventListener("click",function(){setTimeout(writeHash,0);});});
+  readHash();
+})();
+
+// ==================== THEME TOGGLE ====================
+(function(){
+  var btn=document.getElementById("theme-toggle"),iconEl=document.getElementById("theme-icon"),labelEl=document.getElementById("theme-label");
+  function apply(theme){document.documentElement.dataset.theme=theme;iconEl.textContent=theme==="dark"?"\u2600\uFE0F":"\uD83C\uDF19";labelEl.textContent=theme==="dark"?"Light":"Dark";for(var key in window){if(key.startsWith("__rerender_")&&typeof window[key]==="function")window[key]();}}
+  var saved=localStorage.getItem(THEME_KEY);var prefersDark=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches;apply(saved||(prefersDark?"dark":"light"));
+  btn.addEventListener("click",function(){var next=document.documentElement.dataset.theme==="dark"?"light":"dark";localStorage.setItem(THEME_KEY,next);apply(next);});
+})();
+window.addEventListener("resize",function(){document.querySelectorAll(".chart").forEach(function(el){if(el.data)Plotly.Plots.resize(el);});});
+</script>
+</body>
+</html>
