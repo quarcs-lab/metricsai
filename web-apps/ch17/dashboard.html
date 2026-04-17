@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chapter 17 — Panel Data, Time Series Data, Causation · metricsAI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.plot.ly/plotly-2.35.2.min.js" charset="utf-8"></script>
+<style>
+:root{--cyan:#008CB7;--cyan-soft:#22d3ee;--purple:#7A209F;--purple-soft:#c084fc;--pink:#C21E72;--pink-soft:#f472b6;--bg:#f5f8fb;--panel:#fff;--panel-2:#f0f4f9;--text:#0b1021;--text-soft:#475569;--text-muted:#64748b;--border:#d9e2ec;--accent:var(--cyan);--accent-2:var(--purple);--accent-3:var(--pink);--shadow:0 2px 10px rgba(11,16,33,.06),0 12px 30px rgba(11,16,33,.05);--grid:#e3e8ef;--code-bg:#eef3f8}
+html[data-theme="dark"]{--bg:#0c1024;--panel:#151a33;--panel-2:#1b2142;--text:#e2e8f0;--text-soft:#b5c0d0;--text-muted:#8a98ae;--border:#2a3156;--accent:var(--cyan-soft);--accent-2:var(--purple-soft);--accent-3:var(--pink-soft);--shadow:0 2px 10px rgba(0,0,0,.25),0 12px 30px rgba(0,0,0,.35);--grid:#2a3156;--code-bg:#0f1530}
+*{box-sizing:border-box}html,body{margin:0;padding:0}body{font-family:'Inter',system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);line-height:1.55;transition:background-color .25s ease,color .25s ease}code,.mono{font-family:'JetBrains Mono',ui-monospace,monospace}
+header.page{position:relative;padding:2.4rem 1.5rem 2rem;background:radial-gradient(1200px 400px at 85% -10%,rgba(122,32,159,.15),transparent),radial-gradient(1000px 400px at 10% 0%,rgba(0,140,183,.18),transparent),var(--panel);border-bottom:1px solid var(--border)}.page-inner{max-width:1120px;margin:0 auto}.chapter-badge{display:inline-block;font-size:.72rem;letter-spacing:.15em;text-transform:uppercase;color:var(--accent);font-weight:600;margin-bottom:.5rem}h1.title{font-size:clamp(1.6rem,3.4vw,2.4rem);margin:0 0 .35rem;background:linear-gradient(90deg,var(--accent),var(--accent-2));-webkit-background-clip:text;background-clip:text;color:transparent;font-weight:700}p.subtitle{margin:0 0 .8rem;color:var(--text-soft);font-size:1.05rem;max-width:720px}
+.theme-toggle{position:absolute;top:1.4rem;right:1.5rem;background:var(--panel-2);color:var(--text);border:1px solid var(--border);padding:.4rem .8rem;border-radius:999px;cursor:pointer;font-size:.85rem;font-weight:500;display:inline-flex;align-items:center;gap:.35rem;transition:all .2s ease}.theme-toggle:hover{border-color:var(--accent);color:var(--accent)}
+nav.anchors{position:sticky;top:0;z-index:20;background:color-mix(in srgb,var(--panel) 92%,transparent);backdrop-filter:saturate(150%) blur(8px);-webkit-backdrop-filter:saturate(150%) blur(8px);border-bottom:1px solid var(--border)}nav.anchors ul{display:flex;gap:.25rem;overflow-x:auto;list-style:none;padding:.55rem 1.5rem;margin:0 auto;max-width:1120px;scrollbar-width:thin}nav.anchors a{display:block;padding:.35rem .75rem;border-radius:8px;color:var(--text-soft);text-decoration:none;font-size:.85rem;font-weight:500;white-space:nowrap;transition:all .15s ease}nav.anchors a:hover{color:var(--accent);background:var(--panel-2)}
+main{max-width:1120px;margin:1.2rem auto 3rem;padding:0 1.5rem}
+section.widget{background:var(--panel);border:1px solid var(--border);border-radius:16px;padding:1.5rem 1.4rem 1.3rem;margin-bottom:1.5rem;box-shadow:var(--shadow)}.section-tag{display:inline-block;font-family:'JetBrains Mono',monospace;font-size:.72rem;color:var(--accent);background:color-mix(in srgb,var(--accent) 12%,transparent);padding:.2rem .55rem;border-radius:6px;margin-bottom:.6rem;font-weight:500}.widget h2{margin:0 0 .2rem;font-size:1.35rem;font-weight:600;color:var(--accent-2)}.widget .lede{margin:0 0 1rem;color:var(--text-soft);font-size:.97rem;max-width:780px}
+.controls{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:.9rem 1.2rem;padding:.9rem 1rem;background:var(--panel-2);border-radius:10px;margin-bottom:1rem}.ctrl{display:flex;flex-direction:column;gap:.3rem}.ctrl label{font-size:.78rem;font-weight:500;color:var(--text-soft);text-transform:uppercase;letter-spacing:.05em}.ctrl select{font-family:inherit;font-size:.9rem;padding:.4rem .55rem;border-radius:8px;border:1px solid var(--border);background:var(--panel);color:var(--text)}
+.toggle-group{display:inline-flex;gap:.25rem;background:var(--panel);padding:3px;border-radius:10px;border:1px solid var(--border)}.toggle-group button{background:transparent;border:none;color:var(--text-soft);padding:.32rem .75rem;border-radius:7px;font-family:inherit;font-size:.85rem;cursor:pointer;transition:all .15s ease}.toggle-group button.active{background:var(--accent);color:#fff;font-weight:500}
+.callout{background:color-mix(in srgb,var(--accent-2) 8%,transparent);border-left:3px solid var(--accent-2);padding:.7rem .9rem;border-radius:8px;font-size:.9rem;color:var(--text-soft);margin:.9rem 0 .2rem}.callout strong{color:var(--accent-2)}
+.try-this{background:color-mix(in srgb,var(--accent) 8%,transparent);border-left:3px solid var(--accent);padding:.7rem .9rem;border-radius:8px;font-size:.9rem;color:var(--text-soft);margin:.7rem 0 .2rem}.try-this .try-title{font-weight:600;color:var(--accent);font-size:.78rem;letter-spacing:.08em;text-transform:uppercase;margin-bottom:.3rem}.try-this ol{margin:0;padding-left:1.25rem}.try-this li{margin:.2rem 0}
+.widget-head{display:flex;align-items:flex-start;justify-content:space-between;gap:.5rem;margin-bottom:.2rem}.widget-head>div{flex:1;min-width:0}.reset-btn{background:transparent;color:var(--text-muted);border:1px solid var(--border);padding:.3rem .7rem;border-radius:8px;font-family:inherit;font-size:.8rem;cursor:pointer;white-space:nowrap;transition:all .15s ease}.reset-btn:hover{color:var(--accent);border-color:var(--accent)}
+.chart{width:100%;min-height:340px}.chart.tall{min-height:420px}.chart.short{min-height:280px}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:1rem}@media(max-width:720px){.two-col{grid-template-columns:1fr}}
+.fit-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:.5rem;margin:.5rem 0}.fit-stat{background:var(--panel-2);padding:.55rem .7rem;border-radius:10px;border-left:3px solid var(--accent)}.fit-stat .fs-label{font-size:.68rem;text-transform:uppercase;letter-spacing:.06em;color:var(--text-muted)}.fit-stat .fs-value{font-family:'JetBrains Mono',monospace;font-size:1rem;font-weight:500;color:var(--text);margin-top:.1rem}.fit-stat.warn{border-left-color:var(--accent-3)}.fit-stat.good{border-left-color:var(--accent)}
+.reg-table{width:100%;border-collapse:collapse;font-family:'JetBrains Mono',monospace;font-size:.82rem;margin:.5rem 0}.reg-table th{text-align:left;padding:.5rem .6rem;border-bottom:2px solid var(--border);color:var(--text-muted);font-size:.72rem;text-transform:uppercase;letter-spacing:.05em;font-weight:600}.reg-table td{padding:.4rem .6rem;border-bottom:1px solid var(--border);color:var(--text)}.reg-table tr:hover td{background:var(--panel-2)}.reg-table .sig{color:var(--accent);font-weight:600}.reg-table .insig{color:var(--text-muted)}
+footer.page{max-width:1120px;margin:1rem auto 3rem;padding:0 1.5rem;color:var(--text-muted);font-size:.88rem;text-align:center}footer.page a{color:var(--accent);text-decoration:none}footer.page a:hover{text-decoration:underline}.scroll-top{display:inline-block;font-size:.78rem;color:var(--text-muted);text-decoration:none;margin-top:.4rem}.scroll-top:hover{color:var(--accent)}
+</style>
+</head>
+<body>
+<header class="page"><div class="page-inner"><span class="chapter-badge">Chapter 17 of 18 · Interactive Dashboard</span><h1 class="title">Panel Data, Time Series Data, Causation</h1><p class="subtitle">Explore between vs within variation, compare standard errors, watch fixed effects remove bias, and see how first differencing cures spurious regression — using NBA revenue and U.S. interest rate data.</p></div><button id="theme-toggle" class="theme-toggle" type="button" aria-label="Toggle color theme"><span id="theme-icon">🌙</span><span id="theme-label">Dark</span></button></header>
+
+<nav class="anchors" aria-label="Sections"><ul>
+  <li><a href="#variance">Variance decomp</a></li>
+  <li><a href="#cluster">Cluster SEs</a></li>
+  <li><a href="#poolfe">Pooled vs FE</a></li>
+  <li><a href="#timeseries">Time series</a></li>
+  <li><a href="#acf">Autocorrelation</a></li>
+  <li><a href="#spurious">Levels vs changes</a></li>
+  <li><a href="#adl">ADL model</a></li>
+</ul></nav>
+
+<main>
+
+<!-- ===================== 1. VARIANCE DECOMPOSITION ===================== -->
+<section class="widget" id="variance">
+  <div class="widget-head"><div><span class="section-tag">§ 17.2 · Key Concept 17.1</span><h2>Panel data variance decomposition</h2></div></div>
+  <p class="lede">Panel data has two sources of variation: <em>between</em> (differences across individuals in their averages) and <em>within</em> (deviations from each individual's average over time). Pooled OLS uses both; fixed effects uses only within.</p>
+  <div class="chart short" id="variance-chart"></div>
+  <div class="callout" id="variance-callout"></div>
+  <div class="try-this"><div class="try-title">Try this</div><ol>
+    <li>Log revenue: between SD (0.21) is twice the within SD (0.11). Most variation in NBA revenue is <em>across</em> teams, not over time.</li>
+    <li>Wins: between SD and within SD are closer. Team performance fluctuates substantially from season to season.</li>
+    <li>Fixed effects uses only the within bars. If within variation is small, FE estimates are less precise.</li>
+  </ol></div>
+</section>
+
+<!-- ===================== 2. CLUSTER SEs ===================== -->
+<section class="widget" id="cluster">
+  <div class="widget-head"><div><span class="section-tag">§ 17.2 · Key Concept 17.2</span><h2>Standard error comparison — why clustering matters</h2></div></div>
+  <p class="lede">In panel data, observations within the same team are correlated over time. Default SEs ignore this, producing artificially small standard errors. Cluster-robust SEs account for within-team correlation.</p>
+  <div class="chart short" id="cluster-chart"></div>
+  <div class="callout" id="cluster-callout"></div>
+  <div class="try-this"><div class="try-title">Try this</div><ol>
+    <li>The cluster SE is 1.81× larger than the default. That's enough to change the conclusion about statistical significance.</li>
+    <li>The robust (HC1) SE is only 1.15× larger — it corrects for heteroskedasticity but not for within-team correlation.</li>
+    <li>With cluster SEs, the wins coefficient is still significant (p = 0.0004). But the confidence interval is almost twice as wide.</li>
+  </ol></div>
+</section>
+
+<!-- ===================== 3. POOLED OLS vs FIXED EFFECTS ===================== -->
+<section class="widget" id="poolfe">
+  <div class="widget-head"><div><span class="section-tag">§ 17.3 · Key Concepts 17.3 &amp; 17.4</span><h2>Pooled OLS vs fixed effects</h2></div><button type="button" class="reset-btn" data-reset="poolfe">↺ Reset</button></div>
+  <p class="lede">Pooled OLS treats all 286 observations as independent. Fixed effects adds team-specific intercepts, removing the between-team variation that could confound the wins–revenue relationship.</p>
+  <div class="controls"><div class="ctrl"><label>View</label>
+    <div class="toggle-group" id="poolfe-view"><button type="button" data-val="pooled" class="active">Pooled OLS</button><button type="button" data-val="fe">Fixed Effects</button><button type="button" data-val="both">Both</button></div>
+  </div></div>
+  <div class="fit-stats" id="poolfe-fit"></div>
+  <div class="chart" id="poolfe-chart"></div>
+  <div class="callout" id="poolfe-callout"></div>
+  <div class="try-this"><div class="try-title">Try this</div><ol>
+    <li>Pooled OLS: wins coef = 0.0068 — an extra win is associated with 0.68% higher revenue. But this mixes between and within variation.</li>
+    <li>Switch to FE: wins coef = 0.0045 — smaller. FE removes confounding from persistent team characteristics (market size, arena, brand).</li>
+    <li>Toggle "Both": the FE line is flatter. Pooled OLS overstates the effect because big-market teams win more AND earn more.</li>
+    <li>FE R² (within) = 0.19. Only 19% of within-team revenue variation is explained by wins alone.</li>
+  </ol></div>
+</section>
+
+<!-- ===================== 4. TIME SERIES ===================== -->
+<section class="widget" id="timeseries">
+  <div class="widget-head"><div><span class="section-tag">§ 17.5 · Key Concept 17.5</span><h2>Interest rates — levels vs changes</h2></div><button type="button" class="reset-btn" data-reset="timeseries">↺ Reset</button></div>
+  <p class="lede">Levels of interest rates trend together (non-stationary). First differences remove the trend, producing stationary series that fluctuate around zero. Regressing non-stationary levels produces a spurious R².</p>
+  <div class="controls"><div class="ctrl"><label>View</label>
+    <div class="toggle-group" id="ts-view"><button type="button" data-val="levels" class="active">Levels</button><button type="button" data-val="changes">Changes (Δ)</button></div>
+  </div></div>
+  <div class="chart tall" id="timeseries-chart"></div>
+  <div class="callout" id="timeseries-callout"></div>
+  <div class="try-this"><div class="try-title">Try this</div><ol>
+    <li>Levels: both rates trend downward from ~14% in 1982 to ~2% by 2015. This shared trend inflates R².</li>
+    <li>Switch to Changes: the series fluctuate around zero with no visible trend — this is stationarity.</li>
+    <li>The amplitude of monthly changes is small (±1 pp) compared to the 12-point range in levels.</li>
+  </ol></div>
+</section>
+
+<!-- ===================== 5. AUTOCORRELATION ===================== -->
+<section class="widget" id="acf">
+  <div class="widget-head"><div><span class="section-tag">§ 17.6 · Key Concept 17.6</span><h2>Autocorrelation — the smoking gun of non-stationarity</h2></div><button type="button" class="reset-btn" data-reset="acf">↺ Reset</button></div>
+  <p class="lede">A correlogram (ACF plot) reveals how strongly residuals at lag <em>k</em> correlate with the current residual. Slowly decaying bars are the signature of non-stationarity; bars dropping quickly to zero indicate a well-specified model.</p>
+  <div class="controls"><div class="ctrl"><label>Model residuals</label>
+    <div class="toggle-group" id="acf-model"><button type="button" data-val="levels" class="active">Levels</button><button type="button" data-val="changes">Changes</button><button type="button" data-val="adl">ADL(2,2)</button></div>
+  </div></div>
+  <div class="chart" id="acf-chart"></div>
+  <div class="callout" id="acf-callout"></div>
+  <div class="try-this"><div class="try-title">Try this</div><ol>
+    <li>Levels: ACF at lag 1 = 0.98, at lag 10 still above 0.80. These residuals are highly persistent — the levels regression is spurious.</li>
+    <li>Switch to Changes: ACF drops to 0.25 at lag 1 and mostly stays within the confidence bands after lag 3.</li>
+    <li>Switch to ADL(2,2): ACF at lag 1 = 0.02 — virtually zero. The autoregressive terms have absorbed the serial correlation.</li>
+  </ol></div>
+</section>
+
+<!-- ===================== 6. LEVELS vs CHANGES SCATTER ===================== -->
+<section class="widget" id="spurious">
+  <div class="widget-head"><div><span class="section-tag">§ 17.5 – § 17.7 · Key Concepts 17.5 &amp; 17.7</span><h2>Spurious regression — R² that lies</h2></div><button type="button" class="reset-btn" data-reset="spurious">↺ Reset</button></div>
+  <p class="lede">Regressing 10-year on 1-year rates in levels gives R² = 0.91 — impressive but misleading. The same regression in changes gives R² = 0.57. The difference is the spurious correlation from shared trends.</p>
+  <div class="controls"><div class="ctrl"><label>Regression</label>
+    <div class="toggle-group" id="spurious-reg"><button type="button" data-val="levels" class="active">Levels (gs10 ~ gs1)</button><button type="button" data-val="changes">Changes (Δgs10 ~ Δgs1)</button></div>
+  </div></div>
+  <div class="fit-stats" id="spurious-fit"></div>
+  <div class="chart" id="spurious-chart"></div>
+  <div class="callout" id="spurious-callout"></div>
+  <div class="try-this"><div class="try-title">Try this</div><ol>
+    <li>Levels: R² = 0.91, slope = 0.84. But the residuals are highly autocorrelated (ACF1 = 0.98) — the R² is inflated.</li>
+    <li>Switch to Changes: R² = 0.57, slope = 0.72. Lower but honest — the residual autocorrelation drops to 0.25.</li>
+    <li>The levels SE (default) is 0.013 — absurdly small. HAC SE is 0.045 (3.4× larger). Default SEs are untrustworthy with non-stationary data.</li>
+    <li>The changes slope (0.72) is a more reliable estimate of how monthly rate movements co-move.</li>
+  </ol></div>
+</section>
+
+<!-- ===================== 7. ADL MODEL ===================== -->
+<section class="widget" id="adl">
+  <div class="widget-head"><div><span class="section-tag">§ 17.6 – § 17.7 · Key Concept 17.7</span><h2>ADL(2,2) model — dynamic multipliers</h2></div></div>
+  <p class="lede">An autoregressive distributed lag model adds own lags and predictor lags. The impact multiplier is the contemporaneous effect; cumulative multipliers show how the total effect builds over time.</p>
+  <div class="two-col">
+    <div><div class="chart short" id="adl-coef-chart"></div></div>
+    <div><div class="chart short" id="adl-mult-chart"></div></div>
+  </div>
+  <div class="callout" id="adl-callout"></div>
+  <div class="try-this"><div class="try-title">Try this</div><ol>
+    <li>The impact multiplier (γ₀ = 0.86) means a 1 pp change in the 1-year rate immediately moves the 10-year rate by 0.86 pp.</li>
+    <li>After 1 month, the cumulative effect is 0.31 (γ₀ + γ₁) — actually <em>less</em> because γ₁ is negative (partial reversal).</li>
+    <li>After 2 months, it recovers to 0.54 as γ₂ is positive again. Interest rate transmission is not monotonic.</li>
+    <li>The ADL(2,2) eliminates residual autocorrelation (ACF1 = 0.02) — a well-specified dynamic model.</li>
+  </ol></div>
+</section>
+
+</main>
+
+<footer class="page">
+  <p>Part of <a href="https://quarcs-lab.github.io/metricsai/book/_book/index.html"><strong>metricsAI</strong></a> · Chapter 17: Panel Data, Time Series Data, Causation · by Carlos Mendez · <a href="https://github.com/quarcs-lab/metricsai">GitHub</a></p>
+  <a class="scroll-top" href="#variance">↑ Back to top</a>
+</footer>
+
+<script type="application/json" id="ch-data">{"nba":{"lnrevenue":[4.9684,4.9298,5.0341,4.9215,4.9516,4.9498,5.0139,5.1249,5.1385,5.0753,4.9944,5.001,5.0341,5.0701,5.054,5.0921,5.0992,5.0908,5.1931,5.235,4.6895,4.7049,4.7105,4.7843,4.8376,4.8954,4.8676,4.9065,4.9024,4.9581,4.5985,4.688,4.6605,4.6919,4.7753,4.7557,4.7921,4.8195,4.7562,4.8498,4.5089,4.5005,4.5427,4.5721,4.5432,4.5762,4.7656,4.7524,4.7898,4.7214,4.5089,4.4367,4.4309,4.6507,4.7164,4.6892,4.6368,4.6188,4.5928,4.8004,4.3513,4.3325,4.7267,4.8204,4.7895,4.818,4.8115,4.8577,4.803,4.7484,4.2072,4.1743,4.2291,4.2661,4.3223,4.4487,4.4801,4.5099,4.5517,4.6723,4.3634,4.5798,4.5805,4.6674,4.6377,4.6892,4.6889,4.6729,4.6778,4.6723,4.6174,4.6172,4.6079,4.7544,4.7164,4.7908,4.7588,4.7798,4.763,4.6504,4.3513,4.3078,4.2551,4.2783,4.3223,4.3358,4.3668,4.4554,4.4547,4.6794,4.5089,4.5005,4.3757,4.2283,4.1774,4.2207,4.4978,4.5783,4.6167,4.6206,4.4554,4.4691,4.4309,4.3375,4.3662,4.439,4.3466,4.3043,4.2612,4.2264,4.2884,4.1743,4.1888,4.2661,4.2281,4.2085,4.1683,4.4921,4.5432,4.5741,4.4105,4.3685,4.3757,4.3825,4.398,4.5502,4.5407,4.5532,4.5683,4.5253,4.4984,4.5508,4.6941,4.7694,4.7609,4.851,4.8368,4.9242,4.763,4.6865,4.314,4.2025,4.4309,4.4966,4.5786,4.8379,4.8305,4.8515,4.854,4.7417,4.5397,4.5108,4.4416,4.535,4.5158,4.5325,4.5323,4.483,4.4454,4.4291,4.235,4.2025,4.2422,4.2904,4.3875,4.399,4.3567,4.4075,4.3975,4.4199,4.2621,4.2433,4.387,4.4149,4.4388,4.4584,4.4801,4.5275,4.4999,4.4652,4.608,4.6172,4.5712,4.5721,4.5341,4.5325,4.5152,4.5275,4.473,4.4914,4.5695,4.5508,4.669,4.6507,4.6699,4.666,4.5238,4.4739,4.4073,4.3822,4.1034,4.3078,4.2804,4.2283,4.2525,4.3249,4.3155,4.3364,4.3777,4.4291,4.4554,4.4691,4.5427,4.5537,4.5341,4.4868,4.3767,4.3573,4.3264,4.3529,4.3223,4.3466,4.3155,4.3469,4.3575,4.3529,4.3872,4.3685,4.4731,4.4867,4.4684,4.4487,4.3668,4.3469,4.3264,4.3125,4.314,4.2825,4.3172,4.3375,4.3554,4.3679,4.3866,4.4075,4.4265,4.4291,4.1342,4.069,4.2158,4.4566,4.4488,4.399,4.3155,4.2599,4.2943,4.3329,4.1493,4.1743,4.2422,4.2283,4.2995,4.2914,4.3049,4.2934,4.2943,4.2596],"wins":[56.0,58.0,50.0,56.0,34.0,45.0,42.0,57.0,65.0,57.0,48.0,30.0,37.0,39.0,33.0,23.0,33.0,23.0,32.0,29.0,15.0,21.0,30.0,23.0,47.0,41.0,49.0,33.0,41.0,41.0,53.0,57.0,60.0,52.0,58.0,60.0,67.0,51.0,50.0,55.0,36.0,49.0,44.0,36.0,45.0,33.0,24.0,66.0,62.0,50.0,50.0,36.0,25.0,42.0,59.0,52.0,44.0,15.0,43.0,47.0,45.0,28.0,43.0,45.0,51.0,34.0,52.0,55.0,53.0,9.0,17.0,21.0,38.0,37.0,34.0,34.0,42.0,48.0,29.0,26.0,58.0,58.0,60.0,57.0,59.0,63.0,58.0,56.0,54.0,50.0,51.0,36.0,44.0,29.0,62.0,54.0,61.0,55.0,46.0,54.0,43.0,44.0,42.0,21.0,36.0,36.0,40.0,52.0,59.0,59.0,50.0,49.0,50.0,41.0,27.0,21.0,32.0,41.0,54.0,50.0,26.0,52.0,49.0,47.0,42.0,49.0,41.0,34.0,34.0,12.0,44.0,45.0,40.0,37.0,52.0,35.0,31.0,20.0,23.0,50.0,53.0,44.0,47.0,42.0,26.0,41.0,51.0,54.0,48.0,53.0,32.0,50.0,50.0,54.0,54.0,64.0,53.0,59.0,39.0,27.0,30.0,29.0,17.0,35.0,42.0,50.0,50.0,45.0,66.0,61.0,19.0,37.0,37.0,25.0,45.0,42.0,41.0,43.0,19.0,26.0,31.0,39.0,27.0,28.0,37.0,47.0,40.0,23.0,19.0,29.0,40.0,27.0,17.0,43.0,49.0,44.0,45.0,50.0,54.0,53.0,56.0,43.0,48.0,33.0,43.0,38.0,35.0,40.0,41.0,27.0,55.0,61.0,59.0,55.0,50.0,44.0,33.0,38.0,17.0,25.0,46.0,44.0,47.0,41.0,18.0,38.0,39.0,56.0,49.0,37.0,41.0,42.0,48.0,61.0,44.0,41.0,35.0,36.0,36.0,32.0,18.0,26.0,33.0,32.0,35.0,44.0,47.0,50.0,51.0,58.0,44.0,33.0,32.0,22.0,24.0,15.0,25.0,33.0,35.0,28.0,13.0,26.0,30.0,37.0,47.0,53.0,23.0,23.0,28.0,50.0,45.0,49.0,22.0,22.0,24.0,40.0,52.0,41.0,42.0,41.0,30.0,40.0,28.0,26.0,34.0,46.0],"teamid":[1,1,1,1,1,1,1,1,1,1,2,2,2,2,2,2,2,2,2,2,3,3,3,3,3,3,3,3,3,3,4,4,4,4,4,4,4,4,4,4,5,5,5,5,5,5,5,5,5,5,6,6,6,6,6,6,6,6,6,6,7,7,7,7,7,7,7,7,7,7,8,8,8,8,8,8,8,8,8,8,9,9,9,9,9,9,9,9,9,9,10,10,10,10,10,10,10,10,10,10,11,11,11,11,11,11,11,11,11,11,12,12,12,12,12,12,12,12,12,12,13,13,13,13,13,13,13,13,13,13,14,14,14,14,14,14,14,14,14,14,15,15,15,15,15,15,15,15,15,15,16,16,16,16,16,16,16,16,16,16,17,17,17,17,17,17,17,17,17,17,18,18,18,18,18,18,18,18,18,18,19,19,19,19,19,19,19,19,19,19,20,20,20,20,20,20,20,20,20,20,21,21,21,21,21,21,21,21,21,21,22,22,22,22,22,22,22,22,22,22,23,23,23,23,23,23,23,23,23,23,24,24,24,24,24,24,24,24,24,24,25,25,25,25,25,25,26,26,26,26,26,26,26,26,26,26,27,27,27,27,27,27,27,27,27,27,28,28,28,28,28,28,28,28,28,28,29,29,29,29,29,29,29,29,29,29],"team":["Lakers","Lakers","Lakers","Lakers","Lakers","Lakers","Lakers","Lakers","Lakers","Lakers","Knicks","Knicks","Knicks","Knicks","Knicks","Knicks","Knicks","Knicks","Knicks","Knicks","Bulls","Bulls","Bulls","Bulls","Bulls","Bulls","Bulls","Bulls","Bulls","Bulls","Mavericks","Mavericks","Mavericks","Mavericks","Mavericks","Mavericks","Mavericks","Mavericks","Mavericks","Mavericks","Celtics","Celtics","Celtics","Celtics","Celtics","Celtics","Celtics","Celtics","Celtics","Celtics","Heat","Heat","Heat","Heat","Heat","Heat","Heat","Heat","Heat","Heat","Rockets","Rockets","Rockets","Rockets","Rockets","Rockets","Rockets","Rockets","Rockets","Rockets","Warriors","Warriors","Warriors","Warriors","Warriors","Warriors","Warriors","Warriors","Warriors","Warriors","Spurs","Spurs","Spurs","Spurs","Spurs","Spurs","Spurs","Spurs","Spurs","Spurs","Suns","Suns","Suns","Suns","Suns","Suns","Suns","Suns","Suns","Suns","Magic","Magic","Magic","Magic","Magic","Magic","Magic","Magic","Magic","Magic","TrailBlazers","TrailBlazers","TrailBlazers","TrailBlazers","TrailBlazers","TrailBlazers","TrailBlazers","TrailBlazers","TrailBlazers","TrailBlazers","Nets","Nets","Nets","Nets","Nets","Nets","Nets","Nets","Nets","Nets","SonicsThunder","SonicsThunder","SonicsThunder","SonicsThunder","SonicsThunder","SonicsThunder","SonicsThunder","SonicsThunder","SonicsThunder","SonicsThunder","Jazz","Jazz","Jazz","Jazz","Jazz","Jazz","Jazz","Jazz","Jazz","Jazz","Pistons","Pistons","Pistons","Pistons","Pistons","Pistons","Pistons","Pistons","Pistons","Pistons","Cavaliers","Cavaliers","Cavaliers","Cavaliers","Cavaliers","Cavaliers","Cavaliers","Cavaliers","Cavaliers","Cavaliers","Wizards","Wizards","Wizards","Wizards","Wizards","Wizards","Wizards","Wizards","Wizards","Wizards","Clippers","Clippers","Clippers","Clippers","Clippers","Clippers","Clippers","Clippers","Clippers","Clippers","Nuggets","Nuggets","Nuggets","Nuggets","Nuggets","Nuggets","Nuggets","Nuggets","Nuggets","Nuggets","76ers","76ers","76ers","76ers","76ers","76ers","76ers","76ers","76ers","76ers","Kings","Kings","Kings","Kings","Kings","Kings","Kings","Kings","Kings","Kings","Hornets","Hornets","Hornets","Hornets","Hornets","Hornets","Hornets","Hornets","Hornets","Hornets","Pacers","Pacers","Pacers","Pacers","Pacers","Pacers","Pacers","Pacers","Pacers","Pacers","Bobcats","Bobcats","Bobcats","Bobcats","Bobcats","Bobcats","Timberwolves","Timberwolves","Timberwolves","Timberwolves","Timberwolves","Timberwolves","Timberwolves","Timberwolves","Timberwolves","Timberwolves","Hawks","Hawks","Hawks","Hawks","Hawks","Hawks","Hawks","Hawks","Hawks","Hawks","Grizzlies","Grizzlies","Grizzlies","Grizzlies","Grizzlies","Grizzlies","Grizzlies","Grizzlies","Grizzlies","Grizzlies","Bucks","Bucks","Bucks","Bucks","Bucks","Bucks","Bucks","Bucks","Bucks","Bucks"],"season":[1,2,3,4,5,6,7,8,9,10,1,2,3,4,5,6,7,8,9,10,1,2,3,4,5,6,7,8,9,10,1,2,3,4,5,6,7,8,9,10,1,2,3,4,5,6,7,8,9,10,1,2,3,4,5,6,7,8,9,10,1,2,3,4,5,6,7,8,9,10,1,2,3,4,5,6,7,8,9,10,1,2,3,4,5,6,7,8,9,10,1,2,3,4,5,6,7,8,9,10,1,2,3,4,5,6,7,8,9,10,1,2,3,4,5,6,7,8,9,10,1,2,3,4,5,6,7,8,9,10,1,2,3,4,5,6,7,8,9,10,1,2,3,4,5,6,7,8,9,10,1,2,3,4,5,6,7,8,9,10,1,2,3,4,5,6,7,8,9,10,1,2,3,4,5,6,7,8,9,10,1,2,3,4,5,6,7,8,9,10,1,2,3,4,5,6,7,8,9,10,1,2,3,4,5,6,7,8,9,10,1,2,3,4,5,6,7,8,9,10,1,2,3,4,5,6,7,8,9,10,1,2,3,4,5,6,7,8,9,10,5,6,7,8,9,10,1,2,3,4,5,6,7,8,9,10,1,2,3,4,5,6,7,8,9,10,1,2,3,4,5,6,7,8,9,10,1,2,3,4,5,6,7,8,9,10],"n_teams":29,"n_seasons":10,"n_obs":286,"variance":{"lnrevenue":{"overall":0.236,"between":0.2127,"within":0.1085},"wins":{"overall":12.44,"between":7.04,"within":10.36}},"pooled":{"coef":0.006753,"intercept":4.2552,"r2":0.1267,"se_default":0.001052,"se_robust":0.001022,"se_cluster":0.001909,"t_default":6.4179,"t_robust":6.6091,"t_cluster":3.5379,"p_default":0.0,"p_robust":0.0,"p_cluster":0.0004},"fe":{"coef":0.004505,"r2_within":0.1851,"se_cluster":0.00084,"se_default":0.00056,"t_cluster":5.3628,"p_cluster":0.0},"demeaned_lnrev":[-0.0423,-0.081,0.0234,-0.0893,-0.0592,-0.061,0.0031,0.1141,0.1277,0.0645,-0.092,-0.0854,-0.0522,-0.0163,-0.0324,0.0058,0.0128,0.0044,0.1067,0.1486,-0.1362,-0.1207,-0.1152,-0.0414,0.0119,0.0697,0.0419,0.0808,0.0768,0.1325,-0.1402,-0.0507,-0.0782,-0.0468,0.0365,0.0169,0.0533,0.0808,0.0174,0.111,-0.1184,-0.1267,-0.0845,-0.0552,-0.0841,-0.0511,0.1383,0.1251,0.1625,0.0941,-0.0993,-0.1715,-0.1772,0.0426,0.1083,0.081,0.0286,0.0107,-0.0154,0.1922,-0.3546,-0.3733,0.0208,0.1145,0.0836,0.1121,0.1056,0.1518,0.0971,0.0425,-0.1789,-0.2119,-0.1571,-0.1201,-0.0639,0.0626,0.0939,0.1238,0.1655,0.2861,-0.2596,-0.0432,-0.0425,0.0444,0.0147,0.0662,0.0659,0.0499,0.0548,0.0493,-0.0882,-0.0884,-0.0977,0.0488,0.0108,0.0851,0.0532,0.0742,0.0574,-0.0552,-0.0294,-0.0728,-0.1256,-0.1024,-0.0584,-0.0449,-0.0139,0.0747,0.074,0.2987,0.0764,0.068,-0.0568,-0.2042,-0.2551,-0.2118,0.0653,0.1458,0.1842,0.1881,0.0917,0.1054,0.0673,-0.0262,0.0026,0.0753,-0.0171,-0.0593,-0.1025,-0.1372,-0.0248,-0.1389,-0.1244,-0.0471,-0.0851,-0.1047,-0.1448,0.1789,0.23,0.2609,-0.0568,-0.0988,-0.0916,-0.0848,-0.0693,0.0829,0.0734,0.0859,0.101,0.058,-0.2351,-0.1827,-0.0394,0.0359,0.0274,0.1174,0.1033,0.1907,0.0295,-0.047,-0.2998,-0.4113,-0.1829,-0.1172,-0.0352,0.2241,0.2167,0.2376,0.2401,0.1279,0.0432,0.0143,-0.0549,0.0385,0.0192,0.036,0.0358,-0.0135,-0.0512,-0.0674,-0.0988,-0.1313,-0.0917,-0.0434,0.0537,0.0652,0.0229,0.0737,0.0637,0.0861,-0.1557,-0.1744,-0.0307,-0.0028,0.0211,0.0407,0.0624,0.1098,0.0822,0.0475,0.0638,0.073,0.027,0.0279,-0.0101,-0.0117,-0.029,-0.0167,-0.0712,-0.0528,0.0132,-0.0055,0.1127,0.0944,0.1136,0.1097,-0.0325,-0.0824,-0.149,-0.1741,-0.1922,0.0122,-0.0152,-0.0673,-0.0431,0.0293,0.0199,0.0408,0.0821,0.1335,0.0099,0.0236,0.0972,0.1082,0.0886,0.0413,-0.0688,-0.0883,-0.1191,-0.0926,-0.018,0.0063,-0.0248,0.0066,0.0172,0.0126,-0.0113,-0.03,0.0745,0.0882,0.0698,0.0502,-0.0317,-0.0516,-0.0721,-0.086,-0.0484,-0.0799,-0.0452,-0.0249,-0.007,0.0055,0.0242,0.0451,0.0641,0.0667,-0.1584,-0.2236,-0.0768,0.164,0.1562,0.1064,0.0229,-0.0327,0.0017,0.0403,-0.1045,-0.0794,-0.0116,-0.0254,0.0458,0.0376,0.0512,0.0397,0.0406,0.0059],"demeaned_wins":[4.0,6.0,-2.0,4.0,-18.0,-7.0,-10.0,5.0,13.0,5.0,15.3,-2.7,4.3,6.3,0.3,-9.7,0.3,-9.7,-0.7,-3.7,-19.1,-13.1,-4.1,-11.1,12.9,6.9,14.9,-1.1,6.9,6.9,-3.3,0.7,3.7,-4.3,1.7,3.7,10.7,-5.3,-6.3,-1.3,-8.5,4.5,-0.5,-8.5,0.5,-11.5,-20.5,21.5,17.5,5.5,8.7,-5.3,-16.3,0.7,17.7,10.7,2.7,-26.3,1.7,5.7,3.5,-13.5,1.5,3.5,9.5,-7.5,10.5,13.5,11.5,-32.5,-15.6,-11.6,5.4,4.4,1.4,1.4,9.4,15.4,-3.6,-6.6,0.7,0.7,2.7,-0.3,1.7,5.7,0.7,-1.3,-3.3,-7.3,1.8,-13.2,-5.2,-20.2,12.8,4.8,11.8,5.8,-3.2,4.8,-0.2,0.8,-1.2,-22.2,-7.2,-7.2,-3.2,8.8,15.8,15.8,8.5,7.5,8.5,-0.5,-14.5,-20.5,-9.5,-0.5,12.5,8.5,-12.6,13.4,10.4,8.4,3.4,10.4,2.4,-4.6,-4.6,-26.6,6.3,7.3,2.3,-0.7,14.3,-2.7,-6.7,-17.7,-14.7,12.3,7.1,-1.9,1.1,-3.9,-19.9,-4.9,5.1,8.1,2.1,7.1,-16.2,1.8,1.8,5.8,5.8,15.8,4.8,10.8,-9.2,-21.2,-12.5,-13.5,-25.5,-7.5,-0.5,7.5,7.5,2.5,23.5,18.5,-14.4,3.6,3.6,-8.4,11.6,8.6,7.6,9.6,-14.4,-7.4,-1.0,7.0,-5.0,-4.0,5.0,15.0,8.0,-9.0,-13.0,-3.0,-2.2,-15.2,-25.2,0.8,6.8,1.8,2.8,7.8,11.8,10.8,15.6,2.6,7.6,-7.4,2.6,-2.4,-5.4,-0.4,0.6,-13.4,11.3,17.3,15.3,11.3,6.3,0.3,-10.7,-5.7,-26.7,-18.7,4.5,2.5,5.5,-0.5,-23.5,-3.5,-2.5,14.5,7.5,-4.5,-0.6,0.4,6.4,19.4,2.4,-0.6,-6.6,-5.6,-5.6,-9.6,-13.3,-5.3,1.7,0.7,3.7,12.7,9.4,12.4,13.4,20.4,6.4,-4.6,-5.6,-15.6,-13.6,-22.6,-7.7,0.3,2.3,-4.7,-19.7,-6.7,-2.7,4.3,14.3,20.3,-9.6,-9.6,-4.6,17.4,12.4,16.4,-10.6,-10.6,-8.6,7.4,14.0,3.0,4.0,3.0,-8.0,2.0,-10.0,-12.0,-4.0,8.0]},"ts":{"dates":["1982-01-01","1982-02-01","1982-03-01","1982-04-01","1982-05-01","1982-06-01","1982-07-01","1982-08-01","1982-09-01","1982-10-01","1982-11-01","1982-12-01","1983-01-01","1983-02-01","1983-03-01","1983-04-01","1983-05-01","1983-06-01","1983-07-01","1983-08-01","1983-09-01","1983-10-01","1983-11-01","1983-12-01","1984-01-01","1984-02-01","1984-03-01","1984-04-01","1984-05-01","1984-06-01","1984-07-01","1984-08-01","1984-09-01","1984-10-01","1984-11-01","1984-12-01","1985-01-01","1985-02-01","1985-03-01","1985-04-01","1985-05-01","1985-06-01","1985-07-01","1985-08-01","1985-09-01","1985-10-01","1985-11-01","1985-12-01","1986-01-01","1986-02-01","1986-03-01","1986-04-01","1986-05-01","1986-06-01","1986-07-01","1986-08-01","1986-09-01","1986-10-01","1986-11-01","1986-12-01","1987-01-01","1987-02-01","1987-03-01","1987-04-01","1987-05-01","1987-06-01","1987-07-01","1987-08-01","1987-09-01","1987-10-01","1987-11-01","1987-12-01","1988-01-01","1988-02-01","1988-03-01","1988-04-01","1988-05-01","1988-06-01","1988-07-01","1988-08-01","1988-09-01","1988-10-01","1988-11-01","1988-12-01","1989-01-01","1989-02-01","1989-03-01","1989-04-01","1989-05-01","1989-06-01","1989-07-01","1989-08-01","1989-09-01","1989-10-01","1989-11-01","1989-12-01","1990-01-01","1990-02-01","1990-03-01","1990-04-01","1990-05-01","1990-06-01","1990-07-01","1990-08-01","1990-09-01","1990-10-01","1990-11-01","1990-12-01","1991-01-01","1991-02-01","1991-03-01","1991-04-01","1991-05-01","1991-06-01","1991-07-01","1991-08-01","1991-09-01","1991-10-01","1991-11-01","1991-12-01","1992-01-01","1992-02-01","1992-03-01","1992-04-01","1992-05-01","1992-06-01","1992-07-01","1992-08-01","1992-09-01","1992-10-01","1992-11-01","1992-12-01","1993-01-01","1993-02-01","1993-03-01","1993-04-01","1993-05-01","1993-06-01","1993-07-01","1993-08-01","1993-09-01","1993-10-01","1993-11-01","1993-12-01","1994-01-01","1994-02-01","1994-03-01","1994-04-01","1994-05-01","1994-06-01","1994-07-01","1994-08-01","1994-09-01","1994-10-01","1994-11-01","1994-12-01","1995-01-01","1995-02-01","1995-03-01","1995-04-01","1995-05-01","1995-06-01","1995-07-01","1995-08-01","1995-09-01","1995-10-01","1995-11-01","1995-12-01","1996-01-01","1996-02-01","1996-03-01","1996-04-01","1996-05-01","1996-06-01","1996-07-01","1996-08-01","1996-09-01","1996-10-01","1996-11-01","1996-12-01","1997-01-01","1997-02-01","1997-03-01","1997-04-01","1997-05-01","1997-06-01","1997-07-01","1997-08-01","1997-09-01","1997-10-01","1997-11-01","1997-12-01","1998-01-01","1998-02-01","1998-03-01","1998-04-01","1998-05-01","1998-06-01","1998-07-01","1998-08-01","1998-09-01","1998-10-01","1998-11-01","1998-12-01","1999-01-01","1999-02-01","1999-03-01","1999-04-01","1999-05-01","1999-06-01","1999-07-01","1999-08-01","1999-09-01","1999-10-01","1999-11-01","1999-12-01","2000-01-01","2000-02-01","2000-03-01","2000-04-01","2000-05-01","2000-06-01","2000-07-01","2000-08-01","2000-09-01","2000-10-01","2000-11-01","2000-12-01","2001-01-01","2001-02-01","2001-03-01","2001-04-01","2001-05-01","2001-06-01","2001-07-01","2001-08-01","2001-09-01","2001-10-01","2001-11-01","2001-12-01","2002-01-01","2002-02-01","2002-03-01","2002-04-01","2002-05-01","2002-06-01","2002-07-01","2002-08-01","2002-09-01","2002-10-01","2002-11-01","2002-12-01","2003-01-01","2003-02-01","2003-03-01","2003-04-01","2003-05-01","2003-06-01","2003-07-01","2003-08-01","2003-09-01","2003-10-01","2003-11-01","2003-12-01","2004-01-01","2004-02-01","2004-03-01","2004-04-01","2004-05-01","2004-06-01","2004-07-01","2004-08-01","2004-09-01","2004-10-01","2004-11-01","2004-12-01","2005-01-01","2005-02-01","2005-03-01","2005-04-01","2005-05-01","2005-06-01","2005-07-01","2005-08-01","2005-09-01","2005-10-01","2005-11-01","2005-12-01","2006-01-01","2006-02-01","2006-03-01","2006-04-01","2006-05-01","2006-06-01","2006-07-01","2006-08-01","2006-09-01","2006-10-01","2006-11-01","2006-12-01","2007-01-01","2007-02-01","2007-03-01","2007-04-01","2007-05-01","2007-06-01","2007-07-01","2007-08-01","2007-09-01","2007-10-01","2007-11-01","2007-12-01","2008-01-01","2008-02-01","2008-03-01","2008-04-01","2008-05-01","2008-06-01","2008-07-01","2008-08-01","2008-09-01","2008-10-01","2008-11-01","2008-12-01","2009-01-01","2009-02-01","2009-03-01","2009-04-01","2009-05-01","2009-06-01","2009-07-01","2009-08-01","2009-09-01","2009-10-01","2009-11-01","2009-12-01","2010-01-01","2010-02-01","2010-03-01","2010-04-01","2010-05-01","2010-06-01","2010-07-01","2010-08-01","2010-09-01","2010-10-01","2010-11-01","2010-12-01","2011-01-01","2011-02-01","2011-03-01","2011-04-01","2011-05-01","2011-06-01","2011-07-01","2011-08-01","2011-09-01","2011-10-01","2011-11-01","2011-12-01","2012-01-01","2012-02-01","2012-03-01","2012-04-01","2012-05-01","2012-06-01","2012-07-01","2012-08-01","2012-09-01","2012-10-01","2012-11-01","2012-12-01","2013-01-01","2013-02-01","2013-03-01","2013-04-01","2013-05-01","2013-06-01","2013-07-01","2013-08-01","2013-09-01","2013-10-01","2013-11-01","2013-12-01","2014-01-01","2014-02-01","2014-03-01","2014-04-01","2014-05-01","2014-06-01","2014-07-01","2014-08-01","2014-09-01","2014-10-01","2014-11-01","2014-12-01","2015-01-01"],"gs10":[14.59,14.43,13.86,13.87,13.62,14.3,13.95,13.06,12.34,10.91,10.55,10.54,10.46,10.72,10.51,10.4,10.38,10.85,11.38,11.85,11.65,11.54,11.69,11.83,11.67,11.84,12.32,12.63,13.41,13.56,13.36,12.72,12.52,12.16,11.57,11.5,11.38,11.51,11.86,11.43,10.85,10.16,10.31,10.33,10.37,10.24,9.78,9.26,9.19,8.7,7.78,7.3,7.71,7.8,7.3,7.17,7.45,7.43,7.25,7.11,7.08,7.25,7.25,8.02,8.61,8.4,8.45,8.76,9.42,9.52,8.86,8.99,8.67,8.21,8.37,8.72,9.09,8.92,9.06,9.26,8.98,8.8,8.96,9.11,9.09,9.17,9.36,9.18,8.86,8.28,8.02,8.11,8.19,8.01,7.87,7.84,8.21,8.47,8.59,8.79,8.76,8.48,8.47,8.75,8.89,8.72,8.39,8.08,8.09,7.85,8.11,8.04,8.07,8.28,8.27,7.9,7.65,7.53,7.42,7.09,7.03,7.34,7.54,7.48,7.39,7.26,6.84,6.59,6.42,6.59,6.87,6.77,6.6,6.26,5.98,5.97,6.04,5.96,5.81,5.68,5.36,5.33,5.72,5.77,5.75,5.97,6.48,6.97,7.18,7.1,7.3,7.24,7.46,7.74,7.96,7.81,7.78,7.47,7.2,7.06,6.63,6.17,6.28,6.49,6.2,6.04,5.93,5.71,5.65,5.81,6.27,6.51,6.74,6.91,6.87,6.64,6.83,6.53,6.2,6.3,6.58,6.42,6.69,6.89,6.71,6.49,6.22,6.3,6.21,6.03,5.88,5.81,5.54,5.57,5.65,5.64,5.65,5.5,5.46,5.34,4.81,4.53,4.83,4.65,4.72,5.0,5.23,5.18,5.54,5.9,5.79,5.94,5.92,6.11,6.03,6.28,6.66,6.52,6.26,5.99,6.44,6.1,6.05,5.83,5.8,5.74,5.72,5.24,5.16,5.1,4.89,5.14,5.39,5.28,5.24,4.97,4.73,4.57,4.65,5.09,5.04,4.91,5.28,5.21,5.16,4.93,4.65,4.26,3.87,3.94,4.05,4.03,4.05,3.9,3.81,3.96,3.57,3.33,3.98,4.45,4.27,4.29,4.3,4.27,4.15,4.08,3.83,4.35,4.72,4.73,4.5,4.28,4.13,4.1,4.19,4.23,4.22,4.17,4.5,4.34,4.14,4.0,4.18,4.26,4.2,4.46,4.54,4.47,4.42,4.57,4.72,4.99,5.11,5.11,5.09,4.88,4.72,4.73,4.6,4.56,4.76,4.72,4.56,4.69,4.75,5.1,5.0,4.67,4.52,4.53,4.15,4.1,3.74,3.74,3.51,3.68,3.88,4.1,4.01,3.89,3.69,3.81,3.53,2.42,2.52,2.87,2.82,2.93,3.29,3.72,3.56,3.59,3.4,3.39,3.4,3.59,3.73,3.69,3.73,3.85,3.42,3.2,3.01,2.7,2.65,2.54,2.76,3.29,3.39,3.58,3.41,3.46,3.17,3.0,3.0,2.3,1.98,2.15,2.01,1.98,1.97,1.97,2.17,2.05,1.8,1.62,1.53,1.68,1.72,1.75,1.65,1.72,1.91,1.98,1.96,1.76,1.93,2.3,2.58,2.74,2.81,2.62,2.72,2.9,2.86,2.71,2.72,2.71,2.56,2.6,2.54,2.42,2.53,2.3,2.33,2.21,1.88],"gs1":[14.32,14.73,13.95,13.98,13.34,14.07,13.24,11.43,10.85,9.32,9.16,8.91,8.62,8.92,9.04,8.98,8.9,9.66,10.2,10.53,10.16,9.81,9.94,10.11,9.9,10.04,10.59,10.9,11.66,12.08,12.03,11.82,11.58,10.9,9.82,9.33,9.02,9.29,9.86,9.14,8.46,7.8,7.86,8.05,8.07,8.01,7.88,7.67,7.73,7.61,7.03,6.44,6.65,6.73,6.27,5.93,5.77,5.72,5.8,5.87,5.78,5.96,6.03,6.5,7.0,6.8,6.68,7.03,7.67,7.59,6.96,7.17,6.99,6.64,6.71,7.01,7.4,7.49,7.75,8.17,8.09,8.11,8.48,8.99,9.05,9.25,9.57,9.36,8.98,8.44,7.89,8.18,8.22,7.99,7.77,7.72,7.92,8.11,8.35,8.4,8.32,8.1,7.94,7.78,7.76,7.55,7.31,7.05,6.64,6.27,6.4,6.24,6.13,6.36,6.31,5.78,5.57,5.33,4.89,4.38,4.15,4.29,4.63,4.3,4.19,4.17,3.6,3.47,3.18,3.3,3.68,3.71,3.5,3.39,3.33,3.24,3.36,3.54,3.47,3.44,3.36,3.39,3.58,3.61,3.54,3.87,4.32,4.82,5.31,5.27,5.48,5.56,5.76,6.11,6.54,7.14,7.05,6.7,6.43,6.27,6.0,5.64,5.59,5.75,5.62,5.59,5.43,5.31,5.09,4.94,5.34,5.54,5.64,5.81,5.85,5.67,5.83,5.55,5.42,5.47,5.61,5.53,5.8,5.99,5.87,5.69,5.54,5.56,5.52,5.46,5.46,5.53,5.24,5.31,5.39,5.38,5.44,5.41,5.36,5.21,4.71,4.12,4.53,4.52,4.51,4.7,4.78,4.69,4.85,5.1,5.03,5.2,5.25,5.43,5.55,5.84,6.12,6.22,6.22,6.15,6.33,6.17,6.08,6.18,6.13,6.01,6.09,5.6,4.81,4.68,4.3,3.98,3.78,3.58,3.62,3.47,2.82,2.33,2.18,2.22,2.16,2.23,2.57,2.48,2.35,2.2,1.96,1.76,1.72,1.65,1.49,1.45,1.36,1.3,1.24,1.27,1.18,1.01,1.12,1.31,1.24,1.25,1.34,1.31,1.24,1.24,1.19,1.43,1.78,2.12,2.1,2.02,2.12,2.23,2.5,2.67,2.86,3.03,3.3,3.32,3.33,3.36,3.64,3.87,3.85,4.18,4.33,4.35,4.45,4.68,4.77,4.9,5.0,5.16,5.22,5.08,4.97,5.01,5.01,4.94,5.06,5.05,4.92,4.93,4.91,4.96,4.96,4.47,4.14,4.1,3.5,3.26,2.71,2.05,1.54,1.74,2.06,2.42,2.28,2.18,1.91,1.42,1.07,0.49,0.44,0.62,0.64,0.55,0.5,0.51,0.48,0.46,0.4,0.37,0.31,0.37,0.35,0.35,0.4,0.45,0.37,0.32,0.29,0.26,0.26,0.23,0.25,0.29,0.27,0.29,0.26,0.25,0.19,0.18,0.19,0.11,0.1,0.11,0.11,0.12,0.12,0.16,0.19,0.18,0.19,0.19,0.19,0.18,0.18,0.18,0.18,0.16,0.15,0.16,0.15,0.12,0.12,0.14,0.12,0.13,0.12,0.12,0.12,0.13,0.12,0.12,0.13,0.11,0.1,0.1,0.11,0.11,0.11,0.1,0.13,0.21,0.2],"dgs10":[null,-0.16,-0.57,0.01,-0.25,0.68,-0.35,-0.89,-0.72,-1.43,-0.36,-0.01,-0.08,0.26,-0.21,-0.11,-0.02,0.47,0.53,0.47,-0.2,-0.11,0.15,0.14,-0.16,0.17,0.48,0.31,0.78,0.15,-0.2,-0.64,-0.2,-0.36,-0.59,-0.07,-0.12,0.13,0.35,-0.43,-0.58,-0.69,0.15,0.02,0.04,-0.13,-0.46,-0.52,-0.07,-0.49,-0.92,-0.48,0.41,0.09,-0.5,-0.13,0.28,-0.02,-0.18,-0.14,-0.03,0.17,0.0,0.77,0.59,-0.21,0.05,0.31,0.66,0.1,-0.66,0.13,-0.32,-0.46,0.16,0.35,0.37,-0.17,0.14,0.2,-0.28,-0.18,0.16,0.15,-0.02,0.08,0.19,-0.18,-0.32,-0.58,-0.26,0.09,0.08,-0.18,-0.14,-0.03,0.37,0.26,0.12,0.2,-0.03,-0.28,-0.01,0.28,0.14,-0.17,-0.33,-0.31,0.01,-0.24,0.26,-0.07,0.03,0.21,-0.01,-0.37,-0.25,-0.12,-0.11,-0.33,-0.06,0.31,0.2,-0.06,-0.09,-0.13,-0.42,-0.25,-0.17,0.17,0.28,-0.1,-0.17,-0.34,-0.28,-0.01,0.07,-0.08,-0.15,-0.13,-0.32,-0.03,0.39,0.05,-0.02,0.22,0.51,0.49,0.21,-0.08,0.2,-0.06,0.22,0.28,0.22,-0.15,-0.03,-0.31,-0.27,-0.14,-0.43,-0.46,0.11,0.21,-0.29,-0.16,-0.11,-0.22,-0.06,0.16,0.46,0.24,0.23,0.17,-0.04,-0.23,0.19,-0.3,-0.33,0.1,0.28,-0.16,0.27,0.2,-0.18,-0.22,-0.27,0.08,-0.09,-0.18,-0.15,-0.07,-0.27,0.03,0.08,-0.01,0.01,-0.15,-0.04,-0.12,-0.53,-0.28,0.3,-0.18,0.07,0.28,0.23,-0.05,0.36,0.36,-0.11,0.15,-0.02,0.19,-0.08,0.25,0.38,-0.14,-0.26,-0.27,0.45,-0.34,-0.05,-0.22,-0.03,-0.06,-0.02,-0.48,-0.08,-0.06,-0.21,0.25,0.25,-0.11,-0.04,-0.27,-0.24,-0.16,0.08,0.44,-0.05,-0.13,0.37,-0.07,-0.05,-0.23,-0.28,-0.39,-0.39,0.07,0.11,-0.02,0.02,-0.15,-0.09,0.15,-0.39,-0.24,0.65,0.47,-0.18,0.02,0.01,-0.03,-0.12,-0.07,-0.25,0.52,0.37,0.01,-0.23,-0.22,-0.15,-0.03,0.09,0.04,-0.01,-0.05,0.33,-0.16,-0.2,-0.14,0.18,0.08,-0.06,0.26,0.08,-0.07,-0.05,0.15,0.15,0.27,0.12,0.0,-0.02,-0.21,-0.16,0.01,-0.13,-0.04,0.2,-0.04,-0.16,0.13,0.06,0.35,-0.1,-0.33,-0.15,0.01,-0.38,-0.05,-0.36,0.0,-0.23,0.17,0.2,0.22,-0.09,-0.12,-0.2,0.12,-0.28,-1.11,0.1,0.35,-0.05,0.11,0.36,0.43,-0.16,0.03,-0.19,-0.01,0.01,0.19,0.14,-0.04,0.04,0.12,-0.43,-0.22,-0.19,-0.31,-0.05,-0.11,0.22,0.53,0.1,0.19,-0.17,0.05,-0.29,-0.17,0.0,-0.7,-0.32,0.17,-0.14,-0.03,-0.01,0.0,0.2,-0.12,-0.25,-0.18,-0.09,0.15,0.04,0.03,-0.1,0.07,0.19,0.07,-0.02,-0.2,0.17,0.37,0.28,0.16,0.07,-0.19,0.1,0.18,-0.04,-0.15,0.01,-0.01,-0.15,0.04,-0.06,-0.12,0.11,-0.23,0.03,-0.12,-0.33],"dgs1":[null,0.41,-0.78,0.03,-0.64,0.73,-0.83,-1.81,-0.58,-1.53,-0.16,-0.25,-0.29,0.3,0.12,-0.06,-0.08,0.76,0.54,0.33,-0.37,-0.35,0.13,0.17,-0.21,0.14,0.55,0.31,0.76,0.42,-0.05,-0.21,-0.24,-0.68,-1.08,-0.49,-0.31,0.27,0.57,-0.72,-0.68,-0.66,0.06,0.19,0.02,-0.06,-0.13,-0.21,0.06,-0.12,-0.58,-0.59,0.21,0.08,-0.46,-0.34,-0.16,-0.05,0.08,0.07,-0.09,0.18,0.07,0.47,0.5,-0.2,-0.12,0.35,0.64,-0.08,-0.63,0.21,-0.18,-0.35,0.07,0.3,0.39,0.09,0.26,0.42,-0.08,0.02,0.37,0.51,0.06,0.2,0.32,-0.21,-0.38,-0.54,-0.55,0.29,0.04,-0.23,-0.22,-0.05,0.2,0.19,0.24,0.05,-0.08,-0.22,-0.16,-0.16,-0.02,-0.21,-0.24,-0.26,-0.41,-0.37,0.13,-0.16,-0.11,0.23,-0.05,-0.53,-0.21,-0.24,-0.44,-0.51,-0.23,0.14,0.34,-0.33,-0.11,-0.02,-0.57,-0.13,-0.29,0.12,0.38,0.03,-0.21,-0.11,-0.06,-0.09,0.12,0.18,-0.07,-0.03,-0.08,0.03,0.19,0.03,-0.07,0.33,0.45,0.5,0.49,-0.04,0.21,0.08,0.2,0.35,0.43,0.6,-0.09,-0.35,-0.27,-0.16,-0.27,-0.36,-0.05,0.16,-0.13,-0.03,-0.16,-0.12,-0.22,-0.15,0.4,0.2,0.1,0.17,0.04,-0.18,0.16,-0.28,-0.13,0.05,0.14,-0.08,0.27,0.19,-0.12,-0.18,-0.15,0.02,-0.04,-0.06,0.0,0.07,-0.29,0.07,0.08,-0.01,0.06,-0.03,-0.05,-0.15,-0.5,-0.59,0.41,-0.01,-0.01,0.19,0.08,-0.09,0.16,0.25,-0.07,0.17,0.05,0.18,0.12,0.29,0.28,0.1,0.0,-0.07,0.18,-0.16,-0.09,0.1,-0.05,-0.12,0.08,-0.49,-0.79,-0.13,-0.38,-0.32,-0.2,-0.2,0.04,-0.15,-0.65,-0.49,-0.15,0.04,-0.06,0.07,0.34,-0.09,-0.13,-0.15,-0.24,-0.2,-0.04,-0.07,-0.16,-0.04,-0.09,-0.06,-0.06,0.03,-0.09,-0.17,0.11,0.19,-0.07,0.01,0.09,-0.03,-0.07,0.0,-0.05,0.24,0.35,0.34,-0.02,-0.08,0.1,0.11,0.27,0.17,0.19,0.17,0.27,0.02,0.01,0.03,0.28,0.23,-0.02,0.33,0.15,0.02,0.1,0.23,0.09,0.13,0.1,0.16,0.06,-0.14,-0.11,0.04,0.0,-0.07,0.12,-0.01,-0.13,0.01,-0.02,0.05,0.0,-0.49,-0.33,-0.04,-0.6,-0.24,-0.55,-0.66,-0.51,0.2,0.32,0.36,-0.14,-0.1,-0.27,-0.49,-0.35,-0.58,-0.05,0.18,0.02,-0.09,-0.05,0.01,-0.03,-0.02,-0.06,-0.03,-0.06,0.06,-0.02,0.0,0.05,0.05,-0.08,-0.05,-0.03,-0.03,0.0,-0.03,0.02,0.04,-0.02,0.02,-0.03,-0.01,-0.06,-0.01,0.01,-0.08,-0.01,0.01,0.0,0.01,0.0,0.04,0.03,-0.01,0.01,0.0,0.0,-0.01,0.0,0.0,0.0,-0.02,-0.01,0.01,-0.01,-0.03,0.0,0.02,-0.02,0.01,-0.01,0.0,0.0,0.01,-0.01,0.0,0.01,-0.02,-0.01,0.0,0.01,0.0,0.0,-0.01,0.03,0.08,-0.01],"n":397,"levels":{"coef":0.8359,"intercept":2.2647,"r2":0.9093,"se_default":0.0133,"se_hac":0.0449,"se_ratio":3.38,"acf":[1.0,0.9771,0.9438,0.9107,0.8735,0.8346,0.7951,0.755,0.7121,0.6657,0.6189,0.5736,0.5288,0.4838,0.4416,0.4015,0.3612,0.3228,0.2887,0.2552,0.2238,0.1929,0.1594,0.1258,0.0913]},"changes":{"coef":0.7198,"intercept":-0.0064,"r2":0.5709,"se_default":0.0314,"acf":[1.0,0.2548,-0.0387,0.0608,0.0237,-0.0275,-0.0113,0.0428,0.0811,-0.0017,-0.0197,-0.0044,-0.0145,-0.0873,-0.0753,-0.0237,-0.0472,-0.1031,-0.0368,-0.0669,-0.026,0.0254,0.0171,0.0315,-0.0195]},"adl":{"coefs":{"dgs10_L1":0.2909,"dgs10_L2":-0.1112,"dgs1":0.8588,"dgs1_L1":-0.5512,"dgs1_L2":0.2287},"coef_const":0.0019,"se":{"dgs10_L1":0.099,"dgs10_L2":0.0986,"dgs1":0.1328,"dgs1_L1":0.1775,"dgs1_L2":0.1561},"pvals":{"dgs10_L1":0.0041,"dgs10_L2":0.2621,"dgs1":0.0,"dgs1_L1":0.0025,"dgs1_L2":0.1461},"r2":0.3467,"acf":[1.0,0.024,-0.0599,0.1693,-0.0959,-0.0055,-0.1281,-0.0814,0.1061,-0.0762,0.0701,0.0675,-0.0236,-0.0387,-0.0518,0.1188,-0.0716,-0.1162,0.0734,-0.1543,0.1082,0.0298,-0.014,0.021,-0.1554],"multipliers":{"impact":0.8588,"cumulative":[0.8588,0.3076,0.5363]}}},"meta":{"chapter":"Chapter 17: Panel Data, Time Series Data, Causation","book":"metricsAI: An Introduction to Econometrics with Python and AI in the Cloud","author":"Carlos Mendez"}}</script>
+
+<script>
+"use strict";
+const DATA = JSON.parse(document.getElementById("ch-data").textContent);
+function fmt(v,d){if(v==null||isNaN(v))return"\u2014";d=d??2;const a=Math.abs(v);if(a>=1e6)return(v/1e6).toFixed(1)+"M";if(a>=1e3&&d===0)return Math.round(v).toLocaleString();return v.toFixed(d)}
+function fmtPct(v,d){return(v*100).toFixed(d??1)+"%"}
+
+const THEME_KEY="metricsai-theme";
+function getCSS(v){return getComputedStyle(document.documentElement).getPropertyValue(v).trim()}
+function themeColors(){return{text:getCSS("--text"),textSoft:getCSS("--text-soft"),grid:getCSS("--grid"),panel:getCSS("--panel"),cyan:getCSS("--accent"),purple:getCSS("--accent-2"),pink:getCSS("--accent-3")}}
+function baseLayout(o){const c=themeColors();return Object.assign({paper_bgcolor:"rgba(0,0,0,0)",plot_bgcolor:"rgba(0,0,0,0)",font:{family:"Inter,system-ui,sans-serif",color:c.text,size:12},margin:{l:60,r:18,t:30,b:50},xaxis:{gridcolor:c.grid,linecolor:c.grid,zerolinecolor:c.grid,tickfont:{color:c.textSoft}},yaxis:{gridcolor:c.grid,linecolor:c.grid,zerolinecolor:c.grid,tickfont:{color:c.textSoft}},hoverlabel:{bgcolor:c.panel,bordercolor:c.grid,font:{color:c.text}},legend:{font:{color:c.text},bgcolor:"rgba(0,0,0,0)"}},o||{})}
+const PC={displayModeBar:false,responsive:true};
+function activeVal(id){const b=document.querySelector("#"+id+" button.active");return b?b.dataset.val:null}
+function initToggles(id,cb){document.getElementById(id).querySelectorAll("button").forEach(b=>b.addEventListener("click",()=>{document.getElementById(id).querySelectorAll("button").forEach(x=>x.classList.remove("active"));b.classList.add("active");cb()}))}
+
+// ==================== W1: VARIANCE DECOMPOSITION ====================
+(function(){
+  const callout=document.getElementById("variance-callout");
+  function render(){
+    const c=themeColors();const v=DATA.nba.variance;
+    Plotly.react("variance-chart",[
+      {x:["Overall","Between","Within"],y:[v.lnrevenue.overall,v.lnrevenue.between,v.lnrevenue.within],name:"Log Revenue",type:"bar",marker:{color:c.cyan},text:[v.lnrevenue.overall,v.lnrevenue.between,v.lnrevenue.within].map(x=>x.toFixed(3)),textposition:"outside",textfont:{family:"JetBrains Mono",size:12,color:c.text}},
+      {x:["Overall","Between","Within"],y:[v.wins.overall,v.wins.between,v.wins.within],name:"Wins",type:"bar",marker:{color:c.purple},text:[v.wins.overall,v.wins.between,v.wins.within].map(x=>x.toFixed(2)),textposition:"outside",textfont:{family:"JetBrains Mono",size:12,color:c.text}}
+    ],baseLayout({height:300,barmode:"group",yaxis:Object.assign({},baseLayout().yaxis,{title:{text:"Standard Deviation",font:{color:c.textSoft}}}),legend:{x:.5,y:1.12,xanchor:"center",orientation:"h",font:{color:c.text},bgcolor:"rgba(0,0,0,0)"}}),PC);
+    callout.innerHTML=`<strong>Revenue:</strong> between SD (${v.lnrevenue.between}) > within SD (${v.lnrevenue.within}). Most revenue variation is across teams, not over time. <strong>Wins:</strong> between (${v.wins.between}) and within (${v.wins.within}) are closer — team performance fluctuates more.`;
+  }
+  window.__rerender_variance=render;render();
+})();
+
+// ==================== W2: CLUSTER SEs ====================
+(function(){
+  const callout=document.getElementById("cluster-callout");
+  function render(){
+    const c=themeColors();const p=DATA.nba.pooled;
+    const seTypes=["Default","Robust (HC1)","Cluster"];
+    const seVals=[p.se_default,p.se_robust,p.se_cluster];
+    const tVals=[p.t_default,p.t_robust,p.t_cluster];
+    const colors=[c.cyan,c.purple,c.pink];
+    Plotly.react("cluster-chart",[{
+      x:seTypes,y:seVals,type:"bar",marker:{color:colors},
+      text:seVals.map(v=>v.toFixed(4)),textposition:"outside",
+      textfont:{family:"JetBrains Mono",size:13,color:c.text},
+      hovertemplate:"%{x}: SE = %{y:.6f}<extra></extra>"
+    }],baseLayout({height:280,yaxis:Object.assign({},baseLayout().yaxis,{title:{text:"Standard Error of Wins Coefficient",font:{color:c.textSoft}}}),showlegend:false}),PC);
+    const ratio=p.se_cluster/p.se_default;
+    callout.innerHTML=`<strong>Wins coefficient = ${p.coef.toFixed(4)}</strong> across all SE types. But the SE changes: default = ${p.se_default.toFixed(4)}, robust = ${p.se_robust.toFixed(4)}, cluster = ${p.se_cluster.toFixed(4)}. The cluster SE is <strong>${ratio.toFixed(2)}× larger</strong> — ignoring within-team correlation understates uncertainty.`;
+  }
+  window.__rerender_cluster=render;render();
+})();
+
+// ==================== W3: POOLED vs FE ====================
+(function(){
+  const fitEl=document.getElementById("poolfe-fit");
+  const callout=document.getElementById("poolfe-callout");
+  function render(){
+    const view=activeVal("poolfe-view");
+    const c=themeColors();const p=DATA.nba.pooled;const fe=DATA.nba.fe;
+    const traces=[];
+    if(view==="pooled"||view==="both"){
+      traces.push({x:DATA.nba.wins,y:DATA.nba.lnrevenue,mode:"markers",type:"scatter",name:"All obs",marker:{color:c.cyan,size:5,opacity:.5},hovertemplate:"Wins: %{x}<br>Log Rev: %{y:.3f}<extra></extra>"});
+      const xMin=Math.min(...DATA.nba.wins),xMax=Math.max(...DATA.nba.wins);
+      traces.push({x:[xMin,xMax],y:[p.intercept+p.coef*xMin,p.intercept+p.coef*xMax],mode:"lines",name:"Pooled OLS",line:{color:c.cyan,width:2.5},hoverinfo:"skip"});
+    }
+    if(view==="fe"||view==="both"){
+      traces.push({x:DATA.nba.demeaned_wins,y:DATA.nba.demeaned_lnrev,mode:"markers",type:"scatter",name:"De-meaned",marker:{color:c.purple,size:5,opacity:.5},hovertemplate:"ΔWins: %{x:.1f}<br>ΔLog Rev: %{y:.3f}<extra></extra>"});
+      const dw=DATA.nba.demeaned_wins,dr=DATA.nba.demeaned_lnrev;
+      const xMin2=Math.min(...dw),xMax2=Math.max(...dw);
+      traces.push({x:[xMin2,xMax2],y:[fe.coef*xMin2,fe.coef*xMax2],mode:"lines",name:"Fixed Effects",line:{color:c.purple,width:2.5,dash:"dash"},hoverinfo:"skip"});
+    }
+    const xTitle=view==="fe"?"De-meaned Wins":"Wins";
+    const yTitle=view==="fe"?"De-meaned Log Revenue":"Log Revenue";
+    Plotly.react("poolfe-chart",traces,baseLayout({height:380,xaxis:Object.assign({},baseLayout().xaxis,{title:{text:xTitle,font:{color:c.textSoft}}}),yaxis:Object.assign({},baseLayout().yaxis,{title:{text:yTitle,font:{color:c.textSoft}}}),showlegend:true,legend:{x:.01,y:.99,xanchor:"left",yanchor:"top",font:{color:c.text},bgcolor:"rgba(0,0,0,0)"}}),PC);
+    fitEl.innerHTML=
+      `<div class="fit-stat"><div class="fs-label">Pooled coef</div><div class="fs-value">${p.coef.toFixed(4)}</div></div>`+
+      `<div class="fit-stat"><div class="fs-label">FE coef</div><div class="fs-value">${fe.coef.toFixed(4)}</div></div>`+
+      `<div class="fit-stat"><div class="fs-label">Pooled R²</div><div class="fs-value">${p.r2.toFixed(4)}</div></div>`+
+      `<div class="fit-stat"><div class="fs-label">FE R² (within)</div><div class="fs-value">${fe.r2_within.toFixed(4)}</div></div>`;
+    const drop=((p.coef-fe.coef)/p.coef*100).toFixed(0);
+    callout.innerHTML=`<strong>Pooled OLS:</strong> wins coef = ${p.coef.toFixed(4)}. <strong>Fixed Effects:</strong> wins coef = ${fe.coef.toFixed(4)} (${drop}% smaller). FE removes confounding from persistent team characteristics. The within-R² (${fe.r2_within.toFixed(4)}) is higher than pooled R² (${p.r2.toFixed(4)}) — FE explains more of the within-team variation.`;
+  }
+  initToggles("poolfe-view",render);window.__rerender_poolfe=render;render();
+})();
+
+// ==================== W4: TIME SERIES ===================== -->
+(function(){
+  const callout=document.getElementById("timeseries-callout");
+  function render(){
+    const view=activeVal("ts-view");
+    const c=themeColors();const ts=DATA.ts;
+    const traces=[];
+    if(view==="levels"){
+      traces.push({x:ts.dates,y:ts.gs10,name:"10-year rate",type:"scatter",mode:"lines",line:{color:c.cyan,width:1.5}});
+      traces.push({x:ts.dates,y:ts.gs1,name:"1-year rate",type:"scatter",mode:"lines",line:{color:c.purple,width:1.5}});
+    }else{
+      const d=ts.dates.slice(1),d10=ts.dgs10.filter(v=>v!==null),d1=ts.dgs1.filter(v=>v!==null);
+      const dd=ts.dates.filter((_,i)=>ts.dgs10[i]!==null);
+      traces.push({x:dd,y:ts.dgs10.filter(v=>v!==null),name:"Δ10-year",type:"scatter",mode:"lines",line:{color:c.cyan,width:1}});
+      traces.push({x:dd,y:ts.dgs1.filter(v=>v!==null),name:"Δ1-year",type:"scatter",mode:"lines",line:{color:c.purple,width:1}});
+    }
+    const yTitle=view==="levels"?"Interest Rate (%)":"Change in Rate (pp)";
+    Plotly.react("timeseries-chart",traces,baseLayout({height:400,xaxis:Object.assign({},baseLayout().xaxis,{title:{text:"Date",font:{color:c.textSoft}}}),yaxis:Object.assign({},baseLayout().yaxis,{title:{text:yTitle,font:{color:c.textSoft}}}),showlegend:true,legend:{x:.01,y:.99,xanchor:"left",yanchor:"top",font:{color:c.text},bgcolor:"rgba(0,0,0,0)"}}),PC);
+    callout.innerHTML=view==="levels"
+      ?`<strong>Non-stationary:</strong> both rates trend from ~14% (1982) to ~2% (2015). This shared downward trend produces a spurious R² = ${ts.levels.r2.toFixed(2)} when regressing one on the other.`
+      :`<strong>Stationary:</strong> first differences fluctuate around zero with no visible trend. The regression R² drops to ${ts.changes.r2.toFixed(2)} — lower but honest.`;
+  }
+  initToggles("ts-view",render);window.__rerender_timeseries=render;render();
+})();
+
+// ==================== W5: ACF ====================
+(function(){
+  const callout=document.getElementById("acf-callout");
+  function render(){
+    const model=activeVal("acf-model");
+    const c=themeColors();
+    const acfData=model==="levels"?DATA.ts.levels.acf:model==="changes"?DATA.ts.changes.acf:DATA.ts.adl.acf;
+    const n=DATA.ts.n;const ci=1.96/Math.sqrt(n);
+    const lags=acfData.map((_,i)=>i).slice(1);
+    const vals=acfData.slice(1);
+    Plotly.react("acf-chart",[
+      {x:lags,y:vals,type:"bar",marker:{color:vals.map(v=>Math.abs(v)>ci?c.cyan:c.grid)},hovertemplate:"Lag %{x}: ACF = %{y:.4f}<extra></extra>"},
+      {x:[0,lags.length+1],y:[ci,ci],mode:"lines",line:{color:c.pink,width:1.5,dash:"dash"},showlegend:false,hoverinfo:"skip"},
+      {x:[0,lags.length+1],y:[-ci,-ci],mode:"lines",line:{color:c.pink,width:1.5,dash:"dash"},showlegend:false,hoverinfo:"skip"}
+    ],baseLayout({height:340,xaxis:Object.assign({},baseLayout().xaxis,{title:{text:"Lag",font:{color:c.textSoft}}}),yaxis:Object.assign({},baseLayout().yaxis,{title:{text:"Autocorrelation",font:{color:c.textSoft}},range:[-0.3,1.05]}),showlegend:false}),PC);
+    const labels={levels:"Levels regression",changes:"Changes regression",adl:"ADL(2,2)"};
+    callout.innerHTML=`<strong>${labels[model]}:</strong> Lag-1 ACF = ${acfData[1].toFixed(4)}. `+
+      (acfData[1]>0.5?`Bars decay slowly — a hallmark of non-stationarity. Default SEs are severely understated.`
+      :acfData[1]>0.1?`Some residual autocorrelation remains. HAC standard errors are recommended.`
+      :`Near zero at all lags — the dynamic specification has absorbed the serial correlation. Default SEs are reliable.`);
+  }
+  initToggles("acf-model",render);window.__rerender_acf=render;render();
+})();
+
+// ==================== W6: SPURIOUS REGRESSION ====================
+(function(){
+  const fitEl=document.getElementById("spurious-fit");
+  const callout=document.getElementById("spurious-callout");
+  function render(){
+    const reg=activeVal("spurious-reg");
+    const c=themeColors();const ts=DATA.ts;
+    const isLev=reg==="levels";
+    const m=isLev?ts.levels:ts.changes;
+    const xs=isLev?ts.gs1:ts.dgs1.filter(v=>v!==null);
+    const ys=isLev?ts.gs10:ts.dgs10.filter(v=>v!==null);
+    const xMin=Math.min(...xs),xMax=Math.max(...xs);
+    Plotly.react("spurious-chart",[
+      {x:xs,y:ys,mode:"markers",type:"scatter",marker:{color:c.cyan,size:4,opacity:.5},hovertemplate:"X: %{x:.2f}<br>Y: %{y:.2f}<extra></extra>"},
+      {x:[xMin,xMax],y:[m.intercept+m.coef*xMin,m.intercept+m.coef*xMax],mode:"lines",line:{color:c.purple,width:2.5},hoverinfo:"skip"}
+    ],baseLayout({height:360,xaxis:Object.assign({},baseLayout().xaxis,{title:{text:isLev?"1-year Rate (%)":"Δ1-year Rate (pp)",font:{color:c.textSoft}}}),yaxis:Object.assign({},baseLayout().yaxis,{title:{text:isLev?"10-year Rate (%)":"Δ10-year Rate (pp)",font:{color:c.textSoft}}}),showlegend:false}),PC);
+    const seInfo=isLev?`Default SE = ${m.se_default}, HAC SE = ${m.se_hac} (${m.se_ratio}× larger)`:`SE = ${m.se_default}`;
+    const acf1=m.acf[1];
+    fitEl.innerHTML=
+      `<div class="fit-stat${isLev?" warn":""}"><div class="fs-label">R²</div><div class="fs-value">${m.r2.toFixed(4)}</div></div>`+
+      `<div class="fit-stat"><div class="fs-label">Slope</div><div class="fs-value">${m.coef.toFixed(4)}</div></div>`+
+      `<div class="fit-stat${acf1>0.5?" warn":" good"}"><div class="fs-label">Resid ACF1</div><div class="fs-value">${acf1.toFixed(4)}</div></div>`+
+      `<div class="fit-stat"><div class="fs-label">SE</div><div class="fs-value">${m.se_default.toFixed(4)}</div></div>`;
+    callout.innerHTML=isLev
+      ?`<strong>Spurious regression:</strong> R² = ${m.r2.toFixed(2)} looks great, but residual ACF1 = ${acf1.toFixed(2)} reveals severe autocorrelation. The ${seInfo}. This R² is inflated by the shared downward trend.`
+      :`<strong>Honest regression:</strong> R² = ${m.r2.toFixed(2)} is lower but reliable. Residual ACF1 = ${acf1.toFixed(2)} — much less autocorrelation. First differencing removed the spurious trend.`;
+  }
+  initToggles("spurious-reg",render);window.__rerender_spurious=render;render();
+})();
+
+// ==================== W7: ADL MODEL ====================
+(function(){
+  const callout=document.getElementById("adl-callout");
+  function render(){
+    const c=themeColors();const adl=DATA.ts.adl;
+    const vars=["dgs10_L1","dgs10_L2","dgs1","dgs1_L1","dgs1_L2"];
+    const labels=["Δgs10(t-1)","Δgs10(t-2)","Δgs1(t)","Δgs1(t-1)","Δgs1(t-2)"];
+    const coefs=vars.map(v=>adl.coefs[v]);
+    const colors=vars.map(v=>adl.pvals[v]<0.05?c.cyan:c.pink);
+    Plotly.react("adl-coef-chart",[{
+      y:labels.slice().reverse(),x:coefs.slice().reverse(),type:"scatter",mode:"markers",
+      marker:{color:colors.slice().reverse(),size:10},
+      error_x:{type:"data",symmetric:true,array:vars.map(v=>1.96*adl.se[v]).reverse(),color:c.cyan,thickness:2},
+      hovertemplate:"%{y}: %{x:.4f}<extra></extra>"
+    }],baseLayout({height:280,margin:{l:100,r:18,t:10,b:40},xaxis:Object.assign({},baseLayout().xaxis,{title:{text:"Coefficient",font:{color:c.textSoft}},zeroline:true,zerolinecolor:c.pink,zerolinewidth:2}),yaxis:{tickfont:{color:c.textSoft}},showlegend:false}),PC);
+
+    const mult=adl.multipliers;
+    Plotly.react("adl-mult-chart",[{
+      x:["Impact (t)","After 1 month","After 2 months"],y:mult.cumulative,type:"bar",
+      marker:{color:[c.cyan,c.purple,c.pink]},
+      text:mult.cumulative.map(v=>v.toFixed(2)),textposition:"outside",
+      textfont:{family:"JetBrains Mono",size:13,color:c.text}
+    }],baseLayout({height:280,yaxis:Object.assign({},baseLayout().yaxis,{title:{text:"Cumulative Multiplier",font:{color:c.textSoft}}}),showlegend:false}),PC);
+
+    callout.innerHTML=`<strong>ADL(2,2) model</strong> (R² = ${adl.r2.toFixed(4)}, residual ACF1 = ${adl.acf[1].toFixed(4)}). Impact multiplier = ${mult.impact.toFixed(2)}: a 1 pp Δgs1 moves Δgs10 by ${mult.impact.toFixed(2)} pp immediately. The cumulative effect after 2 months is ${mult.cumulative[2].toFixed(2)} — partial reversal at lag 1 followed by recovery.`;
+  }
+  window.__rerender_adl=render;render();
+})();
+
+// ==================== RESET + HASH ====================
+(function(){
+  const REG={poolfe:[{group:"poolfe-view",kind:"toggle",def:"pooled"}],timeseries:[{group:"ts-view",kind:"toggle",def:"levels"}],acf:[{group:"acf-model",kind:"toggle",def:"levels"}],spurious:[{group:"spurious-reg",kind:"toggle",def:"levels"}],variance:[],cluster:[],adl:[]};
+  function getVal(c){if(c.kind==="toggle"){const b=document.querySelector("#"+c.group+" button.active");return b?b.dataset.val:c.def}return document.getElementById(c.id).value}
+  function setVal(c,val){if(c.kind==="toggle"){const g=document.getElementById(c.group);if(!g)return;const b=g.querySelector('button[data-val="'+val+'"]');if(b&&!b.classList.contains("active"))b.click()}else{const el=document.getElementById(c.id);if(!el)return;if(el.value!==String(val)){el.value=val;el.dispatchEvent(new Event(c.kind==="select"?"change":"input",{bubbles:true}))}}}
+  function resetWidget(w){const ctrls=REG[w]||[];for(const c of ctrls)setVal(c,c.def);const fn=window["__rerender_"+w];if(fn)fn();writeHash()}
+  function writeHash(){const parts=[];for(const[w,ctrls]of Object.entries(REG)){for(const c of ctrls){const v=String(getVal(c));if(v!==String(c.def)){const key=c.id||c.group;parts.push(key+"="+encodeURIComponent(v))}}}const want=parts.length?"#"+parts.join("&"):"";if(want===""&&location.hash.match(/=/))history.replaceState(null,"",location.pathname+location.search);else if(want!==""&&location.hash!==want)history.replaceState(null,"",location.pathname+location.search+want)}
+  function readHash(){const hash=location.hash.slice(1);if(!hash||!hash.includes("="))return;const params={};for(const pair of hash.split("&")){const eq=pair.indexOf("=");if(eq<0)continue;params[pair.slice(0,eq)]=decodeURIComponent(pair.slice(eq+1))}for(const ctrls of Object.values(REG)){for(const c of ctrls){const key=c.id||c.group;if(key in params)setVal(c,params[key])}}}
+  document.querySelectorAll(".reset-btn[data-reset]").forEach(b=>{b.addEventListener("click",()=>resetWidget(b.dataset.reset))});
+  document.querySelectorAll(".toggle-group button").forEach(b=>{b.addEventListener("click",()=>setTimeout(writeHash,0))});
+  readHash();
+})();
+
+// ==================== THEME ====================
+(function(){const btn=document.getElementById("theme-toggle"),iconEl=document.getElementById("theme-icon"),labelEl=document.getElementById("theme-label");function apply(t){document.documentElement.dataset.theme=t;iconEl.textContent=t==="dark"?"\u2600\uFE0F":"\uD83C\uDF19";labelEl.textContent=t==="dark"?"Light":"Dark";for(const k in window)if(k.startsWith("__rerender_")&&typeof window[k]==="function")window[k]()}const saved=localStorage.getItem(THEME_KEY);const prefersDark=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches;apply(saved||(prefersDark?"dark":"light"));btn.addEventListener("click",()=>{const next=document.documentElement.dataset.theme==="dark"?"light":"dark";localStorage.setItem(THEME_KEY,next);apply(next)})})();
+window.addEventListener("resize",()=>{document.querySelectorAll(".chart").forEach(el=>{if(el.data)Plotly.Plots.resize(el)})});
+</script>
+</body>
+</html>

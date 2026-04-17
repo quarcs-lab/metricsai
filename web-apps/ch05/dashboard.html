@@ -1,0 +1,1493 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chapter 05 — Bivariate Data Summary · metricsAI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.plot.ly/plotly-2.35.2.min.js" charset="utf-8"></script>
+<style>
+:root {
+  --cyan: #008CB7;
+  --cyan-soft: #22d3ee;
+  --purple: #7A209F;
+  --purple-soft: #c084fc;
+  --pink: #C21E72;
+  --pink-soft: #f472b6;
+
+  --bg: #f5f8fb;
+  --panel: #ffffff;
+  --panel-2: #f0f4f9;
+  --text: #0b1021;
+  --text-soft: #475569;
+  --text-muted: #64748b;
+  --border: #d9e2ec;
+  --accent: var(--cyan);
+  --accent-2: var(--purple);
+  --accent-3: var(--pink);
+  --shadow: 0 2px 10px rgba(11, 16, 33, 0.06), 0 12px 30px rgba(11, 16, 33, 0.05);
+  --grid: #e3e8ef;
+  --code-bg: #eef3f8;
+}
+html[data-theme="dark"] {
+  --bg: #0c1024;
+  --panel: #151a33;
+  --panel-2: #1b2142;
+  --text: #e2e8f0;
+  --text-soft: #b5c0d0;
+  --text-muted: #8a98ae;
+  --border: #2a3156;
+  --accent: var(--cyan-soft);
+  --accent-2: var(--purple-soft);
+  --accent-3: var(--pink-soft);
+  --shadow: 0 2px 10px rgba(0, 0, 0, 0.25), 0 12px 30px rgba(0, 0, 0, 0.35);
+  --grid: #2a3156;
+  --code-bg: #0f1530;
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.55;
+  transition: background-color .25s ease, color .25s ease;
+}
+code, .mono { font-family: 'JetBrains Mono', ui-monospace, monospace; }
+
+header.page {
+  position: relative;
+  padding: 2.4rem 1.5rem 2rem;
+  background:
+    radial-gradient(1200px 400px at 85% -10%, rgba(122, 32, 159, 0.15), transparent),
+    radial-gradient(1000px 400px at 10% 0%, rgba(0, 140, 183, 0.18), transparent),
+    var(--panel);
+  border-bottom: 1px solid var(--border);
+}
+.page-inner { max-width: 1120px; margin: 0 auto; }
+.chapter-badge {
+  display: inline-block;
+  font-size: 0.72rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--accent);
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+h1.title {
+  font-size: clamp(1.6rem, 3.4vw, 2.4rem);
+  margin: 0 0 0.35rem;
+  background: linear-gradient(90deg, var(--accent), var(--accent-2));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+p.subtitle {
+  margin: 0 0 0.8rem;
+  color: var(--text-soft);
+  font-size: 1.05rem;
+  max-width: 720px;
+}
+.theme-toggle {
+  position: absolute;
+  top: 1.4rem;
+  right: 1.5rem;
+  background: var(--panel-2);
+  color: var(--text);
+  border: 1px solid var(--border);
+  padding: 0.4rem 0.8rem;
+  border-radius: 999px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  transition: all .2s ease;
+}
+.theme-toggle:hover { border-color: var(--accent); color: var(--accent); }
+
+nav.anchors {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background: color-mix(in srgb, var(--panel) 92%, transparent);
+  backdrop-filter: saturate(150%) blur(8px);
+  -webkit-backdrop-filter: saturate(150%) blur(8px);
+  border-bottom: 1px solid var(--border);
+}
+nav.anchors ul {
+  display: flex;
+  gap: 0.25rem;
+  overflow-x: auto;
+  list-style: none;
+  padding: 0.55rem 1.5rem;
+  margin: 0 auto;
+  max-width: 1120px;
+  scrollbar-width: thin;
+}
+nav.anchors a {
+  display: block;
+  padding: 0.35rem 0.75rem;
+  border-radius: 8px;
+  color: var(--text-soft);
+  text-decoration: none;
+  font-size: 0.85rem;
+  font-weight: 500;
+  white-space: nowrap;
+  transition: all .15s ease;
+}
+nav.anchors a:hover { color: var(--accent); background: var(--panel-2); }
+
+main { max-width: 1120px; margin: 1.2rem auto 3rem; padding: 0 1.5rem; }
+
+section.widget {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 1.5rem 1.4rem 1.3rem;
+  margin-bottom: 1.5rem;
+  box-shadow: var(--shadow);
+}
+.section-tag {
+  display: inline-block;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.72rem;
+  color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+  padding: 0.2rem 0.55rem;
+  border-radius: 6px;
+  margin-bottom: 0.6rem;
+  font-weight: 500;
+}
+.widget h2 {
+  margin: 0 0 0.2rem;
+  font-size: 1.35rem;
+  font-weight: 600;
+  color: var(--accent-2);
+  letter-spacing: -0.005em;
+}
+.widget .lede {
+  margin: 0 0 1rem;
+  color: var(--text-soft);
+  font-size: 0.97rem;
+  max-width: 780px;
+}
+
+.controls {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 0.9rem 1.2rem;
+  padding: 0.9rem 1rem;
+  background: var(--panel-2);
+  border-radius: 10px;
+  margin-bottom: 1rem;
+}
+.ctrl { display: flex; flex-direction: column; gap: 0.3rem; }
+.ctrl label {
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: var(--text-soft);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.ctrl select, .ctrl input[type="range"], .ctrl input[type="number"] {
+  font-family: inherit;
+  font-size: 0.9rem;
+  padding: 0.4rem 0.55rem;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--panel);
+  color: var(--text);
+}
+.ctrl input[type="range"] { padding: 0.2rem 0; accent-color: var(--accent); }
+.ctrl .val {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.82rem;
+  color: var(--accent);
+  font-weight: 500;
+}
+.toggle-group { display: inline-flex; gap: 0.25rem; background: var(--panel); padding: 3px; border-radius: 10px; border: 1px solid var(--border); }
+.toggle-group button {
+  background: transparent;
+  border: none;
+  color: var(--text-soft);
+  padding: 0.32rem 0.75rem;
+  border-radius: 7px;
+  font-family: inherit;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all .15s ease;
+}
+.toggle-group button.active { background: var(--accent); color: white; font-weight: 500; }
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+  gap: 0.6rem;
+  margin: 0.5rem 0 1rem;
+}
+.stat {
+  background: var(--panel-2);
+  padding: 0.65rem 0.75rem;
+  border-radius: 10px;
+  border-left: 3px solid var(--accent);
+}
+.stat .label { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-muted); }
+.stat .value { font-family: 'JetBrains Mono', monospace; font-size: 1.05rem; font-weight: 500; color: var(--text); margin-top: 0.15rem; }
+.stat.mean   { border-left-color: var(--accent); }
+.stat.median { border-left-color: var(--accent-3); }
+.stat.spread { border-left-color: var(--accent-2); }
+
+.callout {
+  background: color-mix(in srgb, var(--accent-2) 8%, transparent);
+  border-left: 3px solid var(--accent-2);
+  padding: 0.7rem 0.9rem;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  color: var(--text-soft);
+  margin: 0.9rem 0 0.2rem;
+}
+.callout strong { color: var(--accent-2); }
+
+.try-this {
+  background: color-mix(in srgb, var(--accent) 8%, transparent);
+  border-left: 3px solid var(--accent);
+  padding: 0.7rem 0.9rem;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  color: var(--text-soft);
+  margin: 0.7rem 0 0.2rem;
+}
+.try-this .try-title {
+  font-weight: 600; color: var(--accent); font-size: 0.78rem;
+  letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 0.3rem;
+}
+.try-this ol { margin: 0; padding-left: 1.25rem; }
+.try-this li { margin: 0.2rem 0; }
+
+.widget-head {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  gap: 0.5rem; margin-bottom: 0.2rem;
+}
+.widget-head > div { flex: 1; min-width: 0; }
+.reset-btn {
+  background: transparent;
+  color: var(--text-muted);
+  border: 1px solid var(--border);
+  padding: 0.3rem 0.7rem;
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 0.8rem;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all .15s ease;
+}
+.reset-btn:hover { color: var(--accent); border-color: var(--accent); }
+
+.chart { width: 100%; min-height: 340px; }
+.chart.tall { min-height: 420px; }
+.chart.short { min-height: 280px; }
+
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+@media (max-width: 720px) { .two-col { grid-template-columns: 1fr; } }
+
+.equation-box {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.95rem;
+  background: var(--panel-2);
+  padding: 0.75rem 1rem;
+  border-radius: 10px;
+  border-left: 3px solid var(--accent);
+  margin: 0.5rem 0 0.8rem;
+  color: var(--text);
+  line-height: 1.7;
+}
+.equation-box .eq-label { font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; }
+.equation-box .eq-main { font-size: 1.1rem; font-weight: 500; }
+.equation-box .eq-detail { font-size: 0.85rem; color: var(--text-soft); }
+.equation-box .eq-val { color: var(--accent); font-weight: 600; }
+
+.comparison-box {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.8rem;
+  margin: 0.5rem 0 0.8rem;
+}
+@media (max-width: 720px) { .comparison-box { grid-template-columns: 1fr; } }
+.comparison-box .comp-side {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.88rem;
+  background: var(--panel-2);
+  padding: 0.7rem 0.9rem;
+  border-radius: 10px;
+  line-height: 1.6;
+}
+.comparison-box .comp-side.left { border-left: 3px solid var(--accent); }
+.comparison-box .comp-side.right { border-left: 3px solid var(--accent-3); }
+.comp-side .comp-label { font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; }
+.comp-side .comp-val { color: var(--accent); font-weight: 600; }
+
+.decomp-bars {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.6rem;
+  margin: 0.5rem 0 0.8rem;
+}
+@media (max-width: 720px) { .decomp-bars { grid-template-columns: 1fr; } }
+.decomp-bar {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.88rem;
+  background: var(--panel-2);
+  padding: 0.65rem 0.85rem;
+  border-radius: 10px;
+  text-align: center;
+}
+.decomp-bar .bar-label { font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; }
+.decomp-bar .bar-value { font-size: 1.1rem; font-weight: 600; margin-top: 0.1rem; }
+.decomp-bar .bar-pct { font-size: 0.82rem; color: var(--text-soft); }
+.decomp-bar.tss { border-left: 3px solid var(--accent-2); }
+.decomp-bar.tss .bar-value { color: var(--accent-2); }
+.decomp-bar.ess { border-left: 3px solid var(--accent); }
+.decomp-bar.ess .bar-value { color: var(--accent); }
+.decomp-bar.rss { border-left: 3px solid var(--accent-3); }
+.decomp-bar.rss .bar-value { color: var(--accent-3); }
+
+footer.page {
+  max-width: 1120px;
+  margin: 1rem auto 3rem;
+  padding: 0 1.5rem;
+  color: var(--text-muted);
+  font-size: 0.88rem;
+  text-align: center;
+}
+footer.page a { color: var(--accent); text-decoration: none; }
+footer.page a:hover { text-decoration: underline; }
+
+.scroll-top {
+  display: inline-block;
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  text-decoration: none;
+  margin-top: 0.4rem;
+}
+.scroll-top:hover { color: var(--accent); }
+</style>
+</head>
+<body>
+
+<header class="page">
+  <div class="page-inner">
+    <span class="chapter-badge">Chapter 05 of 18 · Interactive Dashboard</span>
+    <h1 class="title">Bivariate Data Summary</h1>
+    <p class="subtitle">Slide, toggle, and compare to build intuition for scatterplots, correlation, regression, and R-squared — using the same house-price dataset as the chapter.</p>
+  </div>
+  <button id="theme-toggle" class="theme-toggle" type="button" aria-label="Toggle color theme"><span id="theme-icon">🌙</span><span id="theme-label">Dark</span></button>
+</header>
+
+<nav class="anchors" aria-label="Sections">
+  <ul>
+    <li><a href="#bvstats">Bivariate stats</a></li>
+    <li><a href="#scatter">Scatter &amp; r</a></li>
+    <li><a href="#corr">Correlation patterns</a></li>
+    <li><a href="#ols">OLS regression</a></li>
+    <li><a href="#rsq">R-squared</a></li>
+    <li><a href="#asym">Asymmetry</a></li>
+    <li><a href="#nonpar">Nonparametric</a></li>
+  </ul>
+</nav>
+
+<main>
+
+<!-- ===================== 1. BIVARIATE SUMMARY STATS ===================== -->
+<section class="widget" id="bvstats">
+  <div class="widget-head">
+    <div>
+      <span class="section-tag">§ 5.1 · Key Concept 5.1</span>
+      <h2>Bivariate summary statistics</h2>
+    </div>
+    <button type="button" class="reset-btn" data-reset="bvstats">↺ Reset</button>
+  </div>
+  <p class="lede">Before examining the relationship between two variables, summarize each one separately. Pick a variable pair and compare means, medians, spreads, and coefficients of variation side by side.</p>
+  <div class="controls">
+    <div class="ctrl">
+      <label for="bvstats-pair">Variable pair</label>
+      <select id="bvstats-pair">
+        <option value="size">Price vs Size (sqft)</option>
+        <option value="bedrooms">Price vs Bedrooms</option>
+        <option value="bathrooms">Price vs Bathrooms</option>
+        <option value="lotsize">Price vs Lot size (acres)</option>
+        <option value="age">Price vs Age (years)</option>
+      </select>
+    </div>
+  </div>
+  <div class="two-col">
+    <div class="stats-grid" id="bvstats-grid-y"></div>
+    <div class="stats-grid" id="bvstats-grid-x"></div>
+  </div>
+  <div class="callout" id="bvstats-callout"></div>
+  <div class="try-this">
+    <div class="try-title">Try this</div>
+    <ol>
+      <li>Compare CVs for price vs size: size (CV = 0.21) is more variable than price (CV = 0.15) relative to their means.</li>
+      <li>Switch to price vs age. The covariance is near zero — these two variables barely co-move.</li>
+      <li>Check bedrooms: the mean (3.79) is close to the median (4) — little skewness in this discrete variable.</li>
+    </ol>
+  </div>
+</section>
+
+<!-- ===================== 2. SCATTER & CORRELATION ===================== -->
+<section class="widget" id="scatter">
+  <div class="widget-head">
+    <div>
+      <span class="section-tag">§ 5.3 – § 5.4 · Key Concepts 5.3 &amp; 5.4</span>
+      <h2>Scatterplot &amp; correlation coefficient</h2>
+    </div>
+    <button type="button" class="reset-btn" data-reset="scatter">↺ Reset</button>
+  </div>
+  <p class="lede">A scatterplot reveals direction, strength, form, and outliers. The correlation coefficient <em>r</em> summarizes the linear strength in a single number between −1 and +1. Pick an X variable and watch <em>r</em> change.</p>
+  <div class="controls">
+    <div class="ctrl">
+      <label for="scatter-x">X variable (predictor)</label>
+      <select id="scatter-x">
+        <option value="size">Size (sqft)</option>
+        <option value="bedrooms">Bedrooms</option>
+        <option value="bathrooms">Bathrooms</option>
+        <option value="lotsize">Lot size (acres)</option>
+        <option value="age">Age (years)</option>
+      </select>
+    </div>
+    <div class="ctrl">
+      <label>Correlation</label>
+      <div class="mono" id="scatter-r-display" style="font-size:1.4rem;color:var(--accent);font-weight:600"></div>
+    </div>
+    <div class="ctrl">
+      <label>Strength</label>
+      <div id="scatter-strength" style="font-size:.92rem;color:var(--text-soft)"></div>
+    </div>
+  </div>
+  <div class="chart" id="scatter-chart"></div>
+  <div class="callout" id="scatter-callout"></div>
+  <div class="try-this">
+    <div class="try-title">Try this</div>
+    <ol>
+      <li>Price vs size: r = 0.79 (strong positive) — the points form a clear upward band.</li>
+      <li>Switch to bedrooms: r = 0.43 (moderate) — the scatter is much looser. Is this still a useful predictor?</li>
+      <li>Switch to age: r = −0.07 (near zero) — the cloud is nearly random. Size matters for price; age barely does.</li>
+      <li>For any pair, hover over the most distant point from the trend. Is it an outlier, or just natural variation in n = 29?</li>
+    </ol>
+  </div>
+</section>
+
+<!-- ===================== 3. CORRELATION PATTERNS ===================== -->
+<section class="widget" id="corr">
+  <div class="widget-head">
+    <div>
+      <span class="section-tag">§ 5.4 · Key Concept 5.4</span>
+      <h2>What does a given correlation look like?</h2>
+    </div>
+    <button type="button" class="reset-btn" data-reset="corr">↺ Reset</button>
+  </div>
+  <p class="lede">Correlation coefficients are abstract until you see the scatter. Drag the slider to visualize synthetic data at different target <em>r</em> values — from perfect negative (−1) through zero to perfect positive (+1).</p>
+  <div class="controls">
+    <div class="ctrl" style="min-width:280px">
+      <label for="corr-target">Target correlation <span class="val" id="corr-target-val">0.8</span></label>
+      <input type="range" id="corr-target" min="-10" max="10" step="1" value="8">
+    </div>
+    <div class="ctrl">
+      <label>Actual sample r</label>
+      <div class="mono" id="corr-actual" style="font-size:1.2rem;color:var(--accent);font-weight:600"></div>
+    </div>
+  </div>
+  <div class="chart" id="corr-chart"></div>
+  <div class="callout" id="corr-callout"></div>
+  <div class="try-this">
+    <div class="try-title">Try this</div>
+    <ol>
+      <li>Set r to 0.8 (close to the house data's 0.79). Notice how the points form a clear upward band.</li>
+      <li>Slide to r = 0.0. The cloud has no direction — you cannot predict Y from X.</li>
+      <li>Slide to r = −0.5. The downward trend is visible but loose — compare this to 0.8's tightness.</li>
+      <li>Slide to r = 1.0. All points fall on a perfect line — and any real dataset will look looser than this.</li>
+    </ol>
+  </div>
+</section>
+
+<!-- ===================== 4. OLS REGRESSION LINE ===================== -->
+<section class="widget" id="ols">
+  <div class="widget-head">
+    <div>
+      <span class="section-tag">§ 5.5 – § 5.6 · Key Concepts 5.5 &amp; 5.6</span>
+      <h2>OLS regression line</h2>
+    </div>
+    <button type="button" class="reset-btn" data-reset="ols">↺ Reset</button>
+  </div>
+  <p class="lede">Ordinary Least Squares chooses the line that minimizes the sum of squared vertical distances (residuals) from each point to the line. Pick a predictor, toggle residuals on, and slide to predict at any X value.</p>
+  <div class="controls">
+    <div class="ctrl">
+      <label for="ols-x">X variable (predictor)</label>
+      <select id="ols-x">
+        <option value="size">Size (sqft)</option>
+        <option value="bedrooms">Bedrooms</option>
+        <option value="bathrooms">Bathrooms</option>
+        <option value="lotsize">Lot size (acres)</option>
+        <option value="age">Age (years)</option>
+      </select>
+    </div>
+    <div class="ctrl">
+      <label for="ols-predict">Predict at X = <span class="val" id="ols-predict-val"></span></label>
+      <input type="range" id="ols-predict" min="0" max="100" step="1" value="50">
+    </div>
+    <div class="ctrl">
+      <label>Show residuals</label>
+      <div class="toggle-group" id="ols-resid">
+        <button type="button" data-val="off" class="active">Off</button>
+        <button type="button" data-val="on">On</button>
+      </div>
+    </div>
+  </div>
+  <div class="equation-box" id="ols-equation"></div>
+  <div class="chart" id="ols-chart"></div>
+  <div class="callout" id="ols-callout"></div>
+  <div class="try-this">
+    <div class="try-title">Try this</div>
+    <ol>
+      <li>With size as X, read the equation: price = $115,017 + $73.77 × size. Move the prediction slider to 2,000 sqft — the predicted price is $262,559.</li>
+      <li>Toggle "Show residuals" on. The vertical lines from each point to the line are the residuals. OLS chose the line that makes the sum of squared lengths as small as possible.</li>
+      <li>Switch X to bedrooms. The slope is steeper ($23,667 per bedroom) but R² drops to 0.18 — the relationship is real but noisy.</li>
+      <li>Switch X to age. The slope is near zero and R² = 0.005 — age tells us almost nothing about price.</li>
+    </ol>
+  </div>
+</section>
+
+<!-- ===================== 5. R-SQUARED DECOMPOSITION ===================== -->
+<section class="widget" id="rsq">
+  <div class="widget-head">
+    <div>
+      <span class="section-tag">§ 5.6 · Key Concept 5.6</span>
+      <h2>R-squared decomposition — where does the variation go?</h2>
+    </div>
+    <button type="button" class="reset-btn" data-reset="rsq">↺ Reset</button>
+  </div>
+  <p class="lede">Total variation (TSS) splits into explained variation (ESS) and residual variation (RSS). R² = ESS / TSS tells you the fraction the model explains. Toggle between the three views to see each component on the scatter.</p>
+  <div class="controls">
+    <div class="ctrl">
+      <label>View</label>
+      <div class="toggle-group" id="rsq-view">
+        <button type="button" data-val="all" class="active">All</button>
+        <button type="button" data-val="total">Total (TSS)</button>
+        <button type="button" data-val="explained">Explained (ESS)</button>
+        <button type="button" data-val="residual">Residual (RSS)</button>
+      </div>
+    </div>
+  </div>
+  <div class="decomp-bars" id="rsq-bars"></div>
+  <div class="chart" id="rsq-chart"></div>
+  <div class="callout" id="rsq-callout"></div>
+  <div class="try-this">
+    <div class="try-title">Try this</div>
+    <ol>
+      <li>In "All" view, see the three-number split: ESS (cyan) = 61.7% of TSS. That percentage is R².</li>
+      <li>Switch to "Total." The purple lines show how far each house price is from the average ($253,910). This is the variation the model tries to explain.</li>
+      <li>Switch to "Explained." The cyan lines show how far each <em>predicted</em> price is from the average — variation captured by the model.</li>
+      <li>Switch to "Residual." The pink lines show prediction errors. Smaller = better fit.</li>
+    </ol>
+  </div>
+</section>
+
+<!-- ===================== 6. REGRESSION ASYMMETRY ===================== -->
+<section class="widget" id="asym">
+  <div class="widget-head">
+    <div>
+      <span class="section-tag">§ 5.7 · Key Concept 5.7</span>
+      <h2>Regression asymmetry — Y~X ≠ X~Y</h2>
+    </div>
+    <button type="button" class="reset-btn" data-reset="asym">↺ Reset</button>
+  </div>
+  <p class="lede">If regression measured a symmetric, causal relationship, then regressing price on size and size on price should give reciprocal slopes. They don't — proving that regression captures <em>association</em>, not causation.</p>
+  <div class="controls">
+    <div class="ctrl">
+      <label>Regression direction</label>
+      <div class="toggle-group" id="asym-dir">
+        <button type="button" data-val="yx" class="active">price ~ size</button>
+        <button type="button" data-val="xy">size ~ price</button>
+        <button type="button" data-val="both">Both</button>
+      </div>
+    </div>
+  </div>
+  <div class="comparison-box" id="asym-comparison"></div>
+  <div class="chart" id="asym-chart"></div>
+  <div class="callout" id="asym-callout"></div>
+  <div class="try-this">
+    <div class="try-title">Try this</div>
+    <ol>
+      <li>Start with "price ~ size." The slope is $73.77 per sqft. If regression were symmetric, regressing size on price should give 1/73.77 = 0.01356 sqft per dollar.</li>
+      <li>Switch to "size ~ price." The actual slope is 0.00837 — NOT 0.01356. These are different questions.</li>
+      <li>Toggle to "Both." The two lines cross at the mean point (1,883 sqft, $253,910) but diverge everywhere else.</li>
+      <li>Notice R² is the same in both directions (0.6175). Correlation is symmetric; regression is not.</li>
+    </ol>
+  </div>
+</section>
+
+<!-- ===================== 7. PARAMETRIC vs NONPARAMETRIC ===================== -->
+<section class="widget" id="nonpar">
+  <div class="widget-head">
+    <div>
+      <span class="section-tag">§ 5.11</span>
+      <h2>Parametric vs nonparametric regression</h2>
+    </div>
+    <button type="button" class="reset-btn" data-reset="nonpar">↺ Reset</button>
+  </div>
+  <p class="lede">OLS assumes a straight line. LOWESS lets the data speak — it fits local regressions at each point, with the bandwidth controlling how "local." When LOWESS and OLS agree, the linearity assumption is validated.</p>
+  <div class="controls">
+    <div class="ctrl">
+      <label>OLS line</label>
+      <div class="toggle-group" id="nonpar-ols">
+        <button type="button" data-val="on" class="active">On</button>
+        <button type="button" data-val="off">Off</button>
+      </div>
+    </div>
+    <div class="ctrl">
+      <label>LOWESS curve</label>
+      <div class="toggle-group" id="nonpar-lowess">
+        <button type="button" data-val="on" class="active">On</button>
+        <button type="button" data-val="off">Off</button>
+      </div>
+    </div>
+    <div class="ctrl" style="min-width:260px">
+      <label for="nonpar-frac">LOWESS bandwidth (frac) <span class="val" id="nonpar-frac-val">0.65</span></label>
+      <input type="range" id="nonpar-frac" min="30" max="100" step="5" value="65">
+    </div>
+    <div class="ctrl">
+      <label>Kernel smoothing</label>
+      <div class="toggle-group" id="nonpar-kernel">
+        <button type="button" data-val="off" class="active">Off</button>
+        <button type="button" data-val="on">On</button>
+      </div>
+    </div>
+  </div>
+  <div class="chart" id="nonpar-chart"></div>
+  <div class="callout" id="nonpar-callout"></div>
+  <div class="try-this">
+    <div class="try-title">Try this</div>
+    <ol>
+      <li>With OLS and LOWESS both on (frac = 0.65), notice they trace nearly the same path. The linear assumption holds.</li>
+      <li>Drag the bandwidth down to 0.30. LOWESS becomes wiggly — overfitting 29 data points.</li>
+      <li>Push bandwidth to 1.00. LOWESS is nearly as straight as OLS. When the flexible method agrees with the rigid one, parsimony wins.</li>
+      <li>Turn on kernel smoothing. It tells the same story: the price–size relationship is genuinely linear.</li>
+    </ol>
+  </div>
+</section>
+
+</main>
+
+<footer class="page">
+  <p>Part of <a href="https://quarcs-lab.github.io/metricsai/book/_book/index.html"><strong>metricsAI</strong></a> · Chapter 05: Bivariate Data Summary · by Carlos Mendez · <a href="https://github.com/quarcs-lab/metricsai">GitHub</a></p>
+  <a class="scroll-top" href="#bvstats">↑ Back to top</a>
+</footer>
+
+<script type="application/json" id="ch-data">{"house":{"price":[204000.0,212000.0,213000.0,220000.0,224500.0,229000.0,230000.0,233000.0,235000.0,235000.0,236500.0,238000.0,239500.0,241000.0,244000.0,245000.0,249000.0,253000.0,255000.0,258500.0,270000.0,270000.0,272000.0,273000.0,278500.0,279900.0,310000.0,340000.0,375000.0],"size":[1400.0,1600.0,1800.0,1600.0,2100.0,1700.0,2100.0,1700.0,1700.0,1600.0,1600.0,1900.0,1600.0,1600.0,2000.0,1400.0,1900.0,2100.0,1500.0,1600.0,1800.0,2000.0,1800.0,1900.0,2600.0,2000.0,2300.0,2400.0,3300.0],"bedrooms":[3.0,3.0,3.0,3.0,4.0,4.0,4.0,3.0,4.0,3.0,3.0,4.0,3.0,4.0,4.0,4.0,4.0,4.0,4.0,3.0,4.0,4.0,4.0,5.0,6.0,4.0,4.0,4.0,4.0],"bathrooms":[2.0,3.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0,3.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0,3.0,2.0],"lotsize":[1.0,2.0,2.0,1.0,2.0,2.0,2.0,1.0,2.0,3.0,3.0,2.0,3.0,2.0,1.0,2.0,3.0,3.0,3.0,1.0,3.0,3.0,2.0,2.0,3.0,2.0,2.0,2.0,2.0],"age":[31.0,33.0,51.0,49.0,47.0,35.0,34.0,40.0,29.0,35.0,23.0,29.0,34.0,34.0,29.0,30.0,37.0,47.0,47.0,39.0,31.0,39.0,46.0,37.0,38.0,31.0,28.0,34.0,39.0]},"regression":{"size":{"intercept":115017.28,"slope":73.77104,"r":0.7858,"r_squared":0.6175,"se":23550.66,"fitted":[218296.74,233050.95,247805.16,233050.95,269936.47,240428.05,269936.47,240428.05,240428.05,233050.95,233050.95,255182.26,233050.95,233050.95,262559.36,218296.74,255182.26,269936.47,225673.84,233050.95,247805.16,262559.36,247805.16,255182.26,306821.99,262559.36,284690.68,292067.78,358461.72],"residuals":[-14296.74,-21050.95,-34805.16,-13050.95,-45436.47,-11428.05,-39936.47,-7428.05,-5428.05,1949.05,3449.05,-17182.26,6449.05,7949.05,-18559.36,26703.26,-6182.26,-16936.47,29326.16,25449.05,22194.84,7440.64,24194.84,17817.74,-28321.99,17340.64,25309.32,47932.22,16538.28],"tss":39145826896.55,"ess":24170725242.05,"rss":14975101654.5,"y_mean":253910.34},"bedrooms":{"intercept":164137.84,"slope":23667.297297,"r":0.4273,"r_squared":0.1826,"se":34426.09,"fitted":[235139.73,235139.73,235139.73,235139.73,258807.03,258807.03,258807.03,235139.73,258807.03,235139.73,235139.73,258807.03,235139.73,258807.03,258807.03,258807.03,258807.03,258807.03,258807.03,235139.73,258807.03,258807.03,258807.03,282474.32,306141.62,258807.03,258807.03,258807.03,258807.03],"residuals":[-31139.73,-23139.73,-22139.73,-15139.73,-34307.03,-29807.03,-28807.03,-2139.73,-23807.03,-139.73,1360.27,-20807.03,4360.27,-17807.03,-14807.03,-13807.03,-9807.03,-5807.03,-3807.03,23360.27,11192.97,11192.97,13192.97,-9474.32,-27641.62,21092.97,51192.97,81192.97,116192.97],"tss":39145826896.55,"ess":7146626058.71,"rss":31999200837.84,"y_mean":253910.34},"bathrooms":{"intercept":223200.0,"slope":14600.0,"r":0.121,"r_squared":0.0146,"se":37796.97,"fitted":[252400.0,267000.0,252400.0,252400.0,252400.0,252400.0,252400.0,252400.0,252400.0,252400.0,252400.0,252400.0,252400.0,252400.0,252400.0,252400.0,267000.0,252400.0,252400.0,252400.0,252400.0,252400.0,252400.0,252400.0,252400.0,252400.0,252400.0,267000.0,252400.0],"residuals":[-48400.0,-55000.0,-39400.0,-32400.0,-27900.0,-23400.0,-22400.0,-19400.0,-17400.0,-17400.0,-15900.0,-14400.0,-12900.0,-11400.0,-8400.0,-7400.0,-18000.0,600.0,2600.0,6100.0,17600.0,17600.0,19600.0,20600.0,26100.0,27500.0,57600.0,73000.0,122600.0],"tss":39145826896.55,"ess":573326896.55,"rss":38572500000.0,"y_mean":253910.34},"lotsize":{"intercept":236207.18,"slope":8280.512821,"r":0.1535,"r_squared":0.0236,"se":37625.7,"fitted":[244487.69,252768.21,252768.21,244487.69,252768.21,252768.21,252768.21,244487.69,252768.21,261048.72,261048.72,252768.21,261048.72,252768.21,244487.69,252768.21,261048.72,261048.72,261048.72,244487.69,261048.72,261048.72,252768.21,252768.21,261048.72,252768.21,252768.21,252768.21,252768.21],"residuals":[-40487.69,-40768.21,-39768.21,-24487.69,-28268.21,-23768.21,-22768.21,-11487.69,-17768.21,-26048.72,-24548.72,-14768.21,-21548.72,-11768.21,-487.69,-7768.21,-12048.72,-8048.72,-6048.72,14012.31,8951.28,8951.28,19231.79,20231.79,17451.28,27131.79,57231.79,87231.79,122231.79],"tss":39145826896.55,"ess":922106486.3,"rss":38223720410.26,"y_mean":253910.34},"age":{"intercept":266918.51,"slope":-357.231726,"r":-0.068,"r_squared":0.0046,"se":37988.66,"fitted":[255844.32,255129.86,248699.69,249414.15,250128.62,254415.4,254772.63,252629.24,256558.79,254415.4,258702.18,256558.79,254772.63,254772.63,256558.79,256201.56,253700.93,250128.62,250128.62,252986.47,255844.32,252986.47,250485.85,253700.93,253343.7,255844.32,256916.02,254772.63,252986.47],"residuals":[-51844.32,-43129.86,-35699.69,-29414.15,-25628.62,-25415.4,-24772.63,-19629.24,-21558.79,-19415.4,-22202.18,-18558.79,-15272.63,-13772.63,-12558.79,-11201.56,-4700.93,2871.38,4871.38,5513.53,14155.68,17013.53,21514.15,19299.07,25156.3,24055.68,53083.98,85227.37,122013.53],"tss":39145826896.55,"ess":181089384.89,"rss":38964737511.66,"y_mean":253910.34}},"reverse":{"intercept":-242.44,"slope":0.00837,"r":0.7858,"r_squared":0.6175,"se":250.85,"fitted":[1465.02,1531.97,1540.34,1598.93,1636.6,1674.26,1682.63,1707.74,1724.48,1724.48,1737.04,1749.59,1762.15,1774.7,1799.81,1808.18,1841.66,1875.14,1891.88,1921.17,2017.43,2017.43,2034.17,2042.54,2088.57,2100.29,2352.22,2603.32,2896.26],"residuals":[-65.02,68.03,259.66,1.07,463.4,25.74,417.37,-7.74,-24.48,-124.48,-137.04,150.41,-162.15,-174.7,200.19,-408.18,58.34,224.86,-391.88,-321.17,-217.43,-17.43,-234.17,-142.54,511.43,-100.29,-52.22,-203.32,403.74],"tss":4441379.31,"ess":2742344.91,"rss":1699034.4,"y_mean":1882.76},"correlation":{"size":0.7858,"bedrooms":0.4273,"bathrooms":0.121,"lotsize":0.1535,"age":-0.068},"synthetic_r":{"-1.0":{"x":[3.497,2.862,3.648,4.523,2.766,2.766,4.579,3.767,2.531,3.543,2.537,2.534,3.242,1.087,1.275,2.438,1.987,3.314,2.092,1.588,4.466,2.774,3.068,1.575,2.456,3.111,1.849,3.376,2.399,2.708],"y":[4.226,4.944,4.055,3.066,5.052,5.052,3.003,3.92,5.318,4.174,5.311,5.314,4.514,6.95,6.737,5.423,5.932,4.432,5.814,6.383,3.131,5.043,4.711,6.397,5.403,4.662,6.088,4.363,5.466,5.117],"actual_r":-1.0},"-0.9":{"x":[2.521,2.814,1.894,1.804,3.813,4.356,2.928,4.004,3.362,2.355,3.361,4.538,2.964,4.565,0.38,3.822,3.087,2.701,3.092,1.012,2.78,3.357,4.478,2.482,2.192,2.498,3.915,3.329,2.47,3.513],"y":[5.496,5.605,5.727,5.973,4.091,3.122,5.207,4.2,4.68,5.505,4.061,3.409,4.896,3.218,7.359,4.43,5.754,5.364,5.039,6.814,4.378,4.671,3.674,6.564,5.674,5.606,4.152,4.199,5.999,4.866],"actual_r":-0.9274},"-0.8":{"x":[3.791,2.091,4.403,1.598,3.587,5.19,2.009,2.434,3.1,2.497,1.449,3.069,1.938,3.474,2.081,4.55,2.217,2.678,3.814,1.769,3.227,4.307,1.393,3.185,3.26,3.782,1.763,1.68,3.522,3.297],"y":[4.446,5.855,3.402,6.178,4.634,2.756,6.831,5.659,4.131,5.718,5.572,5.342,6.464,4.056,6.233,3.941,6.04,6.319,4.131,5.45,4.21,3.397,6.155,4.983,4.884,4.8,5.915,6.846,4.351,6.321],"actual_r":-0.8665},"-0.7":{"x":[3.626,2.143,1.929,3.482,2.777,3.714,3.473,2.927,2.153,1.485,2.553,3.856,3.214,1.754,3.173,3.385,2.116,3.154,3.058,1.857,3.358,3.561,4.083,4.054,1.622,2.062,3.515,3.514,3.515,6.853],"y":[5.029,6.435,6.45,5.183,4.97,5.104,4.172,4.924,5.27,6.127,6.999,3.132,5.39,4.735,4.59,5.561,5.688,4.171,4.494,6.303,4.281,4.82,4.344,3.866,7.507,6.131,3.25,4.83,4.223,3.048],"actual_r":-0.7428},"-0.6":{"x":[2.207,2.885,3.505,3.866,1.8,2.665,2.525,2.347,4.765,3.405,1.739,3.918,5.122,4.032,1.481,2.516,4.267,2.292,3.444,3.775,2.073,2.94,-0.241,1.976,2.747,1.752,4.632,1.57,2.56,3.131],"y":[6.495,3.836,5.589,4.477,4.772,5.47,5.334,4.788,4.05,4.403,5.679,4.971,5.075,3.39,7.431,3.618,4.136,5.768,4.915,4.018,5.246,4.561,6.16,6.144,5.343,5.027,4.784,5.924,5.807,5.359],"actual_r":-0.5858},"-0.5":{"x":[2.171,2.44,3.747,3.61,2.979,3.117,4.278,2.408,3.547,2.798,2.782,4.099,3.825,3.814,4.305,3.021,3.682,2.69,3.324,2.87,3.097,3.595,2.182,5.092,1.994,1.786,4.158,3.792,3.624,3.628],"y":[5.716,4.774,4.761,4.199,6.043,4.98,3.634,5.293,5.184,4.829,4.615,4.677,4.857,4.213,3.922,5.372,3.484,4.169,4.35,5.085,5.39,6.073,6.463,3.677,5.826,5.111,4.411,4.416,5.056,4.057],"actual_r":-0.6362},"-0.4":{"x":[3.519,4.533,2.891,3.402,3.69,2.599,3.224,3.013,3.098,2.227,3.025,3.498,4.451,3.959,5.153,2.233,3.872,3.183,5.19,2.192,2.16,2.401,0.876,2.474,2.241,3.15,3.342,4.876,3.95,2.423],"y":[4.057,4.916,3.928,6.607,5.892,4.828,3.432,6.329,4.948,6.545,3.622,4.34,4.504,4.744,3.799,5.979,3.758,4.888,4.307,5.896,6.09,4.308,4.558,6.48,5.709,4.346,6.375,4.431,5.785,5.392],"actual_r":-0.3524},"-0.3":{"x":[5.061,4.755,2.751,3.972,3.645,4.369,2.035,3.686,4.058,1.241,1.817,0.961,2.731,3.718,4.502,3.074,4.629,1.62,1.297,2.944,3.384,2.967,0.933,2.911,1.696,3.67,3.367,2.06,2.486,1.941],"y":[4.397,5.446,4.109,5.217,4.314,3.878,5.131,3.822,4.185,4.294,7.163,5.542,4.387,5.005,4.493,4.755,5.153,6.062,4.916,4.45,4.624,2.798,4.07,6.312,6.889,4.576,5.441,5.523,8.054,6.325],"actual_r":-0.3172},"-0.2":{"x":[2.872,2.044,1.394,3.203,2.244,1.578,2.353,1.918,4.687,3.882,2.992,4.48,3.077,2.139,4.523,3.539,1.963,2.81,2.124,1.617,3.926,4.909,1.601,3.563,2.349,2.513,2.408,2.136,3.049,2.169],"y":[5.251,5.106,5.054,4.029,4.549,5.99,5.582,4.223,4.712,5.516,3.326,5.19,4.295,5.695,3.901,3.081,3.577,5.046,5.393,4.356,5.396,2.942,5.181,3.658,4.454,5.106,4.238,4.759,5.936,4.564],"actual_r":-0.3046},"-0.1":{"x":[3.836,1.87,3.53,4.442,0.528,2.203,3.577,2.797,3.371,2.396,3.087,2.844,4.168,3.254,3.338,2.588,2.512,2.567,3.394,2.579,3.29,5.075,3.871,2.674,4.201,2.592,0.962,1.992,1.129,2.648],"y":[4.926,6.772,5.263,4.629,6.064,2.871,5.168,5.778,3.483,6.19,5.319,4.593,5.504,7.225,5.138,5.279,4.583,4.189,5.778,4.181,5.033,4.308,5.38,5.356,5.903,4.524,4.927,4.118,4.736,5.402],"actual_r":-0.0249},"0.0":{"x":[3.757,2.078,3.87,4.356,3.413,4.877,2.226,1.755,1.221,4.496,3.654,2.944,3.28,1.875,5.446,3.129,3.109,3.726,3.481,3.224,2.21,3.471,4.882,4.345,4.593,2.489,2.01,2.874,3.056,4.094],"y":[3.308,6.53,4.842,4.573,3.988,3.345,5.823,5.073,3.71,3.705,4.664,6.669,4.74,3.497,4.754,4.727,2.303,4.946,4.769,5.696,6.849,6.127,4.731,3.893,7.573,5.059,5.014,4.976,5.198,4.856],"actual_r":-0.1313},"0.1":{"x":[2.426,2.453,2.967,2.457,2.287,3.106,2.745,4.504,0.349,4.092,4.246,0.927,2.657,2.629,1.592,2.222,1.889,4.752,3.936,4.272,3.722,1.871,2.475,3.489,1.778,3.713,2.76,2.625,3.711,3.444],"y":[4.598,6.113,3.934,5.573,5.534,4.715,5.312,3.913,5.676,4.934,4.613,5.856,4.279,3.575,3.328,5.54,3.631,6.928,3.031,6.823,5.292,4.807,4.42,5.457,4.857,6.179,5.103,5.126,4.719,4.999],"actual_r":0.0938},"0.2":{"x":[3.308,1.29,1.652,3.743,3.171,2.816,3.018,3.348,2.46,2.222,3.196,2.022,3.408,1.297,4.029,3.473,3.256,3.983,4.665,4.014,1.159,1.72,2.375,3.026,3.518,2.274,3.187,2.245,2.388,1.593],"y":[4.209,3.343,3.791,6.242,4.153,7.584,5.533,5.303,4.085,5.559,4.525,4.949,7.644,4.575,6.399,4.461,5.068,6.998,4.799,7.045,5.332,4.211,5.527,6.004,5.769,3.346,4.374,4.636,4.837,5.342],"actual_r":0.4572},"0.3":{"x":[3.178,1.665,3.38,3.611,3.56,4.081,3.834,3.459,2.93,1.339,3.43,3.208,3.272,1.723,1.919,4.053,2.96,3.682,3.028,3.03,3.938,2.484,3.096,2.538,2.566,2.691,3.222,2.521,4.256,2.105],"y":[4.884,4.029,6.524,5.425,6.201,4.01,5.582,6.024,5.04,5.333,4.67,6.418,7.293,4.126,4.127,6.803,6.481,4.767,4.6,4.733,4.087,3.904,4.071,4.07,4.781,5.088,6.559,3.843,6.437,4.423],"actual_r":0.4333},"0.4":{"x":[2.951,3.675,1.877,3.382,3.166,3.492,3.289,5.455,2.362,2.469,2.377,2.445,2.363,4.189,4.421,2.429,2.168,3.471,2.448,3.633,3.203,1.484,4.548,4.796,2.387,2.612,3.286,3.334,3.659,5.01],"y":[4.728,4.462,3.175,4.401,4.95,6.762,4.558,6.147,4.628,5.777,6.965,4.191,4.194,6.367,6.132,6.363,5.096,4.779,5.22,6.193,5.748,4.739,6.538,6.737,5.92,5.342,4.878,5.186,6.293,5.006],"actual_r":0.4291},"0.5":{"x":[3.369,2.607,3.029,4.278,3.191,3.046,1.64,3.746,3.645,5.163,2.692,3.219,3.249,4.577,2.905,3.279,3.608,3.187,2.554,3.194,4.074,1.973,3.133,2.3,4.195,1.477,2.441,3.377,4.566,2.934],"y":[4.608,6.26,3.63,3.731,5.363,4.46,3.166,5.929,5.466,5.678,3.573,5.754,5.58,5.729,6.409,4.108,3.911,4.38,4.559,5.194,5.303,4.555,3.863,5.697,5.514,4.92,4.828,5.489,6.301,5.215],"actual_r":0.3222},"0.6":{"x":[3.643,4.329,3.197,3.709,2.91,4.44,2.324,4.801,2.96,1.569,3.128,2.319,3.841,2.347,2.554,1.11,2.548,0.576,1.416,3.76,3.786,3.425,2.033,2.952,2.996,1.842,4.503,3.877,2.779,3.027],"y":[5.57,4.174,4.943,4.897,4.171,5.648,6.066,6.598,4.545,4.642,6.22,5.364,5.568,4.124,5.322,4.229,5.476,4.108,4.933,5.045,6.542,5.434,6.117,4.446,6.412,4.502,5.389,5.155,4.639,5.381],"actual_r":0.4078},"0.7":{"x":[3.523,2.426,2.976,5.142,4.728,3.436,3.038,3.12,3.614,1.977,2.743,1.331,3.399,3.647,2.517,4.574,1.774,1.536,3.224,4.047,4.684,2.541,4.079,2.961,2.827,3.884,3.652,1.424,4.477,4.38],"y":[4.738,4.709,5.159,6.489,5.624,4.645,4.831,5.744,5.635,3.852,5.196,1.636,5.919,4.028,4.23,5.111,3.052,4.64,4.644,5.794,5.953,4.847,5.623,3.88,5.415,5.081,4.162,3.428,6.915,6.384],"actual_r":0.7634},"0.8":{"x":[2.651,2.651,2.678,5.077,3.382,3.43,4.03,3.239,2.741,2.804,2.928,2.963,3.728,3.052,3.733,2.919,3.079,1.002,3.916,3.346,3.998,0.104,5.088,2.86,4.108,1.96,3.613,1.947,2.376,4.914],"y":[4.511,4.756,5.168,6.766,5.271,5.436,7.116,5.038,4.814,5.372,5.5,5.575,5.827,4.244,6.427,4.141,5.132,2.92,5.549,5.351,5.842,2.943,7.446,5.057,5.586,4.679,6.07,3.354,4.775,6.766],"actual_r":0.902},"0.9":{"x":[2.702,4.376,2.85,3.126,2.827,3.016,1.904,1.56,4.595,2.153,2.009,0.847,2.361,1.677,4.642,4.01,2.312,5.252,3.982,2.675,0.501,5.291,1.61,1.355,4.023,5.44,4.384,3.564,3.595,3.853],"y":[5.073,5.998,4.888,5.002,4.498,4.832,3.463,3.925,5.593,3.889,4.351,4.092,4.911,3.363,5.625,6.038,4.049,6.372,5.849,4.302,3.296,5.914,3.74,3.968,4.942,6.789,5.873,5.567,5.444,6.117],"actual_r":0.9213},"1.0":{"x":[3.125,2.571,3.122,3.543,3.049,3.041,2.298,2.337,1.597,4.75,1.756,2.307,2.282,3.895,2.705,4.248,2.327,3.279,2.165,5.145,1.812,3.31,3.634,3.414,2.815,2.87,3.044,2.853,3.964,5.211],"y":[5.047,4.44,5.044,5.504,4.963,4.954,4.142,4.185,3.375,6.824,3.549,4.152,4.124,5.889,4.587,6.275,4.173,5.215,3.996,7.257,3.611,5.249,5.603,5.363,4.707,4.768,4.958,4.749,5.965,7.329],"actual_r":1.0}},"lowess":{"30":{"x":[1400.0,1400.0,1500.0,1600.0,1600.0,1600.0,1600.0,1600.0,1600.0,1600.0,1700.0,1700.0,1700.0,1800.0,1800.0,1800.0,1900.0,1900.0,1900.0,2000.0,2000.0,2000.0,2100.0,2100.0,2100.0,2300.0,2400.0,2600.0,3300.0],"y":[224500.0,224500.0,255000.0,234696.65,234696.65,234696.65,234696.65,234696.65,234696.65,234696.65,232335.45,232335.45,232335.45,260368.76,260368.76,260368.76,252793.36,252793.36,252793.36,265339.85,265339.85,265339.85,235384.6,235384.6,235384.6,307700.08,297218.32,295766.46,371294.9]},"35":{"x":[1400.0,1400.0,1500.0,1600.0,1600.0,1600.0,1600.0,1600.0,1600.0,1600.0,1700.0,1700.0,1700.0,1800.0,1800.0,1800.0,1900.0,1900.0,1900.0,2000.0,2000.0,2000.0,2100.0,2100.0,2100.0,2300.0,2400.0,2600.0,3300.0],"y":[224500.0,224500.0,255000.0,234672.28,234672.28,234672.28,234672.28,234672.28,234672.28,234672.28,232334.59,232334.59,232334.59,246956.0,246956.0,246956.0,256220.65,256220.65,256220.65,252515.49,252515.49,252515.49,235571.77,235571.77,235571.77,293668.41,293807.76,307818.34,371395.0]},"40":{"x":[1400.0,1400.0,1500.0,1600.0,1600.0,1600.0,1600.0,1600.0,1600.0,1600.0,1700.0,1700.0,1700.0,1800.0,1800.0,1800.0,1900.0,1900.0,1900.0,2000.0,2000.0,2000.0,2100.0,2100.0,2100.0,2300.0,2400.0,2600.0,3300.0],"y":[230154.22,230154.22,234886.69,234669.69,234669.69,234669.69,234669.69,234669.69,234669.69,234669.69,232334.51,232334.51,232334.51,246926.4,246926.4,246926.4,256224.8,256224.8,256224.8,253112.66,253112.66,253112.66,254600.55,254600.55,254600.55,294715.3,294752.23,307865.58,371646.62]},"45":{"x":[1400.0,1400.0,1500.0,1600.0,1600.0,1600.0,1600.0,1600.0,1600.0,1600.0,1700.0,1700.0,1700.0,1800.0,1800.0,1800.0,1900.0,1900.0,1900.0,2000.0,2000.0,2000.0,2100.0,2100.0,2100.0,2300.0,2400.0,2600.0,3300.0],"y":[229979.01,229979.01,234872.46,236749.37,236749.37,236749.37,236749.37,236749.37,236749.37,236749.37,232334.34,232334.34,232334.34,246875.59,246875.59,246875.59,256138.22,256138.22,256138.22,250757.61,250757.61,250757.61,253888.99,253888.99,253888.99,285806.19,291565.36,307091.73,371576.43]},"50":{"x":[1400.0,1400.0,1500.0,1600.0,1600.0,1600.0,1600.0,1600.0,1600.0,1600.0,1700.0,1700.0,1700.0,1800.0,1800.0,1800.0,1900.0,1900.0,1900.0,2000.0,2000.0,2000.0,2100.0,2100.0,2100.0,2300.0,2400.0,2600.0,3300.0],"y":[231517.6,231517.6,234040.03,236740.38,236740.38,236740.38,236740.38,236740.38,236740.38,236740.38,239621.48,239621.48,239621.48,246892.82,246892.82,246892.82,256139.52,256139.52,256139.52,250758.29,250758.29,250758.29,253903.78,253903.78,253903.78,286058.56,291916.01,309126.92,372292.64]},"55":{"x":[1400.0,1400.0,1500.0,1600.0,1600.0,1600.0,1600.0,1600.0,1600.0,1600.0,1700.0,1700.0,1700.0,1800.0,1800.0,1800.0,1900.0,1900.0,1900.0,2000.0,2000.0,2000.0,2100.0,2100.0,2100.0,2300.0,2400.0,2600.0,3300.0],"y":[231516.46,231516.46,234039.41,236740.28,236740.28,236740.28,236740.28,236740.28,236740.28,236740.28,239621.21,239621.21,239621.21,246892.74,246892.74,246892.74,256151.03,256151.03,256151.03,251193.06,251193.06,251193.06,262679.15,262679.15,262679.15,286822.41,292467.34,309285.47,372151.93]},"60":{"x":[1400.0,1400.0,1500.0,1600.0,1600.0,1600.0,1600.0,1600.0,1600.0,1600.0,1700.0,1700.0,1700.0,1800.0,1800.0,1800.0,1900.0,1900.0,1900.0,2000.0,2000.0,2000.0,2100.0,2100.0,2100.0,2300.0,2400.0,2600.0,3300.0],"y":[230964.48,230964.48,233247.99,236145.98,236145.98,236145.98,236145.98,236145.98,236145.98,236145.98,239621.88,239621.88,239621.88,246812.66,246812.66,246812.66,252213.68,252213.68,252213.68,252666.18,252666.18,252666.18,262325.87,262325.87,262325.87,282660.85,289504.95,307742.74,372131.05]},"65":{"x":[1400.0,1400.0,1500.0,1600.0,1600.0,1600.0,1600.0,1600.0,1600.0,1600.0,1700.0,1700.0,1700.0,1800.0,1800.0,1800.0,1900.0,1900.0,1900.0,2000.0,2000.0,2000.0,2100.0,2100.0,2100.0,2300.0,2400.0,2600.0,3300.0],"y":[231013.89,231013.89,233276.59,236155.19,236155.19,236155.19,236155.19,236155.19,236155.19,236155.19,240614.91,240614.91,240614.91,246834.28,246834.28,246834.28,252399.38,252399.38,252399.38,253177.97,253177.97,253177.97,266897.27,266897.27,266897.27,283123.25,289816.88,307887.17,372025.36]},"70":{"x":[1400.0,1400.0,1500.0,1600.0,1600.0,1600.0,1600.0,1600.0,1600.0,1600.0,1700.0,1700.0,1700.0,1800.0,1800.0,1800.0,1900.0,1900.0,1900.0,2000.0,2000.0,2000.0,2100.0,2100.0,2100.0,2300.0,2400.0,2600.0,3300.0],"y":[228918.0,228918.0,232294.6,236327.42,236327.42,236327.42,236327.42,236327.42,236327.42,236327.42,240646.66,240646.66,240646.66,247255.06,247255.06,247255.06,252420.01,252420.01,252420.01,253114.21,253114.21,253114.21,266586.53,266586.53,266586.53,281089.61,287972.83,307465.23,371556.52]},"75":{"x":[1400.0,1400.0,1500.0,1600.0,1600.0,1600.0,1600.0,1600.0,1600.0,1600.0,1700.0,1700.0,1700.0,1800.0,1800.0,1800.0,1900.0,1900.0,1900.0,2000.0,2000.0,2000.0,2100.0,2100.0,2100.0,2300.0,2400.0,2600.0,3300.0],"y":[228918.0,228918.0,232294.6,236327.42,236327.42,236327.42,236327.42,236327.42,236327.42,236327.42,240646.66,240646.66,240646.66,247255.06,247255.06,247255.06,252420.01,252420.01,252420.01,253114.21,253114.21,253114.21,266586.53,266586.53,266586.53,281089.61,287972.83,307465.23,371556.52]},"80":{"x":[1400.0,1400.0,1500.0,1600.0,1600.0,1600.0,1600.0,1600.0,1600.0,1600.0,1700.0,1700.0,1700.0,1800.0,1800.0,1800.0,1900.0,1900.0,1900.0,2000.0,2000.0,2000.0,2100.0,2100.0,2100.0,2300.0,2400.0,2600.0,3300.0],"y":[227245.24,227245.24,231574.71,236394.1,236394.1,236394.1,236394.1,236394.1,236394.1,236394.1,241445.29,241445.29,241445.29,247190.43,247190.43,247190.43,249552.0,249552.0,249552.0,252944.66,252944.66,252944.66,266636.54,266636.54,266636.54,281449.63,288459.92,307814.03,371719.04]},"85":{"x":[1400.0,1400.0,1500.0,1600.0,1600.0,1600.0,1600.0,1600.0,1600.0,1600.0,1700.0,1700.0,1700.0,1800.0,1800.0,1800.0,1900.0,1900.0,1900.0,2000.0,2000.0,2000.0,2100.0,2100.0,2100.0,2300.0,2400.0,2600.0,3300.0],"y":[227282.17,227282.17,231582.23,236372.84,236372.84,236372.84,236372.84,236372.84,236372.84,236372.84,241399.58,241399.58,241399.58,246268.76,246268.76,246268.76,249505.88,249505.88,249505.88,252923.63,252923.63,252923.63,266627.69,266627.69,266627.69,281444.21,288457.85,307810.02,371722.2]},"90":{"x":[1400.0,1400.0,1500.0,1600.0,1600.0,1600.0,1600.0,1600.0,1600.0,1600.0,1700.0,1700.0,1700.0,1800.0,1800.0,1800.0,1900.0,1900.0,1900.0,2000.0,2000.0,2000.0,2100.0,2100.0,2100.0,2300.0,2400.0,2600.0,3300.0],"y":[227309.4,227309.4,231955.1,236667.34,236667.34,236667.34,236667.34,236667.34,236667.34,236667.34,241256.26,241256.26,241256.26,245462.58,245462.58,245462.58,249257.81,249257.81,249257.81,258103.48,258103.48,258103.48,267710.02,267710.02,267710.02,280601.05,287551.61,307680.27,371579.23]},"95":{"x":[1400.0,1400.0,1500.0,1600.0,1600.0,1600.0,1600.0,1600.0,1600.0,1600.0,1700.0,1700.0,1700.0,1800.0,1800.0,1800.0,1900.0,1900.0,1900.0,2000.0,2000.0,2000.0,2100.0,2100.0,2100.0,2300.0,2400.0,2600.0,3300.0],"y":[227818.04,227818.04,232295.53,236771.77,236771.77,236771.77,236771.77,236771.77,236771.77,236771.77,241123.15,241123.15,241123.15,245219.45,245219.45,245219.45,249244.07,249244.07,249244.07,257975.61,257975.61,257975.61,266992.77,266992.77,266992.77,279600.42,287099.37,307499.88,370845.58]},"100":{"x":[1400.0,1400.0,1500.0,1600.0,1600.0,1600.0,1600.0,1600.0,1600.0,1600.0,1700.0,1700.0,1700.0,1800.0,1800.0,1800.0,1900.0,1900.0,1900.0,2000.0,2000.0,2000.0,2100.0,2100.0,2100.0,2300.0,2400.0,2600.0,3300.0],"y":[223572.47,223572.47,229387.56,235277.83,235277.83,235277.83,235277.83,235277.83,235277.83,235277.83,241238.67,241238.67,241238.67,247267.22,247267.22,247267.22,253372.15,253372.15,253372.15,259571.12,259571.12,259571.12,265900.91,265900.91,265900.91,279598.26,287417.58,307802.15,370189.6]}},"kernel":{"50":{"x":[1400.0,1419.19,1438.38,1457.58,1476.77,1495.96,1515.15,1534.34,1553.54,1572.73,1591.92,1611.11,1630.3,1649.49,1668.69,1687.88,1707.07,1726.26,1745.45,1764.65,1783.84,1803.03,1822.22,1841.41,1860.61,1879.8,1898.99,1918.18,1937.37,1956.57,1975.76,1994.95,2014.14,2033.33,2052.53,2071.72,2090.91,2110.1,2129.29,2148.48,2167.68,2186.87,2206.06,2225.25,2244.44,2263.64,2282.83,2302.02,2321.21,2340.4,2359.6,2378.79,2397.98,2417.17,2436.36,2455.56,2474.75,2493.94,2513.13,2532.32,2551.52,2570.71,2589.9,2609.09,2628.28,2647.47,2666.67,2685.86,2705.05,2724.24,2743.43,2762.63,2781.82,2801.01,2820.2,2839.39,2858.59,2877.78,2896.97,2916.16,2935.35,2954.55,2973.74,2992.93,3012.12,3031.31,3050.51,3069.7,3088.89,3108.08,3127.27,3146.46,3165.66,3184.85,3204.04,3223.23,3242.42,3261.62,3280.81,3300.0],"y":[235200.86,235466.31,235737.81,236017.49,236307.65,236610.78,236929.45,237266.29,237623.88,238004.71,238411.03,238844.81,239307.56,239800.24,240323.16,240875.88,241457.12,242064.72,242695.67,243346.18,244011.81,244687.69,245368.8,246050.32,246728.03,247398.67,248060.39,248713.11,249358.79,250001.69,250648.51,251308.44,251993.08,252716.3,253493.97,254343.58,255283.78,256333.75,257512.44,258837.66,260325.02,261986.72,263830.25,265857.06,268061.28,270428.66,272935.99,275550.91,278232.6,280933.11,283599.51,286176.7,288610.5,290850.93,292855.07,294589.44,296031.48,297170.13,298005.54,298548.06,298816.7,298837.35,298640.94,298261.89,297736.81,297103.85,296402.53,295674.41,294964.51,294323.75,293812.37,293504.49,293493.51,293897.63,294863.7,296565.99,299194.55,302926.49,307876.72,314034.24,321207.55,329015.31,336947.61,344484.04,351214.43,356907.42,361509.51,365097.16,367816.66,369835.06,371310.06,372375.91,373139.95,373684.54,374071.15,374344.86,374538.25,374674.72,374770.94,374838.72]},"100":{"x":[1400.0,1419.19,1438.38,1457.58,1476.77,1495.96,1515.15,1534.34,1553.54,1572.73,1591.92,1611.11,1630.3,1649.49,1668.69,1687.88,1707.07,1726.26,1745.45,1764.65,1783.84,1803.03,1822.22,1841.41,1860.61,1879.8,1898.99,1918.18,1937.37,1956.57,1975.76,1994.95,2014.14,2033.33,2052.53,2071.72,2090.91,2110.1,2129.29,2148.48,2167.68,2186.87,2206.06,2225.25,2244.44,2263.64,2282.83,2302.02,2321.21,2340.4,2359.6,2378.79,2397.98,2417.17,2436.36,2455.56,2474.75,2493.94,2513.13,2532.32,2551.52,2570.71,2589.9,2609.09,2628.28,2647.47,2666.67,2685.86,2705.05,2724.24,2743.43,2762.63,2781.82,2801.01,2820.2,2839.39,2858.59,2877.78,2896.97,2916.16,2935.35,2954.55,2973.74,2992.93,3012.12,3031.31,3050.51,3069.7,3088.89,3108.08,3127.27,3146.46,3165.66,3184.85,3204.04,3223.23,3242.42,3261.62,3280.81,3300.0],"y":[240083.41,240297.16,240516.12,240740.47,240970.41,241206.14,241447.85,241695.76,241950.1,242211.1,242479.0,242754.05,243036.51,243326.66,243624.76,243931.12,244246.04,244569.82,244902.8,245245.3,245597.67,245960.26,246333.43,246717.56,247113.02,247520.21,247939.5,248371.31,248816.04,249274.09,249745.87,250231.79,250732.26,251247.69,251778.48,252325.03,252887.75,253467.03,254063.24,254676.78,255308.03,255957.35,256625.12,257311.72,258017.54,258742.96,259488.4,260254.29,261041.11,261849.36,262679.61,263532.51,264408.77,265309.23,266234.81,267186.6,268165.83,269173.92,270212.46,271283.3,272388.48,273530.31,274711.34,275934.4,277202.57,278519.16,279887.73,281312.0,282795.84,284343.16,285957.89,287643.77,289404.33,291242.67,293161.33,295162.12,297245.93,299412.56,301660.54,303987.03,306387.67,308856.51,311386.05,313967.24,316589.62,319241.49,321910.18,324582.31,327244.1,329881.78,332481.88,335031.57,337518.96,339933.34,342265.4,344507.29,346652.75,348697.08,350637.11,352471.12]},"150":{"x":[1400.0,1419.19,1438.38,1457.58,1476.77,1495.96,1515.15,1534.34,1553.54,1572.73,1591.92,1611.11,1630.3,1649.49,1668.69,1687.88,1707.07,1726.26,1745.45,1764.65,1783.84,1803.03,1822.22,1841.41,1860.61,1879.8,1898.99,1918.18,1937.37,1956.57,1975.76,1994.95,2014.14,2033.33,2052.53,2071.72,2090.91,2110.1,2129.29,2148.48,2167.68,2186.87,2206.06,2225.25,2244.44,2263.64,2282.83,2302.02,2321.21,2340.4,2359.6,2378.79,2397.98,2417.17,2436.36,2455.56,2474.75,2493.94,2513.13,2532.32,2551.52,2570.71,2589.9,2609.09,2628.28,2647.47,2666.67,2685.86,2705.05,2724.24,2743.43,2762.63,2781.82,2801.01,2820.2,2839.39,2858.59,2877.78,2896.97,2916.16,2935.35,2954.55,2973.74,2992.93,3012.12,3031.31,3050.51,3069.7,3088.89,3108.08,3127.27,3146.46,3165.66,3184.85,3204.04,3223.23,3242.42,3261.62,3280.81,3300.0],"y":[243493.25,243659.33,243828.21,243999.94,244174.61,244352.27,244533.01,244716.9,244904.01,245094.43,245288.24,245485.52,245686.37,245890.87,246099.12,246311.23,246527.28,246747.39,246971.67,247200.23,247433.2,247670.69,247912.84,248159.78,248411.66,248668.61,248930.79,249198.37,249471.51,249750.38,250035.17,250326.06,250623.27,250926.99,251237.45,251554.88,251879.53,252211.63,252551.46,252899.3,253255.44,253620.18,253993.84,254376.75,254769.28,255171.78,255584.64,256008.27,256443.08,256889.5,257348.01,257819.07,258303.19,258800.88,259312.68,259839.14,260380.85,260938.4,261512.41,262103.51,262712.36,263339.63,263986.01,264652.19,265338.88,266046.82,266776.72,267529.32,268305.35,269105.54,269930.61,270781.28,271658.23,272562.13,273493.63,274453.33,275441.79,276459.53,277506.99,278584.57,279692.59,280831.28,282000.78,283201.15,284432.32,285694.12,286986.26,288308.33,289659.76,291039.87,292447.82,293882.64,295343.2,296828.23,298336.31,299865.88,301415.26,302982.61,304565.98,306163.31]},"200":{"x":[1400.0,1419.19,1438.38,1457.58,1476.77,1495.96,1515.15,1534.34,1553.54,1572.73,1591.92,1611.11,1630.3,1649.49,1668.69,1687.88,1707.07,1726.26,1745.45,1764.65,1783.84,1803.03,1822.22,1841.41,1860.61,1879.8,1898.99,1918.18,1937.37,1956.57,1975.76,1994.95,2014.14,2033.33,2052.53,2071.72,2090.91,2110.1,2129.29,2148.48,2167.68,2186.87,2206.06,2225.25,2244.44,2263.64,2282.83,2302.02,2321.21,2340.4,2359.6,2378.79,2397.98,2417.17,2436.36,2455.56,2474.75,2493.94,2513.13,2532.32,2551.52,2570.71,2589.9,2609.09,2628.28,2647.47,2666.67,2685.86,2705.05,2724.24,2743.43,2762.63,2781.82,2801.01,2820.2,2839.39,2858.59,2877.78,2896.97,2916.16,2935.35,2954.55,2973.74,2992.93,3012.12,3031.31,3050.51,3069.7,3088.89,3108.08,3127.27,3146.46,3165.66,3184.85,3204.04,3223.23,3242.42,3261.62,3280.81,3300.0],"y":[245843.72,245975.93,246109.89,246245.64,246383.21,246522.65,246664.0,246807.3,246952.59,247099.92,247249.33,247400.87,247554.59,247710.53,247868.76,248029.32,248192.26,248357.65,248525.54,248695.99,248869.06,249044.82,249223.33,249404.66,249588.87,249776.04,249966.25,250159.56,250356.05,250555.81,250758.91,250965.45,251175.5,251389.15,251606.51,251827.66,252052.7,252281.73,252514.85,252752.16,252993.79,253239.83,253490.4,253745.61,254005.59,254270.46,254540.35,254815.37,255095.67,255381.38,255672.63,255969.57,256272.34,256581.09,256895.96,257217.11,257544.69,257878.86,258219.78,258567.61,258922.52,259284.68,259654.26,260031.43,260416.36,260809.22,261210.21,261619.49,262037.24,262463.65,262898.9,263343.17,263796.63,264259.48,264731.89,265214.04,265706.11,266208.27,266720.7,267243.58,267777.05,268321.3,268876.47,269442.73,270020.22,270609.07,271209.44,271821.44,272445.19,273080.81,273728.4,274388.04,275059.81,275743.8,276440.04,277148.58,277869.46,278602.68,279348.24,280106.14]},"300":{"x":[1400.0,1419.19,1438.38,1457.58,1476.77,1495.96,1515.15,1534.34,1553.54,1572.73,1591.92,1611.11,1630.3,1649.49,1668.69,1687.88,1707.07,1726.26,1745.45,1764.65,1783.84,1803.03,1822.22,1841.41,1860.61,1879.8,1898.99,1918.18,1937.37,1956.57,1975.76,1994.95,2014.14,2033.33,2052.53,2071.72,2090.91,2110.1,2129.29,2148.48,2167.68,2186.87,2206.06,2225.25,2244.44,2263.64,2282.83,2302.02,2321.21,2340.4,2359.6,2378.79,2397.98,2417.17,2436.36,2455.56,2474.75,2493.94,2513.13,2532.32,2551.52,2570.71,2589.9,2609.09,2628.28,2647.47,2666.67,2685.86,2705.05,2724.24,2743.43,2762.63,2781.82,2801.01,2820.2,2839.39,2858.59,2877.78,2896.97,2916.16,2935.35,2954.55,2973.74,2992.93,3012.12,3031.31,3050.51,3069.7,3088.89,3108.08,3127.27,3146.46,3165.66,3184.85,3204.04,3223.23,3242.42,3261.62,3280.81,3300.0],"y":[248896.93,248987.78,249079.42,249171.85,249265.09,249359.15,249454.02,249549.74,249646.3,249743.72,249842.0,249941.17,250041.22,250142.18,250244.05,250346.84,250450.57,250555.24,250660.87,250767.48,250875.07,250983.65,251093.24,251203.86,251315.51,251428.2,251541.95,251656.78,251772.7,251889.71,252007.84,252127.1,252247.49,252369.05,252491.77,252615.68,252740.79,252867.12,252994.67,253123.47,253253.52,253384.86,253517.48,253651.41,253786.66,253923.25,254061.2,254200.51,254341.22,254483.33,254626.86,254771.82,254918.24,255066.14,255215.52,255366.41,255518.83,255672.78,255828.3,255985.4,256144.09,256304.4,256466.34,256629.93,256795.19,256962.14,257130.8,257301.19,257473.32,257647.22,257822.9,258000.39,258179.69,258360.84,258543.86,258728.75,258915.55,259104.27,259294.93,259487.55,259682.15,259878.75,260077.38,260278.04,260480.76,260685.57,260892.48,261101.5,261312.67,261526.0,261741.51,261959.21,262179.14,262401.31,262625.74,262852.45,263081.45,263312.78,263546.44,263782.45]}},"meta":{"chapter":"Chapter 5: Bivariate Data Summary","book":"metricsAI: An Introduction to Econometrics with Python and AI in the Cloud","author":"Carlos Mendez"}}</script>
+
+<script>
+"use strict";
+
+const DATA = JSON.parse(document.getElementById("ch-data").textContent);
+
+// ---------- Stats helpers ----------
+const mean = a => a.reduce((s, v) => s + v, 0) / a.length;
+const sortedCopy = a => [...a].sort((x, y) => x - y);
+function quantile(sorted, p) {
+  const idx = p * (sorted.length - 1);
+  const lo = Math.floor(idx), hi = Math.ceil(idx);
+  if (lo === hi) return sorted[lo];
+  return sorted[lo] + (idx - lo) * (sorted[hi] - sorted[lo]);
+}
+function std(a, m) {
+  m = m ?? mean(a);
+  let s = 0;
+  for (const v of a) s += (v - m) * (v - m);
+  return Math.sqrt(s / (a.length - 1));
+}
+
+// ---------- Formatting ----------
+function fmt(v, decimals) {
+  if (v === null || v === undefined || isNaN(v)) return "\u2014";
+  decimals = decimals ?? 2;
+  const abs = Math.abs(v);
+  if (abs >= 1e9) return (v / 1e9).toFixed(1) + "B";
+  if (abs >= 1e6) return (v / 1e6).toFixed(1) + "M";
+  if (abs >= 1e3 && decimals === 0) return Math.round(v).toLocaleString();
+  return v.toFixed(decimals);
+}
+function fmtMoney(v) { return v === null ? "\u2014" : "$" + Math.round(v).toLocaleString(); }
+function fmtPct(v, d) { return (v * 100).toFixed(d ?? 1) + "%"; }
+
+// ---------- Theme ----------
+const THEME_KEY = "metricsai-theme";
+function getCSS(varName) {
+  return getComputedStyle(document.documentElement).getPropertyValue(varName).trim();
+}
+function themeColors() {
+  return {
+    text: getCSS("--text"),
+    textSoft: getCSS("--text-soft"),
+    grid: getCSS("--grid"),
+    panel: getCSS("--panel"),
+    cyan: getCSS("--accent"),
+    purple: getCSS("--accent-2"),
+    pink: getCSS("--accent-3")
+  };
+}
+function baseLayout(overrides) {
+  const c = themeColors();
+  return Object.assign({
+    paper_bgcolor: "rgba(0,0,0,0)",
+    plot_bgcolor: "rgba(0,0,0,0)",
+    font: { family: "Inter, system-ui, sans-serif", color: c.text, size: 12 },
+    margin: { l: 60, r: 18, t: 30, b: 50 },
+    xaxis: { gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft } },
+    yaxis: { gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft } },
+    hoverlabel: { bgcolor: c.panel, bordercolor: c.grid, font: { color: c.text } },
+    legend: { font: { color: c.text }, bgcolor: "rgba(0,0,0,0)" }
+  }, overrides || {});
+}
+const PLOTLY_CONFIG = { displayModeBar: false, responsive: true };
+
+// ---------- Variable metadata ----------
+const VAR_LABELS = {
+  price: "Price ($)", size: "Size (sqft)", bedrooms: "Bedrooms",
+  bathrooms: "Bathrooms", lotsize: "Lot size (acres)", age: "Age (years)"
+};
+const VAR_FMT = {
+  price: fmtMoney, size: v => fmt(v, 0) + " sqft", bedrooms: v => fmt(v, 0),
+  bathrooms: v => fmt(v, 0), lotsize: v => fmt(v, 2) + " ac", age: v => fmt(v, 0) + " yr"
+};
+
+// ---------- Toggle helper ----------
+function activeVal(groupId) {
+  const btn = document.querySelector("#" + groupId + " button.active");
+  return btn ? btn.dataset.val : null;
+}
+function initToggles(groupId, callback) {
+  const group = document.getElementById(groupId);
+  group.querySelectorAll("button").forEach(btn => {
+    btn.addEventListener("click", () => {
+      group.querySelectorAll("button").forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      callback();
+    });
+  });
+}
+
+// ==================== WIDGET 1: BIVARIATE SUMMARY STATS ====================
+(function() {
+  const select = document.getElementById("bvstats-pair");
+  const gridY = document.getElementById("bvstats-grid-y");
+  const gridX = document.getElementById("bvstats-grid-x");
+  const callout = document.getElementById("bvstats-callout");
+
+  function computeStats(arr) {
+    const sorted = sortedCopy(arr);
+    const m = mean(arr);
+    const sd = std(arr, m);
+    return {
+      n: arr.length, mean: m, median: quantile(sorted, 0.5),
+      std: sd, min: sorted[0], max: sorted[sorted.length - 1],
+      q1: quantile(sorted, 0.25), q3: quantile(sorted, 0.75),
+      cv: sd / Math.abs(m)
+    };
+  }
+
+  function renderGrid(el, stats, label, fmtFn) {
+    const cells = [
+      [label, "", ""],
+      ["n", fmt(stats.n, 0), ""],
+      ["Mean", fmtFn(stats.mean), "mean"],
+      ["Median", fmtFn(stats.median), "median"],
+      ["Std dev", fmtFn(stats.std), "spread"],
+      ["Min", fmtFn(stats.min), ""],
+      ["Max", fmtFn(stats.max), ""],
+      ["CV", stats.cv.toFixed(3), "spread"]
+    ];
+    el.innerHTML = cells.map(([l, v, cls]) =>
+      `<div class="stat ${cls}"><div class="label">${l}</div><div class="value">${v}</div></div>`
+    ).join("");
+  }
+
+  function render() {
+    const xvar = select.value;
+    const price = DATA.house.price;
+    const xvals = DATA.house[xvar];
+    const statsY = computeStats(price);
+    const statsX = computeStats(xvals);
+
+    renderGrid(gridY, statsY, "Price ($)", fmtMoney);
+    renderGrid(gridX, statsX, VAR_LABELS[xvar], VAR_FMT[xvar]);
+
+    // Covariance
+    const n = price.length;
+    const mx = mean(xvals), my = mean(price);
+    let cov = 0;
+    for (let i = 0; i < n; i++) cov += (xvals[i] - mx) * (price[i] - my);
+    cov /= (n - 1);
+    const r = DATA.correlation[xvar];
+    callout.innerHTML = `<strong>Covariance(price, ${xvar}) = ${fmt(cov, 0)}</strong> — ` +
+      (Math.abs(cov) > 1000
+        ? `large and ${cov > 0 ? "positive" : "negative"}, but the magnitude depends on units. The correlation <strong>r = ${r}</strong> standardizes this to a unit-free measure.`
+        : `near zero, indicating little linear co-movement. The correlation <strong>r = ${r}</strong> confirms: negligible linear association.`);
+  }
+
+  select.addEventListener("change", render);
+  window.__rerender_bvstats = render;
+  render();
+})();
+
+// ==================== WIDGET 2: SCATTER & CORRELATION ====================
+(function() {
+  const select = document.getElementById("scatter-x");
+  const rDisplay = document.getElementById("scatter-r-display");
+  const strengthEl = document.getElementById("scatter-strength");
+  const callout = document.getElementById("scatter-callout");
+
+  function strengthLabel(r) {
+    const abs = Math.abs(r);
+    const dir = r >= 0 ? "positive" : "negative";
+    if (abs >= 0.7) return "strong " + dir;
+    if (abs >= 0.4) return "moderate " + dir;
+    if (abs >= 0.2) return "weak " + dir;
+    return "negligible";
+  }
+
+  function render() {
+    const xvar = select.value;
+    const xvals = DATA.house[xvar];
+    const yvals = DATA.house.price;
+    const r = DATA.correlation[xvar];
+    const c = themeColors();
+
+    rDisplay.textContent = "r = " + r.toFixed(4);
+    const sl = strengthLabel(r);
+    strengthEl.innerHTML = `<span style="font-weight:600;color:${Math.abs(r) >= 0.7 ? c.cyan : Math.abs(r) >= 0.4 ? c.purple : c.pink}">${sl}</span> · r² = ${(r*r).toFixed(4)} (${fmtPct(r*r, 1)} of variation)`;
+
+    const trace = {
+      x: xvals, y: yvals, mode: "markers", type: "scatter",
+      marker: { color: c.cyan, size: 9, opacity: 0.8, line: { color: c.purple, width: 1 } },
+      hovertemplate: VAR_LABELS[xvar] + ": %{x}<br>Price: $%{y:,.0f}<extra></extra>"
+    };
+    const layout = baseLayout({
+      height: 380,
+      xaxis: Object.assign({}, baseLayout().xaxis, { title: { text: VAR_LABELS[xvar], font: { color: c.textSoft } } }),
+      yaxis: Object.assign({}, baseLayout().yaxis, { title: { text: "Price ($)", font: { color: c.textSoft } } }),
+      showlegend: false
+    });
+    Plotly.react("scatter-chart", [trace], layout, PLOTLY_CONFIG);
+
+    callout.innerHTML = `<strong>r = ${r.toFixed(4)}</strong> (${sl}). ` +
+      (Math.abs(r) >= 0.5
+        ? `${VAR_LABELS[xvar]} explains ${fmtPct(r*r, 1)} of the variation in price — there's a clear linear pattern in the scatter.`
+        : `${VAR_LABELS[xvar]} explains only ${fmtPct(r*r, 1)} of price variation — the scatter is too diffuse for a useful linear predictor.`);
+  }
+
+  select.addEventListener("change", render);
+  window.__rerender_scatter = render;
+  render();
+})();
+
+// ==================== WIDGET 3: CORRELATION PATTERNS ====================
+(function() {
+  const slider = document.getElementById("corr-target");
+  const valDisplay = document.getElementById("corr-target-val");
+  const actualDisplay = document.getElementById("corr-actual");
+  const callout = document.getElementById("corr-callout");
+
+  function render() {
+    const targetInt = parseInt(slider.value);
+    const target = targetInt / 10;
+    valDisplay.textContent = target.toFixed(1);
+    const key = target.toFixed(1);
+    const ds = DATA.synthetic_r[key];
+    if (!ds) return;
+    actualDisplay.textContent = "r = " + ds.actual_r.toFixed(4);
+
+    const c = themeColors();
+    const trace = {
+      x: ds.x, y: ds.y, mode: "markers", type: "scatter",
+      marker: { color: c.cyan, size: 9, opacity: 0.75, line: { color: c.purple, width: 1 } },
+      hovertemplate: "x: %{x:.2f}<br>y: %{y:.2f}<extra></extra>"
+    };
+    const layout = baseLayout({
+      height: 380,
+      xaxis: Object.assign({}, baseLayout().xaxis, { title: { text: "X", font: { color: c.textSoft } } }),
+      yaxis: Object.assign({}, baseLayout().yaxis, { title: { text: "Y", font: { color: c.textSoft } } }),
+      showlegend: false,
+      annotations: [{
+        x: 0.02, y: 0.98, xref: "paper", yref: "paper", xanchor: "left", yanchor: "top",
+        text: "target r = " + target.toFixed(1) + "<br>actual r = " + ds.actual_r.toFixed(4),
+        showarrow: false,
+        font: { family: "JetBrains Mono", size: 13, color: c.cyan },
+        bgcolor: c.panel, bordercolor: c.grid, borderwidth: 1, borderpad: 6
+      }]
+    });
+    Plotly.react("corr-chart", [trace], layout, PLOTLY_CONFIG);
+
+    const diff = Math.abs(ds.actual_r - target);
+    callout.innerHTML = `<strong>Target r = ${target.toFixed(1)}, actual sample r = ${ds.actual_r.toFixed(4)}</strong>. ` +
+      (diff > 0.05
+        ? `With only 30 points, the sample correlation wobbles around the target — a reminder that r is an <em>estimate</em> subject to sampling variability.`
+        : `The sample closely matches the target — but with a different random seed, it could differ substantially.`);
+  }
+
+  slider.addEventListener("input", render);
+  window.__rerender_corr = render;
+  render();
+})();
+
+// ==================== WIDGET 4: OLS REGRESSION LINE ====================
+(function() {
+  const xSelect = document.getElementById("ols-x");
+  const predictSlider = document.getElementById("ols-predict");
+  const predictVal = document.getElementById("ols-predict-val");
+  const equationBox = document.getElementById("ols-equation");
+  const callout = document.getElementById("ols-callout");
+
+  function getXRange(xvar) {
+    const vals = DATA.house[xvar];
+    return { min: Math.min(...vals), max: Math.max(...vals) };
+  }
+
+  function updateSliderRange() {
+    const xvar = xSelect.value;
+    const range = getXRange(xvar);
+    predictSlider.min = range.min;
+    predictSlider.max = range.max;
+    const mid = Math.round((range.min + range.max) / 2);
+    predictSlider.value = mid;
+    if (xvar === "lotsize") { predictSlider.step = "0.01"; }
+    else { predictSlider.step = "1"; }
+  }
+
+  function render() {
+    const xvar = xSelect.value;
+    const reg = DATA.regression[xvar];
+    const xvals = DATA.house[xvar];
+    const yvals = DATA.house.price;
+    const c = themeColors();
+    const showResid = activeVal("ols-resid") === "on";
+    const predictX = parseFloat(predictSlider.value);
+    const predictY = reg.intercept + reg.slope * predictX;
+    predictVal.textContent = VAR_FMT[xvar](predictX);
+
+    // Equation box
+    const slopeAbs = Math.abs(reg.slope);
+    const slopeSign = reg.slope >= 0 ? "+" : "−";
+    equationBox.innerHTML =
+      `<div class="eq-label">OLS Equation</div>` +
+      `<div class="eq-main">price = <span class="eq-val">${fmtMoney(reg.intercept)}</span> ${slopeSign} <span class="eq-val">$${fmt(slopeAbs, 2)}</span> × ${xvar}</div>` +
+      `<div class="eq-detail">R² = <span class="eq-val">${reg.r_squared.toFixed(4)}</span> (${fmtPct(reg.r_squared, 1)}) · SE = <span class="eq-val">${fmtMoney(reg.se)}</span> · ` +
+      `Predicted at ${VAR_FMT[xvar](predictX)}: <span class="eq-val">${fmtMoney(predictY)}</span></div>`;
+
+    // Build traces
+    const traces = [];
+
+    // Residual lines (behind scatter)
+    if (showResid) {
+      for (let i = 0; i < xvals.length; i++) {
+        traces.push({
+          x: [xvals[i], xvals[i]], y: [yvals[i], reg.fitted[i]],
+          mode: "lines", type: "scatter",
+          line: { color: c.pink, width: 1.5, dash: "dot" },
+          hoverinfo: "skip", showlegend: false
+        });
+      }
+    }
+
+    // Scatter points
+    traces.push({
+      x: xvals, y: yvals, mode: "markers", type: "scatter", name: "Houses",
+      marker: { color: c.cyan, size: 9, opacity: 0.8, line: { color: c.purple, width: 1 } },
+      hovertemplate: VAR_LABELS[xvar] + ": %{x}<br>Price: $%{y:,.0f}<extra></extra>"
+    });
+
+    // Regression line
+    const xRange = getXRange(xvar);
+    const lineX = [xRange.min, xRange.max];
+    const lineY = lineX.map(x => reg.intercept + reg.slope * x);
+    traces.push({
+      x: lineX, y: lineY, mode: "lines", type: "scatter", name: "OLS line",
+      line: { color: c.purple, width: 2.5 }, hoverinfo: "skip"
+    });
+
+    // Prediction crosshair
+    traces.push({
+      x: [predictX], y: [predictY], mode: "markers", type: "scatter", name: "Prediction",
+      marker: { color: c.pink, size: 14, symbol: "x", line: { width: 2, color: c.pink } },
+      hovertemplate: "Predicted: $%{y:,.0f}<extra></extra>"
+    });
+
+    const layout = baseLayout({
+      height: 400,
+      xaxis: Object.assign({}, baseLayout().xaxis, { title: { text: VAR_LABELS[xvar], font: { color: c.textSoft } } }),
+      yaxis: Object.assign({}, baseLayout().yaxis, { title: { text: "Price ($)", font: { color: c.textSoft } } }),
+      showlegend: true,
+      legend: { x: 0.01, y: 0.99, xanchor: "left", yanchor: "top", font: { color: c.text }, bgcolor: "rgba(0,0,0,0)" }
+    });
+    Plotly.react("ols-chart", traces, layout, PLOTLY_CONFIG);
+
+    callout.innerHTML = `<strong>Interpretation:</strong> each additional unit of ${xvar} is associated with a ` +
+      `${fmtMoney(Math.abs(reg.slope))} ${reg.slope >= 0 ? "increase" : "decrease"} in house price. ` +
+      `The model explains <strong>${fmtPct(reg.r_squared, 1)}</strong> of price variation ` +
+      `(R² = ${reg.r_squared.toFixed(4)}).`;
+  }
+
+  xSelect.addEventListener("change", () => { updateSliderRange(); render(); });
+  predictSlider.addEventListener("input", render);
+  initToggles("ols-resid", render);
+  updateSliderRange();
+  window.__rerender_ols = render;
+  render();
+})();
+
+// ==================== WIDGET 5: R-SQUARED DECOMPOSITION ====================
+(function() {
+  const barsEl = document.getElementById("rsq-bars");
+  const callout = document.getElementById("rsq-callout");
+
+  function render() {
+    const view = activeVal("rsq-view");
+    const reg = DATA.regression.size;
+    const tss = reg.tss, ess = reg.ess, rss = reg.rss;
+    const yMean = reg.y_mean;
+    const c = themeColors();
+    const xvals = DATA.house.size;
+    const yvals = DATA.house.price;
+    const fitted = reg.fitted;
+
+    // Decomposition bars
+    const highlight = { all: [true, true, true], total: [true, false, false], explained: [false, true, false], residual: [false, false, true] };
+    const hl = highlight[view] || [true, true, true];
+    barsEl.innerHTML =
+      `<div class="decomp-bar tss" style="opacity:${hl[0] ? 1 : 0.35}"><div class="bar-label">Total (TSS)</div><div class="bar-value">${fmt(tss)}</div><div class="bar-pct">100%</div></div>` +
+      `<div class="decomp-bar ess" style="opacity:${hl[1] ? 1 : 0.35}"><div class="bar-label">Explained (ESS)</div><div class="bar-value">${fmt(ess)}</div><div class="bar-pct">${fmtPct(ess/tss, 1)}</div></div>` +
+      `<div class="decomp-bar rss" style="opacity:${hl[2] ? 1 : 0.35}"><div class="bar-label">Residual (RSS)</div><div class="bar-value">${fmt(rss)}</div><div class="bar-pct">${fmtPct(rss/tss, 1)}</div></div>`;
+
+    // Build traces
+    const traces = [];
+
+    // Deviation lines
+    if (view === "all" || view === "total") {
+      for (let i = 0; i < xvals.length; i++) {
+        traces.push({
+          x: [xvals[i], xvals[i]], y: [yvals[i], yMean],
+          mode: "lines", line: { color: c.purple, width: 1.2, dash: "dot" },
+          hoverinfo: "skip", showlegend: false
+        });
+      }
+    }
+    if (view === "all" || view === "explained") {
+      for (let i = 0; i < xvals.length; i++) {
+        traces.push({
+          x: [xvals[i], xvals[i]], y: [fitted[i], yMean],
+          mode: "lines", line: { color: c.cyan, width: 1.5 },
+          hoverinfo: "skip", showlegend: false
+        });
+      }
+    }
+    if (view === "all" || view === "residual") {
+      for (let i = 0; i < xvals.length; i++) {
+        traces.push({
+          x: [xvals[i], xvals[i]], y: [yvals[i], fitted[i]],
+          mode: "lines", line: { color: c.pink, width: 1.5, dash: "dash" },
+          hoverinfo: "skip", showlegend: false
+        });
+      }
+    }
+
+    // Scatter points
+    traces.push({
+      x: xvals, y: yvals, mode: "markers", type: "scatter", name: "Houses",
+      marker: { color: c.cyan, size: 8, opacity: 0.8, line: { color: c.purple, width: 1 } },
+      hovertemplate: "Size: %{x} sqft<br>Price: $%{y:,.0f}<extra></extra>"
+    });
+
+    // Regression line
+    const xMin = Math.min(...xvals), xMax = Math.max(...xvals);
+    traces.push({
+      x: [xMin, xMax], y: [reg.intercept + reg.slope * xMin, reg.intercept + reg.slope * xMax],
+      mode: "lines", name: "OLS", line: { color: c.purple, width: 2 }, hoverinfo: "skip"
+    });
+
+    // Mean line
+    traces.push({
+      x: [xMin, xMax], y: [yMean, yMean],
+      mode: "lines", name: "Mean ($" + Math.round(yMean).toLocaleString() + ")",
+      line: { color: c.pink, width: 1.5, dash: "dash" }, hoverinfo: "skip"
+    });
+
+    const layout = baseLayout({
+      height: 400,
+      xaxis: Object.assign({}, baseLayout().xaxis, { title: { text: "Size (sqft)", font: { color: c.textSoft } } }),
+      yaxis: Object.assign({}, baseLayout().yaxis, { title: { text: "Price ($)", font: { color: c.textSoft } } }),
+      showlegend: true,
+      legend: { x: 0.01, y: 0.99, xanchor: "left", yanchor: "top", font: { color: c.text }, bgcolor: "rgba(0,0,0,0)" }
+    });
+    Plotly.react("rsq-chart", traces, layout, PLOTLY_CONFIG);
+
+    const viewLabels = { all: "All three", total: "Total (TSS)", explained: "Explained (ESS)", residual: "Residual (RSS)" };
+    callout.innerHTML = `<strong>${viewLabels[view]}:</strong> R² = ESS/TSS = ${fmt(ess)}/${fmt(tss)} = <strong>${reg.r_squared.toFixed(4)}</strong>. ` +
+      `The OLS line captures ${fmtPct(ess/tss, 1)} of the total variation in house prices. The remaining ${fmtPct(rss/tss, 1)} is unexplained (residual).`;
+  }
+
+  initToggles("rsq-view", render);
+  window.__rerender_rsq = render;
+  render();
+})();
+
+// ==================== WIDGET 6: REGRESSION ASYMMETRY ====================
+(function() {
+  const compBox = document.getElementById("asym-comparison");
+  const callout = document.getElementById("asym-callout");
+
+  function render() {
+    const dir = activeVal("asym-dir");
+    const fwd = DATA.regression.size;
+    const rev = DATA.reverse;
+    const c = themeColors();
+    const xvals = DATA.house.size;
+    const yvals = DATA.house.price;
+    const reciprocal = 1 / fwd.slope;
+
+    // Comparison box
+    compBox.innerHTML =
+      `<div class="comp-side left">` +
+      `<div class="comp-label">price ~ size (Y on X)</div>` +
+      `slope = <span class="comp-val">$${fmt(fwd.slope, 2)}</span>/sqft<br>` +
+      `intercept = <span class="comp-val">${fmtMoney(fwd.intercept)}</span><br>` +
+      `R² = <span class="comp-val">${fwd.r_squared.toFixed(4)}</span>` +
+      `</div>` +
+      `<div class="comp-side right" style="--accent:var(--accent-3)">` +
+      `<div class="comp-label">size ~ price (X on Y)</div>` +
+      `slope = <span style="color:var(--accent-3);font-weight:600">${rev.slope.toFixed(6)}</span> sqft/$<br>` +
+      `1/fwd slope = <span style="color:var(--accent-3);font-weight:600">${reciprocal.toFixed(6)}</span> sqft/$<br>` +
+      `R² = <span style="color:var(--accent-3);font-weight:600">${rev.r_squared.toFixed(4)}</span>` +
+      `</div>`;
+
+    // Build traces
+    const traces = [];
+    const xMin = Math.min(...xvals), xMax = Math.max(...xvals);
+    const yMin = Math.min(...yvals), yMax = Math.max(...yvals);
+
+    // Scatter
+    traces.push({
+      x: xvals, y: yvals, mode: "markers", type: "scatter", name: "Houses",
+      marker: { color: c.cyan, size: 9, opacity: 0.8, line: { color: c.purple, width: 1 } },
+      hovertemplate: "Size: %{x} sqft<br>Price: $%{y:,.0f}<extra></extra>"
+    });
+
+    // Forward regression line (Y~X): price = intercept + slope * size
+    if (dir === "yx" || dir === "both") {
+      traces.push({
+        x: [xMin, xMax],
+        y: [fwd.intercept + fwd.slope * xMin, fwd.intercept + fwd.slope * xMax],
+        mode: "lines", name: "price ~ size",
+        line: { color: c.purple, width: 2.5 }, hoverinfo: "skip"
+      });
+    }
+
+    // Reverse regression line (X~Y): size = rev.intercept + rev.slope * price
+    // Rearranged for scatter: price = (size - rev.intercept) / rev.slope
+    if (dir === "xy" || dir === "both") {
+      const revY1 = (xMin - rev.intercept) / rev.slope;
+      const revY2 = (xMax - rev.intercept) / rev.slope;
+      traces.push({
+        x: [xMin, xMax],
+        y: [revY1, revY2],
+        mode: "lines", name: "size ~ price",
+        line: { color: c.pink, width: 2.5, dash: "dash" }, hoverinfo: "skip"
+      });
+    }
+
+    // Mean point
+    const mx = mean(xvals), my = mean(yvals);
+    traces.push({
+      x: [mx], y: [my], mode: "markers", name: "Mean point",
+      marker: { color: c.pink, size: 12, symbol: "diamond", line: { color: "white", width: 1.5 } },
+      hovertemplate: "Mean: %{x:.0f} sqft, $%{y:,.0f}<extra></extra>"
+    });
+
+    const layout = baseLayout({
+      height: 400,
+      xaxis: Object.assign({}, baseLayout().xaxis, { title: { text: "Size (sqft)", font: { color: c.textSoft } } }),
+      yaxis: Object.assign({}, baseLayout().yaxis, { title: { text: "Price ($)", font: { color: c.textSoft } } }),
+      showlegend: true,
+      legend: { x: 0.01, y: 0.99, xanchor: "left", yanchor: "top", font: { color: c.text }, bgcolor: "rgba(0,0,0,0)" }
+    });
+    Plotly.react("asym-chart", traces, layout, PLOTLY_CONFIG);
+
+    const ratio = (reciprocal / rev.slope).toFixed(2);
+    callout.innerHTML = `<strong>Key insight:</strong> 1/slope(price~size) = ${reciprocal.toFixed(6)} ≠ slope(size~price) = ${rev.slope.toFixed(6)}. ` +
+      `The forward reciprocal is <strong>${ratio}× larger</strong> than the reverse slope. ` +
+      `Both R² values are identical (${fwd.r_squared.toFixed(4)}) because correlation is symmetric — but regression is directional. This is why we say regression measures <em>association</em>, not causation.`;
+  }
+
+  initToggles("asym-dir", render);
+  window.__rerender_asym = render;
+  render();
+})();
+
+// ==================== WIDGET 7: PARAMETRIC vs NONPARAMETRIC ====================
+(function() {
+  const fracSlider = document.getElementById("nonpar-frac");
+  const fracVal = document.getElementById("nonpar-frac-val");
+  const callout = document.getElementById("nonpar-callout");
+
+  function nearestLowessKey(frac) {
+    // Snap to nearest available LOWESS frac key (30, 35, ..., 100)
+    const pct = Math.round(frac * 100 / 5) * 5;
+    const clamped = Math.max(30, Math.min(100, pct));
+    return String(clamped);
+  }
+
+  function render() {
+    const fracPct = parseInt(fracSlider.value);
+    const frac = fracPct / 100;
+    fracVal.textContent = frac.toFixed(2);
+    const showOLS = activeVal("nonpar-ols") === "on";
+    const showLowess = activeVal("nonpar-lowess") === "on";
+    const showKernel = activeVal("nonpar-kernel") === "on";
+    const c = themeColors();
+    const xvals = DATA.house.size;
+    const yvals = DATA.house.price;
+    const reg = DATA.regression.size;
+    const xMin = Math.min(...xvals), xMax = Math.max(...xvals);
+
+    const traces = [];
+
+    // Scatter
+    traces.push({
+      x: xvals, y: yvals, mode: "markers", type: "scatter", name: "Houses",
+      marker: { color: c.cyan, size: 9, opacity: 0.7, line: { color: c.purple, width: 1 } },
+      hovertemplate: "Size: %{x} sqft<br>Price: $%{y:,.0f}<extra></extra>"
+    });
+
+    // OLS line
+    if (showOLS) {
+      traces.push({
+        x: [xMin, xMax],
+        y: [reg.intercept + reg.slope * xMin, reg.intercept + reg.slope * xMax],
+        mode: "lines", name: "OLS (linear)",
+        line: { color: c.purple, width: 2.5 }, hoverinfo: "skip"
+      });
+    }
+
+    // LOWESS
+    if (showLowess) {
+      const key = nearestLowessKey(frac);
+      const lw = DATA.lowess[key];
+      if (lw) {
+        traces.push({
+          x: lw.x, y: lw.y, mode: "lines", name: "LOWESS (frac=" + frac.toFixed(2) + ")",
+          line: { color: c.cyan, width: 2.5, dash: "dash" }, hoverinfo: "skip"
+        });
+      }
+    }
+
+    // Kernel
+    if (showKernel) {
+      const kernelData = DATA.kernel["150"];
+      if (kernelData) {
+        traces.push({
+          x: kernelData.x, y: kernelData.y, mode: "lines", name: "Kernel (Gaussian)",
+          line: { color: c.pink, width: 2, dash: "dot" }, hoverinfo: "skip"
+        });
+      }
+    }
+
+    const layout = baseLayout({
+      height: 400,
+      xaxis: Object.assign({}, baseLayout().xaxis, { title: { text: "Size (sqft)", font: { color: c.textSoft } } }),
+      yaxis: Object.assign({}, baseLayout().yaxis, { title: { text: "Price ($)", font: { color: c.textSoft } } }),
+      showlegend: true,
+      legend: { x: 0.01, y: 0.99, xanchor: "left", yanchor: "top", font: { color: c.text }, bgcolor: "rgba(0,0,0,0)" }
+    });
+    Plotly.react("nonpar-chart", traces, layout, PLOTLY_CONFIG);
+
+    // Compute average deviation between OLS and LOWESS
+    const key = nearestLowessKey(frac);
+    const lw = DATA.lowess[key];
+    let avgDev = 0;
+    if (lw) {
+      let sumDev = 0;
+      for (let i = 0; i < lw.x.length; i++) {
+        const olsY = reg.intercept + reg.slope * lw.x[i];
+        sumDev += Math.abs(lw.y[i] - olsY);
+      }
+      avgDev = sumDev / lw.x.length;
+    }
+    callout.innerHTML = `<strong>LOWESS (frac = ${frac.toFixed(2)})</strong> deviates from OLS by an average of <strong>${fmtMoney(avgDev)}</strong>. ` +
+      (avgDev < reg.se * 0.3
+        ? `This is small relative to the regression SE (${fmtMoney(reg.se)}), confirming that the <em>linear model is adequate</em> for this data.`
+        : `At this bandwidth, LOWESS is chasing local noise. A wider bandwidth would smooth toward the OLS line.`);
+  }
+
+  fracSlider.addEventListener("input", render);
+  initToggles("nonpar-ols", render);
+  initToggles("nonpar-lowess", render);
+  initToggles("nonpar-kernel", render);
+  window.__rerender_nonpar = render;
+  render();
+})();
+
+// ==================== RESET + URL HASH STATE ====================
+(function() {
+  const REG = {
+    bvstats: [
+      { id: "bvstats-pair", kind: "select", def: "size" }
+    ],
+    scatter: [
+      { id: "scatter-x", kind: "select", def: "size" }
+    ],
+    corr: [
+      { id: "corr-target", kind: "range", def: "8" }
+    ],
+    ols: [
+      { id: "ols-x", kind: "select", def: "size" },
+      { id: "ols-predict", kind: "range", def: "2000" },
+      { group: "ols-resid", kind: "toggle", def: "off" }
+    ],
+    rsq: [
+      { group: "rsq-view", kind: "toggle", def: "all" }
+    ],
+    asym: [
+      { group: "asym-dir", kind: "toggle", def: "yx" }
+    ],
+    nonpar: [
+      { group: "nonpar-ols", kind: "toggle", def: "on" },
+      { group: "nonpar-lowess", kind: "toggle", def: "on" },
+      { id: "nonpar-frac", kind: "range", def: "65" },
+      { group: "nonpar-kernel", kind: "toggle", def: "off" }
+    ]
+  };
+
+  function getVal(c) {
+    if (c.kind === "toggle") {
+      const btn = document.querySelector("#" + c.group + " button.active");
+      return btn ? btn.dataset.val : c.def;
+    }
+    return document.getElementById(c.id).value;
+  }
+
+  function setVal(c, val, fireEvents) {
+    if (c.kind === "toggle") {
+      const group = document.getElementById(c.group);
+      if (!group) return;
+      const btn = group.querySelector('button[data-val="' + val + '"]');
+      if (btn && !btn.classList.contains("active")) btn.click();
+    } else {
+      const el = document.getElementById(c.id);
+      if (!el) return;
+      if (el.value !== String(val)) {
+        el.value = val;
+        if (fireEvents) el.dispatchEvent(new Event(c.kind === "select" ? "change" : "input", { bubbles: true }));
+      }
+    }
+  }
+
+  function resetWidget(widget) {
+    const ctrls = REG[widget] || [];
+    for (const c of ctrls) setVal(c, c.def, true);
+    const fn = window["__rerender_" + widget];
+    if (fn) fn();
+    writeHash();
+  }
+
+  function writeHash() {
+    const parts = [];
+    for (const [widget, ctrls] of Object.entries(REG)) {
+      for (const c of ctrls) {
+        const v = String(getVal(c));
+        if (v !== String(c.def)) {
+          const key = c.id || c.group;
+          parts.push(key + "=" + encodeURIComponent(v));
+        }
+      }
+    }
+    const want = parts.length ? "#" + parts.join("&") : "";
+    if (want === "" && location.hash.match(/=/)) {
+      history.replaceState(null, "", location.pathname + location.search);
+    } else if (want !== "" && location.hash !== want) {
+      history.replaceState(null, "", location.pathname + location.search + want);
+    }
+  }
+
+  function readHash() {
+    const hash = location.hash.slice(1);
+    if (!hash || !hash.includes("=")) return;
+    const params = {};
+    for (const pair of hash.split("&")) {
+      const eq = pair.indexOf("=");
+      if (eq < 0) continue;
+      params[pair.slice(0, eq)] = decodeURIComponent(pair.slice(eq + 1));
+    }
+    for (const ctrls of Object.values(REG)) {
+      for (const c of ctrls) {
+        const key = c.id || c.group;
+        if (key in params) setVal(c, params[key], true);
+      }
+    }
+  }
+
+  document.querySelectorAll(".reset-btn[data-reset]").forEach(btn => {
+    btn.addEventListener("click", () => resetWidget(btn.dataset.reset));
+  });
+  document.addEventListener("input", e => {
+    if (e.target.matches("input[type=range], select")) writeHash();
+  });
+  document.addEventListener("change", e => {
+    if (e.target.matches("select")) writeHash();
+  });
+  document.querySelectorAll(".toggle-group button").forEach(b => {
+    b.addEventListener("click", () => setTimeout(writeHash, 0));
+  });
+  readHash();
+})();
+
+// ==================== THEME TOGGLE ====================
+(function() {
+  const btn = document.getElementById("theme-toggle");
+  const iconEl = document.getElementById("theme-icon");
+  const labelEl = document.getElementById("theme-label");
+
+  function apply(theme) {
+    document.documentElement.dataset.theme = theme;
+    iconEl.textContent = theme === "dark" ? "\u2600\uFE0F" : "\uD83C\uDF19";
+    labelEl.textContent = theme === "dark" ? "Light" : "Dark";
+    for (const key in window) {
+      if (key.startsWith("__rerender_") && typeof window[key] === "function") window[key]();
+    }
+  }
+
+  const saved = localStorage.getItem(THEME_KEY);
+  const prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+  apply(saved || (prefersDark ? "dark" : "light"));
+
+  btn.addEventListener("click", () => {
+    const next = document.documentElement.dataset.theme === "dark" ? "light" : "dark";
+    localStorage.setItem(THEME_KEY, next);
+    apply(next);
+  });
+})();
+
+// ==================== Resize handling ====================
+window.addEventListener("resize", () => {
+  document.querySelectorAll(".chart").forEach(el => {
+    if (el.data) Plotly.Plots.resize(el);
+  });
+});
+</script>
+
+</body>
+</html>

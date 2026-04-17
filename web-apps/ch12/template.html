@@ -1,0 +1,1301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chapter 12 — Further Topics in Multiple Regression · metricsAI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.plot.ly/plotly-2.35.2.min.js" charset="utf-8"></script>
+<style>
+:root {
+  --cyan: #008CB7;
+  --cyan-soft: #22d3ee;
+  --purple: #7A209F;
+  --purple-soft: #c084fc;
+  --pink: #C21E72;
+  --pink-soft: #f472b6;
+
+  --bg: #f5f8fb;
+  --panel: #ffffff;
+  --panel-2: #f0f4f9;
+  --text: #0b1021;
+  --text-soft: #475569;
+  --text-muted: #64748b;
+  --border: #d9e2ec;
+  --accent: var(--cyan);
+  --accent-2: var(--purple);
+  --accent-3: var(--pink);
+  --shadow: 0 2px 10px rgba(11, 16, 33, 0.06), 0 12px 30px rgba(11, 16, 33, 0.05);
+  --grid: #e3e8ef;
+  --code-bg: #eef3f8;
+}
+html[data-theme="dark"] {
+  --bg: #0c1024;
+  --panel: #151a33;
+  --panel-2: #1b2142;
+  --text: #e2e8f0;
+  --text-soft: #b5c0d0;
+  --text-muted: #8a98ae;
+  --border: #2a3156;
+  --accent: var(--cyan-soft);
+  --accent-2: var(--purple-soft);
+  --accent-3: var(--pink-soft);
+  --shadow: 0 2px 10px rgba(0, 0, 0, 0.25), 0 12px 30px rgba(0, 0, 0, 0.35);
+  --grid: #2a3156;
+  --code-bg: #0f1530;
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.55;
+  transition: background-color .25s ease, color .25s ease;
+}
+code, .mono { font-family: 'JetBrains Mono', ui-monospace, monospace; }
+
+header.page {
+  position: relative;
+  padding: 2.4rem 1.5rem 2rem;
+  background:
+    radial-gradient(1200px 400px at 85% -10%, rgba(122, 32, 159, 0.15), transparent),
+    radial-gradient(1000px 400px at 10% 0%, rgba(0, 140, 183, 0.18), transparent),
+    var(--panel);
+  border-bottom: 1px solid var(--border);
+}
+.page-inner { max-width: 1120px; margin: 0 auto; }
+.chapter-badge {
+  display: inline-block; font-size: 0.72rem; letter-spacing: 0.15em;
+  text-transform: uppercase; color: var(--accent); font-weight: 600; margin-bottom: 0.5rem;
+}
+h1.title {
+  font-size: clamp(1.6rem, 3.4vw, 2.4rem); margin: 0 0 0.35rem;
+  background: linear-gradient(90deg, var(--accent), var(--accent-2));
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+  font-weight: 700; letter-spacing: -0.01em;
+}
+p.subtitle { margin: 0 0 0.8rem; color: var(--text-soft); font-size: 1.05rem; max-width: 720px; }
+.theme-toggle {
+  position: absolute; top: 1.4rem; right: 1.5rem;
+  background: var(--panel-2); color: var(--text); border: 1px solid var(--border);
+  padding: 0.4rem 0.8rem; border-radius: 999px; cursor: pointer;
+  font-size: 0.85rem; font-weight: 500; display: inline-flex; align-items: center; gap: 0.35rem;
+  transition: all .2s ease;
+}
+.theme-toggle:hover { border-color: var(--accent); color: var(--accent); }
+
+nav.anchors {
+  position: sticky; top: 0; z-index: 20;
+  background: color-mix(in srgb, var(--panel) 92%, transparent);
+  backdrop-filter: saturate(150%) blur(8px); -webkit-backdrop-filter: saturate(150%) blur(8px);
+  border-bottom: 1px solid var(--border);
+}
+nav.anchors ul {
+  display: flex; gap: 0.25rem; overflow-x: auto; list-style: none;
+  padding: 0.55rem 1.5rem; margin: 0 auto; max-width: 1120px; scrollbar-width: thin;
+}
+nav.anchors a {
+  display: block; padding: 0.35rem 0.75rem; border-radius: 8px;
+  color: var(--text-soft); text-decoration: none; font-size: 0.85rem;
+  font-weight: 500; white-space: nowrap; transition: all .15s ease;
+}
+nav.anchors a:hover { color: var(--accent); background: var(--panel-2); }
+
+main { max-width: 1120px; margin: 1.2rem auto 3rem; padding: 0 1.5rem; }
+
+section.widget {
+  background: var(--panel); border: 1px solid var(--border); border-radius: 16px;
+  padding: 1.5rem 1.4rem 1.3rem; margin-bottom: 1.5rem; box-shadow: var(--shadow);
+}
+.section-tag {
+  display: inline-block; font-family: 'JetBrains Mono', monospace; font-size: 0.72rem;
+  color: var(--accent); background: color-mix(in srgb, var(--accent) 12%, transparent);
+  padding: 0.2rem 0.55rem; border-radius: 6px; margin-bottom: 0.6rem; font-weight: 500;
+}
+.widget h2 { margin: 0 0 0.2rem; font-size: 1.35rem; font-weight: 600; color: var(--accent-2); letter-spacing: -0.005em; }
+.widget .lede { margin: 0 0 1rem; color: var(--text-soft); font-size: 0.97rem; max-width: 780px; }
+
+.controls {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 0.9rem 1.2rem; padding: 0.9rem 1rem; background: var(--panel-2); border-radius: 10px; margin-bottom: 1rem;
+}
+.ctrl { display: flex; flex-direction: column; gap: 0.3rem; }
+.ctrl label { font-size: 0.78rem; font-weight: 500; color: var(--text-soft); text-transform: uppercase; letter-spacing: 0.05em; }
+.ctrl select, .ctrl input[type="range"], .ctrl input[type="number"] {
+  font-family: inherit; font-size: 0.9rem; padding: 0.4rem 0.55rem; border-radius: 8px;
+  border: 1px solid var(--border); background: var(--panel); color: var(--text);
+}
+.ctrl input[type="range"] { padding: 0.2rem 0; accent-color: var(--accent); }
+.ctrl .val { font-family: 'JetBrains Mono', monospace; font-size: 0.82rem; color: var(--accent); font-weight: 500; }
+.toggle-group { display: inline-flex; gap: 0.25rem; background: var(--panel); padding: 3px; border-radius: 10px; border: 1px solid var(--border); flex-wrap: wrap; }
+.toggle-group button {
+  background: transparent; border: none; color: var(--text-soft);
+  padding: 0.32rem 0.75rem; border-radius: 7px; font-family: inherit; font-size: 0.85rem;
+  cursor: pointer; transition: all .15s ease;
+}
+.toggle-group button.active { background: var(--accent); color: white; font-weight: 500; }
+
+.stats-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+  gap: 0.6rem; margin: 0.5rem 0 1rem;
+}
+.stat {
+  background: var(--panel-2); padding: 0.65rem 0.75rem; border-radius: 10px; border-left: 3px solid var(--accent);
+}
+.stat .label { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-muted); }
+.stat .value { font-family: 'JetBrains Mono', monospace; font-size: 1.05rem; font-weight: 500; color: var(--text); margin-top: 0.15rem; }
+.stat.pop { border-left-color: var(--accent-2); }
+.stat.err { border-left-color: var(--accent-3); }
+
+.callout {
+  background: color-mix(in srgb, var(--accent-2) 8%, transparent);
+  border-left: 3px solid var(--accent-2); padding: 0.7rem 0.9rem;
+  border-radius: 8px; font-size: 0.9rem; color: var(--text-soft); margin: 0.9rem 0 0.2rem;
+}
+.callout strong { color: var(--accent-2); }
+
+.try-this {
+  background: color-mix(in srgb, var(--accent) 8%, transparent);
+  border-left: 3px solid var(--accent); padding: 0.7rem 0.9rem;
+  border-radius: 8px; font-size: 0.9rem; color: var(--text-soft); margin: 0.7rem 0 0.2rem;
+}
+.try-this .try-title { font-weight: 600; color: var(--accent); font-size: 0.78rem; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 0.3rem; }
+.try-this ol { margin: 0; padding-left: 1.25rem; }
+.try-this li { margin: 0.2rem 0; }
+
+.widget-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 0.5rem; margin-bottom: 0.2rem; }
+.widget-head > div { flex: 1; min-width: 0; }
+.reset-btn {
+  background: transparent; color: var(--text-muted); border: 1px solid var(--border);
+  padding: 0.3rem 0.7rem; border-radius: 8px; font-family: inherit; font-size: 0.8rem;
+  cursor: pointer; white-space: nowrap; transition: all .15s ease;
+}
+.reset-btn:hover { color: var(--accent); border-color: var(--accent); }
+.resim-btn {
+  background: var(--panel); color: var(--accent); border: 1px solid var(--accent);
+  padding: 0.35rem 0.85rem; border-radius: 8px; font-family: inherit; font-size: 0.85rem;
+  cursor: pointer; font-weight: 500; transition: all .15s ease;
+}
+.resim-btn:hover { background: var(--accent); color: white; }
+
+.chart { width: 100%; min-height: 340px; }
+.chart.tall { min-height: 420px; }
+.chart.short { min-height: 280px; }
+
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+@media (max-width: 720px) { .two-col { grid-template-columns: 1fr; } }
+
+footer.page {
+  max-width: 1120px; margin: 1rem auto 3rem; padding: 0 1.5rem;
+  color: var(--text-muted); font-size: 0.88rem; text-align: center;
+}
+footer.page a { color: var(--accent); text-decoration: none; }
+footer.page a:hover { text-decoration: underline; }
+.scroll-top { display: inline-block; font-size: 0.78rem; color: var(--text-muted); text-decoration: none; margin-top: 0.4rem; }
+.scroll-top:hover { color: var(--accent); }
+</style>
+</head>
+<body>
+
+<header class="page">
+  <div class="page-inner">
+    <span class="chapter-badge">Chapter 12 of 18 · Interactive Dashboard</span>
+    <h1 class="title">Further Topics in Multiple Regression</h1>
+    <p class="subtitle">Explore robust standard errors, prediction intervals, Type I/II errors, autocorrelation, and bootstrap methods with real house-price and GDP data.</p>
+  </div>
+  <button id="theme-toggle" class="theme-toggle" type="button" aria-label="Toggle color theme"><span id="theme-icon">🌙</span><span id="theme-label">Dark</span></button>
+</header>
+
+<nav class="anchors" aria-label="Sections">
+  <ul>
+    <li><a href="#robust-se">Robust SEs</a></li>
+    <li><a href="#prediction">Prediction</a></li>
+    <li><a href="#type-errors">Type I/II</a></li>
+    <li><a href="#autocorrelation">Autocorrelation</a></li>
+    <li><a href="#se-ratio">SE Ratios</a></li>
+    <li><a href="#bootstrap">Bootstrap</a></li>
+  </ul>
+</nav>
+
+<main>
+
+<!-- ==================== WIDGET 1: Robust SE Selector ==================== -->
+<section class="widget" id="robust-se">
+  <div class="widget-head">
+    <div>
+      <span class="section-tag">§ 12.2 · Key Concepts 12.1, 12.2</span>
+      <h2>Robust Standard Error Selector</h2>
+    </div>
+    <button class="reset-btn" data-reset="robustse">↺ Reset</button>
+  </div>
+  <p class="lede">House price regression (price ~ size + bedrooms + bathrooms + lotsize + age + monthsold). Toggle between Default, HC1-Robust, and HAC standard errors. Coefficients stay the same — only SEs, t-stats, and p-values change.</p>
+  <div class="controls">
+    <div class="ctrl">
+      <label>Standard Error Type</label>
+      <div class="toggle-group" id="rse-type">
+        <button type="button" data-val="default" class="active">Default</button>
+        <button type="button" data-val="hc1">HC1-Robust</button>
+      </div>
+    </div>
+    <div class="ctrl">
+      <label>Variable Focus</label>
+      <select id="rse-var">
+        <option value="size">size</option>
+        <option value="bedrooms">bedrooms</option>
+        <option value="bathrooms">bathrooms</option>
+        <option value="lotsize">lotsize</option>
+        <option value="age">age</option>
+        <option value="monthsold">monthsold</option>
+      </select>
+    </div>
+  </div>
+  <div class="stats-grid">
+    <div class="stat pop"><div class="label">Coefficient</div><div class="value" id="rse-coef">—</div></div>
+    <div class="stat"><div class="label">Std. Error</div><div class="value" id="rse-se">—</div></div>
+    <div class="stat"><div class="label">t-statistic</div><div class="value" id="rse-tstat">—</div></div>
+    <div class="stat err"><div class="label">p-value</div><div class="value" id="rse-pval">—</div></div>
+    <div class="stat"><div class="label">R²</div><div class="value" id="rse-r2">—</div></div>
+    <div class="stat"><div class="label">SE Ratio</div><div class="value" id="rse-ratio">—</div></div>
+  </div>
+  <div class="chart" id="chart-rse"></div>
+  <div class="callout"><strong>Key Concept 12.1:</strong> When error variance is not constant, default OLS standard errors are invalid. HC1-robust SEs correct this without changing coefficient estimates. Only the SEs, t-statistics, and confidence intervals change. For cross-sectional data, reporting HC1 robust SEs is best practice.</div>
+  <div class="try-this">
+    <div class="try-title">Try this</div>
+    <ol>
+      <li>Toggle between <strong>Default</strong> and <strong>HC1-Robust</strong> for the <em>bathrooms</em> variable. The SE ratio is above 1.2 — heteroskedasticity inflates uncertainty for that variable.</li>
+      <li>Check <strong>lotsize</strong> — the robust SE is <em>smaller</em> than the default (ratio &lt; 1). This is unusual but possible.</li>
+      <li>Compare p-values: do any variables switch significance at the 5% level when you change SE type?</li>
+    </ol>
+  </div>
+</section>
+
+<!-- ==================== WIDGET 2: Prediction Interval Visualizer ==================== -->
+<section class="widget" id="prediction">
+  <div class="widget-head">
+    <div>
+      <span class="section-tag">§ 12.3 · Key Concepts 12.3, 12.4</span>
+      <h2>Prediction Interval Visualizer</h2>
+    </div>
+    <button class="reset-btn" data-reset="pred">↺ Reset</button>
+  </div>
+  <p class="lede">Simple regression: price = b₀ + b₁ × size. The confidence interval (CI) for the conditional mean is narrow; the prediction interval (PI) for an individual house is 3-4x wider due to the irreducible "1+" term in the forecast variance.</p>
+  <div class="controls">
+    <div class="ctrl">
+      <label for="pred-size">Predict at size <span class="val" id="pred-size-val">2000</span> sq ft</label>
+      <input type="range" id="pred-size" min="1200" max="3500" step="50" value="2000">
+    </div>
+    <div class="ctrl">
+      <label>Show bands</label>
+      <div class="toggle-group" id="pred-bands">
+        <button type="button" data-val="both" class="active">Both</button>
+        <button type="button" data-val="ci">CI Only</button>
+        <button type="button" data-val="pi">PI Only</button>
+      </div>
+    </div>
+  </div>
+  <div class="stats-grid">
+    <div class="stat pop"><div class="label">Predicted price</div><div class="value" id="pred-yhat">—</div></div>
+    <div class="stat"><div class="label">CI SE</div><div class="value" id="pred-se-ci">—</div></div>
+    <div class="stat err"><div class="label">PI SE</div><div class="value" id="pred-se-pi">—</div></div>
+    <div class="stat"><div class="label">PI / CI width</div><div class="value" id="pred-ratio">—</div></div>
+    <div class="stat"><div class="label">RMSE</div><div class="value" id="pred-rmse">—</div></div>
+  </div>
+  <div class="chart tall" id="chart-pred"></div>
+  <div class="callout"><strong>Key Concept 12.3:</strong> Predicting the average outcome E[y|x*] is more precise than predicting an individual y|x*. The forecast SE satisfies se(y_f) >= s_e — at least as large as the RMSE. As n grows, the CI shrinks to zero, but the PI remains at least +/- 1.96 × s_e wide.</div>
+  <div class="try-this">
+    <div class="try-title">Try this</div>
+    <ol>
+      <li>Set size to the sample mean (~1883 sq ft). The CI is narrowest here. Drag to 3500 — watch both bands widen as you extrapolate.</li>
+      <li>Toggle to <strong>CI Only</strong>, then <strong>PI Only</strong>. The PI dwarfs the CI — most uncertainty is irreducible individual variation.</li>
+      <li>Note the PI/CI width ratio. It is largest near the mean (where CI is tightest) and decreases at extremes (where estimation uncertainty dominates more).</li>
+    </ol>
+  </div>
+</section>
+
+<!-- ==================== WIDGET 3: Type I/II Error Explorer ==================== -->
+<section class="widget" id="type-errors">
+  <div class="widget-head">
+    <div>
+      <span class="section-tag">§ 12.7 · Key Concept 12.8</span>
+      <h2>Type I/II Error Explorer</h2>
+    </div>
+    <button class="reset-btn" data-reset="typerr">↺ Reset</button>
+  </div>
+  <p class="lede">The power curve shows how the probability of rejecting H₀: β = 0 varies with the true effect size. At β = 0, rejection rate equals α (Type I error). As |β| grows, power rises toward 1. Adjust sample size and SE to see how study design affects detection ability.</p>
+  <div class="controls">
+    <div class="ctrl">
+      <label for="typerr-n">Sample size n <span class="val" id="typerr-n-val">30</span></label>
+      <input type="range" id="typerr-n" min="10" max="200" step="5" value="30">
+    </div>
+    <div class="ctrl">
+      <label for="typerr-se">Noise σ <span class="val" id="typerr-se-val">15</span></label>
+      <input type="range" id="typerr-se" min="5" max="40" step="1" value="15">
+    </div>
+    <div class="ctrl">
+      <label for="typerr-alpha">α level <span class="val" id="typerr-alpha-val">0.05</span></label>
+      <input type="range" id="typerr-alpha" min="0.01" max="0.10" step="0.01" value="0.05">
+    </div>
+  </div>
+  <div class="stats-grid">
+    <div class="stat"><div class="label">SE(β̂)</div><div class="value" id="typerr-seb">—</div></div>
+    <div class="stat pop"><div class="label">80% power at |β|</div><div class="value" id="typerr-mde">—</div></div>
+    <div class="stat err"><div class="label">Type I rate (α)</div><div class="value" id="typerr-t1">—</div></div>
+    <div class="stat"><div class="label">Power at β = SE</div><div class="value" id="typerr-powse">—</div></div>
+  </div>
+  <div class="chart tall" id="chart-typerr"></div>
+  <div class="callout"><strong>Key Concept 12.8:</strong> Type I error (false positive) = rejecting a true H₀; probability = α. Type II error (false negative) = failing to reject a false H₀; probability = β. Power = 1 − β. The most powerful test uses the most precise estimator. With n = 30 and σ = 15, you need |β| ≈ 30 to reach 80% power.</div>
+  <div class="try-this">
+    <div class="try-title">Try this</div>
+    <ol>
+      <li>Keep defaults (n=30, σ=15). Read the "80% power at |β|" stat. Now double n to 60 — the minimum detectable effect drops by ~30%.</li>
+      <li>Increase α from 0.05 to 0.10. Power goes up everywhere, but at the cost of more false positives. This is the fundamental tradeoff.</li>
+      <li>Set σ = 5 (low noise). The power curve becomes very steep — even small effects are detectable with precise data.</li>
+    </ol>
+  </div>
+</section>
+
+<!-- ==================== WIDGET 4: Autocorrelation Visualizer ==================== -->
+<section class="widget" id="autocorrelation">
+  <div class="widget-head">
+    <div>
+      <span class="section-tag">§ 12.2 · Key Concept 12.2</span>
+      <h2>Autocorrelation Visualizer</h2>
+    </div>
+    <button class="reset-btn" data-reset="acf">↺ Reset</button>
+  </div>
+  <p class="lede">GDP growth time series (241 quarters, 1960-2020). The autocorrelation function (ACF) shows how today's growth correlates with growth s periods ago. Strong positive lag-1 correlation (ρ₁ ≈ 0.87) means growth persists — motivating HAC standard errors.</p>
+  <div class="controls">
+    <div class="ctrl">
+      <label for="acf-lags">Max lags displayed <span class="val" id="acf-lags-val">12</span></label>
+      <input type="range" id="acf-lags" min="4" max="20" step="1" value="12">
+    </div>
+    <div class="ctrl">
+      <label>Display</label>
+      <div class="toggle-group" id="acf-display">
+        <button type="button" data-val="both" class="active">Time Series + ACF</button>
+        <button type="button" data-val="ts">Time Series</button>
+        <button type="button" data-val="acf">ACF Only</button>
+      </div>
+    </div>
+  </div>
+  <div class="stats-grid">
+    <div class="stat pop"><div class="label">Mean growth</div><div class="value" id="acf-mean">—</div></div>
+    <div class="stat"><div class="label">ρ(1)</div><div class="value" id="acf-rho1">—</div></div>
+    <div class="stat"><div class="label">ρ(2)</div><div class="value" id="acf-rho2">—</div></div>
+    <div class="stat err"><div class="label">95% band ±</div><div class="value" id="acf-band">—</div></div>
+  </div>
+  <div class="two-col" id="acf-twocol">
+    <div class="chart" id="chart-acf-ts"></div>
+    <div class="chart" id="chart-acf-bars"></div>
+  </div>
+  <div class="callout"><strong>Key Concept 12.2:</strong> In time series data, errors are often autocorrelated — today's shock persists into tomorrow. HAC (Newey-West) SEs account for both heteroskedasticity and autocorrelation. Lag length rule of thumb: m = 0.75 × T^(1/3). For T = 241, m ≈ 5.</div>
+  <div class="try-this">
+    <div class="try-title">Try this</div>
+    <ol>
+      <li>Look at lags 1-3 in the ACF — all well above the 95% band. GDP growth has strong persistence.</li>
+      <li>Increase max lags to 20. By lag 6-7, autocorrelations cross zero and turn slightly negative. Shocks eventually reverse.</li>
+      <li>In the time series plot, notice how growth clusters: long runs of above-average and below-average periods. This is autocorrelation at work.</li>
+    </ol>
+  </div>
+</section>
+
+<!-- ==================== WIDGET 5: SE Ratio Comparator ==================== -->
+<section class="widget" id="se-ratio">
+  <div class="widget-head">
+    <div>
+      <span class="section-tag">§ 12.2 · Key Concept 12.1</span>
+      <h2>SE Ratio Comparator</h2>
+    </div>
+    <button class="reset-btn" data-reset="seratio">↺ Reset</button>
+  </div>
+  <p class="lede">Bar chart of Robust SE / Default SE for each variable. Ratio > 1 means heteroskedasticity inflates that variable's uncertainty; the default SEs were too optimistic. Ratio near 1 means both methods agree.</p>
+  <div class="controls">
+    <div class="ctrl">
+      <label>Sort order</label>
+      <div class="toggle-group" id="ser-sort">
+        <button type="button" data-val="ratio" class="active">By Ratio</button>
+        <button type="button" data-val="alpha">Alphabetical</button>
+      </div>
+    </div>
+  </div>
+  <div class="stats-grid">
+    <div class="stat pop"><div class="label">Max ratio</div><div class="value" id="ser-max">—</div></div>
+    <div class="stat"><div class="label">Min ratio</div><div class="value" id="ser-min">—</div></div>
+    <div class="stat err"><div class="label">Mean ratio</div><div class="value" id="ser-mean">—</div></div>
+    <div class="stat"><div class="label">Vars > 1.0</div><div class="value" id="ser-above">—</div></div>
+  </div>
+  <div class="chart" id="chart-seratio"></div>
+  <div class="callout"><strong>Key Concept 12.1:</strong> When the SE ratio differs substantially (>30% change), heteroskedasticity is likely present. Robust SEs correct for this. Notice that lotsize has ratio &lt; 1 (robust SE smaller), while bathrooms has the highest ratio — heteroskedasticity affects different variables differently.</div>
+  <div class="try-this">
+    <div class="try-title">Try this</div>
+    <ol>
+      <li>Sort <strong>By Ratio</strong> to see which variables are most affected by heteroskedasticity.</li>
+      <li>The reference line at 1.0 separates variables where robust SEs are larger (right) from those where they are smaller (left).</li>
+      <li>Remember: regardless of the ratio, the coefficient estimates are identical — only inference changes.</li>
+    </ol>
+  </div>
+</section>
+
+<!-- ==================== WIDGET 6: Bootstrap Simulation ==================== -->
+<section class="widget" id="bootstrap">
+  <div class="widget-head">
+    <div>
+      <span class="section-tag">§ 12.6 · Key Concept 12.7</span>
+      <h2>Bootstrap Confidence Intervals</h2>
+    </div>
+    <button class="reset-btn" data-reset="boot">↺ Reset</button>
+  </div>
+  <p class="lede">Resample the 29 house-price observations with replacement and re-estimate the slope (price ~ size). Each click accumulates bootstrap estimates. The histogram shows the empirical sampling distribution; the 2.5th and 97.5th percentiles form the 95% bootstrap CI.</p>
+  <div class="controls">
+    <div class="ctrl">
+      <label for="boot-nrep">Reps per click <span class="val" id="boot-nrep-val">200</span></label>
+      <input type="range" id="boot-nrep" min="50" max="500" step="50" value="200">
+    </div>
+    <div class="ctrl">
+      <label>&nbsp;</label>
+      <button class="resim-btn" id="boot-run" type="button">Run Bootstrap</button>
+    </div>
+    <div class="ctrl">
+      <label>&nbsp;</label>
+      <button class="reset-btn" id="boot-clear" type="button">Clear All</button>
+    </div>
+  </div>
+  <div class="stats-grid">
+    <div class="stat pop"><div class="label">OLS slope</div><div class="value" id="boot-ols">—</div></div>
+    <div class="stat"><div class="label">Boot mean</div><div class="value" id="boot-mean">—</div></div>
+    <div class="stat"><div class="label">Boot SE</div><div class="value" id="boot-sd">—</div></div>
+    <div class="stat err"><div class="label">95% CI lower</div><div class="value" id="boot-lo">—</div></div>
+    <div class="stat err"><div class="label">95% CI upper</div><div class="value" id="boot-hi">—</div></div>
+    <div class="stat"><div class="label">Total reps</div><div class="value" id="boot-total">0</div></div>
+  </div>
+  <div class="chart" id="chart-boot"></div>
+  <div class="callout"><strong>Key Concept 12.7:</strong> The bootstrap resamples data with replacement many times to estimate the sampling distribution. The percentile CI uses the 2.5th and 97.5th percentiles — no normality assumption needed. With B >= 1000 reps, the bootstrap CI converges to a stable interval.</div>
+  <div class="try-this">
+    <div class="try-title">Try this</div>
+    <ol>
+      <li>Click <strong>Run Bootstrap</strong> once (200 reps). The histogram is rough. Click again — it smooths out. After 1000+ reps, the CI stabilizes.</li>
+      <li>Compare the bootstrap SE to the OLS analytical SE. They should be similar — the bootstrap validates the formula.</li>
+      <li>Notice the histogram may be slightly skewed (not perfectly normal). This is why bootstrap CIs can outperform normal-approximation CIs in small samples.</li>
+    </ol>
+  </div>
+</section>
+
+</main>
+
+<footer class="page">
+  <p>Part of <a href="https://quarcs-lab.github.io/metricsai/book/_book/index.html"><strong>metricsAI</strong></a> · Chapter 12: Further Topics in Multiple Regression · by Carlos Mendez · <a href="https://github.com/quarcs-lab/metricsai">GitHub</a></p>
+  <p>Data: AED_HOUSE.DTA (29 houses, Davis CA 1999) · AED_REALGDPPC.DTA (GDP growth, 241 quarters).</p>
+  <a class="scroll-top" href="#top">↑ Back to top</a>
+</footer>
+
+<script type="application/json" id="ch-data">{{DATA_JSON}}</script>
+
+<script>
+"use strict";
+
+var DATA = JSON.parse(document.getElementById("ch-data").textContent);
+
+// ==================== STATS HELPERS ====================
+var mean = function(a) { var s = 0; for (var i = 0; i < a.length; i++) s += a[i]; return s / a.length; };
+var sortedCopy = function(a) { return a.slice().sort(function(x, y) { return x - y; }); };
+function quantile(sorted, p) {
+  var idx = p * (sorted.length - 1);
+  var lo = Math.floor(idx), hi = Math.ceil(idx);
+  if (lo === hi) return sorted[lo];
+  return sorted[lo] + (idx - lo) * (sorted[hi] - sorted[lo]);
+}
+function std(a, m) {
+  if (m === undefined) m = mean(a);
+  var s = 0;
+  for (var i = 0; i < a.length; i++) s += (a[i] - m) * (a[i] - m);
+  return Math.sqrt(s / (a.length - 1));
+}
+function fmt(v, d) {
+  if (d === undefined) d = 4;
+  if (v === null || v === undefined || isNaN(v)) return "\u2014";
+  return v.toFixed(d);
+}
+function fmtDollar(v) {
+  if (v === null || v === undefined || isNaN(v)) return "\u2014";
+  return "$" + Math.round(v).toLocaleString();
+}
+
+// ==================== PRNG ====================
+function mulberry32(a) {
+  return function() {
+    a |= 0; a = a + 0x6D2B79F5 | 0;
+    var t = Math.imul(a ^ a >>> 15, 1 | a);
+    t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+    return ((t ^ t >>> 14) >>> 0) / 4294967296;
+  };
+}
+
+// ==================== T-DISTRIBUTION HELPERS ====================
+function lnGamma(x) {
+  var c = [76.18009172947146, -86.50532032941678, 24.01409824083091,
+    -1.231739572450155, 0.001208650973866179, -0.000005395239384953];
+  var y = x, tmp = x + 5.5;
+  tmp -= (x + 0.5) * Math.log(tmp);
+  var ser = 1.000000000190015;
+  for (var j = 0; j < 6; j++) ser += c[j] / ++y;
+  return -tmp + Math.log(2.5066282746310005 * ser / x);
+}
+
+function betaIncCF(a, b, x) {
+  var maxIter = 200, eps = 3e-14;
+  var qab = a + b, qap = a + 1, qam = a - 1;
+  var c = 1, d = 1 - qab * x / qap;
+  if (Math.abs(d) < 1e-30) d = 1e-30;
+  d = 1 / d;
+  var h = d;
+  for (var m = 1; m <= maxIter; m++) {
+    var m2 = 2 * m;
+    var aa = m * (b - m) * x / ((qam + m2) * (a + m2));
+    d = 1 + aa * d; if (Math.abs(d) < 1e-30) d = 1e-30; d = 1 / d;
+    c = 1 + aa / c; if (Math.abs(c) < 1e-30) c = 1e-30;
+    h *= d * c;
+    aa = -(a + m) * (qab + m) * x / ((a + m2) * (qap + m2));
+    d = 1 + aa * d; if (Math.abs(d) < 1e-30) d = 1e-30; d = 1 / d;
+    c = 1 + aa / c; if (Math.abs(c) < 1e-30) c = 1e-30;
+    var del = d * c;
+    h *= del;
+    if (Math.abs(del - 1) < eps) break;
+  }
+  return h;
+}
+
+function betaInc(a, b, x) {
+  if (x < 0 || x > 1) return 0;
+  if (x === 0 || x === 1) return x;
+  var bt = Math.exp(lnGamma(a + b) - lnGamma(a) - lnGamma(b) + a * Math.log(x) + b * Math.log(1 - x));
+  if (x < (a + 1) / (a + b + 2)) return bt * betaIncCF(a, b, x) / a;
+  return 1 - bt * betaIncCF(b, a, 1 - x) / b;
+}
+
+function tCDF(t, df) {
+  var x = df / (df + t * t);
+  var p = 0.5 * betaInc(df / 2, 0.5, x);
+  return t >= 0 ? 1 - p : p;
+}
+
+function tQuantile(p, df) {
+  // Newton's method on tCDF
+  var x = 0;
+  if (p < 0.5) x = -2; else x = 2;
+  for (var i = 0; i < 60; i++) {
+    var cp = tCDF(x, df);
+    var tpdf = Math.exp(lnGamma((df + 1) / 2) - lnGamma(df / 2)) / Math.sqrt(df * Math.PI) * Math.pow(1 + x * x / df, -(df + 1) / 2);
+    if (tpdf < 1e-15) tpdf = 1e-15;
+    x = x - (cp - p) / tpdf;
+  }
+  return x;
+}
+
+function normalCDF(x) {
+  var a1 = 0.254829592, a2 = -0.284496736, a3 = 1.421413741, a4 = -1.453152027, a5 = 1.061405429, pp = 0.3275911;
+  var sign = 1;
+  if (x < 0) { sign = -1; x = -x; }
+  var t = 1 / (1 + pp * x);
+  var y = 1 - (((((a5 * t + a4) * t) + a3) * t + a2) * t + a1) * t * Math.exp(-x * x / 2);
+  return 0.5 * (1 + sign * y);
+}
+
+function normalPDF(x, mu, sigma) {
+  var z = (x - mu) / sigma;
+  return Math.exp(-0.5 * z * z) / (sigma * Math.sqrt(2 * Math.PI));
+}
+
+function linspace(a, b, n) {
+  var out = new Array(n);
+  var step = (b - a) / (n - 1);
+  for (var i = 0; i < n; i++) out[i] = a + i * step;
+  return out;
+}
+
+// ==================== OLS ENGINE ====================
+function olsFit(x, y) {
+  var n = x.length;
+  var xbar = mean(x), ybar = mean(y);
+  var SSx = 0, SSxy = 0;
+  for (var i = 0; i < n; i++) {
+    SSx += (x[i] - xbar) * (x[i] - xbar);
+    SSxy += (x[i] - xbar) * (y[i] - ybar);
+  }
+  var b1 = SSxy / SSx;
+  var b0 = ybar - b1 * xbar;
+  var yhat = new Array(n);
+  var residuals = new Array(n);
+  var RSS = 0;
+  for (var i = 0; i < n; i++) {
+    yhat[i] = b0 + b1 * x[i];
+    residuals[i] = y[i] - yhat[i];
+    RSS += residuals[i] * residuals[i];
+  }
+  var se = Math.sqrt(RSS / (n - 2));
+  var se_b1 = se / Math.sqrt(SSx);
+  var SST = 0;
+  for (var i = 0; i < n; i++) SST += (y[i] - ybar) * (y[i] - ybar);
+  var R2 = SST > 0 ? 1 - RSS / SST : 0;
+  return { b0: b0, b1: b1, yhat: yhat, residuals: residuals, n: n, xbar: xbar, ybar: ybar, SSx: SSx, RSS: RSS, se: se, se_b1: se_b1, R2: R2, SST: SST };
+}
+
+// ==================== THEME ====================
+var THEME_KEY = "metricsai-theme";
+function getCSS(varName) { return getComputedStyle(document.documentElement).getPropertyValue(varName).trim(); }
+function themeColors() {
+  return { text: getCSS("--text"), textSoft: getCSS("--text-soft"), grid: getCSS("--grid"),
+    panel: getCSS("--panel"), cyan: getCSS("--accent"), purple: getCSS("--accent-2"), pink: getCSS("--accent-3") };
+}
+function baseLayout(overrides) {
+  var c = themeColors();
+  var base = {
+    paper_bgcolor: "rgba(0,0,0,0)", plot_bgcolor: "rgba(0,0,0,0)",
+    font: { family: "Inter, system-ui, sans-serif", color: c.text, size: 12 },
+    margin: { l: 56, r: 18, t: 30, b: 46 },
+    xaxis: { gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft } },
+    yaxis: { gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft } },
+    hoverlabel: { bgcolor: c.panel, bordercolor: c.grid, font: { color: c.text } },
+    legend: { font: { color: c.text }, bgcolor: "rgba(0,0,0,0)" }
+  };
+  if (overrides) for (var k in overrides) base[k] = overrides[k];
+  return base;
+}
+var PLOTLY_CONFIG = { displayModeBar: false, responsive: true };
+
+// ==================== TOGGLE / SLIDER HELPERS ====================
+function bindToggles(groupId, renderFn) {
+  document.querySelectorAll("#" + groupId + " button").forEach(function(btn) {
+    btn.addEventListener("click", function() {
+      this.parentNode.querySelectorAll("button").forEach(function(b) { b.classList.remove("active"); });
+      this.classList.add("active");
+      renderFn();
+    });
+  });
+}
+function bindSlider(id, valId, formatFn, renderFn) {
+  var el = document.getElementById(id);
+  var valEl = document.getElementById(valId);
+  el.addEventListener("input", function() {
+    valEl.textContent = formatFn(this.value);
+    renderFn();
+  });
+}
+function getToggleVal(groupId) {
+  var btn = document.querySelector("#" + groupId + " button.active");
+  return btn ? btn.dataset.val : "";
+}
+
+// ==================== WIDGET 1: Robust SE Selector ====================
+(function() {
+  var chartEl = document.getElementById("chart-rse");
+  var H = DATA.house;
+
+  function render() {
+    var c = themeColors();
+    var seType = getToggleVal("rse-type");
+    var focusVar = document.getElementById("rse-var").value;
+
+    var coef = H.coefs[focusVar];
+    var seDef = H.seDefault[focusVar];
+    var seRob = H.seRobust[focusVar];
+    var se = seType === "hc1" ? seRob : seDef;
+    var tstat = coef / se;
+    var df = H.n - H.allVars.length;
+    var pval = 2 * (1 - tCDF(Math.abs(tstat), df));
+    var ratio = seRob / seDef;
+
+    document.getElementById("rse-coef").textContent = fmt(coef, 2);
+    document.getElementById("rse-se").textContent = fmt(se, 2);
+    document.getElementById("rse-tstat").textContent = fmt(tstat, 3);
+    document.getElementById("rse-pval").textContent = pval < 0.0001 ? "<0.0001" : fmt(pval, 4);
+    document.getElementById("rse-r2").textContent = fmt(H.r2Multi);
+    document.getElementById("rse-ratio").textContent = fmt(ratio, 4);
+
+    // Bar chart: coefficients with error bars
+    var vars = H.vars;
+    var coefs = vars.map(function(v) { return H.coefs[v]; });
+    var ses = vars.map(function(v) { return seType === "hc1" ? H.seRobust[v] : H.seDefault[v]; });
+    var tcrit = tQuantile(0.975, df);
+    var ciLo = vars.map(function(v, i) { return coefs[i] - tcrit * ses[i]; });
+    var ciHi = vars.map(function(v, i) { return coefs[i] + tcrit * ses[i]; });
+
+    var colors = vars.map(function(v) { return v === focusVar ? c.pink : c.cyan; });
+
+    var traces = [{
+      x: vars, y: coefs, type: "bar",
+      marker: { color: colors },
+      error_y: { type: "data", symmetric: false, array: vars.map(function(v, i) { return ciHi[i] - coefs[i]; }), arrayminus: vars.map(function(v, i) { return coefs[i] - ciLo[i]; }), color: c.text, thickness: 1.5, width: 5 },
+      hovertemplate: "%{x}<br>Coef: %{y:.2f}<extra></extra>",
+      name: seType === "hc1" ? "HC1-Robust" : "Default"
+    }];
+
+    Plotly.react(chartEl, traces, baseLayout({
+      title: { text: "Coefficients with 95% CI (" + (seType === "hc1" ? "HC1-Robust" : "Default") + " SEs)", font: { size: 13, color: c.textSoft } },
+      xaxis: { title: "Variable", gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft } },
+      yaxis: { title: "Coefficient", gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft } },
+      shapes: [{ type: "line", x0: -0.5, x1: vars.length - 0.5, y0: 0, y1: 0, line: { color: c.grid, width: 1, dash: "dash" } }]
+    }), PLOTLY_CONFIG);
+  }
+
+  bindToggles("rse-type", render);
+  document.getElementById("rse-var").addEventListener("change", render);
+  window.__rerender_robustse = render;
+  render();
+})();
+
+// ==================== WIDGET 2: Prediction Interval Visualizer ====================
+(function() {
+  var chartEl = document.getElementById("chart-pred");
+  var H = DATA.house;
+  var simple = H.simple;
+
+  function render() {
+    var c = themeColors();
+    var predSize = parseFloat(document.getElementById("pred-size").value);
+    var bandMode = getToggleVal("pred-bands");
+
+    var n = simple.n;
+    var b0 = simple.b0, b1 = simple.b1;
+    var se = simple.se;
+    var xbar = simple.xbar;
+    var SSx = simple.SSx;
+    var df = n - 2;
+    var tcrit = tQuantile(0.975, df);
+
+    // Predicted value
+    var yhat = b0 + b1 * predSize;
+
+    // SE for conditional mean
+    var seCM = se * Math.sqrt(1 / n + (predSize - xbar) * (predSize - xbar) / SSx);
+    // SE for forecast (individual)
+    var seF = se * Math.sqrt(1 + 1 / n + (predSize - xbar) * (predSize - xbar) / SSx);
+
+    var ciWidth = 2 * tcrit * seCM;
+    var piWidth = 2 * tcrit * seF;
+    var ratio = piWidth / ciWidth;
+
+    document.getElementById("pred-yhat").textContent = fmtDollar(yhat);
+    document.getElementById("pred-se-ci").textContent = fmtDollar(seCM);
+    document.getElementById("pred-se-pi").textContent = fmtDollar(seF);
+    document.getElementById("pred-ratio").textContent = fmt(ratio, 2) + "\u00D7";
+    document.getElementById("pred-rmse").textContent = fmtDollar(se);
+
+    // Generate CI and PI bands across range of sizes
+    var sizeMin = 1200, sizeMax = 3500;
+    var xs = linspace(sizeMin, sizeMax, 80);
+    var yLine = xs.map(function(x) { return b0 + b1 * x; });
+    var ciUp = [], ciLo = [], piUp = [], piLo = [];
+    for (var i = 0; i < xs.length; i++) {
+      var dx = xs[i] - xbar;
+      var sCM = se * Math.sqrt(1 / n + dx * dx / SSx);
+      var sF = se * Math.sqrt(1 + 1 / n + dx * dx / SSx);
+      ciUp.push(b0 + b1 * xs[i] + tcrit * sCM);
+      ciLo.push(b0 + b1 * xs[i] - tcrit * sCM);
+      piUp.push(b0 + b1 * xs[i] + tcrit * sF);
+      piLo.push(b0 + b1 * xs[i] - tcrit * sF);
+    }
+
+    var traces = [];
+
+    // PI band
+    if (bandMode === "both" || bandMode === "pi") {
+      traces.push({ x: xs.concat(xs.slice().reverse()), y: piUp.concat(piLo.slice().reverse()),
+        fill: "toself", fillcolor: "rgba(0,140,183,0.12)", line: { color: "transparent" },
+        name: "95% PI", hoverinfo: "skip", showlegend: true });
+    }
+
+    // CI band
+    if (bandMode === "both" || bandMode === "ci") {
+      traces.push({ x: xs.concat(xs.slice().reverse()), y: ciUp.concat(ciLo.slice().reverse()),
+        fill: "toself", fillcolor: "rgba(194,30,114,0.2)", line: { color: "transparent" },
+        name: "95% CI", hoverinfo: "skip", showlegend: true });
+    }
+
+    // Regression line
+    traces.push({ x: xs, y: yLine, mode: "lines", line: { color: c.purple, width: 2.5 }, name: "Regression line" });
+
+    // Data points
+    traces.push({ x: H.size, y: H.price, mode: "markers", type: "scatter",
+      marker: { color: c.cyan, size: 7, opacity: 0.8 }, name: "Houses (n=29)",
+      hovertemplate: "Size: %{x} sq ft<br>Price: $%{y:,.0f}<extra></extra>" });
+
+    // Prediction marker
+    var predY = b0 + b1 * predSize;
+    traces.push({ x: [predSize], y: [predY], mode: "markers",
+      marker: { color: c.pink, size: 14, symbol: "diamond", line: { color: "white", width: 2 } },
+      name: "Prediction", hovertemplate: "Size: %{x} sq ft<br>Predicted: $%{y:,.0f}<extra></extra>" });
+
+    Plotly.react(chartEl, traces, baseLayout({
+      xaxis: { title: "House Size (sq ft)", gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft } },
+      yaxis: { title: "Price ($)", gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft } },
+      legend: { x: 0.02, y: 0.98, font: { color: c.text, size: 11 }, bgcolor: "rgba(0,0,0,0)" }
+    }), PLOTLY_CONFIG);
+  }
+
+  bindSlider("pred-size", "pred-size-val", function(v) { return v; }, render);
+  bindToggles("pred-bands", render);
+  window.__rerender_pred = render;
+  render();
+})();
+
+// ==================== WIDGET 3: Type I/II Error Explorer ====================
+(function() {
+  var chartEl = document.getElementById("chart-typerr");
+
+  function render() {
+    var c = themeColors();
+    var n = parseInt(document.getElementById("typerr-n").value);
+    var sigma = parseFloat(document.getElementById("typerr-se").value);
+    var alpha = parseFloat(document.getElementById("typerr-alpha").value);
+
+    // SE of beta hat = sigma / sqrt(n) (simplified for illustration)
+    var seBeta = sigma / Math.sqrt(n);
+    var zCrit = -tQuantile(alpha / 2, 1e6); // approx normal critical value
+
+    // Power function: for each true beta, power = P(reject H0)
+    // Under H_a: beta = b, test stat ~ N(b/se, 1), reject if |Z| > zCrit
+    var betas = linspace(-60, 60, 200);
+    var powers = [];
+    for (var i = 0; i < betas.length; i++) {
+      var ncp = betas[i] / seBeta; // non-centrality parameter
+      // Power = P(Z > zCrit - ncp) + P(Z < -zCrit - ncp)
+      var pow = 1 - normalCDF(zCrit - ncp) + normalCDF(-zCrit - ncp);
+      powers.push(pow);
+    }
+
+    // Find minimum detectable effect for 80% power
+    var mde = 0;
+    for (var i = Math.floor(betas.length / 2); i < betas.length; i++) {
+      if (powers[i] >= 0.8) { mde = betas[i]; break; }
+    }
+
+    // Power at beta = SE
+    var ncpAtSE = seBeta / seBeta;
+    var powAtSE = 1 - normalCDF(zCrit - ncpAtSE) + normalCDF(-zCrit - ncpAtSE);
+
+    document.getElementById("typerr-seb").textContent = fmt(seBeta, 2);
+    document.getElementById("typerr-mde").textContent = fmt(mde, 1);
+    document.getElementById("typerr-t1").textContent = fmt(alpha);
+    document.getElementById("typerr-powse").textContent = fmt(powAtSE, 3);
+
+    var traces = [];
+    // Power curve
+    traces.push({ x: betas, y: powers, mode: "lines", line: { color: c.cyan, width: 3 }, name: "Power", hovertemplate: "\u03B2 = %{x:.1f}<br>Power = %{y:.3f}<extra></extra>" });
+
+    Plotly.react(chartEl, traces, baseLayout({
+      xaxis: { title: "True effect size (\u03B2)", gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft } },
+      yaxis: { title: "Power = P(Reject H\u2080)", range: [0, 1.05], gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft } },
+      shapes: [
+        { type: "line", x0: 0, x1: 0, yref: "paper", y0: 0, y1: 1, line: { color: c.grid, width: 1.5, dash: "dash" } },
+        { type: "line", xref: "paper", x0: 0, x1: 1, y0: alpha, y1: alpha, line: { color: c.pink, width: 1.5, dash: "dot" } },
+        { type: "line", xref: "paper", x0: 0, x1: 1, y0: 0.8, y1: 0.8, line: { color: c.purple, width: 1.5, dash: "dash" } }
+      ],
+      annotations: [
+        { x: 0.02, xref: "paper", y: alpha + 0.03, text: "\u03B1 = " + fmt(alpha, 2), showarrow: false, font: { color: c.pink, size: 11 } },
+        { x: 0.02, xref: "paper", y: 0.83, text: "80% power", showarrow: false, font: { color: c.purple, size: 11 } },
+        { x: 0, y: alpha, text: "H\u2080 true", showarrow: true, ax: 30, ay: -25, font: { color: c.textSoft, size: 10 } }
+      ],
+      legend: { x: 0.7, y: 0.3, font: { color: c.text, size: 11 }, bgcolor: "rgba(0,0,0,0)" }
+    }), PLOTLY_CONFIG);
+  }
+
+  bindSlider("typerr-n", "typerr-n-val", function(v) { return v; }, render);
+  bindSlider("typerr-se", "typerr-se-val", function(v) { return v; }, render);
+  bindSlider("typerr-alpha", "typerr-alpha-val", function(v) { return v; }, render);
+  window.__rerender_typerr = render;
+  render();
+})();
+
+// ==================== WIDGET 4: Autocorrelation Visualizer ====================
+(function() {
+  var tsEl = document.getElementById("chart-acf-ts");
+  var barEl = document.getElementById("chart-acf-bars");
+  var twoCol = document.getElementById("acf-twocol");
+  var G = DATA.gdp;
+
+  function render() {
+    var c = themeColors();
+    var maxLags = parseInt(document.getElementById("acf-lags").value);
+    var displayMode = getToggleVal("acf-display");
+
+    var n = G.n;
+    var band95 = 1.96 / Math.sqrt(n);
+
+    document.getElementById("acf-mean").textContent = fmt(G.meanGrowth, 3) + "%";
+    document.getElementById("acf-rho1").textContent = fmt(G.acf[1]);
+    document.getElementById("acf-rho2").textContent = fmt(G.acf[2]);
+    document.getElementById("acf-band").textContent = fmt(band95, 4);
+
+    // Layout visibility
+    if (displayMode === "ts") {
+      tsEl.style.display = ""; barEl.style.display = "none";
+      twoCol.style.gridTemplateColumns = "1fr";
+    } else if (displayMode === "acf") {
+      tsEl.style.display = "none"; barEl.style.display = "";
+      twoCol.style.gridTemplateColumns = "1fr";
+    } else {
+      tsEl.style.display = ""; barEl.style.display = "";
+      twoCol.style.gridTemplateColumns = "1fr 1fr";
+    }
+
+    // Time series plot
+    if (displayMode !== "acf") {
+      var tsTraces = [];
+      tsTraces.push({ x: G.time, y: G.growth, mode: "lines", line: { color: c.cyan, width: 1.5 },
+        name: "GDP Growth", hovertemplate: "Q: %{x:.2f}<br>Growth: %{y:.2f}%<extra></extra>" });
+      tsTraces.push({ x: [G.time[0], G.time[G.time.length - 1]], y: [G.meanGrowth, G.meanGrowth],
+        mode: "lines", line: { color: c.pink, width: 1.5, dash: "dash" }, name: "Mean" });
+
+      Plotly.react(tsEl, tsTraces, baseLayout({
+        title: { text: "GDP Growth (Quarterly)", font: { size: 13, color: c.textSoft } },
+        xaxis: { title: "Year", gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft } },
+        yaxis: { title: "Growth (%)", gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft } },
+        legend: { x: 0.02, y: 0.98, font: { color: c.text, size: 11 }, bgcolor: "rgba(0,0,0,0)" }
+      }), PLOTLY_CONFIG);
+    }
+
+    // ACF bar chart
+    if (displayMode !== "ts") {
+      var lags = [];
+      var acfVals = [];
+      var barColors = [];
+      for (var i = 1; i <= maxLags; i++) {
+        lags.push(i);
+        acfVals.push(G.acf[i]);
+        barColors.push(Math.abs(G.acf[i]) > band95 ? c.cyan : c.grid);
+      }
+
+      var acfTraces = [];
+      acfTraces.push({ x: lags, y: acfVals, type: "bar",
+        marker: { color: barColors }, name: "ACF",
+        hovertemplate: "Lag %{x}<br>\u03C1 = %{y:.4f}<extra></extra>" });
+
+      var shapes = [
+        { type: "line", xref: "paper", x0: 0, x1: 1, y0: band95, y1: band95, line: { color: c.pink, width: 1.5, dash: "dot" } },
+        { type: "line", xref: "paper", x0: 0, x1: 1, y0: -band95, y1: -band95, line: { color: c.pink, width: 1.5, dash: "dot" } },
+        { type: "line", xref: "paper", x0: 0, x1: 1, y0: 0, y1: 0, line: { color: c.grid, width: 1 } }
+      ];
+
+      Plotly.react(barEl, acfTraces, baseLayout({
+        title: { text: "Autocorrelation Function (ACF)", font: { size: 13, color: c.textSoft } },
+        xaxis: { title: "Lag", gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft }, dtick: 1 },
+        yaxis: { title: "Autocorrelation", range: [-0.3, 1.05], gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft } },
+        shapes: shapes,
+        annotations: [{ x: 0.98, xref: "paper", y: band95 + 0.04, text: "95% band", showarrow: false, font: { color: c.pink, size: 10 } }]
+      }), PLOTLY_CONFIG);
+    }
+  }
+
+  bindSlider("acf-lags", "acf-lags-val", function(v) { return v; }, render);
+  bindToggles("acf-display", render);
+  window.__rerender_acf = render;
+  render();
+})();
+
+// ==================== WIDGET 5: SE Ratio Comparator ====================
+(function() {
+  var chartEl = document.getElementById("chart-seratio");
+  var H = DATA.house;
+
+  function render() {
+    var c = themeColors();
+    var sortMode = getToggleVal("ser-sort");
+
+    var vars = H.vars.slice();
+    var ratios = vars.map(function(v) { return H.seRobust[v] / H.seDefault[v]; });
+
+    // Sort
+    if (sortMode === "ratio") {
+      var paired = vars.map(function(v, i) { return { v: v, r: ratios[i] }; });
+      paired.sort(function(a, b) { return b.r - a.r; });
+      vars = paired.map(function(p) { return p.v; });
+      ratios = paired.map(function(p) { return p.r; });
+    }
+
+    var maxR = Math.max.apply(null, ratios);
+    var minR = Math.min.apply(null, ratios);
+    var meanR = mean(ratios);
+    var aboveCount = ratios.filter(function(r) { return r > 1.0; }).length;
+
+    document.getElementById("ser-max").textContent = fmt(maxR, 4);
+    document.getElementById("ser-min").textContent = fmt(minR, 4);
+    document.getElementById("ser-mean").textContent = fmt(meanR, 4);
+    document.getElementById("ser-above").textContent = aboveCount + " / " + vars.length;
+
+    var barColors = ratios.map(function(r) { return r > 1.0 ? c.pink : c.cyan; });
+
+    var traces = [{
+      y: vars, x: ratios, type: "bar", orientation: "h",
+      marker: { color: barColors },
+      hovertemplate: "%{y}<br>Ratio: %{x:.4f}<extra></extra>",
+      name: "Robust / Default SE"
+    }];
+
+    Plotly.react(chartEl, traces, baseLayout({
+      xaxis: { title: "Robust SE / Default SE", gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft } },
+      yaxis: { gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft }, autorange: "reversed" },
+      shapes: [{ type: "line", yref: "paper", y0: 0, y1: 1, x0: 1, x1: 1, line: { color: c.purple, width: 2, dash: "dash" } }],
+      annotations: [{ x: 1, yref: "paper", y: -0.08, text: "Ratio = 1", showarrow: false, font: { color: c.purple, size: 11 } }],
+      margin: { l: 100, r: 18, t: 30, b: 46 }
+    }), PLOTLY_CONFIG);
+  }
+
+  bindToggles("ser-sort", render);
+  window.__rerender_seratio = render;
+  render();
+})();
+
+// ==================== WIDGET 6: Bootstrap Simulation ====================
+(function() {
+  var chartEl = document.getElementById("chart-boot");
+  var H = DATA.house;
+  var bootSlopes = [];
+  var seed = 42;
+
+  var olsSlope = olsFit(H.size, H.price);
+
+  function render() {
+    var c = themeColors();
+
+    document.getElementById("boot-ols").textContent = fmt(olsSlope.b1, 4);
+    document.getElementById("boot-total").textContent = bootSlopes.length.toString();
+
+    if (bootSlopes.length === 0) {
+      document.getElementById("boot-mean").textContent = "\u2014";
+      document.getElementById("boot-sd").textContent = "\u2014";
+      document.getElementById("boot-lo").textContent = "\u2014";
+      document.getElementById("boot-hi").textContent = "\u2014";
+
+      Plotly.react(chartEl, [], baseLayout({
+        xaxis: { title: "Bootstrap slope estimates", gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft } },
+        yaxis: { title: "Density", gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft } },
+        annotations: [{ x: 0.5, y: 0.5, xref: "paper", yref: "paper", text: "Click \"Run Bootstrap\" to start", showarrow: false, font: { color: c.textSoft, size: 14 } }]
+      }), PLOTLY_CONFIG);
+      return;
+    }
+
+    var m = mean(bootSlopes);
+    var s = std(bootSlopes, m);
+    var sorted = sortedCopy(bootSlopes);
+    var lo = quantile(sorted, 0.025);
+    var hi = quantile(sorted, 0.975);
+
+    document.getElementById("boot-mean").textContent = fmt(m, 4);
+    document.getElementById("boot-sd").textContent = fmt(s, 4);
+    document.getElementById("boot-lo").textContent = fmt(lo, 2);
+    document.getElementById("boot-hi").textContent = fmt(hi, 2);
+
+    var traces = [];
+    traces.push({ x: bootSlopes, type: "histogram", histnorm: "probability density", nbinsx: 40,
+      marker: { color: c.cyan + "88", line: { color: c.cyan, width: 1 } }, name: "Bootstrap slopes" });
+
+    // Normal overlay
+    var xFit = linspace(sorted[0], sorted[sorted.length - 1], 100);
+    var yFit = xFit.map(function(x) { return normalPDF(x, m, s); });
+    traces.push({ x: xFit, y: yFit, mode: "lines", line: { color: c.pink, width: 2 }, name: "Normal fit" });
+
+    Plotly.react(chartEl, traces, baseLayout({
+      xaxis: { title: "Bootstrap slope estimates", gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft } },
+      yaxis: { title: "Density", gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft } },
+      shapes: [
+        { type: "line", x0: olsSlope.b1, x1: olsSlope.b1, yref: "paper", y0: 0, y1: 1, line: { color: c.purple, width: 2.5, dash: "dash" } },
+        { type: "line", x0: lo, x1: lo, yref: "paper", y0: 0, y1: 1, line: { color: c.pink, width: 1.5, dash: "dot" } },
+        { type: "line", x0: hi, x1: hi, yref: "paper", y0: 0, y1: 1, line: { color: c.pink, width: 1.5, dash: "dot" } }
+      ],
+      annotations: [
+        { x: olsSlope.b1, yref: "paper", y: 1.02, text: "OLS slope", showarrow: false, font: { color: c.purple, size: 11 } },
+        { x: lo, yref: "paper", y: 1.02, text: "2.5%", showarrow: false, font: { color: c.pink, size: 10 } },
+        { x: hi, yref: "paper", y: 1.02, text: "97.5%", showarrow: false, font: { color: c.pink, size: 10 } }
+      ],
+      legend: { x: 0.7, y: 0.98, font: { color: c.text, size: 11 }, bgcolor: "rgba(0,0,0,0)" }
+    }), PLOTLY_CONFIG);
+  }
+
+  function runBootstrap() {
+    var nReps = parseInt(document.getElementById("boot-nrep").value);
+    var rng = mulberry32(seed);
+    seed += nReps;
+    var n = H.size.length;
+
+    for (var r = 0; r < nReps; r++) {
+      // Resample with replacement
+      var bx = new Array(n), by = new Array(n);
+      for (var i = 0; i < n; i++) {
+        var idx = Math.floor(rng() * n);
+        bx[i] = H.size[idx];
+        by[i] = H.price[idx];
+      }
+      var fit = olsFit(bx, by);
+      bootSlopes.push(fit.b1);
+    }
+    render();
+  }
+
+  function clearBootstrap() {
+    bootSlopes = [];
+    seed = 42;
+    render();
+  }
+
+  bindSlider("boot-nrep", "boot-nrep-val", function(v) { return v; }, function() {});
+  document.getElementById("boot-run").addEventListener("click", runBootstrap);
+  document.getElementById("boot-clear").addEventListener("click", clearBootstrap);
+  window.__rerender_boot = render;
+  render();
+})();
+
+// ==================== RESET + URL HASH STATE ====================
+(function() {
+  var REG = {
+    robustse: [
+      { group: "rse-type", kind: "toggle", def: "default" },
+      { id: "rse-var", kind: "select", def: "size" }
+    ],
+    pred: [
+      { id: "pred-size", kind: "range", def: "2000" },
+      { group: "pred-bands", kind: "toggle", def: "both" }
+    ],
+    typerr: [
+      { id: "typerr-n", kind: "range", def: "30" },
+      { id: "typerr-se", kind: "range", def: "15" },
+      { id: "typerr-alpha", kind: "range", def: "0.05" }
+    ],
+    acf: [
+      { id: "acf-lags", kind: "range", def: "12" },
+      { group: "acf-display", kind: "toggle", def: "both" }
+    ],
+    seratio: [
+      { group: "ser-sort", kind: "toggle", def: "ratio" }
+    ],
+    boot: [
+      { id: "boot-nrep", kind: "range", def: "200" }
+    ]
+  };
+
+  function getVal(c) {
+    if (c.kind === "toggle") {
+      var btn = document.querySelector("#" + c.group + " button.active");
+      return btn ? btn.dataset.val : c.def;
+    }
+    return document.getElementById(c.id).value;
+  }
+
+  function setVal(c, val, fire) {
+    if (c.kind === "toggle") {
+      var group = document.getElementById(c.group);
+      if (!group) return;
+      var btn = group.querySelector('button[data-val="' + val + '"]');
+      if (btn && !btn.classList.contains("active")) btn.click();
+    } else {
+      var el = document.getElementById(c.id);
+      if (!el) return;
+      if (el.value !== String(val)) {
+        el.value = val;
+        if (fire) el.dispatchEvent(new Event(c.kind === "select" ? "change" : "input", { bubbles: true }));
+      }
+    }
+  }
+
+  function resetWidget(widget) {
+    var ctrls = REG[widget] || [];
+    for (var i = 0; i < ctrls.length; i++) setVal(ctrls[i], ctrls[i].def, true);
+    var fn = window["__rerender_" + widget];
+    if (fn) fn();
+    writeHash();
+  }
+
+  function writeHash() {
+    var parts = [];
+    for (var widget in REG) {
+      var ctrls = REG[widget];
+      for (var i = 0; i < ctrls.length; i++) {
+        var c = ctrls[i];
+        var v = String(getVal(c));
+        if (v !== String(c.def)) {
+          var key = c.id || c.group;
+          parts.push(key + "=" + encodeURIComponent(v));
+        }
+      }
+    }
+    var want = parts.length ? "#" + parts.join("&") : "";
+    if (want === "" && location.hash.match(/=/)) {
+      history.replaceState(null, "", location.pathname + location.search);
+    } else if (want !== "" && location.hash !== want) {
+      history.replaceState(null, "", location.pathname + location.search + want);
+    }
+  }
+
+  function readHash() {
+    var hash = location.hash.slice(1);
+    if (!hash || !hash.includes("=")) return;
+    var params = {};
+    var pairs = hash.split("&");
+    for (var i = 0; i < pairs.length; i++) {
+      var eq = pairs[i].indexOf("=");
+      if (eq < 0) continue;
+      params[pairs[i].slice(0, eq)] = decodeURIComponent(pairs[i].slice(eq + 1));
+    }
+    for (var widget in REG) {
+      var ctrls = REG[widget];
+      for (var i = 0; i < ctrls.length; i++) {
+        var c = ctrls[i];
+        var key = c.id || c.group;
+        if (key in params) setVal(c, params[key], true);
+      }
+    }
+  }
+
+  document.querySelectorAll(".reset-btn[data-reset]").forEach(function(btn) {
+    btn.addEventListener("click", function() { resetWidget(btn.dataset.reset); });
+  });
+  document.addEventListener("input", function(e) {
+    if (e.target.matches("input[type=range], select")) writeHash();
+  });
+  document.addEventListener("change", function(e) {
+    if (e.target.matches("select")) writeHash();
+  });
+  document.querySelectorAll(".toggle-group button").forEach(function(b) {
+    b.addEventListener("click", function() { setTimeout(writeHash, 0); });
+  });
+  readHash();
+})();
+
+// ==================== THEME TOGGLE ====================
+(function() {
+  var btn = document.getElementById("theme-toggle");
+  var iconEl = document.getElementById("theme-icon");
+  var labelEl = document.getElementById("theme-label");
+
+  function apply(theme) {
+    document.documentElement.dataset.theme = theme;
+    iconEl.textContent = theme === "dark" ? "\u2600\uFE0F" : "\uD83C\uDF19";
+    labelEl.textContent = theme === "dark" ? "Light" : "Dark";
+    for (var key in window) {
+      if (key.startsWith("__rerender_") && typeof window[key] === "function") window[key]();
+    }
+  }
+
+  var saved = localStorage.getItem(THEME_KEY);
+  var prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+  apply(saved || (prefersDark ? "dark" : "light"));
+
+  btn.addEventListener("click", function() {
+    var next = document.documentElement.dataset.theme === "dark" ? "light" : "dark";
+    localStorage.setItem(THEME_KEY, next);
+    apply(next);
+  });
+})();
+
+// ==================== Resize handling ====================
+window.addEventListener("resize", function() {
+  document.querySelectorAll(".chart").forEach(function(el) {
+    if (el.offsetWidth > 0) Plotly.Plots.resize(el);
+  });
+});
+</script>
+</body>
+</html>

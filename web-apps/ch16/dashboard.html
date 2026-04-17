@@ -1,0 +1,1395 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chapter 16 — Checking the Model and Data · metricsAI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.plot.ly/plotly-2.35.2.min.js" charset="utf-8"></script>
+<style>
+:root {
+  --cyan: #008CB7;
+  --cyan-soft: #22d3ee;
+  --purple: #7A209F;
+  --purple-soft: #c084fc;
+  --pink: #C21E72;
+  --pink-soft: #f472b6;
+
+  --bg: #f5f8fb;
+  --panel: #ffffff;
+  --panel-2: #f0f4f9;
+  --text: #0b1021;
+  --text-soft: #475569;
+  --text-muted: #64748b;
+  --border: #d9e2ec;
+  --accent: var(--cyan);
+  --accent-2: var(--purple);
+  --accent-3: var(--pink);
+  --shadow: 0 2px 10px rgba(11, 16, 33, 0.06), 0 12px 30px rgba(11, 16, 33, 0.05);
+  --grid: #e3e8ef;
+  --code-bg: #eef3f8;
+}
+html[data-theme="dark"] {
+  --bg: #0c1024;
+  --panel: #151a33;
+  --panel-2: #1b2142;
+  --text: #e2e8f0;
+  --text-soft: #b5c0d0;
+  --text-muted: #8a98ae;
+  --border: #2a3156;
+  --accent: var(--cyan-soft);
+  --accent-2: var(--purple-soft);
+  --accent-3: var(--pink-soft);
+  --shadow: 0 2px 10px rgba(0, 0, 0, 0.25), 0 12px 30px rgba(0, 0, 0, 0.35);
+  --grid: #2a3156;
+  --code-bg: #0f1530;
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.55;
+  transition: background-color .25s ease, color .25s ease;
+}
+code, .mono { font-family: 'JetBrains Mono', ui-monospace, monospace; }
+
+header.page {
+  position: relative;
+  padding: 2.4rem 1.5rem 2rem;
+  background:
+    radial-gradient(1200px 400px at 85% -10%, rgba(122, 32, 159, 0.15), transparent),
+    radial-gradient(1000px 400px at 10% 0%, rgba(0, 140, 183, 0.18), transparent),
+    var(--panel);
+  border-bottom: 1px solid var(--border);
+}
+.page-inner { max-width: 1120px; margin: 0 auto; }
+.chapter-badge {
+  display: inline-block; font-size: 0.72rem; letter-spacing: 0.15em;
+  text-transform: uppercase; color: var(--accent); font-weight: 600; margin-bottom: 0.5rem;
+}
+h1.title {
+  font-size: clamp(1.6rem, 3.4vw, 2.4rem); margin: 0 0 0.35rem;
+  background: linear-gradient(90deg, var(--accent), var(--accent-2));
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+  font-weight: 700; letter-spacing: -0.01em;
+}
+p.subtitle { margin: 0 0 0.8rem; color: var(--text-soft); font-size: 1.05rem; max-width: 720px; }
+.theme-toggle {
+  position: absolute; top: 1.4rem; right: 1.5rem;
+  background: var(--panel-2); color: var(--text); border: 1px solid var(--border);
+  padding: 0.4rem 0.8rem; border-radius: 999px; cursor: pointer;
+  font-size: 0.85rem; font-weight: 500; display: inline-flex; align-items: center; gap: 0.35rem;
+  transition: all .2s ease;
+}
+.theme-toggle:hover { border-color: var(--accent); color: var(--accent); }
+
+nav.anchors {
+  position: sticky; top: 0; z-index: 20;
+  background: color-mix(in srgb, var(--panel) 92%, transparent);
+  backdrop-filter: saturate(150%) blur(8px); -webkit-backdrop-filter: saturate(150%) blur(8px);
+  border-bottom: 1px solid var(--border);
+}
+nav.anchors ul {
+  display: flex; gap: 0.25rem; overflow-x: auto; list-style: none;
+  padding: 0.55rem 1.5rem; margin: 0 auto; max-width: 1120px; scrollbar-width: thin;
+}
+nav.anchors a {
+  display: block; padding: 0.35rem 0.75rem; border-radius: 8px;
+  color: var(--text-soft); text-decoration: none; font-size: 0.85rem;
+  font-weight: 500; white-space: nowrap; transition: all .15s ease;
+}
+nav.anchors a:hover { color: var(--accent); background: var(--panel-2); }
+
+main { max-width: 1120px; margin: 1.2rem auto 3rem; padding: 0 1.5rem; }
+
+section.widget {
+  background: var(--panel); border: 1px solid var(--border); border-radius: 16px;
+  padding: 1.5rem 1.4rem 1.3rem; margin-bottom: 1.5rem; box-shadow: var(--shadow);
+}
+.section-tag {
+  display: inline-block; font-family: 'JetBrains Mono', monospace; font-size: 0.72rem;
+  color: var(--accent); background: color-mix(in srgb, var(--accent) 12%, transparent);
+  padding: 0.2rem 0.55rem; border-radius: 6px; margin-bottom: 0.6rem; font-weight: 500;
+}
+.widget h2 { margin: 0 0 0.2rem; font-size: 1.35rem; font-weight: 600; color: var(--accent-2); letter-spacing: -0.005em; }
+.widget .lede { margin: 0 0 1rem; color: var(--text-soft); font-size: 0.97rem; max-width: 780px; }
+
+.controls {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 0.9rem 1.2rem; padding: 0.9rem 1rem; background: var(--panel-2); border-radius: 10px; margin-bottom: 1rem;
+}
+.ctrl { display: flex; flex-direction: column; gap: 0.3rem; }
+.ctrl label { font-size: 0.78rem; font-weight: 500; color: var(--text-soft); text-transform: uppercase; letter-spacing: 0.05em; }
+.ctrl select, .ctrl input[type="range"], .ctrl input[type="number"] {
+  font-family: inherit; font-size: 0.9rem; padding: 0.4rem 0.55rem; border-radius: 8px;
+  border: 1px solid var(--border); background: var(--panel); color: var(--text);
+}
+.ctrl input[type="range"] { padding: 0.2rem 0; accent-color: var(--accent); }
+.ctrl .val { font-family: 'JetBrains Mono', monospace; font-size: 0.82rem; color: var(--accent); font-weight: 500; }
+.toggle-group { display: inline-flex; gap: 0.25rem; background: var(--panel); padding: 3px; border-radius: 10px; border: 1px solid var(--border); flex-wrap: wrap; }
+.toggle-group button {
+  background: transparent; border: none; color: var(--text-soft);
+  padding: 0.32rem 0.75rem; border-radius: 7px; font-family: inherit; font-size: 0.85rem;
+  cursor: pointer; transition: all .15s ease;
+}
+.toggle-group button.active { background: var(--accent); color: white; font-weight: 500; }
+
+.stats-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+  gap: 0.6rem; margin: 0.5rem 0 1rem;
+}
+.stat {
+  background: var(--panel-2); padding: 0.65rem 0.75rem; border-radius: 10px; border-left: 3px solid var(--accent);
+}
+.stat .label { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-muted); }
+.stat .value { font-family: 'JetBrains Mono', monospace; font-size: 1.05rem; font-weight: 500; color: var(--text); margin-top: 0.15rem; }
+.stat.pop { border-left-color: var(--accent-2); }
+.stat.err { border-left-color: var(--accent-3); }
+
+.callout {
+  background: color-mix(in srgb, var(--accent-2) 8%, transparent);
+  border-left: 3px solid var(--accent-2); padding: 0.7rem 0.9rem;
+  border-radius: 8px; font-size: 0.9rem; color: var(--text-soft); margin: 0.9rem 0 0.2rem;
+}
+.callout strong { color: var(--accent-2); }
+
+.try-this {
+  background: color-mix(in srgb, var(--accent) 8%, transparent);
+  border-left: 3px solid var(--accent); padding: 0.7rem 0.9rem;
+  border-radius: 8px; font-size: 0.9rem; color: var(--text-soft); margin: 0.7rem 0 0.2rem;
+}
+.try-this .try-title { font-weight: 600; color: var(--accent); font-size: 0.78rem; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 0.3rem; }
+.try-this ol { margin: 0; padding-left: 1.25rem; }
+.try-this li { margin: 0.2rem 0; }
+
+.widget-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 0.5rem; margin-bottom: 0.2rem; }
+.widget-head > div { flex: 1; min-width: 0; }
+.reset-btn {
+  background: transparent; color: var(--text-muted); border: 1px solid var(--border);
+  padding: 0.3rem 0.7rem; border-radius: 8px; font-family: inherit; font-size: 0.8rem;
+  cursor: pointer; white-space: nowrap; transition: all .15s ease;
+}
+.reset-btn:hover { color: var(--accent); border-color: var(--accent); }
+.resim-btn {
+  background: var(--panel); color: var(--accent); border: 1px solid var(--accent);
+  padding: 0.35rem 0.85rem; border-radius: 8px; font-family: inherit; font-size: 0.85rem;
+  cursor: pointer; font-weight: 500; transition: all .15s ease;
+}
+.resim-btn:hover { background: var(--accent); color: white; }
+
+.delta-row {
+  display: flex; flex-wrap: wrap; gap: 0.6rem 1.2rem;
+  margin: 0.2rem 0 0.9rem; padding: 0.55rem 0.85rem;
+  background: var(--panel-2); border-radius: 10px;
+  font-family: 'JetBrains Mono', monospace; font-size: 0.88rem;
+  color: var(--text-soft); border-left: 3px solid var(--accent-3);
+}
+.delta-row .label { color: var(--text-muted); margin-right: 0.35rem; }
+
+.chart { width: 100%; min-height: 340px; }
+.chart.tall { min-height: 420px; }
+.chart.short { min-height: 280px; }
+
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+@media (max-width: 720px) { .two-col { grid-template-columns: 1fr; } }
+
+footer.page {
+  max-width: 1120px; margin: 1rem auto 3rem; padding: 0 1.5rem;
+  color: var(--text-muted); font-size: 0.88rem; text-align: center;
+}
+footer.page a { color: var(--accent); text-decoration: none; }
+footer.page a:hover { text-decoration: underline; }
+.scroll-top { display: inline-block; font-size: 0.78rem; color: var(--text-muted); text-decoration: none; margin-top: 0.4rem; }
+.scroll-top:hover { color: var(--accent); }
+</style>
+</head>
+<body>
+
+<header class="page">
+  <div class="page-inner">
+    <span class="chapter-badge">Chapter 16 of 18 · Interactive Dashboard</span>
+    <h1 class="title">Checking the Model and Data</h1>
+    <p class="subtitle">Explore regression diagnostics interactively -- multicollinearity, heteroskedasticity, autocorrelation, omitted variable bias, diagnostic plots, and influential observations.</p>
+  </div>
+  <button id="theme-toggle" class="theme-toggle" type="button" aria-label="Toggle color theme"><span id="theme-icon">🌙</span><span id="theme-label">Dark</span></button>
+</header>
+
+<nav class="anchors" aria-label="Sections">
+  <ul>
+    <li><a href="#vif-explorer">VIF Explorer</a></li>
+    <li><a href="#robust-se">Robust SEs</a></li>
+    <li><a href="#autocorrelation">Autocorrelation</a></li>
+    <li><a href="#diagnostic-plots">Diagnostics</a></li>
+    <li><a href="#influential-obs">Influence</a></li>
+    <li><a href="#omitted-var">OVB</a></li>
+  </ul>
+</nav>
+
+<main>
+
+<!-- ==================== WIDGET 1: VIF Explorer ==================== -->
+<section class="widget" id="vif-explorer">
+  <div class="widget-head">
+    <div>
+      <span class="section-tag">&sect; 16.1 &middot; Key Concepts 16.1, 16.2</span>
+      <h2>VIF Explorer: Multicollinearity</h2>
+    </div>
+    <button class="reset-btn" data-reset="vif">&#8634; Reset</button>
+  </div>
+  <p class="lede">Compare two earnings models: a base model (age + education) and a collinear model that adds the age&times;education interaction. See how VIF values explode and standard errors inflate when multicollinearity is present.</p>
+  <div class="controls">
+    <div class="ctrl">
+      <label>Model specification</label>
+      <div class="toggle-group" id="vif-model">
+        <button type="button" data-val="base" class="active">Base (age + educ)</button>
+        <button type="button" data-val="collinear">+ Interaction</button>
+      </div>
+    </div>
+    <div class="ctrl">
+      <label for="vif-threshold">VIF threshold <span class="val" id="vif-threshold-val">10</span></label>
+      <input type="range" id="vif-threshold" min="2" max="20" step="1" value="10">
+    </div>
+  </div>
+  <div class="stats-grid">
+    <div class="stat"><div class="label">VIF age</div><div class="value" id="vif-age">--</div></div>
+    <div class="stat"><div class="label">VIF education</div><div class="value" id="vif-educ">--</div></div>
+    <div class="stat"><div class="label">VIF interaction</div><div class="value" id="vif-inter">--</div></div>
+    <div class="stat err"><div class="label">Max VIF</div><div class="value" id="vif-max">--</div></div>
+    <div class="stat pop"><div class="label">R&sup2;</div><div class="value" id="vif-r2">--</div></div>
+  </div>
+  <div class="two-col">
+    <div class="chart" id="chart-vif-bars"></div>
+    <div class="chart" id="chart-vif-corr"></div>
+  </div>
+  <div class="callout"><strong>Key Concept 16.1:</strong> The Variance Inflation Factor quantifies multicollinearity: VIF<sub>j</sub> = 1/(1 - R<sub>j</sub>&sup2;). VIF = 1 means no collinearity; VIF &gt; 10 indicates serious problems (SEs inflated by &radic;10 &asymp; 3.2&times;). While OLS remains unbiased, individual coefficients become imprecise. Joint F-tests remain powerful despite multicollinearity.</div>
+  <div class="try-this">
+    <div class="try-title">Try this</div>
+    <ol>
+      <li>Start with the <strong>Base</strong> model -- VIF values near 1.0 indicate no multicollinearity. Now toggle to <strong>+ Interaction</strong> and watch VIF jump to 22-37.</li>
+      <li>Drag the <strong>threshold slider</strong> to 5. Even the base model variables stay below threshold, but with interaction, all three exceed it.</li>
+      <li>Note the correlation heatmap: age&times;education correlates 0.73 with age and 0.64 with education -- these high correlations drive the VIF.</li>
+    </ol>
+  </div>
+</section>
+
+<!-- ==================== WIDGET 2: Robust vs Standard SEs ==================== -->
+<section class="widget" id="robust-se">
+  <div class="widget-head">
+    <div>
+      <span class="section-tag">&sect; 16.5 &middot; Key Concepts 16.3, 16.4</span>
+      <h2>Robust vs. Standard SEs</h2>
+    </div>
+    <button class="reset-btn" data-reset="robse">&#8634; Reset</button>
+  </div>
+  <p class="lede">Compare default OLS standard errors with heteroskedasticity-robust (HC1) SEs. The residual scatter reveals heteroskedasticity -- error variance increases with fitted values, making default SEs unreliable.</p>
+  <div class="controls">
+    <div class="ctrl">
+      <label>Display</label>
+      <div class="toggle-group" id="robse-display">
+        <button type="button" data-val="comparison" class="active">SE Comparison</button>
+        <button type="button" data-val="residuals">Residual Scatter</button>
+      </div>
+    </div>
+    <div class="ctrl">
+      <label>Highlight</label>
+      <div class="toggle-group" id="robse-highlight">
+        <button type="button" data-val="all" class="active">All Variables</button>
+        <button type="button" data-val="education">Education Only</button>
+        <button type="button" data-val="age">Age Only</button>
+      </div>
+    </div>
+  </div>
+  <div class="stats-grid">
+    <div class="stat"><div class="label">SE(age) standard</div><div class="value" id="robse-age-std">--</div></div>
+    <div class="stat"><div class="label">SE(age) robust</div><div class="value" id="robse-age-rob">--</div></div>
+    <div class="stat"><div class="label">SE(educ) standard</div><div class="value" id="robse-educ-std">--</div></div>
+    <div class="stat"><div class="label">SE(educ) robust</div><div class="value" id="robse-educ-rob">--</div></div>
+    <div class="stat err"><div class="label">Ratio (educ)</div><div class="value" id="robse-ratio">--</div></div>
+  </div>
+  <div class="chart" id="chart-robse"></div>
+  <div class="callout"><strong>Key Concept 16.4:</strong> Heteroskedasticity means error variance depends on regressors: Var[u<sub>i</sub>|x<sub>i</sub>] &ne; &sigma;&sup2;. OLS coefficients remain unbiased, but default SEs are wrong -- typically too small, giving false confidence. Use HC1 robust SEs, which are valid whether or not heteroskedasticity is present. Always use robust SEs for cross-sectional data.</div>
+  <div class="try-this">
+    <div class="try-title">Try this</div>
+    <ol>
+      <li>In <strong>SE Comparison</strong> mode, compare bar heights. Robust SEs are consistently larger -- the ratio for education is about 1.12.</li>
+      <li>Toggle to <strong>Residual Scatter</strong>. Look for the fan shape -- residuals spread wider at higher fitted values, indicating heteroskedasticity.</li>
+      <li>Focus on <strong>Education Only</strong> to see that its SE inflates more than age's, because education has more heteroskedastic patterns in earnings.</li>
+    </ol>
+  </div>
+</section>
+
+<!-- ==================== WIDGET 3: Autocorrelation Explorer ==================== -->
+<section class="widget" id="autocorrelation">
+  <div class="widget-head">
+    <div>
+      <span class="section-tag">&sect; 16.6 &middot; Key Concept 16.5</span>
+      <h2>Autocorrelation Explorer</h2>
+    </div>
+    <button class="reset-btn" data-reset="acf">&#8634; Reset</button>
+  </div>
+  <p class="lede">Simulate an AR(1) error process with adjustable persistence parameter &rho;. As &rho; increases, errors cluster in runs of the same sign, ACF bars decay slowly, and effective sample size shrinks.</p>
+  <div class="controls">
+    <div class="ctrl">
+      <label for="acf-rho">&rho; (persistence) <span class="val" id="acf-rho-val">0.80</span></label>
+      <input type="range" id="acf-rho" min="0" max="0.95" step="0.05" value="0.80">
+    </div>
+    <div class="ctrl">
+      <label for="acf-n">Observations <span class="val" id="acf-n-val">200</span></label>
+      <input type="range" id="acf-n" min="50" max="500" step="50" value="200">
+    </div>
+    <div class="ctrl">
+      <label>&nbsp;</label>
+      <button class="resim-btn" id="acf-resim" type="button">Resimulate</button>
+    </div>
+  </div>
+  <div class="stats-grid">
+    <div class="stat"><div class="label">Lag 1 ACF</div><div class="value" id="acf-lag1">--</div></div>
+    <div class="stat"><div class="label">Lag 5 ACF</div><div class="value" id="acf-lag5">--</div></div>
+    <div class="stat pop"><div class="label">Theory Lag 1</div><div class="value" id="acf-theo1">--</div></div>
+    <div class="stat err"><div class="label">Eff. sample / n</div><div class="value" id="acf-effn">--</div></div>
+  </div>
+  <div class="two-col">
+    <div class="chart" id="chart-acf-ts"></div>
+    <div class="chart" id="chart-acf-bars"></div>
+  </div>
+  <div class="callout"><strong>Key Concept 16.5:</strong> Autocorrelation means errors are correlated over time (Cov[u<sub>t</sub>, u<sub>s</sub>] &ne; 0). OLS remains unbiased but SEs are wrong -- typically too small, leading to false significance. Use HAC (Newey-West) SEs for valid inference. The ACF of residuals reveals the problem: significant bars at multiple lags indicate autocorrelation.</div>
+  <div class="try-this">
+    <div class="try-title">Try this</div>
+    <ol>
+      <li>Set &rho; = 0. The time series looks like white noise and ACF bars are within the confidence band. Now drag to &rho; = 0.80 -- errors cluster in long runs.</li>
+      <li>At &rho; = 0.95, notice the ACF decays very slowly -- lag 10 is still large. The effective sample size drops dramatically (shown in the stat box).</li>
+      <li>Click <strong>Resimulate</strong> at &rho; = 0.80 several times. Each realization looks different, but the slow ACF decay pattern is consistent.</li>
+    </ol>
+  </div>
+</section>
+
+<!-- ==================== WIDGET 4: Diagnostic Plots ==================== -->
+<section class="widget" id="diagnostic-plots">
+  <div class="widget-head">
+    <div>
+      <span class="section-tag">&sect; 16.8 &middot; Key Concept 16.7</span>
+      <h2>Diagnostic Plots</h2>
+    </div>
+    <button class="reset-btn" data-reset="diag">&#8634; Reset</button>
+  </div>
+  <p class="lede">Inspect the democracy-growth regression with two key diagnostic plots: actual vs. fitted values (should cluster around 45-degree line) and residual vs. fitted values (should scatter randomly around zero).</p>
+  <div class="controls">
+    <div class="ctrl">
+      <label>Model</label>
+      <div class="toggle-group" id="diag-model">
+        <button type="button" data-val="bivariate" class="active">Bivariate</button>
+        <button type="button" data-val="multiple">With Controls</button>
+      </div>
+    </div>
+    <div class="ctrl">
+      <label>Plot type</label>
+      <div class="toggle-group" id="diag-plot">
+        <button type="button" data-val="actual" class="active">Actual vs. Fitted</button>
+        <button type="button" data-val="residual">Residual vs. Fitted</button>
+      </div>
+    </div>
+    <div class="ctrl">
+      <label>Labels</label>
+      <div class="toggle-group" id="diag-labels">
+        <button type="button" data-val="off" class="active">Off</button>
+        <button type="button" data-val="on">Show Countries</button>
+      </div>
+    </div>
+  </div>
+  <div class="stats-grid">
+    <div class="stat"><div class="label">Growth coef</div><div class="value" id="diag-coef">--</div></div>
+    <div class="stat"><div class="label">R&sup2;</div><div class="value" id="diag-r2">--</div></div>
+    <div class="stat"><div class="label">Resid mean</div><div class="value" id="diag-rmean">--</div></div>
+    <div class="stat err"><div class="label">Resid std</div><div class="value" id="diag-rstd">--</div></div>
+  </div>
+  <div class="chart tall" id="chart-diag"></div>
+  <div class="callout"><strong>Key Concept 16.7:</strong> Diagnostic plots assess model adequacy: (1) actual vs. fitted shows how well the model predicts -- points should cluster around the 45-degree line; (2) residual vs. fitted detects heteroskedasticity (fan shape) and nonlinearity (curved pattern). Random scatter around zero with constant spread indicates assumptions are satisfied.</div>
+  <div class="try-this">
+    <div class="try-title">Try this</div>
+    <ol>
+      <li>Start with the <strong>Bivariate</strong> model on <strong>Actual vs. Fitted</strong>. Points scatter widely -- R&sup2; is only about 0.19. Switch to <strong>With Controls</strong> and the fit improves (R&sup2; &asymp; 0.45).</li>
+      <li>Toggle to <strong>Residual vs. Fitted</strong>. Look for fan shapes or curvature. With controls, residuals look more randomly scattered.</li>
+      <li>Turn on <strong>Show Countries</strong> to identify which nations are outliers. Hover over extreme points to see country names.</li>
+    </ol>
+  </div>
+</section>
+
+<!-- ==================== WIDGET 5: Influential Observations ==================== -->
+<section class="widget" id="influential-obs">
+  <div class="widget-head">
+    <div>
+      <span class="section-tag">&sect; 16.8 &middot; Key Concept 16.8</span>
+      <h2>Influential Observations</h2>
+    </div>
+    <button class="reset-btn" data-reset="influence">&#8634; Reset</button>
+  </div>
+  <p class="lede">DFITS measures how much each observation influences its own prediction. Points exceeding the threshold 2&radic;(k/n) warrant investigation. Toggle to DFBETAS to see influence on the growth coefficient specifically.</p>
+  <div class="controls">
+    <div class="ctrl">
+      <label>Measure</label>
+      <div class="toggle-group" id="infl-measure">
+        <button type="button" data-val="dfits" class="active">DFITS</button>
+        <button type="button" data-val="dfbetas">DFBETAS (growth)</button>
+      </div>
+    </div>
+    <div class="ctrl">
+      <label>Labels</label>
+      <div class="toggle-group" id="infl-labels">
+        <button type="button" data-val="flagged" class="active">Flagged Only</button>
+        <button type="button" data-val="all">All Countries</button>
+        <button type="button" data-val="off">Off</button>
+      </div>
+    </div>
+  </div>
+  <div class="stats-grid">
+    <div class="stat"><div class="label">n countries</div><div class="value" id="infl-n">--</div></div>
+    <div class="stat"><div class="label">k parameters</div><div class="value" id="infl-k">--</div></div>
+    <div class="stat pop"><div class="label">Threshold</div><div class="value" id="infl-thresh">--</div></div>
+    <div class="stat err"><div class="label">Flagged</div><div class="value" id="infl-flagged">--</div></div>
+  </div>
+  <div class="chart tall" id="chart-infl"></div>
+  <div class="callout"><strong>Key Concept 16.8:</strong> DFITS measures influence on fitted values: DFITS<sub>i</sub> is the scaled change in y&#770;<sub>i</sub> when observation i is excluded. DFBETAS measures influence on individual coefficients. Thresholds: |DFITS| &gt; 2&radic;(k/n) and |DFBETAS| &gt; 2/&radic;n. Don't automatically delete influential points -- investigate whether they represent data errors, genuine outliers, or valid extreme values.</div>
+  <div class="try-this">
+    <div class="try-title">Try this</div>
+    <ol>
+      <li>With <strong>DFITS</strong> selected and <strong>Flagged Only</strong> labels, identify the most influential countries. China, Oman, and Myanmar typically appear as top influencers.</li>
+      <li>Switch to <strong>DFBETAS (growth)</strong>. Different countries may emerge -- these specifically affect the growth coefficient, not just predictions.</li>
+      <li>Turn on <strong>All Countries</strong> labels and hover over points near the threshold. These borderline cases also warrant attention.</li>
+    </ol>
+  </div>
+</section>
+
+<!-- ==================== WIDGET 6: Omitted Variable Bias ==================== -->
+<section class="widget" id="omitted-var">
+  <div class="widget-head">
+    <div>
+      <span class="section-tag">&sect; 16.7 &middot; Key Concept 16.6</span>
+      <h2>Omitted Variable Bias</h2>
+    </div>
+    <button class="reset-btn" data-reset="ovb">&#8634; Reset</button>
+  </div>
+  <p class="lede">The growth coefficient drops from 0.131 (bivariate) to 0.047 (with controls) -- a 64% reduction. Toggle controls on and off to see omitted variable bias in action: institutional variables were confounding the democracy-growth relationship.</p>
+  <div class="controls">
+    <div class="ctrl">
+      <label>Controls</label>
+      <div class="toggle-group" id="ovb-controls">
+        <button type="button" data-val="none" class="active">None (bivariate)</button>
+        <button type="button" data-val="institutional">+ Institutional</button>
+        <button type="button" data-val="religion">+ Religion</button>
+        <button type="button" data-val="all">All Controls</button>
+      </div>
+    </div>
+    <div class="ctrl">
+      <label>Show</label>
+      <div class="toggle-group" id="ovb-show">
+        <button type="button" data-val="scatter" class="active">Scatter + Line</button>
+        <button type="button" data-val="coefbar">Coefficient Bar</button>
+      </div>
+    </div>
+  </div>
+  <div class="stats-grid">
+    <div class="stat"><div class="label">Growth coef</div><div class="value" id="ovb-coef">--</div></div>
+    <div class="stat"><div class="label">SE (robust)</div><div class="value" id="ovb-se">--</div></div>
+    <div class="stat"><div class="label">R&sup2;</div><div class="value" id="ovb-r2">--</div></div>
+    <div class="stat err"><div class="label">% change from bivariate</div><div class="value" id="ovb-pct">--</div></div>
+  </div>
+  <div class="chart tall" id="chart-ovb"></div>
+  <div class="callout"><strong>Key Concept 16.6:</strong> The democracy-growth example demonstrates omitted variable bias: the growth coefficient falls from 0.131 (bivariate) to 0.047 (with controls), a 64% reduction. Institutional variables (religion, executive constraints) were correlated with both democracy and growth, biasing the bivariate estimate upward. Always ask: "What variables might affect my outcome and correlate with my key regressor?"</div>
+  <div class="try-this">
+    <div class="try-title">Try this</div>
+    <ol>
+      <li>Start at <strong>None (bivariate)</strong>: growth coef = 0.131. Add <strong>+ Institutional</strong> controls (constraint + independence) -- the coefficient drops substantially.</li>
+      <li>Add <strong>+ Religion</strong> controls. Each set of controls absorbs some of the growth coefficient. With <strong>All Controls</strong>, it falls to 0.047.</li>
+      <li>Switch to <strong>Coefficient Bar</strong> view to see the dramatic shrinkage visually. The bivariate estimate overstated the democracy-growth relationship by 64%.</li>
+    </ol>
+  </div>
+</section>
+
+</main>
+
+<footer class="page">
+  <p>Part of <a href="https://quarcs-lab.github.io/metricsai/book/_book/index.html"><strong>metricsAI</strong></a> &middot; Chapter 16: Checking the Model and Data &middot; by Carlos Mendez &middot; <a href="https://github.com/quarcs-lab/metricsai">GitHub</a></p>
+  <p>Data: AED_EARNINGS_COMPLETE (872 workers), AED_DEMOCRACY (131 countries, Acemoglu et al. 2008).</p>
+  <a class="scroll-top" href="#top">&uarr; Back to top</a>
+</footer>
+
+<script type="application/json" id="ch-data">{"earnings":{"n":872,"age":[45.0,61.0,58.0,58.0,34.0,59.0,25.0,50.0,27.0,28.0,44.0,35.0,28.0,49.0,50.0,56.0,26.0,47.0,50.0,50.0,36.0,55.0,50.0,38.0,26.0,44.0,49.0,51.0,34.0,56.0,44.0,44.0,49.0,49.0,43.0,52.0,26.0,36.0,37.0,56.0,28.0,34.0,52.0,50.0,45.0,45.0,30.0,28.0,40.0,35.0,30.0,52.0,42.0,61.0,60.0,40.0,30.0,47.0,39.0,50.0,61.0,49.0,57.0,25.0,41.0,32.0,62.0,56.0,52.0,36.0,64.0,42.0,54.0,53.0,51.0,48.0,45.0,26.0,30.0,51.0,52.0,37.0,43.0,30.0,60.0,44.0,30.0,51.0,41.0,46.0,38.0,46.0,36.0,37.0,26.0,31.0,65.0,34.0,32.0,26.0,62.0,26.0,59.0,33.0,65.0,34.0,54.0,47.0,36.0,64.0,59.0,49.0,56.0,39.0,47.0,64.0,59.0,62.0,58.0,38.0,45.0,29.0,26.0,55.0,30.0,25.0,50.0,55.0,49.0,32.0,30.0,54.0,38.0,53.0,54.0,27.0,58.0,36.0,38.0,49.0,45.0,51.0,38.0,44.0,46.0,40.0,53.0,48.0,42.0,36.0,29.0,31.0,28.0,28.0,31.0,43.0,36.0,47.0,30.0,55.0,60.0,59.0,41.0,52.0,58.0,48.0,48.0,43.0,41.0,50.0,49.0,26.0,26.0,54.0,31.0,47.0,34.0,42.0,53.0,30.0,55.0,33.0,53.0,36.0,38.0,29.0,25.0,47.0,61.0,39.0,33.0,35.0,36.0,55.0,48.0,58.0,51.0,32.0,59.0,41.0,47.0,44.0,56.0,61.0,40.0,48.0,58.0,61.0,57.0,32.0,36.0,34.0,25.0,44.0,35.0,35.0,49.0,27.0,44.0,39.0,28.0,34.0,25.0,49.0,32.0,35.0,49.0,46.0,43.0,44.0,35.0,45.0,60.0,42.0,32.0,38.0,33.0,53.0,34.0,54.0,42.0,34.0,45.0,42.0,42.0,42.0,38.0,49.0,47.0,32.0,40.0,43.0,40.0,35.0,55.0,38.0,36.0,28.0,25.0,42.0,36.0,51.0,57.0,56.0,35.0,39.0,48.0,31.0,55.0,27.0,27.0,42.0,39.0,33.0,32.0,45.0,46.0,28.0,53.0,30.0,42.0,45.0,56.0,47.0,37.0,44.0,26.0,29.0,37.0,53.0,59.0,43.0,46.0,46.0,43.0,46.0,38.0,62.0,34.0,35.0,52.0,53.0,27.0,49.0,52.0,64.0,45.0,30.0,42.0,29.0,41.0,60.0,25.0,40.0,25.0,61.0,37.0,28.0,56.0,51.0,37.0,26.0,46.0,45.0,33.0,37.0,43.0,58.0,56.0,59.0,42.0,25.0,39.0,39.0,51.0,32.0,37.0,31.0,27.0,46.0,35.0,40.0,43.0,46.0,52.0,39.0,27.0,25.0,25.0,53.0,28.0,44.0,34.0,25.0,47.0,32.0,51.0,26.0,52.0,47.0,47.0,45.0,37.0,40.0,44.0,63.0,41.0,48.0,46.0,49.0,48.0,46.0,58.0,41.0,64.0,61.0,34.0,42.0,56.0,31.0,46.0,42.0,59.0,47.0,32.0,62.0,49.0,49.0,29.0,45.0,30.0,39.0,31.0,32.0,48.0,42.0,28.0,56.0,33.0,28.0,43.0,41.0,29.0,53.0,27.0,60.0,36.0,50.0,45.0,61.0,36.0,43.0,25.0,27.0,30.0,38.0,56.0,33.0,30.0,60.0,39.0,56.0,43.0,56.0,38.0,40.0,52.0,29.0,31.0,53.0,35.0,51.0,52.0,34.0,48.0,27.0,49.0,31.0,52.0,60.0,35.0,45.0,64.0,31.0,42.0,25.0,37.0,51.0,44.0,45.0,39.0,50.0,53.0,27.0,41.0,42.0,32.0,62.0,43.0,50.0,50.0,31.0,35.0,51.0,36.0,38.0,35.0,48.0,39.0,40.0,25.0,48.0,51.0,33.0,46.0,27.0,46.0,33.0,52.0,58.0,59.0,61.0,35.0,55.0,29.0,27.0,26.0,65.0,45.0,28.0,57.0,39.0,46.0,59.0,53.0,50.0,46.0,31.0,32.0,55.0,29.0,36.0,62.0,63.0,47.0,63.0,36.0,57.0,28.0,47.0,32.0,56.0,49.0,33.0,50.0,54.0,49.0,55.0,62.0,48.0,28.0,54.0,35.0,39.0,51.0,58.0,27.0,43.0,46.0,36.0,39.0,39.0,55.0,25.0,25.0,47.0,46.0,49.0,57.0,32.0,36.0,47.0,55.0,36.0,25.0,32.0,51.0,33.0,27.0,39.0,47.0,37.0,59.0,30.0,33.0,47.0,54.0,44.0,48.0,60.0,57.0,36.0,33.0,49.0,44.0,42.0,31.0,55.0,45.0,37.0,55.0,34.0,45.0,58.0,29.0,55.0,32.0,42.0,44.0,58.0,53.0,40.0,61.0,30.0,36.0,49.0,54.0,44.0,39.0,45.0,50.0,50.0,39.0,31.0,61.0,36.0,61.0,32.0,43.0,51.0,44.0,33.0,58.0,35.0,43.0,56.0,59.0,25.0,55.0,45.0,47.0,32.0,53.0,33.0,35.0,53.0,51.0,25.0,57.0,54.0,65.0,26.0,28.0,56.0,32.0,62.0,27.0,33.0,45.0,36.0,33.0,37.0,37.0,31.0,34.0,28.0,56.0,33.0,39.0,55.0,30.0,48.0,57.0,54.0,46.0,30.0,28.0,47.0,50.0,26.0,42.0,35.0,31.0,64.0,54.0,44.0,54.0,43.0,48.0,57.0,49.0,49.0,38.0,28.0,63.0,56.0,49.0,25.0,49.0,28.0,29.0,35.0,51.0,47.0,50.0,56.0,63.0,52.0,32.0,48.0,36.0,30.0,53.0,56.0,61.0,33.0,42.0,46.0,61.0,33.0,26.0,43.0,43.0,61.0,62.0,49.0,38.0,38.0,45.0,31.0,46.0,50.0,32.0,45.0,31.0,41.0,57.0,58.0,41.0,48.0,56.0,64.0,36.0,60.0,44.0,44.0,56.0,43.0,39.0,49.0,47.0,52.0,37.0,42.0,47.0,31.0,54.0,37.0,59.0,54.0,51.0,37.0,42.0,41.0,63.0,25.0,32.0,51.0,37.0,58.0,28.0,47.0,25.0,26.0,53.0,60.0,25.0,51.0,47.0,61.0,56.0,49.0,25.0,39.0,53.0,40.0,32.0,38.0,47.0,29.0,55.0,27.0,36.0,47.0,44.0,55.0,32.0,55.0,52.0,52.0,51.0,57.0,39.0,37.0,26.0,44.0,55.0,34.0,45.0,46.0,54.0,50.0,30.0,36.0,45.0,55.0,48.0,60.0,61.0,42.0,38.0,35.0,26.0,44.0,44.0,56.0,44.0,57.0,49.0,57.0,50.0,32.0,29.0,35.0,47.0,55.0,35.0,57.0,42.0,31.0,27.0,40.0,57.0,26.0,35.0,45.0,44.0,33.0,38.0,37.0,31.0,38.0,37.0,49.0,38.0,35.0,37.0,39.0,50.0,51.0,48.0,63.0,61.0,36.0,47.0,51.0,38.0,60.0,28.0,28.0,51.0,47.0,45.0,48.0,34.0,44.0,54.0,56.0,63.0,38.0,48.0,43.0,44.0,50.0,43.0,32.0,44.0,46.0,37.0,44.0,49.0,51.0,50.0,25.0,42.0,48.0,45.0,54.0,39.0,36.0,55.0,61.0],"education":[16.0,16.0,16.0,14.0,18.0,16.0,18.0,12.0,16.0,14.0,13.0,16.0,16.0,12.0,12.0,20.0,16.0,12.0,12.0,12.0,16.0,12.0,16.0,13.0,14.0,12.0,13.0,18.0,12.0,12.0,16.0,14.0,13.0,12.0,10.0,13.0,13.0,14.0,16.0,16.0,12.0,16.0,16.0,8.0,16.0,12.0,12.0,13.0,16.0,18.0,12.0,12.0,12.0,12.0,13.0,18.0,12.0,12.0,9.0,18.0,12.0,13.0,13.0,12.0,16.0,12.0,0.0,13.0,12.0,16.0,12.0,16.0,18.0,13.0,16.0,13.0,13.0,12.0,16.0,12.0,14.0,16.0,12.0,12.0,13.0,12.0,16.0,16.0,16.0,20.0,12.0,13.0,16.0,18.0,12.0,6.0,0.0,16.0,12.0,16.0,14.0,16.0,12.0,14.0,14.0,13.0,14.0,13.0,12.0,13.0,18.0,16.0,13.0,18.0,12.0,12.0,14.0,12.0,14.0,6.0,12.0,16.0,12.0,0.0,14.0,12.0,13.0,14.0,13.0,18.0,16.0,16.0,18.0,16.0,12.0,12.0,18.0,12.0,16.0,12.0,13.0,12.0,18.0,18.0,18.0,16.0,6.0,12.0,11.0,13.0,13.0,14.0,13.0,13.0,16.0,12.0,20.0,16.0,12.0,12.0,18.0,12.0,18.0,18.0,16.0,18.0,16.0,12.0,18.0,16.0,16.0,18.0,16.0,12.0,16.0,16.0,14.0,18.0,12.0,16.0,14.0,13.0,18.0,13.0,18.0,12.0,16.0,12.0,12.0,16.0,12.0,14.0,16.0,16.0,16.0,12.0,16.0,12.0,12.0,14.0,12.0,20.0,12.0,10.0,12.0,16.0,12.0,12.0,12.0,12.0,12.0,16.0,13.0,12.0,16.0,14.0,13.0,12.0,12.0,14.0,14.0,13.0,12.0,12.0,7.0,14.0,12.0,18.0,13.0,16.0,9.0,12.0,14.0,12.0,18.0,12.0,16.0,16.0,13.0,12.0,12.0,13.0,16.0,16.0,12.0,12.0,16.0,14.0,16.0,12.0,16.0,12.0,13.0,12.0,14.0,13.0,13.0,13.0,12.0,12.0,16.0,12.0,16.0,12.0,12.0,12.0,12.0,13.0,12.0,13.0,18.0,6.0,12.0,18.0,13.0,12.0,9.0,14.0,12.0,18.0,12.0,16.0,16.0,12.0,18.0,18.0,16.0,16.0,16.0,20.0,18.0,13.0,10.0,12.0,12.0,13.0,18.0,12.0,18.0,13.0,12.0,12.0,14.0,16.0,12.0,12.0,14.0,16.0,13.0,13.0,20.0,12.0,16.0,16.0,4.0,16.0,16.0,16.0,12.0,18.0,12.0,14.0,13.0,12.0,13.0,18.0,12.0,13.0,16.0,16.0,12.0,14.0,14.0,14.0,12.0,13.0,13.0,12.0,12.0,12.0,14.0,12.0,16.0,11.0,14.0,12.0,16.0,12.0,12.0,12.0,12.0,16.0,12.0,13.0,12.0,12.0,14.0,12.0,16.0,16.0,13.0,12.0,18.0,13.0,16.0,20.0,12.0,12.0,18.0,0.0,12.0,18.0,12.0,16.0,13.0,16.0,16.0,13.0,12.0,18.0,12.0,18.0,12.0,13.0,13.0,16.0,12.0,16.0,12.0,16.0,16.0,14.0,18.0,18.0,16.0,12.0,16.0,18.0,16.0,16.0,16.0,16.0,20.0,18.0,16.0,13.0,16.0,16.0,18.0,13.0,18.0,16.0,16.0,13.0,16.0,16.0,18.0,13.0,12.0,12.0,14.0,14.0,16.0,12.0,12.0,16.0,14.0,14.0,13.0,14.0,0.0,14.0,18.0,16.0,13.0,12.0,12.0,12.0,14.0,20.0,12.0,14.0,16.0,14.0,18.0,12.0,16.0,12.0,14.0,13.0,12.0,12.0,13.0,13.0,12.0,12.0,13.0,12.0,16.0,11.0,16.0,18.0,12.0,16.0,14.0,16.0,16.0,16.0,16.0,16.0,13.0,12.0,16.0,10.0,12.0,13.0,12.0,13.0,12.0,12.0,10.0,16.0,12.0,12.0,16.0,16.0,13.0,13.0,16.0,11.0,12.0,14.0,18.0,18.0,13.0,16.0,12.0,16.0,16.0,12.0,14.0,12.0,20.0,12.0,12.0,14.0,18.0,13.0,13.0,16.0,14.0,12.0,13.0,16.0,12.0,12.0,18.0,0.0,12.0,16.0,16.0,12.0,16.0,14.0,12.0,12.0,16.0,16.0,13.0,13.0,12.0,12.0,16.0,14.0,16.0,12.0,12.0,14.0,13.0,18.0,18.0,13.0,20.0,12.0,0.0,12.0,18.0,13.0,13.0,12.0,18.0,12.0,13.0,18.0,12.0,18.0,18.0,1.0,13.0,13.0,12.0,18.0,14.0,12.0,13.0,12.0,12.0,12.0,13.0,12.0,14.0,12.0,18.0,11.0,16.0,12.0,18.0,13.0,12.0,20.0,13.0,12.0,12.0,16.0,13.0,13.0,0.0,18.0,18.0,18.0,13.0,12.0,13.0,13.0,13.0,13.0,18.0,18.0,12.0,20.0,16.0,12.0,16.0,9.0,18.0,16.0,12.0,13.0,16.0,14.0,12.0,13.0,16.0,14.0,12.0,13.0,18.0,12.0,12.0,12.0,13.0,18.0,16.0,18.0,12.0,14.0,10.0,12.0,16.0,18.0,14.0,16.0,12.0,14.0,16.0,9.0,18.0,12.0,18.0,13.0,13.0,14.0,14.0,12.0,18.0,16.0,14.0,18.0,18.0,13.0,16.0,16.0,16.0,18.0,14.0,16.0,16.0,11.0,12.0,12.0,12.0,12.0,12.0,12.0,12.0,12.0,16.0,12.0,16.0,12.0,18.0,12.0,12.0,12.0,12.0,16.0,16.0,16.0,12.0,16.0,18.0,16.0,13.0,9.0,12.0,16.0,14.0,12.0,16.0,14.0,12.0,13.0,13.0,13.0,10.0,14.0,16.0,18.0,16.0,13.0,11.0,12.0,13.0,14.0,16.0,18.0,14.0,16.0,12.0,13.0,12.0,16.0,16.0,14.0,13.0,12.0,14.0,13.0,16.0,12.0,18.0,12.0,13.0,12.0,18.0,13.0,14.0,11.0,16.0,18.0,13.0,11.0,18.0,12.0,12.0,13.0,18.0,12.0,9.0,12.0,16.0,16.0,13.0,14.0,13.0,12.0,16.0,13.0,10.0,18.0,12.0,0.0,12.0,16.0,18.0,14.0,16.0,9.0,20.0,12.0,18.0,13.0,16.0,12.0,12.0,12.0,9.0,12.0,14.0,14.0,12.0,16.0,16.0,16.0,9.0,6.0,16.0,10.0,12.0,9.0,13.0,18.0,6.0,13.0,18.0,16.0,18.0,12.0,13.0,13.0,16.0,12.0,12.0,12.0,16.0,16.0,18.0,16.0,14.0,12.0,12.0,12.0,16.0,16.0,12.0,16.0,14.0,12.0,12.0,14.0,18.0,16.0,12.0,13.0,12.0,13.0,14.0,16.0,12.0,16.0,12.0,18.0,12.0,14.0,13.0,13.0,13.0,13.0,12.0,12.0,12.0,12.0,12.0,16.0,18.0,18.0,12.0,12.0,14.0,16.0,14.0,12.0,12.0,13.0,13.0,12.0,13.0,16.0,12.0,12.0,13.0,14.0,12.0,12.0,16.0,8.0,12.0,14.0,16.0,13.0,18.0,12.0,12.0,18.0,14.0,12.0,18.0,13.0,16.0,14.0,14.0,16.0],"earnings":[120000.0,23000.0,20000.0,55000.0,43200.0,110000.0,44000.0,120000.0,65000.0,7200.0,20000.0,120000.0,65000.0,38000.0,65000.0,115000.0,48000.0,45000.0,130000.0,36000.0,52000.0,36400.0,125000.0,36000.0,24000.0,48000.0,30000.0,89000.0,38000.0,12000.0,85000.0,50000.0,30500.0,50000.0,219000.0,135000.0,15000.0,30000.0,30800.0,36000.0,24000.0,318000.0,35000.0,25000.0,44900.0,18000.0,37000.0,19000.0,100000.0,65000.0,25000.0,44200.0,110000.0,70000.0,50000.0,70000.0,36000.0,50000.0,23000.0,25000.0,79000.0,60000.0,32000.0,40000.0,75000.0,52000.0,48500.0,6700.0,31200.0,55000.0,48000.0,110000.0,48000.0,45000.0,50000.0,60000.0,80000.0,20000.0,26200.0,130000.0,26600.0,63000.0,20000.0,20000.0,75000.0,60000.0,80000.0,180000.0,80000.0,105000.0,65000.0,117000.0,45000.0,53000.0,127000.0,20000.0,4000.0,42000.0,40000.0,55000.0,100000.0,63000.0,37000.0,50000.0,6000.0,8400.0,45000.0,75000.0,12000.0,72000.0,285000.0,100000.0,105000.0,90000.0,51000.0,8500.0,100000.0,28000.0,92000.0,18400.0,17000.0,50000.0,50000.0,10000.0,40000.0,26000.0,120000.0,62000.0,72000.0,80000.0,85000.0,85000.0,103000.0,90000.0,30000.0,35000.0,103000.0,12000.0,74000.0,39000.0,65000.0,50000.0,93000.0,222000.0,70000.0,98000.0,32000.0,26000.0,30000.0,45000.0,50000.0,23400.0,45000.0,55000.0,62000.0,50000.0,93000.0,41800.0,26400.0,44000.0,30000.0,45000.0,150000.0,375000.0,31600.0,130000.0,60000.0,38000.0,140000.0,72000.0,36800.0,45000.0,55000.0,65000.0,52000.0,50000.0,42000.0,85000.0,55000.0,50000.0,17000.0,20000.0,175000.0,75000.0,40000.0,29000.0,50000.0,24700.0,24000.0,60000.0,40000.0,45000.0,72000.0,50000.0,18000.0,38000.0,25000.0,24800.0,15000.0,40000.0,26100.0,83000.0,22000.0,35000.0,18000.0,90000.0,24200.0,95000.0,5400.0,35000.0,35000.0,35000.0,30000.0,35600.0,55000.0,4300.0,30000.0,5000.0,23000.0,10000.0,38000.0,106000.0,40600.0,50000.0,20000.0,42000.0,59000.0,120000.0,48000.0,52000.0,25000.0,23000.0,43000.0,31500.0,70000.0,30000.0,34000.0,20000.0,33000.0,48000.0,42000.0,15600.0,40000.0,30300.0,31000.0,13000.0,47100.0,65000.0,17200.0,31200.0,40000.0,48700.0,17000.0,40000.0,32000.0,38000.0,22000.0,39800.0,62000.0,52000.0,110000.0,20000.0,58000.0,36000.0,30000.0,30000.0,56000.0,12000.0,38000.0,50000.0,43000.0,30000.0,35000.0,47000.0,42000.0,70000.0,15000.0,30000.0,21000.0,40000.0,30000.0,60000.0,28000.0,23100.0,120000.0,40000.0,40000.0,82000.0,115000.0,60000.0,71400.0,376000.0,10500.0,50000.0,55000.0,30600.0,31000.0,64000.0,55000.0,34000.0,100000.0,35500.0,70000.0,61000.0,46000.0,30700.0,74000.0,22000.0,60000.0,29000.0,80000.0,60000.0,49000.0,296000.0,30000.0,20200.0,52000.0,50000.0,50000.0,130000.0,35000.0,39300.0,50000.0,35000.0,25000.0,60000.0,63000.0,36000.0,100000.0,62000.0,18000.0,30000.0,32000.0,28000.0,30000.0,17000.0,25000.0,24000.0,28000.0,30600.0,45000.0,40000.0,53000.0,25000.0,21000.0,20000.0,55000.0,13000.0,10000.0,26000.0,29000.0,44000.0,27300.0,10000.0,22000.0,40500.0,28000.0,50000.0,53000.0,28000.0,52000.0,50000.0,85000.0,54000.0,103000.0,115000.0,75000.0,84000.0,60000.0,40000.0,10000.0,44000.0,35000.0,58000.0,75000.0,42000.0,46000.0,60000.0,30000.0,65000.0,51000.0,140000.0,42000.0,52000.0,50000.0,50000.0,40000.0,115000.0,32000.0,54000.0,39000.0,52000.0,48000.0,45000.0,59000.0,14700.0,55000.0,125000.0,75000.0,60000.0,40000.0,225000.0,48000.0,120000.0,125000.0,46900.0,91000.0,50000.0,35000.0,30000.0,57000.0,90000.0,27000.0,23500.0,42400.0,65000.0,68000.0,25000.0,40000.0,32000.0,42000.0,120000.0,80000.0,100000.0,18000.0,294000.0,40000.0,54000.0,20600.0,36000.0,23000.0,55000.0,81000.0,70000.0,37000.0,19000.0,38200.0,40000.0,50000.0,150000.0,98000.0,40000.0,62000.0,24000.0,42000.0,50000.0,50000.0,20000.0,50000.0,21000.0,40000.0,60000.0,18000.0,25000.0,27000.0,34000.0,24000.0,37000.0,41700.0,36400.0,79000.0,6500.0,242000.0,17000.0,35000.0,40000.0,41000.0,73000.0,60000.0,77000.0,15000.0,32000.0,87000.0,32000.0,22000.0,27000.0,45000.0,28000.0,45000.0,38000.0,19700.0,75000.0,41000.0,25000.0,10000.0,90000.0,41000.0,25000.0,87000.0,24000.0,47700.0,18000.0,230000.0,24000.0,22000.0,80000.0,38000.0,116000.0,90000.0,50000.0,50000.0,70000.0,60000.0,70000.0,30000.0,60000.0,85000.0,45000.0,45000.0,118000.0,52800.0,36000.0,27100.0,52000.0,17000.0,30000.0,103000.0,52000.0,37000.0,80000.0,498000.0,29000.0,85000.0,36000.0,41000.0,12000.0,80000.0,48000.0,40000.0,60000.0,40000.0,25000.0,125000.0,45000.0,50000.0,60000.0,60000.0,50000.0,17700.0,185000.0,60000.0,34000.0,120000.0,24000.0,40000.0,27000.0,55000.0,38000.0,15600.0,35000.0,60000.0,12000.0,81000.0,65000.0,80000.0,110000.0,498000.0,22000.0,55000.0,21900.0,20000.0,52000.0,31200.0,14100.0,7500.0,41000.0,49500.0,75000.0,22300.0,20000.0,90000.0,55000.0,42500.0,34000.0,20000.0,203000.0,51000.0,65000.0,20000.0,130000.0,21000.0,30000.0,25000.0,36800.0,41000.0,40000.0,27000.0,65000.0,40000.0,53000.0,33600.0,50000.0,19000.0,8400.0,38000.0,59000.0,63000.0,40000.0,36400.0,60000.0,65000.0,24500.0,62000.0,22000.0,80000.0,61000.0,39000.0,35000.0,54000.0,35000.0,49600.0,35000.0,60000.0,50000.0,12000.0,57000.0,56000.0,28000.0,53000.0,29000.0,50000.0,41000.0,55000.0,61000.0,110000.0,72000.0,20000.0,11000.0,74000.0,65000.0,84000.0,60000.0,20000.0,36000.0,62000.0,34000.0,100000.0,85000.0,80500.0,28600.0,30000.0,80000.0,40000.0,20000.0,133000.0,48000.0,25000.0,301000.0,72000.0,15000.0,21000.0,52000.0,29000.0,95000.0,30000.0,91000.0,76000.0,32200.0,53000.0,70000.0,24000.0,110000.0,24000.0,55000.0,53000.0,22000.0,125000.0,18000.0,24000.0,24800.0,55000.0,42000.0,64000.0,50000.0,29100.0,70000.0,99000.0,20000.0,35000.0,46000.0,168000.0,55000.0,14400.0,22500.0,30000.0,84000.0,149000.0,25000.0,14600.0,48000.0,50000.0,24000.0,62000.0,34700.0,35000.0,37000.0,41000.0,56000.0,125000.0,50000.0,22000.0,32000.0,50000.0,27000.0,60000.0,281000.0,60000.0,102000.0,42000.0,26400.0,130000.0,76000.0,32000.0,118000.0,10000.0,50000.0,40000.0,48000.0,30000.0,24000.0,40000.0,90000.0,50000.0,10000.0,160000.0,95000.0,98000.0,16000.0,49200.0,52000.0,36000.0,17700.0,52000.0,12000.0,35500.0,40000.0,63000.0,80000.0,9000.0,15700.0,30000.0,100000.0,20000.0,28000.0,56000.0,30000.0,70000.0,16000.0,23000.0,24900.0,28000.0,16000.0,42000.0,43000.0,25000.0,40000.0,100000.0,60000.0,60000.0,31200.0,165000.0,30000.0,58000.0,20000.0,32000.0,33000.0,14000.0,47000.0,37000.0,21000.0,28000.0,60000.0,65000.0,68000.0,25000.0,40000.0,36800.0,23000.0,40000.0,30000.0,90000.0,74000.0,17000.0,24000.0,140000.0,60000.0,52000.0,322000.0,40000.0,45000.0,100000.0,20000.0,23000.0,100000.0,38000.0,46000.0,174001.0,26600.0,28500.0,7500.0,80000.0,32100.0,20000.0,42000.0,50000.0,504000.0,30000.0,80000.0,45000.0,34200.0,45000.0,110000.0,170000.0,45000.0,55000.0,25000.0,36000.0,39700.0,113000.0,25000.0,40000.0,120000.0,22700.0,40000.0,40000.0,28000.0,30000.0,29000.0,60000.0,56000.0,23000.0,80000.0,12800.0,316000.0,85000.0,180000.0,10000.0,50000.0,55000.0,48000.0,64000.0,126000.0,20000.0,24000.0,26000.0,30000.0,38000.0,63000.0,30000.0,33000.0,150000.0,27000.0,58000.0,24000.0,129000.0,18000.0,65000.0,19100.0,50000.0,78000.0,60000.0,40000.0,58000.0,49000.0,65000.0,44200.0,84000.0,89000.0,45000.0,95000.0,42000.0,19000.0],"agebyeduc":[720.0,976.0,928.0,812.0,612.0,944.0,450.0,600.0,432.0,392.0,572.0,560.0,448.0,588.0,600.0,1120.0,416.0,564.0,600.0,600.0,576.0,660.0,800.0,494.0,364.0,528.0,637.0,918.0,408.0,672.0,704.0,616.0,637.0,588.0,430.0,676.0,338.0,504.0,592.0,896.0,336.0,544.0,832.0,400.0,720.0,540.0,360.0,364.0,640.0,630.0,360.0,624.0,504.0,732.0,780.0,720.0,360.0,564.0,351.0,900.0,732.0,637.0,741.0,300.0,656.0,384.0,0.0,728.0,624.0,576.0,768.0,672.0,972.0,689.0,816.0,624.0,585.0,312.0,480.0,612.0,728.0,592.0,516.0,360.0,780.0,528.0,480.0,816.0,656.0,920.0,456.0,598.0,576.0,666.0,312.0,186.0,0.0,544.0,384.0,416.0,868.0,416.0,708.0,462.0,910.0,442.0,756.0,611.0,432.0,832.0,1062.0,784.0,728.0,702.0,564.0,768.0,826.0,744.0,812.0,228.0,540.0,464.0,312.0,0.0,420.0,300.0,650.0,770.0,637.0,576.0,480.0,864.0,684.0,848.0,648.0,324.0,1044.0,432.0,608.0,588.0,585.0,612.0,684.0,792.0,828.0,640.0,318.0,576.0,462.0,468.0,377.0,434.0,364.0,364.0,496.0,516.0,720.0,752.0,360.0,660.0,1080.0,708.0,738.0,936.0,928.0,864.0,768.0,516.0,738.0,800.0,784.0,468.0,416.0,648.0,496.0,752.0,476.0,756.0,636.0,480.0,770.0,429.0,954.0,468.0,684.0,348.0,400.0,564.0,732.0,624.0,396.0,490.0,576.0,880.0,768.0,696.0,816.0,384.0,708.0,574.0,564.0,880.0,672.0,610.0,480.0,768.0,696.0,732.0,684.0,384.0,432.0,544.0,325.0,528.0,560.0,490.0,637.0,324.0,528.0,546.0,392.0,442.0,300.0,588.0,224.0,490.0,588.0,828.0,559.0,704.0,315.0,540.0,840.0,504.0,576.0,456.0,528.0,848.0,442.0,648.0,504.0,442.0,720.0,672.0,504.0,504.0,608.0,686.0,752.0,384.0,640.0,516.0,520.0,420.0,770.0,494.0,468.0,364.0,300.0,504.0,576.0,612.0,912.0,672.0,420.0,468.0,576.0,403.0,660.0,351.0,486.0,252.0,468.0,594.0,416.0,540.0,414.0,392.0,636.0,540.0,504.0,720.0,896.0,564.0,666.0,792.0,416.0,464.0,592.0,1060.0,1062.0,559.0,460.0,552.0,516.0,598.0,684.0,744.0,612.0,455.0,624.0,636.0,378.0,784.0,624.0,768.0,630.0,480.0,546.0,377.0,820.0,720.0,400.0,640.0,100.0,976.0,592.0,448.0,672.0,918.0,444.0,364.0,598.0,540.0,429.0,666.0,516.0,754.0,896.0,944.0,504.0,350.0,546.0,546.0,612.0,416.0,481.0,372.0,324.0,552.0,490.0,480.0,688.0,506.0,728.0,468.0,432.0,300.0,300.0,636.0,336.0,704.0,408.0,325.0,564.0,384.0,714.0,312.0,832.0,752.0,611.0,540.0,666.0,520.0,704.0,1260.0,492.0,576.0,828.0,0.0,576.0,828.0,696.0,656.0,832.0,976.0,544.0,546.0,672.0,558.0,552.0,756.0,708.0,611.0,416.0,992.0,588.0,784.0,348.0,720.0,480.0,546.0,558.0,576.0,768.0,504.0,448.0,1008.0,528.0,448.0,688.0,656.0,580.0,954.0,432.0,780.0,576.0,800.0,810.0,793.0,648.0,688.0,400.0,351.0,480.0,608.0,1008.0,429.0,360.0,720.0,546.0,784.0,688.0,672.0,456.0,640.0,728.0,406.0,403.0,742.0,0.0,714.0,936.0,544.0,624.0,324.0,588.0,372.0,728.0,1200.0,420.0,630.0,1024.0,434.0,756.0,300.0,592.0,612.0,616.0,585.0,468.0,600.0,689.0,351.0,492.0,504.0,416.0,744.0,688.0,550.0,800.0,558.0,420.0,816.0,504.0,608.0,560.0,768.0,624.0,640.0,325.0,576.0,816.0,330.0,552.0,351.0,552.0,429.0,624.0,696.0,590.0,976.0,420.0,660.0,464.0,432.0,338.0,845.0,720.0,308.0,684.0,546.0,828.0,1062.0,689.0,800.0,552.0,496.0,512.0,660.0,406.0,432.0,1240.0,756.0,564.0,882.0,648.0,741.0,364.0,752.0,448.0,672.0,637.0,528.0,600.0,648.0,882.0,0.0,744.0,768.0,448.0,648.0,560.0,546.0,612.0,696.0,432.0,688.0,598.0,468.0,468.0,468.0,880.0,350.0,400.0,564.0,552.0,686.0,741.0,576.0,648.0,611.0,1100.0,432.0,0.0,384.0,918.0,429.0,351.0,468.0,846.0,444.0,767.0,540.0,396.0,846.0,972.0,44.0,624.0,780.0,684.0,648.0,462.0,588.0,572.0,504.0,372.0,660.0,585.0,444.0,770.0,408.0,810.0,638.0,464.0,660.0,576.0,546.0,528.0,1160.0,689.0,480.0,732.0,480.0,468.0,637.0,0.0,792.0,702.0,810.0,650.0,600.0,507.0,403.0,793.0,468.0,1098.0,576.0,516.0,1020.0,704.0,396.0,928.0,315.0,774.0,896.0,708.0,325.0,880.0,630.0,564.0,416.0,848.0,462.0,420.0,689.0,918.0,300.0,684.0,648.0,845.0,468.0,448.0,1008.0,384.0,868.0,270.0,396.0,720.0,648.0,462.0,592.0,444.0,434.0,544.0,252.0,1008.0,396.0,702.0,715.0,390.0,672.0,798.0,648.0,828.0,480.0,392.0,846.0,900.0,338.0,672.0,560.0,496.0,1152.0,756.0,704.0,864.0,473.0,576.0,684.0,588.0,588.0,456.0,336.0,756.0,672.0,784.0,300.0,784.0,336.0,522.0,420.0,612.0,564.0,600.0,896.0,1008.0,832.0,384.0,768.0,648.0,480.0,689.0,504.0,732.0,528.0,588.0,552.0,976.0,462.0,312.0,559.0,559.0,793.0,620.0,686.0,608.0,684.0,720.0,403.0,506.0,600.0,416.0,630.0,496.0,738.0,798.0,928.0,492.0,624.0,672.0,1024.0,576.0,840.0,572.0,528.0,784.0,559.0,624.0,588.0,846.0,624.0,481.0,504.0,846.0,403.0,756.0,407.0,944.0,972.0,663.0,407.0,756.0,492.0,756.0,325.0,576.0,612.0,333.0,696.0,448.0,752.0,325.0,364.0,689.0,720.0,400.0,663.0,470.0,1098.0,672.0,0.0,300.0,624.0,954.0,560.0,512.0,342.0,940.0,348.0,990.0,351.0,576.0,564.0,528.0,660.0,288.0,660.0,728.0,728.0,612.0,912.0,624.0,592.0,234.0,264.0,880.0,340.0,540.0,414.0,702.0,900.0,180.0,468.0,810.0,880.0,864.0,720.0,793.0,546.0,608.0,420.0,312.0,528.0,704.0,896.0,792.0,912.0,686.0,684.0,600.0,384.0,464.0,560.0,564.0,880.0,490.0,684.0,504.0,434.0,486.0,640.0,684.0,338.0,420.0,585.0,616.0,528.0,456.0,592.0,372.0,684.0,444.0,686.0,494.0,455.0,481.0,507.0,600.0,612.0,576.0,756.0,732.0,576.0,846.0,918.0,456.0,720.0,392.0,448.0,714.0,564.0,540.0,624.0,442.0,528.0,702.0,896.0,756.0,456.0,624.0,602.0,528.0,600.0,688.0,256.0,528.0,644.0,592.0,572.0,882.0,612.0,600.0,450.0,588.0,576.0,810.0,702.0,624.0,504.0,770.0,976.0],"baseModel":{"params":{"Intercept":-46875.3605,"age":524.9953,"education":5811.3673},"se_standard":{"Intercept":10663.8935,"age":154.1036,"education":570.4358},"se_robust":{"Intercept":11306.33,"age":151.3874,"education":641.5329},"R2":0.115},"collinearModel":{"params":{"Intercept":-29089.3822,"age":127.4922,"education":4514.9867,"agebyeduc":29.0392},"se_standard":{"Intercept":33336.4986,"age":722.5051,"education":2371.7244,"agebyeduc":51.5663},"se_robust":{"Intercept":30958.5081,"age":719.2798,"education":2401.5172,"agebyeduc":56.052},"R2":0.1153},"vifBase":{"age":1.0,"education":1.0},"vifCollinear":{"age":22.0,"education":17.3,"agebyeduc":36.88},"correlation":{"vars":["age","education","agebyeduc"],"matrix":[[1.0,-0.0382,0.7291],[-0.0382,1.0,0.636],[0.7291,0.636,1.0]]},"seCompare":{"Intercept":{"standard":10663.89,"robust":11306.33,"ratio":1.0602},"age":{"standard":154.1,"robust":151.39,"ratio":0.9824},"education":{"standard":570.44,"robust":641.53,"ratio":1.1246}},"yhat":[69731.31,78131.23,76556.24,64933.51,75579.09,77081.24,70854.13,49110.81,60281.39,49183.65,51772.21,64481.35,60806.39,48585.82,49110.81,98751.72,59756.39,47535.83,49110.81,49110.81,65006.35,51735.79,72356.28,48622.24,48133.66,45960.84,54397.19,84504.01,40710.89,52260.78,69206.31,57583.58,54397.19,48585.82,33813.11,55972.17,42322.29,53383.61,65531.34,75506.25,37560.92,63956.36,73406.27,25865.34,69731.31,46485.84,38610.91,43372.28,67106.33,76104.09,38610.91,50160.8,44910.85,54885.76,60172.13,78729.06,38610.91,47535.83,25901.76,83979.02,54885.76,54397.19,58597.15,35985.93,67631.32,39660.9,-14325.65,58072.15,50160.8,65006.35,56460.75,68156.32,86079.0,56497.17,72881.28,53872.19,52297.2,36510.93,61856.38,49635.81,61783.54,65531.34,45435.85,38610.91,60172.13,45960.84,61856.38,72881.28,67631.32,93501.77,42810.87,52822.2,65006.35,77154.08,36510.93,4267.7,-12750.67,63956.36,39660.9,59756.39,67033.49,59756.39,53835.77,51808.63,68608.48,46522.26,62833.53,53347.19,41760.88,62272.11,88703.97,71831.29,58072.15,78204.07,47535.83,56460.75,65458.51,55410.76,64933.51,7942.67,46485.84,61331.38,36510.93,-18000.62,50233.64,35985.93,54922.18,63358.52,54397.19,74529.1,61856.38,74456.26,77679.07,73931.27,51210.79,37035.92,88178.98,41760.88,66056.34,48585.82,52297.2,49635.81,77679.07,80829.05,81879.04,67106.33,15817.6,48060.82,39099.48,47572.25,43897.28,50758.64,43372.28,43372.28,62381.37,45435.85,88251.82,70781.3,38610.91,51735.79,89228.97,53835.77,79254.06,85029.01,76556.24,82929.03,71306.29,45435.85,79254.06,72356.28,71831.29,71379.13,59756.39,51210.79,62381.37,70781.3,52333.62,79779.05,50685.8,61856.38,63358.52,45997.26,85554.0,47572.25,77679.07,38085.91,59231.4,47535.83,54885.76,66581.33,40185.89,52858.62,65006.35,74981.26,71306.29,53310.78,72881.28,39660.9,53835.77,56008.59,47535.83,92451.78,52260.78,43263.03,43860.86,71306.29,53310.78,54885.76,52785.78,39660.9,41760.88,63956.36,41797.3,45960.84,64481.35,52858.62,54397.19,37035.92,45960.84,54958.6,49183.65,46522.26,35985.93,48585.82,10604.06,52858.62,48585.82,81879.04,51247.21,69206.31,23801.78,46485.84,65983.5,44910.85,74529.1,42810.87,63431.36,73931.27,46522.26,51210.79,44910.85,46522.26,69731.31,68156.32,44910.85,44910.85,66056.34,60208.55,70781.3,39660.9,67106.33,45435.85,49672.23,41235.88,63358.52,48622.24,47572.25,43372.28,35985.93,44910.85,65006.35,49635.81,76031.25,52260.78,41235.88,43335.86,48060.82,44947.27,51735.79,42847.29,71904.12,10042.65,43335.86,75054.1,45472.26,46485.84,29576.73,49183.65,50685.8,73479.11,44910.85,69731.31,75506.25,47535.83,77154.08,80829.05,59756.39,61331.38,65531.34,97176.74,88703.97,51247.21,35388.1,47010.83,45435.85,52822.2,77679.07,55410.76,75579.09,47047.25,50160.8,50685.8,48658.66,71831.29,50160.8,56460.75,58108.57,61856.38,50722.22,43897.28,90876.79,54360.77,59231.4,67106.33,-10505.01,78131.23,65531.34,60806.39,52260.78,84504.01,42285.87,48133.66,52822.2,46485.84,45997.26,77154.08,45435.85,59122.14,75506.25,77081.24,44910.85,47608.67,54958.6,54958.6,49635.81,45472.26,48097.24,39135.9,37035.92,47010.83,52858.62,43860.86,68681.32,41199.46,61783.54,43335.86,60281.39,35985.93,35985.93,50685.8,37560.92,69206.31,40710.89,41797.3,47535.83,39660.9,61258.54,36510.93,73406.27,70781.3,53347.19,46485.84,77154.08,49672.23,69206.31,102426.69,44385.86,48060.82,81879.04,-21150.59,48060.82,81879.04,53310.78,67631.32,62272.11,78131.23,63956.36,50722.22,52260.78,74004.11,47010.83,79779.05,53835.77,53347.19,45472.26,78656.23,48585.82,71831.29,38085.91,69731.31,61856.38,54958.6,74004.11,74529.1,71306.29,44910.85,60806.39,87128.99,63431.36,60806.39,68681.32,67631.32,84576.85,85554.0,60281.39,60172.13,65006.35,72356.28,81354.04,60697.13,76629.08,68681.32,59231.4,42847.29,61856.38,66056.34,87128.99,45997.26,38610.91,54360.77,54958.6,63883.52,68681.32,52260.78,42810.87,67106.33,61783.54,49708.65,44947.27,62308.53,-28500.52,61258.54,85029.01,63956.36,53872.19,37035.92,48585.82,39135.9,61783.54,100851.7,41235.88,58108.57,79706.22,50758.64,79779.05,35985.93,65531.34,49635.81,57583.58,52297.2,43335.86,49110.81,56497.17,42847.29,44385.86,44910.85,45472.26,55410.76,68681.32,43299.45,72356.28,74004.11,41235.88,72881.28,53383.61,66056.34,64481.35,71306.29,66581.33,67106.33,41797.3,48060.82,72881.28,28563.16,47010.83,42847.29,47010.83,45997.26,50160.8,53310.78,42213.04,78131.23,41235.88,51735.79,61331.38,60281.39,42322.29,62797.11,69731.31,31749.55,52785.78,54958.6,81879.04,88703.97,56497.17,72356.28,47010.83,62381.37,62906.37,51735.79,49708.65,41760.88,101901.7,55935.75,47535.83,67558.49,76629.08,58597.15,43372.28,70781.3,51283.63,52260.78,54397.19,63431.36,49110.81,51210.79,83454.02,-18000.62,55410.76,71306.29,60806.39,51210.79,64481.35,54958.6,49635.81,53310.78,60281.39,68681.32,52822.2,47572.25,43335.86,43335.86,74981.26,47608.67,59231.4,47535.83,47010.83,60208.55,58597.15,74529.1,76629.08,53347.19,98226.73,41760.88,-33750.48,39660.9,84504.01,45997.26,42847.29,43335.86,82404.03,42285.87,59647.14,73479.11,40185.89,82404.03,86079.0,-17964.2,53872.19,60172.13,52785.78,76629.08,51808.63,48585.82,51772.21,44910.85,39135.9,51735.79,52297.2,42285.87,63358.52,40710.89,81354.04,47499.41,61331.38,51735.79,74529.1,50722.22,45960.84,99801.71,56497.17,43860.86,54885.76,61856.38,47572.25,54397.19,-18525.61,80829.05,78204.07,81354.04,54922.18,49110.81,49147.23,44947.27,60697.13,47572.25,89753.97,74529.1,45435.85,96126.75,69206.31,40185.89,76556.24,23801.78,80304.05,75506.25,53835.77,41797.3,74981.26,58108.57,47535.83,45472.26,73931.27,51808.63,41235.88,56497.17,84504.01,35985.93,52785.78,51210.79,62797.11,71379.13,60806.39,87128.99,39660.9,67033.49,25413.19,40185.89,69731.31,76629.08,51808.63,65531.34,42285.87,50758.64,63956.36,20126.81,87128.99,40185.89,78204.07,57547.16,44422.27,59683.56,64408.51,51210.79,81879.04,61856.38,49183.65,82404.03,83979.02,42322.29,68156.32,64481.35,62381.37,91328.95,62833.53,69206.31,74456.26,39624.48,48060.82,52785.78,48585.82,48585.82,42810.87,37560.92,55935.75,52260.78,71831.29,35985.93,71831.29,37560.92,72954.12,41235.88,49635.81,47535.83,49110.81,75506.25,79181.22,73406.27,39660.9,71306.29,76629.08,61856.38,56497.17,34826.68,54885.76,63431.36,56533.59,47010.83,78131.23,51808.63,36510.93,51247.21,51247.21,60697.13,43788.02,60208.55,66056.34,77679.07,69731.31,44947.27,41199.46,49110.81,45472.26,58108.57,62381.37,79254.06,64408.51,76556.24,44385.86,53872.19,52260.78,79706.22,65006.35,65983.5,51772.21,45960.84,63883.52,51247.21,66581.33,48585.82,82404.03,50160.8,48097.24,44910.85,82404.03,44947.27,62833.53,36474.51,77081.24,86079.0,55447.18,36474.51,79779.05,44385.86,55935.75,41797.3,74529.1,49635.81,24851.77,53310.78,60806.39,70781.3,41797.3,48133.66,56497.17,54360.77,59231.4,55447.18,35913.09,89753.97,52260.78,-21150.59,35985.93,66581.33,85554.0,55483.59,62906.37,25376.77,94026.77,38085.91,86603.99,42847.29,65006.35,47535.83,45960.84,51735.79,22226.8,51735.79,61783.54,61783.54,49635.81,76031.25,66581.33,65531.34,19076.82,11092.64,74981.26,29088.15,46485.84,29576.73,57022.16,83979.02,3742.7,47572.25,81354.04,74981.26,82929.03,54360.77,60697.13,50722.22,66056.34,41235.88,36510.93,45960.84,69206.31,75506.25,80829.05,76031.25,60208.55,52785.78,49110.81,39660.9,61331.38,64481.35,47535.83,74981.26,52858.62,52785.78,44910.85,50758.64,71904.12,67106.33,52785.78,42322.29,41235.88,52297.2,57583.58,63431.36,42810.87,65531.34,39135.9,77679.07,42285.87,60208.55,48622.24,47047.25,48097.24,49147.23,49110.81,49635.81,48060.82,55935.75,54885.76,65006.35,82404.03,84504.01,42810.87,54360.77,49183.65,60806.39,61258.54,47535.83,46485.84,53872.19,46522.26,45960.84,57022.16,75506.25,55935.75,42810.87,53872.19,57058.58,45960.84,49110.81,68681.32,16415.43,45960.84,58633.57,65531.34,51772.21,83454.02,49635.81,49110.81,70854.13,56533.59,48060.82,81354.04,57022.16,66581.33,53383.61,63358.52,78131.23],"residuals":[50268.69,-55131.23,-56556.24,-9933.51,-32379.09,32918.76,-26854.13,70889.19,4718.61,-41983.65,-31772.21,55518.65,4193.61,-10585.82,15889.19,16248.28,-11756.39,-2535.83,80889.19,-13110.81,-13006.35,-15335.79,52643.72,-12622.24,-24133.66,2039.16,-24397.19,4495.99,-2710.89,-40260.78,15793.69,-7583.58,-23897.19,1414.18,185186.89,79027.83,-27322.29,-23383.61,-34731.34,-39506.25,-13560.92,254043.64,-38406.27,-865.34,-24831.31,-28485.84,-1610.91,-24372.28,32893.67,-11104.09,-13610.91,-5960.8,65089.15,15114.24,-10172.13,-8729.06,-2610.91,2464.17,-2901.76,-58979.02,24114.24,5602.81,-26597.15,4014.07,7368.68,12339.1,62825.65,-51372.15,-18960.8,-10006.35,-8460.75,41843.68,-38079.0,-11497.17,-22881.28,6127.81,27702.8,-16510.93,-35656.38,80364.19,-35183.54,-2531.34,-25435.85,-18610.91,14827.87,14039.16,18143.62,107118.72,12368.68,11498.23,22189.13,64177.8,-20006.35,-24154.08,90489.07,15732.3,16750.67,-21956.36,339.1,-4756.39,32966.51,3243.61,-16835.77,-1808.63,-62608.48,-38122.26,-17833.53,21652.81,-29760.88,9727.89,196296.03,28168.71,46927.85,11795.93,3464.17,-47960.75,34541.49,-27410.76,27066.49,10457.33,-29485.84,-11331.38,13489.07,28000.62,-10233.64,-9985.93,65077.82,-1358.52,17602.81,5470.9,23143.62,10543.74,25320.93,16068.73,-21210.79,-2035.92,14821.02,-29760.88,7943.66,-9585.82,12702.8,364.19,15320.93,141170.95,-11879.04,30893.67,16182.4,-22060.82,-9099.48,-2572.25,6102.72,-27358.64,1627.72,11627.72,-381.37,4564.15,4748.18,-28981.3,-12210.91,-7735.79,-59228.97,-8835.77,70745.94,289970.99,-44956.24,47070.97,-11306.29,-7435.85,60745.94,-356.28,-35031.29,-26379.13,-4756.39,13789.21,-10381.37,-20781.3,-10333.62,5220.95,4314.2,-11856.38,-46358.52,-25997.26,89446.0,27427.75,-37679.07,-9085.91,-9231.4,-22835.83,-30885.76,-6581.33,-185.89,-7858.62,6993.65,-24981.26,-53306.29,-15310.78,-47881.28,-14860.9,-38835.77,-16008.59,-21435.83,-9451.78,-30260.78,-8263.03,-25860.86,18693.71,-29110.78,40114.24,-47385.78,-4660.9,-6760.88,-28956.36,-11797.3,-10360.84,-9481.35,-48558.62,-24397.19,-32035.92,-22960.84,-44958.6,-11183.65,59477.74,4614.07,1414.18,9395.94,-10858.62,10414.18,38120.96,-3247.21,-17206.31,1198.22,-23485.84,-22983.5,-13410.85,-4529.1,-12810.87,-29431.36,-53931.27,-13522.26,-3210.79,-2910.85,-30922.26,-29731.31,-37856.32,-13910.85,-31910.85,-18956.34,4791.45,-53581.3,-8460.9,-27106.33,3264.15,-32672.23,-1235.88,-31358.52,-10622.24,-25572.25,-3572.28,26014.07,7089.15,44993.65,-29635.81,-18031.25,-16260.78,-11235.88,-13335.86,7939.18,-32947.27,-13735.79,7152.71,-28904.12,19957.35,-8335.86,-28054.1,-3472.26,23514.16,-14576.73,-19183.65,-29685.8,-33479.11,-14910.85,-9731.31,-47506.25,-24435.83,42845.92,-40829.05,-19756.39,20668.62,49468.66,-37176.74,-17303.97,324752.79,-24888.1,2989.17,9564.15,-22222.2,-46679.07,8589.24,-20579.09,-13047.25,49839.2,-15185.8,21341.34,-10831.29,-4160.8,-25760.75,15891.43,-39856.38,9277.78,-14897.28,-10876.79,5639.23,-10231.4,228893.67,40505.01,-57931.23,-13531.34,-10806.39,-2260.78,45495.99,-7285.87,-8833.66,-2822.2,-11485.84,-20997.26,-17154.08,17564.15,-23122.14,24493.75,-15081.24,-26910.85,-17608.67,-22958.6,-26958.6,-19635.81,-28472.26,-23097.24,-15135.9,-9035.92,-16410.83,-7858.62,-3860.86,-15681.32,-16199.46,-40783.54,-23335.86,-5281.39,-22985.93,-25985.93,-24685.8,-8560.92,-25206.31,-13410.89,-31797.3,-25535.83,839.1,-33258.54,13489.07,-20406.27,-42781.3,-1347.19,3514.16,7845.92,4327.77,33793.69,12573.31,30614.14,35939.18,-21879.04,61150.59,-38060.82,-37879.04,-18310.78,-9631.32,12727.89,-36131.23,-17956.36,9277.78,-22260.78,-9004.11,3989.17,60220.95,-11835.77,-1347.19,4527.74,-28656.23,-8585.82,43168.71,-6085.91,-15731.31,-22856.38,-2958.6,-26004.11,-29529.1,-12306.29,-30210.85,-5806.39,37871.01,11568.64,-806.39,-28681.32,157368.68,-36576.85,34446.0,64718.61,-13272.13,25993.65,-22356.28,-46354.04,-30697.13,-19629.08,21318.68,-32231.4,-19347.29,-19456.38,-1056.34,-19128.99,-20997.26,1389.09,-22360.77,-12958.6,56116.48,11318.68,47739.22,-24810.87,226893.67,-21783.54,4291.35,-24347.27,-26308.53,51500.52,-6258.54,-4029.01,6043.64,-16872.19,-18035.92,-10385.82,864.1,-11783.54,49148.3,56764.12,-18108.57,-17706.22,-26758.64,-37779.05,14014.07,-15531.34,-29635.81,-7583.58,-31297.2,-3335.86,10889.19,-38497.17,-17847.29,-17385.86,-10910.85,-21472.26,-18410.76,-26981.32,-6899.45,6643.72,-67504.11,200764.12,-55881.28,-18383.61,-26056.34,-23481.35,1693.71,-6581.33,9893.67,-26797.3,-16060.82,14118.72,3436.84,-25010.83,-15847.29,-2010.83,-17997.26,-5160.8,-15310.78,-22513.04,-3131.23,-235.88,-26735.79,-51331.38,29718.61,-1322.29,-37797.11,17268.69,-7749.55,-5085.78,-36958.6,148120.96,-64703.97,-34497.17,7643.72,-9010.83,53618.63,27093.63,-1735.79,291.35,28239.12,-41901.7,14064.25,-17535.83,-7558.49,8370.92,-13597.15,1627.72,47218.7,1516.37,-16260.78,-27297.19,-11431.36,-32110.81,-21210.79,19545.98,70000.62,-18410.76,8693.71,437193.61,-22210.79,20518.65,-18958.6,-8635.81,-41310.78,19718.61,-20681.32,-12822.2,12427.75,-3335.86,-18335.86,50018.74,-2608.67,-9231.4,12464.17,12989.17,-10208.55,-40897.15,110470.9,-16629.08,-19347.19,21773.27,-17760.88,73750.48,-12660.9,-29504.01,-7997.26,-27247.29,-8335.86,-22404.03,-30285.87,21352.86,-8479.11,39814.11,27595.97,411921.0,39964.2,1127.81,-38272.13,-32785.78,-24629.08,-20608.63,-34485.82,-44272.21,-3910.85,10364.1,23264.21,-29997.2,-22285.87,26641.48,14289.11,-38854.04,-13499.41,-41331.38,151264.21,-23529.1,14277.78,-25960.84,30198.29,-35497.17,-13860.86,-29885.76,-25056.38,-6572.25,-14397.19,45525.61,-15829.05,-38204.07,-28354.04,-21322.18,889.19,-30147.23,-36547.27,-22697.13,11427.75,-26753.97,-34529.1,-9035.85,-36126.75,-4206.31,-15685.89,-14556.24,-1801.78,-304.05,-14506.25,-14835.77,-6797.3,-20981.26,-23108.57,2064.17,-10472.26,-13931.27,-1808.63,-29235.88,502.83,-28504.01,-7985.93,214.22,-22210.79,-12797.11,-30379.13,-5806.39,-26128.99,70339.1,4966.51,-5413.19,-29185.89,4268.69,-11629.08,32191.37,-5531.34,-22285.87,-14758.64,-1956.36,13873.19,12871.01,44814.11,2295.93,-28947.16,-14422.27,20316.44,-24408.51,-31210.79,51120.96,-13856.38,-24183.65,218595.97,-11979.02,-27322.29,-47156.32,-12481.35,-33381.37,3671.05,-32833.53,21793.69,1543.74,-7424.48,4939.18,17214.22,-24585.82,61414.18,-18810.87,17439.08,-2935.75,-30260.78,53168.71,-17985.93,-47831.29,-12760.92,-17954.12,764.12,14364.19,2464.17,-20010.81,-5506.25,19818.78,-53406.27,-4660.9,-25306.29,91370.92,-6856.38,-42097.17,-12326.68,-24885.76,20568.64,92466.41,-22010.83,-63531.23,-3808.63,13489.07,-27247.21,10752.79,-25997.13,-8788.02,-23208.55,-25056.34,-21679.07,55268.69,5052.73,-19199.46,-17110.81,4527.74,-31108.57,-2381.37,201745.94,-4408.51,25443.76,-2385.86,-27472.19,77739.22,-3706.22,-33006.35,52016.5,-41772.21,4039.16,-23883.52,-3247.21,-36581.33,-24585.82,-42404.03,39839.2,1902.76,-34910.85,77595.97,50052.73,35166.47,-20474.51,-27881.24,-34079.0,-19447.18,-18774.51,-27779.05,-32385.86,-20435.75,-1797.3,-11529.1,30364.19,-15851.77,-37610.78,-30806.39,29218.7,-21797.3,-20133.66,-497.17,-24360.77,10768.6,-39447.18,-12913.09,-64853.97,-24260.78,37150.59,6014.07,-23581.33,-60554.0,-15483.59,37093.63,34623.23,-34026.77,-6885.91,78396.01,-12847.29,-7006.35,-27535.83,-13960.84,-18735.79,-8226.8,-4735.79,-24783.54,-40783.54,-21635.81,-16031.25,-1581.33,2468.66,5923.18,28907.36,-38181.26,-6088.15,-6485.84,423.27,32977.84,-9979.02,13257.3,-23572.25,58645.96,-14981.26,-30929.03,267639.23,-20697.13,-5722.22,33943.66,-21235.88,-13510.93,54039.16,-31206.31,-29506.25,93171.95,-49431.25,-31708.55,-45285.78,30889.19,-7560.9,-41331.38,-22481.35,2464.17,429018.74,-22858.62,27214.22,89.15,-16558.64,-26904.12,42893.67,117214.22,2677.71,13764.12,-27297.2,-21583.58,-23731.36,70189.13,-40531.34,864.1,42320.93,-19585.87,-20208.55,-8622.24,-19047.25,-18097.24,-20147.23,10889.19,6364.19,-25060.82,24064.25,-42085.76,250993.65,2595.97,95495.99,-32810.87,-4360.77,5816.35,-12806.39,2741.46,78464.17,-26485.84,-29872.19,-20522.26,-15960.84,-19022.16,-12506.25,-25935.75,-9810.87,96127.81,-30058.58,12039.16,-25110.81,60318.68,1584.57,19039.16,-39533.57,-15531.34,26227.79,-23454.02,-9635.81,8889.19,-21854.13,8466.41,-3860.82,2645.96,31977.84,-21581.33,41616.39,-21358.52,-59131.23]},"democracy":{"n":131,"k":7,"countries":["Afghanistan","Angola","United Arab Emirates","Argentina","Australia","Austria","Burundi","Belgium","Benin","Burkina Faso","Bangladesh","Bulgaria","Bahrain","Bolivia","Brazil","Bhutan","Botswana","Central African Republic","Canada","Switzerland","Chile","China","Cote d'Ivoire","Cameroon","Congo, Rep.","Colombia","Comoros","Costa Rica","Cuba","Germany","Djibouti","Denmark","Dominican Republic","Algeria","Ecuador","Egypt, Arab Rep.","Spain","Estonia","Finland","Fiji","France","Gabon","United Kingdom","Ghana","Guinea","Gambia, The","Guinea-Bissau","Equatorial Guinea","Greece","Guatemala","Guyana","Honduras","Haiti","Hungary","Indonesia","India","Ireland","Iran","Iraq","Iceland","Israel","Italy","Jamaica","Jordan","Japan","Kenya","Cambodia","Korea, Rep.","Kuwait","Lao PDR","Liberia","Libya","Sri Lanka","Lesotho","Latvia","Morocco","Madagascar","Mexico","Mali","Myanmar","Mongolia","Mozambique","Mauritania","Mauritius","Malawi","Malaysia","Niger","Nigeria","Nicaragua","Netherlands","Norway","Nepal","New Zealand","Oman","Pakistan-post-1972","Panama","Peru","Philippines","Papua New Guinea","Poland","Korea, Dem. Rep.","Portugal","Paraguay","Qatar","Romania","Russia","Rwanda","Saudi Arabia","Sudan","Senegal","Singapore","Sierra Leone","El Salvador","Sweden","Swaziland","Syrian Arab Republic","Chad","Togo","Thailand","Trinidad and Tobago","Tunisia","Turkey","Tanzania","Uganda","Uruguay","United States","Venezuela, RB","Vietnam","South Africa","Zambia","Zimbabwe"],"democracy":[0.15,0.35,0.1,0.9,1.0,1.0,0.45,0.95,0.8,0.35,0.8,0.9,0.05,0.95,0.9,0.1,0.95,0.75,1.0,0.9,0.95,0.15,0.7,0.3,0.2,0.85,0.45,1.0,0.15,1.0,0.6,0.9,0.9,0.35,0.8,0.2,1.0,0.8,1.0,0.75,0.85,0.3,0.9,0.6,0.45,0.25,0.75,0.25,1.0,0.9,0.8,0.85,0.4,0.9,0.85,0.95,0.9,0.65,0.05,1.0,1.0,0.95,0.95,0.4,1.0,0.4,0.6,0.9,0.15,0.15,0.5,0.15,0.75,0.9,0.9,0.2,0.85,0.9,0.8,0.15,1.0,0.8,0.2,1.0,0.85,0.65,0.7,0.7,0.9,0.95,1.0,0.8,1.0,0.05,0.2,0.95,0.55,0.9,1.0,0.9,0.05,1.0,0.85,0.0,0.9,0.85,0.3,0.0,0.15,0.9,0.4,0.15,0.85,0.9,0.05,0.15,0.4,0.4,0.95,1.0,0.35,0.85,0.6,0.3,1.0,1.0,0.85,0.15,0.95,0.55,0.25],"growth":[-0.0849,0.6445,3.3726,2.7137,3.9862,3.3473,0.3281,3.1657,1.1616,0.7224,0.4302,2.3811,2.188,1.5143,2.6312,1.5434,2.3516,0.4463,4.0163,3.5506,2.855,1.742,1.1643,0.9905,1.6768,2.1969,0.3387,2.3888,1.4498,3.2969,0.9795,3.4393,1.8668,1.9088,1.7001,1.8161,3.1398,3.0834,3.7986,1.5434,3.3535,2.2394,3.3233,1.1284,0.3224,0.7713,0.4971,2.6425,3.3256,1.791,2.2974,1.2398,0.3584,2.6665,1.7298,1.2447,3.7337,2.1221,0.7655,3.4558,3.3481,2.8353,1.8348,1.9665,3.741,0.9014,0.6493,3.2289,2.889,0.7254,0.7158,1.411,1.859,1.3794,2.6085,1.8937,0.5336,2.8322,0.71,0.8678,0.6469,1.241,0.8987,3.2477,0.4954,2.6289,0.1943,1.0266,1.0122,3.3453,3.6394,0.5648,3.6895,2.4961,1.218,2.3233,1.8731,1.435,1.5434,2.6773,0.7219,3.1415,1.6718,2.6503,1.8005,2.3355,0.6956,2.6453,0.8731,1.2417,3.666,-0.0887,1.5675,3.3762,1.8396,2.578,0.0229,0.3286,2.4118,3.1785,2.3944,2.4523,0.2356,0.6438,2.6302,4.2531,2.6985,1.1479,2.3024,0.4759,1.1291],"bivariate":{"b0":0.3967,"b1":0.1308,"se":0.0194,"R2":0.1916,"yhat":[0.3856,0.4811,0.8379,0.7517,0.9182,0.8346,0.4397,0.8109,0.5487,0.4912,0.453,0.7082,0.683,0.5948,0.7409,0.5986,0.7044,0.4551,0.9221,0.8612,0.7702,0.6246,0.549,0.5263,0.6161,0.6841,0.4411,0.7092,0.5864,0.828,0.5249,0.8466,0.641,0.6464,0.6191,0.6343,0.8075,0.8001,0.8936,0.5986,0.8354,0.6897,0.8315,0.5444,0.4389,0.4976,0.4618,0.7424,0.8318,0.631,0.6973,0.5589,0.4436,0.7456,0.623,0.5596,0.8852,0.6743,0.4969,0.8488,0.8347,0.7676,0.6368,0.654,0.8861,0.5147,0.4817,0.8191,0.7747,0.4916,0.4904,0.5813,0.6399,0.5772,0.738,0.6445,0.4666,0.7672,0.4896,0.5103,0.4814,0.5591,0.5143,0.8216,0.4616,0.7406,0.4222,0.531,0.5292,0.8344,0.8728,0.4706,0.8794,0.7233,0.5561,0.7007,0.6418,0.5845,0.5986,0.747,0.4912,0.8077,0.6154,0.7434,0.6323,0.7023,0.4877,0.7428,0.511,0.5592,0.8763,0.3851,0.6018,0.8384,0.6374,0.734,0.3997,0.4397,0.7122,0.8125,0.71,0.7175,0.4276,0.481,0.7408,0.9531,0.7497,0.5469,0.6979,0.459,0.5445],"resid":[-0.2356,-0.1311,-0.7379,0.1483,0.0818,0.1654,0.0103,0.1391,0.2513,-0.1412,0.347,0.1918,-0.633,0.3552,0.1591,-0.4986,0.2456,0.2949,0.0779,0.0388,0.1798,-0.4746,0.151,-0.2263,-0.4161,0.1659,0.0089,0.2908,-0.4364,0.172,0.0751,0.0534,0.259,-0.2964,0.1809,-0.4343,0.1925,-0.0001,0.1064,0.1514,0.0146,-0.3897,0.0685,0.0556,0.0111,-0.2476,0.2882,-0.4924,0.1682,0.269,0.1027,0.2911,-0.0436,0.1544,0.227,0.3904,0.0148,-0.0243,-0.4469,0.1512,0.1653,0.1824,0.3132,-0.254,0.1139,-0.1147,0.1183,0.0809,-0.6247,-0.3416,0.0096,-0.4313,0.1101,0.3228,0.162,-0.4445,0.3834,0.1328,0.3104,-0.3603,0.5186,0.2409,-0.3143,0.1784,0.3884,-0.0906,0.2778,0.169,0.3708,0.1156,0.1272,0.3294,0.1206,-0.6733,-0.3561,0.2493,-0.0918,0.3155,0.4014,0.153,-0.4412,0.1923,0.2346,-0.7434,0.2677,0.1477,-0.1877,-0.7428,-0.361,0.3408,-0.4763,-0.2351,0.2482,0.0616,-0.5874,-0.584,0.0003,-0.0397,0.2378,0.1875,-0.36,0.1325,0.1724,-0.181,0.2592,0.0469,0.1003,-0.3969,0.2521,0.091,-0.2945]},"multiple":{"params":{"Intercept":3.030721,"growth":0.046774,"constraint":0.164485,"indcent":-0.133122,"catholic":0.117139,"muslim":-0.232662,"protestant":0.180089},"se":{"Intercept":0.974859,"growth":0.025403,"constraint":0.07245,"indcent":0.050033,"catholic":0.0885,"muslim":0.101031,"protestant":0.103952},"R2":0.4492,"yhat":[0.2411,0.6027,0.3997,0.8519,0.9275,0.9054,0.557,0.9559,0.4878,0.4016,0.2795,0.6492,0.3017,0.8394,0.8381,0.5526,0.6925,0.5638,1.0042,1.104,0.8543,0.7104,0.4503,0.5451,0.6701,0.8931,0.2378,0.8896,0.6603,0.8736,0.2695,0.9671,0.8338,0.2864,0.8559,0.4907,0.8951,0.9073,0.9887,0.7077,0.8782,0.6566,0.9955,0.5101,0.2802,0.3663,0.4062,0.6311,0.7593,0.8093,0.6961,0.8415,0.7658,0.9161,0.5472,0.6447,0.9262,0.5061,0.3012,0.9784,0.7415,0.8387,0.7801,0.3677,0.8118,0.5909,0.4559,0.6621,0.371,0.5787,0.7563,0.3265,0.6809,0.6567,0.808,0.3146,0.5674,0.9216,0.3137,0.641,0.5553,0.5058,0.2984,0.7273,0.4907,0.6038,0.2812,0.5062,0.7728,0.9149,1.0358,0.654,0.9193,0.5215,0.3229,0.7594,0.8653,0.6904,0.7818,0.8513,0.5301,0.8937,0.814,0.3189,0.6845,0.7191,0.5174,0.353,0.358,0.3295,0.6109,0.4261,0.8517,0.917,0.5841,0.4364,0.3657,0.481,0.7391,0.7826,0.3077,0.5185,0.4636,0.5926,0.7974,1.1097,0.859,0.5526,0.8397,0.5588,0.6855],"resid":[-0.0911,-0.2527,-0.2997,0.0481,0.0725,0.0946,-0.107,-0.0059,0.3122,-0.0516,0.5205,0.2508,-0.2517,0.1106,0.0619,-0.4526,0.2575,0.1862,-0.0042,-0.204,0.0957,-0.5604,0.2497,-0.2451,-0.4701,-0.0431,0.2122,0.1104,-0.5103,0.1264,0.3305,-0.0671,0.0662,0.0636,-0.0559,-0.2907,0.1049,-0.1073,0.0113,0.0423,-0.0282,-0.3566,-0.0955,0.0899,0.1698,-0.1163,0.3438,-0.3811,0.2407,0.0907,0.1039,0.0085,-0.3658,-0.0161,0.3028,0.3053,-0.0262,0.1439,-0.2512,0.0216,0.2585,0.1113,0.1699,0.0323,0.1882,-0.1909,0.1441,0.2379,-0.221,-0.4287,-0.2563,-0.1765,0.0691,0.2433,0.092,-0.1146,0.2826,-0.0216,0.4863,-0.491,0.4447,0.2942,-0.0984,0.2727,0.3593,0.0462,0.4188,0.1938,0.1272,0.0351,-0.0358,0.146,0.0807,-0.4715,-0.1229,0.1906,-0.3153,0.2096,0.2182,0.0487,-0.4801,0.1063,0.036,-0.3189,0.2155,0.1309,-0.2174,-0.353,-0.208,0.5705,-0.2109,-0.2761,-0.0017,-0.017,-0.5341,-0.2864,0.0343,-0.081,0.2109,0.2174,0.0423,0.3315,0.1364,-0.2926,0.2026,-0.1097,-0.009,-0.4026,0.1103,-0.0088,-0.4355]},"controlVars":["constraint","indcent","catholic","muslim","protestant"],"controlData":{"constraint":[0.0,0.3333,0.3333,0.0,1.0,0.0,0.1481,0.6667,0.125,0.2,0.3148,0.1852,0.0667,0.3333,0.0,0.0,0.6667,0.0,1.0,1.0,0.0,0.0,0.0,0.3333,0.3833,0.3333,0.3167,0.3333,0.3333,0.3333,0.1667,0.0,0.3333,0.05,0.3333,0.75,0.0,1.0,1.0,1.0,0.0,0.1333,1.0,0.0,0.0,0.6667,0.3333,0.0333,0.0,0.0,0.8667,0.3667,0.0,0.3333,0.7333,1.0,1.0,0.0,0.1667,1.0,1.0,0.3333,1.0,0.3,0.0,0.4833,0.0,0.2619,0.2083,0.6667,1.0,0.3333,1.0,0.45,1.0,0.1833,0.3333,0.3333,0.2667,1.0,0.3333,0.1667,0.4,1.0,0.0,1.0,0.3333,0.6,0.0,0.0,0.3333,0.0,1.0,0.0,0.5,0.3333,0.3333,0.5333,1.0,0.9333,0.3333,0.0,0.0,0.0,0.3333,0.0,0.0,0.0,0.3333,0.3333,0.3333,0.55,0.3333,0.0,0.0833,0.5,0.0,0.2333,0.0,1.0,0.0,0.0,0.3333,0.5926,0.0,1.0,0.0,0.3333,1.0,0.2,1.0],"indcent":[19.19,19.75,19.71,18.16,19.01,18.0,19.62,18.3,19.6,19.6,19.71,18.78,19.71,18.25,18.22,19.07,19.66,19.6,18.67,18.0,18.1,18.0,19.6,19.6,19.6,18.1,19.75,18.21,19.02,18.71,19.77,18.0,18.44,19.62,18.22,19.22,18.0,19.18,19.17,19.7,18.0,19.6,18.0,19.57,19.58,19.65,19.73,19.68,18.21,18.21,19.66,18.21,18.04,18.0,19.45,19.47,19.21,18.0,19.32,19.18,19.48,18.61,19.62,19.46,18.0,19.63,19.53,19.45,19.61,19.49,18.47,19.51,19.48,19.66,19.2,19.56,19.6,18.1,19.6,19.48,19.21,19.75,19.6,19.68,19.64,19.57,19.6,19.6,18.21,18.0,18.0,18.0,19.07,18.0,19.71,19.03,18.21,19.46,19.75,19.18,19.45,18.0,18.11,19.71,18.77,18.0,19.62,19.32,19.56,19.6,19.65,19.61,18.21,18.0,19.68,19.46,19.6,19.6,18.0,19.62,19.56,18.0,19.61,19.62,18.25,18.0,18.11,19.45,19.1,19.64,19.65],"catholic":[0.0,0.687,0.004,0.916,0.296,0.888,0.783,0.9,0.185,0.09,0.002,0.005,0.008,0.925,0.878,0.0,0.094,0.331,0.466,0.528,0.821,0.0,0.185,0.35,0.539,0.966,0.001,0.905,0.32,0.35,0.067,0.006,0.966,0.005,0.964,0.002,0.969,0.02,0.001,0.09,0.764,0.652,0.131,0.187,0.011,0.019,0.102,0.713,0.004,0.94,0.18,0.958,0.826,0.539,0.027,0.013,0.953,0.001,0.018,0.007,0.01,0.832,0.096,0.017,0.006,0.264,0.001,0.039,0.021,0.008,0.019,0.002,0.068,0.435,0.182,0.002,0.26,0.947,0.007,0.009,0.0,0.314,0.003,0.312,0.276,0.028,0.002,0.121,0.947,0.426,0.003,0.0,0.187,0.001,0.005,0.85,0.951,0.841,0.328,0.81,0.0,0.941,0.96,0.012,0.049,0.014,0.556,0.001,0.044,0.056,0.047,0.022,0.962,0.014,0.108,0.013,0.21,0.293,0.004,0.358,0.001,0.001,0.282,0.496,0.595,0.3,0.948,0.039,0.104,0.262,0.144],"muslim":[0.993,0.0,0.949,0.002,0.002,0.006,0.009,0.011,0.152,0.43,0.859,0.106,0.95,0.0,0.001,0.05,0.0,0.032,0.006,0.003,0.0,0.024,0.24,0.22,0.004,0.002,0.997,0.0,0.0,0.0002,0.906,0.002,0.0,0.991,0.0,0.818,0.0,0.0001,0.0,0.078,0.03,0.008,0.014,0.157,0.69,0.848,0.383,0.005,0.015,0.0,0.09,0.001,0.0,0.0,0.434,0.116,0.0,0.979,0.958,0.0,0.08,0.001,0.001,0.93,0.0,0.06,0.024,0.0,0.951,0.01,0.212,0.981,0.072,0.0,0.0001,0.994,0.017,0.0,0.8,0.036,0.014,0.13,0.994,0.164,0.162,0.494,0.879,0.45,0.0,0.01,0.001,0.03,0.0,0.989,0.968,0.045,0.0,0.043,0.0,0.0,0.0,0.0,0.0,0.924,0.012,0.113,0.086,0.988,0.73,0.91,0.174,0.394,0.0,0.001,0.001,0.896,0.44,0.17,0.039,0.065,0.994,0.992,0.325,0.066,0.0,0.008,0.0,0.01,0.013,0.003,0.009],"protestant":[0.0,0.198,0.003,0.027,0.235,0.065,0.049,0.004,0.028,0.016,0.002,0.004,0.009,0.023,0.04,0.0,0.268,0.5,0.296,0.432,0.019,0.0,0.047,0.181,0.249,0.009,0.001,0.058,0.008,0.464,0.002,0.952,0.014,0.0,0.019,0.002,0.001,0.66,0.931,0.391,0.024,0.188,0.161,0.258,0.001,0.004,0.006,0.049,0.001,0.049,0.18,0.026,0.128,0.216,0.011,0.048,0.011,0.0,0.0,0.966,0.002,0.004,0.555,0.003,0.009,0.193,0.001,0.122,0.001,0.002,0.186,0.001,0.004,0.298,0.141,0.0,0.22,0.012,0.002,0.032,0.0,0.068,0.0,0.009,0.315,0.014,0.0,0.158,0.044,0.424,0.978,0.0,0.379,0.001,0.008,0.052,0.027,0.038,0.584,0.001,0.0,0.011,0.019,0.009,0.058,0.0,0.116,0.001,0.001,0.001,0.026,0.048,0.024,0.684,0.339,0.002,0.116,0.061,0.002,0.132,0.0,0.0,0.112,0.019,0.019,0.436,0.01,0.002,0.39,0.319,0.214]},"dfits":[-0.1006,-0.2369,-0.3626,0.0393,0.0692,0.0847,-0.105,-0.0055,0.2222,-0.03,0.4197,0.2177,-0.2421,0.0955,0.0481,-0.4415,0.1853,0.2337,-0.0039,-0.239,0.0752,-0.7041,0.1831,-0.1412,-0.3436,-0.0367,0.1982,0.0831,-0.3059,0.1,0.2619,-0.1353,0.0529,0.0582,-0.0487,-0.265,0.097,-0.1168,0.0184,0.0361,-0.0242,-0.3507,-0.1184,0.0728,0.1281,-0.1045,0.2167,-0.4812,0.3057,0.0744,0.0722,0.0083,-0.4407,-0.0109,0.198,0.2957,-0.0359,0.1844,-0.2145,0.0365,0.307,0.0806,0.1691,0.0253,0.263,-0.1184,0.1521,0.2695,-0.2321,-0.4114,-0.3892,-0.1437,0.0659,0.1742,0.0745,-0.0983,0.2083,-0.0179,0.3444,-0.5427,0.4204,0.2135,-0.0864,0.2934,0.3417,0.0426,0.3717,0.1128,0.1216,0.0336,-0.0686,0.2116,0.0715,-0.6106,-0.1052,0.1418,-0.2656,0.1792,0.2537,0.0492,-0.4515,0.096,0.0312,-0.3549,0.1676,0.1469,-0.1885,-0.3626,-0.1322,0.4405,-0.2749,-0.238,-0.0016,-0.0247,-0.5378,-0.2489,0.0277,-0.0554,0.2512,0.2068,0.0433,0.4269,0.0925,-0.2194,0.1425,-0.1287,-0.0075,-0.3437,0.0896,-0.0078,-0.3822],"dfbetasGrowth":[0.06,0.0676,-0.264,0.0097,0.0419,0.0366,0.0331,-0.0011,0.0162,0.0091,-0.1826,0.0633,-0.1168,-0.0428,0.0114,-0.0438,0.067,-0.0783,-0.0018,0.0162,0.0233,0.1279,0.0205,0.0441,-0.0312,0.0067,-0.0828,-0.0063,0.0514,0.0417,-0.0163,-0.0036,-0.0111,0.0202,0.0179,0.036,0.0347,-0.0086,0.003,-0.0106,-0.0115,-0.1523,0.0032,-0.0027,-0.0499,0.0427,-0.0911,-0.2874,0.1299,-0.0154,0.0194,-0.0045,0.3267,0.0013,-0.0079,-0.0935,-0.0173,-0.0259,0.0772,0.0022,0.1592,0.0331,-0.0392,0.0061,0.1214,0.0471,-0.0149,0.1898,-0.1485,0.1503,0.2675,0.0068,-0.0015,-0.0189,0.0114,-0.027,-0.1017,-0.0022,-0.1201,0.2226,-0.1579,0.0302,0.024,0.1683,-0.1077,0.0128,-0.2092,-0.0534,-0.0627,0.0083,0.0006,-0.1094,0.0332,0.0097,0.0137,0.041,0.0812,-0.0128,-0.0724,0.0106,0.1115,0.0347,-0.0087,-0.2229,-0.0138,0.0025,0.0281,-0.1909,0.0436,-0.0396,-0.227,0.1818,0.0007,-0.0026,-0.1398,-0.1056,-0.0151,0.0282,0.0127,0.1107,0.022,-0.013,-0.0629,0.0966,0.0432,-0.0247,-0.0016,0.0226,-0.0167,0.0032,0.1549],"threshDfits":0.4623,"threshDfbetas":0.1747,"pctReduction":64.2},"meta":{"chapter":"Chapter 16: Checking the Model and Data","book":"metricsAI: An Introduction to Econometrics with Python and AI in the Cloud","author":"Carlos Mendez"}}</script>
+
+<script>
+"use strict";
+
+var DATA = JSON.parse(document.getElementById("ch-data").textContent);
+
+// ==================== STATS HELPERS ====================
+var mean = function(a) { var s = 0; for (var i = 0; i < a.length; i++) s += a[i]; return s / a.length; };
+function std(a, m) {
+  if (m === undefined) m = mean(a);
+  var s = 0;
+  for (var i = 0; i < a.length; i++) s += (a[i] - m) * (a[i] - m);
+  return Math.sqrt(s / (a.length - 1));
+}
+function fmt(v, d) {
+  if (d === undefined) d = 4;
+  if (v === null || v === undefined || isNaN(v)) return "\u2014";
+  return v.toFixed(d);
+}
+
+// ==================== PRNG & SAMPLING ====================
+function mulberry32(a) {
+  return function() {
+    a |= 0; a = a + 0x6D2B79F5 | 0;
+    var t = Math.imul(a ^ a >>> 15, 1 | a);
+    t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+    return ((t ^ t >>> 14) >>> 0) / 4294967296;
+  };
+}
+function boxMuller(rng) {
+  var u1 = rng(), u2 = rng();
+  return Math.sqrt(-2 * Math.log(u1)) * Math.cos(2 * Math.PI * u2);
+}
+function linspace(a, b, n) {
+  var out = new Array(n);
+  var step = (b - a) / (n - 1);
+  for (var i = 0; i < n; i++) out[i] = a + i * step;
+  return out;
+}
+
+// ==================== OLS ENGINE ====================
+function olsFit(x, y) {
+  var n = x.length;
+  var xbar = mean(x), ybar = mean(y);
+  var SSx = 0, SSxy = 0;
+  for (var i = 0; i < n; i++) {
+    SSx += (x[i] - xbar) * (x[i] - xbar);
+    SSxy += (x[i] - xbar) * (y[i] - ybar);
+  }
+  var b2 = SSxy / SSx;
+  var b1 = ybar - b2 * xbar;
+  var yhat = new Array(n);
+  var residuals = new Array(n);
+  var RSS = 0;
+  for (var i = 0; i < n; i++) {
+    yhat[i] = b1 + b2 * x[i];
+    residuals[i] = y[i] - yhat[i];
+    RSS += residuals[i] * residuals[i];
+  }
+  var se = Math.sqrt(RSS / (n - 2));
+  var se_b2 = se / Math.sqrt(SSx);
+  var SST = 0;
+  for (var i = 0; i < n; i++) SST += (y[i] - ybar) * (y[i] - ybar);
+  var R2 = SST > 0 ? 1 - RSS / SST : 0;
+  return { b1: b1, b2: b2, yhat: yhat, residuals: residuals, n: n, xbar: xbar, ybar: ybar, SSx: SSx, RSS: RSS, se: se, se_b2: se_b2, R2: R2 };
+}
+
+// Multiple regression via normal equations
+function olsMultiple(X, y) {
+  var n = X.length;
+  var k = X[0].length;
+  var i, j, m;
+  var XtX = [];
+  var Xty = [];
+  for (i = 0; i < k; i++) {
+    XtX.push(new Array(k));
+    Xty.push(0);
+    for (j = 0; j < k; j++) XtX[i][j] = 0;
+  }
+  for (i = 0; i < n; i++) {
+    for (j = 0; j < k; j++) {
+      Xty[j] += X[i][j] * y[i];
+      for (m = 0; m < k; m++) XtX[j][m] += X[i][j] * X[i][m];
+    }
+  }
+  var aug = [];
+  for (i = 0; i < k; i++) {
+    aug.push(XtX[i].slice());
+    aug[i].push(Xty[i]);
+  }
+  for (i = 0; i < k; i++) {
+    var maxRow = i;
+    for (j = i + 1; j < k; j++) {
+      if (Math.abs(aug[j][i]) > Math.abs(aug[maxRow][i])) maxRow = j;
+    }
+    var tmp = aug[i]; aug[i] = aug[maxRow]; aug[maxRow] = tmp;
+    var pivot = aug[i][i];
+    if (Math.abs(pivot) < 1e-12) continue;
+    for (j = i; j <= k; j++) aug[i][j] /= pivot;
+    for (j = 0; j < k; j++) {
+      if (j === i) continue;
+      var factor = aug[j][i];
+      for (m = i; m <= k; m++) aug[j][m] -= factor * aug[i][m];
+    }
+  }
+  var beta = [];
+  for (i = 0; i < k; i++) beta.push(aug[i][k]);
+  var yhat = new Array(n);
+  var resid = new Array(n);
+  var RSS = 0;
+  var ybar = mean(y);
+  var SST = 0;
+  for (i = 0; i < n; i++) {
+    yhat[i] = 0;
+    for (j = 0; j < k; j++) yhat[i] += X[i][j] * beta[j];
+    resid[i] = y[i] - yhat[i];
+    RSS += resid[i] * resid[i];
+    SST += (y[i] - ybar) * (y[i] - ybar);
+  }
+  var R2 = SST > 0 ? 1 - RSS / SST : 0;
+  var se = Math.sqrt(RSS / (n - k));
+  return { beta: beta, yhat: yhat, resid: resid, R2: R2, n: n, k: k, RSS: RSS, se: se };
+}
+
+// ==================== THEME ====================
+var THEME_KEY = "metricsai-theme";
+function getCSS(varName) { return getComputedStyle(document.documentElement).getPropertyValue(varName).trim(); }
+function themeColors() {
+  return { text: getCSS("--text"), textSoft: getCSS("--text-soft"), grid: getCSS("--grid"),
+    panel: getCSS("--panel"), cyan: getCSS("--accent"), purple: getCSS("--accent-2"), pink: getCSS("--accent-3") };
+}
+function baseLayout(overrides) {
+  var c = themeColors();
+  var base = {
+    paper_bgcolor: "rgba(0,0,0,0)", plot_bgcolor: "rgba(0,0,0,0)",
+    font: { family: "Inter, system-ui, sans-serif", color: c.text, size: 12 },
+    margin: { l: 56, r: 18, t: 30, b: 46 },
+    xaxis: { gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft } },
+    yaxis: { gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft } },
+    hoverlabel: { bgcolor: c.panel, bordercolor: c.grid, font: { color: c.text } },
+    legend: { font: { color: c.text }, bgcolor: "rgba(0,0,0,0)" }
+  };
+  if (overrides) for (var k in overrides) base[k] = overrides[k];
+  return base;
+}
+var PLOTLY_CONFIG = { displayModeBar: false, responsive: true };
+
+// ==================== TOGGLE / SLIDER HELPERS ====================
+function bindToggles(groupId, renderFn) {
+  document.querySelectorAll("#" + groupId + " button").forEach(function(btn) {
+    btn.addEventListener("click", function() {
+      this.parentNode.querySelectorAll("button").forEach(function(b) { b.classList.remove("active"); });
+      this.classList.add("active");
+      renderFn();
+    });
+  });
+}
+function bindSlider(id, valId, formatFn, renderFn) {
+  var el = document.getElementById(id);
+  var valEl = document.getElementById(valId);
+  el.addEventListener("input", function() {
+    valEl.textContent = formatFn(this.value);
+    renderFn();
+  });
+}
+function getToggleVal(groupId) {
+  var btn = document.querySelector("#" + groupId + " button.active");
+  return btn ? btn.dataset.val : "";
+}
+
+// ==================== WIDGET 1: VIF Explorer ====================
+(function() {
+  var barsEl = document.getElementById("chart-vif-bars");
+  var corrEl = document.getElementById("chart-vif-corr");
+  var EARN = DATA.earnings;
+
+  function render() {
+    var c = themeColors();
+    var modelType = getToggleVal("vif-model");
+    var threshold = parseInt(document.getElementById("vif-threshold").value);
+
+    var vif, r2;
+    if (modelType === "base") {
+      vif = EARN.vifBase;
+      r2 = EARN.baseModel.R2;
+    } else {
+      vif = EARN.vifCollinear;
+      r2 = EARN.collinearModel.R2;
+    }
+
+    document.getElementById("vif-age").textContent = fmt(vif.age, 2);
+    document.getElementById("vif-educ").textContent = fmt(vif.education, 2);
+    document.getElementById("vif-inter").textContent = vif.agebyeduc !== undefined ? fmt(vif.agebyeduc, 2) : "\u2014";
+    var maxVif = Math.max(vif.age, vif.education, vif.agebyeduc || 0);
+    document.getElementById("vif-max").textContent = fmt(maxVif, 2);
+    document.getElementById("vif-r2").textContent = fmt(r2);
+
+    var varNames = modelType === "base" ? ["age", "education"] : ["age", "education", "age\u00D7educ"];
+    var vifVals = modelType === "base" ? [vif.age, vif.education] : [vif.age, vif.education, vif.agebyeduc];
+    var barColors = vifVals.map(function(v) { return v > threshold ? c.pink : c.cyan; });
+
+    Plotly.react(barsEl, [{
+      x: varNames, y: vifVals, type: "bar",
+      marker: { color: barColors, line: { color: barColors, width: 1 } },
+      text: vifVals.map(function(v) { return v.toFixed(1); }),
+      textposition: "outside",
+      textfont: { color: c.text, size: 12, family: "JetBrains Mono" },
+      hovertemplate: "%{x}: VIF = %{y:.2f}<extra></extra>"
+    }], baseLayout({
+      title: { text: "VIF Values", font: { size: 13, color: c.textSoft } },
+      xaxis: { gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft } },
+      yaxis: { title: "VIF", gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft } },
+      shapes: [{ type: "line", x0: -0.5, x1: varNames.length - 0.5, y0: threshold, y1: threshold, line: { color: c.pink, width: 2, dash: "dash" } }],
+      annotations: [{ x: varNames.length - 1, y: threshold, text: "Threshold = " + threshold, showarrow: false, yshift: 12, font: { color: c.pink, size: 10 } }],
+      showlegend: false
+    }), PLOTLY_CONFIG);
+
+    var corrData = EARN.correlation;
+    var labels = ["age", "educ", "age\u00D7educ"];
+    var z = corrData.matrix;
+    var textArr = z.map(function(row) { return row.map(function(v) { return v.toFixed(3); }); });
+
+    Plotly.react(corrEl, [{
+      z: z, x: labels, y: labels, type: "heatmap",
+      colorscale: [[0, "#2563eb"], [0.5, "#f8fafc"], [1, "#dc2626"]],
+      zmin: -1, zmax: 1,
+      text: textArr, texttemplate: "%{text}", textfont: { size: 13, family: "JetBrains Mono" },
+      hovertemplate: "%{y} vs %{x}: r = %{z:.3f}<extra></extra>",
+      showscale: true,
+      colorbar: { title: "r", titlefont: { color: c.textSoft }, tickfont: { color: c.textSoft } }
+    }], baseLayout({
+      title: { text: "Correlation Matrix", font: { size: 13, color: c.textSoft } },
+      xaxis: { gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft, size: 11 }, side: "bottom" },
+      yaxis: { gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft, size: 11 }, autorange: "reversed" },
+      margin: { l: 70, r: 18, t: 30, b: 60 }
+    }), PLOTLY_CONFIG);
+  }
+
+  bindToggles("vif-model", render);
+  bindSlider("vif-threshold", "vif-threshold-val", function(v) { return v; }, render);
+  window.__rerender_vif = render;
+  render();
+})();
+
+// ==================== WIDGET 2: Robust vs Standard SEs ====================
+(function() {
+  var chartEl = document.getElementById("chart-robse");
+  var EARN = DATA.earnings;
+
+  function render() {
+    var c = themeColors();
+    var display = getToggleVal("robse-display");
+    var highlight = getToggleVal("robse-highlight");
+
+    var seComp = EARN.seCompare;
+    document.getElementById("robse-age-std").textContent = fmt(seComp.age.standard, 2);
+    document.getElementById("robse-age-rob").textContent = fmt(seComp.age.robust, 2);
+    document.getElementById("robse-educ-std").textContent = fmt(seComp.education.standard, 2);
+    document.getElementById("robse-educ-rob").textContent = fmt(seComp.education.robust, 2);
+    document.getElementById("robse-ratio").textContent = fmt(seComp.education.ratio, 4) + "\u00D7";
+
+    if (display === "comparison") {
+      var vars = (highlight === "education") ? ["education"] : (highlight === "age") ? ["age"] : ["Intercept", "age", "education"];
+      var stdVals = vars.map(function(v) { return seComp[v].standard; });
+      var robVals = vars.map(function(v) { return seComp[v].robust; });
+      var ratios = vars.map(function(v) { return seComp[v].ratio; });
+
+      var traces = [];
+      traces.push({
+        x: vars, y: stdVals, type: "bar", name: "Standard SE",
+        marker: { color: c.cyan + "cc" },
+        hovertemplate: "%{x}: %{y:.2f}<extra>Standard</extra>"
+      });
+      traces.push({
+        x: vars, y: robVals, type: "bar", name: "Robust (HC1) SE",
+        marker: { color: c.pink + "cc" },
+        hovertemplate: "%{x}: %{y:.2f}<extra>Robust</extra>"
+      });
+
+      var annotations = ratios.map(function(r, i) {
+        return { x: vars[i], y: Math.max(stdVals[i], robVals[i]), text: r.toFixed(2) + "\u00D7", showarrow: false, yshift: 16, font: { color: c.purple, size: 11, family: "JetBrains Mono" } };
+      });
+
+      Plotly.react(chartEl, traces, baseLayout({
+        barmode: "group",
+        xaxis: { title: "Variable", gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft } },
+        yaxis: { title: "Standard Error", gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft } },
+        annotations: annotations,
+        legend: { x: 0.6, y: 0.98, font: { color: c.text }, bgcolor: "rgba(0,0,0,0)" }
+      }), PLOTLY_CONFIG);
+    } else {
+      var yhat = EARN.yhat;
+      var resid = EARN.residuals;
+      Plotly.react(chartEl, [{
+        x: yhat, y: resid, mode: "markers", type: "scatter",
+        marker: { color: c.cyan, size: 4, opacity: 0.5 },
+        name: "Residuals",
+        hovertemplate: "Fitted: %{x:.0f}<br>Residual: %{y:.0f}<extra></extra>"
+      }, {
+        x: [Math.min.apply(null, yhat), Math.max.apply(null, yhat)],
+        y: [0, 0],
+        mode: "lines", line: { color: c.purple, width: 2, dash: "dash" },
+        name: "Zero line", hoverinfo: "skip"
+      }], baseLayout({
+        xaxis: { title: "Fitted Earnings ($)", gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft } },
+        yaxis: { title: "Residual ($)", gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft } },
+        legend: { x: 0.02, y: 0.98, font: { color: c.text }, bgcolor: "rgba(0,0,0,0)" }
+      }), PLOTLY_CONFIG);
+    }
+  }
+
+  bindToggles("robse-display", render);
+  bindToggles("robse-highlight", render);
+  window.__rerender_robse = render;
+  render();
+})();
+
+// ==================== WIDGET 3: Autocorrelation Explorer ====================
+(function() {
+  var tsEl = document.getElementById("chart-acf-ts");
+  var acfEl = document.getElementById("chart-acf-bars");
+  var seed = 160;
+
+  function render() {
+    var c = themeColors();
+    var rho = parseFloat(document.getElementById("acf-rho").value);
+    var nObs = parseInt(document.getElementById("acf-n").value);
+    var rng = mulberry32(seed);
+
+    var u = new Array(nObs);
+    u[0] = boxMuller(rng);
+    for (var t = 1; t < nObs; t++) {
+      var rhoSafe = Math.min(rho, 0.999);
+      u[t] = rhoSafe * u[t - 1] + Math.sqrt(1 - rhoSafe * rhoSafe) * boxMuller(rng);
+    }
+
+    var maxLag = 20;
+    var ubar = mean(u);
+    var denom = 0;
+    for (var t = 0; t < nObs; t++) denom += (u[t] - ubar) * (u[t] - ubar);
+    var acfVals = new Array(maxLag + 1);
+    acfVals[0] = 1.0;
+    for (var lag = 1; lag <= maxLag; lag++) {
+      var num = 0;
+      for (var t = lag; t < nObs; t++) num += (u[t] - ubar) * (u[t - lag] - ubar);
+      acfVals[lag] = denom > 0 ? num / denom : 0;
+    }
+
+    document.getElementById("acf-lag1").textContent = fmt(acfVals[1]);
+    document.getElementById("acf-lag5").textContent = fmt(acfVals[5] !== undefined ? acfVals[5] : 0);
+    document.getElementById("acf-theo1").textContent = fmt(rho);
+    var effRatio = rho < 0.99 ? (1 - rho) / (1 + rho) : 0.005;
+    document.getElementById("acf-effn").textContent = fmt(effRatio, 3);
+
+    var tIdx = [];
+    for (var t = 0; t < nObs; t++) tIdx.push(t);
+
+    Plotly.react(tsEl, [{
+      x: tIdx, y: u, mode: "lines", type: "scatter",
+      line: { color: c.cyan, width: 1.5 },
+      name: "AR(1) errors",
+      hovertemplate: "t=%{x}<br>u=%{y:.3f}<extra></extra>"
+    }, {
+      x: [0, nObs - 1], y: [0, 0],
+      mode: "lines", line: { color: c.purple, width: 1.5, dash: "dash" },
+      name: "Zero", hoverinfo: "skip"
+    }], baseLayout({
+      title: { text: "Time Series: u\u209C = " + rho.toFixed(2) + " u\u209C\u208B\u2081 + \u03B5\u209C", font: { size: 13, color: c.textSoft } },
+      xaxis: { title: "Time (t)", gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft } },
+      yaxis: { title: "Error u\u209C", gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft } },
+      showlegend: false
+    }), PLOTLY_CONFIG);
+
+    var lags = [];
+    var acfDisplay = [];
+    for (var lag = 1; lag <= maxLag; lag++) {
+      lags.push(lag);
+      acfDisplay.push(acfVals[lag]);
+    }
+    var confBound = 1.96 / Math.sqrt(nObs);
+    var barColors = acfDisplay.map(function(v) { return Math.abs(v) > confBound ? c.pink : c.cyan; });
+
+    Plotly.react(acfEl, [{
+      x: lags, y: acfDisplay, type: "bar",
+      marker: { color: barColors },
+      hovertemplate: "Lag %{x}: ACF = %{y:.3f}<extra></extra>"
+    }], baseLayout({
+      title: { text: "Autocorrelation Function (ACF)", font: { size: 13, color: c.textSoft } },
+      xaxis: { title: "Lag", gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft } },
+      yaxis: { title: "ACF", range: [-0.3, 1.05], gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft } },
+      shapes: [
+        { type: "line", x0: 0.5, x1: maxLag + 0.5, y0: confBound, y1: confBound, line: { color: c.purple, width: 1.5, dash: "dot" } },
+        { type: "line", x0: 0.5, x1: maxLag + 0.5, y0: -confBound, y1: -confBound, line: { color: c.purple, width: 1.5, dash: "dot" } }
+      ],
+      showlegend: false
+    }), PLOTLY_CONFIG);
+  }
+
+  bindSlider("acf-rho", "acf-rho-val", function(v) { return parseFloat(v).toFixed(2); }, render);
+  bindSlider("acf-n", "acf-n-val", function(v) { return v; }, render);
+  document.getElementById("acf-resim").addEventListener("click", function() { seed += 1000; render(); });
+  window.__rerender_acf = render;
+  render();
+})();
+
+// ==================== WIDGET 4: Diagnostic Plots ====================
+(function() {
+  var chartEl = document.getElementById("chart-diag");
+  var DEM = DATA.democracy;
+
+  function render() {
+    var c = themeColors();
+    var modelType = getToggleVal("diag-model");
+    var plotType = getToggleVal("diag-plot");
+    var showLabels = getToggleVal("diag-labels") === "on";
+
+    var yhat, resid, coef, r2;
+    if (modelType === "bivariate") {
+      yhat = DEM.bivariate.yhat;
+      resid = DEM.bivariate.resid;
+      coef = DEM.bivariate.b1;
+      r2 = DEM.bivariate.R2;
+    } else {
+      yhat = DEM.multiple.yhat;
+      resid = DEM.multiple.resid;
+      coef = DEM.multiple.params.growth;
+      r2 = DEM.multiple.R2;
+    }
+
+    var rmean = mean(resid);
+    var rstd = std(resid, rmean);
+    document.getElementById("diag-coef").textContent = fmt(coef);
+    document.getElementById("diag-r2").textContent = fmt(r2);
+    document.getElementById("diag-rmean").textContent = fmt(rmean, 6);
+    document.getElementById("diag-rstd").textContent = fmt(rstd);
+
+    var traces = [];
+    if (plotType === "actual") {
+      traces.push({
+        x: yhat, y: DEM.democracy, mode: showLabels ? "markers+text" : "markers", type: "scatter",
+        marker: { color: c.cyan, size: 7, opacity: 0.7 },
+        text: DEM.countries,
+        textposition: "top right",
+        textfont: { size: 8, color: c.textSoft },
+        name: "Countries",
+        hovertemplate: "%{customdata}<br>Fitted: %{x:.3f}<br>Actual: %{y:.3f}<extra></extra>",
+        customdata: DEM.countries
+      });
+      var minV = Math.min(Math.min.apply(null, yhat), Math.min.apply(null, DEM.democracy));
+      var maxV = Math.max(Math.max.apply(null, yhat), Math.max.apply(null, DEM.democracy));
+      traces.push({
+        x: [minV - 0.05, maxV + 0.05], y: [minV - 0.05, maxV + 0.05],
+        mode: "lines", line: { color: c.purple, width: 2, dash: "dash" },
+        name: "45\u00B0 line", hoverinfo: "skip"
+      });
+
+      Plotly.react(chartEl, traces, baseLayout({
+        title: { text: "Actual vs. Fitted Democracy", font: { size: 13, color: c.textSoft } },
+        xaxis: { title: "Fitted Democracy", gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft } },
+        yaxis: { title: "Actual Democracy", gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft } },
+        legend: { x: 0.02, y: 0.98, font: { color: c.text }, bgcolor: "rgba(0,0,0,0)" }
+      }), PLOTLY_CONFIG);
+    } else {
+      traces.push({
+        x: yhat, y: resid, mode: showLabels ? "markers+text" : "markers", type: "scatter",
+        marker: { color: c.cyan, size: 7, opacity: 0.7 },
+        text: DEM.countries,
+        textposition: "top right",
+        textfont: { size: 8, color: c.textSoft },
+        name: "Residuals",
+        hovertemplate: "%{customdata}<br>Fitted: %{x:.3f}<br>Residual: %{y:.3f}<extra></extra>",
+        customdata: DEM.countries
+      });
+      traces.push({
+        x: [Math.min.apply(null, yhat) - 0.05, Math.max.apply(null, yhat) + 0.05],
+        y: [0, 0],
+        mode: "lines", line: { color: c.purple, width: 2, dash: "dash" },
+        name: "Zero line", hoverinfo: "skip"
+      });
+
+      Plotly.react(chartEl, traces, baseLayout({
+        title: { text: "Residual vs. Fitted Democracy", font: { size: 13, color: c.textSoft } },
+        xaxis: { title: "Fitted Democracy", gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft } },
+        yaxis: { title: "Residual", gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft } },
+        legend: { x: 0.02, y: 0.98, font: { color: c.text }, bgcolor: "rgba(0,0,0,0)" }
+      }), PLOTLY_CONFIG);
+    }
+  }
+
+  bindToggles("diag-model", render);
+  bindToggles("diag-plot", render);
+  bindToggles("diag-labels", render);
+  window.__rerender_diag = render;
+  render();
+})();
+
+// ==================== WIDGET 5: Influential Observations ====================
+(function() {
+  var chartEl = document.getElementById("chart-infl");
+  var DEM = DATA.democracy;
+
+  function render() {
+    var c = themeColors();
+    var measure = getToggleVal("infl-measure");
+    var labelMode = getToggleVal("infl-labels");
+
+    var vals, threshold, title, yLabel;
+    if (measure === "dfits") {
+      vals = DEM.dfits;
+      threshold = DEM.threshDfits;
+      title = "DFITS: Influence on Fitted Values";
+      yLabel = "DFITS";
+    } else {
+      vals = DEM.dfbetasGrowth;
+      threshold = DEM.threshDfbetas;
+      title = "DFBETAS: Influence on Growth Coefficient";
+      yLabel = "DFBETAS (growth)";
+    }
+
+    var n = vals.length;
+    document.getElementById("infl-n").textContent = n.toString();
+    document.getElementById("infl-k").textContent = DEM.k.toString();
+    document.getElementById("infl-thresh").textContent = "\u00B1" + fmt(threshold, 4);
+    var flagged = 0;
+    for (var i = 0; i < n; i++) { if (Math.abs(vals[i]) > threshold) flagged++; }
+    document.getElementById("infl-flagged").textContent = flagged.toString();
+
+    var obsIdx = [];
+    var colors = [];
+    var labels = [];
+    for (var i = 0; i < n; i++) {
+      obsIdx.push(i);
+      var isFlagged = Math.abs(vals[i]) > threshold;
+      colors.push(isFlagged ? c.pink : c.cyan);
+      if (labelMode === "all") {
+        labels.push(DEM.countries[i]);
+      } else if (labelMode === "flagged" && isFlagged) {
+        labels.push(DEM.countries[i]);
+      } else {
+        labels.push("");
+      }
+    }
+
+    Plotly.react(chartEl, [{
+      x: obsIdx, y: vals, mode: "markers+text", type: "scatter",
+      marker: { color: colors, size: 7, opacity: 0.8 },
+      text: labels,
+      textposition: "top center",
+      textfont: { size: 9, color: c.textSoft, family: "Inter" },
+      hovertemplate: "%{customdata}<br>Index: %{x}<br>" + yLabel + ": %{y:.4f}<extra></extra>",
+      customdata: DEM.countries,
+      showlegend: false
+    }], baseLayout({
+      title: { text: title, font: { size: 13, color: c.textSoft } },
+      xaxis: { title: "Observation Index", gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft } },
+      yaxis: { title: yLabel, gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft } },
+      shapes: [
+        { type: "line", x0: -1, x1: n, y0: threshold, y1: threshold, line: { color: c.pink, width: 2, dash: "dash" } },
+        { type: "line", x0: -1, x1: n, y0: -threshold, y1: -threshold, line: { color: c.pink, width: 2, dash: "dash" } },
+        { type: "line", x0: -1, x1: n, y0: 0, y1: 0, line: { color: c.grid, width: 1 } }
+      ],
+      annotations: [{ x: n - 1, y: threshold, text: "\u00B1" + threshold.toFixed(3), showarrow: false, yshift: 12, font: { color: c.pink, size: 10 } }]
+    }), PLOTLY_CONFIG);
+  }
+
+  bindToggles("infl-measure", render);
+  bindToggles("infl-labels", render);
+  window.__rerender_influence = render;
+  render();
+})();
+
+// ==================== WIDGET 6: Omitted Variable Bias ====================
+(function() {
+  var chartEl = document.getElementById("chart-ovb");
+  var DEM = DATA.democracy;
+
+  function render() {
+    var c = themeColors();
+    var controls = getToggleVal("ovb-controls");
+    var showMode = getToggleVal("ovb-show");
+
+    var includeVars = [];
+    if (controls === "institutional" || controls === "all") {
+      includeVars.push("constraint");
+      includeVars.push("indcent");
+    }
+    if (controls === "religion" || controls === "all") {
+      includeVars.push("catholic");
+      includeVars.push("muslim");
+      includeVars.push("protestant");
+    }
+
+    var y = DEM.democracy;
+    var growth = DEM.growth;
+    var n = y.length;
+
+    var coef, r2, se;
+
+    if (includeVars.length === 0) {
+      coef = DEM.bivariate.b1;
+      r2 = DEM.bivariate.R2;
+      se = DEM.bivariate.se;
+    } else {
+      var X = [];
+      for (var i = 0; i < n; i++) {
+        var row = [1, growth[i]];
+        for (var j = 0; j < includeVars.length; j++) {
+          row.push(DEM.controlData[includeVars[j]][i]);
+        }
+        X.push(row);
+      }
+      var result = olsMultiple(X, y);
+      coef = result.beta[1];
+      r2 = result.R2;
+      var xbar = mean(growth);
+      var SSx = 0;
+      for (var i = 0; i < n; i++) SSx += (growth[i] - xbar) * (growth[i] - xbar);
+      se = result.se / Math.sqrt(SSx);
+    }
+
+    var bivCoef = DEM.bivariate.b1;
+    var pctChange = controls === "none" ? 0 : ((bivCoef - coef) / bivCoef * 100);
+
+    document.getElementById("ovb-coef").textContent = fmt(coef);
+    document.getElementById("ovb-se").textContent = fmt(se);
+    document.getElementById("ovb-r2").textContent = fmt(r2);
+    document.getElementById("ovb-pct").textContent = controls === "none" ? "\u2014" : fmt(pctChange, 1) + "%";
+
+    if (showMode === "scatter") {
+      var traces = [];
+      traces.push({
+        x: growth, y: y, mode: "markers", type: "scatter",
+        marker: { color: c.cyan, size: 7, opacity: 0.6 },
+        name: "Countries",
+        hovertemplate: "%{customdata}<br>Growth: %{x:.3f}<br>Democracy: %{y:.3f}<extra></extra>",
+        customdata: DEM.countries
+      });
+      var gMin = Math.min.apply(null, growth);
+      var gMax = Math.max.apply(null, growth);
+      traces.push({
+        x: [gMin, gMax],
+        y: [DEM.bivariate.b0 + DEM.bivariate.b1 * gMin, DEM.bivariate.b0 + DEM.bivariate.b1 * gMax],
+        mode: "lines", line: { color: c.purple, width: 2, dash: controls === "none" ? "solid" : "dash" },
+        name: "Bivariate (\u03B2=" + fmt(bivCoef, 3) + ")"
+      });
+      if (controls !== "none") {
+        var yMean = mean(y);
+        var gMean = mean(growth);
+        var y0 = yMean - coef * gMean;
+        traces.push({
+          x: [gMin, gMax],
+          y: [y0 + coef * gMin, y0 + coef * gMax],
+          mode: "lines", line: { color: c.pink, width: 2.5 },
+          name: "With controls (\u03B2=" + fmt(coef, 3) + ")"
+        });
+      }
+
+      Plotly.react(chartEl, traces, baseLayout({
+        title: { text: "Democracy vs. Growth (131 countries)", font: { size: 13, color: c.textSoft } },
+        xaxis: { title: "Change in Log GDP per capita (1500-2000)", gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft } },
+        yaxis: { title: "Change in Democracy (1500-2000)", gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft } },
+        legend: { x: 0.02, y: 0.98, font: { color: c.text, size: 11 }, bgcolor: "rgba(0,0,0,0)" }
+      }), PLOTLY_CONFIG);
+    } else {
+      var allLabels = ["None", "+ Institutional", "+ Religion", "All Controls"];
+      var specs = [
+        [],
+        ["constraint", "indcent"],
+        ["catholic", "muslim", "protestant"],
+        ["constraint", "indcent", "catholic", "muslim", "protestant"]
+      ];
+      var allCoefs = [];
+      for (var s = 0; s < specs.length; s++) {
+        if (specs[s].length === 0) {
+          allCoefs.push(bivCoef);
+        } else {
+          var X = [];
+          for (var i = 0; i < n; i++) {
+            var row = [1, growth[i]];
+            for (var j = 0; j < specs[s].length; j++) {
+              row.push(DEM.controlData[specs[s][j]][i]);
+            }
+            X.push(row);
+          }
+          allCoefs.push(olsMultiple(X, y).beta[1]);
+        }
+      }
+
+      var allColors = allLabels.map(function(label, i) {
+        if (controls === "none" && i === 0) return c.pink;
+        if (controls === "institutional" && i === 1) return c.pink;
+        if (controls === "religion" && i === 2) return c.pink;
+        if (controls === "all" && i === 3) return c.pink;
+        return c.cyan + "88";
+      });
+
+      Plotly.react(chartEl, [{
+        x: allLabels, y: allCoefs, type: "bar",
+        marker: { color: allColors },
+        text: allCoefs.map(function(v) { return v.toFixed(3); }),
+        textposition: "outside",
+        textfont: { color: c.text, size: 12, family: "JetBrains Mono" },
+        hovertemplate: "%{x}: \u03B2 = %{y:.4f}<extra></extra>"
+      }], baseLayout({
+        title: { text: "Growth Coefficient Under Different Specifications", font: { size: 13, color: c.textSoft } },
+        xaxis: { gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft } },
+        yaxis: { title: "Growth coefficient", gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft } },
+        shapes: [{ type: "line", x0: -0.5, x1: 3.5, y0: bivCoef, y1: bivCoef, line: { color: c.purple, width: 1.5, dash: "dot" } }],
+        annotations: [{ x: 3, y: bivCoef, text: "Bivariate = " + fmt(bivCoef, 3), showarrow: false, yshift: 10, font: { color: c.purple, size: 10 } }],
+        showlegend: false
+      }), PLOTLY_CONFIG);
+    }
+  }
+
+  bindToggles("ovb-controls", render);
+  bindToggles("ovb-show", render);
+  window.__rerender_ovb = render;
+  render();
+})();
+
+// ==================== RESET + URL HASH STATE ====================
+(function() {
+  var REG = {
+    vif: [
+      { group: "vif-model", kind: "toggle", def: "base" },
+      { id: "vif-threshold", kind: "range", def: "10" }
+    ],
+    robse: [
+      { group: "robse-display", kind: "toggle", def: "comparison" },
+      { group: "robse-highlight", kind: "toggle", def: "all" }
+    ],
+    acf: [
+      { id: "acf-rho", kind: "range", def: "0.80" },
+      { id: "acf-n", kind: "range", def: "200" }
+    ],
+    diag: [
+      { group: "diag-model", kind: "toggle", def: "bivariate" },
+      { group: "diag-plot", kind: "toggle", def: "actual" },
+      { group: "diag-labels", kind: "toggle", def: "off" }
+    ],
+    influence: [
+      { group: "infl-measure", kind: "toggle", def: "dfits" },
+      { group: "infl-labels", kind: "toggle", def: "flagged" }
+    ],
+    ovb: [
+      { group: "ovb-controls", kind: "toggle", def: "none" },
+      { group: "ovb-show", kind: "toggle", def: "scatter" }
+    ]
+  };
+
+  function getVal(c) {
+    if (c.kind === "toggle") {
+      var btn = document.querySelector("#" + c.group + " button.active");
+      return btn ? btn.dataset.val : c.def;
+    }
+    return document.getElementById(c.id).value;
+  }
+
+  function setVal(c, val, fire) {
+    if (c.kind === "toggle") {
+      var group = document.getElementById(c.group);
+      if (!group) return;
+      var btn = group.querySelector('button[data-val="' + val + '"]');
+      if (btn && !btn.classList.contains("active")) btn.click();
+    } else {
+      var el = document.getElementById(c.id);
+      if (!el) return;
+      if (el.value !== String(val)) {
+        el.value = val;
+        if (fire) el.dispatchEvent(new Event(c.kind === "select" ? "change" : "input", { bubbles: true }));
+      }
+    }
+  }
+
+  function resetWidget(widget) {
+    var ctrls = REG[widget] || [];
+    for (var i = 0; i < ctrls.length; i++) setVal(ctrls[i], ctrls[i].def, true);
+    var fn = window["__rerender_" + widget];
+    if (fn) fn();
+    writeHash();
+  }
+
+  function writeHash() {
+    var parts = [];
+    for (var widget in REG) {
+      var ctrls = REG[widget];
+      for (var i = 0; i < ctrls.length; i++) {
+        var c = ctrls[i];
+        var v = String(getVal(c));
+        if (v !== String(c.def)) {
+          var key = c.id || c.group;
+          parts.push(key + "=" + encodeURIComponent(v));
+        }
+      }
+    }
+    var want = parts.length ? "#" + parts.join("&") : "";
+    if (want === "" && location.hash.match(/=/)) {
+      history.replaceState(null, "", location.pathname + location.search);
+    } else if (want !== "" && location.hash !== want) {
+      history.replaceState(null, "", location.pathname + location.search + want);
+    }
+  }
+
+  function readHash() {
+    var hash = location.hash.slice(1);
+    if (!hash || !hash.includes("=")) return;
+    var params = {};
+    var pairs = hash.split("&");
+    for (var i = 0; i < pairs.length; i++) {
+      var eq = pairs[i].indexOf("=");
+      if (eq < 0) continue;
+      params[pairs[i].slice(0, eq)] = decodeURIComponent(pairs[i].slice(eq + 1));
+    }
+    for (var widget in REG) {
+      var ctrls = REG[widget];
+      for (var i = 0; i < ctrls.length; i++) {
+        var c = ctrls[i];
+        var key = c.id || c.group;
+        if (key in params) setVal(c, params[key], true);
+      }
+    }
+  }
+
+  document.querySelectorAll(".reset-btn[data-reset]").forEach(function(btn) {
+    btn.addEventListener("click", function() { resetWidget(btn.dataset.reset); });
+  });
+  document.addEventListener("input", function(e) {
+    if (e.target.matches("input[type=range], select")) writeHash();
+  });
+  document.addEventListener("change", function(e) {
+    if (e.target.matches("select")) writeHash();
+  });
+  document.querySelectorAll(".toggle-group button").forEach(function(b) {
+    b.addEventListener("click", function() { setTimeout(writeHash, 0); });
+  });
+  readHash();
+})();
+
+// ==================== THEME TOGGLE ====================
+(function() {
+  var btn = document.getElementById("theme-toggle");
+  var iconEl = document.getElementById("theme-icon");
+  var labelEl = document.getElementById("theme-label");
+
+  function apply(theme) {
+    document.documentElement.dataset.theme = theme;
+    iconEl.textContent = theme === "dark" ? "\u2600\uFE0F" : "\uD83C\uDF19";
+    labelEl.textContent = theme === "dark" ? "Light" : "Dark";
+    for (var key in window) {
+      if (key.startsWith("__rerender_") && typeof window[key] === "function") window[key]();
+    }
+  }
+
+  var saved = localStorage.getItem(THEME_KEY);
+  var prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+  apply(saved || (prefersDark ? "dark" : "light"));
+
+  btn.addEventListener("click", function() {
+    var next = document.documentElement.dataset.theme === "dark" ? "light" : "dark";
+    localStorage.setItem(THEME_KEY, next);
+    apply(next);
+  });
+})();
+
+// ==================== Resize handling ====================
+window.addEventListener("resize", function() {
+  document.querySelectorAll(".chart").forEach(function(el) {
+    if (el.data) Plotly.Plots.resize(el);
+  });
+});
+</script>
+
+</body>
+</html>

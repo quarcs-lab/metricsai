@@ -1,0 +1,1341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chapter 08 — Case Studies for Bivariate Regression · metricsAI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.plot.ly/plotly-2.35.2.min.js" charset="utf-8"></script>
+<style>
+:root {
+  --cyan: #008CB7;
+  --cyan-soft: #22d3ee;
+  --purple: #7A209F;
+  --purple-soft: #c084fc;
+  --pink: #C21E72;
+  --pink-soft: #f472b6;
+
+  --bg: #f5f8fb;
+  --panel: #ffffff;
+  --panel-2: #f0f4f9;
+  --text: #0b1021;
+  --text-soft: #475569;
+  --text-muted: #64748b;
+  --border: #d9e2ec;
+  --accent: var(--cyan);
+  --accent-2: var(--purple);
+  --accent-3: var(--pink);
+  --shadow: 0 2px 10px rgba(11, 16, 33, 0.06), 0 12px 30px rgba(11, 16, 33, 0.05);
+  --grid: #e3e8ef;
+  --code-bg: #eef3f8;
+}
+html[data-theme="dark"] {
+  --bg: #0c1024;
+  --panel: #151a33;
+  --panel-2: #1b2142;
+  --text: #e2e8f0;
+  --text-soft: #b5c0d0;
+  --text-muted: #8a98ae;
+  --border: #2a3156;
+  --accent: var(--cyan-soft);
+  --accent-2: var(--purple-soft);
+  --accent-3: var(--pink-soft);
+  --shadow: 0 2px 10px rgba(0, 0, 0, 0.25), 0 12px 30px rgba(0, 0, 0, 0.35);
+  --grid: #2a3156;
+  --code-bg: #0f1530;
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.55;
+  transition: background-color .25s ease, color .25s ease;
+}
+code, .mono { font-family: 'JetBrains Mono', ui-monospace, monospace; }
+
+header.page {
+  position: relative;
+  padding: 2.4rem 1.5rem 2rem;
+  background:
+    radial-gradient(1200px 400px at 85% -10%, rgba(122, 32, 159, 0.15), transparent),
+    radial-gradient(1000px 400px at 10% 0%, rgba(0, 140, 183, 0.18), transparent),
+    var(--panel);
+  border-bottom: 1px solid var(--border);
+}
+.page-inner { max-width: 1120px; margin: 0 auto; }
+.chapter-badge {
+  display: inline-block; font-size: 0.72rem; letter-spacing: 0.15em;
+  text-transform: uppercase; color: var(--accent); font-weight: 600; margin-bottom: 0.5rem;
+}
+h1.title {
+  font-size: clamp(1.6rem, 3.4vw, 2.4rem); margin: 0 0 0.35rem;
+  background: linear-gradient(90deg, var(--accent), var(--accent-2));
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+  font-weight: 700; letter-spacing: -0.01em;
+}
+p.subtitle { margin: 0 0 0.8rem; color: var(--text-soft); font-size: 1.05rem; max-width: 720px; }
+.theme-toggle {
+  position: absolute; top: 1.4rem; right: 1.5rem;
+  background: var(--panel-2); color: var(--text); border: 1px solid var(--border);
+  padding: 0.4rem 0.8rem; border-radius: 999px; cursor: pointer;
+  font-size: 0.85rem; font-weight: 500; display: inline-flex; align-items: center; gap: 0.35rem;
+  transition: all .2s ease;
+}
+.theme-toggle:hover { border-color: var(--accent); color: var(--accent); }
+
+nav.anchors {
+  position: sticky; top: 0; z-index: 20;
+  background: color-mix(in srgb, var(--panel) 92%, transparent);
+  backdrop-filter: saturate(150%) blur(8px); -webkit-backdrop-filter: saturate(150%) blur(8px);
+  border-bottom: 1px solid var(--border);
+}
+nav.anchors ul {
+  display: flex; gap: 0.25rem; overflow-x: auto; list-style: none;
+  padding: 0.55rem 1.5rem; margin: 0 auto; max-width: 1120px; scrollbar-width: thin;
+}
+nav.anchors a {
+  display: block; padding: 0.35rem 0.75rem; border-radius: 8px;
+  color: var(--text-soft); text-decoration: none; font-size: 0.85rem;
+  font-weight: 500; white-space: nowrap; transition: all .15s ease;
+}
+nav.anchors a:hover { color: var(--accent); background: var(--panel-2); }
+
+main { max-width: 1120px; margin: 1.2rem auto 3rem; padding: 0 1.5rem; }
+
+section.widget {
+  background: var(--panel); border: 1px solid var(--border); border-radius: 16px;
+  padding: 1.5rem 1.4rem 1.3rem; margin-bottom: 1.5rem; box-shadow: var(--shadow);
+}
+.section-tag {
+  display: inline-block; font-family: 'JetBrains Mono', monospace; font-size: 0.72rem;
+  color: var(--accent); background: color-mix(in srgb, var(--accent) 12%, transparent);
+  padding: 0.2rem 0.55rem; border-radius: 6px; margin-bottom: 0.6rem; font-weight: 500;
+}
+.widget h2 { margin: 0 0 0.2rem; font-size: 1.35rem; font-weight: 600; color: var(--accent-2); letter-spacing: -0.005em; }
+.widget .lede { margin: 0 0 1rem; color: var(--text-soft); font-size: 0.97rem; max-width: 780px; }
+
+.controls {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 0.9rem 1.2rem; padding: 0.9rem 1rem; background: var(--panel-2); border-radius: 10px; margin-bottom: 1rem;
+}
+.ctrl { display: flex; flex-direction: column; gap: 0.3rem; }
+.ctrl label { font-size: 0.78rem; font-weight: 500; color: var(--text-soft); text-transform: uppercase; letter-spacing: 0.05em; }
+.ctrl select, .ctrl input[type="range"], .ctrl input[type="number"] {
+  font-family: inherit; font-size: 0.9rem; padding: 0.4rem 0.55rem; border-radius: 8px;
+  border: 1px solid var(--border); background: var(--panel); color: var(--text);
+}
+.ctrl input[type="range"] { padding: 0.2rem 0; accent-color: var(--accent); }
+.ctrl .val { font-family: 'JetBrains Mono', monospace; font-size: 0.82rem; color: var(--accent); font-weight: 500; }
+.toggle-group { display: inline-flex; gap: 0.25rem; background: var(--panel); padding: 3px; border-radius: 10px; border: 1px solid var(--border); flex-wrap: wrap; }
+.toggle-group button {
+  background: transparent; border: none; color: var(--text-soft);
+  padding: 0.32rem 0.75rem; border-radius: 7px; font-family: inherit; font-size: 0.85rem;
+  cursor: pointer; transition: all .15s ease;
+}
+.toggle-group button.active { background: var(--accent); color: white; font-weight: 500; }
+
+.stats-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+  gap: 0.6rem; margin: 0.5rem 0 1rem;
+}
+.stat {
+  background: var(--panel-2); padding: 0.65rem 0.75rem; border-radius: 10px; border-left: 3px solid var(--accent);
+}
+.stat .label { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-muted); }
+.stat .value { font-family: 'JetBrains Mono', monospace; font-size: 1.05rem; font-weight: 500; color: var(--text); margin-top: 0.15rem; }
+.stat.pop { border-left-color: var(--accent-2); }
+.stat.err { border-left-color: var(--accent-3); }
+
+.callout {
+  background: color-mix(in srgb, var(--accent-2) 8%, transparent);
+  border-left: 3px solid var(--accent-2); padding: 0.7rem 0.9rem;
+  border-radius: 8px; font-size: 0.9rem; color: var(--text-soft); margin: 0.9rem 0 0.2rem;
+}
+.callout strong { color: var(--accent-2); }
+
+.try-this {
+  background: color-mix(in srgb, var(--accent) 8%, transparent);
+  border-left: 3px solid var(--accent); padding: 0.7rem 0.9rem;
+  border-radius: 8px; font-size: 0.9rem; color: var(--text-soft); margin: 0.7rem 0 0.2rem;
+}
+.try-this .try-title { font-weight: 600; color: var(--accent); font-size: 0.78rem; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 0.3rem; }
+.try-this ol { margin: 0; padding-left: 1.25rem; }
+.try-this li { margin: 0.2rem 0; }
+
+.widget-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 0.5rem; margin-bottom: 0.2rem; }
+.widget-head > div { flex: 1; min-width: 0; }
+.reset-btn {
+  background: transparent; color: var(--text-muted); border: 1px solid var(--border);
+  padding: 0.3rem 0.7rem; border-radius: 8px; font-family: inherit; font-size: 0.8rem;
+  cursor: pointer; white-space: nowrap; transition: all .15s ease;
+}
+.reset-btn:hover { color: var(--accent); border-color: var(--accent); }
+
+.delta-row {
+  display: flex; flex-wrap: wrap; gap: 0.6rem 1.2rem;
+  margin: 0.2rem 0 0.9rem; padding: 0.55rem 0.85rem;
+  background: var(--panel-2); border-radius: 10px;
+  font-family: 'JetBrains Mono', monospace; font-size: 0.88rem;
+  color: var(--text-soft); border-left: 3px solid var(--accent-3);
+}
+.delta-row .label { color: var(--text-muted); margin-right: 0.35rem; }
+
+.chart { width: 100%; min-height: 340px; }
+.chart.tall { min-height: 420px; }
+.chart.short { min-height: 280px; }
+
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+@media (max-width: 720px) { .two-col { grid-template-columns: 1fr; } }
+
+footer.page {
+  max-width: 1120px; margin: 1rem auto 3rem; padding: 0 1.5rem;
+  color: var(--text-muted); font-size: 0.88rem; text-align: center;
+}
+footer.page a { color: var(--accent); text-decoration: none; }
+footer.page a:hover { text-decoration: underline; }
+.scroll-top { display: inline-block; font-size: 0.78rem; color: var(--text-muted); text-decoration: none; margin-top: 0.4rem; }
+.scroll-top:hover { color: var(--accent); }
+</style>
+</head>
+<body>
+
+<header class="page">
+  <div class="page-inner">
+    <span class="chapter-badge">Chapter 08 of 18 · Interactive Dashboard</span>
+    <h1 class="title">Case Studies for Bivariate Regression</h1>
+    <p class="subtitle">Explore health economics, financial markets, and macroeconomics through interactive regression analysis. Toggle outcomes, compare stocks, exclude outliers, and test Okun's Law.</p>
+  </div>
+  <button id="theme-toggle" class="theme-toggle" type="button" aria-label="Toggle color theme"><span id="theme-icon">🌙</span><span id="theme-label">Dark</span></button>
+</header>
+
+<nav class="anchors" aria-label="Sections">
+  <ul>
+    <li><a href="#health-outcomes">Health Outcomes</a></li>
+    <li><a href="#health-gdp">Health vs GDP</a></li>
+    <li><a href="#outlier-impact">Outlier Impact</a></li>
+    <li><a href="#capm">CAPM Betas</a></li>
+    <li><a href="#capm-resid">CAPM Residuals</a></li>
+    <li><a href="#okun">Okun's Law</a></li>
+    <li><a href="#okun-ts">Okun Time Series</a></li>
+  </ul>
+</nav>
+
+<main>
+
+<!-- ==================== WIDGET 1: Health Outcomes ==================== -->
+<section class="widget" id="health-outcomes">
+  <div class="widget-head">
+    <div>
+      <span class="section-tag">§ 8.1 · Key Concepts 8.1, 8.2</span>
+      <h2>Health Outcomes Across Countries</h2>
+    </div>
+    <button class="reset-btn" data-reset="hout">↺ Reset</button>
+  </div>
+  <p class="lede">Does higher health spending improve outcomes? Toggle between life expectancy and infant mortality as the dependent variable. Hover over countries to see their names. The U.S. stands out as a major outlier in both regressions.</p>
+  <div class="controls">
+    <div class="ctrl">
+      <label>Outcome variable</label>
+      <div class="toggle-group" id="hout-outcome">
+        <button type="button" data-val="lifeexp" class="active">Life Expectancy</button>
+        <button type="button" data-val="infmort">Infant Mortality</button>
+      </div>
+    </div>
+    <div class="ctrl">
+      <label>Show residuals</label>
+      <div class="toggle-group" id="hout-resid">
+        <button type="button" data-val="off" class="active">Off</button>
+        <button type="button" data-val="on">On</button>
+      </div>
+    </div>
+  </div>
+  <div class="stats-grid">
+    <div class="stat"><div class="label">Intercept (b1)</div><div class="value" id="hout-b1">—</div></div>
+    <div class="stat"><div class="label">Slope (b2)</div><div class="value" id="hout-b2">—</div></div>
+    <div class="stat"><div class="label">se(b2)</div><div class="value" id="hout-se">—</div></div>
+    <div class="stat"><div class="label">t-statistic</div><div class="value" id="hout-t">—</div></div>
+    <div class="stat pop"><div class="label">R-squared</div><div class="value" id="hout-r2">—</div></div>
+    <div class="stat"><div class="label">n</div><div class="value" id="hout-n">—</div></div>
+  </div>
+  <div class="chart" id="chart-hout"></div>
+  <div class="callout"><strong>Key Concept 8.1:</strong> Economic vs. statistical significance. The life expectancy slope is highly significant (t ≈ 5.3), and each $1,000 in spending predicts ~1.1 more years of life. But the U.S. spends $7,960 yet achieves lower life expectancy than predicted — magnitude and precision both matter for policy.</div>
+  <div class="try-this">
+    <div class="try-title">Try this</div>
+    <ol>
+      <li>Start with <strong>Life Expectancy</strong>. Note R² ≈ 0.32 — spending explains only 32% of variation. Hover over the U.S. point — it falls well below the line.</li>
+      <li>Switch to <strong>Infant Mortality</strong>. The slope is negative (higher spending, fewer deaths). The U.S. has much higher infant mortality than predicted.</li>
+      <li>Toggle <strong>Residuals</strong> on. The U.S. has the largest residual in both models — a persistent anomaly across health outcomes.</li>
+    </ol>
+  </div>
+</section>
+
+<!-- ==================== WIDGET 2: Health Expenditure vs GDP ==================== -->
+<section class="widget" id="health-gdp">
+  <div class="widget-head">
+    <div>
+      <span class="section-tag">§ 8.2 · Key Concept 8.3</span>
+      <h2>Health Expenditures vs. GDP</h2>
+    </div>
+    <button class="reset-btn" data-reset="hgdp">↺ Reset</button>
+  </div>
+  <p class="lede">How does national income determine health spending? GDP per capita strongly predicts health expenditure. The income elasticity near 1.0 suggests health care is a "normal good" — spending rises proportionally with income.</p>
+  <div class="controls">
+    <div class="ctrl">
+      <label>Sample</label>
+      <div class="toggle-group" id="hgdp-sample">
+        <button type="button" data-val="all" class="active">All 34 Countries</button>
+        <button type="button" data-val="subset">Exclude USA &amp; LUX</button>
+      </div>
+    </div>
+    <div class="ctrl">
+      <label>Highlight outliers</label>
+      <div class="toggle-group" id="hgdp-highlight">
+        <button type="button" data-val="on" class="active">On</button>
+        <button type="button" data-val="off">Off</button>
+      </div>
+    </div>
+  </div>
+  <div class="stats-grid">
+    <div class="stat"><div class="label">Slope (b2)</div><div class="value" id="hgdp-b2">—</div></div>
+    <div class="stat"><div class="label">se(b2)</div><div class="value" id="hgdp-se">—</div></div>
+    <div class="stat pop"><div class="label">R-squared</div><div class="value" id="hgdp-r2">—</div></div>
+    <div class="stat err"><div class="label">Elasticity at mean</div><div class="value" id="hgdp-elast">—</div></div>
+    <div class="stat"><div class="label">n</div><div class="value" id="hgdp-n">—</div></div>
+  </div>
+  <div class="chart" id="chart-hgdp"></div>
+  <div class="callout"><strong>Key Concept 8.3:</strong> Income elasticity of demand measures how spending changes with income. At the mean, elasticity ≈ 1.0: a 1% increase in GDP associates with roughly a 1% increase in health spending. Health care behaves as a normal good in cross-country data.</div>
+  <div class="try-this">
+    <div class="try-title">Try this</div>
+    <ol>
+      <li>With <strong>All 34</strong> selected, note R² ≈ 0.60. The U.S. and Luxembourg pull the line. Toggle highlights to see them in pink.</li>
+      <li>Switch to <strong>Exclude USA &amp; LUX</strong>. Watch R² jump to ~0.93 — a dramatic improvement. The slope also increases from 0.09 to 0.13.</li>
+      <li>Compare the two regression lines visually. Two countries completely transformed the story about how GDP predicts health spending.</li>
+    </ol>
+  </div>
+</section>
+
+<!-- ==================== WIDGET 3: Outlier Impact ==================== -->
+<section class="widget" id="outlier-impact">
+  <div class="widget-head">
+    <div>
+      <span class="section-tag">§ 8.2 · Key Concept 8.4</span>
+      <h2>Outlier Detection and Influence</h2>
+    </div>
+    <button class="reset-btn" data-reset="outlier">↺ Reset</button>
+  </div>
+  <p class="lede">Interactively remove countries to see how each one influences the regression. The slider drops the N most extreme residual countries. Watch R² and the slope shift as outliers are excluded — a hands-on lesson in influence analysis.</p>
+  <div class="controls">
+    <div class="ctrl">
+      <label for="outlier-drop">Countries to drop (by |residual|) <span class="val" id="outlier-drop-val">0</span></label>
+      <input type="range" id="outlier-drop" min="0" max="8" step="1" value="0">
+    </div>
+  </div>
+  <div class="stats-grid">
+    <div class="stat"><div class="label">Slope (b2)</div><div class="value" id="outlier-b2">—</div></div>
+    <div class="stat pop"><div class="label">R-squared</div><div class="value" id="outlier-r2">—</div></div>
+    <div class="stat err"><div class="label">Dropped</div><div class="value" id="outlier-dropped">—</div></div>
+    <div class="stat"><div class="label">Remaining n</div><div class="value" id="outlier-n">—</div></div>
+  </div>
+  <div class="chart" id="chart-outlier"></div>
+  <div class="callout"><strong>Key Concept 8.4:</strong> Outlier detection and influence. A few extreme observations can dramatically alter regression results. Always (1) identify outliers visually, (2) assess their influence on coefficients, (3) test robustness to exclusion, and (4) interpret in context.</div>
+  <div class="try-this">
+    <div class="try-title">Try this</div>
+    <ol>
+      <li>Start at 0 drops. Note the initial R² (~0.60). Slide to 1 — which country was dropped? Check the pink markers for the excluded points.</li>
+      <li>Slide to 2. The USA and Luxembourg are now excluded (the two biggest residuals). R² should jump to ~0.93.</li>
+      <li>Keep sliding to 5 or 6. At what point does dropping more countries stop improving R²? This reveals the "natural" scatter in the data vs. true outlier influence.</li>
+    </ol>
+  </div>
+</section>
+
+<!-- ==================== WIDGET 4: CAPM Beta Comparison ==================== -->
+<section class="widget" id="capm">
+  <div class="widget-head">
+    <div>
+      <span class="section-tag">§ 8.3 · Key Concepts 8.5, 8.6</span>
+      <h2>CAPM: Stock Betas</h2>
+    </div>
+    <button class="reset-btn" data-reset="capm">↺ Reset</button>
+  </div>
+  <p class="lede">The Capital Asset Pricing Model relates stock excess returns to market excess returns. The slope (beta) measures systematic risk. Compare Coca-Cola, Target, and Walmart — which is the most defensive? Which amplifies market moves?</p>
+  <div class="controls">
+    <div class="ctrl">
+      <label>Stock</label>
+      <div class="toggle-group" id="capm-stock">
+        <button type="button" data-val="rko_rf" class="active">Coca-Cola</button>
+        <button type="button" data-val="rtgt_rf">Target</button>
+        <button type="button" data-val="rwmt_rf">Walmart</button>
+      </div>
+    </div>
+    <div class="ctrl">
+      <label>Show 45° line (beta=1)</label>
+      <div class="toggle-group" id="capm-refline">
+        <button type="button" data-val="off" class="active">Off</button>
+        <button type="button" data-val="on">On</button>
+      </div>
+    </div>
+  </div>
+  <div class="stats-grid">
+    <div class="stat"><div class="label">Alpha</div><div class="value" id="capm-alpha">—</div></div>
+    <div class="stat"><div class="label">Beta</div><div class="value" id="capm-beta">—</div></div>
+    <div class="stat"><div class="label">se(beta)</div><div class="value" id="capm-se">—</div></div>
+    <div class="stat"><div class="label">t(beta)</div><div class="value" id="capm-t">—</div></div>
+    <div class="stat pop"><div class="label">R-squared</div><div class="value" id="capm-r2">—</div></div>
+    <div class="stat"><div class="label">n</div><div class="value" id="capm-n">—</div></div>
+  </div>
+  <div class="chart" id="chart-capm"></div>
+  <div class="callout"><strong>Key Concept 8.5:</strong> Systematic risk (beta) measures how returns co-move with the market. Beta &lt; 1 = defensive stock (Coca-Cola, Walmart); beta &gt; 1 = aggressive stock (Target). Only systematic risk is priced in efficient markets — idiosyncratic risk diversifies away.</div>
+  <div class="try-this">
+    <div class="try-title">Try this</div>
+    <ol>
+      <li>Start with <strong>Coca-Cola</strong> (beta ≈ 0.61). Toggle the <strong>45° line</strong> on — the fitted line is flatter, confirming beta &lt; 1.</li>
+      <li>Switch to <strong>Target</strong>. Its beta is above 1.0 — it amplifies market movements. The scatter is wider too (lower R²).</li>
+      <li>Compare <strong>Walmart</strong> — another consumer staple like Coca-Cola. Is its beta also low? Stable demand for everyday goods makes these stocks defensive.</li>
+    </ol>
+  </div>
+</section>
+
+<!-- ==================== WIDGET 5: CAPM Residual Diagnostics ==================== -->
+<section class="widget" id="capm-resid">
+  <div class="widget-head">
+    <div>
+      <span class="section-tag">§ 8.3 · Key Concept 8.6</span>
+      <h2>CAPM Residual Diagnostics</h2>
+    </div>
+    <button class="reset-btn" data-reset="cresid">↺ Reset</button>
+  </div>
+  <p class="lede">Explore the residuals from the CAPM regression. A well-specified model shows residuals randomly scattered around zero with no pattern. Large residuals represent months with unusual firm-specific news. R² tells you what fraction of return variation the market explains.</p>
+  <div class="controls">
+    <div class="ctrl">
+      <label>Stock</label>
+      <div class="toggle-group" id="cresid-stock">
+        <button type="button" data-val="rko_rf" class="active">Coca-Cola</button>
+        <button type="button" data-val="rtgt_rf">Target</button>
+        <button type="button" data-val="rwmt_rf">Walmart</button>
+      </div>
+    </div>
+    <div class="ctrl">
+      <label>Plot type</label>
+      <div class="toggle-group" id="cresid-type">
+        <button type="button" data-val="scatter" class="active">Residuals vs. Fitted</button>
+        <button type="button" data-val="hist">Residual Histogram</button>
+      </div>
+    </div>
+  </div>
+  <div class="stats-grid">
+    <div class="stat"><div class="label">Mean residual</div><div class="value" id="cresid-mean">—</div></div>
+    <div class="stat"><div class="label">SD residual</div><div class="value" id="cresid-sd">—</div></div>
+    <div class="stat err"><div class="label">Max |residual|</div><div class="value" id="cresid-max">—</div></div>
+    <div class="stat pop"><div class="label">R-squared</div><div class="value" id="cresid-r2">—</div></div>
+  </div>
+  <div class="chart" id="chart-cresid"></div>
+  <div class="callout"><strong>Key Concept 8.6:</strong> R² in CAPM measures the fraction of return variation explained by market movements (systematic risk). The remaining 1 − R² is idiosyncratic risk — firm-specific shocks that diversify away in portfolios and earn no risk premium.</div>
+  <div class="try-this">
+    <div class="try-title">Try this</div>
+    <ol>
+      <li>View <strong>Residuals vs. Fitted</strong> for Coca-Cola. The cloud should look random — no fan shape or curve. This suggests homoskedasticity holds approximately.</li>
+      <li>Switch to <strong>Residual Histogram</strong>. Is the distribution roughly bell-shaped? Large outliers represent months with unusual firm-specific events.</li>
+      <li>Compare residual SD across all three stocks. Which stock has the most idiosyncratic risk (largest SD)? That stock benefits most from diversification.</li>
+    </ol>
+  </div>
+</section>
+
+<!-- ==================== WIDGET 6: Okun's Law ==================== -->
+<section class="widget" id="okun">
+  <div class="widget-head">
+    <div>
+      <span class="section-tag">§ 8.4 · Key Concept 8.7</span>
+      <h2>Okun's Law: GDP Growth vs. Unemployment</h2>
+    </div>
+    <button class="reset-btn" data-reset="okun">↺ Reset</button>
+  </div>
+  <p class="lede">Okun's Law predicts that each 1-point rise in unemployment reduces GDP growth by ~2 points. Our estimate is -1.59. Use the prediction slider to see what the model forecasts for different unemployment changes, and toggle the hypothesis reference line.</p>
+  <div class="controls">
+    <div class="ctrl">
+      <label for="okun-predict">Predict for URATE change <span class="val" id="okun-predict-val">0.0</span></label>
+      <input type="range" id="okun-predict" min="-3" max="5" step="0.1" value="0">
+    </div>
+    <div class="ctrl">
+      <label>Show Okun's original (slope = -2.0)</label>
+      <div class="toggle-group" id="okun-refline">
+        <button type="button" data-val="off" class="active">Off</button>
+        <button type="button" data-val="on">On</button>
+      </div>
+    </div>
+  </div>
+  <div class="stats-grid">
+    <div class="stat"><div class="label">Intercept (b1)</div><div class="value" id="okun-b1">—</div></div>
+    <div class="stat"><div class="label">Slope (b2)</div><div class="value" id="okun-b2">—</div></div>
+    <div class="stat"><div class="label">se(b2)</div><div class="value" id="okun-seb2">—</div></div>
+    <div class="stat pop"><div class="label">R-squared</div><div class="value" id="okun-r2">—</div></div>
+    <div class="stat err"><div class="label">Predicted GDP growth</div><div class="value" id="okun-pred">—</div></div>
+    <div class="stat"><div class="label">n</div><div class="value" id="okun-n">—</div></div>
+  </div>
+  <div class="chart" id="chart-okun"></div>
+  <div class="callout"><strong>Key Concept 8.7:</strong> Okun's Law is a remarkably stable empirical regularity. Our slope of -1.59 is close to, but statistically different from, Okun's original -2.0. The relationship holds across time periods and countries, but structural changes (labor markets, technology) shift the exact coefficient.</div>
+  <div class="try-this">
+    <div class="try-title">Try this</div>
+    <ol>
+      <li>Set the prediction slider to +3 (unemployment rises 3 points). The predicted GDP growth drops sharply — this simulates a severe recession.</li>
+      <li>Toggle <strong>Okun's original</strong> on. The dashed reference line is steeper (slope = -2.0). Our estimate of -1.59 suggests a somewhat weaker modern relationship.</li>
+      <li>Hover over points in the lower-right. These are recession years (2008-2009, 1982) — large unemployment increases with negative GDP growth.</li>
+    </ol>
+  </div>
+</section>
+
+<!-- ==================== WIDGET 7: Okun Time Series ==================== -->
+<section class="widget" id="okun-ts">
+  <div class="widget-head">
+    <div>
+      <span class="section-tag">§ 8.4 · Key Concept 8.8</span>
+      <h2>Actual vs. Predicted GDP Growth Over Time</h2>
+    </div>
+    <button class="reset-btn" data-reset="okunts">↺ Reset</button>
+  </div>
+  <p class="lede">Okun's Law predicts GDP growth from unemployment changes. How well does it track the actual data over 60 years? This time series view reveals structural breaks — periods where the relationship weakens or strengthens.</p>
+  <div class="controls">
+    <div class="ctrl">
+      <label for="okunts-start">Start year <span class="val" id="okunts-start-val">1961</span></label>
+      <input type="range" id="okunts-start" min="1961" max="2010" step="1" value="1961">
+    </div>
+    <div class="ctrl">
+      <label for="okunts-end">End year <span class="val" id="okunts-end-val">2019</span></label>
+      <input type="range" id="okunts-end" min="1970" max="2019" step="1" value="2019">
+    </div>
+    <div class="ctrl">
+      <label>Show</label>
+      <div class="toggle-group" id="okunts-show">
+        <button type="button" data-val="both" class="active">Actual + Predicted</button>
+        <button type="button" data-val="residuals">Residuals</button>
+      </div>
+    </div>
+  </div>
+  <div class="stats-grid">
+    <div class="stat"><div class="label">Subperiod slope</div><div class="value" id="okunts-b2">—</div></div>
+    <div class="stat pop"><div class="label">Subperiod R²</div><div class="value" id="okunts-r2">—</div></div>
+    <div class="stat"><div class="label">Years</div><div class="value" id="okunts-years">—</div></div>
+    <div class="stat err"><div class="label">Mean |residual|</div><div class="value" id="okunts-mae">—</div></div>
+  </div>
+  <div class="chart" id="chart-okunts"></div>
+  <div class="callout"><strong>Key Concept 8.8:</strong> Structural breaks in time series relationships. The Okun relationship tracked well from 1961 to 2007, but the post-2008 "jobless recovery" produced systematic prediction errors. Visual inspection of actual vs. predicted over time reveals when models break down.</div>
+  <div class="try-this">
+    <div class="try-title">Try this</div>
+    <ol>
+      <li>Set the range to 1961–2007 (pre-crisis). Note the subperiod R². Now extend to 1961–2019 — does the fit change?</li>
+      <li>Set 2008–2019 only. The slope and R² for this post-crisis period differ from the full sample. This is a potential structural break.</li>
+      <li>Toggle to <strong>Residuals</strong>. Are the errors randomly scattered, or do you see runs of positive/negative values? Persistent patterns suggest serial correlation or structural change.</li>
+    </ol>
+  </div>
+</section>
+
+</main>
+
+<footer class="page">
+  <p>Part of <a href="https://quarcs-lab.github.io/metricsai/book/_book/index.html"><strong>metricsAI</strong></a> · Chapter 08: Case Studies for Bivariate Regression · by Carlos Mendez · <a href="https://github.com/quarcs-lab/metricsai">GitHub</a></p>
+  <p>Data: AED_HEALTH2009.DTA (34 OECD, 2009) · AED_CAPM.DTA (monthly, 1983–2013) · AED_GDPUNEMPLOY.DTA (annual US, 1961–2019).</p>
+  <a class="scroll-top" href="#top">↑ Back to top</a>
+</footer>
+
+<script type="application/json" id="ch-data">{"health":{"codes":["AUS","AUT","BEL","CAN","CHL","CZR","DEN","EST","FIN","FRA","GER","GRE","HUN","ICE","IRE","ISR","ITA","JAP","KOR","LUX","MEX","NET","NZ","NOR","PER","POR","SLR","SLO","SPA","SWE","SWI","TUR","UK","USA"],"hlthpc":[3670.0,4346.0,3911.0,4317.0,1210.0,2048.0,4385.0,1385.0,3271.0,3930.0,4225.0,3106.0,1559.0,3539.0,3944.0,2165.0,3005.0,3035.0,1864.0,4786.0,923.0,4886.0,2923.0,5348.0,1365.0,2697.0,2066.0,2524.0,3076.0,3711.0,5135.0,968.0,3379.0,7990.0],"lifeexp":[79.3,77.6,77.3,78.5,75.8,74.2,76.9,69.8,76.6,77.7,77.8,77.8,70.0,79.7,77.4,79.6,79.4,79.6,77.0,78.1,72.9,78.5,78.8,78.7,71.5,76.5,71.3,75.8,78.7,79.4,79.9,71.5,78.3,76.0],"infmort":[4.3,3.8,3.4,5.0,7.9,2.9,3.1,3.6,2.6,3.9,3.5,3.1,5.1,1.8,3.2,3.8,3.9,2.4,3.2,2.5,14.7,3.8,5.2,3.1,5.6,3.6,5.7,2.4,3.2,2.5,4.3,13.1,4.6,6.4],"gdppc":[39039.96,38827.71,36721.66,37842.29,15177.29,25627.48,38295.5,19792.64,35696.87,33548.94,36039.62,29384.27,20156.55,36751.62,39835.76,25472.17,32250.03,32107.05,26930.55,82900.88,13806.16,41082.2,29496.46,54693.76,18927.12,24937.99,22579.66,27179.32,32164.39,37341.37,45108.31,14453.63,34476.23,45191.94],"regLifeexp":{"b1":73.083546,"b2":0.001112,"se_b1":1.024218,"se_b2":0.000287,"t_b1":71.3555,"t_b2":3.878,"se":2.4598,"R2":0.3197,"n":34,"xbar":3255.6471,"ybar":76.7029,"SSx":73623113.7647,"RSS":193.6159},"regInfmort":{"b1":6.701697,"b2":-0.000693,"se_b1":1.063762,"se_b2":0.000298,"t_b1":6.3,"t_b2":-2.3259,"se":2.5547,"R2":0.1446,"n":34,"xbar":3255.6471,"ybar":4.4471,"SSx":73623113.7647,"RSS":208.8551},"regHlthAll":{"b1":284.906191,"b2":0.089875,"se_b1":455.582934,"se_b2":0.012863,"t_b1":0.6254,"t_b2":6.9873,"se":954.4245,"R2":0.6041,"n":34,"xbar":33054.0404,"ybar":3255.6471,"SSx":5505802828.0659,"RSS":29149636.4205},"regHlthSub":{"b1":-883.311182,"b2":0.126721,"se_b1":208.948518,"se_b2":0.006435,"t_b1":-4.2274,"t_b2":19.6923,"se":337.6844,"R2":0.9282,"n":32,"xbar":31117.0173,"ybar":3059.875,"SSx":2753700716.0943,"RSS":3420923.3928},"outlierCodes":["USA","LUX"]},"capm":{"rm_rf":[0.0063,0.0311,-0.039,-0.0041,0.0085,-0.0356,0.0226,-0.0178,-0.0206,-0.0462,0.0061,-0.0056,-0.0601,0.0159,-0.0288,0.1044,-0.0082,-0.0101,-0.018,0.0173,0.0792,0.0111,-0.0079,-0.0094,0.0492,0.0116,-0.0065,-0.0103,-0.0458,0.0379,0.0631,0.0366,0.0042,0.0672,0.0479,-0.0131,0.0459,0.009,-0.0649,0.0616,-0.0835,0.0447,0.0112,-0.0313,0.1243,0.0436,0.019,-0.0214,0.0013,0.0389,0.0396,0.0324,-0.0253,-0.2314,-0.0758,0.0664,0.042,0.0471,-0.021,0.0064,-0.0047,0.0466,-0.0124,-0.0339,0.031,0.0115,-0.0221,0.0148,0.0606,-0.0225,0.0148,0.0415,0.0314,-0.012,0.0701,0.0147,-0.008,-0.0361,0.0109,0.0122,-0.0758,0.0092,0.0177,-0.0352,0.0821,-0.0105,-0.0162,-0.0985,-0.0598,-0.0193,0.06,0.0235,0.0439,0.071,0.0245,-0.002,0.036,-0.0482,0.0419,0.0222,-0.0156,0.0136,-0.0412,0.103,-0.0046,0.0106,-0.0271,0.0102,0.0036,-0.0225,0.0368,-0.0234,0.0098,0.0087,0.0379,0.015,0.0103,0.0032,0.0226,-0.0278,0.0274,0.0029,-0.0032,0.037,-0.002,0.0159,-0.0201,0.0172,0.029,-0.0263,-0.0485,0.0068,0.0062,-0.031,0.0278,0.0389,-0.0221,0.0107,-0.0409,0.0082,0.0162,0.0356,0.0224,0.0206,0.0286,0.0265,0.0363,0.0046,0.0321,-0.016,0.0385,0.0103,0.0238,0.0124,0.007,0.0209,0.0226,-0.0123,-0.0583,0.0284,0.0486,0.0095,0.0615,-0.016,0.049,-0.005,-0.0492,0.0381,0.0667,0.0404,0.0722,-0.0404,0.0541,-0.0386,0.0265,0.013,0.0002,0.0694,0.0474,0.0066,-0.0297,0.0278,-0.0274,-0.1621,0.0592,0.0712,0.0589,0.0593,0.035,-0.0416,0.0336,0.0454,-0.0241,0.0468,-0.0345,-0.0139,-0.0267,0.0582,0.0332,0.0794,-0.0437,0.0275,0.0488,-0.0641,-0.044,0.0476,-0.0219,0.0709,-0.0562,-0.0302,-0.1076,0.0154,0.0341,-0.1032,-0.0747,0.0799,0.0074,-0.0203,-0.0213,-0.0621,-0.0943,0.0256,0.0771,0.0164,-0.0174,-0.023,0.0434,-0.0511,-0.0119,-0.0716,-0.0826,0.0066,-0.1014,0.0735,0.0601,-0.0544,-0.0244,-0.0163,0.0093,0.0818,0.0626,0.0153,0.0224,0.0243,-0.0099,0.0596,0.0159,0.0447,0.0223,0.0149,-0.0116,-0.025,0.0135,0.0208,-0.0387,0.0016,0.0194,0.0167,0.0467,0.0336,-0.0282,0.0211,-0.019,-0.0273,0.0356,0.0092,0.0409,-0.0089,0.0077,-0.0235,0.0373,0.0003,0.0365,-0.005,0.0154,0.0094,-0.0353,-0.0044,-0.0059,0.0209,0.0153,0.033,0.0195,0.0068,0.015,-0.0178,0.0087,0.0355,0.0348,-0.0187,-0.0357,0.0075,0.0377,0.0226,-0.0527,-0.007,-0.0644,-0.0233,-0.0121,0.0494,0.0221,-0.0803,-0.0147,0.0099,-0.0997,-0.1855,-0.0856,0.0206,-0.0775,-0.1012,0.0875,0.1104,0.0673,-0.0028,0.0823,0.0318,0.0452,-0.0284,0.0574,0.0291,-0.0371,0.0353,0.0644,0.0202,-0.08,-0.0521,0.071,-0.044,0.0924,0.0389,0.0056,0.0677,0.0201,0.0385,0.0028,0.0282,-0.0147,-0.0185,-0.0235,-0.0586,-0.0843,0.1153,-0.0061,0.0049,0.0539,0.042,0.0252,-0.0069,-0.0659,0.0385,0.0103,0.0265,0.0265,-0.0144],"n":354,"stocks":{"rko_rf":{"label":"Coca-Cola","values":[-0.0747,-0.02488,-0.08147,0.0924,-0.0076,0.02876,0.06318,-0.04009,-0.05845,0.01076,0.06288,-0.0081,-0.0078,0.05807,0.02257,0.03648,0.01997,0.01778,-0.03433,-0.0064,-0.04817,0.05217,0.11709,-0.03159,-0.0191,0.03247,0.03039,-0.0055,-0.02953,0.02964,0.15669,0.0135,-0.0154,0.14321,0.09745,0.0573,0.03186,0.087,-0.07014,-0.03932,-0.10522,0.0754,0.00351,0.03186,0.12346,0.04601,0.02524,-0.07417,0.00245,0.03868,0.06683,0.05641,-0.04115,-0.15274,-0.10541,0.03156,-0.0166,-0.01154,0.02357,-0.0046,-0.0119,0.02935,-0.01835,0.03437,0.09703,-0.0178,0.00613,0.02294,0.03995,0.01564,0.07309,0.05241,0.05722,-0.02457,0.19744,-0.02954,0.00859,0.07127,0.06551,-0.0061,-0.11502,0.01957,0.0605,0.0129,0.17443,-0.01726,0.01536,-0.07435,-0.06705,0.12942,0.02972,-0.00074,0.04192,0.0702,0.03513,-0.03215,0.08036,-0.04869,0.09931,0.08978,-0.02111,0.02938,0.04123,0.15337,-0.03773,0.0513,0.001,0.0114,0.05763,-0.0914,0.04452,0.02297,-0.05662,0.00063,-0.02128,0.05077,0.01041,-0.0022,0.00726,-0.07837,0.05161,0.03722,0.00306,0.00157,-0.02557,0.02546,-0.03076,0.06003,-0.08594,0.04057,-0.04499,0.02437,-0.03926,0.01129,0.0894,0.03266,0.0577,0.0328,0.01452,0.00343,0.01467,0.04393,0.02451,0.02691,0.05435,0.03319,0.02489,-0.02546,0.07344,0.0371,0.05245,-0.02426,0.01089,0.06715,0.02403,-0.01955,0.12477,0.06381,-0.04798,0.06289,0.01522,-0.01135,0.01085,0.02486,0.09513,0.05008,-0.08843,0.13699,0.07165,-0.00898,0.01204,-0.17492,0.06249,-0.07553,0.10226,0.06198,-0.03332,0.05588,0.12704,-0.02461,0.02873,0.08921,-0.06262,-0.1952,-0.1175,0.16887,0.03594,-0.04724,-0.02887,-0.02533,-0.04078,0.10499,0.00303,-0.09661,-0.02712,-0.01651,-0.19459,0.21876,0.13978,-0.13867,-0.01807,-0.15782,-0.03595,0.00231,0.12486,0.07549,0.06227,-0.14654,0.04559,0.08992,0.03494,-0.03195,-0.05375,-0.08935,-0.14985,0.01915,0.0228,-0.04953,-0.01186,0.08808,-0.04048,0.01993,-0.01725,0.00245,-0.07331,0.08163,0.10602,0.06109,-0.00045,0.01009,-0.1099,0.02018,-0.05756,-0.03197,-0.01528,-0.04051,-0.07769,-0.00734,0.01196,-0.00356,0.12739,0.02231,-0.03181,-0.03281,-0.00909,0.07935,0.00649,0.09036,-0.03039,0.01392,0.01137,0.00425,0.01498,-0.01317,-0.13176,0.01792,-0.10008,0.01397,-0.02809,0.05749,-0.0052,0.02971,-0.02195,0.04019,0.02503,-0.0607,0.04603,0.00207,-0.01467,-0.01234,0.00148,-0.05907,0.02307,0.01072,0.00152,-0.00187,0.04524,-0.01992,0.03058,0.00281,-0.00035,0.04177,0.00447,0.02633,-0.01176,-0.02901,0.0312,0.08326,0.01121,-0.01021,-0.00802,0.02806,0.07189,0.07149,0.00749,-0.01459,-0.04046,-0.01069,0.04646,-0.03495,-0.02907,-0.0878,-0.0107,0.00976,0.02125,-0.16761,0.0726,-0.03535,-0.056,-0.04419,0.08711,-0.0203,0.14175,-0.01545,0.03841,-0.02173,0.11001,-0.00732,0.08067,-0.00351,-0.04829,-0.02837,0.05171,-0.02815,-0.03831,-0.01683,0.09943,0.01383,0.05522,0.04762,0.03717,0.04115,-0.04451,0.01695,0.04526,0.01698,-0.00959,0.01436,0.01077,0.03583,-0.03469,0.01127,-0.00873,0.0407,-0.03473,0.03447,0.06723,0.03122,-0.02108,0.05345,0.03348,-0.07436,0.0209,-0.01987],"reg":{"b1":0.006812,"b2":0.606332,"se_b1":0.002952,"se_b2":0.064423,"t_b1":2.3071,"t_b2":9.4117,"se":0.0551,"R2":0.2011,"n":354,"xbar":0.0055,"ybar":0.0102,"SSx":0.7326,"RSS":1.0703}},"rtgt_rf":{"label":"Target","values":[0.015699,0.070648,-0.027913,-0.09137,-0.001886,0.066264,-0.065201,-0.085952,-0.038088,-0.013389,-0.051604,0.01839,-0.098123,0.176897,0.045692,0.042836,-0.030222,-0.026575,-0.0073,-0.051344,0.134676,0.025128,0.0438,-0.03101,0.159254,-0.043157,-0.088809,0.022936,-0.047475,0.027154,0.138086,0.01789,-0.013537,-0.0173,0.147846,-0.019235,0.119655,-0.027352,-0.189666,0.01921,-0.078143,0.104187,-0.064277,-0.049077,-0.033612,0.026003,0.07093,-0.062994,0.095785,0.074445,0.00589,0.057584,0.106249,-0.484006,-0.132713,0.015455,0.262923,0.1104,-0.026822,-0.064233,-0.024612,0.019976,-0.000246,0.04724,0.094717,0.052233,-0.029322,-0.066784,0.106088,0.020927,0.004578,0.041627,0.130398,-0.084982,0.168676,0.050071,0.015239,0.001179,-0.017454,0.012567,-0.068527,0.030613,0.114894,-0.026131,0.1182,-0.045516,-0.043081,-0.192482,-0.075364,-0.103073,0.142066,0.044898,0.140099,0.042464,0.021728,0.064144,0.068893,-0.111055,-0.041017,0.135915,-0.070308,-0.129475,-0.099377,0.073978,0.048146,0.048671,-0.089647,-0.018506,0.11119,-0.014828,-0.024276,0.014227,0.049409,0.096576,0.03042,-0.040424,0.022391,-0.004208,0.06591,-0.137993,0.021765,-0.085479,0.030083,-0.029466,0.034352,0.006709,0.030613,-0.070676,-0.013968,0.090707,0.018531,0.08046,-0.0032,0.02761,0.015822,0.029207,-0.101045,0.007965,0.05444,-0.136268,-0.035846,0.030858,0.008032,-0.064691,0.056547,0.0078,0.048998,-0.032044,0.033853,-0.097543,0.057634,0.027229,-0.014028,0.003959,0.136451,0.121896,0.068638,0.005901,-0.123548,0.140574,-0.047456,0.045147,0.123148,0.005216,-0.045812,0.116506,-0.009956,0.074198,0.067885,0.101511,0.210113,-0.119118,0.051891,0.042038,0.053029,0.0115,0.061251,0.073325,0.134618,-0.012304,0.060551,0.041883,-0.018493,-0.234202,-0.031335,0.181888,0.060918,0.202113,0.171554,-0.020704,0.060504,0.006793,-0.066051,0.027758,-0.008453,-0.108898,0.035071,0.071893,0.090217,0.036349,-0.107037,-0.107433,0.262568,-0.114231,-0.062043,-0.078511,-0.0048,-0.203884,0.099875,0.072293,0.085543,0.067769,0.172037,0.024602,-0.079282,0.061747,-0.01875,-0.087247,0.115447,-0.106333,-0.086492,-0.021334,0.205146,0.092126,0.080307,-0.056469,0.027895,0.010695,-0.050379,-0.082269,-0.126163,0.025988,-0.138354,0.019063,0.15544,-0.13849,-0.060537,0.016842,0.020395,0.141746,0.09652,0.031787,0.012178,0.060802,-0.074059,0.055507,-0.024604,-0.009255,-0.012167,0.159424,0.023715,-0.037837,0.031884,-0.050888,0.025762,0.023158,0.014017,0.104385,0.02387,0.012414,-0.024057,0.001051,-0.017742,-0.074392,0.156587,0.010814,0.077526,-0.086524,-0.036738,0.069711,-0.040567,0.024069,-0.00735,-0.008079,-0.04764,0.017349,-0.081143,-0.004907,-0.064386,0.052094,0.137712,0.067014,-0.020658,-0.021874,0.071108,0.00106,-0.041204,-0.00254,0.049558,0.014678,-0.05157,0.086973,-0.038986,-0.03807,-0.023432,-0.168971,0.106263,-0.049493,-0.03843,0.04667,0.00498,-0.130476,-0.028673,0.174717,-0.076439,-0.182739,-0.154521,0.021813,-0.09634,-0.08802,0.214601,0.199838,-0.043739,0.004256,0.105078,0.081823,-0.006901,0.037434,-0.035204,0.038669,0.059934,0.008285,0.020853,0.081288,-0.038433,-0.098397,0.043677,0.00175,0.044431,-0.028194,0.101376,0.055874,-0.088213,-0.037264,-0.048398,-0.018303,0.013771,-0.052874,0.097529,0.009751,-0.050966,0.116425,-0.031943,-0.028144,-0.007989,0.122207,0.027808,-0.005586,0.004815,0.004716,0.04242,0.062608,-0.00983,0.004337],"reg":{"b1":0.004396,"b2":1.066779,"se_b1":0.003687,"se_b2":0.08046,"t_b1":1.1923,"t_b2":13.2585,"se":0.0689,"R2":0.3331,"n":354,"xbar":0.0055,"ybar":0.0103,"SSx":0.7326,"RSS":1.6695}},"rwmt_rf":{"label":"Walmart","values":[0.15748,0.08742,0.03561,-0.03853,0.02431,-0.04884,0.06827,-0.0773,-0.09362,-0.10122,0.01867,0.06785,0.03926,0.10486,-0.0284,0.08448,-0.0369,-0.02942,-0.06671,-0.04851,0.1913,-0.0058,-0.02455,0.03953,0.1184,0.03418,-0.0978,0.03652,-0.07858,0.09785,0.11201,0.07096,0.00747,0.05276,0.15254,0.02112,0.17972,0.07705,-0.1092,0.00879,-0.11023,0.06437,0.05601,-0.02664,0.0358,0.12818,0.04436,-0.01879,0.02905,0.15068,0.09938,0.08117,-0.06828,-0.27575,-0.1341,0.07765,0.05266,0.06683,-0.04651,-0.01559,0.01342,0.07874,0.06873,-0.0934,0.06914,-0.03158,-0.04165,0.03099,0.06966,-0.06081,0.01581,0.10022,0.04324,0.00101,0.12705,-0.02868,-0.03549,0.00564,0.04224,0.02434,-0.0557,0.02779,0.06767,0.04482,0.12845,0.102,-0.00191,-0.09736,-0.04878,-0.02542,0.11954,0.00075,0.08525,0.0674,0.09159,0.04045,0.05405,-0.00656,0.10871,0.05916,-0.06154,-0.03492,0.05293,0.20199,-0.08831,-0.00093,-0.0165,-0.02216,0.01169,0.01204,0.0363,0.01996,0.03359,0.02751,0.05477,-0.00749,0.015,-0.00452,-0.02419,-0.15996,0.04009,-0.06021,-0.03589,0.01433,-0.04642,0.06806,0.08408,-0.12839,0.05762,0.06784,-0.08927,-0.02688,-0.07258,0.03098,0.0281,-0.01669,-0.05431,0.00153,-0.01324,-0.09005,0.07191,0.03408,0.07716,-0.07804,0.04167,0.07322,-0.00913,-0.08291,0.00681,-0.13157,0.10793,-0.07795,-0.08865,0.03974,0.08089,0.03287,0.07939,-0.02114,-0.05876,0.09733,-0.0044,0.00045,-0.04206,-0.11047,0.03963,0.10641,0.05512,0.00446,0.05765,0.1304,0.10529,-0.05803,0.02994,-0.04869,0.13995,-0.01817,0.00494,0.15961,0.09468,-0.00907,0.08617,0.09929,0.03507,-0.06953,-0.07767,0.26119,0.08727,0.07876,0.05258,-0.0021,0.06725,-0.00579,-0.07661,0.12907,-0.12799,0.0446,0.07066,0.1802,0.01971,0.19602,-0.21197,-0.11397,0.15575,-0.02438,0.03558,-0.00296,-0.04605,-0.14298,0.0065,-0.06266,0.14501,0.0143,0.06358,-0.12199,0.00516,0.02073,-0.00297,-0.0585,0.14262,-0.14367,0.02902,0.03634,0.07114,0.04326,0.04082,0.03266,-0.01167,-0.09019,-0.03292,0.01673,-0.10733,0.08604,-0.07959,0.08631,0.00522,-0.06251,-0.05471,0.00455,0.08355,0.08127,-0.06663,0.0208,0.04109,0.05758,-0.05706,0.05659,-0.05689,-0.04572,0.01438,0.10561,0.00345,-0.04584,-0.02058,-0.05881,0.00882,-0.0053,0.00911,0.0123,-0.03596,0.01546,-0.00955,-0.01673,-0.0283,-0.06125,0.00278,0.01806,0.02164,-0.08915,-0.02833,0.0769,0.02351,-0.03649,-0.01826,-0.01988,0.04174,-0.05047,0.07545,-0.00966,-0.08017,0.00453,0.09878,-0.00502,-0.06868,0.00143,0.02828,0.00929,-0.02779,0.01628,-0.00622,0.00663,-0.04886,-0.04994,-0.00269,0.03241,0.05622,-0.00597,0.06536,-0.0239,0.06566,0.09875,-0.00161,-0.02845,0.0415,0.01056,0.01227,-0.06889,0.00108,0.00657,-0.15948,0.04495,0.0638,-0.03268,-0.00777,-0.02621,0.02961,0.02529,-0.03501,0.01184,0.09816,-0.01529,-0.0004,0.01203,0.03397,-0.03524,-0.05212,-0.04931,0.06488,-0.01499,0.06729,0.0121,-0.00165,0.00243,0.0397,-0.0731,0.00836,0.05612,0.01116,-0.03778,-0.00797,0.01616,-0.0241,0.09285,0.03832,0.02107,0.02677,-0.0372,0.04277,-0.03738,0.12481,0.05911,0.06764,-0.01942,0.01643,0.01643],"reg":{"b1":0.007976,"b2":0.747972,"se_b1":0.003289,"se_b2":0.071759,"t_b1":2.4253,"t_b2":10.4234,"se":0.0614,"R2":0.2359,"n":354,"xbar":0.0055,"ybar":0.0121,"SSx":0.7326,"RSS":1.328}}}},"okun":{"years":[1961,1962,1963,1964,1965,1966,1967,1968,1969,1970,1971,1972,1973,1974,1975,1976,1977,1978,1979,1980,1981,1982,1983,1984,1985,1986,1987,1988,1989,1990,1991,1992,1993,1994,1995,1996,1997,1998,1999,2000,2001,2002,2003,2004,2005,2006,2007,2008,2009,2010,2011,2012,2013,2014,2015,2016,2017,2018,2019],"rgdpgrowth":[2.5637,6.1271,4.3551,5.7613,6.4977,6.596,2.7425,4.9156,3.1248,0.1861,3.2934,5.2589,5.6457,-0.5405,-0.2055,5.3881,4.6242,5.5353,3.1662,-0.2568,2.5377,-1.8029,4.5839,7.2366,4.1697,3.4627,3.4596,4.177,3.6727,1.886,-0.1083,3.5224,2.7528,4.0288,2.6843,3.7725,4.4472,4.4814,4.7532,4.1275,0.9983,1.7417,2.8612,3.7989,3.5132,2.855,1.8762,-0.1366,-2.5368,2.5638,1.5508,2.2495,1.8421,2.526,2.908,1.6378,2.3698,2.9273,2.3333],"uratechange":[1.1532,-1.1741,0.1429,-0.493,-0.6662,-0.7478,0.0589,-0.2825,-0.0505,1.4504,1.0331,-0.353,-0.7378,0.7263,2.8844,-0.7749,-0.6541,-0.9983,-0.2104,1.3319,0.4856,2.1196,-0.0804,-2.1431,-0.3333,-0.2072,-0.7997,-0.708,-0.2486,0.3321,1.2547,0.6801,-0.5819,-0.8567,-0.5249,-0.1865,-0.4612,-0.4462,-0.2971,-0.2321,0.7657,1.065,0.2099,-0.4636,-0.454,-0.455,-0.0139,1.1724,3.5304,0.3901,-0.7017,-0.9008,-0.6804,-1.2299,-0.889,-0.4329,-0.5287,-0.4669,-0.2195],"reg":{"b1":3.008245,"b2":-1.588937,"se_b1":0.171032,"se_b2":0.174706,"t_b1":17.5888,"t_b2":-9.0949,"se":1.313,"R2":0.592,"n":59,"xbar":-0.0322,"ybar":3.0594,"SSx":56.4836,"RSS":98.268}},"meta":{"chapter":"Chapter 08: Case Studies for Bivariate Regression","book":"metricsAI: An Introduction to Econometrics with Python and AI in the Cloud","author":"Carlos Mendez"}}</script>
+
+<script>
+"use strict";
+
+var DATA = JSON.parse(document.getElementById("ch-data").textContent);
+
+// ==================== STATS HELPERS ====================
+var mean = function(a) { var s = 0; for (var i = 0; i < a.length; i++) s += a[i]; return s / a.length; };
+function std(a, m) {
+  if (m === undefined) m = mean(a);
+  var s = 0;
+  for (var i = 0; i < a.length; i++) s += (a[i] - m) * (a[i] - m);
+  return Math.sqrt(s / (a.length - 1));
+}
+function fmt(v, d) {
+  if (d === undefined) d = 4;
+  if (v === null || v === undefined || isNaN(v)) return "\u2014";
+  return v.toFixed(d);
+}
+function linspace(a, b, n) {
+  var out = new Array(n);
+  var step = (b - a) / (n - 1);
+  for (var i = 0; i < n; i++) out[i] = a + i * step;
+  return out;
+}
+
+// ==================== OLS ENGINE ====================
+function olsFit(x, y) {
+  var n = x.length;
+  var xbar = mean(x), ybar = mean(y);
+  var SSx = 0, SSxy = 0;
+  for (var i = 0; i < n; i++) {
+    SSx += (x[i] - xbar) * (x[i] - xbar);
+    SSxy += (x[i] - xbar) * (y[i] - ybar);
+  }
+  var b2 = SSxy / SSx;
+  var b1 = ybar - b2 * xbar;
+  var yhat = new Array(n);
+  var residuals = new Array(n);
+  var RSS = 0;
+  for (var i = 0; i < n; i++) {
+    yhat[i] = b1 + b2 * x[i];
+    residuals[i] = y[i] - yhat[i];
+    RSS += residuals[i] * residuals[i];
+  }
+  var se = Math.sqrt(RSS / (n - 2));
+  var se_b2 = se / Math.sqrt(SSx);
+  var SST = 0;
+  for (var i = 0; i < n; i++) SST += (y[i] - ybar) * (y[i] - ybar);
+  var R2 = SST > 0 ? 1 - RSS / SST : 0;
+  return { b1: b1, b2: b2, yhat: yhat, residuals: residuals, n: n, xbar: xbar, ybar: ybar, SSx: SSx, RSS: RSS, se: se, se_b2: se_b2, R2: R2 };
+}
+
+// ==================== THEME ====================
+var THEME_KEY = "metricsai-theme";
+function getCSS(varName) { return getComputedStyle(document.documentElement).getPropertyValue(varName).trim(); }
+function themeColors() {
+  return { text: getCSS("--text"), textSoft: getCSS("--text-soft"), grid: getCSS("--grid"),
+    panel: getCSS("--panel"), cyan: getCSS("--accent"), purple: getCSS("--accent-2"), pink: getCSS("--accent-3") };
+}
+function baseLayout(overrides) {
+  var c = themeColors();
+  var base = {
+    paper_bgcolor: "rgba(0,0,0,0)", plot_bgcolor: "rgba(0,0,0,0)",
+    font: { family: "Inter, system-ui, sans-serif", color: c.text, size: 12 },
+    margin: { l: 56, r: 18, t: 30, b: 46 },
+    xaxis: { gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft } },
+    yaxis: { gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft } },
+    hoverlabel: { bgcolor: c.panel, bordercolor: c.grid, font: { color: c.text } },
+    legend: { font: { color: c.text }, bgcolor: "rgba(0,0,0,0)" }
+  };
+  if (overrides) for (var k in overrides) base[k] = overrides[k];
+  return base;
+}
+var PLOTLY_CONFIG = { displayModeBar: false, responsive: true };
+
+// ==================== TOGGLE / SLIDER HELPERS ====================
+function bindToggles(groupId, renderFn) {
+  document.querySelectorAll("#" + groupId + " button").forEach(function(btn) {
+    btn.addEventListener("click", function() {
+      this.parentNode.querySelectorAll("button").forEach(function(b) { b.classList.remove("active"); });
+      this.classList.add("active");
+      renderFn();
+    });
+  });
+}
+function bindSlider(id, valId, formatFn, renderFn) {
+  var el = document.getElementById(id);
+  var valEl = document.getElementById(valId);
+  el.addEventListener("input", function() {
+    valEl.textContent = formatFn(this.value);
+    renderFn();
+  });
+}
+function getToggleVal(groupId) {
+  var btn = document.querySelector("#" + groupId + " button.active");
+  return btn ? btn.dataset.val : "";
+}
+
+// ==================== WIDGET 1: Health Outcomes ====================
+(function() {
+  var chartEl = document.getElementById("chart-hout");
+  var H = DATA.health;
+
+  function render() {
+    var c = themeColors();
+    var outcome = getToggleVal("hout-outcome");
+    var showResid = getToggleVal("hout-resid") === "on";
+
+    var yData = outcome === "lifeexp" ? H.lifeexp : H.infmort;
+    var reg = outcome === "lifeexp" ? H.regLifeexp : H.regInfmort;
+    var yLabel = outcome === "lifeexp" ? "Life Expectancy (years)" : "Infant Mortality (per 1,000)";
+
+    document.getElementById("hout-b1").textContent = fmt(reg.b1, 2);
+    document.getElementById("hout-b2").textContent = fmt(reg.b2, 6);
+    document.getElementById("hout-se").textContent = fmt(reg.se_b2, 6);
+    document.getElementById("hout-t").textContent = fmt(reg.t_b2, 2);
+    document.getElementById("hout-r2").textContent = fmt(reg.R2);
+    document.getElementById("hout-n").textContent = reg.n;
+
+    var traces = [];
+
+    // scatter with country labels
+    traces.push({
+      x: H.hlthpc, y: yData, mode: "markers", type: "scatter",
+      marker: { color: c.cyan, size: 8, opacity: 0.8 },
+      text: H.codes, name: "Countries",
+      hovertemplate: "%{text}<br>Hlthpc=$%{x:,.0f}<br>" + (outcome === "lifeexp" ? "LifeExp" : "InfMort") + "=%{y:.1f}<extra></extra>"
+    });
+
+    // regression line
+    var xMin = Math.min.apply(null, H.hlthpc);
+    var xMax = Math.max.apply(null, H.hlthpc);
+    traces.push({
+      x: [xMin, xMax], y: [reg.b1 + reg.b2 * xMin, reg.b1 + reg.b2 * xMax],
+      mode: "lines", line: { color: c.purple, width: 2.5 }, name: "OLS fit"
+    });
+
+    // residuals
+    if (showResid) {
+      for (var i = 0; i < H.hlthpc.length; i++) {
+        var yhat = reg.b1 + reg.b2 * H.hlthpc[i];
+        traces.push({
+          x: [H.hlthpc[i], H.hlthpc[i]], y: [yData[i], yhat],
+          mode: "lines", line: { color: c.pink, width: 1.2, dash: "dot" },
+          showlegend: i === 0, name: i === 0 ? "Residual" : "", hoverinfo: "skip"
+        });
+      }
+    }
+
+    Plotly.react(chartEl, traces, baseLayout({
+      xaxis: { title: "Health Spending per Capita ($)", gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft } },
+      yaxis: { title: yLabel, gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft } },
+      legend: { x: 0.02, y: 0.98, font: { color: c.text }, bgcolor: "rgba(0,0,0,0)" }
+    }), PLOTLY_CONFIG);
+  }
+
+  bindToggles("hout-outcome", render);
+  bindToggles("hout-resid", render);
+  window.__rerender_hout = render;
+  render();
+})();
+
+// ==================== WIDGET 2: Health Expenditure vs GDP ====================
+(function() {
+  var chartEl = document.getElementById("chart-hgdp");
+  var H = DATA.health;
+
+  function render() {
+    var c = themeColors();
+    var sample = getToggleVal("hgdp-sample");
+    var highlight = getToggleVal("hgdp-highlight") === "on";
+    var useAll = sample === "all";
+    var reg = useAll ? H.regHlthAll : H.regHlthSub;
+
+    var xData, yData, codes;
+    if (useAll) {
+      xData = H.gdppc;
+      yData = H.hlthpc;
+      codes = H.codes;
+    } else {
+      xData = []; yData = []; codes = [];
+      for (var i = 0; i < H.codes.length; i++) {
+        if (H.codes[i] !== "USA" && H.codes[i] !== "LUX") {
+          xData.push(H.gdppc[i]); yData.push(H.hlthpc[i]); codes.push(H.codes[i]);
+        }
+      }
+    }
+
+    // Compute elasticity at mean
+    var elast = (reg.b2 * reg.xbar) / reg.ybar;
+
+    document.getElementById("hgdp-b2").textContent = fmt(reg.b2);
+    document.getElementById("hgdp-se").textContent = fmt(reg.se_b2);
+    document.getElementById("hgdp-r2").textContent = fmt(reg.R2);
+    document.getElementById("hgdp-elast").textContent = fmt(elast, 2);
+    document.getElementById("hgdp-n").textContent = reg.n;
+
+    var traces = [];
+
+    // main scatter
+    traces.push({
+      x: xData, y: yData, mode: "markers", type: "scatter",
+      marker: { color: c.cyan, size: 8, opacity: 0.8 },
+      text: codes, name: "Countries",
+      hovertemplate: "%{text}<br>GDP=$%{x:,.0f}<br>Hlthpc=$%{y:,.0f}<extra></extra>"
+    });
+
+    // highlight outliers if "all" and highlight on
+    if (useAll && highlight) {
+      var outX = [], outY = [], outCodes = [];
+      for (var i = 0; i < H.codes.length; i++) {
+        if (H.codes[i] === "USA" || H.codes[i] === "LUX") {
+          outX.push(H.gdppc[i]); outY.push(H.hlthpc[i]); outCodes.push(H.codes[i]);
+        }
+      }
+      traces.push({
+        x: outX, y: outY, mode: "markers+text", type: "scatter",
+        marker: { color: c.pink, size: 12, symbol: "diamond", line: { color: "white", width: 1 } },
+        text: outCodes, textposition: "top center", textfont: { color: c.pink, size: 11 },
+        name: "Outliers", hovertemplate: "%{text}<br>GDP=$%{x:,.0f}<br>Hlthpc=$%{y:,.0f}<extra></extra>"
+      });
+    }
+
+    // regression line
+    var xMin = Math.min.apply(null, xData) - 1000;
+    var xMax = Math.max.apply(null, xData) + 1000;
+    traces.push({
+      x: [xMin, xMax], y: [reg.b1 + reg.b2 * xMin, reg.b1 + reg.b2 * xMax],
+      mode: "lines", line: { color: c.purple, width: 2.5 }, name: "OLS fit"
+    });
+
+    Plotly.react(chartEl, traces, baseLayout({
+      xaxis: { title: "GDP per Capita ($)", gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft } },
+      yaxis: { title: "Health Spending per Capita ($)", gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft } },
+      legend: { x: 0.02, y: 0.98, font: { color: c.text }, bgcolor: "rgba(0,0,0,0)" }
+    }), PLOTLY_CONFIG);
+  }
+
+  bindToggles("hgdp-sample", render);
+  bindToggles("hgdp-highlight", render);
+  window.__rerender_hgdp = render;
+  render();
+})();
+
+// ==================== WIDGET 3: Outlier Impact ====================
+(function() {
+  var chartEl = document.getElementById("chart-outlier");
+  var H = DATA.health;
+
+  // Pre-compute residuals from full model (hlthpc ~ gdppc)
+  var fullReg = H.regHlthAll;
+  var absResids = [];
+  for (var i = 0; i < H.codes.length; i++) {
+    var yhat = fullReg.b1 + fullReg.b2 * H.gdppc[i];
+    absResids.push({ idx: i, absR: Math.abs(H.hlthpc[i] - yhat), code: H.codes[i] });
+  }
+  // Sort by absolute residual descending
+  absResids.sort(function(a, b) { return b.absR - a.absR; });
+
+  function render() {
+    var c = themeColors();
+    var nDrop = parseInt(document.getElementById("outlier-drop").value);
+
+    // Determine which to drop
+    var dropSet = {};
+    var droppedNames = [];
+    for (var i = 0; i < nDrop && i < absResids.length; i++) {
+      dropSet[absResids[i].idx] = true;
+      droppedNames.push(absResids[i].code);
+    }
+
+    var xKeep = [], yKeep = [], codesKeep = [];
+    var xDrop = [], yDrop = [], codesDrop = [];
+    for (var i = 0; i < H.codes.length; i++) {
+      if (dropSet[i]) {
+        xDrop.push(H.gdppc[i]); yDrop.push(H.hlthpc[i]); codesDrop.push(H.codes[i]);
+      } else {
+        xKeep.push(H.gdppc[i]); yKeep.push(H.hlthpc[i]); codesKeep.push(H.codes[i]);
+      }
+    }
+
+    var reg = xKeep.length > 2 ? olsFit(xKeep, yKeep) : { b2: 0, R2: 0, b1: 0, n: 0 };
+
+    document.getElementById("outlier-b2").textContent = fmt(reg.b2);
+    document.getElementById("outlier-r2").textContent = fmt(reg.R2);
+    document.getElementById("outlier-dropped").textContent = droppedNames.length > 0 ? droppedNames.join(", ") : "none";
+    document.getElementById("outlier-n").textContent = xKeep.length;
+
+    var traces = [];
+
+    // kept points
+    traces.push({
+      x: xKeep, y: yKeep, mode: "markers", type: "scatter",
+      marker: { color: c.cyan, size: 8, opacity: 0.8 },
+      text: codesKeep, name: "Included",
+      hovertemplate: "%{text}<br>GDP=$%{x:,.0f}<br>Hlthpc=$%{y:,.0f}<extra></extra>"
+    });
+
+    // dropped points
+    if (xDrop.length > 0) {
+      traces.push({
+        x: xDrop, y: yDrop, mode: "markers+text", type: "scatter",
+        marker: { color: c.pink, size: 10, symbol: "x", line: { width: 2 } },
+        text: codesDrop, textposition: "top center", textfont: { color: c.pink, size: 10 },
+        name: "Excluded", hovertemplate: "%{text} (excluded)<br>GDP=$%{x:,.0f}<br>Hlthpc=$%{y:,.0f}<extra></extra>"
+      });
+    }
+
+    // regression line
+    if (xKeep.length > 2) {
+      var xMin = Math.min.apply(null, H.gdppc) - 1000;
+      var xMax = Math.max.apply(null, H.gdppc) + 1000;
+      traces.push({
+        x: [xMin, xMax], y: [reg.b1 + reg.b2 * xMin, reg.b1 + reg.b2 * xMax],
+        mode: "lines", line: { color: c.purple, width: 2.5 }, name: "OLS fit"
+      });
+    }
+
+    Plotly.react(chartEl, traces, baseLayout({
+      xaxis: { title: "GDP per Capita ($)", gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft } },
+      yaxis: { title: "Health Spending per Capita ($)", gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft } },
+      legend: { x: 0.02, y: 0.98, font: { color: c.text }, bgcolor: "rgba(0,0,0,0)" }
+    }), PLOTLY_CONFIG);
+  }
+
+  bindSlider("outlier-drop", "outlier-drop-val", function(v) { return v; }, render);
+  window.__rerender_outlier = render;
+  render();
+})();
+
+// ==================== WIDGET 4: CAPM Beta Comparison ====================
+(function() {
+  var chartEl = document.getElementById("chart-capm");
+  var C = DATA.capm;
+
+  function render() {
+    var c = themeColors();
+    var stockKey = getToggleVal("capm-stock");
+    var showRef = getToggleVal("capm-refline") === "on";
+    var stock = C.stocks[stockKey];
+    var reg = stock.reg;
+
+    document.getElementById("capm-alpha").textContent = fmt(reg.b1);
+    document.getElementById("capm-beta").textContent = fmt(reg.b2);
+    document.getElementById("capm-se").textContent = fmt(reg.se_b2);
+    document.getElementById("capm-t").textContent = fmt(reg.t_b2, 2);
+    document.getElementById("capm-r2").textContent = fmt(reg.R2);
+    document.getElementById("capm-n").textContent = reg.n;
+
+    var traces = [];
+
+    // scatter
+    traces.push({
+      x: C.rm_rf, y: stock.values, mode: "markers", type: "scatter",
+      marker: { color: c.cyan, size: 5, opacity: 0.5 },
+      name: stock.label,
+      hovertemplate: "Market=%{x:.4f}<br>" + stock.label + "=%{y:.4f}<extra></extra>"
+    });
+
+    // fitted line
+    var xMin = Math.min.apply(null, C.rm_rf);
+    var xMax = Math.max.apply(null, C.rm_rf);
+    traces.push({
+      x: [xMin, xMax], y: [reg.b1 + reg.b2 * xMin, reg.b1 + reg.b2 * xMax],
+      mode: "lines", line: { color: c.purple, width: 2.5 },
+      name: "CAPM fit (\u03B2=" + fmt(reg.b2, 2) + ")"
+    });
+
+    // reference 45-degree line (beta=1)
+    if (showRef) {
+      traces.push({
+        x: [xMin, xMax], y: [xMin, xMax],
+        mode: "lines", line: { color: c.pink, width: 2, dash: "dash" },
+        name: "\u03B2 = 1 reference"
+      });
+    }
+
+    Plotly.react(chartEl, traces, baseLayout({
+      xaxis: { title: "Market Excess Return (Rm - Rf)", gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft } },
+      yaxis: { title: stock.label + " Excess Return", gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft } },
+      legend: { x: 0.02, y: 0.98, font: { color: c.text }, bgcolor: "rgba(0,0,0,0)" }
+    }), PLOTLY_CONFIG);
+  }
+
+  bindToggles("capm-stock", render);
+  bindToggles("capm-refline", render);
+  window.__rerender_capm = render;
+  render();
+})();
+
+// ==================== WIDGET 5: CAPM Residual Diagnostics ====================
+(function() {
+  var chartEl = document.getElementById("chart-cresid");
+  var C = DATA.capm;
+
+  function render() {
+    var c = themeColors();
+    var stockKey = getToggleVal("cresid-stock");
+    var plotType = getToggleVal("cresid-type");
+    var stock = C.stocks[stockKey];
+    var reg = stock.reg;
+
+    // Compute residuals in JS
+    var resids = new Array(C.rm_rf.length);
+    var fitted = new Array(C.rm_rf.length);
+    for (var i = 0; i < C.rm_rf.length; i++) {
+      fitted[i] = reg.b1 + reg.b2 * C.rm_rf[i];
+      resids[i] = stock.values[i] - fitted[i];
+    }
+
+    var absMax = 0;
+    var residMean = mean(resids);
+    for (var i = 0; i < resids.length; i++) {
+      if (Math.abs(resids[i]) > absMax) absMax = Math.abs(resids[i]);
+    }
+    var residSD = std(resids, residMean);
+
+    document.getElementById("cresid-mean").textContent = fmt(residMean, 6);
+    document.getElementById("cresid-sd").textContent = fmt(residSD);
+    document.getElementById("cresid-max").textContent = fmt(absMax);
+    document.getElementById("cresid-r2").textContent = fmt(reg.R2);
+
+    var traces = [];
+
+    if (plotType === "scatter") {
+      traces.push({
+        x: fitted, y: resids, mode: "markers", type: "scatter",
+        marker: { color: c.cyan, size: 5, opacity: 0.5 },
+        name: "Residuals",
+        hovertemplate: "Fitted=%{x:.4f}<br>Residual=%{y:.4f}<extra></extra>"
+      });
+      // zero line
+      var fMin = Math.min.apply(null, fitted);
+      var fMax = Math.max.apply(null, fitted);
+      traces.push({
+        x: [fMin, fMax], y: [0, 0],
+        mode: "lines", line: { color: c.pink, width: 1.5, dash: "dash" },
+        name: "Zero", showlegend: false
+      });
+      Plotly.react(chartEl, traces, baseLayout({
+        xaxis: { title: "Fitted Values", gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft } },
+        yaxis: { title: "Residuals", gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft } },
+        legend: { x: 0.02, y: 0.98, font: { color: c.text }, bgcolor: "rgba(0,0,0,0)" }
+      }), PLOTLY_CONFIG);
+    } else {
+      traces.push({
+        x: resids, type: "histogram", histnorm: "probability density", nbinsx: 35,
+        marker: { color: c.cyan + "88", line: { color: c.cyan, width: 1 } },
+        name: "Residual distribution"
+      });
+      // Normal overlay
+      var xs = linspace(-absMax, absMax, 100);
+      var ys = [];
+      var k = 1 / (residSD * Math.sqrt(2 * Math.PI));
+      for (var i = 0; i < xs.length; i++) {
+        var z = (xs[i] - residMean) / residSD;
+        ys.push(k * Math.exp(-0.5 * z * z));
+      }
+      traces.push({
+        x: xs, y: ys, mode: "lines", line: { color: c.pink, width: 2 },
+        name: "Normal fit"
+      });
+      Plotly.react(chartEl, traces, baseLayout({
+        xaxis: { title: "Residual Value", gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft } },
+        yaxis: { title: "Density", gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft } },
+        legend: { x: 0.65, y: 0.98, font: { color: c.text }, bgcolor: "rgba(0,0,0,0)" }
+      }), PLOTLY_CONFIG);
+    }
+  }
+
+  bindToggles("cresid-stock", render);
+  bindToggles("cresid-type", render);
+  window.__rerender_cresid = render;
+  render();
+})();
+
+// ==================== WIDGET 6: Okun's Law ====================
+(function() {
+  var chartEl = document.getElementById("chart-okun");
+  var O = DATA.okun;
+  var reg = O.reg;
+
+  function render() {
+    var c = themeColors();
+    var predX = parseFloat(document.getElementById("okun-predict").value);
+    var showRef = getToggleVal("okun-refline") === "on";
+
+    var predY = reg.b1 + reg.b2 * predX;
+
+    document.getElementById("okun-b1").textContent = fmt(reg.b1, 2);
+    document.getElementById("okun-b2").textContent = fmt(reg.b2, 2);
+    document.getElementById("okun-seb2").textContent = fmt(reg.se_b2);
+    document.getElementById("okun-r2").textContent = fmt(reg.R2);
+    document.getElementById("okun-pred").textContent = fmt(predY, 2) + "%";
+    document.getElementById("okun-n").textContent = reg.n;
+
+    var traces = [];
+
+    // scatter with year labels
+    traces.push({
+      x: O.uratechange, y: O.rgdpgrowth, mode: "markers", type: "scatter",
+      marker: { color: c.cyan, size: 7, opacity: 0.7 },
+      text: O.years.map(function(y) { return String(y); }),
+      name: "Annual data",
+      hovertemplate: "Year %{text}<br>\u0394Urate=%{x:.2f}<br>GDP Growth=%{y:.2f}%<extra></extra>"
+    });
+
+    // regression line
+    var xMin = Math.min.apply(null, O.uratechange) - 0.5;
+    var xMax = Math.max.apply(null, O.uratechange) + 0.5;
+    traces.push({
+      x: [xMin, xMax], y: [reg.b1 + reg.b2 * xMin, reg.b1 + reg.b2 * xMax],
+      mode: "lines", line: { color: c.purple, width: 2.5 },
+      name: "OLS (slope=" + fmt(reg.b2, 2) + ")"
+    });
+
+    // Okun reference line (slope = -2, same intercept)
+    if (showRef) {
+      traces.push({
+        x: [xMin, xMax], y: [reg.b1 + (-2) * xMin, reg.b1 + (-2) * xMax],
+        mode: "lines", line: { color: c.pink, width: 2, dash: "dash" },
+        name: "Okun original (slope=-2.0)"
+      });
+    }
+
+    // prediction marker
+    traces.push({
+      x: [predX], y: [predY], mode: "markers", type: "scatter",
+      marker: { color: c.pink, size: 14, symbol: "star", line: { color: "white", width: 1 } },
+      name: "Prediction",
+      hovertemplate: "\u0394Urate=%{x:.1f}<br>Predicted GDP=%{y:.2f}%<extra></extra>"
+    });
+
+    Plotly.react(chartEl, traces, baseLayout({
+      xaxis: { title: "Change in Unemployment Rate (pp)", gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft } },
+      yaxis: { title: "Real GDP Growth (%)", gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft } },
+      legend: { x: 0.6, y: 0.98, font: { color: c.text }, bgcolor: "rgba(0,0,0,0)" }
+    }), PLOTLY_CONFIG);
+  }
+
+  bindSlider("okun-predict", "okun-predict-val", function(v) { return parseFloat(v).toFixed(1); }, render);
+  bindToggles("okun-refline", render);
+  window.__rerender_okun = render;
+  render();
+})();
+
+// ==================== WIDGET 7: Okun Time Series ====================
+(function() {
+  var chartEl = document.getElementById("chart-okunts");
+  var O = DATA.okun;
+  var fullReg = O.reg;
+
+  function render() {
+    var c = themeColors();
+    var startYear = parseInt(document.getElementById("okunts-start").value);
+    var endYear = parseInt(document.getElementById("okunts-end").value);
+    if (endYear <= startYear) endYear = startYear + 1;
+    var showMode = getToggleVal("okunts-show");
+
+    // Filter data to subperiod
+    var subYears = [], subActual = [], subUrate = [];
+    var subPredFull = [];
+    for (var i = 0; i < O.years.length; i++) {
+      if (O.years[i] >= startYear && O.years[i] <= endYear) {
+        subYears.push(O.years[i]);
+        subActual.push(O.rgdpgrowth[i]);
+        subUrate.push(O.uratechange[i]);
+        subPredFull.push(fullReg.b1 + fullReg.b2 * O.uratechange[i]);
+      }
+    }
+
+    // Compute subperiod regression
+    var subReg = subUrate.length > 2 ? olsFit(subUrate, subActual) : { b2: 0, R2: 0 };
+
+    // Compute mean absolute error
+    var mae = 0;
+    for (var i = 0; i < subActual.length; i++) {
+      mae += Math.abs(subActual[i] - subPredFull[i]);
+    }
+    mae = subActual.length > 0 ? mae / subActual.length : 0;
+
+    document.getElementById("okunts-b2").textContent = fmt(subReg.b2, 2);
+    document.getElementById("okunts-r2").textContent = fmt(subReg.R2);
+    document.getElementById("okunts-years").textContent = startYear + "\u2013" + endYear + " (" + subYears.length + ")";
+    document.getElementById("okunts-mae").textContent = fmt(mae, 2) + "pp";
+
+    var traces = [];
+
+    if (showMode === "both") {
+      traces.push({
+        x: subYears, y: subActual, mode: "lines+markers", type: "scatter",
+        line: { color: c.cyan, width: 2 }, marker: { color: c.cyan, size: 5 },
+        name: "Actual GDP Growth",
+        hovertemplate: "%{x}<br>Actual=%{y:.2f}%<extra></extra>"
+      });
+      traces.push({
+        x: subYears, y: subPredFull, mode: "lines+markers", type: "scatter",
+        line: { color: c.purple, width: 2, dash: "dash" }, marker: { color: c.purple, size: 4 },
+        name: "Predicted (Okun)",
+        hovertemplate: "%{x}<br>Predicted=%{y:.2f}%<extra></extra>"
+      });
+      // zero line
+      traces.push({
+        x: [subYears[0], subYears[subYears.length - 1]], y: [0, 0],
+        mode: "lines", line: { color: c.pink, width: 1, dash: "dot" },
+        name: "Zero", showlegend: false
+      });
+    } else {
+      // Residuals
+      var residuals = [];
+      for (var i = 0; i < subActual.length; i++) {
+        residuals.push(subActual[i] - subPredFull[i]);
+      }
+      traces.push({
+        x: subYears, y: residuals, mode: "lines+markers", type: "scatter",
+        line: { color: c.cyan, width: 2 }, marker: { color: c.cyan, size: 5 },
+        name: "Residuals (Actual - Predicted)",
+        hovertemplate: "%{x}<br>Residual=%{y:.2f}pp<extra></extra>"
+      });
+      traces.push({
+        x: [subYears[0], subYears[subYears.length - 1]], y: [0, 0],
+        mode: "lines", line: { color: c.pink, width: 1.5, dash: "dash" },
+        name: "Zero", showlegend: false
+      });
+    }
+
+    Plotly.react(chartEl, traces, baseLayout({
+      xaxis: { title: "Year", gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft } },
+      yaxis: { title: showMode === "both" ? "GDP Growth (%)" : "Residual (pp)", gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft } },
+      legend: { x: 0.02, y: 0.98, font: { color: c.text }, bgcolor: "rgba(0,0,0,0)" }
+    }), PLOTLY_CONFIG);
+  }
+
+  bindSlider("okunts-start", "okunts-start-val", function(v) { return v; }, render);
+  bindSlider("okunts-end", "okunts-end-val", function(v) { return v; }, render);
+  bindToggles("okunts-show", render);
+  window.__rerender_okunts = render;
+  render();
+})();
+
+// ==================== RESET + URL HASH STATE ====================
+(function() {
+  var REG = {
+    hout: [
+      { group: "hout-outcome", kind: "toggle", def: "lifeexp" },
+      { group: "hout-resid", kind: "toggle", def: "off" }
+    ],
+    hgdp: [
+      { group: "hgdp-sample", kind: "toggle", def: "all" },
+      { group: "hgdp-highlight", kind: "toggle", def: "on" }
+    ],
+    outlier: [
+      { id: "outlier-drop", kind: "range", def: "0" }
+    ],
+    capm: [
+      { group: "capm-stock", kind: "toggle", def: "rko_rf" },
+      { group: "capm-refline", kind: "toggle", def: "off" }
+    ],
+    cresid: [
+      { group: "cresid-stock", kind: "toggle", def: "rko_rf" },
+      { group: "cresid-type", kind: "toggle", def: "scatter" }
+    ],
+    okun: [
+      { id: "okun-predict", kind: "range", def: "0" },
+      { group: "okun-refline", kind: "toggle", def: "off" }
+    ],
+    okunts: [
+      { id: "okunts-start", kind: "range", def: "1961" },
+      { id: "okunts-end", kind: "range", def: "2019" },
+      { group: "okunts-show", kind: "toggle", def: "both" }
+    ]
+  };
+
+  function getVal(c) {
+    if (c.kind === "toggle") {
+      var btn = document.querySelector("#" + c.group + " button.active");
+      return btn ? btn.dataset.val : c.def;
+    }
+    return document.getElementById(c.id).value;
+  }
+
+  function setVal(c, val, fire) {
+    if (c.kind === "toggle") {
+      var group = document.getElementById(c.group);
+      if (!group) return;
+      var btn = group.querySelector('button[data-val="' + val + '"]');
+      if (btn && !btn.classList.contains("active")) btn.click();
+    } else {
+      var el = document.getElementById(c.id);
+      if (!el) return;
+      if (el.value !== String(val)) {
+        el.value = val;
+        if (fire) el.dispatchEvent(new Event(c.kind === "select" ? "change" : "input", { bubbles: true }));
+      }
+    }
+  }
+
+  function resetWidget(widget) {
+    var ctrls = REG[widget] || [];
+    for (var i = 0; i < ctrls.length; i++) setVal(ctrls[i], ctrls[i].def, true);
+    var fn = window["__rerender_" + widget];
+    if (fn) fn();
+    writeHash();
+  }
+
+  function writeHash() {
+    var parts = [];
+    for (var widget in REG) {
+      var ctrls = REG[widget];
+      for (var i = 0; i < ctrls.length; i++) {
+        var c = ctrls[i];
+        var v = String(getVal(c));
+        if (v !== String(c.def)) {
+          var key = c.id || c.group;
+          parts.push(key + "=" + encodeURIComponent(v));
+        }
+      }
+    }
+    var want = parts.length ? "#" + parts.join("&") : "";
+    if (want === "" && location.hash.match(/=/)) {
+      history.replaceState(null, "", location.pathname + location.search);
+    } else if (want !== "" && location.hash !== want) {
+      history.replaceState(null, "", location.pathname + location.search + want);
+    }
+  }
+
+  function readHash() {
+    var hash = location.hash.slice(1);
+    if (!hash || !hash.includes("=")) return;
+    var params = {};
+    var pairs = hash.split("&");
+    for (var i = 0; i < pairs.length; i++) {
+      var eq = pairs[i].indexOf("=");
+      if (eq < 0) continue;
+      params[pairs[i].slice(0, eq)] = decodeURIComponent(pairs[i].slice(eq + 1));
+    }
+    for (var widget in REG) {
+      var ctrls = REG[widget];
+      for (var i = 0; i < ctrls.length; i++) {
+        var c = ctrls[i];
+        var key = c.id || c.group;
+        if (key in params) setVal(c, params[key], true);
+      }
+    }
+  }
+
+  document.querySelectorAll(".reset-btn[data-reset]").forEach(function(btn) {
+    btn.addEventListener("click", function() { resetWidget(btn.dataset.reset); });
+  });
+  document.addEventListener("input", function(e) {
+    if (e.target.matches("input[type=range], select")) writeHash();
+  });
+  document.addEventListener("change", function(e) {
+    if (e.target.matches("select")) writeHash();
+  });
+  document.querySelectorAll(".toggle-group button").forEach(function(b) {
+    b.addEventListener("click", function() { setTimeout(writeHash, 0); });
+  });
+  readHash();
+})();
+
+// ==================== THEME TOGGLE ====================
+(function() {
+  var btn = document.getElementById("theme-toggle");
+  var iconEl = document.getElementById("theme-icon");
+  var labelEl = document.getElementById("theme-label");
+
+  function apply(theme) {
+    document.documentElement.dataset.theme = theme;
+    iconEl.textContent = theme === "dark" ? "\u2600\uFE0F" : "\uD83C\uDF19";
+    labelEl.textContent = theme === "dark" ? "Light" : "Dark";
+    for (var key in window) {
+      if (key.startsWith("__rerender_") && typeof window[key] === "function") window[key]();
+    }
+  }
+
+  var saved = localStorage.getItem(THEME_KEY);
+  var prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+  apply(saved || (prefersDark ? "dark" : "light"));
+
+  btn.addEventListener("click", function() {
+    var next = document.documentElement.dataset.theme === "dark" ? "light" : "dark";
+    localStorage.setItem(THEME_KEY, next);
+    apply(next);
+  });
+})();
+
+// ==================== Resize handling ====================
+window.addEventListener("resize", function() {
+  document.querySelectorAll(".chart").forEach(function(el) {
+    if (el.data) Plotly.Plots.resize(el);
+  });
+});
+</script>
+
+</body>
+</html>

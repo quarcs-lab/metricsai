@@ -1,0 +1,754 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chapter 10 — Data Summary for Multiple Regression · metricsAI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.plot.ly/plotly-2.35.2.min.js" charset="utf-8"></script>
+<style>
+:root {
+  --cyan: #008CB7; --cyan-soft: #22d3ee;
+  --purple: #7A209F; --purple-soft: #c084fc;
+  --pink: #C21E72; --pink-soft: #f472b6;
+  --bg: #f5f8fb; --panel: #ffffff; --panel-2: #f0f4f9;
+  --text: #0b1021; --text-soft: #475569; --text-muted: #64748b;
+  --border: #d9e2ec; --accent: var(--cyan); --accent-2: var(--purple); --accent-3: var(--pink);
+  --shadow: 0 2px 10px rgba(11,16,33,0.06), 0 12px 30px rgba(11,16,33,0.05);
+  --grid: #e3e8ef; --code-bg: #eef3f8;
+}
+html[data-theme="dark"] {
+  --bg: #0c1024; --panel: #151a33; --panel-2: #1b2142;
+  --text: #e2e8f0; --text-soft: #b5c0d0; --text-muted: #8a98ae;
+  --border: #2a3156; --accent: var(--cyan-soft); --accent-2: var(--purple-soft); --accent-3: var(--pink-soft);
+  --shadow: 0 2px 10px rgba(0,0,0,0.25), 0 12px 30px rgba(0,0,0,0.35);
+  --grid: #2a3156; --code-bg: #0f1530;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body { font-family: 'Inter', system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--text); line-height: 1.55; transition: background-color .25s ease, color .25s ease; }
+code, .mono { font-family: 'JetBrains Mono', ui-monospace, monospace; }
+header.page { position: relative; padding: 2.4rem 1.5rem 2rem; background: radial-gradient(1200px 400px at 85% -10%, rgba(122,32,159,0.15), transparent), radial-gradient(1000px 400px at 10% 0%, rgba(0,140,183,0.18), transparent), var(--panel); border-bottom: 1px solid var(--border); }
+.page-inner { max-width: 1120px; margin: 0 auto; }
+.chapter-badge { display: inline-block; font-size: 0.72rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--accent); font-weight: 600; margin-bottom: 0.5rem; }
+h1.title { font-size: clamp(1.6rem, 3.4vw, 2.4rem); margin: 0 0 0.35rem; background: linear-gradient(90deg, var(--accent), var(--accent-2)); -webkit-background-clip: text; background-clip: text; color: transparent; font-weight: 700; letter-spacing: -0.01em; }
+p.subtitle { margin: 0 0 0.8rem; color: var(--text-soft); font-size: 1.05rem; max-width: 720px; }
+.theme-toggle { position: absolute; top: 1.4rem; right: 1.5rem; background: var(--panel-2); color: var(--text); border: 1px solid var(--border); padding: 0.4rem 0.8rem; border-radius: 999px; cursor: pointer; font-size: 0.85rem; font-weight: 500; display: inline-flex; align-items: center; gap: 0.35rem; transition: all .2s ease; }
+.theme-toggle:hover { border-color: var(--accent); color: var(--accent); }
+nav.anchors { position: sticky; top: 0; z-index: 20; background: color-mix(in srgb, var(--panel) 92%, transparent); backdrop-filter: saturate(150%) blur(8px); -webkit-backdrop-filter: saturate(150%) blur(8px); border-bottom: 1px solid var(--border); }
+nav.anchors ul { display: flex; gap: 0.25rem; overflow-x: auto; list-style: none; padding: 0.55rem 1.5rem; margin: 0 auto; max-width: 1120px; scrollbar-width: thin; }
+nav.anchors a { display: block; padding: 0.35rem 0.75rem; border-radius: 8px; color: var(--text-soft); text-decoration: none; font-size: 0.85rem; font-weight: 500; white-space: nowrap; transition: all .15s ease; }
+nav.anchors a:hover { color: var(--accent); background: var(--panel-2); }
+main { max-width: 1120px; margin: 1.2rem auto 3rem; padding: 0 1.5rem; }
+section.widget { background: var(--panel); border: 1px solid var(--border); border-radius: 16px; padding: 1.5rem 1.4rem 1.3rem; margin-bottom: 1.5rem; box-shadow: var(--shadow); }
+.section-tag { display: inline-block; font-family: 'JetBrains Mono', monospace; font-size: 0.72rem; color: var(--accent); background: color-mix(in srgb, var(--accent) 12%, transparent); padding: 0.2rem 0.55rem; border-radius: 6px; margin-bottom: 0.6rem; font-weight: 500; }
+.widget h2 { margin: 0 0 0.2rem; font-size: 1.35rem; font-weight: 600; color: var(--accent-2); letter-spacing: -0.005em; }
+.widget .lede { margin: 0 0 1rem; color: var(--text-soft); font-size: 0.97rem; max-width: 780px; }
+.controls { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 0.9rem 1.2rem; padding: 0.9rem 1rem; background: var(--panel-2); border-radius: 10px; margin-bottom: 1rem; }
+.ctrl { display: flex; flex-direction: column; gap: 0.3rem; }
+.ctrl label { font-size: 0.78rem; font-weight: 500; color: var(--text-soft); text-transform: uppercase; letter-spacing: 0.05em; }
+.ctrl select { font-family: inherit; font-size: 0.9rem; padding: 0.4rem 0.55rem; border-radius: 8px; border: 1px solid var(--border); background: var(--panel); color: var(--text); }
+.toggle-group { display: inline-flex; gap: 0.25rem; background: var(--panel); padding: 3px; border-radius: 10px; border: 1px solid var(--border); }
+.toggle-group button { background: transparent; border: none; color: var(--text-soft); padding: 0.32rem 0.75rem; border-radius: 7px; font-family: inherit; font-size: 0.85rem; cursor: pointer; transition: all .15s ease; }
+.toggle-group button.active { background: var(--accent); color: white; font-weight: 500; }
+.callout { background: color-mix(in srgb, var(--accent-2) 8%, transparent); border-left: 3px solid var(--accent-2); padding: 0.7rem 0.9rem; border-radius: 8px; font-size: 0.9rem; color: var(--text-soft); margin: 0.9rem 0 0.2rem; }
+.callout strong { color: var(--accent-2); }
+.try-this { background: color-mix(in srgb, var(--accent) 8%, transparent); border-left: 3px solid var(--accent); padding: 0.7rem 0.9rem; border-radius: 8px; font-size: 0.9rem; color: var(--text-soft); margin: 0.7rem 0 0.2rem; }
+.try-this .try-title { font-weight: 600; color: var(--accent); font-size: 0.78rem; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 0.3rem; }
+.try-this ol { margin: 0; padding-left: 1.25rem; }
+.try-this li { margin: 0.2rem 0; }
+.widget-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 0.5rem; margin-bottom: 0.2rem; }
+.widget-head > div { flex: 1; min-width: 0; }
+.reset-btn { background: transparent; color: var(--text-muted); border: 1px solid var(--border); padding: 0.3rem 0.7rem; border-radius: 8px; font-family: inherit; font-size: 0.8rem; cursor: pointer; white-space: nowrap; transition: all .15s ease; }
+.reset-btn:hover { color: var(--accent); border-color: var(--accent); }
+.chart { width: 100%; min-height: 340px; }
+.chart.tall { min-height: 420px; }
+.chart.short { min-height: 280px; }
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+@media (max-width: 720px) { .two-col { grid-template-columns: 1fr; } }
+.var-checks { display: flex; flex-wrap: wrap; gap: 0.5rem 1rem; padding: 0.7rem 0.9rem; background: var(--panel-2); border-radius: 10px; margin-bottom: 1rem; }
+.var-check { display: flex; align-items: center; gap: 0.35rem; cursor: pointer; }
+.var-check input[type="checkbox"] { accent-color: var(--accent); width: 16px; height: 16px; cursor: pointer; }
+.var-check span { font-size: 0.88rem; font-weight: 500; color: var(--text-soft); }
+.reg-table { width: 100%; border-collapse: collapse; font-family: 'JetBrains Mono', monospace; font-size: 0.82rem; margin: 0.5rem 0; }
+.reg-table th { text-align: left; padding: 0.5rem 0.6rem; border-bottom: 2px solid var(--border); color: var(--text-muted); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600; }
+.reg-table td { padding: 0.4rem 0.6rem; border-bottom: 1px solid var(--border); color: var(--text); }
+.reg-table tr:hover td { background: var(--panel-2); }
+.reg-table .sig { color: var(--accent); font-weight: 600; }
+.reg-table .insig { color: var(--text-muted); }
+.fit-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 0.5rem; margin: 0.5rem 0; }
+.fit-stat { background: var(--panel-2); padding: 0.55rem 0.7rem; border-radius: 10px; border-left: 3px solid var(--accent); }
+.fit-stat .fs-label { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-muted); }
+.fit-stat .fs-value { font-family: 'JetBrains Mono', monospace; font-size: 1rem; font-weight: 500; color: var(--text); margin-top: 0.1rem; }
+.fit-stat.warn { border-left-color: var(--accent-3); }
+.vif-bar { display: flex; align-items: center; gap: 0.6rem; padding: 0.35rem 0; }
+.vif-bar .vif-name { font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; width: 90px; text-align: right; color: var(--text-soft); }
+.vif-bar .vif-track { flex: 1; height: 22px; background: var(--panel-2); border-radius: 6px; overflow: hidden; }
+.vif-bar .vif-fill { height: 100%; border-radius: 6px; transition: width 0.3s ease; }
+.vif-bar .vif-val { font-family: 'JetBrains Mono', monospace; font-size: 0.82rem; width: 55px; font-weight: 600; }
+footer.page { max-width: 1120px; margin: 1rem auto 3rem; padding: 0 1.5rem; color: var(--text-muted); font-size: 0.88rem; text-align: center; }
+footer.page a { color: var(--accent); text-decoration: none; }
+footer.page a:hover { text-decoration: underline; }
+.scroll-top { display: inline-block; font-size: 0.78rem; color: var(--text-muted); text-decoration: none; margin-top: 0.4rem; }
+.scroll-top:hover { color: var(--accent); }
+</style>
+</head>
+<body>
+
+<header class="page">
+  <div class="page-inner">
+    <span class="chapter-badge">Chapter 10 of 18 · Interactive Dashboard</span>
+    <h1 class="title">Data Summary for Multiple Regression</h1>
+    <p class="subtitle">Toggle variables, compare models, and visualize partial effects — building intuition for how multiple regression separates the contribution of each predictor.</p>
+  </div>
+  <button id="theme-toggle" class="theme-toggle" type="button" aria-label="Toggle color theme"><span id="theme-icon">🌙</span><span id="theme-label">Dark</span></button>
+</header>
+
+<nav class="anchors" aria-label="Sections">
+  <ul>
+    <li><a href="#partial">Partial effects</a></li>
+    <li><a href="#corrmatrix">Correlation matrix</a></li>
+    <li><a href="#regbuilder">Regression builder</a></li>
+    <li><a href="#fwl">FWL theorem</a></li>
+    <li><a href="#modelcomp">Model comparison</a></li>
+    <li><a href="#vif">Multicollinearity</a></li>
+    <li><a href="#diagnostics">Diagnostics</a></li>
+  </ul>
+</nav>
+
+<main>
+
+<!-- ===================== 1. PARTIAL VS TOTAL EFFECTS ===================== -->
+<section class="widget" id="partial">
+  <div class="widget-head">
+    <div>
+      <span class="section-tag">§ 10.1 · Key Concept 10.1</span>
+      <h2>Partial effects vs total effects</h2>
+    </div>
+    <button type="button" class="reset-btn" data-reset="partial">↺ Reset</button>
+  </div>
+  <p class="lede">The bivariate coefficient for bedrooms is $23,667 — but add size to the model and it drops to $1,553. The "total" effect included size's contribution; the "partial" effect isolates what bedrooms adds <em>beyond</em> size.</p>
+  <div class="controls">
+    <div class="ctrl">
+      <label for="partial-var">Focus variable</label>
+      <select id="partial-var">
+        <option value="bedrooms">Bedrooms</option>
+        <option value="bathrooms">Bathrooms</option>
+        <option value="lotsize">Lot size</option>
+        <option value="age">Age</option>
+        <option value="monthsold">Month sold</option>
+      </select>
+    </div>
+    <div class="ctrl">
+      <label for="partial-control">Control for</label>
+      <select id="partial-control">
+        <option value="size">Size</option>
+        <option value="bedrooms">Bedrooms</option>
+        <option value="bathrooms">Bathrooms</option>
+        <option value="lotsize">Lot size</option>
+        <option value="age">Age</option>
+        <option value="monthsold">Month sold</option>
+      </select>
+    </div>
+  </div>
+  <div class="two-col" id="partial-comparison"></div>
+  <div class="chart short" id="partial-chart"></div>
+  <div class="callout" id="partial-callout"></div>
+  <div class="try-this">
+    <div class="try-title">Try this</div>
+    <ol>
+      <li>Bedrooms controlling for size: the coefficient drops from $23,667 to $1,553 — a 93% reduction. Size was doing most of the work.</li>
+      <li>Switch focus to bathrooms, controlling for size. Does the same pattern hold?</li>
+      <li>Try age controlling for size. The bivariate effect was already near zero — controlling barely changes it.</li>
+      <li>Now control for bedrooms instead of size. The drop is smaller because bedrooms is a weaker confounder.</li>
+    </ol>
+  </div>
+</section>
+
+<!-- ===================== 2. CORRELATION MATRIX ===================== -->
+<section class="widget" id="corrmatrix">
+  <div class="widget-head">
+    <div>
+      <span class="section-tag">§ 10.2 – § 10.3 · Key Concepts 10.2 &amp; 10.3</span>
+      <h2>Correlation matrix heatmap</h2>
+    </div>
+  </div>
+  <p class="lede">A correlation matrix shows all pairwise linear associations at a glance. High correlations between predictors (e.g., size-bedrooms r = 0.52) signal potential multicollinearity — the reason partial effects differ from total effects.</p>
+  <div class="chart tall" id="corrmatrix-chart"></div>
+  <div class="callout" id="corrmatrix-callout"></div>
+  <div class="try-this">
+    <div class="try-title">Try this</div>
+    <ol>
+      <li>Find the strongest predictor of price: size (r = 0.79). This is why the size-only model has the highest R².</li>
+      <li>Find size-bedrooms (r = 0.52). This correlation is why bedrooms' coefficient shrinks in a multiple regression.</li>
+      <li>Look at monthsold-bathrooms (r = −0.39). These two are negatively correlated in this sample.</li>
+      <li>Which predictor pairs have near-zero correlation? These would remain relatively stable across bivariate and multiple regression.</li>
+    </ol>
+  </div>
+</section>
+
+<!-- ===================== 3. REGRESSION BUILDER ===================== -->
+<section class="widget" id="regbuilder">
+  <div class="widget-head">
+    <div>
+      <span class="section-tag">§ 10.4 · Key Concept 10.4</span>
+      <h2>Multiple regression builder</h2>
+    </div>
+    <button type="button" class="reset-btn" data-reset="regbuilder">↺ Reset</button>
+  </div>
+  <p class="lede">Toggle predictors on and off to build your own model. Watch how coefficients, significance, and fit statistics change as you add or remove variables. With 6 predictors, there are 63 possible models — all pre-computed.</p>
+  <div class="var-checks" id="regbuilder-checks">
+    <label class="var-check"><input type="checkbox" value="size" checked><span>Size</span></label>
+    <label class="var-check"><input type="checkbox" value="bedrooms"><span>Bedrooms</span></label>
+    <label class="var-check"><input type="checkbox" value="bathrooms"><span>Bathrooms</span></label>
+    <label class="var-check"><input type="checkbox" value="lotsize"><span>Lot size</span></label>
+    <label class="var-check"><input type="checkbox" value="age"><span>Age</span></label>
+    <label class="var-check"><input type="checkbox" value="monthsold"><span>Month sold</span></label>
+  </div>
+  <div class="fit-stats" id="regbuilder-fit"></div>
+  <table class="reg-table" id="regbuilder-table">
+    <thead><tr><th>Variable</th><th>Coef</th><th>Std Err</th><th>t</th><th>P&gt;|t|</th><th>[95% CI]</th></tr></thead>
+    <tbody></tbody>
+  </table>
+  <div class="chart" id="regbuilder-chart"></div>
+  <div class="callout" id="regbuilder-callout"></div>
+  <div class="try-this">
+    <div class="try-title">Try this</div>
+    <ol>
+      <li>Start with size only (R² = 0.618, adj R² = 0.603). Now check bedrooms — R² barely moves (0.618) and adj R² <em>falls</em> (0.589). Bedrooms adds nothing beyond size.</li>
+      <li>Check all 6 variables. R² rises to 0.651 but adj R² falls to 0.555. With n = 29 and k = 7, the model is overfitting.</li>
+      <li>Look at p-values: only size is significant (p &lt; 0.05). Every other variable has p &gt; 0.25.</li>
+      <li>Uncheck all except size. The parsimony principle: the simplest adequate model wins.</li>
+    </ol>
+  </div>
+</section>
+
+<!-- ===================== 4. FWL THEOREM ===================== -->
+<section class="widget" id="fwl">
+  <div class="widget-head">
+    <div>
+      <span class="section-tag">§ 10.5 · Key Concept 10.5</span>
+      <h2>Frisch-Waugh-Lovell theorem</h2>
+    </div>
+    <button type="button" class="reset-btn" data-reset="fwl">↺ Reset</button>
+  </div>
+  <p class="lede">The FWL theorem reveals <em>how</em> multiple regression isolates each variable's partial effect: residualize both Y and X on the controls, then regress the residuals. The slope equals the multiple regression coefficient exactly.</p>
+  <div class="controls">
+    <div class="ctrl">
+      <label for="fwl-target">Target variable (X)</label>
+      <select id="fwl-target">
+        <option value="size">Size</option>
+        <option value="bedrooms">Bedrooms</option>
+        <option value="bathrooms">Bathrooms</option>
+        <option value="lotsize">Lot size</option>
+        <option value="age">Age</option>
+      </select>
+    </div>
+    <div class="ctrl">
+      <label for="fwl-control">Control variable (Z)</label>
+      <select id="fwl-control">
+        <option value="bedrooms">Bedrooms</option>
+        <option value="size">Size</option>
+        <option value="bathrooms">Bathrooms</option>
+        <option value="lotsize">Lot size</option>
+        <option value="age">Age</option>
+      </select>
+    </div>
+  </div>
+  <div class="two-col" id="fwl-results"></div>
+  <div class="chart" id="fwl-chart"></div>
+  <div class="callout" id="fwl-callout"></div>
+  <div class="try-this">
+    <div class="try-title">Try this</div>
+    <ol>
+      <li>Default: size controlling for bedrooms. The FWL slope (72.41) matches the multiple regression coefficient exactly.</li>
+      <li>Switch target to bedrooms, control to size. The FWL slope ($1,553) matches price ~ bedrooms + size.</li>
+      <li>Try bathrooms controlling for size. The FWL slope shows bathrooms' partial contribution after removing size's influence.</li>
+      <li>The x-axis shows "Residualized X" — the parts of X that the control variable couldn't explain.</li>
+    </ol>
+  </div>
+</section>
+
+<!-- ===================== 5. MODEL COMPARISON ===================== -->
+<section class="widget" id="modelcomp">
+  <div class="widget-head">
+    <div>
+      <span class="section-tag">§ 10.6 – § 10.7 · Key Concepts 10.6 &amp; 10.7</span>
+      <h2>Model comparison — when more is less</h2>
+    </div>
+  </div>
+  <p class="lede">R² can only go up as you add variables. Adjusted R², AIC, and BIC penalize complexity — they can go <em>down</em> when extra variables add noise rather than signal. Watch what happens as you build from 1 to 6 predictors.</p>
+  <div class="chart tall" id="modelcomp-chart"></div>
+  <div class="callout" id="modelcomp-callout"></div>
+  <div class="try-this">
+    <div class="try-title">Try this</div>
+    <ol>
+      <li>R² (cyan) rises from 0.618 to 0.651 — a modest 3.3 percentage-point gain for 5 extra variables.</li>
+      <li>Adjusted R² (purple) falls from 0.603 to 0.555. The penalty for complexity exceeds the gain in fit.</li>
+      <li>AIC rises from 668 to 676 — higher is worse. BIC rises even more (671 to 685) because it penalizes small-sample complexity more heavily.</li>
+      <li>All four metrics agree: the 1-variable model (size only) is the best specification for n = 29.</li>
+    </ol>
+  </div>
+</section>
+
+<!-- ===================== 6. VIF DETECTOR ===================== -->
+<section class="widget" id="vif">
+  <div class="widget-head">
+    <div>
+      <span class="section-tag">§ 10.8 · Key Concept 10.8</span>
+      <h2>Variance inflation factors — detecting multicollinearity</h2>
+    </div>
+  </div>
+  <p class="lede">VIF measures how much a predictor's variance is inflated by correlation with the other predictors. VIF = 1 means no collinearity; VIF &gt; 5 is moderate concern; VIF &gt; 10 is severe. With n = 29 and 6 correlated predictors, the VIFs are alarming.</p>
+  <div id="vif-bars"></div>
+  <div class="callout" id="vif-callout"></div>
+  <div class="try-this">
+    <div class="try-title">Try this</div>
+    <ol>
+      <li>Bedrooms has VIF = 57.8 and size has VIF = 40.1. Both far exceed the VIF &gt; 10 threshold — severe multicollinearity.</li>
+      <li>Even lotsize (VIF = 12.0) and monthsold (VIF = 12.8) exceed the threshold. With only 29 houses, 6 predictors is too many.</li>
+      <li>This explains why only size is significant in the full model: multicollinearity inflates standard errors, making it harder to detect real effects.</li>
+      <li>The remedy: drop redundant predictors (the parsimony principle from the model comparison widget).</li>
+    </ol>
+  </div>
+</section>
+
+<!-- ===================== 7. DIAGNOSTICS ===================== -->
+<section class="widget" id="diagnostics">
+  <div class="widget-head">
+    <div>
+      <span class="section-tag">§ 10.4</span>
+      <h2>Regression diagnostics — actual vs predicted &amp; residuals</h2>
+    </div>
+    <button type="button" class="reset-btn" data-reset="diagnostics">↺ Reset</button>
+  </div>
+  <p class="lede">A good model produces predictions close to actual values (points near the 45° line) and residuals that scatter randomly around zero (no patterns).</p>
+  <div class="controls">
+    <div class="ctrl">
+      <label for="diag-model">Model</label>
+      <select id="diag-model">
+        <option value="size">Size only</option>
+        <option value="bedrooms,size">Size + Bedrooms</option>
+        <option value="age,bathrooms,bedrooms,lotsize,monthsold,size">Full (all 6)</option>
+      </select>
+    </div>
+  </div>
+  <div class="two-col">
+    <div><div class="chart short" id="diag-avp"></div></div>
+    <div><div class="chart short" id="diag-resid"></div></div>
+  </div>
+  <div class="callout" id="diag-callout"></div>
+  <div class="try-this">
+    <div class="try-title">Try this</div>
+    <ol>
+      <li>Size only: points scatter around the 45° line with some spread. The residual plot shows no obvious pattern.</li>
+      <li>Switch to the full model. The scatter tightens slightly (R² rises from 0.618 to 0.651) but the improvement is marginal.</li>
+      <li>In the residual plot, look for fan shapes or curves. Random scatter means the model's assumptions are reasonable.</li>
+      <li>Notice the house around $340,000 — it's consistently under-predicted across models.</li>
+    </ol>
+  </div>
+</section>
+
+</main>
+
+<footer class="page">
+  <p>Part of <a href="https://quarcs-lab.github.io/metricsai/book/_book/index.html"><strong>metricsAI</strong></a> · Chapter 10: Data Summary for Multiple Regression · by Carlos Mendez · <a href="https://github.com/quarcs-lab/metricsai">GitHub</a></p>
+  <a class="scroll-top" href="#partial">↑ Back to top</a>
+</footer>
+
+<script type="application/json" id="ch-data">{"house":{"price":[204000.0,212000.0,213000.0,220000.0,224500.0,229000.0,230000.0,233000.0,235000.0,235000.0,236500.0,238000.0,239500.0,241000.0,244000.0,245000.0,249000.0,253000.0,255000.0,258500.0,270000.0,270000.0,272000.0,273000.0,278500.0,279900.0,310000.0,340000.0,375000.0],"size":[1400.0,1600.0,1800.0,1600.0,2100.0,1700.0,2100.0,1700.0,1700.0,1600.0,1600.0,1900.0,1600.0,1600.0,2000.0,1400.0,1900.0,2100.0,1500.0,1600.0,1800.0,2000.0,1800.0,1900.0,2600.0,2000.0,2300.0,2400.0,3300.0],"bedrooms":[3.0,3.0,3.0,3.0,4.0,4.0,4.0,3.0,4.0,3.0,3.0,4.0,3.0,4.0,4.0,4.0,4.0,4.0,4.0,3.0,4.0,4.0,4.0,5.0,6.0,4.0,4.0,4.0,4.0],"bathrooms":[2.0,3.0,2.0,2.0,2.5,2.5,2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0,3.0,2.0,2.0,2.0,2.0,2.5,2.5,2.0,2.0,2.0,2.5,3.0,2.5],"lotsize":[1.0,2.0,2.0,1.0,2.0,2.0,2.0,1.0,2.0,3.0,3.0,2.0,3.0,2.0,1.0,2.0,3.0,3.0,3.0,1.0,3.0,3.0,2.0,2.0,3.0,2.0,2.0,2.0,2.0],"age":[31.0,33.0,51.0,49.0,47.0,35.0,34.0,40.0,29.0,35.0,23.0,29.0,34.0,34.0,29.0,30.0,37.0,47.0,47.0,39.0,31.0,39.0,46.0,37.0,38.0,31.0,28.0,34.0,39.0],"monthsold":[7.0,5.0,4.0,4.0,6.0,3.0,8.0,6.0,7.0,5.0,8.0,7.0,6.0,8.0,7.0,8.0,6.0,6.0,7.0,8.0,3.0,5.0,3.0,7.0,8.0,7.0,5.0,6.0,3.0]},"models":{"size":{"vars":["size"],"coefs":{"const":115017.2826,"size":73.771},"se":{"const":21489.3599,"size":11.1749},"tvals":{"const":5.3523,"size":6.6015},"pvals":{"const":0.0,"size":0.0},"ci_lo":{"const":70924.76,"size":50.84},"ci_hi":{"const":159109.81,"size":96.7},"r2":0.6175,"adj_r2":0.6033,"aic":668.11,"bic":670.84,"rmse":23550.66,"n":29,"k":2,"fitted":[218296.74,233050.95,247805.16,233050.95,269936.47,240428.05,269936.47,240428.05,240428.05,233050.95,233050.95,255182.26,233050.95,233050.95,262559.36,218296.74,255182.26,269936.47,225673.84,233050.95,247805.16,262559.36,247805.16,255182.26,306821.99,262559.36,284690.68,292067.78,358461.72],"residuals":[-14296.74,-21050.95,-34805.16,-13050.95,-45436.47,-11428.05,-39936.47,-7428.05,-5428.05,1949.05,3449.05,-17182.26,6449.05,7949.05,-18559.36,26703.26,-6182.26,-16936.47,29326.16,25449.05,22194.84,7440.64,24194.84,17817.74,-28321.99,17340.64,25309.32,47932.22,16538.28]},"bedrooms":{"vars":["bedrooms"],"coefs":{"const":164137.8378,"bedrooms":23667.2973},"se":{"const":37112.5717,"bedrooms":9637.9756},"tvals":{"const":4.4227,"bedrooms":2.4556},"pvals":{"const":0.0001,"bedrooms":0.0208},"ci_lo":{"const":87989.13,"bedrooms":3891.8},"ci_hi":{"const":240286.55,"bedrooms":43442.79},"r2":0.1826,"adj_r2":0.1523,"aic":690.13,"bic":692.86,"rmse":34426.09,"n":29,"k":2,"fitted":[235139.73,235139.73,235139.73,235139.73,258807.03,258807.03,258807.03,235139.73,258807.03,235139.73,235139.73,258807.03,235139.73,258807.03,258807.03,258807.03,258807.03,258807.03,258807.03,235139.73,258807.03,258807.03,258807.03,282474.32,306141.62,258807.03,258807.03,258807.03,258807.03],"residuals":[-31139.73,-23139.73,-22139.73,-15139.73,-34307.03,-29807.03,-28807.03,-2139.73,-23807.03,-139.73,1360.27,-20807.03,4360.27,-17807.03,-14807.03,-13807.03,-9807.03,-5807.03,-3807.03,23360.27,11192.97,11192.97,13192.97,-9474.32,-27641.62,21092.97,51192.97,81192.97,116192.97]},"bathrooms":{"vars":["bathrooms"],"coefs":{"const":174138.6243,"bathrooms":36146.5608},"se":{"const":44450.3728,"bathrooms":19913.1738},"tvals":{"const":3.9176,"bathrooms":1.8152},"pvals":{"const":0.0006,"bathrooms":0.0806},"ci_lo":{"const":82933.99,"bathrooms":-4711.9},"ci_hi":{"const":265343.26,"bathrooms":77005.02},"r2":0.1088,"adj_r2":0.0758,"aic":692.63,"bic":695.37,"rmse":35946.56,"n":29,"k":2,"fitted":[246431.75,282578.31,246431.75,246431.75,264505.03,264505.03,246431.75,246431.75,246431.75,246431.75,246431.75,246431.75,246431.75,246431.75,246431.75,246431.75,282578.31,246431.75,246431.75,246431.75,246431.75,264505.03,264505.03,246431.75,246431.75,246431.75,264505.03,282578.31,264505.03],"residuals":[-42431.75,-70578.31,-33431.75,-26431.75,-40005.03,-35505.03,-16431.75,-13431.75,-11431.75,-11431.75,-9931.75,-8431.75,-6931.75,-5431.75,-2431.75,-1431.75,-33578.31,6568.25,8568.25,12068.25,23568.25,5494.97,7494.97,26568.25,32068.25,33468.25,45494.97,57421.69,110494.97]},"lotsize":{"vars":["lotsize"],"coefs":{"const":236207.1795,"lotsize":8280.5128},"se":{"const":23021.2404,"lotsize":10260.0929},"tvals":{"const":10.2604,"lotsize":0.8071},"pvals":{"const":0.0,"lotsize":0.4267},"ci_lo":{"const":188971.5,"lotsize":-12771.46},"ci_hi":{"const":283442.86,"lotsize":29332.48},"r2":0.0236,"adj_r2":-0.0126,"aic":695.28,"bic":698.02,"rmse":37625.7,"n":29,"k":2,"fitted":[244487.69,252768.21,252768.21,244487.69,252768.21,252768.21,252768.21,244487.69,252768.21,261048.72,261048.72,252768.21,261048.72,252768.21,244487.69,252768.21,261048.72,261048.72,261048.72,244487.69,261048.72,261048.72,252768.21,252768.21,261048.72,252768.21,252768.21,252768.21,252768.21],"residuals":[-40487.69,-40768.21,-39768.21,-24487.69,-28268.21,-23768.21,-22768.21,-11487.69,-17768.21,-26048.72,-24548.72,-14768.21,-21548.72,-11768.21,-487.69,-7768.21,-12048.72,-8048.72,-6048.72,14012.31,8951.28,8951.28,19231.79,20231.79,17451.28,27131.79,57231.79,87231.79,122231.79]},"age":{"vars":["age"],"coefs":{"const":266918.507,"age":-357.2317},"se":{"const":37393.1914,"age":1008.4573},"tvals":{"const":7.1382,"age":-0.3542},"pvals":{"const":0.0,"age":0.7259},"ci_lo":{"const":190194.02,"age":-2426.42},"ci_hi":{"const":343643.0,"age":1711.95},"r2":0.0046,"adj_r2":-0.0322,"aic":695.84,"bic":698.57,"rmse":37988.66,"n":29,"k":2,"fitted":[255844.32,255129.86,248699.69,249414.15,250128.62,254415.4,254772.63,252629.24,256558.79,254415.4,258702.18,256558.79,254772.63,254772.63,256558.79,256201.56,253700.93,250128.62,250128.62,252986.47,255844.32,252986.47,250485.85,253700.93,253343.7,255844.32,256916.02,254772.63,252986.47],"residuals":[-51844.32,-43129.86,-35699.69,-29414.15,-25628.62,-25415.4,-24772.63,-19629.24,-21558.79,-19415.4,-22202.18,-18558.79,-15272.63,-13772.63,-12558.79,-11201.56,-4700.93,2871.38,4871.38,5513.53,14155.68,17013.53,21514.15,19299.07,25156.3,24055.68,53083.98,85227.37,122013.53]},"monthsold":{"vars":["monthsold"],"coefs":{"const":281801.0917,"monthsold":-4675.3275},"se":{"const":25930.3163,"monthsold":4189.3803},"tvals":{"const":10.8676,"monthsold":-1.116},"pvals":{"const":0.0,"monthsold":0.2743},"ci_lo":{"const":228596.48,"monthsold":-13271.23},"ci_hi":{"const":335005.71,"monthsold":3920.57},"r2":0.0441,"adj_r2":0.0087,"aic":694.67,"bic":697.4,"rmse":37227.9,"n":29,"k":2,"fitted":[249073.8,258424.45,263099.78,263099.78,253749.13,267775.11,244398.47,253749.13,249073.8,258424.45,244398.47,249073.8,253749.13,244398.47,249073.8,244398.47,253749.13,253749.13,249073.8,244398.47,267775.11,258424.45,267775.11,249073.8,244398.47,249073.8,258424.45,253749.13,267775.11],"residuals":[-45073.8,-46424.45,-50099.78,-43099.78,-29249.13,-38775.11,-14398.47,-20749.13,-14073.8,-23424.45,-7898.47,-11073.8,-14249.13,-3398.47,-5073.8,601.53,-4749.13,-749.13,5926.2,14101.53,2224.89,11575.55,4224.89,23926.2,34101.53,30826.2,51575.55,86250.87,107224.89]},"bedrooms,size":{"vars":["size","bedrooms"],"coefs":{"const":111690.8562,"size":72.4081,"bedrooms":1553.458},"se":{"const":27589.0742,"size":13.2996,"bedrooms":7846.8662},"tvals":{"const":4.0484,"size":5.4444,"bedrooms":0.198},"pvals":{"const":0.0004,"size":0.0,"bedrooms":0.8446},"ci_lo":{"const":54980.7,"size":45.07,"bedrooms":-14576.01},"ci_hi":{"const":168401.01,"size":99.75,"bedrooms":17682.92},"r2":0.618,"adj_r2":0.5886,"aic":670.06,"bic":674.17,"rmse":23981.21,"n":29,"k":3,"fitted":[217722.64,232204.26,246685.89,232204.26,269961.8,240998.54,269961.8,239445.08,240998.54,232204.26,232204.26,255480.17,232204.26,233757.72,262720.98,219276.09,255480.17,269961.8,226516.91,232204.26,248239.35,262720.98,248239.35,257033.62,309272.78,262720.98,284443.42,291684.24,356851.57],"residuals":[-13722.64,-20204.26,-33685.89,-12204.26,-45461.8,-11998.54,-39961.8,-6445.08,-5998.54,2795.74,4295.74,-17480.17,7295.74,7242.28,-18720.98,25723.91,-6480.17,-16961.8,28483.09,26295.74,21760.65,7279.02,23760.65,15966.38,-30772.78,17179.02,25556.58,48315.76,18148.43]},"bathrooms,size":{"vars":["size","bathrooms"],"coefs":{"const":98233.3113,"size":71.0907,"bathrooms":9891.8985},"se":{"const":32015.1026,"size":11.8887,"bathrooms":13879.5579},"tvals":{"const":3.0683,"size":5.9797,"bathrooms":0.7127},"pvals":{"const":0.005,"size":0.0,"bathrooms":0.4824},"ci_lo":{"const":32425.33,"size":46.65,"bathrooms":-18637.94},"ci_hi":{"const":164041.3,"size":95.53,"bathrooms":38421.74},"r2":0.6248,"adj_r2":0.5959,"aic":669.55,"bic":673.65,"rmse":23768.24,"n":29,"k":3,"fitted":[217544.09,241654.13,245980.38,231762.24,272253.54,243817.26,267307.59,238871.31,238871.31,231762.24,231762.24,253089.45,231762.24,231762.24,260198.52,217544.09,262981.35,267307.59,224653.17,231762.24,245980.38,265144.47,250926.33,253089.45,302852.94,260198.52,286471.68,298526.7,357562.38],"residuals":[-13544.09,-29654.13,-32980.38,-11762.24,-47753.54,-14817.26,-37307.59,-5871.31,-3871.31,3237.76,4737.76,-15089.45,7737.76,9237.76,-16198.52,27455.91,-13981.35,-14307.59,30346.83,26737.76,24019.62,4855.53,21073.67,19910.55,-24352.94,19701.48,23528.32,41473.3,17437.62]},"lotsize,size":{"vars":["size","lotsize"],"coefs":{"const":108719.8265,"size":73.0748,"lotsize":3558.759},"se":{"const":24667.2048,"size":11.3959,"lotsize":6549.005},"tvals":{"const":4.4075,"size":6.4124,"lotsize":0.5434},"pvals":{"const":0.0002,"size":0.0,"lotsize":0.5915},"ci_lo":{"const":58015.66,"size":49.65,"lotsize":-9902.91},"ci_hi":{"const":159423.99,"size":96.5,"lotsize":17020.43},"r2":0.6217,"adj_r2":0.5927,"aic":669.78,"bic":673.88,"rmse":23864.15,"n":29,"k":3,"fitted":[214583.25,232756.96,247371.92,229198.2,269294.34,240064.44,269294.34,236505.68,240064.44,236315.72,236315.72,254679.39,236315.72,232756.96,258428.11,218142.01,258238.15,272853.1,229008.25,229198.2,250930.67,265545.63,247371.92,254679.39,309390.48,261986.87,283909.3,291216.77,356984.06],"residuals":[-10583.25,-20756.96,-34371.92,-9198.2,-44794.34,-11064.44,-39294.34,-3505.68,-5064.44,-1315.72,184.28,-16679.39,3184.28,8243.04,-14428.11,26857.99,-9238.15,-19853.1,25991.75,29301.8,19069.33,4454.37,24628.08,18320.61,-30890.48,17913.13,26090.7,48783.23,18015.94]},"age,size":{"vars":["size","age"],"coefs":{"const":137975.1872,"size":74.7043,"age":-678.7259},"se":{"const":30093.5606,"size":11.1711,"age":624.9668},"tvals":{"const":4.5849,"size":6.6873,"age":-1.086},"pvals":{"const":0.0001,"size":0.0,"age":0.2874},"ci_lo":{"const":76116.99,"size":51.74,"age":-1963.36},"ci_hi":{"const":199833.39,"size":97.67,"age":605.91},"r2":0.6341,"adj_r2":0.6059,"aic":668.82,"bic":672.92,"rmse":23472.79,"n":29,"k":3,"fitted":[221520.69,235104.09,237827.88,224244.48,262954.07,241217.07,271777.51,237823.44,245289.43,233746.64,241891.35,260230.28,234425.37,234425.37,267700.71,222199.41,254800.48,262954.07,218131.5,231031.74,251402.4,260913.45,241221.51,254800.48,306414.75,266343.26,290790.72,294188.8,358029.03],"residuals":[-17520.69,-23104.09,-24827.88,-4244.48,-38454.07,-12217.07,-41777.51,-4823.44,-10289.43,1253.36,-5391.35,-22230.28,5074.63,6574.63,-23700.71,22800.59,-5800.48,-9954.07,36868.5,27468.26,18597.6,9086.55,30778.49,18199.52,-27914.75,13556.74,19209.28,45811.2,16970.97]},"monthsold,size":{"vars":["size","monthsold"],"coefs":{"const":122431.4411,"size":72.8965,"monthsold":-966.8357},"se":{"const":30410.4334,"size":11.6317,"monthsold":2758.5777},"tvals":{"const":4.026,"size":6.267,"monthsold":-0.3505},"pvals":{"const":0.0004,"size":0.0,"monthsold":0.7288},"ci_lo":{"const":59921.9,"size":48.99,"monthsold":-6637.17},"ci_hi":{"const":184940.98,"size":96.81,"monthsold":4703.5},"r2":0.6193,"adj_r2":0.59,"aic":669.97,"bic":674.07,"rmse":23942.79,"n":29,"k":3,"fitted":[217718.74,234231.72,249777.86,235198.55,269713.15,243455.04,267779.48,240554.54,239587.7,234231.72,231331.21,254167.01,233264.88,231331.21,261456.66,216751.9,255133.84,269713.15,225008.39,231331.21,250744.7,263390.33,250744.7,254167.01,304227.75,261456.66,285259.29,291582.11,360089.5],"residuals":[-13718.74,-22231.72,-36777.86,-15198.55,-45213.15,-14455.04,-37779.48,-7554.54,-4587.7,768.28,5168.79,-16167.01,6235.12,9668.79,-17456.66,28248.1,-6133.84,-16713.15,29991.61,27168.79,19255.3,6609.67,21255.3,18832.99,-25727.75,18443.34,24740.71,48417.89,14910.5]},"bathrooms,bedrooms":{"vars":["bedrooms","bathrooms"],"coefs":{"const":90600.1661,"bedrooms":23015.6977,"bathrooms":34441.6944},"se":{"const":52668.8067,"bedrooms":9216.6145,"bathrooms":18237.1252},"tvals":{"const":1.7202,"bedrooms":2.4972,"bathrooms":1.8885},"pvals":{"const":0.0973,"bedrooms":0.0192,"bathrooms":0.0702},"ci_lo":{"const":-17662.12,"bedrooms":4070.68,"bathrooms":-3045.25},"ci_hi":{"const":198862.45,"bedrooms":41960.72,"bathrooms":71928.64},"r2":0.2812,"adj_r2":0.2259,"aic":688.4,"bic":692.5,"rmse":32897.94,"n":29,"k":3,"fitted":[228530.65,262972.34,228530.65,228530.65,268767.19,268767.19,251546.35,228530.65,251546.35,228530.65,228530.65,251546.35,228530.65,251546.35,251546.35,251546.35,285988.04,251546.35,251546.35,228530.65,251546.35,268767.19,268767.19,274562.04,297577.74,251546.35,268767.19,285988.04,268767.19],"residuals":[-24530.65,-50972.34,-15530.65,-8530.65,-44267.19,-39767.19,-21546.35,4469.35,-16546.35,6469.35,7969.35,-13546.35,10969.35,-10546.35,-7546.35,-6546.35,-36988.04,1453.65,3453.65,29969.35,18453.65,1232.81,3232.81,-1562.04,-19077.74,28353.65,41232.81,54011.96,106232.81]},"bedrooms,lotsize":{"vars":["bedrooms","lotsize"],"coefs":{"const":162449.22,"bedrooms":23160.7119,"lotsize":1688.6179},"se":{"const":39098.5982,"bedrooms":10264.1655,"lotsize":9997.5182},"tvals":{"const":4.1549,"bedrooms":2.2565,"lotsize":0.1689},"pvals":{"const":0.0003,"bedrooms":0.0327,"lotsize":0.8672},"ci_lo":{"const":82080.9,"bedrooms":2062.42,"lotsize":-18861.58},"ci_hi":{"const":242817.54,"bedrooms":44259.01,"lotsize":22238.81},"r2":0.1835,"adj_r2":0.1206,"aic":692.1,"bic":696.2,"rmse":35062.65,"n":29,"k":3,"fitted":[233619.97,235308.59,235308.59,233619.97,258469.3,258469.3,258469.3,233619.97,258469.3,236997.21,236997.21,258469.3,236997.21,258469.3,256780.69,258469.3,260157.92,260157.92,260157.92,233619.97,260157.92,260157.92,258469.3,281630.02,306479.35,258469.3,258469.3,258469.3,258469.3],"residuals":[-29619.97,-23308.59,-22308.59,-13619.97,-33969.3,-29469.3,-28469.3,-619.97,-23469.3,-1997.21,-497.21,-20469.3,2502.79,-17469.3,-12780.69,-13469.3,-11157.92,-7157.92,-5157.92,24880.03,9842.08,9842.08,13530.7,-8630.02,-27979.35,21430.7,51530.7,81530.7,116530.7]},"age,bedrooms":{"vars":["bedrooms","age"],"coefs":{"const":175329.7406,"bedrooms":23584.9326,"age":-298.7737},"se":{"const":51358.4349,"bedrooms":9805.4775,"age":929.767},"tvals":{"const":3.4138,"bedrooms":2.4053,"age":-0.3213},"pvals":{"const":0.0021,"bedrooms":0.0236,"age":0.7505},"ci_lo":{"const":69760.97,"bedrooms":3429.49,"age":-2209.94},"ci_hi":{"const":280898.52,"bedrooms":43740.38,"age":1612.39},"r2":0.1858,"adj_r2":0.1232,"aic":692.01,"bic":696.11,"rmse":35012.42,"n":29,"k":3,"fitted":[236822.55,236225.01,230847.08,231444.63,255627.11,259212.39,259511.16,234133.59,261005.03,235627.46,239212.74,261005.03,235926.23,259511.16,261005.03,260706.26,258614.84,255627.11,255627.11,234432.36,260407.49,258017.3,255925.88,282199.78,305485.93,260407.49,261303.81,259511.16,258017.3],"residuals":[-32822.55,-24225.01,-17847.08,-11444.63,-31127.11,-30212.39,-29511.16,-1133.59,-26005.03,-627.46,-2712.74,-23005.03,3573.77,-18511.16,-17005.03,-15706.26,-9614.84,-2627.11,-627.11,24067.64,9592.51,11982.7,16074.12,-9199.78,-26985.93,19492.51,48696.19,80488.84,116982.7]},"bedrooms,monthsold":{"vars":["bedrooms","monthsold"],"coefs":{"const":192281.3695,"bedrooms":26678.8344,"monthsold":-6632.552},"se":{"const":39243.4433,"bedrooms":9450.6848,"monthsold":3798.7997},"tvals":{"const":4.8997,"bedrooms":2.823,"monthsold":-1.746},"pvals":{"const":0.0,"bedrooms":0.009,"monthsold":0.0926},"ci_lo":{"const":111615.32,"bedrooms":7252.67,"monthsold":-14441.1},"ci_hi":{"const":272947.42,"bedrooms":46105.0,"monthsold":1175.99},"r2":0.2683,"adj_r2":0.2121,"aic":688.91,"bic":693.01,"rmse":33190.11,"n":29,"k":3,"fitted":[225890.01,239155.11,245787.66,245787.66,259201.39,279099.05,245936.29,232522.56,252568.84,239155.11,219257.46,252568.84,232522.56,245936.29,252568.84,245936.29,259201.39,259201.39,252568.84,219257.46,279099.05,265833.95,279099.05,279247.68,299293.96,252568.84,265833.95,259201.39,279099.05],"residuals":[-21890.01,-27155.11,-32787.66,-25787.66,-34701.39,-50099.05,-15936.29,477.44,-17568.84,-4155.11,17242.54,-14568.84,6977.44,-4936.29,-8568.84,-936.29,-10201.39,-6201.39,2431.16,39242.54,-9099.05,4166.05,-7099.05,-6247.68,-20793.96,27331.16,44166.05,80798.61,95900.95]},"bathrooms,lotsize":{"vars":["bathrooms","lotsize"],"coefs":{"const":163133.6911,"bathrooms":34796.8992,"lotsize":6540.6679},"se":{"const":47948.9055,"bathrooms":20230.8715,"lotsize":9958.5978},"tvals":{"const":3.4022,"bathrooms":1.72,"lotsize":0.6568},"pvals":{"const":0.0022,"bathrooms":0.0973,"lotsize":0.5171},"ci_lo":{"const":64573.3,"bathrooms":-6788.25,"lotsize":-13929.52},"ci_hi":{"const":261694.08,"bathrooms":76382.05,"lotsize":27010.86},"r2":0.1233,"adj_r2":0.0559,"aic":694.16,"bic":698.26,"rmse":36331.18,"n":29,"k":3,"fitted":[239268.16,280605.72,245808.83,239268.16,263207.27,263207.27,245808.83,239268.16,245808.83,252349.49,252349.49,245808.83,252349.49,245808.83,239268.16,245808.83,287146.39,252349.49,252349.49,239268.16,252349.49,269747.94,263207.27,245808.83,252349.49,245808.83,263207.27,280605.72,263207.27],"residuals":[-35268.16,-68605.72,-32808.83,-19268.16,-38707.27,-34207.27,-15808.83,-6268.16,-10808.83,-17349.49,-15849.49,-7808.83,-12849.49,-4808.83,4731.84,-808.83,-38146.39,650.51,2650.51,19231.84,17650.51,252.06,8792.73,27191.17,26150.51,34091.17,46792.73,59394.28,111792.73]},"age,bathrooms":{"vars":["bathrooms","age"],"coefs":{"const":188783.4149,"bathrooms":36472.4967,"age":-421.9307},"se":{"const":56298.2878,"bathrooms":20232.8728,"age":969.5673},"tvals":{"const":3.3533,"bathrooms":1.8026,"age":-0.4352},"pvals":{"const":0.0025,"bathrooms":0.083,"age":0.667},"ci_lo":{"const":73060.63,"bathrooms":-5116.77,"age":-2414.9},"ci_hi":{"const":304506.2,"bathrooms":78061.76,"age":1571.04},"r2":0.1152,"adj_r2":0.0471,"aic":694.42,"bic":698.53,"rmse":36498.64,"n":29,"k":3,"fitted":[248648.56,284277.19,240209.94,241053.8,260133.91,265197.08,247382.76,244851.18,249492.42,246960.83,252024.0,249492.42,247382.76,247382.76,249492.42,249070.49,282589.47,241897.67,241897.67,245273.11,248648.56,263509.36,260555.84,246116.97,245695.04,248648.56,268150.6,283855.26,263509.36],"residuals":[-44648.56,-72277.19,-27209.94,-21053.8,-35633.91,-36197.08,-17382.76,-11851.18,-14492.42,-11960.83,-15524.0,-11492.42,-7882.76,-6382.76,-5492.42,-4070.49,-33589.47,11102.33,13102.33,13226.89,21351.44,6490.64,11444.16,26883.03,32804.96,31251.44,41849.4,56144.74,111490.64]},"bathrooms,monthsold":{"vars":["bathrooms","monthsold"],"coefs":{"const":195832.251,"bathrooms":32050.2475,"monthsold":-2121.1047},"se":{"const":64162.8761,"bathrooms":21965.8301,"monthsold":4462.1666},"tvals":{"const":3.0521,"bathrooms":1.4591,"monthsold":-0.4754},"pvals":{"const":0.0052,"bathrooms":0.1565,"monthsold":0.6385},"ci_lo":{"const":63943.57,"bathrooms":-13101.16,"monthsold":-11293.22},"ci_hi":{"const":327720.93,"bathrooms":77201.66,"monthsold":7051.01},"r2":0.1164,"adj_r2":0.0485,"aic":694.38,"bic":698.48,"rmse":36473.17,"n":29,"k":3,"fitted":[245085.01,281377.47,251448.33,251448.33,263231.24,269594.56,242963.91,247206.12,245085.01,249327.22,242963.91,245085.01,247206.12,242963.91,245085.01,242963.91,279256.37,247206.12,245085.01,242963.91,253569.43,265352.35,269594.56,245085.01,242963.91,245085.01,265352.35,279256.37,269594.56],"residuals":[-41085.01,-69377.47,-38448.33,-31448.33,-38731.24,-40594.56,-12963.91,-14206.12,-10085.01,-14327.22,-6463.91,-7085.01,-7706.12,-1963.91,-1085.01,2036.09,-30256.37,5793.88,9914.99,15536.09,16430.57,4647.65,2405.44,27914.99,35536.09,34814.99,44647.65,60743.63,105405.44]},"age,lotsize":{"vars":["lotsize","age"],"coefs":{"const":248800.056,"lotsize":8213.0165,"age":-341.8643},"se":{"const":44137.8295,"lotsize":10434.77,"age":1015.8269},"tvals":{"const":5.6369,"lotsize":0.7871,"age":-0.3365},"pvals":{"const":0.0,"lotsize":0.4384,"age":0.7392},"ci_lo":{"const":158073.45,"lotsize":-13235.96,"age":-2429.93},"ci_hi":{"const":339526.66,"lotsize":29661.99,"age":1746.2},"r2":0.0278,"adj_r2":-0.047,"aic":697.16,"bic":701.26,"rmse":38259.21,"n":29,"k":3,"fitted":[246415.28,253944.57,247791.01,240261.72,249158.47,253260.84,253602.7,243338.5,255312.03,261473.86,265576.23,255312.03,261815.72,253602.7,247099.01,254970.16,260790.13,257371.49,257371.49,243680.37,262841.31,260106.4,249500.33,252577.11,260448.26,254628.3,255653.89,253602.7,251893.38],"residuals":[-42415.28,-41944.57,-34791.01,-20261.72,-24658.47,-24260.84,-23602.7,-10338.5,-20312.03,-26473.86,-29076.23,-17312.03,-22315.72,-12602.7,-3099.01,-9970.16,-11790.13,-4371.49,-2371.49,14819.63,7158.69,9893.6,22499.67,20422.89,18051.74,25271.7,54346.11,86397.3,123106.62]},"lotsize,monthsold":{"vars":["lotsize","monthsold"],"coefs":{"const":264351.1793,"lotsize":7658.1639,"monthsold":-4494.742},"se":{"const":35061.7676,"lotsize":10252.5063,"monthsold":4231.0154},"tvals":{"const":7.5396,"lotsize":0.747,"monthsold":-1.0623},"pvals":{"const":0.0,"lotsize":0.4618,"monthsold":0.2979},"ci_lo":{"const":192280.68,"lotsize":-13416.16,"monthsold":-13191.72},"ci_hi":{"const":336421.67,"lotsize":28732.49,"monthsold":4202.23},"r2":0.0642,"adj_r2":-0.0078,"aic":696.05,"bic":700.15,"rmse":37536.45,"n":29,"k":3,"fitted":[240546.15,257193.8,261688.54,254030.38,252699.06,266183.28,243709.57,245040.89,248204.31,264851.96,251367.74,248204.31,260357.22,243709.57,240546.15,243709.57,260357.22,260357.22,255862.48,236051.41,273841.45,264851.96,266183.28,248204.31,251367.74,248204.31,257193.8,252699.06,266183.28],"residuals":[-36546.15,-45193.8,-48688.54,-34030.38,-28199.06,-37183.28,-13709.57,-12040.89,-13204.31,-29851.96,-14867.74,-10204.31,-20857.22,-2709.57,3453.85,1290.43,-11357.22,-7357.22,-862.48,22448.59,-3841.45,5148.04,5816.72,24795.69,27132.26,31695.69,52806.2,87300.94,108816.72]},"age,monthsold":{"vars":["age","monthsold"],"coefs":{"const":321949.1239,"age":-878.9999,"monthsold":-6039.8885},"se":{"const":55336.0934,"age":1068.4519,"monthsold":4529.3168},"tvals":{"const":5.8181,"age":-0.8227,"monthsold":-1.3335},"pvals":{"const":0.0,"age":0.4182,"monthsold":0.1939},"ci_lo":{"const":208204.15,"age":-3075.23,"monthsold":-15350.03},"ci_hi":{"const":435694.09,"age":1317.23,"monthsold":3270.26},"r2":0.0683,"adj_r2":-0.0033,"aic":695.92,"bic":700.02,"rmse":37452.73,"n":29,"k":3,"fitted":[252420.91,262742.69,252960.58,254718.58,244396.8,273064.46,243744.02,250549.8,254178.91,260984.69,253413.02,254178.91,255823.8,243744.02,254178.91,247260.02,253186.8,244396.8,238356.91,239349.02,276580.46,257468.69,263395.46,247146.91,240228.02,252420.91,267137.68,255823.8,269548.46],"residuals":[-48420.91,-50742.69,-39960.58,-34718.58,-19896.8,-44064.46,-13744.02,-17549.8,-19178.91,-25984.69,-16913.02,-16178.91,-16323.8,-2744.02,-10178.91,-2260.02,-4186.8,8603.2,16643.09,19150.98,-6580.46,12531.31,8604.54,25853.09,38271.98,27479.09,42862.32,84176.2,105451.54]},"bathrooms,bedrooms,size":{"vars":["size","bedrooms","bathrooms"],"coefs":{"const":91764.7304,"size":68.7321,"bedrooms":2475.9801,"bathrooms":10579.5433},"se":{"const":38732.832,"size":14.3077,"bedrooms":8013.7281,"bathrooms":14301.7169},"tvals":{"const":2.3692,"size":4.8039,"bedrooms":0.309,"bathrooms":0.7397},"pvals":{"const":0.0259,"size":0.0001,"bedrooms":0.7599,"bathrooms":0.4663},"ci_lo":{"const":11992.97,"size":39.26,"bedrooms":-14028.6,"bathrooms":-18875.39},"ci_hi":{"const":171536.49,"size":98.2,"bedrooms":18980.56,"bathrooms":40034.48},"r2":0.6262,"adj_r2":0.5814,"aic":671.44,"bic":676.9,"rmse":24192.79,"n":29,"k":4,"fitted":[216576.74,240902.71,244069.59,230323.16,272454.98,244962.13,267165.21,237196.38,239672.36,230323.16,230323.16,253418.78,230323.16,232799.14,260292.0,219052.72,263998.33,267165.21,225925.93,230323.16,246545.57,265581.77,251835.34,255894.76,306483.23,260292.0,286201.41,298364.39,354933.53],"residuals":[-12576.74,-28902.71,-31069.59,-10323.16,-47954.98,-15962.13,-37165.21,-4196.38,-4672.36,4676.84,6176.84,-15418.78,9176.84,8200.86,-16292.0,25947.28,-14998.33,-14165.21,29074.07,28176.84,23454.43,4418.23,20164.66,17105.24,-27983.23,19608.0,23798.59,41635.61,20066.47]},"bedrooms,lotsize,size":{"vars":["size","bedrooms","lotsize"],"coefs":{"const":107996.9873,"size":72.7276,"bedrooms":417.1487,"lotsize":3462.4624},"se":{"const":28960.9442,"size":13.5113,"bedrooms":8282.7195,"lotsize":6946.6791},"tvals":{"const":3.7291,"size":5.3827,"bedrooms":0.0504,"lotsize":0.4984},"pvals":{"const":0.001,"size":0.0,"bedrooms":0.9602,"lotsize":0.6225},"ci_lo":{"const":48350.81,"size":44.9,"bedrooms":-16641.43,"lotsize":-10844.49},"ci_hi":{"const":167643.17,"size":100.55,"bedrooms":17475.73,"lotsize":17769.42},"r2":0.6218,"adj_r2":0.5764,"aic":671.78,"bic":677.25,"rmse":24335.52,"n":29,"k":4,"fitted":[214529.57,232537.56,247083.08,229075.1,269318.52,240227.47,269318.52,236347.86,240227.47,236000.02,236000.02,254773.0,236000.02,232954.71,258583.3,218409.18,258235.46,272780.98,229144.41,229075.1,250962.69,265508.22,247500.23,255190.14,309979.09,262045.76,283864.05,291136.81,356591.67],"residuals":[-10529.57,-20537.56,-34083.08,-9075.1,-44818.52,-11227.47,-39318.52,-3347.86,-5227.47,-1000.02,499.98,-16773.0,3499.98,8045.29,-14583.3,26590.82,-9235.46,-19780.98,25855.59,29424.9,19037.31,4491.78,24499.77,17809.86,-31479.09,17854.24,26135.95,48863.19,18408.33]},"age,bedrooms,size":{"vars":["size","bedrooms","age"],"coefs":{"const":135823.5476,"size":73.8945,"bedrooms":913.9914,"age":-672.9756},"se":{"const":35821.6165,"size":13.3467,"bedrooms":7854.0,"age":639.0842},"tvals":{"const":3.7917,"size":5.5365,"bedrooms":0.1164,"age":-1.053},"pvals":{"const":0.0008,"size":0.0,"bedrooms":0.9083,"age":0.3024},"ci_lo":{"const":62047.55,"size":46.41,"bedrooms":-15261.62,"age":-1989.19},"ci_hi":{"const":209599.55,"size":101.38,"bedrooms":17089.61,"age":643.24},"r2":0.6343,"adj_r2":0.5904,"aic":670.8,"bic":676.27,"rmse":23931.16,"n":29,"k":4,"fitted":[221155.59,234588.54,237253.89,223820.94,263028.13,241546.04,271776.82,237267.17,245583.89,233242.59,241318.3,260362.79,233915.57,234829.56,267752.24,222742.56,254978.99,263028.13,218691.43,230550.69,251627.39,261022.49,241532.76,255892.98,307860.15,266406.29,290593.57,293945.17,357085.35],"residuals":[-17155.59,-22588.54,-24253.89,-3820.94,-38528.13,-12546.04,-41776.82,-4267.17,-10583.89,1757.41,-4818.3,-22362.79,5584.43,6170.44,-23752.24,22257.44,-5978.99,-10028.13,36308.57,27949.31,18372.61,8977.51,30467.24,17107.02,-29360.15,13493.71,19406.43,46054.83,17914.65]},"bedrooms,monthsold,size":{"vars":["size","bedrooms","monthsold"],"coefs":{"const":119005.2169,"size":70.0552,"bedrooms":2872.3817,"monthsold":-1322.1108},"se":{"const":32566.2516,"size":14.5259,"bedrooms":8513.8595,"monthsold":2997.8636},"tvals":{"const":3.6542,"size":4.8228,"bedrooms":0.3374,"monthsold":-0.441},"pvals":{"const":0.0012,"size":0.0001,"bedrooms":0.7386,"monthsold":0.663},"ci_lo":{"const":51933.77,"size":40.14,"bedrooms":-14662.24,"monthsold":-7496.33},"ci_hi":{"const":186076.67,"size":99.97,"bedrooms":20407.0,"monthsold":4852.1},"r2":0.621,"adj_r2":0.5755,"aic":671.84,"bic":677.31,"rmse":24361.55,"n":29,"k":4,"fitted":[216444.81,233100.07,248433.21,234422.18,269677.92,245622.19,267033.7,238783.47,240333.74,233100.07,229133.74,254344.78,231777.96,232006.12,261350.29,217995.09,255666.89,269677.92,226322.71,229133.74,252627.7,263994.52,252627.7,257217.16,307806.04,261350.29,285011.06,290694.47,357710.45],"residuals":[-12444.81,-21100.07,-35433.21,-14422.18,-45177.92,-16622.19,-37033.7,-5783.47,-5333.74,1899.93,7366.26,-16344.78,7722.04,8993.88,-17350.29,27004.91,-6666.89,-16677.92,28677.29,29366.26,17372.3,6005.48,19372.3,15782.84,-29306.04,18549.71,24988.94,49305.53,17289.55]},"bathrooms,lotsize,size":{"vars":["size","bathrooms","lotsize"],"coefs":{"const":93305.1444,"size":70.5862,"bathrooms":9407.7616,"lotsize":3249.1716},"se":{"const":34017.1082,"size":12.1103,"bathrooms":14121.7193,"lotsize":6636.4876},"tvals":{"const":2.7429,"size":5.8286,"bathrooms":0.6662,"lotsize":0.4896},"pvals":{"const":0.0111,"size":0.0,"bathrooms":0.5114,"lotsize":0.6287},"ci_lo":{"const":23245.6,"size":45.64,"bathrooms":-19676.46,"lotsize":-10418.93},"ci_hi":{"const":163364.69,"size":95.53,"bathrooms":38491.99,"lotsize":16917.27},"r2":0.6283,"adj_r2":0.5837,"aic":671.27,"bic":676.74,"rmse":24123.57,"n":29,"k":4,"fitted":[214190.49,240964.66,245674.13,228307.73,271553.87,243319.4,266849.99,235366.35,238615.52,234806.07,234806.07,252732.75,234806.07,231556.9,256542.2,217439.66,265389.69,270099.16,227747.45,228307.73,248923.31,267744.42,250378.02,252732.75,305392.25,259791.37,285671.11,297433.6,356257.29],"residuals":[-10190.49,-28964.66,-32674.13,-8307.73,-47053.87,-14319.4,-36849.99,-2366.35,-3615.52,193.93,1693.93,-14732.75,4693.93,9443.1,-12542.2,27560.34,-16389.69,-17099.16,27252.55,30192.27,21076.69,2255.58,21621.98,20267.25,-26892.25,20108.63,24328.89,42566.4,18742.71]},"age,bathrooms,size":{"vars":["size","bathrooms","age"],"coefs":{"const":121058.1728,"size":71.9779,"bathrooms":10093.3368,"age":-684.8973},"se":{"const":38206.8827,"size":11.8761,"bathrooms":13833.2241,"age":630.7206},"tvals":{"const":3.1685,"size":6.0608,"bathrooms":0.7296,"age":-1.0859},"pvals":{"const":0.004,"size":0.0,"bathrooms":0.4724,"age":0.2879},"ci_lo":{"const":42369.62,"size":47.52,"bathrooms":-18396.72,"age":-1983.89},"ci_hi":{"const":199746.72,"size":96.44,"bathrooms":38583.4,"age":614.1},"r2":0.6417,"adj_r2":0.5987,"aic":670.21,"bic":675.68,"rmse":23686.76,"n":29,"k":4,"fitted":[220782.03,243901.14,235875.23,222849.45,265254.84,244682.47,269111.84,236211.31,243745.18,232438.01,240656.78,258140.75,233122.91,233122.91,265338.54,221466.93,262754.91,260208.17,217021.46,229698.42,249573.17,263536.23,244346.38,252661.57,302361.18,263968.74,292663.46,300798.53,357107.45],"residuals":[-16782.03,-31901.14,-22875.23,-2849.45,-40754.84,-15682.47,-39111.84,-3211.31,-8745.18,2561.99,-4156.78,-20140.75,6377.09,7877.09,-21338.54,23533.07,-13754.91,-7208.17,37978.54,28801.58,20426.83,6463.77,27653.62,20338.43,-23861.18,15931.26,17336.54,39201.47,17892.55]},"bathrooms,monthsold,size":{"vars":["size","bathrooms","monthsold"],"coefs":{"const":101683.1676,"size":70.9539,"bathrooms":9318.6001,"monthsold":-323.0261},"se":{"const":45594.594,"size":12.1869,"bathrooms":15107.6062,"monthsold":2980.7632},"tvals":{"const":2.2302,"size":5.8222,"bathrooms":0.6168,"monthsold":-0.1084},"pvals":{"const":0.035,"size":0.0,"bathrooms":0.5429,"monthsold":0.9146},"ci_lo":{"const":7779.34,"size":45.85,"bathrooms":-21796.1,"monthsold":-6462.02},"ci_hi":{"const":195586.99,"size":96.05,"bathrooms":40433.3,"monthsold":5815.97},"r2":0.625,"adj_r2":0.58,"aic":671.53,"bic":677.0,"rmse":24233.25,"n":29,"k":4,"fitted":[217394.6,241550.03,246745.23,232554.45,272044.64,244632.17,266739.28,239003.79,238680.76,232231.43,231262.35,252871.54,231908.4,231262.35,259966.92,217071.58,262513.16,267385.34,224489.99,231262.35,247068.25,265272.28,251727.55,252871.54,302216.22,259966.92,286558.44,297990.1,358158.36],"residuals":[-13394.6,-29550.03,-33745.23,-12554.45,-47544.64,-15632.17,-36739.28,-6003.79,-3680.76,2768.57,5237.65,-14871.54,7591.6,9737.65,-15966.92,27928.42,-13513.16,-14385.34,30510.01,27237.65,22931.75,4727.72,20272.45,20128.46,-23716.22,19933.08,23441.56,42009.9,16841.64]},"age,lotsize,size":{"vars":["size","lotsize","age"],"coefs":{"const":131710.6477,"size":74.0334,"lotsize":3364.6266,"age":-669.543},"se":{"const":32865.1607,"size":11.4071,"lotsize":6537.2309,"age":634.2445},"tvals":{"const":4.0076,"size":6.4901,"lotsize":0.5147,"age":-1.0557},"pvals":{"const":0.0005,"size":0.0,"lotsize":0.6113,"age":0.3012},"ci_lo":{"const":64023.58,"size":50.54,"lotsize":-10099.05,"age":-1975.79},"ci_hi":{"const":199397.71,"size":97.53,"lotsize":16828.31,"age":636.71},"r2":0.6379,"adj_r2":0.5944,"aic":670.51,"bic":675.98,"rmse":23811.82,"n":29,"k":4,"fitted":[217966.15,234798.37,237553.27,220721.05,262441.45,240862.62,271145.51,234150.28,244879.88,236823.91,244858.42,259686.55,237493.45,234128.82,263725.26,222000.32,257694.83,265806.07,221386.06,227416.48,254308.75,263759.08,240900.98,254330.21,308848.64,265750.8,289969.44,293355.52,356637.83],"residuals":[-13966.15,-22798.37,-24553.27,-721.05,-37941.45,-11862.62,-41145.51,-1150.28,-9879.88,-1823.91,-8358.42,-21686.55,2006.55,6871.18,-19725.26,22999.68,-8694.83,-12806.07,33613.94,31083.52,15691.25,6240.92,31099.02,18669.79,-30348.64,14149.2,20030.56,46644.48,18362.17]},"lotsize,monthsold,size":{"vars":["size","lotsize","monthsold"],"coefs":{"const":115883.809,"size":72.2598,"lotsize":3484.4392,"monthsold":-917.0618},"se":{"const":33292.7329,"size":11.8606,"lotsize":6668.2749,"monthsold":2799.5911},"tvals":{"const":3.4808,"size":6.0924,"lotsize":0.5225,"monthsold":-0.3276},"pvals":{"const":0.0019,"size":0.0,"lotsize":0.6059,"monthsold":0.746},"ci_lo":{"const":47316.14,"size":47.83,"lotsize":-10249.13,"monthsold":-6682.93},"ci_hi":{"const":184451.48,"size":96.69,"lotsize":17218.01,"monthsold":4848.8},"r2":0.6234,"adj_r2":0.5782,"aic":671.66,"bic":677.12,"rmse":24284.69,"n":29,"k":4,"fitted":[214112.56,233883.09,249252.11,231315.71,269095.93,242943.19,267261.81,236707.57,239274.94,237367.52,234616.34,253726.91,236450.46,231131.9,257468.45,216679.94,258128.41,272580.37,228307.42,227647.46,253653.61,266271.45,250169.17,253726.91,306876.16,260952.89,284464.96,290773.88,358558.9],"residuals":[-10112.56,-21883.09,-36252.11,-11315.71,-44595.93,-13943.19,-37261.81,-3707.57,-4274.94,-2367.52,1883.66,-15726.91,3049.54,9868.1,-13468.45,28320.06,-9128.41,-19580.37,26692.58,30852.54,16346.39,3728.55,21830.83,19273.09,-28376.16,18947.11,25535.04,49226.12,16441.1]},"age,monthsold,size":{"vars":["size","age","monthsold"],"coefs":{"const":162286.9682,"size":72.8699,"age":-871.3213,"monthsold":-2320.831},"se":{"const":43049.301,"size":11.4849,"age":674.4176,"monthsold":2918.4155},"tvals":{"const":3.7698,"size":6.3448,"age":-1.292,"monthsold":-0.7952},"pvals":{"const":0.0009,"size":0.0,"age":0.2082,"monthsold":0.434},"ci_lo":{"const":73625.27,"size":49.22,"age":-2260.31,"monthsold":-8331.42},"ci_hi":{"const":250948.66,"size":96.52,"age":517.67,"monthsold":3689.76},"r2":0.6431,"adj_r2":0.6003,"aic":670.1,"bic":675.57,"rmse":23640.5,"n":29,"k":4,"fitted":[221048.06,238521.06,239732.09,226900.75,260436.69,248707.07,267122.2,237387.97,244651.68,236778.42,240271.78,259225.66,235328.91,230687.25,266512.65,219598.55,254575.92,260436.69,214393.91,226330.64,259479.35,262441.1,246409.53,252255.09,300071.87,264770.01,293886.61,293624.84,361813.64],"residuals":[-17048.06,-26521.06,-26732.09,-6900.75,-35936.69,-19707.07,-37122.2,-4387.97,-9651.68,-1778.42,-3771.78,-21225.66,4171.09,10312.75,-22512.65,25401.45,-5575.92,-7436.69,40606.09,32169.36,10520.65,7558.9,25590.47,20744.91,-21571.87,15129.99,16113.39,46375.16,13186.36]},"bathrooms,bedrooms,lotsize":{"vars":["bedrooms","bathrooms","lotsize"],"coefs":{"const":90594.9441,"bedrooms":23013.1439,"bathrooms":34440.1063,"lotsize":8.6127},"se":{"const":54026.9261,"bedrooms":9821.5207,"bathrooms":18682.5,"lotsize":9609.3678},"tvals":{"const":1.6768,"bedrooms":2.3431,"bathrooms":1.8434,"lotsize":0.0009},"pvals":{"const":0.106,"bedrooms":0.0274,"bathrooms":0.0772,"lotsize":0.9993},"ci_lo":{"const":-20675.59,"bedrooms":2785.34,"bathrooms":-4037.22,"lotsize":-19782.25},"ci_hi":{"const":201865.48,"bedrooms":43240.94,"bathrooms":72917.44,"lotsize":19799.48},"r2":0.2812,"adj_r2":0.1949,"aic":690.4,"bic":695.87,"rmse":33549.45,"n":29,"k":4,"fitted":[228523.2,262971.92,228531.81,228523.2,268765.01,268765.01,251544.96,228523.2,251544.96,228540.43,228540.43,251544.96,228540.43,251544.96,251536.35,251544.96,285993.68,251553.57,251553.57,228523.2,251553.57,268773.62,268765.01,274558.1,297579.86,251544.96,268765.01,285985.06,268765.01],"residuals":[-24523.2,-50971.92,-15531.81,-8523.2,-44265.01,-39765.01,-21544.96,4476.8,-16544.96,6459.57,7959.57,-13544.96,10959.57,-10544.96,-7536.35,-6544.96,-36993.68,1446.43,3446.43,29976.8,18446.43,1226.38,3234.99,-1558.1,-19079.86,28355.04,41234.99,54014.94,106234.99]},"age,bathrooms,bedrooms":{"vars":["bedrooms","bathrooms","age"],"coefs":{"const":103548.6369,"bedrooms":22910.45,"bathrooms":34729.1709,"age":-362.052},"se":{"const":62257.0507,"bedrooms":9371.6493,"bathrooms":18550.2739,"age":888.6171},"tvals":{"const":1.6632,"bedrooms":2.4447,"bathrooms":1.8722,"age":-0.4074},"pvals":{"const":0.1088,"bedrooms":0.0219,"bathrooms":0.0729,"age":0.6872},"ci_lo":{"const":-24672.16,"bedrooms":3609.18,"bathrooms":-3475.83,"age":-2192.19},"ci_hi":{"const":231769.43,"bedrooms":42211.72,"bathrooms":72934.18,"age":1468.09},"r2":0.2859,"adj_r2":0.2002,"aic":690.21,"bic":695.68,"rmse":33438.62,"n":29,"k":4,"fitted":[230514.72,264519.78,223273.68,223997.78,264996.92,269341.54,252339.01,227256.25,254149.27,229066.51,233411.13,254149.27,229428.56,252339.01,254149.27,253787.22,285982.03,247632.33,247632.33,227618.3,253425.17,267893.34,265358.97,274163.3,296711.7,253425.17,271875.91,287068.18,267893.34],"residuals":[-26514.72,-52519.78,-10273.68,-3997.78,-40496.92,-40341.54,-22339.01,5743.75,-19149.27,5933.49,3088.87,-16149.27,10071.44,-11339.01,-10149.27,-8787.22,-36982.03,5367.67,7367.67,30881.7,16574.83,2106.66,6641.03,-1163.3,-18211.7,26474.83,38124.09,52931.82,107106.66]},"bathrooms,bedrooms,monthsold":{"vars":["bedrooms","bathrooms","monthsold"],"coefs":{"const":128461.9323,"bedrooms":25218.4354,"bathrooms":25619.5714,"monthsold":-4483.6792},"se":{"const":62892.7799,"bedrooms":9401.5512,"bathrooms":19884.6947,"monthsold":4105.5285},"tvals":{"const":2.0426,"bedrooms":2.6824,"bathrooms":1.2884,"monthsold":-1.0921},"pvals":{"const":0.0518,"bedrooms":0.0128,"bathrooms":0.2094,"monthsold":0.2852},"ci_lo":{"const":-1068.17,"bedrooms":5855.58,"bathrooms":-15333.72,"monthsold":-12939.17},"ci_hi":{"const":257992.04,"bedrooms":44581.29,"bathrooms":66572.87,"monthsold":3971.81},"r2":0.3139,"adj_r2":0.2316,"aic":689.05,"bic":694.52,"rmse":32776.71,"n":29,"k":4,"fitted":[223970.63,258557.56,237421.66,237421.66,266482.53,279933.56,244705.38,228454.31,249189.06,232937.99,219486.95,249189.06,228454.31,244705.38,249189.06,244705.38,279292.31,253672.74,249189.06,219486.95,267123.78,270966.21,279933.56,274407.5,295142.25,249189.06,270966.21,279292.31,279933.56],"residuals":[-19970.63,-46557.56,-24421.66,-17421.66,-41982.53,-50933.56,-14705.38,4545.69,-14189.06,2062.01,17013.05,-11189.06,11045.69,-3705.38,-5189.06,294.62,-30292.31,-672.74,5810.94,39013.05,2876.22,-966.21,-7933.56,-1407.5,-16642.25,30710.94,39033.79,60707.69,95066.44]},"age,bedrooms,lotsize":{"vars":["bedrooms","lotsize","age"],"coefs":{"const":173610.0076,"bedrooms":23090.4473,"lotsize":1649.9952,"age":-296.9121},"se":{"const":53411.7082,"bedrooms":10449.3572,"lotsize":10176.3009,"age":947.7514},"tvals":{"const":3.2504,"bedrooms":2.2097,"lotsize":0.1621,"age":-0.3133},"pvals":{"const":0.0033,"bedrooms":0.0365,"lotsize":0.8725,"age":0.7567},"ci_lo":{"const":63606.54,"bedrooms":1569.59,"lotsize":-19308.49,"age":-2248.84},"ci_hi":{"const":283613.48,"bedrooms":44611.3,"lotsize":22608.48,"age":1655.02},"r2":0.1867,"adj_r2":0.0891,"aic":693.98,"bic":699.45,"rmse":35687.05,"n":29,"k":4,"fitted":[235327.07,236383.24,231038.83,229982.65,255316.92,258879.87,259176.78,232654.86,260661.34,237439.41,241002.36,260661.34,237736.33,259176.78,259011.34,260364.43,259936.04,256966.92,256966.92,232951.77,261717.51,259342.21,255613.83,281376.49,305820.02,260067.51,260958.25,259176.78,257692.22],"residuals":[-31327.07,-24383.24,-18038.83,-9982.65,-30816.92,-29879.87,-29176.78,345.14,-25661.34,-2439.41,-4502.36,-22661.34,1763.67,-18176.78,-15011.34,-15364.43,-10936.04,-3966.92,-1966.92,25548.23,8282.49,10657.79,16386.17,-8376.49,-27320.02,19832.49,49041.75,80823.22,117307.78]},"bedrooms,lotsize,monthsold":{"vars":["bedrooms","lotsize","monthsold"],"coefs":{"const":192588.7816,"bedrooms":26761.1653,"lotsize":-256.1525,"monthsold":-6644.6323},"se":{"const":41684.8756,"bedrooms":10131.2419,"lotsize":9718.1789,"monthsold":3900.9933},"tvals":{"const":4.6201,"bedrooms":2.6414,"lotsize":-0.0264,"monthsold":-1.7033},"pvals":{"const":0.0001,"bedrooms":0.014,"lotsize":0.9792,"monthsold":0.1009},"ci_lo":{"const":106737.17,"bedrooms":5895.48,"lotsize":-20271.12,"monthsold":-14678.88},"ci_hi":{"const":278440.39,"bedrooms":47626.85,"lotsize":19758.81,"monthsold":1389.61},"r2":0.2684,"adj_r2":0.1806,"aic":690.91,"bic":696.38,"rmse":33846.93,"n":29,"k":4,"fitted":[226103.7,239136.81,245781.44,246037.6,259253.34,279187.24,245964.08,232748.33,252608.71,238880.66,218946.76,252608.71,232236.03,245964.08,252864.86,245964.08,258997.19,258997.19,252352.56,219459.07,278931.09,265641.82,279187.24,279369.88,299230.26,252608.71,265897.98,259253.34,279187.24],"residuals":[-22103.7,-27136.81,-32781.44,-26037.6,-34753.34,-50187.24,-15964.08,251.67,-17608.71,-3880.66,17553.24,-14608.71,7263.97,-4964.08,-8864.86,-964.08,-9997.19,-5997.19,2647.44,39040.93,-8931.09,4358.18,-7187.24,-6369.88,-20730.26,27291.29,44102.02,80746.66,95812.76]},"age,bedrooms,monthsold":{"vars":["bedrooms","age","monthsold"],"coefs":{"const":236460.7623,"bedrooms":27122.7673,"age":-999.8756,"monthsold":-8217.3287},"se":{"const":57261.8479,"bedrooms":9438.6562,"age":945.6426,"monthsold":4075.7999},"tvals":{"const":4.1295,"bedrooms":2.8736,"age":-1.0574,"monthsold":-2.0161},"pvals":{"const":0.0004,"bedrooms":0.0082,"age":0.3005,"monthsold":0.0547},"ci_lo":{"const":118527.78,"bedrooms":7683.49,"age":-2947.46,"monthsold":-16611.6},"ci_hi":{"const":354393.75,"bedrooms":46562.04,"age":947.71,"monthsold":176.94},"r2":0.2997,"adj_r2":0.2156,"aic":689.64,"bic":695.11,"rmse":33115.05,"n":29,"k":4,"fitted":[229311.62,243746.53,233966.09,235965.84,248653.71,285304.2,245217.43,228530.07,258434.14,241746.77,229093.3,258434.14,234529.32,245217.43,258434.14,249216.93,258652.46,248653.71,240436.38,213095.29,289303.7,264870.04,274305.57,277557.9,295463.46,256434.39,275868.67,261652.09,281304.7],"residuals":[-25311.62,-31746.53,-20966.09,-15965.84,-24153.71,-56304.2,-15217.43,4469.93,-23434.14,-6746.77,7406.7,-20434.14,4970.68,-4217.43,-14434.14,-4216.93,-9652.46,4346.29,14563.62,45404.71,-19303.7,5129.96,-2305.57,-4557.9,-16963.46,23465.61,34131.33,78347.91,93695.3]},"age,bathrooms,lotsize":{"vars":["bathrooms","lotsize","age"],"coefs":{"const":177440.9997,"bathrooms":35131.7408,"lotsize":6443.4715,"age":-407.4959},"se":{"const":59676.5525,"bathrooms":20576.5058,"lotsize":10123.6634,"age":981.1157},"tvals":{"const":2.9734,"bathrooms":1.7074,"lotsize":0.6365,"age":-0.4153},"pvals":{"const":0.0064,"bathrooms":0.1001,"lotsize":0.5303,"age":0.6814},"ci_lo":{"const":54534.84,"bathrooms":-7246.37,"lotsize":-14406.6,"age":-2428.14},"ci_hi":{"const":300347.16,"bathrooms":77509.85,"lotsize":27293.55,"age":1613.15},"r2":0.1293,"adj_r2":0.0248,"aic":695.96,"bic":701.43,"rmse":36923.5,"n":29,"k":4,"fitted":[241515.58,282275.8,239809.14,234180.66,259004.99,263894.94,246736.56,237848.12,248774.04,252772.54,257662.49,248774.04,253180.04,246736.56,242330.57,248366.55,287089.29,247882.59,247882.59,238255.61,254402.52,268708.43,259412.48,245514.08,251550.05,247959.05,266747.41,281868.31,262264.96],"residuals":[-37515.58,-70275.8,-26809.14,-14180.66,-34504.99,-34894.94,-16736.56,-4848.12,-13774.04,-17772.54,-21162.49,-10774.04,-13680.04,-5736.56,1669.43,-3366.55,-38089.29,5117.41,7117.41,20244.39,15597.48,1291.57,12587.52,27485.92,26949.95,31940.95,43252.59,58131.69,112735.04]},"bathrooms,lotsize,monthsold":{"vars":["bathrooms","lotsize","monthsold"],"coefs":{"const":184417.8955,"bathrooms":30823.7492,"lotsize":6453.1698,"monthsold":-2066.6789},"se":{"const":67328.2001,"bathrooms":22303.7099,"lotsize":10115.3265,"monthsold":4514.7466},"tvals":{"const":2.7391,"bathrooms":1.382,"lotsize":0.638,"monthsold":-0.4578},"pvals":{"const":0.0112,"bathrooms":0.1792,"lotsize":0.5293,"monthsold":0.6511},"ci_lo":{"const":45752.87,"bathrooms":-15111.6,"lotsize":-14379.74,"monthsold":-11364.97},"ci_hi":{"const":323082.92,"bathrooms":76759.1,"lotsize":27286.07,"monthsold":7231.62},"r2":0.1306,"adj_r2":0.0263,"aic":695.91,"bic":701.38,"rmse":36896.37,"n":29,"k":4,"fitted":[238051.81,279462.09,250705.02,244251.85,261983.53,268183.57,242438.3,240118.49,244504.98,255091.51,248891.47,244504.98,253024.83,242438.3,238051.81,242438.3,283848.58,253024.83,250958.15,235985.13,259224.87,270503.38,268183.57,244504.98,248891.47,244504.98,264050.21,277395.41,268183.57],"residuals":[-34051.81,-67462.09,-37705.02,-24251.85,-37483.53,-39183.57,-12438.3,-7118.49,-9504.98,-20091.51,-12391.47,-6504.98,-13524.83,-1438.3,5948.19,2561.7,-34848.58,-24.83,4041.85,22514.87,10775.13,-503.38,3816.43,28495.02,29608.53,35395.02,45949.79,62604.59,106816.43]},"age,bathrooms,monthsold":{"vars":["bathrooms","age","monthsold"],"coefs":{"const":232780.9189,"bathrooms":30207.1146,"age":-700.7123,"monthsold":-3355.779},"se":{"const":85635.7974,"bathrooms":22382.0923,"age":1060.2253,"monthsold":4882.8015},"tvals":{"const":2.7183,"bathrooms":1.3496,"age":-0.6609,"monthsold":-0.6873},"pvals":{"const":0.0118,"bathrooms":0.1892,"age":0.5147,"monthsold":0.4982},"ci_lo":{"const":56410.69,"bathrooms":-15889.67,"age":-2884.29,"monthsold":-13412.1},"ci_hi":{"const":409151.15,"bathrooms":76303.9,"age":1482.86,"monthsold":6700.54},"r2":0.1316,"adj_r2":0.0274,"aic":695.88,"bic":701.35,"rmse":36874.74,"n":29,"k":4,"fitted":[247982.61,283499.86,244035.7,245437.13,255230.55,273706.44,242524.7,245031.98,249384.04,251891.32,250232.53,249384.04,249236.26,242524.7,249384.04,245327.55,277341.23,240126.99,236771.22,239021.14,261405.73,264192.03,265998.6,243778.34,239721.85,247982.61,271899.87,279443.37,270903.59],"residuals":[-43982.61,-71499.86,-31035.7,-25437.13,-30730.55,-44706.44,-12524.7,-12031.98,-14384.04,-16891.32,-13732.53,-11384.04,-9736.26,-1524.7,-5384.04,-327.55,-28341.23,12873.01,18228.78,19478.86,8594.27,5807.97,6001.4,29221.66,38778.15,31917.39,38100.13,60556.63,104096.41]},"age,lotsize,monthsold":{"vars":["lotsize","age","monthsold"],"coefs":{"const":303790.1965,"lotsize":7308.1383,"age":-846.0148,"monthsold":-5816.3507},"se":{"const":61499.2894,"lotsize":10339.1771,"age":1079.8928,"monthsold":4584.4611},"tvals":{"const":4.9397,"lotsize":0.7068,"age":-0.7834,"monthsold":-1.2687},"pvals":{"const":0.0,"lotsize":0.4862,"age":0.4407,"monthsold":0.2162},"ci_lo":{"const":177130.04,"lotsize":-13985.8,"age":-3070.1,"monthsold":-15258.23},"ci_hi":{"const":430450.35,"lotsize":28602.07,"age":1378.07,"monthsold":3625.52},"r2":0.0866,"adj_r2":-0.023,"aic":697.35,"bic":702.82,"rmse":37818.41,"n":29,"k":4,"fitted":[244157.42,261406.23,251994.32,246378.21,243745.67,271346.9,243111.17,242359.64,253157.59,267022.34,259725.47,253157.59,262052.0,243111.17,245849.45,246495.22,259513.96,251053.81,245237.46,231572.95,282039.1,263638.28,262040.74,246389.47,247035.24,251465.56,265636.31,254743.87,267962.84],"residuals":[-40157.42,-49406.23,-38994.32,-26378.21,-19245.67,-42346.9,-13111.17,-9359.64,-18157.59,-32022.34,-23225.47,-15157.59,-22552.0,-2111.17,-1849.45,-1495.22,-10513.96,1946.19,9762.54,26927.05,-12039.1,6361.72,9959.26,26610.53,31464.76,28434.44,44363.69,85256.13,107037.16]},"bathrooms,bedrooms,lotsize,size":{"vars":["size","bedrooms","bathrooms","lotsize"],"coefs":{"const":90017.4137,"size":69.247,"bedrooms":1463.3306,"bathrooms":9866.7512,"lotsize":2896.265},"se":{"const":39624.6922,"size":14.6062,"bedrooms":8517.577,"bathrooms":14649.7337,"lotsize":7073.9871},"tvals":{"const":2.2718,"size":4.7409,"bedrooms":0.1718,"bathrooms":0.6735,"lotsize":0.4094},"pvals":{"const":0.0324,"size":0.0001,"bedrooms":0.865,"bathrooms":0.5071,"lotsize":0.6859},"ci_lo":{"const":8236.07,"size":39.1,"bedrooms":-16116.08,"bathrooms":-20368.81,"lotsize":-11703.73},"ci_hi":{"const":171798.76,"size":99.39,"bedrooms":19042.75,"bathrooms":40102.32,"lotsize":17496.26},"r2":0.6288,"adj_r2":0.5669,"aic":673.23,"bic":680.07,"rmse":24605.89,"n":29,"k":5,"fitted":[213983.02,240595.45,244578.1,227832.43,271748.92,244050.1,266815.54,234757.13,239116.73,233624.96,233624.96,252966.14,233624.96,232192.03,256994.57,218342.62,265729.15,269711.81,228163.59,227832.43,248937.7,267720.48,250974.81,254429.47,307261.99,259890.84,285598.33,297456.4,354845.36],"residuals":[-9983.02,-28595.45,-31578.1,-7832.43,-47248.92,-15050.1,-36815.54,-1757.13,-4116.73,1375.04,2875.04,-14966.14,5875.04,8807.97,-12994.57,26657.38,-16729.15,-16711.81,26836.41,30667.57,21062.3,2279.52,21025.19,18570.53,-28761.99,20009.16,24401.67,42543.6,20154.64]},"age,bathrooms,bedrooms,size":{"vars":["size","bedrooms","bathrooms","age"],"coefs":{"const":115882.1537,"size":70.2127,"bedrooms":1837.696,"bathrooms":10600.404,"age":-673.6455},"se":{"const":45031.6305,"size":14.3518,"bedrooms":8022.4646,"bathrooms":14275.7319,"age":644.8973},"tvals":{"const":2.5734,"size":4.8923,"bedrooms":0.2291,"bathrooms":0.7425,"age":-1.0446},"pvals":{"const":0.0167,"size":0.0001,"bedrooms":0.8208,"bathrooms":0.465,"age":0.3066},"ci_lo":{"const":22941.44,"size":40.59,"bedrooms":-14719.86,"bathrooms":-18863.26,"age":-2004.65},"ci_hi":{"const":208822.87,"size":99.83,"bedrooms":18395.25,"bathrooms":40064.07,"age":657.36},"r2":0.6425,"adj_r2":0.5829,"aic":672.15,"bic":678.98,"rmse":24148.81,"n":29,"k":5,"fitted":[220010.85,243306.51,234623.03,221927.78,265519.33,245517.99,268976.52,235011.86,244259.66,231358.82,239442.56,258302.2,232032.46,233870.16,265323.48,222522.2,263513.44,260219.13,218091.5,228664.24,249933.64,263887.22,245129.16,254750.74,305063.69,263976.18,292361.14,300640.74,355163.76],"residuals":[-16010.85,-31306.51,-21623.03,-1927.78,-41019.33,-16517.99,-38976.52,-2011.86,-9259.66,3641.18,-2942.56,-20302.2,7467.54,7129.84,-21323.48,22477.8,-14513.44,-7219.13,36908.5,29835.76,20066.36,6112.78,26870.84,18249.26,-26563.69,15923.82,17638.86,39359.26,19836.24]},"bathrooms,bedrooms,monthsold,size":{"vars":["size","bedrooms","bathrooms","monthsold"],"coefs":{"const":97566.4912,"size":67.8736,"bedrooms":3070.9139,"bathrooms":9522.3418,"monthsold":-688.7807},"se":{"const":47831.5287,"size":15.1252,"bedrooms":8626.8974,"bathrooms":15389.239,"monthsold":3203.4792},"tvals":{"const":2.0398,"size":4.4875,"bedrooms":0.356,"bathrooms":0.6188,"monthsold":-0.215},"pvals":{"const":0.0525,"size":0.0002,"bedrooms":0.725,"bathrooms":0.5419,"monthsold":0.8316},"ci_lo":{"const":-1152.93,"size":36.66,"bedrooms":-14734.13,"bathrooms":-22239.49,"monthsold":-7300.44},"ci_hi":{"const":196285.91,"size":99.09,"bedrooms":20875.95,"bathrooms":41284.17,"monthsold":5922.88},"r2":0.6269,"adj_r2":0.5648,"aic":673.38,"bic":680.22,"rmse":24667.92,"n":29,"k":5,"fitted":[216025.54,240500.17,245241.33,231666.61,272057.95,246974.84,265919.22,237076.41,239458.54,230977.83,228911.49,253033.27,230289.05,231982.4,259820.63,218407.67,263244.39,267296.78,225883.82,228911.49,249001.03,265959.37,253762.2,256104.18,305997.86,259820.63,286321.46,297181.21,355572.65],"residuals":[-12025.54,-28500.17,-32241.33,-11666.61,-47557.95,-17974.84,-35919.22,-4076.41,-4458.54,4022.17,7588.51,-15033.27,9210.95,9017.6,-15820.63,26592.33,-14244.39,-14296.78,29116.18,29588.51,20998.97,4040.63,18237.8,16895.82,-27497.86,20079.37,23678.54,42818.79,19427.35]},"age,bedrooms,lotsize,size":{"vars":["size","bedrooms","lotsize","age"],"coefs":{"const":132102.5552,"size":74.2042,"bedrooms":-203.3383,"lotsize":3411.2322,"age":-670.6951},"se":{"const":37156.2706,"size":13.5685,"bedrooms":8293.2563,"lotsize":6937.4398,"age":649.0182},"tvals":{"const":3.5553,"size":5.4689,"bedrooms":-0.0245,"lotsize":0.4917,"age":-1.0334},"pvals":{"const":0.0016,"size":0.0,"bedrooms":0.9806,"lotsize":0.6274,"age":0.3117},"ci_lo":{"const":55415.78,"size":46.2,"bedrooms":-17319.78,"lotsize":-10906.94,"age":-2010.2},"ci_hi":{"const":208789.33,"size":102.21,"bedrooms":16913.1,"lotsize":17729.4,"age":668.81},"r2":0.6379,"adj_r2":0.5775,"aic":672.51,"bic":679.35,"rmse":24302.53,"n":29,"k":5,"fitted":[217998.14,234908.83,237677.16,220766.47,262417.87,240784.52,271136.91,234223.15,244808.69,236978.67,245027.01,259649.54,237649.37,234034.79,263658.73,221876.73,257695.21,265829.1,221306.57,227473.43,254298.96,263774.24,240827.3,254080.64,308560.8,265728.57,290001.92,293398.18,356828.5],"residuals":[-13998.14,-22908.83,-24677.16,-766.47,-37917.87,-11784.52,-41136.91,-1223.15,-9808.69,-1978.67,-8527.01,-21649.54,1850.63,6965.21,-19658.73,23123.27,-8695.21,-12829.1,33693.43,31026.57,15701.04,6225.76,31172.7,18919.36,-30060.8,14171.43,19998.08,46601.82,18171.5]},"bedrooms,lotsize,monthsold,size":{"vars":["size","bedrooms","lotsize","monthsold"],"coefs":{"const":114649.7189,"size":70.6829,"bedrooms":1668.4236,"lotsize":3082.1027,"monthsold":-1129.1707},"se":{"const":34615.445,"size":14.8398,"bedrooms":9094.8985,"lotsize":7145.9055,"monthsold":3080.5446},"tvals":{"const":3.3121,"size":4.7631,"bedrooms":0.1834,"lotsize":0.4313,"monthsold":-0.3665},"pvals":{"const":0.0029,"size":0.0001,"bedrooms":0.856,"lotsize":0.6701,"monthsold":0.7172},"ci_lo":{"const":43206.95,"size":40.06,"bedrooms":-17102.52,"lotsize":-11666.32,"monthsold":-7487.1},"ci_hi":{"const":186092.49,"size":101.31,"bedrooms":20439.37,"lotsize":17830.53,"monthsold":5228.76},"r2":0.6239,"adj_r2":0.5612,"aic":673.61,"bic":680.45,"rmse":24768.1,"n":29,"k":5,"fitted":[213788.99,233266.02,248531.78,231313.09,269146.74,244261.08,266888.4,236123.04,239744.4,236348.12,232960.61,253880.98,235218.95,231546.93,257867.17,217410.35,258092.26,272228.84,228689.91,226796.41,254411.47,266289.72,251329.37,255549.41,308648.81,260949.27,284412.49,290351.62,357353.76],"residuals":[-9788.99,-21266.02,-35531.78,-11313.09,-44646.74,-15261.08,-36888.4,-3123.04,-4744.4,-1348.12,3539.39,-15880.98,4281.05,9453.07,-13867.17,27589.65,-9092.26,-19228.84,26310.09,31703.59,15588.53,3710.28,20670.63,17450.59,-30148.81,18950.73,25587.51,49648.38,17646.24]},"age,bedrooms,monthsold,size":{"vars":["size","bedrooms","age","monthsold"],"coefs":{"const":158862.3356,"size":69.4274,"bedrooms":3479.6256,"age":-887.1914,"monthsold":-2775.8754},"se":{"const":44557.8976,"size":14.3439,"bedrooms":8415.5044,"age":686.959,"monthsold":3165.508},"tvals":{"const":3.5653,"size":4.8402,"bedrooms":0.4135,"age":-1.2915,"monthsold":-0.8769},"pvals":{"const":0.0016,"size":0.0001,"bedrooms":0.6829,"age":0.2088,"monthsold":0.3892},"ci_lo":{"const":66899.35,"size":39.82,"bedrooms":-13889.12,"age":-2305.01,"monthsold":-9309.16},"ci_hi":{"const":250825.32,"size":99.03,"bedrooms":20848.37,"age":530.62,"monthsold":3757.41},"r2":0.6456,"adj_r2":0.5865,"aic":671.89,"bic":678.73,"rmse":24042.5,"n":29,"k":5,"fitted":[219565.46,237228.3,237920.2,225809.11,260225.05,251428.03,266206.79,235184.82,245647.68,235453.92,237772.59,259533.15,233565.23,231493.11,266475.89,221156.4,255211.49,260225.05,215792.76,223577.52,261919.53,263155.72,248611.66,255915.24,304330.96,264701.5,293743.04,292586.75,358963.05],"residuals":[-15565.46,-25228.3,-24920.2,-5809.11,-35725.05,-22428.03,-36206.79,-2184.82,-10647.68,-453.92,-1272.59,-21533.15,5934.77,9506.89,-22475.89,23843.6,-6211.49,-7225.05,39207.24,34922.48,8080.47,6844.28,23388.34,17084.76,-25830.96,15198.5,16256.96,47413.25,16036.95]},"age,bathrooms,lotsize,size":{"vars":["size","bathrooms","lotsize","age"],"coefs":{"const":116152.5668,"size":71.4938,"bathrooms":9637.0157,"lotsize":3045.534,"age":-676.3062},"se":{"const":40263.7556,"size":12.1138,"bathrooms":14091.7121,"lotsize":6624.4119,"age":641.1829},"tvals":{"const":2.8848,"size":5.9019,"bathrooms":0.6839,"lotsize":0.4597,"age":-1.0548},"pvals":{"const":0.0081,"size":0.0,"bathrooms":0.5006,"lotsize":0.6498,"age":0.302},"ci_lo":{"const":33052.26,"size":46.49,"bathrooms":-19446.85,"lotsize":-10626.58,"age":-1999.64},"ci_hi":{"const":199252.87,"size":96.5,"bathrooms":38720.88,"lotsize":16717.65,"age":647.03},"r2":0.6448,"adj_r2":0.5856,"aic":671.95,"bic":678.79,"rmse":24069.44,"n":29,"k":5,"fitted":[217597.99,243226.7,235714.93,219723.25,264686.81,244204.96,268660.29,232959.39,243444.29,235282.6,243398.28,257743.05,235958.91,232913.37,261846.9,221319.83,265015.15,262913.84,220017.55,226486.31,252286.59,265993.41,243914.97,252332.6,304747.51,263539.82,291835.4,299745.45,355889.85],"residuals":[-13597.99,-31226.7,-22714.93,276.75,-40186.81,-15204.96,-38660.29,40.61,-8444.29,-282.6,-6898.28,-19743.05,3541.09,8086.63,-17846.9,23680.17,-16015.15,-9913.84,34982.45,32013.69,17713.41,4006.59,28085.03,20667.4,-26247.51,16360.18,18164.6,40254.55,19110.15]},"bathrooms,lotsize,monthsold,size":{"vars":["size","bathrooms","lotsize","monthsold"],"coefs":{"const":96608.1669,"size":70.4567,"bathrooms":8861.6767,"lotsize":3242.1584,"monthsold":-308.2813},"se":{"const":47511.8541,"size":12.4227,"bathrooms":15375.685,"lotsize":6772.2249,"monthsold":3027.9622},"tvals":{"const":2.0333,"size":5.6716,"bathrooms":0.5763,"lotsize":0.4787,"monthsold":-0.1018},"pvals":{"const":0.0532,"size":0.0,"bathrooms":0.5697,"lotsize":0.6365,"monthsold":0.9198},"ci_lo":{"const":-1451.48,"size":44.82,"bathrooms":-22872.18,"lotsize":-10735.03,"monthsold":-6557.69},"ci_hi":{"const":194667.81,"size":96.1,"bathrooms":40595.53,"lotsize":17219.34,"monthsold":5941.13},"r2":0.6285,"adj_r2":0.5666,"aic":673.26,"bic":680.09,"rmse":24615.7,"n":29,"k":5,"fitted":[214055.06,240866.79,246404.73,229071.24,271356.01,244098.19,266308.61,235500.35,238434.22,235247.28,234322.43,252525.56,234938.99,231080.27,256329.07,216988.94,264937.68,270167.33,227585.05,227838.12,249955.17,267860.79,251143.85,252525.56,304779.11,259571.23,285755.63,296923.86,356828.87],"residuals":[-10055.06,-28866.79,-33404.73,-9071.24,-46856.01,-15098.19,-36308.61,-2500.35,-3434.22,-247.28,2177.57,-14525.56,4561.01,9919.73,-12329.07,28011.06,-15937.68,-17167.33,27414.95,30661.88,20044.83,2139.21,20856.15,20474.44,-26279.11,20328.77,24244.37,43076.14,18171.13]},"age,bathrooms,monthsold,size":{"vars":["size","bathrooms","age","monthsold"],"coefs":{"const":144850.3343,"size":71.4145,"bathrooms":6987.1911,"age":-830.2351,"monthsold":-1774.2491},"se":{"const":57735.9812,"size":12.0862,"bathrooms":15100.5266,"age":691.0036,"monthsold":3192.014},"tvals":{"const":2.5088,"size":5.9087,"bathrooms":0.4627,"age":-1.2015,"monthsold":-0.5558},"pvals":{"const":0.0193,"size":0.0,"bathrooms":0.6477,"age":0.2413,"monthsold":0.5835},"ci_lo":{"const":25689.13,"size":46.47,"bathrooms":-24178.76,"age":-2256.4,"monthsold":-8362.24},"ci_hi":{"const":264011.54,"size":96.36,"bathrooms":38153.15,"age":595.93,"monthsold":4813.74},"r2":0.6462,"adj_r2":0.5873,"aic":671.84,"bic":678.67,"rmse":24021.08,"n":29,"k":5,"fitted":[220648.03,243806.15,237931.89,225309.45,262622.28,249342.04,266373.25,236374.52,243732.86,235158.49,239798.57,258015.77,234214.48,230665.98,265157.22,219704.02,260135.32,259128.69,214505.72,226514.81,256310.84,263896.96,247350.91,251373.88,298759.57,263496.75,294453.91,298333.3,360284.35],"residuals":[-16648.03,-31806.15,-24931.89,-5309.45,-38122.28,-20342.04,-36373.25,-3374.52,-8732.86,-158.49,-3298.57,-20015.77,5285.52,10334.02,-21157.22,25295.98,-11135.32,-6128.69,40494.28,31985.19,13689.16,6103.04,24649.09,21626.12,-20259.57,16403.25,15546.09,41666.7,14715.65]},"age,lotsize,monthsold,size":{"vars":["size","lotsize","age","monthsold"],"coefs":{"const":155767.1238,"size":72.2988,"lotsize":3127.5045,"age":-857.2656,"monthsold":-2254.3138},"se":{"const":45846.6396,"size":11.7294,"lotsize":6600.6528,"age":685.7695,"monthsold":2968.0829},"tvals":{"const":3.3976,"size":6.1639,"lotsize":0.4738,"age":-1.2501,"monthsold":-0.7595},"pvals":{"const":0.0024,"size":0.0,"lotsize":0.6399,"age":0.2233,"monthsold":0.4549},"ci_lo":{"const":61144.31,"size":48.09,"lotsize":-10495.57,"age":-2272.62,"monthsold":-8380.14},"ci_hi":{"const":250389.94,"size":96.51,"lotsize":16750.58,"age":558.09,"monthsold":3871.51},"r2":0.6464,"adj_r2":0.5875,"aic":671.83,"bic":678.66,"rmse":24015.92,"n":29,"k":5,"fitted":[217757.58,238138.95,239422.25,223549.51,260032.34,248162.93,266668.16,233986.16,244289.27,239551.92,243076.17,258749.04,238154.87,230518.74,262851.42,219488.04,257272.73,263159.84,217526.22,223104.91,261949.38,265042.4,245962.89,251890.91,302516.03,264264.39,293034.47,292866.45,360412.02],"residuals":[-13757.58,-26138.95,-26422.25,-3549.51,-35532.34,-19162.93,-36668.16,-986.16,-9289.27,-4551.92,-6576.17,-20749.04,1345.13,10481.26,-18851.42,25511.96,-8272.73,-10159.84,37473.78,35395.09,8050.62,4957.6,26037.11,21109.09,-24016.03,15635.61,16965.53,47133.55,14587.98]},"age,bathrooms,bedrooms,lotsize":{"vars":["bedrooms","bathrooms","lotsize","age"],"coefs":{"const":103583.6001,"bedrooms":22926.1646,"bathrooms":34739.0188,"lotsize":-53.0747,"age":-362.1298},"se":{"const":63866.3398,"bedrooms":9993.3013,"bathrooms":19019.4856,"lotsize":9776.3352,"age":907.0538},"tvals":{"const":1.6219,"bedrooms":2.2942,"bathrooms":1.8265,"lotsize":-0.0054,"age":-0.3992},"pvals":{"const":0.1179,"bedrooms":0.0308,"bathrooms":0.0802,"lotsize":0.9957,"age":0.6932},"ci_lo":{"const":-28230.05,"bedrooms":2301.0,"bathrooms":-4515.27,"lotsize":-20230.44,"age":-2234.2},"ci_hi":{"const":235397.25,"bedrooms":43551.32,"bathrooms":73993.31,"lotsize":20124.29,"age":1509.94},"r2":0.2859,"adj_r2":0.1669,"aic":692.21,"bic":699.04,"rmse":34128.13,"n":29,"k":5,"fitted":[230561.03,264522.72,223265.36,224042.7,265009.55,269355.11,252347.73,227301.86,254158.38,229006.36,233351.92,254158.38,229368.49,252347.73,254211.46,253796.25,285947.29,247586.97,247586.97,227663.99,253381.05,267853.52,265371.68,274187.51,296698.47,253434.12,271890.02,287086.75,267906.59],"residuals":[-26561.03,-52522.72,-10265.36,-4042.7,-40509.55,-40355.11,-22347.73,5698.14,-19158.38,5993.64,3148.08,-16158.38,10131.51,-11347.73,-10211.46,-8796.25,-36947.29,5413.03,7413.03,30836.01,16618.95,2146.48,6628.32,-1187.51,-18198.47,26465.88,38109.98,52913.25,107093.41]},"bathrooms,bedrooms,lotsize,monthsold":{"vars":["bedrooms","bathrooms","lotsize","monthsold"],"coefs":{"const":129285.0101,"bedrooms":25498.3078,"bathrooms":25716.9847,"lotsize":-888.0317,"monthsold":-4517.3885},"se":{"const":64794.2104,"bedrooms":10061.023,"bathrooms":20318.5273,"lotsize":9616.2164,"monthsold":4205.3156},"tvals":{"const":1.9953,"bedrooms":2.5344,"bathrooms":1.2657,"lotsize":-0.0923,"monthsold":-1.0742},"pvals":{"const":0.0575,"bedrooms":0.0182,"bathrooms":0.2178,"lotsize":0.9272,"monthsold":0.2934},"ci_lo":{"const":-4443.67,"bedrooms":4733.38,"bathrooms":-16218.39,"lotsize":-20734.93,"monthsold":-13196.73},"ci_hi":{"const":263013.69,"bedrooms":46263.24,"bathrooms":67652.36,"lotsize":18958.86,"monthsold":4161.96},"r2":0.3141,"adj_r2":0.1998,"aic":691.04,"bic":697.87,"rmse":33446.64,"n":29,"k":5,"fitted":[224704.15,258567.88,237368.29,238256.32,266690.31,280242.47,244797.04,229221.54,249314.43,231962.87,218410.7,249314.43,227445.48,244797.04,250202.46,244797.04,278660.77,252943.78,248426.4,220186.76,266495.95,270319.67,280242.47,274812.74,294905.62,249314.43,271207.7,279548.8,280242.47],"residuals":[-20704.15,-46567.88,-24368.29,-18256.32,-42190.31,-51242.47,-14797.04,3778.46,-14314.43,3037.13,18089.3,-11314.43,12054.52,-3797.04,-6202.46,202.96,-29660.77,56.22,6573.6,38313.24,3504.05,-319.67,-8242.47,-1812.74,-16405.62,30585.57,38792.3,60451.2,94757.53]},"age,bathrooms,bedrooms,monthsold":{"vars":["bedrooms","bathrooms","age","monthsold"],"coefs":{"const":172249.0051,"bedrooms":25734.67,"bathrooms":23234.8802,"age":-856.5532,"monthsold":-6041.3124},"se":{"const":79568.8714,"bedrooms":9453.4033,"bathrooms":20131.4536,"age":947.5958,"monthsold":4466.4302},"tvals":{"const":2.1648,"bedrooms":2.7223,"bathrooms":1.1542,"age":-0.9039,"monthsold":-1.3526},"pvals":{"const":0.0406,"bedrooms":0.0119,"bathrooms":0.2598,"age":0.375,"monthsold":0.1888},"ci_lo":{"const":8026.93,"bedrooms":6223.8,"bathrooms":-18314.4,"age":-2812.29,"monthsold":-15259.57},"ci_hi":{"const":336471.08,"bedrooms":45245.54,"bathrooms":64784.16,"age":1099.19,"monthsold":3176.95},"r2":0.3365,"adj_r2":0.2259,"aic":690.08,"bic":696.91,"rmse":32897.28,"n":29,"k":5,"fitted":[227080.44,260684.84,228073.31,229786.42,256769.01,285171.59,244204.14,225412.77,254528.22,235736.85,227891.55,254528.22,230552.09,244204.14,254528.22,247630.35,276951.98,245151.57,239110.26,214186.7,276980.36,269662.75,275749.5,273410.46,292247.27,252815.11,279084.84,279521.64,281745.38],"residuals":[-23080.44,-48684.84,-15073.31,-9786.42,-32269.01,-56171.59,-14204.14,7587.23,-19528.22,-736.85,8608.45,-16528.22,8947.91,-3204.14,-10528.22,-2630.35,-27951.98,7848.43,15889.74,44313.3,-6980.36,337.25,-3749.5,-410.46,-13747.27,27084.89,30915.16,60478.36,93254.62]},"age,bedrooms,lotsize,monthsold":{"vars":["bedrooms","lotsize","age","monthsold"],"coefs":{"const":237721.3797,"bedrooms":27401.9302,"lotsize":-861.4583,"age":-1005.0079,"monthsold":-8266.09},"se":{"const":60139.3243,"bedrooms":10133.6749,"lotsize":9719.9708,"age":966.7205,"monthsold":4195.397},"tvals":{"const":3.9528,"bedrooms":2.704,"lotsize":-0.0886,"age":-1.0396,"monthsold":-1.9703},"pvals":{"const":0.0006,"bedrooms":0.0124,"lotsize":0.9301,"age":0.3089,"monthsold":0.0604},"ci_lo":{"const":113599.91,"bedrooms":6487.05,"lotsize":-20922.49,"age":-3000.22,"monthsold":-16924.96},"ci_hi":{"const":361842.84,"bedrooms":48316.81,"lotsize":19199.58,"age":990.21,"monthsold":392.78},"r2":0.2999,"adj_r2":0.1832,"aic":691.63,"bic":698.47,"rmse":33792.38,"n":29,"k":5,"fitted":[230047.84,243708.54,233884.49,236755.96,248774.27,285632.64,245307.2,229268.86,258598.32,240837.07,228098.89,258598.32,233575.99,245307.2,259459.78,249327.23,257962.89,247912.81,239646.72,213741.68,288791.21,264218.97,274577.55,277960.19,295229.57,256588.31,276135.51,261839.38,281612.61],"residuals":[-26047.84,-31708.54,-20884.49,-16755.96,-24274.27,-56632.64,-15307.2,3731.14,-23598.32,-5837.07,8401.11,-20598.32,5924.01,-4307.2,-15459.78,-4327.23,-8962.89,5087.19,15353.28,44758.32,-18791.21,5781.03,-2577.55,-4960.19,-16729.57,23311.69,33864.49,78160.62,93387.39]},"age,bathrooms,lotsize,monthsold":{"vars":["bathrooms","lotsize","age","monthsold"],"coefs":{"const":220609.2108,"bathrooms":29077.6036,"lotsize":6240.418,"age":-679.2129,"monthsold":-3265.2649},"se":{"const":89005.6688,"bathrooms":22744.7684,"lotsize":10244.5424,"age":1074.3986,"monthsold":4947.637},"tvals":{"const":2.4786,"bathrooms":1.2784,"lotsize":0.6091,"age":-0.6322,"monthsold":-0.66},"pvals":{"const":0.0206,"bathrooms":0.2133,"lotsize":0.5482,"age":0.5332,"monthsold":0.5156},"ci_lo":{"const":36910.54,"bathrooms":-17865.29,"lotsize":-14903.28,"age":-2896.66,"monthsold":-13476.69},"ci_hi":{"const":404307.88,"bathrooms":76020.5,"lotsize":27384.11,"age":1538.24,"monthsold":6946.16},"r2":0.1448,"adj_r2":0.0023,"aic":697.44,"bic":704.27,"rmse":37347.52,"n":29,"k":5,"fitted":[241092.38,281582.51,243544.34,238662.34,254269.46,272215.81,242029.9,238244.73,248691.23,257386.9,255741.66,248691.23,254800.84,242029.9,242450.81,244746.75,281840.81,245971.08,242705.81,232393.41,266634.28,269208.85,264744.47,243257.52,245553.46,247332.8,270439.77,277638.03,269498.96],"residuals":[-37092.38,-69582.51,-30544.34,-18662.34,-29769.46,-43215.81,-12029.9,-5244.73,-13691.23,-22386.9,-19241.66,-10691.23,-15300.84,-1029.9,1549.19,253.25,-32840.81,7028.92,12294.19,26106.59,3365.72,791.15,7255.53,29742.48,32946.54,32567.2,39560.23,62361.97,105501.04]},"age,bathrooms,bedrooms,lotsize,size":{"vars":["size","bedrooms","bathrooms","lotsize","age"],"coefs":{"const":114097.3364,"size":70.7139,"bedrooms":845.5085,"bathrooms":9900.6575,"lotsize":2843.0123,"age":-671.7006},"se":{"const":46053.4008,"size":14.6622,"bedrooms":8530.6624,"bathrooms":14635.4759,"lotsize":7067.2759,"age":656.4801},"tvals":{"const":2.4775,"size":4.8229,"bedrooms":0.0991,"bathrooms":0.6765,"lotsize":0.4023,"age":-1.0232},"pvals":{"const":0.021,"size":0.0001,"bedrooms":0.9219,"bathrooms":0.5055,"lotsize":0.6912,"age":0.3169},"ci_lo":{"const":18828.62,"size":40.38,"bedrooms":-16801.51,"bathrooms":-20375.13,"lotsize":-11776.76,"age":-2029.73},"ci_hi":{"const":209366.05,"size":101.04,"bedrooms":18492.53,"bathrooms":40176.45,"lotsize":17462.79,"age":686.33},"r2":0.645,"adj_r2":0.5678,"aic":673.94,"bic":682.15,"rmse":24581.88,"n":29,"k":6,"fitted":[217454.91,242997.96,235149.47,219507.08,264846.28,244621.13,268628.06,232623.78,243701.0,234596.91,242657.32,257843.78,235268.61,233271.11,262072.16,221815.14,265213.85,262738.96,220310.63,226224.09,252272.0,265991.5,244303.81,253315.68,305832.23,263571.77,291751.37,299742.88,355076.55],"residuals":[-13454.91,-30997.96,-22149.47,492.92,-40346.28,-15621.13,-38628.06,376.22,-8701.0,403.09,-6157.32,-19843.78,4231.39,7728.89,-18072.16,23184.86,-16213.85,-9738.96,34689.37,32275.91,17728.0,4008.5,27696.19,19684.32,-27332.23,16328.23,18248.63,40257.12,19923.45]},"bathrooms,bedrooms,lotsize,monthsold,size":{"vars":["size","bedrooms","bathrooms","lotsize","monthsold"],"coefs":{"const":94706.1549,"size":68.541,"bedrooms":1983.8346,"bathrooms":9061.4868,"lotsize":2758.2985,"monthsold":-546.7622},"se":{"const":49287.9033,"size":15.5025,"bedrooms":9240.3174,"bathrooms":15718.245,"lotsize":7269.1567,"monthsold":3283.5841},"tvals":{"const":1.9215,"size":4.4213,"bedrooms":0.2147,"bathrooms":0.5765,"lotsize":0.3795,"monthsold":-0.1665},"pvals":{"const":0.0671,"size":0.0002,"bedrooms":0.8319,"bathrooms":0.5699,"lotsize":0.7078,"monthsold":0.8692},"ci_lo":{"const":-7253.64,"size":36.47,"bedrooms":-17131.22,"bathrooms":-23454.18,"lotsize":-12279.1,"monthsold":-7339.37},"ci_hi":{"const":196665.95,"size":100.61,"bedrooms":21098.89,"bathrooms":41577.15,"lotsize":17795.69,"monthsold":6245.85},"r2":0.6293,"adj_r2":0.5487,"aic":675.2,"bic":683.4,"rmse":25119.97,"n":29,"k":6,"fitted":[213669.03,240290.54,245484.02,229017.52,271467.38,245691.26,265843.12,234778.1,238973.47,233987.35,232347.07,252681.67,233440.59,231572.6,256777.48,217864.4,265048.22,269694.94,228023.56,226830.47,250772.92,267918.34,252545.36,254665.51,306839.6,259535.78,285722.35,296560.43,355356.9],"residuals":[-9669.03,-28290.54,-32484.02,-9017.52,-46967.38,-16691.26,-35843.12,-1778.1,-3973.47,1012.65,4152.93,-14681.67,6059.41,9427.4,-12777.48,27135.6,-16048.22,-16694.94,26976.44,31669.53,19227.08,2081.66,19454.64,18334.49,-28339.6,20364.22,24277.65,43439.57,19643.1]},"age,bathrooms,bedrooms,monthsold,size":{"vars":["size","bedrooms","bathrooms","age","monthsold"],"coefs":{"const":140817.2162,"size":67.8112,"bedrooms":3600.8568,"bathrooms":7183.2109,"age":-845.5055,"monthsold":-2229.8135},"se":{"const":59529.3044,"size":14.9879,"bedrooms":8559.9246,"bathrooms":15373.3701,"age":704.1021,"monthsold":3423.9722},"tvals":{"const":2.3655,"size":4.5244,"bedrooms":0.4207,"bathrooms":0.4673,"age":-1.2008,"monthsold":-0.6512},"pvals":{"const":0.0268,"size":0.0002,"bedrooms":0.6779,"bathrooms":0.6447,"age":0.242,"monthsold":0.5213},"ci_lo":{"const":17671.47,"size":36.81,"bedrooms":-14106.7,"bathrooms":-24619.03,"age":-2302.05,"monthsold":-9312.84},"ci_hi":{"const":263962.96,"size":98.82,"bedrooms":21308.41,"bathrooms":38985.45,"age":611.04,"monthsold":4853.21},"r2":0.6489,"adj_r2":0.5726,"aic":673.62,"bic":681.82,"rmse":24443.87,"n":29,"k":6,"fitted":[219102.55,242616.62,236006.37,224135.14,262464.59,252175.61,265404.93,234066.18,244737.78,233742.4,237199.02,258300.03,232358.09,231499.32,265081.15,221319.1,260949.01,258872.98,215956.44,223670.94,258747.15,264677.33,249656.17,255136.84,303130.23,263390.14,294321.25,297391.13,357291.54],"residuals":[-15102.55,-30616.62,-23006.37,-4135.14,-37964.59,-23175.61,-35404.93,-1066.18,-9737.78,1257.6,-699.02,-20300.03,7141.91,9500.68,-21081.15,23680.9,-11949.01,-5872.98,39043.56,34829.06,11252.85,5322.67,22343.83,17863.16,-24630.23,16509.86,15678.75,42608.87,17708.46]},"age,bedrooms,lotsize,monthsold,size":{"vars":["size","bedrooms","lotsize","age","monthsold"],"coefs":{"const":154583.6694,"size":69.9525,"bedrooms":2483.2674,"lotsize":2522.8231,"age":-871.309,"monthsold":-2591.9212},"se":{"const":46952.7624,"size":14.6862,"bedrooms":9017.4303,"lotsize":7080.5988,"age":701.2236,"monthsold":3265.7726},"tvals":{"const":3.2923,"size":4.7631,"bedrooms":0.2754,"lotsize":0.3563,"age":-1.2426,"monthsold":-0.7937},"pvals":{"const":0.0032,"size":0.0001,"bedrooms":0.7855,"lotsize":0.7249,"age":0.2266,"monthsold":0.4355},"ci_lo":{"const":57454.48,"size":39.57,"bedrooms":-16170.71,"lotsize":-12124.51,"age":-2321.9,"monthsold":-9347.69},"ci_hi":{"const":251712.86,"size":100.33,"bedrooms":21137.24,"lotsize":17170.16,"age":579.28,"monthsold":4163.84},"r2":0.6476,"adj_r2":0.5709,"aic":673.73,"bic":681.93,"rmse":24492.11,"n":29,"k":6,"fitted":[217335.7,237290.24,238189.09,223418.39,259959.48,250209.97,266102.66,233071.57,245070.14,238070.44,240750.39,259060.63,236349.83,231126.43,263533.05,220621.18,257204.9,262482.3,217918.91,221763.8,263213.28,265049.45,247620.82,254573.43,305083.0,264313.26,293096.76,292272.23,358648.66],"residuals":[-13335.7,-25290.24,-25189.09,-3418.39,-35459.48,-21209.97,-36102.66,-71.57,-10070.14,-3070.44,-4250.39,-21060.63,3150.17,9873.57,-19533.05,24378.82,-8204.9,-9482.3,37081.09,36736.2,6786.72,4950.55,24379.18,18426.57,-26583.0,15586.74,16903.24,47727.77,16351.34]},"age,bathrooms,lotsize,monthsold,size":{"vars":["size","bathrooms","lotsize","age","monthsold"],"coefs":{"const":139638.3071,"size":70.954,"bathrooms":6600.6349,"lotsize":2962.8937,"age":-819.1922,"monthsold":-1741.4718},"se":{"const":59910.7781,"size":12.3388,"bathrooms":15385.7077,"lotsize":6726.7537,"age":703.3542,"monthsold":3247.8542},"tvals":{"const":2.3308,"size":5.7505,"bathrooms":0.429,"lotsize":0.4405,"age":-1.1647,"monthsold":-0.5362},"pvals":{"const":0.0289,"size":0.0,"bathrooms":0.6719,"lotsize":0.6637,"age":0.2561,"monthsold":0.597},"ci_lo":{"const":15703.42,"size":45.43,"bathrooms":-25227.13,"lotsize":-10952.46,"age":-2274.19,"monthsold":-8460.17},"ci_hi":{"const":263573.19,"size":96.48,"bathrooms":38428.4,"lotsize":16878.24,"age":635.81,"monthsold":4977.23},"r2":0.6492,"adj_r2":0.5729,"aic":673.59,"bic":681.8,"rmse":24434.88,"n":29,"k":6,"fitted":[217552.87,243151.76,237737.95,222222.63,262118.3,248791.41,265984.54,233207.82,243440.36,237875.64,242481.53,257631.17,236953.36,230507.52,261763.68,219593.48,262382.63,261780.88,217466.98,223448.67,258826.16,266280.8,246875.7,251077.63,301147.69,263088.19,293615.23,297354.33,359041.1],"residuals":[-13552.87,-31151.76,-24737.95,-2222.63,-37618.3,-19791.41,-35984.54,-207.82,-8440.36,-2875.64,-5981.53,-19631.17,2546.64,10492.48,-17763.68,25406.52,-13382.63,-8780.88,37533.02,35051.33,11173.84,3719.2,25124.3,21922.37,-22647.69,16811.81,16384.77,42645.67,15958.9]},"age,bathrooms,bedrooms,lotsize,monthsold":{"vars":["bedrooms","bathrooms","lotsize","age","monthsold"],"coefs":{"const":173871.6278,"bedrooms":26164.6523,"bathrooms":23362.8169,"lotsize":-1350.452,"age":-863.8096,"monthsold":-6105.7707},"se":{"const":82072.6559,"bedrooms":10131.9337,"bathrooms":20576.137,"lotsize":9671.524,"age":968.9611,"monthsold":4583.8649},"tvals":{"const":2.1185,"bedrooms":2.5824,"bathrooms":1.1354,"lotsize":-0.1396,"age":-0.8915,"monthsold":-1.332},"pvals":{"const":0.0451,"bedrooms":0.0167,"bathrooms":0.2679,"lotsize":0.8902,"age":0.3819,"monthsold":0.1959},"ci_lo":{"const":4091.4,"bedrooms":5205.15,"bathrooms":-19202.17,"lotsize":-21357.52,"age":-2868.26,"monthsold":-15588.22},"ci_hi":{"const":343651.85,"bedrooms":47124.15,"bathrooms":65927.8,"lotsize":18656.62,"age":1140.64,"monthsold":3376.68},"r2":0.3371,"adj_r2":0.1929,"aic":692.05,"bic":700.26,"rmse":33590.6,"n":29,"k":6,"fitted":[228222.28,260718.56,227912.94,230991.02,257002.7,285685.73,244339.28,226553.76,254764.09,234277.67,226326.08,254764.09,229035.71,244339.28,256114.55,247794.51,275971.75,243970.84,237865.07,215206.03,276109.11,268668.5,276183.82,274018.27,291862.89,253036.48,279520.85,279913.63,282230.49],"residuals":[-24222.28,-48718.56,-14912.94,-10991.02,-32502.7,-56685.73,-14339.28,6446.24,-19764.09,722.33,10173.92,-16764.09,10464.29,-3339.28,-12114.55,-2794.51,-26971.75,9029.16,17134.93,43293.97,-6109.11,1331.5,-4183.82,-1018.27,-13362.89,26863.52,30479.15,60086.37,92769.51]},"age,bathrooms,bedrooms,lotsize,monthsold,size":{"vars":["size","bedrooms","bathrooms","lotsize","age","monthsold"],"coefs":{"const":137791.0657,"size":68.3694,"bedrooms":2685.3151,"bathrooms":6832.88,"lotsize":2303.2214,"age":-833.0386,"monthsold":-2088.5036},"se":{"const":61464.9519,"size":15.3895,"bedrooms":9192.5257,"bathrooms":15721.1915,"lotsize":7226.5352,"age":719.3345,"monthsold":3520.8979},"tvals":{"const":2.2418,"size":4.4426,"bedrooms":0.2921,"bathrooms":0.4346,"lotsize":0.3187,"age":-1.1581,"monthsold":-0.5932},"pvals":{"const":0.0354,"size":0.0002,"bedrooms":0.7729,"bathrooms":0.6681,"lotsize":0.7529,"age":0.2593,"monthsold":0.5591},"ci_lo":{"const":10320.56,"size":36.45,"bedrooms":-16378.82,"bathrooms":-25770.88,"lotsize":-12683.7,"age":-2324.85,"monthsold":-9390.4},"ci_hi":{"const":265261.57,"size":100.29,"bedrooms":21749.45,"bathrooms":39436.64,"lotsize":17290.14,"age":658.77,"monthsold":5213.39},"r2":0.6506,"adj_r2":0.5552,"aic":675.48,"bic":685.05,"rmse":24935.73,"n":29,"k":7,"fitted":[217089.46,242410.37,236345.18,222034.16,262112.91,251027.12,265348.97,232191.44,244254.9,236214.64,239945.59,257928.78,234959.17,231164.26,262462.5,220822.53,262489.08,260999.69,217889.54,222010.53,260083.0,266332.0,248700.64,253949.79,303875.37,263099.64,293703.03,296869.68,357086.04],"residuals":[-13089.46,-30410.37,-23345.18,-2034.16,-37612.91,-22027.12,-35348.97,808.56,-9254.9,-1214.64,-3445.59,-19928.78,4540.83,9835.74,-18462.5,24177.47,-13489.08,-7999.69,37110.46,36489.47,9917.0,3668.0,23299.36,19050.21,-25375.37,16800.36,16296.97,43130.32,17913.96]}},"correlations":{"columns":["price","size","bedrooms","bathrooms","lotsize","age","monthsold"],"matrix":[[1.0,0.7858,0.4273,0.3298,0.1535,-0.068,-0.21],[0.7858,1.0,0.5176,0.3163,0.1124,0.0769,-0.2145],[0.4273,0.5176,1.0,0.0374,0.2922,-0.0261,0.1825],[0.3298,0.3163,0.0374,1.0,0.1016,0.037,-0.3923],[0.1535,0.1124,0.2922,0.1016,1.0,-0.0192,-0.0571],[-0.068,0.0769,-0.0261,0.037,-0.0192,1.0,-0.3662],[-0.21,-0.2145,0.1825,-0.3923,-0.0571,-0.3662,1.0]]},"vif":{"full":{"size":40.13,"bedrooms":57.82,"bathrooms":34.74,"lotsize":11.97,"age":21.02,"monthsold":12.8},"drop_size":{"bedrooms":37.22,"bathrooms":28.77,"lotsize":11.86,"age":20.86,"monthsold":12.14},"drop_bedrooms":{"size":25.83,"bathrooms":34.73,"lotsize":10.63,"age":20.47,"monthsold":9.14},"drop_bathrooms":{"size":33.23,"bedrooms":57.8,"lotsize":11.4,"age":17.37,"monthsold":12.56},"drop_lotsize":{"size":39.77,"bedrooms":51.36,"bathrooms":33.1,"age":20.97,"monthsold":12.78},"drop_age":{"size":39.81,"bedrooms":56.3,"bathrooms":28.7,"lotsize":11.94,"monthsold":12.79},"drop_monthsold":{"size":38.07,"bedrooms":41.29,"bathrooms":34.11,"lotsize":11.96,"age":21.01}},"predictors":["size","bedrooms","bathrooms","lotsize","age","monthsold"],"meta":{"chapter":"Chapter 10: Data Summary for Multiple Regression","book":"metricsAI: An Introduction to Econometrics with Python and AI in the Cloud","author":"Carlos Mendez"}}</script>
+
+<script>
+"use strict";
+
+const DATA = JSON.parse(document.getElementById("ch-data").textContent);
+
+// ---------- Helpers ----------
+const mean = a => a.reduce((s, v) => s + v, 0) / a.length;
+function fmt(v, d) { if (v == null || isNaN(v)) return "\u2014"; d = d ?? 2; const a = Math.abs(v); if (a >= 1e9) return (v/1e9).toFixed(1)+"B"; if (a >= 1e6) return (v/1e6).toFixed(1)+"M"; if (a >= 1e3 && d === 0) return Math.round(v).toLocaleString(); return v.toFixed(d); }
+function fmtMoney(v) { return v == null ? "\u2014" : "$" + Math.round(v).toLocaleString(); }
+function fmtPct(v, d) { return (v * 100).toFixed(d ?? 1) + "%"; }
+
+function modelKey(vars) { return [...vars].sort().join(","); }
+function getModel(vars) { return DATA.models[modelKey(vars)]; }
+
+function linfit(xs, ys) {
+  const n = xs.length, mx = mean(xs), my = mean(ys);
+  let num = 0, den = 0;
+  for (let i = 0; i < n; i++) { num += (xs[i]-mx)*(ys[i]-my); den += (xs[i]-mx)**2; }
+  const slope = num / den;
+  return { slope, intercept: my - slope * mx, fitted: xs.map(x => my - slope * mx + slope * x) };
+}
+
+// ---------- Theme ----------
+const THEME_KEY = "metricsai-theme";
+function getCSS(v) { return getComputedStyle(document.documentElement).getPropertyValue(v).trim(); }
+function themeColors() { return { text: getCSS("--text"), textSoft: getCSS("--text-soft"), grid: getCSS("--grid"), panel: getCSS("--panel"), cyan: getCSS("--accent"), purple: getCSS("--accent-2"), pink: getCSS("--accent-3") }; }
+function baseLayout(o) {
+  const c = themeColors();
+  return Object.assign({
+    paper_bgcolor: "rgba(0,0,0,0)", plot_bgcolor: "rgba(0,0,0,0)",
+    font: { family: "Inter, system-ui, sans-serif", color: c.text, size: 12 },
+    margin: { l: 60, r: 18, t: 30, b: 50 },
+    xaxis: { gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft } },
+    yaxis: { gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft } },
+    hoverlabel: { bgcolor: c.panel, bordercolor: c.grid, font: { color: c.text } },
+    legend: { font: { color: c.text }, bgcolor: "rgba(0,0,0,0)" }
+  }, o || {});
+}
+const PLOTLY_CONFIG = { displayModeBar: false, responsive: true };
+const VAR_LABELS = { price:"Price ($)", size:"Size (sqft)", bedrooms:"Bedrooms", bathrooms:"Bathrooms", lotsize:"Lot size", age:"Age (yr)", monthsold:"Month sold" };
+
+function initToggles(id, cb) { document.getElementById(id).querySelectorAll("button").forEach(b => b.addEventListener("click", () => { document.getElementById(id).querySelectorAll("button").forEach(x => x.classList.remove("active")); b.classList.add("active"); cb(); })); }
+
+// ==================== WIDGET 1: PARTIAL VS TOTAL EFFECTS ====================
+(function() {
+  const varSel = document.getElementById("partial-var");
+  const ctrlSel = document.getElementById("partial-control");
+  const compBox = document.getElementById("partial-comparison");
+  const callout = document.getElementById("partial-callout");
+
+  function render() {
+    const focusVar = varSel.value;
+    const controlVar = ctrlSel.value;
+    if (focusVar === controlVar) { callout.innerHTML = "<strong>Select different variables for focus and control.</strong>"; compBox.innerHTML = ""; Plotly.react("partial-chart", [], baseLayout({height:280}), PLOTLY_CONFIG); return; }
+    const c = themeColors();
+    const biv = getModel([focusVar]);
+    const multi = getModel([focusVar, controlVar]);
+    if (!biv || !multi) return;
+    const bivCoef = biv.coefs[focusVar];
+    const multiCoef = multi.coefs[focusVar];
+    const drop = bivCoef - multiCoef;
+    const dropPct = Math.abs(drop / bivCoef) * 100;
+
+    compBox.innerHTML =
+      `<div style="background:var(--panel-2);padding:0.8rem;border-radius:10px;border-left:3px solid var(--accent);font-family:'JetBrains Mono',monospace;font-size:0.9rem">` +
+      `<div style="font-size:0.7rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em">Bivariate: price ~ ${focusVar}</div>` +
+      `<div style="font-size:1.3rem;font-weight:600;color:var(--accent);margin-top:0.2rem">${fmtMoney(bivCoef)}</div>` +
+      `<div style="font-size:0.8rem;color:var(--text-soft)">R² = ${biv.r2.toFixed(4)}</div></div>` +
+      `<div style="background:var(--panel-2);padding:0.8rem;border-radius:10px;border-left:3px solid var(--accent-3);font-family:'JetBrains Mono',monospace;font-size:0.9rem">` +
+      `<div style="font-size:0.7rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em">Multiple: price ~ ${focusVar} + ${controlVar}</div>` +
+      `<div style="font-size:1.3rem;font-weight:600;color:var(--accent-3);margin-top:0.2rem">${fmtMoney(multiCoef)}</div>` +
+      `<div style="font-size:0.8rem;color:var(--text-soft)">R² = ${multi.r2.toFixed(4)} · Change: ${dropPct.toFixed(0)}% ${drop > 0 ? "drop" : "increase"}</div></div>`;
+
+    Plotly.react("partial-chart", [{
+      x: ["Bivariate\n(total effect)", "Multiple\n(partial effect)"],
+      y: [bivCoef, multiCoef], type: "bar",
+      marker: { color: [c.cyan, c.pink] },
+      text: [fmtMoney(bivCoef), fmtMoney(multiCoef)], textposition: "outside",
+      textfont: { family: "JetBrains Mono", size: 13, color: c.text },
+      hovertemplate: "%{x}: %{y:$,.0f}<extra></extra>"
+    }], baseLayout({
+      height: 280,
+      yaxis: Object.assign({}, baseLayout().yaxis, { title: { text: "Coefficient on " + focusVar, font: { color: c.textSoft } } }),
+      showlegend: false
+    }), PLOTLY_CONFIG);
+
+    callout.innerHTML = `<strong>Controlling for ${controlVar}</strong> ${drop > 0 ? "reduces" : "increases"} the ${focusVar} coefficient from <strong>${fmtMoney(bivCoef)}</strong> to <strong>${fmtMoney(multiCoef)}</strong> (${dropPct.toFixed(0)}% change). ` +
+      (dropPct > 50 ? `The bivariate coefficient was largely picking up ${controlVar}'s effect — confounding at work.` :
+       dropPct > 10 ? `A meaningful change, indicating some confounding between ${focusVar} and ${controlVar}.` :
+       `Relatively stable — ${focusVar} and ${controlVar} provide largely independent information.`);
+  }
+
+  varSel.addEventListener("change", render);
+  ctrlSel.addEventListener("change", render);
+  window.__rerender_partial = render;
+  render();
+})();
+
+// ==================== WIDGET 2: CORRELATION MATRIX ====================
+(function() {
+  const callout = document.getElementById("corrmatrix-callout");
+
+  function render() {
+    const c = themeColors();
+    const cols = DATA.correlations.columns;
+    const matrix = DATA.correlations.matrix;
+    const n = cols.length;
+    const annotations = [];
+    for (let i = 0; i < n; i++) for (let j = 0; j < n; j++) {
+      annotations.push({ x: j, y: i, text: matrix[i][j].toFixed(2), showarrow: false, font: { family: "JetBrains Mono", size: 11, color: Math.abs(matrix[i][j]) > 0.5 ? "white" : c.text } });
+    }
+    Plotly.react("corrmatrix-chart", [{
+      z: matrix, x: cols.map(v => VAR_LABELS[v]||v), y: cols.map(v => VAR_LABELS[v]||v),
+      type: "heatmap", colorscale: [[0,"#2166ac"],[0.5,"#f7f7f7"],[1,"#b2182b"]],
+      zmin: -1, zmax: 1, showscale: true,
+      colorbar: { tickfont: { color: c.textSoft }, title: { text: "r", font: { color: c.textSoft } } },
+      hovertemplate: "%{x} vs %{y}: r = %{z:.4f}<extra></extra>"
+    }], baseLayout({
+      height: 450, xaxis: { tickfont: { color: c.textSoft, size: 11 }, tickangle: -30 },
+      yaxis: { tickfont: { color: c.textSoft, size: 11 }, autorange: "reversed" },
+      margin: { l: 110, r: 60, t: 20, b: 90 }, annotations: annotations
+    }), PLOTLY_CONFIG);
+    callout.innerHTML = `<strong>Strongest predictor of price:</strong> size (r = 0.79). <strong>Strongest predictor-predictor correlation:</strong> size-bedrooms (r = 0.52) — this is why bedrooms' coefficient shrinks when size enters the model.`;
+  }
+
+  window.__rerender_corrmatrix = render;
+  render();
+})();
+
+// ==================== WIDGET 3: REGRESSION BUILDER ====================
+(function() {
+  const checksEl = document.getElementById("regbuilder-checks");
+  const fitEl = document.getElementById("regbuilder-fit");
+  const tableEl = document.getElementById("regbuilder-table").querySelector("tbody");
+  const callout = document.getElementById("regbuilder-callout");
+
+  function getCheckedVars() { return Array.from(checksEl.querySelectorAll("input:checked")).map(cb => cb.value); }
+
+  function render() {
+    const vars = getCheckedVars();
+    if (vars.length === 0) {
+      fitEl.innerHTML = '<div class="fit-stat"><div class="fs-label">Select at least one variable</div></div>';
+      tableEl.innerHTML = ""; callout.innerHTML = "";
+      Plotly.react("regbuilder-chart", [], baseLayout({height:200}), PLOTLY_CONFIG);
+      return;
+    }
+    const m = getModel(vars);
+    if (!m) { callout.innerHTML = "<strong>Model not found.</strong>"; return; }
+    const c = themeColors();
+    const sizeOnly = getModel(["size"]);
+    const adjWarn = sizeOnly && m.adj_r2 < sizeOnly.adj_r2 ? " warn" : "";
+
+    fitEl.innerHTML =
+      `<div class="fit-stat"><div class="fs-label">R²</div><div class="fs-value">${m.r2.toFixed(4)}</div></div>` +
+      `<div class="fit-stat${adjWarn}"><div class="fs-label">Adj R²</div><div class="fs-value">${m.adj_r2.toFixed(4)}</div></div>` +
+      `<div class="fit-stat"><div class="fs-label">AIC</div><div class="fs-value">${m.aic.toFixed(1)}</div></div>` +
+      `<div class="fit-stat"><div class="fs-label">BIC</div><div class="fs-value">${m.bic.toFixed(1)}</div></div>` +
+      `<div class="fit-stat"><div class="fs-label">RMSE</div><div class="fs-value">${fmtMoney(m.rmse)}</div></div>` +
+      `<div class="fit-stat"><div class="fs-label">n / k</div><div class="fs-value">${m.n} / ${m.k}</div></div>`;
+
+    const allVars = ["const", ...vars];
+    tableEl.innerHTML = allVars.map(v => {
+      const sig = m.pvals[v] < 0.05;
+      const cls = sig ? "sig" : "insig";
+      const stars = m.pvals[v] < 0.001 ? "***" : m.pvals[v] < 0.01 ? "**" : m.pvals[v] < 0.05 ? "*" : "";
+      return `<tr><td>${v === "const" ? "(intercept)" : VAR_LABELS[v]||v}</td>` +
+        `<td class="${cls}">${fmt(m.coefs[v], 2)}${stars}</td><td>${fmt(m.se[v], 2)}</td>` +
+        `<td>${fmt(m.tvals[v], 3)}</td><td class="${cls}">${m.pvals[v] < 0.001 ? "<0.001" : m.pvals[v].toFixed(3)}</td>` +
+        `<td>[${fmt(m.ci_lo[v], 0)}, ${fmt(m.ci_hi[v], 0)}]</td></tr>`;
+    }).join("");
+
+    const plotVars = vars.slice().reverse();
+    Plotly.react("regbuilder-chart", [{
+      y: plotVars.map(v => VAR_LABELS[v]||v), x: plotVars.map(v => m.coefs[v]),
+      error_x: { type: "data", symmetric: false, array: plotVars.map(v => m.ci_hi[v] - m.coefs[v]), arrayminus: plotVars.map(v => m.coefs[v] - m.ci_lo[v]), color: c.cyan, thickness: 2 },
+      type: "scatter", mode: "markers",
+      marker: { color: plotVars.map(v => m.pvals[v] < 0.05 ? c.cyan : c.pink), size: 10 },
+      hovertemplate: "%{y}: %{x:.2f}<extra></extra>"
+    }], baseLayout({
+      height: Math.max(200, 50 + plotVars.length * 50),
+      margin: { l: 110, r: 18, t: 10, b: 40 },
+      xaxis: Object.assign({}, baseLayout().xaxis, { title: { text: "Coefficient", font: { color: c.textSoft } }, zeroline: true, zerolinecolor: c.pink, zerolinewidth: 2 }),
+      yaxis: { tickfont: { color: c.textSoft } }, showlegend: false
+    }), PLOTLY_CONFIG);
+
+    const sigVars = vars.filter(v => m.pvals[v] < 0.05);
+    callout.innerHTML = `<strong>${vars.length} predictor${vars.length > 1 ? "s" : ""}, ${m.k} parameters.</strong> ` +
+      (sigVars.length > 0 ? `Significant (p < 0.05): <strong>${sigVars.map(v => VAR_LABELS[v]||v).join(", ")}</strong>. ` : `No predictors individually significant at p < 0.05. `) +
+      `R² = ${m.r2.toFixed(4)}, adjusted R² = ${m.adj_r2.toFixed(4)}.`;
+  }
+
+  checksEl.querySelectorAll("input").forEach(cb => cb.addEventListener("change", render));
+  window.__rerender_regbuilder = render;
+  render();
+})();
+
+// ==================== WIDGET 4: FWL THEOREM ====================
+(function() {
+  const targetSel = document.getElementById("fwl-target");
+  const controlSel = document.getElementById("fwl-control");
+  const resultsEl = document.getElementById("fwl-results");
+  const callout = document.getElementById("fwl-callout");
+
+  function render() {
+    const target = targetSel.value;
+    const control = controlSel.value;
+    if (target === control) { callout.innerHTML = "<strong>Select different target and control variables.</strong>"; resultsEl.innerHTML = ""; Plotly.react("fwl-chart", [], baseLayout({height:300}), PLOTLY_CONFIG); return; }
+    const c = themeColors();
+    const price = DATA.house.price;
+    const xvals = DATA.house[target];
+    const zvals = DATA.house[control];
+
+    const fitYZ = linfit(zvals, price);
+    const residY = price.map((y, i) => y - fitYZ.fitted[i]);
+    const fitXZ = linfit(zvals, xvals);
+    const residX = xvals.map((x, i) => x - fitXZ.fitted[i]);
+    const fwlFit = linfit(residX, residY);
+
+    const multi = getModel([target, control]);
+    const multiCoef = multi.coefs[target];
+
+    resultsEl.innerHTML =
+      `<div style="background:var(--panel-2);padding:0.8rem;border-radius:10px;border-left:3px solid var(--accent);font-family:'JetBrains Mono',monospace;font-size:0.9rem">` +
+      `<div style="font-size:0.7rem;color:var(--text-muted);text-transform:uppercase">FWL slope (residuals)</div>` +
+      `<div style="font-size:1.3rem;font-weight:600;color:var(--accent);margin-top:0.2rem">${fwlFit.slope.toFixed(4)}</div></div>` +
+      `<div style="background:var(--panel-2);padding:0.8rem;border-radius:10px;border-left:3px solid var(--accent-2);font-family:'JetBrains Mono',monospace;font-size:0.9rem">` +
+      `<div style="font-size:0.7rem;color:var(--text-muted);text-transform:uppercase">Multiple regression coef</div>` +
+      `<div style="font-size:1.3rem;font-weight:600;color:var(--accent-2);margin-top:0.2rem">${multiCoef.toFixed(4)}</div></div>`;
+
+    Plotly.react("fwl-chart", [
+      { x: residX, y: residY, mode: "markers", type: "scatter", name: "Residuals",
+        marker: { color: c.cyan, size: 9, opacity: 0.8, line: { color: c.purple, width: 1 } },
+        hovertemplate: "Resid "+target+": %{x:.1f}<br>Resid price: $%{y:,.0f}<extra></extra>" },
+      { x: [Math.min(...residX), Math.max(...residX)],
+        y: [fwlFit.intercept + fwlFit.slope * Math.min(...residX), fwlFit.intercept + fwlFit.slope * Math.max(...residX)],
+        mode: "lines", name: "FWL line", line: { color: c.purple, width: 2.5 }, hoverinfo: "skip" }
+    ], baseLayout({
+      height: 360,
+      xaxis: Object.assign({}, baseLayout().xaxis, { title: { text: "Residualized " + (VAR_LABELS[target]||target), font: { color: c.textSoft } } }),
+      yaxis: Object.assign({}, baseLayout().yaxis, { title: { text: "Residualized Price ($)", font: { color: c.textSoft } } }),
+      showlegend: true, legend: { x:0.01, y:0.99, xanchor:"left", yanchor:"top", font:{color:c.text}, bgcolor:"rgba(0,0,0,0)" }
+    }), PLOTLY_CONFIG);
+
+    const diff = Math.abs(fwlFit.slope - multiCoef);
+    callout.innerHTML = `<strong>FWL slope = ${fwlFit.slope.toFixed(4)}, multiple regression coefficient = ${multiCoef.toFixed(4)}</strong>. ` +
+      `Difference: ${diff.toExponential(2)} (numerical precision only). ` +
+      `The partial effect of ${target} is what remains after both price and ${target} have been "cleaned" of ${control}'s influence.`;
+  }
+
+  targetSel.addEventListener("change", render);
+  controlSel.addEventListener("change", render);
+  window.__rerender_fwl = render;
+  render();
+})();
+
+// ==================== WIDGET 5: MODEL COMPARISON ====================
+(function() {
+  const callout = document.getElementById("modelcomp-callout");
+  const PROG = [["size"],["size","bedrooms"],["size","bedrooms","bathrooms"],["size","bedrooms","bathrooms","lotsize"],["size","bedrooms","bathrooms","lotsize","age"],["size","bedrooms","bathrooms","lotsize","age","monthsold"]];
+
+  function render() {
+    const c = themeColors();
+    const labels = PROG.map((v,i) => (i+1)+" var"+(i>0?"s":""));
+    const r2 = PROG.map(v => getModel(v).r2);
+    const adjR2 = PROG.map(v => getModel(v).adj_r2);
+    const aic = PROG.map(v => getModel(v).aic);
+    const bic = PROG.map(v => getModel(v).bic);
+
+    Plotly.react("modelcomp-chart", [
+      { x: labels, y: r2, name: "R²", type: "scatter", mode: "lines+markers", marker:{color:c.cyan,size:8}, line:{color:c.cyan,width:2}, yaxis:"y2" },
+      { x: labels, y: adjR2, name: "Adj R²", type: "scatter", mode: "lines+markers", marker:{color:c.purple,size:8}, line:{color:c.purple,width:2,dash:"dash"}, yaxis:"y2" },
+      { x: labels, y: aic, name: "AIC", type: "bar", marker:{color:"rgba(0,140,183,0.25)"}, yaxis:"y" },
+      { x: labels, y: bic, name: "BIC", type: "bar", marker:{color:"rgba(122,32,159,0.25)"}, yaxis:"y" }
+    ], baseLayout({
+      height: 420,
+      xaxis: { tickfont:{color:c.textSoft} },
+      yaxis: { title:{text:"AIC / BIC",font:{color:c.textSoft}}, gridcolor:c.grid, linecolor:c.grid, tickfont:{color:c.textSoft}, side:"left" },
+      yaxis2: { title:{text:"R² / Adj R²",font:{color:c.textSoft}}, gridcolor:"rgba(0,0,0,0)", linecolor:c.grid, tickfont:{color:c.textSoft}, overlaying:"y", side:"right", range:[0.4,0.75] },
+      barmode: "group",
+      legend: { x:0.5, y:1.12, xanchor:"center", orientation:"h", font:{color:c.text}, bgcolor:"rgba(0,0,0,0)" }
+    }), PLOTLY_CONFIG);
+
+    callout.innerHTML = `<strong>The parsimony principle:</strong> R² rises from ${r2[0].toFixed(3)} to ${r2[5].toFixed(3)} (+${((r2[5]-r2[0])*100).toFixed(1)} pp), but adjusted R² falls from ${adjR2[0].toFixed(3)} to ${adjR2[5].toFixed(3)}. ` +
+      `AIC and BIC both increase (worse). All metrics agree: <strong>the 1-variable model (size only) wins</strong>.`;
+  }
+
+  window.__rerender_modelcomp = render;
+  render();
+})();
+
+// ==================== WIDGET 6: VIF DETECTOR ====================
+(function() {
+  const barsEl = document.getElementById("vif-bars");
+  const callout = document.getElementById("vif-callout");
+
+  function render() {
+    const c = themeColors();
+    const vifData = DATA.vif.full;
+    const vars = DATA.predictors;
+    const maxVif = Math.max(...vars.map(v => vifData[v]));
+
+    barsEl.innerHTML = vars.map(v => {
+      const vif = vifData[v];
+      const pct = Math.min(100, (vif / Math.max(maxVif, 60)) * 100);
+      const color = vif > 10 ? c.pink : vif > 5 ? c.purple : c.cyan;
+      const label = vif > 10 ? "severe" : vif > 5 ? "moderate" : "ok";
+      return `<div class="vif-bar"><div class="vif-name">${v}</div><div class="vif-track"><div class="vif-fill" style="width:${pct}%;background:${color}"></div></div><div class="vif-val" style="color:${color}">${vif.toFixed(1)}</div><div style="font-size:0.75rem;color:${color};width:55px">${label}</div></div>`;
+    }).join("") +
+    `<div style="display:flex;gap:1.5rem;margin-top:0.6rem;font-size:0.78rem;color:var(--text-muted)">` +
+    `<span style="border-left:3px solid ${c.cyan};padding-left:0.4rem">VIF \u2264 5: OK</span>` +
+    `<span style="border-left:3px solid ${c.purple};padding-left:0.4rem">5 < VIF \u2264 10: moderate</span>` +
+    `<span style="border-left:3px solid ${c.pink};padding-left:0.4rem">VIF > 10: severe</span></div>`;
+
+    const severeCount = vars.filter(v => vifData[v] > 10).length;
+    callout.innerHTML = `<strong>${severeCount} of ${vars.length} predictors</strong> have VIF > 10 (severe multicollinearity). ` +
+      `Worst: <strong>bedrooms (${vifData.bedrooms.toFixed(1)})</strong> and <strong>size (${vifData.size.toFixed(1)})</strong>. ` +
+      `With n = 29 and 6 correlated predictors, standard errors are inflated and individual significance tests are unreliable.`;
+  }
+
+  window.__rerender_vif = render;
+  render();
+})();
+
+// ==================== WIDGET 7: DIAGNOSTICS ====================
+(function() {
+  const modelSel = document.getElementById("diag-model");
+  const callout = document.getElementById("diag-callout");
+
+  function render() {
+    const key = modelSel.value;
+    const m = DATA.models[key];
+    if (!m) return;
+    const c = themeColors();
+    const actual = DATA.house.price;
+    const fitted = m.fitted;
+    const residuals = m.residuals;
+    const minP = Math.min(...actual, ...fitted), maxP = Math.max(...actual, ...fitted);
+
+    Plotly.react("diag-avp", [
+      { x: actual, y: fitted, mode: "markers", type: "scatter", marker:{color:c.cyan,size:9,opacity:0.8,line:{color:c.purple,width:1}}, hovertemplate:"Actual: $%{x:,.0f}<br>Predicted: $%{y:,.0f}<extra></extra>" },
+      { x: [minP,maxP], y: [minP,maxP], mode: "lines", line:{color:c.pink,width:2,dash:"dash"}, hoverinfo:"skip" }
+    ], baseLayout({ height:300, xaxis:Object.assign({},baseLayout().xaxis,{title:{text:"Actual ($)",font:{color:c.textSoft}}}), yaxis:Object.assign({},baseLayout().yaxis,{title:{text:"Predicted ($)",font:{color:c.textSoft}}}), showlegend:false, margin:{l:65,r:10,t:20,b:50} }), PLOTLY_CONFIG);
+
+    Plotly.react("diag-resid", [
+      { x: fitted, y: residuals, mode: "markers", type: "scatter", marker:{color:c.cyan,size:9,opacity:0.8,line:{color:c.purple,width:1}}, hovertemplate:"Fitted: $%{x:,.0f}<br>Residual: $%{y:,.0f}<extra></extra>" },
+      { x: [Math.min(...fitted),Math.max(...fitted)], y: [0,0], mode: "lines", line:{color:c.pink,width:2,dash:"dash"}, hoverinfo:"skip" }
+    ], baseLayout({ height:300, xaxis:Object.assign({},baseLayout().xaxis,{title:{text:"Fitted ($)",font:{color:c.textSoft}}}), yaxis:Object.assign({},baseLayout().yaxis,{title:{text:"Residuals ($)",font:{color:c.textSoft}}}), showlegend:false, margin:{l:65,r:10,t:20,b:50} }), PLOTLY_CONFIG);
+
+    callout.innerHTML = `<strong>Model:</strong> ${m.vars.join(" + ")} (R² = ${m.r2.toFixed(4)}, RMSE = ${fmtMoney(m.rmse)}). ` +
+      `Points near the 45° line = accurate predictions. Random residual scatter = reasonable model assumptions.`;
+  }
+
+  modelSel.addEventListener("change", render);
+  window.__rerender_diagnostics = render;
+  render();
+})();
+
+// ==================== RESET + URL HASH STATE ====================
+(function() {
+  const REG = {
+    partial: [{ id:"partial-var", kind:"select", def:"bedrooms" },{ id:"partial-control", kind:"select", def:"size" }],
+    corrmatrix: [],
+    regbuilder: [],
+    fwl: [{ id:"fwl-target", kind:"select", def:"size" },{ id:"fwl-control", kind:"select", def:"bedrooms" }],
+    modelcomp: [],
+    vif: [],
+    diagnostics: [{ id:"diag-model", kind:"select", def:"size" }]
+  };
+  function getVal(c) { if(c.kind==="toggle"){const b=document.querySelector("#"+c.group+" button.active");return b?b.dataset.val:c.def;} return document.getElementById(c.id).value; }
+  function setVal(c,val,fire) { if(c.kind==="toggle"){const g=document.getElementById(c.group);if(!g)return;const b=g.querySelector('button[data-val="'+val+'"]');if(b&&!b.classList.contains("active"))b.click();}else{const el=document.getElementById(c.id);if(!el)return;if(el.value!==String(val)){el.value=val;if(fire)el.dispatchEvent(new Event(c.kind==="select"?"change":"input",{bubbles:true}));}}}
+  function resetWidget(w) {
+    const ctrls=REG[w]||[];for(const c of ctrls)setVal(c,c.def,true);
+    if(w==="regbuilder"){document.querySelectorAll("#regbuilder-checks input").forEach((cb,i)=>{cb.checked=i===0;});window.__rerender_regbuilder();}
+    const fn=window["__rerender_"+w];if(fn)fn();writeHash();
+  }
+  function writeHash(){const parts=[];for(const[w,ctrls]of Object.entries(REG)){for(const c of ctrls){const v=String(getVal(c));if(v!==String(c.def)){const key=c.id||c.group;parts.push(key+"="+encodeURIComponent(v));}}}const want=parts.length?"#"+parts.join("&"):"";if(want===""&&location.hash.match(/=/)){history.replaceState(null,"",location.pathname+location.search);}else if(want!==""&&location.hash!==want){history.replaceState(null,"",location.pathname+location.search+want);}}
+  function readHash(){const hash=location.hash.slice(1);if(!hash||!hash.includes("="))return;const params={};for(const pair of hash.split("&")){const eq=pair.indexOf("=");if(eq<0)continue;params[pair.slice(0,eq)]=decodeURIComponent(pair.slice(eq+1));}for(const ctrls of Object.values(REG)){for(const c of ctrls){const key=c.id||c.group;if(key in params)setVal(c,params[key],true);}}}
+  document.querySelectorAll(".reset-btn[data-reset]").forEach(b=>{b.addEventListener("click",()=>resetWidget(b.dataset.reset));});
+  document.addEventListener("input",e=>{if(e.target.matches("input[type=range],select"))writeHash();});
+  document.addEventListener("change",e=>{if(e.target.matches("select"))writeHash();});
+  document.querySelectorAll(".toggle-group button").forEach(b=>{b.addEventListener("click",()=>setTimeout(writeHash,0));});
+  readHash();
+})();
+
+// ==================== THEME TOGGLE ====================
+(function(){const btn=document.getElementById("theme-toggle"),iconEl=document.getElementById("theme-icon"),labelEl=document.getElementById("theme-label");function apply(t){document.documentElement.dataset.theme=t;iconEl.textContent=t==="dark"?"\u2600\uFE0F":"\uD83C\uDF19";labelEl.textContent=t==="dark"?"Light":"Dark";for(const k in window){if(k.startsWith("__rerender_")&&typeof window[k]==="function")window[k]();}}const saved=localStorage.getItem(THEME_KEY);const prefersDark=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches;apply(saved||(prefersDark?"dark":"light"));btn.addEventListener("click",()=>{const next=document.documentElement.dataset.theme==="dark"?"light":"dark";localStorage.setItem(THEME_KEY,next);apply(next);});})();
+
+window.addEventListener("resize",()=>{document.querySelectorAll(".chart").forEach(el=>{if(el.data)Plotly.Plots.resize(el);});});
+</script>
+
+</body>
+</html>

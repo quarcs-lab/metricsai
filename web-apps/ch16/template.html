@@ -1,0 +1,1395 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chapter 16 — Checking the Model and Data · metricsAI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.plot.ly/plotly-2.35.2.min.js" charset="utf-8"></script>
+<style>
+:root {
+  --cyan: #008CB7;
+  --cyan-soft: #22d3ee;
+  --purple: #7A209F;
+  --purple-soft: #c084fc;
+  --pink: #C21E72;
+  --pink-soft: #f472b6;
+
+  --bg: #f5f8fb;
+  --panel: #ffffff;
+  --panel-2: #f0f4f9;
+  --text: #0b1021;
+  --text-soft: #475569;
+  --text-muted: #64748b;
+  --border: #d9e2ec;
+  --accent: var(--cyan);
+  --accent-2: var(--purple);
+  --accent-3: var(--pink);
+  --shadow: 0 2px 10px rgba(11, 16, 33, 0.06), 0 12px 30px rgba(11, 16, 33, 0.05);
+  --grid: #e3e8ef;
+  --code-bg: #eef3f8;
+}
+html[data-theme="dark"] {
+  --bg: #0c1024;
+  --panel: #151a33;
+  --panel-2: #1b2142;
+  --text: #e2e8f0;
+  --text-soft: #b5c0d0;
+  --text-muted: #8a98ae;
+  --border: #2a3156;
+  --accent: var(--cyan-soft);
+  --accent-2: var(--purple-soft);
+  --accent-3: var(--pink-soft);
+  --shadow: 0 2px 10px rgba(0, 0, 0, 0.25), 0 12px 30px rgba(0, 0, 0, 0.35);
+  --grid: #2a3156;
+  --code-bg: #0f1530;
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.55;
+  transition: background-color .25s ease, color .25s ease;
+}
+code, .mono { font-family: 'JetBrains Mono', ui-monospace, monospace; }
+
+header.page {
+  position: relative;
+  padding: 2.4rem 1.5rem 2rem;
+  background:
+    radial-gradient(1200px 400px at 85% -10%, rgba(122, 32, 159, 0.15), transparent),
+    radial-gradient(1000px 400px at 10% 0%, rgba(0, 140, 183, 0.18), transparent),
+    var(--panel);
+  border-bottom: 1px solid var(--border);
+}
+.page-inner { max-width: 1120px; margin: 0 auto; }
+.chapter-badge {
+  display: inline-block; font-size: 0.72rem; letter-spacing: 0.15em;
+  text-transform: uppercase; color: var(--accent); font-weight: 600; margin-bottom: 0.5rem;
+}
+h1.title {
+  font-size: clamp(1.6rem, 3.4vw, 2.4rem); margin: 0 0 0.35rem;
+  background: linear-gradient(90deg, var(--accent), var(--accent-2));
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+  font-weight: 700; letter-spacing: -0.01em;
+}
+p.subtitle { margin: 0 0 0.8rem; color: var(--text-soft); font-size: 1.05rem; max-width: 720px; }
+.theme-toggle {
+  position: absolute; top: 1.4rem; right: 1.5rem;
+  background: var(--panel-2); color: var(--text); border: 1px solid var(--border);
+  padding: 0.4rem 0.8rem; border-radius: 999px; cursor: pointer;
+  font-size: 0.85rem; font-weight: 500; display: inline-flex; align-items: center; gap: 0.35rem;
+  transition: all .2s ease;
+}
+.theme-toggle:hover { border-color: var(--accent); color: var(--accent); }
+
+nav.anchors {
+  position: sticky; top: 0; z-index: 20;
+  background: color-mix(in srgb, var(--panel) 92%, transparent);
+  backdrop-filter: saturate(150%) blur(8px); -webkit-backdrop-filter: saturate(150%) blur(8px);
+  border-bottom: 1px solid var(--border);
+}
+nav.anchors ul {
+  display: flex; gap: 0.25rem; overflow-x: auto; list-style: none;
+  padding: 0.55rem 1.5rem; margin: 0 auto; max-width: 1120px; scrollbar-width: thin;
+}
+nav.anchors a {
+  display: block; padding: 0.35rem 0.75rem; border-radius: 8px;
+  color: var(--text-soft); text-decoration: none; font-size: 0.85rem;
+  font-weight: 500; white-space: nowrap; transition: all .15s ease;
+}
+nav.anchors a:hover { color: var(--accent); background: var(--panel-2); }
+
+main { max-width: 1120px; margin: 1.2rem auto 3rem; padding: 0 1.5rem; }
+
+section.widget {
+  background: var(--panel); border: 1px solid var(--border); border-radius: 16px;
+  padding: 1.5rem 1.4rem 1.3rem; margin-bottom: 1.5rem; box-shadow: var(--shadow);
+}
+.section-tag {
+  display: inline-block; font-family: 'JetBrains Mono', monospace; font-size: 0.72rem;
+  color: var(--accent); background: color-mix(in srgb, var(--accent) 12%, transparent);
+  padding: 0.2rem 0.55rem; border-radius: 6px; margin-bottom: 0.6rem; font-weight: 500;
+}
+.widget h2 { margin: 0 0 0.2rem; font-size: 1.35rem; font-weight: 600; color: var(--accent-2); letter-spacing: -0.005em; }
+.widget .lede { margin: 0 0 1rem; color: var(--text-soft); font-size: 0.97rem; max-width: 780px; }
+
+.controls {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 0.9rem 1.2rem; padding: 0.9rem 1rem; background: var(--panel-2); border-radius: 10px; margin-bottom: 1rem;
+}
+.ctrl { display: flex; flex-direction: column; gap: 0.3rem; }
+.ctrl label { font-size: 0.78rem; font-weight: 500; color: var(--text-soft); text-transform: uppercase; letter-spacing: 0.05em; }
+.ctrl select, .ctrl input[type="range"], .ctrl input[type="number"] {
+  font-family: inherit; font-size: 0.9rem; padding: 0.4rem 0.55rem; border-radius: 8px;
+  border: 1px solid var(--border); background: var(--panel); color: var(--text);
+}
+.ctrl input[type="range"] { padding: 0.2rem 0; accent-color: var(--accent); }
+.ctrl .val { font-family: 'JetBrains Mono', monospace; font-size: 0.82rem; color: var(--accent); font-weight: 500; }
+.toggle-group { display: inline-flex; gap: 0.25rem; background: var(--panel); padding: 3px; border-radius: 10px; border: 1px solid var(--border); flex-wrap: wrap; }
+.toggle-group button {
+  background: transparent; border: none; color: var(--text-soft);
+  padding: 0.32rem 0.75rem; border-radius: 7px; font-family: inherit; font-size: 0.85rem;
+  cursor: pointer; transition: all .15s ease;
+}
+.toggle-group button.active { background: var(--accent); color: white; font-weight: 500; }
+
+.stats-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+  gap: 0.6rem; margin: 0.5rem 0 1rem;
+}
+.stat {
+  background: var(--panel-2); padding: 0.65rem 0.75rem; border-radius: 10px; border-left: 3px solid var(--accent);
+}
+.stat .label { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-muted); }
+.stat .value { font-family: 'JetBrains Mono', monospace; font-size: 1.05rem; font-weight: 500; color: var(--text); margin-top: 0.15rem; }
+.stat.pop { border-left-color: var(--accent-2); }
+.stat.err { border-left-color: var(--accent-3); }
+
+.callout {
+  background: color-mix(in srgb, var(--accent-2) 8%, transparent);
+  border-left: 3px solid var(--accent-2); padding: 0.7rem 0.9rem;
+  border-radius: 8px; font-size: 0.9rem; color: var(--text-soft); margin: 0.9rem 0 0.2rem;
+}
+.callout strong { color: var(--accent-2); }
+
+.try-this {
+  background: color-mix(in srgb, var(--accent) 8%, transparent);
+  border-left: 3px solid var(--accent); padding: 0.7rem 0.9rem;
+  border-radius: 8px; font-size: 0.9rem; color: var(--text-soft); margin: 0.7rem 0 0.2rem;
+}
+.try-this .try-title { font-weight: 600; color: var(--accent); font-size: 0.78rem; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 0.3rem; }
+.try-this ol { margin: 0; padding-left: 1.25rem; }
+.try-this li { margin: 0.2rem 0; }
+
+.widget-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 0.5rem; margin-bottom: 0.2rem; }
+.widget-head > div { flex: 1; min-width: 0; }
+.reset-btn {
+  background: transparent; color: var(--text-muted); border: 1px solid var(--border);
+  padding: 0.3rem 0.7rem; border-radius: 8px; font-family: inherit; font-size: 0.8rem;
+  cursor: pointer; white-space: nowrap; transition: all .15s ease;
+}
+.reset-btn:hover { color: var(--accent); border-color: var(--accent); }
+.resim-btn {
+  background: var(--panel); color: var(--accent); border: 1px solid var(--accent);
+  padding: 0.35rem 0.85rem; border-radius: 8px; font-family: inherit; font-size: 0.85rem;
+  cursor: pointer; font-weight: 500; transition: all .15s ease;
+}
+.resim-btn:hover { background: var(--accent); color: white; }
+
+.delta-row {
+  display: flex; flex-wrap: wrap; gap: 0.6rem 1.2rem;
+  margin: 0.2rem 0 0.9rem; padding: 0.55rem 0.85rem;
+  background: var(--panel-2); border-radius: 10px;
+  font-family: 'JetBrains Mono', monospace; font-size: 0.88rem;
+  color: var(--text-soft); border-left: 3px solid var(--accent-3);
+}
+.delta-row .label { color: var(--text-muted); margin-right: 0.35rem; }
+
+.chart { width: 100%; min-height: 340px; }
+.chart.tall { min-height: 420px; }
+.chart.short { min-height: 280px; }
+
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+@media (max-width: 720px) { .two-col { grid-template-columns: 1fr; } }
+
+footer.page {
+  max-width: 1120px; margin: 1rem auto 3rem; padding: 0 1.5rem;
+  color: var(--text-muted); font-size: 0.88rem; text-align: center;
+}
+footer.page a { color: var(--accent); text-decoration: none; }
+footer.page a:hover { text-decoration: underline; }
+.scroll-top { display: inline-block; font-size: 0.78rem; color: var(--text-muted); text-decoration: none; margin-top: 0.4rem; }
+.scroll-top:hover { color: var(--accent); }
+</style>
+</head>
+<body>
+
+<header class="page">
+  <div class="page-inner">
+    <span class="chapter-badge">Chapter 16 of 18 · Interactive Dashboard</span>
+    <h1 class="title">Checking the Model and Data</h1>
+    <p class="subtitle">Explore regression diagnostics interactively -- multicollinearity, heteroskedasticity, autocorrelation, omitted variable bias, diagnostic plots, and influential observations.</p>
+  </div>
+  <button id="theme-toggle" class="theme-toggle" type="button" aria-label="Toggle color theme"><span id="theme-icon">🌙</span><span id="theme-label">Dark</span></button>
+</header>
+
+<nav class="anchors" aria-label="Sections">
+  <ul>
+    <li><a href="#vif-explorer">VIF Explorer</a></li>
+    <li><a href="#robust-se">Robust SEs</a></li>
+    <li><a href="#autocorrelation">Autocorrelation</a></li>
+    <li><a href="#diagnostic-plots">Diagnostics</a></li>
+    <li><a href="#influential-obs">Influence</a></li>
+    <li><a href="#omitted-var">OVB</a></li>
+  </ul>
+</nav>
+
+<main>
+
+<!-- ==================== WIDGET 1: VIF Explorer ==================== -->
+<section class="widget" id="vif-explorer">
+  <div class="widget-head">
+    <div>
+      <span class="section-tag">&sect; 16.1 &middot; Key Concepts 16.1, 16.2</span>
+      <h2>VIF Explorer: Multicollinearity</h2>
+    </div>
+    <button class="reset-btn" data-reset="vif">&#8634; Reset</button>
+  </div>
+  <p class="lede">Compare two earnings models: a base model (age + education) and a collinear model that adds the age&times;education interaction. See how VIF values explode and standard errors inflate when multicollinearity is present.</p>
+  <div class="controls">
+    <div class="ctrl">
+      <label>Model specification</label>
+      <div class="toggle-group" id="vif-model">
+        <button type="button" data-val="base" class="active">Base (age + educ)</button>
+        <button type="button" data-val="collinear">+ Interaction</button>
+      </div>
+    </div>
+    <div class="ctrl">
+      <label for="vif-threshold">VIF threshold <span class="val" id="vif-threshold-val">10</span></label>
+      <input type="range" id="vif-threshold" min="2" max="20" step="1" value="10">
+    </div>
+  </div>
+  <div class="stats-grid">
+    <div class="stat"><div class="label">VIF age</div><div class="value" id="vif-age">--</div></div>
+    <div class="stat"><div class="label">VIF education</div><div class="value" id="vif-educ">--</div></div>
+    <div class="stat"><div class="label">VIF interaction</div><div class="value" id="vif-inter">--</div></div>
+    <div class="stat err"><div class="label">Max VIF</div><div class="value" id="vif-max">--</div></div>
+    <div class="stat pop"><div class="label">R&sup2;</div><div class="value" id="vif-r2">--</div></div>
+  </div>
+  <div class="two-col">
+    <div class="chart" id="chart-vif-bars"></div>
+    <div class="chart" id="chart-vif-corr"></div>
+  </div>
+  <div class="callout"><strong>Key Concept 16.1:</strong> The Variance Inflation Factor quantifies multicollinearity: VIF<sub>j</sub> = 1/(1 - R<sub>j</sub>&sup2;). VIF = 1 means no collinearity; VIF &gt; 10 indicates serious problems (SEs inflated by &radic;10 &asymp; 3.2&times;). While OLS remains unbiased, individual coefficients become imprecise. Joint F-tests remain powerful despite multicollinearity.</div>
+  <div class="try-this">
+    <div class="try-title">Try this</div>
+    <ol>
+      <li>Start with the <strong>Base</strong> model -- VIF values near 1.0 indicate no multicollinearity. Now toggle to <strong>+ Interaction</strong> and watch VIF jump to 22-37.</li>
+      <li>Drag the <strong>threshold slider</strong> to 5. Even the base model variables stay below threshold, but with interaction, all three exceed it.</li>
+      <li>Note the correlation heatmap: age&times;education correlates 0.73 with age and 0.64 with education -- these high correlations drive the VIF.</li>
+    </ol>
+  </div>
+</section>
+
+<!-- ==================== WIDGET 2: Robust vs Standard SEs ==================== -->
+<section class="widget" id="robust-se">
+  <div class="widget-head">
+    <div>
+      <span class="section-tag">&sect; 16.5 &middot; Key Concepts 16.3, 16.4</span>
+      <h2>Robust vs. Standard SEs</h2>
+    </div>
+    <button class="reset-btn" data-reset="robse">&#8634; Reset</button>
+  </div>
+  <p class="lede">Compare default OLS standard errors with heteroskedasticity-robust (HC1) SEs. The residual scatter reveals heteroskedasticity -- error variance increases with fitted values, making default SEs unreliable.</p>
+  <div class="controls">
+    <div class="ctrl">
+      <label>Display</label>
+      <div class="toggle-group" id="robse-display">
+        <button type="button" data-val="comparison" class="active">SE Comparison</button>
+        <button type="button" data-val="residuals">Residual Scatter</button>
+      </div>
+    </div>
+    <div class="ctrl">
+      <label>Highlight</label>
+      <div class="toggle-group" id="robse-highlight">
+        <button type="button" data-val="all" class="active">All Variables</button>
+        <button type="button" data-val="education">Education Only</button>
+        <button type="button" data-val="age">Age Only</button>
+      </div>
+    </div>
+  </div>
+  <div class="stats-grid">
+    <div class="stat"><div class="label">SE(age) standard</div><div class="value" id="robse-age-std">--</div></div>
+    <div class="stat"><div class="label">SE(age) robust</div><div class="value" id="robse-age-rob">--</div></div>
+    <div class="stat"><div class="label">SE(educ) standard</div><div class="value" id="robse-educ-std">--</div></div>
+    <div class="stat"><div class="label">SE(educ) robust</div><div class="value" id="robse-educ-rob">--</div></div>
+    <div class="stat err"><div class="label">Ratio (educ)</div><div class="value" id="robse-ratio">--</div></div>
+  </div>
+  <div class="chart" id="chart-robse"></div>
+  <div class="callout"><strong>Key Concept 16.4:</strong> Heteroskedasticity means error variance depends on regressors: Var[u<sub>i</sub>|x<sub>i</sub>] &ne; &sigma;&sup2;. OLS coefficients remain unbiased, but default SEs are wrong -- typically too small, giving false confidence. Use HC1 robust SEs, which are valid whether or not heteroskedasticity is present. Always use robust SEs for cross-sectional data.</div>
+  <div class="try-this">
+    <div class="try-title">Try this</div>
+    <ol>
+      <li>In <strong>SE Comparison</strong> mode, compare bar heights. Robust SEs are consistently larger -- the ratio for education is about 1.12.</li>
+      <li>Toggle to <strong>Residual Scatter</strong>. Look for the fan shape -- residuals spread wider at higher fitted values, indicating heteroskedasticity.</li>
+      <li>Focus on <strong>Education Only</strong> to see that its SE inflates more than age's, because education has more heteroskedastic patterns in earnings.</li>
+    </ol>
+  </div>
+</section>
+
+<!-- ==================== WIDGET 3: Autocorrelation Explorer ==================== -->
+<section class="widget" id="autocorrelation">
+  <div class="widget-head">
+    <div>
+      <span class="section-tag">&sect; 16.6 &middot; Key Concept 16.5</span>
+      <h2>Autocorrelation Explorer</h2>
+    </div>
+    <button class="reset-btn" data-reset="acf">&#8634; Reset</button>
+  </div>
+  <p class="lede">Simulate an AR(1) error process with adjustable persistence parameter &rho;. As &rho; increases, errors cluster in runs of the same sign, ACF bars decay slowly, and effective sample size shrinks.</p>
+  <div class="controls">
+    <div class="ctrl">
+      <label for="acf-rho">&rho; (persistence) <span class="val" id="acf-rho-val">0.80</span></label>
+      <input type="range" id="acf-rho" min="0" max="0.95" step="0.05" value="0.80">
+    </div>
+    <div class="ctrl">
+      <label for="acf-n">Observations <span class="val" id="acf-n-val">200</span></label>
+      <input type="range" id="acf-n" min="50" max="500" step="50" value="200">
+    </div>
+    <div class="ctrl">
+      <label>&nbsp;</label>
+      <button class="resim-btn" id="acf-resim" type="button">Resimulate</button>
+    </div>
+  </div>
+  <div class="stats-grid">
+    <div class="stat"><div class="label">Lag 1 ACF</div><div class="value" id="acf-lag1">--</div></div>
+    <div class="stat"><div class="label">Lag 5 ACF</div><div class="value" id="acf-lag5">--</div></div>
+    <div class="stat pop"><div class="label">Theory Lag 1</div><div class="value" id="acf-theo1">--</div></div>
+    <div class="stat err"><div class="label">Eff. sample / n</div><div class="value" id="acf-effn">--</div></div>
+  </div>
+  <div class="two-col">
+    <div class="chart" id="chart-acf-ts"></div>
+    <div class="chart" id="chart-acf-bars"></div>
+  </div>
+  <div class="callout"><strong>Key Concept 16.5:</strong> Autocorrelation means errors are correlated over time (Cov[u<sub>t</sub>, u<sub>s</sub>] &ne; 0). OLS remains unbiased but SEs are wrong -- typically too small, leading to false significance. Use HAC (Newey-West) SEs for valid inference. The ACF of residuals reveals the problem: significant bars at multiple lags indicate autocorrelation.</div>
+  <div class="try-this">
+    <div class="try-title">Try this</div>
+    <ol>
+      <li>Set &rho; = 0. The time series looks like white noise and ACF bars are within the confidence band. Now drag to &rho; = 0.80 -- errors cluster in long runs.</li>
+      <li>At &rho; = 0.95, notice the ACF decays very slowly -- lag 10 is still large. The effective sample size drops dramatically (shown in the stat box).</li>
+      <li>Click <strong>Resimulate</strong> at &rho; = 0.80 several times. Each realization looks different, but the slow ACF decay pattern is consistent.</li>
+    </ol>
+  </div>
+</section>
+
+<!-- ==================== WIDGET 4: Diagnostic Plots ==================== -->
+<section class="widget" id="diagnostic-plots">
+  <div class="widget-head">
+    <div>
+      <span class="section-tag">&sect; 16.8 &middot; Key Concept 16.7</span>
+      <h2>Diagnostic Plots</h2>
+    </div>
+    <button class="reset-btn" data-reset="diag">&#8634; Reset</button>
+  </div>
+  <p class="lede">Inspect the democracy-growth regression with two key diagnostic plots: actual vs. fitted values (should cluster around 45-degree line) and residual vs. fitted values (should scatter randomly around zero).</p>
+  <div class="controls">
+    <div class="ctrl">
+      <label>Model</label>
+      <div class="toggle-group" id="diag-model">
+        <button type="button" data-val="bivariate" class="active">Bivariate</button>
+        <button type="button" data-val="multiple">With Controls</button>
+      </div>
+    </div>
+    <div class="ctrl">
+      <label>Plot type</label>
+      <div class="toggle-group" id="diag-plot">
+        <button type="button" data-val="actual" class="active">Actual vs. Fitted</button>
+        <button type="button" data-val="residual">Residual vs. Fitted</button>
+      </div>
+    </div>
+    <div class="ctrl">
+      <label>Labels</label>
+      <div class="toggle-group" id="diag-labels">
+        <button type="button" data-val="off" class="active">Off</button>
+        <button type="button" data-val="on">Show Countries</button>
+      </div>
+    </div>
+  </div>
+  <div class="stats-grid">
+    <div class="stat"><div class="label">Growth coef</div><div class="value" id="diag-coef">--</div></div>
+    <div class="stat"><div class="label">R&sup2;</div><div class="value" id="diag-r2">--</div></div>
+    <div class="stat"><div class="label">Resid mean</div><div class="value" id="diag-rmean">--</div></div>
+    <div class="stat err"><div class="label">Resid std</div><div class="value" id="diag-rstd">--</div></div>
+  </div>
+  <div class="chart tall" id="chart-diag"></div>
+  <div class="callout"><strong>Key Concept 16.7:</strong> Diagnostic plots assess model adequacy: (1) actual vs. fitted shows how well the model predicts -- points should cluster around the 45-degree line; (2) residual vs. fitted detects heteroskedasticity (fan shape) and nonlinearity (curved pattern). Random scatter around zero with constant spread indicates assumptions are satisfied.</div>
+  <div class="try-this">
+    <div class="try-title">Try this</div>
+    <ol>
+      <li>Start with the <strong>Bivariate</strong> model on <strong>Actual vs. Fitted</strong>. Points scatter widely -- R&sup2; is only about 0.19. Switch to <strong>With Controls</strong> and the fit improves (R&sup2; &asymp; 0.45).</li>
+      <li>Toggle to <strong>Residual vs. Fitted</strong>. Look for fan shapes or curvature. With controls, residuals look more randomly scattered.</li>
+      <li>Turn on <strong>Show Countries</strong> to identify which nations are outliers. Hover over extreme points to see country names.</li>
+    </ol>
+  </div>
+</section>
+
+<!-- ==================== WIDGET 5: Influential Observations ==================== -->
+<section class="widget" id="influential-obs">
+  <div class="widget-head">
+    <div>
+      <span class="section-tag">&sect; 16.8 &middot; Key Concept 16.8</span>
+      <h2>Influential Observations</h2>
+    </div>
+    <button class="reset-btn" data-reset="influence">&#8634; Reset</button>
+  </div>
+  <p class="lede">DFITS measures how much each observation influences its own prediction. Points exceeding the threshold 2&radic;(k/n) warrant investigation. Toggle to DFBETAS to see influence on the growth coefficient specifically.</p>
+  <div class="controls">
+    <div class="ctrl">
+      <label>Measure</label>
+      <div class="toggle-group" id="infl-measure">
+        <button type="button" data-val="dfits" class="active">DFITS</button>
+        <button type="button" data-val="dfbetas">DFBETAS (growth)</button>
+      </div>
+    </div>
+    <div class="ctrl">
+      <label>Labels</label>
+      <div class="toggle-group" id="infl-labels">
+        <button type="button" data-val="flagged" class="active">Flagged Only</button>
+        <button type="button" data-val="all">All Countries</button>
+        <button type="button" data-val="off">Off</button>
+      </div>
+    </div>
+  </div>
+  <div class="stats-grid">
+    <div class="stat"><div class="label">n countries</div><div class="value" id="infl-n">--</div></div>
+    <div class="stat"><div class="label">k parameters</div><div class="value" id="infl-k">--</div></div>
+    <div class="stat pop"><div class="label">Threshold</div><div class="value" id="infl-thresh">--</div></div>
+    <div class="stat err"><div class="label">Flagged</div><div class="value" id="infl-flagged">--</div></div>
+  </div>
+  <div class="chart tall" id="chart-infl"></div>
+  <div class="callout"><strong>Key Concept 16.8:</strong> DFITS measures influence on fitted values: DFITS<sub>i</sub> is the scaled change in y&#770;<sub>i</sub> when observation i is excluded. DFBETAS measures influence on individual coefficients. Thresholds: |DFITS| &gt; 2&radic;(k/n) and |DFBETAS| &gt; 2/&radic;n. Don't automatically delete influential points -- investigate whether they represent data errors, genuine outliers, or valid extreme values.</div>
+  <div class="try-this">
+    <div class="try-title">Try this</div>
+    <ol>
+      <li>With <strong>DFITS</strong> selected and <strong>Flagged Only</strong> labels, identify the most influential countries. China, Oman, and Myanmar typically appear as top influencers.</li>
+      <li>Switch to <strong>DFBETAS (growth)</strong>. Different countries may emerge -- these specifically affect the growth coefficient, not just predictions.</li>
+      <li>Turn on <strong>All Countries</strong> labels and hover over points near the threshold. These borderline cases also warrant attention.</li>
+    </ol>
+  </div>
+</section>
+
+<!-- ==================== WIDGET 6: Omitted Variable Bias ==================== -->
+<section class="widget" id="omitted-var">
+  <div class="widget-head">
+    <div>
+      <span class="section-tag">&sect; 16.7 &middot; Key Concept 16.6</span>
+      <h2>Omitted Variable Bias</h2>
+    </div>
+    <button class="reset-btn" data-reset="ovb">&#8634; Reset</button>
+  </div>
+  <p class="lede">The growth coefficient drops from 0.131 (bivariate) to 0.047 (with controls) -- a 64% reduction. Toggle controls on and off to see omitted variable bias in action: institutional variables were confounding the democracy-growth relationship.</p>
+  <div class="controls">
+    <div class="ctrl">
+      <label>Controls</label>
+      <div class="toggle-group" id="ovb-controls">
+        <button type="button" data-val="none" class="active">None (bivariate)</button>
+        <button type="button" data-val="institutional">+ Institutional</button>
+        <button type="button" data-val="religion">+ Religion</button>
+        <button type="button" data-val="all">All Controls</button>
+      </div>
+    </div>
+    <div class="ctrl">
+      <label>Show</label>
+      <div class="toggle-group" id="ovb-show">
+        <button type="button" data-val="scatter" class="active">Scatter + Line</button>
+        <button type="button" data-val="coefbar">Coefficient Bar</button>
+      </div>
+    </div>
+  </div>
+  <div class="stats-grid">
+    <div class="stat"><div class="label">Growth coef</div><div class="value" id="ovb-coef">--</div></div>
+    <div class="stat"><div class="label">SE (robust)</div><div class="value" id="ovb-se">--</div></div>
+    <div class="stat"><div class="label">R&sup2;</div><div class="value" id="ovb-r2">--</div></div>
+    <div class="stat err"><div class="label">% change from bivariate</div><div class="value" id="ovb-pct">--</div></div>
+  </div>
+  <div class="chart tall" id="chart-ovb"></div>
+  <div class="callout"><strong>Key Concept 16.6:</strong> The democracy-growth example demonstrates omitted variable bias: the growth coefficient falls from 0.131 (bivariate) to 0.047 (with controls), a 64% reduction. Institutional variables (religion, executive constraints) were correlated with both democracy and growth, biasing the bivariate estimate upward. Always ask: "What variables might affect my outcome and correlate with my key regressor?"</div>
+  <div class="try-this">
+    <div class="try-title">Try this</div>
+    <ol>
+      <li>Start at <strong>None (bivariate)</strong>: growth coef = 0.131. Add <strong>+ Institutional</strong> controls (constraint + independence) -- the coefficient drops substantially.</li>
+      <li>Add <strong>+ Religion</strong> controls. Each set of controls absorbs some of the growth coefficient. With <strong>All Controls</strong>, it falls to 0.047.</li>
+      <li>Switch to <strong>Coefficient Bar</strong> view to see the dramatic shrinkage visually. The bivariate estimate overstated the democracy-growth relationship by 64%.</li>
+    </ol>
+  </div>
+</section>
+
+</main>
+
+<footer class="page">
+  <p>Part of <a href="https://quarcs-lab.github.io/metricsai/book/_book/index.html"><strong>metricsAI</strong></a> &middot; Chapter 16: Checking the Model and Data &middot; by Carlos Mendez &middot; <a href="https://github.com/quarcs-lab/metricsai">GitHub</a></p>
+  <p>Data: AED_EARNINGS_COMPLETE (872 workers), AED_DEMOCRACY (131 countries, Acemoglu et al. 2008).</p>
+  <a class="scroll-top" href="#top">&uarr; Back to top</a>
+</footer>
+
+<script type="application/json" id="ch-data">{{DATA_JSON}}</script>
+
+<script>
+"use strict";
+
+var DATA = JSON.parse(document.getElementById("ch-data").textContent);
+
+// ==================== STATS HELPERS ====================
+var mean = function(a) { var s = 0; for (var i = 0; i < a.length; i++) s += a[i]; return s / a.length; };
+function std(a, m) {
+  if (m === undefined) m = mean(a);
+  var s = 0;
+  for (var i = 0; i < a.length; i++) s += (a[i] - m) * (a[i] - m);
+  return Math.sqrt(s / (a.length - 1));
+}
+function fmt(v, d) {
+  if (d === undefined) d = 4;
+  if (v === null || v === undefined || isNaN(v)) return "\u2014";
+  return v.toFixed(d);
+}
+
+// ==================== PRNG & SAMPLING ====================
+function mulberry32(a) {
+  return function() {
+    a |= 0; a = a + 0x6D2B79F5 | 0;
+    var t = Math.imul(a ^ a >>> 15, 1 | a);
+    t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+    return ((t ^ t >>> 14) >>> 0) / 4294967296;
+  };
+}
+function boxMuller(rng) {
+  var u1 = rng(), u2 = rng();
+  return Math.sqrt(-2 * Math.log(u1)) * Math.cos(2 * Math.PI * u2);
+}
+function linspace(a, b, n) {
+  var out = new Array(n);
+  var step = (b - a) / (n - 1);
+  for (var i = 0; i < n; i++) out[i] = a + i * step;
+  return out;
+}
+
+// ==================== OLS ENGINE ====================
+function olsFit(x, y) {
+  var n = x.length;
+  var xbar = mean(x), ybar = mean(y);
+  var SSx = 0, SSxy = 0;
+  for (var i = 0; i < n; i++) {
+    SSx += (x[i] - xbar) * (x[i] - xbar);
+    SSxy += (x[i] - xbar) * (y[i] - ybar);
+  }
+  var b2 = SSxy / SSx;
+  var b1 = ybar - b2 * xbar;
+  var yhat = new Array(n);
+  var residuals = new Array(n);
+  var RSS = 0;
+  for (var i = 0; i < n; i++) {
+    yhat[i] = b1 + b2 * x[i];
+    residuals[i] = y[i] - yhat[i];
+    RSS += residuals[i] * residuals[i];
+  }
+  var se = Math.sqrt(RSS / (n - 2));
+  var se_b2 = se / Math.sqrt(SSx);
+  var SST = 0;
+  for (var i = 0; i < n; i++) SST += (y[i] - ybar) * (y[i] - ybar);
+  var R2 = SST > 0 ? 1 - RSS / SST : 0;
+  return { b1: b1, b2: b2, yhat: yhat, residuals: residuals, n: n, xbar: xbar, ybar: ybar, SSx: SSx, RSS: RSS, se: se, se_b2: se_b2, R2: R2 };
+}
+
+// Multiple regression via normal equations
+function olsMultiple(X, y) {
+  var n = X.length;
+  var k = X[0].length;
+  var i, j, m;
+  var XtX = [];
+  var Xty = [];
+  for (i = 0; i < k; i++) {
+    XtX.push(new Array(k));
+    Xty.push(0);
+    for (j = 0; j < k; j++) XtX[i][j] = 0;
+  }
+  for (i = 0; i < n; i++) {
+    for (j = 0; j < k; j++) {
+      Xty[j] += X[i][j] * y[i];
+      for (m = 0; m < k; m++) XtX[j][m] += X[i][j] * X[i][m];
+    }
+  }
+  var aug = [];
+  for (i = 0; i < k; i++) {
+    aug.push(XtX[i].slice());
+    aug[i].push(Xty[i]);
+  }
+  for (i = 0; i < k; i++) {
+    var maxRow = i;
+    for (j = i + 1; j < k; j++) {
+      if (Math.abs(aug[j][i]) > Math.abs(aug[maxRow][i])) maxRow = j;
+    }
+    var tmp = aug[i]; aug[i] = aug[maxRow]; aug[maxRow] = tmp;
+    var pivot = aug[i][i];
+    if (Math.abs(pivot) < 1e-12) continue;
+    for (j = i; j <= k; j++) aug[i][j] /= pivot;
+    for (j = 0; j < k; j++) {
+      if (j === i) continue;
+      var factor = aug[j][i];
+      for (m = i; m <= k; m++) aug[j][m] -= factor * aug[i][m];
+    }
+  }
+  var beta = [];
+  for (i = 0; i < k; i++) beta.push(aug[i][k]);
+  var yhat = new Array(n);
+  var resid = new Array(n);
+  var RSS = 0;
+  var ybar = mean(y);
+  var SST = 0;
+  for (i = 0; i < n; i++) {
+    yhat[i] = 0;
+    for (j = 0; j < k; j++) yhat[i] += X[i][j] * beta[j];
+    resid[i] = y[i] - yhat[i];
+    RSS += resid[i] * resid[i];
+    SST += (y[i] - ybar) * (y[i] - ybar);
+  }
+  var R2 = SST > 0 ? 1 - RSS / SST : 0;
+  var se = Math.sqrt(RSS / (n - k));
+  return { beta: beta, yhat: yhat, resid: resid, R2: R2, n: n, k: k, RSS: RSS, se: se };
+}
+
+// ==================== THEME ====================
+var THEME_KEY = "metricsai-theme";
+function getCSS(varName) { return getComputedStyle(document.documentElement).getPropertyValue(varName).trim(); }
+function themeColors() {
+  return { text: getCSS("--text"), textSoft: getCSS("--text-soft"), grid: getCSS("--grid"),
+    panel: getCSS("--panel"), cyan: getCSS("--accent"), purple: getCSS("--accent-2"), pink: getCSS("--accent-3") };
+}
+function baseLayout(overrides) {
+  var c = themeColors();
+  var base = {
+    paper_bgcolor: "rgba(0,0,0,0)", plot_bgcolor: "rgba(0,0,0,0)",
+    font: { family: "Inter, system-ui, sans-serif", color: c.text, size: 12 },
+    margin: { l: 56, r: 18, t: 30, b: 46 },
+    xaxis: { gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft } },
+    yaxis: { gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft } },
+    hoverlabel: { bgcolor: c.panel, bordercolor: c.grid, font: { color: c.text } },
+    legend: { font: { color: c.text }, bgcolor: "rgba(0,0,0,0)" }
+  };
+  if (overrides) for (var k in overrides) base[k] = overrides[k];
+  return base;
+}
+var PLOTLY_CONFIG = { displayModeBar: false, responsive: true };
+
+// ==================== TOGGLE / SLIDER HELPERS ====================
+function bindToggles(groupId, renderFn) {
+  document.querySelectorAll("#" + groupId + " button").forEach(function(btn) {
+    btn.addEventListener("click", function() {
+      this.parentNode.querySelectorAll("button").forEach(function(b) { b.classList.remove("active"); });
+      this.classList.add("active");
+      renderFn();
+    });
+  });
+}
+function bindSlider(id, valId, formatFn, renderFn) {
+  var el = document.getElementById(id);
+  var valEl = document.getElementById(valId);
+  el.addEventListener("input", function() {
+    valEl.textContent = formatFn(this.value);
+    renderFn();
+  });
+}
+function getToggleVal(groupId) {
+  var btn = document.querySelector("#" + groupId + " button.active");
+  return btn ? btn.dataset.val : "";
+}
+
+// ==================== WIDGET 1: VIF Explorer ====================
+(function() {
+  var barsEl = document.getElementById("chart-vif-bars");
+  var corrEl = document.getElementById("chart-vif-corr");
+  var EARN = DATA.earnings;
+
+  function render() {
+    var c = themeColors();
+    var modelType = getToggleVal("vif-model");
+    var threshold = parseInt(document.getElementById("vif-threshold").value);
+
+    var vif, r2;
+    if (modelType === "base") {
+      vif = EARN.vifBase;
+      r2 = EARN.baseModel.R2;
+    } else {
+      vif = EARN.vifCollinear;
+      r2 = EARN.collinearModel.R2;
+    }
+
+    document.getElementById("vif-age").textContent = fmt(vif.age, 2);
+    document.getElementById("vif-educ").textContent = fmt(vif.education, 2);
+    document.getElementById("vif-inter").textContent = vif.agebyeduc !== undefined ? fmt(vif.agebyeduc, 2) : "\u2014";
+    var maxVif = Math.max(vif.age, vif.education, vif.agebyeduc || 0);
+    document.getElementById("vif-max").textContent = fmt(maxVif, 2);
+    document.getElementById("vif-r2").textContent = fmt(r2);
+
+    var varNames = modelType === "base" ? ["age", "education"] : ["age", "education", "age\u00D7educ"];
+    var vifVals = modelType === "base" ? [vif.age, vif.education] : [vif.age, vif.education, vif.agebyeduc];
+    var barColors = vifVals.map(function(v) { return v > threshold ? c.pink : c.cyan; });
+
+    Plotly.react(barsEl, [{
+      x: varNames, y: vifVals, type: "bar",
+      marker: { color: barColors, line: { color: barColors, width: 1 } },
+      text: vifVals.map(function(v) { return v.toFixed(1); }),
+      textposition: "outside",
+      textfont: { color: c.text, size: 12, family: "JetBrains Mono" },
+      hovertemplate: "%{x}: VIF = %{y:.2f}<extra></extra>"
+    }], baseLayout({
+      title: { text: "VIF Values", font: { size: 13, color: c.textSoft } },
+      xaxis: { gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft } },
+      yaxis: { title: "VIF", gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft } },
+      shapes: [{ type: "line", x0: -0.5, x1: varNames.length - 0.5, y0: threshold, y1: threshold, line: { color: c.pink, width: 2, dash: "dash" } }],
+      annotations: [{ x: varNames.length - 1, y: threshold, text: "Threshold = " + threshold, showarrow: false, yshift: 12, font: { color: c.pink, size: 10 } }],
+      showlegend: false
+    }), PLOTLY_CONFIG);
+
+    var corrData = EARN.correlation;
+    var labels = ["age", "educ", "age\u00D7educ"];
+    var z = corrData.matrix;
+    var textArr = z.map(function(row) { return row.map(function(v) { return v.toFixed(3); }); });
+
+    Plotly.react(corrEl, [{
+      z: z, x: labels, y: labels, type: "heatmap",
+      colorscale: [[0, "#2563eb"], [0.5, "#f8fafc"], [1, "#dc2626"]],
+      zmin: -1, zmax: 1,
+      text: textArr, texttemplate: "%{text}", textfont: { size: 13, family: "JetBrains Mono" },
+      hovertemplate: "%{y} vs %{x}: r = %{z:.3f}<extra></extra>",
+      showscale: true,
+      colorbar: { title: "r", titlefont: { color: c.textSoft }, tickfont: { color: c.textSoft } }
+    }], baseLayout({
+      title: { text: "Correlation Matrix", font: { size: 13, color: c.textSoft } },
+      xaxis: { gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft, size: 11 }, side: "bottom" },
+      yaxis: { gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft, size: 11 }, autorange: "reversed" },
+      margin: { l: 70, r: 18, t: 30, b: 60 }
+    }), PLOTLY_CONFIG);
+  }
+
+  bindToggles("vif-model", render);
+  bindSlider("vif-threshold", "vif-threshold-val", function(v) { return v; }, render);
+  window.__rerender_vif = render;
+  render();
+})();
+
+// ==================== WIDGET 2: Robust vs Standard SEs ====================
+(function() {
+  var chartEl = document.getElementById("chart-robse");
+  var EARN = DATA.earnings;
+
+  function render() {
+    var c = themeColors();
+    var display = getToggleVal("robse-display");
+    var highlight = getToggleVal("robse-highlight");
+
+    var seComp = EARN.seCompare;
+    document.getElementById("robse-age-std").textContent = fmt(seComp.age.standard, 2);
+    document.getElementById("robse-age-rob").textContent = fmt(seComp.age.robust, 2);
+    document.getElementById("robse-educ-std").textContent = fmt(seComp.education.standard, 2);
+    document.getElementById("robse-educ-rob").textContent = fmt(seComp.education.robust, 2);
+    document.getElementById("robse-ratio").textContent = fmt(seComp.education.ratio, 4) + "\u00D7";
+
+    if (display === "comparison") {
+      var vars = (highlight === "education") ? ["education"] : (highlight === "age") ? ["age"] : ["Intercept", "age", "education"];
+      var stdVals = vars.map(function(v) { return seComp[v].standard; });
+      var robVals = vars.map(function(v) { return seComp[v].robust; });
+      var ratios = vars.map(function(v) { return seComp[v].ratio; });
+
+      var traces = [];
+      traces.push({
+        x: vars, y: stdVals, type: "bar", name: "Standard SE",
+        marker: { color: c.cyan + "cc" },
+        hovertemplate: "%{x}: %{y:.2f}<extra>Standard</extra>"
+      });
+      traces.push({
+        x: vars, y: robVals, type: "bar", name: "Robust (HC1) SE",
+        marker: { color: c.pink + "cc" },
+        hovertemplate: "%{x}: %{y:.2f}<extra>Robust</extra>"
+      });
+
+      var annotations = ratios.map(function(r, i) {
+        return { x: vars[i], y: Math.max(stdVals[i], robVals[i]), text: r.toFixed(2) + "\u00D7", showarrow: false, yshift: 16, font: { color: c.purple, size: 11, family: "JetBrains Mono" } };
+      });
+
+      Plotly.react(chartEl, traces, baseLayout({
+        barmode: "group",
+        xaxis: { title: "Variable", gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft } },
+        yaxis: { title: "Standard Error", gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft } },
+        annotations: annotations,
+        legend: { x: 0.6, y: 0.98, font: { color: c.text }, bgcolor: "rgba(0,0,0,0)" }
+      }), PLOTLY_CONFIG);
+    } else {
+      var yhat = EARN.yhat;
+      var resid = EARN.residuals;
+      Plotly.react(chartEl, [{
+        x: yhat, y: resid, mode: "markers", type: "scatter",
+        marker: { color: c.cyan, size: 4, opacity: 0.5 },
+        name: "Residuals",
+        hovertemplate: "Fitted: %{x:.0f}<br>Residual: %{y:.0f}<extra></extra>"
+      }, {
+        x: [Math.min.apply(null, yhat), Math.max.apply(null, yhat)],
+        y: [0, 0],
+        mode: "lines", line: { color: c.purple, width: 2, dash: "dash" },
+        name: "Zero line", hoverinfo: "skip"
+      }], baseLayout({
+        xaxis: { title: "Fitted Earnings ($)", gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft } },
+        yaxis: { title: "Residual ($)", gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft } },
+        legend: { x: 0.02, y: 0.98, font: { color: c.text }, bgcolor: "rgba(0,0,0,0)" }
+      }), PLOTLY_CONFIG);
+    }
+  }
+
+  bindToggles("robse-display", render);
+  bindToggles("robse-highlight", render);
+  window.__rerender_robse = render;
+  render();
+})();
+
+// ==================== WIDGET 3: Autocorrelation Explorer ====================
+(function() {
+  var tsEl = document.getElementById("chart-acf-ts");
+  var acfEl = document.getElementById("chart-acf-bars");
+  var seed = 160;
+
+  function render() {
+    var c = themeColors();
+    var rho = parseFloat(document.getElementById("acf-rho").value);
+    var nObs = parseInt(document.getElementById("acf-n").value);
+    var rng = mulberry32(seed);
+
+    var u = new Array(nObs);
+    u[0] = boxMuller(rng);
+    for (var t = 1; t < nObs; t++) {
+      var rhoSafe = Math.min(rho, 0.999);
+      u[t] = rhoSafe * u[t - 1] + Math.sqrt(1 - rhoSafe * rhoSafe) * boxMuller(rng);
+    }
+
+    var maxLag = 20;
+    var ubar = mean(u);
+    var denom = 0;
+    for (var t = 0; t < nObs; t++) denom += (u[t] - ubar) * (u[t] - ubar);
+    var acfVals = new Array(maxLag + 1);
+    acfVals[0] = 1.0;
+    for (var lag = 1; lag <= maxLag; lag++) {
+      var num = 0;
+      for (var t = lag; t < nObs; t++) num += (u[t] - ubar) * (u[t - lag] - ubar);
+      acfVals[lag] = denom > 0 ? num / denom : 0;
+    }
+
+    document.getElementById("acf-lag1").textContent = fmt(acfVals[1]);
+    document.getElementById("acf-lag5").textContent = fmt(acfVals[5] !== undefined ? acfVals[5] : 0);
+    document.getElementById("acf-theo1").textContent = fmt(rho);
+    var effRatio = rho < 0.99 ? (1 - rho) / (1 + rho) : 0.005;
+    document.getElementById("acf-effn").textContent = fmt(effRatio, 3);
+
+    var tIdx = [];
+    for (var t = 0; t < nObs; t++) tIdx.push(t);
+
+    Plotly.react(tsEl, [{
+      x: tIdx, y: u, mode: "lines", type: "scatter",
+      line: { color: c.cyan, width: 1.5 },
+      name: "AR(1) errors",
+      hovertemplate: "t=%{x}<br>u=%{y:.3f}<extra></extra>"
+    }, {
+      x: [0, nObs - 1], y: [0, 0],
+      mode: "lines", line: { color: c.purple, width: 1.5, dash: "dash" },
+      name: "Zero", hoverinfo: "skip"
+    }], baseLayout({
+      title: { text: "Time Series: u\u209C = " + rho.toFixed(2) + " u\u209C\u208B\u2081 + \u03B5\u209C", font: { size: 13, color: c.textSoft } },
+      xaxis: { title: "Time (t)", gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft } },
+      yaxis: { title: "Error u\u209C", gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft } },
+      showlegend: false
+    }), PLOTLY_CONFIG);
+
+    var lags = [];
+    var acfDisplay = [];
+    for (var lag = 1; lag <= maxLag; lag++) {
+      lags.push(lag);
+      acfDisplay.push(acfVals[lag]);
+    }
+    var confBound = 1.96 / Math.sqrt(nObs);
+    var barColors = acfDisplay.map(function(v) { return Math.abs(v) > confBound ? c.pink : c.cyan; });
+
+    Plotly.react(acfEl, [{
+      x: lags, y: acfDisplay, type: "bar",
+      marker: { color: barColors },
+      hovertemplate: "Lag %{x}: ACF = %{y:.3f}<extra></extra>"
+    }], baseLayout({
+      title: { text: "Autocorrelation Function (ACF)", font: { size: 13, color: c.textSoft } },
+      xaxis: { title: "Lag", gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft } },
+      yaxis: { title: "ACF", range: [-0.3, 1.05], gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft } },
+      shapes: [
+        { type: "line", x0: 0.5, x1: maxLag + 0.5, y0: confBound, y1: confBound, line: { color: c.purple, width: 1.5, dash: "dot" } },
+        { type: "line", x0: 0.5, x1: maxLag + 0.5, y0: -confBound, y1: -confBound, line: { color: c.purple, width: 1.5, dash: "dot" } }
+      ],
+      showlegend: false
+    }), PLOTLY_CONFIG);
+  }
+
+  bindSlider("acf-rho", "acf-rho-val", function(v) { return parseFloat(v).toFixed(2); }, render);
+  bindSlider("acf-n", "acf-n-val", function(v) { return v; }, render);
+  document.getElementById("acf-resim").addEventListener("click", function() { seed += 1000; render(); });
+  window.__rerender_acf = render;
+  render();
+})();
+
+// ==================== WIDGET 4: Diagnostic Plots ====================
+(function() {
+  var chartEl = document.getElementById("chart-diag");
+  var DEM = DATA.democracy;
+
+  function render() {
+    var c = themeColors();
+    var modelType = getToggleVal("diag-model");
+    var plotType = getToggleVal("diag-plot");
+    var showLabels = getToggleVal("diag-labels") === "on";
+
+    var yhat, resid, coef, r2;
+    if (modelType === "bivariate") {
+      yhat = DEM.bivariate.yhat;
+      resid = DEM.bivariate.resid;
+      coef = DEM.bivariate.b1;
+      r2 = DEM.bivariate.R2;
+    } else {
+      yhat = DEM.multiple.yhat;
+      resid = DEM.multiple.resid;
+      coef = DEM.multiple.params.growth;
+      r2 = DEM.multiple.R2;
+    }
+
+    var rmean = mean(resid);
+    var rstd = std(resid, rmean);
+    document.getElementById("diag-coef").textContent = fmt(coef);
+    document.getElementById("diag-r2").textContent = fmt(r2);
+    document.getElementById("diag-rmean").textContent = fmt(rmean, 6);
+    document.getElementById("diag-rstd").textContent = fmt(rstd);
+
+    var traces = [];
+    if (plotType === "actual") {
+      traces.push({
+        x: yhat, y: DEM.democracy, mode: showLabels ? "markers+text" : "markers", type: "scatter",
+        marker: { color: c.cyan, size: 7, opacity: 0.7 },
+        text: DEM.countries,
+        textposition: "top right",
+        textfont: { size: 8, color: c.textSoft },
+        name: "Countries",
+        hovertemplate: "%{customdata}<br>Fitted: %{x:.3f}<br>Actual: %{y:.3f}<extra></extra>",
+        customdata: DEM.countries
+      });
+      var minV = Math.min(Math.min.apply(null, yhat), Math.min.apply(null, DEM.democracy));
+      var maxV = Math.max(Math.max.apply(null, yhat), Math.max.apply(null, DEM.democracy));
+      traces.push({
+        x: [minV - 0.05, maxV + 0.05], y: [minV - 0.05, maxV + 0.05],
+        mode: "lines", line: { color: c.purple, width: 2, dash: "dash" },
+        name: "45\u00B0 line", hoverinfo: "skip"
+      });
+
+      Plotly.react(chartEl, traces, baseLayout({
+        title: { text: "Actual vs. Fitted Democracy", font: { size: 13, color: c.textSoft } },
+        xaxis: { title: "Fitted Democracy", gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft } },
+        yaxis: { title: "Actual Democracy", gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft } },
+        legend: { x: 0.02, y: 0.98, font: { color: c.text }, bgcolor: "rgba(0,0,0,0)" }
+      }), PLOTLY_CONFIG);
+    } else {
+      traces.push({
+        x: yhat, y: resid, mode: showLabels ? "markers+text" : "markers", type: "scatter",
+        marker: { color: c.cyan, size: 7, opacity: 0.7 },
+        text: DEM.countries,
+        textposition: "top right",
+        textfont: { size: 8, color: c.textSoft },
+        name: "Residuals",
+        hovertemplate: "%{customdata}<br>Fitted: %{x:.3f}<br>Residual: %{y:.3f}<extra></extra>",
+        customdata: DEM.countries
+      });
+      traces.push({
+        x: [Math.min.apply(null, yhat) - 0.05, Math.max.apply(null, yhat) + 0.05],
+        y: [0, 0],
+        mode: "lines", line: { color: c.purple, width: 2, dash: "dash" },
+        name: "Zero line", hoverinfo: "skip"
+      });
+
+      Plotly.react(chartEl, traces, baseLayout({
+        title: { text: "Residual vs. Fitted Democracy", font: { size: 13, color: c.textSoft } },
+        xaxis: { title: "Fitted Democracy", gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft } },
+        yaxis: { title: "Residual", gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft } },
+        legend: { x: 0.02, y: 0.98, font: { color: c.text }, bgcolor: "rgba(0,0,0,0)" }
+      }), PLOTLY_CONFIG);
+    }
+  }
+
+  bindToggles("diag-model", render);
+  bindToggles("diag-plot", render);
+  bindToggles("diag-labels", render);
+  window.__rerender_diag = render;
+  render();
+})();
+
+// ==================== WIDGET 5: Influential Observations ====================
+(function() {
+  var chartEl = document.getElementById("chart-infl");
+  var DEM = DATA.democracy;
+
+  function render() {
+    var c = themeColors();
+    var measure = getToggleVal("infl-measure");
+    var labelMode = getToggleVal("infl-labels");
+
+    var vals, threshold, title, yLabel;
+    if (measure === "dfits") {
+      vals = DEM.dfits;
+      threshold = DEM.threshDfits;
+      title = "DFITS: Influence on Fitted Values";
+      yLabel = "DFITS";
+    } else {
+      vals = DEM.dfbetasGrowth;
+      threshold = DEM.threshDfbetas;
+      title = "DFBETAS: Influence on Growth Coefficient";
+      yLabel = "DFBETAS (growth)";
+    }
+
+    var n = vals.length;
+    document.getElementById("infl-n").textContent = n.toString();
+    document.getElementById("infl-k").textContent = DEM.k.toString();
+    document.getElementById("infl-thresh").textContent = "\u00B1" + fmt(threshold, 4);
+    var flagged = 0;
+    for (var i = 0; i < n; i++) { if (Math.abs(vals[i]) > threshold) flagged++; }
+    document.getElementById("infl-flagged").textContent = flagged.toString();
+
+    var obsIdx = [];
+    var colors = [];
+    var labels = [];
+    for (var i = 0; i < n; i++) {
+      obsIdx.push(i);
+      var isFlagged = Math.abs(vals[i]) > threshold;
+      colors.push(isFlagged ? c.pink : c.cyan);
+      if (labelMode === "all") {
+        labels.push(DEM.countries[i]);
+      } else if (labelMode === "flagged" && isFlagged) {
+        labels.push(DEM.countries[i]);
+      } else {
+        labels.push("");
+      }
+    }
+
+    Plotly.react(chartEl, [{
+      x: obsIdx, y: vals, mode: "markers+text", type: "scatter",
+      marker: { color: colors, size: 7, opacity: 0.8 },
+      text: labels,
+      textposition: "top center",
+      textfont: { size: 9, color: c.textSoft, family: "Inter" },
+      hovertemplate: "%{customdata}<br>Index: %{x}<br>" + yLabel + ": %{y:.4f}<extra></extra>",
+      customdata: DEM.countries,
+      showlegend: false
+    }], baseLayout({
+      title: { text: title, font: { size: 13, color: c.textSoft } },
+      xaxis: { title: "Observation Index", gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft } },
+      yaxis: { title: yLabel, gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft } },
+      shapes: [
+        { type: "line", x0: -1, x1: n, y0: threshold, y1: threshold, line: { color: c.pink, width: 2, dash: "dash" } },
+        { type: "line", x0: -1, x1: n, y0: -threshold, y1: -threshold, line: { color: c.pink, width: 2, dash: "dash" } },
+        { type: "line", x0: -1, x1: n, y0: 0, y1: 0, line: { color: c.grid, width: 1 } }
+      ],
+      annotations: [{ x: n - 1, y: threshold, text: "\u00B1" + threshold.toFixed(3), showarrow: false, yshift: 12, font: { color: c.pink, size: 10 } }]
+    }), PLOTLY_CONFIG);
+  }
+
+  bindToggles("infl-measure", render);
+  bindToggles("infl-labels", render);
+  window.__rerender_influence = render;
+  render();
+})();
+
+// ==================== WIDGET 6: Omitted Variable Bias ====================
+(function() {
+  var chartEl = document.getElementById("chart-ovb");
+  var DEM = DATA.democracy;
+
+  function render() {
+    var c = themeColors();
+    var controls = getToggleVal("ovb-controls");
+    var showMode = getToggleVal("ovb-show");
+
+    var includeVars = [];
+    if (controls === "institutional" || controls === "all") {
+      includeVars.push("constraint");
+      includeVars.push("indcent");
+    }
+    if (controls === "religion" || controls === "all") {
+      includeVars.push("catholic");
+      includeVars.push("muslim");
+      includeVars.push("protestant");
+    }
+
+    var y = DEM.democracy;
+    var growth = DEM.growth;
+    var n = y.length;
+
+    var coef, r2, se;
+
+    if (includeVars.length === 0) {
+      coef = DEM.bivariate.b1;
+      r2 = DEM.bivariate.R2;
+      se = DEM.bivariate.se;
+    } else {
+      var X = [];
+      for (var i = 0; i < n; i++) {
+        var row = [1, growth[i]];
+        for (var j = 0; j < includeVars.length; j++) {
+          row.push(DEM.controlData[includeVars[j]][i]);
+        }
+        X.push(row);
+      }
+      var result = olsMultiple(X, y);
+      coef = result.beta[1];
+      r2 = result.R2;
+      var xbar = mean(growth);
+      var SSx = 0;
+      for (var i = 0; i < n; i++) SSx += (growth[i] - xbar) * (growth[i] - xbar);
+      se = result.se / Math.sqrt(SSx);
+    }
+
+    var bivCoef = DEM.bivariate.b1;
+    var pctChange = controls === "none" ? 0 : ((bivCoef - coef) / bivCoef * 100);
+
+    document.getElementById("ovb-coef").textContent = fmt(coef);
+    document.getElementById("ovb-se").textContent = fmt(se);
+    document.getElementById("ovb-r2").textContent = fmt(r2);
+    document.getElementById("ovb-pct").textContent = controls === "none" ? "\u2014" : fmt(pctChange, 1) + "%";
+
+    if (showMode === "scatter") {
+      var traces = [];
+      traces.push({
+        x: growth, y: y, mode: "markers", type: "scatter",
+        marker: { color: c.cyan, size: 7, opacity: 0.6 },
+        name: "Countries",
+        hovertemplate: "%{customdata}<br>Growth: %{x:.3f}<br>Democracy: %{y:.3f}<extra></extra>",
+        customdata: DEM.countries
+      });
+      var gMin = Math.min.apply(null, growth);
+      var gMax = Math.max.apply(null, growth);
+      traces.push({
+        x: [gMin, gMax],
+        y: [DEM.bivariate.b0 + DEM.bivariate.b1 * gMin, DEM.bivariate.b0 + DEM.bivariate.b1 * gMax],
+        mode: "lines", line: { color: c.purple, width: 2, dash: controls === "none" ? "solid" : "dash" },
+        name: "Bivariate (\u03B2=" + fmt(bivCoef, 3) + ")"
+      });
+      if (controls !== "none") {
+        var yMean = mean(y);
+        var gMean = mean(growth);
+        var y0 = yMean - coef * gMean;
+        traces.push({
+          x: [gMin, gMax],
+          y: [y0 + coef * gMin, y0 + coef * gMax],
+          mode: "lines", line: { color: c.pink, width: 2.5 },
+          name: "With controls (\u03B2=" + fmt(coef, 3) + ")"
+        });
+      }
+
+      Plotly.react(chartEl, traces, baseLayout({
+        title: { text: "Democracy vs. Growth (131 countries)", font: { size: 13, color: c.textSoft } },
+        xaxis: { title: "Change in Log GDP per capita (1500-2000)", gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft } },
+        yaxis: { title: "Change in Democracy (1500-2000)", gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft } },
+        legend: { x: 0.02, y: 0.98, font: { color: c.text, size: 11 }, bgcolor: "rgba(0,0,0,0)" }
+      }), PLOTLY_CONFIG);
+    } else {
+      var allLabels = ["None", "+ Institutional", "+ Religion", "All Controls"];
+      var specs = [
+        [],
+        ["constraint", "indcent"],
+        ["catholic", "muslim", "protestant"],
+        ["constraint", "indcent", "catholic", "muslim", "protestant"]
+      ];
+      var allCoefs = [];
+      for (var s = 0; s < specs.length; s++) {
+        if (specs[s].length === 0) {
+          allCoefs.push(bivCoef);
+        } else {
+          var X = [];
+          for (var i = 0; i < n; i++) {
+            var row = [1, growth[i]];
+            for (var j = 0; j < specs[s].length; j++) {
+              row.push(DEM.controlData[specs[s][j]][i]);
+            }
+            X.push(row);
+          }
+          allCoefs.push(olsMultiple(X, y).beta[1]);
+        }
+      }
+
+      var allColors = allLabels.map(function(label, i) {
+        if (controls === "none" && i === 0) return c.pink;
+        if (controls === "institutional" && i === 1) return c.pink;
+        if (controls === "religion" && i === 2) return c.pink;
+        if (controls === "all" && i === 3) return c.pink;
+        return c.cyan + "88";
+      });
+
+      Plotly.react(chartEl, [{
+        x: allLabels, y: allCoefs, type: "bar",
+        marker: { color: allColors },
+        text: allCoefs.map(function(v) { return v.toFixed(3); }),
+        textposition: "outside",
+        textfont: { color: c.text, size: 12, family: "JetBrains Mono" },
+        hovertemplate: "%{x}: \u03B2 = %{y:.4f}<extra></extra>"
+      }], baseLayout({
+        title: { text: "Growth Coefficient Under Different Specifications", font: { size: 13, color: c.textSoft } },
+        xaxis: { gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft } },
+        yaxis: { title: "Growth coefficient", gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft } },
+        shapes: [{ type: "line", x0: -0.5, x1: 3.5, y0: bivCoef, y1: bivCoef, line: { color: c.purple, width: 1.5, dash: "dot" } }],
+        annotations: [{ x: 3, y: bivCoef, text: "Bivariate = " + fmt(bivCoef, 3), showarrow: false, yshift: 10, font: { color: c.purple, size: 10 } }],
+        showlegend: false
+      }), PLOTLY_CONFIG);
+    }
+  }
+
+  bindToggles("ovb-controls", render);
+  bindToggles("ovb-show", render);
+  window.__rerender_ovb = render;
+  render();
+})();
+
+// ==================== RESET + URL HASH STATE ====================
+(function() {
+  var REG = {
+    vif: [
+      { group: "vif-model", kind: "toggle", def: "base" },
+      { id: "vif-threshold", kind: "range", def: "10" }
+    ],
+    robse: [
+      { group: "robse-display", kind: "toggle", def: "comparison" },
+      { group: "robse-highlight", kind: "toggle", def: "all" }
+    ],
+    acf: [
+      { id: "acf-rho", kind: "range", def: "0.80" },
+      { id: "acf-n", kind: "range", def: "200" }
+    ],
+    diag: [
+      { group: "diag-model", kind: "toggle", def: "bivariate" },
+      { group: "diag-plot", kind: "toggle", def: "actual" },
+      { group: "diag-labels", kind: "toggle", def: "off" }
+    ],
+    influence: [
+      { group: "infl-measure", kind: "toggle", def: "dfits" },
+      { group: "infl-labels", kind: "toggle", def: "flagged" }
+    ],
+    ovb: [
+      { group: "ovb-controls", kind: "toggle", def: "none" },
+      { group: "ovb-show", kind: "toggle", def: "scatter" }
+    ]
+  };
+
+  function getVal(c) {
+    if (c.kind === "toggle") {
+      var btn = document.querySelector("#" + c.group + " button.active");
+      return btn ? btn.dataset.val : c.def;
+    }
+    return document.getElementById(c.id).value;
+  }
+
+  function setVal(c, val, fire) {
+    if (c.kind === "toggle") {
+      var group = document.getElementById(c.group);
+      if (!group) return;
+      var btn = group.querySelector('button[data-val="' + val + '"]');
+      if (btn && !btn.classList.contains("active")) btn.click();
+    } else {
+      var el = document.getElementById(c.id);
+      if (!el) return;
+      if (el.value !== String(val)) {
+        el.value = val;
+        if (fire) el.dispatchEvent(new Event(c.kind === "select" ? "change" : "input", { bubbles: true }));
+      }
+    }
+  }
+
+  function resetWidget(widget) {
+    var ctrls = REG[widget] || [];
+    for (var i = 0; i < ctrls.length; i++) setVal(ctrls[i], ctrls[i].def, true);
+    var fn = window["__rerender_" + widget];
+    if (fn) fn();
+    writeHash();
+  }
+
+  function writeHash() {
+    var parts = [];
+    for (var widget in REG) {
+      var ctrls = REG[widget];
+      for (var i = 0; i < ctrls.length; i++) {
+        var c = ctrls[i];
+        var v = String(getVal(c));
+        if (v !== String(c.def)) {
+          var key = c.id || c.group;
+          parts.push(key + "=" + encodeURIComponent(v));
+        }
+      }
+    }
+    var want = parts.length ? "#" + parts.join("&") : "";
+    if (want === "" && location.hash.match(/=/)) {
+      history.replaceState(null, "", location.pathname + location.search);
+    } else if (want !== "" && location.hash !== want) {
+      history.replaceState(null, "", location.pathname + location.search + want);
+    }
+  }
+
+  function readHash() {
+    var hash = location.hash.slice(1);
+    if (!hash || !hash.includes("=")) return;
+    var params = {};
+    var pairs = hash.split("&");
+    for (var i = 0; i < pairs.length; i++) {
+      var eq = pairs[i].indexOf("=");
+      if (eq < 0) continue;
+      params[pairs[i].slice(0, eq)] = decodeURIComponent(pairs[i].slice(eq + 1));
+    }
+    for (var widget in REG) {
+      var ctrls = REG[widget];
+      for (var i = 0; i < ctrls.length; i++) {
+        var c = ctrls[i];
+        var key = c.id || c.group;
+        if (key in params) setVal(c, params[key], true);
+      }
+    }
+  }
+
+  document.querySelectorAll(".reset-btn[data-reset]").forEach(function(btn) {
+    btn.addEventListener("click", function() { resetWidget(btn.dataset.reset); });
+  });
+  document.addEventListener("input", function(e) {
+    if (e.target.matches("input[type=range], select")) writeHash();
+  });
+  document.addEventListener("change", function(e) {
+    if (e.target.matches("select")) writeHash();
+  });
+  document.querySelectorAll(".toggle-group button").forEach(function(b) {
+    b.addEventListener("click", function() { setTimeout(writeHash, 0); });
+  });
+  readHash();
+})();
+
+// ==================== THEME TOGGLE ====================
+(function() {
+  var btn = document.getElementById("theme-toggle");
+  var iconEl = document.getElementById("theme-icon");
+  var labelEl = document.getElementById("theme-label");
+
+  function apply(theme) {
+    document.documentElement.dataset.theme = theme;
+    iconEl.textContent = theme === "dark" ? "\u2600\uFE0F" : "\uD83C\uDF19";
+    labelEl.textContent = theme === "dark" ? "Light" : "Dark";
+    for (var key in window) {
+      if (key.startsWith("__rerender_") && typeof window[key] === "function") window[key]();
+    }
+  }
+
+  var saved = localStorage.getItem(THEME_KEY);
+  var prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+  apply(saved || (prefersDark ? "dark" : "light"));
+
+  btn.addEventListener("click", function() {
+    var next = document.documentElement.dataset.theme === "dark" ? "light" : "dark";
+    localStorage.setItem(THEME_KEY, next);
+    apply(next);
+  });
+})();
+
+// ==================== Resize handling ====================
+window.addEventListener("resize", function() {
+  document.querySelectorAll(".chart").forEach(function(el) {
+    if (el.data) Plotly.Plots.resize(el);
+  });
+});
+</script>
+
+</body>
+</html>

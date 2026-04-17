@@ -1,0 +1,754 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chapter 10 — Data Summary for Multiple Regression · metricsAI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.plot.ly/plotly-2.35.2.min.js" charset="utf-8"></script>
+<style>
+:root {
+  --cyan: #008CB7; --cyan-soft: #22d3ee;
+  --purple: #7A209F; --purple-soft: #c084fc;
+  --pink: #C21E72; --pink-soft: #f472b6;
+  --bg: #f5f8fb; --panel: #ffffff; --panel-2: #f0f4f9;
+  --text: #0b1021; --text-soft: #475569; --text-muted: #64748b;
+  --border: #d9e2ec; --accent: var(--cyan); --accent-2: var(--purple); --accent-3: var(--pink);
+  --shadow: 0 2px 10px rgba(11,16,33,0.06), 0 12px 30px rgba(11,16,33,0.05);
+  --grid: #e3e8ef; --code-bg: #eef3f8;
+}
+html[data-theme="dark"] {
+  --bg: #0c1024; --panel: #151a33; --panel-2: #1b2142;
+  --text: #e2e8f0; --text-soft: #b5c0d0; --text-muted: #8a98ae;
+  --border: #2a3156; --accent: var(--cyan-soft); --accent-2: var(--purple-soft); --accent-3: var(--pink-soft);
+  --shadow: 0 2px 10px rgba(0,0,0,0.25), 0 12px 30px rgba(0,0,0,0.35);
+  --grid: #2a3156; --code-bg: #0f1530;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body { font-family: 'Inter', system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--text); line-height: 1.55; transition: background-color .25s ease, color .25s ease; }
+code, .mono { font-family: 'JetBrains Mono', ui-monospace, monospace; }
+header.page { position: relative; padding: 2.4rem 1.5rem 2rem; background: radial-gradient(1200px 400px at 85% -10%, rgba(122,32,159,0.15), transparent), radial-gradient(1000px 400px at 10% 0%, rgba(0,140,183,0.18), transparent), var(--panel); border-bottom: 1px solid var(--border); }
+.page-inner { max-width: 1120px; margin: 0 auto; }
+.chapter-badge { display: inline-block; font-size: 0.72rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--accent); font-weight: 600; margin-bottom: 0.5rem; }
+h1.title { font-size: clamp(1.6rem, 3.4vw, 2.4rem); margin: 0 0 0.35rem; background: linear-gradient(90deg, var(--accent), var(--accent-2)); -webkit-background-clip: text; background-clip: text; color: transparent; font-weight: 700; letter-spacing: -0.01em; }
+p.subtitle { margin: 0 0 0.8rem; color: var(--text-soft); font-size: 1.05rem; max-width: 720px; }
+.theme-toggle { position: absolute; top: 1.4rem; right: 1.5rem; background: var(--panel-2); color: var(--text); border: 1px solid var(--border); padding: 0.4rem 0.8rem; border-radius: 999px; cursor: pointer; font-size: 0.85rem; font-weight: 500; display: inline-flex; align-items: center; gap: 0.35rem; transition: all .2s ease; }
+.theme-toggle:hover { border-color: var(--accent); color: var(--accent); }
+nav.anchors { position: sticky; top: 0; z-index: 20; background: color-mix(in srgb, var(--panel) 92%, transparent); backdrop-filter: saturate(150%) blur(8px); -webkit-backdrop-filter: saturate(150%) blur(8px); border-bottom: 1px solid var(--border); }
+nav.anchors ul { display: flex; gap: 0.25rem; overflow-x: auto; list-style: none; padding: 0.55rem 1.5rem; margin: 0 auto; max-width: 1120px; scrollbar-width: thin; }
+nav.anchors a { display: block; padding: 0.35rem 0.75rem; border-radius: 8px; color: var(--text-soft); text-decoration: none; font-size: 0.85rem; font-weight: 500; white-space: nowrap; transition: all .15s ease; }
+nav.anchors a:hover { color: var(--accent); background: var(--panel-2); }
+main { max-width: 1120px; margin: 1.2rem auto 3rem; padding: 0 1.5rem; }
+section.widget { background: var(--panel); border: 1px solid var(--border); border-radius: 16px; padding: 1.5rem 1.4rem 1.3rem; margin-bottom: 1.5rem; box-shadow: var(--shadow); }
+.section-tag { display: inline-block; font-family: 'JetBrains Mono', monospace; font-size: 0.72rem; color: var(--accent); background: color-mix(in srgb, var(--accent) 12%, transparent); padding: 0.2rem 0.55rem; border-radius: 6px; margin-bottom: 0.6rem; font-weight: 500; }
+.widget h2 { margin: 0 0 0.2rem; font-size: 1.35rem; font-weight: 600; color: var(--accent-2); letter-spacing: -0.005em; }
+.widget .lede { margin: 0 0 1rem; color: var(--text-soft); font-size: 0.97rem; max-width: 780px; }
+.controls { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 0.9rem 1.2rem; padding: 0.9rem 1rem; background: var(--panel-2); border-radius: 10px; margin-bottom: 1rem; }
+.ctrl { display: flex; flex-direction: column; gap: 0.3rem; }
+.ctrl label { font-size: 0.78rem; font-weight: 500; color: var(--text-soft); text-transform: uppercase; letter-spacing: 0.05em; }
+.ctrl select { font-family: inherit; font-size: 0.9rem; padding: 0.4rem 0.55rem; border-radius: 8px; border: 1px solid var(--border); background: var(--panel); color: var(--text); }
+.toggle-group { display: inline-flex; gap: 0.25rem; background: var(--panel); padding: 3px; border-radius: 10px; border: 1px solid var(--border); }
+.toggle-group button { background: transparent; border: none; color: var(--text-soft); padding: 0.32rem 0.75rem; border-radius: 7px; font-family: inherit; font-size: 0.85rem; cursor: pointer; transition: all .15s ease; }
+.toggle-group button.active { background: var(--accent); color: white; font-weight: 500; }
+.callout { background: color-mix(in srgb, var(--accent-2) 8%, transparent); border-left: 3px solid var(--accent-2); padding: 0.7rem 0.9rem; border-radius: 8px; font-size: 0.9rem; color: var(--text-soft); margin: 0.9rem 0 0.2rem; }
+.callout strong { color: var(--accent-2); }
+.try-this { background: color-mix(in srgb, var(--accent) 8%, transparent); border-left: 3px solid var(--accent); padding: 0.7rem 0.9rem; border-radius: 8px; font-size: 0.9rem; color: var(--text-soft); margin: 0.7rem 0 0.2rem; }
+.try-this .try-title { font-weight: 600; color: var(--accent); font-size: 0.78rem; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 0.3rem; }
+.try-this ol { margin: 0; padding-left: 1.25rem; }
+.try-this li { margin: 0.2rem 0; }
+.widget-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 0.5rem; margin-bottom: 0.2rem; }
+.widget-head > div { flex: 1; min-width: 0; }
+.reset-btn { background: transparent; color: var(--text-muted); border: 1px solid var(--border); padding: 0.3rem 0.7rem; border-radius: 8px; font-family: inherit; font-size: 0.8rem; cursor: pointer; white-space: nowrap; transition: all .15s ease; }
+.reset-btn:hover { color: var(--accent); border-color: var(--accent); }
+.chart { width: 100%; min-height: 340px; }
+.chart.tall { min-height: 420px; }
+.chart.short { min-height: 280px; }
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+@media (max-width: 720px) { .two-col { grid-template-columns: 1fr; } }
+.var-checks { display: flex; flex-wrap: wrap; gap: 0.5rem 1rem; padding: 0.7rem 0.9rem; background: var(--panel-2); border-radius: 10px; margin-bottom: 1rem; }
+.var-check { display: flex; align-items: center; gap: 0.35rem; cursor: pointer; }
+.var-check input[type="checkbox"] { accent-color: var(--accent); width: 16px; height: 16px; cursor: pointer; }
+.var-check span { font-size: 0.88rem; font-weight: 500; color: var(--text-soft); }
+.reg-table { width: 100%; border-collapse: collapse; font-family: 'JetBrains Mono', monospace; font-size: 0.82rem; margin: 0.5rem 0; }
+.reg-table th { text-align: left; padding: 0.5rem 0.6rem; border-bottom: 2px solid var(--border); color: var(--text-muted); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600; }
+.reg-table td { padding: 0.4rem 0.6rem; border-bottom: 1px solid var(--border); color: var(--text); }
+.reg-table tr:hover td { background: var(--panel-2); }
+.reg-table .sig { color: var(--accent); font-weight: 600; }
+.reg-table .insig { color: var(--text-muted); }
+.fit-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 0.5rem; margin: 0.5rem 0; }
+.fit-stat { background: var(--panel-2); padding: 0.55rem 0.7rem; border-radius: 10px; border-left: 3px solid var(--accent); }
+.fit-stat .fs-label { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-muted); }
+.fit-stat .fs-value { font-family: 'JetBrains Mono', monospace; font-size: 1rem; font-weight: 500; color: var(--text); margin-top: 0.1rem; }
+.fit-stat.warn { border-left-color: var(--accent-3); }
+.vif-bar { display: flex; align-items: center; gap: 0.6rem; padding: 0.35rem 0; }
+.vif-bar .vif-name { font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; width: 90px; text-align: right; color: var(--text-soft); }
+.vif-bar .vif-track { flex: 1; height: 22px; background: var(--panel-2); border-radius: 6px; overflow: hidden; }
+.vif-bar .vif-fill { height: 100%; border-radius: 6px; transition: width 0.3s ease; }
+.vif-bar .vif-val { font-family: 'JetBrains Mono', monospace; font-size: 0.82rem; width: 55px; font-weight: 600; }
+footer.page { max-width: 1120px; margin: 1rem auto 3rem; padding: 0 1.5rem; color: var(--text-muted); font-size: 0.88rem; text-align: center; }
+footer.page a { color: var(--accent); text-decoration: none; }
+footer.page a:hover { text-decoration: underline; }
+.scroll-top { display: inline-block; font-size: 0.78rem; color: var(--text-muted); text-decoration: none; margin-top: 0.4rem; }
+.scroll-top:hover { color: var(--accent); }
+</style>
+</head>
+<body>
+
+<header class="page">
+  <div class="page-inner">
+    <span class="chapter-badge">Chapter 10 of 18 · Interactive Dashboard</span>
+    <h1 class="title">Data Summary for Multiple Regression</h1>
+    <p class="subtitle">Toggle variables, compare models, and visualize partial effects — building intuition for how multiple regression separates the contribution of each predictor.</p>
+  </div>
+  <button id="theme-toggle" class="theme-toggle" type="button" aria-label="Toggle color theme"><span id="theme-icon">🌙</span><span id="theme-label">Dark</span></button>
+</header>
+
+<nav class="anchors" aria-label="Sections">
+  <ul>
+    <li><a href="#partial">Partial effects</a></li>
+    <li><a href="#corrmatrix">Correlation matrix</a></li>
+    <li><a href="#regbuilder">Regression builder</a></li>
+    <li><a href="#fwl">FWL theorem</a></li>
+    <li><a href="#modelcomp">Model comparison</a></li>
+    <li><a href="#vif">Multicollinearity</a></li>
+    <li><a href="#diagnostics">Diagnostics</a></li>
+  </ul>
+</nav>
+
+<main>
+
+<!-- ===================== 1. PARTIAL VS TOTAL EFFECTS ===================== -->
+<section class="widget" id="partial">
+  <div class="widget-head">
+    <div>
+      <span class="section-tag">§ 10.1 · Key Concept 10.1</span>
+      <h2>Partial effects vs total effects</h2>
+    </div>
+    <button type="button" class="reset-btn" data-reset="partial">↺ Reset</button>
+  </div>
+  <p class="lede">The bivariate coefficient for bedrooms is $23,667 — but add size to the model and it drops to $1,553. The "total" effect included size's contribution; the "partial" effect isolates what bedrooms adds <em>beyond</em> size.</p>
+  <div class="controls">
+    <div class="ctrl">
+      <label for="partial-var">Focus variable</label>
+      <select id="partial-var">
+        <option value="bedrooms">Bedrooms</option>
+        <option value="bathrooms">Bathrooms</option>
+        <option value="lotsize">Lot size</option>
+        <option value="age">Age</option>
+        <option value="monthsold">Month sold</option>
+      </select>
+    </div>
+    <div class="ctrl">
+      <label for="partial-control">Control for</label>
+      <select id="partial-control">
+        <option value="size">Size</option>
+        <option value="bedrooms">Bedrooms</option>
+        <option value="bathrooms">Bathrooms</option>
+        <option value="lotsize">Lot size</option>
+        <option value="age">Age</option>
+        <option value="monthsold">Month sold</option>
+      </select>
+    </div>
+  </div>
+  <div class="two-col" id="partial-comparison"></div>
+  <div class="chart short" id="partial-chart"></div>
+  <div class="callout" id="partial-callout"></div>
+  <div class="try-this">
+    <div class="try-title">Try this</div>
+    <ol>
+      <li>Bedrooms controlling for size: the coefficient drops from $23,667 to $1,553 — a 93% reduction. Size was doing most of the work.</li>
+      <li>Switch focus to bathrooms, controlling for size. Does the same pattern hold?</li>
+      <li>Try age controlling for size. The bivariate effect was already near zero — controlling barely changes it.</li>
+      <li>Now control for bedrooms instead of size. The drop is smaller because bedrooms is a weaker confounder.</li>
+    </ol>
+  </div>
+</section>
+
+<!-- ===================== 2. CORRELATION MATRIX ===================== -->
+<section class="widget" id="corrmatrix">
+  <div class="widget-head">
+    <div>
+      <span class="section-tag">§ 10.2 – § 10.3 · Key Concepts 10.2 &amp; 10.3</span>
+      <h2>Correlation matrix heatmap</h2>
+    </div>
+  </div>
+  <p class="lede">A correlation matrix shows all pairwise linear associations at a glance. High correlations between predictors (e.g., size-bedrooms r = 0.52) signal potential multicollinearity — the reason partial effects differ from total effects.</p>
+  <div class="chart tall" id="corrmatrix-chart"></div>
+  <div class="callout" id="corrmatrix-callout"></div>
+  <div class="try-this">
+    <div class="try-title">Try this</div>
+    <ol>
+      <li>Find the strongest predictor of price: size (r = 0.79). This is why the size-only model has the highest R².</li>
+      <li>Find size-bedrooms (r = 0.52). This correlation is why bedrooms' coefficient shrinks in a multiple regression.</li>
+      <li>Look at monthsold-bathrooms (r = −0.39). These two are negatively correlated in this sample.</li>
+      <li>Which predictor pairs have near-zero correlation? These would remain relatively stable across bivariate and multiple regression.</li>
+    </ol>
+  </div>
+</section>
+
+<!-- ===================== 3. REGRESSION BUILDER ===================== -->
+<section class="widget" id="regbuilder">
+  <div class="widget-head">
+    <div>
+      <span class="section-tag">§ 10.4 · Key Concept 10.4</span>
+      <h2>Multiple regression builder</h2>
+    </div>
+    <button type="button" class="reset-btn" data-reset="regbuilder">↺ Reset</button>
+  </div>
+  <p class="lede">Toggle predictors on and off to build your own model. Watch how coefficients, significance, and fit statistics change as you add or remove variables. With 6 predictors, there are 63 possible models — all pre-computed.</p>
+  <div class="var-checks" id="regbuilder-checks">
+    <label class="var-check"><input type="checkbox" value="size" checked><span>Size</span></label>
+    <label class="var-check"><input type="checkbox" value="bedrooms"><span>Bedrooms</span></label>
+    <label class="var-check"><input type="checkbox" value="bathrooms"><span>Bathrooms</span></label>
+    <label class="var-check"><input type="checkbox" value="lotsize"><span>Lot size</span></label>
+    <label class="var-check"><input type="checkbox" value="age"><span>Age</span></label>
+    <label class="var-check"><input type="checkbox" value="monthsold"><span>Month sold</span></label>
+  </div>
+  <div class="fit-stats" id="regbuilder-fit"></div>
+  <table class="reg-table" id="regbuilder-table">
+    <thead><tr><th>Variable</th><th>Coef</th><th>Std Err</th><th>t</th><th>P&gt;|t|</th><th>[95% CI]</th></tr></thead>
+    <tbody></tbody>
+  </table>
+  <div class="chart" id="regbuilder-chart"></div>
+  <div class="callout" id="regbuilder-callout"></div>
+  <div class="try-this">
+    <div class="try-title">Try this</div>
+    <ol>
+      <li>Start with size only (R² = 0.618, adj R² = 0.603). Now check bedrooms — R² barely moves (0.618) and adj R² <em>falls</em> (0.589). Bedrooms adds nothing beyond size.</li>
+      <li>Check all 6 variables. R² rises to 0.651 but adj R² falls to 0.555. With n = 29 and k = 7, the model is overfitting.</li>
+      <li>Look at p-values: only size is significant (p &lt; 0.05). Every other variable has p &gt; 0.25.</li>
+      <li>Uncheck all except size. The parsimony principle: the simplest adequate model wins.</li>
+    </ol>
+  </div>
+</section>
+
+<!-- ===================== 4. FWL THEOREM ===================== -->
+<section class="widget" id="fwl">
+  <div class="widget-head">
+    <div>
+      <span class="section-tag">§ 10.5 · Key Concept 10.5</span>
+      <h2>Frisch-Waugh-Lovell theorem</h2>
+    </div>
+    <button type="button" class="reset-btn" data-reset="fwl">↺ Reset</button>
+  </div>
+  <p class="lede">The FWL theorem reveals <em>how</em> multiple regression isolates each variable's partial effect: residualize both Y and X on the controls, then regress the residuals. The slope equals the multiple regression coefficient exactly.</p>
+  <div class="controls">
+    <div class="ctrl">
+      <label for="fwl-target">Target variable (X)</label>
+      <select id="fwl-target">
+        <option value="size">Size</option>
+        <option value="bedrooms">Bedrooms</option>
+        <option value="bathrooms">Bathrooms</option>
+        <option value="lotsize">Lot size</option>
+        <option value="age">Age</option>
+      </select>
+    </div>
+    <div class="ctrl">
+      <label for="fwl-control">Control variable (Z)</label>
+      <select id="fwl-control">
+        <option value="bedrooms">Bedrooms</option>
+        <option value="size">Size</option>
+        <option value="bathrooms">Bathrooms</option>
+        <option value="lotsize">Lot size</option>
+        <option value="age">Age</option>
+      </select>
+    </div>
+  </div>
+  <div class="two-col" id="fwl-results"></div>
+  <div class="chart" id="fwl-chart"></div>
+  <div class="callout" id="fwl-callout"></div>
+  <div class="try-this">
+    <div class="try-title">Try this</div>
+    <ol>
+      <li>Default: size controlling for bedrooms. The FWL slope (72.41) matches the multiple regression coefficient exactly.</li>
+      <li>Switch target to bedrooms, control to size. The FWL slope ($1,553) matches price ~ bedrooms + size.</li>
+      <li>Try bathrooms controlling for size. The FWL slope shows bathrooms' partial contribution after removing size's influence.</li>
+      <li>The x-axis shows "Residualized X" — the parts of X that the control variable couldn't explain.</li>
+    </ol>
+  </div>
+</section>
+
+<!-- ===================== 5. MODEL COMPARISON ===================== -->
+<section class="widget" id="modelcomp">
+  <div class="widget-head">
+    <div>
+      <span class="section-tag">§ 10.6 – § 10.7 · Key Concepts 10.6 &amp; 10.7</span>
+      <h2>Model comparison — when more is less</h2>
+    </div>
+  </div>
+  <p class="lede">R² can only go up as you add variables. Adjusted R², AIC, and BIC penalize complexity — they can go <em>down</em> when extra variables add noise rather than signal. Watch what happens as you build from 1 to 6 predictors.</p>
+  <div class="chart tall" id="modelcomp-chart"></div>
+  <div class="callout" id="modelcomp-callout"></div>
+  <div class="try-this">
+    <div class="try-title">Try this</div>
+    <ol>
+      <li>R² (cyan) rises from 0.618 to 0.651 — a modest 3.3 percentage-point gain for 5 extra variables.</li>
+      <li>Adjusted R² (purple) falls from 0.603 to 0.555. The penalty for complexity exceeds the gain in fit.</li>
+      <li>AIC rises from 668 to 676 — higher is worse. BIC rises even more (671 to 685) because it penalizes small-sample complexity more heavily.</li>
+      <li>All four metrics agree: the 1-variable model (size only) is the best specification for n = 29.</li>
+    </ol>
+  </div>
+</section>
+
+<!-- ===================== 6. VIF DETECTOR ===================== -->
+<section class="widget" id="vif">
+  <div class="widget-head">
+    <div>
+      <span class="section-tag">§ 10.8 · Key Concept 10.8</span>
+      <h2>Variance inflation factors — detecting multicollinearity</h2>
+    </div>
+  </div>
+  <p class="lede">VIF measures how much a predictor's variance is inflated by correlation with the other predictors. VIF = 1 means no collinearity; VIF &gt; 5 is moderate concern; VIF &gt; 10 is severe. With n = 29 and 6 correlated predictors, the VIFs are alarming.</p>
+  <div id="vif-bars"></div>
+  <div class="callout" id="vif-callout"></div>
+  <div class="try-this">
+    <div class="try-title">Try this</div>
+    <ol>
+      <li>Bedrooms has VIF = 57.8 and size has VIF = 40.1. Both far exceed the VIF &gt; 10 threshold — severe multicollinearity.</li>
+      <li>Even lotsize (VIF = 12.0) and monthsold (VIF = 12.8) exceed the threshold. With only 29 houses, 6 predictors is too many.</li>
+      <li>This explains why only size is significant in the full model: multicollinearity inflates standard errors, making it harder to detect real effects.</li>
+      <li>The remedy: drop redundant predictors (the parsimony principle from the model comparison widget).</li>
+    </ol>
+  </div>
+</section>
+
+<!-- ===================== 7. DIAGNOSTICS ===================== -->
+<section class="widget" id="diagnostics">
+  <div class="widget-head">
+    <div>
+      <span class="section-tag">§ 10.4</span>
+      <h2>Regression diagnostics — actual vs predicted &amp; residuals</h2>
+    </div>
+    <button type="button" class="reset-btn" data-reset="diagnostics">↺ Reset</button>
+  </div>
+  <p class="lede">A good model produces predictions close to actual values (points near the 45° line) and residuals that scatter randomly around zero (no patterns).</p>
+  <div class="controls">
+    <div class="ctrl">
+      <label for="diag-model">Model</label>
+      <select id="diag-model">
+        <option value="size">Size only</option>
+        <option value="bedrooms,size">Size + Bedrooms</option>
+        <option value="age,bathrooms,bedrooms,lotsize,monthsold,size">Full (all 6)</option>
+      </select>
+    </div>
+  </div>
+  <div class="two-col">
+    <div><div class="chart short" id="diag-avp"></div></div>
+    <div><div class="chart short" id="diag-resid"></div></div>
+  </div>
+  <div class="callout" id="diag-callout"></div>
+  <div class="try-this">
+    <div class="try-title">Try this</div>
+    <ol>
+      <li>Size only: points scatter around the 45° line with some spread. The residual plot shows no obvious pattern.</li>
+      <li>Switch to the full model. The scatter tightens slightly (R² rises from 0.618 to 0.651) but the improvement is marginal.</li>
+      <li>In the residual plot, look for fan shapes or curves. Random scatter means the model's assumptions are reasonable.</li>
+      <li>Notice the house around $340,000 — it's consistently under-predicted across models.</li>
+    </ol>
+  </div>
+</section>
+
+</main>
+
+<footer class="page">
+  <p>Part of <a href="https://quarcs-lab.github.io/metricsai/book/_book/index.html"><strong>metricsAI</strong></a> · Chapter 10: Data Summary for Multiple Regression · by Carlos Mendez · <a href="https://github.com/quarcs-lab/metricsai">GitHub</a></p>
+  <a class="scroll-top" href="#partial">↑ Back to top</a>
+</footer>
+
+<script type="application/json" id="ch-data">{{DATA_JSON}}</script>
+
+<script>
+"use strict";
+
+const DATA = JSON.parse(document.getElementById("ch-data").textContent);
+
+// ---------- Helpers ----------
+const mean = a => a.reduce((s, v) => s + v, 0) / a.length;
+function fmt(v, d) { if (v == null || isNaN(v)) return "\u2014"; d = d ?? 2; const a = Math.abs(v); if (a >= 1e9) return (v/1e9).toFixed(1)+"B"; if (a >= 1e6) return (v/1e6).toFixed(1)+"M"; if (a >= 1e3 && d === 0) return Math.round(v).toLocaleString(); return v.toFixed(d); }
+function fmtMoney(v) { return v == null ? "\u2014" : "$" + Math.round(v).toLocaleString(); }
+function fmtPct(v, d) { return (v * 100).toFixed(d ?? 1) + "%"; }
+
+function modelKey(vars) { return [...vars].sort().join(","); }
+function getModel(vars) { return DATA.models[modelKey(vars)]; }
+
+function linfit(xs, ys) {
+  const n = xs.length, mx = mean(xs), my = mean(ys);
+  let num = 0, den = 0;
+  for (let i = 0; i < n; i++) { num += (xs[i]-mx)*(ys[i]-my); den += (xs[i]-mx)**2; }
+  const slope = num / den;
+  return { slope, intercept: my - slope * mx, fitted: xs.map(x => my - slope * mx + slope * x) };
+}
+
+// ---------- Theme ----------
+const THEME_KEY = "metricsai-theme";
+function getCSS(v) { return getComputedStyle(document.documentElement).getPropertyValue(v).trim(); }
+function themeColors() { return { text: getCSS("--text"), textSoft: getCSS("--text-soft"), grid: getCSS("--grid"), panel: getCSS("--panel"), cyan: getCSS("--accent"), purple: getCSS("--accent-2"), pink: getCSS("--accent-3") }; }
+function baseLayout(o) {
+  const c = themeColors();
+  return Object.assign({
+    paper_bgcolor: "rgba(0,0,0,0)", plot_bgcolor: "rgba(0,0,0,0)",
+    font: { family: "Inter, system-ui, sans-serif", color: c.text, size: 12 },
+    margin: { l: 60, r: 18, t: 30, b: 50 },
+    xaxis: { gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft } },
+    yaxis: { gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft } },
+    hoverlabel: { bgcolor: c.panel, bordercolor: c.grid, font: { color: c.text } },
+    legend: { font: { color: c.text }, bgcolor: "rgba(0,0,0,0)" }
+  }, o || {});
+}
+const PLOTLY_CONFIG = { displayModeBar: false, responsive: true };
+const VAR_LABELS = { price:"Price ($)", size:"Size (sqft)", bedrooms:"Bedrooms", bathrooms:"Bathrooms", lotsize:"Lot size", age:"Age (yr)", monthsold:"Month sold" };
+
+function initToggles(id, cb) { document.getElementById(id).querySelectorAll("button").forEach(b => b.addEventListener("click", () => { document.getElementById(id).querySelectorAll("button").forEach(x => x.classList.remove("active")); b.classList.add("active"); cb(); })); }
+
+// ==================== WIDGET 1: PARTIAL VS TOTAL EFFECTS ====================
+(function() {
+  const varSel = document.getElementById("partial-var");
+  const ctrlSel = document.getElementById("partial-control");
+  const compBox = document.getElementById("partial-comparison");
+  const callout = document.getElementById("partial-callout");
+
+  function render() {
+    const focusVar = varSel.value;
+    const controlVar = ctrlSel.value;
+    if (focusVar === controlVar) { callout.innerHTML = "<strong>Select different variables for focus and control.</strong>"; compBox.innerHTML = ""; Plotly.react("partial-chart", [], baseLayout({height:280}), PLOTLY_CONFIG); return; }
+    const c = themeColors();
+    const biv = getModel([focusVar]);
+    const multi = getModel([focusVar, controlVar]);
+    if (!biv || !multi) return;
+    const bivCoef = biv.coefs[focusVar];
+    const multiCoef = multi.coefs[focusVar];
+    const drop = bivCoef - multiCoef;
+    const dropPct = Math.abs(drop / bivCoef) * 100;
+
+    compBox.innerHTML =
+      `<div style="background:var(--panel-2);padding:0.8rem;border-radius:10px;border-left:3px solid var(--accent);font-family:'JetBrains Mono',monospace;font-size:0.9rem">` +
+      `<div style="font-size:0.7rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em">Bivariate: price ~ ${focusVar}</div>` +
+      `<div style="font-size:1.3rem;font-weight:600;color:var(--accent);margin-top:0.2rem">${fmtMoney(bivCoef)}</div>` +
+      `<div style="font-size:0.8rem;color:var(--text-soft)">R² = ${biv.r2.toFixed(4)}</div></div>` +
+      `<div style="background:var(--panel-2);padding:0.8rem;border-radius:10px;border-left:3px solid var(--accent-3);font-family:'JetBrains Mono',monospace;font-size:0.9rem">` +
+      `<div style="font-size:0.7rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em">Multiple: price ~ ${focusVar} + ${controlVar}</div>` +
+      `<div style="font-size:1.3rem;font-weight:600;color:var(--accent-3);margin-top:0.2rem">${fmtMoney(multiCoef)}</div>` +
+      `<div style="font-size:0.8rem;color:var(--text-soft)">R² = ${multi.r2.toFixed(4)} · Change: ${dropPct.toFixed(0)}% ${drop > 0 ? "drop" : "increase"}</div></div>`;
+
+    Plotly.react("partial-chart", [{
+      x: ["Bivariate\n(total effect)", "Multiple\n(partial effect)"],
+      y: [bivCoef, multiCoef], type: "bar",
+      marker: { color: [c.cyan, c.pink] },
+      text: [fmtMoney(bivCoef), fmtMoney(multiCoef)], textposition: "outside",
+      textfont: { family: "JetBrains Mono", size: 13, color: c.text },
+      hovertemplate: "%{x}: %{y:$,.0f}<extra></extra>"
+    }], baseLayout({
+      height: 280,
+      yaxis: Object.assign({}, baseLayout().yaxis, { title: { text: "Coefficient on " + focusVar, font: { color: c.textSoft } } }),
+      showlegend: false
+    }), PLOTLY_CONFIG);
+
+    callout.innerHTML = `<strong>Controlling for ${controlVar}</strong> ${drop > 0 ? "reduces" : "increases"} the ${focusVar} coefficient from <strong>${fmtMoney(bivCoef)}</strong> to <strong>${fmtMoney(multiCoef)}</strong> (${dropPct.toFixed(0)}% change). ` +
+      (dropPct > 50 ? `The bivariate coefficient was largely picking up ${controlVar}'s effect — confounding at work.` :
+       dropPct > 10 ? `A meaningful change, indicating some confounding between ${focusVar} and ${controlVar}.` :
+       `Relatively stable — ${focusVar} and ${controlVar} provide largely independent information.`);
+  }
+
+  varSel.addEventListener("change", render);
+  ctrlSel.addEventListener("change", render);
+  window.__rerender_partial = render;
+  render();
+})();
+
+// ==================== WIDGET 2: CORRELATION MATRIX ====================
+(function() {
+  const callout = document.getElementById("corrmatrix-callout");
+
+  function render() {
+    const c = themeColors();
+    const cols = DATA.correlations.columns;
+    const matrix = DATA.correlations.matrix;
+    const n = cols.length;
+    const annotations = [];
+    for (let i = 0; i < n; i++) for (let j = 0; j < n; j++) {
+      annotations.push({ x: j, y: i, text: matrix[i][j].toFixed(2), showarrow: false, font: { family: "JetBrains Mono", size: 11, color: Math.abs(matrix[i][j]) > 0.5 ? "white" : c.text } });
+    }
+    Plotly.react("corrmatrix-chart", [{
+      z: matrix, x: cols.map(v => VAR_LABELS[v]||v), y: cols.map(v => VAR_LABELS[v]||v),
+      type: "heatmap", colorscale: [[0,"#2166ac"],[0.5,"#f7f7f7"],[1,"#b2182b"]],
+      zmin: -1, zmax: 1, showscale: true,
+      colorbar: { tickfont: { color: c.textSoft }, title: { text: "r", font: { color: c.textSoft } } },
+      hovertemplate: "%{x} vs %{y}: r = %{z:.4f}<extra></extra>"
+    }], baseLayout({
+      height: 450, xaxis: { tickfont: { color: c.textSoft, size: 11 }, tickangle: -30 },
+      yaxis: { tickfont: { color: c.textSoft, size: 11 }, autorange: "reversed" },
+      margin: { l: 110, r: 60, t: 20, b: 90 }, annotations: annotations
+    }), PLOTLY_CONFIG);
+    callout.innerHTML = `<strong>Strongest predictor of price:</strong> size (r = 0.79). <strong>Strongest predictor-predictor correlation:</strong> size-bedrooms (r = 0.52) — this is why bedrooms' coefficient shrinks when size enters the model.`;
+  }
+
+  window.__rerender_corrmatrix = render;
+  render();
+})();
+
+// ==================== WIDGET 3: REGRESSION BUILDER ====================
+(function() {
+  const checksEl = document.getElementById("regbuilder-checks");
+  const fitEl = document.getElementById("regbuilder-fit");
+  const tableEl = document.getElementById("regbuilder-table").querySelector("tbody");
+  const callout = document.getElementById("regbuilder-callout");
+
+  function getCheckedVars() { return Array.from(checksEl.querySelectorAll("input:checked")).map(cb => cb.value); }
+
+  function render() {
+    const vars = getCheckedVars();
+    if (vars.length === 0) {
+      fitEl.innerHTML = '<div class="fit-stat"><div class="fs-label">Select at least one variable</div></div>';
+      tableEl.innerHTML = ""; callout.innerHTML = "";
+      Plotly.react("regbuilder-chart", [], baseLayout({height:200}), PLOTLY_CONFIG);
+      return;
+    }
+    const m = getModel(vars);
+    if (!m) { callout.innerHTML = "<strong>Model not found.</strong>"; return; }
+    const c = themeColors();
+    const sizeOnly = getModel(["size"]);
+    const adjWarn = sizeOnly && m.adj_r2 < sizeOnly.adj_r2 ? " warn" : "";
+
+    fitEl.innerHTML =
+      `<div class="fit-stat"><div class="fs-label">R²</div><div class="fs-value">${m.r2.toFixed(4)}</div></div>` +
+      `<div class="fit-stat${adjWarn}"><div class="fs-label">Adj R²</div><div class="fs-value">${m.adj_r2.toFixed(4)}</div></div>` +
+      `<div class="fit-stat"><div class="fs-label">AIC</div><div class="fs-value">${m.aic.toFixed(1)}</div></div>` +
+      `<div class="fit-stat"><div class="fs-label">BIC</div><div class="fs-value">${m.bic.toFixed(1)}</div></div>` +
+      `<div class="fit-stat"><div class="fs-label">RMSE</div><div class="fs-value">${fmtMoney(m.rmse)}</div></div>` +
+      `<div class="fit-stat"><div class="fs-label">n / k</div><div class="fs-value">${m.n} / ${m.k}</div></div>`;
+
+    const allVars = ["const", ...vars];
+    tableEl.innerHTML = allVars.map(v => {
+      const sig = m.pvals[v] < 0.05;
+      const cls = sig ? "sig" : "insig";
+      const stars = m.pvals[v] < 0.001 ? "***" : m.pvals[v] < 0.01 ? "**" : m.pvals[v] < 0.05 ? "*" : "";
+      return `<tr><td>${v === "const" ? "(intercept)" : VAR_LABELS[v]||v}</td>` +
+        `<td class="${cls}">${fmt(m.coefs[v], 2)}${stars}</td><td>${fmt(m.se[v], 2)}</td>` +
+        `<td>${fmt(m.tvals[v], 3)}</td><td class="${cls}">${m.pvals[v] < 0.001 ? "<0.001" : m.pvals[v].toFixed(3)}</td>` +
+        `<td>[${fmt(m.ci_lo[v], 0)}, ${fmt(m.ci_hi[v], 0)}]</td></tr>`;
+    }).join("");
+
+    const plotVars = vars.slice().reverse();
+    Plotly.react("regbuilder-chart", [{
+      y: plotVars.map(v => VAR_LABELS[v]||v), x: plotVars.map(v => m.coefs[v]),
+      error_x: { type: "data", symmetric: false, array: plotVars.map(v => m.ci_hi[v] - m.coefs[v]), arrayminus: plotVars.map(v => m.coefs[v] - m.ci_lo[v]), color: c.cyan, thickness: 2 },
+      type: "scatter", mode: "markers",
+      marker: { color: plotVars.map(v => m.pvals[v] < 0.05 ? c.cyan : c.pink), size: 10 },
+      hovertemplate: "%{y}: %{x:.2f}<extra></extra>"
+    }], baseLayout({
+      height: Math.max(200, 50 + plotVars.length * 50),
+      margin: { l: 110, r: 18, t: 10, b: 40 },
+      xaxis: Object.assign({}, baseLayout().xaxis, { title: { text: "Coefficient", font: { color: c.textSoft } }, zeroline: true, zerolinecolor: c.pink, zerolinewidth: 2 }),
+      yaxis: { tickfont: { color: c.textSoft } }, showlegend: false
+    }), PLOTLY_CONFIG);
+
+    const sigVars = vars.filter(v => m.pvals[v] < 0.05);
+    callout.innerHTML = `<strong>${vars.length} predictor${vars.length > 1 ? "s" : ""}, ${m.k} parameters.</strong> ` +
+      (sigVars.length > 0 ? `Significant (p < 0.05): <strong>${sigVars.map(v => VAR_LABELS[v]||v).join(", ")}</strong>. ` : `No predictors individually significant at p < 0.05. `) +
+      `R² = ${m.r2.toFixed(4)}, adjusted R² = ${m.adj_r2.toFixed(4)}.`;
+  }
+
+  checksEl.querySelectorAll("input").forEach(cb => cb.addEventListener("change", render));
+  window.__rerender_regbuilder = render;
+  render();
+})();
+
+// ==================== WIDGET 4: FWL THEOREM ====================
+(function() {
+  const targetSel = document.getElementById("fwl-target");
+  const controlSel = document.getElementById("fwl-control");
+  const resultsEl = document.getElementById("fwl-results");
+  const callout = document.getElementById("fwl-callout");
+
+  function render() {
+    const target = targetSel.value;
+    const control = controlSel.value;
+    if (target === control) { callout.innerHTML = "<strong>Select different target and control variables.</strong>"; resultsEl.innerHTML = ""; Plotly.react("fwl-chart", [], baseLayout({height:300}), PLOTLY_CONFIG); return; }
+    const c = themeColors();
+    const price = DATA.house.price;
+    const xvals = DATA.house[target];
+    const zvals = DATA.house[control];
+
+    const fitYZ = linfit(zvals, price);
+    const residY = price.map((y, i) => y - fitYZ.fitted[i]);
+    const fitXZ = linfit(zvals, xvals);
+    const residX = xvals.map((x, i) => x - fitXZ.fitted[i]);
+    const fwlFit = linfit(residX, residY);
+
+    const multi = getModel([target, control]);
+    const multiCoef = multi.coefs[target];
+
+    resultsEl.innerHTML =
+      `<div style="background:var(--panel-2);padding:0.8rem;border-radius:10px;border-left:3px solid var(--accent);font-family:'JetBrains Mono',monospace;font-size:0.9rem">` +
+      `<div style="font-size:0.7rem;color:var(--text-muted);text-transform:uppercase">FWL slope (residuals)</div>` +
+      `<div style="font-size:1.3rem;font-weight:600;color:var(--accent);margin-top:0.2rem">${fwlFit.slope.toFixed(4)}</div></div>` +
+      `<div style="background:var(--panel-2);padding:0.8rem;border-radius:10px;border-left:3px solid var(--accent-2);font-family:'JetBrains Mono',monospace;font-size:0.9rem">` +
+      `<div style="font-size:0.7rem;color:var(--text-muted);text-transform:uppercase">Multiple regression coef</div>` +
+      `<div style="font-size:1.3rem;font-weight:600;color:var(--accent-2);margin-top:0.2rem">${multiCoef.toFixed(4)}</div></div>`;
+
+    Plotly.react("fwl-chart", [
+      { x: residX, y: residY, mode: "markers", type: "scatter", name: "Residuals",
+        marker: { color: c.cyan, size: 9, opacity: 0.8, line: { color: c.purple, width: 1 } },
+        hovertemplate: "Resid "+target+": %{x:.1f}<br>Resid price: $%{y:,.0f}<extra></extra>" },
+      { x: [Math.min(...residX), Math.max(...residX)],
+        y: [fwlFit.intercept + fwlFit.slope * Math.min(...residX), fwlFit.intercept + fwlFit.slope * Math.max(...residX)],
+        mode: "lines", name: "FWL line", line: { color: c.purple, width: 2.5 }, hoverinfo: "skip" }
+    ], baseLayout({
+      height: 360,
+      xaxis: Object.assign({}, baseLayout().xaxis, { title: { text: "Residualized " + (VAR_LABELS[target]||target), font: { color: c.textSoft } } }),
+      yaxis: Object.assign({}, baseLayout().yaxis, { title: { text: "Residualized Price ($)", font: { color: c.textSoft } } }),
+      showlegend: true, legend: { x:0.01, y:0.99, xanchor:"left", yanchor:"top", font:{color:c.text}, bgcolor:"rgba(0,0,0,0)" }
+    }), PLOTLY_CONFIG);
+
+    const diff = Math.abs(fwlFit.slope - multiCoef);
+    callout.innerHTML = `<strong>FWL slope = ${fwlFit.slope.toFixed(4)}, multiple regression coefficient = ${multiCoef.toFixed(4)}</strong>. ` +
+      `Difference: ${diff.toExponential(2)} (numerical precision only). ` +
+      `The partial effect of ${target} is what remains after both price and ${target} have been "cleaned" of ${control}'s influence.`;
+  }
+
+  targetSel.addEventListener("change", render);
+  controlSel.addEventListener("change", render);
+  window.__rerender_fwl = render;
+  render();
+})();
+
+// ==================== WIDGET 5: MODEL COMPARISON ====================
+(function() {
+  const callout = document.getElementById("modelcomp-callout");
+  const PROG = [["size"],["size","bedrooms"],["size","bedrooms","bathrooms"],["size","bedrooms","bathrooms","lotsize"],["size","bedrooms","bathrooms","lotsize","age"],["size","bedrooms","bathrooms","lotsize","age","monthsold"]];
+
+  function render() {
+    const c = themeColors();
+    const labels = PROG.map((v,i) => (i+1)+" var"+(i>0?"s":""));
+    const r2 = PROG.map(v => getModel(v).r2);
+    const adjR2 = PROG.map(v => getModel(v).adj_r2);
+    const aic = PROG.map(v => getModel(v).aic);
+    const bic = PROG.map(v => getModel(v).bic);
+
+    Plotly.react("modelcomp-chart", [
+      { x: labels, y: r2, name: "R²", type: "scatter", mode: "lines+markers", marker:{color:c.cyan,size:8}, line:{color:c.cyan,width:2}, yaxis:"y2" },
+      { x: labels, y: adjR2, name: "Adj R²", type: "scatter", mode: "lines+markers", marker:{color:c.purple,size:8}, line:{color:c.purple,width:2,dash:"dash"}, yaxis:"y2" },
+      { x: labels, y: aic, name: "AIC", type: "bar", marker:{color:"rgba(0,140,183,0.25)"}, yaxis:"y" },
+      { x: labels, y: bic, name: "BIC", type: "bar", marker:{color:"rgba(122,32,159,0.25)"}, yaxis:"y" }
+    ], baseLayout({
+      height: 420,
+      xaxis: { tickfont:{color:c.textSoft} },
+      yaxis: { title:{text:"AIC / BIC",font:{color:c.textSoft}}, gridcolor:c.grid, linecolor:c.grid, tickfont:{color:c.textSoft}, side:"left" },
+      yaxis2: { title:{text:"R² / Adj R²",font:{color:c.textSoft}}, gridcolor:"rgba(0,0,0,0)", linecolor:c.grid, tickfont:{color:c.textSoft}, overlaying:"y", side:"right", range:[0.4,0.75] },
+      barmode: "group",
+      legend: { x:0.5, y:1.12, xanchor:"center", orientation:"h", font:{color:c.text}, bgcolor:"rgba(0,0,0,0)" }
+    }), PLOTLY_CONFIG);
+
+    callout.innerHTML = `<strong>The parsimony principle:</strong> R² rises from ${r2[0].toFixed(3)} to ${r2[5].toFixed(3)} (+${((r2[5]-r2[0])*100).toFixed(1)} pp), but adjusted R² falls from ${adjR2[0].toFixed(3)} to ${adjR2[5].toFixed(3)}. ` +
+      `AIC and BIC both increase (worse). All metrics agree: <strong>the 1-variable model (size only) wins</strong>.`;
+  }
+
+  window.__rerender_modelcomp = render;
+  render();
+})();
+
+// ==================== WIDGET 6: VIF DETECTOR ====================
+(function() {
+  const barsEl = document.getElementById("vif-bars");
+  const callout = document.getElementById("vif-callout");
+
+  function render() {
+    const c = themeColors();
+    const vifData = DATA.vif.full;
+    const vars = DATA.predictors;
+    const maxVif = Math.max(...vars.map(v => vifData[v]));
+
+    barsEl.innerHTML = vars.map(v => {
+      const vif = vifData[v];
+      const pct = Math.min(100, (vif / Math.max(maxVif, 60)) * 100);
+      const color = vif > 10 ? c.pink : vif > 5 ? c.purple : c.cyan;
+      const label = vif > 10 ? "severe" : vif > 5 ? "moderate" : "ok";
+      return `<div class="vif-bar"><div class="vif-name">${v}</div><div class="vif-track"><div class="vif-fill" style="width:${pct}%;background:${color}"></div></div><div class="vif-val" style="color:${color}">${vif.toFixed(1)}</div><div style="font-size:0.75rem;color:${color};width:55px">${label}</div></div>`;
+    }).join("") +
+    `<div style="display:flex;gap:1.5rem;margin-top:0.6rem;font-size:0.78rem;color:var(--text-muted)">` +
+    `<span style="border-left:3px solid ${c.cyan};padding-left:0.4rem">VIF \u2264 5: OK</span>` +
+    `<span style="border-left:3px solid ${c.purple};padding-left:0.4rem">5 < VIF \u2264 10: moderate</span>` +
+    `<span style="border-left:3px solid ${c.pink};padding-left:0.4rem">VIF > 10: severe</span></div>`;
+
+    const severeCount = vars.filter(v => vifData[v] > 10).length;
+    callout.innerHTML = `<strong>${severeCount} of ${vars.length} predictors</strong> have VIF > 10 (severe multicollinearity). ` +
+      `Worst: <strong>bedrooms (${vifData.bedrooms.toFixed(1)})</strong> and <strong>size (${vifData.size.toFixed(1)})</strong>. ` +
+      `With n = 29 and 6 correlated predictors, standard errors are inflated and individual significance tests are unreliable.`;
+  }
+
+  window.__rerender_vif = render;
+  render();
+})();
+
+// ==================== WIDGET 7: DIAGNOSTICS ====================
+(function() {
+  const modelSel = document.getElementById("diag-model");
+  const callout = document.getElementById("diag-callout");
+
+  function render() {
+    const key = modelSel.value;
+    const m = DATA.models[key];
+    if (!m) return;
+    const c = themeColors();
+    const actual = DATA.house.price;
+    const fitted = m.fitted;
+    const residuals = m.residuals;
+    const minP = Math.min(...actual, ...fitted), maxP = Math.max(...actual, ...fitted);
+
+    Plotly.react("diag-avp", [
+      { x: actual, y: fitted, mode: "markers", type: "scatter", marker:{color:c.cyan,size:9,opacity:0.8,line:{color:c.purple,width:1}}, hovertemplate:"Actual: $%{x:,.0f}<br>Predicted: $%{y:,.0f}<extra></extra>" },
+      { x: [minP,maxP], y: [minP,maxP], mode: "lines", line:{color:c.pink,width:2,dash:"dash"}, hoverinfo:"skip" }
+    ], baseLayout({ height:300, xaxis:Object.assign({},baseLayout().xaxis,{title:{text:"Actual ($)",font:{color:c.textSoft}}}), yaxis:Object.assign({},baseLayout().yaxis,{title:{text:"Predicted ($)",font:{color:c.textSoft}}}), showlegend:false, margin:{l:65,r:10,t:20,b:50} }), PLOTLY_CONFIG);
+
+    Plotly.react("diag-resid", [
+      { x: fitted, y: residuals, mode: "markers", type: "scatter", marker:{color:c.cyan,size:9,opacity:0.8,line:{color:c.purple,width:1}}, hovertemplate:"Fitted: $%{x:,.0f}<br>Residual: $%{y:,.0f}<extra></extra>" },
+      { x: [Math.min(...fitted),Math.max(...fitted)], y: [0,0], mode: "lines", line:{color:c.pink,width:2,dash:"dash"}, hoverinfo:"skip" }
+    ], baseLayout({ height:300, xaxis:Object.assign({},baseLayout().xaxis,{title:{text:"Fitted ($)",font:{color:c.textSoft}}}), yaxis:Object.assign({},baseLayout().yaxis,{title:{text:"Residuals ($)",font:{color:c.textSoft}}}), showlegend:false, margin:{l:65,r:10,t:20,b:50} }), PLOTLY_CONFIG);
+
+    callout.innerHTML = `<strong>Model:</strong> ${m.vars.join(" + ")} (R² = ${m.r2.toFixed(4)}, RMSE = ${fmtMoney(m.rmse)}). ` +
+      `Points near the 45° line = accurate predictions. Random residual scatter = reasonable model assumptions.`;
+  }
+
+  modelSel.addEventListener("change", render);
+  window.__rerender_diagnostics = render;
+  render();
+})();
+
+// ==================== RESET + URL HASH STATE ====================
+(function() {
+  const REG = {
+    partial: [{ id:"partial-var", kind:"select", def:"bedrooms" },{ id:"partial-control", kind:"select", def:"size" }],
+    corrmatrix: [],
+    regbuilder: [],
+    fwl: [{ id:"fwl-target", kind:"select", def:"size" },{ id:"fwl-control", kind:"select", def:"bedrooms" }],
+    modelcomp: [],
+    vif: [],
+    diagnostics: [{ id:"diag-model", kind:"select", def:"size" }]
+  };
+  function getVal(c) { if(c.kind==="toggle"){const b=document.querySelector("#"+c.group+" button.active");return b?b.dataset.val:c.def;} return document.getElementById(c.id).value; }
+  function setVal(c,val,fire) { if(c.kind==="toggle"){const g=document.getElementById(c.group);if(!g)return;const b=g.querySelector('button[data-val="'+val+'"]');if(b&&!b.classList.contains("active"))b.click();}else{const el=document.getElementById(c.id);if(!el)return;if(el.value!==String(val)){el.value=val;if(fire)el.dispatchEvent(new Event(c.kind==="select"?"change":"input",{bubbles:true}));}}}
+  function resetWidget(w) {
+    const ctrls=REG[w]||[];for(const c of ctrls)setVal(c,c.def,true);
+    if(w==="regbuilder"){document.querySelectorAll("#regbuilder-checks input").forEach((cb,i)=>{cb.checked=i===0;});window.__rerender_regbuilder();}
+    const fn=window["__rerender_"+w];if(fn)fn();writeHash();
+  }
+  function writeHash(){const parts=[];for(const[w,ctrls]of Object.entries(REG)){for(const c of ctrls){const v=String(getVal(c));if(v!==String(c.def)){const key=c.id||c.group;parts.push(key+"="+encodeURIComponent(v));}}}const want=parts.length?"#"+parts.join("&"):"";if(want===""&&location.hash.match(/=/)){history.replaceState(null,"",location.pathname+location.search);}else if(want!==""&&location.hash!==want){history.replaceState(null,"",location.pathname+location.search+want);}}
+  function readHash(){const hash=location.hash.slice(1);if(!hash||!hash.includes("="))return;const params={};for(const pair of hash.split("&")){const eq=pair.indexOf("=");if(eq<0)continue;params[pair.slice(0,eq)]=decodeURIComponent(pair.slice(eq+1));}for(const ctrls of Object.values(REG)){for(const c of ctrls){const key=c.id||c.group;if(key in params)setVal(c,params[key],true);}}}
+  document.querySelectorAll(".reset-btn[data-reset]").forEach(b=>{b.addEventListener("click",()=>resetWidget(b.dataset.reset));});
+  document.addEventListener("input",e=>{if(e.target.matches("input[type=range],select"))writeHash();});
+  document.addEventListener("change",e=>{if(e.target.matches("select"))writeHash();});
+  document.querySelectorAll(".toggle-group button").forEach(b=>{b.addEventListener("click",()=>setTimeout(writeHash,0));});
+  readHash();
+})();
+
+// ==================== THEME TOGGLE ====================
+(function(){const btn=document.getElementById("theme-toggle"),iconEl=document.getElementById("theme-icon"),labelEl=document.getElementById("theme-label");function apply(t){document.documentElement.dataset.theme=t;iconEl.textContent=t==="dark"?"\u2600\uFE0F":"\uD83C\uDF19";labelEl.textContent=t==="dark"?"Light":"Dark";for(const k in window){if(k.startsWith("__rerender_")&&typeof window[k]==="function")window[k]();}}const saved=localStorage.getItem(THEME_KEY);const prefersDark=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches;apply(saved||(prefersDark?"dark":"light"));btn.addEventListener("click",()=>{const next=document.documentElement.dataset.theme==="dark"?"light":"dark";localStorage.setItem(THEME_KEY,next);apply(next);});})();
+
+window.addEventListener("resize",()=>{document.querySelectorAll(".chart").forEach(el=>{if(el.data)Plotly.Plots.resize(el);});});
+</script>
+
+</body>
+</html>

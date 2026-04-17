@@ -1,0 +1,1206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chapter 09 — Models with Natural Logarithms · metricsAI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.plot.ly/plotly-2.35.2.min.js" charset="utf-8"></script>
+<style>
+:root {
+  --cyan: #008CB7;
+  --cyan-soft: #22d3ee;
+  --purple: #7A209F;
+  --purple-soft: #c084fc;
+  --pink: #C21E72;
+  --pink-soft: #f472b6;
+
+  --bg: #f5f8fb;
+  --panel: #ffffff;
+  --panel-2: #f0f4f9;
+  --text: #0b1021;
+  --text-soft: #475569;
+  --text-muted: #64748b;
+  --border: #d9e2ec;
+  --accent: var(--cyan);
+  --accent-2: var(--purple);
+  --accent-3: var(--pink);
+  --shadow: 0 2px 10px rgba(11, 16, 33, 0.06), 0 12px 30px rgba(11, 16, 33, 0.05);
+  --grid: #e3e8ef;
+  --code-bg: #eef3f8;
+}
+html[data-theme="dark"] {
+  --bg: #0c1024;
+  --panel: #151a33;
+  --panel-2: #1b2142;
+  --text: #e2e8f0;
+  --text-soft: #b5c0d0;
+  --text-muted: #8a98ae;
+  --border: #2a3156;
+  --accent: var(--cyan-soft);
+  --accent-2: var(--purple-soft);
+  --accent-3: var(--pink-soft);
+  --shadow: 0 2px 10px rgba(0, 0, 0, 0.25), 0 12px 30px rgba(0, 0, 0, 0.35);
+  --grid: #2a3156;
+  --code-bg: #0f1530;
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.55;
+  transition: background-color .25s ease, color .25s ease;
+}
+code, .mono { font-family: 'JetBrains Mono', ui-monospace, monospace; }
+
+header.page {
+  position: relative;
+  padding: 2.4rem 1.5rem 2rem;
+  background:
+    radial-gradient(1200px 400px at 85% -10%, rgba(122, 32, 159, 0.15), transparent),
+    radial-gradient(1000px 400px at 10% 0%, rgba(0, 140, 183, 0.18), transparent),
+    var(--panel);
+  border-bottom: 1px solid var(--border);
+}
+.page-inner { max-width: 1120px; margin: 0 auto; }
+.chapter-badge {
+  display: inline-block; font-size: 0.72rem; letter-spacing: 0.15em;
+  text-transform: uppercase; color: var(--accent); font-weight: 600; margin-bottom: 0.5rem;
+}
+h1.title {
+  font-size: clamp(1.6rem, 3.4vw, 2.4rem); margin: 0 0 0.35rem;
+  background: linear-gradient(90deg, var(--accent), var(--accent-2));
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+  font-weight: 700; letter-spacing: -0.01em;
+}
+p.subtitle { margin: 0 0 0.8rem; color: var(--text-soft); font-size: 1.05rem; max-width: 720px; }
+.theme-toggle {
+  position: absolute; top: 1.4rem; right: 1.5rem;
+  background: var(--panel-2); color: var(--text); border: 1px solid var(--border);
+  padding: 0.4rem 0.8rem; border-radius: 999px; cursor: pointer;
+  font-size: 0.85rem; font-weight: 500; display: inline-flex; align-items: center; gap: 0.35rem;
+  transition: all .2s ease;
+}
+.theme-toggle:hover { border-color: var(--accent); color: var(--accent); }
+
+nav.anchors {
+  position: sticky; top: 0; z-index: 20;
+  background: color-mix(in srgb, var(--panel) 92%, transparent);
+  backdrop-filter: saturate(150%) blur(8px); -webkit-backdrop-filter: saturate(150%) blur(8px);
+  border-bottom: 1px solid var(--border);
+}
+nav.anchors ul {
+  display: flex; gap: 0.25rem; overflow-x: auto; list-style: none;
+  padding: 0.55rem 1.5rem; margin: 0 auto; max-width: 1120px; scrollbar-width: thin;
+}
+nav.anchors a {
+  display: block; padding: 0.35rem 0.75rem; border-radius: 8px;
+  color: var(--text-soft); text-decoration: none; font-size: 0.85rem;
+  font-weight: 500; white-space: nowrap; transition: all .15s ease;
+}
+nav.anchors a:hover { color: var(--accent); background: var(--panel-2); }
+
+main { max-width: 1120px; margin: 1.2rem auto 3rem; padding: 0 1.5rem; }
+
+section.widget {
+  background: var(--panel); border: 1px solid var(--border); border-radius: 16px;
+  padding: 1.5rem 1.4rem 1.3rem; margin-bottom: 1.5rem; box-shadow: var(--shadow);
+}
+.section-tag {
+  display: inline-block; font-family: 'JetBrains Mono', monospace; font-size: 0.72rem;
+  color: var(--accent); background: color-mix(in srgb, var(--accent) 12%, transparent);
+  padding: 0.2rem 0.55rem; border-radius: 6px; margin-bottom: 0.6rem; font-weight: 500;
+}
+.widget h2 { margin: 0 0 0.2rem; font-size: 1.35rem; font-weight: 600; color: var(--accent-2); letter-spacing: -0.005em; }
+.widget .lede { margin: 0 0 1rem; color: var(--text-soft); font-size: 0.97rem; max-width: 780px; }
+
+.controls {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 0.9rem 1.2rem; padding: 0.9rem 1rem; background: var(--panel-2); border-radius: 10px; margin-bottom: 1rem;
+}
+.ctrl { display: flex; flex-direction: column; gap: 0.3rem; }
+.ctrl label { font-size: 0.78rem; font-weight: 500; color: var(--text-soft); text-transform: uppercase; letter-spacing: 0.05em; }
+.ctrl select, .ctrl input[type="range"], .ctrl input[type="number"] {
+  font-family: inherit; font-size: 0.9rem; padding: 0.4rem 0.55rem; border-radius: 8px;
+  border: 1px solid var(--border); background: var(--panel); color: var(--text);
+}
+.ctrl input[type="range"] { padding: 0.2rem 0; accent-color: var(--accent); }
+.ctrl .val { font-family: 'JetBrains Mono', monospace; font-size: 0.82rem; color: var(--accent); font-weight: 500; }
+.toggle-group { display: inline-flex; gap: 0.25rem; background: var(--panel); padding: 3px; border-radius: 10px; border: 1px solid var(--border); flex-wrap: wrap; }
+.toggle-group button {
+  background: transparent; border: none; color: var(--text-soft);
+  padding: 0.32rem 0.75rem; border-radius: 7px; font-family: inherit; font-size: 0.85rem;
+  cursor: pointer; transition: all .15s ease;
+}
+.toggle-group button.active { background: var(--accent); color: white; font-weight: 500; }
+
+.stats-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+  gap: 0.6rem; margin: 0.5rem 0 1rem;
+}
+.stat {
+  background: var(--panel-2); padding: 0.65rem 0.75rem; border-radius: 10px; border-left: 3px solid var(--accent);
+}
+.stat .label { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-muted); }
+.stat .value { font-family: 'JetBrains Mono', monospace; font-size: 1.05rem; font-weight: 500; color: var(--text); margin-top: 0.15rem; }
+.stat.pop { border-left-color: var(--accent-2); }
+.stat.err { border-left-color: var(--accent-3); }
+
+.callout {
+  background: color-mix(in srgb, var(--accent-2) 8%, transparent);
+  border-left: 3px solid var(--accent-2); padding: 0.7rem 0.9rem;
+  border-radius: 8px; font-size: 0.9rem; color: var(--text-soft); margin: 0.9rem 0 0.2rem;
+}
+.callout strong { color: var(--accent-2); }
+
+.try-this {
+  background: color-mix(in srgb, var(--accent) 8%, transparent);
+  border-left: 3px solid var(--accent); padding: 0.7rem 0.9rem;
+  border-radius: 8px; font-size: 0.9rem; color: var(--text-soft); margin: 0.7rem 0 0.2rem;
+}
+.try-this .try-title { font-weight: 600; color: var(--accent); font-size: 0.78rem; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 0.3rem; }
+.try-this ol { margin: 0; padding-left: 1.25rem; }
+.try-this li { margin: 0.2rem 0; }
+
+.widget-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 0.5rem; margin-bottom: 0.2rem; }
+.widget-head > div { flex: 1; min-width: 0; }
+.reset-btn {
+  background: transparent; color: var(--text-muted); border: 1px solid var(--border);
+  padding: 0.3rem 0.7rem; border-radius: 8px; font-family: inherit; font-size: 0.8rem;
+  cursor: pointer; white-space: nowrap; transition: all .15s ease;
+}
+.reset-btn:hover { color: var(--accent); border-color: var(--accent); }
+
+.delta-row {
+  display: flex; flex-wrap: wrap; gap: 0.6rem 1.2rem;
+  margin: 0.2rem 0 0.9rem; padding: 0.55rem 0.85rem;
+  background: var(--panel-2); border-radius: 10px;
+  font-family: 'JetBrains Mono', monospace; font-size: 0.88rem;
+  color: var(--text-soft); border-left: 3px solid var(--accent-3);
+}
+.delta-row .label { color: var(--text-muted); margin-right: 0.35rem; }
+
+.chart { width: 100%; min-height: 340px; }
+.chart.tall { min-height: 420px; }
+.chart.short { min-height: 280px; }
+
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+@media (max-width: 720px) { .two-col { grid-template-columns: 1fr; } }
+
+footer.page {
+  max-width: 1120px; margin: 1rem auto 3rem; padding: 0 1.5rem;
+  color: var(--text-muted); font-size: 0.88rem; text-align: center;
+}
+footer.page a { color: var(--accent); text-decoration: none; }
+footer.page a:hover { text-decoration: underline; }
+.scroll-top { display: inline-block; font-size: 0.78rem; color: var(--text-muted); text-decoration: none; margin-top: 0.4rem; }
+.scroll-top:hover { color: var(--accent); }
+</style>
+</head>
+<body>
+
+<header class="page">
+  <div class="page-inner">
+    <span class="chapter-badge">Chapter 09 of 18 · Interactive Dashboard</span>
+    <h1 class="title">Models with Natural Logarithms</h1>
+    <p class="subtitle">Slide, toggle, and compare to build intuition for logarithmic transformations, semi-elasticities, elasticities, and exponential growth — using the same datasets as the book.</p>
+  </div>
+  <button id="theme-toggle" class="theme-toggle" type="button" aria-label="Toggle color theme"><span id="theme-icon">🌙</span><span id="theme-label">Dark</span></button>
+</header>
+
+<nav class="anchors" aria-label="Sections">
+  <ul>
+    <li><a href="#log-approx">Log Approx</a></li>
+    <li><a href="#four-models">Four Models</a></li>
+    <li><a href="#semi-elast">Semi-Elasticity</a></li>
+    <li><a href="#elasticity">Elasticity</a></li>
+    <li><a href="#exp-growth">Exp Growth</a></li>
+    <li><a href="#model-compare">Model Compare</a></li>
+    <li><a href="#cross-country">Cross-Country</a></li>
+  </ul>
+</nav>
+
+<main>
+
+<!-- ==================== WIDGET 1: Log Approximation Explorer ==================== -->
+<section class="widget" id="log-approx">
+  <div class="widget-head">
+    <div>
+      <span class="section-tag">§ 9.1 · Key Concept 9.1</span>
+      <h2>Logarithmic Approximation Explorer</h2>
+    </div>
+    <button class="reset-btn" data-reset="logapprox">↺ Reset</button>
+  </div>
+  <p class="lede">The log approximation says the change in ln(x) approximately equals the proportionate change in x. This works well for small changes but breaks down for large ones. Drag the slider to see where the approximation fails.</p>
+  <div class="controls">
+    <div class="ctrl">
+      <label for="logapprox-pct">Percentage change <span class="val" id="logapprox-pct-val">5%</span></label>
+      <input type="range" id="logapprox-pct" min="1" max="100" step="1" value="5">
+    </div>
+    <div class="ctrl">
+      <label for="logapprox-x0">Starting value x₀ <span class="val" id="logapprox-x0-val">100</span></label>
+      <input type="range" id="logapprox-x0" min="10" max="1000" step="10" value="100">
+    </div>
+  </div>
+  <div class="stats-grid">
+    <div class="stat"><div class="label">Exact %Δx</div><div class="value" id="logapprox-exact">—</div></div>
+    <div class="stat"><div class="label">Log Approx 100×Δln(x)</div><div class="value" id="logapprox-approx">—</div></div>
+    <div class="stat err"><div class="label">Approx Error</div><div class="value" id="logapprox-err">—</div></div>
+    <div class="stat pop"><div class="label">Exact via exp</div><div class="value" id="logapprox-exact2">—</div></div>
+  </div>
+  <div class="chart" id="chart-logapprox"></div>
+  <div class="callout"><strong>Key Concept 9.1:</strong> The change in ln(x) approximates the proportionate change in x: Δln(x) ≈ Δx/x. Multiplying by 100 gives the percentage change. The approximation is excellent for changes under 10%. For larger changes, use the exact formula: %Δx = 100 × (e^Δln(x) - 1).</div>
+  <div class="try-this">
+    <div class="try-title">Try this</div>
+    <ol>
+      <li>Set the percentage change to 1%. The exact and log approximation are virtually identical — the gap is invisible.</li>
+      <li>Drag to 10%. The error is about 0.5 percentage points. Still usable but not exact.</li>
+      <li>Push to 50%. Now the log approximation says 40.5% instead of 50% — a 10 pp error. The approximation breaks down for large changes.</li>
+    </ol>
+  </div>
+</section>
+
+<!-- ==================== WIDGET 2: Four Model Specifications ==================== -->
+<section class="widget" id="four-models">
+  <div class="widget-head">
+    <div>
+      <span class="section-tag">§ 9.3 · Key Concepts 9.2–9.5</span>
+      <h2>Four Model Specifications</h2>
+    </div>
+    <button class="reset-btn" data-reset="fourmodels">↺ Reset</button>
+  </div>
+  <p class="lede">The same data (earnings vs. education) can be modeled four different ways by logging the dependent variable, the independent variable, both, or neither. Toggle between specifications to see how each transforms the scatter plot and changes the regression interpretation.</p>
+  <div class="controls">
+    <div class="ctrl">
+      <label>Model specification</label>
+      <div class="toggle-group" id="fourmodels-spec">
+        <button type="button" data-val="linlin" class="active">Linear</button>
+        <button type="button" data-val="loglin">Log-Linear</button>
+        <button type="button" data-val="loglog">Log-Log</button>
+        <button type="button" data-val="linlog">Linear-Log</button>
+      </div>
+    </div>
+  </div>
+  <div class="stats-grid">
+    <div class="stat"><div class="label">Intercept (b₁)</div><div class="value" id="fourmodels-b1">—</div></div>
+    <div class="stat"><div class="label">Slope (b₂)</div><div class="value" id="fourmodels-b2">—</div></div>
+    <div class="stat pop"><div class="label">R²</div><div class="value" id="fourmodels-r2">—</div></div>
+    <div class="stat err"><div class="label">Interpretation</div><div class="value" id="fourmodels-interp">—</div></div>
+  </div>
+  <div class="chart" id="chart-fourmodels"></div>
+  <div class="callout"><strong>Key Concepts 9.2–9.5:</strong> Linear: Δy = β₁Δx (dollar change). Log-linear: %Δy ≈ 100β₁ (semi-elasticity, most common). Log-log: %Δy ≈ β₁%Δx (elasticity, unit-free). Linear-log: Δy ≈ β₁/100 per %Δx. Choose based on theory, data, and interpretation needs.</div>
+  <div class="try-this">
+    <div class="try-title">Try this</div>
+    <ol>
+      <li>Start with <strong>Linear</strong> — the scatter shows raw dollars vs. years. Note the high-earning outliers pulling the line.</li>
+      <li>Switch to <strong>Log-Linear</strong> — logging earnings compresses the y-axis and gives the best fit (R² ≈ 0.334). Each year of education raises earnings by about 13%.</li>
+      <li>Compare <strong>Log-Log</strong> and <strong>Linear-Log</strong>. Log-Log gives an elasticity of ~1.48. Linear-Log has the worst R².</li>
+    </ol>
+  </div>
+</section>
+
+<!-- ==================== WIDGET 3: Semi-Elasticity Visualizer ==================== -->
+<section class="widget" id="semi-elast">
+  <div class="widget-head">
+    <div>
+      <span class="section-tag">§ 9.2–9.3 · Key Concept 9.3</span>
+      <h2>Semi-Elasticity Visualizer</h2>
+    </div>
+    <button class="reset-btn" data-reset="semielast">↺ Reset</button>
+  </div>
+  <p class="lede">In a log-linear model ln(y) = β₀ + β₁x, the slope β₁ is the semi-elasticity: a unit increase in x produces a 100×β₁ percent change in y. Drag the slider to see how different semi-elasticities shape the relationship between x and y in both log and level space.</p>
+  <div class="controls">
+    <div class="ctrl">
+      <label for="semielast-beta">Semi-elasticity β₁ <span class="val" id="semielast-beta-val">0.13</span></label>
+      <input type="range" id="semielast-beta" min="0.01" max="0.30" step="0.01" value="0.13">
+    </div>
+    <div class="ctrl">
+      <label for="semielast-b0">Intercept β₀ <span class="val" id="semielast-b0-val">8.50</span></label>
+      <input type="range" id="semielast-b0" min="6" max="12" step="0.25" value="8.5">
+    </div>
+  </div>
+  <div class="stats-grid">
+    <div class="stat"><div class="label">% change per unit x</div><div class="value" id="semielast-pct">—</div></div>
+    <div class="stat pop"><div class="label">Exact % (large β₁)</div><div class="value" id="semielast-exact">—</div></div>
+    <div class="stat"><div class="label">y at x=10</div><div class="value" id="semielast-y10">—</div></div>
+    <div class="stat"><div class="label">y at x=16</div><div class="value" id="semielast-y16">—</div></div>
+  </div>
+  <div class="two-col">
+    <div class="chart" id="chart-semielast-log"></div>
+    <div class="chart" id="chart-semielast-level"></div>
+  </div>
+  <div class="callout"><strong>Key Concept 9.3:</strong> In the log-linear model, 100 × β₁ = percentage change in y per unit increase in x. This is the semi-elasticity. The approximation works well for β₁ &lt; 0.10. For larger values, the exact percentage change is 100 × (e^β₁ - 1). The log-linear model is the most common earnings specification because a percentage return scales automatically across income levels.</div>
+  <div class="try-this">
+    <div class="try-title">Try this</div>
+    <ol>
+      <li>Set β₁ = 0.05 (5% return per year). The log-space plot is a gentle line; the level-space curve is nearly straight. The approximation error is tiny.</li>
+      <li>Set β₁ = 0.13 (the earnings-education estimate). In level space the exponential curve is visible — earnings accelerate for more educated workers.</li>
+      <li>Push β₁ to 0.25. The level-space curve is steeply exponential. Compare the approximate (25%) vs exact (28.4%) percentage change per unit.</li>
+    </ol>
+  </div>
+</section>
+
+<!-- ==================== WIDGET 4: Elasticity Visualizer ==================== -->
+<section class="widget" id="elasticity">
+  <div class="widget-head">
+    <div>
+      <span class="section-tag">§ 9.2–9.3 · Key Concept 9.4</span>
+      <h2>Elasticity Visualizer</h2>
+    </div>
+    <button class="reset-btn" data-reset="elasticity">↺ Reset</button>
+  </div>
+  <p class="lede">In a log-log model ln(y) = β₀ + β₁ln(x), the slope β₁ is the elasticity: a 1% change in x produces a β₁% change in y. This is unit-free. Adjust the elasticity to see diminishing returns (β₁ &lt; 1) vs. increasing returns (β₁ &gt; 1).</p>
+  <div class="controls">
+    <div class="ctrl">
+      <label for="elasticity-beta">Elasticity β₁ <span class="val" id="elasticity-beta-val">1.48</span></label>
+      <input type="range" id="elasticity-beta" min="0.1" max="3.0" step="0.01" value="1.48">
+    </div>
+    <div class="ctrl">
+      <label for="elasticity-b0">Intercept β₀ <span class="val" id="elasticity-b0-val">7.00</span></label>
+      <input type="range" id="elasticity-b0" min="4" max="12" step="0.25" value="7">
+    </div>
+  </div>
+  <div class="stats-grid">
+    <div class="stat"><div class="label">Elasticity</div><div class="value" id="elasticity-val">—</div></div>
+    <div class="stat pop"><div class="label">Returns type</div><div class="value" id="elasticity-type">—</div></div>
+    <div class="stat"><div class="label">y at x=5</div><div class="value" id="elasticity-y5">—</div></div>
+    <div class="stat"><div class="label">y at x=20</div><div class="value" id="elasticity-y20">—</div></div>
+  </div>
+  <div class="two-col">
+    <div class="chart" id="chart-elast-log"></div>
+    <div class="chart" id="chart-elast-level"></div>
+  </div>
+  <div class="callout"><strong>Key Concept 9.4:</strong> In the log-log model, β₁ is the elasticity: %Δy / %Δx. If β₁ &lt; 1 there are diminishing returns (concave in levels). If β₁ &gt; 1 there are increasing returns (convex in levels). If β₁ = 1, the relationship is proportional. Elasticity is unit-free — it does not depend on whether you measure in dollars or thousands.</div>
+  <div class="try-this">
+    <div class="try-title">Try this</div>
+    <ol>
+      <li>Set β₁ = 0.33 (typical capital elasticity). In level space the power curve is strongly concave — classic diminishing returns.</li>
+      <li>Set β₁ = 1.0. The log-space line has slope 1 and the level-space curve becomes a straight line through the origin (proportional).</li>
+      <li>Set β₁ = 2.0 (increasing returns). The level-space curve becomes convex — quadratic growth. This is rare in economics for production but common for network effects.</li>
+    </ol>
+  </div>
+</section>
+
+<!-- ==================== WIDGET 5: Exponential Growth & Rule of 72 ==================== -->
+<section class="widget" id="exp-growth">
+  <div class="widget-head">
+    <div>
+      <span class="section-tag">§ 9.4 · Key Concepts 9.6, 9.7</span>
+      <h2>Exponential Growth and Rule of 72</h2>
+    </div>
+    <button class="reset-btn" data-reset="expgrowth">↺ Reset</button>
+  </div>
+  <p class="lede">Exponential growth in levels becomes linear in logs. The S&amp;P 500 looks like an explosive curve in levels but a steady upward line when logged. The slope directly estimates the average annual growth rate, and the Rule of 72 gives the doubling time.</p>
+  <div class="controls">
+    <div class="ctrl">
+      <label>Display</label>
+      <div class="toggle-group" id="expgrowth-display">
+        <button type="button" data-val="both" class="active">Levels + Logs</button>
+        <button type="button" data-val="levels">Levels Only</button>
+        <button type="button" data-val="logs">Logs Only</button>
+      </div>
+    </div>
+    <div class="ctrl">
+      <label for="expgrowth-rate">Custom growth rate <span class="val" id="expgrowth-rate-val">6.5%</span></label>
+      <input type="range" id="expgrowth-rate" min="1" max="15" step="0.5" value="6.5">
+    </div>
+  </div>
+  <div class="stats-grid">
+    <div class="stat"><div class="label">Est. growth rate</div><div class="value" id="expgrowth-grate">—</div></div>
+    <div class="stat pop"><div class="label">R² (log model)</div><div class="value" id="expgrowth-r2">—</div></div>
+    <div class="stat err"><div class="label">Rule of 72 doubling</div><div class="value" id="expgrowth-double">—</div></div>
+    <div class="stat"><div class="label">Custom doubling</div><div class="value" id="expgrowth-cdouble">—</div></div>
+  </div>
+  <div class="two-col">
+    <div class="chart" id="chart-expgrowth-levels"></div>
+    <div class="chart" id="chart-expgrowth-logs"></div>
+  </div>
+  <div class="callout"><strong>Key Concepts 9.6–9.7:</strong> Exponential growth x_t = x₀(1+r)^t becomes linear in logs: ln(x_t) ≈ ln(x₀) + r×t. The OLS slope on logged data directly estimates the growth rate. The Rule of 72: doubling time ≈ 72/r (where r is in percent). S&amp;P 500 grew at ~6.5%/year (1927-2019), doubling roughly every 11 years.</div>
+  <div class="try-this">
+    <div class="try-title">Try this</div>
+    <ol>
+      <li>Look at <strong>Levels + Logs</strong>. The left panel shows the explosive S&amp;P 500 curve; the right shows a relatively straight line. This is the power of the log transformation.</li>
+      <li>Set the custom growth rate slider to 3%. The Rule of 72 says: 72/3 = 24 years to double. At 12%: 72/12 = 6 years to double.</li>
+      <li>Toggle to <strong>Logs Only</strong>. Notice the deviations from the trend line — market crashes (1930s, 2000, 2008) show as dips below the linear trend.</li>
+    </ol>
+  </div>
+</section>
+
+<!-- ==================== WIDGET 6: Model Comparison Grid ==================== -->
+<section class="widget" id="model-compare">
+  <div class="widget-head">
+    <div>
+      <span class="section-tag">§ 9.3 · Key Concept 9.5</span>
+      <h2>Model Comparison: 2×2 Grid</h2>
+    </div>
+    <button class="reset-btn" data-reset="modelcmp">↺ Reset</button>
+  </div>
+  <p class="lede">See all four model specifications side by side on the earnings-education data. Each panel transforms the axes differently. Compare R² values and notice how the scatter shape changes when you log one or both variables.</p>
+  <div class="controls">
+    <div class="ctrl">
+      <label>Highlight model</label>
+      <div class="toggle-group" id="modelcmp-highlight">
+        <button type="button" data-val="all" class="active">All Equal</button>
+        <button type="button" data-val="linlin">Linear</button>
+        <button type="button" data-val="loglin">Log-Lin</button>
+        <button type="button" data-val="loglog">Log-Log</button>
+        <button type="button" data-val="linlog">Lin-Log</button>
+      </div>
+    </div>
+  </div>
+  <div class="stats-grid">
+    <div class="stat"><div class="label">R² Linear</div><div class="value" id="modelcmp-r2-linlin">—</div></div>
+    <div class="stat pop"><div class="label">R² Log-Linear</div><div class="value" id="modelcmp-r2-loglin">—</div></div>
+    <div class="stat"><div class="label">R² Log-Log</div><div class="value" id="modelcmp-r2-loglog">—</div></div>
+    <div class="stat"><div class="label">R² Lin-Log</div><div class="value" id="modelcmp-r2-linlog">—</div></div>
+  </div>
+  <div class="two-col">
+    <div class="chart" id="chart-cmp-linlin"></div>
+    <div class="chart" id="chart-cmp-loglin"></div>
+  </div>
+  <div class="two-col">
+    <div class="chart" id="chart-cmp-loglog"></div>
+    <div class="chart" id="chart-cmp-linlog"></div>
+  </div>
+  <div class="callout"><strong>Key Concept 9.5:</strong> Choosing the right functional form depends on: (1) economic theory — does it predict absolute or percentage effects? (2) data properties — is y right-skewed? (3) model fit — which R² is highest? (4) interpretation needs. The log-linear model typically wins for earnings data because percentage returns scale automatically across income levels.</div>
+  <div class="try-this">
+    <div class="try-title">Try this</div>
+    <ol>
+      <li>Compare the four R² values. Log-Linear has the highest — it best captures the earnings-education relationship.</li>
+      <li>Highlight <strong>Log-Lin</strong>. Notice how logging earnings compresses the y-axis and reduces the influence of high earners.</li>
+      <li>Highlight <strong>Linear</strong>. The raw scatter shows extreme heteroskedasticity — earnings variance grows with education. Logging y stabilizes this.</li>
+    </ol>
+  </div>
+</section>
+
+<!-- ==================== WIDGET 7: Cross-Country Log Models ==================== -->
+<section class="widget" id="cross-country">
+  <div class="widget-head">
+    <div>
+      <span class="section-tag">§ Case Study · Key Concepts 9.8, 9.9</span>
+      <h2>Cross-Country Log Models</h2>
+    </div>
+    <button class="reset-btn" data-reset="crosscountry">↺ Reset</button>
+  </div>
+  <p class="lede">Cross-country data spans huge ranges (productivity varies 100x). Log transformations compress this range and reveal meaningful relationships. Explore the convergence clubs dataset with different model specifications and variable choices.</p>
+  <div class="controls">
+    <div class="ctrl">
+      <label>Model</label>
+      <div class="toggle-group" id="crosscountry-model">
+        <button type="button" data-val="loglog" class="active">Log-Log (kl)</button>
+        <button type="button" data-val="loglin">Log-Linear (h)</button>
+        <button type="button" data-val="linlin">Linear (kl)</button>
+      </div>
+    </div>
+    <div class="ctrl">
+      <label>Show labels</label>
+      <div class="toggle-group" id="crosscountry-labels">
+        <button type="button" data-val="off" class="active">Off</button>
+        <button type="button" data-val="on">On</button>
+      </div>
+    </div>
+  </div>
+  <div class="stats-grid">
+    <div class="stat"><div class="label">Slope (b₂)</div><div class="value" id="crosscountry-b2">—</div></div>
+    <div class="stat pop"><div class="label">R²</div><div class="value" id="crosscountry-r2">—</div></div>
+    <div class="stat"><div class="label">Interpretation</div><div class="value" id="crosscountry-interp">—</div></div>
+    <div class="stat"><div class="label">N countries</div><div class="value" id="crosscountry-n">—</div></div>
+  </div>
+  <div class="chart tall" id="chart-crosscountry"></div>
+  <div class="callout"><strong>Key Concepts 9.8–9.9:</strong> Log models are essential for cross-country analysis because: (1) variables span huge ranges requiring compression, (2) economic theory predicts multiplicative relationships (production functions), (3) percentage comparisons are more meaningful than absolute ones. The log-log specification directly estimates the output elasticity of capital — a key parameter in growth theory.</div>
+  <div class="try-this">
+    <div class="try-title">Try this</div>
+    <ol>
+      <li>Start with <strong>Log-Log (kl)</strong>. The elasticity of productivity w.r.t. capital is the slope. Is it less than 1 (diminishing returns)?</li>
+      <li>Switch to <strong>Log-Linear (h)</strong> to see the semi-elasticity of productivity w.r.t. human capital. How much does a unit increase in human capital index raise productivity?</li>
+      <li>Switch to <strong>Linear (kl)</strong>. The scatter is dominated by a few rich countries. This shows why log transformations are essential for cross-country data.</li>
+    </ol>
+  </div>
+</section>
+
+</main>
+
+<footer class="page">
+  <p>Part of <a href="https://quarcs-lab.github.io/metricsai/book/_book/index.html"><strong>metricsAI</strong></a> · Chapter 09: Models with Natural Logarithms · by Carlos Mendez · <a href="https://github.com/quarcs-lab/metricsai">GitHub</a></p>
+  <p>Data: AED_EARNINGS.DTA (171 workers), AED_SP500INDEX.DTA (1927-2019), Mendez (2020) convergence clubs (108 countries).</p>
+  <a class="scroll-top" href="#top">↑ Back to top</a>
+</footer>
+
+<script type="application/json" id="ch-data">{{DATA_JSON}}</script>
+
+<script>
+"use strict";
+
+var DATA = JSON.parse(document.getElementById("ch-data").textContent);
+
+// ==================== STATS HELPERS ====================
+var mean = function(a) { var s = 0; for (var i = 0; i < a.length; i++) s += a[i]; return s / a.length; };
+var sortedCopy = function(a) { return a.slice().sort(function(x, y) { return x - y; }); };
+function quantile(sorted, p) {
+  var idx = p * (sorted.length - 1);
+  var lo = Math.floor(idx), hi = Math.ceil(idx);
+  if (lo === hi) return sorted[lo];
+  return sorted[lo] + (idx - lo) * (sorted[hi] - sorted[lo]);
+}
+function std(a, m) {
+  if (m === undefined) m = mean(a);
+  var s = 0;
+  for (var i = 0; i < a.length; i++) s += (a[i] - m) * (a[i] - m);
+  return Math.sqrt(s / (a.length - 1));
+}
+function fmt(v, d) {
+  if (d === undefined) d = 4;
+  if (v === null || v === undefined || isNaN(v)) return "\u2014";
+  return v.toFixed(d);
+}
+function fmtPct(v, d) {
+  if (d === undefined) d = 1;
+  if (v === null || v === undefined || isNaN(v)) return "\u2014";
+  return (v * 100).toFixed(d) + "%";
+}
+function fmtMoney(v) {
+  if (v === null || v === undefined || isNaN(v)) return "\u2014";
+  return "$" + Math.round(v).toLocaleString();
+}
+function linspace(a, b, n) {
+  var out = new Array(n);
+  var step = (b - a) / (n - 1);
+  for (var i = 0; i < n; i++) out[i] = a + i * step;
+  return out;
+}
+
+// ==================== OLS ENGINE ====================
+function olsFit(x, y) {
+  var n = x.length;
+  var xbar = mean(x), ybar = mean(y);
+  var SSx = 0, SSxy = 0;
+  for (var i = 0; i < n; i++) {
+    SSx += (x[i] - xbar) * (x[i] - xbar);
+    SSxy += (x[i] - xbar) * (y[i] - ybar);
+  }
+  var b2 = SSxy / SSx;
+  var b1 = ybar - b2 * xbar;
+  var yhat = new Array(n);
+  var RSS = 0;
+  for (var i = 0; i < n; i++) {
+    yhat[i] = b1 + b2 * x[i];
+    var res = y[i] - yhat[i];
+    RSS += res * res;
+  }
+  var SST = 0;
+  for (var i = 0; i < n; i++) SST += (y[i] - ybar) * (y[i] - ybar);
+  var R2 = SST > 0 ? 1 - RSS / SST : 0;
+  return { b1: b1, b2: b2, yhat: yhat, R2: R2, n: n };
+}
+
+// ==================== THEME ====================
+var THEME_KEY = "metricsai-theme";
+function getCSS(varName) { return getComputedStyle(document.documentElement).getPropertyValue(varName).trim(); }
+function themeColors() {
+  return { text: getCSS("--text"), textSoft: getCSS("--text-soft"), grid: getCSS("--grid"),
+    panel: getCSS("--panel"), cyan: getCSS("--accent"), purple: getCSS("--accent-2"), pink: getCSS("--accent-3") };
+}
+function baseLayout(overrides) {
+  var c = themeColors();
+  var base = {
+    paper_bgcolor: "rgba(0,0,0,0)", plot_bgcolor: "rgba(0,0,0,0)",
+    font: { family: "Inter, system-ui, sans-serif", color: c.text, size: 12 },
+    margin: { l: 56, r: 18, t: 30, b: 46 },
+    xaxis: { gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft } },
+    yaxis: { gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft } },
+    hoverlabel: { bgcolor: c.panel, bordercolor: c.grid, font: { color: c.text } },
+    legend: { font: { color: c.text }, bgcolor: "rgba(0,0,0,0)" }
+  };
+  if (overrides) for (var k in overrides) base[k] = overrides[k];
+  return base;
+}
+var PLOTLY_CONFIG = { displayModeBar: false, responsive: true };
+
+// ==================== TOGGLE / SLIDER HELPERS ====================
+function bindToggles(groupId, renderFn) {
+  document.querySelectorAll("#" + groupId + " button").forEach(function(btn) {
+    btn.addEventListener("click", function() {
+      this.parentNode.querySelectorAll("button").forEach(function(b) { b.classList.remove("active"); });
+      this.classList.add("active");
+      renderFn();
+    });
+  });
+}
+function bindSlider(id, valId, formatFn, renderFn) {
+  var el = document.getElementById(id);
+  var valEl = document.getElementById(valId);
+  el.addEventListener("input", function() {
+    valEl.textContent = formatFn(this.value);
+    renderFn();
+  });
+}
+function getToggleVal(groupId) {
+  var btn = document.querySelector("#" + groupId + " button.active");
+  return btn ? btn.dataset.val : "";
+}
+
+// ==================== WIDGET 1: Log Approximation Explorer ====================
+(function() {
+  var chartEl = document.getElementById("chart-logapprox");
+
+  function render() {
+    var c = themeColors();
+    var pct = parseFloat(document.getElementById("logapprox-pct").value);
+    var x0 = parseFloat(document.getElementById("logapprox-x0").value);
+
+    var x1 = x0 * (1 + pct / 100);
+    var exactProp = pct / 100;
+    var logApprox = Math.log(x1) - Math.log(x0);
+    var exactFromLog = Math.exp(logApprox) - 1;
+    var err = Math.abs(pct - logApprox * 100);
+
+    document.getElementById("logapprox-exact").textContent = pct.toFixed(1) + "%";
+    document.getElementById("logapprox-approx").textContent = (logApprox * 100).toFixed(2) + "%";
+    document.getElementById("logapprox-err").textContent = err.toFixed(2) + " pp";
+    document.getElementById("logapprox-exact2").textContent = (exactFromLog * 100).toFixed(2) + "%";
+
+    // Plot: exact vs approx for range of % changes
+    var pctRange = linspace(1, 100, 100);
+    var exactLine = pctRange.slice();
+    var approxLine = pctRange.map(function(p) { return Math.log(1 + p / 100) * 100; });
+
+    var traces = [];
+    traces.push({ x: pctRange, y: exactLine, mode: "lines", line: { color: c.cyan, width: 2.5 }, name: "Exact %\u0394x" });
+    traces.push({ x: pctRange, y: approxLine, mode: "lines", line: { color: c.purple, width: 2.5, dash: "dash" }, name: "Log approx 100\u00D7\u0394ln(x)" });
+    // Current point marker
+    traces.push({ x: [pct], y: [pct], mode: "markers", marker: { color: c.cyan, size: 12, symbol: "circle" }, name: "Exact", showlegend: false });
+    traces.push({ x: [pct], y: [logApprox * 100], mode: "markers", marker: { color: c.purple, size: 12, symbol: "diamond" }, name: "Approx", showlegend: false });
+    // Error segment
+    traces.push({ x: [pct, pct], y: [logApprox * 100, pct], mode: "lines", line: { color: c.pink, width: 2, dash: "dot" }, name: "Error: " + err.toFixed(2) + " pp" });
+
+    Plotly.react(chartEl, traces, baseLayout({
+      xaxis: { title: "Actual percentage change (%)", gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft } },
+      yaxis: { title: "Measured change (%)", gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft } },
+      legend: { x: 0.02, y: 0.98, font: { color: c.text }, bgcolor: "rgba(0,0,0,0)" }
+    }), PLOTLY_CONFIG);
+  }
+
+  bindSlider("logapprox-pct", "logapprox-pct-val", function(v) { return v + "%"; }, render);
+  bindSlider("logapprox-x0", "logapprox-x0-val", function(v) { return v; }, render);
+  window.__rerender_logapprox = render;
+  render();
+})();
+
+// ==================== WIDGET 2: Four Model Specifications ====================
+(function() {
+  var chartEl = document.getElementById("chart-fourmodels");
+  var E = DATA.earnings;
+
+  function render() {
+    var c = themeColors();
+    var spec = getToggleVal("fourmodels-spec");
+
+    var xData, yData, model, xLabel, yLabel, interpStr;
+    if (spec === "linlin") {
+      xData = E.education; yData = E.earnings; model = E.models.linlin;
+      xLabel = "Education (years)"; yLabel = "Earnings ($)";
+      interpStr = fmtMoney(model.b2) + "/yr";
+    } else if (spec === "loglin") {
+      xData = E.education; yData = E.lnEarnings; model = E.models.loglin;
+      xLabel = "Education (years)"; yLabel = "ln(Earnings)";
+      interpStr = (model.b2 * 100).toFixed(1) + "%/yr";
+    } else if (spec === "loglog") {
+      xData = E.lnEducation; yData = E.lnEarnings; model = E.models.loglog;
+      xLabel = "ln(Education)"; yLabel = "ln(Earnings)";
+      interpStr = fmt(model.b2, 2) + "% per 1%";
+    } else {
+      xData = E.lnEducation; yData = E.earnings; model = E.models.linlog;
+      xLabel = "ln(Education)"; yLabel = "Earnings ($)";
+      interpStr = fmtMoney(model.b2 / 100) + " per 1%";
+    }
+
+    document.getElementById("fourmodels-b1").textContent = fmt(model.b1);
+    document.getElementById("fourmodels-b2").textContent = fmt(model.b2);
+    document.getElementById("fourmodels-r2").textContent = fmt(model.R2);
+    document.getElementById("fourmodels-interp").textContent = interpStr;
+
+    var xMin = Math.min.apply(null, xData);
+    var xMax = Math.max.apply(null, xData);
+    var xLine = linspace(xMin, xMax, 100);
+    var yLine = xLine.map(function(xi) { return model.b1 + model.b2 * xi; });
+
+    var traces = [];
+    traces.push({ x: xData, y: yData, mode: "markers", type: "scatter",
+      marker: { color: c.cyan, size: 6, opacity: 0.6 }, name: "Data",
+      hovertemplate: "x=%{x:.2f}<br>y=%{y:.2f}<extra></extra>" });
+    traces.push({ x: xLine, y: yLine, mode: "lines",
+      line: { color: c.purple, width: 2.5 }, name: "OLS fit (R\u00B2=" + fmt(model.R2, 3) + ")" });
+
+    Plotly.react(chartEl, traces, baseLayout({
+      xaxis: { title: xLabel, gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft } },
+      yaxis: { title: yLabel, gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft } },
+      legend: { x: 0.02, y: 0.98, font: { color: c.text }, bgcolor: "rgba(0,0,0,0)" }
+    }), PLOTLY_CONFIG);
+  }
+
+  bindToggles("fourmodels-spec", render);
+  window.__rerender_fourmodels = render;
+  render();
+})();
+
+// ==================== WIDGET 3: Semi-Elasticity Visualizer ====================
+(function() {
+  var logChartEl = document.getElementById("chart-semielast-log");
+  var levelChartEl = document.getElementById("chart-semielast-level");
+
+  function render() {
+    var c = themeColors();
+    var beta = parseFloat(document.getElementById("semielast-beta").value);
+    var b0 = parseFloat(document.getElementById("semielast-b0").value);
+
+    var pctApprox = beta * 100;
+    var pctExact = (Math.exp(beta) - 1) * 100;
+    var y10 = Math.exp(b0 + beta * 10);
+    var y16 = Math.exp(b0 + beta * 16);
+
+    document.getElementById("semielast-pct").textContent = pctApprox.toFixed(1) + "%";
+    document.getElementById("semielast-exact").textContent = pctExact.toFixed(1) + "%";
+    document.getElementById("semielast-y10").textContent = fmtMoney(y10);
+    document.getElementById("semielast-y16").textContent = fmtMoney(y16);
+
+    var xRange = linspace(6, 20, 100);
+    var lnY = xRange.map(function(x) { return b0 + beta * x; });
+    var levelY = lnY.map(function(ly) { return Math.exp(ly); });
+
+    // Log-space plot (linear)
+    var traces1 = [];
+    traces1.push({ x: xRange, y: lnY, mode: "lines", line: { color: c.cyan, width: 2.5 }, name: "ln(y) = " + fmt(b0, 2) + " + " + fmt(beta, 2) + "x" });
+    // Show slope visually
+    traces1.push({ x: [12, 13], y: [b0 + beta * 12, b0 + beta * 12], mode: "lines", line: { color: c.pink, width: 1.5, dash: "dot" }, showlegend: false });
+    traces1.push({ x: [13, 13], y: [b0 + beta * 12, b0 + beta * 13], mode: "lines", line: { color: c.pink, width: 1.5, dash: "dot" }, name: "\u0394x=1 \u2192 \u0394ln(y)=" + fmt(beta, 3) });
+
+    Plotly.react(logChartEl, traces1, baseLayout({
+      title: { text: "Log Space (linear)", font: { size: 13 } },
+      xaxis: { title: "Education (years)", gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft } },
+      yaxis: { title: "ln(Earnings)", gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft } },
+      legend: { x: 0.02, y: 0.98, font: { color: c.text, size: 10 }, bgcolor: "rgba(0,0,0,0)" }
+    }), PLOTLY_CONFIG);
+
+    // Level-space plot (exponential)
+    var traces2 = [];
+    traces2.push({ x: xRange, y: levelY, mode: "lines", line: { color: c.purple, width: 2.5 }, name: "y = exp(" + fmt(b0, 2) + " + " + fmt(beta, 2) + "x)" });
+
+    Plotly.react(levelChartEl, traces2, baseLayout({
+      title: { text: "Level Space (exponential)", font: { size: 13 } },
+      xaxis: { title: "Education (years)", gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft } },
+      yaxis: { title: "Earnings ($)", gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft } },
+      legend: { x: 0.02, y: 0.98, font: { color: c.text, size: 10 }, bgcolor: "rgba(0,0,0,0)" }
+    }), PLOTLY_CONFIG);
+  }
+
+  bindSlider("semielast-beta", "semielast-beta-val", function(v) { return v; }, render);
+  bindSlider("semielast-b0", "semielast-b0-val", function(v) { return v; }, render);
+  window.__rerender_semielast = render;
+  render();
+})();
+
+// ==================== WIDGET 4: Elasticity Visualizer ====================
+(function() {
+  var logChartEl = document.getElementById("chart-elast-log");
+  var levelChartEl = document.getElementById("chart-elast-level");
+
+  function render() {
+    var c = themeColors();
+    var beta = parseFloat(document.getElementById("elasticity-beta").value);
+    var b0 = parseFloat(document.getElementById("elasticity-b0").value);
+
+    var returnType = beta < 0.99 ? "Diminishing" : (beta > 1.01 ? "Increasing" : "Constant");
+    var y5 = Math.exp(b0 + beta * Math.log(5));
+    var y20 = Math.exp(b0 + beta * Math.log(20));
+
+    document.getElementById("elasticity-val").textContent = fmt(beta, 2);
+    document.getElementById("elasticity-type").textContent = returnType;
+    document.getElementById("elasticity-y5").textContent = fmtMoney(y5);
+    document.getElementById("elasticity-y20").textContent = fmtMoney(y20);
+
+    var xRange = linspace(2, 22, 100);
+    var lnX = xRange.map(function(x) { return Math.log(x); });
+    var lnY = lnX.map(function(lx) { return b0 + beta * lx; });
+    var levelY = lnY.map(function(ly) { return Math.exp(ly); });
+
+    // Log-log plot (linear)
+    var traces1 = [];
+    traces1.push({ x: lnX, y: lnY, mode: "lines", line: { color: c.cyan, width: 2.5 }, name: "ln(y) = " + fmt(b0, 2) + " + " + fmt(beta, 2) + " ln(x)" });
+    // Slope annotation
+    var midLnX = Math.log(10);
+    traces1.push({ x: [midLnX, midLnX + 0.3], y: [b0 + beta * midLnX, b0 + beta * midLnX], mode: "lines", line: { color: c.pink, width: 1.5, dash: "dot" }, showlegend: false });
+    traces1.push({ x: [midLnX + 0.3, midLnX + 0.3], y: [b0 + beta * midLnX, b0 + beta * (midLnX + 0.3)], mode: "lines", line: { color: c.pink, width: 1.5, dash: "dot" }, name: "Slope = " + fmt(beta, 2) });
+
+    Plotly.react(logChartEl, traces1, baseLayout({
+      title: { text: "Log-Log Space (linear)", font: { size: 13 } },
+      xaxis: { title: "ln(x)", gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft } },
+      yaxis: { title: "ln(y)", gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft } },
+      legend: { x: 0.02, y: 0.98, font: { color: c.text, size: 10 }, bgcolor: "rgba(0,0,0,0)" }
+    }), PLOTLY_CONFIG);
+
+    // Level-space plot (power curve)
+    var traces2 = [];
+    traces2.push({ x: xRange, y: levelY, mode: "lines", line: { color: c.purple, width: 2.5 }, name: "y = e^" + fmt(b0, 1) + " \u00D7 x^" + fmt(beta, 2) });
+    // Reference line for proportional (beta=1)
+    var refY = xRange.map(function(x) { return Math.exp(b0) * x; });
+    traces2.push({ x: xRange, y: refY, mode: "lines", line: { color: c.grid, width: 1.5, dash: "dash" }, name: "Proportional (\u03B2=1)" });
+
+    Plotly.react(levelChartEl, traces2, baseLayout({
+      title: { text: "Level Space (power curve)", font: { size: 13 } },
+      xaxis: { title: "x", gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft } },
+      yaxis: { title: "y", gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft } },
+      legend: { x: 0.02, y: 0.98, font: { color: c.text, size: 10 }, bgcolor: "rgba(0,0,0,0)" }
+    }), PLOTLY_CONFIG);
+  }
+
+  bindSlider("elasticity-beta", "elasticity-beta-val", function(v) { return v; }, render);
+  bindSlider("elasticity-b0", "elasticity-b0-val", function(v) { return v; }, render);
+  window.__rerender_elasticity = render;
+  render();
+})();
+
+// ==================== WIDGET 5: Exponential Growth & Rule of 72 ====================
+(function() {
+  var levelsEl = document.getElementById("chart-expgrowth-levels");
+  var logsEl = document.getElementById("chart-expgrowth-logs");
+  var SP = DATA.sp500;
+
+  function render() {
+    var c = themeColors();
+    var displayMode = getToggleVal("expgrowth-display");
+    var customRate = parseFloat(document.getElementById("expgrowth-rate").value);
+
+    var reg = SP.growthReg;
+    var estRate = reg.b2 * 100;
+    var doubling = 72 / estRate;
+    var customDoubling = 72 / customRate;
+
+    document.getElementById("expgrowth-grate").textContent = estRate.toFixed(2) + "%/yr";
+    document.getElementById("expgrowth-r2").textContent = fmt(reg.R2);
+    document.getElementById("expgrowth-double").textContent = doubling.toFixed(1) + " yrs";
+    document.getElementById("expgrowth-cdouble").textContent = customDoubling.toFixed(1) + " yrs";
+
+    var showLevels = displayMode === "both" || displayMode === "levels";
+    var showLogs = displayMode === "both" || displayMode === "logs";
+
+    // Fitted values
+    var fittedLn = SP.year.map(function(yr) { return reg.b1 + reg.b2 * yr; });
+    var fittedLevels = fittedLn.map(function(v) { return Math.exp(v); });
+
+    // Levels chart
+    if (showLevels) {
+      var traces1 = [];
+      traces1.push({ x: SP.year, y: SP.sp500, mode: "lines", line: { color: c.cyan, width: 2 }, name: "Actual S&P 500" });
+      traces1.push({ x: SP.year, y: fittedLevels, mode: "lines", line: { color: c.purple, width: 2, dash: "dash" }, name: "Fitted (exponential)" });
+
+      Plotly.react(levelsEl, traces1, baseLayout({
+        title: { text: "S&P 500: Levels", font: { size: 13 } },
+        xaxis: { title: "Year", gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft } },
+        yaxis: { title: "S&P 500 Index", gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft } },
+        legend: { x: 0.02, y: 0.98, font: { color: c.text, size: 10 }, bgcolor: "rgba(0,0,0,0)" }
+      }), PLOTLY_CONFIG);
+    } else {
+      Plotly.react(levelsEl, [], baseLayout({ title: { text: "", font: { size: 1 } } }), PLOTLY_CONFIG);
+    }
+
+    // Logs chart
+    if (showLogs) {
+      var traces2 = [];
+      traces2.push({ x: SP.year, y: SP.lnsp500, mode: "lines", line: { color: c.cyan, width: 2 }, name: "Actual ln(S&P 500)" });
+      traces2.push({ x: SP.year, y: fittedLn, mode: "lines", line: { color: c.purple, width: 2, dash: "dash" }, name: "Fitted (linear trend)" });
+
+      Plotly.react(logsEl, traces2, baseLayout({
+        title: { text: "S&P 500: Logarithms", font: { size: 13 } },
+        xaxis: { title: "Year", gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft } },
+        yaxis: { title: "ln(S&P 500)", gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft } },
+        legend: { x: 0.02, y: 0.98, font: { color: c.text, size: 10 }, bgcolor: "rgba(0,0,0,0)" }
+      }), PLOTLY_CONFIG);
+    } else {
+      Plotly.react(logsEl, [], baseLayout({ title: { text: "", font: { size: 1 } } }), PLOTLY_CONFIG);
+    }
+  }
+
+  bindToggles("expgrowth-display", render);
+  bindSlider("expgrowth-rate", "expgrowth-rate-val", function(v) { return v + "%"; }, render);
+  window.__rerender_expgrowth = render;
+  render();
+})();
+
+// ==================== WIDGET 6: Model Comparison Grid ====================
+(function() {
+  var elLinLin = document.getElementById("chart-cmp-linlin");
+  var elLogLin = document.getElementById("chart-cmp-loglin");
+  var elLogLog = document.getElementById("chart-cmp-loglog");
+  var elLinLog = document.getElementById("chart-cmp-linlog");
+  var E = DATA.earnings;
+
+  function render() {
+    var c = themeColors();
+    var highlight = getToggleVal("modelcmp-highlight");
+
+    document.getElementById("modelcmp-r2-linlin").textContent = fmt(E.models.linlin.R2, 3);
+    document.getElementById("modelcmp-r2-loglin").textContent = fmt(E.models.loglin.R2, 3);
+    document.getElementById("modelcmp-r2-loglog").textContent = fmt(E.models.loglog.R2, 3);
+    document.getElementById("modelcmp-r2-linlog").textContent = fmt(E.models.linlog.R2, 3);
+
+    var specs = [
+      { el: elLinLin, key: "linlin", x: E.education, y: E.earnings, m: E.models.linlin, xl: "Education (years)", yl: "Earnings ($)", title: "Linear: y ~ x" },
+      { el: elLogLin, key: "loglin", x: E.education, y: E.lnEarnings, m: E.models.loglin, xl: "Education (years)", yl: "ln(Earnings)", title: "Log-Linear: ln(y) ~ x" },
+      { el: elLogLog, key: "loglog", x: E.lnEducation, y: E.lnEarnings, m: E.models.loglog, xl: "ln(Education)", yl: "ln(Earnings)", title: "Log-Log: ln(y) ~ ln(x)" },
+      { el: elLinLog, key: "linlog", x: E.lnEducation, y: E.earnings, m: E.models.linlog, xl: "ln(Education)", yl: "Earnings ($)", title: "Linear-Log: y ~ ln(x)" }
+    ];
+
+    for (var i = 0; i < specs.length; i++) {
+      var s = specs[i];
+      var isHighlighted = highlight === "all" || highlight === s.key;
+      var opacity = isHighlighted ? 0.6 : 0.15;
+      var lineWidth = isHighlighted ? 2.5 : 1;
+      var lineColor = isHighlighted ? c.purple : c.grid;
+
+      var xMin = Math.min.apply(null, s.x);
+      var xMax = Math.max.apply(null, s.x);
+      var xLine = linspace(xMin, xMax, 50);
+      var yLine = xLine.map(function(xi) { return s.m.b1 + s.m.b2 * xi; });
+
+      var traces = [];
+      traces.push({ x: s.x, y: s.y, mode: "markers", type: "scatter",
+        marker: { color: c.cyan, size: 5, opacity: opacity }, name: "Data", showlegend: false });
+      traces.push({ x: xLine, y: yLine, mode: "lines",
+        line: { color: lineColor, width: lineWidth }, name: "R\u00B2=" + fmt(s.m.R2, 3), showlegend: true });
+
+      Plotly.react(s.el, traces, baseLayout({
+        title: { text: s.title, font: { size: 12, color: isHighlighted ? c.text : c.textSoft } },
+        margin: { l: 50, r: 12, t: 32, b: 40 },
+        xaxis: { title: s.xl, gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft, size: 10 } },
+        yaxis: { title: s.yl, gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft, size: 10 } },
+        legend: { x: 0.02, y: 0.98, font: { color: c.text, size: 10 }, bgcolor: "rgba(0,0,0,0)" }
+      }), PLOTLY_CONFIG);
+    }
+  }
+
+  bindToggles("modelcmp-highlight", render);
+  window.__rerender_modelcmp = render;
+  render();
+})();
+
+// ==================== WIDGET 7: Cross-Country Log Models ====================
+(function() {
+  var chartEl = document.getElementById("chart-crosscountry");
+  var CONV = DATA.convergence;
+
+  function render() {
+    var c = themeColors();
+    var modelType = getToggleVal("crosscountry-model");
+    var showLabels = getToggleVal("crosscountry-labels") === "on";
+
+    var xData, yData, reg, xLabel, yLabel, interpStr;
+    if (modelType === "loglog") {
+      xData = CONV.lnKl; yData = CONV.lnLp; reg = CONV.loglogKl;
+      xLabel = "ln(Capital per worker)"; yLabel = "ln(Labor productivity)";
+      interpStr = "Elast: " + fmt(reg.b2, 2);
+    } else if (modelType === "loglin") {
+      xData = CONV.h; yData = CONV.lnLp; reg = CONV.loglinH;
+      xLabel = "Human capital index"; yLabel = "ln(Labor productivity)";
+      interpStr = "Semi-e: " + (reg.b2 * 100).toFixed(1) + "%";
+    } else {
+      // Linear on raw data — compute on the fly
+      var fit = olsFit(CONV.kl, CONV.lp);
+      xData = CONV.kl; yData = CONV.lp;
+      reg = { b1: fit.b1, b2: fit.b2, R2: fit.R2, n: fit.n };
+      xLabel = "Capital per worker"; yLabel = "Labor productivity";
+      interpStr = "$" + Math.round(reg.b2) + "/unit";
+    }
+
+    document.getElementById("crosscountry-b2").textContent = fmt(reg.b2);
+    document.getElementById("crosscountry-r2").textContent = fmt(reg.R2);
+    document.getElementById("crosscountry-interp").textContent = interpStr;
+    document.getElementById("crosscountry-n").textContent = String(CONV.countries.length);
+
+    var xMin = Math.min.apply(null, xData);
+    var xMax = Math.max.apply(null, xData);
+    var xLine = linspace(xMin, xMax, 100);
+    var yLine = xLine.map(function(xi) { return reg.b1 + reg.b2 * xi; });
+
+    var traces = [];
+    var textArr = showLabels ? CONV.countries : CONV.countries.map(function() { return ""; });
+    traces.push({ x: xData, y: yData, mode: showLabels ? "markers+text" : "markers", type: "scatter",
+      marker: { color: c.cyan, size: 7, opacity: 0.7 },
+      text: CONV.countries, textposition: "top right", textfont: { size: 8, color: c.textSoft },
+      hovertemplate: "%{text}<br>x=%{x:.2f}<br>y=%{y:.2f}<extra></extra>",
+      name: "Countries" });
+    traces.push({ x: xLine, y: yLine, mode: "lines",
+      line: { color: c.purple, width: 2.5 }, name: "OLS (R\u00B2=" + fmt(reg.R2, 3) + ")" });
+
+    Plotly.react(chartEl, traces, baseLayout({
+      xaxis: { title: xLabel, gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft } },
+      yaxis: { title: yLabel, gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft } },
+      legend: { x: 0.02, y: 0.98, font: { color: c.text }, bgcolor: "rgba(0,0,0,0)" }
+    }), PLOTLY_CONFIG);
+  }
+
+  bindToggles("crosscountry-model", render);
+  bindToggles("crosscountry-labels", render);
+  window.__rerender_crosscountry = render;
+  render();
+})();
+
+// ==================== RESET + URL HASH STATE ====================
+(function() {
+  var REG = {
+    logapprox: [
+      { id: "logapprox-pct", kind: "range", def: "5" },
+      { id: "logapprox-x0", kind: "range", def: "100" }
+    ],
+    fourmodels: [
+      { group: "fourmodels-spec", kind: "toggle", def: "linlin" }
+    ],
+    semielast: [
+      { id: "semielast-beta", kind: "range", def: "0.13" },
+      { id: "semielast-b0", kind: "range", def: "8.5" }
+    ],
+    elasticity: [
+      { id: "elasticity-beta", kind: "range", def: "1.48" },
+      { id: "elasticity-b0", kind: "range", def: "7" }
+    ],
+    expgrowth: [
+      { group: "expgrowth-display", kind: "toggle", def: "both" },
+      { id: "expgrowth-rate", kind: "range", def: "6.5" }
+    ],
+    modelcmp: [
+      { group: "modelcmp-highlight", kind: "toggle", def: "all" }
+    ],
+    crosscountry: [
+      { group: "crosscountry-model", kind: "toggle", def: "loglog" },
+      { group: "crosscountry-labels", kind: "toggle", def: "off" }
+    ]
+  };
+
+  function getVal(c) {
+    if (c.kind === "toggle") {
+      var btn = document.querySelector("#" + c.group + " button.active");
+      return btn ? btn.dataset.val : c.def;
+    }
+    return document.getElementById(c.id).value;
+  }
+
+  function setVal(c, val, fire) {
+    if (c.kind === "toggle") {
+      var group = document.getElementById(c.group);
+      if (!group) return;
+      var btn = group.querySelector('button[data-val="' + val + '"]');
+      if (btn && !btn.classList.contains("active")) btn.click();
+    } else {
+      var el = document.getElementById(c.id);
+      if (!el) return;
+      if (el.value !== String(val)) {
+        el.value = val;
+        if (fire) el.dispatchEvent(new Event(c.kind === "select" ? "change" : "input", { bubbles: true }));
+      }
+    }
+  }
+
+  function resetWidget(widget) {
+    var ctrls = REG[widget] || [];
+    for (var i = 0; i < ctrls.length; i++) setVal(ctrls[i], ctrls[i].def, true);
+    var fn = window["__rerender_" + widget];
+    if (fn) fn();
+    writeHash();
+  }
+
+  function writeHash() {
+    var parts = [];
+    for (var widget in REG) {
+      var ctrls = REG[widget];
+      for (var i = 0; i < ctrls.length; i++) {
+        var c = ctrls[i];
+        var v = String(getVal(c));
+        if (v !== String(c.def)) {
+          var key = c.id || c.group;
+          parts.push(key + "=" + encodeURIComponent(v));
+        }
+      }
+    }
+    var want = parts.length ? "#" + parts.join("&") : "";
+    if (want === "" && location.hash.match(/=/)) {
+      history.replaceState(null, "", location.pathname + location.search);
+    } else if (want !== "" && location.hash !== want) {
+      history.replaceState(null, "", location.pathname + location.search + want);
+    }
+  }
+
+  function readHash() {
+    var hash = location.hash.slice(1);
+    if (!hash || !hash.includes("=")) return;
+    var params = {};
+    var pairs = hash.split("&");
+    for (var i = 0; i < pairs.length; i++) {
+      var eq = pairs[i].indexOf("=");
+      if (eq < 0) continue;
+      params[pairs[i].slice(0, eq)] = decodeURIComponent(pairs[i].slice(eq + 1));
+    }
+    for (var widget in REG) {
+      var ctrls = REG[widget];
+      for (var i = 0; i < ctrls.length; i++) {
+        var c = ctrls[i];
+        var key = c.id || c.group;
+        if (key in params) setVal(c, params[key], true);
+      }
+    }
+  }
+
+  document.querySelectorAll(".reset-btn[data-reset]").forEach(function(btn) {
+    btn.addEventListener("click", function() { resetWidget(btn.dataset.reset); });
+  });
+  document.addEventListener("input", function(e) {
+    if (e.target.matches("input[type=range], select")) writeHash();
+  });
+  document.addEventListener("change", function(e) {
+    if (e.target.matches("select")) writeHash();
+  });
+  document.querySelectorAll(".toggle-group button").forEach(function(b) {
+    b.addEventListener("click", function() { setTimeout(writeHash, 0); });
+  });
+  readHash();
+})();
+
+// ==================== THEME TOGGLE ====================
+(function() {
+  var btn = document.getElementById("theme-toggle");
+  var iconEl = document.getElementById("theme-icon");
+  var labelEl = document.getElementById("theme-label");
+
+  function apply(theme) {
+    document.documentElement.dataset.theme = theme;
+    iconEl.textContent = theme === "dark" ? "\u2600\uFE0F" : "\uD83C\uDF19";
+    labelEl.textContent = theme === "dark" ? "Light" : "Dark";
+    for (var key in window) {
+      if (key.startsWith("__rerender_") && typeof window[key] === "function") window[key]();
+    }
+  }
+
+  var saved = localStorage.getItem(THEME_KEY);
+  var prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+  apply(saved || (prefersDark ? "dark" : "light"));
+
+  btn.addEventListener("click", function() {
+    var next = document.documentElement.dataset.theme === "dark" ? "light" : "dark";
+    localStorage.setItem(THEME_KEY, next);
+    apply(next);
+  });
+})();
+
+// ==================== Resize handling ====================
+window.addEventListener("resize", function() {
+  document.querySelectorAll(".chart").forEach(function(el) {
+    if (el.data) Plotly.Plots.resize(el);
+  });
+});
+</script>
+
+</body>
+</html>

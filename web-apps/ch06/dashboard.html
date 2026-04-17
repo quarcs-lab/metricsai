@@ -1,0 +1,1446 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chapter 06 — The Least Squares Estimator · metricsAI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.plot.ly/plotly-2.35.2.min.js" charset="utf-8"></script>
+<style>
+:root {
+  --cyan: #008CB7;
+  --cyan-soft: #22d3ee;
+  --purple: #7A209F;
+  --purple-soft: #c084fc;
+  --pink: #C21E72;
+  --pink-soft: #f472b6;
+
+  --bg: #f5f8fb;
+  --panel: #ffffff;
+  --panel-2: #f0f4f9;
+  --text: #0b1021;
+  --text-soft: #475569;
+  --text-muted: #64748b;
+  --border: #d9e2ec;
+  --accent: var(--cyan);
+  --accent-2: var(--purple);
+  --accent-3: var(--pink);
+  --shadow: 0 2px 10px rgba(11, 16, 33, 0.06), 0 12px 30px rgba(11, 16, 33, 0.05);
+  --grid: #e3e8ef;
+  --code-bg: #eef3f8;
+}
+html[data-theme="dark"] {
+  --bg: #0c1024;
+  --panel: #151a33;
+  --panel-2: #1b2142;
+  --text: #e2e8f0;
+  --text-soft: #b5c0d0;
+  --text-muted: #8a98ae;
+  --border: #2a3156;
+  --accent: var(--cyan-soft);
+  --accent-2: var(--purple-soft);
+  --accent-3: var(--pink-soft);
+  --shadow: 0 2px 10px rgba(0, 0, 0, 0.25), 0 12px 30px rgba(0, 0, 0, 0.35);
+  --grid: #2a3156;
+  --code-bg: #0f1530;
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.55;
+  transition: background-color .25s ease, color .25s ease;
+}
+code, .mono { font-family: 'JetBrains Mono', ui-monospace, monospace; }
+
+header.page {
+  position: relative;
+  padding: 2.4rem 1.5rem 2rem;
+  background:
+    radial-gradient(1200px 400px at 85% -10%, rgba(122, 32, 159, 0.15), transparent),
+    radial-gradient(1000px 400px at 10% 0%, rgba(0, 140, 183, 0.18), transparent),
+    var(--panel);
+  border-bottom: 1px solid var(--border);
+}
+.page-inner { max-width: 1120px; margin: 0 auto; }
+.chapter-badge {
+  display: inline-block; font-size: 0.72rem; letter-spacing: 0.15em;
+  text-transform: uppercase; color: var(--accent); font-weight: 600; margin-bottom: 0.5rem;
+}
+h1.title {
+  font-size: clamp(1.6rem, 3.4vw, 2.4rem); margin: 0 0 0.35rem;
+  background: linear-gradient(90deg, var(--accent), var(--accent-2));
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+  font-weight: 700; letter-spacing: -0.01em;
+}
+p.subtitle { margin: 0 0 0.8rem; color: var(--text-soft); font-size: 1.05rem; max-width: 720px; }
+.theme-toggle {
+  position: absolute; top: 1.4rem; right: 1.5rem;
+  background: var(--panel-2); color: var(--text); border: 1px solid var(--border);
+  padding: 0.4rem 0.8rem; border-radius: 999px; cursor: pointer;
+  font-size: 0.85rem; font-weight: 500; display: inline-flex; align-items: center; gap: 0.35rem;
+  transition: all .2s ease;
+}
+.theme-toggle:hover { border-color: var(--accent); color: var(--accent); }
+
+nav.anchors {
+  position: sticky; top: 0; z-index: 20;
+  background: color-mix(in srgb, var(--panel) 92%, transparent);
+  backdrop-filter: saturate(150%) blur(8px); -webkit-backdrop-filter: saturate(150%) blur(8px);
+  border-bottom: 1px solid var(--border);
+}
+nav.anchors ul {
+  display: flex; gap: 0.25rem; overflow-x: auto; list-style: none;
+  padding: 0.55rem 1.5rem; margin: 0 auto; max-width: 1120px; scrollbar-width: thin;
+}
+nav.anchors a {
+  display: block; padding: 0.35rem 0.75rem; border-radius: 8px;
+  color: var(--text-soft); text-decoration: none; font-size: 0.85rem;
+  font-weight: 500; white-space: nowrap; transition: all .15s ease;
+}
+nav.anchors a:hover { color: var(--accent); background: var(--panel-2); }
+
+main { max-width: 1120px; margin: 1.2rem auto 3rem; padding: 0 1.5rem; }
+
+section.widget {
+  background: var(--panel); border: 1px solid var(--border); border-radius: 16px;
+  padding: 1.5rem 1.4rem 1.3rem; margin-bottom: 1.5rem; box-shadow: var(--shadow);
+}
+.section-tag {
+  display: inline-block; font-family: 'JetBrains Mono', monospace; font-size: 0.72rem;
+  color: var(--accent); background: color-mix(in srgb, var(--accent) 12%, transparent);
+  padding: 0.2rem 0.55rem; border-radius: 6px; margin-bottom: 0.6rem; font-weight: 500;
+}
+.widget h2 { margin: 0 0 0.2rem; font-size: 1.35rem; font-weight: 600; color: var(--accent-2); letter-spacing: -0.005em; }
+.widget .lede { margin: 0 0 1rem; color: var(--text-soft); font-size: 0.97rem; max-width: 780px; }
+
+.controls {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 0.9rem 1.2rem; padding: 0.9rem 1rem; background: var(--panel-2); border-radius: 10px; margin-bottom: 1rem;
+}
+.ctrl { display: flex; flex-direction: column; gap: 0.3rem; }
+.ctrl label { font-size: 0.78rem; font-weight: 500; color: var(--text-soft); text-transform: uppercase; letter-spacing: 0.05em; }
+.ctrl select, .ctrl input[type="range"], .ctrl input[type="number"] {
+  font-family: inherit; font-size: 0.9rem; padding: 0.4rem 0.55rem; border-radius: 8px;
+  border: 1px solid var(--border); background: var(--panel); color: var(--text);
+}
+.ctrl input[type="range"] { padding: 0.2rem 0; accent-color: var(--accent); }
+.ctrl .val { font-family: 'JetBrains Mono', monospace; font-size: 0.82rem; color: var(--accent); font-weight: 500; }
+.toggle-group { display: inline-flex; gap: 0.25rem; background: var(--panel); padding: 3px; border-radius: 10px; border: 1px solid var(--border); flex-wrap: wrap; }
+.toggle-group button {
+  background: transparent; border: none; color: var(--text-soft);
+  padding: 0.32rem 0.75rem; border-radius: 7px; font-family: inherit; font-size: 0.85rem;
+  cursor: pointer; transition: all .15s ease;
+}
+.toggle-group button.active { background: var(--accent); color: white; font-weight: 500; }
+
+.stats-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+  gap: 0.6rem; margin: 0.5rem 0 1rem;
+}
+.stat {
+  background: var(--panel-2); padding: 0.65rem 0.75rem; border-radius: 10px; border-left: 3px solid var(--accent);
+}
+.stat .label { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-muted); }
+.stat .value { font-family: 'JetBrains Mono', monospace; font-size: 1.05rem; font-weight: 500; color: var(--text); margin-top: 0.15rem; }
+.stat.pop { border-left-color: var(--accent-2); }
+.stat.err { border-left-color: var(--accent-3); }
+
+.callout {
+  background: color-mix(in srgb, var(--accent-2) 8%, transparent);
+  border-left: 3px solid var(--accent-2); padding: 0.7rem 0.9rem;
+  border-radius: 8px; font-size: 0.9rem; color: var(--text-soft); margin: 0.9rem 0 0.2rem;
+}
+.callout strong { color: var(--accent-2); }
+
+.try-this {
+  background: color-mix(in srgb, var(--accent) 8%, transparent);
+  border-left: 3px solid var(--accent); padding: 0.7rem 0.9rem;
+  border-radius: 8px; font-size: 0.9rem; color: var(--text-soft); margin: 0.7rem 0 0.2rem;
+}
+.try-this .try-title { font-weight: 600; color: var(--accent); font-size: 0.78rem; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 0.3rem; }
+.try-this ol { margin: 0; padding-left: 1.25rem; }
+.try-this li { margin: 0.2rem 0; }
+
+.widget-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 0.5rem; margin-bottom: 0.2rem; }
+.widget-head > div { flex: 1; min-width: 0; }
+.reset-btn {
+  background: transparent; color: var(--text-muted); border: 1px solid var(--border);
+  padding: 0.3rem 0.7rem; border-radius: 8px; font-family: inherit; font-size: 0.8rem;
+  cursor: pointer; white-space: nowrap; transition: all .15s ease;
+}
+.reset-btn:hover { color: var(--accent); border-color: var(--accent); }
+.resim-btn {
+  background: var(--panel); color: var(--accent); border: 1px solid var(--accent);
+  padding: 0.35rem 0.85rem; border-radius: 8px; font-family: inherit; font-size: 0.85rem;
+  cursor: pointer; font-weight: 500; transition: all .15s ease;
+}
+.resim-btn:hover { background: var(--accent); color: white; }
+
+.delta-row {
+  display: flex; flex-wrap: wrap; gap: 0.6rem 1.2rem;
+  margin: 0.2rem 0 0.9rem; padding: 0.55rem 0.85rem;
+  background: var(--panel-2); border-radius: 10px;
+  font-family: 'JetBrains Mono', monospace; font-size: 0.88rem;
+  color: var(--text-soft); border-left: 3px solid var(--accent-3);
+}
+.delta-row .label { color: var(--text-muted); margin-right: 0.35rem; }
+
+.chart { width: 100%; min-height: 340px; }
+.chart.tall { min-height: 420px; }
+.chart.short { min-height: 280px; }
+
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+@media (max-width: 720px) { .two-col { grid-template-columns: 1fr; } }
+
+footer.page {
+  max-width: 1120px; margin: 1rem auto 3rem; padding: 0 1.5rem;
+  color: var(--text-muted); font-size: 0.88rem; text-align: center;
+}
+footer.page a { color: var(--accent); text-decoration: none; }
+footer.page a:hover { text-decoration: underline; }
+.scroll-top { display: inline-block; font-size: 0.78rem; color: var(--text-muted); text-decoration: none; margin-top: 0.4rem; }
+.scroll-top:hover { color: var(--accent); }
+</style>
+</head>
+<body>
+
+<header class="page">
+  <div class="page-inner">
+    <span class="chapter-badge">Chapter 06 of 18 · Interactive Dashboard</span>
+    <h1 class="title">The Least Squares Estimator</h1>
+    <p class="subtitle">Slide, toggle, and simulate to build intuition for OLS properties — unbiasedness, sampling variability, standard errors, and efficiency.</p>
+  </div>
+  <button id="theme-toggle" class="theme-toggle" type="button" aria-label="Toggle color theme"><span id="theme-icon">🌙</span><span id="theme-label">Dark</span></button>
+</header>
+
+<nav class="anchors" aria-label="Sections">
+  <ul>
+    <li><a href="#pop-vs-sample">Pop vs. Sample</a></li>
+    <li><a href="#assumptions">Assumptions</a></li>
+    <li><a href="#monte-carlo">Monte Carlo</a></li>
+    <li><a href="#se-anatomy">SE Anatomy</a></li>
+    <li><a href="#gauss-markov">Gauss-Markov</a></li>
+    <li><a href="#convergence">Real Data</a></li>
+    <li><a href="#se-vs-n">SE vs. n</a></li>
+  </ul>
+</nav>
+
+<main>
+
+<!-- ==================== WIDGET 1: Population vs. Sample Regression ==================== -->
+<section class="widget" id="pop-vs-sample">
+  <div class="widget-head">
+    <div>
+      <span class="section-tag">§ 6.1–6.2 · Key Concepts 6.1, 6.2</span>
+      <h2>Population vs. Sample Regression</h2>
+    </div>
+    <button class="reset-btn" data-reset="popvs">↺ Reset</button>
+  </div>
+  <p class="lede">The population line E[y|x] = 1 + 2x is fixed and unknown. The sample line ŷ = b₁ + b₂x estimates it from limited data. Toggle between errors (deviations from the true line) and residuals (deviations from the fitted line).</p>
+  <div class="controls">
+    <div class="ctrl">
+      <label for="popvs-n">Sample size n <span class="val" id="popvs-n-val">30</span></label>
+      <input type="range" id="popvs-n" min="5" max="100" step="5" value="30">
+    </div>
+    <div class="ctrl">
+      <label>Show deviations</label>
+      <div class="toggle-group" id="popvs-show">
+        <button type="button" data-val="off" class="active">Off</button>
+        <button type="button" data-val="errors">Errors (u)</button>
+        <button type="button" data-val="residuals">Residuals (e)</button>
+        <button type="button" data-val="both">Both</button>
+      </div>
+    </div>
+    <div class="ctrl">
+      <label>&nbsp;</label>
+      <button class="resim-btn" id="popvs-resim" type="button">Resimulate</button>
+    </div>
+  </div>
+  <div class="stats-grid">
+    <div class="stat pop"><div class="label">True β₁</div><div class="value">1.0000</div></div>
+    <div class="stat pop"><div class="label">True β₂</div><div class="value">2.0000</div></div>
+    <div class="stat"><div class="label">Sample b₁</div><div class="value" id="popvs-b1">—</div></div>
+    <div class="stat"><div class="label">Sample b₂</div><div class="value" id="popvs-b2">—</div></div>
+    <div class="stat err"><div class="label">Sampling error</div><div class="value" id="popvs-err">—</div></div>
+    <div class="stat"><div class="label">R²</div><div class="value" id="popvs-r2">—</div></div>
+  </div>
+  <div class="chart" id="chart-popvs"></div>
+  <div class="callout"><strong>Key Concepts 6.1–6.2:</strong> The population regression E[y|x] = β₁ + β₂x is unknown and fixed. The sample regression ŷ = b₁ + b₂x estimates it from data. The error u = y − E[y|x] is unobservable; the residual e = y − ŷ is observable. We use residuals to learn about errors.</div>
+  <div class="try-this">
+    <div class="try-title">Try this</div>
+    <ol>
+      <li>Toggle to <strong>Both</strong> at n = 30. Purple dashed segments (errors) go to the true line; pink segments (residuals) go to the fitted line. Residuals are shorter on average — OLS minimizes squared residuals, not squared errors.</li>
+      <li>Set n = 5 and click <strong>Resimulate</strong> several times. The sample line swings wildly. Now set n = 100 — the sample line barely moves between draws.</li>
+      <li>Show <strong>Errors (u)</strong> — some are positive, some negative. Their average is close to zero by construction. This is the E[u|x] = 0 assumption in action.</li>
+    </ol>
+  </div>
+</section>
+
+<!-- ==================== WIDGET 2: OLS Assumptions Diagnostic ==================== -->
+<section class="widget" id="assumptions">
+  <div class="widget-head">
+    <div>
+      <span class="section-tag">§ 6.3 · Key Concept 6.3</span>
+      <h2>OLS Assumptions Diagnostic</h2>
+    </div>
+    <button class="reset-btn" data-reset="assumptions">↺ Reset</button>
+  </div>
+  <p class="lede">OLS relies on four assumptions. When all hold, the estimator is unbiased and efficient. Toggle each violation to see how it distorts the regression — biasing the slope (assumptions 1–2) or invalidating standard errors (assumptions 3–4).</p>
+  <div class="controls">
+    <div class="ctrl">
+      <label>Assumption to violate</label>
+      <div class="toggle-group" id="assume-which">
+        <button type="button" data-val="none" class="active">All Correct</button>
+        <button type="button" data-val="linearity">Linearity</button>
+        <button type="button" data-val="meanzero">Mean-Zero</button>
+        <button type="button" data-val="homosk">Homosk.</button>
+        <button type="button" data-val="indep">Independence</button>
+      </div>
+    </div>
+    <div class="ctrl">
+      <label for="assume-severity">Severity <span class="val" id="assume-severity-val">50%</span></label>
+      <input type="range" id="assume-severity" min="0" max="100" step="5" value="50">
+    </div>
+    <div class="ctrl">
+      <label>&nbsp;</label>
+      <button class="resim-btn" id="assume-resim" type="button">Resimulate</button>
+    </div>
+  </div>
+  <div class="stats-grid">
+    <div class="stat pop"><div class="label">True β₂</div><div class="value">2.0000</div></div>
+    <div class="stat"><div class="label">Sample b₂</div><div class="value" id="assume-b2">—</div></div>
+    <div class="stat err"><div class="label">Bias (b₂ − β₂)</div><div class="value" id="assume-bias">—</div></div>
+    <div class="stat"><div class="label">se(b₂)</div><div class="value" id="assume-se">—</div></div>
+  </div>
+  <div class="chart" id="chart-assume"></div>
+  <div class="callout"><strong>Key Concept 6.3:</strong> The four OLS assumptions: (1) correct model y = β₁ + β₂x + u, (2) E[u|x] = 0, (3) homoskedasticity Var[u|x] = σ², (4) independence of errors. Violating 1–2 biases the slope. Violating 3–4 makes standard errors unreliable but can be addressed with robust SEs.</div>
+  <div class="try-this">
+    <div class="try-title">Try this</div>
+    <ol>
+      <li>Select <strong>Mean-Zero</strong> and push severity to 100%. The sample line consistently misses the true line — this is omitted variable bias, the most dangerous violation.</li>
+      <li>Select <strong>Homosk.</strong> at 100%. The fitted line still tracks the true line well (b₂ ≈ 2), but notice the fan-shaped scatter. The reported se(b₂) is unreliable.</li>
+      <li>Set <strong>All Correct</strong> and click Resimulate several times. b₂ varies randomly around 2.0 — never systematic. That is the hallmark of an unbiased estimator.</li>
+    </ol>
+  </div>
+</section>
+
+<!-- ==================== WIDGET 3: Monte Carlo Unbiasedness ==================== -->
+<section class="widget" id="monte-carlo">
+  <div class="widget-head">
+    <div>
+      <span class="section-tag">§ 6.3 · Key Concepts 6.4, 6.8</span>
+      <h2>Monte Carlo Unbiasedness Simulator</h2>
+    </div>
+    <button class="reset-btn" data-reset="mc">↺ Reset</button>
+  </div>
+  <p class="lede">Run many OLS regressions on independent samples from the same DGP. The histogram of slope estimates clusters around the true β₂ = 2 (unbiasedness) and follows a bell curve (CLT). The spaghetti plot below shows 20 individual sample lines dancing around the true line.</p>
+  <div class="controls">
+    <div class="ctrl">
+      <label for="mc-nsim">Simulations <span class="val" id="mc-nsim-val">1000</span></label>
+      <input type="range" id="mc-nsim" min="100" max="2000" step="100" value="1000">
+    </div>
+    <div class="ctrl">
+      <label for="mc-n">Sample size n <span class="val" id="mc-n-val">30</span></label>
+      <input type="range" id="mc-n" min="10" max="200" step="5" value="30">
+    </div>
+    <div class="ctrl">
+      <label>Parameter</label>
+      <div class="toggle-group" id="mc-param">
+        <button type="button" data-val="slope" class="active">Slope (b₂)</button>
+        <button type="button" data-val="intercept">Intercept (b₁)</button>
+      </div>
+    </div>
+    <div class="ctrl">
+      <label>&nbsp;</label>
+      <button class="resim-btn" id="mc-resim" type="button">Resimulate</button>
+    </div>
+  </div>
+  <div class="stats-grid">
+    <div class="stat pop"><div class="label">True value</div><div class="value" id="mc-true">2.0000</div></div>
+    <div class="stat"><div class="label">Mean of estimates</div><div class="value" id="mc-mean">—</div></div>
+    <div class="stat"><div class="label">SD of estimates</div><div class="value" id="mc-sd">—</div></div>
+    <div class="stat"><div class="label">Theoretical SE</div><div class="value" id="mc-theose">—</div></div>
+    <div class="stat err"><div class="label">|Bias|</div><div class="value" id="mc-bias">—</div></div>
+  </div>
+  <div class="chart" id="chart-mc-hist"></div>
+  <div class="chart short" id="chart-mc-spaghetti"></div>
+  <div class="callout"><strong>Key Concepts 6.4, 6.8:</strong> Monte Carlo simulation confirms E[b₂] = β₂. The average of 1,000 slope estimates ≈ 1.9944, within 0.006 of the true value 2.0. Individual estimates vary (sampling variability), but average out. The distribution is approximately normal by the CLT.</div>
+  <div class="try-this">
+    <div class="try-title">Try this</div>
+    <ol>
+      <li>At n = 30 the SD ≈ 0.38. Set n = 120 (4× larger) — the SD drops to ≈ 0.19 (halved). You need 4× the data to halve the spread. This is the √n rule.</li>
+      <li>Switch to <strong>Intercept (b₁)</strong>. The distribution is wider (SD ≈ 1.2). The intercept is harder to estimate because it extrapolates to x = 0, far from the data center.</li>
+      <li>Set n = 10 and click Resimulate — the histogram looks lumpy. Now set n = 100 — the bell is smooth every time. The CLT works better with larger n.</li>
+    </ol>
+  </div>
+</section>
+
+<!-- ==================== WIDGET 4: Standard Error Anatomy ==================== -->
+<section class="widget" id="se-anatomy">
+  <div class="widget-head">
+    <div>
+      <span class="section-tag">§ 6.4 · Key Concepts 6.5, 6.6</span>
+      <h2>Standard Error Anatomy</h2>
+    </div>
+    <button class="reset-btn" data-reset="se">↺ Reset</button>
+  </div>
+  <p class="lede">The standard error se(b₂) = sₑ / √SSx depends on three factors: model fit (σᵤ), sample size (n), and x-spread (σₓ). Adjust each slider to see how the formula components change and how precision improves or deteriorates.</p>
+  <div class="controls">
+    <div class="ctrl">
+      <label for="se-sigma">Error σᵤ <span class="val" id="se-sigma-val">2.0</span></label>
+      <input type="range" id="se-sigma" min="0.5" max="5" step="0.5" value="2">
+    </div>
+    <div class="ctrl">
+      <label for="se-n">Sample size n <span class="val" id="se-n-val">30</span></label>
+      <input type="range" id="se-n" min="5" max="150" step="5" value="30">
+    </div>
+    <div class="ctrl">
+      <label for="se-xspread">X spread σₓ <span class="val" id="se-xspread-val">1.0</span></label>
+      <input type="range" id="se-xspread" min="0.3" max="3" step="0.1" value="1">
+    </div>
+    <div class="ctrl">
+      <label>&nbsp;</label>
+      <button class="resim-btn" id="se-resim" type="button">Resimulate</button>
+    </div>
+  </div>
+  <div class="stats-grid">
+    <div class="stat"><div class="label">sₑ (Root MSE)</div><div class="value" id="se-rootmse">—</div></div>
+    <div class="stat"><div class="label">df = n − 2</div><div class="value" id="se-df">—</div></div>
+    <div class="stat"><div class="label">SSx = Σ(xᵢ−x̄)²</div><div class="value" id="se-ssx">—</div></div>
+    <div class="stat err"><div class="label">se(b₂)</div><div class="value" id="se-seb2">—</div></div>
+    <div class="stat"><div class="label">R²</div><div class="value" id="se-r2">—</div></div>
+  </div>
+  <div class="delta-row">
+    <span><span class="label">Formula:</span> se(b₂) = <span id="se-formula">—</span></span>
+  </div>
+  <div class="chart" id="chart-se"></div>
+  <div class="callout"><strong>Key Concepts 6.5–6.6:</strong> se(b₂) = sₑ / √SSx, where sₑ = √(RSS / (n−2)). We divide by (n−2), not n, because estimating 2 parameters uses 2 degrees of freedom. Precision improves with: smaller errors (lower σᵤ), more data (larger n), and wider x-spread (larger SSx).</div>
+  <div class="try-this">
+    <div class="try-title">Try this</div>
+    <ol>
+      <li>Set σᵤ = 0.5 — points hug the line, se(b₂) is tiny. Drag to σᵤ = 5 — the cloud explodes and se(b₂) grows proportionally. Model fit drives precision.</li>
+      <li>Keep σᵤ = 2, set n = 5 (df = 3, large SE). Increase to n = 80 — diminishing returns. This is the √n effect on degrees of freedom.</li>
+      <li>Set σₓ = 0.3 — x values cluster tightly, SSx is small, slope poorly identified. Drag to σₓ = 3 — wide spread, precise slope. This is why experimental design matters.</li>
+    </ol>
+  </div>
+</section>
+
+<!-- ==================== WIDGET 5: Gauss-Markov ==================== -->
+<section class="widget" id="gauss-markov">
+  <div class="widget-head">
+    <div>
+      <span class="section-tag">§ 6.3–6.4 · Key Concept 6.7</span>
+      <h2>Gauss-Markov: OLS vs. Alternatives</h2>
+    </div>
+    <button class="reset-btn" data-reset="gm">↺ Reset</button>
+  </div>
+  <p class="lede">Under the four OLS assumptions, the Gauss-Markov Theorem guarantees OLS is BLUE — Best Linear Unbiased Estimator. Compare its sampling distribution to two alternatives: a deliberately inefficient linear estimator and the robust Theil median slope.</p>
+  <div class="controls">
+    <div class="ctrl">
+      <label>Error structure</label>
+      <div class="toggle-group" id="gm-errors">
+        <button type="button" data-val="homo" class="active">Assumptions Met</button>
+        <button type="button" data-val="hetero">Heteroskedastic</button>
+      </div>
+    </div>
+    <div class="ctrl">
+      <label for="gm-nsim">Simulations <span class="val" id="gm-nsim-val">1000</span></label>
+      <input type="range" id="gm-nsim" min="500" max="2000" step="100" value="1000">
+    </div>
+    <div class="ctrl">
+      <label>&nbsp;</label>
+      <button class="resim-btn" id="gm-resim" type="button">Resimulate</button>
+    </div>
+  </div>
+  <div class="stats-grid">
+    <div class="stat"><div class="label">OLS SD</div><div class="value" id="gm-ols-sd">—</div></div>
+    <div class="stat"><div class="label">Alt-Linear SD</div><div class="value" id="gm-alt-sd">—</div></div>
+    <div class="stat"><div class="label">Median-Slope SD</div><div class="value" id="gm-med-sd">—</div></div>
+    <div class="stat err"><div class="label">Efficiency (Alt/OLS)</div><div class="value" id="gm-eff">—</div></div>
+  </div>
+  <div class="chart" id="chart-gm"></div>
+  <div class="callout"><strong>Key Concept 6.7:</strong> The Gauss-Markov Theorem: under assumptions 1–4, OLS has the smallest variance among all linear unbiased estimators (BLUE). The efficiency ratio shows alternative linear estimators are wider. When homoskedasticity fails, OLS loses this optimality, motivating robust methods (Chapter 7).</div>
+  <div class="try-this">
+    <div class="try-title">Try this</div>
+    <ol>
+      <li>Under <strong>Assumptions Met</strong>, compare the three histograms. OLS (cyan) is always tightest. The efficiency ratio (Alt SD / OLS SD) should be well above 1.0.</li>
+      <li>Switch to <strong>Heteroskedastic</strong>. OLS is still unbiased (centered on 2.0), but the median-slope estimator may now have comparable spread. OLS is no longer the best.</li>
+      <li>Increase simulations to 2000 for smoother histograms. The ranking of estimator variances becomes clearer with more draws.</li>
+    </ol>
+  </div>
+</section>
+
+<!-- ==================== WIDGET 6: Convergence Case Study ==================== -->
+<section class="widget" id="convergence">
+  <div class="widget-head">
+    <div>
+      <span class="section-tag">§ Case Study · Key Concepts 6.8, 6.9</span>
+      <h2>Real-Data Sampling Variability</h2>
+    </div>
+    <button class="reset-btn" data-reset="conv">↺ Reset</button>
+  </div>
+  <p class="lede">The convergence clubs dataset (Mendez 2020) has 108 countries. Treat the full dataset as the "population" and draw random subsamples. Watch how the sample regression line dances around the population line — the same phenomenon we saw with generated data, now with real economic data.</p>
+  <div class="controls">
+    <div class="ctrl">
+      <label for="conv-n">Subsample size <span class="val" id="conv-n-val">50</span></label>
+      <input type="range" id="conv-n" min="10" max="90" step="5" value="50">
+    </div>
+    <div class="ctrl">
+      <label for="conv-mc">MC draws <span class="val" id="conv-mc-val">500</span></label>
+      <input type="range" id="conv-mc" min="100" max="1000" step="100" value="500">
+    </div>
+    <div class="ctrl">
+      <label>Display</label>
+      <div class="toggle-group" id="conv-display">
+        <button type="button" data-val="all" class="active">All + Sample</button>
+        <button type="button" data-val="sample">Sample Only</button>
+      </div>
+    </div>
+    <div class="ctrl">
+      <label>&nbsp;</label>
+      <button class="resim-btn" id="conv-resim" type="button">Resimulate</button>
+    </div>
+  </div>
+  <div class="stats-grid">
+    <div class="stat pop"><div class="label">Pop β₂</div><div class="value" id="conv-popb2">—</div></div>
+    <div class="stat"><div class="label">Sample b₂</div><div class="value" id="conv-b2">—</div></div>
+    <div class="stat err"><div class="label">Sampling error</div><div class="value" id="conv-err">—</div></div>
+    <div class="stat"><div class="label">MC Mean(b₂)</div><div class="value" id="conv-mcmean">—</div></div>
+    <div class="stat"><div class="label">MC SD(b₂)</div><div class="value" id="conv-mcsd">—</div></div>
+  </div>
+  <div class="two-col">
+    <div class="chart" id="chart-conv-scatter"></div>
+    <div class="chart" id="chart-conv-hist"></div>
+  </div>
+  <div class="callout"><strong>Key Concepts 6.8–6.9:</strong> The full dataset of 108 countries is our "population." Drawing a sample of 50 yields a different slope each time. The sampling error b₂ − β₂ is random: sometimes positive, sometimes negative, but averaging to zero (unbiasedness). This connects abstract theory to real economic data.</div>
+  <div class="try-this">
+    <div class="try-title">Try this</div>
+    <ol>
+      <li>Set n = 20 and click <strong>Resimulate</strong> several times. The pink sample line swings widely around the purple population line. With only 20 of 108 countries, uncertainty is substantial.</li>
+      <li>Increase n to 80. The sample line barely departs. Compare the MC SD — did going from 20 to 80 halve it?</li>
+      <li>Toggle to <strong>Sample Only</strong> at n = 30. Different subsets of countries tell very different stories about the capital-productivity relationship.</li>
+    </ol>
+  </div>
+</section>
+
+<!-- ==================== WIDGET 7: SE vs Sample Size ==================== -->
+<section class="widget" id="se-vs-n">
+  <div class="widget-head">
+    <div>
+      <span class="section-tag">§ Case Study · Key Concept 6.10</span>
+      <h2>Standard Errors and Sample Size</h2>
+    </div>
+    <button class="reset-btn" data-reset="sevn">↺ Reset</button>
+  </div>
+  <p class="lede">Standard errors shrink with the square root of sample size: se(b₂) ∝ 1/√n. To halve the SE, you need 4× the data. This widget plots the theoretical curve alongside Monte Carlo empirical points — theory meets practice.</p>
+  <div class="controls">
+    <div class="ctrl">
+      <label for="sevn-sigma">Error σᵤ <span class="val" id="sevn-sigma-val">2.0</span></label>
+      <input type="range" id="sevn-sigma" min="0.5" max="5" step="0.5" value="2">
+    </div>
+    <div class="ctrl">
+      <label for="sevn-xspread">X spread σₓ <span class="val" id="sevn-xspread-val">1.0</span></label>
+      <input type="range" id="sevn-xspread" min="0.3" max="3" step="0.1" value="1">
+    </div>
+    <div class="ctrl">
+      <label>Data source</label>
+      <div class="toggle-group" id="sevn-source">
+        <button type="button" data-val="dgp" class="active">Generated DGP</button>
+        <button type="button" data-val="convergence">Convergence Data</button>
+      </div>
+    </div>
+    <div class="ctrl">
+      <label>&nbsp;</label>
+      <button class="resim-btn" id="sevn-resim" type="button">Resimulate</button>
+    </div>
+  </div>
+  <div class="stats-grid">
+    <div class="stat"><div class="label">SE at n=25</div><div class="value" id="sevn-se25">—</div></div>
+    <div class="stat"><div class="label">SE at n=100</div><div class="value" id="sevn-se100">—</div></div>
+    <div class="stat err"><div class="label">Ratio (n=25/n=100)</div><div class="value" id="sevn-ratio">—</div></div>
+    <div class="stat pop"><div class="label">Theory predicts</div><div class="value">2.00×</div></div>
+  </div>
+  <div class="chart" id="chart-sevn"></div>
+  <div class="callout"><strong>Key Concept 6.10:</strong> se(b₂) = σᵤ / √(n × Var(x)). To halve the SE, you need 4× the sample size. Going from n = 100 to n = 400 has the same precision gain as going from n = 25 to n = 100. This diminishing-returns relationship is a fundamental constraint of statistical estimation.</div>
+  <div class="try-this">
+    <div class="try-title">Try this</div>
+    <ol>
+      <li>Read off the SE at n = 25 and n = 100 (4× larger). Is the ratio close to 2.0? The 1/√n theory predicts it should be exactly 2.</li>
+      <li>Increase σᵤ from 2 to 4. The entire curve shifts up — noisier data means larger SEs at every sample size.</li>
+      <li>Switch to <strong>Convergence Data</strong>. The theory curve no longer applies perfectly (real data is not from a normal DGP), but the √n decay pattern still holds approximately.</li>
+    </ol>
+  </div>
+</section>
+
+</main>
+
+<footer class="page">
+  <p>Part of <a href="https://quarcs-lab.github.io/metricsai/book/_book/index.html"><strong>metricsAI</strong></a> · Chapter 06: The Least Squares Estimator · by Carlos Mendez · <a href="https://github.com/quarcs-lab/metricsai">GitHub</a></p>
+  <p>Case study data: Mendez (2020) convergence clubs dataset, 108 countries 1990–2014.</p>
+  <a class="scroll-top" href="#top">↑ Back to top</a>
+</footer>
+
+<script type="application/json" id="ch-data">{"genData":{"x":[1.0,2.0,3.0,4.0,5.0],"y":[4.6899,4.6813,4.4933,7.3667,8.6092],"Ey":[3.0,5.0,7.0,9.0,11.0]},"convergence":{"countries":["Albania","Algeria","Argentina","Armenia","Australia","Austria","Bangladesh","Belgium","Benin","Bolivia","Brazil","Bulgaria","Burundi","Cambodia","Cameroon","Canada","Central African Republic","Chile","China","Colombia","Congo","Costa Rica","Cote d'Ivoire","Croatia","Czech Republic","Democratic Republic of Congo","Denmark","Dominican Republic","Ecuador","Egypt","El Salvador","Estonia","Finland","France","Germany","Ghana","Greece","Guatemala","Haiti","Honduras","Hong Kong","Hungary","India","Indonesia","Iran","Ireland","Israel","Italy","Jamaica","Japan","Kazakhstan","Kenya","Kyrgyz Republic","Latvia","Lithuania","Malawi","Malaysia","Mali","Mexico","Mongolia","Morocco","Mozambique","Myanmar","Nepal","Netherlands","New Zealand","Nicaragua","Niger","Norway","Pakistan","Panama","Paraguay","Peru","Philippines","Poland","Portugal","Romania","Russia","Rwanda","Saudi Arabia","Senegal","Sierra Leone","Singapore","Slovak Republic","Slovenia","South Africa","South Korea","Spain","Sri Lanka","Sudan","Sweden","Switzerland","Taiwan","Tajikistan","Tanzania","Thailand","Togo","Tunisia","Turkey","Uganda","Ukraine","United Kingdom","United States","Uruguay","Venezuela","Vietnam","Yemen","Zambia"],"productivity":[10873.19,12776.72,20007.18,9118.29,43590.28,45158.24,2887.38,38894.31,2102.85,5798.49,14673.54,16768.48,839.62,2983.79,2680.8,42793.58,598.63,21125.28,12275.32,12710.09,4503.03,13356.3,3218.56,20495.07,28953.49,1199.18,43732.85,12630.67,10921.65,10779.8,7964.36,25692.09,37818.23,38169.15,46189.98,3608.04,24385.19,6874.59,1649.73,4317.93,45399.33,22629.37,5386.09,9642.26,15337.32,51224.51,31242.34,34920.18,7197.93,35270.6,23118.91,2956.07,5599.27,22172.02,24980.13,971.41,21391.48,1506.49,15424.44,10918.35,7251.31,1211.41,5567.87,2577.7,47392.05,33713.18,4494.58,868.01,75920.02,4797.65,19792.19,8168.77,10846.81,6603.0,24278.27,26720.04,20018.52,23768.19,1626.85,46772.05,2309.28,1352.99,66050.36,24944.4,27475.38,11962.84,34585.18,32454.11,10729.67,3681.51,42117.14,61570.26,41514.42,3183.64,2309.13,13586.9,1445.93,10535.25,19521.83,1852.92,10256.67,38324.34,51622.96,19573.24,15117.76,5411.61,3491.14,3576.28],"capital":[127640.2,155396.63,118698.07,36610.1,329658.97,427737.19,25878.04,469572.78,14164.65,24397.26,128932.8,87473.89,2482.35,10385.95,14058.0,323836.97,8187.3,149675.58,86901.92,76396.9,57985.25,69598.88,20597.63,274616.72,341953.53,3153.94,384622.06,102571.95,100192.09,45623.91,41267.63,238241.73,386086.25,443125.28,356783.88,24872.56,502747.31,58347.86,30523.5,36585.52,440963.75,256326.81,44077.54,119061.42,158795.83,535436.13,202648.41,552395.19,126503.72,280624.31,85119.69,17055.21,15036.79,383185.59,234440.61,8800.49,140713.11,10049.23,129880.92,107471.66,108619.98,5999.2,13527.71,12726.2,401166.72,194352.64,35739.33,11631.07,471053.94,27410.98,115138.7,45154.54,62418.48,59648.47,130951.8,446210.56,208357.78,107192.95,6416.93,465393.72,23944.01,9427.29,472351.28,237987.11,349862.06,121865.38,261647.34,479139.25,85120.62,32888.94,373380.56,380356.88,305468.78,77374.37,24351.28,95264.73,9274.1,160419.8,186852.41,15333.91,86393.27,381477.56,355979.28,156742.94,184725.89,27092.06,35054.76,67122.44],"popRegression":{"b1":2648.9862,"b2":0.0949,"se_b2":0.0046,"se":7530.2429,"R2":0.8006,"n":108,"xbar":165853.5132,"ybar":18382.871,"SSx":2681270733026.3906}},"dgp":{"beta1":1,"beta2":2,"sigmaU":2,"muX":3,"sigmaX":1},"reference":{"mc1000":{"b1_mean":0.996,"b1_sd":1.2069,"b2_mean":1.9944,"b2_sd":0.3836},"threeSamples":[{"b1":0.82,"b2":1.81},{"b1":1.75,"b2":1.79},{"b1":2.01,"b2":1.67}]},"meta":{"chapter":"Chapter 06: The Least Squares Estimator","book":"metricsAI: An Introduction to Econometrics with Python and AI in the Cloud","author":"Carlos Mendez"}}</script>
+
+<script>
+"use strict";
+
+var DATA = JSON.parse(document.getElementById("ch-data").textContent);
+
+// ==================== STATS HELPERS ====================
+var mean = function(a) { var s = 0; for (var i = 0; i < a.length; i++) s += a[i]; return s / a.length; };
+var sortedCopy = function(a) { return a.slice().sort(function(x, y) { return x - y; }); };
+function quantile(sorted, p) {
+  var idx = p * (sorted.length - 1);
+  var lo = Math.floor(idx), hi = Math.ceil(idx);
+  if (lo === hi) return sorted[lo];
+  return sorted[lo] + (idx - lo) * (sorted[hi] - sorted[lo]);
+}
+function std(a, m) {
+  if (m === undefined) m = mean(a);
+  var s = 0;
+  for (var i = 0; i < a.length; i++) s += (a[i] - m) * (a[i] - m);
+  return Math.sqrt(s / (a.length - 1));
+}
+function fmt(v, d) {
+  if (d === undefined) d = 4;
+  if (v === null || v === undefined || isNaN(v)) return "\u2014";
+  return v.toFixed(d);
+}
+
+// ==================== PRNG & SAMPLING ====================
+function mulberry32(a) {
+  return function() {
+    a |= 0; a = a + 0x6D2B79F5 | 0;
+    var t = Math.imul(a ^ a >>> 15, 1 | a);
+    t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+    return ((t ^ t >>> 14) >>> 0) / 4294967296;
+  };
+}
+function boxMuller(rng) {
+  var u1 = rng(), u2 = rng();
+  return Math.sqrt(-2 * Math.log(u1)) * Math.cos(2 * Math.PI * u2);
+}
+function normalPDF(x, mu, sigma) {
+  var z = (x - mu) / sigma;
+  return Math.exp(-0.5 * z * z) / (sigma * Math.sqrt(2 * Math.PI));
+}
+function linspace(a, b, n) {
+  var out = new Array(n);
+  var step = (b - a) / (n - 1);
+  for (var i = 0; i < n; i++) out[i] = a + i * step;
+  return out;
+}
+
+// ==================== OLS ENGINE ====================
+function olsFit(x, y) {
+  var n = x.length;
+  var xbar = mean(x), ybar = mean(y);
+  var SSx = 0, SSxy = 0;
+  for (var i = 0; i < n; i++) {
+    SSx += (x[i] - xbar) * (x[i] - xbar);
+    SSxy += (x[i] - xbar) * (y[i] - ybar);
+  }
+  var b2 = SSxy / SSx;
+  var b1 = ybar - b2 * xbar;
+  var yhat = new Array(n);
+  var residuals = new Array(n);
+  var RSS = 0;
+  for (var i = 0; i < n; i++) {
+    yhat[i] = b1 + b2 * x[i];
+    residuals[i] = y[i] - yhat[i];
+    RSS += residuals[i] * residuals[i];
+  }
+  var se = Math.sqrt(RSS / (n - 2));
+  var se_b2 = se / Math.sqrt(SSx);
+  var SST = 0;
+  for (var i = 0; i < n; i++) SST += (y[i] - ybar) * (y[i] - ybar);
+  var R2 = SST > 0 ? 1 - RSS / SST : 0;
+  return { b1: b1, b2: b2, yhat: yhat, residuals: residuals, n: n, xbar: xbar, ybar: ybar, SSx: SSx, RSS: RSS, se: se, se_b2: se_b2, R2: R2 };
+}
+
+function generateSample(rng, n, beta1, beta2, sigmaU, muX, sigmaX) {
+  var x = new Array(n), y = new Array(n);
+  for (var i = 0; i < n; i++) {
+    x[i] = muX + sigmaX * boxMuller(rng);
+    var u = sigmaU * boxMuller(rng);
+    y[i] = beta1 + beta2 * x[i] + u;
+  }
+  return { x: x, y: y };
+}
+
+function monteCarloOLS(rng, nSim, n, beta1, beta2, sigmaU, muX, sigmaX) {
+  var b1s = new Array(nSim), b2s = new Array(nSim);
+  var fits = [];
+  for (var i = 0; i < nSim; i++) {
+    var sample = generateSample(rng, n, beta1, beta2, sigmaU, muX, sigmaX);
+    var fit = olsFit(sample.x, sample.y);
+    b1s[i] = fit.b1;
+    b2s[i] = fit.b2;
+    if (i < 20) fits.push({ x: sample.x, b1: fit.b1, b2: fit.b2 });
+  }
+  return { b1s: b1s, b2s: b2s, fits: fits };
+}
+
+// ==================== THEME ====================
+var THEME_KEY = "metricsai-theme";
+function getCSS(varName) { return getComputedStyle(document.documentElement).getPropertyValue(varName).trim(); }
+function themeColors() {
+  return { text: getCSS("--text"), textSoft: getCSS("--text-soft"), grid: getCSS("--grid"),
+    panel: getCSS("--panel"), cyan: getCSS("--accent"), purple: getCSS("--accent-2"), pink: getCSS("--accent-3") };
+}
+function baseLayout(overrides) {
+  var c = themeColors();
+  var base = {
+    paper_bgcolor: "rgba(0,0,0,0)", plot_bgcolor: "rgba(0,0,0,0)",
+    font: { family: "Inter, system-ui, sans-serif", color: c.text, size: 12 },
+    margin: { l: 56, r: 18, t: 30, b: 46 },
+    xaxis: { gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft } },
+    yaxis: { gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft } },
+    hoverlabel: { bgcolor: c.panel, bordercolor: c.grid, font: { color: c.text } },
+    legend: { font: { color: c.text }, bgcolor: "rgba(0,0,0,0)" }
+  };
+  if (overrides) for (var k in overrides) base[k] = overrides[k];
+  return base;
+}
+var PLOTLY_CONFIG = { displayModeBar: false, responsive: true };
+
+// ==================== TOGGLE / SLIDER HELPERS ====================
+function bindToggles(groupId, renderFn) {
+  document.querySelectorAll("#" + groupId + " button").forEach(function(btn) {
+    btn.addEventListener("click", function() {
+      this.parentNode.querySelectorAll("button").forEach(function(b) { b.classList.remove("active"); });
+      this.classList.add("active");
+      renderFn();
+    });
+  });
+}
+function bindSlider(id, valId, formatFn, renderFn) {
+  var el = document.getElementById(id);
+  var valEl = document.getElementById(valId);
+  el.addEventListener("input", function() {
+    valEl.textContent = formatFn(this.value);
+    renderFn();
+  });
+}
+function getToggleVal(groupId) {
+  var btn = document.querySelector("#" + groupId + " button.active");
+  return btn ? btn.dataset.val : "";
+}
+
+// ==================== WIDGET 1: Population vs. Sample Regression ====================
+(function() {
+  var chartEl = document.getElementById("chart-popvs");
+  var DGP = DATA.dgp;
+  var seed = 42;
+
+  function render() {
+    var c = themeColors();
+    var n = parseInt(document.getElementById("popvs-n").value);
+    var showMode = getToggleVal("popvs-show");
+    var rng = mulberry32(seed + n);
+    var sample = generateSample(rng, n, DGP.beta1, DGP.beta2, DGP.sigmaU, DGP.muX, DGP.sigmaX);
+    var fit = olsFit(sample.x, sample.y);
+
+    document.getElementById("popvs-b1").textContent = fmt(fit.b1);
+    document.getElementById("popvs-b2").textContent = fmt(fit.b2);
+    document.getElementById("popvs-err").textContent = fmt(fit.b2 - DGP.beta2);
+    document.getElementById("popvs-r2").textContent = fmt(fit.R2);
+
+    var xMin = Math.min.apply(null, sample.x) - 0.5;
+    var xMax = Math.max.apply(null, sample.x) + 0.5;
+
+    var traces = [];
+    // scatter points
+    traces.push({ x: sample.x, y: sample.y, mode: "markers", type: "scatter",
+      marker: { color: c.cyan, size: 7, opacity: 0.7 }, name: "Data", hovertemplate: "x=%{x:.2f}<br>y=%{y:.2f}<extra></extra>" });
+
+    // population line
+    traces.push({ x: [xMin, xMax], y: [DGP.beta1 + DGP.beta2 * xMin, DGP.beta1 + DGP.beta2 * xMax],
+      mode: "lines", line: { color: c.purple, width: 2.5, dash: "dash" }, name: "Population E[y|x]" });
+
+    // sample line
+    traces.push({ x: [xMin, xMax], y: [fit.b1 + fit.b2 * xMin, fit.b1 + fit.b2 * xMax],
+      mode: "lines", line: { color: c.pink, width: 2.5 }, name: "Sample ŷ" });
+
+    // deviations
+    if (showMode === "errors" || showMode === "both") {
+      for (var i = 0; i < n; i++) {
+        var ey = DGP.beta1 + DGP.beta2 * sample.x[i];
+        traces.push({ x: [sample.x[i], sample.x[i]], y: [sample.y[i], ey],
+          mode: "lines", line: { color: c.purple, width: 1, dash: "dot" }, showlegend: i === 0, name: i === 0 ? "Error (u)" : "", hoverinfo: "skip" });
+      }
+    }
+    if (showMode === "residuals" || showMode === "both") {
+      for (var i = 0; i < n; i++) {
+        traces.push({ x: [sample.x[i], sample.x[i]], y: [sample.y[i], fit.yhat[i]],
+          mode: "lines", line: { color: c.pink, width: 1, dash: "dot" }, showlegend: i === 0, name: i === 0 ? "Residual (e)" : "", hoverinfo: "skip" });
+      }
+    }
+
+    Plotly.react(chartEl, traces, baseLayout({
+      xaxis: { title: "x", gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft } },
+      yaxis: { title: "y", gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft } },
+      legend: { x: 0.02, y: 0.98, font: { color: c.text }, bgcolor: "rgba(0,0,0,0)" }
+    }), PLOTLY_CONFIG);
+  }
+
+  bindSlider("popvs-n", "popvs-n-val", function(v) { return v; }, render);
+  bindToggles("popvs-show", render);
+  document.getElementById("popvs-resim").addEventListener("click", function() { seed += 1000; render(); });
+  window.__rerender_popvs = render;
+  render();
+})();
+
+// ==================== WIDGET 2: OLS Assumptions Diagnostic ====================
+(function() {
+  var chartEl = document.getElementById("chart-assume");
+  var DGP = DATA.dgp;
+  var seed = 200;
+  var N_PTS = 60;
+
+  function generateViolated(rng, which, severity) {
+    var sev = severity / 100;
+    var x = new Array(N_PTS), y = new Array(N_PTS);
+    var prevU = 0;
+    for (var i = 0; i < N_PTS; i++) {
+      x[i] = DGP.muX + DGP.sigmaX * boxMuller(rng);
+    }
+    x.sort(function(a, b) { return a - b; }); // sort for AR(1) to make sense visually
+    for (var i = 0; i < N_PTS; i++) {
+      var u;
+      if (which === "linearity") {
+        u = DGP.sigmaU * boxMuller(rng);
+        y[i] = DGP.beta1 + DGP.beta2 * x[i] + sev * 0.8 * (x[i] - DGP.muX) * (x[i] - DGP.muX) + u;
+      } else if (which === "meanzero") {
+        u = (sev * 2 * (x[i] - DGP.muX)) + DGP.sigmaU * boxMuller(rng);
+        y[i] = DGP.beta1 + DGP.beta2 * x[i] + u;
+      } else if (which === "homosk") {
+        var sd = DGP.sigmaU * (1 + sev * 2 * Math.abs(x[i] - DGP.muX));
+        u = sd * boxMuller(rng);
+        y[i] = DGP.beta1 + DGP.beta2 * x[i] + u;
+      } else if (which === "indep") {
+        var rho = sev * 0.85;
+        var eps = DGP.sigmaU * boxMuller(rng);
+        prevU = rho * prevU + Math.sqrt(1 - rho * rho) * eps;
+        u = prevU;
+        y[i] = DGP.beta1 + DGP.beta2 * x[i] + u;
+      } else {
+        u = DGP.sigmaU * boxMuller(rng);
+        y[i] = DGP.beta1 + DGP.beta2 * x[i] + u;
+      }
+    }
+    return { x: x, y: y };
+  }
+
+  function render() {
+    var c = themeColors();
+    var which = getToggleVal("assume-which");
+    var severity = parseInt(document.getElementById("assume-severity").value);
+    var rng = mulberry32(seed);
+    var sample = generateViolated(rng, which, severity);
+    var fit = olsFit(sample.x, sample.y);
+
+    document.getElementById("assume-b2").textContent = fmt(fit.b2);
+    document.getElementById("assume-bias").textContent = fmt(fit.b2 - DGP.beta2);
+    document.getElementById("assume-se").textContent = fmt(fit.se_b2);
+
+    var xMin = Math.min.apply(null, sample.x) - 0.3;
+    var xMax = Math.max.apply(null, sample.x) + 0.3;
+
+    var traces = [];
+    traces.push({ x: sample.x, y: sample.y, mode: "markers", type: "scatter",
+      marker: { color: c.cyan, size: 6, opacity: 0.7 }, name: "Data", hovertemplate: "x=%{x:.2f}<br>y=%{y:.2f}<extra></extra>" });
+    traces.push({ x: [xMin, xMax], y: [DGP.beta1 + DGP.beta2 * xMin, DGP.beta1 + DGP.beta2 * xMax],
+      mode: "lines", line: { color: c.purple, width: 2, dash: "dash" }, name: "True line" });
+    traces.push({ x: [xMin, xMax], y: [fit.b1 + fit.b2 * xMin, fit.b1 + fit.b2 * xMax],
+      mode: "lines", line: { color: c.pink, width: 2 }, name: "OLS fit" });
+
+    var title = which === "none" ? "All Assumptions Satisfied" :
+      which === "linearity" ? "Violated: Linearity (quadratic term)" :
+      which === "meanzero" ? "Violated: E[u|x] = 0 (correlated errors)" :
+      which === "homosk" ? "Violated: Homoskedasticity (fan-shaped)" :
+      "Violated: Independence (AR(1) errors)";
+
+    Plotly.react(chartEl, traces, baseLayout({
+      title: { text: title, font: { size: 13, color: which === "none" ? c.text : c.pink } },
+      xaxis: { title: "x", gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft } },
+      yaxis: { title: "y", gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft } },
+      legend: { x: 0.02, y: 0.98, font: { color: c.text }, bgcolor: "rgba(0,0,0,0)" }
+    }), PLOTLY_CONFIG);
+  }
+
+  bindToggles("assume-which", render);
+  bindSlider("assume-severity", "assume-severity-val", function(v) { return v + "%"; }, render);
+  document.getElementById("assume-resim").addEventListener("click", function() { seed += 1000; render(); });
+  window.__rerender_assumptions = render;
+  render();
+})();
+
+// ==================== WIDGET 3: Monte Carlo Unbiasedness ====================
+(function() {
+  var histEl = document.getElementById("chart-mc-hist");
+  var spagEl = document.getElementById("chart-mc-spaghetti");
+  var DGP = DATA.dgp;
+  var seed = 300;
+
+  function render() {
+    var c = themeColors();
+    var nSim = parseInt(document.getElementById("mc-nsim").value);
+    var n = parseInt(document.getElementById("mc-n").value);
+    var param = getToggleVal("mc-param");
+    var rng = mulberry32(seed + n * 7);
+    var mc = monteCarloOLS(rng, nSim, n, DGP.beta1, DGP.beta2, DGP.sigmaU, DGP.muX, DGP.sigmaX);
+
+    var vals = param === "slope" ? mc.b2s : mc.b1s;
+    var trueVal = param === "slope" ? DGP.beta2 : DGP.beta1;
+    var theoSE = param === "slope" ? DGP.sigmaU / Math.sqrt(n * DGP.sigmaX * DGP.sigmaX) : DGP.sigmaU * Math.sqrt((1 / n) + (DGP.muX * DGP.muX) / (n * DGP.sigmaX * DGP.sigmaX));
+    var m = mean(vals);
+    var s = std(vals, m);
+
+    document.getElementById("mc-true").textContent = fmt(trueVal);
+    document.getElementById("mc-mean").textContent = fmt(m);
+    document.getElementById("mc-sd").textContent = fmt(s);
+    document.getElementById("mc-theose").textContent = fmt(theoSE);
+    document.getElementById("mc-bias").textContent = fmt(Math.abs(m - trueVal));
+
+    // Histogram
+    var sorted = sortedCopy(vals);
+    var lo = sorted[0], hi = sorted[sorted.length - 1];
+    var xs = linspace(lo, hi, 100);
+    var ys = xs.map(function(x) { return normalPDF(x, m, s); });
+    var traces = [];
+    traces.push({ x: vals, type: "histogram", histnorm: "probability density", nbinsx: 40,
+      marker: { color: c.cyan + "88", line: { color: c.cyan, width: 1 } }, name: "Estimates" });
+    traces.push({ x: xs, y: ys, mode: "lines", line: { color: c.pink, width: 2 }, name: "Normal fit" });
+
+    Plotly.react(histEl, traces, baseLayout({
+      xaxis: { title: param === "slope" ? "b\u2082 estimates" : "b\u2081 estimates", gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft } },
+      yaxis: { title: "Density", gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft } },
+      shapes: [{ type: "line", x0: trueVal, x1: trueVal, yref: "paper", y0: 0, y1: 1, line: { color: c.purple, width: 2.5, dash: "dash" } }],
+      annotations: [{ x: trueVal, yref: "paper", y: 1.02, text: "True \u03B2 = " + trueVal, showarrow: false, font: { color: c.purple, size: 11 } }],
+      legend: { x: 0.72, y: 0.98, font: { color: c.text }, bgcolor: "rgba(0,0,0,0)" }
+    }), PLOTLY_CONFIG);
+
+    // Spaghetti plot
+    var spagTraces = [];
+    var xRange = [DGP.muX - 3 * DGP.sigmaX, DGP.muX + 3 * DGP.sigmaX];
+    spagTraces.push({ x: xRange, y: [DGP.beta1 + DGP.beta2 * xRange[0], DGP.beta1 + DGP.beta2 * xRange[1]],
+      mode: "lines", line: { color: c.purple, width: 3, dash: "dash" }, name: "True line" });
+    for (var i = 0; i < mc.fits.length; i++) {
+      var f = mc.fits[i];
+      spagTraces.push({ x: xRange, y: [f.b1 + f.b2 * xRange[0], f.b1 + f.b2 * xRange[1]],
+        mode: "lines", line: { color: c.cyan, width: 1, opacity: 0.3 }, showlegend: i === 0, name: i === 0 ? "Sample lines" : "", hoverinfo: "skip" });
+    }
+    Plotly.react(spagEl, spagTraces, baseLayout({
+      margin: { l: 56, r: 18, t: 10, b: 36 },
+      xaxis: { title: "x", gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft } },
+      yaxis: { title: "y", gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft } },
+      legend: { x: 0.02, y: 0.98, font: { color: c.text }, bgcolor: "rgba(0,0,0,0)" }
+    }), PLOTLY_CONFIG);
+  }
+
+  bindSlider("mc-nsim", "mc-nsim-val", function(v) { return v; }, render);
+  bindSlider("mc-n", "mc-n-val", function(v) { return v; }, render);
+  bindToggles("mc-param", render);
+  document.getElementById("mc-resim").addEventListener("click", function() { seed += 1000; render(); });
+  window.__rerender_mc = render;
+  render();
+})();
+
+// ==================== WIDGET 4: Standard Error Anatomy ====================
+(function() {
+  var chartEl = document.getElementById("chart-se");
+  var DGP = DATA.dgp;
+  var seed = 400;
+
+  function render() {
+    var c = themeColors();
+    var sigmaU = parseFloat(document.getElementById("se-sigma").value);
+    var n = parseInt(document.getElementById("se-n").value);
+    var sigmaX = parseFloat(document.getElementById("se-xspread").value);
+    var rng = mulberry32(seed + n * 3 + Math.round(sigmaU * 10) + Math.round(sigmaX * 10) * 7);
+    var sample = generateSample(rng, n, DGP.beta1, DGP.beta2, sigmaU, DGP.muX, sigmaX);
+    var fit = olsFit(sample.x, sample.y);
+
+    document.getElementById("se-rootmse").textContent = fmt(fit.se);
+    document.getElementById("se-df").textContent = (n - 2).toString();
+    document.getElementById("se-ssx").textContent = fmt(fit.SSx, 2);
+    document.getElementById("se-seb2").textContent = fmt(fit.se_b2);
+    document.getElementById("se-r2").textContent = fmt(fit.R2);
+    document.getElementById("se-formula").textContent = fmt(fit.se) + " / \u221A" + fmt(fit.SSx, 2) + " = " + fmt(fit.se_b2);
+
+    var xMin = Math.min.apply(null, sample.x) - 0.5;
+    var xMax = Math.max.apply(null, sample.x) + 0.5;
+
+    var traces = [];
+    traces.push({ x: sample.x, y: sample.y, mode: "markers", type: "scatter",
+      marker: { color: c.cyan, size: 6, opacity: 0.7 }, name: "Data", hovertemplate: "x=%{x:.2f}<br>y=%{y:.2f}<extra></extra>" });
+    traces.push({ x: [xMin, xMax], y: [DGP.beta1 + DGP.beta2 * xMin, DGP.beta1 + DGP.beta2 * xMax],
+      mode: "lines", line: { color: c.purple, width: 2, dash: "dash" }, name: "True line" });
+    traces.push({ x: [xMin, xMax], y: [fit.b1 + fit.b2 * xMin, fit.b1 + fit.b2 * xMax],
+      mode: "lines", line: { color: c.pink, width: 2 }, name: "OLS fit" });
+
+    Plotly.react(chartEl, traces, baseLayout({
+      xaxis: { title: "x", gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft } },
+      yaxis: { title: "y", gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft } },
+      legend: { x: 0.02, y: 0.98, font: { color: c.text }, bgcolor: "rgba(0,0,0,0)" }
+    }), PLOTLY_CONFIG);
+  }
+
+  bindSlider("se-sigma", "se-sigma-val", function(v) { return v; }, render);
+  bindSlider("se-n", "se-n-val", function(v) { return v; }, render);
+  bindSlider("se-xspread", "se-xspread-val", function(v) { return v; }, render);
+  document.getElementById("se-resim").addEventListener("click", function() { seed += 1000; render(); });
+  window.__rerender_se = render;
+  render();
+})();
+
+// ==================== WIDGET 5: Gauss-Markov ====================
+(function() {
+  var chartEl = document.getElementById("chart-gm");
+  var DGP = DATA.dgp;
+  var seed = 500;
+  var N_PER_SIM = 30;
+
+  function theilMedianSlope(x, y) {
+    var slopes = [];
+    for (var i = 0; i < x.length; i++) {
+      for (var j = i + 1; j < x.length; j++) {
+        if (x[j] !== x[i]) slopes.push((y[j] - y[i]) / (x[j] - x[i]));
+      }
+    }
+    slopes.sort(function(a, b) { return a - b; });
+    return slopes[Math.floor(slopes.length / 2)];
+  }
+
+  function equalWeightSlope(x, y) {
+    // Sort by x, take consecutive pair slopes, average
+    var idx = [];
+    for (var i = 0; i < x.length; i++) idx.push(i);
+    idx.sort(function(a, b) { return x[a] - x[b]; });
+    var slopes = [];
+    for (var i = 1; i < idx.length; i++) {
+      var dx = x[idx[i]] - x[idx[i - 1]];
+      if (Math.abs(dx) > 1e-10) slopes.push((y[idx[i]] - y[idx[i - 1]]) / dx);
+    }
+    return mean(slopes);
+  }
+
+  function render() {
+    var c = themeColors();
+    var errorType = getToggleVal("gm-errors");
+    var nSim = parseInt(document.getElementById("gm-nsim").value);
+    var rng = mulberry32(seed + nSim);
+
+    var olsArr = new Array(nSim), altArr = new Array(nSim), medArr = new Array(nSim);
+    for (var i = 0; i < nSim; i++) {
+      var x = new Array(N_PER_SIM), y = new Array(N_PER_SIM);
+      for (var j = 0; j < N_PER_SIM; j++) {
+        x[j] = DGP.muX + DGP.sigmaX * boxMuller(rng);
+        var sd = errorType === "hetero" ? (0.5 + 1.5 * Math.abs(x[j] - DGP.muX)) : DGP.sigmaU;
+        y[j] = DGP.beta1 + DGP.beta2 * x[j] + sd * boxMuller(rng);
+      }
+      var fit = olsFit(x, y);
+      olsArr[i] = fit.b2;
+      altArr[i] = equalWeightSlope(x, y);
+      medArr[i] = theilMedianSlope(x, y);
+    }
+
+    var olsSD = std(olsArr), altSD = std(altArr), medSD = std(medArr);
+    document.getElementById("gm-ols-sd").textContent = fmt(olsSD);
+    document.getElementById("gm-alt-sd").textContent = fmt(altSD);
+    document.getElementById("gm-med-sd").textContent = fmt(medSD);
+    document.getElementById("gm-eff").textContent = fmt(altSD / olsSD, 2) + "\u00D7";
+
+    var traces = [];
+    traces.push({ x: olsArr, type: "histogram", histnorm: "probability density", opacity: 0.6, nbinsx: 35,
+      marker: { color: c.cyan }, name: "OLS (SD=" + fmt(olsSD, 3) + ")" });
+    traces.push({ x: altArr, type: "histogram", histnorm: "probability density", opacity: 0.5, nbinsx: 35,
+      marker: { color: c.purple }, name: "Alt-Linear (SD=" + fmt(altSD, 3) + ")" });
+    traces.push({ x: medArr, type: "histogram", histnorm: "probability density", opacity: 0.4, nbinsx: 35,
+      marker: { color: c.pink }, name: "Median Slope (SD=" + fmt(medSD, 3) + ")" });
+
+    Plotly.react(chartEl, traces, baseLayout({
+      barmode: "overlay",
+      xaxis: { title: "b\u2082 estimates", gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft } },
+      yaxis: { title: "Density", gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft } },
+      shapes: [{ type: "line", x0: DGP.beta2, x1: DGP.beta2, yref: "paper", y0: 0, y1: 1, line: { color: c.text, width: 2, dash: "dash" } }],
+      annotations: [{ x: DGP.beta2, yref: "paper", y: 1.02, text: "\u03B2\u2082 = 2", showarrow: false, font: { color: c.text, size: 11 } }],
+      legend: { x: 0.6, y: 0.98, font: { color: c.text, size: 11 }, bgcolor: "rgba(0,0,0,0)" }
+    }), PLOTLY_CONFIG);
+  }
+
+  bindToggles("gm-errors", render);
+  bindSlider("gm-nsim", "gm-nsim-val", function(v) { return v; }, render);
+  document.getElementById("gm-resim").addEventListener("click", function() { seed += 1000; render(); });
+  window.__rerender_gm = render;
+  render();
+})();
+
+// ==================== WIDGET 6: Convergence Case Study ====================
+(function() {
+  var scatterEl = document.getElementById("chart-conv-scatter");
+  var histEl = document.getElementById("chart-conv-hist");
+  var CONV = DATA.convergence;
+  var popReg = CONV.popRegression;
+  var seed = 600;
+
+  function render() {
+    var c = themeColors();
+    var nSub = parseInt(document.getElementById("conv-n").value);
+    var nMC = parseInt(document.getElementById("conv-mc").value);
+    var displayMode = getToggleVal("conv-display");
+    var rng = mulberry32(seed);
+    var N = CONV.productivity.length;
+
+    // Draw current subsample
+    var indices = [];
+    for (var i = 0; i < N; i++) indices.push(i);
+    // Fisher-Yates shuffle
+    for (var i = N - 1; i > 0; i--) {
+      var j = Math.floor(rng() * (i + 1));
+      var tmp = indices[i]; indices[i] = indices[j]; indices[j] = tmp;
+    }
+    var subIdx = indices.slice(0, nSub);
+    var subX = subIdx.map(function(i) { return CONV.capital[i]; });
+    var subY = subIdx.map(function(i) { return CONV.productivity[i]; });
+    var subFit = olsFit(subX, subY);
+
+    // Monte Carlo
+    var b2s = new Array(nMC);
+    for (var mc = 0; mc < nMC; mc++) {
+      var rng2 = mulberry32(seed + mc * 17 + nSub);
+      var idx2 = [];
+      for (var i = 0; i < N; i++) idx2.push(i);
+      for (var i = N - 1; i > 0; i--) {
+        var j = Math.floor(rng2() * (i + 1));
+        var tmp = idx2[i]; idx2[i] = idx2[j]; idx2[j] = tmp;
+      }
+      var sx = [], sy = [];
+      for (var i = 0; i < nSub; i++) { sx.push(CONV.capital[idx2[i]]); sy.push(CONV.productivity[idx2[i]]); }
+      b2s[mc] = olsFit(sx, sy).b2;
+    }
+    var mcMean = mean(b2s), mcSD = std(b2s, mcMean);
+
+    document.getElementById("conv-popb2").textContent = fmt(popReg.b2);
+    document.getElementById("conv-b2").textContent = fmt(subFit.b2);
+    document.getElementById("conv-err").textContent = fmt(subFit.b2 - popReg.b2);
+    document.getElementById("conv-mcmean").textContent = fmt(mcMean);
+    document.getElementById("conv-mcsd").textContent = fmt(mcSD);
+
+    // Scatter
+    var sTraces = [];
+    if (displayMode === "all") {
+      sTraces.push({ x: CONV.capital, y: CONV.productivity, mode: "markers", type: "scatter",
+        marker: { color: c.grid, size: 6, opacity: 0.5 }, name: "All 108", hovertemplate: "%{text}<br>Capital=%{x:.0f}<br>Prod=%{y:.0f}<extra></extra>",
+        text: CONV.countries });
+    }
+    sTraces.push({ x: subX, y: subY, mode: "markers", type: "scatter",
+      marker: { color: c.cyan, size: 7, opacity: 0.8 }, name: "Sample (n=" + nSub + ")",
+      hovertemplate: "%{text}<br>Capital=%{x:.0f}<br>Prod=%{y:.0f}<extra></extra>",
+      text: subIdx.map(function(i) { return CONV.countries[i]; }) });
+
+    var xMin = Math.min.apply(null, CONV.capital) - 5;
+    var xMax = Math.max.apply(null, CONV.capital) + 5;
+    sTraces.push({ x: [xMin, xMax], y: [popReg.b1 + popReg.b2 * xMin, popReg.b1 + popReg.b2 * xMax],
+      mode: "lines", line: { color: c.purple, width: 2.5, dash: "dash" }, name: "Population" });
+    sTraces.push({ x: [xMin, xMax], y: [subFit.b1 + subFit.b2 * xMin, subFit.b1 + subFit.b2 * xMax],
+      mode: "lines", line: { color: c.pink, width: 2.5 }, name: "Sample" });
+
+    Plotly.react(scatterEl, sTraces, baseLayout({
+      xaxis: { title: "Capital per worker", gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft } },
+      yaxis: { title: "Productivity (GDP/capita)", gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft } },
+      legend: { x: 0.02, y: 0.98, font: { color: c.text, size: 11 }, bgcolor: "rgba(0,0,0,0)" }
+    }), PLOTLY_CONFIG);
+
+    // Histogram
+    var hTraces = [];
+    hTraces.push({ x: b2s, type: "histogram", histnorm: "probability density", nbinsx: 30,
+      marker: { color: c.cyan + "88", line: { color: c.cyan, width: 1 } }, name: "b\u2082 estimates" });
+    Plotly.react(histEl, hTraces, baseLayout({
+      xaxis: { title: "b\u2082 estimates", gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft } },
+      yaxis: { title: "Density", gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft } },
+      shapes: [{ type: "line", x0: popReg.b2, x1: popReg.b2, yref: "paper", y0: 0, y1: 1, line: { color: c.purple, width: 2.5, dash: "dash" } }],
+      annotations: [{ x: popReg.b2, yref: "paper", y: 1.02, text: "Pop \u03B2\u2082", showarrow: false, font: { color: c.purple, size: 11 } }]
+    }), PLOTLY_CONFIG);
+  }
+
+  bindSlider("conv-n", "conv-n-val", function(v) { return v; }, render);
+  bindSlider("conv-mc", "conv-mc-val", function(v) { return v; }, render);
+  bindToggles("conv-display", render);
+  document.getElementById("conv-resim").addEventListener("click", function() { seed += 1000; render(); });
+  window.__rerender_conv = render;
+  render();
+})();
+
+// ==================== WIDGET 7: SE vs. Sample Size ====================
+(function() {
+  var chartEl = document.getElementById("chart-sevn");
+  var DGP = DATA.dgp;
+  var CONV = DATA.convergence;
+  var seed = 700;
+  var N_MC_PER = 500;
+  var DGP_NS = [10, 20, 30, 50, 75, 100, 150, 200];
+  var CONV_NS = [10, 15, 20, 30, 40, 50, 60, 70, 80, 90];
+
+  function render() {
+    var c = themeColors();
+    var sigmaU = parseFloat(document.getElementById("sevn-sigma").value);
+    var sigmaX = parseFloat(document.getElementById("sevn-xspread").value);
+    var source = getToggleVal("sevn-source");
+
+    var traces = [];
+
+    if (source === "dgp") {
+      // Theoretical curve
+      var nCurve = linspace(5, 220, 100);
+      var seCurve = nCurve.map(function(n) { return sigmaU / Math.sqrt(n * sigmaX * sigmaX); });
+      traces.push({ x: nCurve, y: seCurve, mode: "lines", line: { color: c.purple, width: 2.5 }, name: "Theory: \u03C3\u1D64/\u221A(n\u00B7\u03C3\u02E3\u00B2)" });
+
+      // MC points
+      var mcNs = [], mcSEs = [];
+      for (var k = 0; k < DGP_NS.length; k++) {
+        var n = DGP_NS[k];
+        var rng = mulberry32(seed + n * 11);
+        var b2s = new Array(N_MC_PER);
+        for (var i = 0; i < N_MC_PER; i++) {
+          var sample = generateSample(rng, n, DGP.beta1, DGP.beta2, sigmaU, DGP.muX, sigmaX);
+          b2s[i] = olsFit(sample.x, sample.y).b2;
+        }
+        mcNs.push(n);
+        mcSEs.push(std(b2s));
+      }
+      traces.push({ x: mcNs, y: mcSEs, mode: "markers", type: "scatter",
+        marker: { color: c.cyan, size: 9, symbol: "diamond" }, name: "MC empirical SE" });
+
+      // Stats
+      var se25 = sigmaU / Math.sqrt(25 * sigmaX * sigmaX);
+      var se100 = sigmaU / Math.sqrt(100 * sigmaX * sigmaX);
+      document.getElementById("sevn-se25").textContent = fmt(se25);
+      document.getElementById("sevn-se100").textContent = fmt(se100);
+      document.getElementById("sevn-ratio").textContent = fmt(se25 / se100, 2) + "\u00D7";
+
+    } else {
+      // Convergence data mode
+      var N = CONV.productivity.length;
+      var mcNs = [], mcSEs = [];
+      for (var k = 0; k < CONV_NS.length; k++) {
+        var nSub = CONV_NS[k];
+        if (nSub >= N) continue;
+        var b2s = new Array(N_MC_PER);
+        for (var i = 0; i < N_MC_PER; i++) {
+          var rng = mulberry32(seed + i * 17 + nSub * 3);
+          var idx = [];
+          for (var j = 0; j < N; j++) idx.push(j);
+          for (var j = N - 1; j > 0; j--) {
+            var r = Math.floor(rng() * (j + 1));
+            var tmp = idx[j]; idx[j] = idx[r]; idx[r] = tmp;
+          }
+          var sx = [], sy = [];
+          for (var j = 0; j < nSub; j++) { sx.push(CONV.capital[idx[j]]); sy.push(CONV.productivity[idx[j]]); }
+          b2s[i] = olsFit(sx, sy).b2;
+        }
+        mcNs.push(nSub);
+        mcSEs.push(std(b2s));
+      }
+      traces.push({ x: mcNs, y: mcSEs, mode: "lines+markers", type: "scatter",
+        marker: { color: c.cyan, size: 8 }, line: { color: c.cyan, width: 2 }, name: "MC empirical SE" });
+
+      // Fit a 1/sqrt(n) curve to the MC points
+      if (mcNs.length > 0) {
+        var refSE = mcSEs[0] * Math.sqrt(mcNs[0]);
+        var fitNs = linspace(8, 95, 50);
+        var fitSEs = fitNs.map(function(n) { return refSE / Math.sqrt(n); });
+        traces.push({ x: fitNs, y: fitSEs, mode: "lines", line: { color: c.purple, width: 2, dash: "dash" }, name: "Fitted 1/\u221An" });
+      }
+
+      var se25 = mcSEs.length > 2 ? mcSEs[2] : 0;
+      var se50 = mcSEs.length > 5 ? mcSEs[5] : 0;
+      document.getElementById("sevn-se25").textContent = mcNs.length > 2 ? fmt(se25) : "\u2014";
+      document.getElementById("sevn-se100").textContent = mcNs.length > 5 ? "n=50: " + fmt(se50) : "\u2014";
+      document.getElementById("sevn-ratio").textContent = (se25 > 0 && se50 > 0) ? fmt(se25 / se50, 2) + "\u00D7" : "\u2014";
+    }
+
+    Plotly.react(chartEl, traces, baseLayout({
+      xaxis: { title: "Sample size (n)", gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft } },
+      yaxis: { title: "se(b\u2082)", gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft } },
+      legend: { x: 0.6, y: 0.98, font: { color: c.text, size: 11 }, bgcolor: "rgba(0,0,0,0)" }
+    }), PLOTLY_CONFIG);
+  }
+
+  bindSlider("sevn-sigma", "sevn-sigma-val", function(v) { return v; }, render);
+  bindSlider("sevn-xspread", "sevn-xspread-val", function(v) { return v; }, render);
+  bindToggles("sevn-source", render);
+  document.getElementById("sevn-resim").addEventListener("click", function() { seed += 1000; render(); });
+  window.__rerender_sevn = render;
+  render();
+})();
+
+// ==================== RESET + URL HASH STATE ====================
+(function() {
+  var REG = {
+    popvs: [
+      { id: "popvs-n", kind: "range", def: "30" },
+      { group: "popvs-show", kind: "toggle", def: "off" }
+    ],
+    assumptions: [
+      { group: "assume-which", kind: "toggle", def: "none" },
+      { id: "assume-severity", kind: "range", def: "50" }
+    ],
+    mc: [
+      { id: "mc-nsim", kind: "range", def: "1000" },
+      { id: "mc-n", kind: "range", def: "30" },
+      { group: "mc-param", kind: "toggle", def: "slope" }
+    ],
+    se: [
+      { id: "se-sigma", kind: "range", def: "2" },
+      { id: "se-n", kind: "range", def: "30" },
+      { id: "se-xspread", kind: "range", def: "1" }
+    ],
+    gm: [
+      { group: "gm-errors", kind: "toggle", def: "homo" },
+      { id: "gm-nsim", kind: "range", def: "1000" }
+    ],
+    conv: [
+      { id: "conv-n", kind: "range", def: "50" },
+      { id: "conv-mc", kind: "range", def: "500" },
+      { group: "conv-display", kind: "toggle", def: "all" }
+    ],
+    sevn: [
+      { id: "sevn-sigma", kind: "range", def: "2" },
+      { id: "sevn-xspread", kind: "range", def: "1" },
+      { group: "sevn-source", kind: "toggle", def: "dgp" }
+    ]
+  };
+
+  function getVal(c) {
+    if (c.kind === "toggle") {
+      var btn = document.querySelector("#" + c.group + " button.active");
+      return btn ? btn.dataset.val : c.def;
+    }
+    return document.getElementById(c.id).value;
+  }
+
+  function setVal(c, val, fire) {
+    if (c.kind === "toggle") {
+      var group = document.getElementById(c.group);
+      if (!group) return;
+      var btn = group.querySelector('button[data-val="' + val + '"]');
+      if (btn && !btn.classList.contains("active")) btn.click();
+    } else {
+      var el = document.getElementById(c.id);
+      if (!el) return;
+      if (el.value !== String(val)) {
+        el.value = val;
+        if (fire) el.dispatchEvent(new Event(c.kind === "select" ? "change" : "input", { bubbles: true }));
+      }
+    }
+  }
+
+  function resetWidget(widget) {
+    var ctrls = REG[widget] || [];
+    for (var i = 0; i < ctrls.length; i++) setVal(ctrls[i], ctrls[i].def, true);
+    var fn = window["__rerender_" + widget];
+    if (fn) fn();
+    writeHash();
+  }
+
+  function writeHash() {
+    var parts = [];
+    for (var widget in REG) {
+      var ctrls = REG[widget];
+      for (var i = 0; i < ctrls.length; i++) {
+        var c = ctrls[i];
+        var v = String(getVal(c));
+        if (v !== String(c.def)) {
+          var key = c.id || c.group;
+          parts.push(key + "=" + encodeURIComponent(v));
+        }
+      }
+    }
+    var want = parts.length ? "#" + parts.join("&") : "";
+    if (want === "" && location.hash.match(/=/)) {
+      history.replaceState(null, "", location.pathname + location.search);
+    } else if (want !== "" && location.hash !== want) {
+      history.replaceState(null, "", location.pathname + location.search + want);
+    }
+  }
+
+  function readHash() {
+    var hash = location.hash.slice(1);
+    if (!hash || !hash.includes("=")) return;
+    var params = {};
+    var pairs = hash.split("&");
+    for (var i = 0; i < pairs.length; i++) {
+      var eq = pairs[i].indexOf("=");
+      if (eq < 0) continue;
+      params[pairs[i].slice(0, eq)] = decodeURIComponent(pairs[i].slice(eq + 1));
+    }
+    for (var widget in REG) {
+      var ctrls = REG[widget];
+      for (var i = 0; i < ctrls.length; i++) {
+        var c = ctrls[i];
+        var key = c.id || c.group;
+        if (key in params) setVal(c, params[key], true);
+      }
+    }
+  }
+
+  document.querySelectorAll(".reset-btn[data-reset]").forEach(function(btn) {
+    btn.addEventListener("click", function() { resetWidget(btn.dataset.reset); });
+  });
+  document.addEventListener("input", function(e) {
+    if (e.target.matches("input[type=range], select")) writeHash();
+  });
+  document.addEventListener("change", function(e) {
+    if (e.target.matches("select")) writeHash();
+  });
+  document.querySelectorAll(".toggle-group button").forEach(function(b) {
+    b.addEventListener("click", function() { setTimeout(writeHash, 0); });
+  });
+  readHash();
+})();
+
+// ==================== THEME TOGGLE ====================
+(function() {
+  var btn = document.getElementById("theme-toggle");
+  var iconEl = document.getElementById("theme-icon");
+  var labelEl = document.getElementById("theme-label");
+
+  function apply(theme) {
+    document.documentElement.dataset.theme = theme;
+    iconEl.textContent = theme === "dark" ? "\u2600\uFE0F" : "\uD83C\uDF19";
+    labelEl.textContent = theme === "dark" ? "Light" : "Dark";
+    for (var key in window) {
+      if (key.startsWith("__rerender_") && typeof window[key] === "function") window[key]();
+    }
+  }
+
+  var saved = localStorage.getItem(THEME_KEY);
+  var prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+  apply(saved || (prefersDark ? "dark" : "light"));
+
+  btn.addEventListener("click", function() {
+    var next = document.documentElement.dataset.theme === "dark" ? "light" : "dark";
+    localStorage.setItem(THEME_KEY, next);
+    apply(next);
+  });
+})();
+
+// ==================== Resize handling ====================
+window.addEventListener("resize", function() {
+  document.querySelectorAll(".chart").forEach(function(el) {
+    if (el.data) Plotly.Plots.resize(el);
+  });
+});
+</script>
+
+</body>
+</html>

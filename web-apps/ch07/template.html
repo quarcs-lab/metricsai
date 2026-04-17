@@ -1,0 +1,1516 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chapter 07 — Statistical Inference for Bivariate Regression · metricsAI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.plot.ly/plotly-2.35.2.min.js" charset="utf-8"></script>
+<style>
+:root {
+  --cyan: #008CB7;
+  --cyan-soft: #22d3ee;
+  --purple: #7A209F;
+  --purple-soft: #c084fc;
+  --pink: #C21E72;
+  --pink-soft: #f472b6;
+
+  --bg: #f5f8fb;
+  --panel: #ffffff;
+  --panel-2: #f0f4f9;
+  --text: #0b1021;
+  --text-soft: #475569;
+  --text-muted: #64748b;
+  --border: #d9e2ec;
+  --accent: var(--cyan);
+  --accent-2: var(--purple);
+  --accent-3: var(--pink);
+  --shadow: 0 2px 10px rgba(11, 16, 33, 0.06), 0 12px 30px rgba(11, 16, 33, 0.05);
+  --grid: #e3e8ef;
+  --code-bg: #eef3f8;
+}
+html[data-theme="dark"] {
+  --bg: #0c1024;
+  --panel: #151a33;
+  --panel-2: #1b2142;
+  --text: #e2e8f0;
+  --text-soft: #b5c0d0;
+  --text-muted: #8a98ae;
+  --border: #2a3156;
+  --accent: var(--cyan-soft);
+  --accent-2: var(--purple-soft);
+  --accent-3: var(--pink-soft);
+  --shadow: 0 2px 10px rgba(0, 0, 0, 0.25), 0 12px 30px rgba(0, 0, 0, 0.35);
+  --grid: #2a3156;
+  --code-bg: #0f1530;
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.55;
+  transition: background-color .25s ease, color .25s ease;
+}
+code, .mono { font-family: 'JetBrains Mono', ui-monospace, monospace; }
+
+header.page {
+  position: relative;
+  padding: 2.4rem 1.5rem 2rem;
+  background:
+    radial-gradient(1200px 400px at 85% -10%, rgba(122, 32, 159, 0.15), transparent),
+    radial-gradient(1000px 400px at 10% 0%, rgba(0, 140, 183, 0.18), transparent),
+    var(--panel);
+  border-bottom: 1px solid var(--border);
+}
+.page-inner { max-width: 1120px; margin: 0 auto; }
+.chapter-badge {
+  display: inline-block; font-size: 0.72rem; letter-spacing: 0.15em;
+  text-transform: uppercase; color: var(--accent); font-weight: 600; margin-bottom: 0.5rem;
+}
+h1.title {
+  font-size: clamp(1.6rem, 3.4vw, 2.4rem); margin: 0 0 0.35rem;
+  background: linear-gradient(90deg, var(--accent), var(--accent-2));
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+  font-weight: 700; letter-spacing: -0.01em;
+}
+p.subtitle { margin: 0 0 0.8rem; color: var(--text-soft); font-size: 1.05rem; max-width: 720px; }
+.theme-toggle {
+  position: absolute; top: 1.4rem; right: 1.5rem;
+  background: var(--panel-2); color: var(--text); border: 1px solid var(--border);
+  padding: 0.4rem 0.8rem; border-radius: 999px; cursor: pointer;
+  font-size: 0.85rem; font-weight: 500; display: inline-flex; align-items: center; gap: 0.35rem;
+  transition: all .2s ease;
+}
+.theme-toggle:hover { border-color: var(--accent); color: var(--accent); }
+
+nav.anchors {
+  position: sticky; top: 0; z-index: 20;
+  background: color-mix(in srgb, var(--panel) 92%, transparent);
+  backdrop-filter: saturate(150%) blur(8px); -webkit-backdrop-filter: saturate(150%) blur(8px);
+  border-bottom: 1px solid var(--border);
+}
+nav.anchors ul {
+  display: flex; gap: 0.25rem; overflow-x: auto; list-style: none;
+  padding: 0.55rem 1.5rem; margin: 0 auto; max-width: 1120px; scrollbar-width: thin;
+}
+nav.anchors a {
+  display: block; padding: 0.35rem 0.75rem; border-radius: 8px;
+  color: var(--text-soft); text-decoration: none; font-size: 0.85rem;
+  font-weight: 500; white-space: nowrap; transition: all .15s ease;
+}
+nav.anchors a:hover { color: var(--accent); background: var(--panel-2); }
+
+main { max-width: 1120px; margin: 1.2rem auto 3rem; padding: 0 1.5rem; }
+
+section.widget {
+  background: var(--panel); border: 1px solid var(--border); border-radius: 16px;
+  padding: 1.5rem 1.4rem 1.3rem; margin-bottom: 1.5rem; box-shadow: var(--shadow);
+}
+.section-tag {
+  display: inline-block; font-family: 'JetBrains Mono', monospace; font-size: 0.72rem;
+  color: var(--accent); background: color-mix(in srgb, var(--accent) 12%, transparent);
+  padding: 0.2rem 0.55rem; border-radius: 6px; margin-bottom: 0.6rem; font-weight: 500;
+}
+.widget h2 { margin: 0 0 0.2rem; font-size: 1.35rem; font-weight: 600; color: var(--accent-2); letter-spacing: -0.005em; }
+.widget .lede { margin: 0 0 1rem; color: var(--text-soft); font-size: 0.97rem; max-width: 780px; }
+
+.controls {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 0.9rem 1.2rem; padding: 0.9rem 1rem; background: var(--panel-2); border-radius: 10px; margin-bottom: 1rem;
+}
+.ctrl { display: flex; flex-direction: column; gap: 0.3rem; }
+.ctrl label { font-size: 0.78rem; font-weight: 500; color: var(--text-soft); text-transform: uppercase; letter-spacing: 0.05em; }
+.ctrl select, .ctrl input[type="range"], .ctrl input[type="number"] {
+  font-family: inherit; font-size: 0.9rem; padding: 0.4rem 0.55rem; border-radius: 8px;
+  border: 1px solid var(--border); background: var(--panel); color: var(--text);
+}
+.ctrl input[type="range"] { padding: 0.2rem 0; accent-color: var(--accent); }
+.ctrl .val { font-family: 'JetBrains Mono', monospace; font-size: 0.82rem; color: var(--accent); font-weight: 500; }
+.toggle-group { display: inline-flex; gap: 0.25rem; background: var(--panel); padding: 3px; border-radius: 10px; border: 1px solid var(--border); flex-wrap: wrap; }
+.toggle-group button {
+  background: transparent; border: none; color: var(--text-soft);
+  padding: 0.32rem 0.75rem; border-radius: 7px; font-family: inherit; font-size: 0.85rem;
+  cursor: pointer; transition: all .15s ease;
+}
+.toggle-group button.active { background: var(--accent); color: white; font-weight: 500; }
+
+.stats-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+  gap: 0.6rem; margin: 0.5rem 0 1rem;
+}
+.stat {
+  background: var(--panel-2); padding: 0.65rem 0.75rem; border-radius: 10px; border-left: 3px solid var(--accent);
+}
+.stat .label { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-muted); }
+.stat .value { font-family: 'JetBrains Mono', monospace; font-size: 1.05rem; font-weight: 500; color: var(--text); margin-top: 0.15rem; }
+.stat.pop { border-left-color: var(--accent-2); }
+.stat.err { border-left-color: var(--accent-3); }
+
+.callout {
+  background: color-mix(in srgb, var(--accent-2) 8%, transparent);
+  border-left: 3px solid var(--accent-2); padding: 0.7rem 0.9rem;
+  border-radius: 8px; font-size: 0.9rem; color: var(--text-soft); margin: 0.9rem 0 0.2rem;
+}
+.callout strong { color: var(--accent-2); }
+
+.try-this {
+  background: color-mix(in srgb, var(--accent) 8%, transparent);
+  border-left: 3px solid var(--accent); padding: 0.7rem 0.9rem;
+  border-radius: 8px; font-size: 0.9rem; color: var(--text-soft); margin: 0.7rem 0 0.2rem;
+}
+.try-this .try-title { font-weight: 600; color: var(--accent); font-size: 0.78rem; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 0.3rem; }
+.try-this ol { margin: 0; padding-left: 1.25rem; }
+.try-this li { margin: 0.2rem 0; }
+
+.widget-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 0.5rem; margin-bottom: 0.2rem; }
+.widget-head > div { flex: 1; min-width: 0; }
+.reset-btn {
+  background: transparent; color: var(--text-muted); border: 1px solid var(--border);
+  padding: 0.3rem 0.7rem; border-radius: 8px; font-family: inherit; font-size: 0.8rem;
+  cursor: pointer; white-space: nowrap; transition: all .15s ease;
+}
+.reset-btn:hover { color: var(--accent); border-color: var(--accent); }
+.resim-btn {
+  background: var(--panel); color: var(--accent); border: 1px solid var(--accent);
+  padding: 0.35rem 0.85rem; border-radius: 8px; font-family: inherit; font-size: 0.85rem;
+  cursor: pointer; font-weight: 500; transition: all .15s ease;
+}
+.resim-btn:hover { background: var(--accent); color: white; }
+
+.delta-row {
+  display: flex; flex-wrap: wrap; gap: 0.6rem 1.2rem;
+  margin: 0.2rem 0 0.9rem; padding: 0.55rem 0.85rem;
+  background: var(--panel-2); border-radius: 10px;
+  font-family: 'JetBrains Mono', monospace; font-size: 0.88rem;
+  color: var(--text-soft); border-left: 3px solid var(--accent-3);
+}
+.delta-row .label { color: var(--text-muted); margin-right: 0.35rem; }
+
+.chart { width: 100%; min-height: 340px; }
+.chart.tall { min-height: 420px; }
+.chart.short { min-height: 280px; }
+
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+@media (max-width: 720px) { .two-col { grid-template-columns: 1fr; } }
+
+footer.page {
+  max-width: 1120px; margin: 1rem auto 3rem; padding: 0 1.5rem;
+  color: var(--text-muted); font-size: 0.88rem; text-align: center;
+}
+footer.page a { color: var(--accent); text-decoration: none; }
+footer.page a:hover { text-decoration: underline; }
+.scroll-top { display: inline-block; font-size: 0.78rem; color: var(--text-muted); text-decoration: none; margin-top: 0.4rem; }
+.scroll-top:hover { color: var(--accent); }
+</style>
+</head>
+<body>
+
+<header class="page">
+  <div class="page-inner">
+    <span class="chapter-badge">Chapter 07 of 18 · Interactive Dashboard</span>
+    <h1 class="title">Statistical Inference for Bivariate Regression</h1>
+    <p class="subtitle">Slide, toggle, and simulate to build intuition for t-statistics, confidence intervals, hypothesis testing, p-values, and robust standard errors.</p>
+  </div>
+  <button id="theme-toggle" class="theme-toggle" type="button" aria-label="Toggle color theme"><span id="theme-icon">🌙</span><span id="theme-label">Dark</span></button>
+</header>
+
+<nav class="anchors" aria-label="Sections">
+  <ul>
+    <li><a href="#t-dist">t-Distribution</a></li>
+    <li><a href="#ci-sim">CI Simulator</a></li>
+    <li><a href="#hyp-test">Hypothesis Test</a></li>
+    <li><a href="#p-value">p-Value Explorer</a></li>
+    <li><a href="#econ-stat">Econ vs. Stat</a></li>
+    <li><a href="#robust-se">Robust SEs</a></li>
+    <li><a href="#house-data">House Data</a></li>
+  </ul>
+</nav>
+
+<main>
+
+<!-- ==================== WIDGET 1: t-Distribution Explorer ==================== -->
+<section class="widget" id="t-dist">
+  <div class="widget-head">
+    <div>
+      <span class="section-tag">§ 7.2 · Key Concept 7.1</span>
+      <h2>t-Distribution Explorer</h2>
+    </div>
+    <button class="reset-btn" data-reset="tdist">↺ Reset</button>
+  </div>
+  <p class="lede">The t-distribution accounts for the extra uncertainty from estimating the error variance. With few degrees of freedom it has heavier tails than the normal; as df grows the two converge. Drag the slider to see the tails shrink toward N(0,1).</p>
+  <div class="controls">
+    <div class="ctrl">
+      <label for="tdist-df">Degrees of freedom <span class="val" id="tdist-df-val">5</span></label>
+      <input type="range" id="tdist-df" min="1" max="100" step="1" value="5">
+    </div>
+    <div class="ctrl">
+      <label>Show area</label>
+      <div class="toggle-group" id="tdist-area">
+        <button type="button" data-val="none" class="active">None</button>
+        <button type="button" data-val="tails">95% Tails</button>
+        <button type="button" data-val="center">95% Center</button>
+      </div>
+    </div>
+  </div>
+  <div class="stats-grid">
+    <div class="stat"><div class="label">df</div><div class="value" id="tdist-dfstat">5</div></div>
+    <div class="stat"><div class="label">t crit (2.5%)</div><div class="value" id="tdist-tcrit">—</div></div>
+    <div class="stat pop"><div class="label">z crit (N(0,1))</div><div class="value">1.960</div></div>
+    <div class="stat err"><div class="label">Difference</div><div class="value" id="tdist-diff">—</div></div>
+    <div class="stat"><div class="label">Variance df/(df-2)</div><div class="value" id="tdist-var">—</div></div>
+  </div>
+  <div class="chart tall" id="chart-tdist"></div>
+  <div class="callout"><strong>Key Concept 7.1:</strong> The t-distribution with df = n - 2 is used for inference in bivariate regression because the population variance is unknown. Its heavier tails lead to wider confidence intervals and more conservative tests compared to the normal distribution. For n > 100 the difference is negligible.</div>
+  <div class="try-this">
+    <div class="try-title">Try this</div>
+    <ol>
+      <li>Set df = 3 (n = 5 observations). The t critical value is about 3.18 vs. 1.96 for normal. Toggle <strong>95% Tails</strong> to see how much wider the rejection regions are.</li>
+      <li>Drag df to 27 (the house price data). The critical value is 2.052, only 5% above 1.96. For this sample size, t and normal give nearly the same inference.</li>
+      <li>Push df to 100. The two curves overlap almost perfectly. This is why large-sample theory uses the normal approximation.</li>
+    </ol>
+  </div>
+</section>
+
+<!-- ==================== WIDGET 2: Confidence Interval Simulator ==================== -->
+<section class="widget" id="ci-sim">
+  <div class="widget-head">
+    <div>
+      <span class="section-tag">§ 7.3 · Key Concept 7.2</span>
+      <h2>Confidence Interval Simulator</h2>
+    </div>
+    <button class="reset-btn" data-reset="cisim">↺ Reset</button>
+  </div>
+  <p class="lede">Draw repeated samples from y = 1 + 2x + u and build a 95% CI for the slope each time. About 95% of intervals capture the true value. The ones that miss are colored pink. This is the correct interpretation: the procedure works 95% of the time, not that any single interval has 95% probability of containing the truth.</p>
+  <div class="controls">
+    <div class="ctrl">
+      <label for="cisim-nci">Number of CIs <span class="val" id="cisim-nci-val">100</span></label>
+      <input type="range" id="cisim-nci" min="20" max="200" step="10" value="100">
+    </div>
+    <div class="ctrl">
+      <label for="cisim-n">Sample size n <span class="val" id="cisim-n-val">30</span></label>
+      <input type="range" id="cisim-n" min="10" max="100" step="5" value="30">
+    </div>
+    <div class="ctrl">
+      <label for="cisim-conf">Confidence level <span class="val" id="cisim-conf-val">95%</span></label>
+      <input type="range" id="cisim-conf" min="80" max="99" step="1" value="95">
+    </div>
+    <div class="ctrl">
+      <label>&nbsp;</label>
+      <button class="resim-btn" id="cisim-resim" type="button">Resimulate</button>
+    </div>
+  </div>
+  <div class="stats-grid">
+    <div class="stat pop"><div class="label">True slope</div><div class="value">2.0000</div></div>
+    <div class="stat"><div class="label">Coverage rate</div><div class="value" id="cisim-coverage">—</div></div>
+    <div class="stat"><div class="label">Avg CI width</div><div class="value" id="cisim-width">—</div></div>
+    <div class="stat err"><div class="label">Missed</div><div class="value" id="cisim-missed">—</div></div>
+  </div>
+  <div class="chart tall" id="chart-cisim"></div>
+  <div class="callout"><strong>Key Concept 7.2:</strong> A 95% confidence interval means that if we repeated the sampling process many times, 95% of constructed intervals would contain the true parameter. It does NOT mean there is a 95% probability the true value is in this interval. The parameter is fixed; the interval is random.</div>
+  <div class="try-this">
+    <div class="try-title">Try this</div>
+    <ol>
+      <li>At n = 30 with 100 CIs, count the pink (missed) intervals. You should see roughly 5 out of 100. Click <strong>Resimulate</strong> a few times; the number fluctuates around 5.</li>
+      <li>Reduce n to 10. The intervals get much wider (more uncertainty) but the coverage rate stays near 95%. The t-distribution automatically compensates for small samples.</li>
+      <li>Change confidence level to 80%. The intervals narrow but more of them miss the true value (about 20 out of 100).</li>
+    </ol>
+  </div>
+</section>
+
+<!-- ==================== WIDGET 3: Hypothesis Testing ==================== -->
+<section class="widget" id="hyp-test">
+  <div class="widget-head">
+    <div>
+      <span class="section-tag">§ 7.4-7.5 · Key Concepts 7.3, 7.5</span>
+      <h2>Hypothesis Testing Framework</h2>
+    </div>
+    <button class="reset-btn" data-reset="hyptest">↺ Reset</button>
+  </div>
+  <p class="lede">Test whether the slope equals a null value. The test statistic t = (b2 - null) / se(b2) is compared to the t-distribution. Set the null value and choose one-sided or two-sided to see the rejection region, test statistic, and decision. Uses the house price data: b2 = 73.77, se = 11.17, df = 27.</p>
+  <div class="controls">
+    <div class="ctrl">
+      <label for="hyptest-null">Null value (H0: slope =) <span class="val" id="hyptest-null-val">0</span></label>
+      <input type="range" id="hyptest-null" min="-20" max="120" step="5" value="0">
+    </div>
+    <div class="ctrl">
+      <label for="hyptest-alpha">Significance level <span class="val" id="hyptest-alpha-val">5%</span></label>
+      <input type="range" id="hyptest-alpha" min="1" max="10" step="1" value="5">
+    </div>
+    <div class="ctrl">
+      <label>Test type</label>
+      <div class="toggle-group" id="hyptest-type">
+        <button type="button" data-val="two" class="active">Two-Sided</button>
+        <button type="button" data-val="right">Right-Tail</button>
+        <button type="button" data-val="left">Left-Tail</button>
+      </div>
+    </div>
+  </div>
+  <div class="stats-grid">
+    <div class="stat"><div class="label">b2 (estimate)</div><div class="value" id="hyptest-b2">73.77</div></div>
+    <div class="stat"><div class="label">se(b2)</div><div class="value" id="hyptest-se">11.17</div></div>
+    <div class="stat"><div class="label">t-statistic</div><div class="value" id="hyptest-tstat">—</div></div>
+    <div class="stat err"><div class="label">p-value</div><div class="value" id="hyptest-pval">—</div></div>
+    <div class="stat pop"><div class="label">Decision</div><div class="value" id="hyptest-decision">—</div></div>
+  </div>
+  <div class="chart tall" id="chart-hyptest"></div>
+  <div class="callout"><strong>Key Concepts 7.3, 7.5:</strong> Hypothesis testing uses t = (b2 - null) / se(b2). For two-sided tests, reject if |t| > critical value. For one-sided tests, only one tail matters. Setting null = 0 tests statistical significance; setting null = 90 tests whether the effect equals $90/sq ft. Note: null = 90 is inside the 95% CI [50.84, 96.70], so we do not reject.</div>
+  <div class="try-this">
+    <div class="try-title">Try this</div>
+    <ol>
+      <li>Set null = 0 (two-sided). t = 6.60 far in the rejection region, p is essentially 0. Strong evidence that house size affects price.</li>
+      <li>Set null = 90 (two-sided). t = -1.45, p = 0.158. We fail to reject. The data are consistent with a $90/sq ft effect.</li>
+      <li>Set null = 90 and switch to <strong>Left-Tail</strong> (test whether slope < 90). The one-sided p-value is half the two-sided: about 0.079. At 10% significance we would reject, but not at 5%.</li>
+    </ol>
+  </div>
+</section>
+
+<!-- ==================== WIDGET 4: p-Value Explorer ==================== -->
+<section class="widget" id="p-value">
+  <div class="widget-head">
+    <div>
+      <span class="section-tag">§ 7.4 · Key Concept 7.8</span>
+      <h2>p-Value Explorer</h2>
+    </div>
+    <button class="reset-btn" data-reset="pval">↺ Reset</button>
+  </div>
+  <p class="lede">Drag the t-statistic slider and watch the shaded p-value area change in real time. The p-value is the probability of observing a test statistic as extreme or more extreme than the one calculated, assuming the null hypothesis is true. Smaller shaded area = stronger evidence against H0.</p>
+  <div class="controls">
+    <div class="ctrl">
+      <label for="pval-t">t-statistic <span class="val" id="pval-t-val">2.00</span></label>
+      <input type="range" id="pval-t" min="-5" max="5" step="0.1" value="2">
+    </div>
+    <div class="ctrl">
+      <label for="pval-df">Degrees of freedom <span class="val" id="pval-df-val">27</span></label>
+      <input type="range" id="pval-df" min="3" max="100" step="1" value="27">
+    </div>
+    <div class="ctrl">
+      <label>Test type</label>
+      <div class="toggle-group" id="pval-type">
+        <button type="button" data-val="two" class="active">Two-Sided</button>
+        <button type="button" data-val="right">Right-Tail</button>
+        <button type="button" data-val="left">Left-Tail</button>
+      </div>
+    </div>
+  </div>
+  <div class="stats-grid">
+    <div class="stat"><div class="label">|t|</div><div class="value" id="pval-abst">—</div></div>
+    <div class="stat err"><div class="label">p-value</div><div class="value" id="pval-p">—</div></div>
+    <div class="stat"><div class="label">Significant at 5%?</div><div class="value" id="pval-sig5">—</div></div>
+    <div class="stat"><div class="label">Significant at 1%?</div><div class="value" id="pval-sig1">—</div></div>
+  </div>
+  <div class="chart tall" id="chart-pval"></div>
+  <div class="callout"><strong>Key Concept 7.8:</strong> The p-value measures the strength of evidence against H0. Common thresholds: p < 0.01 (strong evidence), p < 0.05 (moderate), p < 0.10 (weak). But p-values do not measure effect size or practical importance. A tiny effect with enough data will have a tiny p-value.</div>
+  <div class="try-this">
+    <div class="try-title">Try this</div>
+    <ol>
+      <li>Set t = 1.96. For df = 27 (two-sided), p is just above 0.05. The t-distribution requires a slightly larger t to reach significance compared to the normal.</li>
+      <li>Set t = 2.05 (the t critical value for df = 27). Now p is right at 0.05. This is the boundary between reject and fail to reject.</li>
+      <li>Drag t from 0 to 5 slowly. Watch the p-value shrink from 1.0 toward 0. The relationship between t and p is monotonic but nonlinear.</li>
+    </ol>
+  </div>
+</section>
+
+<!-- ==================== WIDGET 5: Economic vs. Statistical Significance ==================== -->
+<section class="widget" id="econ-stat">
+  <div class="widget-head">
+    <div>
+      <span class="section-tag">§ 7.4 · Key Concept 7.4</span>
+      <h2>Economic vs. Statistical Significance</h2>
+    </div>
+    <button class="reset-btn" data-reset="econstat">↺ Reset</button>
+  </div>
+  <p class="lede">A large sample can make a trivially small effect statistically significant. Conversely, an economically important effect may fail significance tests in small samples. Adjust the true slope and sample size to see how statistical significance (p-value) and economic significance (effect size) can diverge.</p>
+  <div class="controls">
+    <div class="ctrl">
+      <label for="econstat-beta">True slope <span class="val" id="econstat-beta-val">0.20</span></label>
+      <input type="range" id="econstat-beta" min="0" max="3" step="0.05" value="0.2">
+    </div>
+    <div class="ctrl">
+      <label for="econstat-n">Sample size n <span class="val" id="econstat-n-val">500</span></label>
+      <input type="range" id="econstat-n" min="10" max="2000" step="10" value="500">
+    </div>
+    <div class="ctrl">
+      <label for="econstat-sigma">Error sigma <span class="val" id="econstat-sigma-val">2.0</span></label>
+      <input type="range" id="econstat-sigma" min="0.5" max="5" step="0.5" value="2">
+    </div>
+    <div class="ctrl">
+      <label>&nbsp;</label>
+      <button class="resim-btn" id="econstat-resim" type="button">Resimulate</button>
+    </div>
+  </div>
+  <div class="stats-grid">
+    <div class="stat pop"><div class="label">True slope</div><div class="value" id="econstat-true">—</div></div>
+    <div class="stat"><div class="label">Estimated b2</div><div class="value" id="econstat-b2">—</div></div>
+    <div class="stat"><div class="label">t-statistic</div><div class="value" id="econstat-tstat">—</div></div>
+    <div class="stat err"><div class="label">p-value</div><div class="value" id="econstat-pval">—</div></div>
+    <div class="stat"><div class="label">Significant?</div><div class="value" id="econstat-sig">—</div></div>
+  </div>
+  <div class="chart" id="chart-econstat"></div>
+  <div class="callout"><strong>Key Concept 7.4:</strong> Statistical significance (Is the effect different from zero?) and economic significance (Is the effect large enough to matter?) answer different questions. With n = 2000, even a slope of 0.05 becomes statistically significant, but it may be economically trivial. Always report effect sizes alongside p-values.</div>
+  <div class="try-this">
+    <div class="try-title">Try this</div>
+    <ol>
+      <li>Set slope = 0.10 and n = 50. The effect is usually not significant (p > 0.05). Now increase n to 2000. The same tiny slope becomes highly significant.</li>
+      <li>Set slope = 2.0 and n = 10. A large effect often fails to reach significance with few observations. Increase n to 30 and it almost always passes.</li>
+      <li>Compare slope = 0.05 at n = 2000 (significant but tiny) with slope = 1.5 at n = 15 (not significant but large). Which finding is more useful to a decision maker?</li>
+    </ol>
+  </div>
+</section>
+
+<!-- ==================== WIDGET 6: Robust Standard Errors ==================== -->
+<section class="widget" id="robust-se">
+  <div class="widget-head">
+    <div>
+      <span class="section-tag">§ 7.7 · Key Concept 7.6</span>
+      <h2>Robust Standard Errors</h2>
+    </div>
+    <button class="reset-btn" data-reset="robustse">↺ Reset</button>
+  </div>
+  <p class="lede">When heteroskedasticity is present, default standard errors are wrong. Robust (HC1) standard errors remain valid whether or not heteroskedasticity exists. Toggle between homoskedastic and heteroskedastic error structures to see how the two SE types compare.</p>
+  <div class="controls">
+    <div class="ctrl">
+      <label>Error structure</label>
+      <div class="toggle-group" id="robustse-errors">
+        <button type="button" data-val="homo" class="active">Homoskedastic</button>
+        <button type="button" data-val="hetero">Heteroskedastic</button>
+      </div>
+    </div>
+    <div class="ctrl">
+      <label for="robustse-n">Sample size n <span class="val" id="robustse-n-val">50</span></label>
+      <input type="range" id="robustse-n" min="20" max="200" step="10" value="50">
+    </div>
+    <div class="ctrl">
+      <label for="robustse-severity">Het. severity <span class="val" id="robustse-severity-val">50%</span></label>
+      <input type="range" id="robustse-severity" min="0" max="100" step="5" value="50">
+    </div>
+    <div class="ctrl">
+      <label>&nbsp;</label>
+      <button class="resim-btn" id="robustse-resim" type="button">Resimulate</button>
+    </div>
+  </div>
+  <div class="stats-grid">
+    <div class="stat"><div class="label">Standard se(b2)</div><div class="value" id="robustse-std">—</div></div>
+    <div class="stat"><div class="label">Robust se(b2)</div><div class="value" id="robustse-rob">—</div></div>
+    <div class="stat err"><div class="label">Ratio (Robust/Std)</div><div class="value" id="robustse-ratio">—</div></div>
+    <div class="stat"><div class="label">b2</div><div class="value" id="robustse-b2">—</div></div>
+    <div class="stat pop"><div class="label">True slope</div><div class="value">2.0000</div></div>
+  </div>
+  <div class="two-col">
+    <div class="chart" id="chart-robustse-scatter"></div>
+    <div class="chart" id="chart-robustse-resid"></div>
+  </div>
+  <div class="callout"><strong>Key Concept 7.6:</strong> Heteroskedasticity makes standard SEs unreliable. Robust SEs (HC1) are valid in both cases. When errors are homoskedastic, the two SE types are similar. When heteroskedastic, they diverge. Modern best practice: always report robust SEs for cross-sectional data.</div>
+  <div class="try-this">
+    <div class="try-title">Try this</div>
+    <ol>
+      <li>Under <strong>Homoskedastic</strong>, the standard and robust SEs are nearly identical (ratio close to 1.0). The scatter shows constant spread.</li>
+      <li>Switch to <strong>Heteroskedastic</strong> at 100% severity. The residual plot shows a clear fan shape. The robust SE is typically larger, protecting against false positives.</li>
+      <li>With heteroskedastic errors, click <strong>Resimulate</strong> several times. Standard SEs fluctuate more wildly; robust SEs are more stable.</li>
+    </ol>
+  </div>
+</section>
+
+<!-- ==================== WIDGET 7: House Price Real Data ==================== -->
+<section class="widget" id="house-data">
+  <div class="widget-head">
+    <div>
+      <span class="section-tag">§ 7.1-7.7 · Key Concepts 7.1-7.6</span>
+      <h2>House Price Data: Full Inference</h2>
+    </div>
+    <button class="reset-btn" data-reset="house">↺ Reset</button>
+  </div>
+  <p class="lede">The chapter's real dataset: 29 houses in Central Davis, California (1999). Explore the complete regression output, confidence intervals, and hypothesis test for any null value. Compare standard vs. robust standard errors on real data where heteroskedasticity may be present.</p>
+  <div class="controls">
+    <div class="ctrl">
+      <label for="house-null">Test null value ($/sq ft) <span class="val" id="house-null-val">0</span></label>
+      <input type="range" id="house-null" min="-20" max="120" step="5" value="0">
+    </div>
+    <div class="ctrl">
+      <label for="house-conf">Confidence level <span class="val" id="house-conf-val">95%</span></label>
+      <input type="range" id="house-conf" min="80" max="99" step="1" value="95">
+    </div>
+    <div class="ctrl">
+      <label>SE type</label>
+      <div class="toggle-group" id="house-setype">
+        <button type="button" data-val="standard" class="active">Standard</button>
+        <button type="button" data-val="robust">Robust (HC1)</button>
+      </div>
+    </div>
+  </div>
+  <div class="stats-grid">
+    <div class="stat"><div class="label">b2 (slope)</div><div class="value" id="house-b2">—</div></div>
+    <div class="stat"><div class="label">se(b2)</div><div class="value" id="house-se">—</div></div>
+    <div class="stat"><div class="label">t-statistic</div><div class="value" id="house-tstat">—</div></div>
+    <div class="stat err"><div class="label">p-value</div><div class="value" id="house-pval">—</div></div>
+    <div class="stat"><div class="label">CI</div><div class="value" id="house-ci">—</div></div>
+    <div class="stat pop"><div class="label">R-squared</div><div class="value" id="house-r2">—</div></div>
+  </div>
+  <div class="chart" id="chart-house"></div>
+  <div class="callout"><strong>Key Concepts 7.1-7.6 in practice:</strong> For these 29 houses, b2 = 73.77 (each sq ft adds ~$74 to price). The standard SE is 11.17 and the robust SE is 11.33 — very similar, suggesting homoskedasticity is not a major issue here. The 95% CI of [50.84, 96.70] excludes 0 (significant) but includes 90 (cannot reject $90/sq ft).</div>
+  <div class="try-this">
+    <div class="try-title">Try this</div>
+    <ol>
+      <li>Set null = 0. The t-statistic is 6.60 and p is essentially 0. House size strongly predicts price.</li>
+      <li>Set null = 90. We fail to reject: 90 is inside the CI. Set null = 97 and it falls outside the CI — now we reject.</li>
+      <li>Switch between <strong>Standard</strong> and <strong>Robust</strong> SEs. The CIs barely change, confirming that heteroskedasticity is mild in this dataset.</li>
+    </ol>
+  </div>
+</section>
+
+</main>
+
+<footer class="page">
+  <p>Part of <a href="https://quarcs-lab.github.io/metricsai/book/_book/index.html"><strong>metricsAI</strong></a> · Chapter 07: Statistical Inference for Bivariate Regression · by Carlos Mendez · <a href="https://github.com/quarcs-lab/metricsai">GitHub</a></p>
+  <p>House price data: 29 houses in Central Davis, California (1999) from AED_HOUSE.DTA.</p>
+  <a class="scroll-top" href="#top">↑ Back to top</a>
+</footer>
+
+<script type="application/json" id="ch-data">{{DATA_JSON}}</script>
+
+<script>
+"use strict";
+
+var DATA = JSON.parse(document.getElementById("ch-data").textContent);
+
+// ==================== STATS HELPERS ====================
+var mean = function(a) { var s = 0; for (var i = 0; i < a.length; i++) s += a[i]; return s / a.length; };
+var sortedCopy = function(a) { return a.slice().sort(function(x, y) { return x - y; }); };
+function std(a, m) {
+  if (m === undefined) m = mean(a);
+  var s = 0;
+  for (var i = 0; i < a.length; i++) s += (a[i] - m) * (a[i] - m);
+  return Math.sqrt(s / (a.length - 1));
+}
+function fmt(v, d) {
+  if (d === undefined) d = 4;
+  if (v === null || v === undefined || isNaN(v)) return "\u2014";
+  return v.toFixed(d);
+}
+
+// ==================== PRNG & SAMPLING ====================
+function mulberry32(a) {
+  return function() {
+    a |= 0; a = a + 0x6D2B79F5 | 0;
+    var t = Math.imul(a ^ a >>> 15, 1 | a);
+    t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+    return ((t ^ t >>> 14) >>> 0) / 4294967296;
+  };
+}
+function boxMuller(rng) {
+  var u1 = rng(), u2 = rng();
+  return Math.sqrt(-2 * Math.log(u1)) * Math.cos(2 * Math.PI * u2);
+}
+function normalPDF(x, mu, sigma) {
+  var z = (x - mu) / sigma;
+  return Math.exp(-0.5 * z * z) / (sigma * Math.sqrt(2 * Math.PI));
+}
+function linspace(a, b, n) {
+  var out = new Array(n);
+  var step = (b - a) / (n - 1);
+  for (var i = 0; i < n; i++) out[i] = a + i * step;
+  return out;
+}
+
+// ==================== OLS ENGINE ====================
+function olsFit(x, y) {
+  var n = x.length;
+  var xbar = mean(x), ybar = mean(y);
+  var SSx = 0, SSxy = 0;
+  for (var i = 0; i < n; i++) {
+    SSx += (x[i] - xbar) * (x[i] - xbar);
+    SSxy += (x[i] - xbar) * (y[i] - ybar);
+  }
+  var b2 = SSxy / SSx;
+  var b1 = ybar - b2 * xbar;
+  var yhat = new Array(n);
+  var residuals = new Array(n);
+  var RSS = 0;
+  for (var i = 0; i < n; i++) {
+    yhat[i] = b1 + b2 * x[i];
+    residuals[i] = y[i] - yhat[i];
+    RSS += residuals[i] * residuals[i];
+  }
+  var se = Math.sqrt(RSS / (n - 2));
+  var se_b2 = se / Math.sqrt(SSx);
+  var SST = 0;
+  for (var i = 0; i < n; i++) SST += (y[i] - ybar) * (y[i] - ybar);
+  var R2 = SST > 0 ? 1 - RSS / SST : 0;
+  // Robust HC1 standard error
+  var hc1_num = 0;
+  var adj = n / (n - 2); // HC1 small-sample correction
+  for (var i = 0; i < n; i++) {
+    hc1_num += residuals[i] * residuals[i] * (x[i] - xbar) * (x[i] - xbar);
+  }
+  var se_b2_robust = Math.sqrt(adj * hc1_num / (SSx * SSx));
+  return { b1: b1, b2: b2, yhat: yhat, residuals: residuals, n: n, xbar: xbar, ybar: ybar,
+    SSx: SSx, RSS: RSS, se: se, se_b2: se_b2, se_b2_robust: se_b2_robust, R2: R2 };
+}
+
+function generateSample(rng, n, beta1, beta2, sigmaU, muX, sigmaX) {
+  var x = new Array(n), y = new Array(n);
+  for (var i = 0; i < n; i++) {
+    x[i] = muX + sigmaX * boxMuller(rng);
+    var u = sigmaU * boxMuller(rng);
+    y[i] = beta1 + beta2 * x[i] + u;
+  }
+  return { x: x, y: y };
+}
+
+// ==================== t-DISTRIBUTION HELPERS ====================
+function lnGamma(x) {
+  var c = [76.18009172947146, -86.50532032941678, 24.01409824083091,
+    -1.231739572450155, 0.001208650973866179, -0.000005395239384953];
+  var y = x, tmp = x + 5.5;
+  tmp -= (x + 0.5) * Math.log(tmp);
+  var ser = 1.000000000190015;
+  for (var j = 0; j < 6; j++) ser += c[j] / ++y;
+  return -tmp + Math.log(2.5066282746310005 * ser / x);
+}
+
+function tPDF(t, df) {
+  var c = Math.exp(lnGamma((df + 1) / 2) - lnGamma(df / 2)) / Math.sqrt(df * Math.PI);
+  return c * Math.pow(1 + t * t / df, -(df + 1) / 2);
+}
+
+// Continued fraction for regularized incomplete beta (Numerical Recipes)
+function betaCF(a, b, x) {
+  var MAXIT = 200, EPS = 3e-12, FPMIN = 1e-30;
+  var qab = a + b, qap = a + 1, qam = a - 1;
+  var c = 1;
+  var d = 1 - qab * x / qap;
+  if (Math.abs(d) < FPMIN) d = FPMIN;
+  d = 1 / d;
+  var h = d;
+  for (var m = 1; m <= MAXIT; m++) {
+    var m2 = 2 * m;
+    var aa = m * (b - m) * x / ((qam + m2) * (a + m2));
+    d = 1 + aa * d; if (Math.abs(d) < FPMIN) d = FPMIN;
+    c = 1 + aa / c; if (Math.abs(c) < FPMIN) c = FPMIN;
+    d = 1 / d; h *= d * c;
+    aa = -(a + m) * (qab + m) * x / ((a + m2) * (qap + m2));
+    d = 1 + aa * d; if (Math.abs(d) < FPMIN) d = FPMIN;
+    c = 1 + aa / c; if (Math.abs(c) < FPMIN) c = FPMIN;
+    d = 1 / d;
+    var del = d * c; h *= del;
+    if (Math.abs(del - 1) < EPS) break;
+  }
+  return h;
+}
+
+function betaI(a, b, x) {
+  if (x <= 0) return 0;
+  if (x >= 1) return 1;
+  var bt = Math.exp(lnGamma(a + b) - lnGamma(a) - lnGamma(b) + a * Math.log(x) + b * Math.log(1 - x));
+  if (x < (a + 1) / (a + b + 2)) {
+    return bt * betaCF(a, b, x) / a;
+  } else {
+    return 1 - bt * betaCF(b, a, 1 - x) / b;
+  }
+}
+
+function tCDF(t, df) {
+  var x = df / (df + t * t);
+  var ib = betaI(df / 2, 0.5, x);
+  return t >= 0 ? 1 - 0.5 * ib : 0.5 * ib;
+}
+
+// Inverse t-CDF via bisection
+function tQuantile(p, df) {
+  if (p <= 0) return -Infinity;
+  if (p >= 1) return Infinity;
+  if (p === 0.5) return 0;
+  var lo = -30, hi = 30;
+  for (var i = 0; i < 80; i++) {
+    var mid = (lo + hi) / 2;
+    if (tCDF(mid, df) < p) lo = mid;
+    else hi = mid;
+  }
+  return (lo + hi) / 2;
+}
+
+// ==================== THEME ====================
+var THEME_KEY = "metricsai-theme";
+function getCSS(varName) { return getComputedStyle(document.documentElement).getPropertyValue(varName).trim(); }
+function themeColors() {
+  return { text: getCSS("--text"), textSoft: getCSS("--text-soft"), grid: getCSS("--grid"),
+    panel: getCSS("--panel"), cyan: getCSS("--accent"), purple: getCSS("--accent-2"), pink: getCSS("--accent-3") };
+}
+function baseLayout(overrides) {
+  var c = themeColors();
+  var base = {
+    paper_bgcolor: "rgba(0,0,0,0)", plot_bgcolor: "rgba(0,0,0,0)",
+    font: { family: "Inter, system-ui, sans-serif", color: c.text, size: 12 },
+    margin: { l: 56, r: 18, t: 30, b: 46 },
+    xaxis: { gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft } },
+    yaxis: { gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft } },
+    hoverlabel: { bgcolor: c.panel, bordercolor: c.grid, font: { color: c.text } },
+    legend: { font: { color: c.text }, bgcolor: "rgba(0,0,0,0)" }
+  };
+  if (overrides) for (var k in overrides) base[k] = overrides[k];
+  return base;
+}
+var PLOTLY_CONFIG = { displayModeBar: false, responsive: true };
+
+// ==================== TOGGLE / SLIDER HELPERS ====================
+function bindToggles(groupId, renderFn) {
+  document.querySelectorAll("#" + groupId + " button").forEach(function(btn) {
+    btn.addEventListener("click", function() {
+      this.parentNode.querySelectorAll("button").forEach(function(b) { b.classList.remove("active"); });
+      this.classList.add("active");
+      renderFn();
+    });
+  });
+}
+function bindSlider(id, valId, formatFn, renderFn) {
+  var el = document.getElementById(id);
+  var valEl = document.getElementById(valId);
+  el.addEventListener("input", function() {
+    valEl.textContent = formatFn(this.value);
+    renderFn();
+  });
+}
+function getToggleVal(groupId) {
+  var btn = document.querySelector("#" + groupId + " button.active");
+  return btn ? btn.dataset.val : "";
+}
+
+// ==================== WIDGET 1: t-Distribution Explorer ====================
+(function() {
+  var chartEl = document.getElementById("chart-tdist");
+
+  function render() {
+    var c = themeColors();
+    var df = parseInt(document.getElementById("tdist-df").value);
+    var areaMode = getToggleVal("tdist-area");
+
+    var tcrit = tQuantile(0.975, df);
+    var tvar = df > 2 ? df / (df - 2) : Infinity;
+
+    document.getElementById("tdist-dfstat").textContent = df;
+    document.getElementById("tdist-tcrit").textContent = fmt(tcrit, 3);
+    document.getElementById("tdist-diff").textContent = fmt(tcrit - 1.96, 3);
+    document.getElementById("tdist-var").textContent = tvar === Infinity ? "\u221E" : fmt(tvar, 3);
+
+    var xs = linspace(-5, 5, 300);
+    var tys = xs.map(function(x) { return tPDF(x, df); });
+    var nys = xs.map(function(x) { return normalPDF(x, 0, 1); });
+
+    var traces = [];
+    traces.push({ x: xs, y: nys, mode: "lines", line: { color: c.purple, width: 2, dash: "dash" },
+      name: "N(0,1)", hovertemplate: "t=%{x:.2f}<br>density=%{y:.4f}<extra>N(0,1)</extra>" });
+    traces.push({ x: xs, y: tys, mode: "lines", line: { color: c.cyan, width: 2.5 },
+      name: "t(" + df + ")", hovertemplate: "t=%{x:.2f}<br>density=%{y:.4f}<extra>t(" + df + ")</extra>" });
+
+    // Shaded areas
+    if (areaMode === "tails") {
+      var leftXs = [], leftYs = [], rightXs = [], rightYs = [];
+      for (var i = 0; i < xs.length; i++) {
+        if (xs[i] <= -tcrit) { leftXs.push(xs[i]); leftYs.push(tys[i]); }
+        if (xs[i] >= tcrit) { rightXs.push(xs[i]); rightYs.push(tys[i]); }
+      }
+      if (leftXs.length > 0) {
+        traces.push({ x: leftXs.concat([leftXs[leftXs.length - 1], leftXs[0]]),
+          y: leftYs.concat([0, 0]), fill: "toself", fillcolor: c.pink + "44",
+          line: { color: "transparent" }, showlegend: false, hoverinfo: "skip" });
+      }
+      if (rightXs.length > 0) {
+        traces.push({ x: rightXs.concat([rightXs[rightXs.length - 1], rightXs[0]]),
+          y: rightYs.concat([0, 0]), fill: "toself", fillcolor: c.pink + "44",
+          line: { color: "transparent" }, showlegend: false, hoverinfo: "skip" });
+      }
+    } else if (areaMode === "center") {
+      var centerXs = [], centerYs = [];
+      for (var i = 0; i < xs.length; i++) {
+        if (xs[i] >= -tcrit && xs[i] <= tcrit) { centerXs.push(xs[i]); centerYs.push(tys[i]); }
+      }
+      if (centerXs.length > 0) {
+        traces.push({ x: centerXs.concat([centerXs[centerXs.length - 1], centerXs[0]]),
+          y: centerYs.concat([0, 0]), fill: "toself", fillcolor: c.cyan + "33",
+          line: { color: "transparent" }, showlegend: false, hoverinfo: "skip" });
+      }
+    }
+
+    Plotly.react(chartEl, traces, baseLayout({
+      xaxis: { title: "t", gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft } },
+      yaxis: { title: "Density", gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft } },
+      shapes: [
+        { type: "line", x0: -tcrit, x1: -tcrit, yref: "paper", y0: 0, y1: 1, line: { color: c.pink, width: 1, dash: "dot" } },
+        { type: "line", x0: tcrit, x1: tcrit, yref: "paper", y0: 0, y1: 1, line: { color: c.pink, width: 1, dash: "dot" } }
+      ],
+      annotations: [
+        { x: tcrit, yref: "paper", y: 1.03, text: "t=" + fmt(tcrit, 2), showarrow: false, font: { color: c.pink, size: 10 } },
+        { x: -tcrit, yref: "paper", y: 1.03, text: "t=" + fmt(-tcrit, 2), showarrow: false, font: { color: c.pink, size: 10 } }
+      ],
+      legend: { x: 0.75, y: 0.98, font: { color: c.text }, bgcolor: "rgba(0,0,0,0)" }
+    }), PLOTLY_CONFIG);
+  }
+
+  bindSlider("tdist-df", "tdist-df-val", function(v) { return v; }, render);
+  bindToggles("tdist-area", render);
+  window.__rerender_tdist = render;
+  render();
+})();
+
+// ==================== WIDGET 2: Confidence Interval Simulator ====================
+(function() {
+  var chartEl = document.getElementById("chart-cisim");
+  var DGP = DATA.dgp;
+  var seed = 200;
+
+  function render() {
+    var c = themeColors();
+    var nCI = parseInt(document.getElementById("cisim-nci").value);
+    var n = parseInt(document.getElementById("cisim-n").value);
+    var conf = parseInt(document.getElementById("cisim-conf").value);
+    var alpha = 1 - conf / 100;
+    var rng = mulberry32(seed + n * 7 + conf);
+
+    var tcrit = tQuantile(1 - alpha / 2, n - 2);
+    var captured = 0;
+    var totalWidth = 0;
+    var ciData = [];
+
+    for (var i = 0; i < nCI; i++) {
+      var sample = generateSample(rng, n, DGP.beta1, DGP.beta2, DGP.sigmaU, DGP.muX, DGP.sigmaX);
+      var fit = olsFit(sample.x, sample.y);
+      var lo = fit.b2 - tcrit * fit.se_b2;
+      var hi = fit.b2 + tcrit * fit.se_b2;
+      var covers = (lo <= DGP.beta2 && hi >= DGP.beta2);
+      if (covers) captured++;
+      totalWidth += (hi - lo);
+      ciData.push({ b2: fit.b2, lo: lo, hi: hi, covers: covers });
+    }
+
+    var coverage = captured / nCI;
+    document.getElementById("cisim-coverage").textContent = (coverage * 100).toFixed(1) + "%";
+    document.getElementById("cisim-width").textContent = fmt(totalWidth / nCI, 3);
+    document.getElementById("cisim-missed").textContent = (nCI - captured) + " / " + nCI;
+
+    var traces = [];
+    // Draw CIs as horizontal line segments
+    var yCover = [], xLoCover = [], xHiCover = [];
+    var yMiss = [], xLoMiss = [], xHiMiss = [];
+    for (var i = 0; i < ciData.length; i++) {
+      if (ciData[i].covers) {
+        yCover.push(i); xLoCover.push(ciData[i].lo); xHiCover.push(ciData[i].hi);
+      } else {
+        yMiss.push(i); xLoMiss.push(ciData[i].lo); xHiMiss.push(ciData[i].hi);
+      }
+    }
+
+    // Captured CIs
+    for (var i = 0; i < yCover.length; i++) {
+      traces.push({ x: [xLoCover[i], xHiCover[i]], y: [yCover[i], yCover[i]],
+        mode: "lines", line: { color: c.cyan, width: 1.5 }, showlegend: i === 0,
+        name: i === 0 ? "Captures \u03B2\u2082" : "", hoverinfo: "skip" });
+    }
+    // Missed CIs
+    for (var i = 0; i < yMiss.length; i++) {
+      traces.push({ x: [xLoMiss[i], xHiMiss[i]], y: [yMiss[i], yMiss[i]],
+        mode: "lines", line: { color: c.pink, width: 2 }, showlegend: i === 0,
+        name: i === 0 ? "Misses \u03B2\u2082" : "", hoverinfo: "skip" });
+    }
+
+    Plotly.react(chartEl, traces, baseLayout({
+      xaxis: { title: "Slope estimate (b\u2082)", gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft } },
+      yaxis: { title: "Sample #", gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft },
+        autorange: "reversed" },
+      shapes: [{ type: "line", x0: DGP.beta2, x1: DGP.beta2, yref: "paper", y0: 0, y1: 1,
+        line: { color: c.purple, width: 2.5, dash: "dash" } }],
+      annotations: [{ x: DGP.beta2, yref: "paper", y: -0.06, text: "\u03B2\u2082 = " + DGP.beta2, showarrow: false,
+        font: { color: c.purple, size: 11 } }],
+      legend: { x: 0.72, y: 0.02, font: { color: c.text }, bgcolor: "rgba(0,0,0,0)" }
+    }), PLOTLY_CONFIG);
+  }
+
+  bindSlider("cisim-nci", "cisim-nci-val", function(v) { return v; }, render);
+  bindSlider("cisim-n", "cisim-n-val", function(v) { return v; }, render);
+  bindSlider("cisim-conf", "cisim-conf-val", function(v) { return v + "%"; }, render);
+  document.getElementById("cisim-resim").addEventListener("click", function() { seed += 1000; render(); });
+  window.__rerender_cisim = render;
+  render();
+})();
+
+// ==================== WIDGET 3: Hypothesis Testing Framework ====================
+(function() {
+  var chartEl = document.getElementById("chart-hyptest");
+  var HOUSE = DATA.house.regression;
+
+  function render() {
+    var c = themeColors();
+    var nullVal = parseFloat(document.getElementById("hyptest-null").value);
+    var alpha = parseInt(document.getElementById("hyptest-alpha").value) / 100;
+    var testType = getToggleVal("hyptest-type");
+
+    var b2 = HOUSE.b2;
+    var se = HOUSE.se_b2;
+    var df = HOUSE.df;
+    var tStat = (b2 - nullVal) / se;
+
+    var pVal;
+    if (testType === "two") {
+      pVal = 2 * (1 - tCDF(Math.abs(tStat), df));
+    } else if (testType === "right") {
+      pVal = 1 - tCDF(tStat, df);
+    } else {
+      pVal = tCDF(tStat, df);
+    }
+
+    var reject = pVal < alpha;
+
+    document.getElementById("hyptest-b2").textContent = fmt(b2, 2);
+    document.getElementById("hyptest-se").textContent = fmt(se, 2);
+    document.getElementById("hyptest-tstat").textContent = fmt(tStat, 3);
+    document.getElementById("hyptest-pval").textContent = pVal < 0.0001 ? "< 0.0001" : fmt(pVal, 4);
+    document.getElementById("hyptest-decision").textContent = reject ? "Reject H\u2080" : "Fail to reject";
+
+    var xs = linspace(-8, 8, 400);
+    var ys = xs.map(function(x) { return tPDF(x, df); });
+
+    var traces = [];
+    traces.push({ x: xs, y: ys, mode: "lines", line: { color: c.cyan, width: 2 }, name: "t(" + df + ")",
+      hovertemplate: "t=%{x:.2f}<br>density=%{y:.4f}<extra></extra>" });
+
+    // Rejection region shading
+    if (testType === "two") {
+      var tcrit = tQuantile(1 - alpha / 2, df);
+      var leftXs = [], leftYs = [], rightXs = [], rightYs = [];
+      for (var i = 0; i < xs.length; i++) {
+        if (xs[i] <= -tcrit) { leftXs.push(xs[i]); leftYs.push(ys[i]); }
+        if (xs[i] >= tcrit) { rightXs.push(xs[i]); rightYs.push(ys[i]); }
+      }
+      if (leftXs.length > 0) {
+        traces.push({ x: leftXs.concat([leftXs[leftXs.length - 1], leftXs[0]]),
+          y: leftYs.concat([0, 0]), fill: "toself", fillcolor: c.pink + "44",
+          line: { color: "transparent" }, showlegend: false, hoverinfo: "skip" });
+      }
+      if (rightXs.length > 0) {
+        traces.push({ x: rightXs.concat([rightXs[rightXs.length - 1], rightXs[0]]),
+          y: rightYs.concat([0, 0]), fill: "toself", fillcolor: c.pink + "44",
+          line: { color: "transparent" }, name: "Rejection region", hoverinfo: "skip" });
+      }
+    } else if (testType === "right") {
+      var tcrit = tQuantile(1 - alpha, df);
+      var rXs = [], rYs = [];
+      for (var i = 0; i < xs.length; i++) {
+        if (xs[i] >= tcrit) { rXs.push(xs[i]); rYs.push(ys[i]); }
+      }
+      if (rXs.length > 0) {
+        traces.push({ x: rXs.concat([rXs[rXs.length - 1], rXs[0]]),
+          y: rYs.concat([0, 0]), fill: "toself", fillcolor: c.pink + "44",
+          line: { color: "transparent" }, name: "Rejection region", hoverinfo: "skip" });
+      }
+    } else {
+      var tcrit = tQuantile(alpha, df);
+      var lXs = [], lYs = [];
+      for (var i = 0; i < xs.length; i++) {
+        if (xs[i] <= tcrit) { lXs.push(xs[i]); lYs.push(ys[i]); }
+      }
+      if (lXs.length > 0) {
+        traces.push({ x: lXs.concat([lXs[lXs.length - 1], lXs[0]]),
+          y: lYs.concat([0, 0]), fill: "toself", fillcolor: c.pink + "44",
+          line: { color: "transparent" }, name: "Rejection region", hoverinfo: "skip" });
+      }
+    }
+
+    // Test statistic marker
+    var tStatClamped = Math.max(-7.8, Math.min(7.8, tStat));
+    traces.push({ x: [tStatClamped], y: [tPDF(tStatClamped, df)], mode: "markers",
+      marker: { color: reject ? c.pink : c.purple, size: 12, symbol: "diamond" },
+      name: "t = " + fmt(tStat, 2), hovertemplate: "t=%{x:.3f}<extra></extra>" });
+
+    Plotly.react(chartEl, traces, baseLayout({
+      xaxis: { title: "t-statistic", range: [-8, 8], gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft } },
+      yaxis: { title: "Density", gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft } },
+      shapes: [{ type: "line", x0: tStatClamped, x1: tStatClamped, yref: "paper", y0: 0, y1: 0.85,
+        line: { color: reject ? c.pink : c.purple, width: 2, dash: "dot" } }],
+      legend: { x: 0.72, y: 0.98, font: { color: c.text, size: 11 }, bgcolor: "rgba(0,0,0,0)" }
+    }), PLOTLY_CONFIG);
+  }
+
+  bindSlider("hyptest-null", "hyptest-null-val", function(v) { return v; }, render);
+  bindSlider("hyptest-alpha", "hyptest-alpha-val", function(v) { return v + "%"; }, render);
+  bindToggles("hyptest-type", render);
+  window.__rerender_hyptest = render;
+  render();
+})();
+
+// ==================== WIDGET 4: p-Value Explorer ====================
+(function() {
+  var chartEl = document.getElementById("chart-pval");
+
+  function render() {
+    var c = themeColors();
+    var tVal = parseFloat(document.getElementById("pval-t").value);
+    var df = parseInt(document.getElementById("pval-df").value);
+    var testType = getToggleVal("pval-type");
+
+    var pVal;
+    if (testType === "two") {
+      pVal = 2 * (1 - tCDF(Math.abs(tVal), df));
+    } else if (testType === "right") {
+      pVal = 1 - tCDF(tVal, df);
+    } else {
+      pVal = tCDF(tVal, df);
+    }
+
+    document.getElementById("pval-abst").textContent = fmt(Math.abs(tVal), 2);
+    document.getElementById("pval-p").textContent = pVal < 0.0001 ? "< 0.0001" : fmt(pVal, 4);
+    document.getElementById("pval-sig5").textContent = pVal < 0.05 ? "Yes" : "No";
+    document.getElementById("pval-sig1").textContent = pVal < 0.01 ? "Yes" : "No";
+
+    var xs = linspace(-5.5, 5.5, 400);
+    var ys = xs.map(function(x) { return tPDF(x, df); });
+
+    var traces = [];
+    traces.push({ x: xs, y: ys, mode: "lines", line: { color: c.cyan, width: 2 }, name: "t(" + df + ")",
+      hovertemplate: "t=%{x:.2f}<br>density=%{y:.4f}<extra></extra>" });
+
+    // p-value shading
+    if (testType === "two") {
+      var absT = Math.abs(tVal);
+      var leftXs = [], leftYs = [], rightXs = [], rightYs = [];
+      for (var i = 0; i < xs.length; i++) {
+        if (xs[i] <= -absT) { leftXs.push(xs[i]); leftYs.push(ys[i]); }
+        if (xs[i] >= absT) { rightXs.push(xs[i]); rightYs.push(ys[i]); }
+      }
+      if (leftXs.length > 0) {
+        traces.push({ x: leftXs.concat([leftXs[leftXs.length - 1], leftXs[0]]),
+          y: leftYs.concat([0, 0]), fill: "toself", fillcolor: c.pink + "55",
+          line: { color: "transparent" }, showlegend: false, hoverinfo: "skip" });
+      }
+      if (rightXs.length > 0) {
+        traces.push({ x: rightXs.concat([rightXs[rightXs.length - 1], rightXs[0]]),
+          y: rightYs.concat([0, 0]), fill: "toself", fillcolor: c.pink + "55",
+          line: { color: "transparent" }, name: "p = " + (pVal < 0.0001 ? "<0.0001" : fmt(pVal, 4)), hoverinfo: "skip" });
+      }
+    } else if (testType === "right") {
+      var rXs = [], rYs = [];
+      for (var i = 0; i < xs.length; i++) {
+        if (xs[i] >= tVal) { rXs.push(xs[i]); rYs.push(ys[i]); }
+      }
+      if (rXs.length > 0) {
+        traces.push({ x: rXs.concat([rXs[rXs.length - 1], rXs[0]]),
+          y: rYs.concat([0, 0]), fill: "toself", fillcolor: c.pink + "55",
+          line: { color: "transparent" }, name: "p = " + (pVal < 0.0001 ? "<0.0001" : fmt(pVal, 4)), hoverinfo: "skip" });
+      }
+    } else {
+      var lXs = [], lYs = [];
+      for (var i = 0; i < xs.length; i++) {
+        if (xs[i] <= tVal) { lXs.push(xs[i]); lYs.push(ys[i]); }
+      }
+      if (lXs.length > 0) {
+        traces.push({ x: lXs.concat([lXs[lXs.length - 1], lXs[0]]),
+          y: lYs.concat([0, 0]), fill: "toself", fillcolor: c.pink + "55",
+          line: { color: "transparent" }, name: "p = " + (pVal < 0.0001 ? "<0.0001" : fmt(pVal, 4)), hoverinfo: "skip" });
+      }
+    }
+
+    // t-statistic marker
+    traces.push({ x: [tVal], y: [tPDF(tVal, df)], mode: "markers",
+      marker: { color: c.purple, size: 11, symbol: "diamond" },
+      name: "t = " + fmt(tVal, 2), hovertemplate: "t=%{x:.2f}<extra></extra>" });
+
+    Plotly.react(chartEl, traces, baseLayout({
+      xaxis: { title: "t-statistic", gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft } },
+      yaxis: { title: "Density", gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft } },
+      shapes: [{ type: "line", x0: tVal, x1: tVal, yref: "paper", y0: 0, y1: 0.9,
+        line: { color: c.purple, width: 1.5, dash: "dot" } }],
+      legend: { x: 0.72, y: 0.98, font: { color: c.text, size: 11 }, bgcolor: "rgba(0,0,0,0)" }
+    }), PLOTLY_CONFIG);
+  }
+
+  bindSlider("pval-t", "pval-t-val", function(v) { return parseFloat(v).toFixed(2); }, render);
+  bindSlider("pval-df", "pval-df-val", function(v) { return v; }, render);
+  bindToggles("pval-type", render);
+  window.__rerender_pval = render;
+  render();
+})();
+
+// ==================== WIDGET 5: Economic vs. Statistical Significance ====================
+(function() {
+  var chartEl = document.getElementById("chart-econstat");
+  var DGP = DATA.dgp;
+  var seed = 500;
+
+  function render() {
+    var c = themeColors();
+    var trueBeta = parseFloat(document.getElementById("econstat-beta").value);
+    var n = parseInt(document.getElementById("econstat-n").value);
+    var sigmaU = parseFloat(document.getElementById("econstat-sigma").value);
+    var rng = mulberry32(seed + n * 3 + Math.round(trueBeta * 100));
+
+    var sample = generateSample(rng, n, DGP.beta1, trueBeta, sigmaU, DGP.muX, DGP.sigmaX);
+    var fit = olsFit(sample.x, sample.y);
+    var tStat = fit.b2 / fit.se_b2;
+    var pVal = 2 * (1 - tCDF(Math.abs(tStat), n - 2));
+    var sig = pVal < 0.05;
+
+    document.getElementById("econstat-true").textContent = fmt(trueBeta, 2);
+    document.getElementById("econstat-b2").textContent = fmt(fit.b2);
+    document.getElementById("econstat-tstat").textContent = fmt(tStat, 3);
+    document.getElementById("econstat-pval").textContent = pVal < 0.0001 ? "< 0.0001" : fmt(pVal, 4);
+    document.getElementById("econstat-sig").textContent = sig ? "Yes (p < 0.05)" : "No (p \u2265 0.05)";
+
+    // Show scatter + fit, with annotation about effect size vs significance
+    var xMin = Math.min.apply(null, sample.x) - 0.5;
+    var xMax = Math.max.apply(null, sample.x) + 0.5;
+
+    var traces = [];
+    traces.push({ x: sample.x, y: sample.y, mode: "markers", type: "scatter",
+      marker: { color: c.cyan, size: Math.max(3, Math.min(7, 200 / n)), opacity: 0.6 }, name: "Data (n=" + n + ")",
+      hovertemplate: "x=%{x:.2f}<br>y=%{y:.2f}<extra></extra>" });
+    // True line
+    traces.push({ x: [xMin, xMax], y: [DGP.beta1 + trueBeta * xMin, DGP.beta1 + trueBeta * xMax],
+      mode: "lines", line: { color: c.purple, width: 2, dash: "dash" }, name: "True line (\u03B2\u2082=" + fmt(trueBeta, 2) + ")" });
+    // OLS fit
+    traces.push({ x: [xMin, xMax], y: [fit.b1 + fit.b2 * xMin, fit.b1 + fit.b2 * xMax],
+      mode: "lines", line: { color: sig ? c.pink : c.text, width: 2 }, name: "OLS (b\u2082=" + fmt(fit.b2, 3) + ")" });
+    // Zero slope
+    traces.push({ x: [xMin, xMax], y: [fit.b1, fit.b1],
+      mode: "lines", line: { color: c.grid, width: 1, dash: "dot" }, name: "Zero slope", hoverinfo: "skip" });
+
+    var titleText = sig ? "Statistically significant (p=" + (pVal < 0.0001 ? "<0.0001" : fmt(pVal, 3)) + ")" :
+      "Not significant (p=" + fmt(pVal, 3) + ")";
+    var titleColor = sig ? c.pink : c.textSoft;
+
+    Plotly.react(chartEl, traces, baseLayout({
+      title: { text: titleText, font: { size: 13, color: titleColor } },
+      xaxis: { title: "x", gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft } },
+      yaxis: { title: "y", gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft } },
+      legend: { x: 0.02, y: 0.98, font: { color: c.text, size: 11 }, bgcolor: "rgba(0,0,0,0)" }
+    }), PLOTLY_CONFIG);
+  }
+
+  bindSlider("econstat-beta", "econstat-beta-val", function(v) { return parseFloat(v).toFixed(2); }, render);
+  bindSlider("econstat-n", "econstat-n-val", function(v) { return v; }, render);
+  bindSlider("econstat-sigma", "econstat-sigma-val", function(v) { return v; }, render);
+  document.getElementById("econstat-resim").addEventListener("click", function() { seed += 1000; render(); });
+  window.__rerender_econstat = render;
+  render();
+})();
+
+// ==================== WIDGET 6: Robust Standard Errors ====================
+(function() {
+  var scatterEl = document.getElementById("chart-robustse-scatter");
+  var residEl = document.getElementById("chart-robustse-resid");
+  var DGP = DATA.dgp;
+  var seed = 600;
+
+  function render() {
+    var c = themeColors();
+    var errorType = getToggleVal("robustse-errors");
+    var n = parseInt(document.getElementById("robustse-n").value);
+    var severity = parseInt(document.getElementById("robustse-severity").value) / 100;
+    var rng = mulberry32(seed + n * 3);
+
+    var x = new Array(n), y = new Array(n);
+    for (var i = 0; i < n; i++) {
+      x[i] = DGP.muX + DGP.sigmaX * boxMuller(rng);
+      var sd;
+      if (errorType === "hetero") {
+        sd = DGP.sigmaU * (0.3 + severity * 2.5 * Math.abs(x[i] - DGP.muX));
+      } else {
+        sd = DGP.sigmaU;
+      }
+      y[i] = DGP.beta1 + DGP.beta2 * x[i] + sd * boxMuller(rng);
+    }
+
+    var fit = olsFit(x, y);
+
+    document.getElementById("robustse-std").textContent = fmt(fit.se_b2);
+    document.getElementById("robustse-rob").textContent = fmt(fit.se_b2_robust);
+    document.getElementById("robustse-ratio").textContent = fmt(fit.se_b2_robust / fit.se_b2, 3) + "\u00D7";
+    document.getElementById("robustse-b2").textContent = fmt(fit.b2);
+
+    var xMin = Math.min.apply(null, x) - 0.3;
+    var xMax = Math.max.apply(null, x) + 0.3;
+
+    // Scatter plot
+    var sTraces = [];
+    sTraces.push({ x: x, y: y, mode: "markers", type: "scatter",
+      marker: { color: c.cyan, size: 6, opacity: 0.7 }, name: "Data",
+      hovertemplate: "x=%{x:.2f}<br>y=%{y:.2f}<extra></extra>" });
+    sTraces.push({ x: [xMin, xMax], y: [DGP.beta1 + DGP.beta2 * xMin, DGP.beta1 + DGP.beta2 * xMax],
+      mode: "lines", line: { color: c.purple, width: 2, dash: "dash" }, name: "True line" });
+    sTraces.push({ x: [xMin, xMax], y: [fit.b1 + fit.b2 * xMin, fit.b1 + fit.b2 * xMax],
+      mode: "lines", line: { color: c.pink, width: 2 }, name: "OLS fit" });
+
+    Plotly.react(scatterEl, sTraces, baseLayout({
+      title: { text: errorType === "hetero" ? "Heteroskedastic Errors" : "Homoskedastic Errors", font: { size: 12, color: c.textSoft } },
+      xaxis: { title: "x", gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft } },
+      yaxis: { title: "y", gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft } },
+      legend: { x: 0.02, y: 0.98, font: { color: c.text, size: 10 }, bgcolor: "rgba(0,0,0,0)" }
+    }), PLOTLY_CONFIG);
+
+    // Residual plot
+    var rTraces = [];
+    rTraces.push({ x: fit.yhat, y: fit.residuals, mode: "markers", type: "scatter",
+      marker: { color: c.cyan, size: 5, opacity: 0.7 }, name: "Residuals",
+      hovertemplate: "\u0177=%{x:.1f}<br>e=%{y:.2f}<extra></extra>" });
+    rTraces.push({ x: [Math.min.apply(null, fit.yhat), Math.max.apply(null, fit.yhat)], y: [0, 0],
+      mode: "lines", line: { color: c.grid, width: 1.5, dash: "dash" }, showlegend: false, hoverinfo: "skip" });
+
+    Plotly.react(residEl, rTraces, baseLayout({
+      title: { text: "Residuals vs. Fitted", font: { size: 12, color: c.textSoft } },
+      xaxis: { title: "Fitted values (\u0177)", gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft } },
+      yaxis: { title: "Residuals (e)", gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft } }
+    }), PLOTLY_CONFIG);
+  }
+
+  bindToggles("robustse-errors", render);
+  bindSlider("robustse-n", "robustse-n-val", function(v) { return v; }, render);
+  bindSlider("robustse-severity", "robustse-severity-val", function(v) { return v + "%"; }, render);
+  document.getElementById("robustse-resim").addEventListener("click", function() { seed += 1000; render(); });
+  window.__rerender_robustse = render;
+  render();
+})();
+
+// ==================== WIDGET 7: House Price Real Data ====================
+(function() {
+  var chartEl = document.getElementById("chart-house");
+  var HOUSE = DATA.house;
+  var REG = HOUSE.regression;
+
+  function render() {
+    var c = themeColors();
+    var nullVal = parseFloat(document.getElementById("house-null").value);
+    var conf = parseInt(document.getElementById("house-conf").value);
+    var seType = getToggleVal("house-setype");
+    var alpha = 1 - conf / 100;
+
+    var b2 = REG.b2;
+    var se = seType === "robust" ? REG.se_b2_robust : REG.se_b2;
+    var df = REG.df;
+    var tcrit = tQuantile(1 - alpha / 2, df);
+    var tStat = (b2 - nullVal) / se;
+    var pVal = 2 * (1 - tCDF(Math.abs(tStat), df));
+    var ciLo = b2 - tcrit * se;
+    var ciHi = b2 + tcrit * se;
+
+    document.getElementById("house-b2").textContent = fmt(b2, 2);
+    document.getElementById("house-se").textContent = fmt(se, 4);
+    document.getElementById("house-tstat").textContent = fmt(tStat, 3);
+    document.getElementById("house-pval").textContent = pVal < 0.0001 ? "< 0.0001" : fmt(pVal, 4);
+    document.getElementById("house-ci").textContent = "[" + fmt(ciLo, 2) + ", " + fmt(ciHi, 2) + "]";
+    document.getElementById("house-r2").textContent = fmt(REG.R2);
+
+    var x = HOUSE.size;
+    var y = HOUSE.price;
+    var xMin = Math.min.apply(null, x) - 100;
+    var xMax = Math.max.apply(null, x) + 100;
+
+    var traces = [];
+    // Data points
+    traces.push({ x: x, y: y, mode: "markers", type: "scatter",
+      marker: { color: c.cyan, size: 8, opacity: 0.8 }, name: "Houses (n=29)",
+      hovertemplate: "Size=%{x} sqft<br>Price=$%{y:,.0f}<extra></extra>" });
+
+    // Regression line
+    var yLo = REG.b1 + REG.b2 * xMin;
+    var yHi = REG.b1 + REG.b2 * xMax;
+    traces.push({ x: [xMin, xMax], y: [yLo, yHi],
+      mode: "lines", line: { color: c.pink, width: 2.5 }, name: "\u0177 = " + Math.round(REG.b1).toLocaleString() + " + " + fmt(REG.b2, 2) + "\u00B7size" });
+
+    // CI band for the regression line (confidence band for E[y|x])
+    var xRange = linspace(xMin, xMax, 50);
+    var ciUpper = new Array(50), ciLower2 = new Array(50);
+    for (var i = 0; i < 50; i++) {
+      var xv = xRange[i];
+      var yhat = REG.b1 + REG.b2 * xv;
+      // SE of predicted mean: se * sqrt(1/n + (x - xbar)^2 / SSx)
+      var sePred = REG.se * Math.sqrt(1 / REG.n + (xv - REG.xbar) * (xv - REG.xbar) / REG.SSx);
+      ciUpper[i] = yhat + tcrit * sePred;
+      ciLower2[i] = yhat - tcrit * sePred;
+    }
+    traces.push({ x: xRange, y: ciUpper, mode: "lines", line: { color: c.cyan, width: 0, dash: "dot" },
+      showlegend: false, hoverinfo: "skip" });
+    traces.push({ x: xRange, y: ciLower2, mode: "lines", line: { color: c.cyan, width: 0, dash: "dot" },
+      fill: "tonexty", fillcolor: c.cyan + "22", name: conf + "% CI band", hoverinfo: "skip" });
+
+    // Mark the null value on the slope
+    var nullLineY1 = REG.b1 + nullVal * xMin + (REG.b2 - nullVal) * REG.xbar;
+    var nullLineY2 = REG.b1 + nullVal * xMax + (REG.b2 - nullVal) * REG.xbar;
+
+    Plotly.react(chartEl, traces, baseLayout({
+      xaxis: { title: "House Size (sq ft)", gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft } },
+      yaxis: { title: "Price ($)", gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft } },
+      legend: { x: 0.02, y: 0.98, font: { color: c.text, size: 11 }, bgcolor: "rgba(0,0,0,0)" }
+    }), PLOTLY_CONFIG);
+  }
+
+  bindSlider("house-null", "house-null-val", function(v) { return v; }, render);
+  bindSlider("house-conf", "house-conf-val", function(v) { return v + "%"; }, render);
+  bindToggles("house-setype", render);
+  window.__rerender_house = render;
+  render();
+})();
+
+// ==================== RESET + URL HASH STATE ====================
+(function() {
+  var REG = {
+    tdist: [
+      { id: "tdist-df", kind: "range", def: "5" },
+      { group: "tdist-area", kind: "toggle", def: "none" }
+    ],
+    cisim: [
+      { id: "cisim-nci", kind: "range", def: "100" },
+      { id: "cisim-n", kind: "range", def: "30" },
+      { id: "cisim-conf", kind: "range", def: "95" }
+    ],
+    hyptest: [
+      { id: "hyptest-null", kind: "range", def: "0" },
+      { id: "hyptest-alpha", kind: "range", def: "5" },
+      { group: "hyptest-type", kind: "toggle", def: "two" }
+    ],
+    pval: [
+      { id: "pval-t", kind: "range", def: "2" },
+      { id: "pval-df", kind: "range", def: "27" },
+      { group: "pval-type", kind: "toggle", def: "two" }
+    ],
+    econstat: [
+      { id: "econstat-beta", kind: "range", def: "0.2" },
+      { id: "econstat-n", kind: "range", def: "500" },
+      { id: "econstat-sigma", kind: "range", def: "2" }
+    ],
+    robustse: [
+      { group: "robustse-errors", kind: "toggle", def: "homo" },
+      { id: "robustse-n", kind: "range", def: "50" },
+      { id: "robustse-severity", kind: "range", def: "50" }
+    ],
+    house: [
+      { id: "house-null", kind: "range", def: "0" },
+      { id: "house-conf", kind: "range", def: "95" },
+      { group: "house-setype", kind: "toggle", def: "standard" }
+    ]
+  };
+
+  function getVal(c) {
+    if (c.kind === "toggle") {
+      var btn = document.querySelector("#" + c.group + " button.active");
+      return btn ? btn.dataset.val : c.def;
+    }
+    return document.getElementById(c.id).value;
+  }
+
+  function setVal(c, val, fire) {
+    if (c.kind === "toggle") {
+      var group = document.getElementById(c.group);
+      if (!group) return;
+      var btn = group.querySelector('button[data-val="' + val + '"]');
+      if (btn && !btn.classList.contains("active")) btn.click();
+    } else {
+      var el = document.getElementById(c.id);
+      if (!el) return;
+      if (el.value !== String(val)) {
+        el.value = val;
+        if (fire) el.dispatchEvent(new Event(c.kind === "select" ? "change" : "input", { bubbles: true }));
+      }
+    }
+  }
+
+  function resetWidget(widget) {
+    var ctrls = REG[widget] || [];
+    for (var i = 0; i < ctrls.length; i++) setVal(ctrls[i], ctrls[i].def, true);
+    var fn = window["__rerender_" + widget];
+    if (fn) fn();
+    writeHash();
+  }
+
+  function writeHash() {
+    var parts = [];
+    for (var widget in REG) {
+      var ctrls = REG[widget];
+      for (var i = 0; i < ctrls.length; i++) {
+        var c = ctrls[i];
+        var v = String(getVal(c));
+        if (v !== String(c.def)) {
+          var key = c.id || c.group;
+          parts.push(key + "=" + encodeURIComponent(v));
+        }
+      }
+    }
+    var want = parts.length ? "#" + parts.join("&") : "";
+    if (want === "" && location.hash.match(/=/)) {
+      history.replaceState(null, "", location.pathname + location.search);
+    } else if (want !== "" && location.hash !== want) {
+      history.replaceState(null, "", location.pathname + location.search + want);
+    }
+  }
+
+  function readHash() {
+    var hash = location.hash.slice(1);
+    if (!hash || !hash.includes("=")) return;
+    var params = {};
+    var pairs = hash.split("&");
+    for (var i = 0; i < pairs.length; i++) {
+      var eq = pairs[i].indexOf("=");
+      if (eq < 0) continue;
+      params[pairs[i].slice(0, eq)] = decodeURIComponent(pairs[i].slice(eq + 1));
+    }
+    for (var widget in REG) {
+      var ctrls = REG[widget];
+      for (var i = 0; i < ctrls.length; i++) {
+        var c = ctrls[i];
+        var key = c.id || c.group;
+        if (key in params) setVal(c, params[key], true);
+      }
+    }
+  }
+
+  document.querySelectorAll(".reset-btn[data-reset]").forEach(function(btn) {
+    btn.addEventListener("click", function() { resetWidget(btn.dataset.reset); });
+  });
+  document.addEventListener("input", function(e) {
+    if (e.target.matches("input[type=range], select")) writeHash();
+  });
+  document.addEventListener("change", function(e) {
+    if (e.target.matches("select")) writeHash();
+  });
+  document.querySelectorAll(".toggle-group button").forEach(function(b) {
+    b.addEventListener("click", function() { setTimeout(writeHash, 0); });
+  });
+  readHash();
+})();
+
+// ==================== THEME TOGGLE ====================
+(function() {
+  var btn = document.getElementById("theme-toggle");
+  var iconEl = document.getElementById("theme-icon");
+  var labelEl = document.getElementById("theme-label");
+
+  function apply(theme) {
+    document.documentElement.dataset.theme = theme;
+    iconEl.textContent = theme === "dark" ? "\u2600\uFE0F" : "\uD83C\uDF19";
+    labelEl.textContent = theme === "dark" ? "Light" : "Dark";
+    for (var key in window) {
+      if (key.startsWith("__rerender_") && typeof window[key] === "function") window[key]();
+    }
+  }
+
+  var saved = localStorage.getItem(THEME_KEY);
+  var prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+  apply(saved || (prefersDark ? "dark" : "light"));
+
+  btn.addEventListener("click", function() {
+    var next = document.documentElement.dataset.theme === "dark" ? "light" : "dark";
+    localStorage.setItem(THEME_KEY, next);
+    apply(next);
+  });
+})();
+
+// ==================== Resize handling ====================
+window.addEventListener("resize", function() {
+  document.querySelectorAll(".chart").forEach(function(el) {
+    if (el.data) Plotly.Plots.resize(el);
+  });
+});
+</script>
+
+</body>
+</html>

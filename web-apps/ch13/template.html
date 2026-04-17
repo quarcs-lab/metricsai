@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chapter 13 — Case Studies for Multiple Regression · metricsAI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.plot.ly/plotly-2.35.2.min.js" charset="utf-8"></script>
+<style>
+:root{--cyan:#008CB7;--cyan-soft:#22d3ee;--purple:#7A209F;--purple-soft:#c084fc;--pink:#C21E72;--pink-soft:#f472b6;--bg:#f5f8fb;--panel:#fff;--panel-2:#f0f4f9;--text:#0b1021;--text-soft:#475569;--text-muted:#64748b;--border:#d9e2ec;--accent:var(--cyan);--accent-2:var(--purple);--accent-3:var(--pink);--shadow:0 2px 10px rgba(11,16,33,.06),0 12px 30px rgba(11,16,33,.05);--grid:#e3e8ef;--code-bg:#eef3f8}
+html[data-theme="dark"]{--bg:#0c1024;--panel:#151a33;--panel-2:#1b2142;--text:#e2e8f0;--text-soft:#b5c0d0;--text-muted:#8a98ae;--border:#2a3156;--accent:var(--cyan-soft);--accent-2:var(--purple-soft);--accent-3:var(--pink-soft);--shadow:0 2px 10px rgba(0,0,0,.25),0 12px 30px rgba(0,0,0,.35);--grid:#2a3156;--code-bg:#0f1530}
+*{box-sizing:border-box}html,body{margin:0;padding:0}body{font-family:'Inter',system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);line-height:1.55;transition:background-color .25s ease,color .25s ease}code,.mono{font-family:'JetBrains Mono',ui-monospace,monospace}
+header.page{position:relative;padding:2.4rem 1.5rem 2rem;background:radial-gradient(1200px 400px at 85% -10%,rgba(122,32,159,.15),transparent),radial-gradient(1000px 400px at 10% 0%,rgba(0,140,183,.18),transparent),var(--panel);border-bottom:1px solid var(--border)}.page-inner{max-width:1120px;margin:0 auto}.chapter-badge{display:inline-block;font-size:.72rem;letter-spacing:.15em;text-transform:uppercase;color:var(--accent);font-weight:600;margin-bottom:.5rem}h1.title{font-size:clamp(1.6rem,3.4vw,2.4rem);margin:0 0 .35rem;background:linear-gradient(90deg,var(--accent),var(--accent-2));-webkit-background-clip:text;background-clip:text;color:transparent;font-weight:700}p.subtitle{margin:0 0 .8rem;color:var(--text-soft);font-size:1.05rem;max-width:720px}
+.theme-toggle{position:absolute;top:1.4rem;right:1.5rem;background:var(--panel-2);color:var(--text);border:1px solid var(--border);padding:.4rem .8rem;border-radius:999px;cursor:pointer;font-size:.85rem;font-weight:500;display:inline-flex;align-items:center;gap:.35rem;transition:all .2s ease}.theme-toggle:hover{border-color:var(--accent);color:var(--accent)}
+nav.anchors{position:sticky;top:0;z-index:20;background:color-mix(in srgb,var(--panel) 92%,transparent);backdrop-filter:saturate(150%) blur(8px);-webkit-backdrop-filter:saturate(150%) blur(8px);border-bottom:1px solid var(--border)}nav.anchors ul{display:flex;gap:.25rem;overflow-x:auto;list-style:none;padding:.55rem 1.5rem;margin:0 auto;max-width:1120px;scrollbar-width:thin}nav.anchors a{display:block;padding:.35rem .75rem;border-radius:8px;color:var(--text-soft);text-decoration:none;font-size:.85rem;font-weight:500;white-space:nowrap;transition:all .15s ease}nav.anchors a:hover{color:var(--accent);background:var(--panel-2)}
+main{max-width:1120px;margin:1.2rem auto 3rem;padding:0 1.5rem}
+section.widget{background:var(--panel);border:1px solid var(--border);border-radius:16px;padding:1.5rem 1.4rem 1.3rem;margin-bottom:1.5rem;box-shadow:var(--shadow)}.section-tag{display:inline-block;font-family:'JetBrains Mono',monospace;font-size:.72rem;color:var(--accent);background:color-mix(in srgb,var(--accent) 12%,transparent);padding:.2rem .55rem;border-radius:6px;margin-bottom:.6rem;font-weight:500}.widget h2{margin:0 0 .2rem;font-size:1.35rem;font-weight:600;color:var(--accent-2)}.widget .lede{margin:0 0 1rem;color:var(--text-soft);font-size:.97rem;max-width:780px}
+.controls{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:.9rem 1.2rem;padding:.9rem 1rem;background:var(--panel-2);border-radius:10px;margin-bottom:1rem}.ctrl{display:flex;flex-direction:column;gap:.3rem}.ctrl label{font-size:.78rem;font-weight:500;color:var(--text-soft);text-transform:uppercase;letter-spacing:.05em}
+.toggle-group{display:inline-flex;gap:.25rem;background:var(--panel);padding:3px;border-radius:10px;border:1px solid var(--border)}.toggle-group button{background:transparent;border:none;color:var(--text-soft);padding:.32rem .75rem;border-radius:7px;font-family:inherit;font-size:.85rem;cursor:pointer;transition:all .15s ease}.toggle-group button.active{background:var(--accent);color:#fff;font-weight:500}
+.callout{background:color-mix(in srgb,var(--accent-2) 8%,transparent);border-left:3px solid var(--accent-2);padding:.7rem .9rem;border-radius:8px;font-size:.9rem;color:var(--text-soft);margin:.9rem 0 .2rem}.callout strong{color:var(--accent-2)}
+.try-this{background:color-mix(in srgb,var(--accent) 8%,transparent);border-left:3px solid var(--accent);padding:.7rem .9rem;border-radius:8px;font-size:.9rem;color:var(--text-soft);margin:.7rem 0 .2rem}.try-this .try-title{font-weight:600;color:var(--accent);font-size:.78rem;letter-spacing:.08em;text-transform:uppercase;margin-bottom:.3rem}.try-this ol{margin:0;padding-left:1.25rem}.try-this li{margin:.2rem 0}
+.widget-head{display:flex;align-items:flex-start;justify-content:space-between;gap:.5rem;margin-bottom:.2rem}.widget-head>div{flex:1;min-width:0}.reset-btn{background:transparent;color:var(--text-muted);border:1px solid var(--border);padding:.3rem .7rem;border-radius:8px;font-family:inherit;font-size:.8rem;cursor:pointer;white-space:nowrap;transition:all .15s ease}.reset-btn:hover{color:var(--accent);border-color:var(--accent)}
+.chart{width:100%;min-height:340px}.chart.tall{min-height:420px}.chart.short{min-height:280px}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:1rem}@media(max-width:720px){.two-col{grid-template-columns:1fr}}
+.fit-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:.5rem;margin:.5rem 0}.fit-stat{background:var(--panel-2);padding:.55rem .7rem;border-radius:10px;border-left:3px solid var(--accent)}.fit-stat .fs-label{font-size:.68rem;text-transform:uppercase;letter-spacing:.06em;color:var(--text-muted)}.fit-stat .fs-value{font-family:'JetBrains Mono',monospace;font-size:1rem;font-weight:500;color:var(--text);margin-top:.1rem}.fit-stat.warn{border-left-color:var(--accent-3)}.fit-stat.good{border-left-color:var(--accent)}
+.did-table{width:100%;border-collapse:collapse;font-family:'JetBrains Mono',monospace;font-size:.88rem;margin:.5rem 0}.did-table th,.did-table td{padding:.55rem .7rem;border:1px solid var(--border);text-align:center}.did-table th{background:var(--panel-2);color:var(--text-muted);font-size:.72rem;text-transform:uppercase;letter-spacing:.05em;font-weight:600}.did-table .did-val{font-weight:600;color:var(--accent)}.did-table .did-highlight{background:color-mix(in srgb,var(--accent) 10%,transparent);font-weight:700;color:var(--accent)}
+footer.page{max-width:1120px;margin:1rem auto 3rem;padding:0 1.5rem;color:var(--text-muted);font-size:.88rem;text-align:center}footer.page a{color:var(--accent);text-decoration:none}footer.page a:hover{text-decoration:underline}.scroll-top{display:inline-block;font-size:.78rem;color:var(--text-muted);text-decoration:none;margin-top:.4rem}.scroll-top:hover{color:var(--accent)}
+</style>
+</head>
+<body>
+<header class="page"><div class="page-inner"><span class="chapter-badge">Chapter 13 of 18 · Interactive Dashboard</span><h1 class="title">Case Studies for Multiple Regression</h1><p class="subtitle">Six econometric case studies — from production functions to causal inference — each with its own dataset and interactive visualization.</p></div><button id="theme-toggle" class="theme-toggle" type="button" aria-label="Toggle color theme"><span id="theme-icon">🌙</span><span id="theme-label">Dark</span></button></header>
+
+<nav class="anchors" aria-label="Sections"><ul>
+  <li><a href="#cobbdouglas">Cobb-Douglas</a></li>
+  <li><a href="#phillips">Phillips curve</a></li>
+  <li><a href="#rct">RCT (RAND)</a></li>
+  <li><a href="#did">Diff-in-Diff</a></li>
+  <li><a href="#rd">Regression Disc.</a></li>
+  <li><a href="#iv">Instrumental Vars</a></li>
+</ul></nav>
+
+<main>
+
+<!-- ===================== 1. COBB-DOUGLAS ===================== -->
+<section class="widget" id="cobbdouglas">
+  <div class="widget-head"><div><span class="section-tag">§ 13.2 · Key Concepts 13.2 &amp; 13.3</span><h2>Cobb-Douglas production function</h2></div></div>
+  <p class="lede">The log-linear Cobb-Douglas model estimates capital and labor elasticities: ln(Q) = β₁ + α·ln(K) + β·ln(L). If α + β = 1, the technology exhibits constant returns to scale.</p>
+  <div class="fit-stats" id="cd-fit"></div>
+  <div class="chart" id="cd-chart"></div>
+  <div class="callout" id="cd-callout"></div>
+  <div class="try-this"><div class="try-title">Try this</div><ol>
+    <li>Capital elasticity α = 0.23: a 1% increase in capital raises output by 0.23%. Labor elasticity β = 0.81: labor is the dominant input.</li>
+    <li>α + β = 1.04 ≈ 1. The F-test for constant returns to scale gives p = 0.61 — we cannot reject CRS.</li>
+    <li>The predicted output (purple) tracks actual output (cyan) closely. R² = 0.96 — an excellent fit for 24 years of data.</li>
+  </ol></div>
+</section>
+
+<!-- ===================== 2. PHILLIPS CURVE ===================== -->
+<section class="widget" id="phillips">
+  <div class="widget-head"><div><span class="section-tag">§ 13.3 · Key Concepts 13.4 &amp; 13.5</span><h2>Phillips curve &amp; omitted variables bias</h2></div><button type="button" class="reset-btn" data-reset="phillips">↺ Reset</button></div>
+  <p class="lede">The Phillips curve — the negative relationship between unemployment and inflation — broke down after 1970. The culprit: omitted expected inflation. When expectations are controlled for, the negative relationship reappears.</p>
+  <div class="controls"><div class="ctrl"><label>Period</label>
+    <div class="toggle-group" id="phillips-period"><button type="button" data-val="pre" class="active">Pre-1970</button><button type="button" data-val="post">Post-1970</button></div>
+  </div></div>
+  <div class="chart" id="phillips-chart"></div>
+  <div class="callout" id="phillips-callout"></div>
+  <div class="try-this"><div class="try-title">Try this</div><ol>
+    <li>Pre-1970: the classic negative slope (−1.03). Higher unemployment → lower inflation.</li>
+    <li>Switch to post-1970: the slope flips to +0.27! This is the breakdown that shocked economists.</li>
+    <li>The OVB formula explains it: E[b₂] = β₂ + β₃γ = −0.13 + 1.15 × 0.34 = +0.26 ≈ actual +0.27. Perfect match.</li>
+    <li>The augmented model (controlling for expected inflation) recovers the negative effect: −0.13.</li>
+  </ol></div>
+</section>
+
+<!-- ===================== 3. RCT ===================== -->
+<section class="widget" id="rct">
+  <div class="widget-head"><div><span class="section-tag">§ 13.5 · Key Concept 13.7</span><h2>RAND Health Insurance Experiment (RCT)</h2></div></div>
+  <p class="lede">The RAND experiment randomly assigned families to insurance plans with different cost-sharing. Because assignment was random, spending differences across plans are <em>causal</em> estimates of moral hazard.</p>
+  <div class="chart" id="rct-chart"></div>
+  <div class="callout" id="rct-callout"></div>
+  <div class="try-this"><div class="try-title">Try this</div><ol>
+    <li>Free care: $2,154/year. 95% cost-sharing: $1,046/year. People spend 51% less when they pay out of pocket — moral hazard confirmed.</li>
+    <li>The F-test (F = 11.39, p < 0.001) confirms that plan assignment matters. This is a joint test that all plan coefficients equal zero.</li>
+    <li>R² = 0.007 is intentionally low. Most variation in medical spending is random health shocks, not insurance plan — the experiment detects the signal anyway.</li>
+  </ol></div>
+</section>
+
+<!-- ===================== 4. DiD ===================== -->
+<section class="widget" id="did">
+  <div class="widget-head"><div><span class="section-tag">§ 13.6 · Key Concept 13.8</span><h2>Difference-in-Differences: health clinic access</h2></div></div>
+  <p class="lede">South African children in communities that gained health clinics (treatment) improved more than children in communities without clinics (control). The DiD design controls for pre-existing differences and common time trends.</p>
+  <div id="did-table-container"></div>
+  <div class="chart short" id="did-chart"></div>
+  <div class="callout" id="did-callout"></div>
+  <div class="try-this"><div class="try-title">Try this</div><ol>
+    <li>Both groups improved from 1993 to 1998 (common trend). But treated communities improved <em>more</em>.</li>
+    <li>DiD = (treated change) − (control change) = 0.52 standard deviations. That's like moving from the 25th to the 45th percentile in weight.</li>
+    <li>The 95% CI is [0.06, 0.98] — it just excludes zero (p = 0.027). The effect is significant but the interval is wide due to clustering.</li>
+  </ol></div>
+</section>
+
+<!-- ===================== 5. RD ===================== -->
+<section class="widget" id="rd">
+  <div class="widget-head"><div><span class="section-tag">§ 13.7 · Key Concept 13.9</span><h2>Regression discontinuity: incumbency advantage</h2></div><button type="button" class="reset-btn" data-reset="rd">↺ Reset</button></div>
+  <p class="lede">Candidates who barely <em>win</em> a Senate race (margin > 0) gain an incumbency advantage in the next election. At the threshold, winning is quasi-random — creating a natural experiment.</p>
+  <div class="controls"><div class="ctrl"><label>Display</label>
+    <div class="toggle-group" id="rd-display"><button type="button" data-val="binned" class="active">Binned means</button><button type="button" data-val="raw">Raw scatter</button></div>
+  </div></div>
+  <div class="fit-stats" id="rd-fit"></div>
+  <div class="chart" id="rd-chart"></div>
+  <div class="callout" id="rd-callout"></div>
+  <div class="try-this"><div class="try-title">Try this</div><ol>
+    <li>The jump at margin = 0 is the incumbency advantage: 4.8 percentage points. Barely winning → nearly 5% more votes next time.</li>
+    <li>Toggle to "Raw scatter" to see the full data. The jump is visible even without binning.</li>
+    <li>The 95% CI is [3.1, 6.5] — clearly excludes zero (p < 0.001). This is one of the most robust findings in political science.</li>
+    <li>Note the linear slopes on each side. The slope (0.35) means that a 10-point wider margin adds 3.5% to the next election vote.</li>
+  </ol></div>
+</section>
+
+<!-- ===================== 6. IV ===================== -->
+<section class="widget" id="iv">
+  <div class="widget-head"><div><span class="section-tag">§ 13.8 · Key Concept 13.10</span><h2>Instrumental variables: institutions and GDP</h2></div><button type="button" class="reset-btn" data-reset="iv">↺ Reset</button></div>
+  <p class="lede">Do institutions cause growth, or does growth improve institutions? OLS can't tell. Using historical settler mortality as an instrument — it affects institutions but not modern GDP directly — IV estimates the causal effect.</p>
+  <div class="controls"><div class="ctrl"><label>Stage</label>
+    <div class="toggle-group" id="iv-stage"><button type="button" data-val="ols" class="active">OLS (biased)</button><button type="button" data-val="first">First stage</button><button type="button" data-val="iv">IV / 2SLS</button></div>
+  </div></div>
+  <div class="fit-stats" id="iv-fit"></div>
+  <div class="chart" id="iv-chart"></div>
+  <div class="callout" id="iv-callout"></div>
+  <div class="try-this"><div class="try-title">Try this</div><ol>
+    <li>OLS: institutions coefficient = 0.52. But this is biased by reverse causation and omitted variables.</li>
+    <li>First stage: settler mortality strongly predicts institutions (F = 16.3 > 10). The instrument is relevant.</li>
+    <li>IV/2SLS: institutions coefficient = 0.94 — nearly twice the OLS estimate. OLS was biased <em>downward</em> (attenuation bias).</li>
+    <li>Interpretation: a 1-unit improvement in institutions → 156% increase in GDP (e^0.94 ≈ 2.56).</li>
+  </ol></div>
+</section>
+
+</main>
+
+<footer class="page">
+  <p>Part of <a href="https://quarcs-lab.github.io/metricsai/book/_book/index.html"><strong>metricsAI</strong></a> · Chapter 13: Case Studies for Multiple Regression · by Carlos Mendez · <a href="https://github.com/quarcs-lab/metricsai">GitHub</a></p>
+  <a class="scroll-top" href="#cobbdouglas">↑ Back to top</a>
+</footer>
+
+<script type="application/json" id="ch-data">{{DATA_JSON}}</script>
+
+<script>
+"use strict";
+const DATA=JSON.parse(document.getElementById("ch-data").textContent);
+function fmt(v,d){if(v==null||isNaN(v))return"\u2014";d=d??2;const a=Math.abs(v);if(a>=1e6)return(v/1e6).toFixed(1)+"M";if(a>=1e3&&d===0)return Math.round(v).toLocaleString();return v.toFixed(d)}
+function fmtMoney(v){return v==null?"\u2014":"$"+Math.round(v).toLocaleString()}
+const THEME_KEY="metricsai-theme";
+function getCSS(v){return getComputedStyle(document.documentElement).getPropertyValue(v).trim()}
+function themeColors(){return{text:getCSS("--text"),textSoft:getCSS("--text-soft"),grid:getCSS("--grid"),panel:getCSS("--panel"),cyan:getCSS("--accent"),purple:getCSS("--accent-2"),pink:getCSS("--accent-3")}}
+function baseLayout(o){const c=themeColors();return Object.assign({paper_bgcolor:"rgba(0,0,0,0)",plot_bgcolor:"rgba(0,0,0,0)",font:{family:"Inter,system-ui,sans-serif",color:c.text,size:12},margin:{l:60,r:18,t:30,b:50},xaxis:{gridcolor:c.grid,linecolor:c.grid,zerolinecolor:c.grid,tickfont:{color:c.textSoft}},yaxis:{gridcolor:c.grid,linecolor:c.grid,zerolinecolor:c.grid,tickfont:{color:c.textSoft}},hoverlabel:{bgcolor:c.panel,bordercolor:c.grid,font:{color:c.text}},legend:{font:{color:c.text},bgcolor:"rgba(0,0,0,0)"}},o||{})}
+const PC={displayModeBar:false,responsive:true};
+function activeVal(id){const b=document.querySelector("#"+id+" button.active");return b?b.dataset.val:null}
+function initToggles(id,cb){document.getElementById(id).querySelectorAll("button").forEach(b=>b.addEventListener("click",()=>{document.getElementById(id).querySelectorAll("button").forEach(x=>x.classList.remove("active"));b.classList.add("active");cb()}))}
+
+// ==================== W1: COBB-DOUGLAS ====================
+(function(){
+  const fitEl=document.getElementById("cd-fit");const callout=document.getElementById("cd-callout");
+  function render(){
+    const c=themeColors();const cd=DATA.cobbdouglas;
+    fitEl.innerHTML=`<div class="fit-stat"><div class="fs-label">α (Capital)</div><div class="fs-value">${cd.alpha.toFixed(4)}</div></div>`+`<div class="fit-stat"><div class="fs-label">β (Labor)</div><div class="fs-value">${cd.beta.toFixed(4)}</div></div>`+`<div class="fit-stat"><div class="fs-label">α + β</div><div class="fs-value">${cd.sum_ab.toFixed(4)}</div></div>`+`<div class="fit-stat good"><div class="fs-label">CRS p-value</div><div class="fs-value">${cd.crs_p.toFixed(4)}</div></div>`+`<div class="fit-stat"><div class="fs-label">R²</div><div class="fs-value">${cd.r2.toFixed(4)}</div></div>`;
+    Plotly.react("cd-chart",[
+      {x:cd.year,y:cd.q,name:"Actual output",type:"scatter",mode:"lines+markers",marker:{color:c.cyan,size:7},line:{color:c.cyan,width:2}},
+      {x:cd.year,y:cd.q_pred,name:"Predicted (Cobb-Douglas)",type:"scatter",mode:"lines+markers",marker:{color:c.purple,size:7},line:{color:c.purple,width:2,dash:"dash"}}
+    ],baseLayout({height:380,xaxis:Object.assign({},baseLayout().xaxis,{title:{text:"Year",font:{color:c.textSoft}}}),yaxis:Object.assign({},baseLayout().yaxis,{title:{text:"Output Index",font:{color:c.textSoft}}}),showlegend:true,legend:{x:.01,y:.99,xanchor:"left",yanchor:"top",font:{color:c.text},bgcolor:"rgba(0,0,0,0)"}}),PC);
+    callout.innerHTML=`<strong>Capital elasticity α = ${cd.alpha}</strong>, <strong>labor elasticity β = ${cd.beta}</strong>. Sum = ${cd.sum_ab} ≈ 1. The F-test for constant returns to scale gives p = ${cd.crs_p} — we cannot reject CRS at any conventional level.`;
+  }
+  window.__rerender_cobbdouglas=render;render();
+})();
+
+// ==================== W2: PHILLIPS CURVE ====================
+(function(){
+  const callout=document.getElementById("phillips-callout");
+  function render(){
+    const period=activeVal("phillips-period");const c=themeColors();
+    const d=period==="pre"?DATA.phillips.pre:DATA.phillips.post;
+    const xMin=Math.min(...d.urate),xMax=Math.max(...d.urate);
+    Plotly.react("phillips-chart",[
+      {x:d.urate,y:d.inflgdp,mode:"markers",type:"scatter",name:"Data",marker:{color:c.cyan,size:8,opacity:.7,line:{color:c.purple,width:1}},hovertemplate:"Unemployment: %{x:.1f}%<br>Inflation: %{y:.1f}%<extra></extra>"},
+      {x:[xMin,xMax],y:[d.intercept+d.coef*xMin,d.intercept+d.coef*xMax],mode:"lines",name:"OLS fit",line:{color:c.purple,width:2.5},hoverinfo:"skip"}
+    ],baseLayout({height:380,xaxis:Object.assign({},baseLayout().xaxis,{title:{text:"Unemployment Rate (%)",font:{color:c.textSoft}}}),yaxis:Object.assign({},baseLayout().yaxis,{title:{text:"GDP Inflation (%)",font:{color:c.textSoft}}}),showlegend:true,legend:{x:.99,y:.99,xanchor:"right",yanchor:"top",font:{color:c.text},bgcolor:"rgba(0,0,0,0)"}}),PC);
+    const ovb=DATA.phillips.ovb;const aug=DATA.phillips.augmented;
+    if(period==="pre"){
+      callout.innerHTML=`<strong>Pre-1970 (n=${d.n}):</strong> slope = ${d.coef} (classic negative Phillips curve). R² = ${d.r2}. Higher unemployment → lower inflation — the trade-off policymakers relied on.`;
+    }else{
+      callout.innerHTML=`<strong>Post-1970 (n=${d.n}):</strong> slope = <strong>${d.coef}</strong> — the sign flipped! Omitted variable bias: the augmented model gives urate = ${aug.coef_urate}, expected inflation = ${aug.coef_inflgdp1yr}. OVB formula: E[b₂] = ${aug.coef_urate} + ${aug.coef_inflgdp1yr} × ${ovb.gamma} = <strong>${ovb.predicted_bias}</strong> ≈ actual ${ovb.actual_bivariate}.`;
+    }
+  }
+  initToggles("phillips-period",render);window.__rerender_phillips=render;render();
+})();
+
+// ==================== W3: RCT ====================
+(function(){
+  const callout=document.getElementById("rct-callout");
+  function render(){
+    const c=themeColors();const rnd=DATA.rand;
+    const labels=rnd.plans.map(p=>p.plan);const means=rnd.plans.map(p=>p.mean);const ns=rnd.plans.map(p=>p.n);
+    const colors=[c.cyan,c.purple,c.purple,c.pink,c.purple,c.purple];
+    Plotly.react("rct-chart",[{x:labels,y:means,type:"bar",marker:{color:colors},text:means.map(v=>"$"+Math.round(v).toLocaleString()),textposition:"outside",textfont:{family:"JetBrains Mono",size:12,color:c.text},hovertemplate:"%{x}<br>Mean: $%{y:,.0f}<br>n = "+ns.map(String).join(", n = ")+"<extra></extra>"}],baseLayout({height:380,yaxis:Object.assign({},baseLayout().yaxis,{title:{text:"Mean Annual Spending ($)",font:{color:c.textSoft}}}),xaxis:{tickfont:{color:c.textSoft,size:10},tickangle:-20},showlegend:false,margin:{l:60,r:18,t:30,b:90}}),PC);
+    callout.innerHTML=`<strong>F-test: F = ${rnd.f_stat}, p < 0.001.</strong> Insurance plans jointly significant. Free care ($2,154) vs 95% cost-sharing ($1,046) — people spend 51% less when they pay out of pocket. R² = ${rnd.r2} (low, but expected). n = ${rnd.n.toLocaleString()}.`;
+  }
+  window.__rerender_rct=render;render();
+})();
+
+// ==================== W4: DiD ====================
+(function(){
+  const tableEl=document.getElementById("did-table-container");const callout=document.getElementById("did-callout");
+  function render(){
+    const c=themeColors();const d=DATA.did;const t=d.table;
+    tableEl.innerHTML=`<table class="did-table"><thead><tr><th></th><th>1993 (Pre)</th><th>1998 (Post)</th><th>Change</th></tr></thead><tbody>`+
+      `<tr><td><strong>Control (low clinics)</strong></td><td>${t.ctrl_pre.toFixed(3)}</td><td>${t.ctrl_post.toFixed(3)}</td><td class="did-val">${t.ctrl_change.toFixed(3)}</td></tr>`+
+      `<tr><td><strong>Treated (high clinics)</strong></td><td>${t.treat_pre.toFixed(3)}</td><td>${t.treat_post.toFixed(3)}</td><td class="did-val">${t.treat_change.toFixed(3)}</td></tr>`+
+      `<tr><td><strong>Difference</strong></td><td></td><td></td><td class="did-highlight">DiD = ${t.did.toFixed(3)}</td></tr>`+
+      `</tbody></table>`;
+    // Visual: group means over time
+    Plotly.react("did-chart",[
+      {x:["1993","1998"],y:[t.ctrl_pre,t.ctrl_post],name:"Control",type:"scatter",mode:"lines+markers",marker:{color:c.purple,size:10},line:{color:c.purple,width:2}},
+      {x:["1993","1998"],y:[t.treat_pre,t.treat_post],name:"Treated",type:"scatter",mode:"lines+markers",marker:{color:c.cyan,size:10},line:{color:c.cyan,width:2}},
+      {x:["1998","1998"],y:[t.treat_post,t.treat_post-parseFloat(t.did)],mode:"lines",line:{color:c.pink,width:3,dash:"dash"},name:"DiD gap",hoverinfo:"skip"}
+    ],baseLayout({height:280,xaxis:{tickfont:{color:c.textSoft}},yaxis:Object.assign({},baseLayout().yaxis,{title:{text:"Weight-for-Age Z-score",font:{color:c.textSoft}}}),showlegend:true,legend:{x:.01,y:.99,xanchor:"left",yanchor:"top",font:{color:c.text},bgcolor:"rgba(0,0,0,0)"}}),PC);
+    callout.innerHTML=`<strong>DiD = ${d.coef} SD</strong> (SE = ${d.se}, p = ${d.p}). 95% CI: [${d.ci_lo}, ${d.ci_hi}]. Clinic access improved child nutrition by about half a standard deviation — equivalent to moving from the 25th to the 45th percentile. n = ${d.n.toLocaleString()}.`;
+  }
+  window.__rerender_did=render;render();
+})();
+
+// ==================== W5: RD ====================
+(function(){
+  const fitEl=document.getElementById("rd-fit");const callout=document.getElementById("rd-callout");
+  function render(){
+    const display=activeVal("rd-display");const c=themeColors();const rd=DATA.rd;
+    fitEl.innerHTML=`<div class="fit-stat"><div class="fs-label">Incumbency advantage</div><div class="fs-value">${rd.coef_win.toFixed(1)} pp</div></div>`+`<div class="fit-stat"><div class="fs-label">95% CI</div><div class="fs-value">[${rd.ci_lo.toFixed(1)}, ${rd.ci_hi.toFixed(1)}]</div></div>`+`<div class="fit-stat"><div class="fs-label">p-value</div><div class="fs-value">${rd.p_win < 0.001 ? "<0.001" : rd.p_win.toFixed(4)}</div></div>`+`<div class="fit-stat"><div class="fs-label">R²</div><div class="fs-value">${rd.r2.toFixed(4)}</div></div>`;
+    const traces=[];
+    if(display==="raw"){
+      traces.push({x:rd.margin,y:rd.vote,mode:"markers",type:"scatter",name:"Elections",marker:{color:rd.win.map(w=>w?c.cyan:c.pink),size:4,opacity:.4},hovertemplate:"Margin: %{x:.1f}<br>Next vote: %{y:.1f}%<extra></extra>"});
+    }else{
+      traces.push({x:rd.binned_margin,y:rd.binned_vote,mode:"markers",type:"scatter",name:"Binned means",marker:{color:rd.binned_margin.map(m=>m>=0?c.cyan:c.pink),size:10,line:{color:c.text,width:1}},hovertemplate:"Margin bin: %{x:.1f}<br>Mean vote: %{y:.1f}%<extra></extra>"});
+    }
+    // Left fitted line (losers)
+    const xL=-50,xR=0;
+    traces.push({x:[xL,xR],y:[rd.intercept+rd.coef_margin*xL,rd.intercept+rd.coef_margin*xR],mode:"lines",name:"Losers fit",line:{color:c.pink,width:2.5},hoverinfo:"skip"});
+    // Right fitted line (winners)
+    const xL2=0,xR2=50;
+    traces.push({x:[xL2,xR2],y:[rd.intercept+rd.coef_win+rd.coef_margin*xL2,rd.intercept+rd.coef_win+rd.coef_margin*xR2],mode:"lines",name:"Winners fit",line:{color:c.cyan,width:2.5},hoverinfo:"skip"});
+    // Threshold
+    traces.push({x:[0,0],y:[0,100],mode:"lines",line:{color:c.text,width:1,dash:"dot"},showlegend:false,hoverinfo:"skip"});
+    Plotly.react("rd-chart",traces,baseLayout({height:400,xaxis:Object.assign({},baseLayout().xaxis,{title:{text:"Election t Margin (% above 50)",font:{color:c.textSoft}},range:[-52,52]}),yaxis:Object.assign({},baseLayout().yaxis,{title:{text:"Vote Share in Election t+1 (%)",font:{color:c.textSoft}}}),showlegend:true,legend:{x:.01,y:.01,xanchor:"left",yanchor:"bottom",font:{color:c.text},bgcolor:"rgba(0,0,0,0)"}}),PC);
+    callout.innerHTML=`<strong>Incumbency advantage = ${rd.coef_win.toFixed(1)} percentage points</strong> (95% CI: [${rd.ci_lo.toFixed(1)}, ${rd.ci_hi.toFixed(1)}]). At the threshold (margin = 0), winning is quasi-random — candidates just above and below 50% are nearly identical except for incumbency status. n = ${rd.n.toLocaleString()} Senate elections.`;
+  }
+  initToggles("rd-display",render);window.__rerender_rd=render;render();
+})();
+
+// ==================== W6: IV ====================
+(function(){
+  const fitEl=document.getElementById("iv-fit");const callout=document.getElementById("iv-callout");
+  function render(){
+    const stage=activeVal("iv-stage");const c=themeColors();const iv=DATA.iv;
+    const traces=[];let xTitle,yTitle,info;
+    if(stage==="ols"){
+      traces.push({x:iv.avexpr,y:iv.logpgp95,mode:"markers",type:"scatter",marker:{color:c.cyan,size:8,opacity:.7,line:{color:c.purple,width:1}},hovertemplate:"Institutions: %{x:.1f}<br>Log GDP: %{y:.2f}<extra></extra>"});
+      const xMin=Math.min(...iv.avexpr),xMax=Math.max(...iv.avexpr);
+      traces.push({x:[xMin,xMax],y:[iv.ols.intercept+iv.ols.coef*xMin,iv.ols.intercept+iv.ols.coef*xMax],mode:"lines",line:{color:c.purple,width:2.5},hoverinfo:"skip"});
+      xTitle="Institutions (avexpr)";yTitle="Log GDP per capita (1995)";
+      info={label:"OLS (biased)",coef:iv.ols.coef,r2:iv.ols.r2};
+    }else if(stage==="first"){
+      traces.push({x:iv.logem4,y:iv.avexpr,mode:"markers",type:"scatter",marker:{color:c.cyan,size:8,opacity:.7,line:{color:c.purple,width:1}},hovertemplate:"Log settler mortality: %{x:.2f}<br>Institutions: %{y:.1f}<extra></extra>"});
+      const xMin=Math.min(...iv.logem4),xMax=Math.max(...iv.logem4);
+      traces.push({x:[xMin,xMax],y:[iv.first_stage.intercept+iv.first_stage.coef*xMin,iv.first_stage.intercept+iv.first_stage.coef*xMax],mode:"lines",line:{color:c.purple,width:2.5},hoverinfo:"skip"});
+      xTitle="Log Settler Mortality";yTitle="Institutions (avexpr)";
+      info={label:"First Stage",coef:iv.first_stage.coef,r2:iv.first_stage.r2,f:iv.first_stage.f_stat};
+    }else{
+      traces.push({x:iv.avexpr_hat,y:iv.logpgp95,mode:"markers",type:"scatter",marker:{color:c.cyan,size:8,opacity:.7,line:{color:c.purple,width:1}},hovertemplate:"Predicted institutions: %{x:.2f}<br>Log GDP: %{y:.2f}<extra></extra>"});
+      const xMin=Math.min(...iv.avexpr_hat),xMax=Math.max(...iv.avexpr_hat);
+      traces.push({x:[xMin,xMax],y:[iv.iv.intercept+iv.iv.coef*xMin,iv.iv.intercept+iv.iv.coef*xMax],mode:"lines",line:{color:c.purple,width:2.5},hoverinfo:"skip"});
+      xTitle="Predicted Institutions (from first stage)";yTitle="Log GDP per capita (1995)";
+      info={label:"IV / 2SLS",coef:iv.iv.coef};
+    }
+    fitEl.innerHTML=`<div class="fit-stat"><div class="fs-label">${info.label} coef</div><div class="fs-value">${info.coef.toFixed(4)}</div></div>`+
+      (info.r2!=null?`<div class="fit-stat"><div class="fs-label">R²</div><div class="fs-value">${info.r2.toFixed(4)}</div></div>`:"")+
+      (info.f!=null?`<div class="fit-stat${info.f>10?" good":" warn"}"><div class="fs-label">First-stage F</div><div class="fs-value">${info.f.toFixed(1)}</div></div>`:"")+
+      `<div class="fit-stat"><div class="fs-label">OLS coef</div><div class="fs-value">${iv.ols.coef.toFixed(4)}</div></div>`+
+      `<div class="fit-stat"><div class="fs-label">IV coef</div><div class="fs-value">${iv.iv.coef.toFixed(4)}</div></div>`;
+    Plotly.react("iv-chart",traces,baseLayout({height:380,xaxis:Object.assign({},baseLayout().xaxis,{title:{text:xTitle,font:{color:c.textSoft}}}),yaxis:Object.assign({},baseLayout().yaxis,{title:{text:yTitle,font:{color:c.textSoft}}}),showlegend:false}),PC);
+    const labels={ols:`<strong>OLS:</strong> institutions coef = ${iv.ols.coef} — but biased by reverse causation (rich countries build better institutions) and omitted variables.`,first:`<strong>First stage:</strong> settler mortality coef = ${iv.first_stage.coef}, F = ${iv.first_stage.f_stat} (> 10 ✓). Historical mortality strongly predicts modern institutions — the instrument is relevant.`,iv:`<strong>IV/2SLS:</strong> institutions coef = ${iv.iv.coef} — nearly twice the OLS estimate (${iv.ols.coef}). OLS was biased downward (attenuation). A 1-unit improvement in institutions → ${(Math.exp(iv.iv.coef)*100-100).toFixed(0)}% increase in GDP.`};
+    callout.innerHTML=labels[stage]+` n = ${iv.n} former colonies.`;
+  }
+  initToggles("iv-stage",render);window.__rerender_iv=render;render();
+})();
+
+// ==================== RESET + HASH ====================
+(function(){
+  const REG={phillips:[{group:"phillips-period",kind:"toggle",def:"pre"}],rd:[{group:"rd-display",kind:"toggle",def:"binned"}],iv:[{group:"iv-stage",kind:"toggle",def:"ols"}],cobbdouglas:[],rct:[],did:[]};
+  function getVal(c){if(c.kind==="toggle"){const b=document.querySelector("#"+c.group+" button.active");return b?b.dataset.val:c.def}return document.getElementById(c.id).value}
+  function setVal(c,val){if(c.kind==="toggle"){const g=document.getElementById(c.group);if(!g)return;const b=g.querySelector('button[data-val="'+val+'"]');if(b&&!b.classList.contains("active"))b.click()}else{const el=document.getElementById(c.id);if(!el)return;if(el.value!==String(val)){el.value=val;el.dispatchEvent(new Event(c.kind==="select"?"change":"input",{bubbles:true}))}}}
+  function resetWidget(w){const ctrls=REG[w]||[];for(const c of ctrls)setVal(c,c.def);const fn=window["__rerender_"+w];if(fn)fn();writeHash()}
+  function writeHash(){const parts=[];for(const[w,ctrls]of Object.entries(REG)){for(const c of ctrls){const v=String(getVal(c));if(v!==String(c.def)){const key=c.id||c.group;parts.push(key+"="+encodeURIComponent(v))}}}const want=parts.length?"#"+parts.join("&"):"";if(want===""&&location.hash.match(/=/))history.replaceState(null,"",location.pathname+location.search);else if(want!==""&&location.hash!==want)history.replaceState(null,"",location.pathname+location.search+want)}
+  function readHash(){const hash=location.hash.slice(1);if(!hash||!hash.includes("="))return;const params={};for(const pair of hash.split("&")){const eq=pair.indexOf("=");if(eq<0)continue;params[pair.slice(0,eq)]=decodeURIComponent(pair.slice(eq+1))}for(const ctrls of Object.values(REG)){for(const c of ctrls){const key=c.id||c.group;if(key in params)setVal(c,params[key])}}}
+  document.querySelectorAll(".reset-btn[data-reset]").forEach(b=>{b.addEventListener("click",()=>resetWidget(b.dataset.reset))});
+  document.querySelectorAll(".toggle-group button").forEach(b=>{b.addEventListener("click",()=>setTimeout(writeHash,0))});
+  readHash();
+})();
+
+// ==================== THEME ====================
+(function(){const btn=document.getElementById("theme-toggle"),iconEl=document.getElementById("theme-icon"),labelEl=document.getElementById("theme-label");function apply(t){document.documentElement.dataset.theme=t;iconEl.textContent=t==="dark"?"\u2600\uFE0F":"\uD83C\uDF19";labelEl.textContent=t==="dark"?"Light":"Dark";for(const k in window)if(k.startsWith("__rerender_")&&typeof window[k]==="function")window[k]()}const saved=localStorage.getItem(THEME_KEY);const prefersDark=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches;apply(saved||(prefersDark?"dark":"light"));btn.addEventListener("click",()=>{const next=document.documentElement.dataset.theme==="dark"?"light":"dark";localStorage.setItem(THEME_KEY,next);apply(next)})})();
+window.addEventListener("resize",()=>{document.querySelectorAll(".chart").forEach(el=>{if(el.data)Plotly.Plots.resize(el)})});
+</script>
+</body>
+</html>
