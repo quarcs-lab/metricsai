@@ -405,6 +405,71 @@ footer.page a:hover { text-decoration: underline; }
   font-weight: 500;
 }
 .takeaway a:hover { text-decoration: underline; }
+
+/* --- Code summary section --- */
+.code-summary pre {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--accent);
+  border-radius: 8px;
+  padding: 1rem 1.2rem;
+  overflow-x: auto;
+  font-family: 'JetBrains Mono', 'Fira Code', monospace;
+  font-size: 0.82rem;
+  line-height: 1.55;
+  color: var(--text);
+  white-space: pre;
+  max-height: 600px;
+  overflow-y: auto;
+}
+.code-summary pre code {
+  font-family: inherit;
+  font-size: inherit;
+}
+.code-summary .btn-copy {
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 0.45rem 1rem;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+}
+.code-summary .btn-copy:hover { opacity: 0.85; }
+.code-summary .btn-colab {
+  color: var(--accent);
+  font-weight: 500;
+  text-decoration: none;
+  font-size: 0.9rem;
+}
+.code-summary .btn-colab:hover { text-decoration: underline; }
+
+/* --- Syntax highlighting tokens (Prism.js) --- */
+.code-summary pre[class*="language-"],
+.code-summary code[class*="language-"] {
+  background: var(--panel);
+  color: var(--text);
+}
+.code-summary .token.comment,
+.code-summary .token.prolog { color: var(--text-muted); font-style: italic; }
+.code-summary .token.string,
+.code-summary .token.attr-value { color: #50a14f; }
+[data-theme="dark"] .code-summary .token.string,
+[data-theme="dark"] .code-summary .token.attr-value { color: #98c379; }
+.code-summary .token.keyword { color: var(--accent-2); font-weight: 500; }
+.code-summary .token.function { color: var(--accent); }
+.code-summary .token.number { color: var(--accent-3); }
+.code-summary .token.boolean { color: var(--accent-3); }
+.code-summary .token.operator { color: var(--text-soft); }
+.code-summary .token.punctuation { color: var(--text-soft); }
+.code-summary .token.builtin,
+.code-summary .token.class-name { color: #e5c07b; }
+[data-theme="light"] .code-summary .token.builtin,
+[data-theme="light"] .code-summary .token.class-name { color: #c18401; }
+.code-summary .token.decorator { color: var(--accent-2); }
+.code-summary .token.triple-quoted-string { color: #50a14f; }
+[data-theme="dark"] .code-summary .token.triple-quoted-string { color: #98c379; }
 </style>
 </head>
 <body>
@@ -425,6 +490,7 @@ footer.page a:hover { text-decoration: underline; }
     <li><a href="#predict">Prediction explorer</a></li>
     <li><a href="#r2">R² explained</a></li>
     <li><a href="#compare">Multi-predictor</a></li>
+    <li><a href="#code">Python code</a></li>
   </ul>
 </nav>
 
@@ -683,6 +749,104 @@ footer.page a:hover { text-decoration: underline; }
   </div>
 
   <p class="takeaway"><strong>Take-away:</strong> Switching predictors gives you five different stories about price — until you control for confounders, none of them is a causal story. <a href="../../book/_book/notebooks_quarto/ch01_Analysis_of_Economics_Data.html#economic-interpretation-and-examples" target="_blank" rel="noopener">Read §1.9 in the chapter →</a></p>
+</section>
+
+<section class="howto-card code-summary" id="code" aria-label="Python code summary">
+  <h2>Python Libraries and Code</h2>
+  <p class="motivation">You've explored the key concepts interactively — now reproduce them in Python. This self-contained code block covers everything you practiced above. Copy it into an empty notebook and run it.</p>
+  <pre><code id="code-cheatsheet" class="language-python"># =============================================================================
+# CHAPTER 1 CHEAT SHEET: Analysis of Economics Data
+# =============================================================================
+
+# --- Libraries ---
+import pandas as pd                       # data loading and manipulation
+import matplotlib.pyplot as plt           # creating plots and visualizations
+from statsmodels.formula.api import ols   # OLS regression with R-style formulas
+
+# =============================================================================
+# STEP 1: Load data directly from a URL
+# =============================================================================
+# pd.read_stata() reads Stata .dta files (pandas also supports CSV, Excel, etc.)
+url = "https://raw.githubusercontent.com/quarcs-lab/data-open/master/AED/AED_HOUSE.DTA"
+data_house = pd.read_stata(url)
+
+print(f"Dataset: {data_house.shape[0]} observations, {data_house.shape[1]} variables")
+
+# =============================================================================
+# STEP 2: Descriptive statistics — summarize before modeling
+# =============================================================================
+# .head() shows the first rows; .describe() gives mean, std, min, quartiles, max
+print(data_house[['price', 'size']].describe().round(2))
+
+# =============================================================================
+# STEP 3: Scatter plot — always visualize before fitting a regression
+# =============================================================================
+fig, ax = plt.subplots(figsize=(10, 6))
+ax.scatter(data_house['size'], data_house['price'], s=50, alpha=0.7)
+ax.set_xlabel('House Size (square feet)')
+ax.set_ylabel('House Sale Price (dollars)')
+ax.set_title('House Price vs Size')
+ax.grid(True, alpha=0.3)
+plt.tight_layout()
+plt.show()
+
+# =============================================================================
+# STEP 4: OLS regression — fit the model
+# =============================================================================
+# Formula syntax: 'y ~ x' regresses y on x (intercept included automatically)
+# IMPORTANT: .fit() estimates the model — without it, nothing is computed!
+model = ols('price ~ size', data=data_house).fit()
+
+# Extract key results
+slope     = model.params['size']       # marginal effect: $/sq ft
+intercept = model.params['Intercept']  # predicted price when size = 0
+r_squared = model.rsquared             # proportion of variation explained
+
+print(f"Estimated equation: price = {intercept:,.0f} + {slope:.2f} × size")
+print(f"Interpretation: each additional sq ft is associated with ${slope:,.2f} higher price")
+print(f"R-squared: {r_squared:.4f} ({r_squared*100:.1f}% of variation explained)")
+
+# Full regression table (coefficients, std errors, t-stats, p-values, R²)
+model.summary()
+
+# =============================================================================
+# STEP 5: Scatter plot with fitted regression line and R²
+# =============================================================================
+# model.fittedvalues contains the predicted y-values from the estimated equation
+fig, ax = plt.subplots(figsize=(10, 6))
+ax.scatter(data_house['size'], data_house['price'], s=50, alpha=0.7, label='Actual prices')
+ax.plot(data_house['size'], model.fittedvalues, color='red', linewidth=2, label='Fitted line')
+ax.set_xlabel('House Size (square feet)')
+ax.set_ylabel('House Sale Price (dollars)')
+ax.set_title(f'OLS Regression: price = {intercept:,.0f} + {slope:.2f} × size  (R² = {r_squared:.2%})')
+ax.legend()
+ax.grid(True, alpha=0.3)
+plt.tight_layout()
+plt.show()
+
+# =============================================================================
+# STEP 6: Compare predictors — association is NOT causation
+# =============================================================================
+# Running separate regressions with different x-variables shows that each tells
+# a different story. High R² does not prove causation — omitted variables
+# (location, condition, school district) can bias any single-variable slope.
+predictors = {
+    'size':      'Size (sq ft)',
+    'bedrooms':  'Bedrooms',
+    'bathrooms': 'Bathrooms',
+    'lotsize':   'Lot size',
+    'age':       'Age (years)',
+}
+
+print(f"{'Predictor':&lt;18} {'Slope':&gt;10} {'R²':&gt;8}")
+print("-" * 38)
+for var, label in predictors.items():
+    m = ols(f'price ~ {var}', data=data_house).fit()
+    print(f"{label:&lt;18} {m.params[var]:&gt;10.2f} {m.rsquared:&gt;8.4f}")</code></pre>
+  <div style="display:flex;gap:0.8rem;align-items:center;margin-top:0.8rem;flex-wrap:wrap">
+    <button class="btn-copy" onclick="navigator.clipboard.writeText(document.getElementById('code-cheatsheet').textContent).then(()=>{this.textContent='Copied!';setTimeout(()=>this.textContent='Copy code',1500)})">Copy code</button>
+    <a class="btn-colab" href="https://colab.research.google.com/notebooks/empty.ipynb" target="_blank" rel="noopener">Open empty Colab notebook →</a>
+  </div>
 </section>
 
 </main>
@@ -1337,5 +1501,8 @@ window.addEventListener("resize", () => {
 });
 </script>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" data-manual></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+<script>Prism.highlightAll();</script>
 </body>
 </html>

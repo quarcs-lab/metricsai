@@ -426,6 +426,57 @@ footer.page a:hover { text-decoration: underline; }
   font-weight: 500;
 }
 .takeaway a:hover { text-decoration: underline; }
+
+/* --- Code summary section --- */
+.code-summary pre {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--accent);
+  border-radius: 8px;
+  padding: 1rem 1.2rem;
+  overflow-x: auto;
+  font-family: 'JetBrains Mono', 'Fira Code', monospace;
+  font-size: 0.82rem;
+  line-height: 1.55;
+  color: var(--text);
+  white-space: pre;
+  max-height: 600px;
+  overflow-y: auto;
+}
+.code-summary pre code { font-family: inherit; font-size: inherit; }
+.code-summary .btn-copy {
+  background: var(--accent); color: #fff; border: none; border-radius: 6px;
+  padding: 0.45rem 1rem; font-size: 0.85rem; font-weight: 500; cursor: pointer;
+}
+.code-summary .btn-copy:hover { opacity: 0.85; }
+.code-summary .btn-colab { color: var(--accent); font-weight: 500; text-decoration: none; font-size: 0.9rem; }
+.code-summary .btn-colab:hover { text-decoration: underline; }
+
+/* --- Syntax highlighting tokens (Prism.js) --- */
+.code-summary pre[class*="language-"],
+.code-summary code[class*="language-"] {
+  background: var(--panel);
+  color: var(--text);
+}
+.code-summary .token.comment,
+.code-summary .token.prolog { color: var(--text-muted); font-style: italic; }
+.code-summary .token.string,
+.code-summary .token.attr-value { color: #50a14f; }
+[data-theme="dark"] .code-summary .token.string,
+[data-theme="dark"] .code-summary .token.attr-value { color: #98c379; }
+.code-summary .token.keyword { color: var(--accent-2); font-weight: 500; }
+.code-summary .token.function { color: var(--accent); }
+.code-summary .token.number { color: var(--accent-3); }
+.code-summary .token.boolean { color: var(--accent-3); }
+.code-summary .token.operator { color: var(--text-soft); }
+.code-summary .token.punctuation { color: var(--text-soft); }
+.code-summary .token.builtin,
+.code-summary .token.class-name { color: #e5c07b; }
+[data-theme="light"] .code-summary .token.builtin,
+[data-theme="light"] .code-summary .token.class-name { color: #c18401; }
+.code-summary .token.decorator { color: var(--accent-2); }
+.code-summary .token.triple-quoted-string { color: #50a14f; }
+[data-theme="dark"] .code-summary .token.triple-quoted-string { color: #98c379; }
 </style>
 </head>
 <body>
@@ -448,6 +499,8 @@ footer.page a:hover { text-decoration: underline; }
     <li><a href="#rsq">R-squared</a></li>
     <li><a href="#asym">Asymmetry</a></li>
     <li><a href="#nonpar">Nonparametric</a></li>
+    <li><a href="#python-code">Python Code</a></li>
+    <li><a href="#code">Python code</a></li>
   </ul>
 </nav>
 
@@ -844,6 +897,128 @@ footer.page a:hover { text-decoration: underline; }
   </div>
 
   <p class="takeaway"><strong>Take-away:</strong> nonparametric curves are a sanity check — when they echo the OLS line, the straight-line model is trustworthy. <a href="../../book/_book/notebooks_quarto/ch05_Bivariate_Data_Summary.html#nonparametric-regression" target="_blank" rel="noopener">Read §5.11 in the chapter →</a></p>
+</section>
+
+<section id="python-code" class="howto-card code-summary" id="code" aria-label="Python code summary">
+  <h2>Python Libraries and Code</h2>
+  <p class="motivation">You've explored the key concepts interactively — now reproduce them in Python. This self-contained code block covers everything you practiced above. Copy it into an empty notebook and run it.</p>
+  <pre><code id="code-cheatsheet" class="language-python"># =============================================================================
+# CHAPTER 5 CHEAT SHEET: Bivariate Data Summary
+# =============================================================================
+
+# --- Libraries ---
+import pandas as pd                                         # data loading and manipulation
+import matplotlib.pyplot as plt                              # creating plots and visualizations
+from statsmodels.formula.api import ols                      # OLS regression with R-style formulas
+from statsmodels.nonparametric.smoothers_lowess import lowess  # LOWESS nonparametric smoothing
+
+# =============================================================================
+# STEP 1: Load data directly from a URL
+# =============================================================================
+# pd.read_stata() reads Stata .dta files — the dataset has 29 house sales
+url = "https://raw.githubusercontent.com/quarcs-lab/data-open/master/AED/AED_HOUSE.DTA"
+data_house = pd.read_stata(url)
+
+print(f"Dataset: {data_house.shape[0]} observations, {data_house.shape[1]} variables")
+
+# =============================================================================
+# STEP 2: Descriptive statistics — summarize each variable before comparing
+# =============================================================================
+# .describe() gives mean, std, min, quartiles, max for both variables
+print(data_house[['price', 'size']].describe().round(2))
+
+# =============================================================================
+# STEP 3: Scatter plot — visualize the relationship before quantifying it
+# =============================================================================
+fig, ax = plt.subplots(figsize=(10, 6))
+ax.scatter(data_house['size'], data_house['price'], s=60, alpha=0.7)
+ax.set_xlabel('House Size (square feet)')
+ax.set_ylabel('House Sale Price (dollars)')
+ax.set_title('House Price vs Size')
+ax.grid(True, alpha=0.3)
+plt.tight_layout()
+plt.show()
+
+# =============================================================================
+# STEP 4: Correlation coefficient — one number for direction and strength
+# =============================================================================
+# .corr() computes the Pearson correlation matrix; r is unit-free and symmetric
+corr_matrix = data_house[['price', 'size']].corr()
+r = corr_matrix.loc['price', 'size']
+
+print(f"Correlation coefficient: r = {r:.4f}")
+print(f"Strength: {'Strong' if abs(r) &gt; 0.7 else 'Moderate' if abs(r) &gt; 0.4 else 'Weak'}")
+print(f"r² = {r**2:.4f} ({r**2*100:.1f}% of variation shared)")
+
+# =============================================================================
+# STEP 5: OLS regression — fit the best-fitting line
+# =============================================================================
+# Formula syntax: 'y ~ x' regresses y on x (intercept included automatically)
+# IMPORTANT: .fit() estimates the model — without it, nothing is computed!
+model = ols('price ~ size', data=data_house).fit()
+
+slope     = model.params['size']        # marginal effect: $/sq ft
+intercept = model.params['Intercept']   # predicted price when size = 0
+r_squared = model.rsquared              # proportion of variation explained
+
+print(f"Estimated equation: price = {intercept:,.0f} + {slope:.2f} × size")
+print(f"Interpretation: each additional sq ft is associated with ${slope:,.2f} higher price")
+print(f"R-squared: {r_squared:.4f} ({r_squared*100:.1f}% of variation explained)")
+
+# Full regression table (coefficients, std errors, t-stats, p-values, R²)
+model.summary()
+
+# =============================================================================
+# STEP 6: Scatter plot with fitted line and R² — visualize model fit
+# =============================================================================
+# model.fittedvalues contains the predicted y-values from the estimated equation
+fig, ax = plt.subplots(figsize=(10, 6))
+ax.scatter(data_house['size'], data_house['price'], s=60, alpha=0.7, label='Actual prices')
+ax.plot(data_house['size'], model.fittedvalues, color='red', linewidth=2, label='Fitted line')
+ax.set_xlabel('House Size (square feet)')
+ax.set_ylabel('House Sale Price (dollars)')
+ax.set_title(f'OLS: price = {intercept:,.0f} + {slope:.2f} × size  (R² = {r_squared:.2%})')
+ax.legend()
+ax.grid(True, alpha=0.3)
+plt.tight_layout()
+plt.show()
+
+# =============================================================================
+# STEP 7: Reverse regression — association is NOT causation
+# =============================================================================
+# If regression = causation, the reverse slope would be 1/slope. It is not.
+reverse_model = ols('size ~ price', data=data_house).fit()
+
+print(f"price ~ size  slope: {slope:.4f}")
+print(f"size ~ price  slope: {reverse_model.params['price']:.6f}")
+print(f"1 / original slope:  {1/slope:.6f}")
+print(f"Reciprocals match?   {1/slope:.6f} ≠ {reverse_model.params['price']:.6f}")
+print("→ Regression is asymmetric: association, not causation!")
+
+# =============================================================================
+# STEP 8: Nonparametric regression — check the linearity assumption
+# =============================================================================
+# LOWESS fits weighted local regressions; if the curve tracks the OLS line,
+# the linear assumption is validated for this dataset
+lowess_result = lowess(data_house['price'], data_house['size'], frac=0.6)
+
+fig, ax = plt.subplots(figsize=(10, 6))
+ax.scatter(data_house['size'], data_house['price'], s=60, alpha=0.6, label='Actual data')
+ax.plot(data_house['size'], model.fittedvalues, color='red',
+        linewidth=2, label='OLS (parametric)')
+ax.plot(lowess_result[:, 0], lowess_result[:, 1], color='green',
+        linewidth=2, linestyle='--', label='LOWESS (nonparametric)')
+ax.set_xlabel('House Size (square feet)')
+ax.set_ylabel('House Sale Price (dollars)')
+ax.set_title('Parametric vs Nonparametric Regression')
+ax.legend()
+ax.grid(True, alpha=0.3)
+plt.tight_layout()
+plt.show()</code></pre>
+  <div style="display:flex;gap:0.8rem;align-items:center;margin-top:0.8rem;flex-wrap:wrap">
+    <button class="btn-copy" onclick="navigator.clipboard.writeText(document.getElementById('code-cheatsheet').textContent).then(()=>{this.textContent='Copied!';setTimeout(()=>this.textContent='Copy code',1500)})">Copy code</button>
+    <a class="btn-colab" href="https://colab.research.google.com/notebooks/empty.ipynb" target="_blank" rel="noopener">Open empty Colab notebook →</a>
+  </div>
 </section>
 
 </main>
@@ -1652,5 +1827,8 @@ window.addEventListener("resize", () => {
 });
 </script>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" data-manual></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+<script>Prism.highlightAll();</script>
 </body>
 </html>

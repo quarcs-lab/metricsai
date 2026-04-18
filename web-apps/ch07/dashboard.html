@@ -261,6 +261,57 @@ footer.page a:hover { text-decoration: underline; }
   font-weight: 500;
 }
 .takeaway a:hover { text-decoration: underline; }
+
+/* --- Code summary section --- */
+.code-summary pre {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--accent);
+  border-radius: 8px;
+  padding: 1rem 1.2rem;
+  overflow-x: auto;
+  font-family: 'JetBrains Mono', 'Fira Code', monospace;
+  font-size: 0.82rem;
+  line-height: 1.55;
+  color: var(--text);
+  white-space: pre;
+  max-height: 600px;
+  overflow-y: auto;
+}
+.code-summary pre code { font-family: inherit; font-size: inherit; }
+.code-summary .btn-copy {
+  background: var(--accent); color: #fff; border: none; border-radius: 6px;
+  padding: 0.45rem 1rem; font-size: 0.85rem; font-weight: 500; cursor: pointer;
+}
+.code-summary .btn-copy:hover { opacity: 0.85; }
+.code-summary .btn-colab { color: var(--accent); font-weight: 500; text-decoration: none; font-size: 0.9rem; }
+.code-summary .btn-colab:hover { text-decoration: underline; }
+
+/* --- Syntax highlighting tokens (Prism.js) --- */
+.code-summary pre[class*="language-"],
+.code-summary code[class*="language-"] {
+  background: var(--panel);
+  color: var(--text);
+}
+.code-summary .token.comment,
+.code-summary .token.prolog { color: var(--text-muted); font-style: italic; }
+.code-summary .token.string,
+.code-summary .token.attr-value { color: #50a14f; }
+[data-theme="dark"] .code-summary .token.string,
+[data-theme="dark"] .code-summary .token.attr-value { color: #98c379; }
+.code-summary .token.keyword { color: var(--accent-2); font-weight: 500; }
+.code-summary .token.function { color: var(--accent); }
+.code-summary .token.number { color: var(--accent-3); }
+.code-summary .token.boolean { color: var(--accent-3); }
+.code-summary .token.operator { color: var(--text-soft); }
+.code-summary .token.punctuation { color: var(--text-soft); }
+.code-summary .token.builtin,
+.code-summary .token.class-name { color: #e5c07b; }
+[data-theme="light"] .code-summary .token.builtin,
+[data-theme="light"] .code-summary .token.class-name { color: #c18401; }
+.code-summary .token.decorator { color: var(--accent-2); }
+.code-summary .token.triple-quoted-string { color: #50a14f; }
+[data-theme="dark"] .code-summary .token.triple-quoted-string { color: #98c379; }
 </style>
 </head>
 <body>
@@ -283,6 +334,7 @@ footer.page a:hover { text-decoration: underline; }
     <li><a href="#econ-stat">Econ vs. Stat</a></li>
     <li><a href="#robust-se">Robust SEs</a></li>
     <li><a href="#house-data">House Data</a></li>
+    <li><a href="#code">Python code</a></li>
   </ul>
 </nav>
 
@@ -723,6 +775,106 @@ footer.page a:hover { text-decoration: underline; }
   </div>
 
   <p class="takeaway"><strong>Take-away:</strong> On real data, a narrow CI and a large-magnitude t-statistic tell the same story: house size matters, by about $74/sq ft. <a href="../../book/_book/notebooks_quarto/ch07_Statistical_Inference_for_Bivariate_Regression.html#example-house-price-and-size" target="_blank" rel="noopener">Read §7.1 in the chapter →</a></p>
+</section>
+
+<section class="howto-card code-summary" id="code" aria-label="Python code summary">
+  <h2>Python Libraries and Code</h2>
+  <p class="motivation">You've explored the key concepts interactively — now reproduce them in Python. This self-contained code block covers everything you practiced above. Copy it into an empty notebook and run it.</p>
+  <pre><code id="code-cheatsheet" class="language-python"># =============================================================================
+# CHAPTER 7 CHEAT SHEET: Statistical Inference for Bivariate Regression
+# =============================================================================
+
+# --- Libraries ---
+import pandas as pd                       # data loading and manipulation
+import matplotlib.pyplot as plt           # creating plots and visualizations
+from statsmodels.formula.api import ols   # OLS regression with R-style formulas
+from scipy import stats                   # t-distribution and critical values
+
+# =============================================================================
+# STEP 1: Load data directly from a URL
+# =============================================================================
+# pd.read_stata() reads Stata .dta files — the house price dataset has 29 houses
+url = "https://raw.githubusercontent.com/quarcs-lab/data-open/master/AED/AED_HOUSE.DTA"
+data_house = pd.read_stata(url)
+
+print(f"Dataset: {data_house.shape[0]} observations, {data_house.shape[1]} variables")
+
+# =============================================================================
+# STEP 2: Estimate the regression and extract key statistics
+# =============================================================================
+# The t-statistic measures how many standard errors the estimate is from zero
+model = ols('price ~ size', data=data_house).fit()
+
+slope     = model.params['size']       # marginal effect: $/sq ft
+intercept = model.params['Intercept']
+se_slope  = model.bse['size']          # standard error of the slope
+t_stat    = model.tvalues['size']      # t = b2 / se(b2)
+p_value   = model.pvalues['size']      # two-sided p-value for H0: b2 = 0
+
+print(f"Estimated equation: price = {intercept:,.0f} + {slope:.2f} x size")
+print(f"Standard error of slope: {se_slope:.2f}")
+print(f"t-statistic: {t_stat:.4f}")
+print(f"p-value: {p_value:.6f}")
+
+# Full regression table (coefficients, std errors, t-stats, p-values, R2)
+model.summary()
+
+# =============================================================================
+# STEP 3: Confidence interval — a range of plausible values for b2
+# =============================================================================
+# CI = b2 +/- t_crit x se(b2), using T(n-2) distribution
+n  = len(data_house)
+df = n - 2                                        # degrees of freedom
+t_crit = stats.t.ppf(0.975, df)                   # critical value for 95% CI
+
+ci_lower = slope - t_crit * se_slope
+ci_upper = slope + t_crit * se_slope
+
+print(f"Degrees of freedom: {df}")
+print(f"Critical t-value (alpha=0.05, two-sided): {t_crit:.4f}")
+print(f"95% CI for slope: [{ci_lower:.2f}, {ci_upper:.2f}]")
+print(f"Interpretation: each sq ft adds between ${ci_lower:.0f} and ${ci_upper:.0f} to price")
+
+# =============================================================================
+# STEP 4: Hypothesis tests — does size matter? Is the effect $90/sq ft?
+# =============================================================================
+# Test 1: Statistical significance (H0: b2 = 0)
+print(f"Test H0: b2 = 0  -&gt;  t = {t_stat:.2f}, p = {p_value:.6f}  -&gt;  Reject H0")
+
+# Test 2: Two-sided test for a specific value (H0: b2 = 90)
+null_value = 90
+t_90 = (slope - null_value) / se_slope
+p_90 = 2 * (1 - stats.t.cdf(abs(t_90), df))
+
+print(f"Test H0: b2 = 90  -&gt;  t = {t_90:.4f}, p = {p_90:.4f}  -&gt;  Fail to reject H0")
+print(f"  (90 is inside the 95% CI [{ci_lower:.2f}, {ci_upper:.2f}])")
+
+# =============================================================================
+# STEP 5: One-sided test — does size increase price by less than $90/sq ft?
+# =============================================================================
+# H0: b2 &gt;= 90  vs  Ha: b2 &lt; 90 (lower-tailed test)
+p_lower = stats.t.cdf(t_90, df)                   # one-sided p-value (left tail)
+
+print(f"One-sided test H0: b2 &gt;= 90 vs Ha: b2 &lt; 90")
+print(f"  t = {t_90:.4f}, one-sided p = {p_lower:.4f}")
+print(f"  Fail to reject at 5% (p = {p_lower:.3f} &gt; 0.05)")
+print(f"  Would reject at 10% (p = {p_lower:.3f} &lt; 0.10)")
+
+# =============================================================================
+# STEP 6: Robust standard errors — valid with or without heteroskedasticity
+# =============================================================================
+# HC1 robust SEs protect against non-constant variance in the errors
+robust_model = ols('price ~ size', data=data_house).fit(cov_type='HC1')
+
+print(f"{'':20s} {'Standard':&gt;12s} {'Robust (HC1)':&gt;12s}")
+print("-" * 46)
+print(f"{'SE(size)':&lt;20s} {se_slope:&gt;12.2f} {robust_model.bse['size']:&gt;12.2f}")
+print(f"{'t-statistic':&lt;20s} {t_stat:&gt;12.2f} {robust_model.tvalues['size']:&gt;12.2f}")
+print(f"{'p-value':&lt;20s} {p_value:&gt;12.6f} {robust_model.pvalues['size']:&gt;12.6f}")</code></pre>
+  <div style="display:flex;gap:0.8rem;align-items:center;margin-top:0.8rem;flex-wrap:wrap">
+    <button class="btn-copy" onclick="navigator.clipboard.writeText(document.getElementById('code-cheatsheet').textContent).then(()=>{this.textContent='Copied!';setTimeout(()=>this.textContent='Copy code',1500)})">Copy code</button>
+    <a class="btn-colab" href="https://colab.research.google.com/notebooks/empty.ipynb" target="_blank" rel="noopener">Open empty Colab notebook →</a>
+  </div>
 </section>
 
 </main>
@@ -1675,5 +1827,8 @@ window.addEventListener("resize", function() {
 });
 </script>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" data-manual></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+<script>Prism.highlightAll();</script>
 </body>
 </html>

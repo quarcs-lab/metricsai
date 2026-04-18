@@ -261,6 +261,57 @@ footer.page a:hover { text-decoration: underline; }
   font-weight: 500;
 }
 .takeaway a:hover { text-decoration: underline; }
+
+/* --- Code summary section --- */
+.code-summary pre {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--accent);
+  border-radius: 8px;
+  padding: 1rem 1.2rem;
+  overflow-x: auto;
+  font-family: 'JetBrains Mono', 'Fira Code', monospace;
+  font-size: 0.82rem;
+  line-height: 1.55;
+  color: var(--text);
+  white-space: pre;
+  max-height: 600px;
+  overflow-y: auto;
+}
+.code-summary pre code { font-family: inherit; font-size: inherit; }
+.code-summary .btn-copy {
+  background: var(--accent); color: #fff; border: none; border-radius: 6px;
+  padding: 0.45rem 1rem; font-size: 0.85rem; font-weight: 500; cursor: pointer;
+}
+.code-summary .btn-copy:hover { opacity: 0.85; }
+.code-summary .btn-colab { color: var(--accent); font-weight: 500; text-decoration: none; font-size: 0.9rem; }
+.code-summary .btn-colab:hover { text-decoration: underline; }
+
+/* --- Syntax highlighting tokens (Prism.js) --- */
+.code-summary pre[class*="language-"],
+.code-summary code[class*="language-"] {
+  background: var(--panel);
+  color: var(--text);
+}
+.code-summary .token.comment,
+.code-summary .token.prolog { color: var(--text-muted); font-style: italic; }
+.code-summary .token.string,
+.code-summary .token.attr-value { color: #50a14f; }
+[data-theme="dark"] .code-summary .token.string,
+[data-theme="dark"] .code-summary .token.attr-value { color: #98c379; }
+.code-summary .token.keyword { color: var(--accent-2); font-weight: 500; }
+.code-summary .token.function { color: var(--accent); }
+.code-summary .token.number { color: var(--accent-3); }
+.code-summary .token.boolean { color: var(--accent-3); }
+.code-summary .token.operator { color: var(--text-soft); }
+.code-summary .token.punctuation { color: var(--text-soft); }
+.code-summary .token.builtin,
+.code-summary .token.class-name { color: #e5c07b; }
+[data-theme="light"] .code-summary .token.builtin,
+[data-theme="light"] .code-summary .token.class-name { color: #c18401; }
+.code-summary .token.decorator { color: var(--accent-2); }
+.code-summary .token.triple-quoted-string { color: #50a14f; }
+[data-theme="dark"] .code-summary .token.triple-quoted-string { color: #98c379; }
 </style>
 </head>
 <body>
@@ -283,6 +334,7 @@ footer.page a:hover { text-decoration: underline; }
     <li><a href="#gauss-markov">Gauss-Markov</a></li>
     <li><a href="#convergence">Real Data</a></li>
     <li><a href="#se-vs-n">SE vs. n</a></li>
+    <li><a href="#code">Python code</a></li>
   </ul>
 </nav>
 
@@ -740,6 +792,152 @@ footer.page a:hover { text-decoration: underline; }
   </div>
 
   <p class="takeaway"><strong>Take-away:</strong> Going from n = 25 to n = 100 halves the SE; going from n = 100 to n = 200 only saves you another ~29%. <a href="../../book/_book/notebooks_quarto/ch06_The_Least_Squares_Estimator.html#case-study-1-sampling-variability-in-productivity-regressions" target="_blank" rel="noopener">Read the case study in the chapter →</a></p>
+</section>
+
+<section class="howto-card code-summary" id="code" aria-label="Python code summary">
+  <h2>Python Libraries and Code</h2>
+  <p class="motivation">You've explored the key concepts interactively — now reproduce them in Python. This self-contained code block covers everything you practiced above. Copy it into an empty notebook and run it.</p>
+  <pre><code id="code-cheatsheet" class="language-python"># =============================================================================
+# CHAPTER 6 CHEAT SHEET: The Least Squares Estimator
+# =============================================================================
+
+# --- Libraries ---
+import numpy as np                        # random sampling and numerical operations
+import pandas as pd                       # data manipulation
+import matplotlib.pyplot as plt           # creating plots and visualizations
+from statsmodels.formula.api import ols   # OLS regression with R-style formulas
+
+# =============================================================================
+# STEP 1: Define the Data-Generating Process (DGP)
+# =============================================================================
+# The DGP specifies the TRUE population relationship: y = b1 + b2x + u
+# We know the true parameters — in real research, we never do!
+beta_1_true = 1       # true intercept
+beta_2_true = 2       # true slope
+sigma_u     = 2       # error standard deviation
+
+# Generate one sample of n observations
+np.random.seed(42)
+n = 30
+x = np.random.normal(3, 1, n)
+u = np.random.normal(0, sigma_u, n)
+y = beta_1_true + beta_2_true * x + u
+
+data = pd.DataFrame({'x': x, 'y': y})
+print(f"Generated sample: {n} observations from y = {beta_1_true} + {beta_2_true}x + u")
+
+# =============================================================================
+# STEP 2: Fit OLS and compare sample vs. population parameters
+# =============================================================================
+# The sample regression estimates the unknown population line from data
+model = ols('y ~ x', data=data).fit()
+
+b1 = model.params['Intercept']
+b2 = model.params['x']
+
+print(f"\nPopulation:  E[y|x] = {beta_1_true} + {beta_2_true}x")
+print(f"Sample:      y_hat = {b1:.2f} + {b2:.2f}x")
+print(f"Sampling error in slope: b2 - b2_true = {b2 - beta_2_true:.4f}")
+
+# Full regression table (coefficients, std errors, t-stats, p-values, R2)
+model.summary()
+
+# =============================================================================
+# STEP 3: Scatter plot — population line vs. sample line
+# =============================================================================
+# Visualizing the gap between the true line and our estimate
+fig, ax = plt.subplots(figsize=(10, 6))
+ax.scatter(data['x'], data['y'], s=50, alpha=0.7, label='Observed data')
+ax.plot(data['x'], model.fittedvalues, color='red', linewidth=2,
+        label=f'Sample: y_hat = {b1:.2f} + {b2:.2f}x')
+x_range = np.linspace(data['x'].min(), data['x'].max(), 100)
+ax.plot(x_range, beta_1_true + beta_2_true * x_range,
+        color='green', linewidth=2, linestyle='--',
+        label=f'Population: E[y|x] = {beta_1_true} + {beta_2_true}x')
+ax.set_xlabel('x')
+ax.set_ylabel('y')
+ax.set_title('Population Regression vs. Sample Regression')
+ax.legend()
+ax.grid(True, alpha=0.3)
+plt.tight_layout()
+plt.show()
+
+# =============================================================================
+# STEP 4: Monte Carlo simulation — demonstrate unbiasedness
+# =============================================================================
+# Draw many samples from the SAME DGP to see how b2 varies
+# Unbiasedness: on average, b2 equals the true b2
+n_simulations = 1000
+b2_estimates = []
+
+for i in range(n_simulations):
+    x_sim = np.random.normal(3, 1, n)
+    u_sim = np.random.normal(0, sigma_u, n)
+    y_sim = beta_1_true + beta_2_true * x_sim + u_sim
+    df_sim = pd.DataFrame({'x': x_sim, 'y': y_sim})
+    m = ols('y ~ x', data=df_sim).fit()
+    b2_estimates.append(m.params['x'])
+
+print(f"\nMonte Carlo results ({n_simulations} simulations, n={n} each):")
+print(f"  True b2:              {beta_2_true}")
+print(f"  Mean of b2 estimates: {np.mean(b2_estimates):.4f}  (approx b2, confirming unbiasedness)")
+print(f"  Std dev of estimates:  {np.std(b2_estimates):.4f}  (empirical standard error)")
+
+# =============================================================================
+# STEP 5: Visualize the sampling distribution of b2
+# =============================================================================
+# The histogram should be centered on b2 (unbiasedness) and bell-shaped (CLT)
+fig, ax = plt.subplots(figsize=(10, 6))
+ax.hist(b2_estimates, bins=40, density=True, alpha=0.7, edgecolor='white',
+        label=f'{n_simulations} estimates of b2')
+ax.axvline(beta_2_true, color='green', linewidth=2, linestyle='--',
+           label=f'True b2 = {beta_2_true}')
+ax.axvline(np.mean(b2_estimates), color='red', linewidth=2,
+           label=f'Mean of estimates = {np.mean(b2_estimates):.4f}')
+ax.set_xlabel('Slope estimate (b2)')
+ax.set_ylabel('Density')
+ax.set_title('Sampling Distribution of b2: Unbiasedness + CLT')
+ax.legend()
+ax.grid(True, alpha=0.3)
+plt.tight_layout()
+plt.show()
+
+# =============================================================================
+# STEP 6: Standard error — what controls precision?
+# =============================================================================
+# se(b2) = s_e / sqrt[sum((xi - x_bar)^2)]
+# Smaller when: (1) model fits well, (2) large n, (3) x spread wide
+se_b2       = model.bse['x']                       # from regression output
+s_e         = np.sqrt(model.mse_resid)             # standard error of regression
+x_variation = np.sum((data['x'] - data['x'].mean())**2)
+
+print(f"\nStandard error anatomy (from the single-sample regression):")
+print(f"  s_e (root MSE):          {s_e:.4f}")
+print(f"  sum((xi - x_bar)^2):     {x_variation:.4f}")
+print(f"  se(b2) = s_e / sqrt(sum) = {s_e / np.sqrt(x_variation):.4f}")
+print(f"  se(b2) from output:      {se_b2:.4f}")
+
+# =============================================================================
+# STEP 7: Effect of sample size on precision
+# =============================================================================
+# Theory: se(b2) proportional to 1/sqrt(n) — doubling n cuts SE by ~30%, quadrupling halves it
+sample_sizes = [20, 50, 100, 200]
+
+print(f"\n{'n':&gt;6}  {'Mean b2':&gt;10}  {'Std dev (empirical SE)':&gt;22}")
+print("-" * 42)
+for ns in sample_sizes:
+    estimates = []
+    for _ in range(1000):
+        xs = np.random.normal(3, 1, ns)
+        us = np.random.normal(0, sigma_u, ns)
+        ys = beta_1_true + beta_2_true * xs + us
+        m = ols('y ~ x', data=pd.DataFrame({'x': xs, 'y': ys})).fit()
+        estimates.append(m.params['x'])
+    print(f"{ns:&gt;6}  {np.mean(estimates):&gt;10.4f}  {np.std(estimates):&gt;22.4f}")</code></pre>
+  <div style="display:flex;gap:0.8rem;align-items:center;margin-top:0.8rem;flex-wrap:wrap">
+    <button class="btn-copy" onclick="navigator.clipboard.writeText(document.getElementById('code-cheatsheet').textContent).then(()=>{this.textContent='Copied!';setTimeout(()=>this.textContent='Copy code',1500)})">Copy code</button>
+    <a class="btn-colab" href="https://colab.research.google.com/notebooks/empty.ipynb" target="_blank" rel="noopener">Open empty Colab notebook →</a>
+  </div>
 </section>
 
 </main>
@@ -1606,5 +1804,8 @@ window.addEventListener("resize", function() {
 });
 </script>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" data-manual></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+<script>Prism.highlightAll();</script>
 </body>
 </html>

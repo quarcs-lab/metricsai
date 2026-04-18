@@ -430,6 +430,70 @@ footer.page a:hover { text-decoration: underline; }
   margin-top: 0.4rem;
 }
 .scroll-top:hover { color: var(--accent); }
+/* --- Code summary section --- */
+.code-summary pre {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--accent);
+  border-radius: 8px;
+  padding: 1rem 1.2rem;
+  overflow-x: auto;
+  font-family: 'JetBrains Mono', 'Fira Code', monospace;
+  font-size: 0.82rem;
+  line-height: 1.55;
+  color: var(--text);
+  white-space: pre;
+  max-height: 600px;
+  overflow-y: auto;
+}
+.code-summary pre code {
+  font-family: inherit;
+  font-size: inherit;
+}
+.code-summary .btn-copy {
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 0.45rem 1rem;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+}
+.code-summary .btn-copy:hover { opacity: 0.85; }
+.code-summary .btn-colab {
+  color: var(--accent);
+  font-weight: 500;
+  text-decoration: none;
+  font-size: 0.9rem;
+}
+.code-summary .btn-colab:hover { text-decoration: underline; }
+
+/* --- Syntax highlighting tokens (Prism.js) --- */
+.code-summary pre[class*="language-"],
+.code-summary code[class*="language-"] {
+  background: var(--panel);
+  color: var(--text);
+}
+.code-summary .token.comment,
+.code-summary .token.prolog { color: var(--text-muted); font-style: italic; }
+.code-summary .token.string,
+.code-summary .token.attr-value { color: #50a14f; }
+[data-theme="dark"] .code-summary .token.string,
+[data-theme="dark"] .code-summary .token.attr-value { color: #98c379; }
+.code-summary .token.keyword { color: var(--accent-2); font-weight: 500; }
+.code-summary .token.function { color: var(--accent); }
+.code-summary .token.number { color: var(--accent-3); }
+.code-summary .token.boolean { color: var(--accent-3); }
+.code-summary .token.operator { color: var(--text-soft); }
+.code-summary .token.punctuation { color: var(--text-soft); }
+.code-summary .token.builtin,
+.code-summary .token.class-name { color: #e5c07b; }
+[data-theme="light"] .code-summary .token.builtin,
+[data-theme="light"] .code-summary .token.class-name { color: #c18401; }
+.code-summary .token.decorator { color: var(--accent-2); }
+.code-summary .token.triple-quoted-string { color: #50a14f; }
+[data-theme="dark"] .code-summary .token.triple-quoted-string { color: #98c379; }
 </style>
 </head>
 <body>
@@ -453,6 +517,7 @@ footer.page a:hover { text-decoration: underline; }
     <li><a href="#log">Log transform</a></li>
     <li><a href="#z">Z-score</a></li>
     <li><a href="#ma">Moving average</a></li>
+    <li><a href="#code">Python code</a></li>
   </ul>
 </nav>
 
@@ -909,6 +974,126 @@ footer.page a:hover { text-decoration: underline; }
   </div>
 
   <p class="takeaway"><strong>Take-away:</strong> a moving average is a dial between noise and signal — match the window to the cycle you want to cancel. <a href="../../book/_book/notebooks_quarto/ch02_Univariate_Data_Summary.html#time-series-transformations" target="_blank" rel="noopener">Read §2.6 in the chapter →</a></p>
+</section>
+
+<section class="howto-card code-summary" id="code" aria-label="Python code summary">
+  <h2>Python Libraries and Code</h2>
+  <p class="motivation">You've explored the key concepts interactively — now reproduce them in Python. This self-contained code block covers everything you practiced above. Copy it into an empty notebook and run it.</p>
+  <pre><code id="code-cheatsheet" class="language-python"># =============================================================================
+# CHAPTER 2 CHEAT SHEET: Univariate Data Summary
+# =============================================================================
+
+# --- Libraries ---
+import numpy as np                        # numerical operations (log, mean)
+import pandas as pd                       # data loading and manipulation
+import matplotlib.pyplot as plt           # creating plots and visualizations
+from scipy import stats                   # skewness, kurtosis, distribution shape
+
+# =============================================================================
+# STEP 1: Load data directly from a URL
+# =============================================================================
+# pd.read_stata() reads Stata .dta files; this dataset has 171 observations
+url_earnings = "https://raw.githubusercontent.com/quarcs-lab/data-open/master/AED/AED_EARNINGS.DTA"
+data_earnings = pd.read_stata(url_earnings)
+
+earnings = data_earnings['earnings']
+print(f"Dataset: {data_earnings.shape[0]} observations, {data_earnings.shape[1]} variables")
+
+# =============================================================================
+# STEP 2: Summary statistics — mean vs median reveals skewness
+# =============================================================================
+# .describe() gives count, mean, std, min, quartiles, max in one call
+print(data_earnings[['earnings']].describe().round(2))
+
+# Skewness and kurtosis measure the shape of the distribution
+print(f"\nSkewness:        {stats.skew(earnings):.2f}  (&gt; 1 = strongly right-skewed)")
+print(f"Excess kurtosis: {stats.kurtosis(earnings):.2f}  (&gt; 0 = heavier tails than normal)")
+print(f"Mean - Median:   ${earnings.mean() - earnings.median():,.0f}  (positive gap signals right skew)")
+
+# =============================================================================
+# STEP 3: Histogram with KDE overlay — see the distribution shape
+# =============================================================================
+# Bin width is a choice: narrower = more detail (and noise), wider = smoother
+fig, ax = plt.subplots(figsize=(10, 6))
+ax.hist(earnings, bins=20, edgecolor='black', alpha=0.7, density=True, label='Histogram')
+earnings.plot.kde(ax=ax, linewidth=2, color='red', label='KDE')
+ax.set_xlabel('Annual Earnings ($)')
+ax.set_ylabel('Density')
+ax.set_title('Earnings Distribution: Histogram + Kernel Density Estimate')
+ax.legend()
+ax.grid(True, alpha=0.3)
+plt.tight_layout()
+plt.show()
+
+# =============================================================================
+# STEP 4: Box plot — visualize quartiles and outliers
+# =============================================================================
+# The box spans Q1 to Q3 (IQR); whiskers extend 1.5×IQR; dots are outliers
+fig, ax = plt.subplots(figsize=(10, 4))
+ax.boxplot(earnings, vert=False, patch_artist=True,
+           boxprops=dict(facecolor='lightblue', alpha=0.7),
+           medianprops=dict(color='red', linewidth=2))
+ax.set_xlabel('Annual Earnings ($)')
+ax.set_title('Box Plot of Earnings — Median, Quartiles, and Outliers')
+ax.grid(True, alpha=0.3)
+plt.tight_layout()
+plt.show()
+
+# =============================================================================
+# STEP 5: Log transformation — taming right skew
+# =============================================================================
+# np.log() compresses big values and stretches small ones, making skewed
+# distributions more symmetric — a prerequisite for many statistical methods
+data_earnings['lnearnings'] = np.log(earnings)
+
+fig, axes = plt.subplots(1, 2, figsize=(14, 5))
+axes[0].hist(earnings, bins=20, edgecolor='black', alpha=0.7, color='steelblue')
+axes[0].set_title(f'Original  (skewness = {stats.skew(earnings):.2f})')
+axes[0].set_xlabel('Earnings ($)')
+
+axes[1].hist(data_earnings['lnearnings'], bins=20, edgecolor='black', alpha=0.7, color='coral')
+axes[1].set_title(f'Log-transformed  (skewness = {stats.skew(data_earnings["lnearnings"]):.2f})')
+axes[1].set_xlabel('ln(Earnings)')
+
+plt.suptitle('Effect of Log Transformation on Skewness', fontweight='bold')
+plt.tight_layout()
+plt.show()
+
+# =============================================================================
+# STEP 6: Z-scores — how unusual is each observation?
+# =============================================================================
+# z = (x - mean) / std  puts every value on a common "standard deviations
+# from the mean" scale: |z| &gt; 2 is unusual, |z| &gt; 3 is very unusual
+z_scores = (earnings - earnings.mean()) / earnings.std()
+
+print(f"Highest earner: ${earnings.max():,.0f}  →  z = {z_scores.max():.2f}")
+print(f"Median earner:  ${earnings.median():,.0f}  →  z = {(earnings.median() - earnings.mean()) / earnings.std():.2f}")
+print(f"Observations with |z| &gt; 2: {(z_scores.abs() &gt; 2).sum()} out of {len(z_scores)}")
+
+# =============================================================================
+# STEP 7: Time series — moving average smooths seasonal noise
+# =============================================================================
+# Monthly home sales zigzag with the seasons; an 11-month moving average
+# cancels one full seasonal cycle, revealing the underlying trend
+url_homesales = "https://raw.githubusercontent.com/quarcs-lab/data-open/master/AED/AED_MONTHLYHOMESALES.DTA"
+data_hs = pd.read_stata(url_homesales)
+data_hs = data_hs[data_hs['year'] &gt;= 2005]
+
+fig, ax = plt.subplots(figsize=(12, 6))
+ax.plot(data_hs['daten'], data_hs['exsales'], linewidth=1, alpha=0.6, label='Original (monthly)')
+ax.plot(data_hs['daten'], data_hs['exsales_ma11'], linewidth=2, color='red',
+        linestyle='--', label='11-month Moving Average')
+ax.set_xlabel('Year')
+ax.set_ylabel('Monthly Home Sales')
+ax.set_title('U.S. Home Sales: Raw Series vs. Moving Average (2005–2015)')
+ax.legend()
+ax.grid(True, alpha=0.3)
+plt.tight_layout()
+plt.show()</code></pre>
+  <div style="display:flex;gap:0.8rem;align-items:center;margin-top:0.8rem;flex-wrap:wrap">
+    <button class="btn-copy" onclick="navigator.clipboard.writeText(document.getElementById('code-cheatsheet').textContent).then(()=>{this.textContent='Copied!';setTimeout(()=>this.textContent='Copy code',1500)})">Copy code</button>
+    <a class="btn-colab" href="https://colab.research.google.com/notebooks/empty.ipynb" target="_blank" rel="noopener">Open empty Colab notebook →</a>
+  </div>
 </section>
 
 <section class="howto-card" aria-label="Next steps" style="text-align:center">
@@ -1926,5 +2111,8 @@ window.addEventListener("resize", () => {
 });
 </script>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" data-manual></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+<script>Prism.highlightAll();</script>
 </body>
 </html>

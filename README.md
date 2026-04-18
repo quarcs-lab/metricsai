@@ -52,7 +52,7 @@ Click any badge below to open and run immediately in your browser. Every chapter
 
 ## Learning Apps
 
-Every chapter features a self-contained interactive dashboard where students manipulate sliders, toggles, and dropdowns to build intuition for key concepts — no coding required. Each app uses the same datasets as the chapter and works offline after first load.
+Every chapter features a self-contained interactive dashboard where students manipulate sliders, toggles, and dropdowns to build intuition for key concepts — no coding required. Each app uses the same datasets as the chapter and works offline after first load. Every app includes a **Python Libraries and Code** section at the bottom with a syntax-highlighted, copyable code cheat sheet and a link to an empty Google Colab notebook — so students can go from exploring interactively to writing code in one click.
 
 | Chapter | Web App |
 |---------|---------|

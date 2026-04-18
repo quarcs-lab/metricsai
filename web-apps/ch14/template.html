@@ -126,6 +126,57 @@ footer.page a{color:var(--accent);text-decoration:none}footer.page a:hover{text-
   font-weight: 500;
 }
 .takeaway a:hover { text-decoration: underline; }
+
+/* --- Code summary section --- */
+.code-summary pre {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--accent);
+  border-radius: 8px;
+  padding: 1rem 1.2rem;
+  overflow-x: auto;
+  font-family: 'JetBrains Mono', 'Fira Code', monospace;
+  font-size: 0.82rem;
+  line-height: 1.55;
+  color: var(--text);
+  white-space: pre;
+  max-height: 600px;
+  overflow-y: auto;
+}
+.code-summary pre code { font-family: inherit; font-size: inherit; }
+.code-summary .btn-copy {
+  background: var(--accent); color: #fff; border: none; border-radius: 6px;
+  padding: 0.45rem 1rem; font-size: 0.85rem; font-weight: 500; cursor: pointer;
+}
+.code-summary .btn-copy:hover { opacity: 0.85; }
+.code-summary .btn-colab { color: var(--accent); font-weight: 500; text-decoration: none; font-size: 0.9rem; }
+.code-summary .btn-colab:hover { text-decoration: underline; }
+
+/* --- Syntax highlighting tokens (Prism.js) --- */
+.code-summary pre[class*="language-"],
+.code-summary code[class*="language-"] {
+  background: var(--panel);
+  color: var(--text);
+}
+.code-summary .token.comment,
+.code-summary .token.prolog { color: var(--text-muted); font-style: italic; }
+.code-summary .token.string,
+.code-summary .token.attr-value { color: #50a14f; }
+[data-theme="dark"] .code-summary .token.string,
+[data-theme="dark"] .code-summary .token.attr-value { color: #98c379; }
+.code-summary .token.keyword { color: var(--accent-2); font-weight: 500; }
+.code-summary .token.function { color: var(--accent); }
+.code-summary .token.number { color: var(--accent-3); }
+.code-summary .token.boolean { color: var(--accent-3); }
+.code-summary .token.operator { color: var(--text-soft); }
+.code-summary .token.punctuation { color: var(--text-soft); }
+.code-summary .token.builtin,
+.code-summary .token.class-name { color: #e5c07b; }
+[data-theme="light"] .code-summary .token.builtin,
+[data-theme="light"] .code-summary .token.class-name { color: #c18401; }
+.code-summary .token.decorator { color: var(--accent-2); }
+.code-summary .token.triple-quoted-string { color: #50a14f; }
+[data-theme="dark"] .code-summary .token.triple-quoted-string { color: #98c379; }
 </style>
 </head>
 <body>
@@ -147,6 +198,7 @@ footer.page a{color:var(--accent);text-decoration:none}footer.page a:hover{text-
     <li><a href="#dummy-trap">Dummy Trap</a></li>
     <li><a href="#worker-type">Worker Types</a></li>
     <li><a href="#scatter-gender">Scatter by Gender</a></li>
+    <li><a href="#code">Python code</a></li>
   </ul>
 </nav>
 
@@ -448,6 +500,140 @@ footer.page a{color:var(--accent);text-decoration:none}footer.page a:hover{text-
   <p class="takeaway"><strong>Take-away:</strong> Two lines on one chart tell you in a glance whether you need interactions — and at which education levels the gender gap is widest. <a href="../../book/_book/notebooks_quarto/ch14_Regression_with_Indicator_Variables.html#interactions-with-indicator-variables" target="_blank" rel="noopener">Read §14.3 in the chapter →</a></p>
 </section>
 
+<section class="howto-card code-summary" id="code" aria-label="Python code summary">
+  <h2>Python Libraries and Code</h2>
+  <p class="motivation">You've explored the key concepts interactively — now reproduce them in Python. This self-contained code block covers everything you practiced above. Copy it into an empty notebook and run it.</p>
+  <pre><code id="code-cheatsheet" class="language-python"># =============================================================================
+# CHAPTER 14 CHEAT SHEET: Regression with Indicator Variables
+# =============================================================================
+
+# --- Libraries ---
+import pandas as pd                       # data loading and manipulation
+import numpy as np                        # numerical operations
+import matplotlib.pyplot as plt           # creating plots and visualizations
+from statsmodels.formula.api import ols   # OLS regression with R-style formulas
+from scipy import stats                   # t-tests for group comparisons
+from scipy.stats import f_oneway          # one-way ANOVA F-test
+
+# =============================================================================
+# STEP 1: Load data directly from a URL
+# =============================================================================
+# pd.read_stata() reads Stata .dta files — 872 full-time workers aged 25-65
+url = "https://raw.githubusercontent.com/quarcs-lab/data-open/master/AED/AED_EARNINGS_COMPLETE.DTA"
+data = pd.read_stata(url)
+
+print(f"Dataset: {data.shape[0]} observations, {data.shape[1]} variables")
+
+# =============================================================================
+# STEP 2: Descriptive statistics — compare earnings by gender
+# =============================================================================
+# Indicator variable: gender = 1 (female), gender = 0 (male)
+mean_male   = data[data['gender'] == 0]['earnings'].mean()
+mean_female = data[data['gender'] == 1]['earnings'].mean()
+diff_means  = mean_female - mean_male
+
+print(f"Mean earnings (Male):   ${mean_male:,.2f}")
+print(f"Mean earnings (Female): ${mean_female:,.2f}")
+print(f"Difference (F - M):     ${diff_means:,.2f}")
+
+# =============================================================================
+# STEP 3: Regression on a single indicator — equivalent to difference in means
+# =============================================================================
+# The intercept = mean for d=0 (males); the gender coefficient = mean difference
+# IMPORTANT: .fit(cov_type='HC1') uses robust standard errors
+model1 = ols('earnings ~ gender', data=data).fit(cov_type='HC1')
+
+intercept = model1.params['Intercept']    # mean earnings for males
+gap       = model1.params['gender']       # earnings gap (females - males)
+r2        = model1.rsquared
+
+print(f"\nModel 1: earnings = {intercept:,.0f} + ({gap:,.0f}) × gender")
+print(f"Raw gender gap: ${gap:,.0f} (females earn ${abs(gap):,.0f} less)")
+print(f"R-squared: {r2:.4f} ({r2*100:.1f}% of variation explained)")
+
+model1.summary()
+
+# =============================================================================
+# STEP 4: Add controls and interaction — how the gap changes
+# =============================================================================
+# Adding education as a control measures the gap AFTER accounting for education
+model2 = ols('earnings ~ gender + education', data=data).fit(cov_type='HC1')
+
+# Adding gender×education interaction allows returns to education to differ by gender
+model3 = ols('earnings ~ gender + education + genderbyeduc', data=data).fit(cov_type='HC1')
+
+# Full model with additional controls
+model4 = ols('earnings ~ gender + education + genderbyeduc + age + hours',
+             data=data).fit(cov_type='HC1')
+
+# Compare how the gender coefficient evolves across models
+print(f"{'Model':&lt;12} {'Gender Coef':&gt;14} {'R²':&gt;8}")
+print("-" * 36)
+for name, m in [('Gender only', model1), ('+ Education', model2),
+                ('+ Interact', model3), ('+ Age,Hours', model4)]:
+    g = m.params['gender']
+    print(f"{name:&lt;12} {g:&gt;14,.0f} {m.rsquared:&gt;8.4f}")
+
+# =============================================================================
+# STEP 5: Scatter plot — visualize separate regression lines by gender
+# =============================================================================
+# Non-parallel lines indicate different slopes = interaction term is needed
+fig, ax = plt.subplots(figsize=(10, 6))
+
+for g, label, color in [(0, 'Male', 'tab:blue'), (1, 'Female', 'tab:red')]:
+    subset = data[data['gender'] == g]
+    ax.scatter(subset['education'], subset['earnings'], alpha=0.3, s=25,
+               label=label, color=color)
+    # Fit and plot regression line for each group
+    z = np.polyfit(subset['education'], subset['earnings'], 1)
+    edu_range = np.linspace(subset['education'].min(), subset['education'].max(), 100)
+    ax.plot(edu_range, np.poly1d(z)(edu_range), linewidth=2, color=color,
+            label=f'{label} slope: ${z[0]:,.0f}/yr')
+
+ax.set_xlabel('Years of Education')
+ax.set_ylabel('Earnings ($)')
+ax.set_title('Earnings vs Education by Gender (non-parallel = interaction needed)')
+ax.legend()
+ax.grid(True, alpha=0.3)
+plt.tight_layout()
+plt.show()
+
+# =============================================================================
+# STEP 6: Sets of indicators — worker type and the dummy variable trap
+# =============================================================================
+# Three mutually exclusive categories: dself, dprivate, dgovt (sum to 1)
+# Drop one (dprivate = base) to avoid perfect multicollinearity
+model_worker = ols('earnings ~ dself + dgovt + education + age',
+                   data=data).fit(cov_type='HC1')
+
+print(f"Base category: Private sector")
+print(f"Self-employed vs Private: ${model_worker.params['dself']:,.0f}")
+print(f"Government vs Private:   ${model_worker.params['dgovt']:,.0f}")
+print(f"R-squared: {model_worker.rsquared:.4f}")
+
+model_worker.summary()
+
+# =============================================================================
+# STEP 7: ANOVA — test if earnings differ across worker types
+# =============================================================================
+# Regression on mutually exclusive indicators = analysis of variance (ANOVA)
+group_self = data[data['dself'] == 1]['earnings']
+group_priv = data[data['dprivate'] == 1]['earnings']
+group_govt = data[data['dgovt'] == 1]['earnings']
+
+f_stat, p_value = f_oneway(group_self, group_priv, group_govt)
+print(f"\nANOVA F-statistic: {f_stat:.2f}, p-value: {p_value:.4f}")
+
+# Group means with counts
+data['worker_type'] = np.where(data['dself'] == 1, 'Self-employed',
+                      np.where(data['dprivate'] == 1, 'Private', 'Government'))
+print(data.groupby('worker_type')['earnings'].agg(['mean', 'count']).round(0))</code></pre>
+  <div style="display:flex;gap:0.8rem;align-items:center;margin-top:0.8rem;flex-wrap:wrap">
+    <button class="btn-copy" onclick="navigator.clipboard.writeText(document.getElementById('code-cheatsheet').textContent).then(()=>{this.textContent='Copied!';setTimeout(()=>this.textContent='Copy code',1500)})">Copy code</button>
+    <a class="btn-colab" href="https://colab.research.google.com/notebooks/empty.ipynb" target="_blank" rel="noopener">Open empty Colab notebook →</a>
+  </div>
+</section>
+
 </main>
 
 <footer class="page">
@@ -714,5 +900,8 @@ function bindToggles(id,fn){document.querySelectorAll("#"+id+" button").forEach(
 })();
 window.addEventListener("resize",function(){document.querySelectorAll(".chart").forEach(function(el){if(el.data)Plotly.Plots.resize(el);});});
 </script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" data-manual></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+<script>Prism.highlightAll();</script>
 </body>
 </html>

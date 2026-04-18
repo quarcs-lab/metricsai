@@ -118,6 +118,57 @@ footer.page a{color:var(--accent);text-decoration:none}footer.page a:hover{text-
   font-weight: 500;
 }
 .takeaway a:hover { text-decoration: underline; }
+
+/* --- Code summary section --- */
+.code-summary pre {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--accent);
+  border-radius: 8px;
+  padding: 1rem 1.2rem;
+  overflow-x: auto;
+  font-family: 'JetBrains Mono', 'Fira Code', monospace;
+  font-size: 0.82rem;
+  line-height: 1.55;
+  color: var(--text);
+  white-space: pre;
+  max-height: 600px;
+  overflow-y: auto;
+}
+.code-summary pre code { font-family: inherit; font-size: inherit; }
+.code-summary .btn-copy {
+  background: var(--accent); color: #fff; border: none; border-radius: 6px;
+  padding: 0.45rem 1rem; font-size: 0.85rem; font-weight: 500; cursor: pointer;
+}
+.code-summary .btn-copy:hover { opacity: 0.85; }
+.code-summary .btn-colab { color: var(--accent); font-weight: 500; text-decoration: none; font-size: 0.9rem; }
+.code-summary .btn-colab:hover { text-decoration: underline; }
+
+/* --- Syntax highlighting tokens (Prism.js) --- */
+.code-summary pre[class*="language-"],
+.code-summary code[class*="language-"] {
+  background: var(--panel);
+  color: var(--text);
+}
+.code-summary .token.comment,
+.code-summary .token.prolog { color: var(--text-muted); font-style: italic; }
+.code-summary .token.string,
+.code-summary .token.attr-value { color: #50a14f; }
+[data-theme="dark"] .code-summary .token.string,
+[data-theme="dark"] .code-summary .token.attr-value { color: #98c379; }
+.code-summary .token.keyword { color: var(--accent-2); font-weight: 500; }
+.code-summary .token.function { color: var(--accent); }
+.code-summary .token.number { color: var(--accent-3); }
+.code-summary .token.boolean { color: var(--accent-3); }
+.code-summary .token.operator { color: var(--text-soft); }
+.code-summary .token.punctuation { color: var(--text-soft); }
+.code-summary .token.builtin,
+.code-summary .token.class-name { color: #e5c07b; }
+[data-theme="light"] .code-summary .token.builtin,
+[data-theme="light"] .code-summary .token.class-name { color: #c18401; }
+.code-summary .token.decorator { color: var(--accent-2); }
+.code-summary .token.triple-quoted-string { color: #50a14f; }
+[data-theme="dark"] .code-summary .token.triple-quoted-string { color: #98c379; }
 </style>
 </head>
 <body>
@@ -139,6 +190,7 @@ footer.page a{color:var(--accent);text-decoration:none}footer.page a:hover{text-
     <li><a href="#interaction-me">Interaction Effects</a></li>
     <li><a href="#retransform">Retransformation</a></li>
     <li><a href="#residuals">Residual Distribution</a></li>
+    <li><a href="#code">Python code</a></li>
   </ul>
 </nav>
 
@@ -452,6 +504,134 @@ footer.page a{color:var(--accent);text-decoration:none}footer.page a:hover{text-
   <p class="takeaway"><strong>Take-away:</strong> The right specification is partly a residual-diagnostic question — logs produce cleaner, more symmetric residuals when y is skewed, and cleaner residuals mean honest t-tests and CIs. <a href="../../book/_book/notebooks_quarto/ch15_Regression_with_Transformed_Variables.html#logarithmic-transformations" target="_blank" rel="noopener">Read §15.2 in the chapter →</a></p>
 </section>
 
+<section class="howto-card code-summary" id="code" aria-label="Python code summary">
+  <h2>Python Libraries and Code</h2>
+  <p class="motivation">You've explored the key concepts interactively — now reproduce them in Python. This self-contained code block covers everything you practiced above. Copy it into an empty notebook and run it.</p>
+  <pre><code id="code-cheatsheet" class="language-python"># =============================================================================
+# CHAPTER 15 CHEAT SHEET: Regression with Transformed Variables
+# =============================================================================
+
+# --- Libraries ---
+import numpy as np                        # numerical operations (log, exp, sqrt)
+import pandas as pd                       # data loading and manipulation
+import matplotlib.pyplot as plt           # creating plots and visualizations
+from statsmodels.formula.api import ols   # OLS regression with R-style formulas
+
+# =============================================================================
+# STEP 1: Load data directly from a URL
+# =============================================================================
+# 872 full-time workers aged 25-65 with earnings, education, age, and hours
+url = "https://raw.githubusercontent.com/quarcs-lab/data-open/master/AED/AED_EARNINGS_COMPLETE.DTA"
+data_earnings = pd.read_stata(url)
+
+# Create log and squared variables for transformations
+data_earnings['lnage'] = np.log(data_earnings['age'])
+
+print(f"Dataset: {data_earnings.shape[0]} observations, {data_earnings.shape[1]} variables")
+print(data_earnings[['earnings', 'lnearnings', 'age', 'education']].describe().round(2))
+
+# =============================================================================
+# STEP 2: Log transformations — levels vs log-linear vs log-log
+# =============================================================================
+# Three specifications of the same relationship reveal different stories
+ols_levels = ols('earnings ~ age + education', data=data_earnings).fit(cov_type='HC1')
+ols_loglin = ols('lnearnings ~ age + education', data=data_earnings).fit(cov_type='HC1')
+ols_loglog = ols('lnearnings ~ lnage + education', data=data_earnings).fit(cov_type='HC1')
+
+print("=== Levels: absolute dollar effects ===")
+print(f"  Education: +${ols_levels.params['education']:,.0f} per year")
+
+print("\n=== Log-Linear: semi-elasticity (% change per unit) ===")
+print(f"  Education: +{100*ols_loglin.params['education']:.1f}% per year (Mincer return)")
+
+print("\n=== Log-Log: elasticity (% change per % change) ===")
+print(f"  Age elasticity: {ols_loglog.params['lnage']:.4f}")
+
+# =============================================================================
+# STEP 3: Quadratic model — turning point and varying marginal effects
+# =============================================================================
+# A quadratic in age captures the inverted-U life-cycle earnings profile
+ols_quad = ols('earnings ~ age + agesq + education', data=data_earnings).fit(cov_type='HC1')
+
+bage    = ols_quad.params['age']
+bagesq  = ols_quad.params['agesq']
+turning_point = -bage / (2 * bagesq)        # age where earnings peak
+
+print(f"Turning point: {turning_point:.1f} years")
+for a in [25, 40, 55]:
+    me = bage + 2 * bagesq * a              # ME varies with age
+    print(f"  ME at age {a}: ${me:,.0f}/year")
+
+# Joint F-test: H0: age and age² are jointly zero
+f_test = ols_quad.wald_test('(age = 0, agesq = 0)', use_f=True)
+print(f"Joint F-test p-value: {f_test.pvalue:.4f}")
+
+# =============================================================================
+# STEP 4: Standardized coefficients — compare variable importance
+# =============================================================================
+# Raw coefficients can't be compared across different units; beta* can
+ols_mix = ols('earnings ~ gender + age + agesq + education + dself + dgovt + lnhours',
+              data=data_earnings).fit(cov_type='HC1')
+
+sd_y = data_earnings['earnings'].std()
+predictors = ['gender', 'age', 'agesq', 'education', 'dself', 'dgovt', 'lnhours']
+
+print(f"\n{'Variable':&lt;12} {'Raw coef':&gt;12} {'Beta*':&gt;8}")
+print("-" * 34)
+for var in sorted(predictors, key=lambda v: abs(ols_mix.params[v] * data_earnings[v].std() / sd_y), reverse=True):
+    raw  = ols_mix.params[var]
+    beta_star = raw * data_earnings[var].std() / sd_y
+    print(f"{var:&lt;12} {raw:&gt;12.2f} {beta_star:&gt;8.4f}")
+
+# =============================================================================
+# STEP 5: Interaction terms — education returns that vary with age
+# =============================================================================
+# Does one more year of schooling pay the same at 25 as at 55?
+ols_inter = ols('earnings ~ age + education + agebyeduc', data=data_earnings).fit(cov_type='HC1')
+
+b_educ  = ols_inter.params['education']
+b_inter = ols_inter.params['agebyeduc']
+
+print(f"\nME of education = {b_educ:,.0f} + {b_inter:.1f} × age")
+for a in [25, 40, 55]:
+    me = b_educ + b_inter * a               # ME depends on age
+    print(f"  At age {a}: ${me:,.0f} per year of education")
+
+# =============================================================================
+# STEP 6: Retransformation bias — naive exp() underpredicts
+# =============================================================================
+# Jensen's inequality: E[exp(u)] &gt; exp(E[u]), so naive predictions are biased
+rmse_log = np.sqrt(ols_loglin.mse_resid)
+correction = np.exp(rmse_log**2 / 2)        # normal-based smearing factor
+
+naive_pred    = np.exp(ols_loglin.fittedvalues)
+adjusted_pred = correction * naive_pred
+
+print(f"\nSmearing factor: {correction:.4f}")
+print(f"Actual mean:     ${data_earnings['earnings'].mean():,.0f}")
+print(f"Naive mean:      ${naive_pred.mean():,.0f}  (underpredicts)")
+print(f"Corrected mean:  ${adjusted_pred.mean():,.0f}  (bias removed)")
+
+# =============================================================================
+# STEP 7: Comprehensive model — combine all transformation types
+# =============================================================================
+# A single model mixing logs, quadratics, dummies, and continuous regressors
+ols_full = ols('lnearnings ~ gender + age + agesq + education + dself + dgovt + lnhours',
+               data=data_earnings).fit(cov_type='HC1')
+
+print(f"\nR²: {ols_full.rsquared:.4f}")
+print(f"Education return: ~{100*ols_full.params['education']:.1f}% per year (semi-elasticity)")
+print(f"Gender gap: ~{100*ols_full.params['gender']:.1f}%")
+print(f"Hours elasticity: {ols_full.params['lnhours']:.3f} (log-log coefficient)")
+
+# Full regression table
+ols_full.summary()</code></pre>
+  <div style="display:flex;gap:0.8rem;align-items:center;margin-top:0.8rem;flex-wrap:wrap">
+    <button class="btn-copy" onclick="navigator.clipboard.writeText(document.getElementById('code-cheatsheet').textContent).then(()=>{this.textContent='Copied!';setTimeout(()=>this.textContent='Copy code',1500)})">Copy code</button>
+    <a class="btn-colab" href="https://colab.research.google.com/notebooks/empty.ipynb" target="_blank" rel="noopener">Open empty Colab notebook →</a>
+  </div>
+</section>
+
 </main>
 
 <footer class="page">
@@ -675,5 +855,8 @@ function bindSlider(id,vid,ffn,rfn){var el=document.getElementById(id);var ve=do
 })();
 window.addEventListener("resize",function(){document.querySelectorAll(".chart").forEach(function(el){if(el.data)Plotly.Plots.resize(el);});});
 </script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" data-manual></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+<script>Prism.highlightAll();</script>
 </body>
 </html>
