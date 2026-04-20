@@ -139,6 +139,8 @@ python3 .claude/skills/web-app/scripts/verify_app.py web-apps/ch02/dashboard.htm
 - **Source of truth:** `.qmd` files in `notebooks_quarto/` — all editing happens here
 - **HTML book:** Quarto project in `book/` with symlinks (`book/notebooks_quarto` → `../notebooks_quarto`)
 - **Colab export:** `scripts/export_qmd_to_ipynb.py` converts `.qmd` → `.ipynb` for Google Colab
+- **Markdown export:** `notebooks_md/` contains `.md` versions of all chapters (auto-synced)
+- **Auto-sync hook:** Editing any `.qmd` file automatically updates `.ipynb` (Colab), `.md` (Markdown), and `.html` (book) via `scripts/sync_chapter.sh`
 - **PDF pipeline:** `quarto render` → `scripts/inject_print_css.py` → `scripts/generate_pdf_playwright.py`
 - **Skills:** `chapter-standard` (template compliance), `compile-book` (PDF compilation), `proofread` (content review), `improve-readability` (notebook readability), `improve-webapp-readability` (web app pedagogy), `web-app` (interactive dashboards), `create-chapter-code-summary` (Python code cheat sheets)
 - **Web apps:** Single-file Plotly.js dashboards in `web-apps/chNN/dashboard.html`, built by `web-apps/chNN/build.py` from `web-apps/chNN/template.html`
