@@ -101,28 +101,20 @@
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
-        /* Typing cursor */
-        .typing-cursor::after {
-            content: '|';
-            display: inline-block;
-            animation: blink-cursor 0.75s step-end infinite;
-            margin-left: 2px;
-            background: none;
-            -webkit-background-clip: unset;
-            -webkit-text-fill-color: #008CB7;
+        /* Hero animation: fade-in for title */
+        .hero-title-fade { opacity: 0; transition: opacity 0.5s ease; }
+        .hero-title-fade.visible { opacity: 1; }
+        /* Hero animation: staggered fade+slide for content below title */
+        .hero-fade { opacity: 0; transform: translateY(12px); transition: opacity 0.5s ease, transform 0.5s ease; }
+        .hero-fade.visible { opacity: 1; transform: translateY(0); }
+        /* Gradient shimmer sweep on typing completion */
+        @keyframes shimmer {
+            0% { background-position: -200% center; }
+            100% { background-position: 200% center; }
         }
-        .dark .typing-cursor::after {
-            -webkit-text-fill-color: #62c7da;
-        }
-        .typing-cursor.done::after {
-            animation: fade-cursor 0.6s ease forwards;
-        }
-        @keyframes blink-cursor {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0; }
-        }
-        @keyframes fade-cursor {
-            to { opacity: 0; }
+        .gradient-text.shimmer {
+            background-size: 200% auto;
+            animation: shimmer 0.8s ease-in-out 1;
         }
         /* Hero pulsing glow */
         @keyframes pulse-glow {
@@ -275,14 +267,17 @@
                     <div class="inline-flex items-center px-3 py-1 rounded-full bg-brand-100 dark:bg-brand-900 text-brand-700 dark:text-brand-200 text-sm font-semibold mb-6">
                         <i class="fa-brands fa-python mr-2"></i> Python & AI for Economics
                     </div>
-                    <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-slate-900 dark:text-white mb-6 leading-tight">
-                        Econometrics <br>
-                        <span class="gradient-text typing-cursor" id="hero-typed"></span>
+                    <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-slate-900 dark:text-white mb-1 leading-tight">
+                        <span class="hero-title-fade" id="hero-title">Econometrics</span> <br>
+                        <span style="position:relative;display:inline-block">
+                            <span class="gradient-text" id="hero-typed" style="border-right:3px solid transparent;padding-right:2px"></span>
+                            <span class="gradient-text" style="visibility:hidden" aria-hidden="true">Powered by AI</span>
+                        </span>
                     </h1>
-                    <p class="text-lg md:text-xl text-slate-600 dark:text-slate-400 mb-8 max-w-2xl mx-auto lg:mx-0 leading-relaxed">
+                    <p id="hero-subtitle" class="hero-fade text-lg md:text-xl text-slate-600 dark:text-slate-400 mb-8 max-w-2xl mx-auto lg:mx-0 leading-relaxed">
                         A modern introduction that combines foundational concepts, cloud-based computational notebooks, learning apps, and AI learning tools.
                     </p>
-                    <div class="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
+                    <div id="hero-buttons" class="hero-fade flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
                         <a href="#curriculum" class="inline-flex justify-center items-center px-8 py-3.5 border border-transparent text-base font-semibold rounded-lg shadow-sm text-white bg-brand-500 hover:bg-brand-600 dark:bg-brand-500 dark:hover:bg-brand-600 transition-all hover:shadow-lg hover:-translate-y-0.5">
                             Learn by coding
                             <i class="fa-solid fa-arrow-right ml-2"></i>
@@ -291,7 +286,7 @@
                             <i class="fa-solid fa-robot mr-2 text-[#7A209F]"></i> AI Tutor
                         </a>
                     </div>
-                    <p class="mt-6 text-sm text-slate-500 dark:text-slate-400 font-medium">
+                    <p id="hero-checks" class="hero-fade mt-6 text-sm text-slate-500 dark:text-slate-400 font-medium">
                         <i class="fa-solid fa-check text-green-500 mr-1"></i> Zero Installation
                         <span class="mx-2">•</span>
                         <i class="fa-solid fa-check text-green-500 mr-1"></i> Learning Apps
@@ -1782,23 +1777,64 @@
             if (icon) icon.className = isDark ? 'fa-solid fa-sun text-lg' : 'fa-solid fa-moon text-lg';
         })();
 
-        // Hero typing animation
+        // Hero typing animation — orchestrated sequence
         (function() {
+            var title = document.getElementById('hero-title');
+            var typed = document.getElementById('hero-typed');
+            var subtitle = document.getElementById('hero-subtitle');
+            var buttons = document.getElementById('hero-buttons');
+            var checks = document.getElementById('hero-checks');
+            if (!typed) return;
+
             var text = 'Powered by AI';
-            var el = document.getElementById('hero-typed');
-            if (!el) return;
             var i = 0;
-            var delay = 400; // initial pause before typing starts
-            setTimeout(function type() {
-                if (i < text.length) {
-                    el.textContent += text.charAt(i);
-                    i++;
-                    setTimeout(type, 70 + Math.random() * 40);
-                } else {
-                    // Cursor fades out after typing completes
-                    setTimeout(function() { el.classList.add('done'); }, 1200);
+            var isDark = document.documentElement.classList.contains('dark');
+            var cursorColor = isDark ? '#62c7da' : '#008CB7';
+
+            // Phase 1: Fade in "Econometrics"
+            setTimeout(function() { title.classList.add('visible'); }, 50);
+
+            // Phase 2: Start typing at 800ms
+            setTimeout(function() {
+                typed.style.borderRight = '3px solid ' + cursorColor;
+                // Blink cursor
+                var blink = true;
+                var blinkInterval = setInterval(function() {
+                    blink = !blink;
+                    typed.style.borderColor = blink ? cursorColor : 'transparent';
+                }, 530);
+
+                function typeChar() {
+                    if (i < text.length) {
+                        typed.textContent += text.charAt(i);
+                        i++;
+                        // Slower for first 3 chars (ease in), then accelerate
+                        var speed = i <= 3 ? 120 + Math.random() * 40 : 65 + Math.random() * 35;
+                        setTimeout(typeChar, speed);
+                    } else {
+                        // Phase 3: Shimmer sweep on completion
+                        typed.classList.add('shimmer');
+                        setTimeout(function() { typed.classList.remove('shimmer'); }, 800);
+
+                        // Phase 4: Thin the cursor and keep blinking gently
+                        setTimeout(function() {
+                            clearInterval(blinkInterval);
+                            typed.style.borderRight = '2px solid ' + cursorColor;
+                            var slowBlink = true;
+                            setInterval(function() {
+                                slowBlink = !slowBlink;
+                                typed.style.borderColor = slowBlink ? cursorColor : 'transparent';
+                            }, 800);
+                        }, 1200);
+
+                        // Phase 5: Stagger reveal content
+                        setTimeout(function() { subtitle.classList.add('visible'); }, 600);
+                        setTimeout(function() { buttons.classList.add('visible'); }, 800);
+                        setTimeout(function() { checks.classList.add('visible'); }, 1000);
+                    }
                 }
-            }, delay);
+                typeChar();
+            }, 800);
         })();
 
         // Initialize AOS scroll animations
