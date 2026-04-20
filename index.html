@@ -101,11 +101,16 @@
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
-        /* Hero animation: pure opacity fades — no translateY to avoid layout shifts */
-        .hero-title-fade { opacity: 0; transition: opacity 0.5s ease; }
+        /* Hero animation: pure opacity fades — GPU-composited */
+        .hero-title-fade { opacity: 0; transition: opacity 0.5s ease; will-change: opacity; }
         .hero-title-fade.visible { opacity: 1; }
-        .hero-fade { opacity: 0; transition: opacity 0.5s ease; }
+        .hero-fade { opacity: 0; transition: opacity 0.5s ease; will-change: opacity; }
         .hero-fade.visible { opacity: 1; }
+        /* CSS cursor blink — replaces JS setInterval for GPU compositing */
+        @keyframes cursor-blink { 0%, 100% { border-color: currentColor; } 50% { border-color: transparent; } }
+        @keyframes cursor-blink-slow { 0%, 100% { border-color: currentColor; } 50% { border-color: transparent; } }
+        .cursor-blink { animation: cursor-blink 1.06s step-end infinite; }
+        .cursor-blink-slow { animation: cursor-blink-slow 1.6s step-end infinite; }
         /* Gradient shimmer sweep on typing completion */
         @keyframes shimmer {
             0% { background-position: -200% center; }
@@ -122,6 +127,16 @@
         }
         .hero-glow {
             animation: pulse-glow 4s ease-in-out infinite;
+        }
+        /* Disable expensive glow animation on mobile */
+        @media (max-width: 768px) {
+            .hero-glow { animation: none; opacity: 0.2; }
+        }
+        /* Respect prefers-reduced-motion: show everything instantly */
+        @media (prefers-reduced-motion: reduce) {
+            .hero-title-fade, .hero-fade { opacity: 1; transition: none; }
+            .hero-glow { animation: none; }
+            .cursor-blink, .cursor-blink-slow { animation: none; }
         }
         /* Dot pattern for alternating sections */
         .dot-pattern {
@@ -1780,12 +1795,11 @@
             if (icon) icon.className = isDark ? 'fa-solid fa-sun text-lg' : 'fa-solid fa-moon text-lg';
         })();
 
-        // Hero typing animation — smooth orchestrated sequence
+        // Hero typing animation — mobile-optimized
         (function() {
             var badge = document.getElementById('hero-badge');
             var title = document.getElementById('hero-title');
             var typed = document.getElementById('hero-typed');
-            var image = document.getElementById('hero-image');
             var subtitle = document.getElementById('hero-subtitle');
             var buttons = document.getElementById('hero-buttons');
             var checks = document.getElementById('hero-checks');
@@ -1796,42 +1810,48 @@
             var isDark = document.documentElement.classList.contains('dark');
             var cursorColor = isDark ? '#62c7da' : '#008CB7';
 
-            // Phase 1: Fade in badge, then title + image together
+            // Skip animation if user prefers reduced motion
+            if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                typed.textContent = text;
+                badge.classList.add('visible');
+                title.classList.add('visible');
+                subtitle.classList.add('visible');
+                buttons.classList.add('visible');
+                checks.classList.add('visible');
+                return;
+            }
+
+            // Phase 1: Fade in badge, then title
             setTimeout(function() { badge.classList.add('visible'); }, 50);
             setTimeout(function() { title.classList.add('visible'); }, 200);
 
-            // Phase 2: Start typing at 400ms
+            // Phase 2: Start typing at 400ms — use CSS class for cursor blink
             setTimeout(function() {
+                typed.style.color = cursorColor;
                 typed.style.borderRight = '3px solid ' + cursorColor;
-                var blink = true;
-                var blinkInterval = setInterval(function() {
-                    blink = !blink;
-                    typed.style.borderColor = blink ? cursorColor : 'transparent';
-                }, 530);
+                typed.classList.add('cursor-blink');
 
                 function typeChar() {
                     if (i < text.length) {
-                        typed.textContent += text.charAt(i);
-                        i++;
-                        var speed = i <= 3 ? 110 + Math.random() * 30 : 60 + Math.random() * 30;
-                        setTimeout(typeChar, speed);
+                        requestAnimationFrame(function() {
+                            typed.textContent += text.charAt(i);
+                            i++;
+                            var speed = i <= 3 ? 110 + Math.random() * 30 : 60 + Math.random() * 30;
+                            setTimeout(typeChar, speed);
+                        });
                     } else {
                         // Shimmer sweep on completion
                         typed.classList.add('shimmer');
                         setTimeout(function() { typed.classList.remove('shimmer'); }, 800);
 
-                        // Thin cursor, keep blinking gently
+                        // Switch to thin, slow-blinking cursor (CSS-driven)
                         setTimeout(function() {
-                            clearInterval(blinkInterval);
+                            typed.classList.remove('cursor-blink');
                             typed.style.borderRight = '2px solid ' + cursorColor;
-                            var slowBlink = true;
-                            setInterval(function() {
-                                slowBlink = !slowBlink;
-                                typed.style.borderColor = slowBlink ? cursorColor : 'transparent';
-                            }, 800);
+                            typed.classList.add('cursor-blink-slow');
                         }, 1200);
 
-                        // Stagger reveal content (tight 150ms gaps)
+                        // Stagger reveal content
                         setTimeout(function() { subtitle.classList.add('visible'); }, 400);
                         setTimeout(function() { buttons.classList.add('visible'); }, 550);
                         setTimeout(function() { checks.classList.add('visible'); }, 700);
