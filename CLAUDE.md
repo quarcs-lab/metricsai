@@ -50,7 +50,7 @@ metricsai/
 ├── scripts/            # PDF generation, conversion, web-app builders, and utilities
 ├── web-apps/           # Interactive HTML dashboards (one folder per chapter)
 ├── book/               # Quarto HTML book (symlinks to notebooks_quarto/ and images/)
-├── tutors/             # AI tutor instruction files for Gemini
+├── tutors/             # 9 AI tutor instruction files (customized Google Gemini Gems)
 ├── images/             # Cover images + chapter visual summaries
 ├── data/               # .DTA datasets from AED textbook (with comprehensive README)
 ├── log/                # Timestamped session logs

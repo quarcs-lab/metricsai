@@ -86,7 +86,7 @@ Every chapter features a self-contained interactive dashboard where students man
 
 ## AI Tutors
 
-Every student learns differently. The course features **9 specialized AI tutors**, each with a distinct pedagogical approach — all powered by Google Gemini and trained on the full course content (17 chapters, 189 Key Concepts, all datasets and Python code).
+Every student learns differently. The course features **9 specialized AI tutors**, each built as a customized [Gem](https://gemini.google.com/gems) on [Google Gemini](https://gemini.google.com/) with a distinct pedagogical approach. All tutors are trained on the full course content (17 chapters, 189 Key Concepts, all datasets and Python code).
 
 Browse all tutors on the [AI Tutors page](https://quarcs-lab.github.io/metricsai/tutors.html).
 
