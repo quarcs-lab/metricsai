@@ -84,12 +84,26 @@ Every chapter features a self-contained interactive dashboard where students man
 
 **No installation, no downloads, no setup required!**
 
-## AI Learning Tools
+## AI Tutors
 
-Each chapter comes with AI-powered learning support:
+Every student learns differently. The course features **9 specialized AI tutors**, each with a distinct pedagogical approach — all powered by Google Gemini and trained on the full course content (17 chapters, 189 Key Concepts, all datasets and Python code).
 
-- **AI Tutor** — an interactive tutor powered by Google NotebookLM that answers questions, explains concepts, and quizzes students on chapter content
-- **Learning Coach** — a Gemini-powered coaching assistant that helps students with homework, code debugging, and exam preparation using the full course material
+Browse all tutors on the [AI Tutors page](https://quarcs-lab.github.io/metricsai/tutors.html).
+
+| Tutor | Style | Best For |
+|-------|-------|----------|
+| [Learning Coach](https://gemini.google.com/gem/1mvbUPJb9CZ1SEWlxui86i25-HINaUH1c?usp=sharing) | Step-by-step lesson plans with quizzes | Structured learners |
+| [Socratic Challenger](https://gemini.google.com/gem/1H9epbzIpQ817PMcm3KI2hVMrI5VJF2X9?usp=sharing) | Guides through questions, never explains directly | Deepening understanding |
+| [Code-First Experimenter](https://gemini.google.com/gem/1eh5s0paPD7X1sM4nT4BxluA_Xy9iPRmg?usp=sharing) | Learn by running and modifying Python code | Hands-on coders |
+| [Exam Coach](https://gemini.google.com/gem/1e5xqx1VQJ-aXZrFlTEE_HsyUc0Nv4y2q?usp=sharing) | Timed drills, pitfall alerts, weakness tracking | Midterm & final prep |
+| [Analogy Builder](https://gemini.google.com/gem/17lpdVXncLiCLP4BF1WAohf4a4Tp6nDbX?usp=sharing) | Vivid real-world analogies before formulas | Abstract concepts feel hard |
+| Debate Partner | Takes contrarian positions to stress-test reasoning | Critical thinking (forthcoming) |
+| Visual Intuition | Every concept becomes a plot or diagram | Visual learners (forthcoming) |
+| Research Mentor | Guides through the empirical research workflow | Thesis prep (forthcoming) |
+| Spaced Review | Mastery tracking with spaced repetition | Long-term retention (forthcoming) |
+
+Additional AI learning support:
+
 - **Python Code Summaries** — every chapter includes a self-contained Python cheat sheet in Key Takeaways (`code/chNN_*.py`) covering the core workflow, and a compiled reference at `code/short/codeSummary.md`
 
 ## 🛠️ Local Development Setup
