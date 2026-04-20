@@ -101,12 +101,11 @@
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
-        /* Hero animation: fade-in for title */
+        /* Hero animation: pure opacity fades — no translateY to avoid layout shifts */
         .hero-title-fade { opacity: 0; transition: opacity 0.5s ease; }
         .hero-title-fade.visible { opacity: 1; }
-        /* Hero animation: staggered fade+slide for content below title */
-        .hero-fade { opacity: 0; transform: translateY(12px); transition: opacity 0.5s ease, transform 0.5s ease; }
-        .hero-fade.visible { opacity: 1; transform: translateY(0); }
+        .hero-fade { opacity: 0; transition: opacity 0.5s ease; }
+        .hero-fade.visible { opacity: 1; }
         /* Gradient shimmer sweep on typing completion */
         @keyframes shimmer {
             0% { background-position: -200% center; }
@@ -260,14 +259,14 @@
         </div>
 
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="lg:grid lg:grid-cols-12 lg:gap-16 items-center">
+            <div class="lg:grid lg:grid-cols-12 lg:gap-16 items-start">
                 
                 <!-- Hero Content -->
                 <div class="lg:col-span-6 text-center lg:text-left">
-                    <div class="inline-flex items-center px-3 py-1 rounded-full bg-brand-100 dark:bg-brand-900 text-brand-700 dark:text-brand-200 text-sm font-semibold mb-6">
+                    <div id="hero-badge" class="hero-title-fade inline-flex items-center px-3 py-1 rounded-full bg-brand-100 dark:bg-brand-900 text-brand-700 dark:text-brand-200 text-sm font-semibold mb-6">
                         <i class="fa-brands fa-python mr-2"></i> Python & AI for Economics
                     </div>
-                    <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-slate-900 dark:text-white mb-1 leading-tight">
+                    <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-slate-900 dark:text-white mb-0 leading-tight">
                         <span class="hero-title-fade" id="hero-title">Econometrics</span> <br>
                         <span style="position:relative;display:inline-block">
                             <span class="gradient-text" id="hero-typed" style="border-right:3px solid transparent;padding-right:2px"></span>
@@ -296,7 +295,7 @@
                 </div>
 
                 <!-- Hero Image -->
-                <div class="lg:col-span-6 mt-12 lg:mt-0 relative flex justify-center lg:justify-end">
+                <div id="hero-image" class="lg:col-span-6 mt-12 lg:mt-0 relative flex justify-center lg:justify-end">
                     <div class="relative w-full max-w-lg lg:max-w-2xl perspective-1000 group">
                         <!-- Decorative glow -->
                         <div class="absolute -inset-4 bg-gradient-to-r from-[#008CB7] to-[#7A209F] rounded-xl blur-2xl hero-glow"></div>
@@ -1777,10 +1776,12 @@
             if (icon) icon.className = isDark ? 'fa-solid fa-sun text-lg' : 'fa-solid fa-moon text-lg';
         })();
 
-        // Hero typing animation — orchestrated sequence
+        // Hero typing animation — smooth orchestrated sequence
         (function() {
+            var badge = document.getElementById('hero-badge');
             var title = document.getElementById('hero-title');
             var typed = document.getElementById('hero-typed');
+            var image = document.getElementById('hero-image');
             var subtitle = document.getElementById('hero-subtitle');
             var buttons = document.getElementById('hero-buttons');
             var checks = document.getElementById('hero-checks');
@@ -1791,13 +1792,13 @@
             var isDark = document.documentElement.classList.contains('dark');
             var cursorColor = isDark ? '#62c7da' : '#008CB7';
 
-            // Phase 1: Fade in "Econometrics"
-            setTimeout(function() { title.classList.add('visible'); }, 50);
+            // Phase 1: Fade in badge, then title + image together
+            setTimeout(function() { badge.classList.add('visible'); }, 50);
+            setTimeout(function() { title.classList.add('visible'); }, 200);
 
-            // Phase 2: Start typing at 800ms
+            // Phase 2: Start typing at 400ms
             setTimeout(function() {
                 typed.style.borderRight = '3px solid ' + cursorColor;
-                // Blink cursor
                 var blink = true;
                 var blinkInterval = setInterval(function() {
                     blink = !blink;
@@ -1808,15 +1809,14 @@
                     if (i < text.length) {
                         typed.textContent += text.charAt(i);
                         i++;
-                        // Slower for first 3 chars (ease in), then accelerate
-                        var speed = i <= 3 ? 120 + Math.random() * 40 : 65 + Math.random() * 35;
+                        var speed = i <= 3 ? 110 + Math.random() * 30 : 60 + Math.random() * 30;
                         setTimeout(typeChar, speed);
                     } else {
-                        // Phase 3: Shimmer sweep on completion
+                        // Shimmer sweep on completion
                         typed.classList.add('shimmer');
                         setTimeout(function() { typed.classList.remove('shimmer'); }, 800);
 
-                        // Phase 4: Thin the cursor and keep blinking gently
+                        // Thin cursor, keep blinking gently
                         setTimeout(function() {
                             clearInterval(blinkInterval);
                             typed.style.borderRight = '2px solid ' + cursorColor;
@@ -1827,14 +1827,14 @@
                             }, 800);
                         }, 1200);
 
-                        // Phase 5: Stagger reveal content
-                        setTimeout(function() { subtitle.classList.add('visible'); }, 600);
-                        setTimeout(function() { buttons.classList.add('visible'); }, 800);
-                        setTimeout(function() { checks.classList.add('visible'); }, 1000);
+                        // Stagger reveal content (tight 150ms gaps)
+                        setTimeout(function() { subtitle.classList.add('visible'); }, 400);
+                        setTimeout(function() { buttons.classList.add('visible'); }, 550);
+                        setTimeout(function() { checks.classList.add('visible'); }, 700);
                     }
                 }
                 typeChar();
-            }, 800);
+            }, 400);
         })();
 
         // Initialize AOS scroll animations
