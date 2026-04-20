@@ -84,6 +84,14 @@ Every chapter features a self-contained interactive dashboard where students man
 
 **No installation, no downloads, no setup required!**
 
+## AI Learning Tools
+
+Each chapter comes with AI-powered learning support:
+
+- **AI Tutor** — an interactive tutor powered by Google NotebookLM that answers questions, explains concepts, and quizzes students on chapter content
+- **Learning Coach** — a Gemini-powered coaching assistant that helps students with homework, code debugging, and exam preparation using the full course material
+- **Python Code Summaries** — every chapter includes a self-contained Python cheat sheet in Key Takeaways (`code/chNN_*.py`) covering the core workflow, and a compiled reference at `code/short/codeSummary.md`
+
 ## 🛠️ Local Development Setup
 
 For local development (not required for Colab usage):

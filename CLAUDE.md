@@ -45,16 +45,19 @@ The `./log/` directory preserves context across sessions. Chat sessions can die 
 metricsai/
 ├── notebooks_quarto/   # 18 chapters (.qmd) — SOURCE OF TRUTH
 ├── notebooks_colab/    # 18 chapters (.ipynb) — generated for Colab
+├── notebooks_md/       # 18 chapters (.md) — markdown versions (auto-synced)
+├── code/               # 17 Python code summaries (.py) + code/short/codeSummary.md
 ├── scripts/            # PDF generation, conversion, web-app builders, and utilities
 ├── web-apps/           # Interactive HTML dashboards (one folder per chapter)
 ├── book/               # Quarto HTML book (symlinks to notebooks_quarto/ and images/)
+├── tutors/             # AI tutor instruction files for Gemini
 ├── images/             # Cover images + chapter visual summaries
-├── data/               # .DTA datasets from AED textbook
+├── data/               # .DTA datasets from AED textbook (with comprehensive README)
 ├── log/                # Timestamped session logs
 ├── legacy/             # Archived files (R, Stata, Python originals)
 ├── .venv/              # Python virtual environment (gitignored)
 ├── .claude/rules/      # Detailed workflow docs (PDF, Quarto)
-├── .claude/skills/     # chapter-standard, compile-book, proofread, web-app
+├── .claude/skills/     # 7 skills (see Architecture section)
 ├── index.html          # Project website (standalone)
 ├── requirements.txt    # Python dependencies
 └── README.md           # Project documentation
