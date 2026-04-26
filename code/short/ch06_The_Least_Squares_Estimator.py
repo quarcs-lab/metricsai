@@ -6,7 +6,8 @@
 import numpy as np                        # random sampling and numerical operations
 import pandas as pd                       # data manipulation
 import matplotlib.pyplot as plt           # creating plots and visualizations
-from statsmodels.formula.api import ols   # OLS regression with R-style formulas
+import pyfixest as pf                     # OLS regression with R-style formulas
+# !pip install pyfixest  # if not installed
 
 # =============================================================================
 # STEP 1: Define the Data-Generating Process (DGP)
@@ -31,17 +32,17 @@ print(f"Generated sample: {n} observations from y = {beta_1_true} + {beta_2_true
 # STEP 2: Fit OLS and compare sample vs. population parameters
 # =============================================================================
 # The sample regression estimates the unknown population line from data
-model = ols('y ~ x', data=data).fit()
+fit = pf.feols('y ~ x', data=data)
 
-b1 = model.params['Intercept']
-b2 = model.params['x']
+b1 = fit.coef()['Intercept']
+b2 = fit.coef()['x']
 
 print(f"\nPopulation:  E[y|x] = {beta_1_true} + {beta_2_true}x")
 print(f"Sample:      ŷ = {b1:.2f} + {b2:.2f}x")
 print(f"Sampling error in slope: b₂ - β₂ = {b2 - beta_2_true:.4f}")
 
 # Full regression table (coefficients, std errors, t-stats, p-values, R²)
-model.summary()
+fit.summary()
 
 # =============================================================================
 # STEP 3: Scatter plot — population line vs. sample line
@@ -49,7 +50,7 @@ model.summary()
 # Visualizing the gap between the true line and our estimate
 fig, ax = plt.subplots(figsize=(10, 6))
 ax.scatter(data['x'], data['y'], s=50, alpha=0.7, label='Observed data')
-ax.plot(data['x'], model.fittedvalues, color='red', linewidth=2,
+ax.plot(data['x'], fit.predict(), color='red', linewidth=2,
         label=f'Sample: ŷ = {b1:.2f} + {b2:.2f}x')
 x_range = np.linspace(data['x'].min(), data['x'].max(), 100)
 ax.plot(x_range, beta_1_true + beta_2_true * x_range,
@@ -76,8 +77,8 @@ for i in range(n_simulations):
     u_sim = np.random.normal(0, sigma_u, n)
     y_sim = beta_1_true + beta_2_true * x_sim + u_sim
     df_sim = pd.DataFrame({'x': x_sim, 'y': y_sim})
-    m = ols('y ~ x', data=df_sim).fit()
-    b2_estimates.append(m.params['x'])
+    m = pf.feols('y ~ x', data=df_sim)
+    b2_estimates.append(m.coef()['x'])
 
 print(f"\nMonte Carlo results ({n_simulations} simulations, n={n} each):")
 print(f"  True β₂:              {beta_2_true}")
@@ -108,8 +109,8 @@ plt.show()
 # =============================================================================
 # se(b₂) = sₑ / √[Σ(xᵢ - x̄)²]
 # Smaller when: (1) model fits well, (2) large n, (3) x spread wide
-se_b2       = model.bse['x']                       # from regression output
-s_e         = np.sqrt(model.mse_resid)             # standard error of regression
+se_b2       = fit.se()['x']                         # from regression output
+s_e         = np.sqrt(np.mean(fit._u_hat**2))      # standard error of regression
 x_variation = np.sum((data['x'] - data['x'].mean())**2)
 
 print(f"\nStandard error anatomy (from the single-sample regression):")
@@ -132,6 +133,6 @@ for ns in sample_sizes:
         xs = np.random.normal(3, 1, ns)
         us = np.random.normal(0, sigma_u, ns)
         ys = beta_1_true + beta_2_true * xs + us
-        m = ols('y ~ x', data=pd.DataFrame({'x': xs, 'y': ys})).fit()
-        estimates.append(m.params['x'])
+        m = pf.feols('y ~ x', data=pd.DataFrame({'x': xs, 'y': ys}))
+        estimates.append(m.coef()['x'])
     print(f"{ns:>6}  {np.mean(estimates):>10.4f}  {np.std(estimates):>22.4f}")

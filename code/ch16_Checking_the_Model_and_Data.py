@@ -6,8 +6,10 @@
 import numpy as np                                          # numerical operations
 import pandas as pd                                         # data loading and manipulation
 import matplotlib.pyplot as plt                             # creating plots and visualizations
-from statsmodels.formula.api import ols                     # OLS regression with R-style formulas
+import pyfixest as pf                                       # OLS regression with R-style formulas
+# !pip install pyfixest  # if not installed
 import statsmodels.api as sm                                # add_constant for VIF calculation
+from statsmodels.formula.api import ols as sm_ols           # for OLSInfluence diagnostics
 from statsmodels.stats.outliers_influence import (          # diagnostic tools:
     variance_inflation_factor, OLSInfluence)                #   VIF and influence measures
 from statsmodels.nonparametric.smoothers_lowess import lowess  # LOWESS smooth for residual plots
@@ -44,14 +46,14 @@ print(vif_data.to_string(index=False))
 # STEP 3: Compare standard vs robust standard errors
 # =============================================================================
 # Heteroskedasticity makes default SEs too small -> use HC1 (White) robust SEs
-model_std    = ols('earnings ~ age + education', data=data_earnings).fit()
-model_robust = ols('earnings ~ age + education', data=data_earnings).fit(cov_type='HC1')
+fit_std    = pf.feols('earnings ~ age + education', data=data_earnings)
+fit_robust = pf.feols('earnings ~ age + education', data=data_earnings, vcov='HC1')
 
 se_comparison = pd.DataFrame({
-    'Variable':    model_std.params.index,
-    'Standard SE': model_std.bse.values.round(2),
-    'Robust SE':   model_robust.bse.values.round(2),
-    'Ratio':       (model_robust.bse / model_std.bse).values.round(3)
+    'Variable':    fit_std.coef().index,
+    'Standard SE': fit_std.se().values.round(2),
+    'Robust SE':   fit_robust.se().values.round(2),
+    'Ratio':       (fit_robust.se() / fit_std.se()).values.round(3)
 })
 print("\nSE Comparison (ratio > 1 signals heteroskedasticity):")
 print(se_comparison.to_string(index=False))
@@ -60,12 +62,12 @@ print(se_comparison.to_string(index=False))
 # STEP 4: Omitted variable bias — democracy and growth
 # =============================================================================
 # Adding controls reveals how much the bivariate estimate was biased upward
-model_bivariate = ols('democracy ~ growth', data=data_democracy).fit(cov_type='HC1')
-model_multiple  = ols('democracy ~ growth + constraint + indcent + catholic + muslim + protestant',
-                      data=data_democracy).fit(cov_type='HC1')
+fit_bivariate = pf.feols('democracy ~ growth', data=data_democracy, vcov='HC1')
+fit_multiple  = pf.feols('democracy ~ growth + constraint + indcent + catholic + muslim + protestant',
+                         data=data_democracy, vcov='HC1')
 
-b_biv  = model_bivariate.params['growth']
-b_mult = model_multiple.params['growth']
+b_biv  = fit_bivariate.coef()['growth']
+b_mult = fit_multiple.coef()['growth']
 print(f"\nGrowth coefficient (bivariate):       {b_biv:.4f}")
 print(f"Growth coefficient (with controls):   {b_mult:.4f}")
 print(f"Reduction: {(1 - b_mult/b_biv)*100:.0f}% — institutional controls absorb the bias")
@@ -74,8 +76,8 @@ print(f"Reduction: {(1 - b_mult/b_biv)*100:.0f}% — institutional controls abso
 # STEP 5: Diagnostic plots — residual vs fitted
 # =============================================================================
 # Random scatter around zero = assumptions OK; fan shape = heteroskedasticity
-uhat = model_multiple.resid
-yhat = model_multiple.fittedvalues
+uhat = fit_multiple._u_hat
+yhat = fit_multiple.predict()
 
 fig, axes = plt.subplots(1, 2, figsize=(14, 5))
 
@@ -108,10 +110,13 @@ plt.show()
 # =============================================================================
 # DFITS_i measures how much prediction i changes when observation i is excluded
 # Threshold: |DFITS| > 2*sqrt(k/n)
-influence = OLSInfluence(model_multiple)
+# OLSInfluence requires statsmodels model object
+sm_multiple = sm_ols('democracy ~ growth + constraint + indcent + catholic + muslim + protestant',
+                     data=data_democracy).fit(cov_type='HC1')
+influence = OLSInfluence(sm_multiple)
 dfits     = influence.dffits[0]
 n = len(data_democracy)
-k = len(model_multiple.params)
+k = len(fit_multiple.coef())
 threshold = 2 * np.sqrt(k / n)
 
 print(f"\nDFITS threshold: {threshold:.4f}")

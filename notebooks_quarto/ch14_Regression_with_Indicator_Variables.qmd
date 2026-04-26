@@ -78,11 +78,9 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
-import statsmodels.api as sm
-from statsmodels.formula.api import ols
+import pyfixest as pf                    # fast OLS estimation
 from scipy import stats
 from scipy.stats import f_oneway
-from statsmodels.stats.anova import anova_lm
 import random
 import os
 
@@ -229,24 +227,24 @@ We'll use **heteroskedasticity-robust standard errors** (HC1) for valid inferenc
 
 # Model 1: Gender only
 # Model 1: earnings ~ gender
-model1 = ols('earnings ~ gender', data=data).fit(cov_type='HC1')
+fit1 = pf.feols('earnings ~ gender', data=data, vcov='HC1')
 
 # Key results
-intercept_m1 = model1.params['Intercept']
-gender_coef  = model1.params['gender']
-r2_m1        = model1.rsquared
+intercept_m1 = fit1.coef()['Intercept']
+gender_coef  = fit1.coef()['gender']
+r2_m1        = fit1._r2
 
 print(f"Estimated equation: earnings = {intercept_m1:,.0f} + ({gender_coef:,.0f}) x gender")
 print(f"Gender gap: females earn ${abs(gender_coef):,.0f} less than males on average")
 print(f"R-squared: {r2_m1:.4f} ({r2_m1*100:.1f}% of variation explained)")
 
 # Full regression output
-model1.summary()
+fit1.summary()
 
 print(f"\nInterpretation:")
-print(f"  Intercept: ${model1.params['Intercept']:,.2f} (mean for males)")
-print(f"  Gender coefficient: ${model1.params['gender']:,.2f} (difference for females)")
-print(f"  Females earn ${abs(model1.params['gender']):,.2f} less than males on average")
+print(f"  Intercept: ${fit1.coef()['Intercept']:,.2f} (mean for males)")
+print(f"  Gender coefficient: ${fit1.coef()['gender']:,.2f} (difference for females)")
+print(f"  Females earn ${abs(fit1.coef()['gender']):,.2f} less than males on average")
 ```
 
 > **Key Concept 14.1: Indicator Variables and Difference in Means**
@@ -312,9 +310,9 @@ print(f"  p-value: {p_value_classical:.6f}")
 
 # Regression with default SEs
 print("\n3. Regression with default (homoskedastic) SEs:")
-model_gender_default = ols('earnings ~ gender', data=data).fit()
-print(f"  t-statistic: {model_gender_default.tvalues['gender']:.4f}")
-print(f"  p-value: {model_gender_default.pvalues['gender']:.6f}")
+fit_gender_default = pf.feols('earnings ~ gender', data=data)
+print(f"  t-statistic: {fit_gender_default.tstat()['gender']:.4f}")
+print(f"  p-value: {fit_gender_default.pval()['gender']:.6f}")
 print(f"  Note: IDENTICAL to classical t-test with equal variances")
 ```
 
@@ -359,29 +357,29 @@ We'll estimate five models of increasing complexity:
 
 # Model 2: Gender + Education
 # Model 2: earnings ~ gender + education
-model2 = ols('earnings ~ gender + education', data=data).fit(cov_type='HC1')
-model2.summary()
+fit2 = pf.feols('earnings ~ gender + education', data=data, vcov='HC1')
+fit2.summary()
 
 # Model 3: Gender + Education + Interaction
 # Model 3: earnings ~ gender + education + genderbyeduc
-model3 = ols('earnings ~ gender + education + genderbyeduc', data=data).fit(cov_type='HC1')
-model3.summary()
+fit3 = pf.feols('earnings ~ gender + education + genderbyeduc', data=data, vcov='HC1')
+fit3.summary()
 
 # Model 4: Add Age and Hours
 # Model 4: earnings ~ gender + education + genderbyeduc + age + hours
-model4 = ols('earnings ~ gender + education + genderbyeduc + age + hours', data=data).fit(cov_type='HC1')
-model4.summary()
+fit4 = pf.feols('earnings ~ gender + education + genderbyeduc + age + hours', data=data, vcov='HC1')
+fit4.summary()
 
 # Model 5: Full interactions
-model5 = ols('earnings ~ gender + education + genderbyeduc + age + genderbyage + hours + genderbyhours',
-             data=data).fit(cov_type='HC1')
-model5.summary()
+fit5 = pf.feols('earnings ~ gender + education + genderbyeduc + age + genderbyage + hours + genderbyhours',
+             data=data, vcov='HC1')
+fit5.summary()
 
 # Joint F-test for all gender terms
 # Joint F-Test: All Gender Terms
-hypotheses = '(gender = 0, genderbyeduc = 0, genderbyage = 0, genderbyhours = 0)'
-f_test = model5.wald_test(hypotheses, use_f=True)
-print(f_test)
+# Test joint significance using pyfixest's wald_test
+print("Joint F-test for all gender terms:")
+print(fit5.wald_test(R=np.eye(len(fit5.coef()))[[list(fit5.coef().index).index(v) for v in ['gender', 'genderbyeduc', 'genderbyage', 'genderbyhours']]]))
 
 # All gender effects (level and interactions) are highly significant.
 ```
@@ -520,21 +518,21 @@ Let's create a comprehensive comparison of all five models.
 # Summary Table: All Five Models
 
 summary_df = pd.DataFrame({
-    'Model 1': ['Gender only', model1.params.get('gender', np.nan),
-                model1.bse.get('gender', np.nan), model1.tvalues.get('gender', np.nan),
-                model1.nobs, model1.rsquared, model1.rsquared_adj, np.sqrt(model1.mse_resid)],
-    'Model 2': ['+ Education', model2.params.get('gender', np.nan),
-                model2.bse.get('gender', np.nan), model2.tvalues.get('gender', np.nan),
-                model2.nobs, model2.rsquared, model2.rsquared_adj, np.sqrt(model2.mse_resid)],
-    'Model 3': ['+ Gender×Educ', model3.params.get('gender', np.nan),
-                model3.bse.get('gender', np.nan), model3.tvalues.get('gender', np.nan),
-                model3.nobs, model3.rsquared, model3.rsquared_adj, np.sqrt(model3.mse_resid)],
-    'Model 4': ['+ Age, Hours', model4.params.get('gender', np.nan),
-                model4.bse.get('gender', np.nan), model4.tvalues.get('gender', np.nan),
-                model4.nobs, model4.rsquared, model4.rsquared_adj, np.sqrt(model4.mse_resid)],
-    'Model 5': ['Full Interact', model5.params.get('gender', np.nan),
-                model5.bse.get('gender', np.nan), model5.tvalues.get('gender', np.nan),
-                model5.nobs, model5.rsquared, model5.rsquared_adj, np.sqrt(model5.mse_resid)]
+    'Model 1': ['Gender only', fit1.coef().get('gender', np.nan),
+                fit1.se().get('gender', np.nan), fit1.tstat().get('gender', np.nan),
+                fit1._N, fit1._r2, fit1._adj_r2, np.sqrt(np.mean(fit1._u_hat**2))],
+    'Model 2': ['+ Education', fit2.coef().get('gender', np.nan),
+                fit2.se().get('gender', np.nan), fit2.tstat().get('gender', np.nan),
+                fit2._N, fit2._r2, fit2._adj_r2, np.sqrt(np.mean(fit2._u_hat**2))],
+    'Model 3': ['+ Gender×Educ', fit3.coef().get('gender', np.nan),
+                fit3.se().get('gender', np.nan), fit3.tstat().get('gender', np.nan),
+                fit3._N, fit3._r2, fit3._adj_r2, np.sqrt(np.mean(fit3._u_hat**2))],
+    'Model 4': ['+ Age, Hours', fit4.coef().get('gender', np.nan),
+                fit4.se().get('gender', np.nan), fit4.tstat().get('gender', np.nan),
+                fit4._N, fit4._r2, fit4._adj_r2, np.sqrt(np.mean(fit4._u_hat**2))],
+    'Model 5': ['Full Interact', fit5.coef().get('gender', np.nan),
+                fit5.se().get('gender', np.nan), fit5.tstat().get('gender', np.nan),
+                fit5._N, fit5._r2, fit5._adj_r2, np.sqrt(np.mean(fit5._u_hat**2))]
 }, index=['Description', 'Gender Coef', 'Robust SE', 't-stat', 'N', 'R²', 'Adj R²', 'RMSE'])
 
 summary_df.to_string()
@@ -574,41 +572,41 @@ $$H_0: \beta^F = \beta^M \text{ (pooled model)} \quad \text{vs.} \quad H_a: \bet
 print("\nSeparate Regressions by Gender")
 
 # Female regression
-model_female = ols('earnings ~ education + age + hours',
-                   data=data[data['gender'] == 1]).fit(cov_type='HC1')
+fit_female = pf.feols('earnings ~ education + age + hours',
+                   data=data[data['gender'] == 1], vcov='HC1')
 print("\nFemale subsample:")
-print(f"  N = {int(model_female.nobs)}")
-print(f"  Intercept: {model_female.params['Intercept']:,.2f}")
-print(f"  Education: {model_female.params['education']:,.2f}")
-print(f"  Age: {model_female.params['age']:,.2f}")
-print(f"  Hours: {model_female.params['hours']:,.2f}")
-print(f"  R²: {model_female.rsquared:.4f}")
+print(f"  N = {int(fit_female._N)}")
+print(f"  Intercept: {fit_female.coef()['Intercept']:,.2f}")
+print(f"  Education: {fit_female.coef()['education']:,.2f}")
+print(f"  Age: {fit_female.coef()['age']:,.2f}")
+print(f"  Hours: {fit_female.coef()['hours']:,.2f}")
+print(f"  R²: {fit_female._r2:.4f}")
 
 # Male regression
-model_male = ols('earnings ~ education + age + hours',
-                 data=data[data['gender'] == 0]).fit(cov_type='HC1')
+fit_male = pf.feols('earnings ~ education + age + hours',
+                 data=data[data['gender'] == 0], vcov='HC1')
 print("\nMale subsample:")
-print(f"  N = {int(model_male.nobs)}")
-print(f"  Intercept: {model_male.params['Intercept']:,.2f}")
-print(f"  Education: {model_male.params['education']:,.2f}")
-print(f"  Age: {model_male.params['age']:,.2f}")
-print(f"  Hours: {model_male.params['hours']:,.2f}")
-print(f"  R²: {model_male.rsquared:.4f}")
+print(f"  N = {int(fit_male._N)}")
+print(f"  Intercept: {fit_male.coef()['Intercept']:,.2f}")
+print(f"  Education: {fit_male.coef()['education']:,.2f}")
+print(f"  Age: {fit_male.coef()['age']:,.2f}")
+print(f"  Hours: {fit_male.coef()['hours']:,.2f}")
+print(f"  R²: {fit_male._r2:.4f}")
 
 # Compare coefficients
 # Comparison of Coefficients
 
 comparison = pd.DataFrame({
-    'Female': model_female.params,
-    'Male': model_male.params,
-    'Difference': model_female.params - model_male.params
+    'Female': fit_female.coef(),
+    'Male': fit_male.coef(),
+    'Difference': fit_female.coef() - fit_male.coef()
 })
 print(comparison)
 
 print("\nKey findings:")
-print(f"  - Returns to education: ${model_female.params['education']:,.0f} (F) vs ${model_male.params['education']:,.0f} (M)")
-print(f"  - Returns to age: ${model_female.params['age']:,.0f} (F) vs ${model_male.params['age']:,.0f} (M)")
-print(f"  - Returns to hours: ${model_female.params['hours']:,.0f} (F) vs ${model_male.params['hours']:,.0f} (M)")
+print(f"  - Returns to education: ${fit_female.coef()['education']:,.0f} (F) vs ${fit_male.coef()['education']:,.0f} (M)")
+print(f"  - Returns to age: ${fit_female.coef()['age']:,.0f} (F) vs ${fit_male.coef()['age']:,.0f} (M)")
+print(f"  - Returns to hours: ${fit_female.coef()['hours']:,.0f} (F) vs ${fit_male.coef()['hours']:,.0f} (M)")
 ```
 
 > **Key Concept 14.5: Testing for Structural Change**
@@ -646,21 +644,21 @@ The coefficient of an included indicator measures the difference relative to the
 
 # Approach 1: Include intercept, drop one indicator (dprivate as reference)
 # Approach 1: Intercept + dself + dgovt (dprivate is reference)
-model_worker1 = ols('earnings ~ dself + dgovt + education + age', data=data).fit(cov_type='HC1')
-model_worker1.summary()
+fit_worker1 = pf.feols('earnings ~ dself + dgovt + education + age', data=data, vcov='HC1')
+fit_worker1.summary()
 
 # Approach 2: Drop intercept, include all indicators
 # Approach 2: No intercept + all dummies (dself + dprivate + dgovt)
-model_worker2 = ols('earnings ~ dself + dprivate + dgovt + education + age - 1', data=data).fit(cov_type='HC1')
-model_worker2.summary()
+fit_worker2 = pf.feols('earnings ~ dself + dprivate + dgovt + education + age - 1', data=data, vcov='HC1')
+fit_worker2.summary()
 
 # Approach 3: Different reference category (dself as reference)
 # Approach 3: Intercept + dprivate + dgovt (dself is reference)
-model_worker3 = ols('earnings ~ dprivate + dgovt + education + age', data=data).fit(cov_type='HC1')
-model_worker3.summary()
+fit_worker3 = pf.feols('earnings ~ dprivate + dgovt + education + age', data=data, vcov='HC1')
+fit_worker3.summary()
 
 # Key Insight:
-print(f"  All three models have IDENTICAL R²: {model_worker1.rsquared:.4f}")
+print(f"  All three models have IDENTICAL R²: {fit_worker1._r2:.4f}")
 print(f"  Only the interpretation changes (different reference category)")
 print(f"  Fitted values and residuals are the same across all three")
 ```
@@ -767,9 +765,8 @@ else:
 # Using statsmodels for detailed ANOVA table
 # Detailed ANOVA table (statsmodels)
 
-model_anova = ols('earnings ~ C(typeworker)', data=data).fit()
-anova_table = anova_lm(model_anova, typ=2)
-print(anova_table)
+fit_anova = pf.feols('earnings ~ C(typeworker)', data=data)
+fit_anova.summary()
 
 print("\nNote: ANOVA F-statistic matches the joint test from regression")
 ```
@@ -923,7 +920,8 @@ This single code block reproduces the core workflow of Chapter 14. It is self-co
 import pandas as pd                       # data loading and manipulation
 import numpy as np                        # numerical operations
 import matplotlib.pyplot as plt           # creating plots and visualizations
-from statsmodels.formula.api import ols   # OLS regression with R-style formulas
+import pyfixest as pf                     # fast OLS estimation
+# !pip install pyfixest
 from scipy import stats                   # t-tests for group comparisons
 from scipy.stats import f_oneway          # one-way ANOVA F-test
 
@@ -952,39 +950,39 @@ print(f"Difference (F - M):     ${diff_means:,.2f}")
 # STEP 3: Regression on a single indicator — equivalent to difference in means
 # =============================================================================
 # The intercept = mean for d=0 (males); the gender coefficient = mean difference
-# IMPORTANT: .fit(cov_type='HC1') uses robust standard errors
-model1 = ols('earnings ~ gender', data=data).fit(cov_type='HC1')
+# pf.feols with vcov='HC1' uses robust standard errors
+fit1 = pf.feols('earnings ~ gender', data=data, vcov='HC1')
 
-intercept = model1.params['Intercept']    # mean earnings for males
-gap       = model1.params['gender']       # earnings gap (females - males)
-r2        = model1.rsquared
+intercept = fit1.coef()['Intercept']    # mean earnings for males
+gap       = fit1.coef()['gender']       # earnings gap (females - males)
+r2        = fit1._r2
 
 print(f"\nModel 1: earnings = {intercept:,.0f} + ({gap:,.0f}) × gender")
 print(f"Raw gender gap: ${gap:,.0f} (females earn ${abs(gap):,.0f} less)")
 print(f"R-squared: {r2:.4f} ({r2*100:.1f}% of variation explained)")
 
-model1.summary()
+fit1.summary()
 
 # =============================================================================
 # STEP 4: Add controls and interaction — how the gap changes
 # =============================================================================
 # Adding education as a control measures the gap AFTER accounting for education
-model2 = ols('earnings ~ gender + education', data=data).fit(cov_type='HC1')
+fit2 = pf.feols('earnings ~ gender + education', data=data, vcov='HC1')
 
 # Adding gender×education interaction allows returns to education to differ by gender
-model3 = ols('earnings ~ gender + education + genderbyeduc', data=data).fit(cov_type='HC1')
+fit3 = pf.feols('earnings ~ gender + education + genderbyeduc', data=data, vcov='HC1')
 
 # Full model with additional controls
-model4 = ols('earnings ~ gender + education + genderbyeduc + age + hours',
-             data=data).fit(cov_type='HC1')
+fit4 = pf.feols('earnings ~ gender + education + genderbyeduc + age + hours',
+             data=data, vcov='HC1')
 
 # Compare how the gender coefficient evolves across models
 print(f"{'Model':<12} {'Gender Coef':>14} {'R²':>8}")
 print("-" * 36)
-for name, m in [('Gender only', model1), ('+ Education', model2),
-                ('+ Interact', model3), ('+ Age,Hours', model4)]:
-    g = m.params['gender']
-    print(f"{name:<12} {g:>14,.0f} {m.rsquared:>8.4f}")
+for name, m in [('Gender only', fit1), ('+ Education', fit2),
+                ('+ Interact', fit3), ('+ Age,Hours', fit4)]:
+    g = m.coef()['gender']
+    print(f"{name:<12} {g:>14,.0f} {m._r2:>8.4f}")
 
 # =============================================================================
 # STEP 5: Scatter plot — visualize separate regression lines by gender
@@ -1015,15 +1013,15 @@ plt.show()
 # =============================================================================
 # Three mutually exclusive categories: dself, dprivate, dgovt (sum to 1)
 # Drop one (dprivate = base) to avoid perfect multicollinearity
-model_worker = ols('earnings ~ dself + dgovt + education + age',
-                   data=data).fit(cov_type='HC1')
+fit_worker = pf.feols('earnings ~ dself + dgovt + education + age',
+                   data=data, vcov='HC1')
 
 print(f"Base category: Private sector")
-print(f"Self-employed vs Private: ${model_worker.params['dself']:,.0f}")
-print(f"Government vs Private:   ${model_worker.params['dgovt']:,.0f}")
-print(f"R-squared: {model_worker.rsquared:.4f}")
+print(f"Self-employed vs Private: ${fit_worker.coef()['dself']:,.0f}")
+print(f"Government vs Private:   ${fit_worker.coef()['dgovt']:,.0f}")
+print(f"R-squared: {fit_worker._r2:.4f}")
 
-model_worker.summary()
+fit_worker.summary()
 
 # =============================================================================
 # STEP 7: ANOVA — test if earnings differ across worker types
@@ -1172,9 +1170,9 @@ print(dat2014.groupby('region')['ln_lp'].agg(['mean', 'count']))
 Regress log productivity on regional indicators (using one region as the base category).
 
 ```python
-import statsmodels.formula.api as smf
-model1 = smf.ols('ln_lp ~ C(region)', data=dat2014).fit(cov_type='HC1')
-model1.summary()
+import pyfixest as pf
+fit1 = pf.feols('ln_lp ~ C(region)', data=dat2014, vcov='HC1')
+fit1.summary()
 ```
 
 **Questions:** Which region is the base category? How do you interpret the coefficients? Are the regional differences statistically significant?
@@ -1301,8 +1299,8 @@ print(f"Lowest mean IMDS:  {dept_stats['mean'].idxmin()} ({dept_stats['mean'].mi
 4. What is the base department? How much higher or lower is each department relative to the base?
 
 ```python
-model_dep = ols('imds ~ C(dep)', data=bol_key).fit(cov_type='HC1')
-model_dep.summary()
+fit_dep = pf.feols('imds ~ C(dep)', data=bol_key, vcov='HC1')
+fit_dep.summary()
 ```
 
 ```{python}
@@ -1313,11 +1311,11 @@ model_dep.summary()
 # 2. Print summary
 # 3. Identify the base department and interpret coefficients
 #
-# model_dep = ols('imds ~ C(dep)', data=bol_key).fit(cov_type='HC1')
-# print(model_dep.summary())
+# fit_dep = pf.feols('imds ~ C(dep)', data=bol_key, vcov='HC1')
+# print(fit_dep.summary())
 #
 # print(f"\nBase department: {sorted(bol_key['dep'].unique())[0]}")
-# print(f"Intercept = mean IMDS for the base department: {model_dep.params['Intercept']:.2f}")
+# print(f"Intercept = mean IMDS for the base department: {fit_dep.coef()['Intercept']:.2f}")
 ```
 
 > **Key Concept 14.9: Geographic Indicator Variables**
@@ -1348,8 +1346,8 @@ model_dep.summary()
 # 2. Compare department coefficients with Task 2 results
 # 3. Interpret changes
 #
-# model_dep_ntl = ols('imds ~ C(dep) + ln_NTLpc2017', data=bol_key).fit(cov_type='HC1')
-# print(model_dep_ntl.summary())
+# fit_dep_ntl = pf.feols('imds ~ C(dep) + ln_NTLpc2017', data=bol_key, vcov='HC1')
+# print(fit_dep_ntl.summary())
 #
 # print("\nComparison: Do department coefficients shrink with NTL control?")
 # print("If yes, NTL explains part of the regional development gap.")
@@ -1380,8 +1378,8 @@ model_dep.summary()
 # 2. Examine interaction coefficients
 # 3. Identify departments where NTL effect is stronger/weaker
 #
-# model_interact = ols('imds ~ C(dep) * ln_NTLpc2017', data=bol_key).fit(cov_type='HC1')
-# print(model_interact.summary())
+# fit_interact = pf.feols('imds ~ C(dep) * ln_NTLpc2017', data=bol_key, vcov='HC1')
+# print(fit_interact.summary())
 #
 # print("\nInterpretation:")
 # print("  Significant interactions indicate the NTL slope differs by department.")
@@ -1418,11 +1416,9 @@ model_dep.summary()
 # 3. Compare models with and without regional effects
 #
 # Approach: Compare nested models using ANOVA
-# from statsmodels.stats.anova import anova_lm
-#
-# model_base = ols('imds ~ ln_NTLpc2017', data=bol_key).fit()
-# model_dep_only = ols('imds ~ C(dep) + ln_NTLpc2017', data=bol_key).fit()
-# model_full = ols('imds ~ C(dep) * ln_NTLpc2017', data=bol_key).fit()
+# fit_base = pf.feols('imds ~ ln_NTLpc2017', data=bol_key)
+# fit_dep_only = pf.feols('imds ~ C(dep) + ln_NTLpc2017', data=bol_key)
+# fit_full = pf.feols('imds ~ C(dep) * ln_NTLpc2017', data=bol_key)
 #
 # print("F-test: Department indicators (comparing base vs dep_only)")
 # print(anova_lm(model_base, model_dep_only))

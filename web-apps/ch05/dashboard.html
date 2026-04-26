@@ -938,6 +938,7 @@ footer.page a:hover { text-decoration: underline; }
   <div class="code-tabs" id="code-lang-tabs">
     <button type="button" data-lang="python" class="active">Python</button>
     <button type="button" data-lang="stata">Stata</button>
+    <button type="button" data-lang="r">R</button>
   </div>
 
   <div class="code-panel active" id="panel-python">
@@ -948,7 +949,8 @@ footer.page a:hover { text-decoration: underline; }
 # --- Libraries ---
 import pandas as pd                                         # data loading and manipulation
 import matplotlib.pyplot as plt                              # creating plots and visualizations
-from statsmodels.formula.api import ols                      # OLS regression with R-style formulas
+import pyfixest as pf                                         # OLS regression with R-style formulas
+# !pip install pyfixest                                       # uncomment if running in Google Colab
 from statsmodels.nonparametric.smoothers_lowess import lowess  # LOWESS nonparametric smoothing
 
 # =============================================================================
@@ -993,27 +995,27 @@ print(f"r² = {r**2:.4f} ({r**2*100:.1f}% of variation shared)")
 # STEP 5: OLS regression — fit the best-fitting line
 # =============================================================================
 # Formula syntax: 'y ~ x' regresses y on x (intercept included automatically)
-# IMPORTANT: .fit() estimates the model — without it, nothing is computed!
-model = ols('price ~ size', data=data_house).fit()
+# pf.feols() estimates the model in one call (no separate .fit() step)
+fit = pf.feols('price ~ size', data=data_house)
 
-slope     = model.params['size']        # marginal effect: $/sq ft
-intercept = model.params['Intercept']   # predicted price when size = 0
-r_squared = model.rsquared              # proportion of variation explained
+slope     = fit.coef()['size']          # marginal effect: $/sq ft
+intercept = fit.coef()['Intercept']     # predicted price when size = 0
+r_squared = fit._r2                     # proportion of variation explained
 
 print(f"Estimated equation: price = {intercept:,.0f} + {slope:.2f} × size")
 print(f"Interpretation: each additional sq ft is associated with ${slope:,.2f} higher price")
 print(f"R-squared: {r_squared:.4f} ({r_squared*100:.1f}% of variation explained)")
 
 # Full regression table (coefficients, std errors, t-stats, p-values, R²)
-model.summary()
+fit.summary()
 
 # =============================================================================
 # STEP 6: Scatter plot with fitted line and R² — visualize model fit
 # =============================================================================
-# model.fittedvalues contains the predicted y-values from the estimated equation
+# fit.predict() returns the predicted y-values from the estimated equation
 fig, ax = plt.subplots(figsize=(10, 6))
 ax.scatter(data_house['size'], data_house['price'], s=60, alpha=0.7, label='Actual prices')
-ax.plot(data_house['size'], model.fittedvalues, color='red', linewidth=2, label='Fitted line')
+ax.plot(data_house['size'], fit.predict(), color='red', linewidth=2, label='Fitted line')
 ax.set_xlabel('House Size (square feet)')
 ax.set_ylabel('House Sale Price (dollars)')
 ax.set_title(f'OLS: price = {intercept:,.0f} + {slope:.2f} × size  (R² = {r_squared:.2%})')
@@ -1026,12 +1028,12 @@ plt.show()
 # STEP 7: Reverse regression — association is NOT causation
 # =============================================================================
 # If regression = causation, the reverse slope would be 1/slope. It is not.
-reverse_model = ols('size ~ price', data=data_house).fit()
+reverse_fit = pf.feols('size ~ price', data=data_house)
 
 print(f"price ~ size  slope: {slope:.4f}")
-print(f"size ~ price  slope: {reverse_model.params['price']:.6f}")
+print(f"size ~ price  slope: {reverse_fit.coef()['price']:.6f}")
 print(f"1 / original slope:  {1/slope:.6f}")
-print(f"Reciprocals match?   {1/slope:.6f} ≠ {reverse_model.params['price']:.6f}")
+print(f"Reciprocals match?   {1/slope:.6f} ≠ {reverse_fit.coef()['price']:.6f}")
 print("→ Regression is asymmetric: association, not causation!")
 
 # =============================================================================
@@ -1043,7 +1045,7 @@ lowess_result = lowess(data_house['price'], data_house['size'], frac=0.6)
 
 fig, ax = plt.subplots(figsize=(10, 6))
 ax.scatter(data_house['size'], data_house['price'], s=60, alpha=0.6, label='Actual data')
-ax.plot(data_house['size'], model.fittedvalues, color='red',
+ax.plot(data_house['size'], fit.predict(), color='red',
         linewidth=2, label='OLS (parametric)')
 ax.plot(lowess_result[:, 0], lowess_result[:, 1], color='green',
         linewidth=2, linestyle='--', label='LOWESS (nonparametric)')
@@ -1161,6 +1163,108 @@ twoway (scatter price size, mcolor(%50))                                       /
   <div style="display:flex;gap:0.8rem;align-items:center;margin-top:0.8rem;flex-wrap:wrap">
     <button class="btn-copy" onclick="navigator.clipboard.writeText(document.getElementById('code-stata').textContent).then(()=>{this.textContent='Copied!';setTimeout(()=>this.textContent='Copy code',1500)})">Copy code</button>
     <span style="color:var(--text-muted);font-size:0.88rem">Paste into your Stata do-file editor</span>
+  </div>
+  </div>
+
+  <div class="code-panel" id="panel-r">
+  <pre><code id="code-r" class="language-r"># =============================================================================
+# CHAPTER 5 CHEAT SHEET: Bivariate Data Summary
+# =============================================================================
+
+# --- Libraries ---
+library(haven)           # read Stata .dta files directly from URLs
+library(fixest)          # fast OLS estimation with feols()
+library(dplyr)           # data manipulation (mutate, filter, summarize)
+library(ggplot2)         # grammar of graphics for all plots
+
+# =============================================================================
+# STEP 1: Load data directly from a URL
+# =============================================================================
+url &lt;- "https://raw.githubusercontent.com/quarcs-lab/data-open/master/AED/AED_HOUSE.DTA"
+data_house &lt;- read_dta(url)
+
+cat("Dataset:", nrow(data_house), "observations,", ncol(data_house), "variables\n")
+
+# =============================================================================
+# STEP 2: Descriptive statistics &mdash; summarize each variable before comparing
+# =============================================================================
+summary(data_house[, c("price", "size")])
+
+# =============================================================================
+# STEP 3: Scatter plot &mdash; visualize the relationship before quantifying it
+# =============================================================================
+ggplot(data_house, aes(x = size, y = price)) +
+  geom_point(color = "steelblue", size = 3, alpha = 0.7) +
+  labs(x = "House Size (square feet)", y = "House Sale Price (dollars)",
+       title = "House Price vs Size") +
+  theme_minimal()
+
+# =============================================================================
+# STEP 4: Correlation coefficient &mdash; one number for direction and strength
+# =============================================================================
+# cor() computes the Pearson correlation; cor.test() adds a p-value
+r &lt;- cor(data_house$price, data_house$size)
+cat("Correlation coefficient: r =", round(r, 4), "\n")
+cat("r&sup2; =", round(r^2, 4), "(", round(r^2*100, 1), "% of variation shared)\n")
+
+cor.test(data_house$price, data_house$size)
+
+# =============================================================================
+# STEP 5: OLS regression &mdash; fit the best-fitting line
+# =============================================================================
+# feols() from fixest: formula syntax y ~ x (intercept included automatically)
+model &lt;- feols(price ~ size, data = data_house)
+summary(model)
+
+slope     &lt;- coef(model)["size"]
+intercept &lt;- coef(model)["(Intercept)"]
+r_squared &lt;- r2(model)
+
+cat("Estimated equation: price =", round(intercept, 0), "+",
+    round(slope, 2), "&times; size\n")
+cat("R-squared:", round(r_squared, 4), "\n")
+
+# =============================================================================
+# STEP 6: Scatter plot with fitted line and R&sup2; &mdash; visualize model fit
+# =============================================================================
+ggplot(data_house, aes(x = size, y = price)) +
+  geom_point(color = "steelblue", size = 3, alpha = 0.7) +
+  geom_smooth(method = "lm", formula = y ~ x, color = "red",
+              linewidth = 1.2, se = FALSE) +
+  labs(x = "House Size (square feet)", y = "House Sale Price (dollars)",
+       title = paste0("OLS Regression: Fitted Line  (R&sup2; = ",
+                      round(r_squared * 100, 1), "%)")) +
+  theme_minimal()
+
+# =============================================================================
+# STEP 7: Reverse regression &mdash; association is NOT causation
+# =============================================================================
+# If regression = causation, the reverse slope would be 1/slope. It is not.
+reverse_model &lt;- feols(size ~ price, data = data_house)
+
+cat("price ~ size  slope:", round(slope, 4), "\n")
+cat("size ~ price  slope:", round(coef(reverse_model)["price"], 6), "\n")
+cat("1 / original slope: ", round(1/slope, 6), "\n")
+cat("Reciprocals match?   No &mdash; regression is asymmetric!\n")
+
+# =============================================================================
+# STEP 8: Nonparametric regression &mdash; check the linearity assumption
+# =============================================================================
+# LOESS fits weighted local regressions; if the curve tracks the OLS line,
+# the linear assumption is validated for this dataset
+ggplot(data_house, aes(x = size, y = price)) +
+  geom_point(color = "steelblue", size = 3, alpha = 0.6) +
+  geom_smooth(method = "lm", formula = y ~ x, color = "red",
+              linewidth = 1.2, se = FALSE, aes(linetype = "OLS (parametric)")) +
+  geom_smooth(method = "loess", formula = y ~ x, color = "green",
+              linewidth = 1.2, se = FALSE, linetype = "dashed",
+              aes(linetype = "LOESS (nonparametric)")) +
+  labs(x = "House Size (square feet)", y = "House Sale Price (dollars)",
+       title = "Parametric vs Nonparametric Regression") +
+  theme_minimal()</code></pre>
+  <div style="display:flex;gap:0.8rem;align-items:center;margin-top:0.8rem;flex-wrap:wrap">
+    <button class="btn-copy" onclick="navigator.clipboard.writeText(document.getElementById('code-r').textContent).then(()=>{this.textContent='Copied!';setTimeout(()=>this.textContent='Copy code',1500)})">Copy code</button>
+    <span style="color:var(--text-muted);font-size:0.88rem">Paste into your R console or RStudio</span>
   </div>
   </div>
 </section>
@@ -1979,7 +2083,8 @@ window.addEventListener("resize", () => {
   var buttons = tabBar.querySelectorAll('button');
   var panels  = {
     python: document.getElementById('panel-python'),
-    stata:  document.getElementById('panel-stata')
+    stata:  document.getElementById('panel-stata'),
+    r:      document.getElementById('panel-r')
   };
   buttons.forEach(function(btn) {
     btn.addEventListener('click', function() {
@@ -1995,6 +2100,7 @@ window.addEventListener("resize", () => {
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" data-manual></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-r.min.js"></script>
 <script>
 // Minimal Stata language grammar for Prism.js syntax highlighting
 Prism.languages.stata = {

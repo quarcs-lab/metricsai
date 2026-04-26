@@ -809,6 +809,7 @@ footer.page a:hover { text-decoration: underline; }
   <div class="code-tabs" id="code-lang-tabs">
     <button type="button" data-lang="python" class="active">Python</button>
     <button type="button" data-lang="stata">Stata</button>
+    <button type="button" data-lang="r">R</button>
   </div>
 
   <div class="code-panel active" id="panel-python">
@@ -820,7 +821,8 @@ footer.page a:hover { text-decoration: underline; }
 import numpy as np                        # random sampling and numerical operations
 import pandas as pd                       # data manipulation
 import matplotlib.pyplot as plt           # creating plots and visualizations
-from statsmodels.formula.api import ols   # OLS regression with R-style formulas
+import pyfixest as pf                     # OLS regression with R-style formulas
+# !pip install pyfixest                   # uncomment if running in Google Colab
 
 # =============================================================================
 # STEP 1: Define the Data-Generating Process (DGP)
@@ -845,17 +847,17 @@ print(f"Generated sample: {n} observations from y = {beta_1_true} + {beta_2_true
 # STEP 2: Fit OLS and compare sample vs. population parameters
 # =============================================================================
 # The sample regression estimates the unknown population line from data
-model = ols('y ~ x', data=data).fit()
+fit = pf.feols('y ~ x', data=data)
 
-b1 = model.params['Intercept']
-b2 = model.params['x']
+b1 = fit.coef()['Intercept']
+b2 = fit.coef()['x']
 
 print(f"\nPopulation:  E[y|x] = {beta_1_true} + {beta_2_true}x")
 print(f"Sample:      y_hat = {b1:.2f} + {b2:.2f}x")
 print(f"Sampling error in slope: b2 - b2_true = {b2 - beta_2_true:.4f}")
 
 # Full regression table (coefficients, std errors, t-stats, p-values, R2)
-model.summary()
+fit.summary()
 
 # =============================================================================
 # STEP 3: Scatter plot — population line vs. sample line
@@ -863,7 +865,7 @@ model.summary()
 # Visualizing the gap between the true line and our estimate
 fig, ax = plt.subplots(figsize=(10, 6))
 ax.scatter(data['x'], data['y'], s=50, alpha=0.7, label='Observed data')
-ax.plot(data['x'], model.fittedvalues, color='red', linewidth=2,
+ax.plot(data['x'], fit.predict(), color='red', linewidth=2,
         label=f'Sample: y_hat = {b1:.2f} + {b2:.2f}x')
 x_range = np.linspace(data['x'].min(), data['x'].max(), 100)
 ax.plot(x_range, beta_1_true + beta_2_true * x_range,
@@ -890,8 +892,8 @@ for i in range(n_simulations):
     u_sim = np.random.normal(0, sigma_u, n)
     y_sim = beta_1_true + beta_2_true * x_sim + u_sim
     df_sim = pd.DataFrame({'x': x_sim, 'y': y_sim})
-    m = ols('y ~ x', data=df_sim).fit()
-    b2_estimates.append(m.params['x'])
+    m = pf.feols('y ~ x', data=df_sim)
+    b2_estimates.append(m.coef()['x'])
 
 print(f"\nMonte Carlo results ({n_simulations} simulations, n={n} each):")
 print(f"  True b2:              {beta_2_true}")
@@ -922,8 +924,8 @@ plt.show()
 # =============================================================================
 # se(b2) = s_e / sqrt[sum((xi - x_bar)^2)]
 # Smaller when: (1) model fits well, (2) large n, (3) x spread wide
-se_b2       = model.bse['x']                       # from regression output
-s_e         = np.sqrt(model.mse_resid)             # standard error of regression
+se_b2       = fit.se()['x']                         # from regression output
+s_e         = np.sqrt(np.sum(fit._u_hat**2) / (n - 2))  # standard error of regression
 x_variation = np.sum((data['x'] - data['x'].mean())**2)
 
 print(f"\nStandard error anatomy (from the single-sample regression):")
@@ -946,8 +948,8 @@ for ns in sample_sizes:
         xs = np.random.normal(3, 1, ns)
         us = np.random.normal(0, sigma_u, ns)
         ys = beta_1_true + beta_2_true * xs + us
-        m = ols('y ~ x', data=pd.DataFrame({'x': xs, 'y': ys})).fit()
-        estimates.append(m.params['x'])
+        m = pf.feols('y ~ x', data=pd.DataFrame({'x': xs, 'y': ys}))
+        estimates.append(m.coef()['x'])
     print(f"{ns:&gt;6}  {np.mean(estimates):&gt;10.4f}  {np.std(estimates):&gt;22.4f}")</code></pre>
   <div style="display:flex;gap:0.8rem;align-items:center;margin-top:0.8rem;flex-wrap:wrap">
     <button class="btn-copy" onclick="navigator.clipboard.writeText(document.getElementById('code-python').textContent).then(()=>{this.textContent='Copied!';setTimeout(()=>this.textContent='Copy code',1500)})">Copy code</button>
@@ -1111,6 +1113,129 @@ foreach ns in 20 50 100 200 {
   <div style="display:flex;gap:0.8rem;align-items:center;margin-top:0.8rem;flex-wrap:wrap">
     <button class="btn-copy" onclick="navigator.clipboard.writeText(document.getElementById('code-stata').textContent).then(()=>{this.textContent='Copied!';setTimeout(()=>this.textContent='Copy code',1500)})">Copy code</button>
     <span style="color:var(--text-muted);font-size:0.88rem">Paste into your Stata do-file editor</span>
+  </div>
+  </div>
+
+  <div class="code-panel" id="panel-r">
+  <pre><code id="code-r" class="language-r"># =============================================================================
+# CHAPTER 6 CHEAT SHEET: The Least Squares Estimator
+# =============================================================================
+
+# --- Libraries ---
+library(fixest)          # fast OLS estimation with feols()
+library(ggplot2)         # grammar of graphics for all plots
+library(dplyr)           # data manipulation
+
+# =============================================================================
+# STEP 1: Define the Data-Generating Process (DGP)
+# =============================================================================
+# The DGP specifies the TRUE population relationship: y = b1 + b2*x + u
+# We know the true parameters — in real research, we never do!
+beta_1_true &lt;- 1         # true intercept
+beta_2_true &lt;- 2         # true slope
+sigma_u     &lt;- 2         # error standard deviation
+
+# Generate one sample of n observations
+set.seed(42)
+n &lt;- 30
+x &lt;- rnorm(n, mean = 3, sd = 1)
+u &lt;- rnorm(n, mean = 0, sd = sigma_u)
+y &lt;- beta_1_true + beta_2_true * x + u
+
+data &lt;- data.frame(x = x, y = y)
+cat("Generated sample:", n, "observations from y =", beta_1_true, "+", beta_2_true, "x + u\n")
+
+# =============================================================================
+# STEP 2: Fit OLS and compare sample vs. population parameters
+# =============================================================================
+model &lt;- feols(y ~ x, data = data)
+summary(model)
+
+b1 &lt;- coef(model)["(Intercept)"]
+b2 &lt;- coef(model)["x"]
+
+cat("\nPopulation:  E[y|x] =", beta_1_true, "+", beta_2_true, "x\n")
+cat("Sample:      y_hat =", round(b1, 2), "+", round(b2, 2), "x\n")
+cat("Sampling error in slope: b2 - b2_true =", round(b2 - beta_2_true, 4), "\n")
+
+# =============================================================================
+# STEP 3: Scatter plot — population line vs. sample line
+# =============================================================================
+ggplot(data, aes(x = x, y = y)) +
+  geom_point(size = 2, alpha = 0.7) +
+  geom_smooth(method = "lm", formula = y ~ x, se = FALSE,
+              color = "red", linewidth = 1.2) +
+  geom_abline(intercept = beta_1_true, slope = beta_2_true,
+              color = "green", linewidth = 1.2, linetype = "dashed") +
+  labs(x = "x", y = "y",
+       title = "Population Regression vs. Sample Regression") +
+  theme_minimal()
+
+# =============================================================================
+# STEP 4: Monte Carlo simulation — demonstrate unbiasedness
+# =============================================================================
+# Draw many samples from the SAME DGP to see how b2 varies
+set.seed(42)
+n_sims &lt;- 1000
+
+# replicate() runs the simulation n_sims times
+b2_estimates &lt;- replicate(n_sims, {
+  x_sim &lt;- rnorm(n, mean = 3, sd = 1)
+  u_sim &lt;- rnorm(n, mean = 0, sd = sigma_u)
+  y_sim &lt;- beta_1_true + beta_2_true * x_sim + u_sim
+  coef(feols(y_sim ~ x_sim))["x_sim"]
+})
+
+cat("\nMonte Carlo results (", n_sims, "simulations, n =", n, "each):\n")
+cat("  True b2:             ", beta_2_true, "\n")
+cat("  Mean of b2 estimates:", round(mean(b2_estimates), 4),
+    " (confirming unbiasedness)\n")
+cat("  Std dev of estimates:", round(sd(b2_estimates), 4),
+    " (empirical standard error)\n")
+
+# =============================================================================
+# STEP 5: Visualize the sampling distribution of b2
+# =============================================================================
+ggplot(data.frame(b2 = b2_estimates), aes(x = b2)) +
+  geom_histogram(bins = 40, fill = "steelblue", color = "white", alpha = 0.7) +
+  geom_vline(xintercept = beta_2_true, color = "green",
+             linewidth = 1.5, linetype = "dashed") +
+  geom_vline(xintercept = mean(b2_estimates), color = "red", linewidth = 1.2) +
+  labs(x = "Slope estimate (b2)", y = "Frequency",
+       title = "Sampling Distribution of b2: Unbiasedness + CLT") +
+  theme_minimal()
+
+# =============================================================================
+# STEP 6: Standard error — what controls precision?
+# =============================================================================
+# se(b2) = s_e / sqrt[sum((xi - x_bar)^2)]
+se_b2       &lt;- se(model)["x"]
+s_e         &lt;- sigma(model)               # residual standard error (root MSE)
+x_variation &lt;- sum((data$x - mean(data$x))^2)
+
+cat("\nStandard error anatomy:\n")
+cat("  s_e (root MSE):         ", round(s_e, 4), "\n")
+cat("  sum((xi - x_bar)^2):    ", round(x_variation, 4), "\n")
+cat("  se(b2) = s_e / sqrt(sum):", round(s_e / sqrt(x_variation), 4), "\n")
+cat("  se(b2) from output:     ", round(se_b2, 4), "\n")
+
+# =============================================================================
+# STEP 7: Effect of sample size on precision
+# =============================================================================
+# Theory: se(b2) proportional to 1/sqrt(n)
+cat("\n    n    Mean b2    Std dev (empirical SE)\n")
+
+for (ns in c(20, 50, 100, 200)) {
+  ests &lt;- replicate(1000, {
+    xs &lt;- rnorm(ns, 3, 1); us &lt;- rnorm(ns, 0, sigma_u)
+    ys &lt;- beta_1_true + beta_2_true * xs + us
+    coef(feols(ys ~ xs))["xs"]
+  })
+  cat(sprintf("%5d  %10.4f  %22.4f\n", ns, mean(ests), sd(ests)))
+}</code></pre>
+  <div style="display:flex;gap:0.8rem;align-items:center;margin-top:0.8rem;flex-wrap:wrap">
+    <button class="btn-copy" onclick="navigator.clipboard.writeText(document.getElementById('code-r').textContent).then(()=>{this.textContent='Copied!';setTimeout(()=>this.textContent='Copy code',1500)})">Copy code</button>
+    <span style="color:var(--text-muted);font-size:0.88rem">Paste into your R console or RStudio</span>
   </div>
   </div>
 </section>
@@ -1987,7 +2112,8 @@ window.addEventListener("resize", function() {
   var buttons = tabBar.querySelectorAll('button');
   var panels  = {
     python: document.getElementById('panel-python'),
-    stata:  document.getElementById('panel-stata')
+    stata:  document.getElementById('panel-stata'),
+    r:      document.getElementById('panel-r')
   };
   buttons.forEach(function(btn) {
     btn.addEventListener('click', function() {
@@ -2003,6 +2129,7 @@ window.addEventListener("resize", function() {
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" data-manual></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-r.min.js"></script>
 <script>
 // Minimal Stata language grammar for Prism.js syntax highlighting
 Prism.languages.stata = {

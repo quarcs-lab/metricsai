@@ -6,8 +6,9 @@
 import pandas as pd                       # data loading and manipulation
 import numpy as np                        # numerical operations
 import matplotlib.pyplot as plt           # creating plots and visualizations
-from statsmodels.formula.api import ols   # OLS regression with R-style formulas
-import statsmodels.api as sm              # prediction tools (add_constant, get_prediction)
+import pyfixest as pf                     # OLS regression with R-style formulas
+# !pip install pyfixest  # if not installed
+from statsmodels.formula.api import ols as sm_ols  # for prediction intervals
 from scipy import stats                   # statistical distributions for CIs and power
 from statsmodels.graphics.tsaplots import plot_acf  # autocorrelation plots
 
@@ -25,28 +26,28 @@ print(data_house[['price', 'size', 'bedrooms', 'bathrooms', 'lotsize', 'age']].d
 # STEP 2: OLS regression with default standard errors
 # =============================================================================
 # Default SEs assume homoskedasticity (constant error variance)
-model_default = ols('price ~ size + bedrooms + bathrooms + lotsize + age + monthsold',
-                    data=data_house).fit()
+fit_default = pf.feols('price ~ size + bedrooms + bathrooms + lotsize + age + monthsold',
+                       data=data_house)
 
-print(f"\nR-squared: {model_default.rsquared:.4f}")
-print(f"Size effect (default): ${model_default.params['size']:,.2f} per sq ft")
-model_default.summary()
+print(f"\nR-squared: {fit_default._r2:.4f}")
+print(f"Size effect (default): ${fit_default.coef()['size']:,.2f} per sq ft")
+fit_default.summary()
 
 # =============================================================================
 # STEP 3: Robust (HC1) standard errors — compare with default
 # =============================================================================
 # HC1 SEs correct for heteroskedasticity without changing coefficient estimates
 # Only the SEs, t-statistics, and confidence intervals change
-model_robust = ols('price ~ size + bedrooms + bathrooms + lotsize + age + monthsold',
-                   data=data_house).fit(cov_type='HC1')
+fit_robust = pf.feols('price ~ size + bedrooms + bathrooms + lotsize + age + monthsold',
+                      data=data_house, vcov='HC1')
 
 # SE ratio: how much heteroskedasticity affects each coefficient's uncertainty
 print(f"{'Variable':<14} {'Coef':>10} {'Default SE':>12} {'Robust SE':>12} {'Ratio':>8}")
 print("-" * 58)
-for var in model_default.params.index:
-    coef  = model_default.params[var]
-    se_d  = model_default.bse[var]
-    se_r  = model_robust.bse[var]
+for var in fit_default.coef().index:
+    coef  = fit_default.coef()[var]
+    se_d  = fit_default.se()[var]
+    se_r  = fit_robust.se()[var]
     ratio = se_r / se_d                   # ratio > 1 → default was too optimistic
     print(f"{var:<14} {coef:>10.2f} {se_d:>12.2f} {se_r:>12.2f} {ratio:>8.3f}")
 
@@ -54,14 +55,16 @@ for var in model_default.params.index:
 # STEP 4: Prediction — conditional mean CI vs. individual forecast PI
 # =============================================================================
 # Predicting E[y|x*] is more precise than predicting an individual y|x*
-model_simple = ols('price ~ size', data=data_house).fit()
+fit_simple = pf.feols('price ~ size', data=data_house)
+# Use statsmodels for prediction intervals (not available in pyfixest)
+sm_simple = sm_ols('price ~ size', data=data_house).fit()
 
 # Predict for a 2000 sq ft house
 new_house = pd.DataFrame({'size': [2000]})
-pred = model_simple.get_prediction(new_house)
+pred = sm_simple.get_prediction(new_house)
 pred_frame = pred.summary_frame(alpha=0.05)
 
-s_e = np.sqrt(model_simple.mse_resid)    # RMSE — irreducible individual uncertainty
+s_e = np.sqrt(np.mean(fit_simple._u_hat**2))  # RMSE — irreducible individual uncertainty
 
 print(f"\nPredicted price (2000 sq ft): ${pred_frame['mean'].values[0]:,.0f}")
 print(f"95% CI for E[Y|X=2000]: [${pred_frame['mean_ci_lower'].values[0]:,.0f}, "
@@ -72,15 +75,15 @@ print(f"\nRMSE (s_e): ${s_e:,.0f} — PI can never be narrower than ±1.96 × s_
 
 # Visualize: CI (narrow) vs. PI (wide)
 sizes_sorted = data_house[['size']].sort_values('size')
-pred_all = model_simple.get_prediction(sizes_sorted)
-pf = pred_all.summary_frame(alpha=0.05)
+pred_all = sm_simple.get_prediction(sizes_sorted)
+pred_f = pred_all.summary_frame(alpha=0.05)
 
 fig, ax = plt.subplots(figsize=(10, 6))
 ax.scatter(data_house['size'], data_house['price'], s=50, alpha=0.6, label='Actual')
-ax.plot(sizes_sorted['size'], pf['mean'], color='red', linewidth=2, label='Fitted line')
-ax.fill_between(sizes_sorted['size'], pf['mean_ci_lower'], pf['mean_ci_upper'],
+ax.plot(sizes_sorted['size'], pred_f['mean'], color='red', linewidth=2, label='Fitted line')
+ax.fill_between(sizes_sorted['size'], pred_f['mean_ci_lower'], pred_f['mean_ci_upper'],
                 color='red', alpha=0.2, label='95% CI (conditional mean)')
-ax.fill_between(sizes_sorted['size'], pf['obs_ci_lower'], pf['obs_ci_upper'],
+ax.fill_between(sizes_sorted['size'], pred_f['obs_ci_lower'], pred_f['obs_ci_upper'],
                 color='blue', alpha=0.1, label='95% PI (individual)')
 ax.set_xlabel('House Size (sq ft)')
 ax.set_ylabel('House Price ($)')
@@ -103,15 +106,13 @@ lag_length   = int(0.75 * n_gdp**(1/3))  # rule of thumb: m = 0.75 × T^(1/3)
 
 # Compare default SE vs. HAC SE for the mean
 se_default = data_gdp['growth'].std() / np.sqrt(n_gdp)
-y = data_gdp['growth']
-X = np.ones(n_gdp)
-from statsmodels.regression.linear_model import OLS
-model_hac = OLS(y, X).fit(cov_type='HAC', cov_kwds={'maxlags': lag_length})
+data_gdp['_const'] = 1
+fit_hac = pf.feols('growth ~ 1', data=data_gdp, vcov={'NW': lag_length})
 
 print(f"\nGDP Growth: mean = {mean_growth:.4f}")
 print(f"Default SE (no autocorrelation): {se_default:.6f}")
-print(f"HAC SE (lag = {lag_length}):            {model_hac.bse[0]:.6f}")
-print(f"Ratio HAC/Default: {model_hac.bse[0] / se_default:.3f}")
+print(f"HAC SE (lag = {lag_length}):            {fit_hac.se()['Intercept']:.6f}")
+print(f"Ratio HAC/Default: {fit_hac.se()['Intercept'] / se_default:.3f}")
 
 # Correlogram — visualize autocorrelation structure
 fig, ax = plt.subplots(figsize=(10, 6))
@@ -164,18 +165,18 @@ boot_slopes = []
 
 for _ in range(n_boot):
     boot_sample = data_house.sample(n=len(data_house), replace=True)
-    boot_model  = ols('price ~ size', data=boot_sample).fit()
-    boot_slopes.append(boot_model.params['size'])
+    boot_fit    = pf.feols('price ~ size', data=boot_sample)
+    boot_slopes.append(boot_fit.coef()['size'])
 
 # Percentile method: 95% CI = [2.5th, 97.5th percentile]
 ci_lower = np.percentile(boot_slopes, 2.5)
 ci_upper = np.percentile(boot_slopes, 97.5)
-ols_slope = model_simple.params['size']
+ols_slope = fit_simple.coef()['size']
 
 print(f"\nOLS slope (size): {ols_slope:.4f}")
 print(f"Bootstrap 95% CI: [{ci_lower:.4f}, {ci_upper:.4f}]")
-print(f"Analytical 95% CI: [{model_simple.conf_int().loc['size'][0]:.4f}, "
-      f"{model_simple.conf_int().loc['size'][1]:.4f}]")
+print(f"Analytical 95% CI: [{fit_simple.confint().loc['size'].iloc[0]:.4f}, "
+      f"{fit_simple.confint().loc['size'].iloc[1]:.4f}]")
 
 fig, ax = plt.subplots(figsize=(10, 6))
 ax.hist(boot_slopes, bins=40, edgecolor='black', alpha=0.7)

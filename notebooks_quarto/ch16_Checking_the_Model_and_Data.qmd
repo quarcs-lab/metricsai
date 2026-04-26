@@ -71,12 +71,12 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
-import statsmodels.api as sm
-from statsmodels.formula.api import ols
+import pyfixest as pf                    # fast OLS estimation
+import statsmodels.api as sm             # add_constant for VIF calculation
+import statsmodels.formula.api as smf    # for diagnostics-only models
 from statsmodels.stats.outliers_influence import variance_inflation_factor, OLSInfluence
 from statsmodels.stats.diagnostic import het_white, acorr_ljungbox
 from statsmodels.graphics.tsaplots import plot_acf
-from statsmodels.regression.linear_model import OLS
 from statsmodels.nonparametric.smoothers_lowess import lowess
 from statsmodels.tsa.stattools import acf
 from scipy import stats
@@ -149,23 +149,23 @@ data_earnings[['earnings', 'age', 'education', 'agebyeduc']].describe()
 
 # Base model without interaction
 # Base Model: earnings ~ age + education
-model_base = ols('earnings ~ age + education', data=data_earnings).fit(cov_type='HC1')
+fit_base = pf.feols('earnings ~ age + education', data=data_earnings, vcov='HC1')
 
 # Key results
-print(f"Age coefficient:       {model_base.params['age']:,.2f} (SE: {model_base.bse['age']:,.2f})")
-print(f"Education coefficient: {model_base.params['education']:,.2f} (SE: {model_base.bse['education']:,.2f})")
-print(f"R-squared:             {model_base.rsquared:.4f}")
+print(f"Age coefficient:       {fit_base.coef()['age']:,.2f} (SE: {fit_base.se()['age']:,.2f})")
+print(f"Education coefficient: {fit_base.coef()['education']:,.2f} (SE: {fit_base.se()['education']:,.2f})")
+print(f"R-squared:             {fit_base._r2:.4f}")
 
 # Full regression output
-model_base.summary()
+fit_base.summary()
 ```
 
 ```{python}
 # Model with interaction (creates multicollinearity)
 # Collinear Model: earnings ~ age + education + agebyeduc
-model_collinear = ols('earnings ~ age + education + agebyeduc', 
-                      data=data_earnings).fit(cov_type='HC1')
-model_collinear.summary()
+fit_collinear = pf.feols('earnings ~ age + education + agebyeduc', 
+                      data=data_earnings, vcov='HC1')
+fit_collinear.summary()
 
 print("\nNote: Compare standard errors between base and collinear models.")
 # Standard errors increase dramatically with the interaction term.
@@ -330,11 +330,11 @@ Despite high VIF:
 ```{python}
 # Auxiliary regression to detect multicollinearity
 # Auxiliary Regression: agebyeduc ~ age + education
-model_aux = ols('agebyeduc ~ age + education', data=data_earnings).fit()
-model_aux.summary()
+fit_aux = pf.feols('agebyeduc ~ age + education', data=data_earnings)
+fit_aux.summary()
 
-print(f"\nR² from auxiliary regression: {model_aux.rsquared:.4f}")
-print(f"VIF formula: 1/(1-R²) = {1/(1-model_aux.rsquared):.2f}")
+print(f"\nR² from auxiliary regression: {fit_aux._r2:.4f}")
+print(f"VIF formula: 1/(1-R²) = {1/(1-fit_aux._r2):.2f}")
 # High R² indicates that agebyeduc is nearly a perfect combination of age and education.
 ```
 
@@ -346,14 +346,12 @@ Even with multicollinearity, joint tests can be powerful. Individual coefficient
 # Joint hypothesis tests
 
 # Test 1: H₀: age = 0 AND agebyeduc = 0
-hypotheses = '(age = 0, agebyeduc = 0)'
-f_test = model_collinear.wald_test(hypotheses, use_f=True)
-print(f_test)
+print("Test 1: H₀: age = 0 AND agebyeduc = 0")
+print(fit_collinear.wald_test(R=np.eye(len(fit_collinear.coef()))[[list(fit_collinear.coef().index).index(v) for v in ['age', 'agebyeduc']]]))
 
 # Test 2: H₀: education = 0 AND agebyeduc = 0
-hypotheses = '(education = 0, agebyeduc = 0)'
-f_test = model_collinear.wald_test(hypotheses, use_f=True)
-print(f_test)
+print("Test 2: H₀: education = 0 AND agebyeduc = 0")
+print(fit_collinear.wald_test(R=np.eye(len(fit_collinear.coef()))[[list(fit_collinear.coef().index).index(v) for v in ['education', 'agebyeduc']]]))
 
 ```
 
@@ -433,22 +431,22 @@ Heteroskedasticity means the error variance depends on $x$: $Var(u_i | x_i) = \s
 # Earnings Regression: earnings ~ age + education
 
 # Standard SEs
-model_standard = ols('earnings ~ age + education', data=data_earnings).fit()
+fit_standard = pf.feols('earnings ~ age + education', data=data_earnings)
 print("\nWith Standard SEs:")
-model_standard.summary()
+fit_standard.summary()
 
 # Robust SEs
-model_robust = ols('earnings ~ age + education', data=data_earnings).fit(cov_type='HC1')
+fit_robust = pf.feols('earnings ~ age + education', data=data_earnings, vcov='HC1')
 # With Heteroskedasticity-Robust (HC1) SEs:
-model_robust.summary()
+fit_robust.summary()
 
 # Comparison
 # SE Comparison: Standard vs Robust
 se_comparison = pd.DataFrame({
-    'Variable': model_standard.params.index,
-    'Standard SE': model_standard.bse.values,
-    'Robust SE': model_robust.bse.values,
-    'Ratio (Robust/Standard)': (model_robust.bse / model_standard.bse).values
+    'Variable': fit_standard.coef().index,
+    'Standard SE': fit_standard.se().values,
+    'Robust SE': fit_robust.se().values,
+    'Ratio (Robust/Standard)': (fit_robust.se() / fit_standard.se()).values
 })
 print(se_comparison)
 
@@ -624,8 +622,8 @@ print(f"\nGenerated {n} observations with AR(1) errors (ρ = 0.8)")
 # Estimate model and check residual autocorrelation
 # Model: y ~ x (with autocorrelated errors)
 
-model_ts = ols('y1 ~ x', data=ts_data).fit()
-residuals = model_ts.resid
+fit_ts = pf.feols('y1 ~ x', data=ts_data)
+residuals = fit_ts._u_hat
 
 # Check autocorrelation of residuals
 acf_vals = acf(residuals, nlags=10, fft=False)
@@ -822,20 +820,20 @@ print(f"Time period: 1500-2000")
 ```{python}
 # Bivariate regression: democracy ~ growth
 
-model_bivariate = ols('democracy ~ growth', data=data_democracy).fit(cov_type='HC1')
+fit_bivariate = pf.feols('democracy ~ growth', data=data_democracy, vcov='HC1')
 
 # Key results
-print(f"Growth coefficient: {model_bivariate.params['growth']:.4f} (SE: {model_bivariate.bse['growth']:.4f})")
-print(f"R-squared:          {model_bivariate.rsquared:.4f}")
+print(f"Growth coefficient: {fit_bivariate.coef()['growth']:.4f} (SE: {fit_bivariate.se()['growth']:.4f})")
+print(f"R-squared:          {fit_bivariate._r2:.4f}")
 
 # Full regression output
-model_bivariate.summary()
+fit_bivariate.summary()
 
 # Visualize relationship
 fig, ax = plt.subplots(figsize=(10, 6))
 ax.scatter(data_democracy['growth'], data_democracy['democracy'],
            alpha=0.6, s=50, color='#22d3ee')
-ax.plot(data_democracy['growth'], model_bivariate.fittedvalues,
+ax.plot(data_democracy['growth'], fit_bivariate.predict(),
         color='#c084fc', linewidth=2, label='OLS regression line')
 ax.set_xlabel('Change in Log GDP per capita (1500-2000)', fontsize=12)
 ax.set_ylabel('Change in Democracy (1500-2000)', fontsize=12)
@@ -862,18 +860,18 @@ print(f"  But this may reflect omitted institutional variables...")
 # Multiple regression: add institutional controls
 # Multiple Regression with Institutional Controls
 
-model_multiple = ols('democracy ~ growth + constraint + indcent + catholic + muslim + protestant',
-                     data=data_democracy).fit(cov_type='HC1')
+fit_multiple = pf.feols('democracy ~ growth + constraint + indcent + catholic + muslim + protestant',
+                     data=data_democracy, vcov='HC1')
 
 # Key results
-print(f"Growth coefficient: {model_multiple.params['growth']:.4f} (SE: {model_multiple.bse['growth']:.4f})")
-print(f"R-squared:          {model_multiple.rsquared:.4f}")
+print(f"Growth coefficient: {fit_multiple.coef()['growth']:.4f} (SE: {fit_multiple.se()['growth']:.4f})")
+print(f"R-squared:          {fit_multiple._r2:.4f}")
 
 # Full regression output
-model_multiple.summary()
+fit_multiple.summary()
 
 print("\nKey findings:")
-print(f"  Growth coefficient fell from {model_bivariate.params['growth']:.4f} to {model_multiple.params['growth']:.4f}")
+print(f"  Growth coefficient fell from {fit_bivariate.coef()['growth']:.4f} to {fit_multiple.coef()['growth']:.4f}")
 print(f"  Institutional variables (religion, constraints) are important.")
 print(f"  This suggests omitted variable bias in the bivariate model.")
 ```
@@ -884,8 +882,11 @@ print(f"  This suggests omitted variable bias in the bivariate model.")
 
 ```{python}
 # Get residuals from multiple regression for diagnostic plots
-uhat = model_multiple.resid
-yhat = model_multiple.fittedvalues
+# Use pyfixest for estimation, statsmodels for diagnostics
+_diag_model = smf.ols('democracy ~ growth + constraint + indcent + catholic + muslim + protestant',
+                      data=data_democracy).fit()
+uhat = fit_multiple._u_hat
+yhat = fit_multiple.predict()
 
 # Residual Diagnostics Prepared
 print(f"Number of residuals: {len(uhat)}")
@@ -1101,16 +1102,16 @@ axes[0].legend()
 axes[0].grid(True, alpha=0.3)
 
 # Panel B: Component Plus Residual
-b_growth = model_multiple.params['growth']
+b_growth = fit_multiple.coef()['growth']
 pr_growth = b_growth * data_democracy['growth'] + uhat
 
 axes[1].scatter(data_democracy['growth'], pr_growth, alpha=0.6, s=50, color='#22d3ee')
 
 # Regression line
-model_compplusres = ols('pr_growth ~ growth', 
+fit_compplusres = pf.feols('pr_growth ~ growth', 
                         data=pd.DataFrame({'growth': data_democracy['growth'],
-                                         'pr_growth': pr_growth})).fit()
-axes[1].plot(data_democracy['growth'], model_compplusres.fittedvalues,
+                                         'pr_growth': pr_growth}))
+axes[1].plot(data_democracy['growth'], fit_compplusres.predict(),
              '-', color='#c084fc', linewidth=2, label='Regression line')
 
 lowess_result = lowess(pr_growth, data_democracy['growth'], frac=0.3)
@@ -1124,20 +1125,20 @@ axes[1].legend()
 axes[1].grid(True, alpha=0.3)
 
 # Panel C: Added Variable Plot
-model_nogrowth = ols('democracy ~ constraint + indcent + catholic + muslim + protestant',
-                     data=data_democracy).fit()
-uhat_democ = model_nogrowth.resid
+fit_nogrowth = pf.feols('democracy ~ constraint + indcent + catholic + muslim + protestant',
+                     data=data_democracy)
+uhat_democ = fit_nogrowth._u_hat
 
-model_growth = ols('growth ~ constraint + indcent + catholic + muslim + protestant',
-                   data=data_democracy).fit()
-uhat_growth = model_growth.resid
+fit_growth_partial = pf.feols('growth ~ constraint + indcent + catholic + muslim + protestant',
+                   data=data_democracy)
+uhat_growth = fit_growth_partial._u_hat
 
 axes[2].scatter(uhat_growth, uhat_democ, alpha=0.6, s=50, color='#22d3ee')
 
-model_addedvar = ols('uhat_democ ~ uhat_growth',
+fit_addedvar = pf.feols('uhat_democ ~ uhat_growth',
                      data=pd.DataFrame({'uhat_growth': uhat_growth,
-                                       'uhat_democ': uhat_democ})).fit()
-axes[2].plot(uhat_growth, model_addedvar.fittedvalues,
+                                       'uhat_democ': uhat_democ}))
+axes[2].plot(uhat_growth, fit_addedvar.predict(),
              '-', color='#c084fc', linewidth=2, label='Regression line')
 
 lowess_result = lowess(uhat_democ, uhat_growth, frac=0.3)
@@ -1186,11 +1187,11 @@ where:
 # Influential Observations: Dfits
 
 # Get influence diagnostics
-influence = OLSInfluence(model_multiple)
+influence = OLSInfluence(_diag_model)
 dfits = influence.dffits[0]
 n = len(data_democracy)
 
-threshold_dfits = 2 * np.sqrt(len(model_multiple.params) / n)
+threshold_dfits = 2 * np.sqrt(len(fit_multiple.coef()) / n)
 print(f"\nDFITS threshold: {threshold_dfits:.4f}")
 print(f"Observations exceeding threshold: {np.sum(np.abs(dfits) > threshold_dfits)}")
 
@@ -1461,7 +1462,7 @@ print("\nInterpretation:")
 - Investigate influential observations rather than automatically deleting them
 - Check whether conclusions change substantially when influential cases are excluded
 
-**Python tools:** `statsmodels` (VIF, OLSInfluence, robust covariance), `matplotlib`/`seaborn` (diagnostic plots), LOWESS smoothing
+**Python tools:** `pyfixest` (OLS estimation, robust/cluster SEs), `statsmodels` (VIF, OLSInfluence, LOWESS), `matplotlib`/`seaborn` (diagnostic plots)
 
 **Python Libraries and Code:**
 
@@ -1476,8 +1477,10 @@ This single code block reproduces the core workflow of Chapter 16. It is self-co
 import numpy as np                                          # numerical operations
 import pandas as pd                                         # data loading and manipulation
 import matplotlib.pyplot as plt                             # creating plots and visualizations
-from statsmodels.formula.api import ols                     # OLS regression with R-style formulas
+import pyfixest as pf                                       # fast OLS estimation
+# !pip install pyfixest
 import statsmodels.api as sm                                # add_constant for VIF calculation
+import statsmodels.formula.api as smf                       # for diagnostics-only models
 from statsmodels.stats.outliers_influence import (          # diagnostic tools:
     variance_inflation_factor, OLSInfluence)                #   VIF and influence measures
 from statsmodels.nonparametric.smoothers_lowess import lowess  # LOWESS smooth for residual plots
@@ -1514,14 +1517,14 @@ print(vif_data.to_string(index=False))
 # STEP 3: Compare standard vs robust standard errors
 # =============================================================================
 # Heteroskedasticity makes default SEs too small -> use HC1 (White) robust SEs
-model_std    = ols('earnings ~ age + education', data=data_earnings).fit()
-model_robust = ols('earnings ~ age + education', data=data_earnings).fit(cov_type='HC1')
+fit_std    = pf.feols('earnings ~ age + education', data=data_earnings)
+fit_robust = pf.feols('earnings ~ age + education', data=data_earnings, vcov='HC1')
 
 se_comparison = pd.DataFrame({
-    'Variable':    model_std.params.index,
-    'Standard SE': model_std.bse.values.round(2),
-    'Robust SE':   model_robust.bse.values.round(2),
-    'Ratio':       (model_robust.bse / model_std.bse).values.round(3)
+    'Variable':    fit_std.coef().index,
+    'Standard SE': fit_std.se().values.round(2),
+    'Robust SE':   fit_robust.se().values.round(2),
+    'Ratio':       (fit_robust.se() / fit_std.se()).values.round(3)
 })
 print("\nSE Comparison (ratio > 1 signals heteroskedasticity):")
 print(se_comparison.to_string(index=False))
@@ -1530,12 +1533,12 @@ print(se_comparison.to_string(index=False))
 # STEP 4: Omitted variable bias — democracy and growth
 # =============================================================================
 # Adding controls reveals how much the bivariate estimate was biased upward
-model_bivariate = ols('democracy ~ growth', data=data_democracy).fit(cov_type='HC1')
-model_multiple  = ols('democracy ~ growth + constraint + indcent + catholic + muslim + protestant',
-                      data=data_democracy).fit(cov_type='HC1')
+fit_bivariate = pf.feols('democracy ~ growth', data=data_democracy, vcov='HC1')
+fit_multiple  = pf.feols('democracy ~ growth + constraint + indcent + catholic + muslim + protestant',
+                      data=data_democracy, vcov='HC1')
 
-b_biv  = model_bivariate.params['growth']
-b_mult = model_multiple.params['growth']
+b_biv  = fit_bivariate.coef()['growth']
+b_mult = fit_multiple.coef()['growth']
 print(f"\nGrowth coefficient (bivariate):       {b_biv:.4f}")
 print(f"Growth coefficient (with controls):   {b_mult:.4f}")
 print(f"Reduction: {(1 - b_mult/b_biv)*100:.0f}% — institutional controls absorb the bias")
@@ -1544,8 +1547,10 @@ print(f"Reduction: {(1 - b_mult/b_biv)*100:.0f}% — institutional controls abso
 # STEP 5: Diagnostic plots — residual vs fitted
 # =============================================================================
 # Random scatter around zero = assumptions OK; fan shape = heteroskedasticity
-uhat = model_multiple.resid
-yhat = model_multiple.fittedvalues
+_diag_model = smf.ols('democracy ~ growth + constraint + indcent + catholic + muslim + protestant',
+                      data=data_democracy).fit()
+uhat = fit_multiple._u_hat
+yhat = fit_multiple.predict()
 
 fig, axes = plt.subplots(1, 2, figsize=(14, 5))
 
@@ -1578,10 +1583,10 @@ plt.show()
 # =============================================================================
 # DFITS_i measures how much prediction i changes when observation i is excluded
 # Threshold: |DFITS| > 2*sqrt(k/n)
-influence = OLSInfluence(model_multiple)
+influence = OLSInfluence(_diag_model)
 dfits     = influence.dffits[0]
 n = len(data_democracy)
-k = len(model_multiple.params)
+k = len(fit_multiple.coef())
 threshold = 2 * np.sqrt(k / n)
 
 print(f"\nDFITS threshold: {threshold:.4f}")
@@ -1702,7 +1707,7 @@ Load the dataset and estimate a regression of log labor productivity (`np.log(lp
 ```python
 import pandas as pd
 import numpy as np
-from statsmodels.formula.api import ols
+import pyfixest as pf
 from statsmodels.stats.outliers_influence import variance_inflation_factor
 import statsmodels.api as sm
 
@@ -1713,7 +1718,7 @@ dat2014['ln_lp'] = np.log(dat2014['lp'])
 dat2014['ln_rk'] = np.log(dat2014['rk'])
 dat2014['ln_rgdppc'] = np.log(dat2014['rgdppc'])
 
-# Estimate the model = ols('ln_lp ~ ln_rk + hc + ln_rgdppc', data=dat2014).fit(cov_type='HC1')
+# fit = pf.feols('ln_lp ~ ln_rk + hc + ln_rgdppc', data=dat2014, vcov='HC1')
 model.summary()
 
 # Calculate VIF
@@ -1732,13 +1737,13 @@ Interpret the VIF values. Is multicollinearity a concern? Which variables are mo
 Estimate the same model with both default and robust (HC1) standard errors. Create a comparison table.
 
 ```python
-model_default = ols('ln_lp ~ ln_rk + hc', data=dat2014).fit()
-model_robust = ols('ln_lp ~ ln_rk + hc', data=dat2014).fit(cov_type='HC1')
+fit_default = pf.feols('ln_lp ~ ln_rk + hc', data=dat2014)
+fit_robust = pf.feols('ln_lp ~ ln_rk + hc', data=dat2014, vcov='HC1')
 
-comparison = pd. DataFrame({
-    'Default SE': model_default.bse,
-    'Robust SE': model_robust.bse,
-    'Ratio': model_robust.bse / model_default.bse
+comparison = pd.DataFrame({
+    'Default SE': fit_default.se(),
+    'Robust SE': fit_robust.se(),
+    'Ratio': fit_robust.se() / fit_default.se()
 })
 print(comparison)
 ```
@@ -1827,7 +1832,8 @@ In this case study, you applied the complete diagnostic toolkit to cross-country
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-from statsmodels.formula.api import ols
+import pyfixest as pf
+import statsmodels.formula.api as smf
 from statsmodels.stats.outliers_influence import variance_inflation_factor, OLSInfluence
 import statsmodels.api as sm
 
@@ -1899,10 +1905,10 @@ bol_cs[['imds', 'ln_NTLpc2017', 'A00', 'A10', 'A20', 'A30', 'A40']].describe().r
 # Your code here: Compare standard and robust SEs
 #
 # Example structure:
-# model_default = ols('imds ~ ln_NTLpc2017 + A00 + A10 + A20 + A30 + A40',
-#                     data=bol_cs).fit()
-# model_robust = ols('imds ~ ln_NTLpc2017 + A00 + A10 + A20 + A30 + A40',
-#                    data=bol_cs).fit(cov_type='HC1')
+# fit_default = pf.feols('imds ~ ln_NTLpc2017 + A00 + A10 + A20 + A30 + A40',
+#                     data=bol_cs)
+# fit_robust = pf.feols('imds ~ ln_NTLpc2017 + A00 + A10 + A20 + A30 + A40',
+#                    data=bol_cs, vcov='HC1')
 #
 # comparison = pd.DataFrame({
 #     'Default SE': model_default.bse,
@@ -1935,8 +1941,8 @@ bol_cs[['imds', 'ln_NTLpc2017', 'A00', 'A10', 'A20', 'A30', 'A40']].describe().r
 #
 # Example structure:
 # from scipy import stats
-# model = ols('imds ~ ln_NTLpc2017 + A00 + A10 + A20 + A30 + A40',
-#             data=bol_cs).fit(cov_type='HC1')
+# fit = pf.feols('imds ~ ln_NTLpc2017 + A00 + A10 + A20 + A30 + A40',
+#             data=bol_cs, vcov='HC1')
 #
 # fig, axes = plt.subplots(1, 3, figsize=(15, 5))
 #
@@ -1978,8 +1984,8 @@ bol_cs[['imds', 'ln_NTLpc2017', 'A00', 'A10', 'A20', 'A30', 'A40']].describe().r
 # Your code here: Influential observation analysis
 #
 # Example structure:
-# model = ols('imds ~ ln_NTLpc2017 + A00 + A10 + A20 + A30 + A40',
-#             data=bol_cs).fit()
+# fit = pf.feols('imds ~ ln_NTLpc2017 + A00 + A10 + A20 + A30 + A40',
+#             data=bol_cs)
 # infl = OLSInfluence(model)
 #
 # # DFITS
@@ -2019,8 +2025,8 @@ bol_cs[['imds', 'ln_NTLpc2017', 'A00', 'A10', 'A20', 'A30', 'A40']].describe().r
 # Your code here: Omitted variable analysis
 #
 # Example structure:
-# m_no_dept = ols('imds ~ ln_NTLpc2017 + A00 + A10', data=bol_cs).fit(cov_type='HC1')
-# m_with_dept = ols('imds ~ ln_NTLpc2017 + A00 + A10 + C(dep)', data=bol_cs).fit(cov_type='HC1')
+# m_no_dept = pf.feols('imds ~ ln_NTLpc2017 + A00 + A10', data=bol_cs, vcov='HC1')
+# m_with_dept = pf.feols('imds ~ ln_NTLpc2017 + A00 + A10 + C(dep)', data=bol_cs, vcov='HC1')
 #
 # print("WITHOUT department controls:")
 # print(f"  NTL coef: {m_no_dept.params['ln_NTLpc2017']:.4f} (SE: {m_no_dept.bse['ln_NTLpc2017']:.4f})")

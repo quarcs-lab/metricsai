@@ -551,6 +551,7 @@ footer.page a{color:var(--accent);text-decoration:none}footer.page a:hover{text-
   <div class="code-tabs" id="code-lang-tabs">
     <button type="button" data-lang="python" class="active">Python</button>
     <button type="button" data-lang="stata">Stata</button>
+    <button type="button" data-lang="r">R</button>
   </div>
 
   <div class="code-panel active" id="panel-python">
@@ -562,9 +563,9 @@ footer.page a{color:var(--accent);text-decoration:none}footer.page a:hover{text-
 import numpy as np                              # numerical operations
 import pandas as pd                             # data loading and manipulation
 import matplotlib.pyplot as plt                 # creating plots and visualizations
-from statsmodels.formula.api import ols         # OLS regression with R-style formulas
+import pyfixest as pf                           # OLS regression with R-style formulas
+# !pip install pyfixest                         # uncomment if running in Google Colab
 from scipy import stats                         # t and F distributions for inference
-from statsmodels.stats.anova import anova_lm    # ANOVA table for model comparison
 
 # =============================================================================
 # STEP 1: Load data directly from a URL
@@ -580,33 +581,33 @@ print(data_house[['price', 'size', 'bedrooms', 'bathrooms', 'lotsize', 'age']].d
 # STEP 2: Estimate the full multiple regression model
 # =============================================================================
 # Formula syntax: 'y ~ x1 + x2 + ...' includes an intercept automatically
-# IMPORTANT: .fit() estimates the model — without it, nothing is computed!
-model_full = ols('price ~ size + bedrooms + bathrooms + lotsize + age + monthsold',
-                 data=data_house).fit()
+# pf.feols() estimates and returns the fitted model in one call
+fit_full = pf.feols('price ~ size + bedrooms + bathrooms + lotsize + age + monthsold',
+                    data=data_house)
 
-n = int(model_full.nobs)
-k = len(model_full.params)
+n = int(fit_full._N)
+k = len(fit_full.coef())
 df = n - k  # degrees of freedom for t and F tests
 
-print(f"\nSize effect: ${model_full.params['size']:,.2f} per sq ft (p = {model_full.pvalues['size']:.4f})")
-print(f"R-squared: {model_full.rsquared:.4f} ({model_full.rsquared*100:.1f}% of variation explained)")
+print(f"\nSize effect: ${fit_full.coef()['size']:,.2f} per sq ft (p = {fit_full.pval()['size']:.4f})")
+print(f"R-squared: {fit_full._r2:.4f} ({fit_full._r2*100:.1f}% of variation explained)")
 print(f"Degrees of freedom: n-k = {n}-{k} = {df}")
 
 # Full regression table (coefficients, std errors, t-stats, p-values, R\u00b2)
-model_full.summary()
+fit_full.summary()
 
 # =============================================================================
 # STEP 3: Confidence intervals — does the CI exclude zero?
 # =============================================================================
 # 95% CI: b_j \u00b1 t_critical \u00d7 se(b_j)
 # If the interval excludes zero, the coefficient is statistically significant at 5%
-conf_int = model_full.conf_int(alpha=0.05)
+conf_int = fit_full.confint()
 print("\n95% Confidence Intervals:")
 print(conf_int.round(2))
 
 # Manual calculation for the size coefficient
-coef_size = model_full.params['size']
-se_size   = model_full.bse['size']
+coef_size = fit_full.coef()['size']
+se_size   = fit_full.se()['size']
 t_crit    = stats.t.ppf(0.975, df)  # 0.975 = upper tail for two-sided 95% CI
 
 ci_lower = coef_size - t_crit * se_size
@@ -630,61 +631,71 @@ print(f"  Decision: {'Reject' if p_value &lt; 0.05 else 'Fail to reject'} H\u208
 # Test of statistical significance: H\u2080: \u03b2_size = 0
 t_stat_zero = coef_size / se_size
 print(f"\nTest H\u2080: \u03b2_size = 0")
-print(f"  t-statistic: {t_stat_zero:.4f}, p-value: {model_full.pvalues['size']:.6f}")
+print(f"  t-statistic: {t_stat_zero:.4f}, p-value: {fit_full.pval()['size']:.6f}")
 print(f"  Size IS statistically significant at 5% level")
 
 # =============================================================================
 # STEP 5: Joint F-test — are groups of coefficients jointly significant?
 # =============================================================================
 # Overall F-test: H\u2080: all slope coefficients = 0
-print(f"\nOverall F-test: F = {model_full.fvalue:.4f}, p = {model_full.f_pvalue:.6e}")
+overall_F = fit_full.wald_test()
+print(f"\nOverall F-test: F = {overall_F.stat.values[0]:.4f}, p = {overall_F.pval.values[0]:.6e}")
 print(f"  At least one variable matters \u2192 model is jointly significant")
 
 # Subset F-test: are variables other than size jointly significant?
 # H\u2080: \u03b2_bedrooms = \u03b2_bathrooms = \u03b2_lotsize = \u03b2_age = \u03b2_monthsold = 0
-hypotheses = ['bedrooms = 0', 'bathrooms = 0', 'lotsize = 0',
-              'age = 0', 'monthsold = 0']
-f_test_result = model_full.f_test(hypotheses)
+# Use R matrix: each row zeroes out one coefficient
+vars_to_test = ['bedrooms', 'bathrooms', 'lotsize', 'age', 'monthsold']
+all_vars = list(fit_full.coef().index)
+R = np.zeros((len(vars_to_test), len(all_vars)))
+for i, v in enumerate(vars_to_test):
+    R[i, all_vars.index(v)] = 1
+subset_F = fit_full.wald_test(R=R)
 print(f"\nSubset F-test (drop 5 vars, keep size):")
-print(f"  F = {f_test_result.fvalue[0][0]:.4f}, p = {float(f_test_result.pvalue):.4f}")
+print(f"  F = {subset_F.stat.values[0]:.4f}, p = {subset_F.pval.values[0]:.4f}")
 print(f"  Extra variables are NOT jointly significant \u2192 simpler model preferred")
 
 # =============================================================================
 # STEP 6: Model comparison — restricted vs unrestricted
 # =============================================================================
 # Restricted model: only size as predictor
-model_restricted = ols('price ~ size', data=data_house).fit()
+fit_restricted = pf.feols('price ~ size', data=data_house)
 
-# ANOVA table confirms the F-test result
-anova_results = anova_lm(model_restricted, model_full)
-print("\nANOVA: Restricted (size only) vs Full model:")
-print(anova_results)
+# Manual F-test: restricted vs unrestricted
+rss_r = np.sum(fit_restricted._u_hat**2)
+rss_u = np.sum(fit_full._u_hat**2)
+q = len(fit_full.coef()) - len(fit_restricted.coef())  # number of restrictions
+F_manual = ((rss_r - rss_u) / q) / (rss_u / (n - len(fit_full.coef())))
+p_manual = 1 - stats.f.cdf(F_manual, q, n - len(fit_full.coef()))
+print(f"\nF-test: Restricted (size only) vs Full model:")
+print(f"  F = {F_manual:.4f}, p = {p_manual:.4f}")
 
 # Compare fit statistics
-print(f"\n{'Model':&lt;25} {'R\u00b2':&gt;8} {'Adj. R\u00b2':&gt;9} {'F-stat':&gt;8}")
-print("-" * 52)
-for name, m in [('Size only', model_restricted), ('Full model', model_full)]:
-    print(f"{name:&lt;25} {m.rsquared:&gt;8.4f} {m.rsquared_adj:&gt;9.4f} {m.fvalue:&gt;8.2f}")
+print(f"\n{'Model':&lt;25} {'R\u00b2':&gt;8} {'Adj. R\u00b2':&gt;9}")
+print("-" * 44)
+for name, m in [('Size only', fit_restricted), ('Full model', fit_full)]:
+    print(f"{name:&lt;25} {m._r2:&gt;8.4f} {m._adj_r2:&gt;9.4f}")
 
 # =============================================================================
 # STEP 7: Robust standard errors — valid under heteroskedasticity
 # =============================================================================
 # HC1 (White's correction) provides valid inference without constant variance
-model_robust = model_full.get_robustcov_results(cov_type='HC1')
+fit_robust = pf.feols('price ~ size + bedrooms + bathrooms + lotsize + age + monthsold',
+                      data=data_house, vcov='HC1')
 
 print("\nStandard vs Robust SEs:")
 print(f"{'Variable':&lt;14} {'Coef':&gt;10} {'Std SE':&gt;10} {'Robust SE':&gt;10} {'p (robust)':&gt;10}")
 print("-" * 56)
-for var in model_full.params.index:
-    print(f"{var:&lt;14} {model_full.params[var]:&gt;10.2f} "
-          f"{model_full.bse[var]:&gt;10.2f} {model_robust.bse[var]:&gt;10.2f} "
-          f"{model_robust.pvalues[var]:&gt;10.4f}")
+for var in fit_full.coef().index:
+    print(f"{var:&lt;14} {fit_full.coef()[var]:&gt;10.2f} "
+          f"{fit_full.se()[var]:&gt;10.2f} {fit_robust.se()[var]:&gt;10.2f} "
+          f"{fit_robust.pval()[var]:&gt;10.4f}")
 
 # =============================================================================
 # STEP 8: Coefficient plot — visual summary of significance
 # =============================================================================
 # Error bars crossing zero = not significant at 5%
-params_plot = model_full.params[1:]  # exclude intercept
+params_plot = fit_full.coef()[1:]  # exclude intercept
 ci_plot = conf_int.iloc[1:, :]
 
 fig, ax = plt.subplots(figsize=(10, 6))
@@ -833,6 +844,86 @@ coefplot, drop(_cons) xline(0, lcolor(red) lpattern(dash))          ///
   <div style="display:flex;gap:0.8rem;align-items:center;margin-top:0.8rem;flex-wrap:wrap">
     <button class="btn-copy" onclick="navigator.clipboard.writeText(document.getElementById('code-stata').textContent).then(()=>{this.textContent='Copied!';setTimeout(()=>this.textContent='Copy code',1500)})">Copy code</button>
     <span style="color:var(--text-muted);font-size:0.88rem">Paste into your Stata do-file editor</span>
+  </div>
+  </div>
+
+  <div class="code-panel" id="panel-r">
+  <pre><code id="code-r" class="language-r"># =============================================================================
+# CHAPTER 11 CHEAT SHEET: Statistical Inference for Multiple Regression
+# =============================================================================
+
+# --- Libraries ---
+library(haven)           # read Stata .dta files
+library(fixest)          # fast OLS estimation with feols()
+library(dplyr)           # data manipulation
+library(ggplot2)         # grammar of graphics
+
+# =============================================================================
+# STEP 1: Load data directly from a URL
+# =============================================================================
+url &lt;- "https://raw.githubusercontent.com/quarcs-lab/data-open/master/AED/AED_HOUSE.DTA"
+data_house &lt;- read_dta(url)
+
+cat("Dataset:", nrow(data_house), "observations,", ncol(data_house), "variables\n")
+
+# =============================================================================
+# STEP 2: Estimate the full multiple regression model
+# =============================================================================
+model_full &lt;- feols(price ~ size + bedrooms + bathrooms + lotsize + age + monthsold,
+                    data = data_house)
+summary(model_full)
+
+cat("Size effect: $", round(coef(model_full)["size"], 2), "per sq ft\n")
+cat("R-squared:", round(r2(model_full), 4), "\n")
+
+# =============================================================================
+# STEP 3: Confidence intervals — does the CI exclude zero?
+# =============================================================================
+# confint() computes 95% CIs; if the interval excludes zero, significant at 5%
+confint(model_full, level = 0.95)
+
+# =============================================================================
+# STEP 4: Hypothesis test on a single coefficient
+# =============================================================================
+# Test H0: beta_size = 50 vs H1: beta_size != 50
+# wald() from fixest tests linear hypotheses
+wald(model_full, "size = 50")
+
+# =============================================================================
+# STEP 5: Joint F-test — are groups of coefficients jointly significant?
+# =============================================================================
+# Overall F-test is shown in summary output
+# Subset F-test: are the 5 extra variables jointly significant?
+wald(model_full, c("bedrooms", "bathrooms", "lotsize", "age", "monthsold"))
+
+# =============================================================================
+# STEP 6: Model comparison — restricted vs unrestricted
+# =============================================================================
+model_restricted &lt;- feols(price ~ size, data = data_house)
+
+etable(model_restricted, model_full,
+       headers = c("Size only", "Full model"),
+       fitstat = c("r2", "ar2", "n"))
+
+# =============================================================================
+# STEP 7: Robust standard errors — valid under heteroskedasticity
+# =============================================================================
+# vcov = "HC1" provides HC1 (White's correction) robust SEs
+model_robust &lt;- feols(price ~ size + bedrooms + bathrooms + lotsize + age + monthsold,
+                      data = data_house, vcov = "HC1")
+
+etable(model_full, model_robust,
+       headers = c("Standard", "Robust (HC1)"))
+
+# =============================================================================
+# STEP 8: Coefficient plot — visual summary of significance
+# =============================================================================
+# coefplot() from fixest draws coefficient estimates with CIs
+# Error bars crossing zero = not significant at 5%
+coefplot(model_full, drop = "(Intercept)")</code></pre>
+  <div style="display:flex;gap:0.8rem;align-items:center;margin-top:0.8rem;flex-wrap:wrap">
+    <button class="btn-copy" onclick="navigator.clipboard.writeText(document.getElementById('code-r').textContent).then(()=>{this.textContent='Copied!';setTimeout(()=>this.textContent='Copy code',1500)})">Copy code</button>
+    <span style="color:var(--text-muted);font-size:0.88rem">Paste into your R console or RStudio</span>
   </div>
   </div>
 </section>
@@ -1134,7 +1225,8 @@ window.addEventListener("resize",function(){document.querySelectorAll(".chart").
   var buttons = tabBar.querySelectorAll('button');
   var panels  = {
     python: document.getElementById('panel-python'),
-    stata:  document.getElementById('panel-stata')
+    stata:  document.getElementById('panel-stata'),
+    r:      document.getElementById('panel-r')
   };
   buttons.forEach(function(btn) {
     btn.addEventListener('click', function() {
@@ -1150,6 +1242,7 @@ window.addEventListener("resize",function(){document.querySelectorAll(".chart").
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" data-manual></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-r.min.js"></script>
 <script>
 // Minimal Stata language grammar for Prism.js syntax highlighting
 Prism.languages.stata = {

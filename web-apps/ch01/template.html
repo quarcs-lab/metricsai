@@ -791,6 +791,7 @@ footer.page a:hover { text-decoration: underline; }
   <div class="code-tabs" id="code-lang-tabs">
     <button type="button" data-lang="python" class="active">Python</button>
     <button type="button" data-lang="stata">Stata</button>
+    <button type="button" data-lang="r">R</button>
   </div>
 
   <div class="code-panel active" id="panel-python">
@@ -801,7 +802,8 @@ footer.page a:hover { text-decoration: underline; }
 # --- Libraries ---
 import pandas as pd                       # data loading and manipulation
 import matplotlib.pyplot as plt           # creating plots and visualizations
-from statsmodels.formula.api import ols   # OLS regression with R-style formulas
+import pyfixest as pf                     # OLS regression (Python port of R's fixest)
+# !pip install pyfixest                   # uncomment if running in Google Colab
 
 # =============================================================================
 # STEP 1: Load data directly from a URL
@@ -833,29 +835,29 @@ plt.show()
 # =============================================================================
 # STEP 4: OLS regression — fit the model
 # =============================================================================
-# Formula syntax: 'y ~ x' regresses y on x (intercept included automatically)
-# IMPORTANT: .fit() estimates the model — without it, nothing is computed!
-model = ols('price ~ size', data=data_house).fit()
+# pf.feols() estimates OLS in one step — same formula syntax as R's fixest
+# Formula: 'y ~ x' regresses y on x (intercept included automatically)
+fit = pf.feols('price ~ size', data=data_house)
 
 # Extract key results
-slope     = model.params['size']       # marginal effect: $/sq ft
-intercept = model.params['Intercept']  # predicted price when size = 0
-r_squared = model.rsquared             # proportion of variation explained
+slope     = fit.coef()['size']         # marginal effect: $/sq ft
+intercept = fit.coef()['Intercept']    # predicted price when size = 0
+r_squared = fit._r2                    # proportion of variation explained
 
 print(f"Estimated equation: price = {intercept:,.0f} + {slope:.2f} × size")
 print(f"Interpretation: each additional sq ft is associated with ${slope:,.2f} higher price")
 print(f"R-squared: {r_squared:.4f} ({r_squared*100:.1f}% of variation explained)")
 
 # Full regression table (coefficients, std errors, t-stats, p-values, R²)
-model.summary()
+fit.summary()
 
 # =============================================================================
 # STEP 5: Scatter plot with fitted regression line and R²
 # =============================================================================
-# model.fittedvalues contains the predicted y-values from the estimated equation
+# fit.predict() returns the predicted y-values from the estimated equation
 fig, ax = plt.subplots(figsize=(10, 6))
 ax.scatter(data_house['size'], data_house['price'], s=50, alpha=0.7, label='Actual prices')
-ax.plot(data_house['size'], model.fittedvalues, color='red', linewidth=2, label='Fitted line')
+ax.plot(data_house['size'], fit.predict(), color='red', linewidth=2, label='Fitted line')
 ax.set_xlabel('House Size (square feet)')
 ax.set_ylabel('House Sale Price (dollars)')
 ax.set_title(f'OLS Regression: price = {intercept:,.0f} + {slope:.2f} × size  (R² = {r_squared:.2%})')
@@ -881,8 +883,8 @@ predictors = {
 print(f"{'Predictor':&lt;18} {'Slope':&gt;10} {'R²':&gt;8}")
 print("-" * 38)
 for var, label in predictors.items():
-    m = ols(f'price ~ {var}', data=data_house).fit()
-    print(f"{label:&lt;18} {m.params[var]:&gt;10.2f} {m.rsquared:&gt;8.4f}")</code></pre>
+    m = pf.feols(f'price ~ {var}', data=data_house)
+    print(f"{label:&lt;18} {m.coef()[var]:&gt;10.2f} {m._r2:&gt;8.4f}")</code></pre>
   <div style="display:flex;gap:0.8rem;align-items:center;margin-top:0.8rem;flex-wrap:wrap">
     <button class="btn-copy" onclick="navigator.clipboard.writeText(document.getElementById('code-python').textContent).then(()=>{this.textContent='Copied!';setTimeout(()=>this.textContent='Copy code',1500)})">Copy code</button>
     <a class="btn-colab" href="https://colab.research.google.com/notebooks/empty.ipynb" target="_blank" rel="noopener">Open empty Colab notebook &rarr;</a>
@@ -978,6 +980,94 @@ display "Age        — Slope: " _b[age]       " R²: " e(r2)</code></pre>
   <div style="display:flex;gap:0.8rem;align-items:center;margin-top:0.8rem;flex-wrap:wrap">
     <button class="btn-copy" onclick="navigator.clipboard.writeText(document.getElementById('code-stata').textContent).then(()=>{this.textContent='Copied!';setTimeout(()=>this.textContent='Copy code',1500)})">Copy code</button>
     <span style="color:var(--text-muted);font-size:0.88rem">Paste into your Stata do-file editor</span>
+  </div>
+  </div>
+
+  <div class="code-panel" id="panel-r">
+  <pre><code id="code-r" class="language-r"># =============================================================================
+# CHAPTER 1 CHEAT SHEET: Analysis of Economics Data
+# =============================================================================
+
+# --- Libraries ---
+library(haven)           # read Stata .dta files directly from URLs
+library(fixest)          # fast OLS estimation with feols()
+library(dplyr)           # data manipulation (mutate, filter, summarize)
+library(ggplot2)         # grammar of graphics for all plots
+
+# =============================================================================
+# STEP 1: Load data directly from a URL
+# =============================================================================
+# read_dta() reads Stata .dta files; works with local paths or URLs
+url &lt;- "https://raw.githubusercontent.com/quarcs-lab/data-open/master/AED/AED_HOUSE.DTA"
+data_house &lt;- read_dta(url)
+
+cat("Dataset:", nrow(data_house), "observations,", ncol(data_house), "variables\n")
+
+# =============================================================================
+# STEP 2: Descriptive statistics &mdash; summarize before modeling
+# =============================================================================
+# summary() gives min, Q1, median, mean, Q3, max in one call
+summary(data_house[, c("price", "size")])
+
+# =============================================================================
+# STEP 3: Scatter plot &mdash; always visualize before fitting a regression
+# =============================================================================
+ggplot(data_house, aes(x = size, y = price)) +
+  geom_point(color = "steelblue", size = 3, alpha = 0.7) +
+  labs(x = "House Size (square feet)", y = "House Sale Price (dollars)",
+       title = "House Price vs Size") +
+  theme_minimal()
+
+# =============================================================================
+# STEP 4: OLS regression &mdash; fit the model
+# =============================================================================
+# feols() from fixest estimates OLS; formula syntax: y ~ x
+# IMPORTANT: fixest automatically includes an intercept
+model &lt;- feols(price ~ size, data = data_house)
+
+# summary() shows coefficients, SEs, t-stats, p-values, and R&sup2;
+summary(model)
+
+# Extract key results
+slope     &lt;- coef(model)["size"]         # marginal effect: $/sq ft
+intercept &lt;- coef(model)["(Intercept)"]  # predicted price when size = 0
+r_squared &lt;- r2(model)                   # proportion of variation explained
+
+cat("Estimated equation: price =", round(intercept, 0), "+",
+    round(slope, 2), "x size\n")
+cat("Interpretation: each additional sq ft is associated with $",
+    round(slope, 2), "higher price\n")
+cat("R-squared:", round(r_squared, 4), "\n")
+
+# =============================================================================
+# STEP 5: Scatter plot with fitted regression line and R&sup2;
+# =============================================================================
+# fitted() extracts the predicted y-values from the estimated model
+ggplot(data_house, aes(x = size, y = price)) +
+  geom_point(color = "steelblue", size = 3, alpha = 0.7) +
+  geom_smooth(method = "lm", formula = y ~ x, color = "red",
+              linewidth = 1.2, se = FALSE) +
+  labs(x = "House Size (square feet)", y = "House Sale Price (dollars)",
+       title = paste0("OLS Regression: price on size  (R&sup2; = ",
+                      round(r_squared * 100, 1), "%)")) +
+  theme_minimal()
+
+# =============================================================================
+# STEP 6: Compare predictors &mdash; association is NOT causation
+# =============================================================================
+# Running separate regressions with different x-variables shows that each tells
+# a different story. High R&sup2; does not prove causation &mdash; omitted variables
+# (location, condition, school district) can bias any single-variable slope.
+predictors &lt;- c("size", "bedrooms", "bathrooms", "lotsize", "age")
+
+results &lt;- lapply(predictors, function(var) {
+  m &lt;- feols(as.formula(paste("price ~", var)), data = data_house)
+  data.frame(Predictor = var, Slope = coef(m)[var], R2 = r2(m))
+})
+do.call(rbind, results)</code></pre>
+  <div style="display:flex;gap:0.8rem;align-items:center;margin-top:0.8rem;flex-wrap:wrap">
+    <button class="btn-copy" onclick="navigator.clipboard.writeText(document.getElementById('code-r').textContent).then(()=>{this.textContent='Copied!';setTimeout(()=>this.textContent='Copy code',1500)})">Copy code</button>
+    <span style="color:var(--text-muted);font-size:0.88rem">Paste into your R console or RStudio</span>
   </div>
   </div>
 </section>
@@ -1642,7 +1732,8 @@ window.addEventListener("resize", () => {
   var buttons = tabBar.querySelectorAll('button');
   var panels  = {
     python: document.getElementById('panel-python'),
-    stata:  document.getElementById('panel-stata')
+    stata:  document.getElementById('panel-stata'),
+    r:      document.getElementById('panel-r')
   };
   buttons.forEach(function(btn) {
     btn.addEventListener('click', function() {
@@ -1658,6 +1749,7 @@ window.addEventListener("resize", () => {
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" data-manual></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-r.min.js"></script>
 <script>
 // Minimal Stata language grammar for Prism.js syntax highlighting
 Prism.languages.stata = {

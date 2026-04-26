@@ -1016,6 +1016,7 @@ footer.page a:hover { text-decoration: underline; }
   <div class="code-tabs" id="code-lang-tabs">
     <button type="button" data-lang="python" class="active">Python</button>
     <button type="button" data-lang="stata">Stata</button>
+    <button type="button" data-lang="r">R</button>
   </div>
 
   <div class="code-panel active" id="panel-python">
@@ -1236,6 +1237,133 @@ twoway (line exsales daten, lwidth(thin) lcolor(gs10))                     ///
   <div style="display:flex;gap:0.8rem;align-items:center;margin-top:0.8rem;flex-wrap:wrap">
     <button class="btn-copy" onclick="navigator.clipboard.writeText(document.getElementById('code-stata').textContent).then(()=>{this.textContent='Copied!';setTimeout(()=>this.textContent='Copy code',1500)})">Copy code</button>
     <span style="color:var(--text-muted);font-size:0.88rem">Paste into your Stata do-file editor</span>
+  </div>
+  </div>
+
+  <div class="code-panel" id="panel-r">
+  <pre><code id="code-r" class="language-r"># =============================================================================
+# CHAPTER 2 CHEAT SHEET: Univariate Data Summary
+# =============================================================================
+
+# --- Libraries ---
+library(haven)           # read Stata .dta files directly from URLs
+library(dplyr)           # data manipulation (mutate, filter, summarize)
+library(ggplot2)         # grammar of graphics for all plots
+library(e1071)           # skewness() and kurtosis() functions
+
+# =============================================================================
+# STEP 1: Load data directly from a URL
+# =============================================================================
+# read_dta() reads Stata .dta files; works with local paths or URLs
+url_earnings &lt;- "https://raw.githubusercontent.com/quarcs-lab/data-open/master/AED/AED_EARNINGS.DTA"
+data_earnings &lt;- read_dta(url_earnings)
+
+earnings &lt;- data_earnings$earnings
+cat("Dataset:", nrow(data_earnings), "observations,", ncol(data_earnings), "variables\n")
+
+# =============================================================================
+# STEP 2: Summary statistics — mean vs median reveals skewness
+# =============================================================================
+# summary() gives min, Q1, median, mean, Q3, max in one call
+summary(earnings)
+
+# Skewness and kurtosis measure the shape of the distribution
+cat("\nSkewness:       ", round(skewness(earnings), 2),
+    " (&gt; 1 = strongly right-skewed)\n")
+cat("Excess kurtosis:", round(kurtosis(earnings), 2),
+    " (&gt; 0 = heavier tails than normal)\n")
+cat("Mean - Median:  $", round(mean(earnings) - median(earnings), 0),
+    " (positive gap signals right skew)\n")
+
+# =============================================================================
+# STEP 3: Histogram with KDE overlay — see the distribution shape
+# =============================================================================
+# geom_histogram draws the bars; geom_density overlays the smooth KDE curve
+# after_stat(density) rescales the histogram to match the density scale
+ggplot(data_earnings, aes(x = earnings)) +
+  geom_histogram(aes(y = after_stat(density)), bins = 20,
+                 fill = "steelblue", color = "black", alpha = 0.7) +
+  geom_density(color = "red", linewidth = 1.2) +
+  labs(x = "Annual Earnings ($)", y = "Density",
+       title = "Earnings Distribution: Histogram + Kernel Density Estimate") +
+  theme_minimal()
+
+# =============================================================================
+# STEP 4: Box plot — visualize quartiles and outliers
+# =============================================================================
+# The box spans Q1 to Q3 (IQR); whiskers extend 1.5x IQR; dots are outliers
+ggplot(data_earnings, aes(y = earnings)) +
+  geom_boxplot(fill = "lightblue", alpha = 0.7, outlier.color = "red") +
+  coord_flip() +
+  labs(x = "", y = "Annual Earnings ($)",
+       title = "Box Plot of Earnings \u2014 Median, Quartiles, and Outliers") +
+  theme_minimal()
+
+# =============================================================================
+# STEP 5: Log transformation — taming right skew
+# =============================================================================
+# log() compresses big values and stretches small ones, making skewed
+# distributions more symmetric — a prerequisite for many statistical methods
+data_earnings &lt;- data_earnings |&gt;
+  mutate(lnearnings = log(earnings))
+
+# Compare original vs log-transformed distributions side by side
+library(patchwork)       # combine ggplots side by side with + operator
+
+p1 &lt;- ggplot(data_earnings, aes(x = earnings)) +
+  geom_histogram(bins = 20, fill = "steelblue", color = "black", alpha = 0.7) +
+  labs(x = "Earnings ($)",
+       title = paste0("Original (skewness = ",
+                      round(skewness(earnings), 2), ")")) +
+  theme_minimal()
+
+p2 &lt;- ggplot(data_earnings, aes(x = lnearnings)) +
+  geom_histogram(bins = 20, fill = "coral", color = "black", alpha = 0.7) +
+  labs(x = "ln(Earnings)",
+       title = paste0("Log-transformed (skewness = ",
+                      round(skewness(data_earnings$lnearnings), 2), ")")) +
+  theme_minimal()
+
+p1 + p2 + plot_annotation(title = "Effect of Log Transformation on Skewness")
+
+# =============================================================================
+# STEP 6: Z-scores — how unusual is each observation?
+# =============================================================================
+# z = (x - mean) / sd puts every value on a "standard deviations from the
+# mean" scale: |z| &gt; 2 is unusual, |z| &gt; 3 is very unusual
+z_scores &lt;- scale(earnings)[, 1]         # scale() returns a matrix; [,1] extracts vector
+
+cat("Highest earner: $", max(earnings), " \u2192  z =", round(max(z_scores), 2), "\n")
+cat("Median earner:  $", median(earnings), " \u2192  z =",
+    round((median(earnings) - mean(earnings)) / sd(earnings), 2), "\n")
+cat("Observations with |z| &gt; 2:", sum(abs(z_scores) &gt; 2),
+    "out of", length(z_scores), "\n")
+
+# =============================================================================
+# STEP 7: Time series — moving average smooths seasonal noise
+# =============================================================================
+# Monthly home sales zigzag with the seasons; an 11-month moving average
+# cancels one full seasonal cycle, revealing the underlying trend
+url_homesales &lt;- "https://raw.githubusercontent.com/quarcs-lab/data-open/master/AED/AED_MONTHLYHOMESALES.DTA"
+data_hs &lt;- read_dta(url_homesales) |&gt;
+  filter(year &gt;= 2005)
+
+# zoo::rollmean computes a centered moving average; k = window width
+library(zoo)             # rollmean() for moving averages
+
+data_hs &lt;- data_hs |&gt;
+  mutate(exsales_smooth = rollmean(exsales, k = 11, fill = NA, align = "center"))
+
+ggplot(data_hs, aes(x = daten)) +
+  geom_line(aes(y = exsales), linewidth = 0.5, alpha = 0.6) +
+  geom_line(aes(y = exsales_smooth), color = "red",
+            linewidth = 1.2, linetype = "dashed") +
+  labs(x = "Year", y = "Monthly Home Sales",
+       title = "U.S. Home Sales: Raw Series vs. Moving Average (2005\u20132015)") +
+  theme_minimal()</code></pre>
+  <div style="display:flex;gap:0.8rem;align-items:center;margin-top:0.8rem;flex-wrap:wrap">
+    <button class="btn-copy" onclick="navigator.clipboard.writeText(document.getElementById('code-r').textContent).then(()=>{this.textContent='Copied!';setTimeout(()=>this.textContent='Copy code',1500)})">Copy code</button>
+    <span style="color:var(--text-muted);font-size:0.88rem">Paste into your R console or RStudio</span>
   </div>
   </div>
 </section>
@@ -2263,7 +2391,8 @@ window.addEventListener("resize", () => {
   var buttons = tabBar.querySelectorAll('button');
   var panels  = {
     python: document.getElementById('panel-python'),
-    stata:  document.getElementById('panel-stata')
+    stata:  document.getElementById('panel-stata'),
+    r:      document.getElementById('panel-r')
   };
   buttons.forEach(function(btn) {
     btn.addEventListener('click', function() {
@@ -2279,6 +2408,7 @@ window.addEventListener("resize", () => {
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" data-manual></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-r.min.js"></script>
 <script>
 // Minimal Stata language grammar for Prism.js syntax highlighting
 Prism.languages.stata = {

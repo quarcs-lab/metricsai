@@ -78,8 +78,7 @@ import numpy as np                        # numerical operations
 import pandas as pd                       # data manipulation
 import matplotlib.pyplot as plt           # plotting
 import seaborn as sns                     # statistical plots
-import statsmodels.api as sm              # statistical models
-from statsmodels.formula.api import ols   # OLS with formula syntax
+import pyfixest as pf                    # fast OLS estimation
 from scipy import stats                   # statistical distributions
 import random
 import os
@@ -183,31 +182,31 @@ else:
 # 15.2 Logarithmic Transformations
 
 # Model 1: Levels Model - earnings ~ age + education
-ols_linear = ols('earnings ~ age + education', data=data_earnings).fit(cov_type='HC1')
+fit_linear = pf.feols('earnings ~ age + education', data=data_earnings, vcov='HC1')
 
 # Model 2: Log-Linear Model - lnearnings ~ age + education
-ols_loglin = ols('lnearnings ~ age + education', data=data_earnings).fit(cov_type='HC1')
+fit_loglin = pf.feols('lnearnings ~ age + education', data=data_earnings, vcov='HC1')
 
 # Model 3: Log-Log Model - lnearnings ~ lnage + education
-ols_loglog = ols('lnearnings ~ lnage + education', data=data_earnings).fit(cov_type='HC1')
+fit_loglog = pf.feols('lnearnings ~ lnage + education', data=data_earnings, vcov='HC1')
 
 # Key results across all three specifications
 print("=== Model 1: Levels ===")
-print(f"  Equation: earnings = {ols_linear.params['Intercept']:,.0f} + {ols_linear.params['age']:.2f} x age + {ols_linear.params['education']:.2f} x education")
-print(f"  R-squared: {ols_linear.rsquared:.4f}")
+print(f"  Equation: earnings = {fit_linear.coef()['Intercept']:,.0f} + {fit_linear.coef()['age']:.2f} x age + {fit_linear.coef()['education']:.2f} x education")
+print(f"  R-squared: {fit_linear._r2:.4f}")
 
 print("\n=== Model 2: Log-Linear ===")
-print(f"  Equation: ln(earnings) = {ols_loglin.params['Intercept']:.4f} + {ols_loglin.params['age']:.4f} x age + {ols_loglin.params['education']:.4f} x education")
-print(f"  Education return: ~{100*ols_loglin.params['education']:.1f}% per year (semi-elasticity)")
-print(f"  R-squared: {ols_loglin.rsquared:.4f}")
+print(f"  Equation: ln(earnings) = {fit_loglin.coef()['Intercept']:.4f} + {fit_loglin.coef()['age']:.4f} x age + {fit_loglin.coef()['education']:.4f} x education")
+print(f"  Education return: ~{100*fit_loglin.coef()['education']:.1f}% per year (semi-elasticity)")
+print(f"  R-squared: {fit_loglin._r2:.4f}")
 
 print("\n=== Model 3: Log-Log ===")
-print(f"  Equation: ln(earnings) = {ols_loglog.params['Intercept']:.4f} + {ols_loglog.params['lnage']:.4f} x ln(age) + {ols_loglog.params['education']:.4f} x education")
-print(f"  Age elasticity: {ols_loglog.params['lnage']:.4f} (a 1% increase in age -> {ols_loglog.params['lnage']:.2f}% increase in earnings)")
-print(f"  R-squared: {ols_loglog.rsquared:.4f}")
+print(f"  Equation: ln(earnings) = {fit_loglog.coef()['Intercept']:.4f} + {fit_loglog.coef()['lnage']:.4f} x ln(age) + {fit_loglog.coef()['education']:.4f} x education")
+print(f"  Age elasticity: {fit_loglog.coef()['lnage']:.4f} (a 1% increase in age -> {fit_loglog.coef()['lnage']:.2f}% increase in earnings)")
+print(f"  R-squared: {fit_loglog._r2:.4f}")
 
 # Full regression output (Model 2 - the Mincer equation)
-ols_loglin.summary()
+fit_loglin.summary()
 ```
 
 > **Key Concept 15.1: Log Transformations and Coefficient Interpretation**
@@ -287,8 +286,8 @@ comparison_table = pd.DataFrame({
     'Specification': ['earnings ~ age + education', 
                       'ln(earnings) ~ age + education',
                       'ln(earnings) ~ ln(age) + education'],
-    'R-squared': [ols_linear.rsquared, ols_loglin.rsquared, ols_loglog.rsquared],
-    'Adj R-squared': [ols_linear.rsquared_adj, ols_loglin.rsquared_adj, ols_loglog.rsquared_adj]
+    'R-squared': [fit_linear._r2, fit_loglin._r2, fit_loglog._r2],
+    'Adj R-squared': [fit_linear._r2_adj, fit_loglin._r2_adj, fit_loglog._r2_adj]
 })
 
 comparison_table.to_string(index=False)
@@ -330,30 +329,30 @@ $$AME = \beta_2 + 2\beta_3 \bar{x}$$
 
 # Linear model (for comparison)
 # Linear Model: earnings ~ age + education
-ols_linear_age = ols('earnings ~ age + education', data=data_earnings).fit(cov_type='HC1')
+fit_linear_age = pf.feols('earnings ~ age + education', data=data_earnings, vcov='HC1')
 
 # Quadratic Model: earnings ~ age + agesq + education
-ols_quad = ols('earnings ~ age + agesq + education', data=data_earnings).fit(cov_type='HC1')
+fit_quad = pf.feols('earnings ~ age + agesq + education', data=data_earnings, vcov='HC1')
 
 # Key results: Quadratic vs Linear
-print(f"Linear model R-squared:    {ols_linear_age.rsquared:.4f}")
-print(f"Quadratic model R-squared: {ols_quad.rsquared:.4f}")
+print(f"Linear model R-squared:    {fit_linear_age._r2:.4f}")
+print(f"Quadratic model R-squared: {fit_quad._r2:.4f}")
 print(f"\nQuadratic coefficients:")
-print(f"  age:       {ols_quad.params['age']:,.2f}")
-print(f"  age-sq:    {ols_quad.params['agesq']:.4f}")
-print(f"  education: {ols_quad.params['education']:,.2f}")
+print(f"  age:       {fit_quad.coef()['age']:,.2f}")
+print(f"  age-sq:    {fit_quad.coef()['agesq']:.4f}")
+print(f"  education: {fit_quad.coef()['education']:,.2f}")
 
 # Full regression output (quadratic model)
-ols_quad.summary()
+fit_quad.summary()
 ```
 
 ```{python}
 # TURNING POINT AND MARGINAL EFFECTS
 
 # Extract coefficients
-bage = ols_quad.params['age']
-bagesq = ols_quad.params['agesq']
-beducation = ols_quad.params['education']
+bage = fit_quad.coef()['age']
+bagesq = fit_quad.coef()['agesq']
+beducation = fit_quad.coef()['education']
 
 # Calculate turning point
 turning_point = -bage / (2 * bagesq)
@@ -449,7 +448,7 @@ The **joint F-test** for $H_0: \beta_{age} = 0$ AND $\beta_{age^2} = 0$ is **hig
 # JOINT HYPOTHESIS TEST: H₀: β_age = 0 AND β_agesq = 0
 
 hypotheses = '(age = 0, agesq = 0)'
-f_test = ols_quad.wald_test(hypotheses, use_f=True)
+f_test = fit_quad.wald_test(R=np.eye(len(fit_quad.coef()))[[list(fit_quad.coef().index).index(v) for v in ['age', 'agesq']]])
 print(f_test)
 
 print("\nInterpretation:")
@@ -476,8 +475,8 @@ age_range = np.linspace(25, 65, 100)
 educ_mean = data_earnings['education'].mean()
 
 # Predictions holding education at mean
-linear_pred = ols_linear_age.params['Intercept'] + ols_linear_age.params['age']*age_range + ols_linear_age.params['education']*educ_mean
-quad_pred = ols_quad.params['Intercept'] + bage*age_range + bagesq*age_range**2 + beducation*educ_mean
+linear_pred = fit_linear_age.coef()['Intercept'] + fit_linear_age.coef()['age']*age_range + fit_linear_age.coef()['education']*educ_mean
+quad_pred = fit_quad.coef()['Intercept'] + bage*age_range + bagesq*age_range**2 + beducation*educ_mean
 
 axes[0].scatter(data_earnings['age'], data_earnings['earnings'], alpha=0.3, s=20, color='gray', label='Actual data')  # alpha = transparency, s = marker size
 axes[0].plot(age_range, linear_pred, '-', color='#c084fc', linewidth=2, label='Linear model')
@@ -490,7 +489,7 @@ axes[0].legend()
 axes[0].grid(True, alpha=0.3)
 
 # Right plot: Marginal effects
-me_linear = np.full_like(age_range, ols_linear_age.params['age'])
+me_linear = np.full_like(age_range, fit_linear_age.coef()['age'])
 me_quad = bage + 2 * bagesq * age_range
 
 axes[1].plot(age_range, me_linear, '-', color='#c084fc', linewidth=2, label='Linear model (constant)')
@@ -546,16 +545,16 @@ $$\beta^* = \beta \times \frac{s_x}{s_y}$$
 # Estimate a comprehensive model
 # Linear Model with Mixed Regressors:
 # earnings ~ gender + age + agesq + education + dself + dgovt + lnhours
-ols_linear_mix = ols('earnings ~ gender + age + agesq + education + dself + dgovt + lnhours',
-                     data=data_earnings).fit(cov_type='HC1')
+fit_linear_mix = pf.feols('earnings ~ gender + age + agesq + education + dself + dgovt + lnhours',
+                     data=data_earnings, vcov='HC1')
 
 # Key results
-print(f"R-squared: {ols_linear_mix.rsquared:.4f} ({ols_linear_mix.rsquared*100:.1f}% of variation explained)")
-print(f"Education: +${ols_linear_mix.params['education']:,.0f} per year of schooling")
-print(f"Gender: ${ols_linear_mix.params['gender']:,.0f} (negative = women earn less)")
+print(f"R-squared: {fit_linear_mix._r2:.4f} ({fit_linear_mix._r2*100:.1f}% of variation explained)")
+print(f"Education: +${fit_linear_mix.coef()['education']:,.0f} per year of schooling")
+print(f"Gender: ${fit_linear_mix.coef()['gender']:,.0f} (negative = women earn less)")
 
 # Full regression output
-ols_linear_mix.summary()
+fit_linear_mix.summary()
 ```
 
 ```{python}
@@ -573,13 +572,13 @@ sd_lnhours = data_earnings['lnhours'].std()
 
 # Calculate standardized coefficients
 standardized_coefs = {
-    'gender': ols_linear_mix.params['gender'] * sd_gender / sd_y,
-    'age': ols_linear_mix.params['age'] * sd_age / sd_y,
-    'agesq': ols_linear_mix.params['agesq'] * sd_agesq / sd_y,
-    'education': ols_linear_mix.params['education'] * sd_education / sd_y,
-    'dself': ols_linear_mix.params['dself'] * sd_dself / sd_y,
-    'dgovt': ols_linear_mix.params['dgovt'] * sd_dgovt / sd_y,
-    'lnhours': ols_linear_mix.params['lnhours'] * sd_lnhours / sd_y
+    'gender': fit_linear_mix.coef()['gender'] * sd_gender / sd_y,
+    'age': fit_linear_mix.coef()['age'] * sd_age / sd_y,
+    'agesq': fit_linear_mix.coef()['agesq'] * sd_agesq / sd_y,
+    'education': fit_linear_mix.coef()['education'] * sd_education / sd_y,
+    'dself': fit_linear_mix.coef()['dself'] * sd_dself / sd_y,
+    'dgovt': fit_linear_mix.coef()['dgovt'] * sd_dgovt / sd_y,
+    'lnhours': fit_linear_mix.coef()['lnhours'] * sd_lnhours / sd_y
 }
 
 print("\nStandardized Coefficients (Beta coefficients):")
@@ -738,22 +737,22 @@ $$ME_z = \beta_3 + \beta_4 x$$
 
 # Model without interaction (for comparison)
 # Model WITHOUT Interaction: earnings ~ age + education
-ols_no_interact = ols('earnings ~ age + education', data=data_earnings).fit(cov_type='HC1')
+fit_no_interact = pf.feols('earnings ~ age + education', data=data_earnings, vcov='HC1')
 
 # Model WITH Interaction: earnings ~ age + education + agebyeduc
-ols_interact = ols('earnings ~ age + education + agebyeduc', data=data_earnings).fit(cov_type='HC1')
+fit_interact = pf.feols('earnings ~ age + education + agebyeduc', data=data_earnings, vcov='HC1')
 
 # Key results: How returns to education vary with age
-b_educ = ols_interact.params['education']
-b_inter = ols_interact.params['agebyeduc']
+b_educ = fit_interact.coef()['education']
+b_inter = fit_interact.coef()['agebyeduc']
 print(f"Interaction model: ME of education = {b_educ:,.0f} + {b_inter:.1f} x age")
 print(f"  At age 25: ${b_educ + b_inter*25:,.0f} per year of education")
 print(f"  At age 40: ${b_educ + b_inter*40:,.0f} per year of education")
 print(f"  At age 55: ${b_educ + b_inter*55:,.0f} per year of education")
-print(f"R-squared (with interaction): {ols_interact.rsquared:.4f}")
+print(f"R-squared (with interaction): {fit_interact._r2:.4f}")
 
 # Full regression output
-ols_interact.summary()
+fit_interact.summary()
 ```
 
 > **Key Concept 15.6: Interaction Terms and Varying Marginal Effects**
@@ -865,14 +864,14 @@ This explains why:
 # Test 1: H₀: β_age = 0 AND β_agebyeduc = 0
 print("(Tests whether age matters at all)")
 hypotheses_age = '(age = 0, agebyeduc = 0)'
-f_test_age = ols_interact.wald_test(hypotheses_age, use_f=True)
+f_test_age = fit_interact.wald_test(R=np.eye(len(fit_interact.coef()))[[list(fit_interact.coef().index).index(v) for v in ['age', 'agebyeduc']]])
 print(f_test_age)
 
 # Test 2: Joint test for education
 # Test 2: H₀: β_education = 0 AND β_agebyeduc = 0
 print("(Tests whether education matters at all)")
 hypotheses_educ = '(education = 0, agebyeduc = 0)'
-f_test_educ = ols_interact.wald_test(hypotheses_educ, use_f=True)
+f_test_educ = fit_interact.wald_test(R=np.eye(len(fit_interact.coef()))[[list(fit_interact.coef().index).index(v) for v in ['education', 'agebyeduc']]])
 print(f_test_educ)
 
 print("\nKey insight: Individual coefficients may be insignificant due to")
@@ -924,14 +923,14 @@ Example: If $s_e = 0.4$, adjustment factor = $\exp(0.16/2) = 1.083$
 # Retransformation Bias Demonstration
 
 # Get RMSE from log model
-rmse_log = np.sqrt(ols_loglin.mse_resid)
+rmse_log = np.sqrt(np.mean(fit_loglin._u_hat**2))
 
 print(f"\nRMSE from log model: {rmse_log:.4f}")
 print(f"Adjustment factor: exp({rmse_log:.4f}²/2) = {np.exp(rmse_log**2/2):.4f}")
 
 # Predictions
-linear_predict = ols_linear.predict()
-log_fitted = ols_loglin.predict()
+linear_predict = fit_linear.predict()
+log_fitted = fit_loglin.predict()
 
 # Biased retransformation (naive)
 biased_predict = np.exp(log_fitted)
@@ -1108,43 +1107,43 @@ plt.show()
 # Log-transformed dependent variable
 # Log-Linear Model with Mixed Regressors:
 # lnearnings ~ gender + age + agesq + education + dself + dgovt + lnhours
-ols_log_mix = ols('lnearnings ~ gender + age + agesq + education + dself + dgovt + lnhours',
-                  data=data_earnings).fit(cov_type='HC1')
+fit_log_mix = pf.feols('lnearnings ~ gender + age + agesq + education + dself + dgovt + lnhours',
+                  data=data_earnings, vcov='HC1')
 
 # Key results
-print(f"R-squared: {ols_log_mix.rsquared:.4f} ({ols_log_mix.rsquared*100:.1f}% of variation in ln(earnings) explained)")
-print(f"Education return: ~{100*ols_log_mix.params['education']:.1f}% per year")
-print(f"Gender gap: ~{100*ols_log_mix.params['gender']:.1f}%")
-print(f"Hours elasticity: {ols_log_mix.params['lnhours']:.3f}")
+print(f"R-squared: {fit_log_mix._r2:.4f} ({fit_log_mix._r2*100:.1f}% of variation in ln(earnings) explained)")
+print(f"Education return: ~{100*fit_log_mix.coef()['education']:.1f}% per year")
+print(f"Gender gap: ~{100*fit_log_mix.coef()['gender']:.1f}%")
+print(f"Hours elasticity: {fit_log_mix.coef()['lnhours']:.3f}")
 
 # Full regression output
-ols_log_mix.summary()
+fit_log_mix.summary()
 
 # INTERPRETATION OF COEFFICIENTS (controlling for other regressors)
 
-print(f"\n1. Gender: {ols_log_mix.params['gender']:.4f}")
-print(f"   Women earn approximately {100*ols_log_mix.params['gender']:.1f}% less than men")
+print(f"\n1. Gender: {fit_log_mix.coef()['gender']:.4f}")
+print(f"   Women earn approximately {100*fit_log_mix.coef()['gender']:.1f}% less than men")
 
 print(f"\n2. Age and Age²: Quadratic relationship")
-b_age_log = ols_log_mix.params['age']
-b_agesq_log = ols_log_mix.params['agesq']
+b_age_log = fit_log_mix.coef()['age']
+b_agesq_log = fit_log_mix.coef()['agesq']
 turning_point_log = -b_age_log / (2 * b_agesq_log)
 print(f"   Turning point: {turning_point_log:.1f} years")
 print(f"   Earnings increase with age until {turning_point_log:.1f}, then decrease")
 
-print(f"\n3. Education: {ols_log_mix.params['education']:.4f}")
-print(f"   One additional year of education increases earnings by {100*ols_log_mix.params['education']:.1f}%")
+print(f"\n3. Education: {fit_log_mix.coef()['education']:.4f}")
+print(f"   One additional year of education increases earnings by {100*fit_log_mix.coef()['education']:.1f}%")
 
-print(f"\n4. Self-employed (dself): {ols_log_mix.params['dself']:.4f}")
-print(f"   Self-employed earn approximately {100*ols_log_mix.params['dself']:.1f}% less than private sector")
+print(f"\n4. Self-employed (dself): {fit_log_mix.coef()['dself']:.4f}")
+print(f"   Self-employed earn approximately {100*fit_log_mix.coef()['dself']:.1f}% less than private sector")
 print(f"   (though not statistically significant at 5% level)")
 
-print(f"\n5. Government (dgovt): {ols_log_mix.params['dgovt']:.4f}")
-print(f"   Government workers earn approximately {100*ols_log_mix.params['dgovt']:.1f}% more than private sector")
+print(f"\n5. Government (dgovt): {fit_log_mix.coef()['dgovt']:.4f}")
+print(f"   Government workers earn approximately {100*fit_log_mix.coef()['dgovt']:.1f}% more than private sector")
 print(f"   (though not statistically significant at 5% level)")
 
-print(f"\n6. Ln(Hours): {ols_log_mix.params['lnhours']:.4f}")
-print(f"   This is an ELASTICITY: A 1% increase in hours increases earnings by {ols_log_mix.params['lnhours']:.3f}%")
+print(f"\n6. Ln(Hours): {fit_log_mix.coef()['lnhours']:.4f}")
+print(f"   This is an ELASTICITY: A 1% increase in hours increases earnings by {fit_log_mix.coef()['lnhours']:.3f}%")
 print(f"   Nearly proportional relationship (elasticity ≈ 1)")
 ```
 
@@ -1209,7 +1208,8 @@ This single code block reproduces the core workflow of Chapter 15. It is self-co
 import numpy as np                        # numerical operations (log, exp, sqrt)
 import pandas as pd                       # data loading and manipulation
 import matplotlib.pyplot as plt           # creating plots and visualizations
-from statsmodels.formula.api import ols   # OLS regression with R-style formulas
+import pyfixest as pf                     # fast OLS estimation
+# !pip install pyfixest
 
 # =============================================================================
 # STEP 1: Load data directly from a URL
@@ -1228,27 +1228,27 @@ print(data_earnings[['earnings', 'lnearnings', 'age', 'education']].describe().r
 # STEP 2: Log transformations — levels vs log-linear vs log-log
 # =============================================================================
 # Three specifications of the same relationship reveal different stories
-ols_levels = ols('earnings ~ age + education', data=data_earnings).fit(cov_type='HC1')
-ols_loglin = ols('lnearnings ~ age + education', data=data_earnings).fit(cov_type='HC1')
-ols_loglog = ols('lnearnings ~ lnage + education', data=data_earnings).fit(cov_type='HC1')
+fit_levels = pf.feols('earnings ~ age + education', data=data_earnings, vcov='HC1')
+fit_loglin = pf.feols('lnearnings ~ age + education', data=data_earnings, vcov='HC1')
+fit_loglog = pf.feols('lnearnings ~ lnage + education', data=data_earnings, vcov='HC1')
 
 print("=== Levels: absolute dollar effects ===")
-print(f"  Education: +${ols_levels.params['education']:,.0f} per year")
+print(f"  Education: +${fit_levels.coef()['education']:,.0f} per year")
 
 print("\n=== Log-Linear: semi-elasticity (% change per unit) ===")
-print(f"  Education: +{100*ols_loglin.params['education']:.1f}% per year (Mincer return)")
+print(f"  Education: +{100*fit_loglin.coef()['education']:.1f}% per year (Mincer return)")
 
 print("\n=== Log-Log: elasticity (% change per % change) ===")
-print(f"  Age elasticity: {ols_loglog.params['lnage']:.4f}")
+print(f"  Age elasticity: {fit_loglog.coef()['lnage']:.4f}")
 
 # =============================================================================
 # STEP 3: Quadratic model — turning point and varying marginal effects
 # =============================================================================
 # A quadratic in age captures the inverted-U life-cycle earnings profile
-ols_quad = ols('earnings ~ age + agesq + education', data=data_earnings).fit(cov_type='HC1')
+fit_quad = pf.feols('earnings ~ age + agesq + education', data=data_earnings, vcov='HC1')
 
-bage    = ols_quad.params['age']
-bagesq  = ols_quad.params['agesq']
+bage    = fit_quad.coef()['age']
+bagesq  = fit_quad.coef()['agesq']
 turning_point = -bage / (2 * bagesq)        # age where earnings peak
 
 print(f"Turning point: {turning_point:.1f} years")
@@ -1257,15 +1257,15 @@ for a in [25, 40, 55]:
     print(f"  ME at age {a}: ${me:,.0f}/year")
 
 # Joint F-test: H0: age and age² are jointly zero
-f_test = ols_quad.wald_test('(age = 0, agesq = 0)', use_f=True)
+f_test = fit_quad.wald_test(R=np.eye(len(fit_quad.coef()))[[list(fit_quad.coef().index).index(v) for v in ['age', 'agesq']]])
 print(f"Joint F-test p-value: {f_test.pvalue:.4f}")
 
 # =============================================================================
 # STEP 4: Standardized coefficients — compare variable importance
 # =============================================================================
 # Raw coefficients can't be compared across different units; beta* can
-ols_mix = ols('earnings ~ gender + age + agesq + education + dself + dgovt + lnhours',
-              data=data_earnings).fit(cov_type='HC1')
+fit_mix = pf.feols('earnings ~ gender + age + agesq + education + dself + dgovt + lnhours',
+              data=data_earnings, vcov='HC1')
 
 sd_y = data_earnings['earnings'].std()
 predictors = ['gender', 'age', 'agesq', 'education', 'dself', 'dgovt', 'lnhours']
@@ -1273,7 +1273,7 @@ predictors = ['gender', 'age', 'agesq', 'education', 'dself', 'dgovt', 'lnhours'
 print(f"\n{'Variable':<12} {'Raw coef':>12} {'Beta*':>8}")
 print("-" * 34)
 for var in sorted(predictors, key=lambda v: abs(ols_mix.params[v] * data_earnings[v].std() / sd_y), reverse=True):
-    raw  = ols_mix.params[var]
+    raw  = fit_mix.coef()[var]
     beta_star = raw * data_earnings[var].std() / sd_y
     print(f"{var:<12} {raw:>12.2f} {beta_star:>8.4f}")
 
@@ -1281,10 +1281,10 @@ for var in sorted(predictors, key=lambda v: abs(ols_mix.params[v] * data_earning
 # STEP 5: Interaction terms — education returns that vary with age
 # =============================================================================
 # Does one more year of schooling pay the same at 25 as at 55?
-ols_inter = ols('earnings ~ age + education + agebyeduc', data=data_earnings).fit(cov_type='HC1')
+fit_inter = pf.feols('earnings ~ age + education + agebyeduc', data=data_earnings, vcov='HC1')
 
-b_educ  = ols_inter.params['education']
-b_inter = ols_inter.params['agebyeduc']
+b_educ  = fit_inter.coef()['education']
+b_inter = fit_inter.coef()['agebyeduc']
 
 print(f"\nME of education = {b_educ:,.0f} + {b_inter:.1f} × age")
 for a in [25, 40, 55]:
@@ -1295,10 +1295,10 @@ for a in [25, 40, 55]:
 # STEP 6: Retransformation bias — naive exp() underpredicts
 # =============================================================================
 # Jensen's inequality: E[exp(u)] > exp(E[u]), so naive predictions are biased
-rmse_log = np.sqrt(ols_loglin.mse_resid)
+rmse_log = np.sqrt(np.mean(fit_loglin._u_hat**2))
 correction = np.exp(rmse_log**2 / 2)        # normal-based smearing factor
 
-naive_pred    = np.exp(ols_loglin.fittedvalues)
+naive_pred    = np.exp(fit_loglin.predict())
 adjusted_pred = correction * naive_pred
 
 print(f"\nSmearing factor: {correction:.4f}")
@@ -1310,16 +1310,16 @@ print(f"Corrected mean:  ${adjusted_pred.mean():,.0f}  (bias removed)")
 # STEP 7: Comprehensive model — combine all transformation types
 # =============================================================================
 # A single model mixing logs, quadratics, dummies, and continuous regressors
-ols_full = ols('lnearnings ~ gender + age + agesq + education + dself + dgovt + lnhours',
-               data=data_earnings).fit(cov_type='HC1')
+fit_full = pf.feols('lnearnings ~ gender + age + agesq + education + dself + dgovt + lnhours',
+               data=data_earnings, vcov='HC1')
 
-print(f"\nR²: {ols_full.rsquared:.4f}")
-print(f"Education return: ~{100*ols_full.params['education']:.1f}% per year (semi-elasticity)")
-print(f"Gender gap: ~{100*ols_full.params['gender']:.1f}%")
-print(f"Hours elasticity: {ols_full.params['lnhours']:.3f} (log-log coefficient)")
+print(f"\nR²: {fit_full._r2:.4f}")
+print(f"Education return: ~{100*fit_full.coef()['education']:.1f}% per year (semi-elasticity)")
+print(f"Gender gap: ~{100*fit_full.coef()['gender']:.1f}%")
+print(f"Hours elasticity: {fit_full.coef()['lnhours']:.3f} (log-log coefficient)")
 
 # Full regression table
-ols_full.summary()
+fit_full.summary()
 ```
 
 **Try it yourself!** Copy this code into an empty Google Colab notebook and run it: [Open Colab](https://colab.research.google.com/notebooks/empty.ipynb)
@@ -1342,7 +1342,7 @@ df['x_z'] = df['x'] * df['z']            # Create interaction
 beta_star = beta * (s_x / s_y)           # Manual calculation
 
 # Joint hypothesis tests
-model.f_test('x = 0, x_sq = 0')          # Joint F-test
+fit.wald_test(...)                        # Joint F-test
 
 # Retransformation correction
 y_pred = np.exp(ln_y_hat) * np.exp(s_e**2 / 2)
@@ -1483,10 +1483,10 @@ Estimate three models of labor productivity on physical capital:
 - Log-log: `ln_lp ~ ln_rk`
 
 ```python
-import statsmodels.formula.api as smf
-m1 = smf.ols('lp ~ rk', data=dat2014).fit(cov_type='HC1')
-m2 = smf.ols('ln_lp ~ rk', data=dat2014).fit(cov_type='HC1')
-m3 = smf.ols('ln_lp ~ ln_rk', data=dat2014).fit(cov_type='HC1')
+import pyfixest as pf
+m1 = pf.feols('lp ~ rk', data=dat2014, vcov='HC1')
+m2 = pf.feols('ln_lp ~ rk', data=dat2014, vcov='HC1')
+m3 = pf.feols('ln_lp ~ ln_rk', data=dat2014, vcov='HC1')
 m1.summary(), m2.summary(), m3.summary()
 ```
 
@@ -1500,10 +1500,10 @@ Test whether the returns to human capital follow a nonlinear (quadratic) pattern
 
 ```python
 dat2014['hc_sq'] = dat2014['hc'] ** 2
-m4 = smf.ols('ln_lp ~ ln_rk + hc', data=dat2014).fit(cov_type='HC1')
-m5 = smf.ols('ln_lp ~ ln_rk + hc + hc_sq', data=dat2014).fit(cov_type='HC1')
+m4 = pf.feols('ln_lp ~ ln_rk + hc', data=dat2014, vcov='HC1')
+m5 = pf.feols('ln_lp ~ ln_rk + hc + hc_sq', data=dat2014, vcov='HC1')
 m5.summary()
-print(f"Turning point: hc* = {-m5.params['hc'] / (2*m5.params['hc_sq']):.2f}")
+print(f"Turning point: hc* = {-m5.coef()['hc'] / (2*m5.coef()['hc_sq']):.2f}")
 ```
 
 **Questions:** Is the quadratic term significant? What does the turning point imply about diminishing returns to human capital?
@@ -1586,7 +1586,7 @@ Write a 200-300 word brief addressing:
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-from statsmodels.formula.api import ols
+import pyfixest as pf
 
 url_bol = "https://raw.githubusercontent.com/quarcs-lab/ds4bolivia/master/ds4bolivia_v20250523.csv"
 bol = pd.read_csv(url_bol)
@@ -1628,10 +1628,10 @@ bol_cs[['imds', 'ln_NTLpc2017', 'NTLpc2017_raw', 'sdg7_1_ec']].describe().round(
 # bol_reg = bol_cs[['imds', 'ln_NTLpc2017', 'NTLpc2017_raw']].dropna()
 # bol_reg = bol_reg[bol_reg['imds'] > 0]  # Ensure log is defined
 #
-# m_a = ols('imds ~ ln_NTLpc2017', data=bol_reg).fit(cov_type='HC1')
-# m_b = ols('np.log(imds) ~ ln_NTLpc2017', data=bol_reg).fit(cov_type='HC1')
-# m_c = ols('imds ~ NTLpc2017_raw', data=bol_reg).fit(cov_type='HC1')
-# m_d = ols('np.log(imds) ~ NTLpc2017_raw', data=bol_reg).fit(cov_type='HC1')
+# m_a = pf.feols('imds ~ ln_NTLpc2017', data=bol_reg, vcov='HC1')
+# m_b = pf.feols('np.log(imds) ~ ln_NTLpc2017', data=bol_reg, vcov='HC1')
+# m_c = pf.feols('imds ~ NTLpc2017_raw', data=bol_reg, vcov='HC1')
+# m_d = pf.feols('np.log(imds) ~ NTLpc2017_raw', data=bol_reg, vcov='HC1')
 #
 # print("Model (a) Level-Log  R²:", m_a.rsquared.round(4))
 # print("Model (b) Log-Log    R²:", m_b.rsquared.round(4))
@@ -1655,7 +1655,7 @@ bol_cs[['imds', 'ln_NTLpc2017', 'NTLpc2017_raw', 'sdg7_1_ec']].describe().round(
 # Your code here: Quadratic specification
 #
 # Example structure:
-# m_quad = ols('imds ~ ln_NTLpc2017 + I(ln_NTLpc2017**2)', data=bol_reg).fit(cov_type='HC1')
+# m_quad = pf.feols('imds ~ ln_NTLpc2017 + I(ln_NTLpc2017**2)', data=bol_reg, vcov='HC1')
 # print(m_quad.summary())
 #
 # # Turning point
@@ -1700,7 +1700,7 @@ bol_cs[['imds', 'ln_NTLpc2017', 'NTLpc2017_raw', 'sdg7_1_ec']].describe().round(
 # for col in ['imds', 'ln_NTLpc2017', 'sdg7_1_ec']:
 #     bol_std[f'{col}_z'] = (bol_std[col] - bol_std[col].mean()) / bol_std[col].std()
 #
-# m_std = ols('imds_z ~ ln_NTLpc2017_z + sdg7_1_ec_z', data=bol_std).fit(cov_type='HC1')
+# m_std = pf.feols('imds_z ~ ln_NTLpc2017_z + sdg7_1_ec_z', data=bol_std, vcov='HC1')
 # print(m_std.summary())
 # print("\nStandardized coefficients (beta weights):")
 # print(f"  NTL:         {m_std.params['ln_NTLpc2017_z']:.4f}")
@@ -1724,7 +1724,7 @@ bol_cs[['imds', 'ln_NTLpc2017', 'NTLpc2017_raw', 'sdg7_1_ec']].describe().round(
 # Your code here: Interaction model
 #
 # Example structure:
-# m_int = ols('imds ~ ln_NTLpc2017 * sdg7_1_ec', data=bol_reg_full).fit(cov_type='HC1')
+# m_int = pf.feols('imds ~ ln_NTLpc2017 * sdg7_1_ec', data=bol_reg_full, vcov='HC1')
 # print(m_int.summary())
 #
 # # Marginal effect at different electricity levels
@@ -1756,7 +1756,7 @@ bol_cs[['imds', 'ln_NTLpc2017', 'NTLpc2017_raw', 'sdg7_1_ec']].describe().round(
 # Your code here: Retransformation bias correction
 #
 # Example structure:
-# m_loglog = ols('np.log(imds) ~ ln_NTLpc2017', data=bol_reg).fit(cov_type='HC1')
+# m_loglog = pf.feols('np.log(imds) ~ ln_NTLpc2017', data=bol_reg, vcov='HC1')
 #
 # # Naive prediction
 # naive_pred = np.exp(m_loglog.fittedvalues)

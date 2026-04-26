@@ -609,6 +609,7 @@ footer.page a{color:var(--accent);text-decoration:none}footer.page a:hover{text-
   <div class="code-tabs" id="code-lang-tabs">
     <button type="button" data-lang="python" class="active">Python</button>
     <button type="button" data-lang="stata">Stata</button>
+    <button type="button" data-lang="r">R</button>
   </div>
 
   <div class="code-panel active" id="panel-python">
@@ -929,6 +930,142 @@ display "Decision: " cond(abs(`z') &gt; 1.96, "Reject H0", "Do not reject H0")</
   <div style="display:flex;gap:0.8rem;align-items:center;margin-top:0.8rem;flex-wrap:wrap">
     <button class="btn-copy" onclick="navigator.clipboard.writeText(document.getElementById('code-stata').textContent).then(()=>{this.textContent='Copied!';setTimeout(()=>this.textContent='Copy code',1500)})">Copy code</button>
     <span style="color:var(--text-muted);font-size:0.88rem">Paste into your Stata do-file editor</span>
+  </div>
+  </div>
+
+  <div class="code-panel" id="panel-r">
+  <pre><code id="code-r" class="language-r"># =============================================================================
+# CHAPTER 4 CHEAT SHEET: Statistical Inference for the Mean
+# =============================================================================
+
+# --- Libraries ---
+library(haven)           # read Stata .dta files directly from URLs
+library(ggplot2)         # grammar of graphics for all plots
+
+# =============================================================================
+# STEP 1: Load data directly from a URL
+# =============================================================================
+# read_dta() reads Stata .dta files &mdash; this sample has 171 female workers
+url &lt;- "https://raw.githubusercontent.com/quarcs-lab/data-open/master/AED/AED_EARNINGS.DTA"
+data_earnings &lt;- read_dta(url)
+earnings &lt;- data_earnings$earnings
+
+cat("Dataset:", length(earnings), "observations\n")
+
+# =============================================================================
+# STEP 2: Sample statistics and standard error
+# =============================================================================
+# The standard error measures the precision of the sample mean as an estimate
+# of the population mean. It shrinks with sqrt(n), not n &mdash; so quadrupling the
+# sample size is needed to halve the SE.
+n             &lt;- length(earnings)
+mean_earnings &lt;- mean(earnings)
+std_earnings  &lt;- sd(earnings)              # sd() uses n-1 denominator (sample SD)
+se_earnings   &lt;- std_earnings / sqrt(n)    # standard error = s / sqrt(n)
+
+cat("Sample mean:       $", round(mean_earnings, 2), "\n")
+cat("Standard deviation:$", round(std_earnings, 2), "\n")
+cat("Standard error:    $", round(se_earnings, 2), "\n")
+
+# =============================================================================
+# STEP 3: t-distribution vs standard normal
+# =============================================================================
+# When sigma is unknown (estimated by s), we use the t-distribution instead of
+# the normal. It has fatter tails but approaches the normal as n grows.
+x &lt;- seq(-4, 4, length.out = 200)
+
+ggplot(data.frame(x = x), aes(x = x)) +
+  stat_function(fun = dnorm, linetype = "dashed", linewidth = 1.2,
+                aes(color = "Standard Normal")) +
+  stat_function(fun = dt, args = list(df = 4), linewidth = 1.2,
+                aes(color = "t(4) &mdash; fatter tails")) +
+  stat_function(fun = dt, args = list(df = 30), linewidth = 1.2,
+                aes(color = "t(30) &mdash; nearly normal")) +
+  labs(x = "t value", y = "Density",
+       title = "t-Distribution Approaches Normal as Degrees of Freedom Increase",
+       color = NULL) +
+  theme_minimal() +
+  theme(legend.position = "bottom")
+
+# =============================================================================
+# STEP 4: Confidence interval &mdash; a range of plausible values for mu
+# =============================================================================
+# A 95% CI means: if we repeatedly sampled and built CIs, about 95% would
+# contain the true mu. Formula: x-bar +/- t_crit * SE
+alpha  &lt;- 0.05
+t_crit &lt;- qt(1 - alpha/2, df = n - 1)   # critical value from t(n-1)
+margin &lt;- t_crit * se_earnings
+
+ci_lower &lt;- mean_earnings - margin
+ci_upper &lt;- mean_earnings + margin
+
+cat("Critical t-value (t_170, 0.025):", round(t_crit, 4), "\n")
+cat("Margin of error:                $", round(margin, 2), "\n")
+cat("95% CI: [$", round(ci_lower, 2), ", $", round(ci_upper, 2), "]\n")
+
+# Compare 90%, 95%, and 99% &mdash; higher confidence requires wider intervals
+for (conf in c(0.90, 0.95, 0.99)) {
+  tc &lt;- qt(1 - (1 - conf)/2, df = n - 1)
+  lo &lt;- mean_earnings - tc * se_earnings
+  hi &lt;- mean_earnings + tc * se_earnings
+  cat(sprintf("%3.0f%% CI: [$%.2f, $%.2f]  width = $%.2f\n",
+              conf*100, lo, hi, hi - lo))
+}
+
+# =============================================================================
+# STEP 5: Two-sided hypothesis test &mdash; H0: mu = $40,000
+# =============================================================================
+# The t-statistic measures how many standard errors the estimate is from the
+# hypothesized value. The p-value is the probability of a result at least as
+# extreme as ours if H0 were true.
+mu0    &lt;- 40000
+t_stat &lt;- (mean_earnings - mu0) / se_earnings
+p_val  &lt;- 2 * pt(-abs(t_stat), df = n - 1)  # two-sided p-value
+
+cat("\nH0: mu = $40,000 vs Ha: mu != $40,000\n")
+cat("t-statistic:", round(t_stat, 4), "\n")
+cat("p-value:    ", round(p_val, 4), "\n")
+cat("Decision:   ", ifelse(p_val &lt; 0.05, "Reject H0", "Do not reject H0"),
+    "at alpha = 0.05\n")
+
+# t.test() does all of this in one call:
+t.test(earnings, mu = 40000)
+
+# =============================================================================
+# STEP 6: Statistical vs practical significance &mdash; gasoline prices
+# =============================================================================
+url_gas  &lt;- "https://raw.githubusercontent.com/quarcs-lab/data-open/master/AED/AED_GASPRICE.DTA"
+data_gas &lt;- read_dta(url_gas)
+price    &lt;- data_gas$price
+
+# Test against the CA state average of $3.81
+result_gas &lt;- t.test(price, mu = 3.81)
+cat("\nGas price test: t =", round(result_gas$statistic, 4),
+    ", p =", round(result_gas$p.value, 6), "\n")
+cat("Practical: $", round(3.81 - mean(price), 2), "/gallon x 15 gal = $",
+    round((3.81 - mean(price)) * 15, 2), "per tank\n")
+
+# =============================================================================
+# STEP 7: Inference for proportions &mdash; binary (0/1) data
+# =============================================================================
+# Proportions are just means of 0/1 variables. The same CI and hypothesis-test
+# logic applies &mdash; only the SE formula changes: sqrt(p_hat*(1-p_hat)/n).
+n_voters &lt;- 921
+n_dem    &lt;- 480
+p_hat    &lt;- n_dem / n_voters
+
+# prop.test() gives CI and hypothesis test in one call
+result_prop &lt;- prop.test(n_dem, n_voters, p = 0.50, correct = FALSE)
+
+cat("\nSample proportion:", round(p_hat, 4), "(", round(p_hat*100, 1), "%)\n")
+cat("95% CI: [", round(result_prop$conf.int[1], 4), ",",
+    round(result_prop$conf.int[2], 4), "]\n")
+cat("H0: p = 0.50  p-value =", round(result_prop$p.value, 4), "\n")
+cat("Decision:", ifelse(result_prop$p.value &lt; 0.05,
+    "Reject H0", "Do not reject H0"), "\n")</code></pre>
+  <div style="display:flex;gap:0.8rem;align-items:center;margin-top:0.8rem;flex-wrap:wrap">
+    <button class="btn-copy" onclick="navigator.clipboard.writeText(document.getElementById('code-r').textContent).then(()=>{this.textContent='Copied!';setTimeout(()=>this.textContent='Copy code',1500)})">Copy code</button>
+    <span style="color:var(--text-muted);font-size:0.88rem">Paste into your R console or RStudio</span>
   </div>
   </div>
 </section>
@@ -1281,7 +1418,8 @@ window.addEventListener("resize",function(){document.querySelectorAll(".chart").
   var buttons = tabBar.querySelectorAll('button');
   var panels  = {
     python: document.getElementById('panel-python'),
-    stata:  document.getElementById('panel-stata')
+    stata:  document.getElementById('panel-stata'),
+    r:      document.getElementById('panel-r')
   };
   buttons.forEach(function(btn) {
     btn.addEventListener('click', function() {
@@ -1297,6 +1435,7 @@ window.addEventListener("resize",function(){document.querySelectorAll(".chart").
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" data-manual></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-r.min.js"></script>
 <script>
 // Minimal Stata language grammar for Prism.js syntax highlighting
 Prism.languages.stata = {

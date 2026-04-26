@@ -68,8 +68,7 @@ import numpy as np                                          # numerical operatio
 import pandas as pd                                         # data manipulation
 import matplotlib.pyplot as plt                             # plotting
 import seaborn as sns                                       # statistical visualization
-import statsmodels.api as sm                                # statistical models
-from statsmodels.formula.api import ols                     # OLS with formula syntax
+import pyfixest as pf                                       # fast OLS regression
 from statsmodels.nonparametric.smoothers_lowess import lowess  # LOWESS smoothing
 from scipy import stats                                     # statistical distributions
 from scipy.ndimage import gaussian_filter1d                 # kernel smoothing
@@ -501,17 +500,17 @@ Correlation measures the strength of association, but doesn't provide a predicti
 
 ```{python}
 # Fit OLS regression
-model = ols('price ~ size', data=data_house).fit()
+fit = pf.feols('price ~ size', data=data_house)
 
 # Key results
-intercept = model.params['Intercept']
-slope = model.params['size']
-r_squared = model.rsquared
+intercept = fit.coef()['Intercept']
+slope = fit.coef()['size']
+r_squared = fit._r2
 print(f"Estimated equation: price = {intercept:,.2f} + {slope:.4f} x size")
 print(f"R-squared: {r_squared:.4f} ({r_squared*100:.1f}% of variation explained)")
 
 # Full regression output
-model.summary()
+fit.summary()
 ```
 
 > **Key Concept 5.5: Ordinary Least Squares**
@@ -520,9 +519,9 @@ model.summary()
 
 ```{python}
 # Extract and interpret coefficients
-intercept = model.params['Intercept']
-slope = model.params['size']
-r_squared = model.rsquared
+intercept = fit.coef()['Intercept']
+slope = fit.coef()['size']
+r_squared = fit._r2
 
 # Key regression coefficients
 print(f"Fitted regression line:")
@@ -593,7 +592,7 @@ print(f"  {r_squared*100:.2f}% of price variation is explained by size")
 fig, ax = plt.subplots(figsize=(10, 6))
 ax.scatter(size, price, s=80, alpha=0.7, color='#22d3ee',
            edgecolor='#3a4a6b', label='Actual prices')
-ax.plot(size, model.fittedvalues, color='#c084fc', linewidth=2, label='Fitted regression line')
+ax.plot(size, fit.predict(), color='#c084fc', linewidth=2, label='Fitted regression line')
 
 # Add equation to plot
 equation_text = f'ŷ = {intercept:,.0f} + {slope:.2f} × size\nR² = {r_squared:.4f}'
@@ -620,10 +619,10 @@ When we regress y on only an intercept (no x variable), the OLS estimate equals 
 
 ```{python}
 # Intercept-only regression
-model_intercept = ols('price ~ 1', data=data_house).fit()
+fit_intercept = pf.feols('price ~ 1', data=data_house)
 
 # Intercept-only regression
-print(f"Intercept from regression: ${model_intercept.params[0]:,.2f}")
+print(f"Intercept from regression: ${fit_intercept.coef()['Intercept']:,.2f}")
 print(f"Sample mean of price:      ${price.mean():,.2f}")
 # These are equal, confirming that OLS generalizes the sample mean.
 ```
@@ -656,9 +655,9 @@ $$s_e = \sqrt{\frac{1}{n-2} \sum_{i=1}^n (y_i - \hat{y}_i)^2}$$
 
 ```{python}
 # Measures of model fit
-r_squared = model.rsquared
-adj_r_squared = model.rsquared_adj
-se = np.sqrt(model.mse_resid)
+r_squared = fit._r2
+adj_r_squared = fit._adj_r2
+se = np.sqrt(np.mean(fit._u_hat**2) * len(data_house) / (len(data_house) - 2))
 n = len(data_house)
 
 print(f"\nR-squared:               {r_squared:.4f}")
@@ -747,19 +746,21 @@ epsilon = np.random.normal(0, 2, 5)
 y_sim = 1 + 2*x_sim + epsilon
 
 df_sim = pd.DataFrame({'x': x_sim, 'y': y_sim})
-model_sim = ols('y ~ x', data=df_sim).fit()
+fit_sim = pf.feols('y ~ x', data=df_sim)
 
 # Simulated data for model fit illustration
+fitted_sim = fit_sim.predict()
+resid_sim = fit_sim._u_hat
 print(f"{'x':<5} {'y':<10} {'y-hat':<10} {'Residual (e)':<15} {'(y - y-bar)':<10} {'(y-hat - y-bar)':<10}")
 for i in range(len(x_sim)):
-    print(f"{x_sim[i]:<5} {y_sim[i]:<10.4f} {model_sim.fittedvalues[i]:<10.4f} "
-          f"{model_sim.resid[i]:<15.4f} {y_sim[i] - y_sim.mean():<10.4f} "
-          f"{model_sim.fittedvalues[i] - y_sim.mean():<10.4f}")
+    print(f"{x_sim[i]:<5} {y_sim[i]:<10.4f} {fitted_sim.iloc[i]:<10.4f} "
+          f"{resid_sim.iloc[i]:<15.4f} {y_sim[i] - y_sim.mean():<10.4f} "
+          f"{fitted_sim.iloc[i] - y_sim.mean():<10.4f}")
 
 print(f"\nSums of Squares:")
 total_ss = np.sum((y_sim - y_sim.mean())**2)
-explained_ss = np.sum((model_sim.fittedvalues - y_sim.mean())**2)
-residual_ss = np.sum(model_sim.resid**2)
+explained_ss = np.sum((fitted_sim - y_sim.mean())**2)
+residual_ss = np.sum(resid_sim**2)
 
 print(f"  Total SS     = {total_ss:.4f}")
 print(f"  Explained SS = {explained_ss:.4f}")
@@ -768,7 +769,7 @@ print(f"\nCheck: Explained SS + Residual SS = {explained_ss + residual_ss:.4f}")
 print(f"       Total SS                     = {total_ss:.4f}")
 
 print(f"\nR² = Explained SS / Total SS = {explained_ss / total_ss:.4f}")
-print(f"R² from model = {model_sim.rsquared:.4f}")
+print(f"R² from model = {fit_sim._r2:.4f}")
 ```
 
 ```{python}
@@ -790,13 +791,13 @@ axes[0].legend()
 axes[0].grid(True, alpha=0.3)
 
 # Panel B: Explained SS (deviations of fitted values from mean)
-axes[1].scatter(x_sim, model_sim.fittedvalues, s=100, color='#22d3ee',
+axes[1].scatter(x_sim, fitted_sim, s=100, color='#22d3ee',
                 marker='o', label='Fitted ŷ', zorder=3)
 axes[1].axhline(y=y_sim.mean(), color='red', linewidth=2, linestyle='--',
                 label=f'Mean of y = {y_sim.mean():.2f}', zorder=2)
 # Draw vertical lines from fitted values to mean
 for i in range(len(x_sim)):
-    axes[1].plot([x_sim[i], x_sim[i]], [model_sim.fittedvalues[i], y_sim.mean()],
+    axes[1].plot([x_sim[i], x_sim[i]], [fitted_sim.iloc[i], y_sim.mean()],
                  'g-', linewidth=1.5, alpha=0.5, zorder=1)
 axes[1].set_xlabel('x', fontsize=12)
 axes[1].set_ylabel('ŷ', fontsize=12)
@@ -851,7 +852,7 @@ For now, remember: the standard error ($23,551) gives a rough sense of typical p
 
 ```{python}
 # Complete regression output
-model.summary()
+fit.summary()
 ```
 
 **Guide to reading regression output:**
@@ -883,7 +884,7 @@ $$\hat{y} = b_1 + b_2 x^*$$
 
 # Predict for a 2000 sq ft house
 new_size = pd.DataFrame({'size': [2000]})
-predicted_price = model.predict(new_size)
+predicted_price = fit.predict(newdata=new_size)
 
 print(f"\nExample 1: Predict price for a 2,000 sq ft house")
 print(f"  Using the model: ŷ = {intercept:.2f} + {slope:.2f} × 2000")
@@ -897,7 +898,7 @@ print(f"  Manual check: ${manual_prediction:,.2f}")
 print(f"\nExample 2: Predictions for various house sizes")
 sizes_to_predict = [1500, 1800, 2000, 2500, 3000]
 predictions = pd.DataFrame({'size': sizes_to_predict})
-predictions['predicted_price'] = model.predict(predictions)
+predictions['predicted_price'] = fit.predict(newdata=predictions)
 
 predictions
 
@@ -964,9 +965,9 @@ residual = actual price - predicted price
 # Outlier detection
 
 # Add residuals and standardized residuals to dataset
-data_house['fitted'] = model.fittedvalues
-data_house['residual'] = model.resid
-data_house['std_resid'] = model.resid / model.resid.std()
+data_house['fitted'] = fit.predict()
+data_house['residual'] = fit._u_hat
+data_house['std_resid'] = fit._u_hat / fit._u_hat.std()
 
 # Observations with large residuals (>2 std deviations)
 outliers = data_house[np.abs(data_house['std_resid']) > 2]
@@ -1072,26 +1073,26 @@ We've learned how to measure and quantify relationships. Now we address a critic
 
 ```{python}
 # Reverse regression: demonstrating non-symmetry
-reverse_model = ols('size ~ price', data=data_house).fit()
+fit_reverse = pf.feols('size ~ price', data=data_house)
 
 print("\nOriginal Regression (price ~ size):")
-print(f"  ŷ = {model.params['Intercept']:,.2f} + {model.params['size']:.4f} × size")
-print(f"  Slope: {model.params['size']:.4f}")
-print(f"  R-squared: {model.rsquared:.4f}")
+print(f"  ŷ = {fit.coef()['Intercept']:,.2f} + {fit.coef()['size']:.4f} × size")
+print(f"  Slope: {fit.coef()['size']:.4f}")
+print(f"  R-squared: {fit._r2:.4f}")
 
 print("\nReverse Regression (size ~ price):")
-print(f"  x̂ = {reverse_model.params['Intercept']:.2f} + {reverse_model.params['price']:.6f} × price")
-print(f"  Slope: {reverse_model.params['price']:.6f}")
-print(f"  R-squared: {reverse_model.rsquared:.4f}")
+print(f"  x̂ = {fit_reverse.coef()['Intercept']:.2f} + {fit_reverse.coef()['price']:.6f} × price")
+print(f"  Slope: {fit_reverse.coef()['price']:.6f}")
+print(f"  R-squared: {fit_reverse._r2:.4f}")
 
 print("\nComparison:")
-print(f"  1 / b₂ = 1 / {model.params['size']:.4f} = {1/model.params['size']:.6f}")
-print(f"  c₂ = {reverse_model.params['price']:.6f}")
-print(f"  Are they equal? {np.isclose(1/model.params['size'], reverse_model.params['price'])}")
+print(f"  1 / b₂ = 1 / {fit.coef()['size']:.4f} = {1/fit.coef()['size']:.6f}")
+print(f"  c₂ = {fit_reverse.coef()['price']:.6f}")
+print(f"  Are they equal? {np.isclose(1/fit.coef()['size'], fit_reverse.coef()['price'])}")
 
 print("\nKey insight:")
-print("  • Original slope: $1 increase in size → ${:.2f} increase in price".format(model.params['size']))
-print("  • Reverse slope: $1 increase in price → {:.6f} sq ft increase in size".format(reverse_model.params['price']))
+print("  • Original slope: $1 increase in size → ${:.2f} increase in price".format(fit.coef()['size']))
+print("  • Reverse slope: $1 increase in price → {:.6f} sq ft increase in size".format(fit_reverse.coef()['price']))
 print("  • These answer different questions!")
 
 print("\nNote: Both regressions have the same R² because in simple regression,")
@@ -1221,7 +1222,7 @@ ax.scatter(size, price, s=80, alpha=0.6, color='#22d3ee',
            edgecolor='#3a4a6b', label='Actual data', zorder=1)
 
 # OLS line
-ax.plot(size, model.fittedvalues, color='#c084fc', linewidth=2.5,
+ax.plot(size, fit.predict(), color='#c084fc', linewidth=2.5,
         label='OLS (parametric)', zorder=2)
 
 # LOWESS
@@ -1385,7 +1386,8 @@ This single code block reproduces the core workflow of Chapter 5. It is self-con
 # --- Libraries ---
 import pandas as pd                                         # data loading and manipulation
 import matplotlib.pyplot as plt                              # creating plots and visualizations
-from statsmodels.formula.api import ols                      # OLS regression with R-style formulas
+import pyfixest as pf                                        # fast OLS regression
+# !pip install pyfixest  # uncomment if running in Google Colab
 from statsmodels.nonparametric.smoothers_lowess import lowess  # LOWESS nonparametric smoothing
 
 # =============================================================================
@@ -1430,27 +1432,26 @@ print(f"r² = {r**2:.4f} ({r**2*100:.1f}% of variation shared)")
 # STEP 5: OLS regression — fit the best-fitting line
 # =============================================================================
 # Formula syntax: 'y ~ x' regresses y on x (intercept included automatically)
-# IMPORTANT: .fit() estimates the model — without it, nothing is computed!
-model = ols('price ~ size', data=data_house).fit()
+fit = pf.feols('price ~ size', data=data_house)
 
-slope     = model.params['size']        # marginal effect: $/sq ft
-intercept = model.params['Intercept']   # predicted price when size = 0
-r_squared = model.rsquared              # proportion of variation explained
+slope     = fit.coef()['size']        # marginal effect: $/sq ft
+intercept = fit.coef()['Intercept']   # predicted price when size = 0
+r_squared = fit._r2                   # proportion of variation explained
 
 print(f"Estimated equation: price = {intercept:,.0f} + {slope:.2f} × size")
 print(f"Interpretation: each additional sq ft is associated with ${slope:,.2f} higher price")
 print(f"R-squared: {r_squared:.4f} ({r_squared*100:.1f}% of variation explained)")
 
 # Full regression table (coefficients, std errors, t-stats, p-values, R²)
-model.summary()
+fit.summary()
 
 # =============================================================================
 # STEP 6: Scatter plot with fitted line and R² — visualize model fit
 # =============================================================================
-# model.fittedvalues contains the predicted y-values from the estimated equation
+# fit.predict() contains the predicted y-values from the estimated equation
 fig, ax = plt.subplots(figsize=(10, 6))
 ax.scatter(data_house['size'], data_house['price'], s=60, alpha=0.7, label='Actual prices')
-ax.plot(data_house['size'], model.fittedvalues, color='red', linewidth=2, label='Fitted line')
+ax.plot(data_house['size'], fit.predict(), color='red', linewidth=2, label='Fitted line')
 ax.set_xlabel('House Size (square feet)')
 ax.set_ylabel('House Sale Price (dollars)')
 ax.set_title(f'OLS: price = {intercept:,.0f} + {slope:.2f} × size  (R² = {r_squared:.2%})')
@@ -1463,12 +1464,12 @@ plt.show()
 # STEP 7: Reverse regression — association is NOT causation
 # =============================================================================
 # If regression = causation, the reverse slope would be 1/slope. It is not.
-reverse_model = ols('size ~ price', data=data_house).fit()
+fit_reverse = pf.feols('size ~ price', data=data_house)
 
 print(f"price ~ size  slope: {slope:.4f}")
-print(f"size ~ price  slope: {reverse_model.params['price']:.6f}")
+print(f"size ~ price  slope: {fit_reverse.coef()['price']:.6f}")
 print(f"1 / original slope:  {1/slope:.6f}")
-print(f"Reciprocals match?   {1/slope:.6f} ≠ {reverse_model.params['price']:.6f}")
+print(f"Reciprocals match?   {1/slope:.6f} ≠ {fit_reverse.coef()['price']:.6f}")
 print("→ Regression is asymmetric: association, not causation!")
 
 # =============================================================================
@@ -1480,7 +1481,7 @@ lowess_result = lowess(data_house['price'], data_house['size'], frac=0.6)
 
 fig, ax = plt.subplots(figsize=(10, 6))
 ax.scatter(data_house['size'], data_house['price'], s=60, alpha=0.6, label='Actual data')
-ax.plot(data_house['size'], model.fittedvalues, color='red',
+ax.plot(data_house['size'], fit.predict(), color='red',
         linewidth=2, label='OLS (parametric)')
 ax.plot(lowess_result[:, 0], lowess_result[:, 1], color='green',
         linewidth=2, linestyle='--', label='LOWESS (nonparametric)')
@@ -1603,7 +1604,7 @@ Using the house price data or your own dataset:
 
 (b) Calculate the correlation coefficient using `pandas` `.corr()` method.
 
-(c) Fit an OLS regression using `statsmodels` and interpret the output.
+(c) Fit an OLS regression using `pyfixest` and interpret the output.
 
 (d) Create residual plots to check for outliers.
 
@@ -1684,7 +1685,8 @@ This research ([Mendez, 2020](https://github.com/quarcs-lab/mendez2020-convergen
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-from statsmodels.formula.api import ols
+import pyfixest as pf
+# !pip install pyfixest  # uncomment if running in Google Colab
 
 # Load convergence clubs dataset
 df = pd.read_csv(
@@ -1795,7 +1797,7 @@ print(f"- R² (shared variation): {r**2:.4f} ({r**2*100:.2f}%)")
 **Instructions:**
 
 1. Prepare regression data (remove missing values, reset index if needed)
-2. Estimate: `lp ~ kl` using `ols()` from statsmodels
+2. Estimate: `lp ~ kl` using `pf.feols()` from pyfixest
 3. Display the regression summary
 4. Extract and interpret the slope coefficient economically
 5. Report the R-squared value
@@ -2097,7 +2099,7 @@ plt.show()
 3. Estimate a second OLS: `imds ~ sdg1_1_ubn`. Report slope, intercept, and R²
 4. Compare: Which predictor explains more variation in development?
 
-**Hint**: Use `ols()` from statsmodels as practiced in this chapter.
+**Hint**: Use `pf.feols()` from pyfixest as practiced in this chapter.
 
 ```{python}
 # Your code here: OLS regression with fitted lines
@@ -2112,25 +2114,25 @@ plt.show()
 # reg_data = bol_cs[['imds', 'ln_NTLpc2017', 'sdg1_1_ubn']].dropna()
 #
 # # Model 1: NTL
-# model_ntl = ols('imds ~ ln_NTLpc2017', data=reg_data).fit()
+# fit_ntl = pf.feols('imds ~ ln_NTLpc2017', data=reg_data)
 # print("Model 1: IMDS ~ Log NTL per Capita")
-# print(f"  Slope:     {model_ntl.params['ln_NTLpc2017']:.4f}")
-# print(f"  Intercept: {model_ntl.params['Intercept']:.4f}")
-# print(f"  R-squared: {model_ntl.rsquared:.4f}")
+# print(f"  Slope:     {fit_ntl.coef()['ln_NTLpc2017']:.4f}")
+# print(f"  Intercept: {fit_ntl.coef()['Intercept']:.4f}")
+# print(f"  R-squared: {fit_ntl._r2:.4f}")
 #
 # # Model 2: UBN
-# model_ubn = ols('imds ~ sdg1_1_ubn', data=reg_data).fit()
+# fit_ubn = pf.feols('imds ~ sdg1_1_ubn', data=reg_data)
 # print("\nModel 2: IMDS ~ Unsatisfied Basic Needs")
-# print(f"  Slope:     {model_ubn.params['sdg1_1_ubn']:.4f}")
-# print(f"  Intercept: {model_ubn.params['Intercept']:.4f}")
-# print(f"  R-squared: {model_ubn.rsquared:.4f}")
+# print(f"  Slope:     {fit_ubn.coef()['sdg1_1_ubn']:.4f}")
+# print(f"  Intercept: {fit_ubn.coef()['Intercept']:.4f}")
+# print(f"  R-squared: {fit_ubn._r2:.4f}")
 #
 # # Scatter + fitted line for Model 1
 # fig, ax = plt.subplots(figsize=(8, 6))
 # ax.scatter(reg_data['ln_NTLpc2017'], reg_data['imds'], alpha=0.4, color='#008CB7', s=20)
 # x_range = np.linspace(reg_data['ln_NTLpc2017'].min(), reg_data['ln_NTLpc2017'].max(), 100)
-# ax.plot(x_range, model_ntl.params['Intercept'] + model_ntl.params['ln_NTLpc2017'] * x_range,
-#         color='#C21E72', linewidth=2, label=f'OLS: R² = {model_ntl.rsquared:.3f}')
+# ax.plot(x_range, fit_ntl.coef()['Intercept'] + fit_ntl.coef()['ln_NTLpc2017'] * x_range,
+#         color='#C21E72', linewidth=2, label=f'OLS: R² = {fit_ntl._r2:.3f}')
 # ax.set_xlabel('Log NTL per Capita (2017)')
 # ax.set_ylabel('IMDS')
 # ax.set_title('OLS Regression: Nighttime Lights Predicting Development')
@@ -2183,9 +2185,9 @@ plt.show()
 # for dep_name in ['La Paz', 'Santa Cruz', 'Potosí']:
 #     dep_data = plot_data[plot_data['dep'] == dep_name]
 #     if len(dep_data) > 5:
-#         model_dep = ols('imds ~ ln_NTLpc2017', data=dep_data).fit()
-#         print(f"{dep_name}: slope = {model_dep.params['ln_NTLpc2017']:.3f}, "
-#               f"R² = {model_dep.rsquared:.3f}, n = {len(dep_data)}")
+#         fit_dep = pf.feols('imds ~ ln_NTLpc2017', data=dep_data)
+#         print(f"{dep_name}: slope = {fit_dep.coef()['ln_NTLpc2017']:.3f}, "
+#               f"R² = {fit_dep._r2:.3f}, n = {len(dep_data)}")
 ```
 
 #### Task 6: Alternative Predictors (Independent)
@@ -2210,28 +2212,28 @@ plt.show()
 
 # Example structure:
 # reg_data = bol_cs[['imds', 'ln_NTLpc2017', 'sdg1_1_ubn']].dropna()
-# model_ntl = ols('imds ~ ln_NTLpc2017', data=reg_data).fit()
-# model_ubn = ols('imds ~ sdg1_1_ubn', data=reg_data).fit()
+# fit_ntl = pf.feols('imds ~ ln_NTLpc2017', data=reg_data)
+# fit_ubn = pf.feols('imds ~ sdg1_1_ubn', data=reg_data)
 #
 # fig, axes = plt.subplots(1, 2, figsize=(14, 5))
 #
 # # Left: NTL model
 # axes[0].scatter(reg_data['ln_NTLpc2017'], reg_data['imds'], alpha=0.4, color='#008CB7', s=20)
 # x1 = np.linspace(reg_data['ln_NTLpc2017'].min(), reg_data['ln_NTLpc2017'].max(), 100)
-# axes[0].plot(x1, model_ntl.predict(pd.DataFrame({'ln_NTLpc2017': x1})),
+# axes[0].plot(x1, fit_ntl.predict(newdata=pd.DataFrame({'ln_NTLpc2017': x1})),
 #              color='#C21E72', linewidth=2)
 # axes[0].set_xlabel('Log NTL per Capita (2017)')
 # axes[0].set_ylabel('IMDS')
-# axes[0].set_title(f'Model 1: NTL (R² = {model_ntl.rsquared:.3f})')
+# axes[0].set_title(f'Model 1: NTL (R² = {fit_ntl._r2:.3f})')
 #
 # # Right: UBN model
 # axes[1].scatter(reg_data['sdg1_1_ubn'], reg_data['imds'], alpha=0.4, color='#7A209F', s=20)
 # x2 = np.linspace(reg_data['sdg1_1_ubn'].min(), reg_data['sdg1_1_ubn'].max(), 100)
-# axes[1].plot(x2, model_ubn.predict(pd.DataFrame({'sdg1_1_ubn': x2})),
+# axes[1].plot(x2, fit_ubn.predict(newdata=pd.DataFrame({'sdg1_1_ubn': x2})),
 #              color='#C21E72', linewidth=2)
 # axes[1].set_xlabel('Unsatisfied Basic Needs (%)')
 # axes[1].set_ylabel('IMDS')
-# axes[1].set_title(f'Model 2: UBN (R² = {model_ubn.rsquared:.3f})')
+# axes[1].set_title(f'Model 2: UBN (R² = {fit_ubn._r2:.3f})')
 #
 # plt.suptitle('Comparing Predictors of Municipal Development',
 #              fontsize=13, fontweight='bold')
@@ -2239,9 +2241,9 @@ plt.show()
 # plt.show()
 #
 # print(f"\nR² comparison:")
-# print(f"  NTL model: {model_ntl.rsquared:.4f}")
-# print(f"  UBN model: {model_ubn.rsquared:.4f}")
-# print(f"  Difference: {abs(model_ubn.rsquared - model_ntl.rsquared):.4f}")
+# print(f"  NTL model: {fit_ntl._r2:.4f}")
+# print(f"  UBN model: {fit_ubn._r2:.4f}")
+# print(f"  Difference: {abs(fit_ubn._r2 - fit_ntl._r2):.4f}")
 ```
 
 ### What You've Learned from This Case Study

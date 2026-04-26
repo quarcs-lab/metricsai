@@ -544,6 +544,7 @@ footer.page a{color:var(--accent);text-decoration:none}footer.page a:hover{text-
   <div class="code-tabs" id="code-lang-tabs">
     <button type="button" data-lang="python" class="active">Python</button>
     <button type="button" data-lang="stata">Stata</button>
+    <button type="button" data-lang="r">R</button>
   </div>
 
   <div class="code-panel active" id="panel-python">
@@ -555,7 +556,8 @@ footer.page a{color:var(--accent);text-decoration:none}footer.page a:hover{text-
 import numpy as np                        # numerical operations (log, exp, sqrt)
 import pandas as pd                       # data loading and manipulation
 import matplotlib.pyplot as plt           # creating plots and visualizations
-from statsmodels.formula.api import ols   # OLS regression with R-style formulas
+import pyfixest as pf                     # OLS regression with R-style formulas
+# !pip install pyfixest                   # uncomment if running in Google Colab
 
 # =============================================================================
 # STEP 1: Load data directly from a URL
@@ -574,27 +576,27 @@ print(data_earnings[['earnings', 'lnearnings', 'age', 'education']].describe().r
 # STEP 2: Log transformations — levels vs log-linear vs log-log
 # =============================================================================
 # Three specifications of the same relationship reveal different stories
-ols_levels = ols('earnings ~ age + education', data=data_earnings).fit(cov_type='HC1')
-ols_loglin = ols('lnearnings ~ age + education', data=data_earnings).fit(cov_type='HC1')
-ols_loglog = ols('lnearnings ~ lnage + education', data=data_earnings).fit(cov_type='HC1')
+fit_levels = pf.feols('earnings ~ age + education', data=data_earnings, vcov='HC1')
+fit_loglin = pf.feols('lnearnings ~ age + education', data=data_earnings, vcov='HC1')
+fit_loglog = pf.feols('lnearnings ~ lnage + education', data=data_earnings, vcov='HC1')
 
 print("=== Levels: absolute dollar effects ===")
-print(f"  Education: +${ols_levels.params['education']:,.0f} per year")
+print(f"  Education: +${fit_levels.coef()['education']:,.0f} per year")
 
 print("\n=== Log-Linear: semi-elasticity (% change per unit) ===")
-print(f"  Education: +{100*ols_loglin.params['education']:.1f}% per year (Mincer return)")
+print(f"  Education: +{100*fit_loglin.coef()['education']:.1f}% per year (Mincer return)")
 
 print("\n=== Log-Log: elasticity (% change per % change) ===")
-print(f"  Age elasticity: {ols_loglog.params['lnage']:.4f}")
+print(f"  Age elasticity: {fit_loglog.coef()['lnage']:.4f}")
 
 # =============================================================================
 # STEP 3: Quadratic model — turning point and varying marginal effects
 # =============================================================================
 # A quadratic in age captures the inverted-U life-cycle earnings profile
-ols_quad = ols('earnings ~ age + agesq + education', data=data_earnings).fit(cov_type='HC1')
+fit_quad = pf.feols('earnings ~ age + agesq + education', data=data_earnings, vcov='HC1')
 
-bage    = ols_quad.params['age']
-bagesq  = ols_quad.params['agesq']
+bage    = fit_quad.coef()['age']
+bagesq  = fit_quad.coef()['agesq']
 turning_point = -bage / (2 * bagesq)        # age where earnings peak
 
 print(f"Turning point: {turning_point:.1f} years")
@@ -603,23 +605,27 @@ for a in [25, 40, 55]:
     print(f"  ME at age {a}: ${me:,.0f}/year")
 
 # Joint F-test: H0: age and age² are jointly zero
-f_test = ols_quad.wald_test('(age = 0, agesq = 0)', use_f=True)
-print(f"Joint F-test p-value: {f_test.pvalue:.4f}")
+all_vars = list(fit_quad.coef().index)
+R = np.zeros((2, len(all_vars)))
+R[0, all_vars.index('age')] = 1
+R[1, all_vars.index('agesq')] = 1
+f_test = fit_quad.wald_test(R=R)
+print(f"Joint F-test p-value: {f_test.pval.values[0]:.4f}")
 
 # =============================================================================
 # STEP 4: Standardized coefficients — compare variable importance
 # =============================================================================
 # Raw coefficients can't be compared across different units; beta* can
-ols_mix = ols('earnings ~ gender + age + agesq + education + dself + dgovt + lnhours',
-              data=data_earnings).fit(cov_type='HC1')
+fit_mix = pf.feols('earnings ~ gender + age + agesq + education + dself + dgovt + lnhours',
+                   data=data_earnings, vcov='HC1')
 
 sd_y = data_earnings['earnings'].std()
 predictors = ['gender', 'age', 'agesq', 'education', 'dself', 'dgovt', 'lnhours']
 
 print(f"\n{'Variable':&lt;12} {'Raw coef':&gt;12} {'Beta*':&gt;8}")
 print("-" * 34)
-for var in sorted(predictors, key=lambda v: abs(ols_mix.params[v] * data_earnings[v].std() / sd_y), reverse=True):
-    raw  = ols_mix.params[var]
+for var in sorted(predictors, key=lambda v: abs(fit_mix.coef()[v] * data_earnings[v].std() / sd_y), reverse=True):
+    raw  = fit_mix.coef()[var]
     beta_star = raw * data_earnings[var].std() / sd_y
     print(f"{var:&lt;12} {raw:&gt;12.2f} {beta_star:&gt;8.4f}")
 
@@ -627,10 +633,10 @@ for var in sorted(predictors, key=lambda v: abs(ols_mix.params[v] * data_earning
 # STEP 5: Interaction terms — education returns that vary with age
 # =============================================================================
 # Does one more year of schooling pay the same at 25 as at 55?
-ols_inter = ols('earnings ~ age + education + agebyeduc', data=data_earnings).fit(cov_type='HC1')
+fit_inter = pf.feols('earnings ~ age + education + agebyeduc', data=data_earnings, vcov='HC1')
 
-b_educ  = ols_inter.params['education']
-b_inter = ols_inter.params['agebyeduc']
+b_educ  = fit_inter.coef()['education']
+b_inter = fit_inter.coef()['agebyeduc']
 
 print(f"\nME of education = {b_educ:,.0f} + {b_inter:.1f} × age")
 for a in [25, 40, 55]:
@@ -641,10 +647,10 @@ for a in [25, 40, 55]:
 # STEP 6: Retransformation bias — naive exp() underpredicts
 # =============================================================================
 # Jensen's inequality: E[exp(u)] &gt; exp(E[u]), so naive predictions are biased
-rmse_log = np.sqrt(ols_loglin.mse_resid)
+rmse_log = np.sqrt(np.mean(fit_loglin._u_hat**2))
 correction = np.exp(rmse_log**2 / 2)        # normal-based smearing factor
 
-naive_pred    = np.exp(ols_loglin.fittedvalues)
+naive_pred    = np.exp(fit_loglin.predict())
 adjusted_pred = correction * naive_pred
 
 print(f"\nSmearing factor: {correction:.4f}")
@@ -656,16 +662,16 @@ print(f"Corrected mean:  ${adjusted_pred.mean():,.0f}  (bias removed)")
 # STEP 7: Comprehensive model — combine all transformation types
 # =============================================================================
 # A single model mixing logs, quadratics, dummies, and continuous regressors
-ols_full = ols('lnearnings ~ gender + age + agesq + education + dself + dgovt + lnhours',
-               data=data_earnings).fit(cov_type='HC1')
+fit_full = pf.feols('lnearnings ~ gender + age + agesq + education + dself + dgovt + lnhours',
+                    data=data_earnings, vcov='HC1')
 
-print(f"\nR²: {ols_full.rsquared:.4f}")
-print(f"Education return: ~{100*ols_full.params['education']:.1f}% per year (semi-elasticity)")
-print(f"Gender gap: ~{100*ols_full.params['gender']:.1f}%")
-print(f"Hours elasticity: {ols_full.params['lnhours']:.3f} (log-log coefficient)")
+print(f"\nR²: {fit_full._r2:.4f}")
+print(f"Education return: ~{100*fit_full.coef()['education']:.1f}% per year (semi-elasticity)")
+print(f"Gender gap: ~{100*fit_full.coef()['gender']:.1f}%")
+print(f"Hours elasticity: {fit_full.coef()['lnhours']:.3f} (log-log coefficient)")
 
 # Full regression table
-ols_full.summary()</code></pre>
+fit_full.summary()</code></pre>
   <div style="display:flex;gap:0.8rem;align-items:center;margin-top:0.8rem;flex-wrap:wrap">
     <button class="btn-copy" onclick="navigator.clipboard.writeText(document.getElementById('code-python').textContent).then(()=>{this.textContent='Copied!';setTimeout(()=>this.textContent='Copy code',1500)})">Copy code</button>
     <a class="btn-colab" href="https://colab.research.google.com/notebooks/empty.ipynb" target="_blank" rel="noopener">Open empty Colab notebook &rarr;</a>
@@ -800,6 +806,115 @@ display "Hours elasticity: " _b[lnhours] " (log-log coefficient)"
   <div style="display:flex;gap:0.8rem;align-items:center;margin-top:0.8rem;flex-wrap:wrap">
     <button class="btn-copy" onclick="navigator.clipboard.writeText(document.getElementById('code-stata').textContent).then(()=>{this.textContent='Copied!';setTimeout(()=>this.textContent='Copy code',1500)})">Copy code</button>
     <span style="color:var(--text-muted);font-size:0.88rem">Paste into your Stata do-file editor</span>
+  </div>
+  </div>
+
+  <div class="code-panel" id="panel-r">
+  <pre><code id="code-r" class="language-r"># =============================================================================
+# CHAPTER 15 CHEAT SHEET: Regression with Transformed Variables
+# =============================================================================
+
+# --- Libraries ---
+library(haven)           # read Stata .dta files
+library(fixest)          # fast OLS estimation with feols()
+library(dplyr)           # data manipulation
+library(ggplot2)         # grammar of graphics
+
+# =============================================================================
+# STEP 1: Load data directly from a URL
+# =============================================================================
+url &lt;- "https://raw.githubusercontent.com/quarcs-lab/data-open/master/AED/AED_EARNINGS_COMPLETE.DTA"
+data_earnings &lt;- read_dta(url) |&gt;
+  mutate(lnage = log(age))
+
+cat("Dataset:", nrow(data_earnings), "observations\n")
+
+# =============================================================================
+# STEP 2: Log transformations — levels vs log-linear vs log-log
+# =============================================================================
+m_levels &lt;- feols(earnings ~ age + education, data = data_earnings, vcov = "HC1")
+m_loglin &lt;- feols(lnearnings ~ age + education, data = data_earnings, vcov = "HC1")
+m_loglog &lt;- feols(lnearnings ~ lnage + education, data = data_earnings, vcov = "HC1")
+
+cat("Levels:     Education +$", round(coef(m_levels)["education"], 0), "/yr\n")
+cat("Log-linear: Education +", round(100*coef(m_loglin)["education"], 1), "%/yr\n")
+cat("Log-log:    Age elasticity =", round(coef(m_loglog)["lnage"], 4), "\n")
+
+# =============================================================================
+# STEP 3: Quadratic model — turning point and varying marginal effects
+# =============================================================================
+m_quad &lt;- feols(earnings ~ age + agesq + education, data = data_earnings, vcov = "HC1")
+
+b_age   &lt;- coef(m_quad)["age"]
+b_agesq &lt;- coef(m_quad)["agesq"]
+turning_point &lt;- -b_age / (2 * b_agesq)
+
+cat("Turning point:", round(turning_point, 1), "years\n")
+for (a in c(25, 40, 55)) {
+  me &lt;- b_age + 2 * b_agesq * a
+  cat("  ME at age", a, ": $", round(me, 0), "/year\n")
+}
+
+# Joint F-test: H0: age and age&#178; are jointly zero
+wald(m_quad, c("age", "agesq"))
+
+# =============================================================================
+# STEP 4: Standardized coefficients — compare variable importance
+# =============================================================================
+# Scale each variable to mean 0, SD 1, then re-estimate
+vars_to_std &lt;- c("earnings","gender","age","agesq","education","dself","dgovt","lnhours")
+data_std &lt;- data_earnings |&gt;
+  mutate(across(all_of(vars_to_std), ~ as.numeric(scale(.))))
+
+m_std &lt;- feols(earnings ~ gender + age + agesq + education + dself + dgovt + lnhours,
+               data = data_std)
+cat("\nStandardized coefficients (beta*):\n")
+print(round(coef(m_std)[-1], 4))
+
+# =============================================================================
+# STEP 5: Interaction terms — education returns that vary with age
+# =============================================================================
+m_inter &lt;- feols(earnings ~ age + education + agebyeduc,
+                 data = data_earnings, vcov = "HC1")
+
+b_educ  &lt;- coef(m_inter)["education"]
+b_inter &lt;- coef(m_inter)["agebyeduc"]
+
+cat("\nME of education =", round(b_educ, 0), "+", round(b_inter, 1), "&#215; age\n")
+for (a in c(25, 40, 55)) {
+  me &lt;- b_educ + b_inter * a
+  cat("  At age", a, ": $", round(me, 0), "per year of education\n")
+}
+
+# =============================================================================
+# STEP 6: Retransformation bias — naive exp() underpredicts
+# =============================================================================
+# Jensen's inequality: E[exp(u)] &gt; exp(E[u])
+rmse_log   &lt;- sigma(lm(lnearnings ~ age + education, data = data_earnings))
+correction &lt;- exp(rmse_log^2 / 2)        # normal-based smearing factor
+
+naive_pred    &lt;- exp(fitted(m_loglin))
+adjusted_pred &lt;- correction * naive_pred
+
+cat("\nSmearing factor:", round(correction, 4), "\n")
+cat("Actual mean:    $", round(mean(data_earnings$earnings), 0), "\n")
+cat("Naive mean:     $", round(mean(naive_pred), 0), " (underpredicts)\n")
+cat("Corrected mean: $", round(mean(adjusted_pred), 0), " (bias removed)\n")
+
+# =============================================================================
+# STEP 7: Comprehensive model — combine all transformation types
+# =============================================================================
+m_full &lt;- feols(lnearnings ~ gender + age + agesq + education + dself + dgovt + lnhours,
+                data = data_earnings, vcov = "HC1")
+summary(m_full)
+
+cat("R&#178;:", round(r2(m_full), 4), "\n")
+cat("Education return: ~", round(100*coef(m_full)["education"], 1), "%/yr\n")
+cat("Gender gap: ~", round(100*coef(m_full)["gender"], 1), "%\n")
+cat("Hours elasticity:", round(coef(m_full)["lnhours"], 3), "\n")</code></pre>
+  <div style="display:flex;gap:0.8rem;align-items:center;margin-top:0.8rem;flex-wrap:wrap">
+    <button class="btn-copy" onclick="navigator.clipboard.writeText(document.getElementById('code-r').textContent).then(()=>{this.textContent='Copied!';setTimeout(()=>this.textContent='Copy code',1500)})">Copy code</button>
+    <span style="color:var(--text-muted);font-size:0.88rem">Paste into your R console or RStudio</span>
   </div>
   </div>
 </section>
@@ -1035,7 +1150,8 @@ window.addEventListener("resize",function(){document.querySelectorAll(".chart").
   var buttons = tabBar.querySelectorAll('button');
   var panels  = {
     python: document.getElementById('panel-python'),
-    stata:  document.getElementById('panel-stata')
+    stata:  document.getElementById('panel-stata'),
+    r: document.getElementById('panel-r')
   };
   buttons.forEach(function(btn) {
     btn.addEventListener('click', function() {
@@ -1051,6 +1167,7 @@ window.addEventListener("resize",function(){document.querySelectorAll(".chart").
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" data-manual></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-r.min.js"></script>
 <script>
 // Minimal Stata language grammar for Prism.js syntax highlighting
 Prism.languages.stata = {

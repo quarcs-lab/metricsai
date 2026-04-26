@@ -80,10 +80,7 @@ import numpy as np                        # numerical operations
 import pandas as pd                       # data manipulation
 import matplotlib.pyplot as plt           # plotting
 import seaborn as sns                     # statistical visualizations
-import statsmodels.api as sm              # statistical models
-from statsmodels.formula.api import ols   # OLS with formula syntax
-from statsmodels.stats.diagnostic import het_breuschpagan
-from statsmodels.stats.outliers_influence import variance_inflation_factor
+import pyfixest as pf                    # fast OLS/IV estimation
 from scipy import stats                   # statistical tests
 import warnings
 warnings.filterwarnings('ignore')
@@ -169,26 +166,26 @@ plt.show()
 
 ```{python}
 # Bivariate regression: API ~ Edparent
-model_api_biv = ols('api99 ~ edparent', data=data_api).fit(cov_type='HC1')
+fit_api_biv = pf.feols('api99 ~ edparent', data=data_api, vcov='HC1')
 
 # Key results
-intercept_api = model_api_biv.params['Intercept']
-slope_api     = model_api_biv.params['edparent']
-r2_api        = model_api_biv.rsquared
+intercept_api = fit_api_biv.coef()['Intercept']
+slope_api     = fit_api_biv.coef()['edparent']
+r2_api        = fit_api_biv._r2
 
 print(f"Estimated equation: API = {intercept_api:.1f} + {slope_api:.1f} x edparent")
 print(f"Slope: each additional year of parent education is associated with {slope_api:.1f} higher API")
 print(f"R-squared: {r2_api:.4f} ({r2_api*100:.1f}% of variation explained)")
 
 # Full regression output
-model_api_biv.summary()
+fit_api_biv.summary()
 ```
 
 ```{python}
 # Scatter plot with regression line
 plt.figure(figsize=(10, 6))
 plt.scatter(data_api['edparent'], data_api['api99'], alpha=0.5, s=30, color='#22d3ee')  # s = marker size, alpha = transparency
-plt.plot(data_api['edparent'], model_api_biv.fittedvalues, color='#c084fc', linewidth=2,
+plt.plot(data_api['edparent'], fit_api_biv.predict(), color='#c084fc', linewidth=2,
          label='Fitted line')
 plt.xlabel('Average Years of Parent Education')
 plt.ylabel('Academic Performance Index (API)')
@@ -242,17 +239,17 @@ The correlation matrix shows the **linear relationships** between all variables:
 
 ```{python}
 # Multiple regression
-model_api_mult = ols('api99 ~ edparent + meals + englearn + yearround + credteach + emerteach',
-                      data=data_api).fit()
+fit_api_mult = pf.feols('api99 ~ edparent + meals + englearn + yearround + credteach + emerteach',
+                         data=data_api)
 # Multiple Regression
-model_api_mult.summary()
+fit_api_mult.summary()
 
 # Coefficient table
 coef_df = pd.DataFrame({
-    'Coefficient': model_api_mult.params,
-    'Std Error': model_api_mult.bse,
-    't-stat': model_api_mult.tvalues,
-    'p-value': model_api_mult.pvalues
+    'Coefficient': fit_api_mult.coef(),
+    'Std Error': fit_api_mult.se(),
+    't-stat': fit_api_mult.tstat(),
+    'p-value': fit_api_mult.pval()
 }).round(3)
 print("\n", coef_df)
 ```
@@ -313,21 +310,22 @@ data_cobb[['q', 'k', 'l', 'lnq', 'lnk', 'lnl']].describe()
 
 ```{python}
 # Estimate Cobb-Douglas with HAC standard errors
-model_cobb = ols('lnq ~ lnk + lnl', data=data_cobb).fit(cov_type='HAC', cov_kwds={'maxlags': 3})
+data_cobb['_time'] = range(len(data_cobb))
+fit_cobb = pf.feols('lnq ~ lnk + lnl', data=data_cobb, vcov={'NW': 3})
 
 # Key results
-beta_k = model_cobb.params['lnk']
-beta_l = model_cobb.params['lnl']
-r2_cobb = model_cobb.rsquared
+beta_k = fit_cobb.coef()['lnk']
+beta_l = fit_cobb.coef()['lnl']
+r2_cobb = fit_cobb._r2
 
-print(f"Estimated equation: ln(Q) = {model_cobb.params['Intercept']:.3f} + {beta_k:.3f} ln(K) + {beta_l:.3f} ln(L)")
+print(f"Estimated equation: ln(Q) = {fit_cobb.coef()['Intercept']:.3f} + {beta_k:.3f} ln(K) + {beta_l:.3f} ln(L)")
 print(f"Capital elasticity: {beta_k:.3f} (1% increase in K raises output by {beta_k:.3f}%)")
 print(f"Labor elasticity: {beta_l:.3f} (1% increase in L raises output by {beta_l:.3f}%)")
 print(f"Sum of coefficients: {beta_k:.3f} + {beta_l:.3f} = {beta_k + beta_l:.3f}")
 print(f"R-squared: {r2_cobb:.4f}")
 
 # Full regression output
-model_cobb.summary()
+fit_cobb.summary()
 ```
 
 > **Key Concept 13.2: Logarithmic Transformation of Production Functions**
@@ -381,13 +379,14 @@ print(f"Estimated sum: {sum_betas:.3f}")
 # Restricted model: ln(Q/L) ~ ln(K/L)
 data_cobb['lnq_per_l'] = data_cobb['lnq'] - data_cobb['lnl']
 data_cobb['lnk_per_l'] = data_cobb['lnk'] - data_cobb['lnl']
-model_restricted = ols('lnq_per_l ~ lnk_per_l', data=data_cobb).fit()
+fit_restricted = pf.feols('lnq_per_l ~ lnk_per_l', data=data_cobb)
 
 # F-test
-rss_unr = model_cobb.ssr
-rss_r = model_restricted.ssr
-f_stat = ((rss_r - rss_unr) / 1) / (rss_unr / model_cobb.df_resid)
-p_value = 1 - stats.f.cdf(f_stat, 1, model_cobb.df_resid)
+rss_unr = np.sum(fit_cobb._u_hat**2)
+rss_r = np.sum(fit_restricted._u_hat**2)
+df_resid = fit_cobb._N - len(fit_cobb.coef())
+f_stat = ((rss_r - rss_unr) / 1) / (rss_unr / df_resid)
+p_value = 1 - stats.f.cdf(f_stat, 1, df_resid)
 
 print(f"F-statistic: {f_stat:.2f}")
 print(f"p-value: {p_value:.3f}")
@@ -400,9 +399,9 @@ print(f"Conclusion: {'Reject' if p_value < 0.05 else 'Fail to reject'} H0 at 5% 
 
 ```{python}
 # Predicted output with bias correction
-se = np.sqrt(model_cobb.scale)
+se = np.sqrt(np.mean(fit_cobb._u_hat**2))
 bias_correction = np.exp(se**2 / 2)
-data_cobb['q_pred'] = bias_correction * np.exp(model_cobb.fittedvalues)
+data_cobb['q_pred'] = bias_correction * np.exp(fit_cobb.predict())
 
 # Plot actual vs predicted
 plt.figure(figsize=(10, 6))
@@ -459,10 +458,11 @@ data_phillips.head()
 
 ```{python}
 # Pre-1970 regression
-data_pre1970 = data_phillips[data_phillips['year'] < 1970]
-model_pre = ols('inflgdp ~ urate', data=data_pre1970).fit(cov_type='HAC', cov_kwds={'maxlags': 3})
+data_pre1970 = data_phillips[data_phillips['year'] < 1970].copy()
+data_pre1970['_time'] = range(len(data_pre1970))
+fit_pre = pf.feols('inflgdp ~ urate', data=data_pre1970, vcov={'NW': 3})
 # Phillips Curve Pre-1970 (1949-1969)
-model_pre.summary()
+fit_pre.summary()
 ```
 
 ### **Pre-1970: Phillips Curve Works!**
@@ -484,7 +484,7 @@ In the 1950s-60s, expected inflation was **stable and low** (around 2-3%). Since
 # Plot pre-1970
 plt.figure(figsize=(10, 6))
 plt.scatter(data_pre1970['urate'], data_pre1970['inflgdp'], alpha=0.7, s=50, color='#22d3ee')  # s = marker size, alpha = transparency
-plt.plot(data_pre1970['urate'], model_pre.fittedvalues, color='#c084fc', linewidth=2,
+plt.plot(data_pre1970['urate'], fit_pre.predict(), color='#c084fc', linewidth=2,
          label='Fitted line')
 plt.xlabel('Unemployment Rate (%)')
 plt.ylabel('Inflation Rate (%)')
@@ -502,10 +502,11 @@ plt.show()
 
 ```{python}
 # Post-1970 regression
-data_post1970 = data_phillips[data_phillips['year'] >= 1970]
-model_post = ols('inflgdp ~ urate', data=data_post1970).fit(cov_type='HAC', cov_kwds={'maxlags': 5})
+data_post1970 = data_phillips[data_phillips['year'] >= 1970].copy()
+data_post1970['_time'] = range(len(data_post1970))
+fit_post = pf.feols('inflgdp ~ urate', data=data_post1970, vcov={'NW': 5})
 # Phillips Curve Post-1970 (1970-2014)
-model_post.summary()
+fit_post.summary()
 ```
 
 > **Key Concept 13.4: The Phillips Curve Breakdown**
@@ -536,7 +537,7 @@ Omitting expected inflation now causes **severe omitted variables bias** that re
 # Plot post-1970
 plt.figure(figsize=(10, 6))
 plt.scatter(data_post1970['urate'], data_post1970['inflgdp'], alpha=0.7, s=50, color='#22d3ee')  # s = marker size, alpha = transparency
-plt.plot(data_post1970['urate'], model_post.fittedvalues, color='red', linewidth=2,
+plt.plot(data_post1970['urate'], fit_post.predict(), color='red', linewidth=2,
          label='Fitted line')
 plt.xlabel('Unemployment Rate (%)')
 plt.ylabel('Inflation Rate (%)')
@@ -557,26 +558,26 @@ plt.show()
 
 data_post1970_exp = data_post1970.dropna(subset=['inflgdp1yr'])
 
-model_augmented = ols('inflgdp ~ urate + inflgdp1yr', data=data_post1970_exp).fit(
-
-    cov_type='HAC', cov_kwds={'maxlags': 5})
+data_post1970_exp = data_post1970_exp.copy()
+data_post1970_exp['_time'] = range(len(data_post1970_exp))
+fit_augmented = pf.feols('inflgdp ~ urate + inflgdp1yr', data=data_post1970_exp, vcov={'NW': 5})
 
 
 # Augmented Phillips Curve Post-1970
 
 
-model_augmented.summary()
+fit_augmented.summary()
 ```
 
 ```{python}
 # Demonstrate omitted variables bias
 
 # Bivariate regression of Expinflation on Urate
-model_aux = ols('inflgdp1yr ~ urate', data=data_post1970_exp).fit()
+fit_aux = pf.feols('inflgdp1yr ~ urate', data=data_post1970_exp)
 
-gamma = model_aux.params['urate']
-beta3 = model_augmented.params['inflgdp1yr']
-beta2 = model_augmented.params['urate']
+gamma = fit_aux.coef()['urate']
+beta3 = fit_augmented.coef()['inflgdp1yr']
+beta2 = fit_augmented.coef()['urate']
 
 # Omitted Variables Bias Calculation
 # True model: Inflation = β1 + β2*Urate + β3*Expinflation
@@ -592,7 +593,7 @@ print(
     f"\nPredicted E[b2] = {beta2:.3f} + {beta3:.3f} * {gamma:.3f} "
     f"= {beta2 + beta3 * gamma:.3f}"
 )
-print(f"Actual b2 (from bivariate): {model_post.params['urate']:.3f}")
+print(f"Actual b2 (from bivariate): {fit_post.coef()['urate']:.3f}")
 
 print("\n✓ Omitted variables bias explains the sign reversal!")
 ```
@@ -735,24 +736,21 @@ We use logs of both outcome (MPG) and predictors (weight, HP, torque) because:
 ```{python}
 # Log-log regression with cluster-robust standard errors
 # Use pre-computed log variables
-model_auto = ols('lmpg ~ lhp + lcurbwt + ltorque + year', data=data_auto).fit(
-    cov_type='cluster',
-    cov_kwds={'groups': data_auto['mfr']}
-)
+fit_auto = pf.feols('lmpg ~ lhp + lcurbwt + ltorque + year', data=data_auto, vcov={'CRV1': 'mfr'})
 
 # Log-Log Regression: Fuel Efficiency
-model_auto.summary()
+fit_auto.summary()
 
 # Interpretation
 # ELASTICITY INTERPRETATION
-print(f"Horsepower elasticity: {model_auto.params['lhp']:.3f}")
-print(f"  → 1% increase in HP → {model_auto.params['lhp']:.2f}% change in MPG")
-print(f"\nWeight elasticity: {model_auto.params['lcurbwt']:.3f}")
-print(f"  → 1% increase in weight → {model_auto.params['lcurbwt']:.2f}% change in MPG")
-print(f"\nTorque elasticity: {model_auto.params['ltorque']:.3f}")
-print(f"  → 1% increase in torque → {model_auto.params['ltorque']:.2f}% change in MPG")
-print(f"\nYear trend: {model_auto.params['year']:.4f}")
-print(f"  → Efficiency improves {model_auto.params['year']*100:.2f}% per year")
+print(f"Horsepower elasticity: {fit_auto.coef()['lhp']:.3f}")
+print(f"  → 1% increase in HP → {fit_auto.coef()['lhp']:.2f}% change in MPG")
+print(f"\nWeight elasticity: {fit_auto.coef()['lcurbwt']:.3f}")
+print(f"  → 1% increase in weight → {fit_auto.coef()['lcurbwt']:.2f}% change in MPG")
+print(f"\nTorque elasticity: {fit_auto.coef()['ltorque']:.3f}")
+print(f"  → 1% increase in torque → {fit_auto.coef()['ltorque']:.2f}% change in MPG")
+print(f"\nYear trend: {fit_auto.coef()['year']:.4f}")
+print(f"  → Efficiency improves {fit_auto.coef()['year']*100:.2f}% per year")
 
 # CLUSTER-ROBUST STANDARD ERRORS
 print(f"Clustered by manufacturer (mfr)")
@@ -911,24 +909,27 @@ spending_by_plan = data_health_y1.groupby('plan')['spending'].agg(['mean', 'std'
 print(spending_by_plan)
 
 # Regression with plan indicators
-model_rct = ols('spending ~ coins25 + coins50 + coins95 + coinsmixed + coinsindiv',
-                data=data_health_y1).fit(
-    cov_type='cluster',
-    cov_kwds={'groups': data_health_y1['idfamily']}
-)
+fit_rct = pf.feols('spending ~ coins25 + coins50 + coins95 + coinsmixed + coinsindiv',
+                data=data_health_y1, vcov={'CRV1': 'idfamily'})
 
 # RCT REGRESSION: SPENDING ON INSURANCE PLANS
 print("Omitted category: Free Care (coins0)")
-model_rct.summary()
+fit_rct.summary()
 
 # F-test for joint significance
 # JOINT F-TEST: DO PLANS MATTER?
-hypotheses = 'coins25 = coins50 = coins95 = coinsmixed = coinsindiv = 0'
-ftest = model_rct.f_test(hypotheses)
+from scipy.stats import f as f_dist
+coef_names = ['coins25', 'coins50', 'coins95', 'coinsmixed', 'coinsindiv']
+coefs = np.array([fit_rct.coef()[c] for c in coef_names])
+V = fit_rct._vcov
+idx = [list(fit_rct.coef().index).index(c) for c in coef_names]
+V_sub = V[np.ix_(idx, idx)]
+f_val = float(coefs @ np.linalg.inv(V_sub) @ coefs / len(coef_names))
+p_val = 1 - f_dist.cdf(f_val, len(coef_names), fit_rct._N - len(fit_rct.coef()))
 print(f"H0: All plan coefficients = 0")
-print(f"F-statistic: {ftest.fvalue:.2f}")
-print(f"p-value: {ftest.pvalue:.4f}")
-print(f"Conclusion: {'Reject H0' if ftest.pvalue < 0.05 else 'Fail to reject H0'} at 5% level")
+print(f"F-statistic: {f_val:.2f}")
+print(f"p-value: {p_val:.4f}")
+print(f"Conclusion: {'Reject H0' if p_val < 0.05 else 'Fail to reject H0'} at 5% level")
 
 # CAUSAL INTERPRETATION
 print("✓ Randomized Control Trial enables causal inference")
@@ -1098,20 +1099,17 @@ print(f"  Treated change: {post_treat:.3f} - {pre_treat:.3f} = {post_treat - pre
 print(f"  DiD estimate: ({post_treat:.3f} - {pre_treat:.3f}) - ({post_control:.3f} - {pre_control:.3f}) = {did_estimate:.3f}")
 
 # DiD regression
-model_did = ols('waz ~ hightreat + post + postXhigh', data=data_access).fit(
-    cov_type='cluster',
-    cov_kwds={'groups': data_access['idcommunity']}
-)
+fit_did = pf.feols('waz ~ hightreat + post + postXhigh', data=data_access, vcov={'CRV1': 'idcommunity'})
 
 # DiD REGRESSION
-model_did.summary()
+fit_did.summary()
 
 # INTERPRETATION
-print(f"DiD coefficient (postXhigh): {model_did.params['postXhigh']:.3f}")
+print(f"DiD coefficient (postXhigh): {fit_did.coef()['postXhigh']:.3f}")
 print(f"Matches manual calculation: {did_estimate:.3f} ✓")
 print(f"\nCausal interpretation:")
-print(f"Clinic access improved child nutrition by {model_did.params['postXhigh']:.2f} standard deviations")
-print(f"This is a {'statistically significant' if model_did.pvalues['postXhigh'] < 0.05 else 'not significant'} effect")
+print(f"Clinic access improved child nutrition by {fit_did.coef()['postXhigh']:.2f} standard deviations")
+print(f"This is a {'statistically significant' if fit_did.pval()['postXhigh'] < 0.05 else 'not significant'} effect")
 print(f"\nCluster-robust SEs by community account for within-community correlation")
 ```
 
@@ -1252,16 +1250,17 @@ data_rd = data_incumb[data_incumb['vote'].notna()].copy()
 print(f"\nObservations with outcome data: {len(data_rd)}")
 
 # RD regression (linear)
-model_rd = ols('vote ~ win + margin', data=data_rd).fit(cov_type='HC1')
+fit_rd = pf.feols('vote ~ win + margin', data=data_rd, vcov='HC1')
 
 # REGRESSION DISCONTINUITY ESTIMATION
-model_rd.summary()
+fit_rd.summary()
 
 # INCUMBENCY ADVANTAGE
-print(f"RD estimate (win coefficient): {model_rd.params['win']:.3f}")
-print(f"95% CI: [{model_rd.conf_int().loc['win', 0]:.3f}, {model_rd.conf_int().loc['win', 1]:.3f}]")
+print(f"RD estimate (win coefficient): {fit_rd.coef()['win']:.3f}")
+ci = fit_rd.confint()
+print(f"95% CI: [{ci.loc['win', '2.5%']:.3f}, {ci.loc['win', '97.5%']:.3f}]")
 print(f"\nInterpretation:")
-print(f"Barely winning vs barely losing increases vote share in next election by {model_rd.params['win']:.1f}%")
+print(f"Barely winning vs barely losing increases vote share in next election by {fit_rd.coef()['win']:.1f}%")
 print(f"This is the causal effect of incumbency")
 print(f"\nWhy causal? At the threshold (margin≈0), winning is quasi-random")
 print(f"Candidates just above/below threshold are similar in all respects except incumbency status")
@@ -1393,47 +1392,45 @@ print(f"directly affect modern GDP")
 data_inst[['logpgp95', 'avexpr', 'logem4']].describe()
 
 # OLS (biased - endogeneity problem)
-model_ols = ols('logpgp95 ~ avexpr', data=data_inst).fit(cov_type='HC1')
+fit_ols = pf.feols('logpgp95 ~ avexpr', data=data_inst, vcov='HC1')
 
 # OLS REGRESSION (BIASED)
-model_ols.summary()
-print(f"\nOLS coefficient: {model_ols.params['avexpr']:.3f}")
+fit_ols.summary()
+print(f"\nOLS coefficient: {fit_ols.coef()['avexpr']:.3f}")
 print("⚠️ This is biased due to endogeneity (omitted variables, reverse causation)")
 
 # First stage
-model_first = ols('avexpr ~ logem4', data=data_inst).fit(cov_type='HC1')
+fit_first = pf.feols('avexpr ~ logem4', data=data_inst, vcov='HC1')
 
 # FIRST STAGE: INSTITUTIONS ~ SETTLER MORTALITY
-model_first.summary()
-print(f"\nFirst stage F-statistic: {model_first.fvalue:.2f}")
+fit_first.summary()
+first_f = fit_first.tstat()['logem4']**2
+print(f"\nFirst stage F-statistic: {first_f:.2f}")
 print(f"Rule of thumb: F > 10 for strong instrument")
-print(f"Instrument strength: {'Strong ✓' if model_first.fvalue > 10 else 'Weak ⚠️'}")
+print(f"Instrument strength: {'Strong ✓' if first_f > 10 else 'Weak ⚠️'}")
 
-# 2SLS manually (for pedagogy)
+# 2SLS using pyfixest IV syntax
 # TWO-STAGE LEAST SQUARES (2SLS)
 
-# Predicted institutions from first stage
-data_inst['avexpr_hat'] = model_first.fittedvalues
+# Single-call IV estimation: y ~ exog | endog ~ instrument
+fit_iv = pf.feols('logpgp95 ~ 1 | avexpr ~ logem4', data=data_inst, vcov='HC1')
 
-# Second stage (using predicted values)
-model_second = ols('logpgp95 ~ avexpr_hat', data=data_inst).fit(cov_type='HC1')
-
-print("\nSecond stage:")
-model_second.summary()
+print("\nIV/2SLS estimation:")
+fit_iv.summary()
 
 # COMPARISON: OLS vs IV
-print(f"OLS coefficient: {model_ols.params['avexpr']:.3f}")
-print(f"IV/2SLS coefficient: {model_second.params['avexpr_hat']:.3f}")
-print(f"\nDifference: {model_second.params['avexpr_hat'] - model_ols.params['avexpr']:.3f}")
+print(f"OLS coefficient: {fit_ols.coef()['avexpr']:.3f}")
+print(f"IV/2SLS coefficient: {fit_iv.coef()['avexpr']:.3f}")
+print(f"\nDifference: {fit_iv.coef()['avexpr'] - fit_ols.coef()['avexpr']:.3f}")
 print(f"\nIV estimate is larger → OLS has attenuation bias")
 print(f"(measurement error and omitted variables bias OLS toward zero)")
 
 # CAUSAL INTERPRETATION
-print(f"1-unit improvement in institutions → {model_second.params['avexpr_hat']:.2f} increase in log GDP")
-print(f"Exponentiating: {np.exp(model_second.params['avexpr_hat']):.2f}x increase in GDP level")
+print(f"1-unit improvement in institutions → {fit_iv.coef()['avexpr']:.2f} increase in log GDP")
+print(f"Exponentiating: {np.exp(fit_iv.coef()['avexpr']):.2f}x increase in GDP level")
 print(f"\n✓ This is a causal estimate (under IV assumptions)")
 print(f"✓ Instrument (settler mortality) is:")
-print(f"  - Relevant: Strong first stage (F = {model_first.fvalue:.1f})")
+print(f"  - Relevant: Strong first stage (F = {first_f:.1f})")
 print(f"  - Exogenous: Mortality in 1700s doesn't directly affect modern GDP")
 ```
 
@@ -1646,8 +1643,9 @@ This single code block reproduces the core workflow of Chapter 13. It is self-co
 import numpy as np                        # numerical operations and log transforms
 import pandas as pd                       # data loading and manipulation
 import matplotlib.pyplot as plt           # creating plots and visualizations
-from statsmodels.formula.api import ols   # OLS regression with R-style formulas
+import pyfixest as pf                     # fast OLS/IV estimation
 from scipy import stats                   # F-distribution for hypothesis tests
+# !pip install pyfixest
 
 # --- Data source ---
 URL = "https://raw.githubusercontent.com/quarcs-lab/data-open/master/AED/"
@@ -1662,24 +1660,26 @@ data_cobb['lnk'] = np.log(data_cobb['k'])
 data_cobb['lnl'] = np.log(data_cobb['l'])
 
 # OLS with HAC standard errors (time series: autocorrelation + heteroskedasticity)
-model_cobb = ols('lnq ~ lnk + lnl', data=data_cobb).fit(
-    cov_type='HAC', cov_kwds={'maxlags': 3}
-)
+data_cobb['_time'] = range(len(data_cobb))
+fit_cobb = pf.feols('lnq ~ lnk + lnl', data=data_cobb, vcov={'NW': 3})
 
-alpha = model_cobb.params['lnk']   # capital elasticity
-beta  = model_cobb.params['lnl']   # labor elasticity
+alpha = fit_cobb.coef()['lnk']   # capital elasticity
+beta  = fit_cobb.coef()['lnl']   # labor elasticity
 
 print(f"Capital elasticity α = {alpha:.3f}, Labor elasticity β = {beta:.3f}")
 print(f"Sum α + β = {alpha + beta:.3f}  (≈1 → constant returns to scale)")
-print(f"R² = {model_cobb.rsquared:.4f}")
-model_cobb.summary()
+print(f"R² = {fit_cobb._r2:.4f}")
+fit_cobb.summary()
 
 # F-test for constant returns to scale: H0: α + β = 1
 data_cobb['lnq_l'] = data_cobb['lnq'] - data_cobb['lnl']
 data_cobb['lnk_l'] = data_cobb['lnk'] - data_cobb['lnl']
-model_r = ols('lnq_l ~ lnk_l', data=data_cobb).fit()
-f_stat = ((model_r.ssr - model_cobb.ssr) / 1) / (model_cobb.ssr / model_cobb.df_resid)
-p_val  = 1 - stats.f.cdf(f_stat, 1, model_cobb.df_resid)
+fit_r = pf.feols('lnq_l ~ lnk_l', data=data_cobb)
+rss_unr = np.sum(fit_cobb._u_hat**2)
+rss_r = np.sum(fit_r._u_hat**2)
+df_res = fit_cobb._N - len(fit_cobb.coef())
+f_stat = ((rss_r - rss_unr) / 1) / (rss_unr / df_res)
+p_val  = 1 - stats.f.cdf(f_stat, 1, df_res)
 print(f"CRS test: F = {f_stat:.2f}, p = {p_val:.3f} → {'Fail to reject' if p_val > 0.05 else 'Reject'} CRS")
 
 # =============================================================================
@@ -1691,26 +1691,30 @@ data_phil = pd.read_stata(URL + "AED_PHILLIPS.DTA")
 
 # Pre-1970: classic negative relationship
 pre = data_phil[data_phil['year'] < 1970]
-m_pre = ols('inflgdp ~ urate', data=pre).fit(cov_type='HAC', cov_kwds={'maxlags': 3})
-print(f"\nPre-1970 slope: {m_pre.params['urate']:.3f}  (negative → classic Phillips curve)")
+pre = pre.copy()
+pre['_time'] = range(len(pre))
+m_pre = pf.feols('inflgdp ~ urate', data=pre, vcov={'NW': 3})
+print(f"\nPre-1970 slope: {m_pre.coef()['urate']:.3f}  (negative → classic Phillips curve)")
 
 # Post-1970: sign flips due to omitted expected inflation
 post = data_phil[data_phil['year'] >= 1970]
-m_post = ols('inflgdp ~ urate', data=post).fit(cov_type='HAC', cov_kwds={'maxlags': 5})
-print(f"Post-1970 slope: {m_post.params['urate']:.3f}  (positive → breakdown!)")
+post = post.copy()
+post['_time'] = range(len(post))
+m_post = pf.feols('inflgdp ~ urate', data=post, vcov={'NW': 5})
+print(f"Post-1970 slope: {m_post.coef()['urate']:.3f}  (positive → breakdown!)")
 
 # Augmented model: adding expected inflation restores the negative sign
 post_exp = post.dropna(subset=['inflgdp1yr'])
-m_aug = ols('inflgdp ~ urate + inflgdp1yr', data=post_exp).fit(
-    cov_type='HAC', cov_kwds={'maxlags': 5}
-)
-print(f"Augmented slope on urate: {m_aug.params['urate']:.3f}  (negative again!)")
-print(f"Expected inflation coef:  {m_aug.params['inflgdp1yr']:.3f}")
+post_exp = post_exp.copy()
+post_exp['_time'] = range(len(post_exp))
+m_aug = pf.feols('inflgdp ~ urate + inflgdp1yr', data=post_exp, vcov={'NW': 5})
+print(f"Augmented slope on urate: {m_aug.coef()['urate']:.3f}  (negative again!)")
+print(f"Expected inflation coef:  {m_aug.coef()['inflgdp1yr']:.3f}")
 
 # OVB formula: E[b2] = β2 + β3*γ
-m_aux = ols('inflgdp1yr ~ urate', data=post_exp).fit()
-predicted = m_aug.params['urate'] + m_aug.params['inflgdp1yr'] * m_aux.params['urate']
-print(f"OVB predicted bivariate slope: {predicted:.3f}  (actual: {m_post.params['urate']:.3f})")
+m_aux = pf.feols('inflgdp1yr ~ urate', data=post_exp)
+predicted = m_aug.coef()['urate'] + m_aug.coef()['inflgdp1yr'] * m_aux.coef()['urate']
+print(f"OVB predicted bivariate slope: {predicted:.3f}  (actual: {m_post.coef()['urate']:.3f})")
 
 # =============================================================================
 # STEP 3: RAND Health Insurance Experiment — RCT as the gold standard
@@ -1725,15 +1729,9 @@ for plan, grp in data_rand_y1.groupby('plan')['spending']:
     print(f"{plan:<12} {grp.mean():>10,.0f} {len(grp):>8,}")
 
 # Regression with cluster-robust SEs by family
-model_rct = ols('spending ~ coins25 + coins50 + coins95 + coinsmixed + coinsindiv',
-                data=data_rand_y1).fit(
-    cov_type='cluster', cov_kwds={'groups': data_rand_y1['idfamily']}
-)
-model_rct.summary()
-
-# Joint F-test: do insurance plans matter?
-ftest = model_rct.f_test('coins25 = coins50 = coins95 = coinsmixed = coinsindiv = 0')
-print(f"Joint F-test: F = {ftest.fvalue:.2f}, p = {ftest.pvalue:.4f}")
+fit_rct = pf.feols('spending ~ coins25 + coins50 + coins95 + coinsmixed + coinsindiv',
+                data=data_rand_y1, vcov={'CRV1': 'idfamily'})
+fit_rct.summary()
 
 # =============================================================================
 # STEP 4: Difference-in-Differences — health clinic access in South Africa
@@ -1750,11 +1748,9 @@ did    = (post_t - pre_t) - (post_c - pre_c)
 print(f"\nDiD estimate (manual): {did:.3f} SD improvement in child nutrition")
 
 # DiD regression with cluster-robust SEs by community
-model_did = ols('waz ~ hightreat + post + postXhigh', data=data_did).fit(
-    cov_type='cluster', cov_kwds={'groups': data_did['idcommunity']}
-)
-print(f"DiD coefficient (regression): {model_did.params['postXhigh']:.3f}")
-print(f"p-value: {model_did.pvalues['postXhigh']:.4f}")
+fit_did = pf.feols('waz ~ hightreat + post + postXhigh', data=data_did, vcov={'CRV1': 'idcommunity'})
+print(f"DiD coefficient (regression): {fit_did.coef()['postXhigh']:.3f}")
+print(f"p-value: {fit_did.pval()['postXhigh']:.4f}")
 
 # =============================================================================
 # STEP 5: Regression Discontinuity — incumbency advantage in U.S. Senate
@@ -1764,10 +1760,11 @@ print(f"p-value: {model_did.pvalues['postXhigh']:.4f}")
 data_rd = pd.read_stata(URL + "AED_INCUMBENCY.DTA")
 data_rd = data_rd[data_rd['vote'].notna()].copy()
 
-model_rd = ols('vote ~ win + margin', data=data_rd).fit(cov_type='HC1')
-print(f"\nIncumbency advantage: {model_rd.params['win']:.1f} percentage points")
-print(f"95% CI: [{model_rd.conf_int().loc['win', 0]:.1f}, {model_rd.conf_int().loc['win', 1]:.1f}]")
-print(f"p-value: {model_rd.pvalues['win']:.4f}")
+fit_rd = pf.feols('vote ~ win + margin', data=data_rd, vcov='HC1')
+print(f"\nIncumbency advantage: {fit_rd.coef()['win']:.1f} percentage points")
+ci = fit_rd.confint()
+print(f"95% CI: [{ci.loc['win', '2.5%']:.1f}, {ci.loc['win', '97.5%']:.1f}]")
+print(f"p-value: {fit_rd.pval()['win']:.4f}")
 
 # =============================================================================
 # STEP 6: Instrumental Variables — do institutions cause growth?
@@ -1777,20 +1774,20 @@ print(f"p-value: {model_rd.pvalues['win']:.4f}")
 data_iv = pd.read_stata(URL + "AED_INSTITUTIONS.DTA")
 
 # OLS (biased)
-m_ols = ols('logpgp95 ~ avexpr', data=data_iv).fit(cov_type='HC1')
+m_ols = pf.feols('logpgp95 ~ avexpr', data=data_iv, vcov='HC1')
 
-# First stage: institutions ~ settler mortality
-m_1st = ols('avexpr ~ logem4', data=data_iv).fit(cov_type='HC1')
-print(f"\nFirst-stage F = {m_1st.fvalue:.1f}  ({'Strong' if m_1st.fvalue > 10 else 'Weak'} instrument)")
+# IV/2SLS: y ~ exog | endog ~ instrument
+m_iv = pf.feols('logpgp95 ~ 1 | avexpr ~ logem4', data=data_iv, vcov='HC1')
 
-# Second stage: GDP ~ predicted institutions
-data_iv['avexpr_hat'] = m_1st.fittedvalues
-m_2nd = ols('logpgp95 ~ avexpr_hat', data=data_iv).fit(cov_type='HC1')
+# First-stage F
+m_1st = pf.feols('avexpr ~ logem4', data=data_iv, vcov='HC1')
+first_f = m_1st.tstat()['logem4']**2
+print(f"\nFirst-stage F = {first_f:.1f}  ({'Strong' if first_f > 10 else 'Weak'} instrument)")
 
-print(f"OLS coefficient:  {m_ols.params['avexpr']:.3f}  (biased)")
-print(f"IV/2SLS coefficient: {m_2nd.params['avexpr_hat']:.3f}  (causal)")
+print(f"OLS coefficient:  {m_ols.coef()['avexpr']:.3f}  (biased)")
+print(f"IV/2SLS coefficient: {m_iv.coef()['avexpr']:.3f}  (causal)")
 print(f"Causal effect: 1-unit improvement in institutions → "
-      f"{np.exp(m_2nd.params['avexpr_hat']):.1f}x increase in GDP")
+      f"{np.exp(m_iv.coef()['avexpr']):.1f}x increase in GDP")
 ```
 
 **Try it yourself!** Copy this code into an empty Google Colab notebook and run it: [Open Colab](https://colab.research.google.com/notebooks/empty.ipynb)

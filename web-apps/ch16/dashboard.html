@@ -747,6 +747,7 @@ footer.page a:hover { text-decoration: underline; }
   <div class="code-tabs" id="code-lang-tabs">
     <button type="button" data-lang="python" class="active">Python</button>
     <button type="button" data-lang="stata">Stata</button>
+    <button type="button" data-lang="r">R</button>
   </div>
 
   <div class="code-panel active" id="panel-python">
@@ -758,8 +759,10 @@ footer.page a:hover { text-decoration: underline; }
 import numpy as np                                          # numerical operations
 import pandas as pd                                         # data loading and manipulation
 import matplotlib.pyplot as plt                             # creating plots and visualizations
-from statsmodels.formula.api import ols                     # OLS regression with R-style formulas
+import pyfixest as pf                                       # fast fixed-effects estimation
+# !pip install pyfixest                                     # uncomment if running in Google Colab
 import statsmodels.api as sm                                # add_constant for VIF calculation
+import statsmodels.formula.api as smf                       # OLS for diagnostics only
 from statsmodels.stats.outliers_influence import (          # diagnostic tools:
     variance_inflation_factor, OLSInfluence)                #   VIF and influence measures
 from statsmodels.nonparametric.smoothers_lowess import lowess  # LOWESS smooth for residual plots
@@ -796,14 +799,14 @@ print(vif_data.to_string(index=False))
 # STEP 3: Compare standard vs robust standard errors
 # =============================================================================
 # Heteroskedasticity makes default SEs too small -&gt; use HC1 (White) robust SEs
-model_std    = ols('earnings ~ age + education', data=data_earnings).fit()
-model_robust = ols('earnings ~ age + education', data=data_earnings).fit(cov_type='HC1')
+fit_std    = pf.feols('earnings ~ age + education', data=data_earnings)
+fit_robust = pf.feols('earnings ~ age + education', data=data_earnings, vcov='HC1')
 
 se_comparison = pd.DataFrame({
-    'Variable':    model_std.params.index,
-    'Standard SE': model_std.bse.values.round(2),
-    'Robust SE':   model_robust.bse.values.round(2),
-    'Ratio':       (model_robust.bse / model_std.bse).values.round(3)
+    'Variable':    list(fit_std.coef().index),
+    'Standard SE': fit_std.se().values.round(2),
+    'Robust SE':   fit_robust.se().values.round(2),
+    'Ratio':       (fit_robust.se() / fit_std.se()).values.round(3)
 })
 print("\nSE Comparison (ratio &gt; 1 signals heteroskedasticity):")
 print(se_comparison.to_string(index=False))
@@ -812,12 +815,12 @@ print(se_comparison.to_string(index=False))
 # STEP 4: Omitted variable bias — democracy and growth
 # =============================================================================
 # Adding controls reveals how much the bivariate estimate was biased upward
-model_bivariate = ols('democracy ~ growth', data=data_democracy).fit(cov_type='HC1')
-model_multiple  = ols('democracy ~ growth + constraint + indcent + catholic + muslim + protestant',
-                      data=data_democracy).fit(cov_type='HC1')
+fit_bivariate = pf.feols('democracy ~ growth', data=data_democracy, vcov='HC1')
+fit_multiple  = pf.feols('democracy ~ growth + constraint + indcent + catholic + muslim + protestant',
+                         data=data_democracy, vcov='HC1')
 
-b_biv  = model_bivariate.params['growth']
-b_mult = model_multiple.params['growth']
+b_biv  = fit_bivariate.coef()['growth']
+b_mult = fit_multiple.coef()['growth']
 print(f"\nGrowth coefficient (bivariate):       {b_biv:.4f}")
 print(f"Growth coefficient (with controls):   {b_mult:.4f}")
 print(f"Reduction: {(1 - b_mult/b_biv)*100:.0f}% — institutional controls absorb the bias")
@@ -826,8 +829,8 @@ print(f"Reduction: {(1 - b_mult/b_biv)*100:.0f}% — institutional controls abso
 # STEP 5: Diagnostic plots — residual vs fitted
 # =============================================================================
 # Random scatter around zero = assumptions OK; fan shape = heteroskedasticity
-uhat = model_multiple.resid
-yhat = model_multiple.fittedvalues
+uhat = fit_multiple._u_hat
+yhat = fit_multiple.predict()
 
 fig, axes = plt.subplots(1, 2, figsize=(14, 5))
 
@@ -860,10 +863,13 @@ plt.show()
 # =============================================================================
 # DFITS_i measures how much prediction i changes when observation i is excluded
 # Threshold: |DFITS| &gt; 2*sqrt(k/n)
-influence = OLSInfluence(model_multiple)
+# OLSInfluence requires a statsmodels fitted model (diagnostics only)
+_diag_model = smf.ols('democracy ~ growth + constraint + indcent + catholic + muslim + protestant',
+                      data=data_democracy).fit()
+influence = OLSInfluence(_diag_model)
 dfits     = influence.dffits[0]
 n = len(data_democracy)
-k = len(model_multiple.params)
+k = len(fit_multiple.coef())
 threshold = 2 * np.sqrt(k / n)
 
 print(f"\nDFITS threshold: {threshold:.4f}")
@@ -1028,6 +1034,111 @@ twoway (scatter dfits_val obs_id if abs(dfits_val) &lt;= `threshold',   ///
   <div style="display:flex;gap:0.8rem;align-items:center;margin-top:0.8rem;flex-wrap:wrap">
     <button class="btn-copy" onclick="navigator.clipboard.writeText(document.getElementById('code-stata').textContent).then(()=>{this.textContent='Copied!';setTimeout(()=>this.textContent='Copy code',1500)})">Copy code</button>
     <span style="color:var(--text-muted);font-size:0.88rem">Paste into your Stata do-file editor</span>
+  </div>
+  </div>
+
+  <div class="code-panel" id="panel-r">
+  <pre><code id="code-r" class="language-r"># =============================================================================
+# CHAPTER 16 CHEAT SHEET: Checking the Model and Data
+# =============================================================================
+
+# --- Libraries ---
+library(haven)           # read Stata .dta files
+library(fixest)          # fast OLS estimation with feols()
+library(dplyr)           # data manipulation
+library(ggplot2)         # grammar of graphics
+library(car)             # vif() for multicollinearity detection
+
+# =============================================================================
+# STEP 1: Load data
+# =============================================================================
+url_base &lt;- "https://raw.githubusercontent.com/quarcs-lab/data-open/master/AED/"
+data_earnings  &lt;- read_dta(paste0(url_base, "AED_EARNINGS_COMPLETE.DTA"))
+data_democracy &lt;- read_dta(paste0(url_base, "AED_DEMOCRACY.DTA"))
+
+cat("Earnings: ", nrow(data_earnings), "workers\n")
+cat("Democracy:", nrow(data_democracy), "countries\n")
+
+# =============================================================================
+# STEP 2: Detect multicollinearity with VIF
+# =============================================================================
+# VIF_j = 1/(1 - R_j^2); VIF &gt; 10 = serious; VIF &gt; 5 = investigate
+model_vif &lt;- lm(earnings ~ age + education + agebyeduc, data = data_earnings)
+vif(model_vif)
+
+# =============================================================================
+# STEP 3: Compare standard vs robust standard errors
+# =============================================================================
+model_std    &lt;- feols(earnings ~ age + education, data = data_earnings)
+model_robust &lt;- feols(earnings ~ age + education, data = data_earnings, vcov = "HC1")
+
+etable(model_std, model_robust, headers = c("Standard", "Robust (HC1)"))
+
+# =============================================================================
+# STEP 4: Omitted variable bias — democracy and growth
+# =============================================================================
+m_biv  &lt;- feols(democracy ~ growth, data = data_democracy, vcov = "HC1")
+m_mult &lt;- feols(democracy ~ growth + constraint + indcent + catholic + muslim + protestant,
+                data = data_democracy, vcov = "HC1")
+
+cat("\nGrowth coefficient (bivariate):    ", round(coef(m_biv)["growth"], 4), "\n")
+cat("Growth coefficient (with controls):", round(coef(m_mult)["growth"], 4), "\n")
+cat("Reduction:", round((1 - coef(m_mult)["growth"]/coef(m_biv)["growth"])*100, 0),
+    "% — institutional controls absorb the bias\n")
+
+etable(m_biv, m_mult, headers = c("Bivariate", "With controls"))
+
+# =============================================================================
+# STEP 5: Diagnostic plots — residual vs fitted
+# =============================================================================
+data_democracy$yhat  &lt;- fitted(m_mult)
+data_democracy$resid &lt;- residuals(m_mult)
+
+library(patchwork)
+
+p1 &lt;- ggplot(data_democracy, aes(x = yhat, y = democracy)) +
+  geom_point(alpha = 0.6) +
+  geom_abline(color = "red", linetype = "dashed", linewidth = 1.2) +
+  labs(x = "Fitted Democracy", y = "Actual Democracy",
+       title = "Actual vs Fitted") +
+  theme_minimal()
+
+p2 &lt;- ggplot(data_democracy, aes(x = yhat, y = resid)) +
+  geom_point(alpha = 0.6) +
+  geom_hline(yintercept = 0, color = "gray") +
+  geom_smooth(method = "loess", formula = y ~ x, color = "red",
+              linetype = "dashed", se = FALSE) +
+  labs(x = "Fitted Democracy", y = "Residual",
+       title = "Residual vs Fitted") +
+  theme_minimal()
+
+p1 + p2
+
+# =============================================================================
+# STEP 6: Influential observations — DFITS
+# =============================================================================
+# DFITS_i measures how much prediction i changes when obs i is excluded
+model_lm  &lt;- lm(democracy ~ growth + constraint + indcent + catholic + muslim + protestant,
+                 data = data_democracy)
+dfits_val &lt;- dffits(model_lm)
+n &lt;- nrow(data_democracy)
+k &lt;- length(coef(model_lm))
+threshold &lt;- 2 * sqrt(k / n)
+
+cat("\nDFITS threshold:", round(threshold, 4), "\n")
+cat("Observations exceeding threshold:", sum(abs(dfits_val) &gt; threshold), "out of", n, "\n")
+
+ggplot(data.frame(obs = 1:n, dfits = dfits_val), aes(x = obs, y = dfits)) +
+  geom_point(aes(color = abs(dfits) &gt; threshold), size = 2, alpha = 0.7) +
+  scale_color_manual(values = c("FALSE" = "steelblue", "TRUE" = "red"), guide = "none") +
+  geom_hline(yintercept = c(-threshold, threshold), color = "red", linetype = "dashed") +
+  geom_hline(yintercept = 0, color = "gray", linewidth = 0.5) +
+  labs(x = "Observation Index", y = "DFITS",
+       title = "Influential Observations (DFITS)") +
+  theme_minimal()</code></pre>
+  <div style="display:flex;gap:0.8rem;align-items:center;margin-top:0.8rem;flex-wrap:wrap">
+    <button class="btn-copy" onclick="navigator.clipboard.writeText(document.getElementById('code-r').textContent).then(()=>{this.textContent='Copied!';setTimeout(()=>this.textContent='Copy code',1500)})">Copy code</button>
+    <span style="color:var(--text-muted);font-size:0.88rem">Paste into your R console or RStudio</span>
   </div>
   </div>
 </section>
@@ -1923,7 +2034,8 @@ window.addEventListener("resize", function() {
   var buttons = tabBar.querySelectorAll('button');
   var panels  = {
     python: document.getElementById('panel-python'),
-    stata:  document.getElementById('panel-stata')
+    stata:  document.getElementById('panel-stata'),
+    r: document.getElementById('panel-r')
   };
   buttons.forEach(function(btn) {
     btn.addEventListener('click', function() {
@@ -1939,6 +2051,7 @@ window.addEventListener("resize", function() {
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" data-manual></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-r.min.js"></script>
 <script>
 // Minimal Stata language grammar for Prism.js syntax highlighting
 Prism.languages.stata = {

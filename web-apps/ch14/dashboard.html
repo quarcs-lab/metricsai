@@ -540,6 +540,7 @@ footer.page a{color:var(--accent);text-decoration:none}footer.page a:hover{text-
   <div class="code-tabs" id="code-lang-tabs">
     <button type="button" data-lang="python" class="active">Python</button>
     <button type="button" data-lang="stata">Stata</button>
+    <button type="button" data-lang="r">R</button>
   </div>
 
   <div class="code-panel active" id="panel-python">
@@ -551,7 +552,8 @@ footer.page a{color:var(--accent);text-decoration:none}footer.page a:hover{text-
 import pandas as pd                       # data loading and manipulation
 import numpy as np                        # numerical operations
 import matplotlib.pyplot as plt           # creating plots and visualizations
-from statsmodels.formula.api import ols   # OLS regression with R-style formulas
+import pyfixest as pf                     # fast OLS estimation with feols()
+# !pip install pyfixest                   # uncomment if running in Google Colab
 from scipy import stats                   # t-tests for group comparisons
 from scipy.stats import f_oneway          # one-way ANOVA F-test
 
@@ -580,39 +582,39 @@ print(f"Difference (F - M):     ${diff_means:,.2f}")
 # STEP 3: Regression on a single indicator — equivalent to difference in means
 # =============================================================================
 # The intercept = mean for d=0 (males); the gender coefficient = mean difference
-# IMPORTANT: .fit(cov_type='HC1') uses robust standard errors
-model1 = ols('earnings ~ gender', data=data).fit(cov_type='HC1')
+# IMPORTANT: vcov='HC1' uses robust standard errors
+fit1 = pf.feols('earnings ~ gender', data=data, vcov='HC1')
 
-intercept = model1.params['Intercept']    # mean earnings for males
-gap       = model1.params['gender']       # earnings gap (females - males)
-r2        = model1.rsquared
+intercept = fit1.coef()['Intercept']      # mean earnings for males
+gap       = fit1.coef()['gender']         # earnings gap (females - males)
+r2        = fit1._r2
 
 print(f"\nModel 1: earnings = {intercept:,.0f} + ({gap:,.0f}) × gender")
 print(f"Raw gender gap: ${gap:,.0f} (females earn ${abs(gap):,.0f} less)")
 print(f"R-squared: {r2:.4f} ({r2*100:.1f}% of variation explained)")
 
-model1.summary()
+fit1.summary()
 
 # =============================================================================
 # STEP 4: Add controls and interaction — how the gap changes
 # =============================================================================
 # Adding education as a control measures the gap AFTER accounting for education
-model2 = ols('earnings ~ gender + education', data=data).fit(cov_type='HC1')
+fit2 = pf.feols('earnings ~ gender + education', data=data, vcov='HC1')
 
 # Adding gender×education interaction allows returns to education to differ by gender
-model3 = ols('earnings ~ gender + education + genderbyeduc', data=data).fit(cov_type='HC1')
+fit3 = pf.feols('earnings ~ gender + education + genderbyeduc', data=data, vcov='HC1')
 
 # Full model with additional controls
-model4 = ols('earnings ~ gender + education + genderbyeduc + age + hours',
-             data=data).fit(cov_type='HC1')
+fit4 = pf.feols('earnings ~ gender + education + genderbyeduc + age + hours',
+                data=data, vcov='HC1')
 
 # Compare how the gender coefficient evolves across models
 print(f"{'Model':&lt;12} {'Gender Coef':&gt;14} {'R²':&gt;8}")
 print("-" * 36)
-for name, m in [('Gender only', model1), ('+ Education', model2),
-                ('+ Interact', model3), ('+ Age,Hours', model4)]:
-    g = m.params['gender']
-    print(f"{name:&lt;12} {g:&gt;14,.0f} {m.rsquared:&gt;8.4f}")
+for name, f in [('Gender only', fit1), ('+ Education', fit2),
+                ('+ Interact', fit3), ('+ Age,Hours', fit4)]:
+    g = f.coef()['gender']
+    print(f"{name:&lt;12} {g:&gt;14,.0f} {f._r2:&gt;8.4f}")
 
 # =============================================================================
 # STEP 5: Scatter plot — visualize separate regression lines by gender
@@ -643,15 +645,15 @@ plt.show()
 # =============================================================================
 # Three mutually exclusive categories: dself, dprivate, dgovt (sum to 1)
 # Drop one (dprivate = base) to avoid perfect multicollinearity
-model_worker = ols('earnings ~ dself + dgovt + education + age',
-                   data=data).fit(cov_type='HC1')
+fit_worker = pf.feols('earnings ~ dself + dgovt + education + age',
+                      data=data, vcov='HC1')
 
 print(f"Base category: Private sector")
-print(f"Self-employed vs Private: ${model_worker.params['dself']:,.0f}")
-print(f"Government vs Private:   ${model_worker.params['dgovt']:,.0f}")
-print(f"R-squared: {model_worker.rsquared:.4f}")
+print(f"Self-employed vs Private: ${fit_worker.coef()['dself']:,.0f}")
+print(f"Government vs Private:   ${fit_worker.coef()['dgovt']:,.0f}")
+print(f"R-squared: {fit_worker._r2:.4f}")
 
-model_worker.summary()
+fit_worker.summary()
 
 # =============================================================================
 # STEP 7: ANOVA — test if earnings differ across worker types
@@ -795,6 +797,106 @@ tabulate worker_type, summarize(earnings)</code></pre>
   <div style="display:flex;gap:0.8rem;align-items:center;margin-top:0.8rem;flex-wrap:wrap">
     <button class="btn-copy" onclick="navigator.clipboard.writeText(document.getElementById('code-stata').textContent).then(()=>{this.textContent='Copied!';setTimeout(()=>this.textContent='Copy code',1500)})">Copy code</button>
     <span style="color:var(--text-muted);font-size:0.88rem">Paste into your Stata do-file editor</span>
+  </div>
+  </div>
+
+  <div class="code-panel" id="panel-r">
+  <pre><code id="code-r" class="language-r"># =============================================================================
+# CHAPTER 14 CHEAT SHEET: Regression with Indicator Variables
+# =============================================================================
+
+# --- Libraries ---
+library(haven)           # read Stata .dta files
+library(fixest)          # fast OLS estimation with feols()
+library(dplyr)           # data manipulation
+library(ggplot2)         # grammar of graphics
+
+# =============================================================================
+# STEP 1: Load data directly from a URL
+# =============================================================================
+# 872 full-time workers aged 25-65
+url &lt;- "https://raw.githubusercontent.com/quarcs-lab/data-open/master/AED/AED_EARNINGS_COMPLETE.DTA"
+data &lt;- read_dta(url)
+
+cat("Dataset:", nrow(data), "observations,", ncol(data), "variables\n")
+
+# =============================================================================
+# STEP 2: Descriptive statistics — compare earnings by gender
+# =============================================================================
+# Indicator variable: gender = 1 (female), gender = 0 (male)
+data |&gt;
+  group_by(gender) |&gt;
+  summarize(mean_earnings = mean(earnings), n = n())
+
+# =============================================================================
+# STEP 3: Regression on a single indicator — equivalent to difference in means
+# =============================================================================
+# The intercept = mean for d=0 (males); the gender coefficient = mean difference
+model1 &lt;- feols(earnings ~ gender, data = data, vcov = "HC1")
+summary(model1)
+
+cat("Raw gender gap: $", round(coef(model1)["gender"], 0), "\n")
+
+# =============================================================================
+# STEP 4: Add controls and interaction — how the gap changes
+# =============================================================================
+model2 &lt;- feols(earnings ~ gender + education, data = data, vcov = "HC1")
+model3 &lt;- feols(earnings ~ gender + education + genderbyeduc,
+                data = data, vcov = "HC1")
+model4 &lt;- feols(earnings ~ gender + education + genderbyeduc + age + hours,
+                data = data, vcov = "HC1")
+
+# Compare how the gender coefficient evolves across models
+etable(model1, model2, model3, model4,
+       headers = c("Gender only", "+ Educ", "+ Interact", "+ Age,Hours"),
+       keep = "gender")
+
+# =============================================================================
+# STEP 5: Scatter plot — visualize separate regression lines by gender
+# =============================================================================
+ggplot(data, aes(x = education, y = earnings, color = factor(gender))) +
+  geom_point(alpha = 0.3, size = 1.5) +
+  geom_smooth(method = "lm", formula = y ~ x, se = FALSE, linewidth = 1.2) +
+  scale_color_manual(values = c("0" = "blue", "1" = "red"),
+                     labels = c("Male", "Female")) +
+  labs(x = "Years of Education", y = "Earnings ($)",
+       title = "Earnings vs Education by Gender", color = NULL) +
+  theme_minimal()
+
+# =============================================================================
+# STEP 6: Sets of indicators — worker type and the dummy variable trap
+# =============================================================================
+# Three mutually exclusive categories: dself, dprivate, dgovt (sum to 1)
+# Drop one (dprivate = base) to avoid perfect multicollinearity
+model_worker &lt;- feols(earnings ~ dself + dgovt + education + age,
+                      data = data, vcov = "HC1")
+summary(model_worker)
+
+cat("Base category: Private sector\n")
+cat("Self-employed vs Private: $", round(coef(model_worker)["dself"], 0), "\n")
+cat("Government vs Private:   $", round(coef(model_worker)["dgovt"], 0), "\n")
+
+# =============================================================================
+# STEP 7: ANOVA — test if earnings differ across worker types
+# =============================================================================
+data &lt;- data |&gt;
+  mutate(worker_type = case_when(
+    dself == 1    ~ "Self-employed",
+    dprivate == 1 ~ "Private",
+    dgovt == 1    ~ "Government"
+  ))
+
+# One-way ANOVA
+aov_result &lt;- aov(earnings ~ worker_type, data = data)
+summary(aov_result)
+
+# Group means
+data |&gt;
+  group_by(worker_type) |&gt;
+  summarize(mean = round(mean(earnings), 0), n = n())</code></pre>
+  <div style="display:flex;gap:0.8rem;align-items:center;margin-top:0.8rem;flex-wrap:wrap">
+    <button class="btn-copy" onclick="navigator.clipboard.writeText(document.getElementById('code-r').textContent).then(()=>{this.textContent='Copied!';setTimeout(()=>this.textContent='Copy code',1500)})">Copy code</button>
+    <span style="color:var(--text-muted);font-size:0.88rem">Paste into your R console or RStudio</span>
   </div>
   </div>
 </section>
@@ -1073,7 +1175,8 @@ window.addEventListener("resize",function(){document.querySelectorAll(".chart").
   var buttons = tabBar.querySelectorAll('button');
   var panels  = {
     python: document.getElementById('panel-python'),
-    stata:  document.getElementById('panel-stata')
+    stata:  document.getElementById('panel-stata'),
+    r: document.getElementById('panel-r')
   };
   buttons.forEach(function(btn) {
     btn.addEventListener('click', function() {
@@ -1089,6 +1192,7 @@ window.addEventListener("resize",function(){document.querySelectorAll(".chart").
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" data-manual></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-r.min.js"></script>
 <script>
 // Minimal Stata language grammar for Prism.js syntax highlighting
 Prism.languages.stata = {

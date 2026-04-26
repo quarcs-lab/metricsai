@@ -6,7 +6,8 @@
 import pandas as pd                       # data loading and manipulation
 import numpy as np                        # numerical operations
 import matplotlib.pyplot as plt           # creating plots and visualizations
-from statsmodels.formula.api import ols   # OLS regression with R-style formulas
+import pyfixest as pf                     # OLS regression with R-style formulas
+# !pip install pyfixest  # if not installed
 from scipy import stats                   # t-tests for group comparisons
 from scipy.stats import f_oneway          # one-way ANOVA F-test
 
@@ -35,39 +36,39 @@ print(f"Difference (F - M):     ${diff_means:,.2f}")
 # STEP 3: Regression on a single indicator — equivalent to difference in means
 # =============================================================================
 # The intercept = mean for d=0 (males); the gender coefficient = mean difference
-# IMPORTANT: .fit(cov_type='HC1') uses robust standard errors
-model1 = ols('earnings ~ gender', data=data).fit(cov_type='HC1')
+# IMPORTANT: vcov='HC1' uses robust standard errors
+fit1 = pf.feols('earnings ~ gender', data=data, vcov='HC1')
 
-intercept = model1.params['Intercept']    # mean earnings for males
-gap       = model1.params['gender']       # earnings gap (females - males)
-r2        = model1.rsquared
+intercept = fit1.coef()['Intercept']      # mean earnings for males
+gap       = fit1.coef()['gender']         # earnings gap (females - males)
+r2        = fit1._r2
 
 print(f"\nModel 1: earnings = {intercept:,.0f} + ({gap:,.0f}) × gender")
 print(f"Raw gender gap: ${gap:,.0f} (females earn ${abs(gap):,.0f} less)")
 print(f"R-squared: {r2:.4f} ({r2*100:.1f}% of variation explained)")
 
-model1.summary()
+fit1.summary()
 
 # =============================================================================
 # STEP 4: Add controls and interaction — how the gap changes
 # =============================================================================
 # Adding education as a control measures the gap AFTER accounting for education
-model2 = ols('earnings ~ gender + education', data=data).fit(cov_type='HC1')
+fit2 = pf.feols('earnings ~ gender + education', data=data, vcov='HC1')
 
 # Adding gender×education interaction allows returns to education to differ by gender
-model3 = ols('earnings ~ gender + education + genderbyeduc', data=data).fit(cov_type='HC1')
+fit3 = pf.feols('earnings ~ gender + education + genderbyeduc', data=data, vcov='HC1')
 
 # Full model with additional controls
-model4 = ols('earnings ~ gender + education + genderbyeduc + age + hours',
-             data=data).fit(cov_type='HC1')
+fit4 = pf.feols('earnings ~ gender + education + genderbyeduc + age + hours',
+                data=data, vcov='HC1')
 
 # Compare how the gender coefficient evolves across models
 print(f"{'Model':<12} {'Gender Coef':>14} {'R²':>8}")
 print("-" * 36)
-for name, m in [('Gender only', model1), ('+ Education', model2),
-                ('+ Interact', model3), ('+ Age,Hours', model4)]:
-    g = m.params['gender']
-    print(f"{name:<12} {g:>14,.0f} {m.rsquared:>8.4f}")
+for name, m in [('Gender only', fit1), ('+ Education', fit2),
+                ('+ Interact', fit3), ('+ Age,Hours', fit4)]:
+    g = m.coef()['gender']
+    print(f"{name:<12} {g:>14,.0f} {m._r2:>8.4f}")
 
 # =============================================================================
 # STEP 5: Scatter plot — visualize separate regression lines by gender
@@ -98,15 +99,15 @@ plt.show()
 # =============================================================================
 # Three mutually exclusive categories: dself, dprivate, dgovt (sum to 1)
 # Drop one (dprivate = base) to avoid perfect multicollinearity
-model_worker = ols('earnings ~ dself + dgovt + education + age',
-                   data=data).fit(cov_type='HC1')
+fit_worker = pf.feols('earnings ~ dself + dgovt + education + age',
+                      data=data, vcov='HC1')
 
 print(f"Base category: Private sector")
-print(f"Self-employed vs Private: ${model_worker.params['dself']:,.0f}")
-print(f"Government vs Private:   ${model_worker.params['dgovt']:,.0f}")
-print(f"R-squared: {model_worker.rsquared:.4f}")
+print(f"Self-employed vs Private: ${fit_worker.coef()['dself']:,.0f}")
+print(f"Government vs Private:   ${fit_worker.coef()['dgovt']:,.0f}")
+print(f"R-squared: {fit_worker._r2:.4f}")
 
-model_worker.summary()
+fit_worker.summary()
 
 # =============================================================================
 # STEP 7: ANOVA — test if earnings differ across worker types

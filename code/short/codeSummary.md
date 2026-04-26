@@ -1,8 +1,10 @@
 # metricsAI: Code Summaries
 
+
 A compilation of all chapter code cheat sheets — self-contained Python scripts covering the core workflow of each chapter.
 
 ---
+
 
 ## Chapter 1: Analysis of Economics Data
 
@@ -14,7 +16,8 @@ A compilation of all chapter code cheat sheets — self-contained Python scripts
 # --- Libraries ---
 import pandas as pd                       # data loading and manipulation
 import matplotlib.pyplot as plt           # creating plots and visualizations
-from statsmodels.formula.api import ols   # OLS regression with R-style formulas
+import pyfixest as pf                     # OLS regression with R-style formulas
+# !pip install pyfixest  # if not installed
 
 # =============================================================================
 # STEP 1: Load data directly from a URL
@@ -47,28 +50,27 @@ plt.show()
 # STEP 4: OLS regression — fit the model
 # =============================================================================
 # Formula syntax: 'y ~ x' regresses y on x (intercept included automatically)
-# IMPORTANT: .fit() estimates the model — without it, nothing is computed!
-model = ols('price ~ size', data=data_house).fit()
+fit = pf.feols('price ~ size', data=data_house)
 
 # Extract key results
-slope     = model.params['size']       # marginal effect: $/sq ft
-intercept = model.params['Intercept']  # predicted price when size = 0
-r_squared = model.rsquared             # proportion of variation explained
+slope     = fit.coef()['size']         # marginal effect: $/sq ft
+intercept = fit.coef()['Intercept']    # predicted price when size = 0
+r_squared = fit._r2                    # proportion of variation explained
 
 print(f"Estimated equation: price = {intercept:,.0f} + {slope:.2f} × size")
 print(f"Interpretation: each additional sq ft is associated with ${slope:,.2f} higher price")
 print(f"R-squared: {r_squared:.4f} ({r_squared*100:.1f}% of variation explained)")
 
 # Full regression table (coefficients, std errors, t-stats, p-values, R²)
-model.summary()
+fit.summary()
 
 # =============================================================================
 # STEP 5: Scatter plot with fitted regression line and R²
 # =============================================================================
-# model.fittedvalues contains the predicted y-values from the estimated equation
+# fit.predict() contains the predicted y-values from the estimated equation
 fig, ax = plt.subplots(figsize=(10, 6))
 ax.scatter(data_house['size'], data_house['price'], s=50, alpha=0.7, label='Actual prices')
-ax.plot(data_house['size'], model.fittedvalues, color='red', linewidth=2, label='Fitted line')
+ax.plot(data_house['size'], fit.predict(), color='red', linewidth=2, label='Fitted line')
 ax.set_xlabel('House Size (square feet)')
 ax.set_ylabel('House Sale Price (dollars)')
 ax.set_title(f'OLS Regression: price = {intercept:,.0f} + {slope:.2f} × size  (R² = {r_squared:.2%})')
@@ -94,11 +96,12 @@ predictors = {
 print(f"{'Predictor':<18} {'Slope':>10} {'R²':>8}")
 print("-" * 38)
 for var, label in predictors.items():
-    m = ols(f'price ~ {var}', data=data_house).fit()
-    print(f"{label:<18} {m.params[var]:>10.2f} {m.rsquared:>8.4f}")
+    m = pf.feols(f'price ~ {var}', data=data_house)
+    print(f"{label:<18} {m.coef()[var]:>10.2f} {m._r2:>8.4f}")
 ```
 
 ---
+
 
 ## Chapter 2: Univariate Data Summary
 
@@ -217,6 +220,7 @@ plt.show()
 ```
 
 ---
+
 
 ## Chapter 3: The Sample Mean
 
@@ -368,6 +372,7 @@ print(f"Weighted mean (IPW):   ${weighted:,.0f}  (bias: ${weighted - true_pop_me
 ```
 
 ---
+
 
 ## Chapter 4: Statistical Inference for the Mean
 
@@ -526,6 +531,7 @@ print(f"Decision: {'Reject H0' if abs(z_stat) > 1.96 else 'Do not reject H0'}")
 
 ---
 
+
 ## Chapter 5: Bivariate Data Summary
 
 ```python
@@ -536,7 +542,8 @@ print(f"Decision: {'Reject H0' if abs(z_stat) > 1.96 else 'Do not reject H0'}")
 # --- Libraries ---
 import pandas as pd                                         # data loading and manipulation
 import matplotlib.pyplot as plt                              # creating plots and visualizations
-from statsmodels.formula.api import ols                      # OLS regression with R-style formulas
+import pyfixest as pf                                        # OLS regression with R-style formulas
+# !pip install pyfixest  # if not installed
 from statsmodels.nonparametric.smoothers_lowess import lowess  # LOWESS nonparametric smoothing
 
 # =============================================================================
@@ -581,27 +588,26 @@ print(f"r² = {r**2:.4f} ({r**2*100:.1f}% of variation shared)")
 # STEP 5: OLS regression — fit the best-fitting line
 # =============================================================================
 # Formula syntax: 'y ~ x' regresses y on x (intercept included automatically)
-# IMPORTANT: .fit() estimates the model — without it, nothing is computed!
-model = ols('price ~ size', data=data_house).fit()
+fit = pf.feols('price ~ size', data=data_house)
 
-slope     = model.params['size']        # marginal effect: $/sq ft
-intercept = model.params['Intercept']   # predicted price when size = 0
-r_squared = model.rsquared              # proportion of variation explained
+slope     = fit.coef()['size']          # marginal effect: $/sq ft
+intercept = fit.coef()['Intercept']     # predicted price when size = 0
+r_squared = fit._r2                     # proportion of variation explained
 
 print(f"Estimated equation: price = {intercept:,.0f} + {slope:.2f} × size")
 print(f"Interpretation: each additional sq ft is associated with ${slope:,.2f} higher price")
 print(f"R-squared: {r_squared:.4f} ({r_squared*100:.1f}% of variation explained)")
 
 # Full regression table (coefficients, std errors, t-stats, p-values, R²)
-model.summary()
+fit.summary()
 
 # =============================================================================
 # STEP 6: Scatter plot with fitted line and R² — visualize model fit
 # =============================================================================
-# model.fittedvalues contains the predicted y-values from the estimated equation
+# fit.predict() contains the predicted y-values from the estimated equation
 fig, ax = plt.subplots(figsize=(10, 6))
 ax.scatter(data_house['size'], data_house['price'], s=60, alpha=0.7, label='Actual prices')
-ax.plot(data_house['size'], model.fittedvalues, color='red', linewidth=2, label='Fitted line')
+ax.plot(data_house['size'], fit.predict(), color='red', linewidth=2, label='Fitted line')
 ax.set_xlabel('House Size (square feet)')
 ax.set_ylabel('House Sale Price (dollars)')
 ax.set_title(f'OLS: price = {intercept:,.0f} + {slope:.2f} × size  (R² = {r_squared:.2%})')
@@ -614,12 +620,12 @@ plt.show()
 # STEP 7: Reverse regression — association is NOT causation
 # =============================================================================
 # If regression = causation, the reverse slope would be 1/slope. It is not.
-reverse_model = ols('size ~ price', data=data_house).fit()
+fit_reverse = pf.feols('size ~ price', data=data_house)
 
 print(f"price ~ size  slope: {slope:.4f}")
-print(f"size ~ price  slope: {reverse_model.params['price']:.6f}")
+print(f"size ~ price  slope: {fit_reverse.coef()['price']:.6f}")
 print(f"1 / original slope:  {1/slope:.6f}")
-print(f"Reciprocals match?   {1/slope:.6f} ≠ {reverse_model.params['price']:.6f}")
+print(f"Reciprocals match?   {1/slope:.6f} ≠ {fit_reverse.coef()['price']:.6f}")
 print("→ Regression is asymmetric: association, not causation!")
 
 # =============================================================================
@@ -631,7 +637,7 @@ lowess_result = lowess(data_house['price'], data_house['size'], frac=0.6)
 
 fig, ax = plt.subplots(figsize=(10, 6))
 ax.scatter(data_house['size'], data_house['price'], s=60, alpha=0.6, label='Actual data')
-ax.plot(data_house['size'], model.fittedvalues, color='red',
+ax.plot(data_house['size'], fit.predict(), color='red',
         linewidth=2, label='OLS (parametric)')
 ax.plot(lowess_result[:, 0], lowess_result[:, 1], color='green',
         linewidth=2, linestyle='--', label='LOWESS (nonparametric)')
@@ -646,6 +652,7 @@ plt.show()
 
 ---
 
+
 ## Chapter 6: The Least Squares Estimator
 
 ```python
@@ -657,7 +664,8 @@ plt.show()
 import numpy as np                        # random sampling and numerical operations
 import pandas as pd                       # data manipulation
 import matplotlib.pyplot as plt           # creating plots and visualizations
-from statsmodels.formula.api import ols   # OLS regression with R-style formulas
+import pyfixest as pf                     # OLS regression with R-style formulas
+# !pip install pyfixest  # if not installed
 
 # =============================================================================
 # STEP 1: Define the Data-Generating Process (DGP)
@@ -682,17 +690,17 @@ print(f"Generated sample: {n} observations from y = {beta_1_true} + {beta_2_true
 # STEP 2: Fit OLS and compare sample vs. population parameters
 # =============================================================================
 # The sample regression estimates the unknown population line from data
-model = ols('y ~ x', data=data).fit()
+fit = pf.feols('y ~ x', data=data)
 
-b1 = model.params['Intercept']
-b2 = model.params['x']
+b1 = fit.coef()['Intercept']
+b2 = fit.coef()['x']
 
 print(f"\nPopulation:  E[y|x] = {beta_1_true} + {beta_2_true}x")
 print(f"Sample:      ŷ = {b1:.2f} + {b2:.2f}x")
 print(f"Sampling error in slope: b₂ - β₂ = {b2 - beta_2_true:.4f}")
 
 # Full regression table (coefficients, std errors, t-stats, p-values, R²)
-model.summary()
+fit.summary()
 
 # =============================================================================
 # STEP 3: Scatter plot — population line vs. sample line
@@ -700,7 +708,7 @@ model.summary()
 # Visualizing the gap between the true line and our estimate
 fig, ax = plt.subplots(figsize=(10, 6))
 ax.scatter(data['x'], data['y'], s=50, alpha=0.7, label='Observed data')
-ax.plot(data['x'], model.fittedvalues, color='red', linewidth=2,
+ax.plot(data['x'], fit.predict(), color='red', linewidth=2,
         label=f'Sample: ŷ = {b1:.2f} + {b2:.2f}x')
 x_range = np.linspace(data['x'].min(), data['x'].max(), 100)
 ax.plot(x_range, beta_1_true + beta_2_true * x_range,
@@ -727,8 +735,8 @@ for i in range(n_simulations):
     u_sim = np.random.normal(0, sigma_u, n)
     y_sim = beta_1_true + beta_2_true * x_sim + u_sim
     df_sim = pd.DataFrame({'x': x_sim, 'y': y_sim})
-    m = ols('y ~ x', data=df_sim).fit()
-    b2_estimates.append(m.params['x'])
+    m = pf.feols('y ~ x', data=df_sim)
+    b2_estimates.append(m.coef()['x'])
 
 print(f"\nMonte Carlo results ({n_simulations} simulations, n={n} each):")
 print(f"  True β₂:              {beta_2_true}")
@@ -759,8 +767,8 @@ plt.show()
 # =============================================================================
 # se(b₂) = sₑ / √[Σ(xᵢ - x̄)²]
 # Smaller when: (1) model fits well, (2) large n, (3) x spread wide
-se_b2       = model.bse['x']                       # from regression output
-s_e         = np.sqrt(model.mse_resid)             # standard error of regression
+se_b2       = fit.se()['x']                         # from regression output
+s_e         = np.sqrt(np.mean(fit._u_hat**2))      # standard error of regression
 x_variation = np.sum((data['x'] - data['x'].mean())**2)
 
 print(f"\nStandard error anatomy (from the single-sample regression):")
@@ -783,12 +791,13 @@ for ns in sample_sizes:
         xs = np.random.normal(3, 1, ns)
         us = np.random.normal(0, sigma_u, ns)
         ys = beta_1_true + beta_2_true * xs + us
-        m = ols('y ~ x', data=pd.DataFrame({'x': xs, 'y': ys})).fit()
-        estimates.append(m.params['x'])
+        m = pf.feols('y ~ x', data=pd.DataFrame({'x': xs, 'y': ys}))
+        estimates.append(m.coef()['x'])
     print(f"{ns:>6}  {np.mean(estimates):>10.4f}  {np.std(estimates):>22.4f}")
 ```
 
 ---
+
 
 ## Chapter 7: Statistical Inference for Bivariate Regression
 
@@ -800,7 +809,8 @@ for ns in sample_sizes:
 # --- Libraries ---
 import pandas as pd                       # data loading and manipulation
 import matplotlib.pyplot as plt           # creating plots and visualizations
-from statsmodels.formula.api import ols   # OLS regression with R-style formulas
+import pyfixest as pf                     # OLS regression with R-style formulas
+# !pip install pyfixest  # if not installed
 from scipy import stats                   # t-distribution and critical values
 
 # =============================================================================
@@ -816,13 +826,13 @@ print(f"Dataset: {data_house.shape[0]} observations, {data_house.shape[1]} varia
 # STEP 2: Estimate the regression and extract key statistics
 # =============================================================================
 # The t-statistic measures how many standard errors the estimate is from zero
-model = ols('price ~ size', data=data_house).fit()
+fit = pf.feols('price ~ size', data=data_house)
 
-slope     = model.params['size']       # marginal effect: $/sq ft
-intercept = model.params['Intercept']
-se_slope  = model.bse['size']          # standard error of the slope
-t_stat    = model.tvalues['size']      # t = b2 / se(b2)
-p_value   = model.pvalues['size']      # two-sided p-value for H0: b2 = 0
+slope     = fit.coef()['size']         # marginal effect: $/sq ft
+intercept = fit.coef()['Intercept']
+se_slope  = fit.se()['size']           # standard error of the slope
+t_stat    = fit.tstat()['size']        # t = b2 / se(b2)
+p_value   = fit.pval()['size']         # two-sided p-value for H0: b2 = 0
 
 print(f"Estimated equation: price = {intercept:,.0f} + {slope:.2f} × size")
 print(f"Standard error of slope: {se_slope:.2f}")
@@ -830,7 +840,7 @@ print(f"t-statistic: {t_stat:.4f}")
 print(f"p-value: {p_value:.6f}")
 
 # Full regression table (coefficients, std errors, t-stats, p-values, R²)
-model.summary()
+fit.summary()
 
 # =============================================================================
 # STEP 3: Confidence interval — a range of plausible values for β₂
@@ -877,15 +887,15 @@ print(f"  Would reject at 10% (p = {p_lower:.3f} < 0.10)")
 # STEP 6: Robust standard errors — valid with or without heteroskedasticity
 # =============================================================================
 # HC1 robust SEs protect against non-constant variance in the errors
-robust_model = ols('price ~ size', data=data_house).fit(cov_type='HC1')
+fit_robust = pf.feols('price ~ size', data=data_house, vcov='HC1')
 
 print(f"{'':20s} {'Standard':>12s} {'Robust (HC1)':>12s}")
 print("-" * 46)
-print(f"{'SE(size)':<20s} {se_slope:>12.2f} {robust_model.bse['size']:>12.2f}")
-print(f"{'t-statistic':<20s} {t_stat:>12.2f} {robust_model.tvalues['size']:>12.2f}")
-print(f"{'p-value':<20s} {p_value:>12.6f} {robust_model.pvalues['size']:>12.6f}")
+print(f"{'SE(size)':<20s} {se_slope:>12.2f} {fit_robust.se()['size']:>12.2f}")
+print(f"{'t-statistic':<20s} {t_stat:>12.2f} {fit_robust.tstat()['size']:>12.2f}")
+print(f"{'p-value':<20s} {p_value:>12.6f} {fit_robust.pval()['size']:>12.6f}")
 
-pct_change = ((robust_model.bse['size'] - se_slope) / se_slope) * 100
+pct_change = ((fit_robust.se()['size'] - se_slope) / se_slope) * 100
 print(f"\nRobust SE is {pct_change:+.1f}% different from standard SE")
 
 # =============================================================================
@@ -893,7 +903,7 @@ print(f"\nRobust SE is {pct_change:+.1f}% different from standard SE")
 # =============================================================================
 fig, ax = plt.subplots(figsize=(10, 6))
 ax.scatter(data_house['size'], data_house['price'], s=50, alpha=0.7, label='Actual prices')
-ax.plot(data_house['size'], model.fittedvalues, color='red', linewidth=2, label='Fitted line')
+ax.plot(data_house['size'], fit.predict(), color='red', linewidth=2, label='Fitted line')
 ax.set_xlabel('House Size (square feet)')
 ax.set_ylabel('House Sale Price (dollars)')
 ax.set_title(f'price = {intercept:,.0f} + {slope:.2f} × size    '
@@ -906,6 +916,7 @@ plt.show()
 
 ---
 
+
 ## Chapter 8: Case Studies for Bivariate Regression
 
 ```python
@@ -916,7 +927,8 @@ plt.show()
 # --- Libraries ---
 import pandas as pd                       # data loading and manipulation
 import matplotlib.pyplot as plt           # creating plots and visualizations
-from statsmodels.formula.api import ols   # OLS regression with R-style formulas
+import pyfixest as pf                     # OLS regression with R-style formulas
+# !pip install pyfixest  # if not installed
 
 # =============================================================================
 # STEP 1: Load OECD health data from a URL
@@ -937,26 +949,26 @@ print(data_health[['hlthpc', 'lifeexp', 'infmort', 'gdppc']].describe().round(2)
 # STEP 3: Health outcomes regression with robust standard errors
 # =============================================================================
 # Does higher health spending improve life expectancy?
-model_life = ols('lifeexp ~ hlthpc', data=data_health).fit()
+fit_life = pf.feols('lifeexp ~ hlthpc', data=data_health)
 
-slope_life = model_life.params['hlthpc']
-r2_life    = model_life.rsquared
+slope_life = fit_life.coef()['hlthpc']
+r2_life    = fit_life._r2
 
 print(f"Life expectancy: slope = {slope_life:.5f}, R² = {r2_life:.4f}")
 print(f"Each extra $1,000 in spending → {slope_life*1000:.2f} more years of life expectancy")
 
 # Robust standard errors adjust for non-constant error variance (heteroskedasticity)
-model_life_robust = model_life.get_robustcov_results(cov_type='HC1')
-model_life_robust.summary()
+fit_life_robust = pf.feols('lifeexp ~ hlthpc', data=data_health, vcov='HC1')
+fit_life_robust.summary()
 
 # =============================================================================
 # STEP 4: Health spending vs GDP — income elasticity
 # =============================================================================
 # How much of health spending is driven by national income?
-model_gdp = ols('hlthpc ~ gdppc', data=data_health).fit()
+fit_gdp = pf.feols('hlthpc ~ gdppc', data=data_health)
 
-slope_gdp = model_gdp.params['gdppc']
-r2_gdp    = model_gdp.rsquared
+slope_gdp = fit_gdp.coef()['gdppc']
+r2_gdp    = fit_gdp._r2
 
 # Income elasticity at the mean: (slope × mean_x) / mean_y
 mean_gdp  = data_health['gdppc'].mean()
@@ -973,23 +985,23 @@ print(f"Income elasticity at the mean: {elasticity:.2f} (≈1.0 → normal good)
 data_subset = data_health[(data_health['code'] != 'USA') &
                           (data_health['code'] != 'LUX')]
 
-model_subset = ols('hlthpc ~ gdppc', data=data_subset).fit()
+fit_subset = pf.feols('hlthpc ~ gdppc', data=data_subset)
 
 print(f"\nAll 34 countries:  slope = {slope_gdp:.4f}, R² = {r2_gdp:.4f}")
-print(f"Excluding USA/LUX: slope = {model_subset.params['gdppc']:.4f}, R² = {model_subset.rsquared:.4f}")
+print(f"Excluding USA/LUX: slope = {fit_subset.coef()['gdppc']:.4f}, R² = {fit_subset._r2:.4f}")
 print("Removing 2 of 34 countries transforms R² — always check for influential observations!")
 
 fig, axes = plt.subplots(1, 2, figsize=(14, 5))
 for ax, df, mdl, title in zip(
         axes,
         [data_health, data_subset],
-        [model_gdp, model_subset],
+        [fit_gdp, fit_subset],
         ['All 34 Countries', 'Excluding USA & Luxembourg']):
     ax.scatter(df['gdppc'], df['hlthpc'], s=50, alpha=0.7)
-    ax.plot(df['gdppc'], mdl.fittedvalues, color='red', linewidth=2)
+    ax.plot(df['gdppc'], mdl.predict(), color='red', linewidth=2)
     ax.set_xlabel('GDP per capita ($)')
     ax.set_ylabel('Health spending per capita ($)')
-    ax.set_title(f'{title}  (R² = {mdl.rsquared:.2f})')
+    ax.set_title(f'{title}  (R² = {mdl._r2:.2f})')
     ax.grid(True, alpha=0.3)
 plt.tight_layout()
 plt.show()
@@ -1001,18 +1013,18 @@ plt.show()
 url_capm = "https://raw.githubusercontent.com/quarcs-lab/data-open/master/AED/AED_CAPM.DTA"
 data_capm = pd.read_stata(url_capm)
 
-model_capm = ols('rko_rf ~ rm_rf', data=data_capm).fit()
+fit_capm = pf.feols('rko_rf ~ rm_rf', data=data_capm)
 
-alpha = model_capm.params['Intercept']   # excess return beyond CAPM prediction
-beta  = model_capm.params['rm_rf']       # systematic risk
-r2_capm = model_capm.rsquared
+alpha = fit_capm.coef()['Intercept']     # excess return beyond CAPM prediction
+beta  = fit_capm.coef()['rm_rf']         # systematic risk
+r2_capm = fit_capm._r2
 
 print(f"Coca-Cola CAPM: alpha = {alpha:.4f}, beta = {beta:.4f}, R² = {r2_capm:.4f}")
 print(f"Beta < 1 → defensive stock (moves less than the market)")
 print(f"R² = {r2_capm:.2%} explained by market; {1-r2_capm:.2%} is idiosyncratic risk")
 
 # Full regression table
-model_capm.summary()
+fit_capm.summary()
 
 # =============================================================================
 # STEP 7: Okun's Law — GDP growth vs unemployment change
@@ -1021,10 +1033,10 @@ model_capm.summary()
 url_gdp = "https://raw.githubusercontent.com/quarcs-lab/data-open/master/AED/AED_GDPUNEMPLOY.DTA"
 data_gdp = pd.read_stata(url_gdp)
 
-model_okun = ols('rgdpgrowth ~ uratechange', data=data_gdp).fit()
+fit_okun = pf.feols('rgdpgrowth ~ uratechange', data=data_gdp)
 
-slope_okun = model_okun.params['uratechange']
-r2_okun    = model_okun.rsquared
+slope_okun = fit_okun.coef()['uratechange']
+r2_okun    = fit_okun._r2
 
 print(f"Okun's Law: slope = {slope_okun:.2f} (Okun's original: -2.0)")
 print(f"R² = {r2_okun:.4f} — unemployment explains {r2_okun*100:.0f}% of GDP growth variation")
@@ -1032,7 +1044,7 @@ print(f"R² = {r2_okun:.4f} — unemployment explains {r2_okun*100:.0f}% of GDP 
 # Scatter plot with fitted line
 fig, ax = plt.subplots(figsize=(10, 6))
 ax.scatter(data_gdp['uratechange'], data_gdp['rgdpgrowth'], s=50, alpha=0.7)
-ax.plot(data_gdp['uratechange'], model_okun.fittedvalues, color='red', linewidth=2,
+ax.plot(data_gdp['uratechange'], fit_okun.predict(), color='red', linewidth=2,
         label=f'Fitted: slope = {slope_okun:.2f}')
 ax.axhline(y=0, color='gray', linestyle=':', linewidth=1, alpha=0.5)
 ax.set_xlabel('Change in unemployment rate (percentage points)')
@@ -1046,6 +1058,7 @@ plt.show()
 
 ---
 
+
 ## Chapter 9: Models with Natural Logarithms
 
 ```python
@@ -1057,7 +1070,8 @@ plt.show()
 import numpy as np                        # logarithms and exponentials
 import pandas as pd                       # data loading and manipulation
 import matplotlib.pyplot as plt           # creating plots and visualizations
-from statsmodels.formula.api import ols   # OLS regression with R-style formulas
+import pyfixest as pf                     # OLS regression with R-style formulas
+# !pip install pyfixest  # if not installed
 
 # =============================================================================
 # STEP 1: Load the earnings-education dataset
@@ -1095,42 +1109,42 @@ print(data_earnings[['earnings', 'lnearn', 'education', 'lneduc']].describe().ro
 # Each model answers a different economic question about earnings and education
 
 # Model 1: Linear — Δy = β₁Δx (dollar change per year of education)
-model_linear = ols('earnings ~ education', data=data_earnings).fit()
+fit_linear = pf.feols('earnings ~ education', data=data_earnings)
 
 # Model 2: Log-linear — 100β₁ ≈ % change in y per unit x (semi-elasticity)
-model_loglin = ols('lnearn ~ education', data=data_earnings).fit()
+fit_loglin = pf.feols('lnearn ~ education', data=data_earnings)
 
 # Model 3: Log-log — β₁ ≈ % change in y per % change in x (elasticity)
-model_loglog = ols('lnearn ~ lneduc', data=data_earnings).fit()
+fit_loglog = pf.feols('lnearn ~ lneduc', data=data_earnings)
 
 # Model 4: Linear-log — β₁/100 ≈ dollar change per % change in x
-model_linlog = ols('earnings ~ lneduc', data=data_earnings).fit()
+fit_linlog = pf.feols('earnings ~ lneduc', data=data_earnings)
 
 # Print the most important model: log-linear (semi-elasticity)
-semi_elast = model_loglin.params['education']
+semi_elast = fit_loglin.coef()['education']
 print(f"Log-linear: each year of education → {100*semi_elast:.1f}% higher earnings")
-print(f"Log-log elasticity: {model_loglog.params['lneduc']:.3f}")
+print(f"Log-log elasticity: {fit_loglog.coef()['lneduc']:.3f}")
 
 # Full regression table for the log-linear model
-model_loglin.summary()
+fit_loglin.summary()
 
 # =============================================================================
 # STEP 5: Compare all four models side by side
 # =============================================================================
 # The comparison shows that model choice affects both R² and interpretation
 models = {
-    'Linear':     ('earnings ~ education',  model_linear,  'education', '${:,.0f} per year'),
-    'Log-linear': ('ln(y) ~ x',            model_loglin,  'education', '{:.1f}% per year'),
-    'Log-log':    ('ln(y) ~ ln(x)',         model_loglog,  'lneduc',   '{:.2f}% per 1%'),
-    'Linear-log': ('y ~ ln(x)',            model_linlog,  'lneduc',   '${:,.0f} per 1%'),
+    'Linear':     ('earnings ~ education',  fit_linear,  'education', '${:,.0f} per year'),
+    'Log-linear': ('ln(y) ~ x',            fit_loglin,  'education', '{:.1f}% per year'),
+    'Log-log':    ('ln(y) ~ ln(x)',         fit_loglog,  'lneduc',   '{:.2f}% per 1%'),
+    'Linear-log': ('y ~ ln(x)',            fit_linlog,  'lneduc',   '${:,.0f} per 1%'),
 }
 
 print(f"{'Model':<12} {'Specification':<16} {'Slope':>10} {'R²':>8}  Interpretation")
 print("-" * 75)
 for name, (spec, m, var, fmt) in models.items():
-    slope = m.params[var]
+    slope = m.coef()[var]
     interp = fmt.format(100*slope if 'per year' in fmt and 'Log' in name else slope/100 if 'per 1%' in fmt and name == 'Linear-log' else slope)
-    print(f"{name:<12} {spec:<16} {slope:>10.4f} {m.rsquared:>8.3f}  {interp}")
+    print(f"{name:<12} {spec:<16} {slope:>10.4f} {m._r2:>8.3f}  {interp}")
 
 # =============================================================================
 # STEP 6: Scatter plot with the log-linear fitted line
@@ -1138,11 +1152,11 @@ for name, (spec, m, var, fmt) in models.items():
 # The log-linear model (semi-elasticity) provides the best fit for earnings data
 fig, ax = plt.subplots(figsize=(10, 6))
 ax.scatter(data_earnings['education'], data_earnings['lnearn'], s=50, alpha=0.7)
-ax.plot(data_earnings['education'], model_loglin.fittedvalues,
+ax.plot(data_earnings['education'], fit_loglin.predict(),
         color='red', linewidth=2, label='Fitted line')
 ax.set_xlabel('Education (years)')
 ax.set_ylabel('ln(Earnings)')
-ax.set_title(f'Log-Linear Model: semi-elasticity = {semi_elast:.4f}  (R² = {model_loglin.rsquared:.3f})')
+ax.set_title(f'Log-Linear Model: semi-elasticity = {semi_elast:.4f}  (R² = {fit_loglin._r2:.3f})')
 ax.legend()
 ax.grid(True, alpha=0.3)
 plt.tight_layout()
@@ -1156,12 +1170,12 @@ plt.show()
 url_sp500 = "https://raw.githubusercontent.com/quarcs-lab/data-open/master/AED/AED_SP500INDEX.DTA"
 data_sp500 = pd.read_stata(url_sp500)
 
-model_sp500 = ols('lnsp500 ~ year', data=data_sp500).fit()
-growth_rate = model_sp500.params['year']
+fit_sp500 = pf.feols('lnsp500 ~ year', data=data_sp500)
+growth_rate = fit_sp500.coef()['year']
 
 print(f"S&P 500 estimated growth rate: {100*growth_rate:.2f}% per year")
 print(f"Rule of 72: doubles every {72/(100*growth_rate):.1f} years")
-print(f"R-squared: {model_sp500.rsquared:.4f}")
+print(f"R-squared: {fit_sp500._r2:.4f}")
 
 # Visualize: exponential in levels vs. linear in logs
 fig, axes = plt.subplots(1, 2, figsize=(14, 5))
@@ -1172,7 +1186,7 @@ axes[0].set_title('Exponential Growth in Levels')
 axes[0].grid(True, alpha=0.3)
 
 axes[1].plot(data_sp500['year'], data_sp500['lnsp500'], linewidth=2)
-axes[1].plot(data_sp500['year'], model_sp500.fittedvalues,
+axes[1].plot(data_sp500['year'], fit_sp500.predict(),
              color='red', linewidth=2, linestyle='--', label='Fitted (linear)')
 axes[1].set_xlabel('Year')
 axes[1].set_ylabel('ln(S&P 500 Index)')
@@ -1184,6 +1198,7 @@ plt.show()
 ```
 
 ---
+
 
 ## Chapter 10: Data Summary for Multiple Regression
 
@@ -1197,7 +1212,8 @@ import numpy as np                                          # numerical operatio
 import pandas as pd                                         # data loading and manipulation
 import matplotlib.pyplot as plt                             # creating plots and visualizations
 import seaborn as sns                                       # statistical visualization (heatmaps, pairplots)
-from statsmodels.formula.api import ols                     # OLS regression with R-style formulas
+import pyfixest as pf                                       # OLS regression with R-style formulas
+# !pip install pyfixest  # if not installed
 from statsmodels.stats.outliers_influence import variance_inflation_factor  # multicollinearity detection
 
 # =============================================================================
@@ -1214,14 +1230,14 @@ print(data_house[['price', 'size', 'bedrooms', 'bathrooms', 'lotsize', 'age']].d
 # STEP 2: Partial effects vs. total effects — why controls matter
 # =============================================================================
 # Bivariate regression captures TOTAL effect (direct + indirect through size)
-model_bivariate = ols('price ~ bedrooms', data=data_house).fit()
+fit_bivariate = pf.feols('price ~ bedrooms', data=data_house)
 
 # Multiple regression isolates the PARTIAL effect (holding size constant)
-model_partial = ols('price ~ bedrooms + size', data=data_house).fit()
+fit_partial = pf.feols('price ~ bedrooms + size', data=data_house)
 
-print(f"Bedrooms coefficient (bivariate):  ${model_bivariate.params['bedrooms']:,.2f}")
-print(f"Bedrooms coefficient (multiple):   ${model_partial.params['bedrooms']:,.2f}")
-print(f"Change: ${model_partial.params['bedrooms'] - model_bivariate.params['bedrooms']:,.2f}")
+print(f"Bedrooms coefficient (bivariate):  ${fit_bivariate.coef()['bedrooms']:,.2f}")
+print(f"Bedrooms coefficient (multiple):   ${fit_partial.coef()['bedrooms']:,.2f}")
+print(f"Change: ${fit_partial.coef()['bedrooms'] - fit_bivariate.coef()['bedrooms']:,.2f}")
 # The coefficient drops from ~$23,667 to ~$1,553 once we control for size
 
 # =============================================================================
@@ -1246,45 +1262,45 @@ print(f"Size-Bedrooms correlation: {corr_matrix.loc['size', 'bedrooms']:.3f}")
 # =============================================================================
 # Each coefficient measures the change in price for a one-unit change in that
 # variable, holding ALL other regressors constant
-model_full = ols('price ~ size + bedrooms + bathrooms + lotsize + age + monthsold',
-                 data=data_house).fit()
+fit_full = pf.feols('price ~ size + bedrooms + bathrooms + lotsize + age + monthsold',
+                    data=data_house)
 
-size_coef = model_full.params['size']
+size_coef = fit_full.coef()['size']
 print(f"Size effect: each additional sq ft is associated with ${size_coef:,.2f} higher price")
-print(f"R-squared: {model_full.rsquared:.4f} ({model_full.rsquared*100:.1f}% of variation explained)")
-print(f"Adjusted R-squared: {model_full.rsquared_adj:.4f}")
+print(f"R-squared: {fit_full._r2:.4f} ({fit_full._r2*100:.1f}% of variation explained)")
+print(f"Adjusted R-squared: {fit_full._adj_r2:.4f}")
 
 # Full regression table (coefficients, std errors, t-stats, p-values)
-model_full.summary()
+fit_full.summary()
 
 # =============================================================================
 # STEP 5: FWL theorem — how "holding constant" actually works
 # =============================================================================
 # Step A: Regress size on all other regressors, keep residuals
-model_size_on_others = ols('size ~ bedrooms + bathrooms + lotsize + age + monthsold',
-                            data=data_house).fit()
-resid_size = model_size_on_others.resid
+fit_size_on_others = pf.feols('size ~ bedrooms + bathrooms + lotsize + age + monthsold',
+                              data=data_house)
+resid_size = fit_size_on_others._u_hat
 
 # Step B: Regress price on those residuals — the slope matches the full model
 data_house['resid_size'] = resid_size
-model_fwl = ols('price ~ resid_size', data=data_house).fit()
+fit_fwl = pf.feols('price ~ resid_size', data=data_house)
 
-print(f"Size coef from FULL regression:     {model_full.params['size']:.10f}")
-print(f"Coef from FWL residual regression:  {model_fwl.params['resid_size']:.10f}")
+print(f"Size coef from FULL regression:     {fit_full.coef()['size']:.10f}")
+print(f"Coef from FWL residual regression:  {fit_fwl.coef()['resid_size']:.10f}")
 # These are identical — the FWL theorem in action
 
 # =============================================================================
 # STEP 6: Model comparison — parsimony vs. complexity
 # =============================================================================
 # Compare simple (size only) vs. full model using fit statistics
-model_simple = ols('price ~ size', data=data_house).fit()
+fit_simple = pf.feols('price ~ size', data=data_house)
 
 comparison = pd.DataFrame({
     'Model': ['Size only', 'Full (all variables)'],
-    'R²':     [model_simple.rsquared,     model_full.rsquared],
-    'Adj R²': [model_simple.rsquared_adj, model_full.rsquared_adj],
-    'AIC':    [model_simple.aic,          model_full.aic],
-    'BIC':    [model_simple.bic,          model_full.bic],
+    'R²':     [fit_simple._r2,     fit_full._r2],
+    'Adj R²': [fit_simple._adj_r2, fit_full._adj_r2],
+    'AIC':    [fit_simple._aic,    fit_full._aic],
+    'BIC':    [fit_simple._bic,    fit_full._bic],
 })
 print(comparison.to_string(index=False))
 # Adj R² DECREASES when adding 5 weak predictors — parsimony wins
@@ -1308,7 +1324,7 @@ print(vif_data.to_string(index=False))
 fig, axes = plt.subplots(1, 2, figsize=(14, 6))
 
 # Actual vs. predicted
-axes[0].scatter(data_house['price'], model_full.fittedvalues, alpha=0.7, s=50)
+axes[0].scatter(data_house['price'], fit_full.predict(), alpha=0.7, s=50)
 axes[0].plot([data_house['price'].min(), data_house['price'].max()],
              [data_house['price'].min(), data_house['price'].max()],
              'r--', linewidth=2, label='Perfect prediction (45° line)')
@@ -1319,7 +1335,7 @@ axes[0].legend()
 axes[0].grid(True, alpha=0.3)
 
 # Residual plot
-axes[1].scatter(model_full.fittedvalues, model_full.resid, alpha=0.7, s=50)
+axes[1].scatter(fit_full.predict(), fit_full._u_hat, alpha=0.7, s=50)
 axes[1].axhline(y=0, color='red', linestyle='--', linewidth=2)
 axes[1].set_xlabel('Fitted Values ($)')
 axes[1].set_ylabel('Residuals ($)')
@@ -1332,6 +1348,7 @@ plt.show()
 
 ---
 
+
 ## Chapter 11: Statistical Inference for Multiple Regression
 
 ```python
@@ -1343,8 +1360,10 @@ plt.show()
 import numpy as np                              # numerical operations
 import pandas as pd                             # data loading and manipulation
 import matplotlib.pyplot as plt                 # creating plots and visualizations
-from statsmodels.formula.api import ols         # OLS regression with R-style formulas
+import pyfixest as pf                           # OLS regression with R-style formulas
+# !pip install pyfixest  # if not installed
 from scipy import stats                         # t and F distributions for inference
+from statsmodels.formula.api import ols as sm_ols  # for ANOVA model comparison
 from statsmodels.stats.anova import anova_lm    # ANOVA table for model comparison
 
 # =============================================================================
@@ -1361,33 +1380,33 @@ print(data_house[['price', 'size', 'bedrooms', 'bathrooms', 'lotsize', 'age']].d
 # STEP 2: Estimate the full multiple regression model
 # =============================================================================
 # Formula syntax: 'y ~ x1 + x2 + ...' includes an intercept automatically
-# IMPORTANT: .fit() estimates the model — without it, nothing is computed!
-model_full = ols('price ~ size + bedrooms + bathrooms + lotsize + age + monthsold',
-                 data=data_house).fit()
+# pf.feols() estimates the model in one step (no separate .fit() needed)
+fit_full = pf.feols('price ~ size + bedrooms + bathrooms + lotsize + age + monthsold',
+                    data=data_house)
 
-n = int(model_full.nobs)
-k = len(model_full.params)
+n = int(fit_full._N)
+k = len(fit_full.coef())
 df = n - k  # degrees of freedom for t and F tests
 
-print(f"\nSize effect: ${model_full.params['size']:,.2f} per sq ft (p = {model_full.pvalues['size']:.4f})")
-print(f"R-squared: {model_full.rsquared:.4f} ({model_full.rsquared*100:.1f}% of variation explained)")
+print(f"\nSize effect: ${fit_full.coef()['size']:,.2f} per sq ft (p = {fit_full.pval()['size']:.4f})")
+print(f"R-squared: {fit_full._r2:.4f} ({fit_full._r2*100:.1f}% of variation explained)")
 print(f"Degrees of freedom: n-k = {n}-{k} = {df}")
 
 # Full regression table (coefficients, std errors, t-stats, p-values, R²)
-model_full.summary()
+fit_full.summary()
 
 # =============================================================================
 # STEP 3: Confidence intervals — does the CI exclude zero?
 # =============================================================================
 # 95% CI: b_j ± t_critical × se(b_j)
 # If the interval excludes zero, the coefficient is statistically significant at 5%
-conf_int = model_full.conf_int(alpha=0.05)
+conf_int = fit_full.confint()
 print("\n95% Confidence Intervals:")
 print(conf_int.round(2))
 
 # Manual calculation for the size coefficient
-coef_size = model_full.params['size']
-se_size   = model_full.bse['size']
+coef_size = fit_full.coef()['size']
+se_size   = fit_full.se()['size']
 t_crit    = stats.t.ppf(0.975, df)  # 0.975 = upper tail for two-sided 95% CI
 
 ci_lower = coef_size - t_crit * se_size
@@ -1411,21 +1430,24 @@ print(f"  Decision: {'Reject' if p_value < 0.05 else 'Fail to reject'} H₀ at 5
 # Test of statistical significance: H₀: β_size = 0
 t_stat_zero = coef_size / se_size
 print(f"\nTest H₀: β_size = 0")
-print(f"  t-statistic: {t_stat_zero:.4f}, p-value: {model_full.pvalues['size']:.6f}")
+print(f"  t-statistic: {t_stat_zero:.4f}, p-value: {fit_full.pval()['size']:.6f}")
 print(f"  Size IS statistically significant at 5% level")
 
 # =============================================================================
 # STEP 5: Joint F-test — are groups of coefficients jointly significant?
 # =============================================================================
 # Overall F-test: H₀: all slope coefficients = 0
-print(f"\nOverall F-test: F = {model_full.fvalue:.4f}, p = {model_full.f_pvalue:.6e}")
+# Use statsmodels for F-test functionality
+sm_full = sm_ols('price ~ size + bedrooms + bathrooms + lotsize + age + monthsold',
+                 data=data_house).fit()
+print(f"\nOverall F-test: F = {sm_full.fvalue:.4f}, p = {sm_full.f_pvalue:.6e}")
 print(f"  At least one variable matters → model is jointly significant")
 
 # Subset F-test: are variables other than size jointly significant?
 # H₀: β_bedrooms = β_bathrooms = β_lotsize = β_age = β_monthsold = 0
 hypotheses = ['bedrooms = 0', 'bathrooms = 0', 'lotsize = 0',
               'age = 0', 'monthsold = 0']
-f_test_result = model_full.f_test(hypotheses)
+f_test_result = sm_full.f_test(hypotheses)
 print(f"\nSubset F-test (drop 5 vars, keep size):")
 print(f"  F = {f_test_result.fvalue[0][0]:.4f}, p = {float(f_test_result.pvalue):.4f}")
 print(f"  Extra variables are NOT jointly significant → simpler model preferred")
@@ -1434,38 +1456,40 @@ print(f"  Extra variables are NOT jointly significant → simpler model preferre
 # STEP 6: Model comparison — restricted vs unrestricted
 # =============================================================================
 # Restricted model: only size as predictor
-model_restricted = ols('price ~ size', data=data_house).fit()
+fit_restricted = pf.feols('price ~ size', data=data_house)
+sm_restricted = sm_ols('price ~ size', data=data_house).fit()
 
 # ANOVA table confirms the F-test result
-anova_results = anova_lm(model_restricted, model_full)
+anova_results = anova_lm(sm_restricted, sm_full)
 print("\nANOVA: Restricted (size only) vs Full model:")
 print(anova_results)
 
 # Compare fit statistics
-print(f"\n{'Model':<25} {'R²':>8} {'Adj. R²':>9} {'F-stat':>8}")
-print("-" * 52)
-for name, m in [('Size only', model_restricted), ('Full model', model_full)]:
-    print(f"{name:<25} {m.rsquared:>8.4f} {m.rsquared_adj:>9.4f} {m.fvalue:>8.2f}")
+print(f"\n{'Model':<25} {'R²':>8} {'Adj. R²':>9}")
+print("-" * 44)
+for name, m in [('Size only', fit_restricted), ('Full model', fit_full)]:
+    print(f"{name:<25} {m._r2:>8.4f} {m._adj_r2:>9.4f}")
 
 # =============================================================================
 # STEP 7: Robust standard errors — valid under heteroskedasticity
 # =============================================================================
 # HC1 (White's correction) provides valid inference without constant variance
-model_robust = model_full.get_robustcov_results(cov_type='HC1')
+fit_robust = pf.feols('price ~ size + bedrooms + bathrooms + lotsize + age + monthsold',
+                      data=data_house, vcov='HC1')
 
 print("\nStandard vs Robust SEs:")
 print(f"{'Variable':<14} {'Coef':>10} {'Std SE':>10} {'Robust SE':>10} {'p (robust)':>10}")
 print("-" * 56)
-for var in model_full.params.index:
-    print(f"{var:<14} {model_full.params[var]:>10.2f} "
-          f"{model_full.bse[var]:>10.2f} {model_robust.bse[var]:>10.2f} "
-          f"{model_robust.pvalues[var]:>10.4f}")
+for var in fit_full.coef().index:
+    print(f"{var:<14} {fit_full.coef()[var]:>10.2f} "
+          f"{fit_full.se()[var]:>10.2f} {fit_robust.se()[var]:>10.2f} "
+          f"{fit_robust.pval()[var]:>10.4f}")
 
 # =============================================================================
 # STEP 8: Coefficient plot — visual summary of significance
 # =============================================================================
 # Error bars crossing zero = not significant at 5%
-params_plot = model_full.params[1:]  # exclude intercept
+params_plot = fit_full.coef()[1:]  # exclude intercept
 ci_plot = conf_int.iloc[1:, :]
 
 fig, ax = plt.subplots(figsize=(10, 6))
@@ -1487,6 +1511,7 @@ plt.show()
 
 ---
 
+
 ## Chapter 12: Further Topics in Multiple Regression
 
 ```python
@@ -1498,8 +1523,9 @@ plt.show()
 import pandas as pd                       # data loading and manipulation
 import numpy as np                        # numerical operations
 import matplotlib.pyplot as plt           # creating plots and visualizations
-from statsmodels.formula.api import ols   # OLS regression with R-style formulas
-import statsmodels.api as sm              # prediction tools (add_constant, get_prediction)
+import pyfixest as pf                     # OLS regression with R-style formulas
+# !pip install pyfixest  # if not installed
+from statsmodels.formula.api import ols as sm_ols  # for prediction intervals
 from scipy import stats                   # statistical distributions for CIs and power
 from statsmodels.graphics.tsaplots import plot_acf  # autocorrelation plots
 
@@ -1517,28 +1543,28 @@ print(data_house[['price', 'size', 'bedrooms', 'bathrooms', 'lotsize', 'age']].d
 # STEP 2: OLS regression with default standard errors
 # =============================================================================
 # Default SEs assume homoskedasticity (constant error variance)
-model_default = ols('price ~ size + bedrooms + bathrooms + lotsize + age + monthsold',
-                    data=data_house).fit()
+fit_default = pf.feols('price ~ size + bedrooms + bathrooms + lotsize + age + monthsold',
+                       data=data_house)
 
-print(f"\nR-squared: {model_default.rsquared:.4f}")
-print(f"Size effect (default): ${model_default.params['size']:,.2f} per sq ft")
-model_default.summary()
+print(f"\nR-squared: {fit_default._r2:.4f}")
+print(f"Size effect (default): ${fit_default.coef()['size']:,.2f} per sq ft")
+fit_default.summary()
 
 # =============================================================================
 # STEP 3: Robust (HC1) standard errors — compare with default
 # =============================================================================
 # HC1 SEs correct for heteroskedasticity without changing coefficient estimates
 # Only the SEs, t-statistics, and confidence intervals change
-model_robust = ols('price ~ size + bedrooms + bathrooms + lotsize + age + monthsold',
-                   data=data_house).fit(cov_type='HC1')
+fit_robust = pf.feols('price ~ size + bedrooms + bathrooms + lotsize + age + monthsold',
+                      data=data_house, vcov='HC1')
 
 # SE ratio: how much heteroskedasticity affects each coefficient's uncertainty
 print(f"{'Variable':<14} {'Coef':>10} {'Default SE':>12} {'Robust SE':>12} {'Ratio':>8}")
 print("-" * 58)
-for var in model_default.params.index:
-    coef  = model_default.params[var]
-    se_d  = model_default.bse[var]
-    se_r  = model_robust.bse[var]
+for var in fit_default.coef().index:
+    coef  = fit_default.coef()[var]
+    se_d  = fit_default.se()[var]
+    se_r  = fit_robust.se()[var]
     ratio = se_r / se_d                   # ratio > 1 → default was too optimistic
     print(f"{var:<14} {coef:>10.2f} {se_d:>12.2f} {se_r:>12.2f} {ratio:>8.3f}")
 
@@ -1546,14 +1572,16 @@ for var in model_default.params.index:
 # STEP 4: Prediction — conditional mean CI vs. individual forecast PI
 # =============================================================================
 # Predicting E[y|x*] is more precise than predicting an individual y|x*
-model_simple = ols('price ~ size', data=data_house).fit()
+fit_simple = pf.feols('price ~ size', data=data_house)
+# Use statsmodels for prediction intervals (not available in pyfixest)
+sm_simple = sm_ols('price ~ size', data=data_house).fit()
 
 # Predict for a 2000 sq ft house
 new_house = pd.DataFrame({'size': [2000]})
-pred = model_simple.get_prediction(new_house)
+pred = sm_simple.get_prediction(new_house)
 pred_frame = pred.summary_frame(alpha=0.05)
 
-s_e = np.sqrt(model_simple.mse_resid)    # RMSE — irreducible individual uncertainty
+s_e = np.sqrt(np.mean(fit_simple._u_hat**2))  # RMSE — irreducible individual uncertainty
 
 print(f"\nPredicted price (2000 sq ft): ${pred_frame['mean'].values[0]:,.0f}")
 print(f"95% CI for E[Y|X=2000]: [${pred_frame['mean_ci_lower'].values[0]:,.0f}, "
@@ -1564,15 +1592,15 @@ print(f"\nRMSE (s_e): ${s_e:,.0f} — PI can never be narrower than ±1.96 × s_
 
 # Visualize: CI (narrow) vs. PI (wide)
 sizes_sorted = data_house[['size']].sort_values('size')
-pred_all = model_simple.get_prediction(sizes_sorted)
-pf = pred_all.summary_frame(alpha=0.05)
+pred_all = sm_simple.get_prediction(sizes_sorted)
+pred_f = pred_all.summary_frame(alpha=0.05)
 
 fig, ax = plt.subplots(figsize=(10, 6))
 ax.scatter(data_house['size'], data_house['price'], s=50, alpha=0.6, label='Actual')
-ax.plot(sizes_sorted['size'], pf['mean'], color='red', linewidth=2, label='Fitted line')
-ax.fill_between(sizes_sorted['size'], pf['mean_ci_lower'], pf['mean_ci_upper'],
+ax.plot(sizes_sorted['size'], pred_f['mean'], color='red', linewidth=2, label='Fitted line')
+ax.fill_between(sizes_sorted['size'], pred_f['mean_ci_lower'], pred_f['mean_ci_upper'],
                 color='red', alpha=0.2, label='95% CI (conditional mean)')
-ax.fill_between(sizes_sorted['size'], pf['obs_ci_lower'], pf['obs_ci_upper'],
+ax.fill_between(sizes_sorted['size'], pred_f['obs_ci_lower'], pred_f['obs_ci_upper'],
                 color='blue', alpha=0.1, label='95% PI (individual)')
 ax.set_xlabel('House Size (sq ft)')
 ax.set_ylabel('House Price ($)')
@@ -1595,15 +1623,13 @@ lag_length   = int(0.75 * n_gdp**(1/3))  # rule of thumb: m = 0.75 × T^(1/3)
 
 # Compare default SE vs. HAC SE for the mean
 se_default = data_gdp['growth'].std() / np.sqrt(n_gdp)
-y = data_gdp['growth']
-X = np.ones(n_gdp)
-from statsmodels.regression.linear_model import OLS
-model_hac = OLS(y, X).fit(cov_type='HAC', cov_kwds={'maxlags': lag_length})
+data_gdp['_const'] = 1
+fit_hac = pf.feols('growth ~ 1', data=data_gdp, vcov={'NW': lag_length})
 
 print(f"\nGDP Growth: mean = {mean_growth:.4f}")
 print(f"Default SE (no autocorrelation): {se_default:.6f}")
-print(f"HAC SE (lag = {lag_length}):            {model_hac.bse[0]:.6f}")
-print(f"Ratio HAC/Default: {model_hac.bse[0] / se_default:.3f}")
+print(f"HAC SE (lag = {lag_length}):            {fit_hac.se()['Intercept']:.6f}")
+print(f"Ratio HAC/Default: {fit_hac.se()['Intercept'] / se_default:.3f}")
 
 # Correlogram — visualize autocorrelation structure
 fig, ax = plt.subplots(figsize=(10, 6))
@@ -1656,18 +1682,18 @@ boot_slopes = []
 
 for _ in range(n_boot):
     boot_sample = data_house.sample(n=len(data_house), replace=True)
-    boot_model  = ols('price ~ size', data=boot_sample).fit()
-    boot_slopes.append(boot_model.params['size'])
+    boot_fit    = pf.feols('price ~ size', data=boot_sample)
+    boot_slopes.append(boot_fit.coef()['size'])
 
 # Percentile method: 95% CI = [2.5th, 97.5th percentile]
 ci_lower = np.percentile(boot_slopes, 2.5)
 ci_upper = np.percentile(boot_slopes, 97.5)
-ols_slope = model_simple.params['size']
+ols_slope = fit_simple.coef()['size']
 
 print(f"\nOLS slope (size): {ols_slope:.4f}")
 print(f"Bootstrap 95% CI: [{ci_lower:.4f}, {ci_upper:.4f}]")
-print(f"Analytical 95% CI: [{model_simple.conf_int().loc['size'][0]:.4f}, "
-      f"{model_simple.conf_int().loc['size'][1]:.4f}]")
+print(f"Analytical 95% CI: [{fit_simple.confint().loc['size'].iloc[0]:.4f}, "
+      f"{fit_simple.confint().loc['size'].iloc[1]:.4f}]")
 
 fig, ax = plt.subplots(figsize=(10, 6))
 ax.hist(boot_slopes, bins=40, edgecolor='black', alpha=0.7)
@@ -1685,6 +1711,7 @@ plt.show()
 
 ---
 
+
 ## Chapter 13: Case Studies for Multiple Regression
 
 ```python
@@ -1696,7 +1723,9 @@ plt.show()
 import numpy as np                        # numerical operations and log transforms
 import pandas as pd                       # data loading and manipulation
 import matplotlib.pyplot as plt           # creating plots and visualizations
-from statsmodels.formula.api import ols   # OLS regression with R-style formulas
+import pyfixest as pf                     # OLS regression with R-style formulas
+# !pip install pyfixest  # if not installed
+from statsmodels.formula.api import ols as sm_ols  # for SSR-based F-tests and cluster SEs
 from scipy import stats                   # F-distribution for hypothesis tests
 
 # --- Data source ---
@@ -1712,24 +1741,24 @@ data_cobb['lnk'] = np.log(data_cobb['k'])
 data_cobb['lnl'] = np.log(data_cobb['l'])
 
 # OLS with HAC standard errors (time series: autocorrelation + heteroskedasticity)
-model_cobb = ols('lnq ~ lnk + lnl', data=data_cobb).fit(
-    cov_type='HAC', cov_kwds={'maxlags': 3}
-)
+fit_cobb = pf.feols('lnq ~ lnk + lnl', data=data_cobb, vcov={'NW': 3})
 
-alpha = model_cobb.params['lnk']   # capital elasticity
-beta  = model_cobb.params['lnl']   # labor elasticity
+alpha = fit_cobb.coef()['lnk']    # capital elasticity
+beta  = fit_cobb.coef()['lnl']    # labor elasticity
 
 print(f"Capital elasticity α = {alpha:.3f}, Labor elasticity β = {beta:.3f}")
 print(f"Sum α + β = {alpha + beta:.3f}  (≈1 → constant returns to scale)")
-print(f"R² = {model_cobb.rsquared:.4f}")
-model_cobb.summary()
+print(f"R² = {fit_cobb._r2:.4f}")
+fit_cobb.summary()
 
 # F-test for constant returns to scale: H0: α + β = 1
 data_cobb['lnq_l'] = data_cobb['lnq'] - data_cobb['lnl']
 data_cobb['lnk_l'] = data_cobb['lnk'] - data_cobb['lnl']
-model_r = ols('lnq_l ~ lnk_l', data=data_cobb).fit()
-f_stat = ((model_r.ssr - model_cobb.ssr) / 1) / (model_cobb.ssr / model_cobb.df_resid)
-p_val  = 1 - stats.f.cdf(f_stat, 1, model_cobb.df_resid)
+# Use statsmodels for SSR-based F-test
+sm_cobb = sm_ols('lnq ~ lnk + lnl', data=data_cobb).fit()
+sm_r = sm_ols('lnq_l ~ lnk_l', data=data_cobb).fit()
+f_stat = ((sm_r.ssr - sm_cobb.ssr) / 1) / (sm_cobb.ssr / sm_cobb.df_resid)
+p_val  = 1 - stats.f.cdf(f_stat, 1, sm_cobb.df_resid)
 print(f"CRS test: F = {f_stat:.2f}, p = {p_val:.3f} → {'Fail to reject' if p_val > 0.05 else 'Reject'} CRS")
 
 # =============================================================================
@@ -1741,26 +1770,24 @@ data_phil = pd.read_stata(URL + "AED_PHILLIPS.DTA")
 
 # Pre-1970: classic negative relationship
 pre = data_phil[data_phil['year'] < 1970]
-m_pre = ols('inflgdp ~ urate', data=pre).fit(cov_type='HAC', cov_kwds={'maxlags': 3})
-print(f"\nPre-1970 slope: {m_pre.params['urate']:.3f}  (negative → classic Phillips curve)")
+fit_pre = pf.feols('inflgdp ~ urate', data=pre, vcov={'NW': 3})
+print(f"\nPre-1970 slope: {fit_pre.coef()['urate']:.3f}  (negative → classic Phillips curve)")
 
 # Post-1970: sign flips due to omitted expected inflation
 post = data_phil[data_phil['year'] >= 1970]
-m_post = ols('inflgdp ~ urate', data=post).fit(cov_type='HAC', cov_kwds={'maxlags': 5})
-print(f"Post-1970 slope: {m_post.params['urate']:.3f}  (positive → breakdown!)")
+fit_post = pf.feols('inflgdp ~ urate', data=post, vcov={'NW': 5})
+print(f"Post-1970 slope: {fit_post.coef()['urate']:.3f}  (positive → breakdown!)")
 
 # Augmented model: adding expected inflation restores the negative sign
 post_exp = post.dropna(subset=['inflgdp1yr'])
-m_aug = ols('inflgdp ~ urate + inflgdp1yr', data=post_exp).fit(
-    cov_type='HAC', cov_kwds={'maxlags': 5}
-)
-print(f"Augmented slope on urate: {m_aug.params['urate']:.3f}  (negative again!)")
-print(f"Expected inflation coef:  {m_aug.params['inflgdp1yr']:.3f}")
+fit_aug = pf.feols('inflgdp ~ urate + inflgdp1yr', data=post_exp, vcov={'NW': 5})
+print(f"Augmented slope on urate: {fit_aug.coef()['urate']:.3f}  (negative again!)")
+print(f"Expected inflation coef:  {fit_aug.coef()['inflgdp1yr']:.3f}")
 
 # OVB formula: E[b2] = β2 + β3*γ
-m_aux = ols('inflgdp1yr ~ urate', data=post_exp).fit()
-predicted = m_aug.params['urate'] + m_aug.params['inflgdp1yr'] * m_aux.params['urate']
-print(f"OVB predicted bivariate slope: {predicted:.3f}  (actual: {m_post.params['urate']:.3f})")
+fit_aux = pf.feols('inflgdp1yr ~ urate', data=post_exp)
+predicted = fit_aug.coef()['urate'] + fit_aug.coef()['inflgdp1yr'] * fit_aux.coef()['urate']
+print(f"OVB predicted bivariate slope: {predicted:.3f}  (actual: {fit_post.coef()['urate']:.3f})")
 
 # =============================================================================
 # STEP 3: RAND Health Insurance Experiment — RCT as the gold standard
@@ -1775,14 +1802,16 @@ for plan, grp in data_rand_y1.groupby('plan')['spending']:
     print(f"{plan:<12} {grp.mean():>10,.0f} {len(grp):>8,}")
 
 # Regression with cluster-robust SEs by family
-model_rct = ols('spending ~ coins25 + coins50 + coins95 + coinsmixed + coinsindiv',
+fit_rct = pf.feols('spending ~ coins25 + coins50 + coins95 + coinsmixed + coinsindiv',
+                   data=data_rand_y1, vcov={'CRV1': 'idfamily'})
+fit_rct.summary()
+
+# Joint F-test: do insurance plans matter?
+sm_rct = sm_ols('spending ~ coins25 + coins50 + coins95 + coinsmixed + coinsindiv',
                 data=data_rand_y1).fit(
     cov_type='cluster', cov_kwds={'groups': data_rand_y1['idfamily']}
 )
-model_rct.summary()
-
-# Joint F-test: do insurance plans matter?
-ftest = model_rct.f_test('coins25 = coins50 = coins95 = coinsmixed = coinsindiv = 0')
+ftest = sm_rct.f_test('coins25 = coins50 = coins95 = coinsmixed = coinsindiv = 0')
 print(f"Joint F-test: F = {ftest.fvalue:.2f}, p = {ftest.pvalue:.4f}")
 
 # =============================================================================
@@ -1800,11 +1829,10 @@ did    = (post_t - pre_t) - (post_c - pre_c)
 print(f"\nDiD estimate (manual): {did:.3f} SD improvement in child nutrition")
 
 # DiD regression with cluster-robust SEs by community
-model_did = ols('waz ~ hightreat + post + postXhigh', data=data_did).fit(
-    cov_type='cluster', cov_kwds={'groups': data_did['idcommunity']}
-)
-print(f"DiD coefficient (regression): {model_did.params['postXhigh']:.3f}")
-print(f"p-value: {model_did.pvalues['postXhigh']:.4f}")
+fit_did = pf.feols('waz ~ hightreat + post + postXhigh', data=data_did,
+                   vcov={'CRV1': 'idcommunity'})
+print(f"DiD coefficient (regression): {fit_did.coef()['postXhigh']:.3f}")
+print(f"p-value: {fit_did.pval()['postXhigh']:.4f}")
 
 # =============================================================================
 # STEP 5: Regression Discontinuity — incumbency advantage in U.S. Senate
@@ -1814,10 +1842,10 @@ print(f"p-value: {model_did.pvalues['postXhigh']:.4f}")
 data_rd = pd.read_stata(URL + "AED_INCUMBENCY.DTA")
 data_rd = data_rd[data_rd['vote'].notna()].copy()
 
-model_rd = ols('vote ~ win + margin', data=data_rd).fit(cov_type='HC1')
-print(f"\nIncumbency advantage: {model_rd.params['win']:.1f} percentage points")
-print(f"95% CI: [{model_rd.conf_int().loc['win', 0]:.1f}, {model_rd.conf_int().loc['win', 1]:.1f}]")
-print(f"p-value: {model_rd.pvalues['win']:.4f}")
+fit_rd = pf.feols('vote ~ win + margin', data=data_rd, vcov='HC1')
+print(f"\nIncumbency advantage: {fit_rd.coef()['win']:.1f} percentage points")
+print(f"95% CI: [{fit_rd.confint().loc['win'].iloc[0]:.1f}, {fit_rd.confint().loc['win'].iloc[1]:.1f}]")
+print(f"p-value: {fit_rd.pval()['win']:.4f}")
 
 # =============================================================================
 # STEP 6: Instrumental Variables — do institutions cause growth?
@@ -1827,23 +1855,25 @@ print(f"p-value: {model_rd.pvalues['win']:.4f}")
 data_iv = pd.read_stata(URL + "AED_INSTITUTIONS.DTA")
 
 # OLS (biased)
-m_ols = ols('logpgp95 ~ avexpr', data=data_iv).fit(cov_type='HC1')
+fit_ols_iv = pf.feols('logpgp95 ~ avexpr', data=data_iv, vcov='HC1')
 
 # First stage: institutions ~ settler mortality
-m_1st = ols('avexpr ~ logem4', data=data_iv).fit(cov_type='HC1')
-print(f"\nFirst-stage F = {m_1st.fvalue:.1f}  ({'Strong' if m_1st.fvalue > 10 else 'Weak'} instrument)")
+fit_1st = pf.feols('avexpr ~ logem4', data=data_iv, vcov='HC1')
+sm_1st = sm_ols('avexpr ~ logem4', data=data_iv).fit(cov_type='HC1')
+print(f"\nFirst-stage F = {sm_1st.fvalue:.1f}  ({'Strong' if sm_1st.fvalue > 10 else 'Weak'} instrument)")
 
 # Second stage: GDP ~ predicted institutions
-data_iv['avexpr_hat'] = m_1st.fittedvalues
-m_2nd = ols('logpgp95 ~ avexpr_hat', data=data_iv).fit(cov_type='HC1')
+data_iv['avexpr_hat'] = fit_1st.predict()
+fit_2nd = pf.feols('logpgp95 ~ avexpr_hat', data=data_iv, vcov='HC1')
 
-print(f"OLS coefficient:  {m_ols.params['avexpr']:.3f}  (biased)")
-print(f"IV/2SLS coefficient: {m_2nd.params['avexpr_hat']:.3f}  (causal)")
+print(f"OLS coefficient:  {fit_ols_iv.coef()['avexpr']:.3f}  (biased)")
+print(f"IV/2SLS coefficient: {fit_2nd.coef()['avexpr_hat']:.3f}  (causal)")
 print(f"Causal effect: 1-unit improvement in institutions → "
-      f"{np.exp(m_2nd.params['avexpr_hat']):.1f}x increase in GDP")
+      f"{np.exp(fit_2nd.coef()['avexpr_hat']):.1f}x increase in GDP")
 ```
 
 ---
+
 
 ## Chapter 14: Regression with Indicator Variables
 
@@ -1856,7 +1886,8 @@ print(f"Causal effect: 1-unit improvement in institutions → "
 import pandas as pd                       # data loading and manipulation
 import numpy as np                        # numerical operations
 import matplotlib.pyplot as plt           # creating plots and visualizations
-from statsmodels.formula.api import ols   # OLS regression with R-style formulas
+import pyfixest as pf                     # OLS regression with R-style formulas
+# !pip install pyfixest  # if not installed
 from scipy import stats                   # t-tests for group comparisons
 from scipy.stats import f_oneway          # one-way ANOVA F-test
 
@@ -1885,39 +1916,39 @@ print(f"Difference (F - M):     ${diff_means:,.2f}")
 # STEP 3: Regression on a single indicator — equivalent to difference in means
 # =============================================================================
 # The intercept = mean for d=0 (males); the gender coefficient = mean difference
-# IMPORTANT: .fit(cov_type='HC1') uses robust standard errors
-model1 = ols('earnings ~ gender', data=data).fit(cov_type='HC1')
+# IMPORTANT: vcov='HC1' uses robust standard errors
+fit1 = pf.feols('earnings ~ gender', data=data, vcov='HC1')
 
-intercept = model1.params['Intercept']    # mean earnings for males
-gap       = model1.params['gender']       # earnings gap (females - males)
-r2        = model1.rsquared
+intercept = fit1.coef()['Intercept']      # mean earnings for males
+gap       = fit1.coef()['gender']         # earnings gap (females - males)
+r2        = fit1._r2
 
 print(f"\nModel 1: earnings = {intercept:,.0f} + ({gap:,.0f}) × gender")
 print(f"Raw gender gap: ${gap:,.0f} (females earn ${abs(gap):,.0f} less)")
 print(f"R-squared: {r2:.4f} ({r2*100:.1f}% of variation explained)")
 
-model1.summary()
+fit1.summary()
 
 # =============================================================================
 # STEP 4: Add controls and interaction — how the gap changes
 # =============================================================================
 # Adding education as a control measures the gap AFTER accounting for education
-model2 = ols('earnings ~ gender + education', data=data).fit(cov_type='HC1')
+fit2 = pf.feols('earnings ~ gender + education', data=data, vcov='HC1')
 
 # Adding gender×education interaction allows returns to education to differ by gender
-model3 = ols('earnings ~ gender + education + genderbyeduc', data=data).fit(cov_type='HC1')
+fit3 = pf.feols('earnings ~ gender + education + genderbyeduc', data=data, vcov='HC1')
 
 # Full model with additional controls
-model4 = ols('earnings ~ gender + education + genderbyeduc + age + hours',
-             data=data).fit(cov_type='HC1')
+fit4 = pf.feols('earnings ~ gender + education + genderbyeduc + age + hours',
+                data=data, vcov='HC1')
 
 # Compare how the gender coefficient evolves across models
 print(f"{'Model':<12} {'Gender Coef':>14} {'R²':>8}")
 print("-" * 36)
-for name, m in [('Gender only', model1), ('+ Education', model2),
-                ('+ Interact', model3), ('+ Age,Hours', model4)]:
-    g = m.params['gender']
-    print(f"{name:<12} {g:>14,.0f} {m.rsquared:>8.4f}")
+for name, m in [('Gender only', fit1), ('+ Education', fit2),
+                ('+ Interact', fit3), ('+ Age,Hours', fit4)]:
+    g = m.coef()['gender']
+    print(f"{name:<12} {g:>14,.0f} {m._r2:>8.4f}")
 
 # =============================================================================
 # STEP 5: Scatter plot — visualize separate regression lines by gender
@@ -1948,15 +1979,15 @@ plt.show()
 # =============================================================================
 # Three mutually exclusive categories: dself, dprivate, dgovt (sum to 1)
 # Drop one (dprivate = base) to avoid perfect multicollinearity
-model_worker = ols('earnings ~ dself + dgovt + education + age',
-                   data=data).fit(cov_type='HC1')
+fit_worker = pf.feols('earnings ~ dself + dgovt + education + age',
+                      data=data, vcov='HC1')
 
 print(f"Base category: Private sector")
-print(f"Self-employed vs Private: ${model_worker.params['dself']:,.0f}")
-print(f"Government vs Private:   ${model_worker.params['dgovt']:,.0f}")
-print(f"R-squared: {model_worker.rsquared:.4f}")
+print(f"Self-employed vs Private: ${fit_worker.coef()['dself']:,.0f}")
+print(f"Government vs Private:   ${fit_worker.coef()['dgovt']:,.0f}")
+print(f"R-squared: {fit_worker._r2:.4f}")
 
-model_worker.summary()
+fit_worker.summary()
 
 # =============================================================================
 # STEP 7: ANOVA — test if earnings differ across worker types
@@ -1977,6 +2008,7 @@ print(data.groupby('worker_type')['earnings'].agg(['mean', 'count']).round(0))
 
 ---
 
+
 ## Chapter 15: Regression with Transformed Variables
 
 ```python
@@ -1988,7 +2020,9 @@ print(data.groupby('worker_type')['earnings'].agg(['mean', 'count']).round(0))
 import numpy as np                        # numerical operations (log, exp, sqrt)
 import pandas as pd                       # data loading and manipulation
 import matplotlib.pyplot as plt           # creating plots and visualizations
-from statsmodels.formula.api import ols   # OLS regression with R-style formulas
+import pyfixest as pf                     # OLS regression with R-style formulas
+# !pip install pyfixest  # if not installed
+from statsmodels.formula.api import ols as sm_ols  # for Wald test
 
 # =============================================================================
 # STEP 1: Load data directly from a URL
@@ -2007,27 +2041,27 @@ print(data_earnings[['earnings', 'lnearnings', 'age', 'education']].describe().r
 # STEP 2: Log transformations — levels vs log-linear vs log-log
 # =============================================================================
 # Three specifications of the same relationship reveal different stories
-ols_levels = ols('earnings ~ age + education', data=data_earnings).fit(cov_type='HC1')
-ols_loglin = ols('lnearnings ~ age + education', data=data_earnings).fit(cov_type='HC1')
-ols_loglog = ols('lnearnings ~ lnage + education', data=data_earnings).fit(cov_type='HC1')
+fit_levels = pf.feols('earnings ~ age + education', data=data_earnings, vcov='HC1')
+fit_loglin = pf.feols('lnearnings ~ age + education', data=data_earnings, vcov='HC1')
+fit_loglog = pf.feols('lnearnings ~ lnage + education', data=data_earnings, vcov='HC1')
 
 print("=== Levels: absolute dollar effects ===")
-print(f"  Education: +${ols_levels.params['education']:,.0f} per year")
+print(f"  Education: +${fit_levels.coef()['education']:,.0f} per year")
 
 print("\n=== Log-Linear: semi-elasticity (% change per unit) ===")
-print(f"  Education: +{100*ols_loglin.params['education']:.1f}% per year (Mincer return)")
+print(f"  Education: +{100*fit_loglin.coef()['education']:.1f}% per year (Mincer return)")
 
 print("\n=== Log-Log: elasticity (% change per % change) ===")
-print(f"  Age elasticity: {ols_loglog.params['lnage']:.4f}")
+print(f"  Age elasticity: {fit_loglog.coef()['lnage']:.4f}")
 
 # =============================================================================
 # STEP 3: Quadratic model — turning point and varying marginal effects
 # =============================================================================
 # A quadratic in age captures the inverted-U life-cycle earnings profile
-ols_quad = ols('earnings ~ age + agesq + education', data=data_earnings).fit(cov_type='HC1')
+fit_quad = pf.feols('earnings ~ age + agesq + education', data=data_earnings, vcov='HC1')
 
-bage    = ols_quad.params['age']
-bagesq  = ols_quad.params['agesq']
+bage    = fit_quad.coef()['age']
+bagesq  = fit_quad.coef()['agesq']
 turning_point = -bage / (2 * bagesq)        # age where earnings peak
 
 print(f"Turning point: {turning_point:.1f} years")
@@ -2036,23 +2070,24 @@ for a in [25, 40, 55]:
     print(f"  ME at age {a}: ${me:,.0f}/year")
 
 # Joint F-test: H0: age and age² are jointly zero
-f_test = ols_quad.wald_test('(age = 0, agesq = 0)', use_f=True)
+sm_quad = sm_ols('earnings ~ age + agesq + education', data=data_earnings).fit(cov_type='HC1')
+f_test = sm_quad.wald_test('(age = 0, agesq = 0)', use_f=True)
 print(f"Joint F-test p-value: {f_test.pvalue:.4f}")
 
 # =============================================================================
 # STEP 4: Standardized coefficients — compare variable importance
 # =============================================================================
 # Raw coefficients can't be compared across different units; beta* can
-ols_mix = ols('earnings ~ gender + age + agesq + education + dself + dgovt + lnhours',
-              data=data_earnings).fit(cov_type='HC1')
+fit_mix = pf.feols('earnings ~ gender + age + agesq + education + dself + dgovt + lnhours',
+                   data=data_earnings, vcov='HC1')
 
 sd_y = data_earnings['earnings'].std()
 predictors = ['gender', 'age', 'agesq', 'education', 'dself', 'dgovt', 'lnhours']
 
 print(f"\n{'Variable':<12} {'Raw coef':>12} {'Beta*':>8}")
 print("-" * 34)
-for var in sorted(predictors, key=lambda v: abs(ols_mix.params[v] * data_earnings[v].std() / sd_y), reverse=True):
-    raw  = ols_mix.params[var]
+for var in sorted(predictors, key=lambda v: abs(fit_mix.coef()[v] * data_earnings[v].std() / sd_y), reverse=True):
+    raw  = fit_mix.coef()[var]
     beta_star = raw * data_earnings[var].std() / sd_y
     print(f"{var:<12} {raw:>12.2f} {beta_star:>8.4f}")
 
@@ -2060,10 +2095,10 @@ for var in sorted(predictors, key=lambda v: abs(ols_mix.params[v] * data_earning
 # STEP 5: Interaction terms — education returns that vary with age
 # =============================================================================
 # Does one more year of schooling pay the same at 25 as at 55?
-ols_inter = ols('earnings ~ age + education + agebyeduc', data=data_earnings).fit(cov_type='HC1')
+fit_inter = pf.feols('earnings ~ age + education + agebyeduc', data=data_earnings, vcov='HC1')
 
-b_educ  = ols_inter.params['education']
-b_inter = ols_inter.params['agebyeduc']
+b_educ  = fit_inter.coef()['education']
+b_inter = fit_inter.coef()['agebyeduc']
 
 print(f"\nME of education = {b_educ:,.0f} + {b_inter:.1f} × age")
 for a in [25, 40, 55]:
@@ -2074,10 +2109,10 @@ for a in [25, 40, 55]:
 # STEP 6: Retransformation bias — naive exp() underpredicts
 # =============================================================================
 # Jensen's inequality: E[exp(u)] > exp(E[u]), so naive predictions are biased
-rmse_log = np.sqrt(ols_loglin.mse_resid)
+rmse_log = np.sqrt(np.mean(fit_loglin._u_hat**2))
 correction = np.exp(rmse_log**2 / 2)        # normal-based smearing factor
 
-naive_pred    = np.exp(ols_loglin.fittedvalues)
+naive_pred    = np.exp(fit_loglin.predict())
 adjusted_pred = correction * naive_pred
 
 print(f"\nSmearing factor: {correction:.4f}")
@@ -2089,19 +2124,20 @@ print(f"Corrected mean:  ${adjusted_pred.mean():,.0f}  (bias removed)")
 # STEP 7: Comprehensive model — combine all transformation types
 # =============================================================================
 # A single model mixing logs, quadratics, dummies, and continuous regressors
-ols_full = ols('lnearnings ~ gender + age + agesq + education + dself + dgovt + lnhours',
-               data=data_earnings).fit(cov_type='HC1')
+fit_full = pf.feols('lnearnings ~ gender + age + agesq + education + dself + dgovt + lnhours',
+                    data=data_earnings, vcov='HC1')
 
-print(f"\nR²: {ols_full.rsquared:.4f}")
-print(f"Education return: ~{100*ols_full.params['education']:.1f}% per year (semi-elasticity)")
-print(f"Gender gap: ~{100*ols_full.params['gender']:.1f}%")
-print(f"Hours elasticity: {ols_full.params['lnhours']:.3f} (log-log coefficient)")
+print(f"\nR²: {fit_full._r2:.4f}")
+print(f"Education return: ~{100*fit_full.coef()['education']:.1f}% per year (semi-elasticity)")
+print(f"Gender gap: ~{100*fit_full.coef()['gender']:.1f}%")
+print(f"Hours elasticity: {fit_full.coef()['lnhours']:.3f} (log-log coefficient)")
 
 # Full regression table
-ols_full.summary()
+fit_full.summary()
 ```
 
 ---
+
 
 ## Chapter 16: Checking the Model and Data
 
@@ -2114,8 +2150,10 @@ ols_full.summary()
 import numpy as np                                          # numerical operations
 import pandas as pd                                         # data loading and manipulation
 import matplotlib.pyplot as plt                             # creating plots and visualizations
-from statsmodels.formula.api import ols                     # OLS regression with R-style formulas
+import pyfixest as pf                                       # OLS regression with R-style formulas
+# !pip install pyfixest  # if not installed
 import statsmodels.api as sm                                # add_constant for VIF calculation
+from statsmodels.formula.api import ols as sm_ols           # for OLSInfluence diagnostics
 from statsmodels.stats.outliers_influence import (          # diagnostic tools:
     variance_inflation_factor, OLSInfluence)                #   VIF and influence measures
 from statsmodels.nonparametric.smoothers_lowess import lowess  # LOWESS smooth for residual plots
@@ -2152,14 +2190,14 @@ print(vif_data.to_string(index=False))
 # STEP 3: Compare standard vs robust standard errors
 # =============================================================================
 # Heteroskedasticity makes default SEs too small -> use HC1 (White) robust SEs
-model_std    = ols('earnings ~ age + education', data=data_earnings).fit()
-model_robust = ols('earnings ~ age + education', data=data_earnings).fit(cov_type='HC1')
+fit_std    = pf.feols('earnings ~ age + education', data=data_earnings)
+fit_robust = pf.feols('earnings ~ age + education', data=data_earnings, vcov='HC1')
 
 se_comparison = pd.DataFrame({
-    'Variable':    model_std.params.index,
-    'Standard SE': model_std.bse.values.round(2),
-    'Robust SE':   model_robust.bse.values.round(2),
-    'Ratio':       (model_robust.bse / model_std.bse).values.round(3)
+    'Variable':    fit_std.coef().index,
+    'Standard SE': fit_std.se().values.round(2),
+    'Robust SE':   fit_robust.se().values.round(2),
+    'Ratio':       (fit_robust.se() / fit_std.se()).values.round(3)
 })
 print("\nSE Comparison (ratio > 1 signals heteroskedasticity):")
 print(se_comparison.to_string(index=False))
@@ -2168,12 +2206,12 @@ print(se_comparison.to_string(index=False))
 # STEP 4: Omitted variable bias — democracy and growth
 # =============================================================================
 # Adding controls reveals how much the bivariate estimate was biased upward
-model_bivariate = ols('democracy ~ growth', data=data_democracy).fit(cov_type='HC1')
-model_multiple  = ols('democracy ~ growth + constraint + indcent + catholic + muslim + protestant',
-                      data=data_democracy).fit(cov_type='HC1')
+fit_bivariate = pf.feols('democracy ~ growth', data=data_democracy, vcov='HC1')
+fit_multiple  = pf.feols('democracy ~ growth + constraint + indcent + catholic + muslim + protestant',
+                         data=data_democracy, vcov='HC1')
 
-b_biv  = model_bivariate.params['growth']
-b_mult = model_multiple.params['growth']
+b_biv  = fit_bivariate.coef()['growth']
+b_mult = fit_multiple.coef()['growth']
 print(f"\nGrowth coefficient (bivariate):       {b_biv:.4f}")
 print(f"Growth coefficient (with controls):   {b_mult:.4f}")
 print(f"Reduction: {(1 - b_mult/b_biv)*100:.0f}% — institutional controls absorb the bias")
@@ -2182,8 +2220,8 @@ print(f"Reduction: {(1 - b_mult/b_biv)*100:.0f}% — institutional controls abso
 # STEP 5: Diagnostic plots — residual vs fitted
 # =============================================================================
 # Random scatter around zero = assumptions OK; fan shape = heteroskedasticity
-uhat = model_multiple.resid
-yhat = model_multiple.fittedvalues
+uhat = fit_multiple._u_hat
+yhat = fit_multiple.predict()
 
 fig, axes = plt.subplots(1, 2, figsize=(14, 5))
 
@@ -2216,10 +2254,13 @@ plt.show()
 # =============================================================================
 # DFITS_i measures how much prediction i changes when observation i is excluded
 # Threshold: |DFITS| > 2*sqrt(k/n)
-influence = OLSInfluence(model_multiple)
+# OLSInfluence requires statsmodels model object
+sm_multiple = sm_ols('democracy ~ growth + constraint + indcent + catholic + muslim + protestant',
+                     data=data_democracy).fit(cov_type='HC1')
+influence = OLSInfluence(sm_multiple)
 dfits     = influence.dffits[0]
 n = len(data_democracy)
-k = len(model_multiple.params)
+k = len(fit_multiple.coef())
 threshold = 2 * np.sqrt(k / n)
 
 print(f"\nDFITS threshold: {threshold:.4f}")
@@ -2242,7 +2283,8 @@ plt.show()
 
 ---
 
-## Chapter 17: Panel Data Time Series Data Causation
+
+## Chapter 17: Panel Data, Time Series Data, Causation
 
 ```python
 # =============================================================================
@@ -2253,10 +2295,9 @@ plt.show()
 import pandas as pd                       # data loading and manipulation
 import numpy as np                         # numerical operations
 import matplotlib.pyplot as plt            # creating plots and visualizations
-import statsmodels.api as sm               # statistical models and tools
-from statsmodels.formula.api import ols    # OLS regression with R-style formulas
+import pyfixest as pf                      # OLS and FE regression with R-style formulas
+# !pip install pyfixest  # if not installed
 from statsmodels.tsa.stattools import acf  # autocorrelation function
-from linearmodels.panel import PanelOLS    # fixed effects panel estimation
 
 # =============================================================================
 # STEP 1: Load panel data (NBA teams across seasons)
@@ -2286,34 +2327,28 @@ print(f"  Between > Within → team characteristics dominate year-to-year swings
 # =============================================================================
 # Observations within the same team are correlated over time — default SEs
 # dramatically understate uncertainty. Always cluster by individual in panel data.
-model_pool = ols('lnrevenue ~ wins', data=data_nba).fit()
-model_cluster = ols('lnrevenue ~ wins', data=data_nba).fit(
-    cov_type='cluster', cov_kwds={'groups': data_nba['teamid']}
-)
+fit_pool = pf.feols('lnrevenue ~ wins', data=data_nba)
+fit_cluster = pf.feols('lnrevenue ~ wins', data=data_nba, vcov={'CRV1': 'teamid'})
 
-print(f"\nPooled OLS — wins coefficient: {model_pool.params['wins']:.6f}")
-print(f"  Default SE:  {model_pool.bse['wins']:.6f}")
-print(f"  Cluster SE:  {model_cluster.bse['wins']:.6f}")
-print(f"  Ratio:       {model_cluster.bse['wins'] / model_pool.bse['wins']:.2f}x larger")
+print(f"\nPooled OLS — wins coefficient: {fit_pool.coef()['wins']:.6f}")
+print(f"  Default SE:  {fit_pool.se()['wins']:.6f}")
+print(f"  Cluster SE:  {fit_cluster.se()['wins']:.6f}")
+print(f"  Ratio:       {fit_cluster.se()['wins'] / fit_pool.se()['wins']:.2f}x larger")
 
 # =============================================================================
 # STEP 4: Fixed effects — control for unobserved team characteristics
 # =============================================================================
 # FE uses only within-team variation (de-meaning), eliminating bias from
 # persistent traits like market size, brand value, and arena quality.
-data_panel = data_nba.set_index(['teamid', 'season'])
-y = data_panel[['lnrevenue']]
-X = data_panel[['wins']]
+fit_fe = pf.feols('lnrevenue ~ wins | teamid', data=data_nba, vcov={'CRV1': 'teamid'})
 
-model_fe = PanelOLS(y, X, entity_effects=True).fit(cov_type='clustered', cluster_entity=True)
-
-print(f"\nFixed Effects — wins coefficient: {model_fe.params['wins']:.6f}")
-print(f"  Cluster SE:  {model_fe.std_errors['wins']:.6f}")
-print(f"  R² (within): {model_fe.rsquared_within:.4f}")
+print(f"\nFixed Effects — wins coefficient: {fit_fe.coef()['wins']:.6f}")
+print(f"  Cluster SE:  {fit_fe.se()['wins']:.6f}")
+print(f"  R² (within): {fit_fe._r2_within:.4f}")
 
 print(f"\nComparison:")
-print(f"  Pooled OLS coef: {model_pool.params['wins']:.6f}")
-print(f"  Fixed Effects:   {model_fe.params['wins']:.6f}")
+print(f"  Pooled OLS coef: {fit_pool.coef()['wins']:.6f}")
+print(f"  Fixed Effects:   {fit_fe.coef()['wins']:.6f}")
 print(f"  FE is smaller → pooled OLS had positive omitted variable bias")
 
 # =============================================================================
@@ -2325,13 +2360,13 @@ url_rates = "https://raw.githubusercontent.com/quarcs-lab/data-open/master/AED/A
 data_rates = pd.read_stata(url_rates)
 
 # Regression in levels (potentially spurious)
-model_levels = ols('gs10 ~ gs1', data=data_rates).fit()
+fit_levels = pf.feols('gs10 ~ gs1', data=data_rates)
 
 # Regression in first differences (removes trends)
-model_changes = ols('dgs10 ~ dgs1', data=data_rates).fit()
+fit_changes = pf.feols('dgs10 ~ dgs1', data=data_rates)
 
-print(f"\nLevels regression:  gs1 coef = {model_levels.params['gs1']:.4f}, R² = {model_levels.rsquared:.4f}")
-print(f"Changes regression: dgs1 coef = {model_changes.params['dgs1']:.4f}, R² = {model_changes.rsquared:.4f}")
+print(f"\nLevels regression:  gs1 coef = {fit_levels.coef()['gs1']:.4f}, R² = {fit_levels._r2:.4f}")
+print(f"Changes regression: dgs1 coef = {fit_changes.coef()['dgs1']:.4f}, R² = {fit_changes._r2:.4f}")
 print(f"R² drops after differencing — lower but honest (no spurious trend inflation)")
 
 # =============================================================================
@@ -2339,18 +2374,18 @@ print(f"R² drops after differencing — lower but honest (no spurious trend inf
 # =============================================================================
 # Slowly decaying ACF in residuals signals non-stationarity and invalid SEs.
 # After differencing, autocorrelation should drop dramatically.
-acf_levels  = acf(model_levels.resid.dropna(), nlags=5)
-acf_changes = acf(model_changes.resid.dropna(), nlags=5)
+acf_levels  = acf(pd.Series(fit_levels._u_hat).dropna(), nlags=5)
+acf_changes = acf(pd.Series(fit_changes._u_hat).dropna(), nlags=5)
 
 print(f"\nResidual autocorrelation (lag 1):")
 print(f"  Levels regression:  {acf_levels[1]:.4f} (high → non-stationary residuals)")
 print(f"  Changes regression: {acf_changes[1]:.4f} (much lower → differencing worked)")
 
 # HAC (Newey-West) SEs correct for autocorrelation without differencing
-model_hac = ols('gs10 ~ gs1', data=data_rates).fit(cov_type='HAC', cov_kwds={'maxlags': 24})
-print(f"\nDefault SE on gs1:   {model_levels.bse['gs1']:.4f}")
-print(f"HAC SE on gs1:       {model_hac.bse['gs1']:.4f}")
-print(f"HAC is {model_hac.bse['gs1'] / model_levels.bse['gs1']:.1f}x larger — default SEs are too small")
+fit_hac = pf.feols('gs10 ~ gs1', data=data_rates, vcov={'NW': 24})
+print(f"\nDefault SE on gs1:   {fit_levels.se()['gs1']:.4f}")
+print(f"HAC SE on gs1:       {fit_hac.se()['gs1']:.4f}")
+print(f"HAC is {fit_hac.se()['gs1'] / fit_levels.se()['gs1']:.1f}x larger — default SEs are too small")
 
 # =============================================================================
 # STEP 7: ADL model — dynamic multipliers
@@ -2362,19 +2397,18 @@ data_rates['dgs10_lag2'] = data_rates['dgs10'].shift(2)
 data_rates['dgs1_lag1']  = data_rates['dgs1'].shift(1)
 data_rates['dgs1_lag2']  = data_rates['dgs1'].shift(2)
 
-model_adl = ols('dgs10 ~ dgs10_lag1 + dgs10_lag2 + dgs1 + dgs1_lag1 + dgs1_lag2',
-                data=data_rates).fit()
+fit_adl = pf.feols('dgs10 ~ dgs10_lag1 + dgs10_lag2 + dgs1 + dgs1_lag1 + dgs1_lag2',
+                   data=data_rates)
 
 print(f"\nADL(2,2) Model:")
-print(f"  Impact multiplier (dgs1):       {model_adl.params['dgs1']:.4f}")
-print(f"  1-month cumulative:             {model_adl.params['dgs1'] + model_adl.params['dgs1_lag1']:.4f}")
-print(f"  2-month cumulative:             {model_adl.params['dgs1'] + model_adl.params['dgs1_lag1'] + model_adl.params['dgs1_lag2']:.4f}")
-print(f"  R²: {model_adl.rsquared:.4f} (much higher than static model)")
+print(f"  Impact multiplier (dgs1):       {fit_adl.coef()['dgs1']:.4f}")
+print(f"  1-month cumulative:             {fit_adl.coef()['dgs1'] + fit_adl.coef()['dgs1_lag1']:.4f}")
+print(f"  2-month cumulative:             {fit_adl.coef()['dgs1'] + fit_adl.coef()['dgs1_lag1'] + fit_adl.coef()['dgs1_lag2']:.4f}")
+print(f"  R²: {fit_adl._r2:.4f} (much higher than static model)")
 
 # Check residual autocorrelation — should be near zero if well-specified
-acf_adl = acf(model_adl.resid.dropna(), nlags=5)
+acf_adl = acf(pd.Series(fit_adl._u_hat).dropna(), nlags=5)
 print(f"  Residual ACF(1): {acf_adl[1]:.4f} (near zero → dynamics captured)")
 ```
 
 ---
-

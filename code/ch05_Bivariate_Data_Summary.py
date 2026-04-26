@@ -5,7 +5,8 @@
 # --- Libraries ---
 import pandas as pd                                         # data loading and manipulation
 import matplotlib.pyplot as plt                              # creating plots and visualizations
-from statsmodels.formula.api import ols                      # OLS regression with R-style formulas
+import pyfixest as pf                                        # OLS regression with R-style formulas
+# !pip install pyfixest  # if not installed
 from statsmodels.nonparametric.smoothers_lowess import lowess  # LOWESS nonparametric smoothing
 
 # =============================================================================
@@ -50,27 +51,26 @@ print(f"r² = {r**2:.4f} ({r**2*100:.1f}% of variation shared)")
 # STEP 5: OLS regression — fit the best-fitting line
 # =============================================================================
 # Formula syntax: 'y ~ x' regresses y on x (intercept included automatically)
-# IMPORTANT: .fit() estimates the model — without it, nothing is computed!
-model = ols('price ~ size', data=data_house).fit()
+fit = pf.feols('price ~ size', data=data_house)
 
-slope     = model.params['size']        # marginal effect: $/sq ft
-intercept = model.params['Intercept']   # predicted price when size = 0
-r_squared = model.rsquared              # proportion of variation explained
+slope     = fit.coef()['size']          # marginal effect: $/sq ft
+intercept = fit.coef()['Intercept']     # predicted price when size = 0
+r_squared = fit._r2                     # proportion of variation explained
 
 print(f"Estimated equation: price = {intercept:,.0f} + {slope:.2f} × size")
 print(f"Interpretation: each additional sq ft is associated with ${slope:,.2f} higher price")
 print(f"R-squared: {r_squared:.4f} ({r_squared*100:.1f}% of variation explained)")
 
 # Full regression table (coefficients, std errors, t-stats, p-values, R²)
-model.summary()
+fit.summary()
 
 # =============================================================================
 # STEP 6: Scatter plot with fitted line and R² — visualize model fit
 # =============================================================================
-# model.fittedvalues contains the predicted y-values from the estimated equation
+# fit.predict() contains the predicted y-values from the estimated equation
 fig, ax = plt.subplots(figsize=(10, 6))
 ax.scatter(data_house['size'], data_house['price'], s=60, alpha=0.7, label='Actual prices')
-ax.plot(data_house['size'], model.fittedvalues, color='red', linewidth=2, label='Fitted line')
+ax.plot(data_house['size'], fit.predict(), color='red', linewidth=2, label='Fitted line')
 ax.set_xlabel('House Size (square feet)')
 ax.set_ylabel('House Sale Price (dollars)')
 ax.set_title(f'OLS: price = {intercept:,.0f} + {slope:.2f} × size  (R² = {r_squared:.2%})')
@@ -83,12 +83,12 @@ plt.show()
 # STEP 7: Reverse regression — association is NOT causation
 # =============================================================================
 # If regression = causation, the reverse slope would be 1/slope. It is not.
-reverse_model = ols('size ~ price', data=data_house).fit()
+fit_reverse = pf.feols('size ~ price', data=data_house)
 
 print(f"price ~ size  slope: {slope:.4f}")
-print(f"size ~ price  slope: {reverse_model.params['price']:.6f}")
+print(f"size ~ price  slope: {fit_reverse.coef()['price']:.6f}")
 print(f"1 / original slope:  {1/slope:.6f}")
-print(f"Reciprocals match?   {1/slope:.6f} ≠ {reverse_model.params['price']:.6f}")
+print(f"Reciprocals match?   {1/slope:.6f} ≠ {fit_reverse.coef()['price']:.6f}")
 print("→ Regression is asymmetric: association, not causation!")
 
 # =============================================================================
@@ -100,7 +100,7 @@ lowess_result = lowess(data_house['price'], data_house['size'], frac=0.6)
 
 fig, ax = plt.subplots(figsize=(10, 6))
 ax.scatter(data_house['size'], data_house['price'], s=60, alpha=0.6, label='Actual data')
-ax.plot(data_house['size'], model.fittedvalues, color='red',
+ax.plot(data_house['size'], fit.predict(), color='red',
         linewidth=2, label='OLS (parametric)')
 ax.plot(lowess_result[:, 0], lowess_result[:, 1], color='green',
         linewidth=2, linestyle='--', label='LOWESS (nonparametric)')

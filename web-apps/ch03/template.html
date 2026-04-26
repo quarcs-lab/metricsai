@@ -828,6 +828,7 @@ footer.page a:hover { text-decoration: underline; }
   <div class="code-tabs" id="code-lang-tabs">
     <button type="button" data-lang="python" class="active">Python</button>
     <button type="button" data-lang="stata">Stata</button>
+    <button type="button" data-lang="r">R</button>
   </div>
 
   <div class="code-panel active" id="panel-python">
@@ -1137,6 +1138,137 @@ display "Weighted mean (IPW):   $" %9.0fc `weighted'</code></pre>
   <div style="display:flex;gap:0.8rem;align-items:center;margin-top:0.8rem;flex-wrap:wrap">
     <button class="btn-copy" onclick="navigator.clipboard.writeText(document.getElementById('code-stata').textContent).then(()=>{this.textContent='Copied!';setTimeout(()=>this.textContent='Copy code',1500)})">Copy code</button>
     <span style="color:var(--text-muted);font-size:0.88rem">Paste into your Stata do-file editor</span>
+  </div>
+  </div>
+
+  <div class="code-panel" id="panel-r">
+  <pre><code id="code-r" class="language-r"># =============================================================================
+# CHAPTER 3 CHEAT SHEET: The Sample Mean
+# =============================================================================
+
+# --- Libraries ---
+library(haven)           # read Stata .dta files directly from URLs
+library(ggplot2)         # grammar of graphics for all plots
+library(dplyr)           # data manipulation
+
+# =============================================================================
+# STEP 1: Load pre-computed sample means from coin toss experiments
+# =============================================================================
+# 400 samples of 30 coin tosses each &mdash; precomputed in the textbook dataset
+url_coin &lt;- "https://raw.githubusercontent.com/quarcs-lab/data-open/master/AED/AED_COINTOSSMEANS.DTA"
+data_coin &lt;- read_dta(url_coin)
+
+cat("Coin toss experiment:", nrow(data_coin), "sample means (each from n=30 tosses)\n")
+cat("Mean of sample means:", round(mean(data_coin$xbar), 4),
+    " (theoretical &mu; = 0.5)\n")
+cat("SD of sample means:  ", round(sd(data_coin$xbar), 4),
+    " (theoretical &sigma;/&radic;n =", round(sqrt(0.25/30), 4), ")\n")
+
+# =============================================================================
+# STEP 2: Visualize the sampling distribution with normal overlay
+# =============================================================================
+# The histogram of 400 sample means approximates the sampling distribution
+theo_se &lt;- sqrt(0.25 / 30)
+
+ggplot(data_coin, aes(x = xbar)) +
+  geom_histogram(aes(y = after_stat(density)), bins = 25,
+                 fill = "steelblue", color = "black", alpha = 0.7) +
+  stat_function(fun = dnorm, args = list(mean = 0.5, sd = theo_se),
+                color = "red", linewidth = 1.5) +
+  labs(x = "Sample Mean (proportion of heads)", y = "Density",
+       title = "Sampling Distribution of X-bar from 400 Coin Toss Experiments (n=30)") +
+  theme_minimal()
+
+# =============================================================================
+# STEP 3: Central Limit Theorem &mdash; non-normal population still gives normal X-bar
+# =============================================================================
+# 1880 U.S. Census ages: highly skewed population, yet sample means are normal
+url_census &lt;- "https://raw.githubusercontent.com/quarcs-lab/data-open/master/AED/AED_CENSUSAGEMEANS.DTA"
+data_census &lt;- read_dta(url_census)
+
+# Identify the sample mean column
+age_means &lt;- if ("xmean" %in% names(data_census)) data_census$xmean else data_census[[1]]
+
+cat("\n1880 Census:", length(age_means), "sample means\n")
+cat("Mean of sample means:", round(mean(age_means), 2), "years\n")
+cat("SD of sample means:  ", round(sd(age_means), 2), "years\n")
+
+ggplot(data.frame(xmean = age_means), aes(x = xmean)) +
+  geom_histogram(aes(y = after_stat(density)), bins = 20,
+                 fill = "steelblue", color = "black", alpha = 0.7) +
+  stat_function(fun = dnorm, args = list(mean = 24.13, sd = 18.61/sqrt(25)),
+                color = "red", linewidth = 1.5) +
+  labs(x = "Sample Mean Age (years)", y = "Density",
+       title = "CLT in Action: Normal Sample Means from a Skewed Population") +
+  theme_minimal()
+
+# =============================================================================
+# STEP 4: Standard error &mdash; how sample size affects precision
+# =============================================================================
+# SE = &sigma;/&radic;n: to halve the SE, you must quadruple the sample size
+sigma &lt;- 0.5
+
+se_table &lt;- data.frame(
+  n = c(10, 30, 100, 400, 1000),
+  SE = sigma / sqrt(c(10, 30, 100, 400, 1000)),
+  Var_Xbar = sigma^2 / c(10, 30, 100, 400, 1000)
+)
+print(se_table, row.names = FALSE)
+
+# =============================================================================
+# STEP 5: Monte Carlo simulation &mdash; verify the theory computationally
+# =============================================================================
+# Simulate 1000 samples of 30 coin tosses to see the CLT converge
+set.seed(10101)
+n_sims &lt;- 1000
+sample_size &lt;- 30
+
+# replicate() runs an expression n_sims times and collects results
+sim_means &lt;- replicate(n_sims, mean(rbinom(sample_size, 1, 0.5)))
+
+cat("\nMonte Carlo simulation (", n_sims, "samples, n =", sample_size, "):\n")
+cat("Mean of simulated means:", round(mean(sim_means), 4), " (theoretical: 0.5)\n")
+cat("SD of simulated means:  ", round(sd(sim_means), 4),
+    " (theoretical:", round(sqrt(0.25/30), 4), ")\n")
+
+ggplot(data.frame(x = sim_means), aes(x = x)) +
+  geom_histogram(aes(y = after_stat(density)), bins = 30,
+                 fill = "steelblue", color = "white", alpha = 0.7) +
+  stat_function(fun = dnorm, args = list(mean = 0.5, sd = sqrt(0.25/30)),
+                color = "red", linewidth = 1.5) +
+  labs(x = "Sample Mean", y = "Density",
+       title = "Monte Carlo Simulation vs Theoretical Sampling Distribution") +
+  theme_minimal()
+
+# =============================================================================
+# STEP 6: Weighted means &mdash; correcting for nonrepresentative samples
+# =============================================================================
+# When inclusion probabilities differ, the unweighted mean is biased;
+# inverse-probability weights w_i = 1/&pi;_i recover the true population mean
+set.seed(42)
+income_men   &lt;- rnorm(50, mean = 60000, sd = 15000)
+income_women &lt;- rnorm(50, mean = 50000, sd = 15000)
+true_pop_mean &lt;- (mean(income_men) + mean(income_women)) / 2
+
+# Biased sample: oversample women (70% women, 30% men)
+sample_men   &lt;- sample(income_men, 15, replace = FALSE)
+sample_women &lt;- sample(income_women, 35, replace = FALSE)
+sample_income &lt;- c(sample_men, sample_women)
+
+# Unweighted mean is biased toward the oversampled group
+unweighted &lt;- mean(sample_income)
+
+# Weighted mean with IPW: w_i = 1/&pi;_i corrects the imbalance
+weights &lt;- c(rep(1/0.3, 15), rep(1/0.7, 35))
+weighted_mean &lt;- weighted.mean(sample_income, weights)
+
+cat("\nWeighted vs Unweighted Means:\n")
+cat("True population mean: $", round(true_pop_mean, 0), "\n")
+cat("Unweighted mean:      $", round(unweighted, 0), "\n")
+cat("Weighted mean (IPW):  $", round(weighted_mean, 0), "\n")</code></pre>
+  <div style="display:flex;gap:0.8rem;align-items:center;margin-top:0.8rem;flex-wrap:wrap">
+    <button class="btn-copy" onclick="navigator.clipboard.writeText(document.getElementById('code-r').textContent).then(()=>{this.textContent='Copied!';setTimeout(()=>this.textContent='Copy code',1500)})">Copy code</button>
+    <span style="color:var(--text-muted);font-size:0.88rem">Paste into your R console or RStudio</span>
   </div>
   </div>
 </section>
@@ -1858,7 +1990,8 @@ window.addEventListener("resize", function() {
   var buttons = tabBar.querySelectorAll('button');
   var panels  = {
     python: document.getElementById('panel-python'),
-    stata:  document.getElementById('panel-stata')
+    stata:  document.getElementById('panel-stata'),
+    r:      document.getElementById('panel-r')
   };
   buttons.forEach(function(btn) {
     btn.addEventListener('click', function() {
@@ -1874,6 +2007,7 @@ window.addEventListener("resize", function() {
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" data-manual></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-r.min.js"></script>
 <script>
 // Minimal Stata language grammar for Prism.js syntax highlighting
 Prism.languages.stata = {

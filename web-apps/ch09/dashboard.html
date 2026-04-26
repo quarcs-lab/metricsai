@@ -750,6 +750,7 @@ footer.page a:hover { text-decoration: underline; }
   <div class="code-tabs" id="code-lang-tabs">
     <button type="button" data-lang="python" class="active">Python</button>
     <button type="button" data-lang="stata">Stata</button>
+    <button type="button" data-lang="r">R</button>
   </div>
 
   <div class="code-panel active" id="panel-python">
@@ -761,7 +762,8 @@ footer.page a:hover { text-decoration: underline; }
 import numpy as np                        # logarithms and exponentials
 import pandas as pd                       # data loading and manipulation
 import matplotlib.pyplot as plt           # creating plots and visualizations
-from statsmodels.formula.api import ols   # OLS regression with R-style formulas
+import pyfixest as pf                     # fast OLS estimation with feols()
+# !pip install pyfixest                   # uncomment if running in Google Colab
 
 # =============================================================================
 # STEP 1: Load the earnings-education dataset
@@ -799,42 +801,42 @@ print(data_earnings[['earnings', 'lnearn', 'education', 'lneduc']].describe().ro
 # Each model answers a different economic question about earnings and education
 
 # Model 1: Linear — Δy = β₁Δx (dollar change per year of education)
-model_linear = ols('earnings ~ education', data=data_earnings).fit()
+fit_linear = pf.feols('earnings ~ education', data=data_earnings)
 
 # Model 2: Log-linear — 100β₁ ≈ % change in y per unit x (semi-elasticity)
-model_loglin = ols('lnearn ~ education', data=data_earnings).fit()
+fit_loglin = pf.feols('lnearn ~ education', data=data_earnings)
 
 # Model 3: Log-log — β₁ ≈ % change in y per % change in x (elasticity)
-model_loglog = ols('lnearn ~ lneduc', data=data_earnings).fit()
+fit_loglog = pf.feols('lnearn ~ lneduc', data=data_earnings)
 
 # Model 4: Linear-log — β₁/100 ≈ dollar change per % change in x
-model_linlog = ols('earnings ~ lneduc', data=data_earnings).fit()
+fit_linlog = pf.feols('earnings ~ lneduc', data=data_earnings)
 
 # Print the most important model: log-linear (semi-elasticity)
-semi_elast = model_loglin.params['education']
+semi_elast = fit_loglin.coef()['education']
 print(f"Log-linear: each year of education → {100*semi_elast:.1f}% higher earnings")
-print(f"Log-log elasticity: {model_loglog.params['lneduc']:.3f}")
+print(f"Log-log elasticity: {fit_loglog.coef()['lneduc']:.3f}")
 
 # Full regression table for the log-linear model
-model_loglin.summary()
+fit_loglin.summary()
 
 # =============================================================================
 # STEP 5: Compare all four models side by side
 # =============================================================================
 # The comparison shows that model choice affects both R² and interpretation
 models = {
-    'Linear':     ('earnings ~ education',  model_linear,  'education', '${:,.0f} per year'),
-    'Log-linear': ('ln(y) ~ x',            model_loglin,  'education', '{:.1f}% per year'),
-    'Log-log':    ('ln(y) ~ ln(x)',         model_loglog,  'lneduc',   '{:.2f}% per 1%'),
-    'Linear-log': ('y ~ ln(x)',            model_linlog,  'lneduc',   '${:,.0f} per 1%'),
+    'Linear':     ('earnings ~ education',  fit_linear,  'education', '${:,.0f} per year'),
+    'Log-linear': ('ln(y) ~ x',            fit_loglin,  'education', '{:.1f}% per year'),
+    'Log-log':    ('ln(y) ~ ln(x)',         fit_loglog,  'lneduc',   '{:.2f}% per 1%'),
+    'Linear-log': ('y ~ ln(x)',            fit_linlog,  'lneduc',   '${:,.0f} per 1%'),
 }
 
 print(f"{'Model':&lt;12} {'Specification':&lt;16} {'Slope':&gt;10} {'R²':&gt;8}  Interpretation")
 print("-" * 75)
-for name, (spec, m, var, fmt) in models.items():
-    slope = m.params[var]
-    interp = fmt.format(100*slope if 'per year' in fmt and 'Log' in name else slope/100 if 'per 1%' in fmt and name == 'Linear-log' else slope)
-    print(f"{name:&lt;12} {spec:&lt;16} {slope:&gt;10.4f} {m.rsquared:&gt;8.3f}  {interp}")
+for name, (spec, f, var, fmt_str) in models.items():
+    slope = f.coef()[var]
+    interp = fmt_str.format(100*slope if 'per year' in fmt_str and 'Log' in name else slope/100 if 'per 1%' in fmt_str and name == 'Linear-log' else slope)
+    print(f"{name:&lt;12} {spec:&lt;16} {slope:&gt;10.4f} {f._r2:&gt;8.3f}  {interp}")
 
 # =============================================================================
 # STEP 6: Scatter plot with the log-linear fitted line
@@ -842,11 +844,11 @@ for name, (spec, m, var, fmt) in models.items():
 # The log-linear model (semi-elasticity) provides the best fit for earnings data
 fig, ax = plt.subplots(figsize=(10, 6))
 ax.scatter(data_earnings['education'], data_earnings['lnearn'], s=50, alpha=0.7)
-ax.plot(data_earnings['education'], model_loglin.fittedvalues,
+ax.plot(data_earnings['education'], fit_loglin.predict(),
         color='red', linewidth=2, label='Fitted line')
 ax.set_xlabel('Education (years)')
 ax.set_ylabel('ln(Earnings)')
-ax.set_title(f'Log-Linear Model: semi-elasticity = {semi_elast:.4f}  (R² = {model_loglin.rsquared:.3f})')
+ax.set_title(f'Log-Linear Model: semi-elasticity = {semi_elast:.4f}  (R² = {fit_loglin._r2:.3f})')
 ax.legend()
 ax.grid(True, alpha=0.3)
 plt.tight_layout()
@@ -860,12 +862,12 @@ plt.show()
 url_sp500 = "https://raw.githubusercontent.com/quarcs-lab/data-open/master/AED/AED_SP500INDEX.DTA"
 data_sp500 = pd.read_stata(url_sp500)
 
-model_sp500 = ols('lnsp500 ~ year', data=data_sp500).fit()
-growth_rate = model_sp500.params['year']
+fit_sp500 = pf.feols('lnsp500 ~ year', data=data_sp500)
+growth_rate = fit_sp500.coef()['year']
 
 print(f"S&amp;P 500 estimated growth rate: {100*growth_rate:.2f}% per year")
 print(f"Rule of 72: doubles every {72/(100*growth_rate):.1f} years")
-print(f"R-squared: {model_sp500.rsquared:.4f}")
+print(f"R-squared: {fit_sp500._r2:.4f}")
 
 # Visualize: exponential in levels vs. linear in logs
 fig, axes = plt.subplots(1, 2, figsize=(14, 5))
@@ -876,7 +878,7 @@ axes[0].set_title('Exponential Growth in Levels')
 axes[0].grid(True, alpha=0.3)
 
 axes[1].plot(data_sp500['year'], data_sp500['lnsp500'], linewidth=2)
-axes[1].plot(data_sp500['year'], model_sp500.fittedvalues,
+axes[1].plot(data_sp500['year'], fit_sp500.predict(),
              color='red', linewidth=2, linestyle='--', label='Fitted (linear)')
 axes[1].set_xlabel('Year')
 axes[1].set_ylabel('ln(S&amp;P 500 Index)')
@@ -1019,6 +1021,127 @@ graph combine levels logs, title("S&amp;P 500: Levels vs. Logs")</code></pre>
   <div style="display:flex;gap:0.8rem;align-items:center;margin-top:0.8rem;flex-wrap:wrap">
     <button class="btn-copy" onclick="navigator.clipboard.writeText(document.getElementById('code-stata').textContent).then(()=>{this.textContent='Copied!';setTimeout(()=>this.textContent='Copy code',1500)})">Copy code</button>
     <span style="color:var(--text-muted);font-size:0.88rem">Paste into your Stata do-file editor</span>
+  </div>
+  </div>
+
+  <div class="code-panel" id="panel-r">
+  <pre><code id="code-r" class="language-r"># =============================================================================
+# CHAPTER 9 CHEAT SHEET: Models with Natural Logarithms
+# =============================================================================
+
+# --- Libraries ---
+library(haven)           # read Stata .dta files
+library(fixest)          # fast OLS estimation with feols()
+library(dplyr)           # data manipulation
+library(ggplot2)         # grammar of graphics
+
+# =============================================================================
+# STEP 1: Load the earnings-education dataset
+# =============================================================================
+url_earn &lt;- "https://raw.githubusercontent.com/quarcs-lab/data-open/master/AED/AED_EARNINGS.DTA"
+data_earnings &lt;- read_dta(url_earn)
+
+cat("Dataset:", nrow(data_earnings), "observations,", ncol(data_earnings), "variables\n")
+
+# =============================================================================
+# STEP 2: Logarithmic approximation — why economists use logs
+# =============================================================================
+# Key property: \u0394ln(x) \u2248 \u0394x/x (proportionate change)
+x0 &lt;- 40; x1 &lt;- 40.4
+exact  &lt;- (x1 - x0) / x0
+approx &lt;- log(x1) - log(x0)
+cat("Change from", x0, "to", x1, ":\n")
+cat("  Exact proportionate change:", round(exact, 6), "\n")
+cat("  Log approximation \u0394ln(x): ", round(approx, 6), "\n")
+
+# =============================================================================
+# STEP 3: Descriptive statistics and log transformations
+# =============================================================================
+data_earnings &lt;- data_earnings |&gt;
+  mutate(lnearn = log(earnings),
+         lneduc = log(education))
+
+summary(data_earnings[, c("earnings", "lnearn", "education", "lneduc")])
+
+# =============================================================================
+# STEP 4: Estimate all four model specifications
+# =============================================================================
+# Each model answers a different economic question about earnings and education
+
+# Model 1: Linear — \u0394y = \u03b2\u2081\u0394x (dollar change per year of education)
+m_linear &lt;- feols(earnings ~ education, data = data_earnings)
+
+# Model 2: Log-linear — 100\u03b2\u2081 \u2248 % change in y per unit x (semi-elasticity)
+m_loglin &lt;- feols(lnearn ~ education, data = data_earnings)
+
+# Model 3: Log-log — \u03b2\u2081 \u2248 % change in y per % change in x (elasticity)
+m_loglog &lt;- feols(lnearn ~ lneduc, data = data_earnings)
+
+# Model 4: Linear-log — \u03b2\u2081/100 \u2248 dollar change per % change in x
+m_linlog &lt;- feols(earnings ~ lneduc, data = data_earnings)
+
+cat("Log-linear: each year of education \u2192",
+    round(100 * coef(m_loglin)["education"], 1), "% higher earnings\n")
+cat("Log-log elasticity:", round(coef(m_loglog)["lneduc"], 3), "\n")
+
+# etable() compares all models side by side (fixest's built-in table)
+etable(m_linear, m_loglin, m_loglog, m_linlog,
+       headers = c("Linear", "Log-linear", "Log-log", "Linear-log"))
+
+# =============================================================================
+# STEP 5: Compare all four models side by side
+# =============================================================================
+cat("\nModel comparison:\n")
+models &lt;- list(Linear = m_linear, `Log-lin` = m_loglin,
+               `Log-log` = m_loglog, `Lin-log` = m_linlog)
+for (nm in names(models)) {
+  m &lt;- models[[nm]]
+  cat(sprintf("%-10s R\u00b2 = %.3f\n", nm, r2(m)))
+}
+
+# =============================================================================
+# STEP 6: Scatter plot with the log-linear fitted line
+# =============================================================================
+ggplot(data_earnings, aes(x = education, y = lnearn)) +
+  geom_point(color = "gray50", size = 2, alpha = 0.6) +
+  geom_smooth(method = "lm", formula = y ~ x, color = "red",
+              linewidth = 1.2, se = FALSE) +
+  labs(x = "Education (years)", y = "ln(Earnings)",
+       title = paste0("Log-Linear Model: semi-elasticity = ",
+                      round(coef(m_loglin)["education"], 4))) +
+  theme_minimal()
+
+# =============================================================================
+# STEP 7: Exponential growth — S&amp;P 500 and the Rule of 72
+# =============================================================================
+url_sp500 &lt;- "https://raw.githubusercontent.com/quarcs-lab/data-open/master/AED/AED_SP500INDEX.DTA"
+data_sp500 &lt;- read_dta(url_sp500)
+
+model_sp500 &lt;- feols(lnsp500 ~ year, data = data_sp500)
+growth_rate &lt;- coef(model_sp500)["year"]
+
+cat("\nS&amp;P 500 estimated growth rate:", round(100 * growth_rate, 2), "% per year\n")
+cat("Rule of 72: doubles every", round(72 / (100 * growth_rate), 1), "years\n")
+
+library(patchwork)
+p1 &lt;- ggplot(data_sp500, aes(x = year, y = sp500)) +
+  geom_line(linewidth = 1) +
+  labs(x = "Year", y = "S&amp;P 500 Index", title = "Exponential Growth in Levels") +
+  theme_minimal()
+
+p2 &lt;- ggplot(data_sp500, aes(x = year, y = lnsp500)) +
+  geom_line(linewidth = 1, color = "gray50") +
+  geom_smooth(method = "lm", formula = y ~ x, color = "red",
+              linewidth = 1.2, se = FALSE, linetype = "dashed") +
+  labs(x = "Year", y = "ln(S&amp;P 500 Index)",
+       title = paste0("Linear in Logs: growth = ",
+                      round(100 * growth_rate, 2), "%/year")) +
+  theme_minimal()
+
+p1 + p2</code></pre>
+  <div style="display:flex;gap:0.8rem;align-items:center;margin-top:0.8rem;flex-wrap:wrap">
+    <button class="btn-copy" onclick="navigator.clipboard.writeText(document.getElementById('code-r').textContent).then(()=>{this.textContent='Copied!';setTimeout(()=>this.textContent='Copy code',1500)})">Copy code</button>
+    <span style="color:var(--text-muted);font-size:0.88rem">Paste into your R console or RStudio</span>
   </div>
   </div>
 </section>
@@ -1709,7 +1832,8 @@ window.addEventListener("resize", function() {
   var buttons = tabBar.querySelectorAll('button');
   var panels  = {
     python: document.getElementById('panel-python'),
-    stata:  document.getElementById('panel-stata')
+    stata:  document.getElementById('panel-stata'),
+    r:      document.getElementById('panel-r')
   };
   buttons.forEach(function(btn) {
     btn.addEventListener('click', function() {
@@ -1725,6 +1849,7 @@ window.addEventListener("resize", function() {
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" data-manual></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-r.min.js"></script>
 <script>
 // Minimal Stata language grammar for Prism.js syntax highlighting
 Prism.languages.stata = {

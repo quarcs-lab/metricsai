@@ -792,6 +792,7 @@ footer.page a:hover { text-decoration: underline; }
   <div class="code-tabs" id="code-lang-tabs">
     <button type="button" data-lang="python" class="active">Python</button>
     <button type="button" data-lang="stata">Stata</button>
+    <button type="button" data-lang="r">R</button>
   </div>
 
   <div class="code-panel active" id="panel-python">
@@ -802,7 +803,8 @@ footer.page a:hover { text-decoration: underline; }
 # --- Libraries ---
 import pandas as pd                       # data loading and manipulation
 import matplotlib.pyplot as plt           # creating plots and visualizations
-from statsmodels.formula.api import ols   # OLS regression with R-style formulas
+import pyfixest as pf                     # fast OLS estimation with feols()
+# !pip install pyfixest                   # uncomment if running in Google Colab
 from scipy import stats                   # t-distribution and critical values
 
 # =============================================================================
@@ -818,13 +820,13 @@ print(f"Dataset: {data_house.shape[0]} observations, {data_house.shape[1]} varia
 # STEP 2: Estimate the regression and extract key statistics
 # =============================================================================
 # The t-statistic measures how many standard errors the estimate is from zero
-model = ols('price ~ size', data=data_house).fit()
+fit = pf.feols('price ~ size', data=data_house)
 
-slope     = model.params['size']       # marginal effect: $/sq ft
-intercept = model.params['Intercept']
-se_slope  = model.bse['size']          # standard error of the slope
-t_stat    = model.tvalues['size']      # t = b2 / se(b2)
-p_value   = model.pvalues['size']      # two-sided p-value for H0: b2 = 0
+slope     = fit.coef()['size']         # marginal effect: $/sq ft
+intercept = fit.coef()['Intercept']
+se_slope  = fit.se()['size']           # standard error of the slope
+t_stat    = fit.tstat()['size']        # t = b2 / se(b2)
+p_value   = fit.pval()['size']         # two-sided p-value for H0: b2 = 0
 
 print(f"Estimated equation: price = {intercept:,.0f} + {slope:.2f} x size")
 print(f"Standard error of slope: {se_slope:.2f}")
@@ -832,7 +834,7 @@ print(f"t-statistic: {t_stat:.4f}")
 print(f"p-value: {p_value:.6f}")
 
 # Full regression table (coefficients, std errors, t-stats, p-values, R2)
-model.summary()
+fit.summary()
 
 # =============================================================================
 # STEP 3: Confidence interval — a range of plausible values for b2
@@ -879,13 +881,13 @@ print(f"  Would reject at 10% (p = {p_lower:.3f} &lt; 0.10)")
 # STEP 6: Robust standard errors — valid with or without heteroskedasticity
 # =============================================================================
 # HC1 robust SEs protect against non-constant variance in the errors
-robust_model = ols('price ~ size', data=data_house).fit(cov_type='HC1')
+fit_robust = pf.feols('price ~ size', data=data_house, vcov='HC1')
 
 print(f"{'':20s} {'Standard':&gt;12s} {'Robust (HC1)':&gt;12s}")
 print("-" * 46)
-print(f"{'SE(size)':&lt;20s} {se_slope:&gt;12.2f} {robust_model.bse['size']:&gt;12.2f}")
-print(f"{'t-statistic':&lt;20s} {t_stat:&gt;12.2f} {robust_model.tvalues['size']:&gt;12.2f}")
-print(f"{'p-value':&lt;20s} {p_value:&gt;12.6f} {robust_model.pvalues['size']:&gt;12.6f}")</code></pre>
+print(f"{'SE(size)':&lt;20s} {se_slope:&gt;12.2f} {fit_robust.se()['size']:&gt;12.2f}")
+print(f"{'t-statistic':&lt;20s} {t_stat:&gt;12.2f} {fit_robust.tstat()['size']:&gt;12.2f}")
+print(f"{'p-value':&lt;20s} {p_value:&gt;12.6f} {fit_robust.pval()['size']:&gt;12.6f}")</code></pre>
   <div style="display:flex;gap:0.8rem;align-items:center;margin-top:0.8rem;flex-wrap:wrap">
     <button class="btn-copy" onclick="navigator.clipboard.writeText(document.getElementById('code-python').textContent).then(()=>{this.textContent='Copied!';setTimeout(()=>this.textContent='Copy code',1500)})">Copy code</button>
     <a class="btn-colab" href="https://colab.research.google.com/notebooks/empty.ipynb" target="_blank" rel="noopener">Open empty Colab notebook &rarr;</a>
@@ -988,6 +990,91 @@ display "t-statistic: Standard = " `t_std'   "   Robust = " _b[size] / _se[size]
   <div style="display:flex;gap:0.8rem;align-items:center;margin-top:0.8rem;flex-wrap:wrap">
     <button class="btn-copy" onclick="navigator.clipboard.writeText(document.getElementById('code-stata').textContent).then(()=>{this.textContent='Copied!';setTimeout(()=>this.textContent='Copy code',1500)})">Copy code</button>
     <span style="color:var(--text-muted);font-size:0.88rem">Paste into your Stata do-file editor</span>
+  </div>
+  </div>
+
+  <div class="code-panel" id="panel-r">
+  <pre><code id="code-r" class="language-r"># =============================================================================
+# CHAPTER 7 CHEAT SHEET: Statistical Inference for Bivariate Regression
+# =============================================================================
+
+# --- Libraries ---
+library(haven)           # read Stata .dta files
+library(fixest)          # fast OLS estimation with feols()
+library(ggplot2)         # grammar of graphics
+
+# =============================================================================
+# STEP 1: Load data directly from a URL
+# =============================================================================
+url &lt;- "https://raw.githubusercontent.com/quarcs-lab/data-open/master/AED/AED_HOUSE.DTA"
+data_house &lt;- read_dta(url)
+
+cat("Dataset:", nrow(data_house), "observations,", ncol(data_house), "variables\n")
+
+# =============================================================================
+# STEP 2: Estimate the regression and extract key statistics
+# =============================================================================
+# feols() estimates OLS; the t-statistic measures how many SEs from zero
+model &lt;- feols(price ~ size, data = data_house)
+summary(model)
+
+slope    &lt;- coef(model)["size"]
+se_slope &lt;- se(model)["size"]
+t_stat   &lt;- tstat(model)["size"]
+p_value  &lt;- pvalue(model)["size"]
+
+cat("Slope:", round(slope, 2), "  SE:", round(se_slope, 2),
+    "  t:", round(t_stat, 4), "  p:", round(p_value, 6), "\n")
+
+# =============================================================================
+# STEP 3: Confidence interval — a range of plausible values for b2
+# =============================================================================
+# CI = b2 +/- t_crit x se(b2), using T(n-2) distribution
+n  &lt;- nrow(data_house)
+df &lt;- n - 2
+t_crit &lt;- qt(0.975, df)
+
+ci &lt;- confint(model)                     # 95% CI for all coefficients
+cat("95% CI for slope: [", round(ci["size", 1], 2), ",",
+    round(ci["size", 2], 2), "]\n")
+
+# =============================================================================
+# STEP 4: Hypothesis tests — does size matter? Is the effect $90/sq ft?
+# =============================================================================
+# Test 1: H0: b2 = 0 (shown in summary output)
+cat("Test H0: b2 = 0 -&gt; t =", round(t_stat, 2),
+    ", p =", round(p_value, 6), "-&gt; Reject H0\n")
+
+# Test 2: H0: b2 = 90 (manual t-test)
+null_value &lt;- 90
+t_90 &lt;- (slope - null_value) / se_slope
+p_90 &lt;- 2 * pt(-abs(t_90), df = df)
+cat("Test H0: b2 = 90 -&gt; t =", round(t_90, 4),
+    ", p =", round(p_90, 4), "-&gt; Fail to reject H0\n")
+
+# =============================================================================
+# STEP 5: One-sided test — does size increase price by less than $90/sq ft?
+# =============================================================================
+# H0: b2 &gt;= 90  vs  Ha: b2 &lt; 90 (lower-tailed test)
+p_lower &lt;- pt(t_90, df = df)             # one-sided p-value (left tail)
+
+cat("One-sided test H0: b2 &gt;= 90 vs Ha: b2 &lt; 90\n")
+cat("  t =", round(t_90, 4), ", one-sided p =", round(p_lower, 4), "\n")
+
+# =============================================================================
+# STEP 6: Robust standard errors — valid with or without heteroskedasticity
+# =============================================================================
+# vcov = "HC1" computes HC1 robust SEs (same as Stata's , robust)
+model_robust &lt;- feols(price ~ size, data = data_house, vcov = "HC1")
+
+cat("\nComparison of Standard vs. Robust (HC1) Standard Errors:\n")
+cat("SE(size):    Standard =", round(se_slope, 2),
+    "  Robust =", round(se(model_robust)["size"], 2), "\n")
+cat("t-statistic: Standard =", round(t_stat, 2),
+    "  Robust =", round(tstat(model_robust)["size"], 2), "\n")</code></pre>
+  <div style="display:flex;gap:0.8rem;align-items:center;margin-top:0.8rem;flex-wrap:wrap">
+    <button class="btn-copy" onclick="navigator.clipboard.writeText(document.getElementById('code-r').textContent).then(()=>{this.textContent='Copied!';setTimeout(()=>this.textContent='Copy code',1500)})">Copy code</button>
+    <span style="color:var(--text-muted);font-size:0.88rem">Paste into your R console or RStudio</span>
   </div>
   </div>
 </section>
@@ -1950,7 +2037,8 @@ window.addEventListener("resize", function() {
   var buttons = tabBar.querySelectorAll('button');
   var panels  = {
     python: document.getElementById('panel-python'),
-    stata:  document.getElementById('panel-stata')
+    stata:  document.getElementById('panel-stata'),
+    r:      document.getElementById('panel-r')
   };
   buttons.forEach(function(btn) {
     btn.addEventListener('click', function() {
@@ -1966,6 +2054,7 @@ window.addEventListener("resize", function() {
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" data-manual></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-r.min.js"></script>
 <script>
 // Minimal Stata language grammar for Prism.js syntax highlighting
 Prism.languages.stata = {
