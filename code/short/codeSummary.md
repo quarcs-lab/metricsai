@@ -5,8 +5,7 @@ A compilation of all chapter code cheat sheets — self-contained Python scripts
 
 ---
 
-
-## Chapter 1: Analysis of Economics Data
+## Chapter 01 Analysis of Economics Data
 
 ```python
 # =============================================================================
@@ -98,12 +97,12 @@ print("-" * 38)
 for var, label in predictors.items():
     m = pf.feols(f'price ~ {var}', data=data_house)
     print(f"{label:<18} {m.coef()[var]:>10.2f} {m._r2:>8.4f}")
+
 ```
 
 ---
 
-
-## Chapter 2: Univariate Data Summary
+## Chapter 02 Univariate Data Summary
 
 ```python
 # =============================================================================
@@ -217,12 +216,12 @@ ax.legend()
 ax.grid(True, alpha=0.3)
 plt.tight_layout()
 plt.show()
+
 ```
 
 ---
 
-
-## Chapter 3: The Sample Mean
+## Chapter 03 The Sample Mean
 
 ```python
 # =============================================================================
@@ -369,12 +368,12 @@ print(f"\nWeighted vs Unweighted Means:")
 print(f"True population mean:  ${true_pop_mean:,.0f}")
 print(f"Unweighted mean:       ${unweighted:,.0f}  (bias: ${unweighted - true_pop_mean:,.0f})")
 print(f"Weighted mean (IPW):   ${weighted:,.0f}  (bias: ${weighted - true_pop_mean:,.0f})")
+
 ```
 
 ---
 
-
-## Chapter 4: Statistical Inference for the Mean
+## Chapter 04 Statistical Inference for the Mean
 
 ```python
 # =============================================================================
@@ -527,12 +526,12 @@ print(f"SE: {se_prop:.4f}")
 print(f"95% CI: [{ci_lo:.4f}, {ci_hi:.4f}]")
 print(f"\nH0: p = {p0}  z = {z_stat:.4f}  p-value = {p_val_z:.4f}")
 print(f"Decision: {'Reject H0' if abs(z_stat) > 1.96 else 'Do not reject H0'}")
+
 ```
 
 ---
 
-
-## Chapter 5: Bivariate Data Summary
+## Chapter 05 Bivariate Data Summary
 
 ```python
 # =============================================================================
@@ -648,12 +647,12 @@ ax.legend()
 ax.grid(True, alpha=0.3)
 plt.tight_layout()
 plt.show()
+
 ```
 
 ---
 
-
-## Chapter 6: The Least Squares Estimator
+## Chapter 06 The Least Squares Estimator
 
 ```python
 # =============================================================================
@@ -794,12 +793,12 @@ for ns in sample_sizes:
         m = pf.feols('y ~ x', data=pd.DataFrame({'x': xs, 'y': ys}))
         estimates.append(m.coef()['x'])
     print(f"{ns:>6}  {np.mean(estimates):>10.4f}  {np.std(estimates):>22.4f}")
+
 ```
 
 ---
 
-
-## Chapter 7: Statistical Inference for Bivariate Regression
+## Chapter 07 Statistical Inference for Bivariate Regression
 
 ```python
 # =============================================================================
@@ -832,7 +831,7 @@ slope     = fit.coef()['size']         # marginal effect: $/sq ft
 intercept = fit.coef()['Intercept']
 se_slope  = fit.se()['size']           # standard error of the slope
 t_stat    = fit.tstat()['size']        # t = b2 / se(b2)
-p_value   = fit.pval()['size']         # two-sided p-value for H0: b2 = 0
+p_value   = fit.pvalue()['size']         # two-sided p-value for H0: b2 = 0
 
 print(f"Estimated equation: price = {intercept:,.0f} + {slope:.2f} × size")
 print(f"Standard error of slope: {se_slope:.2f}")
@@ -893,7 +892,7 @@ print(f"{'':20s} {'Standard':>12s} {'Robust (HC1)':>12s}")
 print("-" * 46)
 print(f"{'SE(size)':<20s} {se_slope:>12.2f} {fit_robust.se()['size']:>12.2f}")
 print(f"{'t-statistic':<20s} {t_stat:>12.2f} {fit_robust.tstat()['size']:>12.2f}")
-print(f"{'p-value':<20s} {p_value:>12.6f} {fit_robust.pval()['size']:>12.6f}")
+print(f"{'p-value':<20s} {p_value:>12.6f} {fit_robust.pvalue()['size']:>12.6f}")
 
 pct_change = ((fit_robust.se()['size'] - se_slope) / se_slope) * 100
 print(f"\nRobust SE is {pct_change:+.1f}% different from standard SE")
@@ -912,12 +911,12 @@ ax.legend()
 ax.grid(True, alpha=0.3)
 plt.tight_layout()
 plt.show()
+
 ```
 
 ---
 
-
-## Chapter 8: Case Studies for Bivariate Regression
+## Chapter 08 Case Studies for Bivariate Regression
 
 ```python
 # =============================================================================
@@ -1054,12 +1053,12 @@ ax.legend()
 ax.grid(True, alpha=0.3)
 plt.tight_layout()
 plt.show()
+
 ```
 
 ---
 
-
-## Chapter 9: Models with Natural Logarithms
+## Chapter 09 Models with Natural Logarithms
 
 ```python
 # =============================================================================
@@ -1195,12 +1194,12 @@ axes[1].legend()
 axes[1].grid(True, alpha=0.3)
 plt.tight_layout()
 plt.show()
+
 ```
 
 ---
 
-
-## Chapter 10: Data Summary for Multiple Regression
+## Chapter 10 Data Summary for Multiple Regression
 
 ```python
 # =============================================================================
@@ -1344,12 +1343,12 @@ axes[1].grid(True, alpha=0.3)
 
 plt.tight_layout()
 plt.show()
+
 ```
 
 ---
 
-
-## Chapter 11: Statistical Inference for Multiple Regression
+## Chapter 11 Statistical Inference for Multiple Regression
 
 ```python
 # =============================================================================
@@ -1388,7 +1387,7 @@ n = int(fit_full._N)
 k = len(fit_full.coef())
 df = n - k  # degrees of freedom for t and F tests
 
-print(f"\nSize effect: ${fit_full.coef()['size']:,.2f} per sq ft (p = {fit_full.pval()['size']:.4f})")
+print(f"\nSize effect: ${fit_full.coef()['size']:,.2f} per sq ft (p = {fit_full.pvalue()['size']:.4f})")
 print(f"R-squared: {fit_full._r2:.4f} ({fit_full._r2*100:.1f}% of variation explained)")
 print(f"Degrees of freedom: n-k = {n}-{k} = {df}")
 
@@ -1430,7 +1429,7 @@ print(f"  Decision: {'Reject' if p_value < 0.05 else 'Fail to reject'} H₀ at 5
 # Test of statistical significance: H₀: β_size = 0
 t_stat_zero = coef_size / se_size
 print(f"\nTest H₀: β_size = 0")
-print(f"  t-statistic: {t_stat_zero:.4f}, p-value: {fit_full.pval()['size']:.6f}")
+print(f"  t-statistic: {t_stat_zero:.4f}, p-value: {fit_full.pvalue()['size']:.6f}")
 print(f"  Size IS statistically significant at 5% level")
 
 # =============================================================================
@@ -1483,7 +1482,7 @@ print("-" * 56)
 for var in fit_full.coef().index:
     print(f"{var:<14} {fit_full.coef()[var]:>10.2f} "
           f"{fit_full.se()[var]:>10.2f} {fit_robust.se()[var]:>10.2f} "
-          f"{fit_robust.pval()[var]:>10.4f}")
+          f"{fit_robust.pvalue()[var]:>10.4f}")
 
 # =============================================================================
 # STEP 8: Coefficient plot — visual summary of significance
@@ -1507,12 +1506,12 @@ ax.legend()
 ax.grid(True, alpha=0.3, axis='x')
 plt.tight_layout()
 plt.show()
+
 ```
 
 ---
 
-
-## Chapter 12: Further Topics in Multiple Regression
+## Chapter 12 Further Topics in Multiple Regression
 
 ```python
 # =============================================================================
@@ -1624,7 +1623,9 @@ lag_length   = int(0.75 * n_gdp**(1/3))  # rule of thumb: m = 0.75 × T^(1/3)
 # Compare default SE vs. HAC SE for the mean
 se_default = data_gdp['growth'].std() / np.sqrt(n_gdp)
 data_gdp['_const'] = 1
-fit_hac = pf.feols('growth ~ 1', data=data_gdp, vcov={'NW': lag_length})
+data_gdp['_time'] = range(len(data_gdp))
+fit_hac = pf.feols('growth ~ 1', data=data_gdp,
+                   vcov='NW', vcov_kwargs={'time_id': '_time', 'lag': lag_length})
 
 print(f"\nGDP Growth: mean = {mean_growth:.4f}")
 print(f"Default SE (no autocorrelation): {se_default:.6f}")
@@ -1707,12 +1708,12 @@ ax.legend()
 ax.grid(True, alpha=0.3)
 plt.tight_layout()
 plt.show()
+
 ```
 
 ---
 
-
-## Chapter 13: Case Studies for Multiple Regression
+## Chapter 13 Case Studies for Multiple Regression
 
 ```python
 # =============================================================================
@@ -1741,7 +1742,9 @@ data_cobb['lnk'] = np.log(data_cobb['k'])
 data_cobb['lnl'] = np.log(data_cobb['l'])
 
 # OLS with HAC standard errors (time series: autocorrelation + heteroskedasticity)
-fit_cobb = pf.feols('lnq ~ lnk + lnl', data=data_cobb, vcov={'NW': 3})
+data_cobb['_time'] = range(len(data_cobb))
+fit_cobb = pf.feols('lnq ~ lnk + lnl', data=data_cobb,
+                    vcov='NW', vcov_kwargs={'time_id': '_time', 'lag': 3})
 
 alpha = fit_cobb.coef()['lnk']    # capital elasticity
 beta  = fit_cobb.coef()['lnl']    # labor elasticity
@@ -1769,18 +1772,24 @@ print(f"CRS test: F = {f_stat:.2f}, p = {p_val:.3f} → {'Fail to reject' if p_v
 data_phil = pd.read_stata(URL + "AED_PHILLIPS.DTA")
 
 # Pre-1970: classic negative relationship
-pre = data_phil[data_phil['year'] < 1970]
-fit_pre = pf.feols('inflgdp ~ urate', data=pre, vcov={'NW': 3})
+pre = data_phil[data_phil['year'] < 1970].copy()
+pre['_time'] = range(len(pre))
+fit_pre = pf.feols('inflgdp ~ urate', data=pre,
+                   vcov='NW', vcov_kwargs={'time_id': '_time', 'lag': 3})
 print(f"\nPre-1970 slope: {fit_pre.coef()['urate']:.3f}  (negative → classic Phillips curve)")
 
 # Post-1970: sign flips due to omitted expected inflation
-post = data_phil[data_phil['year'] >= 1970]
-fit_post = pf.feols('inflgdp ~ urate', data=post, vcov={'NW': 5})
+post = data_phil[data_phil['year'] >= 1970].copy()
+post['_time'] = range(len(post))
+fit_post = pf.feols('inflgdp ~ urate', data=post,
+                    vcov='NW', vcov_kwargs={'time_id': '_time', 'lag': 5})
 print(f"Post-1970 slope: {fit_post.coef()['urate']:.3f}  (positive → breakdown!)")
 
 # Augmented model: adding expected inflation restores the negative sign
-post_exp = post.dropna(subset=['inflgdp1yr'])
-fit_aug = pf.feols('inflgdp ~ urate + inflgdp1yr', data=post_exp, vcov={'NW': 5})
+post_exp = post.dropna(subset=['inflgdp1yr']).copy()
+post_exp['_time'] = range(len(post_exp))
+fit_aug = pf.feols('inflgdp ~ urate + inflgdp1yr', data=post_exp,
+                   vcov='NW', vcov_kwargs={'time_id': '_time', 'lag': 5})
 print(f"Augmented slope on urate: {fit_aug.coef()['urate']:.3f}  (negative again!)")
 print(f"Expected inflation coef:  {fit_aug.coef()['inflgdp1yr']:.3f}")
 
@@ -1832,7 +1841,7 @@ print(f"\nDiD estimate (manual): {did:.3f} SD improvement in child nutrition")
 fit_did = pf.feols('waz ~ hightreat + post + postXhigh', data=data_did,
                    vcov={'CRV1': 'idcommunity'})
 print(f"DiD coefficient (regression): {fit_did.coef()['postXhigh']:.3f}")
-print(f"p-value: {fit_did.pval()['postXhigh']:.4f}")
+print(f"p-value: {fit_did.pvalue()['postXhigh']:.4f}")
 
 # =============================================================================
 # STEP 5: Regression Discontinuity — incumbency advantage in U.S. Senate
@@ -1845,7 +1854,7 @@ data_rd = data_rd[data_rd['vote'].notna()].copy()
 fit_rd = pf.feols('vote ~ win + margin', data=data_rd, vcov='HC1')
 print(f"\nIncumbency advantage: {fit_rd.coef()['win']:.1f} percentage points")
 print(f"95% CI: [{fit_rd.confint().loc['win'].iloc[0]:.1f}, {fit_rd.confint().loc['win'].iloc[1]:.1f}]")
-print(f"p-value: {fit_rd.pval()['win']:.4f}")
+print(f"p-value: {fit_rd.pvalue()['win']:.4f}")
 
 # =============================================================================
 # STEP 6: Instrumental Variables — do institutions cause growth?
@@ -1870,12 +1879,12 @@ print(f"OLS coefficient:  {fit_ols_iv.coef()['avexpr']:.3f}  (biased)")
 print(f"IV/2SLS coefficient: {fit_2nd.coef()['avexpr_hat']:.3f}  (causal)")
 print(f"Causal effect: 1-unit improvement in institutions → "
       f"{np.exp(fit_2nd.coef()['avexpr_hat']):.1f}x increase in GDP")
+
 ```
 
 ---
 
-
-## Chapter 14: Regression with Indicator Variables
+## Chapter 14 Regression with Indicator Variables
 
 ```python
 # =============================================================================
@@ -2004,12 +2013,12 @@ print(f"\nANOVA F-statistic: {f_stat:.2f}, p-value: {p_value:.4f}")
 data['worker_type'] = np.where(data['dself'] == 1, 'Self-employed',
                       np.where(data['dprivate'] == 1, 'Private', 'Government'))
 print(data.groupby('worker_type')['earnings'].agg(['mean', 'count']).round(0))
+
 ```
 
 ---
 
-
-## Chapter 15: Regression with Transformed Variables
+## Chapter 15 Regression with Transformed Variables
 
 ```python
 # =============================================================================
@@ -2134,12 +2143,12 @@ print(f"Hours elasticity: {fit_full.coef()['lnhours']:.3f} (log-log coefficient)
 
 # Full regression table
 fit_full.summary()
+
 ```
 
 ---
 
-
-## Chapter 16: Checking the Model and Data
+## Chapter 16 Checking the Model and Data
 
 ```python
 # =============================================================================
@@ -2279,12 +2288,12 @@ ax.legend()
 ax.grid(True, alpha=0.3)
 plt.tight_layout()
 plt.show()
+
 ```
 
 ---
 
-
-## Chapter 17: Panel Data, Time Series Data, Causation
+## Chapter 17 Panel Data Time Series Data Causation
 
 ```python
 # =============================================================================
@@ -2382,7 +2391,8 @@ print(f"  Levels regression:  {acf_levels[1]:.4f} (high → non-stationary resid
 print(f"  Changes regression: {acf_changes[1]:.4f} (much lower → differencing worked)")
 
 # HAC (Newey-West) SEs correct for autocorrelation without differencing
-fit_hac = pf.feols('gs10 ~ gs1', data=data_rates, vcov={'NW': 24})
+fit_hac = pf.feols('gs10 ~ gs1', data=data_rates,
+                   vcov='NW', vcov_kwargs={'time_id': 'time', 'lag': 24})
 print(f"\nDefault SE on gs1:   {fit_levels.se()['gs1']:.4f}")
 print(f"HAC SE on gs1:       {fit_hac.se()['gs1']:.4f}")
 print(f"HAC is {fit_hac.se()['gs1'] / fit_levels.se()['gs1']:.1f}x larger — default SEs are too small")
@@ -2409,6 +2419,6 @@ print(f"  R²: {fit_adl._r2:.4f} (much higher than static model)")
 # Check residual autocorrelation — should be near zero if well-specified
 acf_adl = acf(pd.Series(fit_adl._u_hat).dropna(), nlags=5)
 print(f"  Residual ACF(1): {acf_adl[1]:.4f} (near zero → dynamics captured)")
+
 ```
 
----

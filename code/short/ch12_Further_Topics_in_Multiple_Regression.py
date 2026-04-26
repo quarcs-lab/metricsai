@@ -107,7 +107,9 @@ lag_length   = int(0.75 * n_gdp**(1/3))  # rule of thumb: m = 0.75 × T^(1/3)
 # Compare default SE vs. HAC SE for the mean
 se_default = data_gdp['growth'].std() / np.sqrt(n_gdp)
 data_gdp['_const'] = 1
-fit_hac = pf.feols('growth ~ 1', data=data_gdp, vcov={'NW': lag_length})
+data_gdp['_time'] = range(len(data_gdp))
+fit_hac = pf.feols('growth ~ 1', data=data_gdp,
+                   vcov='NW', vcov_kwargs={'time_id': '_time', 'lag': lag_length})
 
 print(f"\nGDP Growth: mean = {mean_growth:.4f}")
 print(f"Default SE (no autocorrelation): {se_default:.6f}")

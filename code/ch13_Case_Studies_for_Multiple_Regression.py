@@ -24,7 +24,9 @@ data_cobb['lnk'] = np.log(data_cobb['k'])
 data_cobb['lnl'] = np.log(data_cobb['l'])
 
 # OLS with HAC standard errors (time series: autocorrelation + heteroskedasticity)
-fit_cobb = pf.feols('lnq ~ lnk + lnl', data=data_cobb, vcov={'NW': 3})
+data_cobb['_time'] = range(len(data_cobb))
+fit_cobb = pf.feols('lnq ~ lnk + lnl', data=data_cobb,
+                    vcov='NW', vcov_kwargs={'time_id': '_time', 'lag': 3})
 
 alpha = fit_cobb.coef()['lnk']    # capital elasticity
 beta  = fit_cobb.coef()['lnl']    # labor elasticity
@@ -52,18 +54,24 @@ print(f"CRS test: F = {f_stat:.2f}, p = {p_val:.3f} → {'Fail to reject' if p_v
 data_phil = pd.read_stata(URL + "AED_PHILLIPS.DTA")
 
 # Pre-1970: classic negative relationship
-pre = data_phil[data_phil['year'] < 1970]
-fit_pre = pf.feols('inflgdp ~ urate', data=pre, vcov={'NW': 3})
+pre = data_phil[data_phil['year'] < 1970].copy()
+pre['_time'] = range(len(pre))
+fit_pre = pf.feols('inflgdp ~ urate', data=pre,
+                   vcov='NW', vcov_kwargs={'time_id': '_time', 'lag': 3})
 print(f"\nPre-1970 slope: {fit_pre.coef()['urate']:.3f}  (negative → classic Phillips curve)")
 
 # Post-1970: sign flips due to omitted expected inflation
-post = data_phil[data_phil['year'] >= 1970]
-fit_post = pf.feols('inflgdp ~ urate', data=post, vcov={'NW': 5})
+post = data_phil[data_phil['year'] >= 1970].copy()
+post['_time'] = range(len(post))
+fit_post = pf.feols('inflgdp ~ urate', data=post,
+                    vcov='NW', vcov_kwargs={'time_id': '_time', 'lag': 5})
 print(f"Post-1970 slope: {fit_post.coef()['urate']:.3f}  (positive → breakdown!)")
 
 # Augmented model: adding expected inflation restores the negative sign
-post_exp = post.dropna(subset=['inflgdp1yr'])
-fit_aug = pf.feols('inflgdp ~ urate + inflgdp1yr', data=post_exp, vcov={'NW': 5})
+post_exp = post.dropna(subset=['inflgdp1yr']).copy()
+post_exp['_time'] = range(len(post_exp))
+fit_aug = pf.feols('inflgdp ~ urate + inflgdp1yr', data=post_exp,
+                   vcov='NW', vcov_kwargs={'time_id': '_time', 'lag': 5})
 print(f"Augmented slope on urate: {fit_aug.coef()['urate']:.3f}  (negative again!)")
 print(f"Expected inflation coef:  {fit_aug.coef()['inflgdp1yr']:.3f}")
 
@@ -115,7 +123,7 @@ print(f"\nDiD estimate (manual): {did:.3f} SD improvement in child nutrition")
 fit_did = pf.feols('waz ~ hightreat + post + postXhigh', data=data_did,
                    vcov={'CRV1': 'idcommunity'})
 print(f"DiD coefficient (regression): {fit_did.coef()['postXhigh']:.3f}")
-print(f"p-value: {fit_did.pval()['postXhigh']:.4f}")
+print(f"p-value: {fit_did.pvalue()['postXhigh']:.4f}")
 
 # =============================================================================
 # STEP 5: Regression Discontinuity — incumbency advantage in U.S. Senate
@@ -128,7 +136,7 @@ data_rd = data_rd[data_rd['vote'].notna()].copy()
 fit_rd = pf.feols('vote ~ win + margin', data=data_rd, vcov='HC1')
 print(f"\nIncumbency advantage: {fit_rd.coef()['win']:.1f} percentage points")
 print(f"95% CI: [{fit_rd.confint().loc['win'].iloc[0]:.1f}, {fit_rd.confint().loc['win'].iloc[1]:.1f}]")
-print(f"p-value: {fit_rd.pval()['win']:.4f}")
+print(f"p-value: {fit_rd.pvalue()['win']:.4f}")
 
 # =============================================================================
 # STEP 6: Instrumental Variables — do institutions cause growth?

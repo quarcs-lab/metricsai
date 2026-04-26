@@ -28,7 +28,7 @@ slope     = fit.coef()['size']         # marginal effect: $/sq ft
 intercept = fit.coef()['Intercept']
 se_slope  = fit.se()['size']           # standard error of the slope
 t_stat    = fit.tstat()['size']        # t = b2 / se(b2)
-p_value   = fit.pval()['size']         # two-sided p-value for H0: b2 = 0
+p_value   = fit.pvalue()['size']         # two-sided p-value for H0: b2 = 0
 
 print(f"Estimated equation: price = {intercept:,.0f} + {slope:.2f} × size")
 print(f"Standard error of slope: {se_slope:.2f}")
@@ -89,7 +89,7 @@ print(f"{'':20s} {'Standard':>12s} {'Robust (HC1)':>12s}")
 print("-" * 46)
 print(f"{'SE(size)':<20s} {se_slope:>12.2f} {fit_robust.se()['size']:>12.2f}")
 print(f"{'t-statistic':<20s} {t_stat:>12.2f} {fit_robust.tstat()['size']:>12.2f}")
-print(f"{'p-value':<20s} {p_value:>12.6f} {fit_robust.pval()['size']:>12.6f}")
+print(f"{'p-value':<20s} {p_value:>12.6f} {fit_robust.pvalue()['size']:>12.6f}")
 
 pct_change = ((fit_robust.se()['size'] - se_slope) / se_slope) * 100
 print(f"\nRobust SE is {pct_change:+.1f}% different from standard SE")

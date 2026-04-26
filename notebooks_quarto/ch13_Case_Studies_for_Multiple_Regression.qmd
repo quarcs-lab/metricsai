@@ -249,7 +249,7 @@ coef_df = pd.DataFrame({
     'Coefficient': fit_api_mult.coef(),
     'Std Error': fit_api_mult.se(),
     't-stat': fit_api_mult.tstat(),
-    'p-value': fit_api_mult.pval()
+    'p-value': fit_api_mult.pvalue()
 }).round(3)
 print("\n", coef_df)
 ```
@@ -311,7 +311,8 @@ data_cobb[['q', 'k', 'l', 'lnq', 'lnk', 'lnl']].describe()
 ```{python}
 # Estimate Cobb-Douglas with HAC standard errors
 data_cobb['_time'] = range(len(data_cobb))
-fit_cobb = pf.feols('lnq ~ lnk + lnl', data=data_cobb, vcov={'NW': 3})
+fit_cobb = pf.feols('lnq ~ lnk + lnl', data=data_cobb,
+                    vcov='NW', vcov_kwargs={'time_id': '_time', 'lag': 3})
 
 # Key results
 beta_k = fit_cobb.coef()['lnk']
@@ -460,7 +461,8 @@ data_phillips.head()
 # Pre-1970 regression
 data_pre1970 = data_phillips[data_phillips['year'] < 1970].copy()
 data_pre1970['_time'] = range(len(data_pre1970))
-fit_pre = pf.feols('inflgdp ~ urate', data=data_pre1970, vcov={'NW': 3})
+fit_pre = pf.feols('inflgdp ~ urate', data=data_pre1970,
+                   vcov='NW', vcov_kwargs={'time_id': '_time', 'lag': 3})
 # Phillips Curve Pre-1970 (1949-1969)
 fit_pre.summary()
 ```
@@ -504,7 +506,8 @@ plt.show()
 # Post-1970 regression
 data_post1970 = data_phillips[data_phillips['year'] >= 1970].copy()
 data_post1970['_time'] = range(len(data_post1970))
-fit_post = pf.feols('inflgdp ~ urate', data=data_post1970, vcov={'NW': 5})
+fit_post = pf.feols('inflgdp ~ urate', data=data_post1970,
+                    vcov='NW', vcov_kwargs={'time_id': '_time', 'lag': 5})
 # Phillips Curve Post-1970 (1970-2014)
 fit_post.summary()
 ```
@@ -560,7 +563,8 @@ data_post1970_exp = data_post1970.dropna(subset=['inflgdp1yr'])
 
 data_post1970_exp = data_post1970_exp.copy()
 data_post1970_exp['_time'] = range(len(data_post1970_exp))
-fit_augmented = pf.feols('inflgdp ~ urate + inflgdp1yr', data=data_post1970_exp, vcov={'NW': 5})
+fit_augmented = pf.feols('inflgdp ~ urate + inflgdp1yr', data=data_post1970_exp,
+                         vcov='NW', vcov_kwargs={'time_id': '_time', 'lag': 5})
 
 
 # Augmented Phillips Curve Post-1970
@@ -1109,7 +1113,7 @@ print(f"DiD coefficient (postXhigh): {fit_did.coef()['postXhigh']:.3f}")
 print(f"Matches manual calculation: {did_estimate:.3f} ✓")
 print(f"\nCausal interpretation:")
 print(f"Clinic access improved child nutrition by {fit_did.coef()['postXhigh']:.2f} standard deviations")
-print(f"This is a {'statistically significant' if fit_did.pval()['postXhigh'] < 0.05 else 'not significant'} effect")
+print(f"This is a {'statistically significant' if fit_did.pvalue()['postXhigh'] < 0.05 else 'not significant'} effect")
 print(f"\nCluster-robust SEs by community account for within-community correlation")
 ```
 
@@ -1661,7 +1665,8 @@ data_cobb['lnl'] = np.log(data_cobb['l'])
 
 # OLS with HAC standard errors (time series: autocorrelation + heteroskedasticity)
 data_cobb['_time'] = range(len(data_cobb))
-fit_cobb = pf.feols('lnq ~ lnk + lnl', data=data_cobb, vcov={'NW': 3})
+fit_cobb = pf.feols('lnq ~ lnk + lnl', data=data_cobb,
+                    vcov='NW', vcov_kwargs={'time_id': '_time', 'lag': 3})
 
 alpha = fit_cobb.coef()['lnk']   # capital elasticity
 beta  = fit_cobb.coef()['lnl']   # labor elasticity
@@ -1693,21 +1698,24 @@ data_phil = pd.read_stata(URL + "AED_PHILLIPS.DTA")
 pre = data_phil[data_phil['year'] < 1970]
 pre = pre.copy()
 pre['_time'] = range(len(pre))
-m_pre = pf.feols('inflgdp ~ urate', data=pre, vcov={'NW': 3})
+m_pre = pf.feols('inflgdp ~ urate', data=pre,
+                 vcov='NW', vcov_kwargs={'time_id': '_time', 'lag': 3})
 print(f"\nPre-1970 slope: {m_pre.coef()['urate']:.3f}  (negative → classic Phillips curve)")
 
 # Post-1970: sign flips due to omitted expected inflation
 post = data_phil[data_phil['year'] >= 1970]
 post = post.copy()
 post['_time'] = range(len(post))
-m_post = pf.feols('inflgdp ~ urate', data=post, vcov={'NW': 5})
+m_post = pf.feols('inflgdp ~ urate', data=post,
+                  vcov='NW', vcov_kwargs={'time_id': '_time', 'lag': 5})
 print(f"Post-1970 slope: {m_post.coef()['urate']:.3f}  (positive → breakdown!)")
 
 # Augmented model: adding expected inflation restores the negative sign
 post_exp = post.dropna(subset=['inflgdp1yr'])
 post_exp = post_exp.copy()
 post_exp['_time'] = range(len(post_exp))
-m_aug = pf.feols('inflgdp ~ urate + inflgdp1yr', data=post_exp, vcov={'NW': 5})
+m_aug = pf.feols('inflgdp ~ urate + inflgdp1yr', data=post_exp,
+                 vcov='NW', vcov_kwargs={'time_id': '_time', 'lag': 5})
 print(f"Augmented slope on urate: {m_aug.coef()['urate']:.3f}  (negative again!)")
 print(f"Expected inflation coef:  {m_aug.coef()['inflgdp1yr']:.3f}")
 
@@ -1750,7 +1758,7 @@ print(f"\nDiD estimate (manual): {did:.3f} SD improvement in child nutrition")
 # DiD regression with cluster-robust SEs by community
 fit_did = pf.feols('waz ~ hightreat + post + postXhigh', data=data_did, vcov={'CRV1': 'idcommunity'})
 print(f"DiD coefficient (regression): {fit_did.coef()['postXhigh']:.3f}")
-print(f"p-value: {fit_did.pval()['postXhigh']:.4f}")
+print(f"p-value: {fit_did.pvalue()['postXhigh']:.4f}")
 
 # =============================================================================
 # STEP 5: Regression Discontinuity — incumbency advantage in U.S. Senate
@@ -1764,7 +1772,7 @@ fit_rd = pf.feols('vote ~ win + margin', data=data_rd, vcov='HC1')
 print(f"\nIncumbency advantage: {fit_rd.coef()['win']:.1f} percentage points")
 ci = fit_rd.confint()
 print(f"95% CI: [{ci.loc['win', '2.5%']:.1f}, {ci.loc['win', '97.5%']:.1f}]")
-print(f"p-value: {fit_rd.pval()['win']:.4f}")
+print(f"p-value: {fit_rd.pvalue()['win']:.4f}")
 
 # =============================================================================
 # STEP 6: Instrumental Variables — do institutions cause growth?

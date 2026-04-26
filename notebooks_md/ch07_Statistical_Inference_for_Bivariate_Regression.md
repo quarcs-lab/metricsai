@@ -2429,8 +2429,8 @@ print(f"Conclusion: {'Reject' if p_value < 0.05 else 'Fail to reject'} H₀ at t
 # Task 2: Confidence interval for the slope
 
 ci = model.confint()
-ci_lower = ci.loc['ln_NTLpc2017', 0]
-ci_upper = ci.loc['ln_NTLpc2017', 1]
+ci_lower = ci.loc['ln_NTLpc2017'].iloc[0]
+ci_upper = ci.loc['ln_NTLpc2017'].iloc[1]
 
 # 95% confidence interval for NTL coefficient
 print(f"Point estimate:  {model.coef()['ln_NTLpc2017']:.4f}")

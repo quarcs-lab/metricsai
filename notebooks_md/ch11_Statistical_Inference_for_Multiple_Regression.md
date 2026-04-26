@@ -474,7 +474,7 @@ Python's pyfixest package provides convenient methods for hypothesis testing.
 ```python
 # Using pyfixest wald_test
 # Hypothesis test using pyfixest wald_test:
-t_test_result = model_full.wald_test(R=np.array([[0, 0, 0, 0, 0, 1, 0]]), r=np.array([null_value]))
+t_test_result = model_full.wald_test(R=np.array([[0, 0, 0, 0, 0, 1, 0]]), q=np.array([null_value]))
 print(t_test_result)
 
 ```
@@ -1000,7 +1000,7 @@ for i, (name, model) in enumerate(zip(model_names, models), 1):
     coef_col = f'{name} Coef'
     se_col = f'{name} SE'
     
-    coef_comparison[coef_col] = model.params.reindex(all_params)
+    coef_comparison[coef_col] = model.coef().reindex(all_params)
     coef_comparison[se_col] = model.se().reindex(all_params)
 
 coef_comparison.fillna('-')
@@ -1059,7 +1059,7 @@ A coefficient plot provides a visual summary of estimation results.
 # Figure 11.1: Confidence intervals for all coefficients
 fig, ax = plt.subplots(figsize=(10, 8))
 
-params_no_int = model_full.params[1:]
+params_no_int = model_full.coef()[1:]
 ci_no_int = conf_int.iloc[1:, :]
 
 y_pos = np.arange(len(params_no_int))
@@ -1332,7 +1332,7 @@ for var in model_full.coef().index:
 # STEP 8: Coefficient plot — visual summary of significance
 # =============================================================================
 # Error bars crossing zero = not significant at 5%
-params_plot = model_full.params[1:]  # exclude intercept
+params_plot = model_full.coef()[1:]  # exclude intercept
 ci_plot = conf_int.iloc[1:, :]
 
 fig, ax = plt.subplots(figsize=(10, 6))
@@ -1531,8 +1531,8 @@ Test the statistical significance of each coefficient.
 # Test significance of each coefficient
 print("t-statistics and p-values:")
 for var in ['ln_rk', 'hc']:
-    t = model_prod.tvalues[var]
-    p = model_prod.pvalues[var]
+    t = model_prod.tstat()[var]
+    p = model_prod.pvalue()[var]
     sig = '***' if p < 0.01 else '**' if p < 0.05 else '*' if p < 0.10 else ''
     print(f"  {var}: t = {t:.3f}, p = {p:.4f} {sig}")
 ```
@@ -1668,7 +1668,7 @@ model_full.summary()
 # # Identify significant predictors
 # print("\nSignificance at 5% level:")
 # for var in model_full.coef().index:
-#     p = model_full.pvalues[var]
+#     p = model_full.pvalue()[var]
 #     sig = "***" if p < 0.01 else "**" if p < 0.05 else "*" if p < 0.10 else ""
 #     print(f"  {var:18s}  p = {p:.4f}  {sig}")
 ```
@@ -1711,9 +1711,9 @@ print(ci[['Estimate', 'Lower 2.5%', 'Upper 97.5%']].round(4))
 # embed_vars = ['A00', 'A10', 'A20', 'A30', 'A40']
 # fig, ax = plt.subplots(figsize=(8, 5))
 # y_pos = range(len(embed_vars))
-# estimates = [model_full.params[v] for v in embed_vars]
-# errors = [(model_full.params[v] - ci.loc[v, 'Lower'],
-#            ci.loc[v, 'Upper'] - model_full.params[v]) for v in embed_vars]
+# estimates = [model_full.coef()[v] for v in embed_vars]
+# errors = [(model_full.coef()[v] - ci.loc[v, 'Lower'],
+#            ci.loc[v, 'Upper'] - model_full.coef()[v]) for v in embed_vars]
 # errors_T = list(zip(*errors))
 # ax.errorbar(estimates, y_pos, xerr=errors_T, fmt='o', color='navy',
 #             capsize=5, markersize=8)
@@ -1755,8 +1755,8 @@ Examine the t-statistics and p-values for each satellite embedding coefficient i
 # sig_5 = 0
 # sig_10 = 0
 # for var in embed_vars:
-#     t = model_full.tvalues[var]
-#     p = model_full.pvalues[var]
+#     t = model_full.tstat()[var]
+#     p = model_full.pvalue()[var]
 #     if p < 0.05:
 #         level = "Significant at 5%  ***"
 #         sig_5 += 1

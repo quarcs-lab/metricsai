@@ -285,7 +285,7 @@ comparison_table = pd.DataFrame({
                       'ln(earnings) ~ age + education',
                       'ln(earnings) ~ ln(age) + education'],
     'R-squared': [fit_linear._r2, fit_loglin._r2, fit_loglog._r2],
-    'Adj R-squared': [fit_linear._r2_adj, fit_loglin._r2_adj, fit_loglog._r2_adj]
+    'Adj R-squared': [fit_linear._adj_r2, fit_loglin._adj_r2, fit_loglog._adj_r2]
 })
 
 comparison_table.to_string(index=False)

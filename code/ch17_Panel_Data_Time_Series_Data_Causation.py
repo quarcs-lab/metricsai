@@ -93,7 +93,8 @@ print(f"  Levels regression:  {acf_levels[1]:.4f} (high → non-stationary resid
 print(f"  Changes regression: {acf_changes[1]:.4f} (much lower → differencing worked)")
 
 # HAC (Newey-West) SEs correct for autocorrelation without differencing
-fit_hac = pf.feols('gs10 ~ gs1', data=data_rates, vcov={'NW': 24})
+fit_hac = pf.feols('gs10 ~ gs1', data=data_rates,
+                   vcov='NW', vcov_kwargs={'time_id': 'time', 'lag': 24})
 print(f"\nDefault SE on gs1:   {fit_levels.se()['gs1']:.4f}")
 print(f"HAC SE on gs1:       {fit_hac.se()['gs1']:.4f}")
 print(f"HAC is {fit_hac.se()['gs1'] / fit_levels.se()['gs1']:.1f}x larger — default SEs are too small")

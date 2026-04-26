@@ -324,7 +324,7 @@ fit_pool.summary()
 print(f"Wins coefficient: {fit_pool.coef()['wins']:.6f}")
 print(f"Wins SE (cluster): {fit_pool.se()['wins']:.6f}")
 print(f"t-statistic: {fit_pool.tstat()['wins']:.4f}")
-print(f"p-value: {fit_pool.pval()['wins']:.4f}")
+print(f"p-value: {fit_pool.pvalue()['wins']:.4f}")
 print(f"R² (overall): {fit_pool._r2:.4f}")
 print(f"N observations: {fit_pool._N}")
 
@@ -531,7 +531,7 @@ fit_fe.summary()
 print(f"Wins coefficient: {fit_fe.coef()['wins']:.6f}")
 print(f"Wins SE (cluster): {fit_fe.se()['wins']:.6f}")
 print(f"t-statistic: {fit_fe.tstat()['wins']:.4f}")
-print(f"p-value: {fit_fe.pval()['wins']:.4f}")
+print(f"p-value: {fit_fe.pvalue()['wins']:.4f}")
 print(f"R² (within): {fit_fe._r2_within:.4f}")
 
 # Comparison: Pooled vs Fixed Effects
@@ -908,7 +908,8 @@ print(f"  gs1 coef: {fit_levels.coef()['gs1']:.6f}")
 print(f"  R²: {fit_levels._r2:.6f}")
 
 # HAC standard errors (Newey-West)
-fit_levels_hac = pf.feols('gs10 ~ gs1 + time', data=data_rates, vcov={'NW': 24})  # 2 years of monthly data
+fit_levels_hac = pf.feols('gs10 ~ gs1 + time', data=data_rates,
+                          vcov='NW', vcov_kwargs={'time_id': 'time', 'lag': 24})  # 2 years of monthly data
 print("\nLevels regression (HAC SEs with 24 lags):")
 print(f"  gs1 coef: {fit_levels_hac.coef()['gs1']:.6f}")
 print(f"  gs1 SE (default): {fit_levels.se()['gs1']:.6f}")
@@ -992,7 +993,7 @@ print(f"  R²: {fit_changes._r2:.6f}")
 
 # Check residual autocorrelation
 uhat_dgs10 = fit_changes._u_hat
-acf_dgs10_resid = acf(uhat_dgs10.dropna(), nlags=10)
+acf_dgs10_resid = acf(uhat_dgs10[~np.isnan(uhat_dgs10)], nlags=10)
 
 print("\nAutocorrelations of residuals (changes regression):")
 for i in range(min(11, len(acf_dgs10_resid))):
@@ -1431,7 +1432,8 @@ print(f"  Levels regression:  {acf_levels[1]:.4f} (high → non-stationary resid
 print(f"  Changes regression: {acf_changes[1]:.4f} (much lower → differencing worked)")
 
 # HAC (Newey-West) SEs correct for autocorrelation without differencing
-fit_hac = pf.feols('gs10 ~ gs1', data=data_rates, vcov={'NW': 24})
+fit_hac = pf.feols('gs10 ~ gs1', data=data_rates,
+                   vcov='NW', vcov_kwargs={'time_id': 'time', 'lag': 24})
 print(f"\nDefault SE on gs1:   {fit_levels.se()['gs1']:.4f}")
 print(f"HAC SE on gs1:       {fit_hac.se()['gs1']:.4f}")
 print(f"HAC is {fit_hac.se()['gs1'] / fit_levels.se()['gs1']:.1f}x larger — default SEs are too small")

@@ -783,7 +783,7 @@ models = {
 print(f"{'Model':<12} {'Specification':<16} {'Slope':>10} {'R²':>8}  Interpretation")
 print("-" * 75)
 for name, (spec, m, var, fmt) in models.items():
-    slope = m.params[var]
+    slope = m.coef()[var]
     interp = fmt.format(100*slope if 'per year' in fmt and 'Log' in name else slope/100 if 'per 1%' in fmt and name == 'Linear-log' else slope)
     print(f"{name:<12} {spec:<16} {slope:>10.4f} {m._r2:>8.3f}  {interp}")
 
@@ -1090,7 +1090,7 @@ m3_loglog.summary()
 elasticity = m3_loglog.coef()['ln_rk']
 ci = m3_loglog.confint().loc['ln_rk']
 print(f"\nElasticity: {elasticity:.4f}")
-print(f"95% CI: [{ci[0]:.4f}, {ci[1]:.4f}]")
+print(f"95% CI: [{ci.iloc[0]:.4f}, {ci.iloc[1]:.4f}]")
 
 # Test H0: beta = 0.33
 # Your hypothesis test here

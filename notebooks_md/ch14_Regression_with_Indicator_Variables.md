@@ -310,7 +310,7 @@ print(f"  p-value: {p_value_classical:.6f}")
 print("\n3. Regression with default (homoskedastic) SEs:")
 fit_gender_default = pf.feols('earnings ~ gender', data=data)
 print(f"  t-statistic: {fit_gender_default.tstat()['gender']:.4f}")
-print(f"  p-value: {fit_gender_default.pval()['gender']:.6f}")
+print(f"  p-value: {fit_gender_default.pvalue()['gender']:.6f}")
 print(f"  Note: IDENTICAL to classical t-test with equal variances")
 ```
 

@@ -34,7 +34,7 @@ n = int(fit_full._N)
 k = len(fit_full.coef())
 df = n - k  # degrees of freedom for t and F tests
 
-print(f"\nSize effect: ${fit_full.coef()['size']:,.2f} per sq ft (p = {fit_full.pval()['size']:.4f})")
+print(f"\nSize effect: ${fit_full.coef()['size']:,.2f} per sq ft (p = {fit_full.pvalue()['size']:.4f})")
 print(f"R-squared: {fit_full._r2:.4f} ({fit_full._r2*100:.1f}% of variation explained)")
 print(f"Degrees of freedom: n-k = {n}-{k} = {df}")
 
@@ -76,7 +76,7 @@ print(f"  Decision: {'Reject' if p_value < 0.05 else 'Fail to reject'} H₀ at 5
 # Test of statistical significance: H₀: β_size = 0
 t_stat_zero = coef_size / se_size
 print(f"\nTest H₀: β_size = 0")
-print(f"  t-statistic: {t_stat_zero:.4f}, p-value: {fit_full.pval()['size']:.6f}")
+print(f"  t-statistic: {t_stat_zero:.4f}, p-value: {fit_full.pvalue()['size']:.6f}")
 print(f"  Size IS statistically significant at 5% level")
 
 # =============================================================================
@@ -129,7 +129,7 @@ print("-" * 56)
 for var in fit_full.coef().index:
     print(f"{var:<14} {fit_full.coef()[var]:>10.2f} "
           f"{fit_full.se()[var]:>10.2f} {fit_robust.se()[var]:>10.2f} "
-          f"{fit_robust.pval()[var]:>10.4f}")
+          f"{fit_robust.pvalue()[var]:>10.4f}")
 
 # =============================================================================
 # STEP 8: Coefficient plot — visual summary of significance
