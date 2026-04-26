@@ -1801,11 +1801,11 @@ print(f"Population variables available: {pop_vars}")
 #
 # fit_fe = pf.feols('ln_NTLpc ~ ln_pop + year | asdf_id', data=panel_reg, vcov={'CRV1': 'asdf_id'})
 # print("FIXED EFFECTS (WITHIN ESTIMATOR)")
-# print(model_fe.summary())
+# print(fit_fe.summary())
 #
 # print("\nCOMPARISON:")
-# print(f"  Pooled OLS ln_pop coef: {model_pooled.params['ln_pop']:.4f}")
-# print(f"  Fixed Effects ln_pop coef: {model_fe.params['ln_pop_dm']:.4f}")
+# print(f"  Pooled OLS ln_pop coef: {fit_pooled.coef()['ln_pop']:.4f}")
+# print(f"  Fixed Effects ln_pop coef: {fit_fe.coef()['ln_pop']:.4f}")
 ```
 
 > **Key Concept 17.11: Fixed Effects for Spatial Heterogeneity**
@@ -1872,7 +1872,7 @@ print(f"Population variables available: {pop_vars}")
 # print("FIRST DIFFERENCES ESTIMATION")
 # print(model_fd.summary())
 #
-# print(f"\nFD coefficient on ln_pop: {model_fd.params['d_ln_pop']:.4f}")
+# print(f"\nFD coefficient on ln_pop: {fit_fd.coef()['d_ln_pop']:.4f}")
 ```
 
 #### Task 6: Panel Brief (Independent)

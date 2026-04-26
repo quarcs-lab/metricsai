@@ -845,7 +845,7 @@ plt.tight_layout()
 plt.show()
 
 print("\nInterpretation:")
-print(f"  Coefficient: {model_bivariate.params['growth']:.4f}")
+print(f"  Coefficient: {fit_bivariate.coef()['growth']:.4f}")
 print(f"  Higher economic growth is associated with greater democratization.")
 print(f"  But this may reflect omitted institutional variables...")
 ```
@@ -882,9 +882,6 @@ print(f"  This suggests omitted variable bias in the bivariate model.")
 
 ```{python}
 # Get residuals from multiple regression for diagnostic plots
-# Use pyfixest for estimation, statsmodels for diagnostics
-_diag_model = smf.ols('democracy ~ growth + constraint + indcent + catholic + muslim + protestant',
-                      data=data_democracy).fit()
 uhat = fit_multiple._u_hat
 yhat = fit_multiple.predict()
 
@@ -1186,7 +1183,9 @@ where:
 ```{python}
 # Influential Observations: Dfits
 
-# Get influence diagnostics
+# OLSInfluence requires a statsmodels fitted model (diagnostics only)
+_diag_model = smf.ols('democracy ~ growth + constraint + indcent + catholic + muslim + protestant',
+                      data=data_democracy).fit()
 influence = OLSInfluence(_diag_model)
 dfits = influence.dffits[0]
 n = len(data_democracy)
@@ -1377,7 +1376,7 @@ threshold_dfbetas = 2 / np.sqrt(n)
 print(f"\nDFBETAS threshold: {threshold_dfbetas:.4f}")
 
 # Plot DFBETAS for each variable
-param_names = model_multiple.params.index
+param_names = list(fit_multiple.coef().index)
 n_params = len(param_names)
 
 fig, axes = plt.subplots(2, 3, figsize=(18, 10))
@@ -1547,8 +1546,6 @@ print(f"Reduction: {(1 - b_mult/b_biv)*100:.0f}% — institutional controls abso
 # STEP 5: Diagnostic plots — residual vs fitted
 # =============================================================================
 # Random scatter around zero = assumptions OK; fan shape = heteroskedasticity
-_diag_model = smf.ols('democracy ~ growth + constraint + indcent + catholic + muslim + protestant',
-                      data=data_democracy).fit()
 uhat = fit_multiple._u_hat
 yhat = fit_multiple.predict()
 
@@ -1583,6 +1580,8 @@ plt.show()
 # =============================================================================
 # DFITS_i measures how much prediction i changes when observation i is excluded
 # Threshold: |DFITS| > 2*sqrt(k/n)
+_diag_model = smf.ols('democracy ~ growth + constraint + indcent + catholic + muslim + protestant',
+                      data=data_democracy).fit()
 influence = OLSInfluence(_diag_model)
 dfits     = influence.dffits[0]
 n = len(data_democracy)
@@ -1911,13 +1910,13 @@ bol_cs[['imds', 'ln_NTLpc2017', 'A00', 'A10', 'A20', 'A30', 'A40']].describe().r
 #                    data=bol_cs, vcov='HC1')
 #
 # comparison = pd.DataFrame({
-#     'Default SE': model_default.bse,
-#     'Robust SE': model_robust.bse,
-#     'Ratio': model_robust.bse / model_default.bse
+#     'Default SE': fit_default.se(),
+#     'Robust SE': fit_robust.se(),
+#     'Ratio': fit_robust.se() / fit_default.se()
 # })
 # print("STANDARD ERROR COMPARISON")
 # print(comparison.round(4))
-# print(f"\nMean ratio: {(model_robust.bse / model_default.bse).mean():.3f}")
+# print(f"\nMean ratio: {(fit_robust.se() / fit_default.se()).mean():.3f}")
 ```
 
 #### Task 3: Residual Diagnostics (Semi-guided)
@@ -1934,7 +1933,7 @@ bol_cs[['imds', 'ln_NTLpc2017', 'A00', 'A10', 'A20', 'A30', 'A40']].describe().r
 
 3. Interpret each plot: What do the patterns reveal about model adequacy?
 
-**Hint**: Use `model.fittedvalues` and `model.resid` for the plots. For the Q-Q plot, use `from scipy import stats; stats.probplot(residuals, plot=ax)`.
+**Hint**: Use `fit.predict()` for fitted values and `fit._u_hat` for residuals. For the Q-Q plot, use `from scipy import stats; stats.probplot(residuals, plot=ax)`.
 
 ```{python}
 # Your code here: Residual diagnostic plots
@@ -1947,18 +1946,18 @@ bol_cs[['imds', 'ln_NTLpc2017', 'A00', 'A10', 'A20', 'A30', 'A40']].describe().r
 # fig, axes = plt.subplots(1, 3, figsize=(15, 5))
 #
 # # (a) Residuals vs Fitted
-# axes[0].scatter(model.fittedvalues, model.resid, alpha=0.4)
+# axes[0].scatter(fit.predict(), fit._u_hat, alpha=0.4)
 # axes[0].axhline(0, color='red', linestyle='--')
 # axes[0].set_xlabel('Fitted Values')
 # axes[0].set_ylabel('Residuals')
 # axes[0].set_title('Residuals vs Fitted')
 #
 # # (b) Q-Q Plot
-# stats.probplot(model.resid, plot=axes[1])
+# stats.probplot(fit._u_hat, plot=axes[1])
 # axes[1].set_title('Q-Q Plot of Residuals')
 #
 # # (c) Histogram
-# axes[2].hist(model.resid, bins=30, edgecolor='black', alpha=0.7)
+# axes[2].hist(fit._u_hat, bins=30, edgecolor='black', alpha=0.7)
 # axes[2].set_xlabel('Residuals')
 # axes[2].set_title('Distribution of Residuals')
 #
@@ -2029,14 +2028,14 @@ bol_cs[['imds', 'ln_NTLpc2017', 'A00', 'A10', 'A20', 'A30', 'A40']].describe().r
 # m_with_dept = pf.feols('imds ~ ln_NTLpc2017 + A00 + A10 + C(dep)', data=bol_cs, vcov='HC1')
 #
 # print("WITHOUT department controls:")
-# print(f"  NTL coef: {m_no_dept.params['ln_NTLpc2017']:.4f} (SE: {m_no_dept.bse['ln_NTLpc2017']:.4f})")
-# print(f"  R²: {m_no_dept.rsquared:.4f}")
+# print(f"  NTL coef: {m_no_dept.coef()['ln_NTLpc2017']:.4f} (SE: {m_no_dept.se()['ln_NTLpc2017']:.4f})")
+# print(f"  R²: {m_no_dept._r2:.4f}")
 #
 # print("\nWITH department controls:")
-# print(f"  NTL coef: {m_with_dept.params['ln_NTLpc2017']:.4f} (SE: {m_with_dept.bse['ln_NTLpc2017']:.4f})")
-# print(f"  R²: {m_with_dept.rsquared:.4f}")
+# print(f"  NTL coef: {m_with_dept.coef()['ln_NTLpc2017']:.4f} (SE: {m_with_dept.se()['ln_NTLpc2017']:.4f})")
+# print(f"  R²: {m_with_dept._r2:.4f}")
 #
-# print(f"\nCoefficient change: {m_with_dept.params['ln_NTLpc2017'] - m_no_dept.params['ln_NTLpc2017']:.4f}")
+# print(f"\nCoefficient change: {m_with_dept.coef()['ln_NTLpc2017'] - m_no_dept.coef()['ln_NTLpc2017']:.4f}")
 ```
 
 #### Task 6: Diagnostic Report (Independent)

@@ -166,7 +166,7 @@ coef_table = pd.DataFrame({
     'Coefficient': model_basic.coef(),
     'Std. Error': model_basic.se(),
     't-statistic': model_basic.tstat(),
-    'p-value': model_basic.pval()
+    'p-value': model_basic.pvalue()
 })
 
 # Coefficient table
@@ -286,7 +286,7 @@ model_basic.summary()
 coef_size = model_basic.coef()['size']
 se_size = model_basic.se()['size']
 t_stat_size = model_basic.tstat()['size']
-p_value_size = model_basic.pval()['size']
+p_value_size = model_basic.pvalue()['size']
 
 # Detailed statistics for 'size' coefficient
 print(f"Coefficient: ${coef_size:.4f}")
@@ -419,7 +419,7 @@ Confidence intervals are more informative than hypothesis tests because they sho
 
 ```python
 # 7.3 Confidence intervals
-conf_int = model_basic.confint(level=0.95)
+conf_int = model_basic.confint()
 
 # 95% confidence intervals
 conf_int
@@ -1007,10 +1007,6 @@ print(f"\n95% CI for β₂: [{ci_lower:.2f}, {ci_upper:.2f}]")
 print(f"Since {null_value} is inside the CI, we do not reject H₀.")
 ```
 
-### Hypothesis Test Using statsmodels
-
-Python's statsmodels package provides convenient methods for hypothesis testing.
-
 ### Why Robust Standard Errors Matter
 
 **The problem with default standard errors:**
@@ -1385,8 +1381,8 @@ comparison_df = pd.DataFrame({
     'Robust SE': robust_results.se(),
     't-stat (standard)': model_basic.tstat(),
     't-stat (robust)': robust_results.tstat(),
-    'p-value (standard)': model_basic.pval(),
-    'p-value (robust)': robust_results.pval()
+    'p-value (standard)': model_basic.pvalue(),
+    'p-value (robust)': robust_results.pvalue()
 })
 comparison_df
 ```
@@ -1439,7 +1435,7 @@ fig, ax = plt.subplots(figsize=(10, 6))
 
 # Plot point estimate and confidence interval
 coef_names = ['Intercept', 'Size']
-coefs = model_basic.params.values
+coefs = model_basic.coef().values
 ci_low = conf_int.iloc[:, 0].values
 ci_high = conf_int.iloc[:, 1].values
 
@@ -1588,7 +1584,7 @@ slope     = model.coef()['size']       # marginal effect: $/sq ft
 intercept = model.coef()['Intercept']
 se_slope  = model.se()['size']          # standard error of the slope
 t_stat    = model.tstat()['size']      # t = b2 / se(b2)
-p_value   = model.pval()['size']      # two-sided p-value for H0: b2 = 0
+p_value   = model.pvalue()['size']      # two-sided p-value for H0: b2 = 0
 
 print(f"Estimated equation: price = {intercept:,.0f} + {slope:.2f} × size")
 print(f"Standard error of slope: {se_slope:.2f}")
@@ -1649,7 +1645,7 @@ print(f"{'':20s} {'Standard':>12s} {'Robust (HC1)':>12s}")
 print("-" * 46)
 print(f"{'SE(size)':<20s} {se_slope:>12.2f} {robust_model.se()['size']:>12.2f}")
 print(f"{'t-statistic':<20s} {t_stat:>12.2f} {robust_model.tstat()['size']:>12.2f}")
-print(f"{'p-value':<20s} {p_value:>12.6f} {robust_model.pval()['size']:>12.6f}")
+print(f"{'p-value':<20s} {p_value:>12.6f} {robust_model.pvalue()['size']:>12.6f}")
 
 pct_change = ((robust_model.se()['size'] - se_slope) / se_slope) * 100
 print(f"\nRobust SE is {pct_change:+.1f}% different from standard SE")
@@ -1875,7 +1871,7 @@ model_convergence.summary()
 beta2 = model_convergence.coef()['capital']
 se_beta2 = model_convergence.se()['capital']
 t_stat = model_convergence.tstat()['capital']
-p_value = model_convergence.pval()['capital']
+p_value = model_convergence.pvalue()['capital']
 
 # Key statistics
 print(f"Coefficient (β₂): {beta2:.4f}")
@@ -1884,7 +1880,7 @@ print(f"t-statistic: {t_stat:.2f}")
 print(f"p-value: {p_value:.6f}")
 
 # 95% Confidence Interval
-ci_95 = model_convergence.confint(level=0.95).loc['capital']
+ci_95 = model_convergence.confint().loc['capital']
 print(f"95% Confidence Interval: [{ci_95.iloc[0]:.4f}, {ci_95.iloc[1]:.4f}]")
 ```
 
@@ -2034,7 +2030,7 @@ robust_model = pf.feols('productivity ~ capital', data=data_2014, vcov='HC1')
 beta2_robust = robust_model.coef()['capital']
 se_beta2_robust = robust_model.se()['capital']
 t_stat_robust = robust_model.tstat()['capital']
-p_value_robust = robust_model.pval()['capital']
+p_value_robust = robust_model.pvalue()['capital']
 
 # Comparison table
 # Comparison of Standard vs. Robust Standard Errors
@@ -2057,7 +2053,7 @@ else:
     print("→ Still best practice to use robust SEs")
 
 # Robust confidence interval
-ci_robust = robust_model.confint(level=0.95)
+ci_robust = robust_model.confint()
 ci_95_robust = ci_robust.loc['capital'] if 'capital' in ci_robust.index else ci_robust.iloc[1]
 print(f"95% Confidence Intervals:")
 print(f"  Standard CI: [{ci_95.iloc[0]:.4f}, {ci_95.iloc[1]:.4f}]")
@@ -2123,7 +2119,7 @@ comparison_groups = pd.DataFrame({
     'β₂': [robust_high.coef()['capital'], robust_dev.coef()['capital'], beta2_robust],
     'Robust SE': [robust_high.se()['capital'], robust_dev.se()['capital'], se_beta2_robust],
     't-stat': [robust_high.tstat()['capital'], robust_dev.tstat()['capital'], t_stat_robust],
-    'p-value': [robust_high.pval()['capital'], robust_dev.pval()['capital'], p_value_robust]
+    'p-value': [robust_high.pvalue()['capital'], robust_dev.pvalue()['capital'], p_value_robust]
 })
 
 # Regression Results by Income Group
@@ -2408,7 +2404,7 @@ model.summary()
 
 # Extract t-statistic and p-value for the slope
 t_stat = model.tstat()['ln_NTLpc2017']
-p_value = model.pval()['ln_NTLpc2017']
+p_value = model.pvalue()['ln_NTLpc2017']
 
 # Hypothesis test: H₀: β₁ = 0
 print(f"Slope coefficient: {model.coef()['ln_NTLpc2017']:.4f}")
@@ -2432,7 +2428,7 @@ print(f"Conclusion: {'Reject' if p_value < 0.05 else 'Fail to reject'} H₀ at t
 ```python
 # Task 2: Confidence interval for the slope
 
-ci = model.confint(level=0.95)
+ci = model.confint()
 ci_lower = ci.loc['ln_NTLpc2017', 0]
 ci_upper = ci.loc['ln_NTLpc2017', 1]
 
@@ -2467,7 +2463,7 @@ print(f"{'':30s} {'Default':>12s} {'Robust (HC1)':>12s}")
 print(f"{'Slope coefficient':30s} {model.coef()['ln_NTLpc2017']:12.4f} {model_robust.coef()['ln_NTLpc2017']:12.4f}")
 print(f"{'Standard error':30s} {model.se()['ln_NTLpc2017']:12.4f} {model_robust.se()['ln_NTLpc2017']:12.4f}")
 print(f"{'t-statistic':30s} {model.tstat()['ln_NTLpc2017']:12.4f} {model_robust.tstat()['ln_NTLpc2017']:12.4f}")
-print(f"{'p-value':30s} {model.pval()['ln_NTLpc2017']:12.6f} {model_robust.pval()['ln_NTLpc2017']:12.6f}")
+print(f"{'p-value':30s} {model.pvalue()['ln_NTLpc2017']:12.6f} {model_robust.pvalue()['ln_NTLpc2017']:12.6f}")
 print(f"SE ratio (robust/default): {model_robust.se()['ln_NTLpc2017'] / model.se()['ln_NTLpc2017']:.3f}")
 ```
 
@@ -2568,7 +2564,7 @@ beta = model_robust.coef()['ln_NTLpc2017']
 
 # Economic vs statistical significance — key facts
 print(f"\nEstimated slope (robust): {beta:.4f}")
-print(f"Robust p-value:           {model_robust.pval()['ln_NTLpc2017']:.6f}")
+print(f"Robust p-value:           {model_robust.pvalue()['ln_NTLpc2017']:.6f}")
 print(f"\nIMDS range:     {reg_data['imds'].min():.1f} to {reg_data['imds'].max():.1f} (range = {imds_range:.1f})")
 print(f"IMDS std dev:   {imds_std:.2f}")
 print(f"\nEffect of 1-unit increase in log NTL:")

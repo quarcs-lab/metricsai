@@ -1272,7 +1272,7 @@ predictors = ['gender', 'age', 'agesq', 'education', 'dself', 'dgovt', 'lnhours'
 
 print(f"\n{'Variable':<12} {'Raw coef':>12} {'Beta*':>8}")
 print("-" * 34)
-for var in sorted(predictors, key=lambda v: abs(ols_mix.params[v] * data_earnings[v].std() / sd_y), reverse=True):
+for var in sorted(predictors, key=lambda v: abs(fit_mix.coef()[v] * data_earnings[v].std() / sd_y), reverse=True):
     raw  = fit_mix.coef()[var]
     beta_star = raw * data_earnings[var].std() / sd_y
     print(f"{var:<12} {raw:>12.2f} {beta_star:>8.4f}")
@@ -1633,10 +1633,10 @@ bol_cs[['imds', 'ln_NTLpc2017', 'NTLpc2017_raw', 'sdg7_1_ec']].describe().round(
 # m_c = pf.feols('imds ~ NTLpc2017_raw', data=bol_reg, vcov='HC1')
 # m_d = pf.feols('np.log(imds) ~ NTLpc2017_raw', data=bol_reg, vcov='HC1')
 #
-# print("Model (a) Level-Log  R²:", m_a.rsquared.round(4))
-# print("Model (b) Log-Log    R²:", m_b.rsquared.round(4))
-# print("Model (c) Level-Level R²:", m_c.rsquared.round(4))
-# print("Model (d) Log-Level  R²:", m_d.rsquared.round(4))
+# print("Model (a) Level-Log  R²:", round(m_a._r2, 4))
+# print("Model (b) Log-Log    R²:", round(m_b._r2, 4))
+# print("Model (c) Level-Level R²:", round(m_c._r2, 4))
+# print("Model (d) Log-Level  R²:", round(m_d._r2, 4))
 ```
 
 #### Task 2: Quadratic NTL (Guided)
@@ -1659,13 +1659,13 @@ bol_cs[['imds', 'ln_NTLpc2017', 'NTLpc2017_raw', 'sdg7_1_ec']].describe().round(
 # print(m_quad.summary())
 #
 # # Turning point
-# b1 = m_quad.params['ln_NTLpc2017']
-# b2 = m_quad.params['I(ln_NTLpc2017 ** 2)']
+# b1 = m_quad.coef()['ln_NTLpc2017']
+# b2 = m_quad.coef()['I(ln_NTLpc2017 ** 2)']
 # print(f"\nTurning point: ln_NTLpc = {-b1/(2*b2):.2f}")
 #
 # # Plot fitted curve
 # x_range = np.linspace(bol_reg['ln_NTLpc2017'].min(), bol_reg['ln_NTLpc2017'].max(), 100)
-# y_hat = m_quad.params['Intercept'] + b1*x_range + b2*x_range**2
+# y_hat = m_quad.coef()['Intercept'] + b1*x_range + b2*x_range**2
 # fig, ax = plt.subplots(figsize=(10, 6))
 # ax.scatter(bol_reg['ln_NTLpc2017'], bol_reg['imds'], alpha=0.4, label='Data')
 # ax.plot(x_range, y_hat, 'r-', linewidth=2, label='Quadratic fit')
@@ -1703,8 +1703,8 @@ bol_cs[['imds', 'ln_NTLpc2017', 'NTLpc2017_raw', 'sdg7_1_ec']].describe().round(
 # m_std = pf.feols('imds_z ~ ln_NTLpc2017_z + sdg7_1_ec_z', data=bol_std, vcov='HC1')
 # print(m_std.summary())
 # print("\nStandardized coefficients (beta weights):")
-# print(f"  NTL:         {m_std.params['ln_NTLpc2017_z']:.4f}")
-# print(f"  Electricity: {m_std.params['sdg7_1_ec_z']:.4f}")
+# print(f"  NTL:         {m_std.coef()['ln_NTLpc2017_z']:.4f}")
+# print(f"  Electricity: {m_std.coef()['sdg7_1_ec_z']:.4f}")
 ```
 
 #### Task 4: Interaction: NTL x Electricity (Semi-guided)
@@ -1730,8 +1730,8 @@ bol_cs[['imds', 'ln_NTLpc2017', 'NTLpc2017_raw', 'sdg7_1_ec']].describe().round(
 # # Marginal effect at different electricity levels
 # elec_25 = bol_reg_full['sdg7_1_ec'].quantile(0.25)
 # elec_75 = bol_reg_full['sdg7_1_ec'].quantile(0.75)
-# me_low = m_int.params['ln_NTLpc2017'] + m_int.params['ln_NTLpc2017:sdg7_1_ec'] * elec_25
-# me_high = m_int.params['ln_NTLpc2017'] + m_int.params['ln_NTLpc2017:sdg7_1_ec'] * elec_75
+# me_low = m_int.coef()['ln_NTLpc2017'] + m_int.coef()['ln_NTLpc2017:sdg7_1_ec'] * elec_25
+# me_high = m_int.coef()['ln_NTLpc2017'] + m_int.coef()['ln_NTLpc2017:sdg7_1_ec'] * elec_75
 # print(f"\nMarginal effect of NTL at low electricity ({elec_25:.1f}%): {me_low:.4f}")
 # print(f"Marginal effect of NTL at high electricity ({elec_75:.1f}%): {me_high:.4f}")
 ```
@@ -1759,10 +1759,10 @@ bol_cs[['imds', 'ln_NTLpc2017', 'NTLpc2017_raw', 'sdg7_1_ec']].describe().round(
 # m_loglog = pf.feols('np.log(imds) ~ ln_NTLpc2017', data=bol_reg, vcov='HC1')
 #
 # # Naive prediction
-# naive_pred = np.exp(m_loglog.fittedvalues)
+# naive_pred = np.exp(m_loglog.predict())
 #
 # # Duan smearing correction
-# smearing_factor = np.exp(m_loglog.resid).mean()
+# smearing_factor = np.exp(m_loglog._u_hat).mean()
 # corrected_pred = naive_pred * smearing_factor
 #
 # print(f"Smearing factor: {smearing_factor:.4f}")
