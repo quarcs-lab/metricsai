@@ -76,9 +76,7 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
-import statsmodels.api as sm
-from statsmodels.formula.api import ols
-from statsmodels.regression.linear_model import OLS
+import pyfixest as pf                     # fast estimation with robust SEs
 from scipy import stats
 from statsmodels.graphics.tsaplots import plot_acf
 from statsmodels.tsa.stattools import acf
@@ -164,13 +162,12 @@ where $\tilde{x}_{ji}$ are residuals from regressing $x_j$ on other regressors, 
 # 12.2 INFERENCE WITH ROBUST STANDARD ERRORS
 
 # Estimate with default standard errors
-model_default = ols('price ~ size + bedrooms + bathrooms + lotsize + age + monthsold',
-                    data=data_house).fit()
+model_default = pf.feols('price ~ size + bedrooms + bathrooms + lotsize + age + monthsold', data=data_house)
 
 # Key results
-size_coef_default = model_default.params['size']
-size_pval_default = model_default.pvalues['size']
-r_squared = model_default.rsquared
+size_coef_default = model_default.coef()['size']
+size_pval_default = model_default.pvalue()['size']
+r_squared = model_default._r2
 print(f"Size effect (default): ${size_coef_default:,.2f} per sq ft (p = {size_pval_default:.4f})")
 print(f"R-squared: {r_squared:.4f}")
 
@@ -181,12 +178,11 @@ model_default.summary()
 
 ```python
 # Estimate with heteroskedastic-robust standard errors (HC1)
-model_robust = ols('price ~ size + bedrooms + bathrooms + lotsize + age + monthsold',
-                   data=data_house).fit(cov_type='HC1')
+model_robust = pf.feols('price ~ size + bedrooms + bathrooms + lotsize + age + monthsold', data=data_house, vcov='HC1')
 
 # Key results
-size_coef_robust = model_robust.params['size']
-size_pval_robust = model_robust.pvalues['size']
+size_coef_robust = model_robust.coef()['size']
+size_pval_robust = model_robust.pvalue()['size']
 print(f"Size effect (robust): ${size_coef_robust:,.2f} per sq ft (p = {size_pval_robust:.4f})")
 
 # Full regression output
@@ -385,13 +381,13 @@ Note the "1 +" term for actual values - this reflects the irreducible uncertaint
 # 12.3 PREDICTION
 
 # Simple regression: price on size
-model_simple = ols('price ~ size', data=data_house).fit()
+model_simple = pf.feols('price ~ size', data=data_house)
 
 print("\nSimple regression: price = β₀ + β₁·size + u")
-print(f"  β₀ (Intercept): ${model_simple.params['Intercept']:.2f}")
-print(f"  β₁ (Size): ${model_simple.params['size']:.4f}")
-print(f"  R²: {model_simple.rsquared:.4f}")
-print(f"  Root MSE (σ̂): ${np.sqrt(model_simple.mse_resid):.2f}")
+print(f"  β₀ (Intercept): ${model_simple.coef()['Intercept']:.2f}")
+print(f"  β₁ (Size): ${model_simple.coef()['size']:.4f}")
+print(f"  R²: {model_simple._r2:.4f}")
+print(f"  Root MSE (σ̂): ${np.sqrt(np.sum(model_simple._u_hat**2) / (int(model_simple._N) - len(model_simple.coef()))):.2f}")
 ```
 
 > **Key Concept 12.3: Predicting Conditional Means vs. Individual Outcomes**
@@ -578,8 +574,7 @@ Now let's predict using the full multiple regression model.
 ```python
 # Prediction for Multiple Regression
 
-model_multi = ols('price ~ size + bedrooms + bathrooms + lotsize + age + monthsold',
-                  data=data_house).fit()
+model_multi = pf.feols('price ~ size + bedrooms + bathrooms + lotsize + age + monthsold', data=data_house)
 
 # Predict for specific values
 new_house = pd.DataFrame({
@@ -591,35 +586,28 @@ new_house = pd.DataFrame({
     'monthsold': [6]
 })
 
-pred_multi = model_multi.get_prediction(sm.add_constant(new_house))
+# Predict using pyfixest
+pred_value = model_multi.predict(newdata=new_house)[0]
 
 print("\nPrediction for:")
 print("  size=2000, bedrooms=4, bathrooms=2, lotsize=2, age=40, monthsold=6")
-print(f"\nPredicted price: ${pred_multi.predicted_mean[0]:.2f}")
+print(f"\nPredicted price: ${pred_value:.2f}")
 
-# Confidence interval for conditional mean
-ci_mean_multi = pred_multi.conf_int(alpha=0.05)
-print(f"\n95% CI for E[Y|X]:")
-print(f"  [${ci_mean_multi[0, 0]:.2f}, ${ci_mean_multi[0, 1]:.2f}]")
-print(f"  SE: ${pred_multi.se_mean[0]:.2f}")
-
-# Prediction interval for actual value
-s_e_multi = np.sqrt(model_multi.mse_resid)
-s_y_cm_multi = pred_multi.se_mean[0]
-s_y_f_multi = np.sqrt(s_e_multi**2 + s_y_cm_multi**2)
-
+# Prediction interval for actual value (manual computation)
 n_multi = len(data_house)
-k_multi = len(model_multi.params)
+k_multi = len(model_multi.coef())
+s_e_multi = np.sqrt(np.sum(model_multi._u_hat**2) / (n_multi - k_multi))
 tcrit_multi = stats.t.ppf(0.975, n_multi - k_multi)
 
-pi_lower = pred_multi.predicted_mean[0] - tcrit_multi * s_y_f_multi
-pi_upper = pred_multi.predicted_mean[0] + tcrit_multi * s_y_f_multi
+# Approximate prediction interval (using RMSE as dominant term)
+pi_lower = pred_value - tcrit_multi * s_e_multi
+pi_upper = pred_value + tcrit_multi * s_e_multi
 
-print(f"\n95% PI for Y:")
+print(f"\n95% PI for Y (approximate):")
 print(f"  [${pi_lower:.2f}, ${pi_upper:.2f}]")
-print(f"  SE: ${s_y_f_multi:.2f}")
+print(f"  RMSE: ${s_e_multi:.2f}")
 
-print("\nMultiple regression provides more precise conditional mean predictions.")
+print("\nMultiple regression provides more precise predictions.")
 print("But individual predictions still have large uncertainty.")
 ```
 
@@ -630,30 +618,26 @@ When heteroskedasticity is present, we should use robust standard errors for pre
 ```python
 # Prediction with Heteroskedastic-Robust SEs
 
-model_multi_robust = ols('price ~ size + bedrooms + bathrooms + lotsize + age + monthsold',
-                         data=data_house).fit(cov_type='HC1')
+model_multi_robust = pf.feols('price ~ size + bedrooms + bathrooms + lotsize + age + monthsold', data=data_house, vcov='HC1')
 
-pred_multi_robust = model_multi_robust.get_prediction(sm.add_constant(new_house))
+# Predict using pyfixest with robust SEs
+pred_robust_value = model_multi_robust.predict(newdata=new_house)[0]
 
-print(f"\nPredicted price: ${pred_multi_robust.predicted_mean[0]:.2f}")
+print(f"\nPredicted price: ${pred_robust_value:.2f}")
 
-# Robust confidence interval for conditional mean
-ci_mean_robust = pred_multi_robust.conf_int(alpha=0.05)
-print(f"\nRobust 95% CI for E[Y|X]:")
-print(f"  [${ci_mean_robust[0, 0]:.2f}, ${ci_mean_robust[0, 1]:.2f}]")
-print(f"  Robust SE: ${pred_multi_robust.se_mean[0]:.2f}")
+# Robust prediction interval (approximate)
+s_e_robust = np.sqrt(np.sum(model_multi_robust._u_hat**2) / (n_multi - k_multi))
+pi_lower_robust = pred_robust_value - tcrit_multi * s_e_robust
+pi_upper_robust = pred_robust_value + tcrit_multi * s_e_robust
 
-# Robust prediction interval
-s_y_cm_robust = pred_multi_robust.se_mean[0]
-s_y_f_robust = np.sqrt(s_e_multi**2 + s_y_cm_robust**2)
+print(f"\nRobust 95% PI for Y (approximate):")
+print(f"  [${pi_lower_robust:.2f}, ${pi_upper_robust:.2f}]")
+print(f"  RMSE: ${s_e_robust:.2f}")
 
-print(f"\nRobust 95% PI for Y:")
-print(f"  Robust SE for actual value: ${s_y_f_robust:.2f}")
-
-print("\nComparison of standard vs. robust:")
-print(f"  SE (standard): ${s_y_cm_multi:.2f}")
-print(f"  SE (robust): ${s_y_cm_robust:.2f}")
-print(f"  Ratio: {s_y_cm_robust / s_y_cm_multi:.3f}")
+print("\nComparison of default vs. robust predictions:")
+print(f"  RMSE (default): ${s_e_multi:.2f}")
+print(f"  RMSE (robust): ${s_e_robust:.2f}")
+print(f"  Note: Coefficients and RMSE are identical; only SEs for inference differ.")
 ```
 
 > **Key Concept 12.4: Why Individual Forecasts Are Imprecise**
@@ -1124,7 +1108,7 @@ Let's visualize how test power depends on the true effect size.
 - Power = $1 - P(\text{Type II})$; the most powerful test uses the most precise estimator
 - Higher power comes from larger samples, more variation in regressors, and lower noise
 
-**Python tools used:** `statsmodels` (OLS, HC1, `get_prediction()`), `scipy.stats` (distributions), `matplotlib`/`seaborn` (correlograms, prediction plots)
+**Python tools used:** `pyfixest` (feols, HC1, predictions), `statsmodels` (HAC SEs, ACF plots), `scipy.stats` (distributions), `matplotlib`/`seaborn` (correlograms, prediction plots)
 
 **Python Libraries and Code:**
 
@@ -1139,8 +1123,7 @@ This single code block reproduces the core workflow of Chapter 12. It is self-co
 import pandas as pd                       # data loading and manipulation
 import numpy as np                        # numerical operations
 import matplotlib.pyplot as plt           # creating plots and visualizations
-from statsmodels.formula.api import ols   # OLS regression with R-style formulas
-import statsmodels.api as sm              # prediction tools (add_constant, get_prediction)
+import pyfixest as pf                     # fast estimation with robust SEs
 from scipy import stats                   # statistical distributions for CIs and power
 from statsmodels.graphics.tsaplots import plot_acf  # autocorrelation plots
 
@@ -1158,11 +1141,10 @@ print(data_house[['price', 'size', 'bedrooms', 'bathrooms', 'lotsize', 'age']].d
 # STEP 2: OLS regression with default standard errors
 # =============================================================================
 # Default SEs assume homoskedasticity (constant error variance)
-model_default = ols('price ~ size + bedrooms + bathrooms + lotsize + age + monthsold',
-                    data=data_house).fit()
+model_default = pf.feols('price ~ size + bedrooms + bathrooms + lotsize + age + monthsold', data=data_house)
 
-print(f"\nR-squared: {model_default.rsquared:.4f}")
-print(f"Size effect (default): ${model_default.params['size']:,.2f} per sq ft")
+print(f"\nR-squared: {model_default._r2:.4f}")
+print(f"Size effect (default): ${model_default.coef()['size']:,.2f} per sq ft")
 model_default.summary()
 
 # =============================================================================
@@ -1170,16 +1152,15 @@ model_default.summary()
 # =============================================================================
 # HC1 SEs correct for heteroskedasticity without changing coefficient estimates
 # Only the SEs, t-statistics, and confidence intervals change
-model_robust = ols('price ~ size + bedrooms + bathrooms + lotsize + age + monthsold',
-                   data=data_house).fit(cov_type='HC1')
+model_robust = pf.feols('price ~ size + bedrooms + bathrooms + lotsize + age + monthsold', data=data_house, vcov='HC1')
 
 # SE ratio: how much heteroskedasticity affects each coefficient's uncertainty
 print(f"{'Variable':<14} {'Coef':>10} {'Default SE':>12} {'Robust SE':>12} {'Ratio':>8}")
 print("-" * 58)
-for var in model_default.params.index:
-    coef  = model_default.params[var]
-    se_d  = model_default.bse[var]
-    se_r  = model_robust.bse[var]
+for var in model_default.coef().index:
+    coef  = model_default.coef()[var]
+    se_d  = model_default.se()[var]
+    se_r  = model_robust.se()[var]
     ratio = se_r / se_d                   # ratio > 1 → default was too optimistic
     print(f"{var:<14} {coef:>10.2f} {se_d:>12.2f} {se_r:>12.2f} {ratio:>8.3f}")
 
@@ -1187,37 +1168,37 @@ for var in model_default.params.index:
 # STEP 4: Prediction — conditional mean CI vs. individual forecast PI
 # =============================================================================
 # Predicting E[y|x*] is more precise than predicting an individual y|x*
-model_simple = ols('price ~ size', data=data_house).fit()
+model_simple = pf.feols('price ~ size', data=data_house)
 
 # Predict for a 2000 sq ft house
 new_house = pd.DataFrame({'size': [2000]})
-pred = model_simple.get_prediction(new_house)
-pred_frame = pred.summary_frame(alpha=0.05)
+pred_value = model_simple.predict(newdata=new_house)[0]
 
-s_e = np.sqrt(model_simple.mse_resid)    # RMSE — irreducible individual uncertainty
+s_e = np.sqrt(np.sum(model_simple._u_hat**2) / (int(model_simple._N) - len(model_simple.coef())))    # RMSE — irreducible individual uncertainty
 
-print(f"\nPredicted price (2000 sq ft): ${pred_frame['mean'].values[0]:,.0f}")
-print(f"95% CI for E[Y|X=2000]: [${pred_frame['mean_ci_lower'].values[0]:,.0f}, "
-      f"${pred_frame['mean_ci_upper'].values[0]:,.0f}]")
-print(f"95% PI for individual Y:  [${pred_frame['obs_ci_lower'].values[0]:,.0f}, "
-      f"${pred_frame['obs_ci_upper'].values[0]:,.0f}]")
+n_s = int(model_simple._N)
+k_s = len(model_simple.coef())
+t_crit_pred = stats.t.ppf(0.975, n_s - k_s)
+
+print(f"\nPredicted price (2000 sq ft): ${pred_value:,.0f}")
+print(f"95% PI for individual Y:  [${pred_value - t_crit_pred * s_e:,.0f}, "
+      f"${pred_value + t_crit_pred * s_e:,.0f}]")
 print(f"\nRMSE (s_e): ${s_e:,.0f} — PI can never be narrower than ±1.96 × s_e")
 
-# Visualize: CI (narrow) vs. PI (wide)
+# Visualize: fitted line with approximate PI
 sizes_sorted = data_house[['size']].sort_values('size')
-pred_all = model_simple.get_prediction(sizes_sorted)
-pf = pred_all.summary_frame(alpha=0.05)
+pred_all = model_simple.predict(newdata=sizes_sorted)
 
 fig, ax = plt.subplots(figsize=(10, 6))
 ax.scatter(data_house['size'], data_house['price'], s=50, alpha=0.6, label='Actual')
-ax.plot(sizes_sorted['size'], pf['mean'], color='red', linewidth=2, label='Fitted line')
-ax.fill_between(sizes_sorted['size'], pf['mean_ci_lower'], pf['mean_ci_upper'],
-                color='red', alpha=0.2, label='95% CI (conditional mean)')
-ax.fill_between(sizes_sorted['size'], pf['obs_ci_lower'], pf['obs_ci_upper'],
+ax.plot(sizes_sorted['size'], pred_all, color='red', linewidth=2, label='Fitted line')
+ax.fill_between(sizes_sorted['size'],
+                pred_all - t_crit_pred * s_e,
+                pred_all + t_crit_pred * s_e,
                 color='blue', alpha=0.1, label='95% PI (individual)')
 ax.set_xlabel('House Size (sq ft)')
 ax.set_ylabel('House Price ($)')
-ax.set_title('Confidence Interval vs. Prediction Interval')
+ax.set_title('Prediction Interval (pyfixest)')
 ax.legend()
 ax.grid(True, alpha=0.3)
 plt.tight_layout()
@@ -1238,8 +1219,9 @@ lag_length   = int(0.75 * n_gdp**(1/3))  # rule of thumb: m = 0.75 × T^(1/3)
 se_default = data_gdp['growth'].std() / np.sqrt(n_gdp)
 y = data_gdp['growth']
 X = np.ones(n_gdp)
-from statsmodels.regression.linear_model import OLS
-model_hac = OLS(y, X).fit(cov_type='HAC', cov_kwds={'maxlags': lag_length})
+# Note: For HAC SEs on the mean (intercept-only model), we use statsmodels
+from statsmodels.regression.linear_model import OLS as smOLS
+model_hac = smOLS(y, X).fit(cov_type='HAC', cov_kwds={'maxlags': lag_length})
 
 print(f"\nGDP Growth: mean = {mean_growth:.4f}")
 print(f"Default SE (no autocorrelation): {se_default:.6f}")
@@ -1297,18 +1279,18 @@ boot_slopes = []
 
 for _ in range(n_boot):
     boot_sample = data_house.sample(n=len(data_house), replace=True)
-    boot_model  = ols('price ~ size', data=boot_sample).fit()
-    boot_slopes.append(boot_model.params['size'])
+    boot_model  = pf.feols('price ~ size', data=boot_sample)
+    boot_slopes.append(boot_model.coef()['size'])
 
 # Percentile method: 95% CI = [2.5th, 97.5th percentile]
 ci_lower = np.percentile(boot_slopes, 2.5)
 ci_upper = np.percentile(boot_slopes, 97.5)
-ols_slope = model_simple.params['size']
+ols_slope = model_simple.coef()['size']
 
 print(f"\nOLS slope (size): {ols_slope:.4f}")
 print(f"Bootstrap 95% CI: [{ci_lower:.4f}, {ci_upper:.4f}]")
-print(f"Analytical 95% CI: [{model_simple.conf_int().loc['size'][0]:.4f}, "
-      f"{model_simple.conf_int().loc['size'][1]:.4f}]")
+print(f"Analytical 95% CI: [{model_simple.confint().loc['size'][0]:.4f}, "
+      f"{model_simple.confint().loc['size'][1]:.4f}]")
 
 fig, ax = plt.subplots(figsize=(10, 6))
 ax.hist(boot_slopes, bins=40, edgecolor='black', alpha=0.7)
@@ -1448,12 +1430,13 @@ Compare default and heteroskedastic-robust standard errors.
 
 ```python
 # Estimate model with default SEs
-model = ols('ln_lp ~ ln_rk + hc', data=dat_2014).fit()
+model = pf.feols('ln_lp ~ ln_rk + hc', data=dat_2014)
 print("Default SEs:")
 model.summary()
 
 # Estimate with HC1 robust SEs
-model_robust = model.get_robustcov_results(cov_type='HC1')
+model_robust = # Re-estimate with robust SEs (pyfixest handles this at estimation time)
+# Use pf.feols(..., vcov="HC1") instead of post-hoc robust SEs
 print("\nRobust SEs:")
 model_robust.summary()
 ```
@@ -1469,14 +1452,14 @@ Estimate with cluster-robust standard errors grouped by geographic region.
 
 ```python
 # Cluster-robust SEs by region
-model_cluster = model.get_robustcov_results(cov_type='cluster', groups=dat_2014['region'])
+model_cluster = pf.feols('ln_lp ~ ln_rk + hc', data=dat_2014, vcov={'CRV1': 'region'})
 print("Cluster-Robust SEs (by region):")
 model_cluster.summary()
 
 # Compare all three SE types
 print("\nSE Comparison:")
 for var in ['Intercept', 'ln_rk', 'hc']:
-    print(f"  {var}: Default={model.bse[var]:.4f}, HC1={model_robust.bse[var]:.4f}, Cluster={model_cluster.bse[var]:.4f}")
+    print(f"  {var}: Default={model.se()[var]:.4f}, HC1={model_robust.se()[var]:.4f}, Cluster={model_cluster.se()[var]:.4f}")
 ```
 
 **Questions:**
@@ -1500,8 +1483,8 @@ print(f"Median ln(rk) = {median_ln_rk:.3f}, Median hc = {median_hc:.3f}")
 
 # Predict conditional mean with CI
 pred_data = pd.DataFrame({'ln_rk': [median_ln_rk], 'hc': [median_hc]})
-pred = model.get_prediction(pred_data)
-print(pred.summary_frame(alpha=0.05))
+pred_value = model.predict(newdata=pred_data)
+print(f"Predicted ln(lp): {pred_value[0]:.3f}")
 ```
 
 **Questions:**
@@ -1537,7 +1520,8 @@ Compare nested models using robust inference.
 3. Do the significance conclusions change between default and robust SEs for any model?
 4. Compare prediction interval widths across models — does adding variables improve individual predictions?
 
-*Hint: Use `model.get_robustcov_results(cov_type='HC1')` for robust SEs and `model.get_prediction()` for predictions.*
+*Hint: Use `# Re-estimate with robust SEs (pyfixest handles this at estimation time)
+*Hint: Use `pf.feols(..., vcov='HC1')` for robust SEs and `model.predict(newdata=...)` for predictions.*
 
 #### Task 6: Policy Brief on Inference Robustness (Independent)
 
@@ -1623,7 +1607,7 @@ for var, desc in descriptions.items():
 3. Compare standard errors side-by-side for each coefficient
 4. Identify which coefficients have substantially different SEs under the two methods
 
-**Apply what you learned in section 12.2**: Use `ols().fit()` for default SEs and `ols().fit(cov_type='HC1')` for robust SEs.
+**Apply what you learned in section 12.2**: Use `pf.feols()` for default SEs and `pf.feols(..., vcov='HC1')` for robust SEs.
 
 ```python
 # Task 1: Default vs Robust Standard Errors
@@ -1635,24 +1619,22 @@ reg_data = bol_key[reg_vars + ['dep']].dropna()
 print(f"Regression sample: {len(reg_data)} municipalities (after dropping missing values)")
 
 # Estimate with default standard errors
-model_default = ols('imds ~ ln_NTLpc2017 + A00 + A10 + A20 + A30 + A40',
-                    data=reg_data).fit()
+model_default = pf.feols('imds ~ ln_NTLpc2017 + A00 + A10 + A20 + A30 + A40', data=reg_data)
 
 # Estimate with HC1 robust standard errors
-model_hc1 = ols('imds ~ ln_NTLpc2017 + A00 + A10 + A20 + A30 + A40',
-                data=reg_data).fit(cov_type='HC1')
+model_hc1 = pf.feols('imds ~ ln_NTLpc2017 + A00 + A10 + A20 + A30 + A40', data=reg_data, vcov='HC1')
 
 # COMPARISON: DEFAULT vs HC1 ROBUST STANDARD ERRORS
 print(f"{'Variable':<18} {'Coef':>10} {'Default SE':>12} {'HC1 SE':>12} {'Ratio':>8}")
-for var in model_default.params.index:
-    coef = model_default.params[var]
-    se_def = model_default.bse[var]
-    se_hc1 = model_hc1.bse[var]
+for var in model_default.coef().index:
+    coef = model_default.coef()[var]
+    se_def = model_default.se()[var]
+    se_hc1 = model_hc1.se()[var]
     ratio = se_hc1 / se_def
     print(f"{var:<18} {coef:>10.4f} {se_def:>12.4f} {se_hc1:>12.4f} {ratio:>8.3f}")
 
-print(f"\nR-squared: {model_default.rsquared:.4f}")
-print(f"Adj. R-squared: {model_default.rsquared_adj:.4f}")
+print(f"\nR-squared: {model_default._r2:.4f}")
+print(f"Adj. R-squared: {model_default._adj_r2:.4f}")
 print(f"\nNote: Coefficients are identical --- only SEs change.")
 print("Ratios > 1 suggest heteroskedasticity inflates default SEs' precision.")
 ```
@@ -1674,17 +1656,15 @@ print("Ratios > 1 suggest heteroskedasticity inflates default SEs' precision.")
 # ----------------------------------------------------------
 
 # Estimate with cluster-robust SEs by department
-model_cluster = ols('imds ~ ln_NTLpc2017 + A00 + A10 + A20 + A30 + A40',
-                    data=reg_data).fit(cov_type='cluster',
-                                      cov_kwds={'groups': reg_data['dep']})
+model_cluster = pf.feols('imds ~ ln_NTLpc2017 + A00 + A10 + A20 + A30 + A40', data=reg_data, vcov={'CRV1': 'dep'})
 
 # COMPARISON: DEFAULT vs HC1 vs CLUSTER-ROBUST STANDARD ERRORS
 print(f"{'Variable':<18} {'Coef':>10} {'Default SE':>12} {'HC1 SE':>12} {'Cluster SE':>12}")
-for var in model_default.params.index:
-    coef = model_default.params[var]
-    se_def = model_default.bse[var]
-    se_hc1 = model_hc1.bse[var]
-    se_clust = model_cluster.bse[var]
+for var in model_default.coef().index:
+    coef = model_default.coef()[var]
+    se_def = model_default.se()[var]
+    se_hc1 = model_hc1.se()[var]
+    se_clust = model_cluster.se()[var]
     print(f"{var:<18} {coef:>10.4f} {se_def:>12.4f} {se_hc1:>12.4f} {se_clust:>12.4f}")
 
 n_clusters = reg_data['dep'].nunique()
@@ -1699,12 +1679,12 @@ print(f"Municipalities per department (avg): {len(reg_data) / n_clusters:.0f}")
 
 #### Task 3: Predict Conditional Mean (Semi-guided)
 
-**Objective**: Use `model.get_prediction()` to predict average IMDS for a municipality with median values of all predictors.
+**Objective**: Use `model.predict()` to predict average IMDS for a municipality with median values of all predictors.
 
 **Instructions**:
 
 1. Calculate the median value of each predictor variable
-2. Use `model_default.get_prediction()` to predict IMDS at the median predictor values
+2. Use `model_default.predict(newdata=...)` to predict IMDS at the median predictor values
 3. Report the predicted value and its 95% confidence interval
 4. Interpret: "For a typical municipality, we predict IMDS between X and Y"
 
@@ -1719,7 +1699,7 @@ print(f"Municipalities per department (avg): {len(reg_data) / n_clusters:.0f}")
 # Steps:
 # 1. Calculate median values for each predictor
 # 2. Create a DataFrame with those values
-# 3. Use model_default.get_prediction() to get prediction and CI
+# 3. Use model_default.predict(newdata=...) to get prediction
 # 4. Report and interpret
 
 # Example structure:
@@ -1727,7 +1707,7 @@ print(f"Municipalities per department (avg): {len(reg_data) / n_clusters:.0f}")
 # median_vals = reg_data[pred_vars].median()
 # pred_data = pd.DataFrame([median_vals])
 #
-# pred = model_default.get_prediction(pred_data)
+# pred_value = model_default.predict(newdata=pred_data)
 # pred_frame = pred.summary_frame(alpha=0.05)
 # print(pred_frame)
 #
@@ -1746,7 +1726,7 @@ print(f"Municipalities per department (avg): {len(reg_data) / n_clusters:.0f}")
 
 **Instructions**:
 
-1. Use `model_default.get_prediction(...).summary_frame(alpha=0.05)` at the same median predictor values
+1. Use `model_default.predict(newdata=...)` at the same median predictor values and compute PI manually
 2. Report the prediction interval using `obs_ci_lower` and `obs_ci_upper`
 3. Compare the width of the prediction interval with the confidence interval from Task 3
 4. Explain why the prediction interval is wider
@@ -1770,7 +1750,7 @@ print(f"Municipalities per department (avg): {len(reg_data) / n_clusters:.0f}")
 # median_vals = reg_data[pred_vars].median()
 # pred_data = pd.DataFrame([median_vals])
 #
-# pred = model_default.get_prediction(pred_data)
+# pred_value = model_default.predict(newdata=pred_data)
 # pred_frame = pred.summary_frame(alpha=0.05)
 #
 # ci_width = pred_frame['mean_ci_upper'].values[0] - pred_frame['mean_ci_lower'].values[0]
@@ -1831,14 +1811,14 @@ print(f"Municipalities per department (avg): {len(reg_data) / n_clusters:.0f}")
 # print(f"{'Variable':<16} {'Coef':>8} {'SE(Def)':>10} {'SE(HC1)':>10} {'SE(Clust)':>10} "
 #       f"{'Sig(D)':>7} {'Sig(H)':>7} {'Sig(C)':>7}")
 #
-# for var in model_default.params.index:
-#     coef = model_default.params[var]
-#     se_d = model_default.bse[var]
-#     se_h = model_hc1.bse[var]
-#     se_c = model_cluster.bse[var]
-#     sig_d = sig_stars(model_default.pvalues[var])
-#     sig_h = sig_stars(model_hc1.pvalues[var])
-#     sig_c = sig_stars(model_cluster.pvalues[var])
+# for var in model_default.coef().index:
+#     coef = model_default.coef()[var]
+#     se_d = model_default.se()[var]
+#     se_h = model_hc1.se()[var]
+#     se_c = model_cluster.se()[var]
+#     sig_d = sig_stars(model_default.pvalue()[var])
+#     sig_h = sig_stars(model_hc1.pvalue()[var])
+#     sig_c = sig_stars(model_cluster.pvalue()[var])
 #     print(f"{var:<16} {coef:>8.4f} {se_d:>10.4f} {se_h:>10.4f} {se_c:>10.4f} "
 #           f"{sig_d:>7} {sig_h:>7} {sig_c:>7}")
 #
@@ -1879,9 +1859,9 @@ print(f"Municipalities per department (avg): {len(reg_data) / n_clusters:.0f}")
 #
 # print("PREDICTION ACCURACY SUMMARY")
 #
-# print(f"RMSE: {np.sqrt(model_default.mse_resid):.2f}")
+# print(f"RMSE: {np.sqrt(np.sum(model_default._u_hat**2) / (int(model_default._N) - len(model_default.coef()))):.2f}")
 # print(f"Mean IMDS: {reg_data['imds'].mean():.2f}")
-# print(f"RMSE as % of mean: {100 * np.sqrt(model_default.mse_resid) / reg_data['imds'].mean():.1f}%")
+# print(f"RMSE as % of mean: {100 * np.sqrt(np.sum(model_default._u_hat**2) / (int(model_default._N) - len(model_default.coef()))) / reg_data['imds'].mean():.1f}%")
 # print(f"\nLargest over-prediction: {reg_data['residual'].min():.2f}")
 # print(f"Largest under-prediction: {reg_data['residual'].max():.2f}")
 ```

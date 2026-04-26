@@ -65,10 +65,8 @@ import numpy as np                                       # numerical operations
 import pandas as pd                                      # data manipulation
 import matplotlib.pyplot as plt                          # plotting
 import seaborn as sns                                    # statistical visualizations
-import statsmodels.api as sm                             # statistical models
-from statsmodels.formula.api import ols                  # OLS with formula syntax
+import pyfixest as pf                                    # fast estimation with robust SEs
 from scipy import stats                                  # statistical distributions
-from statsmodels.stats.sandwich_covariance import cov_hc1  # robust standard errors
 import random
 import os
 
@@ -143,12 +141,12 @@ We estimate the bivariate regression model using ordinary least squares (OLS).
 
 ```python
 # Table 7.1 - Basic regression
-model_basic = ols('price ~ size', data=data_house).fit()
+model_basic = pf.feols('price ~ size', data=data_house)
 
 # Key results
-intercept = model_basic.params['Intercept']
-slope     = model_basic.params['size']
-r_squared = model_basic.rsquared
+intercept = model_basic.coef()['Intercept']
+slope     = model_basic.coef()['size']
+r_squared = model_basic._r2
 
 print(f"Estimated equation: price = {intercept:,.2f} + {slope:.2f} x size")
 print(f"Slope: each additional sq ft is associated with ${slope:,.2f} higher price")
@@ -165,10 +163,10 @@ Let's create a clean table showing the key statistics for statistical inference.
 ```python
 # Save coefficients in a clean table
 coef_table = pd.DataFrame({
-    'Coefficient': model_basic.params,
-    'Std. Error': model_basic.bse,
-    't-statistic': model_basic.tvalues,
-    'p-value': model_basic.pvalues
+    'Coefficient': model_basic.coef(),
+    'Std. Error': model_basic.se(),
+    't-statistic': model_basic.tstat(),
+    'p-value': model_basic.pval()
 })
 
 # Coefficient table
@@ -282,13 +280,13 @@ For our house price example:
 
 ```python
 # 7.2 The t statistic
-model_basic.summary2().tables[1]
+model_basic.summary()
 
 # Extract key statistics
-coef_size = model_basic.params['size']
-se_size = model_basic.bse['size']
-t_stat_size = model_basic.tvalues['size']
-p_value_size = model_basic.pvalues['size']
+coef_size = model_basic.coef()['size']
+se_size = model_basic.se()['size']
+t_stat_size = model_basic.tstat()['size']
+p_value_size = model_basic.pval()['size']
 
 # Detailed statistics for 'size' coefficient
 print(f"Coefficient: ${coef_size:.4f}")
@@ -421,7 +419,7 @@ Confidence intervals are more informative than hypothesis tests because they sho
 
 ```python
 # 7.3 Confidence intervals
-conf_int = model_basic.conf_int(alpha=0.05)
+conf_int = model_basic.confint(level=0.95)
 
 # 95% confidence intervals
 conf_int
@@ -636,11 +634,11 @@ x = np.array([1, 2, 3, 4, 5])
 y = np.array([1, 2, 2, 2, 3])
 df_artificial = pd.DataFrame({'x': x, 'y': y})
 
-model_artificial = ols('y ~ x', data=df_artificial).fit()
+model_artificial = pf.feols('y ~ x', data=df_artificial)
 model_artificial.summary()
 
-coef_x = model_artificial.params['x']
-se_x = model_artificial.bse['x']
+coef_x = model_artificial.coef()['x']
+se_x = model_artificial.se()['x']
 n_art = len(x)
 df_art = n_art - 2
 t_crit_art = stats.t.ppf(0.975, df_art)  # 0.975 = upper tail for 95% two-sided CI
@@ -1275,10 +1273,12 @@ Think of robust SEs as the "safe" choice:
 It's like wearing a seatbelt: doesn't hurt if you don't crash, saves you if you do.
 
 ```python
-# Hypothesis test using statsmodels
-hypothesis = f'size = {null_value}'
-t_test_result = model_basic.t_test(hypothesis)
-t_test_result
+# Hypothesis test using manual t-statistic (pyfixest)
+t_manual = (model_basic.coef()['size'] - null_value) / model_basic.se()['size']
+p_manual = 2 * (1 - stats.t.cdf(abs(t_manual), df))
+print(f"Test H₀: size = {null_value}")
+print(f"  t-statistic: {t_manual:.4f}")
+print(f"  p-value: {p_manual:.4f}")
 ```
 
 ## 7.6 One-Sided Directional Hypothesis Tests
@@ -1376,17 +1376,17 @@ $$se_{het}(b_2) = \frac{\sqrt{\sum_{i=1}^n e_i^2 (x_i - \bar{x})^2}}{\sum_{i=1}^
 
 ```python
 # 7.7 Robust standard errors
-robust_results = ols('price ~ size', data=data_house).fit(cov_type='HC1')
+robust_results = pf.feols('price ~ size', data=data_house, vcov='HC1')
 
 # Comparison of standard and robust standard errors
 comparison_df = pd.DataFrame({
-    'Coefficient': model_basic.params,
-    'Std. Error': model_basic.bse,
-    'Robust SE': robust_results.bse,
-    't-stat (standard)': model_basic.tvalues,
-    't-stat (robust)': robust_results.tvalues,
-    'p-value (standard)': model_basic.pvalues,
-    'p-value (robust)': robust_results.pvalues
+    'Coefficient': model_basic.coef(),
+    'Std. Error': model_basic.se(),
+    'Robust SE': robust_results.se(),
+    't-stat (standard)': model_basic.tstat(),
+    't-stat (robust)': robust_results.tstat(),
+    'p-value (standard)': model_basic.pval(),
+    'p-value (robust)': robust_results.pval()
 })
 comparison_df
 ```
@@ -1409,7 +1409,7 @@ fig, ax = plt.subplots(figsize=(10, 6))
 ax.scatter(data_house['size'], data_house['price'],
            alpha=0.6, s=50,  # alpha = transparency, s = marker size
            color='#22d3ee', label='Actual observations')
-ax.plot(data_house['size'], model_basic.fittedvalues, color='#c084fc',
+ax.plot(data_house['size'], model_basic.predict(), color='#c084fc',
         linewidth=2, label='Fitted regression line')
 ax.set_xlabel('Size (square feet)', fontsize=12)
 ax.set_ylabel('Price ($1000s)', fontsize=12)
@@ -1473,7 +1473,7 @@ Check for patterns in residuals that might violate model assumptions.
 ```python
 # Figure 7.3: Residual plot
 fig, ax = plt.subplots(figsize=(10, 6))
-ax.scatter(model_basic.fittedvalues, model_basic.resid,
+ax.scatter(model_basic.predict(), model_basic._u_hat,
            alpha=0.6, s=50, color='#22d3ee')  # alpha = transparency, s = marker size
 ax.axhline(y=0, color='red', linestyle='--', linewidth=2, label='Zero residual line')
 ax.set_xlabel('Fitted values', fontsize=12)
@@ -1566,7 +1566,7 @@ This single code block reproduces the core workflow of Chapter 7. It is self-con
 # --- Libraries ---
 import pandas as pd                       # data loading and manipulation
 import matplotlib.pyplot as plt           # creating plots and visualizations
-from statsmodels.formula.api import ols   # OLS regression with R-style formulas
+import pyfixest as pf                     # fast estimation with robust SEs
 from scipy import stats                   # t-distribution and critical values
 
 # =============================================================================
@@ -1582,13 +1582,13 @@ print(f"Dataset: {data_house.shape[0]} observations, {data_house.shape[1]} varia
 # STEP 2: Estimate the regression and extract key statistics
 # =============================================================================
 # The t-statistic measures how many standard errors the estimate is from zero
-model = ols('price ~ size', data=data_house).fit()
+model = pf.feols('price ~ size', data=data_house)
 
-slope     = model.params['size']       # marginal effect: $/sq ft
-intercept = model.params['Intercept']
-se_slope  = model.bse['size']          # standard error of the slope
-t_stat    = model.tvalues['size']      # t = b2 / se(b2)
-p_value   = model.pvalues['size']      # two-sided p-value for H0: b2 = 0
+slope     = model.coef()['size']       # marginal effect: $/sq ft
+intercept = model.coef()['Intercept']
+se_slope  = model.se()['size']          # standard error of the slope
+t_stat    = model.tstat()['size']      # t = b2 / se(b2)
+p_value   = model.pval()['size']      # two-sided p-value for H0: b2 = 0
 
 print(f"Estimated equation: price = {intercept:,.0f} + {slope:.2f} × size")
 print(f"Standard error of slope: {se_slope:.2f}")
@@ -1643,15 +1643,15 @@ print(f"  Would reject at 10% (p = {p_lower:.3f} < 0.10)")
 # STEP 6: Robust standard errors — valid with or without heteroskedasticity
 # =============================================================================
 # HC1 robust SEs protect against non-constant variance in the errors
-robust_model = ols('price ~ size', data=data_house).fit(cov_type='HC1')
+robust_model = pf.feols('price ~ size', data=data_house, vcov='HC1')
 
 print(f"{'':20s} {'Standard':>12s} {'Robust (HC1)':>12s}")
 print("-" * 46)
-print(f"{'SE(size)':<20s} {se_slope:>12.2f} {robust_model.bse['size']:>12.2f}")
-print(f"{'t-statistic':<20s} {t_stat:>12.2f} {robust_model.tvalues['size']:>12.2f}")
-print(f"{'p-value':<20s} {p_value:>12.6f} {robust_model.pvalues['size']:>12.6f}")
+print(f"{'SE(size)':<20s} {se_slope:>12.2f} {robust_model.se()['size']:>12.2f}")
+print(f"{'t-statistic':<20s} {t_stat:>12.2f} {robust_model.tstat()['size']:>12.2f}")
+print(f"{'p-value':<20s} {p_value:>12.6f} {robust_model.pval()['size']:>12.6f}")
 
-pct_change = ((robust_model.bse['size'] - se_slope) / se_slope) * 100
+pct_change = ((robust_model.se()['size'] - se_slope) / se_slope) * 100
 print(f"\nRobust SE is {pct_change:+.1f}% different from standard SE")
 
 # =============================================================================
@@ -1659,7 +1659,7 @@ print(f"\nRobust SE is {pct_change:+.1f}% different from standard SE")
 # =============================================================================
 fig, ax = plt.subplots(figsize=(10, 6))
 ax.scatter(data_house['size'], data_house['price'], s=50, alpha=0.7, label='Actual prices')
-ax.plot(data_house['size'], model.fittedvalues, color='red', linewidth=2, label='Fitted line')
+ax.plot(data_house['size'], model.predict(), color='red', linewidth=2, label='Fitted line')
 ax.set_xlabel('House Size (square feet)')
 ax.set_ylabel('House Sale Price (dollars)')
 ax.set_title(f'price = {intercept:,.0f} + {slope:.2f} × size    '
@@ -1866,16 +1866,16 @@ d) Is the effect economically significant? (Consider that the average country ha
 
 ```python
 # Task 1: Basic regression
-model_convergence = ols('productivity ~ capital', data=data_2014).fit()
+model_convergence = pf.feols('productivity ~ capital', data=data_2014)
 
 # Task 1: Regression of Productivity on Capital
 model_convergence.summary()
 
 # Extract key statistics
-beta2 = model_convergence.params['capital']
-se_beta2 = model_convergence.bse['capital']
-t_stat = model_convergence.tvalues['capital']
-p_value = model_convergence.pvalues['capital']
+beta2 = model_convergence.coef()['capital']
+se_beta2 = model_convergence.se()['capital']
+t_stat = model_convergence.tstat()['capital']
+p_value = model_convergence.pval()['capital']
 
 # Key statistics
 print(f"Coefficient (β₂): {beta2:.4f}")
@@ -1884,7 +1884,7 @@ print(f"t-statistic: {t_stat:.2f}")
 print(f"p-value: {p_value:.6f}")
 
 # 95% Confidence Interval
-ci_95 = model_convergence.conf_int(alpha=0.05).loc['capital']
+ci_95 = model_convergence.confint(level=0.95).loc['capital']
 print(f"95% Confidence Interval: [{ci_95.iloc[0]:.4f}, {ci_95.iloc[1]:.4f}]")
 ```
 
@@ -1918,7 +1918,7 @@ c) **Test pessimistic hypothesis:**
 ```python
 # For part (b)
 t_test_05 = (beta2 - 0.5) / se_beta2
-p_value_05 = 2 * (1 - stats.t.cdf(abs(t_test_05), df=model_convergence.df_resid))
+p_value_05 = 2 * (1 - stats.t.cdf(abs(t_test_05), df=(int(model_convergence._N) - len(model_convergence.coef()))))
 
 # For part (c) - one-sided test
 null_value = 0.30
@@ -1942,7 +1942,7 @@ else:
 # Task 2(b): Test H₀: β₂ = 0.5
 null_value_b = 0.5
 t_test_05 = (beta2 - null_value_b) / se_beta2
-p_value_05 = 2 * (1 - stats.t.cdf(abs(t_test_05), df=model_convergence.df_resid))
+p_value_05 = 2 * (1 - stats.t.cdf(abs(t_test_05), df=(int(model_convergence._N) - len(model_convergence.coef()))))
 print(f"t-statistic: {t_test_05:.2f}")
 print(f"p-value: {p_value_05:.6f}")
 if p_value_05 < 0.05:
@@ -1956,7 +1956,7 @@ null_value_c = 0.30
 print("H₀: β₂ ≥ 0.30 vs. Hₐ: β₂ < 0.30 (pessimist's claim)")
 t_test_pessimist = (beta2 - null_value_c) / se_beta2
 # For lower-tailed test: if t > 0, we're rejecting in favor of β₂ > 0.30 (opposite direction)
-p_value_pessimist_lower = stats.t.cdf(t_test_pessimist, df=model_convergence.df_resid)
+p_value_pessimist_lower = stats.t.cdf(t_test_pessimist, df=(int(model_convergence._N) - len(model_convergence.coef())))
 print(f"t-statistic: {t_test_pessimist:.2f}")
 print(f"One-sided p-value (lower tail): {p_value_pessimist_lower:.6f}")
 if t_test_pessimist < 0:
@@ -2006,7 +2006,7 @@ Cross-country data often exhibits heteroskedasticity because larger/richer count
 
 a) Obtain heteroskedasticity-robust standard errors (HC1) using:
    ```python
-   robust_model = ols('productivity ~ capital', data=data_2014).fit(cov_type='HC1')
+   robust_model = pf.feols('productivity ~ capital', data=data_2014, vcov='HC1')
    ```
 
 b) Compare standard vs. robust standard errors:
@@ -2026,15 +2026,15 @@ d) Construct a 95% CI using robust standard errors:
 
 ```python
 # Task 3: Robust standard errors
-robust_model = ols('productivity ~ capital', data=data_2014).fit(cov_type='HC1')
+robust_model = pf.feols('productivity ~ capital', data=data_2014, vcov='HC1')
 
 # Task 3: Robust Standard Errors Analysis
 
 # Extract robust statistics
-beta2_robust = robust_model.params['capital']
-se_beta2_robust = robust_model.bse['capital']
-t_stat_robust = robust_model.tvalues['capital']
-p_value_robust = robust_model.pvalues['capital']
+beta2_robust = robust_model.coef()['capital']
+se_beta2_robust = robust_model.se()['capital']
+t_stat_robust = robust_model.tstat()['capital']
+p_value_robust = robust_model.pval()['capital']
 
 # Comparison table
 # Comparison of Standard vs. Robust Standard Errors
@@ -2057,7 +2057,7 @@ else:
     print("→ Still best practice to use robust SEs")
 
 # Robust confidence interval
-ci_robust = robust_model.conf_int(alpha=0.05)
+ci_robust = robust_model.confint(level=0.95)
 ci_95_robust = ci_robust.loc['capital'] if 'capital' in ci_robust.index else ci_robust.iloc[1]
 print(f"95% Confidence Intervals:")
 print(f"  Standard CI: [{ci_95.iloc[0]:.4f}, {ci_95.iloc[1]:.4f}]")
@@ -2096,8 +2096,8 @@ high_income = data_2014[data_2014['productivity'] > threshold]
 developing = data_2014[data_2014['productivity'] <= threshold]
 
 # Run regressions with robust SEs
-model_high = ols('productivity ~ capital', data=high_income).fit(cov_type='HC1')
-model_dev = ols('productivity ~ capital', data=developing).fit(cov_type='HC1')
+model_high = pf.feols('productivity ~ capital', data=high_income, vcov='HC1')
+model_dev = pf.feols('productivity ~ capital', data=developing, vcov='HC1')
 ```
 
 ```python
@@ -2113,17 +2113,17 @@ print(f"High-income countries: {len(high_income)}")
 print(f"Developing countries: {len(developing)}")
 
 # Estimate separate regressions with robust SEs
-robust_high = ols('productivity ~ capital', data=high_income).fit(cov_type='HC1')
-robust_dev = ols('productivity ~ capital', data=developing).fit(cov_type='HC1')
+robust_high = pf.feols('productivity ~ capital', data=high_income, vcov='HC1')
+robust_dev = pf.feols('productivity ~ capital', data=developing, vcov='HC1')
 
 # Create comparison table
 comparison_groups = pd.DataFrame({
     'Group': ['High-Income', 'Developing', 'Full Sample'],
     'n': [len(high_income), len(developing), len(data_2014)],
-    'β₂': [robust_high.params['capital'], robust_dev.params['capital'], beta2_robust],
-    'Robust SE': [robust_high.bse['capital'], robust_dev.bse['capital'], se_beta2_robust],
-    't-stat': [robust_high.tvalues['capital'], robust_dev.tvalues['capital'], t_stat_robust],
-    'p-value': [robust_high.pvalues['capital'], robust_dev.pvalues['capital'], p_value_robust]
+    'β₂': [robust_high.coef()['capital'], robust_dev.coef()['capital'], beta2_robust],
+    'Robust SE': [robust_high.se()['capital'], robust_dev.se()['capital'], se_beta2_robust],
+    't-stat': [robust_high.tstat()['capital'], robust_dev.tstat()['capital'], t_stat_robust],
+    'p-value': [robust_high.pval()['capital'], robust_dev.pval()['capital'], p_value_robust]
 })
 
 # Regression Results by Income Group
@@ -2131,10 +2131,10 @@ comparison_groups.to_string(index=False)
 
 # Test β₂ = 0.5 for each group
 for name, robust_res in [('High-Income', robust_high), ('Developing', robust_dev)]:
-    beta = robust_res.params['capital']
-    se = robust_res.bse['capital']
+    beta = robust_res.coef()['capital']
+    se = robust_res.se()['capital']
     t_05 = (beta - 0.5) / se
-    p_05 = 2 * (1 - stats.t.cdf(abs(t_05), df=robust_res.df_resid))
+    p_05 = 2 * (1 - stats.t.cdf(abs(t_05), df=(int(robust_res._N) - len(robust_res.coef()))))
     print(f"\n{name}:")
     print(f"  t-statistic: {t_05:.2f}")
     print(f"  p-value: {p_05:.4f}")
@@ -2217,7 +2217,7 @@ fig, axes = plt.subplots(1, 2, figsize=(14, 6))
 ax1 = axes[0]
 ax1.scatter(data_2014['capital'], data_2014['productivity'], 
            alpha=0.5, s=40, color='#22d3ee', label='All countries')
-ax1.plot(data_2014['capital'], model_convergence.fittedvalues, 
+ax1.plot(data_2014['capital'], model_convergence.predict(), 
         color='red', linewidth=2, label='Regression line')
 ax1.set_xlabel('Capital per Worker ($1000s)')
 ax1.set_ylabel('Labor Productivity ($1000s)')
@@ -2251,8 +2251,8 @@ plt.show()
 fig, ax = plt.subplots(figsize=(10, 6))
 
 groups = ['Full Sample', 'High-Income', 'Developing']
-estimates = [beta2_robust, robust_high.params['capital'], robust_dev.params['capital']]
-ses = [se_beta2_robust, robust_high.bse['capital'], robust_dev.bse['capital']]
+estimates = [beta2_robust, robust_high.coef()['capital'], robust_dev.coef()['capital']]
+ses = [se_beta2_robust, robust_high.se()['capital'], robust_dev.se()['capital']]
 cis_lower = [e - 1.96*se for e, se in zip(estimates, ses)]
 cis_upper = [e + 1.96*se for e, se in zip(estimates, ses)]
 
@@ -2403,16 +2403,16 @@ reg_data.describe().round(3)
 # Task 1: Estimate OLS and test the slope
 
 # Estimate the model
-model = ols('imds ~ ln_NTLpc2017', data=reg_data).fit()
+model = pf.feols('imds ~ ln_NTLpc2017', data=reg_data)
 model.summary()
 
 # Extract t-statistic and p-value for the slope
-t_stat = model.tvalues['ln_NTLpc2017']
-p_value = model.pvalues['ln_NTLpc2017']
+t_stat = model.tstat()['ln_NTLpc2017']
+p_value = model.pval()['ln_NTLpc2017']
 
 # Hypothesis test: H₀: β₁ = 0
-print(f"Slope coefficient: {model.params['ln_NTLpc2017']:.4f}")
-print(f"Standard error:    {model.bse['ln_NTLpc2017']:.4f}")
+print(f"Slope coefficient: {model.coef()['ln_NTLpc2017']:.4f}")
+print(f"Standard error:    {model.se()['ln_NTLpc2017']:.4f}")
 print(f"t-statistic:       {t_stat:.4f}")
 print(f"p-value:           {p_value:.6f}")
 print(f"Conclusion: {'Reject' if p_value < 0.05 else 'Fail to reject'} H₀ at the 5% level.")
@@ -2424,7 +2424,7 @@ print(f"Conclusion: {'Reject' if p_value < 0.05 else 'Fail to reject'} H₀ at t
 
 **Instructions:**
 
-1. Use `model.conf_int()` to obtain the 95% confidence interval
+1. Use `model.confint()` to obtain the 95% confidence interval
 2. Extract the lower and upper bounds for the slope
 3. Interpret: "We are 95% confident that a 1-unit increase in log NTL per capita is associated with between X and Y points of IMDS."
 4. Does the confidence interval contain zero? What does that tell us?
@@ -2432,12 +2432,12 @@ print(f"Conclusion: {'Reject' if p_value < 0.05 else 'Fail to reject'} H₀ at t
 ```python
 # Task 2: Confidence interval for the slope
 
-ci = model.conf_int(alpha=0.05)
+ci = model.confint(level=0.95)
 ci_lower = ci.loc['ln_NTLpc2017', 0]
 ci_upper = ci.loc['ln_NTLpc2017', 1]
 
 # 95% confidence interval for NTL coefficient
-print(f"Point estimate:  {model.params['ln_NTLpc2017']:.4f}")
+print(f"Point estimate:  {model.coef()['ln_NTLpc2017']:.4f}")
 print(f"95% CI:          [{ci_lower:.4f}, {ci_upper:.4f}]")
 print(f"Does the CI contain zero? {'Yes' if ci_lower <= 0 <= ci_upper else 'No'}")
 ```
@@ -2453,22 +2453,22 @@ print(f"Does the CI contain zero? {'Yes' if ci_lower <= 0 <= ci_upper else 'No'}
 3. Discuss: Do the robust SEs differ substantially from the default SEs?
 4. Why might robust standard errors matter for municipality-level spatial data?
 
-**Hint:** Use `model_robust = ols('imds ~ ln_NTLpc2017', data=reg_data).fit(cov_type='HC1')`
+**Hint:** Use `model_robust = pf.feols('imds ~ ln_NTLpc2017', data=reg_data, vcov='HC1')`
 
 ```python
 # Task 3: Robust standard errors
 
 # Re-estimate with HC1 robust standard errors
-model_robust = ols('imds ~ ln_NTLpc2017', data=reg_data).fit(cov_type='HC1')
+model_robust = pf.feols('imds ~ ln_NTLpc2017', data=reg_data, vcov='HC1')
 
 # Compare default vs robust results
 # Comparison: default vs robust standard errors
 print(f"{'':30s} {'Default':>12s} {'Robust (HC1)':>12s}")
-print(f"{'Slope coefficient':30s} {model.params['ln_NTLpc2017']:12.4f} {model_robust.params['ln_NTLpc2017']:12.4f}")
-print(f"{'Standard error':30s} {model.bse['ln_NTLpc2017']:12.4f} {model_robust.bse['ln_NTLpc2017']:12.4f}")
-print(f"{'t-statistic':30s} {model.tvalues['ln_NTLpc2017']:12.4f} {model_robust.tvalues['ln_NTLpc2017']:12.4f}")
-print(f"{'p-value':30s} {model.pvalues['ln_NTLpc2017']:12.6f} {model_robust.pvalues['ln_NTLpc2017']:12.6f}")
-print(f"SE ratio (robust/default): {model_robust.bse['ln_NTLpc2017'] / model.bse['ln_NTLpc2017']:.3f}")
+print(f"{'Slope coefficient':30s} {model.coef()['ln_NTLpc2017']:12.4f} {model_robust.coef()['ln_NTLpc2017']:12.4f}")
+print(f"{'Standard error':30s} {model.se()['ln_NTLpc2017']:12.4f} {model_robust.se()['ln_NTLpc2017']:12.4f}")
+print(f"{'t-statistic':30s} {model.tstat()['ln_NTLpc2017']:12.4f} {model_robust.tstat()['ln_NTLpc2017']:12.4f}")
+print(f"{'p-value':30s} {model.pval()['ln_NTLpc2017']:12.6f} {model_robust.pval()['ln_NTLpc2017']:12.6f}")
+print(f"SE ratio (robust/default): {model_robust.se()['ln_NTLpc2017'] / model.se()['ln_NTLpc2017']:.3f}")
 ```
 
 > **Key Concept 7.12: Robust Inference with Spatial Data**
@@ -2486,7 +2486,7 @@ print(f"SE ratio (robust/default): {model_robust.bse['ln_NTLpc2017'] / model.bse
 3. Compute the two-sided p-value using `scipy.stats.t.sf()`
 4. Can we reject that the true effect equals exactly 5?
 
-**Hint:** Use robust standard errors for this test. The degrees of freedom are `model_robust.df_resid`.
+**Hint:** Use robust standard errors for this test. The degrees of freedom are `(int(model_robust._N) - len(model_robust.coef()))`.
 
 ```python
 # Task 4: Two-sided hypothesis test for H0: beta_1 = 5
@@ -2496,9 +2496,9 @@ from scipy import stats
 beta_0_hyp = 5
 
 # Calculate t-statistic manually
-beta_hat = model_robust.params['ln_NTLpc2017']
-se_robust = model_robust.bse['ln_NTLpc2017']
-df = model_robust.df_resid
+beta_hat = model_robust.coef()['ln_NTLpc2017']
+se_robust = model_robust.se()['ln_NTLpc2017']
+df = (int(model_robust._N) - len(model_robust.coef()))
 
 t_manual = (beta_hat - beta_0_hyp) / se_robust
 p_two_sided = 2 * stats.t.sf(abs(t_manual), df=df)
@@ -2530,12 +2530,12 @@ print(f"Conclusion: {'Reject' if p_two_sided < 0.05 else 'Fail to reject'} H₀ 
 # Task 5: One-sided test — H0: beta_1 <= 0 vs H1: beta_1 > 0
 
 # t-statistic for H0: beta_1 = 0 using robust SEs
-t_onesided = model_robust.tvalues['ln_NTLpc2017']
-p_onesided = stats.t.sf(t_onesided, df=model_robust.df_resid)
+t_onesided = model_robust.tstat()['ln_NTLpc2017']
+p_onesided = stats.t.sf(t_onesided, df=(int(model_robust._N) - len(model_robust.coef())))
 
 # One-sided test: H₀: β₁ ≤ 0 vs H₁: β₁ > 0
-print(f"Estimated slope:     {model_robust.params['ln_NTLpc2017']:.4f}")
-print(f"Robust SE:           {model_robust.bse['ln_NTLpc2017']:.4f}")
+print(f"Estimated slope:     {model_robust.coef()['ln_NTLpc2017']:.4f}")
+print(f"Robust SE:           {model_robust.se()['ln_NTLpc2017']:.4f}")
 print(f"t-statistic:         {t_onesided:.4f}")
 print(f"One-sided p-value:   {p_onesided:.8f}")
 print(f"\nConclusion: {'Reject' if p_onesided < 0.05 else 'Fail to reject'} H₀ at the 5% level.")
@@ -2564,11 +2564,11 @@ print(f"There {'is' if p_onesided < 0.05 else 'is not'} strong evidence for a po
 # Summary statistics for context
 imds_range = reg_data['imds'].max() - reg_data['imds'].min()
 imds_std = reg_data['imds'].std()
-beta = model_robust.params['ln_NTLpc2017']
+beta = model_robust.coef()['ln_NTLpc2017']
 
 # Economic vs statistical significance — key facts
 print(f"\nEstimated slope (robust): {beta:.4f}")
-print(f"Robust p-value:           {model_robust.pvalues['ln_NTLpc2017']:.6f}")
+print(f"Robust p-value:           {model_robust.pval()['ln_NTLpc2017']:.6f}")
 print(f"\nIMDS range:     {reg_data['imds'].min():.1f} to {reg_data['imds'].max():.1f} (range = {imds_range:.1f})")
 print(f"IMDS std dev:   {imds_std:.2f}")
 print(f"\nEffect of 1-unit increase in log NTL:")
@@ -2578,8 +2578,8 @@ print(f"  As % of IMDS std dev:  {100 * beta / imds_std:.1f}%")
 print(f"\nEffect of doubling NTL per capita (0.693 increase in log NTL):")
 print(f"  Predicted IMDS change: {beta * 0.693:.2f} points")
 print(f"  As % of IMDS range:    {100 * beta * 0.693 / imds_range:.1f}%")
-print(f"\nR-squared: {model.rsquared:.4f}")
-print(f"NTL explains {model.rsquared * 100:.1f}% of variation in IMDS across municipalities.")
+print(f"\nR-squared: {model._r2:.4f}")
+print(f"NTL explains {model._r2 * 100:.1f}% of variation in IMDS across municipalities.")
 ```
 
 ### What You've Learned

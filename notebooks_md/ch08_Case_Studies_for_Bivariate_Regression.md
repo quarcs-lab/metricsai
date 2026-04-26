@@ -72,8 +72,7 @@ import numpy as np                        # numerical operations
 import pandas as pd                       # data manipulation
 import matplotlib.pyplot as plt           # plotting
 import seaborn as sns                     # statistical visualizations
-import statsmodels.api as sm              # statistical models
-from statsmodels.formula.api import ols   # OLS with formula syntax
+import pyfixest as pf                     # fast estimation with robust SEs
 from scipy import stats                   # statistical distributions
 import random
 import os
@@ -171,12 +170,12 @@ $$\text{Lifeexp} = \beta_1 + \beta_2 \times \text{Hlthpc} + u$$
 
 ```python
 # Life expectancy regression
-model_lifeexp = ols('lifeexp ~ hlthpc', data=data_health).fit()
+model_lifeexp = pf.feols('lifeexp ~ hlthpc', data=data_health)
 
 # Key results
-intercept_life = model_lifeexp.params['Intercept']
-slope_life     = model_lifeexp.params['hlthpc']
-r2_life        = model_lifeexp.rsquared
+intercept_life = model_lifeexp.coef()['Intercept']
+slope_life     = model_lifeexp.coef()['hlthpc']
+r2_life        = model_lifeexp._r2
 
 print(f"Estimated equation: lifeexp = {intercept_life:.2f} + {slope_life:.5f} x hlthpc")
 print(f"Slope: each additional $1,000 in spending is associated with {slope_life*1000:.2f} more years of life expectancy")
@@ -221,7 +220,7 @@ fig, ax = plt.subplots(figsize=(10, 6))
 ax.scatter(data_health['hlthpc'], data_health['lifeexp'],
            alpha=0.6, s=50,  # alpha = transparency, s = marker size
            color='#22d3ee', label='Actual')
-ax.plot(data_health['hlthpc'], model_lifeexp.fittedvalues, color='#c084fc',
+ax.plot(data_health['hlthpc'], model_lifeexp.predict(), color='#c084fc',
         linewidth=2, label='Fitted')
 ax.set_xlabel('Health Spending per capita (in $1000s)', fontsize=12)
 ax.set_ylabel('Life Expectancy (in years)', fontsize=12)
@@ -245,12 +244,12 @@ We expect $\beta_2 < 0$ (higher spending reduces infant mortality).
 
 ```python
 # Infant mortality regression
-model_infmort = ols('infmort ~ hlthpc', data=data_health).fit()
+model_infmort = pf.feols('infmort ~ hlthpc', data=data_health)
 
 # Key results
-intercept_inf = model_infmort.params['Intercept']
-slope_inf     = model_infmort.params['hlthpc']
-r2_inf        = model_infmort.rsquared
+intercept_inf = model_infmort.coef()['Intercept']
+slope_inf     = model_infmort.coef()['hlthpc']
+r2_inf        = model_infmort._r2
 
 print(f"Estimated equation: infmort = {intercept_inf:.2f} + ({slope_inf:.5f}) x hlthpc")
 print(f"Slope: each additional $1,000 in spending is associated with {slope_inf*1000:.2f} fewer infant deaths per 1,000 births")
@@ -260,7 +259,7 @@ print(f"R-squared: {r2_inf:.4f} ({r2_inf*100:.1f}% of variation explained)\n")
 display(model_infmort.summary())
 
 # Robust standard errors
-model_infmort_robust = model_infmort.get_robustcov_results(cov_type='HC1')
+model_infmort_robust = pf.feols('infmort ~ hlthpc', data=data_health, vcov='HC1')
 
 # Infant mortality regression (robust SE)
 model_infmort_robust.summary()
@@ -306,7 +305,7 @@ fig, ax = plt.subplots(figsize=(10, 6))
 ax.scatter(data_health['hlthpc'], data_health['infmort'],
            alpha=0.6, s=50,  # alpha = transparency, s = marker size
            color='#22d3ee', label='Actual')
-ax.plot(data_health['hlthpc'], model_infmort.fittedvalues, color='#c084fc',
+ax.plot(data_health['hlthpc'], model_infmort.predict(), color='#c084fc',
         linewidth=2, label='Fitted')
 ax.set_xlabel('Health Spending per capita (in $1000s)', fontsize=12)
 ax.set_ylabel('Infant Mortality per 1,000 births', fontsize=12)
@@ -353,12 +352,12 @@ summary_gdp[['mean', 'std', 'min', 'max', 'range']]
 
 ```python
 # Health expenditure regression (all countries)
-model_hlthpc = ols('hlthpc ~ gdppc', data=data_health).fit()
+model_hlthpc = pf.feols('hlthpc ~ gdppc', data=data_health)
 
 # Key results
-intercept_hlth = model_hlthpc.params['Intercept']
-slope_hlth     = model_hlthpc.params['gdppc']
-r2_hlth        = model_hlthpc.rsquared
+intercept_hlth = model_hlthpc.coef()['Intercept']
+slope_hlth     = model_hlthpc.coef()['gdppc']
+r2_hlth        = model_hlthpc._r2
 
 print(f"Estimated equation: hlthpc = {intercept_hlth:,.2f} + {slope_hlth:.4f} x gdppc")
 print(f"R-squared: {r2_hlth:.4f} ({r2_hlth*100:.1f}% of variation explained)\n")
@@ -367,7 +366,7 @@ print(f"R-squared: {r2_hlth:.4f} ({r2_hlth*100:.1f}% of variation explained)\n")
 display(model_hlthpc.summary())
 
 # Robust standard errors
-model_hlthpc_robust = model_hlthpc.get_robustcov_results(cov_type='HC1')
+model_hlthpc_robust = pf.feols('hlthpc ~ gdppc', data=data_health, vcov='HC1')
 
 # Health expenditure regression (robust SE)
 model_hlthpc_robust.summary()
@@ -413,7 +412,7 @@ fig, ax = plt.subplots(figsize=(10, 6))
 ax.scatter(data_health['gdppc'], data_health['hlthpc'],
            alpha=0.6, s=50,  # alpha = transparency, s = marker size
            color='#22d3ee', label='Actual')
-ax.plot(data_health['gdppc'], model_hlthpc.fittedvalues, color='#c084fc',
+ax.plot(data_health['gdppc'], model_hlthpc.predict(), color='#c084fc',
         linewidth=2, label='Fitted')
 ax.set_xlabel('GDP per capita (in $1000s)', fontsize=12)
 ax.set_ylabel('Health Spending per capita (in $1000s)', fontsize=12)
@@ -442,12 +441,12 @@ print(f"Original sample size: {len(data_health)}")
 print(f"Subset sample size: {len(data_health_subset)}")
 print()
 
-model_hlthpc_subset = ols('hlthpc ~ gdppc', data=data_health_subset).fit()
+model_hlthpc_subset = pf.feols('hlthpc ~ gdppc', data=data_health_subset)
 
 # Key results (excluding USA & Luxembourg)
-intercept_sub = model_hlthpc_subset.params['Intercept']
-slope_sub     = model_hlthpc_subset.params['gdppc']
-r2_sub        = model_hlthpc_subset.rsquared
+intercept_sub = model_hlthpc_subset.coef()['Intercept']
+slope_sub     = model_hlthpc_subset.coef()['gdppc']
+r2_sub        = model_hlthpc_subset._r2
 
 print(f"Estimated equation: hlthpc = {intercept_sub:,.2f} + {slope_sub:.4f} x gdppc")
 print(f"R-squared: {r2_sub:.4f} ({r2_sub*100:.1f}% of variation explained)\n")
@@ -456,7 +455,7 @@ print(f"R-squared: {r2_sub:.4f} ({r2_sub*100:.1f}% of variation explained)\n")
 display(model_hlthpc_subset.summary())
 
 # Robust standard errors
-model_hlthpc_subset_robust = model_hlthpc_subset.get_robustcov_results(cov_type='HC1')
+model_hlthpc_subset_robust = pf.feols('hlthpc ~ gdppc', data=data_health_subset, vcov='HC1')
 
 # Health expenditure regression (excluding USA & LUX, robust SE)
 model_hlthpc_subset_robust.summary()
@@ -503,7 +502,7 @@ fig, ax = plt.subplots(figsize=(10, 6))
 ax.scatter(data_health_subset['gdppc'], data_health_subset['hlthpc'],
            alpha=0.6, s=50,  # alpha = transparency, s = marker size
            color='#22d3ee', label='Actual')
-ax.plot(data_health_subset['gdppc'], model_hlthpc_subset.fittedvalues, color='#c084fc',
+ax.plot(data_health_subset['gdppc'], model_hlthpc_subset.predict(), color='#c084fc',
         linewidth=2, label='Fitted')
 ax.set_xlabel('GDP per capita (in $1000s)', fontsize=12)
 ax.set_ylabel('Health Spending per capita (in $1000s)', fontsize=12)
@@ -609,12 +608,12 @@ plt.show()
 
 ```python
 # CAPM regression: Coca-Cola
-model_capm = ols('rko_rf ~ rm_rf', data=data_capm).fit()
+model_capm = pf.feols('rko_rf ~ rm_rf', data=data_capm)
 
 # Key results
-alpha = model_capm.params['Intercept']
-beta = model_capm.params['rm_rf']
-r2_capm = model_capm.rsquared
+alpha = model_capm.coef()['Intercept']
+beta = model_capm.coef()['rm_rf']
+r2_capm = model_capm._r2
 
 print(f"Estimated equation: rko_rf = {alpha:.4f} + {beta:.4f} x rm_rf")
 print(f"Beta (systematic risk): {beta:.4f} — Coca-Cola is a defensive stock (beta < 1)")
@@ -622,10 +621,10 @@ print(f"R-squared: {r2_capm:.4f} ({r2_capm*100:.1f}% of return variation explain
 
 # Full regression output
 model_capm.summary()
-alpha_se = model_capm.bse['Intercept']
-beta_se = model_capm.bse['rm_rf']
-alpha_t = model_capm.tvalues['Intercept']
-beta_t = model_capm.tvalues['rm_rf']
+alpha_se = model_capm.se()['Intercept']
+beta_se = model_capm.se()['rm_rf']
+alpha_t = model_capm.tstat()[\1Intercept']
+beta_t = model_capm.tstat()[\1rm_rf']
 ```
 
 ### CAPM Results with Robust Standard Errors
@@ -683,7 +682,7 @@ fig, ax = plt.subplots(figsize=(10, 6))
 ax.scatter(data_capm['rm_rf'], data_capm['rko_rf'],
            alpha=0.4, s=30,  # alpha = transparency, s = marker size
            color='#22d3ee', label='Actual')
-ax.plot(data_capm['rm_rf'], model_capm.fittedvalues, color='#c084fc',
+ax.plot(data_capm['rm_rf'], model_capm.predict(), color='#c084fc',
         linewidth=2, label='Fitted')
 ax.set_xlabel('Market excess return (rm - rf)', fontsize=12)
 ax.set_ylabel('Coca-Cola excess return (rko - rf)', fontsize=12)
@@ -694,7 +693,7 @@ ax.grid(True, alpha=0.3)
 plt.tight_layout()
 plt.show()
 
-print(f"Beta (slope) = {model_capm.params['rm_rf']:.4f}")
+print(f"Beta (slope) = {model_capm.coef()['rm_rf']:.4f}")
 # The slope less than 1 confirms Coca-Cola is a 'defensive' stock.
 # Each 1% increase in market return -> ~0.6% increase in Coca-Cola return.
 ```
@@ -787,20 +786,20 @@ print(f"  - Sample period includes major recessions (1982, 2008-2009, 2020)")
 
 ```python
 # Okun's law regression
-model_okun = ols('rgdpgrowth ~ uratechange', data=data_gdp).fit()
+model_okun = pf.feols('rgdpgrowth ~ uratechange', data=data_gdp)
 
 # Key results
-intercept_okun = model_okun.params['Intercept']
-slope_okun = model_okun.params['uratechange']
-r2_okun = model_okun.rsquared
+intercept_okun = model_okun.coef()['Intercept']
+slope_okun = model_okun.coef()['uratechange']
+r2_okun = model_okun._r2
 
 print(f"Estimated equation: GDP_growth = {intercept_okun:.2f} + ({slope_okun:.2f}) x URATEchange")
 print(f"R-squared: {r2_okun:.4f} ({r2_okun*100:.1f}% of variation explained)\n")
 
 # Full regression output
 model_okun.summary()
-slope_se_okun = model_okun.bse['uratechange']
-slope_t_okun = model_okun.tvalues['uratechange']
+slope_se_okun = model_okun.se()['uratechange']
+slope_t_okun = model_okun.tstat()[\1uratechange']
 ```
 
 ### Okun's Law with Robust Standard Errors
@@ -861,7 +860,7 @@ fig, ax = plt.subplots(figsize=(10, 6))
 ax.scatter(data_gdp['uratechange'], data_gdp['rgdpgrowth'],
            alpha=0.6, s=50,  # alpha = transparency, s = marker size
            color='#22d3ee', label='Actual')
-ax.plot(data_gdp['uratechange'], model_okun.fittedvalues, color='#c084fc',
+ax.plot(data_gdp['uratechange'], model_okun.predict(), color='#c084fc',
         linewidth=2, label='Fitted')
 ax.set_xlabel('Change in unemployment rate (percentage points)', fontsize=12)
 ax.set_ylabel('Percentage change in real GDP', fontsize=12)
@@ -923,7 +922,7 @@ More advanced time series methods could improve on this simple OLS regression.
 fig, ax = plt.subplots(figsize=(12, 6))
 ax.plot(data_gdp['year'], data_gdp['rgdpgrowth'], linewidth=1.5,
         label='Actual GDP Growth', color='#22d3ee')
-ax.plot(data_gdp['year'], model_okun.fittedvalues, linewidth=1.5, linestyle='--',
+ax.plot(data_gdp['year'], model_okun.predict(), linewidth=1.5, linestyle='--',
         label='Predicted (from Okun\'s Law)', color='#c084fc')
 ax.axhline(y=0, color='red', linestyle=':', linewidth=1, alpha=0.5)
 ax.set_xlabel('Year', fontsize=12)
@@ -1027,8 +1026,8 @@ This type of time series plot is more informative than just reporting R² becaus
 **Python Tools:**
 
 - `pandas`: Data manipulation, summary statistics, subsetting
-- `statsmodels.formula.api.ols`: Regression estimation
-- `.get_robustcov_results(cov_type='HC1')`: Robust standard errors
+- `pyfixest.feols()`: Regression estimation with built-in robust SEs
+- `pf.feols(..., vcov='HC1')`: Heteroskedasticity-robust standard errors
 - `matplotlib` & `seaborn`: Professional visualizations
 - `scipy.stats`: Statistical distributions
 
@@ -1051,7 +1050,7 @@ This single code block reproduces the core workflow of Chapter 8. It is self-con
 # --- Libraries ---
 import pandas as pd                       # data loading and manipulation
 import matplotlib.pyplot as plt           # creating plots and visualizations
-from statsmodels.formula.api import ols   # OLS regression with R-style formulas
+import pyfixest as pf                     # fast estimation with robust SEs
 
 # =============================================================================
 # STEP 1: Load OECD health data from a URL
@@ -1072,26 +1071,26 @@ print(data_health[['hlthpc', 'lifeexp', 'infmort', 'gdppc']].describe().round(2)
 # STEP 3: Health outcomes regression with robust standard errors
 # =============================================================================
 # Does higher health spending improve life expectancy?
-model_life = ols('lifeexp ~ hlthpc', data=data_health).fit()
+model_life = pf.feols('lifeexp ~ hlthpc', data=data_health)
 
-slope_life = model_life.params['hlthpc']
-r2_life    = model_life.rsquared
+slope_life = model_life.coef()['hlthpc']
+r2_life    = model_life._r2
 
 print(f"Life expectancy: slope = {slope_life:.5f}, R² = {r2_life:.4f}")
 print(f"Each extra $1,000 in spending → {slope_life*1000:.2f} more years of life expectancy")
 
 # Robust standard errors adjust for non-constant error variance (heteroskedasticity)
-model_life_robust = model_life.get_robustcov_results(cov_type='HC1')
+model_life_robust = pf.feols('lifeexp ~ hlthpc', data=data_health, vcov='HC1')
 model_life_robust.summary()
 
 # =============================================================================
 # STEP 4: Health spending vs GDP — income elasticity
 # =============================================================================
 # How much of health spending is driven by national income?
-model_gdp = ols('hlthpc ~ gdppc', data=data_health).fit()
+model_gdp = pf.feols('hlthpc ~ gdppc', data=data_health)
 
-slope_gdp = model_gdp.params['gdppc']
-r2_gdp    = model_gdp.rsquared
+slope_gdp = model_gdp.coef()['gdppc']
+r2_gdp    = model_gdp._r2
 
 # Income elasticity at the mean: (slope × mean_x) / mean_y
 mean_gdp  = data_health['gdppc'].mean()
@@ -1108,10 +1107,10 @@ print(f"Income elasticity at the mean: {elasticity:.2f} (≈1.0 → normal good)
 data_subset = data_health[(data_health['code'] != 'USA') &
                           (data_health['code'] != 'LUX')]
 
-model_subset = ols('hlthpc ~ gdppc', data=data_subset).fit()
+model_subset = pf.feols('hlthpc ~ gdppc', data=data_subset)
 
 print(f"\nAll 34 countries:  slope = {slope_gdp:.4f}, R² = {r2_gdp:.4f}")
-print(f"Excluding USA/LUX: slope = {model_subset.params['gdppc']:.4f}, R² = {model_subset.rsquared:.4f}")
+print(f"Excluding USA/LUX: slope = {model_subset.coef()['gdppc']:.4f}, R² = {model_subset._r2:.4f}")
 print("Removing 2 of 34 countries transforms R² — always check for influential observations!")
 
 fig, axes = plt.subplots(1, 2, figsize=(14, 5))
@@ -1121,10 +1120,10 @@ for ax, df, mdl, title in zip(
         [model_gdp, model_subset],
         ['All 34 Countries', 'Excluding USA & Luxembourg']):
     ax.scatter(df['gdppc'], df['hlthpc'], s=50, alpha=0.7)
-    ax.plot(df['gdppc'], mdl.fittedvalues, color='red', linewidth=2)
+    ax.plot(df['gdppc'], mdl.predict(), color='red', linewidth=2)
     ax.set_xlabel('GDP per capita ($)')
     ax.set_ylabel('Health spending per capita ($)')
-    ax.set_title(f'{title}  (R² = {mdl.rsquared:.2f})')
+    ax.set_title(f'{title}  (R² = {mdl._r2:.2f})')
     ax.grid(True, alpha=0.3)
 plt.tight_layout()
 plt.show()
@@ -1136,11 +1135,11 @@ plt.show()
 url_capm = "https://raw.githubusercontent.com/quarcs-lab/data-open/master/AED/AED_CAPM.DTA"
 data_capm = pd.read_stata(url_capm)
 
-model_capm = ols('rko_rf ~ rm_rf', data=data_capm).fit()
+model_capm = pf.feols('rko_rf ~ rm_rf', data=data_capm)
 
-alpha = model_capm.params['Intercept']   # excess return beyond CAPM prediction
-beta  = model_capm.params['rm_rf']       # systematic risk
-r2_capm = model_capm.rsquared
+alpha = model_capm.coef()['Intercept']   # excess return beyond CAPM prediction
+beta  = model_capm.coef()['rm_rf']       # systematic risk
+r2_capm = model_capm._r2
 
 print(f"Coca-Cola CAPM: alpha = {alpha:.4f}, beta = {beta:.4f}, R² = {r2_capm:.4f}")
 print(f"Beta < 1 → defensive stock (moves less than the market)")
@@ -1156,10 +1155,10 @@ model_capm.summary()
 url_gdp = "https://raw.githubusercontent.com/quarcs-lab/data-open/master/AED/AED_GDPUNEMPLOY.DTA"
 data_gdp = pd.read_stata(url_gdp)
 
-model_okun = ols('rgdpgrowth ~ uratechange', data=data_gdp).fit()
+model_okun = pf.feols('rgdpgrowth ~ uratechange', data=data_gdp)
 
-slope_okun = model_okun.params['uratechange']
-r2_okun    = model_okun.rsquared
+slope_okun = model_okun.coef()['uratechange']
+r2_okun    = model_okun._r2
 
 print(f"Okun's Law: slope = {slope_okun:.2f} (Okun's original: -2.0)")
 print(f"R² = {r2_okun:.4f} — unemployment explains {r2_okun*100:.0f}% of GDP growth variation")
@@ -1167,7 +1166,7 @@ print(f"R² = {r2_okun:.4f} — unemployment explains {r2_okun*100:.0f}% of GDP 
 # Scatter plot with fitted line
 fig, ax = plt.subplots(figsize=(10, 6))
 ax.scatter(data_gdp['uratechange'], data_gdp['rgdpgrowth'], s=50, alpha=0.7)
-ax.plot(data_gdp['uratechange'], model_okun.fittedvalues, color='red', linewidth=2,
+ax.plot(data_gdp['uratechange'], model_okun.predict(), color='red', linewidth=2,
         label=f'Fitted: slope = {slope_okun:.2f}')
 ax.axhline(y=0, color='gray', linestyle=':', linewidth=1, alpha=0.5)
 ax.set_xlabel('Change in unemployment rate (percentage points)')

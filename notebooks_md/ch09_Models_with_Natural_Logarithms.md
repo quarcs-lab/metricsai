@@ -72,8 +72,7 @@ import numpy as np                        # numerical operations
 import pandas as pd                       # data manipulation
 import matplotlib.pyplot as plt           # plotting
 import seaborn as sns                     # statistical visualizations
-import statsmodels.api as sm              # statistical models
-from statsmodels.formula.api import ols   # OLS with formula syntax
+import pyfixest as pf                     # fast estimation with robust SEs
 from scipy import stats                   # statistical distributions
 import random
 import os
@@ -290,12 +289,12 @@ data_earnings[table_vars].describe()
 # Model 1: Linear
 # MODEL 1: LINEAR - earnings = β₀ + β₁(education)
 
-model_linear = ols('earnings ~ education', data=data_earnings).fit()
+model_linear = pf.feols('earnings ~ education', data=data_earnings)
 
 # Key results
-intercept_1 = model_linear.params['Intercept']
-slope_1     = model_linear.params['education']
-r2_1        = model_linear.rsquared
+intercept_1 = model_linear.coef()['Intercept']
+slope_1     = model_linear.coef()['education']
+r2_1        = model_linear._r2
 
 print(f"Estimated equation: earnings = {intercept_1:,.0f} + {slope_1:,.2f} x education")
 print(f"Slope: each additional year of education is associated with ${slope_1:,.2f} higher annual earnings")
@@ -319,12 +318,12 @@ This is the **most common** specification for earnings equations!
 # Model 2: Log-linear
 # MODEL 2: LOG-LINEAR - ln(earnings) = β₀ + β₁(education)
 
-model_loglin = ols('lnearn ~ education', data=data_earnings).fit()
+model_loglin = pf.feols('lnearn ~ education', data=data_earnings)
 
 # Key results
-intercept_2   = model_loglin.params['Intercept']
-semi_elast    = model_loglin.params['education']
-r2_2          = model_loglin.rsquared
+intercept_2   = model_loglin.coef()['Intercept']
+semi_elast    = model_loglin.coef()['education']
+r2_2          = model_loglin._r2
 
 print(f"Estimated equation: ln(earnings) = {intercept_2:.4f} + {semi_elast:.4f} x education")
 print(f"Each additional year of education is associated with a {100*semi_elast:.2f}% increase in earnings")
@@ -357,12 +356,12 @@ model_loglin.summary()
 # Model 3: Log-log
 # MODEL 3: LOG-LOG - ln(earnings) = β₀ + β₁ln(education)
 
-model_loglog = ols('lnearn ~ lneduc', data=data_earnings).fit()
+model_loglog = pf.feols('lnearn ~ lneduc', data=data_earnings)
 
 # Key results
-intercept_3 = model_loglog.params['Intercept']
-elasticity  = model_loglog.params['lneduc']
-r2_3        = model_loglog.rsquared
+intercept_3 = model_loglog.coef()['Intercept']
+elasticity  = model_loglog.coef()['lneduc']
+r2_3        = model_loglog._r2
 
 print(f"Estimated equation: ln(earnings) = {intercept_3:.4f} + {elasticity:.4f} x ln(education)")
 print(f"Elasticity: a 1% increase in education is associated with a {elasticity:.3f}% increase in earnings")
@@ -394,12 +393,12 @@ This model is less common but captures **diminishing returns** (additional years
 # Model 4: Linear-log
 # MODEL 4: LINEAR-LOG - earnings = β₀ + β₁ln(education)
 
-model_linlog = ols('earnings ~ lneduc', data=data_earnings).fit()
+model_linlog = pf.feols('earnings ~ lneduc', data=data_earnings)
 
 # Key results
-intercept_4 = model_linlog.params['Intercept']
-slope_4     = model_linlog.params['lneduc']
-r2_4        = model_linlog.rsquared
+intercept_4 = model_linlog.coef()['Intercept']
+slope_4     = model_linlog.coef()['lneduc']
+r2_4        = model_linlog._r2
 
 print(f"Estimated equation: earnings = {intercept_4:,.0f} + {slope_4:,.2f} x ln(education)")
 print(f"A 1% increase in education is associated with a ${slope_4/100:,.2f} increase in annual earnings")
@@ -420,22 +419,22 @@ comparison_df = pd.DataFrame({
     'Model': ['Linear', 'Log-linear', 'Log-log', 'Linear-log'],
     'Specification': ['y ~ x', 'ln(y) ~ x', 'ln(y) ~ ln(x)', 'y ~ ln(x)'],
     'Slope Coefficient': [
-        f"{model_linear.params[1]:,.2f}",
-        f"{model_loglin.params[1]:.4f}",
-        f"{model_loglog.params[1]:.4f}",
-        f"{model_linlog.params[1]:,.2f}"
+        f"{model_linear.coef().iloc[1]:,.2f}",
+        f"{model_loglin.coef().iloc[1]:.4f}",
+        f"{model_loglog.coef().iloc[1]:.4f}",
+        f"{model_linlog.coef().iloc[1]:,.2f}"
     ],
     'Interpretation': [
-        f"${model_linear.params[1]:,.0f} per year",
-        f"{100*model_loglin.params[1]:.1f}% per year",
-        f"{model_loglog.params[1]:.2f}% per 1% change",
-        f"${model_linlog.params[1]/100:,.0f} per 1% change"
+        f"${model_linear.coef().iloc[1]:,.0f} per year",
+        f"{100*model_loglin.coef().iloc[1]:.1f}% per year",
+        f"{model_loglog.coef().iloc[1]:.2f}% per 1% change",
+        f"${model_linlog.coef().iloc[1]/100:,.0f} per 1% change"
     ],
     'R²': [
-        f"{model_linear.rsquared:.3f}",
-        f"{model_loglin.rsquared:.3f}",
-        f"{model_loglog.rsquared:.3f}",
-        f"{model_linlog.rsquared:.3f}"
+        f"{model_linear._r2:.3f}",
+        f"{model_loglin._r2:.3f}",
+        f"{model_loglog._r2:.3f}",
+        f"{model_linlog._r2:.3f}"
     ]
 })
 
@@ -443,8 +442,8 @@ comparison_df.to_string(index=False)
 
 # WHICH MODEL IS BEST?
 # For this data
-print(f"  - Best fit (highest R²): Log-linear (R² = {model_loglin.rsquared:.3f})")
-print(f"  Best fit (highest R²): Log-linear (R² = {model_loglin.rsquared:.3f})")
+print(f"  - Best fit (highest R²): Log-linear (R² = {model_loglin._r2:.3f})")
+print(f"  Best fit (highest R²): Log-linear (R² = {model_loglin._r2:.3f})")
 ```
 
 > **Key Concept 9.5: Choosing the Right Functional Form**
@@ -467,8 +466,8 @@ fig, axes = plt.subplots(2, 2, figsize=(16, 12))
 # Model 1: Linear
 axes[0, 0].scatter(data_earnings['education'], data_earnings['earnings'],
                    alpha=0.5, s=20, color='#22d3ee')  # alpha = transparency, s = marker size
-axes[0, 0].plot(data_earnings['education'], model_linear.fittedvalues,
-                color='#c084fc', linewidth=2, label=f'R² = {model_linear.rsquared:.3f}')
+axes[0, 0].plot(data_earnings['education'], model_linear.predict(),
+                color='#c084fc', linewidth=2, label=f'R² = {model_linear._r2:.3f}')
 axes[0, 0].set_xlabel('Education (years)', fontsize=11)
 axes[0, 0].set_ylabel('Earnings ($)', fontsize=11)
 axes[0, 0].set_title('Model 1: Linear\ny = β₀ + β₁x\nSlope: $5,021 per year',
@@ -479,8 +478,8 @@ axes[0, 0].grid(True, alpha=0.3)
 # Model 2: Log-linear
 axes[0, 1].scatter(data_earnings['education'], data_earnings['lnearn'],
                    alpha=0.5, s=20, color='#22d3ee')
-axes[0, 1].plot(data_earnings['education'], model_loglin.fittedvalues,
-                color='#c084fc', linewidth=2, label=f'R² = {model_loglin.rsquared:.3f}')
+axes[0, 1].plot(data_earnings['education'], model_loglin.predict(),
+                color='#c084fc', linewidth=2, label=f'R² = {model_loglin._r2:.3f}')
 axes[0, 1].set_xlabel('Education (years)', fontsize=11)
 axes[0, 1].set_ylabel('ln(Earnings)', fontsize=11)
 axes[0, 1].set_title('Model 2: Log-linear\nln(y) = β₀ + β₁x\nSlope: 13.1% per year',
@@ -491,8 +490,8 @@ axes[0, 1].grid(True, alpha=0.3)
 # Model 3: Log-log
 axes[1, 0].scatter(data_earnings['lneduc'], data_earnings['lnearn'],
                    alpha=0.5, s=20, color='#22d3ee')
-axes[1, 0].plot(data_earnings['lneduc'], model_loglog.fittedvalues,
-                color='#c084fc', linewidth=2, label=f'R² = {model_loglog.rsquared:.3f}')
+axes[1, 0].plot(data_earnings['lneduc'], model_loglog.predict(),
+                color='#c084fc', linewidth=2, label=f'R² = {model_loglog._r2:.3f}')
 axes[1, 0].set_xlabel('ln(Education)', fontsize=11)
 axes[1, 0].set_ylabel('ln(Earnings)', fontsize=11)
 axes[1, 0].set_title('Model 3: Log-log\nln(y) = β₀ + β₁ln(x)\nElasticity: 1.48',
@@ -503,8 +502,8 @@ axes[1, 0].grid(True, alpha=0.3)
 # Model 4: Linear-log
 axes[1, 1].scatter(data_earnings['lneduc'], data_earnings['earnings'],
                    alpha=0.5, s=20, color='#22d3ee')
-axes[1, 1].plot(data_earnings['lneduc'], model_linlog.fittedvalues,
-                color='#c084fc', linewidth=2, label=f'R² = {model_linlog.rsquared:.3f}')
+axes[1, 1].plot(data_earnings['lneduc'], model_linlog.predict(),
+                color='#c084fc', linewidth=2, label=f'R² = {model_linlog._r2:.3f}')
 axes[1, 1].set_xlabel('ln(Education)', fontsize=11)
 axes[1, 1].set_ylabel('Earnings ($)', fontsize=11)
 axes[1, 1].set_title('Model 4: Linear-log\ny = β₀ + β₁ln(x)\nSlope: $545 per 1% change',
@@ -568,12 +567,12 @@ print(data_sp500[['year', 'sp500', 'lnsp500']].tail(3))
 # Estimate exponential growth model
 # EXPONENTIAL GROWTH MODEL: ln(sp500) = β₀ + β₁(year)
 
-model_sp500 = ols('lnsp500 ~ year', data=data_sp500).fit()
+model_sp500 = pf.feols('lnsp500 ~ year', data=data_sp500)
 
 # Key results
-intercept_sp = model_sp500.params['Intercept']
-growth_rate  = model_sp500.params['year']
-r2_sp        = model_sp500.rsquared
+intercept_sp = model_sp500.coef()['Intercept']
+growth_rate  = model_sp500.coef()['year']
+r2_sp        = model_sp500._r2
 
 print(f"Estimated equation: ln(SP500) = {intercept_sp:.4f} + {growth_rate:.6f} x year")
 print(f"Estimated annual growth rate: {100*growth_rate:.4f}% per year")
@@ -604,8 +603,8 @@ fig, axes = plt.subplots(1, 2, figsize=(16, 6))
 # Apply retransformation bias correction (Duan's smearing estimate)
 n = len(data_sp500)
 k = 2  # number of parameters: intercept + slope
-MSE = np.sum(model_sp500.resid**2) / (n - k)
-psp500 = np.exp(model_sp500.fittedvalues) * np.exp(MSE/2)  # exp(MSE/2) corrects for log-retransformation bias
+MSE = np.sum(model_sp500._u_hat**2) / (n - k)
+psp500 = np.exp(model_sp500.predict()) * np.exp(MSE/2)  # exp(MSE/2) corrects for log-retransformation bias
 
 axes[0].plot(data_sp500['year'], data_sp500['sp500'], linewidth=2,
              label='Actual', color='#22d3ee')
@@ -621,7 +620,7 @@ axes[0].grid(True, alpha=0.3)
 # Panel B: Linear growth in logs
 axes[1].plot(data_sp500['year'], data_sp500['lnsp500'], linewidth=2,
              label='Actual', color='#22d3ee')
-axes[1].plot(data_sp500['year'], model_sp500.fittedvalues, linewidth=2,
+axes[1].plot(data_sp500['year'], model_sp500.predict(), linewidth=2,
              linestyle='--', label='Fitted (linear)', color='#c084fc')
 axes[1].set_xlabel('Year', fontsize=12)
 axes[1].set_ylabel('ln(S&P 500 Index)', fontsize=12)
@@ -713,7 +712,7 @@ This single code block reproduces the core workflow of Chapter 9. It is self-con
 import numpy as np                        # logarithms and exponentials
 import pandas as pd                       # data loading and manipulation
 import matplotlib.pyplot as plt           # creating plots and visualizations
-from statsmodels.formula.api import ols   # OLS regression with R-style formulas
+import pyfixest as pf                     # fast estimation with robust SEs
 
 # =============================================================================
 # STEP 1: Load the earnings-education dataset
@@ -751,21 +750,21 @@ print(data_earnings[['earnings', 'lnearn', 'education', 'lneduc']].describe().ro
 # Each model answers a different economic question about earnings and education
 
 # Model 1: Linear — Δy = β₁Δx (dollar change per year of education)
-model_linear = ols('earnings ~ education', data=data_earnings).fit()
+model_linear = pf.feols('earnings ~ education', data=data_earnings)
 
 # Model 2: Log-linear — 100β₁ ≈ % change in y per unit x (semi-elasticity)
-model_loglin = ols('lnearn ~ education', data=data_earnings).fit()
+model_loglin = pf.feols('lnearn ~ education', data=data_earnings)
 
 # Model 3: Log-log — β₁ ≈ % change in y per % change in x (elasticity)
-model_loglog = ols('lnearn ~ lneduc', data=data_earnings).fit()
+model_loglog = pf.feols('lnearn ~ lneduc', data=data_earnings)
 
 # Model 4: Linear-log — β₁/100 ≈ dollar change per % change in x
-model_linlog = ols('earnings ~ lneduc', data=data_earnings).fit()
+model_linlog = pf.feols('earnings ~ lneduc', data=data_earnings)
 
 # Print the most important model: log-linear (semi-elasticity)
-semi_elast = model_loglin.params['education']
+semi_elast = model_loglin.coef()['education']
 print(f"Log-linear: each year of education → {100*semi_elast:.1f}% higher earnings")
-print(f"Log-log elasticity: {model_loglog.params['lneduc']:.3f}")
+print(f"Log-log elasticity: {model_loglog.coef()['lneduc']:.3f}")
 
 # Full regression table for the log-linear model
 model_loglin.summary()
@@ -786,7 +785,7 @@ print("-" * 75)
 for name, (spec, m, var, fmt) in models.items():
     slope = m.params[var]
     interp = fmt.format(100*slope if 'per year' in fmt and 'Log' in name else slope/100 if 'per 1%' in fmt and name == 'Linear-log' else slope)
-    print(f"{name:<12} {spec:<16} {slope:>10.4f} {m.rsquared:>8.3f}  {interp}")
+    print(f"{name:<12} {spec:<16} {slope:>10.4f} {m._r2:>8.3f}  {interp}")
 
 # =============================================================================
 # STEP 6: Scatter plot with the log-linear fitted line
@@ -794,11 +793,11 @@ for name, (spec, m, var, fmt) in models.items():
 # The log-linear model (semi-elasticity) provides the best fit for earnings data
 fig, ax = plt.subplots(figsize=(10, 6))
 ax.scatter(data_earnings['education'], data_earnings['lnearn'], s=50, alpha=0.7)
-ax.plot(data_earnings['education'], model_loglin.fittedvalues,
+ax.plot(data_earnings['education'], model_loglin.predict(),
         color='red', linewidth=2, label='Fitted line')
 ax.set_xlabel('Education (years)')
 ax.set_ylabel('ln(Earnings)')
-ax.set_title(f'Log-Linear Model: semi-elasticity = {semi_elast:.4f}  (R² = {model_loglin.rsquared:.3f})')
+ax.set_title(f'Log-Linear Model: semi-elasticity = {semi_elast:.4f}  (R² = {model_loglin._r2:.3f})')
 ax.legend()
 ax.grid(True, alpha=0.3)
 plt.tight_layout()
@@ -812,12 +811,12 @@ plt.show()
 url_sp500 = "https://raw.githubusercontent.com/quarcs-lab/data-open/master/AED/AED_SP500INDEX.DTA"
 data_sp500 = pd.read_stata(url_sp500)
 
-model_sp500 = ols('lnsp500 ~ year', data=data_sp500).fit()
-growth_rate = model_sp500.params['year']
+model_sp500 = pf.feols('lnsp500 ~ year', data=data_sp500)
+growth_rate = model_sp500.coef()['year']
 
 print(f"S&P 500 estimated growth rate: {100*growth_rate:.2f}% per year")
 print(f"Rule of 72: doubles every {72/(100*growth_rate):.1f} years")
-print(f"R-squared: {model_sp500.rsquared:.4f}")
+print(f"R-squared: {model_sp500._r2:.4f}")
 
 # Visualize: exponential in levels vs. linear in logs
 fig, axes = plt.subplots(1, 2, figsize=(14, 5))
@@ -828,7 +827,7 @@ axes[0].set_title('Exponential Growth in Levels')
 axes[0].grid(True, alpha=0.3)
 
 axes[1].plot(data_sp500['year'], data_sp500['lnsp500'], linewidth=2)
-axes[1].plot(data_sp500['year'], model_sp500.fittedvalues,
+axes[1].plot(data_sp500['year'], model_sp500.predict(),
              color='red', linewidth=2, linestyle='--', label='Fitted (linear)')
 axes[1].set_xlabel('Year')
 axes[1].set_ylabel('ln(S&P 500 Index)')
@@ -1012,17 +1011,17 @@ c) Is the coefficient statistically significant at the 5% level?
 ```python
 # Task 2: Log-Linear Model for Productivity (Guided)
 # Estimate: ln(lp) = β₀ + β₁ × h
-model_hc = ols('_____ ~ _____', data=data_2014).fit()
+model_hc = pf.feols('_____ ~ _____', data=data_2014)
 
 # LOG-LINEAR MODEL: ln(productivity) ~ human capital
 model_hc.summary()
 
 # Interpret the semi-elasticity
-beta_hc = model_hc.params['h']
+beta_hc = model_hc.coef()['h']
 print(f"\nSemi-elasticity: {beta_hc:.4f}")
 print(f"Interpretation: Each unit increase in human capital is associated with")
 print(f"  a {100*beta_hc:.1f}% _____ in labor productivity.")
-print(f"\nR² = {model_hc.rsquared:.3f}")
+print(f"\nR² = {model_hc._r2:.3f}")
 ```
 
 #### Task 3: Comparing Model Specifications (Semi-guided)
@@ -1044,10 +1043,10 @@ d) Why might the log-log specification be particularly appropriate for the produ
 data_2014['ln_kl'] = np.log(data_2014['kl'])
 
 # Estimate four models (fill in the formulas)
-m1_linear  = ols('lp ~ kl', data=data_2014).fit()
-m2_loglin  = ols('ln_lp ~ kl', data=data_2014).fit()
-m3_loglog  = ols('ln_lp ~ ln_kl', data=data_2014).fit()
-m4_linlog  = ols('lp ~ ln_kl', data=data_2014).fit()
+m1_linear  = pf.feols('lp ~ kl', data=data_2014)
+m2_loglin  = pf.feols('ln_lp ~ kl', data=data_2014)
+m3_loglog  = pf.feols('ln_lp ~ ln_kl', data=data_2014)
+m4_linlog  = pf.feols('lp ~ ln_kl', data=data_2014)
 
 # Create comparison table
 # Hint: Follow the pattern from Section 9.3
@@ -1088,8 +1087,8 @@ d) In growth theory, the output elasticity of capital is often assumed to be abo
 m3_loglog.summary()
 
 # Elasticity and confidence interval
-elasticity = m3_loglog.params['ln_rk']
-ci = m3_loglog.conf_int().loc['ln_rk']
+elasticity = m3_loglog.coef()['ln_rk']
+ci = m3_loglog.confint().loc['ln_rk']
 print(f"\nElasticity: {elasticity:.4f}")
 print(f"95% CI: [{ci[0]:.4f}, {ci[1]:.4f}]")
 

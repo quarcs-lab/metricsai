@@ -93,8 +93,7 @@ import numpy as np                        # numerical operations
 import pandas as pd                       # data manipulation
 import matplotlib.pyplot as plt           # plotting
 import seaborn as sns                     # statistical visualization
-import statsmodels.api as sm              # statistical models
-from statsmodels.formula.api import ols   # OLS with formula syntax
+import pyfixest as pf                     # fast OLS regression
 from scipy import stats                   # statistical distributions
 import random
 import os
@@ -344,27 +343,27 @@ df2 = pd.DataFrame({'x': x2, 'y': y2})
 df3 = pd.DataFrame({'x': x3, 'y': y3})
 
 # Fit regressions for each sample
-model1 = ols('y ~ x', data=df1).fit()
-model2 = ols('y ~ x', data=df2).fit()
-model3 = ols('y ~ x', data=df3).fit()
+fit1 = pf.feols('y ~ x', data=df1)
+fit2 = pf.feols('y ~ x', data=df2)
+fit3 = pf.feols('y ~ x', data=df3)
 
 # Three samples generated and regressions fitted
-print(f"Sample 1 - Intercept: {model1.params['Intercept']:.2f}, Slope: {model1.params['x']:.2f}")
-print(f"Sample 2 - Intercept: {model2.params['Intercept']:.2f}, Slope: {model2.params['x']:.2f}")
-print(f"Sample 3 - Intercept: {model3.params['Intercept']:.2f}, Slope: {model3.params['x']:.2f}")
+print(f"Sample 1 - Intercept: {fit1.coef()['Intercept']:.2f}, Slope: {fit1.coef()['x']:.2f}")
+print(f"Sample 2 - Intercept: {fit2.coef()['Intercept']:.2f}, Slope: {fit2.coef()['x']:.2f}")
+print(f"Sample 3 - Intercept: {fit3.coef()['Intercept']:.2f}, Slope: {fit3.coef()['x']:.2f}")
 ```
 
 ```python
 # Visualize all three regressions
 fig, axes = plt.subplots(1, 3, figsize=(18, 5))
 
-for idx, (ax, df, model, title) in enumerate(zip(axes,
+for idx, (ax, df, fit_i, title) in enumerate(zip(axes,
                                                    [df1, df2, df3],
-                                                   [model1, model2, model3],
+                                                   [fit1, fit2, fit3],
                                                    ['Sample 1', 'Sample 2', 'Sample 3'])):
     ax.scatter(df['x'], df['y'], alpha=0.6, s=50, color='#22d3ee', label='Actual')
-    ax.plot(df['x'], model.fittedvalues, color='red', linewidth=2,
-            label=f'ŷ = {model.params[0]:.2f} + {model.params[1]:.2f}x')
+    ax.plot(df['x'], fit_i.predict(), color='red', linewidth=2,
+            label=f'ŷ = {fit_i.coef()["Intercept"]:.2f} + {fit_i.coef()["x"]:.2f}x')
     # Add population line
     x_range = np.linspace(df['x'].min(), df['x'].max(), 100)
     y_pop = 1 + 2*x_range
@@ -852,7 +851,7 @@ From the formula $se(b_2) = \frac{s_e}{\sqrt{\sum_{i=1}^n (x_i - \bar{x})^2}}$, 
 
 ### Software Implementation
 
-- **Python tools**: `statsmodels.OLS` for estimation, `numpy` for simulation, `matplotlib` for visualization
+- **Python tools**: `pyfixest.feols` for estimation, `numpy` for simulation, `matplotlib` for visualization
 - Generated data example uses **random seed** for reproducibility
 - **Visualization techniques**: Scatter plots with fitted line, histograms of sampling distributions
 - Can compare **population line vs. fitted line** when population model is known (simulations)
@@ -871,7 +870,8 @@ This single code block reproduces the core workflow of Chapter 6. It is self-con
 import numpy as np                        # random sampling and numerical operations
 import pandas as pd                       # data manipulation
 import matplotlib.pyplot as plt           # creating plots and visualizations
-from statsmodels.formula.api import ols   # OLS regression with R-style formulas
+import pyfixest as pf                     # fast OLS regression
+# !pip install pyfixest  # uncomment if running in Google Colab
 
 # =============================================================================
 # STEP 1: Define the Data-Generating Process (DGP)
@@ -896,17 +896,17 @@ print(f"Generated sample: {n} observations from y = {beta_1_true} + {beta_2_true
 # STEP 2: Fit OLS and compare sample vs. population parameters
 # =============================================================================
 # The sample regression estimates the unknown population line from data
-model = ols('y ~ x', data=data).fit()
+fit = pf.feols('y ~ x', data=data)
 
-b1 = model.params['Intercept']
-b2 = model.params['x']
+b1 = fit.coef()['Intercept']
+b2 = fit.coef()['x']
 
 print(f"\nPopulation:  E[y|x] = {beta_1_true} + {beta_2_true}x")
 print(f"Sample:      ŷ = {b1:.2f} + {b2:.2f}x")
 print(f"Sampling error in slope: b₂ - β₂ = {b2 - beta_2_true:.4f}")
 
 # Full regression table (coefficients, std errors, t-stats, p-values, R²)
-model.summary()
+fit.summary()
 
 # =============================================================================
 # STEP 3: Scatter plot — population line vs. sample line
@@ -914,7 +914,7 @@ model.summary()
 # Visualizing the gap between the true line and our estimate
 fig, ax = plt.subplots(figsize=(10, 6))
 ax.scatter(data['x'], data['y'], s=50, alpha=0.7, label='Observed data')
-ax.plot(data['x'], model.fittedvalues, color='red', linewidth=2,
+ax.plot(data['x'], fit.predict(), color='red', linewidth=2,
         label=f'Sample: ŷ = {b1:.2f} + {b2:.2f}x')
 x_range = np.linspace(data['x'].min(), data['x'].max(), 100)
 ax.plot(x_range, beta_1_true + beta_2_true * x_range,
@@ -941,8 +941,8 @@ for i in range(n_simulations):
     u_sim = np.random.normal(0, sigma_u, n)
     y_sim = beta_1_true + beta_2_true * x_sim + u_sim
     df_sim = pd.DataFrame({'x': x_sim, 'y': y_sim})
-    m = ols('y ~ x', data=df_sim).fit()
-    b2_estimates.append(m.params['x'])
+    m = pf.feols('y ~ x', data=df_sim)
+    b2_estimates.append(m.coef()['x'])
 
 print(f"\nMonte Carlo results ({n_simulations} simulations, n={n} each):")
 print(f"  True β₂:              {beta_2_true}")
@@ -973,8 +973,8 @@ plt.show()
 # =============================================================================
 # se(b₂) = sₑ / √[Σ(xᵢ - x̄)²]
 # Smaller when: (1) model fits well, (2) large n, (3) x spread wide
-se_b2       = model.bse['x']                       # from regression output
-s_e         = np.sqrt(model.mse_resid)             # standard error of regression
+se_b2       = fit.se()['x']                        # from regression output
+s_e         = np.sqrt(np.mean(fit._u_hat**2) * len(data) / (len(data) - 2))  # standard error of regression
 x_variation = np.sum((data['x'] - data['x'].mean())**2)
 
 print(f"\nStandard error anatomy (from the single-sample regression):")
@@ -997,8 +997,8 @@ for ns in sample_sizes:
         xs = np.random.normal(3, 1, ns)
         us = np.random.normal(0, sigma_u, ns)
         ys = beta_1_true + beta_2_true * xs + us
-        m = ols('y ~ x', data=pd.DataFrame({'x': xs, 'y': ys})).fit()
-        estimates.append(m.params['x'])
+        m = pf.feols('y ~ x', data=pd.DataFrame({'x': xs, 'y': ys}))
+        estimates.append(m.coef()['x'])
     print(f"{ns:>6}  {np.mean(estimates):>10.4f}  {np.std(estimates):>22.4f}")
 ```
 
@@ -1203,12 +1203,12 @@ data_2014.head()
 **Code template:**
 ```python
 # Estimate full-sample ("population") regression
-population_model = ols('productivity ~ capital', data=data_2014).fit()
-print(population_model.summary())
+fit_pop = pf.feols('productivity ~ capital', data=data_2014)
+print(fit_pop.summary())
 
 # Store population coefficients
-beta_1_pop = population_model.params['Intercept']
-beta_2_pop = population_model.params['capital']
+beta_1_pop = fit_pop.coef()['Intercept']
+beta_2_pop = fit_pop.coef()['capital']
 print(f"\nPopulation coefficients: β₁ = {beta_1_pop:.4f}, β₂ = {beta_2_pop:.4f}")
 ```
 
@@ -1259,10 +1259,10 @@ for i in range(n_simulations):
     sample = data_2014.sample(n=sample_size, replace=False)
     
     # Estimate regression
-    model = ols('productivity ~ capital', data=sample).fit()
-    
+    fit_sample = pf.feols('productivity ~ capital', data=sample)
+
     # Store slope coefficient
-    b2_estimates.append(model.params['capital'])
+    b2_estimates.append(fit_sample.coef()['capital'])
 
 # Analyze sampling distribution
 print(f"Mean of b₂ estimates: {np.mean(b2_estimates):.4f}")

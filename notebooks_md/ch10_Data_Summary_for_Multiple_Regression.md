@@ -73,8 +73,7 @@ import numpy as np                        # numerical operations
 import pandas as pd                       # data manipulation
 import matplotlib.pyplot as plt           # plotting
 import seaborn as sns                     # statistical visualization
-import statsmodels.api as sm              # statistical models
-from statsmodels.formula.api import ols   # OLS with formula syntax
+import pyfixest as pf                     # fast estimation with robust SEs
 from scipy import stats                   # statistical distributions
 import random
 import os
@@ -143,28 +142,28 @@ Let's compare a simple regression (price on bedrooms only) with a multiple regre
 
 ```python
 # Bivariate regression: price ~ bedrooms
-model_bivariate = ols('price ~ bedrooms', data=data_house).fit()
+model_bivariate = pf.feols('price ~ bedrooms', data=data_house)
 
 # Key results: bivariate
-print(f"Bivariate: bedrooms coef = ${model_bivariate.params['bedrooms']:,.2f}, R² = {model_bivariate.rsquared:.4f}")
+print(f"Bivariate: bedrooms coef = ${model_bivariate.coef()['bedrooms']:,.2f}, R² = {model_bivariate._r2:.4f}")
 
 # Full regression output
 model_bivariate.summary()
 
 # Multiple regression: price ~ bedrooms + size
-model_multiple = ols('price ~ bedrooms + size', data=data_house).fit()
+model_multiple = pf.feols('price ~ bedrooms + size', data=data_house)
 
 # Key results: multiple
-print(f"Multiple: bedrooms coef = ${model_multiple.params['bedrooms']:,.2f}, R² = {model_multiple.rsquared:.4f}")
+print(f"Multiple: bedrooms coef = ${model_multiple.coef()['bedrooms']:,.2f}, R² = {model_multiple._r2:.4f}")
 
 # Full regression output
 model_multiple.summary()
 
 # Compare bedrooms coefficient
 # COEFFICIENT COMPARISON
-print(f"Bedrooms coefficient (bivariate):  ${model_bivariate.params['bedrooms']:,.2f}")
-print(f"Bedrooms coefficient (multiple):   ${model_multiple.params['bedrooms']:,.2f}")
-print(f"Change: ${model_multiple.params['bedrooms'] - model_bivariate.params['bedrooms']:,.2f}")
+print(f"Bedrooms coefficient (bivariate):  ${model_bivariate.coef()['bedrooms']:,.2f}")
+print(f"Bedrooms coefficient (multiple):   ${model_multiple.coef()['bedrooms']:,.2f}")
+print(f"Change: ${model_multiple.coef()['bedrooms'] - model_bivariate.coef()['bedrooms']:,.2f}")
 
 ```
 
@@ -252,15 +251,14 @@ where $y_i$ is the actual price and $\widehat{y}_i$ is the predicted price.
 
 ```python
 # Estimate full multiple regression model
-model_full = ols('price ~ size + bedrooms + bathrooms + lotsize + age + monthsold',
-                 data=data_house).fit()
+model_full = pf.feols('price ~ size + bedrooms + bathrooms + lotsize + age + monthsold', data=data_house)
 
 # Key results
-r_squared_full = model_full.rsquared
-adj_r_squared_full = model_full.rsquared_adj
-size_coef = model_full.params['size']
+r_squared_full = model_full._r2
+adj_r_squared_full = model_full._adj_r2
+size_coef = model_full.coef()['size']
 
-print(f"Estimated equation: price = {model_full.params['Intercept']:,.0f} + {size_coef:.2f} x size + ...")
+print(f"Estimated equation: price = {model_full.coef()['Intercept']:,.0f} + {size_coef:.2f} x size + ...")
 print(f"Size effect: each additional sq ft is associated with ${size_coef:,.2f} higher price")
 print(f"R-squared: {r_squared_full:.4f} ({r_squared_full*100:.1f}% of variation explained)")
 print(f"Adjusted R-squared: {adj_r_squared_full:.4f}")
@@ -282,14 +280,14 @@ The 95% confidence interval tells us the range of plausible values for each coef
 
 ```python
 # Display coefficients with 95% confidence intervals
-conf_int = model_full.conf_int(alpha=0.05)
+conf_int = model_full.confint()
 coef_table = pd.DataFrame({
-    'Coefficient': model_full.params,
-    'Std. Error': model_full.bse,
+    'Coefficient': model_full.coef(),
+    'Std. Error': model_full.se(),
     'CI Lower': conf_int.iloc[:, 0],
     'CI Upper': conf_int.iloc[:, 1],
-    't-statistic': model_full.tvalues,
-    'p-value': model_full.pvalues
+    't-statistic': model_full.tstat(),
+    'p-value': model_full.pvalue()
 })
 
 print("Coefficients with 95% Confidence Intervals:")
@@ -316,19 +314,18 @@ The **Frisch-Waugh-Lovell (FWL) Theorem** states that the coefficient on any var
 
 ```python
 # Step 1: Regress size on all other variables
-model_size_on_others = ols('size ~ bedrooms + bathrooms + lotsize + age + monthsold',
-                            data=data_house).fit()
-resid_size = model_size_on_others.resid
+model_size_on_others = pf.feols('size ~ bedrooms + bathrooms + lotsize + age + monthsold', data=data_house)
+resid_size = model_size_on_others._u_hat
 
 # Step 2: Regress price on residualized size
 data_house['resid_size'] = resid_size
-model_price_on_resid = ols('price ~ resid_size', data=data_house).fit()
+model_price_on_resid = pf.feols('price ~ resid_size', data=data_house)
 
 # Compare coefficients
 # DEMONSTRATION: FWL THEOREM (Partial Effects)
-print(f"Size coefficient from FULL multiple regression:  {model_full.params['size']:.10f}")
-print(f"Coefficient on residualized size (bivariate):    {model_price_on_resid.params['resid_size']:.10f}")
-print(f"Difference (numerical precision):                 {abs(model_full.params['size'] - model_price_on_resid.params['resid_size']):.15f}")
+print(f"Size coefficient from FULL multiple regression:  {model_full.coef()['size']:.10f}")
+print(f"Coefficient on residualized size (bivariate):    {model_price_on_resid.coef()['resid_size']:.10f}")
+print(f"Difference (numerical precision):                 {abs(model_full.coef()['size'] - model_price_on_resid.coef()['resid_size']):.15f}")
 
 ```
 
@@ -363,25 +360,25 @@ Several statistics summarize how well the regression model fits the data:
 ```python
 # Calculate and display model fit statistics
 n = len(data_house)
-k = len(model_full.params)  # includes intercept
+k = len(model_full.coef())  # includes intercept
 df = n - k
 
 # MODEL FIT STATISTICS
 print(f"Sample size (n):               {n}")
 print(f"Number of parameters (k):      {k}")
 print(f"Degrees of freedom (n-k):      {df}")
-print(f"\nR-squared:                     {model_full.rsquared:.6f}")
-print(f"Adjusted R-squared:            {model_full.rsquared_adj:.6f}")
-print(f"Root MSE:                      ${np.sqrt(model_full.mse_resid):,.2f}")
+print(f"\nR-squared:                     {model_full._r2:.6f}")
+print(f"Adjusted R-squared:            {model_full._adj_r2:.6f}")
+print(f"Root MSE:                      ${np.sqrt(np.sum(model_full._u_hat**2) / (int(model_full._N) - len(model_full.coef()))):,.2f}")
 
 # Verify R² = [Corr(y, ŷ)]²
-predicted = model_full.fittedvalues
+predicted = model_full.predict()
 corr_y_yhat = np.corrcoef(data_house['price'], predicted)[0, 1]
 print(f"\nVerification: R² = [Corr(y, ŷ)]²")
 print(f"  Correlation(y, ŷ):           {corr_y_yhat:.6f}")
 print(f"  [Correlation(y, ŷ)]²:        {corr_y_yhat**2:.6f}")
-print(f"  R² from model:                {model_full.rsquared:.6f}")
-print(f"  Match: {np.isclose(corr_y_yhat**2, model_full.rsquared)}")
+print(f"  R² from model:                {model_full._r2:.6f}")
+print(f"  Match: {np.isclose(corr_y_yhat**2, model_full._r2)}")
 ```
 
 ### Information Criteria (AIC and BIC)
@@ -402,16 +399,12 @@ $$\text{BIC} = n \times \ln(\widehat{\sigma}_e^2) + n(1 + \ln 2\pi) + k \times \
 # Calculate information criteria
 # INFORMATION CRITERIA
 
-# AIC and BIC from statsmodels
-print(f"AIC (statsmodels):             {model_full.aic:.4f}")
-print(f"BIC (statsmodels):             {model_full.bic:.4f}")
-
-# Manual calculation (Stata convention)
-rss = np.sum(model_full.resid ** 2)
+# Manual calculation of AIC and BIC (Stata convention)
+rss = np.sum(model_full._u_hat ** 2)
 aic_stata = n * np.log(rss/n) + n * (1 + np.log(2*np.pi)) + 2*k
 bic_stata = n * np.log(rss/n) + n * (1 + np.log(2*np.pi)) + k*np.log(n)
 
-print(f"\nAIC (Stata convention):        {aic_stata:.4f}")
+print(f"AIC (Stata convention):        {aic_stata:.4f}")
 print(f"BIC (Stata convention):        {bic_stata:.4f}")
 
 ```
@@ -437,24 +430,24 @@ It's often useful to compare multiple model specifications side-by-side. Here we
 
 ```python
 # Estimate simple model (size only)
-model_simple = ols('price ~ size', data=data_house).fit()
+model_simple = pf.feols('price ~ size', data=data_house)
 
 # Create comparison table
 # MODEL COMPARISON: Simple vs. Full
 
 comparison_stats = pd.DataFrame({
     'Model': ['Simple (size only)', 'Full (all variables)'],
-    'R²': [model_simple.rsquared, model_full.rsquared],
-    'Adj R²': [model_simple.rsquared_adj, model_full.rsquared_adj],
-    'AIC': [model_simple.aic, model_full.aic],
-    'BIC': [model_simple.bic, model_full.bic],
+    'R²': [model_simple._r2, model_full._r2],
+    'Adj R²': [model_simple._adj_r2, model_full._adj_r2],
+    'AIC': [model_simple._aic if hasattr(model_simple, "_aic") else float("nan"), model_full._aic if hasattr(model_full, "_aic") else float("nan")],
+    'BIC': [model_simple._bic if hasattr(model_simple, "_bic") else float("nan"), model_full._bic if hasattr(model_full, "_bic") else float("nan")],
     'N': [n, n]
 })
 
 comparison_stats.to_string(index=False)
 
-print(f"R² increases from {model_simple.rsquared:.3f} to {model_full.rsquared:.3f}")
-print(f"Adj R² decreases from {model_simple.rsquared_adj:.3f} to {model_full.rsquared_adj:.3f}")
+print(f"R² increases from {model_simple._r2:.3f} to {model_full._r2:.3f}")
+print(f"Adj R² decreases from {model_simple._adj_r2:.3f} to {model_full._adj_r2:.3f}")
 ```
 
 > **Key Concept 10.7: The Parsimony Principle**
@@ -490,7 +483,7 @@ print("Creating variable: size_twice = 2 × size")
 print("Attempting to estimate: price ~ size + size_twice + bedrooms\n")
 
 try:
-    model_collinear = ols('price ~ size + size_twice + bedrooms', data=data_house).fit()
+    model_collinear = pf.feols('price ~ size + size_twice + bedrooms', data=data_house)
     print("Model estimated (software automatically dropped one variable):")
     model_collinear.summary()
 except Exception as e:
@@ -535,7 +528,7 @@ A plot of actual vs. predicted values helps visualize model fit. Points close to
 ```python
 # Create actual vs predicted plot
 fig, ax = plt.subplots(figsize=(10, 6))
-ax.scatter(data_house['price'], model_full.fittedvalues, alpha=0.6, s=50, color='#22d3ee')  # alpha = transparency, s = marker size
+ax.scatter(data_house['price'], model_full.predict(), alpha=0.6, s=50, color='#22d3ee')  # alpha = transparency, s = marker size
 ax.plot([data_house['price'].min(), data_house['price'].max()],
         [data_house['price'].min(), data_house['price'].max()],
         'r--', linewidth=2, label='Perfect prediction (45° line)')
@@ -567,7 +560,7 @@ A **residual plot** (residuals vs. fitted values) helps diagnose model problems:
 ```python
 # Create residual plot
 fig, ax = plt.subplots(figsize=(10, 6))
-ax.scatter(model_full.fittedvalues, model_full.resid, alpha=0.6, s=50, color='#22d3ee')  # alpha = transparency, s = marker size
+ax.scatter(model_full.predict(), model_full._u_hat, alpha=0.6, s=50, color='#22d3ee')  # alpha = transparency, s = marker size
 ax.axhline(y=0, color='red', linestyle='--', linewidth=2, label='Zero residual line')
 ax.set_xlabel('Fitted values ($1000s)', fontsize=12)
 ax.set_ylabel('Residuals ($1000s)', fontsize=12)
@@ -681,7 +674,7 @@ import numpy as np                                          # numerical operatio
 import pandas as pd                                         # data loading and manipulation
 import matplotlib.pyplot as plt                             # creating plots and visualizations
 import seaborn as sns                                       # statistical visualization (heatmaps, pairplots)
-from statsmodels.formula.api import ols                     # OLS regression with R-style formulas
+import pyfixest as pf                                       # fast estimation with robust SEs
 from statsmodels.stats.outliers_influence import variance_inflation_factor  # multicollinearity detection
 
 # =============================================================================
@@ -698,14 +691,14 @@ print(data_house[['price', 'size', 'bedrooms', 'bathrooms', 'lotsize', 'age']].d
 # STEP 2: Partial effects vs. total effects — why controls matter
 # =============================================================================
 # Bivariate regression captures TOTAL effect (direct + indirect through size)
-model_bivariate = ols('price ~ bedrooms', data=data_house).fit()
+model_bivariate = pf.feols('price ~ bedrooms', data=data_house)
 
 # Multiple regression isolates the PARTIAL effect (holding size constant)
-model_partial = ols('price ~ bedrooms + size', data=data_house).fit()
+model_partial = pf.feols('price ~ bedrooms + size', data=data_house)
 
-print(f"Bedrooms coefficient (bivariate):  ${model_bivariate.params['bedrooms']:,.2f}")
-print(f"Bedrooms coefficient (multiple):   ${model_partial.params['bedrooms']:,.2f}")
-print(f"Change: ${model_partial.params['bedrooms'] - model_bivariate.params['bedrooms']:,.2f}")
+print(f"Bedrooms coefficient (bivariate):  ${model_bivariate.coef()['bedrooms']:,.2f}")
+print(f"Bedrooms coefficient (multiple):   ${model_partial.coef()['bedrooms']:,.2f}")
+print(f"Change: ${model_partial.coef()['bedrooms'] - model_bivariate.coef()['bedrooms']:,.2f}")
 # The coefficient drops from ~$23,667 to ~$1,553 once we control for size
 
 # =============================================================================
@@ -730,13 +723,12 @@ print(f"Size-Bedrooms correlation: {corr_matrix.loc['size', 'bedrooms']:.3f}")
 # =============================================================================
 # Each coefficient measures the change in price for a one-unit change in that
 # variable, holding ALL other regressors constant
-model_full = ols('price ~ size + bedrooms + bathrooms + lotsize + age + monthsold',
-                 data=data_house).fit()
+model_full = pf.feols('price ~ size + bedrooms + bathrooms + lotsize + age + monthsold', data=data_house)
 
-size_coef = model_full.params['size']
+size_coef = model_full.coef()['size']
 print(f"Size effect: each additional sq ft is associated with ${size_coef:,.2f} higher price")
-print(f"R-squared: {model_full.rsquared:.4f} ({model_full.rsquared*100:.1f}% of variation explained)")
-print(f"Adjusted R-squared: {model_full.rsquared_adj:.4f}")
+print(f"R-squared: {model_full._r2:.4f} ({model_full._r2*100:.1f}% of variation explained)")
+print(f"Adjusted R-squared: {model_full._adj_r2:.4f}")
 
 # Full regression table (coefficients, std errors, t-stats, p-values)
 model_full.summary()
@@ -745,30 +737,29 @@ model_full.summary()
 # STEP 5: FWL theorem — how "holding constant" actually works
 # =============================================================================
 # Step A: Regress size on all other regressors, keep residuals
-model_size_on_others = ols('size ~ bedrooms + bathrooms + lotsize + age + monthsold',
-                            data=data_house).fit()
-resid_size = model_size_on_others.resid
+model_size_on_others = pf.feols('size ~ bedrooms + bathrooms + lotsize + age + monthsold', data=data_house)
+resid_size = model_size_on_others._u_hat
 
 # Step B: Regress price on those residuals — the slope matches the full model
 data_house['resid_size'] = resid_size
-model_fwl = ols('price ~ resid_size', data=data_house).fit()
+model_fwl = pf.feols('price ~ resid_size', data=data_house)
 
-print(f"Size coef from FULL regression:     {model_full.params['size']:.10f}")
-print(f"Coef from FWL residual regression:  {model_fwl.params['resid_size']:.10f}")
+print(f"Size coef from FULL regression:     {model_full.coef()['size']:.10f}")
+print(f"Coef from FWL residual regression:  {model_fwl.coef()['resid_size']:.10f}")
 # These are identical — the FWL theorem in action
 
 # =============================================================================
 # STEP 6: Model comparison — parsimony vs. complexity
 # =============================================================================
 # Compare simple (size only) vs. full model using fit statistics
-model_simple = ols('price ~ size', data=data_house).fit()
+model_simple = pf.feols('price ~ size', data=data_house)
 
 comparison = pd.DataFrame({
     'Model': ['Size only', 'Full (all variables)'],
-    'R²':     [model_simple.rsquared,     model_full.rsquared],
-    'Adj R²': [model_simple.rsquared_adj, model_full.rsquared_adj],
-    'AIC':    [model_simple.aic,          model_full.aic],
-    'BIC':    [model_simple.bic,          model_full.bic],
+    'R²':     [model_simple._r2,     model_full._r2],
+    'Adj R²': [model_simple._adj_r2, model_full._adj_r2],
+    'AIC':    [model_simple._aic if hasattr(model_simple, "_aic") else float("nan"),          model_full._aic if hasattr(model_full, "_aic") else float("nan")],
+    'BIC':    [model_simple._bic if hasattr(model_simple, "_bic") else float("nan"),          model_full._bic if hasattr(model_full, "_bic") else float("nan")],
 })
 print(comparison.to_string(index=False))
 # Adj R² DECREASES when adding 5 weak predictors — parsimony wins
@@ -792,7 +783,7 @@ print(vif_data.to_string(index=False))
 fig, axes = plt.subplots(1, 2, figsize=(14, 6))
 
 # Actual vs. predicted
-axes[0].scatter(data_house['price'], model_full.fittedvalues, alpha=0.7, s=50)
+axes[0].scatter(data_house['price'], model_full.predict(), alpha=0.7, s=50)
 axes[0].plot([data_house['price'].min(), data_house['price'].max()],
              [data_house['price'].min(), data_house['price'].max()],
              'r--', linewidth=2, label='Perfect prediction (45° line)')
@@ -803,7 +794,7 @@ axes[0].legend()
 axes[0].grid(True, alpha=0.3)
 
 # Residual plot
-axes[1].scatter(model_full.fittedvalues, model_full.resid, alpha=0.7, s=50)
+axes[1].scatter(model_full.predict(), model_full._u_hat, alpha=0.7, s=50)
 axes[1].axhline(y=0, color='red', linestyle='--', linewidth=2)
 axes[1].set_xlabel('Fitted Values ($)')
 axes[1].set_ylabel('Residuals ($)')
@@ -816,7 +807,7 @@ plt.show()
 
 **Try it yourself!** Copy this code into an empty Google Colab notebook and run it: [Open Colab](https://colab.research.google.com/notebooks/empty.ipynb)
 
-**Python tools used:** `statsmodels` (OLS, VIF), `seaborn` (pairplot, heatmap), `pandas` (DataFrames), `matplotlib` (coefficient plots, diagnostics)
+**Python tools used:** `pyfixest` (feols), `statsmodels` (VIF), `seaborn` (pairplot, heatmap), `pandas` (DataFrames), `matplotlib` (coefficient plots, diagnostics)
 
 **Next steps:** Chapter 11 covers **statistical inference** for multiple regression — hypothesis tests, confidence intervals, and overall F-tests for model significance.
 
@@ -999,15 +990,15 @@ Estimate bivariate and multiple regression models for labor productivity.
 
 ```python
 # Model 1: ln(lp) ~ ln(rk) only
-model1 = ols('ln_lp ~ ln_rk', data=dat_2014).fit()
+model1 = pf.feols('ln_lp ~ ln_rk', data=dat_2014)
 print(model1.summary())
 
 # Model 2: ln(lp) ~ hc only
-model2 = ols('ln_lp ~ hc', data=dat_2014).fit()
+model2 = pf.feols('ln_lp ~ hc', data=dat_2014)
 print(model2.summary())
 
 # Model 3: ln(lp) ~ ln(rk) + hc (multiple regression)
-model3 = ols('ln_lp ~ ln_rk + hc', data=dat_2014).fit()
+model3 = pf.feols('ln_lp ~ ln_rk + hc', data=dat_2014)
 print(model3.summary())
 ```
 
@@ -1023,9 +1014,9 @@ Interpret the coefficients from the multiple regression model.
 ```python
 # Display coefficients with confidence intervals
 print("Model 3 Coefficients:")
-print(model3.params)
+print(model3.coef())
 print("\n95% Confidence Intervals:")
-print(model3.conf_int())
+print(model3.confint())
 ```
 
 **Questions:**
@@ -1045,7 +1036,7 @@ Compare models using fit statistics and information criteria.
 3. Does the parsimony principle favor one model over another?
 4. Calculate VIF for Model 3 — is multicollinearity a concern?
 
-*Hint: Use `model.rsquared`, `model.rsquared_adj`, `model.aic`, `model.bic` and `variance_inflation_factor()` from statsmodels.*
+*Hint: Use `model._r2`, `model._adj_r2`, `model._aic if hasattr(model, "_aic") else float("nan")`, `model._bic if hasattr(model, "_bic") else float("nan")` and `variance_inflation_factor()` from statsmodels.*
 
 #### Task 6: Development Policy Brief (Independent)
 
@@ -1207,7 +1198,7 @@ for var, r in imds_corr.items():
 4. Interpret: How much does adding embeddings improve explanatory power?
 5. Which embedding coefficients are statistically significant?
 
-**Apply what you learned in section 10.4**: Use `ols()` from statsmodels and interpret partial effects.
+**Apply what you learned in section 10.4**: Use `pf.feols()` from pyfixest and interpret partial effects.
 
 ```python
 # Your code here: Multiple regression with satellite predictors
@@ -1217,21 +1208,20 @@ reg_data = bol_sat[['imds', 'ln_NTLpc2017', 'A00', 'A10', 'A20', 'A30', 'A40']].
 print(f"Regression sample: {len(reg_data)} municipalities (complete cases)")
 
 # Step 2: Bivariate model (NTL only — baseline from Chapter 1)
-model_ntl = ols('imds ~ ln_NTLpc2017', data=reg_data).fit()
+model_ntl = pf.feols('imds ~ ln_NTLpc2017', data=reg_data)
 # MODEL 1: BIVARIATE — imds ~ ln_NTLpc2017
 model_ntl.summary()
 
 # Step 3: Multiple regression (NTL + all 5 embeddings)
-model_full_sat = ols('imds ~ ln_NTLpc2017 + A00 + A10 + A20 + A30 + A40',
-                     data=reg_data).fit()
+model_full_sat = pf.feols('imds ~ ln_NTLpc2017 + A00 + A10 + A20 + A30 + A40', data=reg_data)
 # MODEL 2: MULTIPLE — imds ~ ln_NTLpc2017 + A00 + A10 + A20 + A30 + A40
 model_full_sat.summary()
 
 # Step 4: Compare R-squared
 # R-SQUARED COMPARISON
-print(f"NTL only:           R² = {model_ntl.rsquared:.4f}")
-print(f"NTL + 5 embeddings: R² = {model_full_sat.rsquared:.4f}")
-print(f"Improvement:        ΔR² = {model_full_sat.rsquared - model_ntl.rsquared:.4f}")
+print(f"NTL only:           R² = {model_ntl._r2:.4f}")
+print(f"NTL + 5 embeddings: R² = {model_full_sat._r2:.4f}")
+print(f"Improvement:        ΔR² = {model_full_sat._r2 - model_ntl._r2:.4f}")
 ```
 
 #### Task 4: Partial Effects via FWL (Semi-guided)
@@ -1251,22 +1241,22 @@ print(f"Improvement:        ΔR² = {model_full_sat.rsquared - model_ntl.rsquare
 # Your code here: FWL theorem demonstration
 #
 # Step 1: Regress imds on embeddings only, save residuals e_y
-model_y_on_emb = ols('imds ~ A00 + A10 + A20 + A30 + A40', data=reg_data).fit()
-e_y = model_y_on_emb.resid
+model_y_on_emb = pf.feols('imds ~ A00 + A10 + A20 + A30 + A40', data=reg_data)
+e_y = model_y_on_emb._u_hat
 
 # Step 2: Regress ln_NTLpc2017 on embeddings only, save residuals e_x
-model_x_on_emb = ols('ln_NTLpc2017 ~ A00 + A10 + A20 + A30 + A40', data=reg_data).fit()
-e_x = model_x_on_emb.resid
+model_x_on_emb = pf.feols('ln_NTLpc2017 ~ A00 + A10 + A20 + A30 + A40', data=reg_data)
+e_x = model_x_on_emb._u_hat
 
 # Step 3: Regress e_y on e_x
 fwl_data = pd.DataFrame({'e_y': e_y, 'e_x': e_x})
-model_fwl = ols('e_y ~ e_x', data=fwl_data).fit()
+model_fwl = pf.feols('e_y ~ e_x', data=fwl_data)
 
 # Step 4: Compare coefficients
 # FWL THEOREM DEMONSTRATION
-print(f"NTL coefficient from FULL multiple regression:  {model_full_sat.params['ln_NTLpc2017']:.10f}")
-print(f"Coefficient from FWL residual regression:       {model_fwl.params['e_x']:.10f}")
-print(f"Difference (numerical precision):                {abs(model_full_sat.params['ln_NTLpc2017'] - model_fwl.params['e_x']):.15f}")
+print(f"NTL coefficient from FULL multiple regression:  {model_full_sat.coef()['ln_NTLpc2017']:.10f}")
+print(f"Coefficient from FWL residual regression:       {model_fwl.coef()['e_x']:.10f}")
+print(f"Difference (numerical precision):                {abs(model_full_sat.coef()['ln_NTLpc2017'] - model_fwl.coef()['e_x']):.15f}")
 # The coefficients are identical — confirming the FWL theorem
 ```
 
@@ -1282,7 +1272,7 @@ print(f"Difference (numerical precision):                {abs(model_full_sat.par
    - **Model 3**: `imds ~ ln_NTLpc2017 + A00 + A10 + A20 + A30 + A40` (NTL + 5 embeddings)
 
 2. Create a comparison table reporting $R^2$, adjusted $R^2$, AIC, and BIC for each model
-3. Use `model.rsquared`, `model.rsquared_adj`, `model.aic`, `model.bic`
+3. Use `model._r2`, `model._adj_r2`, `model._aic if hasattr(model, "_aic") else float("nan")`, `model._bic if hasattr(model, "_bic") else float("nan")`
 4. Which model is "best" by each criterion?
 5. Does the parsimony principle favor fewer or more embedding variables?
 
@@ -1292,17 +1282,17 @@ print(f"Difference (numerical precision):                {abs(model_full_sat.par
 # Your code here: Model comparison
 #
 # Step 1: Estimate three models
-# model_1 = ols('imds ~ ln_NTLpc2017', data=reg_data).fit()
-# model_2 = ols('imds ~ ln_NTLpc2017 + A00 + A10', data=reg_data).fit()
-# model_3 = ols('imds ~ ln_NTLpc2017 + A00 + A10 + A20 + A30 + A40', data=reg_data).fit()
+# model_1 = pf.feols('imds ~ ln_NTLpc2017', data=reg_data)
+# model_2 = pf.feols('imds ~ ln_NTLpc2017 + A00 + A10', data=reg_data)
+# model_3 = pf.feols('imds ~ ln_NTLpc2017 + A00 + A10 + A20 + A30 + A40', data=reg_data)
 #
 # Step 2: Create comparison table
 # comparison = pd.DataFrame({
 #     'Model': ['NTL only', 'NTL + 2 embeddings', 'NTL + 5 embeddings'],
-#     'R²': [model_1.rsquared, model_2.rsquared, model_3.rsquared],
-#     'Adj R²': [model_1.rsquared_adj, model_2.rsquared_adj, model_3.rsquared_adj],
-#     'AIC': [model_1.aic, model_2.aic, model_3.aic],
-#     'BIC': [model_1.bic, model_2.bic, model_3.bic],
+#     'R²': [model_1._r2, model_2._r2, model_3._r2],
+#     'Adj R²': [model_1._adj_r2, model_2._adj_r2, model_3._adj_r2],
+#     'AIC': [model_1._aic if hasattr(model_1, "_aic") else float("nan"), model_2._aic if hasattr(model_2, "_aic") else float("nan"), model_3._aic if hasattr(model_3, "_aic") else float("nan")],
+#     'BIC': [model_1._bic if hasattr(model_1, "_bic") else float("nan"), model_2._bic if hasattr(model_2, "_bic") else float("nan"), model_3._bic if hasattr(model_3, "_bic") else float("nan")],
 #     'N': [len(reg_data)] * 3
 # })
 # print(comparison.to_string(index=False))
@@ -1339,11 +1329,11 @@ print(f"Difference (numerical precision):                {abs(model_full_sat.par
 #
 # Example:
 # print("KEY RESULTS FOR POLICY BRIEF")
-# print(f"NTL-only R²:          {model_1.rsquared:.4f}")
-# print(f"NTL + 5 embed R²:     {model_3.rsquared:.4f}")
-# print(f"R² improvement:       {(model_3.rsquared - model_1.rsquared) / model_1.rsquared * 100:.1f}%")
-# print(f"NTL coef (bivariate): {model_1.params['ln_NTLpc2017']:.4f}")
-# print(f"NTL coef (multiple):  {model_3.params['ln_NTLpc2017']:.4f}")
+# print(f"NTL-only R²:          {model_1._r2:.4f}")
+# print(f"NTL + 5 embed R²:     {model_3._r2:.4f}")
+# print(f"R² improvement:       {(model_3._r2 - model_1._r2) / model_1._r2 * 100:.1f}%")
+# print(f"NTL coef (bivariate): {model_1.coef()['ln_NTLpc2017']:.4f}")
+# print(f"NTL coef (multiple):  {model_3.coef()['ln_NTLpc2017']:.4f}")
 ```
 
 #### What You've Learned from This Case Study

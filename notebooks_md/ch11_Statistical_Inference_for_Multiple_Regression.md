@@ -77,10 +77,9 @@ import numpy as np                              # numerical operations
 import pandas as pd                             # data manipulation
 import matplotlib.pyplot as plt                 # plotting
 import seaborn as sns                           # statistical visualization
-import statsmodels.api as sm                    # statistical models
-from statsmodels.formula.api import ols         # OLS with formula syntax
+import pyfixest as pf                           # fast estimation with robust SEs
 from scipy import stats                         # statistical distributions
-from statsmodels.stats.anova import anova_lm    # ANOVA for model comparison
+# anova_lm replaced by manual F-test with pyfixest
 import random
 import os
 
@@ -192,14 +191,13 @@ $$\text{price} = \beta_1 + \beta_2 \times \text{size} + \beta_3 \times \text{bed
 
 ```python
 # Full multiple regression model
-model_full = ols('price ~ size + bedrooms + bathrooms + lotsize + age + monthsold',
-                 data=data_house).fit()
+model_full = pf.feols('price ~ size + bedrooms + bathrooms + lotsize + age + monthsold', data=data_house)
 
 # Key results
-size_coef = model_full.params['size']
-size_pval = model_full.pvalues['size']
-r_squared = model_full.rsquared
-root_mse = np.sqrt(model_full.mse_resid)
+size_coef = model_full.coef()['size']
+size_pval = model_full.pvalue()['size']
+r_squared = model_full._r2
+root_mse = np.sqrt(np.sum(model_full._u_hat**2) / (int(model_full._N) - len(model_full.coef())))
 
 print(f"Size effect: ${size_coef:,.2f} per sq ft (p = {size_pval:.4f})")
 print(f"R-squared: {r_squared:.4f} ({r_squared*100:.1f}% of variation explained)")
@@ -240,24 +238,24 @@ Let's extract and display key model diagnostics to understand the estimation.
 ```python
 # Extract key statistics
 n = len(data_house)
-k = len(model_full.params)
+k = len(model_full.coef())
 df = n - k
 
 print("Model diagnostics:")
 print(f"  Sample size (n): {n}")
 print(f"  Number of parameters (k): {k}")
 print(f"  Degrees of freedom (n-k): {df}")
-print(f"  Root MSE (σ̂): ${np.sqrt(model_full.mse_resid):,.2f}")
-print(f"  R-squared: {model_full.rsquared:.4f}")
-print(f"  Adjusted R-squared: {model_full.rsquared_adj:.4f}")
+print(f"  Root MSE (σ̂): ${np.sqrt(np.sum(model_full._u_hat**2) / (int(model_full._N) - len(model_full.coef()))):,.2f}")
+print(f"  R-squared: {model_full._r2:.4f}")
+print(f"  Adjusted R-squared: {model_full._adj_r2:.4f}")
 
 # Create comprehensive coefficient table
 # Coefficient Table
 coef_table = pd.DataFrame({
-    'Coefficient': model_full.params,
-    'Std. Error': model_full.bse,
-    't-statistic': model_full.tvalues,
-    'p-value': model_full.pvalues
+    'Coefficient': model_full.coef(),
+    'Std. Error': model_full.se(),
+    't-statistic': model_full.tstat(),
+    'p-value': model_full.pvalue()
 })
 coef_table
 ```
@@ -325,7 +323,7 @@ The fact that only the size interval excludes zero provides strong evidence that
 # 11.3 CONFIDENCE INTERVALS
 
 # 95% confidence intervals
-conf_int = model_full.conf_int(alpha=0.05)
+conf_int = model_full.confint()
 print("\n95% Confidence Intervals:")
 conf_int
 ```
@@ -336,8 +334,8 @@ Let's manually calculate the confidence interval for the size coefficient to und
 
 ```python
 # Detailed confidence interval calculation for 'size'
-coef_size = model_full.params['size']
-se_size = model_full.bse['size']
+coef_size = model_full.coef()['size']
+se_size = model_full.se()['size']
 # 0.975 = upper tail for 95% two-sided CI (2.5% in each tail)
 t_crit = stats.t.ppf(0.975, df)
 
@@ -361,10 +359,10 @@ print(f"  95% CI: [${ci_lower:.2f}, ${ci_upper:.2f}]")
 # Create comprehensive coefficient table
 # Comprehensive Coefficient Table with 95% Confidence Intervals
 coef_table_full = pd.DataFrame({
-    'Coefficient': model_full.params,
-    'Std. Error': model_full.bse,
-    't-statistic': model_full.tvalues,
-    'p-value': model_full.pvalues,
+    'Coefficient': model_full.coef(),
+    'Std. Error': model_full.se(),
+    't-statistic': model_full.tstat(),
+    'p-value': model_full.pvalue(),
     'CI Lower': conf_int.iloc[:, 0],
     'CI Upper': conf_int.iloc[:, 1]
 })
@@ -452,7 +450,7 @@ The most common hypothesis test examines whether a coefficient is zero.
 # Test of Statistical Significance: H₀: β_size = 0
 
 t_stat_zero = coef_size / se_size
-p_value_zero = model_full.pvalues['size']
+p_value_zero = model_full.pvalue()['size']
 
 print(f"\n  t-statistic: {t_stat_zero:.4f}")
 print(f"  p-value: {p_value_zero:.6f}")
@@ -471,14 +469,13 @@ else:
 
 ### Using statsmodels t_test
 
-Python's statsmodels package provides convenient methods for hypothesis testing.
+Python's pyfixest package provides convenient methods for hypothesis testing.
 
 ```python
-# Using statsmodels t_test
-# Hypothesis test using statsmodels t_test:
-hypothesis = f'size = {null_value}'
-t_test_result = model_full.t_test(hypothesis)
-t_test_result
+# Using pyfixest wald_test
+# Hypothesis test using pyfixest wald_test:
+t_test_result = model_full.wald_test(R=np.array([[0, 0, 0, 0, 0, 1, 0]]), r=np.array([null_value]))
+print(t_test_result)
 
 ```
 
@@ -589,10 +586,10 @@ The F-statistic of 6.83 tells us that the explained variation (per parameter) is
 # H₀: β₁ = β₂ = ... = βₖ = 0
 # Test 1: Overall F-test (all slopes = 0)
 
-f_stat = model_full.fvalue
-f_pvalue = model_full.f_pvalue
+f_stat = model_full._f_statistic
 dfn = k - 1  # numerator df (excluding intercept)
 dfd = df     # denominator df
+f_pvalue = 1 - stats.f.cdf(f_stat, dfn, dfd)
 f_crit = stats.f.ppf(0.95, dfn, dfd)  # one-sided F-test at 5% significance
 
 print(f"  H₀: All slope coefficients equal zero")
@@ -617,16 +614,23 @@ Now test whether variables other than size are jointly significant.
 # H₀: β_bedrooms = β_bathrooms = β_lotsize = β_age = β_monthsold = 0
 # Test 2: Joint test - Are variables other than size significant?
 
-hypotheses = ['bedrooms = 0', 'bathrooms = 0', 'lotsize = 0',
-              'age = 0', 'monthsold = 0']
-f_test_result = model_full.f_test(hypotheses)
-f_test_result
+# Manual F-test: restricted model (size only) vs unrestricted (full)
+model_restricted_ftest = pf.feols('price ~ size', data=data_house)
+rss_r = np.sum(model_restricted_ftest._u_hat**2)
+rss_u = np.sum(model_full._u_hat**2)
+q = len(model_full.coef()) - len(model_restricted_ftest.coef())  # number of restrictions
+n_k = int(model_full._N) - len(model_full.coef())
+F_subset = ((rss_r - rss_u) / q) / (rss_u / n_k)
+p_value_subset = 1 - stats.f.cdf(F_subset, q, n_k)
+
+print(f"  Joint F-test: F({q}, {n_k}) = {F_subset:.4f}")
+print(f"  p-value: {p_value_subset:.4f}")
 
 print(f"\nInterpretation:")
 print(f"  This tests whether bedrooms, bathrooms, lotsize, age, and monthsold")
 print(f"  can jointly be excluded from the model (keeping only size).")
 
-if f_test_result.pvalue < 0.05:
+if p_value_subset < 0.05:
     print(f"  Result: These variables are jointly significant.")
 else:
     print(f"  Result: These variables are NOT jointly significant.")
@@ -705,8 +709,8 @@ $$F = \frac{R^2 / (k-1)}{(1-R^2) / (n-k)} \sim F(k-1, n-k)$$
 # Calculate sum of squares
 y = data_house['price']
 y_mean = y.mean()
-y_pred = model_full.fittedvalues
-resid = model_full.resid
+y_pred = model_full.predict()
+resid = model_full._u_hat
 
 # Total sum of squares
 TSS = np.sum((y - y_mean)**2)
@@ -731,7 +735,7 @@ print(f"  From model output: {f_stat:.4f}")
 print(f"  Match: {np.isclose(f_stat_manual, f_stat)}")
 
 # Alternative formula using R²
-r_squared = model_full.rsquared
+r_squared = model_full._r2
 f_stat_rsq = (r_squared / (k-1)) / ((1 - r_squared) / df)
 print(f"\nAlternative formula using R²:")
 print(f"  F = (R²/(k-1)) / ((1-R²)/(n-k))")
@@ -788,7 +792,7 @@ Comparing three nested models helps us understand the incremental value of addin
 
 # Unrestricted model (already estimated as model_full)
 # Restricted model (only size as regressor)
-model_restricted = ols('price ~ size', data=data_house).fit()
+model_restricted = pf.feols('price ~ size', data=data_house)
 
 print("\nRestricted model (only size):")
 model_restricted.summary()
@@ -862,12 +866,12 @@ Heteroskedasticity-robust (HC1) standard errors correct for potential violations
 
 ```python
 # Calculate F-statistic for subset test
-k_unrest = len(model_full.params)
-k_rest = len(model_restricted.params)
+k_unrest = len(model_full.coef())
+k_rest = len(model_restricted.coef())
 q = k_unrest - k_rest  # number of restrictions
 
-RSS_unrest = np.sum(model_full.resid**2)
-RSS_rest = np.sum(model_restricted.resid**2)
+RSS_unrest = np.sum(model_full._u_hat**2)
+RSS_rest = np.sum(model_restricted._u_hat**2)
 df_unrest = n - k_unrest
 
 F_subset = ((RSS_rest - RSS_unrest) / q) / (RSS_unrest / df_unrest)
@@ -895,12 +899,20 @@ else:
 ### ANOVA Table Comparison
 
 ```python
-# Using ANOVA table for comparison
-# ANOVA table comparison
-anova_results = anova_lm(model_restricted, model_full)
-anova_results
+# Model comparison using manual F-test (replaces anova_lm)
+rss_rest = np.sum(model_restricted._u_hat**2)
+rss_full = np.sum(model_full._u_hat**2)
+q_anova = len(model_full.coef()) - len(model_restricted.coef())
+n_k_anova = int(model_full._N) - len(model_full.coef())
+F_anova = ((rss_rest - rss_full) / q_anova) / (rss_full / n_k_anova)
+p_anova = 1 - stats.f.cdf(F_anova, q_anova, n_k_anova)
 
-print("\nThe ANOVA table confirms our manual F-test calculation.")
+print("Model Comparison: Restricted vs Full")
+print(f"  RSS (restricted): {rss_rest:,.2f}")
+print(f"  RSS (full):       {rss_full:,.2f}")
+print(f"  F-statistic:      {F_anova:.4f}")
+print(f"  p-value:          {p_anova:.4f}")
+print("\nThis confirms our manual F-test calculation.")
 ```
 
 > **Key Concept 11.7: Testing Subsets of Regressors**
@@ -937,10 +949,10 @@ This allows readers to see how coefficient estimates change across specification
 # Model Comparison: Three Specifications
 
 # Model 1: Simple regression
-model1 = ols('price ~ size', data=data_house).fit()
+model1 = pf.feols('price ~ size', data=data_house)
 
 # Model 2: Two regressors
-model2 = ols('price ~ size + bedrooms', data=data_house).fit()
+model2 = pf.feols('price ~ size + bedrooms', data=data_house)
 
 # Model 3: Full model (already estimated as model_full)
 model3 = model_full
@@ -953,12 +965,12 @@ comparison_data = []
 for name, model in zip(model_names, models):
     model_stats = {
         'Model': name,
-        'N': int(model.nobs),
-        'R²': f"{model.rsquared:.4f}",
-        'Adj. R²': f"{model.rsquared_adj:.4f}",
-        'RMSE': f"{np.sqrt(model.mse_resid):.2f}",
-        'F-stat': f"{model.fvalue:.4f}",
-        'p-value': f"{model.f_pvalue:.6f}"
+        'N': int(model._N),
+        'R²': f"{model._r2:.4f}",
+        'Adj. R²': f"{model._adj_r2:.4f}",
+        'RMSE': f"{np.sqrt(np.sum(model._u_hat**2) / (int(model._N) - len(model.coef()))):.2f}",
+        'F-stat': f"{model._f_statistic:.4f}",
+        'p-value': f"{1 - stats.f.cdf(model._f_statistic, len(model.coef())-1, int(model._N)-len(model.coef())):.6f}"
     }
     comparison_data.append(model_stats)
 
@@ -979,7 +991,7 @@ Now let's see how coefficient estimates change as we add variables.
 # Get all unique parameter names
 all_params = set()
 for model in models:
-    all_params.update(model.params.index)
+    all_params.update(model.coef().index)
 all_params = sorted(all_params)
 
 # Create coefficient table
@@ -989,7 +1001,7 @@ for i, (name, model) in enumerate(zip(model_names, models), 1):
     se_col = f'{name} SE'
     
     coef_comparison[coef_col] = model.params.reindex(all_params)
-    coef_comparison[se_col] = model.bse.reindex(all_params)
+    coef_comparison[se_col] = model.se().reindex(all_params)
 
 coef_comparison.fillna('-')
 
@@ -1017,17 +1029,18 @@ Classical OLS assumes constant error variance (homoskedasticity). When this fail
 # ROBUST STANDARD ERRORS (HC1)
 
 # Get robust results for full model
-model_full_robust = model_full.get_robustcov_results(cov_type='HC1')
+model_full_robust = pf.feols('price ~ size + bedrooms + bathrooms + lotsize + age + monthsold',
+                             data=data_house, vcov='HC1')
 
 print("\nComparison of standard vs robust standard errors:")
 robust_comparison = pd.DataFrame({
-    'Coefficient': model_full.params,
-    'Std. Error': model_full.bse,
-    'Robust SE': model_full_robust.bse,
-    't-stat (std)': model_full.tvalues,
-    't-stat (robust)': model_full_robust.tvalues,
-    'p-value (std)': model_full.pvalues,
-    'p-value (robust)': model_full_robust.pvalues
+    'Coefficient': model_full.coef(),
+    'Std. Error': model_full.se(),
+    'Robust SE': model_full_robust.se(),
+    't-stat (std)': model_full.tstat(),
+    't-stat (robust)': model_full_robust.tstat(),
+    'p-value (std)': model_full.pvalue(),
+    'p-value (robust)': model_full_robust.pvalue()
 })
 robust_comparison
 
@@ -1121,14 +1134,14 @@ Compare the three models visually by plotting actual vs. predicted values.
 fig, axes = plt.subplots(1, 3, figsize=(18, 5))
 
 for i, (model, name) in enumerate(zip(models, model_names)):
-    axes[i].scatter(data_house['price'], model.fittedvalues,
+    axes[i].scatter(data_house['price'], model.predict(),
                    alpha=0.6, s=50, color='#22d3ee')  # alpha = transparency, s = marker size
     axes[i].plot([data_house['price'].min(), data_house['price'].max()],
                 [data_house['price'].min(), data_house['price'].max()],
                 'r--', linewidth=2)
     axes[i].set_xlabel('Actual Price ($)', fontsize=11)
     axes[i].set_ylabel('Predicted Price ($)', fontsize=11)
-    axes[i].set_title(f'{name}\nR² = {model.rsquared:.4f}',
+    axes[i].set_title(f'{name}\nR² = {model._r2:.4f}',
                      fontsize=11, fontweight='bold')
     axes[i].grid(True, alpha=0.3)
 
@@ -1200,9 +1213,9 @@ This single code block reproduces the core workflow of Chapter 11. It is self-co
 import numpy as np                              # numerical operations
 import pandas as pd                             # data loading and manipulation
 import matplotlib.pyplot as plt                 # creating plots and visualizations
-from statsmodels.formula.api import ols         # OLS regression with R-style formulas
+import pyfixest as pf                           # fast estimation with robust SEs
 from scipy import stats                         # t and F distributions for inference
-from statsmodels.stats.anova import anova_lm    # ANOVA table for model comparison
+# anova_lm replaced by manual F-test with pyfixest
 
 # =============================================================================
 # STEP 1: Load data directly from a URL
@@ -1219,15 +1232,14 @@ print(data_house[['price', 'size', 'bedrooms', 'bathrooms', 'lotsize', 'age']].d
 # =============================================================================
 # Formula syntax: 'y ~ x1 + x2 + ...' includes an intercept automatically
 # IMPORTANT: .fit() estimates the model — without it, nothing is computed!
-model_full = ols('price ~ size + bedrooms + bathrooms + lotsize + age + monthsold',
-                 data=data_house).fit()
+model_full = pf.feols('price ~ size + bedrooms + bathrooms + lotsize + age + monthsold', data=data_house)
 
-n = int(model_full.nobs)
-k = len(model_full.params)
+n = int(model_full._N)
+k = len(model_full.coef())
 df = n - k  # degrees of freedom for t and F tests
 
-print(f"\nSize effect: ${model_full.params['size']:,.2f} per sq ft (p = {model_full.pvalues['size']:.4f})")
-print(f"R-squared: {model_full.rsquared:.4f} ({model_full.rsquared*100:.1f}% of variation explained)")
+print(f"\nSize effect: ${model_full.coef()['size']:,.2f} per sq ft (p = {model_full.pvalue()['size']:.4f})")
+print(f"R-squared: {model_full._r2:.4f} ({model_full._r2*100:.1f}% of variation explained)")
 print(f"Degrees of freedom: n-k = {n}-{k} = {df}")
 
 # Full regression table (coefficients, std errors, t-stats, p-values, R²)
@@ -1238,13 +1250,13 @@ model_full.summary()
 # =============================================================================
 # 95% CI: b_j ± t_critical × se(b_j)
 # If the interval excludes zero, the coefficient is statistically significant at 5%
-conf_int = model_full.conf_int(alpha=0.05)
+conf_int = model_full.confint()
 print("\n95% Confidence Intervals:")
 print(conf_int.round(2))
 
 # Manual calculation for the size coefficient
-coef_size = model_full.params['size']
-se_size   = model_full.bse['size']
+coef_size = model_full.coef()['size']
+se_size   = model_full.se()['size']
 t_crit    = stats.t.ppf(0.975, df)  # 0.975 = upper tail for two-sided 95% CI
 
 ci_lower = coef_size - t_crit * se_size
@@ -1268,55 +1280,53 @@ print(f"  Decision: {'Reject' if p_value < 0.05 else 'Fail to reject'} H₀ at 5
 # Test of statistical significance: H₀: β_size = 0
 t_stat_zero = coef_size / se_size
 print(f"\nTest H₀: β_size = 0")
-print(f"  t-statistic: {t_stat_zero:.4f}, p-value: {model_full.pvalues['size']:.6f}")
+print(f"  t-statistic: {t_stat_zero:.4f}, p-value: {model_full.pvalue()['size']:.6f}")
 print(f"  Size IS statistically significant at 5% level")
 
 # =============================================================================
 # STEP 5: Joint F-test — are groups of coefficients jointly significant?
 # =============================================================================
 # Overall F-test: H₀: all slope coefficients = 0
-print(f"\nOverall F-test: F = {model_full.fvalue:.4f}, p = {model_full.f_pvalue:.6e}")
+f_p = 1 - stats.f.cdf(model_full._f_statistic, len(model_full.coef())-1, int(model_full._N)-len(model_full.coef()))
+print(f"\nOverall F-test: F = {model_full._f_statistic:.4f}, p = {f_p:.6e}")
 print(f"  At least one variable matters → model is jointly significant")
 
 # Subset F-test: are variables other than size jointly significant?
 # H₀: β_bedrooms = β_bathrooms = β_lotsize = β_age = β_monthsold = 0
-hypotheses = ['bedrooms = 0', 'bathrooms = 0', 'lotsize = 0',
-              'age = 0', 'monthsold = 0']
-f_test_result = model_full.f_test(hypotheses)
+model_restricted = pf.feols('price ~ size', data=data_house)
+rss_r = np.sum(model_restricted._u_hat**2)
+rss_u = np.sum(model_full._u_hat**2)
+q = len(model_full.coef()) - len(model_restricted.coef())
+n_k = int(model_full._N) - len(model_full.coef())
+F_sub = ((rss_r - rss_u) / q) / (rss_u / n_k)
+p_sub = 1 - stats.f.cdf(F_sub, q, n_k)
 print(f"\nSubset F-test (drop 5 vars, keep size):")
-print(f"  F = {f_test_result.fvalue[0][0]:.4f}, p = {float(f_test_result.pvalue):.4f}")
+print(f"  F = {F_sub:.4f}, p = {p_sub:.4f}")
 print(f"  Extra variables are NOT jointly significant → simpler model preferred")
 
 # =============================================================================
 # STEP 6: Model comparison — restricted vs unrestricted
 # =============================================================================
-# Restricted model: only size as predictor
-model_restricted = ols('price ~ size', data=data_house).fit()
-
-# ANOVA table confirms the F-test result
-anova_results = anova_lm(model_restricted, model_full)
-print("\nANOVA: Restricted (size only) vs Full model:")
-print(anova_results)
-
 # Compare fit statistics
-print(f"\n{'Model':<25} {'R²':>8} {'Adj. R²':>9} {'F-stat':>8}")
-print("-" * 52)
+print(f"\n{'Model':<25} {'R²':>8} {'Adj. R²':>9}")
+print("-" * 44)
 for name, m in [('Size only', model_restricted), ('Full model', model_full)]:
-    print(f"{name:<25} {m.rsquared:>8.4f} {m.rsquared_adj:>9.4f} {m.fvalue:>8.2f}")
+    print(f"{name:<25} {m._r2:>8.4f} {m._adj_r2:>9.4f}")
 
 # =============================================================================
 # STEP 7: Robust standard errors — valid under heteroskedasticity
 # =============================================================================
 # HC1 (White's correction) provides valid inference without constant variance
-model_robust = model_full.get_robustcov_results(cov_type='HC1')
+model_robust = pf.feols('price ~ size + bedrooms + bathrooms + lotsize + age + monthsold',
+                        data=data_house, vcov='HC1')
 
 print("\nStandard vs Robust SEs:")
 print(f"{'Variable':<14} {'Coef':>10} {'Std SE':>10} {'Robust SE':>10} {'p (robust)':>10}")
 print("-" * 56)
-for var in model_full.params.index:
-    print(f"{var:<14} {model_full.params[var]:>10.2f} "
-          f"{model_full.bse[var]:>10.2f} {model_robust.bse[var]:>10.2f} "
-          f"{model_robust.pvalues[var]:>10.4f}")
+for var in model_full.coef().index:
+    print(f"{var:<14} {model_full.coef()[var]:>10.2f} "
+          f"{model_full.se()[var]:>10.2f} {model_robust.se()[var]:>10.2f} "
+          f"{model_robust.pvalue()[var]:>10.4f}")
 
 # =============================================================================
 # STEP 8: Coefficient plot — visual summary of significance
@@ -1478,7 +1488,7 @@ Estimate the multiple regression model for labor productivity.
 
 ```python
 # Estimate: ln(lp) = beta_0 + beta_1 * ln(rk) + beta_2 * hc + u
-model_prod = ols('ln_lp ~ ln_rk + hc', data=dat_2014).fit()
+model_prod = pf.feols('ln_lp ~ ln_rk + hc', data=dat_2014)
 model_prod.summary()
 ```
 
@@ -1494,12 +1504,12 @@ Compute and interpret 95% confidence intervals for the coefficients.
 ```python
 # 95% confidence intervals
 print("95% Confidence Intervals:")
-print(model_prod.conf_int(alpha=0.05))
+print(model_prod.confint())
 
 # Manual calculation for ln_rk coefficient
-b_rk = model_prod.params['ln_rk']
-se_rk = model_prod.bse['ln_rk']
-df = model_prod.df_resid
+b_rk = model_prod.coef()['ln_rk']
+se_rk = model_prod.se()['ln_rk']
+df = (int(model_prod._N) - len(model_prod.coef()))
 t_crit = stats.t.ppf(0.975, df)
 print(f"\nManual CI for ln(rk): [{b_rk - t_crit*se_rk:.4f}, {b_rk + t_crit*se_rk:.4f}]")
 ```
@@ -1538,14 +1548,19 @@ Test whether physical capital and human capital are jointly significant.
 
 ```python
 # Overall F-test: H0: beta_1 = beta_2 = 0
-print(f"Overall F-statistic: {model_prod.fvalue:.4f}")
-print(f"p-value: {model_prod.f_pvalue:.6e}")
+print(f"Overall F-statistic: {model_prod._f_statistic:.4f}")
+f_p_prod = 1 - stats.f.cdf(model_prod._f_statistic, len(model_prod.coef())-1, int(model_prod._N)-len(model_prod.coef()))
+print(f"p-value: {f_p_prod:.6e}")
 
-# Compare to restricted model (intercept only)
-model_restricted = ols('ln_lp ~ 1', data=dat_2014).fit()
-anova_result = anova_lm(model_restricted, model_prod)
-print("\nANOVA comparison:")
-print(anova_result)
+# Compare to restricted model (intercept only) using manual F-test
+model_restricted = pf.feols('ln_lp ~ 1', data=dat_2014)
+rss_r = np.sum(model_restricted._u_hat**2)
+rss_u = np.sum(model_prod._u_hat**2)
+q = len(model_prod.coef()) - len(model_restricted.coef())
+n_k = int(model_prod._N) - len(model_prod.coef())
+F_val = ((rss_r - rss_u) / q) / (rss_u / n_k)
+p_val = 1 - stats.f.cdf(F_val, q, n_k)
+print(f"\nF-test: F({q}, {n_k}) = {F_val:.4f}, p = {p_val:.6e}")
 ```
 
 **Questions:**
@@ -1564,7 +1579,7 @@ Compare nested models to determine the best specification.
 3. Conduct subset F-tests: does adding hc to the $\ln(\text{rk})$-only model significantly improve fit?
 4. Report robust standard errors for the preferred model
 
-*Hint: Use `anova_lm(model_restricted, model_unrestricted)` for the F-test and `model.get_robustcov_results(cov_type='HC1')` for robust SEs.*
+*Hint: Use the manual F-test formula (RSS comparison) for nested model tests and `pf.feols(..., vcov='HC1')` for robust SEs.*
 
 #### Task 6: Inference Policy Brief (Independent)
 
@@ -1627,7 +1642,7 @@ Estimate the full multiple regression model with nighttime lights and all five s
 
 ```python
 # Estimate: imds = beta_0 + beta_1*ln_NTLpc2017 + beta_2*A00 + ... + beta_6*A40 + u
-model_full = ols('imds ~ ln_NTLpc2017 + A00 + A10 + A20 + A30 + A40', data=bol_cs).fit()
+model_full = pf.feols('imds ~ ln_NTLpc2017 + A00 + A10 + A20 + A30 + A40', data=bol_cs)
 model_full.summary()
 ```
 
@@ -1647,12 +1662,12 @@ model_full.summary()
 # 3. Identify significant coefficients (p < 0.05 and p < 0.10)
 
 # Example structure:
-# model_full = ols('imds ~ ln_NTLpc2017 + A00 + A10 + A20 + A30 + A40', data=bol_cs).fit()
+# model_full = pf.feols('imds ~ ln_NTLpc2017 + A00 + A10 + A20 + A30 + A40', data=bol_cs)
 # model_full.summary()
 #
 # # Identify significant predictors
 # print("\nSignificance at 5% level:")
-# for var in model_full.params.index:
+# for var in model_full.coef().index:
 #     p = model_full.pvalues[var]
 #     sig = "***" if p < 0.01 else "**" if p < 0.05 else "*" if p < 0.10 else ""
 #     print(f"  {var:18s}  p = {p:.4f}  {sig}")
@@ -1664,9 +1679,9 @@ Compute 95% confidence intervals for all coefficients and create a coefficient p
 
 ```python
 # 95% confidence intervals
-ci = model_full.conf_int(alpha=0.05)
+ci = model_full.confint()
 ci.columns = ['Lower 2.5%', 'Upper 97.5%']
-ci['Estimate'] = model_full.params
+ci['Estimate'] = model_full.coef()
 print(ci[['Estimate', 'Lower 2.5%', 'Upper 97.5%']].round(4))
 ```
 
@@ -1681,15 +1696,15 @@ print(ci[['Estimate', 'Lower 2.5%', 'Upper 97.5%']].round(4))
 # Your code here: Confidence intervals and coefficient plot
 #
 # Steps:
-# 1. Compute confidence intervals with model_full.conf_int()
+# 1. Compute confidence intervals with model_full.confint()
 # 2. Print the table of estimates and CIs
 # 3. Create a coefficient plot (forest plot) for embedding variables
 # 4. Identify which CIs include zero
 
 # Example structure:
-# ci = model_full.conf_int(alpha=0.05)
+# ci = model_full.confint()
 # ci.columns = ['Lower', 'Upper']
-# ci['Estimate'] = model_full.params
+# ci['Estimate'] = model_full.coef()
 # print(ci[['Estimate', 'Lower', 'Upper']].round(4))
 #
 # # Forest plot for embedding coefficients
@@ -1765,7 +1780,7 @@ $$H_0: \beta_{A00} = \beta_{A10} = \beta_{A20} = \beta_{A30} = \beta_{A40} = 0$$
 **Your tasks:**
 
 1. Construct a restriction matrix $R$ where each row sets one embedding coefficient to zero
-2. Use `model_full.f_test()` with the restriction matrix to compute the joint F-statistic
+2. Compute the manual F-test using RSS comparison between restricted and unrestricted models
 3. Report the F-statistic, degrees of freedom, and p-value
 4. Compare the joint test result with the individual t-test results from Task 3
 5. Are embeddings *jointly* significant even if some are individually insignificant?
@@ -1777,7 +1792,7 @@ $$H_0: \beta_{A00} = \beta_{A10} = \beta_{A20} = \beta_{A30} = \beta_{A40} = 0$$
 #
 # Steps:
 # 1. Construct the restriction matrix R
-# 2. Perform the joint F-test with model_full.f_test(R)
+# 2. Compute manual F-test using RSS comparison
 # 3. Report F-statistic and p-value
 # 4. Compare with individual t-test results
 
@@ -1793,10 +1808,10 @@ $$H_0: \beta_{A00} = \beta_{A10} = \beta_{A20} = \beta_{A30} = \beta_{A40} = 0$$
 # R[3, 5] = 1  # A30 = 0
 # R[4, 6] = 1  # A40 = 0
 #
-# f_test = model_full.f_test(R)
+# F = ((rss_r - rss_u) / q) / (rss_u / n_k)
 # print("Joint F-Test: All Embedding Coefficients = 0")
 #
-# print(f"F-statistic: {f_test.fvalue[0][0]:.4f}")
+# print(f"F-statistic: {f_test._f_statistic[0][0]:.4f}")
 # print(f"p-value:     {f_test.pvalue:.6f}")
 # print(f"df:          ({int(f_test.df_num)}, {int(f_test.df_denom)})")
 # print(f"\nConclusion: {'Reject H0' if f_test.pvalue < 0.05 else 'Fail to reject H0'} at 5% level")
@@ -1834,13 +1849,13 @@ where $q = 5$ (number of restrictions), $n$ = sample size, $k$ = number of regre
 
 # Example structure:
 # # Restricted model: NTL only
-# model_restricted = ols('imds ~ ln_NTLpc2017', data=bol_cs).fit()
+# model_restricted = pf.feols('imds ~ ln_NTLpc2017', data=bol_cs)
 #
 # # Compare R-squared
-# R2_r = model_restricted.rsquared
-# R2_u = model_full.rsquared
-# n = model_full.nobs
-# k = len(model_full.params) - 1  # number of regressors (excluding intercept)
+# R2_r = model_restricted._r2
+# R2_u = model_full._r2
+# n = model_full._N
+# k = len(model_full.coef()) - 1  # number of regressors (excluding intercept)
 # q = 5  # number of restrictions (embedding coefficients)
 #
 # print("Model Comparison")
@@ -1883,10 +1898,10 @@ Write a 200-300 word inference brief summarizing your statistical findings.
 # Example: Summary of key inference results
 # print("KEY INFERENCE RESULTS")
 #
-# print(f"Sample size: {int(model_full.nobs)} municipalities")
-# print(f"R² (NTL only):          {model_restricted.rsquared:.4f}")
-# print(f"R² (NTL + embeddings):  {model_full.rsquared:.4f}")
-# print(f"R² improvement:         {model_full.rsquared - model_restricted.rsquared:.4f}")
+# print(f"Sample size: {int(model_full._N)} municipalities")
+# print(f"R² (NTL only):          {model_restricted._r2:.4f}")
+# print(f"R² (NTL + embeddings):  {model_full._r2:.4f}")
+# print(f"R² improvement:         {model_full._r2 - model_restricted._r2:.4f}")
 # print(f"\nJoint F-test p-value:   {f_test.pvalue:.6f}")
 # print(f"Individually significant at 5%: {sig_5}/5 embeddings")
 # print(f"Individually significant at 10%: {sig_10}/5 embeddings")

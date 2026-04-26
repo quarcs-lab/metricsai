@@ -78,10 +78,7 @@ import numpy as np                        # numerical operations
 import pandas as pd                       # data manipulation
 import matplotlib.pyplot as plt           # plotting
 import seaborn as sns                     # statistical visualizations
-import statsmodels.api as sm              # statistical models
-from statsmodels.formula.api import ols   # OLS with formula syntax
-from statsmodels.stats.diagnostic import het_breuschpagan
-from statsmodels.stats.outliers_influence import variance_inflation_factor
+import pyfixest as pf                    # fast OLS/IV estimation
 from scipy import stats                   # statistical tests
 import warnings
 warnings.filterwarnings('ignore')
@@ -167,26 +164,26 @@ plt.show()
 
 ```python
 # Bivariate regression: API ~ Edparent
-model_api_biv = ols('api99 ~ edparent', data=data_api).fit(cov_type='HC1')
+fit_api_biv = pf.feols('api99 ~ edparent', data=data_api, vcov='HC1')
 
 # Key results
-intercept_api = model_api_biv.params['Intercept']
-slope_api     = model_api_biv.params['edparent']
-r2_api        = model_api_biv.rsquared
+intercept_api = fit_api_biv.coef()['Intercept']
+slope_api     = fit_api_biv.coef()['edparent']
+r2_api        = fit_api_biv._r2
 
 print(f"Estimated equation: API = {intercept_api:.1f} + {slope_api:.1f} x edparent")
 print(f"Slope: each additional year of parent education is associated with {slope_api:.1f} higher API")
 print(f"R-squared: {r2_api:.4f} ({r2_api*100:.1f}% of variation explained)")
 
 # Full regression output
-model_api_biv.summary()
+fit_api_biv.summary()
 ```
 
 ```python
 # Scatter plot with regression line
 plt.figure(figsize=(10, 6))
 plt.scatter(data_api['edparent'], data_api['api99'], alpha=0.5, s=30, color='#22d3ee')  # s = marker size, alpha = transparency
-plt.plot(data_api['edparent'], model_api_biv.fittedvalues, color='#c084fc', linewidth=2,
+plt.plot(data_api['edparent'], fit_api_biv.predict(), color='#c084fc', linewidth=2,
          label='Fitted line')
 plt.xlabel('Average Years of Parent Education')
 plt.ylabel('Academic Performance Index (API)')
@@ -240,17 +237,17 @@ The correlation matrix shows the **linear relationships** between all variables:
 
 ```python
 # Multiple regression
-model_api_mult = ols('api99 ~ edparent + meals + englearn + yearround + credteach + emerteach',
-                      data=data_api).fit()
+fit_api_mult = pf.feols('api99 ~ edparent + meals + englearn + yearround + credteach + emerteach',
+                         data=data_api)
 # Multiple Regression
-model_api_mult.summary()
+fit_api_mult.summary()
 
 # Coefficient table
 coef_df = pd.DataFrame({
-    'Coefficient': model_api_mult.params,
-    'Std Error': model_api_mult.bse,
-    't-stat': model_api_mult.tvalues,
-    'p-value': model_api_mult.pvalues
+    'Coefficient': fit_api_mult.coef(),
+    'Std Error': fit_api_mult.se(),
+    't-stat': fit_api_mult.tstat(),
+    'p-value': fit_api_mult.pval()
 }).round(3)
 print("\n", coef_df)
 ```
@@ -311,21 +308,22 @@ data_cobb[['q', 'k', 'l', 'lnq', 'lnk', 'lnl']].describe()
 
 ```python
 # Estimate Cobb-Douglas with HAC standard errors
-model_cobb = ols('lnq ~ lnk + lnl', data=data_cobb).fit(cov_type='HAC', cov_kwds={'maxlags': 3})
+data_cobb['_time'] = range(len(data_cobb))
+fit_cobb = pf.feols('lnq ~ lnk + lnl', data=data_cobb, vcov={'NW': 3})
 
 # Key results
-beta_k = model_cobb.params['lnk']
-beta_l = model_cobb.params['lnl']
-r2_cobb = model_cobb.rsquared
+beta_k = fit_cobb.coef()['lnk']
+beta_l = fit_cobb.coef()['lnl']
+r2_cobb = fit_cobb._r2
 
-print(f"Estimated equation: ln(Q) = {model_cobb.params['Intercept']:.3f} + {beta_k:.3f} ln(K) + {beta_l:.3f} ln(L)")
+print(f"Estimated equation: ln(Q) = {fit_cobb.coef()['Intercept']:.3f} + {beta_k:.3f} ln(K) + {beta_l:.3f} ln(L)")
 print(f"Capital elasticity: {beta_k:.3f} (1% increase in K raises output by {beta_k:.3f}%)")
 print(f"Labor elasticity: {beta_l:.3f} (1% increase in L raises output by {beta_l:.3f}%)")
 print(f"Sum of coefficients: {beta_k:.3f} + {beta_l:.3f} = {beta_k + beta_l:.3f}")
 print(f"R-squared: {r2_cobb:.4f}")
 
 # Full regression output
-model_cobb.summary()
+fit_cobb.summary()
 ```
 
 > **Key Concept 13.2: Logarithmic Transformation of Production Functions**
@@ -379,13 +377,14 @@ print(f"Estimated sum: {sum_betas:.3f}")
 # Restricted model: ln(Q/L) ~ ln(K/L)
 data_cobb['lnq_per_l'] = data_cobb['lnq'] - data_cobb['lnl']
 data_cobb['lnk_per_l'] = data_cobb['lnk'] - data_cobb['lnl']
-model_restricted = ols('lnq_per_l ~ lnk_per_l', data=data_cobb).fit()
+fit_restricted = pf.feols('lnq_per_l ~ lnk_per_l', data=data_cobb)
 
 # F-test
-rss_unr = model_cobb.ssr
-rss_r = model_restricted.ssr
-f_stat = ((rss_r - rss_unr) / 1) / (rss_unr / model_cobb.df_resid)
-p_value = 1 - stats.f.cdf(f_stat, 1, model_cobb.df_resid)
+rss_unr = np.sum(fit_cobb._u_hat**2)
+rss_r = np.sum(fit_restricted._u_hat**2)
+df_resid = fit_cobb._N - len(fit_cobb.coef())
+f_stat = ((rss_r - rss_unr) / 1) / (rss_unr / df_resid)
+p_value = 1 - stats.f.cdf(f_stat, 1, df_resid)
 
 print(f"F-statistic: {f_stat:.2f}")
 print(f"p-value: {p_value:.3f}")
@@ -398,9 +397,9 @@ print(f"Conclusion: {'Reject' if p_value < 0.05 else 'Fail to reject'} H0 at 5% 
 
 ```python
 # Predicted output with bias correction
-se = np.sqrt(model_cobb.scale)
+se = np.sqrt(np.mean(fit_cobb._u_hat**2))
 bias_correction = np.exp(se**2 / 2)
-data_cobb['q_pred'] = bias_correction * np.exp(model_cobb.fittedvalues)
+data_cobb['q_pred'] = bias_correction * np.exp(fit_cobb.predict())
 
 # Plot actual vs predicted
 plt.figure(figsize=(10, 6))
@@ -457,10 +456,11 @@ data_phillips.head()
 
 ```python
 # Pre-1970 regression
-data_pre1970 = data_phillips[data_phillips['year'] < 1970]
-model_pre = ols('inflgdp ~ urate', data=data_pre1970).fit(cov_type='HAC', cov_kwds={'maxlags': 3})
+data_pre1970 = data_phillips[data_phillips['year'] < 1970].copy()
+data_pre1970['_time'] = range(len(data_pre1970))
+fit_pre = pf.feols('inflgdp ~ urate', data=data_pre1970, vcov={'NW': 3})
 # Phillips Curve Pre-1970 (1949-1969)
-model_pre.summary()
+fit_pre.summary()
 ```
 
 ### **Pre-1970: Phillips Curve Works!**
