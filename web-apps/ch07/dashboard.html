@@ -287,6 +287,14 @@ footer.page a:hover { text-decoration: underline; }
 .code-summary .btn-colab { color: var(--accent); font-weight: 500; text-decoration: none; font-size: 0.9rem; }
 .code-summary .btn-colab:hover { text-decoration: underline; }
 
+/* --- Code language tabs --- */
+.code-tabs { display: inline-flex; gap: 0; background: var(--panel-2, var(--panel)); padding: 3px; border-radius: 10px; border: 1px solid var(--border); margin-bottom: 0.8rem; }
+.code-tabs button { background: transparent; border: none; color: var(--text-soft); padding: 0.38rem 1rem; border-radius: 7px; font-family: inherit; font-size: 0.85rem; font-weight: 500; cursor: pointer; transition: all .15s ease; }
+.code-tabs button.active { background: var(--accent); color: white; font-weight: 600; }
+.code-tabs button:not(.active):hover { color: var(--accent); }
+.code-panel { display: none; }
+.code-panel.active { display: block; }
+
 /* --- Syntax highlighting tokens (Prism.js) --- */
 .code-summary pre[class*="language-"],
 .code-summary code[class*="language-"] {
@@ -334,7 +342,7 @@ footer.page a:hover { text-decoration: underline; }
     <li><a href="#econ-stat">Econ vs. Stat</a></li>
     <li><a href="#robust-se">Robust SEs</a></li>
     <li><a href="#house-data">House Data</a></li>
-    <li><a href="#code">Python code</a></li>
+    <li><a href="#code">Code</a></li>
   </ul>
 </nav>
 
@@ -777,10 +785,17 @@ footer.page a:hover { text-decoration: underline; }
   <p class="takeaway"><strong>Take-away:</strong> On real data, a narrow CI and a large-magnitude t-statistic tell the same story: house size matters, by about $74/sq ft. <a href="../../book/_book/notebooks_quarto/ch07_Statistical_Inference_for_Bivariate_Regression.html#example-house-price-and-size" target="_blank" rel="noopener">Read §7.1 in the chapter →</a></p>
 </section>
 
-<section class="howto-card code-summary" id="code" aria-label="Python code summary">
-  <h2>Python Libraries and Code</h2>
-  <p class="motivation">You've explored the key concepts interactively — now reproduce them in Python. This self-contained code block covers everything you practiced above. Copy it into an empty notebook and run it.</p>
-  <pre><code id="code-cheatsheet" class="language-python"># =============================================================================
+<section class="howto-card code-summary" id="code" aria-label="Code summary">
+  <h2>Code Summary</h2>
+  <p class="motivation">You've explored the key concepts interactively — now reproduce them in code. These self-contained blocks cover everything you practiced above. Pick your language, copy the code, and run it.</p>
+
+  <div class="code-tabs" id="code-lang-tabs">
+    <button type="button" data-lang="python" class="active">Python</button>
+    <button type="button" data-lang="stata">Stata</button>
+  </div>
+
+  <div class="code-panel active" id="panel-python">
+  <pre><code id="code-python" class="language-python"># =============================================================================
 # CHAPTER 7 CHEAT SHEET: Statistical Inference for Bivariate Regression
 # =============================================================================
 
@@ -872,8 +887,108 @@ print(f"{'SE(size)':&lt;20s} {se_slope:&gt;12.2f} {robust_model.bse['size']:&gt;
 print(f"{'t-statistic':&lt;20s} {t_stat:&gt;12.2f} {robust_model.tvalues['size']:&gt;12.2f}")
 print(f"{'p-value':&lt;20s} {p_value:&gt;12.6f} {robust_model.pvalues['size']:&gt;12.6f}")</code></pre>
   <div style="display:flex;gap:0.8rem;align-items:center;margin-top:0.8rem;flex-wrap:wrap">
-    <button class="btn-copy" onclick="navigator.clipboard.writeText(document.getElementById('code-cheatsheet').textContent).then(()=>{this.textContent='Copied!';setTimeout(()=>this.textContent='Copy code',1500)})">Copy code</button>
-    <a class="btn-colab" href="https://colab.research.google.com/notebooks/empty.ipynb" target="_blank" rel="noopener">Open empty Colab notebook →</a>
+    <button class="btn-copy" onclick="navigator.clipboard.writeText(document.getElementById('code-python').textContent).then(()=>{this.textContent='Copied!';setTimeout(()=>this.textContent='Copy code',1500)})">Copy code</button>
+    <a class="btn-colab" href="https://colab.research.google.com/notebooks/empty.ipynb" target="_blank" rel="noopener">Open empty Colab notebook &rarr;</a>
+  </div>
+  </div>
+
+  <div class="code-panel" id="panel-stata">
+  <pre><code id="code-stata" class="language-stata">* =============================================================================
+* CHAPTER 7 CHEAT SHEET: Statistical Inference for Bivariate Regression
+* =============================================================================
+
+* --- Setup ---
+clear all                                // start with a clean workspace
+set more off                             // do not pause output for long results
+
+* =============================================================================
+* STEP 1: Load data directly from a URL
+* =============================================================================
+* use loads a Stata .dta file; "clear" drops any data already in memory
+use "https://raw.githubusercontent.com/quarcs-lab/data-open/master/AED/AED_HOUSE.DTA", clear
+
+describe                                 // list all variables, types, and labels
+display "Observations: " _N              // _N is Stata's built-in observation count
+
+* =============================================================================
+* STEP 2: Estimate the regression and extract key statistics
+* =============================================================================
+* regress fits OLS; the t-statistic measures how many SEs the estimate is from 0
+regress price size
+
+// After regress, Stata stores results you can reference:
+display "Slope (b2):       " _b[size]         // estimated coefficient
+display "Intercept (b1):   " _b[_cons]
+display "SE of slope:      " _se[size]        // standard error of the slope
+display "t-statistic:      " _b[size] / _se[size]
+
+* =============================================================================
+* STEP 3: Confidence interval — a range of plausible values for b2
+* =============================================================================
+* The confidence interval is shown in the regress output (last two columns)
+* CI = b2 +/- t_crit x se(b2), using T(n-2) distribution
+
+local n = e(N)                                    // number of observations
+local df = `n' - 2                                // degrees of freedom
+display "Degrees of freedom: " `df'
+
+// Critical t-value for 95% CI (two-sided, alpha/2 = 0.025)
+display "Critical t-value (alpha=0.05): " invttail(`df', 0.025)
+
+// Display confidence interval bounds
+local slope = _b[size]
+local se    = _se[size]
+local tcrit = invttail(`df', 0.025)
+display "95% CI for slope: [" `slope' - `tcrit' * `se' ", " `slope' + `tcrit' * `se' "]"
+
+* =============================================================================
+* STEP 4: Hypothesis tests — does size matter? Is the effect $90/sq ft?
+* =============================================================================
+* Test 1: Statistical significance (H0: b2 = 0)
+* This is the default test shown in the regress output
+test size                                // F-test equivalent of t-test for H0: b2 = 0
+
+* Test 2: Two-sided test for a specific value (H0: b2 = 90)
+* lincom computes a linear combination and tests if it equals zero
+* So lincom size - 90 tests H0: b2 - 90 = 0, i.e., H0: b2 = 90
+lincom size - 90
+
+// Alternative: use test with an explicit null value
+test size = 90
+
+* =============================================================================
+* STEP 5: One-sided test — does size increase price by less than $90/sq ft?
+* =============================================================================
+* H0: b2 &gt;= 90  vs  Ha: b2 &lt; 90 (lower-tailed test)
+* Stata's lincom gives a two-sided p-value; divide by 2 for one-sided
+
+// Compute t-statistic for H0: b2 = 90
+local t_90 = (_b[size] - 90) / _se[size]
+display "t-statistic for H0: b2 = 90: " `t_90'
+
+// One-sided p-value (left tail): Pr(T &lt; t_90)
+display "One-sided p-value (Ha: b2 &lt; 90): " ttail(`df', -`t_90')
+
+* =============================================================================
+* STEP 6: Robust standard errors — valid with or without heteroskedasticity
+* =============================================================================
+* vce(robust) computes HC1 robust SEs, protecting against heteroskedasticity
+
+// Standard OLS (for comparison)
+quietly regress price size
+local se_std = _se[size]
+local t_std  = _b[size] / _se[size]
+
+// Robust HC1 standard errors
+regress price size, vce(robust)
+display ""
+display "Comparison of Standard vs. Robust (HC1) Standard Errors:"
+display "SE(size):    Standard = " `se_std'  "   Robust = " _se[size]
+display "t-statistic: Standard = " `t_std'   "   Robust = " _b[size] / _se[size]</code></pre>
+  <div style="display:flex;gap:0.8rem;align-items:center;margin-top:0.8rem;flex-wrap:wrap">
+    <button class="btn-copy" onclick="navigator.clipboard.writeText(document.getElementById('code-stata').textContent).then(()=>{this.textContent='Copied!';setTimeout(()=>this.textContent='Copy code',1500)})">Copy code</button>
+    <span style="color:var(--text-muted);font-size:0.88rem">Paste into your Stata do-file editor</span>
+  </div>
   </div>
 </section>
 
@@ -1827,8 +1942,49 @@ window.addEventListener("resize", function() {
 });
 </script>
 
+<script>
+// ==================== CODE LANGUAGE TABS ====================
+(function() {
+  var tabBar = document.getElementById('code-lang-tabs');
+  if (!tabBar) return;
+  var buttons = tabBar.querySelectorAll('button');
+  var panels  = {
+    python: document.getElementById('panel-python'),
+    stata:  document.getElementById('panel-stata')
+  };
+  buttons.forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      var lang = btn.dataset.lang;
+      buttons.forEach(function(b) { b.classList.remove('active'); });
+      btn.classList.add('active');
+      Object.values(panels).forEach(function(p) { p.classList.remove('active'); });
+      if (panels[lang]) panels[lang].classList.add('active');
+    });
+  });
+})();
+</script>
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" data-manual></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
-<script>Prism.highlightAll();</script>
+<script>
+// Minimal Stata language grammar for Prism.js syntax highlighting
+Prism.languages.stata = {
+  'comment': [
+    { pattern: /\/\*[\s\S]*?\*\//, greedy: true },
+    { pattern: /\/\/.*$/m, greedy: true },
+    { pattern: /^\s*\*.*$/m, greedy: true }
+  ],
+  'string': [
+    { pattern: /"(?:[^"\\]|\\.)*"/, greedy: true },
+    { pattern: /`"(?:[^"]|"(?!'))*"'/, greedy: true }
+  ],
+  'keyword': /\b(?:use|clear|set|gen|generate|replace|drop|keep|rename|order|sort|gsort|merge|append|reshape|collapse|preserve|restore|save|export|import|insheet|outsheet|regress|reg|logit|probit|ivregress|xtreg|areg|newey|tobit|xtset|tsset|predict|margins|marginsplot|test|lincom|nlcom|hausman|estat|summarize|sum|tabulate|tab|describe|des|list|display|di|graph|scatter|twoway|histogram|kdensity|boxplot|qnorm|label|encode|decode|destring|tostring|log|using|if|in|by|bysort|forvalues|foreach|local|global|scalar|matrix|capture|quietly|noisily|return|ereturn|program|end|exit|do|run|include|sysuse|webuse|cd|pwd|macro|tempvar|tempname|tempfile|assert|count|levelsof|codebook|inspect|anova|ttest|correlate|pwcorr|spearman|ranksum|signrank|kwallis|oneway|chi2|mixed|xtmixed|bootstrap|jackknife|permute|simulate|vce|robust|cluster|absorb|noconstant|detail|nolog|level|mle|fe|re|estimates|eststo|esttab|outreg2|coefplot|binscatter|tssmooth|name|combine|lwidth|lcolor|lpattern|xtitle|ytitle|title|legend|more|off|all)\b/,
+  'function': /\b(?:abs|ceil|floor|round|mod|sqrt|exp|ln|log10|max|min|sum|mean|sd|count|cond|inrange|inlist|missing|strlen|substr|strpos|upper|lower|trim|real|string|date|year|month|day|clock|word|wordcount|regexm|runiform|rnormal|_n|_N|_b|_se|e|r|c)\b/,
+  'number': /\b\d+\.?\d*(?:e[+-]?\d+)?\b/i,
+  'operator': /[<>!=]=?|[+\-*/^~&|#]/,
+  'punctuation': /[(),.:]/
+};
+Prism.highlightAll();
+</script>
 </body>
 </html>

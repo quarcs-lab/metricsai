@@ -287,6 +287,14 @@ footer.page a:hover { text-decoration: underline; }
 .code-summary .btn-colab { color: var(--accent); font-weight: 500; text-decoration: none; font-size: 0.9rem; }
 .code-summary .btn-colab:hover { text-decoration: underline; }
 
+/* --- Code language tabs --- */
+.code-tabs { display: inline-flex; gap: 0; background: var(--panel-2, var(--panel)); padding: 3px; border-radius: 10px; border: 1px solid var(--border); margin-bottom: 0.8rem; }
+.code-tabs button { background: transparent; border: none; color: var(--text-soft); padding: 0.38rem 1rem; border-radius: 7px; font-family: inherit; font-size: 0.85rem; font-weight: 500; cursor: pointer; transition: all .15s ease; }
+.code-tabs button.active { background: var(--accent); color: white; font-weight: 600; }
+.code-tabs button:not(.active):hover { color: var(--accent); }
+.code-panel { display: none; }
+.code-panel.active { display: block; }
+
 /* --- Syntax highlighting tokens (Prism.js) --- */
 .code-summary pre[class*="language-"],
 .code-summary code[class*="language-"] {
@@ -334,7 +342,7 @@ footer.page a:hover { text-decoration: underline; }
     <li><a href="#gauss-markov">Gauss-Markov</a></li>
     <li><a href="#convergence">Real Data</a></li>
     <li><a href="#se-vs-n">SE vs. n</a></li>
-    <li><a href="#code">Python code</a></li>
+    <li><a href="#code">Code</a></li>
   </ul>
 </nav>
 
@@ -794,10 +802,17 @@ footer.page a:hover { text-decoration: underline; }
   <p class="takeaway"><strong>Take-away:</strong> Going from n = 25 to n = 100 halves the SE; going from n = 100 to n = 200 only saves you another ~29%. <a href="../../book/_book/notebooks_quarto/ch06_The_Least_Squares_Estimator.html#case-study-1-sampling-variability-in-productivity-regressions" target="_blank" rel="noopener">Read the case study in the chapter →</a></p>
 </section>
 
-<section class="howto-card code-summary" id="code" aria-label="Python code summary">
-  <h2>Python Libraries and Code</h2>
-  <p class="motivation">You've explored the key concepts interactively — now reproduce them in Python. This self-contained code block covers everything you practiced above. Copy it into an empty notebook and run it.</p>
-  <pre><code id="code-cheatsheet" class="language-python"># =============================================================================
+<section class="howto-card code-summary" id="code" aria-label="Code summary">
+  <h2>Code Summary</h2>
+  <p class="motivation">You've explored the key concepts interactively — now reproduce them in code. These self-contained blocks cover everything you practiced above. Pick your language, copy the code, and run it.</p>
+
+  <div class="code-tabs" id="code-lang-tabs">
+    <button type="button" data-lang="python" class="active">Python</button>
+    <button type="button" data-lang="stata">Stata</button>
+  </div>
+
+  <div class="code-panel active" id="panel-python">
+  <pre><code id="code-python" class="language-python"># =============================================================================
 # CHAPTER 6 CHEAT SHEET: The Least Squares Estimator
 # =============================================================================
 
@@ -935,8 +950,168 @@ for ns in sample_sizes:
         estimates.append(m.params['x'])
     print(f"{ns:&gt;6}  {np.mean(estimates):&gt;10.4f}  {np.std(estimates):&gt;22.4f}")</code></pre>
   <div style="display:flex;gap:0.8rem;align-items:center;margin-top:0.8rem;flex-wrap:wrap">
-    <button class="btn-copy" onclick="navigator.clipboard.writeText(document.getElementById('code-cheatsheet').textContent).then(()=>{this.textContent='Copied!';setTimeout(()=>this.textContent='Copy code',1500)})">Copy code</button>
-    <a class="btn-colab" href="https://colab.research.google.com/notebooks/empty.ipynb" target="_blank" rel="noopener">Open empty Colab notebook →</a>
+    <button class="btn-copy" onclick="navigator.clipboard.writeText(document.getElementById('code-python').textContent).then(()=>{this.textContent='Copied!';setTimeout(()=>this.textContent='Copy code',1500)})">Copy code</button>
+    <a class="btn-colab" href="https://colab.research.google.com/notebooks/empty.ipynb" target="_blank" rel="noopener">Open empty Colab notebook &rarr;</a>
+  </div>
+  </div>
+
+  <div class="code-panel" id="panel-stata">
+  <pre><code id="code-stata" class="language-stata">* =============================================================================
+* CHAPTER 6 CHEAT SHEET: The Least Squares Estimator
+* =============================================================================
+
+* --- Setup ---
+clear all                                // start with a clean workspace
+set more off                             // do not pause output for long results
+
+* =============================================================================
+* STEP 1: Define the Data-Generating Process (DGP)
+* =============================================================================
+* The DGP specifies the TRUE population relationship: y = b1 + b2*x + u
+* We know the true parameters — in real research, we never do!
+local beta_1_true = 1                    // true intercept
+local beta_2_true = 2                    // true slope
+local sigma_u     = 2                    // error standard deviation
+
+* Generate one sample of n observations
+set seed 42
+set obs 30
+gen x = rnormal(3, 1)
+gen u = rnormal(0, `sigma_u')
+gen y = `beta_1_true' + `beta_2_true' * x + u
+
+display "Generated sample: " _N " observations from y = `beta_1_true' + `beta_2_true'x + u"
+
+* =============================================================================
+* STEP 2: Fit OLS and compare sample vs. population parameters
+* =============================================================================
+* The sample regression estimates the unknown population line from data
+regress y x
+
+// Display comparison of population vs sample parameters
+display _newline "Population:  E[y|x] = `beta_1_true' + `beta_2_true'x"
+display "Sample:      y_hat = " %6.2f _b[_cons] " + " %6.2f _b[x] "x"
+display "Sampling error in slope: b2 - b2_true = " %8.4f (_b[x] - `beta_2_true')
+
+* =============================================================================
+* STEP 3: Scatter plot — population line vs. sample line
+* =============================================================================
+* Visualizing the gap between the true line and our estimate
+predict yhat                             // fitted values from the regression
+
+// Create the population (true) line for comparison
+gen y_true = `beta_1_true' + `beta_2_true' * x
+
+twoway (scatter y x, msize(small) msymbol(circle))                          ///
+       (line yhat x, sort lcolor(red) lwidth(medthick)                      ///
+            legend(label(2 "Sample: y_hat")))                               ///
+       (line y_true x, sort lcolor(green) lwidth(medthick) lpattern(dash)   ///
+            legend(label(3 "Population: E[y|x]"))),                         ///
+    xtitle("x") ytitle("y")                                                 ///
+    title("Population Regression vs. Sample Regression")                    ///
+    legend(order(1 "Observed data" 2 "Sample line" 3 "Population line"))
+
+* =============================================================================
+* STEP 4: Monte Carlo simulation — demonstrate unbiasedness
+* =============================================================================
+* Draw many samples from the SAME DGP to see how b2 varies
+* Unbiasedness: on average, b2 equals the true b2
+local n_sims = 1000
+local n_obs  = 30
+
+// Program to run a single simulation
+capture program drop one_sim
+program define one_sim, rclass
+    args beta1 beta2 sigma n
+    drop _all
+    set obs `n'
+    gen x = rnormal(3, 1)
+    gen u = rnormal(0, `sigma')
+    gen y = `beta1' + `beta2' * x + u
+    regress y x
+    return scalar b2 = _b[x]
+end
+
+// Run the simulation
+simulate b2 = r(b2), reps(`n_sims') seed(42): ///
+    one_sim `beta_1_true' `beta_2_true' `sigma_u' `n_obs'
+
+summarize b2
+display _newline "Monte Carlo results (`n_sims' simulations, n=`n_obs' each):"
+display "  True b2:              `beta_2_true'"
+display "  Mean of b2 estimates: " %8.4f r(mean) "  (approx b2, confirming unbiasedness)"
+display "  Std dev of estimates: " %8.4f r(sd) "  (empirical standard error)"
+
+* =============================================================================
+* STEP 5: Visualize the sampling distribution of b2
+* =============================================================================
+* The histogram should be centered on b2 (unbiasedness) and bell-shaped (CLT)
+histogram b2, kdensity                                                      ///
+    xline(`beta_2_true', lcolor(green) lwidth(medthick) lpattern(dash))     ///
+    xtitle("Slope estimate (b2)")                                           ///
+    ytitle("Density")                                                       ///
+    title("Sampling Distribution of b2: Unbiasedness + CLT")               ///
+    note("Green line = true b2 = `beta_2_true'")
+
+* =============================================================================
+* STEP 6: Standard error — what controls precision?
+* =============================================================================
+* se(b2) = s_e / sqrt[sum((xi - x_bar)^2)]
+* Smaller when: (1) model fits well, (2) large n, (3) x spread wide
+
+// Reload original sample for SE anatomy
+clear all
+set seed 42
+set obs 30
+gen x = rnormal(3, 1)
+gen u = rnormal(0, 2)
+gen y = 1 + 2 * x + u
+
+regress y x
+local se_b2 = _se[x]                    // standard error of slope
+local s_e   = e(rmse)                   // root MSE (std error of regression)
+
+// Compute sum of squared deviations of x
+summarize x
+local x_var = r(Var) * (r(N) - 1)       // sum((xi - x_bar)^2)
+
+display _newline "Standard error anatomy (from the single-sample regression):"
+display "  s_e (root MSE):          " %8.4f `s_e'
+display "  sum((xi - x_bar)^2):     " %8.4f `x_var'
+display "  se(b2) = s_e / sqrt(sum) = " %8.4f (`s_e' / sqrt(`x_var'))
+display "  se(b2) from output:      " %8.4f `se_b2'
+
+* =============================================================================
+* STEP 7: Effect of sample size on precision
+* =============================================================================
+* Theory: se(b2) proportional to 1/sqrt(n)
+* Doubling n cuts SE by ~30%, quadrupling halves it
+
+display _newline "    n      Mean b2    Std dev (empirical SE)"
+display "==========================================
+
+foreach ns in 20 50 100 200 {
+    capture program drop sim_n
+    program define sim_n, rclass
+        args beta1 beta2 sigma n
+        drop _all
+        set obs `n'
+        gen x = rnormal(3, 1)
+        gen u = rnormal(0, `sigma')
+        gen y = `beta1' + `beta2' * x + u
+        regress y x
+        return scalar b2 = _b[x]
+    end
+
+    quietly simulate b2 = r(b2), reps(1000) seed(42): ///
+        sim_n 1 2 2 `ns'
+    quietly summarize b2
+    display %6.0f `ns' "  " %10.4f r(mean) "  " %22.4f r(sd)
+}</code></pre>
+  <div style="display:flex;gap:0.8rem;align-items:center;margin-top:0.8rem;flex-wrap:wrap">
+    <button class="btn-copy" onclick="navigator.clipboard.writeText(document.getElementById('code-stata').textContent).then(()=>{this.textContent='Copied!';setTimeout(()=>this.textContent='Copy code',1500)})">Copy code</button>
+    <span style="color:var(--text-muted);font-size:0.88rem">Paste into your Stata do-file editor</span>
+  </div>
   </div>
 </section>
 
@@ -1804,8 +1979,49 @@ window.addEventListener("resize", function() {
 });
 </script>
 
+<script>
+// ==================== CODE LANGUAGE TABS ====================
+(function() {
+  var tabBar = document.getElementById('code-lang-tabs');
+  if (!tabBar) return;
+  var buttons = tabBar.querySelectorAll('button');
+  var panels  = {
+    python: document.getElementById('panel-python'),
+    stata:  document.getElementById('panel-stata')
+  };
+  buttons.forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      var lang = btn.dataset.lang;
+      buttons.forEach(function(b) { b.classList.remove('active'); });
+      btn.classList.add('active');
+      Object.values(panels).forEach(function(p) { p.classList.remove('active'); });
+      if (panels[lang]) panels[lang].classList.add('active');
+    });
+  });
+})();
+</script>
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" data-manual></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
-<script>Prism.highlightAll();</script>
+<script>
+// Minimal Stata language grammar for Prism.js syntax highlighting
+Prism.languages.stata = {
+  'comment': [
+    { pattern: /\/\*[\s\S]*?\*\//, greedy: true },
+    { pattern: /\/\/.*$/m, greedy: true },
+    { pattern: /^\s*\*.*$/m, greedy: true }
+  ],
+  'string': [
+    { pattern: /"(?:[^"\\]|\\.)*"/, greedy: true },
+    { pattern: /`"(?:[^"]|"(?!'))*"'/, greedy: true }
+  ],
+  'keyword': /\b(?:use|clear|set|gen|generate|replace|drop|keep|rename|order|sort|gsort|merge|append|reshape|collapse|preserve|restore|save|export|import|insheet|outsheet|regress|reg|logit|probit|ivregress|xtreg|areg|newey|tobit|xtset|tsset|predict|margins|marginsplot|test|lincom|nlcom|hausman|estat|summarize|sum|tabulate|tab|describe|des|list|display|di|graph|scatter|twoway|histogram|kdensity|boxplot|qnorm|label|encode|decode|destring|tostring|log|using|if|in|by|bysort|forvalues|foreach|local|global|scalar|matrix|capture|quietly|noisily|return|ereturn|program|end|exit|do|run|include|sysuse|webuse|cd|pwd|macro|tempvar|tempname|tempfile|assert|count|levelsof|codebook|inspect|anova|ttest|correlate|pwcorr|spearman|ranksum|signrank|kwallis|oneway|chi2|mixed|xtmixed|bootstrap|jackknife|permute|simulate|vce|robust|cluster|absorb|noconstant|detail|nolog|level|mle|fe|re|estimates|eststo|esttab|outreg2|coefplot|binscatter|tssmooth|name|combine|lwidth|lcolor|lpattern|xtitle|ytitle|title|legend|more|off|all)\b/,
+  'function': /\b(?:abs|ceil|floor|round|mod|sqrt|exp|ln|log10|max|min|sum|mean|sd|count|cond|inrange|inlist|missing|strlen|substr|strpos|upper|lower|trim|real|string|date|year|month|day|clock|word|wordcount|regexm|runiform|rnormal|_n|_N|_b|_se|e|r|c)\b/,
+  'number': /\b\d+\.?\d*(?:e[+-]?\d+)?\b/i,
+  'operator': /[<>!=]=?|[+\-*/^~&|#]/,
+  'punctuation': /[(),.:]/
+};
+Prism.highlightAll();
+</script>
 </body>
 </html>

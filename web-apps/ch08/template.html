@@ -281,6 +281,14 @@ footer.page a:hover { text-decoration: underline; }
 .code-summary .btn-colab { color: var(--accent); font-weight: 500; text-decoration: none; font-size: 0.9rem; }
 .code-summary .btn-colab:hover { text-decoration: underline; }
 
+/* --- Code language tabs --- */
+.code-tabs { display: inline-flex; gap: 0; background: var(--panel-2, var(--panel)); padding: 3px; border-radius: 10px; border: 1px solid var(--border); margin-bottom: 0.8rem; }
+.code-tabs button { background: transparent; border: none; color: var(--text-soft); padding: 0.38rem 1rem; border-radius: 7px; font-family: inherit; font-size: 0.85rem; font-weight: 500; cursor: pointer; transition: all .15s ease; }
+.code-tabs button.active { background: var(--accent); color: white; font-weight: 600; }
+.code-tabs button:not(.active):hover { color: var(--accent); }
+.code-panel { display: none; }
+.code-panel.active { display: block; }
+
 /* --- Syntax highlighting tokens (Prism.js) --- */
 .code-summary pre[class*="language-"],
 .code-summary code[class*="language-"] {
@@ -328,7 +336,7 @@ footer.page a:hover { text-decoration: underline; }
     <li><a href="#capm-resid">CAPM Residuals</a></li>
     <li><a href="#okun">Okun's Law</a></li>
     <li><a href="#okun-ts">Okun Time Series</a></li>
-    <li><a href="#code">Python code</a></li>
+    <li><a href="#code">Code</a></li>
   </ul>
 </nav>
 
@@ -744,10 +752,17 @@ footer.page a:hover { text-decoration: underline; }
   <p class="takeaway"><strong>Take-away:</strong> Time-series regressions are not static truths — scanning actual-vs-predicted plots is the cheapest way to catch a model that has quietly stopped working. <a href="../../book/_book/notebooks_quarto/ch08_Case_Studies_for_Bivariate_Regression.html#output-and-unemployment-in-the-u.s.-okuns-law" target="_blank" rel="noopener">Read §8.4 in the chapter →</a></p>
 </section>
 
-<section class="howto-card code-summary" id="code" aria-label="Python code summary">
-  <h2>Python Libraries and Code</h2>
-  <p class="motivation">You've explored the key concepts interactively — now reproduce them in Python. This self-contained code block covers everything you practiced above. Copy it into an empty notebook and run it.</p>
-  <pre><code id="code-cheatsheet" class="language-python"># =============================================================================
+<section class="howto-card code-summary" id="code" aria-label="Code summary">
+  <h2>Code Summary</h2>
+  <p class="motivation">You've explored the key concepts interactively — now reproduce them in code. These self-contained blocks cover everything you practiced above. Pick your language, copy the code, and run it.</p>
+
+  <div class="code-tabs" id="code-lang-tabs">
+    <button type="button" data-lang="python" class="active">Python</button>
+    <button type="button" data-lang="stata">Stata</button>
+  </div>
+
+  <div class="code-panel active" id="panel-python">
+  <pre><code id="code-python" class="language-python"># =============================================================================
 # CHAPTER 8 CHEAT SHEET: Case Studies for Bivariate Regression
 # =============================================================================
 
@@ -881,8 +896,144 @@ ax.grid(True, alpha=0.3)
 plt.tight_layout()
 plt.show()</code></pre>
   <div style="display:flex;gap:0.8rem;align-items:center;margin-top:0.8rem;flex-wrap:wrap">
-    <button class="btn-copy" onclick="navigator.clipboard.writeText(document.getElementById('code-cheatsheet').textContent).then(()=>{this.textContent='Copied!';setTimeout(()=>this.textContent='Copy code',1500)})">Copy code</button>
-    <a class="btn-colab" href="https://colab.research.google.com/notebooks/empty.ipynb" target="_blank" rel="noopener">Open empty Colab notebook →</a>
+    <button class="btn-copy" onclick="navigator.clipboard.writeText(document.getElementById('code-python').textContent).then(()=>{this.textContent='Copied!';setTimeout(()=>this.textContent='Copy code',1500)})">Copy code</button>
+    <a class="btn-colab" href="https://colab.research.google.com/notebooks/empty.ipynb" target="_blank" rel="noopener">Open empty Colab notebook &rarr;</a>
+  </div>
+  </div>
+
+  <div class="code-panel" id="panel-stata">
+  <pre><code id="code-stata" class="language-stata">* =============================================================================
+* CHAPTER 8 CHEAT SHEET: Case Studies for Bivariate Regression
+* =============================================================================
+
+* --- Setup ---
+clear all                                // start with a clean workspace
+set more off                             // do not pause output for long results
+
+* =============================================================================
+* STEP 1: Load OECD health data from a URL
+* =============================================================================
+* use loads a Stata .dta file; "clear" drops any data already in memory
+use "https://raw.githubusercontent.com/quarcs-lab/data-open/master/AED/AED_HEALTH2009.DTA", clear
+
+describe                                 // list all variables, types, and labels
+display "Observations: " _N              // _N is Stata's built-in observation count
+
+* =============================================================================
+* STEP 2: Descriptive statistics — summarize before modeling
+* =============================================================================
+* summarize gives n, mean, std, min, max for key variables
+summarize hlthpc lifeexp infmort gdppc
+
+* "detail" adds median, skewness, kurtosis, and percentiles
+summarize hlthpc, detail
+
+* =============================================================================
+* STEP 3: Health outcomes regression with robust standard errors
+* =============================================================================
+* Does higher health spending improve life expectancy?
+* regress fits OLS: depvar followed by independent variables
+regress lifeexp hlthpc
+
+// After running regress, Stata stores results you can reference:
+display "Slope on hlthpc: " _b[hlthpc]
+display "R-squared:       " e(r2)
+display "Each extra $1,000 in spending → " _b[hlthpc]*1000 " more years of life"
+
+// Robust standard errors adjust for heteroskedasticity (non-constant error variance)
+// Adding ", robust" or ", vce(robust)" re-estimates with HC1 standard errors
+regress lifeexp hlthpc, vce(robust)
+
+* =============================================================================
+* STEP 4: Health spending vs GDP — income elasticity
+* =============================================================================
+* How much of health spending is driven by national income?
+regress hlthpc gdppc
+
+// Income elasticity at the mean: (slope × mean_x) / mean_y
+// After regress, _b[gdppc] holds the slope coefficient
+summarize gdppc
+local mean_gdp = r(mean)
+summarize hlthpc
+local mean_hlth = r(mean)
+local elasticity = (_b[gdppc] * `mean_gdp') / `mean_hlth'
+
+display "Income elasticity at the mean: " `elasticity' "  (≈1.0 → normal good)"
+
+* =============================================================================
+* STEP 5: Outlier robustness — excluding USA and Luxembourg
+* =============================================================================
+* Two countries drive much of the model's "misfit" — test robustness
+* First run with all 34 countries (already done above), then exclude outliers
+
+// "if" restricts the estimation sample without dropping data
+regress hlthpc gdppc if code != "USA" &amp; code != "LUX"
+
+display "Excluding USA/LUX: slope = " _b[gdppc] ", R² = " e(r2)
+display "Removing 2 of 34 countries transforms R² — always check for influential observations!"
+
+// Scatter with fitted line — all countries
+predict hlthpc_hat                       // predict fitted values from last regression
+twoway (scatter hlthpc gdppc, msize(small))                                  ///
+       (lfit hlthpc gdppc, lcolor(red) lwidth(medthick)),                    ///
+    title("All 34 Countries") xtitle("GDP per capita ($)")                   ///
+    ytitle("Health spending per capita ($)") legend(off) name(all, replace)
+
+// Scatter with fitted line — excluding USA and Luxembourg
+twoway (scatter hlthpc gdppc if code != "USA" &amp; code != "LUX", msize(small)) ///
+       (lfit hlthpc gdppc if code != "USA" &amp; code != "LUX",                  ///
+            lcolor(red) lwidth(medthick)),                                    ///
+    title("Excluding USA &amp; Luxembourg") xtitle("GDP per capita ($)")         ///
+    ytitle("Health spending per capita ($)") legend(off) name(excl, replace)
+
+graph combine all excl, title("Outlier Robustness Check")
+
+* =============================================================================
+* STEP 6: CAPM — estimating Coca-Cola's beta (systematic risk)
+* =============================================================================
+* Beta measures how a stock's excess return co-moves with the market
+use "https://raw.githubusercontent.com/quarcs-lab/data-open/master/AED/AED_CAPM.DTA", clear
+
+regress rko_rf rm_rf
+
+// _b[_cons] is the intercept (alpha); _b[rm_rf] is the slope (beta)
+display "Alpha (excess return): " _b[_cons]
+display "Beta (systematic risk): " _b[rm_rf]
+display "R-squared: " e(r2)
+display "Beta &lt; 1 → defensive stock (moves less than the market)"
+
+// Scatter plot with fitted line
+twoway (scatter rko_rf rm_rf, msize(small) mcolor(navy%60))                  ///
+       (lfit rko_rf rm_rf, lcolor(red) lwidth(medthick)),                    ///
+    xtitle("Market excess return (%)") ytitle("Coca-Cola excess return (%)")  ///
+    title("CAPM: Coca-Cola vs Market") legend(off)
+
+* =============================================================================
+* STEP 7: Okun's Law — GDP growth vs unemployment change
+* =============================================================================
+* Okun (1962): each +1 point in unemployment → ≈ -2 points in GDP growth
+use "https://raw.githubusercontent.com/quarcs-lab/data-open/master/AED/AED_GDPUNEMPLOY.DTA", clear
+
+regress rgdpgrowth uratechange
+
+display "Okun's Law slope: " _b[uratechange] "  (Okun's original: -2.0)"
+display "R-squared: " e(r2)
+
+// predict fitted values and residuals for plotting
+predict gdp_hat                          // fitted values from last regression
+predict gdp_resid, residuals             // residuals = actual - fitted
+
+// Scatter plot with fitted line
+twoway (scatter rgdpgrowth uratechange, msize(small) mcolor(navy%60))        ///
+       (lfit rgdpgrowth uratechange, lcolor(red) lwidth(medthick)),          ///
+    xtitle("Change in unemployment rate (pp)")                                ///
+    ytitle("Real GDP growth (%)")                                             ///
+    title("Okun's Law: GDP Growth vs Unemployment Change")                    ///
+    yline(0, lcolor(gray) lpattern(dot)) legend(off)</code></pre>
+  <div style="display:flex;gap:0.8rem;align-items:center;margin-top:0.8rem;flex-wrap:wrap">
+    <button class="btn-copy" onclick="navigator.clipboard.writeText(document.getElementById('code-stata').textContent).then(()=>{this.textContent='Copied!';setTimeout(()=>this.textContent='Copy code',1500)})">Copy code</button>
+    <span style="color:var(--text-muted);font-size:0.88rem">Paste into your Stata do-file editor</span>
+  </div>
   </div>
 </section>
 
@@ -1691,8 +1842,49 @@ window.addEventListener("resize", function() {
 });
 </script>
 
+<script>
+// ==================== CODE LANGUAGE TABS ====================
+(function() {
+  var tabBar = document.getElementById('code-lang-tabs');
+  if (!tabBar) return;
+  var buttons = tabBar.querySelectorAll('button');
+  var panels  = {
+    python: document.getElementById('panel-python'),
+    stata:  document.getElementById('panel-stata')
+  };
+  buttons.forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      var lang = btn.dataset.lang;
+      buttons.forEach(function(b) { b.classList.remove('active'); });
+      btn.classList.add('active');
+      Object.values(panels).forEach(function(p) { p.classList.remove('active'); });
+      if (panels[lang]) panels[lang].classList.add('active');
+    });
+  });
+})();
+</script>
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" data-manual></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
-<script>Prism.highlightAll();</script>
+<script>
+// Minimal Stata language grammar for Prism.js syntax highlighting
+Prism.languages.stata = {
+  'comment': [
+    { pattern: /\/\*[\s\S]*?\*\//, greedy: true },
+    { pattern: /\/\/.*$/m, greedy: true },
+    { pattern: /^\s*\*.*$/m, greedy: true }
+  ],
+  'string': [
+    { pattern: /"(?:[^"\\]|\\.)*"/, greedy: true },
+    { pattern: /`"(?:[^"]|"(?!'))*"'/, greedy: true }
+  ],
+  'keyword': /\b(?:use|clear|set|gen|generate|replace|drop|keep|rename|order|sort|gsort|merge|append|reshape|collapse|preserve|restore|save|export|import|insheet|outsheet|regress|reg|logit|probit|ivregress|xtreg|areg|newey|tobit|xtset|tsset|predict|margins|marginsplot|test|lincom|nlcom|hausman|estat|summarize|sum|tabulate|tab|describe|des|list|display|di|graph|scatter|twoway|histogram|kdensity|boxplot|qnorm|label|encode|decode|destring|tostring|log|using|if|in|by|bysort|forvalues|foreach|local|global|scalar|matrix|capture|quietly|noisily|return|ereturn|program|end|exit|do|run|include|sysuse|webuse|cd|pwd|macro|tempvar|tempname|tempfile|assert|count|levelsof|codebook|inspect|anova|ttest|correlate|pwcorr|spearman|ranksum|signrank|kwallis|oneway|chi2|mixed|xtmixed|bootstrap|jackknife|permute|simulate|vce|robust|cluster|absorb|noconstant|detail|nolog|level|mle|fe|re|estimates|eststo|esttab|outreg2|coefplot|binscatter|tssmooth|name|combine|lwidth|lcolor|lpattern|xtitle|ytitle|title|legend|more|off|all|lfit|msize|mcolor|yline)\b/,
+  'function': /\b(?:abs|ceil|floor|round|mod|sqrt|exp|ln|log10|max|min|sum|mean|sd|count|cond|inrange|inlist|missing|strlen|substr|strpos|upper|lower|trim|real|string|date|year|month|day|clock|word|wordcount|regexm|runiform|rnormal|_n|_N|_b|_se|e|r|c)\b/,
+  'number': /\b\d+\.?\d*(?:e[+-]?\d+)?\b/i,
+  'operator': /[<>!=]=?|[+\-*/^~&|#]/,
+  'punctuation': /[(),.:]/
+};
+Prism.highlightAll();
+</script>
 </body>
 </html>

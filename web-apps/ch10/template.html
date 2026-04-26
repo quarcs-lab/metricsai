@@ -178,6 +178,39 @@ footer.page a:hover { text-decoration: underline; }
 .code-summary .btn-colab { color: var(--accent); font-weight: 500; text-decoration: none; font-size: 0.9rem; }
 .code-summary .btn-colab:hover { text-decoration: underline; }
 
+/* --- Code language tabs --- */
+.code-tabs {
+  display: inline-flex;
+  gap: 0;
+  background: var(--panel-2, var(--panel));
+  padding: 3px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  margin-bottom: 0.8rem;
+}
+.code-tabs button {
+  background: transparent;
+  border: none;
+  color: var(--text-soft);
+  padding: 0.38rem 1rem;
+  border-radius: 7px;
+  font-family: inherit;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all .15s ease;
+}
+.code-tabs button.active {
+  background: var(--accent);
+  color: white;
+  font-weight: 600;
+}
+.code-tabs button:not(.active):hover {
+  color: var(--accent);
+}
+.code-panel { display: none; }
+.code-panel.active { display: block; }
+
 /* --- Syntax highlighting tokens (Prism.js) --- */
 .code-summary pre[class*="language-"],
 .code-summary code[class*="language-"] {
@@ -225,7 +258,7 @@ footer.page a:hover { text-decoration: underline; }
     <li><a href="#modelcomp">Model comparison</a></li>
     <li><a href="#vif">Multicollinearity</a></li>
     <li><a href="#diagnostics">Diagnostics</a></li>
-    <li><a href="#code">Python code</a></li>
+    <li><a href="#code">Code</a></li>
   </ul>
 </nav>
 
@@ -574,10 +607,17 @@ footer.page a:hover { text-decoration: underline; }
   <p class="takeaway"><strong>Take-away:</strong> Actual-vs-predicted and residual plots are cheap insurance — they can invalidate an R² in a single glance. <a href="../../book/_book/notebooks_quarto/ch10_Data_Summary_for_Multiple_Regression.html#multiple-regression-estimation" target="_blank" rel="noopener">Read §10.4 in the chapter →</a></p>
 </section>
 
-<section class="howto-card code-summary" id="code" aria-label="Python code summary">
-  <h2>Python Libraries and Code</h2>
-  <p class="motivation">You've explored the key concepts interactively — now reproduce them in Python. This self-contained code block covers everything you practiced above. Copy it into an empty notebook and run it.</p>
-  <pre><code id="code-cheatsheet" class="language-python"># =============================================================================
+<section class="howto-card code-summary" id="code" aria-label="Code summary">
+  <h2>Code Summary</h2>
+  <p class="motivation">You've explored the key concepts interactively — now reproduce them in code. These self-contained blocks cover everything you practiced above. Pick your language, copy the code, and run it.</p>
+
+  <div class="code-tabs" id="code-lang-tabs">
+    <button type="button" data-lang="python" class="active">Python</button>
+    <button type="button" data-lang="stata">Stata</button>
+  </div>
+
+  <div class="code-panel active" id="panel-python">
+  <pre><code id="code-python" class="language-python"># =============================================================================
 # CHAPTER 10 CHEAT SHEET: Data Summary for Multiple Regression
 # =============================================================================
 
@@ -718,8 +758,134 @@ axes[1].grid(True, alpha=0.3)
 plt.tight_layout()
 plt.show()</code></pre>
   <div style="display:flex;gap:0.8rem;align-items:center;margin-top:0.8rem;flex-wrap:wrap">
-    <button class="btn-copy" onclick="navigator.clipboard.writeText(document.getElementById('code-cheatsheet').textContent).then(()=>{this.textContent='Copied!';setTimeout(()=>this.textContent='Copy code',1500)})">Copy code</button>
-    <a class="btn-colab" href="https://colab.research.google.com/notebooks/empty.ipynb" target="_blank" rel="noopener">Open empty Colab notebook →</a>
+    <button class="btn-copy" onclick="navigator.clipboard.writeText(document.getElementById('code-python').textContent).then(()=>{this.textContent='Copied!';setTimeout(()=>this.textContent='Copy code',1500)})">Copy code</button>
+    <a class="btn-colab" href="https://colab.research.google.com/notebooks/empty.ipynb" target="_blank" rel="noopener">Open empty Colab notebook &rarr;</a>
+  </div>
+  </div>
+
+  <div class="code-panel" id="panel-stata">
+  <pre><code id="code-stata" class="language-stata">* =============================================================================
+* CHAPTER 10 CHEAT SHEET: Data Summary for Multiple Regression
+* =============================================================================
+
+* --- Setup ---
+clear all                                // start with a clean workspace
+set more off                             // do not pause output for long results
+
+* =============================================================================
+* STEP 1: Load data and explore
+* =============================================================================
+* use loads a Stata .dta file; "clear" drops any data already in memory
+use "https://raw.githubusercontent.com/quarcs-lab/data-open/master/AED/AED_HOUSE.DTA", clear
+
+describe                                 // list all variables, types, and labels
+display "Observations: " _N              // _N is Stata's built-in observation count
+summarize price size bedrooms bathrooms lotsize age
+
+* =============================================================================
+* STEP 2: Partial effects vs. total effects — why controls matter
+* =============================================================================
+* Bivariate regression captures TOTAL effect (direct + indirect through size)
+regress price bedrooms
+estimates store bivariate                // save results for comparison
+
+* Multiple regression isolates the PARTIAL effect (holding size constant)
+regress price bedrooms size
+estimates store partial                  // save results for comparison
+
+* Compare: the bedrooms coefficient drops from ~$23,667 to ~$1,553
+estimates table bivariate partial, b(%9.2f) se(%9.2f) stats(r2 r2_a N)
+
+* =============================================================================
+* STEP 3: Correlation matrix — check pairwise associations before modeling
+* =============================================================================
+* High correlations between regressors signal potential multicollinearity
+* correlate shows the full pairwise correlation matrix
+correlate price size bedrooms bathrooms lotsize age
+
+* pwcorr adds significance stars and p-values
+pwcorr price size bedrooms bathrooms lotsize age, star(0.05) sig
+
+* =============================================================================
+* STEP 4: Full multiple regression — estimate partial effects
+* =============================================================================
+* Each coefficient measures the change in price for a one-unit change in that
+* variable, holding ALL other regressors constant
+regress price size bedrooms bathrooms lotsize age monthsold
+estimates store full                     // save full model results
+
+display "Size effect: each additional sq ft is associated with $" _b[size] " higher price"
+display "R-squared: " e(r2)
+display "Adjusted R-squared: " e(r2_a)
+
+* =============================================================================
+* STEP 5: FWL theorem — how "holding constant" actually works
+* =============================================================================
+* Step A: Regress size on all other regressors, keep residuals
+regress size bedrooms bathrooms lotsize age monthsold
+predict resid_size, residuals            // residuals = variation in size unexplained by controls
+
+* Step B: Regress price on those residuals — the slope matches the full model
+regress price resid_size
+
+* Compare: this coefficient matches the size coefficient from the full model
+display "FWL slope:           " _b[resid_size]
+estimates restore full
+display "Full regression coef: " _b[size]
+// These are identical — the FWL theorem in action
+
+* =============================================================================
+* STEP 6: Model comparison — parsimony vs. complexity
+* =============================================================================
+* Compare simple (size only) vs. full model using fit statistics
+
+* Simple model
+quietly regress price size
+estimates store simple
+estat ic                                 // AIC and BIC
+
+* Full model
+quietly regress price size bedrooms bathrooms lotsize age monthsold
+estimates store full
+estat ic                                 // AIC and BIC
+
+* Side-by-side comparison: R², adj R², coefficients
+estimates table simple full, b(%9.2f) se(%9.2f) stats(r2 r2_a N)
+// Adj R² DECREASES when adding 5 weak predictors — parsimony wins
+
+* =============================================================================
+* STEP 7: VIF — detect multicollinearity
+* =============================================================================
+* VIF_j = 1 / (1 - R²_j), where R²_j is from regressing x_j on all other x's
+* VIF &gt; 5: moderate concern; VIF &gt; 10: severe multicollinearity
+quietly regress price size bedrooms bathrooms lotsize age monthsold
+estat vif                                // VIF for each regressor after the last regression
+
+* =============================================================================
+* STEP 8: Diagnostics — actual vs. predicted and residual plots
+* =============================================================================
+* Good fit: points hug the 45° line; residuals scatter randomly around zero
+quietly regress price size bedrooms bathrooms lotsize age monthsold
+predict yhat, xb                         // predicted values
+predict resid, residuals                 // residuals
+
+* Actual vs. predicted plot
+twoway (scatter price yhat, mcolor(navy) msymbol(circle))                 ///
+       (function y=x, range(yhat) lcolor(red) lpattern(dash) lwidth(medthick)), ///
+    xtitle("Predicted Price ($)") ytitle("Actual Price ($)")               ///
+    title("Actual vs Predicted")                                           ///
+    legend(order(1 "Observations" 2 "45° line"))
+
+* Residual plot
+twoway (scatter resid yhat, mcolor(navy) msymbol(circle))                 ///
+       (function y=0, range(yhat) lcolor(red) lpattern(dash) lwidth(medthick)), ///
+    xtitle("Fitted Values ($)") ytitle("Residuals ($)")                    ///
+    title("Residual Plot")                                                 ///
+    legend(order(1 "Residuals" 2 "Zero line"))</code></pre>
+  <div style="display:flex;gap:0.8rem;align-items:center;margin-top:0.8rem;flex-wrap:wrap">
+    <button class="btn-copy" onclick="navigator.clipboard.writeText(document.getElementById('code-stata').textContent).then(()=>{this.textContent='Copied!';setTimeout(()=>this.textContent='Copy code',1500)})">Copy code</button>
+    <span style="color:var(--text-muted);font-size:0.88rem">Paste into your Stata do-file editor</span>
+  </div>
   </div>
 </section>
 
@@ -1122,8 +1288,49 @@ function initToggles(id, cb) { document.getElementById(id).querySelectorAll("but
 window.addEventListener("resize",()=>{document.querySelectorAll(".chart").forEach(el=>{if(el.data)Plotly.Plots.resize(el);});});
 </script>
 
+<script>
+// ==================== CODE LANGUAGE TABS ====================
+(function() {
+  var tabBar = document.getElementById('code-lang-tabs');
+  if (!tabBar) return;
+  var buttons = tabBar.querySelectorAll('button');
+  var panels  = {
+    python: document.getElementById('panel-python'),
+    stata:  document.getElementById('panel-stata')
+  };
+  buttons.forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      var lang = btn.dataset.lang;
+      buttons.forEach(function(b) { b.classList.remove('active'); });
+      btn.classList.add('active');
+      Object.values(panels).forEach(function(p) { p.classList.remove('active'); });
+      if (panels[lang]) panels[lang].classList.add('active');
+    });
+  });
+})();
+</script>
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" data-manual></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
-<script>Prism.highlightAll();</script>
+<script>
+// Minimal Stata language grammar for Prism.js syntax highlighting
+Prism.languages.stata = {
+  'comment': [
+    { pattern: /\/\*[\s\S]*?\*\//, greedy: true },
+    { pattern: /\/\/.*$/m, greedy: true },
+    { pattern: /^\s*\*.*$/m, greedy: true }
+  ],
+  'string': [
+    { pattern: /"(?:[^"\\]|\\.)*"/, greedy: true },
+    { pattern: /`"(?:[^"]|"(?!'))*"'/, greedy: true }
+  ],
+  'keyword': /\b(?:use|clear|set|gen|generate|replace|drop|keep|rename|order|sort|gsort|merge|append|reshape|collapse|preserve|restore|save|export|import|insheet|outsheet|regress|reg|logit|probit|ivregress|xtreg|areg|newey|tobit|xtset|tsset|predict|margins|marginsplot|test|lincom|nlcom|hausman|estat|summarize|sum|tabulate|tab|describe|des|list|display|di|graph|scatter|twoway|histogram|kdensity|boxplot|qnorm|label|encode|decode|destring|tostring|log|using|if|in|by|bysort|forvalues|foreach|local|global|scalar|matrix|capture|quietly|noisily|return|ereturn|program|end|exit|do|run|include|sysuse|webuse|cd|pwd|macro|tempvar|tempname|tempfile|assert|count|levelsof|codebook|inspect|anova|ttest|correlate|pwcorr|spearman|ranksum|signrank|kwallis|oneway|chi2|mixed|xtmixed|bootstrap|jackknife|permute|simulate|vce|robust|cluster|absorb|noconstant|detail|nolog|level|mle|fe|re|estimates|eststo|esttab|outreg2|coefplot|binscatter|tssmooth|name|combine|lwidth|lcolor|lpattern|xtitle|ytitle|title|legend|more|off|all)\b/,
+  'function': /\b(?:abs|ceil|floor|round|mod|sqrt|exp|ln|log10|max|min|sum|mean|sd|count|cond|inrange|inlist|missing|strlen|substr|strpos|upper|lower|trim|real|string|date|year|month|day|clock|word|wordcount|regexm|runiform|rnormal|_n|_N|_b|_se|e|r|c)\b/,
+  'number': /\b\d+\.?\d*(?:e[+-]?\d+)?\b/i,
+  'operator': /[<>!=]=?|[+\-*/^~&|#]/,
+  'punctuation': /[(),.:]/
+};
+Prism.highlightAll();
+</script>
 </body>
 </html>

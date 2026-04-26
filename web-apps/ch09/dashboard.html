@@ -281,6 +281,14 @@ footer.page a:hover { text-decoration: underline; }
 .code-summary .btn-colab { color: var(--accent); font-weight: 500; text-decoration: none; font-size: 0.9rem; }
 .code-summary .btn-colab:hover { text-decoration: underline; }
 
+/* --- Code language tabs --- */
+.code-tabs { display: inline-flex; gap: 0; background: var(--panel-2, var(--panel)); padding: 3px; border-radius: 10px; border: 1px solid var(--border); margin-bottom: 0.8rem; }
+.code-tabs button { background: transparent; border: none; color: var(--text-soft); padding: 0.38rem 1rem; border-radius: 7px; font-family: inherit; font-size: 0.85rem; font-weight: 500; cursor: pointer; transition: all .15s ease; }
+.code-tabs button.active { background: var(--accent); color: white; font-weight: 600; }
+.code-tabs button:not(.active):hover { color: var(--accent); }
+.code-panel { display: none; }
+.code-panel.active { display: block; }
+
 /* --- Syntax highlighting tokens (Prism.js) --- */
 .code-summary pre[class*="language-"],
 .code-summary code[class*="language-"] {
@@ -328,7 +336,7 @@ footer.page a:hover { text-decoration: underline; }
     <li><a href="#exp-growth">Exp Growth</a></li>
     <li><a href="#model-compare">Model Compare</a></li>
     <li><a href="#cross-country">Cross-Country</a></li>
-    <li><a href="#code">Python code</a></li>
+    <li><a href="#code">Code</a></li>
   </ul>
 </nav>
 
@@ -735,10 +743,17 @@ footer.page a:hover { text-decoration: underline; }
   <p class="takeaway"><strong>Take-away:</strong> For cross-country data, log specifications are not a stylistic choice — they are the only way to make the data, the theory, and the interpretation all fit in one picture. <a href="../../book/_book/notebooks_quarto/ch09_Models_with_Natural_Logarithms.html#case-studies" target="_blank" rel="noopener">Read the case studies →</a></p>
 </section>
 
-<section class="howto-card code-summary" id="code" aria-label="Python code summary">
-  <h2>Python Libraries and Code</h2>
-  <p class="motivation">You've explored the key concepts interactively — now reproduce them in Python. This self-contained code block covers everything you practiced above. Copy it into an empty notebook and run it.</p>
-  <pre><code id="code-cheatsheet" class="language-python"># =============================================================================
+<section class="howto-card code-summary" id="code" aria-label="Code summary">
+  <h2>Code Summary</h2>
+  <p class="motivation">You've explored the key concepts interactively — now reproduce them in code. These self-contained blocks cover everything you practiced above. Pick your language, copy the code, and run it.</p>
+
+  <div class="code-tabs" id="code-lang-tabs">
+    <button type="button" data-lang="python" class="active">Python</button>
+    <button type="button" data-lang="stata">Stata</button>
+  </div>
+
+  <div class="code-panel active" id="panel-python">
+  <pre><code id="code-python" class="language-python"># =============================================================================
 # CHAPTER 9 CHEAT SHEET: Models with Natural Logarithms
 # =============================================================================
 
@@ -871,8 +886,140 @@ axes[1].grid(True, alpha=0.3)
 plt.tight_layout()
 plt.show()</code></pre>
   <div style="display:flex;gap:0.8rem;align-items:center;margin-top:0.8rem;flex-wrap:wrap">
-    <button class="btn-copy" onclick="navigator.clipboard.writeText(document.getElementById('code-cheatsheet').textContent).then(()=>{this.textContent='Copied!';setTimeout(()=>this.textContent='Copy code',1500)})">Copy code</button>
-    <a class="btn-colab" href="https://colab.research.google.com/notebooks/empty.ipynb" target="_blank" rel="noopener">Open empty Colab notebook →</a>
+    <button class="btn-copy" onclick="navigator.clipboard.writeText(document.getElementById('code-python').textContent).then(()=>{this.textContent='Copied!';setTimeout(()=>this.textContent='Copy code',1500)})">Copy code</button>
+    <a class="btn-colab" href="https://colab.research.google.com/notebooks/empty.ipynb" target="_blank" rel="noopener">Open empty Colab notebook &rarr;</a>
+  </div>
+  </div>
+
+  <div class="code-panel" id="panel-stata">
+  <pre><code id="code-stata" class="language-stata">* =============================================================================
+* CHAPTER 9 CHEAT SHEET: Models with Natural Logarithms
+* =============================================================================
+
+* --- Setup ---
+clear all                                // start with a clean workspace
+set more off                             // do not pause output for long results
+
+* =============================================================================
+* STEP 1: Load the earnings-education dataset
+* =============================================================================
+* use loads a Stata .dta file; "clear" drops any data already in memory
+use "https://raw.githubusercontent.com/quarcs-lab/data-open/master/AED/AED_EARNINGS.DTA", clear
+
+describe                                 // list all variables, types, and labels
+display "Observations: " _N              // _N is Stata's built-in observation count
+
+* =============================================================================
+* STEP 2: Logarithmic approximation — why economists use logs
+* =============================================================================
+* Key property: Δln(x) ≈ Δx/x (proportionate change)
+* Multiplying by 100 gives the percentage change
+local x0 = 40
+local x1 = 40.4
+local exact = (`x1' - `x0') / `x0'
+local approx = ln(`x1') - ln(`x0')
+display "Change from `x0' to `x1':"
+display "  Exact proportionate change: " %9.6f `exact' " (" %5.2f `exact'*100 "%)"
+display "  Log approximation Δln(x):   " %9.6f `approx' " (" %5.2f `approx'*100 "%)"
+
+* =============================================================================
+* STEP 3: Descriptive statistics and log transformations
+* =============================================================================
+* gen creates a new variable; ln() is the natural log function
+* Log-transformed variables are needed for log-linear and log-log models
+gen lnearn = ln(earnings)
+gen lneduc = ln(education)
+
+summarize earnings lnearn education lneduc, detail
+
+* =============================================================================
+* STEP 4: Estimate all four model specifications
+* =============================================================================
+* Each model answers a different economic question about earnings and education
+
+* Model 1: Linear — Δy = β₁Δx (dollar change per year of education)
+regress earnings education
+estimates store m_linear
+
+* Model 2: Log-linear — 100β₁ ≈ % change in y per unit x (semi-elasticity)
+regress lnearn education
+estimates store m_loglin
+// Store the semi-elasticity coefficient for later display
+local semi_elast = _b[education]
+display "Log-linear: each year of education → " %4.1f 100*`semi_elast' "% higher earnings"
+
+* Model 3: Log-log — β₁ ≈ % change in y per % change in x (elasticity)
+regress lnearn lneduc
+estimates store m_loglog
+display "Log-log elasticity: " %6.3f _b[lneduc]
+
+* Model 4: Linear-log — β₁/100 ≈ dollar change per % change in x
+regress earnings lneduc
+estimates store m_linlog
+
+* =============================================================================
+* STEP 5: Compare all four models side by side
+* =============================================================================
+* estimates table displays coefficients and R² for all stored models
+* The comparison shows that model choice affects both R² and interpretation
+estimates table m_linear m_loglin m_loglog m_linlog, ///
+    stats(r2 N) b(%9.4f)
+
+* Alternatively, use esttab for publication-quality output (requires ssc install estout)
+// esttab m_linear m_loglin m_loglog m_linlog, ///
+//     r2 se label mtitle("Linear" "Log-linear" "Log-log" "Linear-log")
+
+* =============================================================================
+* STEP 6: Scatter plot with the log-linear fitted line
+* =============================================================================
+* The log-linear model (semi-elasticity) provides the best fit for earnings data
+
+// Re-estimate the log-linear model to get fitted values
+regress lnearn education
+predict yhat_loglin                      // fitted values from the regression
+
+twoway (scatter lnearn education, msize(small) mcolor(gs10))           ///
+       (line yhat_loglin education, sort lwidth(medthick) lcolor(red)), ///
+    xtitle("Education (years)")                                         ///
+    ytitle("ln(Earnings)")                                              ///
+    title("Log-Linear Model: ln(Earnings) on Education")                ///
+    legend(order(1 "Observed" 2 "Fitted line"))
+
+* =============================================================================
+* STEP 7: Exponential growth — S&amp;P 500 and the Rule of 72
+* =============================================================================
+* Exponential growth in levels becomes linear in logs:
+* ln(x_t) ≈ ln(x₀) + r × t, where slope r = annual growth rate
+use "https://raw.githubusercontent.com/quarcs-lab/data-open/master/AED/AED_SP500INDEX.DTA", clear
+
+regress lnsp500 year
+local growth = _b[year]
+
+display "S&amp;P 500 estimated growth rate: " %5.2f 100*`growth' "% per year"
+display "Rule of 72: doubles every " %3.1f 72/(100*`growth') " years"
+display "R-squared: " %6.4f e(r2)
+
+// Fitted values for the log-scale plot
+predict yhat_sp500
+
+* Visualize: exponential in levels vs. linear in logs (side by side)
+twoway (line sp500 year, lwidth(medthick)),                            ///
+    xtitle("Year") ytitle("S&amp;P 500 Index")                             ///
+    title("Exponential Growth in Levels")                              ///
+    name(levels, replace)
+
+twoway (line lnsp500 year, lwidth(medthick) lcolor(gs10))              ///
+       (line yhat_sp500 year, lwidth(medthick) lcolor(red) lpattern(dash)), ///
+    xtitle("Year") ytitle("ln(S&amp;P 500 Index)")                         ///
+    title("Linear in Logs: Constant Growth Rate")                       ///
+    legend(order(1 "Observed" 2 "Fitted (linear)"))                    ///
+    name(logs, replace)
+
+graph combine levels logs, title("S&amp;P 500: Levels vs. Logs")</code></pre>
+  <div style="display:flex;gap:0.8rem;align-items:center;margin-top:0.8rem;flex-wrap:wrap">
+    <button class="btn-copy" onclick="navigator.clipboard.writeText(document.getElementById('code-stata').textContent).then(()=>{this.textContent='Copied!';setTimeout(()=>this.textContent='Copy code',1500)})">Copy code</button>
+    <span style="color:var(--text-muted);font-size:0.88rem">Paste into your Stata do-file editor</span>
+  </div>
   </div>
 </section>
 
@@ -1554,8 +1701,49 @@ window.addEventListener("resize", function() {
 });
 </script>
 
+<script>
+// ==================== CODE LANGUAGE TABS ====================
+(function() {
+  var tabBar = document.getElementById('code-lang-tabs');
+  if (!tabBar) return;
+  var buttons = tabBar.querySelectorAll('button');
+  var panels  = {
+    python: document.getElementById('panel-python'),
+    stata:  document.getElementById('panel-stata')
+  };
+  buttons.forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      var lang = btn.dataset.lang;
+      buttons.forEach(function(b) { b.classList.remove('active'); });
+      btn.classList.add('active');
+      Object.values(panels).forEach(function(p) { p.classList.remove('active'); });
+      if (panels[lang]) panels[lang].classList.add('active');
+    });
+  });
+})();
+</script>
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" data-manual></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
-<script>Prism.highlightAll();</script>
+<script>
+// Minimal Stata language grammar for Prism.js syntax highlighting
+Prism.languages.stata = {
+  'comment': [
+    { pattern: /\/\*[\s\S]*?\*\//, greedy: true },
+    { pattern: /\/\/.*$/m, greedy: true },
+    { pattern: /^\s*\*.*$/m, greedy: true }
+  ],
+  'string': [
+    { pattern: /"(?:[^"\\]|\\.)*"/, greedy: true },
+    { pattern: /`"(?:[^"]|"(?!'))*"'/, greedy: true }
+  ],
+  'keyword': /\b(?:use|clear|set|gen|generate|replace|drop|keep|rename|order|sort|gsort|merge|append|reshape|collapse|preserve|restore|save|export|import|insheet|outsheet|regress|reg|logit|probit|ivregress|xtreg|areg|newey|tobit|xtset|tsset|predict|margins|marginsplot|test|lincom|nlcom|hausman|estat|summarize|sum|tabulate|tab|describe|des|list|display|di|graph|scatter|twoway|histogram|kdensity|boxplot|qnorm|label|encode|decode|destring|tostring|log|using|if|in|by|bysort|forvalues|foreach|local|global|scalar|matrix|capture|quietly|noisily|return|ereturn|program|end|exit|do|run|include|sysuse|webuse|cd|pwd|macro|tempvar|tempname|tempfile|assert|count|levelsof|codebook|inspect|anova|ttest|correlate|pwcorr|spearman|ranksum|signrank|kwallis|oneway|chi2|mixed|xtmixed|bootstrap|jackknife|permute|simulate|vce|robust|cluster|absorb|noconstant|detail|nolog|level|mle|fe|re|estimates|eststo|esttab|outreg2|coefplot|binscatter|tssmooth|name|combine|lwidth|lcolor|lpattern|xtitle|ytitle|title|legend|more|off|all|store|table|stats)\b/,
+  'function': /\b(?:abs|ceil|floor|round|mod|sqrt|exp|ln|log10|max|min|sum|mean|sd|count|cond|inrange|inlist|missing|strlen|substr|strpos|upper|lower|trim|real|string|date|year|month|day|clock|word|wordcount|regexm|runiform|rnormal|_n|_N|_b|_se|e|r|c)\b/,
+  'number': /\b\d+\.?\d*(?:e[+-]?\d+)?\b/i,
+  'operator': /[<>!=]=?|[+\-*/^~&|#]/,
+  'punctuation': /[(),.:]/
+};
+Prism.highlightAll();
+</script>
 </body>
 </html>

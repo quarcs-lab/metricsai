@@ -452,6 +452,39 @@ footer.page a:hover { text-decoration: underline; }
 .code-summary .btn-colab { color: var(--accent); font-weight: 500; text-decoration: none; font-size: 0.9rem; }
 .code-summary .btn-colab:hover { text-decoration: underline; }
 
+/* --- Code language tabs --- */
+.code-tabs {
+  display: inline-flex;
+  gap: 0;
+  background: var(--panel-2, var(--panel));
+  padding: 3px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  margin-bottom: 0.8rem;
+}
+.code-tabs button {
+  background: transparent;
+  border: none;
+  color: var(--text-soft);
+  padding: 0.38rem 1rem;
+  border-radius: 7px;
+  font-family: inherit;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all .15s ease;
+}
+.code-tabs button.active {
+  background: var(--accent);
+  color: white;
+  font-weight: 600;
+}
+.code-tabs button:not(.active):hover {
+  color: var(--accent);
+}
+.code-panel { display: none; }
+.code-panel.active { display: block; }
+
 /* --- Syntax highlighting tokens (Prism.js) --- */
 .code-summary pre[class*="language-"],
 .code-summary code[class*="language-"] {
@@ -499,8 +532,7 @@ footer.page a:hover { text-decoration: underline; }
     <li><a href="#rsq">R-squared</a></li>
     <li><a href="#asym">Asymmetry</a></li>
     <li><a href="#nonpar">Nonparametric</a></li>
-    <li><a href="#python-code">Python Code</a></li>
-    <li><a href="#code">Python code</a></li>
+    <li><a href="#code">Code</a></li>
   </ul>
 </nav>
 
@@ -899,10 +931,17 @@ footer.page a:hover { text-decoration: underline; }
   <p class="takeaway"><strong>Take-away:</strong> nonparametric curves are a sanity check — when they echo the OLS line, the straight-line model is trustworthy. <a href="../../book/_book/notebooks_quarto/ch05_Bivariate_Data_Summary.html#nonparametric-regression" target="_blank" rel="noopener">Read §5.11 in the chapter →</a></p>
 </section>
 
-<section id="python-code" class="howto-card code-summary" id="code" aria-label="Python code summary">
-  <h2>Python Libraries and Code</h2>
-  <p class="motivation">You've explored the key concepts interactively — now reproduce them in Python. This self-contained code block covers everything you practiced above. Copy it into an empty notebook and run it.</p>
-  <pre><code id="code-cheatsheet" class="language-python"># =============================================================================
+<section class="howto-card code-summary" id="code" aria-label="Code summary">
+  <h2>Code Summary</h2>
+  <p class="motivation">You've explored the key concepts interactively — now reproduce them in code. These self-contained blocks cover everything you practiced above. Pick your language, copy the code, and run it.</p>
+
+  <div class="code-tabs" id="code-lang-tabs">
+    <button type="button" data-lang="python" class="active">Python</button>
+    <button type="button" data-lang="stata">Stata</button>
+  </div>
+
+  <div class="code-panel active" id="panel-python">
+  <pre><code id="code-python" class="language-python"># =============================================================================
 # CHAPTER 5 CHEAT SHEET: Bivariate Data Summary
 # =============================================================================
 
@@ -1016,8 +1055,113 @@ ax.grid(True, alpha=0.3)
 plt.tight_layout()
 plt.show()</code></pre>
   <div style="display:flex;gap:0.8rem;align-items:center;margin-top:0.8rem;flex-wrap:wrap">
-    <button class="btn-copy" onclick="navigator.clipboard.writeText(document.getElementById('code-cheatsheet').textContent).then(()=>{this.textContent='Copied!';setTimeout(()=>this.textContent='Copy code',1500)})">Copy code</button>
-    <a class="btn-colab" href="https://colab.research.google.com/notebooks/empty.ipynb" target="_blank" rel="noopener">Open empty Colab notebook →</a>
+    <button class="btn-copy" onclick="navigator.clipboard.writeText(document.getElementById('code-python').textContent).then(()=>{this.textContent='Copied!';setTimeout(()=>this.textContent='Copy code',1500)})">Copy code</button>
+    <a class="btn-colab" href="https://colab.research.google.com/notebooks/empty.ipynb" target="_blank" rel="noopener">Open empty Colab notebook &rarr;</a>
+  </div>
+  </div>
+
+  <div class="code-panel" id="panel-stata">
+  <pre><code id="code-stata" class="language-stata">* =============================================================================
+* CHAPTER 5 CHEAT SHEET: Bivariate Data Summary
+* =============================================================================
+
+* --- Setup ---
+clear all                                // start with a clean workspace
+set more off                             // do not pause output for long results
+
+* =============================================================================
+* STEP 1: Load data directly from a URL
+* =============================================================================
+* use loads a Stata .dta file; "clear" drops any data already in memory
+use "https://raw.githubusercontent.com/quarcs-lab/data-open/master/AED/AED_HOUSE.DTA", clear
+
+describe                                 // list all variables, types, and labels
+display "Observations: " _N              // _N is Stata's built-in observation count
+
+* =============================================================================
+* STEP 2: Descriptive statistics — summarize each variable before comparing
+* =============================================================================
+* summarize gives n, mean, std, min, max; "detail" adds median and percentiles
+summarize price size, detail
+
+* =============================================================================
+* STEP 3: Scatter plot — visualize the relationship before quantifying it
+* =============================================================================
+* twoway scatter draws a scatterplot of y against x
+twoway scatter price size,                             ///
+    xtitle("House Size (square feet)")                 ///
+    ytitle("House Sale Price (dollars)")               ///
+    title("House Price vs Size")
+
+* =============================================================================
+* STEP 4: Correlation coefficient — one number for direction and strength
+* =============================================================================
+* correlate computes the Pearson correlation matrix; r is unit-free and symmetric
+correlate price size
+
+// pwcorr shows pairwise correlations with significance levels
+pwcorr price size, sig star(0.05)
+
+* =============================================================================
+* STEP 5: OLS regression — fit the best-fitting line
+* =============================================================================
+* regress fits an OLS model: regress y x (intercept included automatically)
+* The coefficient on size is the marginal effect: dollars per sq ft
+regress price size
+
+// After regress, Stata stores results you can reference:
+display "Slope (b):       " _b[size]          // marginal effect: $/sq ft
+display "Intercept (a):   " _b[_cons]         // predicted price when size = 0
+display "R-squared:       " e(r2)             // proportion of variation explained
+
+* =============================================================================
+* STEP 6: Scatter plot with fitted line and R² — visualize model fit
+* =============================================================================
+* predict creates a new variable with the predicted y-values from the model
+predict price_hat                        // predicted values from the last regress
+
+twoway (scatter price size, mcolor(%60))                                     ///
+       (line price_hat size, lcolor(red) lwidth(medthick) sort),             ///
+    xtitle("House Size (square feet)")                                       ///
+    ytitle("House Sale Price (dollars)")                                     ///
+    title("OLS Regression: Fitted Line and R²")                          ///
+    legend(order(1 "Actual prices" 2 "Fitted line"))
+
+* =============================================================================
+* STEP 7: Reverse regression — association is NOT causation
+* =============================================================================
+* If regression = causation, the reverse slope would be 1/slope. It is not.
+// Store the original slope for comparison
+scalar orig_slope = _b[size]
+
+regress size price
+display "price ~ size  slope: " orig_slope
+display "size ~ price  slope: " _b[price]
+display "1 / original slope:  " 1 / orig_slope
+display "Reciprocals match?   No — regression is asymmetric!"
+
+* =============================================================================
+* STEP 8: Nonparametric regression — check the linearity assumption
+* =============================================================================
+* lowess fits weighted local regressions; if the curve tracks the OLS line,
+* the linear assumption is validated for this dataset
+
+// Re-estimate OLS for the combined plot
+regress price size
+predict price_ols                        // OLS fitted values
+
+// lowess draws the nonparametric fit directly
+twoway (scatter price size, mcolor(%50))                                       ///
+       (line price_ols size, lcolor(red) lwidth(medthick) sort)                ///
+       (lowess price size, lcolor(green) lwidth(medthick) lpattern(dash)),     ///
+    xtitle("House Size (square feet)")                                         ///
+    ytitle("House Sale Price (dollars)")                                       ///
+    title("Parametric vs Nonparametric Regression")                            ///
+    legend(order(1 "Actual data" 2 "OLS (parametric)" 3 "LOWESS (nonparametric)"))</code></pre>
+  <div style="display:flex;gap:0.8rem;align-items:center;margin-top:0.8rem;flex-wrap:wrap">
+    <button class="btn-copy" onclick="navigator.clipboard.writeText(document.getElementById('code-stata').textContent).then(()=>{this.textContent='Copied!';setTimeout(()=>this.textContent='Copy code',1500)})">Copy code</button>
+    <span style="color:var(--text-muted);font-size:0.88rem">Paste into your Stata do-file editor</span>
+  </div>
   </div>
 </section>
 
@@ -1827,8 +1971,49 @@ window.addEventListener("resize", () => {
 });
 </script>
 
+<script>
+// ==================== CODE LANGUAGE TABS ====================
+(function() {
+  var tabBar = document.getElementById('code-lang-tabs');
+  if (!tabBar) return;
+  var buttons = tabBar.querySelectorAll('button');
+  var panels  = {
+    python: document.getElementById('panel-python'),
+    stata:  document.getElementById('panel-stata')
+  };
+  buttons.forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      var lang = btn.dataset.lang;
+      buttons.forEach(function(b) { b.classList.remove('active'); });
+      btn.classList.add('active');
+      Object.values(panels).forEach(function(p) { p.classList.remove('active'); });
+      if (panels[lang]) panels[lang].classList.add('active');
+    });
+  });
+})();
+</script>
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" data-manual></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
-<script>Prism.highlightAll();</script>
+<script>
+// Minimal Stata language grammar for Prism.js syntax highlighting
+Prism.languages.stata = {
+  'comment': [
+    { pattern: /\/\*[\s\S]*?\*\//, greedy: true },
+    { pattern: /\/\/.*$/m, greedy: true },
+    { pattern: /^\s*\*.*$/m, greedy: true }
+  ],
+  'string': [
+    { pattern: /"(?:[^"\\]|\\.)*"/, greedy: true },
+    { pattern: /`"(?:[^"]|"(?!'))*"'/, greedy: true }
+  ],
+  'keyword': /\b(?:use|clear|set|gen|generate|replace|drop|keep|rename|order|sort|gsort|merge|append|reshape|collapse|preserve|restore|save|export|import|insheet|outsheet|regress|reg|logit|probit|ivregress|xtreg|areg|newey|tobit|xtset|tsset|predict|margins|marginsplot|test|lincom|nlcom|hausman|estat|summarize|sum|tabulate|tab|describe|des|list|display|di|graph|scatter|twoway|histogram|kdensity|boxplot|qnorm|label|encode|decode|destring|tostring|log|using|if|in|by|bysort|forvalues|foreach|local|global|scalar|matrix|capture|quietly|noisily|return|ereturn|program|end|exit|do|run|include|sysuse|webuse|cd|pwd|macro|tempvar|tempname|tempfile|assert|count|levelsof|codebook|inspect|anova|ttest|correlate|pwcorr|spearman|ranksum|signrank|kwallis|oneway|chi2|mixed|xtmixed|bootstrap|jackknife|permute|simulate|vce|robust|cluster|absorb|noconstant|detail|nolog|level|mle|fe|re|estimates|eststo|esttab|outreg2|coefplot|binscatter|tssmooth|name|combine|lwidth|lcolor|lpattern|xtitle|ytitle|title|legend|more|off|all|lowess|mcolor|sort|sig|star)\b/,
+  'function': /\b(?:abs|ceil|floor|round|mod|sqrt|exp|ln|log10|max|min|sum|mean|sd|count|cond|inrange|inlist|missing|strlen|substr|strpos|upper|lower|trim|real|string|date|year|month|day|clock|word|wordcount|regexm|runiform|rnormal|_n|_N|_b|_se|e|r|c)\b/,
+  'number': /\b\d+\.?\d*(?:e[+-]?\d+)?\b/i,
+  'operator': /[<>!=]=?|[+\-*/^~&|#]/,
+  'punctuation': /[(),.:]/
+};
+Prism.highlightAll();
+</script>
 </body>
 </html>

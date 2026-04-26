@@ -113,6 +113,39 @@ footer.page{max-width:1120px;margin:1rem auto 3rem;padding:0 1.5rem;color:var(--
 .code-summary .btn-colab { color: var(--accent); font-weight: 500; text-decoration: none; font-size: 0.9rem; }
 .code-summary .btn-colab:hover { text-decoration: underline; }
 
+/* --- Code language tabs --- */
+.code-tabs {
+  display: inline-flex;
+  gap: 0;
+  background: var(--panel-2, var(--panel));
+  padding: 3px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  margin-bottom: 0.8rem;
+}
+.code-tabs button {
+  background: transparent;
+  border: none;
+  color: var(--text-soft);
+  padding: 0.38rem 1rem;
+  border-radius: 7px;
+  font-family: inherit;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all .15s ease;
+}
+.code-tabs button.active {
+  background: var(--accent);
+  color: white;
+  font-weight: 600;
+}
+.code-tabs button:not(.active):hover {
+  color: var(--accent);
+}
+.code-panel { display: none; }
+.code-panel.active { display: block; }
+
 /* --- Syntax highlighting tokens (Prism.js) --- */
 .code-summary pre[class*="language-"],
 .code-summary code[class*="language-"] {
@@ -150,7 +183,7 @@ footer.page{max-width:1120px;margin:1rem auto 3rem;padding:0 1.5rem;color:var(--
   <li><a href="#did">Diff-in-Diff</a></li>
   <li><a href="#rd">Regression Disc.</a></li>
   <li><a href="#iv">Instrumental Vars</a></li>
-  <li><a href="#code">Python code</a></li>
+  <li><a href="#code">Code</a></li>
 </ul></nav>
 
 <main>
@@ -351,10 +384,17 @@ footer.page{max-width:1120px;margin:1rem auto 3rem;padding:0 1.5rem;color:var(--
   <p class="takeaway"><strong>Take-away:</strong> A good instrument turns an observational study into something close to an experiment — when theory picks the right historical lever, IV recovers the causal story OLS cannot. <a href="../../book/_book/notebooks_quarto/ch13_Case_Studies_for_Multiple_Regression.html#institutions-and-gdp-instrumental-variables" target="_blank" rel="noopener">Read §13.8 in the chapter →</a></p>
 </section>
 
-<section class="howto-card code-summary" id="code" aria-label="Python code summary">
-  <h2>Python Libraries and Code</h2>
-  <p class="motivation">You've explored the key concepts interactively — now reproduce them in Python. This self-contained code block covers everything you practiced above. Copy it into an empty notebook and run it.</p>
-  <pre><code id="code-cheatsheet" class="language-python"># =============================================================================
+<section class="howto-card code-summary" id="code" aria-label="Code summary">
+  <h2>Code Summary</h2>
+  <p class="motivation">You've explored the key concepts interactively — now reproduce them in code. These self-contained blocks cover everything you practiced above. Pick your language, copy the code, and run it.</p>
+
+  <div class="code-tabs" id="code-lang-tabs">
+    <button type="button" data-lang="python" class="active">Python</button>
+    <button type="button" data-lang="stata">Stata</button>
+  </div>
+
+  <div class="code-panel active" id="panel-python">
+  <pre><code id="code-python" class="language-python"># =============================================================================
 # CHAPTER 13 CHEAT SHEET: Case Studies for Multiple Regression
 # =============================================================================
 
@@ -508,8 +548,149 @@ print(f"IV/2SLS coefficient: {m_2nd.params['avexpr_hat']:.3f}  (causal)")
 print(f"Causal effect: 1-unit improvement in institutions → "
       f"{np.exp(m_2nd.params['avexpr_hat']):.1f}x increase in GDP")</code></pre>
   <div style="display:flex;gap:0.8rem;align-items:center;margin-top:0.8rem;flex-wrap:wrap">
-    <button class="btn-copy" onclick="navigator.clipboard.writeText(document.getElementById('code-cheatsheet').textContent).then(()=>{this.textContent='Copied!';setTimeout(()=>this.textContent='Copy code',1500)})">Copy code</button>
-    <a class="btn-colab" href="https://colab.research.google.com/notebooks/empty.ipynb" target="_blank" rel="noopener">Open empty Colab notebook →</a>
+    <button class="btn-copy" onclick="navigator.clipboard.writeText(document.getElementById('code-python').textContent).then(()=>{this.textContent='Copied!';setTimeout(()=>this.textContent='Copy code',1500)})">Copy code</button>
+    <a class="btn-colab" href="https://colab.research.google.com/notebooks/empty.ipynb" target="_blank" rel="noopener">Open empty Colab notebook &rarr;</a>
+  </div>
+  </div>
+
+  <div class="code-panel" id="panel-stata">
+  <pre><code id="code-stata" class="language-stata">* =============================================================================
+* CHAPTER 13 CHEAT SHEET: Case Studies for Multiple Regression
+* =============================================================================
+
+* --- Setup ---
+clear all                                // start with a clean workspace
+set more off                             // do not pause output for long results
+
+* --- Data source ---
+global URL "https://raw.githubusercontent.com/quarcs-lab/data-open/master/AED/"
+
+* =============================================================================
+* STEP 1: Cobb-Douglas Production Function — log-linearize and estimate
+* =============================================================================
+* Taking logs converts Q = A*K^alpha*L^beta into a linear model estimable by OLS
+use "${URL}AED_COBBDOUGLAS.DTA", clear
+
+* Generate log-transformed variables
+gen lnq = ln(q)                          // log of output
+gen lnk = ln(k)                          // log of capital
+gen lnl = ln(l)                          // log of labor
+
+* OLS with Newey-West (HAC) standard errors — 3 lags for time series
+newey lnq lnk lnl, lag(3)
+
+* Display elasticities — coefficients ARE the elasticities in the log model
+display "Capital elasticity α = " _b[lnk]
+display "Labor elasticity β = " _b[lnl]
+display "Sum α + β = " _b[lnk] + _b[lnl]
+
+* F-test for constant returns to scale: H0: α + β = 1
+test lnk + lnl = 1
+* A large p-value means we cannot reject CRS (doubling inputs doubles output)
+
+* =============================================================================
+* STEP 2: Phillips Curve — omitted variables bias reverses the sign
+* =============================================================================
+* Pre-1970 the trade-off works; post-1970 it breaks because expected inflation
+* is omitted — a textbook demonstration of OVB
+use "${URL}AED_PHILLIPS.DTA", clear
+
+* Pre-1970: classic negative relationship
+newey inflgdp urate if year < 1970, lag(3)
+display "Pre-1970 slope: " _b[urate] "  (negative → classic Phillips curve)"
+
+* Post-1970: sign flips due to omitted expected inflation
+newey inflgdp urate if year >= 1970, lag(5)
+scalar slope_post = _b[urate]
+display "Post-1970 slope: " slope_post "  (positive → breakdown!)"
+
+* Augmented model: adding expected inflation restores the negative sign
+newey inflgdp urate inflgdp1yr if year >= 1970, lag(5)
+display "Augmented slope on urate: " _b[urate] "  (negative again!)"
+display "Expected inflation coef:  " _b[inflgdp1yr]
+
+* OVB formula: E[b2] = β2 + β3*γ
+* First get γ from the auxiliary regression of omitted var on included var
+scalar b2 = _b[urate]                    // true coefficient on urate
+scalar b3 = _b[inflgdp1yr]              // coefficient on omitted variable
+regress inflgdp1yr urate if year >= 1970 &amp; inflgdp1yr != .
+scalar gamma_hat = _b[urate]            // correlation between omitted and included
+display "OVB predicted slope: " b2 + b3 * gamma_hat "  (actual: " slope_post ")"
+
+* =============================================================================
+* STEP 3: RAND Health Insurance Experiment — RCT as the gold standard
+* =============================================================================
+* Random assignment to insurance plans eliminates selection bias
+use "${URL}AED_HEALTHINSEXP.DTA", clear
+keep if year == 1                        // keep only year 1 observations
+
+* Mean spending by plan
+tabulate plan, summarize(spending) means
+
+* Regression with cluster-robust SEs by family
+regress spending coins25 coins50 coins95 coinsmixed coinsindiv, vce(cluster idfamily)
+
+* Joint F-test: do insurance plans matter?
+test coins25 coins50 coins95 coinsmixed coinsindiv
+* Rejects → insurance plan systematically shifts spending
+
+* =============================================================================
+* STEP 4: Difference-in-Differences — health clinic access in South Africa
+* =============================================================================
+* DiD removes both time-invariant confounders and common time trends
+use "${URL}AED_HEALTHACCESS.DTA", clear
+
+* Manual DiD calculation — compute group means
+tabulate hightreat post, summarize(waz) means
+* DiD = (treat_post - treat_pre) - (ctrl_post - ctrl_pre)
+
+* DiD regression with cluster-robust SEs by community
+regress waz hightreat post postXhigh, vce(cluster idcommunity)
+display "DiD coefficient: " _b[postXhigh]
+display "p-value: " 2 * ttail(e(df_r), abs(_b[postXhigh] / _se[postXhigh]))
+
+* =============================================================================
+* STEP 5: Regression Discontinuity — incumbency advantage in U.S. Senate
+* =============================================================================
+* Candidates who barely win vs barely lose are quasi-randomly assigned to
+* incumbent status — the jump at margin = 0 is the causal effect
+use "${URL}AED_INCUMBENCY.DTA", clear
+drop if vote == .                        // drop missing outcomes
+
+* RD regression with robust standard errors
+regress vote win margin, vce(robust)
+display "Incumbency advantage: " _b[win] " percentage points"
+display "p-value: " 2 * ttail(e(df_r), abs(_b[win] / _se[win]))
+
+* 95% confidence interval for the incumbency effect
+lincom win                               // reports coef, SE, t, p, and CI
+
+* =============================================================================
+* STEP 6: Instrumental Variables — do institutions cause growth?
+* =============================================================================
+* OLS is biased by reverse causation; settler mortality instruments for
+* modern institutions (relevant + exogenous to modern GDP)
+use "${URL}AED_INSTITUTIONS.DTA", clear
+
+* OLS (biased) — institutions predict GDP but direction of causation is unclear
+regress logpgp95 avexpr, vce(robust)
+display "OLS coefficient: " _b[avexpr] "  (biased by reverse causation)"
+
+* First stage: do settler mortality rates predict modern institutions?
+regress avexpr logem4, vce(robust)
+display "First-stage F = " e(F) "  (F > 10 → strong instrument)"
+
+* IV / 2SLS in one step — Stata handles both stages automatically
+ivregress 2sls logpgp95 (avexpr = logem4), vce(robust)
+display "IV/2SLS coefficient: " _b[avexpr] "  (causal estimate)"
+display "Causal effect: 1-unit improvement → " exp(_b[avexpr]) "x GDP increase"
+
+* First-stage diagnostics
+estat firststage                         // reports first-stage F-statistic</code></pre>
+  <div style="display:flex;gap:0.8rem;align-items:center;margin-top:0.8rem;flex-wrap:wrap">
+    <button class="btn-copy" onclick="navigator.clipboard.writeText(document.getElementById('code-stata').textContent).then(()=>{this.textContent='Copied!';setTimeout(()=>this.textContent='Copy code',1500)})">Copy code</button>
+    <span style="color:var(--text-muted);font-size:0.88rem">Paste into your Stata do-file editor</span>
+  </div>
   </div>
 </section>
 
@@ -685,8 +866,49 @@ function initToggles(id,cb){document.getElementById(id).querySelectorAll("button
 (function(){const btn=document.getElementById("theme-toggle"),iconEl=document.getElementById("theme-icon"),labelEl=document.getElementById("theme-label");function apply(t){document.documentElement.dataset.theme=t;iconEl.textContent=t==="dark"?"\u2600\uFE0F":"\uD83C\uDF19";labelEl.textContent=t==="dark"?"Light":"Dark";for(const k in window)if(k.startsWith("__rerender_")&&typeof window[k]==="function")window[k]()}const saved=localStorage.getItem(THEME_KEY);const prefersDark=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches;apply(saved||(prefersDark?"dark":"light"));btn.addEventListener("click",()=>{const next=document.documentElement.dataset.theme==="dark"?"light":"dark";localStorage.setItem(THEME_KEY,next);apply(next)})})();
 window.addEventListener("resize",()=>{document.querySelectorAll(".chart").forEach(el=>{if(el.data)Plotly.Plots.resize(el)})});
 </script>
+<script>
+// ==================== CODE LANGUAGE TABS ====================
+(function() {
+  var tabBar = document.getElementById('code-lang-tabs');
+  if (!tabBar) return;
+  var buttons = tabBar.querySelectorAll('button');
+  var panels  = {
+    python: document.getElementById('panel-python'),
+    stata:  document.getElementById('panel-stata')
+  };
+  buttons.forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      var lang = btn.dataset.lang;
+      buttons.forEach(function(b) { b.classList.remove('active'); });
+      btn.classList.add('active');
+      Object.values(panels).forEach(function(p) { p.classList.remove('active'); });
+      if (panels[lang]) panels[lang].classList.add('active');
+    });
+  });
+})();
+</script>
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" data-manual></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
-<script>Prism.highlightAll();</script>
+<script>
+// Minimal Stata language grammar for Prism.js syntax highlighting
+Prism.languages.stata = {
+  'comment': [
+    { pattern: /\/\*[\s\S]*?\*\//, greedy: true },
+    { pattern: /\/\/.*$/m, greedy: true },
+    { pattern: /^\s*\*.*$/m, greedy: true }
+  ],
+  'string': [
+    { pattern: /"(?:[^"\\]|\\.)*"/, greedy: true },
+    { pattern: /`"(?:[^"]|"(?!'))*"'/, greedy: true }
+  ],
+  'keyword': /\b(?:use|clear|set|gen|generate|replace|drop|keep|rename|order|sort|gsort|merge|append|reshape|collapse|preserve|restore|save|export|import|insheet|outsheet|regress|reg|logit|probit|ivregress|xtreg|areg|newey|tobit|xtset|tsset|predict|margins|marginsplot|test|lincom|nlcom|hausman|estat|summarize|sum|tabulate|tab|describe|des|list|display|di|graph|scatter|twoway|histogram|kdensity|boxplot|qnorm|label|encode|decode|destring|tostring|log|using|if|in|by|bysort|forvalues|foreach|local|global|scalar|matrix|capture|quietly|noisily|return|ereturn|program|end|exit|do|run|include|sysuse|webuse|cd|pwd|macro|tempvar|tempname|tempfile|assert|count|levelsof|codebook|inspect|anova|ttest|correlate|pwcorr|spearman|ranksum|signrank|kwallis|oneway|chi2|mixed|xtmixed|bootstrap|jackknife|permute|simulate|vce|robust|cluster|absorb|noconstant|detail|nolog|level|mle|fe|re|estimates|eststo|esttab|outreg2|coefplot|binscatter|tssmooth|name|combine|lwidth|lcolor|lpattern|xtitle|ytitle|title|legend|more|off|all)\b/,
+  'function': /\b(?:abs|ceil|floor|round|mod|sqrt|exp|ln|log10|max|min|sum|mean|sd|count|cond|inrange|inlist|missing|strlen|substr|strpos|upper|lower|trim|real|string|date|year|month|day|clock|word|wordcount|regexm|runiform|rnormal|_n|_N|_b|_se|e|r|c)\b/,
+  'number': /\b\d+\.?\d*(?:e[+-]?\d+)?\b/i,
+  'operator': /[<>!=]=?|[+\-*/^~&|#]/,
+  'punctuation': /[(),.:]/
+};
+Prism.highlightAll();
+</script>
 </body>
 </html>

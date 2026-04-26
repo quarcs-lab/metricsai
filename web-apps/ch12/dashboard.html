@@ -278,6 +278,39 @@ footer.page a:hover { text-decoration: underline; }
 .code-summary .btn-colab { color: var(--accent); font-weight: 500; text-decoration: none; font-size: 0.9rem; }
 .code-summary .btn-colab:hover { text-decoration: underline; }
 
+/* --- Code language tabs --- */
+.code-tabs {
+  display: inline-flex;
+  gap: 0;
+  background: var(--panel-2, var(--panel));
+  padding: 3px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  margin-bottom: 0.8rem;
+}
+.code-tabs button {
+  background: transparent;
+  border: none;
+  color: var(--text-soft);
+  padding: 0.38rem 1rem;
+  border-radius: 7px;
+  font-family: inherit;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all .15s ease;
+}
+.code-tabs button.active {
+  background: var(--accent);
+  color: white;
+  font-weight: 600;
+}
+.code-tabs button:not(.active):hover {
+  color: var(--accent);
+}
+.code-panel { display: none; }
+.code-panel.active { display: block; }
+
 /* --- Syntax highlighting tokens (Prism.js) --- */
 .code-summary pre[class*="language-"],
 .code-summary code[class*="language-"] {
@@ -324,7 +357,7 @@ footer.page a:hover { text-decoration: underline; }
     <li><a href="#autocorrelation">Autocorrelation</a></li>
     <li><a href="#se-ratio">SE Ratios</a></li>
     <li><a href="#bootstrap">Bootstrap</a></li>
-    <li><a href="#code">Python code</a></li>
+    <li><a href="#code">Code</a></li>
   </ul>
 </nav>
 
@@ -682,10 +715,17 @@ footer.page a:hover { text-decoration: underline; }
   <p class="takeaway"><strong>Take-away:</strong> The bootstrap builds a sampling distribution from the data itself — no normality, no formulas, no asymptotics; just replication. <a href="../../book/_book/notebooks_quarto/ch12_Further_Topics_in_Multiple_Regression.html#best-confidence-intervals" target="_blank" rel="noopener">Read §12.6 in the chapter →</a></p>
 </section>
 
-<section class="howto-card code-summary" id="code" aria-label="Python code summary">
-  <h2>Python Libraries and Code</h2>
-  <p class="motivation">You've explored the key concepts interactively — now reproduce them in Python. This self-contained code block covers everything you practiced above. Copy it into an empty notebook and run it.</p>
-  <pre><code id="code-cheatsheet" class="language-python"># =============================================================================
+<section class="howto-card code-summary" id="code" aria-label="Code summary">
+  <h2>Code Summary</h2>
+  <p class="motivation">You've explored the key concepts interactively — now reproduce them in code. These self-contained blocks cover everything you practiced above. Pick your language, copy the code, and run it.</p>
+
+  <div class="code-tabs" id="code-lang-tabs">
+    <button type="button" data-lang="python" class="active">Python</button>
+    <button type="button" data-lang="stata">Stata</button>
+  </div>
+
+  <div class="code-panel active" id="panel-python">
+  <pre><code id="code-python" class="language-python"># =============================================================================
 # CHAPTER 12 CHEAT SHEET: Further Topics in Multiple Regression
 # =============================================================================
 
@@ -877,8 +917,161 @@ ax.grid(True, alpha=0.3)
 plt.tight_layout()
 plt.show()</code></pre>
   <div style="display:flex;gap:0.8rem;align-items:center;margin-top:0.8rem;flex-wrap:wrap">
-    <button class="btn-copy" onclick="navigator.clipboard.writeText(document.getElementById('code-cheatsheet').textContent).then(()=>{this.textContent='Copied!';setTimeout(()=>this.textContent='Copy code',1500)})">Copy code</button>
-    <a class="btn-colab" href="https://colab.research.google.com/notebooks/empty.ipynb" target="_blank" rel="noopener">Open empty Colab notebook →</a>
+    <button class="btn-copy" onclick="navigator.clipboard.writeText(document.getElementById('code-python').textContent).then(()=>{this.textContent='Copied!';setTimeout(()=>this.textContent='Copy code',1500)})">Copy code</button>
+    <a class="btn-colab" href="https://colab.research.google.com/notebooks/empty.ipynb" target="_blank" rel="noopener">Open empty Colab notebook &rarr;</a>
+  </div>
+  </div>
+
+  <div class="code-panel" id="panel-stata">
+  <pre><code id="code-stata" class="language-stata">* =============================================================================
+* CHAPTER 12 CHEAT SHEET: Further Topics in Multiple Regression
+* =============================================================================
+
+* --- Setup ---
+clear all                                // start with a clean workspace
+set more off                             // do not pause output for long results
+
+* =============================================================================
+* STEP 1: Load house price data from a URL
+* =============================================================================
+* use loads a Stata .dta file; "clear" drops any data already in memory
+use "https://raw.githubusercontent.com/quarcs-lab/data-open/master/AED/AED_HOUSE.DTA", clear
+
+describe                                 // list all variables, types, and labels
+display "Observations: " _N              // _N is Stata's built-in observation count
+summarize price size bedrooms bathrooms lotsize age
+
+* =============================================================================
+* STEP 2: OLS regression with default standard errors
+* =============================================================================
+* Default SEs assume homoskedasticity (constant error variance)
+regress price size bedrooms bathrooms lotsize age monthsold
+
+// After regress, Stata stores results you can reference:
+display "R-squared: " e(r2)
+display "Size effect: " _b[size]         // _b[varname] retrieves coefficients
+
+* =============================================================================
+* STEP 3: Robust (HC1) standard errors — compare with default
+* =============================================================================
+* Adding , robust to regress requests HC1 heteroskedasticity-robust SEs
+* Coefficient estimates stay identical; only SEs, t-stats, CIs change
+regress price size bedrooms bathrooms lotsize age monthsold, robust
+
+// estimates store saves results so you can compare models later
+estimates store robust_model
+
+// Re-run default for side-by-side comparison
+quietly regress price size bedrooms bathrooms lotsize age monthsold
+estimates store default_model
+
+// estimates table displays both sets of results side by side
+estimates table default_model robust_model, se stats(r2 N)
+
+* =============================================================================
+* STEP 4: Prediction — conditional mean CI vs. individual forecast PI
+* =============================================================================
+* Predicting E[y|x*] is more precise than predicting an individual y|x*
+regress price size
+
+// predict generates fitted values for every observation
+predict yhat, xb                         // xb = linear prediction (fitted value)
+
+// For a specific prediction at size = 2000:
+// margins computes predicted values at specified covariate values
+margins, at(size = 2000)                 // predicted E[Y|X=2000] with 95% CI
+
+// For the prediction interval (individual), we need RMSE
+display "RMSE (s_e): " e(rmse)          // irreducible individual uncertainty
+
+// Visualize fitted line with CI bands
+// lfitci plots the linear fit with confidence interval
+twoway (scatter price size, msize(small) mcolor(gs10))            ///
+       (lfitci price size, level(95) fcolor(red%20) lcolor(red)), ///
+    xtitle("House Size (sq ft)") ytitle("House Price ($)")        ///
+    title("Confidence Interval for the Conditional Mean")         ///
+    legend(order(1 "Actual" 3 "Fitted line" 2 "95% CI"))
+
+* =============================================================================
+* STEP 5: HAC (Newey-West) standard errors for time series
+* =============================================================================
+* Time series errors are often autocorrelated — HAC SEs account for this
+use "https://raw.githubusercontent.com/quarcs-lab/data-open/master/AED/AED_REALGDPPC.DTA", clear
+
+summarize growth
+display "Mean GDP growth: " r(mean)
+
+// tsset declares the time-series structure
+tsset daten
+
+// newey estimates regression with Newey-West HAC standard errors
+// lag(4) sets the maximum lag for the autocorrelation correction
+newey growth, lag(4)
+display "HAC SE: " _se[_cons]
+
+// Compare with default OLS SE
+regress growth
+display "Default SE: " _se[_cons]
+
+// Correlogram — visualize autocorrelation structure
+// ac draws the autocorrelation function plot
+ac growth, lags(10) level(95)            ///
+    ytitle("Autocorrelation")            ///
+    title("Correlogram of GDP Growth")
+
+* =============================================================================
+* STEP 6: Power curve — Type I vs. Type II error tradeoff
+* =============================================================================
+* Power = P(reject H0 | H0 is false) — depends on true effect size
+* Stata's power command computes power for common tests
+
+// power twomeans: power for testing whether a mean differs from a value
+// power onettest: power for a one-sample t-test scenario
+// Here we compute power manually for a range of effect sizes:
+
+clear
+set obs 500
+gen beta_true = -60 + (_n - 1) * 240 / 499   // range -60 to 60
+
+local se = 15                            // hypothetical standard error
+local n  = 30                            // sample size
+local df = `n' - 1
+local t_crit = invttail(`df', 0.025)     // two-sided critical value at alpha=0.05
+
+// Non-centrality parameter and power
+gen ncp = beta_true / `se'
+gen power = 1 - (t(`df', `t_crit' - ncp) - t(`df', -`t_crit' - ncp))
+
+twoway (line power beta_true, lwidth(medthick) lcolor(blue))      ///
+       (function y = 0.05, range(-60 60) lpattern(dash) lcolor(gs8)) ///
+       (function y = 0.80, range(-60 60) lpattern(dash) lcolor(green)), ///
+    xtitle("True Coefficient Value ({&beta;)}")                   ///
+    ytitle("Power = P(Reject H{sub:0})")                          ///
+    title("Power Curve: Larger Effects Are Easier to Detect")     ///
+    legend(order(1 "Power" 2 "{&alpha;} = 0.05" 3 "Target = 0.80"))
+
+* =============================================================================
+* STEP 7: Bootstrap confidence intervals — no distributional assumptions
+* =============================================================================
+* Resample data with replacement to estimate the sampling distribution of beta
+use "https://raw.githubusercontent.com/quarcs-lab/data-open/master/AED/AED_HOUSE.DTA", clear
+
+// bootstrap prefix resamples data and re-estimates the model each time
+// reps(1000) = 1000 bootstrap replications; seed(42) for reproducibility
+bootstrap _b[size], reps(1000) seed(42): regress price size
+
+// estat bootstrap displays percentile-method CIs alongside normal CIs
+estat bootstrap, percentile
+
+// Compare with analytical 95% CI from OLS
+regress price size
+display "OLS slope: " _b[size]
+display "Analytical 95% CI: [" _b[size] - invttail(e(df_r), 0.025)*_se[size] ///
+    ", " _b[size] + invttail(e(df_r), 0.025)*_se[size] "]"</code></pre>
+  <div style="display:flex;gap:0.8rem;align-items:center;margin-top:0.8rem;flex-wrap:wrap">
+    <button class="btn-copy" onclick="navigator.clipboard.writeText(document.getElementById('code-stata').textContent).then(()=>{this.textContent='Copied!';setTimeout(()=>this.textContent='Copy code',1500)})">Copy code</button>
+    <span style="color:var(--text-muted);font-size:0.88rem">Paste into your Stata do-file editor</span>
+  </div>
   </div>
 </section>
 
@@ -1695,8 +1888,49 @@ window.addEventListener("resize", function() {
   });
 });
 </script>
+<script>
+// ==================== CODE LANGUAGE TABS ====================
+(function() {
+  var tabBar = document.getElementById('code-lang-tabs');
+  if (!tabBar) return;
+  var buttons = tabBar.querySelectorAll('button');
+  var panels  = {
+    python: document.getElementById('panel-python'),
+    stata:  document.getElementById('panel-stata')
+  };
+  buttons.forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      var lang = btn.dataset.lang;
+      buttons.forEach(function(b) { b.classList.remove('active'); });
+      btn.classList.add('active');
+      Object.values(panels).forEach(function(p) { p.classList.remove('active'); });
+      if (panels[lang]) panels[lang].classList.add('active');
+    });
+  });
+})();
+</script>
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" data-manual></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
-<script>Prism.highlightAll();</script>
+<script>
+// Minimal Stata language grammar for Prism.js syntax highlighting
+Prism.languages.stata = {
+  'comment': [
+    { pattern: /\/\*[\s\S]*?\*\//, greedy: true },
+    { pattern: /\/\/.*$/m, greedy: true },
+    { pattern: /^\s*\*.*$/m, greedy: true }
+  ],
+  'string': [
+    { pattern: /"(?:[^"\\]|\\.)*"/, greedy: true },
+    { pattern: /`"(?:[^"]|"(?!'))*"'/, greedy: true }
+  ],
+  'keyword': /\b(?:use|clear|set|gen|generate|replace|drop|keep|rename|order|sort|gsort|merge|append|reshape|collapse|preserve|restore|save|export|import|insheet|outsheet|regress|reg|logit|probit|ivregress|xtreg|areg|newey|tobit|xtset|tsset|predict|margins|marginsplot|test|lincom|nlcom|hausman|estat|summarize|sum|tabulate|tab|describe|des|list|display|di|graph|scatter|twoway|histogram|kdensity|boxplot|qnorm|label|encode|decode|destring|tostring|log|using|if|in|by|bysort|forvalues|foreach|local|global|scalar|matrix|capture|quietly|noisily|return|ereturn|program|end|exit|do|run|include|sysuse|webuse|cd|pwd|macro|tempvar|tempname|tempfile|assert|count|levelsof|codebook|inspect|anova|ttest|correlate|pwcorr|spearman|ranksum|signrank|kwallis|oneway|chi2|mixed|xtmixed|bootstrap|jackknife|permute|simulate|vce|robust|cluster|absorb|noconstant|detail|nolog|level|mle|fe|re|estimates|eststo|esttab|outreg2|coefplot|binscatter|tssmooth|name|combine|lwidth|lcolor|lpattern|xtitle|ytitle|title|legend|more|off|all)\b/,
+  'function': /\b(?:abs|ceil|floor|round|mod|sqrt|exp|ln|log10|max|min|sum|mean|sd|count|cond|inrange|inlist|missing|strlen|substr|strpos|upper|lower|trim|real|string|date|year|month|day|clock|word|wordcount|regexm|runiform|rnormal|_n|_N|_b|_se|e|r|c)\b/,
+  'number': /\b\d+\.?\d*(?:e[+-]?\d+)?\b/i,
+  'operator': /[<>!=]=?|[+\-*/^~&|#]/,
+  'punctuation': /[(),.:]/
+};
+Prism.highlightAll();
+</script>
 </body>
 </html>

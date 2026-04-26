@@ -113,6 +113,39 @@ footer.page{max-width:1120px;margin:1rem auto 3rem;padding:0 1.5rem;color:var(--
 .code-summary .btn-colab { color: var(--accent); font-weight: 500; text-decoration: none; font-size: 0.9rem; }
 .code-summary .btn-colab:hover { text-decoration: underline; }
 
+/* --- Code language tabs --- */
+.code-tabs {
+  display: inline-flex;
+  gap: 0;
+  background: var(--panel-2, var(--panel));
+  padding: 3px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  margin-bottom: 0.8rem;
+}
+.code-tabs button {
+  background: transparent;
+  border: none;
+  color: var(--text-soft);
+  padding: 0.38rem 1rem;
+  border-radius: 7px;
+  font-family: inherit;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all .15s ease;
+}
+.code-tabs button.active {
+  background: var(--accent);
+  color: white;
+  font-weight: 600;
+}
+.code-tabs button:not(.active):hover {
+  color: var(--accent);
+}
+.code-panel { display: none; }
+.code-panel.active { display: block; }
+
 /* --- Syntax highlighting tokens (Prism.js) --- */
 .code-summary pre[class*="language-"],
 .code-summary code[class*="language-"] {
@@ -151,7 +184,7 @@ footer.page{max-width:1120px;margin:1rem auto 3rem;padding:0 1.5rem;color:var(--
   <li><a href="#acf">Autocorrelation</a></li>
   <li><a href="#spurious">Levels vs changes</a></li>
   <li><a href="#adl">ADL model</a></li>
-  <li><a href="#code">Python code</a></li>
+  <li><a href="#code">Code</a></li>
 </ul></nav>
 
 <main>
@@ -386,10 +419,17 @@ footer.page{max-width:1120px;margin:1rem auto 3rem;padding:0 1.5rem;color:var(--
   <p class="takeaway"><strong>Take-away:</strong> ADL models make the dynamic response explicit — every static coefficient hides a multi-period adjustment path, and cumulative multipliers are how you recover it. <a href="../../book/_book/notebooks_quarto/ch17_Panel_Data_Time_Series_Data_Causation.html#autocorrelation" target="_blank" rel="noopener">Read §17.6 in the chapter →</a></p>
 </section>
 
-<section class="howto-card code-summary" id="code" aria-label="Python code summary">
-  <h2>Python Libraries and Code</h2>
-  <p class="motivation">You've explored the key concepts interactively — now reproduce them in Python. This self-contained code block covers everything you practiced above. Copy it into an empty notebook and run it.</p>
-  <pre><code id="code-cheatsheet" class="language-python"># =============================================================================
+<section class="howto-card code-summary" id="code" aria-label="Code summary">
+  <h2>Code Summary</h2>
+  <p class="motivation">You've explored the key concepts interactively — now reproduce them in code. These self-contained blocks cover everything you practiced above. Pick your language, copy the code, and run it.</p>
+
+  <div class="code-tabs" id="code-lang-tabs">
+    <button type="button" data-lang="python" class="active">Python</button>
+    <button type="button" data-lang="stata">Stata</button>
+  </div>
+
+  <div class="code-panel active" id="panel-python">
+  <pre><code id="code-python" class="language-python"># =============================================================================
 # CHAPTER 17 CHEAT SHEET: Panel Data, Time Series Data, Causation
 # =============================================================================
 
@@ -519,8 +559,161 @@ print(f"  R²: {model_adl.rsquared:.4f} (much higher than static model)")
 acf_adl = acf(model_adl.resid.dropna(), nlags=5)
 print(f"  Residual ACF(1): {acf_adl[1]:.4f} (near zero → dynamics captured)")</code></pre>
   <div style="display:flex;gap:0.8rem;align-items:center;margin-top:0.8rem;flex-wrap:wrap">
-    <button class="btn-copy" onclick="navigator.clipboard.writeText(document.getElementById('code-cheatsheet').textContent).then(()=>{this.textContent='Copied!';setTimeout(()=>this.textContent='Copy code',1500)})">Copy code</button>
-    <a class="btn-colab" href="https://colab.research.google.com/notebooks/empty.ipynb" target="_blank" rel="noopener">Open empty Colab notebook →</a>
+    <button class="btn-copy" onclick="navigator.clipboard.writeText(document.getElementById('code-python').textContent).then(()=>{this.textContent='Copied!';setTimeout(()=>this.textContent='Copy code',1500)})">Copy code</button>
+    <a class="btn-colab" href="https://colab.research.google.com/notebooks/empty.ipynb" target="_blank" rel="noopener">Open empty Colab notebook &rarr;</a>
+  </div>
+  </div>
+
+  <div class="code-panel" id="panel-stata">
+  <pre><code id="code-stata" class="language-stata">* =============================================================================
+* CHAPTER 17 CHEAT SHEET: Panel Data, Time Series Data, Causation
+* =============================================================================
+
+* --- Setup ---
+clear all                                // start with a clean workspace
+set more off                             // do not pause output for long results
+
+* =============================================================================
+* STEP 1: Load panel data (NBA teams across seasons)
+* =============================================================================
+* Panel data: multiple individuals (teams) observed over multiple time periods
+use "https://raw.githubusercontent.com/quarcs-lab/data-open/master/AED/AED_NBA.DTA", clear
+
+describe
+display "Panel: " ///
+    string(r(N)) " observations"         // total team-season observations
+codebook teamid, compact                 // how many unique teams
+codebook season, compact                 // how many unique seasons
+
+* =============================================================================
+* STEP 2: Variance decomposition — between vs within variation
+* =============================================================================
+* Understanding which variation your estimator uses is the first step
+* in panel analysis. xtsum decomposes each variable into overall,
+* between (across teams), and within (over time) components.
+xtset teamid season                      // declare panel structure
+xtsum lnrevenue wins
+
+// xtsum output shows three rows per variable:
+//   overall = total SD across all observations
+//   between = SD of team means
+//   within  = SD of deviations from team means
+
+* =============================================================================
+* STEP 3: Pooled OLS with cluster-robust SEs
+* =============================================================================
+* Observations within the same team are correlated over time — default SEs
+* dramatically understate uncertainty. Always cluster by individual in panel data.
+
+// Default SEs (treats all 286 obs as independent — wrong for panels)
+regress lnrevenue wins
+estimates store pooled_default
+
+// Robust SEs (corrects heteroskedasticity but not serial correlation)
+regress lnrevenue wins, vce(robust)
+estimates store pooled_robust
+
+// Cluster SEs (corrects both heteroskedasticity and within-team correlation)
+regress lnrevenue wins, vce(cluster teamid)
+estimates store pooled_cluster
+
+// Compare all three side by side
+estimates table pooled_default pooled_robust pooled_cluster, se
+
+* =============================================================================
+* STEP 4: Fixed effects — control for unobserved team characteristics
+* =============================================================================
+* FE uses only within-team variation (de-meaning), eliminating bias from
+* persistent traits like market size, brand value, and arena quality.
+
+// xtreg with fe option estimates fixed effects (entity-demeaned regression)
+// vce(cluster teamid) clusters SEs by team
+xtreg lnrevenue wins, fe vce(cluster teamid)
+estimates store fe_model
+
+// Compare pooled OLS vs fixed effects
+// After xtreg, _b[wins] holds the FE coefficient
+display "Fixed Effects coef: " _b[wins]
+estimates restore pooled_cluster
+display "Pooled OLS coef:    " _b[wins]
+display "FE is smaller → pooled OLS had positive omitted variable bias"
+
+// Report within-R² (shown automatically by xtreg, fe)
+estimates restore fe_model
+display "R² (within): " e(r2_w)
+
+* =============================================================================
+* STEP 5: Time series — levels vs first differences
+* =============================================================================
+* Non-stationary (trending) series produce spurious regressions with
+* misleading R². First differencing removes trends and restores valid inference.
+use "https://raw.githubusercontent.com/quarcs-lab/data-open/master/AED/AED_INTERESTRATES.DTA", clear
+
+// Declare time-series structure
+tsset daten
+
+// Regression in levels (potentially spurious)
+regress gs10 gs1
+display "Levels R²:  " e(r2)
+
+// Regression in first differences (removes trends)
+// D.gs10 and D.gs1 are Stata's time-series difference operators
+regress D.gs10 D.gs1
+display "Changes R²: " e(r2)
+display "R² drops after differencing — lower but honest"
+
+* =============================================================================
+* STEP 6: Autocorrelation diagnostics — the smoking gun
+* =============================================================================
+* Slowly decaying ACF in residuals signals non-stationarity and invalid SEs.
+* After differencing, autocorrelation should drop dramatically.
+
+// Levels regression residuals
+quietly regress gs10 gs1
+predict resid_levels, residuals
+corrgram resid_levels, lags(5)           // correlogram shows ACF at each lag
+display "High lag-1 ACF → non-stationary residuals"
+
+// Changes regression residuals
+quietly regress D.gs10 D.gs1
+predict resid_changes, residuals
+corrgram resid_changes, lags(5)
+display "Lower lag-1 ACF → differencing worked"
+
+// HAC (Newey-West) SEs correct for autocorrelation without differencing
+// newey estimates OLS with Newey-West SEs; lag(24) sets bandwidth
+newey gs10 gs1, lag(24)
+display "HAC SE on gs1: " _se[gs1]
+
+// Compare to default SE
+quietly regress gs10 gs1
+display "Default SE:    " _se[gs1]
+display "HAC is larger — default SEs are too small with autocorrelation"
+
+* =============================================================================
+* STEP 7: ADL model — dynamic multipliers
+* =============================================================================
+* Autoregressive distributed lag models capture how effects build over time.
+* Lagged dependent and independent variables model persistence and transmission.
+
+// Generate lagged differences using time-series operators
+// L.D.gs10 = first lag of differenced gs10; L2.D.gs10 = second lag
+regress D.gs10 L.D.gs10 L2.D.gs10 D.gs1 L.D.gs1 L2.D.gs1
+
+display "ADL(2,2) Model:"
+display "  Impact multiplier (D.gs1):    " _b[D.gs1]
+display "  1-month cumulative:           " _b[D.gs1] + _b[L.D.gs1]
+display "  2-month cumulative:           " _b[D.gs1] + _b[L.D.gs1] + _b[L2.D.gs1]
+display "  R²: " e(r2)
+
+// Check residual autocorrelation — should be near zero if well-specified
+predict resid_adl, residuals
+corrgram resid_adl, lags(5)
+display "Near-zero lag-1 ACF → dynamics captured"</code></pre>
+  <div style="display:flex;gap:0.8rem;align-items:center;margin-top:0.8rem;flex-wrap:wrap">
+    <button class="btn-copy" onclick="navigator.clipboard.writeText(document.getElementById('code-stata').textContent).then(()=>{this.textContent='Copied!';setTimeout(()=>this.textContent='Copy code',1500)})">Copy code</button>
+    <span style="color:var(--text-muted);font-size:0.88rem">Paste into your Stata do-file editor</span>
+  </div>
   </div>
 </section>
 
@@ -740,8 +933,49 @@ function initToggles(id,cb){document.getElementById(id).querySelectorAll("button
 (function(){const btn=document.getElementById("theme-toggle"),iconEl=document.getElementById("theme-icon"),labelEl=document.getElementById("theme-label");function apply(t){document.documentElement.dataset.theme=t;iconEl.textContent=t==="dark"?"\u2600\uFE0F":"\uD83C\uDF19";labelEl.textContent=t==="dark"?"Light":"Dark";for(const k in window)if(k.startsWith("__rerender_")&&typeof window[k]==="function")window[k]()}const saved=localStorage.getItem(THEME_KEY);const prefersDark=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches;apply(saved||(prefersDark?"dark":"light"));btn.addEventListener("click",()=>{const next=document.documentElement.dataset.theme==="dark"?"light":"dark";localStorage.setItem(THEME_KEY,next);apply(next)})})();
 window.addEventListener("resize",()=>{document.querySelectorAll(".chart").forEach(el=>{if(el.data)Plotly.Plots.resize(el)})});
 </script>
+<script>
+// ==================== CODE LANGUAGE TABS ====================
+(function() {
+  var tabBar = document.getElementById('code-lang-tabs');
+  if (!tabBar) return;
+  var buttons = tabBar.querySelectorAll('button');
+  var panels  = {
+    python: document.getElementById('panel-python'),
+    stata:  document.getElementById('panel-stata')
+  };
+  buttons.forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      var lang = btn.dataset.lang;
+      buttons.forEach(function(b) { b.classList.remove('active'); });
+      btn.classList.add('active');
+      Object.values(panels).forEach(function(p) { p.classList.remove('active'); });
+      if (panels[lang]) panels[lang].classList.add('active');
+    });
+  });
+})();
+</script>
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" data-manual></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
-<script>Prism.highlightAll();</script>
+<script>
+// Minimal Stata language grammar for Prism.js syntax highlighting
+Prism.languages.stata = {
+  'comment': [
+    { pattern: /\/\*[\s\S]*?\*\//, greedy: true },
+    { pattern: /\/\/.*$/m, greedy: true },
+    { pattern: /^\s*\*.*$/m, greedy: true }
+  ],
+  'string': [
+    { pattern: /"(?:[^"\\]|\\.)*"/, greedy: true },
+    { pattern: /`"(?:[^"]|"(?!'))*"'/, greedy: true }
+  ],
+  'keyword': /\b(?:use|clear|set|gen|generate|replace|drop|keep|rename|order|sort|gsort|merge|append|reshape|collapse|preserve|restore|save|export|import|insheet|outsheet|regress|reg|logit|probit|ivregress|xtreg|areg|newey|tobit|xtset|tsset|predict|margins|marginsplot|test|lincom|nlcom|hausman|estat|summarize|sum|tabulate|tab|describe|des|list|display|di|graph|scatter|twoway|histogram|kdensity|boxplot|qnorm|label|encode|decode|destring|tostring|log|using|if|in|by|bysort|forvalues|foreach|local|global|scalar|matrix|capture|quietly|noisily|return|ereturn|program|end|exit|do|run|include|sysuse|webuse|cd|pwd|macro|tempvar|tempname|tempfile|assert|count|levelsof|codebook|inspect|anova|ttest|correlate|pwcorr|spearman|ranksum|signrank|kwallis|oneway|chi2|mixed|xtmixed|bootstrap|jackknife|permute|simulate|vce|robust|cluster|absorb|noconstant|detail|nolog|level|mle|fe|re|estimates|eststo|esttab|outreg2|coefplot|binscatter|tssmooth|name|combine|lwidth|lcolor|lpattern|xtitle|ytitle|title|legend|more|off|all)\b/,
+  'function': /\b(?:abs|ceil|floor|round|mod|sqrt|exp|ln|log10|max|min|sum|mean|sd|count|cond|inrange|inlist|missing|strlen|substr|strpos|upper|lower|trim|real|string|date|year|month|day|clock|word|wordcount|regexm|runiform|rnormal|_n|_N|_b|_se|e|r|c)\b/,
+  'number': /\b\d+\.?\d*(?:e[+-]?\d+)?\b/i,
+  'operator': /[<>!=]=?|[+\-*/^~&|#]/,
+  'punctuation': /[(),.:]/
+};
+Prism.highlightAll();
+</script>
 </body>
 </html>

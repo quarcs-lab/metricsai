@@ -147,6 +147,14 @@ footer.page a{color:var(--accent);text-decoration:none}footer.page a:hover{text-
 .code-summary .btn-colab { color: var(--accent); font-weight: 500; text-decoration: none; font-size: 0.9rem; }
 .code-summary .btn-colab:hover { text-decoration: underline; }
 
+/* --- Code language tabs --- */
+.code-tabs { display: inline-flex; gap: 0; background: var(--panel-2, var(--panel)); padding: 3px; border-radius: 10px; border: 1px solid var(--border); margin-bottom: 0.8rem; }
+.code-tabs button { background: transparent; border: none; color: var(--text-soft); padding: 0.38rem 1rem; border-radius: 7px; font-family: inherit; font-size: 0.85rem; font-weight: 500; cursor: pointer; transition: all .15s ease; }
+.code-tabs button.active { background: var(--accent); color: white; font-weight: 600; }
+.code-tabs button:not(.active):hover { color: var(--accent); }
+.code-panel { display: none; }
+.code-panel.active { display: block; }
+
 /* --- Syntax highlighting tokens (Prism.js) --- */
 .code-summary pre[class*="language-"],
 .code-summary code[class*="language-"] {
@@ -194,8 +202,7 @@ footer.page a{color:var(--accent);text-decoration:none}footer.page a:hover{text-
     <li><a href="#hyp-one">One-Sided Test</a></li>
     <li><a href="#gas-test">Gas Price Test</a></li>
     <li><a href="#proportions">Proportions</a></li>
-    <li><a href="#python-code">Python Code</a></li>
-    <li><a href="#code">Python code</a></li>
+    <li><a href="#code">Code</a></li>
   </ul>
 </nav>
 
@@ -595,10 +602,17 @@ footer.page a{color:var(--accent);text-decoration:none}footer.page a:hover{text-
   <p class="takeaway"><strong>Take-away:</strong> Proportions are means of 0/1 data — the whole inference toolkit (SE, CI, z-tests) carries over, with only the SE formula changing. <a href="../../book/_book/notebooks_quarto/ch04_Statistical_Inference_for_the_Mean.html#proportions-data" target="_blank" rel="noopener">Read §4.7 in the chapter →</a></p>
 </section>
 
-<section id="python-code" class="howto-card code-summary" id="code" aria-label="Python code summary">
-  <h2>Python Libraries and Code</h2>
-  <p class="motivation">You've explored the key concepts interactively — now reproduce them in Python. This self-contained code block covers everything you practiced above. Copy it into an empty notebook and run it.</p>
-  <pre><code id="code-cheatsheet" class="language-python"># =============================================================================
+<section class="howto-card code-summary" id="code" aria-label="Code summary">
+  <h2>Code Summary</h2>
+  <p class="motivation">You've explored the key concepts interactively — now reproduce them in code. These self-contained blocks cover everything you practiced above. Pick your language, copy the code, and run it.</p>
+
+  <div class="code-tabs" id="code-lang-tabs">
+    <button type="button" data-lang="python" class="active">Python</button>
+    <button type="button" data-lang="stata">Stata</button>
+  </div>
+
+  <div class="code-panel active" id="panel-python">
+  <pre><code id="code-python" class="language-python"># =============================================================================
 # CHAPTER 4 CHEAT SHEET: Statistical Inference for the Mean
 # =============================================================================
 
@@ -749,8 +763,173 @@ print(f"95% CI: [{ci_lo:.4f}, {ci_hi:.4f}]")
 print(f"\nH0: p = {p0}  z = {z_stat:.4f}  p-value = {p_val_z:.4f}")
 print(f"Decision: {'Reject H0' if abs(z_stat) &gt; 1.96 else 'Do not reject H0'}")</code></pre>
   <div style="display:flex;gap:0.8rem;align-items:center;margin-top:0.8rem;flex-wrap:wrap">
-    <button class="btn-copy" onclick="navigator.clipboard.writeText(document.getElementById('code-cheatsheet').textContent).then(()=>{this.textContent='Copied!';setTimeout(()=>this.textContent='Copy code',1500)})">Copy code</button>
-    <a class="btn-colab" href="https://colab.research.google.com/notebooks/empty.ipynb" target="_blank" rel="noopener">Open empty Colab notebook →</a>
+    <button class="btn-copy" onclick="navigator.clipboard.writeText(document.getElementById('code-python').textContent).then(()=>{this.textContent='Copied!';setTimeout(()=>this.textContent='Copy code',1500)})">Copy code</button>
+    <a class="btn-colab" href="https://colab.research.google.com/notebooks/empty.ipynb" target="_blank" rel="noopener">Open empty Colab notebook &rarr;</a>
+  </div>
+  </div>
+
+  <div class="code-panel" id="panel-stata">
+  <pre><code id="code-stata" class="language-stata">* =============================================================================
+* CHAPTER 4 CHEAT SHEET: Statistical Inference for the Mean
+* =============================================================================
+
+* --- Setup ---
+clear all                                // start with a clean workspace
+set more off                             // do not pause output for long results
+
+* =============================================================================
+* STEP 1: Load data directly from a URL
+* =============================================================================
+* use loads a Stata .dta file; "clear" drops any data already in memory
+* This sample has 171 female workers from the AED_EARNINGS dataset
+use "https://raw.githubusercontent.com/quarcs-lab/data-open/master/AED/AED_EARNINGS.DTA", clear
+
+describe                                 // list all variables, types, and labels
+display "Observations: " _N              // _N is Stata's built-in observation count
+
+* =============================================================================
+* STEP 2: Sample statistics and standard error
+* =============================================================================
+* The standard error measures the precision of the sample mean as an estimate
+* of the population mean. It shrinks with sqrt(n), not n — so quadrupling the
+* sample size is needed to halve the SE.
+summarize earnings
+
+// After summarize, Stata stores results in r() that you can reference:
+display "Sample mean:        $" %10.2fc r(mean)
+display "Standard deviation: $" %10.2fc r(sd)
+display "Standard error:     $" %10.2fc r(sd) / sqrt(r(N))
+
+* =============================================================================
+* STEP 3: t-distribution vs standard normal
+* =============================================================================
+* When sigma is unknown (estimated by s), we use the t-distribution instead of
+* the normal. It has fatter tails — more probability in the extremes — but
+* approaches the normal as n grows (the "n &gt;= 30" rule of thumb).
+
+// Generate a grid of t values and plot the densities
+clear
+set obs 200
+gen t = -4 + (_n - 1) * 8 / 199
+
+// tden(df, t) gives the t-density; normalden(t) gives the standard normal
+gen pdf_normal = normalden(t)
+gen pdf_t4     = tden(4, t)
+gen pdf_t30    = tden(30, t)
+
+twoway (line pdf_normal t, lpattern(dash) lwidth(medthick))              ///
+       (line pdf_t4 t, lwidth(medthick))                                 ///
+       (line pdf_t30 t, lwidth(medthick)),                               ///
+    xtitle("t value") ytitle("Density")                                  ///
+    title("t-Distribution Approaches Normal as Degrees of Freedom Increase") ///
+    legend(order(1 "Standard Normal" 2 "t(4) — fatter tails"            ///
+                 3 "t(30) — nearly normal"))
+
+* =============================================================================
+* STEP 4: Confidence interval — a range of plausible values for mu
+* =============================================================================
+* A 95% CI means: if we repeatedly sampled and built CIs, about 95% would
+* contain the true mu. Formula: x-bar +/- t_crit * SE
+
+// Reload the earnings data
+use "https://raw.githubusercontent.com/quarcs-lab/data-open/master/AED/AED_EARNINGS.DTA", clear
+
+// ci means computes confidence intervals directly
+ci means earnings, level(95)
+
+// Compare 90%, 95%, and 99% — higher confidence requires wider intervals
+ci means earnings, level(90)
+ci means earnings, level(95)
+ci means earnings, level(99)
+
+// Manual calculation to see the components
+summarize earnings
+local n    = r(N)
+local xbar = r(mean)
+local se   = r(sd) / sqrt(r(N))
+local tcrit = invttail(`n' - 1, 0.025)       // two-tailed critical value
+local margin = `tcrit' * `se'
+
+display "Critical value (t_170, 0.025): " %8.4f `tcrit'
+display "Margin of error:               $" %10.2fc `margin'
+display "95% CI: [$" %10.2fc `xbar' - `margin' ", $" %10.2fc `xbar' + `margin' "]"
+
+* =============================================================================
+* STEP 5: Two-sided hypothesis test — H0: mu = $40,000
+* =============================================================================
+* The t-statistic measures how many standard errors the estimate is from the
+* hypothesized value. The p-value is the probability of a result at least as
+* extreme as ours if H0 were true.
+
+// ttest performs the hypothesis test in one command
+ttest earnings == 40000
+
+// Stata displays: t-statistic, degrees of freedom, and p-values for
+// Ha: mu != 40000 (two-sided), Ha: mu &lt; 40000, and Ha: mu &gt; 40000
+
+// The stored results can be accessed:
+display "t-statistic: " %8.4f r(t)
+display "p-value (two-sided): " %8.4f r(p)
+
+// One-sided (upper-tailed): H0: mu &lt;= 40000 vs Ha: mu &gt; 40000
+// The one-sided p-value is half the two-sided p-value (for the correct tail)
+display "p-value (one-sided, upper): " %8.4f r(p) / 2
+
+* =============================================================================
+* STEP 6: Statistical vs practical significance — gasoline prices
+* =============================================================================
+* A $0.14 price gap looks small, but the SE is tiny — so the t-statistic is
+* huge and p &lt; 0.0001. Statistical significance says "the difference is real";
+* practical significance asks "does it matter?"
+use "https://raw.githubusercontent.com/quarcs-lab/data-open/master/AED/AED_GASPRICE.DTA", clear
+
+summarize price
+display "Sample mean: $" %6.4f r(mean) "   SE: $" %6.4f r(sd) / sqrt(r(N))
+
+// Test against the CA state average of $3.81
+ttest price == 3.81
+
+display "Decision: " cond(r(p) &lt; 0.05, "Reject H0", "Do not reject H0")
+
+// Practical significance: how much does the difference cost per tank?
+local diff = 3.81 - r(mu_1)
+display "Practical: $" %5.2f `diff' "/gallon * 15 gal = $" %5.2f `diff' * 15 " per tank"
+
+* =============================================================================
+* STEP 7: Inference for proportions — binary (0/1) data
+* =============================================================================
+* Proportions are just means of 0/1 variables. The same CI and hypothesis-test
+* logic applies — only the SE formula changes: sqrt(p_hat*(1-p_hat)/n).
+
+// Create a dataset with 921 voters: 480 Democrat (1), 441 other (0)
+clear
+set obs 921
+gen democrat = (_n &lt;= 480)
+
+// Compute the sample proportion and confidence interval
+ci proportions democrat
+
+// Hypothesis test: H0: p = 0.50
+prtest democrat == 0.50
+
+// Manual calculation to see the components
+summarize democrat
+local p_hat = r(mean)
+local n     = r(N)
+local se_p  = sqrt(`p_hat' * (1 - `p_hat') / `n')
+local se_h0 = sqrt(0.50 * 0.50 / `n')
+local z     = (`p_hat' - 0.50) / `se_h0'
+local pval  = 2 * (1 - normal(abs(`z')))
+
+display "Sample proportion: " %6.4f `p_hat' " (" %4.1f `p_hat' * 100 "%)"
+display "SE: " %6.4f `se_p'
+display "95% CI: [" %6.4f `p_hat' - 1.96 * `se_p' ", " %6.4f `p_hat' + 1.96 * `se_p' "]"
+display "H0: p = 0.50  z = " %6.4f `z' "  p-value = " %6.4f `pval'
+display "Decision: " cond(abs(`z') &gt; 1.96, "Reject H0", "Do not reject H0")</code></pre>
+  <div style="display:flex;gap:0.8rem;align-items:center;margin-top:0.8rem;flex-wrap:wrap">
+    <button class="btn-copy" onclick="navigator.clipboard.writeText(document.getElementById('code-stata').textContent).then(()=>{this.textContent='Copied!';setTimeout(()=>this.textContent='Copy code',1500)})">Copy code</button>
+    <span style="color:var(--text-muted);font-size:0.88rem">Paste into your Stata do-file editor</span>
+  </div>
   </div>
 </section>
 
@@ -1094,8 +1273,49 @@ var GAS = summary(DATA.gas.prices);
 window.addEventListener("resize",function(){document.querySelectorAll(".chart").forEach(function(el){if(el.data)Plotly.Plots.resize(el);});});
 </script>
 
+<script>
+// ==================== CODE LANGUAGE TABS ====================
+(function() {
+  var tabBar = document.getElementById('code-lang-tabs');
+  if (!tabBar) return;
+  var buttons = tabBar.querySelectorAll('button');
+  var panels  = {
+    python: document.getElementById('panel-python'),
+    stata:  document.getElementById('panel-stata')
+  };
+  buttons.forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      var lang = btn.dataset.lang;
+      buttons.forEach(function(b) { b.classList.remove('active'); });
+      btn.classList.add('active');
+      Object.values(panels).forEach(function(p) { p.classList.remove('active'); });
+      if (panels[lang]) panels[lang].classList.add('active');
+    });
+  });
+})();
+</script>
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" data-manual></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
-<script>Prism.highlightAll();</script>
+<script>
+// Minimal Stata language grammar for Prism.js syntax highlighting
+Prism.languages.stata = {
+  'comment': [
+    { pattern: /\/\*[\s\S]*?\*\//, greedy: true },
+    { pattern: /\/\/.*$/m, greedy: true },
+    { pattern: /^\s*\*.*$/m, greedy: true }
+  ],
+  'string': [
+    { pattern: /"(?:[^"\\]|\\.)*"/, greedy: true },
+    { pattern: /`"(?:[^"]|"(?!'))*"'/, greedy: true }
+  ],
+  'keyword': /\b(?:use|clear|set|gen|generate|replace|drop|keep|rename|order|sort|gsort|merge|append|reshape|collapse|preserve|restore|save|export|import|insheet|outsheet|regress|reg|logit|probit|ivregress|xtreg|areg|newey|tobit|xtset|tsset|predict|margins|marginsplot|test|lincom|nlcom|hausman|estat|summarize|sum|tabulate|tab|describe|des|list|display|di|graph|scatter|twoway|histogram|kdensity|boxplot|qnorm|label|encode|decode|destring|tostring|log|using|if|in|by|bysort|forvalues|foreach|local|global|scalar|matrix|capture|quietly|noisily|return|ereturn|program|end|exit|do|run|include|sysuse|webuse|cd|pwd|macro|tempvar|tempname|tempfile|assert|count|levelsof|codebook|inspect|anova|ttest|correlate|pwcorr|spearman|ranksum|signrank|kwallis|oneway|chi2|mixed|xtmixed|bootstrap|jackknife|permute|simulate|vce|robust|cluster|absorb|noconstant|detail|nolog|level|mle|fe|re|estimates|eststo|esttab|outreg2|coefplot|binscatter|tssmooth|name|combine|lwidth|lcolor|lpattern|xtitle|ytitle|title|legend|more|off|all|ci|means|prtest|proportions|invttail|normal|normalden|tden|cond)\b/,
+  'function': /\b(?:abs|ceil|floor|round|mod|sqrt|exp|ln|log10|max|min|sum|mean|sd|count|cond|inrange|inlist|missing|strlen|substr|strpos|upper|lower|trim|real|string|date|year|month|day|clock|word|wordcount|regexm|runiform|rnormal|_n|_N|_b|_se|e|r|c)\b/,
+  'number': /\b\d+\.?\d*(?:e[+-]?\d+)?\b/i,
+  'operator': /[<>!=]=?|[+\-*/^~&|#]/,
+  'punctuation': /[(),.:]/
+};
+Prism.highlightAll();
+</script>
 </body>
 </html>

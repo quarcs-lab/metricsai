@@ -287,6 +287,39 @@ footer.page a:hover { text-decoration: underline; }
 .code-summary .btn-colab { color: var(--accent); font-weight: 500; text-decoration: none; font-size: 0.9rem; }
 .code-summary .btn-colab:hover { text-decoration: underline; }
 
+/* --- Code language tabs --- */
+.code-tabs {
+  display: inline-flex;
+  gap: 0;
+  background: var(--panel-2, var(--panel));
+  padding: 3px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  margin-bottom: 0.8rem;
+}
+.code-tabs button {
+  background: transparent;
+  border: none;
+  color: var(--text-soft);
+  padding: 0.38rem 1rem;
+  border-radius: 7px;
+  font-family: inherit;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all .15s ease;
+}
+.code-tabs button.active {
+  background: var(--accent);
+  color: white;
+  font-weight: 600;
+}
+.code-tabs button:not(.active):hover {
+  color: var(--accent);
+}
+.code-panel { display: none; }
+.code-panel.active { display: block; }
+
 /* --- Syntax highlighting tokens (Prism.js) --- */
 .code-summary pre[class*="language-"],
 .code-summary code[class*="language-"] {
@@ -333,7 +366,7 @@ footer.page a:hover { text-decoration: underline; }
     <li><a href="#diagnostic-plots">Diagnostics</a></li>
     <li><a href="#influential-obs">Influence</a></li>
     <li><a href="#omitted-var">OVB</a></li>
-    <li><a href="#code">Python code</a></li>
+    <li><a href="#code">Code</a></li>
   </ul>
 </nav>
 
@@ -707,10 +740,17 @@ footer.page a:hover { text-decoration: underline; }
   <p class="takeaway"><strong>Take-away:</strong> If a coefficient moves substantially when you add a plausible control, the bivariate estimate was contaminated — OVB is not a hypothetical, it's what the numbers are telling you. <a href="../../book/_book/notebooks_quarto/ch16_Checking_the_Model_and_Data.html#example---democracy-and-growth" target="_blank" rel="noopener">Read §16.7 in the chapter →</a></p>
 </section>
 
-<section class="howto-card code-summary" id="code" aria-label="Python code summary">
-  <h2>Python Libraries and Code</h2>
-  <p class="motivation">You've explored the key concepts interactively — now reproduce them in Python. This self-contained code block covers everything you practiced above. Copy it into an empty notebook and run it.</p>
-  <pre><code id="code-cheatsheet" class="language-python"># =============================================================================
+<section class="howto-card code-summary" id="code" aria-label="Code summary">
+  <h2>Code Summary</h2>
+  <p class="motivation">You've explored the key concepts interactively — now reproduce them in code. These self-contained blocks cover everything you practiced above. Pick your language, copy the code, and run it.</p>
+
+  <div class="code-tabs" id="code-lang-tabs">
+    <button type="button" data-lang="python" class="active">Python</button>
+    <button type="button" data-lang="stata">Stata</button>
+  </div>
+
+  <div class="code-panel active" id="panel-python">
+  <pre><code id="code-python" class="language-python"># =============================================================================
 # CHAPTER 16 CHEAT SHEET: Checking the Model and Data
 # =============================================================================
 
@@ -843,8 +883,152 @@ ax.grid(True, alpha=0.3)
 plt.tight_layout()
 plt.show()</code></pre>
   <div style="display:flex;gap:0.8rem;align-items:center;margin-top:0.8rem;flex-wrap:wrap">
-    <button class="btn-copy" onclick="navigator.clipboard.writeText(document.getElementById('code-cheatsheet').textContent).then(()=>{this.textContent='Copied!';setTimeout(()=>this.textContent='Copy code',1500)})">Copy code</button>
-    <a class="btn-colab" href="https://colab.research.google.com/notebooks/empty.ipynb" target="_blank" rel="noopener">Open empty Colab notebook →</a>
+    <button class="btn-copy" onclick="navigator.clipboard.writeText(document.getElementById('code-python').textContent).then(()=>{this.textContent='Copied!';setTimeout(()=>this.textContent='Copy code',1500)})">Copy code</button>
+    <a class="btn-colab" href="https://colab.research.google.com/notebooks/empty.ipynb" target="_blank" rel="noopener">Open empty Colab notebook &rarr;</a>
+  </div>
+  </div>
+
+  <div class="code-panel" id="panel-stata">
+  <pre><code id="code-stata" class="language-stata">* =============================================================================
+* CHAPTER 16 CHEAT SHEET: Checking the Model and Data
+* =============================================================================
+
+* --- Setup ---
+clear all                                // start with a clean workspace
+set more off                             // do not pause output for long results
+
+* =============================================================================
+* STEP 1: Load data
+* =============================================================================
+* Two datasets: earnings (cross-section) and democracy (cross-country)
+* use loads a Stata .dta file; "clear" drops any data already in memory
+use "https://raw.githubusercontent.com/quarcs-lab/data-open/master/AED/AED_EARNINGS_COMPLETE.DTA", clear
+
+describe                                 // list all variables, types, and labels
+display "Observations: " _N             // _N is Stata's built-in observation count
+
+* =============================================================================
+* STEP 2: Detect multicollinearity with VIF
+* =============================================================================
+* VIF_j = 1/(1 - R_j^2): measures how much SE inflates due to collinearity
+* VIF &gt; 10 = serious problem; VIF &gt; 5 = investigate further
+
+// First run the regression that includes the interaction term
+regress earnings age education agebyeduc
+
+// estat vif computes VIF for each regressor after any regression
+estat vif
+
+// Interpretation: VIF near 1 = no collinearity; VIF &gt; 10 = serious problem
+// The interaction term (agebyeduc) will show a very high VIF because it is
+// nearly a linear combination of age and education
+
+* =============================================================================
+* STEP 3: Compare standard vs robust standard errors
+* =============================================================================
+* Heteroskedasticity makes default SEs too small -&gt; use robust (HC1) SEs
+
+// Model with standard (homoskedastic) SEs
+regress earnings age education
+estimates store model_std
+
+// Same model with robust (White/HC1) SEs
+regress earnings age education, vce(robust)
+estimates store model_robust
+
+// Compare both sets of SEs side by side
+estimates table model_std model_robust, se stats(N r2)
+// Ratio &gt; 1 signals heteroskedasticity: robust SEs are larger than standard SEs
+
+* =============================================================================
+* STEP 4: Omitted variable bias — democracy and growth
+* =============================================================================
+* Adding controls reveals how much the bivariate estimate was biased upward
+
+// Switch to the democracy dataset
+use "https://raw.githubusercontent.com/quarcs-lab/data-open/master/AED/AED_DEMOCRACY.DTA", clear
+describe
+
+// Bivariate regression: democracy on growth alone
+regress democracy growth, vce(robust)
+estimates store bivariate
+scalar b_biv = _b[growth]
+
+// Multiple regression: add institutional and religious controls
+regress democracy growth constraint indcent catholic muslim protestant, vce(robust)
+estimates store multiple
+scalar b_mult = _b[growth]
+
+// Display the reduction in the growth coefficient
+display "Growth coefficient (bivariate):     " b_biv
+display "Growth coefficient (with controls): " b_mult
+display "Reduction: " (1 - b_mult/b_biv)*100 "% — institutional controls absorb the bias"
+
+// Compare both models side by side
+estimates table bivariate multiple, se stats(N r2)
+
+* =============================================================================
+* STEP 5: Diagnostic plots — residual vs fitted
+* =============================================================================
+* Random scatter around zero = assumptions OK; fan shape = heteroskedasticity
+
+// Re-run the multiple regression (needed for predict)
+quietly regress democracy growth constraint indcent catholic muslim protestant, vce(robust)
+
+// Generate fitted values and residuals
+predict yhat, xb                         // fitted values (X*beta)
+predict uhat, residuals                  // OLS residuals (y - X*beta)
+
+// Panel A: Actual vs Fitted with 45-degree line
+twoway (scatter democracy yhat, msymbol(Oh) mcolor(navy))             ///
+       (line yhat yhat, lcolor(red) lwidth(medthick)),                ///
+    xtitle("Fitted Democracy") ytitle("Actual Democracy")            ///
+    title("Actual vs Fitted")                                        ///
+    legend(order(1 "Observations" 2 "45° line"))
+
+// Panel B: Residual vs Fitted with LOWESS smooth
+twoway (scatter uhat yhat, msymbol(Oh) mcolor(navy))                 ///
+       (lowess uhat yhat, lcolor(red) lwidth(medthick) lpattern(dash)), ///
+    xtitle("Fitted Democracy") ytitle("Residual")                    ///
+    title("Residual vs Fitted")                                      ///
+    yline(0, lcolor(gs10) lwidth(thin))                              ///
+    legend(order(1 "Residuals" 2 "LOWESS smooth"))
+
+* =============================================================================
+* STEP 6: Influential observations — DFITS
+* =============================================================================
+* DFITS_i measures how much prediction i changes when observation i is excluded
+* Threshold: |DFITS| &gt; 2*sqrt(k/n)
+
+// predict with dfits option generates DFITS after a regression
+predict dfits_val, dfits
+
+// Compute the threshold
+local k = e(df_m) + 1                    // number of parameters (including intercept)
+local n = e(N)                           // number of observations
+local threshold = 2 * sqrt(`k' / `n')
+display "DFITS threshold: " `threshold'
+
+// Count observations exceeding the threshold
+count if abs(dfits_val) &gt; `threshold'
+display "Observations exceeding threshold: " r(N) " out of " `n'
+
+// Plot DFITS with threshold lines
+gen obs_id = _n                          // observation index for x-axis
+twoway (scatter dfits_val obs_id if abs(dfits_val) &lt;= `threshold',   ///
+            msymbol(Oh) mcolor(navy) msize(small))                    ///
+       (scatter dfits_val obs_id if abs(dfits_val) &gt; `threshold',    ///
+            msymbol(Oh) mcolor(red) msize(small)),                    ///
+    yline(`threshold', lcolor(red) lpattern(dash))                    ///
+    yline(-`threshold', lcolor(red) lpattern(dash))                   ///
+    yline(0, lcolor(gs10) lwidth(thin))                               ///
+    xtitle("Observation Index") ytitle("DFITS")                       ///
+    title("Influential Observations (DFITS)")                         ///
+    legend(order(1 "Below threshold" 2 "Above threshold"))</code></pre>
+  <div style="display:flex;gap:0.8rem;align-items:center;margin-top:0.8rem;flex-wrap:wrap">
+    <button class="btn-copy" onclick="navigator.clipboard.writeText(document.getElementById('code-stata').textContent).then(()=>{this.textContent='Copied!';setTimeout(()=>this.textContent='Copy code',1500)})">Copy code</button>
+    <span style="color:var(--text-muted);font-size:0.88rem">Paste into your Stata do-file editor</span>
+  </div>
   </div>
 </section>
 
@@ -1731,8 +1915,49 @@ window.addEventListener("resize", function() {
 });
 </script>
 
+<script>
+// ==================== CODE LANGUAGE TABS ====================
+(function() {
+  var tabBar = document.getElementById('code-lang-tabs');
+  if (!tabBar) return;
+  var buttons = tabBar.querySelectorAll('button');
+  var panels  = {
+    python: document.getElementById('panel-python'),
+    stata:  document.getElementById('panel-stata')
+  };
+  buttons.forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      var lang = btn.dataset.lang;
+      buttons.forEach(function(b) { b.classList.remove('active'); });
+      btn.classList.add('active');
+      Object.values(panels).forEach(function(p) { p.classList.remove('active'); });
+      if (panels[lang]) panels[lang].classList.add('active');
+    });
+  });
+})();
+</script>
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" data-manual></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
-<script>Prism.highlightAll();</script>
+<script>
+// Minimal Stata language grammar for Prism.js syntax highlighting
+Prism.languages.stata = {
+  'comment': [
+    { pattern: /\/\*[\s\S]*?\*\//, greedy: true },
+    { pattern: /\/\/.*$/m, greedy: true },
+    { pattern: /^\s*\*.*$/m, greedy: true }
+  ],
+  'string': [
+    { pattern: /"(?:[^"\\]|\\.)*"/, greedy: true },
+    { pattern: /`"(?:[^"]|"(?!'))*"'/, greedy: true }
+  ],
+  'keyword': /\b(?:use|clear|set|gen|generate|replace|drop|keep|rename|order|sort|gsort|merge|append|reshape|collapse|preserve|restore|save|export|import|insheet|outsheet|regress|reg|logit|probit|ivregress|xtreg|areg|newey|tobit|xtset|tsset|predict|margins|marginsplot|test|lincom|nlcom|hausman|estat|summarize|sum|tabulate|tab|describe|des|list|display|di|graph|scatter|twoway|histogram|kdensity|boxplot|qnorm|label|encode|decode|destring|tostring|log|using|if|in|by|bysort|forvalues|foreach|local|global|scalar|matrix|capture|quietly|noisily|return|ereturn|program|end|exit|do|run|include|sysuse|webuse|cd|pwd|macro|tempvar|tempname|tempfile|assert|count|levelsof|codebook|inspect|anova|ttest|correlate|pwcorr|spearman|ranksum|signrank|kwallis|oneway|chi2|mixed|xtmixed|bootstrap|jackknife|permute|simulate|vce|robust|cluster|absorb|noconstant|detail|nolog|level|mle|fe|re|estimates|eststo|esttab|outreg2|coefplot|binscatter|tssmooth|name|combine|lwidth|lcolor|lpattern|xtitle|ytitle|title|legend|more|off|all)\b/,
+  'function': /\b(?:abs|ceil|floor|round|mod|sqrt|exp|ln|log10|max|min|sum|mean|sd|count|cond|inrange|inlist|missing|strlen|substr|strpos|upper|lower|trim|real|string|date|year|month|day|clock|word|wordcount|regexm|runiform|rnormal|_n|_N|_b|_se|e|r|c)\b/,
+  'number': /\b\d+\.?\d*(?:e[+-]?\d+)?\b/i,
+  'operator': /[<>!=]=?|[+\-*/^~&|#]/,
+  'punctuation': /[(),.:]/
+};
+Prism.highlightAll();
+</script>
 </body>
 </html>

@@ -152,6 +152,39 @@ footer.page a{color:var(--accent);text-decoration:none}footer.page a:hover{text-
 .code-summary .btn-colab { color: var(--accent); font-weight: 500; text-decoration: none; font-size: 0.9rem; }
 .code-summary .btn-colab:hover { text-decoration: underline; }
 
+/* --- Code language tabs --- */
+.code-tabs {
+  display: inline-flex;
+  gap: 0;
+  background: var(--panel-2, var(--panel));
+  padding: 3px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  margin-bottom: 0.8rem;
+}
+.code-tabs button {
+  background: transparent;
+  border: none;
+  color: var(--text-soft);
+  padding: 0.38rem 1rem;
+  border-radius: 7px;
+  font-family: inherit;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all .15s ease;
+}
+.code-tabs button.active {
+  background: var(--accent);
+  color: white;
+  font-weight: 600;
+}
+.code-tabs button:not(.active):hover {
+  color: var(--accent);
+}
+.code-panel { display: none; }
+.code-panel.active { display: block; }
+
 /* --- Syntax highlighting tokens (Prism.js) --- */
 .code-summary pre[class*="language-"],
 .code-summary code[class*="language-"] {
@@ -198,7 +231,7 @@ footer.page a{color:var(--accent);text-decoration:none}footer.page a:hover{text-
     <li><a href="#dummy-trap">Dummy Trap</a></li>
     <li><a href="#worker-type">Worker Types</a></li>
     <li><a href="#scatter-gender">Scatter by Gender</a></li>
-    <li><a href="#code">Python code</a></li>
+    <li><a href="#code">Code</a></li>
   </ul>
 </nav>
 
@@ -500,10 +533,17 @@ footer.page a{color:var(--accent);text-decoration:none}footer.page a:hover{text-
   <p class="takeaway"><strong>Take-away:</strong> Two lines on one chart tell you in a glance whether you need interactions — and at which education levels the gender gap is widest. <a href="../../book/_book/notebooks_quarto/ch14_Regression_with_Indicator_Variables.html#interactions-with-indicator-variables" target="_blank" rel="noopener">Read §14.3 in the chapter →</a></p>
 </section>
 
-<section class="howto-card code-summary" id="code" aria-label="Python code summary">
-  <h2>Python Libraries and Code</h2>
-  <p class="motivation">You've explored the key concepts interactively — now reproduce them in Python. This self-contained code block covers everything you practiced above. Copy it into an empty notebook and run it.</p>
-  <pre><code id="code-cheatsheet" class="language-python"># =============================================================================
+<section class="howto-card code-summary" id="code" aria-label="Code summary">
+  <h2>Code Summary</h2>
+  <p class="motivation">You've explored the key concepts interactively — now reproduce them in code. These self-contained blocks cover everything you practiced above. Pick your language, copy the code, and run it.</p>
+
+  <div class="code-tabs" id="code-lang-tabs">
+    <button type="button" data-lang="python" class="active">Python</button>
+    <button type="button" data-lang="stata">Stata</button>
+  </div>
+
+  <div class="code-panel active" id="panel-python">
+  <pre><code id="code-python" class="language-python"># =============================================================================
 # CHAPTER 14 CHEAT SHEET: Regression with Indicator Variables
 # =============================================================================
 
@@ -629,8 +669,133 @@ data['worker_type'] = np.where(data['dself'] == 1, 'Self-employed',
                       np.where(data['dprivate'] == 1, 'Private', 'Government'))
 print(data.groupby('worker_type')['earnings'].agg(['mean', 'count']).round(0))</code></pre>
   <div style="display:flex;gap:0.8rem;align-items:center;margin-top:0.8rem;flex-wrap:wrap">
-    <button class="btn-copy" onclick="navigator.clipboard.writeText(document.getElementById('code-cheatsheet').textContent).then(()=>{this.textContent='Copied!';setTimeout(()=>this.textContent='Copy code',1500)})">Copy code</button>
-    <a class="btn-colab" href="https://colab.research.google.com/notebooks/empty.ipynb" target="_blank" rel="noopener">Open empty Colab notebook →</a>
+    <button class="btn-copy" onclick="navigator.clipboard.writeText(document.getElementById('code-python').textContent).then(()=>{this.textContent='Copied!';setTimeout(()=>this.textContent='Copy code',1500)})">Copy code</button>
+    <a class="btn-colab" href="https://colab.research.google.com/notebooks/empty.ipynb" target="_blank" rel="noopener">Open empty Colab notebook &rarr;</a>
+  </div>
+  </div>
+
+  <div class="code-panel" id="panel-stata">
+  <pre><code id="code-stata" class="language-stata">* =============================================================================
+* CHAPTER 14 CHEAT SHEET: Regression with Indicator Variables
+* =============================================================================
+
+* --- Setup ---
+clear all                                // start with a clean workspace
+set more off                             // do not pause output for long results
+
+* =============================================================================
+* STEP 1: Load data directly from a URL
+* =============================================================================
+* use loads a Stata .dta file; "clear" drops any data already in memory
+* 872 full-time workers aged 25-65
+use "https://raw.githubusercontent.com/quarcs-lab/data-open/master/AED/AED_EARNINGS_COMPLETE.DTA", clear
+
+describe                                 // list all variables, types, and labels
+display "Observations: " _N              // _N is Stata's built-in observation count
+
+* =============================================================================
+* STEP 2: Descriptive statistics — compare earnings by gender
+* =============================================================================
+* Indicator variable: gender = 1 (female), gender = 0 (male)
+* tabulate with summarize gives group means in one command
+tabulate gender, summarize(earnings)
+
+// Alternatively, compare means explicitly
+summarize earnings if gender == 0        // male mean
+local mean_male = r(mean)
+summarize earnings if gender == 1        // female mean
+local mean_female = r(mean)
+display "Difference (F - M): " `mean_female' - `mean_male'
+
+* =============================================================================
+* STEP 3: Regression on a single indicator — equivalent to difference in means
+* =============================================================================
+* The intercept = mean for d=0 (males); the gender coefficient = mean difference
+* IMPORTANT: vce(robust) uses heteroscedasticity-robust standard errors (HC1)
+regress earnings gender, vce(robust)
+
+// After regress, Stata stores coefficients in e(b) and R-squared in e(r2)
+display "Raw gender gap: " _b[gender]
+display "R-squared:      " e(r2)
+
+* =============================================================================
+* STEP 4: Add controls and interaction — how the gap changes
+* =============================================================================
+* Adding education as a control measures the gap AFTER accounting for education
+regress earnings gender education, vce(robust)
+estimates store model2                   // store results for later comparison
+
+* Adding gender×education interaction allows returns to education to differ
+* c.education#i.gender creates the interaction term
+regress earnings gender education genderbyeduc, vce(robust)
+estimates store model3
+
+* Full model with additional controls
+regress earnings gender education genderbyeduc age hours, vce(robust)
+estimates store model4
+
+// Compare how the gender coefficient evolves across models
+// esttab produces a side-by-side comparison table (requires estout package)
+// ssc install estout                    // install once if needed
+// esttab model2 model3 model4, se r2
+
+* =============================================================================
+* STEP 5: Scatter plot — visualize separate regression lines by gender
+* =============================================================================
+* Non-parallel lines indicate different slopes = interaction term is needed
+* twoway plots scatter points with linear fits for each group
+twoway (scatter earnings education if gender == 0,               ///
+            mcolor(blue%30) msize(small))                        ///
+       (scatter earnings education if gender == 1,               ///
+            mcolor(red%30) msize(small))                         ///
+       (lfit earnings education if gender == 0,                  ///
+            lcolor(blue) lwidth(medthick))                       ///
+       (lfit earnings education if gender == 1,                  ///
+            lcolor(red) lwidth(medthick)),                       ///
+    xtitle("Years of Education")                                 ///
+    ytitle("Earnings ($)")                                       ///
+    title("Earnings vs Education by Gender")                     ///
+    legend(order(1 "Male" 2 "Female" 3 "Male fit" 4 "Female fit"))
+
+* =============================================================================
+* STEP 6: Sets of indicators — worker type and the dummy variable trap
+* =============================================================================
+* Three mutually exclusive categories: dself, dprivate, dgovt (sum to 1)
+* Drop one (dprivate = base) to avoid perfect multicollinearity
+regress earnings dself dgovt education age, vce(robust)
+
+display "Base category: Private sector"
+display "Self-employed vs Private: " _b[dself]
+display "Government vs Private:   " _b[dgovt]
+display "R-squared: " e(r2)
+
+// Change the base category to see how coefficients shift
+// but predicted means stay the same
+regress earnings dprivate dgovt education age, vce(robust)
+display "Base category: Self-employed"
+
+* =============================================================================
+* STEP 7: ANOVA — test if earnings differ across worker types
+* =============================================================================
+* Regression on mutually exclusive indicators = analysis of variance (ANOVA)
+* oneway performs a one-way ANOVA F-test across groups
+
+// Create a single categorical variable for worker type
+gen worker_type = 1 if dself == 1
+replace worker_type = 2 if dprivate == 1
+replace worker_type = 3 if dgovt == 1
+label define wtype 1 "Self-employed" 2 "Private" 3 "Government"
+label values worker_type wtype
+
+// One-way ANOVA: test if earnings differ across worker types
+oneway earnings worker_type
+
+// Group means with counts
+tabulate worker_type, summarize(earnings)</code></pre>
+  <div style="display:flex;gap:0.8rem;align-items:center;margin-top:0.8rem;flex-wrap:wrap">
+    <button class="btn-copy" onclick="navigator.clipboard.writeText(document.getElementById('code-stata').textContent).then(()=>{this.textContent='Copied!';setTimeout(()=>this.textContent='Copy code',1500)})">Copy code</button>
+    <span style="color:var(--text-muted);font-size:0.88rem">Paste into your Stata do-file editor</span>
+  </div>
   </div>
 </section>
 
@@ -900,8 +1065,49 @@ function bindToggles(id,fn){document.querySelectorAll("#"+id+" button").forEach(
 })();
 window.addEventListener("resize",function(){document.querySelectorAll(".chart").forEach(function(el){if(el.data)Plotly.Plots.resize(el);});});
 </script>
+<script>
+// ==================== CODE LANGUAGE TABS ====================
+(function() {
+  var tabBar = document.getElementById('code-lang-tabs');
+  if (!tabBar) return;
+  var buttons = tabBar.querySelectorAll('button');
+  var panels  = {
+    python: document.getElementById('panel-python'),
+    stata:  document.getElementById('panel-stata')
+  };
+  buttons.forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      var lang = btn.dataset.lang;
+      buttons.forEach(function(b) { b.classList.remove('active'); });
+      btn.classList.add('active');
+      Object.values(panels).forEach(function(p) { p.classList.remove('active'); });
+      if (panels[lang]) panels[lang].classList.add('active');
+    });
+  });
+})();
+</script>
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" data-manual></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
-<script>Prism.highlightAll();</script>
+<script>
+// Minimal Stata language grammar for Prism.js syntax highlighting
+Prism.languages.stata = {
+  'comment': [
+    { pattern: /\/\*[\s\S]*?\*\//, greedy: true },
+    { pattern: /\/\/.*$/m, greedy: true },
+    { pattern: /^\s*\*.*$/m, greedy: true }
+  ],
+  'string': [
+    { pattern: /"(?:[^"\\]|\\.)*"/, greedy: true },
+    { pattern: /`"(?:[^"]|"(?!'))*"'/, greedy: true }
+  ],
+  'keyword': /\b(?:use|clear|set|gen|generate|replace|drop|keep|rename|order|sort|gsort|merge|append|reshape|collapse|preserve|restore|save|export|import|insheet|outsheet|regress|reg|logit|probit|ivregress|xtreg|areg|newey|tobit|xtset|tsset|predict|margins|marginsplot|test|lincom|nlcom|hausman|estat|summarize|sum|tabulate|tab|describe|des|list|display|di|graph|scatter|twoway|histogram|kdensity|boxplot|qnorm|label|encode|decode|destring|tostring|log|using|if|in|by|bysort|forvalues|foreach|local|global|scalar|matrix|capture|quietly|noisily|return|ereturn|program|end|exit|do|run|include|sysuse|webuse|cd|pwd|macro|tempvar|tempname|tempfile|assert|count|levelsof|codebook|inspect|anova|ttest|correlate|pwcorr|spearman|ranksum|signrank|kwallis|oneway|chi2|mixed|xtmixed|bootstrap|jackknife|permute|simulate|vce|robust|cluster|absorb|noconstant|detail|nolog|level|mle|fe|re|estimates|eststo|esttab|outreg2|coefplot|binscatter|tssmooth|name|combine|lwidth|lcolor|lpattern|xtitle|ytitle|title|legend|more|off|all)\b/,
+  'function': /\b(?:abs|ceil|floor|round|mod|sqrt|exp|ln|log10|max|min|sum|mean|sd|count|cond|inrange|inlist|missing|strlen|substr|strpos|upper|lower|trim|real|string|date|year|month|day|clock|word|wordcount|regexm|runiform|rnormal|_n|_N|_b|_se|e|r|c)\b/,
+  'number': /\b\d+\.?\d*(?:e[+-]?\d+)?\b/i,
+  'operator': /[<>!=]=?|[+\-*/^~&|#]/,
+  'punctuation': /[(),.:]/
+};
+Prism.highlightAll();
+</script>
 </body>
 </html>
