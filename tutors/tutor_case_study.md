@@ -232,23 +232,38 @@ plt.tight_layout()
 plt.show()
 ```
 
+NOTE: This course uses pyfixest (https://pyfixest.org) for ALL regression estimation. statsmodels is retained only for diagnostics (VIF, influence measures, heteroskedasticity tests, ACF plots, LOWESS).
+
 OLS REGRESSION:
 ```python
-from statsmodels.formula.api import ols
-model = ols('y ~ x', data=df).fit()       # IMPORTANT: don't forget .fit()!
-model.summary()                           # full regression table
-model.params['x']                         # slope coefficient
-model.rsquared                            # R-squared
-model.bse['x']                            # standard error
-model.tvalues['x']                        # t-statistic
-model.pvalues['x']                        # p-value
-model.fittedvalues                        # predicted values
-model.resid                               # residuals
+import pyfixest as pf
+fit = pf.feols('y ~ x', data=df)          # returns fit directly, NO .fit() step
+fit.summary()                              # full regression table
+fit.coef()['x']                            # slope coefficient
+fit._r2                                    # R-squared
+fit.se()['x']                              # standard error
+fit.tstat()['x']                           # t-statistic
+fit.pvalue()['x']                          # p-value
+fit.predict()                              # predicted values
+fit._u_hat                                 # residuals
+fit.confint()                              # confidence intervals
+fit._adj_r2                                # adjusted R-squared
+fit._N                                     # number of observations
 ```
 
 ROBUST STANDARD ERRORS:
 ```python
-model_robust = ols('y ~ x', data=df).fit(cov_type='HC1')   # heteroskedasticity-robust
+fit = pf.feols('y ~ x', data=df, vcov='HC1')   # heteroskedasticity-robust
+```
+
+CLUSTERED STANDARD ERRORS:
+```python
+fit = pf.feols('y ~ x', data=df, vcov={'CRV1': 'cluster_var'})   # cluster-robust
+```
+
+HAC / NEWEY-WEST STANDARD ERRORS:
+```python
+fit = pf.feols('y ~ x', data=df, vcov='NW', vcov_kwargs={'time_id': '_time', 'lag': 5})
 ```
 
 CONFIDENCE INTERVALS:
@@ -258,6 +273,7 @@ n = len(df)
 t_crit = stats.t.ppf(0.975, n - 2)
 ci_lower = slope - t_crit * se_slope
 ci_upper = slope + t_crit * se_slope
+# Or directly from pyfixest: fit.confint()
 ```
 
 HYPOTHESIS TESTING:
@@ -268,50 +284,58 @@ p_value = 2 * (1 - stats.t.cdf(abs(t_stat), df))  # two-sided
 
 MULTIPLE REGRESSION:
 ```python
-model = ols('y ~ x1 + x2 + x3', data=df).fit()
+fit = pf.feols('y ~ x1 + x2 + x3', data=df)
 ```
 
 LOG MODELS:
 ```python
 import numpy as np
 df['ln_y'] = np.log(df['y'])
-model_loglin = ols('ln_y ~ x', data=df).fit()     # log-linear: %Δy per unit Δx
-model_loglog = ols('ln_y ~ ln_x', data=df).fit()   # log-log: elasticity
+fit_loglin = pf.feols('ln_y ~ x', data=df)     # log-linear: %Δy per unit Δx
+fit_loglog = pf.feols('ln_y ~ ln_x', data=df)   # log-log: elasticity
 ```
 
 INDICATOR VARIABLES:
 ```python
-model = ols('earnings ~ C(gender)', data=df).fit()                    # categorical
-model = ols('earnings ~ education + C(gender)', data=df).fit()        # with controls
-model = ols('earnings ~ education * C(gender)', data=df).fit()        # with interaction
+fit = pf.feols('earnings ~ C(gender)', data=df)                    # categorical
+fit = pf.feols('earnings ~ education + C(gender)', data=df)        # with controls
+fit = pf.feols('earnings ~ education * C(gender)', data=df)        # with interaction
 ```
 
 F-TEST (JOINT HYPOTHESIS):
 ```python
-from statsmodels.stats.anova import anova_lm
-f_test = anova_lm(restricted_model, full_model)
+import numpy as np
+fit.wald_test(R=np.array([[0, 0, 1, 0]]), q=np.array([0]))   # test single restriction
 ```
 
 FIXED EFFECTS (PANEL):
 ```python
-from linearmodels.panel import PanelOLS
-df = df.set_index(['entity', 'time'])
-model_fe = PanelOLS.from_formula('y ~ x + EntityEffects', data=df).fit()
+fit = pf.feols('y ~ x | entity', data=df)                                # entity FE
+fit = pf.feols('y ~ x | entity + time', data=df)                         # two-way FE
+fit = pf.feols('y ~ x | entity', data=df, vcov={'CRV1': 'entity'})      # with cluster SEs
 ```
 
-VIF (MULTICOLLINEARITY):
+INSTRUMENTAL VARIABLES (IV / 2SLS):
+```python
+fit = pf.feols('y ~ 1 | endog ~ instrument', data=df)              # simple IV
+fit = pf.feols('y ~ exog | endog ~ instrument', data=df)           # with exogenous regressors
+```
+
+VIF (MULTICOLLINEARITY) — still uses statsmodels:
 ```python
 from statsmodels.stats.outliers_influence import variance_inflation_factor
 ```
 
 COMMON MISTAKES STUDENTS MAKE:
-1. Forgetting .fit() — ols('y ~ x', data=df) creates the model but .fit() estimates it
+1. Using statsmodels syntax with pyfixest — .params['x'] should be .coef()['x'], .rsquared should be ._r2, .bse['x'] should be .se()['x']
 2. Confusing correlation with causation — regression shows association, not cause-and-effect
 3. Extrapolating beyond the data range — predictions outside observed values are unreliable
-4. Using default SEs when HC1 robust SEs are more appropriate
+4. Using default SEs when HC1 robust SEs are more appropriate (use vcov='HC1')
 5. Interpreting log coefficients as level changes instead of percentage changes
 6. Forgetting the dummy variable trap — always drop one category
 7. Not checking residual plots before trusting regression results
+8. Using .pval() instead of .pvalue() — the correct pyfixest method is .pvalue()
+9. Adding .fit() after pf.feols() — pyfixest returns the fitted model directly
 
 === CASE STUDY WORKFLOW PATH ===
 
@@ -505,9 +529,9 @@ Right — OLS is appropriate because we have a continuous outcome variable and w
 Here is the Python code:
 
 ```python
-from statsmodels.formula.api import ols
-model = ols('uratechange ~ rgdpgrowth', data=df).fit(cov_type='HC1')
-model.summary()
+import pyfixest as pf
+fit = pf.feols('uratechange ~ rgdpgrowth', data=df, vcov='HC1')
+fit.summary()
 ```
 
 Run this and tell me: What is the estimated coefficient on rgdpgrowth? Is it positive or negative? What is the R-squared?
