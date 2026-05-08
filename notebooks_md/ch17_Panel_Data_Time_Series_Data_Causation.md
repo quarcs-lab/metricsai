@@ -28,19 +28,17 @@ This notebook provides an interactive introduction to panel data methods, time s
 
 This chapter focuses on three important topics that extend basic regression methods: panel data, time series analysis, and causal inference. You'll gain both theoretical understanding and practical skills through hands-on Python examples.
 
-**Learning Objectives:**
+**What you'll learn:**
 
-By the end of this chapter, you will be able to:
-
-1. Apply cluster-robust standard errors for panel data with grouped observations
-2. Understand panel data methods including random effects and fixed effects estimators
-3. Decompose panel data variation into within and between components
-4. Use fixed effects to control for time-invariant unobserved heterogeneity
-5. Interpret results from logit models and calculate marginal effects
-6. Recognize time series issues including autocorrelation and nonstationarity
-7. Apply HAC (Newey-West) standard errors for time series regressions
-8. Understand autoregressive and distributed lag models for dynamic relationships
-9. Use instrumental variables and other methods for causal inference
+- Apply cluster-robust standard errors for panel data with grouped observations
+- Understand panel data methods including random effects and fixed effects estimators
+- Decompose panel data variation into within and between components
+- Use fixed effects to control for time-invariant unobserved heterogeneity
+- Interpret results from logit models and calculate marginal effects
+- Recognize time series issues including autocorrelation and nonstationarity
+- Apply HAC (Newey-West) standard errors for time series regressions
+- Understand autoregressive and distributed lag models for dynamic relationships
+- Use instrumental variables and other methods for causal inference
 
 **Chapter outline:**
 
@@ -59,6 +57,100 @@ By the end of this chapter, you will be able to:
 - **AED_NBA.DTA**: NBA team revenue data (29 teams, 10 seasons, 2001-2011)
 - **AED_EARNINGS_COMPLETE.DTA**: 842 full-time workers with earnings, age, and education (2010)
 - **AED_INTERESTRATES.DTA**: U.S. Treasury interest rates, monthly (January 1982 - January 2015)
+
+## Key Concepts
+
+Six core ideas anchor this chapter. Skim them before you start, and come back when a term feels fuzzy. Each entry pairs a concrete example using the chapter's data with a non-technical analogy. Click a panel to expand it.
+
+**Panel Data:** A dataset that follows the same units (people, firms, teams, countries) across multiple time periods, indexed by both $i$ (unit) and $t$ (time). The double indexing lets the analyst separate variation *across* units from variation *within* a unit over time — the foundation for fixed-effects, random-effects, and other panel methods.
+
+::::: {.columns}
+:::: {.column width="50%"}
+::: {.callout-tip collapse="true" appearance="simple" title="Example"}
+The chapter's `data_nba` is a panel: 29 NBA teams observed across 10 seasons (2001–02 to 2010–11), with 290 team-season observations of `revenue`, `wins`, and `playoff` status. The between-team standard deviation of `lnrevenue` is roughly 0.45 (big-market vs. small-market gap), while the within-team SD over time is only about 0.20 — it's the panel's double indexing that lets the chapter quantify each piece separately.
+:::
+::::
+:::: {.column width="50%"}
+::: {.callout-note collapse="true" appearance="simple" title="Analogy"}
+A community survey asks the same hundred residents the same questions every year for a decade. The result isn't one snapshot; it's a film. Each resident's *thread* of answers can be compared with their own past, *and* compared with their neighbours. Panel data is that survey film — the regression methods of this chapter exploit both the cross-sectional comparison and the year-to-year personal change.
+:::
+::::
+:::::
+
+**Within Estimator (Within Transformation):** The fixed-effects machinery that subtracts each unit's *own* time-mean from every variable before fitting OLS. The resulting equation in deviations $(y_{it} - \bar y_i)$ vs. $(x_{it} - \bar x_i)$ algebraically eliminates time-invariant unobservables $\alpha_i$, recovering coefficients identified purely from within-unit changes.
+
+::::: {.columns}
+:::: {.column width="50%"}
+::: {.callout-tip collapse="true" appearance="simple" title="Example"}
+For the NBA panel, the within transformation creates `mdifflnrev = lnrevenue − team_mean(lnrevenue)` and the analogous demeaned `wins` series. Regressing one on the other with cluster-robust SEs by `teamid` gives the within (fixed-effects) coefficient on `wins`. It is smaller than the pooled OLS coefficient because the demeaning has stripped out the persistent market-size gap that confounded the pooled regression.
+:::
+::::
+:::: {.column width="50%"}
+::: {.callout-note collapse="true" appearance="simple" title="Analogy"}
+Sort a family photo album by person — every page shows one family member across many years. Subtract their average expression from every photo and only their year-to-year *change* remains: smiles when they got promoted, frowns during illness. The within transformation is that page-by-person demeaning; what's left is each person's own movement, with their persistent baseline removed.
+:::
+::::
+:::::
+
+**Logit Model:** A regression for binary outcomes ($y \in \{0, 1\}$) that uses the logistic CDF to constrain the predicted probability to the $[0, 1]$ interval: $\Pr[y = 1 \mid x] = 1 / (1 + e^{-x'\beta})$. Coefficients are not direct marginal effects — those have to be computed by differentiating the logistic curve at chosen points.
+
+::::: {.columns}
+:::: {.column width="50%"}
+::: {.callout-tip collapse="true" appearance="simple" title="Example"}
+The chapter constructs a binary `dbigearn` (top-half earner indicator) on `data_earnings` and fits the logit `dbigearn ~ age + education`. The marginal effect of `education` evaluated at the sample means is similar in magnitude to the OLS linear-probability-model coefficient on `education`, demonstrating that logit and LPM agree on direction and rough magnitude — but logit's predicted probabilities never wander outside $[0, 1]$.
+:::
+::::
+:::: {.column width="50%"}
+::: {.callout-note collapse="true" appearance="simple" title="Analogy"}
+A digital signal is squashed by an op-amp into a clean low-or-high state — never wandering negative or above the rail voltage. The logit is the regression's op-amp: it takes the linear combination $x'\beta$ — which can range over all real numbers — and squeezes it through an S-curve into a clean probability between 0 and 1, exactly the range a binary outcome demands.
+:::
+::::
+:::::
+
+**Autoregressive Model AR($p$):** A time-series model where the current value of $y$ is regressed on its own past values: $y_t = \beta_0 + \beta_1 y_{t-1} + \cdots + \beta_p y_{t-p} + u_t$. AR($p$) captures persistence and momentum — "today depends on yesterday" — and is the workhorse of forecasting and dynamic-effects analysis.
+
+::::: {.columns}
+:::: {.column width="50%"}
+::: {.callout-tip collapse="true" appearance="simple" title="Example"}
+For the chapter's monthly `dgs10` series (changes in 10-year Treasury rate, 1982–2015), the AR(2) part of the ADL(2, 2) model gives a small *negative* coefficient on $\Delta\text{gs10}_{t-1}$ (around $-0.20$): when last month's 10-year rate jumped, this month's tends to partly *reverse*. That's mean reversion in *changes* — captured directly by the AR component.
+:::
+::::
+:::: {.column width="50%"}
+::: {.callout-note collapse="true" appearance="simple" title="Analogy"}
+A long stone hallway echoes your handclap for several seconds. A new clap layers on top of the lingering reverberation from the previous one. AR($p$) is exactly that auditory memory: today's level partly carries the past forward. The coefficients on lags of $y$ encode *how much* of the past still rings in the present.
+:::
+::::
+:::::
+
+**Distributed Lag Model (ADL):** An extension of AR($p$) that adds *current and lagged values of an exogenous regressor* $x$: $y_t = \beta_0 + \sum_{j=1}^{p} \alpha_j y_{t-j} + \sum_{j=0}^{q} \gamma_j x_{t-j} + u_t$. The $\gamma$ coefficients trace out how a one-time change in $x$ ripples through to $y$ over time; the *long-run multiplier* sums them.
+
+::::: {.columns}
+:::: {.column width="50%"}
+::: {.callout-tip collapse="true" appearance="simple" title="Example"}
+The chapter's ADL(2, 2) model regresses `dgs10` on its own two lags plus current and two lags of `dgs1` (Fed-controlled 1-year rate). The contemporary $\gamma_0 \approx 0.50$ says half a same-month pass-through; once $\gamma_1 \approx 0.20$ and $\gamma_2 \approx 0.08$ are added, the long-run multiplier is roughly 0.78 — meaning about 78% of a 1-year-rate shock eventually transmits to the 10-year rate.
+:::
+::::
+:::: {.column width="50%"}
+::: {.callout-note collapse="true" appearance="simple" title="Analogy"}
+Marinating chicken: the spice rub doesn't transfer all its flavour at the moment of contact. Some flavour penetrates within minutes, more after an hour, even more overnight. The distributed-lag model is the regression's marinade — past doses of the input keep affecting the output for several periods, and summing the dose-by-dose effects gives the "fully marinated" long-run impact.
+:::
+::::
+:::::
+
+**Hausman Test:** A formal test that compares fixed-effects (FE) and random-effects (RE) estimates of the same panel-regression coefficients. Under the null that $\alpha_i$ is uncorrelated with regressors, RE is consistent and efficient; under the alternative, only FE is consistent. A statistically significant difference between FE and RE coefficients rejects RE.
+
+::::: {.columns}
+:::: {.column width="50%"}
+::: {.callout-tip collapse="true" appearance="simple" title="Example"}
+For the NBA panel, the FE coefficient on `wins` is noticeably smaller than the RE coefficient — because RE pools both within and between variation, while FE strips out the team fixed effects that are correlated with `wins` (big-market teams both win more *and* earn more). A Hausman test on this gap typically rejects RE, confirming that FE is the safer choice when the question is the within-team causal effect of an extra win on revenue.
+:::
+::::
+:::: {.column width="50%"}
+::: {.callout-note collapse="true" appearance="simple" title="Analogy"}
+A courtroom cross-examination puts the same witness through two different lawyers. If both lawyers walk away with consistent versions, you can use the more efficient (faster, cheaper) lawyer's record. If the two versions diverge sharply, only the *more rigorous* lawyer's record can be trusted. Hausman is the panel's cross-examination — when FE and RE diverge, you side with FE.
+:::
+::::
+:::::
 
 ## Setup
 

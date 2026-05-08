@@ -56,6 +56,115 @@ This notebook provides an interactive introduction to bivariate data analysis an
 - 5.10 Causation
 - 5.11 Nonparametric Regression
 
+## Key Concepts
+
+Seven core ideas anchor this chapter. Skim them before you start, and come back when a term feels fuzzy. Each entry pairs a concrete example using the chapter's data with a non-technical analogy. Click a panel to expand it.
+
+**Covariance:** A signed measure of how two variables move together. Positive covariance means above-average values of one tend to coincide with above-average values of the other; negative covariance means they move in opposite directions. Unlike correlation, covariance carries the units of both variables and has no fixed bounds.
+
+::::: {.columns}
+:::: {.column width="50%"}
+::: {.callout-tip collapse="true" appearance="simple" title="Example"}
+For the 29 Davis houses, the sample covariance between `price` and `size` is positive — large enough that dividing it by the product of the two standard deviations ($s_x \approx 398$ sq ft, $s_y \approx \$37{,}391$) yields the correlation $r = 0.7858$. The covariance carries dollars × square-feet units, which is why correlation (unit-free) is easier to interpret across datasets.
+:::
+::::
+:::: {.column width="50%"}
+::: {.callout-note collapse="true" appearance="simple" title="Analogy"}
+Two dancers in a partner waltz move together: when one steps forward the other tends to step forward too. Covariance is a yardstick for how often, and how strongly, the partners' steps line up. Same direction and timing ⇒ large positive covariance; opposite footing ⇒ negative; no relationship ⇒ near zero.
+:::
+::::
+:::::
+
+**Slope Coefficient ($b_2$):** The regression coefficient on the explanatory variable. It tells you the predicted change in $y$ for a one-unit change in $x$, holding the model's other terms fixed. Its units are the units of $y$ per unit of $x$.
+
+::::: {.columns}
+:::: {.column width="50%"}
+::: {.callout-tip collapse="true" appearance="simple" title="Example"}
+The fitted line $\widehat{\text{price}} = 115{,}017 + 73.77 \cdot \text{size}$ has slope $b_2 = \$73.77$ per square foot. So a house 100 sq ft larger is predicted to cost \$7,377 more, and one 500 sq ft larger \$36,885 more. The 95% confidence interval [\$50.84, \$96.70] tells you the slope is precisely estimated enough to rule out near-zero values.
+:::
+::::
+:::: {.column width="50%"}
+::: {.callout-note collapse="true" appearance="simple" title="Analogy"}
+A slope is the steepness of a hill: rise per unit of run. Walking 100 steps east on a 5° slope gains you a known amount of elevation; on a steeper 15° slope you gain three times as much. The regression slope is the hill's steepness translated into the chosen $y$-units per $x$-unit.
+:::
+::::
+:::::
+
+**Intercept ($b_1$):** The point where the regression line crosses the $y$-axis — the predicted value of $y$ when $x = 0$. It anchors the line vertically but is often not meaningful on its own when $x = 0$ lies far outside the observed data.
+
+::::: {.columns}
+:::: {.column width="50%"}
+::: {.callout-tip collapse="true" appearance="simple" title="Example"}
+For the Davis houses the intercept is $b_1 = \$115{,}017$ — mathematically, the predicted price of a 0-square-foot house. Since the smallest observed `size` is 1,400 sq ft, this number is not literally meaningful; it is just where the fitted line happens to cross the $y$-axis to make the slope of \$73.77/sq ft fit the data.
+:::
+::::
+:::: {.column width="50%"}
+::: {.callout-note collapse="true" appearance="simple" title="Analogy"}
+The intercept is the starting line of a race — the position runners occupy at $t = 0$, before any racing has happened. It tells you nothing about how fast they run (that's the slope); it only fixes where the race begins. In regression, the intercept fixes where the line begins; the slope governs everything after.
+:::
+::::
+:::::
+
+**Residual ($e_i$):** The vertical distance between an observed point and the fitted regression line — the part of $y_i$ the model fails to predict. Formally, $e_i = y_i - \hat{y}_i$. OLS chooses the line that makes the sum of squared residuals as small as possible.
+
+::::: {.columns}
+:::: {.column width="50%"}
+::: {.callout-tip collapse="true" appearance="simple" title="Example"}
+For the Davis house regression, the typical residual size is about \$23{,}162 — that is the standard error of the regression. So when the fitted line predicts a 2,000-sq-ft home at \$262,557, an actual house of that size could comfortably sell for anywhere from roughly \$240k to \$285k once unmodelled factors (location, condition, view) are considered.
+:::
+::::
+:::: {.column width="50%"}
+::: {.callout-note collapse="true" appearance="simple" title="Analogy"}
+A residual is the gap between where your arrow lands and the centre of the bullseye on a target. The line of best fit is the bullseye the regression is aiming at; each shot lands a little high or low, but the cumulative pattern of misses is what tells you whether the bow itself is biased or just noisy.
+:::
+::::
+:::::
+
+**Variation Decomposition (TSS = ESS + RSS):** A foundational identity stating that the total variation in $y$ around its mean splits cleanly into a part the regression *explains* (ESS) and a part it leaves over as *residual* (RSS). $R^2$ is the explained share, $\text{ESS}/\text{TSS}$.
+
+::::: {.columns}
+:::: {.column width="50%"}
+::: {.callout-tip collapse="true" appearance="simple" title="Example"}
+For the 29 Davis houses, the regression on `size` explains 61.7% of the variation in `price`, leaving 38.3% in the residual sum of squares. So out of the total spread in observed prices (a range of \$171{,}000 between cheapest and dearest), nearly two-thirds is captured by size alone, while the remaining third reflects location, condition, and other unmodelled features.
+:::
+::::
+:::: {.column width="50%"}
+::: {.callout-note collapse="true" appearance="simple" title="Analogy"}
+Picture a pie representing all the variation in the outcome. The regression cuts the pie into two slices: the explained slice (what we can attribute to the predictor) and the unexplained slice (what remains). $R^2$ measures the size of the explained slice as a fraction of the whole pie — and the two slices always add up to 100%.
+:::
+::::
+:::::
+
+**Standard Error of the Regression ($s_e$):** The typical size of the residuals — the standard deviation of the prediction errors, in the units of $y$. It quantifies how far, on average, fitted values stray from observed values, after the line has been chosen.
+
+::::: {.columns}
+:::: {.column width="50%"}
+::: {.callout-tip collapse="true" appearance="simple" title="Example"}
+For the Davis house regression, $s_e = \$23{,}162$ — about 9% of the average sale price (\$253{,}910). So even though the model captures the main pattern via $R^2 = 0.62$, individual price predictions should be reported with an error band of roughly $\pm \$23{,}000$, reminding the analyst not to over-trust a single point estimate.
+:::
+::::
+:::: {.column width="50%"}
+::: {.callout-note collapse="true" appearance="simple" title="Analogy"}
+A weather app predicts tomorrow's high at 22 °C — but its track record shows forecasts typically miss by ±2 °C. That ±2 °C is the standard error of the forecast: not which way the error will go, but how big it usually is. The standard error of the regression is the same idea applied to predicted $y$-values.
+:::
+::::
+:::::
+
+**Outlier:** An observation that sits far from the bulk of the data, especially far from the regression line. Outliers can pull the fitted slope toward themselves and inflate the standard error, so they need to be flagged and investigated rather than blindly included or excluded.
+
+::::: {.columns}
+:::: {.column width="50%"}
+::: {.callout-tip collapse="true" appearance="simple" title="Example"}
+The Davis scatterplot of `price` vs. `size` shows no obvious outliers — every point fits the upward-sloping cloud. To see why this matters, imagine inserting a 3,300-sq-ft mansion priced at only \$210{,}000 (perhaps a fixer-upper): one such point would shrink the slope from \$73.77 toward something noticeably smaller, and the typical residual would jump well above \$23,162.
+:::
+::::
+:::: {.column width="50%"}
+::: {.callout-note collapse="true" appearance="simple" title="Analogy"}
+A flock of geese flies in a tight V-formation; one bird lagging far behind is the outlier. It might be injured, lost, or a different species entirely — and either way, judging the flock's average altitude or speed by including the straggler will mislead you. Outliers in regression are the stragglers worth identifying before you publish the average.
+:::
+::::
+:::::
+
 ## Setup
 
 First, we import the necessary Python packages and configure the environment for reproducibility. All data will stream directly from GitHub.

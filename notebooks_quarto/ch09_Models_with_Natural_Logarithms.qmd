@@ -62,6 +62,85 @@ Economists care about **proportionate changes** more than absolute changes:
 - Practice Exercises
 - Case Studies
 
+## Key Concepts
+
+Five core ideas anchor this chapter. Skim them before you start, and come back when a term feels fuzzy. Each entry pairs a concrete example using the chapter's data with a non-technical analogy. Click a panel to expand it.
+
+**Natural Logarithm ($\ln$):** The inverse of the exponential function $e^x$, satisfying $\ln(ab) = \ln(a) + \ln(b)$ and $\ln(a^k) = k \ln(a)$. Two properties make it the workhorse of econometrics: small log-differences approximate proportionate changes ($\Delta \ln(x) \approx \Delta x / x$), and exponential time paths become straight lines after a log transformation.
+
+::::: {.columns}
+:::: {.column width="50%"}
+::: {.callout-tip collapse="true" appearance="simple" title="Example"}
+For the 171 women in `data_earnings`, transforming `earnings` to `lnearn` lets the chapter regress $\ln(\text{earnings})$ on `education`. The slope of $0.131$ becomes "13.1% more earnings per extra year of education" — the very same data with a much sharper economic interpretation than dollars per year.
+:::
+::::
+:::: {.column width="50%"}
+::: {.callout-note collapse="true" appearance="simple" title="Analogy"}
+A currency converter takes prices from many countries and reports them in one common unit. The natural log does the same for *change*: it converts multiplicative differences (10× larger) into additive ones ($\ln(10) \approx 2.30$ extra units). Once the data are on a "log scale", percentage moves of any size are directly comparable in the same currency.
+:::
+::::
+:::::
+
+**Linear-Log Model:** A regression of the form $y = \beta_0 + \beta_1 \ln(x) + u$, where $y$ is in its original units but $x$ enters as a logarithm. The slope $\beta_1/100$ is the change in $y$ associated with a 1% increase in $x$, so this model captures *diminishing returns*: each percentage gain in $x$ adds the same dollar amount to $y$.
+
+::::: {.columns}
+:::: {.column width="50%"}
+::: {.callout-tip collapse="true" appearance="simple" title="Example"}
+The linear-log fit of `earnings` on `lneduc` for the 171 working women gives $\beta_1 \approx 545$, meaning a 1% increase in years of education is associated with about \$545 more in annual earnings. This specification has the lowest $R^2$ of the four functional forms ch09 considers, but is useful when economic theory predicts dollar effects from percentage changes.
+:::
+::::
+:::: {.column width="50%"}
+::: {.callout-note collapse="true" appearance="simple" title="Analogy"}
+A staircase whose risers shrink with every step — the first stair lifts you a foot, the next 9 inches, then 6, then 4. The linear-log model is shaped just like that: in dollars, every 1% of extra schooling lifts earnings by the same amount, but because each 1% requires a *larger* absolute jump in years, the upward dollar gain shrinks per added year.
+:::
+::::
+:::::
+
+**Diminishing Returns:** The economic phenomenon in which each additional unit of an input produces a smaller increment in the outcome. Log transformations capture this directly: $\ln(x)$ rises quickly at small $x$ and slowly at large $x$, so $\beta_1 \ln(x)$ in a linear-log or log-log model bends the fitted curve into the classic "diminishing-returns" shape.
+
+::::: {.columns}
+:::: {.column width="50%"}
+::: {.callout-tip collapse="true" appearance="simple" title="Example"}
+The earnings–education comparison in ch09 shows it concretely: in the linear model, every extra year of `education` is associated with a constant \$5{,}021 — implausible at the high end. The log-log fit, with elasticity $\approx 1.48$, lets the marginal dollar return shrink at higher education levels, matching the chapter's intuition that "each extra year of school still helps, but a bit less than the previous year."
+:::
+::::
+:::: {.column width="50%"}
+::: {.callout-note collapse="true" appearance="simple" title="Analogy"}
+The first slice of cake is sublime; the second is good; by the fifth, you are starting to feel ill. The marginal pleasure of each slice is positive but shrinking — diminishing returns to cake. Logarithmic specifications encode this same idea into a regression: more is still better, but each additional unit contributes a little less than the last.
+:::
+::::
+:::::
+
+**Compound Growth Rate:** The constant rate $r$ at which a series multiplies itself each period: $x_t = x_0 (1+r)^t$. Taking natural logs linearises this into $\ln(x_t) \approx \ln(x_0) + r \cdot t$, so an OLS regression of $\ln(x_t)$ on $t$ recovers $r$ as the slope.
+
+::::: {.columns}
+:::: {.column width="50%"}
+::: {.callout-tip collapse="true" appearance="simple" title="Example"}
+For the 93 annual observations on the S&P 500 (`data_sp500`, 1927–2019), the regression of `lnsp500` on `year` gives a slope of $0.065$ — i.e. the S&P 500 has compounded at roughly $6.5\%$ per year over the post-Depression era. Every year, on average, the index multiplied itself by $1.065$.
+:::
+::::
+:::: {.column width="50%"}
+::: {.callout-note collapse="true" appearance="simple" title="Analogy"}
+A savings account with monthly interest doesn't add the same dollar amount each month — it adds a fixed *percentage* of whatever is currently in the account. So the balance accelerates: \$1{,}000 grows to \$1{,}050, then \$1{,}102, then \$1{,}158. The compound growth rate is the steady percentage gear that quietly drives this acceleration.
+:::
+::::
+:::::
+
+**Right-Skewed Distribution:** A distribution with a long tail of large values — a few extreme observations sit far above the bulk of the data. Earnings, prices, firm sizes, and city populations are textbook examples; modelling them in levels squashes most of the action into a small range, while taking logs spreads the data out evenly and stabilises variance.
+
+::::: {.columns}
+:::: {.column width="50%"}
+::: {.callout-tip collapse="true" appearance="simple" title="Example"}
+The 171 women in `data_earnings` have a mean of \$41{,}412.69 but a maximum of \$172{,}000 and a minimum of \$1{,}050 — a classic right-skewed picture (skewness $\approx 1.71$ from ch02). After applying the natural log to give `lnearn`, the long upper tail is pulled in, the distribution looks roughly bell-shaped, and OLS on `lnearn` produces tighter, more interpretable inference.
+:::
+::::
+:::: {.column width="50%"}
+::: {.callout-note collapse="true" appearance="simple" title="Analogy"}
+A neighbourhood of houses where most cost \$200k–\$400k but a single waterfront mansion lists at \$15M. On a linear price chart that mansion stretches the axis off the page; on a *log* chart all houses fit comfortably side by side, and one can see relative differences without one outlier dominating the picture.
+:::
+::::
+:::::
+
 ## Setup
 
 Run this cell first to import all required packages and configure the environment.

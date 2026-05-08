@@ -30,33 +30,17 @@ This chapter presents **nine comprehensive case studies** that apply multiple re
 
 **Design Note:** This chapter uses an integrated case study structure where sections 13.1–13.9 ARE the case studies, each demonstrating different regression techniques and applications.
 
-### What You'll Learn
+**What you'll learn:**
 
-By the end of this chapter, you will be able to:
-
-1. Apply multiple regression to analyze school performance and socioeconomic factors
-2. Use logarithmic transformations to estimate production functions
-3. Understand and test for constant returns to scale
-4. Identify and correct for omitted variables bias
-5. Apply cluster-robust standard errors for grouped data
-6. Understand randomized control trials and difference-in-differences methods
-7. Apply regression discontinuity design to causal questions
-8. Use instrumental variables to estimate causal effects
-9. Navigate the data cleaning and preparation process
-
-### Chapter Outline
-
-- **13.1** School Academic Performance Index
-- **13.2** Cobb-Douglas Production Function
-- **13.3** Phillips Curve and Omitted Variables Bias
-- **13.4** Automobile Fuel Efficiency
-- **13.5** RAND Health Insurance Experiment (RCT)
-- **13.6** Health Care Access (Difference-in-Differences)
-- **13.7** Political Incumbency (Regression Discontinuity)
-- **13.8** Institutions and GDP (Instrumental Variables)
-- **13.9** From Raw Data to Final Data
-- **Key Takeaways** — Chapter review and consolidated lessons
-- **Practice Exercises** — Reinforce your understanding
+- Apply multiple regression to analyze school performance and socioeconomic factors
+- Use logarithmic transformations to estimate production functions
+- Understand and test for constant returns to scale
+- Identify and correct for omitted variables bias
+- Apply cluster-robust standard errors for grouped data
+- Understand randomized control trials and difference-in-differences methods
+- Apply regression discontinuity design to causal questions
+- Use instrumental variables to estimate causal effects
+- Navigate the data cleaning and preparation process
 
 **Datasets used:**
 
@@ -69,6 +53,99 @@ By the end of this chapter, you will be able to:
 - **AED_SenateIncumbency.DTA**: U.S. Senate election results (RD) — Case Study 13.7
 - **AED_InstitutionsGDP.DTA**: Cross-country institutions and GDP data (IV) — Case Study 13.8
 
+**Chapter outline:**
+
+- 13.1 School Academic Performance Index
+- 13.2 Cobb-Douglas Production Function
+- 13.3 Phillips Curve and Omitted Variables Bias
+- 13.4 Automobile Fuel Efficiency
+- 13.5 RAND Health Insurance Experiment (RCT)
+- 13.6 Health Care Access (Difference-in-Differences)
+- 13.7 Political Incumbency (Regression Discontinuity)
+- 13.8 Institutions and GDP (Instrumental Variables)
+- 13.9 From Raw Data to Final Data
+- Key Takeaways
+- Practice Exercises
+
+
+## Key Concepts
+
+Five core ideas anchor this chapter. Skim them before you start, and come back when a term feels fuzzy. Each entry pairs a concrete example using the chapter's data with a non-technical analogy. Click a panel to expand it.
+
+**Production Function:** A model that maps inputs (capital $K$, labor $L$, sometimes more) to output $Q$. The Cobb–Douglas form $Q = A K^{\beta_2} L^{\beta_3}$ is the chapter's headline example: it is multiplicative in inputs, but linear in their logarithms — which is what makes it estimable with OLS.
+
+::::: {.columns}
+:::: {.column width="50%"}
+::: {.callout-tip collapse="true" appearance="simple" title="Example"}
+For 24 years of U.S. manufacturing data (`data_cobb`, 1899–1922), the chapter fits $\ln Q = \beta_1 + \beta_2 \ln K + \beta_3 \ln L$ and estimates $\hat\beta_2 \approx 0.23$ (capital elasticity) and $\hat\beta_3 \approx 0.81$ (labor elasticity). The two elasticities tell you exactly how much each input contributes — labor here was nearly four times as important as capital in turning early-century factories' inputs into output.
+:::
+::::
+:::: {.column width="50%"}
+::: {.callout-note collapse="true" appearance="simple" title="Analogy"}
+A bakery's recipe says: a loaf needs flour, water, and time, in fixed proportions. Double the flour but keep water and time fixed and you don't get two loaves — you get a sticky mess. A production function is the regression's recipe: it tells you how much each ingredient (input) actually contributes to the finished output, *given the others*.
+:::
+::::
+:::::
+
+**Constant Returns to Scale (CRS):** The property of a production function in which scaling all inputs by a factor $\lambda$ scales output by exactly the same factor: $f(\lambda K, \lambda L) = \lambda \cdot f(K, L)$. In Cobb–Douglas form, this happens when $\beta_2 + \beta_3 = 1$.
+
+::::: {.columns}
+:::: {.column width="50%"}
+::: {.callout-tip collapse="true" appearance="simple" title="Example"}
+For the Cobb–Douglas fit on `data_cobb`, the sum of input elasticities is $\hat\beta_2 + \hat\beta_3 \approx 0.23 + 0.81 = 1.04$ — close to 1. The chapter's $F$-test of $H_0: \beta_2 + \beta_3 = 1$ yields $p \approx 0.636$, so the data are consistent with constant returns: doubling capital and labor would, on average, double output across early-century U.S. manufacturing.
+:::
+::::
+:::: {.column width="50%"}
+::: {.callout-note collapse="true" appearance="simple" title="Analogy"}
+A photocopier shows constant returns to scale: feed in twice as much paper and twice as much toner, get twice as many copies. Increasing returns would mean you somehow get *more* than double; decreasing returns would mean you get less. The Cobb–Douglas test asks whether the U.S. economy in 1899–1922 was a well-behaved photocopier or some weirder machine.
+:::
+::::
+:::::
+
+**Selection Bias:** Bias arising when the people who *end up* in a sample are not a random slice of the population — typically because they self-select on characteristics that also affect the outcome. Observational comparisons of "treated" vs. "untreated" units are vulnerable; randomised assignment is the standard fix.
+
+::::: {.columns}
+:::: {.column width="50%"}
+::: {.callout-tip collapse="true" appearance="simple" title="Example"}
+The RAND Health Insurance Experiment (`data_health`, 5{,}639 first-year observations) randomly assigned 5{,}809 individuals to plans with cost-sharing of 0%, 25%, 50%, 95% — a feature impossible to obtain from observational data, where sicker or richer people self-select into more generous plans. Random assignment closed off this selection channel and let a simple regression of `spending` on plan dummies estimate the *causal* effect of insurance generosity.
+:::
+::::
+:::: {.column width="50%"}
+::: {.callout-note collapse="true" appearance="simple" title="Analogy"}
+A restaurant's online reviews look great — but only the most ecstatic and most outraged customers ever bother to write. The "average review" badly overstates the variance of the actual diner experience because reviewers select themselves. Selection bias in econometrics works the same way: the people you *observe* don't represent the people you want to know about.
+:::
+::::
+:::::
+
+**Parallel Trends Assumption:** The identifying assumption of difference-in-differences (DiD) — that, in the *absence* of treatment, the treatment and control groups would have followed the same trend over time. The DiD estimator subtracts the control group's change from the treatment group's, and is unbiased *only if* parallel trends hold.
+
+::::: {.columns}
+:::: {.column width="50%"}
+::: {.callout-tip collapse="true" appearance="simple" title="Example"}
+The South-Africa health-clinic study (`data_access`, 1{,}071 children, 1993 vs 1998) compares high-treatment communities to low-treatment ones over a five-year window. The DiD estimate of $\approx 0.52$ standard deviations in `waz` (weight-for-age $z$-score) credits clinic access *only* under parallel trends — i.e., that low-treatment communities show how high-treatment communities would have evolved without the new clinics.
+:::
+::::
+:::: {.column width="50%"}
+::: {.callout-note collapse="true" appearance="simple" title="Analogy"}
+Two runners normally jog the same route at the same pace. One day, one of them straps on weighted shoes and starts to lag behind. Without the weighted shoes, the assumption goes, both runners would still be neck-and-neck. The lag *is* the causal effect of the shoes — but only if you're sure both runners would otherwise have kept matching strides. Parallel trends is exactly that "would otherwise have matched" condition.
+:::
+::::
+:::::
+
+**Counterfactual:** The unobservable outcome a unit *would* have experienced under the alternative treatment status. Every causal effect is a comparison of an observed outcome to a counterfactual; randomised experiments, DiD, RD, and IV are all different recipes for *imputing* the missing counterfactual.
+
+::::: {.columns}
+:::: {.column width="50%"}
+::: {.callout-tip collapse="true" appearance="simple" title="Example"}
+For the U.S. Senate incumbency study (`data_incumb`, 1{,}390 elections 1914–2010), the regression-discontinuity estimate of $\approx 4.8$ percentage points is the gap between a barely-winning candidate's *next-election* vote share and what it *would have been* had they barely lost (the counterfactual). RD makes that counterfactual credible because the two groups — barely won, barely lost — are nearly identical apart from incumbency status.
+:::
+::::
+:::: {.column width="50%"}
+::: {.callout-note collapse="true" appearance="simple" title="Analogy"}
+A counterfactual is the parallel-universe version of an event — what would have happened if the coin had landed the other way. You can never visit that universe directly. The whole craft of causal inference is to find clever observable proxies for it: a randomised "twin" experiment, a near-tied election, a coincidence of geography that gave one village clinics and another none.
+:::
+::::
+:::::
 
 ## Setup
 

@@ -28,33 +28,18 @@ This notebook provides an interactive introduction to regression with transforme
 
 This chapter focuses on regression models that involve transformed variables. Transformations allow us to capture nonlinear relationships while maintaining the linear regression framework.
 
-### What You'll Learn
+**What you'll learn:**
 
-By the end of this chapter, you will be able to:
+- Understand how variable transformations affect regression interpretation
+- Compute and interpret marginal effects for nonlinear models
+- Distinguish between average marginal effects (AME), marginal effects at the mean (MEM), and marginal effects at representative values (MER)
+- Estimate and interpret quadratic and polynomial regression models
+- Work with interaction terms and test their joint significance
+- Apply natural logarithm transformations to create log-linear and log-log models
+- Make predictions from models with transformed dependent variables, avoiding retransformation bias
+- Combine multiple types of variable transformations in a single model
 
-1. Understand how variable transformations affect regression interpretation
-2. Compute and interpret marginal effects for nonlinear models
-3. Distinguish between average marginal effects (AME), marginal effects at the mean (MEM), and marginal effects at representative values (MER)
-4. Estimate and interpret quadratic and polynomial regression models
-5. Work with interaction terms and test their joint significance
-6. Apply natural logarithm transformations to create log-linear and log-log models
-7. Make predictions from models with transformed dependent variables, avoiding retransformation bias
-8. Combine multiple types of variable transformations in a single model
-
-### Chapter Outline
-
-- **15.1** Example - Earnings and Education
-- **15.2** Logarithmic Transformations
-- **15.3** Polynomial Regression (Quadratic Models)
-- **15.4** Standardized Variables
-- **15.5** Interaction Terms and Marginal Effects
-- **15.6** Retransformation Bias and Prediction
-- **15.7** Comprehensive Model with Mixed Regressors
-- **Key Takeaways** -- Chapter review and consolidated lessons
-- **Practice Exercises** -- Reinforce your understanding
-- **Case Studies** -- Apply transformations to cross-country data
-
-**Dataset used:**
+**Datasets used:**
 
 - **AED_EARNINGS_COMPLETE.DTA**: 872 workers aged 25-65 in 2000
 
@@ -65,6 +50,128 @@ By the end of this chapter, you will be able to:
 - How should we interpret coefficients in log-transformed models?
 - How do we make unbiased predictions from log-linear models?
 
+**Chapter outline:**
+
+- 15.1 Example - Earnings and Education
+- 15.2 Logarithmic Transformations
+- 15.3 Polynomial Regression (Quadratic Models)
+- 15.4 Standardized Variables
+- 15.5 Interaction Terms and Marginal Effects
+- 15.6 Retransformation Bias and Prediction
+- 15.7 Comprehensive Model with Mixed Regressors
+- Key Takeaways
+- Practice Exercises
+- Case Studies
+
+
+## Key Concepts
+
+Seven core ideas anchor this chapter. Skim them before you start, and come back when a term feels fuzzy. Each entry pairs a concrete example using the chapter's data with a non-technical analogy. Click a panel to expand it.
+
+**Marginal Effect:** The change in $y$ associated with a one-unit increase in a regressor, holding the other regressors fixed. In a plain linear model the marginal effect is just the slope; once $x$ enters the regression nonlinearly (squared, logged, interacted), the marginal effect varies with the value of $x$.
+
+::::: {.columns}
+:::: {.column width="50%"}
+::: {.callout-tip collapse="true" appearance="simple" title="Example"}
+For the 872 workers in `data_earnings`, the linear model gives a constant marginal effect of `age` of about \$1{,}000 per year. The chapter's quadratic fit replaces it with $ME_{\text{age}} = \beta_2 + 2\beta_3 \cdot \text{age}$ — about $+\$3{,}000$ at age 25, $\$0$ at the turning point near age 50, and $-\$1{,}000$ at age 60. Same regressor, very different marginal stories.
+:::
+::::
+:::: {.column width="50%"}
+::: {.callout-note collapse="true" appearance="simple" title="Analogy"}
+The grade of a road tells you how much elevation you gain per metre walked *right here*. On a flat stretch the grade is zero; climbing a hill it is positive; rolling downhill it is negative. The marginal effect is the regression's road-grade — the slope you feel taking *one more step* in the regressor.
+:::
+::::
+:::::
+
+**Average Marginal Effect (AME):** Compute the marginal effect for *every* observation in the sample, then average. The AME summarises the typical marginal change across the whole population represented by the data, rather than the change at any one specific point.
+
+::::: {.columns}
+:::: {.column width="50%"}
+::: {.callout-tip collapse="true" appearance="simple" title="Example"}
+For the quadratic earnings-on-age model, $ME_{\text{age}, i} = \beta_2 + 2\beta_3 \cdot \text{age}_i$ is computed for each of the 872 workers and then averaged. The AME for `age` lands between the high-young-worker effect (+\$3{,}000) and the negative-old-worker effect (–\$1{,}000), giving a single summary number that respects the full age distribution in the sample.
+:::
+::::
+:::: {.column width="50%"}
+::: {.callout-note collapse="true" appearance="simple" title="Analogy"}
+A symphony tracks the tempo at every bar across an entire performance, then reports the average. That single number is the *average tempo* — not the conductor's tempo at any one moment, but a faithful summary of how fast the orchestra played overall. AME is the regression's average-tempo statistic for a marginal effect that varies through the score.
+:::
+::::
+:::::
+
+**Marginal Effect at the Mean (MEM):** Plug the *sample-mean values* of every regressor into the marginal-effect formula and compute the resulting number. MEM tells you the marginal effect for a "representative average individual", which can differ noticeably from the AME when the marginal-effect curve is highly nonlinear.
+
+::::: {.columns}
+:::: {.column width="50%"}
+::: {.callout-tip collapse="true" appearance="simple" title="Example"}
+With the quadratic earnings-on-age fit, MEM is $\beta_2 + 2\beta_3 \cdot \overline{\text{age}}$ — using the chapter's mean `age` of about 43. That gives a marginal effect of roughly $+\$1{,}000$ to $+\$1{,}500$ per year for the "average worker", different from the AME because the population is *not* concentrated at the mean.
+:::
+::::
+:::: {.column width="50%"}
+::: {.callout-note collapse="true" appearance="simple" title="Analogy"}
+A photographer focuses the lens on the median guest at a wedding for a "representative" portrait. The result describes that one focused-on guest sharply — but says nothing about the kid at the corner table or the grandmother at the bar. MEM is the regression's "in-focus average guest": precise about that point, less informative about the spread.
+:::
+::::
+:::::
+
+**Marginal Effect at Representative Values (MER):** Plug *chosen* values of the regressors into the marginal-effect formula — typically a few policy-relevant profiles (a 25-year-old, a 40-year-old, a 55-year-old). MER lets you report several marginal effects, each tailored to a specific scenario.
+
+::::: {.columns}
+:::: {.column width="50%"}
+::: {.callout-tip collapse="true" appearance="simple" title="Example"}
+The chapter's interaction model `earnings ~ age + education + agebyeduc` reports $ME_{\text{education}}$ at three representative ages: $+\$2{,}500$ per education-year at age 25, $+\$7{,}000$ at age 40, and $+\$11{,}500$ at age 55 — a 4–5× ramp in the return to schooling across the working life. These three MER values illuminate what AME and MEM each smooth over.
+:::
+::::
+:::: {.column width="50%"}
+::: {.callout-note collapse="true" appearance="simple" title="Analogy"}
+A tailor doesn't make one suit for "the average customer"; they make one suit per customer profile — a tall slim athlete, a short stocky executive, a teenager. Each suit fits its target precisely. MER is the regression's bespoke-suit reporting: instead of one number, a small set of effects, each cut to a profile of interest.
+:::
+::::
+:::::
+
+**Polynomial Regression:** A regression that includes powers of a regressor — $x$, $x^2$, $x^3$, … — to capture curvature while keeping the model linear in coefficients. The quadratic form is the most common; cubic and higher add additional bends but invite over-fitting in small samples.
+
+::::: {.columns}
+:::: {.column width="50%"}
+::: {.callout-tip collapse="true" appearance="simple" title="Example"}
+The chapter fits `earnings ~ age + agesq + education` on `data_earnings`. The linear `age` coefficient is around $+\$3{,}000$ to $+\$5{,}000$ and the quadratic `agesq` coefficient is around $-\$30$ to $-\$50$ — together producing the inverted-U life-cycle pattern with peak earnings near age 50. The joint $F$-test on `age` and `agesq` is highly significant, ruling out the simpler linear-in-age model.
+:::
+::::
+:::: {.column width="50%"}
+::: {.callout-note collapse="true" appearance="simple" title="Analogy"}
+A roller-coaster track climbs, peaks, dips, climbs again — its height isn't a straight line, but it can still be described by a smooth equation that bends in just the right places. Polynomial regression is the regression's roller-coaster: the relationship between $x$ and $y$ rises, peaks, falls — and the coefficients on $x, x^2, \dots$ are the engineering specs of the curve.
+:::
+::::
+:::::
+
+**Standardised Variable ($z$-score within a regression):** Replace each variable by $(x - \bar{x})/s_x$ before fitting. The resulting coefficients tell you the change in $y$ — measured in $y$'s standard deviations — for a one-standard-deviation change in $x$. Standardising puts variables in different units onto a common scale, useful when comparing relative importance.
+
+::::: {.columns}
+:::: {.column width="50%"}
+::: {.callout-tip collapse="true" appearance="simple" title="Example"}
+In the chapter's mixed-regressor earnings model (`earnings ~ gender + age + agesq + education + dself + dgovt + lnhours`), the raw coefficient on `lnhours` (in dollars per log-hour) cannot be compared directly to the coefficient on `education` (in dollars per year). Standardising both produces $\beta^*$ values that *can* be compared: who moves earnings more, by one SD of effort? Education and `lnhours` come out as the largest standardised effects.
+:::
+::::
+:::: {.column width="50%"}
+::: {.callout-note collapse="true" appearance="simple" title="Analogy"}
+A currency converter restates a price in dollars, euros, and yen on a single line so you can compare what each pays you for the same coffee. Standardisation does the same for regressors: it converts dollars-per-year, hours-per-week, and binary flags into a common "standard-deviation" currency, so each coefficient is finally comparable to the others.
+:::
+::::
+:::::
+
+**Smearing Estimator (Duan's):** A nonparametric correction for retransformation bias when the dependent variable is logged. Instead of multiplying $\exp(\widehat{\ln y})$ by a normality-based factor like $\exp(s_e^2/2)$, Duan's method multiplies by the empirical mean $\tfrac{1}{n}\sum \exp(\hat{u}_i)$ — letting the residuals themselves correct the bias.
+
+::::: {.columns}
+:::: {.column width="50%"}
+::: {.callout-tip collapse="true" appearance="simple" title="Example"}
+For the log-linear earnings model on `data_earnings` ($s_e \approx 0.42$), naive retransformation $\exp(\widehat{\ln y})$ gives a sample-mean prediction of about \$48k — well below the actual mean of \$52k. The normality-based factor $\exp(0.42^2/2) \approx 1.092$ recovers \$52k; Duan's smearing correction averages $\exp(\hat{u}_i)$ across the 872 residuals to produce essentially the same correction without assuming normality.
+:::
+::::
+:::: {.column width="50%"}
+::: {.callout-note collapse="true" appearance="simple" title="Analogy"}
+A cook prepares a recipe and finds the salt always measures slightly low at the end. Rather than use a textbook formula to compute the missing pinch, the smearing approach is to look back at the *actual* leftover residue from past batches and add exactly that average back in. The salt comes out right because the correction is read from real cooking, not theory.
+:::
+::::
+:::::
 
 ## Setup
 

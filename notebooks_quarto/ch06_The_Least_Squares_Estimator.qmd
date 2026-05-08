@@ -26,62 +26,132 @@ This notebook provides an interactive introduction to the statistical properties
 
 ## Chapter Overview
 
-### Introduction
+Understanding the properties of the Ordinary Least Squares (OLS) estimator is fundamental to econometric inference. While Chapter 5 showed *how* to estimate regression models, this chapter explains *why* OLS works and *when* we can trust its results. We examine the statistical properties that make OLS the standard estimation method in econometrics: unbiasedness, efficiency, and asymptotic normality. A crucial concept is the distinction between the **population regression** (the true relationship we want to learn about) and the **sample regression** (our estimate from limited data). This chapter uses Monte Carlo simulations and real-world examples to demonstrate OLS properties empirically, connecting abstract statistical theory to tangible patterns in data.
 
-Understanding the properties of the Ordinary Least Squares (OLS) estimator is fundamental to econometric inference. While Chapter 5 showed *how* to estimate regression models, this chapter explains *why* OLS works and *when* we can trust its results. We examine the statistical properties that make OLS the standard estimation method in econometrics: unbiasedness, efficiency, and asymptotic normality.
+**What you'll learn:**
 
-A crucial concept is the distinction between the **population regression** (the true relationship we want to learn about) and the **sample regression** (our estimate from limited data). Different samples yield different estimates—this sampling variability is inevitable but quantifiable. By understanding how OLS estimates vary across samples, we can construct confidence intervals and test hypotheses about economic relationships.
-
-This chapter uses Monte Carlo simulations and real-world examples to demonstrate OLS properties empirically, connecting abstract statistical theory to tangible patterns in data.
-
-### What You'll Learn
-
-In this chapter, you will:
-
-- Distinguish between the population regression line (β₁ + β₂x) and the sample regression line (b₁ + b₂x)
-- Understand the conditional mean E[y|x] and the error term u = y - E[y|x]
-- Differentiate between the unobserved error term (u) and the observed residual (e)
+- Distinguish between the population regression line ($\beta_1 + \beta_2 x$) and the sample regression line ($b_1 + b_2 x$)
+- Understand the conditional mean $E[y \mid x]$ and the error term $u = y - E[y \mid x]$
+- Differentiate between the unobserved error term ($u$) and the observed residual ($e$)
 - Apply the four key OLS assumptions: correct model, mean-zero errors, homoskedasticity, and independence
-- Calculate the variance and standard error of the OLS slope coefficient b₂
-- Explain why b₂ is an unbiased estimator of β₂ under assumptions 1-2
-- Compute the standard error of the regression (sₑ) and use it to estimate precision
+- Calculate the variance and standard error of the OLS slope coefficient $b_2$
+- Explain why $b_2$ is an unbiased estimator of $\beta_2$ under assumptions 1–2
+- Compute the standard error of the regression ($s_e$) and use it to estimate precision
 - Understand when OLS estimates are more precise (good fit, many observations, scattered regressors)
-- Apply the Central Limit Theorem to show b₂ is approximately normally distributed for large samples
+- Apply the Central Limit Theorem to show $b_2$ is approximately normally distributed for large samples
 - Recognize that OLS is the Best Linear Unbiased Estimator (BLUE) under standard assumptions
 - Conduct Monte Carlo simulations to demonstrate sampling distributions
 - Interpret sampling variability and its implications for statistical inference
 
-### Dataset Used
+**Datasets used:**
 
-**Primary dataset:**
+- **Convergence Clubs** (Mendez 2020): 108 countries, 1990–2014, with real GDP per capita (rgdppc), labor productivity, and capital per worker (rk)
+- **Generated data**: computer-simulated samples from a known data-generating process ($y = 1 + 2x + u$)
+- **1880 U.S. Census**: finite-population sampling demonstration
 
-- **Convergence Clubs** (Mendez 2020): 108 countries, 1990-2014
-  - Variables: Real GDP per capita (rgdppc), labor productivity, capital per worker (rk)
-  - Used in Case Study: Sampling variability in productivity-capital regressions
-  - Demonstrates OLS properties with real economic data
+**Chapter outline:**
 
-**Supporting examples:**
+- 6.1 Population and Sample Models
+- 6.2 Examples of Sampling from a Population
+- 6.3 Properties of the Least Squares Estimator
+- 6.4 Estimators of Model Parameters
+- Key Takeaways
+- Practice Exercises
+- Case Studies
 
-- **Generated data**: Computer-simulated samples from known DGP (y = 1 + 2x + u)
-- **1880 U.S. Census**: Finite population sampling demonstration
+## Key Concepts
 
-### Chapter Outline
+Six core ideas anchor this chapter. Skim them before you start, and come back when a term feels fuzzy. Each entry pairs a concrete example using the chapter's data with a non-technical analogy. Click a panel to expand it.
 
-**6.1 Population and Sample Models** - Distinguish between population parameters (β₁, β₂) and sample estimates (b₁, b₂); understand error terms vs. residuals
+**Conditional Mean ($E[Y \mid X]$):** The average value of $Y$ at a fixed value of $X$ — what the chapter calls the population regression line. As $X$ moves, the conditional mean traces out the systematic part of the relationship; everything else is the error term $u$.
 
-**6.2 Examples of Sampling from a Population** - Generated data and census sampling demonstrations showing how estimates vary across samples
+::::: {.columns}
+:::: {.column width="50%"}
+::: {.callout-tip collapse="true" appearance="simple" title="Example"}
+For the chapter's generated DGP $y = 1 + 2x + u$, the conditional mean is $E[y \mid x] = 1 + 2x$ — exactly. So at $x = 3$ the average $y$-value across infinitely many observations is $7.0$, and individual observations scatter around it through the random shock $u \sim N(0, 4)$. The conditional mean is the line; the data are the cloud.
+:::
+::::
+:::: {.column width="50%"}
+::: {.callout-note collapse="true" appearance="simple" title="Analogy"}
+A traffic-forecast app reports the *average* commute time for each hour of the day: 18 min at 6 a.m., 35 min at 8 a.m., 22 min at noon. That average-by-hour curve is the conditional mean. On any given day your trip takes 26 or 38 minutes, but the curve summarises what to expect on average at each clock setting.
+:::
+::::
+:::::
 
-**6.3 Properties of the Least Squares Estimator** - Unbiasedness (E[b₂] = β₂), variance formulas, asymptotic normality, and BLUE property
+**Homoskedasticity:** The OLS assumption that the conditional variance of the error term is the same for every value of $X$, formally $\operatorname{Var}[u \mid x] = \sigma_u^2$. When this fails (heteroskedasticity), OLS is still unbiased but its standard errors are wrong.
 
-**6.4 Estimators of Model Parameters** - Calculating standard errors, understanding degrees of freedom, factors affecting precision
+::::: {.columns}
+:::: {.column width="50%"}
+::: {.callout-tip collapse="true" appearance="simple" title="Example"}
+The chapter's generated DGP fixes $\sigma_u = 2$ at every value of $x$ — homoskedastic by construction. So the vertical scatter of `y` around the line $1 + 2x$ has the same width at $x = 1$ and $x = 6$. In real data, where high-`size` houses might scatter more than low-`size` ones in dollar terms, this assumption is exactly what would break.
+:::
+::::
+:::: {.column width="50%"}
+::: {.callout-note collapse="true" appearance="simple" title="Analogy"}
+A pianist plays a song where every note is meant to be at the same volume. Homoskedasticity is the recording in which all notes do come through equally — soft passages and loud passages alike. Heteroskedasticity is the same recording with one channel fading: the late notes whisper while the early ones blare.
+:::
+::::
+:::::
 
-**Key Takeaways** - Comprehensive chapter summary organized by major themes
+**Independence of Errors:** The OLS assumption that the error for one observation carries no information about the error for any other, formally $\operatorname{Cov}[u_i, u_j] = 0$ for $i \neq j$. Violations are common in time-series data (today's shock predicts tomorrow's) and clustered samples (students in the same school).
 
-**Practice Exercises** - Hands-on problems reinforcing OLS properties, standard errors, and interpretation
+::::: {.columns}
+:::: {.column width="50%"}
+::: {.callout-tip collapse="true" appearance="simple" title="Example"}
+The chapter draws each of the 30 observations in its generated samples by an independent draw $u_i \sim N(0, 4)$, so knowing $u_5 = 1.3$ tells you nothing about $u_6$. That is exactly the independence assumption at work — and it's why the 1{,}000-sample Monte Carlo neatly recovers the textbook standard errors. With clustered errors the same simulation would understate uncertainty.
+:::
+::::
+:::: {.column width="50%"}
+::: {.callout-note collapse="true" appearance="simple" title="Analogy"}
+A casino die has no memory: rolling a six on this throw gives no clue about the next throw. Independent errors behave the same way — each observation's deviation is a fresh, memoryless draw. Time-series data, by contrast, is more like a long card game where the previous hand reshuffles into the next; today's "luck" carries over.
+:::
+::::
+:::::
 
-**Case Studies** - Empirical investigation of sampling variability using convergence clubs data; Monte Carlo with real economic data
+**BLUE — Best Linear Unbiased Estimator:** The Gauss–Markov property stating that, under the four core OLS assumptions, OLS achieves the smallest variance among all *linear* unbiased estimators of the regression coefficients. No other linear-in-$y$ rule that targets the true $\beta$ can do better in terms of sample-to-sample bounce.
 
----
+::::: {.columns}
+:::: {.column width="50%"}
+::: {.callout-tip collapse="true" appearance="simple" title="Example"}
+For the generated DGP $y = 1 + 2x + u$ with $n = 30$, OLS gives a slope estimator with empirical sampling SD ≈ $0.38$ across the chapter's 1{,}000 simulated samples (true slope $\beta_2 = 2$). Any rival linear unbiased rule — using only the first observation, or weighting endpoints — would produce a wider sampling SD than 0.38; OLS is the *tightest* unbiased linear option.
+:::
+::::
+:::: {.column width="50%"}
+::: {.callout-note collapse="true" appearance="simple" title="Analogy"}
+A singing competition is run only between contestants who are already pitch-perfect (unbiased). BLUE picks the contestant with the steadiest voice — the one whose every performance is closest to the same note night after night. Among the on-pitch field, OLS is that steadiest voice.
+:::
+::::
+:::::
+
+**Asymptotic Normality:** A property of OLS coefficients stating that, as the sample size grows, the standardised estimator $(b_2 - \beta_2)/\sigma_{b_2}$ converges in distribution to a standard normal $N(0, 1)$. This is what justifies using $t$-tables and confidence intervals on regression slopes, even when $u$ is not exactly normal.
+
+::::: {.columns}
+:::: {.column width="50%"}
+::: {.callout-tip collapse="true" appearance="simple" title="Example"}
+With $n = 30$ already, the chapter's 1{,}000 simulated slopes form a histogram tightly tracking a normal curve centred on $\beta_2 = 2$ with SD $\approx 0.38$. Even though each `u_i` is normal here, the same shape would emerge from non-normal errors at large $n$ — the CLT acting on the OLS formula as a weighted sum of $y$-values.
+:::
+::::
+:::: {.column width="50%"}
+::: {.callout-note collapse="true" appearance="simple" title="Analogy"}
+A blurry photograph sharpens into clearer focus as the camera collects more light. Asymptotic normality is the same idea: as $n$ grows, the smudged sampling distribution of the OLS coefficient sharpens into the recognizable bell shape, regardless of the original blur's character. Once it's in focus, you can read measurements off it.
+:::
+::::
+:::::
+
+**Standard Error of the Regression ($s_e$):** An estimate of the standard deviation of the error term, computed from the residuals as $s_e = \sqrt{\text{RSS}/(n - 2)}$. It quantifies the typical size of the unmodelled variation in $y$ — how far observations stray from the fitted line, on average.
+
+::::: {.columns}
+:::: {.column width="50%"}
+::: {.callout-tip collapse="true" appearance="simple" title="Example"}
+For the chapter's manual example with $(y, x) = (1, 1), (2, 2), (2, 3), (2, 4), (3, 5)$ and fitted line $\hat{y} = 0.8 + 0.4x$, the $(n - 2) = 3$ degrees of freedom yield a small $s_e$ that feeds directly into $\operatorname{se}(b_2)$. In the generated DGP $y = 1 + 2x + u$ with true $\sigma_u = 2$, the OLS-computed $s_e$ from any single sample of $n = 30$ recovers values clustered around 2.0 — an unbiased estimate of the population error spread.
+:::
+::::
+:::: {.column width="50%"}
+::: {.callout-note collapse="true" appearance="simple" title="Analogy"}
+A recipe says "bake until golden, about 28 minutes" — but if you've made it ten times, you know the typical wiggle is about ±3 minutes around 28. That ±3-minute band is the standard error of the recipe; $s_e$ is the same idea, expressed in the units of $y$. Smaller band ⇒ tighter recipe; bigger band ⇒ unpredictable kitchen.
+:::
+::::
+:::::
 
 ## Setup
 

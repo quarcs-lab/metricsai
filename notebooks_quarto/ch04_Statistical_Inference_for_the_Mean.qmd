@@ -54,6 +54,115 @@ This chapter introduces **statistical inference for the mean**—the foundationa
 - **4.6 One-Sided Directional Hypothesis Tests**
 - **4.7 Proportions Data**
 
+## Key Concepts
+
+Seven core ideas anchor this chapter. Skim them before you start, and come back when a term feels fuzzy. Each entry pairs a concrete example using the chapter's data with a non-technical analogy. Click a panel to expand it.
+
+**Null Hypothesis (H₀):** The default claim about a parameter that we test against the data — typically a statement of "no effect" or "no difference". We never *prove* H₀ true; we either reject it as inconsistent with the sample or fail to reject it.
+
+::::: {.columns}
+:::: {.column width="50%"}
+::: {.callout-tip collapse="true" appearance="simple" title="Example"}
+For Yolo County gas stations ($n = 32$), the chapter tests $H_0: \mu = \$3.81$ — the claim that local prices match the California state average. This is the default position; the test asks whether the sample mean of `price` ($\$3.6697$) departs from \$3.81 by enough that random sampling alone is implausible.
+:::
+::::
+:::: {.column width="50%"}
+::: {.callout-note collapse="true" appearance="simple" title="Analogy"}
+A factory ships every machine with default settings — that's the null hypothesis: "this machine is fine as it left the factory." When a technician inspects a unit, they don't have to prove the defaults are right; they only need to gather enough evidence to reject them. No evidence ⇒ keep using the defaults.
+:::
+::::
+:::::
+
+**Alternative Hypothesis (Hₐ):** The claim we accept if the null is rejected. It can be two-sided ($\mu \neq \mu_0$) when departures in either direction matter, or one-sided ($\mu < \mu_0$ or $\mu > \mu_0$) when only one direction is interesting.
+
+::::: {.columns}
+:::: {.column width="50%"}
+::: {.callout-tip collapse="true" appearance="simple" title="Example"}
+In the gasoline test, $H_a: \mu \neq \$3.81$ — Yolo County prices simply differ from the state average, in either direction. Since the sample mean of `price` is \$3.6697 with $t = -5.26$, the rejection lands the conclusion in the *lower* tail: prices are significantly cheaper.
+:::
+::::
+:::: {.column width="50%"}
+::: {.callout-note collapse="true" appearance="simple" title="Analogy"}
+An insurance claim is an alternative hypothesis: "the policy default ('no payout') is wrong, *something happened*." The claimant has to bring the evidence; until they do, the default stands. A one-sided claim ("damage greater than \$5{,}000") narrows what counts as winning, while a two-sided claim ("damage differs from \$0") is broader.
+:::
+::::
+:::::
+
+**Test Statistic (t):** A single number that summarises how far the sample estimate sits from the null-hypothesised value, measured in standard errors. For the mean it is $t = (\bar{x} - \mu_0)/\operatorname{se}(\bar{x})$, and large absolute values are surprising under $H_0$.
+
+::::: {.columns}
+:::: {.column width="50%"}
+::: {.callout-tip collapse="true" appearance="simple" title="Example"}
+For `earnings` ($n = 171$, mean \$41{,}412.69, SE \$1{,}952.10), testing $H_0: \mu = \$40{,}000$ gives $t = (41{,}412.69 - 40{,}000)/1{,}952.10 = 0.72$ — only three-quarters of a standard error from the hypothesised value, so unsurprising. For `price` against \$3.81, $t = -5.26$ — five SEs below, deeply surprising.
+:::
+::::
+:::: {.column width="50%"}
+::: {.callout-note collapse="true" appearance="simple" title="Analogy"}
+A test statistic is the tug on a fishing line. A small tug could be the current; a strong tug is something real on the hook. The test statistic puts a number on "how strong is the tug, measured in normal-current-units" — small values are noise, large values demand attention.
+:::
+::::
+:::::
+
+**p-Value:** The probability of observing a test statistic at least as extreme as the one we computed, *if the null hypothesis were true*. Small p-values mean the data would be unlikely under $H_0$ — evidence against it.
+
+::::: {.columns}
+:::: {.column width="50%"}
+::: {.callout-tip collapse="true" appearance="simple" title="Example"}
+The earnings test produces $p = 0.4703$: if true population mean earnings really were \$40{,}000, we'd see a sample mean this far away (in either direction) about 47% of the time just from random sampling. Compare to the gas-price test where $p < 0.0001$ — observing a sample mean of \$3.67 if true $\mu = 3.81$ would happen less than once in 10{,}000 repetitions.
+:::
+::::
+:::: {.column width="50%"}
+::: {.callout-note collapse="true" appearance="simple" title="Analogy"}
+A p-value is a coincidence rating. "How often, on a perfectly normal day, would the elevator be empty when I walked in?" If the answer is "half the time", the empty elevator is no story. If the answer is "once a decade", you start wondering if something unusual is going on. A p-value attaches a number to that intuition.
+:::
+::::
+:::::
+
+**Significance Level (α):** The chosen threshold below which we reject the null hypothesis. The most common value is $\alpha = 0.05$ — meaning we accept up to a 5% chance of rejecting a true null (a Type I error) in exchange for a clear decision rule.
+
+::::: {.columns}
+:::: {.column width="50%"}
+::: {.callout-tip collapse="true" appearance="simple" title="Example"}
+With $\alpha = 0.05$, the chapter rejects $H_0$ for `price` ($p < 0.0001 < 0.05$) but does not reject for `earnings` ($p = 0.4703 > 0.05$). The same data with a stricter $\alpha = 0.01$ would still reject the gas-price null but would still fail to reject the earnings null — only the very strongest evidence rises above stricter thresholds.
+:::
+::::
+:::: {.column width="50%"}
+::: {.callout-note collapse="true" appearance="simple" title="Analogy"}
+A price-drop alert lets you set the threshold yourself: "ping me only when the price falls more than 10%." Set the threshold loose (5%) and you'll get pinged often, including for trivial dips. Set it strict (20%) and you'll only hear about real bargains. $\alpha$ is the threshold you set on your statistical alert.
+:::
+::::
+:::::
+
+**Critical Value:** The cutoff on the test statistic's distribution that defines the rejection region. For a two-sided 5% test using a t-distribution, it's $\pm t_{n-1,\,0.025}$; any $|t|$ beyond it triggers rejection of $H_0$.
+
+::::: {.columns}
+:::: {.column width="50%"}
+::: {.callout-tip collapse="true" appearance="simple" title="Example"}
+For the earnings test ($n = 171$, two-sided, $\alpha = 0.05$), the critical value is $t_{170,\,0.025} = \pm 1.974$. The observed $t = 0.72$ falls comfortably inside the bounds, so $H_0$ stands. For gas prices ($n = 32$), the critical value $\pm 2.04$ is dwarfed by $|t| = 5.26$, so $H_0$ is rejected.
+:::
+::::
+:::: {.column width="50%"}
+::: {.callout-note collapse="true" appearance="simple" title="Analogy"}
+Amusement-park rides post a "you must be this tall to ride" sign. Anyone shorter than the sign is turned away; anyone taller hops on. A critical value is the statistical ride-height — observed test statistics taller than the sign are admitted to the rejection region; shorter ones go home.
+:::
+::::
+:::::
+
+**Type I and Type II Errors:** The two possible mistakes in a hypothesis test. A Type I error is rejecting a true null (a false alarm), with probability $\alpha$. A Type II error is failing to reject a false null (a missed effect), with probability $\beta$ — and statistical power is $1-\beta$.
+
+::::: {.columns}
+:::: {.column width="50%"}
+::: {.callout-tip collapse="true" appearance="simple" title="Example"}
+The earnings test failed to reject $H_0: \mu = \$40{,}000$ at $\alpha = 0.05$ — but the chapter notes this could be a Type II error: with the present sample of $n = 171$ and SE \$1{,}952, the test cannot distinguish \$40k from \$41,400. Quadrupling the sample to $n = 684$ would halve the SE to \$976, doubling the t-statistic and likely catching the difference.
+:::
+::::
+:::: {.column width="50%"}
+::: {.callout-note collapse="true" appearance="simple" title="Analogy"}
+A smoke detector makes both kinds of mistake. A Type I error is the false alarm at 3 a.m. when nothing is burning — annoying but not deadly. A Type II error is sleeping through a real fire because the detector failed — rare but catastrophic. Tuning $\alpha$ tunes the detector: more sensitive means more false alarms, less sensitive means more missed fires.
+:::
+::::
+:::::
+
 ## Setup
 
 Run this cell first to import all required packages and configure the environment.

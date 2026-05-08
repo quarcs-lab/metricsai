@@ -55,6 +55,100 @@ This chapter extends statistical inference from univariate to bivariate regressi
 - Key Takeaways
 - Practice Exercises
 
+## Key Concepts
+
+Six core ideas anchor this chapter. Skim them before you start, and come back when a term feels fuzzy. Each entry pairs a concrete example using the chapter's data with a non-technical analogy. Click a panel to expand it.
+
+**Null Hypothesis for the Slope ($H_0: \beta_2 = 0$):** The default claim that the explanatory variable has *no* linear effect on the outcome — i.e., the population slope is exactly zero. Rejecting this null is what allows the analyst to say "$x$ matters for $y$".
+
+::::: {.columns}
+:::: {.column width="50%"}
+::: {.callout-tip collapse="true" appearance="simple" title="Example"}
+For the 29 Davis houses, we test $H_0: \beta_2 = 0$ against $H_a: \beta_2 \neq 0$ on the regression of `price` on `size`. The fitted slope is $b_2 = \$73.77$/sq ft with $\operatorname{se}(b_2) = 11.17$ — a slope this far from zero, this precisely estimated, is the evidence that overturns the null.
+:::
+::::
+:::: {.column width="50%"}
+::: {.callout-note collapse="true" appearance="simple" title="Analogy"}
+A courtroom presumes the defendant innocent — the regression presumes the regressor irrelevant. Both are starting points the data must overturn. Until the prosecution piles up enough evidence, the defendant walks free; until the slope's t-statistic is big enough, $\beta_2 = 0$ stands.
+:::
+::::
+:::::
+
+**t-Statistic for the Slope:** The standardised distance between the estimated slope and its null-hypothesised value, in standard-error units: $t = (b_2 - \beta_2^0)/\operatorname{se}(b_2)$. For the common $H_0: \beta_2 = 0$, this simplifies to $t = b_2/\operatorname{se}(b_2)$, and $|t|$ above the critical value triggers rejection.
+
+::::: {.columns}
+:::: {.column width="50%"}
+::: {.callout-tip collapse="true" appearance="simple" title="Example"}
+For the Davis house regression with $b_2 = 73.77$ and $\operatorname{se}(b_2) = 11.17$, the t-statistic on `size` is $t = 73.77 / 11.17 = 6.60$. The slope sits 6.6 standard errors above zero — far beyond the comfortable noise range — so the chapter rejects $H_0: \beta_2 = 0$ at any conventional significance level.
+:::
+::::
+:::: {.column width="50%"}
+::: {.callout-note collapse="true" appearance="simple" title="Analogy"}
+A fitness tracker counts your daily steps but also reports a *signal-to-noise ratio*: how confident it is that you're actually walking versus jiggling at your desk. The t-statistic is exactly that ratio for a slope — how many step-counts (sample slope) the watch saw, scaled by how jumpy its baseline (standard error) tends to be.
+:::
+::::
+:::::
+
+**Standard Error of the Slope Coefficient ($\operatorname{se}(b_2)$):** The estimated standard deviation of the OLS slope estimator across hypothetical resamples. It shrinks with better model fit (small $s_e$), more observations, and wider spread in $x$ — the three knobs an analyst can turn to sharpen inference.
+
+::::: {.columns}
+:::: {.column width="50%"}
+::: {.callout-tip collapse="true" appearance="simple" title="Example"}
+For the Davis houses, $\operatorname{se}(b_2) = 11.17$ — meaning the slope on `size` would jitter by roughly \$11/sq ft from one sample of 29 houses to another. With $n = 29$, $s_e \approx \$23{,}162$, and the spread $\sigma_{\text{size}} \approx 398$ sq ft, the formula $\operatorname{se}(b_2) = s_e / \sqrt{\sum(x_i - \bar{x})^2}$ produces this estimate; quadrupling $n$ would roughly halve it.
+:::
+::::
+:::: {.column width="50%"}
+::: {.callout-note collapse="true" appearance="simple" title="Analogy"}
+An archer measures her group size — the diameter of the cluster of arrows around the bullseye — across many practice rounds. A tight group (small SE) means the next shot will land predictably; a spray pattern (large SE) means the next shot could go anywhere. $\operatorname{se}(b_2)$ is the slope's group size from imagined re-runs of the regression.
+:::
+::::
+:::::
+
+**Critical t-Value ($t_{n-2,\,\alpha/2}$):** The cutoff value on the $t$-distribution beyond which the null hypothesis is rejected. For a two-sided test at $\alpha = 0.05$ with $n-2$ degrees of freedom, observed $|t|$ values above this cutoff land in the rejection region.
+
+::::: {.columns}
+:::: {.column width="50%"}
+::: {.callout-tip collapse="true" appearance="simple" title="Example"}
+For the Davis house regression, $n = 29$ gives $n - 2 = 27$ degrees of freedom. At $\alpha = 0.05$ two-sided, the critical value is $t_{27,\,0.025} = 2.052$. The observed $|t| = 6.60$ is more than three times this cutoff, so the slope's t-statistic falls deep into the rejection region.
+:::
+::::
+:::: {.column width="50%"}
+::: {.callout-note collapse="true" appearance="simple" title="Analogy"}
+A playground swing is fitted with a "max-height" sensor: cross it, and the operator pulls the safety brake. The critical value is that statistical max-height. Test statistics that swing higher than the line trigger the rejection brake; those that stay below are within the safe range.
+:::
+::::
+:::::
+
+**Margin of Error for the Slope:** The half-width of a confidence interval for $\beta_2$ — the quantity $t_{n-2,\,\alpha/2} \cdot \operatorname{se}(b_2)$ added to and subtracted from the point estimate. Bigger margin ⇒ vaguer interval; smaller margin ⇒ sharper claim.
+
+::::: {.columns}
+:::: {.column width="50%"}
+::: {.callout-tip collapse="true" appearance="simple" title="Example"}
+For the Davis house slope, the 95% margin of error is $2.052 \times 11.17 \approx 22.93$ dollars per square foot. So the 95% confidence interval for $\beta_2$ is $73.77 \pm 22.93 = [50.84, 96.70]$ — a range that excludes \$0 but spans a substantial \$45 spread, telling us "size matters", but at a price between \$51 and \$97 per square foot.
+:::
+::::
+:::: {.column width="50%"}
+::: {.callout-note collapse="true" appearance="simple" title="Analogy"}
+A photo print arrives with a paper border around the image. The margin of error is that border — the visual reminder that the photo's exact framing isn't pinned to a single line, but extends a few millimetres on either side. A wide border means a less certain crop; a narrow border means the photo's edge is precisely where you put it.
+:::
+::::
+:::::
+
+**Test of Statistical Significance ($H_0: \beta = 0$):** The standard hypothesis test asking "is this regressor's true coefficient distinguishable from zero, given sampling noise?" Standard regression output reports the t-statistic, the two-sided p-value, and stars ($*$, $**$, $***$) flagging the significance level at which $H_0$ is rejected.
+
+::::: {.columns}
+:::: {.column width="50%"}
+::: {.callout-tip collapse="true" appearance="simple" title="Example"}
+The chapter's basic regression output reports `size` with $b_2 = 73.77$, $\operatorname{se} = 11.17$, $t = 6.60$, $p \approx 0.000$ — every column tells the same story: the test of significance rejects $H_0: \beta_2 = 0$ overwhelmingly. Translated: across the Davis 1999 housing market, the data leave essentially no room for the claim that size has zero effect on price.
+:::
+::::
+:::: {.column width="50%"}
+::: {.callout-note collapse="true" appearance="simple" title="Analogy"}
+A metal detector swept across a beach beeps when its reading rises clearly above the background hum. A test of significance is the same beep applied to a regression coefficient: the t-statistic is the reading, the critical value sets the beep threshold, and the p-value tells you the chance of hearing a beep on an empty patch of sand. A loud, sharp beep means dig.
+:::
+::::
+:::::
+
 ## Setup
 
 First, we import the necessary Python packages and configure the environment for reproducibility. All data will stream directly from GitHub.

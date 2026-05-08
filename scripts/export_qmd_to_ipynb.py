@@ -56,6 +56,17 @@ def strip_yaml_frontmatter(text: str) -> str:
     return re.sub(pattern, '', text, count=1, flags=re.DOTALL).lstrip('\n')
 
 
+def strip_key_concepts(text: str) -> str:
+    """Drop the '## Key Concepts' glossary section from markdown text.
+
+    The section uses Quarto-only collapsible callouts (`:::` divs) that
+    render as literal text in Jupyter/Colab. Everything from the heading
+    up to (but not including) the next H2 heading is removed.
+    """
+    pattern = r'^## Key Concepts\n.*?(?=^## )'
+    return re.sub(pattern, '', text, flags=re.DOTALL | re.MULTILINE)
+
+
 def postprocess_ipynb(ipynb_path: Path) -> None:
     """Post-process the generated .ipynb for Colab compatibility."""
     with open(ipynb_path, 'r', encoding='utf-8') as f:
@@ -80,6 +91,14 @@ def postprocess_ipynb(ipynb_path: Path) -> None:
         cleaned = strip_yaml_frontmatter(source)
         if cleaned != source:
             nb['cells'][0]['source'] = [cleaned]
+
+    # Strip the Key Concepts glossary section from every markdown cell
+    for cell in nb['cells']:
+        if cell['cell_type'] == 'markdown':
+            source = ''.join(cell['source'])
+            cleaned = strip_key_concepts(source)
+            if cleaned != source:
+                cell['source'] = [cleaned]
 
     # Ensure nbformat is set
     nb['nbformat'] = 4

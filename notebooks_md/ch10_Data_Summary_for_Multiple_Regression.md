@@ -28,18 +28,16 @@ This notebook provides an interactive introduction to multiple regression analys
 
 This chapter extends bivariate regression to the more realistic case where we want to predict an outcome using **multiple explanatory variables** simultaneously. Multiple regression allows us to estimate the partial effect of each variable while controlling for others—a crucial feature for empirical economic analysis.
 
-**Learning Objectives:**
+**What you'll learn:**
 
-By the end of this chapter, you will be able to:
-
-1. Extend bivariate regression concepts to multiple regression with several regressors
-2. Interpret pairwise correlations and use them for exploratory data analysis
-3. Understand the ordinary least squares (OLS) method for multiple regression
-4. Interpret partial effects: how one regressor affects $y$ while holding others constant
-5. Distinguish between partial effects and total effects
-6. Evaluate model fit using R-squared and adjusted R-squared
-7. Understand information criteria (AIC, BIC) for model selection
-8. Recognize when regression coefficients cannot be estimated (perfect collinearity)
+- Extend bivariate regression concepts to multiple regression with several regressors
+- Interpret pairwise correlations and use them for exploratory data analysis
+- Understand the ordinary least squares (OLS) method for multiple regression
+- Interpret partial effects: how one regressor affects $y$ while holding others constant
+- Distinguish between partial effects and total effects
+- Evaluate model fit using R-squared and adjusted R-squared
+- Understand information criteria (AIC, BIC) for model selection
+- Recognize when regression coefficients cannot be estimated (perfect collinearity)
 
 **Dataset used:**
 
@@ -62,6 +60,100 @@ What is the effect of house size on price **after controlling** for other charac
 - Practice Exercises
 - Case Studies
 
+
+## Key Concepts
+
+Six core ideas anchor this chapter. Skim them before you start, and come back when a term feels fuzzy. Each entry pairs a concrete example using the chapter's data with a non-technical analogy. Click a panel to expand it.
+
+**Multiple Regression Model:** A regression with two or more explanatory variables, $\hat{y} = b_1 + b_2 x_2 + b_3 x_3 + \cdots + b_k x_k$. Unlike bivariate regression, each slope $b_j$ is a *partial* coefficient — it isolates the effect of $x_j$ on $y$ while statistically holding the other regressors fixed.
+
+::::: {.columns}
+:::: {.column width="50%"}
+::: {.callout-tip collapse="true" appearance="simple" title="Example"}
+For the 29 Davis houses, the chapter fits $\widehat{\text{price}} = b_1 + b_2 \cdot \text{size} + b_3 \cdot \text{bedrooms} + b_4 \cdot \text{bathrooms} + b_5 \cdot \text{lotsize} + b_6 \cdot \text{age} + b_7 \cdot \text{monthsold}$. The estimated `size` coefficient is \$68.37/sq ft (down from \$73.77 in the bivariate version) — a partial effect that excludes the influence of bedrooms, bathrooms, and the rest.
+:::
+::::
+:::: {.column width="50%"}
+::: {.callout-note collapse="true" appearance="simple" title="Analogy"}
+An orchestra plays a chord: the cello, viola, and violin all sound at once. Bivariate regression listens to one instrument as if it were the whole sound. Multiple regression is a sound engineer's *isolation track* — turning each instrument up against a backdrop of the others, so you hear what that one instrument adds on its own.
+:::
+::::
+:::::
+
+**Pairwise Correlation Matrix:** A square table whose $(i, j)$ entry is the correlation $r_{x_i x_j}$ between two columns of the dataset. It is the standard exploratory tool before fitting multiple regression — strong off-diagonal correlations signal candidate predictors *and* warn of likely multicollinearity.
+
+::::: {.columns}
+:::: {.column width="50%"}
+::: {.callout-tip collapse="true" appearance="simple" title="Example"}
+The chapter's correlation matrix on the Davis houses shows $r(\text{price}, \text{size}) = 0.79$ (the strongest predictor) and $r(\text{price}, \text{bedrooms}) = 0.43$. It also flags $r(\text{size}, \text{bedrooms}) = 0.52$ — a moderate inter-regressor correlation that explains why the bedrooms coefficient drops from \$23{,}667 in the bivariate fit to just \$1{,}553 once size is in the model.
+:::
+::::
+:::: {.column width="50%"}
+::: {.callout-note collapse="true" appearance="simple" title="Analogy"}
+A wedding seating chart records, for every pair of guests, how well they get along. A pairwise correlation matrix is the same idea applied to data columns: for every pair of variables, one number summarising how often they "show up together". Strong pairs sit close; weak pairs go to opposite ends of the room.
+:::
+::::
+:::::
+
+**Control Variable:** A regressor included in the model not because it is the main quantity of interest but to prevent its omission from biasing the focal coefficient. By adding the control, the regression isolates the partial effect of the focal variable while "holding the control fixed".
+
+::::: {.columns}
+:::: {.column width="50%"}
+::: {.callout-tip collapse="true" appearance="simple" title="Example"}
+In the Davis house regression, `bedrooms` looks like a strong predictor of `price` on its own (\$23{,}667 per bedroom). Once `size` is added as a control variable, the bedrooms coefficient collapses to \$1{,}553 — most of the apparent bedrooms effect was really houses with more bedrooms being bigger. `size` here is a textbook control: not the "treatment" of interest but essential for an honest estimate of bedrooms.
+:::
+::::
+:::: {.column width="50%"}
+::: {.callout-note collapse="true" appearance="simple" title="Analogy"}
+A laboratory experiment on plant growth holds *temperature* constant in every sample so the researcher can isolate the effect of fertiliser. Temperature is the lab's control variable — not the thing being studied, but the thing being kept fixed so the rest of the comparison is fair. In regression, control variables play the same role with statistical instead of physical fixing.
+:::
+::::
+:::::
+
+**Confounder:** A variable that influences both the focal regressor and the outcome, creating an indirect channel through which the focal regressor *appears* to affect $y$ even when it does not. Including the confounder as a control variable typically shrinks (or flips) the focal coefficient toward its true partial effect.
+
+::::: {.columns}
+:::: {.column width="50%"}
+::: {.callout-tip collapse="true" appearance="simple" title="Example"}
+For the Davis houses, `size` is a confounder of the bedrooms–price relationship: bigger houses tend to have more bedrooms *and* fetch higher prices. That is why omitting `size` made bedrooms look like a \$23{,}667-per-room driver, while including it brought the partial effect down to \$1{,}553 — most of the original bedrooms coefficient was really `size` showing up in disguise.
+:::
+::::
+:::: {.column width="50%"}
+::: {.callout-note collapse="true" appearance="simple" title="Analogy"}
+Across cities, ice-cream sales and drowning deaths are tightly correlated — but ice cream isn't drowning anyone. Summer is the confounder: it raises both sales and water-park traffic. Failing to control for the season makes ice cream look like a killer; controlling for it reveals the spurious link, just as `size` reveals bedrooms' inflated coefficient.
+:::
+::::
+:::::
+
+**Adjusted $R^2$:** A version of $R^2$ that penalises for the number of regressors: $\bar{R}^2 = 1 - \frac{\text{RSS}/(n-k)}{\text{TSS}/(n-1)}$. Adding a useless variable always raises plain $R^2$ but typically lowers $\bar{R}^2$ — making it the better fit metric when comparing models of different sizes.
+
+::::: {.columns}
+:::: {.column width="50%"}
+::: {.callout-tip collapse="true" appearance="simple" title="Example"}
+For the Davis houses, the simple regression on `size` alone gives $R^2 = 0.618$ and $\bar{R}^2 = 0.603$. The full model with all six regressors raises $R^2$ to $0.651$ — but $\bar{R}^2$ actually *falls* to $0.555$. Plain $R^2$ rewards extra variables; adjusted $R^2$ recognises that the extras barely earned their keep on only $n = 29$ observations.
+:::
+::::
+:::: {.column width="50%"}
+::: {.callout-note collapse="true" appearance="simple" title="Analogy"}
+A football league lets teams sign extra players, but charges a salary-cap penalty for each one. A team with twenty players might score slightly more goals (raw $R^2$ rises), yet still finish the season worse off after paying the penalty (adjusted $R^2$ falls). Adjusted $R^2$ is the league's way of asking, "did those extra signings *really* help?"
+:::
+::::
+:::::
+
+**Perfect Collinearity:** The situation where one regressor is an exact linear combination of others (e.g., `size_twice = 2 × size`). When this happens, the OLS normal equations have no unique solution — software either drops a regressor automatically or returns an error.
+
+::::: {.columns}
+:::: {.column width="50%"}
+::: {.callout-tip collapse="true" appearance="simple" title="Example"}
+The chapter constructs `size_twice = 2 × size` and tries to estimate `price ~ size + size_twice + bedrooms`. Because `size_twice` adds *no* new information beyond `size`, the regression is inestimable: the software silently drops one of the two collinear variables and reports the rest. In contrast, the actual six predictors in the Davis dataset show only moderate VIFs, so all six can be estimated jointly.
+:::
+::::
+:::: {.column width="50%"}
+::: {.callout-note collapse="true" appearance="simple" title="Analogy"}
+Identical twins walk into a tailor's shop wanting matching suits. The tailor has one set of measurements but two customers — there is no way to assign a "different" credit-card to each twin from the dataset alone, because the two are indistinguishable. Perfect collinearity is OLS facing identical twins among its regressors: distinct names, identical information.
+:::
+::::
+:::::
 
 ## Setup
 
@@ -592,7 +684,7 @@ A **coefficient plot** displays estimated coefficients with their 95% confidence
 fig, ax = plt.subplots(figsize=(10, 8))
 
 # Exclude intercept for better visualization
-params_no_int = model_full.params[1:]
+params_no_int = model_full.coef()[1:]
 ci_no_int = conf_int.iloc[1:, :]
 
 y_pos = np.arange(len(params_no_int))

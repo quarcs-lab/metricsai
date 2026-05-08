@@ -28,18 +28,16 @@ This notebook provides an interactive introduction to advanced topics in regress
 
 This chapter covers advanced topics that extend the multiple regression framework: robust standard errors for different data structures, prediction of outcomes, and deeper understanding of estimation and testing optimality.
 
-**Learning Objectives:**
+**What you'll learn:**
 
-By the end of this chapter, you will be able to:
-
-1. Understand when to use heteroskedastic-robust, cluster-robust, and HAC-robust standard errors
-2. Distinguish between prediction of average outcomes and individual outcomes
-3. Compute prediction intervals for conditional means and forecasts
-4. Understand the impact of nonrepresentative samples on regression estimates
-5. Recognize the difference between unbiased and best (most efficient) estimators
-6. Understand Type I and Type II errors in hypothesis testing
-7. Appreciate the role of bootstrap methods as an alternative to classical inference
-8. Know when OLS with robust SEs is preferred over more efficient estimators like FGLS
+- Understand when to use heteroskedastic-robust, cluster-robust, and HAC-robust standard errors
+- Distinguish between prediction of average outcomes and individual outcomes
+- Compute prediction intervals for conditional means and forecasts
+- Understand the impact of nonrepresentative samples on regression estimates
+- Recognize the difference between unbiased and best (most efficient) estimators
+- Understand Type I and Type II errors in hypothesis testing
+- Appreciate the role of bootstrap methods as an alternative to classical inference
+- Know when OLS with robust SEs is preferred over more efficient estimators like FGLS
 
 **Datasets used:**
 
@@ -65,6 +63,100 @@ By the end of this chapter, you will be able to:
 - Practice Exercises
 - Case Studies
 
+
+## Key Concepts
+
+Six core ideas anchor this chapter. Skim them before you start, and come back when a term feels fuzzy. Each entry pairs a concrete example using the chapter's data with a non-technical analogy. Click a panel to expand it.
+
+**Cluster-Robust Standard Error:** A variant of robust standard errors that allows errors to be correlated *within* groups (clusters) but independent *across* them. It is the right correction when the data come in natural clusters — students in classrooms, workers in firms, municipalities in regions — because heteroskedasticity-only SEs (HC1) understate uncertainty in those settings.
+
+::::: {.columns}
+:::: {.column width="50%"}
+::: {.callout-tip collapse="true" appearance="simple" title="Example"}
+The Davis-house regression on `size`, `bedrooms`, `bathrooms`, `lotsize`, `age`, `monthsold` is fit with HC1 robust SEs because the 29 houses are an i.i.d. cross-section. If instead the data were 29 houses spread across a handful of *neighbourhoods*, errors within a neighbourhood would likely be correlated (shared school district, common buyer pool), and a cluster-robust SE keyed on neighbourhood would replace HC1 to keep inference honest.
+:::
+::::
+:::: {.column width="50%"}
+::: {.callout-note collapse="true" appearance="simple" title="Analogy"}
+A school's test scores: students in the same classroom share a teacher, classroom climate, and rumor mill, so their scores aren't truly independent observations of "the population of students". Treating them as independent makes the school sound more confidently above-average than it is. Cluster-robust SEs let each *classroom* count as an effective unit of evidence — closer to the truth.
+:::
+::::
+:::::
+
+**Autocorrelation:** The phenomenon in time-series data of one period's error being correlated with the next period's error: $\operatorname{Corr}(u_t, u_{t-s}) \neq 0$. Positive autocorrelation means good periods (and bad periods) tend to cluster, so consecutive observations carry less independent information than a naive count suggests.
+
+::::: {.columns}
+:::: {.column width="50%"}
+::: {.callout-tip collapse="true" appearance="simple" title="Example"}
+For U.S. real-GDP-per-capita `growth` (`data_gdp`, $T = 241$ observations), the chapter computes a positive lag-1 autocorrelation — fast-growth years are more often followed by fast-growth years than chance would predict. That's why the Newey–West HAC standard error around the mean growth rate is *larger* than the default OLS SE: ignoring this serial dependence would overstate confidence.
+:::
+::::
+:::: {.column width="50%"}
+::: {.callout-note collapse="true" appearance="simple" title="Analogy"}
+A handclap in a long stone hallway echoes for several seconds; sounds you make later overlap with the lingering echo from earlier. Autocorrelation is the data's echo — what happened a moment ago is still ringing, so today's reading isn't an independent observation of "the world", but partly a recording of yesterday's.
+:::
+::::
+:::::
+
+**Confidence Interval for the Conditional Mean ($E[Y \mid X^*]$):** A range covering, at a stated confidence level, the *average* value of $Y$ for a given $X^*$. Its standard error is $s_e \sqrt{1/n + (x^* - \bar{x})^2 / \sum(x_i - \bar{x})^2}$ in the bivariate case — both terms shrink to zero as $n \to \infty$.
+
+::::: {.columns}
+:::: {.column width="50%"}
+::: {.callout-tip collapse="true" appearance="simple" title="Example"}
+For a 2{,}000-sq-ft Davis house, the chapter's regression on `size` predicts an *average* `price` of about \$280k, with a 95% CI roughly $[\$250\mathrm{k}, \$310\mathrm{k}]$. That interval describes the typical sale price across all 2{,}000-sq-ft houses in this market — not what any single house will fetch.
+:::
+::::
+:::: {.column width="50%"}
+::: {.callout-note collapse="true" appearance="simple" title="Analogy"}
+A bakery weighs every loaf and reports an average of 503 g. The CI for the *average* loaf is tight — say 501–505 g — because the bakery has weighed thousands. That number doesn't tell you how heavy *your* loaf is; it tells you what the bakery's process averages to across all customers.
+:::
+::::
+:::::
+
+**Prediction Interval for an Individual Outcome:** A range covering, at a stated confidence level, *the actual value* of $Y$ at a given $X^*$, including both estimation uncertainty and the irreducible noise $u^*$. The "$1 +$" in the formula $s_e \sqrt{1 + 1/n + (x^* - \bar{x})^2 / \sum(x_i - \bar{x})^2}$ never disappears — the floor on individual predictions is roughly $s_e$, no matter how large the sample.
+
+::::: {.columns}
+:::: {.column width="50%"}
+::: {.callout-tip collapse="true" appearance="simple" title="Example"}
+For the same 2{,}000-sq-ft house, the prediction interval for *one specific* sale is roughly $[\$180\mathrm{k}, \$380\mathrm{k}]$ — three to four times wider than the CI for the average. With $s_e \approx \$90{,}000$ in the simple regression on `size`, almost all of that width comes from the irreducible "1" term, not from estimation uncertainty in $\hat\beta$.
+:::
+::::
+:::: {.column width="50%"}
+::: {.callout-note collapse="true" appearance="simple" title="Analogy"}
+A casino slot machine has a known long-run payout of 95 cents on the dollar. That's the *conditional mean* — across thousands of pulls, you'll lose about 5%. For *your next pull*, though, you might win \$10 or lose \$1 — pure individual variation that the long-run average doesn't predict. The prediction interval is the range in which one pull will plausibly land.
+:::
+::::
+:::::
+
+**Generalized Least Squares (GLS):** A weighted-OLS estimator that re-weights observations by the inverse of their (assumed-known) error variances, restoring efficiency when the homoskedasticity assumption fails. In practice the variances are estimated from the data, yielding *feasible* GLS (FGLS) — but with risks: a misspecified weighting model can be worse than plain OLS with robust SEs.
+
+::::: {.columns}
+:::: {.column width="50%"}
+::: {.callout-tip collapse="true" appearance="simple" title="Example"}
+On the Davis house data, plain OLS yields the same $\hat\beta$ regardless of error structure — but its *efficiency* is lost under heteroskedasticity. A GLS estimator that down-weights houses with larger fitted-residual variance would, in principle, deliver tighter standard errors than OLS+HC1 — provided the weights are correctly specified. The chapter notes this trade-off and recommends OLS+robust SEs as the safe default.
+:::
+::::
+:::: {.column width="50%"}
+::: {.callout-note collapse="true" appearance="simple" title="Analogy"}
+A tailor making suits doesn't apply the same fabric tension to every customer — a precise pattern weights tighter where measurements are reliable and looser where they are not. GLS is the regression's tailored fit: weighting each observation by its relative reliability so the resulting estimator hugs the truth more snugly than the off-the-rack OLS line does.
+:::
+::::
+:::::
+
+**Statistical Power ($1 - \beta$):** The probability that a test correctly *rejects* the null hypothesis when the alternative is in fact true. Power rises with sample size $n$, with the true effect size, and with the chosen significance level $\alpha$ — and falls with the noise level. A standard target is power $\geq 0.80$ for the smallest effect of practical interest.
+
+::::: {.columns}
+:::: {.column width="50%"}
+::: {.callout-tip collapse="true" appearance="simple" title="Example"}
+The Davis house regression had only $n = 29$ observations to test $H_0: \beta_{\text{bedrooms}} = 0$, and failed to reject ($p = 0.773$). With such a small sample and substantial multicollinearity between `size` and `bedrooms`, the test's power to detect a modest bedrooms effect was very low — the failure to reject is as likely a Type II error (missed effect) as evidence of no effect at all.
+:::
+::::
+:::: {.column width="50%"}
+::: {.callout-note collapse="true" appearance="simple" title="Analogy"}
+A microscope's magnification determines whether a faint cell wall shows up or stays hidden in the smudge. Statistical power is the magnification of a hypothesis test: with low magnification, real effects can sit invisibly under the noise floor; bumping up the sample size is like swapping in a stronger lens — what was always there finally becomes visible.
+:::
+::::
+:::::
 
 ## Setup
 

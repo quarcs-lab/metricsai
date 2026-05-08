@@ -28,19 +28,17 @@ This notebook provides an interactive introduction to regression diagnostics and
 
 This chapter focuses on checking model assumptions and diagnosing data problems. You'll gain both theoretical understanding and practical skills through hands-on Python examples.
 
-**Learning Objectives:**
+**What you'll learn:**
 
-By the end of this chapter, you will be able to:
-
-1. Identify and diagnose multicollinearity using correlation matrices and VIF
-2. Understand the consequences when each of the four core OLS assumptions fails
-3. Recognize omitted variable bias and specify appropriate control variables
-4. Understand endogeneity and when to use instrumental variables (IV)
-5. Detect and address heteroskedasticity using robust standard errors
-6. Identify autocorrelation in time series data and apply HAC-robust standard errors
-7. Interpret residual diagnostic plots to detect model violations
-8. Identify outliers and influential observations using DFITS and DFBETAS
-9. Apply appropriate diagnostic tests and remedies for common data problems
+- Identify and diagnose multicollinearity using correlation matrices and VIF
+- Understand the consequences when each of the four core OLS assumptions fails
+- Recognize omitted variable bias and specify appropriate control variables
+- Understand endogeneity and when to use instrumental variables (IV)
+- Detect and address heteroskedasticity using robust standard errors
+- Identify autocorrelation in time series data and apply HAC-robust standard errors
+- Interpret residual diagnostic plots to detect model violations
+- Identify outliers and influential observations using DFITS and DFBETAS
+- Apply appropriate diagnostic tests and remedies for common data problems
 
 **Chapter outline:**
 
@@ -58,6 +56,100 @@ By the end of this chapter, you will be able to:
 
 - **AED_EARNINGS_COMPLETE.DTA**: 842 full-time workers with earnings, age, education, and experience (2010)
 - **AED_DEMOCRACY.DTA**: 131 countries with democracy, growth, and institutional variables (Acemoglu et al. 2008)
+
+## Key Concepts
+
+Six core ideas anchor this chapter. Skim them before you start, and come back when a term feels fuzzy. Each entry pairs a concrete example using the chapter's data with a non-technical analogy. Click a panel to expand it.
+
+**Endogeneity:** A regressor is endogenous when it is correlated with the error term — typically because of an omitted variable, simultaneous causality, or measurement error. Endogeneity violates the zero-conditional-mean assumption ($E[u \mid x] = 0$) and biases OLS coefficients, so neither robust standard errors nor more data can rescue inference.
+
+::::: {.columns}
+:::: {.column width="50%"}
+::: {.callout-tip collapse="true" appearance="simple" title="Example"}
+In the chapter's `data_democracy` study (131 countries), regressing economic `growth` on `democracy` looks straightforward — but `democracy` is plausibly endogenous: rich countries afford stronger institutions, so causality runs both ways. OLS on this pair is biased, and the chapter explicitly flags it as a textbook case where naive interpretation of the coefficient ("democracy boosts growth") confuses correlation with causation.
+:::
+::::
+:::: {.column width="50%"}
+::: {.callout-note collapse="true" appearance="simple" title="Analogy"}
+A blood test that *itself* spikes the patient's adrenaline is a contaminated measurement: the act of testing changes the thing being measured. Endogeneity is the regression's contaminated-test problem — the regressor and the unobserved error are entangled, so the recorded effect is partly the test, partly the contamination, and impossible to separate without a different instrument.
+:::
+::::
+:::::
+
+**Instrumental Variable (IV):** A regressor — call it $z$ — that *(i)* shifts the endogenous variable $x$ but *(ii)* affects the outcome $y$ only *through* $x$. Two-stage least squares uses $z$ to estimate the part of $x$ that is exogenous, recovering an unbiased estimate of $x$'s effect on $y$.
+
+::::: {.columns}
+:::: {.column width="50%"}
+::: {.callout-tip collapse="true" appearance="simple" title="Example"}
+The chapter cites Acemoglu, Johnson, and Robinson (2001), who use settler mortality as an IV for institutional quality across the 131 countries in `data_democracy`-related research. The instrument shifts colonial institutions (relevance) but, the argument goes, does not directly affect modern GDP otherwise (exogeneity). The 2SLS estimate of institutions on `growth` is far larger than the biased OLS estimate, dramatising the size of the endogeneity problem.
+:::
+::::
+:::: {.column width="50%"}
+::: {.callout-note collapse="true" appearance="simple" title="Analogy"}
+A locksmith's universal key opens only the front door of a building, but every visit to *anywhere* in the building must first pass through that door. The IV is that one key: it grants access to the variation you actually need (entry through the front door) while ignoring all the unrelated activity happening upstairs.
+:::
+::::
+:::::
+
+**Leverage:** A measure of how unusual an observation's regressor values are — how far the row's $\mathbf{x}_i$ sits from the centre of the regressor cloud. High-leverage points have an outsized capacity to *move* the fitted line if their $y$ values shift, regardless of whether their actual residual is small or large.
+
+::::: {.columns}
+:::: {.column width="50%"}
+::: {.callout-tip collapse="true" appearance="simple" title="Example"}
+Consider an `earnings` regression on `age + education + experience` in `data_earnings` ($n = 842$). A respondent with `education = 21` (PhD) and `experience = 0` (just graduated) sits at an unusual corner of regressor space — high leverage. Whether or not their earnings are unusual, the OLS line bends *more* in response to this row than to a typical mid-career worker — which is exactly when you want a leverage statistic to flag it.
+:::
+::::
+:::: {.column width="50%"}
+::: {.callout-note collapse="true" appearance="simple" title="Analogy"}
+On a see-saw, a small child sitting on the very end has more pivoting power than a heavier adult sitting near the centre. Leverage in regression is exactly that physics: distance from the centre of the regressor cloud determines how much each observation can tip the fitted line, *independent* of how heavy (residual-size) that observation actually is.
+:::
+::::
+:::::
+
+**Cook's Distance:** A composite influence statistic that combines an observation's leverage and its residual size into one summary number. Large Cook's-D values flag rows whose removal would meaningfully change the fitted coefficients; the standard rule of thumb is to investigate any value above $4/n$.
+
+::::: {.columns}
+:::: {.column width="50%"}
+::: {.callout-tip collapse="true" appearance="simple" title="Example"}
+Computing Cook's distance for the earnings regression on `data_earnings` (842 workers) flags a small handful of outliers — a few very high earners far from the bulk of the sample. The chapter compares OLS coefficients with and without these flagged points: when their removal changes the `education` coefficient by more than a standard error, they are influential, not just unusual.
+:::
+::::
+:::: {.column width="50%"}
+::: {.callout-note collapse="true" appearance="simple" title="Analogy"}
+A restaurant critic walks in unannounced and orders the entire menu. Whether or not they leave a tip, the chef will rearrange the kitchen around their visit because the *combination* of presence and impact is enormous. Cook's distance is the regression's critic-detector: not just "this observation is unusual" or "this observation has a big residual" — the product of both, the genuine influence on the menu.
+:::
+::::
+:::::
+
+**Auxiliary Regression:** A side regression of one regressor on all the others, used to compute diagnostics rather than answer a substantive question. Its $R^2$ feeds directly into the variance inflation factor: $\text{VIF}_j = 1/(1 - R_j^2)$.
+
+::::: {.columns}
+:::: {.column width="50%"}
+::: {.callout-tip collapse="true" appearance="simple" title="Example"}
+For `earnings ~ age + education + agebyeduc` on `data_earnings`, the chapter runs the auxiliary regression `agebyeduc ~ age + education` and finds $R^2 \approx 0.987$. Plugging that into the VIF formula gives $\text{VIF}_{\text{agebyeduc}} = 1/(1 - 0.987) \approx 77$ — severe multicollinearity, which explains why the individual t-statistic on the interaction term is so unreliable.
+:::
+::::
+:::: {.column width="50%"}
+::: {.callout-note collapse="true" appearance="simple" title="Analogy"}
+A theatre understudy steps in to play another character's role for one rehearsal — not because the play needs them, but because the director wants to see how easily their lines could be replaced by everyone else's. The auxiliary regression is that rehearsal: it doesn't appear in the final show, but it tells the director how much of *one* part is already implied by *the others*.
+:::
+::::
+:::::
+
+**Specification Test (RESET):** Ramsey's Regression Equation Specification Error Test adds powers of the fitted values ($\hat{y}^2, \hat{y}^3$) to the original regression and tests whether their coefficients are jointly zero. Rejection signals that the model has misspecified its functional form — typically a missing nonlinear term.
+
+::::: {.columns}
+:::: {.column width="50%"}
+::: {.callout-tip collapse="true" appearance="simple" title="Example"}
+A linear `earnings ~ age + education` model on `data_earnings` (842 workers) fails the RESET test once age enters quadratically — because the chapter's preferred quadratic-in-age specification (with peak earnings near age 50) has nonlinear structure the linear model misses. Rejecting RESET tells the analyst: a more flexible functional form is needed, before concluding anything else.
+:::
+::::
+:::: {.column width="50%"}
+::: {.callout-note collapse="true" appearance="simple" title="Analogy"}
+A factory's quality-control inspector picks finished products at random and *re*-tests them with a tougher protocol than the assembly line. If the products fail the tougher test, the assembly line itself is suspect — not just one bad batch. RESET is the regression's quality-control re-test: it asks whether the fitted equation survives a stricter functional-form challenge.
+:::
+::::
+:::::
 
 ## Setup
 

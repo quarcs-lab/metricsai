@@ -55,6 +55,100 @@ This notebook provides an interactive introduction to univariate data analysis u
 - Practice Exercises
 - Case Studies
 
+## Key Concepts
+
+Six core ideas anchor this chapter. Skim them before you start, and come back when a term feels fuzzy. Each entry pairs a concrete example using the chapter's data with a non-technical analogy. Click a panel to expand it.
+
+**Mean and Median:** Two ways to report the center of a dataset. The mean adds up every observation and divides by how many there are; the median picks the value that sits exactly in the middle once the data are sorted.
+
+::::: {.columns}
+:::: {.column width="50%"}
+::: {.callout-tip collapse="true" appearance="simple" title="Example"}
+For the 171 working women aged 30 in `data_earnings`, the mean of `earnings` is \$41,412.69 while the median is \$36,000 — a gap of \$5,413 (15%). The mean is pulled upward by a small group of high earners (the maximum is \$172,000), so when you want to describe a "typical" 30-year-old woman's earnings, the median is the more honest number.
+:::
+::::
+:::: {.column width="50%"}
+::: {.callout-note collapse="true" appearance="simple" title="Analogy"}
+Imagine seven kids on a seesaw: six lightweights and one very heavy kid. The mean is the **balance point** that takes everyone's weight into account — and the heavy kid drags it toward their side. The median is the **middle kid** when you line them up by weight — unaffected by the outlier. The median is the "honest center" for skewed data; the mean is the "weighted center."
+:::
+::::
+:::::
+
+**Standard Deviation:** A single number that measures how spread out the observations are around the mean. A larger value means the data points sit further from the average; a smaller value means they cluster tightly.
+
+::::: {.columns}
+:::: {.column width="50%"}
+::: {.callout-tip collapse="true" appearance="simple" title="Example"}
+`earnings` in `data_earnings` has a standard deviation of about \$25,527 — roughly 62% of the mean. That is enormous spread relative to the typical wage: a rule of thumb says about two-thirds of these 171 women earn within ±\$25,527 of the \$41,413 mean — anywhere from \$16k to \$67k.
+:::
+::::
+:::: {.column width="50%"}
+::: {.callout-note collapse="true" appearance="simple" title="Analogy"}
+Standard deviation is the volume knob on a stereo. A choir singing together at one volume sounds like a single sustained note; the same choir where some sing softly and some belt loudly sounds like a chord with audible spread. The volume knob doesn't change the song's center pitch — only the audible range around it.
+:::
+::::
+:::::
+
+**Quartiles and IQR:** Quartiles are the three values that split sorted data into four equal-sized groups: $Q_1$ (the 25% mark), $Q_2$ (the median), and $Q_3$ (the 75% mark). The interquartile range, IQR, is simply $Q_3 - Q_1$ — the width of the middle half of the data.
+
+::::: {.columns}
+:::: {.column width="50%"}
+::: {.callout-tip collapse="true" appearance="simple" title="Example"}
+For the 171 women in `data_earnings`, $Q_1 = \$25{,}000$ and $Q_3 = \$49{,}000$, giving an IQR of \$24,000. The middle half of women earn between \$25k and \$49k — a tight central band, even though individual earners range from \$1,050 to \$172,000. The box on the chapter's box plot is exactly this \$24k-wide block.
+:::
+::::
+:::: {.column width="50%"}
+::: {.callout-note collapse="true" appearance="simple" title="Analogy"}
+Picture a marathon with 100 runners crossing the finish line. The quartiles are the 25th, 50th, and 75th finishers — they mark the boundaries of the "front pack", "middle pack", and "back pack". The IQR is the time gap between the 25th and 75th finishers: a small gap means a tightly bunched race; a big gap means a strung-out field.
+:::
+::::
+:::::
+
+**Skewness:** A number that summarizes how asymmetric a distribution is. Positive values mean a long tail of high values, negative values mean a long tail of low values, and values near zero mean roughly symmetric.
+
+::::: {.columns}
+:::: {.column width="50%"}
+::: {.callout-tip collapse="true" appearance="simple" title="Example"}
+The `earnings` distribution in `data_earnings` has a skewness of **1.71**. By the chapter's interpretation guideline, anything above 1 is "highly skewed" — which matches what we see: 75% of the 171 women earn under \$49k, but a few outliers reach \$172k, dragging the right tail far past the mean.
+:::
+::::
+:::: {.column width="50%"}
+::: {.callout-note collapse="true" appearance="simple" title="Analogy"}
+Skewness is what makes a portrait photograph feel "off-center". A symmetric face shot has the nose right in the middle, with equal space on both sides. A photo cropped tightly on one side and wide-open on the other has positive or negative skew depending on which side has the extra space. The earnings distribution is like a photo with the subject pinned to the left and an empty hallway stretching to the right.
+:::
+::::
+:::::
+
+**Kurtosis:** A number that summarizes how heavy a distribution's tails are — that is, how often extreme values appear. Positive (excess) values mean more frequent outliers than a perfectly bell-shaped pattern would predict; negative values mean fewer; zero matches the bell-shape.
+
+::::: {.columns}
+:::: {.column width="50%"}
+::: {.callout-tip collapse="true" appearance="simple" title="Example"}
+The `earnings` data has an **excess kurtosis of 4.32** (raw kurtosis 7.32, minus the bell-shape baseline of 3). That is well above zero, meaning extreme high earners — like the women earning \$100k+ — appear much more often in this sample than a bell-shaped reference distribution would predict.
+:::
+::::
+:::: {.column width="50%"}
+::: {.callout-note collapse="true" appearance="simple" title="Analogy"}
+Kurtosis is the "rare-event frequency" on a city traffic network. Some days every commute is the same; in a low-kurtosis city, traffic is steady and freak jams almost never happen. In a high-kurtosis city, smooth days alternate with truly extreme jams. The earnings sample has high kurtosis because extreme paychecks crop up far more often than a steady commuter pattern would suggest.
+:::
+::::
+:::::
+
+**Z-Score (Standardization):** A standardized version of an observation, expressed as the number of standard deviations above or below the mean. Standardizing every observation rescales the dataset to have mean 0 and standard deviation 1, regardless of the original units.
+
+::::: {.columns}
+:::: {.column width="50%"}
+::: {.callout-tip collapse="true" appearance="simple" title="Example"}
+A woman in `data_earnings` who earns \$67,000 is roughly $(67{,}000 - 41{,}413) / 25{,}527 \approx 1.0$ standard deviations above the mean — her z-score is +1. Standardizing the entire `earnings` column lets us compare her position to, say, a runner's position in a marathon-time distribution, even though dollars and minutes share no scale.
+:::
+::::
+:::: {.column width="50%"}
+::: {.callout-note collapse="true" appearance="simple" title="Analogy"}
+A z-score is a currency converter for distributions. Just as you can compare \$10 in New York with €9 in Paris by converting both to a common currency, a z-score converts a \$67k earner and a 28-second 100m sprinter to a common scale ("standard deviations above average"). Once everything is in the same currency, ranking and comparing become trivial.
+:::
+::::
+:::::
+
 ## Setup
 
 Run this cell first to import all required packages and configure the environment.

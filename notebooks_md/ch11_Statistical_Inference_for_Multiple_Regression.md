@@ -28,20 +28,18 @@ This notebook provides an interactive introduction to extending inference to mod
 
 This chapter extends statistical inference to models with multiple regressors. You'll learn to construct confidence intervals, conduct hypothesis tests on individual and groups of parameters, and present regression results professionally.
 
-**Learning Objectives:**
+**What you'll learn:**
 
-By the end of this chapter, you will be able to:
-
-1. Extend statistical inference from bivariate regression to multiple regression with $k$ regressors
-2. Understand the $t$-statistic for individual coefficients following a $T(n-k)$ distribution
-3. Calculate and interpret standard errors for OLS slope coefficients: $se(b_j) = s_e / \sqrt{\sum \widetilde{x}_{ji}^2}$
-4. Construct confidence intervals using $b_j \pm t_{n-k, \alpha/2} \times se(b_j)$
-5. Conduct hypothesis tests on individual parameters to determine statistical significance
-6. Understand and apply F-tests for joint hypotheses involving multiple parameter restrictions
-7. Interpret the F distribution with two degrees of freedom ($v_1$ = restrictions, $v_2 = n-k$)
-8. Perform the test of overall statistical significance using $H_0: \beta_2 = \cdots = \beta_k = 0$
-9. Test whether subsets of regressors are jointly significant using nested model comparisons
-10. Present regression results in standard formats (standard errors, t-statistics, p-values, confidence intervals, asterisks)
+- Extend statistical inference from bivariate regression to multiple regression with $k$ regressors
+- Understand the $t$-statistic for individual coefficients following a $T(n-k)$ distribution
+- Calculate and interpret standard errors for OLS slope coefficients: $se(b_j) = s_e / \sqrt{\sum \widetilde{x}_{ji}^2}$
+- Construct confidence intervals using $b_j \pm t_{n-k, \alpha/2} \times se(b_j)$
+- Conduct hypothesis tests on individual parameters to determine statistical significance
+- Understand and apply F-tests for joint hypotheses involving multiple parameter restrictions
+- Interpret the F distribution with two degrees of freedom ($v_1$ = restrictions, $v_2 = n-k$)
+- Perform the test of overall statistical significance using $H_0: \beta_2 = \cdots = \beta_k = 0$
+- Test whether subsets of regressors are jointly significant using nested model comparisons
+- Present regression results in standard formats (standard errors, t-statistics, p-values, confidence intervals, asterisks)
 
 **Dataset used:**
 
@@ -66,6 +64,100 @@ By the end of this chapter, you will be able to:
 - Practice Exercises
 - Case Studies
 
+
+## Key Concepts
+
+Six core ideas anchor this chapter. Skim them before you start, and come back when a term feels fuzzy. Each entry pairs a concrete example using the chapter's data with a non-technical analogy. Click a panel to expand it.
+
+**$t$-Statistic for $b_j$ ($T(n-k)$):** A standardised distance — how many standard errors the estimated coefficient $b_j$ sits from a hypothesised value: $t = (b_j - \beta_j^*)/\operatorname{se}(b_j)$. In multiple regression, this statistic follows a Student-$t$ distribution with $n-k$ degrees of freedom (one fewer per estimated coefficient).
+
+::::: {.columns}
+:::: {.column width="50%"}
+::: {.callout-tip collapse="true" appearance="simple" title="Example"}
+For the Davis house regression with `size`, `bedrooms`, `bathrooms`, `lotsize`, `age`, `monthsold` (so $n = 29$, $k = 7$, $n - k = 22$), the test of $H_0: \beta_{\text{size}} = 0$ gives $t = 68.37 / \operatorname{se} \approx 4.4$, far above the critical value $t_{22,\,0.025} \approx 2.07$. By contrast, $t$-statistics for `bedrooms` and `bathrooms` are below $1$ — well within the noise band of $T(22)$.
+:::
+::::
+:::: {.column width="50%"}
+::: {.callout-note collapse="true" appearance="simple" title="Analogy"}
+A pulse rate of 100 bpm at rest sounds high, but only by reference to the typical resting range of 60–100. The $t$-statistic does the same standardising for a coefficient: it converts "the slope is \$68" into "the slope is 4.4 typical-jitter-units away from zero" — a number whose surprise level is calibrated to the chapter's $T(n-k)$ table.
+:::
+::::
+:::::
+
+**Degrees of Freedom ($n-k$) in Multiple Regression:** The number of observations minus the number of estimated parameters (intercept plus $k-1$ slopes). It governs the spread of the $T$ and $F$ distributions used for inference and reflects how much information the data have left over after fitting the model.
+
+::::: {.columns}
+:::: {.column width="50%"}
+::: {.callout-tip collapse="true" appearance="simple" title="Example"}
+The full Davis model has $n = 29$ houses and $k = 7$ parameters, so $n - k = 22$ degrees of freedom. Critical values from $T(22)$ ($\pm 2.074$ at $\alpha = 0.05$) drive every confidence interval and $t$-test in the chapter. Add another regressor and degrees of freedom drop to 21, slightly inflating critical values and standard errors — a real cost in a sample this small.
+:::
+::::
+:::: {.column width="50%"}
+::: {.callout-note collapse="true" appearance="simple" title="Analogy"}
+A monthly budget of \$2{,}900 sees \$700 of fixed expenses (rent, utilities, transit) before any discretionary spending; \$2{,}200 is what's left to play with. Degrees of freedom are the data's discretionary budget after paying for parameter estimates: the more parameters fitted, the less budget left for measuring uncertainty.
+:::
+::::
+:::::
+
+**Standard Error of $b_j$ in Multiple Regression:** Under classical assumptions, $\operatorname{se}(b_j) = s_e \big/ \sqrt{\sum_{i=1}^n \widetilde{x}_{ji}^2}$, where $\widetilde{x}_{ji}$ is the residual from regressing $x_j$ on all other regressors. So $\operatorname{se}(b_j)$ shrinks when the model fits well *and* when $x_j$ has plenty of variation that *isn't* already explained by the other variables.
+
+::::: {.columns}
+:::: {.column width="50%"}
+::: {.callout-tip collapse="true" appearance="simple" title="Example"}
+For the Davis house regression, $\operatorname{se}(b_{\text{size}}) \approx 15.4$ — small enough that the size coefficient's $t$-statistic exceeds 4. The standard error on `bedrooms`, however, is large *relative to* its coefficient because much of bedrooms' variation is already absorbed by `size` (recall the $r = 0.52$ correlation between them); $\widetilde{x}_{\text{bedrooms}}$ is small, so the denominator shrinks and the SE balloons.
+:::
+::::
+:::: {.column width="50%"}
+::: {.callout-note collapse="true" appearance="simple" title="Analogy"}
+A camera autofocus needs *contrast* across the scene to lock onto an edge. A foggy, uniform wall — even a beautifully lit one — leaves nothing distinct to focus on, and the autofocus motor hunts blurrily back and forth. $\operatorname{se}(b_j)$ is the same idea: when there's no residual contrast in $x_j$ after the other regressors have fit, focus on $\beta_j$ goes hazy.
+:::
+::::
+:::::
+
+**Test of Overall Significance ($H_0: \beta_2 = \cdots = \beta_k = 0$):** The model-wide F-test asking whether *any* slope coefficient is non-zero. It is the omnibus answer to "does this regression collectively explain $y$?" — orthogonal to which individual variables drive it.
+
+::::: {.columns}
+:::: {.column width="50%"}
+::: {.callout-tip collapse="true" appearance="simple" title="Example"}
+For the full Davis model, the overall F-test gives $F(6, 22) = 6.83$ with $p = 0.0003$ and critical value $\approx 2.55$ — a decisive rejection. The model collectively explains house prices, even though only `size` shows individual significance. The omnibus test "votes" yes; the individual $t$-tests then reveal that the credit goes to `size` alone.
+:::
+::::
+:::: {.column width="50%"}
+::: {.callout-note collapse="true" appearance="simple" title="Analogy"}
+An orchestra warm-up: each section tunes individually, then the conductor calls for the whole ensemble to play one chord. The overall F-test is that single chord — does the *combined* sound rise above silence? Some sections may be quietly tuning; what matters first is that the chord audibly exists.
+:::
+::::
+:::::
+
+**Restricted vs. Unrestricted Model:** A pair of models used for joint F-tests. The unrestricted model includes every coefficient of interest; the restricted model imposes the hypothesis being tested (often by zeroing out a subset). The F-statistic compares the residual sums of squares: $F = \frac{(\text{RSS}_R - \text{RSS}_U)/q}{\text{RSS}_U/(n-k)}$, where $q$ is the number of restrictions.
+
+::::: {.columns}
+:::: {.column width="50%"}
+::: {.callout-tip collapse="true" appearance="simple" title="Example"}
+The chapter tests whether `bedrooms`, `bathrooms`, `lotsize`, `age`, `monthsold` add anything beyond `size`. The unrestricted model has all six regressors; the restricted model keeps only `size`. The resulting $F(5, 22) = 0.42$, $p = 0.832$ — well below the critical 2.66 — so the five extras are jointly redundant, even though the chapter cannot identify any single one as definitively zero.
+:::
+::::
+:::: {.column width="50%"}
+::: {.callout-note collapse="true" appearance="simple" title="Analogy"}
+Compare driving on a freeway with no speed limit (unrestricted) vs. with a 65-mph cap (restricted). Measure travel time in both setups. If the cap barely slows anyone down, the rule is doing nothing; if travel time jumps, the rule is binding. The F-test does the same: does *imposing* the restriction noticeably hurt fit?
+:::
+::::
+:::::
+
+**Asterisk Notation in Regression Tables:** A convention for flagging significance levels next to estimates: typically `*` for $p < 0.10$, `**` for $p < 0.05$, `***` for $p < 0.01$. It compresses the $t$-statistic-and-$p$-value information into a glanceable annotation alongside each coefficient.
+
+::::: {.columns}
+:::: {.column width="50%"}
+::: {.callout-tip collapse="true" appearance="simple" title="Example"}
+A polished version of the Davis regression table would show `size` as $68.37^{***}$ (significant at 1%), with all other coefficients (bedrooms, bathrooms, lotsize, age, monthsold) carrying no asterisks at all — readers can scan the column and immediately see that one variable is doing all the work, without having to parse seven separate $p$-values.
+:::
+::::
+:::: {.column width="50%"}
+::: {.callout-note collapse="true" appearance="simple" title="Analogy"}
+Restaurant rating systems use one to three stars to capture "good", "very good", and "exceptional" without forcing the reader to read every review. Asterisks on coefficients work the same way: a glance tells you which entries cleared the 10%, 5%, and 1% thresholds, and whether the table's headline finding rests on solid or shaky ground.
+:::
+::::
+:::::
 
 ## Setup
 

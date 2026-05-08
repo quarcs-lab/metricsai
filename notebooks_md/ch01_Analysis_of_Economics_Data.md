@@ -56,6 +56,100 @@ This chapter introduces the fundamental concepts of econometrics and regression 
 - Practice Exercises
 - Case Studies
 
+## Key Concepts
+
+Six core ideas anchor this chapter. Skim them before you start, and come back when a term feels fuzzy. Each entry pairs a concrete house-price example with a non-technical analogy. Click a panel to expand it.
+
+**Regression Analysis:** A statistical method for quantifying how one variable changes when another variable changes. It produces a "line of best fit" through the data and reports the slope, intercept, and goodness of fit.
+
+::::: {.columns}
+:::: {.column width="50%"}
+::: {.callout-tip collapse="true" appearance="simple" title="Example"}
+For 29 houses in Davis, CA (1999), regression of `price` on `size` gives `price = 115,952 + 73.77 × size`. The slope says each extra square foot is associated with about \$74 more in sale price.
+:::
+::::
+:::: {.column width="50%"}
+::: {.callout-note collapse="true" appearance="simple" title="Analogy"}
+Like fitting a single straight road through a scattered village. The road won't pass through every house, but it captures the general direction the houses are arranged in.
+:::
+::::
+:::::
+
+**Dependent and Independent Variables (Y and X):** The dependent variable (Y) is the outcome you want to explain or predict. The independent variable (X) is the input you use to explain it. The regression slope tells you how Y moves when X changes by one unit.
+
+::::: {.columns}
+:::: {.column width="50%"}
+::: {.callout-tip collapse="true" appearance="simple" title="Example"}
+Here Y = `price` (sale price in dollars) and X = `size` (square feet). We treat price as the thing being explained and size as the explainer — not the other way around. Reversing them would answer a different question ("how much bigger is a more-expensive house?").
+:::
+::::
+:::: {.column width="50%"}
+::: {.callout-note collapse="true" appearance="simple" title="Analogy"}
+Like a recipe: the amount of flour (X) helps explain how much bread you get (Y). Bread doesn't cause flour. Choosing which is X and which is Y is a modeling decision, not a fact about the world.
+:::
+::::
+:::::
+
+**Intercept ($\beta_0$) and Slope ($\beta_1$):** The intercept is the predicted value of Y when X = 0 — it anchors the regression line. The slope is the change in Y for a one-unit change in X — it is usually the coefficient you actually care about.
+
+::::: {.columns}
+:::: {.column width="50%"}
+::: {.callout-tip collapse="true" appearance="simple" title="Example"}
+In our fit, $\beta_0 \approx \$115{,}952$ (the predicted price of a 0-sqft house — not economically meaningful, just an anchor) and $\beta_1 \approx \$73.77$ per sqft (each additional square foot is associated with about \$74 more in price).
+:::
+::::
+:::: {.column width="50%"}
+::: {.callout-note collapse="true" appearance="simple" title="Analogy"}
+Like a taxi fare: the intercept is the flag-drop charge you pay just for getting in (\$5), and the slope is the per-mile rate (\$2/mile). The flag-drop alone is rarely the interesting number — the per-mile rate is.
+:::
+::::
+:::::
+
+**Ordinary Least Squares (OLS):** The standard method for choosing the regression line. OLS picks the intercept and slope that make the sum of *squared* vertical distances between the actual Y values and the fitted line as small as possible.
+
+::::: {.columns}
+:::: {.column width="50%"}
+::: {.callout-tip collapse="true" appearance="simple" title="Example"}
+For each of the 29 houses, the vertical gap between its dot and the fitted line is a residual. OLS chose $\beta_0 = 115{,}952$ and $\beta_1 = 73.77$ because no other line gives a smaller sum of *squared* residuals across those 29 houses.
+:::
+::::
+:::: {.column width="50%"}
+::: {.callout-note collapse="true" appearance="simple" title="Analogy"}
+Like hanging a clothesline through a row of poles of different heights. You position the line so the total *squared* slack — pulled tight from every pole — is as small as possible. Squaring (rather than just adding) means a few far-off poles get penalized more than many slightly-off ones.
+:::
+::::
+:::::
+
+**R-squared ($R^2$):** The proportion of variation in Y that the regression explains, on a 0-to-1 scale. Higher $R^2$ means the line fits the points more tightly; it does **not** mean the relationship is causal.
+
+::::: {.columns}
+:::: {.column width="50%"}
+::: {.callout-tip collapse="true" appearance="simple" title="Example"}
+Our model has $R^2 \approx 0.62$. Size alone explains about 62% of the variation in house prices across these 29 houses. The remaining 38% comes from other things we didn't include — location, condition, age, lot size.
+:::
+::::
+:::: {.column width="50%"}
+::: {.callout-note collapse="true" appearance="simple" title="Analogy"}
+Like a weather forecast that captures roughly two-thirds of what actually happens. A high $R^2$ means your one explanatory variable does most of the storytelling; a low $R^2$ means most of the story is happening off-stage in variables you haven't measured.
+:::
+::::
+:::::
+
+**Association vs. Causation:** Regression measures *association* — how Y and X move together in your sample. It does **not**, by itself, prove that changing X would change Y. Other variables (omitted, confounding, or reverse-causal) may drive both.
+
+::::: {.columns}
+:::: {.column width="50%"}
+::: {.callout-tip collapse="true" appearance="simple" title="Example"}
+The slope says larger houses sell for more — but bolting an extra 100 sqft onto your house won't necessarily add \$7,400 of value. Bigger houses also tend to be newer, in better neighborhoods, and more carefully renovated. Size is correlated with quality, and the regression credits size for quality's effect too.
+:::
+::::
+:::: {.column width="50%"}
+::: {.callout-note collapse="true" appearance="simple" title="Analogy"}
+Ice-cream sales and drowning deaths both rise in summer. They are strongly *associated*. But banning ice cream would not save swimmers — both are caused by hot weather. Regression alone can't tell you which arrows in the causal diagram are real.
+:::
+::::
+:::::
+
 ## Setup
 
 Run this cell first to import all required packages and configure the environment. This sets up:
