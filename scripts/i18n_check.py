@@ -95,7 +95,8 @@ def collect_html_references() -> dict[Path, set[str]]:
     for p in (ROOT / "web-apps").glob("ch*/dashboard.html"):
         candidates.append(p)
     attr_re = re.compile(r'data-i18n\s*=\s*"([\w.\-]+)"')
-    call_re = re.compile(r'\bt\(\s*"([\w.\-]+)"')
+    # Match both `t("key")` and `window.t('key')`, single or double quoted.
+    call_re = re.compile(r'(?:\bwindow\.)?\bt\(\s*[\'"]([\w.\-]+)[\'"]')
     for path in candidates:
         text = path.read_text(encoding="utf-8")
         if "i18n-runtime.js" not in text:

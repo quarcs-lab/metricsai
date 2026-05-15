@@ -57,8 +57,10 @@
       const key = els[i].getAttribute("data-i18n");
       els[i].innerHTML = window.t(key);
     }
-    const lbl = document.getElementById("siteLanguageLabel");
-    if (lbl) lbl.textContent = lang.toUpperCase();
+    const labels = document.querySelectorAll("#siteLanguageLabel, [data-lang-label]");
+    for (let j = 0; j < labels.length; j++) {
+      labels[j].textContent = lang.toUpperCase();
+    }
     for (const k in window) {
       if (k.indexOf("__rerender_") === 0 && typeof window[k] === "function") {
         try { window[k](); } catch (e) {}
