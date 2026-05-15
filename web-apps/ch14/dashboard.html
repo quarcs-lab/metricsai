@@ -3,24 +3,67 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Chapter 14 — Regression with Indicator Variables · metricsAI</title>
+<title data-i18n="meta.title">Chapter 14 — Regression with Indicator Variables · metricsAI</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <script src="https://cdn.plot.ly/plotly-2.35.2.min.js" charset="utf-8"></script>
 <style>
 :root{--cyan:#008CB7;--cyan-soft:#22d3ee;--purple:#7A209F;--purple-soft:#c084fc;--pink:#C21E72;--pink-soft:#f472b6;--bg:#f5f8fb;--panel:#fff;--panel-2:#f0f4f9;--text:#0b1021;--text-soft:#475569;--text-muted:#64748b;--border:#d9e2ec;--accent:var(--cyan);--accent-2:var(--purple);--accent-3:var(--pink);--shadow:0 2px 10px rgba(11,16,33,.06),0 12px 30px rgba(11,16,33,.05);--grid:#e3e8ef;--code-bg:#eef3f8}
 html[data-theme="dark"]{--bg:#0c1024;--panel:#151a33;--panel-2:#1b2142;--text:#e2e8f0;--text-soft:#b5c0d0;--text-muted:#8a98ae;--border:#2a3156;--accent:var(--cyan-soft);--accent-2:var(--purple-soft);--accent-3:var(--pink-soft);--shadow:0 2px 10px rgba(0,0,0,.25),0 12px 30px rgba(0,0,0,.35);--grid:#2a3156;--code-bg:#0f1530}
 *{box-sizing:border-box}html,body{margin:0;padding:0}
-body{font-family:'Inter',system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);line-height:1.55;transition:background-color .25s ease,color .25s ease}
+body{font-family:'Inter',system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);line-height:1.55;transition:background-color .25s ease,color .25s ease; padding-top: 64px; /* leave room for the fixed .site-nav */ }
+/* ===== Site navigation bar (shared across metricsAI pages) ===== */
+.site-nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 50;
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--border);
+  height: 64px;
+}
+html[data-theme="dark"] .site-nav { background: rgba(12, 16, 36, 0.85); }
+.site-nav-inner { max-width: 1280px; margin: 0 auto; padding: 0 1rem; height: 100%; display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
+.site-nav-brand { display: flex; align-items: center; gap: 0.5rem; font-weight: 700; font-size: 1.15rem; color: var(--text); text-decoration: none; }
+.site-nav-brand .ai-mark { color: var(--accent); }
+.site-nav-links { display: flex; gap: 1.5rem; }
+.site-nav-links a { color: var(--text-soft); text-decoration: none; font-weight: 500; font-size: 0.95rem; transition: color .2s ease; }
+.site-nav-links a:hover { color: var(--accent); }
+.site-nav-links a.active { color: var(--accent); border-bottom: 2px solid var(--accent); padding-bottom: 0.25rem; }
+.site-nav-controls { display: flex; align-items: center; gap: 0.8rem; }
+.site-nav-cameron { display: flex; flex-direction: column; align-items: center; padding: 0.25rem 0.6rem; border: 1px solid var(--border); border-radius: 0.5rem; background: var(--panel-2); text-decoration: none; line-height: 1.1; transition: background .2s ease; }
+.site-nav-cameron:hover { background: var(--panel); }
+.site-nav-cameron .cameron-pre { font-size: 0.6rem; color: var(--text-muted); }
+.site-nav-cameron .cameron-name { font-size: 0.7rem; font-weight: 600; color: var(--text-soft); }
+.site-nav-cameron .cameron-cta { font-size: 0.6rem; color: var(--text-muted); margin-top: 0.1rem; }
+.site-nav-btn { background: transparent; border: none; color: var(--text-soft); cursor: pointer; padding: 0.4rem; border-radius: 0.4rem; font-size: 1.05rem; display: inline-flex; align-items: center; gap: 0.3rem; transition: color .2s ease, background .2s ease; }
+.site-nav-btn:hover { color: var(--accent); background: var(--panel-2); }
+.site-nav-btn .label { font-size: 0.75rem; font-weight: 600; }
+.site-nav-hamburger { display: none; }
+
+.site-nav-mobile { display: none; position: fixed; top: 64px; left: 0; right: 0; background: var(--panel); border-top: 1px solid var(--border); box-shadow: var(--shadow); z-index: 40; padding: 1rem; }
+.site-nav-mobile a { display: block; padding: 0.6rem 0.4rem; color: var(--text-soft); text-decoration: none; font-weight: 500; border-bottom: 1px solid var(--border); }
+.site-nav-mobile a.active { color: var(--accent); }
+.site-nav-mobile a:last-of-type { border-bottom: none; }
+.site-nav-mobile.open { display: block; }
+
+@media (max-width: 768px) {
+  .site-nav-links, .site-nav-cameron { display: none; }
+  .site-nav-hamburger { display: inline-flex; }
+}
+/* ===== /Site navigation bar ===== */
+
 code,.mono{font-family:'JetBrains Mono',ui-monospace,monospace}
 header.page{position:relative;padding:2.4rem 1.5rem 2rem;background:radial-gradient(1200px 400px at 85% -10%,rgba(122,32,159,.15),transparent),radial-gradient(1000px 400px at 10% 0%,rgba(0,140,183,.18),transparent),var(--panel);border-bottom:1px solid var(--border)}
 .page-inner{max-width:1120px;margin:0 auto}
 .chapter-badge{display:inline-block;font-size:.72rem;letter-spacing:.15em;text-transform:uppercase;color:var(--accent);font-weight:600;margin-bottom:.5rem}
 h1.title{font-size:clamp(1.6rem,3.4vw,2.4rem);margin:0 0 .35rem;background:linear-gradient(90deg,var(--accent),var(--accent-2));-webkit-background-clip:text;background-clip:text;color:transparent;font-weight:700;letter-spacing:-.01em}
 p.subtitle{margin:0 0 .8rem;color:var(--text-soft);font-size:1.05rem;max-width:720px}
-.theme-toggle{position:absolute;top:1.4rem;right:1.5rem;background:var(--panel-2);color:var(--text);border:1px solid var(--border);padding:.4rem .8rem;border-radius:999px;cursor:pointer;font-size:.85rem;font-weight:500;display:inline-flex;align-items:center;gap:.35rem;transition:all .2s ease}
-.theme-toggle:hover{border-color:var(--accent);color:var(--accent)}
 nav.anchors{position:sticky;top:0;z-index:20;background:color-mix(in srgb,var(--panel) 92%,transparent);backdrop-filter:saturate(150%) blur(8px);-webkit-backdrop-filter:saturate(150%) blur(8px);border-bottom:1px solid var(--border)}
 nav.anchors ul{display:flex;gap:.25rem;overflow-x:auto;list-style:none;padding:.55rem 1.5rem;margin:0 auto;max-width:1120px;scrollbar-width:thin}
 nav.anchors a{display:block;padding:.35rem .75rem;border-radius:8px;color:var(--text-soft);text-decoration:none;font-size:.85rem;font-weight:500;white-space:nowrap;transition:all .15s ease}
@@ -214,24 +257,71 @@ footer.page a{color:var(--accent);text-decoration:none}footer.page a:hover{text-
 </head>
 <body>
 
+
+<nav class="site-nav" aria-label="Site navigation">
+  <div class="site-nav-inner">
+    <a href="../../index.html" class="site-nav-brand">
+      <i class="fa-solid fa-chart-line" style="color: var(--accent);"></i>
+      <span>metrics<span class="ai-mark">AI</span></span>
+    </a>
+    <div class="site-nav-links">
+      <a href="../../index.html#about" data-i18n="nav.about">About</a>
+      <a href="../../index.html#curriculum" class="active" data-i18n="nav.notebooks">Python Notebooks</a>
+      <a href="../../tutors.html" data-i18n="nav.tutors">AI Tutors</a>
+      <a href="../../index.html#books" data-i18n="nav.books">Books</a>
+      <a href="../../videos.html" data-i18n="nav.videos">Videos</a>
+      <a href="https://open.spotify.com/show/2lN5pA3l10UdHe61ZCoHcF?si=IFFMpG3pROepG61o8qbnvg" target="_blank" rel="noopener" data-i18n="nav.podcasts">Podcasts</a>
+      <a href="../../index.html#authors" data-i18n="nav.authors">Authors</a>
+      <a href="../../index.html#more-resources" data-i18n="nav.resources">More Resources</a>
+    </div>
+    <div class="site-nav-controls">
+      <a href="https://cameron.econ.ucdavis.edu/aed/index.html" target="_blank" rel="noopener" class="site-nav-cameron">
+        <span class="cameron-pre" data-i18n="nav.cameron.pre">Content based on</span>
+        <span class="cameron-name">Cameron (2022)</span>
+        <span class="cameron-cta"><span data-i18n="nav.cameron.cta">Learn More</span> <i class="fa-solid fa-external-link-alt"></i></span>
+      </a>
+      <button type="button" class="site-nav-btn" onclick="toggleDarkModeNav()" title="Toggle dark mode" id="siteDarkModeToggle">
+        <i class="fa-solid fa-moon" id="siteDarkModeIcon"></i>
+      </button>
+      <button type="button" class="site-nav-btn" onclick="toggleLanguage()" title="Switch language / Cambiar idioma" id="siteLanguageToggle">
+        <i class="fa-solid fa-language"></i>
+        <span class="label" id="siteLanguageLabel">EN</span>
+      </button>
+      <button type="button" class="site-nav-btn site-nav-hamburger" onclick="toggleSiteMobileMenu()" id="siteMobileMenuBtn">
+        <i class="fa-solid fa-bars" id="siteHamburgerIcon"></i>
+        <i class="fa-solid fa-times" id="siteCloseIcon" style="display:none"></i>
+      </button>
+    </div>
+  </div>
+</nav>
+<div class="site-nav-mobile" id="siteMobileMenu">
+  <a href="../../index.html#about" data-i18n="nav.about">About</a>
+  <a href="../../index.html#curriculum" class="active" data-i18n="nav.notebooks">Python Notebooks</a>
+  <a href="../../tutors.html" data-i18n="nav.tutors">AI Tutors</a>
+  <a href="../../index.html#books" data-i18n="nav.books">Books</a>
+  <a href="../../videos.html" data-i18n="nav.videos">Videos</a>
+  <a href="https://open.spotify.com/show/2lN5pA3l10UdHe61ZCoHcF?si=IFFMpG3pROepG61o8qbnvg" target="_blank" rel="noopener" data-i18n="nav.podcasts">Podcasts</a>
+  <a href="../../index.html#authors" data-i18n="nav.authors">Authors</a>
+  <a href="../../index.html#more-resources" data-i18n="nav.resources">More Resources</a>
+</div>
+
 <header class="page">
   <div class="page-inner">
-    <span class="chapter-badge">Chapter 14 of 18 · Interactive Dashboard</span>
-    <h1 class="title">Regression with Indicator Variables</h1>
-    <p class="subtitle">Explore the gender earnings gap, interaction effects, the dummy variable trap, and worker-type differences using the same dataset and models as the book.</p>
+    <span class="chapter-badge" data-i18n="header.badge">Chapter 14 of 18 · Interactive Dashboard</span>
+    <h1 class="title" data-i18n="header.title">Regression with Indicator Variables</h1>
+    <p class="subtitle" data-i18n="header.subtitle">Explore the gender earnings gap, interaction effects, the dummy variable trap, and worker-type differences using the same dataset and models as the book.</p>
   </div>
-  <button id="theme-toggle" class="theme-toggle" type="button" aria-label="Toggle color theme"><span id="theme-icon">🌙</span><span id="theme-label">Dark</span></button>
 </header>
 
 <nav class="anchors" aria-label="Sections">
   <ul>
-    <li><a href="#gender-gap">Gender Gap</a></li>
-    <li><a href="#interaction">Interactions</a></li>
-    <li><a href="#model-compare">Model Comparison</a></li>
-    <li><a href="#dummy-trap">Dummy Trap</a></li>
-    <li><a href="#worker-type">Worker Types</a></li>
-    <li><a href="#scatter-gender">Scatter by Gender</a></li>
-    <li><a href="#code">Code</a></li>
+    <li><a href="#gender-gap" data-i18n="nav.gendergap">Gender Gap</a></li>
+    <li><a href="#interaction" data-i18n="nav.interaction">Interactions</a></li>
+    <li><a href="#model-compare" data-i18n="nav.modelcompare">Model Comparison</a></li>
+    <li><a href="#dummy-trap" data-i18n="nav.dummytrap">Dummy Trap</a></li>
+    <li><a href="#worker-type" data-i18n="nav.workertype">Worker Types</a></li>
+    <li><a href="#scatter-gender" data-i18n="nav.scattergender">Scatter by Gender</a></li>
+    <li><a href="#code" data-i18n="nav.code">Code</a></li>
   </ul>
 </nav>
 
@@ -241,20 +331,20 @@ footer.page a{color:var(--accent);text-decoration:none}footer.page a:hover{text-
 <section class="widget" id="gender-gap">
   <div class="widget-head">
     <div>
-      <h2>Gender Earnings Gap Explorer</h2>
+      <h2 data-i18n="widget.gg.heading">Gender Earnings Gap Explorer</h2>
     </div>
-    <button class="reset-btn" data-reset="gendergap">Reset</button>
+    <button class="reset-btn" data-reset="gendergap" data-i18n="common.reset">↺ Reset</button>
   </div>
 
-  <p class="motivation">Women earn $16,396 less per year than men in this sample. <em>How much of that gap survives once we compare workers with similar education, age, and hours?</em></p>
+  <p class="motivation" data-i18n="widget.gg.motivation">Women earn $16,396 less per year than men in this sample. <em>How much of that gap survives once we compare workers with similar education, age, and hours?</em></p>
 
-  <div class="key-concept">
+  <div class="key-concept" data-i18n="widget.gg.kc">
     <span class="kc-title">Regressing y on just an intercept and a single indicator d is algebraically a difference-in-means test.</span> The fitted model <strong>ŷ = b + ad</strong> has intercept b = mean of y when d = 0, and slope a = the mean difference (ȳ₁ − ȳ₀). When you add other regressors, the coefficient on d becomes the <em>adjusted</em> difference — how much of the raw gap remains after controlling for observable differences in those regressors.
   </div>
 
   <div class="widget-howto">
-    <div class="howto-title">What you can do here</div>
-    <ul>
+    <div class="howto-title" data-i18n="common.howtoTitle">What you can do here</div>
+    <ul data-i18n="widget.gg.howto">
       <li><strong>Pick a model</strong> — from gender-only through gender + education + age + hours.</li>
       <li><strong>Watch the gender coefficient move</strong> as controls are added.</li>
       <li><strong>Compare R²</strong> across models to see how much each control adds.</li>
@@ -263,52 +353,52 @@ footer.page a{color:var(--accent);text-decoration:none}footer.page a:hover{text-
 
   <div class="controls">
     <div class="ctrl">
-      <label>Model</label>
+      <label for="gg-model" data-i18n="widget.gg.ctrl.model.label">Model</label>
       <select id="gg-model">
-        <option value="0">Model 1: Gender only</option>
-        <option value="1">Model 2: + Education</option>
-        <option value="2">Model 3: + Gender×Education</option>
-        <option value="3">Model 4: + Age + Hours</option>
+        <option value="0" data-i18n="widget.gg.ctrl.model.opt0">Model 1: Gender only</option>
+        <option value="1" data-i18n="widget.gg.ctrl.model.opt1">Model 2: + Education</option>
+        <option value="2" data-i18n="widget.gg.ctrl.model.opt2">Model 3: + Gender×Education</option>
+        <option value="3" data-i18n="widget.gg.ctrl.model.opt3">Model 4: + Age + Hours</option>
       </select>
     </div>
   </div>
   <div class="stats-grid">
-    <div class="stat mean"><div class="label">Gender coef</div><div class="value" id="gg-stat-coef">—</div></div>
-    <div class="stat spread"><div class="label">t-statistic</div><div class="value" id="gg-stat-t">—</div></div>
-    <div class="stat median"><div class="label">p-value</div><div class="value" id="gg-stat-p">—</div></div>
-    <div class="stat mean"><div class="label">R²</div><div class="value" id="gg-stat-r2">—</div></div>
+    <div class="stat mean"><div class="label" data-i18n="widget.gg.stat.coef">Gender coef</div><div class="value" id="gg-stat-coef">—</div></div>
+    <div class="stat spread"><div class="label" data-i18n="stat.t">t-statistic</div><div class="value" id="gg-stat-t">—</div></div>
+    <div class="stat median"><div class="label" data-i18n="stat.p">p-value</div><div class="value" id="gg-stat-p">—</div></div>
+    <div class="stat mean"><div class="label" data-i18n="stat.r2">R²</div><div class="value" id="gg-stat-r2">—</div></div>
   </div>
   <div id="chart-gender-gap" class="chart short"></div>
   <div class="try-this">
-    <div class="try-title">Try This</div>
-    <ol>
+    <div class="try-title" data-i18n="common.tryTitle">Try this</div>
+    <ol data-i18n="widget.gg.try">
       <li><strong>Start with Model 1 (gender only).</strong> Gap = −$16,396, R² = 2.5%. <em>The raw gap is large but gender alone explains almost none of the earnings variation — most of y₍earnings₎ is driven by other things.</em></li>
       <li><strong>Switch to Model 2 (+ Education).</strong> The gap widens to −$18,258 — it got <em>bigger</em>! <em>Women in this sample have slightly more education on average, so controlling for education strips out some "protective" variation and the residual gap grows.</em></li>
       <li><strong>Switch to Model 4 (full controls).</strong> <em>The gap shrinks substantially once age and hours are added — quantifying how much of the raw gap is "explained" by observable characteristics vs. genuinely unexplained.</em></li>
     </ol>
   </div>
 
-  <p class="takeaway"><strong>Take-away:</strong> A regression on an indicator is a difference-in-means test — and its coefficient <em>adjusts</em> once you add controls, quantifying what's explained vs. what isn't. <a href="../../book/_book/notebooks_quarto/ch14_Regression_with_Indicator_Variables.html#indicator-variables---single-binary-variable" target="_blank" rel="noopener">Read §14.1 in the chapter →</a></p>
+  <p class="takeaway" data-i18n="widget.gg.takeaway"><strong>Take-away:</strong> A regression on an indicator is a difference-in-means test — and its coefficient <em>adjusts</em> once you add controls, quantifying what's explained vs. what isn't. <a href="../../book/_book/notebooks_quarto/ch14_Regression_with_Indicator_Variables.html#indicator-variables---single-binary-variable" target="_blank" rel="noopener">Read §14.1 in the chapter →</a></p>
 </section>
 
 <!-- ==================== WIDGET 2: Interaction Slope Visualizer ==================== -->
 <section class="widget" id="interaction">
   <div class="widget-head">
     <div>
-      <h2>Interaction Effects: Do Returns to Education Differ by Gender?</h2>
+      <h2 data-i18n="widget.int.heading">Interaction Effects: Do Returns to Education Differ by Gender?</h2>
     </div>
-    <button class="reset-btn" data-reset="interaction">Reset</button>
+    <button class="reset-btn" data-reset="interaction" data-i18n="common.reset">↺ Reset</button>
   </div>
 
-  <p class="motivation">Maybe the earnings gap isn't a flat number — maybe it <em>widens</em> (or narrows) with education. An interaction term lets the data say so.</p>
+  <p class="motivation" data-i18n="widget.int.motivation">Maybe the earnings gap isn't a flat number — maybe it <em>widens</em> (or narrows) with education. An interaction term lets the data say so.</p>
 
-  <div class="key-concept">
+  <div class="key-concept" data-i18n="widget.int.kc">
     <span class="kc-title">An interacted indicator variable — the product of an indicator d and a continuous regressor x — lets both intercepts <em>and</em> slopes differ between groups.</span> In the model <strong>y = β₁ + β₂x + α₁d + α₂(d × x) + u</strong>, α₁ shifts the intercept and <strong>α₂ measures how the slope on x differs between groups</strong>. Include only d (no interaction) and the lines stay parallel; add the interaction and they can fan in or out across the range of x.
   </div>
 
   <div class="widget-howto">
-    <div class="howto-title">What you can do here</div>
-    <ul>
+    <div class="howto-title" data-i18n="common.howtoTitle">What you can do here</div>
+    <ul data-i18n="widget.int.howto">
       <li><strong>Toggle the interaction term On or Off.</strong></li>
       <li><strong>Watch the male and female slopes</strong> in the stat cards — parallel lines mean equal slopes; diverging lines mean different ones.</li>
       <li><strong>Read the interaction coefficient</strong> — it's exactly the slope gap.</li>
@@ -317,50 +407,50 @@ footer.page a{color:var(--accent);text-decoration:none}footer.page a:hover{text-
 
   <div class="controls">
     <div class="ctrl">
-      <label>Interaction term</label>
+      <label data-i18n="widget.int.ctrl.label">Interaction term</label>
       <div class="toggle-group" id="int-toggle">
-        <button class="active" data-val="off">Off (parallel)</button>
-        <button data-val="on">On (non-parallel)</button>
+        <button class="active" data-val="off" data-i18n="widget.int.ctrl.off">Off (parallel)</button>
+        <button data-val="on" data-i18n="widget.int.ctrl.on">On (non-parallel)</button>
       </div>
     </div>
   </div>
   <div class="stats-grid">
-    <div class="stat mean"><div class="label">Male slope</div><div class="value" id="int-stat-male">—</div></div>
-    <div class="stat median"><div class="label">Female slope</div><div class="value" id="int-stat-female">—</div></div>
-    <div class="stat spread"><div class="label">Interaction coef</div><div class="value" id="int-stat-inter">—</div></div>
-    <div class="stat mean"><div class="label">R²</div><div class="value" id="int-stat-r2">—</div></div>
+    <div class="stat mean"><div class="label" data-i18n="widget.int.stat.male">Male slope</div><div class="value" id="int-stat-male">—</div></div>
+    <div class="stat median"><div class="label" data-i18n="widget.int.stat.female">Female slope</div><div class="value" id="int-stat-female">—</div></div>
+    <div class="stat spread"><div class="label" data-i18n="widget.int.stat.inter">Interaction coef</div><div class="value" id="int-stat-inter">—</div></div>
+    <div class="stat mean"><div class="label" data-i18n="stat.r2">R²</div><div class="value" id="int-stat-r2">—</div></div>
   </div>
   <div id="chart-interaction" class="chart tall"></div>
   <div class="try-this">
-    <div class="try-title">Try This</div>
-    <ol>
+    <div class="try-title" data-i18n="common.tryTitle">Try this</div>
+    <ol data-i18n="widget.int.try">
       <li><strong>Keep interaction OFF.</strong> Both genders share a single slope of $5,907/year; the two lines are perfectly parallel. <em>The model forces equal returns to education — whatever the data prefers — and only the intercept shifts between groups.</em></li>
       <li><strong>Toggle interaction ON.</strong> Male slope = $6,921/yr; female slope = $6,921 − $2,765 = $4,156/yr. <em>Very different returns — women's earnings rise more slowly with education than men's in this sample.</em></li>
       <li><strong>Follow the lines out to 20 years of education.</strong> <em>The gender gap widens with education — the two groups diverge, so interaction is necessary to tell the right story.</em></li>
     </ol>
   </div>
 
-  <p class="takeaway"><strong>Take-away:</strong> Without interactions, a model forces parallel slopes; adding d × x lets the data reveal differential returns that a simple indicator cannot capture. <a href="../../book/_book/notebooks_quarto/ch14_Regression_with_Indicator_Variables.html#interactions-with-indicator-variables" target="_blank" rel="noopener">Read §14.3 in the chapter →</a></p>
+  <p class="takeaway" data-i18n="widget.int.takeaway"><strong>Take-away:</strong> Without interactions, a model forces parallel slopes; adding d × x lets the data reveal differential returns that a simple indicator cannot capture. <a href="../../book/_book/notebooks_quarto/ch14_Regression_with_Indicator_Variables.html#interactions-with-indicator-variables" target="_blank" rel="noopener">Read §14.3 in the chapter →</a></p>
 </section>
 
 <!-- ==================== WIDGET 3: Model Comparison Table ==================== -->
 <section class="widget" id="model-compare">
   <div class="widget-head">
     <div>
-      <h2>Model Comparison</h2>
+      <h2 data-i18n="widget.mc.heading">Model Comparison</h2>
     </div>
-    <button class="reset-btn" data-reset="modelcompare">Reset</button>
+    <button class="reset-btn" data-reset="modelcompare" data-i18n="common.reset">↺ Reset</button>
   </div>
 
-  <p class="motivation">Does the gender coefficient stay put as you add controls? <em>Or does it grow, shrink, or even flip sign</em> depending on what else is in the model?</p>
+  <p class="motivation" data-i18n="widget.mc.motivation">Does the gender coefficient stay put as you add controls? <em>Or does it grow, shrink, or even flip sign</em> depending on what else is in the model?</p>
 
-  <div class="key-concept">
+  <div class="key-concept" data-i18n="widget.mc.kc">
     <span class="kc-title">When an indicator appears with its interaction, individual t-tests can be misleading; use an F-test for joint significance.</span> Running <strong>separate regressions</strong> for each group allows all coefficients to differ simultaneously, and the <strong>Chow test</strong> (F-test) evaluates whether the relationship is fundamentally different between groups (Key Concept 14.5). The joint test H₀: α₁ = 0, α₂ = 0 evaluates whether the categorical variable matters at all.
   </div>
 
   <div class="widget-howto">
-    <div class="howto-title">What you can do here</div>
-    <ul>
+    <div class="howto-title" data-i18n="common.howtoTitle">What you can do here</div>
+    <ul data-i18n="widget.mc.howto">
       <li><strong>Scan the gender row</strong> across the five columns to see how the coefficient evolves.</li>
       <li><strong>Compare R²</strong> to see which controls add the most explanatory power.</li>
       <li><strong>Cross-reference with the interaction widget</strong> — Models 3 and 5 add the gender × education interaction.</li>
@@ -369,40 +459,40 @@ footer.page a{color:var(--accent);text-decoration:none}footer.page a:hover{text-
 
   <div style="overflow-x:auto">
     <table class="coef-table" id="model-table">
-      <thead><tr><th>Variable</th><th>Model 1</th><th>Model 2</th><th>Model 3</th><th>Model 4</th><th>Model 5</th></tr></thead>
+      <thead><tr><th data-i18n="widget.mc.th.variable">Variable</th><th data-i18n="widget.mc.th.m1">Model 1</th><th data-i18n="widget.mc.th.m2">Model 2</th><th data-i18n="widget.mc.th.m3">Model 3</th><th data-i18n="widget.mc.th.m4">Model 4</th><th data-i18n="widget.mc.th.m5">Model 5</th></tr></thead>
       <tbody id="model-table-body"></tbody>
     </table>
   </div>
   <div class="try-this">
-    <div class="try-title">Try This</div>
-    <ol>
+    <div class="try-title" data-i18n="common.tryTitle">Try this</div>
+    <ol data-i18n="widget.mc.try">
       <li><strong>Scan the gender row across all five models.</strong> The coefficient shifts substantially — and may even flip sign once the interaction enters. <em>That flip is not evidence that the gap disappeared — it's evidence that the interaction absorbs part of the effect, which is why joint F-tests are required.</em></li>
       <li><strong>Compare R² across models.</strong> Education adds the biggest jump; later variables add less. <em>Early controls earn their keep; the last few variables fight over the residual.</em></li>
       <li><strong>Read the Model 5 gender coefficient (~$57,129).</strong> Does that mean women earn more? <em>No — in an interacted model, the "gender" coefficient is the gap at x = 0 (zero education); the true gender effect must be evaluated at realistic x.</em></li>
     </ol>
   </div>
 
-  <p class="takeaway"><strong>Take-away:</strong> In models with interactions, individual coefficients are not the whole story — test the gender block <em>jointly</em> and interpret effects at meaningful values of the interacting variable. <a href="../../book/_book/notebooks_quarto/ch14_Regression_with_Indicator_Variables.html#testing-for-structural-change---separate-regressions" target="_blank" rel="noopener">Read §14.4 in the chapter →</a></p>
+  <p class="takeaway" data-i18n="widget.mc.takeaway"><strong>Take-away:</strong> In models with interactions, individual coefficients are not the whole story — test the gender block <em>jointly</em> and interpret effects at meaningful values of the interacting variable. <a href="../../book/_book/notebooks_quarto/ch14_Regression_with_Indicator_Variables.html#testing-for-structural-change---separate-regressions" target="_blank" rel="noopener">Read §14.4 in the chapter →</a></p>
 </section>
 
 <!-- ==================== WIDGET 4: Dummy Variable Trap ==================== -->
 <section class="widget" id="dummy-trap">
   <div class="widget-head">
     <div>
-      <h2>The Dummy Variable Trap</h2>
+      <h2 data-i18n="widget.dt.heading">The Dummy Variable Trap</h2>
     </div>
-    <button class="reset-btn" data-reset="dummytrap">Reset</button>
+    <button class="reset-btn" data-reset="dummytrap" data-i18n="common.reset">↺ Reset</button>
   </div>
 
-  <p class="motivation">Three categories, three indicators — and suddenly <em>OLS refuses to run</em>. Why does adding the "last" category break everything, and which one do you drop?</p>
+  <p class="motivation" data-i18n="widget.dt.motivation">Three categories, three indicators — and suddenly <em>OLS refuses to run</em>. Why does adding the "last" category break everything, and which one do you drop?</p>
 
-  <div class="key-concept">
+  <div class="key-concept" data-i18n="widget.dt.kc">
     <span class="kc-title">Including all C indicators from a set of mutually exclusive categories plus an intercept creates perfect multicollinearity — the dummy variable trap.</span> Because d₁ + d₂ + ⋯ + d<sub>C</sub> = 1 for every observation, the intercept is an exact linear combination of the indicators. The fix: <strong>drop one indicator</strong> (the base category) <em>or</em> drop the intercept. Standard practice keeps the intercept and drops one category; the remaining coefficients are then interpreted as differences <em>from</em> the base.
   </div>
 
   <div class="widget-howto">
-    <div class="howto-title">What you can do here</div>
-    <ul>
+    <div class="howto-title" data-i18n="common.howtoTitle">What you can do here</div>
+    <ul data-i18n="widget.dt.howto">
       <li><strong>Toggle the base (omitted) category</strong> between Private, Self-employed, and Government.</li>
       <li><strong>Watch the coefficients and SEs</strong> change when the base changes.</li>
       <li><strong>Watch the predicted means</strong> at the bottom — they stay <em>identical</em>.</li>
@@ -411,56 +501,56 @@ footer.page a{color:var(--accent);text-decoration:none}footer.page a:hover{text-
 
   <div class="controls">
     <div class="ctrl">
-      <label>Base (omitted) category</label>
+      <label data-i18n="widget.dt.ctrl.label">Base (omitted) category</label>
       <div class="toggle-group" id="dt-base">
-        <button class="active" data-val="private">Private</button>
-        <button data-val="self">Self-employed</button>
-        <button data-val="govt">Government</button>
+        <button class="active" data-val="private" data-i18n="widget.dt.ctrl.private">Private</button>
+        <button data-val="self" data-i18n="widget.dt.ctrl.self">Self-employed</button>
+        <button data-val="govt" data-i18n="widget.dt.ctrl.govt">Government</button>
       </div>
     </div>
   </div>
   <div style="overflow-x:auto">
     <table class="coef-table" id="dt-table">
-      <thead><tr><th>Variable</th><th>Coefficient</th><th>SE</th><th>t</th></tr></thead>
+      <thead><tr><th data-i18n="widget.dt.th.variable">Variable</th><th data-i18n="widget.dt.th.coef">Coefficient</th><th data-i18n="widget.dt.th.se">SE</th><th data-i18n="widget.dt.th.t">t</th></tr></thead>
       <tbody id="dt-table-body"></tbody>
     </table>
   </div>
   <div class="stats-grid">
-    <div class="stat mean"><div class="label">R²</div><div class="value" id="dt-stat-r2">—</div></div>
-    <div class="stat mean"><div class="label">Pred: Self-emp</div><div class="value" id="dt-pred-self">—</div></div>
-    <div class="stat median"><div class="label">Pred: Private</div><div class="value" id="dt-pred-priv">—</div></div>
-    <div class="stat spread"><div class="label">Pred: Govt</div><div class="value" id="dt-pred-govt">—</div></div>
+    <div class="stat mean"><div class="label" data-i18n="stat.r2">R²</div><div class="value" id="dt-stat-r2">—</div></div>
+    <div class="stat mean"><div class="label" data-i18n="widget.dt.stat.pself">Pred: Self-emp</div><div class="value" id="dt-pred-self">—</div></div>
+    <div class="stat median"><div class="label" data-i18n="widget.dt.stat.ppriv">Pred: Private</div><div class="value" id="dt-pred-priv">—</div></div>
+    <div class="stat spread"><div class="label" data-i18n="widget.dt.stat.pgovt">Pred: Govt</div><div class="value" id="dt-pred-govt">—</div></div>
   </div>
   <div class="try-this">
-    <div class="try-title">Try This</div>
-    <ol>
+    <div class="try-title" data-i18n="common.tryTitle">Try this</div>
+    <ol data-i18n="widget.dt.try">
       <li><strong>Keep Private as base.</strong> The coefficients on dself and dgovt are differences from the private-sector mean. <em>Private is the reference point; the other two categories are compared to it.</em></li>
       <li><strong>Switch to Self-employed as base.</strong> All the coefficients change dramatically — but the predicted means for each category stay the same. <em>The parameterization changes; the model's predictions do not.</em></li>
       <li><strong>Switch to Government.</strong> Same R², same predictions, new coefficient interpretation. <em>The base category is a choice about <em>interpretation</em>, not a choice about model fit — pick whichever makes the story clearest.</em></li>
     </ol>
   </div>
 
-  <p class="takeaway"><strong>Take-away:</strong> C categories require C − 1 indicators plus an intercept; the dropped category becomes the reference point and every other coefficient is read <em>relative to it</em>. <a href="../../book/_book/notebooks_quarto/ch14_Regression_with_Indicator_Variables.html#sets-of-indicator-variables-multiple-categories" target="_blank" rel="noopener">Read §14.5 in the chapter →</a></p>
+  <p class="takeaway" data-i18n="widget.dt.takeaway"><strong>Take-away:</strong> C categories require C − 1 indicators plus an intercept; the dropped category becomes the reference point and every other coefficient is read <em>relative to it</em>. <a href="../../book/_book/notebooks_quarto/ch14_Regression_with_Indicator_Variables.html#sets-of-indicator-variables-multiple-categories" target="_blank" rel="noopener">Read §14.5 in the chapter →</a></p>
 </section>
 
 <!-- ==================== WIDGET 5: Worker Type Bar Chart ==================== -->
 <section class="widget" id="worker-type">
   <div class="widget-head">
     <div>
-      <h2>Worker Type Comparison</h2>
+      <h2 data-i18n="widget.wt.heading">Worker Type Comparison</h2>
     </div>
-    <button class="reset-btn" data-reset="workertype">Reset</button>
+    <button class="reset-btn" data-reset="workertype" data-i18n="common.reset">↺ Reset</button>
   </div>
 
-  <p class="motivation">Self-employed workers look like they earn the most — <em>but is the CI wide enough to matter?</em> The bar heights are only half the story.</p>
+  <p class="motivation" data-i18n="widget.wt.motivation">Self-employed workers look like they earn the most — <em>but is the CI wide enough to matter?</em> The bar heights are only half the story.</p>
 
-  <div class="key-concept">
+  <div class="key-concept" data-i18n="widget.wt.kc">
     <span class="kc-title">Regressing y on a set of mutually exclusive indicators (with no other controls) is equivalent to analysis of variance (ANOVA).</span> The coefficients give group means or differences from the base mean. The regression's <strong>F-test for joint significance</strong> of the indicators is identical to the ANOVA F-statistic — testing whether the categorical variable explains significant variation in y (Key Concept 14.7). Looking at group means with CIs is the visual counterpart.
   </div>
 
   <div class="widget-howto">
-    <div class="howto-title">What you can do here</div>
-    <ul>
+    <div class="howto-title" data-i18n="common.howtoTitle">What you can do here</div>
+    <ul data-i18n="widget.wt.howto">
       <li><strong>Compare the bar heights</strong> across employment types.</li>
       <li><strong>Check the whiskers (95% CIs)</strong> — wider = less precise, narrower = more precise.</li>
       <li><strong>Look for CI overlap</strong> between two categories — overlap usually means the difference isn't statistically significant.</li>
@@ -469,35 +559,35 @@ footer.page a{color:var(--accent);text-decoration:none}footer.page a:hover{text-
 
   <div id="chart-worker-type" class="chart short"></div>
   <div class="try-this">
-    <div class="try-title">Try This</div>
-    <ol>
+    <div class="try-title" data-i18n="common.tryTitle">Try this</div>
+    <ol data-i18n="widget.wt.try">
       <li><strong>Identify the highest-mean category.</strong> Self-employed is visibly highest. <em>But the CI is by far the widest — small sample (n = 79) and heavy-tailed self-employment income make the point estimate unreliable.</em></li>
       <li><strong>Check if the private and government CIs overlap.</strong> <em>Substantial overlap suggests the difference between those two categories may not be statistically significant at 5%.</em></li>
       <li><strong>Note the asymmetry of precision.</strong> The narrowest CIs belong to the largest subsamples. <em>A reminder that "highest mean" and "most precisely estimated" are two different things.</em></li>
     </ol>
   </div>
 
-  <p class="takeaway"><strong>Take-away:</strong> A set of mutually exclusive indicators is just ANOVA in regression clothing — and the CIs around each group mean tell you which differences can be trusted. <a href="../../book/_book/notebooks_quarto/ch14_Regression_with_Indicator_Variables.html#sets-of-indicator-variables-multiple-categories" target="_blank" rel="noopener">Read §14.5 in the chapter →</a></p>
+  <p class="takeaway" data-i18n="widget.wt.takeaway"><strong>Take-away:</strong> A set of mutually exclusive indicators is just ANOVA in regression clothing — and the CIs around each group mean tell you which differences can be trusted. <a href="../../book/_book/notebooks_quarto/ch14_Regression_with_Indicator_Variables.html#sets-of-indicator-variables-multiple-categories" target="_blank" rel="noopener">Read §14.5 in the chapter →</a></p>
 </section>
 
 <!-- ==================== WIDGET 6: Scatter by Gender ==================== -->
 <section class="widget" id="scatter-gender">
   <div class="widget-head">
     <div>
-      <h2>Earnings vs Education by Gender</h2>
+      <h2 data-i18n="widget.sg.heading">Earnings vs Education by Gender</h2>
     </div>
-    <button class="reset-btn" data-reset="scattergender">Reset</button>
+    <button class="reset-btn" data-reset="scattergender" data-i18n="common.reset">↺ Reset</button>
   </div>
 
-  <p class="motivation">Two regression lines, one chart. <em>Are they parallel, or do they fan apart?</em> The answer decides whether you need an interaction term.</p>
+  <p class="motivation" data-i18n="widget.sg.motivation">Two regression lines, one chart. <em>Are they parallel, or do they fan apart?</em> The answer decides whether you need an interaction term.</p>
 
-  <div class="key-concept">
+  <div class="key-concept" data-i18n="widget.sg.kc">
     <span class="kc-title">Scatter plots with separate regression lines by group visually reveal whether slopes and intercepts differ.</span> <strong>Parallel lines</strong> indicate only an intercept shift — an indicator without interaction is enough. <strong>Non-parallel lines</strong> indicate differential slopes — an interaction term is needed. Either way, the gender gap is the vertical distance between the lines <em>at a given x</em>, and it's constant only when the lines are parallel.
   </div>
 
   <div class="widget-howto">
-    <div class="howto-title">What you can do here</div>
-    <ul>
+    <div class="howto-title" data-i18n="common.howtoTitle">What you can do here</div>
+    <ul data-i18n="widget.sg.howto">
       <li><strong>Toggle Both / Male only / Female only</strong> to inspect each group.</li>
       <li><strong>Read male slope, female slope, and the gaps at 12 and 16 years of education</strong> in the stat cards.</li>
       <li><strong>Judge parallelism by eye</strong> — if the two lines tilt apart, interaction belongs in the model.</li>
@@ -506,41 +596,41 @@ footer.page a{color:var(--accent);text-decoration:none}footer.page a:hover{text-
 
   <div class="controls">
     <div class="ctrl">
-      <label>Show</label>
+      <label data-i18n="common.show">Show</label>
       <div class="toggle-group" id="sg-show">
-        <button class="active" data-val="both">Both</button>
-        <button data-val="male">Male only</button>
-        <button data-val="female">Female only</button>
+        <button class="active" data-val="both" data-i18n="widget.sg.ctrl.both">Both</button>
+        <button data-val="male" data-i18n="widget.sg.ctrl.male">Male only</button>
+        <button data-val="female" data-i18n="widget.sg.ctrl.female">Female only</button>
       </div>
     </div>
   </div>
   <div class="stats-grid">
-    <div class="stat mean"><div class="label">Male slope</div><div class="value" id="sg-stat-male">—</div></div>
-    <div class="stat median"><div class="label">Female slope</div><div class="value" id="sg-stat-female">—</div></div>
-    <div class="stat spread"><div class="label">Gap at Educ=12</div><div class="value" id="sg-stat-gap12">—</div></div>
-    <div class="stat spread"><div class="label">Gap at Educ=16</div><div class="value" id="sg-stat-gap16">—</div></div>
+    <div class="stat mean"><div class="label" data-i18n="widget.int.stat.male">Male slope</div><div class="value" id="sg-stat-male">—</div></div>
+    <div class="stat median"><div class="label" data-i18n="widget.int.stat.female">Female slope</div><div class="value" id="sg-stat-female">—</div></div>
+    <div class="stat spread"><div class="label" data-i18n="widget.sg.stat.gap12">Gap at Educ=12</div><div class="value" id="sg-stat-gap12">—</div></div>
+    <div class="stat spread"><div class="label" data-i18n="widget.sg.stat.gap16">Gap at Educ=16</div><div class="value" id="sg-stat-gap16">—</div></div>
   </div>
   <div id="chart-scatter-gender" class="chart tall"></div>
   <div class="try-this">
-    <div class="try-title">Try This</div>
-    <ol>
+    <div class="try-title" data-i18n="common.tryTitle">Try this</div>
+    <ol data-i18n="widget.sg.try">
       <li><strong>Compare the two regression lines by eye.</strong> Are they parallel? <em>If not, returns to education differ by gender and an interaction term is mandatory in the model.</em></li>
       <li><strong>Compare the gap at 12 years vs 16 years.</strong> <em>If the gap grows with education, men's returns outpace women's — exactly what the interaction term in widget 2 estimates.</em></li>
       <li><strong>Toggle Male only, then Female only.</strong> The male subsample has more high-earning outliers. <em>Visual skew is one reason male regressions dominate the pooled slope — the interaction term makes that story explicit.</em></li>
     </ol>
   </div>
 
-  <p class="takeaway"><strong>Take-away:</strong> Two lines on one chart tell you in a glance whether you need interactions — and at which education levels the gender gap is widest. <a href="../../book/_book/notebooks_quarto/ch14_Regression_with_Indicator_Variables.html#interactions-with-indicator-variables" target="_blank" rel="noopener">Read §14.3 in the chapter →</a></p>
+  <p class="takeaway" data-i18n="widget.sg.takeaway"><strong>Take-away:</strong> Two lines on one chart tell you in a glance whether you need interactions — and at which education levels the gender gap is widest. <a href="../../book/_book/notebooks_quarto/ch14_Regression_with_Indicator_Variables.html#interactions-with-indicator-variables" target="_blank" rel="noopener">Read §14.3 in the chapter →</a></p>
 </section>
 
 <section class="howto-card code-summary" id="code" aria-label="Code summary">
-  <h2>Code Summary</h2>
-  <p class="motivation">You've explored the key concepts interactively — now reproduce them in code. These self-contained blocks cover everything you practiced above. Pick your language, copy the code, and run it.</p>
+  <h2 data-i18n="code.heading">Code Summary</h2>
+  <p class="motivation" data-i18n="code.motivation">You've explored the key concepts interactively — now reproduce them in code. These self-contained blocks cover everything you practiced above. Pick your language, copy the code, and run it.</p>
 
   <div class="code-tabs" id="code-lang-tabs">
-    <button type="button" data-lang="python" class="active">Python</button>
-    <button type="button" data-lang="stata">Stata</button>
-    <button type="button" data-lang="r">R</button>
+    <button type="button" data-lang="python" class="active" data-i18n="code.tab.python">Python</button>
+    <button type="button" data-lang="stata" data-i18n="code.tab.stata">Stata</button>
+    <button type="button" data-lang="r" data-i18n="code.tab.r">R</button>
   </div>
 
   <div class="code-panel active" id="panel-python">
@@ -671,8 +761,8 @@ data['worker_type'] = np.where(data['dself'] == 1, 'Self-employed',
                       np.where(data['dprivate'] == 1, 'Private', 'Government'))
 print(data.groupby('worker_type')['earnings'].agg(['mean', 'count']).round(0))</code></pre>
   <div style="display:flex;gap:0.8rem;align-items:center;margin-top:0.8rem;flex-wrap:wrap">
-    <button class="btn-copy" onclick="navigator.clipboard.writeText(document.getElementById('code-python').textContent).then(()=>{this.textContent='Copied!';setTimeout(()=>this.textContent='Copy code',1500)})">Copy code</button>
-    <a class="btn-colab" href="https://colab.research.google.com/notebooks/empty.ipynb" target="_blank" rel="noopener">Open empty Colab notebook &rarr;</a>
+    <button class="btn-copy" data-i18n="code.copy.idle" onclick="navigator.clipboard.writeText(document.getElementById('code-python').textContent).then(()=>{this.textContent=t('code.copy.done');setTimeout(()=>this.textContent=t('code.copy.idle'),1500)})">Copy code</button>
+    <a class="btn-colab" href="https://colab.research.google.com/notebooks/empty.ipynb" target="_blank" rel="noopener" data-i18n="code.colab">Open empty Colab notebook &rarr;</a>
   </div>
   </div>
 
@@ -795,8 +885,8 @@ oneway earnings worker_type
 // Group means with counts
 tabulate worker_type, summarize(earnings)</code></pre>
   <div style="display:flex;gap:0.8rem;align-items:center;margin-top:0.8rem;flex-wrap:wrap">
-    <button class="btn-copy" onclick="navigator.clipboard.writeText(document.getElementById('code-stata').textContent).then(()=>{this.textContent='Copied!';setTimeout(()=>this.textContent='Copy code',1500)})">Copy code</button>
-    <span style="color:var(--text-muted);font-size:0.88rem">Paste into your Stata do-file editor</span>
+    <button class="btn-copy" data-i18n="code.copy.idle" onclick="navigator.clipboard.writeText(document.getElementById('code-stata').textContent).then(()=>{this.textContent=t('code.copy.done');setTimeout(()=>this.textContent=t('code.copy.idle'),1500)})">Copy code</button>
+    <span style="color:var(--text-muted);font-size:0.88rem" data-i18n="code.note.stata">Paste into your Stata do-file editor</span>
   </div>
   </div>
 
@@ -895,8 +985,8 @@ data |&gt;
   group_by(worker_type) |&gt;
   summarize(mean = round(mean(earnings), 0), n = n())</code></pre>
   <div style="display:flex;gap:0.8rem;align-items:center;margin-top:0.8rem;flex-wrap:wrap">
-    <button class="btn-copy" onclick="navigator.clipboard.writeText(document.getElementById('code-r').textContent).then(()=>{this.textContent='Copied!';setTimeout(()=>this.textContent='Copy code',1500)})">Copy code</button>
-    <span style="color:var(--text-muted);font-size:0.88rem">Paste into your R console or RStudio</span>
+    <button class="btn-copy" data-i18n="code.copy.idle" onclick="navigator.clipboard.writeText(document.getElementById('code-r').textContent).then(()=>{this.textContent=t('code.copy.done');setTimeout(()=>this.textContent=t('code.copy.idle'),1500)})">Copy code</button>
+    <span style="color:var(--text-muted);font-size:0.88rem" data-i18n="code.note.r">Paste into your R console or RStudio</span>
   </div>
   </div>
 </section>
@@ -904,9 +994,9 @@ data |&gt;
 </main>
 
 <footer class="page">
-  <p>Part of <a href="https://quarcs-lab.github.io/metricsai/book/_book/index.html"><strong>metricsAI</strong></a> · Chapter 14: Regression with Indicator Variables · by Carlos Mendez · <a href="https://github.com/quarcs-lab/metricsai">GitHub</a></p>
-  <p>Data: AED_EARNINGS_COMPLETE.DTA (872 full-time workers aged 25–65, 2000)</p>
-  <a class="scroll-top" href="#top">&uarr; Back to top</a>
+  <p data-i18n="footer.text">Part of <a href="https://quarcs-lab.github.io/metricsai/book/_book/index.html"><strong>metricsAI</strong></a> · Chapter 14: Regression with Indicator Variables · by Carlos Mendez · <a href="https://github.com/quarcs-lab/metricsai">GitHub</a></p>
+  <p data-i18n="footer.data">Data: AED_EARNINGS_COMPLETE.DTA (872 full-time workers aged 25–65, 2000)</p>
+  <a class="scroll-top" href="#top" data-i18n="footer.scrolltop">↑ Back to top</a>
 </footer>
 
 <script type="application/json" id="ch-data">{"scatter":{"education":[16.0,16.0,16.0,14.0,18.0,16.0,18.0,12.0,16.0,14.0,13.0,16.0,16.0,12.0,12.0,20.0,16.0,12.0,12.0,12.0,16.0,12.0,16.0,13.0,14.0,12.0,13.0,18.0,12.0,12.0,16.0,14.0,13.0,12.0,10.0,13.0,13.0,14.0,16.0,16.0,12.0,16.0,16.0,8.0,16.0,12.0,12.0,13.0,16.0,18.0,12.0,12.0,12.0,12.0,13.0,18.0,12.0,12.0,9.0,18.0,12.0,13.0,13.0,12.0,16.0,12.0,0.0,13.0,12.0,16.0,12.0,16.0,18.0,13.0,16.0,13.0,13.0,12.0,16.0,12.0,14.0,16.0,12.0,12.0,13.0,12.0,16.0,16.0,16.0,20.0,12.0,13.0,16.0,18.0,12.0,6.0,0.0,16.0,12.0,16.0,14.0,16.0,12.0,14.0,14.0,13.0,14.0,13.0,12.0,13.0,18.0,16.0,13.0,18.0,12.0,12.0,14.0,12.0,14.0,6.0,12.0,16.0,12.0,0.0,14.0,12.0,13.0,14.0,13.0,18.0,16.0,16.0,18.0,16.0,12.0,12.0,18.0,12.0,16.0,12.0,13.0,12.0,18.0,18.0,18.0,16.0,6.0,12.0,11.0,13.0,13.0,14.0,13.0,13.0,16.0,12.0,20.0,16.0,12.0,12.0,18.0,12.0,18.0,18.0,16.0,18.0,16.0,12.0,18.0,16.0,16.0,18.0,16.0,12.0,16.0,16.0,14.0,18.0,12.0,16.0,14.0,13.0,18.0,13.0,18.0,12.0,16.0,12.0,12.0,16.0,12.0,14.0,16.0,16.0,16.0,12.0,16.0,12.0,12.0,14.0,12.0,20.0,12.0,10.0,12.0,16.0,12.0,12.0,12.0,12.0,12.0,16.0,13.0,12.0,16.0,14.0,13.0,12.0,12.0,14.0,14.0,13.0,12.0,12.0,7.0,14.0,12.0,18.0,13.0,16.0,9.0,12.0,14.0,12.0,18.0,12.0,16.0,16.0,13.0,12.0,12.0,13.0,16.0,16.0,12.0,12.0,16.0,14.0,16.0,12.0,16.0,12.0,13.0,12.0,14.0,13.0,13.0,13.0,12.0,12.0,16.0,12.0,16.0,12.0,12.0,12.0,12.0,13.0,12.0,13.0,18.0,6.0,12.0,18.0,13.0,12.0,9.0,14.0,12.0,18.0,12.0,16.0,16.0,12.0,18.0,18.0,16.0,16.0,16.0,20.0,18.0,13.0,10.0,12.0,12.0,13.0,18.0,12.0,18.0,13.0,12.0,12.0,14.0,16.0,12.0,12.0,14.0,16.0,13.0,13.0,20.0,12.0,16.0,16.0,4.0,16.0,16.0,16.0,12.0,18.0,12.0,14.0,13.0,12.0,13.0,18.0,12.0,13.0,16.0,16.0,12.0,14.0,14.0,14.0,12.0,13.0,13.0,12.0,12.0,12.0,14.0,12.0,16.0,11.0,14.0,12.0,16.0,12.0,12.0,12.0,12.0,16.0,12.0,13.0,12.0,12.0,14.0,12.0,16.0,16.0,13.0,12.0,18.0,13.0,16.0,20.0,12.0,12.0,18.0,0.0,12.0,18.0,12.0,16.0,13.0,16.0,16.0,13.0,12.0,18.0,12.0,18.0,12.0,13.0,13.0,16.0,12.0,16.0,12.0,16.0,16.0,14.0,18.0,18.0,16.0,12.0,16.0,18.0,16.0,16.0,16.0,16.0,20.0,18.0,16.0,13.0,16.0,16.0,18.0,13.0,18.0,16.0,16.0,13.0,16.0,16.0,18.0,13.0,12.0,12.0,14.0,14.0,16.0,12.0,12.0,16.0,14.0,14.0,13.0,14.0,0.0,14.0,18.0,16.0,13.0,12.0,12.0,12.0,14.0,20.0,12.0,14.0,16.0,14.0,18.0,12.0,16.0,12.0,14.0,13.0,12.0,12.0,13.0,13.0,12.0,12.0,13.0,12.0,16.0,11.0,16.0,18.0,12.0,16.0,14.0,16.0,16.0,16.0,16.0,16.0,13.0,12.0,16.0,10.0,12.0,13.0,12.0,13.0,12.0,12.0,10.0,16.0,12.0,12.0,16.0,16.0,13.0,13.0,16.0,11.0,12.0,14.0,18.0,18.0,13.0,16.0,12.0,16.0,16.0,12.0,14.0,12.0,20.0,12.0,12.0,14.0,18.0,13.0,13.0,16.0,14.0,12.0,13.0,16.0,12.0,12.0,18.0,0.0,12.0,16.0,16.0,12.0,16.0,14.0,12.0,12.0,16.0,16.0,13.0,13.0,12.0,12.0,16.0,14.0,16.0,12.0,12.0,14.0,13.0,18.0,18.0,13.0,20.0,12.0,0.0,12.0,18.0,13.0,13.0,12.0,18.0,12.0,13.0,18.0,12.0,18.0,18.0,1.0,13.0,13.0,12.0,18.0,14.0,12.0,13.0,12.0,12.0,12.0,13.0,12.0,14.0,12.0,18.0,11.0,16.0,12.0,18.0,13.0,12.0,20.0,13.0,12.0,12.0,16.0,13.0,13.0,0.0,18.0,18.0,18.0,13.0,12.0,13.0,13.0,13.0,13.0,18.0,18.0,12.0,20.0,16.0,12.0,16.0,9.0,18.0,16.0,12.0,13.0,16.0,14.0,12.0,13.0,16.0,14.0,12.0,13.0,18.0,12.0,12.0,12.0,13.0,18.0,16.0,18.0,12.0,14.0,10.0,12.0,16.0,18.0,14.0,16.0,12.0,14.0,16.0,9.0,18.0,12.0,18.0,13.0,13.0,14.0,14.0,12.0,18.0,16.0,14.0,18.0,18.0,13.0,16.0,16.0,16.0,18.0,14.0,16.0,16.0,11.0,12.0,12.0,12.0,12.0,12.0,12.0,12.0,12.0,16.0,12.0,16.0,12.0,18.0,12.0,12.0,12.0,12.0,16.0,16.0,16.0,12.0,16.0,18.0,16.0,13.0,9.0,12.0,16.0,14.0,12.0,16.0,14.0,12.0,13.0,13.0,13.0,10.0,14.0,16.0,18.0,16.0,13.0,11.0,12.0,13.0,14.0,16.0,18.0,14.0,16.0,12.0,13.0,12.0,16.0,16.0,14.0,13.0,12.0,14.0,13.0,16.0,12.0,18.0,12.0,13.0,12.0,18.0,13.0,14.0,11.0,16.0,18.0,13.0,11.0,18.0,12.0,12.0,13.0,18.0,12.0,9.0,12.0,16.0,16.0,13.0,14.0,13.0,12.0,16.0,13.0,10.0,18.0,12.0,0.0,12.0,16.0,18.0,14.0,16.0,9.0,20.0,12.0,18.0,13.0,16.0,12.0,12.0,12.0,9.0,12.0,14.0,14.0,12.0,16.0,16.0,16.0,9.0,6.0,16.0,10.0,12.0,9.0,13.0,18.0,6.0,13.0,18.0,16.0,18.0,12.0,13.0,13.0,16.0,12.0,12.0,12.0,16.0,16.0,18.0,16.0,14.0,12.0,12.0,12.0,16.0,16.0,12.0,16.0,14.0,12.0,12.0,14.0,18.0,16.0,12.0,13.0,12.0,13.0,14.0,16.0,12.0,16.0,12.0,18.0,12.0,14.0,13.0,13.0,13.0,13.0,12.0,12.0,12.0,12.0,12.0,16.0,18.0,18.0,12.0,12.0,14.0,16.0,14.0,12.0,12.0,13.0,13.0,12.0,13.0,16.0,12.0,12.0,13.0,14.0,12.0,12.0,16.0,8.0,12.0,14.0,16.0,13.0,18.0,12.0,12.0,18.0,14.0,12.0,18.0,13.0,16.0,14.0,14.0,16.0],"earnings":[120000.0,23000.0,20000.0,55000.0,43200.0,110000.0,44000.0,120000.0,65000.0,7200.0,20000.0,120000.0,65000.0,38000.0,65000.0,115000.0,48000.0,45000.0,130000.0,36000.0,52000.0,36400.0,125000.0,36000.0,24000.0,48000.0,30000.0,89000.0,38000.0,12000.0,85000.0,50000.0,30500.0,50000.0,219000.0,135000.0,15000.0,30000.0,30800.0,36000.0,24000.0,318000.0,35000.0,25000.0,44900.0,18000.0,37000.0,19000.0,100000.0,65000.0,25000.0,44200.0,110000.0,70000.0,50000.0,70000.0,36000.0,50000.0,23000.0,25000.0,79000.0,60000.0,32000.0,40000.0,75000.0,52000.0,48500.0,6700.0,31200.0,55000.0,48000.0,110000.0,48000.0,45000.0,50000.0,60000.0,80000.0,20000.0,26200.0,130000.0,26600.0,63000.0,20000.0,20000.0,75000.0,60000.0,80000.0,180000.0,80000.0,105000.0,65000.0,117000.0,45000.0,53000.0,127000.0,20000.0,4000.0,42000.0,40000.0,55000.0,100000.0,63000.0,37000.0,50000.0,6000.0,8400.0,45000.0,75000.0,12000.0,72000.0,285000.0,100000.0,105000.0,90000.0,51000.0,8500.0,100000.0,28000.0,92000.0,18400.0,17000.0,50000.0,50000.0,10000.0,40000.0,26000.0,120000.0,62000.0,72000.0,80000.0,85000.0,85000.0,103000.0,90000.0,30000.0,35000.0,103000.0,12000.0,74000.0,39000.0,65000.0,50000.0,93000.0,222000.0,70000.0,98000.0,32000.0,26000.0,30000.0,45000.0,50000.0,23400.0,45000.0,55000.0,62000.0,50000.0,93000.0,41800.0,26400.0,44000.0,30000.0,45000.0,150000.0,375000.0,31600.0,130000.0,60000.0,38000.0,140000.0,72000.0,36800.0,45000.0,55000.0,65000.0,52000.0,50000.0,42000.0,85000.0,55000.0,50000.0,17000.0,20000.0,175000.0,75000.0,40000.0,29000.0,50000.0,24700.0,24000.0,60000.0,40000.0,45000.0,72000.0,50000.0,18000.0,38000.0,25000.0,24800.0,15000.0,40000.0,26100.0,83000.0,22000.0,35000.0,18000.0,90000.0,24200.0,95000.0,5400.0,35000.0,35000.0,35000.0,30000.0,35600.0,55000.0,4300.0,30000.0,5000.0,23000.0,10000.0,38000.0,106000.0,40600.0,50000.0,20000.0,42000.0,59000.0,120000.0,48000.0,52000.0,25000.0,23000.0,43000.0,31500.0,70000.0,30000.0,34000.0,20000.0,33000.0,48000.0,42000.0,15600.0,40000.0,30300.0,31000.0,13000.0,47100.0,65000.0,17200.0,31200.0,40000.0,48700.0,17000.0,40000.0,32000.0,38000.0,22000.0,39800.0,62000.0,52000.0,110000.0,20000.0,58000.0,36000.0,30000.0,30000.0,56000.0,12000.0,38000.0,50000.0,43000.0,30000.0,35000.0,47000.0,42000.0,70000.0,15000.0,30000.0,21000.0,40000.0,30000.0,60000.0,28000.0,23100.0,120000.0,40000.0,40000.0,82000.0,115000.0,60000.0,71400.0,376000.0,10500.0,50000.0,55000.0,30600.0,31000.0,64000.0,55000.0,34000.0,100000.0,35500.0,70000.0,61000.0,46000.0,30700.0,74000.0,22000.0,60000.0,29000.0,80000.0,60000.0,49000.0,296000.0,30000.0,20200.0,52000.0,50000.0,50000.0,130000.0,35000.0,39300.0,50000.0,35000.0,25000.0,60000.0,63000.0,36000.0,100000.0,62000.0,18000.0,30000.0,32000.0,28000.0,30000.0,17000.0,25000.0,24000.0,28000.0,30600.0,45000.0,40000.0,53000.0,25000.0,21000.0,20000.0,55000.0,13000.0,10000.0,26000.0,29000.0,44000.0,27300.0,10000.0,22000.0,40500.0,28000.0,50000.0,53000.0,28000.0,52000.0,50000.0,85000.0,54000.0,103000.0,115000.0,75000.0,84000.0,60000.0,40000.0,10000.0,44000.0,35000.0,58000.0,75000.0,42000.0,46000.0,60000.0,30000.0,65000.0,51000.0,140000.0,42000.0,52000.0,50000.0,50000.0,40000.0,115000.0,32000.0,54000.0,39000.0,52000.0,48000.0,45000.0,59000.0,14700.0,55000.0,125000.0,75000.0,60000.0,40000.0,225000.0,48000.0,120000.0,125000.0,46900.0,91000.0,50000.0,35000.0,30000.0,57000.0,90000.0,27000.0,23500.0,42400.0,65000.0,68000.0,25000.0,40000.0,32000.0,42000.0,120000.0,80000.0,100000.0,18000.0,294000.0,40000.0,54000.0,20600.0,36000.0,23000.0,55000.0,81000.0,70000.0,37000.0,19000.0,38200.0,40000.0,50000.0,150000.0,98000.0,40000.0,62000.0,24000.0,42000.0,50000.0,50000.0,20000.0,50000.0,21000.0,40000.0,60000.0,18000.0,25000.0,27000.0,34000.0,24000.0,37000.0,41700.0,36400.0,79000.0,6500.0,242000.0,17000.0,35000.0,40000.0,41000.0,73000.0,60000.0,77000.0,15000.0,32000.0,87000.0,32000.0,22000.0,27000.0,45000.0,28000.0,45000.0,38000.0,19700.0,75000.0,41000.0,25000.0,10000.0,90000.0,41000.0,25000.0,87000.0,24000.0,47700.0,18000.0,230000.0,24000.0,22000.0,80000.0,38000.0,116000.0,90000.0,50000.0,50000.0,70000.0,60000.0,70000.0,30000.0,60000.0,85000.0,45000.0,45000.0,118000.0,52800.0,36000.0,27100.0,52000.0,17000.0,30000.0,103000.0,52000.0,37000.0,80000.0,498000.0,29000.0,85000.0,36000.0,41000.0,12000.0,80000.0,48000.0,40000.0,60000.0,40000.0,25000.0,125000.0,45000.0,50000.0,60000.0,60000.0,50000.0,17700.0,185000.0,60000.0,34000.0,120000.0,24000.0,40000.0,27000.0,55000.0,38000.0,15600.0,35000.0,60000.0,12000.0,81000.0,65000.0,80000.0,110000.0,498000.0,22000.0,55000.0,21900.0,20000.0,52000.0,31200.0,14100.0,7500.0,41000.0,49500.0,75000.0,22300.0,20000.0,90000.0,55000.0,42500.0,34000.0,20000.0,203000.0,51000.0,65000.0,20000.0,130000.0,21000.0,30000.0,25000.0,36800.0,41000.0,40000.0,27000.0,65000.0,40000.0,53000.0,33600.0,50000.0,19000.0,8400.0,38000.0,59000.0,63000.0,40000.0,36400.0,60000.0,65000.0,24500.0,62000.0,22000.0,80000.0,61000.0,39000.0,35000.0,54000.0,35000.0,49600.0,35000.0,60000.0,50000.0,12000.0,57000.0,56000.0,28000.0,53000.0,29000.0,50000.0,41000.0,55000.0,61000.0,110000.0,72000.0,20000.0,11000.0,74000.0,65000.0,84000.0,60000.0,20000.0,36000.0,62000.0,34000.0,100000.0,85000.0,80500.0,28600.0,30000.0,80000.0,40000.0,20000.0,133000.0,48000.0,25000.0,301000.0,72000.0,15000.0,21000.0,52000.0,29000.0,95000.0,30000.0,91000.0,76000.0,32200.0,53000.0,70000.0,24000.0,110000.0,24000.0,55000.0,53000.0,22000.0,125000.0,18000.0,24000.0,24800.0,55000.0,42000.0,64000.0,50000.0,29100.0,70000.0,99000.0,20000.0,35000.0,46000.0,168000.0,55000.0,14400.0,22500.0,30000.0,84000.0,149000.0,25000.0,14600.0,48000.0,50000.0,24000.0,62000.0,34700.0,35000.0,37000.0,41000.0,56000.0,125000.0,50000.0,22000.0,32000.0,50000.0,27000.0,60000.0,281000.0,60000.0,102000.0,42000.0,26400.0,130000.0,76000.0,32000.0,118000.0,10000.0,50000.0,40000.0,48000.0,30000.0,24000.0,40000.0,90000.0,50000.0,10000.0,160000.0,95000.0,98000.0,16000.0,49200.0,52000.0,36000.0,17700.0,52000.0,12000.0,35500.0,40000.0,63000.0,80000.0,9000.0,15700.0,30000.0,100000.0,20000.0,28000.0,56000.0,30000.0,70000.0,16000.0,23000.0,24900.0,28000.0,16000.0,42000.0,43000.0,25000.0,40000.0,100000.0,60000.0,60000.0,31200.0,165000.0,30000.0,58000.0,20000.0,32000.0,33000.0,14000.0,47000.0,37000.0,21000.0,28000.0,60000.0,65000.0,68000.0,25000.0,40000.0,36800.0,23000.0,40000.0,30000.0,90000.0,74000.0,17000.0,24000.0,140000.0,60000.0,52000.0,322000.0,40000.0,45000.0,100000.0,20000.0,23000.0,100000.0,38000.0,46000.0,174001.0,26600.0,28500.0,7500.0,80000.0,32100.0,20000.0,42000.0,50000.0,504000.0,30000.0,80000.0,45000.0,34200.0,45000.0,110000.0,170000.0,45000.0,55000.0,25000.0,36000.0,39700.0,113000.0,25000.0,40000.0,120000.0,22700.0,40000.0,40000.0,28000.0,30000.0,29000.0,60000.0,56000.0,23000.0,80000.0,12800.0,316000.0,85000.0,180000.0,10000.0,50000.0,55000.0,48000.0,64000.0,126000.0,20000.0,24000.0,26000.0,30000.0,38000.0,63000.0,30000.0,33000.0,150000.0,27000.0,58000.0,24000.0,129000.0,18000.0,65000.0,19100.0,50000.0,78000.0,60000.0,40000.0,58000.0,49000.0,65000.0,44200.0,84000.0,89000.0,45000.0,95000.0,42000.0,19000.0],"gender":[0,0,0,1,1,0,1,1,0,1,1,0,1,1,0,0,1,0,0,1,0,0,0,0,0,0,1,1,0,1,0,1,1,1,0,0,0,0,1,0,0,0,1,0,0,0,0,0,0,1,1,1,0,0,1,0,0,0,0,1,0,0,0,1,0,0,1,1,0,0,1,1,1,0,1,1,0,1,1,0,0,0,0,0,0,1,1,1,0,0,0,1,0,1,0,0,1,0,0,0,0,0,0,1,0,0,1,0,0,0,0,0,1,1,1,0,1,1,0,0,0,0,1,0,0,0,1,1,1,1,0,1,1,1,0,0,1,0,1,0,1,0,0,1,1,1,0,1,0,0,0,1,0,0,1,1,0,1,0,0,1,1,0,0,0,0,1,1,0,0,1,0,0,0,1,0,0,0,0,0,1,0,0,0,0,1,0,0,0,1,0,1,1,1,0,1,1,1,1,0,1,0,0,1,0,1,1,0,1,0,1,1,0,1,0,1,1,0,1,0,1,0,1,0,0,1,0,1,0,1,0,1,1,0,1,0,1,1,1,0,0,0,1,0,1,1,0,1,0,0,1,0,1,0,1,1,1,1,0,0,1,1,0,0,1,1,1,1,0,0,1,0,0,1,1,0,0,0,1,1,1,0,0,0,1,0,0,0,0,1,1,0,1,0,1,1,1,1,0,0,0,0,0,0,1,1,0,0,0,1,1,0,1,0,0,1,0,0,1,1,0,0,1,0,0,1,0,0,0,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,1,1,1,0,1,1,1,1,1,1,1,0,1,1,1,0,0,0,1,0,0,0,0,0,0,1,0,1,0,0,0,1,0,1,1,1,1,0,1,1,0,0,1,1,1,0,1,1,0,0,1,1,1,0,0,0,1,0,0,1,1,0,1,1,1,0,0,0,0,0,1,0,0,1,0,1,1,0,0,0,0,0,0,1,0,1,0,1,0,0,1,0,0,0,1,0,0,0,0,0,1,0,0,1,1,1,0,0,1,0,1,0,1,1,1,0,0,0,0,0,1,0,1,1,1,0,1,0,0,0,0,0,1,0,0,1,1,0,0,0,0,0,0,0,0,0,1,0,0,0,1,1,1,0,0,0,0,1,0,0,0,1,0,0,0,1,0,0,1,1,1,0,0,0,1,1,0,0,0,0,1,1,0,1,0,0,0,0,0,1,1,1,0,1,1,0,0,0,0,0,0,0,0,0,0,1,0,0,1,1,0,0,0,1,0,0,0,1,1,1,0,0,0,0,1,1,0,1,0,1,0,0,1,0,0,0,1,1,1,0,0,1,0,0,1,0,1,1,1,1,0,0,1,0,0,0,1,1,1,0,0,1,0,1,1,1,0,1,1,0,0,1,1,0,0,0,1,0,0,1,0,0,0,1,0,0,1,1,1,1,1,0,0,1,0,0,1,1,0,0,0,1,1,0,0,1,1,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,0,1,0,1,1,0,0,0,0,1,0,1,1,1,0,0,1,1,0,0,0,1,0,0,0,1,0,1,0,0,1,1,0,0,0,1,0,0,1,0,0,1,0,1,0,1,1,0,1,0,0,0,1,0,1,0,1,1,0,0,1,0,1,1,1,1,1,1,1,0,1,0,1,1,0,0,1,1,0,1,0,1,0,0,0,0,1,1,0,1,0,0,1,0,1,0,0,1,1,0,0,0,0,0,1,0,1,0,0,0,1,1,1,0,0,0,0,1,0,1,1,1,0,1,0,1,0,0,0,1,0,0,1,0,0,0,0,0,0,0,1,0,1,1,1,0,0,1,1,1,0,1,0,0,0,0,0,1,1,1,0,0,1,1,1,1,0,0,0,0,0,0,1,1,0,1,1,1,0,0,1,1,0,0,1,1,0,1,0,0,0,0,1,1,1,0,0,1,0,1,1,0,1,0,0,1]},"models":[{"name":"Gender only","vars":["const","gender"],"coef":[63476.32,-16396.42],"se":[2776.98,3217.43],"t":[22.858,-5.0961],"p":[0.0,0.0],"r2":0.0249,"r2_adj":0.0238,"n":872},{"name":"Gender + Education","vars":["const","gender","education"],"coef":[-17551.62,-18258.09,5907.29],"se":[7993.55,3136.14,654.08],"t":[-2.1957,-5.8218,9.0315],"p":[0.028112,0.0,0.0],"r2":0.134,"r2_adj":0.132,"n":872},{"name":"Gender + Educ + Interaction","vars":["const","gender","education","gender×educ"],"coef":[-31451.32,20218.8,6920.64,-2764.89],"se":[11846.01,15355.18,946.14,1168.32],"t":[-2.655,1.3167,7.3146,-2.3665],"p":[0.00793,0.187925,0.0,0.017955],"r2":0.1395,"r2_adj":0.1365,"n":872},{"name":"Full controls","vars":["const","gender","education","gender×educ","age","hours"],"coef":[-107343.62,19021.71,6416.8,-2456.29,525.99,1324.51],"se":[22224.38,14994.36,886.12,1123.17,145.01,352.55],"t":[-4.83,1.2686,7.2414,-2.1869,3.6274,3.757],"p":[1e-06,0.204587,0.0,0.028748,0.000286,0.000172],"r2":0.1979,"r2_adj":0.1932,"n":872},{"name":"Full interactions","vars":["const","gender","education","gender×educ","age","gender×age","hours","gender×hours"],"coef":[-120431.57,57129.0,6314.67,-2123.51,549.47,-49.33,1620.81,-929.57],"se":[28847.15,31917.14,878.61,1096.42,227.68,270.26,503.87,554.25],"t":[-4.1748,1.7899,7.1871,-1.9368,2.4133,-0.1825,3.2167,-1.6772],"p":[3e-05,0.073467,0.0,0.052775,0.015807,0.85516,0.001297,0.093506],"r2":0.2028,"r2_adj":0.1963,"n":872}],"worker_models":{"private":{"vars":["const","dself","dgovt"],"coef":[54521.27,17785.06,1584.12],"se":[1897.51,9821.89,3402.8],"t":[28.7331,1.8108,0.4655],"p":[0.0,0.070178,0.64155],"r2":0.0097,"r2_adj":0.0074,"n":872},"self":{"vars":["const","dprivate","dgovt"],"coef":[72306.33,-17785.06,-16200.94],"se":[9636.85,9821.89,10042.28],"t":[7.5031,-1.8108,-1.6133],"p":[0.0,0.070178,0.106685],"r2":0.0097,"r2_adj":0.0074,"n":872},"govt":{"vars":["const","dself","dprivate"],"coef":[56105.38,16200.94,-1584.12],"se":[2824.63,10042.28,3402.8],"t":[19.8629,1.6133,-0.4655],"p":[0.0,0.106685,0.64155],"r2":0.0097,"r2_adj":0.0074,"n":872}},"group_means":{"male":{"n":494,"mean":63476.32,"sd":61713.21,"se":2776.61},"female":{"n":378,"mean":47079.89,"sd":31596.72,"se":1625.16},"self_employed":{"n":79,"mean":72306.33,"sd":86053.13,"se":9681.73},"private":{"n":663,"mean":54521.27,"sd":48811.2,"se":1895.67},"government":{"n":130,"mean":56105.38,"sd":32274.68,"se":2830.68}},"gender_reg":{"male":{"intercept":-31451.32,"slope":6920.64,"r2":0.1167,"n":494},"female":{"intercept":-11232.53,"slope":4155.75,"r2":0.1215,"n":378}},"mean_vals":{"education":13.85,"age":43.31,"hours":44.34},"meta":{"chapter":"Chapter 14: Regression with Indicator Variables","book":"metricsAI: An Introduction to Econometrics with Python and AI in the Cloud","author":"Carlos Mendez"}}</script>
@@ -915,12 +1005,362 @@ data |&gt;
 "use strict";
 var DATA=JSON.parse(document.getElementById("ch-data").textContent);
 
+// ==================== I18N (EN / ES) ====================
+// English is the source of truth. Spanish entries are real translations
+// (no placeholder prefixes). Strings may contain `{name}` placeholders
+// that are filled by t(key, vars).
+var I18N = {
+  defaultLang: "en",
+  storageKey: "language",
+  en: {
+    "meta.title": "Chapter 14 — Regression with Indicator Variables · metricsAI",
+
+    "header.badge":    "Chapter 14 of 18 · Interactive Dashboard",
+    "header.title":    "Regression with Indicator Variables",
+    "header.subtitle": "Explore the gender earnings gap, interaction effects, the dummy variable trap, and worker-type differences using the same dataset and models as the book.",
+
+    "theme.dark":  "Dark",
+    "theme.light": "Light",
+
+    "nav.gendergap":     "Gender Gap",
+    "nav.interaction":   "Interactions",
+    "nav.modelcompare":  "Model Comparison",
+    "nav.dummytrap":     "Dummy Trap",
+    "nav.workertype":    "Worker Types",
+    "nav.scattergender": "Scatter by Gender",
+    "nav.code":          "Code",
+
+    "common.reset":      "↺ Reset",
+    "common.tryTitle":   "Try this",
+    "common.howtoTitle": "What you can do here",
+    "common.takeaway":   "Take-away:",
+    "common.show":       "Show",
+
+    "stat.r2": "R²",
+    "stat.t":  "t-statistic",
+    "stat.p":  "p-value",
+
+    "label.male":         "Male",
+    "label.female":       "Female",
+    "label.maleFit":      "Male fit",
+    "label.femaleFit":    "Female fit",
+    "label.intercept":    "Intercept",
+    "label.gender":       "Gender (Female)",
+    "label.education":    "Education",
+    "label.genderEduc":   "Gender × Educ",
+    "label.age":          "Age",
+    "label.genderAge":    "Gender × Age",
+    "label.hours":        "Hours",
+    "label.genderHours":  "Gender × Hours",
+    "label.selfEmployed": "Self-employed",
+    "label.privateSector":"Private sector",
+    "label.government":   "Government",
+    "label.n":            "N",
+    "label.years":        "Years of Education",
+    "label.earnings":     "Earnings ($)",
+    "label.predEarnings": "Predicted Earnings ($)",
+    "label.meanEarnings": "Mean Earnings ($)",
+    "label.educHover":    "Educ",
+    "label.earnHover":    "Earnings",
+    "label.perYr":        "/yr",
+
+    // ---- Widget 1: Gender Earnings Gap ----
+    "widget.gg.heading":    "Gender Earnings Gap Explorer",
+    "widget.gg.motivation": "Women earn $16,396 less per year than men in this sample. <em>How much of that gap survives once we compare workers with similar education, age, and hours?</em>",
+    "widget.gg.kc":         "<span class=\"kc-title\">Regressing y on just an intercept and a single indicator d is algebraically a difference-in-means test.</span> The fitted model <strong>ŷ = b + ad</strong> has intercept b = mean of y when d = 0, and slope a = the mean difference (ȳ₁ − ȳ₀). When you add other regressors, the coefficient on d becomes the <em>adjusted</em> difference — how much of the raw gap remains after controlling for observable differences in those regressors.",
+    "widget.gg.howto":      "<li><strong>Pick a model</strong> — from gender-only through gender + education + age + hours.</li>\n      <li><strong>Watch the gender coefficient move</strong> as controls are added.</li>\n      <li><strong>Compare R²</strong> across models to see how much each control adds.</li>",
+    "widget.gg.ctrl.model.label": "Model",
+    "widget.gg.ctrl.model.opt0":  "Model 1: Gender only",
+    "widget.gg.ctrl.model.opt1":  "Model 2: + Education",
+    "widget.gg.ctrl.model.opt2":  "Model 3: + Gender×Education",
+    "widget.gg.ctrl.model.opt3":  "Model 4: + Age + Hours",
+    "widget.gg.stat.coef":  "Gender coef",
+    "widget.gg.try":        "<li><strong>Start with Model 1 (gender only).</strong> Gap = −$16,396, R² = 2.5%. <em>The raw gap is large but gender alone explains almost none of the earnings variation — most of y₍earnings₎ is driven by other things.</em></li>\n      <li><strong>Switch to Model 2 (+ Education).</strong> The gap widens to −$18,258 — it got <em>bigger</em>! <em>Women in this sample have slightly more education on average, so controlling for education strips out some \"protective\" variation and the residual gap grows.</em></li>\n      <li><strong>Switch to Model 4 (full controls).</strong> <em>The gap shrinks substantially once age and hours are added — quantifying how much of the raw gap is \"explained\" by observable characteristics vs. genuinely unexplained.</em></li>",
+    "widget.gg.takeaway":   "<strong>Take-away:</strong> A regression on an indicator is a difference-in-means test — and its coefficient <em>adjusts</em> once you add controls, quantifying what's explained vs. what isn't. <a href=\"../../book/_book/notebooks_quarto/ch14_Regression_with_Indicator_Variables.html#indicator-variables---single-binary-variable\" target=\"_blank\" rel=\"noopener\">Read §14.1 in the chapter →</a>",
+
+    // ---- Widget 2: Interaction Slope Visualizer ----
+    "widget.int.heading":    "Interaction Effects: Do Returns to Education Differ by Gender?",
+    "widget.int.motivation": "Maybe the earnings gap isn't a flat number — maybe it <em>widens</em> (or narrows) with education. An interaction term lets the data say so.",
+    "widget.int.kc":         "<span class=\"kc-title\">An interacted indicator variable — the product of an indicator d and a continuous regressor x — lets both intercepts <em>and</em> slopes differ between groups.</span> In the model <strong>y = β₁ + β₂x + α₁d + α₂(d × x) + u</strong>, α₁ shifts the intercept and <strong>α₂ measures how the slope on x differs between groups</strong>. Include only d (no interaction) and the lines stay parallel; add the interaction and they can fan in or out across the range of x.",
+    "widget.int.howto":      "<li><strong>Toggle the interaction term On or Off.</strong></li>\n      <li><strong>Watch the male and female slopes</strong> in the stat cards — parallel lines mean equal slopes; diverging lines mean different ones.</li>\n      <li><strong>Read the interaction coefficient</strong> — it's exactly the slope gap.</li>",
+    "widget.int.ctrl.label": "Interaction term",
+    "widget.int.ctrl.off":   "Off (parallel)",
+    "widget.int.ctrl.on":    "On (non-parallel)",
+    "widget.int.stat.male":   "Male slope",
+    "widget.int.stat.female": "Female slope",
+    "widget.int.stat.inter":  "Interaction coef",
+    "widget.int.try":        "<li><strong>Keep interaction OFF.</strong> Both genders share a single slope of $5,907/year; the two lines are perfectly parallel. <em>The model forces equal returns to education — whatever the data prefers — and only the intercept shifts between groups.</em></li>\n      <li><strong>Toggle interaction ON.</strong> Male slope = $6,921/yr; female slope = $6,921 − $2,765 = $4,156/yr. <em>Very different returns — women's earnings rise more slowly with education than men's in this sample.</em></li>\n      <li><strong>Follow the lines out to 20 years of education.</strong> <em>The gender gap widens with education — the two groups diverge, so interaction is necessary to tell the right story.</em></li>",
+    "widget.int.takeaway":   "<strong>Take-away:</strong> Without interactions, a model forces parallel slopes; adding d × x lets the data reveal differential returns that a simple indicator cannot capture. <a href=\"../../book/_book/notebooks_quarto/ch14_Regression_with_Indicator_Variables.html#interactions-with-indicator-variables\" target=\"_blank\" rel=\"noopener\">Read §14.3 in the chapter →</a>",
+
+    // ---- Widget 3: Model Comparison Table ----
+    "widget.mc.heading":    "Model Comparison",
+    "widget.mc.motivation": "Does the gender coefficient stay put as you add controls? <em>Or does it grow, shrink, or even flip sign</em> depending on what else is in the model?",
+    "widget.mc.kc":         "<span class=\"kc-title\">When an indicator appears with its interaction, individual t-tests can be misleading; use an F-test for joint significance.</span> Running <strong>separate regressions</strong> for each group allows all coefficients to differ simultaneously, and the <strong>Chow test</strong> (F-test) evaluates whether the relationship is fundamentally different between groups (Key Concept 14.5). The joint test H₀: α₁ = 0, α₂ = 0 evaluates whether the categorical variable matters at all.",
+    "widget.mc.howto":      "<li><strong>Scan the gender row</strong> across the five columns to see how the coefficient evolves.</li>\n      <li><strong>Compare R²</strong> to see which controls add the most explanatory power.</li>\n      <li><strong>Cross-reference with the interaction widget</strong> — Models 3 and 5 add the gender × education interaction.</li>",
+    "widget.mc.th.variable": "Variable",
+    "widget.mc.th.m1":       "Model 1",
+    "widget.mc.th.m2":       "Model 2",
+    "widget.mc.th.m3":       "Model 3",
+    "widget.mc.th.m4":       "Model 4",
+    "widget.mc.th.m5":       "Model 5",
+    "widget.mc.try":        "<li><strong>Scan the gender row across all five models.</strong> The coefficient shifts substantially — and may even flip sign once the interaction enters. <em>That flip is not evidence that the gap disappeared — it's evidence that the interaction absorbs part of the effect, which is why joint F-tests are required.</em></li>\n      <li><strong>Compare R² across models.</strong> Education adds the biggest jump; later variables add less. <em>Early controls earn their keep; the last few variables fight over the residual.</em></li>\n      <li><strong>Read the Model 5 gender coefficient (~$57,129).</strong> Does that mean women earn more? <em>No — in an interacted model, the \"gender\" coefficient is the gap at x = 0 (zero education); the true gender effect must be evaluated at realistic x.</em></li>",
+    "widget.mc.takeaway":   "<strong>Take-away:</strong> In models with interactions, individual coefficients are not the whole story — test the gender block <em>jointly</em> and interpret effects at meaningful values of the interacting variable. <a href=\"../../book/_book/notebooks_quarto/ch14_Regression_with_Indicator_Variables.html#testing-for-structural-change---separate-regressions\" target=\"_blank\" rel=\"noopener\">Read §14.4 in the chapter →</a>",
+
+    // ---- Widget 4: Dummy Variable Trap ----
+    "widget.dt.heading":    "The Dummy Variable Trap",
+    "widget.dt.motivation": "Three categories, three indicators — and suddenly <em>OLS refuses to run</em>. Why does adding the \"last\" category break everything, and which one do you drop?",
+    "widget.dt.kc":         "<span class=\"kc-title\">Including all C indicators from a set of mutually exclusive categories plus an intercept creates perfect multicollinearity — the dummy variable trap.</span> Because d₁ + d₂ + ⋯ + d<sub>C</sub> = 1 for every observation, the intercept is an exact linear combination of the indicators. The fix: <strong>drop one indicator</strong> (the base category) <em>or</em> drop the intercept. Standard practice keeps the intercept and drops one category; the remaining coefficients are then interpreted as differences <em>from</em> the base.",
+    "widget.dt.howto":      "<li><strong>Toggle the base (omitted) category</strong> between Private, Self-employed, and Government.</li>\n      <li><strong>Watch the coefficients and SEs</strong> change when the base changes.</li>\n      <li><strong>Watch the predicted means</strong> at the bottom — they stay <em>identical</em>.</li>",
+    "widget.dt.ctrl.label":   "Base (omitted) category",
+    "widget.dt.ctrl.private": "Private",
+    "widget.dt.ctrl.self":    "Self-employed",
+    "widget.dt.ctrl.govt":    "Government",
+    "widget.dt.th.variable":  "Variable",
+    "widget.dt.th.coef":      "Coefficient",
+    "widget.dt.th.se":        "SE",
+    "widget.dt.th.t":         "t",
+    "widget.dt.stat.pself":   "Pred: Self-emp",
+    "widget.dt.stat.ppriv":   "Pred: Private",
+    "widget.dt.stat.pgovt":   "Pred: Govt",
+    "widget.dt.try":          "<li><strong>Keep Private as base.</strong> The coefficients on dself and dgovt are differences from the private-sector mean. <em>Private is the reference point; the other two categories are compared to it.</em></li>\n      <li><strong>Switch to Self-employed as base.</strong> All the coefficients change dramatically — but the predicted means for each category stay the same. <em>The parameterization changes; the model's predictions do not.</em></li>\n      <li><strong>Switch to Government.</strong> Same R², same predictions, new coefficient interpretation. <em>The base category is a choice about <em>interpretation</em>, not a choice about model fit — pick whichever makes the story clearest.</em></li>",
+    "widget.dt.takeaway":     "<strong>Take-away:</strong> C categories require C − 1 indicators plus an intercept; the dropped category becomes the reference point and every other coefficient is read <em>relative to it</em>. <a href=\"../../book/_book/notebooks_quarto/ch14_Regression_with_Indicator_Variables.html#sets-of-indicator-variables-multiple-categories\" target=\"_blank\" rel=\"noopener\">Read §14.5 in the chapter →</a>",
+
+    // ---- Widget 5: Worker Type Bar Chart ----
+    "widget.wt.heading":    "Worker Type Comparison",
+    "widget.wt.motivation": "Self-employed workers look like they earn the most — <em>but is the CI wide enough to matter?</em> The bar heights are only half the story.",
+    "widget.wt.kc":         "<span class=\"kc-title\">Regressing y on a set of mutually exclusive indicators (with no other controls) is equivalent to analysis of variance (ANOVA).</span> The coefficients give group means or differences from the base mean. The regression's <strong>F-test for joint significance</strong> of the indicators is identical to the ANOVA F-statistic — testing whether the categorical variable explains significant variation in y (Key Concept 14.7). Looking at group means with CIs is the visual counterpart.",
+    "widget.wt.howto":      "<li><strong>Compare the bar heights</strong> across employment types.</li>\n      <li><strong>Check the whiskers (95% CIs)</strong> — wider = less precise, narrower = more precise.</li>\n      <li><strong>Look for CI overlap</strong> between two categories — overlap usually means the difference isn't statistically significant.</li>",
+    "widget.wt.try":        "<li><strong>Identify the highest-mean category.</strong> Self-employed is visibly highest. <em>But the CI is by far the widest — small sample (n = 79) and heavy-tailed self-employment income make the point estimate unreliable.</em></li>\n      <li><strong>Check if the private and government CIs overlap.</strong> <em>Substantial overlap suggests the difference between those two categories may not be statistically significant at 5%.</em></li>\n      <li><strong>Note the asymmetry of precision.</strong> The narrowest CIs belong to the largest subsamples. <em>A reminder that \"highest mean\" and \"most precisely estimated\" are two different things.</em></li>",
+    "widget.wt.takeaway":   "<strong>Take-away:</strong> A set of mutually exclusive indicators is just ANOVA in regression clothing — and the CIs around each group mean tell you which differences can be trusted. <a href=\"../../book/_book/notebooks_quarto/ch14_Regression_with_Indicator_Variables.html#sets-of-indicator-variables-multiple-categories\" target=\"_blank\" rel=\"noopener\">Read §14.5 in the chapter →</a>",
+
+    // ---- Widget 6: Scatter by Gender ----
+    "widget.sg.heading":    "Earnings vs Education by Gender",
+    "widget.sg.motivation": "Two regression lines, one chart. <em>Are they parallel, or do they fan apart?</em> The answer decides whether you need an interaction term.",
+    "widget.sg.kc":         "<span class=\"kc-title\">Scatter plots with separate regression lines by group visually reveal whether slopes and intercepts differ.</span> <strong>Parallel lines</strong> indicate only an intercept shift — an indicator without interaction is enough. <strong>Non-parallel lines</strong> indicate differential slopes — an interaction term is needed. Either way, the gender gap is the vertical distance between the lines <em>at a given x</em>, and it's constant only when the lines are parallel.",
+    "widget.sg.howto":      "<li><strong>Toggle Both / Male only / Female only</strong> to inspect each group.</li>\n      <li><strong>Read male slope, female slope, and the gaps at 12 and 16 years of education</strong> in the stat cards.</li>\n      <li><strong>Judge parallelism by eye</strong> — if the two lines tilt apart, interaction belongs in the model.</li>",
+    "widget.sg.ctrl.both":   "Both",
+    "widget.sg.ctrl.male":   "Male only",
+    "widget.sg.ctrl.female": "Female only",
+    "widget.sg.stat.gap12":  "Gap at Educ=12",
+    "widget.sg.stat.gap16":  "Gap at Educ=16",
+    "widget.sg.try":         "<li><strong>Compare the two regression lines by eye.</strong> Are they parallel? <em>If not, returns to education differ by gender and an interaction term is mandatory in the model.</em></li>\n      <li><strong>Compare the gap at 12 years vs 16 years.</strong> <em>If the gap grows with education, men's returns outpace women's — exactly what the interaction term in widget 2 estimates.</em></li>\n      <li><strong>Toggle Male only, then Female only.</strong> The male subsample has more high-earning outliers. <em>Visual skew is one reason male regressions dominate the pooled slope — the interaction term makes that story explicit.</em></li>",
+    "widget.sg.takeaway":    "<strong>Take-away:</strong> Two lines on one chart tell you in a glance whether you need interactions — and at which education levels the gender gap is widest. <a href=\"../../book/_book/notebooks_quarto/ch14_Regression_with_Indicator_Variables.html#interactions-with-indicator-variables\" target=\"_blank\" rel=\"noopener\">Read §14.3 in the chapter →</a>",
+
+    // ---- Code summary ----
+    "code.heading":    "Code Summary",
+    "code.motivation": "You've explored the key concepts interactively — now reproduce them in code. These self-contained blocks cover everything you practiced above. Pick your language, copy the code, and run it.",
+    "code.tab.python": "Python",
+    "code.tab.stata":  "Stata",
+    "code.tab.r":      "R",
+    "code.copy.idle":  "Copy code",
+    "code.copy.done":  "Copied!",
+    "code.colab":      "Open empty Colab notebook &rarr;",
+    "code.note.stata": "Paste into your Stata do-file editor",
+    "code.note.r":     "Paste into your R console or RStudio",
+
+    // ---- Footer ----
+    "footer.text":      "Part of <a href=\"https://quarcs-lab.github.io/metricsai/book/_book/index.html\"><strong>metricsAI</strong></a> · Chapter 14: Regression with Indicator Variables · by Carlos Mendez · <a href=\"https://github.com/quarcs-lab/metricsai\">GitHub</a>",
+    "footer.data":      "Data: AED_EARNINGS_COMPLETE.DTA (872 full-time workers aged 25–65, 2000)",
+    "footer.scrolltop": "↑ Back to top"
+  },
+  es: {
+    "meta.title": "Capítulo 14 — Regresión con variables indicadoras · metricsAI",
+
+    "header.badge":    "Capítulo 14 de 18 · Tablero interactivo",
+    "header.title":    "Regresión con variables indicadoras",
+    "header.subtitle": "Explora la brecha salarial de género, los efectos de interacción, la trampa de las variables ficticias y las diferencias por tipo de trabajador usando el mismo conjunto de datos y los mismos modelos del libro.",
+
+    "theme.dark":  "Oscuro",
+    "theme.light": "Claro",
+
+    "nav.gendergap":     "Brecha de género",
+    "nav.interaction":   "Interacciones",
+    "nav.modelcompare":  "Comparación de modelos",
+    "nav.dummytrap":     "Trampa de dummies",
+    "nav.workertype":    "Tipos de trabajador",
+    "nav.scattergender": "Dispersión por género",
+    "nav.code":          "Código",
+
+    "common.reset":      "↺ Reiniciar",
+    "common.tryTitle":   "Pruébalo",
+    "common.howtoTitle": "Qué puedes hacer aquí",
+    "common.takeaway":   "Para recordar:",
+    "common.show":       "Mostrar",
+
+    "stat.r2": "R²",
+    "stat.t":  "estadístico t",
+    "stat.p":  "valor p",
+
+    "label.male":         "Hombre",
+    "label.female":       "Mujer",
+    "label.maleFit":      "Ajuste hombres",
+    "label.femaleFit":    "Ajuste mujeres",
+    "label.intercept":    "Intercepto",
+    "label.gender":       "Género (Mujer)",
+    "label.education":    "Educación",
+    "label.genderEduc":   "Género × Educ",
+    "label.age":          "Edad",
+    "label.genderAge":    "Género × Edad",
+    "label.hours":        "Horas",
+    "label.genderHours":  "Género × Horas",
+    "label.selfEmployed": "Autoempleado",
+    "label.privateSector":"Sector privado",
+    "label.government":   "Gobierno",
+    "label.n":            "N",
+    "label.years":        "Años de educación",
+    "label.earnings":     "Ingresos ($)",
+    "label.predEarnings": "Ingresos predichos ($)",
+    "label.meanEarnings": "Ingresos medios ($)",
+    "label.educHover":    "Educ",
+    "label.earnHover":    "Ingresos",
+    "label.perYr":        "/año",
+
+    // ---- Widget 1: Gender Earnings Gap ----
+    "widget.gg.heading":    "Explorador de la brecha salarial de género",
+    "widget.gg.motivation": "En esta muestra, las mujeres ganan $16,396 menos al año que los hombres. <em>¿Cuánto de esa brecha sobrevive cuando comparamos trabajadores con educación, edad y horas similares?</em>",
+    "widget.gg.kc":         "<span class=\"kc-title\">Regresar y sobre solo un intercepto y una sola variable indicadora d es algebraicamente una prueba de diferencia de medias.</span> El modelo ajustado <strong>ŷ = b + ad</strong> tiene intercepto b = media de y cuando d = 0, y pendiente a = la diferencia de medias (ȳ₁ − ȳ₀). Cuando agregas otros regresores, el coeficiente de d se convierte en la diferencia <em>ajustada</em> — cuánto de la brecha original queda después de controlar por las diferencias observables en esos regresores.",
+    "widget.gg.howto":      "<li><strong>Elige un modelo</strong> — desde solo género hasta género + educación + edad + horas.</li>\n      <li><strong>Observa cómo se mueve el coeficiente de género</strong> a medida que agregas controles.</li>\n      <li><strong>Compara R²</strong> entre modelos para ver cuánto añade cada control.</li>",
+    "widget.gg.ctrl.model.label": "Modelo",
+    "widget.gg.ctrl.model.opt0":  "Modelo 1: Solo género",
+    "widget.gg.ctrl.model.opt1":  "Modelo 2: + Educación",
+    "widget.gg.ctrl.model.opt2":  "Modelo 3: + Género×Educación",
+    "widget.gg.ctrl.model.opt3":  "Modelo 4: + Edad + Horas",
+    "widget.gg.stat.coef":  "Coef. género",
+    "widget.gg.try":        "<li><strong>Comienza con el Modelo 1 (solo género).</strong> Brecha = −$16,396, R² = 2.5%. <em>La brecha original es grande, pero el género por sí solo explica casi nada de la variación en los ingresos — la mayoría de y₍ingresos₎ está impulsada por otras cosas.</em></li>\n      <li><strong>Cambia al Modelo 2 (+ Educación).</strong> La brecha se amplía a −$18,258 — ¡se hizo <em>más grande</em>! <em>Las mujeres en esta muestra tienen en promedio un poco más de educación, así que controlar por educación quita parte de la variación \"protectora\" y la brecha residual crece.</em></li>\n      <li><strong>Cambia al Modelo 4 (controles completos).</strong> <em>La brecha se reduce sustancialmente una vez agregadas la edad y las horas — cuantificando cuánto de la brecha original es \"explicado\" por características observables versus genuinamente inexplicado.</em></li>",
+    "widget.gg.takeaway":   "<strong>Para recordar:</strong> Una regresión sobre una variable indicadora es una prueba de diferencia de medias — y su coeficiente <em>se ajusta</em> cuando agregas controles, cuantificando lo que se explica versus lo que no. <a href=\"../../book/_book/notebooks_quarto/ch14_Regression_with_Indicator_Variables.html#indicator-variables---single-binary-variable\" target=\"_blank\" rel=\"noopener\">Lee §14.1 en el capítulo →</a>",
+
+    // ---- Widget 2: Interaction Slope Visualizer ----
+    "widget.int.heading":    "Efectos de interacción: ¿los rendimientos de la educación difieren por género?",
+    "widget.int.motivation": "Quizá la brecha salarial no sea un número plano — quizá <em>se amplía</em> (o se reduce) con la educación. Un término de interacción permite que los datos lo digan.",
+    "widget.int.kc":         "<span class=\"kc-title\">Una variable indicadora interactuada — el producto de una indicadora d y un regresor continuo x — permite que tanto los interceptos <em>como</em> las pendientes difieran entre grupos.</span> En el modelo <strong>y = β₁ + β₂x + α₁d + α₂(d × x) + u</strong>, α₁ desplaza el intercepto y <strong>α₂ mide cuánto difiere la pendiente sobre x entre grupos</strong>. Incluye solo d (sin interacción) y las líneas quedan paralelas; agrega la interacción y pueden abrirse o cerrarse a lo largo del rango de x.",
+    "widget.int.howto":      "<li><strong>Activa o desactiva el término de interacción.</strong></li>\n      <li><strong>Observa las pendientes de hombres y mujeres</strong> en las tarjetas de estadísticas — líneas paralelas significan pendientes iguales; líneas que divergen significan pendientes diferentes.</li>\n      <li><strong>Lee el coeficiente de interacción</strong> — es exactamente la diferencia de pendientes.</li>",
+    "widget.int.ctrl.label":  "Término de interacción",
+    "widget.int.ctrl.off":    "Desactivado (paralelo)",
+    "widget.int.ctrl.on":     "Activado (no paralelo)",
+    "widget.int.stat.male":   "Pendiente hombres",
+    "widget.int.stat.female": "Pendiente mujeres",
+    "widget.int.stat.inter":  "Coef. de interacción",
+    "widget.int.try":         "<li><strong>Mantén la interacción DESACTIVADA.</strong> Ambos géneros comparten una sola pendiente de $5,907/año; las dos líneas son perfectamente paralelas. <em>El modelo fuerza rendimientos iguales a la educación — sea lo que prefieran los datos — y solo el intercepto cambia entre grupos.</em></li>\n      <li><strong>Activa la interacción.</strong> Pendiente hombres = $6,921/año; pendiente mujeres = $6,921 − $2,765 = $4,156/año. <em>Rendimientos muy diferentes — los ingresos de las mujeres aumentan más lentamente con la educación que los de los hombres en esta muestra.</em></li>\n      <li><strong>Sigue las líneas hasta los 20 años de educación.</strong> <em>La brecha de género se amplía con la educación — los dos grupos divergen, así que la interacción es necesaria para contar la historia correcta.</em></li>",
+    "widget.int.takeaway":    "<strong>Para recordar:</strong> Sin interacciones, un modelo fuerza pendientes paralelas; agregar d × x permite que los datos revelen rendimientos diferenciales que una indicadora simple no puede capturar. <a href=\"../../book/_book/notebooks_quarto/ch14_Regression_with_Indicator_Variables.html#interactions-with-indicator-variables\" target=\"_blank\" rel=\"noopener\">Lee §14.3 en el capítulo →</a>",
+
+    // ---- Widget 3: Model Comparison Table ----
+    "widget.mc.heading":    "Comparación de modelos",
+    "widget.mc.motivation": "¿El coeficiente de género se queda quieto cuando agregas controles? <em>¿O crece, se reduce o incluso cambia de signo</em> según qué más haya en el modelo?",
+    "widget.mc.kc":         "<span class=\"kc-title\">Cuando una indicadora aparece junto con su interacción, las pruebas t individuales pueden ser engañosas; usa una prueba F de significancia conjunta.</span> Correr <strong>regresiones separadas</strong> para cada grupo permite que todos los coeficientes difieran simultáneamente, y la <strong>prueba de Chow</strong> (prueba F) evalúa si la relación es fundamentalmente distinta entre grupos (Concepto Clave 14.5). La prueba conjunta H₀: α₁ = 0, α₂ = 0 evalúa si la variable categórica importa en absoluto.",
+    "widget.mc.howto":      "<li><strong>Recorre la fila de género</strong> a través de las cinco columnas para ver cómo evoluciona el coeficiente.</li>\n      <li><strong>Compara R²</strong> para ver qué controles añaden más poder explicativo.</li>\n      <li><strong>Cruza con el widget de interacción</strong> — los Modelos 3 y 5 agregan la interacción género × educación.</li>",
+    "widget.mc.th.variable": "Variable",
+    "widget.mc.th.m1":       "Modelo 1",
+    "widget.mc.th.m2":       "Modelo 2",
+    "widget.mc.th.m3":       "Modelo 3",
+    "widget.mc.th.m4":       "Modelo 4",
+    "widget.mc.th.m5":       "Modelo 5",
+    "widget.mc.try":         "<li><strong>Recorre la fila de género en los cinco modelos.</strong> El coeficiente cambia sustancialmente — y hasta puede cambiar de signo cuando entra la interacción. <em>Ese cambio de signo no es evidencia de que la brecha desapareció — es evidencia de que la interacción absorbe parte del efecto, por eso se necesitan pruebas F conjuntas.</em></li>\n      <li><strong>Compara R² entre modelos.</strong> La educación produce el mayor salto; las variables posteriores aportan menos. <em>Los primeros controles se ganan su lugar; las últimas variables pelean por el residuo.</em></li>\n      <li><strong>Lee el coeficiente de género del Modelo 5 (~$57,129).</strong> ¿Eso significa que las mujeres ganan más? <em>No — en un modelo con interacción, el coeficiente de \"género\" es la brecha en x = 0 (cero educación); el verdadero efecto del género debe evaluarse en valores realistas de x.</em></li>",
+    "widget.mc.takeaway":    "<strong>Para recordar:</strong> En modelos con interacciones, los coeficientes individuales no son toda la historia — prueba el bloque de género <em>conjuntamente</em> e interpreta los efectos en valores significativos de la variable que interactúa. <a href=\"../../book/_book/notebooks_quarto/ch14_Regression_with_Indicator_Variables.html#testing-for-structural-change---separate-regressions\" target=\"_blank\" rel=\"noopener\">Lee §14.4 en el capítulo →</a>",
+
+    // ---- Widget 4: Dummy Variable Trap ----
+    "widget.dt.heading":    "La trampa de las variables ficticias",
+    "widget.dt.motivation": "Tres categorías, tres indicadoras — y de pronto <em>MCO se niega a correr</em>. ¿Por qué agregar la \"última\" categoría rompe todo, y cuál hay que dejar fuera?",
+    "widget.dt.kc":         "<span class=\"kc-title\">Incluir las C indicadoras de un conjunto de categorías mutuamente excluyentes junto con un intercepto crea multicolinealidad perfecta — la trampa de las variables ficticias.</span> Como d₁ + d₂ + ⋯ + d<sub>C</sub> = 1 para cada observación, el intercepto es una combinación lineal exacta de las indicadoras. La solución: <strong>quita una indicadora</strong> (la categoría base) <em>o</em> quita el intercepto. La práctica estándar mantiene el intercepto y quita una categoría; los coeficientes restantes se interpretan entonces como diferencias <em>respecto a</em> la base.",
+    "widget.dt.howto":      "<li><strong>Cambia la categoría base (omitida)</strong> entre Privada, Autoempleado y Gobierno.</li>\n      <li><strong>Observa cómo cambian los coeficientes y los EE</strong> cuando cambia la base.</li>\n      <li><strong>Observa las medias predichas</strong> al fondo — se mantienen <em>idénticas</em>.</li>",
+    "widget.dt.ctrl.label":   "Categoría base (omitida)",
+    "widget.dt.ctrl.private": "Privada",
+    "widget.dt.ctrl.self":    "Autoempleado",
+    "widget.dt.ctrl.govt":    "Gobierno",
+    "widget.dt.th.variable":  "Variable",
+    "widget.dt.th.coef":      "Coeficiente",
+    "widget.dt.th.se":        "EE",
+    "widget.dt.th.t":         "t",
+    "widget.dt.stat.pself":   "Pred: Autoempleado",
+    "widget.dt.stat.ppriv":   "Pred: Privada",
+    "widget.dt.stat.pgovt":   "Pred: Gobierno",
+    "widget.dt.try":          "<li><strong>Mantén Privada como base.</strong> Los coeficientes de dself y dgovt son diferencias respecto a la media del sector privado. <em>La privada es el punto de referencia; las otras dos categorías se comparan con ella.</em></li>\n      <li><strong>Cambia a Autoempleado como base.</strong> Todos los coeficientes cambian dramáticamente — pero las medias predichas para cada categoría se mantienen iguales. <em>La parametrización cambia; las predicciones del modelo no.</em></li>\n      <li><strong>Cambia a Gobierno.</strong> Mismo R², mismas predicciones, nueva interpretación de los coeficientes. <em>La categoría base es una elección de <em>interpretación</em>, no de ajuste del modelo — elige la que cuente la historia más clara.</em></li>",
+    "widget.dt.takeaway":     "<strong>Para recordar:</strong> C categorías requieren C − 1 indicadoras más un intercepto; la categoría omitida se vuelve el punto de referencia y todo otro coeficiente se lee <em>relativo a ella</em>. <a href=\"../../book/_book/notebooks_quarto/ch14_Regression_with_Indicator_Variables.html#sets-of-indicator-variables-multiple-categories\" target=\"_blank\" rel=\"noopener\">Lee §14.5 en el capítulo →</a>",
+
+    // ---- Widget 5: Worker Type Bar Chart ----
+    "widget.wt.heading":    "Comparación por tipo de trabajador",
+    "widget.wt.motivation": "Los trabajadores autoempleados parecen ser los que más ganan — <em>¿pero el IC es lo bastante ancho como para importar?</em> La altura de las barras es solo la mitad de la historia.",
+    "widget.wt.kc":         "<span class=\"kc-title\">Regresar y sobre un conjunto de indicadoras mutuamente excluyentes (sin otros controles) es equivalente al análisis de varianza (ANOVA).</span> Los coeficientes dan medias de los grupos o diferencias respecto a la media base. La <strong>prueba F de significancia conjunta</strong> de las indicadoras es idéntica al estadístico F de ANOVA — prueba si la variable categórica explica variación significativa en y (Concepto Clave 14.7). Mirar las medias de los grupos con sus IC es la contraparte visual.",
+    "widget.wt.howto":      "<li><strong>Compara las alturas de las barras</strong> entre tipos de empleo.</li>\n      <li><strong>Mira los bigotes (IC al 95%)</strong> — más anchos = menos preciso, más estrechos = más preciso.</li>\n      <li><strong>Busca solapamiento entre IC</strong> de dos categorías — el solapamiento usualmente significa que la diferencia no es estadísticamente significativa.</li>",
+    "widget.wt.try":        "<li><strong>Identifica la categoría con la media más alta.</strong> Autoempleado es visiblemente la más alta. <em>Pero el IC es por mucho el más ancho — una muestra pequeña (n = 79) e ingresos del autoempleo con colas pesadas hacen que la estimación puntual sea poco confiable.</em></li>\n      <li><strong>Verifica si los IC de privado y gobierno se solapan.</strong> <em>Un solapamiento sustancial sugiere que la diferencia entre esas dos categorías puede no ser estadísticamente significativa al 5%.</em></li>\n      <li><strong>Nota la asimetría de la precisión.</strong> Los IC más estrechos pertenecen a las submuestras más grandes. <em>Un recordatorio de que \"media más alta\" y \"estimada con más precisión\" son dos cosas diferentes.</em></li>",
+    "widget.wt.takeaway":   "<strong>Para recordar:</strong> Un conjunto de indicadoras mutuamente excluyentes es solo ANOVA disfrazado de regresión — y los IC alrededor de cada media de grupo te dicen qué diferencias se pueden creer. <a href=\"../../book/_book/notebooks_quarto/ch14_Regression_with_Indicator_Variables.html#sets-of-indicator-variables-multiple-categories\" target=\"_blank\" rel=\"noopener\">Lee §14.5 en el capítulo →</a>",
+
+    // ---- Widget 6: Scatter by Gender ----
+    "widget.sg.heading":    "Ingresos vs educación por género",
+    "widget.sg.motivation": "Dos líneas de regresión, un solo gráfico. <em>¿Son paralelas o se abren en abanico?</em> La respuesta decide si necesitas un término de interacción.",
+    "widget.sg.kc":         "<span class=\"kc-title\">Los diagramas de dispersión con líneas de regresión separadas por grupo revelan visualmente si las pendientes y los interceptos difieren.</span> <strong>Líneas paralelas</strong> indican solo un desplazamiento del intercepto — basta con una indicadora sin interacción. <strong>Líneas no paralelas</strong> indican pendientes diferenciales — se necesita un término de interacción. En cualquier caso, la brecha de género es la distancia vertical entre las líneas <em>en un x dado</em>, y solo es constante cuando las líneas son paralelas.",
+    "widget.sg.howto":      "<li><strong>Cambia entre Ambos / Solo hombres / Solo mujeres</strong> para inspeccionar cada grupo.</li>\n      <li><strong>Lee la pendiente de hombres, la pendiente de mujeres y las brechas a 12 y 16 años de educación</strong> en las tarjetas de estadísticas.</li>\n      <li><strong>Juzga el paralelismo a ojo</strong> — si las dos líneas se inclinan en distinta dirección, la interacción pertenece al modelo.</li>",
+    "widget.sg.ctrl.both":   "Ambos",
+    "widget.sg.ctrl.male":   "Solo hombres",
+    "widget.sg.ctrl.female": "Solo mujeres",
+    "widget.sg.stat.gap12":  "Brecha en Educ=12",
+    "widget.sg.stat.gap16":  "Brecha en Educ=16",
+    "widget.sg.try":         "<li><strong>Compara las dos líneas de regresión a ojo.</strong> ¿Son paralelas? <em>Si no lo son, los rendimientos a la educación difieren por género y un término de interacción es obligatorio en el modelo.</em></li>\n      <li><strong>Compara la brecha a 12 años versus 16 años.</strong> <em>Si la brecha crece con la educación, los rendimientos de los hombres superan a los de las mujeres — exactamente lo que estima el término de interacción del widget 2.</em></li>\n      <li><strong>Cambia a Solo hombres y luego Solo mujeres.</strong> La submuestra masculina tiene más valores atípicos de altos ingresos. <em>El sesgo visual es una de las razones por las que las regresiones masculinas dominan la pendiente conjunta — el término de interacción hace explícita esa historia.</em></li>",
+    "widget.sg.takeaway":    "<strong>Para recordar:</strong> Dos líneas en un mismo gráfico te dicen de un vistazo si necesitas interacciones — y a qué niveles de educación es más amplia la brecha de género. <a href=\"../../book/_book/notebooks_quarto/ch14_Regression_with_Indicator_Variables.html#interactions-with-indicator-variables\" target=\"_blank\" rel=\"noopener\">Lee §14.3 en el capítulo →</a>",
+
+    // ---- Code summary ----
+    "code.heading":    "Resumen de código",
+    "code.motivation": "Has explorado los conceptos clave de forma interactiva — ahora reprodúcelos en código. Estos bloques autosuficientes cubren todo lo que practicaste arriba. Elige tu lenguaje, copia el código y ejecútalo.",
+    "code.tab.python": "Python",
+    "code.tab.stata":  "Stata",
+    "code.tab.r":      "R",
+    "code.copy.idle":  "Copiar código",
+    "code.copy.done":  "¡Copiado!",
+    "code.colab":      "Abrir un cuaderno Colab vacío &rarr;",
+    "code.note.stata": "Pega esto en tu editor do-file de Stata",
+    "code.note.r":     "Pega esto en tu consola R o RStudio",
+
+    // ---- Footer ----
+    "footer.text":      "Parte de <a href=\"https://quarcs-lab.github.io/metricsai/book/_book/index.html\"><strong>metricsAI</strong></a> · Capítulo 14: Regresión con variables indicadoras · por Carlos Mendez · <a href=\"https://github.com/quarcs-lab/metricsai\">GitHub</a>",
+    "footer.data":      "Datos: AED_EARNINGS_COMPLETE.DTA (872 trabajadores a tiempo completo de 25 a 65 años, 2000)",
+    "footer.scrolltop": "↑ Volver arriba"
+  }
+};
+
+function t(key, vars) {
+  var lang = window.__lang || I18N.defaultLang;
+  var s = (I18N[lang] && I18N[lang][key]);
+  if (s === undefined) s = I18N.en[key];
+  if (s === undefined) return key;
+  if (vars) {
+    for (var k in vars) s = s.split("{" + k + "}").join(String(vars[k]));
+  }
+  return s;
+}
+
+function applyLanguage(lang) {
+  if (lang !== "en" && lang !== "es") lang = I18N.defaultLang;
+  window.__lang = lang;
+  try { localStorage.setItem(I18N.storageKey, lang); } catch (e) {}
+  document.documentElement.lang = lang;
+  document.querySelectorAll("[data-i18n]").forEach(function(el) {
+    var key = el.getAttribute("data-i18n");
+    el.innerHTML = t(key);
+  });
+  var lbl = document.getElementById("siteLanguageLabel");
+  if (lbl) lbl.textContent = lang === "es" ? "ES" : "EN";
+  for (var key2 in window) {
+    if (key2.indexOf("__rerender_") === 0 && typeof window[key2] === "function") {
+      try { window[key2](); } catch (e) {}
+    }
+  }
+}
+
+function toggleLanguage() {
+  applyLanguage((window.__lang || I18N.defaultLang) === "es" ? "en" : "es");
+}
+
+// Read persisted language BEFORE widgets render so first paint is in correct language.
+try {
+  var stored = localStorage.getItem(I18N.storageKey);
+  if (stored === "en" || stored === "es") window.__lang = stored;
+} catch (e) {}
+
 // ==================== HELPERS ====================
 function fmt(v,d){d=d!==undefined?d:2;if(v===null||v===undefined||isNaN(v))return"\u2014";return v.toFixed(d);}
 function fmtMoney(v){return v===null?"\u2014":"$"+Math.round(v).toLocaleString();}
 function fmtPct(v,d){return v===null?"\u2014":(v*100).toFixed(d||1)+"%";}
 function sigStars(p){if(p<0.001)return"***";if(p<0.01)return"**";if(p<0.05)return"*";return"";}
-var THEME_KEY="metricsai-theme";
+const THEME_KEY = "darkMode"; // unified with index.html / tutors.html
 function getCSS(v){return getComputedStyle(document.documentElement).getPropertyValue(v).trim();}
 function themeColors(){return{text:getCSS("--text"),textSoft:getCSS("--text-soft"),grid:getCSS("--grid"),panel:getCSS("--panel"),cyan:getCSS("--accent"),purple:getCSS("--accent-2"),pink:getCSS("--accent-3")};}
 function baseLayout(o){var c=themeColors();return Object.assign({paper_bgcolor:"rgba(0,0,0,0)",plot_bgcolor:"rgba(0,0,0,0)",font:{family:"Inter, system-ui, sans-serif",color:c.text,size:12},margin:{l:56,r:18,t:30,b:46},xaxis:{gridcolor:c.grid,linecolor:c.grid,zerolinecolor:c.grid,tickfont:{color:c.textSoft}},yaxis:{gridcolor:c.grid,linecolor:c.grid,zerolinecolor:c.grid,tickfont:{color:c.textSoft}},hoverlabel:{bgcolor:c.panel,bordercolor:c.grid,font:{color:c.text}},legend:{font:{color:c.text},bgcolor:"rgba(0,0,0,0)"}},o||{});}
@@ -967,8 +1407,8 @@ function bindToggles(id,fn){document.querySelectorAll("#"+id+" button").forEach(
     document.getElementById("gg-stat-p").textContent=m.p[gi]<0.0001?"< 0.0001":fmt(m.p[gi],4);
     document.getElementById("gg-stat-r2").textContent=fmt(m.r2,4);
     var pred=predictMeans(mi);
-    var traces=[{x:["Male","Female"],y:[pred.male,pred.female],type:"bar",marker:{color:[c.cyan+"88",c.pink+"88"],line:{color:[c.cyan,c.pink],width:2}},text:[fmtMoney(pred.male),fmtMoney(pred.female)],textposition:"outside",textfont:{family:"JetBrains Mono",size:13,color:c.text}}];
-    var layout=baseLayout({yaxis:{title:"Predicted Earnings ($)",gridcolor:c.grid,linecolor:c.grid,zerolinecolor:c.grid,tickfont:{color:c.textSoft},range:[0,Math.max(pred.male,pred.female)*1.2]},xaxis:{tickfont:{color:c.textSoft,size:13}},showlegend:false,margin:{l:70,r:18,t:10,b:46}});
+    var traces=[{x:[t("label.male"),t("label.female")],y:[pred.male,pred.female],type:"bar",marker:{color:[c.cyan+"88",c.pink+"88"],line:{color:[c.cyan,c.pink],width:2}},text:[fmtMoney(pred.male),fmtMoney(pred.female)],textposition:"outside",textfont:{family:"JetBrains Mono",size:13,color:c.text}}];
+    var layout=baseLayout({yaxis:{title:t("label.predEarnings"),gridcolor:c.grid,linecolor:c.grid,zerolinecolor:c.grid,tickfont:{color:c.textSoft},range:[0,Math.max(pred.male,pred.female)*1.2]},xaxis:{tickfont:{color:c.textSoft,size:13}},showlegend:false,margin:{l:70,r:18,t:10,b:46}});
     Plotly.react(chartEl,traces,layout,PLOTLY_CONFIG);
   }
   document.getElementById("gg-model").addEventListener("change",render);
@@ -991,8 +1431,8 @@ function bindToggles(id,fn){document.querySelectorAll("#"+id+" button").forEach(
     var maleSlope=ci[eduIdx];
     var femaleSlope=interOn?ci[eduIdx]+ci[intIdx]:ci[eduIdx];
     var interCoef=interOn?ci[intIdx]:0;
-    document.getElementById("int-stat-male").textContent=fmtMoney(maleSlope)+"/yr";
-    document.getElementById("int-stat-female").textContent=fmtMoney(femaleSlope)+"/yr";
+    document.getElementById("int-stat-male").textContent=fmtMoney(maleSlope)+t("label.perYr");
+    document.getElementById("int-stat-female").textContent=fmtMoney(femaleSlope)+t("label.perYr");
     document.getElementById("int-stat-inter").textContent=interOn?fmtMoney(interCoef):"\u2014";
     document.getElementById("int-stat-r2").textContent=fmt(m.r2,4);
     // Scatter
@@ -1002,15 +1442,15 @@ function bindToggles(id,fn){document.querySelectorAll("#"+id+" button").forEach(
       else{femEd.push(ed[i]);femEarn.push(earn[i]);}
     }
     var traces=[
-      {x:maleEd,y:maleEarn,type:"scatter",mode:"markers",marker:{color:c.cyan+"44",size:5},name:"Male",hovertemplate:"Educ: %{x}<br>Earnings: $%{y:,.0f}"},
-      {x:femEd,y:femEarn,type:"scatter",mode:"markers",marker:{color:c.pink+"44",size:5},name:"Female",hovertemplate:"Educ: %{x}<br>Earnings: $%{y:,.0f}"}
+      {x:maleEd,y:maleEarn,type:"scatter",mode:"markers",marker:{color:c.cyan+"44",size:5},name:t("label.male"),hovertemplate:t("label.educHover")+": %{x}<br>"+t("label.earnHover")+": $%{y:,.0f}"},
+      {x:femEd,y:femEarn,type:"scatter",mode:"markers",marker:{color:c.pink+"44",size:5},name:t("label.female"),hovertemplate:t("label.educHover")+": %{x}<br>"+t("label.earnHover")+": $%{y:,.0f}"}
     ];
     // Regression lines
     var xr=[0,22];
     function pred(g,x){var s=ci[0];for(var j=1;j<vi.length;j++){if(vi[j]==="gender")s+=ci[j]*g;else if(vi[j]==="education")s+=ci[j]*x;else if(vi[j]==="gender\u00d7educ")s+=ci[j]*g*x;}return s;}
-    traces.push({x:xr,y:[pred(0,xr[0]),pred(0,xr[1])],type:"scatter",mode:"lines",line:{color:c.cyan,width:3},name:"Male fit",hoverinfo:"skip"});
-    traces.push({x:xr,y:[pred(1,xr[0]),pred(1,xr[1])],type:"scatter",mode:"lines",line:{color:c.pink,width:3},name:"Female fit",hoverinfo:"skip"});
-    var layout=baseLayout({xaxis:{title:"Years of Education",range:[0,22],gridcolor:c.grid,linecolor:c.grid,zerolinecolor:c.grid,tickfont:{color:c.textSoft}},yaxis:{title:"Earnings ($)",gridcolor:c.grid,linecolor:c.grid,zerolinecolor:c.grid,tickfont:{color:c.textSoft},range:[-50000,250000]},showlegend:true,legend:{x:0.02,y:0.98,xanchor:"left",yanchor:"top",font:{color:c.text},bgcolor:"rgba(0,0,0,0)"}});
+    traces.push({x:xr,y:[pred(0,xr[0]),pred(0,xr[1])],type:"scatter",mode:"lines",line:{color:c.cyan,width:3},name:t("label.maleFit"),hoverinfo:"skip"});
+    traces.push({x:xr,y:[pred(1,xr[0]),pred(1,xr[1])],type:"scatter",mode:"lines",line:{color:c.pink,width:3},name:t("label.femaleFit"),hoverinfo:"skip"});
+    var layout=baseLayout({xaxis:{title:t("label.years"),range:[0,22],gridcolor:c.grid,linecolor:c.grid,zerolinecolor:c.grid,tickfont:{color:c.textSoft}},yaxis:{title:t("label.earnings"),gridcolor:c.grid,linecolor:c.grid,zerolinecolor:c.grid,tickfont:{color:c.textSoft},range:[-50000,250000]},showlegend:true,legend:{x:0.02,y:0.98,xanchor:"left",yanchor:"top",font:{color:c.text},bgcolor:"rgba(0,0,0,0)"}});
     Plotly.react(chartEl,traces,layout,PLOTLY_CONFIG);
   }
   bindToggles("int-toggle",render);
@@ -1021,7 +1461,7 @@ function bindToggles(id,fn){document.querySelectorAll("#"+id+" button").forEach(
 // ==================== WIDGET 3: Model Comparison Table ====================
 (function(){
   var allVars=["const","gender","education","gender\u00d7educ","age","gender\u00d7age","hours","gender\u00d7hours"];
-  var labels={"const":"Intercept","gender":"Gender (Female)","education":"Education","gender\u00d7educ":"Gender \u00d7 Educ","age":"Age","gender\u00d7age":"Gender \u00d7 Age","hours":"Hours","gender\u00d7hours":"Gender \u00d7 Hours"};
+  var labelKeys={"const":"label.intercept","gender":"label.gender","education":"label.education","gender\u00d7educ":"label.genderEduc","age":"label.age","gender\u00d7age":"label.genderAge","hours":"label.hours","gender\u00d7hours":"label.genderHours"};
   function render(){
     var tbody=document.getElementById("model-table-body");
     var rows="";
@@ -1029,7 +1469,7 @@ function bindToggles(id,fn){document.querySelectorAll("#"+id+" button").forEach(
       var v=allVars[vi];
       var isGender=v==="gender";
       rows+="<tr"+(isGender?' class="highlight"':"")+">";
-      rows+="<td>"+(labels[v]||v)+"</td>";
+      rows+="<td>"+(labelKeys[v]?t(labelKeys[v]):v)+"</td>";
       for(var mi=0;mi<5;mi++){
         var m=DATA.models[mi];
         var idx=m.vars.indexOf(v);
@@ -1043,11 +1483,11 @@ function bindToggles(id,fn){document.querySelectorAll("#"+id+" button").forEach(
       rows+="</tr>";
     }
     // R² row
-    rows+='<tr class="r2-row"><td>R\u00B2</td>';
+    rows+='<tr class="r2-row"><td>'+t("stat.r2")+'</td>';
     for(var mi=0;mi<5;mi++) rows+="<td>"+fmt(DATA.models[mi].r2,4)+"</td>";
     rows+="</tr>";
     // N row
-    rows+="<tr><td>N</td>";
+    rows+="<tr><td>"+t("label.n")+"</td>";
     for(var mi=0;mi<5;mi++) rows+="<td>"+DATA.models[mi].n+"</td>";
     rows+="</tr>";
     tbody.innerHTML=rows;
@@ -1065,7 +1505,7 @@ function bindToggles(id,fn){document.querySelectorAll("#"+id+" button").forEach(
     var tbody=document.getElementById("dt-table-body");
     var rows="";
     for(var i=0;i<wm.vars.length;i++){
-      var label=wm.vars[i]==="const"?"Intercept":wm.vars[i]==="dself"?"Self-employed":wm.vars[i]==="dprivate"?"Private sector":wm.vars[i]==="dgovt"?"Government":wm.vars[i];
+      var label=wm.vars[i]==="const"?t("label.intercept"):wm.vars[i]==="dself"?t("label.selfEmployed"):wm.vars[i]==="dprivate"?t("label.privateSector"):wm.vars[i]==="dgovt"?t("label.government"):wm.vars[i];
       var stars=sigStars(wm.p[i]);
       rows+="<tr><td>"+label+"</td><td>"+fmtMoney(wm.coef[i])+(stars?' <span class="sig">'+stars+"</span>":"")+"</td><td>"+fmtMoney(wm.se[i])+"</td><td>"+fmt(wm.t[i],2)+"</td></tr>";
     }
@@ -1087,11 +1527,11 @@ function bindToggles(id,fn){document.querySelectorAll("#"+id+" button").forEach(
   function render(){
     var c=themeColors();
     var types=["self_employed","private","government"];
-    var labels=["Self-employed\n(n="+GM.self_employed.n+")","Private sector\n(n="+GM.private.n+")","Government\n(n="+GM.government.n+")"];
+    var labels=[t("label.selfEmployed")+"\n(n="+GM.self_employed.n+")",t("label.privateSector")+"\n(n="+GM.private.n+")",t("label.government")+"\n(n="+GM.government.n+")"];
     var means=[GM.self_employed.mean,GM.private.mean,GM.government.mean];
     var ses=[GM.self_employed.se,GM.private.se,GM.government.se];
     var traces=[{x:labels,y:means,type:"bar",marker:{color:[c.cyan+"77",c.purple+"77",c.pink+"77"],line:{color:[c.cyan,c.purple,c.pink],width:2}},error_y:{type:"data",array:ses.map(function(s){return 1.96*s;}),visible:true,color:c.text,thickness:2,width:6},text:means.map(function(v){return fmtMoney(v);}),textposition:"outside",textfont:{family:"JetBrains Mono",size:12,color:c.text}}];
-    var layout=baseLayout({yaxis:{title:"Mean Earnings ($)",gridcolor:c.grid,linecolor:c.grid,zerolinecolor:c.grid,tickfont:{color:c.textSoft},range:[0,Math.max.apply(null,means)*1.35]},xaxis:{tickfont:{color:c.textSoft,size:11}},showlegend:false,margin:{l:70,r:18,t:10,b:70}});
+    var layout=baseLayout({yaxis:{title:t("label.meanEarnings"),gridcolor:c.grid,linecolor:c.grid,zerolinecolor:c.grid,tickfont:{color:c.textSoft},range:[0,Math.max.apply(null,means)*1.35]},xaxis:{tickfont:{color:c.textSoft,size:11}},showlegend:false,margin:{l:70,r:18,t:10,b:70}});
     Plotly.react(chartEl,traces,layout,PLOTLY_CONFIG);
   }
   window.__rerender_workertype=render;
@@ -1106,8 +1546,8 @@ function bindToggles(id,fn){document.querySelectorAll("#"+id+" button").forEach(
   function render(){
     var c=themeColors();
     var show=getActiveVal("sg-show");
-    document.getElementById("sg-stat-male").textContent=fmtMoney(GR.male.slope)+"/yr";
-    document.getElementById("sg-stat-female").textContent=fmtMoney(GR.female.slope)+"/yr";
+    document.getElementById("sg-stat-male").textContent=fmtMoney(GR.male.slope)+t("label.perYr");
+    document.getElementById("sg-stat-female").textContent=fmtMoney(GR.female.slope)+t("label.perYr");
     var gap12=(GR.male.intercept+GR.male.slope*12)-(GR.female.intercept+GR.female.slope*12);
     var gap16=(GR.male.intercept+GR.male.slope*16)-(GR.female.intercept+GR.female.slope*16);
     document.getElementById("sg-stat-gap12").textContent=fmtMoney(gap12);
@@ -1116,19 +1556,19 @@ function bindToggles(id,fn){document.querySelectorAll("#"+id+" button").forEach(
     for(var i=0;i<ed.length;i++){if(gen[i]===0){maleEd.push(ed[i]);maleEarn.push(earn[i]);}else{femEd.push(ed[i]);femEarn.push(earn[i]);}}
     var traces=[];
     if(show==="both"||show==="male"){
-      traces.push({x:maleEd,y:maleEarn,type:"scatter",mode:"markers",marker:{color:c.cyan+"44",size:5},name:"Male (n="+GR.male.n+")",hovertemplate:"Educ: %{x}<br>Earnings: $%{y:,.0f}"});
+      traces.push({x:maleEd,y:maleEarn,type:"scatter",mode:"markers",marker:{color:c.cyan+"44",size:5},name:t("label.male")+" (n="+GR.male.n+")",hovertemplate:t("label.educHover")+": %{x}<br>"+t("label.earnHover")+": $%{y:,.0f}"});
     }
     if(show==="both"||show==="female"){
-      traces.push({x:femEd,y:femEarn,type:"scatter",mode:"markers",marker:{color:c.pink+"44",size:5},name:"Female (n="+GR.female.n+")",hovertemplate:"Educ: %{x}<br>Earnings: $%{y:,.0f}"});
+      traces.push({x:femEd,y:femEarn,type:"scatter",mode:"markers",marker:{color:c.pink+"44",size:5},name:t("label.female")+" (n="+GR.female.n+")",hovertemplate:t("label.educHover")+": %{x}<br>"+t("label.earnHover")+": $%{y:,.0f}"});
     }
     var xr=[0,22];
     if(show==="both"||show==="male"){
-      traces.push({x:xr,y:[GR.male.intercept,GR.male.intercept+GR.male.slope*22],type:"scatter",mode:"lines",line:{color:c.cyan,width:3},name:"Male fit (R\u00B2="+fmt(GR.male.r2,3)+")",hoverinfo:"skip"});
+      traces.push({x:xr,y:[GR.male.intercept,GR.male.intercept+GR.male.slope*22],type:"scatter",mode:"lines",line:{color:c.cyan,width:3},name:t("label.maleFit")+" ("+t("stat.r2")+"="+fmt(GR.male.r2,3)+")",hoverinfo:"skip"});
     }
     if(show==="both"||show==="female"){
-      traces.push({x:xr,y:[GR.female.intercept,GR.female.intercept+GR.female.slope*22],type:"scatter",mode:"lines",line:{color:c.pink,width:3},name:"Female fit (R\u00B2="+fmt(GR.female.r2,3)+")",hoverinfo:"skip"});
+      traces.push({x:xr,y:[GR.female.intercept,GR.female.intercept+GR.female.slope*22],type:"scatter",mode:"lines",line:{color:c.pink,width:3},name:t("label.femaleFit")+" ("+t("stat.r2")+"="+fmt(GR.female.r2,3)+")",hoverinfo:"skip"});
     }
-    var layout=baseLayout({xaxis:{title:"Years of Education",range:[0,22],gridcolor:c.grid,linecolor:c.grid,zerolinecolor:c.grid,tickfont:{color:c.textSoft}},yaxis:{title:"Earnings ($)",gridcolor:c.grid,linecolor:c.grid,zerolinecolor:c.grid,tickfont:{color:c.textSoft},range:[-50000,250000]},showlegend:true,legend:{x:0.02,y:0.98,xanchor:"left",yanchor:"top",font:{color:c.text},bgcolor:"rgba(0,0,0,0)"}});
+    var layout=baseLayout({xaxis:{title:t("label.years"),range:[0,22],gridcolor:c.grid,linecolor:c.grid,zerolinecolor:c.grid,tickfont:{color:c.textSoft}},yaxis:{title:t("label.earnings"),gridcolor:c.grid,linecolor:c.grid,zerolinecolor:c.grid,tickfont:{color:c.textSoft},range:[-50000,250000]},showlegend:true,legend:{x:0.02,y:0.98,xanchor:"left",yanchor:"top",font:{color:c.text},bgcolor:"rgba(0,0,0,0)"}});
     Plotly.react(chartEl,traces,layout,PLOTLY_CONFIG);
   }
   bindToggles("sg-show",render);
@@ -1158,13 +1598,50 @@ function bindToggles(id,fn){document.querySelectorAll("#"+id+" button").forEach(
   readHash();
 })();
 
-// ==================== THEME TOGGLE ====================
-(function(){
-  var btn=document.getElementById("theme-toggle"),iconEl=document.getElementById("theme-icon"),labelEl=document.getElementById("theme-label");
-  function apply(theme){document.documentElement.dataset.theme=theme;iconEl.textContent=theme==="dark"?"\u2600\uFE0F":"\uD83C\uDF19";labelEl.textContent=theme==="dark"?"Light":"Dark";for(var key in window){if(key.startsWith("__rerender_")&&typeof window[key]==="function")window[key]();}}
-  var saved=localStorage.getItem(THEME_KEY);var prefersDark=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches;apply(saved||(prefersDark?"dark":"light"));
-  btn.addEventListener("click",function(){var next=document.documentElement.dataset.theme==="dark"?"light":"dark";localStorage.setItem(THEME_KEY,next);apply(next);});
+// ==================== THEME TOGGLE (site navbar) ====================
+// Reads/writes localStorage.darkMode (shared with index.html / tutors.html)
+// and applies html[data-theme="dark"] for this chapter's CSS.
+function applyDarkMode(isDark) {
+  document.documentElement.dataset.theme = isDark ? "dark" : "light";
+  const icon = document.getElementById("siteDarkModeIcon");
+  if (icon) icon.className = isDark ? "fa-solid fa-sun" : "fa-solid fa-moon";
+  // Re-render all widgets so Plotly picks up the new CSS colors.
+  for (const key in window) {
+    if (key.startsWith("__rerender_") && typeof window[key] === "function") window[key]();
+  }
+}
+
+function toggleDarkModeNav() {
+  const isDark = document.documentElement.dataset.theme !== "dark";
+  localStorage.setItem(THEME_KEY, isDark ? "dark" : "light");
+  applyDarkMode(isDark);
+}
+
+(function() {
+  const saved = localStorage.getItem(THEME_KEY);
+  const prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+  const isDark = saved ? (saved === "dark") : prefersDark;
+  applyDarkMode(isDark);
 })();
+
+// ==================== MOBILE MENU (site navbar) ====================
+function toggleSiteMobileMenu() {
+  const menu = document.getElementById("siteMobileMenu");
+  const hamburger = document.getElementById("siteHamburgerIcon");
+  const close = document.getElementById("siteCloseIcon");
+  if (!menu || !hamburger || !close) return;
+  const isOpen = menu.classList.toggle("open");
+  hamburger.style.display = isOpen ? "none" : "";
+  close.style.display = isOpen ? "" : "none";
+}
+
+// ==================== LANGUAGE INIT ====================
+// Run AFTER all widget IIFEs have registered themselves with __rerender_*
+// (each widget's render() reads labels via t(), so they pick up the right
+// language on first paint via window.__lang set above; this call swaps
+// every [data-i18n] element and updates the toggle button label).
+applyLanguage(window.__lang || I18N.defaultLang);
+
 window.addEventListener("resize",function(){document.querySelectorAll(".chart").forEach(function(el){if(el.data)Plotly.Plots.resize(el);});});
 </script>
 <script>

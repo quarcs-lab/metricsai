@@ -3,17 +3,61 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Chapter 17 — Panel Data, Time Series Data, Causation · metricsAI</title>
+<title data-i18n="meta.title">Chapter 17 — Panel Data, Time Series, and Causality · metricsAI</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <script src="https://cdn.plot.ly/plotly-2.35.2.min.js" charset="utf-8"></script>
 <style>
 :root{--cyan:#008CB7;--cyan-soft:#22d3ee;--purple:#7A209F;--purple-soft:#c084fc;--pink:#C21E72;--pink-soft:#f472b6;--bg:#f5f8fb;--panel:#fff;--panel-2:#f0f4f9;--text:#0b1021;--text-soft:#475569;--text-muted:#64748b;--border:#d9e2ec;--accent:var(--cyan);--accent-2:var(--purple);--accent-3:var(--pink);--shadow:0 2px 10px rgba(11,16,33,.06),0 12px 30px rgba(11,16,33,.05);--grid:#e3e8ef;--code-bg:#eef3f8}
 html[data-theme="dark"]{--bg:#0c1024;--panel:#151a33;--panel-2:#1b2142;--text:#e2e8f0;--text-soft:#b5c0d0;--text-muted:#8a98ae;--border:#2a3156;--accent:var(--cyan-soft);--accent-2:var(--purple-soft);--accent-3:var(--pink-soft);--shadow:0 2px 10px rgba(0,0,0,.25),0 12px 30px rgba(0,0,0,.35);--grid:#2a3156;--code-bg:#0f1530}
-*{box-sizing:border-box}html,body{margin:0;padding:0}body{font-family:'Inter',system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);line-height:1.55;transition:background-color .25s ease,color .25s ease}code,.mono{font-family:'JetBrains Mono',ui-monospace,monospace}
+*{box-sizing:border-box}html,body{margin:0;padding:0}body{font-family:'Inter',system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);line-height:1.55;transition:background-color .25s ease,color .25s ease; padding-top: 64px; /* leave room for the fixed .site-nav */ }/* ===== Site navigation bar (shared across metricsAI pages) ===== */
+.site-nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 50;
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--border);
+  height: 64px;
+}
+html[data-theme="dark"] .site-nav { background: rgba(12, 16, 36, 0.85); }
+.site-nav-inner { max-width: 1280px; margin: 0 auto; padding: 0 1rem; height: 100%; display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
+.site-nav-brand { display: flex; align-items: center; gap: 0.5rem; font-weight: 700; font-size: 1.15rem; color: var(--text); text-decoration: none; }
+.site-nav-brand .ai-mark { color: var(--accent); }
+.site-nav-links { display: flex; gap: 1.5rem; }
+.site-nav-links a { color: var(--text-soft); text-decoration: none; font-weight: 500; font-size: 0.95rem; transition: color .2s ease; }
+.site-nav-links a:hover { color: var(--accent); }
+.site-nav-links a.active { color: var(--accent); border-bottom: 2px solid var(--accent); padding-bottom: 0.25rem; }
+.site-nav-controls { display: flex; align-items: center; gap: 0.8rem; }
+.site-nav-cameron { display: flex; flex-direction: column; align-items: center; padding: 0.25rem 0.6rem; border: 1px solid var(--border); border-radius: 0.5rem; background: var(--panel-2); text-decoration: none; line-height: 1.1; transition: background .2s ease; }
+.site-nav-cameron:hover { background: var(--panel); }
+.site-nav-cameron .cameron-pre { font-size: 0.6rem; color: var(--text-muted); }
+.site-nav-cameron .cameron-name { font-size: 0.7rem; font-weight: 600; color: var(--text-soft); }
+.site-nav-cameron .cameron-cta { font-size: 0.6rem; color: var(--text-muted); margin-top: 0.1rem; }
+.site-nav-btn { background: transparent; border: none; color: var(--text-soft); cursor: pointer; padding: 0.4rem; border-radius: 0.4rem; font-size: 1.05rem; display: inline-flex; align-items: center; gap: 0.3rem; transition: color .2s ease, background .2s ease; }
+.site-nav-btn:hover { color: var(--accent); background: var(--panel-2); }
+.site-nav-btn .label { font-size: 0.75rem; font-weight: 600; }
+.site-nav-hamburger { display: none; }
+
+.site-nav-mobile { display: none; position: fixed; top: 64px; left: 0; right: 0; background: var(--panel); border-top: 1px solid var(--border); box-shadow: var(--shadow); z-index: 40; padding: 1rem; }
+.site-nav-mobile a { display: block; padding: 0.6rem 0.4rem; color: var(--text-soft); text-decoration: none; font-weight: 500; border-bottom: 1px solid var(--border); }
+.site-nav-mobile a.active { color: var(--accent); }
+.site-nav-mobile a:last-of-type { border-bottom: none; }
+.site-nav-mobile.open { display: block; }
+
+@media (max-width: 768px) {
+  .site-nav-links, .site-nav-cameron { display: none; }
+  .site-nav-hamburger { display: inline-flex; }
+}
+/* ===== /Site navigation bar ===== */
+
+code,.mono{font-family:'JetBrains Mono',ui-monospace,monospace}
 header.page{position:relative;padding:2.4rem 1.5rem 2rem;background:radial-gradient(1200px 400px at 85% -10%,rgba(122,32,159,.15),transparent),radial-gradient(1000px 400px at 10% 0%,rgba(0,140,183,.18),transparent),var(--panel);border-bottom:1px solid var(--border)}.page-inner{max-width:1120px;margin:0 auto}.chapter-badge{display:inline-block;font-size:.72rem;letter-spacing:.15em;text-transform:uppercase;color:var(--accent);font-weight:600;margin-bottom:.5rem}h1.title{font-size:clamp(1.6rem,3.4vw,2.4rem);margin:0 0 .35rem;background:linear-gradient(90deg,var(--accent),var(--accent-2));-webkit-background-clip:text;background-clip:text;color:transparent;font-weight:700}p.subtitle{margin:0 0 .8rem;color:var(--text-soft);font-size:1.05rem;max-width:720px}
-.theme-toggle{position:absolute;top:1.4rem;right:1.5rem;background:var(--panel-2);color:var(--text);border:1px solid var(--border);padding:.4rem .8rem;border-radius:999px;cursor:pointer;font-size:.85rem;font-weight:500;display:inline-flex;align-items:center;gap:.35rem;transition:all .2s ease}.theme-toggle:hover{border-color:var(--accent);color:var(--accent)}
 nav.anchors{position:sticky;top:0;z-index:20;background:color-mix(in srgb,var(--panel) 92%,transparent);backdrop-filter:saturate(150%) blur(8px);-webkit-backdrop-filter:saturate(150%) blur(8px);border-bottom:1px solid var(--border)}nav.anchors ul{display:flex;gap:.25rem;overflow-x:auto;list-style:none;padding:.55rem 1.5rem;margin:0 auto;max-width:1120px;scrollbar-width:thin}nav.anchors a{display:block;padding:.35rem .75rem;border-radius:8px;color:var(--text-soft);text-decoration:none;font-size:.85rem;font-weight:500;white-space:nowrap;transition:all .15s ease}nav.anchors a:hover{color:var(--accent);background:var(--panel-2)}
 main{max-width:1120px;margin:1.2rem auto 3rem;padding:0 1.5rem}
 section.widget{background:var(--panel);border:1px solid var(--border);border-radius:16px;padding:1.5rem 1.4rem 1.3rem;margin-bottom:1.5rem;box-shadow:var(--shadow)}.widget h2{margin:0 0 .2rem;font-size:1.35rem;font-weight:600;color:var(--accent-2)}.widget .lede{margin:0 0 1rem;color:var(--text-soft);font-size:.97rem;max-width:780px}
@@ -174,34 +218,82 @@ footer.page{max-width:1120px;margin:1rem auto 3rem;padding:0 1.5rem;color:var(--
 </style>
 </head>
 <body>
-<header class="page"><div class="page-inner"><span class="chapter-badge">Chapter 17 of 18 · Interactive Dashboard</span><h1 class="title">Panel Data, Time Series Data, Causation</h1><p class="subtitle">Explore between vs within variation, compare standard errors, watch fixed effects remove bias, and see how first differencing cures spurious regression — using NBA revenue and U.S. interest rate data.</p></div><button id="theme-toggle" class="theme-toggle" type="button" aria-label="Toggle color theme"><span id="theme-icon">🌙</span><span id="theme-label">Dark</span></button></header>
+
+<nav class="site-nav" aria-label="Site navigation">
+  <div class="site-nav-inner">
+    <a href="../../index.html" class="site-nav-brand">
+      <i class="fa-solid fa-chart-line" style="color: var(--accent);"></i>
+      <span>metrics<span class="ai-mark">AI</span></span>
+    </a>
+    <div class="site-nav-links">
+      <a href="../../index.html#about" data-i18n="nav.about">About</a>
+      <a href="../../index.html#curriculum" class="active" data-i18n="nav.notebooks">Python Notebooks</a>
+      <a href="../../tutors.html" data-i18n="nav.tutors">AI Tutors</a>
+      <a href="../../index.html#books" data-i18n="nav.books">Books</a>
+      <a href="../../videos.html" data-i18n="nav.videos">Videos</a>
+      <a href="https://open.spotify.com/show/2lN5pA3l10UdHe61ZCoHcF?si=IFFMpG3pROepG61o8qbnvg" target="_blank" rel="noopener" data-i18n="nav.podcasts">Podcasts</a>
+      <a href="../../index.html#authors" data-i18n="nav.authors">Authors</a>
+      <a href="../../index.html#more-resources" data-i18n="nav.resources">More Resources</a>
+    </div>
+    <div class="site-nav-controls">
+      <a href="https://cameron.econ.ucdavis.edu/aed/index.html" target="_blank" rel="noopener" class="site-nav-cameron">
+        <span class="cameron-pre" data-i18n="nav.cameron.pre">Content based on</span>
+        <span class="cameron-name">Cameron (2022)</span>
+        <span class="cameron-cta"><span data-i18n="nav.cameron.cta">Learn More</span> <i class="fa-solid fa-external-link-alt"></i></span>
+      </a>
+      <button type="button" class="site-nav-btn" onclick="toggleDarkModeNav()" title="Toggle dark mode" id="siteDarkModeToggle">
+        <i class="fa-solid fa-moon" id="siteDarkModeIcon"></i>
+      </button>
+      <button type="button" class="site-nav-btn" onclick="toggleLanguage()" title="Switch language / Cambiar idioma" id="siteLanguageToggle">
+        <i class="fa-solid fa-language"></i>
+        <span class="label" id="siteLanguageLabel">EN</span>
+      </button>
+      <button type="button" class="site-nav-btn site-nav-hamburger" onclick="toggleSiteMobileMenu()" id="siteMobileMenuBtn">
+        <i class="fa-solid fa-bars" id="siteHamburgerIcon"></i>
+        <i class="fa-solid fa-times" id="siteCloseIcon" style="display:none"></i>
+      </button>
+    </div>
+  </div>
+</nav>
+<div class="site-nav-mobile" id="siteMobileMenu">
+  <a href="../../index.html#about" data-i18n="nav.about">About</a>
+  <a href="../../index.html#curriculum" class="active" data-i18n="nav.notebooks">Python Notebooks</a>
+  <a href="../../tutors.html" data-i18n="nav.tutors">AI Tutors</a>
+  <a href="../../index.html#books" data-i18n="nav.books">Books</a>
+  <a href="../../videos.html" data-i18n="nav.videos">Videos</a>
+  <a href="https://open.spotify.com/show/2lN5pA3l10UdHe61ZCoHcF?si=IFFMpG3pROepG61o8qbnvg" target="_blank" rel="noopener" data-i18n="nav.podcasts">Podcasts</a>
+  <a href="../../index.html#authors" data-i18n="nav.authors">Authors</a>
+  <a href="../../index.html#more-resources" data-i18n="nav.resources">More Resources</a>
+</div>
+
+<header class="page"><div class="page-inner"><span class="chapter-badge" data-i18n="header.badge">Chapter 17 of 18 · Interactive Dashboard</span><h1 class="title" data-i18n="header.title">Panel Data, Time Series, and Causality</h1><p class="subtitle" data-i18n="header.subtitle">Explore between vs within variation, compare standard errors, watch fixed effects remove bias, and see how first differencing cures spurious regression — using NBA revenue and U.S. interest rate data.</p></div></header>
 
 <nav class="anchors" aria-label="Sections"><ul>
-  <li><a href="#variance">Variance decomp</a></li>
-  <li><a href="#cluster">Cluster SEs</a></li>
-  <li><a href="#poolfe">Pooled vs FE</a></li>
-  <li><a href="#timeseries">Time series</a></li>
-  <li><a href="#acf">Autocorrelation</a></li>
-  <li><a href="#spurious">Levels vs changes</a></li>
-  <li><a href="#adl">ADL model</a></li>
-  <li><a href="#code">Code</a></li>
+  <li><a href="#variance" data-i18n="nav.variance">Variance decomp</a></li>
+  <li><a href="#cluster" data-i18n="nav.cluster">Cluster SEs</a></li>
+  <li><a href="#poolfe" data-i18n="nav.poolfe">Pooled vs FE</a></li>
+  <li><a href="#timeseries" data-i18n="nav.timeseries">Time series</a></li>
+  <li><a href="#acf" data-i18n="nav.acf">Autocorrelation</a></li>
+  <li><a href="#spurious" data-i18n="nav.spurious">Levels vs changes</a></li>
+  <li><a href="#adl" data-i18n="nav.adl">ADL model</a></li>
+  <li><a href="#code" data-i18n="nav.code">Code</a></li>
 </ul></nav>
 
 <main>
 
 <!-- ===================== 1. VARIANCE DECOMPOSITION ===================== -->
 <section class="widget" id="variance">
-  <div class="widget-head"><div><h2>Panel data variance decomposition</h2></div></div>
+  <div class="widget-head"><div><h2 data-i18n="widget.variance.heading">Panel data variance decomposition</h2></div></div>
 
-  <p class="motivation">Panel data has two souls: big-market teams earn more <em>between</em> themselves, and the same team earns more in some years than others <em>within</em> itself. Which variation does your estimator use?</p>
+  <p class="motivation" data-i18n="widget.variance.motivation">Panel data has two souls: big-market teams earn more <em>between</em> themselves, and the same team earns more in some years than others <em>within</em> itself. Which variation does your estimator use?</p>
 
-  <div class="key-concept">
+  <div class="key-concept" data-i18n="widget.variance.kc">
     <span class="kc-title">Panel data variation decomposes into between (differences across individuals in their averages) and within (deviations from individual averages over time).</span> This decomposition determines what each estimator identifies: <strong>pooled OLS uses both</strong> sources, <strong>fixed effects uses only within</strong>, and <strong>random effects uses a weighted combination</strong>. In the NBA example, between variation in revenue is large (big-market vs small-market), while within variation is smaller (year-to-year fluctuations).
   </div>
 
   <div class="widget-howto">
-    <div class="howto-title">What you can do here</div>
-    <ul>
+    <div class="howto-title" data-i18n="common.howtoTitle">What you can do here</div>
+    <ul data-i18n="widget.variance.howto">
       <li><strong>Read the three bars</strong> for each variable — overall, between, within.</li>
       <li><strong>Compare log revenue to wins</strong> — their between/within mixes differ.</li>
       <li><strong>Cross-reference with the Pooled-vs-FE widget</strong> — FE uses only the within piece.</li>
@@ -210,28 +302,28 @@ footer.page{max-width:1120px;margin:1rem auto 3rem;padding:0 1.5rem;color:var(--
 
   <div class="chart short" id="variance-chart"></div>
   <div class="callout" id="variance-callout"></div>
-  <div class="try-this"><div class="try-title">Try this</div><ol>
+  <div class="try-this"><div class="try-title" data-i18n="common.tryTitle">Try this</div><ol data-i18n="widget.variance.try">
     <li><strong>Read log-revenue's three bars.</strong> Between SD ≈ 0.21; within SD ≈ 0.11. <em>Most NBA revenue variation is across teams, not across seasons — big-market vs small-market dominates year-to-year swings.</em></li>
     <li><strong>Read wins' bars.</strong> Between and within are closer in magnitude. <em>Team performance fluctuates substantially season-to-season — a lot of "wins variation" would survive de-meaning.</em></li>
     <li><strong>Connect to estimator choice.</strong> FE only uses the within bars. <em>When within variation is small, FE estimates become imprecise — that's the price of removing all between-team confounding.</em></li>
   </ol></div>
 
-  <p class="takeaway"><strong>Take-away:</strong> What a panel estimator can identify depends on which kind of variation the data carries — inspect the decomposition before choosing pooled OLS, FE, or RE. <a href="../../book/_book/notebooks_quarto/ch17_Panel_Data_Time_Series_Data_Causation.html#panel-data-models" target="_blank" rel="noopener">Read §17.2 in the chapter →</a></p>
+  <p class="takeaway" data-i18n="widget.variance.takeaway"><strong>Take-away:</strong> What a panel estimator can identify depends on which kind of variation the data carries — inspect the decomposition before choosing pooled OLS, FE, or RE. <a href="../../book/_book/notebooks_quarto/ch17_Panel_Data_Time_Series_Data_Causation.html#panel-data-models" target="_blank" rel="noopener">Read §17.2 in the chapter →</a></p>
 </section>
 
 <!-- ===================== 2. CLUSTER SEs ===================== -->
 <section class="widget" id="cluster">
-  <div class="widget-head"><div><h2>Standard error comparison — why clustering matters</h2></div></div>
+  <div class="widget-head"><div><h2 data-i18n="widget.cluster.heading">Standard error comparison — why clustering matters</h2></div></div>
 
-  <p class="motivation">Treat 286 team-seasons as independent and your SEs will be <em>comically small</em>. Cluster by team and reality returns — sometimes doubling the standard error.</p>
+  <p class="motivation" data-i18n="widget.cluster.motivation">Treat 286 team-seasons as independent and your SEs will be <em>comically small</em>. Cluster by team and reality returns — sometimes doubling the standard error.</p>
 
-  <div class="key-concept">
+  <div class="key-concept" data-i18n="widget.cluster.kc">
     <span class="kc-title">Observations within the same individual (team, firm, country) are correlated over time — violating OLS's independence assumption.</span> Default SEs dramatically <strong>understate uncertainty</strong> by treating all observations as independent. <strong>Cluster-robust SEs</strong> account for within-individual correlation, often producing SEs that are 2× or more larger than default. Always cluster by individual in panel data; with few clusters (G &lt; 30), consider wild-bootstrap refinements.
   </div>
 
   <div class="widget-howto">
-    <div class="howto-title">What you can do here</div>
-    <ul>
+    <div class="howto-title" data-i18n="common.howtoTitle">What you can do here</div>
+    <ul data-i18n="widget.cluster.howto">
       <li><strong>Compare default, robust (HC1), and cluster SEs</strong> in the bar chart.</li>
       <li><strong>Read the ratio in the callout</strong> — how much larger the cluster SE is.</li>
       <li><strong>Judge the inference consequences</strong> — does clustering change significance?</li>
@@ -240,164 +332,164 @@ footer.page{max-width:1120px;margin:1rem auto 3rem;padding:0 1.5rem;color:var(--
 
   <div class="chart short" id="cluster-chart"></div>
   <div class="callout" id="cluster-callout"></div>
-  <div class="try-this"><div class="try-title">Try this</div><ol>
+  <div class="try-this"><div class="try-title" data-i18n="common.tryTitle">Try this</div><ol data-i18n="widget.cluster.try">
     <li><strong>Compare the three bars.</strong> Cluster SE ≈ 1.81× default; robust (HC1) SE ≈ 1.15× default. <em>Robust corrects for heteroskedasticity but not serial correlation within a team — only clustering fixes both.</em></li>
     <li><strong>Check significance under each SE type.</strong> Wins stays significant (p = 0.0004) with cluster SEs. <em>The coefficient is strong enough to survive the correction, but the CI is almost twice as wide — every panel inference should be reported with cluster SEs.</em></li>
     <li><strong>Imagine a borderline coefficient.</strong> <em>With default SEs it would be "significant at 5%"; with cluster SEs it would not. This is where clustering changes published conclusions.</em></li>
   </ol></div>
 
-  <p class="takeaway"><strong>Take-away:</strong> Panel observations within the same individual are correlated — always cluster your standard errors by individual, or your t-statistics are fiction. <a href="../../book/_book/notebooks_quarto/ch17_Panel_Data_Time_Series_Data_Causation.html#panel-data-models" target="_blank" rel="noopener">Read §17.2 in the chapter →</a></p>
+  <p class="takeaway" data-i18n="widget.cluster.takeaway"><strong>Take-away:</strong> Panel observations within the same individual are correlated — always cluster your standard errors by individual, or your t-statistics are fiction. <a href="../../book/_book/notebooks_quarto/ch17_Panel_Data_Time_Series_Data_Causation.html#panel-data-models" target="_blank" rel="noopener">Read §17.2 in the chapter →</a></p>
 </section>
 
 <!-- ===================== 3. POOLED OLS vs FIXED EFFECTS ===================== -->
 <section class="widget" id="poolfe">
-  <div class="widget-head"><div><h2>Pooled OLS vs fixed effects</h2></div><button type="button" class="reset-btn" data-reset="poolfe">↺ Reset</button></div>
+  <div class="widget-head"><div><h2 data-i18n="widget.poolfe.heading">Pooled OLS vs fixed effects</h2></div><button type="button" class="reset-btn" data-reset="poolfe" data-i18n="common.reset">↺ Reset</button></div>
 
-  <p class="motivation">Big-market teams win more <em>and</em> earn more — so does winning cause revenue, or is the Lakers' market the whole story? FE removes every persistent team trait and lets you see.</p>
+  <p class="motivation" data-i18n="widget.poolfe.motivation">Big-market teams win more <em>and</em> earn more — so does winning cause revenue, or is the Lakers' market the whole story? FE removes every persistent team trait and lets you see.</p>
 
-  <div class="key-concept">
+  <div class="key-concept" data-i18n="widget.poolfe.kc">
     <span class="kc-title">Fixed effects estimation controls for time-invariant individual characteristics by including individual-specific intercepts α<sub>i</sub>.</span> The <strong>within transformation</strong> (de-meaning y<sub>it</sub> and x<sub>it</sub> by the individual's average) eliminates α<sub>i</sub> entirely and uses only variation within each individual over time. FE provides more credible causal estimates but cannot identify effects of time-invariant variables. FE is consistent whether or not α<sub>i</sub> is correlated with regressors; <strong>random effects is more efficient but inconsistent if the uncorrelated-effects assumption fails</strong> (Key Concept 17.4). The Hausman test decides between them.
   </div>
 
   <div class="widget-howto">
-    <div class="howto-title">What you can do here</div>
-    <ul>
+    <div class="howto-title" data-i18n="common.howtoTitle">What you can do here</div>
+    <ul data-i18n="widget.poolfe.howto">
       <li><strong>Toggle Pooled OLS / Fixed Effects / Both</strong> to compare fitted lines side by side.</li>
       <li><strong>Read the two slope coefficients</strong> in the fit stats — any gap is the bias FE removes.</li>
       <li><strong>Notice within R²</strong> for FE — it measures explanatory power after de-meaning, which is a different quantity than pooled R².</li>
     </ul>
   </div>
 
-  <div class="controls"><div class="ctrl"><label>View</label>
-    <div class="toggle-group" id="poolfe-view"><button type="button" data-val="pooled" class="active">Pooled OLS</button><button type="button" data-val="fe">Fixed Effects</button><button type="button" data-val="both">Both</button></div>
+  <div class="controls"><div class="ctrl"><label data-i18n="widget.poolfe.ctrl.view.label">View</label>
+    <div class="toggle-group" id="poolfe-view"><button type="button" data-val="pooled" class="active" data-i18n="widget.poolfe.ctrl.view.pooled">Pooled OLS</button><button type="button" data-val="fe" data-i18n="widget.poolfe.ctrl.view.fe">Fixed Effects</button><button type="button" data-val="both" data-i18n="widget.poolfe.ctrl.view.both">Both</button></div>
   </div></div>
   <div class="fit-stats" id="poolfe-fit"></div>
   <div class="chart" id="poolfe-chart"></div>
   <div class="callout" id="poolfe-callout"></div>
-  <div class="try-this"><div class="try-title">Try this</div><ol>
+  <div class="try-this"><div class="try-title" data-i18n="common.tryTitle">Try this</div><ol data-i18n="widget.poolfe.try">
     <li><strong>Start on Pooled OLS.</strong> Wins coef = 0.0068 — one extra win is associated with 0.68% higher revenue. <em>Mixes within- and between-team variation — big-market teams win more, so the pooled estimate is contaminated.</em></li>
     <li><strong>Switch to Fixed Effects.</strong> Wins coef drops to 0.0045. <em>FE strips out persistent team characteristics (market size, arena, brand) — the within effect of winning on revenue is smaller than pooled OLS suggested.</em></li>
     <li><strong>Toggle Both.</strong> The FE line is visibly flatter than the pooled line. <em>The slope difference is the between-team confound in dollar terms.</em></li>
     <li><strong>Note FE within-R² ≈ 0.19.</strong> <em>Only 19% of within-team revenue variation is explained by wins — much of the rest is idiosyncratic events (injuries, rule changes, playoff runs).</em></li>
   </ol></div>
 
-  <p class="takeaway"><strong>Take-away:</strong> FE removes bias from persistent individual characteristics at the cost of between-individual variation — credible at the price of precision. <a href="../../book/_book/notebooks_quarto/ch17_Panel_Data_Time_Series_Data_Causation.html#fixed-effects-estimation" target="_blank" rel="noopener">Read §17.3 in the chapter →</a></p>
+  <p class="takeaway" data-i18n="widget.poolfe.takeaway"><strong>Take-away:</strong> FE removes bias from persistent individual characteristics at the cost of between-individual variation — credible at the price of precision. <a href="../../book/_book/notebooks_quarto/ch17_Panel_Data_Time_Series_Data_Causation.html#fixed-effects-estimation" target="_blank" rel="noopener">Read §17.3 in the chapter →</a></p>
 </section>
 
 <!-- ===================== 4. TIME SERIES ===================== -->
 <section class="widget" id="timeseries">
-  <div class="widget-head"><div><h2>Interest rates — levels vs changes</h2></div><button type="button" class="reset-btn" data-reset="timeseries">↺ Reset</button></div>
+  <div class="widget-head"><div><h2 data-i18n="widget.timeseries.heading">Interest rates — levels vs changes</h2></div><button type="button" class="reset-btn" data-reset="timeseries" data-i18n="common.reset">↺ Reset</button></div>
 
-  <p class="motivation">Two time series trending together will <em>always</em> have a high R² — even if they have nothing to do with each other. First differencing is the simplest defense.</p>
+  <p class="motivation" data-i18n="widget.timeseries.motivation">Two time series trending together will <em>always</em> have a high R² — even if they have nothing to do with each other. First differencing is the simplest defense.</p>
 
-  <div class="key-concept">
+  <div class="key-concept" data-i18n="widget.timeseries.kc">
     <span class="kc-title">A time series is stationary if its statistical properties (mean, variance, autocorrelation) are constant over time.</span> Many economic series are <strong>non-stationary</strong> (trending) — and regressing non-stationary series on each other can produce <strong>spurious regressions</strong>: high R² and significant coefficients even when variables are unrelated. <strong>First differencing (Δy<sub>t</sub> = y<sub>t</sub> − y<sub>t−1</sub>)</strong> typically removes trends and restores stationarity. Always check stationarity before interpreting a time-series regression.
   </div>
 
   <div class="widget-howto">
-    <div class="howto-title">What you can do here</div>
-    <ul>
+    <div class="howto-title" data-i18n="common.howtoTitle">What you can do here</div>
+    <ul data-i18n="widget.timeseries.howto">
       <li><strong>Toggle Levels vs Changes (Δ)</strong> to switch between trending and de-trended views.</li>
       <li><strong>Scan the time series</strong> — levels trend, changes fluctuate around zero.</li>
       <li><strong>Cross-reference with the ACF widget</strong> for the corresponding serial-correlation signature.</li>
     </ul>
   </div>
 
-  <div class="controls"><div class="ctrl"><label>View</label>
-    <div class="toggle-group" id="ts-view"><button type="button" data-val="levels" class="active">Levels</button><button type="button" data-val="changes">Changes (Δ)</button></div>
+  <div class="controls"><div class="ctrl"><label data-i18n="widget.timeseries.ctrl.view.label">View</label>
+    <div class="toggle-group" id="ts-view"><button type="button" data-val="levels" class="active" data-i18n="widget.timeseries.ctrl.view.levels">Levels</button><button type="button" data-val="changes" data-i18n="widget.timeseries.ctrl.view.changes">Changes (Δ)</button></div>
   </div></div>
   <div class="chart tall" id="timeseries-chart"></div>
   <div class="callout" id="timeseries-callout"></div>
-  <div class="try-this"><div class="try-title">Try this</div><ol>
+  <div class="try-this"><div class="try-title" data-i18n="common.tryTitle">Try this</div><ol data-i18n="widget.timeseries.try">
     <li><strong>Start on Levels.</strong> Both rates drift from ~14% in 1982 to ~2% by 2015. <em>A shared downward trend — any regression of one on the other will inherit it as "fit," regardless of causality.</em></li>
     <li><strong>Switch to Changes.</strong> Both series fluctuate around zero with no drift. <em>Stationary by construction — first differencing strips out the trend and delivers a series OLS can safely regress on.</em></li>
     <li><strong>Compare amplitudes.</strong> Monthly changes are ±1 percentage point; the level range is 12 points. <em>The two views live on very different scales, which is why R² on levels looks so much larger than on changes.</em></li>
   </ol></div>
 
-  <p class="takeaway"><strong>Take-away:</strong> Trending series share a trend before they share anything else — difference them before regressing, or risk a spurious story. <a href="../../book/_book/notebooks_quarto/ch17_Panel_Data_Time_Series_Data_Causation.html#time-series-data" target="_blank" rel="noopener">Read §17.5 in the chapter →</a></p>
+  <p class="takeaway" data-i18n="widget.timeseries.takeaway"><strong>Take-away:</strong> Trending series share a trend before they share anything else — difference them before regressing, or risk a spurious story. <a href="../../book/_book/notebooks_quarto/ch17_Panel_Data_Time_Series_Data_Causation.html#time-series-data" target="_blank" rel="noopener">Read §17.5 in the chapter →</a></p>
 </section>
 
 <!-- ===================== 5. AUTOCORRELATION ===================== -->
 <section class="widget" id="acf">
-  <div class="widget-head"><div><h2>Autocorrelation — the smoking gun of non-stationarity</h2></div><button type="button" class="reset-btn" data-reset="acf">↺ Reset</button></div>
+  <div class="widget-head"><div><h2 data-i18n="widget.acf.heading">Autocorrelation — the smoking gun of non-stationarity</h2></div><button type="button" class="reset-btn" data-reset="acf" data-i18n="common.reset">↺ Reset</button></div>
 
-  <p class="motivation">The ACF of the residuals is how you <em>prove</em> you have a stationarity problem — or prove that you fixed it.</p>
+  <p class="motivation" data-i18n="widget.acf.motivation">The ACF of the residuals is how you <em>prove</em> you have a stationarity problem — or prove that you fixed it.</p>
 
-  <div class="key-concept">
+  <div class="key-concept" data-i18n="widget.acf.kc">
     <span class="kc-title">The correlogram (ACF plot) reveals autocorrelation patterns in residuals.</span> <strong>Slowly decaying</strong> autocorrelations (e.g., ρ<sub>1</sub> = 0.95, ρ<sub>10</sub> = 0.42) indicate non-stationarity and persistent shocks. With autocorrelation, default SEs are too small — HAC (Newey-West) SEs can be 3–8 times larger. Always check residual autocorrelation after estimating a time-series regression and use HAC SEs or model the dynamics explicitly.
   </div>
 
   <div class="widget-howto">
-    <div class="howto-title">What you can do here</div>
-    <ul>
+    <div class="howto-title" data-i18n="common.howtoTitle">What you can do here</div>
+    <ul data-i18n="widget.acf.howto">
       <li><strong>Toggle between Levels, Changes, and ADL(2,2) residuals.</strong></li>
       <li><strong>Watch how the bars shrink</strong> as you move from mis-specified to correctly-specified residuals.</li>
       <li><strong>Compare lag-1 ACF values</strong> as a quick stationarity verdict.</li>
     </ul>
   </div>
 
-  <div class="controls"><div class="ctrl"><label>Model residuals</label>
-    <div class="toggle-group" id="acf-model"><button type="button" data-val="levels" class="active">Levels</button><button type="button" data-val="changes">Changes</button><button type="button" data-val="adl">ADL(2,2)</button></div>
+  <div class="controls"><div class="ctrl"><label data-i18n="widget.acf.ctrl.model.label">Model residuals</label>
+    <div class="toggle-group" id="acf-model"><button type="button" data-val="levels" class="active" data-i18n="widget.acf.ctrl.model.levels">Levels</button><button type="button" data-val="changes" data-i18n="widget.acf.ctrl.model.changes">Changes</button><button type="button" data-val="adl" data-i18n="widget.acf.ctrl.model.adl">ADL(2,2)</button></div>
   </div></div>
   <div class="chart" id="acf-chart"></div>
   <div class="callout" id="acf-callout"></div>
-  <div class="try-this"><div class="try-title">Try this</div><ol>
+  <div class="try-this"><div class="try-title" data-i18n="common.tryTitle">Try this</div><ol data-i18n="widget.acf.try">
     <li><strong>Start on Levels residuals.</strong> Lag-1 ACF = 0.98; lag-10 ACF still &gt; 0.80. <em>Highly persistent residuals — the levels regression is spurious and the default SEs are invalid.</em></li>
     <li><strong>Switch to Changes.</strong> Lag-1 ACF drops to ~0.25 and most later lags sit inside the band. <em>First differencing removed most of the serial correlation — a much better-specified model.</em></li>
     <li><strong>Switch to ADL(2,2).</strong> Lag-1 ACF ≈ 0.02 — essentially zero. <em>The autoregressive and distributed-lag terms absorbed all the persistence — a textbook correctly-specified dynamic model.</em></li>
   </ol></div>
 
-  <p class="takeaway"><strong>Take-away:</strong> The residual ACF is the diagnostic that says "your model is misspecified" — and cleaning it up with differencing or lagged regressors is the cure. <a href="../../book/_book/notebooks_quarto/ch17_Panel_Data_Time_Series_Data_Causation.html#autocorrelation" target="_blank" rel="noopener">Read §17.6 in the chapter →</a></p>
+  <p class="takeaway" data-i18n="widget.acf.takeaway"><strong>Take-away:</strong> The residual ACF is the diagnostic that says "your model is misspecified" — and cleaning it up with differencing or lagged regressors is the cure. <a href="../../book/_book/notebooks_quarto/ch17_Panel_Data_Time_Series_Data_Causation.html#autocorrelation" target="_blank" rel="noopener">Read §17.6 in the chapter →</a></p>
 </section>
 
 <!-- ===================== 6. LEVELS vs CHANGES SCATTER ===================== -->
 <section class="widget" id="spurious">
-  <div class="widget-head"><div><h2>Spurious regression — R² that lies</h2></div><button type="button" class="reset-btn" data-reset="spurious">↺ Reset</button></div>
+  <div class="widget-head"><div><h2 data-i18n="widget.spurious.heading">Spurious regression — R² that lies</h2></div><button type="button" class="reset-btn" data-reset="spurious" data-i18n="common.reset">↺ Reset</button></div>
 
-  <p class="motivation">R² = 0.91 looks like a home run. But if the residuals are autocorrelated and the series are non-stationary, <em>that 0.91 is lying to you</em>.</p>
+  <p class="motivation" data-i18n="widget.spurious.motivation">R² = 0.91 looks like a home run. But if the residuals are autocorrelated and the series are non-stationary, <em>that 0.91 is lying to you</em>.</p>
 
-  <div class="key-concept">
+  <div class="key-concept" data-i18n="widget.spurious.kc">
     <span class="kc-title">First differencing transforms non-stationary trending series into stationary ones, eliminating spurious-regression problems.</span> After differencing, the residual autocorrelation drops dramatically (from ρ<sub>1</sub> ≈ 0.95 to ρ<sub>1</sub> ≈ 0.25 in the interest-rate example). The <strong>coefficient interpretation changes from levels to changes</strong>: a 1-percentage-point change in the 1-year rate is associated with a 0.72-percentage-point change in the 10-year rate (Key Concept 17.7). R² on changes is always lower — but it's <em>honest</em>.
   </div>
 
   <div class="widget-howto">
-    <div class="howto-title">What you can do here</div>
-    <ul>
+    <div class="howto-title" data-i18n="common.howtoTitle">What you can do here</div>
+    <ul data-i18n="widget.spurious.howto">
       <li><strong>Toggle Levels vs Changes regression</strong> — same pair of series, two very different R²s.</li>
       <li><strong>Compare the slope coefficients</strong> — different magnitude, different meaning.</li>
       <li><strong>Read the default vs HAC SE in the fit stats</strong> — the gap tells you how untrustworthy default SEs are on levels.</li>
     </ul>
   </div>
 
-  <div class="controls"><div class="ctrl"><label>Regression</label>
-    <div class="toggle-group" id="spurious-reg"><button type="button" data-val="levels" class="active">Levels (gs10 ~ gs1)</button><button type="button" data-val="changes">Changes (Δgs10 ~ Δgs1)</button></div>
+  <div class="controls"><div class="ctrl"><label data-i18n="widget.spurious.ctrl.reg.label">Regression</label>
+    <div class="toggle-group" id="spurious-reg"><button type="button" data-val="levels" class="active" data-i18n="widget.spurious.ctrl.reg.levels">Levels (gs10 ~ gs1)</button><button type="button" data-val="changes" data-i18n="widget.spurious.ctrl.reg.changes">Changes (Δgs10 ~ Δgs1)</button></div>
   </div></div>
   <div class="fit-stats" id="spurious-fit"></div>
   <div class="chart" id="spurious-chart"></div>
   <div class="callout" id="spurious-callout"></div>
-  <div class="try-this"><div class="try-title">Try this</div><ol>
+  <div class="try-this"><div class="try-title" data-i18n="common.tryTitle">Try this</div><ol data-i18n="widget.spurious.try">
     <li><strong>Stay on Levels.</strong> R² = 0.91, slope = 0.84. <em>Looks impressive — but residual ACF<sub>1</sub> = 0.98 flags the R² as spurious, inflated by the shared downward trend.</em></li>
     <li><strong>Switch to Changes.</strong> R² = 0.57, slope = 0.72. <em>Lower R² but honest — residual ACF<sub>1</sub> falls to 0.25, and the slope now measures genuine co-movement of monthly changes.</em></li>
     <li><strong>Compare SEs on levels.</strong> Default = 0.013; HAC = 0.045 (3.4× larger). <em>Default SEs are untrustworthy with non-stationary data — any significance test built on them is fiction.</em></li>
     <li><strong>Interpret the changes slope (0.72).</strong> <em>A 1 pp move in the 1-year rate is associated with a 0.72 pp move in the 10-year rate — the honest co-movement estimate.</em></li>
   </ol></div>
 
-  <p class="takeaway"><strong>Take-away:</strong> High R² on trending series is a warning, not a finding — first-difference before you interpret any time-series regression. <a href="../../book/_book/notebooks_quarto/ch17_Panel_Data_Time_Series_Data_Causation.html#time-series-data" target="_blank" rel="noopener">Read §17.5 in the chapter →</a></p>
+  <p class="takeaway" data-i18n="widget.spurious.takeaway"><strong>Take-away:</strong> High R² on trending series is a warning, not a finding — first-difference before you interpret any time-series regression. <a href="../../book/_book/notebooks_quarto/ch17_Panel_Data_Time_Series_Data_Causation.html#time-series-data" target="_blank" rel="noopener">Read §17.5 in the chapter →</a></p>
 </section>
 
 <!-- ===================== 7. ADL MODEL ===================== -->
 <section class="widget" id="adl">
-  <div class="widget-head"><div><h2>ADL(2,2) model — dynamic multipliers</h2></div></div>
+  <div class="widget-head"><div><h2 data-i18n="widget.adl.heading">ADL(2,2) model — dynamic multipliers</h2></div></div>
 
-  <p class="motivation">A rate change today isn't a one-shot event — it propagates for months. <em>Cumulative multipliers</em> trace the full dynamic response from a single impulse.</p>
+  <p class="motivation" data-i18n="widget.adl.motivation">A rate change today isn't a one-shot event — it propagates for months. <em>Cumulative multipliers</em> trace the full dynamic response from a single impulse.</p>
 
-  <div class="key-concept">
+  <div class="key-concept" data-i18n="widget.adl.kc">
     <span class="kc-title">An autoregressive distributed-lag model adds own lags and predictor lags to a regression, turning a static equation into a dynamic one.</span> The <strong>impact multiplier</strong> γ₀ is the contemporaneous effect; <strong>cumulative multipliers</strong> sum γ₀ + γ₁ + γ₂ + ⋯ and show how the total effect builds (or reverses) over time. A well-specified ADL should leave no residual autocorrelation — it's the "model the dynamics explicitly" alternative to HAC SEs.
   </div>
 
   <div class="widget-howto">
-    <div class="howto-title">What you can do here</div>
-    <ul>
+    <div class="howto-title" data-i18n="common.howtoTitle">What you can do here</div>
+    <ul data-i18n="widget.adl.howto">
       <li><strong>Read the coefficient chart</strong> — each bar is an individual γ<sub>k</sub>.</li>
       <li><strong>Read the multiplier chart</strong> — the cumulative path of the response.</li>
       <li><strong>Note the lag-1 residual ACF</strong> reported in the callout — it should be near zero.</li>
@@ -409,24 +501,24 @@ footer.page{max-width:1120px;margin:1rem auto 3rem;padding:0 1.5rem;color:var(--
     <div><div class="chart short" id="adl-mult-chart"></div></div>
   </div>
   <div class="callout" id="adl-callout"></div>
-  <div class="try-this"><div class="try-title">Try this</div><ol>
+  <div class="try-this"><div class="try-title" data-i18n="common.tryTitle">Try this</div><ol data-i18n="widget.adl.try">
     <li><strong>Read the impact multiplier (γ₀ = 0.86).</strong> <em>A 1 pp shock to the 1-year rate immediately moves the 10-year rate by 0.86 pp — the contemporaneous response is large but not 1:1.</em></li>
     <li><strong>Read the 1-month cumulative (γ₀ + γ₁ = 0.31).</strong> <em>The cumulative effect falls because γ₁ is negative — a partial reversal. Interest-rate transmission is not monotonic; the first month corrects toward the trend.</em></li>
     <li><strong>Read the 2-month cumulative (0.54).</strong> <em>Recovers as γ₂ is positive. The dynamic path oscillates before settling — a good reminder that "the effect" of one variable on another is not a single number.</em></li>
     <li><strong>Check residual ACF<sub>1</sub> ≈ 0.02.</strong> <em>The ADL(2,2) has absorbed virtually all the serial correlation — a well-specified dynamic model.</em></li>
   </ol></div>
 
-  <p class="takeaway"><strong>Take-away:</strong> ADL models make the dynamic response explicit — every static coefficient hides a multi-period adjustment path, and cumulative multipliers are how you recover it. <a href="../../book/_book/notebooks_quarto/ch17_Panel_Data_Time_Series_Data_Causation.html#autocorrelation" target="_blank" rel="noopener">Read §17.6 in the chapter →</a></p>
+  <p class="takeaway" data-i18n="widget.adl.takeaway"><strong>Take-away:</strong> ADL models make the dynamic response explicit — every static coefficient hides a multi-period adjustment path, and cumulative multipliers are how you recover it. <a href="../../book/_book/notebooks_quarto/ch17_Panel_Data_Time_Series_Data_Causation.html#autocorrelation" target="_blank" rel="noopener">Read §17.6 in the chapter →</a></p>
 </section>
 
 <section class="howto-card code-summary" id="code" aria-label="Code summary">
-  <h2>Code Summary</h2>
-  <p class="motivation">You've explored the key concepts interactively — now reproduce them in code. These self-contained blocks cover everything you practiced above. Pick your language, copy the code, and run it.</p>
+  <h2 data-i18n="code.heading">Code Summary</h2>
+  <p class="motivation" data-i18n="code.motivation">You've explored the key concepts interactively — now reproduce them in code. These self-contained blocks cover everything you practiced above. Pick your language, copy the code, and run it.</p>
 
   <div class="code-tabs" id="code-lang-tabs">
-    <button type="button" data-lang="python" class="active">Python</button>
-    <button type="button" data-lang="stata">Stata</button>
-    <button type="button" data-lang="r">R</button>
+    <button type="button" data-lang="python" class="active" data-i18n="code.tab.python">Python</button>
+    <button type="button" data-lang="stata" data-i18n="code.tab.stata">Stata</button>
+    <button type="button" data-lang="r" data-i18n="code.tab.r">R</button>
   </div>
 
   <div class="code-panel active" id="panel-python">
@@ -555,8 +647,8 @@ print(f"  R²: {fit_adl._r2:.4f} (much higher than static model)")
 acf_adl = acf(fit_adl._u_hat.dropna(), nlags=5)
 print(f"  Residual ACF(1): {acf_adl[1]:.4f} (near zero → dynamics captured)")</code></pre>
   <div style="display:flex;gap:0.8rem;align-items:center;margin-top:0.8rem;flex-wrap:wrap">
-    <button class="btn-copy" onclick="navigator.clipboard.writeText(document.getElementById('code-python').textContent).then(()=>{this.textContent='Copied!';setTimeout(()=>this.textContent='Copy code',1500)})">Copy code</button>
-    <a class="btn-colab" href="https://colab.research.google.com/notebooks/empty.ipynb" target="_blank" rel="noopener">Open empty Colab notebook &rarr;</a>
+    <button class="btn-copy" data-i18n="code.copy.idle" onclick="navigator.clipboard.writeText(document.getElementById('code-python').textContent).then(()=>{this.textContent=t('code.copy.done');setTimeout(()=>this.textContent=t('code.copy.idle'),1500)})">Copy code</button>
+    <a class="btn-colab" href="https://colab.research.google.com/notebooks/empty.ipynb" target="_blank" rel="noopener" data-i18n="code.colab">Open empty Colab notebook &rarr;</a>
   </div>
   </div>
 
@@ -707,8 +799,8 @@ predict resid_adl, residuals
 corrgram resid_adl, lags(5)
 display "Near-zero lag-1 ACF → dynamics captured"</code></pre>
   <div style="display:flex;gap:0.8rem;align-items:center;margin-top:0.8rem;flex-wrap:wrap">
-    <button class="btn-copy" onclick="navigator.clipboard.writeText(document.getElementById('code-stata').textContent).then(()=>{this.textContent='Copied!';setTimeout(()=>this.textContent='Copy code',1500)})">Copy code</button>
-    <span style="color:var(--text-muted);font-size:0.88rem">Paste into your Stata do-file editor</span>
+    <button class="btn-copy" data-i18n="code.copy.idle" onclick="navigator.clipboard.writeText(document.getElementById('code-stata').textContent).then(()=>{this.textContent=t('code.copy.done');setTimeout(()=>this.textContent=t('code.copy.idle'),1500)})">Copy code</button>
+    <span style="color:var(--text-muted);font-size:0.88rem" data-i18n="code.note.stata">Paste into your Stata do-file editor</span>
   </div>
   </div>
 
@@ -831,8 +923,8 @@ cat("  R&#178;:", round(r2(model_adl), 4), "\n")
 acf_adl &lt;- acf(na.omit(residuals(model_adl)), lag.max = 5, plot = FALSE)$acf[2]
 cat("  Residual ACF(1):", round(acf_adl, 4), "(near zero &#8594; dynamics captured)\n")</code></pre>
   <div style="display:flex;gap:0.8rem;align-items:center;margin-top:0.8rem;flex-wrap:wrap">
-    <button class="btn-copy" onclick="navigator.clipboard.writeText(document.getElementById('code-r').textContent).then(()=>{this.textContent='Copied!';setTimeout(()=>this.textContent='Copy code',1500)})">Copy code</button>
-    <span style="color:var(--text-muted);font-size:0.88rem">Paste into your R console or RStudio</span>
+    <button class="btn-copy" data-i18n="code.copy.idle" onclick="navigator.clipboard.writeText(document.getElementById('code-r').textContent).then(()=>{this.textContent=t('code.copy.done');setTimeout(()=>this.textContent=t('code.copy.idle'),1500)})">Copy code</button>
+    <span style="color:var(--text-muted);font-size:0.88rem" data-i18n="code.note.r">Paste into your R console or RStudio</span>
   </div>
   </div>
 </section>
@@ -840,8 +932,8 @@ cat("  Residual ACF(1):", round(acf_adl, 4), "(near zero &#8594; dynamics captur
 </main>
 
 <footer class="page">
-  <p>Part of <a href="https://quarcs-lab.github.io/metricsai/book/_book/index.html"><strong>metricsAI</strong></a> · Chapter 17: Panel Data, Time Series Data, Causation · by Carlos Mendez · <a href="https://github.com/quarcs-lab/metricsai">GitHub</a></p>
-  <a class="scroll-top" href="#variance">↑ Back to top</a>
+  <p data-i18n="footer.text">Part of <a href="https://quarcs-lab.github.io/metricsai/book/_book/index.html"><strong>metricsAI</strong></a> · Chapter 17: Panel Data, Time Series, and Causality · by Carlos Mendez · <a href="https://github.com/quarcs-lab/metricsai">GitHub</a></p>
+  <a class="scroll-top" href="#variance" data-i18n="footer.scrolltop">↑ Back to top</a>
 </footer>
 
 <script type="application/json" id="ch-data">{"nba":{"lnrevenue":[4.9684,4.9298,5.0341,4.9215,4.9516,4.9498,5.0139,5.1249,5.1385,5.0753,4.9944,5.001,5.0341,5.0701,5.054,5.0921,5.0992,5.0908,5.1931,5.235,4.6895,4.7049,4.7105,4.7843,4.8376,4.8954,4.8676,4.9065,4.9024,4.9581,4.5985,4.688,4.6605,4.6919,4.7753,4.7557,4.7921,4.8195,4.7562,4.8498,4.5089,4.5005,4.5427,4.5721,4.5432,4.5762,4.7656,4.7524,4.7898,4.7214,4.5089,4.4367,4.4309,4.6507,4.7164,4.6892,4.6368,4.6188,4.5928,4.8004,4.3513,4.3325,4.7267,4.8204,4.7895,4.818,4.8115,4.8577,4.803,4.7484,4.2072,4.1743,4.2291,4.2661,4.3223,4.4487,4.4801,4.5099,4.5517,4.6723,4.3634,4.5798,4.5805,4.6674,4.6377,4.6892,4.6889,4.6729,4.6778,4.6723,4.6174,4.6172,4.6079,4.7544,4.7164,4.7908,4.7588,4.7798,4.763,4.6504,4.3513,4.3078,4.2551,4.2783,4.3223,4.3358,4.3668,4.4554,4.4547,4.6794,4.5089,4.5005,4.3757,4.2283,4.1774,4.2207,4.4978,4.5783,4.6167,4.6206,4.4554,4.4691,4.4309,4.3375,4.3662,4.439,4.3466,4.3043,4.2612,4.2264,4.2884,4.1743,4.1888,4.2661,4.2281,4.2085,4.1683,4.4921,4.5432,4.5741,4.4105,4.3685,4.3757,4.3825,4.398,4.5502,4.5407,4.5532,4.5683,4.5253,4.4984,4.5508,4.6941,4.7694,4.7609,4.851,4.8368,4.9242,4.763,4.6865,4.314,4.2025,4.4309,4.4966,4.5786,4.8379,4.8305,4.8515,4.854,4.7417,4.5397,4.5108,4.4416,4.535,4.5158,4.5325,4.5323,4.483,4.4454,4.4291,4.235,4.2025,4.2422,4.2904,4.3875,4.399,4.3567,4.4075,4.3975,4.4199,4.2621,4.2433,4.387,4.4149,4.4388,4.4584,4.4801,4.5275,4.4999,4.4652,4.608,4.6172,4.5712,4.5721,4.5341,4.5325,4.5152,4.5275,4.473,4.4914,4.5695,4.5508,4.669,4.6507,4.6699,4.666,4.5238,4.4739,4.4073,4.3822,4.1034,4.3078,4.2804,4.2283,4.2525,4.3249,4.3155,4.3364,4.3777,4.4291,4.4554,4.4691,4.5427,4.5537,4.5341,4.4868,4.3767,4.3573,4.3264,4.3529,4.3223,4.3466,4.3155,4.3469,4.3575,4.3529,4.3872,4.3685,4.4731,4.4867,4.4684,4.4487,4.3668,4.3469,4.3264,4.3125,4.314,4.2825,4.3172,4.3375,4.3554,4.3679,4.3866,4.4075,4.4265,4.4291,4.1342,4.069,4.2158,4.4566,4.4488,4.399,4.3155,4.2599,4.2943,4.3329,4.1493,4.1743,4.2422,4.2283,4.2995,4.2914,4.3049,4.2934,4.2943,4.2596],"wins":[56.0,58.0,50.0,56.0,34.0,45.0,42.0,57.0,65.0,57.0,48.0,30.0,37.0,39.0,33.0,23.0,33.0,23.0,32.0,29.0,15.0,21.0,30.0,23.0,47.0,41.0,49.0,33.0,41.0,41.0,53.0,57.0,60.0,52.0,58.0,60.0,67.0,51.0,50.0,55.0,36.0,49.0,44.0,36.0,45.0,33.0,24.0,66.0,62.0,50.0,50.0,36.0,25.0,42.0,59.0,52.0,44.0,15.0,43.0,47.0,45.0,28.0,43.0,45.0,51.0,34.0,52.0,55.0,53.0,9.0,17.0,21.0,38.0,37.0,34.0,34.0,42.0,48.0,29.0,26.0,58.0,58.0,60.0,57.0,59.0,63.0,58.0,56.0,54.0,50.0,51.0,36.0,44.0,29.0,62.0,54.0,61.0,55.0,46.0,54.0,43.0,44.0,42.0,21.0,36.0,36.0,40.0,52.0,59.0,59.0,50.0,49.0,50.0,41.0,27.0,21.0,32.0,41.0,54.0,50.0,26.0,52.0,49.0,47.0,42.0,49.0,41.0,34.0,34.0,12.0,44.0,45.0,40.0,37.0,52.0,35.0,31.0,20.0,23.0,50.0,53.0,44.0,47.0,42.0,26.0,41.0,51.0,54.0,48.0,53.0,32.0,50.0,50.0,54.0,54.0,64.0,53.0,59.0,39.0,27.0,30.0,29.0,17.0,35.0,42.0,50.0,50.0,45.0,66.0,61.0,19.0,37.0,37.0,25.0,45.0,42.0,41.0,43.0,19.0,26.0,31.0,39.0,27.0,28.0,37.0,47.0,40.0,23.0,19.0,29.0,40.0,27.0,17.0,43.0,49.0,44.0,45.0,50.0,54.0,53.0,56.0,43.0,48.0,33.0,43.0,38.0,35.0,40.0,41.0,27.0,55.0,61.0,59.0,55.0,50.0,44.0,33.0,38.0,17.0,25.0,46.0,44.0,47.0,41.0,18.0,38.0,39.0,56.0,49.0,37.0,41.0,42.0,48.0,61.0,44.0,41.0,35.0,36.0,36.0,32.0,18.0,26.0,33.0,32.0,35.0,44.0,47.0,50.0,51.0,58.0,44.0,33.0,32.0,22.0,24.0,15.0,25.0,33.0,35.0,28.0,13.0,26.0,30.0,37.0,47.0,53.0,23.0,23.0,28.0,50.0,45.0,49.0,22.0,22.0,24.0,40.0,52.0,41.0,42.0,41.0,30.0,40.0,28.0,26.0,34.0,46.0],"teamid":[1,1,1,1,1,1,1,1,1,1,2,2,2,2,2,2,2,2,2,2,3,3,3,3,3,3,3,3,3,3,4,4,4,4,4,4,4,4,4,4,5,5,5,5,5,5,5,5,5,5,6,6,6,6,6,6,6,6,6,6,7,7,7,7,7,7,7,7,7,7,8,8,8,8,8,8,8,8,8,8,9,9,9,9,9,9,9,9,9,9,10,10,10,10,10,10,10,10,10,10,11,11,11,11,11,11,11,11,11,11,12,12,12,12,12,12,12,12,12,12,13,13,13,13,13,13,13,13,13,13,14,14,14,14,14,14,14,14,14,14,15,15,15,15,15,15,15,15,15,15,16,16,16,16,16,16,16,16,16,16,17,17,17,17,17,17,17,17,17,17,18,18,18,18,18,18,18,18,18,18,19,19,19,19,19,19,19,19,19,19,20,20,20,20,20,20,20,20,20,20,21,21,21,21,21,21,21,21,21,21,22,22,22,22,22,22,22,22,22,22,23,23,23,23,23,23,23,23,23,23,24,24,24,24,24,24,24,24,24,24,25,25,25,25,25,25,26,26,26,26,26,26,26,26,26,26,27,27,27,27,27,27,27,27,27,27,28,28,28,28,28,28,28,28,28,28,29,29,29,29,29,29,29,29,29,29],"team":["Lakers","Lakers","Lakers","Lakers","Lakers","Lakers","Lakers","Lakers","Lakers","Lakers","Knicks","Knicks","Knicks","Knicks","Knicks","Knicks","Knicks","Knicks","Knicks","Knicks","Bulls","Bulls","Bulls","Bulls","Bulls","Bulls","Bulls","Bulls","Bulls","Bulls","Mavericks","Mavericks","Mavericks","Mavericks","Mavericks","Mavericks","Mavericks","Mavericks","Mavericks","Mavericks","Celtics","Celtics","Celtics","Celtics","Celtics","Celtics","Celtics","Celtics","Celtics","Celtics","Heat","Heat","Heat","Heat","Heat","Heat","Heat","Heat","Heat","Heat","Rockets","Rockets","Rockets","Rockets","Rockets","Rockets","Rockets","Rockets","Rockets","Rockets","Warriors","Warriors","Warriors","Warriors","Warriors","Warriors","Warriors","Warriors","Warriors","Warriors","Spurs","Spurs","Spurs","Spurs","Spurs","Spurs","Spurs","Spurs","Spurs","Spurs","Suns","Suns","Suns","Suns","Suns","Suns","Suns","Suns","Suns","Suns","Magic","Magic","Magic","Magic","Magic","Magic","Magic","Magic","Magic","Magic","TrailBlazers","TrailBlazers","TrailBlazers","TrailBlazers","TrailBlazers","TrailBlazers","TrailBlazers","TrailBlazers","TrailBlazers","TrailBlazers","Nets","Nets","Nets","Nets","Nets","Nets","Nets","Nets","Nets","Nets","SonicsThunder","SonicsThunder","SonicsThunder","SonicsThunder","SonicsThunder","SonicsThunder","SonicsThunder","SonicsThunder","SonicsThunder","SonicsThunder","Jazz","Jazz","Jazz","Jazz","Jazz","Jazz","Jazz","Jazz","Jazz","Jazz","Pistons","Pistons","Pistons","Pistons","Pistons","Pistons","Pistons","Pistons","Pistons","Pistons","Cavaliers","Cavaliers","Cavaliers","Cavaliers","Cavaliers","Cavaliers","Cavaliers","Cavaliers","Cavaliers","Cavaliers","Wizards","Wizards","Wizards","Wizards","Wizards","Wizards","Wizards","Wizards","Wizards","Wizards","Clippers","Clippers","Clippers","Clippers","Clippers","Clippers","Clippers","Clippers","Clippers","Clippers","Nuggets","Nuggets","Nuggets","Nuggets","Nuggets","Nuggets","Nuggets","Nuggets","Nuggets","Nuggets","76ers","76ers","76ers","76ers","76ers","76ers","76ers","76ers","76ers","76ers","Kings","Kings","Kings","Kings","Kings","Kings","Kings","Kings","Kings","Kings","Hornets","Hornets","Hornets","Hornets","Hornets","Hornets","Hornets","Hornets","Hornets","Hornets","Pacers","Pacers","Pacers","Pacers","Pacers","Pacers","Pacers","Pacers","Pacers","Pacers","Bobcats","Bobcats","Bobcats","Bobcats","Bobcats","Bobcats","Timberwolves","Timberwolves","Timberwolves","Timberwolves","Timberwolves","Timberwolves","Timberwolves","Timberwolves","Timberwolves","Timberwolves","Hawks","Hawks","Hawks","Hawks","Hawks","Hawks","Hawks","Hawks","Hawks","Hawks","Grizzlies","Grizzlies","Grizzlies","Grizzlies","Grizzlies","Grizzlies","Grizzlies","Grizzlies","Grizzlies","Grizzlies","Bucks","Bucks","Bucks","Bucks","Bucks","Bucks","Bucks","Bucks","Bucks","Bucks"],"season":[1,2,3,4,5,6,7,8,9,10,1,2,3,4,5,6,7,8,9,10,1,2,3,4,5,6,7,8,9,10,1,2,3,4,5,6,7,8,9,10,1,2,3,4,5,6,7,8,9,10,1,2,3,4,5,6,7,8,9,10,1,2,3,4,5,6,7,8,9,10,1,2,3,4,5,6,7,8,9,10,1,2,3,4,5,6,7,8,9,10,1,2,3,4,5,6,7,8,9,10,1,2,3,4,5,6,7,8,9,10,1,2,3,4,5,6,7,8,9,10,1,2,3,4,5,6,7,8,9,10,1,2,3,4,5,6,7,8,9,10,1,2,3,4,5,6,7,8,9,10,1,2,3,4,5,6,7,8,9,10,1,2,3,4,5,6,7,8,9,10,1,2,3,4,5,6,7,8,9,10,1,2,3,4,5,6,7,8,9,10,1,2,3,4,5,6,7,8,9,10,1,2,3,4,5,6,7,8,9,10,1,2,3,4,5,6,7,8,9,10,1,2,3,4,5,6,7,8,9,10,1,2,3,4,5,6,7,8,9,10,5,6,7,8,9,10,1,2,3,4,5,6,7,8,9,10,1,2,3,4,5,6,7,8,9,10,1,2,3,4,5,6,7,8,9,10,1,2,3,4,5,6,7,8,9,10],"n_teams":29,"n_seasons":10,"n_obs":286,"variance":{"lnrevenue":{"overall":0.236,"between":0.2127,"within":0.1085},"wins":{"overall":12.44,"between":7.04,"within":10.36}},"pooled":{"coef":0.006753,"intercept":4.2552,"r2":0.1267,"se_default":0.001052,"se_robust":0.001022,"se_cluster":0.001909,"t_default":6.4179,"t_robust":6.6091,"t_cluster":3.5379,"p_default":0.0,"p_robust":0.0,"p_cluster":0.0004},"fe":{"coef":0.004505,"r2_within":0.1851,"se_cluster":0.00084,"se_default":0.00056,"t_cluster":5.3628,"p_cluster":0.0},"demeaned_lnrev":[-0.0423,-0.081,0.0234,-0.0893,-0.0592,-0.061,0.0031,0.1141,0.1277,0.0645,-0.092,-0.0854,-0.0522,-0.0163,-0.0324,0.0058,0.0128,0.0044,0.1067,0.1486,-0.1362,-0.1207,-0.1152,-0.0414,0.0119,0.0697,0.0419,0.0808,0.0768,0.1325,-0.1402,-0.0507,-0.0782,-0.0468,0.0365,0.0169,0.0533,0.0808,0.0174,0.111,-0.1184,-0.1267,-0.0845,-0.0552,-0.0841,-0.0511,0.1383,0.1251,0.1625,0.0941,-0.0993,-0.1715,-0.1772,0.0426,0.1083,0.081,0.0286,0.0107,-0.0154,0.1922,-0.3546,-0.3733,0.0208,0.1145,0.0836,0.1121,0.1056,0.1518,0.0971,0.0425,-0.1789,-0.2119,-0.1571,-0.1201,-0.0639,0.0626,0.0939,0.1238,0.1655,0.2861,-0.2596,-0.0432,-0.0425,0.0444,0.0147,0.0662,0.0659,0.0499,0.0548,0.0493,-0.0882,-0.0884,-0.0977,0.0488,0.0108,0.0851,0.0532,0.0742,0.0574,-0.0552,-0.0294,-0.0728,-0.1256,-0.1024,-0.0584,-0.0449,-0.0139,0.0747,0.074,0.2987,0.0764,0.068,-0.0568,-0.2042,-0.2551,-0.2118,0.0653,0.1458,0.1842,0.1881,0.0917,0.1054,0.0673,-0.0262,0.0026,0.0753,-0.0171,-0.0593,-0.1025,-0.1372,-0.0248,-0.1389,-0.1244,-0.0471,-0.0851,-0.1047,-0.1448,0.1789,0.23,0.2609,-0.0568,-0.0988,-0.0916,-0.0848,-0.0693,0.0829,0.0734,0.0859,0.101,0.058,-0.2351,-0.1827,-0.0394,0.0359,0.0274,0.1174,0.1033,0.1907,0.0295,-0.047,-0.2998,-0.4113,-0.1829,-0.1172,-0.0352,0.2241,0.2167,0.2376,0.2401,0.1279,0.0432,0.0143,-0.0549,0.0385,0.0192,0.036,0.0358,-0.0135,-0.0512,-0.0674,-0.0988,-0.1313,-0.0917,-0.0434,0.0537,0.0652,0.0229,0.0737,0.0637,0.0861,-0.1557,-0.1744,-0.0307,-0.0028,0.0211,0.0407,0.0624,0.1098,0.0822,0.0475,0.0638,0.073,0.027,0.0279,-0.0101,-0.0117,-0.029,-0.0167,-0.0712,-0.0528,0.0132,-0.0055,0.1127,0.0944,0.1136,0.1097,-0.0325,-0.0824,-0.149,-0.1741,-0.1922,0.0122,-0.0152,-0.0673,-0.0431,0.0293,0.0199,0.0408,0.0821,0.1335,0.0099,0.0236,0.0972,0.1082,0.0886,0.0413,-0.0688,-0.0883,-0.1191,-0.0926,-0.018,0.0063,-0.0248,0.0066,0.0172,0.0126,-0.0113,-0.03,0.0745,0.0882,0.0698,0.0502,-0.0317,-0.0516,-0.0721,-0.086,-0.0484,-0.0799,-0.0452,-0.0249,-0.007,0.0055,0.0242,0.0451,0.0641,0.0667,-0.1584,-0.2236,-0.0768,0.164,0.1562,0.1064,0.0229,-0.0327,0.0017,0.0403,-0.1045,-0.0794,-0.0116,-0.0254,0.0458,0.0376,0.0512,0.0397,0.0406,0.0059],"demeaned_wins":[4.0,6.0,-2.0,4.0,-18.0,-7.0,-10.0,5.0,13.0,5.0,15.3,-2.7,4.3,6.3,0.3,-9.7,0.3,-9.7,-0.7,-3.7,-19.1,-13.1,-4.1,-11.1,12.9,6.9,14.9,-1.1,6.9,6.9,-3.3,0.7,3.7,-4.3,1.7,3.7,10.7,-5.3,-6.3,-1.3,-8.5,4.5,-0.5,-8.5,0.5,-11.5,-20.5,21.5,17.5,5.5,8.7,-5.3,-16.3,0.7,17.7,10.7,2.7,-26.3,1.7,5.7,3.5,-13.5,1.5,3.5,9.5,-7.5,10.5,13.5,11.5,-32.5,-15.6,-11.6,5.4,4.4,1.4,1.4,9.4,15.4,-3.6,-6.6,0.7,0.7,2.7,-0.3,1.7,5.7,0.7,-1.3,-3.3,-7.3,1.8,-13.2,-5.2,-20.2,12.8,4.8,11.8,5.8,-3.2,4.8,-0.2,0.8,-1.2,-22.2,-7.2,-7.2,-3.2,8.8,15.8,15.8,8.5,7.5,8.5,-0.5,-14.5,-20.5,-9.5,-0.5,12.5,8.5,-12.6,13.4,10.4,8.4,3.4,10.4,2.4,-4.6,-4.6,-26.6,6.3,7.3,2.3,-0.7,14.3,-2.7,-6.7,-17.7,-14.7,12.3,7.1,-1.9,1.1,-3.9,-19.9,-4.9,5.1,8.1,2.1,7.1,-16.2,1.8,1.8,5.8,5.8,15.8,4.8,10.8,-9.2,-21.2,-12.5,-13.5,-25.5,-7.5,-0.5,7.5,7.5,2.5,23.5,18.5,-14.4,3.6,3.6,-8.4,11.6,8.6,7.6,9.6,-14.4,-7.4,-1.0,7.0,-5.0,-4.0,5.0,15.0,8.0,-9.0,-13.0,-3.0,-2.2,-15.2,-25.2,0.8,6.8,1.8,2.8,7.8,11.8,10.8,15.6,2.6,7.6,-7.4,2.6,-2.4,-5.4,-0.4,0.6,-13.4,11.3,17.3,15.3,11.3,6.3,0.3,-10.7,-5.7,-26.7,-18.7,4.5,2.5,5.5,-0.5,-23.5,-3.5,-2.5,14.5,7.5,-4.5,-0.6,0.4,6.4,19.4,2.4,-0.6,-6.6,-5.6,-5.6,-9.6,-13.3,-5.3,1.7,0.7,3.7,12.7,9.4,12.4,13.4,20.4,6.4,-4.6,-5.6,-15.6,-13.6,-22.6,-7.7,0.3,2.3,-4.7,-19.7,-6.7,-2.7,4.3,14.3,20.3,-9.6,-9.6,-4.6,17.4,12.4,16.4,-10.6,-10.6,-8.6,7.4,14.0,3.0,4.0,3.0,-8.0,2.0,-10.0,-12.0,-4.0,8.0]},"ts":{"dates":["1982-01-01","1982-02-01","1982-03-01","1982-04-01","1982-05-01","1982-06-01","1982-07-01","1982-08-01","1982-09-01","1982-10-01","1982-11-01","1982-12-01","1983-01-01","1983-02-01","1983-03-01","1983-04-01","1983-05-01","1983-06-01","1983-07-01","1983-08-01","1983-09-01","1983-10-01","1983-11-01","1983-12-01","1984-01-01","1984-02-01","1984-03-01","1984-04-01","1984-05-01","1984-06-01","1984-07-01","1984-08-01","1984-09-01","1984-10-01","1984-11-01","1984-12-01","1985-01-01","1985-02-01","1985-03-01","1985-04-01","1985-05-01","1985-06-01","1985-07-01","1985-08-01","1985-09-01","1985-10-01","1985-11-01","1985-12-01","1986-01-01","1986-02-01","1986-03-01","1986-04-01","1986-05-01","1986-06-01","1986-07-01","1986-08-01","1986-09-01","1986-10-01","1986-11-01","1986-12-01","1987-01-01","1987-02-01","1987-03-01","1987-04-01","1987-05-01","1987-06-01","1987-07-01","1987-08-01","1987-09-01","1987-10-01","1987-11-01","1987-12-01","1988-01-01","1988-02-01","1988-03-01","1988-04-01","1988-05-01","1988-06-01","1988-07-01","1988-08-01","1988-09-01","1988-10-01","1988-11-01","1988-12-01","1989-01-01","1989-02-01","1989-03-01","1989-04-01","1989-05-01","1989-06-01","1989-07-01","1989-08-01","1989-09-01","1989-10-01","1989-11-01","1989-12-01","1990-01-01","1990-02-01","1990-03-01","1990-04-01","1990-05-01","1990-06-01","1990-07-01","1990-08-01","1990-09-01","1990-10-01","1990-11-01","1990-12-01","1991-01-01","1991-02-01","1991-03-01","1991-04-01","1991-05-01","1991-06-01","1991-07-01","1991-08-01","1991-09-01","1991-10-01","1991-11-01","1991-12-01","1992-01-01","1992-02-01","1992-03-01","1992-04-01","1992-05-01","1992-06-01","1992-07-01","1992-08-01","1992-09-01","1992-10-01","1992-11-01","1992-12-01","1993-01-01","1993-02-01","1993-03-01","1993-04-01","1993-05-01","1993-06-01","1993-07-01","1993-08-01","1993-09-01","1993-10-01","1993-11-01","1993-12-01","1994-01-01","1994-02-01","1994-03-01","1994-04-01","1994-05-01","1994-06-01","1994-07-01","1994-08-01","1994-09-01","1994-10-01","1994-11-01","1994-12-01","1995-01-01","1995-02-01","1995-03-01","1995-04-01","1995-05-01","1995-06-01","1995-07-01","1995-08-01","1995-09-01","1995-10-01","1995-11-01","1995-12-01","1996-01-01","1996-02-01","1996-03-01","1996-04-01","1996-05-01","1996-06-01","1996-07-01","1996-08-01","1996-09-01","1996-10-01","1996-11-01","1996-12-01","1997-01-01","1997-02-01","1997-03-01","1997-04-01","1997-05-01","1997-06-01","1997-07-01","1997-08-01","1997-09-01","1997-10-01","1997-11-01","1997-12-01","1998-01-01","1998-02-01","1998-03-01","1998-04-01","1998-05-01","1998-06-01","1998-07-01","1998-08-01","1998-09-01","1998-10-01","1998-11-01","1998-12-01","1999-01-01","1999-02-01","1999-03-01","1999-04-01","1999-05-01","1999-06-01","1999-07-01","1999-08-01","1999-09-01","1999-10-01","1999-11-01","1999-12-01","2000-01-01","2000-02-01","2000-03-01","2000-04-01","2000-05-01","2000-06-01","2000-07-01","2000-08-01","2000-09-01","2000-10-01","2000-11-01","2000-12-01","2001-01-01","2001-02-01","2001-03-01","2001-04-01","2001-05-01","2001-06-01","2001-07-01","2001-08-01","2001-09-01","2001-10-01","2001-11-01","2001-12-01","2002-01-01","2002-02-01","2002-03-01","2002-04-01","2002-05-01","2002-06-01","2002-07-01","2002-08-01","2002-09-01","2002-10-01","2002-11-01","2002-12-01","2003-01-01","2003-02-01","2003-03-01","2003-04-01","2003-05-01","2003-06-01","2003-07-01","2003-08-01","2003-09-01","2003-10-01","2003-11-01","2003-12-01","2004-01-01","2004-02-01","2004-03-01","2004-04-01","2004-05-01","2004-06-01","2004-07-01","2004-08-01","2004-09-01","2004-10-01","2004-11-01","2004-12-01","2005-01-01","2005-02-01","2005-03-01","2005-04-01","2005-05-01","2005-06-01","2005-07-01","2005-08-01","2005-09-01","2005-10-01","2005-11-01","2005-12-01","2006-01-01","2006-02-01","2006-03-01","2006-04-01","2006-05-01","2006-06-01","2006-07-01","2006-08-01","2006-09-01","2006-10-01","2006-11-01","2006-12-01","2007-01-01","2007-02-01","2007-03-01","2007-04-01","2007-05-01","2007-06-01","2007-07-01","2007-08-01","2007-09-01","2007-10-01","2007-11-01","2007-12-01","2008-01-01","2008-02-01","2008-03-01","2008-04-01","2008-05-01","2008-06-01","2008-07-01","2008-08-01","2008-09-01","2008-10-01","2008-11-01","2008-12-01","2009-01-01","2009-02-01","2009-03-01","2009-04-01","2009-05-01","2009-06-01","2009-07-01","2009-08-01","2009-09-01","2009-10-01","2009-11-01","2009-12-01","2010-01-01","2010-02-01","2010-03-01","2010-04-01","2010-05-01","2010-06-01","2010-07-01","2010-08-01","2010-09-01","2010-10-01","2010-11-01","2010-12-01","2011-01-01","2011-02-01","2011-03-01","2011-04-01","2011-05-01","2011-06-01","2011-07-01","2011-08-01","2011-09-01","2011-10-01","2011-11-01","2011-12-01","2012-01-01","2012-02-01","2012-03-01","2012-04-01","2012-05-01","2012-06-01","2012-07-01","2012-08-01","2012-09-01","2012-10-01","2012-11-01","2012-12-01","2013-01-01","2013-02-01","2013-03-01","2013-04-01","2013-05-01","2013-06-01","2013-07-01","2013-08-01","2013-09-01","2013-10-01","2013-11-01","2013-12-01","2014-01-01","2014-02-01","2014-03-01","2014-04-01","2014-05-01","2014-06-01","2014-07-01","2014-08-01","2014-09-01","2014-10-01","2014-11-01","2014-12-01","2015-01-01"],"gs10":[14.59,14.43,13.86,13.87,13.62,14.3,13.95,13.06,12.34,10.91,10.55,10.54,10.46,10.72,10.51,10.4,10.38,10.85,11.38,11.85,11.65,11.54,11.69,11.83,11.67,11.84,12.32,12.63,13.41,13.56,13.36,12.72,12.52,12.16,11.57,11.5,11.38,11.51,11.86,11.43,10.85,10.16,10.31,10.33,10.37,10.24,9.78,9.26,9.19,8.7,7.78,7.3,7.71,7.8,7.3,7.17,7.45,7.43,7.25,7.11,7.08,7.25,7.25,8.02,8.61,8.4,8.45,8.76,9.42,9.52,8.86,8.99,8.67,8.21,8.37,8.72,9.09,8.92,9.06,9.26,8.98,8.8,8.96,9.11,9.09,9.17,9.36,9.18,8.86,8.28,8.02,8.11,8.19,8.01,7.87,7.84,8.21,8.47,8.59,8.79,8.76,8.48,8.47,8.75,8.89,8.72,8.39,8.08,8.09,7.85,8.11,8.04,8.07,8.28,8.27,7.9,7.65,7.53,7.42,7.09,7.03,7.34,7.54,7.48,7.39,7.26,6.84,6.59,6.42,6.59,6.87,6.77,6.6,6.26,5.98,5.97,6.04,5.96,5.81,5.68,5.36,5.33,5.72,5.77,5.75,5.97,6.48,6.97,7.18,7.1,7.3,7.24,7.46,7.74,7.96,7.81,7.78,7.47,7.2,7.06,6.63,6.17,6.28,6.49,6.2,6.04,5.93,5.71,5.65,5.81,6.27,6.51,6.74,6.91,6.87,6.64,6.83,6.53,6.2,6.3,6.58,6.42,6.69,6.89,6.71,6.49,6.22,6.3,6.21,6.03,5.88,5.81,5.54,5.57,5.65,5.64,5.65,5.5,5.46,5.34,4.81,4.53,4.83,4.65,4.72,5.0,5.23,5.18,5.54,5.9,5.79,5.94,5.92,6.11,6.03,6.28,6.66,6.52,6.26,5.99,6.44,6.1,6.05,5.83,5.8,5.74,5.72,5.24,5.16,5.1,4.89,5.14,5.39,5.28,5.24,4.97,4.73,4.57,4.65,5.09,5.04,4.91,5.28,5.21,5.16,4.93,4.65,4.26,3.87,3.94,4.05,4.03,4.05,3.9,3.81,3.96,3.57,3.33,3.98,4.45,4.27,4.29,4.3,4.27,4.15,4.08,3.83,4.35,4.72,4.73,4.5,4.28,4.13,4.1,4.19,4.23,4.22,4.17,4.5,4.34,4.14,4.0,4.18,4.26,4.2,4.46,4.54,4.47,4.42,4.57,4.72,4.99,5.11,5.11,5.09,4.88,4.72,4.73,4.6,4.56,4.76,4.72,4.56,4.69,4.75,5.1,5.0,4.67,4.52,4.53,4.15,4.1,3.74,3.74,3.51,3.68,3.88,4.1,4.01,3.89,3.69,3.81,3.53,2.42,2.52,2.87,2.82,2.93,3.29,3.72,3.56,3.59,3.4,3.39,3.4,3.59,3.73,3.69,3.73,3.85,3.42,3.2,3.01,2.7,2.65,2.54,2.76,3.29,3.39,3.58,3.41,3.46,3.17,3.0,3.0,2.3,1.98,2.15,2.01,1.98,1.97,1.97,2.17,2.05,1.8,1.62,1.53,1.68,1.72,1.75,1.65,1.72,1.91,1.98,1.96,1.76,1.93,2.3,2.58,2.74,2.81,2.62,2.72,2.9,2.86,2.71,2.72,2.71,2.56,2.6,2.54,2.42,2.53,2.3,2.33,2.21,1.88],"gs1":[14.32,14.73,13.95,13.98,13.34,14.07,13.24,11.43,10.85,9.32,9.16,8.91,8.62,8.92,9.04,8.98,8.9,9.66,10.2,10.53,10.16,9.81,9.94,10.11,9.9,10.04,10.59,10.9,11.66,12.08,12.03,11.82,11.58,10.9,9.82,9.33,9.02,9.29,9.86,9.14,8.46,7.8,7.86,8.05,8.07,8.01,7.88,7.67,7.73,7.61,7.03,6.44,6.65,6.73,6.27,5.93,5.77,5.72,5.8,5.87,5.78,5.96,6.03,6.5,7.0,6.8,6.68,7.03,7.67,7.59,6.96,7.17,6.99,6.64,6.71,7.01,7.4,7.49,7.75,8.17,8.09,8.11,8.48,8.99,9.05,9.25,9.57,9.36,8.98,8.44,7.89,8.18,8.22,7.99,7.77,7.72,7.92,8.11,8.35,8.4,8.32,8.1,7.94,7.78,7.76,7.55,7.31,7.05,6.64,6.27,6.4,6.24,6.13,6.36,6.31,5.78,5.57,5.33,4.89,4.38,4.15,4.29,4.63,4.3,4.19,4.17,3.6,3.47,3.18,3.3,3.68,3.71,3.5,3.39,3.33,3.24,3.36,3.54,3.47,3.44,3.36,3.39,3.58,3.61,3.54,3.87,4.32,4.82,5.31,5.27,5.48,5.56,5.76,6.11,6.54,7.14,7.05,6.7,6.43,6.27,6.0,5.64,5.59,5.75,5.62,5.59,5.43,5.31,5.09,4.94,5.34,5.54,5.64,5.81,5.85,5.67,5.83,5.55,5.42,5.47,5.61,5.53,5.8,5.99,5.87,5.69,5.54,5.56,5.52,5.46,5.46,5.53,5.24,5.31,5.39,5.38,5.44,5.41,5.36,5.21,4.71,4.12,4.53,4.52,4.51,4.7,4.78,4.69,4.85,5.1,5.03,5.2,5.25,5.43,5.55,5.84,6.12,6.22,6.22,6.15,6.33,6.17,6.08,6.18,6.13,6.01,6.09,5.6,4.81,4.68,4.3,3.98,3.78,3.58,3.62,3.47,2.82,2.33,2.18,2.22,2.16,2.23,2.57,2.48,2.35,2.2,1.96,1.76,1.72,1.65,1.49,1.45,1.36,1.3,1.24,1.27,1.18,1.01,1.12,1.31,1.24,1.25,1.34,1.31,1.24,1.24,1.19,1.43,1.78,2.12,2.1,2.02,2.12,2.23,2.5,2.67,2.86,3.03,3.3,3.32,3.33,3.36,3.64,3.87,3.85,4.18,4.33,4.35,4.45,4.68,4.77,4.9,5.0,5.16,5.22,5.08,4.97,5.01,5.01,4.94,5.06,5.05,4.92,4.93,4.91,4.96,4.96,4.47,4.14,4.1,3.5,3.26,2.71,2.05,1.54,1.74,2.06,2.42,2.28,2.18,1.91,1.42,1.07,0.49,0.44,0.62,0.64,0.55,0.5,0.51,0.48,0.46,0.4,0.37,0.31,0.37,0.35,0.35,0.4,0.45,0.37,0.32,0.29,0.26,0.26,0.23,0.25,0.29,0.27,0.29,0.26,0.25,0.19,0.18,0.19,0.11,0.1,0.11,0.11,0.12,0.12,0.16,0.19,0.18,0.19,0.19,0.19,0.18,0.18,0.18,0.18,0.16,0.15,0.16,0.15,0.12,0.12,0.14,0.12,0.13,0.12,0.12,0.12,0.13,0.12,0.12,0.13,0.11,0.1,0.1,0.11,0.11,0.11,0.1,0.13,0.21,0.2],"dgs10":[null,-0.16,-0.57,0.01,-0.25,0.68,-0.35,-0.89,-0.72,-1.43,-0.36,-0.01,-0.08,0.26,-0.21,-0.11,-0.02,0.47,0.53,0.47,-0.2,-0.11,0.15,0.14,-0.16,0.17,0.48,0.31,0.78,0.15,-0.2,-0.64,-0.2,-0.36,-0.59,-0.07,-0.12,0.13,0.35,-0.43,-0.58,-0.69,0.15,0.02,0.04,-0.13,-0.46,-0.52,-0.07,-0.49,-0.92,-0.48,0.41,0.09,-0.5,-0.13,0.28,-0.02,-0.18,-0.14,-0.03,0.17,0.0,0.77,0.59,-0.21,0.05,0.31,0.66,0.1,-0.66,0.13,-0.32,-0.46,0.16,0.35,0.37,-0.17,0.14,0.2,-0.28,-0.18,0.16,0.15,-0.02,0.08,0.19,-0.18,-0.32,-0.58,-0.26,0.09,0.08,-0.18,-0.14,-0.03,0.37,0.26,0.12,0.2,-0.03,-0.28,-0.01,0.28,0.14,-0.17,-0.33,-0.31,0.01,-0.24,0.26,-0.07,0.03,0.21,-0.01,-0.37,-0.25,-0.12,-0.11,-0.33,-0.06,0.31,0.2,-0.06,-0.09,-0.13,-0.42,-0.25,-0.17,0.17,0.28,-0.1,-0.17,-0.34,-0.28,-0.01,0.07,-0.08,-0.15,-0.13,-0.32,-0.03,0.39,0.05,-0.02,0.22,0.51,0.49,0.21,-0.08,0.2,-0.06,0.22,0.28,0.22,-0.15,-0.03,-0.31,-0.27,-0.14,-0.43,-0.46,0.11,0.21,-0.29,-0.16,-0.11,-0.22,-0.06,0.16,0.46,0.24,0.23,0.17,-0.04,-0.23,0.19,-0.3,-0.33,0.1,0.28,-0.16,0.27,0.2,-0.18,-0.22,-0.27,0.08,-0.09,-0.18,-0.15,-0.07,-0.27,0.03,0.08,-0.01,0.01,-0.15,-0.04,-0.12,-0.53,-0.28,0.3,-0.18,0.07,0.28,0.23,-0.05,0.36,0.36,-0.11,0.15,-0.02,0.19,-0.08,0.25,0.38,-0.14,-0.26,-0.27,0.45,-0.34,-0.05,-0.22,-0.03,-0.06,-0.02,-0.48,-0.08,-0.06,-0.21,0.25,0.25,-0.11,-0.04,-0.27,-0.24,-0.16,0.08,0.44,-0.05,-0.13,0.37,-0.07,-0.05,-0.23,-0.28,-0.39,-0.39,0.07,0.11,-0.02,0.02,-0.15,-0.09,0.15,-0.39,-0.24,0.65,0.47,-0.18,0.02,0.01,-0.03,-0.12,-0.07,-0.25,0.52,0.37,0.01,-0.23,-0.22,-0.15,-0.03,0.09,0.04,-0.01,-0.05,0.33,-0.16,-0.2,-0.14,0.18,0.08,-0.06,0.26,0.08,-0.07,-0.05,0.15,0.15,0.27,0.12,0.0,-0.02,-0.21,-0.16,0.01,-0.13,-0.04,0.2,-0.04,-0.16,0.13,0.06,0.35,-0.1,-0.33,-0.15,0.01,-0.38,-0.05,-0.36,0.0,-0.23,0.17,0.2,0.22,-0.09,-0.12,-0.2,0.12,-0.28,-1.11,0.1,0.35,-0.05,0.11,0.36,0.43,-0.16,0.03,-0.19,-0.01,0.01,0.19,0.14,-0.04,0.04,0.12,-0.43,-0.22,-0.19,-0.31,-0.05,-0.11,0.22,0.53,0.1,0.19,-0.17,0.05,-0.29,-0.17,0.0,-0.7,-0.32,0.17,-0.14,-0.03,-0.01,0.0,0.2,-0.12,-0.25,-0.18,-0.09,0.15,0.04,0.03,-0.1,0.07,0.19,0.07,-0.02,-0.2,0.17,0.37,0.28,0.16,0.07,-0.19,0.1,0.18,-0.04,-0.15,0.01,-0.01,-0.15,0.04,-0.06,-0.12,0.11,-0.23,0.03,-0.12,-0.33],"dgs1":[null,0.41,-0.78,0.03,-0.64,0.73,-0.83,-1.81,-0.58,-1.53,-0.16,-0.25,-0.29,0.3,0.12,-0.06,-0.08,0.76,0.54,0.33,-0.37,-0.35,0.13,0.17,-0.21,0.14,0.55,0.31,0.76,0.42,-0.05,-0.21,-0.24,-0.68,-1.08,-0.49,-0.31,0.27,0.57,-0.72,-0.68,-0.66,0.06,0.19,0.02,-0.06,-0.13,-0.21,0.06,-0.12,-0.58,-0.59,0.21,0.08,-0.46,-0.34,-0.16,-0.05,0.08,0.07,-0.09,0.18,0.07,0.47,0.5,-0.2,-0.12,0.35,0.64,-0.08,-0.63,0.21,-0.18,-0.35,0.07,0.3,0.39,0.09,0.26,0.42,-0.08,0.02,0.37,0.51,0.06,0.2,0.32,-0.21,-0.38,-0.54,-0.55,0.29,0.04,-0.23,-0.22,-0.05,0.2,0.19,0.24,0.05,-0.08,-0.22,-0.16,-0.16,-0.02,-0.21,-0.24,-0.26,-0.41,-0.37,0.13,-0.16,-0.11,0.23,-0.05,-0.53,-0.21,-0.24,-0.44,-0.51,-0.23,0.14,0.34,-0.33,-0.11,-0.02,-0.57,-0.13,-0.29,0.12,0.38,0.03,-0.21,-0.11,-0.06,-0.09,0.12,0.18,-0.07,-0.03,-0.08,0.03,0.19,0.03,-0.07,0.33,0.45,0.5,0.49,-0.04,0.21,0.08,0.2,0.35,0.43,0.6,-0.09,-0.35,-0.27,-0.16,-0.27,-0.36,-0.05,0.16,-0.13,-0.03,-0.16,-0.12,-0.22,-0.15,0.4,0.2,0.1,0.17,0.04,-0.18,0.16,-0.28,-0.13,0.05,0.14,-0.08,0.27,0.19,-0.12,-0.18,-0.15,0.02,-0.04,-0.06,0.0,0.07,-0.29,0.07,0.08,-0.01,0.06,-0.03,-0.05,-0.15,-0.5,-0.59,0.41,-0.01,-0.01,0.19,0.08,-0.09,0.16,0.25,-0.07,0.17,0.05,0.18,0.12,0.29,0.28,0.1,0.0,-0.07,0.18,-0.16,-0.09,0.1,-0.05,-0.12,0.08,-0.49,-0.79,-0.13,-0.38,-0.32,-0.2,-0.2,0.04,-0.15,-0.65,-0.49,-0.15,0.04,-0.06,0.07,0.34,-0.09,-0.13,-0.15,-0.24,-0.2,-0.04,-0.07,-0.16,-0.04,-0.09,-0.06,-0.06,0.03,-0.09,-0.17,0.11,0.19,-0.07,0.01,0.09,-0.03,-0.07,0.0,-0.05,0.24,0.35,0.34,-0.02,-0.08,0.1,0.11,0.27,0.17,0.19,0.17,0.27,0.02,0.01,0.03,0.28,0.23,-0.02,0.33,0.15,0.02,0.1,0.23,0.09,0.13,0.1,0.16,0.06,-0.14,-0.11,0.04,0.0,-0.07,0.12,-0.01,-0.13,0.01,-0.02,0.05,0.0,-0.49,-0.33,-0.04,-0.6,-0.24,-0.55,-0.66,-0.51,0.2,0.32,0.36,-0.14,-0.1,-0.27,-0.49,-0.35,-0.58,-0.05,0.18,0.02,-0.09,-0.05,0.01,-0.03,-0.02,-0.06,-0.03,-0.06,0.06,-0.02,0.0,0.05,0.05,-0.08,-0.05,-0.03,-0.03,0.0,-0.03,0.02,0.04,-0.02,0.02,-0.03,-0.01,-0.06,-0.01,0.01,-0.08,-0.01,0.01,0.0,0.01,0.0,0.04,0.03,-0.01,0.01,0.0,0.0,-0.01,0.0,0.0,0.0,-0.02,-0.01,0.01,-0.01,-0.03,0.0,0.02,-0.02,0.01,-0.01,0.0,0.0,0.01,-0.01,0.0,0.01,-0.02,-0.01,0.0,0.01,0.0,0.0,-0.01,0.03,0.08,-0.01],"n":397,"levels":{"coef":0.8359,"intercept":2.2647,"r2":0.9093,"se_default":0.0133,"se_hac":0.0449,"se_ratio":3.38,"acf":[1.0,0.9771,0.9438,0.9107,0.8735,0.8346,0.7951,0.755,0.7121,0.6657,0.6189,0.5736,0.5288,0.4838,0.4416,0.4015,0.3612,0.3228,0.2887,0.2552,0.2238,0.1929,0.1594,0.1258,0.0913]},"changes":{"coef":0.7198,"intercept":-0.0064,"r2":0.5709,"se_default":0.0314,"acf":[1.0,0.2548,-0.0387,0.0608,0.0237,-0.0275,-0.0113,0.0428,0.0811,-0.0017,-0.0197,-0.0044,-0.0145,-0.0873,-0.0753,-0.0237,-0.0472,-0.1031,-0.0368,-0.0669,-0.026,0.0254,0.0171,0.0315,-0.0195]},"adl":{"coefs":{"dgs10_L1":0.2909,"dgs10_L2":-0.1112,"dgs1":0.8588,"dgs1_L1":-0.5512,"dgs1_L2":0.2287},"coef_const":0.0019,"se":{"dgs10_L1":0.099,"dgs10_L2":0.0986,"dgs1":0.1328,"dgs1_L1":0.1775,"dgs1_L2":0.1561},"pvals":{"dgs10_L1":0.0041,"dgs10_L2":0.2621,"dgs1":0.0,"dgs1_L1":0.0025,"dgs1_L2":0.1461},"r2":0.3467,"acf":[1.0,0.024,-0.0599,0.1693,-0.0959,-0.0055,-0.1281,-0.0814,0.1061,-0.0762,0.0701,0.0675,-0.0236,-0.0387,-0.0518,0.1188,-0.0716,-0.1162,0.0734,-0.1543,0.1082,0.0298,-0.014,0.021,-0.1554],"multipliers":{"impact":0.8588,"cumulative":[0.8588,0.3076,0.5363]}}},"meta":{"chapter":"Chapter 17: Panel Data, Time Series Data, Causation","book":"metricsAI: An Introduction to Econometrics with Python and AI in the Cloud","author":"Carlos Mendez"}}</script>
@@ -852,7 +944,403 @@ const DATA = JSON.parse(document.getElementById("ch-data").textContent);
 function fmt(v,d){if(v==null||isNaN(v))return"\u2014";d=d??2;const a=Math.abs(v);if(a>=1e6)return(v/1e6).toFixed(1)+"M";if(a>=1e3&&d===0)return Math.round(v).toLocaleString();return v.toFixed(d)}
 function fmtPct(v,d){return(v*100).toFixed(d??1)+"%"}
 
-const THEME_KEY="metricsai-theme";
+// ==================== I18N (EN / ES) ====================
+// English is the source of truth. Spanish entries are real translations
+// (no placeholder prefixes). Strings may contain `{name}` placeholders
+// that are filled by t(key, vars).
+const I18N = {
+  defaultLang: "en",
+  storageKey: "language",
+  en: {
+    "meta.title": "Chapter 17 \u2014 Panel Data, Time Series, and Causality \u00b7 metricsAI",
+
+    "header.badge":    "Chapter 17 of 18 \u00b7 Interactive Dashboard",
+    "header.title":    "Panel Data, Time Series, and Causality",
+    "header.subtitle": "Explore between vs within variation, compare standard errors, watch fixed effects remove bias, and see how first differencing cures spurious regression \u2014 using NBA revenue and U.S. interest rate data.",
+
+    "theme.dark":  "Dark",
+    "theme.light": "Light",
+
+    "nav.variance":   "Variance decomp",
+    "nav.cluster":    "Cluster SEs",
+    "nav.poolfe":     "Pooled vs FE",
+    "nav.timeseries": "Time series",
+    "nav.acf":        "Autocorrelation",
+    "nav.spurious":   "Levels vs changes",
+    "nav.adl":        "ADL model",
+    "nav.code":       "Code",
+
+    "common.reset":      "\u21ba Reset",
+    "common.tryTitle":   "Try this",
+    "common.howtoTitle": "What you can do here",
+
+    // ---- Widget 1: Variance decomposition ----
+    "widget.variance.heading":    "Panel data variance decomposition",
+    "widget.variance.motivation": "Panel data has two souls: big-market teams earn more <em>between</em> themselves, and the same team earns more in some years than others <em>within</em> itself. Which variation does your estimator use?",
+    "widget.variance.kc":         "<span class=\"kc-title\">Panel data variation decomposes into between (differences across individuals in their averages) and within (deviations from individual averages over time).</span> This decomposition determines what each estimator identifies: <strong>pooled OLS uses both</strong> sources, <strong>fixed effects uses only within</strong>, and <strong>random effects uses a weighted combination</strong>. In the NBA example, between variation in revenue is large (big-market vs small-market), while within variation is smaller (year-to-year fluctuations).",
+    "widget.variance.howto":      "<li><strong>Read the three bars</strong> for each variable \u2014 overall, between, within.</li>\n      <li><strong>Compare log revenue to wins</strong> \u2014 their between/within mixes differ.</li>\n      <li><strong>Cross-reference with the Pooled-vs-FE widget</strong> \u2014 FE uses only the within piece.</li>",
+    "widget.variance.try":        "<li><strong>Read log-revenue's three bars.</strong> Between SD \u2248 0.21; within SD \u2248 0.11. <em>Most NBA revenue variation is across teams, not across seasons \u2014 big-market vs small-market dominates year-to-year swings.</em></li>\n    <li><strong>Read wins' bars.</strong> Between and within are closer in magnitude. <em>Team performance fluctuates substantially season-to-season \u2014 a lot of \"wins variation\" would survive de-meaning.</em></li>\n    <li><strong>Connect to estimator choice.</strong> FE only uses the within bars. <em>When within variation is small, FE estimates become imprecise \u2014 that's the price of removing all between-team confounding.</em></li>",
+    "widget.variance.takeaway":   "<strong>Take-away:</strong> What a panel estimator can identify depends on which kind of variation the data carries \u2014 inspect the decomposition before choosing pooled OLS, FE, or RE. <a href=\"../../book/_book/notebooks_quarto/ch17_Panel_Data_Time_Series_Data_Causation.html#panel-data-models\" target=\"_blank\" rel=\"noopener\">Read \u00a717.2 in the chapter \u2192</a>",
+    "widget.variance.chart.overall": "Overall",
+    "widget.variance.chart.between": "Between",
+    "widget.variance.chart.within":  "Within",
+    "widget.variance.chart.lnrev":   "Log Revenue",
+    "widget.variance.chart.wins":    "Wins",
+    "widget.variance.chart.yaxis":   "Standard Deviation",
+    "widget.variance.callout":       "<strong>Revenue:</strong> between SD ({rev_between}) > within SD ({rev_within}). Most revenue variation is across teams, not over time. <strong>Wins:</strong> between ({wins_between}) and within ({wins_within}) are closer \u2014 team performance fluctuates more.",
+
+    // ---- Widget 2: Cluster SEs ----
+    "widget.cluster.heading":    "Standard error comparison \u2014 why clustering matters",
+    "widget.cluster.motivation": "Treat 286 team-seasons as independent and your SEs will be <em>comically small</em>. Cluster by team and reality returns \u2014 sometimes doubling the standard error.",
+    "widget.cluster.kc":         "<span class=\"kc-title\">Observations within the same individual (team, firm, country) are correlated over time \u2014 violating OLS's independence assumption.</span> Default SEs dramatically <strong>understate uncertainty</strong> by treating all observations as independent. <strong>Cluster-robust SEs</strong> account for within-individual correlation, often producing SEs that are 2\u00d7 or more larger than default. Always cluster by individual in panel data; with few clusters (G &lt; 30), consider wild-bootstrap refinements.",
+    "widget.cluster.howto":      "<li><strong>Compare default, robust (HC1), and cluster SEs</strong> in the bar chart.</li>\n      <li><strong>Read the ratio in the callout</strong> \u2014 how much larger the cluster SE is.</li>\n      <li><strong>Judge the inference consequences</strong> \u2014 does clustering change significance?</li>",
+    "widget.cluster.try":        "<li><strong>Compare the three bars.</strong> Cluster SE \u2248 1.81\u00d7 default; robust (HC1) SE \u2248 1.15\u00d7 default. <em>Robust corrects for heteroskedasticity but not serial correlation within a team \u2014 only clustering fixes both.</em></li>\n    <li><strong>Check significance under each SE type.</strong> Wins stays significant (p = 0.0004) with cluster SEs. <em>The coefficient is strong enough to survive the correction, but the CI is almost twice as wide \u2014 every panel inference should be reported with cluster SEs.</em></li>\n    <li><strong>Imagine a borderline coefficient.</strong> <em>With default SEs it would be \"significant at 5%\"; with cluster SEs it would not. This is where clustering changes published conclusions.</em></li>",
+    "widget.cluster.takeaway":   "<strong>Take-away:</strong> Panel observations within the same individual are correlated \u2014 always cluster your standard errors by individual, or your t-statistics are fiction. <a href=\"../../book/_book/notebooks_quarto/ch17_Panel_Data_Time_Series_Data_Causation.html#panel-data-models\" target=\"_blank\" rel=\"noopener\">Read \u00a717.2 in the chapter \u2192</a>",
+    "widget.cluster.bar.default":  "Default",
+    "widget.cluster.bar.robust":   "Robust (HC1)",
+    "widget.cluster.bar.cluster":  "Cluster",
+    "widget.cluster.chart.yaxis":  "Standard Error of Wins Coefficient",
+    "widget.cluster.chart.hover":  "%{x}: SE = %{y:.6f}<extra></extra>",
+    "widget.cluster.callout":      "<strong>Wins coefficient = {coef}</strong> across all SE types. But the SE changes: default = {se_default}, robust = {se_robust}, cluster = {se_cluster}. The cluster SE is <strong>{ratio}\u00d7 larger</strong> \u2014 ignoring within-team correlation understates uncertainty.",
+
+    // ---- Widget 3: Pooled OLS vs FE ----
+    "widget.poolfe.heading":    "Pooled OLS vs fixed effects",
+    "widget.poolfe.motivation": "Big-market teams win more <em>and</em> earn more \u2014 so does winning cause revenue, or is the Lakers' market the whole story? FE removes every persistent team trait and lets you see.",
+    "widget.poolfe.kc":         "<span class=\"kc-title\">Fixed effects estimation controls for time-invariant individual characteristics by including individual-specific intercepts \u03b1<sub>i</sub>.</span> The <strong>within transformation</strong> (de-meaning y<sub>it</sub> and x<sub>it</sub> by the individual's average) eliminates \u03b1<sub>i</sub> entirely and uses only variation within each individual over time. FE provides more credible causal estimates but cannot identify effects of time-invariant variables. FE is consistent whether or not \u03b1<sub>i</sub> is correlated with regressors; <strong>random effects is more efficient but inconsistent if the uncorrelated-effects assumption fails</strong> (Key Concept 17.4). The Hausman test decides between them.",
+    "widget.poolfe.howto":      "<li><strong>Toggle Pooled OLS / Fixed Effects / Both</strong> to compare fitted lines side by side.</li>\n      <li><strong>Read the two slope coefficients</strong> in the fit stats \u2014 any gap is the bias FE removes.</li>\n      <li><strong>Notice within R\u00b2</strong> for FE \u2014 it measures explanatory power after de-meaning, which is a different quantity than pooled R\u00b2.</li>",
+    "widget.poolfe.try":        "<li><strong>Start on Pooled OLS.</strong> Wins coef = 0.0068 \u2014 one extra win is associated with 0.68% higher revenue. <em>Mixes within- and between-team variation \u2014 big-market teams win more, so the pooled estimate is contaminated.</em></li>\n    <li><strong>Switch to Fixed Effects.</strong> Wins coef drops to 0.0045. <em>FE strips out persistent team characteristics (market size, arena, brand) \u2014 the within effect of winning on revenue is smaller than pooled OLS suggested.</em></li>\n    <li><strong>Toggle Both.</strong> The FE line is visibly flatter than the pooled line. <em>The slope difference is the between-team confound in dollar terms.</em></li>\n    <li><strong>Note FE within-R\u00b2 \u2248 0.19.</strong> <em>Only 19% of within-team revenue variation is explained by wins \u2014 much of the rest is idiosyncratic events (injuries, rule changes, playoff runs).</em></li>",
+    "widget.poolfe.takeaway":   "<strong>Take-away:</strong> FE removes bias from persistent individual characteristics at the cost of between-individual variation \u2014 credible at the price of precision. <a href=\"../../book/_book/notebooks_quarto/ch17_Panel_Data_Time_Series_Data_Causation.html#fixed-effects-estimation\" target=\"_blank\" rel=\"noopener\">Read \u00a717.3 in the chapter \u2192</a>",
+    "widget.poolfe.ctrl.view.label":  "View",
+    "widget.poolfe.ctrl.view.pooled": "Pooled OLS",
+    "widget.poolfe.ctrl.view.fe":     "Fixed Effects",
+    "widget.poolfe.ctrl.view.both":   "Both",
+    "widget.poolfe.legend.allobs":    "All obs",
+    "widget.poolfe.legend.pooled":    "Pooled OLS",
+    "widget.poolfe.legend.demeaned":  "De-meaned",
+    "widget.poolfe.legend.fe":        "Fixed Effects",
+    "widget.poolfe.xaxis.wins":       "Wins",
+    "widget.poolfe.xaxis.dwins":      "De-meaned Wins",
+    "widget.poolfe.yaxis.lnrev":      "Log Revenue",
+    "widget.poolfe.yaxis.dlnrev":     "De-meaned Log Revenue",
+    "widget.poolfe.hover.allobs":     "Wins: %{x}<br>Log Rev: %{y:.3f}<extra></extra>",
+    "widget.poolfe.hover.demeaned":   "\u0394Wins: %{x:.1f}<br>\u0394Log Rev: %{y:.3f}<extra></extra>",
+    "widget.poolfe.fit.pooled_coef":  "Pooled coef",
+    "widget.poolfe.fit.fe_coef":      "FE coef",
+    "widget.poolfe.fit.pooled_r2":    "Pooled R\u00b2",
+    "widget.poolfe.fit.fe_r2_within": "FE R\u00b2 (within)",
+    "widget.poolfe.callout":          "<strong>Pooled OLS:</strong> wins coef = {pooled_coef}. <strong>Fixed Effects:</strong> wins coef = {fe_coef} ({drop}% smaller). FE removes confounding from persistent team characteristics. The within-R\u00b2 ({fe_r2}) is higher than pooled R\u00b2 ({p_r2}) \u2014 FE explains more of the within-team variation.",
+
+    // ---- Widget 4: Time series ----
+    "widget.timeseries.heading":    "Interest rates \u2014 levels vs changes",
+    "widget.timeseries.motivation": "Two time series trending together will <em>always</em> have a high R\u00b2 \u2014 even if they have nothing to do with each other. First differencing is the simplest defense.",
+    "widget.timeseries.kc":         "<span class=\"kc-title\">A time series is stationary if its statistical properties (mean, variance, autocorrelation) are constant over time.</span> Many economic series are <strong>non-stationary</strong> (trending) \u2014 and regressing non-stationary series on each other can produce <strong>spurious regressions</strong>: high R\u00b2 and significant coefficients even when variables are unrelated. <strong>First differencing (\u0394y<sub>t</sub> = y<sub>t</sub> \u2212 y<sub>t\u22121</sub>)</strong> typically removes trends and restores stationarity. Always check stationarity before interpreting a time-series regression.",
+    "widget.timeseries.howto":      "<li><strong>Toggle Levels vs Changes (\u0394)</strong> to switch between trending and de-trended views.</li>\n      <li><strong>Scan the time series</strong> \u2014 levels trend, changes fluctuate around zero.</li>\n      <li><strong>Cross-reference with the ACF widget</strong> for the corresponding serial-correlation signature.</li>",
+    "widget.timeseries.try":        "<li><strong>Start on Levels.</strong> Both rates drift from ~14% in 1982 to ~2% by 2015. <em>A shared downward trend \u2014 any regression of one on the other will inherit it as \"fit,\" regardless of causality.</em></li>\n    <li><strong>Switch to Changes.</strong> Both series fluctuate around zero with no drift. <em>Stationary by construction \u2014 first differencing strips out the trend and delivers a series OLS can safely regress on.</em></li>\n    <li><strong>Compare amplitudes.</strong> Monthly changes are \u00b11 percentage point; the level range is 12 points. <em>The two views live on very different scales, which is why R\u00b2 on levels looks so much larger than on changes.</em></li>",
+    "widget.timeseries.takeaway":   "<strong>Take-away:</strong> Trending series share a trend before they share anything else \u2014 difference them before regressing, or risk a spurious story. <a href=\"../../book/_book/notebooks_quarto/ch17_Panel_Data_Time_Series_Data_Causation.html#time-series-data\" target=\"_blank\" rel=\"noopener\">Read \u00a717.5 in the chapter \u2192</a>",
+    "widget.timeseries.ctrl.view.label":   "View",
+    "widget.timeseries.ctrl.view.levels":  "Levels",
+    "widget.timeseries.ctrl.view.changes": "Changes (\u0394)",
+    "widget.timeseries.legend.gs10":  "10-year rate",
+    "widget.timeseries.legend.gs1":   "1-year rate",
+    "widget.timeseries.legend.dgs10": "\u039410-year",
+    "widget.timeseries.legend.dgs1":  "\u03941-year",
+    "widget.timeseries.xaxis":        "Date",
+    "widget.timeseries.yaxis.levels":  "Interest Rate (%)",
+    "widget.timeseries.yaxis.changes": "Change in Rate (pp)",
+    "widget.timeseries.callout.levels":  "<strong>Non-stationary:</strong> both rates trend from ~14% (1982) to ~2% (2015). This shared downward trend produces a spurious R\u00b2 = {r2} when regressing one on the other.",
+    "widget.timeseries.callout.changes": "<strong>Stationary:</strong> first differences fluctuate around zero with no visible trend. The regression R\u00b2 drops to {r2} \u2014 lower but honest.",
+
+    // ---- Widget 5: ACF ----
+    "widget.acf.heading":    "Autocorrelation \u2014 the smoking gun of non-stationarity",
+    "widget.acf.motivation": "The ACF of the residuals is how you <em>prove</em> you have a stationarity problem \u2014 or prove that you fixed it.",
+    "widget.acf.kc":         "<span class=\"kc-title\">The correlogram (ACF plot) reveals autocorrelation patterns in residuals.</span> <strong>Slowly decaying</strong> autocorrelations (e.g., \u03c1<sub>1</sub> = 0.95, \u03c1<sub>10</sub> = 0.42) indicate non-stationarity and persistent shocks. With autocorrelation, default SEs are too small \u2014 HAC (Newey-West) SEs can be 3\u20138 times larger. Always check residual autocorrelation after estimating a time-series regression and use HAC SEs or model the dynamics explicitly.",
+    "widget.acf.howto":      "<li><strong>Toggle between Levels, Changes, and ADL(2,2) residuals.</strong></li>\n      <li><strong>Watch how the bars shrink</strong> as you move from mis-specified to correctly-specified residuals.</li>\n      <li><strong>Compare lag-1 ACF values</strong> as a quick stationarity verdict.</li>",
+    "widget.acf.try":        "<li><strong>Start on Levels residuals.</strong> Lag-1 ACF = 0.98; lag-10 ACF still &gt; 0.80. <em>Highly persistent residuals \u2014 the levels regression is spurious and the default SEs are invalid.</em></li>\n    <li><strong>Switch to Changes.</strong> Lag-1 ACF drops to ~0.25 and most later lags sit inside the band. <em>First differencing removed most of the serial correlation \u2014 a much better-specified model.</em></li>\n    <li><strong>Switch to ADL(2,2).</strong> Lag-1 ACF \u2248 0.02 \u2014 essentially zero. <em>The autoregressive and distributed-lag terms absorbed all the persistence \u2014 a textbook correctly-specified dynamic model.</em></li>",
+    "widget.acf.takeaway":   "<strong>Take-away:</strong> The residual ACF is the diagnostic that says \"your model is misspecified\" \u2014 and cleaning it up with differencing or lagged regressors is the cure. <a href=\"../../book/_book/notebooks_quarto/ch17_Panel_Data_Time_Series_Data_Causation.html#autocorrelation\" target=\"_blank\" rel=\"noopener\">Read \u00a717.6 in the chapter \u2192</a>",
+    "widget.acf.ctrl.model.label":   "Model residuals",
+    "widget.acf.ctrl.model.levels":  "Levels",
+    "widget.acf.ctrl.model.changes": "Changes",
+    "widget.acf.ctrl.model.adl":     "ADL(2,2)",
+    "widget.acf.label.levels":  "Levels regression",
+    "widget.acf.label.changes": "Changes regression",
+    "widget.acf.label.adl":     "ADL(2,2)",
+    "widget.acf.xaxis":  "Lag",
+    "widget.acf.yaxis":  "Autocorrelation",
+    "widget.acf.hover":  "Lag %{x}: ACF = %{y:.4f}<extra></extra>",
+    "widget.acf.callout.head": "<strong>{label}:</strong> Lag-1 ACF = {acf1}. ",
+    "widget.acf.callout.high": "Bars decay slowly \u2014 a hallmark of non-stationarity. Default SEs are severely understated.",
+    "widget.acf.callout.mid":  "Some residual autocorrelation remains. HAC standard errors are recommended.",
+    "widget.acf.callout.low":  "Near zero at all lags \u2014 the dynamic specification has absorbed the serial correlation. Default SEs are reliable.",
+
+    // ---- Widget 6: Spurious regression ----
+    "widget.spurious.heading":    "Spurious regression \u2014 R\u00b2 that lies",
+    "widget.spurious.motivation": "R\u00b2 = 0.91 looks like a home run. But if the residuals are autocorrelated and the series are non-stationary, <em>that 0.91 is lying to you</em>.",
+    "widget.spurious.kc":         "<span class=\"kc-title\">First differencing transforms non-stationary trending series into stationary ones, eliminating spurious-regression problems.</span> After differencing, the residual autocorrelation drops dramatically (from \u03c1<sub>1</sub> \u2248 0.95 to \u03c1<sub>1</sub> \u2248 0.25 in the interest-rate example). The <strong>coefficient interpretation changes from levels to changes</strong>: a 1-percentage-point change in the 1-year rate is associated with a 0.72-percentage-point change in the 10-year rate (Key Concept 17.7). R\u00b2 on changes is always lower \u2014 but it's <em>honest</em>.",
+    "widget.spurious.howto":      "<li><strong>Toggle Levels vs Changes regression</strong> \u2014 same pair of series, two very different R\u00b2s.</li>\n      <li><strong>Compare the slope coefficients</strong> \u2014 different magnitude, different meaning.</li>\n      <li><strong>Read the default vs HAC SE in the fit stats</strong> \u2014 the gap tells you how untrustworthy default SEs are on levels.</li>",
+    "widget.spurious.try":        "<li><strong>Stay on Levels.</strong> R\u00b2 = 0.91, slope = 0.84. <em>Looks impressive \u2014 but residual ACF<sub>1</sub> = 0.98 flags the R\u00b2 as spurious, inflated by the shared downward trend.</em></li>\n    <li><strong>Switch to Changes.</strong> R\u00b2 = 0.57, slope = 0.72. <em>Lower R\u00b2 but honest \u2014 residual ACF<sub>1</sub> falls to 0.25, and the slope now measures genuine co-movement of monthly changes.</em></li>\n    <li><strong>Compare SEs on levels.</strong> Default = 0.013; HAC = 0.045 (3.4\u00d7 larger). <em>Default SEs are untrustworthy with non-stationary data \u2014 any significance test built on them is fiction.</em></li>\n    <li><strong>Interpret the changes slope (0.72).</strong> <em>A 1 pp move in the 1-year rate is associated with a 0.72 pp move in the 10-year rate \u2014 the honest co-movement estimate.</em></li>",
+    "widget.spurious.takeaway":   "<strong>Take-away:</strong> High R\u00b2 on trending series is a warning, not a finding \u2014 first-difference before you interpret any time-series regression. <a href=\"../../book/_book/notebooks_quarto/ch17_Panel_Data_Time_Series_Data_Causation.html#time-series-data\" target=\"_blank\" rel=\"noopener\">Read \u00a717.5 in the chapter \u2192</a>",
+    "widget.spurious.ctrl.reg.label":   "Regression",
+    "widget.spurious.ctrl.reg.levels":  "Levels (gs10 ~ gs1)",
+    "widget.spurious.ctrl.reg.changes": "Changes (\u0394gs10 ~ \u0394gs1)",
+    "widget.spurious.xaxis.levels":  "1-year Rate (%)",
+    "widget.spurious.xaxis.changes": "\u03941-year Rate (pp)",
+    "widget.spurious.yaxis.levels":  "10-year Rate (%)",
+    "widget.spurious.yaxis.changes": "\u039410-year Rate (pp)",
+    "widget.spurious.hover":         "X: %{x:.2f}<br>Y: %{y:.2f}<extra></extra>",
+    "widget.spurious.fit.r2":     "R\u00b2",
+    "widget.spurious.fit.slope":  "Slope",
+    "widget.spurious.fit.acf1":   "Resid ACF1",
+    "widget.spurious.fit.se":     "SE",
+    "widget.spurious.callout.levels":  "<strong>Spurious regression:</strong> R\u00b2 = {r2} looks great, but residual ACF1 = {acf1} reveals severe autocorrelation. Default SE = {se_default}, HAC SE = {se_hac} ({se_ratio}\u00d7 larger). This R\u00b2 is inflated by the shared downward trend.",
+    "widget.spurious.callout.changes": "<strong>Honest regression:</strong> R\u00b2 = {r2} is lower but reliable. Residual ACF1 = {acf1} \u2014 much less autocorrelation. First differencing removed the spurious trend.",
+
+    // ---- Widget 7: ADL ----
+    "widget.adl.heading":    "ADL(2,2) model \u2014 dynamic multipliers",
+    "widget.adl.motivation": "A rate change today isn't a one-shot event \u2014 it propagates for months. <em>Cumulative multipliers</em> trace the full dynamic response from a single impulse.",
+    "widget.adl.kc":         "<span class=\"kc-title\">An autoregressive distributed-lag model adds own lags and predictor lags to a regression, turning a static equation into a dynamic one.</span> The <strong>impact multiplier</strong> \u03b3\u2080 is the contemporaneous effect; <strong>cumulative multipliers</strong> sum \u03b3\u2080 + \u03b3\u2081 + \u03b3\u2082 + \u22ef and show how the total effect builds (or reverses) over time. A well-specified ADL should leave no residual autocorrelation \u2014 it's the \"model the dynamics explicitly\" alternative to HAC SEs.",
+    "widget.adl.howto":      "<li><strong>Read the coefficient chart</strong> \u2014 each bar is an individual \u03b3<sub>k</sub>.</li>\n      <li><strong>Read the multiplier chart</strong> \u2014 the cumulative path of the response.</li>\n      <li><strong>Note the lag-1 residual ACF</strong> reported in the callout \u2014 it should be near zero.</li>",
+    "widget.adl.try":        "<li><strong>Read the impact multiplier (\u03b3\u2080 = 0.86).</strong> <em>A 1 pp shock to the 1-year rate immediately moves the 10-year rate by 0.86 pp \u2014 the contemporaneous response is large but not 1:1.</em></li>\n    <li><strong>Read the 1-month cumulative (\u03b3\u2080 + \u03b3\u2081 = 0.31).</strong> <em>The cumulative effect falls because \u03b3\u2081 is negative \u2014 a partial reversal. Interest-rate transmission is not monotonic; the first month corrects toward the trend.</em></li>\n    <li><strong>Read the 2-month cumulative (0.54).</strong> <em>Recovers as \u03b3\u2082 is positive. The dynamic path oscillates before settling \u2014 a good reminder that \"the effect\" of one variable on another is not a single number.</em></li>\n    <li><strong>Check residual ACF<sub>1</sub> \u2248 0.02.</strong> <em>The ADL(2,2) has absorbed virtually all the serial correlation \u2014 a well-specified dynamic model.</em></li>",
+    "widget.adl.takeaway":   "<strong>Take-away:</strong> ADL models make the dynamic response explicit \u2014 every static coefficient hides a multi-period adjustment path, and cumulative multipliers are how you recover it. <a href=\"../../book/_book/notebooks_quarto/ch17_Panel_Data_Time_Series_Data_Causation.html#autocorrelation\" target=\"_blank\" rel=\"noopener\">Read \u00a717.6 in the chapter \u2192</a>",
+    "widget.adl.coef.xaxis":   "Coefficient",
+    "widget.adl.coef.hover":   "%{y}: %{x:.4f}<extra></extra>",
+    "widget.adl.mult.impact":  "Impact (t)",
+    "widget.adl.mult.m1":      "After 1 month",
+    "widget.adl.mult.m2":      "After 2 months",
+    "widget.adl.mult.yaxis":   "Cumulative Multiplier",
+    "widget.adl.callout":      "<strong>ADL(2,2) model</strong> (R\u00b2 = {r2}, residual ACF1 = {acf1}). Impact multiplier = {impact}: a 1 pp \u0394gs1 moves \u0394gs10 by {impact} pp immediately. The cumulative effect after 2 months is {cum2} \u2014 partial reversal at lag 1 followed by recovery.",
+
+    // ---- Code summary ----
+    "code.heading":    "Code Summary",
+    "code.motivation": "You've explored the key concepts interactively \u2014 now reproduce them in code. These self-contained blocks cover everything you practiced above. Pick your language, copy the code, and run it.",
+    "code.tab.python": "Python",
+    "code.tab.stata":  "Stata",
+    "code.tab.r":      "R",
+    "code.copy.idle":  "Copy code",
+    "code.copy.done":  "Copied!",
+    "code.colab":      "Open empty Colab notebook &rarr;",
+    "code.note.stata": "Paste into your Stata do-file editor",
+    "code.note.r":     "Paste into your R console or RStudio",
+
+    // ---- Footer ----
+    "footer.text":      "Part of <a href=\"https://quarcs-lab.github.io/metricsai/book/_book/index.html\"><strong>metricsAI</strong></a> \u00b7 Chapter 17: Panel Data, Time Series, and Causality \u00b7 by Carlos Mendez \u00b7 <a href=\"https://github.com/quarcs-lab/metricsai\">GitHub</a>",
+    "footer.scrolltop": "\u2191 Back to top"
+  },
+  es: {
+    "meta.title": "Cap\u00edtulo 17 \u2014 Datos de panel, series de tiempo y causalidad \u00b7 metricsAI",
+
+    "header.badge":    "Cap\u00edtulo 17 de 18 \u00b7 Tablero interactivo",
+    "header.title":    "Datos de panel, series de tiempo y causalidad",
+    "header.subtitle": "Explora la variaci\u00f3n entre vs intra, compara errores est\u00e1ndar, observa c\u00f3mo los efectos fijos eliminan el sesgo, y descubre c\u00f3mo la primera diferencia cura la regresi\u00f3n espuria \u2014 usando datos de ingresos de la NBA y tasas de inter\u00e9s de EE. UU.",
+
+    "theme.dark":  "Oscuro",
+    "theme.light": "Claro",
+
+    "nav.variance":   "Descomposici\u00f3n",
+    "nav.cluster":    "EE de cl\u00faster",
+    "nav.poolfe":     "MCO agrupada vs EF",
+    "nav.timeseries": "Serie de tiempo",
+    "nav.acf":        "Autocorrelaci\u00f3n",
+    "nav.spurious":   "Niveles vs cambios",
+    "nav.adl":        "Modelo ADL",
+    "nav.code":       "C\u00f3digo",
+
+    "common.reset":      "\u21ba Reiniciar",
+    "common.tryTitle":   "Pru\u00e9balo",
+    "common.howtoTitle": "Qu\u00e9 puedes hacer aqu\u00ed",
+
+    // ---- Widget 1: Variance decomposition ----
+    "widget.variance.heading":    "Descomposici\u00f3n de la varianza en datos de panel",
+    "widget.variance.motivation": "Los datos de panel tienen dos almas: los equipos de mercados grandes ganan m\u00e1s <em>entre</em> s\u00ed mismos, y el mismo equipo gana m\u00e1s en algunos a\u00f1os que en otros <em>dentro</em> de s\u00ed. \u00bfQu\u00e9 variaci\u00f3n usa tu estimador?",
+    "widget.variance.kc":         "<span class=\"kc-title\">La variaci\u00f3n en datos de panel se descompone en entre (diferencias entre individuos en sus promedios) e intra (desviaciones del promedio individual a lo largo del tiempo).</span> Esta descomposici\u00f3n determina lo que cada estimador identifica: <strong>la MCO agrupada usa ambas</strong> fuentes, <strong>los efectos fijos usan solo la variaci\u00f3n intra</strong>, y <strong>los efectos aleatorios usan una combinaci\u00f3n ponderada</strong>. En el ejemplo de la NBA, la variaci\u00f3n entre equipos en el ingreso es grande (mercados grandes vs peque\u00f1os), mientras que la variaci\u00f3n intra es menor (fluctuaciones a\u00f1o a a\u00f1o).",
+    "widget.variance.howto":      "<li><strong>Lee las tres barras</strong> de cada variable \u2014 total, entre, intra.</li>\n      <li><strong>Compara el log del ingreso con las victorias</strong> \u2014 sus mezclas entre/intra difieren.</li>\n      <li><strong>Cruza referencia con el widget MCO agrupada vs EF</strong> \u2014 EF usa solo la parte intra.</li>",
+    "widget.variance.try":        "<li><strong>Lee las tres barras del log del ingreso.</strong> DE entre \u2248 0.21; DE intra \u2248 0.11. <em>La mayor parte de la variaci\u00f3n de ingresos en la NBA es entre equipos, no entre temporadas \u2014 los mercados grandes vs peque\u00f1os dominan los vaivenes a\u00f1o a a\u00f1o.</em></li>\n    <li><strong>Lee las barras de victorias.</strong> Entre e intra son m\u00e1s cercanas en magnitud. <em>El desempe\u00f1o del equipo fluct\u00faa sustancialmente de temporada a temporada \u2014 gran parte de la \"variaci\u00f3n de victorias\" sobrevivir\u00eda a la dem\u00e9ano.</em></li>\n    <li><strong>Conecta con la elecci\u00f3n del estimador.</strong> EF solo usa las barras intra. <em>Cuando la variaci\u00f3n intra es peque\u00f1a, las estimaciones de EF se vuelven imprecisas \u2014 ese es el precio de eliminar todo el factor de confusi\u00f3n entre equipos.</em></li>",
+    "widget.variance.takeaway":   "<strong>Para recordar:</strong> Lo que un estimador de panel puede identificar depende del tipo de variaci\u00f3n que tienen los datos \u2014 inspecciona la descomposici\u00f3n antes de elegir MCO agrupada, EF o EA. <a href=\"../../book/_book/notebooks_quarto/ch17_Panel_Data_Time_Series_Data_Causation.html#panel-data-models\" target=\"_blank\" rel=\"noopener\">Lee \u00a717.2 en el cap\u00edtulo \u2192</a>",
+    "widget.variance.chart.overall": "Total",
+    "widget.variance.chart.between": "Entre",
+    "widget.variance.chart.within":  "Intra",
+    "widget.variance.chart.lnrev":   "Log del ingreso",
+    "widget.variance.chart.wins":    "Victorias",
+    "widget.variance.chart.yaxis":   "Desviaci\u00f3n est\u00e1ndar",
+    "widget.variance.callout":       "<strong>Ingreso:</strong> DE entre ({rev_between}) > DE intra ({rev_within}). La mayor parte de la variaci\u00f3n de ingresos es entre equipos, no a lo largo del tiempo. <strong>Victorias:</strong> entre ({wins_between}) e intra ({wins_within}) son m\u00e1s cercanas \u2014 el desempe\u00f1o del equipo fluct\u00faa m\u00e1s.",
+
+    // ---- Widget 2: Cluster SEs ----
+    "widget.cluster.heading":    "Comparaci\u00f3n de errores est\u00e1ndar \u2014 por qu\u00e9 importa el cl\u00faster",
+    "widget.cluster.motivation": "Trata las 286 temporadas-equipo como independientes y tus EE ser\u00e1n <em>c\u00f3micamente peque\u00f1os</em>. Agrupa por equipo y la realidad regresa \u2014 a veces duplicando el error est\u00e1ndar.",
+    "widget.cluster.kc":         "<span class=\"kc-title\">Las observaciones del mismo individuo (equipo, empresa, pa\u00eds) est\u00e1n correlacionadas a lo largo del tiempo \u2014 violando el supuesto de independencia de MCO.</span> Los EE por defecto <strong>subestiman dram\u00e1ticamente la incertidumbre</strong> al tratar todas las observaciones como independientes. Los <strong>EE robustos por cl\u00faster</strong> tienen en cuenta la correlaci\u00f3n intra-individual, produciendo a menudo EE que son 2\u00d7 o m\u00e1s grandes que los predeterminados. Siempre agrupa por individuo en datos de panel; con pocos cl\u00fasteres (G &lt; 30), considera refinamientos de wild-bootstrap.",
+    "widget.cluster.howto":      "<li><strong>Compara los EE por defecto, robustos (HC1) y de cl\u00faster</strong> en el gr\u00e1fico de barras.</li>\n      <li><strong>Lee la raz\u00f3n en el comentario</strong> \u2014 cu\u00e1nto m\u00e1s grande es el EE de cl\u00faster.</li>\n      <li><strong>Juzga las consecuencias inferenciales</strong> \u2014 \u00bfcambia el cl\u00faster la significancia?</li>",
+    "widget.cluster.try":        "<li><strong>Compara las tres barras.</strong> EE de cl\u00faster \u2248 1.81\u00d7 el predeterminado; EE robusto (HC1) \u2248 1.15\u00d7 el predeterminado. <em>Robusto corrige la heterocedasticidad pero no la correlaci\u00f3n serial dentro de un equipo \u2014 solo el cl\u00faster arregla ambas.</em></li>\n    <li><strong>Verifica la significancia con cada tipo de EE.</strong> Victorias sigue siendo significativo (p = 0.0004) con EE de cl\u00faster. <em>El coeficiente es lo bastante fuerte para sobrevivir a la correcci\u00f3n, pero el IC es casi el doble de ancho \u2014 toda inferencia de panel deber\u00eda reportarse con EE de cl\u00faster.</em></li>\n    <li><strong>Imagina un coeficiente en el l\u00edmite.</strong> <em>Con EE por defecto ser\u00eda \"significativo al 5%\"; con EE de cl\u00faster no lo ser\u00eda. Aqu\u00ed es donde el cl\u00faster cambia las conclusiones publicadas.</em></li>",
+    "widget.cluster.takeaway":   "<strong>Para recordar:</strong> Las observaciones de panel del mismo individuo est\u00e1n correlacionadas \u2014 siempre agrupa tus errores est\u00e1ndar por individuo, o tus estad\u00edsticos t ser\u00e1n ficci\u00f3n. <a href=\"../../book/_book/notebooks_quarto/ch17_Panel_Data_Time_Series_Data_Causation.html#panel-data-models\" target=\"_blank\" rel=\"noopener\">Lee \u00a717.2 en el cap\u00edtulo \u2192</a>",
+    "widget.cluster.bar.default":  "Por defecto",
+    "widget.cluster.bar.robust":   "Robusto (HC1)",
+    "widget.cluster.bar.cluster":  "Cl\u00faster",
+    "widget.cluster.chart.yaxis":  "Error est\u00e1ndar del coeficiente de victorias",
+    "widget.cluster.chart.hover":  "%{x}: EE = %{y:.6f}<extra></extra>",
+    "widget.cluster.callout":      "<strong>Coeficiente de victorias = {coef}</strong> en todos los tipos de EE. Pero el EE cambia: por defecto = {se_default}, robusto = {se_robust}, cl\u00faster = {se_cluster}. El EE de cl\u00faster es <strong>{ratio}\u00d7 m\u00e1s grande</strong> \u2014 ignorar la correlaci\u00f3n intra-equipo subestima la incertidumbre.",
+
+    // ---- Widget 3: Pooled OLS vs FE ----
+    "widget.poolfe.heading":    "MCO agrupada vs efectos fijos",
+    "widget.poolfe.motivation": "Los equipos de mercados grandes ganan m\u00e1s <em>y</em> obtienen m\u00e1s ingresos \u2014 entonces, \u00bfganar causa ingresos, o el mercado de los Lakers es toda la historia? EF elimina cada rasgo persistente del equipo y te permite verlo.",
+    "widget.poolfe.kc":         "<span class=\"kc-title\">La estimaci\u00f3n de efectos fijos controla las caracter\u00edsticas individuales invariantes en el tiempo incluyendo interceptos \u03b1<sub>i</sub> espec\u00edficos por individuo.</span> La <strong>transformaci\u00f3n intra</strong> (dem\u00e9ano de y<sub>it</sub> y x<sub>it</sub> con respecto al promedio individual) elimina \u03b1<sub>i</sub> por completo y usa solo la variaci\u00f3n dentro de cada individuo a lo largo del tiempo. EF entrega estimaciones causales m\u00e1s cre\u00edbles pero no puede identificar efectos de variables invariantes en el tiempo. EF es consistente est\u00e9 o no \u03b1<sub>i</sub> correlacionado con los regresores; <strong>los efectos aleatorios son m\u00e1s eficientes pero inconsistentes si falla el supuesto de no correlaci\u00f3n</strong> (Concepto Clave 17.4). La prueba de Hausman decide entre ellos.",
+    "widget.poolfe.howto":      "<li><strong>Alterna entre MCO agrupada / Efectos Fijos / Ambos</strong> para comparar l\u00edneas ajustadas lado a lado.</li>\n      <li><strong>Lee los dos coeficientes de pendiente</strong> en las estad\u00edsticas de ajuste \u2014 toda diferencia es el sesgo que EF elimina.</li>\n      <li><strong>Observa el R\u00b2 intra</strong> de EF \u2014 mide el poder explicativo despu\u00e9s de la dem\u00e9ano, una cantidad distinta del R\u00b2 agrupado.</li>",
+    "widget.poolfe.try":        "<li><strong>Comienza en MCO agrupada.</strong> Coef. de victorias = 0.0068 \u2014 una victoria adicional se asocia con 0.68% m\u00e1s de ingresos. <em>Mezcla la variaci\u00f3n intra y entre equipos \u2014 los equipos de mercados grandes ganan m\u00e1s, as\u00ed que la estimaci\u00f3n agrupada est\u00e1 contaminada.</em></li>\n    <li><strong>Cambia a Efectos Fijos.</strong> Coef. de victorias cae a 0.0045. <em>EF elimina las caracter\u00edsticas persistentes del equipo (tama\u00f1o de mercado, arena, marca) \u2014 el efecto intra de ganar sobre los ingresos es menor de lo que suger\u00eda la MCO agrupada.</em></li>\n    <li><strong>Activa Ambos.</strong> La l\u00ednea de EF es visiblemente m\u00e1s plana que la l\u00ednea agrupada. <em>La diferencia de pendiente es el factor de confusi\u00f3n entre equipos en t\u00e9rminos monetarios.</em></li>\n    <li><strong>Nota el R\u00b2 intra de EF \u2248 0.19.</strong> <em>Solo el 19% de la variaci\u00f3n intra-equipo de ingresos se explica por las victorias \u2014 gran parte del resto son eventos idiosincr\u00e1ticos (lesiones, cambios de reglas, playoffs).</em></li>",
+    "widget.poolfe.takeaway":   "<strong>Para recordar:</strong> EF elimina el sesgo de las caracter\u00edsticas individuales persistentes a costa de la variaci\u00f3n entre individuos \u2014 cre\u00edble al precio de la precisi\u00f3n. <a href=\"../../book/_book/notebooks_quarto/ch17_Panel_Data_Time_Series_Data_Causation.html#fixed-effects-estimation\" target=\"_blank\" rel=\"noopener\">Lee \u00a717.3 en el cap\u00edtulo \u2192</a>",
+    "widget.poolfe.ctrl.view.label":  "Vista",
+    "widget.poolfe.ctrl.view.pooled": "MCO agrupada",
+    "widget.poolfe.ctrl.view.fe":     "Efectos fijos",
+    "widget.poolfe.ctrl.view.both":   "Ambos",
+    "widget.poolfe.legend.allobs":    "Todas las obs",
+    "widget.poolfe.legend.pooled":    "MCO agrupada",
+    "widget.poolfe.legend.demeaned":  "Dem\u00e9ano",
+    "widget.poolfe.legend.fe":        "Efectos fijos",
+    "widget.poolfe.xaxis.wins":       "Victorias",
+    "widget.poolfe.xaxis.dwins":      "Victorias dem\u00e9ano",
+    "widget.poolfe.yaxis.lnrev":      "Log del ingreso",
+    "widget.poolfe.yaxis.dlnrev":     "Log del ingreso dem\u00e9ano",
+    "widget.poolfe.hover.allobs":     "Victorias: %{x}<br>Log Ingr.: %{y:.3f}<extra></extra>",
+    "widget.poolfe.hover.demeaned":   "\u0394Victorias: %{x:.1f}<br>\u0394Log Ingr.: %{y:.3f}<extra></extra>",
+    "widget.poolfe.fit.pooled_coef":  "Coef. agrupado",
+    "widget.poolfe.fit.fe_coef":      "Coef. EF",
+    "widget.poolfe.fit.pooled_r2":    "R\u00b2 agrupado",
+    "widget.poolfe.fit.fe_r2_within": "R\u00b2 EF (intra)",
+    "widget.poolfe.callout":          "<strong>MCO agrupada:</strong> coef. de victorias = {pooled_coef}. <strong>Efectos fijos:</strong> coef. de victorias = {fe_coef} ({drop}% m\u00e1s peque\u00f1o). EF elimina la confusi\u00f3n por caracter\u00edsticas persistentes del equipo. El R\u00b2 intra ({fe_r2}) es mayor que el R\u00b2 agrupado ({p_r2}) \u2014 EF explica m\u00e1s de la variaci\u00f3n intra-equipo.",
+
+    // ---- Widget 4: Time series ----
+    "widget.timeseries.heading":    "Tasas de inter\u00e9s \u2014 niveles vs cambios",
+    "widget.timeseries.motivation": "Dos series de tiempo que tienden juntas <em>siempre</em> tendr\u00e1n un R\u00b2 alto \u2014 incluso si no tienen nada que ver entre s\u00ed. La primera diferencia es la defensa m\u00e1s simple.",
+    "widget.timeseries.kc":         "<span class=\"kc-title\">Una serie de tiempo es estacionaria si sus propiedades estad\u00edsticas (media, varianza, autocorrelaci\u00f3n) son constantes en el tiempo.</span> Muchas series econ\u00f3micas son <strong>no estacionarias</strong> (con tendencia) \u2014 y regresar series no estacionarias entre s\u00ed puede producir <strong>regresiones espurias</strong>: R\u00b2 alto y coeficientes significativos incluso cuando las variables no est\u00e1n relacionadas. La <strong>primera diferencia (\u0394y<sub>t</sub> = y<sub>t</sub> \u2212 y<sub>t\u22121</sub>)</strong> t\u00edpicamente elimina las tendencias y restablece la estacionariedad. Siempre verifica la estacionariedad antes de interpretar una regresi\u00f3n de series de tiempo.",
+    "widget.timeseries.howto":      "<li><strong>Alterna entre Niveles y Cambios (\u0394)</strong> para cambiar entre vistas con tendencia y sin tendencia.</li>\n      <li><strong>Examina la serie de tiempo</strong> \u2014 los niveles tienden, los cambios fluct\u00faan alrededor de cero.</li>\n      <li><strong>Cruza referencia con el widget de ACF</strong> para la firma correspondiente de correlaci\u00f3n serial.</li>",
+    "widget.timeseries.try":        "<li><strong>Comienza en Niveles.</strong> Ambas tasas se mueven de ~14% en 1982 a ~2% en 2015. <em>Una tendencia descendente compartida \u2014 cualquier regresi\u00f3n de una sobre la otra la heredar\u00e1 como \"ajuste\", sin importar la causalidad.</em></li>\n    <li><strong>Cambia a Cambios.</strong> Ambas series fluct\u00faan alrededor de cero sin movimiento. <em>Estacionarias por construcci\u00f3n \u2014 la primera diferencia elimina la tendencia y entrega una serie sobre la cual MCO puede regresar de forma segura.</em></li>\n    <li><strong>Compara amplitudes.</strong> Los cambios mensuales son \u00b11 punto porcentual; el rango de niveles es 12 puntos. <em>Las dos vistas viven en escalas muy diferentes, por lo cual el R\u00b2 en niveles parece tanto m\u00e1s grande que en cambios.</em></li>",
+    "widget.timeseries.takeaway":   "<strong>Para recordar:</strong> Las series con tendencia comparten una tendencia antes que cualquier otra cosa \u2014 difer\u00e9ncialas antes de regresar, o arri\u00e9sgate a una historia espuria. <a href=\"../../book/_book/notebooks_quarto/ch17_Panel_Data_Time_Series_Data_Causation.html#time-series-data\" target=\"_blank\" rel=\"noopener\">Lee \u00a717.5 en el cap\u00edtulo \u2192</a>",
+    "widget.timeseries.ctrl.view.label":   "Vista",
+    "widget.timeseries.ctrl.view.levels":  "Niveles",
+    "widget.timeseries.ctrl.view.changes": "Cambios (\u0394)",
+    "widget.timeseries.legend.gs10":  "Tasa a 10 a\u00f1os",
+    "widget.timeseries.legend.gs1":   "Tasa a 1 a\u00f1o",
+    "widget.timeseries.legend.dgs10": "\u039410 a\u00f1os",
+    "widget.timeseries.legend.dgs1":  "\u03941 a\u00f1o",
+    "widget.timeseries.xaxis":        "Fecha",
+    "widget.timeseries.yaxis.levels":  "Tasa de inter\u00e9s (%)",
+    "widget.timeseries.yaxis.changes": "Cambio en la tasa (pp)",
+    "widget.timeseries.callout.levels":  "<strong>No estacionario:</strong> ambas tasas se mueven de ~14% (1982) a ~2% (2015). Esta tendencia descendente compartida produce un R\u00b2 espurio = {r2} al regresar una sobre la otra.",
+    "widget.timeseries.callout.changes": "<strong>Estacionario:</strong> las primeras diferencias fluct\u00faan alrededor de cero sin tendencia visible. El R\u00b2 de la regresi\u00f3n cae a {r2} \u2014 m\u00e1s bajo pero honesto.",
+
+    // ---- Widget 5: ACF ----
+    "widget.acf.heading":    "Autocorrelaci\u00f3n \u2014 el arma humeante de la no estacionariedad",
+    "widget.acf.motivation": "La ACF de los residuos es como <em>pruebas</em> que tienes un problema de estacionariedad \u2014 o pruebas que lo arreglaste.",
+    "widget.acf.kc":         "<span class=\"kc-title\">El correlograma (gr\u00e1fico ACF) revela patrones de autocorrelaci\u00f3n en los residuos.</span> Las autocorrelaciones <strong>de decaimiento lento</strong> (p. ej., \u03c1<sub>1</sub> = 0.95, \u03c1<sub>10</sub> = 0.42) indican no estacionariedad y choques persistentes. Con autocorrelaci\u00f3n, los EE por defecto son demasiado peque\u00f1os \u2014 los EE HAC (Newey-West) pueden ser de 3 a 8 veces m\u00e1s grandes. Siempre verifica la autocorrelaci\u00f3n de los residuos despu\u00e9s de estimar una regresi\u00f3n de series de tiempo y usa EE HAC o modela la din\u00e1mica expl\u00edcitamente.",
+    "widget.acf.howto":      "<li><strong>Alterna entre residuos de Niveles, Cambios y ADL(2,2).</strong></li>\n      <li><strong>Observa c\u00f3mo se reducen las barras</strong> al pasar de residuos mal especificados a residuos correctamente especificados.</li>\n      <li><strong>Compara los valores de ACF en el rezago 1</strong> como un veredicto r\u00e1pido de estacionariedad.</li>",
+    "widget.acf.try":        "<li><strong>Comienza con los residuos de Niveles.</strong> ACF en rezago 1 = 0.98; ACF en rezago 10 sigue &gt; 0.80. <em>Residuos altamente persistentes \u2014 la regresi\u00f3n en niveles es espuria y los EE por defecto son inv\u00e1lidos.</em></li>\n    <li><strong>Cambia a Cambios.</strong> ACF en rezago 1 baja a ~0.25 y la mayor\u00eda de los rezagos posteriores caen dentro de la banda. <em>La primera diferencia elimin\u00f3 la mayor parte de la correlaci\u00f3n serial \u2014 un modelo mucho mejor especificado.</em></li>\n    <li><strong>Cambia a ADL(2,2).</strong> ACF en rezago 1 \u2248 0.02 \u2014 esencialmente cero. <em>Los t\u00e9rminos autorregresivos y de rezagos distribuidos absorbieron toda la persistencia \u2014 un modelo din\u00e1mico de libro de texto correctamente especificado.</em></li>",
+    "widget.acf.takeaway":   "<strong>Para recordar:</strong> La ACF de los residuos es el diagn\u00f3stico que dice \"tu modelo est\u00e1 mal especificado\" \u2014 y limpiarlo con diferenciaci\u00f3n o regresores rezagados es la cura. <a href=\"../../book/_book/notebooks_quarto/ch17_Panel_Data_Time_Series_Data_Causation.html#autocorrelation\" target=\"_blank\" rel=\"noopener\">Lee \u00a717.6 en el cap\u00edtulo \u2192</a>",
+    "widget.acf.ctrl.model.label":   "Residuos del modelo",
+    "widget.acf.ctrl.model.levels":  "Niveles",
+    "widget.acf.ctrl.model.changes": "Cambios",
+    "widget.acf.ctrl.model.adl":     "ADL(2,2)",
+    "widget.acf.label.levels":  "Regresi\u00f3n en niveles",
+    "widget.acf.label.changes": "Regresi\u00f3n en cambios",
+    "widget.acf.label.adl":     "ADL(2,2)",
+    "widget.acf.xaxis":  "Rezago",
+    "widget.acf.yaxis":  "Autocorrelaci\u00f3n",
+    "widget.acf.hover":  "Rezago %{x}: ACF = %{y:.4f}<extra></extra>",
+    "widget.acf.callout.head": "<strong>{label}:</strong> ACF en rezago 1 = {acf1}. ",
+    "widget.acf.callout.high": "Las barras decaen lentamente \u2014 un sello de la no estacionariedad. Los EE por defecto est\u00e1n severamente subestimados.",
+    "widget.acf.callout.mid":  "Queda algo de autocorrelaci\u00f3n en los residuos. Se recomiendan errores est\u00e1ndar HAC.",
+    "widget.acf.callout.low":  "Cerca de cero en todos los rezagos \u2014 la especificaci\u00f3n din\u00e1mica absorbi\u00f3 la correlaci\u00f3n serial. Los EE por defecto son confiables.",
+
+    // ---- Widget 6: Spurious regression ----
+    "widget.spurious.heading":    "Regresi\u00f3n espuria \u2014 un R\u00b2 que miente",
+    "widget.spurious.motivation": "R\u00b2 = 0.91 parece un jonr\u00f3n. Pero si los residuos est\u00e1n autocorrelacionados y las series son no estacionarias, <em>ese 0.91 te est\u00e1 mintiendo</em>.",
+    "widget.spurious.kc":         "<span class=\"kc-title\">La primera diferencia transforma series con tendencia no estacionarias en estacionarias, eliminando los problemas de regresi\u00f3n espuria.</span> Despu\u00e9s de diferenciar, la autocorrelaci\u00f3n de los residuos cae dram\u00e1ticamente (de \u03c1<sub>1</sub> \u2248 0.95 a \u03c1<sub>1</sub> \u2248 0.25 en el ejemplo de tasas de inter\u00e9s). La <strong>interpretaci\u00f3n del coeficiente cambia de niveles a cambios</strong>: un cambio de 1 punto porcentual en la tasa a 1 a\u00f1o se asocia con un cambio de 0.72 puntos porcentuales en la tasa a 10 a\u00f1os (Concepto Clave 17.7). El R\u00b2 en cambios siempre es menor \u2014 pero es <em>honesto</em>.",
+    "widget.spurious.howto":      "<li><strong>Alterna entre regresi\u00f3n en Niveles y en Cambios</strong> \u2014 el mismo par de series, dos R\u00b2 muy diferentes.</li>\n      <li><strong>Compara los coeficientes de pendiente</strong> \u2014 magnitud diferente, significado diferente.</li>\n      <li><strong>Lee el EE por defecto vs el EE HAC en las estad\u00edsticas de ajuste</strong> \u2014 la brecha te dice cu\u00e1n poco confiables son los EE por defecto en niveles.</li>",
+    "widget.spurious.try":        "<li><strong>Qu\u00e9date en Niveles.</strong> R\u00b2 = 0.91, pendiente = 0.84. <em>Parece impresionante \u2014 pero la ACF<sub>1</sub> de los residuos = 0.98 marca el R\u00b2 como espurio, inflado por la tendencia descendente compartida.</em></li>\n    <li><strong>Cambia a Cambios.</strong> R\u00b2 = 0.57, pendiente = 0.72. <em>R\u00b2 m\u00e1s bajo pero honesto \u2014 la ACF<sub>1</sub> de los residuos cae a 0.25, y la pendiente ahora mide el comovimiento genuino de los cambios mensuales.</em></li>\n    <li><strong>Compara los EE en niveles.</strong> Por defecto = 0.013; HAC = 0.045 (3.4\u00d7 m\u00e1s grande). <em>Los EE por defecto no son confiables con datos no estacionarios \u2014 cualquier prueba de significancia construida sobre ellos es ficci\u00f3n.</em></li>\n    <li><strong>Interpreta la pendiente en cambios (0.72).</strong> <em>Un movimiento de 1 pp en la tasa a 1 a\u00f1o se asocia con un movimiento de 0.72 pp en la tasa a 10 a\u00f1os \u2014 la estimaci\u00f3n honesta del comovimiento.</em></li>",
+    "widget.spurious.takeaway":   "<strong>Para recordar:</strong> Un R\u00b2 alto en series con tendencia es una advertencia, no un hallazgo \u2014 diferencia primero antes de interpretar cualquier regresi\u00f3n de series de tiempo. <a href=\"../../book/_book/notebooks_quarto/ch17_Panel_Data_Time_Series_Data_Causation.html#time-series-data\" target=\"_blank\" rel=\"noopener\">Lee \u00a717.5 en el cap\u00edtulo \u2192</a>",
+    "widget.spurious.ctrl.reg.label":   "Regresi\u00f3n",
+    "widget.spurious.ctrl.reg.levels":  "Niveles (gs10 ~ gs1)",
+    "widget.spurious.ctrl.reg.changes": "Cambios (\u0394gs10 ~ \u0394gs1)",
+    "widget.spurious.xaxis.levels":  "Tasa a 1 a\u00f1o (%)",
+    "widget.spurious.xaxis.changes": "\u0394 Tasa a 1 a\u00f1o (pp)",
+    "widget.spurious.yaxis.levels":  "Tasa a 10 a\u00f1os (%)",
+    "widget.spurious.yaxis.changes": "\u0394 Tasa a 10 a\u00f1os (pp)",
+    "widget.spurious.hover":         "X: %{x:.2f}<br>Y: %{y:.2f}<extra></extra>",
+    "widget.spurious.fit.r2":     "R\u00b2",
+    "widget.spurious.fit.slope":  "Pendiente",
+    "widget.spurious.fit.acf1":   "ACF1 residuos",
+    "widget.spurious.fit.se":     "EE",
+    "widget.spurious.callout.levels":  "<strong>Regresi\u00f3n espuria:</strong> R\u00b2 = {r2} se ve excelente, pero la ACF1 de los residuos = {acf1} revela autocorrelaci\u00f3n severa. EE por defecto = {se_default}, EE HAC = {se_hac} ({se_ratio}\u00d7 m\u00e1s grande). Este R\u00b2 est\u00e1 inflado por la tendencia descendente compartida.",
+    "widget.spurious.callout.changes": "<strong>Regresi\u00f3n honesta:</strong> R\u00b2 = {r2} es m\u00e1s bajo pero confiable. ACF1 de los residuos = {acf1} \u2014 mucha menos autocorrelaci\u00f3n. La primera diferencia elimin\u00f3 la tendencia espuria.",
+
+    // ---- Widget 7: ADL ----
+    "widget.adl.heading":    "Modelo ADL(2,2) \u2014 multiplicadores din\u00e1micos",
+    "widget.adl.motivation": "Un cambio de tasa hoy no es un evento puntual \u2014 se propaga durante meses. Los <em>multiplicadores acumulados</em> trazan la respuesta din\u00e1mica completa a un solo impulso.",
+    "widget.adl.kc":         "<span class=\"kc-title\">Un modelo autorregresivo de rezagos distribuidos a\u00f1ade rezagos propios y rezagos del predictor a una regresi\u00f3n, transformando una ecuaci\u00f3n est\u00e1tica en una din\u00e1mica.</span> El <strong>multiplicador de impacto</strong> \u03b3\u2080 es el efecto contempor\u00e1neo; los <strong>multiplicadores acumulados</strong> suman \u03b3\u2080 + \u03b3\u2081 + \u03b3\u2082 + \u22ef y muestran c\u00f3mo el efecto total se construye (o se revierte) a lo largo del tiempo. Un ADL bien especificado no deber\u00eda dejar autocorrelaci\u00f3n en los residuos \u2014 es la alternativa de \"modelar la din\u00e1mica expl\u00edcitamente\" a los EE HAC.",
+    "widget.adl.howto":      "<li><strong>Lee el gr\u00e1fico de coeficientes</strong> \u2014 cada barra es un \u03b3<sub>k</sub> individual.</li>\n      <li><strong>Lee el gr\u00e1fico de multiplicadores</strong> \u2014 la trayectoria acumulada de la respuesta.</li>\n      <li><strong>Observa la ACF en rezago 1 de los residuos</strong> reportada en el comentario \u2014 debe estar cerca de cero.</li>",
+    "widget.adl.try":        "<li><strong>Lee el multiplicador de impacto (\u03b3\u2080 = 0.86).</strong> <em>Un choque de 1 pp en la tasa a 1 a\u00f1o mueve inmediatamente la tasa a 10 a\u00f1os en 0.86 pp \u2014 la respuesta contempor\u00e1nea es grande pero no de 1:1.</em></li>\n    <li><strong>Lee el acumulado de 1 mes (\u03b3\u2080 + \u03b3\u2081 = 0.31).</strong> <em>El efecto acumulado cae porque \u03b3\u2081 es negativo \u2014 una reversi\u00f3n parcial. La transmisi\u00f3n de tasas de inter\u00e9s no es mon\u00f3tona; el primer mes corrige hacia la tendencia.</em></li>\n    <li><strong>Lee el acumulado de 2 meses (0.54).</strong> <em>Se recupera porque \u03b3\u2082 es positivo. La trayectoria din\u00e1mica oscila antes de estabilizarse \u2014 un buen recordatorio de que \"el efecto\" de una variable sobre otra no es un solo n\u00famero.</em></li>\n    <li><strong>Verifica ACF<sub>1</sub> de los residuos \u2248 0.02.</strong> <em>El ADL(2,2) absorbi\u00f3 virtualmente toda la correlaci\u00f3n serial \u2014 un modelo din\u00e1mico bien especificado.</em></li>",
+    "widget.adl.takeaway":   "<strong>Para recordar:</strong> Los modelos ADL hacen expl\u00edcita la respuesta din\u00e1mica \u2014 cada coeficiente est\u00e1tico esconde una trayectoria de ajuste multi-per\u00edodo, y los multiplicadores acumulados son c\u00f3mo la recuperas. <a href=\"../../book/_book/notebooks_quarto/ch17_Panel_Data_Time_Series_Data_Causation.html#autocorrelation\" target=\"_blank\" rel=\"noopener\">Lee \u00a717.6 en el cap\u00edtulo \u2192</a>",
+    "widget.adl.coef.xaxis":   "Coeficiente",
+    "widget.adl.coef.hover":   "%{y}: %{x:.4f}<extra></extra>",
+    "widget.adl.mult.impact":  "Impacto (t)",
+    "widget.adl.mult.m1":      "Tras 1 mes",
+    "widget.adl.mult.m2":      "Tras 2 meses",
+    "widget.adl.mult.yaxis":   "Multiplicador acumulado",
+    "widget.adl.callout":      "<strong>Modelo ADL(2,2)</strong> (R\u00b2 = {r2}, ACF1 de residuos = {acf1}). Multiplicador de impacto = {impact}: un \u0394gs1 de 1 pp mueve \u0394gs10 en {impact} pp inmediatamente. El efecto acumulado tras 2 meses es {cum2} \u2014 reversi\u00f3n parcial en el rezago 1 seguida de recuperaci\u00f3n.",
+
+    // ---- Code summary ----
+    "code.heading":    "Resumen de c\u00f3digo",
+    "code.motivation": "Has explorado los conceptos clave de forma interactiva \u2014 ahora reprod\u00facelos en c\u00f3digo. Estos bloques autosuficientes cubren todo lo que practicaste arriba. Elige tu lenguaje, copia el c\u00f3digo y ejec\u00fatalo.",
+    "code.tab.python": "Python",
+    "code.tab.stata":  "Stata",
+    "code.tab.r":      "R",
+    "code.copy.idle":  "Copiar c\u00f3digo",
+    "code.copy.done":  "\u00a1Copiado!",
+    "code.colab":      "Abrir un cuaderno Colab vac\u00edo &rarr;",
+    "code.note.stata": "Pega esto en tu editor do-file de Stata",
+    "code.note.r":     "Pega esto en tu consola R o RStudio",
+
+    // ---- Footer ----
+    "footer.text":      "Parte de <a href=\"https://quarcs-lab.github.io/metricsai/book/_book/index.html\"><strong>metricsAI</strong></a> \u00b7 Cap\u00edtulo 17: Datos de panel, series de tiempo y causalidad \u00b7 por Carlos Mendez \u00b7 <a href=\"https://github.com/quarcs-lab/metricsai\">GitHub</a>",
+    "footer.scrolltop": "\u2191 Volver arriba"
+  }
+};
+
+function t(key, vars) {
+  const lang = window.__lang || I18N.defaultLang;
+  let s = (I18N[lang] && I18N[lang][key]) || I18N.en[key];
+  if (s === undefined) return key;
+  if (vars) {
+    for (const k in vars) s = s.split("{" + k + "}").join(String(vars[k]));
+  }
+  return s;
+}
+
+function applyLanguage(lang) {
+  if (lang !== "en" && lang !== "es") lang = I18N.defaultLang;
+  window.__lang = lang;
+  try { localStorage.setItem(I18N.storageKey, lang); } catch (e) {}
+  document.documentElement.lang = lang;
+  document.querySelectorAll("[data-i18n]").forEach(el => {
+    const key = el.getAttribute("data-i18n");
+    el.innerHTML = t(key);
+  });
+  const lbl = document.getElementById("siteLanguageLabel");
+  if (lbl) lbl.textContent = lang === "es" ? "ES" : "EN";
+  // Re-fire every widget renderer (Plotly + JS-injected callouts read via t()).
+  for (const key in window) {
+    if (key.indexOf("__rerender_") === 0 && typeof window[key] === "function") {
+      try { window[key](); } catch (e) {}
+    }
+  }
+}
+
+function toggleLanguage() {
+  applyLanguage((window.__lang || I18N.defaultLang) === "es" ? "en" : "es");
+}
+
+// Read persisted language BEFORE widgets render so first paint is in correct language.
+try {
+  const stored = localStorage.getItem(I18N.storageKey);
+  if (stored === "en" || stored === "es") window.__lang = stored;
+} catch (e) {}
+
+const THEME_KEY = "darkMode"; // unified with index.html / tutors.html
 function getCSS(v){return getComputedStyle(document.documentElement).getPropertyValue(v).trim()}
 function themeColors(){return{text:getCSS("--text"),textSoft:getCSS("--text-soft"),grid:getCSS("--grid"),panel:getCSS("--panel"),cyan:getCSS("--accent"),purple:getCSS("--accent-2"),pink:getCSS("--accent-3")}}
 function baseLayout(o){const c=themeColors();return Object.assign({paper_bgcolor:"rgba(0,0,0,0)",plot_bgcolor:"rgba(0,0,0,0)",font:{family:"Inter,system-ui,sans-serif",color:c.text,size:12},margin:{l:60,r:18,t:30,b:50},xaxis:{gridcolor:c.grid,linecolor:c.grid,zerolinecolor:c.grid,tickfont:{color:c.textSoft}},yaxis:{gridcolor:c.grid,linecolor:c.grid,zerolinecolor:c.grid,tickfont:{color:c.textSoft}},hoverlabel:{bgcolor:c.panel,bordercolor:c.grid,font:{color:c.text}},legend:{font:{color:c.text},bgcolor:"rgba(0,0,0,0)"}},o||{})}
@@ -865,11 +1353,12 @@ function initToggles(id,cb){document.getElementById(id).querySelectorAll("button
   const callout=document.getElementById("variance-callout");
   function render(){
     const c=themeColors();const v=DATA.nba.variance;
+    const xCats=[t("widget.variance.chart.overall"),t("widget.variance.chart.between"),t("widget.variance.chart.within")];
     Plotly.react("variance-chart",[
-      {x:["Overall","Between","Within"],y:[v.lnrevenue.overall,v.lnrevenue.between,v.lnrevenue.within],name:"Log Revenue",type:"bar",marker:{color:c.cyan},text:[v.lnrevenue.overall,v.lnrevenue.between,v.lnrevenue.within].map(x=>x.toFixed(3)),textposition:"outside",textfont:{family:"JetBrains Mono",size:12,color:c.text}},
-      {x:["Overall","Between","Within"],y:[v.wins.overall,v.wins.between,v.wins.within],name:"Wins",type:"bar",marker:{color:c.purple},text:[v.wins.overall,v.wins.between,v.wins.within].map(x=>x.toFixed(2)),textposition:"outside",textfont:{family:"JetBrains Mono",size:12,color:c.text}}
-    ],baseLayout({height:300,barmode:"group",yaxis:Object.assign({},baseLayout().yaxis,{title:{text:"Standard Deviation",font:{color:c.textSoft}}}),legend:{x:.5,y:1.12,xanchor:"center",orientation:"h",font:{color:c.text},bgcolor:"rgba(0,0,0,0)"}}),PC);
-    callout.innerHTML=`<strong>Revenue:</strong> between SD (${v.lnrevenue.between}) > within SD (${v.lnrevenue.within}). Most revenue variation is across teams, not over time. <strong>Wins:</strong> between (${v.wins.between}) and within (${v.wins.within}) are closer — team performance fluctuates more.`;
+      {x:xCats,y:[v.lnrevenue.overall,v.lnrevenue.between,v.lnrevenue.within],name:t("widget.variance.chart.lnrev"),type:"bar",marker:{color:c.cyan},text:[v.lnrevenue.overall,v.lnrevenue.between,v.lnrevenue.within].map(x=>x.toFixed(3)),textposition:"outside",textfont:{family:"JetBrains Mono",size:12,color:c.text}},
+      {x:xCats,y:[v.wins.overall,v.wins.between,v.wins.within],name:t("widget.variance.chart.wins"),type:"bar",marker:{color:c.purple},text:[v.wins.overall,v.wins.between,v.wins.within].map(x=>x.toFixed(2)),textposition:"outside",textfont:{family:"JetBrains Mono",size:12,color:c.text}}
+    ],baseLayout({height:300,barmode:"group",yaxis:Object.assign({},baseLayout().yaxis,{title:{text:t("widget.variance.chart.yaxis"),font:{color:c.textSoft}}}),legend:{x:.5,y:1.12,xanchor:"center",orientation:"h",font:{color:c.text},bgcolor:"rgba(0,0,0,0)"}}),PC);
+    callout.innerHTML=t("widget.variance.callout",{rev_between:v.lnrevenue.between,rev_within:v.lnrevenue.within,wins_between:v.wins.between,wins_within:v.wins.within});
   }
   window.__rerender_variance=render;render();
 })();
@@ -879,18 +1368,17 @@ function initToggles(id,cb){document.getElementById(id).querySelectorAll("button
   const callout=document.getElementById("cluster-callout");
   function render(){
     const c=themeColors();const p=DATA.nba.pooled;
-    const seTypes=["Default","Robust (HC1)","Cluster"];
+    const seTypes=[t("widget.cluster.bar.default"),t("widget.cluster.bar.robust"),t("widget.cluster.bar.cluster")];
     const seVals=[p.se_default,p.se_robust,p.se_cluster];
-    const tVals=[p.t_default,p.t_robust,p.t_cluster];
     const colors=[c.cyan,c.purple,c.pink];
     Plotly.react("cluster-chart",[{
       x:seTypes,y:seVals,type:"bar",marker:{color:colors},
       text:seVals.map(v=>v.toFixed(4)),textposition:"outside",
       textfont:{family:"JetBrains Mono",size:13,color:c.text},
-      hovertemplate:"%{x}: SE = %{y:.6f}<extra></extra>"
-    }],baseLayout({height:280,yaxis:Object.assign({},baseLayout().yaxis,{title:{text:"Standard Error of Wins Coefficient",font:{color:c.textSoft}}}),showlegend:false}),PC);
+      hovertemplate:t("widget.cluster.chart.hover")
+    }],baseLayout({height:280,yaxis:Object.assign({},baseLayout().yaxis,{title:{text:t("widget.cluster.chart.yaxis"),font:{color:c.textSoft}}}),showlegend:false}),PC);
     const ratio=p.se_cluster/p.se_default;
-    callout.innerHTML=`<strong>Wins coefficient = ${p.coef.toFixed(4)}</strong> across all SE types. But the SE changes: default = ${p.se_default.toFixed(4)}, robust = ${p.se_robust.toFixed(4)}, cluster = ${p.se_cluster.toFixed(4)}. The cluster SE is <strong>${ratio.toFixed(2)}× larger</strong> — ignoring within-team correlation understates uncertainty.`;
+    callout.innerHTML=t("widget.cluster.callout",{coef:p.coef.toFixed(4),se_default:p.se_default.toFixed(4),se_robust:p.se_robust.toFixed(4),se_cluster:p.se_cluster.toFixed(4),ratio:ratio.toFixed(2)});
   }
   window.__rerender_cluster=render;render();
 })();
@@ -904,31 +1392,31 @@ function initToggles(id,cb){document.getElementById(id).querySelectorAll("button
     const c=themeColors();const p=DATA.nba.pooled;const fe=DATA.nba.fe;
     const traces=[];
     if(view==="pooled"||view==="both"){
-      traces.push({x:DATA.nba.wins,y:DATA.nba.lnrevenue,mode:"markers",type:"scatter",name:"All obs",marker:{color:c.cyan,size:5,opacity:.5},hovertemplate:"Wins: %{x}<br>Log Rev: %{y:.3f}<extra></extra>"});
+      traces.push({x:DATA.nba.wins,y:DATA.nba.lnrevenue,mode:"markers",type:"scatter",name:t("widget.poolfe.legend.allobs"),marker:{color:c.cyan,size:5,opacity:.5},hovertemplate:t("widget.poolfe.hover.allobs")});
       const xMin=Math.min(...DATA.nba.wins),xMax=Math.max(...DATA.nba.wins);
-      traces.push({x:[xMin,xMax],y:[p.intercept+p.coef*xMin,p.intercept+p.coef*xMax],mode:"lines",name:"Pooled OLS",line:{color:c.cyan,width:2.5},hoverinfo:"skip"});
+      traces.push({x:[xMin,xMax],y:[p.intercept+p.coef*xMin,p.intercept+p.coef*xMax],mode:"lines",name:t("widget.poolfe.legend.pooled"),line:{color:c.cyan,width:2.5},hoverinfo:"skip"});
     }
     if(view==="fe"||view==="both"){
-      traces.push({x:DATA.nba.demeaned_wins,y:DATA.nba.demeaned_lnrev,mode:"markers",type:"scatter",name:"De-meaned",marker:{color:c.purple,size:5,opacity:.5},hovertemplate:"ΔWins: %{x:.1f}<br>ΔLog Rev: %{y:.3f}<extra></extra>"});
-      const dw=DATA.nba.demeaned_wins,dr=DATA.nba.demeaned_lnrev;
+      traces.push({x:DATA.nba.demeaned_wins,y:DATA.nba.demeaned_lnrev,mode:"markers",type:"scatter",name:t("widget.poolfe.legend.demeaned"),marker:{color:c.purple,size:5,opacity:.5},hovertemplate:t("widget.poolfe.hover.demeaned")});
+      const dw=DATA.nba.demeaned_wins;
       const xMin2=Math.min(...dw),xMax2=Math.max(...dw);
-      traces.push({x:[xMin2,xMax2],y:[fe.coef*xMin2,fe.coef*xMax2],mode:"lines",name:"Fixed Effects",line:{color:c.purple,width:2.5,dash:"dash"},hoverinfo:"skip"});
+      traces.push({x:[xMin2,xMax2],y:[fe.coef*xMin2,fe.coef*xMax2],mode:"lines",name:t("widget.poolfe.legend.fe"),line:{color:c.purple,width:2.5,dash:"dash"},hoverinfo:"skip"});
     }
-    const xTitle=view==="fe"?"De-meaned Wins":"Wins";
-    const yTitle=view==="fe"?"De-meaned Log Revenue":"Log Revenue";
+    const xTitle=view==="fe"?t("widget.poolfe.xaxis.dwins"):t("widget.poolfe.xaxis.wins");
+    const yTitle=view==="fe"?t("widget.poolfe.yaxis.dlnrev"):t("widget.poolfe.yaxis.lnrev");
     Plotly.react("poolfe-chart",traces,baseLayout({height:380,xaxis:Object.assign({},baseLayout().xaxis,{title:{text:xTitle,font:{color:c.textSoft}}}),yaxis:Object.assign({},baseLayout().yaxis,{title:{text:yTitle,font:{color:c.textSoft}}}),showlegend:true,legend:{x:.01,y:.99,xanchor:"left",yanchor:"top",font:{color:c.text},bgcolor:"rgba(0,0,0,0)"}}),PC);
     fitEl.innerHTML=
-      `<div class="fit-stat"><div class="fs-label">Pooled coef</div><div class="fs-value">${p.coef.toFixed(4)}</div></div>`+
-      `<div class="fit-stat"><div class="fs-label">FE coef</div><div class="fs-value">${fe.coef.toFixed(4)}</div></div>`+
-      `<div class="fit-stat"><div class="fs-label">Pooled R²</div><div class="fs-value">${p.r2.toFixed(4)}</div></div>`+
-      `<div class="fit-stat"><div class="fs-label">FE R² (within)</div><div class="fs-value">${fe.r2_within.toFixed(4)}</div></div>`;
+      `<div class="fit-stat"><div class="fs-label">${t("widget.poolfe.fit.pooled_coef")}</div><div class="fs-value">${p.coef.toFixed(4)}</div></div>`+
+      `<div class="fit-stat"><div class="fs-label">${t("widget.poolfe.fit.fe_coef")}</div><div class="fs-value">${fe.coef.toFixed(4)}</div></div>`+
+      `<div class="fit-stat"><div class="fs-label">${t("widget.poolfe.fit.pooled_r2")}</div><div class="fs-value">${p.r2.toFixed(4)}</div></div>`+
+      `<div class="fit-stat"><div class="fs-label">${t("widget.poolfe.fit.fe_r2_within")}</div><div class="fs-value">${fe.r2_within.toFixed(4)}</div></div>`;
     const drop=((p.coef-fe.coef)/p.coef*100).toFixed(0);
-    callout.innerHTML=`<strong>Pooled OLS:</strong> wins coef = ${p.coef.toFixed(4)}. <strong>Fixed Effects:</strong> wins coef = ${fe.coef.toFixed(4)} (${drop}% smaller). FE removes confounding from persistent team characteristics. The within-R² (${fe.r2_within.toFixed(4)}) is higher than pooled R² (${p.r2.toFixed(4)}) — FE explains more of the within-team variation.`;
+    callout.innerHTML=t("widget.poolfe.callout",{pooled_coef:p.coef.toFixed(4),fe_coef:fe.coef.toFixed(4),drop:drop,fe_r2:fe.r2_within.toFixed(4),p_r2:p.r2.toFixed(4)});
   }
   initToggles("poolfe-view",render);window.__rerender_poolfe=render;render();
 })();
 
-// ==================== W4: TIME SERIES ===================== -->
+// ==================== W4: TIME SERIES ====================
 (function(){
   const callout=document.getElementById("timeseries-callout");
   function render(){
@@ -936,18 +1424,18 @@ function initToggles(id,cb){document.getElementById(id).querySelectorAll("button
     const c=themeColors();const ts=DATA.ts;
     const traces=[];
     if(view==="levels"){
-      traces.push({x:ts.dates,y:ts.gs10,name:"10-year rate",type:"scatter",mode:"lines",line:{color:c.cyan,width:1.5}});
-      traces.push({x:ts.dates,y:ts.gs1,name:"1-year rate",type:"scatter",mode:"lines",line:{color:c.purple,width:1.5}});
+      traces.push({x:ts.dates,y:ts.gs10,name:t("widget.timeseries.legend.gs10"),type:"scatter",mode:"lines",line:{color:c.cyan,width:1.5}});
+      traces.push({x:ts.dates,y:ts.gs1,name:t("widget.timeseries.legend.gs1"),type:"scatter",mode:"lines",line:{color:c.purple,width:1.5}});
     }else{
       const dd=ts.dates.filter((_,i)=>ts.dgs10[i]!==null);
-      traces.push({x:dd,y:ts.dgs10.filter(v=>v!==null),name:"Δ10-year",type:"scatter",mode:"lines",line:{color:c.cyan,width:1}});
-      traces.push({x:dd,y:ts.dgs1.filter(v=>v!==null),name:"Δ1-year",type:"scatter",mode:"lines",line:{color:c.purple,width:1}});
+      traces.push({x:dd,y:ts.dgs10.filter(v=>v!==null),name:t("widget.timeseries.legend.dgs10"),type:"scatter",mode:"lines",line:{color:c.cyan,width:1}});
+      traces.push({x:dd,y:ts.dgs1.filter(v=>v!==null),name:t("widget.timeseries.legend.dgs1"),type:"scatter",mode:"lines",line:{color:c.purple,width:1}});
     }
-    const yTitle=view==="levels"?"Interest Rate (%)":"Change in Rate (pp)";
-    Plotly.react("timeseries-chart",traces,baseLayout({height:400,xaxis:Object.assign({},baseLayout().xaxis,{title:{text:"Date",font:{color:c.textSoft}}}),yaxis:Object.assign({},baseLayout().yaxis,{title:{text:yTitle,font:{color:c.textSoft}}}),showlegend:true,legend:{x:.01,y:.99,xanchor:"left",yanchor:"top",font:{color:c.text},bgcolor:"rgba(0,0,0,0)"}}),PC);
+    const yTitle=view==="levels"?t("widget.timeseries.yaxis.levels"):t("widget.timeseries.yaxis.changes");
+    Plotly.react("timeseries-chart",traces,baseLayout({height:400,xaxis:Object.assign({},baseLayout().xaxis,{title:{text:t("widget.timeseries.xaxis"),font:{color:c.textSoft}}}),yaxis:Object.assign({},baseLayout().yaxis,{title:{text:yTitle,font:{color:c.textSoft}}}),showlegend:true,legend:{x:.01,y:.99,xanchor:"left",yanchor:"top",font:{color:c.text},bgcolor:"rgba(0,0,0,0)"}}),PC);
     callout.innerHTML=view==="levels"
-      ?`<strong>Non-stationary:</strong> both rates trend from ~14% (1982) to ~2% (2015). This shared downward trend produces a spurious R² = ${ts.levels.r2.toFixed(2)} when regressing one on the other.`
-      :`<strong>Stationary:</strong> first differences fluctuate around zero with no visible trend. The regression R² drops to ${ts.changes.r2.toFixed(2)} — lower but honest.`;
+      ?t("widget.timeseries.callout.levels",{r2:ts.levels.r2.toFixed(2)})
+      :t("widget.timeseries.callout.changes",{r2:ts.changes.r2.toFixed(2)});
   }
   initToggles("ts-view",render);window.__rerender_timeseries=render;render();
 })();
@@ -964,15 +1452,16 @@ function initToggles(id,cb){document.getElementById(id).querySelectorAll("button
     const lags=acfData.map((_,i)=>i).slice(1);
     const vals=acfData.slice(1);
     Plotly.react("acf-chart",[
-      {x:lags,y:vals,type:"bar",marker:{color:vals.map(v=>Math.abs(v)>ci?c.cyan:c.grid)},hovertemplate:"Lag %{x}: ACF = %{y:.4f}<extra></extra>"},
+      {x:lags,y:vals,type:"bar",marker:{color:vals.map(v=>Math.abs(v)>ci?c.cyan:c.grid)},hovertemplate:t("widget.acf.hover")},
       {x:[0,lags.length+1],y:[ci,ci],mode:"lines",line:{color:c.pink,width:1.5,dash:"dash"},showlegend:false,hoverinfo:"skip"},
       {x:[0,lags.length+1],y:[-ci,-ci],mode:"lines",line:{color:c.pink,width:1.5,dash:"dash"},showlegend:false,hoverinfo:"skip"}
-    ],baseLayout({height:340,xaxis:Object.assign({},baseLayout().xaxis,{title:{text:"Lag",font:{color:c.textSoft}}}),yaxis:Object.assign({},baseLayout().yaxis,{title:{text:"Autocorrelation",font:{color:c.textSoft}},range:[-0.3,1.05]}),showlegend:false}),PC);
-    const labels={levels:"Levels regression",changes:"Changes regression",adl:"ADL(2,2)"};
-    callout.innerHTML=`<strong>${labels[model]}:</strong> Lag-1 ACF = ${acfData[1].toFixed(4)}. `+
-      (acfData[1]>0.5?`Bars decay slowly — a hallmark of non-stationarity. Default SEs are severely understated.`
-      :acfData[1]>0.1?`Some residual autocorrelation remains. HAC standard errors are recommended.`
-      :`Near zero at all lags — the dynamic specification has absorbed the serial correlation. Default SEs are reliable.`);
+    ],baseLayout({height:340,xaxis:Object.assign({},baseLayout().xaxis,{title:{text:t("widget.acf.xaxis"),font:{color:c.textSoft}}}),yaxis:Object.assign({},baseLayout().yaxis,{title:{text:t("widget.acf.yaxis"),font:{color:c.textSoft}},range:[-0.3,1.05]}),showlegend:false}),PC);
+    const label=t("widget.acf.label."+model);
+    const head=t("widget.acf.callout.head",{label:label,acf1:acfData[1].toFixed(4)});
+    const tail=acfData[1]>0.5?t("widget.acf.callout.high")
+              :acfData[1]>0.1?t("widget.acf.callout.mid")
+              :t("widget.acf.callout.low");
+    callout.innerHTML=head+tail;
   }
   initToggles("acf-model",render);window.__rerender_acf=render;render();
 })();
@@ -990,19 +1479,18 @@ function initToggles(id,cb){document.getElementById(id).querySelectorAll("button
     const ys=isLev?ts.gs10:ts.dgs10.filter(v=>v!==null);
     const xMin=Math.min(...xs),xMax=Math.max(...xs);
     Plotly.react("spurious-chart",[
-      {x:xs,y:ys,mode:"markers",type:"scatter",marker:{color:c.cyan,size:4,opacity:.5},hovertemplate:"X: %{x:.2f}<br>Y: %{y:.2f}<extra></extra>"},
+      {x:xs,y:ys,mode:"markers",type:"scatter",marker:{color:c.cyan,size:4,opacity:.5},hovertemplate:t("widget.spurious.hover")},
       {x:[xMin,xMax],y:[m.intercept+m.coef*xMin,m.intercept+m.coef*xMax],mode:"lines",line:{color:c.purple,width:2.5},hoverinfo:"skip"}
-    ],baseLayout({height:360,xaxis:Object.assign({},baseLayout().xaxis,{title:{text:isLev?"1-year Rate (%)":"Δ1-year Rate (pp)",font:{color:c.textSoft}}}),yaxis:Object.assign({},baseLayout().yaxis,{title:{text:isLev?"10-year Rate (%)":"Δ10-year Rate (pp)",font:{color:c.textSoft}}}),showlegend:false}),PC);
-    const seInfo=isLev?`Default SE = ${m.se_default}, HAC SE = ${m.se_hac} (${m.se_ratio}× larger)`:`SE = ${m.se_default}`;
+    ],baseLayout({height:360,xaxis:Object.assign({},baseLayout().xaxis,{title:{text:isLev?t("widget.spurious.xaxis.levels"):t("widget.spurious.xaxis.changes"),font:{color:c.textSoft}}}),yaxis:Object.assign({},baseLayout().yaxis,{title:{text:isLev?t("widget.spurious.yaxis.levels"):t("widget.spurious.yaxis.changes"),font:{color:c.textSoft}}}),showlegend:false}),PC);
     const acf1=m.acf[1];
     fitEl.innerHTML=
-      `<div class="fit-stat${isLev?" warn":""}"><div class="fs-label">R²</div><div class="fs-value">${m.r2.toFixed(4)}</div></div>`+
-      `<div class="fit-stat"><div class="fs-label">Slope</div><div class="fs-value">${m.coef.toFixed(4)}</div></div>`+
-      `<div class="fit-stat${acf1>0.5?" warn":" good"}"><div class="fs-label">Resid ACF1</div><div class="fs-value">${acf1.toFixed(4)}</div></div>`+
-      `<div class="fit-stat"><div class="fs-label">SE</div><div class="fs-value">${m.se_default.toFixed(4)}</div></div>`;
+      `<div class="fit-stat${isLev?" warn":""}"><div class="fs-label">${t("widget.spurious.fit.r2")}</div><div class="fs-value">${m.r2.toFixed(4)}</div></div>`+
+      `<div class="fit-stat"><div class="fs-label">${t("widget.spurious.fit.slope")}</div><div class="fs-value">${m.coef.toFixed(4)}</div></div>`+
+      `<div class="fit-stat${acf1>0.5?" warn":" good"}"><div class="fs-label">${t("widget.spurious.fit.acf1")}</div><div class="fs-value">${acf1.toFixed(4)}</div></div>`+
+      `<div class="fit-stat"><div class="fs-label">${t("widget.spurious.fit.se")}</div><div class="fs-value">${m.se_default.toFixed(4)}</div></div>`;
     callout.innerHTML=isLev
-      ?`<strong>Spurious regression:</strong> R² = ${m.r2.toFixed(2)} looks great, but residual ACF1 = ${acf1.toFixed(2)} reveals severe autocorrelation. The ${seInfo}. This R² is inflated by the shared downward trend.`
-      :`<strong>Honest regression:</strong> R² = ${m.r2.toFixed(2)} is lower but reliable. Residual ACF1 = ${acf1.toFixed(2)} — much less autocorrelation. First differencing removed the spurious trend.`;
+      ?t("widget.spurious.callout.levels",{r2:m.r2.toFixed(2),acf1:acf1.toFixed(2),se_default:m.se_default,se_hac:m.se_hac,se_ratio:m.se_ratio})
+      :t("widget.spurious.callout.changes",{r2:m.r2.toFixed(2),acf1:acf1.toFixed(2)});
   }
   initToggles("spurious-reg",render);window.__rerender_spurious=render;render();
 })();
@@ -1020,18 +1508,18 @@ function initToggles(id,cb){document.getElementById(id).querySelectorAll("button
       y:labels.slice().reverse(),x:coefs.slice().reverse(),type:"scatter",mode:"markers",
       marker:{color:colors.slice().reverse(),size:10},
       error_x:{type:"data",symmetric:true,array:vars.map(v=>1.96*adl.se[v]).reverse(),color:c.cyan,thickness:2},
-      hovertemplate:"%{y}: %{x:.4f}<extra></extra>"
-    }],baseLayout({height:280,margin:{l:100,r:18,t:10,b:40},xaxis:Object.assign({},baseLayout().xaxis,{title:{text:"Coefficient",font:{color:c.textSoft}},zeroline:true,zerolinecolor:c.pink,zerolinewidth:2}),yaxis:{tickfont:{color:c.textSoft}},showlegend:false}),PC);
+      hovertemplate:t("widget.adl.coef.hover")
+    }],baseLayout({height:280,margin:{l:100,r:18,t:10,b:40},xaxis:Object.assign({},baseLayout().xaxis,{title:{text:t("widget.adl.coef.xaxis"),font:{color:c.textSoft}},zeroline:true,zerolinecolor:c.pink,zerolinewidth:2}),yaxis:{tickfont:{color:c.textSoft}},showlegend:false}),PC);
 
     const mult=adl.multipliers;
     Plotly.react("adl-mult-chart",[{
-      x:["Impact (t)","After 1 month","After 2 months"],y:mult.cumulative,type:"bar",
+      x:[t("widget.adl.mult.impact"),t("widget.adl.mult.m1"),t("widget.adl.mult.m2")],y:mult.cumulative,type:"bar",
       marker:{color:[c.cyan,c.purple,c.pink]},
       text:mult.cumulative.map(v=>v.toFixed(2)),textposition:"outside",
       textfont:{family:"JetBrains Mono",size:13,color:c.text}
-    }],baseLayout({height:280,yaxis:Object.assign({},baseLayout().yaxis,{title:{text:"Cumulative Multiplier",font:{color:c.textSoft}}}),showlegend:false}),PC);
+    }],baseLayout({height:280,yaxis:Object.assign({},baseLayout().yaxis,{title:{text:t("widget.adl.mult.yaxis"),font:{color:c.textSoft}}}),showlegend:false}),PC);
 
-    callout.innerHTML=`<strong>ADL(2,2) model</strong> (R² = ${adl.r2.toFixed(4)}, residual ACF1 = ${adl.acf[1].toFixed(4)}). Impact multiplier = ${mult.impact.toFixed(2)}: a 1 pp Δgs1 moves Δgs10 by ${mult.impact.toFixed(2)} pp immediately. The cumulative effect after 2 months is ${mult.cumulative[2].toFixed(2)} — partial reversal at lag 1 followed by recovery.`;
+    callout.innerHTML=t("widget.adl.callout",{r2:adl.r2.toFixed(4),acf1:adl.acf[1].toFixed(4),impact:mult.impact.toFixed(2),cum2:mult.cumulative[2].toFixed(2)});
   }
   window.__rerender_adl=render;render();
 })();
@@ -1049,8 +1537,50 @@ function initToggles(id,cb){document.getElementById(id).querySelectorAll("button
   readHash();
 })();
 
-// ==================== THEME ====================
-(function(){const btn=document.getElementById("theme-toggle"),iconEl=document.getElementById("theme-icon"),labelEl=document.getElementById("theme-label");function apply(t){document.documentElement.dataset.theme=t;iconEl.textContent=t==="dark"?"\u2600\uFE0F":"\uD83C\uDF19";labelEl.textContent=t==="dark"?"Light":"Dark";for(const k in window)if(k.startsWith("__rerender_")&&typeof window[k]==="function")window[k]()}const saved=localStorage.getItem(THEME_KEY);const prefersDark=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches;apply(saved||(prefersDark?"dark":"light"));btn.addEventListener("click",()=>{const next=document.documentElement.dataset.theme==="dark"?"light":"dark";localStorage.setItem(THEME_KEY,next);apply(next)})})();
+// ==================== THEME TOGGLE (site navbar) ====================
+// Reads/writes localStorage.darkMode (shared with index.html / tutors.html)
+// and applies html[data-theme="dark"] for this chapter's CSS.
+function applyDarkMode(isDark) {
+  document.documentElement.dataset.theme = isDark ? "dark" : "light";
+  const icon = document.getElementById("siteDarkModeIcon");
+  if (icon) icon.className = isDark ? "fa-solid fa-sun" : "fa-solid fa-moon";
+  // Re-render all widgets so Plotly picks up the new CSS colors.
+  for (const key in window) {
+    if (key.startsWith("__rerender_") && typeof window[key] === "function") window[key]();
+  }
+}
+
+function toggleDarkModeNav() {
+  const isDark = document.documentElement.dataset.theme !== "dark";
+  localStorage.setItem(THEME_KEY, isDark ? "dark" : "light");
+  applyDarkMode(isDark);
+}
+
+(function() {
+  const saved = localStorage.getItem(THEME_KEY);
+  const prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+  const isDark = saved ? (saved === "dark") : prefersDark;
+  applyDarkMode(isDark);
+})();
+
+// ==================== MOBILE MENU (site navbar) ====================
+function toggleSiteMobileMenu() {
+  const menu = document.getElementById("siteMobileMenu");
+  const hamburger = document.getElementById("siteHamburgerIcon");
+  const close = document.getElementById("siteCloseIcon");
+  if (!menu || !hamburger || !close) return;
+  const isOpen = menu.classList.toggle("open");
+  hamburger.style.display = isOpen ? "none" : "";
+  close.style.display = isOpen ? "" : "none";
+}
+
+// ==================== LANGUAGE INIT ====================
+// Run AFTER all widget IIFEs have registered themselves with __rerender_*
+// (each widget's render() reads labels via t(), so they pick up the right
+// language on first paint via window.__lang set above; this call swaps
+// every [data-i18n] element and updates the toggle button label).
+applyLanguage(window.__lang || I18N.defaultLang);
+
 window.addEventListener("resize",()=>{document.querySelectorAll(".chart").forEach(el=>{if(el.data)Plotly.Plots.resize(el)})});
 </script>
 <script>

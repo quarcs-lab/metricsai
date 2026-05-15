@@ -3,24 +3,67 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Chapter 04 — Statistical Inference for the Mean · metricsAI</title>
+<title data-i18n="meta.title">Chapter 04 — Statistical Inference for the Mean · metricsAI</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <script src="https://cdn.plot.ly/plotly-2.35.2.min.js" charset="utf-8"></script>
 <style>
 :root{--cyan:#008CB7;--cyan-soft:#22d3ee;--purple:#7A209F;--purple-soft:#c084fc;--pink:#C21E72;--pink-soft:#f472b6;--bg:#f5f8fb;--panel:#fff;--panel-2:#f0f4f9;--text:#0b1021;--text-soft:#475569;--text-muted:#64748b;--border:#d9e2ec;--accent:var(--cyan);--accent-2:var(--purple);--accent-3:var(--pink);--shadow:0 2px 10px rgba(11,16,33,.06),0 12px 30px rgba(11,16,33,.05);--grid:#e3e8ef;--code-bg:#eef3f8}
 html[data-theme="dark"]{--bg:#0c1024;--panel:#151a33;--panel-2:#1b2142;--text:#e2e8f0;--text-soft:#b5c0d0;--text-muted:#8a98ae;--border:#2a3156;--accent:var(--cyan-soft);--accent-2:var(--purple-soft);--accent-3:var(--pink-soft);--shadow:0 2px 10px rgba(0,0,0,.25),0 12px 30px rgba(0,0,0,.35);--grid:#2a3156;--code-bg:#0f1530}
 *{box-sizing:border-box}html,body{margin:0;padding:0}
-body{font-family:'Inter',system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);line-height:1.55;transition:background-color .25s ease,color .25s ease}
+body{font-family:'Inter',system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);line-height:1.55;transition:background-color .25s ease,color .25s ease; padding-top: 64px; /* leave room for the fixed .site-nav */ }
+/* ===== Site navigation bar (shared across metricsAI pages) ===== */
+.site-nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 50;
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--border);
+  height: 64px;
+}
+html[data-theme="dark"] .site-nav { background: rgba(12, 16, 36, 0.85); }
+.site-nav-inner { max-width: 1280px; margin: 0 auto; padding: 0 1rem; height: 100%; display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
+.site-nav-brand { display: flex; align-items: center; gap: 0.5rem; font-weight: 700; font-size: 1.15rem; color: var(--text); text-decoration: none; }
+.site-nav-brand .ai-mark { color: var(--accent); }
+.site-nav-links { display: flex; gap: 1.5rem; }
+.site-nav-links a { color: var(--text-soft); text-decoration: none; font-weight: 500; font-size: 0.95rem; transition: color .2s ease; }
+.site-nav-links a:hover { color: var(--accent); }
+.site-nav-links a.active { color: var(--accent); border-bottom: 2px solid var(--accent); padding-bottom: 0.25rem; }
+.site-nav-controls { display: flex; align-items: center; gap: 0.8rem; }
+.site-nav-cameron { display: flex; flex-direction: column; align-items: center; padding: 0.25rem 0.6rem; border: 1px solid var(--border); border-radius: 0.5rem; background: var(--panel-2); text-decoration: none; line-height: 1.1; transition: background .2s ease; }
+.site-nav-cameron:hover { background: var(--panel); }
+.site-nav-cameron .cameron-pre { font-size: 0.6rem; color: var(--text-muted); }
+.site-nav-cameron .cameron-name { font-size: 0.7rem; font-weight: 600; color: var(--text-soft); }
+.site-nav-cameron .cameron-cta { font-size: 0.6rem; color: var(--text-muted); margin-top: 0.1rem; }
+.site-nav-btn { background: transparent; border: none; color: var(--text-soft); cursor: pointer; padding: 0.4rem; border-radius: 0.4rem; font-size: 1.05rem; display: inline-flex; align-items: center; gap: 0.3rem; transition: color .2s ease, background .2s ease; }
+.site-nav-btn:hover { color: var(--accent); background: var(--panel-2); }
+.site-nav-btn .label { font-size: 0.75rem; font-weight: 600; }
+.site-nav-hamburger { display: none; }
+
+.site-nav-mobile { display: none; position: fixed; top: 64px; left: 0; right: 0; background: var(--panel); border-top: 1px solid var(--border); box-shadow: var(--shadow); z-index: 40; padding: 1rem; }
+.site-nav-mobile a { display: block; padding: 0.6rem 0.4rem; color: var(--text-soft); text-decoration: none; font-weight: 500; border-bottom: 1px solid var(--border); }
+.site-nav-mobile a.active { color: var(--accent); }
+.site-nav-mobile a:last-of-type { border-bottom: none; }
+.site-nav-mobile.open { display: block; }
+
+@media (max-width: 768px) {
+  .site-nav-links, .site-nav-cameron { display: none; }
+  .site-nav-hamburger { display: inline-flex; }
+}
+/* ===== /Site navigation bar ===== */
+
 code,.mono{font-family:'JetBrains Mono',ui-monospace,monospace}
 header.page{position:relative;padding:2.4rem 1.5rem 2rem;background:radial-gradient(1200px 400px at 85% -10%,rgba(122,32,159,.15),transparent),radial-gradient(1000px 400px at 10% 0%,rgba(0,140,183,.18),transparent),var(--panel);border-bottom:1px solid var(--border)}
 .page-inner{max-width:1120px;margin:0 auto}
 .chapter-badge{display:inline-block;font-size:.72rem;letter-spacing:.15em;text-transform:uppercase;color:var(--accent);font-weight:600;margin-bottom:.5rem}
 h1.title{font-size:clamp(1.6rem,3.4vw,2.4rem);margin:0 0 .35rem;background:linear-gradient(90deg,var(--accent),var(--accent-2));-webkit-background-clip:text;background-clip:text;color:transparent;font-weight:700;letter-spacing:-.01em}
 p.subtitle{margin:0 0 .8rem;color:var(--text-soft);font-size:1.05rem;max-width:720px}
-.theme-toggle{position:absolute;top:1.4rem;right:1.5rem;background:var(--panel-2);color:var(--text);border:1px solid var(--border);padding:.4rem .8rem;border-radius:999px;cursor:pointer;font-size:.85rem;font-weight:500;display:inline-flex;align-items:center;gap:.35rem;transition:all .2s ease}
-.theme-toggle:hover{border-color:var(--accent);color:var(--accent)}
 nav.anchors{position:sticky;top:0;z-index:20;background:color-mix(in srgb,var(--panel) 92%,transparent);backdrop-filter:saturate(150%) blur(8px);-webkit-backdrop-filter:saturate(150%) blur(8px);border-bottom:1px solid var(--border)}
 nav.anchors ul{display:flex;gap:.25rem;overflow-x:auto;list-style:none;padding:.55rem 1.5rem;margin:0 auto;max-width:1120px;scrollbar-width:thin}
 nav.anchors a{display:block;padding:.35rem .75rem;border-radius:8px;color:var(--text-soft);text-decoration:none;font-size:.85rem;font-weight:500;white-space:nowrap;transition:all .15s ease}
@@ -184,25 +227,72 @@ footer.page a{color:var(--accent);text-decoration:none}footer.page a:hover{text-
 </head>
 <body>
 
+
+<nav class="site-nav" aria-label="Site navigation">
+  <div class="site-nav-inner">
+    <a href="../../index.html" class="site-nav-brand">
+      <i class="fa-solid fa-chart-line" style="color: var(--accent);"></i>
+      <span>metrics<span class="ai-mark">AI</span></span>
+    </a>
+    <div class="site-nav-links">
+      <a href="../../index.html#about" data-i18n="nav.about">About</a>
+      <a href="../../index.html#curriculum" class="active" data-i18n="nav.notebooks">Python Notebooks</a>
+      <a href="../../tutors.html" data-i18n="nav.tutors">AI Tutors</a>
+      <a href="../../index.html#books" data-i18n="nav.books">Books</a>
+      <a href="../../videos.html" data-i18n="nav.videos">Videos</a>
+      <a href="https://open.spotify.com/show/2lN5pA3l10UdHe61ZCoHcF?si=IFFMpG3pROepG61o8qbnvg" target="_blank" rel="noopener" data-i18n="nav.podcasts">Podcasts</a>
+      <a href="../../index.html#authors" data-i18n="nav.authors">Authors</a>
+      <a href="../../index.html#more-resources" data-i18n="nav.resources">More Resources</a>
+    </div>
+    <div class="site-nav-controls">
+      <a href="https://cameron.econ.ucdavis.edu/aed/index.html" target="_blank" rel="noopener" class="site-nav-cameron">
+        <span class="cameron-pre" data-i18n="nav.cameron.pre">Content based on</span>
+        <span class="cameron-name">Cameron (2022)</span>
+        <span class="cameron-cta"><span data-i18n="nav.cameron.cta">Learn More</span> <i class="fa-solid fa-external-link-alt"></i></span>
+      </a>
+      <button type="button" class="site-nav-btn" onclick="toggleDarkModeNav()" title="Toggle dark mode" id="siteDarkModeToggle">
+        <i class="fa-solid fa-moon" id="siteDarkModeIcon"></i>
+      </button>
+      <button type="button" class="site-nav-btn" onclick="toggleLanguage()" title="Switch language / Cambiar idioma" id="siteLanguageToggle">
+        <i class="fa-solid fa-language"></i>
+        <span class="label" id="siteLanguageLabel">EN</span>
+      </button>
+      <button type="button" class="site-nav-btn site-nav-hamburger" onclick="toggleSiteMobileMenu()" id="siteMobileMenuBtn">
+        <i class="fa-solid fa-bars" id="siteHamburgerIcon"></i>
+        <i class="fa-solid fa-times" id="siteCloseIcon" style="display:none"></i>
+      </button>
+    </div>
+  </div>
+</nav>
+<div class="site-nav-mobile" id="siteMobileMenu">
+  <a href="../../index.html#about" data-i18n="nav.about">About</a>
+  <a href="../../index.html#curriculum" class="active" data-i18n="nav.notebooks">Python Notebooks</a>
+  <a href="../../tutors.html" data-i18n="nav.tutors">AI Tutors</a>
+  <a href="../../index.html#books" data-i18n="nav.books">Books</a>
+  <a href="../../videos.html" data-i18n="nav.videos">Videos</a>
+  <a href="https://open.spotify.com/show/2lN5pA3l10UdHe61ZCoHcF?si=IFFMpG3pROepG61o8qbnvg" target="_blank" rel="noopener" data-i18n="nav.podcasts">Podcasts</a>
+  <a href="../../index.html#authors" data-i18n="nav.authors">Authors</a>
+  <a href="../../index.html#more-resources" data-i18n="nav.resources">More Resources</a>
+</div>
+
 <header class="page">
   <div class="page-inner">
-    <span class="chapter-badge">Chapter 04 of 18 · Interactive Dashboard</span>
-    <h1 class="title">Statistical Inference for the Mean</h1>
-    <p class="subtitle">Explore confidence intervals, hypothesis testing, and the t-distribution through interactive controls — using the same datasets and examples as the book.</p>
+    <span class="chapter-badge" data-i18n="header.badge">Chapter 04 of 18 · Interactive Dashboard</span>
+    <h1 class="title" data-i18n="header.title">Statistical Inference for the Mean</h1>
+    <p class="subtitle" data-i18n="header.subtitle">Explore confidence intervals, hypothesis testing, and the t-distribution through interactive controls — using the same datasets and examples as the book.</p>
   </div>
-  <button id="theme-toggle" class="theme-toggle" type="button" aria-label="Toggle color theme"><span id="theme-icon">🌙</span><span id="theme-label">Dark</span></button>
 </header>
 
 <nav class="anchors" aria-label="Sections">
   <ul>
-    <li><a href="#se-sample-size">SE &amp; Sample Size</a></li>
-    <li><a href="#t-dist">t-Distribution</a></li>
-    <li><a href="#confidence">Confidence Intervals</a></li>
-    <li><a href="#hyp-two">Two-Sided Test</a></li>
-    <li><a href="#hyp-one">One-Sided Test</a></li>
-    <li><a href="#gas-test">Gas Price Test</a></li>
-    <li><a href="#proportions">Proportions</a></li>
-    <li><a href="#code">Code</a></li>
+    <li><a href="#se-sample-size" data-i18n="nav.se">SE &amp; Sample Size</a></li>
+    <li><a href="#t-dist" data-i18n="nav.tdist">t-Distribution</a></li>
+    <li><a href="#confidence" data-i18n="nav.ci">Confidence Intervals</a></li>
+    <li><a href="#hyp-two" data-i18n="nav.hyptwo">Two-Sided Test</a></li>
+    <li><a href="#hyp-one" data-i18n="nav.hypone">One-Sided Test</a></li>
+    <li><a href="#gas-test" data-i18n="nav.gas">Gas Price Test</a></li>
+    <li><a href="#proportions" data-i18n="nav.prop">Proportions</a></li>
+    <li><a href="#code" data-i18n="nav.code">Code</a></li>
   </ul>
 </nav>
 
@@ -212,20 +302,20 @@ footer.page a{color:var(--accent);text-decoration:none}footer.page a:hover{text-
 <section class="widget" id="se-sample-size">
   <div class="widget-head">
     <div>
-      <h2>Standard Error &amp; Sample Size</h2>
+      <h2 data-i18n="widget.se.heading">Standard Error &amp; Sample Size</h2>
     </div>
-    <button class="reset-btn" data-reset="sesamplesize">Reset</button>
+    <button class="reset-btn" data-reset="sesamplesize" data-i18n="common.reset">Reset</button>
   </div>
 
-  <p class="motivation">How precise is our $41k estimate of average earnings? And how much more data would you need to <em>halve</em> that uncertainty?</p>
+  <p class="motivation" data-i18n="widget.se.motivation">How precise is our $41k estimate of average earnings? And how much more data would you need to <em>halve</em> that uncertainty?</p>
 
-  <div class="key-concept">
+  <div class="key-concept" data-i18n="widget.se.kc">
     <span class="kc-title">The standard error se(X&#772;) = s/&radic;n measures the precision of the sample mean as an estimate of &mu;.</span> It quantifies sampling uncertainty — smaller SEs mean more precise estimates. Because SE shrinks with <strong>&radic;n</strong>, not with <strong>n</strong>, quadrupling the sample size is required to halve the standard error.
   </div>
 
   <div class="widget-howto">
-    <div class="howto-title">What you can do here</div>
-    <ul>
+    <div class="howto-title" data-i18n="common.howtoTitle">What you can do here</div>
+    <ul data-i18n="widget.se.howto">
       <li><strong>Slide the sample size n</strong> from 10 to 500 and watch SE and the 95% CI width update.</li>
       <li><strong>Compare to the book's n = 171</strong> — the default position of the slider.</li>
       <li><strong>Hover the curve</strong> to read SE at any point along the 1/&radic;n shape.</li>
@@ -234,48 +324,48 @@ footer.page a{color:var(--accent);text-decoration:none}footer.page a:hover{text-
 
   <div class="controls">
     <div class="ctrl">
-      <label>Sample size (n)</label>
+      <label data-i18n="widget.se.ctrl.n.label">Sample size (n)</label>
       <input type="range" id="se-n" min="10" max="500" step="5" value="171">
       <span class="val" id="se-n-val">n = 171</span>
     </div>
   </div>
   <div class="stats-grid">
-    <div class="stat mean"><div class="label">n</div><div class="value" id="se-stat-n">171</div></div>
-    <div class="stat spread"><div class="label">SD (s)</div><div class="value" id="se-stat-sd">—</div></div>
-    <div class="stat median"><div class="label">SE (s/&radic;n)</div><div class="value" id="se-stat-se">—</div></div>
-    <div class="stat mean"><div class="label">Approx 95% CI width</div><div class="value" id="se-stat-ciw">—</div></div>
+    <div class="stat mean"><div class="label" data-i18n="stat.n">n</div><div class="value" id="se-stat-n">171</div></div>
+    <div class="stat spread"><div class="label" data-i18n="stat.sd">SD (s)</div><div class="value" id="se-stat-sd">—</div></div>
+    <div class="stat median"><div class="label" data-i18n="stat.se">SE (s/&radic;n)</div><div class="value" id="se-stat-se">—</div></div>
+    <div class="stat mean"><div class="label" data-i18n="stat.ciw">Approx 95% CI width</div><div class="value" id="se-stat-ciw">—</div></div>
   </div>
   <div id="chart-se" class="chart"></div>
   <div class="try-this">
-    <div class="try-title">Try This</div>
-    <ol>
+    <div class="try-title" data-i18n="common.tryTitle">Try This</div>
+    <ol data-i18n="widget.se.try">
       <li><strong>Set n = 171 (the book's sample), then set n = 684 (4&times; larger).</strong> <em>SE halves from ~$1,952 to ~$976 — the &radic;n rule in action: halving precision costs four times more data.</em></li>
       <li><strong>Set n = 50.</strong> <em>SE jumps to ~$3,611 and the approximate 95% CI widens to ~$14,400 — under-sampling doesn't just shrink the window slightly, it nearly doubles it.</em></li>
       <li><strong>Set n = 400.</strong> <em>SE drops to ~$1,276 — collecting 229 more observations shaves only ~$676 off the SE, the diminishing-returns shoulder of the 1/&radic;n curve.</em></li>
     </ol>
   </div>
 
-  <p class="takeaway"><strong>Take-away:</strong> SE = s/&radic;n quantifies precision; doubling precision always costs four times more data. <a href="../../book/_book/notebooks_quarto/ch04_Statistical_Inference_for_the_Mean.html#example-mean-annual-earnings" target="_blank" rel="noopener">Read §4.1 in the chapter →</a></p>
+  <p class="takeaway" data-i18n="widget.se.takeaway"><strong>Take-away:</strong> SE = s/&radic;n quantifies precision; doubling precision always costs four times more data. <a href="../../book/_book/notebooks_quarto/ch04_Statistical_Inference_for_the_Mean.html#example-mean-annual-earnings" target="_blank" rel="noopener">Read §4.1 in the chapter →</a></p>
 </section>
 
 <!-- ==================== WIDGET 2: t-Distribution Explorer ==================== -->
 <section class="widget" id="t-dist">
   <div class="widget-head">
     <div>
-      <h2>t-Distribution Explorer</h2>
+      <h2 data-i18n="widget.tdist.heading">t-Distribution Explorer</h2>
     </div>
-    <button class="reset-btn" data-reset="tdist">Reset</button>
+    <button class="reset-btn" data-reset="tdist" data-i18n="common.reset">Reset</button>
   </div>
 
-  <p class="motivation">Why do we need a whole <em>family</em> of bell curves — one for every sample size? Because estimating &sigma; from the sample adds uncertainty the normal curve can't see.</p>
+  <p class="motivation" data-i18n="widget.tdist.motivation">Why do we need a whole <em>family</em> of bell curves — one for every sample size? Because estimating &sigma; from the sample adds uncertainty the normal curve can't see.</p>
 
-  <div class="key-concept">
+  <div class="key-concept" data-i18n="widget.tdist.kc">
     <span class="kc-title">The t-distribution is used when &sigma; is unknown and estimated from the sample.</span> It resembles the standard normal N(0, 1) but with <strong>fatter tails</strong> that reflect the extra uncertainty from using <em>s</em> in place of &sigma;. As <em>n</em> grows, the t-distribution approaches the normal — which is why the normal is a good approximation for large samples (the familiar "n &ge; 30" rule of thumb).
   </div>
 
   <div class="widget-howto">
-    <div class="howto-title">What you can do here</div>
-    <ul>
+    <div class="howto-title" data-i18n="common.howtoTitle">What you can do here</div>
+    <ul data-i18n="widget.tdist.howto">
       <li><strong>Toggle degrees of freedom</strong> between df = 4, 10, 30, and 100.</li>
       <li><strong>Toggle the Normal N(0,1) overlay</strong> to compare the two curves directly.</li>
       <li><strong>Watch the t-critical value</strong> in the stat cards — it shrinks toward 1.96 as df grows.</li>
@@ -284,59 +374,59 @@ footer.page a{color:var(--accent);text-decoration:none}footer.page a:hover{text-
 
   <div class="controls">
     <div class="ctrl">
-      <label>Degrees of freedom</label>
+      <label data-i18n="widget.tdist.ctrl.df.label">Degrees of freedom</label>
       <div class="toggle-group" id="t-dist-df">
-        <button data-val="4">df = 4</button>
-        <button data-val="10">df = 10</button>
-        <button class="active" data-val="30">df = 30</button>
-        <button data-val="100">df = 100</button>
+        <button data-val="4" data-i18n="widget.tdist.df.4">df = 4</button>
+        <button data-val="10" data-i18n="widget.tdist.df.10">df = 10</button>
+        <button class="active" data-val="30" data-i18n="widget.tdist.df.30">df = 30</button>
+        <button data-val="100" data-i18n="widget.tdist.df.100">df = 100</button>
       </div>
     </div>
     <div class="ctrl">
-      <label>Show Normal N(0,1)</label>
+      <label data-i18n="widget.tdist.ctrl.normal.label">Show Normal N(0,1)</label>
       <div class="toggle-group" id="t-dist-normal">
-        <button class="active" data-val="on">On</button>
-        <button data-val="off">Off</button>
+        <button class="active" data-val="on" data-i18n="common.on">On</button>
+        <button data-val="off" data-i18n="common.off">Off</button>
       </div>
     </div>
   </div>
   <div class="stats-grid">
-    <div class="stat mean"><div class="label">df</div><div class="value" id="td-stat-df">30</div></div>
-    <div class="stat spread"><div class="label">t-crit (5%, two-sided)</div><div class="value" id="td-stat-tcrit">—</div></div>
-    <div class="stat median"><div class="label">z-crit (Normal)</div><div class="value" id="td-stat-zcrit">1.960</div></div>
-    <div class="stat mean"><div class="label">Tail area beyond &plusmn;1.96</div><div class="value" id="td-stat-tail">—</div></div>
+    <div class="stat mean"><div class="label" data-i18n="stat.df">df</div><div class="value" id="td-stat-df">30</div></div>
+    <div class="stat spread"><div class="label" data-i18n="stat.tcrit2">t-crit (5%, two-sided)</div><div class="value" id="td-stat-tcrit">—</div></div>
+    <div class="stat median"><div class="label" data-i18n="stat.zcrit">z-crit (Normal)</div><div class="value" id="td-stat-zcrit">1.960</div></div>
+    <div class="stat mean"><div class="label" data-i18n="stat.tailarea">Tail area beyond &plusmn;1.96</div><div class="value" id="td-stat-tail">—</div></div>
   </div>
   <div id="chart-t-dist" class="chart"></div>
   <div class="try-this">
-    <div class="try-title">Try This</div>
-    <ol>
+    <div class="try-title" data-i18n="common.tryTitle">Try This</div>
+    <ol data-i18n="widget.tdist.try">
       <li><strong>Set df = 4 with the Normal overlay on.</strong> <em>The t-tails are visibly fatter and t-crit = 2.78 (vs 1.96 for the normal) — with tiny samples, you need a much larger t-statistic to reject at 5%.</em></li>
       <li><strong>Set df = 30.</strong> <em>t-crit drops to ~2.04, just barely above 1.96 — the classic "n &ge; 30 is large enough" rule is exactly this small gap becoming negligible.</em></li>
       <li><strong>Set df = 100.</strong> <em>The two curves are visually indistinguishable and tail area beyond &plusmn;1.96 is ~5% — for reasonable samples, the normal is a perfectly usable stand-in for the t.</em></li>
     </ol>
   </div>
 
-  <p class="takeaway"><strong>Take-away:</strong> The t-distribution pays for estimating &sigma; with fatter tails and refunds the cost as n grows. <a href="../../book/_book/notebooks_quarto/ch04_Statistical_Inference_for_the_Mean.html#t-statistic-and-t-distribution" target="_blank" rel="noopener">Read §4.2 in the chapter →</a></p>
+  <p class="takeaway" data-i18n="widget.tdist.takeaway"><strong>Take-away:</strong> The t-distribution pays for estimating &sigma; with fatter tails and refunds the cost as n grows. <a href="../../book/_book/notebooks_quarto/ch04_Statistical_Inference_for_the_Mean.html#t-statistic-and-t-distribution" target="_blank" rel="noopener">Read §4.2 in the chapter →</a></p>
 </section>
 
 <!-- ==================== WIDGET 3: Confidence Intervals ==================== -->
 <section class="widget" id="confidence">
   <div class="widget-head">
     <div>
-      <h2>Confidence Interval Visualizer</h2>
+      <h2 data-i18n="widget.ci.heading">Confidence Interval Visualizer</h2>
     </div>
-    <button class="reset-btn" data-reset="confidence">Reset</button>
+    <button class="reset-btn" data-reset="confidence" data-i18n="common.reset">Reset</button>
   </div>
 
-  <p class="motivation">A point estimate of $41k is a single number. <em>What range of &mu; values is the data actually compatible with</em> — and how does that range change with our confidence requirement?</p>
+  <p class="motivation" data-i18n="widget.ci.motivation">A point estimate of $41k is a single number. <em>What range of &mu; values is the data actually compatible with</em> — and how does that range change with our confidence requirement?</p>
 
-  <div class="key-concept">
+  <div class="key-concept" data-i18n="widget.ci.kc">
     <span class="kc-title">A confidence interval provides a range of plausible values for &mu;.</span> A 95% CI means: if we repeated the sampling procedure many times, approximately 95% of the resulting intervals would contain the true &mu;. The interval is constructed as <strong>X&#772; &plusmn; t<sub>&alpha;/2</sub> &times; SE(X&#772;)</strong> — wider intervals indicate less precision.
   </div>
 
   <div class="widget-howto">
-    <div class="howto-title">What you can do here</div>
-    <ul>
+    <div class="howto-title" data-i18n="common.howtoTitle">What you can do here</div>
+    <ul data-i18n="widget.ci.howto">
       <li><strong>Slide the confidence level</strong> from 80% to 99% and watch the CI expand or contract.</li>
       <li><strong>Toggle between Female Earnings and Gas Prices</strong> to see how SE differences reshape the CI.</li>
       <li><strong>Compare the margin of error and CI width</strong> in the stat cards at each setting.</li>
@@ -345,57 +435,57 @@ footer.page a{color:var(--accent);text-decoration:none}footer.page a:hover{text-
 
   <div class="controls">
     <div class="ctrl">
-      <label>Confidence level</label>
+      <label data-i18n="widget.ci.ctrl.level.label">Confidence level</label>
       <input type="range" id="ci-level" min="80" max="99" step="1" value="95">
       <span class="val" id="ci-level-val">95%</span>
     </div>
     <div class="ctrl">
-      <label>Dataset</label>
+      <label data-i18n="widget.ci.ctrl.ds.label">Dataset</label>
       <div class="toggle-group" id="ci-dataset">
-        <button class="active" data-val="earnings">Female Earnings</button>
-        <button data-val="gas">Gas Prices</button>
+        <button class="active" data-val="earnings" data-i18n="widget.ci.ds.earnings">Female Earnings</button>
+        <button data-val="gas" data-i18n="widget.ci.ds.gas">Gas Prices</button>
       </div>
     </div>
   </div>
   <div class="stats-grid">
-    <div class="stat mean"><div class="label">X&#772;</div><div class="value" id="ci-stat-mean">—</div></div>
-    <div class="stat spread"><div class="label">t-critical</div><div class="value" id="ci-stat-tcrit">—</div></div>
-    <div class="stat median"><div class="label">Margin of error</div><div class="value" id="ci-stat-moe">—</div></div>
-    <div class="stat mean"><div class="label">CI Lower</div><div class="value" id="ci-stat-lo">—</div></div>
-    <div class="stat median"><div class="label">CI Upper</div><div class="value" id="ci-stat-hi">—</div></div>
-    <div class="stat spread"><div class="label">Width</div><div class="value" id="ci-stat-width">—</div></div>
+    <div class="stat mean"><div class="label" data-i18n="stat.xbar">X&#772;</div><div class="value" id="ci-stat-mean">—</div></div>
+    <div class="stat spread"><div class="label" data-i18n="stat.tcrit">t-critical</div><div class="value" id="ci-stat-tcrit">—</div></div>
+    <div class="stat median"><div class="label" data-i18n="stat.moe">Margin of error</div><div class="value" id="ci-stat-moe">—</div></div>
+    <div class="stat mean"><div class="label" data-i18n="stat.cilo">CI Lower</div><div class="value" id="ci-stat-lo">—</div></div>
+    <div class="stat median"><div class="label" data-i18n="stat.cihi">CI Upper</div><div class="value" id="ci-stat-hi">—</div></div>
+    <div class="stat spread"><div class="label" data-i18n="stat.width">Width</div><div class="value" id="ci-stat-width">—</div></div>
   </div>
   <div id="chart-ci" class="chart short"></div>
   <div class="try-this">
-    <div class="try-title">Try This</div>
-    <ol>
+    <div class="try-title" data-i18n="common.tryTitle">Try This</div>
+    <ol data-i18n="widget.ci.try">
       <li><strong>At 95%, note the CI for Female Earnings: [$37,559, $45,266] (width $7,707). Push to 99%.</strong> <em>The CI widens to about $10,171 — a 4-point jump in confidence buys you a 30% wider interval.</em></li>
       <li><strong>Drop the confidence level to 90%.</strong> <em>The CI narrows to ~$6,457 — you gain precision but accept that roughly 1 in 10 such intervals would miss the true &mu;.</em></li>
       <li><strong>Switch to Gas Prices at 95%.</strong> <em>The CI is only about $0.11 wide because SE is tiny, and $3.81 (the CA average) sits far outside — the data rejects the state average before any formal test is run.</em></li>
     </ol>
   </div>
 
-  <p class="takeaway"><strong>Take-away:</strong> Confidence intervals trade precision for confidence — the interval widens every time you demand a stronger claim. <a href="../../book/_book/notebooks_quarto/ch04_Statistical_Inference_for_the_Mean.html#confidence-intervals" target="_blank" rel="noopener">Read §4.3 in the chapter →</a></p>
+  <p class="takeaway" data-i18n="widget.ci.takeaway"><strong>Take-away:</strong> Confidence intervals trade precision for confidence — the interval widens every time you demand a stronger claim. <a href="../../book/_book/notebooks_quarto/ch04_Statistical_Inference_for_the_Mean.html#confidence-intervals" target="_blank" rel="noopener">Read §4.3 in the chapter →</a></p>
 </section>
 
 <!-- ==================== WIDGET 4: Two-Sided Hypothesis Test ==================== -->
 <section class="widget" id="hyp-two">
   <div class="widget-head">
     <div>
-      <h2>Two-Sided Hypothesis Test</h2>
+      <h2 data-i18n="widget.hyptwo.heading">Two-Sided Hypothesis Test</h2>
     </div>
-    <button class="reset-btn" data-reset="hyptwo">Reset</button>
+    <button class="reset-btn" data-reset="hyptwo" data-i18n="common.reset">Reset</button>
   </div>
 
-  <p class="motivation">Is the population earnings mean really $40,000 — or is our $41k sample mean <em>too far off</em> for that story to hold?</p>
+  <p class="motivation" data-i18n="widget.hyptwo.motivation">Is the population earnings mean really $40,000 — or is our $41k sample mean <em>too far off</em> for that story to hold?</p>
 
-  <div class="key-concept">
+  <div class="key-concept" data-i18n="widget.hyptwo.kc">
     <span class="kc-title">A hypothesis test evaluates whether data provide sufficient evidence to reject a specific claim (H<sub>0</sub>) about a parameter.</span> The <strong>t-statistic</strong> measures how many standard errors the estimate is from the hypothesized value. The <strong>p-value</strong> is the probability of observing a result at least as extreme as ours if H<sub>0</sub> were true. Small p-values (< &alpha;, typically 0.05) provide evidence against H<sub>0</sub> and lead us to reject it.
   </div>
 
   <div class="widget-howto">
-    <div class="howto-title">What you can do here</div>
-    <ul>
+    <div class="howto-title" data-i18n="common.howtoTitle">What you can do here</div>
+    <ul data-i18n="widget.hyptwo.howto">
       <li><strong>Slide the hypothesized value &mu;<sub>0</sub></strong> from $30k to $55k.</li>
       <li><strong>Watch the t-statistic, p-value, and REJECT / FAIL-TO-REJECT badge</strong> update live.</li>
       <li><strong>See the shaded rejection regions</strong> on the t-distribution shift as &mu;<sub>0</sub> moves.</li>
@@ -404,50 +494,50 @@ footer.page a{color:var(--accent);text-decoration:none}footer.page a:hover{text-
 
   <div class="controls">
     <div class="ctrl">
-      <label>Hypothesized value &mu;<sub>0</sub></label>
+      <label data-i18n="widget.hyptwo.ctrl.mu0.label">Hypothesized value &mu;<sub>0</sub></label>
       <input type="range" id="ht-mu0" min="30000" max="55000" step="500" value="40000">
       <span class="val" id="ht-mu0-val">$40,000</span>
     </div>
   </div>
   <div class="stats-grid">
-    <div class="stat mean"><div class="label">X&#772;</div><div class="value" id="ht-stat-xbar">—</div></div>
-    <div class="stat spread"><div class="label">SE</div><div class="value" id="ht-stat-se">—</div></div>
-    <div class="stat median"><div class="label">t-statistic</div><div class="value" id="ht-stat-t">—</div></div>
-    <div class="stat spread"><div class="label">p-value</div><div class="value" id="ht-stat-p">—</div></div>
-    <div class="stat mean"><div class="label">&plusmn;t-crit (5%)</div><div class="value" id="ht-stat-tcrit">—</div></div>
+    <div class="stat mean"><div class="label" data-i18n="stat.xbar">X&#772;</div><div class="value" id="ht-stat-xbar">—</div></div>
+    <div class="stat spread"><div class="label" data-i18n="stat.seShort">SE</div><div class="value" id="ht-stat-se">—</div></div>
+    <div class="stat median"><div class="label" data-i18n="stat.tstat">t-statistic</div><div class="value" id="ht-stat-t">—</div></div>
+    <div class="stat spread"><div class="label" data-i18n="stat.pval">p-value</div><div class="value" id="ht-stat-p">—</div></div>
+    <div class="stat mean"><div class="label" data-i18n="stat.tcritPm">&plusmn;t-crit (5%)</div><div class="value" id="ht-stat-tcrit">—</div></div>
   </div>
   <div id="ht-decision" class="decision-badge fail">—</div>
   <div id="chart-hyp-two" class="chart"></div>
   <div class="try-this">
-    <div class="try-title">Try This</div>
-    <ol>
+    <div class="try-title" data-i18n="common.tryTitle">Try This</div>
+    <ol data-i18n="widget.hyptwo.try">
       <li><strong>Set &mu;<sub>0</sub> = $40,000 (the book's example).</strong> <em>t &asymp; 0.72, p &asymp; 0.470 — the t-marker sits well inside the white region, so we fail to reject: $40,000 remains a plausible &mu;.</em></li>
       <li><strong>Drag &mu;<sub>0</sub> down toward $35,000 and watch p.</strong> <em>The &mu;<sub>0</sub> where p first crosses 0.05 is exactly the 95% CI endpoint — tests and CIs are the same object seen from opposite sides.</em></li>
       <li><strong>Set &mu;<sub>0</sub> = $50,000.</strong> <em>t is sharply negative, p is tiny, and the decision flips to REJECT — $50k is too far from the sample mean to survive as a population mean.</em></li>
     </ol>
   </div>
 
-  <p class="takeaway"><strong>Take-away:</strong> A hypothesis test is just a confidence interval read in reverse — the values you'd reject are the ones outside the interval. <a href="../../book/_book/notebooks_quarto/ch04_Statistical_Inference_for_the_Mean.html#two-sided-hypothesis-tests" target="_blank" rel="noopener">Read §4.4 in the chapter →</a></p>
+  <p class="takeaway" data-i18n="widget.hyptwo.takeaway"><strong>Take-away:</strong> A hypothesis test is just a confidence interval read in reverse — the values you'd reject are the ones outside the interval. <a href="../../book/_book/notebooks_quarto/ch04_Statistical_Inference_for_the_Mean.html#two-sided-hypothesis-tests" target="_blank" rel="noopener">Read §4.4 in the chapter →</a></p>
 </section>
 
 <!-- ==================== WIDGET 5: One-Sided Hypothesis Test ==================== -->
 <section class="widget" id="hyp-one">
   <div class="widget-head">
     <div>
-      <h2>One-Sided Hypothesis Test</h2>
+      <h2 data-i18n="widget.hypone.heading">One-Sided Hypothesis Test</h2>
     </div>
-    <button class="reset-btn" data-reset="hypone">Reset</button>
+    <button class="reset-btn" data-reset="hypone" data-i18n="common.reset">Reset</button>
   </div>
 
-  <p class="motivation">If theory says earnings should be <em>higher</em> than $40k — not just different — can we extract more statistical power from the same data?</p>
+  <p class="motivation" data-i18n="widget.hypone.motivation">If theory says earnings should be <em>higher</em> than $40k — not just different — can we extract more statistical power from the same data?</p>
 
-  <div class="key-concept">
+  <div class="key-concept" data-i18n="widget.hypone.kc">
     <span class="kc-title">One-sided tests concentrate the rejection region in one tail of the distribution, making them more powerful for detecting effects in the specified direction.</span> Use them when theory predicts a specific direction. The one-sided p-value is exactly <strong>half</strong> the two-sided p-value (when the effect is in the predicted direction), and critical values are smaller — e.g. <strong>1.65 vs &plusmn;1.96</strong> at &alpha; = 0.05.
   </div>
 
   <div class="widget-howto">
-    <div class="howto-title">What you can do here</div>
-    <ul>
+    <div class="howto-title" data-i18n="common.howtoTitle">What you can do here</div>
+    <ul data-i18n="widget.hypone.howto">
       <li><strong>Slide &mu;<sub>0</sub></strong> to set the hypothesized value.</li>
       <li><strong>Toggle the alternative direction</strong> between H<sub>a</sub>: &mu; &gt; &mu;<sub>0</sub> and H<sub>a</sub>: &mu; &lt; &mu;<sub>0</sub>.</li>
       <li><strong>Compare the one-sided and two-sided p-values</strong> side by side in the stat cards.</li>
@@ -456,12 +546,12 @@ footer.page a{color:var(--accent);text-decoration:none}footer.page a:hover{text-
 
   <div class="controls">
     <div class="ctrl">
-      <label>Hypothesized value &mu;<sub>0</sub></label>
+      <label data-i18n="widget.hypone.ctrl.mu0.label">Hypothesized value &mu;<sub>0</sub></label>
       <input type="range" id="ho-mu0" min="30000" max="55000" step="500" value="40000">
       <span class="val" id="ho-mu0-val">$40,000</span>
     </div>
     <div class="ctrl">
-      <label>Alternative hypothesis</label>
+      <label data-i18n="widget.hypone.ctrl.alt.label">Alternative hypothesis</label>
       <div class="toggle-group" id="ho-direction">
         <button class="active" data-val="greater">H&#x2090;: &mu; &gt; &mu;&#x2080;</button>
         <button data-val="less">H&#x2090;: &mu; &lt; &mu;&#x2080;</button>
@@ -469,43 +559,43 @@ footer.page a{color:var(--accent);text-decoration:none}footer.page a:hover{text-
     </div>
   </div>
   <div class="stats-grid">
-    <div class="stat mean"><div class="label">t-statistic</div><div class="value" id="ho-stat-t">—</div></div>
-    <div class="stat median"><div class="label">p-value (one-sided)</div><div class="value" id="ho-stat-p1">—</div></div>
-    <div class="stat spread"><div class="label">p-value (two-sided)</div><div class="value" id="ho-stat-p2">—</div></div>
-    <div class="stat mean"><div class="label">t-crit (one-sided, 5%)</div><div class="value" id="ho-stat-tcrit">—</div></div>
+    <div class="stat mean"><div class="label" data-i18n="stat.tstat">t-statistic</div><div class="value" id="ho-stat-t">—</div></div>
+    <div class="stat median"><div class="label" data-i18n="stat.pval1">p-value (one-sided)</div><div class="value" id="ho-stat-p1">—</div></div>
+    <div class="stat spread"><div class="label" data-i18n="stat.pval2">p-value (two-sided)</div><div class="value" id="ho-stat-p2">—</div></div>
+    <div class="stat mean"><div class="label" data-i18n="stat.tcrit1">t-crit (one-sided, 5%)</div><div class="value" id="ho-stat-tcrit">—</div></div>
   </div>
   <div id="ho-decision" class="decision-badge fail">—</div>
   <div id="chart-hyp-one" class="chart"></div>
   <div class="try-this">
-    <div class="try-title">Try This</div>
-    <ol>
+    <div class="try-title" data-i18n="common.tryTitle">Try This</div>
+    <ol data-i18n="widget.hypone.try">
       <li><strong>Set &mu;<sub>0</sub> = $40,000, H<sub>a</sub>: &mu; &gt; $40,000.</strong> <em>One-sided p &asymp; 0.235, exactly half of the two-sided 0.470 — neither test is significant, but the directional version uses its power efficiently by only looking right.</em></li>
       <li><strong>Set &mu;<sub>0</sub> = $38,000 with H<sub>a</sub>: &mu; &gt; $38,000.</strong> <em>The one-sided test rejects at 5% while the two-sided barely hangs on — the directional version's "extra power" is real and visible here.</em></li>
       <li><strong>Toggle to H<sub>a</sub>: &mu; &lt; &mu;<sub>0</sub> while the t-stat is positive.</strong> <em>p jumps near 1.0 — testing the wrong direction leaves you defenseless: the data is maximally un-supportive of your alternative.</em></li>
     </ol>
   </div>
 
-  <p class="takeaway"><strong>Take-away:</strong> One-sided tests double the power in the predicted direction but leave you unable to detect effects that go the other way. <a href="../../book/_book/notebooks_quarto/ch04_Statistical_Inference_for_the_Mean.html#one-sided-directional-hypothesis-tests" target="_blank" rel="noopener">Read §4.6 in the chapter →</a></p>
+  <p class="takeaway" data-i18n="widget.hypone.takeaway"><strong>Take-away:</strong> One-sided tests double the power in the predicted direction but leave you unable to detect effects that go the other way. <a href="../../book/_book/notebooks_quarto/ch04_Statistical_Inference_for_the_Mean.html#one-sided-directional-hypothesis-tests" target="_blank" rel="noopener">Read §4.6 in the chapter →</a></p>
 </section>
 
 <!-- ==================== WIDGET 6: Gas Price Test ==================== -->
 <section class="widget" id="gas-test">
   <div class="widget-head">
     <div>
-      <h2>Gasoline Prices: Statistical vs Practical Significance</h2>
+      <h2 data-i18n="widget.gas.heading">Gasoline Prices: Statistical vs Practical Significance</h2>
     </div>
-    <button class="reset-btn" data-reset="gastest">Reset</button>
+    <button class="reset-btn" data-reset="gastest" data-i18n="common.reset">Reset</button>
   </div>
 
-  <p class="motivation">Yolo County gas is $0.14/gallon cheaper than the California average — stat-sig at <em>p &lt; 0.0001</em>. But is that $2 per fill-up worth crossing town for?</p>
+  <p class="motivation" data-i18n="widget.gas.motivation">Yolo County gas is $0.14/gallon cheaper than the California average — stat-sig at <em>p &lt; 0.0001</em>. But is that $2 per fill-up worth crossing town for?</p>
 
-  <div class="key-concept">
+  <div class="key-concept" data-i18n="widget.gas.kc">
     <span class="kc-title">Even small practical differences can be statistically significant when the sample gives precise estimates.</span> The gasoline-price gap of $0.14 looks trivial, but the <strong>standard error is tiny</strong> ($0.027), so the <strong>t-statistic is large</strong> (&minus;5.26) — the difference sits many standard errors from zero. Statistical significance answers "Is there a difference?"; <strong>practical significance</strong> asks "Does the difference matter?" Both questions matter in econometrics.
   </div>
 
   <div class="widget-howto">
-    <div class="howto-title">What you can do here</div>
-    <ul>
+    <div class="howto-title" data-i18n="common.howtoTitle">What you can do here</div>
+    <ul data-i18n="widget.gas.howto">
       <li><strong>Slide the hypothesized CA state average</strong> from $3.40 to $4.10.</li>
       <li><strong>Watch the t-statistic, p-value, and REJECT / FAIL badge</strong> update live.</li>
       <li><strong>Compare H<sub>0</sub> to the sample mean</strong> ($3.67) — the closer they are, the larger p becomes.</li>
@@ -514,49 +604,49 @@ footer.page a{color:var(--accent);text-decoration:none}footer.page a:hover{text-
 
   <div class="controls">
     <div class="ctrl">
-      <label>CA state average (H<sub>0</sub>)</label>
+      <label data-i18n="widget.gas.ctrl.mu0.label">CA state average (H<sub>0</sub>)</label>
       <input type="range" id="gas-mu0" min="3.40" max="4.10" step="0.01" value="3.81">
       <span class="val" id="gas-mu0-val">$3.81</span>
     </div>
   </div>
   <div class="stats-grid">
-    <div class="stat mean"><div class="label">Sample mean</div><div class="value" id="gas-stat-mean">—</div></div>
-    <div class="stat spread"><div class="label">SE</div><div class="value" id="gas-stat-se">—</div></div>
-    <div class="stat median"><div class="label">t-statistic</div><div class="value" id="gas-stat-t">—</div></div>
-    <div class="stat spread"><div class="label">p-value</div><div class="value" id="gas-stat-p">—</div></div>
+    <div class="stat mean"><div class="label" data-i18n="stat.smean">Sample mean</div><div class="value" id="gas-stat-mean">—</div></div>
+    <div class="stat spread"><div class="label" data-i18n="stat.seShort">SE</div><div class="value" id="gas-stat-se">—</div></div>
+    <div class="stat median"><div class="label" data-i18n="stat.tstat">t-statistic</div><div class="value" id="gas-stat-t">—</div></div>
+    <div class="stat spread"><div class="label" data-i18n="stat.pval">p-value</div><div class="value" id="gas-stat-p">—</div></div>
   </div>
   <div id="gas-decision" class="decision-badge reject">—</div>
   <div id="chart-gas" class="chart"></div>
   <div class="try-this">
-    <div class="try-title">Try This</div>
-    <ol>
+    <div class="try-title" data-i18n="common.tryTitle">Try This</div>
+    <ol data-i18n="widget.gas.try">
       <li><strong>Set H<sub>0</sub> = $3.81 (the book's CA average).</strong> <em>t = &minus;5.26, p &lt; 0.0001, REJECT — the tiny SE ($0.027) turns a $0.14 gap into overwhelming statistical evidence.</em></li>
       <li><strong>Slide H<sub>0</sub> toward $3.67 (the sample mean).</strong> <em>p grows steeply; it crosses 0.05 near the 95% CI endpoints around $3.62 and $3.72 — inside that narrow window, the data fails to reject.</em></li>
       <li><strong>Set H<sub>0</sub> = $3.67 exactly.</strong> <em>t &asymp; 0, p &asymp; 1.0 — we cannot reject that &mu; equals our own sample mean, a reassuring sanity check on the machinery.</em></li>
     </ol>
   </div>
 
-  <p class="takeaway"><strong>Take-away:</strong> With a small SE, tiny effects become statistically significant — always ask whether the difference also matters <em>practically</em>. <a href="../../book/_book/notebooks_quarto/ch04_Statistical_Inference_for_the_Mean.html#hypothesis-test-examples" target="_blank" rel="noopener">Read §4.5 in the chapter →</a></p>
+  <p class="takeaway" data-i18n="widget.gas.takeaway"><strong>Take-away:</strong> With a small SE, tiny effects become statistically significant — always ask whether the difference also matters <em>practically</em>. <a href="../../book/_book/notebooks_quarto/ch04_Statistical_Inference_for_the_Mean.html#hypothesis-test-examples" target="_blank" rel="noopener">Read §4.5 in the chapter →</a></p>
 </section>
 
 <!-- ==================== WIDGET 7: Proportions Inference ==================== -->
 <section class="widget" id="proportions">
   <div class="widget-head">
     <div>
-      <h2>Inference for Proportions</h2>
+      <h2 data-i18n="widget.prop.heading">Inference for Proportions</h2>
     </div>
-    <button class="reset-btn" data-reset="proportions">Reset</button>
+    <button class="reset-btn" data-reset="proportions" data-i18n="common.reset">Reset</button>
   </div>
 
-  <p class="motivation">A poll says 52.1% plan to vote Democrat. Is that a real lead — <em>or just sampling noise dressed up as a majority?</em></p>
+  <p class="motivation" data-i18n="widget.prop.motivation">A poll says 52.1% plan to vote Democrat. Is that a real lead — <em>or just sampling noise dressed up as a majority?</em></p>
 
-  <div class="key-concept">
+  <div class="key-concept" data-i18n="widget.prop.kc">
     <span class="kc-title">Proportions are simply means of 0/1 binary data, so the whole inference toolkit carries over.</span> Confidence intervals, hypothesis tests, and standard errors for proportions use the same logic as for means — only the SE formula changes: <strong>se(p&#770;) = &radic;(p&#770;(1&minus;p&#770;)/n)</strong>, which follows from the variance of a binary variable. The sample proportion p&#770; is literally the sample mean of the 0/1 codings.
   </div>
 
   <div class="widget-howto">
-    <div class="howto-title">What you can do here</div>
-    <ul>
+    <div class="howto-title" data-i18n="common.howtoTitle">What you can do here</div>
+    <ul data-i18n="widget.prop.howto">
       <li><strong>Slide the sample proportion p&#770;</strong> from 0.30 to 0.70.</li>
       <li><strong>Slide the sample size n</strong> from 50 to 5,000 and watch SE shrink.</li>
       <li><strong>Slide the hypothesized proportion p<sub>0</sub></strong> to test any null value.</li>
@@ -566,50 +656,50 @@ footer.page a{color:var(--accent);text-decoration:none}footer.page a:hover{text-
 
   <div class="controls">
     <div class="ctrl">
-      <label>Sample proportion (p&#770;)</label>
+      <label data-i18n="widget.prop.ctrl.phat.label">Sample proportion (p&#770;)</label>
       <input type="range" id="prop-phat" min="0.30" max="0.70" step="0.01" value="0.52">
       <span class="val" id="prop-phat-val">p&#770; = 0.52</span>
     </div>
     <div class="ctrl">
-      <label>Sample size (n)</label>
+      <label data-i18n="widget.prop.ctrl.n.label">Sample size (n)</label>
       <input type="range" id="prop-n" min="50" max="5000" step="50" value="921">
       <span class="val" id="prop-n-val">n = 921</span>
     </div>
     <div class="ctrl">
-      <label>Hypothesized proportion (p<sub>0</sub>)</label>
+      <label data-i18n="widget.prop.ctrl.p0.label">Hypothesized proportion (p<sub>0</sub>)</label>
       <input type="range" id="prop-p0" min="0.30" max="0.70" step="0.01" value="0.50">
       <span class="val" id="prop-p0-val">p&#x2080; = 0.50</span>
     </div>
   </div>
   <div class="stats-grid">
-    <div class="stat mean"><div class="label">SE</div><div class="value" id="prop-stat-se">—</div></div>
-    <div class="stat mean"><div class="label">95% CI Lower</div><div class="value" id="prop-stat-lo">—</div></div>
-    <div class="stat median"><div class="label">95% CI Upper</div><div class="value" id="prop-stat-hi">—</div></div>
-    <div class="stat spread"><div class="label">z-statistic</div><div class="value" id="prop-stat-z">—</div></div>
-    <div class="stat spread"><div class="label">p-value</div><div class="value" id="prop-stat-p">—</div></div>
+    <div class="stat mean"><div class="label" data-i18n="stat.seShort">SE</div><div class="value" id="prop-stat-se">—</div></div>
+    <div class="stat mean"><div class="label" data-i18n="stat.cilo95">95% CI Lower</div><div class="value" id="prop-stat-lo">—</div></div>
+    <div class="stat median"><div class="label" data-i18n="stat.cihi95">95% CI Upper</div><div class="value" id="prop-stat-hi">—</div></div>
+    <div class="stat spread"><div class="label" data-i18n="stat.zstat">z-statistic</div><div class="value" id="prop-stat-z">—</div></div>
+    <div class="stat spread"><div class="label" data-i18n="stat.pval">p-value</div><div class="value" id="prop-stat-p">—</div></div>
   </div>
   <div id="prop-decision" class="decision-badge fail">—</div>
   <div id="chart-prop" class="chart short"></div>
   <div class="try-this">
-    <div class="try-title">Try This</div>
-    <ol>
+    <div class="try-title" data-i18n="common.tryTitle">Try This</div>
+    <ol data-i18n="widget.prop.try">
       <li><strong>Keep defaults (p&#770; = 0.52, n = 921, p<sub>0</sub> = 0.50).</strong> <em>This matches the book's voter example: SE &asymp; 0.0165, 95% CI &asymp; [48.9%, 55.3%] — since 50% sits inside, we fail to reject and the "majority" is within sampling noise.</em></li>
       <li><strong>Keep p&#770; = 0.52 and push n to 2,500.</strong> <em>The CI tightens enough that 50% now falls outside — the same observed proportion becomes statistically significant purely because SE shrank with &radic;n.</em></li>
       <li><strong>Set p&#770; = 0.50 exactly.</strong> <em>z = 0, p = 1.0, and the CI centers on p<sub>0</sub> — when the estimate equals the hypothesis, there is nothing to reject.</em></li>
     </ol>
   </div>
 
-  <p class="takeaway"><strong>Take-away:</strong> Proportions are means of 0/1 data — the whole inference toolkit (SE, CI, z-tests) carries over, with only the SE formula changing. <a href="../../book/_book/notebooks_quarto/ch04_Statistical_Inference_for_the_Mean.html#proportions-data" target="_blank" rel="noopener">Read §4.7 in the chapter →</a></p>
+  <p class="takeaway" data-i18n="widget.prop.takeaway"><strong>Take-away:</strong> Proportions are means of 0/1 data — the whole inference toolkit (SE, CI, z-tests) carries over, with only the SE formula changing. <a href="../../book/_book/notebooks_quarto/ch04_Statistical_Inference_for_the_Mean.html#proportions-data" target="_blank" rel="noopener">Read §4.7 in the chapter →</a></p>
 </section>
 
 <section class="howto-card code-summary" id="code" aria-label="Code summary">
-  <h2>Code Summary</h2>
-  <p class="motivation">You've explored the key concepts interactively — now reproduce them in code. These self-contained blocks cover everything you practiced above. Pick your language, copy the code, and run it.</p>
+  <h2 data-i18n="code.heading">Code Summary</h2>
+  <p class="motivation" data-i18n="code.motivation">You've explored the key concepts interactively — now reproduce them in code. These self-contained blocks cover everything you practiced above. Pick your language, copy the code, and run it.</p>
 
   <div class="code-tabs" id="code-lang-tabs">
-    <button type="button" data-lang="python" class="active">Python</button>
-    <button type="button" data-lang="stata">Stata</button>
-    <button type="button" data-lang="r">R</button>
+    <button type="button" data-lang="python" class="active" data-i18n="code.tab.python">Python</button>
+    <button type="button" data-lang="stata" data-i18n="code.tab.stata">Stata</button>
+    <button type="button" data-lang="r" data-i18n="code.tab.r">R</button>
   </div>
 
   <div class="code-panel active" id="panel-python">
@@ -764,8 +854,8 @@ print(f"95% CI: [{ci_lo:.4f}, {ci_hi:.4f}]")
 print(f"\nH0: p = {p0}  z = {z_stat:.4f}  p-value = {p_val_z:.4f}")
 print(f"Decision: {'Reject H0' if abs(z_stat) &gt; 1.96 else 'Do not reject H0'}")</code></pre>
   <div style="display:flex;gap:0.8rem;align-items:center;margin-top:0.8rem;flex-wrap:wrap">
-    <button class="btn-copy" onclick="navigator.clipboard.writeText(document.getElementById('code-python').textContent).then(()=>{this.textContent='Copied!';setTimeout(()=>this.textContent='Copy code',1500)})">Copy code</button>
-    <a class="btn-colab" href="https://colab.research.google.com/notebooks/empty.ipynb" target="_blank" rel="noopener">Open empty Colab notebook &rarr;</a>
+    <button class="btn-copy" data-i18n="code.copy.idle" onclick="navigator.clipboard.writeText(document.getElementById('code-python').textContent).then(()=>{this.textContent=t('code.copy.done');setTimeout(()=>this.textContent=t('code.copy.idle'),1500)})">Copy code</button>
+    <a class="btn-colab" href="https://colab.research.google.com/notebooks/empty.ipynb" target="_blank" rel="noopener" data-i18n="code.colab">Open empty Colab notebook &rarr;</a>
   </div>
   </div>
 
@@ -928,8 +1018,8 @@ display "95% CI: [" %6.4f `p_hat' - 1.96 * `se_p' ", " %6.4f `p_hat' + 1.96 * `s
 display "H0: p = 0.50  z = " %6.4f `z' "  p-value = " %6.4f `pval'
 display "Decision: " cond(abs(`z') &gt; 1.96, "Reject H0", "Do not reject H0")</code></pre>
   <div style="display:flex;gap:0.8rem;align-items:center;margin-top:0.8rem;flex-wrap:wrap">
-    <button class="btn-copy" onclick="navigator.clipboard.writeText(document.getElementById('code-stata').textContent).then(()=>{this.textContent='Copied!';setTimeout(()=>this.textContent='Copy code',1500)})">Copy code</button>
-    <span style="color:var(--text-muted);font-size:0.88rem">Paste into your Stata do-file editor</span>
+    <button class="btn-copy" data-i18n="code.copy.idle" onclick="navigator.clipboard.writeText(document.getElementById('code-stata').textContent).then(()=>{this.textContent=t('code.copy.done');setTimeout(()=>this.textContent=t('code.copy.idle'),1500)})">Copy code</button>
+    <span style="color:var(--text-muted);font-size:0.88rem" data-i18n="code.note.stata">Paste into your Stata do-file editor</span>
   </div>
   </div>
 
@@ -1064,8 +1154,8 @@ cat("H0: p = 0.50  p-value =", round(result_prop$p.value, 4), "\n")
 cat("Decision:", ifelse(result_prop$p.value &lt; 0.05,
     "Reject H0", "Do not reject H0"), "\n")</code></pre>
   <div style="display:flex;gap:0.8rem;align-items:center;margin-top:0.8rem;flex-wrap:wrap">
-    <button class="btn-copy" onclick="navigator.clipboard.writeText(document.getElementById('code-r').textContent).then(()=>{this.textContent='Copied!';setTimeout(()=>this.textContent='Copy code',1500)})">Copy code</button>
-    <span style="color:var(--text-muted);font-size:0.88rem">Paste into your R console or RStudio</span>
+    <button class="btn-copy" data-i18n="code.copy.idle" onclick="navigator.clipboard.writeText(document.getElementById('code-r').textContent).then(()=>{this.textContent=t('code.copy.done');setTimeout(()=>this.textContent=t('code.copy.idle'),1500)})">Copy code</button>
+    <span style="color:var(--text-muted);font-size:0.88rem" data-i18n="code.note.r">Paste into your R console or RStudio</span>
   </div>
   </div>
 </section>
@@ -1073,9 +1163,9 @@ cat("Decision:", ifelse(result_prop$p.value &lt; 0.05,
 </main>
 
 <footer class="page">
-  <p>Part of <a href="https://quarcs-lab.github.io/metricsai/book/_book/index.html"><strong>metricsAI</strong></a> · Chapter 04: Statistical Inference for the Mean · by Carlos Mendez · <a href="https://github.com/quarcs-lab/metricsai">GitHub</a></p>
-  <p>Data: AED_EARNINGS.DTA (n=171) · AED_GASPRICE.DTA (n=32) · AED_EARNINGSMALE.DTA (n=191) · AED_REALGDPPC.DTA (n=241)</p>
-  <a class="scroll-top" href="#top">&uarr; Back to top</a>
+  <p data-i18n="footer.text">Part of <a href="https://quarcs-lab.github.io/metricsai/book/_book/index.html"><strong>metricsAI</strong></a> · Chapter 04: Statistical Inference for the Mean · by Carlos Mendez · <a href="https://github.com/quarcs-lab/metricsai">GitHub</a></p>
+  <p data-i18n="footer.data">Data: AED_EARNINGS.DTA (n=171) · AED_GASPRICE.DTA (n=32) · AED_EARNINGSMALE.DTA (n=191) · AED_REALGDPPC.DTA (n=241)</p>
+  <a class="scroll-top" href="#top" data-i18n="footer.scrolltop">&uarr; Back to top</a>
 </footer>
 
 <script type="application/json" id="ch-data">{"earnings":[25000,40000,25000,38000,28800,31000,25000,20000,83000,10800,22000,24000,15000,19000,25000,105000,25000,36000,23000,75000,85000,60000,24000,20000,85000,62000,16000,13000,20000,39000,41000,32000,42000,45500,33000,40000,71000,29300,24000,38000,24500,32000,25000,40000,54000,19000,44800,53000,45000,17000,27000,36000,42000,24000,25000,21500,41000,27000,45000,9000,30000,30000,72000,50000,12000,32000,24000,65000,39000,54000,28000,56000,33720,30000,42000,47000,60000,25000,43000,27000,12000,24000,110000,45000,45000,84000,28000,34000,36000,41000,1050,24000,42000,28000,40800,38000,17000,28000,97000,10000,42000,75000,31000,80000,14900,90000,80000,140000,36000,65000,45000,24500,32000,27000,67000,40000,30000,20000,68000,30000,16000,28000,78000,85000,65000,21100,172000,30000,39000,37000,55000,45300,83000,47700,45000,58000,40000,25000,38000,48000,20000,84000,35000,25000,110000,80000,40000,22000,27000,20000,14000,12000,12000,30000,15600,32000,50000,68000,37500,75000,15000,24000,50000,40000,26200,85000,75000,30000,12000,40000,30000],"gas":{"prices":[3.57,3.79,3.79,3.55,3.99,3.79,3.75,3.55,3.65,3.49,3.79,4.09,3.79,3.49,3.65,3.62,3.65,3.59,3.59,3.49,3.79,3.49,3.75,3.85,3.49,3.49,3.59,3.75,3.69,3.69,3.49,3.69],"ca_avg":3.81},"earnings_male":[38000,40000,30000,20000,47000,89000,20000,77000,19000,62000,32000,24000,60000,50000,75000,17800,100000,30000,50000,90000,45000,40000,35000,44000,68000,22000,37000,36000,30000,20000,39000,30000,65000,65000,56000,170000,60000,25000,40000,41000,38000,14000,75000,10000,24000,30000,70000,72000,40000,27000,28500,68000,26000,28000,38000,81000,30000,25000,75000,65000,40000,50000,24000,75000,30000,30000,17000,75000,44000,15600,15000,22800,24000,22000,30000,9600,50000,24000,30000,39400,92000,25000,29300,31000,75000,81000,45000,21000,11000,43000,86000,42000,53000,80000,50000,60000,22900,85000,242000,21000,96000,38000,25000,15000,38000,45000,30000,18000,70000,70000,15000,60000,125000,26000,30000,90000,79300,86000,498000,220000,47000,498000,40000,498000,1,48000,48000,27800,55000,34000,57000,14000,37000,30000,43000,13000,36000,29000,57700,8000,34000,70000,35000,13000,32000,36000,113000,20000,60000,45000,27900,108000,24000,20000,31300,40000,34000,40000,21000,15600,26000,18200,38000,30000,15000,18000,42000,12000,44000,25000,75000,30000,8000,37000,38000,30000,45000,40000,50000,55000,63000,40000,31000,37000,40000,45000,9500,24400,40000,160000,53000],"gdp_growth":[3.0113,-0.018,0.3241,-1.1999,-2.4694,-0.0662,1.443,4.7387,5.8717,5.0905,4.4071,2.7633,2.0896,2.3339,3.3175,3.6772,4.7383,4.7086,4.0783,3.7501,4.1055,4.3319,5.0463,7.1619,7.2104,6.2431,4.8383,3.3413,1.7776,1.5093,1.6378,1.5933,2.7896,4.4685,4.2952,3.9358,3.4611,2.0622,1.9425,1.0236,-0.7237,-0.9627,-0.7657,-1.4024,1.3663,1.7912,1.7253,3.111,2.3009,4.1153,4.2892,5.8315,6.5169,5.3028,3.7777,3.062,-0.2843,-1.1159,-1.5366,-2.8577,-3.2024,-2.7672,-0.1984,1.541,5.0876,5.1389,3.9723,3.3278,2.2322,3.4304,4.6996,3.9269,3.0412,4.9689,4.1332,5.5218,5.3554,1.5345,1.2586,0.1493,0.2563,-1.9333,-2.7655,-1.1632,0.5342,1.9457,3.3142,0.3277,-3.1369,-1.9644,-3.4761,-2.3596,0.4971,2.3326,4.7869,6.9449,7.6305,7.057,5.9745,4.6501,3.6447,2.7726,3.3309,3.2461,3.1959,2.755,2.19,1.9904,1.8043,2.4422,2.3495,3.5439,3.3046,3.5474,3.2443,2.851,3.3612,2.7818,2.9255,1.7492,1.7983,1.3077,0.5506,-0.6404,-2.2544,-1.8566,-1.4282,-0.1662,1.5193,1.8116,2.2876,2.9933,1.943,1.4683,0.9813,1.3247,2.1652,2.9599,3.089,2.8841,2.2578,1.201,1.4699,1.0018,1.416,2.8005,2.8447,3.1981,3.0775,3.0689,3.425,3.2483,3.62,2.8826,2.9038,3.6865,3.6343,3.475,3.5263,3.6143,3.0151,4.1256,2.9646,1.9104,1.2777,0.0514,-0.4869,-0.8229,0.3411,0.3755,1.2504,1.142,0.8319,1.0868,2.3538,3.3739,3.3666,3.2693,2.5054,2.3472,2.9126,2.6107,2.5492,2.1711,2.3887,2.1452,1.3954,1.6123,0.5124,0.8532,1.2454,1.0028,0.1886,0.1371,-0.9292,-3.6399,-4.1552,-4.7722,-3.8922,-0.6847,0.8327,1.9347,2.3502,1.7811,1.1852,0.9953,0.2283,0.8899,1.9284,1.6427,1.8118,0.7615,0.8787,0.5792,1.2292,1.9159,0.7166,1.9403,2.3759,2.1323,3.2316,2.6119,1.7122,1.1797,0.8924,0.6228,0.8447,1.3366,1.4247,1.511,1.7861,2.1916,2.2852,2.6474,2.6009,2.0033,2.1521,1.7903,1.5874,1.8418,-0.2241],"summary":{"earnings":{"n":171,"mean":41412.6901,"std":25527.0534,"se":1952.1026,"min":1050.0,"max":172000.0,"median":36000.0},"gas":{"n":32,"mean":3.6697,"std":0.151,"se":0.0267,"min":3.49,"max":4.09,"median":3.65},"earnings_male":{"n":191,"mean":52353.9319,"std":65034.7361,"se":4705.7483,"min":1.0,"max":498000.0,"median":38000.0},"gdp_growth":{"n":241,"mean":1.9905,"std":2.1781,"se":0.1403,"min":-4.7722,"max":7.6305,"median":2.0896}},"meta":{"chapter":"Chapter 4: Statistical Inference for the Mean","book":"metricsAI: An Introduction to Econometrics with Python and AI in the Cloud","author":"Carlos Mendez"}}</script>
@@ -1084,6 +1174,416 @@ cat("Decision:", ifelse(result_prop$p.value &lt; 0.05,
 "use strict";
 
 var DATA = JSON.parse(document.getElementById("ch-data").textContent);
+
+// ==================== I18N (EN / ES) ====================
+// English is the source of truth. Spanish entries are real translations
+// (no placeholder prefixes). Strings may contain `{name}` placeholders
+// that are filled by t(key, vars).
+var I18N = {
+  defaultLang: "en",
+  storageKey: "language",
+  en: {
+    "meta.title": "Chapter 04 — Statistical Inference for the Mean · metricsAI",
+
+    "header.badge":    "Chapter 04 of 18 · Interactive Dashboard",
+    "header.title":    "Statistical Inference for the Mean",
+    "header.subtitle": "Explore confidence intervals, hypothesis testing, and the t-distribution through interactive controls — using the same datasets and examples as the book.",
+
+    "theme.dark":  "Dark",
+    "theme.light": "Light",
+
+    "nav.se":      "SE & Sample Size",
+    "nav.tdist":   "t-Distribution",
+    "nav.ci":      "Confidence Intervals",
+    "nav.hyptwo":  "Two-Sided Test",
+    "nav.hypone":  "One-Sided Test",
+    "nav.gas":     "Gas Price Test",
+    "nav.prop":    "Proportions",
+    "nav.code":    "Code",
+
+    "common.reset":      "Reset",
+    "common.tryTitle":   "Try This",
+    "common.howtoTitle": "What you can do here",
+    "common.takeaway":   "Take-away:",
+    "common.on":         "On",
+    "common.off":        "Off",
+    "common.reject":     "Reject H₀",
+    "common.fail":       "Fail to reject H₀",
+    "common.rejectAlpha": "Reject H₀ (α = 0.05)",
+    "common.rejectP":    "Reject H₀: p = {p0}",
+    "common.failP":      "Fail to reject H₀: p = {p0}",
+
+    // ---- Stat card labels ----
+    "stat.n":         "n",
+    "stat.sd":        "SD (s)",
+    "stat.se":        "SE (s/√n)",
+    "stat.seShort":   "SE",
+    "stat.ciw":       "Approx 95% CI width",
+    "stat.df":        "df",
+    "stat.tcrit2":    "t-crit (5%, two-sided)",
+    "stat.zcrit":     "z-crit (Normal)",
+    "stat.tailarea":  "Tail area beyond ±1.96",
+    "stat.xbar":      "X̄",
+    "stat.tcrit":     "t-critical",
+    "stat.moe":       "Margin of error",
+    "stat.cilo":      "CI Lower",
+    "stat.cihi":      "CI Upper",
+    "stat.width":     "Width",
+    "stat.tstat":     "t-statistic",
+    "stat.pval":      "p-value",
+    "stat.tcritPm":   "±t-crit (5%)",
+    "stat.pval1":     "p-value (one-sided)",
+    "stat.pval2":     "p-value (two-sided)",
+    "stat.tcrit1":    "t-crit (one-sided, 5%)",
+    "stat.smean":     "Sample mean",
+    "stat.cilo95":    "95% CI Lower",
+    "stat.cihi95":    "95% CI Upper",
+    "stat.zstat":     "z-statistic",
+
+    // ---- Widget 1: SE & Sample Size ----
+    "widget.se.heading":    "Standard Error & Sample Size",
+    "widget.se.motivation": "How precise is our $41k estimate of average earnings? And how much more data would you need to <em>halve</em> that uncertainty?",
+    "widget.se.kc":         "<span class=\"kc-title\">The standard error se(X&#772;) = s/&radic;n measures the precision of the sample mean as an estimate of &mu;.</span> It quantifies sampling uncertainty — smaller SEs mean more precise estimates. Because SE shrinks with <strong>&radic;n</strong>, not with <strong>n</strong>, quadrupling the sample size is required to halve the standard error.",
+    "widget.se.howto":      "<li><strong>Slide the sample size n</strong> from 10 to 500 and watch SE and the 95% CI width update.</li>\n      <li><strong>Compare to the book's n = 171</strong> — the default position of the slider.</li>\n      <li><strong>Hover the curve</strong> to read SE at any point along the 1/&radic;n shape.</li>",
+    "widget.se.ctrl.n.label": "Sample size (n)",
+    "widget.se.chart.xaxis":   "Sample size (n)",
+    "widget.se.chart.yaxis":   "Standard Error ($)",
+    "widget.se.chart.legend.curve":   "SE = s/√n",
+    "widget.se.chart.legend.current": "Current n = {n}",
+    "widget.se.chart.legend.4n":      "4×n = {n4} (SE halved)",
+    "widget.se.try":         "<li><strong>Set n = 171 (the book's sample), then set n = 684 (4&times; larger).</strong> <em>SE halves from ~$1,952 to ~$976 — the &radic;n rule in action: halving precision costs four times more data.</em></li>\n      <li><strong>Set n = 50.</strong> <em>SE jumps to ~$3,611 and the approximate 95% CI widens to ~$14,400 — under-sampling doesn't just shrink the window slightly, it nearly doubles it.</em></li>\n      <li><strong>Set n = 400.</strong> <em>SE drops to ~$1,276 — collecting 229 more observations shaves only ~$676 off the SE, the diminishing-returns shoulder of the 1/&radic;n curve.</em></li>",
+    "widget.se.takeaway":   "<strong>Take-away:</strong> SE = s/&radic;n quantifies precision; doubling precision always costs four times more data. <a href=\"../../book/_book/notebooks_quarto/ch04_Statistical_Inference_for_the_Mean.html#example-mean-annual-earnings\" target=\"_blank\" rel=\"noopener\">Read §4.1 in the chapter →</a>",
+
+    // ---- Widget 2: t-Distribution ----
+    "widget.tdist.heading":     "t-Distribution Explorer",
+    "widget.tdist.motivation":  "Why do we need a whole <em>family</em> of bell curves — one for every sample size? Because estimating &sigma; from the sample adds uncertainty the normal curve can't see.",
+    "widget.tdist.kc":          "<span class=\"kc-title\">The t-distribution is used when &sigma; is unknown and estimated from the sample.</span> It resembles the standard normal N(0, 1) but with <strong>fatter tails</strong> that reflect the extra uncertainty from using <em>s</em> in place of &sigma;. As <em>n</em> grows, the t-distribution approaches the normal — which is why the normal is a good approximation for large samples (the familiar \"n &ge; 30\" rule of thumb).",
+    "widget.tdist.howto":       "<li><strong>Toggle degrees of freedom</strong> between df = 4, 10, 30, and 100.</li>\n      <li><strong>Toggle the Normal N(0,1) overlay</strong> to compare the two curves directly.</li>\n      <li><strong>Watch the t-critical value</strong> in the stat cards — it shrinks toward 1.96 as df grows.</li>",
+    "widget.tdist.ctrl.df.label":     "Degrees of freedom",
+    "widget.tdist.ctrl.normal.label": "Show Normal N(0,1)",
+    "widget.tdist.df.4":   "df = 4",
+    "widget.tdist.df.10":  "df = 10",
+    "widget.tdist.df.30":  "df = 30",
+    "widget.tdist.df.100": "df = 100",
+    "widget.tdist.chart.xaxis":   "t",
+    "widget.tdist.chart.yaxis":   "Density",
+    "widget.tdist.chart.legend.t":      "t({df})",
+    "widget.tdist.chart.legend.normal": "N(0, 1)",
+    "widget.tdist.chart.legend.reject": "5% rejection",
+    "widget.tdist.try":         "<li><strong>Set df = 4 with the Normal overlay on.</strong> <em>The t-tails are visibly fatter and t-crit = 2.78 (vs 1.96 for the normal) — with tiny samples, you need a much larger t-statistic to reject at 5%.</em></li>\n      <li><strong>Set df = 30.</strong> <em>t-crit drops to ~2.04, just barely above 1.96 — the classic \"n &ge; 30 is large enough\" rule is exactly this small gap becoming negligible.</em></li>\n      <li><strong>Set df = 100.</strong> <em>The two curves are visually indistinguishable and tail area beyond &plusmn;1.96 is ~5% — for reasonable samples, the normal is a perfectly usable stand-in for the t.</em></li>",
+    "widget.tdist.takeaway":    "<strong>Take-away:</strong> The t-distribution pays for estimating &sigma; with fatter tails and refunds the cost as n grows. <a href=\"../../book/_book/notebooks_quarto/ch04_Statistical_Inference_for_the_Mean.html#t-statistic-and-t-distribution\" target=\"_blank\" rel=\"noopener\">Read §4.2 in the chapter →</a>",
+
+    // ---- Widget 3: Confidence Intervals ----
+    "widget.ci.heading":    "Confidence Interval Visualizer",
+    "widget.ci.motivation": "A point estimate of $41k is a single number. <em>What range of &mu; values is the data actually compatible with</em> — and how does that range change with our confidence requirement?",
+    "widget.ci.kc":         "<span class=\"kc-title\">A confidence interval provides a range of plausible values for &mu;.</span> A 95% CI means: if we repeated the sampling procedure many times, approximately 95% of the resulting intervals would contain the true &mu;. The interval is constructed as <strong>X&#772; &plusmn; t<sub>&alpha;/2</sub> &times; SE(X&#772;)</strong> — wider intervals indicate less precision.",
+    "widget.ci.howto":      "<li><strong>Slide the confidence level</strong> from 80% to 99% and watch the CI expand or contract.</li>\n      <li><strong>Toggle between Female Earnings and Gas Prices</strong> to see how SE differences reshape the CI.</li>\n      <li><strong>Compare the margin of error and CI width</strong> in the stat cards at each setting.</li>",
+    "widget.ci.ctrl.level.label": "Confidence level",
+    "widget.ci.ctrl.ds.label":    "Dataset",
+    "widget.ci.ds.earnings": "Female Earnings",
+    "widget.ci.ds.gas":      "Gas Prices",
+    "widget.ci.chart.xaxis.earnings": "Earnings ($)",
+    "widget.ci.chart.xaxis.gas":      "Price ($)",
+    "widget.ci.chart.legend.ci":   "{level}% CI",
+    "widget.ci.chart.legend.mean": "X̄ = {val}",
+    "widget.ci.try":         "<li><strong>At 95%, note the CI for Female Earnings: [$37,559, $45,266] (width $7,707). Push to 99%.</strong> <em>The CI widens to about $10,171 — a 4-point jump in confidence buys you a 30% wider interval.</em></li>\n      <li><strong>Drop the confidence level to 90%.</strong> <em>The CI narrows to ~$6,457 — you gain precision but accept that roughly 1 in 10 such intervals would miss the true &mu;.</em></li>\n      <li><strong>Switch to Gas Prices at 95%.</strong> <em>The CI is only about $0.11 wide because SE is tiny, and $3.81 (the CA average) sits far outside — the data rejects the state average before any formal test is run.</em></li>",
+    "widget.ci.takeaway":    "<strong>Take-away:</strong> Confidence intervals trade precision for confidence — the interval widens every time you demand a stronger claim. <a href=\"../../book/_book/notebooks_quarto/ch04_Statistical_Inference_for_the_Mean.html#confidence-intervals\" target=\"_blank\" rel=\"noopener\">Read §4.3 in the chapter →</a>",
+
+    // ---- Widget 4: Two-Sided Hypothesis Test ----
+    "widget.hyptwo.heading":    "Two-Sided Hypothesis Test",
+    "widget.hyptwo.motivation": "Is the population earnings mean really $40,000 — or is our $41k sample mean <em>too far off</em> for that story to hold?",
+    "widget.hyptwo.kc":         "<span class=\"kc-title\">A hypothesis test evaluates whether data provide sufficient evidence to reject a specific claim (H<sub>0</sub>) about a parameter.</span> The <strong>t-statistic</strong> measures how many standard errors the estimate is from the hypothesized value. The <strong>p-value</strong> is the probability of observing a result at least as extreme as ours if H<sub>0</sub> were true. Small p-values (< &alpha;, typically 0.05) provide evidence against H<sub>0</sub> and lead us to reject it.",
+    "widget.hyptwo.howto":      "<li><strong>Slide the hypothesized value &mu;<sub>0</sub></strong> from $30k to $55k.</li>\n      <li><strong>Watch the t-statistic, p-value, and REJECT / FAIL-TO-REJECT badge</strong> update live.</li>\n      <li><strong>See the shaded rejection regions</strong> on the t-distribution shift as &mu;<sub>0</sub> moves.</li>",
+    "widget.hyptwo.ctrl.mu0.label": "Hypothesized value &mu;<sub>0</sub>",
+    "widget.hyptwo.chart.xaxis":  "t",
+    "widget.hyptwo.chart.yaxis":  "Density",
+    "widget.hyptwo.chart.legend.t":      "t({df})",
+    "widget.hyptwo.chart.legend.reject": "α/2 rejection",
+    "widget.hyptwo.chart.legend.obs":    "Observed t",
+    "widget.hyptwo.try":         "<li><strong>Set &mu;<sub>0</sub> = $40,000 (the book's example).</strong> <em>t &asymp; 0.72, p &asymp; 0.470 — the t-marker sits well inside the white region, so we fail to reject: $40,000 remains a plausible &mu;.</em></li>\n      <li><strong>Drag &mu;<sub>0</sub> down toward $35,000 and watch p.</strong> <em>The &mu;<sub>0</sub> where p first crosses 0.05 is exactly the 95% CI endpoint — tests and CIs are the same object seen from opposite sides.</em></li>\n      <li><strong>Set &mu;<sub>0</sub> = $50,000.</strong> <em>t is sharply negative, p is tiny, and the decision flips to REJECT — $50k is too far from the sample mean to survive as a population mean.</em></li>",
+    "widget.hyptwo.takeaway":   "<strong>Take-away:</strong> A hypothesis test is just a confidence interval read in reverse — the values you'd reject are the ones outside the interval. <a href=\"../../book/_book/notebooks_quarto/ch04_Statistical_Inference_for_the_Mean.html#two-sided-hypothesis-tests\" target=\"_blank\" rel=\"noopener\">Read §4.4 in the chapter →</a>",
+
+    // ---- Widget 5: One-Sided Hypothesis Test ----
+    "widget.hypone.heading":    "One-Sided Hypothesis Test",
+    "widget.hypone.motivation": "If theory says earnings should be <em>higher</em> than $40k — not just different — can we extract more statistical power from the same data?",
+    "widget.hypone.kc":         "<span class=\"kc-title\">One-sided tests concentrate the rejection region in one tail of the distribution, making them more powerful for detecting effects in the specified direction.</span> Use them when theory predicts a specific direction. The one-sided p-value is exactly <strong>half</strong> the two-sided p-value (when the effect is in the predicted direction), and critical values are smaller — e.g. <strong>1.65 vs &plusmn;1.96</strong> at &alpha; = 0.05.",
+    "widget.hypone.howto":      "<li><strong>Slide &mu;<sub>0</sub></strong> to set the hypothesized value.</li>\n      <li><strong>Toggle the alternative direction</strong> between H<sub>a</sub>: &mu; &gt; &mu;<sub>0</sub> and H<sub>a</sub>: &mu; &lt; &mu;<sub>0</sub>.</li>\n      <li><strong>Compare the one-sided and two-sided p-values</strong> side by side in the stat cards.</li>",
+    "widget.hypone.ctrl.mu0.label": "Hypothesized value &mu;<sub>0</sub>",
+    "widget.hypone.ctrl.alt.label": "Alternative hypothesis",
+    "widget.hypone.chart.xaxis":  "t",
+    "widget.hypone.chart.yaxis":  "Density",
+    "widget.hypone.chart.legend.t":      "t({df})",
+    "widget.hypone.chart.legend.reject": "α rejection",
+    "widget.hypone.try":         "<li><strong>Set &mu;<sub>0</sub> = $40,000, H<sub>a</sub>: &mu; &gt; $40,000.</strong> <em>One-sided p &asymp; 0.235, exactly half of the two-sided 0.470 — neither test is significant, but the directional version uses its power efficiently by only looking right.</em></li>\n      <li><strong>Set &mu;<sub>0</sub> = $38,000 with H<sub>a</sub>: &mu; &gt; $38,000.</strong> <em>The one-sided test rejects at 5% while the two-sided barely hangs on — the directional version's \"extra power\" is real and visible here.</em></li>\n      <li><strong>Toggle to H<sub>a</sub>: &mu; &lt; &mu;<sub>0</sub> while the t-stat is positive.</strong> <em>p jumps near 1.0 — testing the wrong direction leaves you defenseless: the data is maximally un-supportive of your alternative.</em></li>",
+    "widget.hypone.takeaway":   "<strong>Take-away:</strong> One-sided tests double the power in the predicted direction but leave you unable to detect effects that go the other way. <a href=\"../../book/_book/notebooks_quarto/ch04_Statistical_Inference_for_the_Mean.html#one-sided-directional-hypothesis-tests\" target=\"_blank\" rel=\"noopener\">Read §4.6 in the chapter →</a>",
+
+    // ---- Widget 6: Gas Price Test ----
+    "widget.gas.heading":    "Gasoline Prices: Statistical vs Practical Significance",
+    "widget.gas.motivation": "Yolo County gas is $0.14/gallon cheaper than the California average — stat-sig at <em>p &lt; 0.0001</em>. But is that $2 per fill-up worth crossing town for?",
+    "widget.gas.kc":         "<span class=\"kc-title\">Even small practical differences can be statistically significant when the sample gives precise estimates.</span> The gasoline-price gap of $0.14 looks trivial, but the <strong>standard error is tiny</strong> ($0.027), so the <strong>t-statistic is large</strong> (&minus;5.26) — the difference sits many standard errors from zero. Statistical significance answers \"Is there a difference?\"; <strong>practical significance</strong> asks \"Does the difference matter?\" Both questions matter in econometrics.",
+    "widget.gas.howto":      "<li><strong>Slide the hypothesized CA state average</strong> from $3.40 to $4.10.</li>\n      <li><strong>Watch the t-statistic, p-value, and REJECT / FAIL badge</strong> update live.</li>\n      <li><strong>Compare H<sub>0</sub> to the sample mean</strong> ($3.67) — the closer they are, the larger p becomes.</li>",
+    "widget.gas.ctrl.mu0.label": "CA state average (H<sub>0</sub>)",
+    "widget.gas.chart.xaxis":   "Price per gallon ($)",
+    "widget.gas.chart.yaxis":   "Count",
+    "widget.gas.chart.legend.prices": "Gas prices",
+    "widget.gas.chart.label.xbar":    "X̄ = ${val}",
+    "widget.gas.chart.label.h0":      "H₀: ${val}",
+    "widget.gas.try":         "<li><strong>Set H<sub>0</sub> = $3.81 (the book's CA average).</strong> <em>t = &minus;5.26, p &lt; 0.0001, REJECT — the tiny SE ($0.027) turns a $0.14 gap into overwhelming statistical evidence.</em></li>\n      <li><strong>Slide H<sub>0</sub> toward $3.67 (the sample mean).</strong> <em>p grows steeply; it crosses 0.05 near the 95% CI endpoints around $3.62 and $3.72 — inside that narrow window, the data fails to reject.</em></li>\n      <li><strong>Set H<sub>0</sub> = $3.67 exactly.</strong> <em>t &asymp; 0, p &asymp; 1.0 — we cannot reject that &mu; equals our own sample mean, a reassuring sanity check on the machinery.</em></li>",
+    "widget.gas.takeaway":   "<strong>Take-away:</strong> With a small SE, tiny effects become statistically significant — always ask whether the difference also matters <em>practically</em>. <a href=\"../../book/_book/notebooks_quarto/ch04_Statistical_Inference_for_the_Mean.html#hypothesis-test-examples\" target=\"_blank\" rel=\"noopener\">Read §4.5 in the chapter →</a>",
+
+    // ---- Widget 7: Proportions ----
+    "widget.prop.heading":    "Inference for Proportions",
+    "widget.prop.motivation": "A poll says 52.1% plan to vote Democrat. Is that a real lead — <em>or just sampling noise dressed up as a majority?</em>",
+    "widget.prop.kc":         "<span class=\"kc-title\">Proportions are simply means of 0/1 binary data, so the whole inference toolkit carries over.</span> Confidence intervals, hypothesis tests, and standard errors for proportions use the same logic as for means — only the SE formula changes: <strong>se(p&#770;) = &radic;(p&#770;(1&minus;p&#770;)/n)</strong>, which follows from the variance of a binary variable. The sample proportion p&#770; is literally the sample mean of the 0/1 codings.",
+    "widget.prop.howto":      "<li><strong>Slide the sample proportion p&#770;</strong> from 0.30 to 0.70.</li>\n      <li><strong>Slide the sample size n</strong> from 50 to 5,000 and watch SE shrink.</li>\n      <li><strong>Slide the hypothesized proportion p<sub>0</sub></strong> to test any null value.</li>\n      <li><strong>Watch the z-statistic, p-value, 95% CI, and decision badge</strong> update together.</li>",
+    "widget.prop.ctrl.phat.label": "Sample proportion (p&#770;)",
+    "widget.prop.ctrl.n.label":    "Sample size (n)",
+    "widget.prop.ctrl.p0.label":   "Hypothesized proportion (p<sub>0</sub>)",
+    "widget.prop.chart.xaxis":     "Proportion",
+    "widget.prop.chart.legend.ci":   "95% CI",
+    "widget.prop.chart.legend.phat": "p̂ = {val}",
+    "widget.prop.chart.legend.p0":   "p₀ = {val}",
+    "widget.prop.try":         "<li><strong>Keep defaults (p&#770; = 0.52, n = 921, p<sub>0</sub> = 0.50).</strong> <em>This matches the book's voter example: SE &asymp; 0.0165, 95% CI &asymp; [48.9%, 55.3%] — since 50% sits inside, we fail to reject and the \"majority\" is within sampling noise.</em></li>\n      <li><strong>Keep p&#770; = 0.52 and push n to 2,500.</strong> <em>The CI tightens enough that 50% now falls outside — the same observed proportion becomes statistically significant purely because SE shrank with &radic;n.</em></li>\n      <li><strong>Set p&#770; = 0.50 exactly.</strong> <em>z = 0, p = 1.0, and the CI centers on p<sub>0</sub> — when the estimate equals the hypothesis, there is nothing to reject.</em></li>",
+    "widget.prop.takeaway":   "<strong>Take-away:</strong> Proportions are means of 0/1 data — the whole inference toolkit (SE, CI, z-tests) carries over, with only the SE formula changing. <a href=\"../../book/_book/notebooks_quarto/ch04_Statistical_Inference_for_the_Mean.html#proportions-data\" target=\"_blank\" rel=\"noopener\">Read §4.7 in the chapter →</a>",
+
+    // ---- Code summary ----
+    "code.heading":    "Code Summary",
+    "code.motivation": "You've explored the key concepts interactively — now reproduce them in code. These self-contained blocks cover everything you practiced above. Pick your language, copy the code, and run it.",
+    "code.tab.python": "Python",
+    "code.tab.stata":  "Stata",
+    "code.tab.r":      "R",
+    "code.copy.idle":  "Copy code",
+    "code.copy.done":  "Copied!",
+    "code.colab":      "Open empty Colab notebook &rarr;",
+    "code.note.stata": "Paste into your Stata do-file editor",
+    "code.note.r":     "Paste into your R console or RStudio",
+
+    // ---- Footer ----
+    "footer.text":      "Part of <a href=\"https://quarcs-lab.github.io/metricsai/book/_book/index.html\"><strong>metricsAI</strong></a> · Chapter 04: Statistical Inference for the Mean · by Carlos Mendez · <a href=\"https://github.com/quarcs-lab/metricsai\">GitHub</a>",
+    "footer.data":      "Data: AED_EARNINGS.DTA (n=171) · AED_GASPRICE.DTA (n=32) · AED_EARNINGSMALE.DTA (n=191) · AED_REALGDPPC.DTA (n=241)",
+    "footer.scrolltop": "&uarr; Back to top"
+  },
+  es: {
+    "meta.title": "Capítulo 04 — Inferencia estadística para la media · metricsAI",
+
+    "header.badge":    "Capítulo 04 de 18 · Tablero interactivo",
+    "header.title":    "Inferencia estadística para la media",
+    "header.subtitle": "Explora intervalos de confianza, pruebas de hipótesis y la distribución t mediante controles interactivos — usando los mismos conjuntos de datos y ejemplos del libro.",
+
+    "theme.dark":  "Oscuro",
+    "theme.light": "Claro",
+
+    "nav.se":      "EE y tamaño de muestra",
+    "nav.tdist":   "Distribución t",
+    "nav.ci":      "Intervalos de confianza",
+    "nav.hyptwo":  "Prueba de dos colas",
+    "nav.hypone":  "Prueba de una cola",
+    "nav.gas":     "Prueba precio gasolina",
+    "nav.prop":    "Proporciones",
+    "nav.code":    "Código",
+
+    "common.reset":      "Reiniciar",
+    "common.tryTitle":   "Pruébalo",
+    "common.howtoTitle": "Qué puedes hacer aquí",
+    "common.takeaway":   "Para recordar:",
+    "common.on":         "Activado",
+    "common.off":        "Desactivado",
+    "common.reject":     "Rechazar H₀",
+    "common.fail":       "No rechazar H₀",
+    "common.rejectAlpha": "Rechazar H₀ (α = 0.05)",
+    "common.rejectP":    "Rechazar H₀: p = {p0}",
+    "common.failP":      "No rechazar H₀: p = {p0}",
+
+    // ---- Stat card labels ----
+    "stat.n":         "n",
+    "stat.sd":        "DE (s)",
+    "stat.se":        "EE (s/√n)",
+    "stat.seShort":   "EE",
+    "stat.ciw":       "Ancho aprox. del IC al 95%",
+    "stat.df":        "gl",
+    "stat.tcrit2":    "t-crít (5%, dos colas)",
+    "stat.zcrit":     "z-crít (Normal)",
+    "stat.tailarea":  "Área de cola más allá de ±1.96",
+    "stat.xbar":      "X̄",
+    "stat.tcrit":     "t-crítico",
+    "stat.moe":       "Margen de error",
+    "stat.cilo":      "IC inferior",
+    "stat.cihi":      "IC superior",
+    "stat.width":     "Ancho",
+    "stat.tstat":     "Estadístico t",
+    "stat.pval":      "Valor p",
+    "stat.tcritPm":   "±t-crít (5%)",
+    "stat.pval1":     "Valor p (una cola)",
+    "stat.pval2":     "Valor p (dos colas)",
+    "stat.tcrit1":    "t-crít (una cola, 5%)",
+    "stat.smean":     "Media muestral",
+    "stat.cilo95":    "IC 95% inferior",
+    "stat.cihi95":    "IC 95% superior",
+    "stat.zstat":     "Estadístico z",
+
+    // ---- Widget 1: SE & Sample Size ----
+    "widget.se.heading":    "Error estándar y tamaño de muestra",
+    "widget.se.motivation": "¿Qué tan precisa es nuestra estimación de $41k para los ingresos promedio? ¿Y cuántos datos más necesitarías para <em>reducir a la mitad</em> esa incertidumbre?",
+    "widget.se.kc":         "<span class=\"kc-title\">El error estándar ee(X&#772;) = s/&radic;n mide la precisión de la media muestral como estimador de &mu;.</span> Cuantifica la incertidumbre del muestreo — un EE más pequeño significa una estimación más precisa. Como el EE se reduce con <strong>&radic;n</strong>, no con <strong>n</strong>, se requiere cuadruplicar el tamaño de muestra para reducir el error estándar a la mitad.",
+    "widget.se.howto":      "<li><strong>Desliza el tamaño de muestra n</strong> de 10 a 500 y observa cómo se actualizan el EE y el ancho del IC al 95%.</li>\n      <li><strong>Compara con el n = 171 del libro</strong> — la posición por defecto del control deslizante.</li>\n      <li><strong>Pasa el cursor sobre la curva</strong> para leer el EE en cualquier punto a lo largo de la forma 1/&radic;n.</li>",
+    "widget.se.ctrl.n.label": "Tamaño de muestra (n)",
+    "widget.se.chart.xaxis":   "Tamaño de muestra (n)",
+    "widget.se.chart.yaxis":   "Error estándar ($)",
+    "widget.se.chart.legend.curve":   "EE = s/√n",
+    "widget.se.chart.legend.current": "n actual = {n}",
+    "widget.se.chart.legend.4n":      "4×n = {n4} (EE a la mitad)",
+    "widget.se.try":         "<li><strong>Establece n = 171 (la muestra del libro), luego n = 684 (4&times; mayor).</strong> <em>El EE se reduce a la mitad de ~$1,952 a ~$976 — la regla &radic;n en acción: duplicar la precisión cuesta cuatro veces más datos.</em></li>\n      <li><strong>Establece n = 50.</strong> <em>El EE salta a ~$3,611 y el IC aproximado al 95% se ensancha a ~$14,400 — un muestreo insuficiente no solo encoge un poco la ventana, casi la duplica.</em></li>\n      <li><strong>Establece n = 400.</strong> <em>El EE baja a ~$1,276 — recolectar 229 observaciones más solo recorta ~$676 del EE, el hombro de rendimientos decrecientes de la curva 1/&radic;n.</em></li>",
+    "widget.se.takeaway":   "<strong>Para recordar:</strong> EE = s/&radic;n cuantifica la precisión; duplicar la precisión siempre cuesta cuatro veces más datos. <a href=\"../../book/_book/notebooks_quarto/ch04_Statistical_Inference_for_the_Mean.html#example-mean-annual-earnings\" target=\"_blank\" rel=\"noopener\">Lee §4.1 en el capítulo →</a>",
+
+    // ---- Widget 2: t-Distribution ----
+    "widget.tdist.heading":     "Explorador de la distribución t",
+    "widget.tdist.motivation":  "¿Por qué necesitamos toda una <em>familia</em> de curvas en forma de campana — una para cada tamaño de muestra? Porque estimar &sigma; a partir de la muestra añade incertidumbre que la curva normal no puede ver.",
+    "widget.tdist.kc":          "<span class=\"kc-title\">La distribución t se usa cuando &sigma; es desconocida y se estima a partir de la muestra.</span> Se parece a la normal estándar N(0, 1) pero con <strong>colas más gruesas</strong> que reflejan la incertidumbre extra de usar <em>s</em> en lugar de &sigma;. A medida que crece <em>n</em>, la distribución t se aproxima a la normal — por eso la normal es una buena aproximación para muestras grandes (la conocida regla práctica \"n &ge; 30\").",
+    "widget.tdist.howto":       "<li><strong>Cambia los grados de libertad</strong> entre gl = 4, 10, 30 y 100.</li>\n      <li><strong>Activa o desactiva la superposición Normal N(0,1)</strong> para comparar las dos curvas directamente.</li>\n      <li><strong>Observa el valor t-crítico</strong> en las tarjetas de estadísticas — se reduce hacia 1.96 a medida que crecen los gl.</li>",
+    "widget.tdist.ctrl.df.label":     "Grados de libertad",
+    "widget.tdist.ctrl.normal.label": "Mostrar Normal N(0,1)",
+    "widget.tdist.df.4":   "gl = 4",
+    "widget.tdist.df.10":  "gl = 10",
+    "widget.tdist.df.30":  "gl = 30",
+    "widget.tdist.df.100": "gl = 100",
+    "widget.tdist.chart.xaxis":   "t",
+    "widget.tdist.chart.yaxis":   "Densidad",
+    "widget.tdist.chart.legend.t":      "t({df})",
+    "widget.tdist.chart.legend.normal": "N(0, 1)",
+    "widget.tdist.chart.legend.reject": "5% rechazo",
+    "widget.tdist.try":         "<li><strong>Establece gl = 4 con la superposición Normal activada.</strong> <em>Las colas de la t son visiblemente más gruesas y t-crít = 2.78 (vs 1.96 para la normal) — con muestras pequeñas, necesitas un estadístico t mucho mayor para rechazar al 5%.</em></li>\n      <li><strong>Establece gl = 30.</strong> <em>t-crít baja a ~2.04, apenas por encima de 1.96 — la clásica regla \"n &ge; 30 es suficientemente grande\" es exactamente esta pequeña brecha que se vuelve insignificante.</em></li>\n      <li><strong>Establece gl = 100.</strong> <em>Las dos curvas son visualmente indistinguibles y el área de cola más allá de &plusmn;1.96 es ~5% — para muestras razonables, la normal es un sustituto perfectamente utilizable de la t.</em></li>",
+    "widget.tdist.takeaway":    "<strong>Para recordar:</strong> La distribución t paga por estimar &sigma; con colas más gruesas y devuelve el costo a medida que n crece. <a href=\"../../book/_book/notebooks_quarto/ch04_Statistical_Inference_for_the_Mean.html#t-statistic-and-t-distribution\" target=\"_blank\" rel=\"noopener\">Lee §4.2 en el capítulo →</a>",
+
+    // ---- Widget 3: Confidence Intervals ----
+    "widget.ci.heading":    "Visualizador de intervalos de confianza",
+    "widget.ci.motivation": "Una estimación puntual de $41k es un solo número. <em>¿Con qué rango de valores de &mu; son realmente compatibles los datos</em> — y cómo cambia ese rango con nuestro requisito de confianza?",
+    "widget.ci.kc":         "<span class=\"kc-title\">Un intervalo de confianza proporciona un rango de valores plausibles para &mu;.</span> Un IC al 95% significa: si repitiéramos el procedimiento de muestreo muchas veces, aproximadamente el 95% de los intervalos resultantes contendrían la verdadera &mu;. El intervalo se construye como <strong>X&#772; &plusmn; t<sub>&alpha;/2</sub> &times; EE(X&#772;)</strong> — intervalos más anchos indican menos precisión.",
+    "widget.ci.howto":      "<li><strong>Desliza el nivel de confianza</strong> del 80% al 99% y observa cómo el IC se expande o contrae.</li>\n      <li><strong>Cambia entre Ingresos femeninos y Precios de gasolina</strong> para ver cómo las diferencias en EE remodelan el IC.</li>\n      <li><strong>Compara el margen de error y el ancho del IC</strong> en las tarjetas de estadísticas en cada configuración.</li>",
+    "widget.ci.ctrl.level.label": "Nivel de confianza",
+    "widget.ci.ctrl.ds.label":    "Conjunto de datos",
+    "widget.ci.ds.earnings": "Ingresos femeninos",
+    "widget.ci.ds.gas":      "Precios de gasolina",
+    "widget.ci.chart.xaxis.earnings": "Ingresos ($)",
+    "widget.ci.chart.xaxis.gas":      "Precio ($)",
+    "widget.ci.chart.legend.ci":   "IC al {level}%",
+    "widget.ci.chart.legend.mean": "X̄ = {val}",
+    "widget.ci.try":         "<li><strong>Al 95%, observa el IC para Ingresos femeninos: [$37,559, $45,266] (ancho $7,707). Empuja al 99%.</strong> <em>El IC se ensancha a aproximadamente $10,171 — un salto de 4 puntos en confianza te compra un intervalo 30% más ancho.</em></li>\n      <li><strong>Baja el nivel de confianza al 90%.</strong> <em>El IC se estrecha a ~$6,457 — ganas precisión pero aceptas que aproximadamente 1 de cada 10 de tales intervalos no incluiría la verdadera &mu;.</em></li>\n      <li><strong>Cambia a Precios de gasolina al 95%.</strong> <em>El IC tiene solo unos $0.11 de ancho porque el EE es minúsculo, y $3.81 (el promedio de CA) queda muy fuera — los datos rechazan el promedio estatal antes de que se realice cualquier prueba formal.</em></li>",
+    "widget.ci.takeaway":    "<strong>Para recordar:</strong> Los intervalos de confianza intercambian precisión por confianza — el intervalo se ensancha cada vez que exiges una afirmación más fuerte. <a href=\"../../book/_book/notebooks_quarto/ch04_Statistical_Inference_for_the_Mean.html#confidence-intervals\" target=\"_blank\" rel=\"noopener\">Lee §4.3 en el capítulo →</a>",
+
+    // ---- Widget 4: Two-Sided Hypothesis Test ----
+    "widget.hyptwo.heading":    "Prueba de hipótesis de dos colas",
+    "widget.hyptwo.motivation": "¿La media poblacional de ingresos es realmente $40,000 — o nuestra media muestral de $41k está <em>demasiado lejos</em> para que esa historia se sostenga?",
+    "widget.hyptwo.kc":         "<span class=\"kc-title\">Una prueba de hipótesis evalúa si los datos proporcionan suficiente evidencia para rechazar una afirmación específica (H<sub>0</sub>) sobre un parámetro.</span> El <strong>estadístico t</strong> mide cuántos errores estándar separa a la estimación del valor hipotético. El <strong>valor p</strong> es la probabilidad de observar un resultado al menos tan extremo como el nuestro si H<sub>0</sub> fuera verdadera. Valores p pequeños (< &alpha;, típicamente 0.05) proporcionan evidencia contra H<sub>0</sub> y nos llevan a rechazarla.",
+    "widget.hyptwo.howto":      "<li><strong>Desliza el valor hipotético &mu;<sub>0</sub></strong> de $30k a $55k.</li>\n      <li><strong>Observa el estadístico t, el valor p y el indicador RECHAZAR / NO RECHAZAR</strong> actualizándose en vivo.</li>\n      <li><strong>Mira las regiones de rechazo sombreadas</strong> en la distribución t desplazándose a medida que se mueve &mu;<sub>0</sub>.</li>",
+    "widget.hyptwo.ctrl.mu0.label": "Valor hipotético &mu;<sub>0</sub>",
+    "widget.hyptwo.chart.xaxis":  "t",
+    "widget.hyptwo.chart.yaxis":  "Densidad",
+    "widget.hyptwo.chart.legend.t":      "t({df})",
+    "widget.hyptwo.chart.legend.reject": "Rechazo α/2",
+    "widget.hyptwo.chart.legend.obs":    "t observado",
+    "widget.hyptwo.try":         "<li><strong>Establece &mu;<sub>0</sub> = $40,000 (el ejemplo del libro).</strong> <em>t &asymp; 0.72, p &asymp; 0.470 — el marcador t se ubica bien dentro de la región blanca, así que no rechazamos: $40,000 sigue siendo una &mu; plausible.</em></li>\n      <li><strong>Arrastra &mu;<sub>0</sub> hacia abajo hasta $35,000 y observa p.</strong> <em>El &mu;<sub>0</sub> donde p cruza por primera vez 0.05 es exactamente el extremo del IC al 95% — las pruebas y los IC son el mismo objeto visto desde lados opuestos.</em></li>\n      <li><strong>Establece &mu;<sub>0</sub> = $50,000.</strong> <em>t es marcadamente negativo, p es minúsculo, y la decisión cambia a RECHAZAR — $50k está demasiado lejos de la media muestral para sobrevivir como media poblacional.</em></li>",
+    "widget.hyptwo.takeaway":   "<strong>Para recordar:</strong> Una prueba de hipótesis es solo un intervalo de confianza leído al revés — los valores que rechazarías son los que están fuera del intervalo. <a href=\"../../book/_book/notebooks_quarto/ch04_Statistical_Inference_for_the_Mean.html#two-sided-hypothesis-tests\" target=\"_blank\" rel=\"noopener\">Lee §4.4 en el capítulo →</a>",
+
+    // ---- Widget 5: One-Sided Hypothesis Test ----
+    "widget.hypone.heading":    "Prueba de hipótesis de una cola",
+    "widget.hypone.motivation": "Si la teoría dice que los ingresos deberían ser <em>mayores</em> que $40k — no solo diferentes — ¿podemos extraer más poder estadístico de los mismos datos?",
+    "widget.hypone.kc":         "<span class=\"kc-title\">Las pruebas de una cola concentran la región de rechazo en una cola de la distribución, haciéndolas más poderosas para detectar efectos en la dirección especificada.</span> Úsalas cuando la teoría predice una dirección específica. El valor p de una cola es exactamente la <strong>mitad</strong> del valor p de dos colas (cuando el efecto va en la dirección predicha), y los valores críticos son menores — por ejemplo <strong>1.65 vs &plusmn;1.96</strong> con &alpha; = 0.05.",
+    "widget.hypone.howto":      "<li><strong>Desliza &mu;<sub>0</sub></strong> para establecer el valor hipotético.</li>\n      <li><strong>Cambia la dirección alternativa</strong> entre H<sub>a</sub>: &mu; &gt; &mu;<sub>0</sub> y H<sub>a</sub>: &mu; &lt; &mu;<sub>0</sub>.</li>\n      <li><strong>Compara los valores p de una y dos colas</strong> lado a lado en las tarjetas de estadísticas.</li>",
+    "widget.hypone.ctrl.mu0.label": "Valor hipotético &mu;<sub>0</sub>",
+    "widget.hypone.ctrl.alt.label": "Hipótesis alternativa",
+    "widget.hypone.chart.xaxis":  "t",
+    "widget.hypone.chart.yaxis":  "Densidad",
+    "widget.hypone.chart.legend.t":      "t({df})",
+    "widget.hypone.chart.legend.reject": "Rechazo α",
+    "widget.hypone.try":         "<li><strong>Establece &mu;<sub>0</sub> = $40,000, H<sub>a</sub>: &mu; &gt; $40,000.</strong> <em>p de una cola &asymp; 0.235, exactamente la mitad del 0.470 de dos colas — ninguna prueba es significativa, pero la versión direccional usa su poder eficientemente al mirar solo a la derecha.</em></li>\n      <li><strong>Establece &mu;<sub>0</sub> = $38,000 con H<sub>a</sub>: &mu; &gt; $38,000.</strong> <em>La prueba de una cola rechaza al 5% mientras que la de dos colas apenas se sostiene — el \"poder extra\" de la versión direccional es real y visible aquí.</em></li>\n      <li><strong>Cambia a H<sub>a</sub>: &mu; &lt; &mu;<sub>0</sub> mientras el estadístico t sea positivo.</strong> <em>p salta cerca de 1.0 — probar la dirección equivocada te deja indefenso: los datos son maximalmente no-favorables a tu alternativa.</em></li>",
+    "widget.hypone.takeaway":   "<strong>Para recordar:</strong> Las pruebas de una cola duplican el poder en la dirección predicha pero te dejan incapaz de detectar efectos que van en la otra dirección. <a href=\"../../book/_book/notebooks_quarto/ch04_Statistical_Inference_for_the_Mean.html#one-sided-directional-hypothesis-tests\" target=\"_blank\" rel=\"noopener\">Lee §4.6 en el capítulo →</a>",
+
+    // ---- Widget 6: Gas Price Test ----
+    "widget.gas.heading":    "Precios de gasolina: significancia estadística vs práctica",
+    "widget.gas.motivation": "La gasolina del condado de Yolo es $0.14/galón más barata que el promedio de California — estadísticamente significativa con <em>p &lt; 0.0001</em>. Pero ¿vale la pena cruzar la ciudad por $2 por tanque?",
+    "widget.gas.kc":         "<span class=\"kc-title\">Incluso pequeñas diferencias prácticas pueden ser estadísticamente significativas cuando la muestra produce estimaciones precisas.</span> La diferencia de $0.14 en el precio de la gasolina parece trivial, pero el <strong>error estándar es minúsculo</strong> ($0.027), por lo que el <strong>estadístico t es grande</strong> (&minus;5.26) — la diferencia se ubica a muchos errores estándar de cero. La significancia estadística responde \"¿Hay una diferencia?\"; la <strong>significancia práctica</strong> pregunta \"¿Importa la diferencia?\". Ambas preguntas importan en econometría.",
+    "widget.gas.howto":      "<li><strong>Desliza el promedio estatal de CA hipotético</strong> de $3.40 a $4.10.</li>\n      <li><strong>Observa el estadístico t, el valor p y el indicador RECHAZAR / NO RECHAZAR</strong> actualizándose en vivo.</li>\n      <li><strong>Compara H<sub>0</sub> con la media muestral</strong> ($3.67) — cuanto más cerca estén, mayor será p.</li>",
+    "widget.gas.ctrl.mu0.label": "Promedio estatal de CA (H<sub>0</sub>)",
+    "widget.gas.chart.xaxis":   "Precio por galón ($)",
+    "widget.gas.chart.yaxis":   "Conteo",
+    "widget.gas.chart.legend.prices": "Precios de gasolina",
+    "widget.gas.chart.label.xbar":    "X̄ = ${val}",
+    "widget.gas.chart.label.h0":      "H₀: ${val}",
+    "widget.gas.try":         "<li><strong>Establece H<sub>0</sub> = $3.81 (el promedio de CA del libro).</strong> <em>t = &minus;5.26, p &lt; 0.0001, RECHAZAR — el minúsculo EE ($0.027) convierte una brecha de $0.14 en evidencia estadística abrumadora.</em></li>\n      <li><strong>Desliza H<sub>0</sub> hacia $3.67 (la media muestral).</strong> <em>p crece abruptamente; cruza 0.05 cerca de los extremos del IC al 95% alrededor de $3.62 y $3.72 — dentro de esa estrecha ventana, los datos no rechazan.</em></li>\n      <li><strong>Establece H<sub>0</sub> = $3.67 exactamente.</strong> <em>t &asymp; 0, p &asymp; 1.0 — no podemos rechazar que &mu; sea igual a nuestra propia media muestral, una verificación tranquilizadora de la maquinaria.</em></li>",
+    "widget.gas.takeaway":   "<strong>Para recordar:</strong> Con un EE pequeño, efectos minúsculos se vuelven estadísticamente significativos — siempre pregúntate si la diferencia también importa <em>en la práctica</em>. <a href=\"../../book/_book/notebooks_quarto/ch04_Statistical_Inference_for_the_Mean.html#hypothesis-test-examples\" target=\"_blank\" rel=\"noopener\">Lee §4.5 en el capítulo →</a>",
+
+    // ---- Widget 7: Proportions ----
+    "widget.prop.heading":    "Inferencia para proporciones",
+    "widget.prop.motivation": "Una encuesta dice que el 52.1% planea votar por el Demócrata. ¿Es eso una ventaja real — <em>o solo ruido de muestreo disfrazado de mayoría?</em>",
+    "widget.prop.kc":         "<span class=\"kc-title\">Las proporciones son simplemente medias de datos binarios 0/1, así que toda la caja de herramientas de inferencia se traslada.</span> Los intervalos de confianza, las pruebas de hipótesis y los errores estándar para proporciones usan la misma lógica que para medias — solo cambia la fórmula del EE: <strong>ee(p&#770;) = &radic;(p&#770;(1&minus;p&#770;)/n)</strong>, que se sigue de la varianza de una variable binaria. La proporción muestral p&#770; es literalmente la media muestral de las codificaciones 0/1.",
+    "widget.prop.howto":      "<li><strong>Desliza la proporción muestral p&#770;</strong> de 0.30 a 0.70.</li>\n      <li><strong>Desliza el tamaño de muestra n</strong> de 50 a 5,000 y observa cómo se reduce el EE.</li>\n      <li><strong>Desliza la proporción hipotética p<sub>0</sub></strong> para probar cualquier valor nulo.</li>\n      <li><strong>Observa el estadístico z, el valor p, el IC al 95% y el indicador de decisión</strong> actualizándose juntos.</li>",
+    "widget.prop.ctrl.phat.label": "Proporción muestral (p&#770;)",
+    "widget.prop.ctrl.n.label":    "Tamaño de muestra (n)",
+    "widget.prop.ctrl.p0.label":   "Proporción hipotética (p<sub>0</sub>)",
+    "widget.prop.chart.xaxis":     "Proporción",
+    "widget.prop.chart.legend.ci":   "IC al 95%",
+    "widget.prop.chart.legend.phat": "p̂ = {val}",
+    "widget.prop.chart.legend.p0":   "p₀ = {val}",
+    "widget.prop.try":         "<li><strong>Mantén los valores por defecto (p&#770; = 0.52, n = 921, p<sub>0</sub> = 0.50).</strong> <em>Esto coincide con el ejemplo de votantes del libro: EE &asymp; 0.0165, IC al 95% &asymp; [48.9%, 55.3%] — como 50% queda dentro, no rechazamos y la \"mayoría\" está dentro del ruido de muestreo.</em></li>\n      <li><strong>Mantén p&#770; = 0.52 y empuja n a 2,500.</strong> <em>El IC se estrecha lo suficiente para que 50% caiga ahora fuera — la misma proporción observada se vuelve estadísticamente significativa puramente porque el EE se redujo con &radic;n.</em></li>\n      <li><strong>Establece p&#770; = 0.50 exactamente.</strong> <em>z = 0, p = 1.0, y el IC se centra en p<sub>0</sub> — cuando la estimación iguala la hipótesis, no hay nada que rechazar.</em></li>",
+    "widget.prop.takeaway":   "<strong>Para recordar:</strong> Las proporciones son medias de datos 0/1 — toda la caja de herramientas de inferencia (EE, IC, pruebas z) se traslada, cambiando solo la fórmula del EE. <a href=\"../../book/_book/notebooks_quarto/ch04_Statistical_Inference_for_the_Mean.html#proportions-data\" target=\"_blank\" rel=\"noopener\">Lee §4.7 en el capítulo →</a>",
+
+    // ---- Code summary ----
+    "code.heading":    "Resumen de código",
+    "code.motivation": "Has explorado los conceptos clave de forma interactiva — ahora reprodúcelos en código. Estos bloques autosuficientes cubren todo lo que practicaste arriba. Elige tu lenguaje, copia el código y ejecútalo.",
+    "code.tab.python": "Python",
+    "code.tab.stata":  "Stata",
+    "code.tab.r":      "R",
+    "code.copy.idle":  "Copiar código",
+    "code.copy.done":  "¡Copiado!",
+    "code.colab":      "Abrir un cuaderno Colab vacío &rarr;",
+    "code.note.stata": "Pega esto en tu editor do-file de Stata",
+    "code.note.r":     "Pega esto en tu consola R o RStudio",
+
+    // ---- Footer ----
+    "footer.text":      "Parte de <a href=\"https://quarcs-lab.github.io/metricsai/book/_book/index.html\"><strong>metricsAI</strong></a> · Capítulo 04: Inferencia estadística para la media · por Carlos Mendez · <a href=\"https://github.com/quarcs-lab/metricsai\">GitHub</a>",
+    "footer.data":      "Datos: AED_EARNINGS.DTA (n=171) · AED_GASPRICE.DTA (n=32) · AED_EARNINGSMALE.DTA (n=191) · AED_REALGDPPC.DTA (n=241)",
+    "footer.scrolltop": "&uarr; Volver arriba"
+  }
+};
+
+function t(key, vars) {
+  var lang = window.__lang || I18N.defaultLang;
+  var s = (I18N[lang] && I18N[lang][key]) || I18N.en[key];
+  if (s === undefined) return key;
+  if (vars) {
+    for (var k in vars) s = s.split("{" + k + "}").join(String(vars[k]));
+  }
+  return s;
+}
+
+function applyLanguage(lang) {
+  if (lang !== "en" && lang !== "es") lang = I18N.defaultLang;
+  window.__lang = lang;
+  try { localStorage.setItem(I18N.storageKey, lang); } catch (e) {}
+  document.documentElement.lang = lang;
+  document.querySelectorAll("[data-i18n]").forEach(function(el) {
+    var key = el.getAttribute("data-i18n");
+    el.innerHTML = t(key);
+  });
+  var lbl = document.getElementById("siteLanguageLabel");
+  if (lbl) lbl.textContent = lang === "es" ? "ES" : "EN";
+  // Re-fire every widget renderer (Plotly + JS-injected callouts read via t()).
+  for (var key in window) {
+    if (key.indexOf("__rerender_") === 0 && typeof window[key] === "function") {
+      try { window[key](); } catch (e) {}
+    }
+  }
+}
+
+function toggleLanguage() {
+  applyLanguage((window.__lang || I18N.defaultLang) === "es" ? "en" : "es");
+}
+
+// Read persisted language BEFORE widgets render so first paint is in correct language.
+try {
+  var stored = localStorage.getItem(I18N.storageKey);
+  if (stored === "en" || stored === "es") window.__lang = stored;
+} catch (e) {}
 
 // ==================== STATS HELPERS ====================
 var mean = function(a){ var s=0; for(var i=0;i<a.length;i++) s+=a[i]; return s/a.length; };
@@ -1109,7 +1609,7 @@ function fmtMoney(v){return v===null?"\u2014":"$"+Math.round(v).toLocaleString()
 function fmtPct(v,d){return v===null?"\u2014":(v*100).toFixed(d||1)+"%";}
 
 // ==================== THEME ====================
-var THEME_KEY="metricsai-theme";
+const THEME_KEY = "darkMode"; // unified with index.html / tutors.html
 function getCSS(v){return getComputedStyle(document.documentElement).getPropertyValue(v).trim();}
 function themeColors(){return{text:getCSS("--text"),textSoft:getCSS("--text-soft"),grid:getCSS("--grid"),panel:getCSS("--panel"),cyan:getCSS("--accent"),purple:getCSS("--accent-2"),pink:getCSS("--accent-3")};}
 function baseLayout(o){var c=themeColors();return Object.assign({paper_bgcolor:"rgba(0,0,0,0)",plot_bgcolor:"rgba(0,0,0,0)",font:{family:"Inter, system-ui, sans-serif",color:c.text,size:12},margin:{l:56,r:18,t:30,b:46},xaxis:{gridcolor:c.grid,linecolor:c.grid,zerolinecolor:c.grid,tickfont:{color:c.textSoft}},yaxis:{gridcolor:c.grid,linecolor:c.grid,zerolinecolor:c.grid,tickfont:{color:c.textSoft}},hoverlabel:{bgcolor:c.panel,bordercolor:c.grid,font:{color:c.text}},legend:{font:{color:c.text},bgcolor:"rgba(0,0,0,0)"}},o||{});}
@@ -1139,19 +1639,19 @@ var GAS = summary(DATA.gas.prices);
     var ns=linspace(10,500,200);
     var ses=ns.map(function(x){return sd/Math.sqrt(x);});
     var traces=[
-      {x:ns,y:ses,type:"scatter",mode:"lines",line:{color:c.cyan,width:2.5},name:"SE = s/\u221An"},
-      {x:[n],y:[se],type:"scatter",mode:"markers",marker:{color:c.pink,size:12,line:{color:"white",width:2}},name:"Current n = "+n}
+      {x:ns,y:ses,type:"scatter",mode:"lines",line:{color:c.cyan,width:2.5},name:t("widget.se.chart.legend.curve")},
+      {x:[n],y:[se],type:"scatter",mode:"markers",marker:{color:c.pink,size:12,line:{color:"white",width:2}},name:t("widget.se.chart.legend.current",{n:n})}
     ];
     if(n<=250){
       var n4=n*4;
       if(n4<=500){
         var se4=sd/Math.sqrt(n4);
-        traces.push({x:[n4],y:[se4],type:"scatter",mode:"markers",marker:{color:c.purple,size:10,symbol:"diamond",line:{color:"white",width:1.5}},name:"4\u00D7n = "+n4+" (SE halved)"});
+        traces.push({x:[n4],y:[se4],type:"scatter",mode:"markers",marker:{color:c.purple,size:10,symbol:"diamond",line:{color:"white",width:1.5}},name:t("widget.se.chart.legend.4n",{n4:n4})});
         traces.push({x:[n,n4],y:[se,se],type:"scatter",mode:"lines",line:{color:c.purple,width:1,dash:"dot"},showlegend:false,hoverinfo:"skip"});
         traces.push({x:[n4,n4],y:[se,se4],type:"scatter",mode:"lines",line:{color:c.purple,width:1,dash:"dot"},showlegend:false,hoverinfo:"skip"});
       }
     }
-    var layout=baseLayout({xaxis:{title:"Sample size (n)",gridcolor:c.grid,linecolor:c.grid,zerolinecolor:c.grid,tickfont:{color:c.textSoft}},yaxis:{title:"Standard Error ($)",gridcolor:c.grid,linecolor:c.grid,zerolinecolor:c.grid,tickfont:{color:c.textSoft}},showlegend:true,legend:{x:0.5,y:0.98,xanchor:"center",yanchor:"top",font:{color:c.text},bgcolor:"rgba(0,0,0,0)"}});
+    var layout=baseLayout({xaxis:{title:t("widget.se.chart.xaxis"),gridcolor:c.grid,linecolor:c.grid,zerolinecolor:c.grid,tickfont:{color:c.textSoft}},yaxis:{title:t("widget.se.chart.yaxis"),gridcolor:c.grid,linecolor:c.grid,zerolinecolor:c.grid,tickfont:{color:c.textSoft}},showlegend:true,legend:{x:0.5,y:0.98,xanchor:"center",yanchor:"top",font:{color:c.text},bgcolor:"rgba(0,0,0,0)"}});
     Plotly.react(chartEl,traces,layout,PLOTLY_CONFIG);
   }
   bindSlider("se-n","se-n-val",function(v){return "n = "+v;},render);
@@ -1174,16 +1674,16 @@ var GAS = summary(DATA.gas.prices);
     var xs=linspace(-5,5,400);
     var traces=[];
     var ys=xs.map(function(x){return tPDF(x,df);});
-    traces.push({x:xs,y:ys,type:"scatter",mode:"lines",line:{color:c.cyan,width:2.5},name:"t("+df+")"});
+    traces.push({x:xs,y:ys,type:"scatter",mode:"lines",line:{color:c.cyan,width:2.5},name:t("widget.tdist.chart.legend.t",{df:df})});
     if(showNorm){
       var yn=xs.map(function(x){return normalPDF(x,0,1);});
-      traces.push({x:xs,y:yn,type:"scatter",mode:"lines",line:{color:c.purple,width:2,dash:"dash"},name:"N(0, 1)"});
+      traces.push({x:xs,y:yn,type:"scatter",mode:"lines",line:{color:c.purple,width:2,dash:"dash"},name:t("widget.tdist.chart.legend.normal")});
     }
     var xLeft=linspace(-5,-tcrit,60);var yLeft=xLeft.map(function(x){return tPDF(x,df);});
     traces.push({x:xLeft.concat([-tcrit,-5]),y:yLeft.concat([0,0]),fill:"toself",fillcolor:c.pink+"22",line:{width:0},showlegend:false,hoverinfo:"skip"});
     var xRight=linspace(tcrit,5,60);var yRight=xRight.map(function(x){return tPDF(x,df);});
-    traces.push({x:xRight.concat([5,tcrit]),y:yRight.concat([0,0]),fill:"toself",fillcolor:c.pink+"22",line:{width:0},name:"5% rejection",hoverinfo:"skip"});
-    var layout=baseLayout({xaxis:{title:"t",gridcolor:c.grid,linecolor:c.grid,zerolinecolor:c.grid,tickfont:{color:c.textSoft}},yaxis:{title:"Density",gridcolor:c.grid,linecolor:c.grid,zerolinecolor:c.grid,tickfont:{color:c.textSoft}},showlegend:true,legend:{x:0.02,y:0.98,xanchor:"left",yanchor:"top",font:{color:c.text},bgcolor:"rgba(0,0,0,0)"},shapes:[{type:"line",xref:"x",yref:"paper",x0:-tcrit,x1:-tcrit,y0:0,y1:1,line:{color:c.pink,width:1.5,dash:"dash"}},{type:"line",xref:"x",yref:"paper",x0:tcrit,x1:tcrit,y0:0,y1:1,line:{color:c.pink,width:1.5,dash:"dash"}}]});
+    traces.push({x:xRight.concat([5,tcrit]),y:yRight.concat([0,0]),fill:"toself",fillcolor:c.pink+"22",line:{width:0},name:t("widget.tdist.chart.legend.reject"),hoverinfo:"skip"});
+    var layout=baseLayout({xaxis:{title:t("widget.tdist.chart.xaxis"),gridcolor:c.grid,linecolor:c.grid,zerolinecolor:c.grid,tickfont:{color:c.textSoft}},yaxis:{title:t("widget.tdist.chart.yaxis"),gridcolor:c.grid,linecolor:c.grid,zerolinecolor:c.grid,tickfont:{color:c.textSoft}},showlegend:true,legend:{x:0.02,y:0.98,xanchor:"left",yanchor:"top",font:{color:c.text},bgcolor:"rgba(0,0,0,0)"},shapes:[{type:"line",xref:"x",yref:"paper",x0:-tcrit,x1:-tcrit,y0:0,y1:1,line:{color:c.pink,width:1.5,dash:"dash"}},{type:"line",xref:"x",yref:"paper",x0:tcrit,x1:tcrit,y0:0,y1:1,line:{color:c.pink,width:1.5,dash:"dash"}}]});
     Plotly.react(chartEl,traces,layout,PLOTLY_CONFIG);
   }
   bindToggles("t-dist-df",render);
@@ -1216,12 +1716,12 @@ var GAS = summary(DATA.gas.prices);
     document.getElementById("ci-stat-width").textContent=f(hi-lo);
     var pad=(hi-lo)*0.6;
     var traces=[
-      {x:[lo,hi],y:[0.5,0.5],type:"scatter",mode:"lines",line:{color:c.cyan,width:6},name:Math.round(level*100)+"% CI",hoverinfo:"x"},
+      {x:[lo,hi],y:[0.5,0.5],type:"scatter",mode:"lines",line:{color:c.cyan,width:6},name:t("widget.ci.chart.legend.ci",{level:Math.round(level*100)}),hoverinfo:"x"},
       {x:[lo],y:[0.5],type:"scatter",mode:"markers",marker:{color:c.cyan,size:14,symbol:"line-ns-open",line:{width:3,color:c.cyan}},showlegend:false,hoverinfo:"x"},
       {x:[hi],y:[0.5],type:"scatter",mode:"markers",marker:{color:c.cyan,size:14,symbol:"line-ns-open",line:{width:3,color:c.cyan}},showlegend:false,hoverinfo:"x"},
-      {x:[s.mean],y:[0.5],type:"scatter",mode:"markers",marker:{color:c.pink,size:12,line:{color:"white",width:2}},name:"X\u0304 = "+f(s.mean),hoverinfo:"x"}
+      {x:[s.mean],y:[0.5],type:"scatter",mode:"markers",marker:{color:c.pink,size:12,line:{color:"white",width:2}},name:t("widget.ci.chart.legend.mean",{val:f(s.mean)}),hoverinfo:"x"}
     ];
-    var layout=baseLayout({xaxis:{title:isMoney?"Earnings ($)":"Price ($)",range:[s.mean-pad-moe,s.mean+pad+moe],gridcolor:c.grid,linecolor:c.grid,zerolinecolor:c.grid,tickfont:{color:c.textSoft}},yaxis:{visible:false,range:[0,1]},showlegend:true,legend:{x:0.5,y:1.1,xanchor:"center",orientation:"h",font:{color:c.text},bgcolor:"rgba(0,0,0,0)"},margin:{l:56,r:18,t:50,b:46},annotations:[{x:lo,y:0.25,text:f(lo),showarrow:false,font:{color:c.text,size:11,family:"JetBrains Mono"}},{x:hi,y:0.25,text:f(hi),showarrow:false,font:{color:c.text,size:11,family:"JetBrains Mono"}}]});
+    var layout=baseLayout({xaxis:{title:isMoney?t("widget.ci.chart.xaxis.earnings"):t("widget.ci.chart.xaxis.gas"),range:[s.mean-pad-moe,s.mean+pad+moe],gridcolor:c.grid,linecolor:c.grid,zerolinecolor:c.grid,tickfont:{color:c.textSoft}},yaxis:{visible:false,range:[0,1]},showlegend:true,legend:{x:0.5,y:1.1,xanchor:"center",orientation:"h",font:{color:c.text},bgcolor:"rgba(0,0,0,0)"},margin:{l:56,r:18,t:50,b:46},annotations:[{x:lo,y:0.25,text:f(lo),showarrow:false,font:{color:c.text,size:11,family:"JetBrains Mono"}},{x:hi,y:0.25,text:f(hi),showarrow:false,font:{color:c.text,size:11,family:"JetBrains Mono"}}]});
     Plotly.react(chartEl,traces,layout,PLOTLY_CONFIG);
   }
   bindSlider("ci-level","ci-level-val",function(v){return v+"%";},render);
@@ -1247,18 +1747,18 @@ var GAS = summary(DATA.gas.prices);
     document.getElementById("ht-stat-p").textContent=pval<0.0001?"< 0.0001":fmt(pval,4);
     document.getElementById("ht-stat-tcrit").textContent="\u00B1"+fmt(tcrit,3);
     var badge=document.getElementById("ht-decision");
-    badge.textContent=reject?"Reject H\u2080":"Fail to reject H\u2080";
+    badge.textContent=reject?t("common.reject"):t("common.fail");
     badge.className="decision-badge "+(reject?"reject":"fail");
     var xs=linspace(-5,5,400);
     var ys=xs.map(function(x){return tPDF(x,df);});
-    var traces=[{x:xs,y:ys,type:"scatter",mode:"lines",line:{color:c.cyan,width:2},name:"t("+df+")"}];
+    var traces=[{x:xs,y:ys,type:"scatter",mode:"lines",line:{color:c.cyan,width:2},name:t("widget.hyptwo.chart.legend.t",{df:df})}];
     var xL=linspace(-5,-tcrit,50),yL=xL.map(function(x){return tPDF(x,df);});
     traces.push({x:xL.concat([-tcrit,-5]),y:yL.concat([0,0]),fill:"toself",fillcolor:c.pink+"22",line:{width:0},showlegend:false,hoverinfo:"skip"});
     var xR=linspace(tcrit,5,50),yR=xR.map(function(x){return tPDF(x,df);});
-    traces.push({x:xR.concat([5,tcrit]),y:yR.concat([0,0]),fill:"toself",fillcolor:c.pink+"22",line:{width:0},name:"\u03B1/2 rejection",hoverinfo:"skip"});
+    traces.push({x:xR.concat([5,tcrit]),y:yR.concat([0,0]),fill:"toself",fillcolor:c.pink+"22",line:{width:0},name:t("widget.hyptwo.chart.legend.reject"),hoverinfo:"skip"});
     var tClamped=Math.max(-4.8,Math.min(4.8,tstat));
-    traces.push({x:[tClamped],y:[tPDF(tClamped,df)*1.15],type:"scatter",mode:"markers+text",marker:{color:reject?c.pink:c.cyan,size:14,symbol:"triangle-down"},text:["t = "+fmt(tstat,2)],textposition:"top center",textfont:{color:reject?c.pink:c.cyan,size:11,family:"JetBrains Mono"},name:"Observed t",showlegend:false});
-    var layout=baseLayout({xaxis:{title:"t",gridcolor:c.grid,linecolor:c.grid,zerolinecolor:c.grid,tickfont:{color:c.textSoft}},yaxis:{title:"Density",gridcolor:c.grid,linecolor:c.grid,zerolinecolor:c.grid,tickfont:{color:c.textSoft}},showlegend:true,legend:{x:0.02,y:0.98,xanchor:"left",yanchor:"top",font:{color:c.text},bgcolor:"rgba(0,0,0,0)"},shapes:[{type:"line",xref:"x",yref:"paper",x0:-tcrit,x1:-tcrit,y0:0,y1:1,line:{color:c.pink,width:1.5,dash:"dash"}},{type:"line",xref:"x",yref:"paper",x0:tcrit,x1:tcrit,y0:0,y1:1,line:{color:c.pink,width:1.5,dash:"dash"}}]});
+    traces.push({x:[tClamped],y:[tPDF(tClamped,df)*1.15],type:"scatter",mode:"markers+text",marker:{color:reject?c.pink:c.cyan,size:14,symbol:"triangle-down"},text:["t = "+fmt(tstat,2)],textposition:"top center",textfont:{color:reject?c.pink:c.cyan,size:11,family:"JetBrains Mono"},name:t("widget.hyptwo.chart.legend.obs"),showlegend:false});
+    var layout=baseLayout({xaxis:{title:t("widget.hyptwo.chart.xaxis"),gridcolor:c.grid,linecolor:c.grid,zerolinecolor:c.grid,tickfont:{color:c.textSoft}},yaxis:{title:t("widget.hyptwo.chart.yaxis"),gridcolor:c.grid,linecolor:c.grid,zerolinecolor:c.grid,tickfont:{color:c.textSoft}},showlegend:true,legend:{x:0.02,y:0.98,xanchor:"left",yanchor:"top",font:{color:c.text},bgcolor:"rgba(0,0,0,0)"},shapes:[{type:"line",xref:"x",yref:"paper",x0:-tcrit,x1:-tcrit,y0:0,y1:1,line:{color:c.pink,width:1.5,dash:"dash"}},{type:"line",xref:"x",yref:"paper",x0:tcrit,x1:tcrit,y0:0,y1:1,line:{color:c.pink,width:1.5,dash:"dash"}}]});
     Plotly.react(chartEl,traces,layout,PLOTLY_CONFIG);
   }
   bindSlider("ht-mu0","ht-mu0-val",function(v){return "$"+parseInt(v).toLocaleString();},render);
@@ -1284,23 +1784,23 @@ var GAS = summary(DATA.gas.prices);
     document.getElementById("ho-stat-p2").textContent=p2<0.0001?"< 0.0001":fmt(p2,4);
     document.getElementById("ho-stat-tcrit").textContent=fmt(tcrit1,3);
     var badge=document.getElementById("ho-decision");
-    badge.textContent=reject?"Reject H\u2080":"Fail to reject H\u2080";
+    badge.textContent=reject?t("common.reject"):t("common.fail");
     badge.className="decision-badge "+(reject?"reject":"fail");
     var xs=linspace(-5,5,400);
     var ys=xs.map(function(x){return tPDF(x,df);});
-    var traces=[{x:xs,y:ys,type:"scatter",mode:"lines",line:{color:c.cyan,width:2},name:"t("+df+")"}];
+    var traces=[{x:xs,y:ys,type:"scatter",mode:"lines",line:{color:c.cyan,width:2},name:t("widget.hypone.chart.legend.t",{df:df})}];
     if(dir==="greater"){
       var tcritAbs=tQuantile(0.95,df);
       var xR=linspace(tcritAbs,5,50),yR=xR.map(function(x){return tPDF(x,df);});
-      traces.push({x:xR.concat([5,tcritAbs]),y:yR.concat([0,0]),fill:"toself",fillcolor:c.pink+"22",line:{width:0},name:"\u03B1 rejection",hoverinfo:"skip"});
+      traces.push({x:xR.concat([5,tcritAbs]),y:yR.concat([0,0]),fill:"toself",fillcolor:c.pink+"22",line:{width:0},name:t("widget.hypone.chart.legend.reject"),hoverinfo:"skip"});
     } else {
       var tcritNeg=tQuantile(0.05,df);
       var xL=linspace(-5,tcritNeg,50),yL=xL.map(function(x){return tPDF(x,df);});
-      traces.push({x:xL.concat([tcritNeg,-5]),y:yL.concat([0,0]),fill:"toself",fillcolor:c.pink+"22",line:{width:0},name:"\u03B1 rejection",hoverinfo:"skip"});
+      traces.push({x:xL.concat([tcritNeg,-5]),y:yL.concat([0,0]),fill:"toself",fillcolor:c.pink+"22",line:{width:0},name:t("widget.hypone.chart.legend.reject"),hoverinfo:"skip"});
     }
     var tClamped=Math.max(-4.8,Math.min(4.8,tstat));
-    traces.push({x:[tClamped],y:[tPDF(tClamped,df)*1.15],type:"scatter",mode:"markers+text",marker:{color:reject?c.pink:c.cyan,size:14,symbol:"triangle-down"},text:["t = "+fmt(tstat,2)],textposition:"top center",textfont:{color:reject?c.pink:c.cyan,size:11,family:"JetBrains Mono"},name:"Observed t",showlegend:false});
-    var layout=baseLayout({xaxis:{title:"t",gridcolor:c.grid,linecolor:c.grid,zerolinecolor:c.grid,tickfont:{color:c.textSoft}},yaxis:{title:"Density",gridcolor:c.grid,linecolor:c.grid,zerolinecolor:c.grid,tickfont:{color:c.textSoft}},showlegend:true,legend:{x:0.02,y:0.98,xanchor:"left",yanchor:"top",font:{color:c.text},bgcolor:"rgba(0,0,0,0)"},shapes:[{type:"line",xref:"x",yref:"paper",x0:tcrit1,x1:tcrit1,y0:0,y1:1,line:{color:c.pink,width:1.5,dash:"dash"}}]});
+    traces.push({x:[tClamped],y:[tPDF(tClamped,df)*1.15],type:"scatter",mode:"markers+text",marker:{color:reject?c.pink:c.cyan,size:14,symbol:"triangle-down"},text:["t = "+fmt(tstat,2)],textposition:"top center",textfont:{color:reject?c.pink:c.cyan,size:11,family:"JetBrains Mono"},name:t("widget.hyptwo.chart.legend.obs"),showlegend:false});
+    var layout=baseLayout({xaxis:{title:t("widget.hypone.chart.xaxis"),gridcolor:c.grid,linecolor:c.grid,zerolinecolor:c.grid,tickfont:{color:c.textSoft}},yaxis:{title:t("widget.hypone.chart.yaxis"),gridcolor:c.grid,linecolor:c.grid,zerolinecolor:c.grid,tickfont:{color:c.textSoft}},showlegend:true,legend:{x:0.02,y:0.98,xanchor:"left",yanchor:"top",font:{color:c.text},bgcolor:"rgba(0,0,0,0)"},shapes:[{type:"line",xref:"x",yref:"paper",x0:tcrit1,x1:tcrit1,y0:0,y1:1,line:{color:c.pink,width:1.5,dash:"dash"}}]});
     Plotly.react(chartEl,traces,layout,PLOTLY_CONFIG);
   }
   bindSlider("ho-mu0","ho-mu0-val",function(v){return "$"+parseInt(v).toLocaleString();},render);
@@ -1324,11 +1824,11 @@ var GAS = summary(DATA.gas.prices);
     document.getElementById("gas-stat-t").textContent=fmt(tstat,4);
     document.getElementById("gas-stat-p").textContent=pval<0.0001?"< 0.0001":fmt(pval,4);
     var badge=document.getElementById("gas-decision");
-    badge.textContent=reject?"Reject H\u2080 (\u03B1 = 0.05)":"Fail to reject H\u2080";
+    badge.textContent=reject?t("common.rejectAlpha"):t("common.fail");
     badge.className="decision-badge "+(reject?"reject":"fail");
     var traces=[];
-    traces.push({x:DATA.gas.prices,type:"histogram",marker:{color:c.cyan+"55",line:{color:c.cyan,width:1.5}},name:"Gas prices",nbinsx:12});
-    var layout=baseLayout({xaxis:{title:"Price per gallon ($)",gridcolor:c.grid,linecolor:c.grid,zerolinecolor:c.grid,tickfont:{color:c.textSoft}},yaxis:{title:"Count",gridcolor:c.grid,linecolor:c.grid,zerolinecolor:c.grid,tickfont:{color:c.textSoft}},showlegend:false,shapes:[{type:"line",xref:"x",yref:"paper",x0:GAS.mean,x1:GAS.mean,y0:0,y1:1,line:{color:c.pink,width:2.5}},{type:"line",xref:"x",yref:"paper",x0:mu0,x1:mu0,y0:0,y1:1,line:{color:c.purple,width:2.5,dash:"dash"}}],annotations:[{x:GAS.mean,y:1.03,yref:"paper",text:"X\u0304 = $"+fmt(GAS.mean,2),showarrow:false,font:{color:c.pink,size:11,family:"JetBrains Mono"}},{x:mu0,y:1.09,yref:"paper",text:"H\u2080: $"+fmt(mu0,2),showarrow:false,font:{color:c.purple,size:11,family:"JetBrains Mono"}}]});
+    traces.push({x:DATA.gas.prices,type:"histogram",marker:{color:c.cyan+"55",line:{color:c.cyan,width:1.5}},name:t("widget.gas.chart.legend.prices"),nbinsx:12});
+    var layout=baseLayout({xaxis:{title:t("widget.gas.chart.xaxis"),gridcolor:c.grid,linecolor:c.grid,zerolinecolor:c.grid,tickfont:{color:c.textSoft}},yaxis:{title:t("widget.gas.chart.yaxis"),gridcolor:c.grid,linecolor:c.grid,zerolinecolor:c.grid,tickfont:{color:c.textSoft}},showlegend:false,shapes:[{type:"line",xref:"x",yref:"paper",x0:GAS.mean,x1:GAS.mean,y0:0,y1:1,line:{color:c.pink,width:2.5}},{type:"line",xref:"x",yref:"paper",x0:mu0,x1:mu0,y0:0,y1:1,line:{color:c.purple,width:2.5,dash:"dash"}}],annotations:[{x:GAS.mean,y:1.03,yref:"paper",text:t("widget.gas.chart.label.xbar",{val:fmt(GAS.mean,2)}),showarrow:false,font:{color:c.pink,size:11,family:"JetBrains Mono"}},{x:mu0,y:1.09,yref:"paper",text:t("widget.gas.chart.label.h0",{val:fmt(mu0,2)}),showarrow:false,font:{color:c.purple,size:11,family:"JetBrains Mono"}}]});
     Plotly.react(chartEl,traces,layout,PLOTLY_CONFIG);
   }
   bindSlider("gas-mu0","gas-mu0-val",function(v){return "$"+parseFloat(v).toFixed(2);},render);
@@ -1355,17 +1855,17 @@ var GAS = summary(DATA.gas.prices);
     document.getElementById("prop-stat-z").textContent=fmt(zstat,4);
     document.getElementById("prop-stat-p").textContent=pval<0.0001?"< 0.0001":fmt(pval,4);
     var badge=document.getElementById("prop-decision");
-    badge.textContent=reject?"Reject H\u2080: p = "+fmt(p0,2):"Fail to reject H\u2080: p = "+fmt(p0,2);
+    badge.textContent=reject?t("common.rejectP",{p0:fmt(p0,2)}):t("common.failP",{p0:fmt(p0,2)});
     badge.className="decision-badge "+(reject?"reject":"fail");
     var pad=(hi-lo)*0.8;
     var traces=[
-      {x:[lo,hi],y:[0.5,0.5],type:"scatter",mode:"lines",line:{color:c.cyan,width:6},name:"95% CI",hoverinfo:"x"},
+      {x:[lo,hi],y:[0.5,0.5],type:"scatter",mode:"lines",line:{color:c.cyan,width:6},name:t("widget.prop.chart.legend.ci"),hoverinfo:"x"},
       {x:[lo],y:[0.5],type:"scatter",mode:"markers",marker:{color:c.cyan,size:14,symbol:"line-ns-open",line:{width:3,color:c.cyan}},showlegend:false,hoverinfo:"x"},
       {x:[hi],y:[0.5],type:"scatter",mode:"markers",marker:{color:c.cyan,size:14,symbol:"line-ns-open",line:{width:3,color:c.cyan}},showlegend:false,hoverinfo:"x"},
-      {x:[phat],y:[0.5],type:"scatter",mode:"markers",marker:{color:c.pink,size:12,line:{color:"white",width:2}},name:"p\u0302 = "+fmtPct(phat),hoverinfo:"x"},
-      {x:[p0],y:[0.5],type:"scatter",mode:"markers",marker:{color:c.purple,size:12,symbol:"diamond",line:{color:"white",width:2}},name:"p\u2080 = "+fmtPct(p0),hoverinfo:"x"}
+      {x:[phat],y:[0.5],type:"scatter",mode:"markers",marker:{color:c.pink,size:12,line:{color:"white",width:2}},name:t("widget.prop.chart.legend.phat",{val:fmtPct(phat)}),hoverinfo:"x"},
+      {x:[p0],y:[0.5],type:"scatter",mode:"markers",marker:{color:c.purple,size:12,symbol:"diamond",line:{color:"white",width:2}},name:t("widget.prop.chart.legend.p0",{val:fmtPct(p0)}),hoverinfo:"x"}
     ];
-    var layout=baseLayout({xaxis:{title:"Proportion",range:[Math.min(lo,p0)-pad,Math.max(hi,p0)+pad],gridcolor:c.grid,linecolor:c.grid,zerolinecolor:c.grid,tickfont:{color:c.textSoft},tickformat:".0%"},yaxis:{visible:false,range:[0,1]},showlegend:true,legend:{x:0.5,y:1.1,xanchor:"center",orientation:"h",font:{color:c.text},bgcolor:"rgba(0,0,0,0)"},margin:{l:56,r:18,t:50,b:46},annotations:[{x:lo,y:0.25,text:fmtPct(lo),showarrow:false,font:{color:c.text,size:11,family:"JetBrains Mono"}},{x:hi,y:0.25,text:fmtPct(hi),showarrow:false,font:{color:c.text,size:11,family:"JetBrains Mono"}}]});
+    var layout=baseLayout({xaxis:{title:t("widget.prop.chart.xaxis"),range:[Math.min(lo,p0)-pad,Math.max(hi,p0)+pad],gridcolor:c.grid,linecolor:c.grid,zerolinecolor:c.grid,tickfont:{color:c.textSoft},tickformat:".0%"},yaxis:{visible:false,range:[0,1]},showlegend:true,legend:{x:0.5,y:1.1,xanchor:"center",orientation:"h",font:{color:c.text},bgcolor:"rgba(0,0,0,0)"},margin:{l:56,r:18,t:50,b:46},annotations:[{x:lo,y:0.25,text:fmtPct(lo),showarrow:false,font:{color:c.text,size:11,family:"JetBrains Mono"}},{x:hi,y:0.25,text:fmtPct(hi),showarrow:false,font:{color:c.text,size:11,family:"JetBrains Mono"}}]});
     Plotly.react(chartEl,traces,layout,PLOTLY_CONFIG);
   }
   bindSlider("prop-phat","prop-phat-val",function(v){return "p\u0302 = "+parseFloat(v).toFixed(2);},render);
@@ -1398,13 +1898,49 @@ var GAS = summary(DATA.gas.prices);
   readHash();
 })();
 
-// ==================== THEME TOGGLE ====================
-(function(){
-  var btn=document.getElementById("theme-toggle"),iconEl=document.getElementById("theme-icon"),labelEl=document.getElementById("theme-label");
-  function apply(theme){document.documentElement.dataset.theme=theme;iconEl.textContent=theme==="dark"?"\u2600\uFE0F":"\uD83C\uDF19";labelEl.textContent=theme==="dark"?"Light":"Dark";for(var key in window){if(key.startsWith("__rerender_")&&typeof window[key]==="function")window[key]();}}
-  var saved=localStorage.getItem(THEME_KEY);var prefersDark=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches;apply(saved||(prefersDark?"dark":"light"));
-  btn.addEventListener("click",function(){var next=document.documentElement.dataset.theme==="dark"?"light":"dark";localStorage.setItem(THEME_KEY,next);apply(next);});
+// ==================== THEME TOGGLE (site navbar) ====================
+// Reads/writes localStorage.darkMode (shared with index.html / tutors.html)
+// and applies html[data-theme="dark"] for this chapter's CSS.
+function applyDarkMode(isDark) {
+  document.documentElement.dataset.theme = isDark ? "dark" : "light";
+  const icon = document.getElementById("siteDarkModeIcon");
+  if (icon) icon.className = isDark ? "fa-solid fa-sun" : "fa-solid fa-moon";
+  // Re-render all widgets so Plotly picks up the new CSS colors.
+  for (const key in window) {
+    if (key.startsWith("__rerender_") && typeof window[key] === "function") window[key]();
+  }
+}
+
+function toggleDarkModeNav() {
+  const isDark = document.documentElement.dataset.theme !== "dark";
+  localStorage.setItem(THEME_KEY, isDark ? "dark" : "light");
+  applyDarkMode(isDark);
+}
+
+(function() {
+  const saved = localStorage.getItem(THEME_KEY);
+  const prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+  const isDark = saved ? (saved === "dark") : prefersDark;
+  applyDarkMode(isDark);
 })();
+
+// ==================== MOBILE MENU (site navbar) ====================
+function toggleSiteMobileMenu() {
+  const menu = document.getElementById("siteMobileMenu");
+  const hamburger = document.getElementById("siteHamburgerIcon");
+  const close = document.getElementById("siteCloseIcon");
+  if (!menu || !hamburger || !close) return;
+  const isOpen = menu.classList.toggle("open");
+  hamburger.style.display = isOpen ? "none" : "";
+  close.style.display = isOpen ? "" : "none";
+}
+
+// ==================== LANGUAGE INIT ====================
+// Run AFTER all widget IIFEs have registered themselves with __rerender_*
+// (each widget's render() reads labels via t(), so they pick up the right
+// language on first paint via window.__lang set above; this call swaps
+// every [data-i18n] element and updates the toggle button label).
+applyLanguage(window.__lang || I18N.defaultLang);
 
 // ==================== Resize handling ====================
 window.addEventListener("resize",function(){document.querySelectorAll(".chart").forEach(function(el){if(el.data)Plotly.Plots.resize(el);});});

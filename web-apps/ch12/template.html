@@ -3,10 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Chapter 12 — Further Topics in Multiple Regression · metricsAI</title>
+<title data-i18n="meta.title">Chapter 12 — Additional Topics in Multiple Regression · metricsAI</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <script src="https://cdn.plot.ly/plotly-2.35.2.min.js" charset="utf-8"></script>
 <style>
 :root {
@@ -54,8 +55,52 @@ body {
   background: var(--bg);
   color: var(--text);
   line-height: 1.55;
-  transition: background-color .25s ease, color .25s ease;
+  transition: background-color .25s ease, color .25s ease; padding-top: 64px; /* leave room for the fixed .site-nav */
 }
+/* ===== Site navigation bar (shared across metricsAI pages) ===== */
+.site-nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 50;
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--border);
+  height: 64px;
+}
+html[data-theme="dark"] .site-nav { background: rgba(12, 16, 36, 0.85); }
+.site-nav-inner { max-width: 1280px; margin: 0 auto; padding: 0 1rem; height: 100%; display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
+.site-nav-brand { display: flex; align-items: center; gap: 0.5rem; font-weight: 700; font-size: 1.15rem; color: var(--text); text-decoration: none; }
+.site-nav-brand .ai-mark { color: var(--accent); }
+.site-nav-links { display: flex; gap: 1.5rem; }
+.site-nav-links a { color: var(--text-soft); text-decoration: none; font-weight: 500; font-size: 0.95rem; transition: color .2s ease; }
+.site-nav-links a:hover { color: var(--accent); }
+.site-nav-links a.active { color: var(--accent); border-bottom: 2px solid var(--accent); padding-bottom: 0.25rem; }
+.site-nav-controls { display: flex; align-items: center; gap: 0.8rem; }
+.site-nav-cameron { display: flex; flex-direction: column; align-items: center; padding: 0.25rem 0.6rem; border: 1px solid var(--border); border-radius: 0.5rem; background: var(--panel-2); text-decoration: none; line-height: 1.1; transition: background .2s ease; }
+.site-nav-cameron:hover { background: var(--panel); }
+.site-nav-cameron .cameron-pre { font-size: 0.6rem; color: var(--text-muted); }
+.site-nav-cameron .cameron-name { font-size: 0.7rem; font-weight: 600; color: var(--text-soft); }
+.site-nav-cameron .cameron-cta { font-size: 0.6rem; color: var(--text-muted); margin-top: 0.1rem; }
+.site-nav-btn { background: transparent; border: none; color: var(--text-soft); cursor: pointer; padding: 0.4rem; border-radius: 0.4rem; font-size: 1.05rem; display: inline-flex; align-items: center; gap: 0.3rem; transition: color .2s ease, background .2s ease; }
+.site-nav-btn:hover { color: var(--accent); background: var(--panel-2); }
+.site-nav-btn .label { font-size: 0.75rem; font-weight: 600; }
+.site-nav-hamburger { display: none; }
+
+.site-nav-mobile { display: none; position: fixed; top: 64px; left: 0; right: 0; background: var(--panel); border-top: 1px solid var(--border); box-shadow: var(--shadow); z-index: 40; padding: 1rem; }
+.site-nav-mobile a { display: block; padding: 0.6rem 0.4rem; color: var(--text-soft); text-decoration: none; font-weight: 500; border-bottom: 1px solid var(--border); }
+.site-nav-mobile a.active { color: var(--accent); }
+.site-nav-mobile a:last-of-type { border-bottom: none; }
+.site-nav-mobile.open { display: block; }
+
+@media (max-width: 768px) {
+  .site-nav-links, .site-nav-cameron { display: none; }
+  .site-nav-hamburger { display: inline-flex; }
+}
+/* ===== /Site navigation bar ===== */
+
 code, .mono { font-family: 'JetBrains Mono', ui-monospace, monospace; }
 
 header.page {
@@ -79,15 +124,6 @@ h1.title {
   font-weight: 700; letter-spacing: -0.01em;
 }
 p.subtitle { margin: 0 0 0.8rem; color: var(--text-soft); font-size: 1.05rem; max-width: 720px; }
-.theme-toggle {
-  position: absolute; top: 1.4rem; right: 1.5rem;
-  background: var(--panel-2); color: var(--text); border: 1px solid var(--border);
-  padding: 0.4rem 0.8rem; border-radius: 999px; cursor: pointer;
-  font-size: 0.85rem; font-weight: 500; display: inline-flex; align-items: center; gap: 0.35rem;
-  transition: all .2s ease;
-}
-.theme-toggle:hover { border-color: var(--accent); color: var(--accent); }
-
 nav.anchors {
   position: sticky; top: 0; z-index: 20;
   background: color-mix(in srgb, var(--panel) 92%, transparent);
@@ -340,24 +376,71 @@ footer.page a:hover { text-decoration: underline; }
 </head>
 <body>
 
+
+<nav class="site-nav" aria-label="Site navigation">
+  <div class="site-nav-inner">
+    <a href="../../index.html" class="site-nav-brand">
+      <i class="fa-solid fa-chart-line" style="color: var(--accent);"></i>
+      <span>metrics<span class="ai-mark">AI</span></span>
+    </a>
+    <div class="site-nav-links">
+      <a href="../../index.html#about" data-i18n="nav.about">About</a>
+      <a href="../../index.html#curriculum" class="active" data-i18n="nav.notebooks">Python Notebooks</a>
+      <a href="../../tutors.html" data-i18n="nav.tutors">AI Tutors</a>
+      <a href="../../index.html#books" data-i18n="nav.books">Books</a>
+      <a href="../../videos.html" data-i18n="nav.videos">Videos</a>
+      <a href="https://open.spotify.com/show/2lN5pA3l10UdHe61ZCoHcF?si=IFFMpG3pROepG61o8qbnvg" target="_blank" rel="noopener" data-i18n="nav.podcasts">Podcasts</a>
+      <a href="../../index.html#authors" data-i18n="nav.authors">Authors</a>
+      <a href="../../index.html#more-resources" data-i18n="nav.resources">More Resources</a>
+    </div>
+    <div class="site-nav-controls">
+      <a href="https://cameron.econ.ucdavis.edu/aed/index.html" target="_blank" rel="noopener" class="site-nav-cameron">
+        <span class="cameron-pre" data-i18n="nav.cameron.pre">Content based on</span>
+        <span class="cameron-name">Cameron (2022)</span>
+        <span class="cameron-cta"><span data-i18n="nav.cameron.cta">Learn More</span> <i class="fa-solid fa-external-link-alt"></i></span>
+      </a>
+      <button type="button" class="site-nav-btn" onclick="toggleDarkModeNav()" title="Toggle dark mode" id="siteDarkModeToggle">
+        <i class="fa-solid fa-moon" id="siteDarkModeIcon"></i>
+      </button>
+      <button type="button" class="site-nav-btn" onclick="toggleLanguage()" title="Switch language / Cambiar idioma" id="siteLanguageToggle">
+        <i class="fa-solid fa-language"></i>
+        <span class="label" id="siteLanguageLabel">EN</span>
+      </button>
+      <button type="button" class="site-nav-btn site-nav-hamburger" onclick="toggleSiteMobileMenu()" id="siteMobileMenuBtn">
+        <i class="fa-solid fa-bars" id="siteHamburgerIcon"></i>
+        <i class="fa-solid fa-times" id="siteCloseIcon" style="display:none"></i>
+      </button>
+    </div>
+  </div>
+</nav>
+<div class="site-nav-mobile" id="siteMobileMenu">
+  <a href="../../index.html#about" data-i18n="nav.about">About</a>
+  <a href="../../index.html#curriculum" class="active" data-i18n="nav.notebooks">Python Notebooks</a>
+  <a href="../../tutors.html" data-i18n="nav.tutors">AI Tutors</a>
+  <a href="../../index.html#books" data-i18n="nav.books">Books</a>
+  <a href="../../videos.html" data-i18n="nav.videos">Videos</a>
+  <a href="https://open.spotify.com/show/2lN5pA3l10UdHe61ZCoHcF?si=IFFMpG3pROepG61o8qbnvg" target="_blank" rel="noopener" data-i18n="nav.podcasts">Podcasts</a>
+  <a href="../../index.html#authors" data-i18n="nav.authors">Authors</a>
+  <a href="../../index.html#more-resources" data-i18n="nav.resources">More Resources</a>
+</div>
+
 <header class="page">
   <div class="page-inner">
-    <span class="chapter-badge">Chapter 12 of 18 · Interactive Dashboard</span>
-    <h1 class="title">Further Topics in Multiple Regression</h1>
-    <p class="subtitle">Explore robust standard errors, prediction intervals, Type I/II errors, autocorrelation, and bootstrap methods with real house-price and GDP data.</p>
+    <span class="chapter-badge" data-i18n="header.badge">Chapter 12 of 18 · Interactive Dashboard</span>
+    <h1 class="title" data-i18n="header.title">Additional Topics in Multiple Regression</h1>
+    <p class="subtitle" data-i18n="header.subtitle">Explore robust standard errors, prediction intervals, Type I/II errors, autocorrelation, and bootstrap methods with real house-price and GDP data.</p>
   </div>
-  <button id="theme-toggle" class="theme-toggle" type="button" aria-label="Toggle color theme"><span id="theme-icon">🌙</span><span id="theme-label">Dark</span></button>
 </header>
 
 <nav class="anchors" aria-label="Sections">
   <ul>
-    <li><a href="#robust-se">Robust SEs</a></li>
-    <li><a href="#prediction">Prediction</a></li>
-    <li><a href="#type-errors">Type I/II</a></li>
-    <li><a href="#autocorrelation">Autocorrelation</a></li>
-    <li><a href="#se-ratio">SE Ratios</a></li>
-    <li><a href="#bootstrap">Bootstrap</a></li>
-    <li><a href="#code">Code</a></li>
+    <li><a href="#robust-se" data-i18n="nav.robustse">Robust SEs</a></li>
+    <li><a href="#prediction" data-i18n="nav.pred">Prediction</a></li>
+    <li><a href="#type-errors" data-i18n="nav.typerr">Type I/II</a></li>
+    <li><a href="#autocorrelation" data-i18n="nav.acf">Autocorrelation</a></li>
+    <li><a href="#se-ratio" data-i18n="nav.seratio">SE Ratios</a></li>
+    <li><a href="#bootstrap" data-i18n="nav.boot">Bootstrap</a></li>
+    <li><a href="#code" data-i18n="nav.code">Code</a></li>
   </ul>
 </nav>
 
@@ -367,20 +450,20 @@ footer.page a:hover { text-decoration: underline; }
 <section class="widget" id="robust-se">
   <div class="widget-head">
     <div>
-      <h2>Robust Standard Error Selector</h2>
+      <h2 data-i18n="widget.rse.heading">Robust Standard Error Selector</h2>
     </div>
-    <button class="reset-btn" data-reset="robustse">↺ Reset</button>
+    <button class="reset-btn" data-reset="robustse" data-i18n="common.reset">↺ Reset</button>
   </div>
 
-  <p class="motivation">Default OLS standard errors assume error variance is constant — but real data rarely obliges. <em>When homoskedasticity fails, your t-statistics and p-values lie by construction.</em></p>
+  <p class="motivation" data-i18n="widget.rse.motivation">Default OLS standard errors assume error variance is constant — but real data rarely obliges. <em>When homoskedasticity fails, your t-statistics and p-values lie by construction.</em></p>
 
-  <div class="key-concept">
+  <div class="key-concept" data-i18n="widget.rse.kc">
     <span class="kc-title">When error variance is not constant, default OLS standard errors are invalid.</span> <strong>Heteroskedastic-robust (HC1) SEs</strong> correct this without changing the coefficient estimates themselves. Only the SEs, t-statistics, and confidence intervals change. For cross-sectional data, reporting HC1 robust SEs is considered <strong>modern best practice</strong> — they cost nothing when homoskedasticity holds and protect you when it fails.
   </div>
 
   <div class="widget-howto">
-    <div class="howto-title">What you can do here</div>
-    <ul>
+    <div class="howto-title" data-i18n="common.howtoTitle">What you can do here</div>
+    <ul data-i18n="widget.rse.howto">
       <li><strong>Toggle between Default and HC1-Robust SEs</strong> — watch SEs, t-stats, and p-values change while the coefficient stays fixed.</li>
       <li><strong>Select each variable in turn</strong> to see where heteroskedasticity bites hardest.</li>
       <li><strong>Check the SE ratio</strong> — ratios far from 1 flag heteroskedasticity.</li>
@@ -389,14 +472,14 @@ footer.page a:hover { text-decoration: underline; }
 
   <div class="controls">
     <div class="ctrl">
-      <label>Standard Error Type</label>
+      <label data-i18n="widget.rse.ctrl.type.label">Standard Error Type</label>
       <div class="toggle-group" id="rse-type">
-        <button type="button" data-val="default" class="active">Default</button>
-        <button type="button" data-val="hc1">HC1-Robust</button>
+        <button type="button" data-val="default" class="active" data-i18n="widget.rse.ctrl.type.default">Default</button>
+        <button type="button" data-val="hc1" data-i18n="widget.rse.ctrl.type.hc1">HC1-Robust</button>
       </div>
     </div>
     <div class="ctrl">
-      <label>Variable Focus</label>
+      <label data-i18n="widget.rse.ctrl.var.label">Variable Focus</label>
       <select id="rse-var">
         <option value="size">size</option>
         <option value="bedrooms">bedrooms</option>
@@ -408,44 +491,44 @@ footer.page a:hover { text-decoration: underline; }
     </div>
   </div>
   <div class="stats-grid">
-    <div class="stat pop"><div class="label">Coefficient</div><div class="value" id="rse-coef">—</div></div>
-    <div class="stat"><div class="label">Std. Error</div><div class="value" id="rse-se">—</div></div>
-    <div class="stat"><div class="label">t-statistic</div><div class="value" id="rse-tstat">—</div></div>
-    <div class="stat err"><div class="label">p-value</div><div class="value" id="rse-pval">—</div></div>
-    <div class="stat"><div class="label">R²</div><div class="value" id="rse-r2">—</div></div>
-    <div class="stat"><div class="label">SE Ratio</div><div class="value" id="rse-ratio">—</div></div>
+    <div class="stat pop"><div class="label" data-i18n="stat.coef">Coefficient</div><div class="value" id="rse-coef">—</div></div>
+    <div class="stat"><div class="label" data-i18n="stat.se">Std. Error</div><div class="value" id="rse-se">—</div></div>
+    <div class="stat"><div class="label" data-i18n="stat.tstat">t-statistic</div><div class="value" id="rse-tstat">—</div></div>
+    <div class="stat err"><div class="label" data-i18n="stat.pval">p-value</div><div class="value" id="rse-pval">—</div></div>
+    <div class="stat"><div class="label" data-i18n="stat.r2">R²</div><div class="value" id="rse-r2">—</div></div>
+    <div class="stat"><div class="label" data-i18n="stat.seRatio">SE Ratio</div><div class="value" id="rse-ratio">—</div></div>
   </div>
   <div class="chart" id="chart-rse"></div>
   <div class="try-this">
-    <div class="try-title">Try this</div>
-    <ol>
+    <div class="try-title" data-i18n="common.tryTitle">Try this</div>
+    <ol data-i18n="widget.rse.try">
       <li><strong>Select bathrooms and toggle Default vs HC1-Robust.</strong> The SE ratio is &gt; 1.2. <em>Heteroskedasticity clearly inflates this variable's uncertainty — the default SE was too optimistic.</em></li>
       <li><strong>Select lotsize and compare.</strong> The robust SE is <em>smaller</em> than the default (ratio &lt; 1). <em>Unusual but legitimate — robust SEs can tighten CIs as well as widen them.</em></li>
       <li><strong>Scan every variable for a p-value significance flip.</strong> None flip at 5% here. <em>Small dataset, modest heteroskedasticity — but on larger cross-sections, robust SEs can overturn conclusions.</em></li>
     </ol>
   </div>
 
-  <p class="takeaway"><strong>Take-away:</strong> Coefficients are the same; only inference changes — always report robust SEs alongside defaults on cross-sectional data. <a href="../../book/_book/notebooks_quarto/ch12_Further_Topics_in_Multiple_Regression.html#inference-with-robust-standard-errors" target="_blank" rel="noopener">Read §12.2 in the chapter →</a></p>
+  <p class="takeaway" data-i18n="widget.rse.takeaway"><strong>Take-away:</strong> Coefficients are the same; only inference changes — always report robust SEs alongside defaults on cross-sectional data. <a href="../../book/_book/notebooks_quarto/ch12_Further_Topics_in_Multiple_Regression.html#inference-with-robust-standard-errors" target="_blank" rel="noopener">Read §12.2 in the chapter →</a></p>
 </section>
 
 <!-- ==================== WIDGET 2: Prediction Interval Visualizer ==================== -->
 <section class="widget" id="prediction">
   <div class="widget-head">
     <div>
-      <h2>Prediction Interval Visualizer</h2>
+      <h2 data-i18n="widget.pred.heading">Prediction Interval Visualizer</h2>
     </div>
-    <button class="reset-btn" data-reset="pred">↺ Reset</button>
+    <button class="reset-btn" data-reset="pred" data-i18n="common.reset">↺ Reset</button>
   </div>
 
-  <p class="motivation">Predicting the <em>average</em> 2,000-sqft house is easy. Predicting a <em>specific</em> 2,000-sqft house is brutal — even with unlimited data, some uncertainty never goes away.</p>
+  <p class="motivation" data-i18n="widget.pred.motivation">Predicting the <em>average</em> 2,000-sqft house is easy. Predicting a <em>specific</em> 2,000-sqft house is brutal — even with unlimited data, some uncertainty never goes away.</p>
 
-  <div class="key-concept">
+  <div class="key-concept" data-i18n="widget.pred.kc">
     <span class="kc-title">Predicting the average outcome E[y|x*] is more precise than predicting an individual y|x*.</span> The forecast variance equals the conditional-mean variance plus <strong>σ²</strong>: Var(ŷ<sub>f</sub>) = Var(ŷ<sub>cm</sub>) + σ². As n → ∞ the conditional-mean SE shrinks to zero, but the forecast SE remains at least <strong>s<sub>e</sub></strong> — the RMSE. This is a <strong>fundamental limit on individual predictions</strong>: 95% PIs are at least ±1.96 × s<sub>e</sub> wide, no matter how much data you collect.
   </div>
 
   <div class="widget-howto">
-    <div class="howto-title">What you can do here</div>
-    <ul>
+    <div class="howto-title" data-i18n="common.howtoTitle">What you can do here</div>
+    <ul data-i18n="widget.pred.howto">
       <li><strong>Slide the "Predict at size" slider</strong> from 1,200 to 3,500 sqft.</li>
       <li><strong>Toggle "Both" / "CI Only" / "PI Only"</strong> to separate mean-prediction uncertainty from individual-prediction uncertainty.</li>
       <li><strong>Watch the PI / CI width ratio</strong> — it reveals how much of the total uncertainty is irreducible.</li>
@@ -454,56 +537,56 @@ footer.page a:hover { text-decoration: underline; }
 
   <div class="controls">
     <div class="ctrl">
-      <label for="pred-size">Predict at size <span class="val" id="pred-size-val">2000</span> sq ft</label>
+      <label for="pred-size"><span data-i18n="widget.pred.ctrl.size.label">Predict at size</span> <span class="val" id="pred-size-val">2000</span> <span data-i18n="widget.pred.ctrl.size.unit">sq ft</span></label>
       <input type="range" id="pred-size" min="1200" max="3500" step="50" value="2000">
     </div>
     <div class="ctrl">
-      <label>Show bands</label>
+      <label data-i18n="widget.pred.ctrl.bands.label">Show bands</label>
       <div class="toggle-group" id="pred-bands">
-        <button type="button" data-val="both" class="active">Both</button>
-        <button type="button" data-val="ci">CI Only</button>
-        <button type="button" data-val="pi">PI Only</button>
+        <button type="button" data-val="both" class="active" data-i18n="widget.pred.ctrl.bands.both">Both</button>
+        <button type="button" data-val="ci" data-i18n="widget.pred.ctrl.bands.ci">CI Only</button>
+        <button type="button" data-val="pi" data-i18n="widget.pred.ctrl.bands.pi">PI Only</button>
       </div>
     </div>
   </div>
   <div class="stats-grid">
-    <div class="stat pop"><div class="label">Predicted price</div><div class="value" id="pred-yhat">—</div></div>
-    <div class="stat"><div class="label">CI SE</div><div class="value" id="pred-se-ci">—</div></div>
-    <div class="stat err"><div class="label">PI SE</div><div class="value" id="pred-se-pi">—</div></div>
-    <div class="stat"><div class="label">PI / CI width</div><div class="value" id="pred-ratio">—</div></div>
-    <div class="stat"><div class="label">RMSE</div><div class="value" id="pred-rmse">—</div></div>
+    <div class="stat pop"><div class="label" data-i18n="stat.predPrice">Predicted price</div><div class="value" id="pred-yhat">—</div></div>
+    <div class="stat"><div class="label" data-i18n="stat.ciSe">CI SE</div><div class="value" id="pred-se-ci">—</div></div>
+    <div class="stat err"><div class="label" data-i18n="stat.piSe">PI SE</div><div class="value" id="pred-se-pi">—</div></div>
+    <div class="stat"><div class="label" data-i18n="stat.piCiRatio">PI / CI width</div><div class="value" id="pred-ratio">—</div></div>
+    <div class="stat"><div class="label" data-i18n="stat.rmse">RMSE</div><div class="value" id="pred-rmse">—</div></div>
   </div>
   <div class="chart tall" id="chart-pred"></div>
   <div class="try-this">
-    <div class="try-title">Try this</div>
-    <ol>
+    <div class="try-title" data-i18n="common.tryTitle">Try this</div>
+    <ol data-i18n="widget.pred.try">
       <li><strong>Set size to the sample mean (~1,883 sqft).</strong> The CI is at its narrowest here. Drag to 3,500 sqft and both bands widen. <em>Predictions are most precise near the center of the data; extrapolating to the edges costs you precision both in the mean and in the individual.</em></li>
       <li><strong>Toggle CI Only, then PI Only.</strong> The PI dwarfs the CI. <em>Most of the uncertainty in predicting an individual house is irreducible — the σ that no amount of data can eliminate.</em></li>
       <li><strong>Watch the PI / CI width ratio.</strong> Largest near the mean, smallest at the extremes. <em>At the data's center, σ dominates; at the edges, estimation uncertainty catches up — but never overtakes σ.</em></li>
     </ol>
   </div>
 
-  <p class="takeaway"><strong>Take-away:</strong> Predicting a conditional mean gets arbitrarily precise with more data; predicting an individual outcome does not — a built-in ceiling on forecasting any specific y. <a href="../../book/_book/notebooks_quarto/ch12_Further_Topics_in_Multiple_Regression.html#prediction" target="_blank" rel="noopener">Read §12.3 in the chapter →</a></p>
+  <p class="takeaway" data-i18n="widget.pred.takeaway"><strong>Take-away:</strong> Predicting a conditional mean gets arbitrarily precise with more data; predicting an individual outcome does not — a built-in ceiling on forecasting any specific y. <a href="../../book/_book/notebooks_quarto/ch12_Further_Topics_in_Multiple_Regression.html#prediction" target="_blank" rel="noopener">Read §12.3 in the chapter →</a></p>
 </section>
 
 <!-- ==================== WIDGET 3: Type I/II Error Explorer ==================== -->
 <section class="widget" id="type-errors">
   <div class="widget-head">
     <div>
-      <h2>Type I/II Error Explorer</h2>
+      <h2 data-i18n="widget.typerr.heading">Type I/II Error Explorer</h2>
     </div>
-    <button class="reset-btn" data-reset="typerr">↺ Reset</button>
+    <button class="reset-btn" data-reset="typerr" data-i18n="common.reset">↺ Reset</button>
   </div>
 
-  <p class="motivation">A test can fail two ways: cry wolf when nothing's there, or miss a real effect. <em>How do sample size, noise, and α each shift that balance?</em></p>
+  <p class="motivation" data-i18n="widget.typerr.motivation">A test can fail two ways: cry wolf when nothing's there, or miss a real effect. <em>How do sample size, noise, and α each shift that balance?</em></p>
 
-  <div class="key-concept">
+  <div class="key-concept" data-i18n="widget.typerr.kc">
     <span class="kc-title">Type I error is a false positive (rejecting a true H<sub>0</sub>); its probability equals α. Type II error is a false negative (failing to reject a false H<sub>0</sub>).</span> <strong>Power = 1 − P(Type II)</strong> measures the ability to detect true effects. The most powerful test for a given size uses the <strong>most precise estimator</strong> — one more reason efficient estimation matters beyond the point estimate itself.
   </div>
 
   <div class="widget-howto">
-    <div class="howto-title">What you can do here</div>
-    <ul>
+    <div class="howto-title" data-i18n="common.howtoTitle">What you can do here</div>
+    <ul data-i18n="widget.typerr.howto">
       <li><strong>Slide the sample size n</strong> — larger n tightens SE(β̂) and shifts the whole power curve upward.</li>
       <li><strong>Slide the noise σ</strong> — more noise flattens the curve.</li>
       <li><strong>Slide the α level</strong> — higher α gives more power but more false positives.</li>
@@ -512,55 +595,55 @@ footer.page a:hover { text-decoration: underline; }
 
   <div class="controls">
     <div class="ctrl">
-      <label for="typerr-n">Sample size n <span class="val" id="typerr-n-val">30</span></label>
+      <label for="typerr-n"><span data-i18n="widget.typerr.ctrl.n.label">Sample size n</span> <span class="val" id="typerr-n-val">30</span></label>
       <input type="range" id="typerr-n" min="10" max="200" step="5" value="30">
     </div>
     <div class="ctrl">
-      <label for="typerr-se">Noise σ <span class="val" id="typerr-se-val">15</span></label>
+      <label for="typerr-se"><span data-i18n="widget.typerr.ctrl.sigma.label">Noise σ</span> <span class="val" id="typerr-se-val">15</span></label>
       <input type="range" id="typerr-se" min="5" max="40" step="1" value="15">
     </div>
     <div class="ctrl">
-      <label for="typerr-alpha">α level <span class="val" id="typerr-alpha-val">0.05</span></label>
+      <label for="typerr-alpha"><span data-i18n="widget.typerr.ctrl.alpha.label">α level</span> <span class="val" id="typerr-alpha-val">0.05</span></label>
       <input type="range" id="typerr-alpha" min="0.01" max="0.10" step="0.01" value="0.05">
     </div>
   </div>
   <div class="stats-grid">
-    <div class="stat"><div class="label">SE(β̂)</div><div class="value" id="typerr-seb">—</div></div>
-    <div class="stat pop"><div class="label">80% power at |β|</div><div class="value" id="typerr-mde">—</div></div>
-    <div class="stat err"><div class="label">Type I rate (α)</div><div class="value" id="typerr-t1">—</div></div>
-    <div class="stat"><div class="label">Power at β = SE</div><div class="value" id="typerr-powse">—</div></div>
+    <div class="stat"><div class="label" data-i18n="stat.seBeta">SE(β̂)</div><div class="value" id="typerr-seb">—</div></div>
+    <div class="stat pop"><div class="label" data-i18n="stat.mde">80% power at |β|</div><div class="value" id="typerr-mde">—</div></div>
+    <div class="stat err"><div class="label" data-i18n="stat.type1">Type I rate (α)</div><div class="value" id="typerr-t1">—</div></div>
+    <div class="stat"><div class="label" data-i18n="stat.powAtSE">Power at β = SE</div><div class="value" id="typerr-powse">—</div></div>
   </div>
   <div class="chart tall" id="chart-typerr"></div>
   <div class="try-this">
-    <div class="try-title">Try this</div>
-    <ol>
+    <div class="try-title" data-i18n="common.tryTitle">Try this</div>
+    <ol data-i18n="widget.typerr.try">
       <li><strong>Keep defaults (n = 30, σ = 15), then double n to 60.</strong> The minimum detectable effect at 80% power drops by ~30%. <em>Larger samples shrink SE(β̂) — the whole power curve shifts upward for free.</em></li>
       <li><strong>Increase α from 0.05 to 0.10.</strong> Power rises everywhere, but false positives rise with it. <em>The fundamental size-power tradeoff: you can only buy detection with tolerance for mistakes.</em></li>
       <li><strong>Set σ = 5 (low noise).</strong> The power curve becomes sharply steep. <em>Precision beats sample size for detection — even a small effect pops once σ is small enough.</em></li>
     </ol>
   </div>
 
-  <p class="takeaway"><strong>Take-away:</strong> Power depends on α, σ, and n together — and the most efficient estimator pushes the whole curve up, increasing your ability to detect real effects. <a href="../../book/_book/notebooks_quarto/ch12_Further_Topics_in_Multiple_Regression.html#best-tests" target="_blank" rel="noopener">Read §12.7 in the chapter →</a></p>
+  <p class="takeaway" data-i18n="widget.typerr.takeaway"><strong>Take-away:</strong> Power depends on α, σ, and n together — and the most efficient estimator pushes the whole curve up, increasing your ability to detect real effects. <a href="../../book/_book/notebooks_quarto/ch12_Further_Topics_in_Multiple_Regression.html#best-tests" target="_blank" rel="noopener">Read §12.7 in the chapter →</a></p>
 </section>
 
 <!-- ==================== WIDGET 4: Autocorrelation Visualizer ==================== -->
 <section class="widget" id="autocorrelation">
   <div class="widget-head">
     <div>
-      <h2>Autocorrelation Visualizer</h2>
+      <h2 data-i18n="widget.acf.heading">Autocorrelation Visualizer</h2>
     </div>
-    <button class="reset-btn" data-reset="acf">↺ Reset</button>
+    <button class="reset-btn" data-reset="acf" data-i18n="common.reset">↺ Reset</button>
   </div>
 
-  <p class="motivation">GDP growth today looks a lot like growth last quarter. <em>How much, exactly?</em> And when do those correlations finally die out?</p>
+  <p class="motivation" data-i18n="widget.acf.motivation">GDP growth today looks a lot like growth last quarter. <em>How much, exactly?</em> And when do those correlations finally die out?</p>
 
-  <div class="key-concept">
+  <div class="key-concept" data-i18n="widget.acf.kc">
     <span class="kc-title">In time series data, errors are often autocorrelated — today's shock persists into tomorrow.</span> <strong>HAC</strong> (heteroskedasticity and autocorrelation consistent) standard errors, also called <strong>Newey-West SEs</strong>, account for both forms of dependence. The lag length <strong>m</strong> must be specified; a common rule of thumb is <strong>m = 0.75 × T<sup>1/3</sup></strong>. For T = 241 quarters, m ≈ 5.
   </div>
 
   <div class="widget-howto">
-    <div class="howto-title">What you can do here</div>
-    <ul>
+    <div class="howto-title" data-i18n="common.howtoTitle">What you can do here</div>
+    <ul data-i18n="widget.acf.howto">
       <li><strong>Slide max lags displayed</strong> from 4 to 20.</li>
       <li><strong>Toggle Time Series + ACF, Time Series only, or ACF only.</strong></li>
       <li><strong>Compare ρ(1), ρ(2), … to the 95% band</strong> to see which lags are statistically distinguishable from zero.</li>
@@ -569,58 +652,58 @@ footer.page a:hover { text-decoration: underline; }
 
   <div class="controls">
     <div class="ctrl">
-      <label for="acf-lags">Max lags displayed <span class="val" id="acf-lags-val">12</span></label>
+      <label for="acf-lags"><span data-i18n="widget.acf.ctrl.lags.label">Max lags displayed</span> <span class="val" id="acf-lags-val">12</span></label>
       <input type="range" id="acf-lags" min="4" max="20" step="1" value="12">
     </div>
     <div class="ctrl">
-      <label>Display</label>
+      <label data-i18n="widget.acf.ctrl.display.label">Display</label>
       <div class="toggle-group" id="acf-display">
-        <button type="button" data-val="both" class="active">Time Series + ACF</button>
-        <button type="button" data-val="ts">Time Series</button>
-        <button type="button" data-val="acf">ACF Only</button>
+        <button type="button" data-val="both" class="active" data-i18n="widget.acf.ctrl.display.both">Time Series + ACF</button>
+        <button type="button" data-val="ts" data-i18n="widget.acf.ctrl.display.ts">Time Series</button>
+        <button type="button" data-val="acf" data-i18n="widget.acf.ctrl.display.acf">ACF Only</button>
       </div>
     </div>
   </div>
   <div class="stats-grid">
-    <div class="stat pop"><div class="label">Mean growth</div><div class="value" id="acf-mean">—</div></div>
-    <div class="stat"><div class="label">ρ(1)</div><div class="value" id="acf-rho1">—</div></div>
-    <div class="stat"><div class="label">ρ(2)</div><div class="value" id="acf-rho2">—</div></div>
-    <div class="stat err"><div class="label">95% band ±</div><div class="value" id="acf-band">—</div></div>
+    <div class="stat pop"><div class="label" data-i18n="stat.meanGrowth">Mean growth</div><div class="value" id="acf-mean">—</div></div>
+    <div class="stat"><div class="label" data-i18n="stat.rho1">ρ(1)</div><div class="value" id="acf-rho1">—</div></div>
+    <div class="stat"><div class="label" data-i18n="stat.rho2">ρ(2)</div><div class="value" id="acf-rho2">—</div></div>
+    <div class="stat err"><div class="label" data-i18n="stat.band95">95% band ±</div><div class="value" id="acf-band">—</div></div>
   </div>
   <div class="two-col" id="acf-twocol">
     <div class="chart" id="chart-acf-ts"></div>
     <div class="chart" id="chart-acf-bars"></div>
   </div>
   <div class="try-this">
-    <div class="try-title">Try this</div>
-    <ol>
+    <div class="try-title" data-i18n="common.tryTitle">Try this</div>
+    <ol data-i18n="widget.acf.try">
       <li><strong>Look at lags 1–3 in the ACF.</strong> All well above the 95% band. <em>GDP growth has strong persistence — today's shock spills into the next several quarters.</em></li>
       <li><strong>Increase max lags to 20.</strong> By lag 6–7 autocorrelations cross zero and turn slightly negative. <em>Shocks eventually mean-revert — the ACF both measures persistence and tells you when it ends.</em></li>
       <li><strong>In the time series panel, scan for long runs of above- or below-average quarters.</strong> They cluster visibly. <em>That visual clustering is autocorrelation's fingerprint in the raw data.</em></li>
     </ol>
   </div>
 
-  <p class="takeaway"><strong>Take-away:</strong> When lag-1 autocorrelation is large, default SEs underestimate uncertainty — HAC (Newey-West) SEs are the standard fix. <a href="../../book/_book/notebooks_quarto/ch12_Further_Topics_in_Multiple_Regression.html#inference-with-robust-standard-errors" target="_blank" rel="noopener">Read §12.2 in the chapter →</a></p>
+  <p class="takeaway" data-i18n="widget.acf.takeaway"><strong>Take-away:</strong> When lag-1 autocorrelation is large, default SEs underestimate uncertainty — HAC (Newey-West) SEs are the standard fix. <a href="../../book/_book/notebooks_quarto/ch12_Further_Topics_in_Multiple_Regression.html#inference-with-robust-standard-errors" target="_blank" rel="noopener">Read §12.2 in the chapter →</a></p>
 </section>
 
 <!-- ==================== WIDGET 5: SE Ratio Comparator ==================== -->
 <section class="widget" id="se-ratio">
   <div class="widget-head">
     <div>
-      <h2>SE Ratio Comparator</h2>
+      <h2 data-i18n="widget.seratio.heading">SE Ratio Comparator</h2>
     </div>
-    <button class="reset-btn" data-reset="seratio">↺ Reset</button>
+    <button class="reset-btn" data-reset="seratio" data-i18n="common.reset">↺ Reset</button>
   </div>
 
-  <p class="motivation">One number tells you whether heteroskedasticity matters for each coefficient: <em>robust SE / default SE</em>. Is it close to 1 — or far off?</p>
+  <p class="motivation" data-i18n="widget.seratio.motivation">One number tells you whether heteroskedasticity matters for each coefficient: <em>robust SE / default SE</em>. Is it close to 1 — or far off?</p>
 
-  <div class="key-concept">
+  <div class="key-concept" data-i18n="widget.seratio.kc">
     <span class="kc-title">The ratio robust-SE / default-SE summarises how badly heteroskedasticity affects each coefficient.</span> <strong>Ratio &gt; 1</strong> means the default SE was too optimistic — heteroskedasticity inflates uncertainty. <strong>Ratio &lt; 1</strong> means the default was too pessimistic (less common). <strong>Ratio ≈ 1</strong> means both methods agree. A substantial deviation (say &gt; 30%) flags heteroskedasticity worth correcting for.
   </div>
 
   <div class="widget-howto">
-    <div class="howto-title">What you can do here</div>
-    <ul>
+    <div class="howto-title" data-i18n="common.howtoTitle">What you can do here</div>
+    <ul data-i18n="widget.seratio.howto">
       <li><strong>Toggle Sort by Ratio</strong> to see which variables are most affected by heteroskedasticity.</li>
       <li><strong>Toggle Alphabetical</strong> to find a specific predictor quickly.</li>
       <li><strong>Compare to the reference line at 1.0</strong> — the break-even between inflation and deflation.</li>
@@ -629,50 +712,50 @@ footer.page a:hover { text-decoration: underline; }
 
   <div class="controls">
     <div class="ctrl">
-      <label>Sort order</label>
+      <label data-i18n="widget.seratio.ctrl.sort.label">Sort order</label>
       <div class="toggle-group" id="ser-sort">
-        <button type="button" data-val="ratio" class="active">By Ratio</button>
-        <button type="button" data-val="alpha">Alphabetical</button>
+        <button type="button" data-val="ratio" class="active" data-i18n="widget.seratio.ctrl.sort.ratio">By Ratio</button>
+        <button type="button" data-val="alpha" data-i18n="widget.seratio.ctrl.sort.alpha">Alphabetical</button>
       </div>
     </div>
   </div>
   <div class="stats-grid">
-    <div class="stat pop"><div class="label">Max ratio</div><div class="value" id="ser-max">—</div></div>
-    <div class="stat"><div class="label">Min ratio</div><div class="value" id="ser-min">—</div></div>
-    <div class="stat err"><div class="label">Mean ratio</div><div class="value" id="ser-mean">—</div></div>
-    <div class="stat"><div class="label">Vars > 1.0</div><div class="value" id="ser-above">—</div></div>
+    <div class="stat pop"><div class="label" data-i18n="stat.maxRatio">Max ratio</div><div class="value" id="ser-max">—</div></div>
+    <div class="stat"><div class="label" data-i18n="stat.minRatio">Min ratio</div><div class="value" id="ser-min">—</div></div>
+    <div class="stat err"><div class="label" data-i18n="stat.meanRatio">Mean ratio</div><div class="value" id="ser-mean">—</div></div>
+    <div class="stat"><div class="label" data-i18n="stat.varsAbove">Vars &gt; 1.0</div><div class="value" id="ser-above">—</div></div>
   </div>
   <div class="chart" id="chart-seratio"></div>
   <div class="try-this">
-    <div class="try-title">Try this</div>
-    <ol>
+    <div class="try-title" data-i18n="common.tryTitle">Try this</div>
+    <ol data-i18n="widget.seratio.try">
       <li><strong>Sort by Ratio.</strong> The variables at the tops of the bars are the most heteroskedasticity-affected. <em>Bathrooms typically leads; lotsize often sits below 1.0 (robust SE is actually smaller).</em></li>
       <li><strong>Locate the 1.0 reference line.</strong> Variables to its right had inflated default SEs; those to its left had deflated ones. <em>Heteroskedasticity doesn't just blow up SEs — it can shrink them too, always unpredictably.</em></li>
       <li><strong>Remember that the coefficients are identical in both columns.</strong> <em>Only inference changes — robust SEs reshuffle confidence, not point estimates.</em></li>
     </ol>
   </div>
 
-  <p class="takeaway"><strong>Take-away:</strong> When the SE ratio strays from 1 for any coefficient, robust SEs earn their keep — and the biggest ratio tells you which variable cares most about heteroskedasticity. <a href="../../book/_book/notebooks_quarto/ch12_Further_Topics_in_Multiple_Regression.html#inference-with-robust-standard-errors" target="_blank" rel="noopener">Read §12.2 in the chapter →</a></p>
+  <p class="takeaway" data-i18n="widget.seratio.takeaway"><strong>Take-away:</strong> When the SE ratio strays from 1 for any coefficient, robust SEs earn their keep — and the biggest ratio tells you which variable cares most about heteroskedasticity. <a href="../../book/_book/notebooks_quarto/ch12_Further_Topics_in_Multiple_Regression.html#inference-with-robust-standard-errors" target="_blank" rel="noopener">Read §12.2 in the chapter →</a></p>
 </section>
 
 <!-- ==================== WIDGET 6: Bootstrap Simulation ==================== -->
 <section class="widget" id="bootstrap">
   <div class="widget-head">
     <div>
-      <h2>Bootstrap Confidence Intervals</h2>
+      <h2 data-i18n="widget.boot.heading">Bootstrap Confidence Intervals</h2>
     </div>
-    <button class="reset-btn" data-reset="boot">↺ Reset</button>
+    <button class="reset-btn" data-reset="boot" data-i18n="common.reset">↺ Reset</button>
   </div>
 
-  <p class="motivation">What if normal-based CIs don't fit your data? <em>The bootstrap builds a CI empirically — by resampling the 29 houses and watching where the slope lands.</em></p>
+  <p class="motivation" data-i18n="widget.boot.motivation">What if normal-based CIs don't fit your data? <em>The bootstrap builds a CI empirically — by resampling the 29 houses and watching where the slope lands.</em></p>
 
-  <div class="key-concept">
+  <div class="key-concept" data-i18n="widget.boot.kc">
     <span class="kc-title">The bootstrap resamples the original data with replacement many times to estimate the sampling distribution of a statistic.</span> <strong>Bootstrap CIs don't rely on normality or large-sample approximations</strong>, making them especially useful with small samples, skewed distributions, or non-standard estimators where analytical formulas aren't available. A 95% percentile CI is just the 2.5th and 97.5th percentiles of the bootstrap estimates.
   </div>
 
   <div class="widget-howto">
-    <div class="howto-title">What you can do here</div>
-    <ul>
+    <div class="howto-title" data-i18n="common.howtoTitle">What you can do here</div>
+    <ul data-i18n="widget.boot.howto">
       <li><strong>Slide "Reps per click"</strong> to set batch size (50–500).</li>
       <li><strong>Click Run Bootstrap</strong> to accumulate more resamples and smooth the histogram.</li>
       <li><strong>Click Clear All</strong> to start over.</li>
@@ -682,47 +765,47 @@ footer.page a:hover { text-decoration: underline; }
 
   <div class="controls">
     <div class="ctrl">
-      <label for="boot-nrep">Reps per click <span class="val" id="boot-nrep-val">200</span></label>
+      <label for="boot-nrep"><span data-i18n="widget.boot.ctrl.nrep.label">Reps per click</span> <span class="val" id="boot-nrep-val">200</span></label>
       <input type="range" id="boot-nrep" min="50" max="500" step="50" value="200">
     </div>
     <div class="ctrl">
       <label>&nbsp;</label>
-      <button class="resim-btn" id="boot-run" type="button">Run Bootstrap</button>
+      <button class="resim-btn" id="boot-run" type="button" data-i18n="widget.boot.runBtn">Run Bootstrap</button>
     </div>
     <div class="ctrl">
       <label>&nbsp;</label>
-      <button class="reset-btn" id="boot-clear" type="button">Clear All</button>
+      <button class="reset-btn" id="boot-clear" type="button" data-i18n="widget.boot.clearBtn">Clear All</button>
     </div>
   </div>
   <div class="stats-grid">
-    <div class="stat pop"><div class="label">OLS slope</div><div class="value" id="boot-ols">—</div></div>
-    <div class="stat"><div class="label">Boot mean</div><div class="value" id="boot-mean">—</div></div>
-    <div class="stat"><div class="label">Boot SE</div><div class="value" id="boot-sd">—</div></div>
-    <div class="stat err"><div class="label">95% CI lower</div><div class="value" id="boot-lo">—</div></div>
-    <div class="stat err"><div class="label">95% CI upper</div><div class="value" id="boot-hi">—</div></div>
-    <div class="stat"><div class="label">Total reps</div><div class="value" id="boot-total">0</div></div>
+    <div class="stat pop"><div class="label" data-i18n="stat.olsSlope">OLS slope</div><div class="value" id="boot-ols">—</div></div>
+    <div class="stat"><div class="label" data-i18n="stat.bootMean">Boot mean</div><div class="value" id="boot-mean">—</div></div>
+    <div class="stat"><div class="label" data-i18n="stat.bootSe">Boot SE</div><div class="value" id="boot-sd">—</div></div>
+    <div class="stat err"><div class="label" data-i18n="stat.ciLower">95% CI lower</div><div class="value" id="boot-lo">—</div></div>
+    <div class="stat err"><div class="label" data-i18n="stat.ciUpper">95% CI upper</div><div class="value" id="boot-hi">—</div></div>
+    <div class="stat"><div class="label" data-i18n="stat.totalReps">Total reps</div><div class="value" id="boot-total">0</div></div>
   </div>
   <div class="chart" id="chart-boot"></div>
   <div class="try-this">
-    <div class="try-title">Try this</div>
-    <ol>
+    <div class="try-title" data-i18n="common.tryTitle">Try this</div>
+    <ol data-i18n="widget.boot.try">
       <li><strong>Click Run Bootstrap once (200 reps).</strong> The histogram is rough. Click again — smoother. After 1,000+ reps the CI stabilises. <em>Bootstrap precision is controlled by B, not by n — more reps buy more stable intervals at constant data.</em></li>
       <li><strong>Compare the Bootstrap SE to the OLS analytical SE.</strong> They should be close. <em>When they agree, the normal-based SE is validated empirically — when they disagree, trust the bootstrap.</em></li>
       <li><strong>Inspect the histogram for skew.</strong> Slightly asymmetric even with a large B. <em>This is why the bootstrap percentile CI can outperform normal-approximation CIs in small or skewed samples.</em></li>
     </ol>
   </div>
 
-  <p class="takeaway"><strong>Take-away:</strong> The bootstrap builds a sampling distribution from the data itself — no normality, no formulas, no asymptotics; just replication. <a href="../../book/_book/notebooks_quarto/ch12_Further_Topics_in_Multiple_Regression.html#best-confidence-intervals" target="_blank" rel="noopener">Read §12.6 in the chapter →</a></p>
+  <p class="takeaway" data-i18n="widget.boot.takeaway"><strong>Take-away:</strong> The bootstrap builds a sampling distribution from the data itself — no normality, no formulas, no asymptotics; just replication. <a href="../../book/_book/notebooks_quarto/ch12_Further_Topics_in_Multiple_Regression.html#best-confidence-intervals" target="_blank" rel="noopener">Read §12.6 in the chapter →</a></p>
 </section>
 
 <section class="howto-card code-summary" id="code" aria-label="Code summary">
-  <h2>Code Summary</h2>
-  <p class="motivation">You've explored the key concepts interactively — now reproduce them in code. These self-contained blocks cover everything you practiced above. Pick your language, copy the code, and run it.</p>
+  <h2 data-i18n="code.heading">Code Summary</h2>
+  <p class="motivation" data-i18n="code.motivation">You've explored the key concepts interactively — now reproduce them in code. These self-contained blocks cover everything you practiced above. Pick your language, copy the code, and run it.</p>
 
   <div class="code-tabs" id="code-lang-tabs">
-    <button type="button" data-lang="python" class="active">Python</button>
-    <button type="button" data-lang="stata">Stata</button>
-    <button type="button" data-lang="r">R</button>
+    <button type="button" data-lang="python" class="active" data-i18n="code.tab.python">Python</button>
+    <button type="button" data-lang="stata" data-i18n="code.tab.stata">Stata</button>
+    <button type="button" data-lang="r" data-i18n="code.tab.r">R</button>
   </div>
 
   <div class="code-panel active" id="panel-python">
@@ -923,8 +1006,8 @@ ax.grid(True, alpha=0.3)
 plt.tight_layout()
 plt.show()</code></pre>
   <div style="display:flex;gap:0.8rem;align-items:center;margin-top:0.8rem;flex-wrap:wrap">
-    <button class="btn-copy" onclick="navigator.clipboard.writeText(document.getElementById('code-python').textContent).then(()=>{this.textContent='Copied!';setTimeout(()=>this.textContent='Copy code',1500)})">Copy code</button>
-    <a class="btn-colab" href="https://colab.research.google.com/notebooks/empty.ipynb" target="_blank" rel="noopener">Open empty Colab notebook &rarr;</a>
+    <button class="btn-copy" data-i18n="code.copy.idle" onclick="navigator.clipboard.writeText(document.getElementById('code-python').textContent).then(()=>{this.textContent=t('code.copy.done');setTimeout(()=>this.textContent=t('code.copy.idle'),1500)})">Copy code</button>
+    <a class="btn-colab" href="https://colab.research.google.com/notebooks/empty.ipynb" target="_blank" rel="noopener" data-i18n="code.colab">Open empty Colab notebook &rarr;</a>
   </div>
   </div>
 
@@ -1075,8 +1158,8 @@ display "OLS slope: " _b[size]
 display "Analytical 95% CI: [" _b[size] - invttail(e(df_r), 0.025)*_se[size] ///
     ", " _b[size] + invttail(e(df_r), 0.025)*_se[size] "]"</code></pre>
   <div style="display:flex;gap:0.8rem;align-items:center;margin-top:0.8rem;flex-wrap:wrap">
-    <button class="btn-copy" onclick="navigator.clipboard.writeText(document.getElementById('code-stata').textContent).then(()=>{this.textContent='Copied!';setTimeout(()=>this.textContent='Copy code',1500)})">Copy code</button>
-    <span style="color:var(--text-muted);font-size:0.88rem">Paste into your Stata do-file editor</span>
+    <button class="btn-copy" data-i18n="code.copy.idle" onclick="navigator.clipboard.writeText(document.getElementById('code-stata').textContent).then(()=>{this.textContent=t('code.copy.done');setTimeout(()=>this.textContent=t('code.copy.idle'),1500)})">Copy code</button>
+    <span style="color:var(--text-muted);font-size:0.88rem" data-i18n="code.note.stata">Paste into your Stata do-file editor</span>
   </div>
   </div>
 
@@ -1195,8 +1278,8 @@ hist(boot_slopes, breaks = 40, col = "steelblue", border = "white",
 abline(v = coef(model_simple)["size"], col = "red", lwd = 2)
 abline(v = ci_boot, col = "green", lwd = 2, lty = 2)</code></pre>
   <div style="display:flex;gap:0.8rem;align-items:center;margin-top:0.8rem;flex-wrap:wrap">
-    <button class="btn-copy" onclick="navigator.clipboard.writeText(document.getElementById('code-r').textContent).then(()=>{this.textContent='Copied!';setTimeout(()=>this.textContent='Copy code',1500)})">Copy code</button>
-    <span style="color:var(--text-muted);font-size:0.88rem">Paste into your R console or RStudio</span>
+    <button class="btn-copy" data-i18n="code.copy.idle" onclick="navigator.clipboard.writeText(document.getElementById('code-r').textContent).then(()=>{this.textContent=t('code.copy.done');setTimeout(()=>this.textContent=t('code.copy.idle'),1500)})">Copy code</button>
+    <span style="color:var(--text-muted);font-size:0.88rem" data-i18n="code.note.r">Paste into your R console or RStudio</span>
   </div>
   </div>
 </section>
@@ -1204,15 +1287,432 @@ abline(v = ci_boot, col = "green", lwd = 2, lty = 2)</code></pre>
 </main>
 
 <footer class="page">
-  <p>Part of <a href="https://quarcs-lab.github.io/metricsai/book/_book/index.html"><strong>metricsAI</strong></a> · Chapter 12: Further Topics in Multiple Regression · by Carlos Mendez · <a href="https://github.com/quarcs-lab/metricsai">GitHub</a></p>
-  <p>Data: AED_HOUSE.DTA (29 houses, Davis CA 1999) · AED_REALGDPPC.DTA (GDP growth, 241 quarters).</p>
-  <a class="scroll-top" href="#top">↑ Back to top</a>
+  <p data-i18n="footer.text">Part of <a href="https://quarcs-lab.github.io/metricsai/book/_book/index.html"><strong>metricsAI</strong></a> · Chapter 12: Additional Topics in Multiple Regression · by Carlos Mendez · <a href="https://github.com/quarcs-lab/metricsai">GitHub</a></p>
+  <p data-i18n="footer.dataNote">Data: AED_HOUSE.DTA (29 houses, Davis CA 1999) · AED_REALGDPPC.DTA (GDP growth, 241 quarters).</p>
+  <a class="scroll-top" href="#top" data-i18n="footer.scrolltop">↑ Back to top</a>
 </footer>
 
 <script type="application/json" id="ch-data">{{DATA_JSON}}</script>
 
 <script>
 "use strict";
+
+// ==================== I18N ====================
+// Static + dynamic strings for the UI in EN/ES.
+// Keys use dot.notation. Strings may contain {name} placeholders filled by t(key, vars).
+var I18N = {
+  defaultLang: "en",
+  storageKey: "language",
+  en: {
+    "meta.title": "Chapter 12 — Additional Topics in Multiple Regression · metricsAI",
+
+    "header.badge":    "Chapter 12 of 18 · Interactive Dashboard",
+    "header.title":    "Additional Topics in Multiple Regression",
+    "header.subtitle": "Explore robust standard errors, prediction intervals, Type I/II errors, autocorrelation, and bootstrap methods with real house-price and GDP data.",
+
+    "theme.dark":  "Dark",
+    "theme.light": "Light",
+
+    "nav.robustse": "Robust SEs",
+    "nav.pred":     "Prediction",
+    "nav.typerr":   "Type I/II",
+    "nav.acf":      "Autocorrelation",
+    "nav.seratio":  "SE Ratios",
+    "nav.boot":     "Bootstrap",
+    "nav.code":     "Code",
+
+    "common.reset":      "↺ Reset",
+    "common.tryTitle":   "Try this",
+    "common.howtoTitle": "What you can do here",
+    "common.takeaway":   "Take-away:",
+
+    "stat.coef":       "Coefficient",
+    "stat.se":         "Std. Error",
+    "stat.tstat":      "t-statistic",
+    "stat.pval":       "p-value",
+    "stat.r2":         "R²",
+    "stat.seRatio":    "SE Ratio",
+    "stat.predPrice":  "Predicted price",
+    "stat.ciSe":       "CI SE",
+    "stat.piSe":       "PI SE",
+    "stat.piCiRatio":  "PI / CI width",
+    "stat.rmse":       "RMSE",
+    "stat.seBeta":     "SE(β̂)",
+    "stat.mde":        "80% power at |β|",
+    "stat.type1":      "Type I rate (α)",
+    "stat.powAtSE":    "Power at β = SE",
+    "stat.meanGrowth": "Mean growth",
+    "stat.rho1":       "ρ(1)",
+    "stat.rho2":       "ρ(2)",
+    "stat.band95":     "95% band ±",
+    "stat.maxRatio":   "Max ratio",
+    "stat.minRatio":   "Min ratio",
+    "stat.meanRatio":  "Mean ratio",
+    "stat.varsAbove":  "Vars > 1.0",
+    "stat.olsSlope":   "OLS slope",
+    "stat.bootMean":   "Boot mean",
+    "stat.bootSe":     "Boot SE",
+    "stat.ciLower":    "95% CI lower",
+    "stat.ciUpper":    "95% CI upper",
+    "stat.totalReps":  "Total reps",
+
+    // ---- Widget 1: Robust SE Selector ----
+    "widget.rse.heading":    "Robust Standard Error Selector",
+    "widget.rse.motivation": "Default OLS standard errors assume error variance is constant — but real data rarely obliges. <em>When homoskedasticity fails, your t-statistics and p-values lie by construction.</em>",
+    "widget.rse.kc":         "<span class=\"kc-title\">When error variance is not constant, default OLS standard errors are invalid.</span> <strong>Heteroskedastic-robust (HC1) SEs</strong> correct this without changing the coefficient estimates themselves. Only the SEs, t-statistics, and confidence intervals change. For cross-sectional data, reporting HC1 robust SEs is considered <strong>modern best practice</strong> — they cost nothing when homoskedasticity holds and protect you when it fails.",
+    "widget.rse.howto":      "<li><strong>Toggle between Default and HC1-Robust SEs</strong> — watch SEs, t-stats, and p-values change while the coefficient stays fixed.</li>\n      <li><strong>Select each variable in turn</strong> to see where heteroskedasticity bites hardest.</li>\n      <li><strong>Check the SE ratio</strong> — ratios far from 1 flag heteroskedasticity.</li>",
+    "widget.rse.ctrl.type.label":   "Standard Error Type",
+    "widget.rse.ctrl.type.default": "Default",
+    "widget.rse.ctrl.type.hc1":     "HC1-Robust",
+    "widget.rse.ctrl.var.label":    "Variable Focus",
+    "widget.rse.chart.label.default": "Default",
+    "widget.rse.chart.label.hc1":     "HC1-Robust",
+    "widget.rse.chart.title":       "Coefficients with 95% CI ({seLabel} SEs)",
+    "widget.rse.chart.xaxis":       "Variable",
+    "widget.rse.chart.yaxis":       "Coefficient",
+    "widget.rse.chart.hover.coef":  "Coef",
+    "widget.rse.try":        "<li><strong>Select bathrooms and toggle Default vs HC1-Robust.</strong> The SE ratio is &gt; 1.2. <em>Heteroskedasticity clearly inflates this variable's uncertainty — the default SE was too optimistic.</em></li>\n      <li><strong>Select lotsize and compare.</strong> The robust SE is <em>smaller</em> than the default (ratio &lt; 1). <em>Unusual but legitimate — robust SEs can tighten CIs as well as widen them.</em></li>\n      <li><strong>Scan every variable for a p-value significance flip.</strong> None flip at 5% here. <em>Small dataset, modest heteroskedasticity — but on larger cross-sections, robust SEs can overturn conclusions.</em></li>",
+    "widget.rse.takeaway":   "<strong>Take-away:</strong> Coefficients are the same; only inference changes — always report robust SEs alongside defaults on cross-sectional data. <a href=\"../../book/_book/notebooks_quarto/ch12_Further_Topics_in_Multiple_Regression.html#inference-with-robust-standard-errors\" target=\"_blank\" rel=\"noopener\">Read §12.2 in the chapter →</a>",
+
+    // ---- Widget 2: Prediction Interval Visualizer ----
+    "widget.pred.heading":    "Prediction Interval Visualizer",
+    "widget.pred.motivation": "Predicting the <em>average</em> 2,000-sqft house is easy. Predicting a <em>specific</em> 2,000-sqft house is brutal — even with unlimited data, some uncertainty never goes away.",
+    "widget.pred.kc":         "<span class=\"kc-title\">Predicting the average outcome E[y|x*] is more precise than predicting an individual y|x*.</span> The forecast variance equals the conditional-mean variance plus <strong>σ²</strong>: Var(ŷ<sub>f</sub>) = Var(ŷ<sub>cm</sub>) + σ². As n → ∞ the conditional-mean SE shrinks to zero, but the forecast SE remains at least <strong>s<sub>e</sub></strong> — the RMSE. This is a <strong>fundamental limit on individual predictions</strong>: 95% PIs are at least ±1.96 × s<sub>e</sub> wide, no matter how much data you collect.",
+    "widget.pred.howto":      "<li><strong>Slide the \"Predict at size\" slider</strong> from 1,200 to 3,500 sqft.</li>\n      <li><strong>Toggle \"Both\" / \"CI Only\" / \"PI Only\"</strong> to separate mean-prediction uncertainty from individual-prediction uncertainty.</li>\n      <li><strong>Watch the PI / CI width ratio</strong> — it reveals how much of the total uncertainty is irreducible.</li>",
+    "widget.pred.ctrl.size.label":  "Predict at size",
+    "widget.pred.ctrl.size.unit":   "sq ft",
+    "widget.pred.ctrl.bands.label": "Show bands",
+    "widget.pred.ctrl.bands.both":  "Both",
+    "widget.pred.ctrl.bands.ci":    "CI Only",
+    "widget.pred.ctrl.bands.pi":    "PI Only",
+    "widget.pred.chart.xaxis":            "House Size (sq ft)",
+    "widget.pred.chart.yaxis":            "Price ($)",
+    "widget.pred.chart.legend.pi":        "95% PI",
+    "widget.pred.chart.legend.ci":        "95% CI",
+    "widget.pred.chart.legend.line":      "Regression line",
+    "widget.pred.chart.legend.houses":    "Houses (n=29)",
+    "widget.pred.chart.legend.prediction": "Prediction",
+    "widget.pred.chart.hover.house":      "Size: %{x} sq ft<br>Price: $%{y:,.0f}<extra></extra>",
+    "widget.pred.chart.hover.pred":       "Size: %{x} sq ft<br>Predicted: $%{y:,.0f}<extra></extra>",
+    "widget.pred.try":        "<li><strong>Set size to the sample mean (~1,883 sqft).</strong> The CI is at its narrowest here. Drag to 3,500 sqft and both bands widen. <em>Predictions are most precise near the center of the data; extrapolating to the edges costs you precision both in the mean and in the individual.</em></li>\n      <li><strong>Toggle CI Only, then PI Only.</strong> The PI dwarfs the CI. <em>Most of the uncertainty in predicting an individual house is irreducible — the σ that no amount of data can eliminate.</em></li>\n      <li><strong>Watch the PI / CI width ratio.</strong> Largest near the mean, smallest at the extremes. <em>At the data's center, σ dominates; at the edges, estimation uncertainty catches up — but never overtakes σ.</em></li>",
+    "widget.pred.takeaway":   "<strong>Take-away:</strong> Predicting a conditional mean gets arbitrarily precise with more data; predicting an individual outcome does not — a built-in ceiling on forecasting any specific y. <a href=\"../../book/_book/notebooks_quarto/ch12_Further_Topics_in_Multiple_Regression.html#prediction\" target=\"_blank\" rel=\"noopener\">Read §12.3 in the chapter →</a>",
+
+    // ---- Widget 3: Type I/II Error Explorer ----
+    "widget.typerr.heading":    "Type I/II Error Explorer",
+    "widget.typerr.motivation": "A test can fail two ways: cry wolf when nothing's there, or miss a real effect. <em>How do sample size, noise, and α each shift that balance?</em>",
+    "widget.typerr.kc":         "<span class=\"kc-title\">Type I error is a false positive (rejecting a true H<sub>0</sub>); its probability equals α. Type II error is a false negative (failing to reject a false H<sub>0</sub>).</span> <strong>Power = 1 − P(Type II)</strong> measures the ability to detect true effects. The most powerful test for a given size uses the <strong>most precise estimator</strong> — one more reason efficient estimation matters beyond the point estimate itself.",
+    "widget.typerr.howto":      "<li><strong>Slide the sample size n</strong> — larger n tightens SE(β̂) and shifts the whole power curve upward.</li>\n      <li><strong>Slide the noise σ</strong> — more noise flattens the curve.</li>\n      <li><strong>Slide the α level</strong> — higher α gives more power but more false positives.</li>",
+    "widget.typerr.ctrl.n.label":     "Sample size n",
+    "widget.typerr.ctrl.sigma.label": "Noise σ",
+    "widget.typerr.ctrl.alpha.label": "α level",
+    "widget.typerr.chart.xaxis":          "True effect size (β)",
+    "widget.typerr.chart.yaxis":          "Power = P(Reject H₀)",
+    "widget.typerr.chart.legend.power":   "Power",
+    "widget.typerr.chart.hover.power":    "Power",
+    "widget.typerr.chart.ann.power80":    "80% power",
+    "widget.typerr.chart.ann.h0":         "H₀ true",
+    "widget.typerr.try":        "<li><strong>Keep defaults (n = 30, σ = 15), then double n to 60.</strong> The minimum detectable effect at 80% power drops by ~30%. <em>Larger samples shrink SE(β̂) — the whole power curve shifts upward for free.</em></li>\n      <li><strong>Increase α from 0.05 to 0.10.</strong> Power rises everywhere, but false positives rise with it. <em>The fundamental size-power tradeoff: you can only buy detection with tolerance for mistakes.</em></li>\n      <li><strong>Set σ = 5 (low noise).</strong> The power curve becomes sharply steep. <em>Precision beats sample size for detection — even a small effect pops once σ is small enough.</em></li>",
+    "widget.typerr.takeaway":   "<strong>Take-away:</strong> Power depends on α, σ, and n together — and the most efficient estimator pushes the whole curve up, increasing your ability to detect real effects. <a href=\"../../book/_book/notebooks_quarto/ch12_Further_Topics_in_Multiple_Regression.html#best-tests\" target=\"_blank\" rel=\"noopener\">Read §12.7 in the chapter →</a>",
+
+    // ---- Widget 4: Autocorrelation Visualizer ----
+    "widget.acf.heading":    "Autocorrelation Visualizer",
+    "widget.acf.motivation": "GDP growth today looks a lot like growth last quarter. <em>How much, exactly?</em> And when do those correlations finally die out?",
+    "widget.acf.kc":         "<span class=\"kc-title\">In time series data, errors are often autocorrelated — today's shock persists into tomorrow.</span> <strong>HAC</strong> (heteroskedasticity and autocorrelation consistent) standard errors, also called <strong>Newey-West SEs</strong>, account for both forms of dependence. The lag length <strong>m</strong> must be specified; a common rule of thumb is <strong>m = 0.75 × T<sup>1/3</sup></strong>. For T = 241 quarters, m ≈ 5.",
+    "widget.acf.howto":      "<li><strong>Slide max lags displayed</strong> from 4 to 20.</li>\n      <li><strong>Toggle Time Series + ACF, Time Series only, or ACF only.</strong></li>\n      <li><strong>Compare ρ(1), ρ(2), … to the 95% band</strong> to see which lags are statistically distinguishable from zero.</li>",
+    "widget.acf.ctrl.lags.label":      "Max lags displayed",
+    "widget.acf.ctrl.display.label":   "Display",
+    "widget.acf.ctrl.display.both":    "Time Series + ACF",
+    "widget.acf.ctrl.display.ts":      "Time Series",
+    "widget.acf.ctrl.display.acf":     "ACF Only",
+    "widget.acf.chart.tsTitle":        "GDP Growth (Quarterly)",
+    "widget.acf.chart.acfTitle":       "Autocorrelation Function (ACF)",
+    "widget.acf.chart.xaxisYear":      "Year",
+    "widget.acf.chart.yaxisGrowth":    "Growth (%)",
+    "widget.acf.chart.xaxisLag":       "Lag",
+    "widget.acf.chart.yaxisAcf":       "Autocorrelation",
+    "widget.acf.chart.legend.growth":  "GDP Growth",
+    "widget.acf.chart.legend.mean":    "Mean",
+    "widget.acf.chart.legend.acf":     "ACF",
+    "widget.acf.chart.hover.growth":   "Growth",
+    "widget.acf.chart.hover.lag":      "Lag",
+    "widget.acf.chart.ann.band":       "95% band",
+    "widget.acf.try":        "<li><strong>Look at lags 1–3 in the ACF.</strong> All well above the 95% band. <em>GDP growth has strong persistence — today's shock spills into the next several quarters.</em></li>\n      <li><strong>Increase max lags to 20.</strong> By lag 6–7 autocorrelations cross zero and turn slightly negative. <em>Shocks eventually mean-revert — the ACF both measures persistence and tells you when it ends.</em></li>\n      <li><strong>In the time series panel, scan for long runs of above- or below-average quarters.</strong> They cluster visibly. <em>That visual clustering is autocorrelation's fingerprint in the raw data.</em></li>",
+    "widget.acf.takeaway":   "<strong>Take-away:</strong> When lag-1 autocorrelation is large, default SEs underestimate uncertainty — HAC (Newey-West) SEs are the standard fix. <a href=\"../../book/_book/notebooks_quarto/ch12_Further_Topics_in_Multiple_Regression.html#inference-with-robust-standard-errors\" target=\"_blank\" rel=\"noopener\">Read §12.2 in the chapter →</a>",
+
+    // ---- Widget 5: SE Ratio Comparator ----
+    "widget.seratio.heading":    "SE Ratio Comparator",
+    "widget.seratio.motivation": "One number tells you whether heteroskedasticity matters for each coefficient: <em>robust SE / default SE</em>. Is it close to 1 — or far off?",
+    "widget.seratio.kc":         "<span class=\"kc-title\">The ratio robust-SE / default-SE summarises how badly heteroskedasticity affects each coefficient.</span> <strong>Ratio &gt; 1</strong> means the default SE was too optimistic — heteroskedasticity inflates uncertainty. <strong>Ratio &lt; 1</strong> means the default was too pessimistic (less common). <strong>Ratio ≈ 1</strong> means both methods agree. A substantial deviation (say &gt; 30%) flags heteroskedasticity worth correcting for.",
+    "widget.seratio.howto":      "<li><strong>Toggle Sort by Ratio</strong> to see which variables are most affected by heteroskedasticity.</li>\n      <li><strong>Toggle Alphabetical</strong> to find a specific predictor quickly.</li>\n      <li><strong>Compare to the reference line at 1.0</strong> — the break-even between inflation and deflation.</li>",
+    "widget.seratio.ctrl.sort.label": "Sort order",
+    "widget.seratio.ctrl.sort.ratio": "By Ratio",
+    "widget.seratio.ctrl.sort.alpha": "Alphabetical",
+    "widget.seratio.chart.xaxis":         "Robust SE / Default SE",
+    "widget.seratio.chart.legend.ratio":  "Robust / Default SE",
+    "widget.seratio.chart.hover.ratio":   "Ratio",
+    "widget.seratio.chart.ann.ref":       "Ratio = 1",
+    "widget.seratio.try":        "<li><strong>Sort by Ratio.</strong> The variables at the tops of the bars are the most heteroskedasticity-affected. <em>Bathrooms typically leads; lotsize often sits below 1.0 (robust SE is actually smaller).</em></li>\n      <li><strong>Locate the 1.0 reference line.</strong> Variables to its right had inflated default SEs; those to its left had deflated ones. <em>Heteroskedasticity doesn't just blow up SEs — it can shrink them too, always unpredictably.</em></li>\n      <li><strong>Remember that the coefficients are identical in both columns.</strong> <em>Only inference changes — robust SEs reshuffle confidence, not point estimates.</em></li>",
+    "widget.seratio.takeaway":   "<strong>Take-away:</strong> When the SE ratio strays from 1 for any coefficient, robust SEs earn their keep — and the biggest ratio tells you which variable cares most about heteroskedasticity. <a href=\"../../book/_book/notebooks_quarto/ch12_Further_Topics_in_Multiple_Regression.html#inference-with-robust-standard-errors\" target=\"_blank\" rel=\"noopener\">Read §12.2 in the chapter →</a>",
+
+    // ---- Widget 6: Bootstrap ----
+    "widget.boot.heading":    "Bootstrap Confidence Intervals",
+    "widget.boot.motivation": "What if normal-based CIs don't fit your data? <em>The bootstrap builds a CI empirically — by resampling the 29 houses and watching where the slope lands.</em>",
+    "widget.boot.kc":         "<span class=\"kc-title\">The bootstrap resamples the original data with replacement many times to estimate the sampling distribution of a statistic.</span> <strong>Bootstrap CIs don't rely on normality or large-sample approximations</strong>, making them especially useful with small samples, skewed distributions, or non-standard estimators where analytical formulas aren't available. A 95% percentile CI is just the 2.5th and 97.5th percentiles of the bootstrap estimates.",
+    "widget.boot.howto":      "<li><strong>Slide \"Reps per click\"</strong> to set batch size (50–500).</li>\n      <li><strong>Click Run Bootstrap</strong> to accumulate more resamples and smooth the histogram.</li>\n      <li><strong>Click Clear All</strong> to start over.</li>\n      <li><strong>Compare the Bootstrap SE to the OLS analytical SE</strong> — the two should converge.</li>",
+    "widget.boot.ctrl.nrep.label":     "Reps per click",
+    "widget.boot.runBtn":              "Run Bootstrap",
+    "widget.boot.clearBtn":            "Clear All",
+    "widget.boot.chart.xaxis":         "Bootstrap slope estimates",
+    "widget.boot.chart.yaxis":         "Density",
+    "widget.boot.chart.empty":         "Click \"Run Bootstrap\" to start",
+    "widget.boot.chart.legend.boot":   "Bootstrap slopes",
+    "widget.boot.chart.legend.normal": "Normal fit",
+    "widget.boot.chart.ann.ols":       "OLS slope",
+    "widget.boot.try":        "<li><strong>Click Run Bootstrap once (200 reps).</strong> The histogram is rough. Click again — smoother. After 1,000+ reps the CI stabilises. <em>Bootstrap precision is controlled by B, not by n — more reps buy more stable intervals at constant data.</em></li>\n      <li><strong>Compare the Bootstrap SE to the OLS analytical SE.</strong> They should be close. <em>When they agree, the normal-based SE is validated empirically — when they disagree, trust the bootstrap.</em></li>\n      <li><strong>Inspect the histogram for skew.</strong> Slightly asymmetric even with a large B. <em>This is why the bootstrap percentile CI can outperform normal-approximation CIs in small or skewed samples.</em></li>",
+    "widget.boot.takeaway":   "<strong>Take-away:</strong> The bootstrap builds a sampling distribution from the data itself — no normality, no formulas, no asymptotics; just replication. <a href=\"../../book/_book/notebooks_quarto/ch12_Further_Topics_in_Multiple_Regression.html#best-confidence-intervals\" target=\"_blank\" rel=\"noopener\">Read §12.6 in the chapter →</a>",
+
+    // ---- Code summary ----
+    "code.heading":    "Code Summary",
+    "code.motivation": "You've explored the key concepts interactively — now reproduce them in code. These self-contained blocks cover everything you practiced above. Pick your language, copy the code, and run it.",
+    "code.tab.python": "Python",
+    "code.tab.stata":  "Stata",
+    "code.tab.r":      "R",
+    "code.copy.idle":  "Copy code",
+    "code.copy.done":  "Copied!",
+    "code.colab":      "Open empty Colab notebook &rarr;",
+    "code.note.stata": "Paste into your Stata do-file editor",
+    "code.note.r":     "Paste into your R console or RStudio",
+
+    // ---- Footer ----
+    "footer.text":      "Part of <a href=\"https://quarcs-lab.github.io/metricsai/book/_book/index.html\"><strong>metricsAI</strong></a> · Chapter 12: Additional Topics in Multiple Regression · by Carlos Mendez · <a href=\"https://github.com/quarcs-lab/metricsai\">GitHub</a>",
+    "footer.dataNote":  "Data: AED_HOUSE.DTA (29 houses, Davis CA 1999) · AED_REALGDPPC.DTA (GDP growth, 241 quarters).",
+    "footer.scrolltop": "↑ Back to top"
+  },
+  es: {
+    "meta.title": "Capítulo 12 — Temas adicionales en regresión múltiple · metricsAI",
+
+    "header.badge":    "Capítulo 12 de 18 · Tablero interactivo",
+    "header.title":    "Temas adicionales en regresión múltiple",
+    "header.subtitle": "Explora errores estándar robustos, intervalos de predicción, errores de Tipo I/II, autocorrelación y métodos de bootstrap con datos reales de precios de viviendas y PIB.",
+
+    "theme.dark":  "Oscuro",
+    "theme.light": "Claro",
+
+    "nav.robustse": "EE robustos",
+    "nav.pred":     "Predicción",
+    "nav.typerr":   "Tipo I/II",
+    "nav.acf":      "Autocorrelación",
+    "nav.seratio":  "Razones de EE",
+    "nav.boot":     "Bootstrap",
+    "nav.code":     "Código",
+
+    "common.reset":      "↺ Reiniciar",
+    "common.tryTitle":   "Pruébalo",
+    "common.howtoTitle": "Qué puedes hacer aquí",
+    "common.takeaway":   "Para recordar:",
+
+    "stat.coef":       "Coeficiente",
+    "stat.se":         "Error estándar",
+    "stat.tstat":      "Estadístico t",
+    "stat.pval":       "Valor p",
+    "stat.r2":         "R²",
+    "stat.seRatio":    "Razón de EE",
+    "stat.predPrice":  "Precio pronosticado",
+    "stat.ciSe":       "EE del IC",
+    "stat.piSe":       "EE del IP",
+    "stat.piCiRatio":  "Ancho IP / IC",
+    "stat.rmse":       "RECM",
+    "stat.seBeta":     "EE(β̂)",
+    "stat.mde":        "80% potencia en |β|",
+    "stat.type1":      "Tasa Tipo I (α)",
+    "stat.powAtSE":    "Potencia en β = EE",
+    "stat.meanGrowth": "Crecimiento medio",
+    "stat.rho1":       "ρ(1)",
+    "stat.rho2":       "ρ(2)",
+    "stat.band95":     "Banda 95% ±",
+    "stat.maxRatio":   "Razón máx",
+    "stat.minRatio":   "Razón mín",
+    "stat.meanRatio":  "Razón media",
+    "stat.varsAbove":  "Vars > 1.0",
+    "stat.olsSlope":   "Pendiente MCO",
+    "stat.bootMean":   "Media bootstrap",
+    "stat.bootSe":     "EE bootstrap",
+    "stat.ciLower":    "IC 95% inferior",
+    "stat.ciUpper":    "IC 95% superior",
+    "stat.totalReps":  "Réplicas totales",
+
+    // ---- Widget 1: Robust SE Selector ----
+    "widget.rse.heading":    "Selector de errores estándar robustos",
+    "widget.rse.motivation": "Los errores estándar de MCO por defecto suponen que la varianza del error es constante — pero los datos reales rara vez obedecen. <em>Cuando falla la homocedasticidad, tus estadísticos t y valores p mienten por construcción.</em>",
+    "widget.rse.kc":         "<span class=\"kc-title\">Cuando la varianza del error no es constante, los errores estándar de MCO por defecto son inválidos.</span> Los <strong>EE robustos a heterocedasticidad (HC1)</strong> corrigen esto sin cambiar las estimaciones de los coeficientes en sí. Solo cambian los EE, los estadísticos t y los intervalos de confianza. Para datos de corte transversal, reportar EE robustos HC1 se considera <strong>la mejor práctica moderna</strong> — no cuestan nada cuando se cumple la homocedasticidad y te protegen cuando falla.",
+    "widget.rse.howto":      "<li><strong>Alterna entre EE por defecto y HC1-Robustos</strong> — observa cómo cambian los EE, estadísticos t y valores p mientras el coeficiente queda fijo.</li>\n      <li><strong>Selecciona cada variable por turno</strong> para ver dónde la heterocedasticidad muerde más fuerte.</li>\n      <li><strong>Revisa la razón de EE</strong> — razones lejos de 1 señalan heterocedasticidad.</li>",
+    "widget.rse.ctrl.type.label":   "Tipo de error estándar",
+    "widget.rse.ctrl.type.default": "Por defecto",
+    "widget.rse.ctrl.type.hc1":     "HC1-Robusto",
+    "widget.rse.ctrl.var.label":    "Variable de enfoque",
+    "widget.rse.chart.label.default": "Por defecto",
+    "widget.rse.chart.label.hc1":     "HC1-Robusto",
+    "widget.rse.chart.title":       "Coeficientes con IC 95% (EE {seLabel})",
+    "widget.rse.chart.xaxis":       "Variable",
+    "widget.rse.chart.yaxis":       "Coeficiente",
+    "widget.rse.chart.hover.coef":  "Coef",
+    "widget.rse.try":        "<li><strong>Selecciona bathrooms y alterna entre Por defecto y HC1-Robusto.</strong> La razón de EE es &gt; 1.2. <em>La heterocedasticidad claramente infla la incertidumbre de esta variable — el EE por defecto era demasiado optimista.</em></li>\n      <li><strong>Selecciona lotsize y compara.</strong> El EE robusto es <em>menor</em> que el por defecto (razón &lt; 1). <em>Inusual pero legítimo — los EE robustos pueden estrechar IC tanto como ampliarlos.</em></li>\n      <li><strong>Revisa cada variable en busca de un cambio de significancia.</strong> Ninguna cambia al 5% aquí. <em>Pequeño tamaño de muestra, heterocedasticidad modesta — pero en cortes transversales más grandes, los EE robustos pueden invertir conclusiones.</em></li>",
+    "widget.rse.takeaway":   "<strong>Para recordar:</strong> Los coeficientes son los mismos; solo cambia la inferencia — siempre reporta EE robustos junto con los por defecto en datos de corte transversal. <a href=\"../../book/_book/notebooks_quarto/ch12_Further_Topics_in_Multiple_Regression.html#inference-with-robust-standard-errors\" target=\"_blank\" rel=\"noopener\">Lee §12.2 en el capítulo →</a>",
+
+    // ---- Widget 2: Prediction Interval Visualizer ----
+    "widget.pred.heading":    "Visualizador de intervalos de predicción",
+    "widget.pred.motivation": "Predecir la casa <em>promedio</em> de 2,000 pies² es fácil. Predecir una casa <em>específica</em> de 2,000 pies² es brutal — incluso con datos ilimitados, parte de la incertidumbre nunca desaparece.",
+    "widget.pred.kc":         "<span class=\"kc-title\">Predecir el resultado promedio E[y|x*] es más preciso que predecir un y|x* individual.</span> La varianza del pronóstico es igual a la varianza de la media condicional más <strong>σ²</strong>: Var(ŷ<sub>f</sub>) = Var(ŷ<sub>cm</sub>) + σ². Cuando n → ∞ el EE de la media condicional se reduce a cero, pero el EE del pronóstico permanece al menos en <strong>s<sub>e</sub></strong> — la RECM. Este es un <strong>límite fundamental para predicciones individuales</strong>: los IP al 95% son al menos ±1.96 × s<sub>e</sub> de ancho, sin importar cuántos datos recolectes.",
+    "widget.pred.howto":      "<li><strong>Desliza el control \"Predecir en tamaño\"</strong> de 1,200 a 3,500 pies².</li>\n      <li><strong>Alterna \"Ambos\" / \"Solo IC\" / \"Solo IP\"</strong> para separar la incertidumbre de la predicción media de la individual.</li>\n      <li><strong>Observa la razón de ancho IP / IC</strong> — revela cuánta de la incertidumbre total es irreducible.</li>",
+    "widget.pred.ctrl.size.label":  "Predecir en tamaño",
+    "widget.pred.ctrl.size.unit":   "pies²",
+    "widget.pred.ctrl.bands.label": "Mostrar bandas",
+    "widget.pred.ctrl.bands.both":  "Ambos",
+    "widget.pred.ctrl.bands.ci":    "Solo IC",
+    "widget.pred.ctrl.bands.pi":    "Solo IP",
+    "widget.pred.chart.xaxis":            "Tamaño de la casa (pies²)",
+    "widget.pred.chart.yaxis":            "Precio ($)",
+    "widget.pred.chart.legend.pi":        "IP 95%",
+    "widget.pred.chart.legend.ci":        "IC 95%",
+    "widget.pred.chart.legend.line":      "Línea de regresión",
+    "widget.pred.chart.legend.houses":    "Casas (n=29)",
+    "widget.pred.chart.legend.prediction": "Predicción",
+    "widget.pred.chart.hover.house":      "Tamaño: %{x} pies²<br>Precio: $%{y:,.0f}<extra></extra>",
+    "widget.pred.chart.hover.pred":       "Tamaño: %{x} pies²<br>Predicho: $%{y:,.0f}<extra></extra>",
+    "widget.pred.try":        "<li><strong>Fija el tamaño en la media muestral (~1,883 pies²).</strong> El IC es más estrecho aquí. Arrastra a 3,500 pies² y ambas bandas se ensanchan. <em>Las predicciones son más precisas cerca del centro de los datos; extrapolar a los extremos te cuesta precisión tanto en la media como en el individuo.</em></li>\n      <li><strong>Activa Solo IC, luego Solo IP.</strong> El IP empequeñece al IC. <em>La mayor parte de la incertidumbre al predecir una casa individual es irreducible — la σ que ninguna cantidad de datos puede eliminar.</em></li>\n      <li><strong>Observa la razón IP / IC.</strong> Mayor cerca de la media, menor en los extremos. <em>En el centro de los datos, σ domina; en los extremos, la incertidumbre de estimación alcanza — pero nunca supera a σ.</em></li>",
+    "widget.pred.takeaway":   "<strong>Para recordar:</strong> Predecir una media condicional se vuelve arbitrariamente preciso con más datos; predecir un resultado individual no — un techo incorporado para pronosticar cualquier y específico. <a href=\"../../book/_book/notebooks_quarto/ch12_Further_Topics_in_Multiple_Regression.html#prediction\" target=\"_blank\" rel=\"noopener\">Lee §12.3 en el capítulo →</a>",
+
+    // ---- Widget 3: Type I/II Error Explorer ----
+    "widget.typerr.heading":    "Explorador de errores de Tipo I/II",
+    "widget.typerr.motivation": "Una prueba puede fallar de dos maneras: gritar lobo cuando no hay nada o pasar por alto un efecto real. <em>¿Cómo cambian ese balance el tamaño de muestra, el ruido y α?</em>",
+    "widget.typerr.kc":         "<span class=\"kc-title\">El error de Tipo I es un falso positivo (rechazar una H<sub>0</sub> verdadera); su probabilidad es igual a α. El error de Tipo II es un falso negativo (no rechazar una H<sub>0</sub> falsa).</span> La <strong>potencia = 1 − P(Tipo II)</strong> mide la capacidad de detectar efectos reales. La prueba más potente para un tamaño dado usa el <strong>estimador más preciso</strong> — una razón más por la que la estimación eficiente importa más allá de la estimación puntual misma.",
+    "widget.typerr.howto":      "<li><strong>Desliza el tamaño de muestra n</strong> — un n mayor estrecha EE(β̂) y desplaza toda la curva de potencia hacia arriba.</li>\n      <li><strong>Desliza el ruido σ</strong> — más ruido aplana la curva.</li>\n      <li><strong>Desliza el nivel α</strong> — un α mayor da más potencia pero más falsos positivos.</li>",
+    "widget.typerr.ctrl.n.label":     "Tamaño de muestra n",
+    "widget.typerr.ctrl.sigma.label": "Ruido σ",
+    "widget.typerr.ctrl.alpha.label": "Nivel α",
+    "widget.typerr.chart.xaxis":          "Tamaño del efecto verdadero (β)",
+    "widget.typerr.chart.yaxis":          "Potencia = P(Rechazar H₀)",
+    "widget.typerr.chart.legend.power":   "Potencia",
+    "widget.typerr.chart.hover.power":    "Potencia",
+    "widget.typerr.chart.ann.power80":    "Potencia 80%",
+    "widget.typerr.chart.ann.h0":         "H₀ verdadera",
+    "widget.typerr.try":        "<li><strong>Mantén los valores por defecto (n = 30, σ = 15), luego duplica n a 60.</strong> El efecto mínimo detectable al 80% de potencia cae ~30%. <em>Muestras más grandes encogen EE(β̂) — toda la curva de potencia se desplaza hacia arriba gratis.</em></li>\n      <li><strong>Aumenta α de 0.05 a 0.10.</strong> La potencia sube en todas partes, pero los falsos positivos también suben. <em>El compromiso fundamental tamaño-potencia: solo puedes comprar detección con tolerancia a errores.</em></li>\n      <li><strong>Fija σ = 5 (poco ruido).</strong> La curva de potencia se vuelve marcadamente empinada. <em>La precisión vence al tamaño de muestra para la detección — incluso un efecto pequeño aparece una vez que σ es lo bastante pequeña.</em></li>",
+    "widget.typerr.takeaway":   "<strong>Para recordar:</strong> La potencia depende de α, σ y n juntos — y el estimador más eficiente empuja toda la curva hacia arriba, aumentando tu capacidad para detectar efectos reales. <a href=\"../../book/_book/notebooks_quarto/ch12_Further_Topics_in_Multiple_Regression.html#best-tests\" target=\"_blank\" rel=\"noopener\">Lee §12.7 en el capítulo →</a>",
+
+    // ---- Widget 4: Autocorrelation Visualizer ----
+    "widget.acf.heading":    "Visualizador de autocorrelación",
+    "widget.acf.motivation": "El crecimiento del PIB de hoy se parece mucho al del trimestre pasado. <em>¿Cuánto, exactamente?</em> ¿Y cuándo finalmente desaparecen esas correlaciones?",
+    "widget.acf.kc":         "<span class=\"kc-title\">En datos de series de tiempo, los errores suelen estar autocorrelacionados — el shock de hoy persiste hasta mañana.</span> Los errores estándar <strong>HAC</strong> (consistentes con heterocedasticidad y autocorrelación), también llamados <strong>EE de Newey-West</strong>, tienen en cuenta ambas formas de dependencia. La longitud del rezago <strong>m</strong> debe especificarse; una regla común es <strong>m = 0.75 × T<sup>1/3</sup></strong>. Para T = 241 trimestres, m ≈ 5.",
+    "widget.acf.howto":      "<li><strong>Desliza el máximo de rezagos mostrados</strong> de 4 a 20.</li>\n      <li><strong>Alterna Serie de tiempo + FAC, solo Serie de tiempo o solo FAC.</strong></li>\n      <li><strong>Compara ρ(1), ρ(2), … con la banda al 95%</strong> para ver qué rezagos son estadísticamente distinguibles de cero.</li>",
+    "widget.acf.ctrl.lags.label":      "Máx. rezagos mostrados",
+    "widget.acf.ctrl.display.label":   "Mostrar",
+    "widget.acf.ctrl.display.both":    "Serie de tiempo + FAC",
+    "widget.acf.ctrl.display.ts":      "Serie de tiempo",
+    "widget.acf.ctrl.display.acf":     "Solo FAC",
+    "widget.acf.chart.tsTitle":        "Crecimiento del PIB (trimestral)",
+    "widget.acf.chart.acfTitle":       "Función de autocorrelación (FAC)",
+    "widget.acf.chart.xaxisYear":      "Año",
+    "widget.acf.chart.yaxisGrowth":    "Crecimiento (%)",
+    "widget.acf.chart.xaxisLag":       "Rezago",
+    "widget.acf.chart.yaxisAcf":       "Autocorrelación",
+    "widget.acf.chart.legend.growth":  "Crecimiento del PIB",
+    "widget.acf.chart.legend.mean":    "Media",
+    "widget.acf.chart.legend.acf":     "FAC",
+    "widget.acf.chart.hover.growth":   "Crecimiento",
+    "widget.acf.chart.hover.lag":      "Rezago",
+    "widget.acf.chart.ann.band":       "Banda 95%",
+    "widget.acf.try":        "<li><strong>Mira los rezagos 1–3 en la FAC.</strong> Todos muy por encima de la banda 95%. <em>El crecimiento del PIB tiene fuerte persistencia — el shock de hoy se derrama en los siguientes trimestres.</em></li>\n      <li><strong>Aumenta los rezagos máximos a 20.</strong> Para el rezago 6–7 las autocorrelaciones cruzan cero y se vuelven ligeramente negativas. <em>Los shocks finalmente revierten a la media — la FAC mide la persistencia y te dice cuándo termina.</em></li>\n      <li><strong>En el panel de serie de tiempo, busca corridas largas de trimestres por encima o por debajo del promedio.</strong> Se agrupan visiblemente. <em>Esa agrupación visual es la huella de la autocorrelación en los datos crudos.</em></li>",
+    "widget.acf.takeaway":   "<strong>Para recordar:</strong> Cuando la autocorrelación de rezago 1 es grande, los EE por defecto subestiman la incertidumbre — los EE HAC (Newey-West) son la solución estándar. <a href=\"../../book/_book/notebooks_quarto/ch12_Further_Topics_in_Multiple_Regression.html#inference-with-robust-standard-errors\" target=\"_blank\" rel=\"noopener\">Lee §12.2 en el capítulo →</a>",
+
+    // ---- Widget 5: SE Ratio Comparator ----
+    "widget.seratio.heading":    "Comparador de razones de EE",
+    "widget.seratio.motivation": "Un solo número te dice si la heterocedasticidad importa para cada coeficiente: <em>EE robusto / EE por defecto</em>. ¿Está cerca de 1 — o lejos?",
+    "widget.seratio.kc":         "<span class=\"kc-title\">La razón EE-robusto / EE-por-defecto resume cuán mal la heterocedasticidad afecta a cada coeficiente.</span> <strong>Razón &gt; 1</strong> significa que el EE por defecto era demasiado optimista — la heterocedasticidad infla la incertidumbre. <strong>Razón &lt; 1</strong> significa que el por defecto era demasiado pesimista (menos común). <strong>Razón ≈ 1</strong> significa que ambos métodos coinciden. Una desviación sustancial (digamos &gt; 30%) marca heterocedasticidad que vale la pena corregir.",
+    "widget.seratio.howto":      "<li><strong>Activa Ordenar por razón</strong> para ver qué variables son las más afectadas por la heterocedasticidad.</li>\n      <li><strong>Activa Alfabético</strong> para encontrar rápido un predictor específico.</li>\n      <li><strong>Compara con la línea de referencia en 1.0</strong> — el punto de equilibrio entre inflación y deflación.</li>",
+    "widget.seratio.ctrl.sort.label": "Orden",
+    "widget.seratio.ctrl.sort.ratio": "Por razón",
+    "widget.seratio.ctrl.sort.alpha": "Alfabético",
+    "widget.seratio.chart.xaxis":         "EE robusto / EE por defecto",
+    "widget.seratio.chart.legend.ratio":  "Robusto / Por defecto EE",
+    "widget.seratio.chart.hover.ratio":   "Razón",
+    "widget.seratio.chart.ann.ref":       "Razón = 1",
+    "widget.seratio.try":        "<li><strong>Ordena por razón.</strong> Las variables en lo alto de las barras son las más afectadas por la heterocedasticidad. <em>Bathrooms suele encabezar; lotsize a menudo queda por debajo de 1.0 (el EE robusto es de hecho menor).</em></li>\n      <li><strong>Localiza la línea de referencia en 1.0.</strong> Las variables a su derecha tenían EE por defecto inflados; las de la izquierda los tenían desinflados. <em>La heterocedasticidad no solo infla los EE — también puede encogerlos, siempre de forma impredecible.</em></li>\n      <li><strong>Recuerda que los coeficientes son idénticos en ambas columnas.</strong> <em>Solo cambia la inferencia — los EE robustos rebarajan la confianza, no las estimaciones puntuales.</em></li>",
+    "widget.seratio.takeaway":   "<strong>Para recordar:</strong> Cuando la razón de EE se aleja de 1 para algún coeficiente, los EE robustos se ganan su lugar — y la razón mayor te dice qué variable se preocupa más por la heterocedasticidad. <a href=\"../../book/_book/notebooks_quarto/ch12_Further_Topics_in_Multiple_Regression.html#inference-with-robust-standard-errors\" target=\"_blank\" rel=\"noopener\">Lee §12.2 en el capítulo →</a>",
+
+    // ---- Widget 6: Bootstrap ----
+    "widget.boot.heading":    "Intervalos de confianza por bootstrap",
+    "widget.boot.motivation": "¿Y si los IC basados en la normal no se ajustan a tus datos? <em>El bootstrap construye un IC empíricamente — remuestreando las 29 casas y observando dónde cae la pendiente.</em>",
+    "widget.boot.kc":         "<span class=\"kc-title\">El bootstrap remuestrea los datos originales con reemplazo muchas veces para estimar la distribución muestral de un estadístico.</span> <strong>Los IC bootstrap no dependen de la normalidad ni de aproximaciones de muestra grande</strong>, lo que los hace especialmente útiles con muestras pequeñas, distribuciones sesgadas o estimadores no estándar para los que no hay fórmulas analíticas. Un IC al 95% por percentiles es simplemente los percentiles 2.5 y 97.5 de las estimaciones bootstrap.",
+    "widget.boot.howto":      "<li><strong>Desliza \"Réplicas por clic\"</strong> para fijar el tamaño de lote (50–500).</li>\n      <li><strong>Haz clic en Ejecutar bootstrap</strong> para acumular más remuestreos y suavizar el histograma.</li>\n      <li><strong>Haz clic en Borrar todo</strong> para empezar de nuevo.</li>\n      <li><strong>Compara el EE bootstrap con el EE analítico de MCO</strong> — los dos deberían converger.</li>",
+    "widget.boot.ctrl.nrep.label":     "Réplicas por clic",
+    "widget.boot.runBtn":              "Ejecutar bootstrap",
+    "widget.boot.clearBtn":            "Borrar todo",
+    "widget.boot.chart.xaxis":         "Estimaciones de pendiente bootstrap",
+    "widget.boot.chart.yaxis":         "Densidad",
+    "widget.boot.chart.empty":         "Haz clic en \"Ejecutar bootstrap\" para empezar",
+    "widget.boot.chart.legend.boot":   "Pendientes bootstrap",
+    "widget.boot.chart.legend.normal": "Ajuste normal",
+    "widget.boot.chart.ann.ols":       "Pendiente MCO",
+    "widget.boot.try":        "<li><strong>Haz clic en Ejecutar bootstrap una vez (200 réplicas).</strong> El histograma es rugoso. Haz clic de nuevo — más suave. Después de 1,000+ réplicas el IC se estabiliza. <em>La precisión del bootstrap está controlada por B, no por n — más réplicas compran intervalos más estables con datos constantes.</em></li>\n      <li><strong>Compara el EE bootstrap con el EE analítico de MCO.</strong> Deberían ser cercanos. <em>Cuando coinciden, el EE basado en la normal queda validado empíricamente — cuando difieren, confía en el bootstrap.</em></li>\n      <li><strong>Inspecciona el histograma en busca de asimetría.</strong> Ligeramente asimétrico incluso con un B grande. <em>Por eso el IC bootstrap por percentiles puede superar a los IC por aproximación normal en muestras pequeñas o sesgadas.</em></li>",
+    "widget.boot.takeaway":   "<strong>Para recordar:</strong> El bootstrap construye una distribución muestral a partir de los datos mismos — sin normalidad, sin fórmulas, sin asintótica; solo replicación. <a href=\"../../book/_book/notebooks_quarto/ch12_Further_Topics_in_Multiple_Regression.html#best-confidence-intervals\" target=\"_blank\" rel=\"noopener\">Lee §12.6 en el capítulo →</a>",
+
+    // ---- Code summary ----
+    "code.heading":    "Resumen de código",
+    "code.motivation": "Has explorado los conceptos clave de forma interactiva — ahora reprodúcelos en código. Estos bloques autosuficientes cubren todo lo que practicaste arriba. Elige tu lenguaje, copia el código y ejecútalo.",
+    "code.tab.python": "Python",
+    "code.tab.stata":  "Stata",
+    "code.tab.r":      "R",
+    "code.copy.idle":  "Copiar código",
+    "code.copy.done":  "¡Copiado!",
+    "code.colab":      "Abrir un cuaderno Colab vacío &rarr;",
+    "code.note.stata": "Pega esto en tu editor do-file de Stata",
+    "code.note.r":     "Pega esto en tu consola R o RStudio",
+
+    // ---- Footer ----
+    "footer.text":      "Parte de <a href=\"https://quarcs-lab.github.io/metricsai/book/_book/index.html\"><strong>metricsAI</strong></a> · Capítulo 12: Temas adicionales en regresión múltiple · por Carlos Mendez · <a href=\"https://github.com/quarcs-lab/metricsai\">GitHub</a>",
+    "footer.dataNote":  "Datos: AED_HOUSE.DTA (29 casas, Davis CA 1999) · AED_REALGDPPC.DTA (crecimiento del PIB, 241 trimestres).",
+    "footer.scrolltop": "↑ Volver arriba"
+  }
+};
+
+function t(key, vars) {
+  var lang = window.__lang || I18N.defaultLang;
+  var s = (I18N[lang] && I18N[lang][key]) || I18N.en[key];
+  if (s === undefined) return key;
+  if (vars) {
+    for (var k in vars) s = s.split("{" + k + "}").join(String(vars[k]));
+  }
+  return s;
+}
+
+function applyLanguage(lang) {
+  if (lang !== "en" && lang !== "es") lang = I18N.defaultLang;
+  window.__lang = lang;
+  try { localStorage.setItem(I18N.storageKey, lang); } catch (e) {}
+  document.documentElement.lang = lang;
+  document.querySelectorAll("[data-i18n]").forEach(function(el) {
+    var key = el.getAttribute("data-i18n");
+    el.innerHTML = t(key);
+  });
+  var lbl = document.getElementById("siteLanguageLabel");
+  if (lbl) lbl.textContent = lang === "es" ? "ES" : "EN";
+  // Re-fire every widget renderer (Plotly + JS-injected text read via t()).
+  for (var key in window) {
+    if (key.indexOf("__rerender_") === 0 && typeof window[key] === "function") {
+      try { window[key](); } catch (e) {}
+    }
+  }
+}
+
+function toggleLanguage() {
+  applyLanguage((window.__lang || I18N.defaultLang) === "es" ? "en" : "es");
+}
+
+// Read persisted language BEFORE widgets render so first paint is in correct language.
+try {
+  var stored = localStorage.getItem(I18N.storageKey);
+  if (stored === "en" || stored === "es") window.__lang = stored;
+} catch (e) {}
 
 var DATA = JSON.parse(document.getElementById("ch-data").textContent);
 
@@ -1361,7 +1861,7 @@ function olsFit(x, y) {
 }
 
 // ==================== THEME ====================
-var THEME_KEY = "metricsai-theme";
+const THEME_KEY = "darkMode"; // unified with index.html / tutors.html
 function getCSS(varName) { return getComputedStyle(document.documentElement).getPropertyValue(varName).trim(); }
 function themeColors() {
   return { text: getCSS("--text"), textSoft: getCSS("--text-soft"), grid: getCSS("--grid"),
@@ -1442,18 +1942,20 @@ function getToggleVal(groupId) {
 
     var colors = vars.map(function(v) { return v === focusVar ? c.pink : c.cyan; });
 
+    var seLabel = seType === "hc1" ? t("widget.rse.chart.label.hc1") : t("widget.rse.chart.label.default");
+
     var traces = [{
       x: vars, y: coefs, type: "bar",
       marker: { color: colors },
       error_y: { type: "data", symmetric: false, array: vars.map(function(v, i) { return ciHi[i] - coefs[i]; }), arrayminus: vars.map(function(v, i) { return coefs[i] - ciLo[i]; }), color: c.text, thickness: 1.5, width: 5 },
-      hovertemplate: "%{x}<br>Coef: %{y:.2f}<extra></extra>",
-      name: seType === "hc1" ? "HC1-Robust" : "Default"
+      hovertemplate: "%{x}<br>" + t("widget.rse.chart.hover.coef") + ": %{y:.2f}<extra></extra>",
+      name: seLabel
     }];
 
     Plotly.react(chartEl, traces, baseLayout({
-      title: { text: "Coefficients with 95% CI (" + (seType === "hc1" ? "HC1-Robust" : "Default") + " SEs)", font: { size: 13, color: c.textSoft } },
-      xaxis: { title: "Variable", gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft } },
-      yaxis: { title: "Coefficient", gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft } },
+      title: { text: t("widget.rse.chart.title", { seLabel: seLabel }), font: { size: 13, color: c.textSoft } },
+      xaxis: { title: t("widget.rse.chart.xaxis"), gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft } },
+      yaxis: { title: t("widget.rse.chart.yaxis"), gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft } },
       shapes: [{ type: "line", x0: -0.5, x1: vars.length - 0.5, y0: 0, y1: 0, line: { color: c.grid, width: 1, dash: "dash" } }]
     }), PLOTLY_CONFIG);
   }
@@ -1522,33 +2024,33 @@ function getToggleVal(groupId) {
     if (bandMode === "both" || bandMode === "pi") {
       traces.push({ x: xs.concat(xs.slice().reverse()), y: piUp.concat(piLo.slice().reverse()),
         fill: "toself", fillcolor: "rgba(0,140,183,0.12)", line: { color: "transparent" },
-        name: "95% PI", hoverinfo: "skip", showlegend: true });
+        name: t("widget.pred.chart.legend.pi"), hoverinfo: "skip", showlegend: true });
     }
 
     // CI band
     if (bandMode === "both" || bandMode === "ci") {
       traces.push({ x: xs.concat(xs.slice().reverse()), y: ciUp.concat(ciLo.slice().reverse()),
         fill: "toself", fillcolor: "rgba(194,30,114,0.2)", line: { color: "transparent" },
-        name: "95% CI", hoverinfo: "skip", showlegend: true });
+        name: t("widget.pred.chart.legend.ci"), hoverinfo: "skip", showlegend: true });
     }
 
     // Regression line
-    traces.push({ x: xs, y: yLine, mode: "lines", line: { color: c.purple, width: 2.5 }, name: "Regression line" });
+    traces.push({ x: xs, y: yLine, mode: "lines", line: { color: c.purple, width: 2.5 }, name: t("widget.pred.chart.legend.line") });
 
     // Data points
     traces.push({ x: H.size, y: H.price, mode: "markers", type: "scatter",
-      marker: { color: c.cyan, size: 7, opacity: 0.8 }, name: "Houses (n=29)",
-      hovertemplate: "Size: %{x} sq ft<br>Price: $%{y:,.0f}<extra></extra>" });
+      marker: { color: c.cyan, size: 7, opacity: 0.8 }, name: t("widget.pred.chart.legend.houses"),
+      hovertemplate: t("widget.pred.chart.hover.house") });
 
     // Prediction marker
     var predY = b0 + b1 * predSize;
     traces.push({ x: [predSize], y: [predY], mode: "markers",
       marker: { color: c.pink, size: 14, symbol: "diamond", line: { color: "white", width: 2 } },
-      name: "Prediction", hovertemplate: "Size: %{x} sq ft<br>Predicted: $%{y:,.0f}<extra></extra>" });
+      name: t("widget.pred.chart.legend.prediction"), hovertemplate: t("widget.pred.chart.hover.pred") });
 
     Plotly.react(chartEl, traces, baseLayout({
-      xaxis: { title: "House Size (sq ft)", gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft } },
-      yaxis: { title: "Price ($)", gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft } },
+      xaxis: { title: t("widget.pred.chart.xaxis"), gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft } },
+      yaxis: { title: t("widget.pred.chart.yaxis"), gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft } },
       legend: { x: 0.02, y: 0.98, font: { color: c.text, size: 11 }, bgcolor: "rgba(0,0,0,0)" }
     }), PLOTLY_CONFIG);
   }
@@ -1601,11 +2103,11 @@ function getToggleVal(groupId) {
 
     var traces = [];
     // Power curve
-    traces.push({ x: betas, y: powers, mode: "lines", line: { color: c.cyan, width: 3 }, name: "Power", hovertemplate: "\u03B2 = %{x:.1f}<br>Power = %{y:.3f}<extra></extra>" });
+    traces.push({ x: betas, y: powers, mode: "lines", line: { color: c.cyan, width: 3 }, name: t("widget.typerr.chart.legend.power"), hovertemplate: "\u03B2 = %{x:.1f}<br>" + t("widget.typerr.chart.hover.power") + " = %{y:.3f}<extra></extra>" });
 
     Plotly.react(chartEl, traces, baseLayout({
-      xaxis: { title: "True effect size (\u03B2)", gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft } },
-      yaxis: { title: "Power = P(Reject H\u2080)", range: [0, 1.05], gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft } },
+      xaxis: { title: t("widget.typerr.chart.xaxis"), gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft } },
+      yaxis: { title: t("widget.typerr.chart.yaxis"), range: [0, 1.05], gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft } },
       shapes: [
         { type: "line", x0: 0, x1: 0, yref: "paper", y0: 0, y1: 1, line: { color: c.grid, width: 1.5, dash: "dash" } },
         { type: "line", xref: "paper", x0: 0, x1: 1, y0: alpha, y1: alpha, line: { color: c.pink, width: 1.5, dash: "dot" } },
@@ -1613,8 +2115,8 @@ function getToggleVal(groupId) {
       ],
       annotations: [
         { x: 0.02, xref: "paper", y: alpha + 0.03, text: "\u03B1 = " + fmt(alpha, 2), showarrow: false, font: { color: c.pink, size: 11 } },
-        { x: 0.02, xref: "paper", y: 0.83, text: "80% power", showarrow: false, font: { color: c.purple, size: 11 } },
-        { x: 0, y: alpha, text: "H\u2080 true", showarrow: true, ax: 30, ay: -25, font: { color: c.textSoft, size: 10 } }
+        { x: 0.02, xref: "paper", y: 0.83, text: t("widget.typerr.chart.ann.power80"), showarrow: false, font: { color: c.purple, size: 11 } },
+        { x: 0, y: alpha, text: t("widget.typerr.chart.ann.h0"), showarrow: true, ax: 30, ay: -25, font: { color: c.textSoft, size: 10 } }
       ],
       legend: { x: 0.7, y: 0.3, font: { color: c.text, size: 11 }, bgcolor: "rgba(0,0,0,0)" }
     }), PLOTLY_CONFIG);
@@ -1663,14 +2165,14 @@ function getToggleVal(groupId) {
     if (displayMode !== "acf") {
       var tsTraces = [];
       tsTraces.push({ x: G.time, y: G.growth, mode: "lines", line: { color: c.cyan, width: 1.5 },
-        name: "GDP Growth", hovertemplate: "Q: %{x:.2f}<br>Growth: %{y:.2f}%<extra></extra>" });
+        name: t("widget.acf.chart.legend.growth"), hovertemplate: "Q: %{x:.2f}<br>" + t("widget.acf.chart.hover.growth") + ": %{y:.2f}%<extra></extra>" });
       tsTraces.push({ x: [G.time[0], G.time[G.time.length - 1]], y: [G.meanGrowth, G.meanGrowth],
-        mode: "lines", line: { color: c.pink, width: 1.5, dash: "dash" }, name: "Mean" });
+        mode: "lines", line: { color: c.pink, width: 1.5, dash: "dash" }, name: t("widget.acf.chart.legend.mean") });
 
       Plotly.react(tsEl, tsTraces, baseLayout({
-        title: { text: "GDP Growth (Quarterly)", font: { size: 13, color: c.textSoft } },
-        xaxis: { title: "Year", gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft } },
-        yaxis: { title: "Growth (%)", gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft } },
+        title: { text: t("widget.acf.chart.tsTitle"), font: { size: 13, color: c.textSoft } },
+        xaxis: { title: t("widget.acf.chart.xaxisYear"), gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft } },
+        yaxis: { title: t("widget.acf.chart.yaxisGrowth"), gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft } },
         legend: { x: 0.02, y: 0.98, font: { color: c.text, size: 11 }, bgcolor: "rgba(0,0,0,0)" }
       }), PLOTLY_CONFIG);
     }
@@ -1688,8 +2190,8 @@ function getToggleVal(groupId) {
 
       var acfTraces = [];
       acfTraces.push({ x: lags, y: acfVals, type: "bar",
-        marker: { color: barColors }, name: "ACF",
-        hovertemplate: "Lag %{x}<br>\u03C1 = %{y:.4f}<extra></extra>" });
+        marker: { color: barColors }, name: t("widget.acf.chart.legend.acf"),
+        hovertemplate: t("widget.acf.chart.hover.lag") + " %{x}<br>\u03C1 = %{y:.4f}<extra></extra>" });
 
       var shapes = [
         { type: "line", xref: "paper", x0: 0, x1: 1, y0: band95, y1: band95, line: { color: c.pink, width: 1.5, dash: "dot" } },
@@ -1698,11 +2200,11 @@ function getToggleVal(groupId) {
       ];
 
       Plotly.react(barEl, acfTraces, baseLayout({
-        title: { text: "Autocorrelation Function (ACF)", font: { size: 13, color: c.textSoft } },
-        xaxis: { title: "Lag", gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft }, dtick: 1 },
-        yaxis: { title: "Autocorrelation", range: [-0.3, 1.05], gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft } },
+        title: { text: t("widget.acf.chart.acfTitle"), font: { size: 13, color: c.textSoft } },
+        xaxis: { title: t("widget.acf.chart.xaxisLag"), gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft }, dtick: 1 },
+        yaxis: { title: t("widget.acf.chart.yaxisAcf"), range: [-0.3, 1.05], gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft } },
         shapes: shapes,
-        annotations: [{ x: 0.98, xref: "paper", y: band95 + 0.04, text: "95% band", showarrow: false, font: { color: c.pink, size: 10 } }]
+        annotations: [{ x: 0.98, xref: "paper", y: band95 + 0.04, text: t("widget.acf.chart.ann.band"), showarrow: false, font: { color: c.pink, size: 10 } }]
       }), PLOTLY_CONFIG);
     }
   }
@@ -1748,15 +2250,15 @@ function getToggleVal(groupId) {
     var traces = [{
       y: vars, x: ratios, type: "bar", orientation: "h",
       marker: { color: barColors },
-      hovertemplate: "%{y}<br>Ratio: %{x:.4f}<extra></extra>",
-      name: "Robust / Default SE"
+      hovertemplate: "%{y}<br>" + t("widget.seratio.chart.hover.ratio") + ": %{x:.4f}<extra></extra>",
+      name: t("widget.seratio.chart.legend.ratio")
     }];
 
     Plotly.react(chartEl, traces, baseLayout({
-      xaxis: { title: "Robust SE / Default SE", gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft } },
+      xaxis: { title: t("widget.seratio.chart.xaxis"), gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft } },
       yaxis: { gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft }, autorange: "reversed" },
       shapes: [{ type: "line", yref: "paper", y0: 0, y1: 1, x0: 1, x1: 1, line: { color: c.purple, width: 2, dash: "dash" } }],
-      annotations: [{ x: 1, yref: "paper", y: -0.08, text: "Ratio = 1", showarrow: false, font: { color: c.purple, size: 11 } }],
+      annotations: [{ x: 1, yref: "paper", y: -0.08, text: t("widget.seratio.chart.ann.ref"), showarrow: false, font: { color: c.purple, size: 11 } }],
       margin: { l: 100, r: 18, t: 30, b: 46 }
     }), PLOTLY_CONFIG);
   }
@@ -1788,9 +2290,9 @@ function getToggleVal(groupId) {
       document.getElementById("boot-hi").textContent = "\u2014";
 
       Plotly.react(chartEl, [], baseLayout({
-        xaxis: { title: "Bootstrap slope estimates", gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft } },
-        yaxis: { title: "Density", gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft } },
-        annotations: [{ x: 0.5, y: 0.5, xref: "paper", yref: "paper", text: "Click \"Run Bootstrap\" to start", showarrow: false, font: { color: c.textSoft, size: 14 } }]
+        xaxis: { title: t("widget.boot.chart.xaxis"), gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft } },
+        yaxis: { title: t("widget.boot.chart.yaxis"), gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft } },
+        annotations: [{ x: 0.5, y: 0.5, xref: "paper", yref: "paper", text: t("widget.boot.chart.empty"), showarrow: false, font: { color: c.textSoft, size: 14 } }]
       }), PLOTLY_CONFIG);
       return;
     }
@@ -1808,23 +2310,23 @@ function getToggleVal(groupId) {
 
     var traces = [];
     traces.push({ x: bootSlopes, type: "histogram", histnorm: "probability density", nbinsx: 40,
-      marker: { color: c.cyan + "88", line: { color: c.cyan, width: 1 } }, name: "Bootstrap slopes" });
+      marker: { color: c.cyan + "88", line: { color: c.cyan, width: 1 } }, name: t("widget.boot.chart.legend.boot") });
 
     // Normal overlay
     var xFit = linspace(sorted[0], sorted[sorted.length - 1], 100);
     var yFit = xFit.map(function(x) { return normalPDF(x, m, s); });
-    traces.push({ x: xFit, y: yFit, mode: "lines", line: { color: c.pink, width: 2 }, name: "Normal fit" });
+    traces.push({ x: xFit, y: yFit, mode: "lines", line: { color: c.pink, width: 2 }, name: t("widget.boot.chart.legend.normal") });
 
     Plotly.react(chartEl, traces, baseLayout({
-      xaxis: { title: "Bootstrap slope estimates", gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft } },
-      yaxis: { title: "Density", gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft } },
+      xaxis: { title: t("widget.boot.chart.xaxis"), gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft } },
+      yaxis: { title: t("widget.boot.chart.yaxis"), gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft } },
       shapes: [
         { type: "line", x0: olsSlope.b1, x1: olsSlope.b1, yref: "paper", y0: 0, y1: 1, line: { color: c.purple, width: 2.5, dash: "dash" } },
         { type: "line", x0: lo, x1: lo, yref: "paper", y0: 0, y1: 1, line: { color: c.pink, width: 1.5, dash: "dot" } },
         { type: "line", x0: hi, x1: hi, yref: "paper", y0: 0, y1: 1, line: { color: c.pink, width: 1.5, dash: "dot" } }
       ],
       annotations: [
-        { x: olsSlope.b1, yref: "paper", y: 1.02, text: "OLS slope", showarrow: false, font: { color: c.purple, size: 11 } },
+        { x: olsSlope.b1, yref: "paper", y: 1.02, text: t("widget.boot.chart.ann.ols"), showarrow: false, font: { color: c.purple, size: 11 } },
         { x: lo, yref: "paper", y: 1.02, text: "2.5%", showarrow: false, font: { color: c.pink, size: 10 } },
         { x: hi, yref: "paper", y: 1.02, text: "97.5%", showarrow: false, font: { color: c.pink, size: 10 } }
       ],
@@ -1981,31 +2483,42 @@ function getToggleVal(groupId) {
   readHash();
 })();
 
-// ==================== THEME TOGGLE ====================
-(function() {
-  var btn = document.getElementById("theme-toggle");
-  var iconEl = document.getElementById("theme-icon");
-  var labelEl = document.getElementById("theme-label");
-
-  function apply(theme) {
-    document.documentElement.dataset.theme = theme;
-    iconEl.textContent = theme === "dark" ? "\u2600\uFE0F" : "\uD83C\uDF19";
-    labelEl.textContent = theme === "dark" ? "Light" : "Dark";
-    for (var key in window) {
-      if (key.startsWith("__rerender_") && typeof window[key] === "function") window[key]();
-    }
+// ==================== THEME TOGGLE (site navbar) ====================
+// Reads/writes localStorage.darkMode (shared with index.html / tutors.html)
+// and applies html[data-theme="dark"] for this chapter's CSS.
+function applyDarkMode(isDark) {
+  document.documentElement.dataset.theme = isDark ? "dark" : "light";
+  const icon = document.getElementById("siteDarkModeIcon");
+  if (icon) icon.className = isDark ? "fa-solid fa-sun" : "fa-solid fa-moon";
+  // Re-render all widgets so Plotly picks up the new CSS colors.
+  for (const key in window) {
+    if (key.startsWith("__rerender_") && typeof window[key] === "function") window[key]();
   }
+}
 
-  var saved = localStorage.getItem(THEME_KEY);
-  var prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
-  apply(saved || (prefersDark ? "dark" : "light"));
+function toggleDarkModeNav() {
+  const isDark = document.documentElement.dataset.theme !== "dark";
+  localStorage.setItem(THEME_KEY, isDark ? "dark" : "light");
+  applyDarkMode(isDark);
+}
 
-  btn.addEventListener("click", function() {
-    var next = document.documentElement.dataset.theme === "dark" ? "light" : "dark";
-    localStorage.setItem(THEME_KEY, next);
-    apply(next);
-  });
+(function() {
+  const saved = localStorage.getItem(THEME_KEY);
+  const prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+  const isDark = saved ? (saved === "dark") : prefersDark;
+  applyDarkMode(isDark);
 })();
+
+// ==================== MOBILE MENU (site navbar) ====================
+function toggleSiteMobileMenu() {
+  const menu = document.getElementById("siteMobileMenu");
+  const hamburger = document.getElementById("siteHamburgerIcon");
+  const close = document.getElementById("siteCloseIcon");
+  if (!menu || !hamburger || !close) return;
+  const isOpen = menu.classList.toggle("open");
+  hamburger.style.display = isOpen ? "none" : "";
+  close.style.display = isOpen ? "" : "none";
+}
 
 // ==================== Resize handling ====================
 window.addEventListener("resize", function() {
@@ -2013,6 +2526,10 @@ window.addEventListener("resize", function() {
     if (el.offsetWidth > 0) Plotly.Plots.resize(el);
   });
 });
+
+// ==================== Apply language (final pass) ====================
+// Runs after all widgets are registered so __rerender_* re-fires can paint Plotly text in the current language.
+applyLanguage(window.__lang || I18N.defaultLang);
 </script>
 <script>
 // ==================== CODE LANGUAGE TABS ====================

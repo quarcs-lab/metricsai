@@ -3,24 +3,67 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Chapter 15 — Regression with Transformed Variables · metricsAI</title>
+<title data-i18n="meta.title">Chapter 15 — Regression with Transformed Variables · metricsAI</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <script src="https://cdn.plot.ly/plotly-2.35.2.min.js" charset="utf-8"></script>
 <style>
 :root{--cyan:#008CB7;--cyan-soft:#22d3ee;--purple:#7A209F;--purple-soft:#c084fc;--pink:#C21E72;--pink-soft:#f472b6;--bg:#f5f8fb;--panel:#fff;--panel-2:#f0f4f9;--text:#0b1021;--text-soft:#475569;--text-muted:#64748b;--border:#d9e2ec;--accent:var(--cyan);--accent-2:var(--purple);--accent-3:var(--pink);--shadow:0 2px 10px rgba(11,16,33,.06),0 12px 30px rgba(11,16,33,.05);--grid:#e3e8ef;--code-bg:#eef3f8}
 html[data-theme="dark"]{--bg:#0c1024;--panel:#151a33;--panel-2:#1b2142;--text:#e2e8f0;--text-soft:#b5c0d0;--text-muted:#8a98ae;--border:#2a3156;--accent:var(--cyan-soft);--accent-2:var(--purple-soft);--accent-3:var(--pink-soft);--shadow:0 2px 10px rgba(0,0,0,.25),0 12px 30px rgba(0,0,0,.35);--grid:#2a3156;--code-bg:#0f1530}
 *{box-sizing:border-box}html,body{margin:0;padding:0}
-body{font-family:'Inter',system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);line-height:1.55;transition:background-color .25s ease,color .25s ease}
+body{font-family:'Inter',system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);line-height:1.55;transition:background-color .25s ease,color .25s ease; padding-top: 64px; /* leave room for the fixed .site-nav */ }
+/* ===== Site navigation bar (shared across metricsAI pages) ===== */
+.site-nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 50;
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--border);
+  height: 64px;
+}
+html[data-theme="dark"] .site-nav { background: rgba(12, 16, 36, 0.85); }
+.site-nav-inner { max-width: 1280px; margin: 0 auto; padding: 0 1rem; height: 100%; display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
+.site-nav-brand { display: flex; align-items: center; gap: 0.5rem; font-weight: 700; font-size: 1.15rem; color: var(--text); text-decoration: none; }
+.site-nav-brand .ai-mark { color: var(--accent); }
+.site-nav-links { display: flex; gap: 1.5rem; }
+.site-nav-links a { color: var(--text-soft); text-decoration: none; font-weight: 500; font-size: 0.95rem; transition: color .2s ease; }
+.site-nav-links a:hover { color: var(--accent); }
+.site-nav-links a.active { color: var(--accent); border-bottom: 2px solid var(--accent); padding-bottom: 0.25rem; }
+.site-nav-controls { display: flex; align-items: center; gap: 0.8rem; }
+.site-nav-cameron { display: flex; flex-direction: column; align-items: center; padding: 0.25rem 0.6rem; border: 1px solid var(--border); border-radius: 0.5rem; background: var(--panel-2); text-decoration: none; line-height: 1.1; transition: background .2s ease; }
+.site-nav-cameron:hover { background: var(--panel); }
+.site-nav-cameron .cameron-pre { font-size: 0.6rem; color: var(--text-muted); }
+.site-nav-cameron .cameron-name { font-size: 0.7rem; font-weight: 600; color: var(--text-soft); }
+.site-nav-cameron .cameron-cta { font-size: 0.6rem; color: var(--text-muted); margin-top: 0.1rem; }
+.site-nav-btn { background: transparent; border: none; color: var(--text-soft); cursor: pointer; padding: 0.4rem; border-radius: 0.4rem; font-size: 1.05rem; display: inline-flex; align-items: center; gap: 0.3rem; transition: color .2s ease, background .2s ease; }
+.site-nav-btn:hover { color: var(--accent); background: var(--panel-2); }
+.site-nav-btn .label { font-size: 0.75rem; font-weight: 600; }
+.site-nav-hamburger { display: none; }
+
+.site-nav-mobile { display: none; position: fixed; top: 64px; left: 0; right: 0; background: var(--panel); border-top: 1px solid var(--border); box-shadow: var(--shadow); z-index: 40; padding: 1rem; }
+.site-nav-mobile a { display: block; padding: 0.6rem 0.4rem; color: var(--text-soft); text-decoration: none; font-weight: 500; border-bottom: 1px solid var(--border); }
+.site-nav-mobile a.active { color: var(--accent); }
+.site-nav-mobile a:last-of-type { border-bottom: none; }
+.site-nav-mobile.open { display: block; }
+
+@media (max-width: 768px) {
+  .site-nav-links, .site-nav-cameron { display: none; }
+  .site-nav-hamburger { display: inline-flex; }
+}
+/* ===== /Site navigation bar ===== */
+
 code,.mono{font-family:'JetBrains Mono',ui-monospace,monospace}
 header.page{position:relative;padding:2.4rem 1.5rem 2rem;background:radial-gradient(1200px 400px at 85% -10%,rgba(122,32,159,.15),transparent),radial-gradient(1000px 400px at 10% 0%,rgba(0,140,183,.18),transparent),var(--panel);border-bottom:1px solid var(--border)}
 .page-inner{max-width:1120px;margin:0 auto}
 .chapter-badge{display:inline-block;font-size:.72rem;letter-spacing:.15em;text-transform:uppercase;color:var(--accent);font-weight:600;margin-bottom:.5rem}
 h1.title{font-size:clamp(1.6rem,3.4vw,2.4rem);margin:0 0 .35rem;background:linear-gradient(90deg,var(--accent),var(--accent-2));-webkit-background-clip:text;background-clip:text;color:transparent;font-weight:700;letter-spacing:-.01em}
 p.subtitle{margin:0 0 .8rem;color:var(--text-soft);font-size:1.05rem;max-width:720px}
-.theme-toggle{position:absolute;top:1.4rem;right:1.5rem;background:var(--panel-2);color:var(--text);border:1px solid var(--border);padding:.4rem .8rem;border-radius:999px;cursor:pointer;font-size:.85rem;font-weight:500;display:inline-flex;align-items:center;gap:.35rem;transition:all .2s ease}
-.theme-toggle:hover{border-color:var(--accent);color:var(--accent)}
 nav.anchors{position:sticky;top:0;z-index:20;background:color-mix(in srgb,var(--panel) 92%,transparent);backdrop-filter:saturate(150%) blur(8px);-webkit-backdrop-filter:saturate(150%) blur(8px);border-bottom:1px solid var(--border)}
 nav.anchors ul{display:flex;gap:.25rem;overflow-x:auto;list-style:none;padding:.55rem 1.5rem;margin:0 auto;max-width:1120px;scrollbar-width:thin}
 nav.anchors a{display:block;padding:.35rem .75rem;border-radius:8px;color:var(--text-soft);text-decoration:none;font-size:.85rem;font-weight:500;white-space:nowrap;transition:all .15s ease}
@@ -206,24 +249,71 @@ footer.page a{color:var(--accent);text-decoration:none}footer.page a:hover{text-
 </head>
 <body>
 
+
+<nav class="site-nav" aria-label="Site navigation">
+  <div class="site-nav-inner">
+    <a href="../../index.html" class="site-nav-brand">
+      <i class="fa-solid fa-chart-line" style="color: var(--accent);"></i>
+      <span>metrics<span class="ai-mark">AI</span></span>
+    </a>
+    <div class="site-nav-links">
+      <a href="../../index.html#about" data-i18n="nav.about">About</a>
+      <a href="../../index.html#curriculum" class="active" data-i18n="nav.notebooks">Python Notebooks</a>
+      <a href="../../tutors.html" data-i18n="nav.tutors">AI Tutors</a>
+      <a href="../../index.html#books" data-i18n="nav.books">Books</a>
+      <a href="../../videos.html" data-i18n="nav.videos">Videos</a>
+      <a href="https://open.spotify.com/show/2lN5pA3l10UdHe61ZCoHcF?si=IFFMpG3pROepG61o8qbnvg" target="_blank" rel="noopener" data-i18n="nav.podcasts">Podcasts</a>
+      <a href="../../index.html#authors" data-i18n="nav.authors">Authors</a>
+      <a href="../../index.html#more-resources" data-i18n="nav.resources">More Resources</a>
+    </div>
+    <div class="site-nav-controls">
+      <a href="https://cameron.econ.ucdavis.edu/aed/index.html" target="_blank" rel="noopener" class="site-nav-cameron">
+        <span class="cameron-pre" data-i18n="nav.cameron.pre">Content based on</span>
+        <span class="cameron-name">Cameron (2022)</span>
+        <span class="cameron-cta"><span data-i18n="nav.cameron.cta">Learn More</span> <i class="fa-solid fa-external-link-alt"></i></span>
+      </a>
+      <button type="button" class="site-nav-btn" onclick="toggleDarkModeNav()" title="Toggle dark mode" id="siteDarkModeToggle">
+        <i class="fa-solid fa-moon" id="siteDarkModeIcon"></i>
+      </button>
+      <button type="button" class="site-nav-btn" onclick="toggleLanguage()" title="Switch language / Cambiar idioma" id="siteLanguageToggle">
+        <i class="fa-solid fa-language"></i>
+        <span class="label" id="siteLanguageLabel">EN</span>
+      </button>
+      <button type="button" class="site-nav-btn site-nav-hamburger" onclick="toggleSiteMobileMenu()" id="siteMobileMenuBtn">
+        <i class="fa-solid fa-bars" id="siteHamburgerIcon"></i>
+        <i class="fa-solid fa-times" id="siteCloseIcon" style="display:none"></i>
+      </button>
+    </div>
+  </div>
+</nav>
+<div class="site-nav-mobile" id="siteMobileMenu">
+  <a href="../../index.html#about" data-i18n="nav.about">About</a>
+  <a href="../../index.html#curriculum" class="active" data-i18n="nav.notebooks">Python Notebooks</a>
+  <a href="../../tutors.html" data-i18n="nav.tutors">AI Tutors</a>
+  <a href="../../index.html#books" data-i18n="nav.books">Books</a>
+  <a href="../../videos.html" data-i18n="nav.videos">Videos</a>
+  <a href="https://open.spotify.com/show/2lN5pA3l10UdHe61ZCoHcF?si=IFFMpG3pROepG61o8qbnvg" target="_blank" rel="noopener" data-i18n="nav.podcasts">Podcasts</a>
+  <a href="../../index.html#authors" data-i18n="nav.authors">Authors</a>
+  <a href="../../index.html#more-resources" data-i18n="nav.resources">More Resources</a>
+</div>
+
 <header class="page">
   <div class="page-inner">
-    <span class="chapter-badge">Chapter 15 of 18 · Interactive Dashboard</span>
-    <h1 class="title">Regression with Transformed Variables</h1>
-    <p class="subtitle">Explore log transformations, quadratic models, standardized coefficients, interaction effects, and retransformation bias — using the same earnings dataset as the book.</p>
+    <span class="chapter-badge" data-i18n="header.badge">Chapter 15 of 18 · Interactive Dashboard</span>
+    <h1 class="title" data-i18n="header.title">Regression with Transformed Variables</h1>
+    <p class="subtitle" data-i18n="header.subtitle">Explore log transformations, quadratic models, standardized coefficients, interaction effects, and retransformation bias — using the same earnings dataset as the book.</p>
   </div>
-  <button id="theme-toggle" class="theme-toggle" type="button" aria-label="Toggle color theme"><span id="theme-icon">🌙</span><span id="theme-label">Dark</span></button>
 </header>
 
 <nav class="anchors" aria-label="Sections">
   <ul>
-    <li><a href="#log-transform">Log Transformation</a></li>
-    <li><a href="#quadratic">Quadratic &amp; Turning Point</a></li>
-    <li><a href="#standardized">Standardized Coefs</a></li>
-    <li><a href="#interaction-me">Interaction Effects</a></li>
-    <li><a href="#retransform">Retransformation</a></li>
-    <li><a href="#residuals">Residual Distribution</a></li>
-    <li><a href="#code">Code</a></li>
+    <li><a href="#log-transform" data-i18n="nav.logtransform">Log Transformation</a></li>
+    <li><a href="#quadratic" data-i18n="nav.quadratic">Quadratic &amp; Turning Point</a></li>
+    <li><a href="#standardized" data-i18n="nav.standardized">Standardized Coefs</a></li>
+    <li><a href="#interaction-me" data-i18n="nav.interactionme">Interaction Effects</a></li>
+    <li><a href="#retransform" data-i18n="nav.retransform">Retransformation</a></li>
+    <li><a href="#residuals" data-i18n="nav.residuals">Residual Distribution</a></li>
+    <li><a href="#code" data-i18n="nav.code">Code</a></li>
   </ul>
 </nav>
 
@@ -233,20 +323,20 @@ footer.page a{color:var(--accent);text-decoration:none}footer.page a:hover{text-
 <section class="widget" id="log-transform">
   <div class="widget-head">
     <div>
-      <h2>Log Transformation Explorer</h2>
+      <h2 data-i18n="widget.logtransform.heading">Log Transformation Explorer</h2>
     </div>
-    <button class="reset-btn" data-reset="logtransform">Reset</button>
+    <button class="reset-btn" data-reset="logtransform" data-i18n="common.reset">↺ Reset</button>
   </div>
 
-  <p class="motivation">Same data, same regressors — but one specification reports "$5,737 per year of school" and the other reports "10% per year." <em>Which answer is the right one?</em></p>
+  <p class="motivation" data-i18n="widget.logtransform.motivation">Same data, same regressors — but one specification reports "$5,737 per year of school" and the other reports "10% per year." <em>Which answer is the right one?</em></p>
 
-  <div class="key-concept">
+  <div class="key-concept" data-i18n="widget.logtransform.kc">
     <span class="kc-title">In a log-linear model (ln y = β₁ + β₂x), β₂ is a semi-elasticity: a 1-unit increase in x is associated with a 100 × β₂ percent change in y.</span> In a <strong>log-log model</strong> (ln y = β₁ + β₂ ln x), β₂ is an elasticity — a 1% increase in x gives a β₂% change in y. You <strong>cannot</strong> directly compare R² across models with different dependent variables (y vs ln y); instead compare by prediction accuracy, information criteria, or economic plausibility (Key Concept 15.2).
   </div>
 
   <div class="widget-howto">
-    <div class="howto-title">What you can do here</div>
-    <ul>
+    <div class="howto-title" data-i18n="common.howtoTitle">What you can do here</div>
+    <ul data-i18n="widget.logtransform.howto">
       <li><strong>Toggle Levels vs Log-linear</strong> to see how the coefficient and interpretation change.</li>
       <li><strong>Read the interpretation stat card</strong> — it translates the coefficient into plain English.</li>
       <li><strong>Compare the fitted lines on the scatter</strong> — notice where each specification misses.</li>
@@ -255,50 +345,50 @@ footer.page a{color:var(--accent);text-decoration:none}footer.page a:hover{text-
 
   <div class="controls">
     <div class="ctrl">
-      <label>Model specification</label>
+      <label data-i18n="widget.logtransform.ctrl.model.label">Model specification</label>
       <div class="toggle-group" id="lt-model">
-        <button class="active" data-val="levels">Levels ($ per year)</button>
-        <button data-val="log">Log-linear (% per year)</button>
+        <button class="active" data-val="levels" data-i18n="widget.logtransform.ctrl.model.opt.levels">Levels ($ per year)</button>
+        <button data-val="log" data-i18n="widget.logtransform.ctrl.model.opt.log">Log-linear (% per year)</button>
       </div>
     </div>
   </div>
   <div class="stats-grid">
-    <div class="stat mean"><div class="label">Education coef</div><div class="value" id="lt-stat-coef">—</div></div>
-    <div class="stat spread"><div class="label">Interpretation</div><div class="value" id="lt-stat-interp">—</div></div>
-    <div class="stat median"><div class="label">R²</div><div class="value" id="lt-stat-r2">—</div></div>
-    <div class="stat mean"><div class="label">t-statistic</div><div class="value" id="lt-stat-t">—</div></div>
+    <div class="stat mean"><div class="label" data-i18n="widget.logtransform.stat.coef">Education coef</div><div class="value" id="lt-stat-coef">—</div></div>
+    <div class="stat spread"><div class="label" data-i18n="widget.logtransform.stat.interp">Interpretation</div><div class="value" id="lt-stat-interp">—</div></div>
+    <div class="stat median"><div class="label" data-i18n="stat.r2">R²</div><div class="value" id="lt-stat-r2">—</div></div>
+    <div class="stat mean"><div class="label" data-i18n="widget.logtransform.stat.t">t-statistic</div><div class="value" id="lt-stat-t">—</div></div>
   </div>
   <div id="chart-log-transform" class="chart"></div>
   <div class="try-this">
-    <div class="try-title">Try This</div>
-    <ol>
+    <div class="try-title" data-i18n="common.tryTitle">Try this</div>
+    <ol data-i18n="widget.logtransform.try">
       <li><strong>Start in Levels.</strong> Each extra year of education adds ≈ $5,737 to earnings. Switch to Log-linear. Each extra year adds ≈ 10%. <em>Dollars-per-year is concrete at the sample mean but misleading at the extremes; percent-per-year scales naturally across income levels.</em></li>
       <li><strong>Compare R² across the two specs.</strong> Log fits better (0.176 vs 0.103). <em>Earnings are right-skewed; logging compresses the tail so the regression line fits everyone, not just the middle.</em></li>
       <li><strong>Inspect the fitted lines on the scatter.</strong> The levels line misses the high earners badly; the log line is visibly more even. <em>Shape of the residuals, not just R², is what decides which functional form is right.</em></li>
     </ol>
   </div>
 
-  <p class="takeaway"><strong>Take-away:</strong> Log transformations convert dollar-change questions into percent-change questions — the right choice when the outcome is skewed and scale-dependent. <a href="../../book/_book/notebooks_quarto/ch15_Regression_with_Transformed_Variables.html#logarithmic-transformations" target="_blank" rel="noopener">Read §15.2 in the chapter →</a></p>
+  <p class="takeaway" data-i18n="widget.logtransform.takeaway"><strong>Take-away:</strong> Log transformations convert dollar-change questions into percent-change questions — the right choice when the outcome is skewed and scale-dependent. <a href="../../book/_book/notebooks_quarto/ch15_Regression_with_Transformed_Variables.html#logarithmic-transformations" target="_blank" rel="noopener">Read §15.2 in the chapter →</a></p>
 </section>
 
 <!-- ==================== WIDGET 2: Quadratic Model & Turning Point ==================== -->
 <section class="widget" id="quadratic">
   <div class="widget-head">
     <div>
-      <h2>Quadratic Model &amp; Turning Point</h2>
+      <h2 data-i18n="widget.quadratic.heading">Quadratic Model &amp; Turning Point</h2>
     </div>
-    <button class="reset-btn" data-reset="quadratic">Reset</button>
+    <button class="reset-btn" data-reset="quadratic" data-i18n="common.reset">↺ Reset</button>
   </div>
 
-  <p class="motivation">Earnings rise with age — <em>up to a point</em>. When does the rise stop? A quadratic term answers in one closed-form formula.</p>
+  <p class="motivation" data-i18n="widget.quadratic.motivation">Earnings rise with age — <em>up to a point</em>. When does the rise stop? A quadratic term answers in one closed-form formula.</p>
 
-  <div class="key-concept">
+  <div class="key-concept" data-i18n="widget.quadratic.kc">
     <span class="kc-title">A quadratic model y = β₁ + β₂x + β₃x² captures nonlinear relationships with a turning point at x* = −β₂ / (2β₃).</span> The marginal effect <strong>ME = β₂ + 2β₃x</strong> varies with x — unlike linear models where it is constant. If <strong>β₃ &lt; 0</strong>, the shape is an inverted U (earnings peaking at a certain age). Always test the joint significance of x and x² with an <strong>F-test</strong>, because individual t-tests on the quadratic term are misleading when x and x² are highly correlated (Key Concept 15.4).
   </div>
 
   <div class="widget-howto">
-    <div class="howto-title">What you can do here</div>
-    <ul>
+    <div class="howto-title" data-i18n="common.howtoTitle">What you can do here</div>
+    <ul data-i18n="widget.quadratic.howto">
       <li><strong>Toggle between Linear and Quadratic</strong> to compare the two fits.</li>
       <li><strong>Slide age</strong> to compute the marginal effect at any point on the life cycle.</li>
       <li><strong>Read the turning point</strong> — where the marginal effect crosses zero.</li>
@@ -307,54 +397,54 @@ footer.page a{color:var(--accent);text-decoration:none}footer.page a:hover{text-
 
   <div class="controls">
     <div class="ctrl">
-      <label>Model</label>
+      <label data-i18n="widget.quadratic.ctrl.model.label">Model</label>
       <div class="toggle-group" id="quad-model">
-        <button data-val="linear">Linear</button>
-        <button class="active" data-val="quadratic">Quadratic</button>
+        <button data-val="linear" data-i18n="widget.quadratic.ctrl.model.opt.linear">Linear</button>
+        <button class="active" data-val="quadratic" data-i18n="widget.quadratic.ctrl.model.opt.quadratic">Quadratic</button>
       </div>
     </div>
     <div class="ctrl">
-      <label>Evaluate marginal effect at age</label>
+      <label for="quad-age" data-i18n="widget.quadratic.ctrl.age.label">Evaluate marginal effect at age</label>
       <input type="range" id="quad-age" min="25" max="65" step="1" value="40">
       <span class="val" id="quad-age-val">Age = 40</span>
     </div>
   </div>
   <div class="stats-grid">
-    <div class="stat mean"><div class="label">Turning point</div><div class="value" id="quad-stat-tp">—</div></div>
-    <div class="stat spread"><div class="label">Marginal effect</div><div class="value" id="quad-stat-me">—</div></div>
-    <div class="stat median"><div class="label">R²</div><div class="value" id="quad-stat-r2">—</div></div>
+    <div class="stat mean"><div class="label" data-i18n="widget.quadratic.stat.tp">Turning point</div><div class="value" id="quad-stat-tp">—</div></div>
+    <div class="stat spread"><div class="label" data-i18n="widget.quadratic.stat.me">Marginal effect</div><div class="value" id="quad-stat-me">—</div></div>
+    <div class="stat median"><div class="label" data-i18n="stat.r2">R²</div><div class="value" id="quad-stat-r2">—</div></div>
   </div>
   <div id="chart-quadratic" class="chart"></div>
   <div class="try-this">
-    <div class="try-title">Try This</div>
-    <ol>
+    <div class="try-title" data-i18n="common.tryTitle">Try this</div>
+    <ol data-i18n="widget.quadratic.try">
       <li><strong>Toggle to Linear.</strong> The line rises monotonically, missing the decline at older ages. Toggle back to Quadratic. <em>The curve peaks in middle age and falls — the shape that linear can never capture.</em></li>
       <li><strong>Slide age to the turning point (~49.5).</strong> The marginal effect crosses zero. <em>One more year of age neither helps nor hurts — that's the inflection of the inverted-U curve.</em></li>
       <li><strong>Slide age to 60.</strong> The marginal effect is negative. <em>Past the peak, additional age costs earnings — the classic life-cycle result quantified.</em></li>
     </ol>
   </div>
 
-  <p class="takeaway"><strong>Take-away:</strong> A single quadratic term converts a monotonic line into an inverted-U with a named turning point — and its marginal effect has an age-specific formula. <a href="../../book/_book/notebooks_quarto/ch15_Regression_with_Transformed_Variables.html#polynomial-regression-quadratic-models" target="_blank" rel="noopener">Read §15.3 in the chapter →</a></p>
+  <p class="takeaway" data-i18n="widget.quadratic.takeaway"><strong>Take-away:</strong> A single quadratic term converts a monotonic line into an inverted-U with a named turning point — and its marginal effect has an age-specific formula. <a href="../../book/_book/notebooks_quarto/ch15_Regression_with_Transformed_Variables.html#polynomial-regression-quadratic-models" target="_blank" rel="noopener">Read §15.3 in the chapter →</a></p>
 </section>
 
 <!-- ==================== WIDGET 3: Standardized Coefficients ==================== -->
 <section class="widget" id="standardized">
   <div class="widget-head">
     <div>
-      <h2>Standardized Coefficients</h2>
+      <h2 data-i18n="widget.standardized.heading">Standardized Coefficients</h2>
     </div>
-    <button class="reset-btn" data-reset="standardized">Reset</button>
+    <button class="reset-btn" data-reset="standardized" data-i18n="common.reset">↺ Reset</button>
   </div>
 
-  <p class="motivation">Which predictor matters <em>most</em> — education in years, gender as 0/1, or log-hours? Raw coefficients can't answer; <em>standardized</em> ones can.</p>
+  <p class="motivation" data-i18n="widget.standardized.motivation">Which predictor matters <em>most</em> — education in years, gender as 0/1, or log-hours? Raw coefficients can't answer; <em>standardized</em> ones can.</p>
 
-  <div class="key-concept">
+  <div class="key-concept" data-i18n="widget.standardized.kc">
     <span class="kc-title">Standardized (beta) coefficients β* = β × (s<sub>x</sub> / s<sub>y</sub>) measure effects in standard-deviation units.</span> A one-standard-deviation increase in x is associated with a <strong>β* standard-deviation change in y</strong>. This lets you compare variables on the <em>same</em> scale regardless of their original units — a genuine ranking of explanatory importance within a single regression.
   </div>
 
   <div class="widget-howto">
-    <div class="howto-title">What you can do here</div>
-    <ul>
+    <div class="howto-title" data-i18n="common.howtoTitle">What you can do here</div>
+    <ul data-i18n="widget.standardized.howto">
       <li><strong>Toggle Raw coefficients vs Standardized (β*).</strong></li>
       <li><strong>Compare bar lengths</strong> in the two modes — the ranking often changes.</li>
       <li><strong>Read the full coefficient label</strong> for interpretation.</li>
@@ -363,44 +453,44 @@ footer.page a{color:var(--accent);text-decoration:none}footer.page a:hover{text-
 
   <div class="controls">
     <div class="ctrl">
-      <label>Display</label>
+      <label data-i18n="widget.standardized.ctrl.display.label">Display</label>
       <div class="toggle-group" id="std-display">
-        <button class="active" data-val="raw">Raw coefficients</button>
-        <button data-val="std">Standardized (&beta;*)</button>
+        <button class="active" data-val="raw" data-i18n="widget.standardized.ctrl.display.opt.raw">Raw coefficients</button>
+        <button data-val="std" data-i18n="widget.standardized.ctrl.display.opt.std">Standardized (&beta;*)</button>
       </div>
     </div>
   </div>
   <div id="chart-standardized" class="chart"></div>
   <div class="try-this">
-    <div class="try-title">Try This</div>
-    <ol>
+    <div class="try-title" data-i18n="common.tryTitle">Try this</div>
+    <ol data-i18n="widget.standardized.try">
       <li><strong>Start in Raw.</strong> ln-hours has the largest coefficient (0.94); gender is small (−0.19). <em>But these raw numbers aren't comparable — they ride on different unit scales and different variances.</em></li>
       <li><strong>Switch to Standardized.</strong> Education leads (β* = 0.40); ln-hours drops to 0.23. <em>Standardization reveals that log-hours has low variance in this sample, so its raw-coefficient lead was misleading.</em></li>
       <li><strong>Read gender's standardized coefficient (β* ≈ −0.13).</strong> <em>Small in SD units, but still ~$7,000 at the sample mean — "small in β*" isn't the same as "unimportant in dollars".</em></li>
     </ol>
   </div>
 
-  <p class="takeaway"><strong>Take-away:</strong> Standardized coefficients let you compare predictors on one yardstick — but always check back against the dollar (or raw) units when stakes are practical. <a href="../../book/_book/notebooks_quarto/ch15_Regression_with_Transformed_Variables.html#standardized-variables" target="_blank" rel="noopener">Read §15.4 in the chapter →</a></p>
+  <p class="takeaway" data-i18n="widget.standardized.takeaway"><strong>Take-away:</strong> Standardized coefficients let you compare predictors on one yardstick — but always check back against the dollar (or raw) units when stakes are practical. <a href="../../book/_book/notebooks_quarto/ch15_Regression_with_Transformed_Variables.html#standardized-variables" target="_blank" rel="noopener">Read §15.4 in the chapter →</a></p>
 </section>
 
 <!-- ==================== WIDGET 4: Interaction Marginal Effects ==================== -->
 <section class="widget" id="interaction-me">
   <div class="widget-head">
     <div>
-      <h2>Interaction Marginal Effects</h2>
+      <h2 data-i18n="widget.interactionme.heading">Interaction Marginal Effects</h2>
     </div>
-    <button class="reset-btn" data-reset="interactionme">Reset</button>
+    <button class="reset-btn" data-reset="interactionme" data-i18n="common.reset">↺ Reset</button>
   </div>
 
-  <p class="motivation">Does one more year of schooling pay the same at 25 as it does at 55? <em>An interaction term lets the data say "no."</em></p>
+  <p class="motivation" data-i18n="widget.interactionme.motivation">Does one more year of schooling pay the same at 25 as it does at 55? <em>An interaction term lets the data say "no."</em></p>
 
-  <div class="key-concept">
+  <div class="key-concept" data-i18n="widget.interactionme.kc">
     <span class="kc-title">With an interaction term x × z, the marginal effect of x depends on z: ME<sub>x</sub> = β₂ + β₄z.</span> The effect of one variable changes with the level of another — the linear-constant-effect assumption is relaxed. Individual coefficients on x and x × z may appear insignificant due to multicollinearity between them, so always use <strong>joint F-tests</strong> to evaluate overall significance.
   </div>
 
   <div class="widget-howto">
-    <div class="howto-title">What you can do here</div>
-    <ul>
+    <div class="howto-title" data-i18n="common.howtoTitle">What you can do here</div>
+    <ul data-i18n="widget.interactionme.howto">
       <li><strong>Slide the age</strong> from 25 to 65.</li>
       <li><strong>Watch the marginal effect at this age</strong> update — it's the formula β<sub>educ</sub> + β<sub>educ×age</sub> × age.</li>
       <li><strong>Trace the ME line on the chart</strong> — its slope is the interaction coefficient.</li>
@@ -409,48 +499,48 @@ footer.page a{color:var(--accent);text-decoration:none}footer.page a:hover{text-
 
   <div class="controls">
     <div class="ctrl">
-      <label>Age</label>
+      <label for="ime-age" data-i18n="widget.interactionme.ctrl.age.label">Age</label>
       <input type="range" id="ime-age" min="25" max="65" step="1" value="40">
       <span class="val" id="ime-age-val">Age = 40</span>
     </div>
   </div>
   <div class="stats-grid">
-    <div class="stat mean"><div class="label">Education coef</div><div class="value" id="ime-stat-educ">—</div></div>
-    <div class="stat spread"><div class="label">Interaction coef</div><div class="value" id="ime-stat-inter">—</div></div>
-    <div class="stat median"><div class="label">ME at this age</div><div class="value" id="ime-stat-me">—</div></div>
-    <div class="stat mean"><div class="label">R²</div><div class="value" id="ime-stat-r2">—</div></div>
+    <div class="stat mean"><div class="label" data-i18n="widget.interactionme.stat.educ">Education coef</div><div class="value" id="ime-stat-educ">—</div></div>
+    <div class="stat spread"><div class="label" data-i18n="widget.interactionme.stat.inter">Interaction coef</div><div class="value" id="ime-stat-inter">—</div></div>
+    <div class="stat median"><div class="label" data-i18n="widget.interactionme.stat.me">ME at this age</div><div class="value" id="ime-stat-me">—</div></div>
+    <div class="stat mean"><div class="label" data-i18n="stat.r2">R²</div><div class="value" id="ime-stat-r2">—</div></div>
   </div>
   <div id="chart-interaction-me" class="chart"></div>
   <div class="try-this">
-    <div class="try-title">Try This</div>
-    <ol>
+    <div class="try-title" data-i18n="common.tryTitle">Try this</div>
+    <ol data-i18n="widget.interactionme.try">
       <li><strong>Slide to age 25, then to age 55.</strong> The ME rises from ~$5,241 to ~$6,112. <em>The interaction coefficient is about $29/year-of-age, so more experienced workers earn more per extra year of schooling.</em></li>
       <li><strong>Watch the marginal-effect line slope upward.</strong> <em>Education and experience are complementary — schooling pays off more when combined with more labor-market experience.</em></li>
       <li><strong>Do the arithmetic.</strong> Age 25 → 55 is 30 years × $29 = ~$871 extra return per year of education. <em>Modest in absolute terms, but economically meaningful over a career.</em></li>
     </ol>
   </div>
 
-  <p class="takeaway"><strong>Take-away:</strong> Interactions turn the constant marginal effect into an age-varying one — and always check their block with a joint F-test, since x and x × z are highly collinear. <a href="../../book/_book/notebooks_quarto/ch15_Regression_with_Transformed_Variables.html#interaction-terms-and-marginal-effects" target="_blank" rel="noopener">Read §15.5 in the chapter →</a></p>
+  <p class="takeaway" data-i18n="widget.interactionme.takeaway"><strong>Take-away:</strong> Interactions turn the constant marginal effect into an age-varying one — and always check their block with a joint F-test, since x and x × z are highly collinear. <a href="../../book/_book/notebooks_quarto/ch15_Regression_with_Transformed_Variables.html#interaction-terms-and-marginal-effects" target="_blank" rel="noopener">Read §15.5 in the chapter →</a></p>
 </section>
 
 <!-- ==================== WIDGET 5: Retransformation Bias ==================== -->
 <section class="widget" id="retransform">
   <div class="widget-head">
     <div>
-      <h2>Retransformation Bias</h2>
+      <h2 data-i18n="widget.retransform.heading">Retransformation Bias</h2>
     </div>
-    <button class="reset-btn" data-reset="retransform">Reset</button>
+    <button class="reset-btn" data-reset="retransform" data-i18n="common.reset">↺ Reset</button>
   </div>
 
-  <p class="motivation">Regress in logs, exponentiate back, publish prediction. <em>Wrong by 18%</em> — unless you know the smearing trick.</p>
+  <p class="motivation" data-i18n="widget.retransform.motivation">Regress in logs, exponentiate back, publish prediction. <em>Wrong by 18%</em> — unless you know the smearing trick.</p>
 
-  <div class="key-concept">
+  <div class="key-concept" data-i18n="widget.retransform.kc">
     <span class="kc-title">The naive prediction exp(ln̂ y) systematically underestimates E[y|x] because E[exp(u)] ≠ exp(E[u]) (Jensen's inequality).</span> Under normal homoskedastic errors, multiply by the correction factor <strong>exp(s<sub>e</sub>² / 2)</strong>. <strong>Duan's smearing estimator</strong> offers a nonparametric alternative: ŷ = exp(ln̂ y) × (1/n) Σ exp(û<sub>i</sub>). Either way, naive exponentiation is biased — and the bias grows with the variance of ln y.
   </div>
 
   <div class="widget-howto">
-    <div class="howto-title">What you can do here</div>
-    <ul>
+    <div class="howto-title" data-i18n="common.howtoTitle">What you can do here</div>
+    <ul data-i18n="widget.retransform.howto">
       <li><strong>Toggle Compare both / Naive only / Corrected only.</strong></li>
       <li><strong>Read the smearing factor</strong> in the stat cards.</li>
       <li><strong>Compare the Actual, Naive, and Corrected means</strong> — the corrected version should be close to actual.</li>
@@ -459,51 +549,51 @@ footer.page a{color:var(--accent);text-decoration:none}footer.page a:hover{text-
 
   <div class="controls">
     <div class="ctrl">
-      <label>Prediction method</label>
+      <label data-i18n="widget.retransform.ctrl.method.label">Prediction method</label>
       <div class="toggle-group" id="rt-method">
-        <button class="active" data-val="both">Compare both</button>
-        <button data-val="naive">Naive only</button>
-        <button data-val="corrected">Corrected only</button>
+        <button class="active" data-val="both" data-i18n="widget.retransform.ctrl.method.opt.both">Compare both</button>
+        <button data-val="naive" data-i18n="widget.retransform.ctrl.method.opt.naive">Naive only</button>
+        <button data-val="corrected" data-i18n="widget.retransform.ctrl.method.opt.corrected">Corrected only</button>
       </div>
     </div>
   </div>
   <div class="stats-grid">
-    <div class="stat mean"><div class="label">Actual mean</div><div class="value" id="rt-stat-actual">—</div></div>
-    <div class="stat median"><div class="label">Naive mean</div><div class="value" id="rt-stat-naive">—</div></div>
-    <div class="stat mean"><div class="label">Corrected mean</div><div class="value" id="rt-stat-corrected">—</div></div>
-    <div class="stat spread"><div class="label">Smearing factor</div><div class="value" id="rt-stat-smearing">—</div></div>
+    <div class="stat mean"><div class="label" data-i18n="widget.retransform.stat.actual">Actual mean</div><div class="value" id="rt-stat-actual">—</div></div>
+    <div class="stat median"><div class="label" data-i18n="widget.retransform.stat.naive">Naive mean</div><div class="value" id="rt-stat-naive">—</div></div>
+    <div class="stat mean"><div class="label" data-i18n="widget.retransform.stat.corrected">Corrected mean</div><div class="value" id="rt-stat-corrected">—</div></div>
+    <div class="stat spread"><div class="label" data-i18n="widget.retransform.stat.smearing">Smearing factor</div><div class="value" id="rt-stat-smearing">—</div></div>
   </div>
   <div id="chart-retransform" class="chart short"></div>
   <div class="try-this">
-    <div class="try-title">Try This</div>
-    <ol>
+    <div class="try-title" data-i18n="common.tryTitle">Try this</div>
+    <ol data-i18n="widget.retransform.try">
       <li><strong>Start in Compare both.</strong> The naive bar underpredicts actual earnings by ~$9,500 (~18%). <em>That's the Jensen's-inequality gap that silently contaminates every uncorrected log-model forecast.</em></li>
       <li><strong>Read the smearing factor (exp(σ²/2) ≈ 1.18).</strong> <em>Multiply every naive prediction by 1.18 to remove the downward bias — a one-line fix that restores unbiased level predictions.</em></li>
       <li><strong>Note the small residual gap ($55,501 vs $56,369 actual).</strong> <em>The normal-based correction is approximate when errors aren't exactly Gaussian — Duan's nonparametric smearing is the fallback when you don't want to assume normality.</em></li>
     </ol>
   </div>
 
-  <p class="takeaway"><strong>Take-away:</strong> Exponentiating log-model predictions without a smearing correction systematically underpredicts the mean — a bias that only vanishes when error variance is zero. <a href="../../book/_book/notebooks_quarto/ch15_Regression_with_Transformed_Variables.html#retransformation-bias-and-prediction" target="_blank" rel="noopener">Read §15.6 in the chapter →</a></p>
+  <p class="takeaway" data-i18n="widget.retransform.takeaway"><strong>Take-away:</strong> Exponentiating log-model predictions without a smearing correction systematically underpredicts the mean — a bias that only vanishes when error variance is zero. <a href="../../book/_book/notebooks_quarto/ch15_Regression_with_Transformed_Variables.html#retransformation-bias-and-prediction" target="_blank" rel="noopener">Read §15.6 in the chapter →</a></p>
 </section>
 
 <!-- ==================== WIDGET 6: Residual Distribution ==================== -->
 <section class="widget" id="residuals">
   <div class="widget-head">
     <div>
-      <h2>Residual Distribution: Levels vs. Log</h2>
+      <h2 data-i18n="widget.residuals.heading">Residual Distribution: Levels vs. Log</h2>
     </div>
-    <button class="reset-btn" data-reset="residuals">Reset</button>
+    <button class="reset-btn" data-reset="residuals" data-i18n="common.reset">↺ Reset</button>
   </div>
 
-  <p class="motivation">OLS inference assumes residuals are roughly normal. <em>Are they?</em> One histogram decides whether you should be regressing on y or on ln y.</p>
+  <p class="motivation" data-i18n="widget.residuals.motivation">OLS inference assumes residuals are roughly normal. <em>Are they?</em> One histogram decides whether you should be regressing on y or on ln y.</p>
 
-  <div class="key-concept">
+  <div class="key-concept" data-i18n="widget.residuals.kc">
     <span class="kc-title">Choosing between levels and logs is partly about which specification produces better-behaved residuals.</span> <strong>Right-skewed residuals</strong> (from a levels model on skewed y) suggest a log transformation would help — the OLS standard errors, t-tests, and p-values rely on residuals being approximately normal. The <strong>skewness statistic</strong> quantifies the asymmetry: closer to 0 is better. You can't compare R² across the two specifications (different dependent variables), but you can compare residual shapes directly.
   </div>
 
   <div class="widget-howto">
-    <div class="howto-title">What you can do here</div>
-    <ul>
+    <div class="howto-title" data-i18n="common.howtoTitle">What you can do here</div>
+    <ul data-i18n="widget.residuals.howto">
       <li><strong>Toggle Levels residuals vs Log residuals.</strong></li>
       <li><strong>Watch the skewness stat card</strong> — it measures asymmetry numerically.</li>
       <li><strong>Compare histogram shapes</strong> — normal means roughly symmetric with thin tails.</li>
@@ -512,39 +602,39 @@ footer.page a{color:var(--accent);text-decoration:none}footer.page a:hover{text-
 
   <div class="controls">
     <div class="ctrl">
-      <label>Model</label>
+      <label data-i18n="widget.residuals.ctrl.model.label">Model</label>
       <div class="toggle-group" id="res-model">
-        <button class="active" data-val="levels">Levels residuals</button>
-        <button data-val="log">Log residuals</button>
+        <button class="active" data-val="levels" data-i18n="widget.residuals.ctrl.model.opt.levels">Levels residuals</button>
+        <button data-val="log" data-i18n="widget.residuals.ctrl.model.opt.log">Log residuals</button>
       </div>
     </div>
   </div>
   <div class="stats-grid">
-    <div class="stat mean"><div class="label">Mean</div><div class="value" id="res-stat-mean">—</div></div>
-    <div class="stat spread"><div class="label">SD</div><div class="value" id="res-stat-sd">—</div></div>
-    <div class="stat median"><div class="label">Skewness</div><div class="value" id="res-stat-skew">—</div></div>
+    <div class="stat mean"><div class="label" data-i18n="stat.mean">Mean</div><div class="value" id="res-stat-mean">—</div></div>
+    <div class="stat spread"><div class="label" data-i18n="stat.sd">SD</div><div class="value" id="res-stat-sd">—</div></div>
+    <div class="stat median"><div class="label" data-i18n="stat.skewness">Skewness</div><div class="value" id="res-stat-skew">—</div></div>
   </div>
   <div id="chart-residuals" class="chart"></div>
   <div class="try-this">
-    <div class="try-title">Try This</div>
-    <ol>
+    <div class="try-title" data-i18n="common.tryTitle">Try this</div>
+    <ol data-i18n="widget.residuals.try">
       <li><strong>Stay on Levels residuals.</strong> The histogram has a long right tail — large positive residuals (underpredictions of high earners). <em>A strong signal that the normality assumption is broken and the standard errors lie.</em></li>
       <li><strong>Switch to Log residuals.</strong> The distribution becomes visibly symmetric and the skewness drops. <em>Logging y pulls the tail back and delivers residuals the OLS formulas actually assume.</em></li>
       <li><strong>Conclude.</strong> <em>This is the residual-shape reason economists default to ln(earnings) — inference is only valid if the residuals cooperate.</em></li>
     </ol>
   </div>
 
-  <p class="takeaway"><strong>Take-away:</strong> The right specification is partly a residual-diagnostic question — logs produce cleaner, more symmetric residuals when y is skewed, and cleaner residuals mean honest t-tests and CIs. <a href="../../book/_book/notebooks_quarto/ch15_Regression_with_Transformed_Variables.html#logarithmic-transformations" target="_blank" rel="noopener">Read §15.2 in the chapter →</a></p>
+  <p class="takeaway" data-i18n="widget.residuals.takeaway"><strong>Take-away:</strong> The right specification is partly a residual-diagnostic question — logs produce cleaner, more symmetric residuals when y is skewed, and cleaner residuals mean honest t-tests and CIs. <a href="../../book/_book/notebooks_quarto/ch15_Regression_with_Transformed_Variables.html#logarithmic-transformations" target="_blank" rel="noopener">Read §15.2 in the chapter →</a></p>
 </section>
 
 <section class="howto-card code-summary" id="code" aria-label="Code summary">
-  <h2>Code Summary</h2>
-  <p class="motivation">You've explored the key concepts interactively — now reproduce them in code. These self-contained blocks cover everything you practiced above. Pick your language, copy the code, and run it.</p>
+  <h2 data-i18n="code.heading">Code Summary</h2>
+  <p class="motivation" data-i18n="code.motivation">You've explored the key concepts interactively — now reproduce them in code. These self-contained blocks cover everything you practiced above. Pick your language, copy the code, and run it.</p>
 
   <div class="code-tabs" id="code-lang-tabs">
-    <button type="button" data-lang="python" class="active">Python</button>
-    <button type="button" data-lang="stata">Stata</button>
-    <button type="button" data-lang="r">R</button>
+    <button type="button" data-lang="python" class="active" data-i18n="code.tab.python">Python</button>
+    <button type="button" data-lang="stata" data-i18n="code.tab.stata">Stata</button>
+    <button type="button" data-lang="r" data-i18n="code.tab.r">R</button>
   </div>
 
   <div class="code-panel active" id="panel-python">
@@ -673,8 +763,8 @@ print(f"Hours elasticity: {fit_full.coef()['lnhours']:.3f} (log-log coefficient)
 # Full regression table
 fit_full.summary()</code></pre>
   <div style="display:flex;gap:0.8rem;align-items:center;margin-top:0.8rem;flex-wrap:wrap">
-    <button class="btn-copy" onclick="navigator.clipboard.writeText(document.getElementById('code-python').textContent).then(()=>{this.textContent='Copied!';setTimeout(()=>this.textContent='Copy code',1500)})">Copy code</button>
-    <a class="btn-colab" href="https://colab.research.google.com/notebooks/empty.ipynb" target="_blank" rel="noopener">Open empty Colab notebook &rarr;</a>
+    <button class="btn-copy" data-i18n="code.copy.idle" onclick="navigator.clipboard.writeText(document.getElementById('code-python').textContent).then(()=>{this.textContent=t('code.copy.done');setTimeout(()=>this.textContent=t('code.copy.idle'),1500)})">Copy code</button>
+    <a class="btn-colab" href="https://colab.research.google.com/notebooks/empty.ipynb" target="_blank" rel="noopener" data-i18n="code.colab">Open empty Colab notebook &rarr;</a>
   </div>
   </div>
 
@@ -804,8 +894,8 @@ display "Hours elasticity: " _b[lnhours] " (log-log coefficient)"
 
 // Full regression table is displayed automatically by regress</code></pre>
   <div style="display:flex;gap:0.8rem;align-items:center;margin-top:0.8rem;flex-wrap:wrap">
-    <button class="btn-copy" onclick="navigator.clipboard.writeText(document.getElementById('code-stata').textContent).then(()=>{this.textContent='Copied!';setTimeout(()=>this.textContent='Copy code',1500)})">Copy code</button>
-    <span style="color:var(--text-muted);font-size:0.88rem">Paste into your Stata do-file editor</span>
+    <button class="btn-copy" data-i18n="code.copy.idle" onclick="navigator.clipboard.writeText(document.getElementById('code-stata').textContent).then(()=>{this.textContent=t('code.copy.done');setTimeout(()=>this.textContent=t('code.copy.idle'),1500)})">Copy code</button>
+    <span style="color:var(--text-muted);font-size:0.88rem" data-i18n="code.note.stata">Paste into your Stata do-file editor</span>
   </div>
   </div>
 
@@ -913,8 +1003,8 @@ cat("Education return: ~", round(100*coef(m_full)["education"], 1), "%/yr\n")
 cat("Gender gap: ~", round(100*coef(m_full)["gender"], 1), "%\n")
 cat("Hours elasticity:", round(coef(m_full)["lnhours"], 3), "\n")</code></pre>
   <div style="display:flex;gap:0.8rem;align-items:center;margin-top:0.8rem;flex-wrap:wrap">
-    <button class="btn-copy" onclick="navigator.clipboard.writeText(document.getElementById('code-r').textContent).then(()=>{this.textContent='Copied!';setTimeout(()=>this.textContent='Copy code',1500)})">Copy code</button>
-    <span style="color:var(--text-muted);font-size:0.88rem">Paste into your R console or RStudio</span>
+    <button class="btn-copy" data-i18n="code.copy.idle" onclick="navigator.clipboard.writeText(document.getElementById('code-r').textContent).then(()=>{this.textContent=t('code.copy.done');setTimeout(()=>this.textContent=t('code.copy.idle'),1500)})">Copy code</button>
+    <span style="color:var(--text-muted);font-size:0.88rem" data-i18n="code.note.r">Paste into your R console or RStudio</span>
   </div>
   </div>
 </section>
@@ -922,9 +1012,9 @@ cat("Hours elasticity:", round(coef(m_full)["lnhours"], 3), "\n")</code></pre>
 </main>
 
 <footer class="page">
-  <p>Part of <a href="https://quarcs-lab.github.io/metricsai/book/_book/index.html"><strong>metricsAI</strong></a> · Chapter 15: Regression with Transformed Variables · by Carlos Mendez · <a href="https://github.com/quarcs-lab/metricsai">GitHub</a></p>
-  <p>Data: AED_EARNINGS_COMPLETE.DTA (872 full-time workers aged 25–65, 2000)</p>
-  <a class="scroll-top" href="#top">&uarr; Back to top</a>
+  <p data-i18n="footer.text">Part of <a href="https://quarcs-lab.github.io/metricsai/book/_book/index.html"><strong>metricsAI</strong></a> · Chapter 15: Regression with Transformed Variables · by Carlos Mendez · <a href="https://github.com/quarcs-lab/metricsai">GitHub</a></p>
+  <p data-i18n="footer.dataset">Data: AED_EARNINGS_COMPLETE.DTA (872 full-time workers aged 25–65, 2000)</p>
+  <a class="scroll-top" href="#top" data-i18n="footer.scrolltop">↑ Back to top</a>
 </footer>
 
 <script type="application/json" id="ch-data">{{DATA_JSON}}</script>
@@ -933,6 +1023,384 @@ cat("Hours elasticity:", round(coef(m_full)["lnhours"], 3), "\n")</code></pre>
 "use strict";
 var DATA=JSON.parse(document.getElementById("ch-data").textContent);
 
+// ==================== I18N (EN / ES) ====================
+// English is the source of truth. Spanish entries are real translations
+// (no placeholder prefixes). Strings may contain `{name}` placeholders
+// that are filled by t(key, vars).
+const I18N = {
+  defaultLang: "en",
+  storageKey: "language",
+  en: {
+    "meta.title": "Chapter 15 — Regression with Transformed Variables · metricsAI",
+
+    "header.badge": "Chapter 15 of 18 · Interactive Dashboard",
+    "header.title": "Regression with Transformed Variables",
+    "header.subtitle": "Explore log transformations, quadratic models, standardized coefficients, interaction effects, and retransformation bias — using the same earnings dataset as the book.",
+
+    "theme.dark":  "Dark",
+    "theme.light": "Light",
+
+    "nav.logtransform":  "Log Transformation",
+    "nav.quadratic":     "Quadratic & Turning Point",
+    "nav.standardized":  "Standardized Coefs",
+    "nav.interactionme": "Interaction Effects",
+    "nav.retransform":   "Retransformation",
+    "nav.residuals":     "Residual Distribution",
+    "nav.code":          "Code",
+
+    "common.reset":      "↺ Reset",
+    "common.tryTitle":   "Try this",
+    "common.howtoTitle": "What you can do here",
+    "common.takeaway":   "Take-away:",
+
+    "stat.r2":       "R²",
+    "stat.mean":     "Mean",
+    "stat.sd":       "SD",
+    "stat.skewness": "Skewness",
+
+    // ---- Widget 1: Log Transformation Explorer ----
+    "widget.logtransform.heading":    "Log Transformation Explorer",
+    "widget.logtransform.motivation": "Same data, same regressors — but one specification reports \"$5,737 per year of school\" and the other reports \"10% per year.\" <em>Which answer is the right one?</em>",
+    "widget.logtransform.kc":         "<span class=\"kc-title\">In a log-linear model (ln y = β₁ + β₂x), β₂ is a semi-elasticity: a 1-unit increase in x is associated with a 100 × β₂ percent change in y.</span> In a <strong>log-log model</strong> (ln y = β₁ + β₂ ln x), β₂ is an elasticity — a 1% increase in x gives a β₂% change in y. You <strong>cannot</strong> directly compare R² across models with different dependent variables (y vs ln y); instead compare by prediction accuracy, information criteria, or economic plausibility (Key Concept 15.2).",
+    "widget.logtransform.howto":      "<li><strong>Toggle Levels vs Log-linear</strong> to see how the coefficient and interpretation change.</li>\n      <li><strong>Read the interpretation stat card</strong> — it translates the coefficient into plain English.</li>\n      <li><strong>Compare the fitted lines on the scatter</strong> — notice where each specification misses.</li>",
+    "widget.logtransform.ctrl.model.label":     "Model specification",
+    "widget.logtransform.ctrl.model.opt.levels": "Levels ($ per year)",
+    "widget.logtransform.ctrl.model.opt.log":    "Log-linear (% per year)",
+    "widget.logtransform.stat.coef":   "Education coef",
+    "widget.logtransform.stat.interp": "Interpretation",
+    "widget.logtransform.stat.t":      "t-statistic",
+    "widget.logtransform.unit.yr":     "yr",
+    "widget.logtransform.legend.data": "Data",
+    "widget.logtransform.legend.fit":  "Fitted line",
+    "widget.logtransform.chart.xaxis":        "Years of Education",
+    "widget.logtransform.chart.yaxis.levels": "Earnings ($)",
+    "widget.logtransform.chart.yaxis.log":    "ln(Earnings)",
+    "widget.logtransform.chart.hover.educ":   "Educ",
+    "widget.logtransform.try":        "<li><strong>Start in Levels.</strong> Each extra year of education adds ≈ $5,737 to earnings. Switch to Log-linear. Each extra year adds ≈ 10%. <em>Dollars-per-year is concrete at the sample mean but misleading at the extremes; percent-per-year scales naturally across income levels.</em></li>\n      <li><strong>Compare R² across the two specs.</strong> Log fits better (0.176 vs 0.103). <em>Earnings are right-skewed; logging compresses the tail so the regression line fits everyone, not just the middle.</em></li>\n      <li><strong>Inspect the fitted lines on the scatter.</strong> The levels line misses the high earners badly; the log line is visibly more even. <em>Shape of the residuals, not just R², is what decides which functional form is right.</em></li>",
+    "widget.logtransform.takeaway":   "<strong>Take-away:</strong> Log transformations convert dollar-change questions into percent-change questions — the right choice when the outcome is skewed and scale-dependent. <a href=\"../../book/_book/notebooks_quarto/ch15_Regression_with_Transformed_Variables.html#logarithmic-transformations\" target=\"_blank\" rel=\"noopener\">Read §15.2 in the chapter →</a>",
+
+    // ---- Widget 2: Quadratic Model & Turning Point ----
+    "widget.quadratic.heading":    "Quadratic Model & Turning Point",
+    "widget.quadratic.motivation": "Earnings rise with age — <em>up to a point</em>. When does the rise stop? A quadratic term answers in one closed-form formula.",
+    "widget.quadratic.kc":         "<span class=\"kc-title\">A quadratic model y = β₁ + β₂x + β₃x² captures nonlinear relationships with a turning point at x* = −β₂ / (2β₃).</span> The marginal effect <strong>ME = β₂ + 2β₃x</strong> varies with x — unlike linear models where it is constant. If <strong>β₃ &lt; 0</strong>, the shape is an inverted U (earnings peaking at a certain age). Always test the joint significance of x and x² with an <strong>F-test</strong>, because individual t-tests on the quadratic term are misleading when x and x² are highly correlated (Key Concept 15.4).",
+    "widget.quadratic.howto":      "<li><strong>Toggle between Linear and Quadratic</strong> to compare the two fits.</li>\n      <li><strong>Slide age</strong> to compute the marginal effect at any point on the life cycle.</li>\n      <li><strong>Read the turning point</strong> — where the marginal effect crosses zero.</li>",
+    "widget.quadratic.ctrl.model.label":      "Model",
+    "widget.quadratic.ctrl.model.opt.linear":    "Linear",
+    "widget.quadratic.ctrl.model.opt.quadratic": "Quadratic",
+    "widget.quadratic.ctrl.age.label":         "Evaluate marginal effect at age",
+    "widget.quadratic.stat.tp":     "Turning point",
+    "widget.quadratic.stat.me":     "Marginal effect",
+    "widget.quadratic.tp.linear":   "linear",
+    "widget.quadratic.unit.yr":     "yr",
+    "widget.quadratic.unit.yrs":    "yrs",
+    "widget.quadratic.slider.age":  "Age = {age}",
+    "widget.quadratic.legend.data":    "Data",
+    "widget.quadratic.legend.linFit":  "Linear fit",
+    "widget.quadratic.legend.quadFit": "Quadratic fit",
+    "widget.quadratic.legend.peak":    "Peak: age {age}",
+    "widget.quadratic.legend.meAt":    "ME at age {age}",
+    "widget.quadratic.chart.xaxis":      "Age",
+    "widget.quadratic.chart.yaxis":      "Earnings ($)",
+    "widget.quadratic.chart.hover.age":  "Age",
+    "widget.quadratic.try":         "<li><strong>Toggle to Linear.</strong> The line rises monotonically, missing the decline at older ages. Toggle back to Quadratic. <em>The curve peaks in middle age and falls — the shape that linear can never capture.</em></li>\n      <li><strong>Slide age to the turning point (~49.5).</strong> The marginal effect crosses zero. <em>One more year of age neither helps nor hurts — that's the inflection of the inverted-U curve.</em></li>\n      <li><strong>Slide age to 60.</strong> The marginal effect is negative. <em>Past the peak, additional age costs earnings — the classic life-cycle result quantified.</em></li>",
+    "widget.quadratic.takeaway":    "<strong>Take-away:</strong> A single quadratic term converts a monotonic line into an inverted-U with a named turning point — and its marginal effect has an age-specific formula. <a href=\"../../book/_book/notebooks_quarto/ch15_Regression_with_Transformed_Variables.html#polynomial-regression-quadratic-models\" target=\"_blank\" rel=\"noopener\">Read §15.3 in the chapter →</a>",
+
+    // ---- Widget 3: Standardized Coefficients ----
+    "widget.standardized.heading":    "Standardized Coefficients",
+    "widget.standardized.motivation": "Which predictor matters <em>most</em> — education in years, gender as 0/1, or log-hours? Raw coefficients can't answer; <em>standardized</em> ones can.",
+    "widget.standardized.kc":         "<span class=\"kc-title\">Standardized (beta) coefficients β* = β × (s<sub>x</sub> / s<sub>y</sub>) measure effects in standard-deviation units.</span> A one-standard-deviation increase in x is associated with a <strong>β* standard-deviation change in y</strong>. This lets you compare variables on the <em>same</em> scale regardless of their original units — a genuine ranking of explanatory importance within a single regression.",
+    "widget.standardized.howto":      "<li><strong>Toggle Raw coefficients vs Standardized (β*).</strong></li>\n      <li><strong>Compare bar lengths</strong> in the two modes — the ranking often changes.</li>\n      <li><strong>Read the full coefficient label</strong> for interpretation.</li>",
+    "widget.standardized.ctrl.display.label":     "Display",
+    "widget.standardized.ctrl.display.opt.raw":   "Raw coefficients",
+    "widget.standardized.ctrl.display.opt.std":   "Standardized (β*)",
+    "widget.standardized.var.education": "Education",
+    "widget.standardized.var.age":       "Age",
+    "widget.standardized.var.agesq":     "Age²",
+    "widget.standardized.var.gender":    "Gender",
+    "widget.standardized.var.lnhours":   "ln(Hours)",
+    "widget.standardized.chart.xaxis.std": "Standardized coefficient (β*)",
+    "widget.standardized.chart.xaxis.raw": "Raw coefficient",
+    "widget.standardized.try":        "<li><strong>Start in Raw.</strong> ln-hours has the largest coefficient (0.94); gender is small (−0.19). <em>But these raw numbers aren't comparable — they ride on different unit scales and different variances.</em></li>\n      <li><strong>Switch to Standardized.</strong> Education leads (β* = 0.40); ln-hours drops to 0.23. <em>Standardization reveals that log-hours has low variance in this sample, so its raw-coefficient lead was misleading.</em></li>\n      <li><strong>Read gender's standardized coefficient (β* ≈ −0.13).</strong> <em>Small in SD units, but still ~$7,000 at the sample mean — \"small in β*\" isn't the same as \"unimportant in dollars\".</em></li>",
+    "widget.standardized.takeaway":   "<strong>Take-away:</strong> Standardized coefficients let you compare predictors on one yardstick — but always check back against the dollar (or raw) units when stakes are practical. <a href=\"../../book/_book/notebooks_quarto/ch15_Regression_with_Transformed_Variables.html#standardized-variables\" target=\"_blank\" rel=\"noopener\">Read §15.4 in the chapter →</a>",
+
+    // ---- Widget 4: Interaction Marginal Effects ----
+    "widget.interactionme.heading":    "Interaction Marginal Effects",
+    "widget.interactionme.motivation": "Does one more year of schooling pay the same at 25 as it does at 55? <em>An interaction term lets the data say \"no.\"</em>",
+    "widget.interactionme.kc":         "<span class=\"kc-title\">With an interaction term x × z, the marginal effect of x depends on z: ME<sub>x</sub> = β₂ + β₄z.</span> The effect of one variable changes with the level of another — the linear-constant-effect assumption is relaxed. Individual coefficients on x and x × z may appear insignificant due to multicollinearity between them, so always use <strong>joint F-tests</strong> to evaluate overall significance.",
+    "widget.interactionme.howto":      "<li><strong>Slide the age</strong> from 25 to 65.</li>\n      <li><strong>Watch the marginal effect at this age</strong> update — it's the formula β<sub>educ</sub> + β<sub>educ×age</sub> × age.</li>\n      <li><strong>Trace the ME line on the chart</strong> — its slope is the interaction coefficient.</li>",
+    "widget.interactionme.ctrl.age.label":  "Age",
+    "widget.interactionme.stat.educ":  "Education coef",
+    "widget.interactionme.stat.inter": "Interaction coef",
+    "widget.interactionme.stat.me":    "ME at this age",
+    "widget.interactionme.unit.yr":    "yr",
+    "widget.interactionme.unit.yrxyr":  "yr×yr",
+    "widget.interactionme.slider.age": "Age = {age}",
+    "widget.interactionme.legend.meEduc": "ME of education",
+    "widget.interactionme.legend.atAge":  "At age {age}",
+    "widget.interactionme.chart.xaxis":   "Age",
+    "widget.interactionme.chart.yaxis":   "Marginal effect of education ($/yr)",
+    "widget.interactionme.try":        "<li><strong>Slide to age 25, then to age 55.</strong> The ME rises from ~$5,241 to ~$6,112. <em>The interaction coefficient is about $29/year-of-age, so more experienced workers earn more per extra year of schooling.</em></li>\n      <li><strong>Watch the marginal-effect line slope upward.</strong> <em>Education and experience are complementary — schooling pays off more when combined with more labor-market experience.</em></li>\n      <li><strong>Do the arithmetic.</strong> Age 25 → 55 is 30 years × $29 = ~$871 extra return per year of education. <em>Modest in absolute terms, but economically meaningful over a career.</em></li>",
+    "widget.interactionme.takeaway":   "<strong>Take-away:</strong> Interactions turn the constant marginal effect into an age-varying one — and always check their block with a joint F-test, since x and x × z are highly collinear. <a href=\"../../book/_book/notebooks_quarto/ch15_Regression_with_Transformed_Variables.html#interaction-terms-and-marginal-effects\" target=\"_blank\" rel=\"noopener\">Read §15.5 in the chapter →</a>",
+
+    // ---- Widget 5: Retransformation Bias ----
+    "widget.retransform.heading":    "Retransformation Bias",
+    "widget.retransform.motivation": "Regress in logs, exponentiate back, publish prediction. <em>Wrong by 18%</em> — unless you know the smearing trick.",
+    "widget.retransform.kc":         "<span class=\"kc-title\">The naive prediction exp(ln̂ y) systematically underestimates E[y|x] because E[exp(u)] ≠ exp(E[u]) (Jensen's inequality).</span> Under normal homoskedastic errors, multiply by the correction factor <strong>exp(s<sub>e</sub>² / 2)</strong>. <strong>Duan's smearing estimator</strong> offers a nonparametric alternative: ŷ = exp(ln̂ y) × (1/n) Σ exp(û<sub>i</sub>). Either way, naive exponentiation is biased — and the bias grows with the variance of ln y.",
+    "widget.retransform.howto":      "<li><strong>Toggle Compare both / Naive only / Corrected only.</strong></li>\n      <li><strong>Read the smearing factor</strong> in the stat cards.</li>\n      <li><strong>Compare the Actual, Naive, and Corrected means</strong> — the corrected version should be close to actual.</li>",
+    "widget.retransform.ctrl.method.label":          "Prediction method",
+    "widget.retransform.ctrl.method.opt.both":       "Compare both",
+    "widget.retransform.ctrl.method.opt.naive":      "Naive only",
+    "widget.retransform.ctrl.method.opt.corrected":  "Corrected only",
+    "widget.retransform.stat.actual":    "Actual mean",
+    "widget.retransform.stat.naive":     "Naive mean",
+    "widget.retransform.stat.corrected": "Corrected mean",
+    "widget.retransform.stat.smearing":  "Smearing factor",
+    "widget.retransform.bar.actual":     "Actual Mean",
+    "widget.retransform.bar.naive":      "Naive exp(ŷ)",
+    "widget.retransform.bar.corrected":  "Corrected",
+    "widget.retransform.chart.yaxis":    "Mean Earnings ($)",
+    "widget.retransform.try":         "<li><strong>Start in Compare both.</strong> The naive bar underpredicts actual earnings by ~$9,500 (~18%). <em>That's the Jensen's-inequality gap that silently contaminates every uncorrected log-model forecast.</em></li>\n      <li><strong>Read the smearing factor (exp(σ²/2) ≈ 1.18).</strong> <em>Multiply every naive prediction by 1.18 to remove the downward bias — a one-line fix that restores unbiased level predictions.</em></li>\n      <li><strong>Note the small residual gap ($55,501 vs $56,369 actual).</strong> <em>The normal-based correction is approximate when errors aren't exactly Gaussian — Duan's nonparametric smearing is the fallback when you don't want to assume normality.</em></li>",
+    "widget.retransform.takeaway":    "<strong>Take-away:</strong> Exponentiating log-model predictions without a smearing correction systematically underpredicts the mean — a bias that only vanishes when error variance is zero. <a href=\"../../book/_book/notebooks_quarto/ch15_Regression_with_Transformed_Variables.html#retransformation-bias-and-prediction\" target=\"_blank\" rel=\"noopener\">Read §15.6 in the chapter →</a>",
+
+    // ---- Widget 6: Residual Distribution ----
+    "widget.residuals.heading":    "Residual Distribution: Levels vs. Log",
+    "widget.residuals.motivation": "OLS inference assumes residuals are roughly normal. <em>Are they?</em> One histogram decides whether you should be regressing on y or on ln y.",
+    "widget.residuals.kc":         "<span class=\"kc-title\">Choosing between levels and logs is partly about which specification produces better-behaved residuals.</span> <strong>Right-skewed residuals</strong> (from a levels model on skewed y) suggest a log transformation would help — the OLS standard errors, t-tests, and p-values rely on residuals being approximately normal. The <strong>skewness statistic</strong> quantifies the asymmetry: closer to 0 is better. You can't compare R² across the two specifications (different dependent variables), but you can compare residual shapes directly.",
+    "widget.residuals.howto":      "<li><strong>Toggle Levels residuals vs Log residuals.</strong></li>\n      <li><strong>Watch the skewness stat card</strong> — it measures asymmetry numerically.</li>\n      <li><strong>Compare histogram shapes</strong> — normal means roughly symmetric with thin tails.</li>",
+    "widget.residuals.ctrl.model.label":      "Model",
+    "widget.residuals.ctrl.model.opt.levels": "Levels residuals",
+    "widget.residuals.ctrl.model.opt.log":    "Log residuals",
+    "widget.residuals.legend.residuals":      "Residuals",
+    "widget.residuals.chart.xaxis.levels":    "Residual ($)",
+    "widget.residuals.chart.xaxis.log":       "Residual (log)",
+    "widget.residuals.chart.yaxis":           "Count",
+    "widget.residuals.annotation.skew":       "Skewness = {skew}",
+    "widget.residuals.try":         "<li><strong>Stay on Levels residuals.</strong> The histogram has a long right tail — large positive residuals (underpredictions of high earners). <em>A strong signal that the normality assumption is broken and the standard errors lie.</em></li>\n      <li><strong>Switch to Log residuals.</strong> The distribution becomes visibly symmetric and the skewness drops. <em>Logging y pulls the tail back and delivers residuals the OLS formulas actually assume.</em></li>\n      <li><strong>Conclude.</strong> <em>This is the residual-shape reason economists default to ln(earnings) — inference is only valid if the residuals cooperate.</em></li>",
+    "widget.residuals.takeaway":    "<strong>Take-away:</strong> The right specification is partly a residual-diagnostic question — logs produce cleaner, more symmetric residuals when y is skewed, and cleaner residuals mean honest t-tests and CIs. <a href=\"../../book/_book/notebooks_quarto/ch15_Regression_with_Transformed_Variables.html#logarithmic-transformations\" target=\"_blank\" rel=\"noopener\">Read §15.2 in the chapter →</a>",
+
+    // ---- Code summary ----
+    "code.heading":    "Code Summary",
+    "code.motivation": "You've explored the key concepts interactively — now reproduce them in code. These self-contained blocks cover everything you practiced above. Pick your language, copy the code, and run it.",
+    "code.tab.python": "Python",
+    "code.tab.stata":  "Stata",
+    "code.tab.r":      "R",
+    "code.copy.idle":  "Copy code",
+    "code.copy.done":  "Copied!",
+    "code.colab":      "Open empty Colab notebook &rarr;",
+    "code.note.stata": "Paste into your Stata do-file editor",
+    "code.note.r":     "Paste into your R console or RStudio",
+
+    // ---- Footer ----
+    "footer.text":      "Part of <a href=\"https://quarcs-lab.github.io/metricsai/book/_book/index.html\"><strong>metricsAI</strong></a> · Chapter 15: Regression with Transformed Variables · by Carlos Mendez · <a href=\"https://github.com/quarcs-lab/metricsai\">GitHub</a>",
+    "footer.dataset":   "Data: AED_EARNINGS_COMPLETE.DTA (872 full-time workers aged 25–65, 2000)",
+    "footer.scrolltop": "↑ Back to top"
+  },
+  es: {
+    "meta.title": "Capítulo 15 — Regresión con variables transformadas · metricsAI",
+
+    "header.badge": "Capítulo 15 de 18 · Tablero interactivo",
+    "header.title": "Regresión con variables transformadas",
+    "header.subtitle": "Explora transformaciones logarítmicas, modelos cuadráticos, coeficientes estandarizados, efectos de interacción y sesgo de retransformación — usando el mismo conjunto de datos de ingresos del libro.",
+
+    "theme.dark":  "Oscuro",
+    "theme.light": "Claro",
+
+    "nav.logtransform":  "Transformación log",
+    "nav.quadratic":     "Cuadrática y punto de inflexión",
+    "nav.standardized":  "Coefs. estandarizados",
+    "nav.interactionme": "Efectos de interacción",
+    "nav.retransform":   "Retransformación",
+    "nav.residuals":     "Distribución de residuos",
+    "nav.code":          "Código",
+
+    "common.reset":      "↺ Reiniciar",
+    "common.tryTitle":   "Pruébalo",
+    "common.howtoTitle": "Qué puedes hacer aquí",
+    "common.takeaway":   "Para recordar:",
+
+    "stat.r2":       "R²",
+    "stat.mean":     "Media",
+    "stat.sd":       "Desv. est.",
+    "stat.skewness": "Asimetría",
+
+    // ---- Widget 1: Log Transformation Explorer ----
+    "widget.logtransform.heading":    "Explorador de transformación logarítmica",
+    "widget.logtransform.motivation": "Mismos datos, mismos regresores — pero una especificación reporta \"$5,737 por año de escuela\" y la otra reporta \"10% por año\". <em>¿Cuál respuesta es la correcta?</em>",
+    "widget.logtransform.kc":         "<span class=\"kc-title\">En un modelo log-lineal (ln y = β₁ + β₂x), β₂ es una semielasticidad: un aumento de 1 unidad en x se asocia con un cambio porcentual de 100 × β₂ en y.</span> En un <strong>modelo log-log</strong> (ln y = β₁ + β₂ ln x), β₂ es una elasticidad — un aumento del 1% en x da un cambio del β₂% en y. <strong>No puedes</strong> comparar directamente R² entre modelos con diferentes variables dependientes (y vs ln y); en su lugar compara por precisión de predicción, criterios de información o plausibilidad económica (Concepto Clave 15.2).",
+    "widget.logtransform.howto":      "<li><strong>Alterna entre Niveles y Log-lineal</strong> para ver cómo cambian el coeficiente y la interpretación.</li>\n      <li><strong>Lee la tarjeta de interpretación</strong> — traduce el coeficiente a lenguaje sencillo.</li>\n      <li><strong>Compara las líneas ajustadas en el diagrama de dispersión</strong> — observa dónde falla cada especificación.</li>",
+    "widget.logtransform.ctrl.model.label":     "Especificación del modelo",
+    "widget.logtransform.ctrl.model.opt.levels": "Niveles ($ por año)",
+    "widget.logtransform.ctrl.model.opt.log":    "Log-lineal (% por año)",
+    "widget.logtransform.stat.coef":   "Coef. educación",
+    "widget.logtransform.stat.interp": "Interpretación",
+    "widget.logtransform.stat.t":      "Estadístico t",
+    "widget.logtransform.unit.yr":     "año",
+    "widget.logtransform.legend.data": "Datos",
+    "widget.logtransform.legend.fit":  "Línea ajustada",
+    "widget.logtransform.chart.xaxis":        "Años de educación",
+    "widget.logtransform.chart.yaxis.levels": "Ingresos ($)",
+    "widget.logtransform.chart.yaxis.log":    "ln(Ingresos)",
+    "widget.logtransform.chart.hover.educ":   "Educ",
+    "widget.logtransform.try":        "<li><strong>Empieza en Niveles.</strong> Cada año adicional de educación añade ≈ $5,737 a los ingresos. Cambia a Log-lineal. Cada año adicional añade ≈ 10%. <em>Dólares-por-año es concreto en la media muestral pero engañoso en los extremos; porcentaje-por-año escala naturalmente entre niveles de ingreso.</em></li>\n      <li><strong>Compara R² entre las dos especificaciones.</strong> El log ajusta mejor (0.176 vs 0.103). <em>Los ingresos están sesgados a la derecha; tomar log comprime la cola para que la línea de regresión ajuste a todos, no solo al medio.</em></li>\n      <li><strong>Inspecciona las líneas ajustadas en el diagrama de dispersión.</strong> La línea en niveles falla mucho con los altos ingresos; la línea log es visiblemente más pareja. <em>La forma de los residuos, no solo R², es lo que decide qué forma funcional es la correcta.</em></li>",
+    "widget.logtransform.takeaway":   "<strong>Para recordar:</strong> Las transformaciones logarítmicas convierten preguntas de cambio en dólares en preguntas de cambio porcentual — la elección correcta cuando el resultado está sesgado y depende de la escala. <a href=\"../../book/_book/notebooks_quarto/ch15_Regression_with_Transformed_Variables.html#logarithmic-transformations\" target=\"_blank\" rel=\"noopener\">Lee §15.2 en el capítulo →</a>",
+
+    // ---- Widget 2: Quadratic Model & Turning Point ----
+    "widget.quadratic.heading":    "Modelo cuadrático y punto de inflexión",
+    "widget.quadratic.motivation": "Los ingresos suben con la edad — <em>hasta cierto punto</em>. ¿Cuándo deja de subir? Un término cuadrático responde con una sola fórmula cerrada.",
+    "widget.quadratic.kc":         "<span class=\"kc-title\">Un modelo cuadrático y = β₁ + β₂x + β₃x² captura relaciones no lineales con un punto de inflexión en x* = −β₂ / (2β₃).</span> El efecto marginal <strong>EM = β₂ + 2β₃x</strong> varía con x — a diferencia de los modelos lineales donde es constante. Si <strong>β₃ &lt; 0</strong>, la forma es una U invertida (los ingresos alcanzan su pico a cierta edad). Siempre prueba la significancia conjunta de x y x² con una <strong>prueba F</strong>, porque las pruebas t individuales sobre el término cuadrático son engañosas cuando x y x² están altamente correlacionadas (Concepto Clave 15.4).",
+    "widget.quadratic.howto":      "<li><strong>Alterna entre Lineal y Cuadrático</strong> para comparar los dos ajustes.</li>\n      <li><strong>Desliza la edad</strong> para calcular el efecto marginal en cualquier punto del ciclo de vida.</li>\n      <li><strong>Lee el punto de inflexión</strong> — donde el efecto marginal cruza el cero.</li>",
+    "widget.quadratic.ctrl.model.label":      "Modelo",
+    "widget.quadratic.ctrl.model.opt.linear":    "Lineal",
+    "widget.quadratic.ctrl.model.opt.quadratic": "Cuadrático",
+    "widget.quadratic.ctrl.age.label":         "Evaluar efecto marginal a la edad",
+    "widget.quadratic.stat.tp":     "Punto de inflexión",
+    "widget.quadratic.stat.me":     "Efecto marginal",
+    "widget.quadratic.tp.linear":   "lineal",
+    "widget.quadratic.unit.yr":     "año",
+    "widget.quadratic.unit.yrs":    "años",
+    "widget.quadratic.slider.age":  "Edad = {age}",
+    "widget.quadratic.legend.data":    "Datos",
+    "widget.quadratic.legend.linFit":  "Ajuste lineal",
+    "widget.quadratic.legend.quadFit": "Ajuste cuadrático",
+    "widget.quadratic.legend.peak":    "Pico: edad {age}",
+    "widget.quadratic.legend.meAt":    "EM a la edad {age}",
+    "widget.quadratic.chart.xaxis":      "Edad",
+    "widget.quadratic.chart.yaxis":      "Ingresos ($)",
+    "widget.quadratic.chart.hover.age":  "Edad",
+    "widget.quadratic.try":         "<li><strong>Cambia a Lineal.</strong> La línea sube monótonamente, perdiéndose la caída en edades mayores. Vuelve a Cuadrático. <em>La curva alcanza su pico en la mediana edad y baja — la forma que el lineal nunca puede capturar.</em></li>\n      <li><strong>Desliza la edad al punto de inflexión (~49.5).</strong> El efecto marginal cruza el cero. <em>Un año más de edad ni ayuda ni perjudica — esa es la inflexión de la curva en U invertida.</em></li>\n      <li><strong>Desliza la edad a 60.</strong> El efecto marginal es negativo. <em>Pasado el pico, la edad adicional cuesta ingresos — el clásico resultado del ciclo de vida cuantificado.</em></li>",
+    "widget.quadratic.takeaway":    "<strong>Para recordar:</strong> Un solo término cuadrático convierte una línea monótona en una U invertida con un punto de inflexión nombrado — y su efecto marginal tiene una fórmula específica para cada edad. <a href=\"../../book/_book/notebooks_quarto/ch15_Regression_with_Transformed_Variables.html#polynomial-regression-quadratic-models\" target=\"_blank\" rel=\"noopener\">Lee §15.3 en el capítulo →</a>",
+
+    // ---- Widget 3: Standardized Coefficients ----
+    "widget.standardized.heading":    "Coeficientes estandarizados",
+    "widget.standardized.motivation": "¿Cuál predictor importa <em>más</em> — educación en años, género como 0/1, o log-horas? Los coeficientes crudos no pueden responder; los <em>estandarizados</em> sí.",
+    "widget.standardized.kc":         "<span class=\"kc-title\">Los coeficientes estandarizados (beta) β* = β × (s<sub>x</sub> / s<sub>y</sub>) miden efectos en unidades de desviación estándar.</span> Un aumento de una desviación estándar en x se asocia con un <strong>cambio de β* desviaciones estándar en y</strong>. Esto te permite comparar variables en la <em>misma</em> escala sin importar sus unidades originales — un ranking genuino de importancia explicativa dentro de una sola regresión.",
+    "widget.standardized.howto":      "<li><strong>Alterna entre Coeficientes crudos y Estandarizados (β*).</strong></li>\n      <li><strong>Compara las longitudes de las barras</strong> en los dos modos — el ranking suele cambiar.</li>\n      <li><strong>Lee la etiqueta completa del coeficiente</strong> para la interpretación.</li>",
+    "widget.standardized.ctrl.display.label":     "Visualización",
+    "widget.standardized.ctrl.display.opt.raw":   "Coeficientes crudos",
+    "widget.standardized.ctrl.display.opt.std":   "Estandarizados (β*)",
+    "widget.standardized.var.education": "Educación",
+    "widget.standardized.var.age":       "Edad",
+    "widget.standardized.var.agesq":     "Edad²",
+    "widget.standardized.var.gender":    "Género",
+    "widget.standardized.var.lnhours":   "ln(Horas)",
+    "widget.standardized.chart.xaxis.std": "Coeficiente estandarizado (β*)",
+    "widget.standardized.chart.xaxis.raw": "Coeficiente crudo",
+    "widget.standardized.try":        "<li><strong>Empieza en Crudo.</strong> ln-horas tiene el mayor coeficiente (0.94); género es pequeño (−0.19). <em>Pero estos números crudos no son comparables — descansan sobre escalas de unidades diferentes y varianzas diferentes.</em></li>\n      <li><strong>Cambia a Estandarizado.</strong> Educación lidera (β* = 0.40); ln-horas baja a 0.23. <em>La estandarización revela que log-horas tiene baja varianza en esta muestra, así que su liderazgo en coeficiente crudo era engañoso.</em></li>\n      <li><strong>Lee el coeficiente estandarizado de género (β* ≈ −0.13).</strong> <em>Pequeño en unidades DE, pero todavía ~$7,000 en la media muestral — \"pequeño en β*\" no es lo mismo que \"sin importancia en dólares\".</em></li>",
+    "widget.standardized.takeaway":   "<strong>Para recordar:</strong> Los coeficientes estandarizados te permiten comparar predictores con una sola vara de medir — pero siempre verifica contra las unidades en dólares (o crudas) cuando hay decisiones prácticas en juego. <a href=\"../../book/_book/notebooks_quarto/ch15_Regression_with_Transformed_Variables.html#standardized-variables\" target=\"_blank\" rel=\"noopener\">Lee §15.4 en el capítulo →</a>",
+
+    // ---- Widget 4: Interaction Marginal Effects ----
+    "widget.interactionme.heading":    "Efectos marginales de interacción",
+    "widget.interactionme.motivation": "¿Un año más de escolaridad paga lo mismo a los 25 que a los 55? <em>Un término de interacción permite que los datos digan \"no\".</em>",
+    "widget.interactionme.kc":         "<span class=\"kc-title\">Con un término de interacción x × z, el efecto marginal de x depende de z: EM<sub>x</sub> = β₂ + β₄z.</span> El efecto de una variable cambia con el nivel de otra — se relaja el supuesto de efecto lineal-constante. Los coeficientes individuales sobre x y x × z pueden parecer no significativos debido a la multicolinealidad entre ellos, así que siempre usa <strong>pruebas F conjuntas</strong> para evaluar la significancia general.",
+    "widget.interactionme.howto":      "<li><strong>Desliza la edad</strong> de 25 a 65.</li>\n      <li><strong>Observa cómo se actualiza el efecto marginal a esta edad</strong> — es la fórmula β<sub>educ</sub> + β<sub>educ×edad</sub> × edad.</li>\n      <li><strong>Sigue la línea EM en el gráfico</strong> — su pendiente es el coeficiente de interacción.</li>",
+    "widget.interactionme.ctrl.age.label":  "Edad",
+    "widget.interactionme.stat.educ":  "Coef. educación",
+    "widget.interactionme.stat.inter": "Coef. interacción",
+    "widget.interactionme.stat.me":    "EM a esta edad",
+    "widget.interactionme.unit.yr":    "año",
+    "widget.interactionme.unit.yrxyr":  "año×año",
+    "widget.interactionme.slider.age": "Edad = {age}",
+    "widget.interactionme.legend.meEduc": "EM de educación",
+    "widget.interactionme.legend.atAge":  "A la edad {age}",
+    "widget.interactionme.chart.xaxis":   "Edad",
+    "widget.interactionme.chart.yaxis":   "Efecto marginal de educación ($/año)",
+    "widget.interactionme.try":        "<li><strong>Desliza a la edad 25, luego a la 55.</strong> El EM sube de ~$5,241 a ~$6,112. <em>El coeficiente de interacción es de unos $29/año-de-edad, así que los trabajadores con más experiencia ganan más por cada año adicional de escolaridad.</em></li>\n      <li><strong>Observa cómo la línea de efecto marginal sube.</strong> <em>Educación y experiencia son complementarias — la escolaridad rinde más cuando se combina con más experiencia laboral.</em></li>\n      <li><strong>Haz la aritmética.</strong> De la edad 25 a la 55 son 30 años × $29 = ~$871 de retorno extra por año de educación. <em>Modesto en términos absolutos, pero económicamente significativo a lo largo de una carrera.</em></li>",
+    "widget.interactionme.takeaway":   "<strong>Para recordar:</strong> Las interacciones convierten el efecto marginal constante en uno que varía con la edad — y siempre verifica su bloque con una prueba F conjunta, ya que x y x × z son altamente colineales. <a href=\"../../book/_book/notebooks_quarto/ch15_Regression_with_Transformed_Variables.html#interaction-terms-and-marginal-effects\" target=\"_blank\" rel=\"noopener\">Lee §15.5 en el capítulo →</a>",
+
+    // ---- Widget 5: Retransformation Bias ----
+    "widget.retransform.heading":    "Sesgo de retransformación",
+    "widget.retransform.motivation": "Regresiona en logs, exponencia de regreso, publica la predicción. <em>Equivocada por un 18%</em> — a menos que conozcas el truco del smearing.",
+    "widget.retransform.kc":         "<span class=\"kc-title\">La predicción ingenua exp(ln̂ y) subestima sistemáticamente E[y|x] porque E[exp(u)] ≠ exp(E[u]) (desigualdad de Jensen).</span> Bajo errores normales y homocedásticos, multiplica por el factor de corrección <strong>exp(s<sub>e</sub>² / 2)</strong>. El <strong>estimador de smearing de Duan</strong> ofrece una alternativa no paramétrica: ŷ = exp(ln̂ y) × (1/n) Σ exp(û<sub>i</sub>). De cualquier forma, la exponenciación ingenua está sesgada — y el sesgo crece con la varianza de ln y.",
+    "widget.retransform.howto":      "<li><strong>Alterna entre Comparar ambos / Solo ingenuo / Solo corregido.</strong></li>\n      <li><strong>Lee el factor de smearing</strong> en las tarjetas de estadísticas.</li>\n      <li><strong>Compara las medias Real, Ingenua y Corregida</strong> — la versión corregida debería estar cerca de la real.</li>",
+    "widget.retransform.ctrl.method.label":          "Método de predicción",
+    "widget.retransform.ctrl.method.opt.both":       "Comparar ambos",
+    "widget.retransform.ctrl.method.opt.naive":      "Solo ingenuo",
+    "widget.retransform.ctrl.method.opt.corrected":  "Solo corregido",
+    "widget.retransform.stat.actual":    "Media real",
+    "widget.retransform.stat.naive":     "Media ingenua",
+    "widget.retransform.stat.corrected": "Media corregida",
+    "widget.retransform.stat.smearing":  "Factor de smearing",
+    "widget.retransform.bar.actual":     "Media real",
+    "widget.retransform.bar.naive":      "Ingenua exp(ŷ)",
+    "widget.retransform.bar.corrected":  "Corregida",
+    "widget.retransform.chart.yaxis":    "Ingresos medios ($)",
+    "widget.retransform.try":         "<li><strong>Empieza en Comparar ambos.</strong> La barra ingenua subestima los ingresos reales en ~$9,500 (~18%). <em>Esa es la brecha de la desigualdad de Jensen que silenciosamente contamina cada pronóstico no corregido de un modelo log.</em></li>\n      <li><strong>Lee el factor de smearing (exp(σ²/2) ≈ 1.18).</strong> <em>Multiplica cada predicción ingenua por 1.18 para eliminar el sesgo a la baja — un arreglo de una línea que restaura predicciones insesgadas en niveles.</em></li>\n      <li><strong>Nota la pequeña brecha residual ($55,501 vs $56,369 real).</strong> <em>La corrección basada en la normal es aproximada cuando los errores no son exactamente gaussianos — el smearing no paramétrico de Duan es el respaldo cuando no quieres asumir normalidad.</em></li>",
+    "widget.retransform.takeaway":    "<strong>Para recordar:</strong> Exponenciar las predicciones de un modelo log sin una corrección de smearing subestima sistemáticamente la media — un sesgo que solo desaparece cuando la varianza del error es cero. <a href=\"../../book/_book/notebooks_quarto/ch15_Regression_with_Transformed_Variables.html#retransformation-bias-and-prediction\" target=\"_blank\" rel=\"noopener\">Lee §15.6 en el capítulo →</a>",
+
+    // ---- Widget 6: Residual Distribution ----
+    "widget.residuals.heading":    "Distribución de residuos: niveles vs. log",
+    "widget.residuals.motivation": "La inferencia MCO supone que los residuos son aproximadamente normales. <em>¿Lo son?</em> Un histograma decide si deberías estar regresionando sobre y o sobre ln y.",
+    "widget.residuals.kc":         "<span class=\"kc-title\">Elegir entre niveles y logs es en parte sobre cuál especificación produce residuos mejor comportados.</span> Los <strong>residuos sesgados a la derecha</strong> (de un modelo en niveles sobre y sesgada) sugieren que una transformación log ayudaría — los errores estándar, las pruebas t y los valores p de MCO dependen de que los residuos sean aproximadamente normales. La <strong>estadística de asimetría</strong> cuantifica la asimetría: más cerca de 0 es mejor. No puedes comparar R² entre las dos especificaciones (variables dependientes diferentes), pero sí puedes comparar las formas de los residuos directamente.",
+    "widget.residuals.howto":      "<li><strong>Alterna entre Residuos en niveles y Residuos en log.</strong></li>\n      <li><strong>Observa la tarjeta de asimetría</strong> — mide la asimetría numéricamente.</li>\n      <li><strong>Compara las formas de los histogramas</strong> — normal significa aproximadamente simétrico con colas delgadas.</li>",
+    "widget.residuals.ctrl.model.label":      "Modelo",
+    "widget.residuals.ctrl.model.opt.levels": "Residuos en niveles",
+    "widget.residuals.ctrl.model.opt.log":    "Residuos en log",
+    "widget.residuals.legend.residuals":      "Residuos",
+    "widget.residuals.chart.xaxis.levels":    "Residuo ($)",
+    "widget.residuals.chart.xaxis.log":       "Residuo (log)",
+    "widget.residuals.chart.yaxis":           "Conteo",
+    "widget.residuals.annotation.skew":       "Asimetría = {skew}",
+    "widget.residuals.try":         "<li><strong>Quédate en Residuos en niveles.</strong> El histograma tiene una cola larga a la derecha — residuos positivos grandes (subpredicciones de altos ingresos). <em>Una señal fuerte de que el supuesto de normalidad está roto y los errores estándar mienten.</em></li>\n      <li><strong>Cambia a Residuos en log.</strong> La distribución se vuelve visiblemente simétrica y la asimetría cae. <em>Tomar log de y jala la cola hacia atrás y entrega residuos que las fórmulas de MCO realmente suponen.</em></li>\n      <li><strong>Concluye.</strong> <em>Esta es la razón de forma residual por la que los economistas usan ln(ingresos) por defecto — la inferencia solo es válida si los residuos cooperan.</em></li>",
+    "widget.residuals.takeaway":    "<strong>Para recordar:</strong> La especificación correcta es en parte una pregunta de diagnóstico residual — los logs producen residuos más limpios y simétricos cuando y está sesgada, y residuos más limpios significan pruebas t e IC honestos. <a href=\"../../book/_book/notebooks_quarto/ch15_Regression_with_Transformed_Variables.html#logarithmic-transformations\" target=\"_blank\" rel=\"noopener\">Lee §15.2 en el capítulo →</a>",
+
+    // ---- Code summary ----
+    "code.heading":    "Resumen de código",
+    "code.motivation": "Has explorado los conceptos clave de forma interactiva — ahora reprodúcelos en código. Estos bloques autosuficientes cubren todo lo que practicaste arriba. Elige tu lenguaje, copia el código y ejecútalo.",
+    "code.tab.python": "Python",
+    "code.tab.stata":  "Stata",
+    "code.tab.r":      "R",
+    "code.copy.idle":  "Copiar código",
+    "code.copy.done":  "¡Copiado!",
+    "code.colab":      "Abrir un cuaderno Colab vacío &rarr;",
+    "code.note.stata": "Pega esto en tu editor do-file de Stata",
+    "code.note.r":     "Pega esto en tu consola R o RStudio",
+
+    // ---- Footer ----
+    "footer.text":      "Parte de <a href=\"https://quarcs-lab.github.io/metricsai/book/_book/index.html\"><strong>metricsAI</strong></a> · Capítulo 15: Regresión con variables transformadas · por Carlos Mendez · <a href=\"https://github.com/quarcs-lab/metricsai\">GitHub</a>",
+    "footer.dataset":   "Datos: AED_EARNINGS_COMPLETE.DTA (872 trabajadores a tiempo completo de 25 a 65 años, 2000)",
+    "footer.scrolltop": "↑ Volver arriba"
+  }
+};
+
+function t(key, vars) {
+  const lang = window.__lang || I18N.defaultLang;
+  let s = (I18N[lang] && I18N[lang][key]) || I18N.en[key];
+  if (s === undefined) return key;
+  if (vars) {
+    for (const k in vars) s = s.split("{" + k + "}").join(String(vars[k]));
+  }
+  return s;
+}
+
+function applyLanguage(lang) {
+  if (lang !== "en" && lang !== "es") lang = I18N.defaultLang;
+  window.__lang = lang;
+  try { localStorage.setItem(I18N.storageKey, lang); } catch (e) {}
+  document.documentElement.lang = lang;
+  document.querySelectorAll("[data-i18n]").forEach(el => {
+    const key = el.getAttribute("data-i18n");
+    el.innerHTML = t(key);
+  });
+  const lbl = document.getElementById("siteLanguageLabel");
+  if (lbl) lbl.textContent = lang === "es" ? "ES" : "EN";
+  // Re-fire every widget renderer (Plotly + JS-injected callouts read via t()).
+  for (const key in window) {
+    if (key.indexOf("__rerender_") === 0 && typeof window[key] === "function") {
+      try { window[key](); } catch (e) {}
+    }
+  }
+}
+
+function toggleLanguage() {
+  applyLanguage((window.__lang || I18N.defaultLang) === "es" ? "en" : "es");
+}
+
+// Read persisted language BEFORE widgets render so first paint is in correct language.
+try {
+  const stored = localStorage.getItem(I18N.storageKey);
+  if (stored === "en" || stored === "es") window.__lang = stored;
+} catch (e) {}
+
 // ==================== HELPERS ====================
 var mean=function(a){var s=0;for(var i=0;i<a.length;i++)s+=a[i];return s/a.length;};
 function std(a,m){m=m!==undefined?m:mean(a);var s=0;for(var i=0;i<a.length;i++)s+=(a[i]-m)*(a[i]-m);return Math.sqrt(s/(a.length-1));}
@@ -940,7 +1408,7 @@ function skewness(a){var m=mean(a),s=std(a,m);if(s===0)return 0;var sum=0;for(va
 function linspace(a,b,n){var out=new Array(n);var step=(b-a)/(n-1);for(var i=0;i<n;i++)out[i]=a+i*step;return out;}
 function fmt(v,d){d=d!==undefined?d:2;if(v===null||v===undefined||isNaN(v))return"\u2014";return v.toFixed(d);}
 function fmtMoney(v){return v===null?"\u2014":"$"+Math.round(v).toLocaleString();}
-var THEME_KEY="metricsai-theme";
+const THEME_KEY = "darkMode"; // unified with index.html / tutors.html
 function getCSS(v){return getComputedStyle(document.documentElement).getPropertyValue(v).trim();}
 function themeColors(){return{text:getCSS("--text"),textSoft:getCSS("--text-soft"),grid:getCSS("--grid"),panel:getCSS("--panel"),cyan:getCSS("--accent"),purple:getCSS("--accent-2"),pink:getCSS("--accent-3")};}
 function baseLayout(o){var c=themeColors();return Object.assign({paper_bgcolor:"rgba(0,0,0,0)",plot_bgcolor:"rgba(0,0,0,0)",font:{family:"Inter, system-ui, sans-serif",color:c.text,size:12},margin:{l:56,r:18,t:30,b:46},xaxis:{gridcolor:c.grid,linecolor:c.grid,zerolinecolor:c.grid,tickfont:{color:c.textSoft}},yaxis:{gridcolor:c.grid,linecolor:c.grid,zerolinecolor:c.grid,tickfont:{color:c.textSoft}},hoverlabel:{bgcolor:c.panel,bordercolor:c.grid,font:{color:c.text}},legend:{font:{color:c.text},bgcolor:"rgba(0,0,0,0)"}},o||{});}
@@ -960,14 +1428,14 @@ function bindSlider(id,vid,ffn,rfn){var el=document.getElementById(id);var ve=do
     var yData=mode==="levels"?earn:lnearn;
     var ei=m.vars.indexOf("education");
     document.getElementById("lt-stat-coef").textContent=mode==="levels"?fmtMoney(m.coef[ei]):fmt(m.coef[ei],4);
-    document.getElementById("lt-stat-interp").textContent=mode==="levels"?fmtMoney(m.coef[ei])+"/yr":fmt(m.coef[ei]*100,1)+"%/yr";
+    document.getElementById("lt-stat-interp").textContent=mode==="levels"?fmtMoney(m.coef[ei])+"/"+t("widget.logtransform.unit.yr"):fmt(m.coef[ei]*100,1)+"%/"+t("widget.logtransform.unit.yr");
     document.getElementById("lt-stat-r2").textContent=fmt(m.r2,4);
     document.getElementById("lt-stat-t").textContent=fmt(m.t[ei],2);
-    var traces=[{x:ed,y:yData,type:"scatter",mode:"markers",marker:{color:c.cyan+"33",size:4},name:"Data",hovertemplate:"Educ: %{x}<br>"+( mode==="levels"?"$%{y:,.0f}":"%{y:.3f}")}];
+    var traces=[{x:ed,y:yData,type:"scatter",mode:"markers",marker:{color:c.cyan+"33",size:4},name:t("widget.logtransform.legend.data"),hovertemplate:t("widget.logtransform.chart.hover.educ")+": %{x}<br>"+( mode==="levels"?"$%{y:,.0f}":"%{y:.3f}")}];
     var xr=[0,22];
     var yfit=xr.map(function(x){return m.coef[0]+m.coef[ei]*x;});
-    traces.push({x:xr,y:yfit,type:"scatter",mode:"lines",line:{color:c.pink,width:3},name:"Fitted line"});
-    var layout=baseLayout({xaxis:{title:"Years of Education",range:[0,22],gridcolor:c.grid,linecolor:c.grid,zerolinecolor:c.grid,tickfont:{color:c.textSoft}},yaxis:{title:mode==="levels"?"Earnings ($)":"ln(Earnings)",gridcolor:c.grid,linecolor:c.grid,zerolinecolor:c.grid,tickfont:{color:c.textSoft}},showlegend:true,legend:{x:0.02,y:0.98,xanchor:"left",yanchor:"top",font:{color:c.text},bgcolor:"rgba(0,0,0,0)"}});
+    traces.push({x:xr,y:yfit,type:"scatter",mode:"lines",line:{color:c.pink,width:3},name:t("widget.logtransform.legend.fit")});
+    var layout=baseLayout({xaxis:{title:t("widget.logtransform.chart.xaxis"),range:[0,22],gridcolor:c.grid,linecolor:c.grid,zerolinecolor:c.grid,tickfont:{color:c.textSoft}},yaxis:{title:mode==="levels"?t("widget.logtransform.chart.yaxis.levels"):t("widget.logtransform.chart.yaxis.log"),gridcolor:c.grid,linecolor:c.grid,zerolinecolor:c.grid,tickfont:{color:c.textSoft}},showlegend:true,legend:{x:0.02,y:0.98,xanchor:"left",yanchor:"top",font:{color:c.text},bgcolor:"rgba(0,0,0,0)"}});
     Plotly.react(chartEl,traces,layout,PLOTLY_CONFIG);
   }
   bindToggles("lt-model",render);
@@ -988,28 +1456,30 @@ function bindSlider(id,vid,ffn,rfn){var el=document.getElementById(id);var ve=do
     var me;
     if(isQuad){me=m.coef[1]+2*m.coef[2]*evalAge;}
     else{me=m.coef[1];}
-    document.getElementById("quad-stat-tp").textContent=tp!==null?fmt(tp,1)+" yrs":"\u2014 (linear)";
-    document.getElementById("quad-stat-me").textContent=fmtMoney(me)+"/yr";
+    document.getElementById("quad-stat-tp").textContent=tp!==null?fmt(tp,1)+" "+t("widget.quadratic.unit.yrs"):"\u2014 ("+t("widget.quadratic.tp.linear")+")";
+    document.getElementById("quad-stat-me").textContent=fmtMoney(me)+"/"+t("widget.quadratic.unit.yr");
     document.getElementById("quad-stat-r2").textContent=fmt(m.r2,4);
-    var traces=[{x:ages,y:earn,type:"scatter",mode:"markers",marker:{color:c.cyan+"33",size:4},name:"Data",hovertemplate:"Age: %{x}<br>$%{y:,.0f}"}];
+    // Update the slider value label in current language
+    var qav=document.getElementById("quad-age-val");if(qav)qav.textContent=t("widget.quadratic.slider.age",{age:evalAge});
+    var traces=[{x:ages,y:earn,type:"scatter",mode:"markers",marker:{color:c.cyan+"33",size:4},name:t("widget.quadratic.legend.data"),hovertemplate:t("widget.quadratic.chart.hover.age")+": %{x}<br>$%{y:,.0f}"}];
     var xs=linspace(25,65,200);
     var ys;
     if(isQuad){ys=xs.map(function(x){return m.coef[0]+m.coef[1]*x+m.coef[2]*x*x;});}
     else{ys=xs.map(function(x){return m.coef[0]+m.coef[1]*x;});}
-    traces.push({x:xs,y:ys,type:"scatter",mode:"lines",line:{color:c.pink,width:3},name:isQuad?"Quadratic fit":"Linear fit"});
+    traces.push({x:xs,y:ys,type:"scatter",mode:"lines",line:{color:c.pink,width:3},name:isQuad?t("widget.quadratic.legend.quadFit"):t("widget.quadratic.legend.linFit")});
     var shapes=[];
     if(isQuad&&tp>=25&&tp<=65){
       var ytp=m.coef[0]+m.coef[1]*tp+m.coef[2]*tp*tp;
-      traces.push({x:[tp],y:[ytp],type:"scatter",mode:"markers",marker:{color:c.purple,size:12,symbol:"diamond",line:{color:"white",width:2}},name:"Peak: age "+fmt(tp,1)});
+      traces.push({x:[tp],y:[ytp],type:"scatter",mode:"markers",marker:{color:c.purple,size:12,symbol:"diamond",line:{color:"white",width:2}},name:t("widget.quadratic.legend.peak",{age:fmt(tp,1)})});
     }
     // Evaluate point
     var yEval=isQuad?m.coef[0]+m.coef[1]*evalAge+m.coef[2]*evalAge*evalAge:m.coef[0]+m.coef[1]*evalAge;
-    traces.push({x:[evalAge],y:[yEval],type:"scatter",mode:"markers",marker:{color:c.pink,size:10,line:{color:"white",width:2}},name:"ME at age "+evalAge,showlegend:false});
-    var layout=baseLayout({xaxis:{title:"Age",range:[23,67],gridcolor:c.grid,linecolor:c.grid,zerolinecolor:c.grid,tickfont:{color:c.textSoft}},yaxis:{title:"Earnings ($)",gridcolor:c.grid,linecolor:c.grid,zerolinecolor:c.grid,tickfont:{color:c.textSoft}},showlegend:true,legend:{x:0.02,y:0.98,xanchor:"left",yanchor:"top",font:{color:c.text},bgcolor:"rgba(0,0,0,0)"}});
+    traces.push({x:[evalAge],y:[yEval],type:"scatter",mode:"markers",marker:{color:c.pink,size:10,line:{color:"white",width:2}},name:t("widget.quadratic.legend.meAt",{age:evalAge}),showlegend:false});
+    var layout=baseLayout({xaxis:{title:t("widget.quadratic.chart.xaxis"),range:[23,67],gridcolor:c.grid,linecolor:c.grid,zerolinecolor:c.grid,tickfont:{color:c.textSoft}},yaxis:{title:t("widget.quadratic.chart.yaxis"),gridcolor:c.grid,linecolor:c.grid,zerolinecolor:c.grid,tickfont:{color:c.textSoft}},showlegend:true,legend:{x:0.02,y:0.98,xanchor:"left",yanchor:"top",font:{color:c.text},bgcolor:"rgba(0,0,0,0)"}});
     Plotly.react(chartEl,traces,layout,PLOTLY_CONFIG);
   }
   bindToggles("quad-model",render);
-  bindSlider("quad-age","quad-age-val",function(v){return "Age = "+v;},render);
+  bindSlider("quad-age","quad-age-val",function(v){return t("widget.quadratic.slider.age",{age:v});},render);
   window.__rerender_quadratic=render;
   render();
 })();
@@ -1017,9 +1487,15 @@ function bindSlider(id,vid,ffn,rfn){var el=document.getElementById(id);var ve=do
 // ==================== WIDGET 3: Standardized Coefficients ====================
 (function(){
   var chartEl=document.getElementById("chart-standardized");
-  var labels={"education":"Education","age":"Age","agesq":"Age²","gender":"Gender","lnhours":"ln(Hours)"};
   function render(){
     var c=themeColors();
+    var labels={
+      "education":t("widget.standardized.var.education"),
+      "age":t("widget.standardized.var.age"),
+      "agesq":t("widget.standardized.var.agesq"),
+      "gender":t("widget.standardized.var.gender"),
+      "lnhours":t("widget.standardized.var.lnhours")
+    };
     var isStd=getActiveVal("std-display")==="std";
     var items=DATA.standardized.slice().sort(function(a,b){
       var va=isStd?Math.abs(a.std):Math.abs(a.raw);
@@ -1031,7 +1507,7 @@ function bindSlider(id,vid,ffn,rfn){var el=document.getElementById(id);var ve=do
     var colors=vals.map(function(v){return v>=0?c.cyan+"77":c.pink+"77";});
     var borders=vals.map(function(v){return v>=0?c.cyan:c.pink;});
     var traces=[{y:names,x:vals,type:"bar",orientation:"h",marker:{color:colors,line:{color:borders,width:2}},text:vals.map(function(v){return isStd?fmt(v,3):fmt(v,4);}),textposition:"outside",textfont:{family:"JetBrains Mono",size:11,color:c.text}}];
-    var layout=baseLayout({xaxis:{title:isStd?"Standardized coefficient (\u03B2*)":"Raw coefficient",gridcolor:c.grid,linecolor:c.grid,zerolinecolor:c.grid,tickfont:{color:c.textSoft}},yaxis:{automargin:true,tickfont:{color:c.textSoft,size:12}},showlegend:false,margin:{l:90,r:60,t:10,b:46},shapes:[{type:"line",xref:"x",yref:"paper",x0:0,x1:0,y0:0,y1:1,line:{color:c.grid,width:1.5}}]});
+    var layout=baseLayout({xaxis:{title:isStd?t("widget.standardized.chart.xaxis.std"):t("widget.standardized.chart.xaxis.raw"),gridcolor:c.grid,linecolor:c.grid,zerolinecolor:c.grid,tickfont:{color:c.textSoft}},yaxis:{automargin:true,tickfont:{color:c.textSoft,size:12}},showlegend:false,margin:{l:90,r:60,t:10,b:46},shapes:[{type:"line",xref:"x",yref:"paper",x0:0,x1:0,y0:0,y1:1,line:{color:c.grid,width:1.5}}]});
     Plotly.react(chartEl,traces,layout,PLOTLY_CONFIG);
   }
   bindToggles("std-display",render);
@@ -1050,19 +1526,21 @@ function bindSlider(id,vid,ffn,rfn){var el=document.getElementById(id);var ve=do
     var evalAge=parseInt(document.getElementById("ime-age").value);
     var me=m.coef[eduIdx]+m.coef[intIdx]*evalAge;
     document.getElementById("ime-stat-educ").textContent=fmtMoney(m.coef[eduIdx]);
-    document.getElementById("ime-stat-inter").textContent="$"+fmt(m.coef[intIdx],2)+"/yr×yr";
-    document.getElementById("ime-stat-me").textContent=fmtMoney(me)+"/yr";
+    document.getElementById("ime-stat-inter").textContent="$"+fmt(m.coef[intIdx],2)+"/"+t("widget.interactionme.unit.yrxyr");
+    document.getElementById("ime-stat-me").textContent=fmtMoney(me)+"/"+t("widget.interactionme.unit.yr");
     document.getElementById("ime-stat-r2").textContent=fmt(m.r2,4);
+    // Refresh slider value label
+    var iav=document.getElementById("ime-age-val");if(iav)iav.textContent=t("widget.interactionme.slider.age",{age:evalAge});
     var ages=linspace(25,65,200);
     var mes=ages.map(function(a){return m.coef[eduIdx]+m.coef[intIdx]*a;});
     var traces=[
-      {x:ages,y:mes,type:"scatter",mode:"lines",line:{color:c.cyan,width:3},name:"ME of education"},
-      {x:[evalAge],y:[me],type:"scatter",mode:"markers+text",marker:{color:c.pink,size:12,line:{color:"white",width:2}},text:[fmtMoney(me)],textposition:"top center",textfont:{color:c.pink,size:12,family:"JetBrains Mono"},name:"At age "+evalAge,showlegend:false}
+      {x:ages,y:mes,type:"scatter",mode:"lines",line:{color:c.cyan,width:3},name:t("widget.interactionme.legend.meEduc")},
+      {x:[evalAge],y:[me],type:"scatter",mode:"markers+text",marker:{color:c.pink,size:12,line:{color:"white",width:2}},text:[fmtMoney(me)],textposition:"top center",textfont:{color:c.pink,size:12,family:"JetBrains Mono"},name:t("widget.interactionme.legend.atAge",{age:evalAge}),showlegend:false}
     ];
-    var layout=baseLayout({xaxis:{title:"Age",range:[23,67],gridcolor:c.grid,linecolor:c.grid,zerolinecolor:c.grid,tickfont:{color:c.textSoft}},yaxis:{title:"Marginal effect of education ($/yr)",gridcolor:c.grid,linecolor:c.grid,zerolinecolor:c.grid,tickfont:{color:c.textSoft}},showlegend:true,legend:{x:0.02,y:0.98,xanchor:"left",yanchor:"top",font:{color:c.text},bgcolor:"rgba(0,0,0,0)"}});
+    var layout=baseLayout({xaxis:{title:t("widget.interactionme.chart.xaxis"),range:[23,67],gridcolor:c.grid,linecolor:c.grid,zerolinecolor:c.grid,tickfont:{color:c.textSoft}},yaxis:{title:t("widget.interactionme.chart.yaxis"),gridcolor:c.grid,linecolor:c.grid,zerolinecolor:c.grid,tickfont:{color:c.textSoft}},showlegend:true,legend:{x:0.02,y:0.98,xanchor:"left",yanchor:"top",font:{color:c.text},bgcolor:"rgba(0,0,0,0)"}});
     Plotly.react(chartEl,traces,layout,PLOTLY_CONFIG);
   }
-  bindSlider("ime-age","ime-age-val",function(v){return "Age = "+v;},render);
+  bindSlider("ime-age","ime-age-val",function(v){return t("widget.interactionme.slider.age",{age:v});},render);
   window.__rerender_interactionme=render;
   render();
 })();
@@ -1079,11 +1557,11 @@ function bindSlider(id,vid,ffn,rfn){var el=document.getElementById(id);var ve=do
     document.getElementById("rt-stat-corrected").textContent=fmtMoney(RT.corrected_mean);
     document.getElementById("rt-stat-smearing").textContent=fmt(RT.smearing_factor,4);
     var labels=[],vals=[],colors=[],borders=[];
-    labels.push("Actual Mean");vals.push(RT.actual_mean);colors.push(c.cyan+"77");borders.push(c.cyan);
-    if(mode==="both"||mode==="naive"){labels.push("Naive exp(\u0177)");vals.push(RT.naive_mean);colors.push(c.pink+"77");borders.push(c.pink);}
-    if(mode==="both"||mode==="corrected"){labels.push("Corrected");vals.push(RT.corrected_mean);colors.push(c.purple+"77");borders.push(c.purple);}
+    labels.push(t("widget.retransform.bar.actual"));vals.push(RT.actual_mean);colors.push(c.cyan+"77");borders.push(c.cyan);
+    if(mode==="both"||mode==="naive"){labels.push(t("widget.retransform.bar.naive"));vals.push(RT.naive_mean);colors.push(c.pink+"77");borders.push(c.pink);}
+    if(mode==="both"||mode==="corrected"){labels.push(t("widget.retransform.bar.corrected"));vals.push(RT.corrected_mean);colors.push(c.purple+"77");borders.push(c.purple);}
     var traces=[{x:labels,y:vals,type:"bar",marker:{color:colors,line:{color:borders,width:2}},text:vals.map(function(v){return fmtMoney(v);}),textposition:"outside",textfont:{family:"JetBrains Mono",size:13,color:c.text}}];
-    var layout=baseLayout({yaxis:{title:"Mean Earnings ($)",gridcolor:c.grid,linecolor:c.grid,zerolinecolor:c.grid,tickfont:{color:c.textSoft},range:[0,RT.actual_mean*1.25]},xaxis:{tickfont:{color:c.textSoft,size:12}},showlegend:false,margin:{l:70,r:18,t:10,b:60},shapes:[{type:"line",xref:"paper",yref:"y",x0:0,x1:1,y0:RT.actual_mean,y1:RT.actual_mean,line:{color:c.cyan,width:2,dash:"dash"}}]});
+    var layout=baseLayout({yaxis:{title:t("widget.retransform.chart.yaxis"),gridcolor:c.grid,linecolor:c.grid,zerolinecolor:c.grid,tickfont:{color:c.textSoft},range:[0,RT.actual_mean*1.25]},xaxis:{tickfont:{color:c.textSoft,size:12}},showlegend:false,margin:{l:70,r:18,t:10,b:60},shapes:[{type:"line",xref:"paper",yref:"y",x0:0,x1:1,y0:RT.actual_mean,y1:RT.actual_mean,line:{color:c.cyan,width:2,dash:"dash"}}]});
     Plotly.react(chartEl,traces,layout,PLOTLY_CONFIG);
   }
   bindToggles("rt-method",render);
@@ -1102,8 +1580,8 @@ function bindSlider(id,vid,ffn,rfn){var el=document.getElementById(id);var ve=do
     document.getElementById("res-stat-mean").textContent=mode==="levels"?fmtMoney(m):fmt(m,4);
     document.getElementById("res-stat-sd").textContent=mode==="levels"?fmtMoney(s):fmt(s,4);
     document.getElementById("res-stat-skew").textContent=fmt(sk,3);
-    var traces=[{x:resid,type:"histogram",marker:{color:c.cyan+"55",line:{color:c.cyan,width:1}},name:"Residuals",nbinsx:35}];
-    var layout=baseLayout({xaxis:{title:mode==="levels"?"Residual ($)":"Residual (log)",gridcolor:c.grid,linecolor:c.grid,zerolinecolor:c.grid,tickfont:{color:c.textSoft}},yaxis:{title:"Count",gridcolor:c.grid,linecolor:c.grid,zerolinecolor:c.grid,tickfont:{color:c.textSoft}},showlegend:false,annotations:[{x:0.98,y:0.95,xref:"paper",yref:"paper",text:"Skewness = "+fmt(sk,3),showarrow:false,font:{color:c.purple,size:13,family:"JetBrains Mono"},xanchor:"right"}]});
+    var traces=[{x:resid,type:"histogram",marker:{color:c.cyan+"55",line:{color:c.cyan,width:1}},name:t("widget.residuals.legend.residuals"),nbinsx:35}];
+    var layout=baseLayout({xaxis:{title:mode==="levels"?t("widget.residuals.chart.xaxis.levels"):t("widget.residuals.chart.xaxis.log"),gridcolor:c.grid,linecolor:c.grid,zerolinecolor:c.grid,tickfont:{color:c.textSoft}},yaxis:{title:t("widget.residuals.chart.yaxis"),gridcolor:c.grid,linecolor:c.grid,zerolinecolor:c.grid,tickfont:{color:c.textSoft}},showlegend:false,annotations:[{x:0.98,y:0.95,xref:"paper",yref:"paper",text:t("widget.residuals.annotation.skew",{skew:fmt(sk,3)}),showarrow:false,font:{color:c.purple,size:13,family:"JetBrains Mono"},xanchor:"right"}]});
     Plotly.react(chartEl,traces,layout,PLOTLY_CONFIG);
   }
   bindToggles("res-model",render);
@@ -1133,14 +1611,49 @@ function bindSlider(id,vid,ffn,rfn){var el=document.getElementById(id);var ve=do
   readHash();
 })();
 
-// ==================== THEME TOGGLE ====================
-(function(){
-  var btn=document.getElementById("theme-toggle"),iconEl=document.getElementById("theme-icon"),labelEl=document.getElementById("theme-label");
-  function apply(theme){document.documentElement.dataset.theme=theme;iconEl.textContent=theme==="dark"?"\u2600\uFE0F":"\uD83C\uDF19";labelEl.textContent=theme==="dark"?"Light":"Dark";for(var key in window){if(key.startsWith("__rerender_")&&typeof window[key]==="function")window[key]();}}
-  var saved=localStorage.getItem(THEME_KEY);var prefersDark=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches;apply(saved||(prefersDark?"dark":"light"));
-  btn.addEventListener("click",function(){var next=document.documentElement.dataset.theme==="dark"?"light":"dark";localStorage.setItem(THEME_KEY,next);apply(next);});
+// ==================== THEME TOGGLE (site navbar) ====================
+// Reads/writes localStorage.darkMode (shared with index.html / tutors.html)
+// and applies html[data-theme="dark"] for this chapter's CSS.
+function applyDarkMode(isDark) {
+  document.documentElement.dataset.theme = isDark ? "dark" : "light";
+  const icon = document.getElementById("siteDarkModeIcon");
+  if (icon) icon.className = isDark ? "fa-solid fa-sun" : "fa-solid fa-moon";
+  // Re-render all widgets so Plotly picks up the new CSS colors.
+  for (const key in window) {
+    if (key.startsWith("__rerender_") && typeof window[key] === "function") window[key]();
+  }
+}
+
+function toggleDarkModeNav() {
+  const isDark = document.documentElement.dataset.theme !== "dark";
+  localStorage.setItem(THEME_KEY, isDark ? "dark" : "light");
+  applyDarkMode(isDark);
+}
+
+(function() {
+  const saved = localStorage.getItem(THEME_KEY);
+  const prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+  const isDark = saved ? (saved === "dark") : prefersDark;
+  applyDarkMode(isDark);
 })();
+
+// ==================== MOBILE MENU (site navbar) ====================
+function toggleSiteMobileMenu() {
+  const menu = document.getElementById("siteMobileMenu");
+  const hamburger = document.getElementById("siteHamburgerIcon");
+  const close = document.getElementById("siteCloseIcon");
+  if (!menu || !hamburger || !close) return;
+  const isOpen = menu.classList.toggle("open");
+  hamburger.style.display = isOpen ? "none" : "";
+  close.style.display = isOpen ? "" : "none";
+}
 window.addEventListener("resize",function(){document.querySelectorAll(".chart").forEach(function(el){if(el.data)Plotly.Plots.resize(el);});});
+
+// Run AFTER all widget IIFEs have registered themselves with __rerender_*
+// (each widget's first render() above happens in the default English/persisted
+// language on first paint via window.__lang set above; this call swaps
+// every [data-i18n] element and updates the toggle button label).
+applyLanguage(window.__lang || I18N.defaultLang);
 </script>
 <script>
 // ==================== CODE LANGUAGE TABS ====================

@@ -3,10 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Chapter 07 — Statistical Inference for Bivariate Regression · metricsAI</title>
+<title data-i18n="meta.title">Chapter 07 — Statistical Inference for Bivariate Regression · metricsAI</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <script src="https://cdn.plot.ly/plotly-2.35.2.min.js" charset="utf-8"></script>
 <style>
 :root {
@@ -54,8 +55,52 @@ body {
   background: var(--bg);
   color: var(--text);
   line-height: 1.55;
-  transition: background-color .25s ease, color .25s ease;
+  transition: background-color .25s ease, color .25s ease; padding-top: 64px; /* leave room for the fixed .site-nav */
 }
+/* ===== Site navigation bar (shared across metricsAI pages) ===== */
+.site-nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 50;
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--border);
+  height: 64px;
+}
+html[data-theme="dark"] .site-nav { background: rgba(12, 16, 36, 0.85); }
+.site-nav-inner { max-width: 1280px; margin: 0 auto; padding: 0 1rem; height: 100%; display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
+.site-nav-brand { display: flex; align-items: center; gap: 0.5rem; font-weight: 700; font-size: 1.15rem; color: var(--text); text-decoration: none; }
+.site-nav-brand .ai-mark { color: var(--accent); }
+.site-nav-links { display: flex; gap: 1.5rem; }
+.site-nav-links a { color: var(--text-soft); text-decoration: none; font-weight: 500; font-size: 0.95rem; transition: color .2s ease; }
+.site-nav-links a:hover { color: var(--accent); }
+.site-nav-links a.active { color: var(--accent); border-bottom: 2px solid var(--accent); padding-bottom: 0.25rem; }
+.site-nav-controls { display: flex; align-items: center; gap: 0.8rem; }
+.site-nav-cameron { display: flex; flex-direction: column; align-items: center; padding: 0.25rem 0.6rem; border: 1px solid var(--border); border-radius: 0.5rem; background: var(--panel-2); text-decoration: none; line-height: 1.1; transition: background .2s ease; }
+.site-nav-cameron:hover { background: var(--panel); }
+.site-nav-cameron .cameron-pre { font-size: 0.6rem; color: var(--text-muted); }
+.site-nav-cameron .cameron-name { font-size: 0.7rem; font-weight: 600; color: var(--text-soft); }
+.site-nav-cameron .cameron-cta { font-size: 0.6rem; color: var(--text-muted); margin-top: 0.1rem; }
+.site-nav-btn { background: transparent; border: none; color: var(--text-soft); cursor: pointer; padding: 0.4rem; border-radius: 0.4rem; font-size: 1.05rem; display: inline-flex; align-items: center; gap: 0.3rem; transition: color .2s ease, background .2s ease; }
+.site-nav-btn:hover { color: var(--accent); background: var(--panel-2); }
+.site-nav-btn .label { font-size: 0.75rem; font-weight: 600; }
+.site-nav-hamburger { display: none; }
+
+.site-nav-mobile { display: none; position: fixed; top: 64px; left: 0; right: 0; background: var(--panel); border-top: 1px solid var(--border); box-shadow: var(--shadow); z-index: 40; padding: 1rem; }
+.site-nav-mobile a { display: block; padding: 0.6rem 0.4rem; color: var(--text-soft); text-decoration: none; font-weight: 500; border-bottom: 1px solid var(--border); }
+.site-nav-mobile a.active { color: var(--accent); }
+.site-nav-mobile a:last-of-type { border-bottom: none; }
+.site-nav-mobile.open { display: block; }
+
+@media (max-width: 768px) {
+  .site-nav-links, .site-nav-cameron { display: none; }
+  .site-nav-hamburger { display: inline-flex; }
+}
+/* ===== /Site navigation bar ===== */
+
 code, .mono { font-family: 'JetBrains Mono', ui-monospace, monospace; }
 
 header.page {
@@ -79,15 +124,6 @@ h1.title {
   font-weight: 700; letter-spacing: -0.01em;
 }
 p.subtitle { margin: 0 0 0.8rem; color: var(--text-soft); font-size: 1.05rem; max-width: 720px; }
-.theme-toggle {
-  position: absolute; top: 1.4rem; right: 1.5rem;
-  background: var(--panel-2); color: var(--text); border: 1px solid var(--border);
-  padding: 0.4rem 0.8rem; border-radius: 999px; cursor: pointer;
-  font-size: 0.85rem; font-weight: 500; display: inline-flex; align-items: center; gap: 0.35rem;
-  transition: all .2s ease;
-}
-.theme-toggle:hover { border-color: var(--accent); color: var(--accent); }
-
 nav.anchors {
   position: sticky; top: 0; z-index: 20;
   background: color-mix(in srgb, var(--panel) 92%, transparent);
@@ -324,25 +360,72 @@ footer.page a:hover { text-decoration: underline; }
 </head>
 <body>
 
+
+<nav class="site-nav" aria-label="Site navigation">
+  <div class="site-nav-inner">
+    <a href="../../index.html" class="site-nav-brand">
+      <i class="fa-solid fa-chart-line" style="color: var(--accent);"></i>
+      <span>metrics<span class="ai-mark">AI</span></span>
+    </a>
+    <div class="site-nav-links">
+      <a href="../../index.html#about" data-i18n="nav.about">About</a>
+      <a href="../../index.html#curriculum" class="active" data-i18n="nav.notebooks">Python Notebooks</a>
+      <a href="../../tutors.html" data-i18n="nav.tutors">AI Tutors</a>
+      <a href="../../index.html#books" data-i18n="nav.books">Books</a>
+      <a href="../../videos.html" data-i18n="nav.videos">Videos</a>
+      <a href="https://open.spotify.com/show/2lN5pA3l10UdHe61ZCoHcF?si=IFFMpG3pROepG61o8qbnvg" target="_blank" rel="noopener" data-i18n="nav.podcasts">Podcasts</a>
+      <a href="../../index.html#authors" data-i18n="nav.authors">Authors</a>
+      <a href="../../index.html#more-resources" data-i18n="nav.resources">More Resources</a>
+    </div>
+    <div class="site-nav-controls">
+      <a href="https://cameron.econ.ucdavis.edu/aed/index.html" target="_blank" rel="noopener" class="site-nav-cameron">
+        <span class="cameron-pre" data-i18n="nav.cameron.pre">Content based on</span>
+        <span class="cameron-name">Cameron (2022)</span>
+        <span class="cameron-cta"><span data-i18n="nav.cameron.cta">Learn More</span> <i class="fa-solid fa-external-link-alt"></i></span>
+      </a>
+      <button type="button" class="site-nav-btn" onclick="toggleDarkModeNav()" title="Toggle dark mode" id="siteDarkModeToggle">
+        <i class="fa-solid fa-moon" id="siteDarkModeIcon"></i>
+      </button>
+      <button type="button" class="site-nav-btn" onclick="toggleLanguage()" title="Switch language / Cambiar idioma" id="siteLanguageToggle">
+        <i class="fa-solid fa-language"></i>
+        <span class="label" id="siteLanguageLabel">EN</span>
+      </button>
+      <button type="button" class="site-nav-btn site-nav-hamburger" onclick="toggleSiteMobileMenu()" id="siteMobileMenuBtn">
+        <i class="fa-solid fa-bars" id="siteHamburgerIcon"></i>
+        <i class="fa-solid fa-times" id="siteCloseIcon" style="display:none"></i>
+      </button>
+    </div>
+  </div>
+</nav>
+<div class="site-nav-mobile" id="siteMobileMenu">
+  <a href="../../index.html#about" data-i18n="nav.about">About</a>
+  <a href="../../index.html#curriculum" class="active" data-i18n="nav.notebooks">Python Notebooks</a>
+  <a href="../../tutors.html" data-i18n="nav.tutors">AI Tutors</a>
+  <a href="../../index.html#books" data-i18n="nav.books">Books</a>
+  <a href="../../videos.html" data-i18n="nav.videos">Videos</a>
+  <a href="https://open.spotify.com/show/2lN5pA3l10UdHe61ZCoHcF?si=IFFMpG3pROepG61o8qbnvg" target="_blank" rel="noopener" data-i18n="nav.podcasts">Podcasts</a>
+  <a href="../../index.html#authors" data-i18n="nav.authors">Authors</a>
+  <a href="../../index.html#more-resources" data-i18n="nav.resources">More Resources</a>
+</div>
+
 <header class="page">
   <div class="page-inner">
-    <span class="chapter-badge">Chapter 07 of 18 · Interactive Dashboard</span>
-    <h1 class="title">Statistical Inference for Bivariate Regression</h1>
-    <p class="subtitle">Slide, toggle, and simulate to build intuition for t-statistics, confidence intervals, hypothesis testing, p-values, and robust standard errors.</p>
+    <span class="chapter-badge" data-i18n="header.badge">Chapter 07 of 18 · Interactive Dashboard</span>
+    <h1 class="title" data-i18n="header.title">Statistical Inference for Bivariate Regression</h1>
+    <p class="subtitle" data-i18n="header.subtitle">Slide, toggle, and simulate to build intuition for t-statistics, confidence intervals, hypothesis testing, p-values, and robust standard errors.</p>
   </div>
-  <button id="theme-toggle" class="theme-toggle" type="button" aria-label="Toggle color theme"><span id="theme-icon">🌙</span><span id="theme-label">Dark</span></button>
 </header>
 
 <nav class="anchors" aria-label="Sections">
   <ul>
-    <li><a href="#t-dist">t-Distribution</a></li>
-    <li><a href="#ci-sim">CI Simulator</a></li>
-    <li><a href="#hyp-test">Hypothesis Test</a></li>
-    <li><a href="#p-value">p-Value Explorer</a></li>
-    <li><a href="#econ-stat">Econ vs. Stat</a></li>
-    <li><a href="#robust-se">Robust SEs</a></li>
-    <li><a href="#house-data">House Data</a></li>
-    <li><a href="#code">Code</a></li>
+    <li><a href="#t-dist" data-i18n="nav.tdist">t-Distribution</a></li>
+    <li><a href="#ci-sim" data-i18n="nav.cisim">CI Simulator</a></li>
+    <li><a href="#hyp-test" data-i18n="nav.hyptest">Hypothesis Test</a></li>
+    <li><a href="#p-value" data-i18n="nav.pval">p-Value Explorer</a></li>
+    <li><a href="#econ-stat" data-i18n="nav.econstat">Econ vs. Stat</a></li>
+    <li><a href="#robust-se" data-i18n="nav.robustse">Robust SEs</a></li>
+    <li><a href="#house-data" data-i18n="nav.house">House Data</a></li>
+    <li><a href="#code" data-i18n="nav.code">Code</a></li>
   </ul>
 </nav>
 
@@ -352,20 +435,20 @@ footer.page a:hover { text-decoration: underline; }
 <section class="widget" id="t-dist">
   <div class="widget-head">
     <div>
-      <h2>t-Distribution Explorer</h2>
+      <h2 data-i18n="widget.tdist.heading">t-Distribution Explorer</h2>
     </div>
-    <button class="reset-btn" data-reset="tdist">↺ Reset</button>
+    <button class="reset-btn" data-reset="tdist" data-i18n="common.reset">↺ Reset</button>
   </div>
 
-  <p class="motivation">When the sample is small, how confident can we be about β₂? The normal bell curve underpromises — it does not account for estimating σ itself. <em>That is the job of the t-distribution.</em></p>
+  <p class="motivation" data-i18n="widget.tdist.motivation">When the sample is small, how confident can we be about β₂? The normal bell curve underpromises — it does not account for estimating σ itself. <em>That is the job of the t-distribution.</em></p>
 
-  <div class="key-concept">
+  <div class="key-concept" data-i18n="widget.tdist.kc">
     <span class="kc-title">The t-distribution is the small-sample cousin of the normal.</span> It is bell-shaped and symmetric, but its tails are <strong>heavier</strong> because we have to estimate the population variance from the sample. It is indexed by <strong>degrees of freedom</strong> (df = n − 2 for bivariate regression), and converges to the normal as df grows — for n &gt; 100 the difference is negligible.
   </div>
 
   <div class="widget-howto">
-    <div class="howto-title">What you can do here</div>
-    <ul>
+    <div class="howto-title" data-i18n="common.howtoTitle">What you can do here</div>
+    <ul data-i18n="widget.tdist.howto">
       <li><strong>Slide degrees of freedom</strong> from 1 up to 100 and watch the t-curve melt into N(0,1).</li>
       <li><strong>Toggle "95% Tails"</strong> to see the two rejection regions.</li>
       <li><strong>Toggle "95% Center"</strong> to see the complementary confidence region.</li>
@@ -374,56 +457,56 @@ footer.page a:hover { text-decoration: underline; }
 
   <div class="controls">
     <div class="ctrl">
-      <label for="tdist-df">Degrees of freedom <span class="val" id="tdist-df-val">5</span></label>
+      <label for="tdist-df"><span data-i18n="widget.tdist.ctrl.df.label">Degrees of freedom</span> <span class="val" id="tdist-df-val">5</span></label>
       <input type="range" id="tdist-df" min="1" max="100" step="1" value="5">
     </div>
     <div class="ctrl">
-      <label>Show area</label>
+      <label data-i18n="widget.tdist.ctrl.area.label">Show area</label>
       <div class="toggle-group" id="tdist-area">
-        <button type="button" data-val="none" class="active">None</button>
-        <button type="button" data-val="tails">95% Tails</button>
-        <button type="button" data-val="center">95% Center</button>
+        <button type="button" data-val="none" class="active" data-i18n="widget.tdist.ctrl.area.none">None</button>
+        <button type="button" data-val="tails" data-i18n="widget.tdist.ctrl.area.tails">95% Tails</button>
+        <button type="button" data-val="center" data-i18n="widget.tdist.ctrl.area.center">95% Center</button>
       </div>
     </div>
   </div>
   <div class="stats-grid">
-    <div class="stat"><div class="label">df</div><div class="value" id="tdist-dfstat">5</div></div>
-    <div class="stat"><div class="label">t crit (2.5%)</div><div class="value" id="tdist-tcrit">—</div></div>
-    <div class="stat pop"><div class="label">z crit (N(0,1))</div><div class="value">1.960</div></div>
-    <div class="stat err"><div class="label">Difference</div><div class="value" id="tdist-diff">—</div></div>
-    <div class="stat"><div class="label">Variance df/(df-2)</div><div class="value" id="tdist-var">—</div></div>
+    <div class="stat"><div class="label" data-i18n="stat.df">df</div><div class="value" id="tdist-dfstat">5</div></div>
+    <div class="stat"><div class="label" data-i18n="widget.tdist.stat.tcrit">t crit (2.5%)</div><div class="value" id="tdist-tcrit">—</div></div>
+    <div class="stat pop"><div class="label" data-i18n="widget.tdist.stat.zcrit">z crit (N(0,1))</div><div class="value">1.960</div></div>
+    <div class="stat err"><div class="label" data-i18n="widget.tdist.stat.diff">Difference</div><div class="value" id="tdist-diff">—</div></div>
+    <div class="stat"><div class="label" data-i18n="widget.tdist.stat.var">Variance df/(df-2)</div><div class="value" id="tdist-var">—</div></div>
   </div>
   <div class="chart tall" id="chart-tdist"></div>
   <div class="try-this">
-    <div class="try-title">Try this</div>
-    <ol>
+    <div class="try-title" data-i18n="common.tryTitle">Try this</div>
+    <ol data-i18n="widget.tdist.try">
       <li><strong>Set df = 3 (only n = 5 observations).</strong> The t critical value is ≈ 3.18 versus 1.96 for the normal. <em>With tiny samples you need much more extreme t-values to reject.</em></li>
       <li><strong>Slide df to 27 (the house-price sample).</strong> t<sub>crit</sub> = 2.052, only ~5% above 1.96. <em>At this sample size the t and normal are already close enough that either gives almost the same decision.</em></li>
       <li><strong>Push df to 100.</strong> The two curves visually overlap. <em>This is why large-sample theory happily uses the normal approximation.</em></li>
     </ol>
   </div>
 
-  <p class="takeaway"><strong>Take-away:</strong> When σ is estimated, the t-distribution is the honest ruler — heavy-tailed for small samples, normal-like for big ones. <a href="../../book/_book/notebooks_quarto/ch07_Statistical_Inference_for_Bivariate_Regression.html#the-t-statistic" target="_blank" rel="noopener">Read §7.2 in the chapter →</a></p>
+  <p class="takeaway" data-i18n="widget.tdist.takeaway"><strong>Take-away:</strong> When σ is estimated, the t-distribution is the honest ruler — heavy-tailed for small samples, normal-like for big ones. <a href="../../book/_book/notebooks_quarto/ch07_Statistical_Inference_for_Bivariate_Regression.html#the-t-statistic" target="_blank" rel="noopener">Read §7.2 in the chapter →</a></p>
 </section>
 
 <!-- ==================== WIDGET 2: Confidence Interval Simulator ==================== -->
 <section class="widget" id="ci-sim">
   <div class="widget-head">
     <div>
-      <h2>Confidence Interval Simulator</h2>
+      <h2 data-i18n="widget.cisim.heading">Confidence Interval Simulator</h2>
     </div>
-    <button class="reset-btn" data-reset="cisim">↺ Reset</button>
+    <button class="reset-btn" data-reset="cisim" data-i18n="common.reset">↺ Reset</button>
   </div>
 
-  <p class="motivation">You ran <em>one</em> regression and got <em>one</em> confidence interval. So what does 95% actually mean — about this interval, or about the procedure?</p>
+  <p class="motivation" data-i18n="widget.cisim.motivation">You ran <em>one</em> regression and got <em>one</em> confidence interval. So what does 95% actually mean — about this interval, or about the procedure?</p>
 
-  <div class="key-concept">
+  <div class="key-concept" data-i18n="widget.cisim.kc">
     <span class="kc-title">A 95% confidence interval is a statement about the procedure, not this specific interval.</span> Across many resamples, <strong>95% of constructed intervals contain β₂</strong>. It does NOT mean there is a 95% probability that β₂ lies inside the one you computed — β₂ is fixed; the interval is the random thing. The formula is <strong>b₂ &plusmn; t<sub>n−2, α/2</sub> &middot; se(b₂)</strong>.
   </div>
 
   <div class="widget-howto">
-    <div class="howto-title">What you can do here</div>
-    <ul>
+    <div class="howto-title" data-i18n="common.howtoTitle">What you can do here</div>
+    <ul data-i18n="widget.cisim.howto">
       <li><strong>Increase the number of CIs</strong> to see the long-run coverage settle down.</li>
       <li><strong>Shrink the sample size n</strong> to watch each interval get wider.</li>
       <li><strong>Dial the confidence level</strong> from 80% to 99% and see the trade-off between width and coverage.</li>
@@ -433,59 +516,59 @@ footer.page a:hover { text-decoration: underline; }
 
   <div class="controls">
     <div class="ctrl">
-      <label for="cisim-nci">Number of CIs <span class="val" id="cisim-nci-val">100</span></label>
+      <label for="cisim-nci"><span data-i18n="widget.cisim.ctrl.nci.label">Number of CIs</span> <span class="val" id="cisim-nci-val">100</span></label>
       <input type="range" id="cisim-nci" min="20" max="200" step="10" value="100">
     </div>
     <div class="ctrl">
-      <label for="cisim-n">Sample size n <span class="val" id="cisim-n-val">30</span></label>
+      <label for="cisim-n"><span data-i18n="widget.cisim.ctrl.n.label">Sample size n</span> <span class="val" id="cisim-n-val">30</span></label>
       <input type="range" id="cisim-n" min="10" max="100" step="5" value="30">
     </div>
     <div class="ctrl">
-      <label for="cisim-conf">Confidence level <span class="val" id="cisim-conf-val">95%</span></label>
+      <label for="cisim-conf"><span data-i18n="widget.cisim.ctrl.conf.label">Confidence level</span> <span class="val" id="cisim-conf-val">95%</span></label>
       <input type="range" id="cisim-conf" min="80" max="99" step="1" value="95">
     </div>
     <div class="ctrl">
       <label>&nbsp;</label>
-      <button class="resim-btn" id="cisim-resim" type="button">Resimulate</button>
+      <button class="resim-btn" id="cisim-resim" type="button" data-i18n="common.resimulate">Resimulate</button>
     </div>
   </div>
   <div class="stats-grid">
-    <div class="stat pop"><div class="label">True slope</div><div class="value">2.0000</div></div>
-    <div class="stat"><div class="label">Coverage rate</div><div class="value" id="cisim-coverage">—</div></div>
-    <div class="stat"><div class="label">Avg CI width</div><div class="value" id="cisim-width">—</div></div>
-    <div class="stat err"><div class="label">Missed</div><div class="value" id="cisim-missed">—</div></div>
+    <div class="stat pop"><div class="label" data-i18n="widget.cisim.stat.true">True slope</div><div class="value">2.0000</div></div>
+    <div class="stat"><div class="label" data-i18n="widget.cisim.stat.cov">Coverage rate</div><div class="value" id="cisim-coverage">—</div></div>
+    <div class="stat"><div class="label" data-i18n="widget.cisim.stat.width">Avg CI width</div><div class="value" id="cisim-width">—</div></div>
+    <div class="stat err"><div class="label" data-i18n="widget.cisim.stat.missed">Missed</div><div class="value" id="cisim-missed">—</div></div>
   </div>
   <div class="chart tall" id="chart-cisim"></div>
   <div class="try-this">
-    <div class="try-title">Try this</div>
-    <ol>
+    <div class="try-title" data-i18n="common.tryTitle">Try this</div>
+    <ol data-i18n="widget.cisim.try">
       <li><strong>At n = 30 with 100 intervals, count the pink (missed) ones.</strong> You should see roughly 5; click Resimulate a few times. <em>The miss rate jitters around 5 — exactly what "95% coverage" promises.</em></li>
       <li><strong>Drop n to 10.</strong> Intervals get much wider but coverage stays near 95%. <em>The t-distribution automatically inflates the interval to compensate for small samples.</em></li>
       <li><strong>Switch the confidence level to 80%.</strong> Intervals narrow sharply and about 20 in 100 miss. <em>Width and coverage are two ends of the same lever.</em></li>
     </ol>
   </div>
 
-  <p class="takeaway"><strong>Take-away:</strong> A CI is an instrument whose long-run hit rate you control — the parameter is fixed; the intervals are the random things. <a href="../../book/_book/notebooks_quarto/ch07_Statistical_Inference_for_Bivariate_Regression.html#confidence-intervals" target="_blank" rel="noopener">Read §7.3 in the chapter →</a></p>
+  <p class="takeaway" data-i18n="widget.cisim.takeaway"><strong>Take-away:</strong> A CI is an instrument whose long-run hit rate you control — the parameter is fixed; the intervals are the random things. <a href="../../book/_book/notebooks_quarto/ch07_Statistical_Inference_for_Bivariate_Regression.html#confidence-intervals" target="_blank" rel="noopener">Read §7.3 in the chapter →</a></p>
 </section>
 
 <!-- ==================== WIDGET 3: Hypothesis Testing ==================== -->
 <section class="widget" id="hyp-test">
   <div class="widget-head">
     <div>
-      <h2>Hypothesis Testing Framework</h2>
+      <h2 data-i18n="widget.hyptest.heading">Hypothesis Testing Framework</h2>
     </div>
-    <button class="reset-btn" data-reset="hyptest">↺ Reset</button>
+    <button class="reset-btn" data-reset="hyptest" data-i18n="common.reset">↺ Reset</button>
   </div>
 
-  <p class="motivation">Is a slope of $73.77/sq ft really different from a round number like $90? Or from zero? <em>Hypothesis testing turns the question into a reproducible decision.</em></p>
+  <p class="motivation" data-i18n="widget.hyptest.motivation">Is a slope of $73.77/sq ft really different from a round number like $90? Or from zero? <em>Hypothesis testing turns the question into a reproducible decision.</em></p>
 
-  <div class="key-concept">
+  <div class="key-concept" data-i18n="widget.hyptest.kc">
     <span class="kc-title">A hypothesis test is a reproducible rule for deciding about a parameter.</span> Write the null H<sub>0</sub> and alternative H<sub>a</sub>, pick a significance level α, compute <strong>t = (b₂ − null) / se(b₂)</strong>, turn t into a p-value, and reject H<sub>0</sub> when p &lt; α. Two-sided tests catch deviations either way; one-sided tests target a direction and have more power there at the cost of none in the other tail. We never "accept" H<sub>0</sub> — only fail to reject.
   </div>
 
   <div class="widget-howto">
-    <div class="howto-title">What you can do here</div>
-    <ul>
+    <div class="howto-title" data-i18n="common.howtoTitle">What you can do here</div>
+    <ul data-i18n="widget.hyptest.howto">
       <li><strong>Slide the null value</strong> to probe different claims — try 0 (is there any effect?) and 90 (does each sq ft add $90?).</li>
       <li><strong>Dial α</strong> between 1% and 10% to move the decision threshold.</li>
       <li><strong>Toggle Two-Sided / Right-Tail / Left-Tail</strong> to reshape the rejection region.</li>
@@ -494,60 +577,60 @@ footer.page a:hover { text-decoration: underline; }
 
   <div class="controls">
     <div class="ctrl">
-      <label for="hyptest-null">Null value (H0: slope =) <span class="val" id="hyptest-null-val">0</span></label>
+      <label for="hyptest-null"><span data-i18n="widget.hyptest.ctrl.null.label">Null value (H0: slope =)</span> <span class="val" id="hyptest-null-val">0</span></label>
       <input type="range" id="hyptest-null" min="-20" max="120" step="5" value="0">
     </div>
     <div class="ctrl">
-      <label for="hyptest-alpha">Significance level <span class="val" id="hyptest-alpha-val">5%</span></label>
+      <label for="hyptest-alpha"><span data-i18n="widget.hyptest.ctrl.alpha.label">Significance level</span> <span class="val" id="hyptest-alpha-val">5%</span></label>
       <input type="range" id="hyptest-alpha" min="1" max="10" step="1" value="5">
     </div>
     <div class="ctrl">
-      <label>Test type</label>
+      <label data-i18n="widget.hyptest.ctrl.type.label">Test type</label>
       <div class="toggle-group" id="hyptest-type">
-        <button type="button" data-val="two" class="active">Two-Sided</button>
-        <button type="button" data-val="right">Right-Tail</button>
-        <button type="button" data-val="left">Left-Tail</button>
+        <button type="button" data-val="two" class="active" data-i18n="common.twoSided">Two-Sided</button>
+        <button type="button" data-val="right" data-i18n="common.rightTail">Right-Tail</button>
+        <button type="button" data-val="left" data-i18n="common.leftTail">Left-Tail</button>
       </div>
     </div>
   </div>
   <div class="stats-grid">
-    <div class="stat"><div class="label">b2 (estimate)</div><div class="value" id="hyptest-b2">73.77</div></div>
-    <div class="stat"><div class="label">se(b2)</div><div class="value" id="hyptest-se">11.17</div></div>
-    <div class="stat"><div class="label">t-statistic</div><div class="value" id="hyptest-tstat">—</div></div>
-    <div class="stat err"><div class="label">p-value</div><div class="value" id="hyptest-pval">—</div></div>
-    <div class="stat pop"><div class="label">Decision</div><div class="value" id="hyptest-decision">—</div></div>
+    <div class="stat"><div class="label" data-i18n="widget.hyptest.stat.b2">b2 (estimate)</div><div class="value" id="hyptest-b2">73.77</div></div>
+    <div class="stat"><div class="label" data-i18n="widget.hyptest.stat.se">se(b2)</div><div class="value" id="hyptest-se">11.17</div></div>
+    <div class="stat"><div class="label" data-i18n="stat.tstat">t-statistic</div><div class="value" id="hyptest-tstat">—</div></div>
+    <div class="stat err"><div class="label" data-i18n="stat.pval">p-value</div><div class="value" id="hyptest-pval">—</div></div>
+    <div class="stat pop"><div class="label" data-i18n="widget.hyptest.stat.decision">Decision</div><div class="value" id="hyptest-decision">—</div></div>
   </div>
   <div class="chart tall" id="chart-hyptest"></div>
   <div class="try-this">
-    <div class="try-title">Try this</div>
-    <ol>
+    <div class="try-title" data-i18n="common.tryTitle">Try this</div>
+    <ol data-i18n="widget.hyptest.try">
       <li><strong>Set null = 0 (two-sided).</strong> t = 6.60 sits far in the tail; p ≈ 0. <em>House size clearly matters for price.</em></li>
       <li><strong>Set null = 90 (two-sided).</strong> t = −1.45, p = 0.158. <em>We fail to reject — the data are consistent with a $90/sq ft effect.</em></li>
       <li><strong>Keep null = 90 and switch to Left-Tail.</strong> The p-value halves to ~0.079. <em>Directional tests are more powerful in their target direction, at the price of blindness in the other.</em></li>
     </ol>
   </div>
 
-  <p class="takeaway"><strong>Take-away:</strong> A hypothesis test converts a claim about β₂ into a decision rule you can defend — but you can only ever fail to reject H<sub>0</sub>, never accept it. <a href="../../book/_book/notebooks_quarto/ch07_Statistical_Inference_for_Bivariate_Regression.html#tests-of-statistical-significance" target="_blank" rel="noopener">Read §7.4 in the chapter →</a></p>
+  <p class="takeaway" data-i18n="widget.hyptest.takeaway"><strong>Take-away:</strong> A hypothesis test converts a claim about β₂ into a decision rule you can defend — but you can only ever fail to reject H<sub>0</sub>, never accept it. <a href="../../book/_book/notebooks_quarto/ch07_Statistical_Inference_for_Bivariate_Regression.html#tests-of-statistical-significance" target="_blank" rel="noopener">Read §7.4 in the chapter →</a></p>
 </section>
 
 <!-- ==================== WIDGET 4: p-Value Explorer ==================== -->
 <section class="widget" id="p-value">
   <div class="widget-head">
     <div>
-      <h2>p-Value Explorer</h2>
+      <h2 data-i18n="widget.pval.heading">p-Value Explorer</h2>
     </div>
-    <button class="reset-btn" data-reset="pval">↺ Reset</button>
+    <button class="reset-btn" data-reset="pval" data-i18n="common.reset">↺ Reset</button>
   </div>
 
-  <p class="motivation">What does "p &lt; 0.05" actually mean? And <em>why does moving the t-statistic a little shrink the p-value so much?</em></p>
+  <p class="motivation" data-i18n="widget.pval.motivation">What does "p &lt; 0.05" actually mean? And <em>why does moving the t-statistic a little shrink the p-value so much?</em></p>
 
-  <div class="key-concept">
+  <div class="key-concept" data-i18n="widget.pval.kc">
     <span class="kc-title">The p-value is the probability of seeing a test statistic at least this extreme if H<sub>0</sub> were true.</span> Small p means your data would be rare under H<sub>0</sub> — strong evidence against it. Rough thresholds: <strong>&lt; 0.01</strong> strong, <strong>&lt; 0.05</strong> moderate, <strong>&lt; 0.10</strong> weak. A small p does NOT mean H<sub>0</sub> is false with that probability, and it says nothing about effect size.
   </div>
 
   <div class="widget-howto">
-    <div class="howto-title">What you can do here</div>
-    <ul>
+    <div class="howto-title" data-i18n="common.howtoTitle">What you can do here</div>
+    <ul data-i18n="widget.pval.howto">
       <li><strong>Drag the t-statistic</strong> between −5 and 5 and watch the shaded area update live.</li>
       <li><strong>Change df</strong> to see how sample size shifts the curve shape.</li>
       <li><strong>Toggle the test type</strong> to switch between one- and two-tailed p-values.</li>
@@ -556,59 +639,59 @@ footer.page a:hover { text-decoration: underline; }
 
   <div class="controls">
     <div class="ctrl">
-      <label for="pval-t">t-statistic <span class="val" id="pval-t-val">2.00</span></label>
+      <label for="pval-t"><span data-i18n="stat.tstat">t-statistic</span> <span class="val" id="pval-t-val">2.00</span></label>
       <input type="range" id="pval-t" min="-5" max="5" step="0.1" value="2">
     </div>
     <div class="ctrl">
-      <label for="pval-df">Degrees of freedom <span class="val" id="pval-df-val">27</span></label>
+      <label for="pval-df"><span data-i18n="widget.tdist.ctrl.df.label">Degrees of freedom</span> <span class="val" id="pval-df-val">27</span></label>
       <input type="range" id="pval-df" min="3" max="100" step="1" value="27">
     </div>
     <div class="ctrl">
-      <label>Test type</label>
+      <label data-i18n="widget.hyptest.ctrl.type.label">Test type</label>
       <div class="toggle-group" id="pval-type">
-        <button type="button" data-val="two" class="active">Two-Sided</button>
-        <button type="button" data-val="right">Right-Tail</button>
-        <button type="button" data-val="left">Left-Tail</button>
+        <button type="button" data-val="two" class="active" data-i18n="common.twoSided">Two-Sided</button>
+        <button type="button" data-val="right" data-i18n="common.rightTail">Right-Tail</button>
+        <button type="button" data-val="left" data-i18n="common.leftTail">Left-Tail</button>
       </div>
     </div>
   </div>
   <div class="stats-grid">
-    <div class="stat"><div class="label">|t|</div><div class="value" id="pval-abst">—</div></div>
-    <div class="stat err"><div class="label">p-value</div><div class="value" id="pval-p">—</div></div>
-    <div class="stat"><div class="label">Significant at 5%?</div><div class="value" id="pval-sig5">—</div></div>
-    <div class="stat"><div class="label">Significant at 1%?</div><div class="value" id="pval-sig1">—</div></div>
+    <div class="stat"><div class="label" data-i18n="widget.pval.stat.abst">|t|</div><div class="value" id="pval-abst">—</div></div>
+    <div class="stat err"><div class="label" data-i18n="stat.pval">p-value</div><div class="value" id="pval-p">—</div></div>
+    <div class="stat"><div class="label" data-i18n="widget.pval.stat.sig5">Significant at 5%?</div><div class="value" id="pval-sig5">—</div></div>
+    <div class="stat"><div class="label" data-i18n="widget.pval.stat.sig1">Significant at 1%?</div><div class="value" id="pval-sig1">—</div></div>
   </div>
   <div class="chart tall" id="chart-pval"></div>
   <div class="try-this">
-    <div class="try-title">Try this</div>
-    <ol>
+    <div class="try-title" data-i18n="common.tryTitle">Try this</div>
+    <ol data-i18n="widget.pval.try">
       <li><strong>Set t = 1.96 with df = 27 (two-sided).</strong> The p-value lands just above 0.05. <em>The t-tail needs slightly more extreme values than the normal does.</em></li>
       <li><strong>Nudge to t = 2.05 (the df = 27 critical value).</strong> p is exactly 0.05. <em>This is the boundary between "reject" and "fail to reject" at the 5% level.</em></li>
       <li><strong>Drag t from 0 to 5 slowly.</strong> The p-value slides from 1.0 toward 0. <em>The mapping is monotonic but very nonlinear — small changes near the critical value move p a lot.</em></li>
     </ol>
   </div>
 
-  <p class="takeaway"><strong>Take-away:</strong> p measures how surprising your data would be under H<sub>0</sub> — not how likely H<sub>0</sub> is, and not how big the effect is. <a href="../../book/_book/notebooks_quarto/ch07_Statistical_Inference_for_Bivariate_Regression.html#two-sided-hypothesis-tests" target="_blank" rel="noopener">Read §7.5 in the chapter →</a></p>
+  <p class="takeaway" data-i18n="widget.pval.takeaway"><strong>Take-away:</strong> p measures how surprising your data would be under H<sub>0</sub> — not how likely H<sub>0</sub> is, and not how big the effect is. <a href="../../book/_book/notebooks_quarto/ch07_Statistical_Inference_for_Bivariate_Regression.html#two-sided-hypothesis-tests" target="_blank" rel="noopener">Read §7.5 in the chapter →</a></p>
 </section>
 
 <!-- ==================== WIDGET 5: Economic vs. Statistical Significance ==================== -->
 <section class="widget" id="econ-stat">
   <div class="widget-head">
     <div>
-      <h2>Economic vs. Statistical Significance</h2>
+      <h2 data-i18n="widget.econstat.heading">Economic vs. Statistical Significance</h2>
     </div>
-    <button class="reset-btn" data-reset="econstat">↺ Reset</button>
+    <button class="reset-btn" data-reset="econstat" data-i18n="common.reset">↺ Reset</button>
   </div>
 
-  <p class="motivation">A news headline says an effect is "statistically significant." Does that mean it matters in dollars? <em>Not always</em> — sample size can dress up a trivial effect or hide an important one.</p>
+  <p class="motivation" data-i18n="widget.econstat.motivation">A news headline says an effect is "statistically significant." Does that mean it matters in dollars? <em>Not always</em> — sample size can dress up a trivial effect or hide an important one.</p>
 
-  <div class="key-concept">
+  <div class="key-concept" data-i18n="widget.econstat.kc">
     <span class="kc-title">Statistical and economic significance answer different questions.</span> <strong>Statistical</strong> asks "is the effect different from zero?" — driven by t = b₂/se(b₂), which grows with <em>n</em>. <strong>Economic</strong> asks "is the effect large enough to matter?" — driven by the coefficient's size in context. Large n can make trivial effects significant; small n can hide real ones. Always report both the estimate and its confidence interval.
   </div>
 
   <div class="widget-howto">
-    <div class="howto-title">What you can do here</div>
-    <ul>
+    <div class="howto-title" data-i18n="common.howtoTitle">What you can do here</div>
+    <ul data-i18n="widget.econstat.howto">
       <li><strong>Slide the true slope</strong> to set the population effect size.</li>
       <li><strong>Slide sample size n</strong> from 10 to 2,000 — this is the key lever.</li>
       <li><strong>Adjust the error σ</strong> to change noise.</li>
@@ -618,60 +701,60 @@ footer.page a:hover { text-decoration: underline; }
 
   <div class="controls">
     <div class="ctrl">
-      <label for="econstat-beta">True slope <span class="val" id="econstat-beta-val">0.20</span></label>
+      <label for="econstat-beta"><span data-i18n="widget.econstat.ctrl.beta.label">True slope</span> <span class="val" id="econstat-beta-val">0.20</span></label>
       <input type="range" id="econstat-beta" min="0" max="3" step="0.05" value="0.2">
     </div>
     <div class="ctrl">
-      <label for="econstat-n">Sample size n <span class="val" id="econstat-n-val">500</span></label>
+      <label for="econstat-n"><span data-i18n="widget.cisim.ctrl.n.label">Sample size n</span> <span class="val" id="econstat-n-val">500</span></label>
       <input type="range" id="econstat-n" min="10" max="2000" step="10" value="500">
     </div>
     <div class="ctrl">
-      <label for="econstat-sigma">Error sigma <span class="val" id="econstat-sigma-val">2.0</span></label>
+      <label for="econstat-sigma"><span data-i18n="widget.econstat.ctrl.sigma.label">Error sigma</span> <span class="val" id="econstat-sigma-val">2.0</span></label>
       <input type="range" id="econstat-sigma" min="0.5" max="5" step="0.5" value="2">
     </div>
     <div class="ctrl">
       <label>&nbsp;</label>
-      <button class="resim-btn" id="econstat-resim" type="button">Resimulate</button>
+      <button class="resim-btn" id="econstat-resim" type="button" data-i18n="common.resimulate">Resimulate</button>
     </div>
   </div>
   <div class="stats-grid">
-    <div class="stat pop"><div class="label">True slope</div><div class="value" id="econstat-true">—</div></div>
-    <div class="stat"><div class="label">Estimated b2</div><div class="value" id="econstat-b2">—</div></div>
-    <div class="stat"><div class="label">t-statistic</div><div class="value" id="econstat-tstat">—</div></div>
-    <div class="stat err"><div class="label">p-value</div><div class="value" id="econstat-pval">—</div></div>
-    <div class="stat"><div class="label">Significant?</div><div class="value" id="econstat-sig">—</div></div>
+    <div class="stat pop"><div class="label" data-i18n="widget.econstat.stat.true">True slope</div><div class="value" id="econstat-true">—</div></div>
+    <div class="stat"><div class="label" data-i18n="widget.econstat.stat.b2">Estimated b2</div><div class="value" id="econstat-b2">—</div></div>
+    <div class="stat"><div class="label" data-i18n="stat.tstat">t-statistic</div><div class="value" id="econstat-tstat">—</div></div>
+    <div class="stat err"><div class="label" data-i18n="stat.pval">p-value</div><div class="value" id="econstat-pval">—</div></div>
+    <div class="stat"><div class="label" data-i18n="widget.econstat.stat.sig">Significant?</div><div class="value" id="econstat-sig">—</div></div>
   </div>
   <div class="chart" id="chart-econstat"></div>
   <div class="try-this">
-    <div class="try-title">Try this</div>
-    <ol>
+    <div class="try-title" data-i18n="common.tryTitle">Try this</div>
+    <ol data-i18n="widget.econstat.try">
       <li><strong>Set slope = 0.10 and n = 50, then push n to 2,000.</strong> The same tiny slope flips from non-significant to highly significant. <em>"Significant" does not mean "big."</em></li>
       <li><strong>Set slope = 2.0 and n = 10, then bump n to 30.</strong> The clearly large effect flips from often failing significance to almost always passing. <em>Small samples can hide real effects.</em></li>
       <li><strong>Compare slope = 0.05 at n = 2,000 against slope = 1.5 at n = 15.</strong> One is "significant but tiny"; the other is "large but not significant." <em>The second finding is usually more useful for a real decision.</em></li>
     </ol>
   </div>
 
-  <p class="takeaway"><strong>Take-away:</strong> Significance and magnitude are two different dials — always report the coefficient and its confidence interval, not just the p-value. <a href="../../book/_book/notebooks_quarto/ch07_Statistical_Inference_for_Bivariate_Regression.html#statistical-significance-vs-economic-significance" target="_blank" rel="noopener">Read §7.4 in the chapter →</a></p>
+  <p class="takeaway" data-i18n="widget.econstat.takeaway"><strong>Take-away:</strong> Significance and magnitude are two different dials — always report the coefficient and its confidence interval, not just the p-value. <a href="../../book/_book/notebooks_quarto/ch07_Statistical_Inference_for_Bivariate_Regression.html#statistical-significance-vs-economic-significance" target="_blank" rel="noopener">Read §7.4 in the chapter →</a></p>
 </section>
 
 <!-- ==================== WIDGET 6: Robust Standard Errors ==================== -->
 <section class="widget" id="robust-se">
   <div class="widget-head">
     <div>
-      <h2>Robust Standard Errors</h2>
+      <h2 data-i18n="widget.robustse.heading">Robust Standard Errors</h2>
     </div>
-    <button class="reset-btn" data-reset="robustse">↺ Reset</button>
+    <button class="reset-btn" data-reset="robustse" data-i18n="common.reset">↺ Reset</button>
   </div>
 
-  <p class="motivation">What happens to a textbook standard error when the noise is bigger in some parts of the data than others? <em>The short answer: it lies, and our p-values lie with it.</em></p>
+  <p class="motivation" data-i18n="widget.robustse.motivation">What happens to a textbook standard error when the noise is bigger in some parts of the data than others? <em>The short answer: it lies, and our p-values lie with it.</em></p>
 
-  <div class="key-concept">
+  <div class="key-concept" data-i18n="widget.robustse.kc">
     <span class="kc-title">Heteroskedasticity-robust (HC1) standard errors stay valid even when the error variance changes with x.</span> Default SEs assume <strong>homoskedasticity</strong> (constant Var[u|x]). When that fails, coefficients are still unbiased but the default SEs are wrong, invalidating tests and CIs. <strong>HC1 SEs</strong> work in both cases — modern best practice for cross-sectional data.
   </div>
 
   <div class="widget-howto">
-    <div class="howto-title">What you can do here</div>
-    <ul>
+    <div class="howto-title" data-i18n="common.howtoTitle">What you can do here</div>
+    <ul data-i18n="widget.robustse.howto">
       <li><strong>Toggle Homoskedastic / Heteroskedastic</strong> to change how errors scale with x.</li>
       <li><strong>Slide sample size n</strong> to see how stable each SE is.</li>
       <li><strong>Dial severity</strong> to push the heteroskedastic case harder.</li>
@@ -681,66 +764,66 @@ footer.page a:hover { text-decoration: underline; }
 
   <div class="controls">
     <div class="ctrl">
-      <label>Error structure</label>
+      <label data-i18n="widget.robustse.ctrl.errors.label">Error structure</label>
       <div class="toggle-group" id="robustse-errors">
-        <button type="button" data-val="homo" class="active">Homoskedastic</button>
-        <button type="button" data-val="hetero">Heteroskedastic</button>
+        <button type="button" data-val="homo" class="active" data-i18n="widget.robustse.ctrl.errors.homo">Homoskedastic</button>
+        <button type="button" data-val="hetero" data-i18n="widget.robustse.ctrl.errors.hetero">Heteroskedastic</button>
       </div>
     </div>
     <div class="ctrl">
-      <label for="robustse-n">Sample size n <span class="val" id="robustse-n-val">50</span></label>
+      <label for="robustse-n"><span data-i18n="widget.cisim.ctrl.n.label">Sample size n</span> <span class="val" id="robustse-n-val">50</span></label>
       <input type="range" id="robustse-n" min="20" max="200" step="10" value="50">
     </div>
     <div class="ctrl">
-      <label for="robustse-severity">Het. severity <span class="val" id="robustse-severity-val">50%</span></label>
+      <label for="robustse-severity"><span data-i18n="widget.robustse.ctrl.severity.label">Het. severity</span> <span class="val" id="robustse-severity-val">50%</span></label>
       <input type="range" id="robustse-severity" min="0" max="100" step="5" value="50">
     </div>
     <div class="ctrl">
       <label>&nbsp;</label>
-      <button class="resim-btn" id="robustse-resim" type="button">Resimulate</button>
+      <button class="resim-btn" id="robustse-resim" type="button" data-i18n="common.resimulate">Resimulate</button>
     </div>
   </div>
   <div class="stats-grid">
-    <div class="stat"><div class="label">Standard se(b2)</div><div class="value" id="robustse-std">—</div></div>
-    <div class="stat"><div class="label">Robust se(b2)</div><div class="value" id="robustse-rob">—</div></div>
-    <div class="stat err"><div class="label">Ratio (Robust/Std)</div><div class="value" id="robustse-ratio">—</div></div>
-    <div class="stat"><div class="label">b2</div><div class="value" id="robustse-b2">—</div></div>
-    <div class="stat pop"><div class="label">True slope</div><div class="value">2.0000</div></div>
+    <div class="stat"><div class="label" data-i18n="widget.robustse.stat.std">Standard se(b2)</div><div class="value" id="robustse-std">—</div></div>
+    <div class="stat"><div class="label" data-i18n="widget.robustse.stat.rob">Robust se(b2)</div><div class="value" id="robustse-rob">—</div></div>
+    <div class="stat err"><div class="label" data-i18n="widget.robustse.stat.ratio">Ratio (Robust/Std)</div><div class="value" id="robustse-ratio">—</div></div>
+    <div class="stat"><div class="label" data-i18n="widget.robustse.stat.b2">b2</div><div class="value" id="robustse-b2">—</div></div>
+    <div class="stat pop"><div class="label" data-i18n="widget.cisim.stat.true">True slope</div><div class="value">2.0000</div></div>
   </div>
   <div class="two-col">
     <div class="chart" id="chart-robustse-scatter"></div>
     <div class="chart" id="chart-robustse-resid"></div>
   </div>
   <div class="try-this">
-    <div class="try-title">Try this</div>
-    <ol>
+    <div class="try-title" data-i18n="common.tryTitle">Try this</div>
+    <ol data-i18n="widget.robustse.try">
       <li><strong>Start on Homoskedastic.</strong> Standard and robust SEs are nearly identical — the ratio hugs 1.0. <em>With constant variance, both formulas agree.</em></li>
       <li><strong>Switch to Heteroskedastic at 100% severity.</strong> The residual plot opens into a fan. <em>The robust SE is usually larger, which protects against false positives.</em></li>
       <li><strong>Click Resimulate a few times under heteroskedasticity.</strong> Standard SEs bounce more; robust SEs are steadier. <em>Robust SEs are paying for insurance — you only notice the value when the default fails.</em></li>
     </ol>
   </div>
 
-  <p class="takeaway"><strong>Take-away:</strong> When the error variance can change with x, reach for robust (HC1) SEs — they cost you nothing when homoskedasticity holds. <a href="../../book/_book/notebooks_quarto/ch07_Statistical_Inference_for_Bivariate_Regression.html#robust-standard-errors" target="_blank" rel="noopener">Read §7.7 in the chapter →</a></p>
+  <p class="takeaway" data-i18n="widget.robustse.takeaway"><strong>Take-away:</strong> When the error variance can change with x, reach for robust (HC1) SEs — they cost you nothing when homoskedasticity holds. <a href="../../book/_book/notebooks_quarto/ch07_Statistical_Inference_for_Bivariate_Regression.html#robust-standard-errors" target="_blank" rel="noopener">Read §7.7 in the chapter →</a></p>
 </section>
 
 <!-- ==================== WIDGET 7: House Price Real Data ==================== -->
 <section class="widget" id="house-data">
   <div class="widget-head">
     <div>
-      <h2>House Price Data: Full Inference</h2>
+      <h2 data-i18n="widget.house.heading">House Price Data: Full Inference</h2>
     </div>
-    <button class="reset-btn" data-reset="house">↺ Reset</button>
+    <button class="reset-btn" data-reset="house" data-i18n="common.reset">↺ Reset</button>
   </div>
 
-  <p class="motivation">Twenty-nine houses, one regression line — <em>how much can we actually say</em> about the per-square-foot premium?</p>
+  <p class="motivation" data-i18n="widget.house.motivation">Twenty-nine houses, one regression line — <em>how much can we actually say</em> about the per-square-foot premium?</p>
 
-  <div class="key-concept">
+  <div class="key-concept" data-i18n="widget.house.kc">
     <span class="kc-title">The six inference tools — t-distribution, standard errors, CIs, hypothesis tests, p-values, robust SEs — work together on real data.</span> For these <strong>29 Central Davis houses (1999)</strong>: b₂ = $73.77/sq ft, se(b₂) = 11.17, <strong>95% CI = [50.84, 96.70]</strong>, robust SE = 11.33. The CI excludes 0 (the effect is real) but includes 90 (we cannot rule out a $90/sq ft premium).
   </div>
 
   <div class="widget-howto">
-    <div class="howto-title">What you can do here</div>
-    <ul>
+    <div class="howto-title" data-i18n="common.howtoTitle">What you can do here</div>
+    <ul data-i18n="widget.house.howto">
       <li><strong>Slide the null value</strong> to test different claims about $/sq ft.</li>
       <li><strong>Change the confidence level</strong> to tighten or widen the CI.</li>
       <li><strong>Toggle Standard / Robust</strong> to compare SE types on real data.</li>
@@ -749,50 +832,50 @@ footer.page a:hover { text-decoration: underline; }
 
   <div class="controls">
     <div class="ctrl">
-      <label for="house-null">Test null value ($/sq ft) <span class="val" id="house-null-val">0</span></label>
+      <label for="house-null"><span data-i18n="widget.house.ctrl.null.label">Test null value ($/sq ft)</span> <span class="val" id="house-null-val">0</span></label>
       <input type="range" id="house-null" min="-20" max="120" step="5" value="0">
     </div>
     <div class="ctrl">
-      <label for="house-conf">Confidence level <span class="val" id="house-conf-val">95%</span></label>
+      <label for="house-conf"><span data-i18n="widget.cisim.ctrl.conf.label">Confidence level</span> <span class="val" id="house-conf-val">95%</span></label>
       <input type="range" id="house-conf" min="80" max="99" step="1" value="95">
     </div>
     <div class="ctrl">
-      <label>SE type</label>
+      <label data-i18n="widget.house.ctrl.setype.label">SE type</label>
       <div class="toggle-group" id="house-setype">
-        <button type="button" data-val="standard" class="active">Standard</button>
-        <button type="button" data-val="robust">Robust (HC1)</button>
+        <button type="button" data-val="standard" class="active" data-i18n="widget.house.ctrl.setype.standard">Standard</button>
+        <button type="button" data-val="robust" data-i18n="widget.house.ctrl.setype.robust">Robust (HC1)</button>
       </div>
     </div>
   </div>
   <div class="stats-grid">
-    <div class="stat"><div class="label">b2 (slope)</div><div class="value" id="house-b2">—</div></div>
-    <div class="stat"><div class="label">se(b2)</div><div class="value" id="house-se">—</div></div>
-    <div class="stat"><div class="label">t-statistic</div><div class="value" id="house-tstat">—</div></div>
-    <div class="stat err"><div class="label">p-value</div><div class="value" id="house-pval">—</div></div>
-    <div class="stat"><div class="label">CI</div><div class="value" id="house-ci">—</div></div>
-    <div class="stat pop"><div class="label">R-squared</div><div class="value" id="house-r2">—</div></div>
+    <div class="stat"><div class="label" data-i18n="widget.house.stat.b2">b2 (slope)</div><div class="value" id="house-b2">—</div></div>
+    <div class="stat"><div class="label" data-i18n="widget.hyptest.stat.se">se(b2)</div><div class="value" id="house-se">—</div></div>
+    <div class="stat"><div class="label" data-i18n="stat.tstat">t-statistic</div><div class="value" id="house-tstat">—</div></div>
+    <div class="stat err"><div class="label" data-i18n="stat.pval">p-value</div><div class="value" id="house-pval">—</div></div>
+    <div class="stat"><div class="label" data-i18n="widget.house.stat.ci">CI</div><div class="value" id="house-ci">—</div></div>
+    <div class="stat pop"><div class="label" data-i18n="widget.house.stat.r2">R-squared</div><div class="value" id="house-r2">—</div></div>
   </div>
   <div class="chart" id="chart-house"></div>
   <div class="try-this">
-    <div class="try-title">Try this</div>
-    <ol>
+    <div class="try-title" data-i18n="common.tryTitle">Try this</div>
+    <ol data-i18n="widget.house.try">
       <li><strong>Set null = 0.</strong> t = 6.60, p ≈ 0. <em>House size predicts price beyond reasonable doubt.</em></li>
       <li><strong>Set null = 90, then try null = 97.</strong> 90 sits inside the 95% CI, so we fail to reject; 97 is outside and the decision flips to "reject." <em>The CI and the test point at the same boundary.</em></li>
       <li><strong>Toggle between Standard and Robust SEs.</strong> The CI barely changes (11.17 vs 11.33). <em>Heteroskedasticity looks mild in this dataset — robust and standard agree.</em></li>
     </ol>
   </div>
 
-  <p class="takeaway"><strong>Take-away:</strong> On real data, a narrow CI and a large-magnitude t-statistic tell the same story: house size matters, by about $74/sq ft. <a href="../../book/_book/notebooks_quarto/ch07_Statistical_Inference_for_Bivariate_Regression.html#example-house-price-and-size" target="_blank" rel="noopener">Read §7.1 in the chapter →</a></p>
+  <p class="takeaway" data-i18n="widget.house.takeaway"><strong>Take-away:</strong> On real data, a narrow CI and a large-magnitude t-statistic tell the same story: house size matters, by about $74/sq ft. <a href="../../book/_book/notebooks_quarto/ch07_Statistical_Inference_for_Bivariate_Regression.html#example-house-price-and-size" target="_blank" rel="noopener">Read §7.1 in the chapter →</a></p>
 </section>
 
 <section class="howto-card code-summary" id="code" aria-label="Code summary">
-  <h2>Code Summary</h2>
-  <p class="motivation">You've explored the key concepts interactively — now reproduce them in code. These self-contained blocks cover everything you practiced above. Pick your language, copy the code, and run it.</p>
+  <h2 data-i18n="code.heading">Code Summary</h2>
+  <p class="motivation" data-i18n="code.motivation">You've explored the key concepts interactively — now reproduce them in code. These self-contained blocks cover everything you practiced above. Pick your language, copy the code, and run it.</p>
 
   <div class="code-tabs" id="code-lang-tabs">
-    <button type="button" data-lang="python" class="active">Python</button>
-    <button type="button" data-lang="stata">Stata</button>
-    <button type="button" data-lang="r">R</button>
+    <button type="button" data-lang="python" class="active" data-i18n="code.tab.python">Python</button>
+    <button type="button" data-lang="stata" data-i18n="code.tab.stata">Stata</button>
+    <button type="button" data-lang="r" data-i18n="code.tab.r">R</button>
   </div>
 
   <div class="code-panel active" id="panel-python">
@@ -889,8 +972,8 @@ print(f"{'SE(size)':&lt;20s} {se_slope:&gt;12.2f} {fit_robust.se()['size']:&gt;1
 print(f"{'t-statistic':&lt;20s} {t_stat:&gt;12.2f} {fit_robust.tstat()['size']:&gt;12.2f}")
 print(f"{'p-value':&lt;20s} {p_value:&gt;12.6f} {fit_robust.pvalue()['size']:&gt;12.6f}")</code></pre>
   <div style="display:flex;gap:0.8rem;align-items:center;margin-top:0.8rem;flex-wrap:wrap">
-    <button class="btn-copy" onclick="navigator.clipboard.writeText(document.getElementById('code-python').textContent).then(()=>{this.textContent='Copied!';setTimeout(()=>this.textContent='Copy code',1500)})">Copy code</button>
-    <a class="btn-colab" href="https://colab.research.google.com/notebooks/empty.ipynb" target="_blank" rel="noopener">Open empty Colab notebook &rarr;</a>
+    <button class="btn-copy" data-i18n="code.copy.idle" onclick="navigator.clipboard.writeText(document.getElementById('code-python').textContent).then(()=>{this.textContent=t('code.copy.done');setTimeout(()=>this.textContent=t('code.copy.idle'),1500)})">Copy code</button>
+    <a class="btn-colab" href="https://colab.research.google.com/notebooks/empty.ipynb" target="_blank" rel="noopener" data-i18n="code.colab">Open empty Colab notebook &rarr;</a>
   </div>
   </div>
 
@@ -988,8 +1071,8 @@ display "Comparison of Standard vs. Robust (HC1) Standard Errors:"
 display "SE(size):    Standard = " `se_std'  "   Robust = " _se[size]
 display "t-statistic: Standard = " `t_std'   "   Robust = " _b[size] / _se[size]</code></pre>
   <div style="display:flex;gap:0.8rem;align-items:center;margin-top:0.8rem;flex-wrap:wrap">
-    <button class="btn-copy" onclick="navigator.clipboard.writeText(document.getElementById('code-stata').textContent).then(()=>{this.textContent='Copied!';setTimeout(()=>this.textContent='Copy code',1500)})">Copy code</button>
-    <span style="color:var(--text-muted);font-size:0.88rem">Paste into your Stata do-file editor</span>
+    <button class="btn-copy" data-i18n="code.copy.idle" onclick="navigator.clipboard.writeText(document.getElementById('code-stata').textContent).then(()=>{this.textContent=t('code.copy.done');setTimeout(()=>this.textContent=t('code.copy.idle'),1500)})">Copy code</button>
+    <span style="color:var(--text-muted);font-size:0.88rem" data-i18n="code.note.stata">Paste into your Stata do-file editor</span>
   </div>
   </div>
 
@@ -1073,8 +1156,8 @@ cat("SE(size):    Standard =", round(se_slope, 2),
 cat("t-statistic: Standard =", round(t_stat, 2),
     "  Robust =", round(tstat(model_robust)["size"], 2), "\n")</code></pre>
   <div style="display:flex;gap:0.8rem;align-items:center;margin-top:0.8rem;flex-wrap:wrap">
-    <button class="btn-copy" onclick="navigator.clipboard.writeText(document.getElementById('code-r').textContent).then(()=>{this.textContent='Copied!';setTimeout(()=>this.textContent='Copy code',1500)})">Copy code</button>
-    <span style="color:var(--text-muted);font-size:0.88rem">Paste into your R console or RStudio</span>
+    <button class="btn-copy" data-i18n="code.copy.idle" onclick="navigator.clipboard.writeText(document.getElementById('code-r').textContent).then(()=>{this.textContent=t('code.copy.done');setTimeout(()=>this.textContent=t('code.copy.idle'),1500)})">Copy code</button>
+    <span style="color:var(--text-muted);font-size:0.88rem" data-i18n="code.note.r">Paste into your R console or RStudio</span>
   </div>
   </div>
 </section>
@@ -1082,9 +1165,9 @@ cat("t-statistic: Standard =", round(t_stat, 2),
 </main>
 
 <footer class="page">
-  <p>Part of <a href="https://quarcs-lab.github.io/metricsai/book/_book/index.html"><strong>metricsAI</strong></a> · Chapter 07: Statistical Inference for Bivariate Regression · by Carlos Mendez · <a href="https://github.com/quarcs-lab/metricsai">GitHub</a></p>
-  <p>House price data: 29 houses in Central Davis, California (1999) from AED_HOUSE.DTA.</p>
-  <a class="scroll-top" href="#top">↑ Back to top</a>
+  <p data-i18n="footer.text">Part of <a href="https://quarcs-lab.github.io/metricsai/book/_book/index.html"><strong>metricsAI</strong></a> · Chapter 07: Statistical Inference for Bivariate Regression · by Carlos Mendez · <a href="https://github.com/quarcs-lab/metricsai">GitHub</a></p>
+  <p data-i18n="footer.note">House price data: 29 houses in Central Davis, California (1999) from AED_HOUSE.DTA.</p>
+  <a class="scroll-top" href="#top" data-i18n="footer.scrolltop">↑ Back to top</a>
 </footer>
 
 <script type="application/json" id="ch-data">{"house":{"size":[1400.0,1600.0,1800.0,1600.0,2100.0,1700.0,2100.0,1700.0,1700.0,1600.0,1600.0,1900.0,1600.0,1600.0,2000.0,1400.0,1900.0,2100.0,1500.0,1600.0,1800.0,2000.0,1800.0,1900.0,2600.0,2000.0,2300.0,2400.0,3300.0],"price":[204000.0,212000.0,213000.0,220000.0,224500.0,229000.0,230000.0,233000.0,235000.0,235000.0,236500.0,238000.0,239500.0,241000.0,244000.0,245000.0,249000.0,253000.0,255000.0,258500.0,270000.0,270000.0,272000.0,273000.0,278500.0,279900.0,310000.0,340000.0,375000.0],"regression":{"b1":115017.2826,"b2":73.771,"se_b2":11.1749,"se_b2_robust":11.3297,"se":23550.6559,"R2":0.6175,"n":29,"df":27,"xbar":1882.7586,"ybar":253910.3448,"SSx":4441379.3103}},"convergence":{"countries":["Albania","Algeria","Argentina","Armenia","Australia","Austria","Bangladesh","Belgium","Benin","Bolivia","Brazil","Bulgaria","Burundi","Cambodia","Cameroon","Canada","Central African Republic","Chile","China","Colombia","Congo","Costa Rica","Cote d'Ivoire","Croatia","Czech Republic","Democratic Republic of Congo","Denmark","Dominican Republic","Ecuador","Egypt","El Salvador","Estonia","Finland","France","Germany","Ghana","Greece","Guatemala","Haiti","Honduras","Hong Kong","Hungary","India","Indonesia","Iran","Ireland","Israel","Italy","Jamaica","Japan","Kazakhstan","Kenya","Kyrgyz Republic","Latvia","Lithuania","Malawi","Malaysia","Mali","Mexico","Mongolia","Morocco","Mozambique","Myanmar","Nepal","Netherlands","New Zealand","Nicaragua","Niger","Norway","Pakistan","Panama","Paraguay","Peru","Philippines","Poland","Portugal","Romania","Russia","Rwanda","Saudi Arabia","Senegal","Sierra Leone","Singapore","Slovak Republic","Slovenia","South Africa","South Korea","Spain","Sri Lanka","Sudan","Sweden","Switzerland","Taiwan","Tajikistan","Tanzania","Thailand","Togo","Tunisia","Turkey","Uganda","Ukraine","United Kingdom","United States","Uruguay","Venezuela","Vietnam","Yemen","Zambia"],"productivity":[10873.19,12776.72,20007.18,9118.29,43590.28,45158.24,2887.38,38894.31,2102.85,5798.49,14673.54,16768.48,839.62,2983.79,2680.8,42793.58,598.63,21125.28,12275.32,12710.09,4503.03,13356.3,3218.56,20495.07,28953.49,1199.18,43732.85,12630.67,10921.65,10779.8,7964.36,25692.09,37818.23,38169.15,46189.98,3608.04,24385.19,6874.59,1649.73,4317.93,45399.33,22629.37,5386.09,9642.26,15337.32,51224.51,31242.34,34920.18,7197.93,35270.6,23118.91,2956.07,5599.27,22172.02,24980.13,971.41,21391.48,1506.49,15424.44,10918.35,7251.31,1211.41,5567.87,2577.7,47392.05,33713.18,4494.58,868.01,75920.02,4797.65,19792.19,8168.77,10846.81,6603.0,24278.27,26720.04,20018.52,23768.19,1626.85,46772.05,2309.28,1352.99,66050.36,24944.4,27475.38,11962.84,34585.18,32454.11,10729.67,3681.51,42117.14,61570.26,41514.42,3183.64,2309.13,13586.9,1445.93,10535.25,19521.83,1852.92,10256.67,38324.34,51622.96,19573.24,15117.76,5411.61,3491.14,3576.28],"capital":[127640.2,155396.63,118698.07,36610.1,329658.97,427737.19,25878.04,469572.78,14164.65,24397.26,128932.8,87473.89,2482.35,10385.95,14058.0,323836.97,8187.3,149675.58,86901.92,76396.9,57985.25,69598.88,20597.63,274616.72,341953.53,3153.94,384622.06,102571.95,100192.09,45623.91,41267.63,238241.73,386086.25,443125.28,356783.88,24872.56,502747.31,58347.86,30523.5,36585.52,440963.75,256326.81,44077.54,119061.42,158795.83,535436.13,202648.41,552395.19,126503.72,280624.31,85119.69,17055.21,15036.79,383185.59,234440.61,8800.49,140713.11,10049.23,129880.92,107471.66,108619.98,5999.2,13527.71,12726.2,401166.72,194352.64,35739.33,11631.07,471053.94,27410.98,115138.7,45154.54,62418.48,59648.47,130951.8,446210.56,208357.78,107192.95,6416.93,465393.72,23944.01,9427.29,472351.28,237987.11,349862.06,121865.38,261647.34,479139.25,85120.62,32888.94,373380.56,380356.88,305468.78,77374.37,24351.28,95264.73,9274.1,160419.8,186852.41,15333.91,86393.27,381477.56,355979.28,156742.94,184725.89,27092.06,35054.76,67122.44],"popRegression":{"b1":2648.9862,"b2":0.0949,"se_b2":0.0046,"se_b2_robust":0.0073,"se":7530.2429,"R2":0.8006,"n":108,"df":106,"xbar":165853.5132,"ybar":18382.871,"SSx":2681270733026.3906}},"dgp":{"beta1":1,"beta2":2,"sigmaU":2,"muX":3,"sigmaX":1},"meta":{"chapter":"Chapter 07: Statistical Inference for Bivariate Regression","book":"metricsAI: An Introduction to Econometrics with Python and AI in the Cloud","author":"Carlos Mendez"}}</script>
@@ -1093,6 +1176,426 @@ cat("t-statistic: Standard =", round(t_stat, 2),
 "use strict";
 
 var DATA = JSON.parse(document.getElementById("ch-data").textContent);
+
+// ==================== I18N (EN / ES) ====================
+// English is the source of truth. Spanish entries are real translations
+// (no placeholder prefixes). Strings may contain `{name}` placeholders
+// that are filled by t(key, vars).
+var I18N = {
+  defaultLang: "en",
+  storageKey: "language",
+  en: {
+    "meta.title": "Chapter 07 — Statistical Inference for Bivariate Regression · metricsAI",
+
+    "header.badge":    "Chapter 07 of 18 · Interactive Dashboard",
+    "header.title":    "Statistical Inference for Bivariate Regression",
+    "header.subtitle": "Slide, toggle, and simulate to build intuition for t-statistics, confidence intervals, hypothesis testing, p-values, and robust standard errors.",
+
+    "theme.dark":  "Dark",
+    "theme.light": "Light",
+
+    "nav.tdist":    "t-Distribution",
+    "nav.cisim":    "CI Simulator",
+    "nav.hyptest":  "Hypothesis Test",
+    "nav.pval":     "p-Value Explorer",
+    "nav.econstat": "Econ vs. Stat",
+    "nav.robustse": "Robust SEs",
+    "nav.house":    "House Data",
+    "nav.code":     "Code",
+
+    "common.reset":      "↺ Reset",
+    "common.tryTitle":   "Try this",
+    "common.howtoTitle": "What you can do here",
+    "common.takeaway":   "Take-away:",
+    "common.resimulate": "Resimulate",
+    "common.twoSided":   "Two-Sided",
+    "common.rightTail":  "Right-Tail",
+    "common.leftTail":   "Left-Tail",
+    "common.yes":        "Yes",
+    "common.no":         "No",
+
+    "stat.df":    "df",
+    "stat.tstat": "t-statistic",
+    "stat.pval":  "p-value",
+
+    "chart.density": "Density",
+    "unit.sqft":     "sqft",
+
+    // ---- Widget 1: t-Distribution Explorer ----
+    "widget.tdist.heading":    "t-Distribution Explorer",
+    "widget.tdist.motivation": "When the sample is small, how confident can we be about β₂? The normal bell curve underpromises — it does not account for estimating σ itself. <em>That is the job of the t-distribution.</em>",
+    "widget.tdist.kc":         "<span class=\"kc-title\">The t-distribution is the small-sample cousin of the normal.</span> It is bell-shaped and symmetric, but its tails are <strong>heavier</strong> because we have to estimate the population variance from the sample. It is indexed by <strong>degrees of freedom</strong> (df = n − 2 for bivariate regression), and converges to the normal as df grows — for n &gt; 100 the difference is negligible.",
+    "widget.tdist.howto":      "<li><strong>Slide degrees of freedom</strong> from 1 up to 100 and watch the t-curve melt into N(0,1).</li>\n      <li><strong>Toggle \"95% Tails\"</strong> to see the two rejection regions.</li>\n      <li><strong>Toggle \"95% Center\"</strong> to see the complementary confidence region.</li>",
+    "widget.tdist.ctrl.df.label":   "Degrees of freedom",
+    "widget.tdist.ctrl.area.label": "Show area",
+    "widget.tdist.ctrl.area.none":  "None",
+    "widget.tdist.ctrl.area.tails": "95% Tails",
+    "widget.tdist.ctrl.area.center":"95% Center",
+    "widget.tdist.stat.tcrit":      "t crit (2.5%)",
+    "widget.tdist.stat.zcrit":      "z crit (N(0,1))",
+    "widget.tdist.stat.diff":       "Difference",
+    "widget.tdist.stat.var":        "Variance df/(df-2)",
+    "widget.tdist.try":             "<li><strong>Set df = 3 (only n = 5 observations).</strong> The t critical value is ≈ 3.18 versus 1.96 for the normal. <em>With tiny samples you need much more extreme t-values to reject.</em></li>\n      <li><strong>Slide df to 27 (the house-price sample).</strong> t<sub>crit</sub> = 2.052, only ~5% above 1.96. <em>At this sample size the t and normal are already close enough that either gives almost the same decision.</em></li>\n      <li><strong>Push df to 100.</strong> The two curves visually overlap. <em>This is why large-sample theory happily uses the normal approximation.</em></li>",
+    "widget.tdist.takeaway":        "<strong>Take-away:</strong> When σ is estimated, the t-distribution is the honest ruler — heavy-tailed for small samples, normal-like for big ones. <a href=\"../../book/_book/notebooks_quarto/ch07_Statistical_Inference_for_Bivariate_Regression.html#the-t-statistic\" target=\"_blank\" rel=\"noopener\">Read §7.2 in the chapter →</a>",
+
+    // ---- Widget 2: CI Simulator ----
+    "widget.cisim.heading":    "Confidence Interval Simulator",
+    "widget.cisim.motivation": "You ran <em>one</em> regression and got <em>one</em> confidence interval. So what does 95% actually mean — about this interval, or about the procedure?",
+    "widget.cisim.kc":         "<span class=\"kc-title\">A 95% confidence interval is a statement about the procedure, not this specific interval.</span> Across many resamples, <strong>95% of constructed intervals contain β₂</strong>. It does NOT mean there is a 95% probability that β₂ lies inside the one you computed — β₂ is fixed; the interval is the random thing. The formula is <strong>b₂ &plusmn; t<sub>n−2, α/2</sub> &middot; se(b₂)</strong>.",
+    "widget.cisim.howto":      "<li><strong>Increase the number of CIs</strong> to see the long-run coverage settle down.</li>\n      <li><strong>Shrink the sample size n</strong> to watch each interval get wider.</li>\n      <li><strong>Dial the confidence level</strong> from 80% to 99% and see the trade-off between width and coverage.</li>\n      <li><strong>Click Resimulate</strong> to draw a fresh batch of samples.</li>",
+    "widget.cisim.ctrl.nci.label":  "Number of CIs",
+    "widget.cisim.ctrl.n.label":    "Sample size n",
+    "widget.cisim.ctrl.conf.label": "Confidence level",
+    "widget.cisim.stat.true":       "True slope",
+    "widget.cisim.stat.cov":        "Coverage rate",
+    "widget.cisim.stat.width":      "Avg CI width",
+    "widget.cisim.stat.missed":     "Missed",
+    "widget.cisim.chart.captures":  "Captures β₂",
+    "widget.cisim.chart.misses":    "Misses β₂",
+    "widget.cisim.chart.xaxis":     "Slope estimate (b₂)",
+    "widget.cisim.chart.yaxis":     "Sample #",
+    "widget.cisim.try":             "<li><strong>At n = 30 with 100 intervals, count the pink (missed) ones.</strong> You should see roughly 5; click Resimulate a few times. <em>The miss rate jitters around 5 — exactly what \"95% coverage\" promises.</em></li>\n      <li><strong>Drop n to 10.</strong> Intervals get much wider but coverage stays near 95%. <em>The t-distribution automatically inflates the interval to compensate for small samples.</em></li>\n      <li><strong>Switch the confidence level to 80%.</strong> Intervals narrow sharply and about 20 in 100 miss. <em>Width and coverage are two ends of the same lever.</em></li>",
+    "widget.cisim.takeaway":        "<strong>Take-away:</strong> A CI is an instrument whose long-run hit rate you control — the parameter is fixed; the intervals are the random things. <a href=\"../../book/_book/notebooks_quarto/ch07_Statistical_Inference_for_Bivariate_Regression.html#confidence-intervals\" target=\"_blank\" rel=\"noopener\">Read §7.3 in the chapter →</a>",
+
+    // ---- Widget 3: Hypothesis Testing ----
+    "widget.hyptest.heading":    "Hypothesis Testing Framework",
+    "widget.hyptest.motivation": "Is a slope of $73.77/sq ft really different from a round number like $90? Or from zero? <em>Hypothesis testing turns the question into a reproducible decision.</em>",
+    "widget.hyptest.kc":         "<span class=\"kc-title\">A hypothesis test is a reproducible rule for deciding about a parameter.</span> Write the null H<sub>0</sub> and alternative H<sub>a</sub>, pick a significance level α, compute <strong>t = (b₂ − null) / se(b₂)</strong>, turn t into a p-value, and reject H<sub>0</sub> when p &lt; α. Two-sided tests catch deviations either way; one-sided tests target a direction and have more power there at the cost of none in the other tail. We never \"accept\" H<sub>0</sub> — only fail to reject.",
+    "widget.hyptest.howto":      "<li><strong>Slide the null value</strong> to probe different claims — try 0 (is there any effect?) and 90 (does each sq ft add $90?).</li>\n      <li><strong>Dial α</strong> between 1% and 10% to move the decision threshold.</li>\n      <li><strong>Toggle Two-Sided / Right-Tail / Left-Tail</strong> to reshape the rejection region.</li>",
+    "widget.hyptest.ctrl.null.label":  "Null value (H0: slope =)",
+    "widget.hyptest.ctrl.alpha.label": "Significance level",
+    "widget.hyptest.ctrl.type.label":  "Test type",
+    "widget.hyptest.stat.b2":          "b2 (estimate)",
+    "widget.hyptest.stat.se":          "se(b2)",
+    "widget.hyptest.stat.decision":    "Decision",
+    "widget.hyptest.decision.reject":  "Reject H₀",
+    "widget.hyptest.decision.fail":    "Fail to reject",
+    "widget.hyptest.chart.rejection":  "Rejection region",
+    "widget.hyptest.try":              "<li><strong>Set null = 0 (two-sided).</strong> t = 6.60 sits far in the tail; p ≈ 0. <em>House size clearly matters for price.</em></li>\n      <li><strong>Set null = 90 (two-sided).</strong> t = −1.45, p = 0.158. <em>We fail to reject — the data are consistent with a $90/sq ft effect.</em></li>\n      <li><strong>Keep null = 90 and switch to Left-Tail.</strong> The p-value halves to ~0.079. <em>Directional tests are more powerful in their target direction, at the price of blindness in the other.</em></li>",
+    "widget.hyptest.takeaway":         "<strong>Take-away:</strong> A hypothesis test converts a claim about β₂ into a decision rule you can defend — but you can only ever fail to reject H<sub>0</sub>, never accept it. <a href=\"../../book/_book/notebooks_quarto/ch07_Statistical_Inference_for_Bivariate_Regression.html#tests-of-statistical-significance\" target=\"_blank\" rel=\"noopener\">Read §7.4 in the chapter →</a>",
+
+    // ---- Widget 4: p-Value Explorer ----
+    "widget.pval.heading":    "p-Value Explorer",
+    "widget.pval.motivation": "What does \"p &lt; 0.05\" actually mean? And <em>why does moving the t-statistic a little shrink the p-value so much?</em>",
+    "widget.pval.kc":         "<span class=\"kc-title\">The p-value is the probability of seeing a test statistic at least this extreme if H<sub>0</sub> were true.</span> Small p means your data would be rare under H<sub>0</sub> — strong evidence against it. Rough thresholds: <strong>&lt; 0.01</strong> strong, <strong>&lt; 0.05</strong> moderate, <strong>&lt; 0.10</strong> weak. A small p does NOT mean H<sub>0</sub> is false with that probability, and it says nothing about effect size.",
+    "widget.pval.howto":      "<li><strong>Drag the t-statistic</strong> between −5 and 5 and watch the shaded area update live.</li>\n      <li><strong>Change df</strong> to see how sample size shifts the curve shape.</li>\n      <li><strong>Toggle the test type</strong> to switch between one- and two-tailed p-values.</li>",
+    "widget.pval.stat.abst": "|t|",
+    "widget.pval.stat.sig5": "Significant at 5%?",
+    "widget.pval.stat.sig1": "Significant at 1%?",
+    "widget.pval.try":       "<li><strong>Set t = 1.96 with df = 27 (two-sided).</strong> The p-value lands just above 0.05. <em>The t-tail needs slightly more extreme values than the normal does.</em></li>\n      <li><strong>Nudge to t = 2.05 (the df = 27 critical value).</strong> p is exactly 0.05. <em>This is the boundary between \"reject\" and \"fail to reject\" at the 5% level.</em></li>\n      <li><strong>Drag t from 0 to 5 slowly.</strong> The p-value slides from 1.0 toward 0. <em>The mapping is monotonic but very nonlinear — small changes near the critical value move p a lot.</em></li>",
+    "widget.pval.takeaway":  "<strong>Take-away:</strong> p measures how surprising your data would be under H<sub>0</sub> — not how likely H<sub>0</sub> is, and not how big the effect is. <a href=\"../../book/_book/notebooks_quarto/ch07_Statistical_Inference_for_Bivariate_Regression.html#two-sided-hypothesis-tests\" target=\"_blank\" rel=\"noopener\">Read §7.5 in the chapter →</a>",
+
+    // ---- Widget 5: Economic vs Statistical Significance ----
+    "widget.econstat.heading":    "Economic vs. Statistical Significance",
+    "widget.econstat.motivation": "A news headline says an effect is \"statistically significant.\" Does that mean it matters in dollars? <em>Not always</em> — sample size can dress up a trivial effect or hide an important one.",
+    "widget.econstat.kc":         "<span class=\"kc-title\">Statistical and economic significance answer different questions.</span> <strong>Statistical</strong> asks \"is the effect different from zero?\" — driven by t = b₂/se(b₂), which grows with <em>n</em>. <strong>Economic</strong> asks \"is the effect large enough to matter?\" — driven by the coefficient's size in context. Large n can make trivial effects significant; small n can hide real ones. Always report both the estimate and its confidence interval.",
+    "widget.econstat.howto":      "<li><strong>Slide the true slope</strong> to set the population effect size.</li>\n      <li><strong>Slide sample size n</strong> from 10 to 2,000 — this is the key lever.</li>\n      <li><strong>Adjust the error σ</strong> to change noise.</li>\n      <li><strong>Click Resimulate</strong> for a fresh random draw.</li>",
+    "widget.econstat.ctrl.beta.label":  "True slope",
+    "widget.econstat.ctrl.sigma.label": "Error sigma",
+    "widget.econstat.stat.true":        "True slope",
+    "widget.econstat.stat.b2":          "Estimated b2",
+    "widget.econstat.stat.sig":         "Significant?",
+    "widget.econstat.sig.yes":          "Yes (p < 0.05)",
+    "widget.econstat.sig.no":           "No (p ≥ 0.05)",
+    "widget.econstat.chart.data":       "Data",
+    "widget.econstat.chart.trueLine":   "True line",
+    "widget.econstat.chart.ols":        "OLS",
+    "widget.econstat.chart.zero":       "Zero slope",
+    "widget.econstat.title.sig":        "Statistically significant (p={p})",
+    "widget.econstat.title.notsig":     "Not significant (p={p})",
+    "widget.econstat.try":              "<li><strong>Set slope = 0.10 and n = 50, then push n to 2,000.</strong> The same tiny slope flips from non-significant to highly significant. <em>\"Significant\" does not mean \"big.\"</em></li>\n      <li><strong>Set slope = 2.0 and n = 10, then bump n to 30.</strong> The clearly large effect flips from often failing significance to almost always passing. <em>Small samples can hide real effects.</em></li>\n      <li><strong>Compare slope = 0.05 at n = 2,000 against slope = 1.5 at n = 15.</strong> One is \"significant but tiny\"; the other is \"large but not significant.\" <em>The second finding is usually more useful for a real decision.</em></li>",
+    "widget.econstat.takeaway":         "<strong>Take-away:</strong> Significance and magnitude are two different dials — always report the coefficient and its confidence interval, not just the p-value. <a href=\"../../book/_book/notebooks_quarto/ch07_Statistical_Inference_for_Bivariate_Regression.html#statistical-significance-vs-economic-significance\" target=\"_blank\" rel=\"noopener\">Read §7.4 in the chapter →</a>",
+
+    // ---- Widget 6: Robust Standard Errors ----
+    "widget.robustse.heading":    "Robust Standard Errors",
+    "widget.robustse.motivation": "What happens to a textbook standard error when the noise is bigger in some parts of the data than others? <em>The short answer: it lies, and our p-values lie with it.</em>",
+    "widget.robustse.kc":         "<span class=\"kc-title\">Heteroskedasticity-robust (HC1) standard errors stay valid even when the error variance changes with x.</span> Default SEs assume <strong>homoskedasticity</strong> (constant Var[u|x]). When that fails, coefficients are still unbiased but the default SEs are wrong, invalidating tests and CIs. <strong>HC1 SEs</strong> work in both cases — modern best practice for cross-sectional data.",
+    "widget.robustse.howto":      "<li><strong>Toggle Homoskedastic / Heteroskedastic</strong> to change how errors scale with x.</li>\n      <li><strong>Slide sample size n</strong> to see how stable each SE is.</li>\n      <li><strong>Dial severity</strong> to push the heteroskedastic case harder.</li>\n      <li><strong>Click Resimulate</strong> for a fresh random draw.</li>",
+    "widget.robustse.ctrl.errors.label":    "Error structure",
+    "widget.robustse.ctrl.errors.homo":     "Homoskedastic",
+    "widget.robustse.ctrl.errors.hetero":   "Heteroskedastic",
+    "widget.robustse.ctrl.severity.label":  "Het. severity",
+    "widget.robustse.stat.std":             "Standard se(b2)",
+    "widget.robustse.stat.rob":             "Robust se(b2)",
+    "widget.robustse.stat.ratio":           "Ratio (Robust/Std)",
+    "widget.robustse.stat.b2":              "b2",
+    "widget.robustse.chart.data":           "Data",
+    "widget.robustse.chart.trueLine":       "True line",
+    "widget.robustse.chart.ols":            "OLS fit",
+    "widget.robustse.chart.titleHomo":      "Homoskedastic Errors",
+    "widget.robustse.chart.titleHetero":    "Heteroskedastic Errors",
+    "widget.robustse.chart.residuals":      "Residuals",
+    "widget.robustse.chart.titleResid":     "Residuals vs. Fitted",
+    "widget.robustse.chart.xaxisResid":     "Fitted values (ŷ)",
+    "widget.robustse.chart.yaxisResid":     "Residuals (e)",
+    "widget.robustse.try":                  "<li><strong>Start on Homoskedastic.</strong> Standard and robust SEs are nearly identical — the ratio hugs 1.0. <em>With constant variance, both formulas agree.</em></li>\n      <li><strong>Switch to Heteroskedastic at 100% severity.</strong> The residual plot opens into a fan. <em>The robust SE is usually larger, which protects against false positives.</em></li>\n      <li><strong>Click Resimulate a few times under heteroskedasticity.</strong> Standard SEs bounce more; robust SEs are steadier. <em>Robust SEs are paying for insurance — you only notice the value when the default fails.</em></li>",
+    "widget.robustse.takeaway":             "<strong>Take-away:</strong> When the error variance can change with x, reach for robust (HC1) SEs — they cost you nothing when homoskedasticity holds. <a href=\"../../book/_book/notebooks_quarto/ch07_Statistical_Inference_for_Bivariate_Regression.html#robust-standard-errors\" target=\"_blank\" rel=\"noopener\">Read §7.7 in the chapter →</a>",
+
+    // ---- Widget 7: House Price Real Data ----
+    "widget.house.heading":    "House Price Data: Full Inference",
+    "widget.house.motivation": "Twenty-nine houses, one regression line — <em>how much can we actually say</em> about the per-square-foot premium?",
+    "widget.house.kc":         "<span class=\"kc-title\">The six inference tools — t-distribution, standard errors, CIs, hypothesis tests, p-values, robust SEs — work together on real data.</span> For these <strong>29 Central Davis houses (1999)</strong>: b₂ = $73.77/sq ft, se(b₂) = 11.17, <strong>95% CI = [50.84, 96.70]</strong>, robust SE = 11.33. The CI excludes 0 (the effect is real) but includes 90 (we cannot rule out a $90/sq ft premium).",
+    "widget.house.howto":      "<li><strong>Slide the null value</strong> to test different claims about $/sq ft.</li>\n      <li><strong>Change the confidence level</strong> to tighten or widen the CI.</li>\n      <li><strong>Toggle Standard / Robust</strong> to compare SE types on real data.</li>",
+    "widget.house.ctrl.null.label":      "Test null value ($/sq ft)",
+    "widget.house.ctrl.setype.label":    "SE type",
+    "widget.house.ctrl.setype.standard": "Standard",
+    "widget.house.ctrl.setype.robust":   "Robust (HC1)",
+    "widget.house.stat.b2":              "b2 (slope)",
+    "widget.house.stat.ci":              "CI",
+    "widget.house.stat.r2":              "R-squared",
+    "widget.house.chart.houses":         "Houses (n=29)",
+    "widget.house.chart.hoverSize":      "Size",
+    "widget.house.chart.hoverPrice":     "Price",
+    "widget.house.chart.sizeWord":       "size",
+    "widget.house.chart.ciBand":         "CI band",
+    "widget.house.chart.xaxis":          "House Size (sq ft)",
+    "widget.house.chart.yaxis":          "Price ($)",
+    "widget.house.try":                  "<li><strong>Set null = 0.</strong> t = 6.60, p ≈ 0. <em>House size predicts price beyond reasonable doubt.</em></li>\n      <li><strong>Set null = 90, then try null = 97.</strong> 90 sits inside the 95% CI, so we fail to reject; 97 is outside and the decision flips to \"reject.\" <em>The CI and the test point at the same boundary.</em></li>\n      <li><strong>Toggle between Standard and Robust SEs.</strong> The CI barely changes (11.17 vs 11.33). <em>Heteroskedasticity looks mild in this dataset — robust and standard agree.</em></li>",
+    "widget.house.takeaway":             "<strong>Take-away:</strong> On real data, a narrow CI and a large-magnitude t-statistic tell the same story: house size matters, by about $74/sq ft. <a href=\"../../book/_book/notebooks_quarto/ch07_Statistical_Inference_for_Bivariate_Regression.html#example-house-price-and-size\" target=\"_blank\" rel=\"noopener\">Read §7.1 in the chapter →</a>",
+
+    // ---- Code summary ----
+    "code.heading":    "Code Summary",
+    "code.motivation": "You've explored the key concepts interactively — now reproduce them in code. These self-contained blocks cover everything you practiced above. Pick your language, copy the code, and run it.",
+    "code.tab.python": "Python",
+    "code.tab.stata":  "Stata",
+    "code.tab.r":      "R",
+    "code.copy.idle":  "Copy code",
+    "code.copy.done":  "Copied!",
+    "code.colab":      "Open empty Colab notebook &rarr;",
+    "code.note.stata": "Paste into your Stata do-file editor",
+    "code.note.r":     "Paste into your R console or RStudio",
+
+    // ---- Footer ----
+    "footer.text":      "Part of <a href=\"https://quarcs-lab.github.io/metricsai/book/_book/index.html\"><strong>metricsAI</strong></a> · Chapter 07: Statistical Inference for Bivariate Regression · by Carlos Mendez · <a href=\"https://github.com/quarcs-lab/metricsai\">GitHub</a>",
+    "footer.note":      "House price data: 29 houses in Central Davis, California (1999) from AED_HOUSE.DTA.",
+    "footer.scrolltop": "↑ Back to top"
+  },
+  es: {
+    "meta.title": "Capítulo 07 — Inferencia estadística para regresión bivariada · metricsAI",
+
+    "header.badge":    "Capítulo 07 de 18 · Tablero interactivo",
+    "header.title":    "Inferencia estadística para regresión bivariada",
+    "header.subtitle": "Desliza, alterna y simula para construir intuición sobre estadísticos t, intervalos de confianza, pruebas de hipótesis, valores p y errores estándar robustos.",
+
+    "theme.dark":  "Oscuro",
+    "theme.light": "Claro",
+
+    "nav.tdist":    "Distribución t",
+    "nav.cisim":    "Simulador de IC",
+    "nav.hyptest":  "Prueba de hipótesis",
+    "nav.pval":     "Explorador del valor p",
+    "nav.econstat": "Económica vs. estadística",
+    "nav.robustse": "EE robustos",
+    "nav.house":    "Datos de viviendas",
+    "nav.code":     "Código",
+
+    "common.reset":      "↺ Reiniciar",
+    "common.tryTitle":   "Pruébalo",
+    "common.howtoTitle": "Qué puedes hacer aquí",
+    "common.takeaway":   "Para recordar:",
+    "common.resimulate": "Resimular",
+    "common.twoSided":   "Dos colas",
+    "common.rightTail":  "Cola derecha",
+    "common.leftTail":   "Cola izquierda",
+    "common.yes":        "Sí",
+    "common.no":         "No",
+
+    "stat.df":    "gl",
+    "stat.tstat": "Estadístico t",
+    "stat.pval":  "Valor p",
+
+    "chart.density": "Densidad",
+    "unit.sqft":     "pies²",
+
+    // ---- Widget 1: t-Distribution Explorer ----
+    "widget.tdist.heading":    "Explorador de la distribución t",
+    "widget.tdist.motivation": "Cuando la muestra es pequeña, ¿cuánta confianza podemos tener en β₂? La curva normal promete de menos — no tiene en cuenta que también estimamos σ. <em>Ese es el trabajo de la distribución t.</em>",
+    "widget.tdist.kc":         "<span class=\"kc-title\">La distribución t es la prima de la normal para muestras pequeñas.</span> Es acampanada y simétrica, pero sus colas son <strong>más pesadas</strong> porque tenemos que estimar la varianza poblacional a partir de la muestra. Está indexada por <strong>grados de libertad</strong> (gl = n − 2 para regresión bivariada) y converge a la normal a medida que crecen los gl — para n &gt; 100 la diferencia es despreciable.",
+    "widget.tdist.howto":      "<li><strong>Desliza los grados de libertad</strong> de 1 a 100 y observa cómo la curva t se funde en N(0,1).</li>\n      <li><strong>Activa \"95% colas\"</strong> para ver las dos regiones de rechazo.</li>\n      <li><strong>Activa \"95% centro\"</strong> para ver la región de confianza complementaria.</li>",
+    "widget.tdist.ctrl.df.label":   "Grados de libertad",
+    "widget.tdist.ctrl.area.label": "Mostrar área",
+    "widget.tdist.ctrl.area.none":  "Ninguna",
+    "widget.tdist.ctrl.area.tails": "95% colas",
+    "widget.tdist.ctrl.area.center":"95% centro",
+    "widget.tdist.stat.tcrit":      "t-crít (2.5%)",
+    "widget.tdist.stat.zcrit":      "z-crít (N(0,1))",
+    "widget.tdist.stat.diff":       "Diferencia",
+    "widget.tdist.stat.var":        "Varianza gl/(gl-2)",
+    "widget.tdist.try":             "<li><strong>Pon gl = 3 (solo n = 5 observaciones).</strong> El valor crítico t es ≈ 3.18 frente a 1.96 de la normal. <em>Con muestras pequeñas necesitas valores t mucho más extremos para rechazar.</em></li>\n      <li><strong>Desliza gl a 27 (la muestra de precios de viviendas).</strong> t<sub>crít</sub> = 2.052, solo ~5% por encima de 1.96. <em>A este tamaño de muestra, t y normal ya son tan parecidas que cualquiera da casi la misma decisión.</em></li>\n      <li><strong>Empuja gl a 100.</strong> Las dos curvas se superponen visualmente. <em>Por eso la teoría de muestras grandes usa con gusto la aproximación normal.</em></li>",
+    "widget.tdist.takeaway":        "<strong>Para recordar:</strong> Cuando σ se estima, la distribución t es la regla honesta — colas pesadas para muestras pequeñas, casi normal para las grandes. <a href=\"../../book/_book/notebooks_quarto/ch07_Statistical_Inference_for_Bivariate_Regression.html#the-t-statistic\" target=\"_blank\" rel=\"noopener\">Lee §7.2 en el capítulo →</a>",
+
+    // ---- Widget 2: CI Simulator ----
+    "widget.cisim.heading":    "Simulador de intervalos de confianza",
+    "widget.cisim.motivation": "Corriste <em>una</em> regresión y obtuviste <em>un</em> intervalo de confianza. ¿Qué significa entonces 95% — sobre este intervalo o sobre el procedimiento?",
+    "widget.cisim.kc":         "<span class=\"kc-title\">Un intervalo de confianza del 95% es una afirmación sobre el procedimiento, no sobre este intervalo en particular.</span> A lo largo de muchas remuestreos, <strong>el 95% de los intervalos construidos contiene a β₂</strong>. NO significa que haya una probabilidad del 95% de que β₂ esté dentro del que tú calculaste — β₂ es fijo; el intervalo es lo aleatorio. La fórmula es <strong>b₂ &plusmn; t<sub>n−2, α/2</sub> &middot; ee(b₂)</strong>.",
+    "widget.cisim.howto":      "<li><strong>Aumenta el número de IC</strong> para ver cómo se estabiliza la cobertura a largo plazo.</li>\n      <li><strong>Reduce el tamaño de muestra n</strong> para ver cómo cada intervalo se vuelve más ancho.</li>\n      <li><strong>Ajusta el nivel de confianza</strong> entre 80% y 99% y observa el compromiso entre amplitud y cobertura.</li>\n      <li><strong>Haz clic en Resimular</strong> para extraer una nueva tanda de muestras.</li>",
+    "widget.cisim.ctrl.nci.label":  "Número de IC",
+    "widget.cisim.ctrl.n.label":    "Tamaño de muestra n",
+    "widget.cisim.ctrl.conf.label": "Nivel de confianza",
+    "widget.cisim.stat.true":       "Pendiente verdadera",
+    "widget.cisim.stat.cov":        "Tasa de cobertura",
+    "widget.cisim.stat.width":      "Amplitud media del IC",
+    "widget.cisim.stat.missed":     "Errados",
+    "widget.cisim.chart.captures":  "Captura β₂",
+    "widget.cisim.chart.misses":    "Falla β₂",
+    "widget.cisim.chart.xaxis":     "Estimación de la pendiente (b₂)",
+    "widget.cisim.chart.yaxis":     "Muestra #",
+    "widget.cisim.try":             "<li><strong>Con n = 30 y 100 intervalos, cuenta los rosas (errados).</strong> Deberías ver aproximadamente 5; haz clic en Resimular varias veces. <em>La tasa de fallo oscila alrededor de 5 — exactamente lo que promete una \"cobertura del 95%\".</em></li>\n      <li><strong>Baja n a 10.</strong> Los intervalos se vuelven mucho más anchos pero la cobertura se mantiene cerca del 95%. <em>La distribución t infla automáticamente el intervalo para compensar las muestras pequeñas.</em></li>\n      <li><strong>Cambia el nivel de confianza al 80%.</strong> Los intervalos se estrechan bruscamente y unos 20 de cada 100 fallan. <em>Amplitud y cobertura son los dos extremos de la misma palanca.</em></li>",
+    "widget.cisim.takeaway":        "<strong>Para recordar:</strong> Un IC es un instrumento cuya tasa de acierto a largo plazo tú controlas — el parámetro es fijo; los intervalos son lo aleatorio. <a href=\"../../book/_book/notebooks_quarto/ch07_Statistical_Inference_for_Bivariate_Regression.html#confidence-intervals\" target=\"_blank\" rel=\"noopener\">Lee §7.3 en el capítulo →</a>",
+
+    // ---- Widget 3: Hypothesis Testing ----
+    "widget.hyptest.heading":    "Marco de pruebas de hipótesis",
+    "widget.hyptest.motivation": "¿Es una pendiente de $73.77/pie² realmente diferente de un número redondo como $90? ¿O de cero? <em>La prueba de hipótesis convierte la pregunta en una decisión reproducible.</em>",
+    "widget.hyptest.kc":         "<span class=\"kc-title\">Una prueba de hipótesis es una regla reproducible para decidir sobre un parámetro.</span> Escribe la nula H<sub>0</sub> y la alternativa H<sub>a</sub>, elige un nivel de significancia α, calcula <strong>t = (b₂ − nula) / ee(b₂)</strong>, convierte t en un valor p y rechaza H<sub>0</sub> cuando p &lt; α. Las pruebas de dos colas detectan desviaciones en cualquier dirección; las de una cola apuntan a una dirección y tienen más potencia allí, a costa de no tener ninguna en la otra cola. Nunca \"aceptamos\" H<sub>0</sub> — solo no la rechazamos.",
+    "widget.hyptest.howto":      "<li><strong>Desliza el valor nulo</strong> para examinar diferentes afirmaciones — prueba 0 (¿hay algún efecto?) y 90 (¿cada pie² añade $90?).</li>\n      <li><strong>Ajusta α</strong> entre 1% y 10% para mover el umbral de decisión.</li>\n      <li><strong>Alterna entre Dos colas / Cola derecha / Cola izquierda</strong> para reformar la región de rechazo.</li>",
+    "widget.hyptest.ctrl.null.label":  "Valor nulo (H0: pendiente =)",
+    "widget.hyptest.ctrl.alpha.label": "Nivel de significancia",
+    "widget.hyptest.ctrl.type.label":  "Tipo de prueba",
+    "widget.hyptest.stat.b2":          "b2 (estimación)",
+    "widget.hyptest.stat.se":          "ee(b2)",
+    "widget.hyptest.stat.decision":    "Decisión",
+    "widget.hyptest.decision.reject":  "Rechazar H₀",
+    "widget.hyptest.decision.fail":    "No rechazar",
+    "widget.hyptest.chart.rejection":  "Región de rechazo",
+    "widget.hyptest.try":              "<li><strong>Pon nula = 0 (dos colas).</strong> t = 6.60 cae lejos en la cola; p ≈ 0. <em>El tamaño de la casa importa claramente para el precio.</em></li>\n      <li><strong>Pon nula = 90 (dos colas).</strong> t = −1.45, p = 0.158. <em>No rechazamos — los datos son consistentes con un efecto de $90/pie².</em></li>\n      <li><strong>Mantén nula = 90 y cambia a Cola izquierda.</strong> El valor p se reduce a la mitad, ~0.079. <em>Las pruebas direccionales son más potentes en su dirección objetivo, al precio de ceguera en la otra.</em></li>",
+    "widget.hyptest.takeaway":         "<strong>Para recordar:</strong> Una prueba de hipótesis convierte una afirmación sobre β₂ en una regla de decisión que puedes defender — pero solo puedes no rechazar H<sub>0</sub>, nunca aceptarla. <a href=\"../../book/_book/notebooks_quarto/ch07_Statistical_Inference_for_Bivariate_Regression.html#tests-of-statistical-significance\" target=\"_blank\" rel=\"noopener\">Lee §7.4 en el capítulo →</a>",
+
+    // ---- Widget 4: p-Value Explorer ----
+    "widget.pval.heading":    "Explorador del valor p",
+    "widget.pval.motivation": "¿Qué significa realmente \"p &lt; 0.05\"? Y <em>¿por qué mover un poco el estadístico t reduce tanto el valor p?</em>",
+    "widget.pval.kc":         "<span class=\"kc-title\">El valor p es la probabilidad de ver un estadístico de prueba al menos tan extremo si H<sub>0</sub> fuera cierta.</span> Un p pequeño significa que tus datos serían raros bajo H<sub>0</sub> — fuerte evidencia en su contra. Umbrales aproximados: <strong>&lt; 0.01</strong> fuerte, <strong>&lt; 0.05</strong> moderado, <strong>&lt; 0.10</strong> débil. Un p pequeño NO significa que H<sub>0</sub> sea falsa con esa probabilidad, y no dice nada sobre el tamaño del efecto.",
+    "widget.pval.howto":      "<li><strong>Arrastra el estadístico t</strong> entre −5 y 5 y observa cómo el área sombreada se actualiza en vivo.</li>\n      <li><strong>Cambia los gl</strong> para ver cómo el tamaño de la muestra cambia la forma de la curva.</li>\n      <li><strong>Alterna el tipo de prueba</strong> para cambiar entre valores p de una y dos colas.</li>",
+    "widget.pval.stat.abst": "|t|",
+    "widget.pval.stat.sig5": "¿Significativo al 5%?",
+    "widget.pval.stat.sig1": "¿Significativo al 1%?",
+    "widget.pval.try":       "<li><strong>Pon t = 1.96 con gl = 27 (dos colas).</strong> El valor p queda justo por encima de 0.05. <em>La cola t necesita valores ligeramente más extremos que la normal.</em></li>\n      <li><strong>Empuja a t = 2.05 (el valor crítico para gl = 27).</strong> p es exactamente 0.05. <em>Esta es la frontera entre \"rechazar\" y \"no rechazar\" al nivel del 5%.</em></li>\n      <li><strong>Arrastra t lentamente de 0 a 5.</strong> El valor p se desliza de 1.0 hacia 0. <em>El mapeo es monótono pero muy no lineal — pequeños cambios cerca del valor crítico mueven mucho a p.</em></li>",
+    "widget.pval.takeaway":  "<strong>Para recordar:</strong> p mide cuán sorprendentes serían tus datos bajo H<sub>0</sub> — no cuán probable es H<sub>0</sub>, ni cuán grande es el efecto. <a href=\"../../book/_book/notebooks_quarto/ch07_Statistical_Inference_for_Bivariate_Regression.html#two-sided-hypothesis-tests\" target=\"_blank\" rel=\"noopener\">Lee §7.5 en el capítulo →</a>",
+
+    // ---- Widget 5: Economic vs Statistical Significance ----
+    "widget.econstat.heading":    "Significancia económica vs. estadística",
+    "widget.econstat.motivation": "Un titular de prensa dice que un efecto es \"estadísticamente significativo\". ¿Significa eso que importa en dólares? <em>No siempre</em> — el tamaño de la muestra puede arropar un efecto trivial u ocultar uno importante.",
+    "widget.econstat.kc":         "<span class=\"kc-title\">La significancia estadística y la económica responden preguntas diferentes.</span> La <strong>estadística</strong> pregunta \"¿es el efecto distinto de cero?\" — impulsada por t = b₂/ee(b₂), que crece con <em>n</em>. La <strong>económica</strong> pregunta \"¿es el efecto lo bastante grande para importar?\" — impulsada por la magnitud del coeficiente en su contexto. Una n grande puede hacer significativos efectos triviales; una n pequeña puede ocultar efectos reales. Reporta siempre la estimación y su intervalo de confianza.",
+    "widget.econstat.howto":      "<li><strong>Desliza la pendiente verdadera</strong> para fijar el tamaño del efecto poblacional.</li>\n      <li><strong>Desliza el tamaño de muestra n</strong> de 10 a 2,000 — esta es la palanca clave.</li>\n      <li><strong>Ajusta el error σ</strong> para cambiar el ruido.</li>\n      <li><strong>Haz clic en Resimular</strong> para una nueva extracción aleatoria.</li>",
+    "widget.econstat.ctrl.beta.label":  "Pendiente verdadera",
+    "widget.econstat.ctrl.sigma.label": "Sigma del error",
+    "widget.econstat.stat.true":        "Pendiente verdadera",
+    "widget.econstat.stat.b2":          "b2 estimada",
+    "widget.econstat.stat.sig":         "¿Significativa?",
+    "widget.econstat.sig.yes":          "Sí (p < 0.05)",
+    "widget.econstat.sig.no":           "No (p ≥ 0.05)",
+    "widget.econstat.chart.data":       "Datos",
+    "widget.econstat.chart.trueLine":   "Línea verdadera",
+    "widget.econstat.chart.ols":        "MCO",
+    "widget.econstat.chart.zero":       "Pendiente cero",
+    "widget.econstat.title.sig":        "Estadísticamente significativo (p={p})",
+    "widget.econstat.title.notsig":     "No significativo (p={p})",
+    "widget.econstat.try":              "<li><strong>Pon pendiente = 0.10 y n = 50, luego empuja n a 2,000.</strong> La misma pendiente diminuta pasa de no significativa a altamente significativa. <em>\"Significativo\" no significa \"grande\".</em></li>\n      <li><strong>Pon pendiente = 2.0 y n = 10, luego sube n a 30.</strong> El efecto claramente grande pasa de fallar a menudo la significancia a casi siempre superarla. <em>Las muestras pequeñas pueden ocultar efectos reales.</em></li>\n      <li><strong>Compara pendiente = 0.05 con n = 2,000 contra pendiente = 1.5 con n = 15.</strong> Uno es \"significativo pero diminuto\"; el otro es \"grande pero no significativo\". <em>El segundo hallazgo suele ser más útil para una decisión real.</em></li>",
+    "widget.econstat.takeaway":         "<strong>Para recordar:</strong> Significancia y magnitud son dos perillas diferentes — reporta siempre el coeficiente y su intervalo de confianza, no solo el valor p. <a href=\"../../book/_book/notebooks_quarto/ch07_Statistical_Inference_for_Bivariate_Regression.html#statistical-significance-vs-economic-significance\" target=\"_blank\" rel=\"noopener\">Lee §7.4 en el capítulo →</a>",
+
+    // ---- Widget 6: Robust Standard Errors ----
+    "widget.robustse.heading":    "Errores estándar robustos",
+    "widget.robustse.motivation": "¿Qué le ocurre a un error estándar de libro de texto cuando el ruido es mayor en algunas partes de los datos que en otras? <em>La respuesta corta: miente, y nuestros valores p mienten con él.</em>",
+    "widget.robustse.kc":         "<span class=\"kc-title\">Los errores estándar robustos a la heterocedasticidad (HC1) siguen siendo válidos incluso cuando la varianza del error cambia con x.</span> Los EE por defecto suponen <strong>homocedasticidad</strong> (Var[u|x] constante). Cuando esto falla, los coeficientes siguen siendo insesgados, pero los EE por defecto son incorrectos, invalidando pruebas e IC. Los <strong>EE HC1</strong> funcionan en ambos casos — la mejor práctica moderna para datos de corte transversal.",
+    "widget.robustse.howto":      "<li><strong>Alterna entre Homocedástico / Heterocedástico</strong> para cambiar cómo escalan los errores con x.</li>\n      <li><strong>Desliza el tamaño de muestra n</strong> para ver cuán estable es cada EE.</li>\n      <li><strong>Ajusta la severidad</strong> para empujar más fuerte el caso heterocedástico.</li>\n      <li><strong>Haz clic en Resimular</strong> para una nueva extracción aleatoria.</li>",
+    "widget.robustse.ctrl.errors.label":    "Estructura del error",
+    "widget.robustse.ctrl.errors.homo":     "Homocedástico",
+    "widget.robustse.ctrl.errors.hetero":   "Heterocedástico",
+    "widget.robustse.ctrl.severity.label":  "Severidad heter.",
+    "widget.robustse.stat.std":             "ee(b2) estándar",
+    "widget.robustse.stat.rob":             "ee(b2) robusto",
+    "widget.robustse.stat.ratio":           "Razón (Robusto/Estándar)",
+    "widget.robustse.stat.b2":              "b2",
+    "widget.robustse.chart.data":           "Datos",
+    "widget.robustse.chart.trueLine":       "Línea verdadera",
+    "widget.robustse.chart.ols":            "Ajuste MCO",
+    "widget.robustse.chart.titleHomo":      "Errores homocedásticos",
+    "widget.robustse.chart.titleHetero":    "Errores heterocedásticos",
+    "widget.robustse.chart.residuals":      "Residuos",
+    "widget.robustse.chart.titleResid":     "Residuos vs. ajustados",
+    "widget.robustse.chart.xaxisResid":     "Valores ajustados (ŷ)",
+    "widget.robustse.chart.yaxisResid":     "Residuos (e)",
+    "widget.robustse.try":                  "<li><strong>Empieza en Homocedástico.</strong> Los EE estándar y robustos son casi idénticos — la razón se pega a 1.0. <em>Con varianza constante, ambas fórmulas coinciden.</em></li>\n      <li><strong>Cambia a Heterocedástico al 100% de severidad.</strong> El gráfico de residuos se abre como un abanico. <em>El EE robusto suele ser mayor, lo que protege contra falsos positivos.</em></li>\n      <li><strong>Haz clic en Resimular varias veces bajo heterocedasticidad.</strong> Los EE estándar saltan más; los robustos son más estables. <em>Los EE robustos son un seguro — solo notas su valor cuando el método por defecto falla.</em></li>",
+    "widget.robustse.takeaway":             "<strong>Para recordar:</strong> Cuando la varianza del error puede cambiar con x, recurre a los EE robustos (HC1) — no te cuestan nada cuando la homocedasticidad se cumple. <a href=\"../../book/_book/notebooks_quarto/ch07_Statistical_Inference_for_Bivariate_Regression.html#robust-standard-errors\" target=\"_blank\" rel=\"noopener\">Lee §7.7 en el capítulo →</a>",
+
+    // ---- Widget 7: House Price Real Data ----
+    "widget.house.heading":    "Datos de precios de viviendas: inferencia completa",
+    "widget.house.motivation": "Veintinueve casas, una línea de regresión — <em>¿cuánto podemos decir realmente</em> sobre la prima por pie cuadrado?",
+    "widget.house.kc":         "<span class=\"kc-title\">Las seis herramientas de inferencia — distribución t, errores estándar, IC, pruebas de hipótesis, valores p, EE robustos — funcionan juntas con datos reales.</span> Para estas <strong>29 casas de Central Davis (1999)</strong>: b₂ = $73.77/pie², ee(b₂) = 11.17, <strong>IC 95% = [50.84, 96.70]</strong>, EE robusto = 11.33. El IC excluye a 0 (el efecto es real) pero incluye a 90 (no podemos descartar una prima de $90/pie²).",
+    "widget.house.howto":      "<li><strong>Desliza el valor nulo</strong> para probar diferentes afirmaciones sobre $/pie².</li>\n      <li><strong>Cambia el nivel de confianza</strong> para estrechar o ampliar el IC.</li>\n      <li><strong>Alterna entre Estándar / Robusto</strong> para comparar los tipos de EE en datos reales.</li>",
+    "widget.house.ctrl.null.label":      "Valor nulo a probar ($/pie²)",
+    "widget.house.ctrl.setype.label":    "Tipo de EE",
+    "widget.house.ctrl.setype.standard": "Estándar",
+    "widget.house.ctrl.setype.robust":   "Robusto (HC1)",
+    "widget.house.stat.b2":              "b2 (pendiente)",
+    "widget.house.stat.ci":              "IC",
+    "widget.house.stat.r2":              "R²",
+    "widget.house.chart.houses":         "Casas (n=29)",
+    "widget.house.chart.hoverSize":      "Tamaño",
+    "widget.house.chart.hoverPrice":     "Precio",
+    "widget.house.chart.sizeWord":       "tamaño",
+    "widget.house.chart.ciBand":         "Banda de IC",
+    "widget.house.chart.xaxis":          "Tamaño de la casa (pies²)",
+    "widget.house.chart.yaxis":          "Precio ($)",
+    "widget.house.try":                  "<li><strong>Pon nula = 0.</strong> t = 6.60, p ≈ 0. <em>El tamaño de la casa predice el precio más allá de toda duda razonable.</em></li>\n      <li><strong>Pon nula = 90, luego prueba nula = 97.</strong> 90 está dentro del IC del 95%, así que no rechazamos; 97 está fuera y la decisión cambia a \"rechazar\". <em>El IC y la prueba apuntan a la misma frontera.</em></li>\n      <li><strong>Alterna entre EE Estándar y Robusto.</strong> El IC apenas cambia (11.17 vs 11.33). <em>La heterocedasticidad parece leve en este conjunto de datos — robusto y estándar coinciden.</em></li>",
+    "widget.house.takeaway":             "<strong>Para recordar:</strong> En datos reales, un IC estrecho y un estadístico t de gran magnitud cuentan la misma historia: el tamaño de la casa importa, en cerca de $74/pie². <a href=\"../../book/_book/notebooks_quarto/ch07_Statistical_Inference_for_Bivariate_Regression.html#example-house-price-and-size\" target=\"_blank\" rel=\"noopener\">Lee §7.1 en el capítulo →</a>",
+
+    // ---- Code summary ----
+    "code.heading":    "Resumen de código",
+    "code.motivation": "Has explorado los conceptos clave de forma interactiva — ahora reprodúcelos en código. Estos bloques autosuficientes cubren todo lo que practicaste arriba. Elige tu lenguaje, copia el código y ejecútalo.",
+    "code.tab.python": "Python",
+    "code.tab.stata":  "Stata",
+    "code.tab.r":      "R",
+    "code.copy.idle":  "Copiar código",
+    "code.copy.done":  "¡Copiado!",
+    "code.colab":      "Abrir un cuaderno Colab vacío &rarr;",
+    "code.note.stata": "Pega esto en tu editor do-file de Stata",
+    "code.note.r":     "Pega esto en tu consola R o RStudio",
+
+    // ---- Footer ----
+    "footer.text":      "Parte de <a href=\"https://quarcs-lab.github.io/metricsai/book/_book/index.html\"><strong>metricsAI</strong></a> · Capítulo 07: Inferencia estadística para regresión bivariada · por Carlos Mendez · <a href=\"https://github.com/quarcs-lab/metricsai\">GitHub</a>",
+    "footer.note":      "Datos de precios de viviendas: 29 casas en Central Davis, California (1999) de AED_HOUSE.DTA.",
+    "footer.scrolltop": "↑ Volver arriba"
+  }
+};
+
+function t(key, vars) {
+  var lang = window.__lang || I18N.defaultLang;
+  var s = (I18N[lang] && I18N[lang][key]) || I18N.en[key];
+  if (s === undefined) return key;
+  if (vars) {
+    for (var k in vars) s = s.split("{" + k + "}").join(String(vars[k]));
+  }
+  return s;
+}
+
+function applyLanguage(lang) {
+  if (lang !== "en" && lang !== "es") lang = I18N.defaultLang;
+  window.__lang = lang;
+  try { localStorage.setItem(I18N.storageKey, lang); } catch (e) {}
+  document.documentElement.lang = lang;
+  document.querySelectorAll("[data-i18n]").forEach(function(el) {
+    var key = el.getAttribute("data-i18n");
+    el.innerHTML = t(key);
+  });
+  var lbl = document.getElementById("siteLanguageLabel");
+  if (lbl) lbl.textContent = lang === "es" ? "ES" : "EN";
+  // Re-fire every widget renderer (Plotly + JS-injected callouts read via t()).
+  for (var key in window) {
+    if (key.indexOf("__rerender_") === 0 && typeof window[key] === "function") {
+      try { window[key](); } catch (e) {}
+    }
+  }
+}
+
+function toggleLanguage() {
+  applyLanguage((window.__lang || I18N.defaultLang) === "es" ? "en" : "es");
+}
+
+// Read persisted language BEFORE widgets render so first paint is in correct language.
+try {
+  var stored = localStorage.getItem(I18N.storageKey);
+  if (stored === "en" || stored === "es") window.__lang = stored;
+} catch (e) {}
 
 // ==================== STATS HELPERS ====================
 var mean = function(a) { var s = 0; for (var i = 0; i < a.length; i++) s += a[i]; return s / a.length; };
@@ -1251,7 +1754,7 @@ function tQuantile(p, df) {
 }
 
 // ==================== THEME ====================
-var THEME_KEY = "metricsai-theme";
+const THEME_KEY = "darkMode"; // unified with index.html / tutors.html
 function getCSS(varName) { return getComputedStyle(document.documentElement).getPropertyValue(varName).trim(); }
 function themeColors() {
   return { text: getCSS("--text"), textSoft: getCSS("--text-soft"), grid: getCSS("--grid"),
@@ -1319,9 +1822,9 @@ function getToggleVal(groupId) {
 
     var traces = [];
     traces.push({ x: xs, y: nys, mode: "lines", line: { color: c.purple, width: 2, dash: "dash" },
-      name: "N(0,1)", hovertemplate: "t=%{x:.2f}<br>density=%{y:.4f}<extra>N(0,1)</extra>" });
+      name: "N(0,1)", hovertemplate: "t=%{x:.2f}<br>" + t("chart.density") + "=%{y:.4f}<extra>N(0,1)</extra>" });
     traces.push({ x: xs, y: tys, mode: "lines", line: { color: c.cyan, width: 2.5 },
-      name: "t(" + df + ")", hovertemplate: "t=%{x:.2f}<br>density=%{y:.4f}<extra>t(" + df + ")</extra>" });
+      name: "t(" + df + ")", hovertemplate: "t=%{x:.2f}<br>" + t("chart.density") + "=%{y:.4f}<extra>t(" + df + ")</extra>" });
 
     // Shaded areas
     if (areaMode === "tails") {
@@ -1354,7 +1857,7 @@ function getToggleVal(groupId) {
 
     Plotly.react(chartEl, traces, baseLayout({
       xaxis: { title: "t", gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft } },
-      yaxis: { title: "Density", gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft } },
+      yaxis: { title: t("chart.density"), gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft } },
       shapes: [
         { type: "line", x0: -tcrit, x1: -tcrit, yref: "paper", y0: 0, y1: 1, line: { color: c.pink, width: 1, dash: "dot" } },
         { type: "line", x0: tcrit, x1: tcrit, yref: "paper", y0: 0, y1: 1, line: { color: c.pink, width: 1, dash: "dot" } }
@@ -1424,18 +1927,18 @@ function getToggleVal(groupId) {
     for (var i = 0; i < yCover.length; i++) {
       traces.push({ x: [xLoCover[i], xHiCover[i]], y: [yCover[i], yCover[i]],
         mode: "lines", line: { color: c.cyan, width: 1.5 }, showlegend: i === 0,
-        name: i === 0 ? "Captures \u03B2\u2082" : "", hoverinfo: "skip" });
+        name: i === 0 ? t("widget.cisim.chart.captures") : "", hoverinfo: "skip" });
     }
     // Missed CIs
     for (var i = 0; i < yMiss.length; i++) {
       traces.push({ x: [xLoMiss[i], xHiMiss[i]], y: [yMiss[i], yMiss[i]],
         mode: "lines", line: { color: c.pink, width: 2 }, showlegend: i === 0,
-        name: i === 0 ? "Misses \u03B2\u2082" : "", hoverinfo: "skip" });
+        name: i === 0 ? t("widget.cisim.chart.misses") : "", hoverinfo: "skip" });
     }
 
     Plotly.react(chartEl, traces, baseLayout({
-      xaxis: { title: "Slope estimate (b\u2082)", gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft } },
-      yaxis: { title: "Sample #", gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft },
+      xaxis: { title: t("widget.cisim.chart.xaxis"), gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft } },
+      yaxis: { title: t("widget.cisim.chart.yaxis"), gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft },
         autorange: "reversed" },
       shapes: [{ type: "line", x0: DGP.beta2, x1: DGP.beta2, yref: "paper", y0: 0, y1: 1,
         line: { color: c.purple, width: 2.5, dash: "dash" } }],
@@ -1484,14 +1987,14 @@ function getToggleVal(groupId) {
     document.getElementById("hyptest-se").textContent = fmt(se, 2);
     document.getElementById("hyptest-tstat").textContent = fmt(tStat, 3);
     document.getElementById("hyptest-pval").textContent = pVal < 0.0001 ? "< 0.0001" : fmt(pVal, 4);
-    document.getElementById("hyptest-decision").textContent = reject ? "Reject H\u2080" : "Fail to reject";
+    document.getElementById("hyptest-decision").textContent = reject ? t("widget.hyptest.decision.reject") : t("widget.hyptest.decision.fail");
 
     var xs = linspace(-8, 8, 400);
     var ys = xs.map(function(x) { return tPDF(x, df); });
 
     var traces = [];
     traces.push({ x: xs, y: ys, mode: "lines", line: { color: c.cyan, width: 2 }, name: "t(" + df + ")",
-      hovertemplate: "t=%{x:.2f}<br>density=%{y:.4f}<extra></extra>" });
+      hovertemplate: "t=%{x:.2f}<br>" + t("chart.density") + "=%{y:.4f}<extra></extra>" });
 
     // Rejection region shading
     if (testType === "two") {
@@ -1509,7 +2012,7 @@ function getToggleVal(groupId) {
       if (rightXs.length > 0) {
         traces.push({ x: rightXs.concat([rightXs[rightXs.length - 1], rightXs[0]]),
           y: rightYs.concat([0, 0]), fill: "toself", fillcolor: c.pink + "44",
-          line: { color: "transparent" }, name: "Rejection region", hoverinfo: "skip" });
+          line: { color: "transparent" }, name: t("widget.hyptest.chart.rejection"), hoverinfo: "skip" });
       }
     } else if (testType === "right") {
       var tcrit = tQuantile(1 - alpha, df);
@@ -1520,7 +2023,7 @@ function getToggleVal(groupId) {
       if (rXs.length > 0) {
         traces.push({ x: rXs.concat([rXs[rXs.length - 1], rXs[0]]),
           y: rYs.concat([0, 0]), fill: "toself", fillcolor: c.pink + "44",
-          line: { color: "transparent" }, name: "Rejection region", hoverinfo: "skip" });
+          line: { color: "transparent" }, name: t("widget.hyptest.chart.rejection"), hoverinfo: "skip" });
       }
     } else {
       var tcrit = tQuantile(alpha, df);
@@ -1531,7 +2034,7 @@ function getToggleVal(groupId) {
       if (lXs.length > 0) {
         traces.push({ x: lXs.concat([lXs[lXs.length - 1], lXs[0]]),
           y: lYs.concat([0, 0]), fill: "toself", fillcolor: c.pink + "44",
-          line: { color: "transparent" }, name: "Rejection region", hoverinfo: "skip" });
+          line: { color: "transparent" }, name: t("widget.hyptest.chart.rejection"), hoverinfo: "skip" });
       }
     }
 
@@ -1542,8 +2045,8 @@ function getToggleVal(groupId) {
       name: "t = " + fmt(tStat, 2), hovertemplate: "t=%{x:.3f}<extra></extra>" });
 
     Plotly.react(chartEl, traces, baseLayout({
-      xaxis: { title: "t-statistic", range: [-8, 8], gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft } },
-      yaxis: { title: "Density", gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft } },
+      xaxis: { title: t("stat.tstat"), range: [-8, 8], gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft } },
+      yaxis: { title: t("chart.density"), gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft } },
       shapes: [{ type: "line", x0: tStatClamped, x1: tStatClamped, yref: "paper", y0: 0, y1: 0.85,
         line: { color: reject ? c.pink : c.purple, width: 2, dash: "dot" } }],
       legend: { x: 0.72, y: 0.98, font: { color: c.text, size: 11 }, bgcolor: "rgba(0,0,0,0)" }
@@ -1578,15 +2081,15 @@ function getToggleVal(groupId) {
 
     document.getElementById("pval-abst").textContent = fmt(Math.abs(tVal), 2);
     document.getElementById("pval-p").textContent = pVal < 0.0001 ? "< 0.0001" : fmt(pVal, 4);
-    document.getElementById("pval-sig5").textContent = pVal < 0.05 ? "Yes" : "No";
-    document.getElementById("pval-sig1").textContent = pVal < 0.01 ? "Yes" : "No";
+    document.getElementById("pval-sig5").textContent = pVal < 0.05 ? t("common.yes") : t("common.no");
+    document.getElementById("pval-sig1").textContent = pVal < 0.01 ? t("common.yes") : t("common.no");
 
     var xs = linspace(-5.5, 5.5, 400);
     var ys = xs.map(function(x) { return tPDF(x, df); });
 
     var traces = [];
     traces.push({ x: xs, y: ys, mode: "lines", line: { color: c.cyan, width: 2 }, name: "t(" + df + ")",
-      hovertemplate: "t=%{x:.2f}<br>density=%{y:.4f}<extra></extra>" });
+      hovertemplate: "t=%{x:.2f}<br>" + t("chart.density") + "=%{y:.4f}<extra></extra>" });
 
     // p-value shading
     if (testType === "two") {
@@ -1634,8 +2137,8 @@ function getToggleVal(groupId) {
       name: "t = " + fmt(tVal, 2), hovertemplate: "t=%{x:.2f}<extra></extra>" });
 
     Plotly.react(chartEl, traces, baseLayout({
-      xaxis: { title: "t-statistic", gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft } },
-      yaxis: { title: "Density", gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft } },
+      xaxis: { title: t("stat.tstat"), gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft } },
+      yaxis: { title: t("chart.density"), gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft } },
       shapes: [{ type: "line", x0: tVal, x1: tVal, yref: "paper", y0: 0, y1: 0.9,
         line: { color: c.purple, width: 1.5, dash: "dot" } }],
       legend: { x: 0.72, y: 0.98, font: { color: c.text, size: 11 }, bgcolor: "rgba(0,0,0,0)" }
@@ -1672,7 +2175,7 @@ function getToggleVal(groupId) {
     document.getElementById("econstat-b2").textContent = fmt(fit.b2);
     document.getElementById("econstat-tstat").textContent = fmt(tStat, 3);
     document.getElementById("econstat-pval").textContent = pVal < 0.0001 ? "< 0.0001" : fmt(pVal, 4);
-    document.getElementById("econstat-sig").textContent = sig ? "Yes (p < 0.05)" : "No (p \u2265 0.05)";
+    document.getElementById("econstat-sig").textContent = sig ? t("widget.econstat.sig.yes") : t("widget.econstat.sig.no");
 
     // Show scatter + fit, with annotation about effect size vs significance
     var xMin = Math.min.apply(null, sample.x) - 0.5;
@@ -1680,20 +2183,20 @@ function getToggleVal(groupId) {
 
     var traces = [];
     traces.push({ x: sample.x, y: sample.y, mode: "markers", type: "scatter",
-      marker: { color: c.cyan, size: Math.max(3, Math.min(7, 200 / n)), opacity: 0.6 }, name: "Data (n=" + n + ")",
+      marker: { color: c.cyan, size: Math.max(3, Math.min(7, 200 / n)), opacity: 0.6 }, name: t("widget.econstat.chart.data") + " (n=" + n + ")",
       hovertemplate: "x=%{x:.2f}<br>y=%{y:.2f}<extra></extra>" });
     // True line
     traces.push({ x: [xMin, xMax], y: [DGP.beta1 + trueBeta * xMin, DGP.beta1 + trueBeta * xMax],
-      mode: "lines", line: { color: c.purple, width: 2, dash: "dash" }, name: "True line (\u03B2\u2082=" + fmt(trueBeta, 2) + ")" });
+      mode: "lines", line: { color: c.purple, width: 2, dash: "dash" }, name: t("widget.econstat.chart.trueLine") + " (\u03B2\u2082=" + fmt(trueBeta, 2) + ")" });
     // OLS fit
     traces.push({ x: [xMin, xMax], y: [fit.b1 + fit.b2 * xMin, fit.b1 + fit.b2 * xMax],
-      mode: "lines", line: { color: sig ? c.pink : c.text, width: 2 }, name: "OLS (b\u2082=" + fmt(fit.b2, 3) + ")" });
+      mode: "lines", line: { color: sig ? c.pink : c.text, width: 2 }, name: t("widget.econstat.chart.ols") + " (b\u2082=" + fmt(fit.b2, 3) + ")" });
     // Zero slope
     traces.push({ x: [xMin, xMax], y: [fit.b1, fit.b1],
-      mode: "lines", line: { color: c.grid, width: 1, dash: "dot" }, name: "Zero slope", hoverinfo: "skip" });
+      mode: "lines", line: { color: c.grid, width: 1, dash: "dot" }, name: t("widget.econstat.chart.zero"), hoverinfo: "skip" });
 
-    var titleText = sig ? "Statistically significant (p=" + (pVal < 0.0001 ? "<0.0001" : fmt(pVal, 3)) + ")" :
-      "Not significant (p=" + fmt(pVal, 3) + ")";
+    var titleText = sig ? t("widget.econstat.title.sig", { p: pVal < 0.0001 ? "<0.0001" : fmt(pVal, 3) }) :
+      t("widget.econstat.title.notsig", { p: fmt(pVal, 3) });
     var titleColor = sig ? c.pink : c.textSoft;
 
     Plotly.react(chartEl, traces, baseLayout({
@@ -1751,15 +2254,15 @@ function getToggleVal(groupId) {
     // Scatter plot
     var sTraces = [];
     sTraces.push({ x: x, y: y, mode: "markers", type: "scatter",
-      marker: { color: c.cyan, size: 6, opacity: 0.7 }, name: "Data",
+      marker: { color: c.cyan, size: 6, opacity: 0.7 }, name: t("widget.robustse.chart.data"),
       hovertemplate: "x=%{x:.2f}<br>y=%{y:.2f}<extra></extra>" });
     sTraces.push({ x: [xMin, xMax], y: [DGP.beta1 + DGP.beta2 * xMin, DGP.beta1 + DGP.beta2 * xMax],
-      mode: "lines", line: { color: c.purple, width: 2, dash: "dash" }, name: "True line" });
+      mode: "lines", line: { color: c.purple, width: 2, dash: "dash" }, name: t("widget.robustse.chart.trueLine") });
     sTraces.push({ x: [xMin, xMax], y: [fit.b1 + fit.b2 * xMin, fit.b1 + fit.b2 * xMax],
-      mode: "lines", line: { color: c.pink, width: 2 }, name: "OLS fit" });
+      mode: "lines", line: { color: c.pink, width: 2 }, name: t("widget.robustse.chart.ols") });
 
     Plotly.react(scatterEl, sTraces, baseLayout({
-      title: { text: errorType === "hetero" ? "Heteroskedastic Errors" : "Homoskedastic Errors", font: { size: 12, color: c.textSoft } },
+      title: { text: errorType === "hetero" ? t("widget.robustse.chart.titleHetero") : t("widget.robustse.chart.titleHomo"), font: { size: 12, color: c.textSoft } },
       xaxis: { title: "x", gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft } },
       yaxis: { title: "y", gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft } },
       legend: { x: 0.02, y: 0.98, font: { color: c.text, size: 10 }, bgcolor: "rgba(0,0,0,0)" }
@@ -1768,15 +2271,15 @@ function getToggleVal(groupId) {
     // Residual plot
     var rTraces = [];
     rTraces.push({ x: fit.yhat, y: fit.residuals, mode: "markers", type: "scatter",
-      marker: { color: c.cyan, size: 5, opacity: 0.7 }, name: "Residuals",
+      marker: { color: c.cyan, size: 5, opacity: 0.7 }, name: t("widget.robustse.chart.residuals"),
       hovertemplate: "\u0177=%{x:.1f}<br>e=%{y:.2f}<extra></extra>" });
     rTraces.push({ x: [Math.min.apply(null, fit.yhat), Math.max.apply(null, fit.yhat)], y: [0, 0],
       mode: "lines", line: { color: c.grid, width: 1.5, dash: "dash" }, showlegend: false, hoverinfo: "skip" });
 
     Plotly.react(residEl, rTraces, baseLayout({
-      title: { text: "Residuals vs. Fitted", font: { size: 12, color: c.textSoft } },
-      xaxis: { title: "Fitted values (\u0177)", gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft } },
-      yaxis: { title: "Residuals (e)", gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft } }
+      title: { text: t("widget.robustse.chart.titleResid"), font: { size: 12, color: c.textSoft } },
+      xaxis: { title: t("widget.robustse.chart.xaxisResid"), gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft } },
+      yaxis: { title: t("widget.robustse.chart.yaxisResid"), gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft } }
     }), PLOTLY_CONFIG);
   }
 
@@ -1825,14 +2328,14 @@ function getToggleVal(groupId) {
     var traces = [];
     // Data points
     traces.push({ x: x, y: y, mode: "markers", type: "scatter",
-      marker: { color: c.cyan, size: 8, opacity: 0.8 }, name: "Houses (n=29)",
-      hovertemplate: "Size=%{x} sqft<br>Price=$%{y:,.0f}<extra></extra>" });
+      marker: { color: c.cyan, size: 8, opacity: 0.8 }, name: t("widget.house.chart.houses"),
+      hovertemplate: t("widget.house.chart.hoverSize") + "=%{x} " + t("unit.sqft") + "<br>" + t("widget.house.chart.hoverPrice") + "=$%{y:,.0f}<extra></extra>" });
 
     // Regression line
     var yLo = REG.b1 + REG.b2 * xMin;
     var yHi = REG.b1 + REG.b2 * xMax;
     traces.push({ x: [xMin, xMax], y: [yLo, yHi],
-      mode: "lines", line: { color: c.pink, width: 2.5 }, name: "\u0177 = " + Math.round(REG.b1).toLocaleString() + " + " + fmt(REG.b2, 2) + "\u00B7size" });
+      mode: "lines", line: { color: c.pink, width: 2.5 }, name: "\u0177 = " + Math.round(REG.b1).toLocaleString() + " + " + fmt(REG.b2, 2) + "\u00B7" + t("widget.house.chart.sizeWord") });
 
     // CI band for the regression line (confidence band for E[y|x])
     var xRange = linspace(xMin, xMax, 50);
@@ -1848,15 +2351,15 @@ function getToggleVal(groupId) {
     traces.push({ x: xRange, y: ciUpper, mode: "lines", line: { color: c.cyan, width: 0, dash: "dot" },
       showlegend: false, hoverinfo: "skip" });
     traces.push({ x: xRange, y: ciLower2, mode: "lines", line: { color: c.cyan, width: 0, dash: "dot" },
-      fill: "tonexty", fillcolor: c.cyan + "22", name: conf + "% CI band", hoverinfo: "skip" });
+      fill: "tonexty", fillcolor: c.cyan + "22", name: conf + "% " + t("widget.house.chart.ciBand"), hoverinfo: "skip" });
 
     // Mark the null value on the slope
     var nullLineY1 = REG.b1 + nullVal * xMin + (REG.b2 - nullVal) * REG.xbar;
     var nullLineY2 = REG.b1 + nullVal * xMax + (REG.b2 - nullVal) * REG.xbar;
 
     Plotly.react(chartEl, traces, baseLayout({
-      xaxis: { title: "House Size (sq ft)", gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft } },
-      yaxis: { title: "Price ($)", gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft } },
+      xaxis: { title: t("widget.house.chart.xaxis"), gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft } },
+      yaxis: { title: t("widget.house.chart.yaxis"), gridcolor: c.grid, linecolor: c.grid, zerolinecolor: c.grid, tickfont: { color: c.textSoft } },
       legend: { x: 0.02, y: 0.98, font: { color: c.text, size: 11 }, bgcolor: "rgba(0,0,0,0)" }
     }), PLOTLY_CONFIG);
   }
@@ -1995,31 +2498,46 @@ function getToggleVal(groupId) {
   readHash();
 })();
 
-// ==================== THEME TOGGLE ====================
-(function() {
-  var btn = document.getElementById("theme-toggle");
-  var iconEl = document.getElementById("theme-icon");
-  var labelEl = document.getElementById("theme-label");
-
-  function apply(theme) {
-    document.documentElement.dataset.theme = theme;
-    iconEl.textContent = theme === "dark" ? "\u2600\uFE0F" : "\uD83C\uDF19";
-    labelEl.textContent = theme === "dark" ? "Light" : "Dark";
-    for (var key in window) {
-      if (key.startsWith("__rerender_") && typeof window[key] === "function") window[key]();
-    }
+// ==================== THEME TOGGLE (site navbar) ====================
+// Reads/writes localStorage.darkMode (shared with index.html / tutors.html)
+// and applies html[data-theme="dark"] for this chapter's CSS.
+function applyDarkMode(isDark) {
+  document.documentElement.dataset.theme = isDark ? "dark" : "light";
+  const icon = document.getElementById("siteDarkModeIcon");
+  if (icon) icon.className = isDark ? "fa-solid fa-sun" : "fa-solid fa-moon";
+  // Re-render all widgets so Plotly picks up the new CSS colors.
+  for (const key in window) {
+    if (key.startsWith("__rerender_") && typeof window[key] === "function") window[key]();
   }
+}
 
-  var saved = localStorage.getItem(THEME_KEY);
-  var prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
-  apply(saved || (prefersDark ? "dark" : "light"));
+function toggleDarkModeNav() {
+  const isDark = document.documentElement.dataset.theme !== "dark";
+  localStorage.setItem(THEME_KEY, isDark ? "dark" : "light");
+  applyDarkMode(isDark);
+}
 
-  btn.addEventListener("click", function() {
-    var next = document.documentElement.dataset.theme === "dark" ? "light" : "dark";
-    localStorage.setItem(THEME_KEY, next);
-    apply(next);
-  });
+(function() {
+  const saved = localStorage.getItem(THEME_KEY);
+  const prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+  const isDark = saved ? (saved === "dark") : prefersDark;
+  applyDarkMode(isDark);
 })();
+
+// ==================== MOBILE MENU (site navbar) ====================
+function toggleSiteMobileMenu() {
+  const menu = document.getElementById("siteMobileMenu");
+  const hamburger = document.getElementById("siteHamburgerIcon");
+  const close = document.getElementById("siteCloseIcon");
+  if (!menu || !hamburger || !close) return;
+  const isOpen = menu.classList.toggle("open");
+  hamburger.style.display = isOpen ? "none" : "";
+  close.style.display = isOpen ? "" : "none";
+}
+
+// ==================== LANGUAGE INIT ====================
+// Run AFTER all widget IIFEs have registered themselves with __rerender_*
+applyLanguage(window.__lang || I18N.defaultLang);
 
 // ==================== Resize handling ====================
 window.addEventListener("resize", function() {
