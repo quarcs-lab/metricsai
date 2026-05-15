@@ -83,9 +83,13 @@ def collect_all_strings() -> tuple[dict[str, dict[str, str]], dict[str, list[Pat
     return merged, key_to_files
 
 
-def collect_html_references() -> dict[Path, set[str]]:
-    """Walk every HTML page that loads i18n-runtime.js. Collect all data-i18n="..." attributes
-    and all t("...") calls. Returns {path: {keys}}.
+def collect_html_references(defined_keys: set[str]) -> dict[Path, set[str]]:
+    """Walk every HTML page that loads i18n-runtime.js. Collect:
+      1. data-i18n="..." attributes
+      2. t("...") / window.t('...') static-string calls
+      3. Any string literal that exactly matches a defined i18n key (catches dynamic
+         indirection like `t(skKey)` where skKey = "common.highSkewed").
+    Returns {path: {keys}}.
     """
     pages: dict[Path, set[str]] = {}
     candidates: list[Path] = []
@@ -95,15 +99,30 @@ def collect_html_references() -> dict[Path, set[str]]:
     for p in (ROOT / "web-apps").glob("ch*/dashboard.html"):
         candidates.append(p)
     attr_re = re.compile(r'data-i18n\s*=\s*"([\w.\-]+)"')
-    # Match both `t("key")` and `window.t('key')`, single or double quoted.
     call_re = re.compile(r'(?:\bwindow\.)?\bt\(\s*[\'"]([\w.\-]+)[\'"]')
+    str_lit_re = re.compile(r'[\'"]([\w.\-]+)[\'"]')
     for path in candidates:
         text = path.read_text(encoding="utf-8")
         if "i18n-runtime.js" not in text:
-            continue  # Page hasn't been migrated yet; ignore for now.
-        keys = set(attr_re.findall(text)) | set(call_re.findall(text))
+            continue
+        keys: set[str] = set(attr_re.findall(text)) | set(call_re.findall(text))
+        # Also consider any string literal that EXACTLY matches a defined key as referenced
+        # (handles dynamic-key patterns like `t(skKey)` with `skKey = "common.highSkewed"`).
+        for match in str_lit_re.findall(text):
+            if match in defined_keys:
+                keys.add(match)
         pages[path] = keys
     return pages
+
+
+# A key is "page-exclusive" if it's defined ONLY in files that are mutually
+# exclusive at runtime (chXX.js, index.js, tutors.js — only one is ever loaded
+# per page). Duplicates among these are fine because they never collide.
+PAGE_EXCLUSIVE_RE = re.compile(r"^(?:ch\d{2}|index|tutors)\.js$")
+
+
+def is_page_exclusive(filename: str) -> bool:
+    return bool(PAGE_EXCLUSIVE_RE.match(filename))
 
 
 def main() -> int:
@@ -132,17 +151,27 @@ def main() -> int:
         print(f"[ok] every key has all {len(languages)} language values")
 
     # Check 2: duplicate definitions.
-    dupes = {k: paths for k, paths in key_to_files.items() if len(paths) > 1}
-    if dupes:
-        print(f"\n[FAIL] {len(dupes)} keys defined in more than one file:")
-        for k, paths in sorted(dupes.items())[:30]:
+    # A duplicate is only a real conflict when at least one of the defining files is
+    # NOT page-exclusive (i.e., is a shared file always loaded with the others), OR
+    # when the page-exclusive files are not mutually exclusive at runtime.
+    # chXX.js, index.js, tutors.js are all mutually exclusive — only one loads per page.
+    real_dupes: dict[str, list[Path]] = {}
+    for k, paths in key_to_files.items():
+        if len(paths) <= 1:
+            continue
+        if all(is_page_exclusive(p.name) for p in paths):
+            continue  # Mutually-exclusive page files — no runtime collision.
+        real_dupes[k] = paths
+    if real_dupes:
+        print(f"\n[FAIL] {len(real_dupes)} keys defined in conflicting files:")
+        for k, paths in sorted(real_dupes.items())[:30]:
             print(f"  {k} → {[p.name for p in paths]}")
-        issues += len(dupes)
+        issues += len(real_dupes)
     else:
-        print("[ok] no duplicate key definitions across string files")
+        print("[ok] no conflicting key definitions across string files")
 
     # Check 3: HTML references.
-    pages = collect_html_references()
+    pages = collect_html_references(set(merged.keys()))
     if not pages:
         print("\n[warn] no HTML pages found that reference i18n-runtime.js — skipping HTML cross-check")
         print("       (this is expected before any page has been migrated)")
@@ -152,7 +181,12 @@ def main() -> int:
         for keys in pages.values():
             all_referenced |= keys
         # Keys referenced but not defined.
-        undefined = sorted(all_referenced - set(merged.keys()))
+        # Skip dynamic-prefix references (keys ending with ".") — these come from
+        # patterns like `t("var.label." + name)` where the literal is just the prefix.
+        undefined = sorted(
+            k for k in (all_referenced - set(merged.keys()))
+            if not k.endswith(".")
+        )
         if undefined:
             print(f"\n[FAIL] {len(undefined)} keys referenced in HTML/JS but not defined:")
             for k in undefined[:30]:
