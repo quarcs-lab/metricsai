@@ -6,7 +6,7 @@
  * No HTML or runtime code needs to change.
  */
 window.I18N_CONFIG = {
-  languages:   ["en", "es"],
+  languages:   ["en", "es", "ja"],
   defaultLang: "en",
   storageKey:  "language"
 };

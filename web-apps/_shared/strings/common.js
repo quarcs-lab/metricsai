@@ -4,9 +4,9 @@
  * Other common.* keys (takeaway, on, off, symmetric, etc.) appear in <17 chapters → stay per-chapter.
  */
 window.I18N_REGISTER({
-  "common.howtoTitle": { en: "What you can do here", es: "Qué puedes hacer aquí" },
-  "common.tryTitle":   { en: "Try this",             es: "Pruébalo" },
-  "common.reset":      { en: "↺ Reset",              es: "↺ Reiniciar" },
-  "theme.dark":        { en: "Dark",                 es: "Oscuro" },
-  "theme.light":       { en: "Light",                es: "Claro" }
+  "common.howtoTitle": { en: "What you can do here", es: "Qué puedes hacer aquí", ja: "ここでできること" },
+  "common.tryTitle":   { en: "Try this",             es: "Pruébalo",              ja: "試してみよう" },
+  "common.reset":      { en: "↺ Reset",              es: "↺ Reiniciar",           ja: "↺ リセット" },
+  "theme.dark":        { en: "Dark",                 es: "Oscuro",                ja: "ダーク" },
+  "theme.light":       { en: "Light",                es: "Claro",                 ja: "ライト" }
 });
