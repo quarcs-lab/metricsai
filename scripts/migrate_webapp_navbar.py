@@ -299,7 +299,12 @@ def remove_theme_label_refresh(s: str) -> str:
     return pat.sub('', s)
 
 def insert_i18n_keys(s: str) -> str:
-    if '"nav.about"' in s:
+    # Idempotency check: look for the DICTIONARY entry (trailing colon after the
+    # quoted key), NOT a bare "nav.about" — which appears in the navbar HTML as
+    # data-i18n="nav.about". An earlier bug used the bare-key check and
+    # caused this whole step to no-op on chapters that already had the navbar
+    # markup inserted, producing untranslated "nav.about" literals on screen.
+    if re.search(r'"nav\.about"\s*:', s):
         return s
     # Find the two "common.reset" dictionary entries (EN first, ES second).
     pat = re.compile(r'^[ \t]*"common\.reset":', re.MULTILINE)
