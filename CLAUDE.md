@@ -47,8 +47,9 @@ metricsai/
 ├── notebooks_colab/    # 18 chapters (.ipynb) — generated for Colab
 ├── notebooks_md/       # 18 chapters (.md) — markdown versions (auto-synced)
 ├── code/               # 17 Python code summaries (.py) + code/short/codeSummary.md
-├── scripts/            # PDF generation, conversion, web-app builders, and utilities
+├── scripts/            # PDF generation, conversion, web-app builders, i18n tooling, and utilities
 ├── web-apps/           # Interactive HTML dashboards (one folder per chapter)
+│   └── _shared/        # Shared i18n runtime, 23 string tables (EN/ES/JA), canonical glossary
 ├── book/               # Quarto HTML book (symlinks to notebooks_quarto/ and images/)
 ├── tutors/             # 9 AI tutor instruction files (customized Google Gemini Gems)
 ├── images/             # Cover images + chapter visual summaries
@@ -128,6 +129,20 @@ python3 web-apps/ch02/build.py
 python3 .claude/skills/web-app/scripts/verify_app.py web-apps/ch02/dashboard.html
 ```
 
+**Validate i18n strings parity (gate before any commit touching `web-apps/_shared/strings/`):**
+
+```bash
+python3 scripts/i18n_check.py
+```
+
+**Run the headless browser i18n smoke test (gate before any commit touching the i18n runtime, boot order, or `__rerender_*` registrations):**
+
+```bash
+python3 scripts/smoke_i18n.py
+```
+
+**Add a new language to the project website (PT, ZH, DE, …):** see `log/20260515_1502.md` for the worked JA example. The 6-phase recipe is: (1) write a new section in `web-apps/_shared/glossary/style-notes.md`; (2) dispatch 1 subagent to fill the new column in `web-apps/_shared/glossary/canonical-terms.md`; (3) pilot 1 chapter; (4) review + promote new vocab; (5) fan out 22 parallel translator subagents; (6) append the 2-letter code to `web-apps/_shared/i18n-config.js` and extend `LANG_CYCLE` in `scripts/smoke_i18n.py`. **No HTML files touched.**
+
 ## Conventions
 
 - **Source files:** `chNN_Title_With_Underscores.qmd` in `notebooks_quarto/` (ch00–ch17) — edit these
@@ -147,4 +162,5 @@ python3 .claude/skills/web-app/scripts/verify_app.py web-apps/ch02/dashboard.htm
 - **PDF pipeline:** `quarto render` → `scripts/inject_print_css.py` → `scripts/generate_pdf_playwright.py`
 - **Skills:** `chapter-standard` (template compliance), `compile-book` (PDF compilation), `proofread` (content review), `improve-readability` (notebook readability), `improve-webapp-readability` (web app pedagogy), `web-app` (interactive dashboards), `create-chapter-code-summary` (Python code cheat sheets)
 - **Web apps:** Single-file Plotly.js dashboards in `web-apps/chNN/dashboard.html`, built by `web-apps/chNN/build.py` from `web-apps/chNN/template.html`
+- **Shared i18n runtime:** All 19 web pages (`index.html`, `tutors.html`, `web-apps/ch01`–`ch17/dashboard.html`) load the runtime + per-page string tables from `web-apps/_shared/`. Languages: EN + ES + JA. Adding a 4th language is a pure data task across `_shared/strings/*.js` — zero HTML touched. Validators: `scripts/i18n_check.py` (parity gate) + `scripts/smoke_i18n.py` (Playwright regression).
 - **Detailed workflow docs:** `.claude/rules/pdf-generation.md` and `.claude/rules/quarto-book.md`

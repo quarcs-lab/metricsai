@@ -54,6 +54,8 @@ Click any badge below to open and run immediately in your browser. Every chapter
 
 Every chapter features a self-contained interactive dashboard where students manipulate sliders, toggles, and dropdowns to build intuition for key concepts — no coding required. Each app uses the same datasets as the chapter and works offline after first load. Every app includes a **Python Libraries and Code** section at the bottom with a syntax-highlighted, copyable code cheat sheet and a link to an empty Google Colab notebook — so students can go from exploring interactively to writing code in one click.
 
+🌐 **Trilingual interface (EN / ES / JA).** The project website (`index.html`, `tutors.html`) and every chapter dashboard ship in English, Spanish, and Japanese. Click the `EN`/`ES`/`JA` button in the navbar to cycle languages — your choice persists across pages via `localStorage`. Plotly chart labels, axis titles, and stat callouts re-paint automatically on language switch. Translations are sourced from a canonical econometric glossary (`web-apps/_shared/glossary/canonical-terms.md`) curated in the Kuroda-tradition for JA and the modern peninsular convention for ES.
+
 | Chapter | Web App |
 |---------|---------|
 | **1** | [![Open Web App](images/webapp-badge.svg)](https://quarcs-lab.github.io/metricsai/web-apps/ch01/dashboard.html) — Scatter plots, regression lines, R², prediction explorer, multi-predictor comparison |
