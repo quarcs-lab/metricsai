@@ -41,7 +41,7 @@ This chapter focuses on regression analysis when some regressors are indicator v
 - Conduct joint F-tests for the significance of sets of indicator variables
 - Apply indicator variable techniques to real earnings data
 
-**Datasets used:**
+**Dataset used:**
 
 - **AED_EARNINGS_COMPLETE.DTA**: 872 full-time workers aged 25-65 in 2000
 
@@ -73,7 +73,7 @@ Six core ideas anchor this chapter. Skim them before you start, and come back wh
 ::::: {.columns}
 :::: {.column width="50%"}
 ::: {.callout-tip collapse="true" appearance="simple" title="Example"}
-For the 872 workers in `data_earnings`, the variable `gender` is an indicator: $1$ for female, $0$ for male. Regressing `earnings` on `gender` alone yields an intercept of about \$68{,}000 (the male mean) and a coefficient of about $-\$16{,}000$ on `gender` — meaning women earn roughly \$16k less than men, *unconditionally*.
+For the 872 workers in `data_earnings`, the variable `gender` is an indicator: $1$ for female, $0$ for male. Regressing `earnings` on `gender` alone yields an intercept of about \$63{,}000 (the male mean) and a coefficient of about $-\$16{,}000$ on `gender` — meaning women earn roughly \$16k less than men, *unconditionally*.
 :::
 ::::
 :::: {.column width="50%"}
@@ -88,7 +88,7 @@ A light switch has only two states: on or off. An indicator variable encodes the
 ::::: {.columns}
 :::: {.column width="50%"}
 ::: {.callout-tip collapse="true" appearance="simple" title="Example"}
-For worker type (self-employed, private, government), the chapter fits `earnings ~ dself + dgovt + …` — making **private sector** the base category. The intercept then reads as average private-sector earnings; `dself`'s coefficient is the self-employed–private gap, and `dgovt`'s is the government–private gap. Switching the base to self-employed re-labels the comparisons but leaves $R^2 \approx 0.16$ unchanged.
+For worker type (self-employed, private, government), the chapter fits `earnings ~ dself + dgovt + …` — making **private sector** the base category. The intercept then reads as average private-sector earnings; `dself`'s coefficient is the self-employed–private gap, and `dgovt`'s is the government–private gap. Switching the base to self-employed re-labels the comparisons but leaves $R^2 \approx 0.12$ unchanged.
 :::
 ::::
 :::: {.column width="50%"}
@@ -245,7 +245,7 @@ print("\nNote on indicator variables:")
 # dgovt: 1=government, 0=not
 ```
 
-## 14.1: Indicator Variables - Single Binary Variable
+## 14.1 Indicator Variables - Single Binary Variable
 
 An **indicator variable** (also called dummy variable or binary variable) takes only two values:
 
@@ -349,7 +349,7 @@ The regression results reveal a **statistically significant gender earnings gap*
 
 **Key Findings:**
 
-1. **Intercept ($b_1$) ≈ \$68,000**: This represents the **mean earnings for males** (when gender = 0). We can verify this matches the actual mean earnings for males in the sample.
+1. **Intercept ($b_1$) ≈ \$63,000**: This represents the **mean earnings for males** (when gender = 0). We can verify this matches the actual mean earnings for males in the sample.
 
 2. **Gender coefficient ($\alpha$) ≈ -\$16,000**: This is the **difference in mean earnings** between females and males. Specifically:
  - Females earn approximately **\$16,000 less** than males on average
@@ -415,7 +415,7 @@ print(f"  Note: IDENTICAL to classical t-test with equal variances")
 >
 > Specialized difference-in-means methods (like Welch's t-test) and regression on an indicator give the **same point estimate** but slightly different standard errors. Regression uses $se(\hat{a})$ from the model, while the t-test uses $se(\bar{y}_1 - \bar{y}_0) = \sqrt{s_1^2/n_1 + s_0^2/n_0}$. Both are valid; regression is more flexible when adding control variables.
 
-## 14.2: Indicator Variable with Additional Regressors
+## 14.2 Indicator Variable with Additional Regressors
 
 The raw difference in earnings by gender may be partly explained by other factors (e.g., education, experience, hours worked).
 
@@ -526,7 +526,7 @@ Comparing the five models reveals how the estimated gender gap evolves as we add
 - With interactions, **individual t-tests can be misleading** due to multicollinearity
 - **Joint F-tests** are essential for testing overall significance of a variable that enters through multiple terms
 
-## 14.3: Interactions with Indicator Variables
+## 14.3 Interactions with Indicator Variables
 
 An **interacted indicator variable** is the product of an indicator variable and another regressor.
 
@@ -638,7 +638,7 @@ summary_df.to_string()
 >
 > When an indicator and its interaction with another variable are both included, test their **joint significance** using an F-test rather than individual t-tests. The joint test $H_0: \alpha_1 = 0, \alpha_2 = 0$ evaluates whether the categorical variable matters at all. Individual t-tests can be misleading when the indicator and interaction are correlated.
 
-## 14.4: Testing for Structural Change - Separate Regressions
+## 14.4 Testing for Structural Change - Separate Regressions
 
 An alternative to including interactions is to estimate **separate regressions** for each group.
 
@@ -699,11 +699,13 @@ print(f"  - Returns to age: ${fit_female.coef()['age']:,.0f} (F) vs ${fit_male.c
 print(f"  - Returns to hours: ${fit_female.coef()['hours']:,.0f} (F) vs ${fit_male.coef()['hours']:,.0f} (M)")
 ```
 
+Comparing the two subsamples shows that the returns to education and to hours are noticeably larger for men than for women (about \$6,300 vs \$4,200 per year of schooling, and about \$1,600 vs \$700 per weekly hour), while the return to age is similar across genders. This pattern — different *slopes*, not just a constant intercept gap — is exactly what a formal Chow test is designed to detect.
+
 > **Key Concept 14.5: Testing for Structural Change**
 >
 > Running **separate regressions** for each group allows all coefficients to differ simultaneously. The **Chow test** evaluates whether pooling the data (imposing the same coefficients for both groups) is justified. If the F-test rejects the null, the relationship between $y$ and $x$ differs fundamentally across groups -- not just in intercept or one slope, but throughout the model.
 
-## 14.5: Sets of Indicator Variables (Multiple Categories)
+## 14.5 Sets of Indicator Variables (Multiple Categories)
 
 Often we have categorical variables with **more than two categories**.
 
@@ -791,7 +793,7 @@ This means one dummy is a **perfect linear combination** of the others plus the 
 
 From the three specifications above:
 
-- **R² is identical** across all specifications (≈ 0.16-0.17)
+- **R² is identical** across all specifications (≈ 0.12)
 - **Joint F-tests** give the same result (testing if worker type matters)
 - Only the individual coefficients change (but they measure different things)
 
@@ -911,6 +913,8 @@ plt.show()
 - **Spread**: Wider boxes and longer whiskers indicate greater earnings variation within a group
 - **Outliers**: Points beyond the whiskers represent unusually high earners
 - **Red diamonds**: Mean markers may differ from medians, indicating skewness in the earnings distribution
+
+Next, we plot earnings against years of education separately for men and women, fitting a regression line to each group. Watch whether the two lines are parallel or have visibly different slopes — non-parallel lines are the visual signature of an interaction effect.
 
 ```python
 # Figure 2: Earnings vs education by gender (with regression lines)
@@ -1231,7 +1235,7 @@ dat = pd.read_csv(url)
 dat2014 = dat[dat['year'] == 2014].copy()
 ```
 
-**Variables:** `lp` (labor productivity), `rk` (physical capital), `hc` (human capital), `region` (world region)
+**Variables:** `lp` (labor productivity), `kl` (physical capital per worker), `h` (human capital), `region` (world region)
 
 ---
 
@@ -1278,7 +1282,7 @@ Add physical capital and human capital as continuous controls. Observe how regio
 
 **Hints:**
 
-- Use `ln_lp ~ C(region) + np.log(rk) + hc` as the formula
+- Use `ln_lp ~ C(region) + np.log(kl) + h` as the formula
 - Compare regional coefficients with and without controls
 - What does it mean when regional gaps shrink after adding controls?
 
@@ -1290,7 +1294,7 @@ Add an interaction between region and human capital to test whether the returns 
 
 **Hints:**
 
-- Use `ln_lp ~ C(region) * hc + np.log(rk)` to include all region-hc interactions
+- Use `ln_lp ~ C(region) * h + np.log(kl)` to include all region-human-capital interactions
 - How do you interpret the interaction coefficients?
 - Do the returns to human capital differ significantly across regions?
 
@@ -1382,7 +1386,7 @@ print(f"Lowest mean IMDS:  {dept_stats['mean'].idxmin()} ({dept_stats['mean'].mi
 
 **Instructions**:
 
-1. Estimate `imds ~ C(dep)` using statsmodels --- `C()` creates dummies automatically
+1. Estimate `imds ~ C(dep)` using pyfixest --- `C()` creates dummies automatically
 2. Print the regression summary
 3. Interpret: Each coefficient is the difference from the **base category** (the omitted department)
 4. What is the base department? How much higher or lower is each department relative to the base?
@@ -1407,7 +1411,7 @@ fit_dep.summary()
 # print(f"Intercept = mean IMDS for the base department: {fit_dep.coef()['Intercept']:.2f}")
 ```
 
-> **Key Concept 14.9: Geographic Indicator Variables**
+> **Key Concept 14.11: Geographic Indicator Variables**
 >
 > Department indicators capture **time-invariant regional characteristics** that affect development: altitude, climate, proximity to borders, historical infrastructure investments, and cultural factors. By including department dummies, we control for these systematic regional differences, allowing us to estimate the NTL-development relationship *within* departments rather than across them. The coefficient on NTL then reflects how NTL variation within a department predicts development variation within that department.
 
@@ -1476,7 +1480,7 @@ fit_dep.summary()
 # print("  Other departments: base slope + interaction coefficient")
 ```
 
-> **Key Concept 14.10: Heterogeneous Satellite Effects**
+> **Key Concept 14.12: Heterogeneous Satellite Effects**
 >
 > Interaction terms between department indicators and NTL allow the **slope of the NTL-development relationship** to differ across regions. This is economically meaningful: in highly urbanized departments (like La Paz or Cochabamba), additional nighttime lights may signal commercial activity, while in rural highland departments (like Potosi), lights primarily reflect basic electrification. A significant interaction indicates that the *economic meaning* of satellite signals varies by geographic context.
 
@@ -1492,7 +1496,7 @@ fit_dep.summary()
 
 **Hints**:
 
-- Use `model.f_test()` or compare restricted vs. unrestricted models
+- Use the fitted model's `wald_test()` method or compare restricted vs. unrestricted models
 - For interaction terms, compare the model with interactions to the model without
 - Report F-statistics and p-values for both tests
 
