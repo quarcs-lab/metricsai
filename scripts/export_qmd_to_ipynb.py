@@ -67,6 +67,33 @@ def strip_key_concepts(text: str) -> str:
     return re.sub(pattern, '', text, flags=re.DOTALL | re.MULTILINE)
 
 
+def prepend_colab_install_cell(nb: dict) -> None:
+    """Insert a pip-install cell at the top so a fresh Colab 'Run all' works.
+
+    Colab does not preinstall pyfixest (the regression engine used in every
+    chapter). `%pip install` is a no-op when the package is already present,
+    so re-running is harmless. Idempotent: skips if the top cell already
+    installs pyfixest.
+    """
+    cells = nb.get('cells', [])
+    if cells and cells[0].get('cell_type') == 'code' \
+            and 'pip install pyfixest' in ''.join(cells[0].get('source', [])):
+        return
+    install_cell = {
+        'cell_type': 'code',
+        'execution_count': None,
+        'id': 'colab-setup-install',
+        'metadata': {},
+        'outputs': [],
+        'source': [
+            '# Run this first in Google Colab to install packages that are not preinstalled.\n',
+            '# (No-op if the package is already available, e.g. in a local Jupyter setup.)\n',
+            '%pip install pyfixest -q',
+        ],
+    }
+    nb['cells'] = [install_cell] + cells
+
+
 def postprocess_ipynb(ipynb_path: Path) -> None:
     """Post-process the generated .ipynb for Colab compatibility."""
     with open(ipynb_path, 'r', encoding='utf-8') as f:
@@ -99,6 +126,9 @@ def postprocess_ipynb(ipynb_path: Path) -> None:
             cleaned = strip_key_concepts(source)
             if cleaned != source:
                 cell['source'] = [cleaned]
+
+    # Prepend the Colab dependency-install cell
+    prepend_colab_install_cell(nb)
 
     # Ensure nbformat is set
     nb['nbformat'] = 4
