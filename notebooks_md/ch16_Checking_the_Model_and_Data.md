@@ -54,7 +54,7 @@ This chapter focuses on checking model assumptions and diagnosing data problems.
 
 **Datasets used:**
 
-- **AED_EARNINGS_COMPLETE.DTA**: 842 full-time workers with earnings, age, education, and experience (2010)
+- **AED_EARNINGS_COMPLETE.DTA**: 872 full-time workers with earnings, age, education, and experience (2010)
 - **AED_DEMOCRACY.DTA**: 131 countries with democracy, growth, and institutional variables (Acemoglu et al. 2008)
 
 ## Key Concepts
@@ -66,7 +66,7 @@ Six core ideas anchor this chapter. Skim them before you start, and come back wh
 ::::: {.columns}
 :::: {.column width="50%"}
 ::: {.callout-tip collapse="true" appearance="simple" title="Example"}
-In the chapter's `data_democracy` study (131 countries), regressing economic `growth` on `democracy` looks straightforward — but `democracy` is plausibly endogenous: rich countries afford stronger institutions, so causality runs both ways. OLS on this pair is biased, and the chapter explicitly flags it as a textbook case where naive interpretation of the coefficient ("democracy boosts growth") confuses correlation with causation.
+In the chapter's `data_democracy` study (131 countries), regressing `democracy` on economic `growth` looks straightforward — but `growth` is plausibly endogenous: democracy may itself raise incomes and unobserved institutions drive both, so causality runs both ways. OLS on this pair is biased, and the chapter explicitly flags it as a textbook case where naive interpretation of the coefficient ("growth boosts democracy") confuses correlation with causation.
 :::
 ::::
 :::: {.column width="50%"}
@@ -96,7 +96,7 @@ A locksmith's universal key opens only the front door of a building, but every v
 ::::: {.columns}
 :::: {.column width="50%"}
 ::: {.callout-tip collapse="true" appearance="simple" title="Example"}
-Consider an `earnings` regression on `age + education + experience` in `data_earnings` ($n = 842$). A respondent with `education = 21` (PhD) and `experience = 0` (just graduated) sits at an unusual corner of regressor space — high leverage. Whether or not their earnings are unusual, the OLS line bends *more* in response to this row than to a typical mid-career worker — which is exactly when you want a leverage statistic to flag it.
+Consider an `earnings` regression on `age + education + experience` in `data_earnings` ($n = 872$). A respondent with `education = 21` (PhD) and `experience = 0` (just graduated) sits at an unusual corner of regressor space — high leverage. Whether or not their earnings are unusual, the OLS line bends *more* in response to this row than to a typical mid-career worker — which is exactly when you want a leverage statistic to flag it.
 :::
 ::::
 :::: {.column width="50%"}
@@ -111,7 +111,7 @@ On a see-saw, a small child sitting on the very end has more pivoting power than
 ::::: {.columns}
 :::: {.column width="50%"}
 ::: {.callout-tip collapse="true" appearance="simple" title="Example"}
-Computing Cook's distance for the earnings regression on `data_earnings` (842 workers) flags a small handful of outliers — a few very high earners far from the bulk of the sample. The chapter compares OLS coefficients with and without these flagged points: when their removal changes the `education` coefficient by more than a standard error, they are influential, not just unusual.
+Computing Cook's distance for the earnings regression on `data_earnings` (872 workers) flags a small handful of outliers — a few very high earners far from the bulk of the sample. The chapter compares OLS coefficients with and without these flagged points: when their removal changes the `education` coefficient by more than a standard error, they are influential, not just unusual.
 :::
 ::::
 :::: {.column width="50%"}
@@ -126,7 +126,7 @@ A restaurant critic walks in unannounced and orders the entire menu. Whether or 
 ::::: {.columns}
 :::: {.column width="50%"}
 ::: {.callout-tip collapse="true" appearance="simple" title="Example"}
-For `earnings ~ age + education + agebyeduc` on `data_earnings`, the chapter runs the auxiliary regression `agebyeduc ~ age + education` and finds $R^2 \approx 0.987$. Plugging that into the VIF formula gives $\text{VIF}_{\text{agebyeduc}} = 1/(1 - 0.987) \approx 77$ — severe multicollinearity, which explains why the individual t-statistic on the interaction term is so unreliable.
+For `earnings ~ age + education + agebyeduc` on `data_earnings`, the chapter runs the auxiliary regression `agebyeduc ~ age + education` and finds $R^2 \approx 0.973$. Plugging that into the VIF formula gives $\text{VIF}_{\text{agebyeduc}} = 1/(1 - 0.973) \approx 37$ — severe multicollinearity, which explains why the individual t-statistic on the interaction term is so unreliable.
 :::
 ::::
 :::: {.column width="50%"}
@@ -141,7 +141,7 @@ A theatre understudy steps in to play another character's role for one rehearsal
 ::::: {.columns}
 :::: {.column width="50%"}
 ::: {.callout-tip collapse="true" appearance="simple" title="Example"}
-A linear `earnings ~ age + education` model on `data_earnings` (842 workers) fails the RESET test once age enters quadratically — because the chapter's preferred quadratic-in-age specification (with peak earnings near age 50) has nonlinear structure the linear model misses. Rejecting RESET tells the analyst: a more flexible functional form is needed, before concluding anything else.
+A linear `earnings ~ age + education` model on `data_earnings` (872 workers) fails the RESET test once age enters quadratically — because the chapter's preferred quadratic-in-age specification (with peak earnings near age 50) has nonlinear structure the linear model misses. Rejecting RESET tells the analyst: a more flexible functional form is needed, before concluding anything else.
 :::
 ::::
 :::: {.column width="50%"}
@@ -201,7 +201,7 @@ plt.rcParams.update({
 print("\nSetup complete! Ready to explore model diagnostics.")
 ```
 
-## 16.1: Multicollinearity
+## 16.1 Multicollinearity
 
 Multicollinearity occurs when regressors are highly correlated with each other. While OLS remains unbiased and consistent, individual coefficients may be imprecisely estimated.
 
@@ -249,6 +249,8 @@ print(f"R-squared:             {fit_base._r2:.4f}")
 # Full regression output
 fit_base.summary()
 ```
+
+Now we add the age×education interaction term to the same regression. Watch how the standard errors on `age` and `education` balloon relative to the base model above — that inflation is the fingerprint of multicollinearity.
 
 ```python
 # Model with interaction (creates multicollinearity)
@@ -317,7 +319,7 @@ The VIF (Variance Inflation Factor) results reveal **severe multicollinearity** 
 
 Typical results when including age × education interaction:
 
-- **agebyeduc** (interaction): VIF ≈ **60-80** (SEVERE!)
+- **agebyeduc** (interaction): VIF ≈ **37** (SEVERE!)
 - **age**: VIF ≈ **15-25** (HIGH)
 - **education**: VIF ≈ **15-25** (HIGH)
 - **Intercept**: VIF ≈ **10-15**
@@ -341,15 +343,15 @@ The interaction term is nearly a perfect linear combination:
 
 - age and education are correlated
 - age × education inherits both correlations
-- $R^2_{agebyeduc|age,educ} \approx 0.9875$
-- This means 98.75% of variation in the interaction is **predictable** from age and education alone!
+- $R^2_{agebyeduc|age,educ} \approx 0.973$
+- This means 97.3% of variation in the interaction is **predictable** from age and education alone!
 
 **Consequences:**
 
 1. **Standard errors inflate dramatically**:
  - $SE(\hat{\beta}_j) = \sigma / \sqrt{(1-R_j^2) \cdot \sum(x_j - \bar{x}_j)^2}$
  - When $R_j^2 \approx 1$: denominator → 0, so SE → ∞
- - VIF = 80 means SE is $\sqrt{80} \approx 9$ times larger than with no collinearity!
+ - VIF = 37 means SE is $\sqrt{37} \approx 6$ times larger than with no collinearity!
 
 2. **Individual t-statistics become small**:
  - Even if the true effect is large
@@ -402,10 +404,10 @@ The interaction term is nearly a perfect linear combination:
 
 **The Auxiliary Regression:**
 
-The output shows regressing agebyeduc ~ age + education gives **R² ≈ 0.987**:
+The output shows regressing agebyeduc ~ age + education gives **R² ≈ 0.973**:
 
-- This confirms 98.7% of interaction variation is explained by main effects
-- VIF = 1/(1-0.987) = 1/0.013 ≈ 77 
+- This confirms 97.3% of interaction variation is explained by main effects
+- VIF = 1/(1-0.973) = 1/0.027 ≈ 37
 
 **Practical Interpretation for Our Model:**
 
@@ -435,6 +437,9 @@ Even with multicollinearity, joint tests can be powerful. Individual coefficient
 ```python
 # Joint hypothesis tests
 
+# The R matrix picks out the coefficient rows we want to test jointly (here age
+# and agebyeduc); wald_test then evaluates H₀ that BOTH equal zero at once.
+
 # Test 1: H₀: age = 0 AND agebyeduc = 0
 print("Test 1: H₀: age = 0 AND agebyeduc = 0")
 print(fit_collinear.wald_test(R=np.eye(len(fit_collinear.coef()))[[list(fit_collinear.coef().index).index(v) for v in ['age', 'agebyeduc']]]))
@@ -451,7 +456,7 @@ Joint tests are highly significant even though individual t-tests are weak. This
 >
 > Even when multicollinearity makes individual t-tests unreliable (high VIF, large standard errors), joint F-tests remain powerful. Testing whether a group of collinear variables is jointly significant avoids the imprecision problem because the F-test evaluates the combined contribution. Always use joint tests for groups of correlated regressors rather than relying on individual significance.
 
-## 16.2-16.4: Model Assumptions
+## 16.2-16.4 Model Assumptions
 
 **Classical OLS Assumptions:**
 
@@ -498,7 +503,7 @@ print("  Endogeneity → Instrumental variables (IV)")
 >
 > When assumptions 1 or 2 fail (incorrect model or endogeneity), OLS is biased and inconsistent -- a fundamental problem requiring model changes or instrumental variables. When assumptions 3 or 4 fail (heteroskedasticity or autocorrelation), OLS remains unbiased and consistent but standard errors are wrong, invalidating confidence intervals and hypothesis tests. The key distinction: bias requires fixing the model; wrong SEs require only changing the inference method.
 
-## 16.5: Heteroskedastic Errors
+## 16.5 Heteroskedastic Errors
 
 Heteroskedasticity means the error variance depends on $x$: $Var(u_i | x_i) = \sigma_i^2 \neq \sigma^2$
 
@@ -557,8 +562,8 @@ The comparison between standard and robust SEs reveals **heteroskedasticity** in
 
 | Variable | Standard SE | Robust SE | Ratio (Robust/Standard) |
 |----------|-------------|-----------|------------------------|
-| age | ~\$200 | ~\$250 | **1.25x** |
-| education | ~\$800 | ~\$1,100 | **1.38x** |
+| age | ~\$154 | ~\$151 | **0.98x** |
+| education | ~\$570 | ~\$642 | **1.13x** |
 
 **What This Tells Us:**
 
@@ -604,12 +609,12 @@ In the residual vs. fitted plot:
 
 **With standard SEs:**
 
-- t-statistic for education: 6.25 → p < 0.001
+- t-statistic for education: 10.19 → p < 0.001
 - Conclusion: Highly significant
 
 **With robust SEs:** 
 
-- t-statistic for education: 4.55 → p < 0.001
+- t-statistic for education: 9.06 → p < 0.001
 - Conclusion: Still significant, but less extreme
 
 **The correction:**
@@ -655,7 +660,7 @@ In this earnings regression:
 - Robust SEs should be **default** for cross-sectional regressions
 - Report robust SEs in all your empirical work!
 
-## 16.6: Correlated Errors (Autocorrelation)
+## 16.6 Correlated Errors (Autocorrelation)
 
 Autocorrelation occurs in time series when $Cov(u_t, u_s) \neq 0$ for $t \neq s$.
 
@@ -707,6 +712,8 @@ ts_data = pd.DataFrame({'y1': y1, 'x': x})
 
 print(f"\nGenerated {n} observations with AR(1) errors (ρ = 0.8)")
 ```
+
+Now we fit the regression to the simulated series and inspect its residuals. Because we built AR(1) structure into the errors, the residual autocorrelation function (ACF) below should show a strong spike at lag 1 that decays gradually across later lags.
 
 ```python
 # Estimate model and check residual autocorrelation
@@ -876,11 +883,11 @@ In the interest rate example:
 - Even with correction, 10-year rate **strongly related** to 1-year rate
 - But not as precisely estimated as default SEs suggest!
 
-## 16.7: Example - Democracy and Growth
+## 16.7 Example - Democracy and Growth
 
 We analyze the relationship between democracy and economic growth using data from Acemoglu, Johnson, Robinson, and Yared (2008).
 
-**Research question**: Does democracy promote economic growth?
+**Research question**: Does economic growth promote democracy?
 
 **Data**: 131 countries, 1500-2000
 
@@ -906,6 +913,8 @@ data_democracy[summary_vars].describe()
 print(f"\nSample size: {len(data_democracy)} countries")
 print(f"Time period: 1500-2000")
 ```
+
+We begin with the simplest specification: regress the 500-year change in democracy on economic growth alone. The scatter plot and fitted line below show the raw association before any controls are added.
 
 ```python
 # Bivariate regression: democracy ~ growth
@@ -946,6 +955,8 @@ print(f"  But this may reflect omitted institutional variables...")
 - **Scatter**: Substantial variation around the line -- growth explains only a fraction of democracy differences
 - **Potential confounders**: The positive association may partly reflect omitted institutional variables (religion, colonial history) rather than a direct causal effect
 
+Now we add institutional controls — executive constraints, independence date, and religious composition. If growth was partly standing in for these omitted factors, its coefficient should shrink once they enter the model.
+
 ```python
 # Multiple regression: add institutional controls
 # Multiple Regression with Institutional Controls
@@ -968,7 +979,7 @@ print(f"  This suggests omitted variable bias in the bivariate model.")
 
 > **Key Concept 16.6: Omitted Variables Bias in Practice**
 >
-> The democracy-growth example demonstrates omitted variables bias: the growth coefficient falls from 0.131 (bivariate) to 0.047 (with controls), a 64% reduction. Institutional variables (religion, executive constraints) were correlated with both democracy and growth, biasing the bivariate estimate upward. Always ask: "What variables might affect my outcome and correlate with my key regressor?" Include relevant controls to reduce bias.
+> The democracy-growth example demonstrates omitted variables bias: the growth coefficient falls from 0.131 (bivariate) to 0.047 (with controls), a 64% reduction that also turns a highly significant effect (t ≈ 6.7) into one indistinguishable from zero at the 5% level (t ≈ 1.8, p ≈ 0.07). Institutional variables (religion, executive constraints) were correlated with both democracy and growth, biasing the bivariate estimate upward. Always ask: "What variables might affect my outcome and correlate with my key regressor?" Include relevant controls to reduce bias.
 
 ```python
 # Get residuals from multiple regression for diagnostic plots
@@ -981,7 +992,7 @@ print(f"Residual mean (should be ~0): {uhat.mean():.6f}")
 print(f"Residual std dev: {uhat.std():.4f}")
 ```
 
-## 16.8: Diagnostics - Residual Plots
+## 16.8 Diagnostics - Residual Plots
 
 Diagnostic plots help detect violations of model assumptions:
 
@@ -1493,8 +1504,6 @@ plt.suptitle('DFBETAS: Influential Observations by Variable',
              fontsize=14, fontweight='bold', y=1.00)
 plt.tight_layout()
 plt.show()
-
-print("\nInterpretation:")
 ```
 
 **What to look for in the DFBETAS plots:**
@@ -1521,7 +1530,7 @@ print("\nInterpretation:")
 - Assumptions 1-2 violations (incorrect model, endogeneity) cause bias and inconsistency -- fundamental problems requiring model changes or IV
 - Assumptions 3-4 violations (heteroskedasticity, autocorrelation) do not bias coefficients but invalidate standard errors
 - Wrong standard errors lead to incorrect t-statistics, confidence intervals, and hypothesis tests
-- Omitted variables bias formula: $\text{Bias} = \beta_3 \times \delta_{23}$, where $\beta_3$ is the omitted variable's effect and $\delta_{23}$ is the correlation
+- Omitted variables bias formula: $\text{Bias} = \beta_3 \times \delta_{23}$, where $\beta_3$ is the omitted variable's effect and $\delta_{23}$ is the slope from an auxiliary regression of the omitted variable on the included regressor
 
 **Heteroskedasticity and Robust Standard Errors:**
 
@@ -1698,7 +1707,12 @@ plt.show()
 
 **Try it yourself!** Copy this code into an empty Google Colab notebook and run it: [Open Colab](https://colab.research.google.com/notebooks/empty.ipynb)
 
-**Next steps:** Chapter 17 extends these ideas to panel data, where you'll learn fixed effects and random effects models that address unobserved heterogeneity across units.
+**Next Steps:**
+
+- Chapter 17 extends these ideas to panel data, where you'll learn fixed effects and random effects models that address unobserved heterogeneity across units.
+- Re-examine regressions from earlier chapters using this chapter's diagnostic workflow: VIF, robust SEs, residual plots, and influence measures.
+- When residual plots or specification tests signal misspecification, experiment with nonlinear terms, interactions, or transformations before drawing conclusions.
+- When endogeneity is suspected, review the instrumental-variables approach and look for a valid instrument.
 
 ---
 
@@ -1791,7 +1805,7 @@ In this case study, you will apply the diagnostic techniques from this chapter t
 
 #### Task 1: Detect Multicollinearity (Guided)
 
-Load the dataset and estimate a regression of log labor productivity (`np.log(lp)`) on log physical capital (`np.log(rk)`), human capital (`hc`), and log GDP per capita (`np.log(rgdppc)`), using the year 2014 cross-section.
+Load the dataset and estimate a regression of log labor productivity (`np.log(lp)`) on log capital per worker (`np.log(kl)`), human capital (`h`), and log GDP per capita (`np.log(GDPpc)`), using the year 2014 cross-section.
 
 ```python
 import pandas as pd
@@ -1804,14 +1818,14 @@ url = "https://raw.githubusercontent.com/quarcs-lab/mendez2020-convergence-clubs
 dat = pd.read_csv(url)
 dat2014 = dat[dat['year'] == 2014].copy()
 dat2014['ln_lp'] = np.log(dat2014['lp'])
-dat2014['ln_rk'] = np.log(dat2014['rk'])
-dat2014['ln_rgdppc'] = np.log(dat2014['rgdppc'])
+dat2014['ln_kl'] = np.log(dat2014['kl'])
+dat2014['ln_GDPpc'] = np.log(dat2014['GDPpc'])
 
-# fit = pf.feols('ln_lp ~ ln_rk + hc + ln_rgdppc', data=dat2014, vcov='HC1')
-model.summary()
+fit = pf.feols('ln_lp ~ ln_kl + h + ln_GDPpc', data=dat2014, vcov='HC1')
+fit.summary()
 
 # Calculate VIF
-X = dat2014[['ln_rk', 'hc', 'ln_rgdppc']].dropna()
+X = dat2014[['ln_kl', 'h', 'ln_GDPpc']].dropna()
 X = sm.add_constant(X)
 for i, col in enumerate(X.columns):
     print(f"VIF({col}): {variance_inflation_factor(X.values, i):.2f}")
@@ -1826,8 +1840,8 @@ Interpret the VIF values. Is multicollinearity a concern? Which variables are mo
 Estimate the same model with both default and robust (HC1) standard errors. Create a comparison table.
 
 ```python
-fit_default = pf.feols('ln_lp ~ ln_rk + hc', data=dat2014)
-fit_robust = pf.feols('ln_lp ~ ln_rk + hc', data=dat2014, vcov='HC1')
+fit_default = pf.feols('ln_lp ~ ln_kl + h', data=dat2014)
+fit_robust = pf.feols('ln_lp ~ ln_kl + h', data=dat2014, vcov='HC1')
 
 comparison = pd.DataFrame({
     'Default SE': fit_default.se(),
@@ -1847,7 +1861,7 @@ Create the three diagnostic plots for the productivity model:
 
 1. Actual vs. fitted values with LOWESS smooth
 2. Residuals vs. fitted values with LOWESS smooth
-3. Residuals vs. `ln_rk` (component-plus-residual plot)
+3. Residuals vs. `ln_kl` (component-plus-residual plot)
 
 *Hint:* Use `from statsmodels.nonparametric.smoothers_lowess import lowess` for the LOWESS smooth. Plot residuals from the robust model.
 
