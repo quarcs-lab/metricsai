@@ -86,7 +86,7 @@ A currency converter takes prices from many countries and reports them in one co
 ::::: {.columns}
 :::: {.column width="50%"}
 ::: {.callout-tip collapse="true" appearance="simple" title="Example"}
-The linear-log fit of `earnings` on `lneduc` for the 171 working women gives $\beta_1 \approx 545$, meaning a 1% increase in years of education is associated with about \$545 more in annual earnings. This specification has the lowest $R^2$ of the four functional forms ch09 considers, but is useful when economic theory predicts dollar effects from percentage changes.
+The linear-log fit of `earnings` on `lneduc` for the 171 working women gives $\beta_1 \approx 54{,}433$, so $\beta_1/100 \approx 544$: a 1% increase in years of education is associated with about \$544 more in annual earnings. This specification has the lowest $R^2$ of the four functional forms ch09 considers, but is useful when economic theory predicts dollar effects from percentage changes.
 :::
 ::::
 :::: {.column width="50%"}
@@ -96,12 +96,12 @@ A staircase whose risers shrink with every step — the first stair lifts you a 
 ::::
 :::::
 
-**Diminishing Returns:** The economic phenomenon in which each additional unit of an input produces a smaller increment in the outcome. Log transformations capture this directly: $\ln(x)$ rises quickly at small $x$ and slowly at large $x$, so $\beta_1 \ln(x)$ in a linear-log or log-log model bends the fitted curve into the classic "diminishing-returns" shape.
+**Diminishing Returns:** The economic phenomenon in which each additional unit of an input produces a smaller increment in the outcome. Log transformations capture this directly: $\ln(x)$ rises quickly at small $x$ and slowly at large $x$, so $\beta_1 \ln(x)$ in a linear-log model — or a log-log model with $\beta_1 < 1$ — bends the fitted curve into the classic "diminishing-returns" shape.
 
 ::::: {.columns}
 :::: {.column width="50%"}
 ::: {.callout-tip collapse="true" appearance="simple" title="Example"}
-The earnings–education comparison in ch09 shows it concretely: in the linear model, every extra year of `education` is associated with a constant \$5{,}021 — implausible at the high end. The log-log fit, with elasticity $\approx 1.48$, lets the marginal dollar return shrink at higher education levels, matching the chapter's intuition that "each extra year of school still helps, but a bit less than the previous year."
+The earnings–education comparison in ch09 shows it concretely: in the linear model, every extra year of `education` is associated with a constant \$5{,}021 — implausible at the high end. The log-log fit, with elasticity $\approx 1.48$, implies the percentage return to an extra year of schooling ($100 \times 1.48/\text{education}$) falls from roughly 12% at 12 years of education to 8% at 18 years, matching the chapter's intuition that "each extra year of school still helps, but a bit less than the previous year."
 :::
 ::::
 :::: {.column width="50%"}
@@ -116,7 +116,7 @@ The first slice of cake is sublime; the second is good; by the fifth, you are st
 ::::: {.columns}
 :::: {.column width="50%"}
 ::: {.callout-tip collapse="true" appearance="simple" title="Example"}
-For the 93 annual observations on the S&P 500 (`data_sp500`, 1927–2019), the regression of `lnsp500` on `year` gives a slope of $0.065$ — i.e. the S&P 500 has compounded at roughly $6.5\%$ per year over the post-Depression era. Every year, on average, the index multiplied itself by $1.065$.
+For the 93 annual observations on the S&P 500 (`data_sp500`, 1927–2019), the regression of `lnsp500` on `year` gives a slope of $0.065$ — i.e. the S&P 500 has compounded at roughly $6.5\%$ per year over the 1927–2019 period. Every year, on average, the index multiplied itself by $1.065$.
 :::
 ::::
 :::: {.column width="50%"}
@@ -233,7 +233,7 @@ log_table = pd.DataFrame({
     'ln(x)': ln_values,
     'exp(ln(x))': np.exp(ln_values)
 })
-log_table.to_string(index=False)
+print(log_table.to_string(index=False))
 
 # KEY PROPERTIES DEMONSTRATED
 print(f"1. ln(1) = {np.log(1):.4f}")
@@ -295,15 +295,12 @@ $$\text{Elasticity} \approx \frac{\Delta \ln(y)}{\Delta \ln(x)}$$
 
 **This is why we use logarithms in regression!** The slope coefficient directly estimates the semi-elasticity or elasticity.
 
-```{python}
-# MODEL INTERPRETATIONS
-# 1. Linear: y = β₀ + β₁x → Δy = β₁Δx
-# 2. Log-linear: ln(y) = β₀ + β₁x → %Δy ≈ 100β₁Δx (semi-elasticity)
-# 3. Log-log: ln(y) = β₀ + β₁ln(x) → %Δy ≈ β₁%Δx (elasticity)
-# 4. Linear-log: y = β₀ + β₁ln(x) → Δy ≈ (β₁/100)%Δx
+**The four model interpretations at a glance:**
 
-# KEY TAKEAWAY
-```
+1. **Linear:** y = β₀ + β₁x → Δy = β₁Δx
+2. **Log-linear:** ln(y) = β₀ + β₁x → %Δy ≈ 100β₁Δx (semi-elasticity)
+3. **Log-log:** ln(y) = β₀ + β₁ln(x) → %Δy ≈ β₁%Δx (elasticity)
+4. **Linear-log:** y = β₀ + β₁ln(x) → Δy ≈ (β₁/100)%Δx
 
 > **Key Concept 9.2: Semi-Elasticity vs. Elasticity**
 >
@@ -313,10 +310,12 @@ $$\text{Elasticity} \approx \frac{\Delta \ln(y)}{\Delta \ln(x)}$$
 > - **Elasticity** = (Δy/y) / (Δx/x) — proportionate change in y per **proportionate** change in x
 >
 > **In regression models:**
+>
 > - Semi-elasticity ≈ Δln(y)/Δx → estimated by the slope in a **log-linear** model
 > - Elasticity ≈ Δln(y)/Δln(x) → estimated by the slope in a **log-log** model
 >
 > **When to use each:**
+>
 > - **Semi-elasticity:** When x is measured in natural units (years of education, age)
 > - **Elasticity:** When both variables are measured in proportions (price and quantity, GDP and investment)
 
@@ -343,11 +342,13 @@ Each model answers a slightly different question and has different economic inte
 data_earnings = pd.read_stata(GITHUB_DATA_URL + 'AED_EARNINGS.DTA')
 
 # DATA SUMMARY: EARNINGS AND EDUCATION
-data_earnings[['earnings', 'education']].describe()
+print(data_earnings[['earnings', 'education']].describe())
 
 print("\nFirst 5 observations:")
 data_earnings[['earnings', 'education']].head()
 ```
+
+The summary statistics show a right-skewed earnings distribution: the mean (about \$41,413) sits well above the median (\$36,000), with a maximum of \$172,000. The next cell creates log-transformed versions of both variables — watch how the log scale pulls in that long upper tail.
 
 ```{python}
 # Create log-transformed variables
@@ -415,6 +416,10 @@ print(f"Note: percentage interpretation scales automatically — applies whether
 model_loglin.summary()
 ```
 
+The headline estimate is meaningful in both senses: economically, each additional year of education is associated with about 13.1% higher earnings; statistically, the coefficient's t-statistic of 9.21 (p < 0.001) makes the association highly significant, so it is very unlikely to reflect sampling variation alone.
+
+*Note on standard errors:* Following AED's convention before Chapter 12, the regression output in this chapter reports classical (iid) standard errors; Section 12.2 introduces heteroskedasticity-robust standard errors, which are preferred in practice.
+
 > **Key Concept 9.3: Interpreting Log-Linear Model Coefficients**
 >
 > In the **log-linear model** ln(y) = β₀ + β₁x, the slope coefficient β₁ is the **semi-elasticity** of y with respect to x:
@@ -423,7 +428,7 @@ model_loglin.summary()
 >
 > This is the most common specification in labor economics because a percentage interpretation **scales automatically** — a 13% return to education applies equally whether you earn \$30,000 or \$100,000.
 >
-> **Important:** The exact percentage change for large β₁ is 100 × (e^β₁ - 1), not 100 × β₁. The approximation works well when β₁ < 0.10.
+> **Important:** The exact percentage change for large β₁ is 100 × (e^β₁ - 1), not 100 × β₁. The approximation works well when |β₁| < 0.10. Here the estimate β₁ ≈ 0.131 slightly exceeds that threshold: the exact effect is 100 × (e^0.131 - 1) ≈ 14.0%, a bit above the 13.1% approximation.
 
 ### Model 3: Log-Log Model
 
@@ -431,7 +436,7 @@ model_loglin.summary()
 
 **Interpretation:** β₁ = **elasticity** = percentage change in earnings for a 1% change in education
 
-**Note:** A "1% increase in education" is a bit artificial (what does 0.14 more years mean?), but this model captures diminishing returns to education.
+**Note:** A "1% increase in education" is a bit artificial (what does 0.14 more years mean?), but this model lets the percentage return to an additional year of education (100β₁/education) decline as education rises.
 
 ```{python}
 # Model 3: Log-log
@@ -492,6 +497,8 @@ model_linlog.summary()
 
 ### Comparison of All Four Models
 
+The table below collects the slope estimate, its economic interpretation, and R² from all four specifications so you can compare them side by side — look for which model fits best and how differently each slope must be read.
+
 ```{python}
 # Create comparison table
 # MODEL COMPARISON SUMMARY
@@ -519,12 +526,12 @@ comparison_df = pd.DataFrame({
     ]
 })
 
-comparison_df.to_string(index=False)
+print(comparison_df.to_string(index=False))
 
 # WHICH MODEL IS BEST?
-# For this data
-print(f"  - Best fit (highest R²): Log-linear (R² = {model_loglin._r2:.3f})")
-print(f"  Best fit (highest R²): Log-linear (R² = {model_loglin._r2:.3f})")
+# R² is comparable only across models with the same dependent variable
+print(f"  - Among ln(earnings) models: Log-linear fits best (R² = {model_loglin._r2:.3f} vs. Log-log {model_loglog._r2:.3f})")
+print(f"  - Among earnings-level models: Linear fits best (R² = {model_linear._r2:.3f} vs. Linear-log {model_linlog._r2:.3f})")
 ```
 
 > **Key Concept 9.5: Choosing the Right Functional Form**
@@ -533,12 +540,14 @@ print(f"  Best fit (highest R²): Log-linear (R² = {model_loglin._r2:.3f})")
 >
 > 1. **Economic theory** — Does the theory predict absolute or percentage effects?
 > 2. **Data properties** — Is the dependent variable right-skewed? Are both variables positive?
-> 3. **Model fit** — Which specification yields the highest R²?
+> 3. **Model fit** — Which specification yields the highest R²? (Compare R² only across models with the same dependent variable.)
 > 4. **Interpretation needs** — Do you need elasticities, semi-elasticities, or dollar amounts?
 >
 > **In practice:** The **log-linear model** is most common in economics because many economic relationships involve percentage changes (returns to education, inflation effects, price responses). When in doubt, start with log-linear.
 
 ### Visualizing All Four Models
+
+The 2×2 grid below plots each specification with its fitted line on the appropriate axes — note how the log transformations straighten the curvature that the linear model misses.
 
 ```{python}
 # Create 2x2 comparison plot
@@ -587,7 +596,7 @@ axes[1, 1].plot(data_earnings['lneduc'], model_linlog.predict(),
                 color='#c084fc', linewidth=2, label=f'R² = {model_linlog._r2:.3f}')
 axes[1, 1].set_xlabel('ln(Education)', fontsize=11)
 axes[1, 1].set_ylabel('Earnings ($)', fontsize=11)
-axes[1, 1].set_title('Model 4: Linear-log\ny = β₀ + β₁ln(x)\nSlope: $545 per 1% change',
+axes[1, 1].set_title('Model 4: Linear-log\ny = β₀ + β₁ln(x)\nSlope: $544 per 1% change',
                      fontsize=12, fontweight='bold')
 axes[1, 1].legend()
 axes[1, 1].grid(True, alpha=0.3)
@@ -602,7 +611,7 @@ plt.show()
 **What to look for across the four panels:**
 
 - **Model 1 (linear)**: Straight line fit, but residuals may be heteroskedastic
-- **Model 2 (log-linear)**: Best fit, captures curvature in original data
+- **Model 2 (log-linear)**: Best fit among the ln(earnings) models, captures curvature in original data
 - **Model 3 (log-log)**: Both axes logged, captures elasticity
 - **Model 4 (linear-log)**: Captures diminishing returns to education
 
@@ -636,13 +645,15 @@ The slope β₁ directly estimates the growth rate r.
 data_sp500 = pd.read_stata(GITHUB_DATA_URL + 'AED_SP500INDEX.DTA')
 
 # S&P 500 INDEX DATA (1927-2019)
-data_sp500[['year', 'sp500', 'lnsp500']].describe()
+print(data_sp500[['year', 'sp500', 'lnsp500']].describe())
 
 print("\nFirst and last years:")
-data_sp500[['year', 'sp500', 'lnsp500']].head(3)
+print(data_sp500[['year', 'sp500', 'lnsp500']].head(3))
 print("...")
 print(data_sp500[['year', 'sp500', 'lnsp500']].tail(3))
 ```
+
+Now we regress ln(sp500) on year — the slope directly estimates the average annual growth rate of the index, and the Rule of 72 converts it into a doubling time.
 
 ```{python}
 # Estimate exponential growth model
@@ -676,12 +687,14 @@ model_sp500.summary()
 
 ### Visualizing Exponential Growth
 
+The two panels below show the same S&P 500 series twice: as an exponential curve in levels (left) and as a near-straight line after taking logs (right) — visual proof that the log transformation linearizes compound growth.
+
 ```{python}
 # Create visualization showing exponential vs linear in logs
 fig, axes = plt.subplots(1, 2, figsize=(16, 6))
 
 # Panel A: Exponential growth in levels
-# Apply retransformation bias correction (Duan's smearing estimate)
+# Apply retransformation bias correction (normal-errors adjustment: multiply by exp(MSE/2))
 n = len(data_sp500)
 k = 2  # number of parameters: intercept + slope
 MSE = np.sum(model_sp500._u_hat**2) / (n - k)
@@ -732,6 +745,7 @@ plt.show()
 > where r is the **percentage** growth rate. This approximation derives from the logarithmic identity: ln(2) ≈ 0.693, combined with ln(1+r) ≈ r for small r.
 >
 > **Examples:**
+>
 > - S&P 500 at 6.5% growth → doubles every 72/6.5 ≈ 11 years
 > - GDP at 3% growth → doubles every 72/3 = 24 years
 > - Population at 1% growth → doubles every 72/1 = 72 years
@@ -739,8 +753,6 @@ plt.show()
 > **Practical value:** The Rule of 72 converts growth rates into an intuitive time horizon without needing a calculator.
 
 ## Key Takeaways
-
-**Key Takeaways:**
 
 1. **Natural logarithms** let us work with **proportionate changes** instead of absolute changes.
    - Key approximation: Δln(x) ≈ Δx/x (proportionate change)
@@ -762,10 +774,10 @@ plt.show()
    - Log-linear is most common in applied economics (earnings, prices)
 
 4. **Earnings-Education results** illustrate the four specifications:
-   - **Linear:** Each year of education → \$5,021 more earnings
-   - **Log-linear:** Each year of education → 13.1% more earnings (best fit, R² = 0.334)
-   - **Log-log:** 1% more education → 1.48% more earnings (elasticity)
-   - **Linear-log:** 1% more education → \$545 more earnings
+   - **Linear:** Each year of education is associated with \$5,021 more earnings
+   - **Log-linear:** Each year of education is associated with 13.1% more earnings (best fit among ln(y) models, R² = 0.334)
+   - **Log-log:** 1% more education is associated with 1.48% more earnings (elasticity)
+   - **Linear-log:** 1% more education is associated with \$544 more earnings
 
 5. **Exponential growth** becomes **linear in logs:**
    - If x grows exponentially: x_t = x₀(1+r)^t
@@ -855,7 +867,7 @@ model_loglin.summary()
 # =============================================================================
 # The comparison shows that model choice affects both R² and interpretation
 models = {
-    'Linear':     ('earnings ~ education',  model_linear,  'education', '${:,.0f} per year'),
+    'Linear':     ('y ~ x',                 model_linear,  'education', '${:,.0f} per year'),
     'Log-linear': ('ln(y) ~ x',            model_loglin,  'education', '{:.1f}% per year'),
     'Log-log':    ('ln(y) ~ ln(x)',         model_loglog,  'lneduc',   '{:.2f}% per 1%'),
     'Linear-log': ('y ~ ln(x)',            model_linlog,  'lneduc',   '${:,.0f} per 1%'),
@@ -865,13 +877,15 @@ print(f"{'Model':<12} {'Specification':<16} {'Slope':>10} {'R²':>8}  Interpreta
 print("-" * 75)
 for name, (spec, m, var, fmt) in models.items():
     slope = m.coef()[var]
-    interp = fmt.format(100*slope if 'per year' in fmt and 'Log' in name else slope/100 if 'per 1%' in fmt and name == 'Linear-log' else slope)
+    # Scale the slope to match each model's interpretation
+    scaled = 100*slope if name == 'Log-linear' else slope/100 if name == 'Linear-log' else slope
+    interp = fmt.format(scaled)
     print(f"{name:<12} {spec:<16} {slope:>10.4f} {m._r2:>8.3f}  {interp}")
 
 # =============================================================================
 # STEP 6: Scatter plot with the log-linear fitted line
 # =============================================================================
-# The log-linear model (semi-elasticity) provides the best fit for earnings data
+# The log-linear model (semi-elasticity) fits best among the ln(earnings) models
 fig, ax = plt.subplots(figsize=(10, 6))
 ax.scatter(data_earnings['education'], data_earnings['lnearn'], s=50, alpha=0.7)
 ax.plot(data_earnings['education'], model_loglin.predict(),
@@ -933,9 +947,9 @@ plt.show()
 
 > **Common Mistakes to Avoid**
 >
-> - **Misinterpreting log-level coefficients**: A one-unit change in X leads to a (b x 100)% change in Y, not b units
+> - **Misinterpreting log-linear coefficients**: A one-unit change in X leads to approximately a (b x 100)% change in Y, not a change of b units
 > - **Forgetting that log(0) is undefined**: Log transformations require strictly positive values
-> - **Confusing log-log and log-level elasticities**: The interpretation depends on which variables are logged
+> - **Confusing elasticities with semi-elasticities**: The log-log slope is an elasticity (% change in Y per 1% change in X); the log-linear slope is a semi-elasticity (% change in Y per one-unit change in X)
 
 ## Practice Exercises
 
@@ -1008,11 +1022,10 @@ We'll use the **Mendez Convergence Clubs dataset** containing:
 - **country**: Country name (108 countries)
 - **year**: Year of observation (1990-2014)
 - **lp**: Labor productivity (output per worker, in dollars)
-- **rk**: Capital per worker (physical capital stock, in thousands of dollars)
-- **hc**: Human capital index (based on years of schooling and returns to education)
+- **kl**: Capital per worker (physical capital stock, in dollars)
+- **h**: Human capital index (based on years of schooling and returns to education)
 
 ```{python}
-#| eval: false
 # Load the Convergence Clubs dataset
 url_mendez = "https://raw.githubusercontent.com/quarcs-lab/mendez2020-convergence-clubs-code-data/master/assets/dat.csv"
 data_cc = pd.read_csv(url_mendez)
@@ -1067,11 +1080,11 @@ data_2014['ln_lp'] = np.log(_____)
 # Summary statistics: levels vs logs
 # LABOR PRODUCTIVITY: LEVELS VS. LOGS
 print("\nIn levels (lp):")
-data_2014['lp'].describe()
+print(data_2014['lp'].describe())
 print(f"\nSkewness: {data_2014['lp'].skew():.3f}")
 
 print("\nIn logarithms (ln_lp):")
-data_2014['ln_lp'].describe()
+print(data_2014['ln_lp'].describe())
 print(f"\nSkewness: {data_2014['_____'].skew():.3f}")
 
 # Ratio of highest to lowest
@@ -1084,7 +1097,7 @@ print(f"\nMax/Min ratio: {data_2014['lp'].max() / data_2014['lp'].min():.1f}x")
 
 **Connection:** Section 9.2 (Semi-Elasticities)
 
-**Your task:** Estimate ln(lp) = β₀ + β₁ × hc and interpret the coefficient as a semi-elasticity.
+**Your task:** Estimate ln(lp) = β₀ + β₁ × h and interpret the coefficient as a semi-elasticity.
 
 a) What is the estimated semi-elasticity of productivity with respect to human capital?
 b) By what percentage does productivity increase for each additional unit of the human capital index?
@@ -1114,18 +1127,17 @@ print(f"\nR² = {model_hc._r2:.3f}")
 
 **Your tasks:**
 
-a) Estimate four models: linear (lp ~ rk), log-linear (ln_lp ~ rk), log-log (ln_lp ~ ln_rk), and linear-log (lp ~ ln_rk)
+a) Estimate four models: linear (lp ~ kl), log-linear (ln_lp ~ kl), log-log (ln_lp ~ ln_kl), and linear-log (lp ~ ln_kl)
 b) Create a comparison table showing the specification, slope coefficient, interpretation, and R² for each model
 c) Which model provides the best fit? Which provides the most economically meaningful interpretation?
 d) Why might the log-log specification be particularly appropriate for the productivity-capital relationship?
 
-```{python}
-#| eval: false
+```python
 # Task 3: Comparing Model Specifications (Semi-guided)
 # Create log-transformed variables
 data_2014['ln_kl'] = np.log(data_2014['kl'])
 
-# Estimate four models (fill in the formulas)
+# Estimate the four models
 m1_linear  = pf.feols('lp ~ kl', data=data_2014)
 m2_loglin  = pf.feols('ln_lp ~ kl', data=data_2014)
 m3_loglog  = pf.feols('ln_lp ~ ln_kl', data=data_2014)
@@ -1157,13 +1169,12 @@ m4_linlog  = pf.feols('lp ~ ln_kl', data=data_2014)
 
 **Your tasks:**
 
-a) Estimate the log-log model: ln(lp) = β₀ + β₁ × ln(rk). Report β₁ and R².
+a) Estimate the log-log model: ln(lp) = β₀ + β₁ × ln(kl). Report β₁ and R².
 b) Interpret β₁ as an elasticity. Is there evidence of diminishing returns to capital (β₁ < 1)?
 c) Construct a 95% confidence interval for the elasticity. Does it include 1?
 d) In growth theory, the output elasticity of capital is often assumed to be about 1/3. Test H₀: β₁ = 0.33 against H₁: β₁ ≠ 0.33.
 
-```{python}
-#| eval: false
+```python
 # Task 4: Elasticity of Productivity (Semi-guided)
 # Use the log-log model from Task 3
 
@@ -1171,8 +1182,8 @@ d) In growth theory, the output elasticity of capital is often assumed to be abo
 m3_loglog.summary()
 
 # Elasticity and confidence interval
-elasticity = m3_loglog.coef()['ln_rk']
-ci = m3_loglog.confint().loc['ln_rk']
+elasticity = m3_loglog.coef()['ln_kl']
+ci = m3_loglog.confint().loc['ln_kl']
 print(f"\nElasticity: {elasticity:.4f}")
 print(f"95% CI: [{ci.iloc[0]:.4f}, {ci.iloc[1]:.4f}]")
 
@@ -1194,8 +1205,7 @@ b) Estimate the exponential growth model: ln(avg_lp) = β₀ + β₁ × year. Wh
 c) Apply the Rule of 72: approximately how many years does it take for average global labor productivity to double?
 d) Repeat the growth rate estimation for two regions or groups of countries (e.g., high-income vs. low-income). Do growth rates differ?
 
-```{python}
-#| eval: false
+```python
 # Task 5: Productivity Growth Rates (Independent)
 # Compute average productivity per year
 
@@ -1233,7 +1243,7 @@ Write a 200-300 word summary analyzing cross-country labor productivity using lo
 >
 > **The bottom line:** Without logarithmic transformations, cross-country analysis would be dominated by a few rich outliers and miss the economic relationships that matter for development policy.
 
-### What You've Learned from This Case Study
+#### What You've Learned from This Case Study
 
 **Congratulations!** You've applied logarithmic model specifications to real cross-country economic data.
 
@@ -1248,7 +1258,7 @@ Write a 200-300 word summary analyzing cross-country labor productivity using lo
 **Economic Insights:**
 
 - Cross-country productivity distributions are highly right-skewed, requiring log transformations
-- Human capital and physical capital both contribute to productivity, but with diminishing returns
+- Human capital and physical capital are both strongly associated with higher productivity; for physical capital the estimated elasticity is below 1, indicating diminishing returns
 - Log-log models connect directly to production function theory in economics
 - Growth rates vary substantially across countries and regions
 
