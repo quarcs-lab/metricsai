@@ -1,0 +1,496 @@
+{
+ "chapter": "ch14",
+ "file": "ch14_Regression_with_Indicator_Variables.qmd",
+ "findings": [
+  {
+   "lines": [
+    495,
+    498
+   ],
+   "category": "methods",
+   "severity": "error",
+   "action": "report",
+   "summary": "The model-evolution narrative claims adding education 'reduces the gender coefficient by ~$6,000' to a conditional gap of approximately -$10,000, but execution shows Model 2's education-adjusted gender coefficient is -$18,258 (larger magnitude than the -$16,396 unconditional gap), so the 'controls shrink the gap' / 'education explains part of the raw gap' OVB-mediation reasoning is directionally reversed.",
+   "evidence": "Dump CELL 4 Model 1 (earnings ~ gender) gender = -16,396; CELL 6 Model 2 (earnings ~ gender + education) gender = -18,258 -- adding education INCREASES the gap magnitude (education is a suppressor). Model 3/4/5 gender coefficients are +20,219 / +19,022 / +57,129, none supporting the stated -$5k to -$10k conditional gap (L495-498 'Gap shrinks to approximately -$10,000 / Adding education as a control reduces the gender coefficient by ~$6,000 / Part of the raw gap is explained by gender differences in education levels'; L519 'From -$16,000 (unconditional) to approximately -$5,000 to -$8,000 (conditional)'). Lens A rule: coefficient-change/OVB direction claims must match the data. Report because fixing flips the stated pedagogical conclusion.",
+   "confidence": "high",
+   "id": "ch14-F01",
+   "verify_note": "Dump: Model 1 gender = -16,396 (CELL 4); Model 2 (earnings ~ gender + education) gender = -18,258 (CELL 6). Adding education WIDENS the gap magnitude by ~$1,862, opposite of the prose's 'shrinks to ~-$10,000 / reduces by ~$6,000'. OVB decomposition (-16,396 = -18,258 + 5,907*delta -> delta = +0.315) confirms women average ~0.32 more years of education, i.e. a suppression effect. Not a misconception block; genuine directional error. action=report appropriate (conclusion flip)."
+  },
+  {
+   "lines": [
+    135,
+    136
+   ],
+   "category": "methods",
+   "severity": "error",
+   "action": "report",
+   "summary": "The 'Conditional vs. Unconditional Gap' Key Concept example claims adding education shrinks the conditional gender gap to roughly -$10,000, but the education-adjusted gender coefficient is actually -$18,258 (larger in magnitude than the -$16,396 unconditional gap), so the direction of the compositional/OVB claim is wrong.",
+   "evidence": "Dump CELL 4 Model 1 gender = -16,396; CELL 6 Model 2 (earnings ~ gender + education) gender = -18,258. The example text 'Adding education shrinks the conditional gap to roughly -$10,000; adding age and hours brings it down further to between -$5,000 and -$8,000' asserts a monotone shrinkage that execution contradicts at the very first control step. Same directional/OVB error as the L495-498 narrative. Report (conclusion flip).",
+   "confidence": "high",
+   "id": "ch14-F02",
+   "verify_note": "Same defect inside the 'Conditional vs. Unconditional Gap' Key Concept Example panel (L135-136), presented as fact not misconception. Model 2 gender = -18,258, so 'adding education shrinks the conditional gap to roughly -$10,000' is directionally false. Real defect."
+  },
+  {
+   "lines": [
+    1236,
+    1236
+   ],
+   "category": "code",
+   "severity": "error",
+   "action": "fix",
+   "summary": "Case Study 1 lists dataset columns `rk` and `hc`, which do not exist in the Mendez dataset (actual columns are `kl` and `h`).",
+   "evidence": "Live load of mendez2020-convergence-clubs-code-data/master/assets/dat.csv shows columns include kl and h; rk and hc are absent (has rk: False, has hc: False, has kl: True, has h: True). Same dataset issue as the ch09 pre-verified seed finding.",
+   "old": "**Variables:** `lp` (labor productivity), `rk` (physical capital), `hc` (human capital), `region` (world region)",
+   "new": "**Variables:** `lp` (labor productivity), `kl` (physical capital per worker), `h` (human capital), `region` (world region)",
+   "confidence": "high",
+   "id": "ch14-F03",
+   "verify_note": "Live load confirms Mendez dataset has no rk/hc columns; it has kl (capital per worker) and h (human capital). Fix labels are accurate: kl='physical capital per worker', h='human capital'. old matches L1236 exactly once."
+  },
+  {
+   "lines": [
+    1283,
+    1283
+   ],
+   "category": "code",
+   "severity": "error",
+   "action": "fix",
+   "summary": "Task 3 hint formula references nonexistent columns `rk` and `hc`; would raise KeyError if run.",
+   "evidence": "Mendez dataset has no `rk`/`hc` columns (verified via live pd.read_csv); physical capital per worker is `kl`, human capital is `h` (the measures ch09 uses on the same dataset).",
+   "old": "- Use `ln_lp ~ C(region) + np.log(rk) + hc` as the formula",
+   "new": "- Use `ln_lp ~ C(region) + np.log(kl) + h` as the formula",
+   "confidence": "high",
+   "id": "ch14-F04",
+   "verify_note": "rk/hc do not exist; kl/h do. old matches L1283 exactly once; replacement formula uses valid columns and mirrors the original log-capital/level-human-capital structure."
+  },
+  {
+   "lines": [
+    1295,
+    1295
+   ],
+   "category": "code",
+   "severity": "error",
+   "action": "fix",
+   "summary": "Task 4 hint formula references nonexistent columns `hc` and `rk`; would raise KeyError if run.",
+   "evidence": "Mendez dataset columns are `kl` (capital per worker) and `h` (human capital), not `rk`/`hc` (verified via live pd.read_csv).",
+   "old": "- Use `ln_lp ~ C(region) * hc + np.log(rk)` to include all region-hc interactions",
+   "new": "- Use `ln_lp ~ C(region) * h + np.log(kl)` to include all region-human-capital interactions",
+   "confidence": "high",
+   "id": "ch14-F05",
+   "verify_note": "Same column issue; old matches L1295 once; C(region)*h + np.log(kl) uses valid columns."
+  },
+  {
+   "lines": [
+    1387,
+    1387
+   ],
+   "category": "code",
+   "severity": "error",
+   "action": "fix",
+   "summary": "Task 2 instruction credits statsmodels for the estimation, but the code uses pyfixest (pf.feols).",
+   "evidence": "The accompanying answer fence (L1393) and scaffold comment (L1405) both call pf.feols('imds ~ C(dep)', ...); statsmodels is never used. Brief Lens B: 'statsmodels credited for estimation → pyfixest.'",
+   "old": "1. Estimate `imds ~ C(dep)` using statsmodels --- `C()` creates dummies automatically",
+   "new": "1. Estimate `imds ~ C(dep)` using pyfixest --- `C()` creates dummies automatically",
+   "confidence": "high",
+   "id": "ch14-F06",
+   "verify_note": "Code fence at L1393 and scaffold at L1405 both use pf.feols; statsmodels never used. old matches L1387 once; pyfixest is the correct estimator."
+  },
+  {
+   "lines": [
+    1497,
+    1497
+   ],
+   "category": "code",
+   "severity": "error",
+   "action": "fix",
+   "summary": "Task 5 hint tells students to use `model.f_test()`, a method pyfixest fit objects do not have.",
+   "evidence": "Verified in venv (pyfixest 0.50.1): a fitted feols object has no `f_test` attribute (has f_test: False) but does have `wald_test` (has wald_test: True), which the chapter itself uses at L474.",
+   "old": "- Use `model.f_test()` or compare restricted vs. unrestricted models",
+   "new": "- Use the fitted model's `wald_test()` method or compare restricted vs. unrestricted models",
+   "confidence": "high",
+   "id": "ch14-F07",
+   "verify_note": "Verified pyfixest 0.50.1: fitted feols object has no f_test attribute but has wald_test. old matches L1497 once; wald_test() fix is correct."
+  },
+  {
+   "lines": [
+    1509,
+    1518
+   ],
+   "category": "code",
+   "severity": "error",
+   "action": "report",
+   "summary": "Task 5 commented scaffold uses statsmodels `anova_lm` (never imported, does not work on pyfixest fits) and references undefined variables `model_base`/`model_dep_only`/`model_full` while the fits are named `fit_base`/`fit_dep_only`/`fit_full`.",
+   "evidence": "pyfixest 0.50.1 has no anova_lm and no fit.anova method (has anova: False); anova_lm is a statsmodels function not imported anywhere in the chapter. The fits are defined as fit_base/fit_dep_only/fit_full (L1510-1512) but the anova_lm calls pass model_base/model_dep_only/model_full (L1515/1518) - a NameError even if anova_lm existed. Fixing requires rewriting the joint-test hint in pyfixest's wald_test idiom (structural, beyond sentence scope).",
+   "confidence": "medium",
+   "id": "ch14-F08",
+   "verify_note": "Real defect (report). anova_lm is a statsmodels fn, never imported, and pyfixest has no anova/anova_lm. Fits are named fit_base/fit_dep_only/fit_full (L1510-1512) but calls pass model_base/model_dep_only/model_full (L1515/1518) - undefined names."
+  },
+  {
+   "lines": [
+    76
+   ],
+   "category": "results",
+   "severity": "drift",
+   "action": "fix",
+   "summary": "KC 'Indicator Variable' example states the Model-1 intercept (male mean) is about $68,000, but the executed intercept/male mean is $63,476.",
+   "evidence": "Dump CELL4: Intercept 63476.318; CELL3 male mean $63,476.32. $68,000 is ~7% too high (>5% tolerance) and misstates 'the male mean'.",
+   "old": "an intercept of about \\$68{,}000 (the male mean)",
+   "new": "an intercept of about \\$63{,}000 (the male mean)",
+   "confidence": "high",
+   "id": "ch14-F09",
+   "verify_note": "Dump CELL4 intercept=63,476.32 = male mean (CELL3). $68k is ~7.1% high. old matches L76 once; ~$63,000 is correct (63,476 rounds to 63k)."
+  },
+  {
+   "lines": [
+    354
+   ],
+   "category": "results",
+   "severity": "drift",
+   "action": "fix",
+   "summary": "Section 14.1 'Key Findings' repeats the wrong male-mean intercept of ~$68,000; executed value is $63,476.",
+   "evidence": "Dump CELL4 Intercept 63476.318 = male mean (CELL3 $63,476.32). Same quantity as L76; both must agree at $63,000.",
+   "old": "**Intercept ($b_1$) ≈ \\$68,000**: This represents the **mean earnings for males**",
+   "new": "**Intercept ($b_1$) ≈ \\$63,000**: This represents the **mean earnings for males**",
+   "confidence": "high",
+   "id": "ch14-F10",
+   "verify_note": "Same quantity; intercept/male mean = 63,476. old matches L354 once; ~$63,000 correct."
+  },
+  {
+   "lines": [
+    91
+   ],
+   "category": "results",
+   "severity": "drift",
+   "action": "fix",
+   "summary": "KC 'Base (Reference) Category' example claims the worker-type model's R^2 is about 0.16; executed R^2 for all three worker-type specifications is 0.1246.",
+   "evidence": "Dump CELL9: fit_worker1/2/3 R2 = 0.125; 'All three models have IDENTICAL R²: 0.1246'. 0.16 is ~28% high.",
+   "old": "leaves $R^2 \\approx 0.16$ unchanged",
+   "new": "leaves $R^2 \\approx 0.12$ unchanged",
+   "confidence": "high",
+   "id": "ch14-F11",
+   "verify_note": "Dump CELL9 worker-type models R²=0.1246 (identical across all three). 0.16 is ~28% high. old matches L91 once; ~0.12 correct."
+  },
+  {
+   "lines": [
+    796
+   ],
+   "category": "results",
+   "severity": "drift",
+   "action": "fix",
+   "summary": "Dummy-trap 'Empirical Results' bullet states R^2 is identical across worker-type specifications at ~0.16-0.17; executed value is 0.1246.",
+   "evidence": "Dump CELL9 identical R² = 0.1246 for fit_worker1/2/3. '0.16-0.17' does not contain the true value.",
+   "old": "- **R² is identical** across all specifications (≈ 0.16-0.17)",
+   "new": "- **R² is identical** across all specifications (≈ 0.12)",
+   "confidence": "high",
+   "id": "ch14-F12",
+   "verify_note": "Same R²=0.1246; stated range 0.16-0.17 excludes true value. old matches L796 once; ~0.12 correct."
+  },
+  {
+   "lines": [
+    136
+   ],
+   "category": "results",
+   "severity": "error",
+   "action": "report",
+   "summary": "KC 'Conditional vs Unconditional Gap' claims education shrinks the gap to ~-$10,000 and age+hours to -$5,000/-$8,000, but the executed conditional gaps contradict this (gap grows with education; no model yields -$5k to -$8k).",
+   "evidence": "Dump CELL6: Model 2 (earnings~gender+education) gender = -18,258 (magnitude GREW vs -16,396). Recomputed: earnings~gender+education+age+hours (no interaction) gender = -15,207; the coded interaction Models 4/5 give gender = +19,022 / +57,129 (gap at zero education). Women average more schooling (14.03 vs 13.72), so controlling for education widens the gap. No specification produces -$10,000 or -$5k..-$8k. Direction of the stated conclusion flips.",
+   "old": "Adding `education` shrinks the conditional gap to roughly $-\\$10{,}000$; adding `age` and `hours` brings it down further to between $-\\$5{,}000$ and $-\\$8{,}000$.",
+   "new": "Adding `education` actually *widens* the conditional gap to about $-\\$18{,}000$ (women in this sample average slightly more schooling than men). Once the `gender × education` interaction enters, the main `gender` coefficient becomes the gap at *zero* education and turns large and positive, so it can no longer be read as a shrinking conditional gap.",
+   "confidence": "high",
+   "id": "ch14-F13",
+   "verify_note": "Recomputed: Model 2 (gender+education) gender=-18,258 (magnitude GREW vs -16,396); female educ mean 14.03 > male 13.72. No spec yields -$10k or -$5k..-$8k. Direction ('shrinks') flips to 'widens'. Real defect (report); supporting numbers all verified."
+  },
+  {
+   "lines": [
+    495,
+    498
+   ],
+   "category": "results",
+   "severity": "error",
+   "action": "report",
+   "summary": "'Model Evolution' says Model 2 (+Education) shrinks the gap to ~-$10,000 and reduces the gender coefficient by ~$6,000, but executed Model 2 gender coefficient is -18,258 (magnitude increases by ~$1,900).",
+   "evidence": "Dump CELL6 first table: gender = -18,258.088 vs Model 1 -16,396.424. Change = -1,862 (larger, not smaller). '-$10,000' and 'reduces by ~$6,000' are both contradicted; conclusion 'shrinks' flips to 'widens'.",
+   "old": "2. **Model 2 (+ Education)**: Gap shrinks to approximately -\\$10,000\n - Adding education as a control **reduces** the gender coefficient by ~\\$6,000\n - Interpretation: Part of the raw gap is explained by gender differences in education levels\n - The remaining -\\$10,000 is the gap **conditional on** education",
+   "new": "2. **Model 2 (+ Education)**: Gap *widens* to approximately -\\$18,000\n - Adding education as a control **increases** the gender coefficient by ~\\$1,900 in magnitude\n - Interpretation: Women in this sample average slightly *more* schooling than men, so holding education fixed makes the unexplained gap larger\n - The -\\$18,000 is the gap **conditional on** education",
+   "confidence": "high",
+   "id": "ch14-F14",
+   "verify_note": "Dump CELL6: Model 2 gender=-18,258.09 (change of -1,862, i.e., magnitude increased ~$1,900, not reduced by ~$6,000). '-$10,000' and 'reduces by ~$6,000' contradicted. old block matches L495-498 once."
+  },
+  {
+   "lines": [
+    518,
+    519
+   ],
+   "category": "results",
+   "severity": "error",
+   "action": "report",
+   "summary": "'Key Insights' asserts the gap decreases substantially from -$16,000 to approximately -$5,000/-$8,000 with controls; no executed specification supports a conditional gap of -$5k to -$8k.",
+   "evidence": "Dump CELL6/CELL7: coded Models 4/5 (with interaction) gender = +19,022 / +57,129 (positive gap-at-zero). Recomputed no-interaction full-control model gender = -15,207; education-only Model 2 = -18,258. None equals -$5k..-$8k, and the direction ('decreases substantially') is wrong.",
+   "old": "- The gender gap **decreases** substantially when we control for education, age, and hours worked\n- From -\\$16,000 (unconditional) to approximately -\\$5,000 to -\\$8,000 (conditional)",
+   "new": "- Holding education fixed does *not* shrink the gap: it *widens* to about -\\$18,000, because women in this sample average slightly more education than men\n- The coded interaction models re-center the main `gender` coefficient on the zero-education gap (positive and large), so they cannot be read as a shrinking conditional gap",
+   "confidence": "high",
+   "id": "ch14-F15",
+   "verify_note": "No executed spec gives -$5k..-$8k: education-only=-18,258, full no-interaction=-15,207 (recomputed), interaction Models 4/5 gender=+19,022/+57,129. 'decreases substantially' is wrong. old block matches L518-519 once."
+  },
+  {
+   "lines": [
+    804,
+    812
+   ],
+   "category": "results",
+   "severity": "error",
+   "action": "report",
+   "summary": "The worker-type 'Example Interpretation' block reports coefficient signs opposite to the executed regressions (self-employed shown earning less than private and government more, when the data show the reverse).",
+   "evidence": "Dump CELL9 fit_worker1 (private base): dself = +17,098 (self earn MORE, not -$5,000 less), dgovt = -2,025 (govt earn LESS, not +$2,000 more). fit_worker3 (self base): dprivate = -17,098 (private earn LESS than self, not +$5,000 more), dgovt = -19,123 (govt earn LESS than self, not +$7,000 more). Every stated sign is inverted; only the govt-minus-private magnitude (~$2,000) is coincidentally right.",
+   "old": "- $d_{self}$ coefficient ≈ -\\$5,000: Self-employed earn \\$5,000 less than private sector\n- $d_{govt}$ coefficient ≈ +\\$2,000: Government workers earn \\$2,000 more than private sector",
+   "new": "- $d_{self}$ coefficient ≈ +\\$17,000: Self-employed earn about \\$17,000 *more* than private sector (controlling for education and age)\n- $d_{govt}$ coefficient ≈ -\\$2,000: Government workers earn about \\$2,000 *less* than private sector",
+   "confidence": "high",
+   "id": "ch14-F16",
+   "verify_note": "Dump CELL9 fit_worker1 (private base): dself=+17,098 (self earn MORE, not $5k less), dgovt=-2,025 (govt earn LESS, not $2k more). Signs inverted. old (L804-805) matches once. New text signs/magnitudes match executed output."
+  },
+  {
+   "lines": [
+    968
+   ],
+   "category": "results",
+   "severity": "drift",
+   "action": "report",
+   "summary": "Key Takeaways cites t = -4.71 for the gender coefficient, which is the classical/default-SE t; the chapter's headline Model 1 uses HC1 robust SEs, whose t is -5.10.",
+   "evidence": "Dump CELL4 (Model 1, HC1): gender t = -5.096. CELL5: classical t-test / default-SE t = -4.7139. The point estimate -$16,396 is quoted from the robust regression, so pairing it with the classical t (-4.71) is inconsistent with the robust headline.",
+   "old": "- Example: Women earn \\$16,396 less than men on average ($t = -4.71$, highly significant)",
+   "new": "- Example: Women earn \\$16,396 less than men on average ($t = -5.10$ with robust SEs, highly significant)",
+   "confidence": "low",
+   "id": "ch14-F17",
+   "verify_note": "The point estimate -$16,396 is SE-invariant, and t=-4.71 is the classical/homoskedastic t that EQUALS the two-sample t-test (CELL5). L968 sits in the 'Regression on a Single Indicator and Difference in Means' section (L961-967) whose explicit point is the regression↔t-test equivalence, so quoting the t-test-matching value -4.71 is contextually defensible/likely intentional. The inconsistency with the HC1 headline (t=-5.10) is arguable but not a decisive error; low-confidence finding."
+  },
+  {
+   "lines": [
+    570
+   ],
+   "category": "results",
+   "severity": "drift",
+   "action": "report",
+   "summary": "Section 14.3 characterizes the Gender×Education interaction as 'around -$1,000 to -$2,000', but the executed interaction coefficients are about -$2,100 to -$2,800.",
+   "evidence": "Dump CELL6: genderbyeduc = -2,764.9 (Model 3), -2,456.3 (Model 4), -2,123.5 (Model 5). Stated range understates the magnitude (midpoint ~-$1,500 vs actual ~-$2,400, >5%). Note this is a hedged illustrative range followed by a hypothetical worked example.",
+   "old": "1. **Gender × Education Interaction** (typically negative, around -\\$1,000 to -\\$2,000):",
+   "new": "1. **Gender × Education Interaction** (typically negative, around -\\$2,000 to -\\$2,800):",
+   "confidence": "low",
+   "id": "ch14-F18",
+   "verify_note": "Actual genderbyeduc coefs are -2,764.9/-2,456.3/-2,123.5 (~-$2,100 to -$2,800), so stated '-$1,000 to -$2,000' does understate. But the text is hedged/illustrative ('typically negative, around...') and immediately followed by a HYPOTHETICAL worked example using β=-1,500 (L572); the proposed range -$2,000 to -$2,800 would clash with that -1,500 example. Not decisively a reporting error of executed output. Actual range ~-$2,100 to -$2,800."
+  },
+  {
+   "lines": [
+    495,
+    498
+   ],
+   "category": "interpretation",
+   "severity": "error",
+   "action": "report",
+   "confidence": "high",
+   "summary": "The 'Model 2 (+ Education)' interpretation claims the gender gap shrinks to about -$10,000 when education is controlled, but the executed Model 2 gender coefficient is -18,258 — controlling for education makes the gap LARGER, not smaller.",
+   "evidence": "Dump Cell 4: Model 1 gender = -16,396.42. Dump Cell 6 (first table): Model 2 (earnings ~ gender + education) gender = -18,258.09. |−18,258| > |−16,396|, so adding education increases the coefficient magnitude by ~$1,862 (a suppression effect, since women in this sample average more education). Education explains none of the raw gap; the stated 'reduces the gender coefficient by ~$6,000 / part of the raw gap is explained by education / remaining -$10,000 conditional' is directionally false. Conclusion flips (shrinks→grows), so action=report.",
+   "old": "2. **Model 2 (+ Education)**: Gap shrinks to approximately -\\$10,000\n - Adding education as a control **reduces** the gender coefficient by ~\\$6,000\n - Interpretation: Part of the raw gap is explained by gender differences in education levels\n - The remaining -\\$10,000 is the gap **conditional on** education",
+   "new": "2. **Model 2 (+ Education)**: Gap *widens* to approximately -\\$18,000\n - Adding education as a control **increases** the gender coefficient magnitude by ~\\$1,900 (from -\\$16,396 to -\\$18,258)\n - Interpretation: Because women in this sample have *more* education on average, holding education fixed makes the unexplained gap **larger**, not smaller (a suppression effect)\n - The -\\$18,000 is the gap **conditional on** education",
+   "id": "ch14-F19",
+   "verify_note": "old text matches L495-498 exactly. Model 2 gender = -18,258 (widens, not shrinks); increase in magnitude 18,258-16,396 = 1,862 ~ $1,900; women average +0.315 yrs education (from exact OVB decomposition), so the suppression framing in the proposed new text is correct. Defect real and proposed replacement accurate."
+  },
+  {
+   "lines": [
+    518,
+    519
+   ],
+   "category": "interpretation",
+   "severity": "error",
+   "action": "report",
+   "confidence": "high",
+   "summary": "The 'Key Insights' summary asserts the gender gap decreases substantially from -$16,000 to -$5,000/-$8,000 after controls, a conditional-gap magnitude that no fitted model produces.",
+   "evidence": "The cleanest conditional-on-education gap (Model 2, no interaction) is -18,258 (dump Cell 6), larger than the -16,396 unconditional gap (Cell 4). In Models 4-5 the gender effect equals gender_coef + genderbyeduc×education; at typical education (~13 yr) that is about 19,022 − 2,456×13 ≈ -13k for Model 4, not -$5k to -$8k. No model yields a -$5,000 to -$8,000 conditional gap, and the main gender coefficients in Models 3-5 are positive (+20,219 / +19,022 / +57,129). The 'decreases substantially' narrative is unsupported/reversed.",
+   "old": "- The gender gap **decreases** substantially when we control for education, age, and hours worked\n- From -\\$16,000 (unconditional) to approximately -\\$5,000 to -\\$8,000 (conditional)",
+   "new": "- The gender gap does **not** shrink toward zero when we control for education, age, and hours worked\n- Holding education fixed (Model 2) the conditional gap is about -\\$18,000; in Models 3-5 gender enters through interactions, so the gap varies with education rather than collapsing to a single small number",
+   "id": "ch14-F20",
+   "verify_note": "old matches L518-519. No fitted model yields a -$5,000 to -$8,000 conditional gap: Model 2 clean conditional gap = -18,258; Models 3-5 main gender coef is positive (+20,219/+19,022/+57,129); Model 4 gender effect at education~13 = 19,022 - 2,456*13 ~ -$13k. Proposed new text avoids a spurious single number and is accurate. Real defect, report."
+  },
+  {
+   "lines": [
+    136,
+    136
+   ],
+   "category": "interpretation",
+   "severity": "error",
+   "action": "report",
+   "confidence": "high",
+   "summary": "The 'Conditional vs. Unconditional Gap' Key Concept example repeats the false claim that adding education shrinks the conditional gap to ~-$10,000 (and further to -$5k/-$8k), contradicting the executed Model 2 coefficient of -18,258.",
+   "evidence": "Dump Cell 6: Model 2 (earnings ~ gender + education) gender = -18,258, i.e. adding education WIDENS the gap versus the -16,396 unconditional gap (Cell 4). The callout's directional interpretation ('shrinks the conditional gap to roughly -$10,000') is the opposite of what the data show; this is the same directional error as the Model-Evolution narrative, so students meet it twice.",
+   "old": "The unconditional gender earnings gap on `data_earnings` is about $-\\$16{,}000$ — what you get from regressing `earnings` on `gender` alone. Adding `education` shrinks the conditional gap to roughly $-\\$10{,}000$; adding `age` and `hours` brings it down further to between $-\\$5{,}000$ and $-\\$8{,}000$. The leftover after controls is the part not explained by observable composition.",
+   "new": "The unconditional gender earnings gap on `data_earnings` is about $-\\$16{,}000$ — what you get from regressing `earnings` on `gender` alone. Adding `education` does **not** shrink this gap; the conditional coefficient (Model 2) is about $-\\$18{,}000$, because women in this sample are more educated on average, so holding education fixed *widens* the unexplained gap. Controls can move a coefficient in either direction.",
+   "id": "ch14-F21",
+   "verify_note": "old matches L136. Model 2 conditional coefficient = -18,258 ~ -$18,000; women more educated on average (delta = +0.315 yrs) so holding education fixed widens the unexplained gap. Proposed replacement is econometrically correct. Real defect."
+  },
+  {
+   "lines": [
+    804,
+    805
+   ],
+   "category": "interpretation",
+   "severity": "error",
+   "action": "report",
+   "confidence": "medium",
+   "summary": "The worker-type 'Example Interpretation' inverts the actual earnings ranking — it portrays self-employed as earning ~$5,000 LESS than private, but the chapter's own regression shows self-employed earn ~$17,000 MORE and are the highest-earning group.",
+   "evidence": "Dump Cell 9 (fit_worker1, earnings ~ dself + dgovt + education + age, dprivate base): dself = +17,097.85, dgovt = -2,025.08. Raw means (Cell 10): Self-employed 72,306 > Government 56,105 > Private 54,521. Both the raw means and the controlled regression make self-employed the top earners, so 'Self-employed earn $5,000 less than private' and 'Government earn $2,000 more than private' reverse the true signs. The mirror block 'If reference = Self-employed' (L809-810) likewise treats private/govt as earning MORE than self-employed, again reversed. Placed under 'Empirical Results from Worker Type Example', so readers will expect it to match the code output above it. Report (illustrative block is internally self-consistent and some real coefficients are insignificant, so a fix requires rewriting the whole example).",
+   "old": "- $d_{self}$ coefficient ≈ -\\$5,000: Self-employed earn \\$5,000 less than private sector\n- $d_{govt}$ coefficient ≈ +\\$2,000: Government workers earn \\$2,000 more than private sector",
+   "new": "- $d_{self}$ coefficient ≈ +\\$17,000: Self-employed earn about \\$17,000 *more* than private sector (self-employed are the highest earners in this sample)\n- $d_{govt}$ coefficient ≈ -\\$2,000: Government workers earn about \\$2,000 *less* than private sector",
+   "id": "ch14-F22",
+   "verify_note": "Dump CELL 9 fit_worker1 (dprivate base): dself = +17,098 (self-employed earn MORE, and are highest earners: raw means Self 72,306 > Govt 56,105 > Private 54,521), dgovt = -2,025 (govt earn LESS). Prose signs are both inverted and the dself magnitude is wrong. No chapter specification makes self-employed earn less than private. Framed under 'Empirical Results from Worker Type Example / From the three specifications above', so not intentional hypothetical pedagogy. Proposed two-line direction is correct; action=report appropriate because the mirror block (L809-810) and 'notice' line (L812) are internally consistent with the wrong numbers and need coordinated rewriting."
+  },
+  {
+   "lines": [
+    915,
+    917
+   ],
+   "category": "readability",
+   "severity": "style",
+   "action": "fix",
+   "summary": "The Figure 2 scatter code cell has no markdown lead-in; it follows directly from the box-plot interpretation bullets with only a blank line.",
+   "evidence": "Lens R rule: every non-Setup code cell should have a >=1-sentence markdown lead-in (what it does + what to look for). The cell at L917 (Figure 2: earnings vs education by gender) is preceded only by the box-plot 'What to look for' bullets, not by an introduction of its own.",
+   "old": "- **Red diamonds**: Mean markers may differ from medians, indicating skewness in the earnings distribution\n\n```{python}\n# Figure 2: Earnings vs education by gender (with regression lines)",
+   "new": "- **Red diamonds**: Mean markers may differ from medians, indicating skewness in the earnings distribution\n\nNext, we plot earnings against years of education separately for men and women, fitting a regression line to each group. Watch whether the two lines are parallel or have visibly different slopes — non-parallel lines are the visual signature of an interaction effect.\n\n```{python}\n# Figure 2: Earnings vs education by gender (with regression lines)",
+   "confidence": "high",
+   "id": "ch14-F23"
+  },
+  {
+   "lines": [
+    702,
+    704
+   ],
+   "category": "readability",
+   "severity": "style",
+   "action": "fix",
+   "summary": "The separate-regressions (Chow) cell produces notable male-vs-female slope divergence but has no markdown interpretation before Key Concept 14.5.",
+   "evidence": "Lens R rule: interpretation should follow notable output. Execution dump (CELL 8) shows returns to education $4,191 (F) vs $6,315 (M) and returns to hours $691 (F) vs $1,621 (M) — a structural divergence — yet the cell is followed immediately by KC 14.5 with no interpretive prose tying to these numbers.",
+   "old": "\n> **Key Concept 14.5: Testing for Structural Change**",
+   "new": "\nComparing the two subsamples shows that the returns to education and to hours are noticeably larger for men than for women (about \\$6,300 vs \\$4,200 per year of schooling, and about \\$1,600 vs \\$700 per weekly hour), while the return to age is similar across genders. This pattern — different *slopes*, not just a constant intercept gap — is exactly what a formal Chow test is designed to detect.\n\n> **Key Concept 14.5: Testing for Structural Change**",
+   "confidence": "medium",
+   "id": "ch14-F24"
+  },
+  {
+   "lines": [
+    250,
+    250
+   ],
+   "category": "format",
+   "severity": "style",
+   "action": "fix",
+   "summary": "Section header 14.1 uses a colon after the number; normalization rule for ch14 strips it to a space.",
+   "old": "## 14.1: Indicator Variables - Single Binary Variable",
+   "new": "## 14.1 Indicator Variables - Single Binary Variable",
+   "evidence": "Lens F normalization table: '## N.M: Title' → '## N.M Title' (remove colon only) applies to ch14; words verbatim.",
+   "confidence": "high",
+   "id": "ch14-F25"
+  },
+  {
+   "lines": [
+    420,
+    420
+   ],
+   "category": "format",
+   "severity": "style",
+   "action": "fix",
+   "summary": "Section header 14.2 uses a colon after the number; strip to a space.",
+   "old": "## 14.2: Indicator Variable with Additional Regressors",
+   "new": "## 14.2 Indicator Variable with Additional Regressors",
+   "evidence": "Lens F normalization table: colon→space for ch14 section headers; words verbatim.",
+   "confidence": "high",
+   "id": "ch14-F26"
+  },
+  {
+   "lines": [
+    531,
+    531
+   ],
+   "category": "format",
+   "severity": "style",
+   "action": "fix",
+   "summary": "Section header 14.3 uses a colon after the number; strip to a space.",
+   "old": "## 14.3: Interactions with Indicator Variables",
+   "new": "## 14.3 Interactions with Indicator Variables",
+   "evidence": "Lens F normalization table: colon→space for ch14 section headers; words verbatim.",
+   "confidence": "high",
+   "id": "ch14-F27"
+  },
+  {
+   "lines": [
+    643,
+    643
+   ],
+   "category": "format",
+   "severity": "style",
+   "action": "fix",
+   "summary": "Section header 14.4 uses a colon after the number; strip to a space.",
+   "old": "## 14.4: Testing for Structural Change - Separate Regressions",
+   "new": "## 14.4 Testing for Structural Change - Separate Regressions",
+   "evidence": "Lens F normalization table: colon→space for ch14 section headers; words verbatim.",
+   "confidence": "high",
+   "id": "ch14-F28"
+  },
+  {
+   "lines": [
+    708,
+    708
+   ],
+   "category": "format",
+   "severity": "style",
+   "action": "fix",
+   "summary": "Section header 14.5 uses a colon after the number; strip to a space.",
+   "old": "## 14.5: Sets of Indicator Variables (Multiple Categories)",
+   "new": "## 14.5 Sets of Indicator Variables (Multiple Categories)",
+   "evidence": "Lens F normalization table: colon→space for ch14 section headers; words verbatim.",
+   "confidence": "high",
+   "id": "ch14-F29"
+  },
+  {
+   "lines": [
+    44,
+    44
+   ],
+   "category": "format",
+   "severity": "style",
+   "action": "fix",
+   "summary": "Front-matter block labeled plural 'Datasets used' but lists exactly one dataset bullet (AED_EARNINGS_COMPLETE.DTA).",
+   "old": "**Datasets used:**\n\n- **AED_EARNINGS_COMPLETE.DTA**: 872 full-time workers aged 25-65 in 2000",
+   "new": "**Dataset used:**\n\n- **AED_EARNINGS_COMPLETE.DTA**: 872 full-time workers aged 25-65 in 2000",
+   "evidence": "Lens F rule: 'Dataset(s) used' grammatical agreement — singular iff one dataset; the enumerated block contains a single dataset.",
+   "confidence": "medium",
+   "id": "ch14-F30"
+  },
+  {
+   "lines": [
+    1412,
+    1412
+   ],
+   "category": "format",
+   "severity": "drift",
+   "action": "fix",
+   "summary": "Key Concept 14.9 is duplicated: Case Study 1 (L1271) and Case Study 2 (L1412) both use 14.9; renumber the Case Study 2 occurrence.",
+   "old": "> **Key Concept 14.9: Geographic Indicator Variables**",
+   "new": "> **Key Concept 14.11: Geographic Indicator Variables**",
+   "evidence": "grep of web-apps/_shared/strings/ch14*.js and web-apps/ch14/template.html returns no reference to 'Key Concept 14.9/14.10/14.11/14.12' (safe to renumber); KC numbering must be sequential and unique, mirroring the ch17 duplicate-KC seed fix.",
+   "confidence": "high",
+   "id": "ch14-F31"
+  },
+  {
+   "lines": [
+    1481,
+    1481
+   ],
+   "category": "format",
+   "severity": "drift",
+   "action": "fix",
+   "summary": "Key Concept 14.10 is duplicated: Case Study 1 (L1299) and Case Study 2 (L1481) both use 14.10; renumber the Case Study 2 occurrence.",
+   "old": "> **Key Concept 14.10: Heterogeneous Satellite Effects**",
+   "new": "> **Key Concept 14.12: Heterogeneous Satellite Effects**",
+   "evidence": "grep of web-apps/_shared/strings/ch14*.js and web-apps/ch14/template.html returns no reference to 'Key Concept 14.9/14.10/14.11/14.12' (safe to renumber); KC numbering must be sequential and unique.",
+   "confidence": "high",
+   "id": "ch14-F32"
+  }
+ ],
+ "killed": []
+}

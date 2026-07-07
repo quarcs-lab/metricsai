@@ -1,0 +1,702 @@
+{
+ "chapter": "ch03",
+ "file": "ch03_The_Sample_Mean.qmd",
+ "findings": [
+  {
+   "lines": [
+    646
+   ],
+   "category": "methods",
+   "severity": "error",
+   "action": "fix",
+   "summary": "Sample-size claim is wrong by an order of magnitude: estimating mean age within ±1 year at 95% confidence requires n ≈ 1,330 (about 53× larger than n=25), not 'about 4 times larger samples'.",
+   "old": "- To estimate average age within ±1 year (95% confidence), we'd need about 4 times larger samples",
+   "new": "- To estimate average age within ±1 year (95% confidence), we'd need n ≈ 1,330 — about 53 times larger samples",
+   "evidence": "Requirement 1.96·σ/√n ≤ 1 with σ = 18.61 gives n ≥ (1.96×18.61)² = 1330.5, i.e. 53.2× larger than n = 25. A 4× larger sample (n = 100) gives a 95% margin of ±1.96×18.61/10 = ±3.65 years, nowhere near ±1 year. Even the weaker SE = 1 target needs n ≈ 346 (≈14×).",
+   "confidence": "high",
+   "id": "ch03-F01",
+   "verify_note": "n=(1.96*18.61)^2=1330.5 → 53.2x larger than n=25; margin at n=100 is +/-3.65yr not +/-1. 'about 4 times' is wrong; fix (n≈1,330, ~53x) correct. NOTE: duplicate of F24 targeting same L646 text — only one of the two can be applied."
+  },
+  {
+   "lines": [
+    1460,
+    1462
+   ],
+   "category": "methods",
+   "severity": "error",
+   "action": "fix",
+   "summary": "Case-study Task 3 (and Task 4, which reuses this pattern) samples WITHOUT replacement from a population of only 108 countries, violating the independence assumption, so the σ/√n and 1/√n-scaling verifications the tasks explicitly ask students to perform will systematically fail.",
+   "old": "for i in range(n_samples):\n sample = np.random.choice(df_2014, size=n, replace=False)\n sample_means.append(sample.mean())",
+   "new": "for i in range(n_samples):\n sample = np.random.choice(df_2014, size=n, replace=True)  # with replacement: independent draws\n sample_means.append(sample.mean())",
+   "evidence": "Without replacement from N=108 the true SE carries a finite-population correction √((N−n)/(N−1)): 0.854 at n=30 (empirical SE ~15% below the σ/√n students are told to compare against) and 0.273 at n=100 in Task 4, so 'Verify that SE decreases as 1/√n' fails badly (quadrupling n=25→100 improves precision ~6.5×, not 2×). Sampling with replacement satisfies assumptions A–C (L429–433) that the chapter's σ/√n theory requires. Plain ```python fence, so no rendered output changes.",
+   "confidence": "high",
+   "id": "ch03-F02",
+   "verify_note": "Without-replacement from N=108 injects FPC (0.854 at n=30, 0.273 at n=100), so the σ/√n and 1/√n checks Tasks 3-4 request systematically fail; replace=True restores the iid theory those tasks verify and matches df_2014.std()/√n (only a negligible ddof N/N-1 gap). Correct fix. An FPC-note remedy also exists (see F23), but replace=True is a valid, self-consistent resolution."
+  },
+  {
+   "lines": [
+    967,
+    971
+   ],
+   "category": "methods",
+   "severity": "error",
+   "action": "fix",
+   "summary": "The weighted-mean example's realized output contradicts its own labels — the '(corrected)' weighted mean misses the truth by $1,204 while the 'biased' unweighted mean misses by only $221 — with no caveat that unbiasedness is a repeated-sampling property; add an interpretation note after the cell.",
+   "old": "print(f\"\\nUnweighted bias: ${unweighted_mean - true_pop_mean:,.0f}\")\nprint(f\"Weighted bias:   ${weighted_mean - true_pop_mean:,.0f}\")\n```\n\n> **Key Concept 3.8: Simple Random Sampling Assumptions**",
+   "new": "print(f\"\\nUnweighted bias: ${unweighted_mean - true_pop_mean:,.0f}\")\nprint(f\"Weighted bias:   ${weighted_mean - true_pop_mean:,.0f}\")\n```\n\n**Note on this particular draw:** In this run the unweighted mean (\\$53,222) happens to land closer to the true mean (\\$53,442) than the weighted mean (\\$54,647). That is sampling luck, not a failure of weighting: the unweighted estimator is *systematically* biased toward the oversampled group — its expected value here is about \\$52,172, roughly \\$1,270 below the truth — while the weighted estimator is unbiased, meaning it is correct on average across repeated samples even though any single draw can miss. This echoes the chapter's central lesson: an estimate is one realization of a random estimator.\n\n> **Key Concept 3.8: Simple Random Sampling Assumptions**",
+   "evidence": "Execution dump CELL 13: truth $53,442; unweighted $53,222 (bias −$221); weighted $54,647 (bias +$1,204). Expected unweighted mean = 0.3×56,618 + 0.7×50,267 = $52,172 (systematic bias −$1,270); the weighted (IPW) estimator has expected bias 0. Seeded (np.random.seed(42)), so these numbers are stable.",
+   "confidence": "high",
+   "id": "ch03-F03",
+   "verify_note": "Exec CELL 13: unweighted bias -$221, weighted +$1,204, true $53,442; E[unweighted]=0.3*56,618+0.7*50,267=$52,172 (expected bias -$1,270), E[weighted]=$53,442 (unbiased). All numbers in the inserted note verified; note correctly frames unbiasedness as a repeated-sampling property. NOTE: overlaps F22 (same cell) — only one note should be inserted."
+  },
+  {
+   "lines": [
+    148
+   ],
+   "category": "methods",
+   "severity": "error",
+   "action": "fix",
+   "summary": "Law of Large Numbers analogy misstates casino economics: a roulette wheel pays out about 94.7 cents per dollar in expectation (house edge ~5.3%), not '47 cents on the dollar' — 47% is the even-money-bet win probability, not the expected payout.",
+   "old": "A casino's roulette wheel pays out 47 cents on the dollar in expectation.",
+   "new": "A casino's roulette wheel keeps about five cents of every dollar wagered in expectation.",
+   "evidence": "American roulette: expected payout per dollar = 36/38 = 0.947 for any standard bet (house keeps ~5.3 cents); 18/38 = 47.4% is the probability an even-money bet wins. A 53% house edge exists on no roulette wheel; the rewrite keeps the 'expected house edge' sentence that follows coherent.",
+   "confidence": "high",
+   "id": "ch03-F04",
+   "verify_note": "American roulette expected payout = 18/38*2 = 0.947 (house keeps ~5.3¢); 18/38=47.4% is the even-money win probability, not payout. No roulette pays out 47¢/$. Fix 'keeps about five cents' matches the ~5.26% house edge and keeps the following house-edge sentence coherent."
+  },
+  {
+   "lines": [
+    1020
+   ],
+   "category": "methods",
+   "severity": "error",
+   "action": "fix",
+   "summary": "Key Takeaways overgeneralizes that the sample median 'has higher variance than X̄' for symmetric distributions — false for heavy-tailed symmetric populations (e.g., Laplace), and it contradicts the chapter's own Exercise 8(c) asking when the median is preferable.",
+   "old": "- Sample median is also unbiased (for symmetric distributions) but has higher variance than $\\bar{X}$",
+   "new": "- Sample median is also unbiased (for symmetric distributions) but has higher variance than $\\bar{X}$ for populations like the normal; for heavy-tailed populations the median can be more efficient (see Exercise 8)",
+   "evidence": "For normal populations Var(median) ≈ (π/2)·σ²/n > σ²/n, but for the Laplace distribution the median is the MLE and beats the mean asymptotically. Exercise 8(c) at L1289 ('For what type of population distribution might the median be preferable?') presumes exactly this, so the blanket claim is internally inconsistent; §3.5 (L737–738) is correctly qualified with 'for many distributions'.",
+   "confidence": "high",
+   "id": "ch03-F05",
+   "verify_note": "Var(median)/Var(mean)=π/2≈1.57 for normal (median worse), but for Laplace the median is the MLE and more efficient; blanket 'higher variance than X̄ for symmetric' is false and contradicts Exercise 8(c) at L1289 which presupposes distributions where the median wins. Fix is correct and internally consistent."
+  },
+  {
+   "lines": [
+    890
+   ],
+   "category": "methods",
+   "severity": "error",
+   "action": "fix",
+   "summary": "Wrong cross-reference: the simple random sample assumptions A–C are stated in Section 3.3 (Properties of the Sample Mean), not Section 3.4 (the Census example).",
+   "old": "(A-C from Section 3.4)",
+   "new": "(A-C from Section 3.3)",
+   "evidence": "Assumptions A (common mean), B (common variance), C (independence) are introduced at L429–433 under '## 3.3 Properties of the Sample Mean' (L427); Section 3.4 (L566) is the 1880 Census example and contains no assumption list.",
+   "confidence": "high",
+   "id": "ch03-F06",
+   "verify_note": "Assumptions A-C are stated at L429-433 under '## 3.3 Properties of the Sample Mean' (L427); §3.4 (L566) is the 1880 Census example with no assumption list. 'Section 3.4' → 'Section 3.3' correct."
+  },
+  {
+   "lines": [
+    143
+   ],
+   "category": "methods",
+   "severity": "error",
+   "action": "fix",
+   "summary": "LLN example claims the typical deviation of the coin-toss sample mean at n = 1,000,000 'is invisible to four decimals', but SD(X̄) = 0.5/√10⁶ = 0.0005, which shows in the fourth decimal (invisibility to 4 dp would need n > 10⁸).",
+   "old": "at $n = 1{,}000{,}000$ it is invisible to four decimals",
+   "new": "at $n = 1{,}000{,}000$ it is a mere $0.0005$",
+   "evidence": "SD(X̄) = σ/√n = 0.5/1000 = 0.0005 at n = 10⁶; typical sample means of 0.4995–0.5005 differ from 0.5000 in the fourth decimal, so the deviation is visible at 4 dp. Stating the exact value 0.0005 preserves the shrinking-deviation point without the false claim. The preceding 'shrinks more than fivefold' (√(1000/30) = 5.77) is correct and untouched.",
+   "confidence": "high",
+   "id": "ch03-F07",
+   "verify_note": "SD(X̄)=0.5/√1e6=0.0005, visible in the 4th decimal (invisibility to 4dp needs n>1e8). Fix to 'a mere 0.0005' correct. Preceding 'shrinks more than fivefold' (√(1000/30)=5.77) is accurate and untouched."
+  },
+  {
+   "lines": [
+    1049
+   ],
+   "category": "methods",
+   "severity": "style",
+   "action": "fix",
+   "summary": "Chapter-4 preview presents x̄ ± 1.96·s/√n as 'the' 95% confidence interval with no large-sample qualifier, violating the brief's rule that a bare 1.96 with estimated s requires an explicit large-sample note (ch04 uses t(n−1)).",
+   "old": "- Rearranging gives 95% confidence interval: $\\bar{x} \\pm 1.96 \\cdot s/\\sqrt{n}$",
+   "new": "- Rearranging gives the large-sample 95% confidence interval: $\\bar{x} \\pm 1.96 \\cdot s/\\sqrt{n}$ (Chapter 4 refines this using the $t_{n-1}$ distribution)",
+   "evidence": "Brief Lens A rule: 't(n−1) for mean; bare 1.96 only with an explicit large-sample note.' ch04_Statistical_Inference_for_the_Mean.qmd L293 introduces the t-distribution with (n−1) dof and L539 uses stats.t.ppf(0.975, n-1), so the forward pointer is accurate.",
+   "confidence": "high",
+   "id": "ch03-F08",
+   "verify_note": "Bare 1.96 with estimated s and no large-sample note violates brief Lens A. Verified ch04 L357 CI uses t_{n-1,α/2} and L539 stats.t.ppf(0.975, n-1), so the forward pointer 'Chapter 4 refines this using the t_{n-1} distribution' is accurate. Fix correct."
+  },
+  {
+   "lines": [
+    1413,
+    1415
+   ],
+   "category": "methods",
+   "severity": "style",
+   "action": "report",
+   "summary": "Case-study Task 2 starter code samples without replacement, setting the pattern students carry into Tasks 3-6 where independence is required for the σ/√n theory being verified; align with the Task 3 fix.",
+   "old": "# Draw a random sample of size 30\nn = 30\nsample = np.random.choice(df_2014, size=n, replace=False)",
+   "new": "# Draw a random sample of size 30 (with replacement, so draws are independent)\nn = 30\nsample = np.random.choice(df_2014, size=n, replace=True)",
+   "evidence": "Task 2 alone only compares one sample mean to μ (harmless), but its code is the template students reuse; with N = 108 the without-replacement design breaks independence (assumption C, L433) and the fpc shrinks the true SE to 0.854×σ/√n at n=30. Plain ```python fence — no rendered output changes.",
+   "confidence": "low",
+   "id": "ch03-F09",
+   "verify_note": "The finding itself admits Task 2's single-sample code is 'harmless' in isolation — it computes a correct sample mean and verifies no σ/√n theory, so there is no standalone defect. The change is only a template-consistency alignment contingent on F02 being applied as replace=True (if Task 3 instead got an FPC note, changing Task 2 would introduce inconsistency). Reasonable but not a decisive standalone defect → uncertain."
+  },
+  {
+   "lines": [
+    1188,
+    1189
+   ],
+   "category": "methods",
+   "severity": "style",
+   "action": "fix",
+   "summary": "Cheat-sheet STEP 6 comment overstates that inverse-probability weights 'recover the true population mean' — the executed run shows the weighted estimate missing by $1,204; weighting delivers unbiasedness (correct on average), not exact recovery in a single draw.",
+   "old": "# When inclusion probabilities differ, the unweighted mean is biased;\n# inverse-probability weights w_i = 1/π_i recover the true population mean",
+   "new": "# When inclusion probabilities differ, the unweighted mean is biased;\n# inverse-probability weights w_i = 1/π_i give an unbiased estimate of the\n# population mean (correct on average, though any single draw can still miss)",
+   "evidence": "Execution dump CELL 13 (same seed-42 code as the cheat sheet): weighted mean $54,647 vs truth $53,442 (bias +$1,204), while the unweighted mean misses by only −$221 in this realization; unbiasedness is a repeated-sampling property, exactly the distinction this chapter teaches.",
+   "confidence": "medium",
+   "id": "ch03-F10",
+   "verify_note": "Cheat-sheet comment 'recover the true population mean' overstates: same seed-42 code yields weighted $54,647 vs truth $53,442 (miss $1,204). IPW delivers unbiasedness (correct on average), not exact single-draw recovery; fix wording is correct and aligns with the chapter's estimator-vs-estimate theme. Minor/style but the original is genuinely misleading."
+  },
+  {
+   "lines": [
+    1493,
+    1501
+   ],
+   "category": "methods",
+   "severity": "style",
+   "action": "report",
+   "summary": "Inconsistent standard-error definition: Key Concept 3.11 (and KC 3.10 L1327, plus prose at L645 and L1010) define/use SE(ȳ) = σ/√n, while Key Concept 3.4 (L534-536) and Key Takeaways L1006-1008 define the standard error as the ESTIMATED sd s/√n and state that σ/√n is a different (unknown) quantity.",
+   "evidence": "KC 3.4: 'se(X̄) = s/√n ... Since σ is unknown in practice, we replace it with s'; L1008: '\"Standard error\" means \"estimated standard deviation\"'; yet KC 3.11 opens 'The standard error SE(ȳ) = σ/√n' and L645/L1010 call the known-σ census value 18.61/√25 = 3.72 an 'se'. Both conventions are defensible in textbooks (report, not fix), and the KC wording is echoed in web-apps/_shared/strings/ch03.js (widget.samplesize.kc uses s/√n; widget.samplingdist.kc calls σ/√n 'the theoretical standard error'), so a wording change would need coordinated web-app string updates. Suggested harmonization: in KC 3.10/3.11 write 'SE(ȳ) = σ/√n (estimated in practice by s/√n)' and at L645/L1010 call 3.72 the (theoretical) standard deviation of the sample mean.",
+   "confidence": "high",
+   "id": "ch03-F11",
+   "verify_note": "Real internal inconsistency: KC 3.4 (L534-536) and Key Takeaways (L1006-1008) define SE strictly as s/√n and call σ/√n the unknown population SD, while KC 3.10 (L1327), KC 3.11 (L1495), L645 and L1010 call σ/√n itself the 'standard error'. action=report is correct (multiple defensible conventions; wording change would need coordinated web-app string updates in ch03.js). Reported issue genuinely exists."
+  },
+  {
+   "lines": [
+    936,
+    938
+   ],
+   "category": "code",
+   "severity": "error",
+   "action": "fix",
+   "summary": "The seeded weighted-mean demo (seed 42) produces output that contradicts its own hard-coded labels: the 'corrected' weighted mean (bias +$1,204) is five times farther from the true population mean than the 'biased' unweighted mean (bias -$221), so the cell demonstrates the opposite of what it claims; reseeding to 5 makes the demonstration work (unweighted bias -$2,350, weighted bias +$3).",
+   "old": "# Simulate population with two groups\nnp.random.seed(42)\nn_men = 50",
+   "new": "# Simulate population with two groups\nnp.random.seed(5)  # seed chosen so sampling noise does not mask the oversampling bias\nn_men = 50",
+   "evidence": "Execution dump CELL 13: 'Unweighted bias: $-221 / Weighted bias: $1,204' while the code prints '(biased toward women)' and '(corrected)'. Verified by simulation: with n=15/35 draws from groups of 50, within-group sampling noise (~$2,900) swamps the systematic oversampling bias (-$1,270); across 500 seeds the weighted mean is closer to truth in only 354/500 (71%). Seed 5 verified output: Men $61,447, Women $51,300, Overall $56,373, Unweighted $54,023 (bias -$2,350), Weighted $56,377 (bias +$3). No prose or web-app string hard-codes the current dollar outputs (grep of ch03.qmd, web-apps/ch03/, _shared/strings/ch03* returned nothing).",
+   "confidence": "high",
+   "id": "ch03-F12",
+   "verify_note": "Defect real: dump CELL 13 (reproduced with seed 42) gives Unweighted bias -$221 vs Weighted bias +$1,204, so the mean labeled '(corrected)' is 5x farther from truth than the '(biased)' one. Fix verified: seed 5 yields Men $61,447, Women $51,300, Overall $56,373, Unweighted $54,023 (bias -$2,350), Weighted $56,377 (bias +$3) — weighted now clearly closer, consistent with labels. old_string matches file lines 936-938 exactly and uniquely. Caveat (not disqualifying): seed 5 is cherry-picked (weighted closer in only ~71% of seeds), so it fixes the displayed demo but the design remains statistically fragile."
+  },
+  {
+   "lines": [
+    1188,
+    1191
+   ],
+   "category": "code",
+   "severity": "error",
+   "action": "fix",
+   "summary": "The cheat-sheet STEP 6 duplicates the same weighted-mean code with seed 42, so its comment 'inverse-probability weights w_i = 1/π_i recover the true population mean' is contradicted by the code's own output (weighted bias $1,204 vs unweighted bias -$221); reseed to 5 to match the chapter-cell fix.",
+   "old": "# When inclusion probabilities differ, the unweighted mean is biased;\n# inverse-probability weights w_i = 1/π_i recover the true population mean\nnp.random.seed(42)\nincome_men = np.random.normal(60000, 15000, 50)",
+   "new": "# When inclusion probabilities differ, the unweighted mean is biased;\n# inverse-probability weights w_i = 1/π_i recover the true population mean\nnp.random.seed(5)  # seed chosen so sampling noise does not mask the oversampling bias\nincome_men = np.random.normal(60000, 15000, 50)",
+   "evidence": "Cheat-sheet code is byte-identical in logic and seed to chapter cell 13; re-seeding resets the generator, so running it standalone reproduces the dump's contradictory output (Unweighted bias $-221, Weighted bias $1,204). Seed 5 verified to give Unweighted bias -$2,350, Weighted bias +$3, consistent with the comment's claim. Must change together with the chapter cell (L937) so both locations tell the same story.",
+   "confidence": "high",
+   "id": "ch03-F13",
+   "verify_note": "Cheat-sheet STEP 6 (lines 1188-1191) is byte-identical in RNG logic to the chapter cell; run standalone with seed 42 it reproduces the same contradiction (unweighted bias -$221, weighted +$1,204). Seed 5 verified to give unweighted bias -$2,350, weighted +$3, matching the comment's IPW claim. old_string matches exactly and uniquely (income_men=... appears only at L1191). Must change with F12 to keep both locations consistent."
+  },
+  {
+   "lines": [
+    1461,
+    1482
+   ],
+   "category": "code",
+   "severity": "error",
+   "action": "report",
+   "summary": "Case-study Tasks 2-4 sample WITHOUT replacement from a population of only N=108 countries while the starter code and questions compare the empirical SE to σ/√n, which omits the finite-population correction, so Task 3's comparison question fails by ~16% at n=30 and Task 4's 'verify SE decreases as 1/√n' fails by ~73% at n=100.",
+   "evidence": "Verified by 1000-rep simulation on the actual Mendez lp data (2014, N=108, σ=33,853): with replace=False the ratio empirical/theoretical SE is 0.96 (n=10), 0.84 (n=30), 0.75 (n=50), 0.27 (n=100) — exactly the FPC sqrt((N-n)/(N-1)); with replace=True the ratios are 0.94-1.00. Task 3 (L1461 `sample = np.random.choice(df_2014, size=n, replace=False)`, comparison print L1481-1482, question L1489 'How close is the empirical standard error to the theoretical prediction?') and Task 4 (L1514 'Verify that SE decreases as 1/sqrt(n)' with n up to 100) both direct students to a comparison the code cannot satisfy. Two defensible fixes exist — (a) minimal: `replace=False` → `replace=True` at L1461 (and L1415 in Task 2 for consistency), matching the iid theory taught in KC 3.10/3.11; or (b) keep SRS-without-replacement and add a finite-population-correction note — so per the fix-vs-report boundary (multiple defensible conventions) this is reported, with option (a) recommended as the minimal change.",
+   "confidence": "high",
+   "id": "ch03-F14",
+   "verify_note": "Verified on actual data: N=108 (df_2014 after dropna), sigma=33,853. Without-replacement empirical/theoretical SE ratios = 0.93 (n=10), 0.85 (n=30), 0.73 (n=50), 0.27 (n=100), exactly matching sqrt((N-n)/(N-1)); with-replacement ratios 0.97-1.02. Task 3 L1461 uses replace=False, compares empirical SE to sigma/sqrt(n) at L1481-82 (question L1489); Task 4 goes to n=100. FPC omission makes the comparison unsatisfiable (~15% off at n=30, ~73% off at n=100). action=report; defect confirmed. Recommended minimal fix (replace=False -> True at L1461, and L1415 in Task 2) is sound."
+  },
+  {
+   "lines": [
+    1379,
+    1379
+   ],
+   "category": "code",
+   "severity": "error",
+   "action": "fix",
+   "summary": "Task 1's histogram x-axis label says labor productivity is in 'thousands, 2011 USD PPP' but the lp variable is in raw 2011 USD PPP per worker, so the plotted axis (values up to ~142,000) is mislabeled by a factor of 1,000.",
+   "old": "ax.set_xlabel('Labor Productivity (thousands, 2011 USD PPP)')",
+   "new": "ax.set_xlabel('Labor Productivity (2011 USD PPP per worker)')",
+   "evidence": "Executed the Task 1 code on the actual dataset: df_2014 = lp for 2014 has mean 40,976.87, min 1,371.30, max 142,219.97 — output per worker in dollars (if 'thousands' were correct, mean productivity would be $41 million per worker). The same code prints 'Population mean: $40976.87', confirming the dollar scale students will see next to the mislabeled axis.",
+   "confidence": "high",
+   "id": "ch03-F15",
+   "verify_note": "df_2014.mean()=40976.87, min=1371.30, max=142219.97 (verified exactly) — raw 2011 USD PPP per worker, not thousands (thousands would imply ~$41M/worker). Code also prints 'Population mean: $40976.87'. old_string on L1379 matches, count=1. Fix '(2011 USD PPP per worker)' is accurate."
+  },
+  {
+   "lines": [
+    1471,
+    1471
+   ],
+   "category": "code",
+   "severity": "error",
+   "action": "fix",
+   "summary": "Task 3's example-code x-axis label repeats the same wrong 'thousands' unit for sample means of lp, which are in raw 2011 USD PPP per worker (~$41,000).",
+   "old": "ax.set_xlabel('Sample Mean (thousands, 2011 USD PPP)')",
+   "new": "ax.set_xlabel('Sample Mean (2011 USD PPP per worker)')",
+   "evidence": "Same computation as the Task 1 finding: sample means of df_2014 (lp, 2014) center on 40,977 dollars per worker (verified sample mean 44,389.85 with seed 42, n=30), so the axis values are dollars, not thousands. Label string verified unique in the file (grep count = 1).",
+   "confidence": "high",
+   "id": "ch03-F16",
+   "verify_note": "Sample means of lp center on ~$41,000/worker (same dollar scale as F15), so 'thousands' label is wrong by 1000x. old_string on L1471 matches, count=1. Fix '(2011 USD PPP per worker)' accurate. Consistent with F15 fix."
+  },
+  {
+   "lines": [
+    646,
+    646
+   ],
+   "category": "results",
+   "severity": "error",
+   "action": "fix",
+   "summary": "Claim that estimating average age within ±1 year at 95% confidence needs 'about 4 times larger samples' is off by an order of magnitude; the required n is about 1,330, i.e. roughly 53 times larger than n=25.",
+   "old": "- To estimate average age within ±1 year (95% confidence), we'd need about 4 times larger samples",
+   "new": "- To estimate average age within ±1 year (95% confidence), we'd need n ≈ 1,330 — about 53 times larger samples",
+   "evidence": "Recomputed in .venv: n = (1.96 × 18.61 / 1)² = 1330.5, ratio to 25 = 53.2. Even under the weaker reading SE = 1 year, n = 18.61² ≈ 346 (14× larger). '4 times larger' (n = 100) gives a 95% margin of ±3.65 years, not ±1.",
+   "confidence": "high",
+   "id": "ch03-F17",
+   "verify_note": "Recomputed: n=(1.96*18.61/1)^2=1330.5, ratio to 25 = 53.2. '4 times larger' (n=100) gives 95% margin 1.96*18.61/10=3.65 yr, not +/-1. Fix 'n ~ 1,330 - about 53 times larger' is correct. old_string count=1."
+  },
+  {
+   "lines": [
+    148,
+    148
+   ],
+   "category": "results",
+   "severity": "error",
+   "action": "fix",
+   "summary": "Law of Large Numbers analogy states a roulette wheel 'pays out 47 cents on the dollar in expectation'; the true expected payout is about 95 cents per dollar (the ~47% figure is the win probability of an even-money bet, not the expected payout).",
+   "old": "A casino's roulette wheel pays out 47 cents on the dollar in expectation.",
+   "new": "A casino's roulette wheel pays out about 95 cents on the dollar in expectation.",
+   "evidence": "Recomputed: American roulette even-money bet returns (18/38) × 2 = $0.947 per $1 staked; every standard roulette bet has expected return 36/38 ≈ 0.947. A 47-cent expected payout would imply a 53% house edge, wildly beyond the actual ~5.3%.",
+   "confidence": "high",
+   "id": "ch03-F18",
+   "verify_note": "American roulette even-money payout=(18/38)*2=0.9474; every standard bet=36/38=0.9474 ~ 95 cents. 47% is the even-money win probability (18/38=0.4737), not the payout. Fix 'about 95 cents' correct. old_string count=1."
+  },
+  {
+   "lines": [
+    143,
+    143
+   ],
+   "category": "results",
+   "severity": "error",
+   "action": "fix",
+   "summary": "Law of Large Numbers example claims that at n = 1,000,000 the typical deviation of the coin-toss sample mean 'is invisible to four decimals', but σ/√n = 0.5/1000 = 0.0005, which sits exactly in the fourth decimal (a 1-SD deviation prints as 0.5005).",
+   "old": "at $n = 1{,}000{,}000$ it is invisible to four decimals.",
+   "new": "at $n = 1{,}000{,}000$ the typical deviation is a mere $0.0005$.",
+   "evidence": "Recomputed in .venv: 0.5/sqrt(1e6) = 0.0005. To be invisible when rounding to four decimals a deviation must be below 0.00005, requiring n ≈ 10^8; P(|X̄−0.5| < 0.00005) ≈ 8% at n = 10^6, so ~92% of draws visibly differ at 4 dp. The replacement states the exact executed-formula value and keeps the pedagogical point.",
+   "confidence": "high",
+   "id": "ch03-F19",
+   "verify_note": "0.5/sqrt(1e6)=0.0005, which occupies the 4th decimal (a 1-SD draw prints 0.5005), so 'invisible to four decimals' is false (would need n~1e8). Fix states the exact value 0.0005 and keeps the point. old_string count=1. Note the '$0.0005$' in new text uses LaTeX math delimiters, rendering as 'a mere 0.0005'."
+  },
+  {
+   "lines": [
+    626,
+    626
+   ],
+   "category": "results",
+   "severity": "drift",
+   "action": "fix",
+   "summary": "Census SD agreement described as 'within 1%' but the actual empirical-vs-theoretical gap is 1.04% (3.7607 vs 3.7220), so the stated bound is violated.",
+   "old": "- Excellent agreement between theory and data (within 1%)",
+   "new": "- Excellent agreement between theory and data (about 1%)",
+   "evidence": "Dump cell 8: empirical std of 100 census sample means = 3.760694; theoretical 18.61/√25 = 3.7220. Recomputed relative difference = 1.0396%, which exceeds the claimed 'within 1%' bound; 'about 1%' is accurate.",
+   "confidence": "medium",
+   "id": "ch03-F20",
+   "verify_note": "Verified: theo=18.61/sqrt(25)=3.7220, emp=3.760694; relative gap=1.04% (vs theo) or 1.03% (vs emp), both exceed the stated 'within 1%'. Fix 'about 1%' is accurate. Marginal drift (just over 1%) but the bound is technically violated and the softened wording is correct. old_string count=1."
+  },
+  {
+   "lines": [
+    952,
+    968
+   ],
+   "category": "results",
+   "severity": "error",
+   "action": "report",
+   "summary": "The executed weighted-mean demo contradicts its own printed labels: the 'corrected' weighted mean ($54,647, bias +$1,204) lands over 5× farther from the true population mean ($53,442) than the mean labeled '(biased toward women)' ($53,222, bias −$221), undermining the section's lesson that IPW weighting fixes nonrepresentative-sample bias.",
+   "evidence": "Dump cell 13: Men $56,618, Women $50,267, Overall $53,442; Unweighted mean: $53,222 (biased toward women), Weighted mean: $54,647 (corrected); Unweighted bias: $-221; Weighted bias: $1,204. Recomputed: the expected unweighted bias under this 70/30 design is ≈ −$1,270 (0.3×56,618 + 0.7×50,267 − 53,442), so seed 42 with n=15/35 subsamples produced a lucky unweighted draw and a noisy weighted one. Fixing requires changing the seed and/or enlarging the population/subsamples so the demo shows the intended result — a structural choice that changes all displayed numbers, hence report not fix. Note the Key Takeaways cheat sheet STEP 6 (lines 1186–1210) replicates the identical code and seed and would print the same contradictory output.",
+   "confidence": "high",
+   "id": "ch03-F21",
+   "verify_note": "Same underlying defect as F12, action=report. Dump CELL 13 values reproduced exactly (Men $56,618, Women $50,267, Overall $53,442; Unweighted $53,222 bias -$221; Weighted $54,647 bias +$1,204). Expected unweighted bias under the 70/30 design = 0.3*56618+0.7*50267-53442 = -$1,270, so seed 42 produced a lucky unweighted draw and a noisy weighted one. Defect real; correctly notes the cheat-sheet (L1186-1210) replicates it. Duplicates F12/F13's defect (they propose the concrete seed-5 fix)."
+  },
+  {
+   "lines": [
+    968,
+    971
+   ],
+   "category": "interpretation",
+   "severity": "error",
+   "action": "fix",
+   "summary": "The weighted-mean cell's printed labels claim the weighted mean is 'corrected' and the unweighted mean 'biased', but in the executed draw the unweighted mean is closer to the truth (bias -$221 vs +$1,204) and no prose reconciles the contradiction; add an interpretive note after the cell.",
+   "old": "print(f\"Weighted bias:   ${weighted_mean - true_pop_mean:,.0f}\")\n```\n\n> **Key Concept 3.8: Simple Random Sampling Assumptions**",
+   "new": "print(f\"Weighted bias:   ${weighted_mean - true_pop_mean:,.0f}\")\n```\n\n**Interpreting the weighted-mean output:** In this particular draw, luck partly masks the problem: the unweighted mean (\\$53,222, bias −\\$221) happens to land closer to the true population mean (\\$53,442) than the weighted mean does (\\$54,647, bias +\\$1,204). That is sampling noise, not evidence against weighting. The unweighted estimator is *systematically* pulled toward women's incomes — its expected value here is about \\$52,172, an expected bias of roughly −\\$1,270 — while the weighted estimator is centered on the truth. Weighting removes bias on average across repeated samples; it cannot guarantee a closer estimate in any single sample.\n\n> **Key Concept 3.8: Simple Random Sampling Assumptions**",
+   "evidence": "Execution dump cell 13: Men $56,618, Women $50,267, Overall $53,442; Unweighted $53,222 (bias -$221), Weighted $54,647 (bias +$1,204). Computed expected unweighted mean = 0.3*56,618 + 0.7*50,267 = $52,172 (expected bias -$1,270). Output as printed contradicts the '(corrected)' label without explanation.",
+   "confidence": "high",
+   "id": "ch03-F22",
+   "verify_note": "Interpretation-lens duplicate of F03; all numbers verified against CELL 13 (unweighted $53,222/-$221, weighted $54,647/+$1,204, true $53,442, E[unweighted]≈$52,172). Note text correct. NOTE: overlaps F03 anchor — only one note should be inserted for this cell."
+  },
+  {
+   "lines": [
+    1461,
+    1514
+   ],
+   "category": "interpretation",
+   "severity": "error",
+   "action": "report",
+   "summary": "Case-study Tasks 3-4 tell students to compare the empirical SE against the 'theoretical prediction' sigma/sqrt(n) and to 'Verify that SE decreases as 1/sqrt(n)', but the starter code samples WITHOUT replacement from a population of only 108 countries, so the finite-population correction makes the comparison systematically fail (empirical SE ~16% below sigma/sqrt(n) at n=30 and ~73% below at n=100).",
+   "evidence": "Verified by simulation on the executed dataset (lp 2014, N=108, sd=$33,853): empirical SE at n=30 ≈ $5,199 vs sigma/sqrt(30)=$6,181; at n=100 ≈ $913 vs sigma/sqrt(100)=$3,385. fpc = sqrt((108-n)/107) = 0.854 at n=30, 0.273 at n=100. Two defensible remedies: (a) change `replace=False` to `replace=True` in Task 2/3 starter code (L1415, L1461) so the iid theory the hints cite applies, or (b) keep the code and add a note that without-replacement draws from a small population shrink the SE by the finite-population correction factor, so the empirical SE will fall below sigma/sqrt(n), dramatically so as n approaches 108 (affects Task 4's n=100 panel). Structural (code + prose across two tasks) → report.",
+   "confidence": "high",
+   "id": "ch03-F23",
+   "verify_note": "Report of the structural FPC problem in Tasks 3-4. Verified: σ/√30=$6,181 vs empirical ≈0.854*=$5,279 (~16% low), σ/√100=$3,385 vs empirical ≈0.273*=$926 (~73% low); FPC=√((108-n)/107). Both remedies (replace=True, or an FPC caveat) are defensible → action=report correct. Complements code-level F02."
+  },
+  {
+   "lines": [
+    646,
+    646
+   ],
+   "category": "interpretation",
+   "severity": "error",
+   "action": "fix",
+   "summary": "The practical-implications claim that estimating average age within ±1 year at 95% confidence needs 'about 4 times larger samples' is wrong by an order of magnitude — it requires n ≈ 1,330, about 53 times larger than n=25.",
+   "old": "- To estimate average age within ±1 year (95% confidence), we'd need about 4 times larger samples",
+   "new": "- To estimate average age within ±1 year (95% confidence), we'd need about 53 times larger samples (n ≈ 1,330)",
+   "evidence": "1.96 × 18.61/sqrt(n) ≤ 1 → n ≥ (1.96 × 18.61)² = 1,330.5; 1,330/25 ≈ 53.2. At 4× (n=100) the 95% margin is 1.96 × 18.61/10 ≈ ±3.6 years, not ±1. Even reading '±1 year' as SE=1 gives n = 18.61² ≈ 346 (≈14×), so 'about 4 times' is wrong under any reading.",
+   "confidence": "high",
+   "id": "ch03-F24",
+   "verify_note": "Same defect as F01 with an equally-correct fix ('about 53 times larger (n≈1,330)'). n=1,330.5, 53.2x. NOTE: duplicate of F01 on the identical L646 text — the two fixes are mutually exclusive; apply only one."
+  },
+  {
+   "lines": [
+    1379,
+    1379
+   ],
+   "category": "interpretation",
+   "severity": "error",
+   "action": "fix",
+   "summary": "Task 1 histogram x-axis labels labor productivity as '(thousands, 2011 USD PPP)' but the lp variable is in raw 2011 PPP dollars per worker (mean ≈ $40,977), so 'thousands' misstates the units by 1000x.",
+   "old": "ax.set_xlabel('Labor Productivity (thousands, 2011 USD PPP)')",
+   "new": "ax.set_xlabel('Labor Productivity (output per worker, 2011 USD PPP)')",
+   "evidence": "Executed lp for 2014: mean = 40,976.87, sd = 33,853.21, range 1,371 to 142,220 — dollars per worker; 'thousands' would imply an absurd $41 million average. The same cell prints 'Population mean: $40976.87', which the axis label then contradicts. (Note: ch05 L1846-1847 repeats the same mislabel — out of scope for this chapter's finding.)",
+   "confidence": "high",
+   "id": "ch03-F25",
+   "verify_note": "lp 2014 mean=$40,976.87 (cell prints '$40976.87'), range 1,371-142,220 — raw 2011 PPP dollars per worker, not thousands (which would imply ~$41M/worker). 'thousands' mislabels by 1000x; fix '(output per worker, 2011 USD PPP)' correct and consistent with the cell's own printed dollar values."
+  },
+  {
+   "lines": [
+    1471,
+    1471
+   ],
+   "category": "interpretation",
+   "severity": "error",
+   "action": "fix",
+   "summary": "Task 3 sampling-distribution plot x-axis repeats the wrong '(thousands, 2011 USD PPP)' unit label for sample means of lp, which is in raw 2011 PPP dollars.",
+   "old": "ax.set_xlabel('Sample Mean (thousands, 2011 USD PPP)')",
+   "new": "ax.set_xlabel('Sample Mean (output per worker, 2011 USD PPP)')",
+   "evidence": "Same computation as Task 1 finding: lp 2014 mean = $40,977, and the cell's own prints (e.g. 'Theoretical SE (σ/√n): $6180.72') are in raw dollars, contradicting the 'thousands' label.",
+   "confidence": "high",
+   "id": "ch03-F26",
+   "verify_note": "Same mislabel for the sampling-distribution x-axis; sample means of lp are in raw dollars (cell prints 'Theoretical SE (σ/√n): $6180.72'). 'thousands' wrong; fix correct and parallel to F25."
+  },
+  {
+   "lines": [
+    684,
+    725
+   ],
+   "category": "interpretation",
+   "severity": "drift",
+   "action": "report",
+   "summary": "The '### Interpreting the Simulation Results' block sits in §3.4 (census section, right after Key Concept 3.6) but interprets output from the §3.6 Monte Carlo simulation cell that appears ~140 lines later, so readers meet 'Key findings from 400 simulated coin toss samples' (mean 0.5004, SD 0.0887, seed 10101) before any simulation has run; the block should be moved into §3.6 after the simulation cell/figure (L828-879), which currently has no interpretation of its own.",
+   "evidence": "The block's numbers (mean 0.5004, SD 0.0887, range 0.2667-0.7667, `np.random.seed(10101)`) exactly match dump CELL 11, produced by the §3.6 code at L828-852. The only coin-toss results shown before L684 are the precomputed AED_COINTOSSMEANS.DTA stats (mean 0.4994, SD 0.0863, max 0.7333 — dump CELL 4), which the block itself cites as 'Earlier we loaded' at L719-723. Moving a 40-line section is beyond sentence scope → report.",
+   "confidence": "high",
+   "id": "ch03-F27",
+   "verify_note": "Block '### Interpreting the Simulation Results' (L684) sits in §3.4 after KC 3.6 but its numbers (mean 0.5004, SD 0.0887, range 0.2667-0.7667, seed 10101) match §3.6 simulation CELL 11 at L828-852, ~140 lines later — readers meet them before the simulation runs, and it even cross-references the pre-loaded DTA (0.4994/0.0863) as 'Earlier'. Genuine ordering drift; moving a 40-line block → action=report correct. §3.6's own sim cell currently has no interpretation."
+  },
+  {
+   "lines": [
+    68,
+    68
+   ],
+   "category": "interpretation",
+   "severity": "drift",
+   "action": "fix",
+   "summary": "The Key Concepts glossary illustrates 'one sample statistic' with x̄ = 23.78 years, but 23.78 is the mean of all 100 sample means (used correctly as such in the Unbiasedness entry at L98), conflating a single sample's statistic with the grand mean; use an actual single-sample value instead.",
+   "old": "they compute one sample statistic — say $\\bar{x} = 23.78$ years.",
+   "new": "they compute one sample statistic — say $\\bar{x} = 27.84$ years (the first of the chapter's 100 census samples).",
+   "evidence": "Execution dump cell 8: 'First 5 sample means: [27.84, 19.40, 23.28, 26.84, 26.56]' and 'Mean of the 100 sample means: 23.78 years'. So 23.78 is the average across samples, not any single sample's statistic; reusing it as a single draw invites exactly the parameter-vs-statistic confusion the entry is teaching against.",
+   "confidence": "medium",
+   "id": "ch03-F28",
+   "verify_note": "23.78 is the grand mean of the 100 census sample means (CELL 8), used correctly as such at L98; presenting it at L68 as 'one sample statistic' reuses the same number both ways within the parameter-vs-statistic entry it teaches. Fix value 27.84 is the verified first sample mean (CELL 8: 'First 5 sample means: [27.84, ...]') and lies within the stated 14.6-33.4 range. Subtle (severity=drift) but a real internal inconsistency; fix is factually grounded."
+  },
+  {
+   "lines": [
+    684,
+    725
+   ],
+   "category": "readability",
+   "severity": "error",
+   "action": "report",
+   "summary": "The entire '### Interpreting the Simulation Results' block sits in Section 3.4 (census example) but interprets the Monte Carlo simulation that is only run later in Section 3.6 — readers meet numeric conclusions (mean 0.5004, SD 0.0887, range 0.2667-0.7667, seed 10101, comparison to AED_COINTOSSMEANS.DTA) before the code that produces them exists; the block should be relocated to Section 3.6, directly after the simulation cell that ends at line 852 (before the 'This figure shows...' sentence at line 855), which also fixes the simulation cell's currently missing post-output interpretation.",
+   "evidence": "Execution dump CELL 11 ('# Simulate 400 samples of 30 coin tosses', the Section 3.6 cell at L828-852) prints exactly the values this block discusses: mean 0.5004, std 0.0887, min 0.2667, max 0.7667. The block also cites np.random.seed(10101) (set at L830) and item 6 compares 'our simulation' to the pre-computed DTA data — all Section 3.6 content. Structural move beyond sentence scope -> action=report per brief.",
+   "confidence": "high",
+   "id": "ch03-F29"
+  },
+  {
+   "lines": [
+    890
+   ],
+   "category": "readability",
+   "severity": "error",
+   "action": "fix",
+   "summary": "Section 3.7 cross-references the simple-random-sample assumptions as coming 'from Section 3.4', but assumptions A-C are stated in Section 3.3 (lines 429-433); Section 3.4 is the census example.",
+   "old": "assumptions (A-C from Section 3.4)",
+   "new": "assumptions (A-C from Section 3.3)",
+   "evidence": "Assumptions A (common mean), B (common variance), C (independence) are introduced at L429-433 under '## 3.3 Properties of the Sample Mean'. '## 3.4 Real Data Example - 1880 U.S. Census' (L566) contains no assumption list.",
+   "confidence": "high",
+   "id": "ch03-F30"
+  },
+  {
+   "lines": [
+    881
+   ],
+   "category": "format",
+   "severity": "drift",
+   "action": "fix",
+   "summary": "Key Concept numbering is out of sequence: KC 3.9 (Monte Carlo Simulation, Section 3.6) appears before KC 3.8 (Section 3.7); renumber this one to 3.8 (paired with the companion fix at line 971) so the chapter reads 3.1-3.11 in order.",
+   "old": "> **Key Concept 3.9: Monte Carlo Simulation**",
+   "new": "> **Key Concept 3.8: Monte Carlo Simulation**",
+   "evidence": "Brief global fact: KC numbering is sequential. Chapter order by position is 3.7 (L768) -> 3.9 (L881) -> 3.8 (L971) -> 3.10 -> 3.11. Grep protocol satisfied: web-apps/_shared/strings/ch03.js and web-apps/ch03/template.html reference only Key Concept 3.5 and 3.6; repo-wide grep finds no non-generated reference to KC 3.8/3.9 outside this .qmd — renumber is safe.",
+   "confidence": "high",
+   "id": "ch03-F31"
+  },
+  {
+   "lines": [
+    971
+   ],
+   "category": "format",
+   "severity": "drift",
+   "action": "fix",
+   "summary": "Companion to the line-881 renumber: Key Concept 3.8 (Simple Random Sampling Assumptions) appears after 3.9 in the chapter; renumber it to 3.9 to restore sequential order.",
+   "old": "> **Key Concept 3.8: Simple Random Sampling Assumptions**",
+   "new": "> **Key Concept 3.9: Simple Random Sampling Assumptions**",
+   "evidence": "Same grep evidence as the line-881 finding: no web-app or repo reference to Key Concept 3.8/3.9 exists outside this .qmd, so the swap breaks nothing. Both edits must be applied together.",
+   "confidence": "high",
+   "id": "ch03-F32"
+  },
+  {
+   "lines": [
+    452
+   ],
+   "category": "format",
+   "severity": "error",
+   "action": "fix",
+   "summary": "Broken LaTeX in Section 3.3 key insights: the escaped dollar sign in '\\$1/\\sqrt{n}$' prevents math rendering, so readers see the literal text '$1/\\sqrt{n}$' with a backslash instead of a formula.",
+   "old": "decreases at rate \\$1/\\sqrt{n}$",
+   "new": "decreases at rate $1/\\sqrt{n}$",
+   "evidence": "L452 reads 'Standard deviation decreases at rate \\$1/\\sqrt{n}$' — the leading backslash escapes the opening dollar so Pandoc treats it as literal text, not math; every other occurrence in the chapter (e.g. L990) uses unescaped $1/\\sqrt{n}$ and renders correctly.",
+   "confidence": "high",
+   "id": "ch03-F33"
+  },
+  {
+   "lines": [
+    51
+   ],
+   "category": "readability",
+   "severity": "drift",
+   "action": "fix",
+   "summary": "Chapter outline bullet for Section 3.2 does not match the actual section heading ('## 3.2 Experiment: Coin Tosses' at line 251); sync the outline bullet to the heading (headings are load-bearing and must not change).",
+   "old": "- 3.2 Experiment - Single Sample of Coin Tosses",
+   "new": "- 3.2 Experiment: Coin Tosses",
+   "evidence": "L251 heading is '## 3.2 Experiment: Coin Tosses'. All other outline bullets (3.1, 3.3-3.7) match their headings verbatim; only 3.2 drifted. Brief: heading words are load-bearing for web-app deep links, so the outline must adapt to the heading, not vice versa.",
+   "confidence": "high",
+   "id": "ch03-F34"
+  },
+  {
+   "lines": [
+    480,
+    481
+   ],
+   "category": "readability",
+   "severity": "style",
+   "action": "fix",
+   "summary": "The '# Standard error calculation' code cell has no markdown lead-in — it follows the Key Concept 3.3 blockquote directly, so readers hit the code without being told what it computes or what to look for.",
+   "old": "```{python}\n# Standard error calculation",
+   "new": "In practice we never know $\\sigma$, so we estimate the precision of $\\bar{x}$ with the **standard error** $se(\\bar{X}) = s/\\sqrt{n}$. The next cell computes it for our single sample of 30 tosses — compare the estimate with the true $\\sigma/\\sqrt{n}$.\n\n```{python}\n# Standard error calculation",
+   "evidence": "Brief Lens R rule: every non-Setup code cell needs a >=1-sentence markdown lead-in (what it does + what to look for). L476-478 is the KC 3.3 blockquote; the cell starts at L480 with no introductory prose. Proposed sentence previews the s-for-sigma substitution that the '### Interpreting the Standard Error' section (L504) later explains.",
+   "confidence": "high",
+   "id": "ch03-F35"
+  },
+  {
+   "lines": [
+    223,
+    224
+   ],
+   "category": "readability",
+   "severity": "style",
+   "action": "fix",
+   "summary": "The first code cell of Section 3.1 computes an unfair coin (p = 0.6) that is never announced in the preceding markdown nor interpreted afterward; add a one-sentence lead-in telling readers what the cell does and what to notice in the unfair-coin output.",
+   "old": "```{python}\n# Coin toss random variable",
+   "new": "Let's verify these formulas in code — first for the fair coin, then for an unfair coin with $p = 0.6$. Notice that the unfair coin has a higher mean but a slightly *lower* variance: outcomes become more predictable when one side dominates.\n\n```{python}\n# Coin toss random variable",
+   "evidence": "Brief Lens R rule on lead-ins. The markdown at L196-221 derives only the fair-coin values (mu=0.5, var=0.25); the cell additionally prints unfair-coin results (mu=0.6, var=0.24 per execution dump) with no setup or interpretation anywhere. Var 0.24 < 0.25 confirms the 'lower variance' claim in the proposed text.",
+   "confidence": "medium",
+   "id": "ch03-F36"
+  },
+  {
+   "lines": [
+    750,
+    751
+   ],
+   "category": "readability",
+   "severity": "style",
+   "action": "fix",
+   "summary": "The '# Consistency: variance shrinks as n increases' cell lacks a direct markdown lead-in — the immediately preceding prose is the 'Economic application' sentence, which does not introduce the code or say what to look for in its table.",
+   "old": "```{python}\n# Consistency: variance shrinks as n increases",
+   "new": "Let's make consistency concrete using the census population ($\\sigma = 18.61$ years): as $n$ grows, watch both $\\operatorname{Var}[\\bar{X}]$ and $SD[\\bar{X}]$ in the table shrink toward zero.\n\n```{python}\n# Consistency: variance shrinks as n increases",
+   "evidence": "Brief Lens R rule on lead-ins. L748 ('**Economic application:** These properties justify...') is the last prose before the cell at L750 and does not reference the upcoming computation. Sigma 18.61 matches the value hard-coded in the cell (L754) and the dump (SD 3.7220 at n=25 down to 0.2632 at n=5000).",
+   "confidence": "medium",
+   "id": "ch03-F37"
+  },
+  {
+   "lines": [
+    969,
+    971
+   ],
+   "category": "readability",
+   "severity": "drift",
+   "action": "fix",
+   "summary": "The weighted-mean cell's output gets no interpretation before Key Concept 3.8 — and the executed numbers need one, because in this seeded draw the 'WRONG' unweighted mean (bias -$221) actually lands closer to the truth than the 'CORRECT' weighted mean (bias +$1,204), which will confuse readers unless explained.",
+   "old": "print(f\"Weighted bias:   ${weighted_mean - true_pop_mean:,.0f}\")\n```",
+   "new": "print(f\"Weighted bias:   ${weighted_mean - true_pop_mean:,.0f}\")\n```\n\n**Interpreting the output:** In this particular draw the unweighted mean (\\$53,222) happens to land closer to the true mean (\\$53,442) than the weighted mean (\\$54,647) — a reminder that any single sample is noisy. The difference is systematic, though: with 70% women in the sample, the unweighted mean is centered on about \\$52,172 ($0.3 \\times 56{,}618 + 0.7 \\times 50{,}267$), biased downward *in expectation*, while the inverse-probability-weighted mean is centered on the truth across repeated samples. Weighting removes the systematic bias; it cannot remove random sampling error.",
+   "evidence": "Execution dump CELL 13: Men $56,618, Women $50,267, Overall $53,442, Unweighted $53,222 (bias -$221), Weighted $54,647 (bias +$1,204). Expected unweighted mean = 0.3*56,618 + 0.7*50,267 = $52,172.30. Brief Lens R rule: notable output needs an interpretation; here the raw numbers superficially contradict the cell's WRONG/CORRECT labels, making the missing interpretation actively misleading.",
+   "confidence": "medium",
+   "id": "ch03-F38"
+  },
+  {
+   "lines": [
+    1578,
+    1578
+   ],
+   "category": "format",
+   "severity": "style",
+   "action": "fix",
+   "summary": "Case-study wrap-up header \"What You've Learned from This Case Study\" is H3 and must be demoted to H4 per the normalization table (ch03 listed in the H3→H4 row).",
+   "old": "### What You've Learned from This Case Study",
+   "new": "#### What You've Learned from This Case Study",
+   "evidence": "Brief normalization table row: Case-study wrap-up header \"What You've Learned...\" → H4 `####` for ch02, ch03, ch05, ch09 (H3→H4).",
+   "confidence": "high",
+   "id": "ch03-F39"
+  },
+  {
+   "lines": [
+    452,
+    452
+   ],
+   "category": "format",
+   "severity": "error",
+   "action": "fix",
+   "summary": "Stray escaped dollar sign `\\$` before the math expression breaks the LaTeX delimiter, so `1/\\sqrt{n}$` renders as literal text with a dangling `$`.",
+   "old": "3. Standard deviation decreases at rate \\$1/\\sqrt{n}$ (to halve uncertainty, need 4× the sample size)",
+   "new": "3. Standard deviation decreases at rate $1/\\sqrt{n}$ (to halve uncertainty, need 4× the sample size)",
+   "evidence": "Byte dump of L452 confirms `\\ $ 1 / \\ s q r t { n } $` — the opening `$` is escaped, leaving unbalanced math. Same expression is correctly written as `$1/\\sqrt{n}$` at L990 and L1497.",
+   "confidence": "high",
+   "id": "ch03-F40"
+  },
+  {
+   "lines": [
+    799,
+    799
+   ],
+   "category": "format",
+   "severity": "error",
+   "action": "fix",
+   "summary": "Broken LaTeX `\\text` in the uniform-draw bullet: the backslash of `\\text` was swallowed and replaced by a literal tab character, leaving `\\sim <TAB>ext{Uniform}(0,1)`.",
+   "old": "- Draw uniform random number $U \\sim \text{Uniform}(0,1)$",
+   "new": "- Draw uniform random number $U \\sim \\text{Uniform}(0,1)$",
+   "evidence": "od -c of L799 shows bytes `\\ s i m <space> \\t(tab) e x t { U n i f o r m }` — a raw TAB followed by `ext`, i.e. `\\text` lost its backslash; renders as garbage in MathJax.",
+   "confidence": "high",
+   "id": "ch03-F41"
+  },
+  {
+   "lines": [
+    890,
+    890
+   ],
+   "category": "format",
+   "severity": "error",
+   "action": "fix",
+   "summary": "Wrong internal cross-reference: the simple-random-sample assumptions A-C are stated in Section 3.3 (L427-433), not Section 3.4.",
+   "old": "The simple random sample assumptions (A-C from Section 3.4) provide the foundation for statistical inference",
+   "new": "The simple random sample assumptions (A-C from Section 3.3) provide the foundation for statistical inference",
+   "evidence": "Assumptions A (common mean), B (common variance), C (independence) are listed under `## 3.3 Properties of the Sample Mean` at L431-433; `## 3.4` is the Census example and contains no assumption list.",
+   "confidence": "high",
+   "id": "ch03-F42"
+  },
+  {
+   "lines": [
+    51,
+    51
+   ],
+   "category": "format",
+   "severity": "drift",
+   "action": "fix",
+   "summary": "Chapter outline entry for 3.2 does not match the actual section heading `## 3.2 Experiment: Coin Tosses` (every other outline entry mirrors its heading verbatim).",
+   "old": "- 3.2 Experiment - Single Sample of Coin Tosses",
+   "new": "- 3.2 Experiment: Coin Tosses",
+   "evidence": "Heading at L251 is `## 3.2 Experiment: Coin Tosses` and the section covers both the single sample and the 400-sample distribution; outline entries 3.1, 3.3-3.7 all match their headings word-for-word. Heading words are load-bearing, so the outline is what must change.",
+   "confidence": "medium",
+   "id": "ch03-F43"
+  },
+  {
+   "lines": [
+    988,
+    990
+   ],
+   "category": "format",
+   "severity": "style",
+   "action": "fix",
+   "summary": "Sub-list in Key Takeaways is indented by only one space, which Pandoc does not treat as a nested list — the three items render at the same level as the parent bullet.",
+   "old": "- Under simple random sampling (common mean $\\mu$, common variance $\\sigma^2$, independence):\n - Mean: $\\mathrm{E}[\\bar{X}] = \\mu$ (unbiased estimator)\n - Variance: $\\operatorname{Var}[\\bar{X}] = \\sigma^2/n$ (precision increases with sample size)\n - Standard deviation: $\\sigma_{\\bar{X}} = \\sigma/\\sqrt{n}$ (decreases at rate $1/\\sqrt{n}$)",
+   "new": "- Under simple random sampling (common mean $\\mu$, common variance $\\sigma^2$, independence):\n  - Mean: $\\mathrm{E}[\\bar{X}] = \\mu$ (unbiased estimator)\n  - Variance: $\\operatorname{Var}[\\bar{X}] = \\sigma^2/n$ (precision increases with sample size)\n  - Standard deviation: $\\sigma_{\\bar{X}} = \\sigma/\\sqrt{n}$ (decreases at rate $1/\\sqrt{n}$)",
+   "evidence": "Byte dump confirms exactly one leading space on L988-990. Pandoc requires sub-items indented to the parent's content column (2 spaces for a `- ` marker) to nest; 1-space indent parses as sibling items.",
+   "confidence": "medium",
+   "id": "ch03-F44"
+  },
+  {
+   "lines": [
+    1025,
+    1031
+   ],
+   "category": "format",
+   "severity": "style",
+   "action": "fix",
+   "summary": "Empirical Validation sub-lists use one-space indentation (nesting lost in Pandoc) and carry trailing spaces where a check-mark glyph was apparently stripped.",
+   "old": "- Coin toss experiment (400 samples, n=30 each):\n - Mean of sample means: 0.4994 vs. theoretical 0.5000 \n - SD of sample means: 0.0863 vs. theoretical 0.0913 \n - Approximately normal distribution \n- Census ages (100 samples, n=25 each):\n - Mean of sample means: 23.78 vs. theoretical 24.13 \n - SD of sample means: 3.76 vs. theoretical 3.72 \n - Normal distribution despite highly non-normal population ",
+   "new": "- Coin toss experiment (400 samples, n=30 each):\n  - Mean of sample means: 0.4994 vs. theoretical 0.5000\n  - SD of sample means: 0.0863 vs. theoretical 0.0913\n  - Approximately normal distribution\n- Census ages (100 samples, n=25 each):\n  - Mean of sample means: 23.78 vs. theoretical 24.13\n  - SD of sample means: 3.76 vs. theoretical 3.72\n  - Normal distribution despite highly non-normal population",
+   "evidence": "Byte dump shows single leading space plus a trailing space on each sub-item (residue of a stripped emoji/check-mark). One-space indent does not nest under a `- ` parent in Pandoc; new text uses 2-space indent and drops the orphan trailing spaces.",
+   "confidence": "medium",
+   "id": "ch03-F45"
+  },
+  {
+   "lines": [
+    1582,
+    1596
+   ],
+   "category": "format",
+   "severity": "style",
+   "action": "fix",
+   "summary": "The eight wrap-up achievement lines are degraded paragraphs each starting with a bare leading space (a stripped check-mark glyph); sibling chapters (ch02, ch05, ch09) format the equivalent block as a bulleted list.",
+   "old": " **Population vs sample**: Understood the difference and why we use samples for inference\n\n **Sample mean**: Computed point estimates from random samples\n\n **Sampling variability**: Observed how sample means vary across different samples\n\n **Sampling distribution**: Simulated and visualized the distribution of sample means\n\n **Central Limit Theorem**: Verified that sample means are approximately normal even for skewed populations\n\n **Standard error**: Quantified precision and understood how it decreases with sample size ($\\sigma/\\sqrt{n}$)\n\n **Effect of sample size**: Compared sampling distributions for different $n$ values\n\n **Subpopulation analysis**: Explored differences across country groups",
+   "new": "- **Population vs sample**: Understood the difference and why we use samples for inference\n- **Sample mean**: Computed point estimates from random samples\n- **Sampling variability**: Observed how sample means vary across different samples\n- **Sampling distribution**: Simulated and visualized the distribution of sample means\n- **Central Limit Theorem**: Verified that sample means are approximately normal even for skewed populations\n- **Standard error**: Quantified precision and understood how it decreases with sample size ($\\sigma/\\sqrt{n}$)\n- **Effect of sample size**: Compared sampling distributions for different $n$ values\n- **Subpopulation analysis**: Explored differences across country groups",
+   "evidence": "od -c shows each line begins `<space> * *` — a leading space left behind by a stripped glyph. ch02 (L2005ff), ch05, ch09 wrap-ups use `- **Term**: ...` bullet lists for the same construct; converting restores list semantics and cross-chapter consistency.",
+   "confidence": "medium",
+   "id": "ch03-F46"
+  }
+ ],
+ "killed": []
+}

@@ -1,0 +1,1475 @@
+{
+ "chapter": "ch07",
+ "file": "ch07_Statistical_Inference_for_Bivariate_Regression.qmd",
+ "findings": [
+  {
+   "lines": [
+    353,
+    358
+   ],
+   "category": "methods",
+   "severity": "error",
+   "action": "fix",
+   "summary": "The worked SE(b2) example plugs the standard deviation of price (~37,000) in place of the regression standard error s_e and uses a wrong SD of size (360 instead of 398), producing 19.1 and then a spurious explanation ('smaller because the relationship is quite strong') for why the actual SE is 11.17.",
+   "old": "- Sample size: n = 29\n- Standard error of regression: σ_u ≈ 37,000\n- Standard deviation of size: σ_x ≈ 360\n- Estimated SE(b₂) = 37,000 / (√29 × 360) ≈ 19.1\n\n(Actual SE is 11.17, smaller because the relationship is quite strong)",
+   "new": "- Sample size: n = 29\n- Standard error of regression: s_e ≈ 23,551\n- Standard deviation of size: σ_x ≈ 398\n- Estimated SE(b₂) = 23,551 / (√29 × 398) ≈ 11.0\n\n(Actual SE is 11.17; the shortcut formula is slightly smaller because it uses √n in place of √(n-1))",
+   "evidence": "Exec dump CELL 2: SD(price)=37,390.7, SD(size)=398.27; CELL 3: RMSE=22,724.06 → s_e = 22,724.06×√(29/27) = 23,550.7 (matches pre-verified seed truth 23,550.66). The prose's 37,000 is the SD of y, not s_e. Correct inputs give 23,551/(√29×398) = 10.99 ≈ 11.0, matching the actual SE 11.17 (exact with √(n−1): 23,551/(√28×398.27) = 11.17), so the 'relationship is quite strong' rationale for the 19.1-vs-11.17 gap is spurious.",
+   "confidence": "high",
+   "id": "ch07-F01",
+   "verify_note": "Real defect. Exec CELL 2 shows sd(price)=37,390.7 (that is sigma_y, mislabeled as sigma_u) and sd(size)=398.27 (not 360). CELL 3 RMSE=22,724.06 -> s_e = 22,724.06*sqrt(29/27) = 23,550.7 ~ 23,551. Correct inputs give 23,551/(sqrt(29)*398) = 10.99 ~ 11.0, essentially matching the true SE 11.17 (exact via sqrt(n-1): 23,551/(sqrt(28)*398.27)=11.18). The original 'smaller because the relationship is quite strong' rationale for the fake 19.1-vs-11.17 gap is spurious. Proposed fix (s_e~23,551, sigma_x~398, ~11.0, sqrt(n) vs sqrt(n-1) explanation) is correct."
+  },
+  {
+   "lines": [
+    375,
+    375
+   ],
+   "category": "methods",
+   "severity": "error",
+   "action": "fix",
+   "summary": "The claim that SE would be 'about 2.5 times larger' if R² were 0.10 misapplies the R²–SE relationship; SE scales with √(1−R²), giving a factor of about 1.5.",
+   "old": "- If R² were 0.10, SE would be about 2.5 times larger",
+   "new": "- If R² were 0.10, SE would be about 1.5 times larger (SE scales with √(1-R²))",
+   "evidence": "s_e ∝ √(1−R²) holding Var(y) fixed; executed R² = 0.6175 (dump CELL 3), so √((1−0.10)/(1−0.6175)) = √(0.90/0.3825) = 1.53, not 2.5. The 2.5 figure appears to come from the incorrect ratio √(0.62/0.10) = 2.49.",
+   "confidence": "high",
+   "id": "ch07-F02",
+   "verify_note": "SE(b2) proportional to s_e proportional to sqrt(1-R^2) holding SST fixed. Executed R^2=0.6175, so ratio = sqrt((1-0.10)/(1-0.6175)) = sqrt(0.90/0.3825) = 1.53 ~ 1.5, not 2.5. The 2.5 comes from the wrong sqrt(0.62/0.10)=2.49. Fix to 'about 1.5 times larger (SE scales with sqrt(1-R^2))' is correct."
+  },
+  {
+   "lines": [
+    434,
+    434
+   ],
+   "category": "methods",
+   "severity": "error",
+   "action": "fix",
+   "summary": "The bullet asserts the calculated 95% CI 'will correctly include β₂ 95% of the time', a probability statement about a realized interval that the chapter itself labels WRONG forty lines later; only repeated-sampling wording about the procedure is allowed outside misconception blocks.",
+   "old": "- The calculated 95% CI will correctly include $\\beta_2$ 95% of the time",
+   "new": "- Any single calculated interval either contains $\\beta_2$ or it does not — the 95% refers to the long-run success rate of the interval-construction procedure",
+   "evidence": "Brief Lens A rule: probability-that-β-is-in-this-interval wording is allowed only inside explicitly labeled misconception/WRONG blocks. L434 is presented as a correct interpretation, and it directly contradicts the chapter's own correction at L471–476 ('The parameter β₂ is fixed (not random); The interval either contains β₂ or it doesn't').",
+   "confidence": "high",
+   "id": "ch07-F03",
+   "verify_note": "L434 is presented as a CORRECT interpretation bullet (not inside a labeled misconception/WRONG block), yet 'The calculated 95% CI will correctly include beta_2 95% of the time' is precisely the realized-interval probability misconception the chapter itself flags as WRONG at L471-476 ('parameter is fixed; interval either contains it or not'). Per brief Lens A this wording is allowed only inside labeled misconception blocks. Proposed replacement matches the chapter's own correction. Confirmed."
+  },
+  {
+   "lines": [
+    1201,
+    1201
+   ],
+   "category": "methods",
+   "severity": "error",
+   "action": "fix",
+   "summary": "The robust-SE taxonomy claims 'Python default: HC1', but no Python estimator used in this book defaults to HC1 — pyfixest's default vcov is classical iid; HC1 must be requested explicitly.",
+   "old": "**Python default:** HC1 (matches Stata's \"robust\" option)",
+   "new": "**This book's choice:** HC1 via `vcov='HC1'` (matches Stata's \"robust\" option; note that pyfixest's default is classical iid SEs)",
+   "evidence": "Brief global fact: pyfixest default is iid (classical). Exec dump confirms: CELL 3 default fit reports 'Inference: iid'; CELL 14 reports 'Inference: HC1' only because vcov='HC1' was passed. statsmodels' default cov_type is 'nonrobust' as well.",
+   "confidence": "high",
+   "id": "ch07-F04",
+   "verify_note": "'Python default: HC1' is false. Exec CELL 3 default fit reports 'Inference: iid'; HC1 appears (CELL 14, CELL 27) only when vcov='HC1' is passed. Brief global fact: pyfixest default is iid; statsmodels default cov_type is nonrobust. Proposed fix correctly reframes HC1 as this book's explicit choice and notes the true iid default."
+  },
+  {
+   "lines": [
+    800,
+    800
+   ],
+   "category": "methods",
+   "severity": "style",
+   "action": "fix",
+   "summary": "The interpretation of the two-sided p-value describes only one tail ('probability of getting t ≥ 6.60') when the two-sided p-value is the probability of |t| at least that extreme.",
+   "old": "- p = 0.000: If β₂ were truly zero, the probability of getting t ≥ 6.60 is less than 0.1%",
+   "new": "- p = 0.000: If β₂ were truly zero, the probability of getting |t| ≥ 6.60 is less than 0.1%",
+   "evidence": "The chapter's own decision rule at L643 defines the two-sided p-value as p = Pr[|T_{n-2}| > |t|]; 't ≥ 6.60' covers only the upper tail. Both statements are numerically below 0.1% here, so this is a precision-of-statement fix, not a numeric one.",
+   "confidence": "high",
+   "id": "ch07-F05",
+   "verify_note": "The reported p (0.000) is the two-sided p-value; the chapter defines it at L643 as Pr[|T_{27}| > |t|], and the surrounding text (L796) frames it as 'a result at least as extreme'. Describing only 't >= 6.60' (upper tail) is imprecise; '|t| >= 6.60' is correct. Numerically both remain <0.1%, so this is a precision fix, appropriately marked style. Confirmed."
+  },
+  {
+   "lines": [
+    850,
+    851
+   ],
+   "category": "methods",
+   "severity": "style",
+   "action": "report",
+   "summary": "The computed t-statistic formula writes the unknown population parameter σ_u in the denominator, contradicting the chapter's own emphasis that the computed t uses the estimate s_e (which is precisely why T(n−2) replaces N(0,1)).",
+   "old": "$$t = \\frac{b_2}{se(b_2)} = \\frac{b_2}{\\sigma_u / \\sqrt{\\sum(x_i - \\bar{x})^2}}$$",
+   "new": "$$t = \\frac{b_2}{se(b_2)} = \\frac{b_2}{s_e / \\sqrt{\\sum(x_i - \\bar{x})^2}}$$",
+   "evidence": "The chapter states at L532 'The problem: We never know σ_u in practice!' and defines the feasible statistic with s_e at L534–538; the sample statistic t = b2/se(b2) is computed from s_e, so σ_u in this denominator conflates the Z and T constructions the section works hard to distinguish.",
+   "confidence": "low",
+   "id": "ch07-F06",
+   "verify_note": "The claim that L850 must use s_e misreads the chapter's dual notation. The chapter's SE formula uses sigma_u at L314 (se(b2)=sigma_u/(sqrt(n)*sigma_x)) and again at L1166 (se(b2)=sigma_u/sqrt(sum(x-xbar)^2)); the s_e substitution appears only in the Z-vs-T sampling-distribution subsection (L530/L536). L850 reproduces the chapter's own theoretical se(b2) formula, so it is internally consistent with L314/L1166. Changing sigma_u->s_e at L850 ALONE would desync it from those two other identical formulas. There is a genuine technical looseness (calling it 't' while using population sigma_u), but the single-site fix as proposed is not decisively correct; a proper fix would harmonize L314, L1166, and L850 together (or leave all three as the theoretical formula)."
+  },
+  {
+   "lines": [
+    2491,
+    2628
+   ],
+   "category": "methods",
+   "severity": "style",
+   "action": "report",
+   "summary": "Case Study 2 switches notation and calls the slope on ln_NTLpc2017 'β₁' (Tasks 1, 4, and 5: H₀: β₁ = 0, H₀: β₁ = 5, H₀: β₁ ≤ 0), whereas the entire rest of the chapter reserves β₁ for the intercept and β₂ for the slope.",
+   "evidence": "β₁ = intercept, β₂ = slope at L202, L279, L296, L407, L568, L1621, and L1889 (Case Study 1); Case Study 2 uses β₁ for the slope at L2491, L2505, L2576, L2584, L2588–2598, L2614, and L2622–2628 in both prose instructions and code comments/variable names (beta_0_hyp, beta_1). A consistent rename to β₂ spans multiple task instructions and code cells, beyond single-sentence fix scope, so reporting rather than fixing.",
+   "confidence": "high",
+   "id": "ch07-F07",
+   "verify_note": "Real cross-section inconsistency. The chapter reserves beta_1 = intercept, beta_2 = slope everywhere (L202/L208 explicit, plus Case Study 1 H0: beta_2=0 at L1893), but Case Study 2 uses beta_1 / beta_1 for the slope on ln_NTLpc2017 across task prose and code comments (L2491, L2505, L2576, L2584, L2598, L2614, L2622, L2628). Whether CS2 intends a 0-indexed beta_0/beta_1 convention or not, mixing it with beta_2-as-slope in the same chapter is confusing; spanning many locations, action=report is appropriate. Defect is real."
+  },
+  {
+   "lines": [
+    2138
+   ],
+   "category": "code",
+   "severity": "error",
+   "action": "fix",
+   "summary": "Case Study 1 Task 3's standard-vs-robust comparison table is never displayed: the return value of comparison_df.to_string() is discarded because it is not printed and not the cell's last expression.",
+   "old": "comparison_df.to_string(index=False)",
+   "new": "print(comparison_df.to_string(index=False))",
+   "evidence": "Execution dump CELL 21 shows only the '+48.4%' lines and CIs — no comparison table appears, even though the task text (L2104) asks students to 'Compare standard vs. robust standard errors' and the code comment says '# Comparison table'.",
+   "confidence": "high",
+   "id": "ch07-F08",
+   "verify_note": "Line 2138 `comparison_df.to_string(index=False)` is followed by print() statements through L2156, so it is neither printed nor the cell's last expression; dump CELL 21 shows no comparison table. Wrapping in print() is the correct fix. Old string unique."
+  },
+  {
+   "lines": [
+    2222
+   ],
+   "category": "code",
+   "severity": "error",
+   "action": "fix",
+   "summary": "Case Study 1 Task 4's income-group comparison table is never displayed: comparison_groups.to_string() is discarded mid-cell, so the table Task 4(b) explicitly requires ('Create a comparison table showing β₂, robust SE, t-statistic, and p-value for each group') never appears.",
+   "old": "comparison_groups.to_string(index=False)",
+   "new": "print(comparison_groups.to_string(index=False))",
+   "evidence": "Execution dump CELL 22 shows only the group counts and the two β₂=0.5 tests — the 'Regression Results by Income Group' table is absent from the output.",
+   "confidence": "high",
+   "id": "ch07-F09",
+   "verify_note": "Line 2222 `comparison_groups.to_string(index=False)` is mid-cell (followed by the for-loop with prints), so the 'Regression Results by Income Group' table is discarded; dump CELL 22 confirms it is absent. print() fix correct. Old string unique."
+  },
+  {
+   "lines": [
+    1201
+   ],
+   "category": "code",
+   "severity": "error",
+   "action": "fix",
+   "summary": "Prose claims 'Python default: HC1', but the chapter's engine pyfixest (like statsmodels) defaults to classical/iid standard errors — HC1 must be requested explicitly.",
+   "old": "**Python default:** HC1 (matches Stata's \"robust\" option)",
+   "new": "**Python (pyfixest):** the default is classical (iid) standard errors — request robust SEs explicitly with `vcov='HC1'`, which matches Stata's \"robust\" option",
+   "evidence": "Execution dump CELLs 3/5/19/25 all show 'Inference: iid' for fits without a vcov argument; robust output only appears when vcov='HC1' is passed (CELLs 13/14/21/27). Brief global facts: 'pyfixest default is iid (classical)'.",
+   "confidence": "high",
+   "id": "ch07-F10",
+   "verify_note": "pyfixest defaults to iid: dump CELLs 3/5/19/25 show 'Inference: iid' with no vcov, HC1 only when vcov='HC1' passed (CELLs 14/27). 'Python default: HC1' is false. Replacement text is accurate. Old string matches L1201."
+  },
+  {
+   "lines": [
+    1636
+   ],
+   "category": "code",
+   "severity": "error",
+   "action": "fix",
+   "summary": "Key Takeaways 'Python Tools Used' credits statsmodels for estimation, but every regression in the chapter is estimated with pyfixest (pf.feols); statsmodels is never imported.",
+   "old": "- `statsmodels`: Econometric estimation and hypothesis testing",
+   "new": "- `pyfixest`: Econometric estimation and hypothesis testing",
+   "evidence": "pre-verified by execution",
+   "confidence": "high",
+   "id": "ch07-F11",
+   "verify_note": "grep confirms pyfixest imported (L164) and statsmodels never imported; all fits use pf.feols. Fix statsmodels->pyfixest correct. Note the other listed tools (pandas/scipy.stats/matplotlib&seaborn) are genuinely used, so only this line is wrong."
+  },
+  {
+   "lines": [
+    2431
+   ],
+   "category": "code",
+   "severity": "error",
+   "action": "fix",
+   "summary": "Case Study 1 'What You've Learned' credits statsmodels for robust standard errors, but robust SEs were generated with pyfixest (pf.feols(..., vcov='HC1')).",
+   "old": "- Generating robust standard errors with `statsmodels`",
+   "new": "- Generating robust standard errors with `pyfixest`",
+   "evidence": "pre-verified by execution",
+   "confidence": "high",
+   "id": "ch07-F12",
+   "verify_note": "Robust SEs produced by pf.feols(...,vcov='HC1'); statsmodels not imported. Fix correct. Old string matches L2431."
+  },
+  {
+   "lines": [
+    2543
+   ],
+   "category": "code",
+   "severity": "error",
+   "action": "fix",
+   "summary": "Case Study 2 Task 3 instruction uses the statsmodels kwarg cov_type='HC1', but the pyfixest API used in the hint (L2548) and the actual code (L2554) is vcov='HC1'.",
+   "old": "1. Re-estimate the model with HC1 robust standard errors using `cov_type='HC1'`",
+   "new": "1. Re-estimate the model with HC1 robust standard errors using `vcov='HC1'`",
+   "evidence": "pre-verified by execution",
+   "confidence": "high",
+   "id": "ch07-F13",
+   "verify_note": "cov_type='HC1' is statsmodels API; the hint (L2548) and code (L2554) use pyfixest's vcov='HC1'. Fix correct. cov_type='HC1' appears exactly once."
+  },
+  {
+   "lines": [
+    1507
+   ],
+   "category": "code",
+   "severity": "error",
+   "action": "fix",
+   "summary": "Figure 7.1 y-axis label says 'Price ($1000s)' but the plotted price variable is in dollars, so the rendered figure mislabels the units by a factor of 1000.",
+   "old": "ax.set_ylabel('Price ($1000s)', fontsize=12)",
+   "new": "ax.set_ylabel('Price (dollars)', fontsize=12)",
+   "evidence": "Execution dump CELL 2: price mean = 253,910, min = 204,000 (dollars); intercept = 115,017. The cheat-sheet plot (L1756) already labels it 'House Sale Price (dollars)', and the seed fix at L206 confirms price is in dollars.",
+   "confidence": "high",
+   "id": "ch07-F14",
+   "verify_note": "price plotted raw (dump CELL 2 mean 253,910, min 204,000 dollars); no rescaling in plot. '$1000s' mislabels units; cheat-sheet L1756 already uses 'House Sale Price (dollars)'. Fix correct. 'Price ($1000s)' unique."
+  },
+  {
+   "lines": [
+    2314,
+    2315
+   ],
+   "category": "code",
+   "severity": "error",
+   "action": "fix",
+   "summary": "Case Study 1 Figure 1 left panel labels both axes '($1000s)' but the plotted Mendez variables lp/kl are in dollars, so the figure mislabels units by a factor of 1000.",
+   "old": "ax1.set_xlabel('Capital per Worker ($1000s)')\nax1.set_ylabel('Labor Productivity ($1000s)')",
+   "new": "ax1.set_xlabel('Capital per Worker (dollars)')\nax1.set_ylabel('Labor Productivity (dollars)')",
+   "evidence": "Execution dump CELL 18: productivity mean = 40,977, capital mean = 165,853 — if these were thousands of dollars, capital per worker would be $166 million. (The matching prose bullets at L1884-1885 saying 'thousands of dollars' are a numbers/interpretation finding for the other lenses; both must be reconciled to dollars.)",
+   "confidence": "high",
+   "id": "ch07-F15",
+   "verify_note": "ax1 plots data_2014['capital']/['productivity'] raw; dump CELL 18 means 165,854 and 40,977 (dollar-scale GDP/worker & capital/worker). '$1000s' wrong; '(dollars)' correct. Old string (ax1.set_xlabel/ylabel) unique."
+  },
+  {
+   "lines": [
+    2333,
+    2334
+   ],
+   "category": "code",
+   "severity": "error",
+   "action": "fix",
+   "summary": "Case Study 1 Figure 1 right panel repeats the '($1000s)' axis-unit mislabeling for data that is in dollars.",
+   "old": "ax2.set_xlabel('Capital per Worker ($1000s)')\nax2.set_ylabel('Labor Productivity ($1000s)')",
+   "new": "ax2.set_xlabel('Capital per Worker (dollars)')\nax2.set_ylabel('Labor Productivity (dollars)')",
+   "evidence": "Execution dump CELL 18: productivity mean = 40,977 and capital mean = 165,853, i.e. dollar-denominated values plotted directly without rescaling.",
+   "confidence": "high",
+   "id": "ch07-F16",
+   "verify_note": "Right panel (ax2) plots the same dollar-denominated capital/productivity raw; identical mislabel. '(dollars)' fix correct. ax2 old string unique."
+  },
+  {
+   "lines": [
+    2348,
+    2349
+   ],
+   "category": "code",
+   "severity": "style",
+   "action": "fix",
+   "summary": "Case Study 1 Task 5 coefficient plot builds its '95% CI' error bars with the normal critical value 1.96 instead of t critical values, contradicting the chapter's own rule of thumb (L586-590: use the t-distribution for 30 <= n < 100) for the n=54 subsamples.",
+   "old": "cis_lower = [e - 1.96*se for e, se in zip(estimates, ses)]\ncis_upper = [e + 1.96*se for e, se in zip(estimates, ses)]",
+   "new": "dfs = [int(m._N) - len(m.coef()) for m in (robust_model, robust_high, robust_dev)]  # df = n - 2 per group\ncis_lower = [e - stats.t.ppf(0.975, d)*se for e, se, d in zip(estimates, ses, dfs)]\ncis_upper = [e + stats.t.ppf(0.975, d)*se for e, se, d in zip(estimates, ses, dfs)]",
+   "evidence": "t(0.975, 52) = 2.0066 and t(0.975, 106) = 1.9826 (computed), so 1.96 makes the subsample bars ~2.3% too narrow; the x-axis label (L2360) promises '95% CI'. No stated conclusion flips ('All three estimates are positive and statistically significant' still holds). robust_model/robust_high/robust_dev are all in scope from Tasks 3-4.",
+   "confidence": "medium",
+   "id": "ch07-F17",
+   "verify_note": "Style/consistency: bars labeled '95% CI' use normal 1.96 but chapter rule L588-589 prescribes t for n<100 (subsamples n=54). Proposed fix computes t(0.975,df) with df=n-2; robust_model (L2121, full sample), robust_high, robust_dev (L2208-2209) are all in scope and in the right order matching estimates=[beta2_robust, high, dev]; scipy stats imported. t(52)=2.007 vs 1.96 => ~2.4% wider; conclusion unchanged. Minor but real; fix correct."
+  },
+  {
+   "lines": [
+    97,
+    97
+   ],
+   "category": "results",
+   "severity": "drift",
+   "action": "fix",
+   "summary": "Key Concept callout states the regression standard error as $23,162 but the executed value is $23,551.",
+   "old": "$s_e \\approx \\$23{,}162$",
+   "new": "$s_e \\approx \\$23{,}551$",
+   "evidence": "pre-verified by execution (seed finding); recomputed: s_e = sqrt(SSR/(n-2)) = 23,550.66; dump CELL 3 RMSE 22,724.058 × sqrt(29/27) = 23,550.66",
+   "confidence": "high",
+   "id": "ch07-F18",
+   "verify_note": "Recomputed s_e = RMSE*sqrt(29/27) = 23,550.66 -> 23,551 (also reproduces se(b2)=11.1749). Displayed 23,162 wrong. Fix 23,551 correct. Old string matches L97."
+  },
+  {
+   "lines": [
+    216,
+    216
+   ],
+   "category": "results",
+   "severity": "drift",
+   "action": "fix",
+   "summary": "Hand-typed regression table shows intercept 115,017.30 but the executed estimate rounds to 115,017.28.",
+   "old": "| Intercept | 115,017.30 | 21,489.36 | 5.35 | 0.000 | [70,924.76, 159,109.8] |",
+   "new": "| Intercept | 115,017.28 | 21,489.36 | 5.35 | 0.000 | [70,924.76, 159,109.8] |",
+   "evidence": "dump CELL 3/4: Intercept = 115017.282609, which rounds to 115,017.28 at the displayed 2 decimal places; the chapter's own code prints 'price = 115,017.28 + 73.77 x size'",
+   "confidence": "high",
+   "id": "ch07-F19",
+   "verify_note": "Dump CELL 4 Intercept=115017.282609 -> 115,017.28; chapter's own print says 115,017.28. Table's 115,017.30 is a hand-typed drift. Fix correct. Old string matches L216."
+  },
+  {
+   "lines": [
+    127,
+    127
+   ],
+   "category": "results",
+   "severity": "drift",
+   "action": "fix",
+   "summary": "Key Concept callout describes the CI width as a $45 spread, but the executed interval width is 45.86, which rounds to $46.",
+   "old": "spans a substantial \\$45 spread",
+   "new": "spans a substantial \\$46 spread",
+   "evidence": "dump CELL 6: CI [50.842, 96.700]; width = 96.700 − 50.842 = 45.86 → $46 at the whole-dollar precision displayed",
+   "confidence": "medium",
+   "id": "ch07-F20",
+   "verify_note": "CI [50.842,96.700] width=45.858, which rounds to 46 at whole-dollar precision; '$45' rounds down incorrectly. Fix $46 correct. Borderline (loose prose approximation) but the rounded value is unambiguously 46. Old string unique."
+  },
+  {
+   "lines": [
+    354,
+    358
+   ],
+   "category": "results",
+   "severity": "error",
+   "action": "fix",
+   "summary": "Worked SE example uses sigma_u ~ 37,000 (actually the std of price, not the regression SE), sigma_x ~ 360 (actual 398), producing 19.1 instead of the correct ~11.0, and the parenthetical explanation is backwards.",
+   "old": "- Standard error of regression: σ_u ≈ 37,000\n- Standard deviation of size: σ_x ≈ 360\n- Estimated SE(b₂) = 37,000 / (√29 × 360) ≈ 19.1\n\n(Actual SE is 11.17, smaller because the relationship is quite strong)",
+   "new": "- Standard error of regression: σ_u ≈ 23,551\n- Standard deviation of size: σ_x ≈ 398\n- Estimated SE(b₂) = 23,551 / (√29 × 398) ≈ 11.0\n\n(Actual SE is 11.17, slightly larger because the exact formula uses √(n−1) = √28 rather than √n)",
+   "evidence": "dump CELL 2: std(price) = 37,390.7 (the 37,000 figure), std(size) = 398.27; executed regression SE s_e = 23,550.66; recomputed 23,551/(√29×398) = 10.99 ≈ 11.0 vs exact 23,551/(√28×398.27) = 11.17",
+   "confidence": "high",
+   "id": "ch07-F21",
+   "verify_note": "37,000 is std(price)=37,391 not the regression SE; correct s_e=23,551, std(size)=398. Recomputed 23,551/(sqrt29*398)=10.99~11.0; exact via sqrt(28) gives 11.175, so actual is slightly LARGER (original's 'smaller because...19.1' is backwards). All fix values verified. Old string matches L354-358."
+  },
+  {
+   "lines": [
+    375,
+    375
+   ],
+   "category": "results",
+   "severity": "error",
+   "action": "fix",
+   "summary": "Claim that SE would be 'about 2.5 times larger' if R² were 0.10 is wrong; SE scales with sqrt(1−R²), giving about 1.5 times.",
+   "old": "- If R² were 0.10, SE would be about 2.5 times larger",
+   "new": "- If R² were 0.10, SE would be about 1.5 times larger",
+   "evidence": "recomputed: se(b2) ∝ s_e ∝ sqrt(1−R²) holding var(y) and x fixed; sqrt((1−0.10)/(1−0.6175)) = 1.53. The 2.5 figure appears to come from the incorrect sqrt(0.6175/0.10) = 2.48",
+   "confidence": "medium",
+   "id": "ch07-F22",
+   "verify_note": "se(b2) ∝ sqrt(1-R^2) holding var(y),var(x),n fixed; sqrt(0.9/0.3825)=1.534 -> ~1.5x. The 2.5 figure = sqrt(0.6175/0.10)=2.485, an invalid formula. Fix 1.5x correct. Old string matches L375."
+  },
+  {
+   "lines": [
+    576,
+    577
+   ],
+   "category": "results",
+   "severity": "drift",
+   "action": "fix",
+   "summary": "CI margins 21.89 and 22.92 (computed from rounded inputs) disagree with the executed margins 21.90 and 22.93 used elsewhere in the chapter (22.93 at L127 and L439).",
+   "old": "- Using normal: 95% CI margin = 1.96 × 11.17 = 21.89\n- Using t(27): 95% CI margin = 2.052 × 11.17 = 22.92",
+   "new": "- Using normal: 95% CI margin = 1.96 × 11.17 ≈ 21.90\n- Using t(27): 95% CI margin = 2.052 × 11.17 ≈ 22.93",
+   "evidence": "dump CELL 7: margin of error = 22.9290 → 22.93; recomputed 1.96 × 11.1749 = 21.9028 → 21.90; same quantity displayed as 22.93 at L127 and L439, violating consistency at shared 2-dp precision",
+   "confidence": "medium",
+   "id": "ch07-F23",
+   "verify_note": "Executed/precise margins: 1.96*11.1749=21.903->21.90 and 2.0518*11.1749=22.929->22.93 (dump CELL 7=22.9290). The identical expression '2.052 x 11.17' is shown as 22.93 at L439 and L127, so L577's 22.92 is an internal inconsistency. Proposed values (with ≈) match execution and the rest of the chapter. Confirmed as consistency drift; t-margin is the strongest case."
+  },
+  {
+   "lines": [
+    1208,
+    1208
+   ],
+   "category": "results",
+   "severity": "error",
+   "action": "fix",
+   "summary": "Comparison table claims the intercept robust SE is 21,825 (+1.6%), but the executed HC1 SE is 20,299, a −5.5% change (robust SE is smaller, not larger).",
+   "old": "| Intercept | 21,489 | 21,825 | +1.6% |",
+   "new": "| Intercept | 21,489 | 20,299 | -5.5% |",
+   "evidence": "dump CELL 13: intercept Robust SE = 20298.704493 vs Std. Error 21489.359861; (20298.70−21489.36)/21489.36 = −5.54%",
+   "confidence": "high",
+   "id": "ch07-F24",
+   "verify_note": "Dump CELL 13 intercept Robust SE=20298.70 vs Std.Error=21489.36; pct=-5.54%. Table's 21,825 (+1.6%) wrong. Fix 20,299 (-5.5%) correct. Old string matches L1208."
+  },
+  {
+   "lines": [
+    1288,
+    1288
+   ],
+   "category": "results",
+   "severity": "error",
+   "action": "fix",
+   "summary": "ASCII bar comparison repeats the wrong intercept robust SE 21,825 (+1.6%) with a longer bar; executed HC1 SE is 20,299 (−5.5%), so the bar should be shorter.",
+   "old": " Robust SE: 21,825 |█████████████████████| (+1.6%)",
+   "new": " Robust SE: 20,299 |███████████████████| (-5.5%)",
+   "evidence": "dump CELL 13/14: intercept robust (HC1) SE = 20298.704, smaller than the classical 21489.360 (−5.5%); bar shortened from 21 to 19 blocks vs the 20-block standard bar to preserve the visual proportion",
+   "confidence": "high",
+   "id": "ch07-F25",
+   "verify_note": "Same intercept HC1 SE 20,299 (-5.5%), smaller than classical so bar must shorten. L1288 has 21 blocks; proposed 19 blocks is a reasonable proportional shrink (20,299/21,489*20~18.9). Numeric content verified. Old string unique."
+  },
+  {
+   "lines": [
+    1299,
+    1299
+   ],
+   "category": "results",
+   "severity": "drift",
+   "action": "fix",
+   "summary": "Robust 95% CI quoted as [50.33, 97.21], but the executed HC1 interval is [50.52, 97.02].",
+   "old": "| 95% CI | [50.84, 96.70] | [50.33, 97.21] | Nearly identical |",
+   "new": "| 95% CI | [50.84, 96.70] | [50.52, 97.02] | Nearly identical |",
+   "evidence": "dump CELL 14 (HC1 summary): size 2.5% = 50.524, 97.5% = 97.018 → [50.52, 97.02]",
+   "confidence": "high",
+   "id": "ch07-F26",
+   "verify_note": "Dump CELL 14 HC1 size CI 2.5%=50.524, 97.5%=97.018 -> [50.52,97.02]. Table's [50.33,97.21] wrong. Fix correct. Old string matches L1299."
+  },
+  {
+   "lines": [
+    1338,
+    1338
+   ],
+   "category": "results",
+   "severity": "drift",
+   "action": "fix",
+   "summary": "Example write-up quotes the robust 95% CI as [$50.33, $97.21]; the executed HC1 interval is [$50.52, $97.02].",
+   "old": "with a 95% confidence interval of [\\$50.33, \\$97.21].\"",
+   "new": "with a 95% confidence interval of [\\$50.52, \\$97.02].\"",
+   "evidence": "dump CELL 14 (HC1 summary): size CI [50.524, 97.018]",
+   "confidence": "high",
+   "id": "ch07-F27",
+   "verify_note": "Same HC1 CI [50.52,97.02] (dump CELL 14). Write-up's [$50.33,$97.21] wrong. Fix correct. Old string matches L1338."
+  },
+  {
+   "lines": [
+    1957,
+    1957
+   ],
+   "category": "results",
+   "severity": "error",
+   "action": "fix",
+   "summary": "Task 1(d) says the average country has capital = 50 and productivity = 25, but the executed sample means are capital ≈ 165,854 and productivity ≈ 40,977.",
+   "old": "d) Is the effect economically significant? (Consider that the average country has capital = 50 and productivity = 25)",
+   "new": "d) Is the effect economically significant? (Consider that the average country has capital ≈ 166,000 and productivity ≈ 41,000)",
+   "evidence": "dump CELL 18: mean productivity = 40976.87, mean capital = 165853.51 (values are in the same units students see in describe(), so the hand-typed 50/25 matches nothing at any rounding)",
+   "confidence": "high",
+   "id": "ch07-F28",
+   "verify_note": "Dump CELL 18 mean capital=165,853.51, productivity=40,976.87 (same units as describe() output students see). Stated 'capital=50, productivity=25' matches nothing. Fix ~166,000/~41,000 correct. Old string matches L1957."
+  },
+  {
+   "lines": [
+    2639,
+    2639
+   ],
+   "category": "results",
+   "severity": "drift",
+   "action": "fix",
+   "summary": "Key Concept 7.13 claims IMDS ranges roughly 20 to 80 so a 5-point effect is about 8% of the range; executed range is 35.7–80.2 (44.5), making 5 points about 11%.",
+   "old": "Since IMDS ranges from roughly 20 to 80, an effect of, say, 5 points represents about 8% of the total range—a meaningful but not transformative association.",
+   "new": "Since IMDS ranges from roughly 36 to 80, an effect of, say, 5 points represents about 11% of the total range—a meaningful but not transformative association.",
+   "evidence": "dump CELL 24/30: IMDS min 35.7, max 80.2, range 44.5 (full 339-municipality dataset also has min 35.7); 5/44.5 = 11.2%, while 8% would require the stated but nonexistent 20–80 (60-point) range",
+   "confidence": "high",
+   "id": "ch07-F29",
+   "verify_note": "Dump CELL 24/30: IMDS min 35.7, max 80.2, range 44.5. 5/44.5=11.2%~11%; the stated 8% needs a 60-pt (20-80) range that doesn't exist. Fix '36 to 80' / 'about 11%' correct. Old string matches L2639."
+  },
+  {
+   "lines": [
+    1884,
+    1885
+   ],
+   "category": "interpretation",
+   "severity": "error",
+   "action": "fix",
+   "summary": "Case Study 1 dataset bullets misdescribe the variables: `lp` is labor productivity (real GDP per worker), not GDP per capita, and both variables are in dollars, not thousands of dollars.",
+   "old": "- **productivity**: Real GDP per capita (thousands of dollars)\n- **capital**: Physical capital per worker (thousands of dollars)",
+   "new": "- **productivity**: Labor productivity — real GDP per worker (dollars)\n- **capital**: Physical capital per worker (dollars)",
+   "evidence": "Exec dump cell 18: productivity mean 40,976.87, max 142,219.97; capital mean 165,853.51, max 552,395.19 — magnitudes only make sense in dollars (in thousands they would imply $40M GDP per capita). Code maps productivity = lp with comment 'labor productivity', and the case-study research question (L1876) itself says 'labor productivity and capital per worker'.",
+   "confidence": "high",
+   "id": "ch07-F30",
+   "verify_note": "Both errors real. Exec CELL 18: productivity mean 40,976.87 / max 142,219.97; capital mean 165,853.51 / max 552,395.19 -> dollars, not thousands. lp is labor productivity (GDP per worker); MEMORY confirms rgdppc is the separate per-capita variable, and code comment L1938 labels productivity = lp = 'labor productivity'. Research question L1876 says 'labor productivity and capital per worker'. Fix ('Labor productivity - real GDP per worker (dollars)' / 'Physical capital per worker (dollars)') is correct."
+  },
+  {
+   "lines": [
+    206
+   ],
+   "category": "interpretation",
+   "severity": "error",
+   "action": "fix",
+   "summary": "Model variable description says price is in thousands of dollars, but the AED_HOUSE price variable is in dollars.",
+   "old": "- $\\text{price}$ is the house sale price (in thousands of dollars)",
+   "new": "- $\\text{price}$ is the house sale price (in dollars)",
+   "evidence": "pre-verified by execution",
+   "confidence": "high",
+   "id": "ch07-F31",
+   "verify_note": "Pre-verified seed finding. Exec CELL 2: price min 204,000, max 375,000 -> dollars, not thousands of dollars. Fix to '(in dollars)' correct."
+  },
+  {
+   "lines": [
+    353,
+    358
+   ],
+   "category": "interpretation",
+   "severity": "error",
+   "action": "fix",
+   "summary": "The worked SE(b2) example labels the standard deviation of price (~37,000) as the 'standard error of regression' σ_u and uses a stale σ_x (360), producing SE ≈ 19.1 and a misleading explanation; the actual s_e is 23,551 and σ_x is 398, which give ≈ 11.0, nearly matching the true SE of 11.17.",
+   "old": "- Sample size: n = 29\n- Standard error of regression: σ_u ≈ 37,000\n- Standard deviation of size: σ_x ≈ 360\n- Estimated SE(b₂) = 37,000 / (√29 × 360) ≈ 19.1\n\n(Actual SE is 11.17, smaller because the relationship is quite strong)",
+   "new": "- Sample size: n = 29\n- Standard error of regression: s_e ≈ 23,551 (our estimate of σ_u)\n- Standard deviation of size: σ_x ≈ 398\n- Estimated SE(b₂) = 23,551 / (√29 × 398) ≈ 11.0\n\n(Very close to the actual SE of 11.17; the small gap comes from using √n rather than √(n-1) in the shortcut denominator)",
+   "evidence": "Exec dump: sd(price) = 37,390.7 (that is σ_y, not σ_u), sd(size) = 398.27, RMSE = 22,724.058 so s_e = 22,724.058×√(29/27) = 23,550.7; 23,551/(√29×398) = 10.99 vs actual SE 11.175. The 37,000 figure is the SD of the outcome, not the residual SE, so the '(smaller because the relationship is strong)' rationale misattributes the discrepancy.",
+   "confidence": "high",
+   "id": "ch07-F32",
+   "verify_note": "Duplicate of F01, same real defect and correct fix. 37,000 is sd(price)=sigma_y (mislabeled sigma_u); s_e~23,551; sigma_x=398.27 (not 360); 23,551/(sqrt(29)*398)=10.99~11.0 vs actual 11.17, gap due to sqrt(n) vs sqrt(n-1). Proposed replacement correct."
+  },
+  {
+   "lines": [
+    1957
+   ],
+   "category": "interpretation",
+   "severity": "error",
+   "action": "fix",
+   "summary": "Task 1(d)'s magnitude context for judging economic significance states average capital = 50 and productivity = 25, but the actual sample means are ~$166,000 and ~$41,000 (the variables are in dollars).",
+   "old": "d) Is the effect economically significant? (Consider that the average country has capital = 50 and productivity = 25)",
+   "new": "d) Is the effect economically significant? (Consider that the average country has capital per worker of about \\$166,000 and productivity of about \\$41,000)",
+   "evidence": "Exec dump cell 18: capital mean = 165,853.51, productivity mean = 40,976.87. The stated 50/25 are wrong even if read as thousands (would be 166/41), so students would misjudge the economic magnitude of β₂ ≈ 0.20.",
+   "confidence": "high",
+   "id": "ch07-F33",
+   "verify_note": "Exec CELL 18: capital mean 165,853.51, productivity mean 40,976.87. Stated 'capital = 50 and productivity = 25' is wrong even read as thousands (would be ~166/41). Fix to '~$166,000' capital and '~$41,000' productivity is correct and lets the economic-significance reasoning (beta2~0.20) work."
+  },
+  {
+   "lines": [
+    2639
+   ],
+   "category": "interpretation",
+   "severity": "error",
+   "action": "fix",
+   "summary": "Key Concept 7.13's practical-significance benchmark misstates the IMDS range (roughly 20 to 80) and the derived share (5 points ≈ 8% of range); the actual range is 35.7–80.2, making 5 points about 11% of the range.",
+   "old": "Since IMDS ranges from roughly 20 to 80, an effect of, say, 5 points represents about 8% of the total range",
+   "new": "Since IMDS ranges from roughly 36 to 80, an effect of, say, 5 points represents about 11% of the total range",
+   "evidence": "Exec dump cells 24 and 30: IMDS min 35.7, max 80.2, range = 44.5; 5/44.5 = 11.2%. The '8%' only follows from the incorrect 20–80 premise.",
+   "confidence": "high",
+   "id": "ch07-F34",
+   "verify_note": "Exec CELL 24/30: IMDS min 35.7, max 80.2, range 44.5. A 5-point effect = 5/44.5 = 11.2% ~ 11%, not 8%. The '8%' only follows from the wrong 20-80 (range 60) premise. Fix to 'roughly 36 to 80 ... about 11%' is correct."
+  },
+  {
+   "lines": [
+    375
+   ],
+   "category": "interpretation",
+   "severity": "error",
+   "action": "fix",
+   "summary": "The claim that SE would be 'about 2.5 times larger' if R² were 0.10 confuses variance with standard deviation; the SE scales with √(1−R²), giving a factor of about 1.5.",
+   "old": "- If R² were 0.10, SE would be about 2.5 times larger",
+   "new": "- If R² were 0.10, SE would be about 1.5 times larger",
+   "evidence": "SE(b₂) ∝ s_e ∝ √(1−R²) holding the data fixed; √((1−0.10)/(1−0.6175)) = √(0.9/0.3825) = 1.53. The 2.35 variance ratio appears to have been mistaken for the SE ratio.",
+   "confidence": "high",
+   "id": "ch07-F35",
+   "verify_note": "Duplicate of F02. SE scales with sqrt(1-R^2); sqrt((1-0.10)/(1-0.6175))=1.53~1.5, not 2.5. Fix to 'about 1.5 times larger' correct."
+  },
+  {
+   "lines": [
+    1507
+   ],
+   "category": "interpretation",
+   "severity": "error",
+   "action": "fix",
+   "summary": "Figure 7.1 y-axis is labeled 'Price ($1000s)' but the plotted price values are raw dollars (~204,000–375,000), so the units label is wrong.",
+   "old": "ax.set_ylabel('Price ($1000s)', fontsize=12)",
+   "new": "ax.set_ylabel('Price (dollars)', fontsize=12)",
+   "evidence": "Exec dump cell 2: price min 204,000, max 375,000 (dollars); the cheat-sheet figure (L1756) already labels the same axis 'House Sale Price (dollars)'.",
+   "confidence": "high",
+   "id": "ch07-F36",
+   "verify_note": "Exec CELL 2: price 204,000-375,000 (dollars); Figure 7.1 plots raw data_house['price'], so ylabel 'Price ($1000s)' is wrong. Interpretation text (L1522) and the cheat-sheet figure already use dollars. Fix to 'Price (dollars)' correct."
+  },
+  {
+   "lines": [
+    2314,
+    2315
+   ],
+   "category": "interpretation",
+   "severity": "error",
+   "action": "fix",
+   "summary": "Task 5 left-panel axis labels claim '$1000s' units but the plotted lp/kl values are raw dollars (capital up to 552,395).",
+   "old": "ax1.set_xlabel('Capital per Worker ($1000s)')\nax1.set_ylabel('Labor Productivity ($1000s)')",
+   "new": "ax1.set_xlabel('Capital per Worker (dollars)')\nax1.set_ylabel('Labor Productivity (dollars)')",
+   "evidence": "Exec dump cell 18: capital max 552,395.19, productivity max 142,219.97 — values plotted are in dollars, so '($1000s)' misstates the axis units.",
+   "confidence": "high",
+   "id": "ch07-F37",
+   "verify_note": "Exec CELL 18: capital max 552,395.19, productivity max 142,219.97; Task 5 left panel plots raw data_2014 values, so '($1000s)' axis labels are wrong. Fix to '(dollars)' correct."
+  },
+  {
+   "lines": [
+    2333,
+    2334
+   ],
+   "category": "interpretation",
+   "severity": "error",
+   "action": "fix",
+   "summary": "Task 5 right-panel axis labels claim '$1000s' units but the plotted lp/kl values are raw dollars.",
+   "old": "ax2.set_xlabel('Capital per Worker ($1000s)')\nax2.set_ylabel('Labor Productivity ($1000s)')",
+   "new": "ax2.set_xlabel('Capital per Worker (dollars)')\nax2.set_ylabel('Labor Productivity (dollars)')",
+   "evidence": "Same as left panel: exec dump cell 18 shows dollar-scale magnitudes (capital mean 165,853.51).",
+   "confidence": "high",
+   "id": "ch07-F38",
+   "verify_note": "Same as F37 for the right panel (ax2). Values plotted are dollar-scale; '($1000s)' mislabels. Fix to '(dollars)' correct. old block is unique via the ax2 prefix."
+  },
+  {
+   "lines": [
+    2393
+   ],
+   "category": "interpretation",
+   "severity": "error",
+   "action": "fix",
+   "summary": "Task 6 example opening equates labor productivity with 'GDP per capita'; the lp variable is GDP per worker.",
+   "old": "labor productivity (GDP per capita) and physical capital per worker",
+   "new": "labor productivity (GDP per worker) and physical capital per worker",
+   "evidence": "lp in the Mendez convergence dataset is labor productivity (output per worker); the dataset has a separate rgdppc variable for GDP per capita. Magnitudes in exec dump cell 18 (mean 40,977) match per-worker, not per-capita, values.",
+   "confidence": "high",
+   "id": "ch07-F39",
+   "verify_note": "lp is labor productivity = GDP per worker, not GDP per capita (separate rgdppc variable exists; code comment L1938 and research question L1876 confirm). Task 6 example opening 'labor productivity (GDP per capita)' is wrong; fix to '(GDP per worker)' correct."
+  },
+  {
+   "lines": [
+    2437
+   ],
+   "category": "interpretation",
+   "severity": "error",
+   "action": "fix",
+   "summary": "Case Study 1 'Next Steps' says Chapter 8 extends these methods to multiple regression, but ch08 is 'Case Studies for Bivariate Regression'; multiple regression is Chapters 10–11.",
+   "old": "- Chapter 8 will extend these methods to multiple regression",
+   "new": "- Chapters 10 and 11 will extend these methods to multiple regression",
+   "evidence": "Repo chapter files: ch08_Case_Studies_for_Bivariate_Regression.qmd, ch10_Data_Summary_for_Multiple_Regression.qmd, ch11_Statistical_Inference_for_Multiple_Regression.qmd. The chapter's own Case Study 2 (L2696) correctly says 'In Chapters 10-12, we extend this analysis to multiple regression'.",
+   "confidence": "high",
+   "id": "ch07-F40",
+   "verify_note": "Repo files: ch08 = Case Studies for Bivariate Regression; multiple regression is ch10 (Data Summary) and ch11 (Statistical Inference). So 'Chapter 8 will extend these methods to multiple regression' is wrong. Proposed 'Chapters 10 and 11' accurately covers multiple regression (the follow-up bullets on confounders and joint hypotheses map to ch10/ch11). Note: the sibling reference at L2696 says 'Chapters 10-12'; either phrasing is defensible, but '10 and 11' is correct."
+  },
+  {
+   "lines": [
+    1854,
+    1864
+   ],
+   "category": "interpretation",
+   "severity": "error",
+   "action": "report",
+   "summary": "Exercise 8's stated sample averages (average firm spends $10,000 on advertising, i.e. x̄=10, and has $5 million in sales, ȳ=5) are mathematically inconsistent with the given OLS output (intercept 2.5, slope 3.2), since the fitted line must pass through (x̄, ȳ): 2.5 + 3.2×10 = 34.5 ≠ 5, and the implied economic magnitude ($3.2M extra sales per $1,000 of advertising for a $5M firm) is incoherent for the part (d) economic-significance discussion.",
+   "evidence": "OLS with an intercept always satisfies ȳ = b1 + b2·x̄. With b1=2.5, b2=3.2 (y in $M, x in $K), x̄=10 implies ȳ=34.5M, contradicting the stated $5M average sales. Multiple defensible repairs exist (change the averages, the coefficients, or the units), so per the fix-vs-report boundary this needs an author decision rather than a one-line fix.",
+   "confidence": "high",
+   "id": "ch07-F41",
+   "verify_note": "Real internal inconsistency. OLS with an intercept forces ybar = b1 + b2*xbar. With b1=2.5 (millions), b2=3.2 (millions per $1000), xbar=10 -> ybar=34.5M, contradicting the stated $5M average sales; the implied $3.2M sales per $1,000 advertising is also incoherent for the part (d) economic-significance question. Multiple defensible repairs exist, so action=report is appropriate. Defect confirmed."
+  },
+  {
+   "lines": [
+    220
+   ],
+   "category": "interpretation",
+   "severity": "style",
+   "action": "fix",
+   "summary": "Headline interpretation bullet uses causal wording ('increases house price') for an observational regression; the chapter's own code output for the same coefficient uses 'is associated with'.",
+   "old": "- Each additional square foot increases house price by approximately \\$73.77",
+   "new": "- Each additional square foot is associated with approximately \\$73.77 higher house price",
+   "evidence": "Lens D rule: 'associated with' in observational settings (29 Davis houses, no causal design). Cell 3 output already prints 'each additional sq ft is associated with $73.77 higher price', so this aligns prose with the chapter's careful language.",
+   "confidence": "high",
+   "id": "ch07-F42",
+   "verify_note": "Observational cross-section (29 Davis houses, no causal design); Lens D calls for 'associated with'. The chapter's own regression output (cell 3, L248) prints 'each additional sq ft is associated with $73.77 higher price', so the fix aligns prose with the chapter's careful language while preserving the number. Correct."
+  },
+  {
+   "lines": [
+    863
+   ],
+   "category": "interpretation",
+   "severity": "style",
+   "action": "fix",
+   "summary": "The 'Economic interpretation' line asserts causally that each sq ft 'adds' $73.77 to price in an observational setting.",
+   "old": "- Economic interpretation: Each sq ft adds \\$73.77 to price",
+   "new": "- Economic interpretation: Each additional sq ft is associated with \\$73.77 higher price",
+   "evidence": "Lens D causal-discipline rule; observational cross-section with no causal design sentence.",
+   "confidence": "high",
+   "id": "ch07-F43",
+   "verify_note": "'Each sq ft adds $73.77 to price' is causal wording in an observational setting; Lens D fix to 'is associated with $73.77 higher price' aligns with the chapter's own output language. Correct."
+  },
+  {
+   "lines": [
+    1338
+   ],
+   "category": "interpretation",
+   "severity": "style",
+   "action": "fix",
+   "summary": "The model 'Example write-up' teaches students to state the observational slope causally ('increases house price'); as a template for a paper it should model association language.",
+   "old": "We find that each additional square foot increases house price by \\$73.77",
+   "new": "We find that each additional square foot is associated with a \\$73.77 higher house price",
+   "evidence": "Lens D causal-discipline rule; this sentence is explicitly framed as a professional write-up template, so causal phrasing here propagates to student writing. (CI numbers later in the same sentence are stale — [50.33, 97.21] vs executed [50.52, 97.02] — left to the results lens.)",
+   "confidence": "high",
+   "id": "ch07-F44",
+   "verify_note": "Professional write-up template teaching causal 'increases' for an observational slope; Lens D fix to 'is associated with a $73.77 higher house price' is correct and preserves the rest of the sentence. (Separately, the CI [50.33, 97.21] vs executed robust [50.52, 97.02] is a results-lens number issue, not part of this fix.)"
+  },
+  {
+   "lines": [
+    1628
+   ],
+   "category": "interpretation",
+   "severity": "style",
+   "action": "fix",
+   "summary": "Key Takeaways summary line states the observational house-price slope causally ('increases price').",
+   "old": "- Coefficient: Each additional sq ft increases price by \\$73.77",
+   "new": "- Coefficient: Each additional sq ft is associated with \\$73.77 higher price",
+   "evidence": "Lens D causal-discipline rule; aligns the Key Takeaways with the 'associated with' phrasing used in the chapter's own regression output (cell 3).",
+   "confidence": "high",
+   "id": "ch07-F45",
+   "verify_note": "Key Takeaways line 'Each additional sq ft increases price by $73.77' uses causal wording for an observational slope; Lens D fix to 'is associated with $73.77 higher price' aligns with the chapter's own output. Correct."
+  },
+  {
+   "lines": [
+    2138,
+    2138
+   ],
+   "category": "readability",
+   "severity": "error",
+   "action": "fix",
+   "summary": "Case Study 1 Task 3: the standard-vs-robust comparison table is built but never displayed because `.to_string()` is a mid-cell expression, so the output the surrounding prose promises is silently missing.",
+   "old": "comparison_df.to_string(index=False)\n\n# Percent change in SE",
+   "new": "print(comparison_df.to_string(index=False))\n\n# Percent change in SE",
+   "evidence": "Execution dump CELL 21 shows only the percent-change lines and CIs; the 7-row comparison table is absent. A mid-cell expression (not last in cell) produces no display in Jupyter.",
+   "confidence": "high",
+   "id": "ch07-F46"
+  },
+  {
+   "lines": [
+    2222,
+    2222
+   ],
+   "category": "readability",
+   "severity": "error",
+   "action": "fix",
+   "summary": "Case Study 1 Task 4: the by-income-group regression comparison table (explicitly requested in the task text at L2174) is never displayed because `.to_string()` is a mid-cell expression.",
+   "old": "# Regression Results by Income Group\ncomparison_groups.to_string(index=False)",
+   "new": "# Regression Results by Income Group\nprint(comparison_groups.to_string(index=False))",
+   "evidence": "Execution dump CELL 22 shows only the group counts and the two β₂=0.5 tests; the comparison table never appears, yet Task 4(b) says 'Create a comparison table showing β₂, robust SE, t-statistic, and p-value for each group'.",
+   "confidence": "high",
+   "id": "ch07-F47"
+  },
+  {
+   "lines": [
+    626,
+    628
+   ],
+   "category": "readability",
+   "severity": "drift",
+   "action": "report",
+   "summary": "The heading '### Example with Artificial Data' and its one-sentence lead-in (L626-628) are stranded roughly 100 lines before the code cell they introduce (L727), separated by the entire §7.4 opening and Key Concepts 7.3-7.5; the block should be moved to immediately precede the '# Example with artificial data' cell.",
+   "evidence": "L626-628 end with the lead-in, then '## 7.4 Tests of Statistical Significance' begins at L629; the artificial-data cell only appears at L727 with no adjacent lead-in. Moving a heading is a structural change beyond sentence scope (brief fix/report boundary), so reported rather than fixed; heading words would be preserved verbatim.",
+   "confidence": "high",
+   "id": "ch07-F48"
+  },
+  {
+   "lines": [
+    1106,
+    1365
+   ],
+   "category": "readability",
+   "severity": "drift",
+   "action": "report",
+   "summary": "A ~260-line robust-standard-errors lecture ('Why Robust Standard Errors Matter' + 'Comparing Standard vs Robust Standard Errors: A Practical Guide') sits inside §7.5 Two-Sided Hypothesis Tests, before §7.6, even though robust SEs are the topic of §7.7; relatedly Key Concept 7.6 (heteroskedasticity, L1025-1051) sits under §7.4.",
+   "evidence": "Section header '## 7.5 Two-Sided Hypothesis Tests' is at L1053, its code cell ends at L1104, then L1106-1365 discuss only robust SEs; '## 7.7 Robust Standard Errors' begins at L1437 and repeats the same material in condensed form. Relocating these blocks under §7.7 is a structural change beyond sentence scope, so action=report.",
+   "confidence": "high",
+   "id": "ch07-F49"
+  },
+  {
+   "lines": [
+    2340,
+    2342
+   ],
+   "category": "readability",
+   "severity": "style",
+   "action": "fix",
+   "summary": "Case Study 1 Task 5 cell is ~66 lines and bundles two independently interpretable figures (two-panel scatter with fits, then a coefficient plot); split into two cells at the figure boundary with a one-sentence lead-in for the second figure.",
+   "old": "plt.show()\n\n# Figure 2: Coefficient plot with confidence intervals",
+   "new": "plt.show()\n```\n\nThe coefficient plot below compares the full-sample, high-income, and developing-country slope estimates with 95% confidence bars — check whether each interval excludes zero and the theory value 0.5.\n\n```{python}\n# Figure 2: Coefficient plot with confidence intervals",
+   "evidence": "Cell spans L2302-2368 (>45 lines) and produces two separate figures (execution dump CELL 23 shows two figure objects), meeting the brief's split rule. Net cell-count change +1, within the ±4 budget.",
+   "confidence": "high",
+   "id": "ch07-F50"
+  },
+  {
+   "lines": [
+    225,
+    226
+   ],
+   "category": "readability",
+   "severity": "style",
+   "action": "fix",
+   "summary": "The first code cell of §7.1 (data load + describe) has no markdown lead-in; the preceding markdown ends with interpretation bullets about regression output, not the data load.",
+   "old": "```{python}\n# 7.1 Example: House price and size",
+   "new": "First, we load the AED house-price dataset and inspect its summary statistics — confirm the sample has 29 houses and that `price` and `size` are on sensible scales (dollars and square feet).\n\n```{python}\n# 7.1 Example: House price and size",
+   "evidence": "Brief Lens R rule: every non-Setup code cell needs a >=1-sentence lead-in stating what it does and what to look for. Sample size 29 confirmed in execution dump CELL 2.",
+   "confidence": "high",
+   "id": "ch07-F51"
+  },
+  {
+   "lines": [
+    232,
+    234
+   ],
+   "category": "readability",
+   "severity": "style",
+   "action": "fix",
+   "summary": "No interpretation follows the `describe()` output before the chapter jumps into the regression; add one grounding sentence.",
+   "old": "data_house.describe()\n\n```\n\n### Basic Regression: Price on Size",
+   "new": "data_house.describe()\n\n```\n\nThe sample covers 29 houses: the average sale price is about \\$253,910 and the average size about 1,883 square feet, with no implausible values in any variable.\n\n### Basic Regression: Price on Size",
+   "evidence": "Execution dump CELL 2: price mean 253,910.34, size mean 1,882.76, count 29. Brief Lens R rule: interpretation after notable output.",
+   "confidence": "high",
+   "id": "ch07-F52"
+  },
+  {
+   "lines": [
+    377,
+    378
+   ],
+   "category": "readability",
+   "severity": "style",
+   "action": "fix",
+   "summary": "The §7.2 code cell has no lead-in; the preceding markdown is a long lecture on standard errors that ends mid-topic ('SE would be about 2.5 times larger') without introducing the cell.",
+   "old": "```{python}\n# 7.2 The t statistic",
+   "new": "The cell below re-displays the regression output and then extracts the ingredients of the t-statistic for `size` — verify that $t = b_2 / \\operatorname{se}(b_2)$ reproduces the value 6.60 shown in the table.\n\n```{python}\n# 7.2 The t statistic",
+   "evidence": "Execution dump CELL 5: t = 73.7710 / 11.1749 = 6.6015. Brief Lens R lead-in rule.",
+   "confidence": "high",
+   "id": "ch07-F53"
+  },
+  {
+   "lines": [
+    516,
+    517
+   ],
+   "category": "readability",
+   "severity": "style",
+   "action": "fix",
+   "summary": "The §7.3 confidence-interval code cell has no lead-in; the preceding markdown ends with a generic bullet list about CI usefulness.",
+   "old": "```{python}\n# 7.3 Confidence intervals",
+   "new": "The cell below extracts the 95% confidence intervals directly from the fitted model — compare the `size` row with the hand calculation above, [50.84, 96.70].\n\n```{python}\n# 7.3 Confidence intervals",
+   "evidence": "Execution dump CELL 6: size CI [50.842017, 96.700064]. Brief Lens R lead-in rule.",
+   "confidence": "high",
+   "id": "ch07-F54"
+  },
+  {
+   "lines": [
+    622,
+    623
+   ],
+   "category": "readability",
+   "severity": "style",
+   "action": "fix",
+   "summary": "No interpretation follows the manual CI calculation output before the next (stranded) heading; add a sentence confirming the match with pyfixest and interpreting the margin of error.",
+   "old": "print(f\"95% CI: [${ci_lower:.4f}, ${ci_upper:.4f}]\")\n```",
+   "new": "print(f\"95% CI: [${ci_lower:.4f}, ${ci_upper:.4f}]\")\n```\n\nThe manual calculation matches pyfixest's `confint()` output exactly: the margin of error $2.052 \\times 11.17 \\approx 22.93$ yields the interval $[50.84, 96.70]$, a spread of roughly \\$46 per square foot around the point estimate.",
+   "evidence": "Execution dump CELL 7: t_crit 2.0518, margin 22.9290, CI [50.8420, 96.7001]. Brief Lens R interpretation rule.",
+   "confidence": "high",
+   "id": "ch07-F55"
+  },
+  {
+   "lines": [
+    748,
+    749
+   ],
+   "category": "readability",
+   "severity": "style",
+   "action": "fix",
+   "summary": "The artificial-data cell's output (a very wide CI from n=5) gets no interpretation, missing the pedagogical payoff of the small-sample example.",
+   "old": "print(f\"95% CI: [{ci_lower_art:.4f}, {ci_upper_art:.4f}]\")\n```",
+   "new": "print(f\"95% CI: [{ci_lower_art:.4f}, {ci_upper_art:.4f}]\")\n```\n\nWith only $n = 5$ observations, the degrees of freedom drop to 3 and the critical value jumps to $t_{3,\\,0.025} = 3.182$, so the 95% interval $[0.03, 0.77]$ is very wide relative to the slope estimate of 0.40 — a concrete illustration of how small samples inflate the margin of error.",
+   "evidence": "Execution dump CELL 8: slope 0.4000, SE 0.1155, CI [0.0325, 0.7675]; stats.t.ppf(0.975, 3) = 3.182. Brief Lens R interpretation rule.",
+   "confidence": "high",
+   "id": "ch07-F56"
+  },
+  {
+   "lines": [
+    1012,
+    1013
+   ],
+   "category": "readability",
+   "severity": "style",
+   "action": "fix",
+   "summary": "The §7.4 significance-test code cell has no lead-in; the preceding markdown is a long two-sided vs one-sided lecture ending with an unrelated decision rule.",
+   "old": "```{python}\n# 7.4 Tests of statistical significance",
+   "new": "Back to the house-price data: the next cell carries out the test of statistical significance for `size`, checking both decision rules — the p-value against $\\alpha = 0.05$ and $|t|$ against the critical value 2.052.\n\n```{python}\n# 7.4 Tests of statistical significance",
+   "evidence": "Execution dump CELL 9: t 6.6015, critical value ±2.0518, reject H₀. Brief Lens R lead-in rule.",
+   "confidence": "high",
+   "id": "ch07-F57"
+  },
+  {
+   "lines": [
+    1367,
+    1368
+   ],
+   "category": "readability",
+   "severity": "style",
+   "action": "fix",
+   "summary": "The manual t-statistic recap cell has no lead-in — it appears abruptly after the seatbelt analogy that closes the robust-SE lecture, and it duplicates the §7.5 test without explanation.",
+   "old": "```{python}\n# Hypothesis test using manual t-statistic (pyfixest)",
+   "new": "As a compact recap, the next cell repeats the $H_0: \\beta_2 = 90$ test in three lines, pulling the coefficient and standard error directly from the fitted model object — the t-statistic and p-value match the Section 7.5 results.\n\n```{python}\n# Hypothesis test using manual t-statistic (pyfixest)",
+   "evidence": "Execution dump CELL 11 reproduces CELL 10's values (t = -1.4523, p = 0.1580) with no connecting prose; preceding markdown (L1358-1365) is about robust SEs, unrelated to this cell. Brief Lens R lead-in rule.",
+   "confidence": "high",
+   "id": "ch07-F58"
+  },
+  {
+   "lines": [
+    1469,
+    1470
+   ],
+   "category": "readability",
+   "severity": "style",
+   "action": "fix",
+   "summary": "The §7.7 robust-SE code cell lacks a direct lead-in telling the reader what the comparison table shows and what to look for.",
+   "old": "```{python}\n# 7.7 Robust standard errors",
+   "new": "The cell below re-estimates the same regression with `vcov='HC1'` and collects classical and robust standard errors side by side — for these data the robust SE on `size` (11.33) barely differs from the classical one (11.17).\n\n```{python}\n# 7.7 Robust standard errors",
+   "evidence": "Execution dump CELL 13: size SE 11.1749 (classical) vs 11.3297 (robust). Preceding §7.7 markdown ends with a generic bullet list on other robust SE types, not a cell introduction. Brief Lens R lead-in rule.",
+   "confidence": "medium",
+   "id": "ch07-F59"
+  },
+  {
+   "lines": [
+    1486,
+    1488
+   ],
+   "category": "readability",
+   "severity": "style",
+   "action": "fix",
+   "summary": "The 'Full Regression Output with Robust Standard Errors' heading is followed immediately by code with no lead-in sentence.",
+   "old": "### Full Regression Output with Robust Standard Errors\n\n```{python}",
+   "new": "### Full Regression Output with Robust Standard Errors\n\nThe full summary now reports `Inference: HC1`: the coefficients are identical to the classical fit — only the standard errors, t-statistics, and confidence intervals change.\n\n```{python}",
+   "evidence": "Execution dump CELL 14 shows 'Inference: HC1' with identical coefficients (115017.283, 73.771) and different SEs/CIs. Brief Lens R lead-in rule.",
+   "confidence": "high",
+   "id": "ch07-F60"
+  },
+  {
+   "lines": [
+    1929,
+    1930
+   ],
+   "category": "readability",
+   "severity": "style",
+   "action": "fix",
+   "summary": "The Case Study 1 data-loading cell has no lead-in; it follows directly after the Key Concept 7.7 blockquote.",
+   "old": "```{python}\n# Case study: Testing convergence hypotheses",
+   "new": "We load the convergence-clubs data, keep the 2014 cross-section, and construct the productivity and capital variables — the summary statistics reveal enormous dispersion across the 108 countries, a first hint that heteroskedasticity may matter later.\n\n```{python}\n# Case study: Testing convergence hypotheses",
+   "evidence": "Execution dump CELL 18: 'Sample: 108 countries in 2014' with productivity std 33,853 vs mean 40,977. Brief Lens R lead-in rule.",
+   "confidence": "high",
+   "id": "ch07-F61"
+  },
+  {
+   "lines": [
+    2238,
+    2238
+   ],
+   "category": "readability",
+   "severity": "style",
+   "action": "fix",
+   "summary": "Case Study 1 Task 4 cell ends with a dangling scaffold comment '# Interpretation' followed by nothing — leftover placeholder that confuses readers.",
+   "old": "print(f\"  Conclusion: Fail to reject H₀. Data consistent with β₂ = 0.5\")\n\n# Interpretation\n```",
+   "new": "print(f\"  Conclusion: Fail to reject H₀. Data consistent with β₂ = 0.5\")\n```",
+   "evidence": "L2238 is a bare '# Interpretation' comment as the last line of the cell with no content after it; execution dump CELL 22 confirms it contributes nothing.",
+   "confidence": "high",
+   "id": "ch07-F62"
+  },
+  {
+   "lines": [
+    1587,
+    1589
+   ],
+   "category": "format",
+   "severity": "style",
+   "action": "fix",
+   "summary": "Redundant '**Key Takeaways:**' bold line sits directly under the '## Key Takeaways' heading and should be deleted.",
+   "old": "## Key Takeaways\n\n**Key Takeaways:**\n\n1. **The t-statistic**",
+   "new": "## Key Takeaways\n\n1. **The t-statistic**",
+   "evidence": "Normalization table row in audit brief: 'Redundant **Key Takeaways:** bold line right under ## Key Takeaways -> delete' applies to ch07.",
+   "confidence": "high",
+   "id": "ch07-F63"
+  },
+  {
+   "lines": [
+    41,
+    41
+   ],
+   "category": "format",
+   "severity": "style",
+   "action": "fix",
+   "summary": "Header says 'Datasets used' (plural) but only one dataset (AED_HOUSE.DTA) is listed; singular required per grammatical-agreement rule.",
+   "old": "**Datasets used:**",
+   "new": "**Dataset used:**",
+   "evidence": "Brief rule: 'Dataset(s) used: grammatical agreement (singular iff one dataset)'. ch07 front matter lists only AED_HOUSE.DTA; ch01 uses the singular form for the same single-dataset case. Front-matter convention across chapters lists only AED datasets (case-study datasets are not listed), so the list of one is intentional.",
+   "confidence": "high",
+   "id": "ch07-F64"
+  },
+  {
+   "lines": [
+    52,
+    56
+   ],
+   "category": "format",
+   "severity": "drift",
+   "action": "fix",
+   "summary": "Chapter outline lists '7.8 Case Studies' before Key Takeaways/Practice Exercises, but the actual document has an unnumbered '## Case Studies' section placed after Practice Exercises.",
+   "old": "- 7.7 Robust Standard Errors\n- 7.8 Case Studies\n- Key Takeaways\n- Practice Exercises",
+   "new": "- 7.7 Robust Standard Errors\n- Key Takeaways\n- Practice Exercises\n- Case Studies",
+   "evidence": "Actual section order in the .qmd: ## 7.7 (L1437), ## Key Takeaways (L1587), ## Practice Exercises (L1784), ## Case Studies (L1870, unnumbered). Outline should mirror the document; heading words untouched.",
+   "confidence": "medium",
+   "id": "ch07-F65"
+  },
+  {
+   "lines": [
+    625,
+    629
+   ],
+   "category": "format",
+   "severity": "drift",
+   "action": "report",
+   "summary": "H3 '### Example with Artificial Data' at L625 is a stranded, contentless section: its one-sentence lead-in is immediately followed by '## 7.4', while the artificial-data code cell it introduces actually appears later inside section 7.4 (L727-749).",
+   "evidence": "Heading-hierarchy sanity check: L625-627 contain only the heading and lead-in sentence, then L629 starts '## 7.4 Tests of Statistical Significance'; the matching code cell ('# Example with artificial data', L727) sits after Key Concepts 7.3-7.5 within 7.4. Fix requires moving the heading+lead-in (or the cell), a structural change beyond sentence scope, so report rather than fix.",
+   "confidence": "high",
+   "id": "ch07-F66"
+  },
+  {
+   "lines": [
+    399,
+    400
+   ],
+   "category": "format",
+   "severity": "error",
+   "action": "fix",
+   "summary": "Key Concept 7.1: blockquote list lacks blank '>' line before it, so it renders as run-on paragraph text in the book.",
+   "old": "> **Key properties:**\n> - Bell-shaped and symmetric (like the normal distribution)",
+   "new": "> **Key properties:**\n>\n> - Bell-shaped and symmetric (like the normal distribution)",
+   "evidence": "Pandoc blank-line-before-list rule; rendered book HTML shows '<p><strong>Key properties:</strong> - Bell-shaped and symmetric ... - Heavier tails ...</p>' as one paragraph (book/_book/notebooks_quarto/ch07_...html).",
+   "confidence": "high",
+   "id": "ch07-F67"
+  },
+  {
+   "lines": [
+    405,
+    406
+   ],
+   "category": "format",
+   "severity": "error",
+   "action": "fix",
+   "summary": "Key Concept 7.1: 'Degrees of freedom' blockquote list lacks blank '>' line and renders as run-on paragraph.",
+   "old": "> **Degrees of freedom = n - 2** for bivariate regression:\n> - Start with n observations",
+   "new": "> **Degrees of freedom = n - 2** for bivariate regression:\n>\n> - Start with n observations",
+   "evidence": "Pandoc blank-line rule; rendered HTML shows 'Degrees of freedom = n - 2 for bivariate regression: - Start with n observations - Estimate ...' as one paragraph.",
+   "confidence": "high",
+   "id": "ch07-F68"
+  },
+  {
+   "lines": [
+    450,
+    451
+   ],
+   "category": "format",
+   "severity": "error",
+   "action": "fix",
+   "summary": "Key Concept 7.2: 'Common misconceptions' blockquote list lacks blank '>' line and renders as run-on paragraph.",
+   "old": "> **Common misconceptions:**\n> - WRONG: \"There's a 95% probability that β₂ is in this interval\"",
+   "new": "> **Common misconceptions:**\n>\n> - WRONG: \"There's a 95% probability that β₂ is in this interval\"",
+   "evidence": "Pandoc blank-line rule; same run-on rendering pattern verified in rendered book HTML for sibling blocks. (WRONG wording itself is intentional misconception pedagogy per brief - only formatting is changed.)",
+   "confidence": "high",
+   "id": "ch07-F69"
+  },
+  {
+   "lines": [
+    454,
+    455
+   ],
+   "category": "format",
+   "severity": "error",
+   "action": "fix",
+   "summary": "Key Concept 7.2: 'Practical interpretation' blockquote list lacks blank '>' line and renders as run-on paragraph.",
+   "old": "> **Practical interpretation:**\n> - The interval represents our uncertainty about the true parameter value",
+   "new": "> **Practical interpretation:**\n>\n> - The interval represents our uncertainty about the true parameter value",
+   "evidence": "Pandoc blank-line rule; run-on rendering verified in rendered book HTML for this pattern.",
+   "confidence": "high",
+   "id": "ch07-F70"
+  },
+  {
+   "lines": [
+    659,
+    660
+   ],
+   "category": "format",
+   "severity": "error",
+   "action": "fix",
+   "summary": "Key Concept 7.3: step-1 blockquote list lacks blank '>' line and renders as run-on paragraph.",
+   "old": "> **1. State the hypotheses:**\n> - **Null hypothesis (H₀)**: The claim we're testing (usually \"no effect\")",
+   "new": "> **1. State the hypotheses:**\n>\n> - **Null hypothesis (H₀)**: The claim we're testing (usually \"no effect\")",
+   "evidence": "Pandoc blank-line rule; run-on rendering verified in rendered book HTML for this pattern.",
+   "confidence": "high",
+   "id": "ch07-F71"
+  },
+  {
+   "lines": [
+    663,
+    664
+   ],
+   "category": "format",
+   "severity": "error",
+   "action": "fix",
+   "summary": "Key Concept 7.3: step-2 blockquote list lacks blank '>' line and renders as run-on paragraph.",
+   "old": "> **2. Choose significance level (α):**\n> - Common choices: 0.10, 0.05, 0.01",
+   "new": "> **2. Choose significance level (α):**\n>\n> - Common choices: 0.10, 0.05, 0.01",
+   "evidence": "Pandoc blank-line rule; run-on rendering verified in rendered book HTML for this pattern.",
+   "confidence": "high",
+   "id": "ch07-F72"
+  },
+  {
+   "lines": [
+    667,
+    668
+   ],
+   "category": "format",
+   "severity": "error",
+   "action": "fix",
+   "summary": "Key Concept 7.3: step-3 blockquote list lacks blank '>' line and renders as run-on paragraph.",
+   "old": "> **3. Calculate test statistic:**\n> - Standardizes the difference: t = (estimate - null value) / SE",
+   "new": "> **3. Calculate test statistic:**\n>\n> - Standardizes the difference: t = (estimate - null value) / SE",
+   "evidence": "Pandoc blank-line rule; run-on rendering verified in rendered book HTML for this pattern.",
+   "confidence": "high",
+   "id": "ch07-F73"
+  },
+  {
+   "lines": [
+    670,
+    671
+   ],
+   "category": "format",
+   "severity": "error",
+   "action": "fix",
+   "summary": "Key Concept 7.3: step-4 blockquote list lacks blank '>' line and renders as run-on paragraph.",
+   "old": "> **4. Determine p-value:**\n> - Probability of observing our result (or more extreme) if H₀ is true",
+   "new": "> **4. Determine p-value:**\n>\n> - Probability of observing our result (or more extreme) if H₀ is true",
+   "evidence": "Pandoc blank-line rule; run-on rendering verified in rendered book HTML for this pattern.",
+   "confidence": "high",
+   "id": "ch07-F74"
+  },
+  {
+   "lines": [
+    674,
+    675
+   ],
+   "category": "format",
+   "severity": "error",
+   "action": "fix",
+   "summary": "Key Concept 7.3: step-5 blockquote list lacks blank '>' line and renders as run-on paragraph.",
+   "old": "> **5. Make decision:**\n> - Reject H₀ if p-value < α",
+   "new": "> **5. Make decision:**\n>\n> - Reject H₀ if p-value < α",
+   "evidence": "Pandoc blank-line rule; run-on rendering verified in rendered book HTML for this pattern.",
+   "confidence": "high",
+   "id": "ch07-F75"
+  },
+  {
+   "lines": [
+    684,
+    685
+   ],
+   "category": "format",
+   "severity": "error",
+   "action": "fix",
+   "summary": "Key Concept 7.4: 'Statistical Significance' blockquote list lacks blank '>' line and renders as run-on paragraph.",
+   "old": "> **Statistical Significance:**\n> - **Question:** Is the effect different from zero?",
+   "new": "> **Statistical Significance:**\n>\n> - **Question:** Is the effect different from zero?",
+   "evidence": "Pandoc blank-line rule; rendered HTML shows 'Statistical Significance: - Question: ... - Determined by: ...' as one paragraph.",
+   "confidence": "high",
+   "id": "ch07-F76"
+  },
+  {
+   "lines": [
+    689,
+    690
+   ],
+   "category": "format",
+   "severity": "error",
+   "action": "fix",
+   "summary": "Key Concept 7.4: 'Economic Significance' blockquote list lacks blank '>' line and renders as run-on paragraph.",
+   "old": "> **Economic Significance:**\n> - **Question:** Is the effect large enough to matter in practice?",
+   "new": "> **Economic Significance:**\n>\n> - **Question:** Is the effect large enough to matter in practice?",
+   "evidence": "Pandoc blank-line rule; run-on rendering verified in rendered book HTML.",
+   "confidence": "high",
+   "id": "ch07-F77"
+  },
+  {
+   "lines": [
+    694,
+    695
+   ],
+   "category": "format",
+   "severity": "error",
+   "action": "fix",
+   "summary": "Key Concept 7.4: 'Why they can diverge' blockquote numbered list lacks blank '>' line and renders as run-on paragraph.",
+   "old": "> **Why they can diverge:**\n> 1. **Large n:** Even tiny effects become statistically significant",
+   "new": "> **Why they can diverge:**\n>\n> 1. **Large n:** Even tiny effects become statistically significant",
+   "evidence": "Rendered HTML shows '<p><strong>Why they can diverge:</strong> 1. Large n: ... - Example: ... 2. Small n: ...</p>' as one run-on paragraph (verified).",
+   "confidence": "high",
+   "id": "ch07-F78"
+  },
+  {
+   "lines": [
+    706,
+    707
+   ],
+   "category": "format",
+   "severity": "error",
+   "action": "fix",
+   "summary": "Key Concept 7.5: 'Two-Sided Test' blockquote list lacks blank '>' line and renders as run-on paragraph.",
+   "old": "> **Two-Sided Test (Most Common):**\n> - H₀: β₂ = β₂* vs. Hₐ: β₂ ≠ β₂*",
+   "new": "> **Two-Sided Test (Most Common):**\n>\n> - H₀: β₂ = β₂* vs. Hₐ: β₂ ≠ β₂*",
+   "evidence": "Pandoc blank-line rule; run-on rendering verified in rendered book HTML for this pattern.",
+   "confidence": "high",
+   "id": "ch07-F79"
+  },
+  {
+   "lines": [
+    712,
+    713
+   ],
+   "category": "format",
+   "severity": "error",
+   "action": "fix",
+   "summary": "Key Concept 7.5: 'One-Sided Test' blockquote list lacks blank '>' line and renders as run-on paragraph.",
+   "old": "> **One-Sided Test (Directional):**\n> - Upper: H₀: β₂ ≤ β₂* vs. Hₐ: β₂ > β₂*",
+   "new": "> **One-Sided Test (Directional):**\n>\n> - Upper: H₀: β₂ ≤ β₂* vs. Hₐ: β₂ > β₂*",
+   "evidence": "Pandoc blank-line rule; run-on rendering verified in rendered book HTML for this pattern.",
+   "confidence": "high",
+   "id": "ch07-F80"
+  },
+  {
+   "lines": [
+    720,
+    721
+   ],
+   "category": "format",
+   "severity": "error",
+   "action": "fix",
+   "summary": "Key Concept 7.5: 'When to use one-sided tests' blockquote list lacks blank '>' line and renders as run-on paragraph.",
+   "old": "> **When to use one-sided tests:**\n> - Strong theoretical prediction of direction (before seeing data)",
+   "new": "> **When to use one-sided tests:**\n>\n> - Strong theoretical prediction of direction (before seeing data)",
+   "evidence": "Pandoc blank-line rule; run-on rendering verified in rendered book HTML for this pattern.",
+   "confidence": "high",
+   "id": "ch07-F81"
+  },
+  {
+   "lines": [
+    1031,
+    1032
+   ],
+   "category": "format",
+   "severity": "error",
+   "action": "fix",
+   "summary": "Key Concept 7.6: 'Why heteroskedasticity matters' blockquote list lacks blank '>' line and renders as run-on paragraph.",
+   "old": "> **Why heteroskedasticity matters:**\n> - Coefficient estimates (b₂): Still unbiased ",
+   "new": "> **Why heteroskedasticity matters:**\n>\n> - Coefficient estimates (b₂): Still unbiased ",
+   "evidence": "Pandoc blank-line rule; run-on rendering verified in rendered book HTML. Note: 'old' preserves the trailing space present in the source line.",
+   "confidence": "high",
+   "id": "ch07-F82"
+  },
+  {
+   "lines": [
+    1036,
+    1037
+   ],
+   "category": "format",
+   "severity": "error",
+   "action": "fix",
+   "summary": "Key Concept 7.6: 'Solution' blockquote list lacks blank '>' line and renders as run-on paragraph.",
+   "old": "> **Solution: Heteroskedasticity-robust standard errors**\n> - Valid whether or not heteroskedasticity exists",
+   "new": "> **Solution: Heteroskedasticity-robust standard errors**\n>\n> - Valid whether or not heteroskedasticity exists",
+   "evidence": "Pandoc blank-line rule; run-on rendering verified in rendered book HTML for this pattern.",
+   "confidence": "high",
+   "id": "ch07-F83"
+  },
+  {
+   "lines": [
+    1041,
+    1042
+   ],
+   "category": "format",
+   "severity": "error",
+   "action": "fix",
+   "summary": "Key Concept 7.6: 'Practical impact' blockquote list lacks blank '>' line and renders as run-on paragraph.",
+   "old": "> **Practical impact:**\n> - Robust SEs usually larger → more conservative inference",
+   "new": "> **Practical impact:**\n>\n> - Robust SEs usually larger → more conservative inference",
+   "evidence": "Pandoc blank-line rule; run-on rendering verified in rendered book HTML for this pattern.",
+   "confidence": "high",
+   "id": "ch07-F84"
+  },
+  {
+   "lines": [
+    1046,
+    1047
+   ],
+   "category": "format",
+   "severity": "error",
+   "action": "fix",
+   "summary": "Key Concept 7.6: 'Types of robust SEs' blockquote list lacks blank '>' line and renders as run-on paragraph.",
+   "old": "> **Types of robust SEs:**\n> - **HC (Heteroskedasticity-Consistent):** Cross-sectional data",
+   "new": "> **Types of robust SEs:**\n>\n> - **HC (Heteroskedasticity-Consistent):** Cross-sectional data",
+   "evidence": "Pandoc blank-line rule; run-on rendering verified in rendered book HTML for this pattern.",
+   "confidence": "high",
+   "id": "ch07-F85"
+  },
+  {
+   "lines": [
+    1911,
+    1912
+   ],
+   "category": "format",
+   "severity": "error",
+   "action": "fix",
+   "summary": "Key Concept 7.7: 'Absolute convergence' blockquote list lacks blank '>' line and renders as run-on paragraph.",
+   "old": "> **Absolute convergence:**\n> - All countries converge to the same income level",
+   "new": "> **Absolute convergence:**\n>\n> - All countries converge to the same income level",
+   "evidence": "Pandoc blank-line rule; run-on rendering verified in rendered book HTML for this pattern.",
+   "confidence": "high",
+   "id": "ch07-F86"
+  },
+  {
+   "lines": [
+    1916,
+    1917
+   ],
+   "category": "format",
+   "severity": "error",
+   "action": "fix",
+   "summary": "Key Concept 7.7: 'Conditional convergence' blockquote list lacks blank '>' line and renders as run-on paragraph.",
+   "old": "> **Conditional convergence:**  \n> - Countries converge to their own steady states",
+   "new": "> **Conditional convergence:**  \n>\n> - Countries converge to their own steady states",
+   "evidence": "Pandoc blank-line rule; run-on rendering verified in rendered book HTML. Note: anchor line ends with two trailing spaces in the source, preserved in old/new.",
+   "confidence": "high",
+   "id": "ch07-F87"
+  },
+  {
+   "lines": [
+    1921,
+    1922
+   ],
+   "category": "format",
+   "severity": "error",
+   "action": "fix",
+   "summary": "Key Concept 7.7: 'Testing convergence hypotheses' blockquote list lacks blank '>' line and renders as run-on paragraph.",
+   "old": "> **Testing convergence hypotheses:**\n> - Requires careful hypothesis formulation",
+   "new": "> **Testing convergence hypotheses:**\n>\n> - Requires careful hypothesis formulation",
+   "evidence": "Pandoc blank-line rule; run-on rendering verified in rendered book HTML for this pattern.",
+   "confidence": "high",
+   "id": "ch07-F88"
+  },
+  {
+   "lines": [
+    2069,
+    2070
+   ],
+   "category": "format",
+   "severity": "error",
+   "action": "fix",
+   "summary": "Key Concept 7.8: 'What p-values tell you' blockquote list lacks blank '>' line and renders as run-on paragraph (the adjacent 'Common p-value thresholds' list has the blank '>' line and renders correctly, confirming the fix).",
+   "old": "> **What p-values tell you:**\n> - p = 0.001: Very strong evidence against H₀ (occurs 0.1% of the time if H₀ true)",
+   "new": "> **What p-values tell you:**\n>\n> - p = 0.001: Very strong evidence against H₀ (occurs 0.1% of the time if H₀ true)",
+   "evidence": "Rendered HTML: 'What p-values tell you: - p = 0.001: ...' is one run-on paragraph, while 'Common p-value thresholds' (which has '>' blank line at L2074) renders as a proper <ul> (verified).",
+   "confidence": "high",
+   "id": "ch07-F89"
+  },
+  {
+   "lines": [
+    2081,
+    2082
+   ],
+   "category": "format",
+   "severity": "error",
+   "action": "fix",
+   "summary": "Key Concept 7.8: 'Critical insights' blockquote numbered list lacks blank '>' line and renders as run-on paragraph.",
+   "old": "> **Critical insights:**\n> 1. **Arbitrary thresholds:** The 0.05 cutoff is convention, not law",
+   "new": "> **Critical insights:**\n>\n> 1. **Arbitrary thresholds:** The 0.05 cutoff is convention, not law",
+   "evidence": "Rendered HTML shows 'Critical insights: 1. Arbitrary thresholds: ... 2. p-values ≠ importance: ...' as one run-on paragraph (verified).",
+   "confidence": "high",
+   "id": "ch07-F90"
+  },
+  {
+   "lines": [
+    2247,
+    2248
+   ],
+   "category": "format",
+   "severity": "error",
+   "action": "fix",
+   "summary": "Key Concept 7.9: item-1 blockquote list lacks blank '>' line and renders as run-on paragraph.",
+   "old": "> **1. Rejecting H₀: β₂ = 0 (statistical significance)**\n> - Statistical: \"Capital has a statistically significant effect on productivity\"",
+   "new": "> **1. Rejecting H₀: β₂ = 0 (statistical significance)**\n>\n> - Statistical: \"Capital has a statistically significant effect on productivity\"",
+   "evidence": "Pandoc blank-line rule; run-on rendering verified in rendered book HTML for KC 7.9 blocks.",
+   "confidence": "high",
+   "id": "ch07-F91"
+  },
+  {
+   "lines": [
+    2252,
+    2253
+   ],
+   "category": "format",
+   "severity": "error",
+   "action": "fix",
+   "summary": "Key Concept 7.9: item-2 blockquote list lacks blank '>' line and renders as run-on paragraph.",
+   "old": "> **2. Rejecting H₀: β₂ = 0.5 (testing theory predictions)**  \n> - Statistical: \"The coefficient differs significantly from 0.5\"",
+   "new": "> **2. Rejecting H₀: β₂ = 0.5 (testing theory predictions)**  \n>\n> - Statistical: \"The coefficient differs significantly from 0.5\"",
+   "evidence": "Pandoc blank-line rule; run-on rendering verified in rendered book HTML. Note: anchor line ends with two trailing spaces in the source, preserved in old/new.",
+   "confidence": "high",
+   "id": "ch07-F92"
+  },
+  {
+   "lines": [
+    2257,
+    2258
+   ],
+   "category": "format",
+   "severity": "error",
+   "action": "fix",
+   "summary": "Key Concept 7.9: item-3 blockquote list lacks blank '>' line and renders as run-on paragraph.",
+   "old": "> **3. Failing to reject H₀ (no statistical significance)**\n> - Statistical: \"Cannot rule out β₂ = 0 (or other null value)\"",
+   "new": "> **3. Failing to reject H₀ (no statistical significance)**\n>\n> - Statistical: \"Cannot rule out β₂ = 0 (or other null value)\"",
+   "evidence": "Rendered HTML shows this block including its nested sub-items as one run-on paragraph (verified: '...Cannot rule out β₂ = 0 ... - Effect truly absent - Effect present but sample too small...').",
+   "confidence": "high",
+   "id": "ch07-F93"
+  },
+  {
+   "lines": [
+    2265,
+    2266
+   ],
+   "category": "format",
+   "severity": "error",
+   "action": "fix",
+   "summary": "Key Concept 7.9: item-4 blockquote list lacks blank '>' line and renders as run-on paragraph.",
+   "old": "> **4. Heterogeneity across groups**\n> - If β₂(high-income) > β₂(developing): Capital complementary with other factors more abundant in rich countries (technology, institutions, human capital)",
+   "new": "> **4. Heterogeneity across groups**\n>\n> - If β₂(high-income) > β₂(developing): Capital complementary with other factors more abundant in rich countries (technology, institutions, human capital)",
+   "evidence": "Rendered HTML shows '4. Heterogeneity across groups - If β₂(high-income) ...' as one run-on paragraph (verified).",
+   "confidence": "high",
+   "id": "ch07-F94"
+  },
+  {
+   "lines": [
+    2269,
+    2270
+   ],
+   "category": "format",
+   "severity": "error",
+   "action": "fix",
+   "summary": "Key Concept 7.9: 'Best practices' blockquote numbered list lacks blank '>' line and renders as run-on paragraph.",
+   "old": "> **Best practices for economic interpretation:**\n> 1. Report point estimates, not just significance",
+   "new": "> **Best practices for economic interpretation:**\n>\n> 1. Report point estimates, not just significance",
+   "evidence": "Rendered HTML shows 'Best practices for economic interpretation: 1. Report point estimates ... 5. Link findings ...' as one run-on paragraph (verified).",
+   "confidence": "high",
+   "id": "ch07-F95"
+  },
+  {
+   "lines": [
+    496,
+    506
+   ],
+   "category": "format",
+   "severity": "style",
+   "action": "report",
+   "summary": "Sub-bullets indented with only 1 space under numbered list items render as separate flat top-level lists instead of nested sub-lists (numbering survives via start attributes, but nesting is lost).",
+   "evidence": "Rendered HTML shows e.g. '<ol><li><strong>Confidence level (1-α)</strong>...</li></ol><ul><li>90% CI: ...</li></ul><ol start=\"2\">...' — split, un-nested lists. Same pattern at L496-506, L1127-1129, L1176-1190, L1217-1223, L1305-1318, L1343-1356. Proper fix is re-indenting each sub-bullet to 4 spaces; reported (not fixed) because rendering is visually acceptable and the change spans ~40 lines across 6 blocks.",
+   "confidence": "high",
+   "id": "ch07-F96"
+  },
+  {
+   "lines": [
+    1947,
+    2622
+   ],
+   "category": "format",
+   "severity": "style",
+   "action": "report",
+   "summary": "Case-study Task headings use H3 ('### Task N ...'), making each task a sibling of its parent '### Case Study N' heading rather than a child; Case Study 2 also mixes an H4 ('#### Load the DS4Bolivia Data', L2460) between H3 siblings, so the heading hierarchy is inconsistent.",
+   "evidence": "Heading-hierarchy sanity check: '### Case Study 1' (L1872) and '### Case Study 2' (L2445) are followed by '### Task 1..6' at the same level (L1947, L1983, L2090, L2159, L2276, L2370; L2482, L2513, L2537, L2570, L2608, L2641); project memory notes the chapter-standard verify script expects '#### Task N' (H4). Demoting 12+ headings is a structural change and web-app deep links derive from heading text, so reported for a coordinated decision rather than fixed here.",
+   "confidence": "medium",
+   "id": "ch07-F97"
+  }
+ ],
+ "killed": []
+}

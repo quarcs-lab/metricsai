@@ -1,0 +1,1033 @@
+{
+ "chapter": "ch10",
+ "file": "ch10_Data_Summary_for_Multiple_Regression.qmd",
+ "findings": [
+  {
+   "lines": [
+    592,
+    612
+   ],
+   "category": "methods",
+   "severity": "error",
+   "action": "report",
+   "summary": "The VIF demonstration computes uncentered VIFs (design matrix passed to statsmodels variance_inflation_factor without an intercept), so the executed output reports 'Warning: Maximum VIF = 57.82 indicates multicollinearity issues' — contradicting the chapter's own glossary claim at line 148 that 'the actual six predictors in the Davis dataset show only moderate VIFs' and misapplying the centered-VIF rule of thumb (VIF>5 moderate, VIF>10 severe) taught in Key Concept 10.8.",
+   "evidence": "Execution dump CELL 13: 'Warning: Maximum VIF = 57.82 indicates multicollinearity issues.' Recomputed on AED_HOUSE.DTA: uncentered VIFs (as chapter code) = size 40.13, bedrooms 57.82, bathrooms 34.74, lotsize 11.97, age 21.02, monthsold 12.80; correct centered VIFs (with sm.add_constant) = 1.69, 1.73, 1.30, 1.13, 1.18, 1.57 (max 1.73 — no multicollinearity, consistent with pairwise correlations ~0.5 and with L148's claim). Fixing the code flips the stated conclusion of the cell's output (warning branch -> 'Good: no serious multicollinearity') and invalidates Exercise 5's numbers, so per the fix-vs-report boundary this is action=report. Suggested repair (for Phase 2): add a constant column before computing VIF and report VIFs only for the non-constant regressors.",
+   "confidence": "high",
+   "id": "ch10-F01",
+   "verify_note": "Recomputed: chapter code (X without add_constant) yields uncentered VIFs max 57.82, matching dump CELL 13's warning; centered VIFs max ~1.73. Genuine bug — contradicts L148 and KC 10.8's stated formula. action=report justified (flips conclusion, invalidates Exercise 5); proposed repair (add constant, report only non-constant regressors) is correct."
+  },
+  {
+   "lines": [
+    978,
+    993
+   ],
+   "category": "methods",
+   "severity": "error",
+   "action": "report",
+   "summary": "Exercise 5's VIF table (Size 40.1, Bedrooms 57.8, Bathrooms 34.7, Age 21.0) reproduces the miscomputed uncentered VIFs from the chapter's flawed code cell, teaching students that a house-price regression like the chapter's exhibits 'the most severe multicollinearity' when the correctly computed centered VIFs for these data are all below 2.",
+   "evidence": "Table values exactly match the uncentered VIFs from the chapter's code (40.13, 57.82, 34.74, 21.02 per recomputation; dump CELL 13 max = 57.82). Centered VIFs on the same data: size 1.69, bedrooms 1.73, bathrooms 1.30, age 1.18. If the VIF code is corrected (see companion finding), this exercise's premise numbers must be replaced (e.g., with a clearly hypothetical dataset) — a content rework beyond one-sentence scope, hence action=report.",
+   "confidence": "high",
+   "id": "ch10-F02",
+   "verify_note": "Exercise 5 table (40.1/57.8/34.7/21.0) matches the chapter's miscomputed uncentered VIFs exactly (40.13/57.82/34.74/21.02); centered VIFs on same data are all <2. Real defect requiring rework; action=report appropriate."
+  },
+  {
+   "lines": [
+    373,
+    373
+   ],
+   "category": "methods",
+   "severity": "style",
+   "action": "fix",
+   "summary": "Chapter 10 draws statistical-significance conclusions from iid (classical-SE) fits without ever labeling the SE convention; per the campaign SE policy for ch10, add one labeling/softening sentence at the first inference discussion (the 95%-CI paragraph in section 10.4).",
+   "old": "The 95% confidence interval tells us the range of plausible values for each coefficient.",
+   "new": "The 95% confidence interval tells us the range of plausible values for each coefficient. Throughout this chapter we report classical (homoskedasticity-assuming) standard errors, as AED does before Chapter 12; Chapter 12 introduces heteroskedasticity-robust standard errors, which are preferred in practice.",
+   "evidence": "All fits in the dump show 'Inference: iid' (CELLs 3, 6, 12, 20), yet prose/comments draw significance conclusions: L390 '# Size is the only statistically significant predictor (p < 0.05)', L708 and L713 'not statistically significant'. Brief SE-convention policy: 'ch01–06, ch10: classical fine. If prose draws a significance conclusion from an iid fit, propose ONE labeling/softening sentence, not a refit.'",
+   "confidence": "high",
+   "id": "ch10-F03",
+   "verify_note": "All fits are iid (dump CELLs 3,6,7,12,20) yet prose draws significance conclusions (L390 comment, L708, L713). Matches ch10 SE-convention policy (one labeling sentence, no refit). Proposed sentence aligns with the campaign's canonical wording (§12.2 introduces robust SEs). L373 old text matches."
+  },
+  {
+   "lines": [
+    482,
+    483
+   ],
+   "category": "methods",
+   "severity": "style",
+   "action": "fix",
+   "summary": "The AIC/BIC formulas use \\widehat{\\sigma}_e^2 without defining its divisor, while the only variance-like quantity the chapter defines (s_e, line 451) divides by n-k; the code actually uses RSS/n, so a one-line clarifier prevents students from plugging in s_e^2 and getting values that do not match the computed AIC = 675.48 / BIC = 685.05.",
+   "old": "$$\\text{BIC} = n \\times \\ln(\\widehat{\\sigma}_e^2) + n(1 + \\ln 2\\pi) + k \\times \\ln(n)$$",
+   "new": "$$\\text{BIC} = n \\times \\ln(\\widehat{\\sigma}_e^2) + n(1 + \\ln 2\\pi) + k \\times \\ln(n)$$\n\nwhere $\\widehat{\\sigma}_e^2 = \\text{RSS}/n$ (note the divisor is $n$, not the $n-k$ used for $s_e$).",
+   "evidence": "Code at lines 497–499 computes aic_stata/bic_stata with np.log(rss/n); dump CELL 10 gives AIC 675.4824, BIC 685.0535, which Exercise 4 (lines 967–968) reuses as 675.5/685.1. Line 451 defines s_e with divisor n-k, so \\widehat{\\sigma}_e^2 is otherwise ambiguous within the chapter.",
+   "confidence": "medium",
+   "id": "ch10-F04",
+   "verify_note": "Code (L497-499) uses rss/n; s_e defined with n-k at L451; section-10.6 formula leaves σ̂_e² undefined. Clarifier 'σ̂_e² = RSS/n (divisor n, not n-k)' is mathematically correct (MLE/Stata convention) and reconciles with AIC 675.48 / BIC 685.05."
+  },
+  {
+   "lines": [
+    506,
+    508
+   ],
+   "category": "methods",
+   "severity": "style",
+   "action": "fix",
+   "summary": "Key Concept 10.6 states BIC = n ln(sigma^2) + k ln(n), silently dropping the n(1+ln 2*pi) constant included in the section 10.6 formulas and in the code — so the KC formula would give 602.75, not the 685.05/685.1 the chapter and Exercise 4 report; a parenthetical reconciles the two.",
+   "old": "stronger penalties: BIC = $n \\ln(\\hat{\\sigma}_e^2) + k \\ln(n)$. Smaller",
+   "new": "stronger penalties: BIC = $n \\ln(\\hat{\\sigma}_e^2) + k \\ln(n)$ (omitting a constant that does not affect model comparisons). Smaller",
+   "evidence": "Section formula at line 483 and code at line 499 include n(1+ln 2*pi) = 82.30 for n=29; dump CELL 10 BIC = 685.0535, matching Exercise 4's 685.1. KC 10.6's version yields 685.05 - 82.30 = 602.75 — internally inconsistent presentation without the clarifier.",
+   "confidence": "medium",
+   "id": "ch10-F05",
+   "verify_note": "Verified: n(1+ln2π)=82.30 for n=29; KC 10.6's simplified BIC would give 685.05-82.30=602.75, inconsistent with Exercise 4's 685.1. The dropped term is constant across models on the same n, so 'omitting a constant that does not affect model comparisons' is accurate. Additive parenthetical is correct."
+  },
+  {
+   "lines": [
+    439,
+    439
+   ],
+   "category": "methods",
+   "severity": "style",
+   "action": "fix",
+   "summary": "The R-squared properties list says R2 'Always increases when adding variables', which is inconsistent with the mathematically precise statement in Key Concept 10.13 ('can only increase or stay the same — it never decreases'); R2 is unchanged when the added regressor gets an exactly zero OLS coefficient.",
+   "old": "- **Problem:** Always increases when adding variables (even irrelevant ones)",
+   "new": "- **Problem:** Never decreases when adding variables (even irrelevant ones)",
+   "evidence": "Key Concept 10.13 (lines 1397–1399) states: 'When adding predictors to a regression model, $R^2$ can only increase or stay the same — it never decreases.' The weak-inequality version is the correct property (R2 stays constant iff the added regressor's OLS coefficient is exactly zero); harmonizing removes the internal inconsistency.",
+   "confidence": "medium",
+   "id": "ch10-F06",
+   "verify_note": "KC 10.13 (L1397-1399) states the precise 'never decreases / can only increase or stay the same'; L439's 'Always increases' is the internally inconsistent loose form. 'Never decreases' is the technically correct property (R² unchanged iff added regressor's OLS coef is exactly 0) and harmonizes the chapter. Also sharpens the contrast with the adjacent adjusted-R² bullet ('can decrease')."
+  },
+  {
+   "lines": [
+    753,
+    753
+   ],
+   "category": "methods",
+   "severity": "style",
+   "action": "fix",
+   "summary": "Key Takeaways claims that under perfect collinearity the 'computer shows \"omitted\"' — that is Stata's behavior, not this book's: pyfixest emits a warning and drops the variable, and no 'omitted' label appears anywhere in the chapter's output.",
+   "old": "- Perfect collinearity makes some coefficients inestimable (computer shows \"omitted\")",
+   "new": "- Perfect collinearity makes some coefficients inestimable (the software drops one of the collinear variables, as pyfixest did with `size_twice`)",
+   "evidence": "Dump CELL 12: pyfixest UserWarning '1 variables dropped due to multicollinearity. The following variables are dropped: [\\'size_twice\\']' and the summary simply omits the row — matching the chapter's own section 10.8 prose ('software automatically dropped one variable', line 581) rather than a Stata-style 'omitted' flag.",
+   "confidence": "high",
+   "id": "ch10-F07",
+   "verify_note": "Dump CELL 12: pyfixest emits UserWarning and drops size_twice; no 'omitted' label appears — 'computer shows omitted' is Stata behavior. Section 10.8 prose (L581) already says 'software automatically dropped one variable'. Proposed fix matches actual tooling. L753 old text matches."
+  },
+  {
+   "lines": [
+    448,
+    452
+   ],
+   "category": "methods",
+   "severity": "style",
+   "action": "fix",
+   "summary": "The reader sees two conflicting values for near-identically named fit statistics with no reconciliation: pyfixest's summary prints 'RMSE: 21718.733' (divisor n) while the fit-statistics cell prints 'Root MSE: $24,935.73' (divisor n-k, per the chapter's s_e formula); add one bullet explaining the divisor difference.",
+   "old": "- Same units as $y$ (dollars in our case)",
+   "new": "- Same units as $y$ (dollars in our case)\n- Note: the `RMSE` printed in pyfixest summaries divides by $n$ rather than $n-k$, so it is slightly smaller than $s_e$",
+   "evidence": "Dump CELL 6 summary: 'RMSE: 21718.733' = sqrt(RSS/29); dump CELL 9: 'Root MSE: $24,935.73' = sqrt(RSS/22) (verified: 22 x 24935.73^2 = 29 x 21718.73^2 = RSS). Both are displayed to the student within the same section with no explanation of the 15% gap.",
+   "confidence": "medium",
+   "id": "ch10-F08",
+   "verify_note": "Verified RMSE 21718.733 = sqrt(RSS/29) and Root MSE 24935.73 = sqrt(RSS/22): ratio 24935.73/21718.733 = 1.1481 = sqrt(29/22). Both shown in same section (~15% gap) with no explanation. Additive bullet at L452 is accurate (pyfixest RMSE divides by n, not n-k)."
+  },
+  {
+   "lines": [
+    1029
+   ],
+   "category": "code",
+   "severity": "error",
+   "action": "fix",
+   "summary": "Case Study 1 loader calls dropna on columns 'rk' and 'hc' that do not exist in the Mendez dataset (actual columns are 'kl' and 'h'), so the cell raises KeyError when a student runs it in Colab.",
+   "old": "dat_2014 = dat[dat['year'] == 2014].dropna(subset=['lp', 'rk', 'hc']).copy()",
+   "new": "dat_2014 = dat[dat['year'] == 2014].dropna(subset=['lp', 'kl', 'h']).copy()",
+   "evidence": "Loaded https://raw.githubusercontent.com/quarcs-lab/mendez2020-convergence-clubs-code-data/master/assets/dat.csv in the repo venv: columns are ['id','country','year','Y','K','pop','L','s','alpha_it','GDPpc','lp','h','kl','kp','ky','TFP',...]; 'rk' and 'hc' absent. pandas dropna(subset=...) raises KeyError for missing columns. Matches ch09 seed: actual Mendez columns are kl/h.",
+   "confidence": "high",
+   "id": "ch10-F09",
+   "verify_note": "dropna(subset=['lp','rk','hc']) raises KeyError; Mendez CSV has kl/h not rk/hc. Old text matches L1029 exactly; fix to kl/h correct."
+  },
+  {
+   "lines": [
+    1040,
+    1047
+   ],
+   "category": "code",
+   "severity": "error",
+   "action": "fix",
+   "summary": "Case Study 1 Task 1 code creates ln_rk from nonexistent column 'rk' and selects nonexistent 'hc'; every line after the log transform would KeyError in Colab.",
+   "old": "dat_2014['ln_lp'] = np.log(dat_2014['lp'])\ndat_2014['ln_rk'] = np.log(dat_2014['rk'])\n\n# Step 2: Summary statistics for key variables\nprint(dat_2014[['lp', 'rk', 'hc', 'ln_lp', 'ln_rk']].describe())\n\n# Step 3: Create a scatterplot matrix\nsns.pairplot(dat_2014[['ln_lp', 'ln_rk', 'hc']], diag_kind='kde')",
+   "new": "dat_2014['ln_lp'] = np.log(dat_2014['lp'])\ndat_2014['ln_kl'] = np.log(dat_2014['kl'])\n\n# Step 2: Summary statistics for key variables\nprint(dat_2014[['lp', 'kl', 'h', 'ln_lp', 'ln_kl']].describe())\n\n# Step 3: Create a scatterplot matrix\nsns.pairplot(dat_2014[['ln_lp', 'ln_kl', 'h']], diag_kind='kde')",
+   "evidence": "Verified in repo venv: Mendez dat.csv has columns 'kl' and 'h', not 'rk'/'hc'. Derived name ln_kl matches the ch09 seed convention (ch09 Task 3 defines ln_kl).",
+   "confidence": "high",
+   "id": "ch10-F10",
+   "verify_note": "Old block matches L1040-1047 exactly; rk/hc absent, kl/h present. ln_kl naming consistent with ch09. Fix correct."
+  },
+  {
+   "lines": [
+    1063
+   ],
+   "category": "code",
+   "severity": "error",
+   "action": "fix",
+   "summary": "Case Study 1 Task 2 correlation code selects nonexistent columns ln_rk (derived from nonexistent 'rk') and 'hc'.",
+   "old": "corr = dat_2014[['ln_lp', 'ln_rk', 'hc']].corr()",
+   "new": "corr = dat_2014[['ln_lp', 'ln_kl', 'h']].corr()",
+   "evidence": "Mendez dat.csv columns verified in repo venv: 'kl'/'h' exist, 'rk'/'hc' do not; ln_kl is defined in the corrected Task 1 code.",
+   "confidence": "high",
+   "id": "ch10-F11",
+   "verify_note": "L1063 matches; ln_kl/h correct replacement."
+  },
+  {
+   "lines": [
+    1086,
+    1096
+   ],
+   "category": "code",
+   "severity": "error",
+   "action": "fix",
+   "summary": "Case Study 1 Task 3 models regress on nonexistent columns (ln_rk, hc) and wrap pyfixest .summary() in print(), which prints a stray 'None' line after each table because summary() returns None.",
+   "old": "# Model 1: ln(lp) ~ ln(rk) only\nmodel1 = pf.feols('ln_lp ~ ln_rk', data=dat_2014)\nprint(model1.summary())\n\n# Model 2: ln(lp) ~ hc only\nmodel2 = pf.feols('ln_lp ~ hc', data=dat_2014)\nprint(model2.summary())\n\n# Model 3: ln(lp) ~ ln(rk) + hc (multiple regression)\nmodel3 = pf.feols('ln_lp ~ ln_rk + hc', data=dat_2014)\nprint(model3.summary())",
+   "new": "# Model 1: ln(lp) ~ ln(kl) only\nmodel1 = pf.feols('ln_lp ~ ln_kl', data=dat_2014)\nmodel1.summary()\n\n# Model 2: ln(lp) ~ h only\nmodel2 = pf.feols('ln_lp ~ h', data=dat_2014)\nmodel2.summary()\n\n# Model 3: ln(lp) ~ ln_kl + h (multiple regression)\nmodel3 = pf.feols('ln_lp ~ ln_kl + h', data=dat_2014)\nmodel3.summary()",
+   "evidence": "Mendez columns kl/h verified in repo venv; also verified pf.feols(...).summary() returns None (prints internally), so print(model.summary()) emits an extra 'None' line — main-text cells (e.g. L245, L361) correctly call .summary() bare.",
+   "confidence": "high",
+   "id": "ch10-F12",
+   "verify_note": "L1086-1096 match. Verified pf.feols().summary() returns None, so print() emits stray 'None'; bare .summary() matches main-text convention (L245,L361). Column fix rk->kl, hc->h correct. Model 3 comment cosmetically uses ln_kl vs ln(kl) but functional code is correct."
+  },
+  {
+   "lines": [
+    1018,
+    1020
+   ],
+   "category": "code",
+   "severity": "error",
+   "action": "fix",
+   "summary": "Case Study 1 dataset bullet list documents variables rk, hc, and rgdppc that do not exist in the Mendez dataset (actual names: kl, h, GDPpc).",
+   "old": "  - `rk` — Physical capital per worker\n  - `hc` — Human capital index\n  - `rgdppc` — Real GDP per capita",
+   "new": "  - `kl` — Physical capital per worker\n  - `h` — Human capital index\n  - `GDPpc` — Real GDP per capita",
+   "evidence": "Verified in repo venv: dat.csv columns include 'kl', 'h', 'GDPpc'; 'rk', 'hc', 'rgdppc' absent. Same defect class as ch09 seed (dataset bullets named rk/hc).",
+   "confidence": "high",
+   "id": "ch10-F13",
+   "verify_note": "L1018-1020 match exactly; kl/h/GDPpc are the real column names."
+  },
+  {
+   "lines": [
+    1075
+   ],
+   "category": "code",
+   "severity": "error",
+   "action": "fix",
+   "summary": "Task 2 question references variable names ln(rk) and hc that do not match the (corrected) code identifiers ln_kl and h.",
+   "old": "- Are $\\ln(\\text{rk})$ and hc correlated with each other? What implications does this have for multiple regression?",
+   "new": "- Are $\\ln(\\text{kl})$ and h correlated with each other? What implications does this have for multiple regression?",
+   "evidence": "Mendez dataset columns are kl/h (verified in repo venv); prose must match the code identifiers used in Tasks 1-3.",
+   "confidence": "high",
+   "id": "ch10-F14",
+   "verify_note": "L1075 matches; kl/h correct."
+  },
+  {
+   "lines": [
+    1079
+   ],
+   "category": "code",
+   "severity": "error",
+   "action": "fix",
+   "summary": "Key Concept 10.9 references ln(rk) and hc, variable names that do not exist in the dataset used by the surrounding code.",
+   "old": "Using $\\ln(\\text{lp})$ and $\\ln(\\text{rk})$ compresses the scale so that both Luxembourg and Malawi can be meaningfully compared. Coefficients on log-transformed variables have elasticity interpretations, while coefficients on level variables (like hc) represent semi-elasticities.",
+   "new": "Using $\\ln(\\text{lp})$ and $\\ln(\\text{kl})$ compresses the scale so that both Luxembourg and Malawi can be meaningfully compared. Coefficients on log-transformed variables have elasticity interpretations, while coefficients on level variables (like h) represent semi-elasticities.",
+   "evidence": "Mendez dataset columns are kl/h (verified in repo venv); KC number 10.9 unchanged, only variable names inside the text.",
+   "confidence": "high",
+   "id": "ch10-F15",
+   "verify_note": "L1079 matches; only variable names changed to kl/h, KC number preserved."
+  },
+  {
+   "lines": [
+    1101
+   ],
+   "category": "code",
+   "severity": "error",
+   "action": "fix",
+   "summary": "Task 3 question references ln(rk), which does not match the dataset column kl / code identifier ln_kl.",
+   "old": "- How do the coefficients on $\\ln(\\text{rk})$ change between Model 1 and Model 3?",
+   "new": "- How do the coefficients on $\\ln(\\text{kl})$ change between Model 1 and Model 3?",
+   "evidence": "Mendez dataset columns are kl/h (verified in repo venv).",
+   "confidence": "high",
+   "id": "ch10-F16",
+   "verify_note": "L1101 matches; ln(kl) correct."
+  },
+  {
+   "lines": [
+    1118,
+    1119
+   ],
+   "category": "code",
+   "severity": "error",
+   "action": "fix",
+   "summary": "Task 4 questions reference ln(rk) and hc, names that do not exist in the dataset the code uses.",
+   "old": "- Interpret the coefficient on $\\ln(\\text{rk})$ in Model 3. What does it mean in economic terms?\n- Interpret the coefficient on hc. How does a one-unit increase in human capital relate to productivity?",
+   "new": "- Interpret the coefficient on $\\ln(\\text{kl})$ in Model 3. What does it mean in economic terms?\n- Interpret the coefficient on h. How does a one-unit increase in human capital relate to productivity?",
+   "evidence": "Mendez dataset columns are kl/h (verified in repo venv).",
+   "confidence": "high",
+   "id": "ch10-F17",
+   "verify_note": "L1118-1119 match; kl/h correct."
+  },
+  {
+   "lines": [
+    1149
+   ],
+   "category": "code",
+   "severity": "error",
+   "action": "fix",
+   "summary": "Key Concept 10.10 references ln(rk) and hc, variable names that do not exist in the Mendez dataset.",
+   "old": "By controlling for both physical capital ($\\ln(\\text{rk})$) and human capital (hc), we can assess each factor's **partial contribution** to productivity.",
+   "new": "By controlling for both physical capital ($\\ln(\\text{kl})$) and human capital (h), we can assess each factor's **partial contribution** to productivity.",
+   "evidence": "Mendez dataset columns are kl/h (verified in repo venv); KC number 10.10 unchanged, only variable names inside the text.",
+   "confidence": "high",
+   "id": "ch10-F18",
+   "verify_note": "L1149 matches; kl/h correct, KC 10.10 number preserved."
+  },
+  {
+   "lines": [
+    596,
+    599
+   ],
+   "category": "code",
+   "severity": "error",
+   "action": "fix",
+   "summary": "The VIF cell passes a design matrix without a constant to statsmodels' variance_inflation_factor, producing uncentered VIFs (max 57.82) instead of the standard centered VIFs (max 1.73) implied by the chapter's own formula VIF_j = 1/(1-R_j^2), and its output ('Warning: multicollinearity issues') contradicts KC 10.8's example text ('only moderate VIFs, so all six can be estimated jointly').",
+   "old": "X = data_house[['size', 'bedrooms', 'bathrooms', 'lotsize', 'age', 'monthsold']]\nvif_data = pd.DataFrame()\nvif_data[\"Variable\"] = X.columns\nvif_data[\"VIF\"] = [variance_inflation_factor(X.values, i) for i in range(X.shape[1])]",
+   "new": "X = data_house[['size', 'bedrooms', 'bathrooms', 'lotsize', 'age', 'monthsold']].copy()\nX.insert(0, 'const', 1.0)  # VIF requires the intercept column in the design matrix\nvif_data = pd.DataFrame()\nvif_data[\"Variable\"] = X.columns[1:]\nvif_data[\"VIF\"] = [variance_inflation_factor(X.values, i) for i in range(1, X.shape[1])]",
+   "evidence": "Computed in repo venv: current code gives 40.13/57.82/34.74/11.97/21.02/12.80 (dump CELL 13: 'Warning: Maximum VIF = 57.82 indicates multicollinearity issues'). With constant: 1.69/1.73/1.30/1.13/1.18/1.57, cross-checked via aux regressions with intercept (bedrooms aux R2=0.4233 -> VIF 1.734). statsmodels' variance_inflation_factor requires the constant in exog; without it the auxiliary R2 is uncentered. Fix restores agreement with KC 10.8 example prose at L148; new printed message becomes 'Good: Maximum VIF = 1.73 - no serious multicollinearity detected.' Note: Exercise 5 (L982-987) hand-types the buggy uncentered values — see separate report finding.",
+   "confidence": "high",
+   "id": "ch10-F19",
+   "verify_note": "L596-599 match. Verified uncentered VIF max=57.82 (no const); with const inserted, centered VIFs are 1.69/1.73/1.30/1.13/1.18/1.57 (max 1.73 bedrooms), matching VIF=1/(1-R2) and KC 10.8 prose. Fix (insert const, index from 1) correct."
+  },
+  {
+   "lines": [
+    601,
+    602
+   ],
+   "category": "code",
+   "severity": "error",
+   "action": "fix",
+   "summary": "The VIF table is a bare mid-cell expression, so it never displays — the section's headline output (per-variable VIFs) is missing from the rendered chapter and Colab.",
+   "old": "# VARIANCE INFLATION FACTORS (VIF)\nvif_data.to_string(index=False)",
+   "new": "# VARIANCE INFLATION FACTORS (VIF)\nprint(vif_data.to_string(index=False))",
+   "evidence": "Jupyter/Quarto auto-display only the last expression of a cell; dump CELL 13 contains only the max-VIF warning line, no table.",
+   "confidence": "high",
+   "id": "ch10-F20",
+   "verify_note": "L601-602 bare to_string() never displays (prints follow); dump CELL 13 shows only warning line. print() fix correct."
+  },
+  {
+   "lines": [
+    866,
+    870
+   ],
+   "category": "code",
+   "severity": "error",
+   "action": "fix",
+   "summary": "Cheat-sheet STEP 7 has the same VIF bug: no constant column, so it reports uncentered VIFs (40-58) that contradict the '> 5 moderate / > 10 severe' guidance printed two lines above.",
+   "old": "X = data_house[['size', 'bedrooms', 'bathrooms', 'lotsize', 'age', 'monthsold']]\nvif_data = pd.DataFrame({\n    'Variable': X.columns,\n    'VIF': [variance_inflation_factor(X.values, i) for i in range(X.shape[1])]\n})",
+   "new": "X = data_house[['size', 'bedrooms', 'bathrooms', 'lotsize', 'age', 'monthsold']].copy()\nX.insert(0, 'const', 1.0)  # VIF requires the intercept column in the design matrix\nvif_data = pd.DataFrame({\n    'Variable': X.columns[1:],\n    'VIF': [variance_inflation_factor(X.values, i) for i in range(1, X.shape[1])]\n})",
+   "evidence": "Same computation as the section 10.8 cell: without the constant, max VIF = 57.82; with it, max = 1.73. A student running the 'self-contained' cheat sheet would wrongly conclude the Davis regressors are severely collinear.",
+   "confidence": "high",
+   "id": "ch10-F21",
+   "verify_note": "L866-870 cheat-sheet has same no-constant VIF bug; fix mirrors F19 correctly."
+  },
+  {
+   "lines": [
+    536,
+    537
+   ],
+   "category": "code",
+   "severity": "error",
+   "action": "report",
+   "summary": "pyfixest Feols objects have no _aic/_bic attributes, so the hasattr-guarded AIC/BIC columns in the section 10.7 comparison table (and cheat-sheet STEP 6 at L855-856, and the Task 5 hints at L1133, L1369, L1388-1389) always evaluate to NaN — the AIC/BIC model comparison the section and KC 10.7 promise never shows real values.",
+   "evidence": "Verified in repo venv: hasattr(model, '_aic') is False for pf.feols fits. Ground truth exists: the manual Stata-convention formula already implemented in the section 10.6 cell gives simple-model AIC/BIC = 668.11/670.84 and full-model 675.48/685.05, exactly matching Exercise 4's hand-typed values (668.1/670.8; 675.5/685.1). Remedy is structural (add a small helper computing n*ln(RSS/n)+n*(1+ln 2pi)+2k and +k*ln(n) in the comparison cell, mirror in cheat sheet, and reword the two Task 5 hints), spanning 5 locations — beyond single-sentence scope, so reported rather than auto-fixed.",
+   "confidence": "high",
+   "id": "ch10-F22",
+   "verify_note": "Report: hasattr(model,'_aic')/'_bic' = False verified, so AIC/BIC columns are NaN. Manual Stata AIC/BIC (668.11/670.84 simple, 675.48/685.05 full) match dump CELL 10 and Exercise 4. Real defect."
+  },
+  {
+   "lines": [
+    223,
+    224
+   ],
+   "category": "code",
+   "severity": "error",
+   "action": "fix",
+   "summary": "The head(10) preview is a bare mid-cell expression that never displays: the cell prints 'First 10 observations:' followed by nothing.",
+   "old": "print(\"First 10 observations:\")\ndata_house[['price', 'size', 'bedrooms', 'bathrooms', 'lotsize', 'age', 'monthsold']].head(10)",
+   "new": "print(\"First 10 observations:\")\nprint(data_house[['price', 'size', 'bedrooms', 'bathrooms', 'lotsize', 'age', 'monthsold']].head(10))",
+   "evidence": "Jupyter/Quarto display only the last expression of a cell (here data_house.describe() at L228). Dump CELL 2 shows 'First 10 observations:' immediately followed by 'Summary statistics:' — the preview table is absent.",
+   "confidence": "high",
+   "id": "ch10-F23",
+   "verify_note": "L223-224 bare head(10) never displays (describe() is last expr); dump CELL 2 shows header then Summary stats, no preview. print() fix acceptable."
+  },
+  {
+   "lines": [
+    315,
+    316
+   ],
+   "category": "code",
+   "severity": "error",
+   "action": "fix",
+   "summary": "The correlation matrix is a bare mid-cell expression that never displays: the cell prints 'Correlation Matrix:' followed by nothing (only the heatmap appears).",
+   "old": "print(\"Correlation Matrix:\")\ncorr_matrix",
+   "new": "print(\"Correlation Matrix:\")\nprint(corr_matrix.round(3))",
+   "evidence": "Dump CELL 5 shows 'Correlation Matrix:' then the figure — no matrix table. round(3) matches the heatmap's fmt='.3f' and the two printed correlations (0.786, 0.518).",
+   "confidence": "high",
+   "id": "ch10-F24",
+   "verify_note": "L315-316 bare corr_matrix never displays; dump CELL 5 shows label then figure only. round(3) matches heatmap fmt. Fix correct."
+  },
+  {
+   "lines": [
+    541
+   ],
+   "category": "code",
+   "severity": "error",
+   "action": "fix",
+   "summary": "The section 10.7 model-comparison table is a bare mid-cell to_string() expression that never displays — the cell's stated purpose ('Create comparison table') produces no visible table.",
+   "old": "comparison_stats.to_string(index=False)",
+   "new": "print(comparison_stats.to_string(index=False))",
+   "evidence": "Dump CELL 11 contains only the two R2/Adj-R2 print lines; the table is absent because two print statements follow the bare expression. (Its AIC/BIC columns are additionally NaN — see the separate _aic/_bic report finding.)",
+   "confidence": "high",
+   "id": "ch10-F25",
+   "verify_note": "L541 bare to_string never displays (prints follow); dump CELL 11 shows only two R2 lines. print() fix correct."
+  },
+  {
+   "lines": [
+    629,
+    630
+   ],
+   "category": "code",
+   "severity": "error",
+   "action": "fix",
+   "summary": "Actual-vs-predicted plot axes are labeled '($1000s)' but price and predictions are plotted in dollars (about 204,000-375,000), overstating values by a factor of 1000.",
+   "old": "ax.set_xlabel('Actual Price ($1000s)', fontsize=12)\nax.set_ylabel('Predicted Price ($1000s)', fontsize=12)",
+   "new": "ax.set_xlabel('Actual Price ($)', fontsize=12)\nax.set_ylabel('Predicted Price ($)', fontsize=12)",
+   "evidence": "Dump CELL 2: price mean 253,910, min 204,000, max 375,000 dollars; dataset bullet L208 says 'Sale price in dollars'. The cheat-sheet version of the same plot (L884-885) correctly uses '($)'.",
+   "confidence": "high",
+   "id": "ch10-F26",
+   "verify_note": "L629-630 mislabel '$1000s' while plotting raw dollars (price mean 253,910); cheat sheet uses '($)'. Fix correct."
+  },
+  {
+   "lines": [
+    659,
+    660
+   ],
+   "category": "code",
+   "severity": "error",
+   "action": "fix",
+   "summary": "Residual-plot axes are labeled '($1000s)' but fitted values and residuals are in dollars.",
+   "old": "ax.set_xlabel('Fitted values ($1000s)', fontsize=12)\nax.set_ylabel('Residuals ($1000s)', fontsize=12)",
+   "new": "ax.set_xlabel('Fitted values ($)', fontsize=12)\nax.set_ylabel('Residuals ($)', fontsize=12)",
+   "evidence": "Fitted values span roughly 200,000-330,000 dollars (price is in dollars per dump CELL 2); cheat-sheet duplicate at L893-894 correctly uses 'Fitted Values ($)' / 'Residuals ($)'.",
+   "confidence": "high",
+   "id": "ch10-F27",
+   "verify_note": "L659-660 same mislabel for fitted/residuals in dollars; cheat sheet duplicate uses '($)'. Fix correct."
+  },
+  {
+   "lines": [
+    1204,
+    1205
+   ],
+   "category": "code",
+   "severity": "error",
+   "action": "fix",
+   "summary": "Case Study 2 loader ends with a bare .to_string() expression, which renders as one quoted repr string with literal \\n escape sequences instead of a formatted table.",
+   "old": "# FIRST 10 MUNICIPALITIES\nbol_sat.head(10).to_string(index=False)",
+   "new": "# FIRST 10 MUNICIPALITIES\nprint(bol_sat.head(10).to_string(index=False))",
+   "evidence": "Dump CELL 17 shows the output as a single quoted string: '            mun        dep ...\\n      Esmeralda      Oruro ...' — a bare str as last expression displays via repr, not as text.",
+   "confidence": "high",
+   "id": "ch10-F28",
+   "verify_note": "L1204-1205 bare to_string() as last expr displays as repr with literal \\n; dump CELL 17 shows single quoted string. print() fix correct."
+  },
+  {
+   "lines": [
+    1225,
+    1226
+   ],
+   "category": "code",
+   "severity": "error",
+   "action": "fix",
+   "summary": "Case Study 2 Task 1's describe() summary is a bare mid-cell expression that never displays, so Step 1 ('Generate summary statistics') produces no output.",
+   "old": "# DESCRIPTIVE STATISTICS: DEVELOPMENT AND SATELLITE PREDICTORS\nbol_sat[['imds', 'ln_NTLpc2017', 'A00', 'A10', 'A20', 'A30', 'A40']].describe().round(3)",
+   "new": "# DESCRIPTIVE STATISTICS: DEVELOPMENT AND SATELLITE PREDICTORS\nprint(bol_sat[['imds', 'ln_NTLpc2017', 'A00', 'A10', 'A20', 'A30', 'A40']].describe().round(3))",
+   "evidence": "Dump CELL 18 shows only the missing-values counts and variable ranges; the describe() table is absent because print statements follow the bare expression.",
+   "confidence": "high",
+   "id": "ch10-F29",
+   "verify_note": "L1225-1226 bare describe() never displays (prints follow); dump CELL 18 shows only missing counts and ranges. print() fix correct."
+  },
+  {
+   "lines": [
+    1260,
+    1261
+   ],
+   "category": "code",
+   "severity": "error",
+   "action": "fix",
+   "summary": "Case Study 2 Task 2's correlation matrix is a bare mid-cell expression that never displays.",
+   "old": "# CORRELATION MATRIX: DEVELOPMENT AND SATELLITE PREDICTORS\ncorr_sat.round(3)",
+   "new": "# CORRELATION MATRIX: DEVELOPMENT AND SATELLITE PREDICTORS\nprint(corr_sat.round(3))",
+   "evidence": "Dump CELL 19 shows only the heatmap figure and the sorted IMDS correlations; the matrix table is absent because a figure and print statements follow the bare expression.",
+   "confidence": "high",
+   "id": "ch10-F30",
+   "verify_note": "L1260-1261 bare corr_sat never displays; dump CELL 19 shows heatmap and sorted correlations only. print() fix correct."
+  },
+  {
+   "lines": [
+    982,
+    987
+   ],
+   "category": "code",
+   "severity": "drift",
+   "action": "report",
+   "summary": "Exercise 5's hand-typed VIF table (Size 40.1, Bedrooms 57.8, Bathrooms 34.7, Age 21.0) reproduces the buggy uncentered VIFs from the chapter's no-constant computation; once the VIF code is fixed (correct centered values 1.69/1.73/1.30/1.18) these values no longer echo any chapter output.",
+   "evidence": "Computed in repo venv: uncentered VIFs for the Davis data are 40.13/57.82/34.74/21.02 — matching the exercise digits exactly, so they were generated from the defective run. The exercise is framed generically ('A multiple regression of house prices yields...'), so it can stand as a hypothetical severe-multicollinearity example, but the campaign owner should decide whether to keep it as an explicitly hypothetical scenario or regenerate the table; conclusion-sensitive, hence report not fix.",
+   "confidence": "high",
+   "id": "ch10-F31",
+   "verify_note": "Report: Exercise 5 VIFs 40.1/57.8/34.7/21.0 exactly match recomputed uncentered VIFs (40.13/57.82/34.74/21.02), confirming they derive from the buggy no-constant run. Conclusion-sensitive; report accurate."
+  },
+  {
+   "lines": [
+    1025,
+    1032
+   ],
+   "category": "code",
+   "severity": "style",
+   "action": "report",
+   "summary": "Case Study 1's loader is a plain ```python fence, so dat_2014 is never created in the book or the exported Colab notebook — unlike the ch09 pattern adopted by the campaign (loader as live {python} cell, task code as plain fences) and unlike Case Study 2 in this same chapter, which is fully live.",
+   "evidence": "Brief ch09 seed: 'loader cell L1014 -> remove #| eval: false so data_cc loads in Colab and the book'. In ch10 no Case Study 1 cell executes (dump jumps from CELL 16 straight to the CS2 loader at CELL 17). After the kl/h column fixes, the loader runs cleanly (verified pd.read_csv of the URL in repo venv). Converting L1025's fence to {python} would match the ch09 convention; structural/consistency decision, so reported.",
+   "confidence": "medium",
+   "id": "ch10-F32",
+   "verify_note": "Report: L1025 CS1 loader is a plain ```python fence (not {python}), so dat_2014 never created in book/Colab; dump jumps CELL16(house)->CELL17(CS2 loader) with no CS1 execution, unlike live CS2 loader at L1186. Factual observation accurate; convention decision left to owner."
+  },
+  {
+   "lines": [
+    133
+   ],
+   "category": "results",
+   "severity": "drift",
+   "action": "fix",
+   "summary": "Key Concept 'Adjusted R²' example states the size-only simple regression has R² = 0.618, but the executed value is 0.617453, which rounds to 0.617 at the displayed 3-dp precision.",
+   "old": "For the Davis houses, the simple regression on `size` alone gives $R^2 = 0.618$ and $\\bar{R}^2 = 0.603$.",
+   "new": "For the Davis houses, the simple regression on `size` alone gives $R^2 = 0.617$ and $\\bar{R}^2 = 0.603$.",
+   "evidence": "Execution dump CELL 11 prints 'R² increases from 0.617 to 0.651'; recomputed simple-model R² = 0.6174534 (rounds to 0.617, not 0.618). The 0.618 value belongs to the different bedrooms+size model (dump CELL 3). Same fix as the pre-verified ch05 seed (0.618 → 0.617).",
+   "confidence": "high",
+   "id": "ch10-F33",
+   "verify_note": "L133 matches; simple R2 recomputed 0.6174534 -> 0.617 (0.618 belongs to bedrooms+size model, dump CELL3). Fix 0.618->0.617 correct, 0.603 kept (adj=0.60328)."
+  },
+  {
+   "lines": [
+    549
+   ],
+   "category": "results",
+   "severity": "drift",
+   "action": "fix",
+   "summary": "Key Concept 10.7 (Parsimony Principle) repeats the stale simple-model R² of 0.618; executed value is 0.617.",
+   "old": "adding five variables beyond size barely increased $R^2$ (0.618 $\\to$ 0.651)",
+   "new": "adding five variables beyond size barely increased $R^2$ (0.617 $\\to$ 0.651)",
+   "evidence": "Execution dump CELL 11: 'R² increases from 0.617 to 0.651'; recomputed simple-model R² = 0.6174534 → 0.617 at 3 dp.",
+   "confidence": "high",
+   "id": "ch10-F34",
+   "verify_note": "L549 substring matches; 0.617 correct per dump CELL 11."
+  },
+  {
+   "lines": [
+    743
+   ],
+   "category": "results",
+   "severity": "drift",
+   "action": "fix",
+   "summary": "Key Takeaways 'Model Fit' bullet repeats the stale simple-model R² of 0.618; executed value is 0.617.",
+   "old": "- Example: Adding 5 regressors increased $R^2$ from 0.618 to 0.651 but decreased $\\bar{R}^2$ from 0.603 to 0.555",
+   "new": "- Example: Adding 5 regressors increased $R^2$ from 0.617 to 0.651 but decreased $\\bar{R}^2$ from 0.603 to 0.555",
+   "evidence": "Execution dump CELL 11: 'R² increases from 0.617 to 0.651'; recomputed simple-model R² = 0.6174534 → 0.617 at 3 dp.",
+   "confidence": "high",
+   "id": "ch10-F35",
+   "verify_note": "L743 matches; 0.617 correct."
+  },
+  {
+   "lines": [
+    148,
+    149
+   ],
+   "category": "results",
+   "severity": "error",
+   "action": "report",
+   "summary": "Key Concept 'Perfect Collinearity' example claims the six Davis predictors 'show only moderate VIFs', directly contradicting the chapter's executed VIF output, which prints 'Warning: Maximum VIF = 57.82 indicates multicollinearity issues.'",
+   "old": "In contrast, the actual six predictors in the Davis dataset show only moderate VIFs, so all six can be estimated jointly.",
+   "new": "",
+   "evidence": "Execution dump CELL 13 prints 'Warning: Maximum VIF = 57.82 indicates multicollinearity issues.' Root cause is that the VIF cell (qmd L592-612) passes X without a constant column to variance_inflation_factor, producing uncentered VIFs (recomputed: size 40.13, bedrooms 57.82, bathrooms 34.74, lotsize 11.97, age 21.02, monthsold 12.80); with a constant added, the proper centered VIFs are all below 2 (max 1.73, bedrooms), which WOULD make the KC prose correct. Reported rather than fixed because two defensible resolutions exist (reword the KC prose to match the displayed output, or fix the code to include a constant), and a code fix would also invalidate the hand-typed Exercise 5 VIF table at L982-987 (Size 40.1, Bedrooms 57.8, Bathrooms 34.7, Age 21.0), whose values exactly match the current constant-omitted computation — the two must be resolved together.",
+   "confidence": "high",
+   "id": "ch10-F36",
+   "verify_note": "Report: L148 'only moderate VIFs' contradicts dump CELL 13 'Maximum VIF = 57.82 ... multicollinearity issues' under current buggy code. Real contradiction; interdependent with F19 code fix and F31 Exercise 5. Accurately reported."
+  },
+  {
+   "lines": [
+    148,
+    148
+   ],
+   "category": "interpretation",
+   "severity": "error",
+   "action": "report",
+   "summary": "Key Concepts example claims the six Davis predictors 'show only moderate VIFs' but the chapter's own VIF cell prints 'Warning: Maximum VIF = 57.82 indicates multicollinearity issues' because the code computes uncentered VIFs (no intercept added to X), so the KC, the section-10.8 output, KC 10.8's >10='severe' rule, and Exercise 5's table (40.1/57.8/34.7/21.0, reusing the same inflated values) give the student contradictory conclusions about the same regression.",
+   "evidence": "Dump CELL 13: 'Warning: Maximum VIF = 57.82 indicates multicollinearity issues.' Recomputed uncentered VIFs match Exercise 5's table (size 40.13, bedrooms 57.82, bathrooms 34.74, lotsize 11.97, age 21.02, monthsold 12.80); properly centered VIFs (sm.add_constant) are size 1.69, bedrooms 1.73, bathrooms 1.30, lotsize 1.13, age 1.18, monthsold 1.57 — no multicollinearity, consistent with the KC claim at L148 and with all six coefficients being estimable (dump CELL 6). Resolution requires a code change (add intercept before variance_inflation_factor, cell at L592-612 and cheat-sheet STEP 7 at L862-871) plus deciding whether Exercise 5 (L978-993) keeps the uncentered numbers as a hypothetical — conclusion-level inconsistency spanning code+prose+exercise, so report rather than a one-line fix.",
+   "confidence": "high",
+   "id": "ch10-F37"
+  },
+  {
+   "lines": [
+    629,
+    630
+   ],
+   "category": "interpretation",
+   "severity": "error",
+   "action": "fix",
+   "summary": "Actual-vs-predicted plot axis labels say '$1000s' but the prices plotted are in dollars (about $204,000-$375,000), overstating the axis units by a factor of 1,000.",
+   "old": "ax.set_xlabel('Actual Price ($1000s)', fontsize=12)\nax.set_ylabel('Predicted Price ($1000s)', fontsize=12)",
+   "new": "ax.set_xlabel('Actual Price ($)', fontsize=12)\nax.set_ylabel('Predicted Price ($)', fontsize=12)",
+   "evidence": "Dump CELL 2: price mean 253,910.34, min 204,000, max 375,000 (dollars); chapter L208 states 'Price: Sale price in dollars'; the Key Takeaways cheat-sheet version of the same plot (L884-885) already labels the axes '($)'.",
+   "confidence": "high",
+   "id": "ch10-F38",
+   "verify_note": "Dump CELL 2: prices $204,000-$375,000 (L208 'in dollars'); plot uses data_house['price'] directly, so axes are in dollars not thousands. Cheat-sheet duplicate (L884-885) already uses '($)'. L629-630 fix to '($)' is correct."
+  },
+  {
+   "lines": [
+    659,
+    660
+   ],
+   "category": "interpretation",
+   "severity": "error",
+   "action": "fix",
+   "summary": "Residual plot axis labels say '$1000s' but fitted values and residuals are in dollars (fitted values in the low hundreds of thousands).",
+   "old": "ax.set_xlabel('Fitted values ($1000s)', fontsize=12)\nax.set_ylabel('Residuals ($1000s)', fontsize=12)",
+   "new": "ax.set_xlabel('Fitted values ($)', fontsize=12)\nax.set_ylabel('Residuals ($)', fontsize=12)",
+   "evidence": "Fitted values come from model_full.predict() on dollar-denominated prices (dump CELL 2: mean price 253,910); the cheat-sheet duplicate of this plot (L893-894) correctly uses 'Fitted Values ($)' and 'Residuals ($)'.",
+   "confidence": "high",
+   "id": "ch10-F39",
+   "verify_note": "Fitted values from predict() on dollar prices (mean ~253,910); residuals in dollars. '$1000s' labels wrong; cheat-sheet (L893-894) uses '($)'. L659-660 fix to '($)' is correct."
+  },
+  {
+   "lines": [
+    714,
+    714
+   ],
+   "category": "interpretation",
+   "severity": "error",
+   "action": "fix",
+   "summary": "Coefficient-plot reading guide claims 'Size has the largest positive effect; other variables cluster near zero', but on the raw-coefficient scale the plot actually shows the opposite: size (68.37) is the point nearest zero while bathrooms (6,833), bedrooms (2,685) and lotsize (2,303) are far larger — raw coefficients across differently-scaled variables are not comparable.",
+   "old": "- **Relative magnitude**: Size has the largest positive effect; other variables cluster near zero",
+   "new": "- **Relative magnitude**: Raw coefficients are not comparable across variables with different units — the size coefficient (\\$68 per square foot) sits nearest zero on this scale, while per-unit coefficients like bathrooms look larger; yet size is the only effect estimated precisely enough for its interval to exclude zero",
+   "evidence": "Dump CELL 6/7: size 68.369 (CI [36.45, 100.29], excludes 0), bathrooms 6,832.88 (CI [-25,771, 39,437]), bedrooms 2,685.32, lotsize 2,303.22, monthsold -2,088.50, age -833.04 — bathrooms, not size, is the largest positive value on the plotted coefficient axis; only size's CI excludes zero.",
+   "confidence": "high",
+   "id": "ch10-F40",
+   "verify_note": "Plot x-axis is raw 'Coefficient Value' (intercept excluded). On that scale bathrooms 6833 is the largest positive and size 68 is nearest zero — opposite of L714's claim. Only size's CI [36.45,100.29] excludes zero (all others include zero per CELL 7). Proposed replacement is accurate, if verbose."
+  },
+  {
+   "lines": [
+    266,
+    266
+   ],
+   "category": "interpretation",
+   "severity": "style",
+   "action": "fix",
+   "summary": "Key Concept 10.1 discusses the bedrooms coefficient's magnitude drop ($23,667 to $1,553) but never notes that the partial effect is statistically indistinguishable from zero, leaving the headline result's significance undiscussed (lens rule: magnitude AND significance).",
+   "old": "> In bivariate regression, the bedrooms coefficient (\\$23,667) captures both the direct effect of bedrooms and the indirect effect through correlation with size. In multiple regression, the bedrooms coefficient drops to \\$1,553 — the **partial effect** holding size constant. This dramatic change illustrates why controlling for confounders is essential for isolating individual variable effects.",
+   "new": "> In bivariate regression, the bedrooms coefficient (\\$23,667) captures both the direct effect of bedrooms and the indirect effect through correlation with size. In multiple regression, the bedrooms coefficient drops to \\$1,553 — the **partial effect** holding size constant — and is no longer statistically significant ($t = 0.20$, $p = 0.85$). This dramatic change illustrates why controlling for confounders is essential for isolating individual variable effects.",
+   "evidence": "Dump CELL 3: multiple-regression bedrooms coefficient 1,553.458, t = 0.198, p = 0.845 (bivariate bedrooms was significant: t = 2.456, p = 0.021); the insignificance is the punchline of the confounding story and is stated nowhere in the section.",
+   "confidence": "high",
+   "id": "ch10-F41",
+   "verify_note": "Dump CELL 3 (price~bedrooms+size): bedrooms coef 1553.46, t=0.198→0.20, p=0.845→0.85 (bivariate was t=2.456,p=0.021, significant). Insignificance is the punchline and is stated nowhere in KC 10.1. Lens D requires magnitude AND significance. Values correct."
+  },
+  {
+   "lines": [
+    370,
+    371
+   ],
+   "category": "interpretation",
+   "severity": "style",
+   "action": "fix",
+   "summary": "The headline size-coefficient interpretation in section 10.4 gives magnitude ($68.37/sq ft) but its statistical significance is stated only in a non-printing code comment (L390), never in prose, despite the subsection being titled 'Coefficient Interpretation with Confidence Intervals'.",
+   "old": "- Coefficient ≈ \\$68.37 per square foot\n- Interpretation: A one square foot increase in house size is associated with a \\$68.37 increase in price, holding bedrooms, bathrooms, lot size, age, and month sold constant.",
+   "new": "- Coefficient ≈ \\$68.37 per square foot\n- Interpretation: A one square foot increase in house size is associated with a \\$68.37 increase in price, holding bedrooms, bathrooms, lot size, age, and month sold constant.\n- Significance: This effect is statistically significant ($t = 4.44$, $p < 0.001$) — size is the only regressor whose 95% confidence interval excludes zero.",
+   "evidence": "Dump CELL 7: size t = 4.4426, p = 0.000205, CI [36.45, 100.29]; all other regressors' CIs contain zero (bedrooms [-16,379, 21,749], bathrooms [-25,771, 39,437], lotsize [-12,684, 17,290], age [-2,325, 659], monthsold [-9,390, 5,213]).",
+   "confidence": "medium",
+   "id": "ch10-F42",
+   "verify_note": "Dump CELL 7: size t=4.4426→4.44, p=0.000205<0.001, CI [36.45,100.29] excludes zero; all other CIs include zero. Significance appears only in non-printing comment L390. Added 'Significance' bullet is accurate. L370-371 old text matches."
+  },
+  {
+   "lines": [
+    332,
+    332
+   ],
+   "category": "interpretation",
+   "severity": "style",
+   "action": "fix",
+   "summary": "Key Concept 10.3 — titled 'Correlation vs. Causation' — itself uses the causal verb 'drives' for an observational association ('size — not bedrooms — drives most of the price variation'), undercutting its own message.",
+   "old": "Multiple regression isolates each variable's partial contribution, revealing that size — not bedrooms — drives most of the price variation.",
+   "new": "Multiple regression isolates each variable's partial contribution, revealing that size — not bedrooms — accounts for most of the price variation.",
+   "evidence": "Lens D causal-discipline rule (audit brief): associational language in observational settings; the chapter's own Key Takeaways (L736) instruct 'OLS measures association, not causation — use careful language'; 'accounts for' preserves the explained-variation meaning without the causal verb.",
+   "confidence": "medium",
+   "id": "ch10-F43",
+   "verify_note": "KC 10.3 is titled 'Correlation vs. Causation' yet uses causal verb 'drives' for observational data; 'accounts for' preserves the explained-variation meaning without the causal claim, consistent with Lens D and the chapter's own L736 instruction. Style-level but a genuine internal gap; replacement is correct."
+  },
+  {
+   "lines": [
+    222,
+    224
+   ],
+   "category": "readability",
+   "severity": "error",
+   "action": "fix",
+   "summary": "Prose prints 'First 10 observations:' but the head(10) table never displays because it is a bare expression mid-cell (only the last expression in a cell renders).",
+   "old": "# Display first few observations\nprint(\"First 10 observations:\")\ndata_house[['price', 'size', 'bedrooms', 'bathrooms', 'lotsize', 'age', 'monthsold']].head(10)",
+   "new": "# Display first few observations\nprint(\"First 10 observations:\")\nprint(data_house[['price', 'size', 'bedrooms', 'bathrooms', 'lotsize', 'age', 'monthsold']].head(10))",
+   "evidence": "Execution dump CELL 2: 'First 10 observations:' is followed immediately by 'Summary statistics:' — the head(10) table is absent from the output.",
+   "confidence": "high",
+   "id": "ch10-F44"
+  },
+  {
+   "lines": [
+    315,
+    316
+   ],
+   "category": "readability",
+   "severity": "error",
+   "action": "fix",
+   "summary": "The correlation matrix announced by print('Correlation Matrix:') never displays — bare mid-cell expression is swallowed before the heatmap code runs.",
+   "old": "print(\"Correlation Matrix:\")\ncorr_matrix",
+   "new": "print(\"Correlation Matrix:\")\nprint(corr_matrix.round(3))",
+   "evidence": "Execution dump CELL 5: 'Correlation Matrix:' is followed directly by the figure object — no matrix table appears. round(3) matches the heatmap's fmt='.3f'.",
+   "confidence": "high",
+   "id": "ch10-F45"
+  },
+  {
+   "lines": [
+    541,
+    541
+   ],
+   "category": "readability",
+   "severity": "error",
+   "action": "fix",
+   "summary": "The model-comparison table — the entire point of section 10.7's cell — never displays: to_string() returns a string that is silently discarded because print statements follow it.",
+   "old": "comparison_stats.to_string(index=False)",
+   "new": "print(comparison_stats.to_string(index=False))",
+   "evidence": "Execution dump CELL 11 contains only the two summary print lines ('R² increases from 0.617 to 0.651' / 'Adj R² decreases...'); the comparison table with AIC/BIC columns is absent. The Key Takeaways cheat sheet (L858) already uses print(comparison.to_string(index=False)).",
+   "confidence": "high",
+   "id": "ch10-F46"
+  },
+  {
+   "lines": [
+    601,
+    602
+   ],
+   "category": "readability",
+   "severity": "error",
+   "action": "fix",
+   "summary": "The per-variable VIF table promised by the lead-in ('calculate VIF for each variable') never displays — the to_string() result is discarded because more code follows it.",
+   "old": "# VARIANCE INFLATION FACTORS (VIF)\nvif_data.to_string(index=False)",
+   "new": "# VARIANCE INFLATION FACTORS (VIF)\nprint(vif_data.to_string(index=False))",
+   "evidence": "Execution dump CELL 13 shows only 'Warning: Maximum VIF = 57.82 indicates multicollinearity issues.' — no VIF table. The cheat sheet at L871 already wraps the identical call in print().",
+   "confidence": "high",
+   "id": "ch10-F47"
+  },
+  {
+   "lines": [
+    1204,
+    1205
+   ],
+   "category": "readability",
+   "severity": "error",
+   "action": "fix",
+   "summary": "The DS4Bolivia 'FIRST 10 MUNICIPALITIES' preview renders as a raw quoted Python string with literal \\n escapes instead of a table, because the to_string() result is the cell's last expression and displays via repr.",
+   "old": "# FIRST 10 MUNICIPALITIES\nbol_sat.head(10).to_string(index=False)",
+   "new": "# FIRST 10 MUNICIPALITIES\nprint(bol_sat.head(10).to_string(index=False))",
+   "evidence": "Execution dump CELL 17 line 229: output is a single quoted string containing literal \\n sequences ('            mun        dep      imds ...\\n      Esmeralda ...').",
+   "confidence": "high",
+   "id": "ch10-F48"
+  },
+  {
+   "lines": [
+    1225,
+    1226
+   ],
+   "category": "readability",
+   "severity": "error",
+   "action": "fix",
+   "summary": "Case Study 2 Task 1's descriptive-statistics table (Step 1 of the instructions) never displays — bare describe() expression mid-cell is swallowed by the code that follows.",
+   "old": "# DESCRIPTIVE STATISTICS: DEVELOPMENT AND SATELLITE PREDICTORS\nbol_sat[['imds', 'ln_NTLpc2017', 'A00', 'A10', 'A20', 'A30', 'A40']].describe().round(3)",
+   "new": "# DESCRIPTIVE STATISTICS: DEVELOPMENT AND SATELLITE PREDICTORS\nprint(bol_sat[['imds', 'ln_NTLpc2017', 'A00', 'A10', 'A20', 'A30', 'A40']].describe().round(3))",
+   "evidence": "Execution dump CELL 18 starts directly with the missing-values counts; the describe() table instructed in Task 1 Step 1 is absent.",
+   "confidence": "high",
+   "id": "ch10-F49"
+  },
+  {
+   "lines": [
+    1260,
+    1261
+   ],
+   "category": "readability",
+   "severity": "error",
+   "action": "fix",
+   "summary": "Case Study 2 Task 2's numeric correlation matrix never displays — bare corr_sat.round(3) mid-cell is swallowed before the heatmap code runs.",
+   "old": "# CORRELATION MATRIX: DEVELOPMENT AND SATELLITE PREDICTORS\ncorr_sat.round(3)",
+   "new": "# CORRELATION MATRIX: DEVELOPMENT AND SATELLITE PREDICTORS\nprint(corr_sat.round(3))",
+   "evidence": "Execution dump CELL 19 shows only the figure object and the sorted correlations-with-IMDS list; the matrix table is absent.",
+   "confidence": "high",
+   "id": "ch10-F50"
+  },
+  {
+   "lines": [
+    216,
+    216
+   ],
+   "category": "readability",
+   "severity": "style",
+   "action": "fix",
+   "summary": "The data-loading cell lacks an explicit one-sentence lead-in saying what the code does and what to look for in its output (surrounding prose describes the dataset but never announces the code).",
+   "old": "**Economic motivation:** A simple regression of price on bedrooms might find a positive relationship, but is this because bedrooms directly add value, or because houses with more bedrooms tend to be larger? Multiple regression helps us disentangle these effects.",
+   "new": "**Economic motivation:** A simple regression of price on bedrooms might find a positive relationship, but is this because bedrooms directly add value, or because houses with more bedrooms tend to be larger? Multiple regression helps us disentangle these effects.\n\nThe code below loads the dataset from GitHub and displays the first ten observations together with summary statistics. Check each variable's scale and range — price is in dollars, size in square feet — before we start modeling.",
+   "evidence": "Brief Lens R rule: every non-Setup code cell needs a ≥1-sentence lead-in stating what it does and what to look for; the prose at L204–216 covers motivation and variable definitions but not the code's action or output.",
+   "confidence": "medium",
+   "id": "ch10-F51"
+  },
+  {
+   "lines": [
+    226,
+    229
+   ],
+   "category": "readability",
+   "severity": "style",
+   "action": "fix",
+   "summary": "No interpretation follows the summary-statistics output before the next subsection heading; readers get a table of nine variables with no guidance on what it shows.",
+   "old": "# Display data summary\nprint(\"\\nSummary statistics:\")\ndata_house.describe()\n```",
+   "new": "# Display data summary\nprint(\"\\nSummary statistics:\")\ndata_house.describe()\n```\n\n**Interpreting the summary statistics:** The 29 Davis houses sold for an average of about \\$253,910 (ranging from \\$204,000 to \\$375,000) and average about 1,883 square feet, with 3.8 bedrooms and 2.2 bathrooms; the typical house is about 36 years old. Keep this small sample size in mind — with only 29 observations, coefficients on six regressors will be imprecisely estimated.",
+   "evidence": "Execution dump CELL 2: mean price 253,910.34, min 204,000, max 375,000, mean size 1,882.76, bedrooms 3.79, bathrooms 2.21, age 36.41, n = 29. Lens R rule: interpretation required after notable output.",
+   "confidence": "medium",
+   "id": "ch10-F52"
+  },
+  {
+   "lines": [
+    387,
+    391
+   ],
+   "category": "readability",
+   "severity": "style",
+   "action": "fix",
+   "summary": "The coefficient/CI table's key finding (only size is significant) is buried in a trailing code comment; no markdown interpretation appears between the cell and Key Concept 10.4.",
+   "old": "print(\"Coefficients with 95% Confidence Intervals:\")\ncoef_table\n\n# Size is the only statistically significant predictor (p < 0.05)\n```",
+   "new": "print(\"Coefficients with 95% Confidence Intervals:\")\ncoef_table\n\n# Size is the only statistically significant predictor (p < 0.05)\n```\n\n**Interpreting the table:** Size is the only statistically significant predictor (t = 4.44, p < 0.001), with a 95% confidence interval of roughly \\$36 to \\$100 per square foot. Every other coefficient has a confidence interval that comfortably includes zero — once size is controlled for, bedrooms, bathrooms, lot size, age, and month sold add little explanatory power in this small sample.",
+   "evidence": "Execution dump CELL 7: size t = 4.4426, p = 0.000205, CI [36.45, 100.29]; all other regressors have p ≥ 0.259 and CIs spanning zero. Lens R rule: interpretation required after notable output.",
+   "confidence": "medium",
+   "id": "ch10-F53"
+  },
+  {
+   "lines": [
+    475,
+    476
+   ],
+   "category": "readability",
+   "severity": "style",
+   "action": "fix",
+   "summary": "The model-fit-statistics output (R², adjusted R², Root MSE, R² = corr² verification) is followed directly by the next subsection heading with no interpretation.",
+   "old": "print(f\"  Match: {np.isclose(corr_y_yhat**2, model_full._r2)}\")\n```",
+   "new": "print(f\"  Match: {np.isclose(corr_y_yhat**2, model_full._r2)}\")\n```\n\n**Interpreting the fit statistics:** The six regressors explain about 65% of the variation in price, but the adjusted $R^2$ of 0.555 reveals that much of that gain is a mechanical reward for adding variables. The Root MSE of roughly \\$24,936 is the typical prediction error — sizable relative to an average price of about \\$253,910. The verification confirms that $R^2$ equals the squared correlation between actual and fitted prices.",
+   "evidence": "Execution dump CELL 9: R² 0.650553, adjusted R² 0.555249, Root MSE $24,935.73, Corr(y,ŷ)² = 0.650553 = R². Lens R rule: interpretation required after notable output.",
+   "confidence": "medium",
+   "id": "ch10-F54"
+  },
+  {
+   "lines": [
+    583,
+    586
+   ],
+   "category": "readability",
+   "severity": "style",
+   "action": "fix",
+   "summary": "The perfect-collinearity demonstration output (pyfixest drops size_twice and re-reports the earlier model) gets no interpretation before the next subsection heading.",
+   "old": "except Exception as e:\n    print(f\"Error: {type(e).__name__}\")\n    print(f\"Message: {str(e)}\")\n```",
+   "new": "except Exception as e:\n    print(f\"Error: {type(e).__name__}\")\n    print(f\"Message: {str(e)}\")\n```\n\n**Interpreting the output:** pyfixest warns that `size_twice` was dropped due to multicollinearity — it carries no information beyond `size` itself. Notice that the remaining estimates are identical to the earlier `price ~ bedrooms + size` regression: dropping the redundant regressor restores an estimable model without changing anything else.",
+   "evidence": "Execution dump CELL 12: UserWarning '1 variables dropped due to multicollinearity ... [size_twice]'; reported coefficients (Intercept 111,690.856; size 72.408; bedrooms 1,553.458) exactly match the earlier price ~ bedrooms + size fit in CELL 3. Lens R rule: interpretation required after notable output.",
+   "confidence": "medium",
+   "id": "ch10-F55"
+  },
+  {
+   "lines": [
+    202
+   ],
+   "category": "format",
+   "severity": "style",
+   "action": "fix",
+   "summary": "Section header uses colon after section number; normalization table requires '## N.M Title' with colon removed and words verbatim.",
+   "old": "## 10.1: Example - House Price and Characteristics",
+   "new": "## 10.1 Example - House Price and Characteristics",
+   "evidence": "Brief Lens F normalization table row 1 (applies to ch10)",
+   "confidence": "high",
+   "id": "ch10-F56"
+  },
+  {
+   "lines": [
+    268
+   ],
+   "category": "format",
+   "severity": "style",
+   "action": "fix",
+   "summary": "Section header uses colon after section number; remove colon only.",
+   "old": "## 10.2: Two-Way Scatterplots",
+   "new": "## 10.2 Two-Way Scatterplots",
+   "evidence": "Brief Lens F normalization table row 1 (applies to ch10)",
+   "confidence": "high",
+   "id": "ch10-F57"
+  },
+  {
+   "lines": [
+    298
+   ],
+   "category": "format",
+   "severity": "style",
+   "action": "fix",
+   "summary": "Section header uses colon after section number; remove colon only.",
+   "old": "## 10.3: Correlation Analysis",
+   "new": "## 10.3 Correlation Analysis",
+   "evidence": "Brief Lens F normalization table row 1 (applies to ch10)",
+   "confidence": "high",
+   "id": "ch10-F58"
+  },
+  {
+   "lines": [
+    334
+   ],
+   "category": "format",
+   "severity": "style",
+   "action": "fix",
+   "summary": "Section header uses colon after section number; remove colon only.",
+   "old": "## 10.4: Multiple Regression Estimation",
+   "new": "## 10.4 Multiple Regression Estimation",
+   "evidence": "Brief Lens F normalization table row 1 (applies to ch10)",
+   "confidence": "high",
+   "id": "ch10-F59"
+  },
+  {
+   "lines": [
+    397
+   ],
+   "category": "format",
+   "severity": "style",
+   "action": "fix",
+   "summary": "Section header uses colon after section number; remove colon only (heading words, including ' - The FWL Theorem', stay verbatim).",
+   "old": "## 10.5: Partial Effects - The FWL Theorem",
+   "new": "## 10.5 Partial Effects - The FWL Theorem",
+   "evidence": "Brief Lens F normalization table row 1 (applies to ch10)",
+   "confidence": "high",
+   "id": "ch10-F60"
+  },
+  {
+   "lines": [
+    430
+   ],
+   "category": "format",
+   "severity": "style",
+   "action": "fix",
+   "summary": "Section header uses colon after section number; remove colon only.",
+   "old": "## 10.6: Model Fit Statistics",
+   "new": "## 10.6 Model Fit Statistics",
+   "evidence": "Brief Lens F normalization table row 1 (applies to ch10)",
+   "confidence": "high",
+   "id": "ch10-F61"
+  },
+  {
+   "lines": [
+    510
+   ],
+   "category": "format",
+   "severity": "style",
+   "action": "fix",
+   "summary": "Section header uses colon after section number; remove colon only.",
+   "old": "## 10.7: Model Comparison",
+   "new": "## 10.7 Model Comparison",
+   "evidence": "Brief Lens F normalization table row 1 (applies to ch10)",
+   "confidence": "high",
+   "id": "ch10-F62"
+  },
+  {
+   "lines": [
+    551
+   ],
+   "category": "format",
+   "severity": "style",
+   "action": "fix",
+   "summary": "Section header uses colon after section number; remove colon only.",
+   "old": "## 10.8: Inestimable Models and Multicollinearity",
+   "new": "## 10.8 Inestimable Models and Multicollinearity",
+   "evidence": "Brief Lens F normalization table row 1 (applies to ch10)",
+   "confidence": "high",
+   "id": "ch10-F63"
+  },
+  {
+   "lines": [
+    1279
+   ],
+   "category": "format",
+   "severity": "drift",
+   "action": "fix",
+   "summary": "Key Concept numbering skips 10.11 (sequence runs 10.10 then 10.12); renumber 10.12 to 10.11 to restore sequential numbering.",
+   "old": "> **Key Concept 10.12: High-Dimensional Satellite Features**",
+   "new": "> **Key Concept 10.11: High-Dimensional Satellite Features**",
+   "evidence": "KC sequence in ch10 .qmd: 10.1-10.10 (L264-L1147) then 10.12 (L1279), 10.13 (L1397); brief requires sequential KC numbering. Web-app safety check performed: grep of web-apps/_shared/strings/ch10.js and web-apps/ch10/template.html finds zero 'Key Concept' references, so renumbering is safe.",
+   "confidence": "high",
+   "id": "ch10-F64"
+  },
+  {
+   "lines": [
+    1397
+   ],
+   "category": "format",
+   "severity": "drift",
+   "action": "fix",
+   "summary": "Companion renumber for the 10.11 gap: Key Concept 10.13 becomes 10.12.",
+   "old": "> **Key Concept 10.13: Incremental Predictive Power**",
+   "new": "> **Key Concept 10.12: Incremental Predictive Power**",
+   "evidence": "Same gap as previous finding; grep of web-apps/_shared/strings/ch10.js and web-apps/ch10/template.html finds zero 'Key Concept' references, so renumbering is safe.",
+   "confidence": "high",
+   "id": "ch10-F65"
+  },
+  {
+   "lines": [
+    906
+   ],
+   "category": "format",
+   "severity": "style",
+   "action": "fix",
+   "summary": "Key Takeaways ends with a one-sentence lowercase '**Next steps:**' line instead of the ch01-style '**Next Steps:**' block with 3-5 bullets required by the normalization table for ch10.",
+   "old": "**Next steps:** Chapter 11 covers **statistical inference** for multiple regression — hypothesis tests, confidence intervals, and overall F-tests for model significance.",
+   "new": "**Next Steps:**\n\n- **Chapter 11**: Statistical inference for multiple regression — hypothesis tests, confidence intervals, and overall F-tests for model significance\n- **Chapter 12**: Further topics in multiple regression — robust standard errors and prediction intervals\n- **Chapter 13**: Case studies applying the multiple regression toolkit to real research questions\n- **Chapters 14-15**: Richer specifications — regression with indicator variables and with transformed variables",
+   "evidence": "Brief Lens F table row 'Missing **Next Steps:** block (3-5 bullets, ch01 style, end of Key Takeaways)' applies to ch10; ch01 pattern at ch01 .qmd L600-605 is '**Next Steps:**' + blank line + bullets. Bullet content drawn from actual chapter titles (ch11_Statistical_Inference_for_Multiple_Regression, ch12_Further_Topics_in_Multiple_Regression, ch13_Case_Studies_for_Multiple_Regression, ch14_Regression_with_Indicator_Variables, ch15_Regression_with_Transformed_Variables) and this chapter's own forward references at L906 and L1443.",
+   "confidence": "high",
+   "id": "ch10-F66"
+  },
+  {
+   "lines": [
+    1151
+   ],
+   "category": "format",
+   "severity": "style",
+   "action": "fix",
+   "summary": "Case Study 1 wrap-up header '### What You've Learned' is H3 (a sibling of the Case Study headings) while Case Study 2's wrap-up at L1433 is already H4; demote to H4 for heading-hierarchy consistency.",
+   "old": "### What You've Learned\n\nIn this case study, you applied the full multiple regression toolkit to cross-country productivity data:",
+   "new": "#### What You've Learned\n\nIn this case study, you applied the full multiple regression toolkit to cross-country productivity data:",
+   "evidence": "Heading inventory: L1151 '### What You've Learned' sits at the same level as '### Case Study 1' (L1009) and '### Case Study 2' (L1163), whereas the parallel wrap-up at L1433 is '#### What You've Learned from This Case Study'. Brief's general heading-hierarchy sanity check; same class of fix the table mandates for ch02/ch03/ch05/ch09 (H3→H4).",
+   "confidence": "medium",
+   "id": "ch10-F67"
+  },
+  {
+   "lines": [
+    51,
+    55
+   ],
+   "category": "format",
+   "severity": "style",
+   "action": "report",
+   "summary": "Chapter outline punctuation drifts from the (load-bearing) section headings: outline says '10.1 Example: House Price...' and '10.5 Partial Effects — The FWL Theorem' while the headings use '10.1 Example - House Price...' and '10.5 Partial Effects - The FWL Theorem' (colon vs hyphen, em dash vs hyphen).",
+   "evidence": "Outline L51 '- 10.1 Example: House Price and Characteristics' and L55 '- 10.5 Partial Effects — The FWL Theorem' vs headings at L202 and L397. Heading words are load-bearing and must stay verbatim, so any sync should change the outline lines to match the headings; reported rather than fixed because two defensible conventions exist (outline-as-is is also readable) and the campaign may prefer a global outline-punctuation convention.",
+   "confidence": "medium",
+   "id": "ch10-F68"
+  }
+ ],
+ "killed": []
+}

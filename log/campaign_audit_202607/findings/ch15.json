@@ -1,0 +1,693 @@
+{
+ "chapter": "ch15",
+ "file": "ch15_Regression_with_Transformed_Variables.qmd",
+ "findings": [
+  {
+   "lines": [
+    101,
+    106
+   ],
+   "category": "methods",
+   "severity": "error",
+   "action": "report",
+   "confidence": "high",
+   "summary": "The MEM Key Concept panel wrongly claims the marginal-effect-at-the-mean differs from the AME for the quadratic earnings-on-age model; for a quadratic the two are identical.",
+   "evidence": "For a quadratic, ME = beta2 + 2*beta3*age is LINEAR in age, so the sample average of ME_i equals ME evaluated at mean(age): AME = MEM exactly. Executed AME (dump CELL 7, L214) = $535.87 at mean age 43.3; MEM = 3104.916 + 2*(-29.6583)*43.31 = ~$536 -- the same number. The chapter's OWN AME formula at L427 ('AME = beta2 + 2*beta3*xbar') confirms AME is computed via the mean, i.e. AME=MEM here. The panel's assertion 'a marginal effect of roughly +$1,000 to +$1,500 per year ... different from the AME because the population is not concentrated at the mean' is therefore both numerically wrong ($536, not $1,000-$1,500) and conceptually wrong (MEM and AME coincide for a quadratic). AME/MEM diverge only when the ME curve is nonlinear in x. Suggested replacement for the L106 sentence: 'With the quadratic earnings-on-age fit, MEM is beta2 + 2*beta3*mean(age) -- using the chapter's mean age of about 43, giving a marginal effect of about +$536 per year for the average worker. Because the marginal effect is linear in age here, MEM and AME coincide exactly; the two diverge only when the marginal-effect curve is itself nonlinear in x (e.g., logit or log-odds models).' Note the AME example panel (L91) and the code label 'Average Marginal Effect (at mean age)' (L480) are consistent with AME=MEM, so only this MEM panel is at odds.",
+   "old": "",
+   "new": "",
+   "id": "ch15-F01",
+   "verify_note": "Mathematically decisive: ME_age = beta2 + 2*beta3*age is affine in age, so AME = mean(ME_i) = beta2 + 2*beta3*mean(age) = MEM exactly for a quadratic. Dump CELL 7 confirms the single value $535.87 at mean age 43.31 (= 3104.916 + 2*(-29.6583)*43.31). L106 panel is both numerically wrong ($1,000-$1,500 vs true $536) and conceptually wrong (asserts MEM != AME). L101 general definition is correct and not the target; finding correctly scopes the defect to the L106 example."
+  },
+  {
+   "lines": [
+    916,
+    921
+   ],
+   "category": "methods",
+   "severity": "error",
+   "action": "report",
+   "confidence": "medium",
+   "summary": "The interaction section attributes the conclusion 'education's effect is age-dependent' to a joint F-test that only establishes whether education matters at all, not whether the interaction is significant.",
+   "evidence": "The cited joint test is H0: beta_education = 0 AND beta_agebyeduc = 0 (executed statistic 86.0, p~2e-19, dump CELL 14 L313-316) -- rejecting it means at least one of education's two coefficients is nonzero, i.e. 'education matters'. It does NOT test the age-interaction. Age-dependence requires the interaction term itself to be significant, but the executed interaction coefficient is insignificant: agebyeduc = 29.04, t = 0.518, p = 0.605 (dump CELL 13, L302). So the bullet 'Education matters, but its effect is age-dependent' (L921) draws an inference the cited test does not support, and the executed data does not support age-dependence at all (the ME of education ramps only $5,241 -> $6,112 across ages 25-55, a 1.17x change, not the '4-5x' claimed). Recommend splitting the claim: the joint test supports only 'education matters overall'; the age-dependence is not statistically supported by the executed fit (interaction p=0.605).",
+   "old": "",
+   "new": "",
+   "id": "ch15-F02",
+   "verify_note": "The joint test H0: beta_education=0 AND beta_agebyeduc=0 (CELL 14 chi2=86.0, p=2.1e-19, 'Tests whether education matters at all') establishes only that education has some effect; age-dependence requires beta_agebyeduc != 0, which is insignificant (t=0.518, p=0.605). Concluding 'its effect is age-dependent' (L921) from that joint test is a logical non-sequitur. Ramp 6112/5241 = 1.17x, not 4-5x. Action=report; defect real."
+  },
+  {
+   "lines": [
+    1620,
+    1620
+   ],
+   "category": "methods",
+   "severity": "error",
+   "action": "fix",
+   "confidence": "low",
+   "summary": "Key Concept 15.9 mislocates the quadratic turning point as where 'decreasing marginal returns' begin; for a concave quadratic diminishing returns hold throughout, and beyond the turning point returns are negative.",
+   "evidence": "In a concave quadratic (ln_lp ~ ln_rk + hc + hc_sq, beta_hc2 < 0), the marginal effect dln_lp/dhc = beta_hc + 2*beta_hc2*hc DECREASES for all hc (diminishing returns everywhere), and hc* = -beta_hc/(2*beta_hc2) is where the marginal effect crosses zero -- beyond it further human capital REDUCES productivity (negative marginal returns), not merely 'decreasing' returns. The current wording implies diminishing returns only start at hc*, which is imprecise.",
+   "old": "The turning point $hc^* = -\\beta_{hc}/(2\\beta_{hc^2})$ identifies the level beyond which further human capital accumulation has decreasing marginal returns.",
+   "new": "The turning point $hc^* = -\\beta_{hc}/(2\\beta_{hc^2})$ identifies the level beyond which further human capital accumulation has *negative* marginal returns -- productivity actually falls; below that point returns are positive but already diminishing.",
+   "id": "ch15-F03",
+   "verify_note": "For a concave quadratic (beta_hc2<0), ME = beta_hc + 2*beta_hc2*hc decreases for all hc (diminishing returns everywhere), crossing zero at hc* and turning NEGATIVE beyond it. Original 'decreasing marginal returns beyond hc*' is imprecise since returns diminish on both sides; what is distinctive beyond hc* is negative returns (output falls). Proposed fix ('negative marginal returns -- productivity actually falls; below that point returns are positive but already diminishing') is econometrically correct. Weakest of the set (subtle, exercise-section KC) but the fix is a genuine, correct precision improvement."
+  },
+  {
+   "lines": [
+    321,
+    321
+   ],
+   "category": "methods",
+   "severity": "style",
+   "action": "fix",
+   "confidence": "low",
+   "summary": "Key Concept 15.1 states the log-linear semi-elasticity as an exact '100*beta2 % change' without the 'approximately' / exact-effect caveat, unlike the chapter's own overview at L267 and the canonical phrasing.",
+   "evidence": "Canonical log-linear interpretation (brief Lens A, ch09 s9.2): '~100*beta % change per unit, accurate for |beta|<0.1; exact effect 100*(e^beta-1)%'. The chapter's Section 15.2 overview (L267) does say 'approximately', but KC 15.1 states it as exact. This matters in this chapter because the same rule is applied to the gender dummy (beta=-0.1928, |beta|>0.1) where the linear approximation (-19.3%) overstates the exact effect 100*(e^-0.1928 - 1) = -17.5%.",
+   "old": "a 1-unit increase in $x$ is associated with a $100 \\times \\beta_2$% change in $y$",
+   "new": "a 1-unit increase in $x$ is associated with approximately a $100 \\times \\beta_2$% change in $y$ (the exact effect is $100(e^{\\beta_2}-1)$%, which matters once $|\\beta_2| > 0.1$)",
+   "id": "ch15-F04",
+   "verify_note": "Aligns KC 15.1 with canonical log-linear phrasing (brief Lens A / ch09 s9.2): '~100*beta, accurate for |beta|<0.1, exact 100*(e^beta-1)%'. Chapter's own overview L267 already says 'approximately'. Material here: gender beta=-0.1928 (CELL 18) gives linear -19.3% vs exact 100(e^-0.1928-1) = -17.5%. Old string ('1-unit increase') is unique to L321 (L1265 uses 'change'). Fix text correct."
+  },
+  {
+   "lines": [
+    1265,
+    1265
+   ],
+   "category": "methods",
+   "severity": "style",
+   "action": "fix",
+   "confidence": "low",
+   "summary": "The Key Takeaways log-linear bullet states the semi-elasticity as an exact '100*beta2 % change' without the 'approximately' / exact-effect caveat.",
+   "evidence": "Same canonical log-linear phrasing as KC 15.1 (brief Lens A): the semi-elasticity is an approximation ('~100*beta') accurate for small |beta|, with exact effect 100*(e^beta-1)%. Consistency with the chapter's own overview wording at L267 ('approximately') and with the fix proposed for KC 15.1.",
+   "old": "a 1-unit change in $x$ is associated with a $100 \\times \\beta_2$% change in $y$",
+   "new": "a 1-unit change in $x$ is associated with approximately a $100 \\times \\beta_2$% change in $y$ (exact effect: $100(e^{\\beta_2}-1)$%)",
+   "id": "ch15-F05",
+   "verify_note": "Same canonical-phrasing alignment as F04, applied to the Key Takeaways bullet. Old string ('1-unit change') unique to L1265. Proposed 'approximately ... (exact effect: 100(e^beta2-1)%)' is correct and consistent with the F04 fix."
+  },
+  {
+   "lines": [
+    400,
+    400
+   ],
+   "category": "code",
+   "severity": "error",
+   "action": "fix",
+   "summary": "The comparison table DataFrame is built but never displayed because `.to_string()` is a discarded middle expression followed by a print(), so the section's intended table output is silently dropped.",
+   "evidence": "Execution dump CELL 5 shows only the line 'Note: R² values are NOT directly comparable across models with different' — the comparison_table is absent. In Jupyter only the last expression auto-displays; here the last statement is the print(), so `comparison_table.to_string(index=False)` produces a string that is neither printed nor returned. Section is titled '### Comparison Table and Model Selection'.",
+   "old": "comparison_table.to_string(index=False)",
+   "new": "print(comparison_table.to_string(index=False))",
+   "confidence": "high",
+   "id": "ch15-F06",
+   "verify_note": "CELL 5 dump shows only the 'Note: R²...' print line; comparison_table is never displayed because .to_string(index=False) is a discarded middle expression (not the last line). old text unique (1 match). Fix wrapping in print() correctly surfaces the table."
+  },
+  {
+   "lines": [
+    1577,
+    1577
+   ],
+   "category": "code",
+   "severity": "error",
+   "action": "fix",
+   "summary": "Case Study 1 loader references nonexistent Mendez column `rk`; the actual physical-capital column is `kl` (capital per worker).",
+   "evidence": "Loaded https://raw.githubusercontent.com/quarcs-lab/mendez2020-convergence-clubs-code-data/master/assets/dat.csv — columns are ['id','country','year','Y','K','pop','L','s','alpha_it','GDPpc','lp','h','kl','kp','ky','TFP',...]. 'rk' is False, 'hc' is False, 'kl' is True, 'h' is True. A student copying this into Colab gets a KeyError. Matches the pre-verified ch09 seed mapping rk→kl, hc→h.",
+   "old": "dat2014['ln_rk'] = np.log(dat2014['rk'])",
+   "new": "dat2014['ln_kl'] = np.log(dat2014['kl'])",
+   "confidence": "high",
+   "id": "ch15-F07",
+   "verify_note": "Live Mendez dataset columns verified: rk=False, hc=False, kl=True, h=True, lp=True, region=True. 'rk' would raise KeyError. old text matches line 1577 exactly once; rk->kl is the economically correct capital-per-worker regressor for a labor-productivity model and matches ch09 seed."
+  },
+  {
+   "lines": [
+    1594,
+    1596
+   ],
+   "category": "code",
+   "severity": "error",
+   "action": "fix",
+   "summary": "Case Study 1 Task 1 regressions reference nonexistent column `rk`/`ln_rk`; should use `kl`/`ln_kl`.",
+   "evidence": "Verified against the live Mendez dataset: column is `kl`, not `rk` ('rk' in d.columns == False; 'kl' in d.columns == True). Consistent with ch09 seed finding (rk→kl). Code as written raises KeyError when run in Colab.",
+   "old": "m1 = pf.feols('lp ~ rk', data=dat2014, vcov='HC1')\nm2 = pf.feols('ln_lp ~ rk', data=dat2014, vcov='HC1')\nm3 = pf.feols('ln_lp ~ ln_rk', data=dat2014, vcov='HC1')",
+   "new": "m1 = pf.feols('lp ~ kl', data=dat2014, vcov='HC1')\nm2 = pf.feols('ln_lp ~ kl', data=dat2014, vcov='HC1')\nm3 = pf.feols('ln_lp ~ ln_kl', data=dat2014, vcov='HC1')",
+   "confidence": "high",
+   "id": "ch15-F08",
+   "verify_note": "rk absent from live data; kl present. old 3-line block matches lines 1594-1596 exactly once. New maps lp~kl / ln_lp~kl / ln_lp~ln_kl (ln_kl defined by F07). Runnable and consistent."
+  },
+  {
+   "lines": [
+    1609,
+    1613
+   ],
+   "category": "code",
+   "severity": "error",
+   "action": "fix",
+   "summary": "Case Study 1 Task 2 quadratic-human-capital code references nonexistent columns `hc` and `ln_rk`; should use `h` and `ln_kl`.",
+   "evidence": "Verified against the live Mendez dataset: human-capital column is `h` and physical-capital column is `kl` ('hc' == False, 'h' == True, 'rk' == False, 'kl' == True). Consistent with ch09 seed (hc→h, rk→kl). As written the cell raises KeyError on dat2014['hc'].",
+   "old": "dat2014['hc_sq'] = dat2014['hc'] ** 2\nm4 = pf.feols('ln_lp ~ ln_rk + hc', data=dat2014, vcov='HC1')\nm5 = pf.feols('ln_lp ~ ln_rk + hc + hc_sq', data=dat2014, vcov='HC1')\nm5.summary()\nprint(f\"Turning point: hc* = {-m5.coef()['hc'] / (2*m5.coef()['hc_sq']):.2f}\")",
+   "new": "dat2014['h_sq'] = dat2014['h'] ** 2\nm4 = pf.feols('ln_lp ~ ln_kl + h', data=dat2014, vcov='HC1')\nm5 = pf.feols('ln_lp ~ ln_kl + h + h_sq', data=dat2014, vcov='HC1')\nm5.summary()\nprint(f\"Turning point: h* = {-m5.coef()['h'] / (2*m5.coef()['h_sq']):.2f}\")",
+   "confidence": "high",
+   "id": "ch15-F09",
+   "verify_note": "hc absent, h present; rk absent, kl present. old block matches lines 1609-1613 exactly once. New (h_sq, ln_kl, h) is self-consistent and depends on ln_kl from F07; turning-point formula updated correctly."
+  },
+  {
+   "lines": [
+    1588,
+    1590
+   ],
+   "category": "code",
+   "severity": "error",
+   "action": "fix",
+   "summary": "Case Study 1 Task 1 prose lists model specifications using the nonexistent column `rk`; should be `kl` to match runnable code.",
+   "evidence": "The backtick formulas are the exact pyfixest specifications students are told to estimate. Column `rk` does not exist in the Mendez dataset (verified: 'rk' == False, 'kl' == True), so these specs must reference `kl`/`ln_kl` to be runnable and consistent with the corrected code cells.",
+   "old": "- Levels: `lp ~ rk`\n- Log-linear: `ln_lp ~ rk`\n- Log-log: `ln_lp ~ ln_rk`",
+   "new": "- Levels: `lp ~ kl`\n- Log-linear: `ln_lp ~ kl`\n- Log-log: `ln_lp ~ ln_kl`",
+   "confidence": "high",
+   "id": "ch15-F10",
+   "verify_note": "Prose spec list at lines 1588-1590 matches exactly once; rk->kl corrects the nonexistent-column references to match the runnable code."
+  },
+  {
+   "lines": [
+    1580,
+    1580
+   ],
+   "category": "code",
+   "severity": "error",
+   "action": "fix",
+   "summary": "Case Study 1 variable dictionary names columns `rk`/`hc` that do not exist in the Mendez dataset; correct identifiers are `kl`/`h`.",
+   "evidence": "Live dataset columns verified: 'rk' and 'hc' are absent; 'kl' (capital per worker) and 'h' (human capital) are present. The dictionary must document the identifiers the code actually uses.",
+   "old": "**Variables:** `lp` (labor productivity), `rk` (physical capital), `hc` (human capital), `region` (world region)",
+   "new": "**Variables:** `lp` (labor productivity), `kl` (capital per worker), `h` (human capital), `region` (world region)",
+   "confidence": "high",
+   "id": "ch15-F11",
+   "verify_note": "Variable dictionary at line 1580 matches exactly once. rk/hc absent from live data; kl (capital per worker)/h (human capital) present. Relabeling rk 'physical capital' -> kl 'capital per worker' is accurate."
+  },
+  {
+   "lines": [
+    1642,
+    1642
+   ],
+   "category": "code",
+   "severity": "error",
+   "action": "fix",
+   "summary": "Case Study 1 Task 4 hint gives a pyfixest formula using nonexistent columns `ln_rk` and `hc`; should use `ln_kl` and `h`.",
+   "evidence": "The backtick formula `ln_lp ~ ln_rk + hc * C(region)` references columns absent from the Mendez dataset (verified: 'rk'/'hc' False; 'kl'/'h' True). It must use ln_kl and h to be runnable and consistent with the rest of the case study.",
+   "old": "- Use `ln_lp ~ ln_rk + hc * C(region)` to include region-hc interactions",
+   "new": "- Use `ln_lp ~ ln_kl + h * C(region)` to include region-hc interactions",
+   "confidence": "high",
+   "id": "ch15-F12",
+   "verify_note": "Task 4 hint at line 1642 matches exactly once; ln_rk/hc -> ln_kl/h fixes nonexistent columns while keeping region (which exists)."
+  },
+  {
+   "lines": [
+    76,
+    76
+   ],
+   "category": "results",
+   "severity": "drift",
+   "action": "fix",
+   "summary": "KC 'Marginal Effect' example cites linear ME ~$1,000 and quadratic ME +$3,000/−$1,000, but the chapter's executed fits give $525 (levels age coef) and +$1,622/−$454.",
+   "evidence": "Cell 4: levels age coef = 525.00. Cell 7 / recompute: quad ME at 25 = $1,622, at 60 = −$454, turning point 52.3.",
+   "confidence": "high",
+   "old": "the linear model gives a constant marginal effect of `age` of about \\$1{,}000 per year. The chapter's quadratic fit replaces it with $ME_{\\text{age}} = \\beta_2 + 2\\beta_3 \\cdot \\text{age}$ — about $+\\$3{,}000$ at age 25, $\\$0$ at the turning point near age 50, and $-\\$1{,}000$ at age 60.",
+   "new": "the linear model gives a constant marginal effect of `age` of about \\$525 per year. The chapter's quadratic fit replaces it with $ME_{\\text{age}} = \\beta_2 + 2\\beta_3 \\cdot \\text{age}$ — about $+\\$1{,}600$ at age 25, $\\$0$ at the turning point near age 52, and $-\\$450$ at age 60.",
+   "id": "ch15-F13",
+   "verify_note": "Levels age coef=525 (Cell 4), ME(25)=1622, turning=52.35, ME(60)=-454 (recomputed). old text unique. Fix values $525 / +$1,600 / near age 52 / -$450 all correct."
+  },
+  {
+   "lines": [
+    91,
+    91
+   ],
+   "category": "results",
+   "severity": "drift",
+   "action": "fix",
+   "summary": "KC 'AME' example states the AME lies between a +$3,000 young effect and a −$1,000 old effect; executed quadratic ME endpoints are +$1,622 (age 25) and −$454 (age 60).",
+   "evidence": "Recompute: ME(25)=$1,622, ME(60)=−$454; AME/MEM = $535.87 (Cell 7) lands between the corrected endpoints.",
+   "confidence": "high",
+   "old": "The AME for `age` lands between the high-young-worker effect (+\\$3{,}000) and the negative-old-worker effect (–\\$1{,}000)",
+   "new": "The AME for `age` lands between the high-young-worker effect (+\\$1{,}600) and the negative-old-worker effect (–\\$450)",
+   "id": "ch15-F14",
+   "verify_note": "ME(25)=1622, ME(60)=-454; AME=$535.87 (Cell 7) lands between corrected endpoints. old text unique. Fix +$1,600 / -$450 correct."
+  },
+  {
+   "lines": [
+    106,
+    106
+   ],
+   "category": "results",
+   "severity": "error",
+   "action": "report",
+   "summary": "KC 'MEM' example claims a marginal effect of roughly +$1,000 to +$1,500/yr for the average worker and that MEM differs from AME, but executed MEM = $536 and for a quadratic (ME linear in age) MEM equals AME exactly.",
+   "evidence": "Cell 7: 'Average Marginal Effect (at mean age 43.3): $535.87' — this is MEM; because ME=β2+2β3·age is linear in age, MEM=AME=$535.87, so both the +$1,000–$1,500 figure and the 'different from the AME' claim are unsupported.",
+   "confidence": "high",
+   "old": "That gives a marginal effect of roughly $+\\$1{,}000$ to $+\\$1{,}500$ per year for the \"average worker\", different from the AME because the population is *not* concentrated at the mean.",
+   "id": "ch15-F15",
+   "verify_note": "Report defect real: Cell 7 gives MEM at mean age=$535.87, not $1,000-$1,500. Because ME=b2+2b3*age is linear in age, AME=MEM exactly, so 'different from the AME' is mathematically false. old anchor unique."
+  },
+  {
+   "lines": [
+    121,
+    121
+   ],
+   "category": "results",
+   "severity": "error",
+   "action": "report",
+   "summary": "KC 'MER' attributes ME_education of +$2,500/+$7,000/+$11,500 and a '4–5× ramp' to the chapter's interaction model, but the executed model gives $5,241/$5,677/$6,112 — a flat 1.17× ramp from a statistically insignificant interaction.",
+   "evidence": "Cell 13: ME educ = 4,515 + 29.0·age → $5,241 (age25), $5,677 (age40), $6,112 (age55); ramp 6112/5241 = 1.17×; agebyeduc coef 29.0 has t=0.518, p=0.605. The '4–5× ramp' conclusion flips.",
+   "confidence": "high",
+   "old": "reports $ME_{\\text{education}}$ at three representative ages: $+\\$2{,}500$ per education-year at age 25, $+\\$7{,}000$ at age 40, and $+\\$11{,}500$ at age 55 — a 4–5× ramp in the return to schooling across the working life.",
+   "id": "ch15-F16",
+   "verify_note": "Report defect real: Cell 13 ME educ = 5241/5677/6112 (ramp 1.17x), not 2500/7000/11500 (4-5x); agebyeduc t=0.518, p=0.605 insignificant. old anchor unique."
+  },
+  {
+   "lines": [
+    151,
+    151
+   ],
+   "category": "results",
+   "severity": "error",
+   "action": "report",
+   "summary": "KC 'Standardised Variable' example claims education and lnhours are the largest standardised effects, but executed β* are largest for age (0.68) and agesq (−0.57).",
+   "evidence": "Cell 11 standardized coefficients: age 0.6803, agesq −0.5736, education 0.3023, lnhours 0.2238; age is the largest single β*, so 'Education and lnhours come out as the largest' is incorrect.",
+   "confidence": "medium",
+   "old": "Education and `lnhours` come out as the largest standardised effects.",
+   "id": "ch15-F17",
+   "verify_note": "Cell 11 standardized |beta*|: age 0.6803 largest, agesq 0.5736, education 0.3023 (3rd), lnhours 0.2238 (4th). Chapter's own printed ranking contradicts 'Education and lnhours come out as the largest'. old anchor unique."
+  },
+  {
+   "lines": [
+    166,
+    166
+   ],
+   "category": "results",
+   "severity": "drift",
+   "action": "fix",
+   "summary": "KC 'Smearing Estimator' example uses s_e≈0.42, naive ~$48k, actual mean ~$52k, factor 1.092; executed values are s_e=0.615, naive $45.8k, actual mean $56.4k, factor 1.208, adjusted $55.4k.",
+   "evidence": "Cell 16: RMSE 0.6153, factor exp(0.6153²/2)=1.2084, actual mean $56,368.69, biased $45,838.14, adjusted $55,391.15.",
+   "confidence": "high",
+   "old": "($s_e \\approx 0.42$), naive retransformation $\\exp(\\widehat{\\ln y})$ gives a sample-mean prediction of about \\$48k — well below the actual mean of \\$52k. The normality-based factor $\\exp(0.42^2/2) \\approx 1.092$ recovers \\$52k;",
+   "new": "($s_e \\approx 0.62$), naive retransformation $\\exp(\\widehat{\\ln y})$ gives a sample-mean prediction of about \\$46k — well below the actual mean of \\$56k. The normality-based factor $\\exp(0.62^2/2) \\approx 1.21$ recovers about \\$55k;",
+   "id": "ch15-F18",
+   "verify_note": "Cell 16: RMSE 0.6153, factor exp(0.6153^2/2)=1.2084, actual $56,369, naive $45,838, adjusted $55,391. old text unique. Fix s_e~0.62 / $46k / $56k / 1.21 / $55k all correct."
+  },
+  {
+   "lines": [
+    362,
+    363
+   ],
+   "category": "results",
+   "severity": "error",
+   "action": "fix",
+   "summary": "Prose says the log-log ln(age) coefficient is ≈0.5 to 1.0 (a 1% age increase → 0.5–1.0% earnings), but the executed elasticity is 0.3457, which the code cell itself prints as '0.35%'.",
+   "evidence": "Cell 4: ln(age) coef = 0.3457; printed line '(a 1% increase in age -> 0.35% increase in earnings)'. The 0.5–1.0 range excludes 0.35.",
+   "confidence": "high",
+   "old": "- **ln(Age) coefficient** ≈ 0.5 to 1.0\n - Interpretation: A **1% increase in age** increases earnings by approximately **0.5-1.0%**",
+   "new": "- **ln(Age) coefficient** ≈ 0.35\n - Interpretation: A **1% increase in age** increases earnings by approximately **0.35%**",
+   "id": "ch15-F19",
+   "verify_note": "Cell 4 ln(age) coef=0.3457, code prints 0.35%. Range 0.5-1.0 excludes it. old 2-line block matches lines 362-363 exactly once. Fix 0.35 correct."
+  },
+  {
+   "lines": [
+    514,
+    517
+   ],
+   "category": "results",
+   "severity": "drift",
+   "action": "fix",
+   "summary": "Narrative quadratic marginal-effect list (+$3,000 at 25, +$1,000 at 40, −$1,000 at 60) is ~2× the executed values.",
+   "evidence": "Cell 7 / recompute: ME at 25=$1,622, 40=$732, 50=$139, 60=−$454.",
+   "confidence": "high",
+   "old": " - At age 25: ME ≈ +\\$3,000 (steep increase)\n - At age 40: ME ≈ +\\$1,000 (slower increase)\n - At age 50: ME ≈ \\$0 (peak earnings)\n - At age 60: ME ≈ -\\$1,000 (earnings decline)",
+   "new": " - At age 25: ME ≈ +\\$1,600 (steep increase)\n - At age 40: ME ≈ +\\$700 (slower increase)\n - At age 50: ME ≈ \\$0 (peak earnings)\n - At age 60: ME ≈ -\\$450 (earnings decline)",
+   "id": "ch15-F20",
+   "verify_note": "Recomputed ME: 25=1622, 40=732, 50=139(~0, near peak), 60=-454. old 4-line block matches lines 514-517 exactly once. Fix +$1,600/+$700/$0/-$450 correct."
+  },
+  {
+   "lines": [
+    538,
+    538
+   ],
+   "category": "results",
+   "severity": "error",
+   "action": "fix",
+   "summary": "Prose claims the joint test on age & agesq gives 'F > 100', but the executed joint test statistic is 18.58.",
+   "evidence": "Cell 8: statistic 18.583806, pvalue 0.000092 (chi2, 2 df). F>100 is false; significance (p<0.001) is preserved.",
+   "confidence": "high",
+   "old": "is **highly significant** (F > 100, p < 0.001):",
+   "new": "is **highly significant** (F ≈ 19, p < 0.001):",
+   "id": "ch15-F21",
+   "verify_note": "Cell 8 joint-test statistic=18.58 (p=0.000092), not F>100. old text unique. Fix 'F ≈ 19' matches printed statistic (18.58 rounds to 19); significance preserved. (Statistic is technically Wald chi2 per warning, but magnitude fix is correct.)"
+  },
+  {
+   "lines": [
+    742,
+    755
+   ],
+   "category": "results",
+   "severity": "error",
+   "action": "report",
+   "summary": "Standardized-coefficient narrative ranks Education as the strongest predictor with age β*≈0.15–0.20, but executed β* make age (0.68) and agesq (−0.57) by far the largest, with education third (0.30).",
+   "evidence": "Cell 11: age 0.6803, agesq −0.5736, education 0.3023, lnhours 0.2238, gender −0.1379. 'Age (β*≈0.15 to 0.20)' and 'Education … Strongest predictor' both contradict the executed ranking.",
+   "confidence": "high",
+   "old": "3. **Age** ($\\beta^* \\approx 0.15$ to $0.20$):",
+   "id": "ch15-F22",
+   "verify_note": "Report defect real: Cell 11 gives age beta*=0.68 (largest), agesq -0.57, education 0.30 (3rd). Narrative 'Age beta*≈0.15-0.20' and 'Education strongest predictor' contradict executed output. old anchor line 752 unique."
+  },
+  {
+   "lines": [
+    883,
+    902
+   ],
+   "category": "results",
+   "severity": "error",
+   "action": "report",
+   "summary": "Interaction-model narrative uses stale coefficients (education −$10,000 to −$5,000 'often negative', interaction +$200 to +$400) and derives ME +$2,500/+$7,000/+$11,500 with a '4–5× larger' payoff, all contradicted by the executed positive-and-flat fit.",
+   "evidence": "Cell 13: education coef = +4,514.99 (positive, p=0.060), agebyeduc = +29.04 (p=0.605); ME educ $5,241→$6,112 across ages 25–55 (1.17×), not 4–5×. Both magnitude and the 'returns strongly increase with age' significance conclusion flip.",
+   "confidence": "high",
+   "old": "- Education ($\\beta_3$): Around **-\\$10,000 to -\\$5,000** (often negative!)\n- Age × Education ($\\beta_4$): Around **+\\$200 to +\\$400** (positive)",
+   "id": "ch15-F23",
+   "verify_note": "Report defect real: Cell 13 education coef=+4,515 (positive, p=0.060) not -$10k to -$5k; agebyeduc=+29 (p=0.605) not +$200-$400; ME 5241->6112 (1.17x) not 2500->11500 (4-5x). old block at lines 883-884 unique."
+  },
+  {
+   "lines": [
+    927,
+    928
+   ],
+   "category": "results",
+   "severity": "error",
+   "action": "fix",
+   "summary": "Prose reports interaction-regressor correlations ≈0.95 and ≈0.90 ('very high!'), but the same code cell prints 0.729 and 0.636.",
+   "evidence": "Cell 15: Correlation(age, agebyeduc)=0.729; Correlation(education, agebyeduc)=0.636.",
+   "confidence": "high",
+   "old": "- Corr(age, age×education) ≈ **0.95** (very high!)\n- Corr(education, age×education) ≈ **0.90** (very high!)",
+   "new": "- Corr(age, age×education) ≈ **0.73** (high)\n- Corr(education, age×education) ≈ **0.64** (moderately high)",
+   "id": "ch15-F24",
+   "verify_note": "Cell 15 prints Corr(age,agebyeduc)=0.729, Corr(education,agebyeduc)=0.636. old 2-line block at lines 927-928 unique. Fix 0.73/0.64 correct."
+  },
+  {
+   "lines": [
+    1086,
+    1088
+   ],
+   "category": "results",
+   "severity": "drift",
+   "action": "fix",
+   "summary": "'Empirical Evidence' block reports actual mean ~$52,000, naive ~$48,000 underpredicting ~$4,000 (8%); executed values are $56,369 / $45,838, an $10,531 (18.7%) underprediction.",
+   "evidence": "Cell 16: actual $56,368.69, biased $45,838.14, adjusted $55,391.15; underprediction 18.7%.",
+   "confidence": "high",
+   "old": "- **Actual mean earnings**: ~\\$52,000\n- **Naive retransformation**: ~\\$48,000 (underpredicts by ~\\$4,000 or **8%**)\n- **Adjusted retransformation**: ~\\$52,000 (matches actual mean!)",
+   "new": "- **Actual mean earnings**: ~\\$56,000\n- **Naive retransformation**: ~\\$46,000 (underpredicts by ~\\$10,500 or **19%**)\n- **Adjusted retransformation**: ~\\$55,000 (matches actual mean!)",
+   "id": "ch15-F25",
+   "verify_note": "Cell 16: actual $56,369, naive $45,838, adjusted $55,391; underpred 18.7%. old 3-line block matches lines 1086-1088 uniquely (distinct from code print at 1051). Fix $56k/$46k/~$10,500/19%/$55k correct."
+  },
+  {
+   "lines": [
+    1101,
+    1103
+   ],
+   "category": "results",
+   "severity": "drift",
+   "action": "fix",
+   "summary": "'Example Calculation' states s_e≈0.40–0.45, factor exp(0.42²/2)≈1.092, 9.2% too low; executed s_e=0.615 gives factor 1.208, ~21% too low.",
+   "evidence": "Cell 16: RMSE 0.6153, exp(0.6153²/2)=1.2084 (20.8%).",
+   "confidence": "high",
+   "old": "- RMSE ($s_e$) ≈ **0.40** to **0.45**\n- Adjustment factor = $\\exp(0.42^2/2) = \\exp(0.088) \\approx **1.092**\n- Predictions are about **9.2% too low** without adjustment!",
+   "new": "- RMSE ($s_e$) ≈ **0.62**\n- Adjustment factor = $\\exp(0.62^2/2) = \\exp(0.19) \\approx **1.21**\n- Predictions are about **21% too low** without adjustment!",
+   "id": "ch15-F26",
+   "verify_note": "Cell 16: RMSE 0.6153, factor 1.2084. old 3-line block matches lines 1101-1103 exactly once. Fix 0.62 / 1.21 / 21% correct; '21% too low' follows the doc's own (factor-1) convention used by the original 1.092->9.2%."
+  },
+  {
+   "lines": [
+    335,
+    336
+   ],
+   "category": "results",
+   "severity": "drift",
+   "action": "report",
+   "summary": "Levels-model age effect is described as ≈$800–$1,200 (~$1,000) per year here and '+$1,000/year' at L527, but the executed levels age coefficient is 525.",
+   "evidence": "Cell 4: 'earnings = -46,875 + 525.00 x age + 5811.37 x education'; age coef = 525, ~half the stated ~$1,000 (range $800–$1,200 excludes it). Same overstatement recurs at line 527.",
+   "confidence": "medium",
+   "old": "- **Age coefficient** ≈ \\$800-\\$1,200 per year\n - Interpretation: Each additional year of age increases earnings by approximately **\\$1,000**",
+   "id": "ch15-F27",
+   "verify_note": "Report defect real: Cell 4 levels age coef=525.00, well below stated $800-$1,200 / ~$1,000 (also recurs at line 527). old anchor at lines 335-336 unique."
+  },
+  {
+   "lines": [
+    347,
+    348
+   ],
+   "category": "results",
+   "severity": "drift",
+   "action": "report",
+   "summary": "Log-linear age coefficient is described as ≈0.01–0.02 (1–2%), but the executed semi-elasticity is 0.0078 (~0.8%/yr), which the code prints as coef 0.008.",
+   "evidence": "Cell 4: log-linear age coef = 0.0078; summary table shows age 0.008. The 0.01–0.02 range excludes 0.008 and '1–2%' overstates the ~0.78% effect.",
+   "confidence": "low",
+   "old": "- **Age coefficient** ≈ 0.01 to 0.02\n - Interpretation: Each additional year of age increases earnings by approximately **1-2%**",
+   "id": "ch15-F28",
+   "verify_note": "Report defect real: Cell 4 log-linear age coef=0.0078 (~0.78%), below stated 0.01-0.02 range and less than '1-2%'. old anchor lines 347-348 unique. Minor but genuinely outside the stated range."
+  },
+  {
+   "lines": [
+    883,
+    902
+   ],
+   "category": "interpretation",
+   "severity": "error",
+   "action": "report",
+   "confidence": "high",
+   "summary": "The entire §15.5 narrative claims returns to education rise 4-5× with age, driven by a negative education main effect and a large positive interaction — but the fitted model shows the opposite and the interaction is statistically insignificant.",
+   "evidence": "Dump CELL 13: education main effect = +$4,514.99 (positive; prose L883 says “often negative,” −$10k to −$5k), agebyeduc = +$29.04 (prose L884 says +$200 to +$400) with t=0.518, p=0.605 (insignificant); ME of education = 4,515 + 29.0×age gives $5,241 at 25, $5,677 at 40, $6,112 at 55 — a 1.17× ramp, not the prose’s $2,500→$11,500 “4-5 times larger.” The joint education F-test (CELL 14 Test 2, p≈2e-19) is significant only because education itself is significant; it does NOT establish age-dependence, so “its effect is age-dependent” (L921) and the policy conclusions at L936-948 (“older workers benefit most,” “wage gap widens with age”) rest on an insignificant interaction.",
+   "old": "1. **Returns to education INCREASE with age**\n - Young workers (age 25): +\\$2,500 per year of education\n - Older workers (age 55): +\\$11,500 per year of education\n - Education payoff is **4-5 times larger** for older workers!",
+   "new": "1. **Returns to education barely change with age in this sample**\n - Young workers (age 25): +\\$5,241 per year of education\n - Older workers (age 55): +\\$6,112 per year of education\n - The interaction coefficient is small (+\\$29/year) and statistically insignificant (t = 0.5, p = 0.61), so there is no reliable evidence that the return to schooling rises with age here.",
+   "id": "ch15-F29",
+   "verify_note": "Executed CELL 13: education main effect = +$4,514.99 (positive; prose L883 says 'often negative', -$10k to -$5k), agebyeduc = +$29.04 (prose L884 says +$200 to +$400), t=0.518 p=0.605 (insignificant). ME ramp $5,241->$6,112 = 1.17x, not $2,500->$11,500 (4-5x). Not a labeled misconception block -- presented as a genuine 'fascinating finding' with policy implications, so not intentional pedagogy. Proposed new numbers ($5,241, $6,112, +$29/yr, t=0.5, p=0.61) all match the dump. Action=report; defect real and fix accurate."
+  },
+  {
+   "lines": [
+    742,
+    769
+   ],
+   "category": "interpretation",
+   "severity": "error",
+   "action": "report",
+   "confidence": "high",
+   "summary": "The standardized-coefficient section concludes “Education dominates / strongest predictor” and ranks age as only “moderate” (β*≈0.15-0.20), contradicting the section’s own printed output where age has by far the largest standardized coefficient.",
+   "evidence": "Dump CELL 11 prints β*: age 0.6803, agesq −0.5736, education 0.3023, lnhours 0.2238, gender −0.1379. Age (0.68) and age² (0.57) are the two largest in magnitude; education (0.30) is only third. So “Education dominates: Strongest predictor” (L769, L742) and “Age (β* ≈ 0.15 to 0.20): Moderate importance” (L752-753) are both false against the output the section is interpreting. (Note: age’s large β* is partly a quadratic artifact of the age/age² pair — the author should decide how to frame this, hence report.)",
+   "old": "1. **Education dominates**: Strongest predictor, supporting human capital theory",
+   "new": "1. **Age dominates numerically**: In this model age and age² carry the largest standardized coefficients (β* ≈ 0.68 and −0.57); education (β* ≈ 0.30) is the strongest *single* continuous predictor once the quadratic age terms are set aside. Interpret the age β* with care, since age and age² move together.",
+   "id": "ch15-F30",
+   "verify_note": "Dump CELL 11 (model WITH agesq): age 0.6803, agesq -0.5736, education 0.3023, lnhours 0.2238. Age/agesq are the two largest std coefs, contradicting 'Education dominates: Strongest predictor' (L769) and 'Age beta*~0.15-0.20 moderate' (L752-753). Fix for the L769 bullet is correct and appropriately hedges the age/age^2 collinearity. Incompleteness note (report action): the ranking list at L742-765 also carries the wrong claims -- especially L752-753 age beta* '0.15-0.20' (should be ~0.68) and L742-743/L747-748 education 'strongest'/hours 'second' -- and should be reconciled in the same edit."
+  },
+  {
+   "lines": [
+    105,
+    106
+   ],
+   "category": "interpretation",
+   "severity": "error",
+   "action": "report",
+   "confidence": "high",
+   "summary": "The MEM Key Concept example claims the marginal effect at the mean differs from the AME for the quadratic earnings model, but for a quadratic the marginal effect is linear in age, so AME and MEM are mathematically identical here.",
+   "evidence": "ME_age = β₂ + 2β₃·age is linear in age, so AME = mean(ME_i) = β₂ + 2β₃·mean(age) = MEM exactly. Dump CELL 7 computes this single value, $535.87 (labeled “Average Marginal Effect (at mean age 43.3)”) — i.e., the code itself uses one formula for both. The stated value “+$1,000 to +$1,500” is also ~2–3× too high (true ≈$536). AME≠MEM only bites for genuinely nonlinear ME curves (logit, cubic+), not this quadratic.",
+   "old": "That gives a marginal effect of roughly $+\\$1{,}000$ to $+\\$1{,}500$ per year for the \"average worker\", different from the AME because the population is *not* concentrated at the mean.",
+   "new": "That gives a marginal effect of about $+\\$536$ per year for the \"average worker\". For a *quadratic* model the marginal effect is linear in age, so here MEM equals the AME exactly; the two diverge only when the marginal-effect curve is itself nonlinear (as in logit or higher-order polynomial models).",
+   "id": "ch15-F31",
+   "verify_note": "Same defect as F01, with a fix. MEM = 3104.916 + 2*(-29.6583)*43.31 = $535.87 (dump CELL 7), so '$536' is exact and 'MEM equals AME exactly for a quadratic; diverge only when the ME curve is nonlinear' is correct. Proposed old->new is an accurate replacement."
+  },
+  {
+   "lines": [
+    121,
+    121
+   ],
+   "category": "interpretation",
+   "severity": "error",
+   "action": "report",
+   "confidence": "high",
+   "summary": "The MER Key Concept glossary example presents a “4–5× ramp in the return to schooling across the working life” as established fact, but the underlying interaction is insignificant and the real ramp is ~1.2×.",
+   "evidence": "Dump CELL 13: ME of education = 4,515 + 29.0×age gives $5,241 (age 25), $5,677 (age 40), $6,112 (age 55) — a 1.17× ramp, not the glossary’s $2,500/$7,000/$11,500 “4–5× ramp.” The interaction coefficient is statistically insignificant (t=0.52, p=0.605), so the glossary’s vivid MER illustration rests on an effect indistinguishable from zero.",
+   "old": "$+\\$11{,}500$ at age 55 — a 4–5× ramp in the return to schooling across the working life",
+   "new": "$+\\$6{,}112$ at age 55 — only about a 1.2× change across the working life (and the underlying age×education interaction is not statistically significant, p ≈ 0.61)",
+   "id": "ch15-F32",
+   "verify_note": "Defect real: L121 presents a '4-5x ramp' as established fact; actual ME_educ = $5,241/$5,677/$6,112 (1.17x) with an insignificant interaction (p=0.605). Fix for age-55 ($6,112, ~1.2x, p~0.61 caveat) is correct. Incompleteness note (report action): the proposed old string leaves the earlier two values in the same sentence stale -- '+$2,500 at age 25' should be +$5,241 and '+$7,000 at age 40' should be +$5,677 -- so a complete edit must also replace those two figures."
+  },
+  {
+   "lines": [
+    151,
+    151
+   ],
+   "category": "interpretation",
+   "severity": "error",
+   "action": "report",
+   "confidence": "high",
+   "summary": "The Standardised-Variable glossary example asserts that education and lnhours are the largest standardised effects, but age and age² have the largest standardised coefficients in that model.",
+   "evidence": "Dump CELL 11 β*: age 0.6803, agesq −0.5736, education 0.3023, lnhours 0.2238. The two largest in magnitude are age and age², not education and lnhours. (Same root issue as the §15.4 ranking; the author should reconcile the age/age² quadratic-artifact framing, hence report.)",
+   "old": "Education and `lnhours` come out as the largest standardised effects.",
+   "new": "Age and its squared term come out as the largest standardised effects; among the remaining regressors, education and `lnhours` have the largest standardised coefficients.",
+   "id": "ch15-F33",
+   "verify_note": "Dump CELL 11: age 0.6803 and agesq -0.5736 are the largest std effects; education 0.3023 and lnhours 0.2238 are only 3rd/4th. So 'Education and lnhours come out as the largest standardised effects' (L151) is false. Proposed fix ('Age and its squared term ... largest; among the remaining regressors, education and lnhours ...') is accurate. Action=report."
+  },
+  {
+   "lines": [
+    453,
+    456
+   ],
+   "category": "readability",
+   "severity": "style",
+   "action": "fix",
+   "summary": "The turning-point / marginal-effects cell follows the quadratic-fit cell with no markdown lead-in between them.",
+   "evidence": "Rule (Lens R): every non-Setup code cell needs a >=1-sentence lead-in saying what it does and what to look for. L454 closes the quadratic cell and L456 immediately opens the next code cell with no prose in between. Executed values: turning point 52.3 yrs; ME at 25 = $1,622, at 55 = -$157.",
+   "confidence": "high",
+   "old": "fit_quad.summary()\n```\n\n```{python}\n# TURNING POINT AND MARGINAL EFFECTS",
+   "new": "fit_quad.summary()\n```\n\nWith the quadratic fit in hand, we extract its economic content: the age at which earnings peak (the turning point) and the marginal effect of age evaluated at several representative ages. Watch how the marginal effect starts large and positive for young workers and turns negative once age passes the turning point.\n\n```{python}\n# TURNING POINT AND MARGINAL EFFECTS",
+   "id": "ch15-F34"
+  },
+  {
+   "lines": [
+    664,
+    667
+   ],
+   "category": "readability",
+   "severity": "style",
+   "action": "fix",
+   "summary": "The standardized-coefficients cell follows the mixed-model cell with no markdown lead-in between them.",
+   "evidence": "Rule (Lens R): every non-Setup code cell needs a >=1-sentence lead-in. L665 closes the mixed-regressor model cell and L667 immediately opens the standardized-coefficients cell with no prose in between. Executed largest |beta*|: age 0.68, agesq -0.57, education 0.30.",
+   "confidence": "high",
+   "old": "fit_linear_mix.summary()\n```\n\n```{python}\n# STANDARDIZED COEFFICIENTS",
+   "new": "fit_linear_mix.summary()\n```\n\nThe raw coefficients above are measured in different units (dollars per year, dollars per log-hour, dollars per dummy), so their magnitudes are not directly comparable. Next we rescale each coefficient into standard-deviation units. Look for which variable has the largest absolute standardized coefficient -- that is the strongest predictor on a common scale.\n\n```{python}\n# STANDARDIZED COEFFICIENTS",
+   "id": "ch15-F35"
+  },
+  {
+   "lines": [
+    1209,
+    1211
+   ],
+   "category": "readability",
+   "severity": "style",
+   "action": "fix",
+   "summary": "Section 15.7 jumps from its header straight into the comprehensive-model code cell with no introductory prose.",
+   "evidence": "Rule (Lens R): every non-Setup code cell needs a >=1-sentence lead-in. L1209 is the section header and L1211 opens the code cell directly, with only a blank line between and no descriptive sentence for the chapter's capstone model. Executed: education ~9.3%, lnhours elasticity 0.975, R2 0.281.",
+   "confidence": "high",
+   "old": "\n\n```{python}\n# Comprehensive Model With Mixed Regressor Types",
+   "new": "\n\nThis capstone model brings together every transformation from the chapter -- a dummy (gender), a quadratic (age and agesq), a log dependent variable (lnearnings), a log regressor (lnhours), and a plain level (education) -- in a single specification. As you read the output, interpret each coefficient according to its own transformation type, and check that the education return (~9%) and hours elasticity (~1) line up with the log-model interpretations from the earlier sections.\n\n```{python}\n# Comprehensive Model With Mixed Regressor Types",
+   "id": "ch15-F36"
+  },
+  {
+   "lines": [
+    218,
+    218
+   ],
+   "category": "format",
+   "severity": "style",
+   "action": "fix",
+   "summary": "Section header 15.1 uses colon after number; normalization table requires colon removed.",
+   "evidence": "Lens F normalization table: `## N.M: Title` → `## N.M Title` (remove colon ONLY; words verbatim) applies to ch15.",
+   "old": "## 15.1: Example - Earnings and Education",
+   "new": "## 15.1 Example - Earnings and Education",
+   "confidence": "high",
+   "id": "ch15-F37"
+  },
+  {
+   "lines": [
+    252,
+    252
+   ],
+   "category": "format",
+   "severity": "style",
+   "action": "fix",
+   "summary": "Section header 15.2 uses colon after number; remove colon.",
+   "evidence": "Lens F normalization table: `## N.M: Title` → `## N.M Title` for ch15.",
+   "old": "## 15.2: Logarithmic Transformations",
+   "new": "## 15.2 Logarithmic Transformations",
+   "confidence": "high",
+   "id": "ch15-F38"
+  },
+  {
+   "lines": [
+    410,
+    410
+   ],
+   "category": "format",
+   "severity": "style",
+   "action": "fix",
+   "summary": "Section header 15.3 uses colon after number; remove colon.",
+   "evidence": "Lens F normalization table: `## N.M: Title` → `## N.M Title` for ch15.",
+   "old": "## 15.3: Polynomial Regression (Quadratic Models)",
+   "new": "## 15.3 Polynomial Regression (Quadratic Models)",
+   "confidence": "high",
+   "id": "ch15-F39"
+  },
+  {
+   "lines": [
+    626,
+    626
+   ],
+   "category": "format",
+   "severity": "style",
+   "action": "fix",
+   "summary": "Section header 15.4 uses colon after number; remove colon.",
+   "evidence": "Lens F normalization table: `## N.M: Title` → `## N.M Title` for ch15.",
+   "old": "## 15.4: Standardized Variables",
+   "new": "## 15.4 Standardized Variables",
+   "confidence": "high",
+   "id": "ch15-F40"
+  },
+  {
+   "lines": [
+    823,
+    823
+   ],
+   "category": "format",
+   "severity": "style",
+   "action": "fix",
+   "summary": "Section header 15.5 uses colon after number; remove colon.",
+   "evidence": "Lens F normalization table: `## N.M: Title` → `## N.M Title` for ch15.",
+   "old": "## 15.5: Interaction Terms and Marginal Effects",
+   "new": "## 15.5 Interaction Terms and Marginal Effects",
+   "confidence": "high",
+   "id": "ch15-F41"
+  },
+  {
+   "lines": [
+    1004,
+    1004
+   ],
+   "category": "format",
+   "severity": "style",
+   "action": "fix",
+   "summary": "Section header 15.6 uses colon after number; remove colon.",
+   "evidence": "Lens F normalization table: `## N.M: Title` → `## N.M Title` for ch15.",
+   "old": "## 15.6: Retransformation Bias and Prediction",
+   "new": "## 15.6 Retransformation Bias and Prediction",
+   "confidence": "high",
+   "id": "ch15-F42"
+  },
+  {
+   "lines": [
+    1209,
+    1209
+   ],
+   "category": "format",
+   "severity": "style",
+   "action": "fix",
+   "summary": "Section header 15.7 uses colon after number; remove colon.",
+   "evidence": "Lens F normalization table: `## N.M: Title` → `## N.M Title` for ch15.",
+   "old": "## 15.7: Comprehensive Model with Mixed Regressors",
+   "new": "## 15.7 Comprehensive Model with Mixed Regressors",
+   "confidence": "medium",
+   "id": "ch15-F43"
+  },
+  {
+   "lines": [
+    42,
+    44
+   ],
+   "category": "format",
+   "severity": "style",
+   "action": "fix",
+   "summary": "Front-matter 'Datasets used' label is plural but the block lists exactly one dataset; make singular for grammatical agreement.",
+   "evidence": "Lens F rule: \"Dataset(s) used\": grammatical agreement (singular iff one dataset). The block lists only AED_EARNINGS_COMPLETE.DTA.",
+   "old": "**Datasets used:**\n\n- **AED_EARNINGS_COMPLETE.DTA**: 872 workers aged 25-65 in 2000",
+   "new": "**Dataset used:**\n\n- **AED_EARNINGS_COMPLETE.DTA**: 872 workers aged 25-65 in 2000",
+   "confidence": "medium",
+   "id": "ch15-F44"
+  }
+ ],
+ "killed": []
+}

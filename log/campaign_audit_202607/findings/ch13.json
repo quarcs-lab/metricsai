@@ -1,0 +1,1040 @@
+{
+ "chapter": "ch13",
+ "file": "ch13_Case_Studies_for_Multiple_Regression.qmd",
+ "findings": [
+  {
+   "lines": [
+    1533,
+    1537
+   ],
+   "category": "methods",
+   "severity": "error",
+   "action": "fix",
+   "summary": "The 'Why the Difference?' block claims omitted variables and reverse causation bias OLS toward zero, but both would bias the OLS institutions coefficient upward — only measurement error attenuates it.",
+   "old": " **Attenuation bias**: OLS is biased toward zero due to:\n\n - Measurement error in institutions quality\n - Omitted variables (culture, geography)\n - Reverse causation (rich countries build better institutions)",
+   "new": " **Attenuation bias**: OLS is biased toward zero by **measurement error** in the institutions-quality measure.\n\n Omitted variables (culture, geography) and reverse causation (rich countries build better institutions) would, if anything, bias OLS **upward** — so the fact that the IV estimate is even larger points to measurement error as the dominant source of bias.",
+   "evidence": "Lens A rule: OVB direction claims must argue both parts. Favorable geography/culture and reverse causation (income → institutions) each correlate positively with institutions and raise GDP, producing UPWARD OLS bias; only measurement error attenuates toward zero (standard AJR 2001 argument). The chapter's own web-app string (ch13.js widget.iv.try) already states it correctly: 'attenuation from measurement error in institutions quality'. No stated conclusion flips (IV 0.944 > OLS 0.522 per dump CELL 27).",
+   "confidence": "high",
+   "id": "ch13-F01",
+   "verify_note": "Real methods error. In the AJR (2001) setup, only classical measurement error in avexpr attenuates OLS toward zero; a positive OVB (favorable geography/culture raising both institutions and GDP) and reverse causation (GDP -> institutions, positive) each make Cov(avexpr,u)>0, biasing OLS UPWARD. Since IV 0.944 > OLS 0.522 (dump CELL 27), attenuation must dominate. The original text wrongly lists all three as reasons OLS is 'biased toward zero.' Proposed replacement is the correct standard AJR argument; old string matches L1533-1537 verbatim."
+  },
+  {
+   "lines": [
+    1506,
+    1507
+   ],
+   "category": "methods",
+   "severity": "error",
+   "action": "fix",
+   "summary": "The printed OLS-vs-IV comparison repeats the same misattribution: 'measurement error and omitted variables bias OLS toward zero' — omitted variables here bias OLS upward, not toward zero.",
+   "old": "print(f\"\\nIV estimate is larger → OLS has attenuation bias\")\nprint(f\"(measurement error and omitted variables bias OLS toward zero)\")",
+   "new": "print(f\"\\nIV estimate is larger → OLS has attenuation bias\")\nprint(f\"(measurement error in institutions quality biases OLS toward zero;\")\nprint(f\" omitted variables and reverse causation would bias OLS upward)\")",
+   "evidence": "Same direction-of-bias error as the prose block at L1533-1537 (Lens A rule: OVB direction claims must argue both parts). Executed output (dump CELL 27) currently prints the incorrect parenthetical verbatim. Web-app widget.iv.try attributes attenuation to measurement error only.",
+   "confidence": "high",
+   "id": "ch13-F02",
+   "verify_note": "Same direction-of-bias error, printed in code. Dump CELL 27 (L566) currently emits '(measurement error and omitted variables bias OLS toward zero)'. Omitted variables/reverse causation bias OLS upward, not toward zero; only measurement error attenuates. The proposed three-print replacement is methodologically correct and matches L1506-1507 exactly. Splitting one print into three is harmless."
+  },
+  {
+   "lines": [
+    682,
+    684
+   ],
+   "category": "methods",
+   "severity": "error",
+   "action": "report",
+   "summary": "Key Concept 13.5 states the OVB equals the omitted variable's coefficient 'times its correlation with the included regressor', but the bias term is β₃×γ where γ is the auxiliary-regression SLOPE, not a correlation.",
+   "evidence": "The chapter's own formula block (L690-697) defines γ correctly as the 'coefficient from regressing expected inflation on Urate (auxiliary regression)'; executed γ = 0.343 (dump CELL 20) is a regression slope, not a correlation coefficient. REPORT rather than fix because web-apps/_shared/strings/ch13.js widget.phillips.kc repeats the identical 'γ is the correlation between the omitted variable and the included regressor' wording in EN/ES/JA — a .qmd-only fix would desync the web app; needs a coordinated wording change (e.g., 'times the slope from regressing the omitted variable on the included regressor') in both places.",
+   "confidence": "medium",
+   "id": "ch13-F03",
+   "verify_note": "Real technical imprecision. The OVB bias term is beta3*gamma where gamma is the auxiliary-regression SLOPE (Cov/Var), not the correlation; bias = beta3*corr only if SD(omitted)=SD(included). The chapter's own formula block (L697) and executed gamma=0.343 (dump CELL 20) define gamma as a regression coefficient, so KC 13.5's 'times its correlation' is internally inconsistent. Report (not fix) is appropriate given the web-app strings repeat the wording in EN/ES/JA and need coordinated change."
+  },
+  {
+   "lines": [
+    449,
+    472
+   ],
+   "category": "methods",
+   "severity": "style",
+   "action": "report",
+   "summary": "The CRS test is a classical RSS-based F-test that assumes iid errors, immediately after the chapter declares default iid SEs 'WRONG here!' and mandates HAC for this time series — an internal methods inconsistency left unacknowledged.",
+   "evidence": "Code at L463-467 computes F = ((RSS_r − RSS_unr)/1)/(RSS_unr/(n−k)) with stats.f.cdf (classical iid F; dump CELL 12: F=0.20, p=0.663), while §13.2 prose at L437-439 says 'Default SEs: Assume errors are uncorrelated and homoskedastic (WRONG here!)' and 'HAC SEs: Fix BOTH problems (correct choice for time series)'. A HAC-robust Wald test of β₂+β₃=1 would be the consistent choice; alternatively a one-sentence caveat noting the subtraction F-test assumes homoskedastic, serially uncorrelated errors. The RSS-subtraction test follows AED's presentation, so this is a plausibly-intentional adaptation (also repeated in the cheat sheet at L1756-1765) → report, not fix. Conclusion would not flip (fail to reject CRS either way).",
+   "confidence": "medium",
+   "id": "ch13-F04",
+   "verify_note": "The inconsistency is factually real and unacknowledged: the CRS test (L462-467) is a classical RSS-difference F-test valid only under iid homoskedastic errors, computed immediately after L437-439 declares default iid SEs 'WRONG here!' for this time series and mandates HAC. A HAC-robust Wald test of beta2+beta3=1 would be the consistent choice. Soft, report-level point (severity=style); the RSS-subtraction F-test is a defensible AED-faithful pedagogical device and the conclusion does not flip (F=0.20, p=0.663, fail to reject CRS either way). Confirmed as a legitimate unacknowledged tension worth a one-sentence caveat."
+  },
+  {
+   "lines": [
+    346,
+    350
+   ],
+   "category": "methods",
+   "severity": "style",
+   "action": "fix",
+   "summary": "§13.2 uses α for total factor productivity while Key Concept 13.2/13.3, the chapter-opening glossary, and the cheat sheet all use A for TFP and α for the CAPITAL ELASTICITY — the same symbol carries two conflicting meanings in one chapter.",
+   "old": "$$Q = \\alpha K^{\\beta_2} L^{\\beta_3}$$\n\n**Parameters:**\n\n- $\\alpha$: Total factor productivity (technology level)",
+   "new": "$$Q = A K^{\\beta_2} L^{\\beta_3}$$\n\n**Parameters:**\n\n- $A$: Total factor productivity (technology level)",
+   "evidence": "Glossary at L75 writes $Q = A K^{\\beta_2} L^{\\beta_3}$; KC 13.2 (L411) writes $Q = AK^\\alpha L^\\beta$ with α = capital elasticity; KC 13.3 (L476) tests $\\alpha + \\beta = 1$; cheat sheet L1737/L1748 uses 'Q = A*K^alpha*L^beta' and alpha = capital elasticity. Renaming §13.2's TFP symbol from α to A removes the double duty and harmonizes with all other occurrences; no numbers or headings touched.",
+   "confidence": "high",
+   "id": "ch13-F05",
+   "verify_note": "Real notation clash: L346/L350/L366 use alpha for TFP, while KC 13.2 (L411), KC 13.3 (L476) and the cheat sheet (L1748) use alpha for the CAPITAL ELASTICITY and A for TFP. Renaming the TFP symbol to A exactly matches the chapter glossary form at L75 ($Q = A K^{\\beta_2} L^{\\beta_3}$) and removes the double meaning; the section already uses beta2/beta3 for the elasticities, so no new clash is introduced. Old string matches L346-350."
+  },
+  {
+   "lines": [
+    366
+   ],
+   "category": "methods",
+   "severity": "style",
+   "action": "fix",
+   "summary": "Companion edit to the α→A TFP renaming: the log-linearized intercept definition still references ln(α).",
+   "old": "where $\\beta_1 = \\ln(\\alpha)$. Now we can use **ordinary least squares (OLS)** regression!",
+   "new": "where $\\beta_1 = \\ln(A)$. Now we can use **ordinary least squares (OLS)** regression!",
+   "evidence": "Same notation clash as L346/L350: α means capital elasticity in KC 13.2/13.3 and the cheat sheet, so the TFP constant should be A here too (as in the L75 glossary).",
+   "confidence": "high",
+   "id": "ch13-F06",
+   "verify_note": "Correct companion edit to F05. With TFP renamed alpha->A, the log-linearized intercept must read beta1 = ln(A), consistent with L364 (ln Q = beta1 + beta2 lnK + beta3 lnL) and the glossary/KC where ln A is the intercept. Old string matches L366 exactly."
+  },
+  {
+   "lines": [
+    908
+   ],
+   "category": "methods",
+   "severity": "style",
+   "action": "fix",
+   "summary": "R² claim says the model 'explains 78% of MPG variation' but the dependent variable is log MPG (lmpg), so R² measures explained variation in log MPG.",
+   "old": "R² ≈ 0.78 means the model explains 78% of MPG variation",
+   "new": "R² ≈ 0.78 means the model explains 78% of the variation in log MPG",
+   "evidence": "Dump CELL 23: 'Dep. var.: lmpg', R2: 0.777. Lens A rule: R² = proportion of variation in y explained; y here is log MPG, not MPG.",
+   "confidence": "high",
+   "id": "ch13-F07",
+   "verify_note": "Dependent variable is lmpg = log MPG (dump CELL 23, R2=0.777). R2 measures the fraction of variation in y explained, and y is log MPG, so 'explains 78% of MPG variation' is wrong; 'variation in log MPG' is correct (Lens A). 0.78 rounding is fine. Old string matches L908."
+  },
+  {
+   "lines": [
+    959
+   ],
+   "category": "methods",
+   "severity": "style",
+   "action": "fix",
+   "summary": "RCT bullet 'Any difference in outcomes is caused by insurance' overstates randomization — chance differences remain, which is why the chapter itself runs an F-test; only systematic differences are attributable to treatment.",
+   "old": "- Any difference in outcomes is caused by insurance\n- **Selection bias eliminated!**",
+   "new": "- Any systematic difference in outcomes is caused by insurance\n- **Selection bias eliminated!**",
+   "evidence": "The bullet two lines above correctly says groups are 'identical in expectation', and the chapter tests H0: all plan coefficients = 0 (dump CELL 24: F = 11.39) precisely because sampling variability must be ruled out; as written the bullet implies no significance testing is needed.",
+   "confidence": "medium",
+   "id": "ch13-F08",
+   "verify_note": "Legitimate rigor refinement. Randomization makes groups identical only in expectation (as the bullet two lines above states, L957), so in a finite sample only SYSTEMATIC differences are attributable to treatment - which is exactly why the chapter runs the joint F-test (F=11.39, dump CELL 24). 'Any difference in outcomes is caused by insurance' overstates by ignoring sampling variability; adding 'systematic' is correct standard RCT language. Soft style point but the fix is accurate and harmless. Old string matches L959-960."
+  },
+  {
+   "lines": [
+    48,
+    54
+   ],
+   "category": "code",
+   "severity": "error",
+   "action": "fix",
+   "summary": "The 'Datasets used' bullets list seven dataset filenames that do not exist at the data URL (HTTP 404); the code loads differently-named files, so students copying these names get download errors.",
+   "old": "- **AED_CobbDouglas.DTA**: 24 years of U.S. manufacturing data (1899–1922) — Case Study 13.2\n- **AED_PhillipsCurve.DTA**: 66 years of U.S. macroeconomic data (1949–2014) — Case Study 13.3\n- **AED_AutoEfficiency.DTA**: 26,995 vehicles, fuel efficiency data (1980–2006) — Case Study 13.4\n- **AED_RandHealthInsurance.DTA**: RAND health insurance experiment (RCT) — Case Study 13.5\n- **AED_SouthAfricaHealth.DTA**: South Africa cross-sectional health data (DiD) — Case Study 13.6\n- **AED_SenateIncumbency.DTA**: U.S. Senate election results (RD) — Case Study 13.7\n- **AED_InstitutionsGDP.DTA**: Cross-country institutions and GDP data (IV) — Case Study 13.8",
+   "new": "- **AED_COBBDOUGLAS.DTA**: 24 years of U.S. manufacturing data (1899–1922) — Case Study 13.2\n- **AED_PHILLIPS.DTA**: 66 years of U.S. macroeconomic data (1949–2014) — Case Study 13.3\n- **AED_AUTOSMPG.DTA**: 26,995 vehicles, fuel efficiency data (1980–2006) — Case Study 13.4\n- **AED_HEALTHINSEXP.DTA**: RAND health insurance experiment (RCT) — Case Study 13.5\n- **AED_HEALTHACCESS.DTA**: South Africa cross-sectional health data (DiD) — Case Study 13.6\n- **AED_INCUMBENCY.DTA**: U.S. Senate election results (RD) — Case Study 13.7\n- **AED_INSTITUTIONS.DTA**: Cross-country institutions and GDP data (IV) — Case Study 13.8",
+   "evidence": "curl HEAD against https://raw.githubusercontent.com/quarcs-lab/data-open/master/AED/: AED_CobbDouglas.DTA, AED_PhillipsCurve.DTA, AED_AutoEfficiency.DTA, AED_RandHealthInsurance.DTA, AED_SouthAfricaHealth.DTA, AED_SenateIncumbency.DTA, AED_InstitutionsGDP.DTA all return 404; the filenames the chapter code actually loads (AED_COBBDOUGLAS.DTA, AED_PHILLIPS.DTA, AED_AUTOSMPG.DTA, AED_HEALTHINSEXP.DTA, AED_HEALTHACCESS.DTA, AED_INCUMBENCY.DTA, AED_INSTITUTIONS.DTA) all return 200 and load successfully per exec dump cells 9, 14, 21, 24, 25, 26, 27.",
+   "confidence": "high",
+   "id": "ch13-F09",
+   "verify_note": "Listed dataset filenames (AED_CobbDouglas.DTA etc.) differ from the CamelCase-vs-UPPERCASE names the code actually loads (AED_COBBDOUGLAS.DTA line 372, AED_PHILLIPS.DTA 531, AED_AUTOSMPG.DTA 777, AED_HEALTHINSEXP.DTA 974, AED_HEALTHACCESS.DTA 1154, AED_INCUMBENCY.DTA 1317, AED_INSTITUTIONS.DTA 1461). New text matches the loaded names exactly. Old block matches lines 48-54 uniquely."
+  },
+  {
+   "lines": [
+    205,
+    213
+   ],
+   "category": "code",
+   "severity": "error",
+   "action": "fix",
+   "summary": "The 'Key Variables' list documents five column names that do not exist in AED_API99.DTA (mealpct, elpct, yrs_teach, totcredpc, emrpct) and misdescribes edparent as a 1-5 scale when it is measured in years.",
+   "old": "**Key Variables:**\n\n- `api99`: Academic Performance Index (outcome variable)\n- `edparent`: Average parental education level (1-5 scale)\n- `mealpct`: Percent of students eligible for free/reduced meals (poverty proxy)\n- `elpct`: Percent of English language learners\n- `yrs_teach`: Average teacher experience in years\n- `totcredpc`: Per-pupil total credentials\n- `emrpct`: Percent of emergency credential teachers",
+   "new": "**Key Variables:**\n\n- `api99`: Academic Performance Index (outcome variable)\n- `edparent`: Average parental education in years\n- `meals`: Percent of students eligible for free/reduced meals (poverty proxy)\n- `englearn`: Percent of English language learners\n- `yearround`: Indicator for year-round school calendar\n- `credteach`: Percent of fully credentialed teachers\n- `emerteach`: Percent of emergency credential teachers",
+   "evidence": "Exec dump cell 2: actual columns are ['sch_code','api99','edparent','meals','englearn','yearround','credteach','emerteach','avg_ed_raw',...]; mealpct/elpct/yrs_teach/totcredpc/emrpct do not exist. Dump cell 3: edparent min 9.62, max 16.0, mean 12.84 — years of schooling, not a 1-5 scale (avg_ed_raw is the 1-5 scale, head values 2.89-3.97). The chapter's own regression cell prints 'each additional year of parent education' (dump cell 5). All regression cells use meals/englearn/yearround/credteach/emerteach.",
+   "confidence": "high",
+   "id": "ch13-F10",
+   "verify_note": "Dump cell 2 columns confirm mealpct/elpct/yrs_teach/totcredpc/emrpct do not exist; edparent min 9.62/max 16.0 (dump cell 3) => years, not 1-5. Fix descriptions all match data (yearround binary, credteach/emerteach percents). Old text matches lines 205-213 uniquely. Note: overlaps/duplicates F22 which fixes the same block with slightly different wording; only one should be applied."
+  },
+  {
+   "lines": [
+    300,
+    315
+   ],
+   "category": "code",
+   "severity": "error",
+   "action": "fix",
+   "summary": "The correlation-matrix interpretation block cites nonexistent column names (mealpct, elpct) and a nonexistent 'teacher experience' variable, and every quoted correlation value disagrees with the executed correlation matrix (values corrected here alongside the names).",
+   "old": "**Strong negative correlations** (darker blues):\n\n- `api99` and `mealpct` (-0.90): Schools with more poverty have much lower test scores\n- `api99` and `elpct` (-0.76): More English learners → lower scores\n- These suggest **socioeconomic factors strongly predict performance**\n\n**Positive correlations** (reds):\n\n- `api99` and `edparent` (0.76): Parental education strongly predicts scores\n- Teacher experience and credentials show weaker correlations\n\n**Multicollinearity concerns:**\n\n- `mealpct` and `edparent` are highly correlated (-0.79)\n- This makes it difficult to separate their individual effects\n- Standard errors may be inflated in multiple regression",
+   "new": "**Strong negative correlations** (darker blues):\n\n- `api99` and `meals` (-0.54): Schools with more poverty have lower test scores\n- `api99` and `englearn` (-0.66): More English learners → lower scores\n- These suggest **socioeconomic factors strongly predict performance**\n\n**Positive correlations** (reds):\n\n- `api99` and `edparent` (0.91): Parental education strongly predicts scores\n- Teacher credential variables show weaker correlations (`credteach` 0.46, `emerteach` -0.45)\n\n**Multicollinearity concerns:**\n\n- `meals` and `edparent` are substantially correlated (-0.60)\n- This makes it difficult to separate their individual effects\n- Standard errors may be inflated in multiple regression",
+   "evidence": "Columns mealpct/elpct do not exist (exec dump cell 2) and there is no teacher-experience variable. Recomputed on AED_API99.DTA with the cell's vars_api list: corr(api99,meals)=-0.54, corr(api99,englearn)=-0.66, corr(api99,edparent)=0.91 (consistent with bivariate R2 0.835=0.914^2 in dump cell 5), corr(meals,edparent)=-0.60, corr(api99,credteach)=0.46, corr(api99,emerteach)=-0.45. Prose values -0.90/-0.76/0.76/-0.79 match none of these.",
+   "confidence": "high",
+   "id": "ch13-F11",
+   "verify_note": "Recomputed: meals -0.54, englearn -0.66, edparent 0.91, meals-edparent -0.60, credteach 0.46, emerteach -0.45 — all match the fix; old values (-0.90/-0.76/0.76/-0.79) and 'teacher experience' are wrong. Old block matches lines 300-315 uniquely. Note: subsumes line-level findings F23-F26 on the same block."
+  },
+  {
+   "lines": [
+    457,
+    472
+   ],
+   "category": "code",
+   "severity": "error",
+   "action": "report",
+   "summary": "The constant-returns-to-scale test is a classical iid RSS-based F-test (executed p = 0.663) even though the model is estimated with HAC (NW) SEs and the section explicitly says default SEs are WRONG here; the prose's hand-typed p = 0.636 (L95, L476, L1678) exactly matches the HAC-robust Wald test the code should arguably run instead.",
+   "evidence": "Exec dump cell 12: F = 0.20, p = 0.663. Recomputed HAC-robust Wald test of beta_lnk + beta_lnl = 1 using fit_cobb's NW vcov: F(1,21) = 0.231, p = 0.636 — identical to the p = 0.636 hand-typed in the Example callout (L95), Key Concept 13.3 (L476), and Key Takeaways (L1678). Two defensible resolutions: (a) replace the RSS F-test with the HAC Wald test, preserving every prose number, consistent with L437-439 ('Default SEs ... WRONG here!'); or (b) keep the classical restricted-vs-unrestricted pedagogy and update prose 0.636 -> 0.663 (Lens C's default). The same classical-F pattern recurs in the cheat sheet at L1756-1765 (prints p = 0.663) and would need the same treatment. No conclusion flips either way (fail to reject CRS). Reported rather than fixed per the multiple-defensible-conventions boundary.",
+   "confidence": "high",
+   "id": "ch13-F12",
+   "verify_note": "Report is well-founded: as-written classical restricted/unrestricted F-test gives p=0.6628 (=0.663, dump cell 12), while a HAC-robust Wald test of b_lnk+b_lnl=1 using the NW vcov gives F(1,21)=0.231, p=0.6357 (=0.636), exactly the hand-typed prose value. Both resolutions are defensible; no conclusion flips (fail to reject CRS either way)."
+  },
+  {
+   "lines": [
+    318,
+    319
+   ],
+   "category": "code",
+   "severity": "drift",
+   "action": "fix",
+   "summary": "The section 13.1 multiple regression is silently iid (no vcov argument) while the bivariate fit in the same section uses HC1 and readers draw inference from the printed p-values; per the ch12-17 SE policy, refit with vcov='HC1'.",
+   "old": "fit_api_mult = pf.feols('api99 ~ edparent + meals + englearn + yearround + credteach + emerteach',\n                         data=data_api)",
+   "new": "fit_api_mult = pf.feols('api99 ~ edparent + meals + englearn + yearround + credteach + emerteach',\n                         data=data_api, vcov='HC1')",
+   "evidence": "Exec dump cell 8: 'Inference: iid'. Bivariate fit at L246 uses vcov='HC1'. HC1 refit verified: SEs become Intercept 44.03, edparent 1.84, meals 0.092, englearn 0.177, yearround 10.75, credteach 0.349, emerteach 0.358; p-values englearn 0.032->0.044 and yearround 0.011->0.016 — no 5% significance conclusion flips; coefficients unchanged. No hand-typed prose number references this fit's SE/t/p columns (Key Concept 13.1 and Key Takeaways cite only the ~74-point coefficient, which is unchanged), so only the displayed table changes. Brief SE-convention policy for ch12-17.",
+   "confidence": "high",
+   "id": "ch13-F13",
+   "verify_note": "Dump cell 8 shows Inference: iid while the sibling bivariate (line 246) uses HC1. HC1 refit verified: SEs 44.03/1.84/0.092/0.177/10.75/0.349/0.358; englearn p 0.0323->0.0440, yearround 0.0110->0.0160 — no 5% conclusion flips, coefficients unchanged. Fix (add vcov='HC1') is a valid consistency/convention change, not a hard bug."
+  },
+  {
+   "lines": [
+    786,
+    788
+   ],
+   "category": "code",
+   "severity": "error",
+   "action": "fix",
+   "summary": "The auto-data summary statistics table is silently discarded (bare mid-cell expression; only the last expression displays), yet the following prose cites its numbers ('MPG range: 8.7 to 76.4', 'Weight: 1,450 to 6,700 lbs') that readers never see.",
+   "old": "key_vars = ['mpg', 'curbwt', 'hp', 'torque', 'year']\n# Summary Statistics\ndata_auto[key_vars].describe()",
+   "new": "key_vars = ['mpg', 'curbwt', 'hp', 'torque', 'year']\n# Summary Statistics\nprint(data_auto[key_vars].describe())",
+   "evidence": "Exec dump cell 22 shows only the mfr value_counts output (the cell's last expression); no describe table appears. Prose at L795-800 cites the invisible table's values (verified against data: mpg 8.7-76.4, curbwt 1450-6700).",
+   "confidence": "high",
+   "id": "ch13-F14",
+   "verify_note": "data_auto[key_vars].describe() (line 788) is a bare mid-cell expression; last expression value_counts().head(10) is all that shows (dump cell 22). Prose ranges verified: mpg 8.7-76.4, curbwt 1450-6700. Fix wraps in print()."
+  },
+  {
+   "lines": [
+    480,
+    480
+   ],
+   "category": "code",
+   "severity": "error",
+   "action": "fix",
+   "summary": "The retransformation bias correction estimates the error variance with np.mean (divides by n=24) instead of the dof-corrected n-k=21 divisor required for s_e.",
+   "old": "se = np.sqrt(np.mean(fit_cobb._u_hat**2))",
+   "new": "se = np.sqrt(np.sum(fit_cobb._u_hat**2) / (fit_cobb._N - len(fit_cobb.coef())))",
+   "evidence": "Brief Lens B rule: manual s_e uses n-k. Here n=24, k=3. Computed: sqrt(RSS/n)=0.05438 giving correction factor exp(s^2/2)=1.00148 vs correct sqrt(RSS/(n-k))=0.05814 giving 1.00169. Effect on Figure 13.4's predicted series is visually negligible and no prose number depends on it, so the fix is safe.",
+   "confidence": "high",
+   "id": "ch13-F15",
+   "verify_note": "Verified: sqrt(mean(u^2))=0.05438 (corr 1.00148) vs dof-corrected sqrt(RSS/(n-k))=0.05814 (corr 1.00169), n=24,k=3. n-k is the conventional s_e divisor; effect negligible and no prose depends on it. Fix correct."
+  },
+  {
+   "lines": [
+    283,
+    285
+   ],
+   "category": "code",
+   "severity": "style",
+   "action": "fix",
+   "summary": "corr_matrix.round(2) is a bare mid-cell expression whose output is silently discarded (only the last expression of a cell displays), so the announced 'Correlation Matrix' table never appears.",
+   "old": "corr_matrix = data_api[vars_api].corr()\n# Correlation Matrix\ncorr_matrix.round(2)",
+   "new": "corr_matrix = data_api[vars_api].corr()\n# Correlation Matrix\nprint(corr_matrix.round(2))",
+   "evidence": "Exec dump cell 7 shows only the heatmap figure — no correlation table output. The annotated heatmap does show the same values, so severity is style, but the current line is dead code.",
+   "confidence": "high",
+   "id": "ch13-F16",
+   "verify_note": "corr_matrix.round(2) (line 285) is discarded; cell's terminal statement is plt.show() so only the heatmap renders (dump cell 7). Fix print() correct; severity style (values also shown in heatmap annotations)."
+  },
+  {
+   "lines": [
+    1327,
+    1327
+   ],
+   "category": "code",
+   "severity": "style",
+   "action": "fix",
+   "summary": "The incumbency-data describe() table is a bare mid-cell expression whose output is silently discarded.",
+   "old": "data_incumb[['vote', 'margin', 'win']].describe()",
+   "new": "print(data_incumb[['vote', 'margin', 'win']].describe())",
+   "evidence": "Exec dump cell 26 output jumps from the setup prints directly to 'Observations with outcome data: 1297' — no describe table appears because only a cell's last expression auto-displays.",
+   "confidence": "high",
+   "id": "ch13-F17",
+   "verify_note": "describe() at line 1327 is a bare mid-cell expression; dump cell 26 jumps to the outcome-count print with no table. Fix print() correct."
+  },
+  {
+   "lines": [
+    1473,
+    1473
+   ],
+   "category": "code",
+   "severity": "style",
+   "action": "fix",
+   "summary": "The institutions-data describe() table is a bare mid-cell expression whose output is silently discarded.",
+   "old": "data_inst[['logpgp95', 'avexpr', 'logem4']].describe()",
+   "new": "print(data_inst[['logpgp95', 'avexpr', 'logem4']].describe())",
+   "evidence": "Exec dump cell 27 output goes straight from the setup prints to the OLS summary — no describe table appears because only a cell's last expression auto-displays.",
+   "confidence": "high",
+   "id": "ch13-F18",
+   "verify_note": "describe() at line 1473 is a bare mid-cell expression; dump cell 27 goes straight to OLS summary with no table. Fix print() correct."
+  },
+  {
+   "lines": [
+    1650,
+    1650
+   ],
+   "category": "code",
+   "severity": "style",
+   "action": "fix",
+   "summary": "Chained-assignment fillna with inplace=True on a column selection is deprecated in pandas 2.x (FutureWarning currently masked by the warnings filter) and will silently stop imputing under pandas 3 copy-on-write.",
+   "old": "df_clean['income'].fillna(df_clean['income'].median(), inplace=True)",
+   "new": "df_clean['income'] = df_clean['income'].fillna(df_clean['income'].median())",
+   "evidence": "Exec dump cell 29 confirms it still works today (income 67500.0 imputed, pandas 2.3.3 with warnings suppressed), but pandas documents that Series.fillna(inplace=True) on a df[col] selection stops modifying the parent frame under copy-on-write (default in pandas 3.0, the direction Colab is headed). The assignment form is behavior-identical now and future-proof.",
+   "confidence": "high",
+   "id": "ch13-F19",
+   "verify_note": "Chained df_clean['income'].fillna(..., inplace=True) at line 1650; assignment form is behavior-identical now (dump cell 29 imputes 67500) and future-proof under copy-on-write. Fix correct."
+  },
+  {
+   "lines": [
+    1349,
+    1354
+   ],
+   "category": "code",
+   "severity": "style",
+   "action": "fix",
+   "summary": "The RD cell prints a dangling header 'To visualize discontinuity:' with the promised steps left as code comments, so the visible output ends mid-sentence.",
+   "old": "# Visualization note\n# RD PLOT\nprint(\"To visualize discontinuity:\")\n# - Bin observations by margin\n# - Plot mean vote in next election vs margin\n# - Should see jump at margin=0",
+   "new": "# Visualization note\n# RD PLOT\nprint(\"To visualize discontinuity:\")\nprint(\" - Bin observations by margin\")\nprint(\" - Plot mean vote in next election vs margin\")\nprint(\" - Should see jump at margin=0\")",
+   "evidence": "Exec dump cell 26 output ends with the bare line 'To visualize discontinuity:' followed by nothing — the three explanatory bullets are comments, not prints.",
+   "confidence": "high",
+   "id": "ch13-F20",
+   "verify_note": "Lines 1349-1354: only print('To visualize discontinuity:') executes; the three bullets are comments, so dump cell 26 ends mid-sentence. Fix converts them to prints. Old text matches uniquely."
+  },
+  {
+   "lines": [
+    1658,
+    1661
+   ],
+   "category": "code",
+   "severity": "style",
+   "action": "fix",
+   "summary": "The data-cleaning cell prints a dangling header 'Key cleaning steps:' with the three steps left as code comments, so the visible output ends with an empty list.",
+   "old": "print(\"\\n✓ Key cleaning steps:\")\n# 1. Detect and handle impossible values (age < 0, age > 120)\n# 2. Impute missing values (median for income)\n# 3. Standardize categorical variables (gender)",
+   "new": "print(\"\\n✓ Key cleaning steps:\")\nprint(\"  1. Detect and handle impossible values (age < 0, age > 120)\")\nprint(\"  2. Impute missing values (median for income)\")\nprint(\"  3. Standardize categorical variables (gender)\")",
+   "evidence": "Exec dump cell 29 output ends with '✓ Key cleaning steps:' and no steps — the numbered items are comments, not prints.",
+   "confidence": "high",
+   "id": "ch13-F21",
+   "verify_note": "Lines 1658-1661: print('Key cleaning steps:') then three comment lines; dump cell 29 ends with the header and no steps. Fix prints the three steps. Old text matches uniquely."
+  },
+  {
+   "lines": [
+    207,
+    213
+   ],
+   "category": "results",
+   "severity": "error",
+   "action": "fix",
+   "summary": "The 'Key Variables' list names five variables that do not exist in the dataset (mealpct, elpct, yrs_teach, totcredpc, emrpct) and misdescribes edparent as a 1-5 scale when executed data show it is years of schooling (9.62-16.0).",
+   "old": "- `api99`: Academic Performance Index (outcome variable)\n- `edparent`: Average parental education level (1-5 scale)\n- `mealpct`: Percent of students eligible for free/reduced meals (poverty proxy)\n- `elpct`: Percent of English language learners\n- `yrs_teach`: Average teacher experience in years\n- `totcredpc`: Per-pupil total credentials\n- `emrpct`: Percent of emergency credential teachers",
+   "new": "- `api99`: Academic Performance Index (outcome variable)\n- `edparent`: Average parental education level (years of schooling)\n- `meals`: Percent of students eligible for free/reduced meals (poverty proxy)\n- `englearn`: Percent of English language learners\n- `yearround`: Indicator for year-round school calendar\n- `credteach`: Percent of fully credentialed teachers\n- `emerteach`: Percent of teachers with emergency credentials",
+   "evidence": "Dump cell 2: actual columns are ['sch_code','api99','edparent','meals','englearn','yearround','credteach','emerteach',...]; dump cell 3 describe(): edparent min 9.62, mean 12.84, max 16.0 (years, not 1-5; the 1-5 scale is avg_ed_raw); regression cells use meals/englearn/yearround/credteach/emerteach.",
+   "confidence": "high",
+   "id": "ch13-F22",
+   "verify_note": "Same defect as F10 (nonexistent vars; edparent is years 9.62-16.0 not 1-5). Old text matches lines 207-213 uniquely; fix descriptions all correct. Duplicate of F10 — apply only one."
+  },
+  {
+   "lines": [
+    302,
+    302
+   ],
+   "category": "results",
+   "severity": "error",
+   "action": "fix",
+   "summary": "Hand-typed correlation of api99 with the meals variable is -0.90 but the executed correlation matrix (shown in the Figure 13.3 heatmap annotations) is -0.54, and the variable is named meals, not mealpct.",
+   "old": "- `api99` and `mealpct` (-0.90): Schools with more poverty have much lower test scores",
+   "new": "- `api99` and `meals` (-0.54): Schools with more poverty have lower test scores",
+   "evidence": "Recomputed in .venv from AED_API99.DTA: corr(api99, meals) = -0.54 (rounded to 2 dp, same values annotated on the rendered heatmap); column is 'meals' per dump cell 2.",
+   "confidence": "high",
+   "id": "ch13-F23",
+   "verify_note": "Recomputed corr(api99,meals)=-0.5419 => -0.54; column is 'meals' not 'mealpct'. Old text matches line 302 uniquely. Fix correct. (Also covered by F11.)"
+  },
+  {
+   "lines": [
+    303,
+    303
+   ],
+   "category": "results",
+   "severity": "error",
+   "action": "fix",
+   "summary": "Hand-typed correlation of api99 with English learners is -0.76 but the executed value is -0.66, and the variable is named englearn, not elpct.",
+   "old": "- `api99` and `elpct` (-0.76): More English learners → lower scores",
+   "new": "- `api99` and `englearn` (-0.66): More English learners → lower scores",
+   "evidence": "Recomputed in .venv: corr(api99, englearn) = -0.66; column is 'englearn' per dump cell 2.",
+   "confidence": "high",
+   "id": "ch13-F24",
+   "verify_note": "Recomputed corr(api99,englearn)=-0.6561 => -0.66; column 'englearn' not 'elpct'. Line 303 unique. Fix correct. (Also covered by F11.)"
+  },
+  {
+   "lines": [
+    308,
+    308
+   ],
+   "category": "results",
+   "severity": "error",
+   "action": "fix",
+   "summary": "Hand-typed correlation of api99 with edparent is 0.76 but the executed value is 0.91 (consistent with the bivariate R2 of 0.835, sqrt = 0.914).",
+   "old": "- `api99` and `edparent` (0.76): Parental education strongly predicts scores",
+   "new": "- `api99` and `edparent` (0.91): Parental education strongly predicts scores",
+   "evidence": "Recomputed in .venv: corr(api99, edparent) = 0.91; cross-check: dump cell 5 bivariate R2 = 0.835, sqrt(0.835) = 0.914.",
+   "confidence": "high",
+   "id": "ch13-F25",
+   "verify_note": "Recomputed corr(api99,edparent)=0.9138 => 0.91; cross-checks sqrt(0.835)=0.914 from bivariate R2. Line 308 unique. Fix correct. (Also covered by F11.)"
+  },
+  {
+   "lines": [
+    313,
+    313
+   ],
+   "category": "results",
+   "severity": "error",
+   "action": "fix",
+   "summary": "Hand-typed correlation between the meals variable and edparent is -0.79 but the executed value is -0.60, and the variable is named meals, not mealpct.",
+   "old": "- `mealpct` and `edparent` are highly correlated (-0.79)",
+   "new": "- `meals` and `edparent` are substantially correlated (-0.60)",
+   "evidence": "Recomputed in .venv: corr(meals, edparent) = -0.60; column is 'meals' per dump cell 2.",
+   "confidence": "high",
+   "id": "ch13-F26",
+   "verify_note": "Recomputed corr(meals,edparent)=-0.6047 => -0.60; column 'meals' not 'mealpct'. Line 313 unique. Fix correct. (Also covered by F11.)"
+  },
+  {
+   "lines": [
+    80,
+    80
+   ],
+   "category": "results",
+   "severity": "drift",
+   "action": "fix",
+   "summary": "Key Concepts example says labor was 'nearly four times' as important as capital, but the executed elasticity ratio is 0.807/0.233 = 3.46 (about 3.5x), more than 5% away from 4.",
+   "old": "labor here was nearly four times as important as capital",
+   "new": "labor here was about three and a half times as important as capital",
+   "evidence": "Dump cell 11: lnl = 0.807, lnk = 0.233; ratio = 3.46. Brief rule: 'roughly/approximately X' acceptable only within 5% of truth (4 vs 3.46 is ~15% off).",
+   "confidence": "medium",
+   "id": "ch13-F27",
+   "verify_note": "0.807/0.233=3.46 (rounded 0.81/0.23=3.52); ~3.5 => 'three and a half', not 'nearly four'. Original overstates by ~15%. Fix wording accurate. Low-stakes wording change."
+  },
+  {
+   "lines": [
+    95,
+    95
+   ],
+   "category": "results",
+   "severity": "drift",
+   "action": "fix",
+   "summary": "Key Concepts CRS example states the F-test p-value as 0.636 but the executed p-value is 0.663.",
+   "old": "yields $p \\approx 0.636$, so the data are consistent with constant returns",
+   "new": "yields $p \\approx 0.663$, so the data are consistent with constant returns",
+   "evidence": "Dump cell 12: 'F-statistic: 0.20 / p-value: 0.663'.",
+   "confidence": "high",
+   "id": "ch13-F28",
+   "verify_note": "As-written F-test outputs p=0.663 (dump cell 12); prose hand-types 0.636. Fix to 0.663 aligns prose with the chapter's actual F-test. Old text matches line 95 uniquely. (See F12: the 0.636 alternative would instead require switching the code to a HAC Wald test.)"
+  },
+  {
+   "lines": [
+    476,
+    476
+   ],
+   "category": "results",
+   "severity": "drift",
+   "action": "fix",
+   "summary": "Key Concept 13.3 states the CRS F-test p-value as 0.636 but the executed p-value is 0.663.",
+   "old": "The estimated sum of 1.040 is not significantly different from 1 (F-test p = 0.636)",
+   "new": "The estimated sum of 1.040 is not significantly different from 1 (F-test p = 0.663)",
+   "evidence": "Dump cell 12: 'p-value: 0.663'; estimated sum 1.040 matches.",
+   "confidence": "high",
+   "id": "ch13-F29",
+   "verify_note": "Executed classical F-test p=0.663; line 476 says 0.636. Fix correct; old text unique. Same F12 caveat about the two resolutions."
+  },
+  {
+   "lines": [
+    1678,
+    1678
+   ],
+   "category": "results",
+   "severity": "drift",
+   "action": "fix",
+   "summary": "Key Takeaways repeats the stale CRS F-test p-value 0.636; the executed value is 0.663.",
+   "old": "(elasticities sum to 1.040, F-test p = 0.636)",
+   "new": "(elasticities sum to 1.040, F-test p = 0.663)",
+   "evidence": "Dump cell 12: 'p-value: 0.663'.",
+   "confidence": "high",
+   "id": "ch13-F30",
+   "verify_note": "Executed p=0.663; line 1678 Key Takeaways says 0.636. Fix correct; old text unique. Same F12 caveat."
+  },
+  {
+   "lines": [
+    551,
+    551
+   ],
+   "category": "results",
+   "severity": "drift",
+   "action": "fix",
+   "summary": "Pre-1970 Phillips curve prose reports the unemployment coefficient as -0.89 but the executed coefficient is -1.030.",
+   "old": "- Coefficient on unemployment ≈ **-0.89**",
+   "new": "- Coefficient on unemployment ≈ **-1.03**",
+   "evidence": "Dump cell 15: urate estimate = -1.030 (NW SEs, 21 obs).",
+   "confidence": "high",
+   "id": "ch13-F31",
+   "verify_note": "Dump cell 15 urate estimate=-1.030; prose says -0.89. Fix -1.03 correct; old text matches line 551 uniquely."
+  },
+  {
+   "lines": [
+    554,
+    554
+   ],
+   "category": "results",
+   "severity": "drift",
+   "action": "fix",
+   "summary": "Pre-1970 interpretation bullet uses the stale 0.89 magnitude; executed coefficient implies a 1.03 point decrease in inflation.",
+   "old": "- 1% increase in unemployment → 0.89% decrease in inflation",
+   "new": "- 1% increase in unemployment → 1.03% decrease in inflation",
+   "evidence": "Dump cell 15: urate estimate = -1.030.",
+   "confidence": "high",
+   "id": "ch13-F32",
+   "verify_note": "Dump cell 15 urate=-1.030 => 1.03% decrease; prose says 0.89%. Fix correct; line 554 unique."
+  },
+  {
+   "lines": [
+    702,
+    702
+   ],
+   "category": "results",
+   "severity": "error",
+   "action": "fix",
+   "summary": "OVB walkthrough states beta_2 ≈ -1.15 but the executed augmented-model urate coefficient is -0.128; as typed the value also makes the OVB arithmetic on line 706 impossible (-1.15 + 1.15*0.34 = -0.76, not +0.26).",
+   "old": "- $\\beta_2 \\approx -1.15$ (true negative effect of unemployment)",
+   "new": "- $\\beta_2 \\approx -0.13$ (true negative effect of unemployment)",
+   "evidence": "Dump cell 20: 'β2 (from full model): -0.128'; predicted E[b2] = -0.128 + 1.146*0.343 = 0.265. Recomputed: -1.15 + 1.15*0.34 = -0.759 (contradicts the stated +0.26).",
+   "confidence": "high",
+   "id": "ch13-F33",
+   "verify_note": "Dump cell 20: beta2 (full model)=-0.128 => -0.13; -1.15 is wrong and makes the OVB arithmetic inconsistent (-1.15+1.15*0.34=-0.76, not +0.26). Fix changes only beta2. beta3(+1.15) and gamma(+0.34) are correct and left alone. Old text is actually on line 701 (finding labels 702) but matches uniquely."
+  },
+  {
+   "lines": [
+    706,
+    706
+   ],
+   "category": "results",
+   "severity": "error",
+   "action": "fix",
+   "summary": "The displayed OVB equation uses the wrong beta_2 (-1.15); with executed values the equation is -0.13 + 1.15 x 0.34 ≈ +0.26 (as typed, -1.15 + 1.15 x 0.34 = -0.76, not +0.26).",
+   "old": "$$E[b_2] = -1.15 + 1.15 \\times 0.34 \\approx +0.26$$",
+   "new": "$$E[b_2] = -0.13 + 1.15 \\times 0.34 \\approx +0.26$$",
+   "evidence": "Dump cell 20: 'Predicted E[b2] = -0.128 + 1.146 * 0.343 = 0.265'. Recomputed: -0.13 + 1.15*0.34 = 0.261 ≈ +0.26; the current -1.15 version yields -0.759.",
+   "confidence": "high",
+   "id": "ch13-F34",
+   "verify_note": "With beta2=-0.13: -0.13+1.15*0.34=0.261 ~ +0.26 (matches dump E[b2]=0.265, actual b2=0.265). Fix keeps 1.15 and 0.34 (correct) and only fixes -1.15->-0.13; result +0.26 preserved. Old text matches line 706 uniquely."
+  },
+  {
+   "lines": [
+    857,
+    858
+   ],
+   "category": "results",
+   "severity": "error",
+   "action": "fix",
+   "summary": "Prose states the horsepower elasticity is ≈ -0.30 to -0.35 but the executed cluster-robust estimate is -0.181, roughly half the claimed magnitude.",
+   "old": "2. **Horsepower Elasticity**: ≈ -0.30 to -0.35\n - 1% increase in HP → ~0.3% decrease in MPG",
+   "new": "2. **Horsepower Elasticity**: ≈ -0.18\n - 1% increase in HP → ~0.18% decrease in MPG",
+   "evidence": "Dump cell 23: lhp estimate = -0.181; printed interpretation: '1% increase in HP → -0.18% change in MPG'.",
+   "confidence": "high",
+   "id": "ch13-F35",
+   "verify_note": "Dump cell 23 lhp=-0.181; printed interpretation '-0.18% change'. Prose -0.30 to -0.35 is ~2x too large. Fix -0.18 correct; old two-line block matches lines 857-858 (with leading-space indent) uniquely."
+  },
+  {
+   "lines": [
+    885,
+    885
+   ],
+   "category": "results",
+   "severity": "drift",
+   "action": "fix",
+   "summary": "Prose claims '40+ manufacturers' but the executed number of clusters is 39.",
+   "old": "**Number of clusters**: 40+ manufacturers",
+   "new": "**Number of clusters**: 39 manufacturers",
+   "evidence": "Dump cell 23: 'Number of clusters: 39'.",
+   "confidence": "high",
+   "id": "ch13-F36",
+   "verify_note": "Dump cell 23: Number of clusters: 39. Prose '40+'. Fix '39' correct; line 885 unique."
+  },
+  {
+   "lines": [
+    886,
+    886
+   ],
+   "category": "results",
+   "severity": "drift",
+   "action": "fix",
+   "summary": "Prose claims ~600 vehicles per cluster but the executed average is 692 (26,995/39), a 15% understatement.",
+   "old": "**Average per cluster**: ~600 vehicles",
+   "new": "**Average per cluster**: ~690 vehicles",
+   "evidence": "Dump cell 23: 'Average observations per cluster: 692'; recomputed 26995/39 = 692.2.",
+   "confidence": "high",
+   "id": "ch13-F37",
+   "verify_note": "Dump cell 23: avg obs per cluster=692 (26995/39=692.2). Prose '~600' understates ~13%. '~690' is an accurate rounding of 692; line 886 unique."
+  },
+  {
+   "lines": [
+    1207,
+    1207
+   ],
+   "category": "results",
+   "severity": "drift",
+   "action": "fix",
+   "summary": "DiD interpretation states p = 0.027 but the executed cluster-robust p-value for postXhigh is 0.031.",
+   "old": "- **Statistically significant** (p = 0.027 < 0.05)",
+   "new": "- **Statistically significant** (p = 0.031 < 0.05)",
+   "evidence": "Dump cell 25: postXhigh Pr(>|t|) = 0.031 (CRV1 by community); significance conclusion unchanged.",
+   "confidence": "high",
+   "id": "ch13-F38",
+   "verify_note": "Dump cell 25: postXhigh Pr(>|t|)=0.031; prose 0.027. Fix 0.031 correct; significance unchanged; line 1207 unique."
+  },
+  {
+   "lines": [
+    1359,
+    1359
+   ],
+   "category": "results",
+   "severity": "drift",
+   "action": "fix",
+   "summary": "Key Concept 13.9 states an incumbency advantage of 'approximately 5-7 percentage points', but the chapter's executed RD estimate is 4.785 (stated as 4.8 four other times in the section), which the 5-7 range excludes.",
+   "old": "an incumbency advantage of approximately 5–7 percentage points",
+   "new": "an incumbency advantage of approximately 5 percentage points",
+   "evidence": "Dump cell 26: win coefficient = 4.785, 95% CI [3.098, 6.471]; chapter lines 1365-1379 consistently say ≈4.8. If '5-7' is an intentional AED literature-range citation, treat as report instead of fix.",
+   "confidence": "medium",
+   "id": "ch13-F39",
+   "verify_note": "Dump cell 26 win coef=4.785 (CI [3.098,6.471]); chapter repeats ~4.8. '5-7' excludes the point estimate. 4.785 rounds to 5, so 'approximately 5 percentage points' is a defensible fix (alternative 'about 4.8' would also be consistent). Line 1359 unique. Medium confidence."
+  },
+  {
+   "lines": [
+    1695,
+    1695
+   ],
+   "category": "results",
+   "severity": "drift",
+   "action": "fix",
+   "summary": "Key Takeaways repeats the '~5-7%' incumbency advantage that does not match the chapter's executed estimate of 4.8 percentage points.",
+   "old": "Political incumbency provides ~5–7% vote share advantage",
+   "new": "Political incumbency provides ~5% vote share advantage",
+   "evidence": "Dump cell 26: win coefficient = 4.785; 4.8 is the value quoted throughout section 13.7.",
+   "confidence": "medium",
+   "id": "ch13-F40",
+   "verify_note": "Same as F39 for Key Takeaways line 1695; win coef=4.785 ~ 5%, not 5-7%. Fix '~5%' defensible. Old substring matches uniquely. Medium confidence."
+  },
+  {
+   "lines": [
+    1541,
+    1541
+   ],
+   "category": "results",
+   "severity": "drift",
+   "action": "fix",
+   "summary": "IV interpretation says e^0.94 ≈ 2.56 → 156% GDP increase, but the executed exponentiated coefficient (exp(0.944)) prints as 2.57x, i.e. a 157% increase, so the prose disagrees with the adjacent code output.",
+   "old": "Exponentiating: $e^{0.94} \\approx 2.56$ → **156% increase in GDP level**",
+   "new": "Exponentiating: $e^{0.94} \\approx 2.57$ → **157% increase in GDP level**",
+   "evidence": "Dump cell 27: 'Exponentiating: 2.57x increase in GDP level'; recomputed exp(0.944) = 2.570 → 157.0%.",
+   "confidence": "high",
+   "id": "ch13-F41",
+   "verify_note": "Code exponentiates full coef 0.944 => exp(0.944)=2.5701 => dump cell 27 prints '2.57x' => 157%. Prose 2.56/156% disagrees with adjacent code output. Fix 2.57/157% matches. Minor caveat: the displayed exponent 'e^{0.94}' literally equals 2.56; ideally show e^{0.944}, but 0.94 is a rounded display of 0.944, so the fix is acceptable. Line 1541 unique."
+  },
+  {
+   "lines": [
+    208,
+    208
+   ],
+   "category": "interpretation",
+   "severity": "error",
+   "action": "fix",
+   "summary": "The key regressor edparent is described as a 1–5 scale, but it is measured in years of schooling, contradicting every coefficient interpretation in the chapter.",
+   "evidence": "Execution dump CELL 3: edparent min 9.62, mean 12.84, max 16.00 — years of schooling, not a 1–5 scale (the 1–5 scale variable in this dataset is avg_ed_raw, ~2.9–4.0). The bivariate slope (L254 'each additional year of parent education'), Key Takeaways (L1669 '~80 API points per year'), and Exercise 1 all interpret edparent in years, so the '(1-5 scale)' descriptor is internally inconsistent. Lens D: units correct and consistent.",
+   "old": "- `edparent`: Average parental education level (1-5 scale)",
+   "new": "- `edparent`: Average parental education level (average years of schooling, roughly 9.6–16 in this sample)",
+   "confidence": "high",
+   "id": "ch13-F42",
+   "verify_note": "Factually wrong descriptor. Dump CELL 3 shows edparent min 9.62, mean 12.84, max 16.00 -> average years of schooling; the 1-5 scale variable in this dataset is avg_ed_raw (~2.9-4.0, dump CELL 1). Every downstream interpretation (L254 'each additional year', L267 axis label, L1669 '~80 API points per year') treats edparent as years, so '(1-5 scale)' is internally inconsistent. Proposed 'roughly 9.6-16 in this sample' matches the executed min/max. Old string matches L208."
+  },
+  {
+   "lines": [
+    600,
+    604
+   ],
+   "category": "interpretation",
+   "severity": "error",
+   "action": "report",
+   "summary": "The post-1970 Phillips 'sign reversal' (and the augmented model's 'return' of the negative slope) is presented as a substantive result, but both urate coefficients are statistically insignificant — significance is never discussed.",
+   "evidence": "Execution dump CELL 17: post-1970 urate = 0.265, t = 0.814, p = 0.420 (insignificant); CELL 19 augmented urate = -0.128, t = -1.575, p = 0.122 (also insignificant). The prose treats the +0.27 slope as a real 'reversal'/'stagflation' and later (L701, L724) treats the augmented -0.13 as 'the true negative effect... the negative relationship returns,' without noting neither is distinguishable from zero. Lens D: headline coefficients must be discussed for BOTH magnitude and significance. Marked report because the OVB point-estimate demonstration is intentional pedagogy and how to caveat is an author judgment.",
+   "old": "- The sign reversed!\n\nThe scatter plot shows an upward slope - higher unemployment is associated with higher inflation. This is **stagflation**.",
+   "new": "- The sign reversed! (With only 45 post-1970 observations, however, the positive slope is **not statistically significant**, $p \\approx 0.42$: the point estimate flips sign, but we cannot reject a zero relationship. Likewise, adding expected inflation in the next section leaves the urate coefficient negative but also insignificant, $p \\approx 0.12$.)\n\nThe scatter plot shows an upward slope - higher unemployment is associated with higher inflation. This is **stagflation**.",
+   "confidence": "medium",
+   "id": "ch13-F43",
+   "verify_note": "Real Lens D gap. Post-1970 urate = 0.265, t=0.814, p=0.420 (dump CELL 17) and augmented urate = -0.128, t=-1.575, p=0.122 (dump CELL 19) are both statistically insignificant, yet the prose presents the +0.27 'sign reversal'/'stagflation' as a substantive result and later (L701/L724) calls the augmented -0.13 'the true negative effect... the negative relationship returns' with no significance caveat - while the pre-1970 discussion (L553) does state significance, creating an asymmetry. The proposed caveat's numbers check out (45 obs, p~0.42, p~0.12). Correctly marked report: the OVB point-estimate demonstration is intentional pedagogy and the exact caveat wording is author judgment, but the missing significance discussion of headline coefficients is a genuine defect."
+  },
+  {
+   "lines": [
+    972,
+    1020
+   ],
+   "category": "readability",
+   "severity": "style",
+   "action": "report",
+   "summary": "The RAND RCT code cell is ~47 lines and bundles three independently interpretable outputs (data load + mean-spending-by-plan table, the fit_rct.summary() regression, and the joint F-test) with no intervening prose.",
+   "evidence": "Cell spans L972-1020 (code lines 973-1019 = 47 > 45). Lens R rule: split only if >45 lines AND >=2 independent outputs. Independent outputs here: (A) spending_by_plan table L988-990, (B) fit_rct.summary() L992-998, (C) joint F-test L1000-1013. Suggested split points: after L990 (data + spending-by-plan), after L1020's regression block, isolating the F-test into its own cell, each with a one-line lead-in.",
+   "confidence": "high",
+   "id": "ch13-F44"
+  },
+  {
+   "lines": [
+    1459,
+    1516
+   ],
+   "category": "readability",
+   "severity": "style",
+   "action": "report",
+   "summary": "The Institutions/IV code cell is ~56 lines and bundles four independently interpretable outputs (data load + summary, biased OLS, first-stage F, and 2SLS + OLS-vs-IV comparison) with no intervening prose.",
+   "evidence": "Cell spans L1459-1516 (code lines 1460-1515 = 56 > 45). Independent outputs: OLS summary L1475-1481, first stage L1483-1491, 2SLS L1493-1500, comparison prints L1502-1516. Suggested split points: after summary/OLS (L1481), after first-stage F (L1491), and 2SLS+comparison as a final cell, each with a short lead-in tying it to the IV narrative.",
+   "confidence": "high",
+   "id": "ch13-F45"
+  },
+  {
+   "lines": [
+    478
+   ],
+   "category": "readability",
+   "severity": "style",
+   "action": "fix",
+   "summary": "The Figure 13.4 predicted-output code cell has no markdown lead-in; it is preceded only by the Key Concept 13.3 blockquote (about the CRS test, a different cell).",
+   "evidence": "Lens R rule: every non-Setup code cell needs a >=1-sentence lead-in stating what it does and what to look for. The cell computes a retransformation bias correction (exp(se^2/2)) and plots actual vs predicted output, but nothing introduces it.",
+   "confidence": "high",
+   "old": "```{python}\n# Predicted output with bias correction",
+   "new": "Because the model is estimated in logs, converting fitted values back to output levels requires a retransformation (bias) correction of $e^{\\hat\\sigma^2/2}$. The plot below overlays these corrected predictions on the actual output series.\n\n```{python}\n# Predicted output with bias correction",
+   "id": "ch13-F46"
+  },
+  {
+   "lines": [
+    495,
+    498
+   ],
+   "category": "readability",
+   "severity": "style",
+   "action": "fix",
+   "summary": "Figure 13.4 (actual vs predicted output) is followed immediately by the next section heading with no interpretation of what the reader should see.",
+   "evidence": "Lens R rule: notable output (a figure) should be followed by an interpretation. Every other figure in the chapter (13.1, 13.2, 13.5, 13.6) has a '**What to look for**' block; Figure 13.4 has none. R^2 = 0.957 from the exec dump (Cell 11) supports the close-tracking claim.",
+   "confidence": "high",
+   "old": "plt.title('Figure 13.4: Actual vs Predicted Output (1899-1922)')\nplt.legend()\nplt.grid(True, alpha=0.3)\nplt.show()\n```\n\n## 13.3 Phillips Curve and Omitted Variables Bias",
+   "new": "plt.title('Figure 13.4: Actual vs Predicted Output (1899-1922)')\nplt.legend()\nplt.grid(True, alpha=0.3)\nplt.show()\n```\n\n**What to look for in this plot:**\n\n- **Tracking**: The dashed predicted series follows the actual output closely across all 24 years -- consistent with the model's high $R^2$ (0.957)\n- **Bias correction**: Fitted values are scaled by $e^{\\hat\\sigma^2/2}$ before comparison, the standard retransformation when the dependent variable is in logs\n- **Fit over time**: Deviations are small and show no systematic trend, suggesting the log-linear Cobb-Douglas form captures the growth path well\n\n## 13.3 Phillips Curve and Omitted Variables Bias",
+   "id": "ch13-F47"
+  },
+  {
+   "lines": [
+    636
+   ],
+   "category": "readability",
+   "severity": "style",
+   "action": "fix",
+   "summary": "The augmented Phillips-curve code cell has no markdown lead-in; it follows the post-1970 scatter's 'What to look for' block and precedes the OVB code cell directly, so the key result (sign restored) is never set up.",
+   "evidence": "Lens R rule: every non-Setup code cell needs a >=1-sentence lead-in. This cell adds inflgdp1yr and is the resolution of the breakdown (exec dump Cell 19: urate coef flips to -0.128, inflgdp1yr = 1.146), but no prose introduces what to watch for.",
+   "confidence": "high",
+   "old": "```{python}\n# Augmented Phillips curve (adding expected inflation)",
+   "new": "We now add expected inflation (`inflgdp1yr`) to the post-1970 regression. Watch the coefficient on `urate`: if the breakdown was caused by omitting expectations, controlling for them should restore the negative Phillips-curve slope.\n\n```{python}\n# Augmented Phillips curve (adding expected inflation)",
+   "id": "ch13-F48"
+  },
+  {
+   "lines": [
+    201,
+    201
+   ],
+   "category": "format",
+   "severity": "style",
+   "action": "fix",
+   "summary": "Strip bold markers from H3 heading (ch13 format rule).",
+   "old": "### **About the Dataset**",
+   "new": "### About the Dataset",
+   "evidence": "Lens F normalization table: ch13 `### **Bold Title**` → strip bold markers, words verbatim.",
+   "confidence": "high",
+   "id": "ch13-F49"
+  },
+  {
+   "lines": [
+    296,
+    296
+   ],
+   "category": "format",
+   "severity": "style",
+   "action": "fix",
+   "summary": "Strip bold markers from H3 heading (ch13 format rule).",
+   "old": "### **What the Correlation Matrix Reveals**",
+   "new": "### What the Correlation Matrix Reveals",
+   "evidence": "Lens F normalization table: ch13 `### **Bold Title**` → strip bold markers, words verbatim.",
+   "confidence": "high",
+   "id": "ch13-F50"
+  },
+  {
+   "lines": [
+    342,
+    342
+   ],
+   "category": "format",
+   "severity": "style",
+   "action": "fix",
+   "summary": "Strip bold markers from H3 heading (ch13 format rule).",
+   "old": "### **The Cobb-Douglas Production Function**",
+   "new": "### The Cobb-Douglas Production Function",
+   "evidence": "Lens F normalization table: ch13 `### **Bold Title**` → strip bold markers, words verbatim.",
+   "confidence": "high",
+   "id": "ch13-F51"
+  },
+  {
+   "lines": [
+    413,
+    413
+   ],
+   "category": "format",
+   "severity": "style",
+   "action": "fix",
+   "summary": "Strip bold markers from H3 heading (ch13 format rule).",
+   "old": "### **Understanding the Results**",
+   "new": "### Understanding the Results",
+   "evidence": "Lens F normalization table: ch13 `### **Bold Title**` → strip bold markers, words verbatim.",
+   "confidence": "high",
+   "id": "ch13-F52"
+  },
+  {
+   "lines": [
+    502,
+    502
+   ],
+   "category": "format",
+   "severity": "style",
+   "action": "fix",
+   "summary": "Strip bold markers from H3 heading (ch13 format rule).",
+   "old": "### **The Phillips Curve and Its Breakdown**",
+   "new": "### The Phillips Curve and Its Breakdown",
+   "evidence": "Lens F normalization table: ch13 `### **Bold Title**` → strip bold markers, words verbatim.",
+   "confidence": "high",
+   "id": "ch13-F53"
+  },
+  {
+   "lines": [
+    547,
+    547
+   ],
+   "category": "format",
+   "severity": "style",
+   "action": "fix",
+   "summary": "Strip bold markers from H3 heading (ch13 format rule).",
+   "old": "### **Pre-1970: Phillips Curve Works!**",
+   "new": "### Pre-1970: Phillips Curve Works!",
+   "evidence": "Lens F normalization table: ch13 `### **Bold Title**` → strip bold markers, words verbatim (colon kept as-is; ch13 not subject to colon-removal rule).",
+   "confidence": "high",
+   "id": "ch13-F54"
+  },
+  {
+   "lines": [
+    596,
+    596
+   ],
+   "category": "format",
+   "severity": "style",
+   "action": "fix",
+   "summary": "Strip bold markers from H3 heading (ch13 format rule).",
+   "old": "### **Post-1970: Phillips Curve Breaks Down!**",
+   "new": "### Post-1970: Phillips Curve Breaks Down!",
+   "evidence": "Lens F normalization table: ch13 `### **Bold Title**` → strip bold markers, words verbatim (colon kept as-is).",
+   "confidence": "high",
+   "id": "ch13-F55"
+  },
+  {
+   "lines": [
+    686,
+    686
+   ],
+   "category": "format",
+   "severity": "style",
+   "action": "fix",
+   "summary": "Strip bold markers from H3 heading (ch13 format rule).",
+   "old": "### **Understanding Omitted Variables Bias**",
+   "new": "### Understanding Omitted Variables Bias",
+   "evidence": "Lens F normalization table: ch13 `### **Bold Title**` → strip bold markers, words verbatim.",
+   "confidence": "high",
+   "id": "ch13-F56"
+  },
+  {
+   "lines": [
+    730,
+    730
+   ],
+   "category": "format",
+   "severity": "style",
+   "action": "fix",
+   "summary": "Strip bold markers from H3 heading (ch13 format rule).",
+   "old": "### **Case Study: Automobile Fuel Efficiency (1980-2006)**",
+   "new": "### Case Study: Automobile Fuel Efficiency (1980-2006)",
+   "evidence": "Lens F normalization table: ch13 `### **Bold Title**` → strip bold markers, words verbatim (colon kept as-is).",
+   "confidence": "high",
+   "id": "ch13-F57"
+  },
+  {
+   "lines": [
+    848,
+    848
+   ],
+   "category": "format",
+   "severity": "style",
+   "action": "fix",
+   "summary": "Strip bold markers from H3 heading (ch13 format rule).",
+   "old": "### **Interpreting the Results**",
+   "new": "### Interpreting the Results",
+   "evidence": "Lens F normalization table: ch13 `### **Bold Title**` → strip bold markers, words verbatim.",
+   "confidence": "high",
+   "id": "ch13-F58"
+  },
+  {
+   "lines": [
+    918,
+    918
+   ],
+   "category": "format",
+   "severity": "style",
+   "action": "fix",
+   "summary": "Strip bold markers from H3 heading (ch13 format rule).",
+   "old": "### **Case Study: The RAND Health Insurance Experiment (Randomized Control Trial)**",
+   "new": "### Case Study: The RAND Health Insurance Experiment (Randomized Control Trial)",
+   "evidence": "Lens F normalization table: ch13 `### **Bold Title**` → strip bold markers, words verbatim (colon kept as-is).",
+   "confidence": "high",
+   "id": "ch13-F59"
+  },
+  {
+   "lines": [
+    1026,
+    1026
+   ],
+   "category": "format",
+   "severity": "style",
+   "action": "fix",
+   "summary": "Strip bold markers from H3 heading (ch13 format rule).",
+   "old": "### **Interpreting the RCT Results**",
+   "new": "### Interpreting the RCT Results",
+   "evidence": "Lens F normalization table: ch13 `### **Bold Title**` → strip bold markers, words verbatim.",
+   "confidence": "high",
+   "id": "ch13-F60"
+  },
+  {
+   "lines": [
+    1103,
+    1103
+   ],
+   "category": "format",
+   "severity": "style",
+   "action": "fix",
+   "summary": "Strip bold markers from H3 heading (ch13 format rule).",
+   "old": "### **Case Study: Health Care Access and Child Nutrition (Difference-in-Differences)**",
+   "new": "### Case Study: Health Care Access and Child Nutrition (Difference-in-Differences)",
+   "evidence": "Lens F normalization table: ch13 `### **Bold Title**` → strip bold markers, words verbatim (colon kept as-is).",
+   "confidence": "high",
+   "id": "ch13-F61"
+  },
+  {
+   "lines": [
+    1201,
+    1201
+   ],
+   "category": "format",
+   "severity": "style",
+   "action": "fix",
+   "summary": "Strip bold markers from H3 heading (ch13 format rule).",
+   "old": "### **Interpreting the DiD Results**",
+   "new": "### Interpreting the DiD Results",
+   "evidence": "Lens F normalization table: ch13 `### **Bold Title**` → strip bold markers, words verbatim.",
+   "confidence": "high",
+   "id": "ch13-F62"
+  },
+  {
+   "lines": [
+    1262,
+    1262
+   ],
+   "category": "format",
+   "severity": "style",
+   "action": "fix",
+   "summary": "Strip bold markers from H3 heading (ch13 format rule).",
+   "old": "### **Case Study: The Incumbency Advantage in U.S. Senate Elections**",
+   "new": "### Case Study: The Incumbency Advantage in U.S. Senate Elections",
+   "evidence": "Lens F normalization table: ch13 `### **Bold Title**` → strip bold markers, words verbatim.",
+   "confidence": "high",
+   "id": "ch13-F63"
+  },
+  {
+   "lines": [
+    1361,
+    1361
+   ],
+   "category": "format",
+   "severity": "style",
+   "action": "fix",
+   "summary": "Strip bold markers from H3 heading (ch13 format rule).",
+   "old": "### **Interpreting the RD Results**",
+   "new": "### Interpreting the RD Results",
+   "evidence": "Lens F normalization table: ch13 `### **Bold Title**` → strip bold markers, words verbatim.",
+   "confidence": "high",
+   "id": "ch13-F64"
+  },
+  {
+   "lines": [
+    1416,
+    1416
+   ],
+   "category": "format",
+   "severity": "style",
+   "action": "fix",
+   "summary": "Strip bold markers from H3 heading (ch13 format rule).",
+   "old": "### **Case Study: Do Institutions Cause Economic Growth?**",
+   "new": "### Case Study: Do Institutions Cause Economic Growth?",
+   "evidence": "Lens F normalization table: ch13 `### **Bold Title**` → strip bold markers, words verbatim (colon kept as-is).",
+   "confidence": "high",
+   "id": "ch13-F65"
+  },
+  {
+   "lines": [
+    1522,
+    1522
+   ],
+   "category": "format",
+   "severity": "style",
+   "action": "fix",
+   "summary": "Strip bold markers from H3 heading (ch13 format rule).",
+   "old": "### **Interpreting the IV Results**",
+   "new": "### Interpreting the IV Results",
+   "evidence": "Lens F normalization table: ch13 `### **Bold Title**` → strip bold markers, words verbatim.",
+   "confidence": "high",
+   "id": "ch13-F66"
+  },
+  {
+   "lines": [
+    1573,
+    1573
+   ],
+   "category": "format",
+   "severity": "style",
+   "action": "fix",
+   "summary": "Strip bold markers from H3 heading (ch13 format rule).",
+   "old": "### **Why Data Wrangling Matters**",
+   "new": "### Why Data Wrangling Matters",
+   "evidence": "Lens F normalization table: ch13 `### **Bold Title**` → strip bold markers, words verbatim.",
+   "confidence": "high",
+   "id": "ch13-F67"
+  }
+ ],
+ "killed": []
+}

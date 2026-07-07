@@ -1,0 +1,620 @@
+{
+ "chapter": "ch16",
+ "file": "ch16_Checking_the_Model_and_Data.qmd",
+ "findings": [
+  {
+   "lines": [
+    1526,
+    1526
+   ],
+   "category": "methods",
+   "severity": "error",
+   "action": "fix",
+   "summary": "The omitted-variables-bias formula mislabels the auxiliary slope $\\delta_{23}$ as \"the correlation\"; in Bias = β3×δ₂₃ the second factor is the regression coefficient (slope) of the omitted variable on the included regressor, not the correlation coefficient.",
+   "old": "where $\\beta_3$ is the omitted variable's effect and $\\delta_{23}$ is the correlation",
+   "new": "where $\\beta_3$ is the omitted variable's effect and $\\delta_{23}$ is the slope from an auxiliary regression of the omitted variable on the included regressor",
+   "evidence": "Standard OVB result: for true model y=β1+β2 x2+β3 x3+u, regressing y on x2 alone gives plim(b2)=β2+β3·δ where δ is the population slope of x3 on x2. Magnitude of the correlation coefficient ≠ magnitude of the slope, so the multiplicative term in Bias=β3×δ₂₃ must be the slope. Lens A rule: OVB claims are stated in terms of the omitted's effect × its relationship to the included regressor (auxiliary slope).",
+   "confidence": "medium",
+   "id": "ch16-F01",
+   "verify_note": "The exact omitted-variables-bias identity Bias = beta3 x delta_{23} uses the auxiliary-regression SLOPE (a regression coefficient), not the correlation coefficient; slope = correlation x (SD_omitted/SD_included), so they differ in magnitude. The delta notation itself denotes a slope. Proposed replacement ('slope from an auxiliary regression of the omitted variable on the included regressor') is the correct definition and matches the chapter's own auxiliary-regression usage. old text matches uniquely at L1526."
+  },
+  {
+   "lines": [
+    69,
+    69
+   ],
+   "category": "methods",
+   "severity": "error",
+   "action": "report",
+   "summary": "The Endogeneity Key Concept example states the chapter regresses \"economic growth on democracy\" with democracy as the endogenous regressor, but the chapter's actual specification is `democracy ~ growth` (democracy is the dependent variable, growth the regressor), so the illustrative example describes a different model than the one estimated.",
+   "old": "In the chapter's `data_democracy` study (131 countries), regressing economic `growth` on `democracy` looks straightforward",
+   "evidence": "Chapter code L915 `pf.feols('democracy ~ growth', ...)` and L955 multiple regression both make democracy the outcome; interpretation L941 \"Higher economic growth is associated with greater democratization\" confirms democracy is the outcome. Exec dump CELL 13/14 (Dep. var.: democracy). The KC example inverts regressor/outcome relative to the estimated model. Requires a structural rewrite of the example (and interlocks with the reversed research-question framing at L885), so action=report.",
+   "confidence": "medium",
+   "id": "ch16-F02",
+   "verify_note": "Real defect. Chapter code L915/CELL 13 fits `democracy ~ growth` (democracy is the dependent variable; interpretation L941 'higher growth -> greater democratization'). The KC Example at L69 says 'regressing growth on democracy', labels democracy endogenous, and quotes 'democracy boosts growth' -- regressor/outcome inverted. Overlaps with ch16-F25, which supplies the sentence-level fix; action=report is a defensible judgment call but the underlying defect is genuine."
+  },
+  {
+   "lines": [
+    1809,
+    1816
+   ],
+   "category": "code",
+   "severity": "error",
+   "action": "fix",
+   "summary": "Case Study 1 Task 1 code references dataset columns rk/hc/rgdppc that do not exist (actual Mendez columns are kl/h/GDPpc), the fit line is commented out, and model.summary() calls an undefined 'model' — the block cannot run in Colab.",
+   "evidence": "Live pandas read of https://raw.githubusercontent.com/quarcs-lab/mendez2020-convergence-clubs-code-data/master/assets/dat.csv (2026-07-08) returns columns [...,'lp','h','kl','kp','ky','TFP','GDPpc',...]; 'rk','hc','rgdppc' are absent so dat2014['rk'] etc. raise KeyError. 'fit' is commented (L1812) yet L1813 calls model.summary() on an undefined name. Matches the ch09 seed pattern (real cols kl/h). This fence is a plain ```python block, so it never appeared in the exec dump.",
+   "old": "dat2014['ln_rk'] = np.log(dat2014['rk'])\ndat2014['ln_rgdppc'] = np.log(dat2014['rgdppc'])\n\n# fit = pf.feols('ln_lp ~ ln_rk + hc + ln_rgdppc', data=dat2014, vcov='HC1')\nmodel.summary()\n\n# Calculate VIF\nX = dat2014[['ln_rk', 'hc', 'ln_rgdppc']].dropna()",
+   "new": "dat2014['ln_kl'] = np.log(dat2014['kl'])\ndat2014['ln_GDPpc'] = np.log(dat2014['GDPpc'])\n\nfit = pf.feols('ln_lp ~ ln_kl + h + ln_GDPpc', data=dat2014, vcov='HC1')\nfit.summary()\n\n# Calculate VIF\nX = dat2014[['ln_kl', 'h', 'ln_GDPpc']].dropna()",
+   "confidence": "high",
+   "id": "ch16-F03",
+   "verify_note": "Mendez dat.csv columns rk/hc/rgdppc absent; kl/h/GDPpc present. Old block matches lines 1809-1816 exactly once. 'fit' commented while model.summary() calls undefined 'model'. New text uses correct columns (ln_kl, h, ln_GDPpc), uncomments fit, and calls fit.summary(). pyfixest objects support .summary(). Correct."
+  },
+  {
+   "lines": [
+    1831,
+    1832
+   ],
+   "category": "code",
+   "severity": "error",
+   "action": "fix",
+   "summary": "Case Study 1 Task 2 fits 'ln_lp ~ ln_rk + hc' but ln_rk/hc derive from non-existent columns; must use ln_kl and h.",
+   "evidence": "Same column verification: rk/hc absent from dat.csv; the correct capital and human-capital columns are kl and h. ln_kl is defined once Task 1 is corrected; h exists directly. Both lines otherwise unchanged.",
+   "old": "fit_default = pf.feols('ln_lp ~ ln_rk + hc', data=dat2014)\nfit_robust = pf.feols('ln_lp ~ ln_rk + hc', data=dat2014, vcov='HC1')",
+   "new": "fit_default = pf.feols('ln_lp ~ ln_kl + h', data=dat2014)\nfit_robust = pf.feols('ln_lp ~ ln_kl + h', data=dat2014, vcov='HC1')",
+   "confidence": "high",
+   "id": "ch16-F04",
+   "verify_note": "Lines 1831-1832 match exactly. ln_rk/hc derive from absent columns; correct regressors ln_kl + h. Fix correct."
+  },
+  {
+   "lines": [
+    1796
+   ],
+   "category": "code",
+   "severity": "error",
+   "action": "fix",
+   "summary": "Case Study 1 Task 1 instruction tells students to compute np.log(rk), hc, np.log(rgdppc) — all non-existent columns; should be np.log(kl), h, np.log(GDPpc).",
+   "evidence": "Column check confirms rk/hc/rgdppc absent; kl is capital per worker (K/L), h is human capital, GDPpc is GDP per capita. Following the instruction literally produces KeyError. Wording 'physical capital' corrected to 'capital per worker' since kl is the capital-labor ratio.",
+   "old": "on log physical capital (`np.log(rk)`), human capital (`hc`), and log GDP per capita (`np.log(rgdppc)`)",
+   "new": "on log capital per worker (`np.log(kl)`), human capital (`h`), and log GDP per capita (`np.log(GDPpc)`)",
+   "confidence": "high",
+   "id": "ch16-F05",
+   "verify_note": "Line 1796 substring matches. rk/hc/rgdppc absent; kl=capital per worker (K/L), h=human capital, GDPpc=GDP per capita all present. Wording 'capital per worker' accurate."
+  },
+  {
+   "lines": [
+    1852
+   ],
+   "category": "code",
+   "severity": "error",
+   "action": "fix",
+   "summary": "Case Study 1 Task 3 instructs plotting 'Residuals vs. ln_rk', a variable that no longer exists after the column fix; should reference ln_kl.",
+   "evidence": "ln_rk is derived from the non-existent 'rk' column; the corrected capital regressor is ln_kl (from kl). Keeps the component-plus-residual plot consistent with the corrected Task 1/Task 2 code.",
+   "old": "3. Residuals vs. `ln_rk` (component-plus-residual plot)",
+   "new": "3. Residuals vs. `ln_kl` (component-plus-residual plot)",
+   "confidence": "high",
+   "id": "ch16-F06",
+   "verify_note": "Line 1852 matches. ln_rk becomes ln_kl after column fix. Correct."
+  },
+  {
+   "lines": [
+    1788
+   ],
+   "category": "code",
+   "severity": "error",
+   "action": "report",
+   "summary": "Case Study 1 dataset bullet documents variables rk/hc/rgdppc/tfp that do not exist in the Mendez dat.csv (actual: kl/h/GDPpc/TFP); descriptions ('physical capital' for kl) need author revision.",
+   "evidence": "Live column list of dat.csv: ['id','country','year','Y','K','pop','L','s','alpha_it','GDPpc','lp','h','kl','kp','ky','TFP',...,'region']. rk/hc/rgdppc/tfp absent. Reported (not auto-fixed) because the variable descriptions require domain judgment (kl is capital per worker, not 'physical capital'), and this documentation error propagates from stale project memory shared across chapters.",
+   "old": "- **Variables:** `lp` (labor productivity), `rk` (physical capital), `hc` (human capital), `rgdppc` (real GDP per capita), `tfp` (total factor productivity), `region`",
+   "new": "- **Variables:** `lp` (labor productivity), `kl` (capital per worker), `h` (human capital), `GDPpc` (real GDP per capita), `TFP` (total factor productivity), `region`",
+   "confidence": "high",
+   "id": "ch16-F07",
+   "verify_note": "action=report. Line 1788 documents rk/hc/rgdppc/tfp which are all absent from dat.csv (verified live: kl/h/GDPpc/TFP present). Real documentation defect; proposed mapping reasonable."
+  },
+  {
+   "lines": [
+    2074,
+    2096
+   ],
+   "category": "code",
+   "severity": "drift",
+   "action": "report",
+   "summary": "Case Study 2 Task 4 example scaffold defines a pyfixest fit then calls OLSInfluence(model)/model.params — 'model' is undefined and OLSInfluence requires a statsmodels OLS result, not a pyfixest object; if uncommented it errors and contradicts the chapter's own correct smf.ols pattern (CELL 18, L1279).",
+   "evidence": "OLSInfluence from statsmodels.stats.outliers_influence takes a statsmodels RegressionResults; pyfixest fits have no .params and are unsupported. The example structure (L2077-2096) sets fit = pf.feols(...) but then uses OLSInfluence(model) and len(model.params); the hint L2072 reinforces OLSInfluence(model). The main text (L1279-1282) correctly builds _diag_model = smf.ols(...).fit() precisely for this reason. Commented scaffolding, so it does not break rendering, but misleads students copying it.",
+   "confidence": "medium",
+   "id": "ch16-F08",
+   "verify_note": "action=report. Task 4 scaffold (lines 2078-2084) sets fit=pf.feols(...) then uses OLSInfluence(model) and len(model.params) — 'model' undefined and OLSInfluence requires a statsmodels result, not pyfixest. Main text L1279-1282 correctly uses _diag_model=smf.ols(...).fit() then OLSInfluence(_diag_model). Defect real."
+  },
+  {
+   "lines": [
+    57
+   ],
+   "category": "results",
+   "severity": "error",
+   "action": "fix",
+   "summary": "Earnings dataset sample size stated as 842 but executed regressions use 872 observations.",
+   "evidence": "Dump CELL 2/3/6/9 all report 'Observations: 872'; Python: len(AED_EARNINGS_COMPLETE)=872 with no missing in earnings/age/education/agebyeduc.",
+   "confidence": "high",
+   "old": "- **AED_EARNINGS_COMPLETE.DTA**: 842 full-time workers with earnings, age, education, and experience (2010)",
+   "new": "- **AED_EARNINGS_COMPLETE.DTA**: 872 full-time workers with earnings, age, education, and experience (2010)",
+   "id": "ch16-F09",
+   "verify_note": "CELL 2 Observations: 872; live read_stata len=872, 0 missing. Line 57 old text matches. 842->872 correct."
+  },
+  {
+   "lines": [
+    99
+   ],
+   "category": "results",
+   "severity": "error",
+   "action": "fix",
+   "summary": "Leverage Key-Concept example states earnings n = 842 but true n = 872.",
+   "evidence": "Dump CELL 2 'Observations: 872'; Python len=872.",
+   "confidence": "high",
+   "old": "in `data_earnings` ($n = 842$)",
+   "new": "in `data_earnings` ($n = 872$)",
+   "id": "ch16-F10",
+   "verify_note": "n=872 (dump + live). Line 99 old string matches uniquely. Correct."
+  },
+  {
+   "lines": [
+    114
+   ],
+   "category": "results",
+   "severity": "error",
+   "action": "fix",
+   "summary": "Cook's Distance example states 842 workers but earnings dataset has 872.",
+   "evidence": "Dump CELL 2 'Observations: 872'; Python len=872.",
+   "confidence": "high",
+   "old": "on `data_earnings` (842 workers) flags a small handful of outliers",
+   "new": "on `data_earnings` (872 workers) flags a small handful of outliers",
+   "id": "ch16-F11",
+   "verify_note": "n=872. Line 114 old string matches uniquely. Correct."
+  },
+  {
+   "lines": [
+    144
+   ],
+   "category": "results",
+   "severity": "error",
+   "action": "fix",
+   "summary": "RESET Key-Concept example states 842 workers but earnings dataset has 872.",
+   "evidence": "Dump CELL 2 'Observations: 872'; Python len=872.",
+   "confidence": "high",
+   "old": "model on `data_earnings` (842 workers) fails the RESET test",
+   "new": "model on `data_earnings` (872 workers) fails the RESET test",
+   "id": "ch16-F12",
+   "verify_note": "n=872. Line 144 old string matches uniquely. Correct."
+  },
+  {
+   "lines": [
+    129
+   ],
+   "category": "results",
+   "severity": "error",
+   "action": "fix",
+   "summary": "Auxiliary-Regression Key Concept states aux R²≈0.987 and VIF≈77; executed values are R²≈0.973 and VIF≈37.",
+   "evidence": "Dump CELL 6: aux R2=0.9729, VIF formula 1/(1-R²)=36.88; CELL 5 agebyeduc VIF=36.88; Python confirms.",
+   "confidence": "high",
+   "old": "and finds $R^2 \\approx 0.987$. Plugging that into the VIF formula gives $\\text{VIF}_{\\text{agebyeduc}} = 1/(1 - 0.987) \\approx 77$ — severe multicollinearity",
+   "new": "and finds $R^2 \\approx 0.973$. Plugging that into the VIF formula gives $\\text{VIF}_{\\text{agebyeduc}} = 1/(1 - 0.973) \\approx 37$ — severe multicollinearity",
+   "id": "ch16-F13",
+   "verify_note": "CELL 6 aux R2=0.9729, VIF=1/(1-0.9729)=36.88. Line 129 old text matches. New 0.973 and 37 (1/0.027=37.04) correct."
+  },
+  {
+   "lines": [
+    322
+   ],
+   "category": "results",
+   "severity": "error",
+   "action": "fix",
+   "summary": "'Typical results' lists agebyeduc VIF ≈ 60-80, but the chapter's own printed VIF is 36.9.",
+   "evidence": "Dump CELL 5: agebyeduc VIF=36.880231; printed line 'agebyeduc VIF = 36.9 (SEVERE!)'.",
+   "confidence": "high",
+   "old": "- **agebyeduc** (interaction): VIF ≈ **60-80** (SEVERE!)",
+   "new": "- **agebyeduc** (interaction): VIF ≈ **37** (SEVERE!)",
+   "id": "ch16-F14",
+   "verify_note": "CELL 5 agebyeduc VIF=36.88, printed 'VIF = 36.9'. Line 322 old '60-80' wrong; new '37' correct."
+  },
+  {
+   "lines": [
+    325
+   ],
+   "category": "results",
+   "severity": "drift",
+   "action": "report",
+   "summary": "Intercept VIF stated as ≈10-15 but statsmodels reports 411.3 for the const row (contradicts executed output; note intercept VIF is not econometrically meaningful).",
+   "evidence": "Dump CELL 5: 'const 411.323019'. Prose says 10-15. A clean fix is awkward because the const VIF is conventionally not interpreted; recommend human decision (drop the line or state it is not meaningful).",
+   "confidence": "medium",
+   "id": "ch16-F15",
+   "verify_note": "action=report. CELL 5 const VIF=411.32; line 325 states 'Intercept: VIF ~10-15'. Real contradiction with executed output; report is appropriate since intercept VIF is not econometrically meaningful."
+  },
+  {
+   "lines": [
+    346,
+    347
+   ],
+   "category": "results",
+   "severity": "error",
+   "action": "fix",
+   "summary": "Auxiliary R² for agebyeduc stated as 0.9875 / 98.75%; executed value is 0.9729 / 97.29%.",
+   "evidence": "Dump CELL 6: 'R² from auxiliary regression: 0.9729'; Python aux R2=0.9729.",
+   "confidence": "high",
+   "old": "- $R^2_{agebyeduc|age,educ} \\approx 0.9875$\n- This means 98.75% of variation in the interaction is **predictable** from age and education alone!",
+   "new": "- $R^2_{agebyeduc|age,educ} \\approx 0.973$\n- This means 97.3% of variation in the interaction is **predictable** from age and education alone!",
+   "id": "ch16-F16",
+   "verify_note": "CELL 6 R2=0.9729. Lines 346-347 match. New 0.973 / 97.3% correct."
+  },
+  {
+   "lines": [
+    354
+   ],
+   "category": "results",
+   "severity": "error",
+   "action": "fix",
+   "summary": "SE-inflation claim uses VIF=80 (√80≈9×); actual agebyeduc VIF≈37 gives √37≈6×.",
+   "evidence": "Dump CELL 5/6: agebyeduc VIF=36.88; sqrt(36.88)=6.07.",
+   "confidence": "high",
+   "old": "VIF = 80 means SE is $\\sqrt{80} \\approx 9$ times larger than with no collinearity!",
+   "new": "VIF = 37 means SE is $\\sqrt{37} \\approx 6$ times larger than with no collinearity!",
+   "id": "ch16-F17",
+   "verify_note": "VIF=36.88, sqrt=6.07. Line 354 old 'VIF=80, sqrt(80)=9' wrong; new 'VIF=37, sqrt(37)=6' correct."
+  },
+  {
+   "lines": [
+    407,
+    410
+   ],
+   "category": "results",
+   "severity": "error",
+   "action": "fix",
+   "summary": "'The Auxiliary Regression' summary states R²≈0.987 (98.7%) and VIF≈77; executed values are R²≈0.973 (97.3%) and VIF≈37.",
+   "evidence": "Dump CELL 6: aux R2=0.9729, VIF=36.88; Python confirms.",
+   "confidence": "high",
+   "old": "The output shows regressing agebyeduc ~ age + education gives **R² ≈ 0.987**:\n\n- This confirms 98.7% of interaction variation is explained by main effects\n- VIF = 1/(1-0.987) = 1/0.013 ≈ 77 ",
+   "new": "The output shows regressing agebyeduc ~ age + education gives **R² ≈ 0.973**:\n\n- This confirms 97.3% of interaction variation is explained by main effects\n- VIF = 1/(1-0.973) = 1/0.027 ≈ 37",
+   "id": "ch16-F18",
+   "verify_note": "CELL 6 R2=0.9729, VIF=36.88. Lines 407-410 (incl. trailing space after '77') match. New 0.973/97.3%/37 correct; 1/(1-0.973)=1/0.027=37.04."
+  },
+  {
+   "lines": [
+    562,
+    563
+   ],
+   "category": "results",
+   "severity": "error",
+   "action": "fix",
+   "summary": "Heteroskedasticity 'Typical Results' SE table (age ~$200/~$250/1.25x, education ~$800/~$1,100/1.38x) contradicts executed SEs (age 154/151/0.98x, education 570/642/1.13x) — the correct values appear in Exercise 4.",
+   "evidence": "Dump CELL 9 SE comparison: age Standard 154.10 Robust 151.39 ratio 0.982; education Standard 570.44 Robust 641.53 ratio 1.125. Exercise 4 (L1751-1752) already uses 570/642/1.13 and 154/151/0.98.",
+   "confidence": "high",
+   "old": "| age | ~\\$200 | ~\\$250 | **1.25x** |\n| education | ~\\$800 | ~\\$1,100 | **1.38x** |",
+   "new": "| age | ~\\$154 | ~\\$151 | **0.98x** |\n| education | ~\\$570 | ~\\$642 | **1.13x** |",
+   "id": "ch16-F19",
+   "verify_note": "CELL 9: age SE 154.10/151.39 ratio 0.982; education 570.44/641.53 ratio 1.125. Lines 562-563 old ($200/$250/1.25x, $800/$1100/1.38x) wrong; new $154/$151/0.98x and $570/$642/1.13x correct."
+  },
+  {
+   "lines": [
+    609
+   ],
+   "category": "results",
+   "severity": "error",
+   "action": "fix",
+   "summary": "Education t-statistic with standard SEs stated as 6.25; executed value is 10.19.",
+   "evidence": "Dump CELL 9 (iid): education Estimate 5811.367 / SE 570.436 = t 10.188; Python t=10.19.",
+   "confidence": "high",
+   "old": "- t-statistic for education: 6.25 → p < 0.001",
+   "new": "- t-statistic for education: 10.19 → p < 0.001",
+   "id": "ch16-F20",
+   "verify_note": "CELL 9 iid: education 5811.367/570.436=10.188. Line 609 old 6.25 wrong; new 10.19 correct."
+  },
+  {
+   "lines": [
+    614
+   ],
+   "category": "results",
+   "severity": "error",
+   "action": "fix",
+   "summary": "Education t-statistic with robust SEs stated as 4.55; executed value is 9.06.",
+   "evidence": "Dump CELL 9 (HC1): education Estimate 5811.367 / SE 641.533 = t 9.059; Python t=9.06.",
+   "confidence": "high",
+   "old": "- t-statistic for education: 4.55 → p < 0.001",
+   "new": "- t-statistic for education: 9.06 → p < 0.001",
+   "id": "ch16-F21",
+   "verify_note": "CELL 9 HC1: education 5811.367/641.533=9.059. Line 614 old 4.55 wrong; new 9.06 correct."
+  },
+  {
+   "lines": [
+    757,
+    787
+   ],
+   "category": "results",
+   "severity": "error",
+   "action": "report",
+   "summary": "Autocorrelation narrative claims residual ρ₁≈0.95-0.98, ρ₅≈0.85-0.90, ρ₁₀≈0.75-0.85 and a variance-inflation factor of 39, but the chapter's actual AR(1) simulation (ρ=0.8) produces lag-1 ACF 0.80, lag-5 0.31, lag-10 0.09 and factor (1+0.8)/(1-0.8)=9 — the whole 'interest rate / levels regression' essay describes a scenario the chapter never runs.",
+   "evidence": "Dump CELL 11 residual ACF: Lag1 0.7974, Lag5 0.3123, Lag10 0.0894; simulation uses ρ=0.8 (CELL 10 'ρ = 0.8'). Exercise 6 (L1770-1774) already uses ρ₁=0.80 and factor (1+ρ)/(1-ρ)=9. Section header L755 'From the residuals of the levels regression' but no interest-rate/levels regression exists in the chapter. Requires human rework, not a single-number fix.",
+   "confidence": "high",
+   "id": "ch16-F22",
+   "verify_note": "action=report. CELL 10 sim uses rho=0.8; CELL 11 residual ACF Lag1 0.797, Lag5 0.312, Lag10 0.089; factor (1+0.8)/(1-0.8)=9. Prose (lines 755-787) claims rho1 0.95-0.98, rho5 0.85-0.90, rho10 0.75-0.85, factor 39, and an 'interest rate / levels regression' the chapter never runs. Real, substantial mismatch requiring rework."
+  },
+  {
+   "lines": [
+    568
+   ],
+   "category": "results",
+   "severity": "drift",
+   "action": "report",
+   "summary": "Section asserts robust SEs are '20-40% larger' than standard, but executed ratios are 0.98x (age) and 1.13x (education) — at most 13% larger, and smaller for age.",
+   "evidence": "Dump CELL 9: ratios age 0.982, education 1.125. The same '20-40%' claim also appears in the code print at L545. Recommend softening to reflect actual ratios once the L562-563 table is corrected.",
+   "confidence": "medium",
+   "id": "ch16-F23",
+   "verify_note": "action=report. CELL 9 ratios: age 0.982 (smaller), education 1.125 (12.5% larger). Line 568 (and L545 print) claim '20-40% larger' — inaccurate. Real drift."
+  },
+  {
+   "lines": [
+    885,
+    885
+   ],
+   "category": "interpretation",
+   "severity": "error",
+   "action": "fix",
+   "summary": "The stated research question reverses the causal direction actually estimated and interpreted in the chapter.",
+   "evidence": "Code L915 estimates `democracy ~ growth` (democracy is the dependent variable); the interpretation at L941 reads 'Higher economic growth is associated with greater democratization' (growth->democracy), and Acemoglu-Johnson-Robinson-Yared (2008) study whether income/growth promotes democracy. The question as written asks the opposite (democracy->growth).",
+   "old": "**Research question**: Does democracy promote economic growth?",
+   "new": "**Research question**: Does economic growth promote democracy?",
+   "confidence": "high",
+   "id": "ch16-F24",
+   "verify_note": "Model estimates growth->democracy (democracy ~ growth, CELL 13); AJRY (2008) 'Income and Democracy' studies whether income/growth promotes democracy. Stated research question 'Does democracy promote economic growth?' reverses the estimated direction. Fix 'Does economic growth promote democracy?' matches both the model and the cited paper. old text unique at L885."
+  },
+  {
+   "lines": [
+    69,
+    69
+   ],
+   "category": "interpretation",
+   "severity": "error",
+   "action": "fix",
+   "summary": "The Endogeneity Key-Concept example states the regression direction backwards and labels the wrong variable as endogenous relative to the chapter's actual model.",
+   "evidence": "The chapter's regression is `democracy ~ growth` (dump CELL 13, code L915), so the regressor (growth) is the potentially endogenous variable and the naive coefficient reads 'growth boosts democracy'. The KC instead says 'regressing economic growth on democracy', calls 'democracy' endogenous, and quotes 'democracy boosts growth' -- all reversed.",
+   "old": "In the chapter's `data_democracy` study (131 countries), regressing economic `growth` on `democracy` looks straightforward — but `democracy` is plausibly endogenous: rich countries afford stronger institutions, so causality runs both ways. OLS on this pair is biased, and the chapter explicitly flags it as a textbook case where naive interpretation of the coefficient (\"democracy boosts growth\") confuses correlation with causation.",
+   "new": "In the chapter's `data_democracy` study (131 countries), regressing `democracy` on economic `growth` looks straightforward — but `growth` is plausibly endogenous: democracy may itself raise incomes and unobserved institutions drive both, so causality runs both ways. OLS on this pair is biased, and the chapter explicitly flags it as a textbook case where naive interpretation of the coefficient (\"growth boosts democracy\") confuses correlation with causation.",
+   "confidence": "high",
+   "id": "ch16-F25",
+   "verify_note": "Correctly reverses the KC Example to match model democracy ~ growth: growth becomes the potentially endogenous regressor, naive reading 'growth boosts democracy' (positive coef 0.131), endogeneity story (reverse causality + omitted institutions) is coherent and consistent with chapter prose L942/L949. Fix preserves pedagogical intent while fixing direction. old paragraph unique at L69."
+  },
+  {
+   "lines": [
+    749,
+    879
+   ],
+   "category": "interpretation",
+   "severity": "error",
+   "action": "report",
+   "summary": "The entire 16.6 discussion block interprets an empirical 'interest rate' analysis that the chapter never performs -- the code only simulates generic AR(1) data.",
+   "evidence": "The chapter's time-series analysis is a simulation of AR(1) errors with rho=0.8 (code L680-711; dump CELL 11 shows Lag-1 residual autocorr = 0.7974). Yet L749-879 attributes 'strong autocorrelation in interest rate data', cites a 'levels regression', 'rho1 ~ 0.95-0.98', 'HAC SE ~0.015', Fed policy, 1980s/2010s rates, and a '10-year rate vs 1-year rate' regression -- none of which exist in the chapter. A student who ran the simulation and saw rho1~0.80 cannot reconcile it with this narrative. The block should be reframed to the simulated AR(1) exercise (or an actual interest-rate dataset added).",
+   "old": "The time series analysis reveals **strong autocorrelation** in interest rate data - a classic problem that invalidates standard inference:",
+   "new": "The simulated AR(1) exercise (rho = 0.8) reveals **strong autocorrelation** in the error process - a classic problem that invalidates standard inference:",
+   "confidence": "high",
+   "id": "ch16-F26",
+   "verify_note": "Definitive mismatch. Chapter code (CELL 10-11) is a pure AR(1) simulation (rho=0.8, Lag-1 autocorr 0.7974, n=10000). grep confirms NO interest-rate dataset is loaded anywhere; all 'interest rate'/'10-year vs 1-year rate'/'levels regression'/'Fed'/'rho1~0.95-0.98'/'HAC SE~0.015' references live only inside the orphaned L749-879 block. The block interprets an analysis the chapter never runs. action=report is appropriate: the entire block (not just the opening sentence) needs reframing to the simulated AR(1) exercise or an actual dataset added."
+  },
+  {
+   "lines": [
+    973,
+    973
+   ],
+   "category": "interpretation",
+   "severity": "drift",
+   "action": "fix",
+   "summary": "The headline growth coefficient is discussed only for magnitude; the chapter omits that adding controls also renders it statistically insignificant.",
+   "evidence": "Dump CELL 14: with controls, growth coef = 0.047, SE = 0.025, t = 1.84, p = 0.068 -- insignificant at 5%, versus the bivariate t = 6.74 (CELL 13). Lens D requires headline coefficients be discussed for both magnitude and significance; only the magnitude reduction is noted.",
+   "old": "the growth coefficient falls from 0.131 (bivariate) to 0.047 (with controls), a 64% reduction.",
+   "new": "the growth coefficient falls from 0.131 (bivariate) to 0.047 (with controls), a 64% reduction that also turns a highly significant effect (t ≈ 6.7) into one indistinguishable from zero at the 5% level (t ≈ 1.8, p ≈ 0.07).",
+   "confidence": "medium",
+   "id": "ch16-F27",
+   "verify_note": "CELL 14: with-controls growth coef 0.047, SE 0.025, t=1.841, p=0.068 (insignificant at 5%); bivariate t=6.736 (CELL 13). KC 16.6 (L973) discusses only the 64% magnitude reduction ((0.131-0.047)/0.131=0.64, verified), omitting significance. Lens D requires headline coefficients discussed for both magnitude and significance. Proposed insert (t~6.7, t~1.8, p~0.07, 'indistinguishable from zero at the 5% level') is numerically exact and additive (no conclusion flip)."
+  },
+  {
+   "lines": [
+    556,
+    556
+   ],
+   "category": "interpretation",
+   "severity": "drift",
+   "action": "report",
+   "summary": "The section concludes the SE comparison 'reveals heteroskedasticity', but the actual robust/standard SE ratios are near 1.0, providing little evidence for it.",
+   "evidence": "Dump CELL 9: robust/standard SE ratios are Intercept 1.06, age 0.98 (robust is smaller), education 1.12 -- maximum inflation ~12% and one SE decreases. Concluding heteroskedasticity 'is present' (also L567) and that robust SEs are '20-40% larger' (L545, L569) overstates the evidence; the interpretation should be softened to 'only modest differences, suggesting mild heteroskedasticity at most.'",
+   "old": "The comparison between standard and robust SEs reveals **heteroskedasticity** in the earnings data:",
+   "new": "The comparison between standard and robust SEs shows only **modest differences** in the earnings data, suggesting mild heteroskedasticity at most:",
+   "confidence": "medium",
+   "id": "ch16-F28",
+   "verify_note": "CELL 9 robust/standard SE ratios: Intercept 1.06, age 0.98 (robust SMALLER), education 1.12 -- max ~12%, contradicting the prose '20-40% larger' (L545 code note, L568-569) and the hand-typed table (age 1.25x, education 1.38x at L562-563, both wrong vs actual). The SE comparison provides weak evidence, so softening L556 to 'modest differences... mild heteroskedasticity at most' is warranted and accurate. action=report is right since the overstatement spans several lines (L545/L562-563/L568-569), not just L556."
+  },
+  {
+   "lines": [
+    255,
+    256
+   ],
+   "category": "readability",
+   "severity": "style",
+   "action": "fix",
+   "summary": "The interaction (collinear) model cell follows the base-model cell with no markdown lead-in, yet it produces the chapter's headline demonstration of standard-error inflation.",
+   "evidence": "Lens R: every non-Setup code cell needs a >=1-sentence markdown lead-in (what it does + what to look for). Cell 3 (L255) directly follows cell 2's closing fence at L253 with only a blank line between. Dump CELL 3 shows age SE jumping 151->719 and education SE 641->2401 — a notable output that deserves a signposted lead-in.",
+   "old": "```\n\n```{python}\n# Model with interaction (creates multicollinearity)",
+   "new": "```\n\nNow we add the age×education interaction term to the same regression. Watch how the standard errors on `age` and `education` balloon relative to the base model above — that inflation is the fingerprint of multicollinearity.\n\n```{python}\n# Model with interaction (creates multicollinearity)",
+   "confidence": "high",
+   "id": "ch16-F29"
+  },
+  {
+   "lines": [
+    912,
+    913
+   ],
+   "category": "readability",
+   "severity": "style",
+   "action": "fix",
+   "summary": "The bivariate democracy~growth regression cell follows the data-loading cell with no markdown lead-in, though it produces both a regression summary and the Figure 16.1 scatter.",
+   "evidence": "Lens R: missing lead-in. Cell 13 (L912) immediately follows cell 12's closing fence at L910 with only a blank line. Dump CELL 13 produces a full regression table (growth coef 0.131) plus a scatter figure — two notable outputs with no introductory sentence.",
+   "old": "```\n\n```{python}\n# Bivariate regression: democracy ~ growth",
+   "new": "```\n\nWe begin with the simplest specification: regress the 500-year change in democracy on economic growth alone. The scatter plot and fitted line below show the raw association before any controls are added.\n\n```{python}\n# Bivariate regression: democracy ~ growth",
+   "confidence": "high",
+   "id": "ch16-F30"
+  },
+  {
+   "lines": [
+    713,
+    714
+   ],
+   "category": "readability",
+   "severity": "style",
+   "action": "fix",
+   "summary": "The residual-autocorrelation estimation/ACF cell follows the data-generation cell with no markdown lead-in.",
+   "evidence": "Lens R: missing lead-in. Cell 11 (L713) directly follows cell 10's closing fence at L711 with only a blank line. The cell fits the model and plots the ACF (dump CELL 11: lag-1 autocorrelation 0.7974 decaying gradually) — a notable output that should be introduced before the reader hits the plot.",
+   "old": "```\n\n```{python}\n# Estimate model and check residual autocorrelation",
+   "new": "```\n\nNow we fit the regression to the simulated series and inspect its residuals. Because we built AR(1) structure into the errors, the residual autocorrelation function (ACF) below should show a strong spike at lag 1 that decays gradually across later lags.\n\n```{python}\n# Estimate model and check residual autocorrelation",
+   "confidence": "medium",
+   "id": "ch16-F31"
+  },
+  {
+   "lines": [
+    951,
+    952
+   ],
+   "category": "readability",
+   "severity": "style",
+   "action": "fix",
+   "summary": "The multiple-regression-with-controls cell (the omitted-variable-bias reveal) has no markdown lead-in; the prose immediately above it is the interpretation of the previous scatter, not an introduction to this cell.",
+   "evidence": "Lens R: missing lead-in. Cell 14 (L951) is the core OVB demonstration (dump CELL 14: growth coef falls 0.1308 -> 0.0468) but the only preceding prose (L945-949) is the 'What to look for in this scatter plot' block belonging to cell 13.",
+   "old": "```{python}\n# Multiple regression: add institutional controls\n# Multiple Regression with Institutional Controls",
+   "new": "Now we add institutional controls — executive constraints, independence date, and religious composition. If growth was partly standing in for these omitted factors, its coefficient should shrink once they enter the model.\n\n```{python}\n# Multiple regression: add institutional controls\n# Multiple Regression with Institutional Controls",
+   "confidence": "medium",
+   "id": "ch16-F32"
+  },
+  {
+   "lines": [
+    440,
+    442
+   ],
+   "category": "readability",
+   "severity": "style",
+   "action": "fix",
+   "summary": "The joint Wald-test cell packs the R-matrix construction into a dense one-liner with no explanatory comment, making it hard to follow what is being tested.",
+   "evidence": "Lens R comment house style: under-commented cells should get a stanza comment. The line `fit_collinear.wald_test(R=np.eye(len(fit_collinear.coef()))[[list(...).index(v) for v in ['age','agebyeduc']]])` gives no hint that R selects the coefficient rows being jointly tested.",
+   "old": "# Test 1: H₀: age = 0 AND agebyeduc = 0\nprint(\"Test 1: H₀: age = 0 AND agebyeduc = 0\")\nprint(fit_collinear.wald_test(R=np.eye(len(fit_collinear.coef()))[[list(fit_collinear.coef().index).index(v) for v in ['age', 'agebyeduc']]]))",
+   "new": "# The R matrix picks out the coefficient rows we want to test jointly (here age\n# and agebyeduc); wald_test then evaluates H₀ that BOTH equal zero at once.\n\n# Test 1: H₀: age = 0 AND agebyeduc = 0\nprint(\"Test 1: H₀: age = 0 AND agebyeduc = 0\")\nprint(fit_collinear.wald_test(R=np.eye(len(fit_collinear.coef()))[[list(fit_collinear.coef().index).index(v) for v in ['age', 'agebyeduc']]]))",
+   "confidence": "medium",
+   "id": "ch16-F33"
+  },
+  {
+   "lines": [
+    1500,
+    1502
+   ],
+   "category": "readability",
+   "severity": "style",
+   "action": "fix",
+   "summary": "The DFBETAS cell ends with print(\"\\nInterpretation:\") that emits a bare 'Interpretation:' label with no body, cluttering the output; the markdown look-for block that follows already provides the interpretation.",
+   "evidence": "Dump CELL 19 (L288-289) shows the output ends with 'Interpretation:' followed by nothing. The '**What to look for in the DFBETAS plots:**' markdown at L1502 supplies the actual interpretation, so the dangling print is redundant and confusing.",
+   "old": "plt.show()\n\nprint(\"\\nInterpretation:\")\n```\n\n**What to look for in the DFBETAS plots:**",
+   "new": "plt.show()\n```\n\n**What to look for in the DFBETAS plots:**",
+   "confidence": "medium",
+   "id": "ch16-F34"
+  },
+  {
+   "lines": [
+    206
+   ],
+   "category": "format",
+   "severity": "style",
+   "action": "fix",
+   "summary": "Numbered section header uses a colon; normalize to space per format table.",
+   "evidence": "Lens F table: '## N.M: Title' -> '## N.M Title' (remove colon ONLY; words verbatim) applies to ch16.",
+   "confidence": "high",
+   "old": "## 16.1: Multicollinearity",
+   "new": "## 16.1 Multicollinearity",
+   "id": "ch16-F35"
+  },
+  {
+   "lines": [
+    456
+   ],
+   "category": "format",
+   "severity": "style",
+   "action": "fix",
+   "summary": "Merged section header uses a colon; keep merged 16.2-16.4 range, only colon->space.",
+   "evidence": "Lens F table: KEEP ch16 merged '16.2-16.4' heading (deliberate AED alignment) — only colon->space.",
+   "confidence": "high",
+   "old": "## 16.2-16.4: Model Assumptions",
+   "new": "## 16.2-16.4 Model Assumptions",
+   "id": "ch16-F36"
+  },
+  {
+   "lines": [
+    503
+   ],
+   "category": "format",
+   "severity": "style",
+   "action": "fix",
+   "summary": "Numbered section header uses a colon; normalize to space.",
+   "evidence": "Lens F table: '## N.M: Title' -> '## N.M Title' for ch16.",
+   "confidence": "high",
+   "old": "## 16.5: Heteroskedastic Errors",
+   "new": "## 16.5 Heteroskedastic Errors",
+   "id": "ch16-F37"
+  },
+  {
+   "lines": [
+    660
+   ],
+   "category": "format",
+   "severity": "style",
+   "action": "fix",
+   "summary": "Numbered section header uses a colon; normalize to space (parenthetical retained verbatim).",
+   "evidence": "Lens F table: '## N.M: Title' -> '## N.M Title' for ch16.",
+   "confidence": "high",
+   "old": "## 16.6: Correlated Errors (Autocorrelation)",
+   "new": "## 16.6 Correlated Errors (Autocorrelation)",
+   "id": "ch16-F38"
+  },
+  {
+   "lines": [
+    881
+   ],
+   "category": "format",
+   "severity": "style",
+   "action": "fix",
+   "summary": "Numbered section header uses a colon; normalize to space.",
+   "evidence": "Lens F table: '## N.M: Title' -> '## N.M Title' for ch16.",
+   "confidence": "high",
+   "old": "## 16.7: Example - Democracy and Growth",
+   "new": "## 16.7 Example - Democracy and Growth",
+   "id": "ch16-F39"
+  },
+  {
+   "lines": [
+    986
+   ],
+   "category": "format",
+   "severity": "style",
+   "action": "fix",
+   "summary": "Numbered section header uses a colon; normalize to space.",
+   "evidence": "Lens F table: '## N.M: Title' -> '## N.M Title' for ch16.",
+   "confidence": "high",
+   "old": "## 16.8: Diagnostics - Residual Plots",
+   "new": "## 16.8 Diagnostics - Residual Plots",
+   "id": "ch16-F40"
+  },
+  {
+   "lines": [
+    1703
+   ],
+   "category": "format",
+   "severity": "style",
+   "action": "fix",
+   "summary": "Key Takeaways ends with a single-sentence 'Next steps' line; normalize to a proper '**Next Steps:**' bulleted block (3-5 bullets, ch01 style).",
+   "evidence": "Lens F table: Missing '**Next Steps:**' block (3-5 bullets, ch01 style, end of Key Takeaways) -> propose text | ch16. Existing L1703 is a lowercase single-sentence line, not the required block.",
+   "confidence": "medium",
+   "old": "**Next steps:** Chapter 17 extends these ideas to panel data, where you'll learn fixed effects and random effects models that address unobserved heterogeneity across units.",
+   "new": "**Next Steps:**\n\n- Chapter 17 extends these ideas to panel data, where you'll learn fixed effects and random effects models that address unobserved heterogeneity across units.\n- Re-examine regressions from earlier chapters using this chapter's diagnostic workflow: VIF, robust SEs, residual plots, and influence measures.\n- When residual plots or specification tests signal misspecification, experiment with nonlinear terms, interactions, or transformations before drawing conclusions.\n- When endogeneity is suspected, review the instrumental-variables approach and look for a valid instrument.",
+   "id": "ch16-F41"
+  }
+ ],
+ "killed": []
+}
