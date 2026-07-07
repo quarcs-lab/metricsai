@@ -38,7 +38,7 @@ This chapter extends statistical inference from univariate to bivariate regressi
 - Heteroskedasticity-robust standard errors and their importance
 - Economic vs. statistical significance
 
-**Datasets used:**
+**Dataset used:**
 
 - **AED_HOUSE.DTA**: House prices and characteristics for 29 houses sold in Central Davis, California in 1999 (price, size, bedrooms, bathrooms, lot size, age)
 
@@ -51,9 +51,9 @@ This chapter extends statistical inference from univariate to bivariate regressi
 - 7.5 Two-Sided Hypothesis Tests
 - 7.6 One-Sided Directional Hypothesis Tests
 - 7.7 Robust Standard Errors
-- 7.8 Case Studies
 - Key Takeaways
 - Practice Exercises
+- Case Studies
 
 ## Key Concepts
 
@@ -94,7 +94,7 @@ A fitness tracker counts your daily steps but also reports a *signal-to-noise ra
 ::::: {.columns}
 :::: {.column width="50%"}
 ::: {.callout-tip collapse="true" appearance="simple" title="Example"}
-For the Davis houses, $\operatorname{se}(b_2) = 11.17$ — meaning the slope on `size` would jitter by roughly \$11/sq ft from one sample of 29 houses to another. With $n = 29$, $s_e \approx \$23{,}162$, and the spread $\sigma_{\text{size}} \approx 398$ sq ft, the formula $\operatorname{se}(b_2) = s_e / \sqrt{\sum(x_i - \bar{x})^2}$ produces this estimate; quadrupling $n$ would roughly halve it.
+For the Davis houses, $\operatorname{se}(b_2) = 11.17$ — meaning the slope on `size` would jitter by roughly \$11/sq ft from one sample of 29 houses to another. With $n = 29$, $s_e \approx \$23{,}551$, and the spread $\sigma_{\text{size}} \approx 398$ sq ft, the formula $\operatorname{se}(b_2) = s_e / \sqrt{\sum(x_i - \bar{x})^2}$ produces this estimate; quadrupling $n$ would roughly halve it.
 :::
 ::::
 :::: {.column width="50%"}
@@ -124,7 +124,7 @@ A playground swing is fitted with a "max-height" sensor: cross it, and the opera
 ::::: {.columns}
 :::: {.column width="50%"}
 ::: {.callout-tip collapse="true" appearance="simple" title="Example"}
-For the Davis house slope, the 95% margin of error is $2.052 \times 11.17 \approx 22.93$ dollars per square foot. So the 95% confidence interval for $\beta_2$ is $73.77 \pm 22.93 = [50.84, 96.70]$ — a range that excludes \$0 but spans a substantial \$45 spread, telling us "size matters", but at a price between \$51 and \$97 per square foot.
+For the Davis house slope, the 95% margin of error is $2.052 \times 11.17 \approx 22.93$ dollars per square foot. So the 95% confidence interval for $\beta_2$ is $73.77 \pm 22.93 = [50.84, 96.70]$ — a range that excludes \$0 but spans a substantial \$46 spread, telling us "size matters", but at a price between \$51 and \$97 per square foot.
 :::
 ::::
 :::: {.column width="50%"}
@@ -203,7 +203,7 @@ $$\text{price} = \beta_1 + \beta_2 \times \text{size} + u$$
 
 where:
 
-- $\text{price}$ is the house sale price (in thousands of dollars)
+- $\text{price}$ is the house sale price (in dollars)
 - $\text{size}$ is the house size (in square feet)
 - $\beta_2$ is the population slope (price increase per square foot)
 - $b_2$ is the sample estimate of $\beta_2$
@@ -213,14 +213,16 @@ where:
 | Variable | Coefficient | Standard Error | t-statistic | p-value | 95% CI |
 |----------|-------------|----------------|-------------|---------|--------|
 | Size | 73.77 | 11.17 | 6.60 | 0.000 | [50.84, 96.70] |
-| Intercept | 115,017.30 | 21,489.36 | 5.35 | 0.000 | [70,924.76, 159,109.8] |
+| Intercept | 115,017.28 | 21,489.36 | 5.35 | 0.000 | [70,924.76, 159,109.8] |
 
 **Interpretation:**
 
-- Each additional square foot increases house price by approximately \$73.77
+- Each additional square foot is associated with approximately \$73.77 higher house price
 - The standard error (11.17) measures uncertainty in this estimate
 - The t-statistic (6.60) tests whether the effect is statistically significant
 - The 95% confidence interval is [50.84, 96.70]
+
+First, we load the AED house-price dataset and inspect its summary statistics — confirm the sample has 29 houses and that `price` and `size` are on sensible scales (dollars and square feet).
 
 ```{python}
 # 7.1 Example: House price and size
@@ -230,6 +232,8 @@ data_house = pd.read_stata(GITHUB_DATA_URL + 'AED_HOUSE.DTA')
 data_house.describe()
 
 ```
+
+The sample covers 29 houses: the average sale price is about \$253,910 and the average size about 1,883 square feet, with no implausible values in any variable.
 
 ### Basic Regression: Price on Size
 
@@ -351,11 +355,11 @@ Think of the regression line as a seesaw balanced at (x̄, ȳ):
 Given:
 
 - Sample size: n = 29
-- Standard error of regression: σ_u ≈ 37,000
-- Standard deviation of size: σ_x ≈ 360
-- Estimated SE(b₂) = 37,000 / (√29 × 360) ≈ 19.1
+- Standard error of regression: s_e ≈ 23,551
+- Standard deviation of size: σ_x ≈ 398
+- Estimated SE(b₂) = 23,551 / (√29 × 398) ≈ 11.0
 
-(Actual SE is 11.17, smaller because the relationship is quite strong)
+(Actual SE is 11.17; the shortcut formula is slightly smaller because it uses √n in place of √(n-1))
 
 **Why standard errors matter:**
 
@@ -372,7 +376,9 @@ For our house price example:
 
 - R² = 0.62 (size explains 62% of price variation)
 - This gives relatively small SE
-- If R² were 0.10, SE would be about 2.5 times larger
+- If R² were 0.10, SE would be about 1.5 times larger (SE scales with √(1-R²))
+
+The cell below re-displays the regression output and then extracts the ingredients of the t-statistic for `size` — verify that $t = b_2 / \operatorname{se}(b_2)$ reproduces the value 6.60 shown in the table.
 
 ```{python}
 # 7.2 The t statistic
@@ -397,12 +403,14 @@ print(f"t = b₂ / se(b₂) = {coef_size:.4f} / {se_size:.4f} = {t_stat_size:.4f
 > The **t-distribution** is used for statistical inference when the population variance is unknown (which is always the case in practice). Unlike the standard normal distribution, the t-distribution accounts for the additional uncertainty from estimating the variance.
 >
 > **Key properties:**
+>
 > - Bell-shaped and symmetric (like the normal distribution)
 > - Heavier tails than the normal distribution (more probability in extremes)
 > - Converges to the normal distribution as sample size increases
 > - Characterized by degrees of freedom (df)
 >
 > **Degrees of freedom = n - 2** for bivariate regression:
+>
 > - Start with n observations
 > - Estimate β₁ (intercept): -1 df
 > - Estimate β₂ (slope): -1 df  
@@ -431,7 +439,7 @@ $$b_2 \pm 2 \times se(b_2)$$
 **Interpretation:**
 
 - If we repeatedly sampled from the population and constructed 95% CIs, approximately 95% of these intervals would contain the true parameter value $\beta_2$
-- The calculated 95% CI will correctly include $\beta_2$ 95% of the time
+- Any single calculated interval either contains $\beta_2$ or it does not — the 95% refers to the long-run success rate of the interval-construction procedure
 
 **Example calculation for house price:**
 
@@ -448,10 +456,12 @@ b_2 \pm t_{27, 0.025} \times se(b_2) &= 73.77 \pm 2.052 \times 11.17 \\
 > $$b_2 \pm t_{n-2, 0.025} \times se(b_2)$$
 >
 > **Common misconceptions:**
+>
 > - WRONG: "There's a 95% probability that β₂ is in this interval"
 > - CORRECT: "If we repeated the sampling process many times, 95% of the constructed intervals would contain β₂"
 >
 > **Practical interpretation:**
+>
 > - The interval represents our uncertainty about the true parameter value
 > - Wider intervals indicate more uncertainty (large SE, small n, or high variability)
 > - Narrower intervals indicate more precision (small SE, large n, or low variability)
@@ -513,6 +523,8 @@ Confidence intervals are more informative than hypothesis tests because they sho
 - The precision of the estimate (width of interval)
 - All null values that would not be rejected (values inside interval)
 
+The cell below extracts the 95% confidence intervals directly from the fitted model — compare the `size` row with the hand calculation above, [50.84, 96.70].
+
 ```{python}
 # 7.3 Confidence intervals
 conf_int = model_basic.confint()
@@ -573,8 +585,8 @@ This substitution introduces additional uncertainty, so we use the t-distributio
 
 **For n = 29 (our house price data):**
 
-- Using normal: 95% CI margin = 1.96 × 11.17 = 21.89
-- Using t(27): 95% CI margin = 2.052 × 11.17 = 22.92
+- Using normal: 95% CI margin = 1.96 × 11.17 ≈ 21.90
+- Using t(27): 95% CI margin = 2.052 × 11.17 ≈ 22.93
 - Difference: 5% wider with t-distribution (more conservative)
 
 **For n = 10 (small sample):**
@@ -622,6 +634,8 @@ print(f"Margin of error: {t_crit * se_size:.4f}")
 print(f"95% CI: [${ci_lower:.4f}, ${ci_upper:.4f}]")
 ```
 
+The manual calculation matches pyfixest's `confint()` output exactly: the margin of error $2.052 \times 11.17 \approx 22.93$ yields the interval $[50.84, 96.70]$, a spread of roughly \$46 per square foot around the point estimate.
+
 ### Example with Artificial Data
 
 To illustrate the concepts more clearly, let's work with a simple artificial dataset.
@@ -657,21 +671,26 @@ $$t = \frac{b_2}{se(b_2)} \sim T(n-2)$$
 > **Hypothesis testing** is a formal procedure for making decisions about population parameters. The key steps are:
 >
 > **1. State the hypotheses:**
+>
 > - **Null hypothesis (H₀)**: The claim we're testing (usually "no effect")
 > - **Alternative hypothesis (Hₐ)**: What we conclude if we reject H₀
 >
 > **2. Choose significance level (α):**
+>
 > - Common choices: 0.10, 0.05, 0.01
 > - α = probability of Type I error (rejecting H₀ when it's true)
 >
 > **3. Calculate test statistic:**
+>
 > - Standardizes the difference: t = (estimate - null value) / SE
 >
 > **4. Determine p-value:**
+>
 > - Probability of observing our result (or more extreme) if H₀ is true
 > - Smaller p-value = stronger evidence against H₀
 >
 > **5. Make decision:**
+>
 > - Reject H₀ if p-value < α
 > - Fail to reject H₀ if p-value ≥ α (never "accept" H₀)
 >
@@ -682,16 +701,19 @@ $$t = \frac{b_2}{se(b_2)} \sim T(n-2)$$
 > **Statistical significance** and **economic significance** are distinct concepts that answer different questions:
 >
 > **Statistical Significance:**
+>
 > - **Question:** Is the effect different from zero?
 > - **Determined by:** t-statistic = b₂ / se(b₂), which depends on sample size, variability, and effect size
 > - **Interpretation:** We can confidently say the effect exists (not due to chance)
 >
 > **Economic Significance:**
+>
 > - **Question:** Is the effect large enough to matter in practice?
 > - **Determined by:** The magnitude of b₂ and the context
 > - **Interpretation:** The effect has real-world importance
 >
 > **Why they can diverge:**
+>
 > 1. **Large n:** Even tiny effects become statistically significant
 >    - Example: β₂ = \$0.01 with n = 10,000 might have p < 0.001 but be economically trivial
 > 2. **Small n:** Large effects may not reach statistical significance  
@@ -704,12 +726,14 @@ $$t = \frac{b_2}{se(b_2)} \sim T(n-2)$$
 > The choice between one-sided and two-sided tests depends on your research question:
 >
 > **Two-Sided Test (Most Common):**
+>
 > - H₀: β₂ = β₂* vs. Hₐ: β₂ ≠ β₂*
 > - Detects deviations in either direction
 > - Standard practice in academic research
 > - Rejection region: Both tails of t-distribution
 >
 > **One-Sided Test (Directional):**
+>
 > - Upper: H₀: β₂ ≤ β₂* vs. Hₐ: β₂ > β₂*
 > - Lower: H₀: β₂ ≥ β₂* vs. Hₐ: β₂ < β₂*  
 > - Detects deviations in one specific direction
@@ -718,6 +742,7 @@ $$t = \frac{b_2}{se(b_2)} \sim T(n-2)$$
 > **Key relationship:** For the same test statistic, one-sided p-value = (two-sided p-value) / 2 (if sign is correct)
 >
 > **When to use one-sided tests:**
+>
 > - Strong theoretical prediction of direction (before seeing data)
 > - Only care about deviations in one direction
 > - Be cautious: Journals typically require two-sided tests
@@ -747,6 +772,8 @@ print(f"Coefficient: {coef_x:.4f}")
 print(f"Standard Error: {se_x:.4f}")
 print(f"95% CI: [{ci_lower_art:.4f}, {ci_upper_art:.4f}]")
 ```
+
+With only $n = 5$ observations, the degrees of freedom drop to 3 and the critical value jumps to $t_{3,\,0.025} = 3.182$, so the 95% interval $[0.03, 0.77]$ is very wide relative to the slope estimate of 0.40 — a concrete illustration of how small samples inflate the margin of error.
 
 ### Understanding Hypothesis Testing: The Complete Workflow
 
@@ -797,7 +824,7 @@ The p-value answers this question: "If the null hypothesis were true, what is th
 
 **Example interpretation:**
 
-- p = 0.000: If β₂ were truly zero, the probability of getting t ≥ 6.60 is less than 0.1%
+- p = 0.000: If β₂ were truly zero, the probability of getting |t| ≥ 6.60 is less than 0.1%
 - This is very unlikely, so we have strong evidence against H₀
 
 **Two approaches to hypothesis testing:**
@@ -860,7 +887,7 @@ As sample size increases:
 For the house price example:
 
 - Statistical result: β₂ = 73.77, highly significant (p < 0.001)
-- Economic interpretation: Each sq ft adds \$73.77 to price
+- Economic interpretation: Each additional sq ft is associated with \$73.77 higher price
 - Context matters:
   - For a 100 sq ft difference: \$7,377 difference (substantial!)
   - For a 10 sq ft difference: \$737.70 difference (moderate)
@@ -1009,6 +1036,8 @@ Use two-sided tests unless:
 2. You specified the direction before seeing the data
 3. You only care about deviations in one direction (rare in economics)
 
+Back to the house-price data: the next cell carries out the test of statistical significance for `size`, checking both decision rules — the p-value against $\alpha = 0.05$ and $|t|$ against the critical value 2.052.
+
 ```{python}
 # 7.4 Tests of statistical significance
 # Null hypothesis: β₂ = 0 (size has no effect on price)
@@ -1029,21 +1058,25 @@ else:
 > **Homoskedasticity assumption** (Assumption 3): Var[u_i | x_i] = σ²_u (constant)
 >
 > **Why heteroskedasticity matters:**
+>
 > - Coefficient estimates (b₂): Still unbiased 
 > - Standard errors: WRONG (biased) 
 > - t-statistics, p-values, CIs: All invalid 
 >
 > **Solution: Heteroskedasticity-robust standard errors**
+>
 > - Valid whether or not heteroskedasticity exists
 > - No need to test for heteroskedasticity first
 > - Modern best practice for cross-sectional data
 >
 > **Practical impact:**
+>
 > - Robust SEs usually larger → more conservative inference
 > - Protects against false positives (Type I errors)
 > - Sometimes smaller → gain power
 >
 > **Types of robust SEs:**
+>
 > - **HC (Heteroskedasticity-Consistent):** Cross-sectional data
 > - **HAC (Heteroskedasticity and Autocorrelation Consistent):** Time series
 > - **Cluster-robust:** Grouped/clustered data
@@ -1198,14 +1231,14 @@ Different formulas for finite-sample adjustment:
 - **HC2**: Leverage-weighted
 - **HC3**: Even more conservative
 
-**Python default:** HC1 (matches Stata's "robust" option)
+**Python (pyfixest):** the default is classical (iid) standard errors — request robust SEs explicitly with `vcov='HC1'`, which matches Stata's "robust" option
 
 **For our house price example:**
 
 | Coefficient | Standard SE | Robust SE | % Change |
 |-------------|-------------|-----------|----------|
 | size | 11.17 | 11.33 | +1.4% |
-| Intercept | 21,489 | 21,825 | +1.6% |
+| Intercept | 21,489 | 20,299 | -5.5% |
 
 - Difference is small (good news!)
 - Suggests heteroskedasticity is not severe
@@ -1285,7 +1318,7 @@ Variable: size
  
 Variable: Intercept
  Standard SE: 21,489 |████████████████████|
- Robust SE: 21,825 |█████████████████████| (+1.6%)
+ Robust SE: 20,299 |███████████████████| (-5.5%)
 ```
 
 **Impact on inference:**
@@ -1296,7 +1329,7 @@ Let's see how the choice affects our conclusions:
 |------|-------------|-----------|------------|
 | t-statistic | 73.77/11.17 = 6.60 | 73.77/11.33 = 6.51 | Both highly significant |
 | p-value | 0.0000 | 0.0000 | Both p < 0.001 |
-| 95% CI | [50.84, 96.70] | [50.33, 97.21] | Nearly identical |
+| 95% CI | [50.84, 96.70] | [50.52, 97.02] | Nearly identical |
 | Reject H₀? | YES | YES | Same conclusion |
 
 **When robust SEs matter most:**
@@ -1335,7 +1368,7 @@ size 73.77 11.17 6.60 11.33 6.51
 
 **Example write-up:**
 
-"We find that each additional square foot increases house price by \$73.77 (robust SE = 11.33, t = 6.51, p < 0.001). The heteroskedasticity-robust standard error is nearly identical to the classical standard error (11.17), suggesting homoskedasticity is approximately satisfied. The effect is highly statistically significant and economically meaningful, with a 95% confidence interval of [\$50.33, \$97.21]."
+"We find that each additional square foot is associated with a \$73.77 higher house price (robust SE = 11.33, t = 6.51, p < 0.001). The heteroskedasticity-robust standard error is nearly identical to the classical standard error (11.17), suggesting homoskedasticity is approximately satisfied. The effect is highly statistically significant and economically meaningful, with a 95% confidence interval of [\$50.52, \$97.02]."
 
 **Common mistakes to avoid:**
 
@@ -1363,6 +1396,8 @@ Think of robust SEs as the "safe" choice:
 - If heteroskedasticity exists: Robust SEs correct the problem (saved you!)
 
 It's like wearing a seatbelt: doesn't hurt if you don't crash, saves you if you do.
+
+As a compact recap, the next cell repeats the $H_0: \beta_2 = 90$ test in three lines, pulling the coefficient and standard error directly from the fitted model object — the t-statistic and p-value match the Section 7.5 results.
 
 ```{python}
 # Hypothesis test using manual t-statistic (pyfixest)
@@ -1466,6 +1501,8 @@ $$se_{het}(b_2) = \frac{\sqrt{\sum_{i=1}^n e_i^2 (x_i - \bar{x})^2}}{\sum_{i=1}^
 - **HAC robust**: For time series with autocorrelation
 - **Cluster robust**: For clustered data (students in schools, people in villages, etc.)
 
+The cell below re-estimates the same regression with `vcov='HC1'` and collects classical and robust standard errors side by side — for these data the robust SE on `size` (11.33) barely differs from the classical one (11.17).
+
 ```{python}
 # 7.7 Robust standard errors
 robust_results = pf.feols('price ~ size', data=data_house, vcov='HC1')
@@ -1484,6 +1521,8 @@ comparison_df
 ```
 
 ### Full Regression Output with Robust Standard Errors
+
+The full summary now reports `Inference: HC1`: the coefficients are identical to the classical fit — only the standard errors, t-statistics, and confidence intervals change.
 
 ```{python}
 # Regression with robust standard errors
@@ -1504,7 +1543,7 @@ ax.scatter(data_house['size'], data_house['price'],
 ax.plot(data_house['size'], model_basic.predict(), color='#c084fc',
         linewidth=2, label='Fitted regression line')
 ax.set_xlabel('Size (square feet)', fontsize=12)
-ax.set_ylabel('Price ($1000s)', fontsize=12)
+ax.set_ylabel('Price (dollars)', fontsize=12)
 ax.set_title('Figure 7.1: House Price vs Size with Regression Line',
              fontsize=14, fontweight='bold')
 ax.legend()
@@ -1586,8 +1625,6 @@ plt.show()
 
 ## Key Takeaways
 
-**Key Takeaways:**
-
 1. **The t-statistic** is fundamental to statistical inference in regression:
    - Formula: $t = \frac{b_2 - \beta_2}{se(b_2)} \sim T(n-2)$
    - Parallels univariate inference: $t = \frac{\bar{x} - \mu}{se(\bar{x})} \sim T(n-1)$
@@ -1625,7 +1662,7 @@ plt.show()
 
 **House Price Example Results:**
 
-- Coefficient: Each additional sq ft increases price by \$73.77
+- Coefficient: Each additional sq ft is associated with \$73.77 higher price
 - 95% CI: [\$50.84, \$96.70]
 - Highly statistically significant (t = 6.60, p < 0.001)
 - Economically meaningful effect
@@ -1633,7 +1670,7 @@ plt.show()
 **Python Tools Used:**
 
 - `pandas`: Data manipulation and summary statistics
-- `statsmodels`: Econometric estimation and hypothesis testing
+- `pyfixest`: Econometric estimation and hypothesis testing
 - `scipy.stats`: Statistical distributions and critical values
 - `matplotlib` & `seaborn`: Visualization
 
@@ -1881,8 +1918,8 @@ Economic growth theory suggests that countries with lower initial capital should
 **Dataset:**  
 We'll use the **Convergence Clubs** dataset (Mendez 2020) containing data for 108 countries in 2014:
 
-- **productivity**: Real GDP per capita (thousands of dollars)
-- **capital**: Physical capital per worker (thousands of dollars)
+- **productivity**: Labor productivity — real GDP per worker (dollars)
+- **capital**: Physical capital per worker (dollars)
 
 **Econometric Model:**
 
@@ -1909,22 +1946,27 @@ $$\text{productivity}_i = \beta_1 + \beta_2 \times \text{capital}_i + u_i$$
 > **Convergence theory** predicts that poorer countries should grow faster than richer countries, leading to a narrowing of income gaps over time. Two main types:
 >
 > **Absolute convergence:**
+>
 > - All countries converge to the same income level
 > - Predicts negative relationship between initial income and growth rate
 > - Test: H₀: β (growth on initial income) ≥ 0 vs. Hₐ: β < 0
 >
 > **Conditional convergence:**  
+>
 > - Countries converge to their own steady states
 > - After controlling for determinants (savings, education, institutions)
 > - More empirically supported than absolute convergence
 >
 > **Testing convergence hypotheses:**
+>
 > - Requires careful hypothesis formulation
 > - One-sided tests appropriate (theory predicts direction)
 > - Economic significance matters (how fast is convergence?)
 > - Must account for heteroskedasticity (countries differ in volatility)
 >
 > **Our approach:** We examine the cross-sectional relationship between productivity and capital intensity to understand the fundamentals underlying convergence patterns.
+
+We load the convergence-clubs data, keep the 2014 cross-section, and construct the productivity and capital variables — the summary statistics reveal enormous dispersion across the 108 countries, a first hint that heteroskedasticity may matter later.
 
 ```{python}
 # Case study: Testing convergence hypotheses
@@ -1954,7 +1996,7 @@ Run the code below to estimate the regression and examine the output. Then answe
 a) What is the estimated effect of capital on productivity? Interpret the coefficient.  
 b) Construct a 95% confidence interval for β₂. What does this interval tell you?  
 c) Is the effect statistically significant at the 5% level?  
-d) Is the effect economically significant? (Consider that the average country has capital = 50 and productivity = 25)
+d) Is the effect economically significant? (Consider that the average country has capital per worker of about \$166,000 and productivity of about \$41,000)
 
 ```{python}
 # Task 1: Basic regression
@@ -2067,6 +2109,7 @@ else:
 > The **p-value** measures the strength of evidence against the null hypothesis. But interpreting p-values requires care:
 >
 > **What p-values tell you:**
+>
 > - p = 0.001: Very strong evidence against H₀ (occurs 0.1% of the time if H₀ true)
 > - p = 0.04: Evidence against H₀ (occurs 4% of the time if H₀ true)
 > - p = 0.15: Weak/no evidence against H₀
@@ -2079,6 +2122,7 @@ else:
 > - **p ≥ 0.10**: Not significant
 >
 > **Critical insights:**
+>
 > 1. **Arbitrary thresholds:** The 0.05 cutoff is convention, not law
 > 2. **p-values ≠ importance:** p < 0.001 doesn't mean "more true" than p = 0.04
 > 3. **Near the threshold:** p = 0.051 and p = 0.049 provide similar evidence
@@ -2135,7 +2179,7 @@ comparison_df = pd.DataFrame({
                   't-statistic (robust)', 'p-value (standard)', 'p-value (robust)'],
     'Value': [beta2, se_beta2, se_beta2_robust, t_stat, t_stat_robust, p_value, p_value_robust]
 })
-comparison_df.to_string(index=False)
+print(comparison_df.to_string(index=False))
 
 # Percent change in SE
 pct_change = ((se_beta2_robust - se_beta2) / se_beta2) * 100
@@ -2219,7 +2263,7 @@ comparison_groups = pd.DataFrame({
 })
 
 # Regression Results by Income Group
-comparison_groups.to_string(index=False)
+print(comparison_groups.to_string(index=False))
 
 # Test β₂ = 0.5 for each group
 for name, robust_res in [('High-Income', robust_high), ('Developing', robust_dev)]:
@@ -2234,8 +2278,6 @@ for name, robust_res in [('High-Income', robust_high), ('Developing', robust_dev
         print(f"  Conclusion: Reject H₀. β₂ differs significantly from 0.5")
     else:
         print(f"  Conclusion: Fail to reject H₀. Data consistent with β₂ = 0.5")
-
-# Interpretation
 ```
 
 > **Key Concept 7.9: Economic Interpretation of Hypothesis Test Results**
@@ -2245,16 +2287,19 @@ for name, robust_res in [('High-Income', robust_high), ('Developing', robust_dev
 > **Translating statistical results to economic conclusions:**
 >
 > **1. Rejecting H₀: β₂ = 0 (statistical significance)**
+>
 > - Statistical: "Capital has a statistically significant effect on productivity"
 > - Economic: "Countries with more capital per worker tend to have higher productivity, and this pattern is unlikely due to chance alone"
 > - Limitations: Says nothing about causation, magnitude, or policy relevance
 >
 > **2. Rejecting H₀: β₂ = 0.5 (testing theory predictions)**  
+>
 > - Statistical: "The coefficient differs significantly from 0.5"
 > - Economic: "The marginal product of capital differs from theory's prediction, suggesting other factors (technology, institutions) matter"
 > - Implications: May indicate model misspecification or heterogeneity across countries
 >
 > **3. Failing to reject H₀ (no statistical significance)**
+>
 > - Statistical: "Cannot rule out β₂ = 0 (or other null value)"
 > - Economic: Multiple interpretations possible:
 >   - Effect truly absent
@@ -2263,10 +2308,12 @@ for name, robust_res in [('High-Income', robust_high), ('Developing', robust_dev
 > - **Never conclude:** "Proved β₂ = 0" or "No relationship exists"
 >
 > **4. Heterogeneity across groups**
+>
 > - If β₂(high-income) > β₂(developing): Capital complementary with other factors more abundant in rich countries (technology, institutions, human capital)
 > - If β₂(developing) > β₂(high-income): Diminishing returns to capital more pronounced in capital-abundant countries
 >
 > **Best practices for economic interpretation:**
+>
 > 1. Report point estimates, not just significance
 > 2. Use confidence intervals to show uncertainty
 > 3. Assess economic magnitude (not just statistical significance)
@@ -2311,8 +2358,8 @@ ax1.scatter(data_2014['capital'], data_2014['productivity'],
            alpha=0.5, s=40, color='#22d3ee', label='All countries')
 ax1.plot(data_2014['capital'], model_convergence.predict(), 
         color='red', linewidth=2, label='Regression line')
-ax1.set_xlabel('Capital per Worker ($1000s)')
-ax1.set_ylabel('Labor Productivity ($1000s)')
+ax1.set_xlabel('Capital per Worker (dollars)')
+ax1.set_ylabel('Labor Productivity (dollars)')
 ax1.set_title('Full Sample Regression')
 ax1.legend()
 ax1.grid(True, alpha=0.3)
@@ -2330,23 +2377,28 @@ ax2.plot(high_income_sorted['capital'], robust_high.predict(high_income_sorted),
         color='#4ade80', linewidth=2, linestyle='--', label='High-income fit')
 ax2.plot(developing_sorted['capital'], robust_dev.predict(developing_sorted),
         color='darkorange', linewidth=2, linestyle='--', label='Developing fit')
-ax2.set_xlabel('Capital per Worker ($1000s)')
-ax2.set_ylabel('Labor Productivity ($1000s)')
+ax2.set_xlabel('Capital per Worker (dollars)')
+ax2.set_ylabel('Labor Productivity (dollars)')
 ax2.set_title('By Income Group')
 ax2.legend()
 ax2.grid(True, alpha=0.3)
 
 plt.tight_layout()
 plt.show()
+```
 
+The coefficient plot below compares the full-sample, high-income, and developing-country slope estimates with 95% confidence bars — check whether each interval excludes zero and the theory value 0.5.
+
+```{python}
 # Figure 2: Coefficient plot with confidence intervals
 fig, ax = plt.subplots(figsize=(10, 6))
 
 groups = ['Full Sample', 'High-Income', 'Developing']
 estimates = [beta2_robust, robust_high.coef()['capital'], robust_dev.coef()['capital']]
 ses = [se_beta2_robust, robust_high.se()['capital'], robust_dev.se()['capital']]
-cis_lower = [e - 1.96*se for e, se in zip(estimates, ses)]
-cis_upper = [e + 1.96*se for e, se in zip(estimates, ses)]
+dfs = [int(m._N) - len(m.coef()) for m in (robust_model, robust_high, robust_dev)]  # df = n - 2 per group
+cis_lower = [e - stats.t.ppf(0.975, d)*se for e, se, d in zip(estimates, ses, dfs)]
+cis_upper = [e + stats.t.ppf(0.975, d)*se for e, se, d in zip(estimates, ses, dfs)]
 
 y_pos = range(len(groups))
 ax.errorbar(estimates, y_pos, 
@@ -2390,7 +2442,7 @@ Write a 200-300 word summary of your analysis as if for an economics journal. Yo
 - Professional tone suitable for academic publication
 
 **Example opening:**  
-"Using cross-sectional data for 108 countries in 2014, I investigate the relationship between labor productivity (GDP per capita) and physical capital per worker. The estimated coefficient of 0.XX (robust SE = 0.YY, p < 0.001) indicates that..."
+"Using cross-sectional data for 108 countries in 2014, I investigate the relationship between labor productivity (GDP per worker) and physical capital per worker. The estimated coefficient of 0.XX (robust SE = 0.YY, p < 0.001) indicates that..."
 
 *Write your summary in the markdown cell below.*
 
@@ -2428,13 +2480,13 @@ Write a 200-300 word summary of your analysis as if for an economics journal. Yo
 **Practical Skills:**
 
 - Using Python for comprehensive econometric analysis
-- Generating robust standard errors with `statsmodels`
+- Generating robust standard errors with `pyfixest`
 - Creating compelling visualizations with `matplotlib`
 - Communicating statistical results to non-technical audiences
 
 **Next Steps:**
 
-- Chapter 8 will extend these methods to multiple regression
+- Chapters 10 and 11 will extend these methods to multiple regression
 - You'll learn how to control for confounding variables
 - And test joint hypotheses about multiple coefficients
 
@@ -2540,7 +2592,7 @@ print(f"Does the CI contain zero? {'Yes' if ci_lower <= 0 <= ci_upper else 'No'}
 
 **Instructions:**
 
-1. Re-estimate the model with HC1 robust standard errors using `cov_type='HC1'`
+1. Re-estimate the model with HC1 robust standard errors using `vcov='HC1'`
 2. Compare the standard errors, t-statistics, and p-values between the two models
 3. Discuss: Do the robust SEs differ substantially from the default SEs?
 4. Why might robust standard errors matter for municipality-level spatial data?
@@ -2636,7 +2688,7 @@ print(f"There {'is' if p_onesided < 0.05 else 'is not'} strong evidence for a po
 
 > **Key Concept 7.13: Practical Significance in Development**
 >
-> A statistically significant regression coefficient must be evaluated for **practical significance**. In the DS4Bolivia context, the NTL coefficient tells us how much IMDS changes for a 1-unit increase in log NTL per capita. Since IMDS ranges from roughly 20 to 80, an effect of, say, 5 points represents about 8% of the total range—a meaningful but not transformative association. Policy decisions should weigh both statistical confidence and effect magnitude.
+> A statistically significant regression coefficient must be evaluated for **practical significance**. In the DS4Bolivia context, the NTL coefficient tells us how much IMDS changes for a 1-unit increase in log NTL per capita. Since IMDS ranges from roughly 36 to 80, an effect of, say, 5 points represents about 11% of the total range—a meaningful but not transformative association. Policy decisions should weigh both statistical confidence and effect magnitude.
 
 ### Task 6: Economic vs Statistical Significance (Independent)
 
