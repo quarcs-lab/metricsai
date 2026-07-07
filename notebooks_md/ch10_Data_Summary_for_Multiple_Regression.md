@@ -130,7 +130,7 @@ Across cities, ice-cream sales and drowning deaths are tightly correlated — bu
 ::::: {.columns}
 :::: {.column width="50%"}
 ::: {.callout-tip collapse="true" appearance="simple" title="Example"}
-For the Davis houses, the simple regression on `size` alone gives $R^2 = 0.618$ and $\bar{R}^2 = 0.603$. The full model with all six regressors raises $R^2$ to $0.651$ — but $\bar{R}^2$ actually *falls* to $0.555$. Plain $R^2$ rewards extra variables; adjusted $R^2$ recognises that the extras barely earned their keep on only $n = 29$ observations.
+For the Davis houses, the simple regression on `size` alone gives $R^2 = 0.617$ and $\bar{R}^2 = 0.603$. The full model with all six regressors raises $R^2$ to $0.651$ — but $\bar{R}^2$ actually *falls* to $0.555$. Plain $R^2$ rewards extra variables; adjusted $R^2$ recognises that the extras barely earned their keep on only $n = 29$ observations.
 :::
 ::::
 :::: {.column width="50%"}
@@ -197,7 +197,7 @@ plt.rcParams.update({
 print("Setup complete! Ready to analyze house price data.")
 ```
 
-## 10.1: Example - House Price and Characteristics
+## 10.1 Example - House Price and Characteristics
 
 We begin with a real estate dataset from Davis, California. Understanding house prices is a classic economic application because prices reflect both fundamental characteristics (size, bedrooms) and market conditions.
 
@@ -213,18 +213,22 @@ We begin with a real estate dataset from Davis, California. Understanding house 
 
 **Economic motivation:** A simple regression of price on bedrooms might find a positive relationship, but is this because bedrooms directly add value, or because houses with more bedrooms tend to be larger? Multiple regression helps us disentangle these effects.
 
+The code below loads the dataset from GitHub and displays the first ten observations together with summary statistics. Check each variable's scale and range — price is in dollars, size in square feet — before we start modeling.
+
 ```python
 # Load house price data
 data_house = pd.read_stata(GITHUB_DATA_URL + 'AED_HOUSE.DTA')
 
 # Display first few observations
 print("First 10 observations:")
-data_house[['price', 'size', 'bedrooms', 'bathrooms', 'lotsize', 'age', 'monthsold']].head(10)
+print(data_house[['price', 'size', 'bedrooms', 'bathrooms', 'lotsize', 'age', 'monthsold']].head(10))
 
 # Display data summary
 print("\nSummary statistics:")
 data_house.describe()
 ```
+
+**Interpreting the summary statistics:** The 29 Davis houses sold for an average of about \$253,910 (ranging from \$204,000 to \$375,000) and average about 1,883 square feet, with 3.8 bedrooms and 2.2 bathrooms; the typical house is about 36 years old. Keep this small sample size in mind — with only 29 observations, coefficients on six regressors will be imprecisely estimated.
 
 ### Bivariate vs. Multiple Regression
 
@@ -261,9 +265,9 @@ print(f"Change: ${model_multiple.coef()['bedrooms'] - model_bivariate.coef()['be
 
 > **Key Concept 10.1: Partial Effects vs. Total Effects in Multiple Regression**
 >
-> In bivariate regression, the bedrooms coefficient (\$23,667) captures both the direct effect of bedrooms and the indirect effect through correlation with size. In multiple regression, the bedrooms coefficient drops to \$1,553 — the **partial effect** holding size constant. This dramatic change illustrates why controlling for confounders is essential for isolating individual variable effects.
+> In bivariate regression, the bedrooms coefficient (\$23,667) captures both the direct effect of bedrooms and the indirect effect through correlation with size. In multiple regression, the bedrooms coefficient drops to \$1,553 — the **partial effect** holding size constant — and is no longer statistically significant ($t = 0.20$, $p = 0.85$). This dramatic change illustrates why controlling for confounders is essential for isolating individual variable effects.
 
-## 10.2: Two-Way Scatterplots
+## 10.2 Two-Way Scatterplots
 
 Before running multiple regression, it's useful to visualize pairwise relationships between variables. A **scatterplot matrix** shows all two-way scatterplots simultaneously.
 
@@ -293,7 +297,7 @@ print("Notice: Price shows strongest relationship with Size.")
 >
 > Pairwise scatterplot matrices display all two-way relationships simultaneously, revealing linear associations, nonlinearities, clusters, and outliers before formal modeling. They also highlight potential multicollinearity: if two regressors are tightly correlated (e.g., size and bedrooms), their individual effects may be hard to separate in a regression.
 
-## 10.3: Correlation Analysis
+## 10.3 Correlation Analysis
 
 The **correlation coefficient** measures the strength of linear association between two variables, ranging from -1 (perfect negative) to +1 (perfect positive).
 
@@ -311,7 +315,7 @@ corr_vars = ['price', 'size', 'bedrooms', 'bathrooms', 'lotsize', 'age', 'months
 corr_matrix = data_house[corr_vars].corr()
 
 print("Correlation Matrix:")
-corr_matrix
+print(corr_matrix.round(3))
 
 # Visualize correlation matrix as heatmap
 fig, ax = plt.subplots(figsize=(10, 8))
@@ -327,9 +331,9 @@ print(f"Size-Bedrooms correlation: {corr_matrix.loc['size', 'bedrooms']:.3f}")
 
 > **Key Concept 10.3: Correlation vs. Causation in Multivariate Analysis**
 >
-> High bivariate correlation (e.g., bedrooms-price, $r = 0.43$) may diminish or vanish after controlling for confounders. In our data, bedrooms correlate with price largely because bigger houses have more bedrooms. Multiple regression isolates each variable's partial contribution, revealing that size — not bedrooms — drives most of the price variation.
+> High bivariate correlation (e.g., bedrooms-price, $r = 0.43$) may diminish or vanish after controlling for confounders. In our data, bedrooms correlate with price largely because bigger houses have more bedrooms. Multiple regression isolates each variable's partial contribution, revealing that size — not bedrooms — accounts for most of the price variation.
 
-## 10.4: Multiple Regression Estimation
+## 10.4 Multiple Regression Estimation
 
 Now we estimate the **full multiple regression model** with all available predictors. The regression equation is:
 
@@ -367,8 +371,9 @@ Each regression coefficient represents a **partial effect**: the expected change
 
 - Coefficient ≈ \$68.37 per square foot
 - Interpretation: A one square foot increase in house size is associated with a \$68.37 increase in price, holding bedrooms, bathrooms, lot size, age, and month sold constant.
+- Significance: This effect is statistically significant ($t = 4.44$, $p < 0.001$) — size is the only regressor whose 95% confidence interval excludes zero.
 
-The 95% confidence interval tells us the range of plausible values for each coefficient.
+The 95% confidence interval tells us the range of plausible values for each coefficient. Throughout this chapter we report classical (homoskedasticity-assuming) standard errors, as AED does before Chapter 12; Chapter 12 introduces heteroskedasticity-robust standard errors, which are preferred in practice.
 
 ```python
 # Display coefficients with 95% confidence intervals
@@ -388,11 +393,13 @@ coef_table
 # Size is the only statistically significant predictor (p < 0.05)
 ```
 
+**Interpreting the table:** Size is the only statistically significant predictor (t = 4.44, p < 0.001), with a 95% confidence interval of roughly \$36 to \$100 per square foot. Every other coefficient has a confidence interval that comfortably includes zero — once size is controlled for, bedrooms, bathrooms, lot size, age, and month sold add little explanatory power in this small sample.
+
 > **Key Concept 10.4: Interpreting Partial Effects in Multiple Regression**
 >
 > Each coefficient $b_j$ measures the expected change in $y$ when $x_j$ increases by one unit, **holding all other regressors constant**. For example, a size coefficient of \$68.37 means each additional square foot is associated with a \$68.37 price increase, controlling for bedrooms, bathrooms, lot size, age, and month sold. Statistical significance is assessed through confidence intervals and $t$-tests.
 
-## 10.5: Partial Effects - The FWL Theorem
+## 10.5 Partial Effects - The FWL Theorem
 
 The **Frisch-Waugh-Lovell (FWL) Theorem** states that the coefficient on any variable in multiple regression equals the coefficient from a bivariate regression of $y$ on the **residualized** version of that variable.
 
@@ -425,7 +432,7 @@ print(f"Difference (numerical precision):                 {abs(model_full.coef()
 >
 > The partial effect of $x_j$ in a multiple regression equals the slope from a bivariate regression of $y$ on $\widetilde{x}_j$, where $\widetilde{x}_j$ is the residual from regressing $x_j$ on all other regressors. Intuitively, $\widetilde{x}_j$ captures the variation in $x_j$ that is independent of the other variables — this is exactly what multiple regression uses to estimate partial effects.
 
-## 10.6: Model Fit Statistics
+## 10.6 Model Fit Statistics
 
 Several statistics summarize how well the regression model fits the data:
 
@@ -434,7 +441,7 @@ Several statistics summarize how well the regression model fits the data:
 - Fraction of variation in $y$ explained by the regressors
 - Formula: $R^2 = \frac{\text{Explained SS}}{\text{Total SS}} = 1 - \frac{\text{Residual SS}}{\text{Total SS}}$
 - Range: 0 to 1 (higher is better fit)
-- **Problem:** Always increases when adding variables (even irrelevant ones)
+- **Problem:** Never decreases when adding variables (even irrelevant ones)
 
 **Adjusted R-squared ($\bar{R}^2$):**
 
@@ -448,6 +455,7 @@ Several statistics summarize how well the regression model fits the data:
 - Typical size of prediction error
 - Formula: $s_e = \sqrt{\frac{1}{n-k}\sum (y_i - \widehat{y}_i)^2}$
 - Same units as $y$ (dollars in our case)
+- Note: the `RMSE` printed in pyfixest summaries divides by $n$ rather than $n-k$, so it is slightly smaller than $s_e$
 
 ```python
 # Calculate and display model fit statistics
@@ -473,12 +481,16 @@ print(f"  R² from model:                {model_full._r2:.6f}")
 print(f"  Match: {np.isclose(corr_y_yhat**2, model_full._r2)}")
 ```
 
+**Interpreting the fit statistics:** The six regressors explain about 65% of the variation in price, but the adjusted $R^2$ of 0.555 reveals that much of that gain is a mechanical reward for adding variables. The Root MSE of roughly \$24,936 is the typical prediction error — sizable relative to an average price of about \$253,910. The verification confirms that $R^2$ equals the squared correlation between actual and fitted prices.
+
 ### Information Criteria (AIC and BIC)
 
 **Akaike Information Criterion (AIC)** and **Bayesian Information Criterion (BIC)** are more sophisticated measures that penalize model complexity:
 
 $$\text{AIC} = n \times \ln(\widehat{\sigma}_e^2) + n(1 + \ln 2\pi) + 2k$$
 $$\text{BIC} = n \times \ln(\widehat{\sigma}_e^2) + n(1 + \ln 2\pi) + k \times \ln(n)$$
+
+where $\widehat{\sigma}_e^2 = \text{RSS}/n$ (note the divisor is $n$, not the $n-k$ used for $s_e$).
 
 **Key points:**
 
@@ -503,9 +515,9 @@ print(f"BIC (Stata convention):        {bic_stata:.4f}")
 
 > **Key Concept 10.6: Model Selection with Adjusted R-squared vs. Information Criteria**
 >
-> Adjusted $R^2$ penalizes complexity mildly by dividing sums of squares by degrees of freedom. Information criteria (AIC, BIC) impose stronger penalties: BIC = $n \ln(\hat{\sigma}_e^2) + k \ln(n)$. Smaller AIC/BIC values indicate better models. BIC is generally preferred because its penalty grows with sample size, favoring more parsimonious specifications.
+> Adjusted $R^2$ penalizes complexity mildly by dividing sums of squares by degrees of freedom. Information criteria (AIC, BIC) impose stronger penalties: BIC = $n \ln(\hat{\sigma}_e^2) + k \ln(n)$ (omitting a constant that does not affect model comparisons). Smaller AIC/BIC values indicate better models. BIC is generally preferred because its penalty grows with sample size, favoring more parsimonious specifications.
 
-## 10.7: Model Comparison
+## 10.7 Model Comparison
 
 It's often useful to compare multiple model specifications side-by-side. Here we compare:
 
@@ -536,7 +548,7 @@ comparison_stats = pd.DataFrame({
     'N': [n, n]
 })
 
-comparison_stats.to_string(index=False)
+print(comparison_stats.to_string(index=False))
 
 print(f"R² increases from {model_simple._r2:.3f} to {model_full._r2:.3f}")
 print(f"Adj R² decreases from {model_simple._adj_r2:.3f} to {model_full._adj_r2:.3f}")
@@ -544,9 +556,9 @@ print(f"Adj R² decreases from {model_simple._adj_r2:.3f} to {model_full._adj_r2
 
 > **Key Concept 10.7: The Parsimony Principle**
 >
-> Simpler models are preferred unless additional variables meaningfully improve fit. In our house price example, adding five variables beyond size barely increased $R^2$ (0.618 $\to$ 0.651) while adjusted $R^2$ actually fell (0.603 $\to$ 0.555). Check adjusted $R^2$, AIC, and BIC — if they don't improve, the simpler model is preferred.
+> Simpler models are preferred unless additional variables meaningfully improve fit. In our house price example, adding five variables beyond size barely increased $R^2$ (0.617 $\to$ 0.651) while adjusted $R^2$ actually fell (0.603 $\to$ 0.555). Check adjusted $R^2$, AIC, and BIC — if they don't improve, the simpler model is preferred.
 
-## 10.8: Inestimable Models and Multicollinearity
+## 10.8 Inestimable Models and Multicollinearity
 
 **Perfect multicollinearity** occurs when one regressor is an exact linear combination of others. In this case, OLS cannot estimate all coefficients (the model is "inestimable").
 
@@ -583,6 +595,8 @@ except Exception as e:
     print(f"Message: {str(e)}")
 ```
 
+**Interpreting the output:** pyfixest warns that `size_twice` was dropped due to multicollinearity — it carries no information beyond `size` itself. Notice that the remaining estimates are identical to the earlier `price ~ bedrooms + size` regression: dropping the redundant regressor restores an estimable model without changing anything else.
+
 ### Variance Inflation Factors (VIF)
 
 Now let's calculate VIF for each variable in our full model to check for multicollinearity problems.
@@ -591,13 +605,14 @@ Now let's calculate VIF for each variable in our full model to check for multico
 # Calculate VIF for each variable in the full model
 from statsmodels.stats.outliers_influence import variance_inflation_factor
 
-X = data_house[['size', 'bedrooms', 'bathrooms', 'lotsize', 'age', 'monthsold']]
+X = data_house[['size', 'bedrooms', 'bathrooms', 'lotsize', 'age', 'monthsold']].copy()
+X.insert(0, 'const', 1.0)  # VIF requires the intercept column in the design matrix
 vif_data = pd.DataFrame()
-vif_data["Variable"] = X.columns
-vif_data["VIF"] = [variance_inflation_factor(X.values, i) for i in range(X.shape[1])]
+vif_data["Variable"] = X.columns[1:]
+vif_data["VIF"] = [variance_inflation_factor(X.values, i) for i in range(1, X.shape[1])]
 
 # VARIANCE INFLATION FACTORS (VIF)
-vif_data.to_string(index=False)
+print(vif_data.to_string(index=False))
 
 
 max_vif = vif_data['VIF'].max()
@@ -624,8 +639,8 @@ ax.scatter(data_house['price'], model_full.predict(), alpha=0.6, s=50, color='#2
 ax.plot([data_house['price'].min(), data_house['price'].max()],
         [data_house['price'].min(), data_house['price'].max()],
         'r--', linewidth=2, label='Perfect prediction (45° line)')
-ax.set_xlabel('Actual Price ($1000s)', fontsize=12)
-ax.set_ylabel('Predicted Price ($1000s)', fontsize=12)
+ax.set_xlabel('Actual Price ($)', fontsize=12)
+ax.set_ylabel('Predicted Price ($)', fontsize=12)
 ax.set_title('Actual vs Predicted House Prices', fontsize=14, fontweight='bold')
 ax.legend()
 ax.grid(True, alpha=0.3)
@@ -654,8 +669,8 @@ A **residual plot** (residuals vs. fitted values) helps diagnose model problems:
 fig, ax = plt.subplots(figsize=(10, 6))
 ax.scatter(model_full.predict(), model_full._u_hat, alpha=0.6, s=50, color='#22d3ee')  # alpha = transparency, s = marker size
 ax.axhline(y=0, color='red', linestyle='--', linewidth=2, label='Zero residual line')
-ax.set_xlabel('Fitted values ($1000s)', fontsize=12)
-ax.set_ylabel('Residuals ($1000s)', fontsize=12)
+ax.set_xlabel('Fitted values ($)', fontsize=12)
+ax.set_ylabel('Residuals ($)', fontsize=12)
 ax.set_title('Residual Plot: Multiple Regression', fontsize=14, fontweight='bold')
 ax.legend()
 ax.grid(True, alpha=0.3)
@@ -709,7 +724,7 @@ print("Coefficients whose CI crosses zero are not statistically significant.")
 **What to look for in this coefficient plot:**
 
 - **Zero crossing**: Coefficients whose error bars cross the red dashed line are not statistically significant at 5%
-- **Relative magnitude**: Size has the largest positive effect; other variables cluster near zero
+- **Relative magnitude**: Raw coefficients are not comparable across variables with different units — the size coefficient (\$68 per square foot) sits nearest zero on this scale, while per-unit coefficients like bathrooms look larger; yet size is the only effect estimated precisely enough for its interval to exclude zero
 - **Precision**: Narrow error bars indicate more precisely estimated coefficients
 
 ## Key Takeaways
@@ -738,7 +753,7 @@ print("Coefficients whose CI crosses zero are not statistically significant.")
 - $R^2$ measures the fraction of variation in $y$ explained by all regressors (0 to 1)
 - Adjusted $R^2$ penalizes model complexity: can decrease when adding weak regressors
 - Standard error of regression $s_e$ measures typical prediction error in units of $y$
-- Example: Adding 5 regressors increased $R^2$ from 0.618 to 0.651 but decreased $\bar{R}^2$ from 0.603 to 0.555
+- Example: Adding 5 regressors increased $R^2$ from 0.617 to 0.651 but decreased $\bar{R}^2$ from 0.603 to 0.555
 
 **Information Criteria:**
 
@@ -748,7 +763,7 @@ print("Coefficients whose CI crosses zero are not statistically significant.")
 
 **Multicollinearity:**
 
-- Perfect collinearity makes some coefficients inestimable (computer shows "omitted")
+- Perfect collinearity makes some coefficients inestimable (the software drops one of the collinear variables, as pyfixest did with `size_twice`)
 - VIF detects multicollinearity: VIF > 10 indicates problematic, VIF > 5 moderate concern
 - High multicollinearity inflates standard errors and makes estimates unstable
 
@@ -861,10 +876,11 @@ print(comparison.to_string(index=False))
 # =============================================================================
 # VIF_j = 1 / (1 - R²_j), where R²_j is from regressing x_j on all other x's
 # VIF > 5: moderate concern; VIF > 10: severe multicollinearity
-X = data_house[['size', 'bedrooms', 'bathrooms', 'lotsize', 'age', 'monthsold']]
+X = data_house[['size', 'bedrooms', 'bathrooms', 'lotsize', 'age', 'monthsold']].copy()
+X.insert(0, 'const', 1.0)  # VIF requires the intercept column in the design matrix
 vif_data = pd.DataFrame({
-    'Variable': X.columns,
-    'VIF': [variance_inflation_factor(X.values, i) for i in range(X.shape[1])]
+    'Variable': X.columns[1:],
+    'VIF': [variance_inflation_factor(X.values, i) for i in range(1, X.shape[1])]
 })
 print(vif_data.to_string(index=False))
 
@@ -901,7 +917,12 @@ plt.show()
 
 **Python tools used:** `pyfixest` (feols), `statsmodels` (VIF), `seaborn` (pairplot, heatmap), `pandas` (DataFrames), `matplotlib` (coefficient plots, diagnostics)
 
-**Next steps:** Chapter 11 covers **statistical inference** for multiple regression — hypothesis tests, confidence intervals, and overall F-tests for model significance.
+**Next Steps:**
+
+- **Chapter 11**: Statistical inference for multiple regression — hypothesis tests, confidence intervals, and overall F-tests for model significance
+- **Chapter 12**: Further topics in multiple regression — robust standard errors and prediction intervals
+- **Chapter 13**: Case studies applying the multiple regression toolkit to real research questions
+- **Chapters 14-15**: Richer specifications — regression with indicator variables and with transformed variables
 
 Congratulations on completing Chapter 10! You now have the tools to estimate and evaluate multiple regression models, a foundation for the rest of the course.
 
@@ -1013,9 +1034,9 @@ In this case study, you will apply multiple regression techniques to investigate
 - **Source:** Mendez (2020), 108 countries, 1990-2014
 - **Key variables:**
   - `lp` — Labor productivity (GDP per worker)
-  - `rk` — Physical capital per worker
-  - `hc` — Human capital index
-  - `rgdppc` — Real GDP per capita
+  - `kl` — Physical capital per worker
+  - `h` — Human capital index
+  - `GDPpc` — Real GDP per capita
   - `region` — Geographic region
 
 **Research question:** How do human capital and physical capital jointly explain cross-country productivity differences?
@@ -1024,7 +1045,7 @@ In this case study, you will apply multiple regression techniques to investigate
 # Load the Mendez convergence clubs dataset
 url = "https://raw.githubusercontent.com/quarcs-lab/mendez2020-convergence-clubs-code-data/master/assets/dat.csv"
 dat = pd.read_csv(url)
-dat_2014 = dat[dat['year'] == 2014].dropna(subset=['lp', 'rk', 'hc']).copy()
+dat_2014 = dat[dat['year'] == 2014].dropna(subset=['lp', 'kl', 'h']).copy()
 print(f"Cross-section sample: {len(dat_2014)} countries (year 2014)")
 dat_2014.head()
 ```
@@ -1036,13 +1057,13 @@ Explore the cross-country productivity dataset.
 ```python
 # Step 1: Create log-transformed variables
 dat_2014['ln_lp'] = np.log(dat_2014['lp'])
-dat_2014['ln_rk'] = np.log(dat_2014['rk'])
+dat_2014['ln_kl'] = np.log(dat_2014['kl'])
 
 # Step 2: Summary statistics for key variables
-print(dat_2014[['lp', 'rk', 'hc', 'ln_lp', 'ln_rk']].describe())
+print(dat_2014[['lp', 'kl', 'h', 'ln_lp', 'ln_kl']].describe())
 
 # Step 3: Create a scatterplot matrix
-sns.pairplot(dat_2014[['ln_lp', 'ln_rk', 'hc']], diag_kind='kde')
+sns.pairplot(dat_2014[['ln_lp', 'ln_kl', 'h']], diag_kind='kde')
 plt.suptitle('Scatterplot Matrix: Productivity Variables', y=1.02)
 plt.show()
 ```
@@ -1058,7 +1079,7 @@ Compute and visualize the correlation matrix.
 
 ```python
 # Step 1: Compute correlation matrix
-corr = dat_2014[['ln_lp', 'ln_rk', 'hc']].corr()
+corr = dat_2014[['ln_lp', 'ln_kl', 'h']].corr()
 print(corr)
 
 # Step 2: Visualize as heatmap
@@ -1070,33 +1091,33 @@ plt.show()
 **Questions:**
 
 - Which predictor is most strongly correlated with $\ln(\text{lp})$?
-- Are $\ln(\text{rk})$ and hc correlated with each other? What implications does this have for multiple regression?
+- Are $\ln(\text{kl})$ and h correlated with each other? What implications does this have for multiple regression?
 
 > **Key Concept 10.9: Functional Form and Cross-Country Comparisons**
 >
-> When comparing countries with vastly different income levels, logarithmic transformations are essential. Using $\ln(\text{lp})$ and $\ln(\text{rk})$ compresses the scale so that both Luxembourg and Malawi can be meaningfully compared. Coefficients on log-transformed variables have elasticity interpretations, while coefficients on level variables (like hc) represent semi-elasticities.
+> When comparing countries with vastly different income levels, logarithmic transformations are essential. Using $\ln(\text{lp})$ and $\ln(\text{kl})$ compresses the scale so that both Luxembourg and Malawi can be meaningfully compared. Coefficients on log-transformed variables have elasticity interpretations, while coefficients on level variables (like h) represent semi-elasticities.
 
 #### Task 3: Multiple Regression Estimation (Semi-guided)
 
 Estimate bivariate and multiple regression models for labor productivity.
 
 ```python
-# Model 1: ln(lp) ~ ln(rk) only
-model1 = pf.feols('ln_lp ~ ln_rk', data=dat_2014)
-print(model1.summary())
+# Model 1: ln(lp) ~ ln(kl) only
+model1 = pf.feols('ln_lp ~ ln_kl', data=dat_2014)
+model1.summary()
 
-# Model 2: ln(lp) ~ hc only
-model2 = pf.feols('ln_lp ~ hc', data=dat_2014)
-print(model2.summary())
+# Model 2: ln(lp) ~ h only
+model2 = pf.feols('ln_lp ~ h', data=dat_2014)
+model2.summary()
 
-# Model 3: ln(lp) ~ ln(rk) + hc (multiple regression)
-model3 = pf.feols('ln_lp ~ ln_rk + hc', data=dat_2014)
-print(model3.summary())
+# Model 3: ln(lp) ~ ln_kl + h (multiple regression)
+model3 = pf.feols('ln_lp ~ ln_kl + h', data=dat_2014)
+model3.summary()
 ```
 
 **Questions:**
 
-- How do the coefficients on $\ln(\text{rk})$ change between Model 1 and Model 3?
+- How do the coefficients on $\ln(\text{kl})$ change between Model 1 and Model 3?
 - Does adding human capital improve the model? Compare $R^2$ and adjusted $R^2$.
 
 #### Task 4: Interpret Partial Effects (Semi-guided)
@@ -1113,8 +1134,8 @@ print(model3.confint())
 
 **Questions:**
 
-- Interpret the coefficient on $\ln(\text{rk})$ in Model 3. What does it mean in economic terms?
-- Interpret the coefficient on hc. How does a one-unit increase in human capital relate to productivity?
+- Interpret the coefficient on $\ln(\text{kl})$ in Model 3. What does it mean in economic terms?
+- Interpret the coefficient on h. How does a one-unit increase in human capital relate to productivity?
 - Are both coefficients statistically significant? How do you know?
 
 #### Task 5: Model Selection (Independent)
@@ -1144,9 +1165,9 @@ Write a 200-300 word policy brief summarizing your findings.
 
 > **Key Concept 10.10: Multiple Regression in Development Economics**
 >
-> Cross-country productivity regressions are central to development economics. By controlling for both physical capital ($\ln(\text{rk})$) and human capital (hc), we can assess each factor's **partial contribution** to productivity. This addresses a key policy question: should developing countries invest in machines or education? Multiple regression helps disentangle these effects, though causal claims require careful identification strategies.
+> Cross-country productivity regressions are central to development economics. By controlling for both physical capital ($\ln(\text{kl})$) and human capital (h), we can assess each factor's **partial contribution** to productivity. This addresses a key policy question: should developing countries invest in machines or education? Multiple regression helps disentangle these effects, though causal claims require careful identification strategies.
 
-### What You've Learned
+#### What You've Learned
 
 In this case study, you applied the full multiple regression toolkit to cross-country productivity data:
 
@@ -1200,7 +1221,7 @@ print(f"Dataset shape: {bol_sat.shape[0]} municipalities, {bol_sat.shape[1]} var
 print(f"Departments: {bol['dep'].nunique()} unique departments")
 print(f"Complete cases: {bol_sat.dropna().shape[0]}")
 # FIRST 10 MUNICIPALITIES
-bol_sat.head(10).to_string(index=False)
+print(bol_sat.head(10).to_string(index=False))
 ```
 
 #### Task 1: Explore Variables (Guided)
@@ -1221,7 +1242,7 @@ bol_sat.head(10).to_string(index=False)
 #
 # Step 1: Summary statistics for all numeric variables
 # DESCRIPTIVE STATISTICS: DEVELOPMENT AND SATELLITE PREDICTORS
-bol_sat[['imds', 'ln_NTLpc2017', 'A00', 'A10', 'A20', 'A30', 'A40']].describe().round(3)
+print(bol_sat[['imds', 'ln_NTLpc2017', 'A00', 'A10', 'A20', 'A30', 'A40']].describe().round(3))
 
 # Step 2: Check for missing values
 # MISSING VALUES
@@ -1256,7 +1277,7 @@ corr_vars = ['imds', 'ln_NTLpc2017', 'A00', 'A10', 'A20', 'A30', 'A40']
 corr_sat = bol_sat[corr_vars].dropna().corr()
 
 # CORRELATION MATRIX: DEVELOPMENT AND SATELLITE PREDICTORS
-corr_sat.round(3)
+print(corr_sat.round(3))
 
 # Step 2: Visualize as heatmap
 fig, ax = plt.subplots(figsize=(10, 8))
@@ -1274,7 +1295,7 @@ for var, r in imds_corr.items():
     print(f"  {var:16s}  r = {r:+.3f}")
 ```
 
-> **Key Concept 10.12: High-Dimensional Satellite Features**
+> **Key Concept 10.11: High-Dimensional Satellite Features**
 >
 > Satellite embeddings are **64 abstract features** extracted by deep learning models (convolutional neural networks) from daytime satellite imagery. Unlike handcrafted variables (e.g., NDVI for vegetation), each embedding dimension captures complex visual patterns — road density, building structures, agricultural layouts — learned automatically from the data. These features are not directly interpretable (dimension A00 doesn't have a specific meaning), but they collectively encode rich information about a municipality's physical landscape.
 
@@ -1392,7 +1413,7 @@ print(f"Difference (numerical precision):                {abs(model_full_sat.coe
 # Step 3: Interpret — which model is preferred by each criterion?
 ```
 
-> **Key Concept 10.13: Incremental Predictive Power**
+> **Key Concept 10.12: Incremental Predictive Power**
 >
 > When adding predictors to a regression model, $R^2$ can only increase or stay the same — it never decreases. This makes $R^2$ misleading for model comparison when models have different numbers of predictors. **Adjusted $R^2$** penalizes for additional variables, while **AIC** and **BIC** balance fit against complexity. In the satellite prediction context, adding all 64 embeddings would maximize $R^2$ but might overfit; information criteria help identify the most parsimonious model.
 
