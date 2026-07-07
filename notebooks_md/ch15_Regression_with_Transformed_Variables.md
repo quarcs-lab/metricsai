@@ -39,7 +39,7 @@ This chapter focuses on regression models that involve transformed variables. Tr
 - Make predictions from models with transformed dependent variables, avoiding retransformation bias
 - Combine multiple types of variable transformations in a single model
 
-**Datasets used:**
+**Dataset used:**
 
 - **AED_EARNINGS_COMPLETE.DTA**: 872 workers aged 25-65 in 2000
 
@@ -73,7 +73,7 @@ Seven core ideas anchor this chapter. Skim them before you start, and come back 
 ::::: {.columns}
 :::: {.column width="50%"}
 ::: {.callout-tip collapse="true" appearance="simple" title="Example"}
-For the 872 workers in `data_earnings`, the linear model gives a constant marginal effect of `age` of about \$1{,}000 per year. The chapter's quadratic fit replaces it with $ME_{\text{age}} = \beta_2 + 2\beta_3 \cdot \text{age}$ — about $+\$3{,}000$ at age 25, $\$0$ at the turning point near age 50, and $-\$1{,}000$ at age 60. Same regressor, very different marginal stories.
+For the 872 workers in `data_earnings`, the linear model gives a constant marginal effect of `age` of about \$525 per year. The chapter's quadratic fit replaces it with $ME_{\text{age}} = \beta_2 + 2\beta_3 \cdot \text{age}$ — about $+\$1{,}600$ at age 25, $\$0$ at the turning point near age 52, and $-\$450$ at age 60. Same regressor, very different marginal stories.
 :::
 ::::
 :::: {.column width="50%"}
@@ -88,7 +88,7 @@ The grade of a road tells you how much elevation you gain per metre walked *righ
 ::::: {.columns}
 :::: {.column width="50%"}
 ::: {.callout-tip collapse="true" appearance="simple" title="Example"}
-For the quadratic earnings-on-age model, $ME_{\text{age}, i} = \beta_2 + 2\beta_3 \cdot \text{age}_i$ is computed for each of the 872 workers and then averaged. The AME for `age` lands between the high-young-worker effect (+\$3{,}000) and the negative-old-worker effect (–\$1{,}000), giving a single summary number that respects the full age distribution in the sample.
+For the quadratic earnings-on-age model, $ME_{\text{age}, i} = \beta_2 + 2\beta_3 \cdot \text{age}_i$ is computed for each of the 872 workers and then averaged. The AME for `age` lands between the high-young-worker effect (+\$1{,}600) and the negative-old-worker effect (–\$450), giving a single summary number that respects the full age distribution in the sample.
 :::
 ::::
 :::: {.column width="50%"}
@@ -163,7 +163,7 @@ A currency converter restates a price in dollars, euros, and yen on a single lin
 ::::: {.columns}
 :::: {.column width="50%"}
 ::: {.callout-tip collapse="true" appearance="simple" title="Example"}
-For the log-linear earnings model on `data_earnings` ($s_e \approx 0.42$), naive retransformation $\exp(\widehat{\ln y})$ gives a sample-mean prediction of about \$48k — well below the actual mean of \$52k. The normality-based factor $\exp(0.42^2/2) \approx 1.092$ recovers \$52k; Duan's smearing correction averages $\exp(\hat{u}_i)$ across the 872 residuals to produce essentially the same correction without assuming normality.
+For the log-linear earnings model on `data_earnings` ($s_e \approx 0.62$), naive retransformation $\exp(\widehat{\ln y})$ gives a sample-mean prediction of about \$46k — well below the actual mean of \$56k. The normality-based factor $\exp(0.62^2/2) \approx 1.21$ recovers about \$55k; Duan's smearing correction averages $\exp(\hat{u}_i)$ across the 872 residuals to produce essentially the same correction without assuming normality.
 :::
 ::::
 :::: {.column width="50%"}
@@ -213,7 +213,7 @@ plt.rcParams.update({
 })
 ```
 
-## 15.1: Example - Earnings and Education
+## 15.1 Example - Earnings and Education
 
 We'll work with the EARNINGS_COMPLETE dataset, which contains information on 872 female and male full-time workers aged 25-65 years in 2000.
 
@@ -247,7 +247,7 @@ key_vars = ['earnings', 'lnearnings', 'age', 'agesq', 'education', 'agebyeduc',
 data_earnings[key_vars].head(10)
 ```
 
-## 15.2: Logarithmic Transformations
+## 15.2 Logarithmic Transformations
 
 Logarithmic transformations are commonly used in economics because:
 
@@ -316,7 +316,7 @@ fit_loglin.summary()
 
 > **Key Concept 15.1: Log Transformations and Coefficient Interpretation**
 >
-> In a **log-linear model** ($\ln y = \beta_1 + \beta_2 x$), the coefficient $\beta_2$ is a semi-elasticity: a 1-unit increase in $x$ is associated with a $100 \times \beta_2$% change in $y$. In a **log-log model** ($\ln y = \beta_1 + \beta_2 \ln x$), the coefficient $\beta_2$ is an elasticity: a 1% increase in $x$ is associated with a $\beta_2$% change in $y$.
+> In a **log-linear model** ($\ln y = \beta_1 + \beta_2 x$), the coefficient $\beta_2$ is a semi-elasticity: a 1-unit increase in $x$ is associated with approximately a $100 \times \beta_2$% change in $y$ (the exact effect is $100(e^{\beta_2}-1)$%, which matters once $|\beta_2| > 0.1$). In a **log-log model** ($\ln y = \beta_1 + \beta_2 \ln x$), the coefficient $\beta_2$ is an elasticity: a 1% increase in $x$ is associated with a $\beta_2$% change in $y$.
 
 ### Interpretation of Log Models
 
@@ -357,8 +357,8 @@ The three models reveal fundamentally different ways to think about the relation
 
 **Model 3: Log-Log (ln(earnings) ~ ln(age) + education)**
 
-- **ln(Age) coefficient** ≈ 0.5 to 1.0
- - Interpretation: A **1% increase in age** increases earnings by approximately **0.5-1.0%**
+- **ln(Age) coefficient** ≈ 0.35
+ - Interpretation: A **1% increase in age** increases earnings by approximately **0.35%**
  - This is an **elasticity** (percentage change in Y for 1% change in X)
  - Elasticity < 1 means **inelastic** relationship (earnings increase slower than age)
  - At age 40: 1% increase = 0.4 years; at age 50: 1% increase = 0.5 years
@@ -395,7 +395,7 @@ comparison_table = pd.DataFrame({
     'Adj R-squared': [fit_linear._adj_r2, fit_loglin._adj_r2, fit_loglog._adj_r2]
 })
 
-comparison_table.to_string(index=False)
+print(comparison_table.to_string(index=False))
 
 print("\nNote: R² values are NOT directly comparable across models with different")
 # dependent variables. For log models, R² measures fit to ln(earnings), not earnings.
@@ -405,7 +405,7 @@ print("\nNote: R² values are NOT directly comparable across models with differe
 >
 > You cannot directly compare $R^2$ across models with different dependent variables ($y$ vs $\ln y$) because they measure variation on different scales. Instead, compare models using **prediction accuracy** (e.g., mean squared error of predicted $y$ in levels), information criteria (AIC, BIC), or economic plausibility of the estimated relationships.
 
-## 15.3: Polynomial Regression (Quadratic Models)
+## 15.3 Polynomial Regression (Quadratic Models)
 
 Polynomial regression allows for nonlinear relationships while maintaining linearity in parameters.
 
@@ -450,6 +450,8 @@ print(f"  education: {fit_quad.coef()['education']:,.2f}")
 # Full regression output (quadratic model)
 fit_quad.summary()
 ```
+
+With the quadratic fit in hand, we extract its economic content: the age at which earnings peak (the turning point) and the marginal effect of age evaluated at several representative ages. Watch how the marginal effect starts large and positive for young workers and turns negative once age passes the turning point.
 
 ```python
 # TURNING POINT AND MARGINAL EFFECTS
@@ -509,10 +511,10 @@ From the regression: earnings = $\beta_1 + \beta_2 \cdot age + \beta_3 \cdot age
 
 2. **Marginal Effect of Age** (varies with age):
  - Formula: $ME_{age} = \beta_2 + 2\beta_3 \cdot age$
- - At age 25: ME ≈ +\$3,000 (steep increase)
- - At age 40: ME ≈ +\$1,000 (slower increase)
+ - At age 25: ME ≈ +\$1,600 (steep increase)
+ - At age 40: ME ≈ +\$700 (slower increase)
  - At age 50: ME ≈ \$0 (peak earnings)
- - At age 60: ME ≈ -\$1,000 (earnings decline)
+ - At age 60: ME ≈ -\$450 (earnings decline)
 
 3. **Why the Inverted U-Shape?**
  - **Early career (20s-30s)**: Rapid skill accumulation, promotions → steep earnings growth
@@ -533,7 +535,7 @@ From the regression: earnings = $\beta_1 + \beta_2 \cdot age + \beta_3 \cdot age
 
 **Statistical Significance:**
 
-The **joint F-test** for $H_0: \beta_{age} = 0$ AND $\beta_{age^2} = 0$ is **highly significant** (F > 100, p < 0.001):
+The **joint F-test** for $H_0: \beta_{age} = 0$ AND $\beta_{age^2} = 0$ is **highly significant** (F ≈ 19, p < 0.001):
 
 - This confirms age **matters** for earnings
 - The quadratic term is **necessary** (not just linear)
@@ -621,7 +623,7 @@ plt.show()
 - **Turning point**: The green dashed line marks the age where additional years stop increasing earnings -- a key policy-relevant quantity
 - **Right panel**: The marginal effect of age decreases steadily; the green/red shading shows where an extra year of age helps vs. hurts earnings
 
-## 15.4: Standardized Variables
+## 15.4 Standardized Variables
 
 Standardized regression coefficients (beta coefficients) allow comparison of the relative importance of regressors measured in different units.
 
@@ -661,6 +663,8 @@ print(f"Gender: ${fit_linear_mix.coef()['gender']:,.0f} (negative = women earn l
 # Full regression output
 fit_linear_mix.summary()
 ```
+
+The raw coefficients above are measured in different units (dollars per year, dollars per log-hour, dollars per dummy), so their magnitudes are not directly comparable. Next we rescale each coefficient into standard-deviation units. Look for which variable has the largest absolute standardized coefficient -- that is the strongest predictor on a common scale.
 
 ```python
 # STANDARDIZED COEFFICIENTS
@@ -818,7 +822,7 @@ plt.show()
 - **Direction (color)**: Cyan bars indicate positive effects; red bars indicate negative effects (e.g., gender penalty)
 - **Relative ranking**: Compare education vs. hours vs. age -- the raw coefficients may suggest a different ranking because those variables are measured in different units
 
-## 15.5: Interaction Terms and Marginal Effects
+## 15.5 Interaction Terms and Marginal Effects
 
 Interaction terms allow the marginal effect of one variable to depend on the level of another variable.
 
@@ -922,8 +926,8 @@ $$ME_{education} = \beta_3 + \beta_4 \cdot age$$
 
 The correlation matrix shows:
 
-- Corr(age, age×education) ≈ **0.95** (very high!)
-- Corr(education, age×education) ≈ **0.90** (very high!)
+- Corr(age, age×education) ≈ **0.73** (high)
+- Corr(education, age×education) ≈ **0.64** (moderately high)
 
 This explains why:
 
@@ -999,7 +1003,7 @@ print(f"  Correlation(education, agebyeduc) = {corr_matrix.loc['education', 'age
 print("even though the variables are jointly significant.")
 ```
 
-## 15.6: Retransformation Bias and Prediction
+## 15.6 Retransformation Bias and Prediction
 
 When predicting $y$ from a model with $\ln y$ as the dependent variable, naive retransformation introduces bias.
 
@@ -1081,9 +1085,9 @@ If $u \sim N(0, \sigma^2)$, then $E[\exp(u)] = \exp(\sigma^2/2) > 1$
 
 From the analysis above:
 
-- **Actual mean earnings**: ~\$52,000
-- **Naive retransformation**: ~\$48,000 (underpredicts by ~\$4,000 or **8%**)
-- **Adjusted retransformation**: ~\$52,000 (matches actual mean!)
+- **Actual mean earnings**: ~\$56,000
+- **Naive retransformation**: ~\$46,000 (underpredicts by ~\$10,500 or **19%**)
+- **Adjusted retransformation**: ~\$55,000 (matches actual mean!)
 
 **The Solution:**
 
@@ -1096,9 +1100,9 @@ where $s_e$ = RMSE from the log regression
 
 From log-linear model:
 
-- RMSE ($s_e$) ≈ **0.40** to **0.45**
-- Adjustment factor = $\exp(0.42^2/2) = \exp(0.088) \approx **1.092**
-- Predictions are about **9.2% too low** without adjustment!
+- RMSE ($s_e$) ≈ **0.62**
+- Adjustment factor = $\exp(0.62^2/2) = \exp(0.19) \approx **1.21**
+- Predictions are about **21% too low** without adjustment!
 
 **When Does This Matter Most?**
 
@@ -1204,7 +1208,9 @@ plt.show()
 - **Middle panel (Biased)**: The entire cloud sits below the 45-degree line, confirming systematic underprediction from naive retransformation
 - **Right panel (Adjusted)**: The correction factor shifts predictions upward so they center on the 45-degree line -- the mean prediction now matches the actual mean
 
-## 15.7: Comprehensive Model with Mixed Regressors
+## 15.7 Comprehensive Model with Mixed Regressors
+
+This capstone model brings together every transformation from the chapter -- a dummy (gender), a quadratic (age and agesq), a log dependent variable (lnearnings), a log regressor (lnhours), and a plain level (education) -- in a single specification. As you read the output, interpret each coefficient according to its own transformation type, and check that the education return (~9%) and hours elasticity (~1) line up with the log-model interpretations from the earlier sections.
 
 ```python
 # Comprehensive Model With Mixed Regressor Types
@@ -1260,7 +1266,7 @@ print(f"   Nearly proportional relationship (elasticity ≈ 1)")
 
 ### Logarithmic Transformations
 
-- **Log-linear model** ($\ln y = \beta_1 + \beta_2 x$): coefficient $\beta_2$ is a **semi-elasticity** -- a 1-unit change in $x$ is associated with a $100 \times \beta_2$% change in $y$
+- **Log-linear model** ($\ln y = \beta_1 + \beta_2 x$): coefficient $\beta_2$ is a **semi-elasticity** -- a 1-unit change in $x$ is associated with approximately a $100 \times \beta_2$% change in $y$ (exact effect: $100(e^{\beta_2}-1)$%)
 - **Log-log model** ($\ln y = \beta_1 + \beta_2 \ln x$): coefficient $\beta_2$ is an **elasticity** -- a 1% change in $x$ is associated with a $\beta_2$% change in $y$
 - Marginal effects in levels require back-transformation: $ME_x = \beta_2 \hat{y}$ (log-linear) or $ME_x = \beta_2 \hat{y}/x$ (log-log)
 - Log transformations are especially useful for right-skewed data (earnings, prices, GDP)
@@ -1572,10 +1578,10 @@ url = "https://raw.githubusercontent.com/quarcs-lab/mendez2020-convergence-clubs
 dat = pd.read_csv(url)
 dat2014 = dat[dat['year'] == 2014].copy()
 dat2014['ln_lp'] = np.log(dat2014['lp'])
-dat2014['ln_rk'] = np.log(dat2014['rk'])
+dat2014['ln_kl'] = np.log(dat2014['kl'])
 ```
 
-**Variables:** `lp` (labor productivity), `rk` (physical capital), `hc` (human capital), `region` (world region)
+**Variables:** `lp` (labor productivity), `kl` (capital per worker), `h` (human capital), `region` (world region)
 
 ---
 
@@ -1583,15 +1589,15 @@ dat2014['ln_rk'] = np.log(dat2014['rk'])
 
 Estimate three models of labor productivity on physical capital:
 
-- Levels: `lp ~ rk`
-- Log-linear: `ln_lp ~ rk`
-- Log-log: `ln_lp ~ ln_rk`
+- Levels: `lp ~ kl`
+- Log-linear: `ln_lp ~ kl`
+- Log-log: `ln_lp ~ ln_kl`
 
 ```python
 import pyfixest as pf
-m1 = pf.feols('lp ~ rk', data=dat2014, vcov='HC1')
-m2 = pf.feols('ln_lp ~ rk', data=dat2014, vcov='HC1')
-m3 = pf.feols('ln_lp ~ ln_rk', data=dat2014, vcov='HC1')
+m1 = pf.feols('lp ~ kl', data=dat2014, vcov='HC1')
+m2 = pf.feols('ln_lp ~ kl', data=dat2014, vcov='HC1')
+m3 = pf.feols('ln_lp ~ ln_kl', data=dat2014, vcov='HC1')
 m1.summary(), m2.summary(), m3.summary()
 ```
 
@@ -1604,18 +1610,18 @@ m1.summary(), m2.summary(), m3.summary()
 Test whether the returns to human capital follow a nonlinear (quadratic) pattern.
 
 ```python
-dat2014['hc_sq'] = dat2014['hc'] ** 2
-m4 = pf.feols('ln_lp ~ ln_rk + hc', data=dat2014, vcov='HC1')
-m5 = pf.feols('ln_lp ~ ln_rk + hc + hc_sq', data=dat2014, vcov='HC1')
+dat2014['h_sq'] = dat2014['h'] ** 2
+m4 = pf.feols('ln_lp ~ ln_kl + h', data=dat2014, vcov='HC1')
+m5 = pf.feols('ln_lp ~ ln_kl + h + h_sq', data=dat2014, vcov='HC1')
 m5.summary()
-print(f"Turning point: hc* = {-m5.coef()['hc'] / (2*m5.coef()['hc_sq']):.2f}")
+print(f"Turning point: h* = {-m5.coef()['h'] / (2*m5.coef()['h_sq']):.2f}")
 ```
 
 **Questions:** Is the quadratic term significant? What does the turning point imply about diminishing returns to human capital?
 
 > **Key Concept 15.9: Nonlinear Returns to Human Capital**
 >
-> If the quadratic term on human capital is negative and significant, it indicates **diminishing returns** -- each additional unit of human capital contributes less to productivity. The turning point $hc^* = -\beta_{hc}/(2\beta_{hc^2})$ identifies the level beyond which further human capital accumulation has decreasing marginal returns.
+> If the quadratic term on human capital is negative and significant, it indicates **diminishing returns** -- each additional unit of human capital contributes less to productivity. The turning point $hc^* = -\beta_{hc}/(2\beta_{hc^2})$ identifies the level beyond which further human capital accumulation has *negative* marginal returns -- productivity actually falls; below that point returns are positive but already diminishing.
 
 ---
 
@@ -1637,7 +1643,7 @@ Test whether the returns to human capital differ by region using interaction ter
 
 **Hints:**
 
-- Use `ln_lp ~ ln_rk + hc * C(region)` to include region-hc interactions
+- Use `ln_lp ~ ln_kl + h * C(region)` to include region-hc interactions
 - Conduct a joint F-test for the interaction terms
 - At which values of human capital are regional differences largest?
 
