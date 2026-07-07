@@ -42,7 +42,7 @@ This chapter demonstrates bivariate regression analysis through four compelling 
 **Datasets used:**
 
 - **AED_HEALTH2009.DTA**: Health outcomes and expenditures for 34 OECD countries (2009)
-- **AED_CAPM.DTA**: Monthly stock returns for Coca-Cola, Target, Walmart (1983-2013)
+- **AED_CAPM.DTA**: Monthly stock returns for Coca-Cola, Target, Walmart (1983-2012)
 - **AED_GDPUNEMPLOY.DTA**: Annual U.S. GDP growth and unemployment (1961-2019)
 
 **Key economic questions:**
@@ -71,7 +71,7 @@ Five core ideas anchor this chapter. Skim them before you start, and come back w
 ::::: {.columns}
 :::: {.column width="50%"}
 ::: {.callout-tip collapse="true" appearance="simple" title="Example"}
-For 366 monthly observations on Coca-Cola from `data_capm` (1983–2013), the CAPM regression of `rko_rf` on `rm_rf` produces $\hat\beta = 0.61$ with $R^2 \approx 0.33$ — the market explains 33% of Coca-Cola's monthly excess returns, and Coke moves only 61 cents on the market's dollar.
+For 354 monthly observations on Coca-Cola from `data_capm` (1983–2012), the CAPM regression of `rko_rf` on `rm_rf` produces $\hat\beta = 0.61$ with $R^2 \approx 0.20$ — the market explains 20% of the variation in Coca-Cola's monthly excess returns, and Coke moves only 61 cents on the market's dollar.
 :::
 ::::
 :::: {.column width="50%"}
@@ -101,7 +101,7 @@ A retail "deal" is the price discount you get *above* the everyday store price. 
 ::::: {.columns}
 :::: {.column width="50%"}
 ::: {.callout-tip collapse="true" appearance="simple" title="Example"}
-The fitted Coca-Cola CAPM gives $\hat\alpha \approx 0.0039$ — about $0.39\%$ per month, or roughly $4.7\%$ annualised, in excess of what the market beta predicts. Tested against $H_0: \alpha = 0$, it is statistically significant — a textbook "alpha puzzle" for risk-adjusted out-performance over 1983–2013.
+The fitted Coca-Cola CAPM gives $\hat\alpha \approx 0.0068$ — about $0.68\%$ per month, or roughly $8.2\%$ annualised, in excess of what the market beta predicts. Tested against $H_0: \alpha = 0$, it is statistically significant — a textbook "alpha puzzle" for risk-adjusted out-performance over 1983–2012.
 :::
 ::::
 :::: {.column width="50%"}
@@ -116,7 +116,7 @@ A chef serves a tasting menu where every dish has a published expected flavor. A
 ::::: {.columns}
 :::: {.column width="50%"}
 ::: {.callout-tip collapse="true" appearance="simple" title="Example"}
-The first case study runs a cross-sectional regression of `lifeexp` on `hlthpc` across 34 OECD countries observed in 2009 — one year, 34 units. The fitted slope of $0.00111$ implies each extra \$1{,}000 in per-capita health spending is associated with about $1.1$ extra years of life expectancy, with $t \approx 5.3$.
+The first case study runs a cross-sectional regression of `lifeexp` on `hlthpc` across 34 OECD countries observed in 2009 — one year, 34 units. The fitted slope of $0.00111$ implies each extra \$1{,}000 in per-capita health spending is associated with about $1.1$ extra years of life expectancy, with $t \approx 3.9$.
 :::
 ::::
 :::: {.column width="50%"}
@@ -183,7 +183,7 @@ plt.rcParams.update({
 print("Setup complete! Ready to explore real-world regression applications.")
 ```
 
-## 8.1: Health Outcomes Across Countries
+## 8.1 Health Outcomes Across Countries
 
 Our first case study examines health outcomes across wealthy OECD nations. We'll investigate whether higher health spending is associated with better health outcomes.
 
@@ -207,11 +207,15 @@ Our first case study examines health outcomes across wealthy OECD nations. We'll
 
 ### Load and Explore Health Data
 
+We start by loading the OECD health dataset directly from GitHub and previewing it. Check the wide cross-country ranges in spending (`hlthpc`) and outcomes (`lifeexp`, `infmort`) in the summary below.
+
 ```python
+# 8.1 Health outcomes across countries
+
 # Read in the health data
 data_health = pd.read_stata(GITHUB_DATA_URL + 'AED_HEALTH2009.DTA')
 
-# 8.1 Health outcomes across countries
+# Summary statistics for all variables
 display(data_health.describe())
 
 # First few observations
@@ -227,7 +231,7 @@ Let's examine the key variables in our health outcomes study.
 table81_vars = ['hlthpc', 'lifeexp', 'infmort']
 summary_table = data_health[table81_vars].describe().T
 summary_table['range'] = summary_table['max'] - summary_table['min']
-summary_table[['mean', 'std', 'min', 'max', 'range']]
+display(summary_table[['mean', 'std', 'min', 'max', 'range']])
 
 print("\nKey observations:")
 print(f"  - Health spending ranges from ${summary_table.loc['hlthpc', 'min']:.0f} to ${summary_table.loc['hlthpc', 'max']:.0f}")
@@ -244,7 +248,7 @@ $$\text{Lifeexp} = \beta_1 + \beta_2 \times \text{Hlthpc} + u$$
 **Interpretation:**
 
 - $\beta_1$: Expected life expectancy when health spending is zero (intercept)
-- $\beta_2$: Change in life expectancy for each additional \$1,000 in health spending
+- $\beta_2$: Change in life expectancy for each additional dollar of health spending (we multiply by 1,000 to report the effect per \$1,000)
 - We expect $\beta_2 > 0$ (higher spending improves outcomes)
 
 ```python
@@ -268,23 +272,29 @@ model_lifeexp.summary()
 
 For cross-sectional data with independence across observations, it's standard to use heteroskedasticity-robust standard errors. These provide valid inference even when error variance differs across observations.
 
+```python
+# Life expectancy regression (robust SE)
+model_lifeexp_robust = pf.feols('lifeexp ~ hlthpc', data=data_health, vcov='HC1')
+model_lifeexp_robust.summary()
+```
+
 ### Interpreting the Life Expectancy Results
 
 **Economic Significance:**
 The estimated coefficient of 0.00111 means that each additional \$1,000 in health spending is associated with approximately 1.1 years of additional life expectancy. To put this in perspective:
 
-- The difference between low-spending Chile (\$999/capita) and high-spending Norway (\$5,522/capita) is \$4,523
-- This predicts a life expectancy difference of 5.0 years (4.523 × 1.11)
-- Actual difference: 75.1 years (Chile) vs 79.9 years (Norway) = 4.8 years
+- The difference between low-spending Chile (\$1,210/capita) and high-spending Norway (\$5,348/capita) is \$4,138
+- This predicts a life expectancy difference of 4.6 years (4.138 × 1.11)
+- Actual difference: 75.8 years (Chile) vs 78.7 years (Norway) = 2.9 years
 
 **Statistical Significance:**
-The t-statistic of approximately 5.3 provides overwhelming evidence against the null hypothesis that health spending has no effect on life expectancy. The p-value is well below 0.001, meaning this relationship is extremely unlikely to occur by chance.
+The t-statistic of approximately 3.9 provides overwhelming evidence against the null hypothesis that health spending has no effect on life expectancy. The p-value is well below 0.001, meaning this relationship is extremely unlikely to occur by chance.
 
 **Important Caveats:**
 
 1. This is correlation, not causation - richer countries may have both higher spending AND other factors that improve health
 2. The relationship may not be linear across all spending levels
-3. The U.S. is a notable outlier - spending \$7,960 per capita but achieving only 76.2 years (below prediction)
+3. The U.S. is a notable outlier - spending \$7,990 per capita but achieving only 76.0 years (below prediction)
 4. Other factors matter: diet, exercise, inequality, healthcare access, environmental quality
 
 > **Key Concept 8.1: Economic vs. Statistical Significance**
@@ -292,6 +302,8 @@ The t-statistic of approximately 5.3 provides overwhelming evidence against the 
 > Economic vs. statistical significance in cross-country regressions. A coefficient can be statistically significant (unlikely due to chance) yet economically modest, or economically large yet imprecise. Always interpret both dimensions.
 
 ### Visualization: Life Expectancy vs Health Spending
+
+The scatter plot below shows each country's health spending against male life expectancy, together with the fitted regression line. Look for the upward slope — and for the U.S., which lies well below the line.
 
 ```python
 # Figure 8.1 Panel A - Life Expectancy
@@ -301,7 +313,7 @@ ax.scatter(data_health['hlthpc'], data_health['lifeexp'],
            color='#22d3ee', label='Actual')
 ax.plot(data_health['hlthpc'], model_lifeexp.predict(), color='#c084fc',
         linewidth=2, label='Fitted')
-ax.set_xlabel('Health Spending per capita (in $1000s)', fontsize=12)
+ax.set_xlabel('Health Spending per capita (US dollars)', fontsize=12)
 ax.set_ylabel('Life Expectancy (in years)', fontsize=12)
 ax.set_title('Figure 8.1 Panel A: Life Expectancy vs Health Spending',
              fontsize=14, fontweight='bold')
@@ -331,11 +343,11 @@ slope_inf     = model_infmort.coef()['hlthpc']
 r2_inf        = model_infmort._r2
 
 print(f"Estimated equation: infmort = {intercept_inf:.2f} + ({slope_inf:.5f}) x hlthpc")
-print(f"Slope: each additional $1,000 in spending is associated with {slope_inf*1000:.2f} fewer infant deaths per 1,000 births")
+print(f"Slope: each additional $1,000 in spending is associated with {-slope_inf*1000:.2f} fewer infant deaths per 1,000 births")
 print(f"R-squared: {r2_inf:.4f} ({r2_inf*100:.1f}% of variation explained)\n")
 
 # Full regression output
-display(model_infmort.summary())
+model_infmort.summary()
 
 # Robust standard errors
 model_infmort_robust = pf.feols('infmort ~ hlthpc', data=data_health, vcov='HC1')
@@ -347,10 +359,10 @@ model_infmort_robust.summary()
 ### Interpreting the Infant Mortality Results
 
 **Economic Significance:**
-The estimated coefficient of approximately -0.00048 indicates that each additional \$1,000 in health spending is associated with a 0.48 decrease in infant deaths per 1,000 live births. While this may seem small, it's quite meaningful:
+The estimated coefficient of approximately -0.00069 indicates that each additional \$1,000 in health spending is associated with a 0.69 decrease in infant deaths per 1,000 live births. While this may seem small, it's quite meaningful:
 
-- A country increasing spending from \$2,000 to \$4,000 per capita would expect infant mortality to fall by 0.96 deaths per 1,000 births
-- For a country with 100,000 births per year, this represents 96 fewer infant deaths annually
+- A country increasing spending from \$2,000 to \$4,000 per capita would expect infant mortality to fall by 1.39 deaths per 1,000 births
+- For a country with 100,000 births per year, this represents 139 fewer infant deaths annually
 - The effect is economically significant in terms of human welfare
 
 **Statistical Significance:**
@@ -359,13 +371,13 @@ The negative relationship is highly statistically significant (t ≈ -5.9, p < 0
 **The U.S. Anomaly:**
 The United States again stands out as a major outlier:
 
-- U.S. infant mortality: 6.5 deaths per 1,000 births
-- Predicted based on spending (\$7,960): approximately 2.8 deaths per 1,000 births
+- U.S. infant mortality: 6.4 deaths per 1,000 births
+- Predicted based on spending (\$7,990): approximately 1.2 deaths per 1,000 births
 - The U.S. has infant mortality rates closer to middle-income countries than to peer wealthy nations
 - This suggests that *how* money is spent matters as much as *how much* is spent
 
 **Model Limitations:**
-The R² suggests health spending explains only about 47% of variation in infant mortality. Other important factors include:
+The R² suggests health spending explains only about 14% of variation in infant mortality. Other important factors include:
 
 - Quality of prenatal care and maternal health programs
 - Income inequality and poverty rates
@@ -378,6 +390,8 @@ The R² suggests health spending explains only about 47% of variation in infant 
 
 ### Visualization: Infant Mortality vs Health Spending
 
+The plot below shows infant mortality against health spending, with the fitted line. Look for the downward slope — and note how far the U.S. sits above the line.
+
 ```python
 # Figure 8.1 Panel B - Infant Mortality
 fig, ax = plt.subplots(figsize=(10, 6))
@@ -386,7 +400,7 @@ ax.scatter(data_health['hlthpc'], data_health['infmort'],
            color='#22d3ee', label='Actual')
 ax.plot(data_health['hlthpc'], model_infmort.predict(), color='#c084fc',
         linewidth=2, label='Fitted')
-ax.set_xlabel('Health Spending per capita (in $1000s)', fontsize=12)
+ax.set_xlabel('Health Spending per capita (US dollars)', fontsize=12)
 ax.set_ylabel('Infant Mortality per 1,000 births', fontsize=12)
 ax.set_title('Figure 8.1 Panel B: Infant Mortality vs Health Spending',
              fontsize=14, fontweight='bold')
@@ -400,7 +414,7 @@ plt.show()
 
 Having examined how health spending affects outcomes, we now investigate what drives health spending itself. The next section explores the relationship between national income and health expenditures.
 
-## 8.2: Health Expenditures Across Countries
+## 8.2 Health Expenditures Across Countries
 
 Now we examine the determinants of health expenditures, focusing on the role of national income.
 
@@ -415,7 +429,9 @@ $$\text{Hlthpc} = \beta_1 + \beta_2 \times \text{Gdppc} + u$$
 - **Gdppc**: GDP per capita (US dollars)
 - **Hlthpc**: Health expenditure per capita (US dollars)
 
-**Key observation:** GDP per capita ranges from \$13,807 (Mexico) to \$82,901 (Luxembourg)
+**Key observation:** GDP per capita ranges from \$13,806 (Mexico) to \$82,901 (Luxembourg)
+
+The summary statistics below quantify this variation in both GDP per capita and health spending.
 
 ```python
 # 8.2 Health expenditures across countries
@@ -428,6 +444,8 @@ summary_gdp[['mean', 'std', 'min', 'max', 'range']]
 ```
 
 ### Health Expenditure Regression (All Countries)
+
+We regress health spending on GDP per capita, first with default standard errors and then with robust ones. Compare the two summaries — the standard errors change noticeably, a sign of heteroskedasticity.
 
 ```python
 # Health expenditure regression (all countries)
@@ -442,7 +460,7 @@ print(f"Estimated equation: hlthpc = {intercept_hlth:,.2f} + {slope_hlth:.4f} x 
 print(f"R-squared: {r2_hlth:.4f} ({r2_hlth*100:.1f}% of variation explained)\n")
 
 # Full regression output
-display(model_hlthpc.summary())
+model_hlthpc.summary()
 
 # Robust standard errors
 model_hlthpc_robust = pf.feols('hlthpc ~ gdppc', data=data_health, vcov='HC1')
@@ -458,8 +476,8 @@ The coefficient of approximately 0.09 indicates that each additional \$1,000 in 
 
 **Income Elasticity of Health Spending:**
 
-- At the mean GDP (\$38,000) and mean health spending (\$3,400):
-- Elasticity ≈ (0.09 × 38,000) / 3,400 ≈ 1.0
+- At the mean GDP (\$33,054) and mean health spending (\$3,256):
+- Elasticity ≈ (0.09 × 33,054) / 3,256 ≈ 0.9
 - This suggests health spending rises roughly proportionally with income
 - Health care appears to be a "normal good" (demand increases with income)
 
@@ -470,12 +488,13 @@ Notice how robust standard errors differ substantially from default standard err
 - Richer countries show more variation in health spending choices
 - Luxembourg and the USA have enormous influence on the estimates
 - Robust SEs adjust for this pattern and provide more reliable inference
+- Even with robust standard errors, the GDP slope remains statistically significant (robust t ≈ 3.1, p ≈ 0.004), though the evidence is weaker than the default output suggests
 
 **The Outlier Problem:**
 Two countries drive much of the relationship:
 
-1. **Luxembourg** (GDP: \$82,901, Health: \$4,808) - extremely wealthy, high spending
-2. **United States** (GDP: \$45,674, Health: \$7,960) - exceptionally high health spending for its GDP level
+1. **Luxembourg** (GDP: \$82,901, Health: \$4,786) - extremely wealthy, high spending
+2. **United States** (GDP: \$45,192, Health: \$7,990) - exceptionally high health spending for its GDP level
 
 These outliers suggest the relationship may not be stable across all countries.
 
@@ -485,6 +504,8 @@ These outliers suggest the relationship may not be stable across all countries.
 
 ### Visualization: Health Spending vs GDP (All Countries)
 
+The scatter plot below shows health spending against GDP per capita for all 34 countries, with the fitted line. Look for the two points that sit far from the rest — the USA and Luxembourg.
+
 ```python
 # Figure 8.2 Panel A - All countries
 fig, ax = plt.subplots(figsize=(10, 6))
@@ -493,8 +514,8 @@ ax.scatter(data_health['gdppc'], data_health['hlthpc'],
            color='#22d3ee', label='Actual')
 ax.plot(data_health['gdppc'], model_hlthpc.predict(), color='#c084fc',
         linewidth=2, label='Fitted')
-ax.set_xlabel('GDP per capita (in $1000s)', fontsize=12)
-ax.set_ylabel('Health Spending per capita (in $1000s)', fontsize=12)
+ax.set_xlabel('GDP per capita (US dollars)', fontsize=12)
+ax.set_ylabel('Health Spending per capita (US dollars)', fontsize=12)
 ax.set_title('Figure 8.2 Panel A: Health Spending vs GDP (All Countries)',
              fontsize=14, fontweight='bold')
 ax.legend()
@@ -531,7 +552,7 @@ print(f"Estimated equation: hlthpc = {intercept_sub:,.2f} + {slope_sub:.4f} x gd
 print(f"R-squared: {r2_sub:.4f} ({r2_sub*100:.1f}% of variation explained)\n")
 
 # Full regression output
-display(model_hlthpc_subset.summary())
+model_hlthpc_subset.summary()
 
 # Robust standard errors
 model_hlthpc_subset_robust = pf.feols('hlthpc ~ gdppc', data=data_health_subset, vcov='HC1')
@@ -548,7 +569,7 @@ The comparison reveals how sensitive regression results can be to outliers:
 
 | Metric | Full Sample | Excluding USA & LUX | Change |
 |--------|-------------|---------------------|--------|
-| Slope | ~0.09 | ~0.12 | +33% |
+| Slope | ~0.09 | ~0.13 | +41% |
 | R² | ~0.60 | ~0.93 | +55% |
 | Interpretation | Weak fit | Excellent fit | Transformed |
 
@@ -575,6 +596,8 @@ If you're advising a "typical" OECD country on expected health spending, the sub
 
 ### Visualization: Health Spending vs GDP (Excluding Outliers)
 
+Re-plotting the 32 remaining countries shows how tightly they cluster around the fitted line once the two outliers are excluded.
+
 ```python
 # Figure 8.2 Panel B - Excluding USA and Luxembourg
 fig, ax = plt.subplots(figsize=(10, 6))
@@ -597,7 +620,7 @@ plt.show()
 
 Our health economics case studies revealed strong relationships but also highlighted outlier issues. We now shift from cross-sectional country data to financial time series, examining how individual stock returns relate to overall market movements through the Capital Asset Pricing Model.
 
-## 8.3: Capital Asset Pricing Model (CAPM)
+## 8.3 Capital Asset Pricing Model (CAPM)
 
 Our third case study applies regression to financial data using the Capital Asset Pricing Model.
 
@@ -626,7 +649,7 @@ $$R_A - R_F = \alpha_A + \beta_A (R_M - R_F) + u$$
 - $\alpha_A$ = excess return ("alpha") after adjusting for risk
   - Pure CAPM theory predicts $\alpha = 0$
 
-**Dataset:** Monthly data from May 1983 to October 2013 (366 observations)
+**Dataset:** Monthly data from May 1983 to October 2012 (354 observations)
 
 - Returns on Coca-Cola (RKO), Target (RTGT), Walmart (RWMT)
 - Market return and risk-free rate
@@ -646,6 +669,8 @@ data_capm[['date', 'rm', 'rf', 'rko', 'rm_rf', 'rko_rf']].head()
 
 ### Summary Statistics for CAPM Variables
 
+Before estimating the CAPM, we summarize the monthly return series. Compare the standard deviations: the individual stocks are clearly more volatile than the market.
+
 ```python
 # Table 8.3: CAPM variables summary
 table83_vars = ['rm', 'rf', 'rko', 'rtgt', 'rwmt', 'rm_rf',
@@ -660,6 +685,8 @@ print(f"  - Stock returns are much more volatile than market returns")
 ```
 
 ### Visualization: Time Series of Excess Returns
+
+The plot below traces Coca-Cola's and the market's excess returns over the most recent fifth of the sample. Notice how the stock's line swings more widely than the market's.
 
 ```python
 # Figure 8.3 Panel A - Time series plot (last 20% of data for readability)
@@ -685,6 +712,8 @@ plt.show()
 
 ### CAPM Regression for Coca-Cola
 
+We now estimate the CAPM regression of Coca-Cola's excess return on the market's excess return. The slope is Coca-Cola's beta — check whether it is above or below 1 in the output.
+
 ```python
 # CAPM regression: Coca-Cola
 model_capm = pf.feols('rko_rf ~ rm_rf', data=data_capm)
@@ -700,13 +729,15 @@ print(f"R-squared: {r2_capm:.4f} ({r2_capm*100:.1f}% of return variation explain
 
 # Full regression output
 model_capm.summary()
-alpha_se = model_capm.se()['Intercept']
-beta_se = model_capm.se()['rm_rf']
-alpha_t = model_capm.tstat()['Intercept']
-beta_t = model_capm.tstat()['rm_rf']
 ```
 
 ### CAPM Results with Robust Standard Errors
+
+```python
+# CAPM regression: Coca-Cola (robust SE)
+model_capm_robust = pf.feols('rko_rf ~ rm_rf', data=data_capm, vcov='HC1')
+model_capm_robust.summary()
+```
 
 ### Interpreting the CAPM Beta for Coca-Cola
 
@@ -728,19 +759,19 @@ The estimated beta of 0.61 reveals Coca-Cola's risk profile:
    - Less sensitive to economic cycles than growth stocks
 
 3. **Statistical precision:**
-   - The t-statistic of ~21.5 provides overwhelming evidence that beta ≠ 0
+   - The t-statistic of ~9.4 provides overwhelming evidence that beta ≠ 0
    - Coca-Cola returns clearly co-move with the market
    - The relationship is one of the strongest we've seen in this chapter
 
 **The Alpha "Puzzle":**
 
-The estimated alpha of 0.0039 (0.39% per month, or ~4.7% annually) is statistically significant:
+The estimated alpha of 0.0068 (0.68% per month, or ~8.2% annually) is statistically significant:
 
 - Pure CAPM theory predicts alpha should equal zero (no excess risk-adjusted returns)
 - Yet we reject H₀: α = 0 at conventional significance levels
 - This suggests either:
   - CAPM is misspecified (missing risk factors)
-  - Coca-Cola generated genuine excess returns during 1983-2013
+  - Coca-Cola generated genuine excess returns during 1983-2012
   - Statistical artifact from data mining
 
 **Investment Implications:**
@@ -754,6 +785,8 @@ The estimated alpha of 0.0039 (0.39% per month, or ~4.7% annually) is statistica
 > Systematic risk (beta) measures how an asset's returns co-move with the overall market. Beta < 1 indicates a "defensive" stock (less volatile than market), while beta > 1 indicates a "growth" stock (amplifies market movements). Only systematic risk is priced in efficient markets.
 
 ### Visualization: CAPM Scatter Plot
+
+The scatter plot below shows every monthly observation with the fitted CAPM line. Note the wide dispersion around the line — most of Coca-Cola's month-to-month variation is firm-specific rather than market-driven.
 
 ```python
 # Figure 8.3 Panel B - CAPM Scatter Plot
@@ -785,8 +818,8 @@ print(f"Beta (slope) = {model_capm.coef()['rm_rf']:.4f}")
 
 2. **Scatter around the line:** The substantial dispersion around the regression line reflects:
    - Idiosyncratic risk (firm-specific factors): management decisions, product launches, competitive pressures
-   - The R² ≈ 0.33 means the market explains only 33% of Coca-Cola's return variation
-   - The remaining 67% is diversifiable risk that disappears in a portfolio
+   - The R² ≈ 0.20 means the market explains only 20% of Coca-Cola's return variation
+   - The remaining 80% is diversifiable risk that disappears in a portfolio
 
 3. **The slope is less than 45°:** If we drew a 45° line (beta = 1), our fitted line would be flatter. This visually confirms beta < 1.
 
@@ -801,7 +834,7 @@ print(f"Beta (slope) = {model_capm.coef()['rm_rf']:.4f}")
 **Time Series Considerations:**
 
 - CAPM assumes returns are independent over time (no autocorrelation)
-- With monthly data over 30+ years, we should ideally check for time-varying beta
+- With monthly data spanning nearly 30 years, we should ideally check for time-varying beta
 - Some periods (recessions) may show different beta than others (expansions)
 - More sophisticated models (e.g., conditional CAPM) could account for this
 
@@ -811,7 +844,7 @@ print(f"Beta (slope) = {model_capm.coef()['rm_rf']:.4f}")
 
 The CAPM demonstrated how financial returns co-move with market-wide factors. Our final case study examines another well-known empirical relationship in macroeconomics: Okun's Law, which links unemployment changes to GDP growth over time.
 
-## 8.4: Output and Unemployment in the U.S. (Okun's Law)
+## 8.4 Output and Unemployment in the U.S. (Okun's Law)
 
 Our final case study examines a fundamental macroeconomic relationship known as Okun's Law.
 
@@ -849,6 +882,8 @@ data_gdp[['year', 'rgdpgrowth', 'uratechange']].head(10)
 
 ### Summary Statistics
 
+We first summarize the two series. GDP growth averages about 3% per year, while the average change in unemployment is close to zero.
+
 ```python
 # Table 8.4: GDP growth and unemployment change summary
 table84_vars = ['rgdpgrowth', 'uratechange']
@@ -858,10 +893,12 @@ display(summary_gdp_tbl[['mean', 'std', 'min', 'max']])
 print("\nKey observations:")
 print(f"  - Average GDP growth: {data_gdp['rgdpgrowth'].mean():.2f}%")
 print(f"  - Average unemployment change: {data_gdp['uratechange'].mean():.3f} percentage points")
-print(f"  - Sample period includes major recessions (1982, 2008-2009, 2020)")
+print(f"  - Sample period includes major recessions (1982, 2008-2009)")
 ```
 
 ### Okun's Law Regression
+
+We estimate Okun's Law by regressing real GDP growth on the change in the unemployment rate. Compare the estimated slope in the output with Okun's benchmark of -2.0.
 
 ```python
 # Okun's law regression
@@ -877,11 +914,15 @@ print(f"R-squared: {r2_okun:.4f} ({r2_okun*100:.1f}% of variation explained)\n")
 
 # Full regression output
 model_okun.summary()
-slope_se_okun = model_okun.se()['uratechange']
-slope_t_okun = model_okun.tstat()['uratechange']
 ```
 
 ### Okun's Law with Robust Standard Errors
+
+```python
+# Okun's law regression (robust SE)
+model_okun_robust = pf.feols('rgdpgrowth ~ uratechange', data=data_gdp, vcov='HC1')
+model_okun_robust.summary()
+```
 
 ### Interpreting Okun's Law Results
 
@@ -915,9 +956,9 @@ Several factors could explain the difference:
    - These may have different dynamics than typical recessions
 
 **Testing β = -2.0:**
-The t-statistic of ~3.4 indicates we reject Okun's exact -2.0 at the 5% level. However:
+The t-statistic of ~2.4 indicates we reject Okun's exact -2.0 at the 5% level. However:
 
-- The 95% confidence interval likely includes values near -2.0
+- The 95% confidence interval, roughly [-1.94, -1.24], excludes -2.0 — consistent with the rejection — though its lower bound is not far from -2.0
 - The difference (-1.59 vs -2.0) is economically modest
 - For practical policy purposes, the relationship is "close enough" to Okun's law
 
@@ -932,6 +973,8 @@ R² = 0.59 means unemployment changes explain 59% of GDP growth variation:
 > Okun's Law as an empirical regularity. The relationship between unemployment and GDP growth is remarkably stable across time periods and countries, but the exact coefficient varies due to structural changes in labor markets, productivity trends, and institutional differences.
 
 ### Visualization: Okun's Law Scatter Plot
+
+In the scatter plot below, each point is one year of U.S. data and the fitted line traces Okun's Law. Look for the recession years far from the main cluster, where unemployment jumped and growth collapsed.
 
 ```python
 # Figure 8.4 Panel A - Okun's Law Scatter Plot
@@ -963,8 +1006,8 @@ plt.show()
 2. **Clustering around the origin:** Most observations lie near the center, representing normal economic times with modest changes in both unemployment and GDP. This is typical of stable economic periods.
 
 3. **Outliers reveal recessions:** Points in the upper-left quadrant represent major recessions:
-   - **2009**: Unemployment rose ~4 percentage points, GDP fell ~2.5%
-   - **1982**: Unemployment rose ~2.5 points, GDP fell ~2%
+   - **2009**: Unemployment rose ~3.5 percentage points, GDP fell ~2.5%
+   - **1982**: Unemployment rose ~2.1 points, GDP fell ~1.8%
    - **2020**: (if included) would show extreme values from COVID-19 pandemic
    
 
@@ -996,6 +1039,8 @@ More advanced time series methods could improve on this simple OLS regression.
 
 ### Visualization: Time Series of Actual vs Predicted GDP Growth
 
+Finally, we plot actual GDP growth alongside the values predicted from unemployment changes alone. Watch how closely the two lines track each other before 2008 — and how they diverge afterward.
+
 ```python
 # Figure 8.4 Panel B - Time Series of Actual vs Predicted GDP Growth
 fig, ax = plt.subplots(figsize=(12, 6))
@@ -1022,7 +1067,7 @@ plt.show()
 **What This Graph Reveals:**
 
 1. **Model tracks major recessions well:**
-   - The predicted line (blue dashed) captures the timing and direction of major downturns
+   - The predicted line (dashed) captures the timing and direction of major downturns
    - 1982, 1991, 2001, 2008-2009 recessions are all identified by the model
    - This validates Okun's Law as a useful empirical relationship
 
@@ -1070,8 +1115,8 @@ This type of time series plot is more informative than just reporting R² becaus
 **Case Study Applications:**
 
 - Health spending and life expectancy: +$1,000 spending → +1.11 years life expectancy
-- Health spending and infant mortality: +$1,000 spending → -0.48 infant deaths per 1,000 births
-- GDP and health spending: +$1,000 GDP → +$90 health expenditures (elasticity ≈ 1.0)
+- Health spending and infant mortality: +$1,000 spending → -0.69 infant deaths per 1,000 births
+- GDP and health spending: +$1,000 GDP → +$90 health expenditures (elasticity ≈ 0.9)
 - CAPM beta for Coca-Cola: 0.61 (defensive stock, less risky than market)
 - Okun's Law: +1 percentage point unemployment → -1.59 percentage points GDP growth
 
@@ -1113,7 +1158,7 @@ This type of time series plot is more informative than just reporting R² becaus
 **Data Types Covered:**
 
 - Cross-sectional: OECD health data (34 countries)
-- Financial time series: Monthly stock returns (1983-2013)
+- Financial time series: Monthly stock returns (1983-2012)
 - Macroeconomic time series: Annual GDP and unemployment (1961-2019)
 - Multi-domain applications: Health, finance, macroeconomics
 
@@ -1177,7 +1222,7 @@ mean_hlth = data_health['hlthpc'].mean()
 elasticity = (slope_gdp * mean_gdp) / mean_hlth
 
 print(f"Health spending on GDP: slope = {slope_gdp:.4f}, R² = {r2_gdp:.4f}")
-print(f"Income elasticity at the mean: {elasticity:.2f} (≈1.0 → normal good)")
+print(f"Income elasticity at the mean: {elasticity:.2f} (near 1 → normal good)")
 
 # =============================================================================
 # STEP 5: Outlier robustness — excluding USA and Luxembourg
@@ -1268,11 +1313,12 @@ plt.show()
 - **Chapter 11:** Statistical inference for multiple regression (F-tests, multicollinearity)
 
 **You have now mastered:**
-✓ Real-world regression applications across economics domains
-✓ Robust inference for heteroskedastic data
-✓ Testing specific economic hypotheses
-✓ Outlier detection and influence assessment
-✓ Economic interpretation of regression coefficients
+
+- ✓ Real-world regression applications across economics domains
+- ✓ Robust inference for heteroskedastic data
+- ✓ Testing specific economic hypotheses
+- ✓ Outlier detection and influence assessment
+- ✓ Economic interpretation of regression coefficients
 
 Congratulations! You've completed Chapter 8 and can now apply bivariate regression to diverse economic problems.
 
@@ -1289,7 +1335,7 @@ Test your understanding of bivariate regression case studies:
 **Exercise 1: Health Outcomes Interpretation**
 
 - (a) If a country increases health spending from $2,500 to $4,000 per capita, what is the predicted change in life expectancy? Show your calculation.
-- (b) The U.S. spends $7,960 per capita but has lower life expectancy than predicted. Suggest three possible explanations beyond the model.
+- (b) The U.S. spends $7,990 per capita but has lower life expectancy than predicted. Suggest three possible explanations beyond the model.
 - (c) Why do we use heteroskedasticity-robust standard errors for cross-country health data?
 
 **Exercise 2: Outlier Impact Assessment**
@@ -1300,7 +1346,7 @@ Test your understanding of bivariate regression case studies:
 
 **Exercise 3: CAPM Beta Interpretation**
 
-- (a) Walmart has beta = 0.45, Target has beta = 1.25. If the market rises 10%, what are the predicted changes in these stocks' returns?
+- (a) Suppose Walmart has beta = 0.45 and Target has beta = 1.25. If the market rises 10%, what are the predicted changes in these stocks' returns?
 - (b) Why might consumer staple stocks (Coca-Cola, Walmart) have low betas?
 - (c) An investor wants high returns and is willing to accept high risk. Should they choose stocks with beta > 1 or beta < 1? Explain.
 
