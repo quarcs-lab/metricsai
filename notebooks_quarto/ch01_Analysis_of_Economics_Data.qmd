@@ -35,12 +35,12 @@ This chapter introduces the fundamental concepts of econometrics and regression 
 - How to visualize relationships between variables using scatter plots
 - How to fit a simple linear regression model using Ordinary Least Squares (OLS)
 - How to interpret regression coefficients in economic terms
-- How to use Python's statsmodels package for regression analysis
+- How to use Python's pyfixest package for regression analysis
 
 **Dataset used:**
 
 - **AED_HOUSE.DTA**: House sale prices for 29 houses in Central Davis, California (1999)
-  - Variables: price (sale price in dollars), size (house size in square feet), plus 7 other characteristics
+  - Variables: price (sale price in dollars), size (house size in square feet), plus 6 other characteristics
 
 **Chapter outline:**
 
@@ -65,7 +65,7 @@ Six core ideas anchor this chapter. Skim them before you start, and come back wh
 ::::: {.columns}
 :::: {.column width="50%"}
 ::: {.callout-tip collapse="true" appearance="simple" title="Example"}
-For 29 houses in Davis, CA (1999), regression of `price` on `size` gives `price = 115,952 + 73.77 × size`. The slope says each extra square foot is associated with about \$74 more in sale price.
+For 29 houses in Davis, CA (1999), regression of `price` on `size` gives `price = 115,017 + 73.77 × size`. The slope says each extra square foot is associated with about \$74 more in sale price.
 :::
 ::::
 :::: {.column width="50%"}
@@ -95,7 +95,7 @@ Like a recipe: the amount of flour (X) helps explain how much bread you get (Y).
 ::::: {.columns}
 :::: {.column width="50%"}
 ::: {.callout-tip collapse="true" appearance="simple" title="Example"}
-In our fit, $\beta_0 \approx \$115{,}952$ (the predicted price of a 0-sqft house — not economically meaningful, just an anchor) and $\beta_1 \approx \$73.77$ per sqft (each additional square foot is associated with about \$74 more in price).
+In our fit, $\beta_0 \approx \$115{,}017$ (the predicted price of a 0-sqft house — not economically meaningful, just an anchor) and $\beta_1 \approx \$73.77$ per sqft (each additional square foot is associated with about \$74 more in price).
 :::
 ::::
 :::: {.column width="50%"}
@@ -110,7 +110,7 @@ Like a taxi fare: the intercept is the flag-drop charge you pay just for getting
 ::::: {.columns}
 :::: {.column width="50%"}
 ::: {.callout-tip collapse="true" appearance="simple" title="Example"}
-For each of the 29 houses, the vertical gap between its dot and the fitted line is a residual. OLS chose $\beta_0 = 115{,}952$ and $\beta_1 = 73.77$ because no other line gives a smaller sum of *squared* residuals across those 29 houses.
+For each of the 29 houses, the vertical gap between its dot and the fitted line is a residual. OLS chose $\beta_0 = 115{,}017$ and $\beta_1 = 73.77$ because no other line gives a smaller sum of *squared* residuals across those 29 houses.
 :::
 ::::
 :::: {.column width="50%"}
@@ -155,7 +155,7 @@ Ice-cream sales and drowning deaths both rise in summer. They are strongly *asso
 Run this cell first to import all required packages and configure the environment. This sets up:
 
 - Data manipulation (pandas, numpy)
-- Statistical modeling (statsmodels)
+- Statistical modeling (pyfixest)
 - Visualization (matplotlib)
 - Reproducibility (random seeds)
 
@@ -251,6 +251,8 @@ Let's look at the first few rows to understand what variables we have available.
 data_house.head()
 ```
 
+Each row is one house sale. Alongside our two key variables — `price` (sale price in dollars) and `size` (square feet) — the data include `bedrooms`, `bathrooms`, `lotsize` (lot size category), `age` (years), `monthsold` (month of sale), and the original listing price (`list`).
+
 ## 1.4 Explore the Data
 
 Before running any regression, we need to understand our data through **descriptive statistics**. These reveal the scale, variability, and range of our variables—essential context for interpreting regression results later. Let's look at the key statistics for price and size.
@@ -321,7 +323,7 @@ $$\min_{\beta_0, \beta_1} \sum_{i=1}^{n} (\text{price}_i - \beta_0 - \beta_1 \ti
 
 In other words, we're finding the line that makes our prediction errors as small as possible (in a squared sense).
 
-We'll use Python's `statsmodels` package, which provides regression output similar to Stata and R.
+We'll use Python's `pyfixest` package, which provides regression output similar to Stata and R.
 
 > **Key Concept 1.4: Introduction to Regression Analysis**
 >
@@ -358,21 +360,21 @@ The regression output contains a lot of information! Let's break down the most i
 1. **Coefficients table** (middle section):
    - **Intercept**: The predicted price when size = 0 (often not economically meaningful)
    - **size**: The slope coefficient - our main interest!
-   - **std err**: Standard error (measures precision of the estimate)
-   - **t**: t-statistic (coefficient / standard error)
-   - **P>|t|**: p-value (tests if coefficient is significantly different from zero)
+   - **Std. Error**: Standard error (measures precision of the estimate)
+   - **t value**: t-statistic (coefficient / standard error)
+   - **Pr(>|t|)**: p-value (tests if coefficient is significantly different from zero)
 
-2. **R-squared** (top right section):
+2. **R2** (bottom line, after the table):
    - Proportion of variation in Y explained by X
    - Ranges from 0 to 1 (higher = better fit)
 
-3. **F-statistic** (top right section):
-   - Tests overall significance of the regression
-   - Low p-value (Prob F-statistic) means the model is statistically significant
+3. **Header block** (top section):
+   - Reports the estimation method (OLS), the dependent variable, and the number of observations
+   - **Inference: iid** indicates classical (default) standard errors
 
 We already extracted the key numbers above. Here's how to read them:
 
-- **Intercept** ($\beta_0$ = \$115,952): The predicted price when size = 0. This is not economically meaningful (no house has zero square feet), but it anchors the regression line.
+- **Intercept** ($\beta_0$ = \$115,017): The predicted price when size = 0. This is not economically meaningful (no house has zero square feet), but it anchors the regression line.
 - **Slope** ($\beta_1$ = \$73.77 per sq ft): Our main result — each additional square foot is associated with a \$73.77 higher price.
 - **R-squared** (0.6175): House size explains about 62% of the variation in prices. The remaining 38% is due to other factors.
 
@@ -437,7 +439,7 @@ Our estimated slope of approximately **\$74 per square foot** means:
 
 We can use our regression equation to predict prices for houses of different sizes. For example, for a 2,000 sq ft house:
 
-$$\hat{\text{price}} = 115,952 + 74.03 \times 2000 = \$264,012$$
+$$\hat{\text{price}} = 115,017 + 73.77 \times 2000 = \$262,557$$
 
 ### Important Caveats:
 
@@ -506,10 +508,10 @@ This single code block reproduces the core workflow of Chapter 1. It is self-con
 # =============================================================================
 
 # --- Libraries ---
+# !pip install pyfixest                   # uncomment if running in Google Colab
 import pandas as pd                       # data loading and manipulation
 import matplotlib.pyplot as plt           # creating plots and visualizations
 import pyfixest as pf                     # OLS regression (Python port of R's fixest)
-# !pip install pyfixest                   # uncomment if running in Google Colab
 
 # =============================================================================
 # STEP 1: Load data directly from a URL
@@ -605,11 +607,12 @@ for var, label in predictors.items():
 - **Chapters 5-7**: Deep dive into bivariate regression (extending what we learned here)
 
 **You have now mastered:**
- Loading and exploring economic data in Python
- Creating scatter plots to visualize relationships
- Estimating simple linear regression models with OLS
- Interpreting regression coefficients economically
- Understanding the limitations of regression analysis
+
+- Loading and exploring economic data in Python
+- Creating scatter plots to visualize relationships
+- Estimating simple linear regression models with OLS
+- Interpreting regression coefficients economically
+- Understanding the limitations of regression analysis
 
 These foundational concepts are the building blocks for all of econometrics. Everything that follows builds on this introduction!
 
@@ -701,7 +704,7 @@ Now let's apply what you've learned to real economic research! In this section, 
 
 **This Research** ([Mendez, 2020](https://github.com/quarcs-lab/mendez2020-convergence-clubs-code-data)): Uses modern econometric methods to identify convergence clubs in labor productivity across countries. The analysis examines whether countries follow one common development path or multiple distinct paths, and what factors (capital accumulation, technology, institutions) drive these patterns.
 
-**The Data**: Panel dataset tracking multiple countries over several years, with 26 variables including:
+**The Data**: Panel dataset tracking multiple countries over several years, with 27 variables including:
 
 - **Output measures**: GDP, GDP per capita
 - **Productivity**: Labor productivity, total factor productivity (TFP)
@@ -747,6 +750,8 @@ print(f"Years: {df1.index.get_level_values('year').min()} to {df1.index.get_leve
 df1.head(5)
 ```
 
+The second dataset is the data dictionary. The cell below displays it in full — use it to find the exact variable names you will need in the tasks that follow.
+
 ```{python}
 # Variable definitions
 df2
@@ -781,8 +786,8 @@ Run the code above and study the output. What patterns do you notice? How many t
 # 3. Examine a specific country's data
 # 4. Count observations per country
 
-# Example: Examine USA's data
-# df1.loc['USA']
+# Example: Examine the United States' data (the index uses full country names)
+# df1.loc['United States']
 ```
 
 #### Task 2: Descriptive Statistics (Semi-guided)
@@ -882,13 +887,13 @@ Run the code above and study the output. What patterns do you notice? How many t
 # Your code here: Time series plots
 #
 # Steps:
-# 1. Select countries (e.g., countries = ['USA', 'CHN', 'JPN'])
+# 1. Select countries (e.g., countries = ['United States', 'China', 'Japan'])
 # 2. For each country, extract time series data
 # 3. Create line plot over time
 # 4. Compare trajectories
 
 # Example structure:
-# countries = ['USA', 'CHN', 'IND']  # Adjust based on actual country codes
+# countries = ['United States', 'China', 'India']  # index uses full country names, not ISO codes
 # fig, ax = plt.subplots(figsize=(10, 6))
 #
 # for country in countries:
@@ -941,7 +946,7 @@ Run the code above and study the output. What patterns do you notice? How many t
 #
 # Interpretation:
 # Slope = ___: For every unit increase in capital per worker,
-#               labor productivity increases by ___ units
+#               labor productivity is ___ units higher (association, not causation)
 # R² = ___: Capital explains ___% of variation in productivity
 ```
 
@@ -1069,6 +1074,8 @@ bol_key = bol[key_vars].copy()
 # First 10 municipalities
 bol_key.head(10)
 ```
+
+Before starting the tasks, run the cell below to print a one-line description of each selected variable. Refer back to this list whenever a variable name is unclear.
 
 ```{python}
 # Key variable descriptions
