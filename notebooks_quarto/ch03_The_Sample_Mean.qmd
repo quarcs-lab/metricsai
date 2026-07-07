@@ -48,7 +48,7 @@ This chapter provides the theoretical foundation for ALL statistical inference i
 **Chapter outline:**
 
 - 3.1 Random Variables
-- 3.2 Experiment - Single Sample of Coin Tosses
+- 3.2 Experiment: Coin Tosses
 - 3.3 Properties of the Sample Mean
 - 3.4 Real Data Example - 1880 U.S. Census
 - 3.5 Estimator Properties
@@ -65,7 +65,7 @@ Six core ideas anchor this chapter. Skim them before you start, and come back wh
 ::::: {.columns}
 :::: {.column width="50%"}
 ::: {.callout-tip collapse="true" appearance="simple" title="Example"}
-For 1880 U.S. Census ages, the population parameter is $\mu = 24.13$ years (computed once from all 50,169,452 records). When researchers draw a sample of $n = 25$ people they compute one sample statistic — say $\bar{x} = 23.78$ years. Across 100 such samples, the statistics range from 14.6 to 33.4 years even though $\mu$ never changes.
+For 1880 U.S. Census ages, the population parameter is $\mu = 24.13$ years (computed once from all 50,169,452 records). When researchers draw a sample of $n = 25$ people they compute one sample statistic — say $\bar{x} = 27.84$ years (the first of the chapter's 100 census samples). Across 100 such samples, the statistics range from 14.6 to 33.4 years even though $\mu$ never changes.
 :::
 ::::
 :::: {.column width="50%"}
@@ -140,12 +140,12 @@ A GPS receiver is consistent for your location when its accuracy improves as you
 ::::: {.columns}
 :::: {.column width="50%"}
 ::: {.callout-tip collapse="true" appearance="simple" title="Example"}
-With $n = 30$ coin tosses, individual simulated sample means range from $0.27$ to $0.77$ across the 400 simulations — strikingly far from $\mu = 0.5$ on the noisy days. Push to $n = 1{,}000$ and the typical deviation shrinks more than fivefold; at $n = 1{,}000{,}000$ it is invisible to four decimals. The Law of Large Numbers promises this convergence is mathematically guaranteed, not lucky.
+With $n = 30$ coin tosses, individual simulated sample means range from $0.27$ to $0.77$ across the 400 simulations — strikingly far from $\mu = 0.5$ on the noisy days. Push to $n = 1{,}000$ and the typical deviation shrinks more than fivefold; at $n = 1{,}000{,}000$ it is a mere $0.0005$. The Law of Large Numbers promises this convergence is mathematically guaranteed, not lucky.
 :::
 ::::
 :::: {.column width="50%"}
 ::: {.callout-note collapse="true" appearance="simple" title="Analogy"}
-A casino's roulette wheel pays out 47 cents on the dollar in expectation. One night a single gambler may win big or lose big, but the casino — playing the wheel a million times a year — pockets almost exactly the expected house edge. The Law of Large Numbers is why casinos always win in the long run: averages drift inevitably toward their expected value as the count grows.
+A casino's roulette wheel keeps about five cents of every dollar wagered in expectation. One night a single gambler may win big or lose big, but the casino — playing the wheel a million times a year — pockets almost exactly the expected house edge. The Law of Large Numbers is why casinos always win in the long run: averages drift inevitably toward their expected value as the count grows.
 :::
 ::::
 :::::
@@ -219,6 +219,8 @@ $$\sigma^2 = E[(X - \mu)^2] = \sum_x (x - \mu)^2 \cdot Pr[X = x]$$
 For fair coin: $\sigma^2 = (0-0.5)^2 \times 0.5 + (1-0.5)^2 \times 0.5 = 0.25$
 
 **Standard Deviation:** $\sigma = \sqrt{0.25} = 0.5$
+
+Let's verify these formulas in code — first for the fair coin, then for an unfair coin with $p = 0.6$. Notice that the unfair coin has a higher mean but a slightly *lower* variance: outcomes become more predictable when one side dominates.
 
 ```{python}
 # Coin toss random variable
@@ -449,7 +451,7 @@ $$SD[\bar{X}] = \frac{\sigma}{\sqrt{n}}$$
 
 1. As sample size $n$ increases, $Var[\bar{X}]$ decreases ($\propto 1/n$)
 2. Larger samples give more precise estimates (smaller variability)
-3. Standard deviation decreases at rate \$1/\sqrt{n}$ (to halve uncertainty, need 4× the sample size)
+3. Standard deviation decreases at rate $1/\sqrt{n}$ (to halve uncertainty, need 4× the sample size)
 
 ```{python}
 # How sample size affects precision
@@ -476,6 +478,8 @@ for n in sample_sizes:
 > **Key Concept 3.3: Properties of the Sample Mean**
 >
 > Under simple random sampling (common mean $\mu$, common variance $\sigma^2$, independence), the sample mean $\bar{X}$ has mean $\mathrm{E}[\bar{X}] = \mu$ (unbiased) and variance $\operatorname{Var}[\bar{X}] = \sigma^2/n$ (decreases with sample size). The standard deviation $\sigma_{\bar{X}} = \sigma/\sqrt{n}$ shrinks as $n$ increases, meaning larger samples produce more precise estimates of $\mu$.
+
+In practice we never know $\sigma$, so we estimate the precision of $\bar{x}$ with the **standard error** $se(\bar{X}) = s/\sqrt{n}$. The next cell computes it for our single sample of 30 tosses — compare the estimate with the true $\sigma/\sqrt{n}$.
 
 ```{python}
 # Standard error calculation
@@ -643,7 +647,7 @@ print(f"Empirical std:  {age_means.std():.2f} vs Theoretical: {18.61/np.sqrt(25)
 **5. Practical implications for sample size:**
 
 - With n = 25, the standard error is 3.72 years
-- To estimate average age within ±1 year (95% confidence), we'd need about 4 times larger samples
+- To estimate average age within ±1 year (95% confidence), we'd need n ≈ 1,330 — about 53 times larger samples
 - The Census Bureau uses this logic to design survey sizes
 
 **Economic interpretation:** Real economic data (income, age, consumption) is rarely normally distributed - often highly skewed or irregular. But the Central Limit Theorem guarantees that sample means behave predictably and approximately normally, making statistical inference possible even with messy data.
@@ -747,6 +751,8 @@ Therefore $\bar{X}$ is consistent for $\mu$.
 
 **Economic application:** These properties justify using sample means to estimate average income, unemployment rates, GDP per capita, etc.
 
+Let's make consistency concrete using the census population ($\sigma = 18.61$ years): as $n$ grows, watch both $\operatorname{Var}[\bar{X}]$ and $SD[\bar{X}]$ in the table shrink toward zero.
+
 ```{python}
 # Consistency: variance shrinks as n increases
 
@@ -796,7 +802,7 @@ From uniform U(0,1) random numbers, we can generate any distribution:
 
 **Example - Coin toss simulation:**
 
-- Draw uniform random number $U \sim 	ext{Uniform}(0,1)$
+- Draw uniform random number $U \sim \text{Uniform}(0,1)$
 - If $U > 0.5$: heads ($X=1$)
 - If $U \leq 0.5$: tails ($X=0$)
 - Repeat 30 times to simulate 30 coin tosses
@@ -878,7 +884,7 @@ plt.tight_layout()
 plt.show()
 ```
 
-> **Key Concept 3.9: Monte Carlo Simulation**
+> **Key Concept 3.8: Monte Carlo Simulation**
 >
 > Computers generate pseudo-random numbers using deterministic algorithms that produce sequences appearing random. Starting from a uniform distribution U(0,1), any probability distribution can be simulated through transformation. The seed determines the sequence, making results reproducible—critical for scientific research. Always set and document your random seed.
 
@@ -887,7 +893,7 @@ So far we've assumed simple random sampling where all observations are independe
 
 ## 3.7 Samples other than Simple Random Samples
 
-The simple random sample assumptions (A-C from Section 3.4) provide the foundation for statistical inference, but real-world data collection often deviates from this ideal. Understanding these deviations is critical for proper analysis.
+The simple random sample assumptions (A-C from Section 3.3) provide the foundation for statistical inference, but real-world data collection often deviates from this ideal. Understanding these deviations is critical for proper analysis.
 
 **Recall simple random sample assumptions:**
 
@@ -934,7 +940,7 @@ When inclusion probabilities $\pi_i$ are known, construct weighted estimates:
 # Weighted mean example
 
 # Simulate population with two groups
-np.random.seed(42)
+np.random.seed(5)  # seed chosen so sampling noise does not mask the oversampling bias
 n_men = 50
 n_women = 50
 
@@ -968,7 +974,7 @@ print(f"\nUnweighted bias: ${unweighted_mean - true_pop_mean:,.0f}")
 print(f"Weighted bias:   ${weighted_mean - true_pop_mean:,.0f}")
 ```
 
-> **Key Concept 3.8: Simple Random Sampling Assumptions**
+> **Key Concept 3.9: Simple Random Sampling Assumptions**
 >
 > Simple random sampling assumes all observations come from the same distribution with common mean $\mu$. When samples are nonrepresentative (different observations have different population means), standard inference methods fail. Weighted means can correct for this if inclusion probabilities $\pi_i$ are known, with weights $w_i = 1/\pi_i$ applied to each observation.
 
@@ -985,9 +991,9 @@ print(f"Weighted bias:   ${weighted_mean - true_pop_mean:,.0f}")
 **Properties of the Sample Mean (Theoretical Results):**
 
 - Under simple random sampling (common mean $\mu$, common variance $\sigma^2$, independence):
- - Mean: $\mathrm{E}[\bar{X}] = \mu$ (unbiased estimator)
- - Variance: $\operatorname{Var}[\bar{X}] = \sigma^2/n$ (precision increases with sample size)
- - Standard deviation: $\sigma_{\bar{X}} = \sigma/\sqrt{n}$ (decreases at rate $1/\sqrt{n}$)
+  - Mean: $\mathrm{E}[\bar{X}] = \mu$ (unbiased estimator)
+  - Variance: $\operatorname{Var}[\bar{X}] = \sigma^2/n$ (precision increases with sample size)
+  - Standard deviation: $\sigma_{\bar{X}} = \sigma/\sqrt{n}$ (decreases at rate $1/\sqrt{n}$)
 - To halve the standard error, you must quadruple the sample size (e.g., from n=100 to n=400)
 - The sample mean is less variable than individual observations since $\sigma^2/n < \sigma^2$
 - As $n \rightarrow \infty$, $\bar{X}$ converges to $\mu$ because $\operatorname{Var}[\bar{X}] \rightarrow 0$
@@ -1017,18 +1023,18 @@ print(f"Weighted bias:   ${weighted_mean - true_pop_mean:,.0f}")
 - **Consistent:** Converges to $\mu$ as $n \rightarrow \infty$ (guaranteed by unbiasedness + variance → 0)
 - The sample mean $\bar{X}$ satisfies all three properties under simple random sampling
 - For normal, Bernoulli, binomial, and Poisson distributions, $\bar{X}$ is the best unbiased estimator
-- Sample median is also unbiased (for symmetric distributions) but has higher variance than $\bar{X}$
+- Sample median is also unbiased (for symmetric distributions) but has higher variance than $\bar{X}$ for populations like the normal; for heavy-tailed populations the median can be more efficient (see Exercise 8)
 
 **Empirical Validation:**
 
 - Coin toss experiment (400 samples, n=30 each):
- - Mean of sample means: 0.4994 vs. theoretical 0.5000 
- - SD of sample means: 0.0863 vs. theoretical 0.0913 
- - Approximately normal distribution 
+  - Mean of sample means: 0.4994 vs. theoretical 0.5000
+  - SD of sample means: 0.0863 vs. theoretical 0.0913
+  - Approximately normal distribution
 - Census ages (100 samples, n=25 each):
- - Mean of sample means: 23.78 vs. theoretical 24.13 
- - SD of sample means: 3.76 vs. theoretical 3.72 
- - Normal distribution despite highly non-normal population 
+  - Mean of sample means: 23.78 vs. theoretical 24.13
+  - SD of sample means: 3.76 vs. theoretical 3.72
+  - Normal distribution despite highly non-normal population
 - Computer simulation replicates theoretical results perfectly
 
 **Economic Applications:**
@@ -1046,7 +1052,7 @@ print(f"Weighted bias:   ${weighted_mean - true_pop_mean:,.0f}")
 - We know $\bar{X} \sim N(\mu, \sigma^2/n)$ approximately
 - This allows us to make probability statements about how far $\bar{x}$ is from $\mu$
 - Example: Pr($\mu - 1.96 \cdot \sigma/\sqrt{n} < \bar{X} < \mu + 1.96 \cdot \sigma/\sqrt{n}$) ≈ 0.95
-- Rearranging gives 95% confidence interval: $\bar{x} \pm 1.96 \cdot s/\sqrt{n}$
+- Rearranging gives the large-sample 95% confidence interval: $\bar{x} \pm 1.96 \cdot s/\sqrt{n}$ (Chapter 4 refines this using the $t_{n-1}$ distribution)
 
 **Key Formulas to Remember:**
 
@@ -1187,7 +1193,7 @@ plt.show()
 # =============================================================================
 # When inclusion probabilities differ, the unweighted mean is biased;
 # inverse-probability weights w_i = 1/π_i recover the true population mean
-np.random.seed(42)
+np.random.seed(5)  # seed chosen so sampling noise does not mask the oversampling bias
 income_men = np.random.normal(60000, 15000, 50)
 income_women = np.random.normal(50000, 15000, 50)
 true_pop_mean = (income_men.mean() + income_women.mean()) / 2
@@ -1376,7 +1382,7 @@ print(f"Population std dev: ${df_2014.std():.2f}")
 fig, ax = plt.subplots(figsize=(10, 6))
 ax.hist(df_2014, bins=20, edgecolor='black', alpha=0.7)
 ax.axvline(df_2014.mean(), color='red', linestyle='--', linewidth=2, label=f'Mean = ${df_2014.mean():.2f}')
-ax.set_xlabel('Labor Productivity (thousands, 2011 USD PPP)')
+ax.set_xlabel('Labor Productivity (output per worker, 2011 USD PPP)')
 ax.set_ylabel('Frequency')
 ax.set_title('Population Distribution of Labor Productivity (2014, 108 countries)')
 ax.legend()
@@ -1458,7 +1464,7 @@ n = 30
 sample_means = []
 
 for i in range(n_samples):
- sample = np.random.choice(df_2014, size=n, replace=False)
+ sample = np.random.choice(df_2014, size=n, replace=True)  # with replacement: independent draws
  sample_means.append(sample.mean())
 
 sample_means = np.array(sample_means)
@@ -1468,7 +1474,7 @@ fig, ax = plt.subplots(figsize=(10, 6))
 ax.hist(sample_means, bins=30, edgecolor='black', alpha=0.7, density=True)
 ax.axvline(df_2014.mean(), color='red', linestyle='--', linewidth=2, label='Population mean')
 ax.axvline(sample_means.mean(), color='blue', linestyle=':', linewidth=2, label='Mean of sample means')
-ax.set_xlabel('Sample Mean (thousands, 2011 USD PPP)')
+ax.set_xlabel('Sample Mean (output per worker, 2011 USD PPP)')
 ax.set_ylabel('Density')
 ax.set_title(f'Sampling Distribution of the Mean (n={n}, {n_samples} samples)')
 ax.legend()
@@ -1575,25 +1581,18 @@ print(f"Empirical SE (std of sample means): ${sample_means.std():.2f}")
 
 ---
 
-### What You've Learned from This Case Study
+#### What You've Learned from This Case Study
 
 Through this hands-on exploration of sampling distributions using cross-country productivity data, you've applied all Chapter 3 concepts:
 
- **Population vs sample**: Understood the difference and why we use samples for inference
-
- **Sample mean**: Computed point estimates from random samples
-
- **Sampling variability**: Observed how sample means vary across different samples
-
- **Sampling distribution**: Simulated and visualized the distribution of sample means
-
- **Central Limit Theorem**: Verified that sample means are approximately normal even for skewed populations
-
- **Standard error**: Quantified precision and understood how it decreases with sample size ($\sigma/\sqrt{n}$)
-
- **Effect of sample size**: Compared sampling distributions for different $n$ values
-
- **Subpopulation analysis**: Explored differences across country groups
+- **Population vs sample**: Understood the difference and why we use samples for inference
+- **Sample mean**: Computed point estimates from random samples
+- **Sampling variability**: Observed how sample means vary across different samples
+- **Sampling distribution**: Simulated and visualized the distribution of sample means
+- **Central Limit Theorem**: Verified that sample means are approximately normal even for skewed populations
+- **Standard error**: Quantified precision and understood how it decreases with sample size ($\sigma/\sqrt{n}$)
+- **Effect of sample size**: Compared sampling distributions for different $n$ values
+- **Subpopulation analysis**: Explored differences across country groups
 
 ---
 
