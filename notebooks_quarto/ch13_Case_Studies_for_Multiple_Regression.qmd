@@ -45,13 +45,13 @@ This chapter presents **nine comprehensive case studies** that apply multiple re
 **Datasets used:**
 
 - **AED_API99.DTA**: 807 California high schools, Academic Performance Index (1999) — Case Study 13.1
-- **AED_CobbDouglas.DTA**: 24 years of U.S. manufacturing data (1899–1922) — Case Study 13.2
-- **AED_PhillipsCurve.DTA**: 66 years of U.S. macroeconomic data (1949–2014) — Case Study 13.3
-- **AED_AutoEfficiency.DTA**: 26,995 vehicles, fuel efficiency data (1980–2006) — Case Study 13.4
-- **AED_RandHealthInsurance.DTA**: RAND health insurance experiment (RCT) — Case Study 13.5
-- **AED_SouthAfricaHealth.DTA**: South Africa cross-sectional health data (DiD) — Case Study 13.6
-- **AED_SenateIncumbency.DTA**: U.S. Senate election results (RD) — Case Study 13.7
-- **AED_InstitutionsGDP.DTA**: Cross-country institutions and GDP data (IV) — Case Study 13.8
+- **AED_COBBDOUGLAS.DTA**: 24 years of U.S. manufacturing data (1899–1922) — Case Study 13.2
+- **AED_PHILLIPS.DTA**: 66 years of U.S. macroeconomic data (1949–2014) — Case Study 13.3
+- **AED_AUTOSMPG.DTA**: 26,995 vehicles, fuel efficiency data (1980–2006) — Case Study 13.4
+- **AED_HEALTHINSEXP.DTA**: RAND health insurance experiment (RCT) — Case Study 13.5
+- **AED_HEALTHACCESS.DTA**: South Africa cross-sectional health data (DiD) — Case Study 13.6
+- **AED_INCUMBENCY.DTA**: U.S. Senate election results (RD) — Case Study 13.7
+- **AED_INSTITUTIONS.DTA**: Cross-country institutions and GDP data (IV) — Case Study 13.8
 
 **Chapter outline:**
 
@@ -77,7 +77,7 @@ Five core ideas anchor this chapter. Skim them before you start, and come back w
 ::::: {.columns}
 :::: {.column width="50%"}
 ::: {.callout-tip collapse="true" appearance="simple" title="Example"}
-For 24 years of U.S. manufacturing data (`data_cobb`, 1899–1922), the chapter fits $\ln Q = \beta_1 + \beta_2 \ln K + \beta_3 \ln L$ and estimates $\hat\beta_2 \approx 0.23$ (capital elasticity) and $\hat\beta_3 \approx 0.81$ (labor elasticity). The two elasticities tell you exactly how much each input contributes — labor here was nearly four times as important as capital in turning early-century factories' inputs into output.
+For 24 years of U.S. manufacturing data (`data_cobb`, 1899–1922), the chapter fits $\ln Q = \beta_1 + \beta_2 \ln K + \beta_3 \ln L$ and estimates $\hat\beta_2 \approx 0.23$ (capital elasticity) and $\hat\beta_3 \approx 0.81$ (labor elasticity). The two elasticities tell you exactly how much each input contributes — labor here was about three and a half times as important as capital in turning early-century factories' inputs into output.
 :::
 ::::
 :::: {.column width="50%"}
@@ -92,7 +92,7 @@ A bakery's recipe says: a loaf needs flour, water, and time, in fixed proportion
 ::::: {.columns}
 :::: {.column width="50%"}
 ::: {.callout-tip collapse="true" appearance="simple" title="Example"}
-For the Cobb–Douglas fit on `data_cobb`, the sum of input elasticities is $\hat\beta_2 + \hat\beta_3 \approx 0.23 + 0.81 = 1.04$ — close to 1. The chapter's $F$-test of $H_0: \beta_2 + \beta_3 = 1$ yields $p \approx 0.636$, so the data are consistent with constant returns: doubling capital and labor would, on average, double output across early-century U.S. manufacturing.
+For the Cobb–Douglas fit on `data_cobb`, the sum of input elasticities is $\hat\beta_2 + \hat\beta_3 \approx 0.23 + 0.81 = 1.04$ — close to 1. The chapter's $F$-test of $H_0: \beta_2 + \beta_3 = 1$ yields $p \approx 0.663$, so the data are consistent with constant returns: doubling capital and labor would, on average, double output across early-century U.S. manufacturing.
 :::
 ::::
 :::: {.column width="50%"}
@@ -198,19 +198,19 @@ print(f"Variables: {list(data_api.columns)}")
 data_api.head()
 ```
 
-### **About the Dataset**
+### About the Dataset
 
 This dataset contains information on **807 California high schools** from 1999. The Academic Performance Index (API) is a score from 200-1000 that measures school performance based on standardized test results.
 
 **Key Variables:**
 
 - `api99`: Academic Performance Index (outcome variable)
-- `edparent`: Average parental education level (1-5 scale)
-- `mealpct`: Percent of students eligible for free/reduced meals (poverty proxy)
-- `elpct`: Percent of English language learners
-- `yrs_teach`: Average teacher experience in years
-- `totcredpc`: Per-pupil total credentials
-- `emrpct`: Percent of emergency credential teachers
+- `edparent`: Average parental education level (average years of schooling, roughly 9.6–16 in this sample)
+- `meals`: Percent of students eligible for free/reduced meals (poverty proxy)
+- `englearn`: Percent of English language learners
+- `yearround`: Indicator for year-round school calendar
+- `credteach`: Percent of fully credentialed teachers
+- `emerteach`: Percent of teachers with emergency credentials
 
 **Economic Question:** What factors determine school performance? Is it resources (teachers, funding) or student demographics (poverty, language, parental education)?
 
@@ -282,7 +282,7 @@ plt.show()
 # Correlation matrix
 corr_matrix = data_api[vars_api].corr()
 # Correlation Matrix
-corr_matrix.round(2)
+print(corr_matrix.round(2))
 
 # Heatmap
 plt.figure(figsize=(10, 8))
@@ -293,31 +293,31 @@ plt.tight_layout()
 plt.show()
 ```
 
-### **What the Correlation Matrix Reveals**
+### What the Correlation Matrix Reveals
 
 The correlation matrix shows the **linear relationships** between all variables:
 
 **Strong negative correlations** (darker blues):
 
-- `api99` and `mealpct` (-0.90): Schools with more poverty have much lower test scores
-- `api99` and `elpct` (-0.76): More English learners → lower scores
+- `api99` and `meals` (-0.54): Schools with more poverty have lower test scores
+- `api99` and `englearn` (-0.66): More English learners → lower scores
 - These suggest **socioeconomic factors strongly predict performance**
 
 **Positive correlations** (reds):
 
-- `api99` and `edparent` (0.76): Parental education strongly predicts scores
-- Teacher experience and credentials show weaker correlations
+- `api99` and `edparent` (0.91): Parental education strongly predicts scores
+- Teacher credential variables show weaker correlations (`credteach` 0.46, `emerteach` -0.45)
 
 **Multicollinearity concerns:**
 
-- `mealpct` and `edparent` are highly correlated (-0.79)
+- `meals` and `edparent` are substantially correlated (-0.60)
 - This makes it difficult to separate their individual effects
 - Standard errors may be inflated in multiple regression
 
 ```{python}
 # Multiple regression
 fit_api_mult = pf.feols('api99 ~ edparent + meals + englearn + yearround + credteach + emerteach',
-                         data=data_api)
+                         data=data_api, vcov='HC1')
 # Multiple Regression
 fit_api_mult.summary()
 
@@ -339,15 +339,15 @@ print("\n", coef_df)
 
 Estimating returns to scale using log transformations.
 
-### **The Cobb-Douglas Production Function**
+### The Cobb-Douglas Production Function
 
 The **Cobb-Douglas production function** is one of the most famous models in economics. It describes how inputs (capital K and labor L) combine to produce output Q:
 
-$$Q = \alpha K^{\beta_2} L^{\beta_3}$$
+$$Q = A K^{\beta_2} L^{\beta_3}$$
 
 **Parameters:**
 
-- $\alpha$: Total factor productivity (technology level)
+- $A$: Total factor productivity (technology level)
 - $\beta_2$: Output elasticity of capital (% change in Q from 1% change in K)
 - $\beta_3$: Output elasticity of labor (% change in Q from 1% change in L)
 
@@ -363,7 +363,7 @@ Taking natural logs of both sides converts the **multiplicative model** into a *
 
 $$\ln(Q) = \beta_1 + \beta_2 \ln(K) + \beta_3 \ln(L) + u$$
 
-where $\beta_1 = \ln(\alpha)$. Now we can use **ordinary least squares (OLS)** regression!
+where $\beta_1 = \ln(A)$. Now we can use **ordinary least squares (OLS)** regression!
 
 **Dataset:** Douglas (1976) used U.S. manufacturing data from **1899-1922** (24 years) to estimate this function.
 
@@ -410,7 +410,7 @@ fit_cobb.summary()
 >
 > Taking natural logarithms of the Cobb-Douglas production function $Q = AK^\alpha L^\beta$ transforms it into the linear model $\ln Q = \ln A + \alpha \ln K + \beta \ln L$, suitable for OLS estimation. The resulting coefficients are **elasticities** — directly interpretable as percentage changes.
 
-### **Understanding the Results**
+### Understanding the Results
 
 **Estimated Coefficients:**
 
@@ -473,11 +473,13 @@ print(f"Conclusion: {'Reject' if p_value < 0.05 else 'Fail to reject'} H0 at 5% 
 
 > **Key Concept 13.3: Testing Constant Returns to Scale**
 >
-> Constant returns to scale implies $\alpha + \beta = 1$: doubling all inputs exactly doubles output. The estimated sum of 1.040 is not significantly different from 1 (F-test p = 0.636), consistent with the theoretical prediction for competitive markets. This is a **joint hypothesis test** on the coefficients.
+> Constant returns to scale implies $\alpha + \beta = 1$: doubling all inputs exactly doubles output. The estimated sum of 1.040 is not significantly different from 1 (F-test p = 0.663), consistent with the theoretical prediction for competitive markets. This is a **joint hypothesis test** on the coefficients.
+
+Because the model is estimated in logs, converting fitted values back to output levels requires a retransformation (bias) correction of $e^{\hat\sigma^2/2}$. The plot below overlays these corrected predictions on the actual output series.
 
 ```{python}
 # Predicted output with bias correction
-se = np.sqrt(np.mean(fit_cobb._u_hat**2))
+se = np.sqrt(np.sum(fit_cobb._u_hat**2) / (fit_cobb._N - len(fit_cobb.coef())))
 bias_correction = np.exp(se**2 / 2)
 data_cobb['q_pred'] = bias_correction * np.exp(fit_cobb.predict())
 
@@ -495,11 +497,17 @@ plt.grid(True, alpha=0.3)
 plt.show()
 ```
 
+**What to look for in this plot:**
+
+- **Tracking**: The dashed predicted series follows the actual output closely across all 24 years -- consistent with the model's high $R^2$ (0.957)
+- **Bias correction**: Fitted values are scaled by $e^{\hat\sigma^2/2}$ before comparison, the standard retransformation when the dependent variable is in logs
+- **Fit over time**: Deviations are small and show no systematic trend, suggesting the log-linear Cobb-Douglas form captures the growth path well
+
 ## 13.3 Phillips Curve and Omitted Variables Bias
 
 Demonstrating omitted variables bias through the breakdown of the Phillips curve.
 
-### **The Phillips Curve and Its Breakdown**
+### The Phillips Curve and Its Breakdown
 
 The **Phillips Curve** describes a **negative relationship** between unemployment and inflation:
 
@@ -544,14 +552,14 @@ fit_pre = pf.feols('inflgdp ~ urate', data=data_pre1970,
 fit_pre.summary()
 ```
 
-### **Pre-1970: Phillips Curve Works!**
+### Pre-1970: Phillips Curve Works!
 
 **Results:**
 
-- Coefficient on unemployment ≈ **-0.89**
+- Coefficient on unemployment ≈ **-1.03**
 - **Negative** relationship (as theory predicts!)
 - Statistically significant
-- 1% increase in unemployment → 0.89% decrease in inflation
+- 1% increase in unemployment → 1.03% decrease in inflation
 
 The scatter plot shows a clear downward slope. This is the classic Phillips curve that policymakers relied on in the 1950s-60s.
 
@@ -593,7 +601,7 @@ fit_post.summary()
 >
 > Pre-1970, higher unemployment was associated with lower inflation (the classic Phillips curve trade-off). Post-1970, this relationship **reversed** — suggesting the simple bivariate model was misspecified. The breakdown motivated the **expectations-augmented Phillips curve**, which includes expected inflation as a regressor.
 
-### **Post-1970: Phillips Curve Breaks Down!**
+### Post-1970: Phillips Curve Breaks Down!
 
 **Results:**
 
@@ -632,6 +640,8 @@ plt.show()
 - **Direction**: Positive slope -- the relationship has **reversed** compared to pre-1970
 - **Scatter**: Much wider dispersion around the line, reflecting the turbulent 1970s-80s
 - **Implication**: The simple bivariate Phillips curve is misspecified post-1970 (omitted variables bias)
+
+We now add expected inflation (`inflgdp1yr`) to the post-1970 regression. Watch the coefficient on `urate`: if the breakdown was caused by omitting expectations, controlling for them should restore the negative Phillips-curve slope.
 
 ```{python}
 # Augmented Phillips curve (adding expected inflation)
@@ -683,7 +693,7 @@ print("\n✓ Omitted variables bias explains the sign reversal!")
 >
 > When a relevant variable (expected inflation) is omitted from the regression, its effect gets absorbed into the included variable's coefficient. The **OVB formula** shows that the bias equals the omitted variable's coefficient times its correlation with the included regressor. In the Phillips curve, this bias reversed the sign of the unemployment coefficient.
 
-### **Understanding Omitted Variables Bias**
+### Understanding Omitted Variables Bias
 
 The **omitted variables bias formula** tells us how the coefficient in the bivariate (wrong) model relates to the true coefficients:
 
@@ -698,12 +708,12 @@ where:
 
 **What we found:**
 
-- $\beta_2 \approx -1.15$ (true negative effect of unemployment)
+- $\beta_2 \approx -0.13$ (true negative effect of unemployment)
 - $\beta_3 \approx +1.15$ (expected inflation has 1-to-1 effect on actual inflation)
 - $\gamma \approx +0.34$ (when unemployment rises, expected inflation also rises in 1970s!)
 
 **Predicted bias:**
-$$E[b_2] = -1.15 + 1.15 \times 0.34 \approx +0.26$$
+$$E[b_2] = -0.13 + 1.15 \times 0.34 \approx +0.26$$
 
 **Actual $b_2$ from bivariate model:** +0.27
 
@@ -727,7 +737,7 @@ The Phillips curve didn't "disappear" - it was always conditional on expected in
 
 Large dataset analysis with cluster-robust standard errors.
 
-### **Case Study: Automobile Fuel Efficiency (1980-2006)**
+### Case Study: Automobile Fuel Efficiency (1980-2006)
 
 **The Policy Question**: What determines vehicle fuel efficiency, and why didn't MPG improve more despite technological advances?
 
@@ -785,7 +795,7 @@ data_auto[['year', 'mfr', 'mpg', 'curbwt', 'hp', 'torque']].head()
 # Summary statistics
 key_vars = ['mpg', 'curbwt', 'hp', 'torque', 'year']
 # Summary Statistics
-data_auto[key_vars].describe()
+print(data_auto[key_vars].describe())
 
 # Manufacturer distribution
 # TOP 10 MANUFACTURERS BY OBSERVATIONS
@@ -845,7 +855,7 @@ print(f"due to common technology, design philosophy, and engineering teams.")
 >
 > When observations are grouped (e.g., vehicles by manufacturer), errors within groups may be correlated. **Cluster-robust standard errors** account for this within-group correlation. Using default SEs when clustering exists **understates uncertainty**, leading to false rejections of the null hypothesis.
 
-### **Interpreting the Results**
+### Interpreting the Results
 
 **Key Findings:**
 
@@ -854,8 +864,8 @@ print(f"due to common technology, design philosophy, and engineering teams.")
  - **Largest effect** among all variables
  - Heavier vehicles are substantially less efficient
 
-2. **Horsepower Elasticity**: ≈ -0.30 to -0.35
- - 1% increase in HP → ~0.3% decrease in MPG
+2. **Horsepower Elasticity**: ≈ -0.18
+ - 1% increase in HP → ~0.18% decrease in MPG
  - More powerful engines burn more fuel
 
 3. **Torque Elasticity**: ≈ -0.10 to -0.15
@@ -882,8 +892,8 @@ We cluster by manufacturer because:
 - Toyota vehicles share design philosophy
 - Errors within manufacturer are **correlated**
 
-**Number of clusters**: 40+ manufacturers
-**Average per cluster**: ~600 vehicles
+**Number of clusters**: 39 manufacturers
+**Average per cluster**: ~690 vehicles
 
 Clustering increases SEs → more conservative inference
 
@@ -905,7 +915,7 @@ Clustering increases SEs → more conservative inference
 
 **Model Quality:**
 
-R² ≈ 0.78 means the model explains 78% of MPG variation
+R² ≈ 0.78 means the model explains 78% of the variation in log MPG
 
 - Excellent fit!
 - Weight, HP, torque are key predictors
@@ -915,7 +925,7 @@ R² ≈ 0.78 means the model explains 78% of MPG variation
 
 Randomized control trial for causal inference.
 
-### **Case Study: The RAND Health Insurance Experiment (Randomized Control Trial)**
+### Case Study: The RAND Health Insurance Experiment (Randomized Control Trial)
 
 **The Gold Standard for Causal Inference**: Randomized Control Trials (RCTs)
 
@@ -956,7 +966,7 @@ Because assignment is random:
 
 - Treatment and control groups are identical in expectation
 - No confounding variables
-- Any difference in outcomes is caused by insurance
+- Any systematic difference in outcomes is caused by insurance
 - **Selection bias eliminated!**
 
 **Data**: Year 1 data (5,639 observations)
@@ -1023,7 +1033,7 @@ print("✓ Higher cost-sharing → lower spending")
 >
 > In a **randomized control trial (RCT)**, subjects are randomly assigned to treatment and control groups. Random assignment ensures the groups are comparable on both observed and unobserved characteristics, eliminating selection bias and omitted variable concerns. The RAND experiment showed that better insurance coverage increases healthcare utilization.
 
-### **Interpreting the RCT Results**
+### Interpreting the RCT Results
 
 **Key Findings:**
 
@@ -1100,7 +1110,7 @@ The fundamental trade-off remains:
 
 Causal inference using DiD methodology.
 
-### **Case Study: Health Care Access and Child Nutrition (Difference-in-Differences)**
+### Case Study: Health Care Access and Child Nutrition (Difference-in-Differences)
 
 **The Policy Question**: Does building health clinics improve child health outcomes?
 
@@ -1198,13 +1208,13 @@ print(f"\nCluster-robust SEs by community account for within-community correlati
 >
 > **Difference-in-differences (DiD)** compares changes over time between treatment and control groups. The key assumption is **parallel trends**: both groups would have followed the same trajectory absent treatment. DiD removes time-invariant confounders and common time effects, isolating the treatment effect.
 
-### **Interpreting the DiD Results**
+### Interpreting the DiD Results
 
 **Key Findings:**
 
 1. **Treatment Effect**: DiD coefficient ≈ 0.52 standard deviations
  - Clinic access improved child weight-for-age by 0.52 SD
- - **Statistically significant** (p = 0.027 < 0.05)
+ - **Statistically significant** (p = 0.031 < 0.05)
  - Large and meaningful effect size
 
 2. **Verification**: Manual calculation matches regression
@@ -1259,7 +1269,7 @@ These results from rural South Africa likely generalize to other:
 
 Causal inference using RD design.
 
-### **Case Study: The Incumbency Advantage in U.S. Senate Elections**
+### Case Study: The Incumbency Advantage in U.S. Senate Elections
 
 **The Question**: Does being an incumbent senator give you an advantage in the next election?
 
@@ -1324,7 +1334,7 @@ print(f"  - Outcome: vote (vote share in election t+1)")
 print(f"  - win: Indicator for margin > 0")
 
 # Summary statistics
-data_incumb[['vote', 'margin', 'win']].describe()
+print(data_incumb[['vote', 'margin', 'win']].describe())
 
 # Keep only elections with non-missing vote in t+1
 data_rd = data_incumb[data_incumb['vote'].notna()].copy()
@@ -1349,16 +1359,16 @@ print(f"Candidates just above/below threshold are similar in all respects except
 # Visualization note
 # RD PLOT
 print("To visualize discontinuity:")
-# - Bin observations by margin
-# - Plot mean vote in next election vs margin
-# - Should see jump at margin=0
+print(" - Bin observations by margin")
+print(" - Plot mean vote in next election vs margin")
+print(" - Should see jump at margin=0")
 ```
 
 > **Key Concept 13.9: Regression Discontinuity Design**
 >
-> **Regression discontinuity (RD)** exploits sharp cutoffs in treatment assignment. Units just above and below the threshold are nearly identical in all respects except treatment status, creating a **quasi-experiment**. In U.S. Senate elections, barely winning provides an incumbency advantage of approximately 5–7 percentage points.
+> **Regression discontinuity (RD)** exploits sharp cutoffs in treatment assignment. Units just above and below the threshold are nearly identical in all respects except treatment status, creating a **quasi-experiment**. In U.S. Senate elections, barely winning provides an incumbency advantage of approximately 5 percentage points.
 
-### **Interpreting the RD Results**
+### Interpreting the RD Results
 
 **Key Findings:**
 
@@ -1413,7 +1423,7 @@ Possible mechanisms:
 
 Causal inference using IV/2SLS.
 
-### **Case Study: Do Institutions Cause Economic Growth?**
+### Case Study: Do Institutions Cause Economic Growth?
 
 **The Fundamental Question**: Why are some countries rich and others poor?
 
@@ -1470,7 +1480,7 @@ print(f"which persist to affect GDP today, but mortality doesn't")
 print(f"directly affect modern GDP")
 
 # Summary statistics
-data_inst[['logpgp95', 'avexpr', 'logem4']].describe()
+print(data_inst[['logpgp95', 'avexpr', 'logem4']].describe())
 
 # OLS (biased - endogeneity problem)
 fit_ols = pf.feols('logpgp95 ~ avexpr', data=data_inst, vcov='HC1')
@@ -1504,7 +1514,8 @@ print(f"OLS coefficient: {fit_ols.coef()['avexpr']:.3f}")
 print(f"IV/2SLS coefficient: {fit_iv.coef()['avexpr']:.3f}")
 print(f"\nDifference: {fit_iv.coef()['avexpr'] - fit_ols.coef()['avexpr']:.3f}")
 print(f"\nIV estimate is larger → OLS has attenuation bias")
-print(f"(measurement error and omitted variables bias OLS toward zero)")
+print(f"(measurement error in institutions quality biases OLS toward zero;")
+print(f" omitted variables and reverse causation would bias OLS upward)")
 
 # CAUSAL INTERPRETATION
 print(f"1-unit improvement in institutions → {fit_iv.coef()['avexpr']:.2f} increase in log GDP")
@@ -1519,7 +1530,7 @@ print(f"  - Exogenous: Mortality in 1700s doesn't directly affect modern GDP")
 >
 > When a regressor is **endogenous** (correlated with the error term), OLS is biased. **Instrumental variables (IV)** use an instrument that is correlated with the endogenous regressor but not directly with the outcome. Two-stage least squares (2SLS) first predicts the endogenous variable, then uses these predictions in the second-stage regression.
 
-### **Interpreting the IV Results**
+### Interpreting the IV Results
 
 **Key Findings:**
 
@@ -1530,15 +1541,13 @@ print(f"  - Exogenous: Mortality in 1700s doesn't directly affect modern GDP")
 
 2. **Why the Difference?**
 
- **Attenuation bias**: OLS is biased toward zero due to:
+ **Attenuation bias**: OLS is biased toward zero by **measurement error** in the institutions-quality measure.
 
- - Measurement error in institutions quality
- - Omitted variables (culture, geography)
- - Reverse causation (rich countries build better institutions)
+ Omitted variables (culture, geography) and reverse causation (rich countries build better institutions) would, if anything, bias OLS **upward** — so the fact that the IV estimate is even larger points to measurement error as the dominant source of bias.
 
 3. **Economic Interpretation**:
  - 1-unit improvement in institutions → 0.94 increase in log GDP
- - Exponentiating: $e^{0.94} \approx 2.56$ → **156% increase in GDP level**
+ - Exponentiating: $e^{0.94} \approx 2.57$ → **157% increase in GDP level**
  - This is a **massive effect**!
 
 4. **Instrument Validity**:
@@ -1570,7 +1579,7 @@ Institutions are not just correlated with prosperity—they **cause** it. Countr
 
 Best practices for data preparation and cleaning.
 
-### **Why Data Wrangling Matters**
+### Why Data Wrangling Matters
 
 Real-world econometric analysis spends **60-80% of time** on data preparation:
 
@@ -1647,7 +1656,7 @@ df_clean.loc[df_clean['age'] < 0, 'age'] = np.nan
 df_clean.loc[df_clean['age'] > 120, 'age'] = np.nan
 
 # Fill missing income with median
-df_clean['income'].fillna(df_clean['income'].median(), inplace=True)
+df_clean['income'] = df_clean['income'].fillna(df_clean['income'].median())
 
 # Standardize gender coding
 df_clean['gender'] = df_clean['gender'].str.upper().str[0]
@@ -1656,9 +1665,9 @@ print("\nCleaned data:")
 print(df_clean)
 
 print("\n✓ Key cleaning steps:")
-# 1. Detect and handle impossible values (age < 0, age > 120)
-# 2. Impute missing values (median for income)
-# 3. Standardize categorical variables (gender)
+print("  1. Detect and handle impossible values (age < 0, age > 120)")
+print("  2. Impute missing values (median for income)")
+print("  3. Standardize categorical variables (gender)")
 ```
 
 ## Key Takeaways
@@ -1675,7 +1684,7 @@ print("\n✓ Key cleaning steps:")
 
 - Natural logarithm transformation converts the nonlinear Cobb-Douglas model into a linear OLS form
 - Estimated **capital elasticity ≈ 0.23** and **labor elasticity ≈ 0.81**
-- Data support **constant returns to scale** (elasticities sum to 1.040, F-test p = 0.636)
+- Data support **constant returns to scale** (elasticities sum to 1.040, F-test p = 0.663)
 - HAC-robust standard errors account for time series autocorrelation
 - Predictions require retransformation bias correction when using log models
 
@@ -1692,7 +1701,7 @@ print("\n✓ Key cleaning steps:")
 - **Log-log models and cluster-robust SEs (13.4):** Automobile efficiency gains offset by larger vehicles; clustering by manufacturer accounts for within-group correlation
 - **Randomized control trials (13.5):** RAND experiment shows better insurance increases healthcare spending; random assignment eliminates selection bias
 - **Difference-in-differences (13.6):** South Africa clinic access improved child health; key assumption is parallel trends
-- **Regression discontinuity (13.7):** Political incumbency provides ~5–7% vote share advantage; exploits sharp cutoffs
+- **Regression discontinuity (13.7):** Political incumbency provides ~5% vote share advantage; exploits sharp cutoffs
 - **Instrumental variables (13.8):** Better institutions causally increase GDP; instruments address endogeneity
 
 ### Data Preparation and Practical Workflow (Case Study 13.9)
