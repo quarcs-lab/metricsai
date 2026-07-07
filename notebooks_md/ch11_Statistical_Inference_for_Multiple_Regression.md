@@ -218,7 +218,9 @@ print("\nFirst few observations:")
 data_house[['price', 'size', 'bedrooms', 'bathrooms', 'lotsize', 'age', 'monthsold']].head()
 ```
 
-## 11.1: Properties of the Least Squares Estimator
+With only 29 observations and an average price around \$254,000, this is a small sample — keep that in mind throughout the chapter, since small samples mean larger standard errors and wider confidence intervals.
+
+## 11.1 Properties of the Least Squares Estimator
 
 Before conducting inference, we need to understand the statistical properties of the OLS estimator. Under the classical linear regression assumptions, OLS has desirable properties.
 
@@ -265,7 +267,7 @@ where:
 >
 > Four assumptions underpin valid inference in multiple regression: (1) linearity in parameters, (2) random sampling, (3) no perfect collinearity among regressors, and (4) zero conditional mean of errors $E[u|X] = 0$. Under these assumptions, OLS is unbiased ($E[b_j] = \beta_j$), consistent, and the Best Linear Unbiased Estimator (BLUE) by the Gauss-Markov theorem.
 
-## 11.2: Estimators of Model Parameters
+## 11.2 Estimators of Model Parameters
 
 Now we estimate the full multiple regression model and examine the parameter estimates, standard errors, and related statistics.
 
@@ -306,7 +308,7 @@ model_full.summary()
 
 The regression output reveals several important findings about the house price data:
 
-1. **Size coefficient = \$68.37 (p < 0.001)**: Each additional square foot increases house price by \$68.37 on average, holding all other variables constant. This effect is highly statistically significant (p = 0.0002), meaning we can be very confident this relationship is not due to chance.
+1. **Size coefficient = \$68.37 (p < 0.001)**: Each additional square foot is associated with a \$68.37 higher house price on average, holding all other variables constant. This effect is highly statistically significant (p = 0.0002): if size truly had no effect, an estimate this far from zero would arise from sampling variation only about 2 times in 10,000.
 
 2. **Other variables are not statistically significant**:
    - **Bedrooms coefficient = \$2,685 (p = 0.773)**: Surprisingly, the number of bedrooms doesn't significantly affect price once we control for size. The p-value of 0.773 means we cannot reject the hypothesis that this coefficient is zero.
@@ -322,6 +324,8 @@ The regression output reveals several important findings about the house price d
 Size dominates all other house characteristics in determining price in this market. Features like number of bedrooms and bathrooms don't add explanatory power beyond what size already captures. This likely reflects multicollinearity—larger houses naturally tend to have more bedrooms and bathrooms, so once we control for size, these other features provide little additional information.
 
 The large standard errors on most coefficients (relative to the coefficient values) suggest imprecise estimation, common in small samples (n=29) with correlated predictors.
+
+Following AED, this chapter reports classical (homoskedasticity-based) standard errors; Chapter 12 (Section 12.2) introduces heteroskedasticity-robust standard errors, which are preferred in practice and are previewed in Section 11.7 at the end of this chapter.
 
 ### Model Diagnostics
 
@@ -341,8 +345,7 @@ print(f"  Root MSE (σ̂): ${np.sqrt(np.sum(model_full._u_hat**2) / (int(model_f
 print(f"  R-squared: {model_full._r2:.4f}")
 print(f"  Adjusted R-squared: {model_full._adj_r2:.4f}")
 
-# Create comprehensive coefficient table
-# Coefficient Table
+# Coefficient table: estimates, SEs, t-statistics, p-values
 coef_table = pd.DataFrame({
     'Coefficient': model_full.coef(),
     'Std. Error': model_full.se(),
@@ -360,7 +363,7 @@ coef_table
 
 **Key findings:**
 
-1. **Size coefficient** (≈ \$68.37): Each additional square foot increases house price by approximately \$68, holding other factors constant.
+1. **Size coefficient** (≈ \$68.37): Each additional square foot is associated with a price approximately \$68 higher, holding other factors constant.
 
 2. **Statistical significance**: Only the size variable appears statistically significant at conventional levels (p < 0.05).
 
@@ -368,11 +371,11 @@ coef_table
 
 This pattern is common in small samples with correlated regressors (multicollinearity).
 
-## 11.3: Confidence Intervals
+## 11.3 Confidence Intervals
 
 A confidence interval provides a range of plausible values for a population parameter.
 
-**Formula for a \$100(1-\alpha)\%$ confidence interval:**
+**Formula for a $100(1-\alpha)\%$ confidence interval:**
 
 $$\hat{\beta}_j \pm t_{n-k, \alpha/2} \times se(\hat{\beta}_j)$$
 
@@ -399,7 +402,7 @@ $$\hat{\beta}_j \pm 2 \times se(\hat{\beta}_j)$$
 
 Looking at the 95% confidence intervals, we can identify which variables have statistically significant effects:
 
-1. **Size: [\$36.45, \$100.29]** - This interval excludes zero, confirming that size has a statistically significant positive effect on price. We are 95% confident that each additional square foot increases price by between \$36 and \$100.
+1. **Size: [\$36.45, \$100.29]** - This interval excludes zero, confirming that size has a statistically significant positive effect on price. We are 95% confident that each additional square foot is associated with a price between \$36 and \$100 higher.
 
 2. **Intercept: [\$10,321, \$265,262]** - The wide interval reflects high uncertainty about the base price level, but it excludes zero.
 
@@ -407,7 +410,7 @@ Looking at the 95% confidence intervals, we can identify which variables have st
 
 **Practical Meaning**:
 
-If we repeatedly sampled 29 houses from this market and calculated 95% confidence intervals, approximately 95% of those intervals would contain the true population parameter. For the size coefficient, this means we're quite certain about its effect—even in the worst case (lower bound), an extra square foot adds at least \$36 to the price.
+If we repeatedly sampled 29 houses from this market and calculated 95% confidence intervals, approximately 95% of those intervals would contain the true population parameter. For the size coefficient, every value in this plausible range is positive—even the interval's lower bound corresponds to an extra square foot adding about \$36 to the price.
 
 The fact that only the size interval excludes zero provides strong evidence that, in this dataset, size is the only reliable predictor of house prices among the variables we measured.
 
@@ -447,9 +450,10 @@ print(f"  95% CI: [${ci_lower:.2f}, ${ci_upper:.2f}]")
 
 ### Comprehensive Table with Confidence Intervals
 
+The table below gathers coefficients, standard errors, t-statistics, p-values, and 95% confidence intervals in one view. Scan the last two columns: only `size` (and the intercept) have intervals that exclude zero.
+
 ```python
-# Create comprehensive coefficient table
-# Comprehensive Coefficient Table with 95% Confidence Intervals
+# Comprehensive coefficient table with 95% confidence intervals
 coef_table_full = pd.DataFrame({
     'Coefficient': model_full.coef(),
     'Std. Error': model_full.se(),
@@ -481,11 +485,11 @@ We tested whether the size coefficient equals 50 (H₀: β_size = 50):
 
 **Economic Interpretation**:
 
-The data are consistent with the hypothesis that each square foot adds \$50 to house price. Even though our point estimate is \$68.37, the difference from \$50 is not statistically significant. This doesn't mean β = 50 is correct—it simply means our data don't provide strong enough evidence to rule it out.
+The data are consistent with the hypothesis that each additional square foot is associated with \$50 more in price. Even though our point estimate is \$68.37, the difference from \$50 is not statistically significant. This doesn't mean β = 50 is correct—it simply means our data don't provide strong enough evidence to rule it out.
 
 This illustrates an important principle: **failing to reject H₀ is NOT the same as proving H₀ is true**. We simply lack sufficient evidence to reject it given our sample size and estimation precision.
 
-## 11.4: Hypothesis Tests on a Single Parameter
+## 11.4 Hypothesis Tests on a Single Parameter
 
 Hypothesis testing allows us to make formal inferences about population parameters.
 
@@ -538,8 +542,7 @@ else:
 The most common hypothesis test examines whether a coefficient is zero.
 
 ```python
-# Test H₀: β_size = 0 (statistical significance)
-# Test of Statistical Significance: H₀: β_size = 0
+# Test of statistical significance: H₀: β_size = 0
 
 t_stat_zero = coef_size / se_size
 p_value_zero = model_full.pvalue()['size']
@@ -564,14 +567,15 @@ else:
 Python's pyfixest package provides convenient methods for hypothesis testing.
 
 ```python
-# Using pyfixest wald_test
-# Hypothesis test using pyfixest wald_test:
-t_test_result = model_full.wald_test(R=np.array([[0, 0, 0, 0, 0, 1, 0]]), q=np.array([null_value]))
+# Hypothesis test using pyfixest wald_test
+t_test_result = model_full.wald_test(R=np.array([[0, 1, 0, 0, 0, 0, 0]]), q=np.array([null_value]))
 print(t_test_result)
 
 ```
 
-## 11.5: Joint Hypothesis Tests
+The built-in Wald test reaches the same conclusion as our manual calculation: we fail to reject $H_0: \beta_{\text{size}} = 50$ at the 5% level. (pyfixest reports a chi-squared version of this test, so the statistic and p-value differ slightly from the manual $t$-test above.)
+
+## 11.5 Joint Hypothesis Tests
 
 Sometimes we want to test multiple restrictions simultaneously. Individual t-tests are insufficient for this purpose.
 
@@ -584,7 +588,7 @@ Sometimes we want to test multiple restrictions simultaneously. Individual t-tes
 
 1. All slope coefficients equal zero: $\beta_2 = \beta_3 = \cdots = \beta_k = 0$
 2. Subset of coefficients equal zero: $\beta_3 = \beta_4 = \beta_5 = 0$
-3. Linear restrictions: $\beta_2 = -\beta_3$ and \$2\beta_4 + \beta_6 = 9$
+3. Linear restrictions: $\beta_2 = -\beta_3$ and $2\beta_4 + \beta_6 = 9$
 
 **F-test procedure:**
 
@@ -653,9 +657,9 @@ This result demonstrates the power of joint testing: while we might hope that be
 
 The sum of squares decomposition breaks down the total variation in house prices:
 
-- **TSS = \$39,145,826,897** (Total Sum of Squares): Total variation in house prices around their mean
-- **ESS = \$25,466,429,042** (Explained Sum of Squares): Variation explained by our model (65.1%)
-- **RSS = \$13,679,397,855** (Residual Sum of Squares): Variation left unexplained (34.9%)
+- **TSS = 39,145,826,897** (Total Sum of Squares): Total variation in house prices around their mean (in squared dollars)
+- **ESS = 25,466,429,042** (Explained Sum of Squares): Variation explained by our model (65.1%)
+- **RSS = 13,679,397,855** (Residual Sum of Squares): Variation left unexplained (34.9%)
 
 **Verification**: TSS = ESS + RSS (The identity holds perfectly)
 
@@ -674,11 +678,9 @@ The F-statistic of 6.83 tells us that the explained variation (per parameter) is
 ```python
 # 11.5 JOINT HYPOTHESIS TESTS
 
-# Test 1: Joint significance of all slope coefficients
-# H₀: β₁ = β₂ = ... = βₖ = 0
-# Test 1: Overall F-test (all slopes = 0)
+# Test 1: Overall F-test — H₀: all slope coefficients equal zero (β₂ = ... = βₖ = 0)
 
-f_stat = model_full._f_statistic
+f_stat = (model_full._r2 / (k - 1)) / ((1 - model_full._r2) / df)  # overall F-test from R² (formula in Section 11.6)
 dfn = k - 1  # numerator df (excluding intercept)
 dfd = df     # denominator df
 f_pvalue = 1 - stats.f.cdf(f_stat, dfn, dfd)
@@ -702,9 +704,8 @@ else:
 Now test whether variables other than size are jointly significant.
 
 ```python
-# Test 2: Joint test of subset of coefficients
+# Test 2: Joint test — are variables other than size significant?
 # H₀: β_bedrooms = β_bathrooms = β_lotsize = β_age = β_monthsold = 0
-# Test 2: Joint test - Are variables other than size significant?
 
 # Manual F-test: restricted model (size only) vs unrestricted (full)
 model_restricted_ftest = pf.feols('price ~ size', data=data_house)
@@ -744,9 +745,9 @@ We're comparing two models:
 
 **Key numbers:**
 
-- **RSS (restricted) = \$14,975,101,655**: Prediction errors when using only size
-- **RSS (unrestricted) = \$13,679,397,855**: Prediction errors when using all variables
-- **Increase in RSS = \$1,295,703,800**: How much worse the restricted model fits
+- **RSS (restricted) = 14,975,101,655**: Sum of squared prediction errors when using only size
+- **RSS (unrestricted) = 13,679,397,855**: Sum of squared prediction errors when using all variables
+- **Increase in RSS = 1,295,703,800**: How much worse the restricted model fits
 
 **Test results:**
 
@@ -758,11 +759,11 @@ We're comparing two models:
 
 **Economic Interpretation**:
 
-This is a powerful result for **model selection**. Adding five additional variables (bedrooms, bathrooms, lotsize, age, monthsold) reduces prediction errors by only \$1.3 million out of \$15 million total—a mere 8.7% improvement. This improvement is so small it could easily be due to random chance.
+This is a powerful result for **model selection**. Adding five additional variables (bedrooms, bathrooms, lotsize, age, monthsold) reduces the residual sum of squares by only about 1.3 billion out of 15.0 billion—a mere 8.7% improvement. This improvement is so small it could easily be due to random chance.
 
 **Practical recommendation**: Use the **simpler model** with only size. It's easier to interpret, requires less data collection, and performs nearly as well as the complex model. This is an application of **Occam's Razor** in econometrics: prefer simpler models when complex ones don't provide meaningful improvement.
 
-## 11.6: F Statistic Under Assumptions 1-4
+## 11.6 F Statistic Under Assumptions 1-4
 
 Under the classical assumptions, the F-statistic has a specific formula based on sums of squares.
 
@@ -795,8 +796,7 @@ $$F = \frac{R^2 / (k-1)}{(1-R^2) / (n-k)} \sim F(k-1, n-k)$$
 ```python
 # 11.6 F STATISTIC UNDER ASSUMPTIONS 1-4
 
-# Manual calculation of F-statistic using sums of squares
-# Manual F-statistic calculation
+# Manual F-statistic calculation using sums of squares
 
 # Calculate sum of squares
 y = data_house['price']
@@ -823,7 +823,7 @@ print(f"\nF-statistic calculation:")
 print(f"  F = (ESS/{k-1}) / (RSS/{df})")
 print(f"  F = ({ESS:,.2f}/{k-1}) / ({RSS:,.2f}/{df})")
 print(f"  F = {f_stat_manual:.4f}")
-print(f"  From model output: {f_stat:.4f}")
+print(f"  From Section 11.5 calculation: {f_stat:.4f}")
 print(f"  Match: {np.isclose(f_stat_manual, f_stat)}")
 
 # Alternative formula using R²
@@ -852,7 +852,7 @@ Comparing three nested models helps us understand the incremental value of addin
 
 **Model 1 (Simple): price ~ size**
 
-- **R² = 0.618**, **Adj. R² = 0.603**: Explains 61.8% of price variation
+- **R² = 0.617**, **Adj. R² = 0.603**: Explains 61.7% of price variation
 - **F-stat = 43.58**: Very strong overall significance
 - **Simplest and most parsimonious**
 
@@ -872,15 +872,14 @@ Comparing three nested models helps us understand the incremental value of addin
 
 1. **Adjusted R² is crucial**: While R² increases with more variables (always), adjusted R² accounts for the complexity penalty. Model 1 has the **highest adjusted R²**, indicating the best balance of fit and simplicity.
 
-2. **Diminishing returns**: Adding bedrooms (Model 2) provides essentially no improvement. Adding five more variables (Model 3) only increases R² from 0.618 to 0.651—a marginal gain.
+2. **Diminishing returns**: Adding bedrooms (Model 2) provides essentially no improvement. Adding five more variables (Model 3) only increases R² from 0.617 to 0.651—a marginal gain.
 
 3. **Statistical vs. practical significance**: Model 3 is statistically significant overall (F = 6.83, p < 0.001), but that doesn't mean it's the **best** model. Model 1 is superior on parsimony grounds.
 
 **Recommendation**: **Use Model 1** (size only). It's simpler, has the highest adjusted R², and loses almost nothing in explanatory power compared to more complex alternatives.
 
 ```python
-# Subset F-test using restricted and unrestricted models
-# Subset F-test: Restricted vs Unrestricted Model
+# Subset F-test: restricted vs unrestricted model
 
 # Unrestricted model (already estimated as model_full)
 # Restricted model (only size as regressor)
@@ -899,7 +898,7 @@ Tracking how coefficients change as we add variables helps diagnose **multicolli
 **Size coefficient across models:**
 
 - **Model 1**: \$73.77 (SE = \$11.17)
-- **Model 2**: \$73.65 (SE = \$11.50)  
+- **Model 2**: \$72.41 (SE = \$13.30)  
 - **Model 3**: \$68.37 (SE = \$15.39)
 
 **What we observe:**
@@ -918,7 +917,7 @@ Tracking how coefficients change as we add variables helps diagnose **multicolli
 
 **Economic lesson:**
 
-This pattern is common in real estate data: once you control for total square footage, the number of rooms matters little. Two houses of identical size but different room configurations (e.g., one with 3 large bedrooms vs. one with 4 small bedrooms) sell for similar prices. **Size is what buyers care about, not how that space is divided.**
+This pattern is common in real estate data: once you control for total square footage, the number of rooms matters little. Two houses of identical size but different room configurations (e.g., one with 3 large bedrooms vs. one with 4 small bedrooms) sell for similar prices. **In this sample, size appears to be what buyers care about, not how that space is divided.**
 
 ### Manual F-test Calculation
 
@@ -930,14 +929,14 @@ Heteroskedasticity-robust (HC1) standard errors correct for potential violations
 
 **Size coefficient:**
 
-- **Standard SE**: \$15.39 → **Robust SE**: \$15.15
-- **Change**: Slight decrease (1.6%)
+- **Standard SE**: \$15.39 → **Robust SE**: \$15.36
+- **Change**: Slight decrease (0.2%)
 - **Both t-stats highly significant** (p ≈ 0.0002)
 
 **Intercept:**
 
-- **Standard SE**: \$61,465 → **Robust SE**: \$69,273
-- **Change**: Increase of 12.7%
+- **Standard SE**: \$61,465 → **Robust SE**: \$65,545
+- **Change**: Increase of 6.6%
 - **p-value changes**: 0.035 → 0.047 (still significant, but closer to the boundary)
 
 **Other variables:**
@@ -990,6 +989,8 @@ else:
 
 ### ANOVA Table Comparison
 
+As a final cross-check, we repeat the restricted-vs-full comparison in compact form — the F-statistic and p-value should match the subset F-test computed above.
+
 ```python
 # Model comparison using manual F-test (replaces anova_lm)
 rss_rest = np.sum(model_restricted._u_hat**2)
@@ -1011,7 +1012,7 @@ print("\nThis confirms our manual F-test calculation.")
 >
 > To test whether a subset of regressors belongs in the model, compare the restricted model (without those variables) to the unrestricted model (with them) using an F-test. If the F-statistic is small (large $p$-value), the additional regressors don't significantly improve fit and the simpler model is preferred.
 
-## 11.7: Presentation of Regression Results
+## 11.7 Presentation of Regression Results
 
 Professional presentation of regression results is important for communication. Different formats emphasize different aspects.
 
@@ -1037,8 +1038,7 @@ This allows readers to see how coefficient estimates change across specification
 ```python
 # 11.7 PRESENTATION OF REGRESSION RESULTS
 
-# Comparison of multiple models
-# Model Comparison: Three Specifications
+# Model comparison: three specifications
 
 # Model 1: Simple regression
 model1 = pf.feols('price ~ size', data=data_house)
@@ -1055,19 +1055,22 @@ model_names = ['Model 1', 'Model 2', 'Model 3']
 
 comparison_data = []
 for name, model in zip(model_names, models):
+    n_m = int(model._N)
+    k_m = len(model.coef())
+    f_m = (model._r2 / (k_m - 1)) / ((1 - model._r2) / (n_m - k_m))  # overall F from R² formula
     model_stats = {
         'Model': name,
-        'N': int(model._N),
+        'N': n_m,
         'R²': f"{model._r2:.4f}",
         'Adj. R²': f"{model._adj_r2:.4f}",
-        'RMSE': f"{np.sqrt(np.sum(model._u_hat**2) / (int(model._N) - len(model.coef()))):.2f}",
-        'F-stat': f"{model._f_statistic:.4f}",
-        'p-value': f"{1 - stats.f.cdf(model._f_statistic, len(model.coef())-1, int(model._N)-len(model.coef())):.6f}"
+        'RMSE': f"{np.sqrt(np.sum(model._u_hat**2) / (n_m - k_m)):.2f}",
+        'F-stat': f"{f_m:.4f}",
+        'p-value': f"{1 - stats.f.cdf(f_m, k_m - 1, n_m - k_m):.6f}"
     }
     comparison_data.append(model_stats)
 
 comparison_df = pd.DataFrame(comparison_data)
-comparison_df.to_string(index=False)
+print(comparison_df.to_string(index=False))
 
 
 ```
@@ -1077,8 +1080,7 @@ comparison_df.to_string(index=False)
 Now let's see how coefficient estimates change as we add variables.
 
 ```python
-# Detailed coefficient comparison
-# Coefficient Comparison Across Models
+# Coefficient comparison across models
 
 # Get all unique parameter names
 all_params = set()
@@ -1217,6 +1219,12 @@ print(f"The observed F-statistic ({f_stat:.2f}) exceeds the critical value ({f_c
 print("This leads us to reject the null hypothesis of no relationship.")
 ```
 
+**What to look for in this F-distribution plot:**
+
+- **Observed vs. critical value**: Compare the red dashed line (observed F) with the green dotted line (critical value) — an observed statistic beyond the critical value means we reject $H_0$
+- **Right-skewed shape**: The F-distribution is always positive and right-skewed; its shape depends on both degrees-of-freedom parameters
+- **Shaded region**: The red area marks the 5% of probability beyond the critical value under $H_0$ — the rejection region
+
 ### Visualization: Model Comparison (Actual vs Predicted)
 
 Compare the three models visually by plotting actual vs. predicted values.
@@ -1307,7 +1315,6 @@ import pandas as pd                             # data loading and manipulation
 import matplotlib.pyplot as plt                 # creating plots and visualizations
 import pyfixest as pf                           # fast estimation with robust SEs
 from scipy import stats                         # t and F distributions for inference
-# anova_lm replaced by manual F-test with pyfixest
 
 # =============================================================================
 # STEP 1: Load data directly from a URL
@@ -1323,7 +1330,7 @@ print(data_house[['price', 'size', 'bedrooms', 'bathrooms', 'lotsize', 'age']].d
 # STEP 2: Estimate the full multiple regression model
 # =============================================================================
 # Formula syntax: 'y ~ x1 + x2 + ...' includes an intercept automatically
-# IMPORTANT: .fit() estimates the model — without it, nothing is computed!
+# pf.feols() estimates the model immediately — no separate .fit() call is needed
 model_full = pf.feols('price ~ size + bedrooms + bathrooms + lotsize + age + monthsold', data=data_house)
 
 n = int(model_full._N)
@@ -1379,8 +1386,9 @@ print(f"  Size IS statistically significant at 5% level")
 # STEP 5: Joint F-test — are groups of coefficients jointly significant?
 # =============================================================================
 # Overall F-test: H₀: all slope coefficients = 0
-f_p = 1 - stats.f.cdf(model_full._f_statistic, len(model_full.coef())-1, int(model_full._N)-len(model_full.coef()))
-print(f"\nOverall F-test: F = {model_full._f_statistic:.4f}, p = {f_p:.6e}")
+F_overall = (model_full._r2 / (k - 1)) / ((1 - model_full._r2) / df)  # overall F from R²
+f_p = 1 - stats.f.cdf(F_overall, k - 1, df)
+print(f"\nOverall F-test: F = {F_overall:.4f}, p = {f_p:.6e}")
 print(f"  At least one variable matters → model is jointly significant")
 
 # Subset F-test: are variables other than size jointly significant?
@@ -1446,7 +1454,12 @@ plt.show()
 
 **Try it yourself!** Copy this code into an empty Google Colab notebook and run it: [Open Colab](https://colab.research.google.com/notebooks/empty.ipynb)
 
-**Next steps:** Chapter 12 covers **further inference and model specification** — additional diagnostic tests and extensions to the multiple regression framework.
+**Next Steps:**
+
+- **Chapter 12**: Further topics in multiple regression — prediction intervals, robust inference in depth, and model specification
+- **Chapter 13**: Case studies applying the full multiple regression toolkit to real datasets
+- **Chapter 14**: Regression with indicator (dummy) variables
+- **Chapter 15**: Regression with transformed variables (logs, polynomials, interactions)
 
 Congratulations on completing Chapter 11! You can now conduct rigorous statistical inference for multiple regression models.
 
@@ -1557,8 +1570,8 @@ In this case study, you will apply confidence intervals, hypothesis tests, and F
 - **Source:** Mendez (2020), 108 countries, 1990-2014
 - **Key variables:**
   - `lp` — Labor productivity (GDP per worker)
-  - `rk` — Physical capital per worker
-  - `hc` — Human capital index
+  - `kl` — Physical capital per worker
+  - `h` — Human capital index
   - `region` — Geographic region
 
 **Research question:** Are physical capital and human capital jointly significant in explaining cross-country labor productivity?
@@ -1567,9 +1580,9 @@ In this case study, you will apply confidence intervals, hypothesis tests, and F
 # Load the Mendez convergence clubs dataset
 url = "https://raw.githubusercontent.com/quarcs-lab/mendez2020-convergence-clubs-code-data/master/assets/dat.csv"
 dat = pd.read_csv(url)
-dat_2014 = dat[dat['year'] == 2014].dropna(subset=['lp', 'rk', 'hc']).copy()
+dat_2014 = dat[dat['year'] == 2014].dropna(subset=['lp', 'kl', 'h']).copy()
 dat_2014['ln_lp'] = np.log(dat_2014['lp'])
-dat_2014['ln_rk'] = np.log(dat_2014['rk'])
+dat_2014['ln_kl'] = np.log(dat_2014['kl'])
 print(f"Cross-section sample: {len(dat_2014)} countries (year 2014)")
 dat_2014.head()
 ```
@@ -1579,8 +1592,8 @@ dat_2014.head()
 Estimate the multiple regression model for labor productivity.
 
 ```python
-# Estimate: ln(lp) = beta_0 + beta_1 * ln(rk) + beta_2 * hc + u
-model_prod = pf.feols('ln_lp ~ ln_rk + hc', data=dat_2014)
+# Estimate: ln(lp) = beta_0 + beta_1 * ln(kl) + beta_2 * h + u
+model_prod = pf.feols('ln_lp ~ ln_kl + h', data=dat_2014)
 model_prod.summary()
 ```
 
@@ -1598,18 +1611,18 @@ Compute and interpret 95% confidence intervals for the coefficients.
 print("95% Confidence Intervals:")
 print(model_prod.confint())
 
-# Manual calculation for ln_rk coefficient
-b_rk = model_prod.coef()['ln_rk']
-se_rk = model_prod.se()['ln_rk']
+# Manual calculation for ln_kl coefficient
+b_kl = model_prod.coef()['ln_kl']
+se_kl = model_prod.se()['ln_kl']
 df = (int(model_prod._N) - len(model_prod.coef()))
 t_crit = stats.t.ppf(0.975, df)
-print(f"\nManual CI for ln(rk): [{b_rk - t_crit*se_rk:.4f}, {b_rk + t_crit*se_rk:.4f}]")
+print(f"\nManual CI for ln(kl): [{b_kl - t_crit*se_kl:.4f}, {b_kl + t_crit*se_kl:.4f}]")
 ```
 
 **Questions:**
 
-- Does the CI for $\ln(\text{rk})$ exclude zero? What does this tell you?
-- Does the CI for hc exclude zero? Interpret in economic terms.
+- Does the CI for $\ln(\text{kl})$ exclude zero? What does this tell you?
+- Does the CI for h exclude zero? Interpret in economic terms.
 
 > **Key Concept 11.9: Statistical Significance in Cross-Country Regressions**
 >
@@ -1622,7 +1635,7 @@ Test the statistical significance of each coefficient.
 ```python
 # Test significance of each coefficient
 print("t-statistics and p-values:")
-for var in ['ln_rk', 'hc']:
+for var in ['ln_kl', 'h']:
     t = model_prod.tstat()[var]
     p = model_prod.pvalue()[var]
     sig = '***' if p < 0.01 else '**' if p < 0.05 else '*' if p < 0.10 else ''
@@ -1632,7 +1645,7 @@ for var in ['ln_rk', 'hc']:
 **Questions:**
 
 - Which coefficients are significant at the 1% level? At the 5% level?
-- Interpret the economic meaning: what does significance of $\ln(\text{rk})$ tell us about physical capital?
+- Interpret the economic meaning: what does significance of $\ln(\text{kl})$ tell us about physical capital?
 
 #### Task 4: Joint F-Test (Semi-guided)
 
@@ -1640,8 +1653,11 @@ Test whether physical capital and human capital are jointly significant.
 
 ```python
 # Overall F-test: H0: beta_1 = beta_2 = 0
-print(f"Overall F-statistic: {model_prod._f_statistic:.4f}")
-f_p_prod = 1 - stats.f.cdf(model_prod._f_statistic, len(model_prod.coef())-1, int(model_prod._N)-len(model_prod.coef()))
+k_prod = len(model_prod.coef())
+n_k_prod = int(model_prod._N) - k_prod
+F_prod = (model_prod._r2 / (k_prod - 1)) / ((1 - model_prod._r2) / n_k_prod)
+print(f"Overall F-statistic: {F_prod:.4f}")
+f_p_prod = 1 - stats.f.cdf(F_prod, k_prod - 1, n_k_prod)
 print(f"p-value: {f_p_prod:.6e}")
 
 # Compare to restricted model (intercept only) using manual F-test
@@ -1666,9 +1682,9 @@ Compare nested models to determine the best specification.
 
 **Your tasks:**
 
-1. Estimate three models: (a) $\ln(\text{lp}) \sim \ln(\text{rk})$ only, (b) $\ln(\text{lp}) \sim \text{hc}$ only, (c) both regressors
+1. Estimate three models: (a) $\ln(\text{lp}) \sim \ln(\text{kl})$ only, (b) $\ln(\text{lp}) \sim \text{h}$ only, (c) both regressors
 2. Create a model comparison table with $R^2$, adjusted $R^2$, AIC, BIC
-3. Conduct subset F-tests: does adding hc to the $\ln(\text{rk})$-only model significantly improve fit?
+3. Conduct subset F-tests: does adding h to the $\ln(\text{kl})$-only model significantly improve fit?
 4. Report robust standard errors for the preferred model
 
 *Hint: Use the manual F-test formula (RSS comparison) for nested model tests and `pf.feols(..., vcov='HC1')` for robust SEs.*
@@ -1689,7 +1705,7 @@ Write a 200-300 word policy brief summarizing your inference results.
 >
 > Finding that both physical and human capital are statistically significant predictors of productivity suggests that investments in both areas may boost economic output. However, the magnitudes matter for policy: confidence intervals tell us the plausible range of effects, while F-tests confirm that both factors jointly matter beyond what each contributes alone. Policy decisions should weigh statistical evidence alongside practical considerations like cost-effectiveness and implementation feasibility.
 
-### What You've Learned
+#### What You've Learned
 
 In this case study, you applied the full statistical inference toolkit to cross-country productivity data:
 
@@ -1719,6 +1735,11 @@ In Chapter 10, we estimated a multiple regression of municipal development on ni
 # Load the DS4Bolivia dataset
 url_bol = "https://raw.githubusercontent.com/quarcs-lab/ds4bolivia/master/ds4bolivia_v20250523.csv"
 bol = pd.read_csv(url_bol)
+
+# Load and merge satellite image embeddings
+url_sat = "https://raw.githubusercontent.com/quarcs-lab/ds4bolivia/master/satelliteEmbeddings/satelliteEmbeddings2017.csv"
+sat = pd.read_csv(url_sat)
+bol = bol.merge(sat[['asdf_id', 'A00', 'A10', 'A20', 'A30', 'A40']], on='asdf_id', how='left')
 
 # Select variables and prepare analysis sample
 embed_vars = ['A00', 'A10', 'A20', 'A30', 'A40']
@@ -1900,16 +1921,23 @@ $$H_0: \beta_{A00} = \beta_{A10} = \beta_{A20} = \beta_{A30} = \beta_{A40} = 0$$
 # R[3, 5] = 1  # A30 = 0
 # R[4, 6] = 1  # A40 = 0
 #
-# F = ((rss_r - rss_u) / q) / (rss_u / n_k)
+# # Restricted model: NTL only (drops all five embeddings)
+# model_r = pf.feols('imds ~ ln_NTLpc2017', data=bol_cs)
+# rss_r = np.sum(model_r._u_hat**2)
+# rss_u = np.sum(model_full._u_hat**2)
+# q = 5
+# n_k = int(model_full._N) - len(model_full.coef())
+# F_joint = ((rss_r - rss_u) / q) / (rss_u / n_k)
+# p_joint = 1 - stats.f.cdf(F_joint, q, n_k)
 # print("Joint F-Test: All Embedding Coefficients = 0")
 #
-# print(f"F-statistic: {f_test._f_statistic[0][0]:.4f}")
-# print(f"p-value:     {f_test.pvalue:.6f}")
-# print(f"df:          ({int(f_test.df_num)}, {int(f_test.df_denom)})")
-# print(f"\nConclusion: {'Reject H0' if f_test.pvalue < 0.05 else 'Fail to reject H0'} at 5% level")
+# print(f"F-statistic: {F_joint:.4f}")
+# print(f"p-value:     {p_joint:.6f}")
+# print(f"df:          ({q}, {n_k})")
+# print(f"\nConclusion: {'Reject H0' if p_joint < 0.05 else 'Fail to reject H0'} at 5% level")
 ```
 
-> **Key Concept 11.12: Joint Significance of Satellite Features**
+> **Key Concept 11.11: Joint Significance of Satellite Features**
 >
 > Individual satellite embedding coefficients may appear **statistically insignificant** (p > 0.05) in a multiple regression, yet the group of embeddings may be **jointly significant** (F-test p < 0.05). This paradox arises when embeddings are correlated with each other: the individual t-tests cannot distinguish each embedding's unique contribution, but the F-test captures their collective explanatory power. Joint F-tests are essential when evaluating groups of related predictors.
 
@@ -1927,7 +1955,7 @@ $$F = \frac{(R^2_u - R^2_r) / q}{(1 - R^2_u) / (n - k - 1)}$$
 
 where $q = 5$ (number of restrictions), $n$ = sample size, $k$ = number of regressors in unrestricted model
 
-4. Compare your manual calculation with `model_full.compare_f_test(model_restricted)`
+4. Verify your manual calculation by recomputing the F-statistic with the RSS-based formula from Task 4
 5. Interpret: How much do the embeddings improve the model's explanatory power?
 
 ```python
@@ -1937,7 +1965,7 @@ where $q = 5$ (number of restrictions), $n$ = sample size, $k$ = number of regre
 # 1. Estimate restricted model (NTL only)
 # 2. Compare R-squared values
 # 3. Compute F-statistic manually
-# 4. Verify with compare_f_test()
+# 4. Verify with the RSS-based F-test formula
 
 # Example structure:
 # # Restricted model: NTL only
@@ -1960,9 +1988,12 @@ where $q = 5$ (number of restrictions), $n$ = sample size, $k$ = number of regre
 # F_manual = ((R2_u - R2_r) / q) / ((1 - R2_u) / (n - k - 1))
 # print(f"\nManual F-statistic: {F_manual:.4f}")
 #
-# # Verify with statsmodels
-# f_compare = model_full.compare_f_test(model_restricted)
-# print(f"compare_f_test:     F = {f_compare[0]:.4f}, p = {f_compare[1]:.6f}")
+# # Verify with the RSS-based F-test formula
+# rss_r = np.sum(model_restricted._u_hat**2)
+# rss_u = np.sum(model_full._u_hat**2)
+# F_rss = ((rss_r - rss_u) / q) / (rss_u / (n - k - 1))
+# p_rss = 1 - stats.f.cdf(F_rss, q, (n - k - 1))
+# print(f"RSS-based F-test:   F = {F_rss:.4f}, p = {p_rss:.6f}")
 ```
 
 #### Task 6: Inference Brief (Independent)
@@ -1994,12 +2025,12 @@ Write a 200-300 word inference brief summarizing your statistical findings.
 # print(f"R² (NTL only):          {model_restricted._r2:.4f}")
 # print(f"R² (NTL + embeddings):  {model_full._r2:.4f}")
 # print(f"R² improvement:         {model_full._r2 - model_restricted._r2:.4f}")
-# print(f"\nJoint F-test p-value:   {f_test.pvalue:.6f}")
+# print(f"\nJoint F-test p-value:   {p_joint:.6f}")
 # print(f"Individually significant at 5%: {sig_5}/5 embeddings")
 # print(f"Individually significant at 10%: {sig_10}/5 embeddings")
 ```
 
-> **Key Concept 11.13: Feature Selection in Prediction Models**
+> **Key Concept 11.12: Feature Selection in Prediction Models**
 >
 > When many potential predictors are available (e.g., 64 satellite embedding dimensions), selecting which to include requires balancing **explanatory power** against **model parsimony**. Joint F-tests help determine whether *subsets* of features add genuine predictive value beyond what simpler models provide. In the DS4Bolivia context, testing whether 5 selected embeddings improve upon NTL alone informs practical decisions about data collection and model complexity for SDG monitoring.
 
@@ -2011,7 +2042,7 @@ Through this analysis of satellite features and municipal development in Bolivia
 - **Confidence intervals**: Constructed and visualized 95% CIs for all coefficients using a forest plot
 - **Individual t-tests**: Assessed the statistical significance of each satellite embedding individually
 - **Joint F-tests**: Tested whether all embeddings are jointly significant using restriction matrices
-- **Restricted vs unrestricted comparison**: Computed F-statistics manually and verified with `compare_f_test()`
+- **Restricted vs unrestricted comparison**: Computed F-statistics manually using both the R² and RSS formulas
 - **Inference interpretation**: Distinguished between individual insignificance and joint significance
 
 **Connection to the next chapter**: In Chapter 12, we address robust standard errors and prediction intervals—crucial for making reliable predictions about individual municipalities.
