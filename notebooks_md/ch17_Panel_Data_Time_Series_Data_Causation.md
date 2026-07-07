@@ -67,7 +67,7 @@ Six core ideas anchor this chapter. Skim them before you start, and come back wh
 ::::: {.columns}
 :::: {.column width="50%"}
 ::: {.callout-tip collapse="true" appearance="simple" title="Example"}
-The chapter's `data_nba` is a panel: 29 NBA teams observed across 10 seasons (2001–02 to 2010–11), with 290 team-season observations of `revenue`, `wins`, and `playoff` status. The between-team standard deviation of `lnrevenue` is roughly 0.45 (big-market vs. small-market gap), while the within-team SD over time is only about 0.20 — it's the panel's double indexing that lets the chapter quantify each piece separately.
+The chapter's `data_nba` is a panel: 29 NBA teams observed across 10 seasons (2001–02 to 2010–11), with 286 team-season observations of `revenue`, `wins`, and `playoff` status. The between-team standard deviation of `lnrevenue` is roughly 0.21 (big-market vs. small-market gap), while the within-team SD over time is only about 0.11 — it's the panel's double indexing that lets the chapter quantify each piece separately.
 :::
 ::::
 :::: {.column width="50%"}
@@ -97,7 +97,7 @@ Sort a family photo album by person — every page shows one family member acros
 ::::: {.columns}
 :::: {.column width="50%"}
 ::: {.callout-tip collapse="true" appearance="simple" title="Example"}
-The chapter constructs a binary `dbigearn` (top-half earner indicator) on `data_earnings` and fits the logit `dbigearn ~ age + education`. The marginal effect of `education` evaluated at the sample means is similar in magnitude to the OLS linear-probability-model coefficient on `education`, demonstrating that logit and LPM agree on direction and rough magnitude — but logit's predicted probabilities never wander outside $[0, 1]$.
+The chapter constructs a binary `dbigearn` (a high-earner indicator equal to 1 for the roughly 27% of workers earning above \$60,000) on `data_earnings` and fits the logit `dbigearn ~ age + education`. The marginal effect of `education` evaluated at the sample means is similar in magnitude to the OLS linear-probability-model coefficient on `education`, demonstrating that logit and LPM agree on direction and rough magnitude — but logit's predicted probabilities never wander outside $[0, 1]$.
 :::
 ::::
 :::: {.column width="50%"}
@@ -127,7 +127,7 @@ A long stone hallway echoes your handclap for several seconds. A new clap layers
 ::::: {.columns}
 :::: {.column width="50%"}
 ::: {.callout-tip collapse="true" appearance="simple" title="Example"}
-The chapter's ADL(2, 2) model regresses `dgs10` on its own two lags plus current and two lags of `dgs1` (Fed-controlled 1-year rate). The contemporary $\gamma_0 \approx 0.50$ says half a same-month pass-through; once $\gamma_1 \approx 0.20$ and $\gamma_2 \approx 0.08$ are added, the long-run multiplier is roughly 0.78 — meaning about 78% of a 1-year-rate shock eventually transmits to the 10-year rate.
+The chapter's ADL(2, 2) model regresses `dgs10` on its own two lags plus current and two lags of `dgs1` (Fed-controlled 1-year rate). The contemporary $\gamma_0 \approx 0.50$ says half a same-month pass-through; once $\gamma_1 \approx 0.20$ and $\gamma_2 \approx 0.08$ are added, the two-month cumulative multiplier is roughly 0.78 — meaning about 78% of a 1-year-rate shock has passed through to the 10-year rate within two months (the full long-run effect is larger).
 :::
 ::::
 :::: {.column width="50%"}
@@ -196,7 +196,7 @@ plt.rcParams.update({
 })
 ```
 
-## 17.2: Panel Data Models
+## 17.2 Panel Data Models
 
 Panel data (also called longitudinal data) combines cross-sectional and time series dimensions. We observe multiple individuals (i = 1, ..., n) over multiple time periods (t = 1, ..., T).
 
@@ -265,9 +265,9 @@ The variance decomposition reveals the **fundamental trade-off** in panel data a
 
 Typical findings:
 
-- **Between SD** (across teams): **0.40-0.50** (large!)
-- **Within SD** (over time): **0.15-0.25** (smaller)
-- **Overall SD**: **0.45-0.55**
+- **Between SD** (across teams): **~0.21** (large relative to within!)
+- **Within SD** (over time): **~0.11** (smaller)
+- **Overall SD**: **~0.24**
 
 **What This Means:**
 
@@ -283,8 +283,8 @@ Typical findings:
 
 3. **Variance decomposition** (approximately):
  - Total variance ≈ Between variance + Within variance
- - \$0.50^2 \approx 0.45^2 + 0.20^2$
- - \$0.25 \approx 0.20 + 0.04$ 
+ - \$0.24^2 \approx 0.21^2 + 0.11^2$
+ - \$0.056 \approx 0.045 + 0.012$ 
 
 **Implications for Estimation:**
 
@@ -582,7 +582,7 @@ With cluster SEs:
 - Previous "significance" was an artifact of ignoring dependence
 - Fixed effects (next section) will address the underlying confounding
 
-## 17.3: Fixed Effects Estimation
+## 17.3 Fixed Effects Estimation
 
 Fixed effects (FE) control for time-invariant individual characteristics by including individual-specific intercepts.
 
@@ -656,7 +656,7 @@ The comparison between Pooled OLS and Fixed Effects reveals **omitted variable b
 **Key Findings:**
 
 1. **Coefficient shrinks substantially**:
- - Pooled: 0.0055 → FE: 0.0025 (drops by **55%**)
+ - Pooled: 0.0068 → FE: 0.0045 (drops by **33%**)
  - This suggests **positive omitted variable bias** in pooled model
  - High-revenue teams (big markets) also tend to win more
  - Pooled confounds **team quality** with **market size**
@@ -667,8 +667,8 @@ The comparison between Pooled OLS and Fixed Effects reveals **omitted variable b
  - More **credible causal interpretation**
 
 3. **R² interpretation changes**:
- - Pooled: Overall R² = 0.15 (explains 15% of total variation)
- - FE: Within R² = 0.65 (explains 65% of within-team variation)
+ - Pooled: Overall R² = 0.13 (explains 13% of total variation)
+ - FE: Within R² = 0.19 (explains 19% of within-team variation)
  - Between R² would be even higher (team fixed effects explain most variation)
 
 **Understanding the Fixed Effects Model:**
@@ -749,7 +749,7 @@ where:
 
 Fixed effects output typically reports three R²:
 
-1. **Within R²** (0.65): Variation explained **within teams over time**
+1. **Within R²** (0.19): Variation explained **within teams over time**
  - How well model predicts year-to-year changes
  - Most relevant for FE
 
@@ -761,13 +761,13 @@ Fixed effects output typically reports three R²:
  - Weighted average of within and between
  - Not directly comparable to pooled R²
 
-**Interpretation of the 0.0025 Coefficient:**
+**Interpretation of the 0.0045 Coefficient:**
 
 **Marginal effect:**
 
-- One additional win → **+0.25%** revenue increase
-- For a team with \$200M revenue: 0.25% × \$200M = **\$500K**
-- Over 10 additional wins: **\$5M** revenue increase
+- One additional win → **+0.45%** revenue increase
+- For a team with \$200M revenue: 0.45% × \$200M = **\$900K**
+- Over 10 additional wins: **\$9M** revenue increase
 
 **Is this economically significant?**
 
@@ -795,7 +795,7 @@ Surprisingly **not significant**! Why?
 - **Fixed Effects**: "Winning more games increases revenue" ? (effect exists but imprecisely estimated)
 - Need **longer panel** or **more teams** for precise FE estimates
 
-## 17.4: Random Effects Estimation
+## 17.4 Random Effects Estimation
 
 Random effects (RE) models individual-specific effects as random draws from a distribution.
 
@@ -897,7 +897,9 @@ print(f"Education coefficient: {fit_lpm.coef()['education']:.6f} (SE: {fit_lpm.s
 print("\nNote: Logit marginal effects and LPM coefficients are similar in magnitude.")
 ```
 
-## 17.5: Time Series Data
+**Interpreting the logit results:** Both `age` and `education` enter with positive coefficients, so older and more-educated workers are more likely to be high earners. Because logit coefficients are not themselves marginal effects, we convert them: the marginal effect of `education` at the sample means (about 0.05, i.e. roughly a 5-percentage-point rise in the probability of high earnings per extra year of schooling) closely matches the linear-probability-model coefficient. This agreement in sign and magnitude is why the simpler LPM is often a useful first pass -- but only the logit keeps every predicted probability inside $[0, 1]$.
+
+## 17.5 Time Series Data
 
 Time series data consist of observations ordered over time: $y_1, y_2, \ldots, y_T$
 
@@ -1007,7 +1009,9 @@ print(f"  gs1 SE (HAC): {fit_levels_hac.se()['gs1']:.6f}")
 print(f"\n  HAC SE is {fit_levels_hac.se()['gs1'] / fit_levels.se()['gs1']:.2f}x larger!")
 ```
 
-## 17.6: Autocorrelation
+**What the levels regression shows:** The near-perfect fit (R² around 0.95) is exactly the kind of result that should make us suspicious -- both rates trend downward over the sample, so a high R² can reflect shared trends rather than a genuine structural link. The HAC standard error is more than three times the default, confirming that the default SEs badly understate uncertainty once we allow for the strong autocorrelation examined in the next section.
+
+## 17.6 Autocorrelation
 
 Autocorrelation (serial correlation) violates the independence assumption of OLS.
 
@@ -1049,6 +1053,8 @@ print("\nStrong autocorrelation evident (lag 1 = {:.4f})".format(acf_resid[1]))
 > The correlogram (ACF plot) reveals autocorrelation patterns in residuals. Slowly decaying autocorrelations (e.g., $\rho_1 = 0.95$, $\rho_{10} = 0.42$) indicate non-stationarity and persistent shocks. With autocorrelation, default SEs are too small -- HAC (Newey-West) SEs can be 3-8 times larger. Always check residual autocorrelation after estimating time series regressions and use HAC SEs or model the dynamics explicitly.
 
 ### Correlogram Visualization
+
+The correlogram below plots the residual autocorrelations against lag length, with confidence bands that flag which lags are statistically significant -- look for how slowly the bars decay.
 
 ```python
 # Plot correlogram
@@ -1137,7 +1143,7 @@ From: $\Delta gs10_t = \beta_0 + \beta_1 \Delta gs10_{t-1} + \beta_2 \Delta gs10
 
 2. **Strong contemporary relationship**:
  - Coefficient ≈ **0.50** on $\Delta gs1_t$
- - When 1-year rate increases 1%, 10-year rate increases **0.50%** same month
+ - When the 1-year rate rises by 1 percentage point, the 10-year rate rises about **0.50 percentage points** the same month
  - **Expectations hypothesis**: Long rates reflect expected future short rates
  - Less than 1-to-1 because 10-year rate is average over many periods
 
@@ -1270,6 +1276,8 @@ Could try ADL(3,3), but gains typically minimal
 
 ### Visualization: Changes in Interest Rates
 
+The plots below show the differenced series over time and a scatter of the changes, so we can confirm that first differencing removed the downward trend seen in the levels.
+
 ```python
 # Figure: Changes
 fig, axes = plt.subplots(2, 1, figsize=(12, 8))
@@ -1309,7 +1317,7 @@ plt.show()
 - **Bottom panel**: The positive scatter confirms that short-rate and long-rate changes move together, but the relationship is less than one-to-one (slope < 1)
 - **Volatility clustering**: Notice periods of larger swings (e.g., early 1980s) -- this heteroskedasticity motivates HAC standard errors
 
-## 17.7: Causality and Instrumental Variables
+## 17.7 Causality and Instrumental Variables
 
 Establishing causality is central to econometrics. Correlation does not imply causation!
 
@@ -1610,7 +1618,7 @@ You estimate a wage equation using panel data on 500 workers over 10 years. The 
 A regression of the 10-year interest rate on the 1-year rate using monthly data yields residuals with:
 
 - Lag 1 autocorrelation: 0.95
-- Lag 5 autocorrelation: 0.75
+- Lag 5 autocorrelation: 0.71
 - Default SE on the 1-year rate coefficient: 0.022
 - HAC SE (24 lags): 0.080
 
@@ -1843,7 +1851,7 @@ print(f"Population variables available: {pop_vars}")
 # print(panel[['ln_NTLpc', 'ln_pop', 'pop']].describe().round(3))
 ```
 
-> **Key Concept 17.10: Satellite Panel Data**
+> **Key Concept 17.11: Satellite Panel Data**
 >
 > Annual nighttime lights observations create **panel datasets** even where traditional economic surveys are unavailable or infrequent. For Bolivia's 339 municipalities over 2012-2020, the NTL panel provides 3,051 municipality-year observations. This temporal dimension allows us to move beyond cross-sectional associations and study *changes within municipalities over time*—a crucial step toward understanding development dynamics rather than just static patterns.
 
@@ -1866,7 +1874,7 @@ print(f"Population variables available: {pop_vars}")
 #
 # fit_pooled = pf.feols('ln_NTLpc ~ ln_pop + year', data=panel_reg, vcov={'CRV1': 'asdf_id'})
 # print("POOLED OLS WITH CLUSTER-ROBUST SEs")
-# print(model_pooled.summary())
+# print(fit_pooled.summary())
 ```
 
 #### Task 3: Fixed Effects (Semi-guided)
@@ -1902,7 +1910,7 @@ print(f"Population variables available: {pop_vars}")
 # print(f"  Fixed Effects ln_pop coef: {fit_fe.coef()['ln_pop']:.4f}")
 ```
 
-> **Key Concept 17.11: Fixed Effects for Spatial Heterogeneity**
+> **Key Concept 17.12: Fixed Effects for Spatial Heterogeneity**
 >
 > Municipality fixed effects absorb all **time-invariant characteristics**: altitude, remoteness, climate, historical infrastructure, cultural factors. After removing these fixed differences, the remaining variation identifies how *changes* in population (or other time-varying factors) relate to *changes* in NTL within the same municipality. This within-municipality analysis is more credible for causal interpretation than cross-sectional regressions, because it eliminates bias from unobserved time-invariant confounders.
 
@@ -1964,7 +1972,7 @@ print(f"Population variables available: {pop_vars}")
 #
 # fit_fd = pf.feols('d_ln_NTLpc ~ d_ln_pop', data=fd_data, vcov={'CRV1': 'asdf_id'})
 # print("FIRST DIFFERENCES ESTIMATION")
-# print(model_fd.summary())
+# print(fit_fd.summary())
 #
 # print(f"\nFD coefficient on ln_pop: {fit_fd.coef()['d_ln_pop']:.4f}")
 ```
