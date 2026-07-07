@@ -1,5 +1,5 @@
 ---
-title: Untitled
+title: Preface
 execute:
   enabled: true
   warning: false
@@ -9,7 +9,7 @@ execute:
 
 **Welcome to "Econometrics Powered by AI"!** This book represents a new approach to learning econometrics—one that embraces the power of modern computational tools while maintaining the rigor of econometrics. In an era where artificial intelligence is transforming how we learn, work, and conduct research, this book seeks to bridge the gap between foundational econometric concepts and cutting-edge learning technologies.
 
-The vision behind this project is simple yet ambitious: to make econometrics accessible, interactive, and engaging for a new generation of learners. By combining authoritative textbook content with cloud-based computational notebooks and AI-enhanced learning tools, I aim to modernize the often-daunting journey of learning econometrics into an more exciting AI-powered discovery of economic stories based real data.
+The vision behind this project is simple yet ambitious: to make econometrics accessible, interactive, and engaging for a new generation of learners. By combining authoritative textbook content with cloud-based computational notebooks and AI-enhanced learning tools, I aim to modernize the often-daunting journey of learning econometrics into a more exciting AI-powered discovery of economic stories based on real data.
 
 ## The Challenge of Learning Econometrics
 
@@ -21,7 +21,7 @@ Moreover, there exists a persistent gap between theory and practical implementat
 
 ## This Book's Approach
 
-This book takes a different approach. It serves as a companion to A. Colin Cameron's  textbook, *Analysis of Economics Data: An Introduction to Econometrics* (2022). Specifically, it brings its key lessons and examples into the interactive, computational world of Python programming and AI-enhanced learning.
+This book takes a different approach. It serves as a companion to A. Colin Cameron's textbook, *Analysis of Economics Data: An Introduction to Econometrics* (2022). Specifically, it brings its key lessons and examples into the interactive, computational world of Python programming and AI-enhanced learning.
 
 At the heart of this approach is a three-pillar methodology:
 
@@ -164,12 +164,14 @@ All Python code in the notebooks has been carefully verified and tested for accu
 > This book is designed to be used in conjunction with two essential companion resources:
 >
 > **The metricsAI Website** ([https://quarcs-lab.github.io/metricsai](https://quarcs-lab.github.io/metricsai)) provides access to:
+>
 > - Interactive Google Colab notebooks for all 17 chapters
 > - AI-generated visual summaries, video overviews, and podcast episodes
 > - Links to quizzes, AI tutors, and presentation slides
 > - Quick summaries of foundational content
 >
 > **Cameron's Original Textbook** (*Analysis of Economics Data: An Introduction to Econometrics*, 2022) and materials ([https://cameron.econ.ucdavis.edu/aed/index.html](https://cameron.econ.ucdavis.edu/aed/index.html)) provide:
+>
 > - Comprehensive explanations of econometric theory
 > - Deeper mathematical derivations and proofs
 > - Extended examples and applications
@@ -177,7 +179,7 @@ All Python code in the notebooks has been carefully verified and tested for accu
 > - Original Stata, R, and Gretl code implementations
 > - Comprehensive datasets and detailed slides
 >
-> Together, these resources create a complete learning ecosystem: this book offers structured content and context and the website provides interactive computational tools with AI learning support.
+> Together, these resources create a complete learning ecosystem: this book offers structured content and context, while the website provides interactive computational tools with AI learning support.
 
 ## How to Use This Book
 
