@@ -40,7 +40,7 @@ This chapter introduces **statistical inference for the mean**—the foundationa
 **Datasets used:**
 
 - **AED_EARNINGS.DTA**: Sample of 171 30-year-old female full-time workers in 2010 (earnings in dollars)
-- **AED_GASPRICE.DTA**: Weekly gasoline prices in the U.S. (testing price level hypotheses)
+- **AED_GASPRICE.DTA**: Gasoline prices at 32 gas stations in Yolo County, California (testing price level hypotheses)
 - **AED_EARNINGSMALE.DTA**: Male earnings data for hypothesis testing examples
 - **AED_REALGDPPC.DTA**: Real GDP per capita growth rates (testing economic growth hypotheses)
 
@@ -108,7 +108,7 @@ A test statistic is the tug on a fishing line. A small tug could be the current;
 ::::: {.columns}
 :::: {.column width="50%"}
 ::: {.callout-tip collapse="true" appearance="simple" title="Example"}
-The earnings test produces $p = 0.4703$: if true population mean earnings really were \$40{,}000, we'd see a sample mean this far away (in either direction) about 47% of the time just from random sampling. Compare to the gas-price test where $p < 0.0001$ — observing a sample mean of \$3.67 if true $\mu = 3.81$ would happen less than once in 10{,}000 repetitions.
+The earnings test produces $p = 0.4703$: if true population mean earnings really were \$40{,}000, we'd see a sample mean this far away (in either direction) about 47% of the time just from random sampling. Compare to the gas-price test where $p < 0.0001$ — observing a sample mean at least as far from \$3.81 as \$3.67 would, if true $\mu = 3.81$, happen less than once in 10{,}000 repetitions.
 :::
 ::::
 :::: {.column width="50%"}
@@ -153,7 +153,7 @@ Amusement-park rides post a "you must be this tall to ride" sign. Anyone shorter
 ::::: {.columns}
 :::: {.column width="50%"}
 ::: {.callout-tip collapse="true" appearance="simple" title="Example"}
-The earnings test failed to reject $H_0: \mu = \$40{,}000$ at $\alpha = 0.05$ — but the chapter notes this could be a Type II error: with the present sample of $n = 171$ and SE \$1{,}952, the test cannot distinguish \$40k from \$41,400. Quadrupling the sample to $n = 684$ would halve the SE to \$976, doubling the t-statistic and likely catching the difference.
+The earnings test failed to reject $H_0: \mu = \$40{,}000$ at $\alpha = 0.05$ — but the chapter notes this could be a Type II error: with the present sample of $n = 171$ and SE \$1{,}952, the test cannot distinguish \$40k from \$41,400. Quadrupling the sample to $n = 684$ would halve the SE to \$976 and double the t-statistic to about 1.45 — still below the ±1.96 cutoff, so even a much larger sample would probably fail to detect a difference this small.
 :::
 ::::
 :::: {.column width="50%"}
@@ -304,6 +304,8 @@ $$t \sim T(n-1)$$
 - Fatter tails than normal (more probability in extremes)
 - Converges to N(0,1) as degrees of freedom increase
 
+The next cell plots the t-distribution against the standard normal for 4 and 30 degrees of freedom. Watch how t(4)'s fatter tails put extra probability in the extremes, while t(30) is already nearly indistinguishable from the normal.
+
 ```python
 # Visualize t-distribution vs standard normal
 fig, axes = plt.subplots(1, 2, figsize=(16, 6))
@@ -371,6 +373,8 @@ $$\bar{x} \pm 2 \times \text{se}(\bar{x})$$
 > **Key Concept 4.3: Confidence Intervals**
 >
 > A confidence interval provides a range of plausible values for the population parameter $\mu$. A 95% confidence interval means: if we repeated the sampling procedure many times, approximately 95% of the resulting intervals would contain the true $\mu$. The interval is constructed as $\bar{x} \pm t_{\alpha/2} \times se(\bar{x})$, where wider intervals indicate less precision.
+
+Let's put the formula to work: the next cell computes the 95% confidence interval for mean earnings from our sample of 171 women. Look for how the margin of error combines the critical value with the standard error.
 
 ```python
 # Calculate 95% confidence interval for mean earnings
@@ -444,7 +448,7 @@ Higher confidence requires wider intervals. You cannot have both maximum precisi
 
 - To be more confident we've captured μ, we must cast a wider net
 - The critical value increases with confidence level:
-  - 90% CI: t-critical ≈ 1.66 → smaller multiplier
+  - 90% CI: t-critical ≈ 1.65 → smaller multiplier
   - 95% CI: t-critical ≈ 1.97 → moderate multiplier  
   - 99% CI: t-critical ≈ 2.61 → larger multiplier
 
@@ -491,10 +495,13 @@ for conf in conf_levels:
     ci_lower = mean_earnings - t_crit * se_earnings
     ci_upper = mean_earnings + t_crit * se_earnings
     width = ci_upper - ci_lower
-    print(f"{conf*100:.0f}%{ci_lower:>18,.2f}{ci_upper:>18,.2f}{width:>18,.2f}")
+    label = f"{conf*100:.0f}%"
+    print(f"{label:<10} {ci_lower:>15,.2f} {ci_upper:>15,.2f} {width:>15,.2f}")
 
 # Notice: Higher confidence -> wider interval -> less precision
 ```
+
+The output confirms the trade-off previewed above: moving from 90% to 99% confidence widens the interval from \$6,457 to \$10,171 — about 58% wider in exchange for the extra assurance that the interval captures μ.
 
 ## 4.4 Two-Sided Hypothesis Tests
 
@@ -606,6 +613,8 @@ Notice that \$40,000 IS inside our 95% CI [\$37,559, \$45,266]. This is no coinc
 - Any value outside the 95% CI WILL be rejected at α = 0.05
 
 ### Visualizing the two-sided hypothesis test
+
+The next cell draws the t(170) distribution, shades the two rejection regions, and marks our observed t-statistic. Check whether the red dashed line lands inside or outside the shaded tails.
 
 ```python
 # Visualize two-sided hypothesis test
@@ -721,7 +730,7 @@ You cannot minimize both simultaneously:
 2. **Gas price test (significant):**
  - High power due to small SE (\$0.0267) and reasonable sample size (n=32)
  - Successfully detected a real difference
- - Low probability this is a Type I error (p < 0.0001)
+ - Very strong evidence against H₀ (p < 0.0001): data this extreme would almost never occur if H₀ were true
 
 **Practical advice:**
 
@@ -813,8 +822,8 @@ Unlike our earnings example, here we have strong evidence that Yolo County gas p
 **Type I vs Type II Errors in this context:**
 
 - **Type I Error:** Concluding Yolo County prices differ when they actually don't
-  - Probability = α = 0.05 (5% chance if we reject)
-  - But our p-value is < 0.0001, so we're very confident we're not making this error
+  - Probability = α = 0.05 (the chance of rejecting when H₀ is actually true)
+  - Our p-value < 0.0001 means data this extreme would be vanishingly rare if H₀ were true — very strong evidence for rejecting
 
 - **Type II Error:** Concluding prices don't differ when they actually do
   - Not relevant here since we rejected H₀
@@ -822,7 +831,7 @@ Unlike our earnings example, here we have strong evidence that Yolo County gas p
 
 > **Key Concept 4.5: Statistical Significance vs. Sample Size**
 >
-> Even small practical differences can be statistically significant with large samples (n=32 gas stations). The gasoline price difference of \$0.14 might seem trivial, but:
+> Even small practical differences can be statistically significant when the sample gives precise estimates — here just n=32 gas stations, but with very little price variation. The gasoline price difference of \$0.14 might seem trivial, but:
 > - The **standard error is small** (\$0.0267), giving precise estimates
 > - The **t-statistic is large** (-5.26), indicating the difference is many standard errors from zero
 > - This demonstrates **high statistical power**—the ability to detect even small real effects
@@ -865,9 +874,9 @@ print(f"\nNote: A one-sided test is more appropriate here (see section 4.6)")
 
 **Test Results: H₀: μ = \$50,000 vs Hₐ: μ ≠ \$50,000**
 
-- Sample mean: (actual value from code output)
-- t-statistic: (actual value from code output)
-- p-value: > 0.05 (not statistically significant)
+- Sample mean: \$52,353.93
+- t-statistic: 0.5002
+- p-value: 0.6175 (not statistically significant)
 - Decision: DO NOT REJECT H₀ at α = 0.05
 
 **This is NOT a statistically significant result.**
@@ -931,7 +940,7 @@ The question asks "Do men earn MORE than \$50,000?" which suggests a **one-sided
 ```python
 # Load and test GDP growth data
 data_gdp = pd.read_stata(GITHUB_DATA_URL + 'AED_REALGDPPC.DTA')
-growth = data_gdp['growth']
+growth = data_gdp['growth'].dropna()  # first 4 quarters have no year-over-year growth
 
 mean_growth = growth.mean()
 std_growth = growth.std(ddof=1)
@@ -956,9 +965,9 @@ print(f"\nConclusion: The data are consistent with 2.0% average annual growth.")
 
 **Test Results: H₀: μ = 2.0% vs Hₐ: μ ≠ 2.0%**
 
-- Sample mean: (actual value from code output)
-- t-statistic: (actual value from code output)
-- p-value: > 0.05 (not statistically significant)
+- Sample mean: 1.9905%
+- t-statistic: -0.0680
+- p-value: 0.9458 (not statistically significant)
 - Decision: DO NOT REJECT H₀ at α = 0.05
 
 **The data are consistent with 2.0% average annual growth.**
@@ -972,7 +981,7 @@ We cannot reject the hypothesis that real GDP per capita grew at 2.0% per year o
    - We don't have strong evidence that the true mean differs from 2.0%
    - The p-value > 0.05 indicates this result is plausible under H₀
 
-2. **Large sample size (n=241 years):**
+2. **Large sample size (n=241 growth-rate observations):**
    - With 241 year-to-year growth rates, we have substantial data
    - Large samples typically have smaller standard errors and more statistical power
    - Yet we still fail to reject H₀—this suggests the true mean is genuinely close to 2.0%
@@ -1030,7 +1039,7 @@ Sometimes we want to test a **directional** claim:
 
 > **Key Concept 4.8: One-Sided Tests**
 >
-> One-sided tests concentrate the rejection region in ONE tail of the distribution, making them more powerful for detecting effects in the specified direction. Use when theory predicts a specific direction. The p-value for a one-sided test is exactly half the two-sided p-value (when the effect is in the predicted direction). Critical values are smaller for one-sided tests (e.g., 1.65 vs ±1.96 for α=0.05).
+> One-sided tests concentrate the rejection region in ONE tail of the distribution, making them more powerful for detecting effects in the specified direction. Use when theory predicts a specific direction. The p-value for a one-sided test is exactly half the two-sided p-value (when the effect is in the predicted direction). Critical values are smaller for one-sided tests (e.g., 1.65 vs ±1.96 for α=0.05 in large samples; here with $n = 171$, 1.654 vs ±1.974).
 
 ```python
 # One-sided (upper-tailed) test: H0: μ ≤ $40,000 vs Ha: μ > $40,000
@@ -1055,6 +1064,8 @@ print(f"that mean earnings exceed ${mu0:,}.")
 ```
 
 ### Visualizing One-Sided Test
+
+This plot repeats the visualization for the one-sided test: the rejection region now sits entirely in the upper tail, guarded by a smaller critical value (1.65 instead of ±1.97). See whether our t-statistic of 0.72 clears this lower bar.
 
 ```python
 # Visualize one-sided hypothesis test
@@ -1159,9 +1170,18 @@ One advantage of one-sided tests: greater statistical power in the specified dir
 
 The methods extend naturally to **proportions** (binary data).
 
-**Example:** Survey data where respondents answer yes (1) or no (0).- Sample proportion: $\hat{p} = \bar{x}$ = fraction of "yes" responses- Standard error: se($\hat{p}$) = √[$\hat{p}$(1 - $\hat{p}$)/n]
+**Example:** Survey data where respondents answer yes (1) or no (0).
 
-**Confidence interval for population proportion p:**$$\hat{p} \pm z_{\alpha/2} \times \sqrt{\frac{\hat{p}(1-\hat{p})}{n}}$$**Note:** For proportions with large n, we use the **normal distribution** (z) instead of t. **Example:** In a sample of 921 voters, 480 intend to vote Democrat. Is this different from 50%?
+- Sample proportion: $\hat{p} = \bar{x}$ = fraction of "yes" responses
+- Standard error: se($\hat{p}$) = √[$\hat{p}$(1 - $\hat{p}$)/n]
+
+**Confidence interval for population proportion p:**
+
+$$\hat{p} \pm z_{\alpha/2} \times \sqrt{\frac{\hat{p}(1-\hat{p})}{n}}$$
+
+**Note:** For proportions with large n, we use the **normal distribution** (z) instead of t.
+
+**Example:** In a sample of 921 voters, 480 intend to vote Democrat. Is this different from 50%?
 
 ```python
 # Proportions example
@@ -1322,13 +1342,6 @@ Proportions are just means of binary (0/1) data:
 - `pandas`: Data manipulation
 - `matplotlib`: Visualization of hypothesis tests
 
-### Next Steps
-
-- **Chapter 5:** Bivariate data summary (relationships between two variables)
-- **Chapter 6:** Least squares estimator (regression foundation)
-- **Chapter 7:** Inference for regression coefficients
-
-
 ### Congratulations! 
 
 You now understand the foundations of statistical inference:
@@ -1429,7 +1442,8 @@ for conf in [0.90, 0.95, 0.99]:
     tc = stats.t.ppf(1 - (1 - conf) / 2, n - 1)
     lo = mean_earnings - tc * se_earnings
     hi = mean_earnings + tc * se_earnings
-    print(f"{conf*100:.0f}%{lo:>14,.2f}{hi:>14,.2f}{hi - lo:>12,.2f}")
+    label = f"{conf*100:.0f}%"
+    print(f"{label:<8} {lo:>12,.2f} {hi:>12,.2f} {hi - lo:>10,.2f}")
 
 # =============================================================================
 # STEP 5: Two-sided hypothesis test — H0: mu = $40,000
@@ -1505,11 +1519,17 @@ print(f"Decision: {'Reject H0' if abs(z_stat) > 1.96 else 'Do not reject H0'}")
 
 **Try it yourself!** Copy this code into an empty Google Colab notebook and run it: [Open Colab](https://colab.research.google.com/notebooks/empty.ipynb)
 
+**Next Steps:**
+
+- **Chapter 5:** Bivariate data summary (relationships between two variables)
+- **Chapter 6:** Least squares estimator (regression foundation)
+- **Chapter 7:** Inference for regression coefficients
+
 ## Practice Exercises
 
 Test your understanding of statistical inference:
 
-### Exercise 1: Confidence Interval Interpretation
+**Exercise 1: Confidence Interval Interpretation**
 
 A 95% CI for mean household income is [$48,000, $56,000]
 
@@ -1521,7 +1541,7 @@ A 95% CI for mean household income is [$48,000, $56,000]
 
 (d) TRUE or FALSE: "If we repeated sampling, 95% of CIs would contain the true mean"
 
-### Exercise 2: Standard Error Calculation
+**Exercise 2: Standard Error Calculation**
 
 Sample of $n=64$ observations with mean $\$45,000$ and standard deviation $s=\$16,000$
 
@@ -1531,7 +1551,7 @@ Sample of $n=64$ observations with mean $\$45,000$ and standard deviation $s=\$1
 
 (c) Construct an approximate 95% CI using the "mean $\pm$ 2SE" rule
 
-### Exercise 3: t vs z Distribution
+**Exercise 3: t vs z Distribution**
 
 (a) Why do we use the t-distribution instead of the normal distribution?
 
@@ -1541,7 +1561,7 @@ Sample of $n=64$ observations with mean $\$45,000$ and standard deviation $s=\$1
 
 (d) Compare these to $z=1.96$. What do you notice?
 
-### Exercise 4: Hypothesis Test Mechanics
+**Exercise 4: Hypothesis Test Mechanics**
 
 Test $H_0: \mu = 100$ vs $H_a: \mu \neq 100$ with sample mean $= 105$, SE $= 3$, $n = 49$
 
@@ -1553,7 +1573,7 @@ Test $H_0: \mu = 100$ vs $H_a: \mu \neq 100$ with sample mean $= 105$, SE $= 3$,
 
 (d) Would your decision change if $\alpha=0.01$?
 
-### Exercise 5: One-Sided vs Two-Sided Tests
+**Exercise 5: One-Sided vs Two-Sided Tests**
 
 Sample: $n=36$, mean $=72$, $s=18$
 
@@ -1565,7 +1585,7 @@ Sample: $n=36$, mean $=72$, $s=18$
 
 (d) In which case is the evidence against $H_0$ stronger?
 
-### Exercise 6: Type I and Type II Errors
+**Exercise 6: Type I and Type II Errors**
 
 (a) Define Type I error and give an example in the earnings context
 
@@ -1575,7 +1595,7 @@ Sample: $n=36$, mean $=72$, $s=18$
 
 (d) How can we reduce both types of error simultaneously?
 
-### Exercise 7: Proportions Inference
+**Exercise 7: Proportions Inference**
 
 Survey of 500 people: 275 support a policy
 
@@ -1587,7 +1607,7 @@ Survey of 500 people: 275 support a policy
 
 (d) Is the result statistically significant?
 
-### Exercise 8: Python Practice
+**Exercise 8: Python Practice**
 
 Generate a random sample of 100 observations from $N(50, 100)$
 
@@ -1647,6 +1667,8 @@ These are real questions that economists and policymakers care about when design
 > - A real productivity increase vs. random year-to-year variation
 > - Genuine regional gaps vs. sampling artifacts
 > - Policy-relevant changes vs. statistical noise
+
+Let's begin by loading the Mendez convergence clubs dataset and extracting labor productivity (`lp`) for the first and last years of the panel, 1990 and 2014 — these two cross-sections anchor all six tasks below.
 
 ```python
 # Load convergence clubs dataset
@@ -1792,7 +1814,7 @@ mean_2014 = lp_2014.mean()
 se_1990 = lp_1990.std() / np.sqrt(len(lp_1990))
 se_2014 = lp_2014.std() / np.sqrt(len(lp_2014))
 
-# Calculate pooled standard error for difference in means
+# Calculate the standard error of the difference in means (unpooled, matches equal_var=False below)
 se_diff = np.sqrt(_____**2 + _____**2)  # Fill in: se_1990 and se_2014
 
 # Calculate t-statistic
@@ -1832,7 +1854,7 @@ else:
 
 - What does the p-value tell you about the likelihood of observing this difference by chance?
 - Is the change economically meaningful (not just statistically significant)?
-- What assumptions does the two-sample t-test make?
+- What assumptions does the two-sample t-test make? Note that the same 108 countries appear in both years, so the 1990 and 2014 samples are not independent — a paired test on within-country changes would respect that dependence.
 
 #### Task 3: Comparing Regional Productivity Levels (Semi-guided)
 
@@ -1874,7 +1896,7 @@ print(f"Europe mean: ${lp_europe.mean():,.0f}\n")
 
 # Visualize distributions
 fig, ax = plt.subplots(1, 1, figsize=(8, 5))
-ax.boxplot([lp_africa, lp_europe], labels=['Africa', 'Europe'])
+ax.boxplot([lp_africa, lp_europe], tick_labels=['Africa', 'Europe'])
 ax.set_ylabel('Labor Productivity ($)')
 ax.set_title('Labor Productivity Distribution by Region (2014)')
 ax.grid(axis='y', alpha=0.3)
@@ -1896,7 +1918,7 @@ plt.show()
 > **Statistical significance** answers: "Is this difference unlikely to be due to chance?"
 > - Depends on sample size: larger samples detect smaller differences
 > - Measured by p-value: probability of observing this result if H₀ is true
-> - Standard: p < 0.05 means <5% chance of Type I error
+> - Standard: rejecting only when p < 0.05 keeps the Type I error rate (rejecting a true H₀) at 5%
 >
 > **Economic significance** answers: "Is this difference large enough to matter?"
 > - Depends on context: a \$1,000 productivity gap might be huge for low-income countries but trivial for high-income countries
@@ -1945,7 +1967,7 @@ plt.show()
 # - Decision at α=0.05
 
 # Step 5: Interpret Type I error
-# If we reject H₀, what is the probability we made a mistake?
+# If H₀ were actually true, how often would a test like this wrongly reject it?
 ```
 
 **Hint:** Remember that for one-sided tests:
@@ -1956,7 +1978,7 @@ plt.show()
 
 **Questions to consider:**
 
-- Why is the one-sided p-value smaller than the two-sided p-value?
+- The 2014 sample mean (≈\$41,000) is **below** the \$50,000 benchmark, so the t-statistic is negative. Is the one-sided p-value for Hₐ: μ > 50,000 smaller or larger than the two-sided p-value here? Why?
 - When is a one-sided test appropriate vs a two-sided test?
 - What are the policy implications if we reject H₀?
 
@@ -1982,8 +2004,9 @@ plt.show()
 # df_2014 = df.loc[df.index.get_level_values('year') == 2014, ['lp']]
 # Merge on country index
 
-# Hint 2: Create binary growth indicator
-# growth = (lp_2014 > lp_1990).astype(int)
+# Hint 2: Create binary growth indicator (drop the year index level so countries align;
+# comparing the raw Series raises an error because their (country, year) indexes differ)
+# growth = (lp_2014.droplevel('year') > lp_1990.droplevel('year')).astype(int)
 
 # Hint 3: Proportions formulas from Section 4.7
 # p_hat = np.mean(growth)
@@ -2096,9 +2119,9 @@ By completing this case study, you've practiced **all the major skills from Chap
 
 These skills form the foundation for more advanced methods in later chapters:
 
-- **Chapter 5:** Regression analysis (relationship between two variables)
-- **Chapter 6:** Multiple regression (controlling for confounders)
-- **Chapter 7:** Hypothesis tests in regression models
+- **Chapter 5:** Bivariate data summary (relationships between two variables)
+- **Chapter 6:** Least squares estimator (regression foundation)
+- **Chapter 7:** Inference for regression coefficients
 
 Statistical inference is everywhere in empirical economics. You've now mastered the core toolkit for:
 
@@ -2242,8 +2265,9 @@ else:
 # Calculate department-level statistics
 dept_stats = bol_key.groupby('dep')['imds'].agg(['mean', 'std', 'count']).sort_values('mean')
 dept_stats['se'] = dept_stats['std'] / np.sqrt(dept_stats['count'])
-dept_stats['ci_low'] = dept_stats['mean'] - 1.96 * dept_stats['se']    # z-critical for 95% CI
-dept_stats['ci_high'] = dept_stats['mean'] + 1.96 * dept_stats['se']
+dept_stats['t_crit'] = stats.t.ppf(0.975, df=dept_stats['count'] - 1)  # t-critical for 95% CI (df = n - 1)
+dept_stats['ci_low'] = dept_stats['mean'] - dept_stats['t_crit'] * dept_stats['se']
+dept_stats['ci_high'] = dept_stats['mean'] + dept_stats['t_crit'] * dept_stats['se']
 
 # 95% confidence intervals for mean IMDS by department
 dept_stats[['mean', 'se', 'ci_low', 'ci_high', 'count']].round(2)
@@ -2253,7 +2277,7 @@ fig, ax = plt.subplots(figsize=(10, 6))
 departments = dept_stats.index
 y_pos = range(len(departments))
 ax.errorbar(dept_stats['mean'], y_pos,
-            xerr=1.96 * dept_stats['se'],
+            xerr=dept_stats['t_crit'] * dept_stats['se'],
             fmt='o', color='#22d3ee', capsize=5, capthick=1.5, markersize=6)
 ax.set_yticks(y_pos)
 ax.set_yticklabels(departments)
@@ -2314,7 +2338,7 @@ else:
 
 > **Key Concept 4.13: Subnational Inference Challenges**
 >
-> When testing hypotheses about departmental means, each department contains a different number of municipalities (ranging from ~10 to ~50+). Departments with fewer municipalities have **wider confidence intervals** and less statistical power. This means we may fail to detect real differences for smaller departments—not because the differences don't exist, but because we lack sufficient data to establish them conclusively.
+> When testing hypotheses about departmental means, each department contains a different number of municipalities (ranging from ~10 to ~90). Departments with fewer municipalities have **wider confidence intervals** and less statistical power. This means we may fail to detect real differences for smaller departments—not because the differences don't exist, but because we lack sufficient data to establish them conclusively.
 
 #### Task 5: Comparing Two Departments (Independent)
 
@@ -2393,8 +2417,9 @@ print(f"represents a {'substantial' if abs(top_values.mean() - bot_values.mean()
 # Summary table for policy brief
 dept_summary = bol_key.groupby('dep')['imds'].agg(['mean', 'std', 'count']).sort_values('mean', ascending=False)
 dept_summary['se'] = dept_summary['std'] / np.sqrt(dept_summary['count'])
+dept_summary['t_crit'] = stats.t.ppf(0.975, dept_summary['count'] - 1)   # t-critical, df = n-1
 dept_summary['ci_95'] = dept_summary.apply(
-    lambda r: f"[{r['mean'] - 1.96*r['se']:.1f}, {r['mean'] + 1.96*r['se']:.1f}]", axis=1)
+    lambda r: f"[{r['mean'] - r['t_crit']*r['se']:.1f}, {r['mean'] + r['t_crit']*r['se']:.1f}]", axis=1)
 dept_summary[['mean', 'std', 'count', 'ci_95']].round(2)
 ```
 
