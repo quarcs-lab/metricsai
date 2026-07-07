@@ -103,7 +103,7 @@ A handclap in a long stone hallway echoes for several seconds; sounds you make l
 ::::: {.columns}
 :::: {.column width="50%"}
 ::: {.callout-tip collapse="true" appearance="simple" title="Example"}
-For a 2{,}000-sq-ft Davis house, the chapter's regression on `size` predicts an *average* `price` of about \$280k, with a 95% CI roughly $[\$250\mathrm{k}, \$310\mathrm{k}]$. That interval describes the typical sale price across all 2{,}000-sq-ft houses in this market — not what any single house will fetch.
+For a 2{,}000-sq-ft Davis house, the chapter's regression on `size` predicts an *average* `price` of about \$263k, with a 95% CI roughly $[\$253\mathrm{k}, \$272\mathrm{k}]$. That interval describes the typical sale price across all 2{,}000-sq-ft houses in this market — not what any single house will fetch.
 :::
 ::::
 :::: {.column width="50%"}
@@ -118,7 +118,7 @@ A bakery weighs every loaf and reports an average of 503 g. The CI for the *aver
 ::::: {.columns}
 :::: {.column width="50%"}
 ::: {.callout-tip collapse="true" appearance="simple" title="Example"}
-For the same 2{,}000-sq-ft house, the prediction interval for *one specific* sale is roughly $[\$180\mathrm{k}, \$380\mathrm{k}]$ — three to four times wider than the CI for the average. With $s_e \approx \$90{,}000$ in the simple regression on `size`, almost all of that width comes from the irreducible "1" term, not from estimation uncertainty in $\hat\beta$.
+For the same 2{,}000-sq-ft house, the prediction interval for *one specific* sale is roughly $[\$213\mathrm{k}, \$312\mathrm{k}]$ — about five times wider than the CI for the average. With $s_e \approx \$23{,}551$ in the simple regression on `size`, almost all of that width comes from the irreducible "1" term, not from estimation uncertainty in $\hat\beta$.
 :::
 ::::
 :::: {.column width="50%"}
@@ -204,7 +204,7 @@ plt.rcParams.update({
 print("Setup complete! Ready to explore further topics in multiple regression.")
 ```
 
-## 12.1: Example - House Price Prediction
+## 12.1 Example - House Price Prediction
 
 We'll work with two datasets:
 
@@ -212,17 +212,21 @@ We'll work with two datasets:
 2. **GDP growth data** for time series HAC inference
 
 ```{python}
+# 12.1 EXAMPLE - HOUSE PRICE PREDICTION
+
 # Read house data
 data_house = pd.read_stata(GITHUB_DATA_URL + 'AED_HOUSE.DTA')
 
 print("House Data Summary:")
-data_house.describe()
+print(data_house.describe())
 
 print("\nFirst few observations:")
 data_house[['price', 'size', 'bedrooms', 'bathrooms', 'lotsize', 'age', 'monthsold']].head()
 ```
 
-## 12.2: Inference with Robust Standard Errors
+The dataset is a small cross-section: 29 houses sold in Davis, California, in 1999. Keep this in mind throughout the chapter — with only $n = 29$ observations, every standard-error comparison and hypothesis test operates with limited power.
+
+## 12.2 Inference with Robust Standard Errors
 
 In practice, the classical assumptions often fail. The most common violations are:
 
@@ -270,6 +274,8 @@ print("\nRegression with Default Standard Errors:")
 model_default.summary()
 ```
 
+Now we re-estimate the identical model with heteroskedastic-robust (HC1) standard errors. The coefficient estimates will not change — watch instead how each standard error, $t$-statistic, and $p$-value shifts relative to the default output above.
+
 ```{python}
 # Estimate with heteroskedastic-robust standard errors (HC1)
 model_robust = pf.feols('price ~ size + bedrooms + bathrooms + lotsize + age + monthsold', data=data_house, vcov='HC1')
@@ -283,6 +289,8 @@ print(f"Size effect (robust): ${size_coef_robust:,.2f} per sq ft (p = {size_pval
 print("\nRegression with Heteroskedastic-Robust Standard Errors (HC1):")
 model_robust.summary()
 ```
+
+For the Davis houses, robust and default standard errors tell the same story: the robust SE for `size` (15.36) is nearly identical to the default (15.39), so the headline conclusion is unchanged — each additional square foot is associated with roughly \$68 more in sale price, highly significant either way (p = 0.0002). The largest adjustments are for `bathrooms` (robust SE about 23% larger) and `lotsize` (robust SE about 26% smaller), but both variables remain far from statistical significance under either method.
 
 > **Key Concept 12.1: Heteroskedastic-Robust Standard Errors**
 >
@@ -313,7 +321,7 @@ Looking at the SE Ratio column, we can see how robust standard errors differ fro
 **When SE Ratio < 1.0**: Robust SE smaller than default SE
 
 - Unusual but possible
-- Could indicate negative correlation between x² and residuals
+- Could indicate negative correlation between x² and squared residuals
 
 **Practical Implications:**
 
@@ -352,27 +360,31 @@ data_gdp = pd.read_stata(GITHUB_DATA_URL + 'AED_REALGDPPC.DTA')
 # HAC Standard Errors for Time Series Data
 
 print("\nGDP Growth Data Summary:")
-data_gdp['growth'].describe()
+print(data_gdp['growth'].describe())
 
 # Mean of growth
 mean_growth = data_gdp['growth'].mean()
 print(f"\nMean growth rate: {mean_growth:.6f}")
 ```
 
+Before adjusting any standard errors, let's measure the serial dependence directly. The next cell computes the autocorrelation of `growth` at lags 0 through 5 — look for a positive lag-1 value, which means one period's growth carries information about the next.
+
 ```{python}
 # Autocorrelation analysis
 print("\nAutocorrelations at multiple lags:")
-acf_values = acf(data_gdp['growth'], nlags=5, fft=False)
+acf_values = acf(data_gdp['growth'].dropna(), nlags=5, fft=False)
 for i in range(6):
     print(f"  Lag {i}: {acf_values[i]:.6f}")
 
 # Positive lag 1 correlation suggests persistence
 ```
 
+Now we plot the correlogram (Figure 12.1), which displays the autocorrelation at each lag together with 95% confidence bands under the null of no autocorrelation.
+
 ```{python}
 # Correlogram
 fig, ax = plt.subplots(figsize=(10, 6))
-plot_acf(data_gdp['growth'], lags=10, ax=ax, alpha=0.05)
+plot_acf(data_gdp['growth'].dropna(), lags=10, ax=ax, alpha=0.05)
 ax.set_xlabel('Lag', fontsize=12)
 ax.set_ylabel('Autocorrelation', fontsize=12)
 ax.set_title('Figure 12.1: Correlogram of GDP Growth', fontsize=14, fontweight='bold')
@@ -437,7 +449,7 @@ Autocorrelation creates **information overlap** between observations:
 - Spurious significance (false discoveries)
 - Invalid hypothesis tests
 
-## 12.3: Prediction
+## 12.3 Prediction
 
 Prediction is a core application of regression, but there's a crucial distinction:
 
@@ -554,27 +566,27 @@ Looking at our predictions, several patterns emerge:
 
 **1. Point Prediction:**
 
-- Predicted price ≈ \$280,000 (approximately)
+- Predicted price ≈ \$263,000 (approximately)
 - This is our best single guess
 - Same for both conditional mean and actual value
 
 **2. Confidence Interval for E[Y|X=2000]:**
 
-- Relatively narrow (e.g., \$250k - \$310k)
+- Relatively narrow (e.g., \$253k - \$272k)
 - Tells us: "We're 95% confident the **average price** of all 2000 sq ft houses is in this range"
 - Precise because we're estimating a population average
 - Useful for: Understanding market valuations, setting pricing policies
 
 **3. Prediction Interval for Y:**
 
-- Much wider (e.g., \$180k - \$380k)
+- Much wider (e.g., \$213k - \$312k)
 - Tells us: "We're 95% confident **this specific house** will sell in this range"
 - Wide because individual houses vary considerably
 - Useful for: Setting listing ranges, individual appraisals
 
 **The Ratio is Revealing:**
 
-Notice that the PI is approximately **3-4 times wider** than the CI. This ratio tells us:
+Notice that the PI is approximately **5 times wider** than the CI. This ratio tells us:
 
 - Most variation is **between houses** (individual heterogeneity)
 - Relatively little variation is **estimation uncertainty**
@@ -590,8 +602,8 @@ Notice that the PI is approximately **3-4 times wider** than the CI. This ratio 
 
 If you're a real estate agent:
 
-- Don't promise a precise price (\$280k)
-- Do provide a realistic range (\$180k - \$380k)
+- Don't promise a precise price (\$263k)
+- Do provide a realistic range (\$213k - \$312k)
 - Explain that individual houses vary, even controlling for size
 - Use the confidence interval to discuss average market values
 
@@ -621,14 +633,14 @@ $$se(\hat{y}_f) = \hat{\sigma} \sqrt{1 + \frac{1}{n} + \frac{(x^* - \bar{x})^2}{
 
 In our example:
 
-- $\hat{\sigma}$ (RMSE) ≈ \$90k (this is the irreducible uncertainty)
+- $\hat{\sigma}$ (RMSE) ≈ \$23.6k (this is the irreducible uncertainty)
 - $(1/n)$ term ≈ 0.034 (small with n=29)
 - Distance term varies with prediction point
 
 For predictions near the mean:
 
-- $se(\hat{y}_{cm})$ ≈ \$90k × √0.034 ≈ \$17k (mainly from 1/n)
-- $se(\hat{y}_f)$ ≈ \$90k × √1.034 ≈ \$92k (mainly from the "1")
+- $se(\hat{y}_{cm})$ ≈ \$23.6k × √0.034 ≈ \$4.4k (mainly from 1/n)
+- $se(\hat{y}_f)$ ≈ \$23.6k × √1.034 ≈ \$24k (mainly from the "1")
 
 **The "1 +" term is why:**
 
@@ -701,8 +713,9 @@ print(f"\n95% PI for Y (approximate):")
 print(f"  [${pi_lower:.2f}, ${pi_upper:.2f}]")
 print(f"  RMSE: ${s_e_multi:.2f}")
 
-print("\nMultiple regression provides more precise predictions.")
-print("But individual predictions still have large uncertainty.")
+print("\nNote: adding regressors does not automatically improve precision —")
+print("here the RMSE is slightly larger than in the simple regression.")
+print("Individual predictions still have large uncertainty.")
 ```
 
 ### Prediction with Robust Standard Errors
@@ -738,7 +751,7 @@ print(f"  Note: Coefficients and RMSE are identical; only SEs for inference diff
 >
 > Even with precisely estimated coefficients, predicting an individual outcome is imprecise because the forecast must account for the unobservable error $u^*$. The forecast standard error satisfies $se(\hat{y}_f) \geq s_e$ — it is at least as large as the regression's standard error. This means 95% prediction intervals are at least $\pm 1.96 \times s_e$ wide, regardless of how much data we have.
 
-## 12.4: Nonrepresentative Samples
+## 12.4 Nonrepresentative Samples
 
 **Sample selection** can bias OLS estimates:
 
@@ -788,7 +801,7 @@ After B replications:
 **Percentile Method CI:**
 
 - 95% CI = [2.5th percentile, 97.5th percentile] of bootstrap distribution
-- Example: If you have 1000 estimates, use the 25th and 975th largest values
+- Example: If you have 1000 estimates, use the 25th and 975th values after sorting from smallest to largest
 
 **Advantages of Bootstrap:**
 
@@ -913,7 +926,7 @@ Testing k hypotheses at α = 0.05:
 3. **Pre-registration**: Specify primary hypotheses before seeing data
 4. **Replication**: Confirm findings in independent samples
 
-## 12.5: Best Estimation Methods
+## 12.5 Best Estimation Methods
 
 **When are OLS estimators "best"?**
 
@@ -925,7 +938,7 @@ Under classical assumptions 1-4, OLS is **BLUE** (Best Linear Unbiased Estimator
 
 - OLS remains unbiased but inefficient
 - **Feasible GLS (FGLS)** or **Weighted Least Squares (WLS)** more efficient
-- Weight observations inversely to error variance: $w_i = 1/\sigma_i$
+- Weight observations inversely to error variance: $w_i = 1/\sigma_i^2$
 
 **2. Autocorrelation**: $Cov[u_t, u_{t-s}] \neq 0$
 
@@ -966,7 +979,7 @@ The power function shows how test power varies with the true coefficient value. 
 4. **The 0.80 threshold (green dashed line)**:
  - Standard target: 80% power
  - Means 20% chance of Type II error (β = 0.20)
- - In this example: Need |β| ≈ 30 to achieve 80% power
+ - In this example: Need |β| ≈ 44 to achieve 80% power
 
 **What This Means for Study Design:**
 
@@ -977,12 +990,12 @@ Given the parameters (n=30, SE=15, α=0.05):
  - More likely to **miss** the effect than detect it
  - Study is underpowered
 
-- **Medium effects** (|β| ≈ 30):
+- **Medium effects** (|β| ≈ 44):
  - Power ≈ 80%
  - Good chance of detection
  - Standard benchmark for adequate power
 
-- **Large effects** (|β| > 45):
+- **Large effects** (|β| > 56):
  - Power > 95%
  - Almost certain detection
  - Study is well-powered
@@ -992,7 +1005,7 @@ Given the parameters (n=30, SE=15, α=0.05):
 To detect smaller effects, you need larger samples:
 
 - **Double the sample** (n=60) → Can detect smaller effects with same power
-- Power roughly proportional to √n
+- Minimum detectable effect shrinks in proportion to 1/√n
 - To halve minimum detectable effect, need **4× the sample size**
 
 **The Power-Sample Size Relationship:**
@@ -1001,7 +1014,7 @@ For a given effect size β:
 
 - Power increases with √n
 - To go from 50% to 80% power: Need ≈ 2× the sample
-- To go from 80% to 95% power: Need ≈ 2× the sample again
+- To go from 80% to 95% power: Need ≈ 1.7× the sample again
 
 **Practical Applications:**
 
@@ -1037,7 +1050,7 @@ For a given effect size β:
 This power curve illustrates a fundamental truth:
 
 - **Smaller effects require larger samples to detect**
-- With n=30 and SE=15, we can reliably detect effects of |β| ≥ 30
+- With n=30 and SE=15, we can reliably detect effects of |β| ≥ 44 (where power reaches 80%)
 - For smaller effects, we'd need more data or reduced noise (lower σ)
 
 ```{python}
@@ -1070,7 +1083,7 @@ print("\n4. Maximum Likelihood:")
 >
 > When error variance is not constant (heteroskedasticity) or errors are correlated (autocorrelation), OLS remains unbiased but is no longer the most efficient estimator. Feasible GLS (FGLS) models the error structure and can achieve lower variance. However, FGLS requires correctly specifying the error structure — in practice, OLS with robust SEs is preferred for its simplicity and robustness to misspecification.
 
-## 12.6: Best Confidence Intervals
+## 12.6 Best Confidence Intervals
 
 **What makes a confidence interval "best"?**
 
@@ -1110,7 +1123,7 @@ A 95% CI is "best" if it:
 >
 > The bootstrap resamples the original data (with replacement) many times to estimate the sampling distribution of a statistic. Bootstrap CIs don't rely on normality or large-sample approximations, making them especially useful with small samples, skewed distributions, or non-standard estimators where analytical formulas aren't available.
 
-## 12.7: Best Tests
+## 12.7 Best Tests
 
 **Type I and Type II errors**:
 
@@ -1305,13 +1318,14 @@ plt.show()
 url_gdp = "https://raw.githubusercontent.com/quarcs-lab/data-open/master/AED/AED_REALGDPPC.DTA"
 data_gdp = pd.read_stata(url_gdp)
 
-mean_growth = data_gdp['growth'].mean()
-n_gdp       = len(data_gdp)
+growth = data_gdp['growth'].dropna()      # drop initial missing growth values
+mean_growth = growth.mean()
+n_gdp       = len(growth)
 lag_length   = int(0.75 * n_gdp**(1/3))  # rule of thumb: m = 0.75 × T^(1/3)
 
 # Compare default SE vs. HAC SE for the mean
-se_default = data_gdp['growth'].std() / np.sqrt(n_gdp)
-y = data_gdp['growth']
+se_default = growth.std() / np.sqrt(n_gdp)
+y = growth
 X = np.ones(n_gdp)
 # Note: For HAC SEs on the mean (intercept-only model), we use statsmodels
 from statsmodels.regression.linear_model import OLS as smOLS
@@ -1319,12 +1333,12 @@ model_hac = smOLS(y, X).fit(cov_type='HAC', cov_kwds={'maxlags': lag_length})
 
 print(f"\nGDP Growth: mean = {mean_growth:.4f}")
 print(f"Default SE (no autocorrelation): {se_default:.6f}")
-print(f"HAC SE (lag = {lag_length}):            {model_hac.bse[0]:.6f}")
-print(f"Ratio HAC/Default: {model_hac.bse[0] / se_default:.3f}")
+print(f"HAC SE (lag = {lag_length}):            {model_hac.bse.iloc[0]:.6f}")
+print(f"Ratio HAC/Default: {model_hac.bse.iloc[0] / se_default:.3f}")
 
 # Correlogram — visualize autocorrelation structure
 fig, ax = plt.subplots(figsize=(10, 6))
-plot_acf(data_gdp['growth'], lags=10, ax=ax, alpha=0.05)
+plot_acf(growth, lags=10, ax=ax, alpha=0.05)
 ax.set_xlabel('Lag')
 ax.set_ylabel('Autocorrelation')
 ax.set_title('Correlogram of GDP Growth')
@@ -1402,7 +1416,12 @@ plt.show()
 
 **Try it yourself!** Copy this code into an empty Google Colab notebook and run it: [Open Colab](https://colab.research.google.com/notebooks/empty.ipynb)
 
-**Next steps:** Chapter 13 introduces **dummy variables** and **indicator variables** — extending regression to handle qualitative explanatory variables.
+**Next Steps:**
+
+- **Chapter 13**: Case studies that apply the full multiple regression toolkit to real economic questions
+- **Chapter 14**: Regression with indicator (dummy) variables — handling qualitative explanatory variables
+- **Chapter 15**: Regression with transformed variables (logs, quadratics, and interactions)
+- **Chapter 16**: Checking the model and data — diagnostics for specification and influential observations
 
 Congratulations on completing Chapter 12! You now understand advanced inference methods for handling real-world data challenges.
 
@@ -1502,8 +1521,8 @@ In this case study, you will apply robust inference methods to cross-country pro
 - **Source:** Mendez (2020), 108 countries, 1990-2014
 - **Key variables:**
   - `lp` — Labor productivity (GDP per worker)
-  - `rk` — Physical capital per worker
-  - `hc` — Human capital index
+  - `kl` — Physical capital per worker
+  - `h` — Human capital index
   - `region` — Geographic region (for clustering)
 
 **Research question:** Do conclusions about productivity determinants change when using robust standard errors? How precisely can we predict productivity for a specific country?
@@ -1512,9 +1531,9 @@ In this case study, you will apply robust inference methods to cross-country pro
 # Load the Mendez convergence clubs dataset
 url = "https://raw.githubusercontent.com/quarcs-lab/mendez2020-convergence-clubs-code-data/master/assets/dat.csv"
 dat = pd.read_csv(url)
-dat_2014 = dat[dat['year'] == 2014].dropna(subset=['lp', 'rk', 'hc']).copy()
+dat_2014 = dat[dat['year'] == 2014].dropna(subset=['lp', 'kl', 'h']).copy()
 dat_2014['ln_lp'] = np.log(dat_2014['lp'])
-dat_2014['ln_rk'] = np.log(dat_2014['rk'])
+dat_2014['ln_kl'] = np.log(dat_2014['kl'])
 print(f"Cross-section sample: {len(dat_2014)} countries (year 2014)")
 ```
 
@@ -1524,13 +1543,12 @@ Compare default and heteroskedastic-robust standard errors.
 
 ```python
 # Estimate model with default SEs
-model = pf.feols('ln_lp ~ ln_rk + hc', data=dat_2014)
+model = pf.feols('ln_lp ~ ln_kl + h', data=dat_2014)
 print("Default SEs:")
 model.summary()
 
-# Estimate with HC1 robust SEs
-model_robust = # Re-estimate with robust SEs (pyfixest handles this at estimation time)
-# Use pf.feols(..., vcov="HC1") instead of post-hoc robust SEs
+# Estimate with HC1 robust SEs (pyfixest handles this at estimation time)
+model_robust = pf.feols('ln_lp ~ ln_kl + h', data=dat_2014, vcov='HC1')
 print("\nRobust SEs:")
 model_robust.summary()
 ```
@@ -1546,13 +1564,13 @@ Estimate with cluster-robust standard errors grouped by geographic region.
 
 ```python
 # Cluster-robust SEs by region
-model_cluster = pf.feols('ln_lp ~ ln_rk + hc', data=dat_2014, vcov={'CRV1': 'region'})
+model_cluster = pf.feols('ln_lp ~ ln_kl + h', data=dat_2014, vcov={'CRV1': 'region'})
 print("Cluster-Robust SEs (by region):")
 model_cluster.summary()
 
 # Compare all three SE types
 print("\nSE Comparison:")
-for var in ['Intercept', 'ln_rk', 'hc']:
+for var in ['Intercept', 'ln_kl', 'h']:
     print(f"  {var}: Default={model.se()[var]:.4f}, HC1={model_robust.se()[var]:.4f}, Cluster={model_cluster.se()[var]:.4f}")
 ```
 
@@ -1571,12 +1589,12 @@ Predict average productivity for a country with median capital and human capital
 
 ```python
 # Get median values
-median_ln_rk = dat_2014['ln_rk'].median()
-median_hc = dat_2014['hc'].median()
-print(f"Median ln(rk) = {median_ln_rk:.3f}, Median hc = {median_hc:.3f}")
+median_ln_kl = dat_2014['ln_kl'].median()
+median_h = dat_2014['h'].median()
+print(f"Median ln(kl) = {median_ln_kl:.3f}, Median h = {median_h:.3f}")
 
 # Predict conditional mean with CI
-pred_data = pd.DataFrame({'ln_rk': [median_ln_rk], 'hc': [median_hc]})
+pred_data = pd.DataFrame({'ln_kl': [median_ln_kl], 'h': [median_h]})
 pred_value = model.predict(newdata=pred_data)
 print(f"Predicted ln(lp): {pred_value[0]:.3f}")
 ```
@@ -1609,12 +1627,11 @@ Compare nested models using robust inference.
 
 **Your tasks:**
 
-1. Estimate three models: (a) $\ln(\text{lp}) \sim \ln(\text{rk})$ only, (b) $\ln(\text{lp}) \sim \text{hc}$ only, (c) both regressors
+1. Estimate three models: (a) $\ln(\text{lp}) \sim \ln(\text{kl})$ only, (b) $\ln(\text{lp}) \sim \text{h}$ only, (c) both regressors
 2. For each model, report both default and HC1 robust standard errors
 3. Do the significance conclusions change between default and robust SEs for any model?
 4. Compare prediction interval widths across models — does adding variables improve individual predictions?
 
-*Hint: Use `# Re-estimate with robust SEs (pyfixest handles this at estimation time)
 *Hint: Use `pf.feols(..., vcov='HC1')` for robust SEs and `model.predict(newdata=...)` for predictions.*
 
 #### Task 6: Policy Brief on Inference Robustness (Independent)
@@ -1633,7 +1650,7 @@ Write a 200-300 word policy brief summarizing your findings.
 >
 > Robust standard errors correct for heteroskedasticity and clustering, but they don't address omitted variable bias, reverse causality, or measurement error. A coefficient estimate with a perfectly robust SE is still biased if the model is misspecified. Robust inference ensures valid $p$-values and CIs *conditional on the model being correct* — it's a necessary but not sufficient condition for credible empirical work.
 
-### What You've Learned
+#### What You've Learned
 
 In this case study, you applied advanced inference methods to cross-country productivity data:
 
@@ -1675,7 +1692,7 @@ bol_key = bol[key_vars].copy()
 
 print(f"\nKey variables selected: {len(key_vars)}")
 # FIRST 10 MUNICIPALITIES
-bol_key.head(10).to_string()
+print(bol_key.head(10).to_string())
 
 # Variable descriptions
 # KEY VARIABLE DESCRIPTIONS
@@ -1697,7 +1714,7 @@ for var, desc in descriptions.items():
 **Instructions**:
 
 1. Estimate `imds ~ ln_NTLpc2017 + A00 + A10 + A20 + A30 + A40` with default standard errors
-2. Re-estimate with HC1 robust standard errors (`cov_type='HC1'`)
+2. Re-estimate with HC1 robust standard errors (`vcov='HC1'`)
 3. Compare standard errors side-by-side for each coefficient
 4. Identify which coefficients have substantially different SEs under the two methods
 
@@ -1730,7 +1747,7 @@ for var in model_default.coef().index:
 print(f"\nR-squared: {model_default._r2:.4f}")
 print(f"Adj. R-squared: {model_default._adj_r2:.4f}")
 print(f"\nNote: Coefficients are identical --- only SEs change.")
-print("Ratios > 1 suggest heteroskedasticity inflates default SEs' precision.")
+print("Ratios > 1 mean the default SEs understated uncertainty (overstated precision) for that coefficient.")
 ```
 
 #### Task 2: Cluster-Robust Standard Errors by Department (Guided)
@@ -1739,11 +1756,11 @@ print("Ratios > 1 suggest heteroskedasticity inflates default SEs' precision.")
 
 **Instructions**:
 
-1. Re-estimate using `cov_type='cluster'` with `cov_kwds={'groups': reg_data['dep']}`
+1. Re-estimate using `vcov={'CRV1': 'dep'}` to cluster by department
 2. Compare cluster-robust SEs with default and HC1 SEs
 3. Discuss: Why might municipalities within a department share unobserved characteristics?
 
-**Apply what you learned in section 12.2**: Cluster-robust SEs account for within-group correlation of errors.
+**Apply what you learned in section 12.2**: Cluster-robust SEs account for within-group correlation of errors. *Caution: with only 9 departments, this analysis sits well below the 30+ clusters rule of thumb (see the Common Mistakes box), so cluster-robust p-values here should be interpreted carefully.*
 
 ```{python}
 # Task 2: Cluster-Robust Standard Errors by Department
