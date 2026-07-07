@@ -79,7 +79,7 @@ Imagine seven kids on a seesaw: six lightweights and one very heavy kid. The mea
 ::::: {.columns}
 :::: {.column width="50%"}
 ::: {.callout-tip collapse="true" appearance="simple" title="Example"}
-`earnings` in `data_earnings` has a standard deviation of about \$25,527 — roughly 62% of the mean. That is enormous spread relative to the typical wage: a rule of thumb says about two-thirds of these 171 women earn within ±\$25,527 of the \$41,413 mean — anywhere from \$16k to \$67k.
+`earnings` in `data_earnings` has a standard deviation of about \$25,527 — roughly 62% of the mean. That is enormous spread relative to the typical wage: a rule of thumb for bell-shaped data says about two-thirds of observations fall within ±\$25,527 of the \$41,413 mean — anywhere from \$16k to \$67k (in this right-skewed sample the actual share is about 75%).
 :::
 ::::
 :::: {.column width="50%"}
@@ -233,9 +233,11 @@ data_earnings.head()
 
 ### Summary Statistics
 
+The next cell computes the full set of summary statistics for `earnings` — as you scan the output, note the gap between the mean and the median, our first numerical clue that the distribution is skewed.
+
 ```python
 # Basic descriptive statistics
-data_earnings.describe()
+display(data_earnings.describe())
 
 # Detailed statistics for earnings
 earnings = data_earnings['earnings']
@@ -269,14 +271,14 @@ for key, value in stats_dict.items():
 
 - **Mean = \$41,412.69**: The arithmetic average
 - **Median = \$36,000**: The middle value
-- **Gap = \$5,412** (mean is 15% higher than median)
+- **Gap = \$5,413** (mean is 15% higher than median)
 - **Why?** This signals right skewness—some high earners pull the mean upward
 
 **2. Spread - Standard Deviation:**
 
 - **Std Dev = \$25,527.05**
 - This equals 61.6% of the mean (substantial variation)
-- **Rule of thumb:** About 68% of women earn within \$41,413 ± \$25,527 = \$15,886 to \$66,940
+- **Rule of thumb (for bell-shaped data):** about 68% of observations fall within 1 standard deviation of the mean — here \$41,413 ± \$25,527 = \$15,886 to \$66,940. Because these earnings are right-skewed, the actual share in this band is higher: about 75%
 
 **3. Range and Quartiles:**
 
@@ -329,7 +331,7 @@ A **box plot** (or box-and-whisker plot) visualizes key summary statistics:
 
 - **Box**: Extends from the 25th to 75th percentile (interquartile range)
 - **Red line**: Median (50th percentile)
-- **Whiskers**: Extend to minimum and maximum values (or 1.5 × IQR from quartiles)
+- **Whiskers**: Extend to the most extreme values within 1.5 × IQR of the quartiles (matplotlib's default); more extreme points are drawn as outlier dots
 - **Dots**: Outliers beyond the whiskers
 
 ```python
@@ -363,7 +365,7 @@ plt.show()
 **3. The Whiskers:**
 
 - Lower whisker extends to \$1,050 (minimum)
-- Upper whisker extends to outliers
+- Upper whisker extends to \$85,000, the largest value within 1.5 × IQR of Q3; the dots beyond it are the outliers
 - Right whisker is MUCH longer than left whisker (asymmetry)
 
 **4. The Outliers (dots on right):**
@@ -447,14 +449,15 @@ plt.show()
 1. **Right skewness confirmed**: Both histograms show long right tail extending to \$172,000
 
 2. **Modal region**: Most common earnings are in the \$15k-\$45k range
-   - This contains ~75% of observations
+   - This contains ~65% of observations
    - Consistent with Q1 (\$25k) and Q3 (\$49k)
 
 3. **Sparse right tail**: Very few observations above \$90k
    - But these high earners substantially influence the mean
    - This is why mean (\$41,413) > median (\$36,000)
 
-4. **Bin width matters**: - **Too wide**: Oversimplifies, may miss important features
+4. **Bin width matters**:
+   - **Too wide**: Oversimplifies, may miss important features
    - **Too narrow**: Introduces noise, harder to see overall pattern
    - **Rule of thumb**: Try multiple bin widths to understand your data
 
@@ -505,7 +508,7 @@ The KDE is a smooth, continuous estimate of the probability density function—t
 
 **1. Peak (Mode):**
 
-- Highest density around **\$30,000-\$35,000**
+- Highest density around **\$29,000-\$30,000**
 - This is the most "probable" earnings level
 - Slightly below the median (\$36,000), consistent with right skew
 
@@ -513,7 +516,7 @@ The KDE is a smooth, continuous estimate of the probability density function—t
 
 - **Clear right skew**: Long tail extending to \$172,000
 - **NOT bell-shaped**: Would be symmetric if normally distributed
-- **Unimodal**: Single dominant peak (not bimodal)
+- **Mostly unimodal**: Single dominant peak, with a small secondary bump near \$77k
 - **Steep left side**: Density drops quickly below \$20k
 - **Gradual right side**: Density tapers slowly above \$50k
 
@@ -535,7 +538,7 @@ If earnings were normally distributed, the KDE would be:
 - **Symmetric** (it's not—it's right-skewed)
 - **Bell-shaped** (it's not—it's asymmetric)
 - **Same mean and median** (they differ by \$5,413)
-- **Unimodal** (it's not—there is another peak around \$70k)
+- **Unimodal** (mostly holds—there is only a small secondary bump around \$77k)
 
 **Advantages of KDE over histograms:**
 
@@ -548,7 +551,7 @@ If earnings were normally distributed, the KDE would be:
 The KDE reveals that earnings are NOT normally distributed—they follow a log-normal-like distribution common in economic data. This justifies logarithmic transformations (see Section 2.5) for statistical modeling.
 
 **Practical implication:** 
-When predicting earnings, the "most likely" value is around \$30k-\$35k, NOT the mean (\$41,413). The mean is inflated by rare high earners.
+When predicting earnings, the "most likely" value is around \$29k-\$30k, NOT the mean (\$41,413). The mean is inflated by rare high earners.
 
 ### Time Series Plot
 
@@ -561,7 +564,7 @@ When predicting earnings, the "most likely" value is around \$30k-\$35k, NOT the
 data_gdp = pd.read_stata(GITHUB_DATA_URL + 'AED_REALGDPPC.DTA')
 
 # GDP data summary
-data_gdp[['realgdppc', 'year']].describe()
+display(data_gdp[['realgdppc', 'year']].describe())
 
 # Create time series plot
 fig, ax = plt.subplots(figsize=(12, 6))
@@ -583,10 +586,10 @@ U.S. real GDP per capita from 1959 to 2020, measured in constant 2012 dollars (i
 
 **1. Long-run growth:**
 
-- **1959**: ~\$17,000 per person
-- **2020**: ~\$60,000 per person
-- **Total growth**: 253% increase (3.5× larger)
-- **Annual growth rate**: ~2.1% per year (compound)
+- **1959**: ~\$17,700 per person
+- **2020**: ~\$57,600 per person
+- **Total growth**: 225% increase (3.2× larger)
+- **Annual growth rate**: ~2.0% per year (compound)
 
 **2. Business cycle patterns (recessions visible as dips):**
 
@@ -596,8 +599,8 @@ U.S. real GDP per capita from 1959 to 2020, measured in constant 2012 dollars (i
 - **1990-1991**: Gulf War recession (brief)
 - **2001**: Dot-com bubble burst
 - **2008-2009**: GREAT RECESSION (deepest post-war decline)
-  - GDP per capita fell from \$55k to \$51k
-  - Took until 2015 to recover pre-crisis level
+  - GDP per capita fell from \$52k to \$49k
+  - Took until 2013 to recover pre-crisis level
 - **2020**: COVID-19 pandemic (sharp, sudden drop)
 
 **3. Trend characteristics:**
@@ -609,10 +612,10 @@ U.S. real GDP per capita from 1959 to 2020, measured in constant 2012 dollars (i
 
 **4. Summary statistics from the data:**
 
-- **Mean GDP per capita**: \$37,941 (over full 1959-2020 period)
-- **Median**: \$35,500 (slightly below mean due to recent growth)
-- **Min**: ~\$17,000 (1959 start)
-- **Max**: ~\$60,000 (pre-COVID peak 2019)
+- **Mean GDP per capita**: \$37,050 (over full 1959-2020 period)
+- **Median**: \$36,929 (slightly below mean due to recent growth)
+- **Min**: ~\$17,700 (1959 start)
+- **Max**: ~\$58,400 (pre-COVID peak 2019)
 
 **Economic interpretation:**
 
@@ -666,6 +669,8 @@ print(f"Total expenditures: ${data_health['expenditures'].sum():,.0f} billion")
 ```
 
 ### Bar Chart
+
+We sort the 13 categories from largest to smallest before plotting so the ranking is instantly readable — look for how far hospital care towers above every other category.
 
 ```python
 # Create bar chart (sorted by expenditure)
@@ -733,13 +738,13 @@ print(f"3. {data_health_sorted.iloc[2]['category']}: ${data_health_sorted.iloc[2
 **1. Hospital dominance:**
 
 - Hospitals alone account for nearly **1/3 of all health spending**
-- More than physicians, drugs, and nursing care COMBINED
+- More than physician services (\$726B) and drugs (\$456B) COMBINED
 - Reflects high fixed costs of hospital infrastructure
 
 **2. Concentration:**
 
 - Top 3 categories (Hospital, Physician, Drugs) = **65% of total**
-- Middle 50% of spending across just 3 categories
+- More than half of all spending (52.5%) flows to just the top 2 categories
 - Long tail of smaller categories
 
 **3. Administrative costs:**
@@ -806,6 +811,8 @@ print(f"Total observations: {len(data_fishing):,}")
 ```
 
 ### Pie Chart
+
+The pie chart below displays each fishing site's share of the 1,182 choices — check whether the two boat-based slices together account for most of the circle.
 
 ```python
 # Create pie chart
@@ -944,6 +951,8 @@ This centers data at 0 with standard deviation 1—useful for comparing variable
 
 ### Log Transformation Effect
 
+We first create the log-transformed variable and put its summary statistics next to the original's — notice how the mean and median, $5,413 apart in dollars, nearly coincide on the log scale.
+
 ```python
 # Create log transformation
 data_earnings['lnearnings'] = np.log(data_earnings['earnings'])
@@ -951,6 +960,8 @@ data_earnings['lnearnings'] = np.log(data_earnings['earnings'])
 # Comparison of earnings and log(earnings)
 data_earnings[['earnings', 'lnearnings']].describe()
 ```
+
+Now let's see the transformation visually: the next cell plots earnings and log(earnings) side by side — watch the long right tail of Panel A collapse into the roughly bell-shaped Panel B.
 
 ```python
 # Compare original and log-transformed earnings
@@ -992,7 +1003,7 @@ print(f"Skewness reduced from {stats.skew(earnings):.2f} to {stats.skew(data_ear
 **Panel B: Log(Earnings) (natural logarithm)**
 
 - **Shape**: Much more symmetric, approximately normal
-- **Skewness**: -0.91 (nearly symmetric, slight left skew)
+- **Skewness**: -0.91 (moderate left skew — far closer to symmetry than the original 1.71)
 - **Mean**: 10.46 (log dollars)
 - **Median**: 10.49 (log dollars)
 - **Std Dev**: 0.62 (only 6% of mean)
@@ -1003,8 +1014,8 @@ print(f"Skewness reduced from {stats.skew(earnings):.2f} to {stats.skew(data_ear
 **1. Reduced skewness dramatically:**
 
 - Original skewness: **1.71** → Log skewness: **-0.91**
-- Reduction of **122%** in absolute skewness
-- Now nearly symmetric (close to 0)
+- Reduction of **47%** in absolute skewness (from 1.71 to 0.91 in magnitude)
+- Now moderately left-skewed rather than strongly right-skewed
 
 **2. Normalized the distribution:**
 
@@ -1036,15 +1047,15 @@ print(f"Skewness reduced from {stats.skew(earnings):.2f} to {stats.skew(data_ear
 **Economic reasons:**
 
 1. **Multiplicative relationships**: Income growth is often proportional (e.g., 10% raise)
-2. **Percentage interpretation**: A 1-unit increase in log(income) ≈ 100% increase in income
+2. **Percentage interpretation**: Small changes in log(income) are approximately percentage changes — a 0.05 increase in log(income) ≈ 5% increase in income (accurate only for small changes; a full 1-unit increase multiplies income by e ≈ 2.72; see Chapter 9)
 3. **Economic theory**: Utility functions often logarithmic (diminishing marginal utility)
 4. **Cross-country comparisons**: Log scale makes it easier to compare countries with vastly different GDP levels
 
 **How to interpret log(earnings) = 10.46?**
 
-- Take exponential: e^10.46 = \$34,762
+- Take exponential: e^10.46 = \$34,892
 - This is close to the median earnings (\$36,000)
-- Each 1-unit increase in log(earnings) ≈ 2.718× increase in earnings
+- Each 1-unit increase in log(earnings) multiplies earnings by e ≈ 2.718 (a 172% increase)
 
 **Example interpretation:**
 
@@ -1068,7 +1079,9 @@ Time series data presents unique challenges—seasonal fluctuations, inflation, 
 
 ## 2.6 Data Transformations for Time Series Data
 
-Time series data often require special transformations: 1. **Moving averages**: Smooth short-term fluctuations by averaging over several periods
+Time series data often require special transformations:
+
+1. **Moving averages**: Smooth short-term fluctuations by averaging over several periods
 
    - Example: 11-month moving average removes monthly noise
 
@@ -1094,6 +1107,8 @@ data_homesales_filtered[['year', 'exsales', 'exsales_ma11', 'exsales_sa']].descr
 ```
 
 ### Time Series Transformations for Home Sales
+
+The two panels below overlay the raw monthly series with each transformation — in Panel A, watch the 11-month moving average cut through the seasonal zigzag; in Panel B, see how seasonal adjustment removes the regular summer peaks and winter troughs.
 
 ```python
 # Create time series plots with transformations
@@ -1265,6 +1280,8 @@ plt.show()
 
 ### GDP Comparisons - Nominal vs Real
 
+As a final illustration of time series transformations, the next cell contrasts nominal GDP with inflation-adjusted (real) GDP, in totals (Panel A) and per capita (Panel B) — watch how the nominal series overstates growth because it bundles inflation together with real gains.
+
 ```python
 # Compare nominal and real GDP
 fig, axes = plt.subplots(1, 2, figsize=(16, 6))
@@ -1297,6 +1314,8 @@ plt.suptitle('GDP Comparisons - Nominal vs Real',
 plt.tight_layout()
 plt.show()
 ```
+
+**What these panels show:** In both panels the nominal series climbs much faster than the real series because it mixes inflation with genuine growth; the two lines cross in 2012, the base year in which nominal and 2012-dollar values coincide by construction. After stripping out inflation, real GDP per capita (Panel B) still grows substantially over 1959-2020, but far less dramatically than the raw nominal numbers suggest. This is why economists compare living standards over time using *real, per-capita* values.
 
 ## Key Takeaways
 
@@ -1436,7 +1455,7 @@ print(f"Observations with |z| > 2: {(z_scores.abs() > 2).sum()} out of {len(z_sc
 # STEP 7: Time series — moving average smooths seasonal noise
 # =============================================================================
 # Monthly home sales zigzag with the seasons; an 11-month moving average
-# cancels one full seasonal cycle, revealing the underlying trend
+# smooths away most of the 12-month seasonal swing, revealing the underlying trend
 url_homesales = "https://raw.githubusercontent.com/quarcs-lab/data-open/master/AED/AED_MONTHLYHOMESALES.DTA"
 data_hs = pd.read_stata(url_homesales)
 data_hs = data_hs[data_hs['year'] >= 2005]
@@ -1465,10 +1484,11 @@ plt.show()
 - **Chapter 6-9**: Simple linear regression and interpretation
 
 **You have now mastered:**
- Calculating and interpreting summary statistics
- Creating effective visualizations for different data types
- Applying transformations to reveal patterns and normalize distributions
- Handling time series data with moving averages and seasonal adjustment
+
+- Calculating and interpreting summary statistics
+- Creating effective visualizations for different data types
+- Applying transformations to reveal patterns and normalize distributions
+- Handling time series data with moving averages and seasonal adjustment
 
 These foundational skills prepare you for inferential statistics and regression analysis in the following chapters!
 
@@ -1480,9 +1500,12 @@ These foundational skills prepare you for inferential statistics and regression 
 
 ## Practice Exercises
 
-Test your understanding of univariate data analysis with these exercises: **Exercise 1:** Calculate summary statistics
+Test your understanding of univariate data analysis with these exercises:
 
-- For the sample {5, 2, 2, 8, 3}, calculate: - (a) Mean
+**Exercise 1:** Calculate summary statistics
+
+- For the sample {5, 2, 2, 8, 3}, calculate:
+  - (a) Mean
   - (b) Median
   - (c) Variance
   - (d) Standard deviation
@@ -1494,7 +1517,8 @@ Test your understanding of univariate data analysis with these exercises: **Exer
 
 **Exercise 3:** Choose visualization types
 
-- For each scenario, recommend the best chart type and explain why: - (a) Quarterly GDP growth rates from 2000 to 2025
+- For each scenario, recommend the best chart type and explain why:
+  - (a) Quarterly GDP growth rates from 2000 to 2025
   - (b) Market share of 5 smartphone brands
   - (c) Distribution of household incomes in a city
   - (d) Monthly temperature readings over a year
@@ -1506,26 +1530,31 @@ Test your understanding of univariate data analysis with these exercises: **Exer
 
 **Exercise 5:** Standard deviation interpretation
 
-- A dataset has mean = 50 and standard deviation = 10. If the data are approximately normally distributed: - (a) What percentage of observations fall between 40 and 60?
+- A dataset has mean = 50 and standard deviation = 10. If the data are approximately normally distributed:
+  - (a) What percentage of observations fall between 40 and 60?
   - (b) What percentage fall between 30 and 70?
 
 **Exercise 6:** Time series transformations
 
-- Explain the difference between: - (a) Moving average vs. seasonal adjustment
+- Explain the difference between:
+  - (a) Moving average vs. seasonal adjustment
   - (b) Nominal GDP vs. Real GDP
   - (c) Total GDP vs. GDP per capita
 
 **Exercise 7:** Z-scores
 
-- For a sample with mean = 100 and standard deviation = 15: - (a) Calculate the z-score for an observation of 130
+- For a sample with mean = 100 and standard deviation = 15:
+  - (a) Calculate the z-score for an observation of 130
   - (b) Interpret what this z-score means
 
 **Exercise 8:** Data interpretation
 
-- A box plot shows: - Lower quartile (Q1) = 25
+- A box plot shows:
+  - Lower quartile (Q1) = 25
   - Median (Q2) = 35
   - Upper quartile (Q3) = 60
-- Calculate: - (a) Interquartile range (IQR)
+- Calculate:
+  - (a) Interquartile range (IQR)
   - (b) Describe the skewness based on quartile positions
 
 ---
@@ -1546,7 +1575,7 @@ By completing this case study, you'll apply all the univariate analysis tools fr
 >
 > Cross-country distributions of economic variables (productivity, GDP per capita, income) are typically right-skewed with long upper tails, reflecting substantial inequality between rich and poor countries. Summary statistics like the median are often more representative than the mean for these distributions, and exploring the shape of the distribution reveals whether gaps between countries are widening or narrowing.
 
-### Load the Productivity Data
+#### Load the Productivity Data
 
 We'll use the same Convergence Clubs dataset from Chapter 1, but focus exclusively on the labor productivity variable (`lp`) across countries and years. This gives us 2,700 observations (108 countries × 25 years, from 1990 to 2014) of international productivity.
 
@@ -1569,7 +1598,7 @@ print(f"Time period: {df1.index.get_level_values('year').min()} to {df1.index.ge
 df1[['lp']].head(10)
 ```
 
-### How to Use These Tasks
+#### How to Use These Tasks
 
 **Instructions:**
 
@@ -1630,8 +1659,9 @@ print(productivity.describe())
 print("\n" + "=" * 70)
 print("Productivity across 5 sample countries:")
 print("=" * 70)
-sample_countries = ['Australia', 'Brazil', 'China', 'France', 'Nigeria']
-for country in sample_countries: country_data = df1.loc[country, 'lp']
+sample_countries = ['Australia', 'Brazil', 'China', 'France', 'Kenya']
+for country in sample_countries:
+    country_data = df1.loc[country, 'lp']
     print(f"\n{country}:")
     print(f"  Mean productivity: {_____:.3f}")
     print(f"  Min: {_____:.3f}, Max: {_____:.3f}")
@@ -1709,7 +1739,7 @@ productivity_1990 = df1.xs(1990, level=_____)['lp']
 productivity_2014 = df1.xs(_____, level='year')['lp']
 
 # Your code here: Create a comparison DataFrame
-# Hint: Use pd. DataFrame() with statistics for both years
+# Hint: Use pd.DataFrame() with statistics for both years
 # Include: mean, median, std, skewness, min, max
 
 ```
@@ -1964,7 +1994,7 @@ prod_2014 = _____  # Extract 2014 data (same pattern as above)
 #     'Australia': 'Asia-Pacific',
 #     'Austria': 'Europe',
 #     'Brazil': 'Americas',
-#     # ... continue for all ~50 countries
+#     # ... continue for all 108 countries
 # }
 
 # Step 2: Add region column to dataframe
@@ -1988,7 +2018,7 @@ prod_2014 = _____  # Extract 2014 data (same pattern as above)
 
 **Hints:**
 
-- There are ~50 countries in the dataset - you'll need to map each one
+- There are 108 countries in the dataset - you'll need to map each one
 - Regions: Africa (Kenya, Nigeria, etc.), Americas (USA, Brazil, etc.), Asia (China, India, etc.)
 - Europe (France, Germany, etc.), Middle East (Israel, Turkey), Asia-Pacific (Australia, Japan, NZ)
 - Use `.groupby('region')['lp'].agg([...])` to calculate statistics by region
@@ -2000,7 +2030,7 @@ prod_2014 = _____  # Extract 2014 data (same pattern as above)
 - Which region has the most internal inequality (widest box)?
 - Are there clear regional clusters or is variation continuous?
 
-### What You've Learned from This Case Study
+#### What You've Learned from This Case Study
 
 By completing this case study on global labor productivity distribution, you've applied the full toolkit of univariate data analysis to a real international economics question. You've moved beyond calculating statistics and making charts to asking substantive economic questions: Are countries converging or diverging? How has global inequality in productivity evolved? Which regions drive global disparity?
 
@@ -2089,7 +2119,7 @@ for var in analysis_vars:
 # Compare mean vs median for each variable:
 # If mean > median -> right-skewed (long upper tail)
 # If mean < median -> left-skewed (long lower tail)
-# High kurtosis (>3) indicates heavy tails (extreme municipalities)
+# Positive kurtosis (>0) indicates heavy tails (extreme municipalities) — pandas .kurtosis() reports excess kurtosis
 ```
 
 #### Task 2: Histograms and Density Plots (Guided)
@@ -2191,8 +2221,8 @@ import seaborn as sns
 dept_order = bol_key.groupby('dep')['imds'].median().sort_values().index.tolist()
 
 fig, ax = plt.subplots(figsize=(10, 7))
-sns.boxplot(data=bol_key, x='imds', y='dep', order=dept_order,
-            palette='viridis', ax=ax)
+sns.boxplot(data=bol_key, x='imds', y='dep', hue='dep', order=dept_order,
+            palette='viridis', legend=False, ax=ax)
 ax.set_xlabel('Municipal Development Index (IMDS)')
 ax.set_ylabel('Department')
 ax.set_title('Municipal Development Distribution by Department')
@@ -2351,7 +2381,7 @@ print(f"{'Median':<15} {pop.median():>15,.0f} {log_pop.median():>15.2f}")
 # print("Write your 200-word analysis here...")
 ```
 
-### What You've Learned from This Case Study
+#### What You've Learned from This Case Study
 
 By applying Chapter 2's univariate analysis tools to Bolivia's municipal SDG data, you've characterized the *distribution* of development outcomes across 339 municipalities. Specifically, you've practiced:
 
