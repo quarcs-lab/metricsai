@@ -38,7 +38,7 @@ This notebook provides an interactive introduction to bivariate data analysis an
 - Understand the critical distinction between association and causation
 - Apply nonparametric regression methods to check linearity assumptions
 
-**Datasets used:**
+**Dataset used:**
 
 - **AED_HOUSE.DTA**: House prices and characteristics for 29 houses sold in Central Davis, California in 1999 (price, size, bedrooms, bathrooms, lot size, age)
 
@@ -51,7 +51,7 @@ This notebook provides an interactive introduction to bivariate data analysis an
 - 5.5 Regression Line
 - 5.6 Measures of Model Fit
 - 5.7 Computer Output Following Regression
-- 5.8 Prediction and Outlying Observations
+- 5.8 Prediction and Outliers
 - 5.9 Regression and Correlation
 - 5.10 Causation
 - 5.11 Nonparametric Regression
@@ -110,7 +110,7 @@ The intercept is the starting line of a race — the position runners occupy at 
 ::::: {.columns}
 :::: {.column width="50%"}
 ::: {.callout-tip collapse="true" appearance="simple" title="Example"}
-For the Davis house regression, the typical residual size is about \$23{,}162 — that is the standard error of the regression. So when the fitted line predicts a 2,000-sq-ft home at \$262,557, an actual house of that size could comfortably sell for anywhere from roughly \$240k to \$285k once unmodelled factors (location, condition, view) are considered.
+For the Davis house regression, the typical residual size is about \$23{,}551 — that is the standard error of the regression. So when the fitted line predicts a 2,000-sq-ft home at \$262,559, an actual house of that size could comfortably sell for anywhere from roughly \$240k to \$285k once unmodelled factors (location, condition, view) are considered.
 :::
 ::::
 :::: {.column width="50%"}
@@ -140,7 +140,7 @@ Picture a pie representing all the variation in the outcome. The regression cuts
 ::::: {.columns}
 :::: {.column width="50%"}
 ::: {.callout-tip collapse="true" appearance="simple" title="Example"}
-For the Davis house regression, $s_e = \$23{,}162$ — about 9% of the average sale price (\$253{,}910). So even though the model captures the main pattern via $R^2 = 0.62$, individual price predictions should be reported with an error band of roughly $\pm \$23{,}000$, reminding the analyst not to over-trust a single point estimate.
+For the Davis house regression, $s_e = \$23{,}551$ — about 9% of the average sale price (\$253{,}910). So even though the model captures the main pattern via $R^2 = 0.62$, individual price predictions should be reported with an error band of roughly $\pm \$23{,}000$, reminding the analyst not to over-trust a single point estimate.
 :::
 ::::
 :::: {.column width="50%"}
@@ -155,7 +155,7 @@ A weather app predicts tomorrow's high at 22 °C — but its track record shows 
 ::::: {.columns}
 :::: {.column width="50%"}
 ::: {.callout-tip collapse="true" appearance="simple" title="Example"}
-The Davis scatterplot of `price` vs. `size` shows no obvious outliers — every point fits the upward-sloping cloud. To see why this matters, imagine inserting a 3,300-sq-ft mansion priced at only \$210{,}000 (perhaps a fixer-upper): one such point would shrink the slope from \$73.77 toward something noticeably smaller, and the typical residual would jump well above \$23,162.
+The Davis scatterplot of `price` vs. `size` shows no obvious outliers — every point fits the upward-sloping cloud. To see why this matters, imagine inserting a 3,300-sq-ft mansion priced at only \$210{,}000 (perhaps a fixer-upper): one such point would shrink the slope from \$73.77 toward something noticeably smaller, and the typical residual would jump well above \$23,551.
 :::
 ::::
 :::: {.column width="50%"}
@@ -230,10 +230,14 @@ print(f"Number of variables: {data_house.shape[1]}")
 print(f"\nVariables: {', '.join(data_house.columns.tolist())}")
 ```
 
+With only 29 observations we can inspect the complete dataset — a rare luxury. As you scan the rows, notice informally whether houses with larger `size` values also tend to have higher `price` values.
+
 ```python
 # Table 5.1: Complete dataset
 data_house
 ```
+
+Before analyzing the two variables jointly, we summarize each one separately. Keep an eye on the means and standard deviations of `price` and `size` — these univariate ingredients reappear later in the correlation and slope formulas.
 
 ```python
 # Table 5.2: Summary statistics
@@ -287,13 +291,6 @@ print(f"  Std Dev:   {size.std():,.0f} sq ft")
 
 **Economic context:** These are moderate-sized homes in a California college town (UC Davis), with typical prices for the late 1990s.
 
-**Key observations:**
-
-- House prices range from \$204,000 to \$375,000 (mean: \$253,910)
-- House sizes range from 1,400 to 3,300 square feet (mean: 1,883 sq ft)
-- Both variables show substantial variation, which is good for regression analysis
-- The data appear to be reasonably symmetric (means close to medians)
-
 ## 5.2 Two-Way Tabulation
 
 A **two-way tabulation** (or crosstabulation) shows how observations are distributed across combinations of two categorical variables. For continuous variables like price and size, we first create categorical ranges.
@@ -335,7 +332,7 @@ Looking at the table:
 **The pattern reveals:**
 
 - **Positive association**: Most observations cluster in the "small and cheap" or "large and expensive" cells
-- **No counterexamples**: We never see "large and cheap" houses (the bottom-right cell is empty)
+- **No counterexamples**: We never see "large and cheap" houses (the ≥ 2,400 sq ft, < \$250,000 cell is empty)
 - **Imperfect relationship**: Some medium-sized houses are low-priced (6 houses), some are high-priced (7 houses)
 
 **Limitation of tabulation:**
@@ -446,7 +443,7 @@ The scatter plot provides **qualitative** insight (direction, form, outliers), b
 The **correlation coefficient** $r$ is a unit-free measure of linear association between two variables. It ranges from -1 to 1:
 
 - $r = 1$: Perfect positive linear relationship
-- \$0 < r < 1$: Positive linear relationship
+- $0 < r < 1$: Positive linear relationship
 - $r = 0$: No linear relationship
 - $-1 < r < 0$: Negative linear relationship
 - $r = -1$: Perfect negative linear relationship
@@ -529,7 +526,7 @@ print(f"  with variation in size.")
 - Chapter 5: Correlation measures how TWO variables move together
 - Both are standardized measures (unit-free)
 
-**Economic interpretation:** The strong correlation confirms what we saw in the scatter plot: house size is a major determinant of house price, but it's not the only factor.
+**Economic interpretation:** The strong correlation confirms what we saw in the scatter plot: house size is a strong predictor of house price, but it's not the only factor.
 
 ### Illustration: Different Correlation Patterns
 
@@ -577,10 +574,10 @@ plt.show()
 
 **What to look for in each panel:**
 
-- **Panel A** (r ~ 0.78): Points cluster tightly around an upward slope
-- **Panel B** (r ~ 0.44): More scatter, but still positive relationship
-- **Panel C** (r ~ 0.00): No systematic pattern
-- **Panel D** (r ~ -0.53): Points follow a downward slope
+- **Panel A** (r ~ 0.77): Points cluster tightly around an upward slope
+- **Panel B** (r ~ 0.45): More scatter, but still positive relationship
+- **Panel C** (r ~ -0.06): No systematic pattern
+- **Panel D** (r ~ -0.45): Points follow a downward slope
 
 ## 5.5 Regression Line
 
@@ -624,6 +621,8 @@ fit.summary()
 >
 > The method of ordinary least squares (OLS) chooses the regression line to minimize the sum of squared residuals. This yields formulas for the slope (b₂ = Σ(xᵢ - x̄)(yᵢ - ȳ) / Σ(xᵢ - x̄)²) and intercept (b₁ = ȳ - b₂x̄) that can be computed from the data. The slope equals the covariance divided by the variance of x.
 
+The next cell pulls the intercept and slope out of the fitted model and translates each into plain English, with worked examples for houses 100 and 500 square feet larger.
+
 ```python
 # Extract and interpret coefficients
 intercept = fit.coef()['Intercept']
@@ -660,7 +659,9 @@ print(f"  {r_squared*100:.2f}% of price variation is explained by size")
 
 - **Interpretation**: Each additional square foot is associated with a \$73.77 increase in house price, on average
 - **Statistical significance**: p-value ≈ 0 (highly significant)
-- **Confidence interval**: [50.84, 96.70] — we're 95% confident the true effect is between \$51 and \$97 per sq ft
+- **Confidence interval**: [50.84, 96.70] — we're 95% confident the true slope is between \$51 and \$97 per sq ft
+
+*Note: These standard errors, p-values, and confidence intervals use the classical (iid) formulas reported by default; formal statistical inference for regression — including robust standard errors — is covered in Chapter 7.*
 
 **2. Practical examples:**
 
@@ -679,10 +680,10 @@ print(f"  {r_squared*100:.2f}% of price variation is explained by size")
 
 - Size explains **62% of the variation** in house prices
 - The remaining **38%** is due to other factors:
- - Location (neighborhood quality, schools)
- - Physical characteristics (bathrooms, garage, condition)
- - Market conditions (time of sale)
- - Unique features (view, lot size, upgrades)
+  - Location (neighborhood quality, schools)
+  - Physical characteristics (bathrooms, garage, condition)
+  - Market conditions (time of sale)
+  - Unique features (view, lot size, upgrades)
 
 **Comparison to correlation:**
 
@@ -693,6 +694,8 @@ print(f"  {r_squared*100:.2f}% of price variation is explained by size")
 **Economic interpretation:** The strong relationship (R² = 0.62) between size and price makes economic sense. Buyers pay a substantial premium for additional space. However, the imperfect fit reminds us that many factors beyond size affect house values.
 
 ### Visualizing the Fitted Regression Line
+
+Plotting the fitted line on top of the scatter makes the OLS idea concrete: the line passes through the middle of the point cloud, balancing points above and below. The annotation box reports the estimated equation and R².
 
 ```python
 # Scatter plot with regression line
@@ -734,6 +737,8 @@ print(f"Sample mean of price:      ${price.mean():,.2f}")
 # These are equal, confirming that OLS generalizes the sample mean.
 ```
 
+Both numbers are \$253,910.34: with no explanatory variable, the best least-squares prediction of price is simply its sample mean. Regression therefore generalizes the univariate summaries of Chapter 2 rather than replacing them.
+
 ## 5.6 Measures of Model Fit
 
 Two key measures assess how well the regression line fits the data:
@@ -759,6 +764,8 @@ $$s_e = \sqrt{\frac{1}{n-2} \sum_{i=1}^n (y_i - \hat{y}_i)^2}$$
 - Lower $s_e$ means fitted values are closer to actual values
 - Units: same as y (dollars in our example)
 - Dividing by (n-2) accounts for estimation of two parameters
+
+We've estimated the regression line. Now we assess how well this line fits the data using R-squared (proportion of variation explained) and the standard error of regression (typical prediction error).
 
 ```python
 # Measures of model fit
@@ -788,9 +795,7 @@ print(f"  Match: {np.isclose(r_squared, r**2)}")
 >
 > R-squared measures the fraction of variation in y explained by the regression on x. It ranges from 0 (no explanatory power) to 1 (perfect fit). For bivariate regression, R² equals the squared correlation coefficient (R² = r²ₓᵧ). R² = 0.62 means 62% of house price variation is explained by size variation, while 38% is due to other factors.
 
-We've estimated the regression line. Now we assess how well this line fits the data using R-squared (proportion of variation explained) and the standard error of regression (typical prediction error).
-
-**Understanding R² = 0.617 and Standard Error = \$23,162**
+**Understanding R² = 0.617 and Standard Error = \$23,551**
 
 **1. R-squared (coefficient of determination):**
 
@@ -808,19 +813,19 @@ We've estimated the regression line. Now we assess how well this line fits the d
 
 - **For cross-sectional data**: Yes, this is quite good!
 - **Context matters**: 
- - Lab experiments: Often R² > 0.9
- - Cross-sectional economics: R² = 0.2-0.6 is typical
- - Time series: R² = 0.7-0.95 is common
+  - Lab experiments: Often R² > 0.9
+  - Cross-sectional economics: R² = 0.2-0.6 is typical
+  - Time series: R² = 0.7-0.95 is common
 
 - **Single predictor**: Size alone explains most variation — impressive!
 
-**2. Standard error: \$23,162**
+**2. Standard error: \$23,551**
 
 - **Meaning**: Typical prediction error (residual size)
 - **Context**: 
- - Average house price: \$253,910
- - Typical error: \$23,162 (about 9% of average)
- - This is reasonably accurate for house price prediction
+  - Average house price: \$253,910
+  - Typical error: \$23,551 (about 9% of average)
+  - This is reasonably accurate for house price prediction
 
 **3. Verification: R² = r²**
 
@@ -879,6 +884,8 @@ print(f"\nR² = Explained SS / Total SS = {explained_ss / total_ss:.4f}")
 print(f"R² from model = {fit_sim._r2:.4f}")
 ```
 
+The same decomposition can be shown graphically. The next figure draws the deviations behind Total SS (actual points to the mean, Panel A) and Explained SS (fitted values to the mean, Panel B) as vertical lines.
+
 ```python
 # Visualization of model fit
 fig, axes = plt.subplots(1, 2, figsize=(14, 5))
@@ -924,7 +931,7 @@ plt.show()
 
 In applied econometrics, R² values around 0.60 are considered quite strong for cross-sectional data. Our R² = 0.617 tells us:
 
-- **Size is a major determinant**: House size explains most of the price variation
+- **Size is a strong predictor**: House size explains most of the price variation
 - **Other factors matter**: The remaining 38% is due to location, quality, age, amenities, etc.
 - **Single-variable limits**: One predictor can only explain so much in complex real-world data
 
@@ -952,7 +959,7 @@ Our prediction ŷ = $262,559 for a 2,000 sq ft house is a **point estimate** —
 
 **Preview of Chapter 7**: We'll learn to construct **prediction intervals** like:
 
-- "We're 95% confident the price will be between $215,000 and $310,000"
+- "We're 95% confident the price will be between $213,000 and $312,000"
 - This acknowledges uncertainty while still providing useful guidance
 
 For now, remember: the standard error ($23,551) gives a rough sense of typical prediction errors.
@@ -964,9 +971,9 @@ fit.summary()
 
 **Guide to reading regression output:**
 
-- **Top section** -- Model Summary: Dep. Variable, No. Observations, R-squared, F-statistic
-- **Middle section** -- Coefficients Table: coef, std err, t, P>|t|, 95% CI
-- **Bottom section** -- Diagnostic Tests: Omnibus, Durbin-Watson, Jarque-Bera, Cond. No.
+- **Top section** -- Model Summary: estimation method (OLS), dependent variable, inference type (iid = classical standard errors), number of observations
+- **Middle section** -- Coefficients Table: Estimate, Std. Error, t value, Pr(>|t|), and the 2.5% / 97.5% confidence-interval bounds
+- **Bottom section** -- Fit statistics: RMSE (the typical size of prediction errors) and R2
 
 ## 5.8 Prediction and Outliers
 
@@ -1007,7 +1014,7 @@ sizes_to_predict = [1500, 1800, 2000, 2500, 3000]
 predictions = pd.DataFrame({'size': sizes_to_predict})
 predictions['predicted_price'] = fit.predict(newdata=predictions)
 
-predictions
+display(predictions)
 
 print(f"\nObserved size range: {size.min():.0f} to {size.max():.0f} sq ft")
 print(f"  1500, 1800, 2000 are in-sample (reliable)")
@@ -1033,7 +1040,7 @@ Using our regression equation:
 
 **2. Prediction accuracy:**
 
-- Standard error: \$23,162
+- Standard error: \$23,551
 - Typical error: about ±\$23,000 around the prediction
 - **Informal prediction interval**: roughly \$239,000 to \$286,000
 - (Chapter 7 will cover formal prediction intervals)
@@ -1085,9 +1092,11 @@ if len(outliers) > 0:
 else:
     print("  None found (all residuals within 2 standard deviations)")
 
-# Top 5 largest residuals (in absolute value)
+# Top 5 largest positive residuals
 data_house.nlargest(5, 'residual', keep='all')[['price', 'size', 'fitted', 'residual']]
 ```
+
+**What the output shows:** Exactly one house crosses the |standardized residual| > 2 threshold: a 2,400 sq ft house that sold for \$340,000 — about \$47,900 more than the fitted line predicts (standardized residual ≈ 2.11). With 29 observations, one residual beyond two standard deviations is roughly what chance alone would produce, so this is a mild outlier worth a second look (perhaps a premium location or condition), not a data error that demands removal.
 
 ## 5.9 Regression and Correlation
 
@@ -1149,6 +1158,8 @@ print(f"  b₂ = r × (s_y / s_x) = {r:.4f} × ({s_y:.4f} / {s_x:.4f}) = {b2_fro
 print(f"\nMatch: {np.isclose(slope, b2_from_r)}")
 ```
 
+The two routes agree exactly: multiplying r = 0.7858 by the ratio of standard deviations (s_y/s_x ≈ 37,391/398) reproduces the OLS slope b₂ = 73.77. The regression slope is just the correlation rescaled into units of y per unit of x — which is why the slope, unlike r, changes when we change measurement units.
+
 ## 5.10 Causation
 
 **Critical distinction:** Regression measures **association**, not **causation**.
@@ -1198,7 +1209,7 @@ print(f"  c₂ = {fit_reverse.coef()['price']:.6f}")
 print(f"  Are they equal? {np.isclose(1/fit.coef()['size'], fit_reverse.coef()['price'])}")
 
 print("\nKey insight:")
-print("  • Original slope: $1 increase in size → ${:.2f} increase in price".format(fit.coef()['size']))
+print("  • Original slope: 1 sq ft increase in size → ${:.2f} increase in price".format(fit.coef()['size']))
 print("  • Reverse slope: $1 increase in price → {:.6f} sq ft increase in size".format(fit_reverse.coef()['price']))
 print("  • These answer different questions!")
 
@@ -1261,7 +1272,7 @@ price = 115,017 + 73.77 × size
 **Key observation:**
 
 - If regression = causation, these should be reciprocals
-- 1 / 73.77 = 0.01355 ≠ 0.00837
+- 1 / 73.77 = 0.01356 ≠ 0.00837
 - They're NOT reciprocals! This reveals regression measures association, not causation
 
 **When can we claim causation?**
@@ -1359,7 +1370,7 @@ plt.show()
 
 **Comparing three approaches to fitting the data:**
 
-**1. OLS (Ordinary Least Squares) — BLUE LINE**
+**1. OLS (Ordinary Least Squares) — PURPLE SOLID LINE**
 
 - **Parametric**: Assumes linear relationship
 - **Equation**: ŷ = \$115,017 + \$73.77 × size
@@ -1445,11 +1456,11 @@ plt.show()
 - **R-squared** measures the fraction of variation in y explained by x, ranging from 0 (no fit) to 1 (perfect fit)
 - **R² = (Explained SS) / (Total SS) = 1 - (Residual SS) / (Total SS)**
 - For bivariate regression, **R² = r²ₓᵧ** (squared correlation coefficient)
-- For house prices, **R² = 0.618** means 62% of price variation is explained by size variation
+- For house prices, **R² = 0.617** means 62% of price variation is explained by size variation
 - **Standard error of regression (sₑ)** measures the typical size of residuals in the units of y
 - **Low R² doesn't mean regression is uninformative**—the coefficient can still be statistically significant and economically important
 - R² depends on data aggregation and choice of dependent variable; use it to compare models with the **same dependent variable**
-- Computer regression output provides coefficients, standard errors, t-statistics, p-values, F-statistics, and ANOVA decomposition
+- Computer regression output provides coefficients, standard errors, t-statistics, p-values, and confidence intervals, along with fit measures such as R² and RMSE
 
 ### Prediction, Causation, and Extensions
 
@@ -1493,8 +1504,8 @@ This single code block reproduces the core workflow of Chapter 5. It is self-con
 # --- Libraries ---
 import pandas as pd                                         # data loading and manipulation
 import matplotlib.pyplot as plt                              # creating plots and visualizations
-import pyfixest as pf                                        # fast OLS regression
 # !pip install pyfixest  # uncomment if running in Google Colab
+import pyfixest as pf                                        # fast OLS regression
 from statsmodels.nonparametric.smoothers_lowess import lowess  # LOWESS nonparametric smoothing
 
 # =============================================================================
@@ -1532,7 +1543,7 @@ corr_matrix = data_house[['price', 'size']].corr()
 r = corr_matrix.loc['price', 'size']
 
 print(f"Correlation coefficient: r = {r:.4f}")
-print(f"Strength: {'Strong' if abs(r) > 0.7 else 'Moderate' if abs(r) > 0.4 else 'Weak'}")
+print(f"Strength: {'Strong' if abs(r) > 0.7 else 'Moderate' if abs(r) > 0.3 else 'Weak'}")
 print(f"r² = {r**2:.4f} ({r**2*100:.1f}% of variation shared)")
 
 # =============================================================================
@@ -1602,6 +1613,15 @@ plt.show()
 ```
 
 **Try it yourself!** Copy this code into an empty Google Colab notebook and run it: [Open Colab](https://colab.research.google.com/notebooks/empty.ipynb)
+
+---
+
+**Next Steps:**
+
+- **Chapter 6**: The least squares estimator — the statistical model behind the fitted regression line
+- **Chapter 7**: Statistical inference for bivariate regression (confidence intervals and hypothesis tests for the slope)
+- **Chapter 8**: Case studies applying bivariate regression to real economic data
+- **Chapters 10-12**: Multiple regression with many explanatory variables
 
 ## Practice Exercises
 
@@ -1762,7 +1782,7 @@ This research ([Mendez, 2020](https://github.com/quarcs-lab/mendez2020-convergen
 
 > **Key Concept 5.8: Capital-Productivity Relationship**
 >
-> The regression of labor productivity on capital per worker quantifies the **capital-output elasticity**—how much productivity increases when capital per worker rises by 1%. In cross-country data, this relationship reflects both:
+> The regression of labor productivity on capital per worker quantifies the **capital-output relationship**—how much productivity increases when capital per worker rises by one dollar. (Estimating the *capital-output elasticity*—the percent change in productivity per 1% increase in capital—would require a log-log regression, introduced in Chapter 9.) In cross-country data, this relationship reflects both:
 >
 > 1. **Diminishing returns to capital** (holding technology constant)
 > 2. **Technology differences** across countries (correlated with capital accumulation)
@@ -1792,8 +1812,8 @@ This research ([Mendez, 2020](https://github.com/quarcs-lab/mendez2020-convergen
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-import pyfixest as pf
 # !pip install pyfixest  # uncomment if running in Google Colab
+import pyfixest as pf
 
 # Load convergence clubs dataset
 df = pd.read_csv(
@@ -1841,8 +1861,8 @@ fig, ax = plt.subplots(figsize=(10, 6))
 ax.scatter(plot_data['kl'], plot_data['lp'], alpha=0.5, s=20)
 
 # Add labels and formatting
-ax.set_xlabel('Capital per Worker (thousands, 2011 USD PPP)', fontsize=12)
-ax.set_ylabel('Labor Productivity (thousands, 2011 USD PPP)', fontsize=12)
+ax.set_xlabel('Capital per Worker (2011 USD PPP)', fontsize=12)
+ax.set_ylabel('Labor Productivity (2011 USD PPP)', fontsize=12)
 ax.set_title('Capital per Worker vs. Labor Productivity (108 countries, 1990-2014)', fontsize=14)
 ax.grid(True, alpha=0.3)
 plt.tight_layout()
@@ -1887,7 +1907,7 @@ print(f"\nCorrelation between capital and productivity: r = {r:.4f}")
 
 # Interpretation
 print(f"\nInterpretation:")
-print(f"- Magnitude: {'Strong' if abs(r) > 0.7 else 'Moderate' if abs(r) > 0.4 else 'Weak'}")
+print(f"- Magnitude: {'Strong' if abs(r) > 0.7 else 'Moderate' if abs(r) > 0.3 else 'Weak'}")
 print(f"- Direction: {'Positive' if r > 0 else 'Negative'}")
 print(f"- R² (shared variation): {r**2:.4f} ({r**2*100:.2f}%)")
 ```
@@ -1920,13 +1940,14 @@ print(f"- R² (shared variation): {r**2:.4f} ({r**2*100:.2f}%)")
 
 > **Key Concept 5.9: Interpreting Slope in Economic Context**
 >
-> The regression slope β₁ in `productivity = β₀ + β₁ × capital` measures the **average change in productivity (in thousands of USD) for each additional thousand USD of capital per worker**.
+> The regression slope β₁ in `productivity = β₀ + β₁ × capital` measures the **average change in productivity (in 2011 USD) for each additional dollar of capital per worker**.
 >
 > In cross-country data, this captures both:
+>
 > - **True capital effect** (more machines → higher output)
 > - **Confounding factors** (richer countries have both more capital AND better technology/institutions)
 >
-> To isolate the true capital effect, we need **multiple regression** (Chapters 6-9) to control for human capital, TFP, and other factors.
+> To isolate the true capital effect, we need **multiple regression** (Chapters 10-12) to control for human capital, TFP, and other factors.
 
 #### Task 5: Compare Relationships Across Income Groups (Independent)
 
@@ -1996,37 +2017,30 @@ print(f"- R² (shared variation): {r**2:.4f} ({r**2*100:.2f}%)")
 > Establishing causation requires:
 > - **Controlled experiments** (rarely feasible for countries)
 > - **Natural experiments** (e.g., policy changes, resource discoveries)
-> - **Instrumental variables** (advanced econometric methods, Chapter 14-15)
+> - **Instrumental variables** (advanced econometric methods, Chapter 17)
 >
 > For now, interpret regression slopes as **descriptive associations**, not causal effects.
 
-### What You've Learned from This Case Study
+#### What You've Learned from This Case Study
 
 Through this hands-on exploration of capital and productivity across countries, you've applied all Chapter 5 tools:
 
- **Visualization:** Scatterplots reveal patterns before quantifying relationships
+- **Visualization:** Scatterplots reveal patterns before quantifying relationships
+- **Correlation:** Pearson coefficient quantifies linear association strength
+- **Regression:** OLS slope measures average change in Y per unit change in X
+- **Interpretation:** Translated coefficients into economic meaning (dollars, percentages)
+- **Model fit:** R-squared shows explanatory power (proportion of variation explained)
+- **Comparative analysis:** Group comparisons reveal heterogeneity (relationships vary by income level)
+- **Critical thinking:** Distinguished association from causation; recognized omitted variable bias
 
- **Correlation:** Pearson coefficient quantifies linear association strength
-
- **Regression:** OLS slope measures average change in Y per unit change in X
-
- **Interpretation:** Translated coefficients into economic meaning (dollars, percentages)
-
- **Model fit:** R-squared shows explanatory power (proportion of variation explained)
-
- **Comparative analysis:** Group comparisons reveal heterogeneity (relationships vary by income level)
-
- **Critical thinking:** Distinguished association from causation; recognized omitted variable bias
-
-**Connection to the Research:** The patterns you've discovered—the capital-productivity relationship, differences across income groups, the role of TFP—are the empirical foundations for Mendez (2020)'s convergence clubs analysis. The full research uses advanced methods (nonparametric regression, clustering algorithms) to formally identify clubs, which you'll learn in later chapters.
+**Connection to the Research:** The patterns you've discovered—the capital-productivity relationship, differences across income groups, the role of TFP—are the empirical foundations for Mendez (2020)'s convergence clubs analysis. The full research uses advanced methods (nonparametric regression, clustering algorithms) to formally identify clubs, building on the bivariate foundations you've practiced here.
 
 **Looking ahead:**
 
-- **Chapter 6-7:** Multiple regression to control for human capital, TFP, and other factors
-- **Chapter 10-11:** Panel data methods to exploit time variation within countries
-- **Chapter 15-17:** Advanced methods for causal inference and club detection
+- **Chapters 10-12:** Multiple regression to control for human capital, TFP, and other factors
+- **Chapter 17:** Panel data methods to exploit time variation within countries, along with advanced methods for causal inference
 
-**Congratulations!** You've completed Chapter 5 and applied bivariate analysis to real cross-country growth data. Continue to Chapter 6 to learn how to extend regression analysis to multiple explanatory variables.
+**Congratulations!** You've completed Chapter 5 and applied bivariate analysis to real cross-country growth data. Continue to Chapter 6 to learn about the statistical properties of the least squares estimator.
 
 ### Case Study 2: Nighttime Lights and Development: A Bivariate Exploration
 
@@ -2353,7 +2367,7 @@ plt.show()
 # print(f"  Difference: {abs(fit_ubn._r2 - fit_ntl._r2):.4f}")
 ```
 
-### What You've Learned from This Case Study
+#### What You've Learned from This Case Study
 
 Through this bivariate exploration of satellite data and municipal development in Bolivia, you've applied the full Chapter 5 toolkit:
 
@@ -2366,7 +2380,7 @@ Through this bivariate exploration of satellite data and municipal development i
 
 **Connection to the research**: The DS4Bolivia project extends this bivariate analysis to multivariate machine learning models, using 64-dimensional satellite embeddings alongside nighttime lights to achieve higher predictive accuracy for SDG indicators.
 
-**Looking ahead**: In Chapter 7, we'll apply *statistical inference* to these regressions—testing whether the NTL coefficient is significantly different from zero and constructing confidence intervals for the effect of satellite data on development.
+**Looking ahead**: In Chapter 7, we'll apply *statistical inference* to these regressions—testing whether the NTL coefficient is significantly different from zero and constructing confidence intervals for the association between nighttime lights and development.
 
 **Well done!** You've now explored two real-world datasets—cross-country convergence and Bolivian municipal development—using the complete bivariate analysis toolkit from Chapter 5.
 
