@@ -957,12 +957,10 @@ footer.page a:hover { text-decoration: underline; }
 
   <div class="try-this">
     <div class="try-title" data-i18n="common.tryTitle">Try this</div>
-    <ol data-i18n="widget.log.try">
-      <li><strong>Compare the two earnings histograms.</strong> Skewness drops from about <code>1.70</code> on the raw data toward zero after <code>ln()</code>. The long right tail flattens; the shape becomes close to symmetric.</li>
+    <ol data-i18n="widget.log.try"><li><strong>Compare the two earnings histograms.</strong> Skewness drops from about <code>1.71</code> on the raw data toward zero after <code>ln()</code>. The long right tail flattens; the shape becomes close to symmetric.</li>
       <li><strong>Find the take-off on the linear GDP chart.</strong> The series is nearly flat for decades, then lifts off around the 1870s — the Industrial Revolution. Before that, income per person barely moved.</li>
       <li><strong>Look at the same data on the log chart.</strong> It becomes nearly a straight line. A straight log line means <em>constant percentage growth</em> (~1.5–1.8%/year). The hockey stick on the raw chart is just what compounding looks like.</li>
-      <li><strong>Spot the kink in the log slope.</strong> The slope steepens around 1870 — that is the onset of modern growth. The linear chart buries this signal; the log chart puts it in plain view.</li>
-    </ol>
+      <li><strong>Spot the kink in the log slope.</strong> The slope steepens around 1870 — that is the onset of modern growth. The linear chart buries this signal; the log chart puts it in plain view.</li></ol>
   </div>
 
   <p class="takeaway" data-i18n="widget.log.takeaway"><strong>Take-away:</strong> when data spans many orders of magnitude, reach for logs. Skewed cross-sections become symmetric; exponential time series become lines. <a href="../../book/_book/notebooks_quarto/ch02_Univariate_Data_Summary.html#log-transformation" target="_blank" rel="noopener">Read §2.5 in the chapter →</a></p>
@@ -1322,7 +1320,7 @@ twoway (line exsales daten, lwidth(thin) lcolor(gs10))                     ///
 library(haven)           # read Stata .dta files directly from URLs
 library(dplyr)           # data manipulation (mutate, filter, summarize)
 library(ggplot2)         # grammar of graphics for all plots
-library(e1071)           # skewness() and kurtosis() functions
+library(e1071)           # skewness() and kurtosis(); type = 1 = population moment (matches scipy)
 
 # =============================================================================
 # STEP 1: Load data directly from a URL
@@ -1341,9 +1339,9 @@ cat("Dataset:", nrow(data_earnings), "observations,", ncol(data_earnings), "vari
 summary(earnings)
 
 # Skewness and kurtosis measure the shape of the distribution
-cat("\nSkewness:       ", round(skewness(earnings), 2),
+cat("\nSkewness:       ", round(skewness(earnings, type = 1), 2),
     " (&gt; 1 = strongly right-skewed)\n")
-cat("Excess kurtosis:", round(kurtosis(earnings), 2),
+cat("Excess kurtosis:", round(kurtosis(earnings, type = 1), 2),
     " (&gt; 0 = heavier tails than normal)\n")
 cat("Mean - Median:  $", round(mean(earnings) - median(earnings), 0),
     " (positive gap signals right skew)\n")
@@ -1387,14 +1385,14 @@ p1 &lt;- ggplot(data_earnings, aes(x = earnings)) +
   geom_histogram(bins = 20, fill = "steelblue", color = "black", alpha = 0.7) +
   labs(x = "Earnings ($)",
        title = paste0("Original (skewness = ",
-                      round(skewness(earnings), 2), ")")) +
+                      round(skewness(earnings, type = 1), 2), ")")) +
   theme_minimal()
 
 p2 &lt;- ggplot(data_earnings, aes(x = lnearnings)) +
   geom_histogram(bins = 20, fill = "coral", color = "black", alpha = 0.7) +
   labs(x = "ln(Earnings)",
        title = paste0("Log-transformed (skewness = ",
-                      round(skewness(data_earnings$lnearnings), 2), ")")) +
+                      round(skewness(data_earnings$lnearnings, type = 1), 2), ")")) +
   theme_minimal()
 
 p1 + p2 + plot_annotation(title = "Effect of Log Transformation on Skewness")
@@ -1491,19 +1489,23 @@ function std(a, m) {
   for (const v of a) s += (v - m) * (v - m);
   return Math.sqrt(s / (a.length - 1));
 }
+// Population moment coefficients g1 (skewness) and g2 (excess kurtosis) — matches
+// scipy.stats.skew/kurtosis, which is what the chapter computes. (The earlier version
+// standardized with the sample SD (ddof=1) but divided the moment sum by n — a mixed
+// estimator matching neither convention.)
 function skewness(a) {
-  const m = mean(a), s = std(a, m);
-  if (s === 0) return 0;
-  let sum = 0;
-  for (const v of a) sum += ((v - m) / s) ** 3;
-  return sum / a.length;
+  const m = mean(a), n = a.length;
+  let m2 = 0, m3 = 0;
+  for (const v of a) { const d = v - m; m2 += d * d; m3 += d * d * d; }
+  m2 /= n; m3 /= n;
+  return m2 === 0 ? 0 : m3 / Math.pow(m2, 1.5);
 }
 function kurtosisExcess(a) {
-  const m = mean(a), s = std(a, m);
-  if (s === 0) return 0;
-  let sum = 0;
-  for (const v of a) sum += ((v - m) / s) ** 4;
-  return sum / a.length - 3;
+  const m = mean(a), n = a.length;
+  let m2 = 0, m4 = 0;
+  for (const v of a) { const d = v - m; m2 += d * d; m4 += d * d * d * d; }
+  m2 /= n; m4 /= n;
+  return m2 === 0 ? 0 : m4 / (m2 * m2) - 3;
 }
 function summary(values) {
   const arr = values.filter(v => v !== null && !isNaN(v));
