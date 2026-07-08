@@ -48,11 +48,11 @@ What is the effect of house size on price **after controlling** for other charac
 
 **Chapter outline:**
 
-- 10.1 Example: House Price and Characteristics
+- 10.1 Example - House Price and Characteristics
 - 10.2 Two-Way Scatterplots
 - 10.3 Correlation Analysis
 - 10.4 Multiple Regression Estimation
-- 10.5 Partial Effects — The FWL Theorem
+- 10.5 Partial Effects - The FWL Theorem
 - 10.6 Model Fit Statistics
 - 10.7 Model Comparison
 - 10.8 Inestimable Models and Multicollinearity
@@ -536,6 +536,20 @@ It's often useful to compare multiple model specifications side-by-side. Here we
 # Estimate simple model (size only)
 model_simple = pf.feols('price ~ size', data=data_house)
 
+# Information criteria (Stata convention). pyfixest's Feols has no ._aic/._bic,
+# so compute them from each model's residual sum of squares.
+def stata_ic(model):
+    n_obs = int(model._N)
+    n_par = len(model.coef())
+    rss_m = np.sum(model._u_hat ** 2)
+    const = n_obs * (1 + np.log(2 * np.pi))
+    aic = n_obs * np.log(rss_m / n_obs) + const + 2 * n_par
+    bic = n_obs * np.log(rss_m / n_obs) + const + n_par * np.log(n_obs)
+    return aic, bic
+
+aic_simple, bic_simple = stata_ic(model_simple)
+aic_full, bic_full = stata_ic(model_full)
+
 # Create comparison table
 # MODEL COMPARISON: Simple vs. Full
 
@@ -543,8 +557,8 @@ comparison_stats = pd.DataFrame({
     'Model': ['Simple (size only)', 'Full (all variables)'],
     'R²': [model_simple._r2, model_full._r2],
     'Adj R²': [model_simple._adj_r2, model_full._adj_r2],
-    'AIC': [model_simple._aic if hasattr(model_simple, "_aic") else float("nan"), model_full._aic if hasattr(model_full, "_aic") else float("nan")],
-    'BIC': [model_simple._bic if hasattr(model_simple, "_bic") else float("nan"), model_full._bic if hasattr(model_full, "_bic") else float("nan")],
+    'AIC': [aic_simple, aic_full],
+    'BIC': [bic_simple, bic_full],
     'N': [n, n]
 })
 
@@ -861,12 +875,20 @@ print(f"Coef from FWL residual regression:  {model_fwl.coef()['resid_size']:.10f
 # Compare simple (size only) vs. full model using fit statistics
 model_simple = pf.feols('price ~ size', data=data_house)
 
+# pyfixest has no ._aic/._bic; compute them (Stata convention) from each model's RSS
+def stata_ic(model):
+    n_obs, n_par = int(model._N), len(model.coef())
+    rss_m = np.sum(model._u_hat ** 2)
+    const = n_obs * (1 + np.log(2 * np.pi))
+    return (n_obs * np.log(rss_m / n_obs) + const + 2 * n_par,
+            n_obs * np.log(rss_m / n_obs) + const + n_par * np.log(n_obs))
+
 comparison = pd.DataFrame({
     'Model': ['Size only', 'Full (all variables)'],
     'R²':     [model_simple._r2,     model_full._r2],
     'Adj R²': [model_simple._adj_r2, model_full._adj_r2],
-    'AIC':    [model_simple._aic if hasattr(model_simple, "_aic") else float("nan"),          model_full._aic if hasattr(model_full, "_aic") else float("nan")],
-    'BIC':    [model_simple._bic if hasattr(model_simple, "_bic") else float("nan"),          model_full._bic if hasattr(model_full, "_bic") else float("nan")],
+    'AIC':    [stata_ic(model_simple)[0], stata_ic(model_full)[0]],
+    'BIC':    [stata_ic(model_simple)[1], stata_ic(model_full)[1]],
 })
 print(comparison.to_string(index=False))
 # Adj R² DECREASES when adding 5 weak predictors — parsimony wins
@@ -996,7 +1018,7 @@ c) What economic reasoning supports the simpler model in this case?
 
 **Exercise 5: Multicollinearity Detection**
 
-A multiple regression of house prices yields the following VIF values:
+Suppose a *hypothetical* house-price regression — one whose predictors overlap far more than the Davis houses used in this chapter (whose correctly centered VIFs are all below 2) — yields the following VIF values:
 
 | Variable | VIF |
 |----------|-----|
@@ -1149,7 +1171,7 @@ Compare models using fit statistics and information criteria.
 3. Does the parsimony principle favor one model over another?
 4. Calculate VIF for Model 3 — is multicollinearity a concern?
 
-*Hint: Use `model._r2`, `model._adj_r2`, `model._aic if hasattr(model, "_aic") else float("nan")`, `model._bic if hasattr(model, "_bic") else float("nan")` and `variance_inflation_factor()` from statsmodels.*
+*Hint: Use `model._r2` and `model._adj_r2` for fit. pyfixest's `Feols` has no `._aic`/`._bic`, so compute them (Stata convention) from the residuals: AIC `= n*np.log(rss/n) + n*(1+np.log(2*np.pi)) + 2*k` and BIC `= ... + k*np.log(n)`, with `rss = np.sum(model._u_hat**2)`, `n = int(model._N)`, `k = len(model.coef())`. Use `variance_inflation_factor()` from statsmodels for VIF.*
 
 #### Task 6: Development Policy Brief (Independent)
 
@@ -1385,7 +1407,7 @@ print(f"Difference (numerical precision):                {abs(model_full_sat.coe
    - **Model 3**: `imds ~ ln_NTLpc2017 + A00 + A10 + A20 + A30 + A40` (NTL + 5 embeddings)
 
 2. Create a comparison table reporting $R^2$, adjusted $R^2$, AIC, and BIC for each model
-3. Use `model._r2`, `model._adj_r2`, `model._aic if hasattr(model, "_aic") else float("nan")`, `model._bic if hasattr(model, "_bic") else float("nan")`
+3. Compute fit statistics from `model._r2` and `model._adj_r2`; pyfixest has no `._aic`/`._bic`, so compute AIC/BIC from the residuals as `n*np.log(rss/n) + n*(1+np.log(2*np.pi)) + 2*k` and `... + k*np.log(n)` (with `rss = np.sum(model._u_hat**2)`, `n = int(model._N)`, `k = len(model.coef())`)
 4. Which model is "best" by each criterion?
 5. Does the parsimony principle favor fewer or more embedding variables?
 
@@ -1404,8 +1426,12 @@ print(f"Difference (numerical precision):                {abs(model_full_sat.coe
 #     'Model': ['NTL only', 'NTL + 2 embeddings', 'NTL + 5 embeddings'],
 #     'R²': [model_1._r2, model_2._r2, model_3._r2],
 #     'Adj R²': [model_1._adj_r2, model_2._adj_r2, model_3._adj_r2],
-#     'AIC': [model_1._aic if hasattr(model_1, "_aic") else float("nan"), model_2._aic if hasattr(model_2, "_aic") else float("nan"), model_3._aic if hasattr(model_3, "_aic") else float("nan")],
-#     'BIC': [model_1._bic if hasattr(model_1, "_bic") else float("nan"), model_2._bic if hasattr(model_2, "_bic") else float("nan"), model_3._bic if hasattr(model_3, "_bic") else float("nan")],
+#     # pyfixest has no ._aic/._bic; compute them (Stata convention) from each model's RSS:
+#     #   def stata_ic(m):
+#     #       n_m, k_m = int(m._N), len(m.coef()); rss_m = np.sum(m._u_hat**2); c = n_m*(1+np.log(2*np.pi))
+#     #       return (n_m*np.log(rss_m/n_m)+c+2*k_m, n_m*np.log(rss_m/n_m)+c+k_m*np.log(n_m))
+#     'AIC': [stata_ic(model_1)[0], stata_ic(model_2)[0], stata_ic(model_3)[0]],
+#     'BIC': [stata_ic(model_1)[1], stata_ic(model_2)[1], stata_ic(model_3)[1]],
 #     'N': [len(reg_data)] * 3
 # })
 # print(comparison.to_string(index=False))
