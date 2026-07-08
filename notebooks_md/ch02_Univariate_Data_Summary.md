@@ -337,7 +337,7 @@ A **box plot** (or box-and-whisker plot) visualizes key summary statistics:
 ```python
 # Create box plot of earnings
 fig, ax = plt.subplots(figsize=(10, 6))
-bp = ax.boxplot(earnings, vert=False, patch_artist=True,
+bp = ax.boxplot(earnings, orientation='horizontal', patch_artist=True,
                 boxprops=dict(facecolor='lightblue', alpha=0.7),  # alpha = transparency (0 = invisible, 1 = opaque)
                 medianprops=dict(color='red', linewidth=2))
 ax.set_xlabel('Annual earnings (in dollars)', fontsize=12)
@@ -1006,7 +1006,7 @@ print(f"Skewness reduced from {stats.skew(earnings):.2f} to {stats.skew(data_ear
 - **Skewness**: -0.91 (moderate left skew — far closer to symmetry than the original 1.71)
 - **Mean**: 10.46 (log dollars)
 - **Median**: 10.49 (log dollars)
-- **Std Dev**: 0.62 (only 6% of mean)
+- **Std Dev**: 0.62 log points (≈ ±62% proportional spread, roughly constant across income levels)
 - **Range**: 6.96 to 12.06
 
 **What the transformation achieved:**
@@ -1025,9 +1025,9 @@ print(f"Skewness reduced from {stats.skew(earnings):.2f} to {stats.skew(data_ear
 
 **3. Equalized variance (stabilization):**
 
-- Original std dev: 62% of mean (high coefficient of variation)
-- Log std dev: 6% of mean (much more stable)
-- High earners no longer dominate the variance
+- In dollars, the spread scales with income (SD = 62% of the mean — a large coefficient of variation), so a few high earners dominate the variance
+- On the log scale, one standard deviation is about 0.62 log points — a roughly ±62% proportional spread that stays about the same at every income level instead of ballooning with income
+- With the variance stabilized, extreme high earners no longer dominate the spread
 
 **4. Brought mean and median closer:**
 
@@ -1411,7 +1411,7 @@ plt.show()
 # =============================================================================
 # The box spans Q1 to Q3 (IQR); whiskers extend 1.5×IQR; dots are outliers
 fig, ax = plt.subplots(figsize=(10, 4))
-ax.boxplot(earnings, vert=False, patch_artist=True,
+ax.boxplot(earnings, orientation='horizontal', patch_artist=True,
            boxprops=dict(facecolor='lightblue', alpha=0.7),
            medianprops=dict(color='red', linewidth=2))
 ax.set_xlabel('Annual Earnings ($)')
@@ -1527,6 +1527,7 @@ Test your understanding of univariate data analysis with these exercises:
 
 - Why is log transformation particularly useful for economic variables like income and GDP?
 - If log(earnings) increases by 0.5, approximately what percentage increase does this represent in earnings?
+- Compare your approximation with the exact percentage change, 100 × (e^0.5 − 1). Why do the two answers differ for a change this large?
 
 **Exercise 5:** Standard deviation interpretation
 
@@ -1790,7 +1791,7 @@ axes[0, 0].set_title('Panel 1: Histogram of Productivity (20 bins)', fontsize=12
 axes[0, 0].grid(True, alpha=0.3)
 
 # Panel 2: Box plot (original productivity)
-axes[0, 1].boxplot(_____, vert=True, patch_artist=True)
+axes[0, 1].boxplot(_____, orientation='vertical', patch_artist=True)
 axes[0, 1].set_ylabel('Labor Productivity', fontsize=11)
 axes[0, 1].set_title('Panel 2: Box Plot of Productivity', fontsize=12, fontweight='bold')
 axes[0, 1].grid(True, alpha=0.3, axis='y')
@@ -1868,7 +1869,7 @@ prod_2014 = _____  # Extract 2014 data (same pattern as above)
 
 # Panel B: Side-by-side box plots
 # Your code here: Create box plots for both years
-# Hint: axes[1].boxplot([prod_1990, prod_2014], labels=['1990', '2014'])
+# Hint: axes[1].boxplot([prod_1990, prod_2014], tick_labels=['1990', '2014'])
 # Set different colors for each box using patch_artist=True
 
 # Step 3: Calculate comparison statistics
@@ -1964,8 +1965,8 @@ prod_2014 = _____  # Extract 2014 data (same pattern as above)
 
 **Instructions:**
 
-1. Add a region column to your dataframe (you'll need to manually assign regions based on country names)
-2. Group countries by region (at minimum: Africa, Asia, Europe, Americas)
+1. Use the dataset's built-in `region` column (its five values are Africa, Americas, Asia, Europe, and Oceania) — no manual mapping is needed
+2. Group countries by region
 3. Create box plots for each region side-by-side
 4. Calculate summary statistics by region
 5. Identify: Which regions have highest/lowest productivity? Most inequality?
@@ -1974,7 +1975,7 @@ prod_2014 = _____  # Extract 2014 data (same pattern as above)
 
 **Starter code guidance:**
 
-- Create a dictionary mapping countries to regions
+- Read the existing `region` column (no dictionary needed)
 - Use `.groupby()` to calculate statistics by region
 - Create side-by-side box plots for visual comparison
 - Calculate mean and standard deviation by region
@@ -1986,21 +1987,15 @@ prod_2014 = _____  # Extract 2014 data (same pattern as above)
 # Task 6: Regional Patterns (INDEPENDENT)
 # Compare productivity distributions across geographic regions
 
-# Step 1: Create region mapping dictionary
-# Your code here: Define region_mapping
-# Map each country to its region (Africa, Americas, Asia, Europe, Middle East, Asia-Pacific)
-# Example structure:
-# region_mapping = {
-#     'Australia': 'Asia-Pacific',
-#     'Austria': 'Europe',
-#     'Brazil': 'Americas',
-#     # ... continue for all 108 countries
-# }
+# Step 1: Use the existing region column
+# The Mendez dataset already labels every country with one of five regions:
+# Africa, Americas, Asia, Europe, Oceania — so no manual mapping is needed.
+# Your code here: confirm the labels
+# Hint: df1['region'].unique()
 
-# Step 2: Add region column to dataframe
-# Your code here: Create a copy of df1 and add region column
-# Hint: df_with_region['region'] = df_with_region.index.get_level_values('country').map(region_mapping)
-# Remove rows with missing regions: .dropna(subset=['region'])
+# Step 2: Build one row per country carrying its region
+# Your code here: region is constant over time, so take the mean lp and first region per country
+# Hint: df_region = df1.reset_index().groupby('country').agg({'lp': 'mean', 'region': 'first'})
 
 # Step 3: Calculate regional statistics
 # Your code here: Group by region and aggregate statistics
@@ -2018,9 +2013,9 @@ prod_2014 = _____  # Extract 2014 data (same pattern as above)
 
 **Hints:**
 
-- There are 108 countries in the dataset - you'll need to map each one
-- Regions: Africa (Kenya, Nigeria, etc.), Americas (USA, Brazil, etc.), Asia (China, India, etc.)
-- Europe (France, Germany, etc.), Middle East (Israel, Turkey), Asia-Pacific (Australia, Japan, NZ)
+- The five region labels already in the data are Africa, Americas, Asia, Europe, and Oceania
+- Example members — Africa (Kenya, South Africa), Americas (United States, Brazil), Asia (China, India, Japan)
+- Europe (France, Germany), Oceania (Australia, New Zealand)
 - Use `.groupby('region')['lp'].agg([...])` to calculate statistics by region
 - Sort regions by mean before plotting for better visualization
 
@@ -2207,7 +2202,7 @@ plt.show()
 # Example structure:
 # dept_order = bol_key.groupby('dep')['imds'].median().sort_values().index
 # fig, ax = plt.subplots(figsize=(10, 7))
-# bol_key.boxplot(column='imds', by='dep', ax=ax, vert=False,
+# bol_key.boxplot(column='imds', by='dep', ax=ax, orientation='horizontal',
 #                 positions=range(len(dept_order)))
 # ax.set_xlabel('Municipal Development Index (IMDS)')
 # ax.set_ylabel('Department')
