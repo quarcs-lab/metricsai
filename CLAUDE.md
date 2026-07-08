@@ -64,6 +64,13 @@ metricsai/
 └── README.md           # Project documentation
 ```
 
+
+## Self-learning 
+When I correct you, or you catch yourself making a mistake: before continuing， add the lesson as a one-line rule under ### Lessons, so it never happens again.
+
+### Lessons 
+-（Claude adds lessons/rules here）
+
 ## Key Commands
 
 **Activate the virtual environment:**
