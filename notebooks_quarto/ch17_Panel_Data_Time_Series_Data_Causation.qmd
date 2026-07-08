@@ -112,7 +112,7 @@ A digital signal is squashed by an op-amp into a clean low-or-high state — nev
 ::::: {.columns}
 :::: {.column width="50%"}
 ::: {.callout-tip collapse="true" appearance="simple" title="Example"}
-For the chapter's monthly `dgs10` series (changes in 10-year Treasury rate, 1982–2015), the AR(2) part of the ADL(2, 2) model gives a small *negative* coefficient on $\Delta\text{gs10}_{t-1}$ (around $-0.20$): when last month's 10-year rate jumped, this month's tends to partly *reverse*. That's mean reversion in *changes* — captured directly by the AR component.
+For the chapter's monthly `dgs10` series (changes in 10-year Treasury rate, 1982–2015), the AR(2) part of the ADL(2, 2) model gives a small *positive* coefficient on $\Delta\text{gs10}_{t-1}$ (around $+0.28$): last month's change in the 10-year rate carries partly into this month — positive momentum in *changes*, consistent with the residual autocorrelation of about +0.25.
 :::
 ::::
 :::: {.column width="50%"}
@@ -127,7 +127,7 @@ A long stone hallway echoes your handclap for several seconds. A new clap layers
 ::::: {.columns}
 :::: {.column width="50%"}
 ::: {.callout-tip collapse="true" appearance="simple" title="Example"}
-The chapter's ADL(2, 2) model regresses `dgs10` on its own two lags plus current and two lags of `dgs1` (Fed-controlled 1-year rate). The contemporary $\gamma_0 \approx 0.50$ says half a same-month pass-through; once $\gamma_1 \approx 0.20$ and $\gamma_2 \approx 0.08$ are added, the two-month cumulative multiplier is roughly 0.78 — meaning about 78% of a 1-year-rate shock has passed through to the 10-year rate within two months (the full long-run effect is larger).
+The chapter's ADL(2, 2) model regresses `dgs10` on its own two lags plus current and two lags of `dgs1` (Fed-controlled 1-year rate). The contemporary $\gamma_0 \approx 0.74$ says roughly three-quarters same-month pass-through; adding $\gamma_1 \approx -0.26$ and $\gamma_2 \approx 0.05$ gives a two-month cumulative multiplier of about 0.53 — so a bit over half of a 1-year-rate shock has passed through to the 10-year rate within two months.
 :::
 ::::
 :::: {.column width="50%"}
@@ -442,8 +442,8 @@ The comparison of standard errors reveals **within-team correlation** - a pervas
 
 | Coefficient | Default SE | Robust SE | **Cluster SE** |
 |-------------|-----------|-----------|---------------|
-| wins | 0.0030 | 0.0035 | **0.0065** |
-| **Ratio** | 1.00x | 1.17x | **2.17x** |
+| wins | 0.0011 | 0.0010 | **0.0019** |
+| **Ratio** | 1.00x | 0.97x | **1.81x** |
 
 **What This Tells Us:**
 
@@ -529,15 +529,15 @@ Imagine two extreme scenarios:
 
 **With default SEs:**
 
-- wins coefficient: t = 3.00, p < 0.01
+- wins coefficient: t = 6.42, p < 0.001
 - **Conclusion**: Highly significant
 
 **With cluster SEs:**
 
-- wins coefficient: t = 1.38, p = 0.17
-- **Conclusion**: Not significant!
+- wins coefficient: t = 3.54, p = 0.001
+- **Conclusion**: Still significant, but the standard error is ~1.8x larger
 
-**Complete reversal of inference!**
+**Clustering widens the interval without overturning significance here** -- the correct lesson is that ignoring within-team correlation understates uncertainty, not that it manufactures significance.
 
 **Best Practices:**
 
@@ -567,22 +567,22 @@ Sometimes need to cluster in **multiple dimensions**:
 - **Season** (common time shocks affect all teams)
 - Example: 2008 financial crisis hit all teams that year
 
-Formula: $SE_{two-way} = SE_{team} + SE_{time} - SE_{pooled}$
+Formula (the *variance* matrices combine, not the SEs themselves): $V_{two-way} = V_{team} + V_{time} - V_{team \times time}$ — the two cluster variances add and the team-by-time cell-level overlap is subtracted; the two-way standard errors are the square roots of the diagonal.
 
 **The NBA Example:**
 
 With cluster SEs:
 
-- wins coefficient: **0.0055** (SE: **0.0040**)
-- t-statistic: **1.38**
-- p-value: **0.17**
+- wins coefficient: **0.0068** (SE: **0.0019**)
+- t-statistic: **3.54**
+- p-value: **0.001**
 
 **Interpretation:**
 
-- Relationship between wins and revenue **not statistically significant**
-- Once we properly account for within-team correlation
-- Previous "significance" was an artifact of ignoring dependence
-- Fixed effects (next section) will address the underlying confounding
+- Relationship between wins and revenue **remains statistically significant** (t ≈ 3.5, p ≈ 0.001)
+- Even after properly accounting for within-team correlation
+- Clustering roughly doubles the standard error but does not overturn the result
+- Fixed effects (next section) will further address the underlying confounding
 
 ## 17.3 Fixed Effects Estimation
 
@@ -652,8 +652,8 @@ The comparison between Pooled OLS and Fixed Effects reveals **omitted variable b
 
 | Model | Wins Coefficient | SE (cluster) | R² |
 |-------|-----------------|-------------|-----|
-| **Pooled OLS** | 0.0055 | 0.0040 | **0.15** (overall) |
-| **Fixed Effects** | 0.0025 | 0.0020 | **0.65** (within) |
+| **Pooled OLS** | 0.0068 | 0.0019 | **0.127** (overall) |
+| **Fixed Effects** | 0.0045 | 0.0008 | **0.185** (within) |
 
 **Key Findings:**
 
@@ -781,21 +781,21 @@ Fixed effects output typically reports three R²:
 
 With cluster SEs:
 
-- t-statistic: 0.0025 / 0.0020 ≈ **1.25**
-- p-value ≈ **0.21** (not significant at 5%)
+- t-statistic: 0.0045 / 0.0008 ≈ **5.35**
+- p-value < **0.001** (highly significant)
 
-Surprisingly **not significant**! Why?
+The within-team wins effect is **precisely estimated** and remains significant after clustering by team. Even so, several features of this panel keep the FE estimate modest and would threaten precision in smaller samples:
 
 1. **Small within-variation** (teams don't vary hugely in wins year-to-year)
 2. **Revenue smoothing** (multi-year contracts, season tickets)
-3. **Only 29 teams** (small number of clusters → large SEs)
+3. **Only 29 teams** (small number of clusters)
 4. **Short panel** (10 years → limited within-variation per team)
 
 **Practical Implications:**
 
 - **Pooled OLS**: "High-revenue teams win more" (true, but confounded)
-- **Fixed Effects**: "Winning more games increases revenue" ? (effect exists but imprecisely estimated)
-- Need **longer panel** or **more teams** for precise FE estimates
+- **Fixed Effects**: "Winning more games increases revenue" (a precisely estimated within-team effect, t ≈ 5.3)
+- The FE estimate is significant even with only 29 teams over 10 seasons
 
 ## 17.4 Random Effects Estimation
 
@@ -883,12 +883,12 @@ print(f"  Education: {model_logit.params['education']:.4f}")
 print(f"  Pseudo R-squared: {model_logit.prsquared:.4f}")
 
 # Full logit output
-model_logit.summary()
+print(model_logit.summary())
 
 # Marginal effects
 marginal_effects = model_logit.get_margeff()
 # Marginal Effects (at means)
-marginal_effects.summary()
+print(marginal_effects.summary())
 
 # Linear Probability Model for comparison
 fit_lpm = pf.feols('dbigearn ~ age + education', data=data_earnings, vcov='HC1')
@@ -1126,8 +1126,8 @@ From: $\Delta gs10_t = \beta_0 + \beta_1 \Delta gs10_{t-1} + \beta_2 \Delta gs10
 
 **Autoregressive terms** (own lags):
 
-- **Lag 1** ($\Delta gs10_{t-1}$): ≈ **-0.15 to -0.25** (negative!)
-- **Lag 2** ($\Delta gs10_{t-2}$): ≈ **-0.05 to -0.10** (negative)
+- **Lag 1** ($\Delta gs10_{t-1}$): ≈ **+0.28** (positive)
+- **Lag 2** ($\Delta gs10_{t-2}$): ≈ **-0.10** (negative)
 
 **Distributed lag terms** (1-year rate):
 
@@ -1198,9 +1198,9 @@ This suggests:
 
 | Model | R² | Residual ρ₁ | BIC |
 |-------|-----|------------|-----|
-| Static ($\Delta gs10 \sim \Delta gs1$) | 0.25 | 0.25 | Higher |
-| AR(2) ($\Delta gs10 \sim \Delta gs10_{t-1,t-2}$) | 0.10 | 0.15 | Higher |
-| **ADL(2,2)** | **0.45** | **0.08** | **Lower** |
+| Static ($\Delta gs10 \sim \Delta gs1$) | 0.57 | 0.25 | Higher |
+| AR(2) ($\Delta gs10 \sim \Delta gs10_{t-1,t-2}$) | 0.13 | 0.01 | Higher |
+| **ADL(2,2)** | **0.61** | **0.01** | **Lower** |
 
 ADL(2,2) dominates on all criteria!
 
@@ -1564,7 +1564,12 @@ print(f"  Residual ACF(1): {acf_adl[1]:.4f} (near zero → dynamics captured)")
 
 **Try it yourself!** Copy this code into an empty Google Colab notebook and run it: [Open Colab](https://colab.research.google.com/notebooks/empty.ipynb)
 
-**Next steps:** Apply these methods to your own research questions. Panel data methods, time series models, and causal inference strategies are essential tools for any applied econometrician working with observational data.
+**Next Steps:**
+
+- **Advanced panel methods**: Dynamic panel estimators (Arellano-Bond) and correlated random effects
+- **Time series econometrics**: Cointegration, error-correction models, and unit-root testing
+- **Modern causal inference**: Difference-in-differences, regression discontinuity, and credible IV designs
+- **Apply the toolkit**: Bring these methods to your own research questions and observational datasets
 
 ---
 
