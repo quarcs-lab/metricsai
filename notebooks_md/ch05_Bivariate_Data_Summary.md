@@ -335,14 +335,6 @@ Looking at the table:
 - **No counterexamples**: We never see "large and cheap" houses (the ≥ 2,400 sq ft, < \$250,000 cell is empty)
 - **Imperfect relationship**: Some medium-sized houses are low-priced (6 houses), some are high-priced (7 houses)
 
-**Limitation of tabulation:**
-
-- We lose information by categorizing continuous variables
-- We can't quantify the strength of the relationship
-- We can't make precise predictions
-
-**Next step:** Use the correlation coefficient and regression to measure the relationship more precisely using the full continuous data.
-
 **From Categorical to Continuous:**
 
 Crosstabulation is useful but has limitations:
@@ -947,23 +939,6 @@ In applied econometrics, R² values around 0.60 are considered quite strong for 
 
 Modern statistical software provides comprehensive regression output. Let's examine each component of the output for our house price regression.
 
-**Understanding Prediction Uncertainty:**
-
-Our prediction ŷ = $262,559 for a 2,000 sq ft house is a **point estimate** — our best single guess. But predictions have uncertainty:
-
-**Sources of uncertainty:**
-
-- **Estimation error**: We don't know the true β₁ and β₂, only estimates b₁ and b₂
-- **Fundamental randomness**: Even houses of identical size sell for different prices
-- **Model limitations**: Our simple model omits many price determinants
-
-**Preview of Chapter 7**: We'll learn to construct **prediction intervals** like:
-
-- "We're 95% confident the price will be between $213,000 and $312,000"
-- This acknowledges uncertainty while still providing useful guidance
-
-For now, remember: the standard error ($23,551) gives a rough sense of typical prediction errors.
-
 ```python
 # Complete regression output
 fit.summary()
@@ -1045,6 +1020,23 @@ Using our regression equation:
 - **Informal prediction interval**: roughly \$239,000 to \$286,000
 - (Chapter 7 will cover formal prediction intervals)
 
+**Understanding Prediction Uncertainty:**
+
+Our prediction ŷ = $262,559 for a 2,000 sq ft house is a **point estimate** — our best single guess. But predictions have uncertainty:
+
+**Sources of uncertainty:**
+
+- **Estimation error**: We don't know the true β₁ and β₂, only estimates b₁ and b₂
+- **Fundamental randomness**: Even houses of identical size sell for different prices
+- **Model limitations**: Our simple model omits many price determinants
+
+**Preview of Chapter 7**: We'll learn to construct **prediction intervals** like:
+
+- "We're 95% confident the price will be between $213,000 and $312,000"
+- This acknowledges uncertainty while still providing useful guidance
+
+For now, remember: the standard error ($23,551) gives a rough sense of typical prediction errors.
+
 **3. Why predictions aren't perfect:**
 
 - Our model only includes size
@@ -1081,7 +1073,7 @@ residual = actual price - predicted price
 # Add residuals and standardized residuals to dataset
 data_house['fitted'] = fit.predict()
 data_house['residual'] = fit._u_hat
-data_house['std_resid'] = fit._u_hat / fit._u_hat.std()
+data_house['std_resid'] = fit._u_hat / se  # standardize by s_e = sqrt(RSS/(n-2)) from Section 5.6
 
 # Observations with large residuals (>2 std deviations)
 outliers = data_house[np.abs(data_house['std_resid']) > 2]
@@ -1096,7 +1088,7 @@ else:
 data_house.nlargest(5, 'residual', keep='all')[['price', 'size', 'fitted', 'residual']]
 ```
 
-**What the output shows:** Exactly one house crosses the |standardized residual| > 2 threshold: a 2,400 sq ft house that sold for \$340,000 — about \$47,900 more than the fitted line predicts (standardized residual ≈ 2.11). With 29 observations, one residual beyond two standard deviations is roughly what chance alone would produce, so this is a mild outlier worth a second look (perhaps a premium location or condition), not a data error that demands removal.
+**What the output shows:** Exactly one house crosses the |standardized residual| > 2 threshold: a 2,400 sq ft house that sold for \$340,000 — about \$47,900 more than the fitted line predicts (standardized residual ≈ 2.04). With 29 observations, one residual beyond two standard deviations is roughly what chance alone would produce, so this is a mild outlier worth a second look (perhaps a premium location or condition), not a data error that demands removal.
 
 ## 5.9 Regression and Correlation
 
@@ -1940,7 +1932,7 @@ print(f"- R² (shared variation): {r**2:.4f} ({r**2*100:.2f}%)")
 
 > **Key Concept 5.9: Interpreting Slope in Economic Context**
 >
-> The regression slope β₁ in `productivity = β₀ + β₁ × capital` measures the **average change in productivity (in 2011 USD) for each additional dollar of capital per worker**.
+> The regression slope b₂ in `productivity = b₁ + b₂ × capital` measures the **average change in productivity (in 2011 USD) for each additional dollar of capital per worker**.
 >
 > In cross-country data, this captures both:
 >
@@ -2067,7 +2059,7 @@ In Chapter 1, we introduced the DS4Bolivia project and estimated a simple regres
 **Instructions**:
 
 1. Load the data from the URL below and select the key variables listed above
-2. Use `pd.cut()` to bin the `imds` variable into three equal-frequency groups labeled **Low**, **Medium**, and **High** (terciles)
+2. Use `pd.qcut()` to bin the `imds` variable into three equal-frequency groups labeled **Low**, **Medium**, and **High** (terciles)
 3. Create a two-way frequency table (cross-tabulation) of `imds` terciles against department using `pd.crosstab()`
 4. Examine the table: Which departments have the most municipalities in the *Low* development category?
 
@@ -2087,9 +2079,9 @@ print(f"Departments: {sorted(bol_cs['dep'].unique())}")
 print()
 
 # Bin imds into terciles
-bol_cs['imds_group'] = pd.cut(bol_cs['imds'],
-                               bins=3,
-                               labels=['Low', 'Medium', 'High'])
+bol_cs['imds_group'] = pd.qcut(bol_cs['imds'],
+                                q=3,
+                                labels=['Low', 'Medium', 'High'])
 
 # Two-way frequency table: imds tercile x department
 cross_tab = pd.crosstab(bol_cs['imds_group'], bol_cs['dep'],
