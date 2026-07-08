@@ -1104,7 +1104,7 @@ summary(model)
 # Extract key results
 slope     &lt;- coef(model)["size"]         # marginal effect: $/sq ft
 intercept &lt;- coef(model)["(Intercept)"]  # predicted price when size = 0
-r_squared &lt;- r2(model)                   # proportion of variation explained
+r_squared &lt;- r2(model, "r2")            # r2() returns several variants; pick plain R-squared
 
 cat("Estimated equation: price =", round(intercept, 0), "+",
     round(slope, 2), "x size\n")
@@ -1135,7 +1135,7 @@ predictors &lt;- c("size", "bedrooms", "bathrooms", "lotsize", "age")
 
 results &lt;- lapply(predictors, function(var) {
   m &lt;- feols(as.formula(paste("price ~", var)), data = data_house)
-  data.frame(Predictor = var, Slope = coef(m)[var], R2 = r2(m))
+  data.frame(Predictor = var, Slope = coef(m)[var], R2 = r2(m, "r2"))
 })
 do.call(rbind, results)</code></pre>
   <div style="display:flex;gap:0.8rem;align-items:center;margin-top:0.8rem;flex-wrap:wrap">
@@ -1189,19 +1189,23 @@ function std(a, m) {
   for (const v of a) s += (v - m) * (v - m);
   return Math.sqrt(s / (a.length - 1));
 }
+// Population moment coefficients g1 (skewness) and g2 (excess kurtosis) — matches
+// scipy.stats.skew/kurtosis, which is what the chapter computes. (The earlier version
+// standardized with the sample SD (ddof=1) but divided the moment sum by n — a mixed
+// estimator matching neither convention.)
 function skewness(a) {
-  const m = mean(a), s = std(a, m);
-  if (s === 0) return 0;
-  let sum = 0;
-  for (const v of a) sum += ((v - m) / s) ** 3;
-  return sum / a.length;
+  const m = mean(a), n = a.length;
+  let m2 = 0, m3 = 0;
+  for (const v of a) { const d = v - m; m2 += d * d; m3 += d * d * d; }
+  m2 /= n; m3 /= n;
+  return m2 === 0 ? 0 : m3 / Math.pow(m2, 1.5);
 }
 function kurtosisExcess(a) {
-  const m = mean(a), s = std(a, m);
-  if (s === 0) return 0;
-  let sum = 0;
-  for (const v of a) sum += ((v - m) / s) ** 4;
-  return sum / a.length - 3;
+  const m = mean(a), n = a.length;
+  let m2 = 0, m4 = 0;
+  for (const v of a) { const d = v - m; m2 += d * d; m4 += d * d * d * d; }
+  m2 /= n; m4 /= n;
+  return m2 === 0 ? 0 : m4 / (m2 * m2) - 3;
 }
 function summary(values) {
   const arr = values.filter(v => v !== null && !isNaN(v));
@@ -1377,7 +1381,7 @@ const PLOTLY_CONFIG = { displayModeBar: false, responsive: true };
       n: s.n,
       skLabel: t(skKey),
       skew: s.skew.toFixed(2),
-      gap: v.fmt(Math.abs(gap))
+      gap: (gap < 0 ? "−" : "") + v.fmt(Math.abs(Math.round(gap * 100) / 100))
     });
   }
 
