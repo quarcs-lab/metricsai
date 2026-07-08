@@ -92,7 +92,7 @@ A bakery's recipe says: a loaf needs flour, water, and time, in fixed proportion
 ::::: {.columns}
 :::: {.column width="50%"}
 ::: {.callout-tip collapse="true" appearance="simple" title="Example"}
-For the Cobb–Douglas fit on `data_cobb`, the sum of input elasticities is $\hat\beta_2 + \hat\beta_3 \approx 0.23 + 0.81 = 1.04$ — close to 1. The chapter's $F$-test of $H_0: \beta_2 + \beta_3 = 1$ yields $p \approx 0.663$, so the data are consistent with constant returns: doubling capital and labor would, on average, double output across early-century U.S. manufacturing.
+For the Cobb–Douglas fit on `data_cobb`, the sum of input elasticities is $\hat\beta_2 + \hat\beta_3 \approx 0.23 + 0.81 = 1.04$ — close to 1. The chapter's $F$-test of $H_0: \beta_2 + \beta_3 = 1$ yields $p \approx 0.636$, so the data are consistent with constant returns: doubling capital and labor would, on average, double output across early-century U.S. manufacturing.
 :::
 ::::
 :::: {.column width="50%"}
@@ -454,16 +454,16 @@ print(f"Testing constant returns to scale:")
 print(f"H0: beta_capital + beta_labor = 1")
 print(f"Estimated sum: {sum_betas:.3f}")
 
-# Restricted model: ln(Q/L) ~ ln(K/L)
-data_cobb['lnq_per_l'] = data_cobb['lnq'] - data_cobb['lnl']
-data_cobb['lnk_per_l'] = data_cobb['lnk'] - data_cobb['lnl']
-fit_restricted = pf.feols('lnq_per_l ~ lnk_per_l', data=data_cobb)
-
-# F-test
-rss_unr = np.sum(fit_cobb._u_hat**2)
-rss_r = np.sum(fit_restricted._u_hat**2)
-df_resid = fit_cobb._N - len(fit_cobb.coef())
-f_stat = ((rss_r - rss_unr) / 1) / (rss_unr / df_resid)
+# HAC-robust Wald test of the linear restriction beta_lnk + beta_lnl = 1.
+# We reuse fit_cobb's Newey-West (HAC) covariance matrix so the test is
+# consistent with the standard errors used throughout this time series case
+# (a classical restricted-vs-unrestricted F-test would instead assume the
+# iid errors we already argued are inappropriate here).
+R = np.array([0.0, 1.0, 1.0])          # selects beta_lnk + beta_lnl
+b_hat = fit_cobb.coef().values         # coefficient order: [Intercept, lnk, lnl]
+V_hac = fit_cobb._vcov                 # Newey-West (HAC) covariance matrix
+df_resid = fit_cobb._N - len(b_hat)
+f_stat = (R @ b_hat - 1.0)**2 / (R @ V_hac @ R)
 p_value = 1 - stats.f.cdf(f_stat, 1, df_resid)
 
 print(f"F-statistic: {f_stat:.2f}")
@@ -473,7 +473,7 @@ print(f"Conclusion: {'Reject' if p_value < 0.05 else 'Fail to reject'} H0 at 5% 
 
 > **Key Concept 13.3: Testing Constant Returns to Scale**
 >
-> Constant returns to scale implies $\alpha + \beta = 1$: doubling all inputs exactly doubles output. The estimated sum of 1.040 is not significantly different from 1 (F-test p = 0.663), consistent with the theoretical prediction for competitive markets. This is a **joint hypothesis test** on the coefficients.
+> Constant returns to scale implies $\alpha + \beta = 1$: doubling all inputs exactly doubles output. The estimated sum of 1.040 is not significantly different from 1 (F-test p = 0.636), consistent with the theoretical prediction for competitive markets. This is a **joint hypothesis test** on the coefficients.
 
 Because the model is estimated in logs, converting fitted values back to output levels requires a retransformation (bias) correction of $e^{\hat\sigma^2/2}$. The plot below overlays these corrected predictions on the actual output series.
 
@@ -607,7 +607,7 @@ fit_post.summary()
 
 - Coefficient on unemployment ≈ **+0.27**
 - **Positive** relationship (opposite of theory!)
-- The sign reversed!
+- The sign reversed! (With only 45 post-1970 observations, however, the positive slope is **not statistically significant**, $p \approx 0.42$: the point estimate flips sign, but we cannot reject a zero relationship. Likewise, adding expected inflation in the next section leaves the urate coefficient negative but also insignificant, $p \approx 0.12$.)
 
 The scatter plot shows an upward slope - higher unemployment is associated with higher inflation. This is **stagflation**.
 
@@ -691,7 +691,7 @@ print("\n✓ Omitted variables bias explains the sign reversal!")
 
 > **Key Concept 13.5: Omitted Variables Bias**
 >
-> When a relevant variable (expected inflation) is omitted from the regression, its effect gets absorbed into the included variable's coefficient. The **OVB formula** shows that the bias equals the omitted variable's coefficient times its correlation with the included regressor. In the Phillips curve, this bias reversed the sign of the unemployment coefficient.
+> When a relevant variable (expected inflation) is omitted from the regression, its effect gets absorbed into the included variable's coefficient. The **OVB formula** shows that the bias equals the omitted variable's coefficient times the slope from regressing the omitted variable on the included regressor. In the Phillips curve, this bias reversed the sign of the unemployment coefficient.
 
 ### Understanding Omitted Variables Bias
 
@@ -998,7 +998,11 @@ print(f"  - Plan indicators: coins0, coins25, coins50, coins95, coinsmixed, coin
 # MEAN SPENDING BY INSURANCE PLAN
 spending_by_plan = data_health_y1.groupby('plan')['spending'].agg(['mean', 'std', 'count'])
 print(spending_by_plan)
+```
 
+With the randomized plan assignments loaded, we regress medical spending on the plan indicators (free care is the omitted baseline), using standard errors clustered by family.
+
+```{python}
 # Regression with plan indicators
 fit_rct = pf.feols('spending ~ coins25 + coins50 + coins95 + coinsmixed + coinsindiv',
                 data=data_health_y1, vcov={'CRV1': 'idfamily'})
@@ -1006,7 +1010,11 @@ fit_rct = pf.feols('spending ~ coins25 + coins50 + coins95 + coinsmixed + coinsi
 # RCT REGRESSION: SPENDING ON INSURANCE PLANS
 print("Omitted category: Free Care (coins0)")
 fit_rct.summary()
+```
 
+Finally, we test whether the insurance plans jointly matter with an F-test of $H_0$: all plan coefficients equal zero.
+
+```{python}
 # F-test for joint significance
 # JOINT F-TEST: DO PLANS MATTER?
 from scipy.stats import f as f_dist
@@ -1489,7 +1497,11 @@ fit_ols = pf.feols('logpgp95 ~ avexpr', data=data_inst, vcov='HC1')
 fit_ols.summary()
 print(f"\nOLS coefficient: {fit_ols.coef()['avexpr']:.3f}")
 print("⚠️ This is biased due to endogeneity (omitted variables, reverse causation)")
+```
 
+The OLS estimate is biased because institutions are endogenous. The first stage checks whether the instrument (settler mortality) is strongly related to institutions.
+
+```{python}
 # First stage
 fit_first = pf.feols('avexpr ~ logem4', data=data_inst, vcov='HC1')
 
@@ -1499,7 +1511,11 @@ first_f = fit_first.tstat()['logem4']**2
 print(f"\nFirst stage F-statistic: {first_f:.2f}")
 print(f"Rule of thumb: F > 10 for strong instrument")
 print(f"Instrument strength: {'Strong ✓' if first_f > 10 else 'Weak ⚠️'}")
+```
 
+With a strong first stage, we estimate the causal effect by 2SLS and compare it against the biased OLS estimate.
+
+```{python}
 # 2SLS using pyfixest IV syntax
 # TWO-STAGE LEAST SQUARES (2SLS)
 
@@ -1684,7 +1700,7 @@ print("  3. Standardize categorical variables (gender)")
 
 - Natural logarithm transformation converts the nonlinear Cobb-Douglas model into a linear OLS form
 - Estimated **capital elasticity ≈ 0.23** and **labor elasticity ≈ 0.81**
-- Data support **constant returns to scale** (elasticities sum to 1.040, F-test p = 0.663)
+- Data support **constant returns to scale** (elasticities sum to 1.040, F-test p = 0.636)
 - HAC-robust standard errors account for time series autocorrelation
 - Predictions require retransformation bias correction when using log models
 
@@ -1762,14 +1778,12 @@ print(f"Sum α + β = {alpha + beta:.3f}  (≈1 → constant returns to scale)")
 print(f"R² = {fit_cobb._r2:.4f}")
 fit_cobb.summary()
 
-# F-test for constant returns to scale: H0: α + β = 1
-data_cobb['lnq_l'] = data_cobb['lnq'] - data_cobb['lnl']
-data_cobb['lnk_l'] = data_cobb['lnk'] - data_cobb['lnl']
-fit_r = pf.feols('lnq_l ~ lnk_l', data=data_cobb)
-rss_unr = np.sum(fit_cobb._u_hat**2)
-rss_r = np.sum(fit_r._u_hat**2)
-df_res = fit_cobb._N - len(fit_cobb.coef())
-f_stat = ((rss_r - rss_unr) / 1) / (rss_unr / df_res)
+# HAC-robust Wald test for constant returns to scale: H0: α + β = 1
+# (reuses fit_cobb's Newey-West covariance, consistent with the HAC SEs above)
+R = np.array([0.0, 1.0, 1.0])            # selects α + β (lnk + lnl)
+b_hat = fit_cobb.coef().values           # order: [Intercept, lnk, lnl]
+df_res = fit_cobb._N - len(b_hat)
+f_stat = (R @ b_hat - 1.0)**2 / (R @ fit_cobb._vcov @ R)
 p_val  = 1 - stats.f.cdf(f_stat, 1, df_res)
 print(f"CRS test: F = {f_stat:.2f}, p = {p_val:.3f} → {'Fail to reject' if p_val > 0.05 else 'Reject'} CRS")
 
