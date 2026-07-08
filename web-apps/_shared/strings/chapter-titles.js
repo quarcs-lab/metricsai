@@ -51,9 +51,9 @@ window.I18N_REGISTER({
   "chapter.ch15.title": { en: "Regression with Transformed Variables",
                           es: "Regresión con variables transformadas",
                           ja: "変数変換を用いた回帰" },
-  "chapter.ch16.title": { en: "Model and Data Verification",
-                          es: "Verificación del modelo y los datos",
-                          ja: "モデルとデータの検証" },
+  "chapter.ch16.title": { en: "Checking the Model and Data",
+                          es: "Comprobación del modelo y los datos",
+                          ja: "モデルとデータの点検" },
   "chapter.ch17.title": { en: "Panel Data, Time Series, and Causality",
                           es: "Datos de panel, series de tiempo y causalidad",
                           ja: "パネルデータ、時系列、因果性" }
