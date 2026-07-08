@@ -33,7 +33,19 @@ ch00:39 ch01:91 ch02:91 ch03:86 ch04:84 ch05:91 ch06:81 ch07:91 ch08:91 ch09:86 
 - ch00 handled separately (no book render; sync = ipynb/md only).
 - TODO after batch: review code-heavy diffs (ch07,08,11,12,13); refine judgment_calls.md (ch12 structural); Phase 3 sweep.
 
-## FINAL STATUS: Phase 2 COMPLETE — all 18 chapters committed. Phase 3 in progress.
+## REMEDIATION PHASE (2026-07-08, actioning the 191 report items — user approved all recs)
+- Decisions: action all 191 per recs; restore ch12/ch06 missing cells; keep ch16 merged heading; ch05 qcut; ch03/ch06 replace=True; inject %pip at export.
+- Phase A DONE: %pip install pyfixest injected at export time (export_qmd_to_ipynb.py), all 18 .ipynb re-exported. Commit 6b73556.
+- Phase B DONE: all 18 remediated + committed (180 edits). Commits: ch11 cd30263, ch10 10bc78f, ch13 0fb0b29, ch07 6b59483, ch05 d0ac31f, ch17 c32ab09, ch08 265ae79, ch14 c523e29, ch15 a36cb6d, ch16 3912605, ch00 e3adce4, ch01 9e951c6, ch02 e33fd3f, ch03 7233fee, ch04 5fa193a, ch09 e2a349f, ch06 5bcc0c6, ch12 c845160.
+  - ch06 restored 5 cells (MC/regression/manual-SE) — verified prose numbers match exactly (0.9960/1.9944/1.2069/0.3836; manual=model SEs). 1880-census removed.
+  - ch12 restored 5 cells (SE-ratio/HAC/CI-PI/prediction/power) — verified ($262,559; CI[$253k,$272k]; PI[$213k,$312k]; 5.25×; HAC lag4 ratio 1.885). Score 86→91.
+  - ch11 F-stat cascade, ch10 VIF fixed (render passed). Conclusion-flips (ch08/14/15/16/17) rewritten with ground-truth.
+- Post-hoc verification DONE: review agents checked 192 rewritten claims across ch08/10/11/14/15/16/17 → 0 mismatches. (Note: parallel nbconvert re-exec trips GitHub 429s → cascade NameErrors that are NOT real; re-exec serially.)
+- Phase C DONE: ch13.js OVB "correlation"→"slope" (EN); i18n_check + smoke_i18n pass; ES/JA flagged. Commit bd31e5d.
+- Phase D DONE: full book render clean; consistency sweep clean; JUDGMENT_CALLS_REPORT.md has RESOLUTION section; session log log/20260708_1735.md.
+- REMEDIATION COMPLETE. All 191 items actioned. Only pre-existing CLAUDE.md remains uncommitted. PDFs still deferred.
+
+## CAMPAIGN Phase 2 COMPLETE — all 18 chapters committed. Phase 3 done.
 Commits: ch00 def9ccb, ch01 6b53264, ch02 c6dea20, ch03 f89fea6, ch04 5ff0a00, ch05 2ecf4a8, ch06 74c409b, ch07 df3ee26, ch08 a364bc3, ch09 b9ac89e, ch10 dff8886, ch11 5272e89, ch12 5656a49, ch13 e9335eb, ch14 a20bdab, ch15 e1ede21, ch16 a817ffa, ch17 6d71b13, book-search 0f9d56b.
 756 edits applied; 191 report items → JUDGMENT_CALLS_REPORT.md. Session log: log/20260708_0731.md.
 ch13/ch16 committed over score gate (verifier artifacts, documented in commits).

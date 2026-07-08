@@ -1,5 +1,20 @@
 # Judgment-Call Report — metricsAI Audit Campaign (202607)
 
+## ✅ RESOLUTION (2026-07-08) — all 191 items actioned per recommendations
+
+The author approved actioning **all** items per this report's recommendations. Implemented as 18 follow-up per-chapter commits (`cd30263`…`c845160`, "Remediate chNN…") plus a Colab-pip infra commit and a web-app string commit. Summary:
+
+- **Structural restorations (Part 1 §1, §3):** ch12 — restored the SE-ratio table, HAC cell (with `dropna()` fix), CI-vs-PI Figure 12.2, prediction+manual-SE, and power-curve Figure 12.3 from the cheat-sheet templates; verified output matches prose ($262,559; CI [$253k,$272k]; PI [$213k,$312k]; 5.25×; HAC lag-4 ratio 1.885). ch12 score 86→91. ch06 — restored the population/sample regression, Monte-Carlo, histogram, and manual-SE cells; verified output matches prose exactly (MC means 0.9960/1.9944, SDs 1.2069/0.3836; manual SEs = model SEs); 1880-census references removed.
+- **Code-bug cascades (§4, §5, §2):** ch11 `_f_statistic`→classical-F helper everywhere + CS1 `rk/hc`→`kl/h` (52 rewritten claims verified vs execution, 0 mismatches); ch10 centered VIF via `add_constant` + Exercise 5 reframed hypothetical; ch12 ACF `dropna()`.
+- **Conclusion/significance flips (§6):** ch17 false "complete reversal" → "clustering widens SE ~1.8×, effect stays significant" + FE precisely estimated; ch08 infant-mortality sig-under-classical-not-robust + robust-SE cells added under the 3 empty headers; ch14 gender-gap *widening/suppression* + worker-type signs; ch15 MEM=AME + corrected std-coef ranking + insignificant-interaction reframe; ch16 endogeneity example `democracy~growth` + AR(1) block reframed to simulated data. **All 192 rewritten claims across ch08/10/11/14/15/16/17 re-executed and verified — 0 mismatches.**
+- **Conventions (§7–§9):** ch16 merged heading kept (AED-faithful); ch05 → `pd.qcut` terciles; ch03/ch06 sampling → `replace=True`; ch01-F12 pip fixed project-wide via `%pip` injection at Colab-export time.
+- **Remaining per-chapter items (Part 2):** actioned per each recommendation; items the report marked "leave as-is / defensible / needs-owner-sign-off" (e.g. ch11-F31 heading rename) were left unchanged by design.
+- **Web-app coordination:** ch13 OVB "correlation"→"slope" fixed in the **EN** string (`ch13.js`); ch03 SE strings already consistent; ch16 OVB widget numbers unchanged. **Follow-up:** the ES/JA translations of `widget.phillips.kc` in `ch13.js` still say "correlation/correlación/相関" — flag for re-translation to "slope".
+
+The per-item detail below is retained as the historical record.
+
+---
+
 ## What this report is
 
 This document lists the **191 audit findings that were deliberately NOT auto-fixed** because each needs an author decision, not a mechanical edit. A finding lands here (rather than in a committed patch) when it meets one of four gates: (1) the correct fix would **flip a stated significance or qualitative conclusion**; (2) there are **multiple defensible conventions** and picking one changes displayed output; (3) the repair is a **structural change beyond sentence scope** (adding/deleting code cells, moving 40–260 line blocks, renaming heading words); or (4) the issue is a **plausibly-intentional AED adaptation** where "wrong" and "as-designed" are both readable. Everything clear-cut — number resyncs, colon→space heading normalization, robust-SE refits that did *not* flip conclusions, dedup of redundant blocks, list-spacing, Next-Steps blocks — is **already committed per-chapter** (commits `def9ccb`…`6d71b13`, 756 edits, one commit per chapter; see `STATE.md`). Read Part 1 first (the big-ticket structural calls), then Part 2 (the per-chapter remainder). Each accepted item can be applied as an isolated follow-up edit.

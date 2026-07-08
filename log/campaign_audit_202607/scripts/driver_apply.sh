@@ -8,17 +8,20 @@ source .venv/bin/activate
 W=log/campaign_audit_202607
 
 score_of () { python3 .claude/skills/chapter-standard/scripts/verify_chapter.py "$1" --json 2>/dev/null | python3 -c "import json,sys;cs=json.load(sys.stdin)['compliance_score'];print(cs['score'] if isinstance(cs,dict) else cs)"; }
-baseline_of () { python3 -c "import json;cs=json.load(open('$W/baseline/verify_$1.json'))['compliance_score'];print(cs['score'] if isinstance(cs,dict) else cs)" 2>/dev/null || echo 0; }
+# Gate against the CURRENT committed score (before applying this phase's patch), so
+# remediation is only blocked if it introduces a NEW regression — not by the
+# documented ch13/ch16 campaign-era verifier false-positives already in HEAD.
 
 for CH in "$@"; do
   QMD=$(ls notebooks_quarto/${CH}_*.qmd 2>/dev/null | head -1)
   if [ -z "$QMD" ]; then echo "!! $CH no qmd found — stopping"; exit 1; fi
   B=$(basename "$QMD" .qmd)
-  BL=$(baseline_of "$CH")
-  echo "========== $CH ($B) =========="
+  BL=$(score_of "$CH")   # current committed score = the gate floor
+  PATCH="$W/patches/${CH}_${PATCHSET:-edits}.json"
+  echo "========== $CH ($B) — current score $BL — patch $(basename $PATCH) =========="
 
   # 1. apply
-  if ! python3 $W/scripts/apply_edits.py "$QMD" "$W/patches/${CH}_edits.json"; then
+  if ! python3 $W/scripts/apply_edits.py "$QMD" "$PATCH"; then
     echo "!! $CH APPLY FAILED — stopping"; exit 1; fi
   git diff -- "$QMD" > "$W/patches/${CH}_applied.diff"
   echo "[$CH] diff saved ($(git diff --stat -- "$QMD" | tail -1))"
@@ -48,12 +51,21 @@ for CH in "$@"; do
   if [ -n "$BAD" ]; then echo "!! $CH staged unexpected paths:"; echo "$BAD"; echo "stopping"; exit 1; fi
 
   # 6. commit
-  { echo "Audit $CH: statistical, code, and format corrections"; echo;
-    cat "$W/commitmsg/${CH}.txt";
-    echo; echo "Verified edits from campaign audit; report-only items in judgment_calls.md.";
-    echo; echo "Co-Authored-By: Claude Opus 4.8 (1M context) <noreply@anthropic.com>";
-    echo "Claude-Session: https://claude.ai/code/session_01Bocu8XHCRxQ5z75AoPKCxh"; } > "$W/commitmsg/${CH}_full.txt"
-  git commit -q -F "$W/commitmsg/${CH}_full.txt"
+  if [ "${PATCHSET:-edits}" = "remediation" ]; then
+    { echo "Remediate $CH: action approved judgment-call items"; echo;
+      cat "$W/commitmsg/${CH}_rem.txt";
+      echo; echo "Follow-up edits actioning JUDGMENT_CALLS_REPORT.md recommendations (author-approved).";
+      echo; echo "Co-Authored-By: Claude Opus 4.8 (1M context) <noreply@anthropic.com>";
+      echo "Claude-Session: https://claude.ai/code/session_01Bocu8XHCRxQ5z75AoPKCxh"; } > "$W/commitmsg/${CH}_remfull.txt"
+    git commit -q -F "$W/commitmsg/${CH}_remfull.txt"
+  else
+    { echo "Audit $CH: statistical, code, and format corrections"; echo;
+      cat "$W/commitmsg/${CH}.txt";
+      echo; echo "Verified edits from campaign audit; report-only items in judgment_calls.md.";
+      echo; echo "Co-Authored-By: Claude Opus 4.8 (1M context) <noreply@anthropic.com>";
+      echo "Claude-Session: https://claude.ai/code/session_01Bocu8XHCRxQ5z75AoPKCxh"; } > "$W/commitmsg/${CH}_full.txt"
+    git commit -q -F "$W/commitmsg/${CH}_full.txt"
+  fi
   echo "[$CH] COMMITTED $(git rev-parse --short HEAD)"
 done
 echo "########## DRIVER DONE for: $* ##########"
