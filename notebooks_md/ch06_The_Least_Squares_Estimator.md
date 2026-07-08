@@ -47,7 +47,6 @@ Understanding the properties of the Ordinary Least Squares (OLS) estimator is fu
 
 - **Convergence Clubs** (Mendez 2020): 108 countries, 1990–2014, with real GDP per capita (GDPpc), labor productivity (lp), and capital per worker (kl)
 - **Generated data**: computer-simulated samples from a known data-generating process ($y = 1 + 2x + u$)
-- **1880 U.S. Census**: finite-population sampling demonstration
 
 **Chapter outline:**
 
@@ -247,12 +246,11 @@ $$e_i = y_i - \hat{y}_i = y_i - (b_1 + b_2 x_i)$$
 
 ## 6.2 Examples of Sampling from a Population
 
-We examine two examples to understand sampling variability:
+We examine a worked example to understand sampling variability, using computer-simulated data drawn from a known model:
 
-1. **Generated data**: Computer-simulated samples from an explicit model $y = 1 + 2x + u$
-2. **Census data**: Samples from the 1880 U.S. Census (a finite population)
+- **Generated data**: Computer-simulated samples from an explicit model $y = 1 + 2x + u$
 
-In both cases:
+In this example:
 
 - We know the true population parameters
 - Different samples yield different estimates
@@ -296,6 +294,28 @@ The generated dataset has just 5 observations. `Eygivenx` rises by exactly 2 for
 
 The population regression line represents $E[y|x] = 1 + 2x$. Points scatter around this line due to the error term $u$.
 
+```python
+# Figure 6.2 Panel A: the population regression line E[y|x] = 1 + 2x
+# The column `Eygivenx` IS the population line, so regressing it on x recovers
+# the true parameters exactly (perfect fit: R2 = 1, standard errors approx 0).
+fit_pop = pf.feols('Eygivenx ~ x', data=data_gen)
+fit_pop.summary()
+
+# Plot the population line together with the observed y values
+fig, ax = plt.subplots(figsize=(10, 6))
+ax.scatter(data_gen['x'], data_gen['y'], s=80, color='#22d3ee',
+           label='Observed y (population + error u)', zorder=3)
+ax.plot(data_gen['x'], data_gen['Eygivenx'], color='#c084fc', linewidth=2,
+        linestyle='--', label='Population line: E[y|x] = 1 + 2x')
+ax.set_xlabel('x')
+ax.set_ylabel('y')
+ax.set_title('Figure 6.2 Panel A: Population Regression Line')
+ax.legend()
+ax.grid(True, alpha=0.3)
+plt.tight_layout()
+plt.show()
+```
+
 ---
 
 ### Interpreting the Population Regression Results
@@ -316,6 +336,33 @@ This represents the **true** relationship between x and y in the population, bef
 ### Figure 6.2 Panel B: Sample Regression Line
 
 The sample regression line is our estimate from the observed data. Note that it differs from the population line due to sampling variability.
+
+```python
+# Figure 6.2 Panel B: the sample regression line y_hat = b1 + b2*x
+# Fitting y (which includes the random errors u) on x gives estimates that
+# differ from the true 1 and 2 because we have only n = 5 noisy observations.
+fit_sample = pf.feols('y ~ x', data=data_gen)
+fit_sample.summary()
+
+b1_gen = fit_sample.coef()['Intercept']
+b2_gen = fit_sample.coef()['x']
+
+# Plot the sample regression line against the true population line
+fig, ax = plt.subplots(figsize=(10, 6))
+ax.scatter(data_gen['x'], data_gen['y'], s=80, color='#22d3ee',
+           label='Observed data', zorder=3)
+ax.plot(data_gen['x'], fit_sample.predict(), color='red', linewidth=2,
+        label=f'Sample: y_hat = {b1_gen:.2f} + {b2_gen:.2f}x')
+ax.plot(data_gen['x'], data_gen['Eygivenx'], color='#c084fc', linewidth=2,
+        linestyle='--', label='Population: E[y|x] = 1 + 2x')
+ax.set_xlabel('x')
+ax.set_ylabel('y')
+ax.set_title('Figure 6.2 Panel B: Sample Regression Line')
+ax.legend()
+ax.grid(True, alpha=0.3)
+plt.tight_layout()
+plt.show()
+```
 
 ### Interpreting the Sample Regression Results
 
@@ -348,40 +395,6 @@ The sample regression estimates **ŷ = 2.81 + 1.05x** from the actual observed d
 To illustrate sampling variability, we generate three different samples from the same data-generating process.
 
 **Key observation:** Each sample produces a different regression line, but all are centered around the true population line.
-
-### Interpreting the Three Sample Regressions
-
-**What this demonstrates:**
-
-We generated three independent samples from the **same data-generating process** (y = 1 + 2x + u), yet obtained three different regression lines:
-
-| Sample | Intercept | Slope | True Values |
-|--------|-----------|-------|-------------|
-| Sample 1 | 0.82 | 1.81 | β₁ = 1.0, β₂ = 2.0 |
-| Sample 2 | 1.75 | 1.79 | β₁ = 1.0, β₂ = 2.0 |
-| Sample 3 | 2.01 | 1.67 | β₁ = 1.0, β₂ = 2.0 |
-
-**Key observations:**
-
-1. **All estimates differ from the true values**: None of the samples perfectly recovered β₁ = 1.0 or β₂ = 2.0, even though we know these are the true parameters.
-
-2. **Estimates vary across samples**: The intercept ranges from 0.82 to 2.01, and the slope ranges from 1.67 to 1.81. This is **sampling variability** in action.
-
-3. **All estimates are "in the neighborhood"**: While no single estimate equals the true value, they're all reasonably close. None gave us absurd values like β₂ = 10 or β₂ = -5.
-
-**The fundamental statistical question**: 
-
-If we know the true parameter is β₂ = 2.0, why would we ever get estimates like 1.81, 1.79, or 1.67? The answer is **random sampling variation**. Each sample contains different realizations of the error term u, which causes the observations to scatter differently around the population line. OLS finds the best fit to each specific sample, leading to different regression lines.
-
-**Why this matters for econometrics**:
-
-In real-world applications, we have only **one sample** and we **don't know the true parameters**. These simulations show that:
-
-- Our estimate is almost certainly not exactly equal to the true value
-- Different samples would give different estimates
-- We need a way to quantify this uncertainty (standard errors!)
-
-This is why we can't simply report "the slope is 1.81" and claim we've discovered the truth. We must report "the slope is 1.81 with a standard error of X," acknowledging that our estimate contains sampling error.
 
 #### Visualization: Three Different Samples from the Same DGP
 
@@ -457,6 +470,40 @@ plt.tight_layout()
 plt.show()
 ```
 
+### Interpreting the Three Sample Regressions
+
+**What this demonstrates:**
+
+We generated three independent samples from the **same data-generating process** (y = 1 + 2x + u), yet obtained three different regression lines:
+
+| Sample | Intercept | Slope | True Values |
+|--------|-----------|-------|-------------|
+| Sample 1 | 0.82 | 1.81 | β₁ = 1.0, β₂ = 2.0 |
+| Sample 2 | 1.75 | 1.79 | β₁ = 1.0, β₂ = 2.0 |
+| Sample 3 | 2.01 | 1.67 | β₁ = 1.0, β₂ = 2.0 |
+
+**Key observations:**
+
+1. **All estimates differ from the true values**: None of the samples perfectly recovered β₁ = 1.0 or β₂ = 2.0, even though we know these are the true parameters.
+
+2. **Estimates vary across samples**: The intercept ranges from 0.82 to 2.01, and the slope ranges from 1.67 to 1.81. This is **sampling variability** in action.
+
+3. **All estimates are "in the neighborhood"**: While no single estimate equals the true value, they're all reasonably close. None gave us absurd values like β₂ = 10 or β₂ = -5.
+
+**The fundamental statistical question**: 
+
+If we know the true parameter is β₂ = 2.0, why would we ever get estimates like 1.81, 1.79, or 1.67? The answer is **random sampling variation**. Each sample contains different realizations of the error term u, which causes the observations to scatter differently around the population line. OLS finds the best fit to each specific sample, leading to different regression lines.
+
+**Why this matters for econometrics**:
+
+In real-world applications, we have only **one sample** and we **don't know the true parameters**. These simulations show that:
+
+- Our estimate is almost certainly not exactly equal to the true value
+- Different samples would give different estimates
+- We need a way to quantify this uncertainty (standard errors!)
+
+This is why we can't simply report "the slope is 1.81" and claim we've discovered the truth. We must report "the slope is 1.81 with a standard error of X," acknowledging that our estimate contains sampling error.
+
 **Key observation:** Each sample produces a different regression line, but all are close to the true population line (purple dashed). This is sampling variability in action.
 
 ## 6.3 Properties of the Least Squares Estimator
@@ -517,6 +564,33 @@ To understand the sampling distribution, we simulate 1,000 regressions from the 
 > **Key Concept 6.3: OLS Assumptions**
 >
 > The four core OLS assumptions are: (1) Correct model specification: y = β₁ + β₂x + u, (2) Mean-zero errors: E[u|x] = 0, (3) Homoskedasticity: Var[u|x] = σ²ᵤ, (4) Independence: errors uncorrelated across observations. Assumptions 1-2 are essential for unbiasedness; assumptions 3-4 affect variance and can be relaxed using robust standard errors.
+
+```python
+# 6.3 Monte Carlo: sampling distribution of the OLS estimator
+# Draw 1,000 samples of n = 30 from the same DGP y = 1 + 2x + u, refit each,
+# and collect the intercept and slope estimates to study their distribution.
+np.random.seed(42)
+n = 30
+beta_1_true, beta_2_true, sigma_u = 1, 2, 2
+n_simulations = 1000
+
+intercept_estimates = []
+slope_estimates = []
+for i in range(n_simulations):
+    x_sim = np.random.normal(3, 1, n)
+    u_sim = np.random.normal(0, sigma_u, n)
+    y_sim = beta_1_true + beta_2_true * x_sim + u_sim
+    m = pf.feols('y ~ x', data=pd.DataFrame({'x': x_sim, 'y': y_sim}))
+    intercept_estimates.append(m.coef()['Intercept'])
+    slope_estimates.append(m.coef()['x'])
+
+intercept_estimates = np.array(intercept_estimates)
+slope_estimates = np.array(slope_estimates)
+
+print(f'Monte Carlo results ({n_simulations} samples, n = {n} each):')
+print(f'  Intercept: true = {beta_1_true}, mean = {intercept_estimates.mean():.4f}, SD = {intercept_estimates.std():.4f}')
+print(f'  Slope:     true = {beta_2_true}, mean = {slope_estimates.mean():.4f}, SD = {slope_estimates.std():.4f}')
+```
 
 ### Interpreting the Monte Carlo Simulation Results
 
@@ -580,6 +654,36 @@ The close match confirms:
 
 1. Unbiasedness (centered on true value)
 2. Approximate normality (CLT works well even with n=30)
+
+```python
+# Two-panel sampling distributions with a fitted normal curve
+fig, axes = plt.subplots(1, 2, figsize=(16, 5))
+
+for ax, estimates, true_val, name in zip(
+        axes,
+        [intercept_estimates, slope_estimates],
+        [beta_1_true, beta_2_true],
+        ['Intercept (b1)', 'Slope (b2)']):
+    ax.hist(estimates, bins=40, density=True, alpha=0.7,
+            color='#22d3ee', edgecolor='white', label='Estimates')
+    # Green vertical line: true parameter value
+    ax.axvline(true_val, color='#22c55e', linewidth=2, linestyle='--',
+               label=f'True value = {true_val}')
+    # Red curve: fitted normal distribution
+    grid = np.linspace(estimates.min(), estimates.max(), 200)
+    ax.plot(grid, stats.norm.pdf(grid, estimates.mean(), estimates.std()),
+            color='red', linewidth=2, label='Normal fit')
+    ax.set_xlabel(f'{name} estimate')
+    ax.set_ylabel('Density')
+    ax.set_title(f'Sampling Distribution of the {name}  (SD = {estimates.std():.2f})')
+    ax.legend(fontsize=9)
+    ax.grid(True, alpha=0.3)
+
+plt.suptitle('Sampling Distributions of OLS Estimators (1,000 samples, n = 30)',
+             fontsize=14, fontweight='bold', y=1.02)
+plt.tight_layout()
+plt.show()
+```
 
 ### Interpreting the Sampling Distribution Histograms
 
@@ -677,6 +781,37 @@ Let's manually compute standard errors for a simple example to understand the fo
 
 - $(y, x)$ = $(1,1), (2,2), (2,3), (2,4), (3,5)$
 - From earlier analysis: $\hat{y} = 0.8 + 0.4x$
+
+```python
+# 6.4 Manual computation of standard errors for the artificial dataset
+manual = pd.DataFrame({'x': [1, 2, 3, 4, 5], 'y': [1, 2, 2, 2, 3]})
+
+# Fit with pyfixest so we can verify the manual numbers against the model
+fit_manual = pf.feols('y ~ x', data=manual)
+
+# Steps 1-2: coefficients, fitted values, residuals, and RSS
+n_obs = len(manual)
+x_bar = manual['x'].mean()
+Sxx   = np.sum((manual['x'] - x_bar) ** 2)
+b1    = fit_manual.coef()['Intercept']
+b2    = fit_manual.coef()['x']
+manual['y_hat']    = b1 + b2 * manual['x']
+manual['residual'] = manual['y'] - manual['y_hat']
+RSS = np.sum(manual['residual'] ** 2)
+display(manual)
+
+# Step 3: standard error of the regression  s_e = sqrt(RSS / (n - 2))
+s_e = np.sqrt(RSS / (n_obs - 2))
+
+# Steps 4-5: standard errors of the slope and intercept
+se_b2 = s_e / np.sqrt(Sxx)
+se_b1 = np.sqrt(s_e ** 2 * np.sum(manual['x'] ** 2) / (n_obs * Sxx))
+
+print(f'Fitted line:  y_hat = {b1:.1f} + {b2:.1f}x')
+print(f'RSS = {RSS:.4f},  s_e = sqrt(RSS/(n-2)) = {s_e:.4f}')
+print(f'Manual se(b2) = {se_b2:.4f}  |  model se(b2) = {fit_manual.se()["x"]:.4f}')
+print(f'Manual se(b1) = {se_b1:.4f}  |  model se(b1) = {fit_manual.se()["Intercept"]:.4f}')
+```
 
 ### Interpreting the Manual Standard Error Calculations
 
@@ -891,7 +1026,7 @@ From the formula $se(b_2) = \frac{s_e}{\sqrt{\sum_{i=1}^n (x_i - \bar{x})^2}}$, 
 ### Monte Carlo Simulation Evidence
 
 - **Monte Carlo simulations** demonstrate OLS properties empirically by generating many samples from a known model
-- Two examples: (1) Generated data from y = 1 + 2x + u with u ~ N(0,4), (2) Samples from 1880 Census (1.06 million males aged 60-70)
+- Generated-data Monte Carlo: samples from y = 1 + 2x + u with u ~ N(0,4) reveal how OLS estimates behave across many repeated samples
 - **Key findings**: (1) Average of many OLS estimates equals true parameter (unbiasedness), (2) Distribution of estimates is approximately normal (CLT), (3) Similar results for intercept and slope
 - **Single sample**: b₁ ≠ β₁ and b₂ ≠ β₂ due to sampling variability
 - **Multiple samples**: Estimates vary across samples but center on true parameters
@@ -1342,7 +1477,7 @@ b2_estimates = []
 
 for i in range(n_simulations):
     # Draw random sample
-    sample = data_2014.sample(n=sample_size, replace=False)
+    sample = data_2014.sample(n=sample_size, replace=True)
     
     # Estimate regression
     fit_sample = pf.feols('productivity ~ capital', data=sample)
