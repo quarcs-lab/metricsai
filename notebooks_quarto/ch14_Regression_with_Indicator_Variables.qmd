@@ -133,7 +133,7 @@ A retailer wants to know whether one ad campaign works equally well across store
 ::::: {.columns}
 :::: {.column width="50%"}
 ::: {.callout-tip collapse="true" appearance="simple" title="Example"}
-The unconditional gender earnings gap on `data_earnings` is about $-\$16{,}000$ — what you get from regressing `earnings` on `gender` alone. Adding `education` shrinks the conditional gap to roughly $-\$10{,}000$; adding `age` and `hours` brings it down further to between $-\$5{,}000$ and $-\$8{,}000$. The leftover after controls is the part not explained by observable composition.
+The unconditional gender earnings gap on `data_earnings` is about $-\$16{,}000$ — what you get from regressing `earnings` on `gender` alone. Adding `education` does **not** shrink this gap; the conditional coefficient (Model 2) is about $-\$18{,}000$, because women in this sample are more educated on average, so holding education fixed *widens* the unexplained gap. Controls can move a coefficient in either direction.
 :::
 ::::
 :::: {.column width="50%"}
@@ -492,10 +492,10 @@ Comparing the five models reveals how the estimated gender gap evolves as we add
  - This is the **raw, unconditional** gender earnings gap
  - Ignores all other factors that might explain earnings differences
 
-2. **Model 2 (+ Education)**: Gap shrinks to approximately -\$10,000
- - Adding education as a control **reduces** the gender coefficient by ~\$6,000
- - Interpretation: Part of the raw gap is explained by gender differences in education levels
- - The remaining -\$10,000 is the gap **conditional on** education
+2. **Model 2 (+ Education)**: Gap *widens* to approximately -\$18,000
+ - Adding education as a control **increases** the gender coefficient magnitude by ~\$1,900 (from -\$16,396 to -\$18,258)
+ - Interpretation: Because women in this sample have *more* education on average, holding education fixed makes the unexplained gap **larger**, not smaller (a suppression effect)
+ - The -\$18,000 is the gap **conditional on** education
 
 3. **Model 3 (+ Gender × Education)**:
  - Now gender enters through **two channels**: the main effect AND the interaction
@@ -506,7 +506,7 @@ Comparing the five models reveals how the estimated gender gap evolves as we add
 4. **Model 4 (+ Age, Hours)**: Further controls
  - Adding age and hours worked provides more refined estimates
  - These are important determinants of earnings that may differ by gender
- - Gap continues to shrink as we account for more observable differences
+ - Because the interaction stays in the model, the main gender coefficient remains the (large, positive) gap at *zero* education rather than a shrinking overall gap
 
 5. **Model 5 (Full Interactions)**: Most flexible specification
  - Allows gender to affect the **intercept AND slopes** of all variables
@@ -515,8 +515,8 @@ Comparing the five models reveals how the estimated gender gap evolves as we add
 
 **Key Insights:**
 
-- The gender gap **decreases** substantially when we control for education, age, and hours worked
-- From -\$16,000 (unconditional) to approximately -\$5,000 to -\$8,000 (conditional)
+- The gender gap does **not** shrink toward zero when we control for education, age, and hours worked
+- Holding education fixed (Model 2) the conditional gap is about -\$18,000; in Models 3-5 gender enters through interactions, so the gap varies with education rather than collapsing to a single small number
 - This suggests **observable characteristics explain part, but not all** of the gap
 - The remaining gap could reflect:
  - Unmeasured factors (experience, occupation, industry)
@@ -803,15 +803,15 @@ From the three specifications above:
 
 If reference = Private sector:
 
-- $d_{self}$ coefficient ≈ -\$5,000: Self-employed earn \$5,000 less than private sector
-- $d_{govt}$ coefficient ≈ +\$2,000: Government workers earn \$2,000 more than private sector
+- $d_{self}$ coefficient ≈ +\$17,000: Self-employed earn about \$17,000 *more* than private sector (self-employed are the highest earners in this sample)
+- $d_{govt}$ coefficient ≈ -\$2,000: Government workers earn about \$2,000 *less* than private sector
 
 If reference = Self-employed:
 
-- $d_{private}$ coefficient ≈ +\$5,000: Private sector earns \$5,000 more than self-employed
-- $d_{govt}$ coefficient ≈ +\$7,000: Government workers earn \$7,000 more than self-employed
+- $d_{private}$ coefficient ≈ -\$17,000: Private sector earns about \$17,000 *less* than self-employed
+- $d_{govt}$ coefficient ≈ -\$19,000: Government workers earn about \$19,000 *less* than self-employed
 
-Notice: The difference between govt and private is the same in both (≈ \$7,000 - \$5,000 = \$2,000)!
+Notice: The government-vs-private gap is the same in both parameterizations (≈ -\$2,000)!
 
 **Practical Advice:**
 
@@ -1510,16 +1510,22 @@ fit_dep.summary()
 # 2. F-test for joint significance of interaction terms
 # 3. Compare models with and without regional effects
 #
-# Approach: Compare nested models using ANOVA
-# fit_base = pf.feols('imds ~ ln_NTLpc2017', data=bol_key)
+# Approach: fit the models, then use pyfixest's wald_test() (as in Section 14.3)
+#           to jointly test the relevant sets of coefficients.
 # fit_dep_only = pf.feols('imds ~ C(dep) + ln_NTLpc2017', data=bol_key)
 # fit_full = pf.feols('imds ~ C(dep) * ln_NTLpc2017', data=bol_key)
 #
-# print("F-test: Department indicators (comparing base vs dep_only)")
-# print(anova_lm(model_base, model_dep_only))
+# # 1. Joint test of all department indicators
+# dep_terms = [c for c in fit_dep_only.coef().index if c.startswith('C(dep)')]
+# R_dep = np.eye(len(fit_dep_only.coef()))[[list(fit_dep_only.coef().index).index(v) for v in dep_terms]]
+# print("Joint F-test: department indicators")
+# print(fit_dep_only.wald_test(R=R_dep))
 #
-# print("\nF-test: Interaction terms (comparing dep_only vs full)")
-# print(anova_lm(model_dep_only, model_full))
+# # 2. Joint test of all department x NTL interaction terms
+# int_terms = [c for c in fit_full.coef().index if ':' in c]
+# R_int = np.eye(len(fit_full.coef()))[[list(fit_full.coef().index).index(v) for v in int_terms]]
+# print("\nJoint F-test: department x NTL interactions")
+# print(fit_full.wald_test(R=R_int))
 ```
 
 #### Task 6: Regional Disparities Brief (Independent)
