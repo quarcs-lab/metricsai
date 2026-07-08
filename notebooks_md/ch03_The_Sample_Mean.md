@@ -644,7 +644,7 @@ print(f"Empirical std:  {age_means.std():.2f} vs Theoretical: {18.61/np.sqrt(25)
 
 **5. Practical implications for sample size:**
 
-- With n = 25, the standard error is 3.72 years
+- With n = 25, the standard deviation of the sample mean ($\sigma/\sqrt{n}$) is 3.72 years
 - To estimate average age within ±1 year (95% confidence), we'd need n ≈ 1,330 — about 53 times larger samples
 - The Census Bureau uses this logic to design survey sizes
 
@@ -682,49 +682,6 @@ plt.show()
 > **Key Concept 3.6: CLT in Practice**
 >
 > The Central Limit Theorem is not just a mathematical curiosity—it works with real data. Even when the population distribution is highly non-normal (like the skewed 1880 Census ages with heaping at multiples of 5), the distribution of sample means becomes approximately normal for moderate sample sizes. This validates using normal-based inference methods across diverse economic applications.
-
-### Interpreting the Simulation Results
-
-**Key findings from 400 simulated coin toss samples:**
-
-**1. Mean of simulated sample means = 0.5004 (vs. theoretical μ = 0.5)**
-
-- Perfect agreement (difference of only 0.0004)
-- This validates our simulation code
-- Confirms the theoretical prediction E[X̄] = μ
-
-**2. Standard deviation of simulated means = 0.0887 (vs. theoretical = 0.0913)**
-
-- Close agreement (within 3%)
-- Theoretical: σ/√n = √(0.25/30) = 0.0913
-- The small difference is random simulation noise
-
-**3. Range of simulated means: 0.2667 to 0.7667**
-
-- Matches the theoretical range well
-- About 95% of values fall within μ ± 2σ(X̄) = 0.5 ± 0.183
-- This is exactly what we'd expect from a normal distribution
-
-**4. Why simulation matters:**
-
-- **Validation:** We've confirmed that theory matches practice
-- **Intuition:** We can see the CLT in action, not just read about it
-- **Flexibility:** We can simulate complex scenarios where theory is hard
-- **Modern econometrics:** Bootstrap, Monte Carlo methods rely on simulation
-
-**5. Reproducibility with random seeds:**
-
-- By setting `np.random.seed(10101)`, we get identical results every time
-- Essential for scientific reproducibility
-- In research, always document your random seed
-
-**6. The simulation matches the pre-computed data:**
-
-- Earlier we loaded AED_COINTOSSMEANS.DTA with mean 0.4994, sd 0.0863
-- Our simulation gave mean 0.5004, sd 0.0887
-- These match closely (differences are just from different random seeds)
-
-**Economic interpretation:** Modern econometric research heavily uses simulation methods (bootstrap standard errors, Monte Carlo integration, Bayesian MCMC). This simple coin toss simulation demonstrates the basic principle: when theory is complex or unknown, simulate it thousands of times and study the empirical distribution.
 
 ## 3.5 Estimator Properties
 
@@ -856,6 +813,49 @@ print(f"sigma(X-bar) = sigma/sqrt(n): {np.sqrt(0.25/30):.4f}")
 ```
 
     
+### Interpreting the Simulation Results
+
+**Key findings from 400 simulated coin toss samples:**
+
+**1. Mean of simulated sample means = 0.5004 (vs. theoretical μ = 0.5)**
+
+- Perfect agreement (difference of only 0.0004)
+- This validates our simulation code
+- Confirms the theoretical prediction E[X̄] = μ
+
+**2. Standard deviation of simulated means = 0.0887 (vs. theoretical = 0.0913)**
+
+- Close agreement (within 3%)
+- Theoretical: σ/√n = √(0.25/30) = 0.0913
+- The small difference is random simulation noise
+
+**3. Range of simulated means: 0.2667 to 0.7667**
+
+- Matches the theoretical range well
+- About 95% of values fall within μ ± 2σ(X̄) = 0.5 ± 0.183
+- This is exactly what we'd expect from a normal distribution
+
+**4. Why simulation matters:**
+
+- **Validation:** We've confirmed that theory matches practice
+- **Intuition:** We can see the CLT in action, not just read about it
+- **Flexibility:** We can simulate complex scenarios where theory is hard
+- **Modern econometrics:** Bootstrap, Monte Carlo methods rely on simulation
+
+**5. Reproducibility with random seeds:**
+
+- By setting `np.random.seed(10101)`, we get identical results every time
+- Essential for scientific reproducibility
+- In research, always document your random seed
+
+**6. The simulation matches the pre-computed data:**
+
+- Earlier we loaded AED_COINTOSSMEANS.DTA with mean 0.4994, sd 0.0863
+- Our simulation gave mean 0.5004, sd 0.0887
+- These match closely (differences are just from different random seeds)
+
+**Economic interpretation:** Modern econometric research heavily uses simulation methods (bootstrap standard errors, Monte Carlo integration, Bayesian MCMC). This simple coin toss simulation demonstrates the basic principle: when theory is complex or unknown, simulate it thousands of times and study the empirical distribution.
+
 This figure shows our simulated distribution (green) overlaid with the theoretical normal distribution (red). They match almost perfectly!
 
 ```python
@@ -1328,7 +1328,7 @@ This is fundamental to statistical inference: if we only observe a sample of cou
 > The **sampling distribution of the mean** shows how sample means $\bar{y}$ vary across different random samples drawn from the same population. Key properties:
 >
 > 1. **Mean of sampling distribution = population mean**: $E[\bar{y}] = \mu$
-> 2. **Standard error decreases with sample size**: $SE(\bar{y}) = \sigma/\sqrt{n}$
+> 2. **Standard error decreases with sample size**: $SE(\bar{y}) = \sigma/\sqrt{n}$ (estimated in practice by $s/\sqrt{n}$, since $\sigma$ is unknown)
 > 3. **Central Limit Theorem**: For large $n$ (typically $n \geq 30$), $\bar{y}$ is approximately normally distributed, **regardless** of the population distribution
 >
 > This is why we can use normal-based inference methods even for non-normal economic data like earnings and wealth distributions.
@@ -1414,9 +1414,9 @@ print("Note: Population distribution is right-skewed (not normal)")
 **Starter code:**
 
 ```python
-# Draw a random sample of size 30
+# Draw a random sample of size 30 (with replacement, so draws are independent)
 n = 30
-sample = np.random.choice(df_2014, size=n, replace=False)
+sample = np.random.choice(df_2014, size=n, replace=True)
 
 # Compute sample mean
 sample_mean = sample.mean()
@@ -1496,7 +1496,7 @@ print(f"Empirical SE (std of sample means): ${sample_means.std():.2f}")
 
 > **Key Concept 3.11: Standard Error and Precision**
 >
-> The **standard error** $SE(\bar{y}) = \sigma/\sqrt{n}$ measures the typical distance between a sample mean and the population mean. Key insights:
+> The **standard error** $SE(\bar{y}) = \sigma/\sqrt{n}$ (estimated in practice by $s/\sqrt{n}$, since $\sigma$ is unknown) measures the typical distance between a sample mean and the population mean. Key insights:
 >
 > 1. **Decreases with sample size**: Doubling the sample size reduces SE by factor of $\sqrt{2} \approx 1.41$
 > 2. **Trade-off**: Larger samples cost more (time/money) but provide more precise estimates
