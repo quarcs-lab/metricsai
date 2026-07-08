@@ -322,7 +322,7 @@ Typical results when including age × education interaction:
 - **agebyeduc** (interaction): VIF ≈ **37** (SEVERE!)
 - **age**: VIF ≈ **15-25** (HIGH)
 - **education**: VIF ≈ **15-25** (HIGH)
-- **Intercept**: VIF ≈ **10-15**
+- **Intercept**: the VIF on the constant term (≈ 411 here) is **not econometrically meaningful** and is conventionally ignored
 
 **Interpreting VIF:**
 
@@ -545,7 +545,7 @@ se_comparison = pd.DataFrame({
 })
 print(se_comparison)
 
-print("\nNote: Robust SEs are typically 20-40% larger, indicating heteroskedasticity.")
+print("\nNote: Here the robust SEs differ only modestly from the standard SEs (age slightly smaller, education about 13% larger), suggesting mild heteroskedasticity at most.")
 ```
 
 > **Key Concept 16.4: Heteroskedasticity and Robust Standard Errors**
@@ -556,7 +556,7 @@ print("\nNote: Robust SEs are typically 20-40% larger, indicating heteroskedasti
 
 ### Why Robust Standard Errors Matter
 
-The comparison between standard and robust SEs reveals **heteroskedasticity** in the earnings data:
+The comparison between standard and robust SEs shows only **modest differences** in the earnings data, suggesting mild heteroskedasticity at most:
 
 **Typical Results:**
 
@@ -567,10 +567,10 @@ The comparison between standard and robust SEs reveals **heteroskedasticity** in
 
 **What This Tells Us:**
 
-1. **Heteroskedasticity is present**:
- - Robust SEs are **20-40% larger** than standard SEs
- - Error variance is **not constant** across observations
- - Violates the classical homoskedasticity assumption
+1. **Mild heteroskedasticity at most**:
+ - Robust SEs here differ only modestly from standard SEs (age slightly smaller, education ~13% larger)
+ - Any departure from constant error variance is small in this sample
+ - Robust SEs remain the safe default regardless
 
 2. **Standard SEs are too small**:
  - Lead to **overstated** t-statistics
@@ -753,85 +753,77 @@ plt.show()
 
 ### Autocorrelation: The Time Series Problem
 
-The time series analysis reveals **strong autocorrelation** in interest rate data - a classic problem that invalidates standard inference:
+The simulated AR(1) exercise (ρ = 0.8) reveals **strong autocorrelation** in the error process — a classic problem that invalidates standard inference:
 
 **Autocorrelation Evidence:**
 
-From the residuals of the levels regression:
+From the residuals of the fitted regression `y1 ~ x`:
 
-- **Lag 1 autocorrelation**: ρ₁ ≈ **0.95-0.98** (extremely high!)
-- **Lag 5 autocorrelation**: ρ₅ ≈ **0.85-0.90** (still very high)
-- **Lag 10 autocorrelation**: ρ₁₀ ≈ **0.75-0.85** (persistent)
+- **Lag 1 autocorrelation**: ρ₁ ≈ **0.80** (very high — it matches the ρ = 0.8 we built into the errors)
+- **Lag 5 autocorrelation**: ρ₅ ≈ **0.31** (decaying geometrically, close to $\rho^5 \approx 0.33$)
+- **Lag 10 autocorrelation**: ρ₁₀ ≈ **0.09** (nearly gone by lag 10)
 
 **What This Means:**
 
-1. **Errors are highly correlated over time**:
- - If today's error is +1%, tomorrow's is likely +0.95%
- - Errors **cluster**: positive errors followed by positive, negative by negative
+1. **Errors are correlated over time**:
+ - If this period's error is +1, the next period's is on average +0.8
+ - Errors **cluster**: positive errors tend to follow positive, negative follow negative
  - Violates OLS assumption of **independent errors**
 
-2. **Standard errors drastically understate uncertainty**:
- 
- Typical results:
+2. **Standard errors understate uncertainty**:
 
- - **Default SE**: ~0.002 (too small!)
- - **HAC SE**: ~0.015 (realistic)
- - **Ratio**: HAC is **7-8 times larger!**
+ Because the errors are positively correlated, the usual OLS formula overstates how much independent information the sample contains. Correcting for the AR(1) structure inflates the variance of the estimator by the factor below, so honest (HAC) standard errors would be roughly $\sqrt{9} = 3$ times larger than the default OLS ones.
 
-3. **Why does autocorrelation inflate HAC SEs?**
- 
+3. **Why does autocorrelation inflate the variance?**
+
  With independent errors:
 
  - $Var(\bar{u}) = \sigma^2/n$
  - Information in n observations
- 
- With autocorrelation (ρ = 0.95):
 
- - $Var(\bar{u}) \approx \sigma^2 \cdot \frac{1 + \rho}{1 - \rho} \cdot \frac{1}{n} = \sigma^2 \cdot 39 \cdot \frac{1}{n}$
- - **39 times larger variance!**
- - Effective sample size ≈ n/39
+ With autocorrelation (ρ = 0.8):
+
+ - $Var(\bar{u}) \approx \sigma^2 \cdot \frac{1 + \rho}{1 - \rho} \cdot \frac{1}{n} = \sigma^2 \cdot 9 \cdot \frac{1}{n}$
+ - **9 times larger variance!**
+ - Effective sample size ≈ n/9
 
 **The Correlogram (ACF Plot):**
 
 The ACF plot shows:
 
-- **Very slow decay** of autocorrelations
-- All lags out to 20-24 months significantly positive
-- Classic sign of **non-stationarity** (trending series)
-- Interest rates have **long memory**
+- **Geometric decay** of the autocorrelations across lags
+- The first several lags sit well outside the confidence band
+- Classic signature of an **AR(1) error process**
+- The errors have **persistent, but fading, memory**
 
-**Why Are Interest Rates Autocorrelated?**
+**Why Is the Simulated Series Autocorrelated?**
 
-1. **Monetary policy persistence**:
- - Fed changes rates gradually (smoothing)
- - Same rate maintained for months
+The autocorrelation here is no accident — we built it into the data-generating process:
 
-2. **Economic conditions**:
- - Inflation, growth evolve slowly
- - Interest rates respond to persistent factors
+1. **The error process is AR(1) by construction**:
+ - Errors follow $u_t = 0.8\,u_{t-1} + \varepsilon_t$
+ - Each shock carries 80% of its value into the next period
 
-3. **Market expectations**:
- - Forward-looking behavior
- - Tomorrow's rate close to today's (no arbitrage)
+2. **The regressor is also AR(1)**:
+ - $x_t = 0.8\,x_{t-1} + v_t$, so it too moves slowly
+ - Slow-moving x combined with slow-moving u is exactly what distorts OLS standard errors
 
-4. **Non-stationarity**:
- - Rates **trend** over long periods
- - 1980s: High rates (15%)
- - 2010s: Low rates (near 0%)
- - Mean not constant over time
+3. **Persistence, not trend**:
+ - With $|\rho| < 1$ the series is stationary — it fluctuates around a fixed mean
+ - The memory fades geometrically rather than trending away
 
 **Consequences for Inference:**
 
 **With default SEs:**
 
-- t-statistic: **50-60** (absurdly high!)
-- p-value: < 0.0001
+- t-statistics look **too large** (default SEs are too small)
+- p-values look **too small**
 - False precision!
 
 **With HAC SEs:**
 
-- t-statistic: **5-8** (more realistic)
-- p-value: still < 0.001 (significant, but not absurdly so)
+- Standard errors widen by roughly $\sqrt{9} \approx 3\times$
+- The slope on `x` stays **highly significant** (its true value is 2)
 - Honest uncertainty
 
 **The Solution: HAC (Newey-West) Standard Errors**
@@ -847,21 +839,21 @@ where:
 
 **Choosing the Lag Length (L):**
 
-For monthly data with T ≈ 400 observations:
+For the simulated series with T = 10,000 observations:
 
-- Rule of thumb: $L \approx 0.75 \cdot 400^{1/3} \approx 5.4$
-- Conservative: L = 12 (one year)
-- Very conservative: L = 24 (two years)
+- Rule of thumb: $L \approx 0.75 \cdot 10000^{1/3} \approx 16$
+- A larger L captures more of the (geometrically decaying) autocorrelation
+- Too large an L, though, adds noise to the variance estimate
 
 **First Differencing as Alternative:**
 
 Transform: $\Delta y_t = y_t - y_{t-1}$
 
-Results from differenced model:
+Differencing a persistent series:
 
-- Much **lower autocorrelation** (ρ₁ ≈ 0.1-0.3)
-- Removes **trend** (achieves stationarity)
+- Sharply **lowers the residual autocorrelation**
 - Changes interpretation: now modeling **changes**, not levels
+- Is most useful for genuinely non-stationary series; here the errors are stationary ($|\rho| < 1$), so HAC SEs are the natural fix
 
 **Practical Recommendations:**
 
@@ -876,12 +868,12 @@ For time series regressions:
 
 **Bottom Line:**
 
-In the interest rate example:
+In this simulated AR(1) example:
 
 - Default SEs give **false confidence**
 - HAC SEs reveal **true uncertainty**
-- Even with correction, 10-year rate **strongly related** to 1-year rate
-- But not as precisely estimated as default SEs suggest!
+- Even after correction, `x` stays **strongly related** to `y` (the true slope is 2)
+- But the effect is **less precisely estimated** than default SEs suggest!
 
 ## 16.7 Example - Democracy and Growth
 
@@ -1797,7 +1789,7 @@ In this case study, you will apply the diagnostic techniques from this chapter t
 
 - **Source:** `https://raw.githubusercontent.com/quarcs-lab/mendez2020-convergence-clubs-code-data/master/assets/dat.csv`
 - **Sample:** 108 countries, 1990-2014
-- **Variables:** `lp` (labor productivity), `rk` (physical capital), `hc` (human capital), `rgdppc` (real GDP per capita), `tfp` (total factor productivity), `region`
+- **Variables:** `lp` (labor productivity), `kl` (capital per worker), `h` (human capital), `GDPpc` (real GDP per capita), `TFP` (total factor productivity), `region`
 
 **Research question:** What econometric issues arise when modeling cross-country productivity, and how do diagnostic tools help detect and address them?
 
@@ -2081,19 +2073,20 @@ bol_cs[['imds', 'ln_NTLpc2017', 'A00', 'A10', 'A20', 'A30', 'A40']].describe().r
 4. Calculate DFBETAS for the key coefficient (`ln_NTLpc2017`)
 5. Discuss: Are the influential municipalities capital cities or special cases?
 
-**Hint**: Use `OLSInfluence(model)` from statsmodels to compute influence measures.
+**Hint**: Build a diagnostics-only statsmodels fit first — `_diag_model = smf.ols(...).fit()` — then pass it to `OLSInfluence(_diag_model)` (OLSInfluence needs a statsmodels result, not a pyfixest one).
 
 ```python
 # Your code here: Influential observation analysis
 #
 # Example structure:
-# fit = pf.feols('imds ~ ln_NTLpc2017 + A00 + A10 + A20 + A30 + A40',
-#             data=bol_cs)
-# infl = OLSInfluence(model)
+# # OLSInfluence needs a statsmodels fit, so build a diagnostics-only model
+# _diag_model = smf.ols('imds ~ ln_NTLpc2017 + A00 + A10 + A20 + A30 + A40',
+#                       data=bol_cs).fit()
+# infl = OLSInfluence(_diag_model)
 #
 # # DFITS
 # dfits_vals = infl.dffits[0]
-# k = len(model.params)
+# k = len(_diag_model.params)
 # n = len(bol_cs)
 # threshold = 2 * np.sqrt(k / n)
 #
