@@ -39,7 +39,7 @@ This book is designed for a diverse audience of learners:
 
 **Economics and social science students** will find a comprehensive introduction to econometrics that emphasizes hands-on learning with real data. Whether you're taking your first econometrics course or looking to deepen your quantitative skills, the combination of theory and practice provided here will serve you well.
 
-**Researchers transitioning from Stata or R to Python** will appreciate the parallel structure that follows Cameron's familiar textbook while introducing Python's powerful ecosystem of data science libraries. Each chapter demonstrates how classic econometric techniques can be implemented using modern Python tools like Pandas, Statsmodels, and Linearmodels.
+**Researchers transitioning from Stata or R to Python** will appreciate the parallel structure that follows Cameron's familiar textbook while introducing Python's powerful ecosystem of data science libraries. Each chapter demonstrates how classic econometric techniques can be implemented using modern Python tools like Pandas, pyfixest, and Statsmodels.
 
 **Self-learners seeking interactive resources** will benefit from the zero-installation requirement and comprehensive AI support. Simply open a notebook in your browser and start learning—no complex setup required. The multiple learning modalities (notebooks, podcasts, slides, quizzes) allow you to create a personalized learning path that fits your style and schedule.
 
@@ -89,7 +89,7 @@ This approach removes all technical barriers to getting started. Whether you're 
 
 The notebooks leverage Python's rich ecosystem of data science and statistical libraries, introducing you to the same tools used by professional data scientists and researchers worldwide.
 
-**Pandas** serves as the foundation for data manipulation and analysis, providing powerful tools for loading, cleaning, transforming, and summarizing datasets. **Statsmodels** provides econometric modeling capabilities, including OLS regression, generalized linear models, and time series analysis. **Linearmodels** extends this toolkit with advanced regression techniques specifically designed for econometric applications.
+**Pandas** serves as the foundation for data manipulation and analysis, providing powerful tools for loading, cleaning, transforming, and summarizing datasets. **pyfixest** provides the book's econometric modeling engine, powering ordinary least squares and fixed-effects regression with modern robust standard errors. **Statsmodels** complements it with additional tools such as locally weighted (lowess) smoothing.
 
 For visualization, we use **Matplotlib** and **Seaborn**, which together provide publication-quality graphics for exploring data and presenting results. **NumPy** and **SciPy** handle the numerical computing that underlies all statistical analysis, from matrix operations to optimization algorithms.
 
@@ -113,7 +113,7 @@ Your notebooks are always up-to-date with the latest software dependencies, as G
 
 #### Leveraging Google's NotebookLM and AI Tools
 
-The third pillar of our approach harnesses the power of artificial intelligence to enhance learning. We've developed AI-enhanced study materials for all 17 chapters, leveraging cutting-edge tools like Google's NotebookLM and Gemini PRO to create multiple learning modalities that accommodate diverse learning preferences.
+The third pillar of our approach harnesses the power of artificial intelligence to enhance learning. We've developed AI-enhanced study materials for all 17 chapters, leveraging cutting-edge tools like Google's NotebookLM and Gemini Pro to create multiple learning modalities that accommodate diverse learning preferences.
 
 These AI tools provide interactive learning assistance, offering explanations, answering questions, and helping you develop deeper understanding of complex concepts. The materials support multiple modalities—visual, auditory, textual, and interactive—ensuring that regardless of your preferred learning style, you'll find resources that resonate with you.
 
@@ -155,7 +155,7 @@ When you struggle with a concept, the AI tutor is available to provide code expl
 
 While AI tools provide powerful learning support, it's crucial to understand their proper role in your education. AI serves as an enhancement, not a replacement for critical thinking and genuine understanding. The foundation of your learning remains Cameron's authoritative textbook and the verified Python code in the notebooks—AI tools supplement this foundation, they don't replace it.
 
-It's important to cross-reference AI-generated content with authoritative sources. While tools like NotebookLM and Gemini PRO are sophisticated, they can occasionally make mistakes or oversimplify complex concepts. You bear responsibility for verifying information and developing true understanding rather than simply accepting AI-generated explanations at face value.
+It's important to cross-reference AI-generated content with authoritative sources. While tools like NotebookLM and Gemini Pro are sophisticated, they can occasionally make mistakes or oversimplify complex concepts. You bear responsibility for verifying information and developing true understanding rather than simply accepting AI-generated explanations at face value.
 
 All Python code in the notebooks has been carefully verified and tested for accuracy. When AI tools provide code explanations or suggestions, compare them against the tested code in the notebooks to ensure accuracy. The goal is to use AI tools to develop multiple learning pathways and deeper understanding—transparency about these tools' capabilities and limitations is essential to using them effectively.
 
@@ -233,7 +233,7 @@ This project relies heavily on cutting-edge technology platforms that have made 
 
 **Google's NotebookLM** powers the AI learning tools—podcasts, slides, and tutoring—that provide personalized learning support. This sophisticated AI technology transforms static educational content into interactive learning experiences tailored to individual needs and learning styles.
 
-**Google's Gemini PRO** generates the visual summaries that help consolidate understanding and provide alternative perspectives on chapter content. The ability to automatically create meaningful visualizations of complex concepts represents a significant advance in educational technology.
+**Google's Gemini Pro** generates the visual summaries that help consolidate understanding and provide alternative perspectives on chapter content. The ability to automatically create meaningful visualizations of complex concepts represents a significant advance in educational technology.
 
 **EdCafe** provides the platform for interactive quizzes and AI tutoring, offering the assessment and feedback mechanisms that are essential for effective learning. Their tools help ensure that learning is not just exposure to content but genuine mastery of concepts.
 
@@ -241,7 +241,7 @@ This project relies heavily on cutting-edge technology platforms that have made 
 
 This book builds on the incredible work of the open source community that has created and maintains Python's scientific computing ecosystem. The developers of Statsmodels, Pandas, NumPy, Matplotlib, and countless other libraries have created the tools that make sophisticated statistical analysis accessible to anyone with a computer and internet connection.
 
-Special thanks go to the creators of Linearmodels and other econometric software tools that extend Python's capabilities specifically for econometric analysis. The documentation writers and maintainers who make these complex tools accessible through clear explanations and examples deserve particular recognition—their work is often invisible but absolutely essential.
+Special thanks go to the creators of pyfixest and other econometric software tools that extend Python's capabilities specifically for econometric analysis. The documentation writers and maintainers who make these complex tools accessible through clear explanations and examples deserve particular recognition—their work is often invisible but absolutely essential.
 
 The open source ethos—that knowledge and tools should be freely shared for the benefit of all—is fundamental to this project. We hope this book contributes back to that community by introducing new users to Python's capabilities and demonstrating how these tools can be applied to econometric analysis.
 
