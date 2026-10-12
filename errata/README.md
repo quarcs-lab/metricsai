@@ -10,6 +10,8 @@ All 54 audit findings are addressed in the selected replacement summaries, eithe
 
 `python3 scripts/sync_visual_summaries.py --write` propagates the manifest's filenames to Quarto sources, website cards, notebook/Markdown exports, rendered HTML, and frozen book content. Running it without `--write` verifies consistency. Synchronization preserves all non-image bytes, including code, notebook outputs, and frozen computation results.
 
+[verification.json](verification.json) records successful local browser checks and post-push verification: all 17 public image hashes, the deployed website, all 17 live book pages, and all 17 public notebooks matched the selected summaries. GitHub Pages successfully built publication commit `9aa5624`.
+
 ## Files and categories
 
 - [visual_summary_errata.csv](visual_summary_errata.csv): the correction checklist, with 54 findings. Each row has a stable ID, chapter, image path, location, original content, corrected equation in LaTeX, replacement wording, reasoning and edit status.
