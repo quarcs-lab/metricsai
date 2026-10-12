@@ -18,7 +18,7 @@ kernelspec:
 
 *[Carlos Mendez](https://carlos-mendez.org)*
 
-<img src="https://raw.githubusercontent.com/quarcs-lab/metricsai/main/images/ch10_visual_summary.jpg" alt="Chapter 10 Visual Summary" width="100%">
+<img src="https://raw.githubusercontent.com/quarcs-lab/metricsai/main/images/ch10_visual_summary_v2.png" alt="Chapter 10 Visual Summary" width="100%">
 
 This notebook provides an interactive introduction to multiple regression analysis. You'll learn how to work with multiple explanatory variables, interpret partial effects, assess model fit, and detect multicollinearity. All code runs directly in Google Colab without any local setup.
 

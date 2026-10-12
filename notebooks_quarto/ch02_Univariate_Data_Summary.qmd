@@ -10,7 +10,7 @@ execute:
 
 *[Carlos Mendez](https://carlos-mendez.org)*
 
-<img src="https://raw.githubusercontent.com/quarcs-lab/metricsai/main/images/ch02_visual_summary.jpg" alt="Chapter 02 Visual Summary" width="100%">
+<img src="https://raw.githubusercontent.com/quarcs-lab/metricsai/main/images/ch02_visual_summary_v3.png" alt="Chapter 02 Visual Summary" width="100%">
 
 This notebook provides an interactive introduction to univariate data analysis using Python. You'll learn how to summarize and visualize single-variable datasets using summary statistics and various chart types.
 

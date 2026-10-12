@@ -10,7 +10,7 @@ execute:
 
 *[Carlos Mendez](https://carlos-mendez.org)*
 
-<img src="https://raw.githubusercontent.com/quarcs-lab/metricsai/main/images/ch16_visual_summary.jpg" alt="Chapter 16 Visual Summary" width="100%">
+<img src="https://raw.githubusercontent.com/quarcs-lab/metricsai/main/images/ch16_visual_summary_v2.png" alt="Chapter 16 Visual Summary" width="100%">
 
 This notebook provides an interactive introduction to regression diagnostics and model validation. All code runs directly in Google Colab without any local setup.
 

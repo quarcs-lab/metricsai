@@ -18,7 +18,7 @@ kernelspec:
 
 *[Carlos Mendez](https://carlos-mendez.org)*
 
-<img src="https://raw.githubusercontent.com/quarcs-lab/metricsai/main/images/ch13_visual_summary.jpg" alt="Chapter 13 Visual Summary" width="100%">
+<img src="https://raw.githubusercontent.com/quarcs-lab/metricsai/main/images/ch13_visual_summary_v2.png" alt="Chapter 13 Visual Summary" width="100%">
 
 This notebook presents comprehensive case studies applying multiple regression to real-world economic problems.
 

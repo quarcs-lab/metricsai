@@ -18,7 +18,7 @@ kernelspec:
 
 *[Carlos Mendez](https://carlos-mendez.org)*
 
-<img src="https://raw.githubusercontent.com/quarcs-lab/metricsai/main/images/ch05_visual_summary.jpg" alt="Chapter 05 Visual Summary" width="100%">
+<img src="https://raw.githubusercontent.com/quarcs-lab/metricsai/main/images/ch05_visual_summary_v2.png" alt="Chapter 05 Visual Summary" width="100%">
 
 This notebook provides an interactive introduction to bivariate data analysis and simple linear regression using Python. You'll learn how to summarize relationships between two variables using correlation, scatter plots, and regression analysis. All code runs directly in Google Colab without any local setup.
 

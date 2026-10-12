@@ -10,7 +10,7 @@ execute:
 
 *[Carlos Mendez](https://carlos-mendez.org)*
 
-<img src="https://raw.githubusercontent.com/quarcs-lab/metricsai/main/images/ch15_visual_summary.jpg" alt="Chapter 15 Visual Summary" width="100%">
+<img src="https://raw.githubusercontent.com/quarcs-lab/metricsai/main/images/ch15_visual_summary_v2.png" alt="Chapter 15 Visual Summary" width="100%">
 
 This notebook provides an interactive introduction to regression with transformed variables. All code runs directly in Google Colab without any local setup.
 

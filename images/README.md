@@ -5,6 +5,11 @@ This directory contains image assets for the metricsAI project.
 ## Current Files
 
 - **cover.jpg** - Cover image for the project, displayed on the main README and website
+- **visual_summaries.json** - Authoritative selection of corrected chapter summaries: Chapter 1 v4, Chapters 2–3 v3, Chapters 4–17 v2 (PNG).
+- **ch00_visual_summary.jpg** - Unchanged preface summary.
+- **chNN_visual_summary.jpg** - Original summaries, retained for historical comparison.
+
+The corrected PNGs use rectangular illustrated mind maps. Mathematical review notes and generation prompts are in `../errata/`. Run `python3 scripts/sync_visual_summaries.py` from the project root to check that website, book and notebooks use the current selection; use `--write` to synchronize image filenames while preserving all other content.
 
 ## Generated Figures
 
@@ -18,4 +23,4 @@ The cover image is referenced in:
 - Project documentation
 - Website homepage
 
-All other data visualizations (scatter plots, histograms, regression plots, etc.) are created on-the-fly in the interactive notebooks and do not require pre-generated image files.
+Chapter summaries are pre-generated images. Other data visualizations (scatter plots, histograms, regression plots, etc.) are created on-the-fly in the interactive notebooks.

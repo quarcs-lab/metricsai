@@ -309,7 +309,7 @@ Now, let's begin the journey into econometrics, powered by AI and brought to lif
 
 *[Carlos Mendez](https://carlos-mendez.org)*
 
-<img src="https://raw.githubusercontent.com/quarcs-lab/metricsai/main/images/ch01_visual_summary.jpg" alt="Chapter 01 Visual Summary" width="100%">
+<img src="https://raw.githubusercontent.com/quarcs-lab/metricsai/main/images/ch01_visual_summary_v4.png" alt="Chapter 01 Visual Summary" width="100%">
 
 This notebook provides an interactive introduction to regression analysis using Python. You can run all code directly in Google Colab without any local setup required. The data streams directly from GitHub, making this notebook fully self-contained.
 
@@ -1530,7 +1530,7 @@ Through this exploration of satellite data and municipal development in Bolivia,
 
 *[Carlos Mendez](https://carlos-mendez.org)*
 
-<img src="https://raw.githubusercontent.com/quarcs-lab/metricsai/main/images/ch02_visual_summary.jpg" alt="Chapter 02 Visual Summary" width="100%">
+<img src="https://raw.githubusercontent.com/quarcs-lab/metricsai/main/images/ch02_visual_summary_v3.png" alt="Chapter 02 Visual Summary" width="100%">
 
 This notebook provides an interactive introduction to univariate data analysis using Python. You'll learn how to summarize and visualize single-variable datasets using summary statistics and various chart types.
 
@@ -3804,7 +3804,7 @@ These univariate tools reveal the *shape* of Bolivia's development distribution�
 
 *[Carlos Mendez](https://carlos-mendez.org)*
 
-<img src="https://raw.githubusercontent.com/quarcs-lab/metricsai/main/images/ch03_visual_summary.jpg" alt="Chapter 03 Visual Summary" width="100%">
+<img src="https://raw.githubusercontent.com/quarcs-lab/metricsai/main/images/ch03_visual_summary_v3.png" alt="Chapter 03 Visual Summary" width="100%">
 
 This notebook provides an interactive introduction to one of the most important concepts in statistics: the **sampling distribution of the sample mean**. You'll explore how sample means behave through experiments and simulations, building intuition for the Central Limit Theorem. All code runs directly in Google Colab without any local setup.
 
@@ -5316,7 +5316,7 @@ Through this hands-on exploration of sampling distributions using cross-country 
 
 *[Carlos Mendez](https://carlos-mendez.org)*
 
-<img src="https://raw.githubusercontent.com/quarcs-lab/metricsai/main/images/ch04_visual_summary.jpg" alt="Chapter 04 Visual Summary" width="100%">
+<img src="https://raw.githubusercontent.com/quarcs-lab/metricsai/main/images/ch04_visual_summary_v2.png" alt="Chapter 04 Visual Summary" width="100%">
 
 This notebook provides an interactive introduction to statistical inference, teaching you how to extrapolate from sample statistics to population parameters using confidence intervals and hypothesis tests.
 
@@ -7623,7 +7623,7 @@ Through this analysis of subnational development in Bolivia, you've applied the 
 
 *[Carlos Mendez](https://carlos-mendez.org)*
 
-<img src="https://raw.githubusercontent.com/quarcs-lab/metricsai/main/images/ch05_visual_summary.jpg" alt="Chapter 05 Visual Summary" width="100%">
+<img src="https://raw.githubusercontent.com/quarcs-lab/metricsai/main/images/ch05_visual_summary_v2.png" alt="Chapter 05 Visual Summary" width="100%">
 
 This notebook provides an interactive introduction to bivariate data analysis and simple linear regression using Python. You'll learn how to summarize relationships between two variables using correlation, scatter plots, and regression analysis. All code runs directly in Google Colab without any local setup.
 
@@ -9883,7 +9883,7 @@ Through this bivariate exploration of satellite data and municipal development i
 
 *[Carlos Mendez](https://carlos-mendez.org)*
 
-<img src="https://raw.githubusercontent.com/quarcs-lab/metricsai/main/images/ch06_visual_summary.jpg" alt="Chapter 06 Visual Summary" width="100%">
+<img src="https://raw.githubusercontent.com/quarcs-lab/metricsai/main/images/ch06_visual_summary_v2.png" alt="Chapter 06 Visual Summary" width="100%">
 
 This notebook provides an interactive introduction to the statistical properties of the OLS estimator. All code runs directly in Google Colab without any local setup.
 
@@ -11238,7 +11238,7 @@ Through this case study, you've:
 
 *[Carlos Mendez](https://carlos-mendez.org)*
 
-<img src="https://raw.githubusercontent.com/quarcs-lab/metricsai/main/images/ch07_visual_summary.jpg" alt="Chapter 07 Visual Summary" width="100%">
+<img src="https://raw.githubusercontent.com/quarcs-lab/metricsai/main/images/ch07_visual_summary_v2.png" alt="Chapter 07 Visual Summary" width="100%">
 
 This notebook provides an interactive introduction to statistical inference for bivariate regression models. All code runs directly in Google Colab without any local setup.
 
@@ -13840,7 +13840,7 @@ In Chapters 10-12, we extend this analysis to *multiple regression*—adding sat
 
 *[Carlos Mendez](https://carlos-mendez.org)*
 
-<img src="https://raw.githubusercontent.com/quarcs-lab/metricsai/main/images/ch08_visual_summary.jpg" alt="Chapter 08 Visual Summary" width="100%">
+<img src="https://raw.githubusercontent.com/quarcs-lab/metricsai/main/images/ch08_visual_summary_v2.png" alt="Chapter 08 Visual Summary" width="100%">
 
 This notebook provides an interactive introduction to bivariate regression through real-world case studies. All code runs directly in Google Colab without any local setup.
 
@@ -15108,7 +15108,7 @@ Choose one dataset not covered in this chapter and conduct a complete bivariate 
 
 *[Carlos Mendez](https://carlos-mendez.org)*
 
-<img src="https://raw.githubusercontent.com/quarcs-lab/metricsai/main/images/ch09_visual_summary.jpg" alt="Chapter 09 Visual Summary" width="100%">
+<img src="https://raw.githubusercontent.com/quarcs-lab/metricsai/main/images/ch09_visual_summary_v2.png" alt="Chapter 09 Visual Summary" width="100%">
 
 This notebook teaches you how to use natural logarithms in regression analysis to measure elasticities, semi-elasticities, and percentage changes—essential tools for empirical economics.
 
@@ -16279,7 +16279,7 @@ Write a 200-300 word summary analyzing cross-country labor productivity using lo
 
 *[Carlos Mendez](https://carlos-mendez.org)*
 
-<img src="https://raw.githubusercontent.com/quarcs-lab/metricsai/main/images/ch10_visual_summary.jpg" alt="Chapter 10 Visual Summary" width="100%">
+<img src="https://raw.githubusercontent.com/quarcs-lab/metricsai/main/images/ch10_visual_summary_v2.png" alt="Chapter 10 Visual Summary" width="100%">
 
 This notebook provides an interactive introduction to multiple regression analysis. You'll learn how to work with multiple explanatory variables, interpret partial effects, assess model fit, and detect multicollinearity. All code runs directly in Google Colab without any local setup.
 
@@ -17632,7 +17632,7 @@ Through this analysis of multiple satellite predictors of Bolivian municipal dev
 
 *[Carlos Mendez](https://carlos-mendez.org)*
 
-<img src="https://raw.githubusercontent.com/quarcs-lab/metricsai/main/images/ch11_visual_summary.jpg" alt="Chapter 11 Visual Summary" width="100%">
+<img src="https://raw.githubusercontent.com/quarcs-lab/metricsai/main/images/ch11_visual_summary_v2.png" alt="Chapter 11 Visual Summary" width="100%">
 
 This notebook provides an interactive introduction to extending inference to models with multiple regressors. All code runs directly in Google Colab without any local setup.
 
@@ -19559,7 +19559,7 @@ Through this analysis of satellite features and municipal development in Bolivia
 
 *[Carlos Mendez](https://carlos-mendez.org)*
 
-<img src="https://raw.githubusercontent.com/quarcs-lab/metricsai/main/images/ch12_visual_summary.jpg" alt="Chapter 12 Visual Summary" width="100%">
+<img src="https://raw.githubusercontent.com/quarcs-lab/metricsai/main/images/ch12_visual_summary_v2.png" alt="Chapter 12 Visual Summary" width="100%">
 
 This notebook provides an interactive introduction to advanced topics in regression inference and prediction. All code runs directly in Google Colab without any local setup.
 
@@ -21442,7 +21442,7 @@ These tools are essential for translating satellite-based models into credible S
 
 *[Carlos Mendez](https://carlos-mendez.org)*
 
-<img src="https://raw.githubusercontent.com/quarcs-lab/metricsai/main/images/ch13_visual_summary.jpg" alt="Chapter 13 Visual Summary" width="100%">
+<img src="https://raw.githubusercontent.com/quarcs-lab/metricsai/main/images/ch13_visual_summary_v2.png" alt="Chapter 13 Visual Summary" width="100%">
 
 This notebook presents comprehensive case studies applying multiple regression to real-world economic problems.
 
@@ -23330,7 +23330,7 @@ You receive a dataset containing country-level GDP, population, and education da
 
 *[Carlos Mendez](https://carlos-mendez.org)*
 
-<img src="https://raw.githubusercontent.com/quarcs-lab/metricsai/main/images/ch14_visual_summary.jpg" alt="Chapter 14 Visual Summary" width="100%">
+<img src="https://raw.githubusercontent.com/quarcs-lab/metricsai/main/images/ch14_visual_summary_v2.png" alt="Chapter 14 Visual Summary" width="100%">
 
 This notebook provides an interactive introduction to regression with indicator variables (also called dummy variables or categorical variables). All code runs directly in Google Colab without any local setup.
 
@@ -24799,7 +24799,7 @@ Through this analysis of regional development disparities in Bolivia, you have a
 
 *[Carlos Mendez](https://carlos-mendez.org)*
 
-<img src="https://raw.githubusercontent.com/quarcs-lab/metricsai/main/images/ch15_visual_summary.jpg" alt="Chapter 15 Visual Summary" width="100%">
+<img src="https://raw.githubusercontent.com/quarcs-lab/metricsai/main/images/ch15_visual_summary_v2.png" alt="Chapter 15 Visual Summary" width="100%">
 
 This notebook provides an interactive introduction to regression with transformed variables. All code runs directly in Google Colab without any local setup.
 
@@ -26605,7 +26605,7 @@ Through this exploration of functional forms for the satellite-development relat
 
 *[Carlos Mendez](https://carlos-mendez.org)*
 
-<img src="https://raw.githubusercontent.com/quarcs-lab/metricsai/main/images/ch16_visual_summary.jpg" alt="Chapter 16 Visual Summary" width="100%">
+<img src="https://raw.githubusercontent.com/quarcs-lab/metricsai/main/images/ch16_visual_summary_v2.png" alt="Chapter 16 Visual Summary" width="100%">
 
 This notebook provides an interactive introduction to regression diagnostics and model validation. All code runs directly in Google Colab without any local setup.
 
@@ -28678,7 +28678,7 @@ Through this diagnostic analysis of the satellite prediction model, you've appli
 
 *[Carlos Mendez](https://carlos-mendez.org)*
 
-<img src="https://raw.githubusercontent.com/quarcs-lab/metricsai/main/images/ch17_visual_summary.jpg" alt="Chapter 17 Visual Summary" width="100%">
+<img src="https://raw.githubusercontent.com/quarcs-lab/metricsai/main/images/ch17_visual_summary_v2.png" alt="Chapter 17 Visual Summary" width="100%">
 
 This notebook provides an interactive introduction to panel data methods, time series analysis, and causal inference. All code runs directly in Google Colab without any local setup.
 
