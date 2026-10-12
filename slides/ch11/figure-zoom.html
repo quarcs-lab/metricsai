@@ -1,0 +1,162 @@
+<!-- figure-zoom.html — click-to-zoom lightbox for deck figures (self-contained, no CDN).
+     Injected via the slides.qmd front matter `include-after-body: figure-zoom.html`.
+     Clicking any figure <img> on a slide opens a full-screen overlay with zoom controls
+     (+ / − / reset / fullscreen), scroll-to-zoom-at-cursor, drag-to-pan, and Esc to close.
+     Copied verbatim into each deck by the write-slides skill. -->
+<style>
+  .reveal .slides img.fig-zoomable { cursor: zoom-in; }
+  #figZoomOverlay {
+    position: fixed; inset: 0; z-index: 10000;
+    background: rgba(8, 10, 16, 0.96);
+    display: none; align-items: center; justify-content: center; overflow: hidden;
+  }
+  #figZoomOverlay.open { display: flex; }
+  #figZoomImg {
+    max-width: 94vw; max-height: 92vh;
+    transform-origin: center center;
+    transition: transform 0.08s ease-out;
+    user-select: none; -webkit-user-drag: none;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6); border-radius: 4px;
+  }
+  #figZoomImg.dragging { transition: none; }
+  #figZoomHint {
+    position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
+    color: #9aa6bd; font: 500 13px/1 -apple-system, "Segoe UI", sans-serif;
+    letter-spacing: 0.02em; z-index: 10001; pointer-events: none;
+  }
+  #figZoomControls {
+    position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+    display: flex; gap: 8px; z-index: 10001;
+  }
+  #figZoomOverlay button {
+    font: 600 18px/1 -apple-system, "Segoe UI", sans-serif;
+    color: #e6e9ef; background: rgba(0, 140, 183, 0.20);
+    border: 1px solid rgba(0, 140, 183, 0.65); border-radius: 8px;
+    width: 46px; height: 42px; cursor: pointer; transition: background 0.15s ease;
+  }
+  #figZoomOverlay button:hover { background: rgba(0, 140, 183, 0.40); color: #fff; }
+  #figZoomClose { position: fixed; top: 18px; right: 22px; width: 46px; height: 46px; z-index: 10001; }
+</style>
+<script>
+(function () {
+  function init() {
+    if (document.getElementById("figZoomOverlay")) return;
+    var overlay = document.createElement("div");
+    overlay.id = "figZoomOverlay";
+    overlay.innerHTML =
+      '<img id="figZoomImg" alt="zoomed figure">' +
+      '<div id="figZoomHint">scroll or + / − to zoom · drag to pan · Esc to close</div>' +
+      '<button id="figZoomClose" title="Close (Esc)" aria-label="Close">×</button>' +
+      '<div id="figZoomControls">' +
+        '<button data-act="out" title="Zoom out (−)" aria-label="Zoom out">−</button>' +
+        '<button data-act="reset" title="Reset (0)" aria-label="Reset">↺</button>' +
+        '<button data-act="in" title="Zoom in (+)" aria-label="Zoom in">+</button>' +
+        '<button data-act="full" title="Full screen" aria-label="Full screen">⛶</button>' +
+      '</div>';
+    document.body.appendChild(overlay);
+
+    var img = overlay.querySelector("#figZoomImg");
+    var scale = 1, tx = 0, ty = 0, drag = false, sx = 0, sy = 0;
+
+    function apply() {
+      img.style.transform = "translate(" + tx + "px," + ty + "px) scale(" + scale + ")";
+      img.style.cursor = scale > 1 ? "grab" : "default";
+    }
+    function reset() { scale = 1; tx = 0; ty = 0; apply(); }
+    function open(src) { img.src = src; reset(); overlay.classList.add("open"); }
+    function close() {
+      overlay.classList.remove("open");
+      if (document.fullscreenElement) { document.exitFullscreen().catch(function () {}); }
+    }
+    function zoom(f) {
+      scale = Math.min(8, Math.max(1, scale * f));
+      if (scale === 1) { tx = 0; ty = 0; }
+      apply();
+    }
+
+    // Body figures are <img> elements on slides.
+    document.querySelectorAll(".reveal .slides img").forEach(function (el) {
+      if (el.closest("#figZoomOverlay")) return;
+      el.classList.add("fig-zoomable");
+      el.addEventListener("click", function (e) {
+        e.preventDefault(); e.stopPropagation();
+        open(el.currentSrc || el.src);
+      });
+    });
+
+    // The TITLE slide's visual summary is a full-bleed slide BACKGROUND (data-background-image),
+    // not an <img> and painted in a separate layer behind an (empty) section. Rather than hunt for
+    // the right element, capture clicks on the whole deck: if the CURRENT slide has a background
+    // image, a click anywhere on it (except controls/links) zooms that image.
+    var revealEl = document.querySelector(".reveal");
+    if (revealEl) {
+      revealEl.style.cursor = revealEl.style.cursor; // no-op; cursor set per-slide below
+      revealEl.addEventListener("click", function (e) {
+        if (overlay.classList.contains("open")) return;
+        if (e.target.closest("#figZoomOverlay")) return;
+        if (e.target.closest("a, button, .controls, .slide-menu, .slide-menu-button, .progress")) return;
+        var cur = (window.Reveal && Reveal.getCurrentSlide) ? Reveal.getCurrentSlide() : null;
+        var url = cur && cur.getAttribute("data-background-image");
+        if (!url) return;
+        e.preventDefault(); e.stopPropagation(); open(url);
+      }, true);
+      // zoom-in cursor while on a background-image slide
+      function setBgCursor() {
+        var cur = (window.Reveal && Reveal.getCurrentSlide) ? Reveal.getCurrentSlide() : null;
+        revealEl.style.cursor = (cur && cur.getAttribute("data-background-image")) ? "zoom-in" : "";
+      }
+      if (window.Reveal && Reveal.on) { Reveal.on("ready", setBgCursor); Reveal.on("slidechanged", setBgCursor); }
+      window.addEventListener("load", function () { setTimeout(setBgCursor, 300); });
+      setTimeout(setBgCursor, 900);
+    }
+
+    overlay.addEventListener("click", function (e) { if (e.target === overlay) close(); });
+    overlay.querySelector("#figZoomClose").addEventListener("click", close);
+    overlay.querySelector("#figZoomControls").addEventListener("click", function (e) {
+      var b = e.target.closest("button"); if (!b) return; e.stopPropagation();
+      var a = b.getAttribute("data-act");
+      if (a === "in") zoom(1.3);
+      else if (a === "out") zoom(1 / 1.3);
+      else if (a === "reset") reset();
+      else if (a === "full") {
+        if (!document.fullscreenElement) { if (overlay.requestFullscreen) overlay.requestFullscreen().catch(function () {}); }
+        else if (document.exitFullscreen) document.exitFullscreen();
+      }
+    });
+
+    overlay.addEventListener("wheel", function (e) {
+      if (!overlay.classList.contains("open")) return;
+      e.preventDefault();
+      var rect = img.getBoundingClientRect();
+      var cx = e.clientX - (rect.left + rect.width / 2);
+      var cy = e.clientY - (rect.top + rect.height / 2);
+      var f = e.deltaY < 0 ? 1.15 : 1 / 1.15;
+      var ns = Math.min(8, Math.max(1, scale * f));
+      var k = ns / scale;
+      tx = (tx - cx) * k + cx; ty = (ty - cy) * k + cy; scale = ns;
+      if (scale === 1) { tx = 0; ty = 0; }
+      apply();
+    }, { passive: false });
+
+    img.addEventListener("mousedown", function (e) {
+      if (scale <= 1) return;
+      drag = true; img.classList.add("dragging"); sx = e.clientX - tx; sy = e.clientY - ty; e.preventDefault();
+    });
+    window.addEventListener("mousemove", function (e) { if (!drag) return; tx = e.clientX - sx; ty = e.clientY - sy; apply(); });
+    window.addEventListener("mouseup", function () { drag = false; img.classList.remove("dragging"); });
+
+    // Capture keys while open so reveal.js doesn't navigate underneath.
+    document.addEventListener("keydown", function (e) {
+      if (!overlay.classList.contains("open")) return;
+      if (e.key === "Escape") close();
+      else if (e.key === "+" || e.key === "=") zoom(1.3);
+      else if (e.key === "-" || e.key === "_") zoom(1 / 1.3);
+      else if (e.key === "0") reset();
+      else if (["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", " "].indexOf(e.key) === -1) return;
+      e.preventDefault(); e.stopPropagation();
+    }, true);
+  }
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init);
+  else init();
+})();
+</script>

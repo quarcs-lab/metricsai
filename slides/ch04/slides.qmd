@@ -1,0 +1,239 @@
+---
+title: "4. Statistical Inference for the Mean"
+subtitle: "From one sample to the population — with quantified uncertainty"
+deck-author: "Carlos Mendez"
+deck-author-url: "https://carlos-mendez.org"
+institute: "Nagoya University (GSID)"
+date: today
+date-format: long
+visual-summary: "figures/visual_summary.png"
+format:
+  revealjs:
+    output-file: index.html
+    theme: [default, site-brand.scss]
+    template-partials:
+      - title-slide.html
+    include-after-body: figure-zoom.html
+    center: true
+    slide-number: c/t
+    menu: true
+    chalkboard: true
+    preview-links: auto
+    overview: true
+    progress: true
+    history: true
+    transition: fade
+    width: 1280
+    height: 720
+    fig-align: center
+    auto-stretch: true
+    highlight-style: github
+    link-external-icon: false
+---
+
+# The question {.divider background-color="#008CB7"}
+
+[Act I · The tension]{.act}
+
+## We measure a sample, but we care about the population
+
+We surveyed **171** women and found mean earnings of **\$41,413**. But we don't care about these 171 — we care about *all* 30-year-old female full-time workers.
+
+. . .
+
+The sample mean is our best guess for the population mean $\mu$ — but it's just one draw. **Statistical inference** turns that single number into a statement with quantified uncertainty: a range, and a test.
+
+::: {.notes}
+Inference is the bridge from the sample we have to the population we want to describe. The whole chapter is about doing that honestly — attaching uncertainty to every estimate.
+:::
+
+## The standard error measures how precise our guess is
+
+$$\text{se}(\bar{x}) = \frac{s}{\sqrt{n}}$$
+
+[The sample mean varies from sample to sample. The standard error is the typical size of that variation — and it shrinks with $\sqrt{n}$, so quadrupling the sample only halves the uncertainty.]{.comment}
+
+[Our estimate: $\bar{x} = \$41{,}413$, with $\text{se}(\bar{x}) = \$1{,}952$ — small next to the mean, so a reasonably precise guess.]{.takeaway .fragment}
+
+## Where we're going
+
+::: {.incremental}
+- **Standard error** — how precise is a sample mean?
+- **t-distribution** — the right ruler when $\sigma$ is unknown
+- **Confidence interval** — a range of plausible values for $\mu$
+- **Hypothesis test** — is a specific claim about $\mu$ credible?
+- **Significance** — statistical vs. practical, two-sided vs. one-sided
+- **Proportions** — the same logic for yes/no data
+:::
+
+## Seven ideas anchor this chapter
+
+::: {.incremental}
+- **$H_0$ vs $H_a$** — the default claim we test, and the alternative we accept if it falls
+- **Test statistic $t$** — how many standard errors the estimate sits from $H_0$
+- **p-value** — probability of data this extreme *if $H_0$ were true*
+- **Significance level $\alpha$** — the threshold (usually $0.05$) for rejecting $H_0$
+- **Critical value** — the cutoff on $t$ that bounds the rejection region
+- **Type I / Type II error** — a false alarm vs. a missed effect
+- **Confidence interval** — the range of $\mu$ values the data won't reject
+:::
+
+[Inference is not about proving $H_0$ — only about whether the data can reject it.]{.takeaway .fragment}
+
+# From sample to inference {.divider background-color="#7A209F"}
+
+[Act II · The investigation]{.act}
+
+## Step 1 — compute the mean and its standard error
+
+``` {.python code-line-numbers="1-2|4-5|7|8-10|12-13"}
+import numpy as np                           # sqrt, arrays
+import pandas as pd                          # load & handle tabular data
+
+url = "https://raw.githubusercontent.com/quarcs-lab/data-open/master/AED/AED_EARNINGS.DTA"
+data = pd.read_stata(url)                    # 171 female full-time workers, 2010
+earnings = data["earnings"]                  # the variable we study
+
+n    = len(earnings)                         # sample size = 171
+mean = earnings.mean()                       # sample mean  ≈ 41,412.69
+s    = earnings.std(ddof=1)                  # sample std   ≈ 25,527 (ddof=1 → sample)
+
+se = s / np.sqrt(n)                          # standard error = s / √n ≈ 1,952.10
+print(n, round(mean, 2), round(se, 2))       # 171  41412.69  1952.1
+```
+
+[↗ Try it in Colab](https://colab.research.google.com/notebooks/empty.ipynb){.colab-link target="_blank" data-preview-link="false"}
+
+::: {.notes}
+ddof=1 gives the sample standard deviation (divides by n−1). The standard error is the one number that drives every interval and test that follows.
+:::
+
+## When $\sigma$ is unknown, use the t-distribution
+
+![Panel A: t(4) has fatter tails than the normal. Panel B: by 30 degrees of freedom, t is nearly normal.](figures/fig_4-2_01.png)
+
+[Because we estimate $\sigma$ with $s$, we pay for the extra uncertainty with **fatter tails** — but they vanish as $n$ grows (the "$n>30$" rule of thumb).]{.takeaway .fragment}
+
+## Step 2 — a confidence interval is estimate ± margin
+
+``` {.python code-line-numbers="1|3-6|8|10-11"}
+from scipy import stats                      # t-distribution: ppf, cdf, pdf
+
+alpha  = 0.05                                # 95% confidence → α = 0.05
+t_crit = stats.t.ppf(1 - alpha/2, n - 1)     # critical value t(170, 0.025) ≈ 1.974
+margin = t_crit * se                         # margin of error ≈ 3,853.48
+ci     = (mean - margin, mean + margin)      # (37,559.21, 45,266.17)
+
+print(f"95% CI: [{ci[0]:,.2f}, {ci[1]:,.2f}]")
+
+# higher confidence → wider interval (the price of more assurance)
+for c in (0.90, 0.95, 0.99):                 # widths: 6,457 · 7,707 · 10,171
+    tc = stats.t.ppf(1 - (1 - c)/2, n - 1)
+    print(c, round(2 * tc * se, 2))
+```
+
+[↗ Try it in Colab](https://colab.research.google.com/notebooks/empty.ipynb){.colab-link target="_blank" data-preview-link="false"}
+
+## Read the interval right — and mind the trade-off
+
+::: {.incremental}
+- **95% CI: [\$37,559, \$45,266]** — the plausible range for $\mu$ given our data.
+- **Correct reading:** across repeated samples, ~95% of such intervals would contain the true $\mu$ — *not* "95% chance $\mu$ is in this one."
+- **Trade-off:** 90% → \$6,457 wide, 99% → \$10,171 wide. More confidence buys a wider net; only more data narrows it at fixed confidence.
+:::
+
+[The critical value $1.974 \approx 2$, which is why the rule of thumb $\bar{x} \pm 2\,\text{se}$ works.]{.takeaway .fragment}
+
+## Step 3 — a hypothesis test asks: is a claim credible?
+
+``` {.python code-line-numbers="1-2|4|5|6|8-11"}
+# H0: μ = $40,000   vs   Ha: μ ≠ $40,000   (two-sided)
+mu0 = 40000                                  # the hypothesized value
+
+t_stat = (mean - mu0) / se                   # how many SEs from μ0 ≈ 0.724
+p_val  = 2 * (1 - stats.t.cdf(abs(t_stat), n - 1))   # two-sided p ≈ 0.4703
+crit   = stats.t.ppf(0.975, n - 1)           # ±1.974 rejection cutoff
+
+print(f"t = {t_stat:.4f},  p = {p_val:.4f}")
+# p = 0.47 > 0.05  AND  |t| = 0.72 < 1.974
+# → do NOT reject H0: the data are consistent with μ = $40,000
+decision = "reject" if p_val < 0.05 else "do not reject"
+print(decision, "H0")
+```
+
+[↗ Try it in Colab](https://colab.research.google.com/notebooks/empty.ipynb){.colab-link target="_blank" data-preview-link="false"}
+
+::: {.notes}
+Note $40,000 sits inside the 95% CI — that is no coincidence. Any value inside the 95% CI will not be rejected by a two-sided test at α = 0.05, and vice versa. The two tools are the same statement.
+:::
+
+## Our t falls inside the bounds — we do not reject $H_0$
+
+![The t(170) curve with the ±1.974 cutoffs. The observed t = 0.72 lands well inside the non-rejection region.](figures/fig_x_01.png)
+
+[$t = 0.72$, $p = 0.47$. The sample mean is less than one standard error from \$40,000 — ordinary sampling noise.]{.takeaway .fragment}
+
+## Significant ≠ large: the gas-price lesson
+
+Testing Yolo County gas prices against the state average \$3.81 ($n=32$): mean \$3.67, a gap of just **14¢**.
+
+. . .
+
+Yet $t = -5.26$ and $p < 0.0001$ — a crushing rejection. Why? The standard error is tiny (\$0.027), so even a small gap is many SEs wide.
+
+[**Statistical significance** says the difference is real; **practical significance** asks if it matters. Here 14¢/gallon ≈ \$109/year — both real *and* meaningful.]{.takeaway .fragment}
+
+## One-sided tests concentrate the rejection in one tail
+
+![The upper-tailed test puts all 5% in one tail, lowering the cutoff from ±1.974 to 1.654. The observed t = 0.72 still falls short.](figures/fig_x_02.png)
+
+[A one-sided test is more powerful in its chosen direction — but the direction must be fixed *before* seeing the data. Switching afterward is p-hacking.]{.takeaway .fragment}
+
+## The same logic extends to proportions
+
+``` {.python code-line-numbers="1-3|5|6|8-10|12"}
+# 480 of 921 polled voters intend to vote Democrat — is it ≠ 50%?
+p_hat = 480 / 921                            # sample proportion ≈ 0.5212
+se_p  = np.sqrt(p_hat * (1 - p_hat) / 921)   # SE for a proportion ≈ 0.0165
+
+ci = (p_hat - 1.96 * se_p, p_hat + 1.96 * se_p)   # 95% CI ≈ [0.489, 0.553]
+p0 = 0.50                                     # H0: p = 0.50 (tied race)
+
+se0    = np.sqrt(p0 * (1 - p0) / 921)         # SE under H0
+z_stat = (p_hat - p0) / se0                   # use NORMAL (z), not t ≈ 1.285
+p_val  = 2 * (1 - stats.norm.cdf(abs(z_stat)))   # two-sided p ≈ 0.1988
+
+print(round(z_stat, 3), round(p_val, 3))      # CI includes 0.50 → not significant
+```
+
+[↗ Try it in Colab](https://colab.research.google.com/notebooks/empty.ipynb){.colab-link target="_blank" data-preview-link="false"}
+
+::: {.notes}
+A proportion is just the mean of 0/1 data. With large n (np and n(1−p) both ≥ 10) we use the normal z instead of t. The 95% CI [48.9%, 55.3%] includes 50%, so we cannot call the race.
+:::
+
+# Reading it right {.divider background-color="#C21E72"}
+
+[Act III · The resolution]{.act}
+
+## The two mistakes that sink an inference
+
+[Objection.]{.objection} "We failed to reject $H_0$, so mean earnings *are* \$40,000."
+
+. . .
+
+[Response.]{.rebuttal} **Fail to reject $\neq$ accept.** The data are merely *consistent* with \$40,000 — \$41,000 and \$42,000 fit too. And a small p-value is the probability of the *data* under $H_0$, never the probability that $H_0$ is true.
+
+[Absence of evidence is not evidence of absence — a non-significant result may just mean too little data.]{.takeaway .fragment}
+
+## What to carry forward
+
+::: {.incremental}
+- The **standard error** $s/\sqrt{n}$ drives every interval and test; it shrinks only with $\sqrt{n}$.
+- Use the **t-distribution** when $\sigma$ is estimated; it becomes the normal as $n$ grows.
+- A **confidence interval** is the range of $\mu$ the data won't reject; a **test** checks one specific value.
+- $t = (\bar{x} - \mu_0)/\text{se}$; reject $H_0$ when $|t|$ beats the critical value, or $p < \alpha$.
+- Separate **statistical** from **practical** significance — and the same tools cover **proportions** via `scipy.stats`.
+:::
+
+# Estimate the mean, bound it with a CI — then test the claim you actually care about. {.divider background-color="#C21E72"}

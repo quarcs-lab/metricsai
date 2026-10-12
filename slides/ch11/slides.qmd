@@ -1,0 +1,258 @@
+---
+title: "11. Statistical Inference for Multiple Regression"
+subtitle: "From many coefficients to which ones actually matter"
+deck-author: "Carlos Mendez"
+deck-author-url: "https://carlos-mendez.org"
+institute: "Nagoya University (GSID)"
+date: today
+date-format: long
+visual-summary: "figures/visual_summary.png"
+format:
+  revealjs:
+    output-file: index.html
+    theme: [default, site-brand.scss]
+    template-partials:
+      - title-slide.html
+    include-after-body: figure-zoom.html
+    center: true
+    slide-number: c/t
+    menu: true
+    chalkboard: true
+    preview-links: auto
+    overview: true
+    progress: true
+    history: true
+    transition: fade
+    width: 1280
+    height: 720
+    fig-align: center
+    auto-stretch: true
+    highlight-style: github
+    link-external-icon: false
+---
+
+# The question {.divider background-color="#008CB7"}
+
+[Act I · The tension]{.act}
+
+## Six variables compete to explain house prices
+
+We regress the price of 29 Davis, CA houses on **size, bedrooms, bathrooms, lotsize, age, and months-on-market**.
+
+$$\text{price} = \beta_1 + \beta_2\,\text{size} + \beta_3\,\text{bedrooms} + \cdots + \beta_7\,\text{monthsold} + u$$
+
+. . .
+
+Every coefficient comes back non-zero. But a point estimate is not evidence — **which of these effects could just be sampling noise?** Inference is how we tell signal from luck.
+
+::: {.notes}
+Same house dataset as Chapter 10, now with full inference. The whole chapter is about separating real effects from noise in a small sample of 29 houses.
+:::
+
+## Where we're going
+
+::: {.incremental}
+- **Estimate** the full model and read its coefficients, SEs, and $t$-statistics
+- **Quantify precision** — why $se(b_j)$ shrinks with fit and variation, and inflates with multicollinearity
+- **Build confidence intervals** $b_j \pm t_{n-k,\,0.025}\,se(b_j)$ for each effect
+- **Test one coefficient** at a time with a $t$-test, and **groups of coefficients** with an $F$-test
+- **Present results** professionally — robust SEs, significance stars, parsimony
+:::
+
+## Six ideas anchor this chapter
+
+::: {.incremental}
+- **$t$-statistic for $b_j$** — standardized distance from a hypothesized value, distributed $T(n-k)$
+- **Degrees of freedom $n-k$** — the data's "budget" left after estimating $k$ parameters ($29-7=22$ here)
+- **Standard error $se(b_j)$** — shrinks with good fit and unique variation; balloons under multicollinearity
+- **Overall $F$-test** — does the model collectively explain $y$? ($H_0:\beta_2=\cdots=\beta_k=0$)
+- **Restricted vs. unrestricted** — compare $\text{RSS}$ to test a *group* of variables jointly
+- **Significance stars** — `*` `**` `***` flag the 10%, 5%, 1% thresholds at a glance
+:::
+
+[Each extra parameter costs a degree of freedom — in a sample of 29, that cost is real.]{.takeaway .fragment}
+
+# From estimates to evidence {.divider background-color="#7A209F"}
+
+[Act II · The investigation]{.act}
+
+## Fit the full model — size dominates, the rest are quiet
+
+``` {.python code-line-numbers="1|3-4|6|8-9|11"}
+!pip install -q pyfixest                     # pyfixest isn't preinstalled in Colab (-q = quiet)
+
+import pandas as pd                          # tabular data
+import pyfixest as pf                         # OLS with R-style formulas
+
+url = "https://raw.githubusercontent.com/quarcs-lab/data-open/master/AED/AED_HOUSE.DTA"
+data = pd.read_stata(url)                    # 29 Davis, CA house sales (1999)
+
+fit = pf.feols("price ~ size + bedrooms + bathrooms + lotsize + age + monthsold",
+               data=data)                    # multiple regression, intercept auto-added
+
+fit.summary()                                # coefficients, SEs, t, p for all 7 parameters
+```
+
+[↗ Try it in Colab](https://colab.research.google.com/notebooks/empty.ipynb){.colab-link target="_blank" data-preview-link="false"}
+
+::: {.notes}
+size = $68.37/sq ft (p = 0.0002); bedrooms, bathrooms, lotsize, age, monthsold all insignificant. R² = 0.651, n = 29, k = 7, df = 22.
+:::
+
+## Only `size` clears the bar — at $\$68.37$ per square foot
+
+::: {.incremental}
+- **size**: $\$68.37$/sq ft, $t = 4.44$, $p = 0.0002$ — highly significant, holding all else constant
+- **bedrooms** $\$2{,}685$ ($p=0.77$), **bathrooms** $\$6{,}833$ ($p=0.67$), **age** $-\$833$ ($p=0.26$) — none significant
+- **$R^2 = 0.651$** — the model explains 65% of price variation, but **adjusted $R^2 = 0.555$**
+:::
+
+[Non-zero is not the same as significant: five of six slopes could plausibly be zero.]{.takeaway .fragment}
+
+## Precision has a formula — and multicollinearity is its enemy
+
+$$se(b_j) = \frac{s_e}{\sqrt{\sum_i \widetilde{x}_{ji}^2}}, \qquad \widetilde{x}_{ji} = x_j \text{ residualized on all other regressors}$$
+
+[$se(b_j)$ shrinks when the model fits well ($s_e$ small) and when $x_j$ carries variation the *other* regressors don't. Because bigger houses have more bedrooms, little of `bedrooms` survives residualization — so its SE balloons.]{.comment}
+
+[With $n=29$ and correlated predictors, estimates are imprecise by construction — the data are stretched thin.]{.takeaway .fragment}
+
+## A confidence interval is the plausible range for each effect
+
+``` {.python code-line-numbers="1|3-4|6|8|10-11"}
+import pandas as pd                          # tabular data
+import pyfixest as pf                         # estimation
+from scipy import stats                       # t critical value
+
+url = "https://raw.githubusercontent.com/quarcs-lab/data-open/master/AED/AED_HOUSE.DTA"
+data = pd.read_stata(url)                    # load the 29 houses
+
+fit = pf.feols("price ~ size + bedrooms + bathrooms + lotsize + age + monthsold", data=data)
+
+fit.confint()                                # 95% CI: b_j ± t(n-k, 0.025) · se(b_j)
+t_crit = stats.t.ppf(0.975, df=29 - 7)       # critical value from T(22) ≈ 2.074
+```
+
+[↗ Try it in Colab](https://colab.research.google.com/notebooks/empty.ipynb){.colab-link target="_blank" data-preview-link="false"}
+
+## Only `size`'s interval misses zero
+
+![Each bar is a 95% confidence interval. `size` sits entirely above zero; every other interval straddles it.](figures/ci_coefficients.png)
+
+[`size`: $[\$36.45,\ \$100.29]$ — even the low end adds $\$36$/sq ft. An interval excluding zero *is* significance at 5%.]{.takeaway .fragment}
+
+## A $t$-test asks whether one coefficient equals a value
+
+``` {.python code-line-numbers="1|3|5|7-8|10"}
+import numpy as np                           # arrays
+# from the fitted model: b_size = 68.37, se_size = 15.39, df = 22
+
+fit = pf.feols("price ~ size + bedrooms + bathrooms + lotsize + age + monthsold", data=data)
+
+b, se = fit.coef()["size"], fit.se()["size"] # estimate and its standard error
+
+t = (b - 50) / se                            # H0: beta_size = 50  →  t = (68.37 - 50)/15.39
+p = 2 * (1 - stats.t.cdf(abs(t), df=29 - 7)) # two-sided p-value from T(22)
+
+print(f"t = {t:.2f},  p = {p:.3f}")          # t = 1.19, p = 0.245 → fail to reject
+```
+
+[↗ Try it in Colab](https://colab.research.google.com/notebooks/empty.ipynb){.colab-link target="_blank" data-preview-link="false"}
+
+::: {.notes}
+Testing beta=50 gives t=1.19, p=0.245: the data are consistent with $50/sq ft even though the point estimate is $68.37. Fail to reject ≠ accept. For beta=0, t = 68.37/15.39 = 4.44, p = 0.0002.
+:::
+
+## One $t$-test can't judge several variables at once
+
+Testing bedrooms, bathrooms, lotsize, age, monthsold **one by one** ignores that they're correlated — and inflates the chance of a false "significant."
+
+. . .
+
+Instead, compare two models by their residual sum of squares:
+
+$$F = \frac{(\text{RSS}_R - \text{RSS}_U)/q}{\text{RSS}_U/(n-k)} \sim F(q,\, n-k)$$
+
+[The **restricted** model drops the variables; the **unrestricted** keeps them. Does dropping them hurt the fit?]{.comment}
+
+## The $F$-test judges a group of variables together
+
+``` {.python code-line-numbers="1|3-4|6|8-10|12"}
+import numpy as np                           # arrays
+from scipy import stats                       # F distribution
+
+full = pf.feols("price ~ size + bedrooms + bathrooms + lotsize + age + monthsold", data=data)
+size_only = pf.feols("price ~ size", data=data)   # restricted: drop the other 5
+
+rss_u, rss_r = np.sum(full._u_hat**2), np.sum(size_only._u_hat**2)
+q, n_k = 5, 29 - 7                           # 5 restrictions, 22 residual df
+F = ((rss_r - rss_u) / q) / (rss_u / n_k)    # joint F-statistic
+p = 1 - stats.f.cdf(F, q, n_k)               # upper-tail p-value
+
+print(f"F({q},{n_k}) = {F:.2f},  p = {p:.3f}")   # F = 0.42, p = 0.832
+```
+
+[↗ Try it in Colab](https://colab.research.google.com/notebooks/empty.ipynb){.colab-link target="_blank" data-preview-link="false"}
+
+## Two $F$-tests, two verdicts
+
+![The $F(q,\,n-k)$ distribution is right-skewed and positive; we reject in the far right tail.](figures/f_distribution.png)
+
+::: {.incremental}
+- **Overall**: $F(6,22) = 6.83$, $p = 0.0003$ — the model *collectively* explains price. **Reject.**
+- **The five extras**: $F(5,22) = 0.42$, $p = 0.832$ — jointly redundant beyond `size`. **Fail to reject.**
+:::
+
+[The model works — but all of its work is being done by `size` alone.]{.takeaway .fragment}
+
+# Reading it right {.divider background-color="#C21E72"}
+
+[Act III · The resolution]{.act}
+
+## Report robust SEs and let stars carry the signal
+
+``` {.python code-line-numbers="1|3|5|7"}
+# vcov="HC1" → heteroskedasticity-robust standard errors (White's correction)
+
+robust = pf.feols("price ~ size + bedrooms + bathrooms + lotsize + age + monthsold",
+                  data=data, vcov="HC1")     # coefficients unchanged; SEs recomputed
+
+robust.summary()                             # size: 68.37*** (p ≈ 0.0002) still dominates
+```
+
+[↗ Try it in Colab](https://colab.research.google.com/notebooks/empty.ipynb){.colab-link target="_blank" data-preview-link="false"}
+
+[Report `size` as $68.37^{***}$ and the rest unstarred — a reader sees in one glance where the evidence lives. Robust SEs here barely move ($\$15.39 \to \$15.36$): mild heteroskedasticity.]{.takeaway .fragment}
+
+## Simpler wins: parsimony beats a crowded model
+
+![Actual vs. predicted price. The size-only model tracks the full model almost exactly.](figures/model_comparison.png)
+
+::: {.incremental}
+- Size-only: $R^2 = 0.617$, **adjusted $R^2 = 0.603$** — the *highest* adjusted $R^2$
+- Full model: $R^2 = 0.651$ but adjusted $R^2 = 0.555$ — six extra parameters, net loss
+:::
+
+[$R^2$ always rises with more variables; adjusted $R^2$ charges for the complexity. Prefer the model that earns its parameters.]{.takeaway .fragment}
+
+## Keep two cautions in view
+
+[Objection.]{.objection} "The five variables are insignificant — so bedrooms and bathrooms don't affect price."
+
+. . .
+
+[Response.]{.rebuttal} **Failing to reject is not accepting.** With $n = 29$ and predictors that move together, the data simply can't resolve those effects — not that they're zero. A larger, less collinear sample might.
+
+[Inference quantifies what *this* sample can support; small, correlated data support less than they seem to.]{.takeaway .fragment}
+
+## What to carry forward
+
+::: {.incremental}
+- The $t$-statistic $t = b_j/se(b_j)$ follows $T(n-k)$; a CI excluding zero means significance at that level.
+- $se(b_j)$ falls with fit and unique variation, and **rises with multicollinearity** — the small-sample tax.
+- Use an **$F$-test** for *groups* of coefficients: overall ($H_0:$ all slopes $=0$) and subset (restricted vs. unrestricted).
+- Report **robust (HC1) SEs** by default for cross-sectional data, with significance stars.
+- Judge models on **adjusted $R^2$ and parsimony**, not raw $R^2$ — here, `size` alone is enough.
+:::
+
+# Estimate the effects, then ask which ones the data can actually defend. {.divider background-color="#C21E72"}
