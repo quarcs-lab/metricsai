@@ -70,6 +70,7 @@ metricsai/
 When I correct you, or you catch yourself making a mistake: before continuing， add the lesson as a one-line rule under ### Lessons, so it never happens again.
 
 ### Lessons 
+- Preserve the book cover's visual hierarchy in related artwork: a dominant foreground brain with a connected cloud backdrop behind it.
 -（Claude adds lessons/rules here）
 - Check generated illustrations for unrequested mathematical claims, and label finite log-model percentage changes as approximations.
 - Check the staged diff, including newly added files, before reporting that whitespace validation passed.

@@ -56,3 +56,16 @@ window.I18N_REGISTER({
   "resources.showMore.post": { en: "More Resources", es: "recursos más", ja: "件のリソース" },
   "resources.showMore.pre": { en: "Show", es: "Mostrar", ja: "さらに表示：" }
 });
+
+// Static AJR laptop illustration.
+window.I18N_REGISTER({
+  "workspace.iv": {en: "Instrumental variables", es: "Variables instrumentales", ja: "操作変数法"},
+  "workspace.model": {en: "First stage · AJR (2001)", es: "Primera etapa · AJR (2001)", ja: "第一段階 · AJR (2001)"},
+  "workspace.chartCaption": {en: "Institutions & settler mortality", es: "Instituciones y mortalidad colonial", ja: "制度と入植者死亡率"},
+  "workspace.open": {en: "Open in Colab", es: "Abrir en Colab", ja: "Colabで開く"},
+  "workspace.aiCaption": {en: "Explain the code. Connect the concepts.", es: "Explica el código. Conecta los conceptos.", ja: "コードを理解し、概念をつなげる。"},
+  "workspace.countries": {en: "64 countries", es: "64 países", ja: "64か国"},
+  "workspace.fit": {en: "OLS fit", es: "Ajuste MCO", ja: "OLS回帰直線"},
+  "workspace.art": {en: "A large glowing neural brain in front of a connected cyan and violet cloud backdrop, above a silver laptop.", es: "Un gran cerebro neuronal luminoso delante de un fondo de nubes conectadas cian y violeta, sobre un portátil plateado.", ja: "銀色のノートパソコンの上で、シアンと紫の一体となったクラウドを背景に大きく輝くニューラルブレイン。"},
+  "workspace.chartAlt": {en: "AJR first stage: 64 countries, institutional protection against log settler mortality, with country labels and a downward OLS fit.", es: "Primera etapa de AJR: 64 países, protección institucional frente al logaritmo de la mortalidad colonial, con etiquetas de países y una recta MCO descendente.", ja: "AJRの第一段階：64か国の制度的保護と入植者死亡率の対数。国名ラベルと右下がりのOLS回帰直線。"}
+});
