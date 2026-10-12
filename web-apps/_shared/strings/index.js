@@ -46,7 +46,7 @@ window.I18N_REGISTER({
   "hero.check.ai": { en: "AI Support", es: "Asistencia con IA", ja: "AIサポート" },
   "hero.check.apps": { en: "Learning Apps", es: "Aplicaciones interactivas", ja: "学習アプリ" },
   "hero.check.install": { en: "Zero Installation", es: "Sin instalación", ja: "インストール不要" },
-  "hero.cta.primary": { en: "Learn by coding", es: "Aprender programando", ja: "コードを書いて学ぶ" },
+  "hero.cta.primary": { en: "Learn by AI-coding", es: "Aprender programando con IA", ja: "AIでコードを書いて学ぶ" },
   "hero.cta.secondary": { en: "Chat with AI Tutors", es: "Chatear con tutores IA", ja: "AIチューターと対話する" },
   "hero.subtitle": { en: "A modern introduction that combines cloud-based computational notebooks, learning apps, and AI tools.", es: "Una introducción moderna que combina cuadernos computacionales en la nube, aplicaciones de aprendizaje y herramientas de IA.", ja: "クラウドベースの計算ノートブック、学習アプリ、AIツールを組み合わせた、現代的な入門書です。" },
   "hero.title": { en: "Econometrics", es: "Econometría", ja: "計量経済学" },

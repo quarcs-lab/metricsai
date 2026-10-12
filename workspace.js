@@ -8,13 +8,17 @@
         'workspace.pause': { en:'Pause motion', es:'Pausar animación', ja:'動きを停止' },
         'workspace.resume': { en:'Resume motion', es:'Reanudar animación', ja:'動きを再開' },
         'workspace.reduced': { en:'Motion reduced', es:'Movimiento reducido', ja:'動きを抑制中' },
-        'workspace.model': { en:'Multiple regression', es:'Regresión múltiple', ja:'重回帰' },
-        'workspace.modelCaption': { en:'Two predictors. One estimated relationship.', es:'Dos predictores. Una relación estimada.', ja:'2つの説明変数から関係を推定。' },
+        'workspace.model': { en:'First stage · AJR (2001)', es:'Primera etapa · AJR (2001)', ja:'第一段階 · AJR (2001)' },
+        'workspace.open': { en:'Open in Colab', es:'Abrir en Colab', ja:'Colabで開く' },
+        'workspace.menus': { en:'File &nbsp; Edit &nbsp; View &nbsp; Insert &nbsp; Runtime &nbsp; Tools', es:'Archivo &nbsp; Editar &nbsp; Ver &nbsp; Insertar &nbsp; Entorno &nbsp; Herramientas', ja:'ファイル &nbsp; 編集 &nbsp; 表示 &nbsp; 挿入 &nbsp; ランタイム &nbsp; ツール' },
+        'workspace.code': { en:'Code', es:'Código', ja:'コード' },
+        'workspace.text': { en:'Text', es:'Texto', ja:'テキスト' },
+        'workspace.executed': { en:'Executed', es:'Ejecutado', ja:'実行済み' },
         'workspace.ai': { en:'AI-assisted interpretation', es:'Interpretación asistida por IA', ja:'AIによる解釈支援' },
         'workspace.aiCaption': { en:'Explain the code. Connect the concepts.', es:'Explica el código. Conecta los conceptos.', ja:'コードを理解し、概念をつなげる。' },
-        'workspace.preview': { en:'Illustrative workspace', es:'Espacio de trabajo ilustrativo', ja:'学習環境のイメージ' },
+        'workspace.preview': { en:'AJR (2001) · 64 countries', es:'AJR (2001) · 64 países', ja:'AJR (2001) · 64か国' },
         'workspace.features': { en:'Learning features', es:'Funciones de aprendizaje', ja:'学習機能' },
-        'workspace.scene': { en:'A book, Python notebook, regression surface and AI guidance in one computational workspace', es:'Un libro, un cuaderno Python, una superficie de regresión y orientación de IA en un espacio de trabajo integrado', ja:'書籍、Pythonノートブック、回帰平面、AIの支援を統合した学習環境' }
+        'workspace.scene': { en:'A portrait book beside a Colab-style notebook with executed AJR instrumental-variables code and its real first-stage plot', es:'Un libro junto a un cuaderno estilo Colab con código de variables instrumentales AJR ejecutado y su gráfico real de primera etapa', ja:'書籍とColab形式のノートブック。AJRの操作変数推定コードと実際に生成した第一段階の図。' }
     });
     const tabs = Array.from(root.querySelectorAll('[role="tab"]'));
     const panels = Array.from(root.querySelectorAll('[role="tabpanel"]'));
