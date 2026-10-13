@@ -78,6 +78,7 @@ When I correct you, or you catch yourself making a mistake: before continuing，
 -（Claude adds lessons/rules here）
 - Check generated illustrations for unrequested mathematical claims, and label finite log-model percentage changes as approximations.
 - Check the staged diff, including newly added files, before reporting that whitespace validation passed.
+- Round reported statistics from exact values, never from already-rounded printed output (double rounding turned t = 5.9953 into "5.99" instead of 6.00).
 
 ## Key Commands
 
