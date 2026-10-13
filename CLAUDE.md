@@ -70,6 +70,10 @@ metricsai/
 When I correct you, or you catch yourself making a mistake: before continuing， add the lesson as a one-line rule under ### Lessons, so it never happens again.
 
 ### Lessons 
+- Size short illustration badge labels to use the available space; equal card dimensions do not require equal font sizes.
+- Balance three-badge illustrations with mirrored side badges, a centered lower badge, and consistent connector lengths.
+- Place illustration badges next to their corresponding objects and use short, quiet pointers.
+- Verify that illustration connectors terminate on the intended object, especially when the foreground brain overlaps the background clouds.
 - Preserve the book cover's visual hierarchy in related artwork: a dominant foreground brain with a connected cloud backdrop behind it.
 -（Claude adds lessons/rules here）
 - Check generated illustrations for unrequested mathematical claims, and label finite log-model percentage changes as approximations.

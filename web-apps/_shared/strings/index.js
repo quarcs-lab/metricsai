@@ -64,6 +64,6 @@ window.I18N_REGISTER({
   "workspace.aiCaption": {en: "Explain the code. Connect the concepts.", es: "Explica el código. Conecta los conceptos.", ja: "コードを理解し、概念をつなげる。"},
   "workspace.countries": {en: "64 countries", es: "64 países", ja: "64か国"},
   "workspace.fit": {en: "OLS fit", es: "Ajuste MCO", ja: "OLS回帰直線"},
-  "workspace.art": {en: "A large glowing neural brain in front of a connected cyan and violet cloud backdrop, above a silver laptop.", es: "Un gran cerebro neuronal luminoso delante de un fondo de nubes conectadas cian y violeta, sobre un portátil plateado.", ja: "銀色のノートパソコンの上で、シアンと紫の一体となったクラウドを背景に大きく輝くニューラルブレイン。"},
+  "workspace.art": {en: "Mirrored AI and Cloud Computing glass badges flank a centered neural brain and cloud backdrop. A silver laptop and Python badge align beneath them on the center line.", es: "Los distintivos de cristal AI y Cloud Computing flanquean simétricamente un cerebro neuronal y un fondo de nubes centrados. Un portátil plateado y el distintivo Python se alinean debajo sobre el eje central.", ja: "中央のニューラルブレインとクラウドの両側に、AIとCloud Computingのガラスバッジを左右対称に配置。その下に銀色のノートパソコンとPythonバッジが中心線上に並ぶ。"},
   "workspace.chartAlt": {en: "AJR first stage: 64 countries, institutional protection against log settler mortality, with country labels and a downward OLS fit.", es: "Primera etapa de AJR: 64 países, protección institucional frente al logaritmo de la mortalidad colonial, con etiquetas de países y una recta MCO descendente.", ja: "AJRの第一段階：64か国の制度的保護と入植者死亡率の対数。国名ラベルと右下がりのOLS回帰直線。"}
 });
