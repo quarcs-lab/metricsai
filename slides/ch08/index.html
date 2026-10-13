@@ -6,10 +6,10 @@
 <script src="slides_files/libs/quarto-html/tippy.umd.min.js"></script>
 <link href="slides_files/libs/quarto-html/tippy.css" rel="stylesheet">
 <link href="slides_files/libs/quarto-html/light-border.css" rel="stylesheet">
-<link href="slides_files/libs/quarto-html/quarto-syntax-highlighting-dark-23bbe8b5e4efc1e257f6d59dce478b08.css" rel="stylesheet" id="quarto-text-highlighting-styles"><meta charset="utf-8">
-  <meta name="generator" content="quarto-1.9.37">
+<link href="slides_files/libs/quarto-html/quarto-syntax-highlighting-dark-f1aadacce99040138bbb613f9330654f.css" rel="stylesheet" id="quarto-text-highlighting-styles"><meta charset="utf-8">
+  <meta name="generator" content="quarto-1.8.27">
 
-  <meta name="dcterms.date" content="2026-10-12">
+  <meta name="dcterms.date" content="2026-10-13">
   <title>8. Case Studies for Bivariate Regression</title>
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -17,9 +17,6 @@
   <link rel="stylesheet" href="slides_files/libs/revealjs/dist/reset.css">
   <link rel="stylesheet" href="slides_files/libs/revealjs/dist/reveal.css">
   <style>
-    /* Default styles provided by pandoc.
-    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
-    */
     code{white-space: pre-wrap;}
     span.smallcaps{font-variant: small-caps;}
     div.columns{display: flex; gap: min(4vw, 1.5em);}
@@ -98,7 +95,8 @@
     code span.vs { color: #9ecbff; } /* VerbatimString */
     code span.wa { color: #ff5555; } /* Warning */
   </style>
-  <link rel="stylesheet" href="slides_files/libs/revealjs/dist/theme/quarto-994ff1788cd86c8e339430767939222d.css">
+  <link rel="stylesheet" href="slides_files/libs/revealjs/dist/theme/quarto-f1f62f3736b4b04a71cdcfbec6126da1.css">
+  <link rel="stylesheet" href="ch08-extra.css">
   <link href="slides_files/libs/revealjs/plugin/quarto-line-highlight/line-highlight.css" rel="stylesheet">
   <link href="slides_files/libs/revealjs/plugin/reveal-menu/menu.css" rel="stylesheet">
   <link href="slides_files/libs/revealjs/plugin/reveal-menu/quarto-menu.css" rel="stylesheet">
@@ -208,14 +206,29 @@
 <section id="one-tool-four-worlds" class="title-slide slide level1 divider center" data-background-color="#008CB7">
 <h1>One tool, four worlds</h1>
 <p><span class="act">Act I · The tension</span></p>
+<aside class="notes">
+<p>This chapter is applications-first: sections 8.1–8.4 are four real case studies, all estimated with the same bivariate OLS regression from Chapters 5–7. What changes from case to case is the data (a cross-section of countries, a monthly financial series, an annual macro series), the units of the slope, the hypothesis worth testing, and the way a few observations or the error structure can change the verdict.</p>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
 </section>
 <section id="the-same-line-answers-wildly-different-questions" class="slide level2 center">
 <h2>The same line answers wildly different questions</h2>
-<p>Health economists, portfolio managers, and macroeconomists seem to work in separate universes.</p>
+<p>A health economist, a portfolio manager and a macroeconomist seem to work in separate worlds. Yet each reaches for the <strong>same</strong> instrument:</p>
+<p><span class="math display">\[y_i = \beta_1 + \beta_2\, x_i + u_i\]</span></p>
 <div class="fragment">
-<p>Yet each reaches for the <strong>same</strong> instrument: a bivariate regression of <span class="math inline">\(y\)</span> on <span class="math inline">\(x\)</span>. The craft is not running it — it is reading the slope <em>honestly</em> once the data fight back.</p>
+<p>The hard part is not <em>running</em> the regression. It is reading the slope honestly: in the right <strong>units</strong>, with the right <strong>standard errors</strong>, against the right <strong>hypothesis</strong>, and with an eye on the few observations that can drive it.</p>
+<p><span class="takeaway fragment">One estimator, four case files. In each, we ask what the slope <em>means</em>, how <em>sure</em> we are, and what could make it <em>misleading</em>.</span></p>
 <aside class="notes">
-<p>This chapter is applications-first: sections 8.1–8.4 ARE four real case studies. The unifying thread is that one estimator travels across cross-sectional, financial, and macro data — but each setting demands care about robust standard errors, outliers, and causation.</p>
+<p>Frame the deck as four case files. Each one follows the same arc: question → data → method → code → output → interpretation → caveats. The recurring thread is a three-part check on every slope: (1) units, what does one unit of x and y mean; (2) uncertainty, classical vs heteroskedasticity-robust standard errors; (3) influence and interpretation, which observations drive it and whether it is causal.</p>
 <style type="text/css">
         span.MJX_Assistive_MathML {
           position:absolute!important;
@@ -229,208 +242,2502 @@
       }</style></aside>
 </div>
 </section>
-<section id="where-were-going" class="slide level2 center">
-<h2>Where we’re going</h2>
-<ul>
-<li class="fragment"><strong>Cross-section</strong> — does health spending buy longer lives across 34 OECD countries?</li>
-<li class="fragment"><strong>Outliers</strong> — how two countries can rewrite a conclusion</li>
-<li class="fragment"><strong>Finance</strong> — a stock’s systematic risk (<span class="math inline">\(\beta\)</span>) from the CAPM</li>
-<li class="fragment"><strong>Macro</strong> — Okun’s Law linking unemployment to GDP growth</li>
-<li class="fragment"><strong>Honest inference</strong> — robust standard errors, economic vs.&nbsp;statistical significance</li>
-</ul>
-</section>
-<section id="five-ideas-anchor-this-chapter" class="slide level2 center">
-<h2>Five ideas anchor this chapter</h2>
-<ul>
-<li class="fragment"><strong>Cross-sectional regression</strong> — many units, one moment (34 countries in 2009)</li>
-<li class="fragment"><strong>Time-series regression</strong> — one unit, many moments (U.S. 1961–2019; monthly returns)</li>
-<li class="fragment"><strong>Robust standard errors (HC1)</strong> — valid inference when error variance is not constant</li>
-<li class="fragment"><strong>CAPM</strong> — <span class="math inline">\(R_A - R_F = \alpha + \beta\,(R_M - R_F) + u\)</span>; <span class="math inline">\(\beta\)</span> is systematic risk</li>
-<li class="fragment"><strong>Economic vs.&nbsp;statistical significance</strong> — a slope can be precise yet tiny, or large yet noisy</li>
-</ul>
-<p><span class="takeaway fragment">Across all four cases, the estimator is <code>pf.feols</code> — what changes is how we read it.</span></p>
-</section></section>
-<section>
-<section id="four-case-studies" class="title-slide slide level1 divider center" data-background-color="#7A209F">
-<h1>Four case studies</h1>
-<p><span class="act">Act II · The investigation</span></p>
-</section>
-<section id="case-1-does-health-spending-buy-longer-lives" class="slide level2 center">
-<h2>Case 1 — does health spending buy longer lives?</h2>
-<p>34 OECD countries, 2009. Regress male life expectancy on per-capita health spending:</p>
-<p><span class="math display">\[\text{lifeexp} = \beta_1 + \beta_2 \cdot \text{hlthpc} + u\]</span></p>
-<p><span class="comment">One snapshot, 34 units — a <strong>cross-sectional</strong> regression. We expect <span class="math inline">\(\beta_2 &gt; 0\)</span>: more spending, longer lives.</span></p>
-</section>
-<section id="step-1-fit-it-then-demand-robust-standard-errors" class="slide level2 center">
-<h2>Step 1 — fit it, then demand robust standard errors</h2>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1" data-code-line-numbers="1|2-3|5-6|8|9|10"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href=""></a><span class="op">!</span>pip install <span class="op">-</span>q pyfixest                       <span class="co"># pyfixest isn't preinstalled in Colab (-q = quiet)</span></span>
-<span id="cb1-2"><a href=""></a><span class="im">import</span> pandas <span class="im">as</span> pd                             <span class="co"># load &amp; handle tabular data</span></span>
-<span id="cb1-3"><a href=""></a><span class="im">import</span> pyfixest <span class="im">as</span> pf                           <span class="co"># OLS with built-in robust SEs</span></span>
-<span id="cb1-4"><a href=""></a></span>
-<span id="cb1-5"><a href=""></a>url <span class="op">=</span> <span class="st">"https://raw.githubusercontent.com/quarcs-lab/data-open/master/AED/AED_HEALTH2009.DTA"</span></span>
-<span id="cb1-6"><a href=""></a>data <span class="op">=</span> pd.read_stata(url)                       <span class="co"># 34 OECD countries, 2009 (one row per country)</span></span>
-<span id="cb1-7"><a href=""></a></span>
-<span id="cb1-8"><a href=""></a>fit  <span class="op">=</span> pf.feols(<span class="st">"lifeexp ~ hlthpc"</span>, data<span class="op">=</span>data)             <span class="co"># OLS with classical (iid) SEs</span></span>
-<span id="cb1-9"><a href=""></a>fitr <span class="op">=</span> pf.feols(<span class="st">"lifeexp ~ hlthpc"</span>, data<span class="op">=</span>data, vcov<span class="op">=</span><span class="st">"HC1"</span>) <span class="co"># same slope, heteroskedasticity-robust SEs</span></span>
-<span id="cb1-10"><a href=""></a>fitr.summary()                                  <span class="co"># β1, β2, robust SE, t, p, R²</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p><a href="https://colab.research.google.com/notebooks/empty.ipynb" class="colab-link" target="_blank" data-preview-link="false">↗ Try it in Colab</a></p>
-<aside class="notes">
-<p>pf.feols fits OLS; passing vcov=‘HC1’ swaps in heteroskedasticity-robust standard errors. The point estimate is identical — only the SEs, t-stats, and p-values change.</p>
-<style type="text/css">
-        span.MJX_Assistive_MathML {
-          position:absolute!important;
-          clip: rect(1px, 1px, 1px, 1px);
-          padding: 1px 0 0 0!important;
-          border: 0!important;
-          height: 1px!important;
-          width: 1px!important;
-          overflow: hidden!important;
-          display:block!important;
-      }</style></aside>
-</section>
-<section id="more-spending-buys-years-but-the-u.s.-sits-far-below-the-line" class="slide level2 center">
-<h2>More spending buys years — but the U.S. sits far below the line</h2>
-
-<img data-src="figures/fig_x_01.png" class="r-stretch quarto-figure-center"><p class="caption">Each dot is a country. The fitted line slopes up; the U.S. spends the most yet lives below prediction.</p><p><span class="takeaway fragment"><span class="math inline">\(+\$1{,}000\)</span> spending <span class="math inline">\(\approx +1.1\)</span> years (<span class="math inline">\(\hat\beta_2 = 0.00111\)</span>). Robust <span class="math inline">\(t \approx 2.4\)</span> — still significant, but weaker than the classical <span class="math inline">\(t \approx 3.9\)</span>.</span></p>
-</section>
-<section id="why-robust-standard-errors-matter-the-infant-mortality-twist" class="slide level2 center">
-<h2>Why robust standard errors matter: the infant-mortality twist</h2>
-<p>Same data, outcome = infant mortality. The slope is negative (<span class="math inline">\(-0.69\)</span> deaths per $1,000), as hoped — but the verdict depends on <em>which</em> standard error you trust:</p>
+<section id="four-case-files-click-any-case-to-jump-to-it" class="slide level2 smaller center">
+<h2>Four case files — click any case to jump to it</h2>
 <table class="caption-top">
 <thead>
 <tr class="header">
-<th>Standard error</th>
-<th><span class="math inline">\(t\)</span>-statistic</th>
-<th><span class="math inline">\(p\)</span>-value</th>
-<th>Verdict at 5%</th>
+<th style="text-align: left;">Case</th>
+<th style="text-align: left;">Question</th>
+<th style="text-align: left;">Data</th>
+<th style="text-align: left;">Headline result</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
-<td>Classical (iid)</td>
-<td><span class="math inline">\(-2.3\)</span></td>
-<td><span class="math inline">\(\approx 0.03\)</span></td>
-<td><span class="key">significant</span></td>
+<td style="text-align: left;"><a href="#/case-81">8.1</a></td>
+<td style="text-align: left;">Does health spending buy longer lives?</td>
+<td style="text-align: left;">34 OECD countries, 2009</td>
+<td style="text-align: left;">+1.11 years per $1,000; infant-mortality slope loses significance with robust SEs</td>
 </tr>
 <tr class="even">
-<td>Robust (HC1)</td>
-<td><span class="math inline">\(-1.3\)</span></td>
-<td><span class="math inline">\(\approx 0.19\)</span></td>
-<td><span class="key"><strong>not</strong> significant</span></td>
+<td style="text-align: left;"><a href="#/case-82">8.2</a></td>
+<td style="text-align: left;">How does health spending rise with income?</td>
+<td style="text-align: left;">34 OECD countries, 2009</td>
+<td style="text-align: left;">+$90 per $1,000 of GDP; <span class="math inline">\(R^2\)</span> 0.60 → 0.93 without USA and Luxembourg</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><a href="#/case-83">8.3</a></td>
+<td style="text-align: left;">How risky is Coca-Cola stock?</td>
+<td style="text-align: left;">354 months, 1983–2012</td>
+<td style="text-align: left;"><span class="math inline">\(\beta = 0.61\)</span>, significantly below 1</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><a href="#/case-84">8.4</a></td>
+<td style="text-align: left;">Does Okun’s Law hold for the U.S.?</td>
+<td style="text-align: left;">59 years, 1961–2019</td>
+<td style="text-align: left;">slope −1.59; the −2 benchmark is rejected at 5%</td>
 </tr>
 </tbody>
 </table>
-<p><span class="takeaway fragment">Cross-sections are usually heteroskedastic. Report robust SEs by default — classical ones can manufacture significance.</span></p>
+<aside class="notes">
+<p>The case numbers are links: click one to jump to that case’s divider. Press M for the menu (every slide title is listed) or O for the overview grid. Cases 8.1 and 8.2 share one dataset (OECD health, 2009) but ask opposite questions: 8.1 treats health spending as the regressor, 8.2 treats it as the outcome.</p>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
 </section>
-<section id="case-2-two-countries-can-rewrite-the-conclusion" class="slide level2 center">
-<h2>Case 2 — two countries can rewrite the conclusion</h2>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2" data-code-line-numbers="1|2-3|5-6|8|9|10|11"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href=""></a><span class="op">!</span>pip install <span class="op">-</span>q pyfixest                       <span class="co"># pyfixest isn't preinstalled in Colab</span></span>
-<span id="cb2-2"><a href=""></a><span class="im">import</span> pandas <span class="im">as</span> pd                             <span class="co"># tabular data</span></span>
-<span id="cb2-3"><a href=""></a><span class="im">import</span> pyfixest <span class="im">as</span> pf                           <span class="co"># OLS estimation</span></span>
-<span id="cb2-4"><a href=""></a></span>
-<span id="cb2-5"><a href=""></a>url <span class="op">=</span> <span class="st">"https://raw.githubusercontent.com/quarcs-lab/data-open/master/AED/AED_HEALTH2009.DTA"</span></span>
-<span id="cb2-6"><a href=""></a>data <span class="op">=</span> pd.read_stata(url)                       <span class="co"># 34 OECD countries</span></span>
-<span id="cb2-7"><a href=""></a></span>
-<span id="cb2-8"><a href=""></a>full   <span class="op">=</span> pf.feols(<span class="st">"hlthpc ~ gdppc"</span>, data<span class="op">=</span>data)  <span class="co"># health spending on GDP — all 34 countries</span></span>
-<span id="cb2-9"><a href=""></a>sub_df <span class="op">=</span> data[(data[<span class="st">"code"</span>] <span class="op">!=</span> <span class="st">"USA"</span>) <span class="op">&amp;</span> (data[<span class="st">"code"</span>] <span class="op">!=</span> <span class="st">"LUX"</span>)]  <span class="co"># drop two influential outliers</span></span>
-<span id="cb2-10"><a href=""></a>sub    <span class="op">=</span> pf.feols(<span class="st">"hlthpc ~ gdppc"</span>, data<span class="op">=</span>sub_df)   <span class="co"># refit on the remaining 32 countries</span></span>
-<span id="cb2-11"><a href=""></a><span class="bu">print</span>(full._r2, sub._r2)                        <span class="co"># R² leaps 0.60 → 0.93 once outliers are removed</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p><a href="https://colab.research.google.com/notebooks/empty.ipynb" class="colab-link" target="_blank" data-preview-link="false">↗ Try it in Colab</a></p>
+<section id="three-kinds-of-data-one-estimator" class="slide level2 smaller center">
+<h2>Three kinds of data, one estimator</h2>
+<table class="caption-top">
+<colgroup>
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;"></th>
+<th style="text-align: left;">Cross-section</th>
+<th style="text-align: left;">Financial time series</th>
+<th style="text-align: left;">Macro time series</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;"><strong>Cases</strong></td>
+<td style="text-align: left;">8.1, 8.2</td>
+<td style="text-align: left;">8.3</td>
+<td style="text-align: left;">8.4</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><strong>Unit of observation</strong></td>
+<td style="text-align: left;">a country in 2009</td>
+<td style="text-align: left;">a month</td>
+<td style="text-align: left;">a year</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><strong>N</strong></td>
+<td style="text-align: left;">34 (32 without USA, LUX)</td>
+<td style="text-align: left;">354</td>
+<td style="text-align: left;">59</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><strong>Outcome <span class="math inline">\(y\)</span></strong></td>
+<td style="text-align: left;">life expectancy, infant mortality, health spending</td>
+<td style="text-align: left;">Coca-Cola excess return</td>
+<td style="text-align: left;">real GDP growth</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><strong>Regressor <span class="math inline">\(x\)</span></strong></td>
+<td style="text-align: left;">health spending, GDP per capita</td>
+<td style="text-align: left;">market excess return</td>
+<td style="text-align: left;">change in unemployment rate</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><strong>Typical worry</strong></td>
+<td style="text-align: left;">heteroskedasticity, influential countries</td>
+<td style="text-align: left;">fat tails, time-varying risk</td>
+<td style="text-align: left;">autocorrelation, structural breaks</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><strong>SEs in the chapter</strong></td>
+<td style="text-align: left;">classical and HC1</td>
+<td style="text-align: left;">classical and HC1</td>
+<td style="text-align: left;">classical and HC1</td>
+</tr>
+</tbody>
+</table>
+<p><span class="takeaway fragment">The estimator never changes (<code>pf.feols</code>). What changes is what can go wrong, so the checks we run must change with the data.</span></p>
+<aside class="notes">
+<p>Cross-sections: many units observed once; the usual concern is that error variance differs across units (heteroskedasticity) and that a few unusual units dominate. Time series: one unit over many periods; errors are often correlated over time (autocorrelation), and the relationship itself can shift (structural breaks). The chapter reports classical and HC1 standard errors in all four cases. HC1 handles heteroskedasticity only; for time series with autocorrelated errors, HAC (Newey–West) standard errors are the standard fix — they appear in Chapter 13 and Chapter 17.</p>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
 </section>
-<section id="drop-the-usa-and-luxembourg-and-the-cloud-snaps-into-a-line" class="slide level2 center">
-<h2>Drop the USA and Luxembourg — and the cloud snaps into a line</h2>
+<section id="method-review-the-bivariate-regression-toolkit" class="slide level2 smaller center">
+<h2>Method review: the bivariate regression toolkit</h2>
 <div class="columns">
 <div class="column" style="width:50%;">
-<div class="quarto-figure quarto-figure-center">
-<figure>
-<p><img data-src="figures/fig_x_03.png"></p>
-<figcaption>All 34 countries: a loose fit.</figcaption>
-</figure>
-</div>
+<p><strong>Estimate</strong></p>
+<ul>
+<li>Slope: <span class="math inline">\(\hat\beta_2 = \dfrac{\sum (x_i-\bar x)(y_i-\bar y)}{\sum (x_i-\bar x)^2}\)</span></li>
+<li>Intercept: <span class="math inline">\(\hat\beta_1 = \bar y - \hat\beta_2\,\bar x\)</span></li>
+<li>Fit: <span class="math inline">\(R^2 = r_{xy}^2\)</span>, the share of the variance of <span class="math inline">\(y\)</span> explained by <span class="math inline">\(x\)</span></li>
+</ul>
 </div><div class="column" style="width:50%;">
+<p><strong>Infer</strong></p>
+<ul>
+<li>Test <span class="math inline">\(H_0\!: \beta_2 = \beta_2^*\)</span> with <span class="math inline">\(t = \dfrac{\hat\beta_2 - \beta_2^*}{\text{se}(\hat\beta_2)} \sim t(n-2)\)</span></li>
+<li>95% CI: <span class="math inline">\(\hat\beta_2 \pm t_{0.025,\,n-2}\times \text{se}(\hat\beta_2)\)</span></li>
+<li><span class="math inline">\(\beta_2^* = 0\)</span> is only the default: Okun’s <span class="math inline">\(-2\)</span> and the CAPM’s <span class="math inline">\(\beta = 1\)</span> are more interesting nulls</li>
+</ul>
+</div></div>
+<p><span class="takeaway fragment">Every result in this deck is one of these formulas applied to real data. The only moving part is which standard error goes into the denominator.</span></p>
+<aside class="notes">
+<p>Quick recap of Chapters 5–7. In a bivariate regression R² equals the squared correlation, so the sign of r and the slope always agree. The t-statistic for any hypothesised value β* uses the same standard error; the chapter tests β = 0 everywhere and, implicitly, β = −2 for Okun’s Law. We will add the CAPM test β = 1 because “is this stock as risky as the market?” is the economically interesting question.</p>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+</section>
+<section id="method-review-classical-vs-robust-standard-errors" class="slide level2 smaller center">
+<h2>Method review: classical vs robust standard errors</h2>
+<p><span class="math display">\[\text{Classical: } \widehat{\text{Var}}(\hat\beta_2) = \frac{s^2}{\sum (x_i-\bar x)^2}
+\qquad
+\text{HC1: } \widehat{\text{Var}}(\hat\beta_2) = \frac{n}{n-2}\,\frac{\sum (x_i-\bar x)^2\,\hat u_i^2}{\left[\sum (x_i-\bar x)^2\right]^2}\]</span></p>
+<ul>
+<li class="fragment">Classical SEs assume every error has the <strong>same variance</strong> <span class="math inline">\(\sigma^2\)</span> (homoskedasticity)</li>
+<li class="fragment">HC1 lets each observation carry its own <span class="math inline">\(\hat u_i^2\)</span>, weighted by how far its <span class="math inline">\(x_i\)</span> sits from <span class="math inline">\(\bar x\)</span></li>
+<li class="fragment">So HC1 is <strong>larger</strong> when big residuals sit at extreme values of <span class="math inline">\(x\)</span>, and can be <em>smaller</em> when they sit near the middle</li>
+<li class="fragment">The coefficient is identical; only the SE, <span class="math inline">\(t\)</span>, <span class="math inline">\(p\)</span> and CI change</li>
+</ul>
+<p><span class="takeaway fragment">In pyfixest this is one argument: <code>vcov="HC1"</code>. We will report both in every case and watch where they disagree.</span></p>
+<aside class="notes">
+<p>This formula explains every SE comparison in the deck. In 8.1 the USA has both the most extreme spending (high leverage, large (x − x̄)²) and the largest residual, so HC1 is 1.6–1.7× the classical SE. In 8.2 the USA and Luxembourg both sit far from mean GDP with huge residuals, so HC1 is 2.3×. In 8.4 the largest residuals are not at extreme unemployment changes, so HC1 is slightly smaller than the classical SE. HC1 = HC0 × n/(n−k), a small-sample correction; it is Stata’s “robust” default.</p>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+</section>
+<section id="the-recurring-thread-read-every-slope-in-its-units" class="slide level2 smaller center">
+<h2>The recurring thread: read every slope in its units</h2>
+<table class="caption-top">
+<colgroup>
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Case</th>
+<th style="text-align: left;"><span class="math inline">\(y\)</span> measured in…</th>
+<th style="text-align: left;"><span class="math inline">\(x\)</span> measured in…</th>
+<th style="text-align: left;">So one unit of <span class="math inline">\(x\)</span> is…</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">8.1</td>
+<td style="text-align: left;">years; deaths per 1,000 births</td>
+<td style="text-align: left;">US dollars per person</td>
+<td style="text-align: left;">$1 — tiny, so rescale to $1,000</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">8.2</td>
+<td style="text-align: left;">US dollars per person</td>
+<td style="text-align: left;">US dollars per person</td>
+<td style="text-align: left;">$1 of GDP → cents of health spending</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">8.3</td>
+<td style="text-align: left;">monthly excess return (decimal)</td>
+<td style="text-align: left;">monthly excess return (decimal)</td>
+<td style="text-align: left;">the same units, so <span class="math inline">\(\beta\)</span> is unit-free</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">8.4</td>
+<td style="text-align: left;">% growth of real GDP</td>
+<td style="text-align: left;">percentage-point change in unemployment</td>
+<td style="text-align: left;">1 percentage point</td>
+</tr>
+</tbody>
+</table>
+<p><span class="takeaway fragment">A slope of 0.0011 can be large and a slope of 0.61 can be small. Translate before you judge.</span></p>
+<aside class="notes">
+<p>This is the first of three checks we apply to every case. 8.1: the coefficient 0.00111 is years per dollar, which looks negligible until rescaled to 1.11 years per $1,000. 8.2: dollars on dollars gives a marginal propensity (9 cents per dollar) and, via the means, an elasticity. 8.3: both sides are returns, so beta is a pure number. 8.4: percent growth on a percentage-point change; mixing up “percent” and “percentage point” is the most common error in reading Okun’s Law.</p>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+</section>
+<section id="five-ideas-anchor-this-chapter" class="slide level2 center">
+<h2>Five ideas anchor this chapter</h2>
+<ul>
+<li class="fragment"><strong>Economic vs statistical significance</strong>: a slope can be precise yet small, or large yet noisy; report both</li>
+<li class="fragment"><strong>Robust standard errors (HC1)</strong>: valid inference when error variance differs across observations</li>
+<li class="fragment"><strong>Influential observations</strong>: two of 34 countries can move a slope by 41% and <span class="math inline">\(R^2\)</span> from 0.60 to 0.93</li>
+<li class="fragment"><strong>Systematic risk (<span class="math inline">\(\beta\)</span>)</strong>: how much an asset moves with the market; <span class="math inline">\(R^2\)</span> splits risk into systematic and idiosyncratic</li>
+<li class="fragment"><strong>Structural breaks</strong>: a relationship estimated over 59 years can drift; plotting actual vs predicted over time reveals it</li>
+</ul>
+<p><span class="takeaway fragment">Each idea is the lesson of one case. Act III puts them side by side.</span></p>
+<aside class="notes">
+<p>These map onto the chapter’s Key Concepts 8.1–8.8: economic vs statistical significance (8.1), robust SEs (8.2), income elasticity (8.3), outliers and influence (8.4), beta (8.5), R² in CAPM (8.6), Okun’s Law (8.7), structural breaks (8.8).</p>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+</section></section>
+<section id="act-ii-four-case-files" class="title-slide slide level1 divider center" data-background-color="#7A209F">
+<h1>Act II · Four case files</h1>
+<p><span class="act">Cross-section · finance · macro</span></p>
+<aside class="notes">
+<p>Four cases, each with its own data, code, output, interpretation and caveats. Each case’s first code block is self-contained: paste it into an empty Colab notebook and it runs. Later blocks in the same case say “continues from the previous block”.</p>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+</section>
+
+<section>
+<section id="case-81" class="title-slide slide level1 divider center" data-background-color="#7A209F">
+<h1>Case 8.1 · Does health spending buy longer lives?</h1>
+<p><span class="act">Cross-section · 34 OECD countries · classical vs HC1 standard errors</span></p>
+<aside class="notes">
+<p>Case 8.1: two regressions on the same regressor, health spending per capita. Outcome 1: male life expectancy. Outcome 2: infant mortality. Tools: interpreting a slope in rescaled units, comparing classical and robust SEs, reading a large residual.</p>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+</section>
+<section id="the-question-do-countries-that-spend-more-on-health-live-longer" class="slide level2 smaller center">
+<h2>The question: do countries that spend more on health live longer?</h2>
+<p><strong>Data.</strong> 34 OECD countries in 2009 (<code>AED_HEALTH2009.DTA</code>), one row per country.</p>
+<table class="caption-top">
+<thead>
+<tr class="header">
+<th style="text-align: left;">Variable</th>
+<th style="text-align: left;">Meaning</th>
+<th style="text-align: left;">Units</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;"><code>hlthpc</code></td>
+<td style="text-align: left;">health expenditure per capita</td>
+<td style="text-align: left;">US dollars</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>lifeexp</code></td>
+<td style="text-align: left;"><strong>male</strong> life expectancy at birth</td>
+<td style="text-align: left;">years</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>infmort</code></td>
+<td style="text-align: left;">infant mortality</td>
+<td style="text-align: left;">deaths per 1,000 live births</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>gdppc</code></td>
+<td style="text-align: left;">GDP per capita (used in 8.2)</td>
+<td style="text-align: left;">US dollars</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>code</code></td>
+<td style="text-align: left;">three-letter country code</td>
+<td style="text-align: left;">e.g.&nbsp;<code>USA</code>, <code>LUX</code></td>
+</tr>
+</tbody>
+</table>
+<p><span class="math display">\[\text{lifeexp}_i = \beta_1 + \beta_2\,\text{hlthpc}_i + u_i \qquad \text{infmort}_i = \beta_1 + \beta_2\,\text{hlthpc}_i + u_i\]</span></p>
+<p><span class="takeaway fragment">We expect <span class="math inline">\(\beta_2 &gt; 0\)</span> for life expectancy and <span class="math inline">\(\beta_2 &lt; 0\)</span> for infant mortality. Spending is chosen by countries, not assigned, so expect <strong>associations</strong>.</span></p>
+<aside class="notes">
+<p>Research questions from the chapter: (1) Is higher health spending associated with longer life expectancy? (2) With lower infant mortality? (3) How does the U.S. compare to the predictions? Note that the life-expectancy variable is male life expectancy (the dataset label says so); female life expectancy is several years higher in every OECD country. The codes in this dataset are not ISO codes (Japan is JAP, Switzerland SWI), which matters if you merge with other data.</p>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+</section>
+<section id="the-data-spending-varies-almost-ninefold-across-the-oecd" class="slide level2 smaller center">
+<h2>The data: spending varies almost ninefold across the OECD</h2>
+<table class="caption-top">
+<colgroup>
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Variable</th>
+<th style="text-align: right;">Mean</th>
+<th style="text-align: right;">Std. dev.</th>
+<th style="text-align: right;">Min</th>
+<th style="text-align: right;">Max</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;"><code>hlthpc</code> (US$)</td>
+<td style="text-align: right;">3,255.6</td>
+<td style="text-align: right;">1,493.7</td>
+<td style="text-align: right;">923 (Mexico)</td>
+<td style="text-align: right;"><span class="key">7,990 (USA)</span></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>lifeexp</code> (years)</td>
+<td style="text-align: right;">76.70</td>
+<td style="text-align: right;">2.94</td>
+<td style="text-align: right;">69.8 (Estonia)</td>
+<td style="text-align: right;">79.9 (Switzerland)</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>infmort</code> (per 1,000)</td>
+<td style="text-align: right;">4.45</td>
+<td style="text-align: right;">2.72</td>
+<td style="text-align: right;">1.8 (Iceland)</td>
+<td style="text-align: right;">14.7 (Mexico)</td>
+</tr>
+</tbody>
+</table>
+<p><span class="comment">N = 34 · OECD, 2009 · Table 8.1 of the chapter</span></p>
+<p><span class="takeaway fragment">The USA spends $2,642 more per person than the next-highest country, Norway. That alone makes it a candidate for an influential observation.</span></p>
+<aside class="notes">
+<p>Spending ranges from $923 (Mexico) to $7,990 (USA), a range of $7,067. Norway is second at $5,348, so the USA is $2,642 beyond the next country and $4,734 above the mean. Life expectancy runs from 69.8 to 79.9 years; infant mortality from 1.8 to 14.7. Keep the USA in mind: in a bivariate regression, an observation far from the mean of x has high leverage, so its residual has a large pull on the slope and on the robust SE.</p>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+</section>
+<section id="code-load-the-data-and-summarize-it" class="slide level2 center">
+<h2>Code: load the data and summarize it</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1" data-code-line-numbers="1-3|4-5|6-8"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href=""></a><span class="op">!</span>pip install <span class="op">-</span>q pyfixest                      <span class="co"># pyfixest is not preinstalled in Colab</span></span>
+<span id="cb1-2"><a href=""></a><span class="im">import</span> pandas <span class="im">as</span> pd                           <span class="co"># tabular data</span></span>
+<span id="cb1-3"><a href=""></a><span class="im">import</span> pyfixest <span class="im">as</span> pf                         <span class="co"># OLS with R-style formulas and robust SEs</span></span>
+<span id="cb1-4"><a href=""></a>url <span class="op">=</span> <span class="st">"https://raw.githubusercontent.com/quarcs-lab/data-open/master/AED/AED_HEALTH2009.DTA"</span></span>
+<span id="cb1-5"><a href=""></a>data_health <span class="op">=</span> pd.read_stata(url)              <span class="co"># 34 OECD countries in 2009, one row each</span></span>
+<span id="cb1-6"><a href=""></a>table81 <span class="op">=</span> data_health[[<span class="st">"hlthpc"</span>, <span class="st">"lifeexp"</span>, <span class="st">"infmort"</span>]].describe().T   <span class="co"># one row per variable</span></span>
+<span id="cb1-7"><a href=""></a>table81[<span class="st">"range"</span>] <span class="op">=</span> table81[<span class="st">"max"</span>] <span class="op">-</span> table81[<span class="st">"min"</span>]                      <span class="co"># max minus min</span></span>
+<span id="cb1-8"><a href=""></a><span class="bu">print</span>(table81[[<span class="st">"mean"</span>, <span class="st">"std"</span>, <span class="st">"min"</span>, <span class="st">"max"</span>, <span class="st">"range"</span>]].<span class="bu">round</span>(<span class="dv">2</span>))         <span class="co"># Table 8.1</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><a href="https://colab.research.google.com/notebooks/empty.ipynb" class="colab-link" target="_blank" data-preview-link="false">↗ Try it in Colab</a></p>
+<aside class="notes">
+<p>Self-contained: paste into an empty Colab cell. pd.read_stata reads the Stata file straight from GitHub. describe().T puts one variable per row, which is easier to read for three variables.</p>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+</section>
+<section id="code-life-expectancy-on-health-spending-two-kinds-of-ses" class="slide level2 center">
+<h2>Code: life expectancy on health spending, two kinds of SEs</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2" data-code-line-numbers="1-3|4-5|6-7"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href=""></a><span class="co"># continues from the previous block</span></span>
+<span id="cb2-2"><a href=""></a>model_lifeexp <span class="op">=</span> pf.feols(<span class="st">"lifeexp ~ hlthpc"</span>, data<span class="op">=</span>data_health)                     <span class="co"># classical SEs</span></span>
+<span id="cb2-3"><a href=""></a>model_lifeexp_robust <span class="op">=</span> pf.feols(<span class="st">"lifeexp ~ hlthpc"</span>, data<span class="op">=</span>data_health, vcov<span class="op">=</span><span class="st">"HC1"</span>)  <span class="co"># robust SEs</span></span>
+<span id="cb2-4"><a href=""></a>model_lifeexp.summary()                           <span class="co"># coefficients with classical (iid) SEs</span></span>
+<span id="cb2-5"><a href=""></a>model_lifeexp_robust.summary()                    <span class="co"># same coefficients, HC1 SEs, t, p, CI</span></span>
+<span id="cb2-6"><a href=""></a>slope_life <span class="op">=</span> model_lifeexp.coef()[<span class="st">"hlthpc"</span>]       <span class="co"># years of life per extra US dollar</span></span>
+<span id="cb2-7"><a href=""></a><span class="bu">print</span>(<span class="ss">f"per $1,000: </span><span class="sc">{</span>slope_life<span class="op">*</span><span class="dv">1000</span><span class="sc">:.2f}</span><span class="ss"> years; R2 = </span><span class="sc">{</span>model_lifeexp<span class="sc">.</span>_r2<span class="sc">:.3f}</span><span class="ss">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><a href="https://colab.research.google.com/notebooks/empty.ipynb" class="colab-link" target="_blank" data-preview-link="false">↗ Try it in Colab</a></p>
+<p><span class="takeaway fragment">Fitting twice costs nothing: <code>vcov</code> changes the standard errors, never the line.</span></p>
+<aside class="notes">
+<p>pf.feols without a vcov argument uses classical (“iid”) standard errors; vcov=“HC1” switches to heteroskedasticity-robust ones. The chapter reports both. Multiplying the slope by 1,000 converts “years per dollar” into “years per $1,000”, the unit the chapter uses for interpretation.</p>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+</section>
+<section id="output-1.11-years-per-1000-but-the-robust-se-is-1.6-larger" class="slide level2 smaller center">
+<h2>Output: +1.11 years per $1,000, but the robust SE is 1.6× larger</h2>
+<table class="caption-top">
+<colgroup>
+<col style="width: 12%">
+<col style="width: 12%">
+<col style="width: 12%">
+<col style="width: 12%">
+<col style="width: 12%">
+<col style="width: 12%">
+<col style="width: 12%">
+<col style="width: 12%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Variable</th>
+<th style="text-align: right;">Coef.</th>
+<th style="text-align: right;">SE (iid)</th>
+<th style="text-align: right;"><span class="math inline">\(t\)</span></th>
+<th style="text-align: right;"><span class="math inline">\(p\)</span></th>
+<th style="text-align: right;">SE (HC1)</th>
+<th style="text-align: right;"><span class="math inline">\(t\)</span></th>
+<th style="text-align: right;"><span class="math inline">\(p\)</span></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;"><code>Intercept</code></td>
+<td style="text-align: right;">73.084</td>
+<td style="text-align: right;">1.024</td>
+<td style="text-align: right;">71.36</td>
+<td style="text-align: right;">&lt;&nbsp;0.001</td>
+<td style="text-align: right;">1.565</td>
+<td style="text-align: right;">46.70</td>
+<td style="text-align: right;">&lt;&nbsp;0.001</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>hlthpc</code></td>
+<td style="text-align: right;"><span class="key">0.001112</span></td>
+<td style="text-align: right;">0.000287</td>
+<td style="text-align: right;">3.88</td>
+<td style="text-align: right;">&lt;&nbsp;0.001</td>
+<td style="text-align: right;">0.000464</td>
+<td style="text-align: right;">2.40</td>
+<td style="text-align: right;">0.023</td>
+</tr>
+</tbody>
+</table>
+<p><span class="comment">N = 34 · <span class="math inline">\(R^2 = 0.320\)</span> · 95% CI for the slope: [0.000528,&nbsp;0.001696] (iid), [0.000167,&nbsp;0.002056] (HC1)</span></p>
+<ul>
+<li class="fragment"><strong>Units:</strong> 0.001112 years per dollar = <strong>1.11 years per $1,000</strong> of spending per person</li>
+<li class="fragment"><strong>Robust 95% CI per $1,000:</strong> from 0.17 to 2.06 years, positive but wide</li>
+<li class="fragment"><strong>Intercept 73.1:</strong> predicted life expectancy at zero spending, far below the lowest observed spending ($923), so it has no meaning on its own</li>
+</ul>
+<p><span class="takeaway fragment">Significant either way (<span class="math inline">\(p\)</span> = 0.023 with HC1), but the robust interval is 1.6× wider. Health spending explains 32% of the cross-country variation.</span></p>
+<aside class="notes">
+<p>Classical t = 3.88 (p &lt; 0.001); robust t = 2.40 (p = 0.023), matching the chapter’s “classical t ≈ 3.9, robust t ≈ 2.4”. The HC1 SE is 1.62 times the classical one. R² = 0.320: about a third of the variation in male life expectancy across these 34 countries lines up with spending. Remember the units: the CI per $1,000 is the HC1 CI multiplied by 1,000.</p>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+</section>
+<section id="reading-the-slope-does-the-line-predict-real-gaps" class="slide level2 center">
+<h2>Reading the slope: does the line predict real gaps?</h2>
+<ul>
+<li class="fragment">Chile spends $1,210 per person; Norway spends $5,348, a gap of <strong>$4,138</strong></li>
+<li class="fragment">The slope predicts a life-expectancy gap of <span class="math inline">\(4.138 \times 1.11 \approx\)</span> <strong>4.6 years</strong></li>
+<li class="fragment">The actual gap is 78.7 − 75.8 = <strong>2.9 years</strong></li>
+<li class="fragment">The line is an <em>average</em> relationship across 34 countries; any one pair can be far from it</li>
+</ul>
+<p><span class="takeaway fragment">A slope summarizes the cloud, not every pair inside it. A typical prediction error is about 2.4 years (the RMSE in the output).</span></p>
+<aside class="notes">
+<p>The chapter’s own illustration. The fitted line overstates the Chile–Norway gap by 1.7 years. pyfixest reports RMSE = 2.39 years (it divides the sum of squared residuals by n); the standard error of the regression, which divides by n − 2, is 2.46 years. Either way, misses of this size are typical. A good habit: whenever you use a slope to predict a specific comparison, quote the RMSE alongside it.</p>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+</section>
+<section id="the-usa-lives-6-years-shorter-than-its-spending-predicts" class="slide level2 center">
+<h2>The USA lives 6 years shorter than its spending predicts</h2>
+
+<img data-src="figures/fig_life_us.png" class="r-stretch quarto-figure-center"><p class="caption">Male life expectancy against health spending, with the OLS line. The USA sits far below the line at the far right.</p><p><span class="takeaway fragment">At $7,990 the line predicts 82.0 years; the USA records 76.0. Its residual of −6.0 years is the largest of all 34 countries.</span></p>
+<aside class="notes">
+<p>Predicted value for the USA: 73.084 + 0.001112 × 7,990 = 82.0 years, which is above every country in the sample (Switzerland’s 79.9 is the highest observed). Actual: 76.0. Residual −5.97. The next-largest negative residuals are Estonia (−4.8) and Hungary (−4.8). The chapter’s explanations — how money is spent, prices, access, inequality, lifestyle — are all outside the model, which is exactly why the residual is large.</p>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+</section>
+<section id="why-the-robust-se-is-larger-big-residuals-at-extreme-spending" class="slide level2 smaller center">
+<h2>Why the robust SE is larger: big residuals at extreme spending</h2>
 <div class="quarto-figure quarto-figure-center">
 <figure>
-<p><img data-src="figures/fig_x_04.png"></p>
-<figcaption>Excluding USA &amp; Luxembourg: tight.</figcaption>
+<p><img data-src="figures/fig_health_resid.png" height="360"></p>
+<figcaption>Residuals against health spending. The largest residuals sit at the lowest (Mexico, Turkey) and highest (USA) spending.</figcaption>
 </figure>
 </div>
+<p><span class="takeaway fragment">HC1 weights each squared residual by <span class="math inline">\((x_i-\bar x)^2\)</span>. The USA is both the most extreme spender and the worst-fitting country, so it inflates the robust SE.</span></p>
+<aside class="notes">
+<p>Connect back to the HC1 formula. The USA’s spending is $4,734 above the mean; Mexico and Turkey are about $2,300 below. Those three have large residuals, so HC1 attributes a lot of uncertainty to the slope. The chapter’s Key Concept 8.2 says “richer countries show more variation in health spending”; more precisely, the problem is that the <em>error</em> variance is not constant across levels of <em>x</em>: the residual spread is not the same at all spending levels, and the largest residuals sit at high-leverage points.</p>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+</section>
+<section id="code-infant-mortality-on-health-spending" class="slide level2 center">
+<h2>Code: infant mortality on health spending</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3" data-code-line-numbers="1-3|4-5|6-7"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href=""></a><span class="co"># continues from the previous block</span></span>
+<span id="cb3-2"><a href=""></a>model_infmort <span class="op">=</span> pf.feols(<span class="st">"infmort ~ hlthpc"</span>, data<span class="op">=</span>data_health)                     <span class="co"># classical SEs</span></span>
+<span id="cb3-3"><a href=""></a>model_infmort_robust <span class="op">=</span> pf.feols(<span class="st">"infmort ~ hlthpc"</span>, data<span class="op">=</span>data_health, vcov<span class="op">=</span><span class="st">"HC1"</span>)  <span class="co"># robust SEs</span></span>
+<span id="cb3-4"><a href=""></a>model_infmort.summary()                           <span class="co"># slope, classical SE, t, p</span></span>
+<span id="cb3-5"><a href=""></a>model_infmort_robust.summary()                    <span class="co"># same slope, HC1 SE, t, p</span></span>
+<span id="cb3-6"><a href=""></a>slope_inf <span class="op">=</span> model_infmort.coef()[<span class="st">"hlthpc"</span>]        <span class="co"># infant deaths per 1,000 births per extra dollar</span></span>
+<span id="cb3-7"><a href=""></a><span class="bu">print</span>(<span class="ss">f"per $1,000: </span><span class="sc">{</span>slope_inf<span class="op">*</span><span class="dv">1000</span><span class="sc">:.2f}</span><span class="ss">; from $2,000 to $4,000: </span><span class="sc">{</span>slope_inf<span class="op">*</span><span class="dv">2000</span><span class="sc">:.2f}</span><span class="ss">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><a href="https://colab.research.google.com/notebooks/empty.ipynb" class="colab-link" target="_blank" data-preview-link="false">↗ Try it in Colab</a></p>
+<aside class="notes">
+<p>Same regressor, a new outcome. The last line reproduces the chapter’s illustration: moving from $2,000 to $4,000 per capita is a $2,000 change, so the predicted change in infant mortality is the slope times 2,000.</p>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+</section>
+<section id="output-the-verdict-flips-with-robust-standard-errors" class="slide level2 smaller center">
+<h2>Output: the verdict flips with robust standard errors</h2>
+<table class="caption-top">
+<colgroup>
+<col style="width: 12%">
+<col style="width: 12%">
+<col style="width: 12%">
+<col style="width: 12%">
+<col style="width: 12%">
+<col style="width: 12%">
+<col style="width: 12%">
+<col style="width: 12%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Variable</th>
+<th style="text-align: right;">Coef.</th>
+<th style="text-align: right;">SE (iid)</th>
+<th style="text-align: right;"><span class="math inline">\(t\)</span></th>
+<th style="text-align: right;"><span class="math inline">\(p\)</span></th>
+<th style="text-align: right;">SE (HC1)</th>
+<th style="text-align: right;"><span class="math inline">\(t\)</span></th>
+<th style="text-align: right;"><span class="math inline">\(p\)</span></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;"><code>Intercept</code></td>
+<td style="text-align: right;">6.702</td>
+<td style="text-align: right;">1.064</td>
+<td style="text-align: right;">6.30</td>
+<td style="text-align: right;">&lt;&nbsp;0.001</td>
+<td style="text-align: right;">1.877</td>
+<td style="text-align: right;">3.57</td>
+<td style="text-align: right;">0.001</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>hlthpc</code></td>
+<td style="text-align: right;">−0.000693</td>
+<td style="text-align: right;">0.000298</td>
+<td style="text-align: right;">−2.33</td>
+<td style="text-align: right;"><span class="key">0.027</span></td>
+<td style="text-align: right;">0.000515</td>
+<td style="text-align: right;">−1.35</td>
+<td style="text-align: right;"><span class="key">0.188</span></td>
+</tr>
+</tbody>
+</table>
+<p><span class="comment">N = 34 · <span class="math inline">\(R^2 = 0.145\)</span> · 95% CI for the slope: [−0.001299,&nbsp;−0.000086] (iid), [−0.001741,&nbsp;0.000356] (HC1)</span></p>
+<ul>
+<li class="fragment"><strong>Units:</strong> −0.69 infant deaths per 1,000 births for every extra $1,000 per person</li>
+<li class="fragment"><strong>Classical SEs:</strong> significant at 5% (<span class="math inline">\(t = -2.33\)</span>)</li>
+<li class="fragment"><strong>HC1:</strong> the SE is 1.7× larger, <span class="math inline">\(t = -1.35\)</span>, <span class="math inline">\(p = 0.19\)</span>, and the CI includes zero</li>
+</ul>
+<p><span class="takeaway fragment">Same slope, opposite verdicts. With robust SEs, the data cannot rule out a zero association.</span></p>
+<aside class="notes">
+<p>This is the chapter’s cautionary example. Classical inference says the negative association is significant (p = 0.027); robust inference says it is not (p = 0.188). Because the cross-section is heteroskedastic — and dominated by a few high-leverage countries — the robust result is the one to report. The robust 95% CI per $1,000 runs from −1.74 to +0.36 deaths per 1,000 births.</p>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+</section>
+<section id="the-usa-again-6.4-infant-deaths-where-the-line-predicts-1.2" class="slide level2 center">
+<h2>The USA again: 6.4 infant deaths where the line predicts 1.2</h2>
+
+<img data-src="figures/fig_inf_us.png" class="r-stretch quarto-figure-center"><p class="caption">Infant mortality against health spending. The line’s prediction for the USA falls below the lowest rate observed anywhere in the sample.</p><p><span class="takeaway fragment">The prediction for the USA (1.2) is lower than any country actually achieves (Iceland, 1.8). A straight line extrapolated to $7,990 promises the impossible.</span></p>
+<aside class="notes">
+<p>Predicted: 6.702 − 0.000693 × 7,990 = 1.17. Actual: 6.4. Residual +5.2, the third largest after Mexico (+8.6) and Turkey (+7.1). Two lessons. First, the USA is again far off the line. Second, linear extrapolation to the edge of the data gives a prediction outside the range of anything observed — a sign that the relationship is probably not linear over the whole spending range (diminishing returns would flatten it).</p>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+</section>
+<section id="interpreting-the-infant-mortality-slope-magnitude-vs-evidence" class="slide level2 center">
+<h2>Interpreting the infant-mortality slope: magnitude vs evidence</h2>
+<ul>
+<li class="fragment"><strong>Economic magnitude</strong> (the chapter’s example): going from $2,000 to $4,000 per person predicts 1.39 fewer deaths per 1,000 births, i.e.&nbsp;about 139 fewer infant deaths a year in a country with 100,000 births</li>
+<li class="fragment"><strong>Statistical evidence:</strong> with robust SEs we cannot distinguish that slope from zero (<span class="math inline">\(p = 0.19\)</span>)</li>
+<li class="fragment"><strong>Fit:</strong> spending explains only 14.5% of the variation; Mexico and Turkey’s high rates dominate the cloud</li>
+</ul>
+<p><span class="takeaway fragment">Economically large if true, statistically weak in this sample. Report both, and do not let a big number stand in for evidence.</span></p>
+<aside class="notes">
+<p>This is Key Concept 8.1 in action: economic and statistical significance are separate questions. The 139-deaths illustration is arithmetic on the point estimate (1.39 per 1,000 × 100,000 births / 1,000); it inherits the full uncertainty of the slope. A 95% robust CI from −1.74 to +0.36 per $1,000 is consistent with a sizeable reduction and with none at all.</p>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+</section>
+<section id="robustness-check-the-same-regressions-without-the-usa" class="slide level2 smaller center">
+<h2>Robustness check: the same regressions without the USA</h2>
+<table class="caption-top" style="width:100%;">
+<colgroup>
+<col style="width: 16%">
+<col style="width: 16%">
+<col style="width: 16%">
+<col style="width: 16%">
+<col style="width: 16%">
+<col style="width: 16%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Outcome</th>
+<th style="text-align: left;">Sample</th>
+<th style="text-align: right;">Slope per $1,000</th>
+<th style="text-align: right;">HC1 <span class="math inline">\(t\)</span></th>
+<th style="text-align: right;"><span class="math inline">\(p\)</span></th>
+<th style="text-align: right;"><span class="math inline">\(R^2\)</span></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Life expectancy</td>
+<td style="text-align: left;">all 34</td>
+<td style="text-align: right;">1.11</td>
+<td style="text-align: right;">2.40</td>
+<td style="text-align: right;">0.023</td>
+<td style="text-align: right;">0.320</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Life expectancy</td>
+<td style="text-align: left;">without USA (33)</td>
+<td style="text-align: right;"><span class="key">1.69</span></td>
+<td style="text-align: right;">5.60</td>
+<td style="text-align: right;">&lt;&nbsp;0.001</td>
+<td style="text-align: right;">0.507</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Infant mortality</td>
+<td style="text-align: left;">all 34</td>
+<td style="text-align: right;">−0.69</td>
+<td style="text-align: right;">−1.35</td>
+<td style="text-align: right;">0.188</td>
+<td style="text-align: right;">0.145</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Infant mortality</td>
+<td style="text-align: left;">without USA (33)</td>
+<td style="text-align: right;"><span class="key">−1.20</span></td>
+<td style="text-align: right;">−2.46</td>
+<td style="text-align: right;">0.019</td>
+<td style="text-align: right;">0.302</td>
+</tr>
+</tbody>
+</table>
+<p><span class="comment">Not in the chapter: the same <code>pf.feols</code> model with <code>vcov="HC1"</code> on 33 countries, mirroring the chapter’s own outlier check in 8.2.</span></p>
+<p><span class="takeaway fragment">One country flattens both slopes and hides the infant-mortality association. Dropping it is not automatically right, but you must know it matters.</span></p>
+<aside class="notes">
+<p>This applies the chapter’s 8.2 robustness check (exclude influential countries, refit) to the 8.1 regressions. Without the USA, the life-expectancy slope rises by half (1.11 → 1.69 years per $1,000) and its R² from 0.32 to 0.51; the infant-mortality slope grows by about 70% (−0.69 → −1.20) and becomes significant even with robust SEs (p = 0.019). Also note: without the USA the robust and classical SEs for the life-expectancy slope are almost equal (0.000301 vs 0.000299), confirming that the USA was what inflated the robust SE. Whether to drop the USA is a substantive question: it is a real country, not a data error. The honest move is to report both.</p>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+</section>
+<section id="code-the-usa-prediction-and-the-drop-one-check" class="slide level2 center">
+<h2>Code: the USA prediction and the drop-one check</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4" data-code-line-numbers="1-4|5-7|8-12"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href=""></a><span class="co"># continues from the previous block</span></span>
+<span id="cb4-2"><a href=""></a>resid <span class="op">=</span> data_health[<span class="st">"lifeexp"</span>] <span class="op">-</span> model_lifeexp.predict()       <span class="co"># actual minus fitted, by country</span></span>
+<span id="cb4-3"><a href=""></a><span class="bu">print</span>(data_health.assign(resid<span class="op">=</span>resid)</span>
+<span id="cb4-4"><a href=""></a>      .nsmallest(<span class="dv">3</span>, <span class="st">"resid"</span>)[[<span class="st">"code"</span>, <span class="st">"lifeexp"</span>, <span class="st">"resid"</span>]])     <span class="co"># USA has the largest shortfall</span></span>
+<span id="cb4-5"><a href=""></a>us <span class="op">=</span> data_health[data_health[<span class="st">"code"</span>] <span class="op">==</span> <span class="st">"USA"</span>]                   <span class="co"># the United States row</span></span>
+<span id="cb4-6"><a href=""></a><span class="bu">print</span>(model_lifeexp.predict(newdata<span class="op">=</span>us),                         <span class="co"># life expectancy at $7,990</span></span>
+<span id="cb4-7"><a href=""></a>      model_infmort.predict(newdata<span class="op">=</span>us))                         <span class="co"># infant mortality at $7,990</span></span>
+<span id="cb4-8"><a href=""></a>no_us <span class="op">=</span> data_health[data_health[<span class="st">"code"</span>] <span class="op">!=</span> <span class="st">"USA"</span>]                <span class="co"># not in the chapter: 33 countries</span></span>
+<span id="cb4-9"><a href=""></a><span class="cf">for</span> y <span class="kw">in</span> [<span class="st">"lifeexp"</span>, <span class="st">"infmort"</span>]:                                 <span class="co"># same model for both outcomes</span></span>
+<span id="cb4-10"><a href=""></a>    fit <span class="op">=</span> pf.feols(<span class="ss">f"</span><span class="sc">{</span>y<span class="sc">}</span><span class="ss"> ~ hlthpc"</span>, data<span class="op">=</span>no_us, vcov<span class="op">=</span><span class="st">"HC1"</span>)      <span class="co"># robust SEs, as before</span></span>
+<span id="cb4-11"><a href=""></a>    <span class="bu">print</span>(y, <span class="bu">round</span>(fit.coef()[<span class="st">"hlthpc"</span>] <span class="op">*</span> <span class="dv">1000</span>, <span class="dv">2</span>),              <span class="co"># slope per $1,000</span></span>
+<span id="cb4-12"><a href=""></a>          <span class="bu">round</span>(fit.tstat()[<span class="st">"hlthpc"</span>], <span class="dv">2</span>), <span class="bu">round</span>(fit._r2, <span class="dv">3</span>))    <span class="co"># robust t and R²</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><a href="https://colab.research.google.com/notebooks/empty.ipynb" class="colab-link" target="_blank" data-preview-link="false">↗ Try it in Colab</a></p>
+<aside class="notes">
+<p>The first half reproduces the chapter’s U.S. comparisons (predicted vs actual). The second half is the drop-one check shown on the previous slide. predict(newdata=…) evaluates the fitted line at new x values.</p>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+</section>
+<section id="why-8.1-is-an-association-not-the-effect-of-spending" class="slide level2 center">
+<h2>Why 8.1 is an association, not the effect of spending</h2>
+<div class="columns">
+<div class="column" style="width:50%;">
+<h3 id="what-the-regression-captures">What the regression captures</h3>
+<ul>
+<li>how life expectancy and infant mortality line up with spending across 34 countries in one year</li>
+</ul>
+</div><div class="column" style="width:50%;">
+<h3 id="what-it-cannot-separate">What it cannot separate</h3>
+<ul>
+<li><strong>income</strong>: rich countries spend more <em>and</em> have better nutrition, housing and education</li>
+<li><strong>how</strong> money is spent: prices, insurance coverage, administrative costs</li>
+<li>lifestyle, inequality, environment, reverse causation (sicker populations may spend more)</li>
+</ul>
 </div></div>
-<p><span class="takeaway fragment"><span class="math inline">\(R^2\)</span> jumps from <span class="math inline">\(\approx 0.60\)</span> to <span class="math inline">\(\approx 0.93\)</span>. Always find your influential points before trusting a slope.</span></p>
+<p><span class="takeaway fragment">1.11 years per $1,000 is a cross-country association. It is not what a country would gain by raising its health budget by $1,000.</span></p>
+<aside class="notes">
+<p>Standard caveats, stated in the chapter: correlation, not causation; the relationship may not be linear; the USA is an outlier; other factors matter. Add two more: (1) only male life expectancy is used; (2) 34 countries is a small sample, which is why a single country can change the inference. Case 8.2 will show that spending itself is largely explained by GDP, which is the confounder that most threatens a causal reading of 8.1.</p>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+</section></section>
+<section>
+<section id="case-82" class="title-slide slide level1 divider center" data-background-color="#7A209F">
+<h1>Case 8.2 · How does health spending rise with income?</h1>
+<p><span class="act">Cross-section · income elasticity · influential observations</span></p>
+<aside class="notes">
+<p>Case 8.2 flips the role of health spending: it is now the outcome, and GDP per capita is the regressor. Tools: a marginal propensity in dollar units, an elasticity evaluated at the means, classical vs robust SEs, and a robustness check that drops two influential countries.</p>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
 </section>
-<section id="case-3-how-much-does-a-stock-move-with-the-market" class="slide level2 center">
-<h2>Case 3 — how much does a stock move with the market?</h2>
-<p>The Capital Asset Pricing Model regresses a stock’s excess return on the market’s excess return:</p>
-<p><span class="math display">\[R_A - R_F = \alpha + \beta\,(R_M - R_F) + u\]</span></p>
-<p><span class="comment"><span class="math inline">\(\beta\)</span> is <strong>systematic risk</strong>: <span class="math inline">\(\beta&gt;1\)</span> amplifies the market, <span class="math inline">\(\beta&lt;1\)</span> is defensive. Pure theory says the intercept <span class="math inline">\(\alpha = 0\)</span>. 354 monthly returns on Coca-Cola, 1983–2012.</span></p>
+<section id="the-question-is-health-care-a-necessity-a-luxury-or-in-between" class="slide level2 smaller center">
+<h2>The question: is health care a necessity, a luxury, or in between?</h2>
+<p><span class="math display">\[\text{hlthpc}_i = \beta_1 + \beta_2\,\text{gdppc}_i + u_i\]</span></p>
+<table class="caption-top">
+<colgroup>
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Variable</th>
+<th style="text-align: right;">Mean</th>
+<th style="text-align: right;">Std. dev.</th>
+<th style="text-align: right;">Min</th>
+<th style="text-align: right;">Max</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;"><code>gdppc</code> (US$)</td>
+<td style="text-align: right;">33,054.0</td>
+<td style="text-align: right;">12,916.8</td>
+<td style="text-align: right;">13,806 (Mexico)</td>
+<td style="text-align: right;"><span class="key">82,901 (Luxembourg)</span></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>hlthpc</code> (US$)</td>
+<td style="text-align: right;">3,255.6</td>
+<td style="text-align: right;">1,493.7</td>
+<td style="text-align: right;">923 (Mexico)</td>
+<td style="text-align: right;"><span class="key">7,990 (USA)</span></td>
+</tr>
+</tbody>
+</table>
+<p><span class="comment">N = 34 · OECD, 2009 · Table 8.2 of the chapter</span></p>
+<p><span class="takeaway fragment">Both variables are in dollars per person, so the slope is a <strong>marginal propensity</strong>: how many cents of health spending go with one more dollar of GDP.</span></p>
+<aside class="notes">
+<p>Same 34 countries as 8.1. Luxembourg’s GDP per capita is 3.9 standard deviations above the mean; the USA’s health spending is 3.2 standard deviations above the mean. One country is extreme in x, the other in y — keep that distinction in mind for the robustness check.</p>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
 </section>
-<section id="step-3-estimate-coca-colas-beta" class="slide level2 center">
-<h2>Step 3 — estimate Coca-Cola’s beta</h2>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3" data-code-line-numbers="1|2-3|5-6|8|9"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href=""></a><span class="op">!</span>pip install <span class="op">-</span>q pyfixest                       <span class="co"># pyfixest isn't preinstalled in Colab</span></span>
-<span id="cb3-2"><a href=""></a><span class="im">import</span> pandas <span class="im">as</span> pd                             <span class="co"># tabular data</span></span>
-<span id="cb3-3"><a href=""></a><span class="im">import</span> pyfixest <span class="im">as</span> pf                           <span class="co"># OLS estimation</span></span>
-<span id="cb3-4"><a href=""></a></span>
-<span id="cb3-5"><a href=""></a>url <span class="op">=</span> <span class="st">"https://raw.githubusercontent.com/quarcs-lab/data-open/master/AED/AED_CAPM.DTA"</span></span>
-<span id="cb3-6"><a href=""></a>capm <span class="op">=</span> pd.read_stata(url)                       <span class="co"># 354 monthly excess returns, 1983–2012</span></span>
-<span id="cb3-7"><a href=""></a></span>
-<span id="cb3-8"><a href=""></a>fit <span class="op">=</span> pf.feols(<span class="st">"rko_rf ~ rm_rf"</span>, data<span class="op">=</span>capm)     <span class="co"># Coca-Cola excess return on market excess return</span></span>
-<span id="cb3-9"><a href=""></a>fit.summary()                                   <span class="co"># α (intercept), β (slope = systematic risk), R²</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<section id="code-health-spending-on-gdp-classical-and-robust-ses" class="slide level2 center">
+<h2>Code: health spending on GDP, classical and robust SEs</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5" data-code-line-numbers="1-4|5-6|7-9|10-12"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href=""></a><span class="op">!</span>pip install <span class="op">-</span>q pyfixest                      <span class="co"># pyfixest is not preinstalled in Colab</span></span>
+<span id="cb5-2"><a href=""></a><span class="im">import</span> pandas <span class="im">as</span> pd                           <span class="co"># tabular data</span></span>
+<span id="cb5-3"><a href=""></a><span class="im">import</span> pyfixest <span class="im">as</span> pf                         <span class="co"># OLS with robust SEs</span></span>
+<span id="cb5-4"><a href=""></a>url <span class="op">=</span> <span class="st">"https://raw.githubusercontent.com/quarcs-lab/data-open/master/AED/AED_HEALTH2009.DTA"</span></span>
+<span id="cb5-5"><a href=""></a>data_health <span class="op">=</span> pd.read_stata(url)              <span class="co"># 34 OECD countries in 2009</span></span>
+<span id="cb5-6"><a href=""></a><span class="bu">print</span>(data_health[[<span class="st">"gdppc"</span>, <span class="st">"hlthpc"</span>]].describe().T.<span class="bu">round</span>(<span class="dv">1</span>))   <span class="co"># Table 8.2</span></span>
+<span id="cb5-7"><a href=""></a>model_hlthpc <span class="op">=</span> pf.feols(<span class="st">"hlthpc ~ gdppc"</span>, data<span class="op">=</span>data_health)                     <span class="co"># classical SEs</span></span>
+<span id="cb5-8"><a href=""></a>model_hlthpc_robust <span class="op">=</span> pf.feols(<span class="st">"hlthpc ~ gdppc"</span>, data<span class="op">=</span>data_health, vcov<span class="op">=</span><span class="st">"HC1"</span>)  <span class="co"># robust SEs</span></span>
+<span id="cb5-9"><a href=""></a>model_hlthpc_robust.summary()                 <span class="co"># same slope, HC1 inference</span></span>
+<span id="cb5-10"><a href=""></a>slope <span class="op">=</span> model_hlthpc.coef()[<span class="st">"gdppc"</span>]          <span class="co"># dollars of health spending per dollar of GDP</span></span>
+<span id="cb5-11"><a href=""></a>x_bar, y_bar <span class="op">=</span> data_health[<span class="st">"gdppc"</span>].mean(), data_health[<span class="st">"hlthpc"</span>].mean()   <span class="co"># sample means</span></span>
+<span id="cb5-12"><a href=""></a><span class="bu">print</span>(<span class="st">"elasticity at the means:"</span>, slope <span class="op">*</span> x_bar <span class="op">/</span> y_bar)                  <span class="co"># slope × x̄ / ȳ</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p><a href="https://colab.research.google.com/notebooks/empty.ipynb" class="colab-link" target="_blank" data-preview-link="false">↗ Try it in Colab</a></p>
+<aside class="notes">
+<p>Self-contained. The last line computes the income elasticity at the sample means, exactly as the chapter does in its interpretation: slope × mean(x) / mean(y).</p>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
 </section>
-<section id="coca-cola-is-defensive-and-the-market-explains-only-a-fifth-of-it" class="slide level2 center">
-<h2>Coca-Cola is defensive — and the market explains only a fifth of it</h2>
-
-<img data-src="figures/fig_x_06.png" class="r-stretch quarto-figure-center"><p class="caption">Monthly excess returns with the fitted CAPM line. The slope is well under 45°.</p><p><span class="takeaway fragment"><span class="math inline">\(\hat\beta = 0.61\)</span> (less volatile than the market), <span class="math inline">\(R^2 \approx 0.20\)</span>. A significant <span class="math inline">\(\hat\alpha \approx 0.68\%\)</span>/month is the “alpha puzzle.”</span></p>
+<section id="output-90-per-1000-of-gdp-with-a-robust-se-2.3-larger" class="slide level2 smaller center">
+<h2>Output: $90 per $1,000 of GDP, with a robust SE 2.3× larger</h2>
+<table class="caption-top">
+<colgroup>
+<col style="width: 12%">
+<col style="width: 12%">
+<col style="width: 12%">
+<col style="width: 12%">
+<col style="width: 12%">
+<col style="width: 12%">
+<col style="width: 12%">
+<col style="width: 12%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Variable</th>
+<th style="text-align: right;">Coef.</th>
+<th style="text-align: right;">SE (iid)</th>
+<th style="text-align: right;"><span class="math inline">\(t\)</span></th>
+<th style="text-align: right;"><span class="math inline">\(p\)</span></th>
+<th style="text-align: right;">SE (HC1)</th>
+<th style="text-align: right;"><span class="math inline">\(t\)</span></th>
+<th style="text-align: right;"><span class="math inline">\(p\)</span></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;"><code>Intercept</code></td>
+<td style="text-align: right;">284.9</td>
+<td style="text-align: right;">455.6</td>
+<td style="text-align: right;">0.63</td>
+<td style="text-align: right;">0.536</td>
+<td style="text-align: right;">862.4</td>
+<td style="text-align: right;">0.33</td>
+<td style="text-align: right;">0.743</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>gdppc</code></td>
+<td style="text-align: right;"><span class="key">0.0899</span></td>
+<td style="text-align: right;">0.0129</td>
+<td style="text-align: right;">6.99</td>
+<td style="text-align: right;">&lt;&nbsp;0.001</td>
+<td style="text-align: right;">0.0292</td>
+<td style="text-align: right;">3.08</td>
+<td style="text-align: right;">0.004</td>
+</tr>
+</tbody>
+</table>
+<p><span class="comment">N = 34 · <span class="math inline">\(R^2 = 0.604\)</span> · 95% CI for the slope: [0.0637,&nbsp;0.1161] (iid), [0.0304,&nbsp;0.1494] (HC1)</span></p>
+<ul>
+<li class="fragment"><strong>Units:</strong> each extra $1,000 of GDP per person goes with <strong>$90 more</strong> health spending per person, about 9 cents per dollar</li>
+<li class="fragment"><strong>Robust inference:</strong> <span class="math inline">\(t\)</span> falls from 6.99 to 3.08, still significant (<span class="math inline">\(p = 0.004\)</span>), but the robust CI runs from $30 to $149 per $1,000</li>
+<li class="fragment"><strong>Fit:</strong> GDP per capita accounts for 60% of the cross-country variation in health spending</li>
+</ul>
+<p><span class="takeaway fragment">The positive slope survives robust SEs, but the classical output overstates the precision by more than half.</span></p>
+<aside class="notes">
+<p>The HC1 SE (0.0292) is 2.27 times the classical SE (0.0129), the biggest gap in the chapter. The reason is the HC1 formula again: the USA and Luxembourg sit far from mean GDP and have the two largest residuals (+$3,643 and −$2,950), so they dominate the robust variance. The chapter’s statement “robust t ≈ 3.1, p ≈ 0.004” matches.</p>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
 </section>
-<section id="case-4-does-okuns-law-hold-for-the-u.s." class="slide level2 center">
-<h2>Case 4 — does Okun’s Law hold for the U.S.?</h2>
-<p>Annual U.S. data, 1961–2019. Regress real GDP growth on the change in the unemployment rate:</p>
-<p><span class="math display">\[\text{growth} = \beta_1 + \beta_2 \cdot \text{URATEchange} + u\]</span></p>
-<p><span class="comment">One country over 59 years — a <strong>time-series</strong> regression. Okun’s 1962 benchmark is <span class="math inline">\(\beta_2 = -2.0\)</span>.</span></p>
+<section id="method-review-from-a-dollar-slope-to-an-income-elasticity" class="slide level2 smaller center">
+<h2>Method review: from a dollar slope to an income elasticity</h2>
+<p><span class="math display">\[\eta = \frac{\partial\, \text{hlthpc}}{\partial\, \text{gdppc}}\cdot\frac{\overline{\text{gdppc}}}{\overline{\text{hlthpc}}} = 0.0899 \times \frac{33{,}054}{3{,}256} \approx 0.91\]</span></p>
+<ul>
+<li class="fragment">At the sample means, a 1% higher GDP per capita goes with about <strong>0.91% higher</strong> health spending</li>
+<li class="fragment"><strong>Normal good</strong> means <span class="math inline">\(\eta &gt; 0\)</span>: spending rises with income. Any positive slope already says that</li>
+<li class="fragment"><strong>Necessity</strong> (<span class="math inline">\(0 &lt; \eta &lt; 1\)</span>) vs <strong>luxury</strong> (<span class="math inline">\(\eta &gt; 1\)</span>): spending rises less, or more, than proportionally</li>
+<li class="fragment">In a linear model the elasticity <strong>changes along the line</strong>; at the means is one point of evaluation</li>
+</ul>
+<p><span class="takeaway fragment"><span class="math inline">\(\eta \approx 0.91\)</span> says health spending rises roughly in proportion to income in this sample, close to the border between necessity and luxury.</span></p>
+<aside class="notes">
+<p>Correction to the chapter: the chapter’s Key Concept 8.3 says “an elasticity near 1.0 suggests health care is a ‘normal good’”. A normal good only requires η &gt; 0; η near 1 means unit elasticity (a constant budget share). Because the linear model has a non-zero intercept, the elasticity varies with the evaluation point; a log-log model (Chapter 9) would estimate a constant elasticity directly. And as the next slides show, the same calculation on the 32-country subset gives η ≈ 1.29, i.e.&nbsp;on the luxury side.</p>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
 </section>
-<section id="step-4-fit-okuns-law-and-compare-to-2.0" class="slide level2 center">
-<h2>Step 4 — fit Okun’s Law and compare to −2.0</h2>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4" data-code-line-numbers="1|2-3|5-6|8|9"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href=""></a><span class="op">!</span>pip install <span class="op">-</span>q pyfixest                       <span class="co"># pyfixest isn't preinstalled in Colab</span></span>
-<span id="cb4-2"><a href=""></a><span class="im">import</span> pandas <span class="im">as</span> pd                             <span class="co"># tabular data</span></span>
-<span id="cb4-3"><a href=""></a><span class="im">import</span> pyfixest <span class="im">as</span> pf                           <span class="co"># OLS estimation</span></span>
-<span id="cb4-4"><a href=""></a></span>
-<span id="cb4-5"><a href=""></a>url <span class="op">=</span> <span class="st">"https://raw.githubusercontent.com/quarcs-lab/data-open/master/AED/AED_GDPUNEMPLOY.DTA"</span></span>
-<span id="cb4-6"><a href=""></a>gdp <span class="op">=</span> pd.read_stata(url)                        <span class="co"># 59 years of U.S. data, 1961–2019</span></span>
-<span id="cb4-7"><a href=""></a></span>
-<span id="cb4-8"><a href=""></a>fit <span class="op">=</span> pf.feols(<span class="st">"rgdpgrowth ~ uratechange"</span>, data<span class="op">=</span>gdp)  <span class="co"># GDP growth on the change in unemployment</span></span>
-<span id="cb4-9"><a href=""></a>fit.summary()                                   <span class="co"># slope ≈ −1.59 vs Okun's −2.0; R² ≈ 0.59</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<section id="code-drop-the-usa-and-luxembourg-then-each-one-alone" class="slide level2 center">
+<h2>Code: drop the USA and Luxembourg, then each one alone</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6" data-code-line-numbers="1-3|4-6|7-10|11-14"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href=""></a><span class="co"># continues from the previous block</span></span>
+<span id="cb6-2"><a href=""></a>data_health_subset <span class="op">=</span> data_health[(data_health[<span class="st">"code"</span>] <span class="op">!=</span> <span class="st">"LUX"</span>) <span class="op">&amp;</span></span>
+<span id="cb6-3"><a href=""></a>                                 (data_health[<span class="st">"code"</span>] <span class="op">!=</span> <span class="st">"USA"</span>)]    <span class="co"># 32 countries</span></span>
+<span id="cb6-4"><a href=""></a>model_hlthpc_subset <span class="op">=</span> pf.feols(<span class="st">"hlthpc ~ gdppc"</span>, data<span class="op">=</span>data_health_subset)        <span class="co"># classical SEs</span></span>
+<span id="cb6-5"><a href=""></a>model_hlthpc_subset_robust <span class="op">=</span> pf.feols(<span class="st">"hlthpc ~ gdppc"</span>, data<span class="op">=</span>data_health_subset,</span>
+<span id="cb6-6"><a href=""></a>                                      vcov<span class="op">=</span><span class="st">"HC1"</span>)                     <span class="co"># robust SEs</span></span>
+<span id="cb6-7"><a href=""></a>model_hlthpc_subset_robust.summary()                                  <span class="co"># slope, HC1 SE, R²</span></span>
+<span id="cb6-8"><a href=""></a>sub <span class="op">=</span> data_health_subset                                              <span class="co"># shorter name</span></span>
+<span id="cb6-9"><a href=""></a>b_sub <span class="op">=</span> model_hlthpc_subset.coef()[<span class="st">"gdppc"</span>]                           <span class="co"># subset slope</span></span>
+<span id="cb6-10"><a href=""></a><span class="bu">print</span>(<span class="st">"elasticity:"</span>, b_sub <span class="op">*</span> sub[<span class="st">"gdppc"</span>].mean() <span class="op">/</span> sub[<span class="st">"hlthpc"</span>].mean())   <span class="co"># at subset means</span></span>
+<span id="cb6-11"><a href=""></a><span class="cf">for</span> code <span class="kw">in</span> [<span class="st">"USA"</span>, <span class="st">"LUX"</span>]:                                           <span class="co"># not in chapter: drop one</span></span>
+<span id="cb6-12"><a href=""></a>    fit <span class="op">=</span> pf.feols(<span class="st">"hlthpc ~ gdppc"</span>, data<span class="op">=</span>data_health[data_health[<span class="st">"code"</span>] <span class="op">!=</span> code], vcov<span class="op">=</span><span class="st">"HC1"</span>)</span>
+<span id="cb6-13"><a href=""></a>    <span class="bu">print</span>(<span class="st">"without"</span>, code, <span class="bu">round</span>(fit.coef()[<span class="st">"gdppc"</span>], <span class="dv">4</span>),</span>
+<span id="cb6-14"><a href=""></a>          <span class="bu">round</span>(fit.tstat()[<span class="st">"gdppc"</span>], <span class="dv">2</span>), <span class="bu">round</span>(fit._r2, <span class="dv">3</span>))          <span class="co"># slope, robust t, R²</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p><a href="https://colab.research.google.com/notebooks/empty.ipynb" class="colab-link" target="_blank" data-preview-link="false">↗ Try it in Colab</a></p>
+<aside class="notes">
+<p>The first part is the chapter’s robustness check (exclude both countries). The loop at the end is a simple extension, labelled as not in the chapter: dropping each country separately shows which one does what.</p>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
 </section>
-<section id="rising-unemployment-falling-growth-close-to-okun-not-identical" class="slide level2 center">
-<h2>Rising unemployment, falling growth — close to Okun, not identical</h2>
+<section id="output-without-two-countries-the-slope-rises-41-and-r2-reaches-0.93" class="slide level2 smaller center">
+<h2>Output: without two countries the slope rises 41% and <span class="math inline">\(R^2\)</span> reaches 0.93</h2>
+<table class="caption-top">
+<colgroup>
+<col style="width: 12%">
+<col style="width: 12%">
+<col style="width: 12%">
+<col style="width: 12%">
+<col style="width: 12%">
+<col style="width: 12%">
+<col style="width: 12%">
+<col style="width: 12%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Variable</th>
+<th style="text-align: right;">Coef.</th>
+<th style="text-align: right;">SE (iid)</th>
+<th style="text-align: right;"><span class="math inline">\(t\)</span></th>
+<th style="text-align: right;"><span class="math inline">\(p\)</span></th>
+<th style="text-align: right;">SE (HC1)</th>
+<th style="text-align: right;"><span class="math inline">\(t\)</span></th>
+<th style="text-align: right;"><span class="math inline">\(p\)</span></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;"><code>Intercept</code></td>
+<td style="text-align: right;">−883.3</td>
+<td style="text-align: right;">208.9</td>
+<td style="text-align: right;">−4.23</td>
+<td style="text-align: right;">&lt;&nbsp;0.001</td>
+<td style="text-align: right;">213.4</td>
+<td style="text-align: right;">−4.14</td>
+<td style="text-align: right;">&lt;&nbsp;0.001</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>gdppc</code></td>
+<td style="text-align: right;"><span class="key">0.1267</span></td>
+<td style="text-align: right;">0.0064</td>
+<td style="text-align: right;">19.69</td>
+<td style="text-align: right;">&lt;&nbsp;0.001</td>
+<td style="text-align: right;">0.0076</td>
+<td style="text-align: right;">16.65</td>
+<td style="text-align: right;">&lt;&nbsp;0.001</td>
+</tr>
+</tbody>
+</table>
+<p><span class="comment">N = 32 (USA and Luxembourg excluded) · <span class="math inline">\(R^2 = 0.928\)</span> · 95% CI for the slope: [0.1136,&nbsp;0.1399] (iid), [0.1112,&nbsp;0.1423] (HC1)</span></p>
+<ul>
+<li class="fragment">Slope: $90 → <strong>$127</strong> per $1,000 of GDP (+41%)</li>
+<li class="fragment"><span class="math inline">\(R^2\)</span>: 0.604 → <strong>0.928</strong>; the robust SE is now only 1.2× the classical SE</li>
+<li class="fragment">Elasticity at the subset means: <span class="math inline">\(0.1267 \times 31{,}117 / 3{,}060 \approx\)</span> <strong>1.29</strong></li>
+</ul>
+<p><span class="takeaway fragment">Remove two countries and the slope, the fit, the SE gap <em>and</em> the economic story (necessity → luxury) all change.</span></p>
+<aside class="notes">
+<p>The chapter reports the slope (≈0.13) and R² (≈0.93) changes. Note the side effect it does not mention: with a negative intercept, the elasticity at the means rises above 1, so the “health care is neither a luxury nor a necessity” conclusion is not robust to the same outlier check the chapter itself runs. The chapter’s comparison table rounds R² to 0.60 and 0.93 and reports “+55%”; from the exact values the increase is 53.6%.</p>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+</section>
+<section id="two-lines-two-stories" class="slide level2 center">
+<h2>Two lines, two stories</h2>
 
-<img data-src="figures/fig_x_07.png" class="r-stretch quarto-figure-center"><p class="caption">Each dot is one year; recession years sit far up-left. The line slopes down at −1.59.</p><p><span class="takeaway fragment"><span class="math inline">\(\hat\beta_2 = -1.59\)</span>, <span class="math inline">\(R^2 = 0.59\)</span>. We reject <span class="math inline">\(\beta_2 = -2.0\)</span> (<span class="math inline">\(t \approx 2.4\)</span>), yet it’s “close enough” for policy.</span></p>
+<img data-src="figures/fig_hgdp_two_lines.png" class="r-stretch quarto-figure-center"><p class="caption">Health spending against GDP per capita. Purple: OLS on all 34 countries. Yellow dashed: OLS on the 32 countries without the USA and Luxembourg.</p><p><span class="takeaway fragment">The USA sits far <em>above</em> any line; Luxembourg sits far to the <em>right</em> and below. Together they tilt the full-sample line and loosen the fit.</span></p>
+<aside class="notes">
+<p>Read the picture before the numbers. Without the two pink points, the 32 countries lie close to a steep line. With them, OLS compromises: Luxembourg (extreme GDP, modest spending) pulls the right end of the line down; the USA (very high spending for its GDP) sits so far above the line that it adds a huge squared residual. Note: the chapter’s own Figure 8.2 Panel B labels its axes “in $1000s”, but the plotted values are in dollars; this figure uses the correct units.</p>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+</section>
+<section id="anatomy-of-influence-drop-each-country-on-its-own" class="slide level2 smaller center">
+<h2>Anatomy of influence: drop each country on its own</h2>
+<table class="caption-top" style="width:100%;">
+<colgroup>
+<col style="width: 16%">
+<col style="width: 16%">
+<col style="width: 16%">
+<col style="width: 16%">
+<col style="width: 16%">
+<col style="width: 16%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Sample</th>
+<th style="text-align: right;">N</th>
+<th style="text-align: right;">Slope</th>
+<th style="text-align: right;">HC1 <span class="math inline">\(t\)</span></th>
+<th style="text-align: right;"><span class="math inline">\(R^2\)</span></th>
+<th style="text-align: left;">What changes</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">All countries</td>
+<td style="text-align: right;">34</td>
+<td style="text-align: right;">0.0899</td>
+<td style="text-align: right;">3.08</td>
+<td style="text-align: right;">0.604</td>
+<td style="text-align: left;">—</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Without USA</td>
+<td style="text-align: right;">33</td>
+<td style="text-align: right;">0.0814</td>
+<td style="text-align: right;">3.37</td>
+<td style="text-align: right;"><span class="key">0.701</span></td>
+<td style="text-align: left;">fit improves, slope barely moves</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Without Luxembourg</td>
+<td style="text-align: right;">33</td>
+<td style="text-align: right;"><span class="key">0.1413</span></td>
+<td style="text-align: right;">8.33</td>
+<td style="text-align: right;">0.826</td>
+<td style="text-align: left;">slope jumps by 57%</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Without both</td>
+<td style="text-align: right;">32</td>
+<td style="text-align: right;">0.1267</td>
+<td style="text-align: right;">16.65</td>
+<td style="text-align: right;">0.928</td>
+<td style="text-align: left;">both effects</td>
+</tr>
+</tbody>
+</table>
+<p><span class="comment">Not in the chapter: the same HC1 regression on each subsample.</span></p>
+<p><span class="takeaway fragment">The USA is an <strong>outlier</strong> in <span class="math inline">\(y\)</span>: a huge residual that mostly adds noise. Luxembourg is a <strong>high-leverage</strong> point in <span class="math inline">\(x\)</span> that drags the slope down.</span></p>
+<aside class="notes">
+<p>This decomposes the chapter’s single robustness check. The USA has GDP close to the upper-middle of the sample ($45,192) but spending $3,643 above the line, so dropping it mainly raises R² (0.60 → 0.70); its effect on the slope is small (0.090 → 0.081). Luxembourg’s GDP ($82,901) is far beyond every other country, so it has high leverage; its spending is $2,950 below the line, and dropping it raises the slope from 0.090 to 0.141. The distinction between outliers (unusual y given x) and leverage (unusual x) is the key idea behind influence diagnostics.</p>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+</section>
+<section id="reading-the-robustness-check-correctly" class="slide level2 center">
+<h2>Reading the robustness check correctly</h2>
+<ul>
+<li class="fragment"><span class="math inline">\(R^2 = 0.60\)</span> is <strong>not</strong> a “weak fit” for a cross-section of 34 countries; GDP explains most of the variation</li>
+<li class="fragment">Removing the two worst-fitting points <strong>mechanically</strong> raises <span class="math inline">\(R^2\)</span>: you deleted the largest residuals</li>
+<li class="fragment">The subset line describes “the other 32 countries”, not a “true” relationship that the outliers were hiding</li>
+<li class="fragment">Legitimate reasons to exclude: a data error, or a unit from a different population (a tiny financial centre whose GDP counts cross-border commuters’ output)</li>
+<li class="fragment">The honest report shows <strong>both</strong> fits and says why they differ</li>
+</ul>
+<p><span class="takeaway fragment">Outlier checks are for <em>understanding</em> a slope, not for choosing the sample that gives the nicest <span class="math inline">\(R^2\)</span>.</span></p>
+<aside class="notes">
+<p>Corrections relative to the chapter’s comparison table and text: the chapter labels the full-sample R² of 0.60 a “weak fit” and the subset an “excellent fit”, and calls the subset relationship the “true” one. Selecting a sample after seeing the residuals biases R² upward by construction. Luxembourg’s GDP per capita is inflated by cross-border workers who produce there but live (and use health care) elsewhere — a substantive reason to treat it differently. The USA’s high spending is a real feature of its health system, not a measurement error, so excluding it changes the question being answered.</p>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+</section>
+<section id="caveats-for-8.2" class="slide level2 center">
+<h2>Caveats for 8.2</h2>
+<ul>
+<li class="fragment"><strong>Association, not causation</strong>: GDP and health spending both reflect institutions, demographics and prices</li>
+<li class="fragment"><strong>One year (2009)</strong>: a recession year; GDP fell more than health budgets in many countries</li>
+<li class="fragment"><strong>Functional form</strong>: a straight line in dollars imposes a varying elasticity; logs (Chapter 9) are the standard alternative</li>
+<li class="fragment"><strong>Small N</strong>: with 34 observations, two countries move every statistic, as we just saw</li>
+</ul>
+<p><span class="takeaway fragment">Health spending rises with income, at roughly 9–13 cents per dollar depending on two countries. Everything finer than that needs more data or more structure.</span></p>
+<aside class="notes">
+<p>The range “9–13 cents per dollar” reports both estimates rather than choosing one. A log-log specification, where the slope is the elasticity directly, is the natural next step and is exactly what Chapter 9 introduces.</p>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+</section></section>
+<section>
+<section id="case-83" class="title-slide slide level1 divider center" data-background-color="#7A209F">
+<h1>Case 8.3 · How risky is Coca-Cola stock?</h1>
+<p><span class="act">Financial time series · CAPM beta · testing <span class="math inline">\(\beta = 1\)</span> and <span class="math inline">\(\alpha = 0\)</span></span></p>
+<aside class="notes">
+<p>Case 8.3: the Capital Asset Pricing Model. Tools: a regression derived from economic theory, a slope with a clear benchmark (β = 1), an intercept with a theoretical prediction (α = 0), and R² read as a decomposition of risk.</p>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+</section>
+<section id="the-theory-only-market-risk-earns-a-premium" class="slide level2 center">
+<h2>The theory: only market risk earns a premium</h2>
+<p><span class="math display">\[\underbrace{R_A - R_F}_{\text{asset excess return}} = \alpha_A + \beta_A\,\underbrace{(R_M - R_F)}_{\text{market excess return}} + u\]</span></p>
+<ul>
+<li class="fragment"><span class="math inline">\(\beta_A\)</span> = <strong>systematic risk</strong>: how much the asset moves with the market. The market itself has <span class="math inline">\(\beta = 1\)</span></li>
+<li class="fragment"><span class="math inline">\(\beta &gt; 1\)</span>: <strong>aggressive</strong>, amplifies market swings; <span class="math inline">\(\beta &lt; 1\)</span>: <strong>defensive</strong>, dampens them</li>
+<li class="fragment"><span class="math inline">\(\alpha_A\)</span> = return beyond what <span class="math inline">\(\beta\)</span> justifies. The CAPM predicts <strong><span class="math inline">\(\alpha = 0\)</span></strong></li>
+<li class="fragment"><span class="math inline">\(u\)</span> = firm-specific (<strong>idiosyncratic</strong>) shocks, which diversification removes</li>
+</ul>
+<p><span class="takeaway fragment">The CAPM hands us two hypotheses that are more interesting than “the slope is zero”: <span class="math inline">\(\beta = 1\)</span> and <span class="math inline">\(\alpha = 0\)</span>.</span></p>
+<aside class="notes">
+<p>Correction: the chapter labels β &gt; 1 a “growth stock” and β &lt; 1 a “value stock”. Growth and value are a different classification, based on valuation ratios such as book-to-market; a growth stock can have a low beta and a value stock a high one. The standard beta labels are aggressive (β &gt; 1) and defensive (β &lt; 1). The empirical CAPM regression is called the “market model” or “characteristic line” in finance.</p>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+</section>
+<section id="the-data-354-months-of-excess-returns-may-1983-october-2012" class="slide level2 smaller center">
+<h2>The data: 354 months of excess returns, May 1983 – October 2012</h2>
+<table class="caption-top">
+<colgroup>
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Variable (monthly)</th>
+<th style="text-align: left;">Meaning</th>
+<th style="text-align: right;">Mean</th>
+<th style="text-align: right;">Std. dev.</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;"><code>rm_rf</code></td>
+<td style="text-align: left;">market excess return, <span class="math inline">\(R_M - R_F\)</span></td>
+<td style="text-align: right;">0.555%</td>
+<td style="text-align: right;">4.556%</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>rko_rf</code></td>
+<td style="text-align: left;">Coca-Cola excess return, <span class="math inline">\(R_A - R_F\)</span></td>
+<td style="text-align: right;">1.018%</td>
+<td style="text-align: right;"><span class="key">6.160%</span></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>rf</code></td>
+<td style="text-align: left;">one-month Treasury bill rate</td>
+<td style="text-align: right;">0.350%</td>
+<td style="text-align: right;">0.221%</td>
+</tr>
+</tbody>
+</table>
+<p><span class="comment">N = 354 · returns are stored as decimals (0.05 = 5%) · the file also holds Target (<code>rtgt_rf</code>) and Walmart (<code>rwmt_rf</code>)</span></p>
+<p><span class="takeaway fragment">Coca-Cola is <em>more</em> volatile than the market (6.2% vs 4.6% a month), yet we will find it is <em>less</em> risky in the CAPM sense.</span></p>
+<aside class="notes">
+<p>Variables are in decimals, so the regression slope is unit-free and the intercept is in decimal return per month. The worst market month in the sample is October 1987 (−23.1% excess return; Coca-Cola −15.3%). The apparent paradox on this slide is resolved by the CAPM: total volatility includes idiosyncratic risk, which diversifies away; beta measures only the part that co-moves with the market.</p>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+</section>
+<section id="coca-cola-and-the-market-move-together-but-not-one-for-one" class="slide level2 center">
+<h2>Coca-Cola and the market move together, but not one-for-one</h2>
+
+<img data-src="figures/fig_capm_ts.png" class="r-stretch quarto-figure-center"><p class="caption">Monthly excess returns, December 2006 – October 2012 (the last 20% of the sample, as in the chapter’s Figure 8.3 Panel A).</p><p><span class="takeaway fragment">The two lines share the big swings (2008–09), but Coca-Cola also moves on its own news. The regression measures how much of each.</span></p>
+<aside class="notes">
+<p>This reproduces the chapter’s Figure 8.3 Panel A (the last fifth of the sample, for readability). Note the financial-crisis months: the market fell sharply in late 2008 and Coca-Cola fell with it, but by less in most months. The chapter’s remark that “individual stock returns fluctuate more than the overall market” is true for total volatility; the beta question is about co-movement.</p>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+</section>
+<section id="code-estimate-the-capm-for-coca-cola" class="slide level2 center">
+<h2>Code: estimate the CAPM for Coca-Cola</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7" data-code-line-numbers="1-4|5-7|8-10"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href=""></a><span class="op">!</span>pip install <span class="op">-</span>q pyfixest                      <span class="co"># pyfixest is not preinstalled in Colab</span></span>
+<span id="cb7-2"><a href=""></a><span class="im">import</span> pandas <span class="im">as</span> pd                           <span class="co"># tabular data</span></span>
+<span id="cb7-3"><a href=""></a><span class="im">import</span> pyfixest <span class="im">as</span> pf                         <span class="co"># OLS with robust SEs</span></span>
+<span id="cb7-4"><a href=""></a><span class="im">from</span> scipy <span class="im">import</span> stats                       <span class="co"># t distribution for custom tests</span></span>
+<span id="cb7-5"><a href=""></a>url <span class="op">=</span> <span class="st">"https://raw.githubusercontent.com/quarcs-lab/data-open/master/AED/AED_CAPM.DTA"</span></span>
+<span id="cb7-6"><a href=""></a>data_capm <span class="op">=</span> pd.read_stata(url)                <span class="co"># 354 monthly returns, May 1983 – Oct 2012</span></span>
+<span id="cb7-7"><a href=""></a><span class="bu">print</span>(data_capm[[<span class="st">"rm_rf"</span>, <span class="st">"rko_rf"</span>, <span class="st">"rf"</span>]].describe().T.<span class="bu">round</span>(<span class="dv">4</span>))   <span class="co"># Table 8.3 (excerpt)</span></span>
+<span id="cb7-8"><a href=""></a>model_capm <span class="op">=</span> pf.feols(<span class="st">"rko_rf ~ rm_rf"</span>, data<span class="op">=</span>data_capm)                     <span class="co"># classical SEs</span></span>
+<span id="cb7-9"><a href=""></a>model_capm_robust <span class="op">=</span> pf.feols(<span class="st">"rko_rf ~ rm_rf"</span>, data<span class="op">=</span>data_capm, vcov<span class="op">=</span><span class="st">"HC1"</span>)  <span class="co"># robust SEs</span></span>
+<span id="cb7-10"><a href=""></a>model_capm_robust.summary()                   <span class="co"># alpha (Intercept), beta (rm_rf), R²</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><a href="https://colab.research.google.com/notebooks/empty.ipynb" class="colab-link" target="_blank" data-preview-link="false">↗ Try it in Colab</a></p>
+<aside class="notes">
+<p>Self-contained. The formula reads “Coca-Cola excess return on market excess return”: the intercept is alpha and the slope is beta. scipy.stats is imported here for the custom hypothesis tests two slides ahead.</p>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+</section>
+<section id="output-hatbeta-0.61-and-a-positive-hatalpha" class="slide level2 smaller center">
+<h2>Output: <span class="math inline">\(\hat\beta = 0.61\)</span>, and a positive <span class="math inline">\(\hat\alpha\)</span></h2>
+<table class="caption-top">
+<colgroup>
+<col style="width: 12%">
+<col style="width: 12%">
+<col style="width: 12%">
+<col style="width: 12%">
+<col style="width: 12%">
+<col style="width: 12%">
+<col style="width: 12%">
+<col style="width: 12%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Variable</th>
+<th style="text-align: right;">Coef.</th>
+<th style="text-align: right;">SE (iid)</th>
+<th style="text-align: right;"><span class="math inline">\(t\)</span></th>
+<th style="text-align: right;"><span class="math inline">\(p\)</span></th>
+<th style="text-align: right;">SE (HC1)</th>
+<th style="text-align: right;"><span class="math inline">\(t\)</span></th>
+<th style="text-align: right;"><span class="math inline">\(p\)</span></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;"><code>Intercept</code> (<span class="math inline">\(\alpha\)</span>)</td>
+<td style="text-align: right;">0.00681</td>
+<td style="text-align: right;">0.00295</td>
+<td style="text-align: right;">2.31</td>
+<td style="text-align: right;">0.022</td>
+<td style="text-align: right;">0.00290</td>
+<td style="text-align: right;">2.35</td>
+<td style="text-align: right;">0.019</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>rm_rf</code> (<span class="math inline">\(\beta\)</span>)</td>
+<td style="text-align: right;"><span class="key">0.6063</span></td>
+<td style="text-align: right;">0.0644</td>
+<td style="text-align: right;">9.41</td>
+<td style="text-align: right;">&lt;&nbsp;0.001</td>
+<td style="text-align: right;">0.0770</td>
+<td style="text-align: right;">7.88</td>
+<td style="text-align: right;">&lt;&nbsp;0.001</td>
+</tr>
+</tbody>
+</table>
+<p><span class="comment">N = 354 · <span class="math inline">\(R^2 = 0.201\)</span> · 95% CI for <span class="math inline">\(\beta\)</span>: [0.4796,&nbsp;0.7330] (iid), [0.4549,&nbsp;0.7577] (HC1)</span></p>
+<ul>
+<li class="fragment"><strong>Beta 0.61:</strong> a month when the market’s excess return is 1 percentage point higher goes with a Coca-Cola excess return about 0.61 points higher</li>
+<li class="fragment"><strong>Alpha 0.0068:</strong> about 0.68% per month that the market exposure does not explain</li>
+<li class="fragment">The robust SE for <span class="math inline">\(\beta\)</span> is 1.2× the classical SE; both reject <span class="math inline">\(\beta = 0\)</span> overwhelmingly</li>
+</ul>
+<p><span class="takeaway fragment">Coca-Cola co-moves with the market at about 61 cents on the market’s dollar. Both CIs lie entirely below 1.</span></p>
+<aside class="notes">
+<p>The chapter reports beta 0.61 with t ≈ 9.4 (classical), and alpha 0.0068. With robust SEs, t = 7.88 for beta and 2.35 for alpha. Testing β = 0 is not very interesting here — every stock co-moves with the market to some extent. The interesting test is β = 1, which comes next.</p>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+</section>
+<section id="reading-beta-three-equivalent-ways" class="slide level2 center">
+<h2>Reading beta: three equivalent ways</h2>
+<ul>
+<li class="fragment"><strong>Scenario:</strong> market excess return +10% → predicted Coca-Cola excess return <span class="math inline">\(0.0068 + 0.606 \times 0.10 \approx\)</span> <strong>+6.7%</strong>; market −10% → <strong>−5.4%</strong></li>
+<li class="fragment"><strong>Correlation × relative volatility:</strong> <span class="math inline">\(\hat\beta = r_{xy}\,\dfrac{s_y}{s_x} = 0.448 \times 1.352 = 0.606\)</span></li>
+<li class="fragment"><strong>Risk split:</strong> <span class="math inline">\(R^2 = 0.201\)</span>, so the market accounts for 20% of the variance of Coca-Cola’s excess return; 80% is idiosyncratic</li>
+</ul>
+<p><span class="takeaway fragment">Coca-Cola is more volatile than the market, but most of that volatility is its own. The part that moves with the market is only 61% as large as the market’s.</span></p>
+<aside class="notes">
+<p>The decomposition β = r × (s_y / s_x) resolves the paradox from the data slide: Coca-Cola’s SD is 1.35× the market’s, but its correlation with the market is only 0.45, so beta is 0.61. The chapter’s statement “when the market rises 10%, Coca-Cola typically rises only 6.1%” drops alpha and refers to excess returns; including the intercept, the predictions are +6.7% and −5.4%. R² in a CAPM regression is the share of systematic risk in total risk (Key Concept 8.6).</p>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+</section>
+<section id="code-test-beta-1-and-annualize-alpha" class="slide level2 center">
+<h2>Code: test <span class="math inline">\(\beta = 1\)</span> and annualize alpha</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb8" data-code-line-numbers="1-3|4-6|7-9"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href=""></a><span class="co"># continues from the previous block</span></span>
+<span id="cb8-2"><a href=""></a>b <span class="op">=</span> model_capm_robust.coef()[<span class="st">"rm_rf"</span>]             <span class="co"># estimated beta</span></span>
+<span id="cb8-3"><a href=""></a>se <span class="op">=</span> model_capm_robust.se()[<span class="st">"rm_rf"</span>]              <span class="co"># robust standard error of beta</span></span>
+<span id="cb8-4"><a href=""></a>t_beta1 <span class="op">=</span> (b <span class="op">-</span> <span class="dv">1</span>) <span class="op">/</span> se                            <span class="co"># H0: beta = 1 (as risky as the market)</span></span>
+<span id="cb8-5"><a href=""></a>df <span class="op">=</span> model_capm._N <span class="op">-</span> <span class="dv">2</span>                            <span class="co"># degrees of freedom, n − 2</span></span>
+<span id="cb8-6"><a href=""></a><span class="bu">print</span>(<span class="st">"t ="</span>, t_beta1, <span class="st">" p ="</span>, <span class="dv">2</span> <span class="op">*</span> stats.t.sf(<span class="bu">abs</span>(t_beta1), df))   <span class="co"># two-sided p-value</span></span>
+<span id="cb8-7"><a href=""></a>alpha <span class="op">=</span> model_capm.coef()[<span class="st">"Intercept"</span>]            <span class="co"># monthly alpha, in decimals</span></span>
+<span id="cb8-8"><a href=""></a><span class="bu">print</span>(<span class="st">"alpha x 12 ="</span>, <span class="dv">12</span> <span class="op">*</span> alpha)                 <span class="co"># simple annualization (the chapter's 8.2%)</span></span>
+<span id="cb8-9"><a href=""></a><span class="bu">print</span>(<span class="st">"compounded ="</span>, (<span class="dv">1</span> <span class="op">+</span> alpha) <span class="op">**</span> <span class="dv">12</span> <span class="op">-</span> <span class="dv">1</span>)      <span class="co"># compounding twelve monthly returns</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><a href="https://colab.research.google.com/notebooks/empty.ipynb" class="colab-link" target="_blank" data-preview-link="false">↗ Try it in Colab</a></p>
+<aside class="notes">
+<p>The t-test for any hypothesised value, as in the method-review slide: subtract the null value, divide by the SE, compare with t(n − 2). The chapter tests hypotheses “beyond β = 0” for Okun’s Law; this is the same idea applied to the CAPM benchmark β = 1.</p>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+</section>
+<section id="output-beta-is-significantly-below-1-alpha-is-about-8-a-year" class="slide level2 smaller center">
+<h2>Output: beta is significantly below 1; alpha is about 8% a year</h2>
+<table class="caption-top" style="width:100%;">
+<colgroup>
+<col style="width: 16%">
+<col style="width: 16%">
+<col style="width: 16%">
+<col style="width: 16%">
+<col style="width: 16%">
+<col style="width: 16%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Hypothesis</th>
+<th style="text-align: right;">Estimate</th>
+<th style="text-align: left;">SE type</th>
+<th style="text-align: right;"><span class="math inline">\(t\)</span></th>
+<th style="text-align: right;"><span class="math inline">\(p\)</span></th>
+<th style="text-align: left;">Verdict at 5%</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;"><span class="math inline">\(H_0: \beta = 1\)</span></td>
+<td style="text-align: right;">0.6063</td>
+<td style="text-align: left;">classical</td>
+<td style="text-align: right;">−6.11</td>
+<td style="text-align: right;">&lt;&nbsp;0.001</td>
+<td style="text-align: left;">reject</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><span class="math inline">\(H_0: \beta = 1\)</span></td>
+<td style="text-align: right;">0.6063</td>
+<td style="text-align: left;">HC1</td>
+<td style="text-align: right;"><span class="key">−5.11</span></td>
+<td style="text-align: right;">&lt;&nbsp;0.001</td>
+<td style="text-align: left;">reject: defensive</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><span class="math inline">\(H_0: \alpha = 0\)</span></td>
+<td style="text-align: right;">0.00681</td>
+<td style="text-align: left;">classical</td>
+<td style="text-align: right;">2.31</td>
+<td style="text-align: right;">0.022</td>
+<td style="text-align: left;">reject</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><span class="math inline">\(H_0: \alpha = 0\)</span></td>
+<td style="text-align: right;">0.00681</td>
+<td style="text-align: left;">HC1</td>
+<td style="text-align: right;"><span class="key">2.35</span></td>
+<td style="text-align: right;">0.019</td>
+<td style="text-align: left;">reject</td>
+</tr>
+</tbody>
+</table>
+<p><span class="comment">Alpha annualized: 12 × 0.68% ≈ 8.2% (simple) or 8.5% (compounded)</span></p>
+<p><span class="takeaway fragment">The data say clearly that Coca-Cola is a <strong>defensive</strong> stock. They also say it earned more than its beta justified, which the CAPM says should not happen.</span></p>
+<aside class="notes">
+<p>β = 1 is rejected decisively with either SE (robust t = −5.11). α = 0 is rejected at 5% but not at 1% (p ≈ 0.02). The chapter’s “8.2% annually” is the simple ×12 annualization; compounding gives 8.5%. Either way it is economically large, which is why the chapter calls it the “alpha puzzle”.</p>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+</section>
+<section id="of-coca-colas-month-to-month-risk-is-its-own" class="slide level2 center">
+<h2>80% of Coca-Cola’s month-to-month risk is its own</h2>
+
+<img data-src="figures/fig_capm_scatter.png" class="r-stretch quarto-figure-center"><p class="caption">Coca-Cola’s excess return against the market’s, 354 months. Purple: OLS line (β = 0.61). Yellow dashed: what β = 1 and α = 0 would look like.</p><p><span class="takeaway fragment">The fitted line is flatter than the β = 1 reference and crosses zero slightly above the origin. The wide vertical scatter is idiosyncratic risk, about 80% of the variance.</span></p>
+<aside class="notes">
+<p>Vertical dispersion around the line is the firm-specific component (product news, earnings surprises, management changes). Horizontal dispersion is the market’s own variation. A portfolio of many stocks averages away the vertical scatter but not the slope — which is why, in the CAPM, only beta is priced. The October 1987 crash is the leftmost point: the market’s excess return was −23.1% and Coca-Cola’s −15.3%, roughly what the line predicts.</p>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+</section>
+<section id="why-is-alpha-positive-three-readings" class="slide level2 center">
+<h2>Why is alpha positive? Three readings</h2>
+<ul>
+<li class="fragment"><strong>The model is incomplete</strong>: other priced risk factors (size, value, momentum) are missing, so “alpha” is compensation for risks the CAPM ignores</li>
+<li class="fragment"><strong>Genuine outperformance</strong>: Coca-Cola beat its risk-adjusted benchmark over 1983–2012</li>
+<li class="fragment"><strong>Selection after the fact</strong>: Coca-Cola is famous <em>because</em> it did well. Studying a known winner over its winning period guarantees a positive alpha</li>
+</ul>
+<p><span class="takeaway fragment">One significant alpha in one hand-picked stock is weak evidence against the CAPM. Tests of the CAPM use many assets at once.</span></p>
+<aside class="notes">
+<p>These are the chapter’s three interpretations, sharpened. The third deserves emphasis: if you search many stocks and report the one with the largest alpha, a p-value of 0.02 is unremarkable. Formal CAPM tests use portfolios or many assets jointly (e.g.&nbsp;the Gibbons–Ross–Shanken test); the dataset’s smb and hml variables are the Fama–French size and value factors that a multi-factor model would add (Chapter 10 and later).</p>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+</section>
+<section id="code-the-same-regression-for-other-stocks-and-other-periods" class="slide level2 center">
+<h2>Code: the same regression for other stocks and other periods</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb9" data-code-line-numbers="1-4|5-8"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href=""></a><span class="co"># continues from the previous block — not in the chapter: simple comparisons, same estimator</span></span>
+<span id="cb9-2"><a href=""></a><span class="cf">for</span> y <span class="kw">in</span> [<span class="st">"rko_rf"</span>, <span class="st">"rwmt_rf"</span>, <span class="st">"rtgt_rf"</span>]:                    <span class="co"># Coca-Cola, Walmart, Target</span></span>
+<span id="cb9-3"><a href=""></a>    fit <span class="op">=</span> pf.feols(<span class="ss">f"</span><span class="sc">{</span>y<span class="sc">}</span><span class="ss"> ~ rm_rf"</span>, data<span class="op">=</span>data_capm, vcov<span class="op">=</span><span class="st">"HC1"</span>)    <span class="co"># CAPM for each stock</span></span>
+<span id="cb9-4"><a href=""></a>    <span class="bu">print</span>(y, fit.coef().<span class="bu">round</span>(<span class="dv">4</span>).to_dict(), <span class="bu">round</span>(fit._r2, <span class="dv">3</span>))    <span class="co"># alpha, beta, R²</span></span>
+<span id="cb9-5"><a href=""></a>half <span class="op">=</span> <span class="bu">len</span>(data_capm) <span class="op">//</span> <span class="dv">2</span>                                    <span class="co"># split the 354 months in two</span></span>
+<span id="cb9-6"><a href=""></a><span class="cf">for</span> name, part <span class="kw">in</span> [(<span class="st">"1983–1998"</span>, data_capm.iloc[:half]), (<span class="st">"1998–2012"</span>, data_capm.iloc[half:])]:</span>
+<span id="cb9-7"><a href=""></a>    fit <span class="op">=</span> pf.feols(<span class="st">"rko_rf ~ rm_rf"</span>, data<span class="op">=</span>part, vcov<span class="op">=</span><span class="st">"HC1"</span>)       <span class="co"># Coca-Cola, each half</span></span>
+<span id="cb9-8"><a href=""></a>    <span class="bu">print</span>(name, fit.coef().<span class="bu">round</span>(<span class="dv">4</span>).to_dict(), fit.pvalue().<span class="bu">round</span>(<span class="dv">3</span>).to_dict())</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><a href="https://colab.research.google.com/notebooks/empty.ipynb" class="colab-link" target="_blank" data-preview-link="false">↗ Try it in Colab</a></p>
+<aside class="notes">
+<p>Two simple contrasts using the chapter’s own data and estimator. The first runs the CAPM for the other two stocks in the file (the chapter’s Exercise 3 uses hypothetical betas for them). The second splits the sample into two halves of 177 months each to check the chapter’s caveat that beta may vary over time.</p>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+</section>
+<section id="output-betas-differ-across-stocks-and-drift-over-time" class="slide level2 smaller center">
+<h2>Output: betas differ across stocks and drift over time</h2>
+<table class="caption-top" style="width:100%;">
+<colgroup>
+<col style="width: 14%">
+<col style="width: 14%">
+<col style="width: 14%">
+<col style="width: 14%">
+<col style="width: 14%">
+<col style="width: 14%">
+<col style="width: 14%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Regression (HC1 SEs)</th>
+<th style="text-align: right;">Months</th>
+<th style="text-align: right;"><span class="math inline">\(\hat\alpha\)</span></th>
+<th style="text-align: right;"><span class="math inline">\(p(\alpha)\)</span></th>
+<th style="text-align: right;"><span class="math inline">\(\hat\beta\)</span></th>
+<th style="text-align: right;">SE(<span class="math inline">\(\beta\)</span>)</th>
+<th style="text-align: right;"><span class="math inline">\(R^2\)</span></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Coca-Cola, full sample</td>
+<td style="text-align: right;">354</td>
+<td style="text-align: right;">0.0068</td>
+<td style="text-align: right;">0.019</td>
+<td style="text-align: right;"><span class="key">0.606</span></td>
+<td style="text-align: right;">0.077</td>
+<td style="text-align: right;">0.201</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Walmart, full sample</td>
+<td style="text-align: right;">354</td>
+<td style="text-align: right;">0.0080</td>
+<td style="text-align: right;">0.017</td>
+<td style="text-align: right;">0.748</td>
+<td style="text-align: right;">0.091</td>
+<td style="text-align: right;">0.236</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Target, full sample</td>
+<td style="text-align: right;">354</td>
+<td style="text-align: right;">0.0044</td>
+<td style="text-align: right;">0.240</td>
+<td style="text-align: right;"><span class="key">1.067</span></td>
+<td style="text-align: right;">0.116</td>
+<td style="text-align: right;">0.333</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Coca-Cola, 1983–1998</td>
+<td style="text-align: right;">177</td>
+<td style="text-align: right;">0.0112</td>
+<td style="text-align: right;">0.002</td>
+<td style="text-align: right;">0.844</td>
+<td style="text-align: right;">0.095</td>
+<td style="text-align: right;">0.344</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Coca-Cola, 1998–2012</td>
+<td style="text-align: right;">177</td>
+<td style="text-align: right;">0.0011</td>
+<td style="text-align: right;">0.800</td>
+<td style="text-align: right;"><span class="key">0.437</span></td>
+<td style="text-align: right;">0.113</td>
+<td style="text-align: right;">0.117</td>
+</tr>
+</tbody>
+</table>
+<p><span class="comment">Not in the chapter: the same HC1 CAPM regression on other columns of <code>AED_CAPM.DTA</code> and on two halves of the sample (May 1983 – Jan 1998, Feb 1998 – Oct 2012).</span></p>
+<p><span class="takeaway fragment">Target is about as risky as the market; the two staples are defensive. Coca-Cola’s beta halved over time, and its alpha came from the first half.</span></p>
+<aside class="notes">
+<p>Three lessons. (1) Beta is stock-specific: the consumer staples (Coca-Cola, Walmart) are below 1, the discount retailer Target is near 1 (its CI includes 1). (2) Beta is not constant: 0.84 in 1983–1998 vs 0.44 in 1998–2012, which supports the chapter’s caveat about time-varying beta. (3) The alpha puzzle is concentrated in the first period — consistent with the “selection after the fact” reading, since Coca-Cola’s famous run was in the 1980s and 1990s.</p>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+</section>
+<section id="caveats-for-8.3" class="slide level2 smaller center">
+<h2>Caveats for 8.3</h2>
+<ul>
+<li class="fragment"><strong>Standard errors</strong>: for monthly returns HC1 is reasonable: the residuals show almost no autocorrelation (lag-1 correlation −0.04)</li>
+<li class="fragment">The CAPM itself does not assume returns are independent over time; the <strong>classical OLS standard errors</strong> do. That is a statement about inference, not about the model</li>
+<li class="fragment"><strong>Time-varying beta</strong>: one beta for 30 years averages over very different periods (0.84 vs 0.44)</li>
+<li class="fragment"><strong>Fat tails</strong>: crash months such as October 1987 carry a lot of weight in a least-squares fit</li>
+<li class="fragment"><strong>Market proxy</strong>: a value-weighted index stands in for “the market portfolio” the theory refers to</li>
+</ul>
+<p><span class="takeaway fragment"><span class="math inline">\(\hat\beta = 0.61\)</span> is a well-measured <strong>average</strong> sensitivity over 1983–2012. Use it to describe the past, not as a constant of nature.</span></p>
+<aside class="notes">
+<p>Correction to the chapter’s “Time Series Considerations”: the chapter says “CAPM assumes returns are independent over time”. The CAPM is a one-period equilibrium model; independence over time is an assumption behind the classical OLS standard errors. Here the lag-1 autocorrelation of the residuals is −0.04, so autocorrelation-robust (HAC) SEs would barely change the inference. Rolling or split-sample betas (as on the previous slide) are the simplest way to check stability.</p>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+</section></section>
+<section>
+<section id="case-84" class="title-slide slide level1 divider center" data-background-color="#7A209F">
+<h1>Case 8.4 · Does Okun’s Law hold for the U.S.?</h1>
+<p><span class="act">Macro time series · testing <span class="math inline">\(\beta_2 = -2\)</span> · structural breaks</span></p>
+<aside class="notes">
+<p>Case 8.4: Okun’s Law with annual U.S. data. Tools: interpreting slope and intercept in percentage points, testing a non-zero null hypothesis, and using a plot of actual vs predicted values over time to detect a breakdown of the relationship.</p>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+</section>
+<section id="the-question-how-much-growth-do-we-lose-when-unemployment-rises" class="slide level2 smaller center">
+<h2>The question: how much growth do we lose when unemployment rises?</h2>
+<p><span class="math display">\[\text{rgdpgrowth}_t = \beta_1 + \beta_2\,\text{uratechange}_t + u_t\]</span></p>
+<table class="caption-top" style="width:100%;">
+<colgroup>
+<col style="width: 16%">
+<col style="width: 16%">
+<col style="width: 16%">
+<col style="width: 16%">
+<col style="width: 16%">
+<col style="width: 16%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Variable</th>
+<th style="text-align: left;">Meaning</th>
+<th style="text-align: right;">Mean</th>
+<th style="text-align: right;">Std. dev.</th>
+<th style="text-align: right;">Min</th>
+<th style="text-align: right;">Max</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;"><code>rgdpgrowth</code></td>
+<td style="text-align: left;">real GDP growth (%)</td>
+<td style="text-align: right;">3.06</td>
+<td style="text-align: right;">2.04</td>
+<td style="text-align: right;">−2.54 (2009)</td>
+<td style="text-align: right;">7.24 (1984)</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>uratechange</code></td>
+<td style="text-align: left;">change in unemployment rate (pp)</td>
+<td style="text-align: right;">−0.03</td>
+<td style="text-align: right;">0.99</td>
+<td style="text-align: right;">−2.14 (1984)</td>
+<td style="text-align: right;"><span class="key">3.53 (2009)</span></td>
+</tr>
+</tbody>
+</table>
+<p><span class="comment">N = 59 · annual U.S. data, 1961–2019 · Table 8.4 of the chapter</span></p>
+<p><span class="takeaway fragment">The benchmark is <strong><span class="math inline">\(\beta_2 = -2\)</span></strong>: each extra percentage point of unemployment goes with about 2 percentage points less growth.</span></p>
+<aside class="notes">
+<p>Variables: growth is a percent change; the regressor is a change in a rate, measured in percentage points (pp). The −2 benchmark is the modern rule of thumb. Arthur Okun’s own 1962 estimates implied a larger ratio, closer to 3 (he wrote that each extra point of unemployment above 4% was associated with about a 3% shortfall in output); the chapter calls −2 “Okun’s original” figure, which is not accurate. The dataset label describes the unemployment rate as the civilian rate for ages 15–64; the chapter text says “16 and older”. Neither changes the analysis, but cite the source correctly.</p>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+</section>
+<section id="code-estimate-okuns-law-with-classical-and-robust-ses" class="slide level2 center">
+<h2>Code: estimate Okun’s Law with classical and robust SEs</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb10" data-code-line-numbers="1-3|4-6|7-9"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href=""></a><span class="op">!</span>pip install <span class="op">-</span>q pyfixest                      <span class="co"># pyfixest is not preinstalled in Colab</span></span>
+<span id="cb10-2"><a href=""></a><span class="im">import</span> pandas <span class="im">as</span> pd                           <span class="co"># tabular data</span></span>
+<span id="cb10-3"><a href=""></a><span class="im">import</span> pyfixest <span class="im">as</span> pf                         <span class="co"># OLS with robust SEs</span></span>
+<span id="cb10-4"><a href=""></a>url <span class="op">=</span> <span class="st">"https://raw.githubusercontent.com/quarcs-lab/data-open/master/AED/AED_GDPUNEMPLOY.DTA"</span></span>
+<span id="cb10-5"><a href=""></a>data_gdp <span class="op">=</span> pd.read_stata(url)                 <span class="co"># annual U.S. data, 1961–2019</span></span>
+<span id="cb10-6"><a href=""></a><span class="bu">print</span>(data_gdp[[<span class="st">"rgdpgrowth"</span>, <span class="st">"uratechange"</span>]].describe().T.<span class="bu">round</span>(<span class="dv">2</span>))   <span class="co"># Table 8.4</span></span>
+<span id="cb10-7"><a href=""></a>model_okun <span class="op">=</span> pf.feols(<span class="st">"rgdpgrowth ~ uratechange"</span>, data<span class="op">=</span>data_gdp)                     <span class="co"># classical</span></span>
+<span id="cb10-8"><a href=""></a>model_okun_robust <span class="op">=</span> pf.feols(<span class="st">"rgdpgrowth ~ uratechange"</span>, data<span class="op">=</span>data_gdp, vcov<span class="op">=</span><span class="st">"HC1"</span>)  <span class="co"># robust</span></span>
+<span id="cb10-9"><a href=""></a>model_okun_robust.summary()                   <span class="co"># intercept, slope, HC1 SE, R²</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><a href="https://colab.research.google.com/notebooks/empty.ipynb" class="colab-link" target="_blank" data-preview-link="false">↗ Try it in Colab</a></p>
+<aside class="notes">
+<p>Self-contained. As in the other cases, the chapter fits the model with classical SEs and then with HC1. We will discuss on the caveats slide why neither is the textbook choice for a time series.</p>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+</section>
+<section id="output-slope-1.59-and-r2-0.59" class="slide level2 smaller center">
+<h2>Output: slope −1.59, and <span class="math inline">\(R^2 = 0.59\)</span></h2>
+<table class="caption-top">
+<colgroup>
+<col style="width: 12%">
+<col style="width: 12%">
+<col style="width: 12%">
+<col style="width: 12%">
+<col style="width: 12%">
+<col style="width: 12%">
+<col style="width: 12%">
+<col style="width: 12%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Variable</th>
+<th style="text-align: right;">Coef.</th>
+<th style="text-align: right;">SE (iid)</th>
+<th style="text-align: right;"><span class="math inline">\(t\)</span></th>
+<th style="text-align: right;"><span class="math inline">\(p\)</span></th>
+<th style="text-align: right;">SE (HC1)</th>
+<th style="text-align: right;"><span class="math inline">\(t\)</span></th>
+<th style="text-align: right;"><span class="math inline">\(p\)</span></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;"><code>Intercept</code></td>
+<td style="text-align: right;">3.008</td>
+<td style="text-align: right;">0.171</td>
+<td style="text-align: right;">17.59</td>
+<td style="text-align: right;">&lt;&nbsp;0.001</td>
+<td style="text-align: right;">0.170</td>
+<td style="text-align: right;">17.69</td>
+<td style="text-align: right;">&lt;&nbsp;0.001</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>uratechange</code></td>
+<td style="text-align: right;"><span class="key">−1.589</span></td>
+<td style="text-align: right;">0.175</td>
+<td style="text-align: right;">−9.09</td>
+<td style="text-align: right;">&lt;&nbsp;0.001</td>
+<td style="text-align: right;">0.163</td>
+<td style="text-align: right;">−9.75</td>
+<td style="text-align: right;">&lt;&nbsp;0.001</td>
+</tr>
+</tbody>
+</table>
+<p><span class="comment">N = 59 · <span class="math inline">\(R^2 = 0.592\)</span> · 95% CI for the slope: [−1.939,&nbsp;−1.239] (iid), [−1.915,&nbsp;−1.263] (HC1)</span></p>
+<ul>
+<li class="fragment"><strong>Slope:</strong> a year in which unemployment rises by 1 percentage point has growth about <strong>1.59 percentage points lower</strong></li>
+<li class="fragment"><strong>Intercept 3.0:</strong> predicted growth in a year when unemployment is unchanged, roughly the economy’s trend growth</li>
+<li class="fragment"><strong>HC1 SE is slightly smaller</strong> than the classical SE (0.93×): robust is not always bigger</li>
+</ul>
+<p><span class="takeaway fragment">A strong, tight association: unemployment changes alone account for 59% of the year-to-year variation in growth.</span></p>
+<aside class="notes">
+<p>Unlike the cross-sections, here the HC1 SE is a little smaller than the classical one: the largest residuals are not concentrated at extreme values of the regressor, so the HC1 formula gives them less weight. Both reject β₂ = 0 overwhelmingly; the economically interesting test is against −2. The correlation between the two series is −0.77.</p>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+</section>
+<section id="reading-the-coefficients-in-percentage-points" class="slide level2 center">
+<h2>Reading the coefficients in percentage points</h2>
+<ul>
+<li class="fragment"><strong>Unemployment 5% → 6%</strong> (+1 pp): predicted growth falls from 3.0% to <span class="math inline">\(3.008 - 1.589 \approx\)</span> <strong>1.4%</strong></li>
+<li class="fragment"><strong>Break-even:</strong> unemployment is predicted to stay flat only when growth is about <strong>3.0%</strong></li>
+<li class="fragment"><strong>Zero growth</strong> goes with a predicted rise in unemployment of <span class="math inline">\(3.008 / 1.589 \approx\)</span> <strong>1.9 pp</strong></li>
+<li class="fragment">Percent vs percentage point: growth is a <em>percent</em> change; the regressor is a change in a <em>rate</em>, so its unit is the <em>percentage point</em></li>
+</ul>
+<p><span class="takeaway fragment">Okun’s Law is a statement about percentage points. “Unemployment up 1%” would mean from 5% to 5.05%, a completely different claim.</span></p>
+<aside class="notes">
+<p>The chapter’s example: “If unemployment rises from 5% to 6% (+1 point), GDP growth falls from 3% to 1.41%.” The 3% is the intercept (growth with unchanged unemployment), and 3.008 − 1.589 = 1.42 from the exact values. The break-even reading of the intercept is the classic macro interpretation: the economy needs to grow at about its trend rate just to keep unemployment constant.</p>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+</section>
+<section id="code-test-the-2-benchmark-and-inspect-the-residuals" class="slide level2 center">
+<h2>Code: test the −2 benchmark and inspect the residuals</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb11" data-code-line-numbers="1-5|6-7|8-11"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href=""></a><span class="co"># continues from the previous block</span></span>
+<span id="cb11-2"><a href=""></a><span class="im">from</span> scipy <span class="im">import</span> stats                                   <span class="co"># t distribution</span></span>
+<span id="cb11-3"><a href=""></a>b <span class="op">=</span> model_okun.coef()[<span class="st">"uratechange"</span>]                      <span class="co"># slope estimate</span></span>
+<span id="cb11-4"><a href=""></a>se <span class="op">=</span> model_okun.se()[<span class="st">"uratechange"</span>]                       <span class="co"># classical SE, as in the chapter</span></span>
+<span id="cb11-5"><a href=""></a>t_okun <span class="op">=</span> (b <span class="op">-</span> (<span class="op">-</span><span class="fl">2.0</span>)) <span class="op">/</span> se                                <span class="co"># H0: beta2 = -2</span></span>
+<span id="cb11-6"><a href=""></a><span class="bu">print</span>(<span class="st">"t ="</span>, t_okun, <span class="st">" p ="</span>, <span class="dv">2</span> <span class="op">*</span> stats.t.sf(<span class="bu">abs</span>(t_okun), model_okun._N <span class="op">-</span> <span class="dv">2</span>))</span>
+<span id="cb11-7"><a href=""></a>pred <span class="op">=</span> model_okun.predict()                               <span class="co"># fitted growth, year by year</span></span>
+<span id="cb11-8"><a href=""></a>resid <span class="op">=</span> data_gdp[<span class="st">"rgdpgrowth"</span>] <span class="op">-</span> pred                     <span class="co"># actual minus predicted</span></span>
+<span id="cb11-9"><a href=""></a>late <span class="op">=</span> (data_gdp[<span class="st">"year"</span>] <span class="op">&gt;=</span> <span class="dv">2010</span>).values                  <span class="co"># the 2010s</span></span>
+<span id="cb11-10"><a href=""></a><span class="bu">print</span>(<span class="st">"2010s below prediction:"</span>, (resid[late] <span class="op">&lt;</span> <span class="dv">0</span>).<span class="bu">sum</span>(), <span class="st">"of"</span>, late.<span class="bu">sum</span>())</span>
+<span id="cb11-11"><a href=""></a><span class="bu">print</span>(<span class="st">"mean actual vs predicted:"</span>, data_gdp[<span class="st">"rgdpgrowth"</span>][late].mean(), pred[late].mean())</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><a href="https://colab.research.google.com/notebooks/empty.ipynb" class="colab-link" target="_blank" data-preview-link="false">↗ Try it in Colab</a></p>
+<aside class="notes">
+<p>The test subtracts the hypothesised value −2 from the estimate and divides by its SE. The residual lines reproduce the chapter’s claims about the 2010s (actual growth below predicted in 9 of 10 years; predicted around 4% vs actual 2–2.5%). Swap model_okun for model_okun_robust in line 3 to get the HC1 version of the test.</p>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+</section>
+<section id="output-2-is-rejected-at-5-though-the-estimate-is-not-far-from-it" class="slide level2 smaller center">
+<h2>Output: −2 is rejected at 5%, though the estimate is not far from it</h2>
+<table class="caption-top" style="width:100%;">
+<colgroup>
+<col style="width: 16%">
+<col style="width: 16%">
+<col style="width: 16%">
+<col style="width: 16%">
+<col style="width: 16%">
+<col style="width: 16%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Test of <span class="math inline">\(H_0: \beta_2 = -2\)</span></th>
+<th style="text-align: right;">Estimate</th>
+<th style="text-align: right;">SE</th>
+<th style="text-align: right;"><span class="math inline">\(t\)</span></th>
+<th style="text-align: right;"><span class="math inline">\(p\)</span></th>
+<th style="text-align: left;">95% CI</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Classical SEs</td>
+<td style="text-align: right;">−1.589</td>
+<td style="text-align: right;">0.175</td>
+<td style="text-align: right;"><span class="key">2.35</span></td>
+<td style="text-align: right;">0.022</td>
+<td style="text-align: left;">[−1.939,&nbsp;−1.239]</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">HC1 SEs</td>
+<td style="text-align: right;">−1.589</td>
+<td style="text-align: right;">0.163</td>
+<td style="text-align: right;"><span class="key">2.52</span></td>
+<td style="text-align: right;">0.014</td>
+<td style="text-align: left;">[−1.915,&nbsp;−1.263]</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li class="fragment">Both CIs <strong>exclude −2</strong>, but only just: −2 lies 0.06–0.09 below their lower ends</li>
+<li class="fragment">At the 1% level we would <strong>not</strong> reject −2 (<span class="math inline">\(p &gt; 0.01\)</span> either way)</li>
+<li class="fragment">Economically, −1.59 vs −2 is a difference of 0.4 points of growth per point of unemployment</li>
+</ul>
+<p><span class="takeaway fragment">Statistically different from −2 at 5%, economically close. The U.S. relationship in 1961–2019 is somewhat weaker than the rule of thumb.</span></p>
+<aside class="notes">
+<p>The chapter reports t ≈ 2.4 and the CI [−1.94, −1.24], both from the classical SEs. With HC1 the conclusion is the same. A good example of separating statistical from economic significance: a policymaker using −2 instead of −1.59 would misjudge a 1-point unemployment rise by 0.4 points of growth.</p>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+</section>
+<section id="every-year-of-negative-growth-had-rising-unemployment" class="slide level2 center">
+<h2>Every year of negative growth had rising unemployment</h2>
+
+<img data-src="figures/fig_okun_scatter.png" class="r-stretch quarto-figure-center"><p class="caption">GDP growth against the change in unemployment, one point per year. Purple: OLS line (−1.59). Yellow dashed: a line with slope −2 drawn through the sample means.</p><p><span class="takeaway fragment">Recessions sit in the <strong>lower right</strong>: unemployment up, growth down. All 7 years with negative growth (1974, 1975, 1980, 1982, 1991, 2008, 2009) had unemployment rising.</span></p>
+<aside class="notes">
+<p>Correction: the chapter says recession years appear “in the upper-left quadrant”. With the change in unemployment on the horizontal axis and growth on the vertical axis, recessions (Δu &gt; 0, growth &lt; 0) are in the lower right. 2009 is the extreme point (unemployment +3.5 pp, growth −2.5%), and it sits almost exactly on the OLS line (predicted −2.6%). 1975 is far above the line: unemployment rose 2.9 pp but growth was only slightly negative.</p>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+</section>
+<section id="actual-vs-predicted-the-line-works-until-the-2010s" class="slide level2 center">
+<h2>Actual vs predicted: the line works until the 2010s</h2>
+
+<img data-src="figures/fig_okun_ts.png" class="r-stretch quarto-figure-center"><p class="caption">Actual real GDP growth and the growth predicted from unemployment changes, 1961–2019. Shaded: the gap in 2010–2019.</p><p><span class="takeaway fragment">From 2010 to 2019 actual growth fell <strong>below</strong> the prediction in 9 of 10 years, by 1.6 points on average (2.3% actual vs 3.9% predicted).</span></p>
+<aside class="notes">
+<p>This is the chapter’s Figure 8.4 Panel B with the 2010s gap shaded. As unemployment fell steadily after 2010, the regression predicted growth of around 4%; actual growth was 2–2.5%. Candidate explanations (from the chapter): falling labour-force participation, so lower unemployment overstated labour-market improvement; weak productivity growth; structural changes after the financial crisis. A plot like this reveals what R² alone cannot: whether the errors are random or systematic.</p>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+</section>
+<section id="was-the-fit-excellent-before-2008" class="slide level2 smaller center">
+<h2>Was the fit “excellent” before 2008?</h2>
+<table class="caption-top">
+<thead>
+<tr class="header">
+<th style="text-align: left;">Period</th>
+<th style="text-align: right;">Years</th>
+<th style="text-align: right;">Root-mean-squared error</th>
+<th style="text-align: right;">Mean residual</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">1961–2007</td>
+<td style="text-align: right;">47</td>
+<td style="text-align: right;">1.16</td>
+<td style="text-align: right;">+0.37</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">2008–2019</td>
+<td style="text-align: right;">12</td>
+<td style="text-align: right;"><span class="key">1.70</span></td>
+<td style="text-align: right;">—</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">2010–2019</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">—</td>
+<td style="text-align: right;"><span class="key">−1.62</span></td>
+</tr>
+</tbody>
+</table>
+<p><span class="comment">Computed from the chapter’s fitted model; no re-estimation.</span></p>
+<ul>
+<li class="fragment">Before 2008 the typical miss was still about 1.2 points of growth, e.g.&nbsp;1974: −0.5% actual vs +1.9% predicted</li>
+<li class="fragment">After 2008 the misses are larger <strong>and</strong> one-signed, the signature of a shift in the relationship</li>
+</ul>
+<p><span class="takeaway fragment">The relationship was good, not excellent, before 2008, and it broke down in a systematic way afterwards. One line for 59 years hides that.</span></p>
+<aside class="notes">
+<p>The chapter says “Pre-2008 fit is excellent” and “Okun’s Law held remarkably well for 1961–2007”. The RMSE of 1.16 points of growth is good for annual macro data but not excellent, and the pre-2008 residuals average +0.37 because the 2010s pull the line. A one-signed run of residuals is the visual hint of a structural break; formal tests (e.g.&nbsp;a Chow test) and subperiod regressions are the next step and are the subject of the chapter’s Exercise 6.</p>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+</section>
+<section id="caveats-for-8.4-time-series-need-time-series-inference" class="slide level2 center">
+<h2>Caveats for 8.4: time series need time-series inference</h2>
+<ul>
+<li class="fragment"><strong>Autocorrelation:</strong> the residuals’ lag-1 correlation is <strong>0.47</strong>; good and bad years come in runs</li>
+<li class="fragment">HC1 corrects for heteroskedasticity but <strong>not</strong> for autocorrelation; the textbook fix is <strong>HAC (Newey–West)</strong> SEs, used in Chapters 13 and 17</li>
+<li class="fragment"><strong>Structural break:</strong> one slope for 1961–2019 averages over at least two regimes</li>
+<li class="fragment"><strong>Not causal:</strong> both growth and unemployment respond to the same demand and supply shocks; Okun’s Law is a regularity, not a lever</li>
+</ul>
+<p><span class="takeaway fragment">With autocorrelated errors, both the classical and HC1 SEs are likely too small, so the rejection of −2 at 5% is less secure than it looks.</span></p>
+<aside class="notes">
+<p>The chapter’s “Data Quality Note” mentions serial correlation, structural breaks and heteroskedasticity but reports only classical and HC1 SEs. The residual autocorrelation of 0.47 is computed from the chapter’s fitted model. With positive autocorrelation in both residuals and regressor, conventional SEs typically understate uncertainty. A side note on the regression direction: Okun originally regressed the unemployment change on output growth; reversing the regression does not give the reciprocal slope unless R² = 1, so the size of “Okun’s coefficient” partly depends on which variable is put on the left.</p>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
 </section></section>
 <section>
 <section id="reading-it-right" class="title-slide slide level1 divider center" data-background-color="#C21E72">
 <h1>Reading it right</h1>
 <p><span class="act">Act III · The resolution</span></p>
+<aside class="notes">
+<p>Act III puts the four cases side by side and draws the general lessons: units, robust inference, influential observations, hypotheses beyond zero, and what a bivariate slope can and cannot claim.</p>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
 </section>
-<section id="four-lessons-that-travel-across-every-case" class="slide level2 center">
-<h2>Four lessons that travel across every case</h2>
-<ul>
-<li class="fragment"><strong>Robust SEs are the default</strong> — cross-sections and time series are rarely homoskedastic; HC1 can flip a verdict.</li>
-<li class="fragment"><strong>Hunt for influential points</strong> — two countries moved <span class="math inline">\(R^2\)</span> from 0.60 to 0.93.</li>
-<li class="fragment"><strong>Separate the two significances</strong> — report the <em>magnitude</em> (1.1 years, <span class="math inline">\(\beta=0.61\)</span>, <span class="math inline">\(-1.59\)</span>), not just the p-value.</li>
-<li class="fragment"><strong>Association is not causation</strong> — richer countries differ in many ways; a slope is a correlation until a design earns more.</li>
-</ul>
-<p><span class="rebuttal">Response.</span> The U.S. spends the most on health yet lives below the line — proof that <em>how</em> you spend, and everything the regression omits, can dominate the slope itself.</p>
+<section id="four-cases-side-by-side" class="slide level2 smaller center">
+<h2>Four cases, side by side</h2>
+<table class="caption-top" style="width:100%;">
+<colgroup>
+<col style="width: 16%">
+<col style="width: 16%">
+<col style="width: 16%">
+<col style="width: 16%">
+<col style="width: 16%">
+<col style="width: 16%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Case</th>
+<th style="text-align: left;">Slope, in its units</th>
+<th style="text-align: right;"><span class="math inline">\(R^2\)</span></th>
+<th style="text-align: right;">SE ratio, HC1 / classical</th>
+<th style="text-align: left;">Does HC1 change the verdict?</th>
+<th style="text-align: left;">Main threat</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">8.1 life expectancy</td>
+<td style="text-align: left;">+1.11 years per $1,000</td>
+<td style="text-align: right;">0.32</td>
+<td style="text-align: right;">1.62</td>
+<td style="text-align: left;">no (<span class="math inline">\(p\)</span> 0.023)</td>
+<td style="text-align: left;">USA; income confounding</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">8.1 infant mortality</td>
+<td style="text-align: left;">−0.69 deaths per 1,000 per $1,000</td>
+<td style="text-align: right;">0.14</td>
+<td style="text-align: right;">1.73</td>
+<td style="text-align: left;"><span class="key"><strong>yes</strong>: <span class="math inline">\(p\)</span> 0.027 → 0.188</span></td>
+<td style="text-align: left;">USA, Mexico, Turkey</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">8.2 health spending</td>
+<td style="text-align: left;">+$90 per $1,000 of GDP</td>
+<td style="text-align: right;">0.60</td>
+<td style="text-align: right;">2.27</td>
+<td style="text-align: left;">no (<span class="math inline">\(p\)</span> 0.004)</td>
+<td style="text-align: left;">USA, Luxembourg</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">8.3 CAPM</td>
+<td style="text-align: left;"><span class="math inline">\(\beta = 0.61\)</span> (unit-free)</td>
+<td style="text-align: right;">0.20</td>
+<td style="text-align: right;">1.19</td>
+<td style="text-align: left;">no</td>
+<td style="text-align: left;">time-varying beta</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">8.4 Okun</td>
+<td style="text-align: left;">−1.59 pp per pp</td>
+<td style="text-align: right;">0.59</td>
+<td style="text-align: right;">0.93</td>
+<td style="text-align: left;">no</td>
+<td style="text-align: left;">autocorrelation, break</td>
+</tr>
+</tbody>
+</table>
+<p><span class="takeaway fragment">Robust SEs matter most in small cross-sections with high-leverage countries, least in the long time series.</span></p>
+<aside class="notes">
+<p>The SE ratio column is the recurring thread. It is largest (2.27) where two extreme countries carry huge residuals, and below 1 for Okun’s Law. The table also shows the units thread: no two slopes are measured in the same units, and only the CAPM slope is unit-free. R² ranges from 0.14 to 0.60, and in no case does a high or low R² by itself say whether the slope is credible.</p>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+</section>
+<section id="testing-the-hypothesis-that-matters-not-just-beta-0" class="slide level2 smaller center">
+<h2>Testing the hypothesis that matters, not just <span class="math inline">\(\beta = 0\)</span></h2>
+<table class="caption-top">
+<colgroup>
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Case</th>
+<th style="text-align: left;">Null hypothesis</th>
+<th style="text-align: left;">Why it matters</th>
+<th style="text-align: right;">Robust <span class="math inline">\(t\)</span></th>
+<th style="text-align: left;">Verdict at 5%</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">8.1–8.2</td>
+<td style="text-align: left;"><span class="math inline">\(\beta_2 = 0\)</span></td>
+<td style="text-align: left;">is there any association?</td>
+<td style="text-align: right;">2.40, −1.35, 3.08</td>
+<td style="text-align: left;">reject, <strong>not</strong> reject, reject</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">8.3</td>
+<td style="text-align: left;"><span class="math inline">\(\beta = 1\)</span></td>
+<td style="text-align: left;">is the stock as risky as the market?</td>
+<td style="text-align: right;">−5.11</td>
+<td style="text-align: left;">reject: defensive</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">8.3</td>
+<td style="text-align: left;"><span class="math inline">\(\alpha = 0\)</span></td>
+<td style="text-align: left;">does the CAPM price this stock?</td>
+<td style="text-align: right;">2.35</td>
+<td style="text-align: left;">reject (but see selection)</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">8.4</td>
+<td style="text-align: left;"><span class="math inline">\(\beta_2 = -2\)</span></td>
+<td style="text-align: left;">does the rule of thumb hold?</td>
+<td style="text-align: right;">2.52</td>
+<td style="text-align: left;">reject, narrowly</td>
+</tr>
+</tbody>
+</table>
+<p><span class="takeaway fragment">Theory supplies the interesting null. The <span class="math inline">\(t\)</span>-statistic is the same formula with a different number subtracted.</span></p>
+<aside class="notes">
+<p>All t-statistics here use HC1 SEs. The β = 0 tests are the defaults that software reports; the CAPM and Okun tests are where economic theory gives a specific benchmark. Each test inherits every caveat of its SE: in 8.4 the HAC concern applies, and in 8.3 the alpha test is undermined by how the stock was chosen.</p>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+</section>
+<section id="one-country-two-case-studies-what-the-usa-does-to-the-slopes" class="slide level2 smaller center">
+<h2>One country, two case studies: what the USA does to the slopes</h2>
+<table class="caption-top">
+<colgroup>
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Regression</th>
+<th style="text-align: right;">All countries</th>
+<th style="text-align: right;">Without the USA</th>
+<th style="text-align: left;">Change</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Life expectancy on spending, per $1,000</td>
+<td style="text-align: right;">1.11</td>
+<td style="text-align: right;">1.69</td>
+<td style="text-align: left;">slope +52%, <span class="math inline">\(R^2\)</span> 0.32 → 0.51</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Infant mortality on spending, per $1,000</td>
+<td style="text-align: right;">−0.69</td>
+<td style="text-align: right;">−1.20</td>
+<td style="text-align: left;">becomes significant with HC1 (<span class="math inline">\(p\)</span> 0.019)</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Health spending on GDP, per $1,000</td>
+<td style="text-align: right;">$89.9</td>
+<td style="text-align: right;">$81.4</td>
+<td style="text-align: left;"><span class="math inline">\(R^2\)</span> 0.60 → 0.70</td>
+</tr>
+</tbody>
+</table>
+<p><span class="takeaway fragment">The USA spends the most and gets less than the line predicts. Whether it belongs in the sample is a question about the population you want to describe.</span></p>
+<aside class="notes">
+<p>Pulls together the drop-one checks from 8.1 and 8.2 (not in the chapter; same estimator, HC1 SEs). In 8.1 the USA is the most extreme x value, so it has high leverage and flattens both slopes. In 8.2 it is extreme in y at a moderate x, so it mostly lowers R². The same country plays a different statistical role depending on which variable is the regressor.</p>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+</section>
+<section id="the-tempting-mistake-and-the-correction" class="slide level2 center">
+<h2>The tempting mistake — and the correction</h2>
+<p><span class="rebuttal">Objection.</span> “The USA and Luxembourg are outliers. Drop them and the <em>true</em> relationship appears: <span class="math inline">\(R^2 = 0.93\)</span>.”</p>
+<div class="fragment">
+<p><span class="rebuttal">Response.</span> Deleting the two largest residuals raises <span class="math inline">\(R^2\)</span> by construction. The 32-country line describes the other 32 countries; it is not truer, it answers a narrower question. The USA is a real health system, and its distance from the line is the most policy-relevant fact in the dataset.</p>
+<p><span class="takeaway fragment">Use outlier checks to learn <strong>which</strong> observations drive a result and <strong>why</strong>, then report every version you looked at.</span></p>
+<aside class="notes">
+<p>The chapter itself slides toward the objection (“The ‘true’ relationship is stronger”; “Weak fit” vs “Excellent fit”). The response: exclusion is defensible for data errors or units from a different population (Luxembourg’s cross-border workers are a substantive argument), not because a point fits badly. A robust habit is to report the full-sample result, the subsample result, and the reason for any difference.</p>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+</div>
+</section>
+<section id="five-questions-to-ask-of-any-bivariate-slope" class="slide level2 center">
+<h2>Five questions to ask of any bivariate slope</h2>
+<ol type="1">
+<li class="fragment"><strong>Units:</strong> what does one unit of <span class="math inline">\(x\)</span> and of <span class="math inline">\(y\)</span> mean, and how big is the slope in a meaningful unit?</li>
+<li class="fragment"><strong>Uncertainty:</strong> classical or robust? Does the verdict change? For time series, is HAC needed?</li>
+<li class="fragment"><strong>Influence:</strong> which observations sit far from <span class="math inline">\(\bar x\)</span> or far from the line, and what happens without them?</li>
+<li class="fragment"><strong>Hypothesis:</strong> is <span class="math inline">\(\beta = 0\)</span> the interesting null, or does theory supply a better one, such as <span class="math inline">\(\beta = 1\)</span> or <span class="math inline">\(\beta = -2\)</span>?</li>
+<li class="fragment"><strong>Interpretation:</strong> is this an association, or does something in the design justify a causal reading?</li>
+</ol>
+<p><span class="takeaway fragment">Each case in this chapter failed at least one question on the first pass. Asking all five is the craft.</span></p>
+<aside class="notes">
+<p>A checklist students can carry into every later chapter. In 8.1 question 2 changes the infant-mortality verdict; in 8.2 question 3 changes the slope and the elasticity story; in 8.3 question 4 gives the defensive-stock result; in 8.4 questions 2 and 3 (autocorrelation, structural break) qualify the rejection of −2. Question 5 applies to all four: none of them is a causal estimate.</p>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
 </section>
 <section id="what-to-carry-forward" class="slide level2 center">
 <h2>What to carry forward</h2>
 <ul>
-<li class="fragment">One estimator, <code>pf.feols</code>, fits cross-sectional, financial, and macro data alike.</li>
-<li class="fragment">Add <code>vcov="HC1"</code> for heteroskedasticity-robust inference — make it a habit.</li>
-<li class="fragment">Test hypotheses beyond <span class="math inline">\(\beta = 0\)</span> (Okun’s <span class="math inline">\(-2.0\)</span>; CAPM’s <span class="math inline">\(\alpha = 0\)</span>).</li>
-<li class="fragment">Always check outliers, report economic magnitude, and resist the causal leap.</li>
+<li class="fragment">One estimator, <code>pf.feols</code>, fits cross-sectional, financial and macro data alike</li>
+<li class="fragment">Add <code>vcov="HC1"</code> for cross-sections; for time series, look ahead to HAC standard errors</li>
+<li class="fragment">Translate every slope into meaningful units before judging its size</li>
+<li class="fragment">Find the influential observations, refit without them, and report both</li>
+<li class="fragment">Test the hypothesis theory gives you, and keep economic and statistical significance apart</li>
 </ul>
+<p><span class="takeaway fragment">Next: Chapter 9 puts the variables in logs, so slopes become elasticities and percentage effects directly.</span></p>
+<aside class="notes">
+<p>Bridge to Chapter 9: the 8.2 elasticity discussion showed the limits of a linear dollar-on-dollar model; log specifications estimate elasticities directly. Chapters 10–12 add more regressors, which is the regression answer to the confounding concerns raised in every case here, and Chapter 13 returns to designs that support causal claims.</p>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
 </section></section>
-<section id="fit-the-line-in-any-domain-then-read-the-slope-with-an-honest-eye." class="title-slide slide level1 divider center" data-background-color="#C21E72">
-<h1>Fit the line in any domain — then read the slope with an honest eye.</h1>
+<section id="fit-the-line-in-any-domain-then-read-the-slope-in-its-units-with-honest-standard-errors-and-an-eye-on-influence." class="title-slide slide level1 divider center" data-background-color="#C21E72">
+<h1>Fit the line in any domain — then read the slope in its units, with honest standard errors and an eye on influence.</h1>
+<aside class="notes">
+<p>Closing line. Four case files, one estimator: the work is in the reading. Units (8.1, 8.2), honest standard errors (8.1’s infant-mortality flip, 8.4’s autocorrelation), influence (the USA and Luxembourg), and hypotheses that theory supplies (β = 1, α = 0, β = −2). None of the four slopes is causal; Chapter 13 returns to the designs that can make that step.</p>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
 
 </section>
     </div>
