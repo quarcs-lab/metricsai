@@ -2055,7 +2055,7 @@
             if (icon) icon.className = isDark ? 'fa-solid fa-sun text-lg' : 'fa-solid fa-moon text-lg';
         })();
 
-        // === Language toggle (EN / ES) ===
+        // === Language picker (EN / ES / JA) ===
         // String tables and helpers live in web-apps/_shared/i18n-{config,runtime}.js
         // and web-apps/_shared/strings/*.js. The runtime provides window.t(),
         // window.applyLanguage(), and window.toggleLanguage(); it swaps every
@@ -2093,6 +2093,23 @@
                 var active = btns[i].getAttribute('data-lang') === lang;
                 btns[i].classList.toggle('is-active', active);
                 btns[i].setAttribute('aria-pressed', active ? 'true' : 'false');
+            }
+        };
+        // Keep chapter thumbnails and their click-to-enlarge images in the
+        // selected language. Cache the English source for repeatable switches.
+        window.__rerender_visualSummaries = function () {
+            var lang = window.__lang || 'en';
+            var images = document.querySelectorAll('#curriculum img[src*="_visual_summary"]');
+            for (var i = 0; i < images.length; i++) {
+                var image = images[i];
+                var englishSrc = image.getAttribute('data-summary-en-src');
+                if (!englishSrc) {
+                    englishSrc = image.getAttribute('src');
+                    image.setAttribute('data-summary-en-src', englishSrc);
+                }
+                var src = lang === 'en' ? englishSrc
+                    : englishSrc.replace(/\.png$/, '_' + lang + '.png');
+                if (image.getAttribute('src') !== src) image.setAttribute('src', src);
             }
         };
         // Point each "Mendez Slides" link at the deck matching the active language.

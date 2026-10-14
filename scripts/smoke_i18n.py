@@ -23,6 +23,7 @@ Usage: python3 scripts/smoke_i18n.py
 
 from __future__ import annotations
 
+import json
 import re
 import socket
 import subprocess
@@ -187,6 +188,54 @@ def smoke_chapter(page, base_url: str, ch: str, defined_keys: set[str]) -> str:
     return f"[{ch}] PASS  (titles: {titles}; plotly: {plotly_seq})"
 
 
+def smoke_visual_summaries(page, base_url: str) -> str:
+    """Exercise the homepage picker, all chapter images, reloads and enlargement."""
+    selected = json.loads((ROOT / "images/visual_summaries.json").read_text())
+    selector = '#curriculum img[src*="_visual_summary"]'
+    page.goto(f"{base_url}/index.html")
+    wait_for_runtime(page)
+
+    for lang in ["en", "es", "ja", "en"]:
+        page.locator(f'nav .lang-opt[data-lang="{lang}"]').click()
+        expected = [
+            "https://raw.githubusercontent.com/quarcs-lab/metricsai/main/images/"
+            + (name if lang == "en" else name.replace(".png", f"_{lang}.png"))
+            for name in selected.values()
+        ]
+        for url in expected:
+            if not (ROOT / "images" / url.rsplit("/", 1)[-1]).is_file():
+                return f"[visual summaries] FAIL: missing image {url}"
+
+        for reload in [False, True]:
+            if reload:
+                page.reload()
+                wait_for_runtime(page)
+            actual = page.locator(selector).evaluate_all(
+                "images => images.map(image => image.getAttribute('src'))"
+            )
+            if actual != expected:
+                return (f"[visual summaries] FAIL: {lang}, reload={reload}, "
+                        f"unexpected sources: {actual}")
+
+        page.locator(selector).first.click()
+        if page.locator("#modalImage").get_attribute("src") != expected[0]:
+            return f"[visual summaries] FAIL: enlarged image did not use {lang}"
+        page.keyboard.press("Escape")
+
+    page.set_viewport_size({"width": 390, "height": 844})
+    page.locator("#mobileMenuButton").click()
+    page.locator('#mobileMenu .lang-opt[data-lang="ja"]').click()
+    mobile_sources = page.locator(selector).evaluate_all(
+        "images => images.map(image => image.getAttribute('src'))"
+    )
+    if len(mobile_sources) != 17 or not all(
+        src.endswith("_ja.png") for src in mobile_sources
+    ):
+        return "[visual summaries] FAIL: mobile picker did not update all 17 images"
+    page.set_viewport_size({"width": 1280, "height": 720})
+    return "[visual summaries] PASS (17 chapters; EN/ES/JA; reload; modal; mobile)"
+
+
 def smoke_persistence(page, base_url: str) -> str:
     """Toggle index.html through every language; after each toggle, navigate
     to web-apps/ch08/dashboard.html and confirm it boots in the same language.
@@ -267,6 +316,14 @@ def main() -> int:
                         page.screenshot(path=str(ROOT / "log" / f"phase5_{ch}_fail.png"))
                     except Exception:
                         pass
+
+            ctx.close()
+            ctx = browser.new_context()
+            page = ctx.new_page()
+            r = smoke_visual_summaries(page, base_url)
+            print(r + "\n")
+            if "FAIL" in r:
+                failures.append(r)
 
             ctx.close()
             ctx = browser.new_context()
