@@ -17,7 +17,7 @@ This notebook provides an interactive introduction to regression with transforme
 [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/quarcs-lab/metricsai/blob/main/notebooks_colab/ch15_Regression_with_Transformed_Variables.ipynb)
 <div class="chapter-resources">
 <a href="https://www.youtube.com/watch?v=XJv1bfr9BI4" target="_blank" class="resource-btn">🎬 AI Video</a>
-<a href="https://carlos-mendez.my.canva.site/s15-regression-with-transformed-variables-pdf" target="_blank" class="resource-btn">✨ AI Slides</a>
+<a href="https://quarcs-lab.github.io/metricsai/slides/ch15/index.html" target="_blank" class="resource-btn">🧑🏽‍🏫 Mendez Slides</a>
 <a href="https://cameron.econ.ucdavis.edu/aed/traedv1_15" target="_blank" class="resource-btn">📊 Cameron Slides</a>
 <a href="https://app.edcafe.ai/quizzes/69786b142f5d08069e04d9ed" target="_blank" class="resource-btn">✏️ Quiz</a>
 <a href="https://app.edcafe.ai/chatbots/6978a2c92f5d08069e072021" target="_blank" class="resource-btn">🤖 AI Tutor</a>

@@ -17,7 +17,7 @@ This notebook provides an interactive introduction to the statistical properties
 [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/quarcs-lab/metricsai/blob/main/notebooks_colab/ch06_The_Least_Squares_Estimator.ipynb)
 <div class="chapter-resources">
 <a href="https://www.youtube.com/watch?v=hSv0usYmlZc" target="_blank" class="resource-btn">🎬 AI Video</a>
-<a href="https://carlos-mendez.my.canva.site/s06-the-least-squares-estimator-pdf" target="_blank" class="resource-btn">✨ AI Slides</a>
+<a href="https://quarcs-lab.github.io/metricsai/slides/ch06/index.html" target="_blank" class="resource-btn">🧑🏽‍🏫 Mendez Slides</a>
 <a href="https://cameron.econ.ucdavis.edu/aed/traedv1_06" target="_blank" class="resource-btn">📊 Cameron Slides</a>
 <a href="https://app.edcafe.ai/quizzes/697866592f5d08069e048b48" target="_blank" class="resource-btn">✏️ Quiz</a>
 <a href="https://app.edcafe.ai/chatbots/69789eae2f5d08069e070694" target="_blank" class="resource-btn">🤖 AI Tutor</a>

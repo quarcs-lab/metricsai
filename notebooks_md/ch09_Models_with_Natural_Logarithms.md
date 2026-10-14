@@ -17,7 +17,7 @@ This notebook teaches you how to use natural logarithms in regression analysis t
 [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/quarcs-lab/metricsai/blob/main/notebooks_colab/ch09_Models_with_Natural_Logarithms.ipynb)
 <div class="chapter-resources">
 <a href="https://www.youtube.com/watch?v=rPy6m8_Wg4c" target="_blank" class="resource-btn">🎬 AI Video</a>
-<a href="https://carlos-mendez.my.canva.site/s09-models-with-natural-logarithms-pdf" target="_blank" class="resource-btn">✨ AI Slides</a>
+<a href="https://quarcs-lab.github.io/metricsai/slides/ch09/index.html" target="_blank" class="resource-btn">🧑🏽‍🏫 Mendez Slides</a>
 <a href="https://cameron.econ.ucdavis.edu/aed/traedv1_09" target="_blank" class="resource-btn">📊 Cameron Slides</a>
 <a href="https://app.edcafe.ai/quizzes/697867a22f5d08069e04a411" target="_blank" class="resource-btn">✏️ Quiz</a>
 <a href="https://app.edcafe.ai/chatbots/6978a07f2f5d08069e0713c6" target="_blank" class="resource-btn">🤖 AI Tutor</a>

@@ -17,7 +17,7 @@ This notebook provides an interactive introduction to statistical inference, tea
 [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/quarcs-lab/metricsai/blob/main/notebooks_colab/ch04_Statistical_Inference_for_the_Mean.ipynb)
 <div class="chapter-resources">
 <a href="https://www.youtube.com/watch?v=8wn00FpUz38" target="_blank" class="resource-btn">🎬 AI Video</a>
-<a href="https://carlos-mendez.my.canva.site/s04-statistical-inference-for-the-mean-pdf" target="_blank" class="resource-btn">✨ AI Slides</a>
+<a href="https://quarcs-lab.github.io/metricsai/slides/ch04/index.html" target="_blank" class="resource-btn">🧑🏽‍🏫 Mendez Slides</a>
 <a href="https://cameron.econ.ucdavis.edu/aed/traedv1_04" target="_blank" class="resource-btn">📊 Cameron Slides</a>
 <a href="https://app.edcafe.ai/quizzes/6978656c2f5d08069e0479cb" target="_blank" class="resource-btn">✏️ Quiz</a>
 <a href="https://app.edcafe.ai/chatbots/69789d9f2f5d08069e06ffa5" target="_blank" class="resource-btn">🤖 AI Tutor</a>

@@ -54,7 +54,7 @@ This is the complete markdown version of the metricsAI textbook. It contains all
 
 **Welcome to "Econometrics Powered by AI"!** This book represents a new approach to learning econometrics—one that embraces the power of modern computational tools while maintaining the rigor of econometrics. In an era where artificial intelligence is transforming how we learn, work, and conduct research, this book seeks to bridge the gap between foundational econometric concepts and cutting-edge learning technologies.
 
-The vision behind this project is simple yet ambitious: to make econometrics accessible, interactive, and engaging for a new generation of learners. By combining authoritative textbook content with cloud-based computational notebooks and AI-enhanced learning tools, I aim to modernize the often-daunting journey of learning econometrics into an more exciting AI-powered discovery of economic stories based real data.
+The vision behind this project is simple yet ambitious: to make econometrics accessible, interactive, and engaging for a new generation of learners. By combining authoritative textbook content with cloud-based computational notebooks and AI-enhanced learning tools, I aim to modernize the often-daunting journey of learning econometrics into a more exciting AI-powered discovery of economic stories based on real data.
 
 ## The Challenge of Learning Econometrics
 
@@ -66,7 +66,7 @@ Moreover, there exists a persistent gap between theory and practical implementat
 
 ## This Book's Approach
 
-This book takes a different approach. It serves as a companion to A. Colin Cameron's  textbook, *Analysis of Economics Data: An Introduction to Econometrics* (2022). Specifically, it brings its key lessons and examples into the interactive, computational world of Python programming and AI-enhanced learning.
+This book takes a different approach. It serves as a companion to A. Colin Cameron's textbook, *Analysis of Economics Data: An Introduction to Econometrics* (2022). Specifically, it brings its key lessons and examples into the interactive, computational world of Python programming and AI-enhanced learning.
 
 At the heart of this approach is a three-pillar methodology:
 
@@ -84,7 +84,7 @@ This book is designed for a diverse audience of learners:
 
 **Economics and social science students** will find a comprehensive introduction to econometrics that emphasizes hands-on learning with real data. Whether you're taking your first econometrics course or looking to deepen your quantitative skills, the combination of theory and practice provided here will serve you well.
 
-**Researchers transitioning from Stata or R to Python** will appreciate the parallel structure that follows Cameron's familiar textbook while introducing Python's powerful ecosystem of data science libraries. Each chapter demonstrates how classic econometric techniques can be implemented using modern Python tools like Pandas, Statsmodels, and Linearmodels.
+**Researchers transitioning from Stata or R to Python** will appreciate the parallel structure that follows Cameron's familiar textbook while introducing Python's powerful ecosystem of data science libraries. Each chapter demonstrates how classic econometric techniques can be implemented using modern Python tools like Pandas, pyfixest, and Statsmodels.
 
 **Self-learners seeking interactive resources** will benefit from the zero-installation requirement and comprehensive AI support. Simply open a notebook in your browser and start learning—no complex setup required. The multiple learning modalities (notebooks, podcasts, slides, quizzes) allow you to create a personalized learning path that fits your style and schedule.
 
@@ -134,7 +134,7 @@ This approach removes all technical barriers to getting started. Whether you're 
 
 The notebooks leverage Python's rich ecosystem of data science and statistical libraries, introducing you to the same tools used by professional data scientists and researchers worldwide.
 
-**Pandas** serves as the foundation for data manipulation and analysis, providing powerful tools for loading, cleaning, transforming, and summarizing datasets. **Statsmodels** provides econometric modeling capabilities, including OLS regression, generalized linear models, and time series analysis. **Linearmodels** extends this toolkit with advanced regression techniques specifically designed for econometric applications.
+**Pandas** serves as the foundation for data manipulation and analysis, providing powerful tools for loading, cleaning, transforming, and summarizing datasets. **pyfixest** provides the book's econometric modeling engine, powering ordinary least squares and fixed-effects regression with modern robust standard errors. **Statsmodels** complements it with additional tools such as locally weighted (lowess) smoothing.
 
 For visualization, we use **Matplotlib** and **Seaborn**, which together provide publication-quality graphics for exploring data and presenting results. **NumPy** and **SciPy** handle the numerical computing that underlies all statistical analysis, from matrix operations to optimization algorithms.
 
@@ -158,7 +158,7 @@ Your notebooks are always up-to-date with the latest software dependencies, as G
 
 #### Leveraging Google's NotebookLM and AI Tools
 
-The third pillar of our approach harnesses the power of artificial intelligence to enhance learning. We've developed AI-enhanced study materials for all 17 chapters, leveraging cutting-edge tools like Google's NotebookLM and Gemini PRO to create multiple learning modalities that accommodate diverse learning preferences.
+The third pillar of our approach harnesses the power of artificial intelligence to enhance learning. We've developed AI-enhanced study materials for all 17 chapters, leveraging cutting-edge tools like Google's NotebookLM and Gemini Pro to create multiple learning modalities that accommodate diverse learning preferences.
 
 These AI tools provide interactive learning assistance, offering explanations, answering questions, and helping you develop deeper understanding of complex concepts. The materials support multiple modalities—visual, auditory, textual, and interactive—ensuring that regardless of your preferred learning style, you'll find resources that resonate with you.
 
@@ -200,7 +200,7 @@ When you struggle with a concept, the AI tutor is available to provide code expl
 
 While AI tools provide powerful learning support, it's crucial to understand their proper role in your education. AI serves as an enhancement, not a replacement for critical thinking and genuine understanding. The foundation of your learning remains Cameron's authoritative textbook and the verified Python code in the notebooks—AI tools supplement this foundation, they don't replace it.
 
-It's important to cross-reference AI-generated content with authoritative sources. While tools like NotebookLM and Gemini PRO are sophisticated, they can occasionally make mistakes or oversimplify complex concepts. You bear responsibility for verifying information and developing true understanding rather than simply accepting AI-generated explanations at face value.
+It's important to cross-reference AI-generated content with authoritative sources. While tools like NotebookLM and Gemini Pro are sophisticated, they can occasionally make mistakes or oversimplify complex concepts. You bear responsibility for verifying information and developing true understanding rather than simply accepting AI-generated explanations at face value.
 
 All Python code in the notebooks has been carefully verified and tested for accuracy. When AI tools provide code explanations or suggestions, compare them against the tested code in the notebooks to ensure accuracy. The goal is to use AI tools to develop multiple learning pathways and deeper understanding—transparency about these tools' capabilities and limitations is essential to using them effectively.
 
@@ -209,12 +209,14 @@ All Python code in the notebooks has been carefully verified and tested for accu
 > This book is designed to be used in conjunction with two essential companion resources:
 >
 > **The metricsAI Website** ([https://quarcs-lab.github.io/metricsai](https://quarcs-lab.github.io/metricsai)) provides access to:
+>
 > - Interactive Google Colab notebooks for all 17 chapters
 > - AI-generated visual summaries, video overviews, and podcast episodes
 > - Links to quizzes, AI tutors, and presentation slides
 > - Quick summaries of foundational content
 >
 > **Cameron's Original Textbook** (*Analysis of Economics Data: An Introduction to Econometrics*, 2022) and materials ([https://cameron.econ.ucdavis.edu/aed/index.html](https://cameron.econ.ucdavis.edu/aed/index.html)) provide:
+>
 > - Comprehensive explanations of econometric theory
 > - Deeper mathematical derivations and proofs
 > - Extended examples and applications
@@ -222,7 +224,7 @@ All Python code in the notebooks has been carefully verified and tested for accu
 > - Original Stata, R, and Gretl code implementations
 > - Comprehensive datasets and detailed slides
 >
-> Together, these resources create a complete learning ecosystem: this book offers structured content and context and the website provides interactive computational tools with AI learning support.
+> Together, these resources create a complete learning ecosystem: this book offers structured content and context, while the website provides interactive computational tools with AI learning support.
 
 ## How to Use This Book
 
@@ -276,7 +278,7 @@ This project relies heavily on cutting-edge technology platforms that have made 
 
 **Google's NotebookLM** powers the AI learning tools—podcasts, slides, and tutoring—that provide personalized learning support. This sophisticated AI technology transforms static educational content into interactive learning experiences tailored to individual needs and learning styles.
 
-**Google's Gemini PRO** generates the visual summaries that help consolidate understanding and provide alternative perspectives on chapter content. The ability to automatically create meaningful visualizations of complex concepts represents a significant advance in educational technology.
+**Google's Gemini Pro** generates the visual summaries that help consolidate understanding and provide alternative perspectives on chapter content. The ability to automatically create meaningful visualizations of complex concepts represents a significant advance in educational technology.
 
 **EdCafe** provides the platform for interactive quizzes and AI tutoring, offering the assessment and feedback mechanisms that are essential for effective learning. Their tools help ensure that learning is not just exposure to content but genuine mastery of concepts.
 
@@ -284,7 +286,7 @@ This project relies heavily on cutting-edge technology platforms that have made 
 
 This book builds on the incredible work of the open source community that has created and maintains Python's scientific computing ecosystem. The developers of Statsmodels, Pandas, NumPy, Matplotlib, and countless other libraries have created the tools that make sophisticated statistical analysis accessible to anyone with a computer and internet connection.
 
-Special thanks go to the creators of Linearmodels and other econometric software tools that extend Python's capabilities specifically for econometric analysis. The documentation writers and maintainers who make these complex tools accessible through clear explanations and examples deserve particular recognition—their work is often invisible but absolutely essential.
+Special thanks go to the creators of pyfixest and other econometric software tools that extend Python's capabilities specifically for econometric analysis. The documentation writers and maintainers who make these complex tools accessible through clear explanations and examples deserve particular recognition—their work is often invisible but absolutely essential.
 
 The open source ethos—that knowledge and tools should be freely shared for the benefit of all—is fundamental to this project. We hope this book contributes back to that community by introducing new users to Python's capabilities and demonstrating how these tools can be applied to econometric analysis.
 
@@ -316,7 +318,7 @@ This notebook provides an interactive introduction to regression analysis using 
 [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/quarcs-lab/metricsai/blob/main/notebooks_colab/ch01_Analysis_of_Economics_Data.ipynb)
 <div class="chapter-resources">
 <a href="https://www.youtube.com/watch?v=RyE01v-zliM" target="_blank" class="resource-btn">🎬 AI Video</a>
-<a href="https://carlos-mendez.my.canva.site/s01-analysis-of-economics-data-pdf" target="_blank" class="resource-btn">✨ AI Slides</a>
+<a href="https://quarcs-lab.github.io/metricsai/slides/ch01/index.html" target="_blank" class="resource-btn">🧑🏽‍🏫 Mendez Slides</a>
 <a href="https://cameron.econ.ucdavis.edu/aed/traedv1_01" target="_blank" class="resource-btn">📊 Cameron Slides</a>
 <a href="https://app.edcafe.ai/quizzes/69715fdb60956f50e60276b9" target="_blank" class="resource-btn">✏️ Quiz</a>
 <a href="https://app.edcafe.ai/chatbots/6971625960956f50e6028155" target="_blank" class="resource-btn">🤖 AI Tutor</a>
@@ -334,12 +336,12 @@ This chapter introduces the fundamental concepts of econometrics and regression 
 - How to visualize relationships between variables using scatter plots
 - How to fit a simple linear regression model using Ordinary Least Squares (OLS)
 - How to interpret regression coefficients in economic terms
-- How to use Python's statsmodels package for regression analysis
+- How to use Python's pyfixest package for regression analysis
 
 **Dataset used:**
 
 - **AED_HOUSE.DTA**: House sale prices for 29 houses in Central Davis, California (1999)
-  - Variables: price (sale price in dollars), size (house size in square feet), plus 7 other characteristics
+  - Variables: price (sale price in dollars), size (house size in square feet), plus 6 other characteristics
 
 **Chapter outline:**
 
@@ -355,12 +357,106 @@ This chapter introduces the fundamental concepts of econometrics and regression 
 - Practice Exercises
 - Case Studies
 
+## Key Concepts
+
+Six core ideas anchor this chapter. Skim them before you start, and come back when a term feels fuzzy. Each entry pairs a concrete house-price example with a non-technical analogy. Click a panel to expand it.
+
+**Regression Analysis:** A statistical method for quantifying how one variable changes when another variable changes. It produces a "line of best fit" through the data and reports the slope, intercept, and goodness of fit.
+
+::::: {.columns}
+:::: {.column width="50%"}
+::: {.callout-tip collapse="true" appearance="simple" title="Example"}
+For 29 houses in Davis, CA (1999), regression of `price` on `size` gives `price = 115,017 + 73.77 × size`. The slope says each extra square foot is associated with about \$74 more in sale price.
+:::
+::::
+:::: {.column width="50%"}
+::: {.callout-note collapse="true" appearance="simple" title="Analogy"}
+Like fitting a single straight road through a scattered village. The road won't pass through every house, but it captures the general direction the houses are arranged in.
+:::
+::::
+:::::
+
+**Dependent and Independent Variables (Y and X):** The dependent variable (Y) is the outcome you want to explain or predict. The independent variable (X) is the input you use to explain it. The regression slope tells you how Y moves when X changes by one unit.
+
+::::: {.columns}
+:::: {.column width="50%"}
+::: {.callout-tip collapse="true" appearance="simple" title="Example"}
+Here Y = `price` (sale price in dollars) and X = `size` (square feet). We treat price as the thing being explained and size as the explainer — not the other way around. Reversing them would answer a different question ("how much bigger is a more-expensive house?").
+:::
+::::
+:::: {.column width="50%"}
+::: {.callout-note collapse="true" appearance="simple" title="Analogy"}
+Like a recipe: the amount of flour (X) helps explain how much bread you get (Y). Bread doesn't cause flour. Choosing which is X and which is Y is a modeling decision, not a fact about the world.
+:::
+::::
+:::::
+
+**Intercept ($\beta_0$) and Slope ($\beta_1$):** The intercept is the predicted value of Y when X = 0 — it anchors the regression line. The slope is the change in Y for a one-unit change in X — it is usually the coefficient you actually care about.
+
+::::: {.columns}
+:::: {.column width="50%"}
+::: {.callout-tip collapse="true" appearance="simple" title="Example"}
+In our fit, $\beta_0 \approx \$115{,}017$ (the predicted price of a 0-sqft house — not economically meaningful, just an anchor) and $\beta_1 \approx \$73.77$ per sqft (each additional square foot is associated with about \$74 more in price).
+:::
+::::
+:::: {.column width="50%"}
+::: {.callout-note collapse="true" appearance="simple" title="Analogy"}
+Like a taxi fare: the intercept is the flag-drop charge you pay just for getting in (\$5), and the slope is the per-mile rate (\$2/mile). The flag-drop alone is rarely the interesting number — the per-mile rate is.
+:::
+::::
+:::::
+
+**Ordinary Least Squares (OLS):** The standard method for choosing the regression line. OLS picks the intercept and slope that make the sum of *squared* vertical distances between the actual Y values and the fitted line as small as possible.
+
+::::: {.columns}
+:::: {.column width="50%"}
+::: {.callout-tip collapse="true" appearance="simple" title="Example"}
+For each of the 29 houses, the vertical gap between its dot and the fitted line is a residual. OLS chose $\beta_0 = 115{,}017$ and $\beta_1 = 73.77$ because no other line gives a smaller sum of *squared* residuals across those 29 houses.
+:::
+::::
+:::: {.column width="50%"}
+::: {.callout-note collapse="true" appearance="simple" title="Analogy"}
+Like hanging a clothesline through a row of poles of different heights. You position the line so the total *squared* slack — pulled tight from every pole — is as small as possible. Squaring (rather than just adding) means a few far-off poles get penalized more than many slightly-off ones.
+:::
+::::
+:::::
+
+**R-squared ($R^2$):** The proportion of variation in Y that the regression explains, on a 0-to-1 scale. Higher $R^2$ means the line fits the points more tightly; it does **not** mean the relationship is causal.
+
+::::: {.columns}
+:::: {.column width="50%"}
+::: {.callout-tip collapse="true" appearance="simple" title="Example"}
+Our model has $R^2 \approx 0.62$. Size alone explains about 62% of the variation in house prices across these 29 houses. The remaining 38% comes from other things we didn't include — location, condition, age, lot size.
+:::
+::::
+:::: {.column width="50%"}
+::: {.callout-note collapse="true" appearance="simple" title="Analogy"}
+Like a weather forecast that captures roughly 62% of what actually happens. A high $R^2$ means your one explanatory variable does most of the storytelling; a low $R^2$ means most of the story is happening off-stage in variables you haven't measured.
+:::
+::::
+:::::
+
+**Association vs. Causation:** Regression measures *association* — how Y and X move together in your sample. It does **not**, by itself, prove that changing X would change Y. Other variables (omitted, confounding, or reverse-causal) may drive both.
+
+::::: {.columns}
+:::: {.column width="50%"}
+::: {.callout-tip collapse="true" appearance="simple" title="Example"}
+The slope says larger houses sell for more — but bolting an extra 100 sqft onto your house won't necessarily add \$7,400 of value. Bigger houses also tend to be newer, in better neighborhoods, and more carefully renovated. Size is correlated with quality, and the regression credits size for quality's effect too.
+:::
+::::
+:::: {.column width="50%"}
+::: {.callout-note collapse="true" appearance="simple" title="Analogy"}
+Ice-cream sales and drowning deaths both rise in summer. They are strongly *associated*. But banning ice cream would not save swimmers — both are caused by hot weather. Regression alone can't tell you which arrows in the causal diagram are real.
+:::
+::::
+:::::
+
 ## Setup
 
 Run this cell first to import all required packages and configure the environment. This sets up:
 
 - Data manipulation (pandas, numpy)
-- Statistical modeling (statsmodels)
+- Statistical modeling (pyfixest)
 - Visualization (matplotlib)
 - Reproducibility (random seeds)
 
@@ -454,6 +550,8 @@ Let's look at the first few rows to understand what variables we have available.
 data_house.head()
 ```
 
+Each row is one house sale. Alongside our two key variables — `price` (sale price in dollars) and `size` (square feet) — the data include `bedrooms`, `bathrooms`, `lotsize` (lot size category), `age` (years), `monthsold` (month of sale), and the original listing price (`list`).
+
 ## 1.4 Explore the Data
 
 Before running any regression, we need to understand our data through **descriptive statistics**. These reveal the scale, variability, and range of our variables—essential context for interpreting regression results later. Let's look at the key statistics for price and size.
@@ -524,7 +622,7 @@ $$\min_{\beta_0, \beta_1} \sum_{i=1}^{n} (\text{price}_i - \beta_0 - \beta_1 \ti
 
 In other words, we're finding the line that makes our prediction errors as small as possible (in a squared sense).
 
-We'll use Python's `statsmodels` package, which provides regression output similar to Stata and R.
+We'll use Python's `pyfixest` package, which provides regression output similar to Stata and R.
 
 > **Key Concept 1.4: Introduction to Regression Analysis**
 >
@@ -561,22 +659,27 @@ The regression output contains a lot of information! Let's break down the most i
 1. **Coefficients table** (middle section):
    - **Intercept**: The predicted price when size = 0 (often not economically meaningful)
    - **size**: The slope coefficient - our main interest!
-   - **std err**: Standard error (measures precision of the estimate)
-   - **t**: t-statistic (coefficient / standard error)
-   - **P>|t|**: p-value (tests if coefficient is significantly different from zero)
+   - **Std. Error**: Standard error (measures precision of the estimate)
+   - **t value**: t-statistic (coefficient / standard error)
+   - **Pr(>|t|)**: p-value (tests if coefficient is significantly different from zero)
 
-2. **R-squared** (top right section):
+2. **R2** (bottom line, after the table):
    - Proportion of variation in Y explained by X
    - Ranges from 0 to 1 (higher = better fit)
 
-3. **F-statistic** (top right section):
-   - Tests overall significance of the regression
-   - Low p-value (Prob F-statistic) means the model is statistically significant
+3. **Header block** (top section):
+   - Reports the estimation method (OLS), the dependent variable, and the number of observations
+   - **Inference: iid** indicates classical (default) standard errors
+
+4. **RMSE** (bottom line of the output):
+   - Root mean squared error — the typical size of a prediction error, in the units of Y (dollars here)
+   - Smaller RMSE means the fitted line predicts prices more accurately
 
 We already extracted the key numbers above. Here's how to read them:
 
-- **Intercept** ($\beta_0$ = \$115,952): The predicted price when size = 0. This is not economically meaningful (no house has zero square feet), but it anchors the regression line.
+- **Intercept** ($\beta_0$ = \$115,017): The predicted price when size = 0. This is not economically meaningful (no house has zero square feet), but it anchors the regression line.
 - **Slope** ($\beta_1$ = \$73.77 per sq ft): Our main result — each additional square foot is associated with a \$73.77 higher price.
+- **Statistical significance** (t = 6.60, p < 0.001): The slope estimate is more than six standard errors away from zero — a pattern this strong would be very unlikely if size and price were truly unrelated in the population. Chapter 7 develops these inference tools for regression in detail, building on the inference foundations introduced in Chapters 3 and 4.
 - **R-squared** (0.6175): House size explains about 62% of the variation in prices. The remaining 38% is due to other factors.
 
 > **Key Concept 1.5: Reading Regression Output**
@@ -640,7 +743,7 @@ Our estimated slope of approximately **\$74 per square foot** means:
 
 We can use our regression equation to predict prices for houses of different sizes. For example, for a 2,000 sq ft house:
 
-$$\hat{\text{price}} = 115,952 + 74.03 \times 2000 = \$264,012$$
+$$\hat{\text{price}} = 115,017 + 73.77 \times 2000 = \$262,557$$
 
 ### Important Caveats:
 
@@ -709,10 +812,10 @@ This single code block reproduces the core workflow of Chapter 1. It is self-con
 # =============================================================================
 
 # --- Libraries ---
+# !pip install pyfixest                   # uncomment if running in Google Colab
 import pandas as pd                       # data loading and manipulation
 import matplotlib.pyplot as plt           # creating plots and visualizations
 import pyfixest as pf                     # OLS regression (Python port of R's fixest)
-# !pip install pyfixest                   # uncomment if running in Google Colab
 
 # =============================================================================
 # STEP 1: Load data directly from a URL
@@ -808,11 +911,12 @@ for var, label in predictors.items():
 - **Chapters 5-7**: Deep dive into bivariate regression (extending what we learned here)
 
 **You have now mastered:**
- Loading and exploring economic data in Python
- Creating scatter plots to visualize relationships
- Estimating simple linear regression models with OLS
- Interpreting regression coefficients economically
- Understanding the limitations of regression analysis
+
+- Loading and exploring economic data in Python
+- Creating scatter plots to visualize relationships
+- Estimating simple linear regression models with OLS
+- Interpreting regression coefficients economically
+- Understanding the limitations of regression analysis
 
 These foundational concepts are the building blocks for all of econometrics. Everything that follows builds on this introduction!
 
@@ -904,7 +1008,7 @@ Now let's apply what you've learned to real economic research! In this section, 
 
 **This Research** ([Mendez, 2020](https://github.com/quarcs-lab/mendez2020-convergence-clubs-code-data)): Uses modern econometric methods to identify convergence clubs in labor productivity across countries. The analysis examines whether countries follow one common development path or multiple distinct paths, and what factors (capital accumulation, technology, institutions) drive these patterns.
 
-**The Data**: Panel dataset tracking multiple countries over several years, with 26 variables including:
+**The Data**: Panel dataset tracking multiple countries over several years, with 27 variables including:
 
 - **Output measures**: GDP, GDP per capita
 - **Productivity**: Labor productivity, total factor productivity (TFP)
@@ -950,6 +1054,8 @@ print(f"Years: {df1.index.get_level_values('year').min()} to {df1.index.get_leve
 df1.head(5)
 ```
 
+The second dataset is the data dictionary. The cell below displays it in full — use it to find the exact variable names you will need in the tasks that follow.
+
 ```python
 # Variable definitions
 df2
@@ -984,8 +1090,8 @@ Run the code above and study the output. What patterns do you notice? How many t
 # 3. Examine a specific country's data
 # 4. Count observations per country
 
-# Example: Examine USA's data
-# df1.loc['USA']
+# Example: Examine the United States' data (the index uses full country names)
+# df1.loc['United States']
 ```
 
 #### Task 2: Descriptive Statistics (Semi-guided)
@@ -1085,13 +1191,13 @@ Run the code above and study the output. What patterns do you notice? How many t
 # Your code here: Time series plots
 #
 # Steps:
-# 1. Select countries (e.g., countries = ['USA', 'CHN', 'JPN'])
+# 1. Select countries (e.g., countries = ['United States', 'China', 'Japan'])
 # 2. For each country, extract time series data
 # 3. Create line plot over time
 # 4. Compare trajectories
 
 # Example structure:
-# countries = ['USA', 'CHN', 'IND']  # Adjust based on actual country codes
+# countries = ['United States', 'China', 'India']  # index uses full country names, not ISO codes
 # fig, ax = plt.subplots(figsize=(10, 6))
 #
 # for country in countries:
@@ -1144,7 +1250,7 @@ Run the code above and study the output. What patterns do you notice? How many t
 #
 # Interpretation:
 # Slope = ___: For every unit increase in capital per worker,
-#               labor productivity increases by ___ units
+#               labor productivity is ___ units higher (association, not causation)
 # R² = ___: Capital explains ___% of variation in productivity
 ```
 
@@ -1272,6 +1378,8 @@ bol_key = bol[key_vars].copy()
 # First 10 municipalities
 bol_key.head(10)
 ```
+
+Before starting the tasks, run the cell below to print a one-line description of each selected variable. Refer back to this list whenever a variable name is unclear.
 
 ```python
 # Key variable descriptions
@@ -1537,7 +1645,7 @@ This notebook provides an interactive introduction to univariate data analysis u
 [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/quarcs-lab/metricsai/blob/main/notebooks_colab/ch02_Univariate_Data_Summary.ipynb)
 <div class="chapter-resources">
 <a href="https://www.youtube.com/watch?v=qegfQaM9UGE" target="_blank" class="resource-btn">🎬 AI Video</a>
-<a href="https://carlos-mendez.my.canva.site/s02-univariate-data-summary-pdf" target="_blank" class="resource-btn">✨ AI Slides</a>
+<a href="https://quarcs-lab.github.io/metricsai/slides/ch02/index.html" target="_blank" class="resource-btn">🧑🏽‍🏫 Mendez Slides</a>
 <a href="https://cameron.econ.ucdavis.edu/aed/traedv1_02" target="_blank" class="resource-btn">📊 Cameron Slides</a>
 <a href="https://app.edcafe.ai/quizzes/6978644a2f5d08069e046930" target="_blank" class="resource-btn">✏️ Quiz</a>
 <a href="https://app.edcafe.ai/chatbots/69789c1e2f5d08069e06f856" target="_blank" class="resource-btn">🤖 AI Tutor</a>
@@ -1574,6 +1682,100 @@ This notebook provides an interactive introduction to univariate data analysis u
 - 2.6 Data Transformations for Time Series Data
 - Practice Exercises
 - Case Studies
+
+## Key Concepts
+
+Six core ideas anchor this chapter. Skim them before you start, and come back when a term feels fuzzy. Each entry pairs a concrete example using the chapter's data with a non-technical analogy. Click a panel to expand it.
+
+**Mean and Median:** Two ways to report the center of a dataset. The mean adds up every observation and divides by how many there are; the median picks the value that sits exactly in the middle once the data are sorted.
+
+::::: {.columns}
+:::: {.column width="50%"}
+::: {.callout-tip collapse="true" appearance="simple" title="Example"}
+For the 171 working women aged 30 in `data_earnings`, the mean of `earnings` is \$41,412.69 while the median is \$36,000 — a gap of \$5,413 (15%). The mean is pulled upward by a small group of high earners (the maximum is \$172,000), so when you want to describe a "typical" 30-year-old woman's earnings, the median is the more honest number.
+:::
+::::
+:::: {.column width="50%"}
+::: {.callout-note collapse="true" appearance="simple" title="Analogy"}
+Imagine seven kids on a seesaw: six lightweights and one very heavy kid. The mean is the **balance point** that takes everyone's weight into account — and the heavy kid drags it toward their side. The median is the **middle kid** when you line them up by weight — unaffected by the outlier. The median is the "honest center" for skewed data; the mean is the "weighted center."
+:::
+::::
+:::::
+
+**Standard Deviation:** A single number that measures how spread out the observations are around the mean. A larger value means the data points sit further from the average; a smaller value means they cluster tightly.
+
+::::: {.columns}
+:::: {.column width="50%"}
+::: {.callout-tip collapse="true" appearance="simple" title="Example"}
+`earnings` in `data_earnings` has a standard deviation of about \$25,527 — roughly 62% of the mean. That is enormous spread relative to the typical wage: a rule of thumb for bell-shaped data says about two-thirds of observations fall within ±\$25,527 of the \$41,413 mean — anywhere from \$16k to \$67k (in this right-skewed sample the actual share is about 75%).
+:::
+::::
+:::: {.column width="50%"}
+::: {.callout-note collapse="true" appearance="simple" title="Analogy"}
+Standard deviation is the volume knob on a stereo. A choir singing together at one volume sounds like a single sustained note; the same choir where some sing softly and some belt loudly sounds like a chord with audible spread. The volume knob doesn't change the song's center pitch — only the audible range around it.
+:::
+::::
+:::::
+
+**Quartiles and IQR:** Quartiles are the three values that split sorted data into four equal-sized groups: $Q_1$ (the 25% mark), $Q_2$ (the median), and $Q_3$ (the 75% mark). The interquartile range, IQR, is simply $Q_3 - Q_1$ — the width of the middle half of the data.
+
+::::: {.columns}
+:::: {.column width="50%"}
+::: {.callout-tip collapse="true" appearance="simple" title="Example"}
+For the 171 women in `data_earnings`, $Q_1 = \$25{,}000$ and $Q_3 = \$49{,}000$, giving an IQR of \$24,000. The middle half of women earn between \$25k and \$49k — a tight central band, even though individual earners range from \$1,050 to \$172,000. The box on the chapter's box plot is exactly this \$24k-wide block.
+:::
+::::
+:::: {.column width="50%"}
+::: {.callout-note collapse="true" appearance="simple" title="Analogy"}
+Picture a marathon with 100 runners crossing the finish line. The quartiles are the 25th, 50th, and 75th finishers — they mark the boundaries of the "front pack", "middle pack", and "back pack". The IQR is the time gap between the 25th and 75th finishers: a small gap means a tightly bunched race; a big gap means a strung-out field.
+:::
+::::
+:::::
+
+**Skewness:** A number that summarizes how asymmetric a distribution is. Positive values mean a long tail of high values, negative values mean a long tail of low values, and values near zero mean roughly symmetric.
+
+::::: {.columns}
+:::: {.column width="50%"}
+::: {.callout-tip collapse="true" appearance="simple" title="Example"}
+The `earnings` distribution in `data_earnings` has a skewness of **1.71**. By the chapter's interpretation guideline, anything above 1 is "highly skewed" — which matches what we see: 75% of the 171 women earn under \$49k, but a few outliers reach \$172k, dragging the right tail far past the mean.
+:::
+::::
+:::: {.column width="50%"}
+::: {.callout-note collapse="true" appearance="simple" title="Analogy"}
+Skewness is what makes a portrait photograph feel "off-center". A symmetric face shot has the nose right in the middle, with equal space on both sides. A photo cropped tightly on one side and wide-open on the other has positive or negative skew depending on which side has the extra space. The earnings distribution is like a photo with the subject pinned to the left and an empty hallway stretching to the right.
+:::
+::::
+:::::
+
+**Kurtosis:** A number that summarizes how heavy a distribution's tails are — that is, how often extreme values appear. Positive (excess) values mean more frequent outliers than a perfectly bell-shaped pattern would predict; negative values mean fewer; zero matches the bell-shape.
+
+::::: {.columns}
+:::: {.column width="50%"}
+::: {.callout-tip collapse="true" appearance="simple" title="Example"}
+The `earnings` data has an **excess kurtosis of 4.32** (raw kurtosis 7.32, minus the bell-shape baseline of 3). That is well above zero, meaning extreme high earners — like the women earning \$100k+ — appear much more often in this sample than a bell-shaped reference distribution would predict.
+:::
+::::
+:::: {.column width="50%"}
+::: {.callout-note collapse="true" appearance="simple" title="Analogy"}
+Kurtosis is the "rare-event frequency" on a city traffic network. Some days every commute is the same; in a low-kurtosis city, traffic is steady and freak jams almost never happen. In a high-kurtosis city, smooth days alternate with truly extreme jams. The earnings sample has high kurtosis because extreme paychecks crop up far more often than a steady commuter pattern would suggest.
+:::
+::::
+:::::
+
+**Z-Score (Standardization):** A standardized version of an observation, expressed as the number of standard deviations above or below the mean. Standardizing every observation rescales the dataset to have mean 0 and standard deviation 1, regardless of the original units.
+
+::::: {.columns}
+:::: {.column width="50%"}
+::: {.callout-tip collapse="true" appearance="simple" title="Example"}
+A woman in `data_earnings` who earns \$67,000 is roughly $(67{,}000 - 41{,}413) / 25{,}527 \approx 1.0$ standard deviations above the mean — her z-score is +1. Standardizing the entire `earnings` column lets us compare her position to, say, a runner's position in a marathon-time distribution, even though dollars and minutes share no scale.
+:::
+::::
+:::: {.column width="50%"}
+::: {.callout-note collapse="true" appearance="simple" title="Analogy"}
+A z-score is a currency converter for distributions. Just as you can compare \$10 in New York with €9 in Paris by converting both to a common currency, a z-score converts a \$67k earner and a 28-second 100m sprinter to a common scale ("standard deviations above average"). Once everything is in the same currency, ranking and comparing become trivial.
+:::
+::::
+:::::
 
 ## Setup
 
@@ -1659,9 +1861,11 @@ data_earnings.head()
 
 ### Summary Statistics
 
+The next cell computes the full set of summary statistics for `earnings` — as you scan the output, note the gap between the mean and the median, our first numerical clue that the distribution is skewed.
+
 ```python
 # Basic descriptive statistics
-data_earnings.describe()
+display(data_earnings.describe())
 
 # Detailed statistics for earnings
 earnings = data_earnings['earnings']
@@ -1695,14 +1899,14 @@ for key, value in stats_dict.items():
 
 - **Mean = \$41,412.69**: The arithmetic average
 - **Median = \$36,000**: The middle value
-- **Gap = \$5,412** (mean is 15% higher than median)
+- **Gap = \$5,413** (mean is 15% higher than median)
 - **Why?** This signals right skewness—some high earners pull the mean upward
 
 **2. Spread - Standard Deviation:**
 
 - **Std Dev = \$25,527.05**
 - This equals 61.6% of the mean (substantial variation)
-- **Rule of thumb:** About 68% of women earn within \$41,413 ± \$25,527 = \$15,886 to \$66,940
+- **Rule of thumb (for bell-shaped data):** about 68% of observations fall within 1 standard deviation of the mean — here \$41,413 ± \$25,527 = \$15,886 to \$66,940. Because these earnings are right-skewed, the actual share in this band is higher: about 75%
 
 **3. Range and Quartiles:**
 
@@ -1755,13 +1959,13 @@ A **box plot** (or box-and-whisker plot) visualizes key summary statistics:
 
 - **Box**: Extends from the 25th to 75th percentile (interquartile range)
 - **Red line**: Median (50th percentile)
-- **Whiskers**: Extend to minimum and maximum values (or 1.5 × IQR from quartiles)
+- **Whiskers**: Extend to the most extreme values within 1.5 × IQR of the quartiles (matplotlib's default); more extreme points are drawn as outlier dots
 - **Dots**: Outliers beyond the whiskers
 
 ```python
 # Create box plot of earnings
 fig, ax = plt.subplots(figsize=(10, 6))
-bp = ax.boxplot(earnings, vert=False, patch_artist=True,
+bp = ax.boxplot(earnings, orientation='horizontal', patch_artist=True,
                 boxprops=dict(facecolor='lightblue', alpha=0.7),  # alpha = transparency (0 = invisible, 1 = opaque)
                 medianprops=dict(color='red', linewidth=2))
 ax.set_xlabel('Annual earnings (in dollars)', fontsize=12)
@@ -1789,7 +1993,7 @@ plt.show()
 **3. The Whiskers:**
 
 - Lower whisker extends to \$1,050 (minimum)
-- Upper whisker extends to outliers
+- Upper whisker extends to \$85,000, the largest value within 1.5 × IQR of Q3; the dots beyond it are the outliers
 - Right whisker is MUCH longer than left whisker (asymmetry)
 
 **4. The Outliers (dots on right):**
@@ -1873,14 +2077,15 @@ plt.show()
 1. **Right skewness confirmed**: Both histograms show long right tail extending to \$172,000
 
 2. **Modal region**: Most common earnings are in the \$15k-\$45k range
-   - This contains ~75% of observations
+   - This contains ~65% of observations
    - Consistent with Q1 (\$25k) and Q3 (\$49k)
 
 3. **Sparse right tail**: Very few observations above \$90k
    - But these high earners substantially influence the mean
    - This is why mean (\$41,413) > median (\$36,000)
 
-4. **Bin width matters**: - **Too wide**: Oversimplifies, may miss important features
+4. **Bin width matters**:
+   - **Too wide**: Oversimplifies, may miss important features
    - **Too narrow**: Introduces noise, harder to see overall pattern
    - **Rule of thumb**: Try multiple bin widths to understand your data
 
@@ -1931,7 +2136,7 @@ The KDE is a smooth, continuous estimate of the probability density function—t
 
 **1. Peak (Mode):**
 
-- Highest density around **\$30,000-\$35,000**
+- Highest density around **\$29,000-\$30,000**
 - This is the most "probable" earnings level
 - Slightly below the median (\$36,000), consistent with right skew
 
@@ -1939,7 +2144,7 @@ The KDE is a smooth, continuous estimate of the probability density function—t
 
 - **Clear right skew**: Long tail extending to \$172,000
 - **NOT bell-shaped**: Would be symmetric if normally distributed
-- **Unimodal**: Single dominant peak (not bimodal)
+- **Mostly unimodal**: Single dominant peak, with a small secondary bump near \$77k
 - **Steep left side**: Density drops quickly below \$20k
 - **Gradual right side**: Density tapers slowly above \$50k
 
@@ -1961,7 +2166,7 @@ If earnings were normally distributed, the KDE would be:
 - **Symmetric** (it's not—it's right-skewed)
 - **Bell-shaped** (it's not—it's asymmetric)
 - **Same mean and median** (they differ by \$5,413)
-- **Unimodal** (it's not—there is another peak around \$70k)
+- **Unimodal** (mostly holds—there is only a small secondary bump around \$77k)
 
 **Advantages of KDE over histograms:**
 
@@ -1974,7 +2179,7 @@ If earnings were normally distributed, the KDE would be:
 The KDE reveals that earnings are NOT normally distributed—they follow a log-normal-like distribution common in economic data. This justifies logarithmic transformations (see Section 2.5) for statistical modeling.
 
 **Practical implication:** 
-When predicting earnings, the "most likely" value is around \$30k-\$35k, NOT the mean (\$41,413). The mean is inflated by rare high earners.
+When predicting earnings, the "most likely" value is around \$29k-\$30k, NOT the mean (\$41,413). The mean is inflated by rare high earners.
 
 ### Time Series Plot
 
@@ -1987,7 +2192,7 @@ When predicting earnings, the "most likely" value is around \$30k-\$35k, NOT the
 data_gdp = pd.read_stata(GITHUB_DATA_URL + 'AED_REALGDPPC.DTA')
 
 # GDP data summary
-data_gdp[['realgdppc', 'year']].describe()
+display(data_gdp[['realgdppc', 'year']].describe())
 
 # Create time series plot
 fig, ax = plt.subplots(figsize=(12, 6))
@@ -2009,10 +2214,10 @@ U.S. real GDP per capita from 1959 to 2020, measured in constant 2012 dollars (i
 
 **1. Long-run growth:**
 
-- **1959**: ~\$17,000 per person
-- **2020**: ~\$60,000 per person
-- **Total growth**: 253% increase (3.5× larger)
-- **Annual growth rate**: ~2.1% per year (compound)
+- **1959**: ~\$17,700 per person
+- **2020**: ~\$57,600 per person
+- **Total growth**: 225% increase (3.2× larger)
+- **Annual growth rate**: ~2.0% per year (compound)
 
 **2. Business cycle patterns (recessions visible as dips):**
 
@@ -2022,8 +2227,8 @@ U.S. real GDP per capita from 1959 to 2020, measured in constant 2012 dollars (i
 - **1990-1991**: Gulf War recession (brief)
 - **2001**: Dot-com bubble burst
 - **2008-2009**: GREAT RECESSION (deepest post-war decline)
-  - GDP per capita fell from \$55k to \$51k
-  - Took until 2015 to recover pre-crisis level
+  - GDP per capita fell from \$52k to \$49k
+  - Took until 2013 to recover pre-crisis level
 - **2020**: COVID-19 pandemic (sharp, sudden drop)
 
 **3. Trend characteristics:**
@@ -2035,10 +2240,10 @@ U.S. real GDP per capita from 1959 to 2020, measured in constant 2012 dollars (i
 
 **4. Summary statistics from the data:**
 
-- **Mean GDP per capita**: \$37,941 (over full 1959-2020 period)
-- **Median**: \$35,500 (slightly below mean due to recent growth)
-- **Min**: ~\$17,000 (1959 start)
-- **Max**: ~\$60,000 (pre-COVID peak 2019)
+- **Mean GDP per capita**: \$37,050 (over full 1959-2020 period)
+- **Median**: \$36,929 (slightly below mean due to recent growth)
+- **Min**: ~\$17,700 (1959 start)
+- **Max**: ~\$58,400 (pre-COVID peak 2019)
 
 **Economic interpretation:**
 
@@ -2092,6 +2297,8 @@ print(f"Total expenditures: ${data_health['expenditures'].sum():,.0f} billion")
 ```
 
 ### Bar Chart
+
+We sort the 13 categories from largest to smallest before plotting so the ranking is instantly readable — look for how far hospital care towers above every other category.
 
 ```python
 # Create bar chart (sorted by expenditure)
@@ -2159,13 +2366,13 @@ print(f"3. {data_health_sorted.iloc[2]['category']}: ${data_health_sorted.iloc[2
 **1. Hospital dominance:**
 
 - Hospitals alone account for nearly **1/3 of all health spending**
-- More than physicians, drugs, and nursing care COMBINED
+- More than physician services (\$726B) and drugs (\$456B) COMBINED
 - Reflects high fixed costs of hospital infrastructure
 
 **2. Concentration:**
 
 - Top 3 categories (Hospital, Physician, Drugs) = **65% of total**
-- Middle 50% of spending across just 3 categories
+- More than half of all spending (52.5%) flows to just the top 2 categories
 - Long tail of smaller categories
 
 **3. Administrative costs:**
@@ -2232,6 +2439,8 @@ print(f"Total observations: {len(data_fishing):,}")
 ```
 
 ### Pie Chart
+
+The pie chart below displays each fishing site's share of the 1,182 choices — check whether the two boat-based slices together account for most of the circle.
 
 ```python
 # Create pie chart
@@ -2370,6 +2579,8 @@ This centers data at 0 with standard deviation 1—useful for comparing variable
 
 ### Log Transformation Effect
 
+We first create the log-transformed variable and put its summary statistics next to the original's — notice how the mean and median, $5,413 apart in dollars, nearly coincide on the log scale.
+
 ```python
 # Create log transformation
 data_earnings['lnearnings'] = np.log(data_earnings['earnings'])
@@ -2377,6 +2588,8 @@ data_earnings['lnearnings'] = np.log(data_earnings['earnings'])
 # Comparison of earnings and log(earnings)
 data_earnings[['earnings', 'lnearnings']].describe()
 ```
+
+Now let's see the transformation visually: the next cell plots earnings and log(earnings) side by side — watch the long right tail of Panel A collapse into the roughly bell-shaped Panel B.
 
 ```python
 # Compare original and log-transformed earnings
@@ -2418,10 +2631,10 @@ print(f"Skewness reduced from {stats.skew(earnings):.2f} to {stats.skew(data_ear
 **Panel B: Log(Earnings) (natural logarithm)**
 
 - **Shape**: Much more symmetric, approximately normal
-- **Skewness**: -0.91 (nearly symmetric, slight left skew)
+- **Skewness**: -0.91 (moderate left skew — far closer to symmetry than the original 1.71)
 - **Mean**: 10.46 (log dollars)
 - **Median**: 10.49 (log dollars)
-- **Std Dev**: 0.62 (only 6% of mean)
+- **Std Dev**: 0.62 log points (≈ ±62% proportional spread, roughly constant across income levels)
 - **Range**: 6.96 to 12.06
 
 **What the transformation achieved:**
@@ -2429,8 +2642,8 @@ print(f"Skewness reduced from {stats.skew(earnings):.2f} to {stats.skew(data_ear
 **1. Reduced skewness dramatically:**
 
 - Original skewness: **1.71** → Log skewness: **-0.91**
-- Reduction of **122%** in absolute skewness
-- Now nearly symmetric (close to 0)
+- Reduction of **47%** in absolute skewness (from 1.71 to 0.91 in magnitude)
+- Now moderately left-skewed rather than strongly right-skewed
 
 **2. Normalized the distribution:**
 
@@ -2440,9 +2653,9 @@ print(f"Skewness reduced from {stats.skew(earnings):.2f} to {stats.skew(data_ear
 
 **3. Equalized variance (stabilization):**
 
-- Original std dev: 62% of mean (high coefficient of variation)
-- Log std dev: 6% of mean (much more stable)
-- High earners no longer dominate the variance
+- In dollars, the spread scales with income (SD = 62% of the mean — a large coefficient of variation), so a few high earners dominate the variance
+- On the log scale, one standard deviation is about 0.62 log points — a roughly ±62% proportional spread that stays about the same at every income level instead of ballooning with income
+- With the variance stabilized, extreme high earners no longer dominate the spread
 
 **4. Brought mean and median closer:**
 
@@ -2462,15 +2675,15 @@ print(f"Skewness reduced from {stats.skew(earnings):.2f} to {stats.skew(data_ear
 **Economic reasons:**
 
 1. **Multiplicative relationships**: Income growth is often proportional (e.g., 10% raise)
-2. **Percentage interpretation**: A 1-unit increase in log(income) ≈ 100% increase in income
+2. **Percentage interpretation**: Small changes in log(income) are approximately percentage changes — a 0.05 increase in log(income) ≈ 5% increase in income (accurate only for small changes; a full 1-unit increase multiplies income by e ≈ 2.72; see Chapter 9)
 3. **Economic theory**: Utility functions often logarithmic (diminishing marginal utility)
 4. **Cross-country comparisons**: Log scale makes it easier to compare countries with vastly different GDP levels
 
 **How to interpret log(earnings) = 10.46?**
 
-- Take exponential: e^10.46 = \$34,762
+- Take exponential: e^10.46 = \$34,892
 - This is close to the median earnings (\$36,000)
-- Each 1-unit increase in log(earnings) ≈ 2.718× increase in earnings
+- Each 1-unit increase in log(earnings) multiplies earnings by e ≈ 2.718 (a 172% increase)
 
 **Example interpretation:**
 
@@ -2494,7 +2707,9 @@ Time series data presents unique challenges—seasonal fluctuations, inflation, 
 
 ## 2.6 Data Transformations for Time Series Data
 
-Time series data often require special transformations: 1. **Moving averages**: Smooth short-term fluctuations by averaging over several periods
+Time series data often require special transformations:
+
+1. **Moving averages**: Smooth short-term fluctuations by averaging over several periods
 
    - Example: 11-month moving average removes monthly noise
 
@@ -2520,6 +2735,8 @@ data_homesales_filtered[['year', 'exsales', 'exsales_ma11', 'exsales_sa']].descr
 ```
 
 ### Time Series Transformations for Home Sales
+
+The two panels below overlay the raw monthly series with each transformation — in Panel A, watch the 11-month moving average cut through the seasonal zigzag; in Panel B, see how seasonal adjustment removes the regular summer peaks and winter troughs.
 
 ```python
 # Create time series plots with transformations
@@ -2691,6 +2908,8 @@ plt.show()
 
 ### GDP Comparisons - Nominal vs Real
 
+As a final illustration of time series transformations, the next cell contrasts nominal GDP with inflation-adjusted (real) GDP, in totals (Panel A) and per capita (Panel B) — watch how the nominal series overstates growth because it bundles inflation together with real gains.
+
 ```python
 # Compare nominal and real GDP
 fig, axes = plt.subplots(1, 2, figsize=(16, 6))
@@ -2723,6 +2942,8 @@ plt.suptitle('GDP Comparisons - Nominal vs Real',
 plt.tight_layout()
 plt.show()
 ```
+
+**What these panels show:** In both panels the nominal series climbs much faster than the real series because it mixes inflation with genuine growth; the two lines cross in 2012, the base year in which nominal and 2012-dollar values coincide by construction. After stripping out inflation, real GDP per capita (Panel B) still grows substantially over 1959-2020, but far less dramatically than the raw nominal numbers suggest. This is why economists compare living standards over time using *real, per-capita* values.
 
 ## Key Takeaways
 
@@ -2818,7 +3039,7 @@ plt.show()
 # =============================================================================
 # The box spans Q1 to Q3 (IQR); whiskers extend 1.5×IQR; dots are outliers
 fig, ax = plt.subplots(figsize=(10, 4))
-ax.boxplot(earnings, vert=False, patch_artist=True,
+ax.boxplot(earnings, orientation='horizontal', patch_artist=True,
            boxprops=dict(facecolor='lightblue', alpha=0.7),
            medianprops=dict(color='red', linewidth=2))
 ax.set_xlabel('Annual Earnings ($)')
@@ -2862,7 +3083,7 @@ print(f"Observations with |z| > 2: {(z_scores.abs() > 2).sum()} out of {len(z_sc
 # STEP 7: Time series — moving average smooths seasonal noise
 # =============================================================================
 # Monthly home sales zigzag with the seasons; an 11-month moving average
-# cancels one full seasonal cycle, revealing the underlying trend
+# smooths away most of the 12-month seasonal swing, revealing the underlying trend
 url_homesales = "https://raw.githubusercontent.com/quarcs-lab/data-open/master/AED/AED_MONTHLYHOMESALES.DTA"
 data_hs = pd.read_stata(url_homesales)
 data_hs = data_hs[data_hs['year'] >= 2005]
@@ -2891,10 +3112,11 @@ plt.show()
 - **Chapter 6-9**: Simple linear regression and interpretation
 
 **You have now mastered:**
- Calculating and interpreting summary statistics
- Creating effective visualizations for different data types
- Applying transformations to reveal patterns and normalize distributions
- Handling time series data with moving averages and seasonal adjustment
+
+- Calculating and interpreting summary statistics
+- Creating effective visualizations for different data types
+- Applying transformations to reveal patterns and normalize distributions
+- Handling time series data with moving averages and seasonal adjustment
 
 These foundational skills prepare you for inferential statistics and regression analysis in the following chapters!
 
@@ -2906,9 +3128,12 @@ These foundational skills prepare you for inferential statistics and regression 
 
 ## Practice Exercises
 
-Test your understanding of univariate data analysis with these exercises: **Exercise 1:** Calculate summary statistics
+Test your understanding of univariate data analysis with these exercises:
 
-- For the sample {5, 2, 2, 8, 3}, calculate: - (a) Mean
+**Exercise 1:** Calculate summary statistics
+
+- For the sample {5, 2, 2, 8, 3}, calculate:
+  - (a) Mean
   - (b) Median
   - (c) Variance
   - (d) Standard deviation
@@ -2920,7 +3145,8 @@ Test your understanding of univariate data analysis with these exercises: **Exer
 
 **Exercise 3:** Choose visualization types
 
-- For each scenario, recommend the best chart type and explain why: - (a) Quarterly GDP growth rates from 2000 to 2025
+- For each scenario, recommend the best chart type and explain why:
+  - (a) Quarterly GDP growth rates from 2000 to 2025
   - (b) Market share of 5 smartphone brands
   - (c) Distribution of household incomes in a city
   - (d) Monthly temperature readings over a year
@@ -2929,29 +3155,35 @@ Test your understanding of univariate data analysis with these exercises: **Exer
 
 - Why is log transformation particularly useful for economic variables like income and GDP?
 - If log(earnings) increases by 0.5, approximately what percentage increase does this represent in earnings?
+- Compare your approximation with the exact percentage change, 100 × (e^0.5 − 1). Why do the two answers differ for a change this large?
 
 **Exercise 5:** Standard deviation interpretation
 
-- A dataset has mean = 50 and standard deviation = 10. If the data are approximately normally distributed: - (a) What percentage of observations fall between 40 and 60?
+- A dataset has mean = 50 and standard deviation = 10. If the data are approximately normally distributed:
+  - (a) What percentage of observations fall between 40 and 60?
   - (b) What percentage fall between 30 and 70?
 
 **Exercise 6:** Time series transformations
 
-- Explain the difference between: - (a) Moving average vs. seasonal adjustment
+- Explain the difference between:
+  - (a) Moving average vs. seasonal adjustment
   - (b) Nominal GDP vs. Real GDP
   - (c) Total GDP vs. GDP per capita
 
 **Exercise 7:** Z-scores
 
-- For a sample with mean = 100 and standard deviation = 15: - (a) Calculate the z-score for an observation of 130
+- For a sample with mean = 100 and standard deviation = 15:
+  - (a) Calculate the z-score for an observation of 130
   - (b) Interpret what this z-score means
 
 **Exercise 8:** Data interpretation
 
-- A box plot shows: - Lower quartile (Q1) = 25
+- A box plot shows:
+  - Lower quartile (Q1) = 25
   - Median (Q2) = 35
   - Upper quartile (Q3) = 60
-- Calculate: - (a) Interquartile range (IQR)
+- Calculate:
+  - (a) Interquartile range (IQR)
   - (b) Describe the skewness based on quartile positions
 
 ---
@@ -2972,7 +3204,7 @@ By completing this case study, you'll apply all the univariate analysis tools fr
 >
 > Cross-country distributions of economic variables (productivity, GDP per capita, income) are typically right-skewed with long upper tails, reflecting substantial inequality between rich and poor countries. Summary statistics like the median are often more representative than the mean for these distributions, and exploring the shape of the distribution reveals whether gaps between countries are widening or narrowing.
 
-### Load the Productivity Data
+#### Load the Productivity Data
 
 We'll use the same Convergence Clubs dataset from Chapter 1, but focus exclusively on the labor productivity variable (`lp`) across countries and years. This gives us 2,700 observations (108 countries × 25 years, from 1990 to 2014) of international productivity.
 
@@ -2995,7 +3227,7 @@ print(f"Time period: {df1.index.get_level_values('year').min()} to {df1.index.ge
 df1[['lp']].head(10)
 ```
 
-### How to Use These Tasks
+#### How to Use These Tasks
 
 **Instructions:**
 
@@ -3056,8 +3288,9 @@ print(productivity.describe())
 print("\n" + "=" * 70)
 print("Productivity across 5 sample countries:")
 print("=" * 70)
-sample_countries = ['Australia', 'Brazil', 'China', 'France', 'Nigeria']
-for country in sample_countries: country_data = df1.loc[country, 'lp']
+sample_countries = ['Australia', 'Brazil', 'China', 'France', 'Kenya']
+for country in sample_countries:
+    country_data = df1.loc[country, 'lp']
     print(f"\n{country}:")
     print(f"  Mean productivity: {_____:.3f}")
     print(f"  Min: {_____:.3f}, Max: {_____:.3f}")
@@ -3135,7 +3368,7 @@ productivity_1990 = df1.xs(1990, level=_____)['lp']
 productivity_2014 = df1.xs(_____, level='year')['lp']
 
 # Your code here: Create a comparison DataFrame
-# Hint: Use pd. DataFrame() with statistics for both years
+# Hint: Use pd.DataFrame() with statistics for both years
 # Include: mean, median, std, skewness, min, max
 
 ```
@@ -3186,7 +3419,7 @@ axes[0, 0].set_title('Panel 1: Histogram of Productivity (20 bins)', fontsize=12
 axes[0, 0].grid(True, alpha=0.3)
 
 # Panel 2: Box plot (original productivity)
-axes[0, 1].boxplot(_____, vert=True, patch_artist=True)
+axes[0, 1].boxplot(_____, orientation='vertical', patch_artist=True)
 axes[0, 1].set_ylabel('Labor Productivity', fontsize=11)
 axes[0, 1].set_title('Panel 2: Box Plot of Productivity', fontsize=12, fontweight='bold')
 axes[0, 1].grid(True, alpha=0.3, axis='y')
@@ -3264,7 +3497,7 @@ prod_2014 = _____  # Extract 2014 data (same pattern as above)
 
 # Panel B: Side-by-side box plots
 # Your code here: Create box plots for both years
-# Hint: axes[1].boxplot([prod_1990, prod_2014], labels=['1990', '2014'])
+# Hint: axes[1].boxplot([prod_1990, prod_2014], tick_labels=['1990', '2014'])
 # Set different colors for each box using patch_artist=True
 
 # Step 3: Calculate comparison statistics
@@ -3360,8 +3593,8 @@ prod_2014 = _____  # Extract 2014 data (same pattern as above)
 
 **Instructions:**
 
-1. Add a region column to your dataframe (you'll need to manually assign regions based on country names)
-2. Group countries by region (at minimum: Africa, Asia, Europe, Americas)
+1. Use the dataset's built-in `region` column (its five values are Africa, Americas, Asia, Europe, and Oceania) — no manual mapping is needed
+2. Group countries by region
 3. Create box plots for each region side-by-side
 4. Calculate summary statistics by region
 5. Identify: Which regions have highest/lowest productivity? Most inequality?
@@ -3370,7 +3603,7 @@ prod_2014 = _____  # Extract 2014 data (same pattern as above)
 
 **Starter code guidance:**
 
-- Create a dictionary mapping countries to regions
+- Read the existing `region` column (no dictionary needed)
 - Use `.groupby()` to calculate statistics by region
 - Create side-by-side box plots for visual comparison
 - Calculate mean and standard deviation by region
@@ -3382,21 +3615,15 @@ prod_2014 = _____  # Extract 2014 data (same pattern as above)
 # Task 6: Regional Patterns (INDEPENDENT)
 # Compare productivity distributions across geographic regions
 
-# Step 1: Create region mapping dictionary
-# Your code here: Define region_mapping
-# Map each country to its region (Africa, Americas, Asia, Europe, Middle East, Asia-Pacific)
-# Example structure:
-# region_mapping = {
-#     'Australia': 'Asia-Pacific',
-#     'Austria': 'Europe',
-#     'Brazil': 'Americas',
-#     # ... continue for all ~50 countries
-# }
+# Step 1: Use the existing region column
+# The Mendez dataset already labels every country with one of five regions:
+# Africa, Americas, Asia, Europe, Oceania — so no manual mapping is needed.
+# Your code here: confirm the labels
+# Hint: df1['region'].unique()
 
-# Step 2: Add region column to dataframe
-# Your code here: Create a copy of df1 and add region column
-# Hint: df_with_region['region'] = df_with_region.index.get_level_values('country').map(region_mapping)
-# Remove rows with missing regions: .dropna(subset=['region'])
+# Step 2: Build one row per country carrying its region
+# Your code here: region is constant over time, so take the mean lp and first region per country
+# Hint: df_region = df1.reset_index().groupby('country').agg({'lp': 'mean', 'region': 'first'})
 
 # Step 3: Calculate regional statistics
 # Your code here: Group by region and aggregate statistics
@@ -3414,9 +3641,9 @@ prod_2014 = _____  # Extract 2014 data (same pattern as above)
 
 **Hints:**
 
-- There are ~50 countries in the dataset - you'll need to map each one
-- Regions: Africa (Kenya, Nigeria, etc.), Americas (USA, Brazil, etc.), Asia (China, India, etc.)
-- Europe (France, Germany, etc.), Middle East (Israel, Turkey), Asia-Pacific (Australia, Japan, NZ)
+- The five region labels already in the data are Africa, Americas, Asia, Europe, and Oceania
+- Example members — Africa (Kenya, South Africa), Americas (United States, Brazil), Asia (China, India, Japan)
+- Europe (France, Germany), Oceania (Australia, New Zealand)
 - Use `.groupby('region')['lp'].agg([...])` to calculate statistics by region
 - Sort regions by mean before plotting for better visualization
 
@@ -3426,7 +3653,7 @@ prod_2014 = _____  # Extract 2014 data (same pattern as above)
 - Which region has the most internal inequality (widest box)?
 - Are there clear regional clusters or is variation continuous?
 
-### What You've Learned from This Case Study
+#### What You've Learned from This Case Study
 
 By completing this case study on global labor productivity distribution, you've applied the full toolkit of univariate data analysis to a real international economics question. You've moved beyond calculating statistics and making charts to asking substantive economic questions: Are countries converging or diverging? How has global inequality in productivity evolved? Which regions drive global disparity?
 
@@ -3515,7 +3742,7 @@ for var in analysis_vars:
 # Compare mean vs median for each variable:
 # If mean > median -> right-skewed (long upper tail)
 # If mean < median -> left-skewed (long lower tail)
-# High kurtosis (>3) indicates heavy tails (extreme municipalities)
+# Positive kurtosis (>0) indicates heavy tails (extreme municipalities) — pandas .kurtosis() reports excess kurtosis
 ```
 
 #### Task 2: Histograms and Density Plots (Guided)
@@ -3603,7 +3830,7 @@ plt.show()
 # Example structure:
 # dept_order = bol_key.groupby('dep')['imds'].median().sort_values().index
 # fig, ax = plt.subplots(figsize=(10, 7))
-# bol_key.boxplot(column='imds', by='dep', ax=ax, vert=False,
+# bol_key.boxplot(column='imds', by='dep', ax=ax, orientation='horizontal',
 #                 positions=range(len(dept_order)))
 # ax.set_xlabel('Municipal Development Index (IMDS)')
 # ax.set_ylabel('Department')
@@ -3617,8 +3844,8 @@ import seaborn as sns
 dept_order = bol_key.groupby('dep')['imds'].median().sort_values().index.tolist()
 
 fig, ax = plt.subplots(figsize=(10, 7))
-sns.boxplot(data=bol_key, x='imds', y='dep', order=dept_order,
-            palette='viridis', ax=ax)
+sns.boxplot(data=bol_key, x='imds', y='dep', hue='dep', order=dept_order,
+            palette='viridis', legend=False, ax=ax)
 ax.set_xlabel('Municipal Development Index (IMDS)')
 ax.set_ylabel('Department')
 ax.set_title('Municipal Development Distribution by Department')
@@ -3777,7 +4004,7 @@ print(f"{'Median':<15} {pop.median():>15,.0f} {log_pop.median():>15.2f}")
 # print("Write your 200-word analysis here...")
 ```
 
-### What You've Learned from This Case Study
+#### What You've Learned from This Case Study
 
 By applying Chapter 2's univariate analysis tools to Bolivia's municipal SDG data, you've characterized the *distribution* of development outcomes across 339 municipalities. Specifically, you've practiced:
 
@@ -3811,7 +4038,7 @@ This notebook provides an interactive introduction to one of the most important 
 [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/quarcs-lab/metricsai/blob/main/notebooks_colab/ch03_The_Sample_Mean.ipynb)
 <div class="chapter-resources">
 <a href="https://www.youtube.com/watch?v=pnv9ff_3hrI" target="_blank" class="resource-btn">🎬 AI Video</a>
-<a href="https://carlos-mendez.my.canva.site/s03-the-sample-mean-pdf" target="_blank" class="resource-btn">✨ AI Slides</a>
+<a href="https://quarcs-lab.github.io/metricsai/slides/ch03/index.html" target="_blank" class="resource-btn">🧑🏽‍🏫 Mendez Slides</a>
 <a href="https://cameron.econ.ucdavis.edu/aed/traedv1_03" target="_blank" class="resource-btn">📊 Cameron Slides</a>
 <a href="https://app.edcafe.ai/quizzes/697864e12f5d08069e0471b5" target="_blank" class="resource-btn">✏️ Quiz</a>
 <a href="https://app.edcafe.ai/chatbots/69789d252f5d08069e06fdad" target="_blank" class="resource-btn">🤖 AI Tutor</a>
@@ -3842,13 +4069,107 @@ This chapter provides the theoretical foundation for ALL statistical inference i
 **Chapter outline:**
 
 - 3.1 Random Variables
-- 3.2 Experiment - Single Sample of Coin Tosses
+- 3.2 Experiment: Coin Tosses
 - 3.3 Properties of the Sample Mean
 - 3.4 Real Data Example - 1880 U.S. Census
 - 3.5 Estimator Properties
 - 3.6 Computer Simulation of Random Samples
 - 3.7 Samples other than Simple Random Samples
 
+
+## Key Concepts
+
+Six core ideas anchor this chapter. Skim them before you start, and come back when a term feels fuzzy. Each entry pairs a concrete example using the chapter's data with a non-technical analogy. Click a panel to expand it.
+
+**Population Parameter vs. Sample Statistic:** A population parameter is a fixed number describing the entire population that we typically never observe directly, like $\mu$ or $\sigma$. A sample statistic is a number we compute from one drawn sample, like $\bar{x}$ or $s$, and it changes from sample to sample.
+
+::::: {.columns}
+:::: {.column width="50%"}
+::: {.callout-tip collapse="true" appearance="simple" title="Example"}
+For 1880 U.S. Census ages, the population parameter is $\mu = 24.13$ years (computed once from all 50,169,452 records). When researchers draw a sample of $n = 25$ people they compute one sample statistic — say $\bar{x} = 27.84$ years (the first of the chapter's 100 census samples). Across 100 such samples, the statistics range from 14.6 to 33.4 years even though $\mu$ never changes.
+:::
+::::
+:::: {.column width="50%"}
+::: {.callout-note collapse="true" appearance="simple" title="Analogy"}
+A population parameter is the published recipe for a cake — written down once and fixed forever. A sample statistic is the cake one baker actually pulls from the oven tonight: a little drier, a little sweeter, a little different from every other baker's cake. The recipe is the truth; each cake is one noisy realization of it.
+:::
+::::
+:::::
+
+**Estimator:** A rule or formula that takes a sample and returns a number meant to approximate a population parameter. The sample mean $\bar{X} = \tfrac{1}{n}\sum X_i$ is an estimator of $\mu$. An *estimate* is the specific number that comes out when we feed the rule one specific sample.
+
+::::: {.columns}
+:::: {.column width="50%"}
+::: {.callout-tip collapse="true" appearance="simple" title="Example"}
+In ch03, $\bar{X}$ is the estimator. Feed it the first 30 coin-toss outcomes and it returns the estimate $\bar{x} = 0.40$. Feed it a different 30 tosses and it returns $0.53$, then $0.47$, and so on — across the 400 simulated samples we get 400 different estimates from one estimator, with mean $0.5004$ and SD $0.0887$.
+:::
+::::
+:::: {.column width="50%"}
+::: {.callout-note collapse="true" appearance="simple" title="Analogy"}
+An estimator is sheet music for a song; an estimate is the recording made by one orchestra on one night. The same sheet music can produce thousands of recordings, each a little different in tempo and emphasis, but all generated by the same underlying rule. Don't confuse the score with any single performance of it.
+:::
+::::
+:::::
+
+**Unbiasedness:** A property meaning the estimator's expected value equals the parameter it targets, with no systematic over- or under-shooting. The sample mean is unbiased for $\mu$ because $E[\bar{X}] = \mu$.
+
+::::: {.columns}
+:::: {.column width="50%"}
+::: {.callout-tip collapse="true" appearance="simple" title="Example"}
+Across the 400 simulated coin-toss samples ($n = 30$, $\mu = 0.5$), the average of all sample means is $0.5004$ — almost exactly the true $\mu$. Across the 100 census-age samples ($n = 25$, $\mu = 24.13$ years), the average of the sample means is $23.78$ years — within $0.4$ of the truth even though individual means range from $14.6$ to $33.4$.
+:::
+::::
+:::: {.column width="50%"}
+::: {.callout-note collapse="true" appearance="simple" title="Analogy"}
+An unbiased archer fires a hundred arrows: each one lands somewhere off-target due to wind and tremor, but their *average* position is exactly the bullseye. The archer doesn't pull left or right systematically — only the unavoidable jitter of small disturbances. That's $\bar{X}$ around $\mu$.
+:::
+::::
+:::::
+
+**Efficiency:** Among all unbiased estimators, the one with the smallest variance is called efficient. The sample mean $\bar{X}$ is efficient for $\mu$ in many common settings (Bernoulli, normal, Poisson) — its sample-to-sample bounce is as small as theory allows.
+
+::::: {.columns}
+:::: {.column width="50%"}
+::: {.callout-tip collapse="true" appearance="simple" title="Example"}
+For the coin toss ($\sigma^2 = 0.25$, $n = 30$), the sample mean has $\operatorname{Var}[\bar{X}] = 0.0083$ and standard deviation $\sigma/\sqrt{n} = 0.0913$. Any rival unbiased estimator — like keeping only the first toss, or averaging just the first and last — would have a wider sample-to-sample swing than this; the simulation's empirical SD of $0.0887$ closely matches the theoretical floor.
+:::
+::::
+:::: {.column width="50%"}
+::: {.callout-note collapse="true" appearance="simple" title="Analogy"}
+A sharp camera lens and a foggy lens both centre on the same subject (no bias), but the sharp lens produces a tight, crisp image while the foggy lens smears across the frame. Efficiency is the optical quality of an estimator: same target, smallest blur, no detail wasted.
+:::
+::::
+:::::
+
+**Consistency:** A property meaning the estimator gets arbitrarily close to the parameter as the sample size grows. For $\bar{X}$, this follows from $\operatorname{Var}[\bar{X}] = \sigma^2/n \to 0$ as $n \to \infty$ — the bounce shrinks without limit.
+
+::::: {.columns}
+:::: {.column width="50%"}
+::: {.callout-tip collapse="true" appearance="simple" title="Example"}
+With census ages ($\sigma = 18.61$ years), the standard deviation of $\bar{X}$ is $3.72$ at $n = 25$, but only $1.86$ at $n = 100$, $0.83$ at $n = 500$, and $0.26$ at $n = 5{,}000$. By the time $n$ approaches the size of the full 1880 census, $\bar{X}$ is glued to $\mu = 24.13$ within hundredths of a year.
+:::
+::::
+:::: {.column width="50%"}
+::: {.callout-note collapse="true" appearance="simple" title="Analogy"}
+A GPS receiver is consistent for your location when its accuracy improves as you collect more satellite pings — at one ping you're "somewhere in the city", at fifty pings "on this street", at five hundred pings "at this house". The error doesn't merely become small on average; it shrinks all the way to zero given enough data.
+:::
+::::
+:::::
+
+**Law of Large Numbers:** A foundational result stating that as $n \to \infty$, the sample mean $\bar{X}$ converges to the population mean $\mu$ with near certainty. It is the formal guarantee behind consistency for $\bar{X}$.
+
+::::: {.columns}
+:::: {.column width="50%"}
+::: {.callout-tip collapse="true" appearance="simple" title="Example"}
+With $n = 30$ coin tosses, individual simulated sample means range from $0.27$ to $0.77$ across the 400 simulations — strikingly far from $\mu = 0.5$ on the noisy days. Push to $n = 1{,}000$ and the typical deviation shrinks more than fivefold; at $n = 1{,}000{,}000$ it is a mere $0.0005$. The Law of Large Numbers promises this convergence is mathematically guaranteed, not lucky.
+:::
+::::
+:::: {.column width="50%"}
+::: {.callout-note collapse="true" appearance="simple" title="Analogy"}
+A casino's roulette wheel keeps about five cents of every dollar wagered in expectation. One night a single gambler may win big or lose big, but the casino — playing the wheel a million times a year — pockets almost exactly the expected house edge. The Law of Large Numbers is why casinos always win in the long run: averages drift inevitably toward their expected value as the count grows.
+:::
+::::
+:::::
 
 ## Setup
 
@@ -3917,6 +4238,8 @@ $$\sigma^2 = E[(X - \mu)^2] = \sum_x (x - \mu)^2 \cdot Pr[X = x]$$
 For fair coin: $\sigma^2 = (0-0.5)^2 \times 0.5 + (1-0.5)^2 \times 0.5 = 0.25$
 
 **Standard Deviation:** $\sigma = \sqrt{0.25} = 0.5$
+
+Let's verify these formulas in code — first for the fair coin, then for an unfair coin with $p = 0.6$. Notice that the unfair coin has a higher mean but a slightly *lower* variance: outcomes become more predictable when one side dominates.
 
 ```python
 # Coin toss random variable
@@ -4147,7 +4470,7 @@ $$SD[\bar{X}] = \frac{\sigma}{\sqrt{n}}$$
 
 1. As sample size $n$ increases, $Var[\bar{X}]$ decreases ($\propto 1/n$)
 2. Larger samples give more precise estimates (smaller variability)
-3. Standard deviation decreases at rate \$1/\sqrt{n}$ (to halve uncertainty, need 4× the sample size)
+3. Standard deviation decreases at rate $1/\sqrt{n}$ (to halve uncertainty, need 4× the sample size)
 
 ```python
 # How sample size affects precision
@@ -4174,6 +4497,8 @@ for n in sample_sizes:
 > **Key Concept 3.3: Properties of the Sample Mean**
 >
 > Under simple random sampling (common mean $\mu$, common variance $\sigma^2$, independence), the sample mean $\bar{X}$ has mean $\mathrm{E}[\bar{X}] = \mu$ (unbiased) and variance $\operatorname{Var}[\bar{X}] = \sigma^2/n$ (decreases with sample size). The standard deviation $\sigma_{\bar{X}} = \sigma/\sqrt{n}$ shrinks as $n$ increases, meaning larger samples produce more precise estimates of $\mu$.
+
+In practice we never know $\sigma$, so we estimate the precision of $\bar{x}$ with the **standard error** $se(\bar{X}) = s/\sqrt{n}$. The next cell computes it for our single sample of 30 tosses — compare the estimate with the true $\sigma/\sqrt{n}$.
 
 ```python
 # Standard error calculation
@@ -4340,8 +4665,8 @@ print(f"Empirical std:  {age_means.std():.2f} vs Theoretical: {18.61/np.sqrt(25)
 
 **5. Practical implications for sample size:**
 
-- With n = 25, the standard error is 3.72 years
-- To estimate average age within ±1 year (95% confidence), we'd need about 4 times larger samples
+- With n = 25, the standard deviation of the sample mean ($\sigma/\sqrt{n}$) is 3.72 years
+- To estimate average age within ±1 year (95% confidence), we'd need n ≈ 1,330 — about 53 times larger samples
 - The Census Bureau uses this logic to design survey sizes
 
 **Economic interpretation:** Real economic data (income, age, consumption) is rarely normally distributed - often highly skewed or irregular. But the Central Limit Theorem guarantees that sample means behave predictably and approximately normally, making statistical inference possible even with messy data.
@@ -4379,49 +4704,6 @@ plt.show()
 >
 > The Central Limit Theorem is not just a mathematical curiosity—it works with real data. Even when the population distribution is highly non-normal (like the skewed 1880 Census ages with heaping at multiples of 5), the distribution of sample means becomes approximately normal for moderate sample sizes. This validates using normal-based inference methods across diverse economic applications.
 
-### Interpreting the Simulation Results
-
-**Key findings from 400 simulated coin toss samples:**
-
-**1. Mean of simulated sample means = 0.5004 (vs. theoretical μ = 0.5)**
-
-- Perfect agreement (difference of only 0.0004)
-- This validates our simulation code
-- Confirms the theoretical prediction E[X̄] = μ
-
-**2. Standard deviation of simulated means = 0.0887 (vs. theoretical = 0.0913)**
-
-- Close agreement (within 3%)
-- Theoretical: σ/√n = √(0.25/30) = 0.0913
-- The small difference is random simulation noise
-
-**3. Range of simulated means: 0.2667 to 0.7667**
-
-- Matches the theoretical range well
-- About 95% of values fall within μ ± 2σ(X̄) = 0.5 ± 0.183
-- This is exactly what we'd expect from a normal distribution
-
-**4. Why simulation matters:**
-
-- **Validation:** We've confirmed that theory matches practice
-- **Intuition:** We can see the CLT in action, not just read about it
-- **Flexibility:** We can simulate complex scenarios where theory is hard
-- **Modern econometrics:** Bootstrap, Monte Carlo methods rely on simulation
-
-**5. Reproducibility with random seeds:**
-
-- By setting `np.random.seed(10101)`, we get identical results every time
-- Essential for scientific reproducibility
-- In research, always document your random seed
-
-**6. The simulation matches the pre-computed data:**
-
-- Earlier we loaded AED_COINTOSSMEANS.DTA with mean 0.4994, sd 0.0863
-- Our simulation gave mean 0.5004, sd 0.0887
-- These match closely (differences are just from different random seeds)
-
-**Economic interpretation:** Modern econometric research heavily uses simulation methods (bootstrap standard errors, Monte Carlo integration, Bayesian MCMC). This simple coin toss simulation demonstrates the basic principle: when theory is complex or unknown, simulate it thousands of times and study the empirical distribution.
-
 ## 3.5 Estimator Properties
 
 Why use the sample mean $\bar{X}$ to estimate the population mean $\mu$? Because it has desirable statistical properties:
@@ -4444,6 +4726,8 @@ An estimator is **consistent** if it converges to the true parameter as $n \to \
 Therefore $\bar{X}$ is consistent for $\mu$.
 
 **Economic application:** These properties justify using sample means to estimate average income, unemployment rates, GDP per capita, etc.
+
+Let's make consistency concrete using the census population ($\sigma = 18.61$ years): as $n$ grows, watch both $\operatorname{Var}[\bar{X}]$ and $SD[\bar{X}]$ in the table shrink toward zero.
 
 ```python
 # Consistency: variance shrinks as n increases
@@ -4494,7 +4778,7 @@ From uniform U(0,1) random numbers, we can generate any distribution:
 
 **Example - Coin toss simulation:**
 
-- Draw uniform random number $U \sim 	ext{Uniform}(0,1)$
+- Draw uniform random number $U \sim \text{Uniform}(0,1)$
 - If $U > 0.5$: heads ($X=1$)
 - If $U \leq 0.5$: tails ($X=0$)
 - Repeat 30 times to simulate 30 coin tosses
@@ -4550,6 +4834,49 @@ print(f"sigma(X-bar) = sigma/sqrt(n): {np.sqrt(0.25/30):.4f}")
 ```
 
     
+### Interpreting the Simulation Results
+
+**Key findings from 400 simulated coin toss samples:**
+
+**1. Mean of simulated sample means = 0.5004 (vs. theoretical μ = 0.5)**
+
+- Perfect agreement (difference of only 0.0004)
+- This validates our simulation code
+- Confirms the theoretical prediction E[X̄] = μ
+
+**2. Standard deviation of simulated means = 0.0887 (vs. theoretical = 0.0913)**
+
+- Close agreement (within 3%)
+- Theoretical: σ/√n = √(0.25/30) = 0.0913
+- The small difference is random simulation noise
+
+**3. Range of simulated means: 0.2667 to 0.7667**
+
+- Matches the theoretical range well
+- About 95% of values fall within μ ± 2σ(X̄) = 0.5 ± 0.183
+- This is exactly what we'd expect from a normal distribution
+
+**4. Why simulation matters:**
+
+- **Validation:** We've confirmed that theory matches practice
+- **Intuition:** We can see the CLT in action, not just read about it
+- **Flexibility:** We can simulate complex scenarios where theory is hard
+- **Modern econometrics:** Bootstrap, Monte Carlo methods rely on simulation
+
+**5. Reproducibility with random seeds:**
+
+- By setting `np.random.seed(10101)`, we get identical results every time
+- Essential for scientific reproducibility
+- In research, always document your random seed
+
+**6. The simulation matches the pre-computed data:**
+
+- Earlier we loaded AED_COINTOSSMEANS.DTA with mean 0.4994, sd 0.0863
+- Our simulation gave mean 0.5004, sd 0.0887
+- These match closely (differences are just from different random seeds)
+
+**Economic interpretation:** Modern econometric research heavily uses simulation methods (bootstrap standard errors, Monte Carlo integration, Bayesian MCMC). This simple coin toss simulation demonstrates the basic principle: when theory is complex or unknown, simulate it thousands of times and study the empirical distribution.
+
 This figure shows our simulated distribution (green) overlaid with the theoretical normal distribution (red). They match almost perfectly!
 
 ```python
@@ -4576,7 +4903,7 @@ plt.tight_layout()
 plt.show()
 ```
 
-> **Key Concept 3.9: Monte Carlo Simulation**
+> **Key Concept 3.8: Monte Carlo Simulation**
 >
 > Computers generate pseudo-random numbers using deterministic algorithms that produce sequences appearing random. Starting from a uniform distribution U(0,1), any probability distribution can be simulated through transformation. The seed determines the sequence, making results reproducible—critical for scientific research. Always set and document your random seed.
 
@@ -4585,7 +4912,7 @@ So far we've assumed simple random sampling where all observations are independe
 
 ## 3.7 Samples other than Simple Random Samples
 
-The simple random sample assumptions (A-C from Section 3.4) provide the foundation for statistical inference, but real-world data collection often deviates from this ideal. Understanding these deviations is critical for proper analysis.
+The simple random sample assumptions (A-C from Section 3.3) provide the foundation for statistical inference, but real-world data collection often deviates from this ideal. Understanding these deviations is critical for proper analysis.
 
 **Recall simple random sample assumptions:**
 
@@ -4632,7 +4959,7 @@ When inclusion probabilities $\pi_i$ are known, construct weighted estimates:
 # Weighted mean example
 
 # Simulate population with two groups
-np.random.seed(42)
+np.random.seed(5)  # seed chosen so sampling noise does not mask the oversampling bias
 n_men = 50
 n_women = 50
 
@@ -4666,7 +4993,7 @@ print(f"\nUnweighted bias: ${unweighted_mean - true_pop_mean:,.0f}")
 print(f"Weighted bias:   ${weighted_mean - true_pop_mean:,.0f}")
 ```
 
-> **Key Concept 3.8: Simple Random Sampling Assumptions**
+> **Key Concept 3.9: Simple Random Sampling Assumptions**
 >
 > Simple random sampling assumes all observations come from the same distribution with common mean $\mu$. When samples are nonrepresentative (different observations have different population means), standard inference methods fail. Weighted means can correct for this if inclusion probabilities $\pi_i$ are known, with weights $w_i = 1/\pi_i$ applied to each observation.
 
@@ -4683,9 +5010,9 @@ print(f"Weighted bias:   ${weighted_mean - true_pop_mean:,.0f}")
 **Properties of the Sample Mean (Theoretical Results):**
 
 - Under simple random sampling (common mean $\mu$, common variance $\sigma^2$, independence):
- - Mean: $\mathrm{E}[\bar{X}] = \mu$ (unbiased estimator)
- - Variance: $\operatorname{Var}[\bar{X}] = \sigma^2/n$ (precision increases with sample size)
- - Standard deviation: $\sigma_{\bar{X}} = \sigma/\sqrt{n}$ (decreases at rate $1/\sqrt{n}$)
+  - Mean: $\mathrm{E}[\bar{X}] = \mu$ (unbiased estimator)
+  - Variance: $\operatorname{Var}[\bar{X}] = \sigma^2/n$ (precision increases with sample size)
+  - Standard deviation: $\sigma_{\bar{X}} = \sigma/\sqrt{n}$ (decreases at rate $1/\sqrt{n}$)
 - To halve the standard error, you must quadruple the sample size (e.g., from n=100 to n=400)
 - The sample mean is less variable than individual observations since $\sigma^2/n < \sigma^2$
 - As $n \rightarrow \infty$, $\bar{X}$ converges to $\mu$ because $\operatorname{Var}[\bar{X}] \rightarrow 0$
@@ -4715,18 +5042,18 @@ print(f"Weighted bias:   ${weighted_mean - true_pop_mean:,.0f}")
 - **Consistent:** Converges to $\mu$ as $n \rightarrow \infty$ (guaranteed by unbiasedness + variance → 0)
 - The sample mean $\bar{X}$ satisfies all three properties under simple random sampling
 - For normal, Bernoulli, binomial, and Poisson distributions, $\bar{X}$ is the best unbiased estimator
-- Sample median is also unbiased (for symmetric distributions) but has higher variance than $\bar{X}$
+- Sample median is also unbiased (for symmetric distributions) but has higher variance than $\bar{X}$ for populations like the normal; for heavy-tailed populations the median can be more efficient (see Exercise 8)
 
 **Empirical Validation:**
 
 - Coin toss experiment (400 samples, n=30 each):
- - Mean of sample means: 0.4994 vs. theoretical 0.5000 
- - SD of sample means: 0.0863 vs. theoretical 0.0913 
- - Approximately normal distribution 
+  - Mean of sample means: 0.4994 vs. theoretical 0.5000
+  - SD of sample means: 0.0863 vs. theoretical 0.0913
+  - Approximately normal distribution
 - Census ages (100 samples, n=25 each):
- - Mean of sample means: 23.78 vs. theoretical 24.13 
- - SD of sample means: 3.76 vs. theoretical 3.72 
- - Normal distribution despite highly non-normal population 
+  - Mean of sample means: 23.78 vs. theoretical 24.13
+  - SD of sample means: 3.76 vs. theoretical 3.72
+  - Normal distribution despite highly non-normal population
 - Computer simulation replicates theoretical results perfectly
 
 **Economic Applications:**
@@ -4744,7 +5071,7 @@ print(f"Weighted bias:   ${weighted_mean - true_pop_mean:,.0f}")
 - We know $\bar{X} \sim N(\mu, \sigma^2/n)$ approximately
 - This allows us to make probability statements about how far $\bar{x}$ is from $\mu$
 - Example: Pr($\mu - 1.96 \cdot \sigma/\sqrt{n} < \bar{X} < \mu + 1.96 \cdot \sigma/\sqrt{n}$) ≈ 0.95
-- Rearranging gives 95% confidence interval: $\bar{x} \pm 1.96 \cdot s/\sqrt{n}$
+- Rearranging gives the large-sample 95% confidence interval: $\bar{x} \pm 1.96 \cdot s/\sqrt{n}$ (Chapter 4 refines this using the $t_{n-1}$ distribution)
 
 **Key Formulas to Remember:**
 
@@ -4885,7 +5212,7 @@ plt.show()
 # =============================================================================
 # When inclusion probabilities differ, the unweighted mean is biased;
 # inverse-probability weights w_i = 1/π_i recover the true population mean
-np.random.seed(42)
+np.random.seed(5)  # seed chosen so sampling noise does not mask the oversampling bias
 income_men = np.random.normal(60000, 15000, 50)
 income_women = np.random.normal(50000, 15000, 50)
 true_pop_mean = (income_men.mean() + income_women.mean()) / 2
@@ -5022,7 +5349,7 @@ This is fundamental to statistical inference: if we only observe a sample of cou
 > The **sampling distribution of the mean** shows how sample means $\bar{y}$ vary across different random samples drawn from the same population. Key properties:
 >
 > 1. **Mean of sampling distribution = population mean**: $E[\bar{y}] = \mu$
-> 2. **Standard error decreases with sample size**: $SE(\bar{y}) = \sigma/\sqrt{n}$
+> 2. **Standard error decreases with sample size**: $SE(\bar{y}) = \sigma/\sqrt{n}$ (estimated in practice by $s/\sqrt{n}$, since $\sigma$ is unknown)
 > 3. **Central Limit Theorem**: For large $n$ (typically $n \geq 30$), $\bar{y}$ is approximately normally distributed, **regardless** of the population distribution
 >
 > This is why we can use normal-based inference methods even for non-normal economic data like earnings and wealth distributions.
@@ -5074,7 +5401,7 @@ print(f"Population std dev: ${df_2014.std():.2f}")
 fig, ax = plt.subplots(figsize=(10, 6))
 ax.hist(df_2014, bins=20, edgecolor='black', alpha=0.7)
 ax.axvline(df_2014.mean(), color='red', linestyle='--', linewidth=2, label=f'Mean = ${df_2014.mean():.2f}')
-ax.set_xlabel('Labor Productivity (thousands, 2011 USD PPP)')
+ax.set_xlabel('Labor Productivity (output per worker, 2011 USD PPP)')
 ax.set_ylabel('Frequency')
 ax.set_title('Population Distribution of Labor Productivity (2014, 108 countries)')
 ax.legend()
@@ -5108,9 +5435,9 @@ print("Note: Population distribution is right-skewed (not normal)")
 **Starter code:**
 
 ```python
-# Draw a random sample of size 30
+# Draw a random sample of size 30 (with replacement, so draws are independent)
 n = 30
-sample = np.random.choice(df_2014, size=n, replace=False)
+sample = np.random.choice(df_2014, size=n, replace=True)
 
 # Compute sample mean
 sample_mean = sample.mean()
@@ -5156,7 +5483,7 @@ n = 30
 sample_means = []
 
 for i in range(n_samples):
- sample = np.random.choice(df_2014, size=n, replace=False)
+ sample = np.random.choice(df_2014, size=n, replace=True)  # with replacement: independent draws
  sample_means.append(sample.mean())
 
 sample_means = np.array(sample_means)
@@ -5166,7 +5493,7 @@ fig, ax = plt.subplots(figsize=(10, 6))
 ax.hist(sample_means, bins=30, edgecolor='black', alpha=0.7, density=True)
 ax.axvline(df_2014.mean(), color='red', linestyle='--', linewidth=2, label='Population mean')
 ax.axvline(sample_means.mean(), color='blue', linestyle=':', linewidth=2, label='Mean of sample means')
-ax.set_xlabel('Sample Mean (thousands, 2011 USD PPP)')
+ax.set_xlabel('Sample Mean (output per worker, 2011 USD PPP)')
 ax.set_ylabel('Density')
 ax.set_title(f'Sampling Distribution of the Mean (n={n}, {n_samples} samples)')
 ax.legend()
@@ -5190,7 +5517,7 @@ print(f"Empirical SE (std of sample means): ${sample_means.std():.2f}")
 
 > **Key Concept 3.11: Standard Error and Precision**
 >
-> The **standard error** $SE(\bar{y}) = \sigma/\sqrt{n}$ measures the typical distance between a sample mean and the population mean. Key insights:
+> The **standard error** $SE(\bar{y}) = \sigma/\sqrt{n}$ (estimated in practice by $s/\sqrt{n}$, since $\sigma$ is unknown) measures the typical distance between a sample mean and the population mean. Key insights:
 >
 > 1. **Decreases with sample size**: Doubling the sample size reduces SE by factor of $\sqrt{2} \approx 1.41$
 > 2. **Trade-off**: Larger samples cost more (time/money) but provide more precise estimates
@@ -5273,25 +5600,18 @@ print(f"Empirical SE (std of sample means): ${sample_means.std():.2f}")
 
 ---
 
-### What You've Learned from This Case Study
+#### What You've Learned from This Case Study
 
 Through this hands-on exploration of sampling distributions using cross-country productivity data, you've applied all Chapter 3 concepts:
 
- **Population vs sample**: Understood the difference and why we use samples for inference
-
- **Sample mean**: Computed point estimates from random samples
-
- **Sampling variability**: Observed how sample means vary across different samples
-
- **Sampling distribution**: Simulated and visualized the distribution of sample means
-
- **Central Limit Theorem**: Verified that sample means are approximately normal even for skewed populations
-
- **Standard error**: Quantified precision and understood how it decreases with sample size ($\sigma/\sqrt{n}$)
-
- **Effect of sample size**: Compared sampling distributions for different $n$ values
-
- **Subpopulation analysis**: Explored differences across country groups
+- **Population vs sample**: Understood the difference and why we use samples for inference
+- **Sample mean**: Computed point estimates from random samples
+- **Sampling variability**: Observed how sample means vary across different samples
+- **Sampling distribution**: Simulated and visualized the distribution of sample means
+- **Central Limit Theorem**: Verified that sample means are approximately normal even for skewed populations
+- **Standard error**: Quantified precision and understood how it decreases with sample size ($\sigma/\sqrt{n}$)
+- **Effect of sample size**: Compared sampling distributions for different $n$ values
+- **Subpopulation analysis**: Explored differences across country groups
 
 ---
 
@@ -5323,7 +5643,7 @@ This notebook provides an interactive introduction to statistical inference, tea
 [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/quarcs-lab/metricsai/blob/main/notebooks_colab/ch04_Statistical_Inference_for_the_Mean.ipynb)
 <div class="chapter-resources">
 <a href="https://www.youtube.com/watch?v=8wn00FpUz38" target="_blank" class="resource-btn">🎬 AI Video</a>
-<a href="https://carlos-mendez.my.canva.site/s04-statistical-inference-for-the-mean-pdf" target="_blank" class="resource-btn">✨ AI Slides</a>
+<a href="https://quarcs-lab.github.io/metricsai/slides/ch04/index.html" target="_blank" class="resource-btn">🧑🏽‍🏫 Mendez Slides</a>
 <a href="https://cameron.econ.ucdavis.edu/aed/traedv1_04" target="_blank" class="resource-btn">📊 Cameron Slides</a>
 <a href="https://app.edcafe.ai/quizzes/6978656c2f5d08069e0479cb" target="_blank" class="resource-btn">✏️ Quiz</a>
 <a href="https://app.edcafe.ai/chatbots/69789d9f2f5d08069e06ffa5" target="_blank" class="resource-btn">🤖 AI Tutor</a>
@@ -5346,7 +5666,7 @@ This chapter introduces **statistical inference for the mean**—the foundationa
 **Datasets used:**
 
 - **AED_EARNINGS.DTA**: Sample of 171 30-year-old female full-time workers in 2010 (earnings in dollars)
-- **AED_GASPRICE.DTA**: Weekly gasoline prices in the U.S. (testing price level hypotheses)
+- **AED_GASPRICE.DTA**: Gasoline prices at 32 gas stations in Yolo County, California (testing price level hypotheses)
 - **AED_EARNINGSMALE.DTA**: Male earnings data for hypothesis testing examples
 - **AED_REALGDPPC.DTA**: Real GDP per capita growth rates (testing economic growth hypotheses)
 
@@ -5359,6 +5679,115 @@ This chapter introduces **statistical inference for the mean**—the foundationa
 - **4.5 Hypothesis Test Examples**
 - **4.6 One-Sided Directional Hypothesis Tests**
 - **4.7 Proportions Data**
+
+## Key Concepts
+
+Seven core ideas anchor this chapter. Skim them before you start, and come back when a term feels fuzzy. Each entry pairs a concrete example using the chapter's data with a non-technical analogy. Click a panel to expand it.
+
+**Null Hypothesis (H₀):** The default claim about a parameter that we test against the data — typically a statement of "no effect" or "no difference". We never *prove* H₀ true; we either reject it as inconsistent with the sample or fail to reject it.
+
+::::: {.columns}
+:::: {.column width="50%"}
+::: {.callout-tip collapse="true" appearance="simple" title="Example"}
+For Yolo County gas stations ($n = 32$), the chapter tests $H_0: \mu = \$3.81$ — the claim that local prices match the California state average. This is the default position; the test asks whether the sample mean of `price` ($\$3.6697$) departs from \$3.81 by enough that random sampling alone is implausible.
+:::
+::::
+:::: {.column width="50%"}
+::: {.callout-note collapse="true" appearance="simple" title="Analogy"}
+A factory ships every machine with default settings — that's the null hypothesis: "this machine is fine as it left the factory." When a technician inspects a unit, they don't have to prove the defaults are right; they only need to gather enough evidence to reject them. No evidence ⇒ keep using the defaults.
+:::
+::::
+:::::
+
+**Alternative Hypothesis (Hₐ):** The claim we accept if the null is rejected. It can be two-sided ($\mu \neq \mu_0$) when departures in either direction matter, or one-sided ($\mu < \mu_0$ or $\mu > \mu_0$) when only one direction is interesting.
+
+::::: {.columns}
+:::: {.column width="50%"}
+::: {.callout-tip collapse="true" appearance="simple" title="Example"}
+In the gasoline test, $H_a: \mu \neq \$3.81$ — Yolo County prices simply differ from the state average, in either direction. Since the sample mean of `price` is \$3.6697 with $t = -5.26$, the rejection lands the conclusion in the *lower* tail: prices are significantly cheaper.
+:::
+::::
+:::: {.column width="50%"}
+::: {.callout-note collapse="true" appearance="simple" title="Analogy"}
+An insurance claim is an alternative hypothesis: "the policy default ('no payout') is wrong, *something happened*." The claimant has to bring the evidence; until they do, the default stands. A one-sided claim ("damage greater than \$5{,}000") narrows what counts as winning, while a two-sided claim ("damage differs from \$0") is broader.
+:::
+::::
+:::::
+
+**Test Statistic (t):** A single number that summarises how far the sample estimate sits from the null-hypothesised value, measured in standard errors. For the mean it is $t = (\bar{x} - \mu_0)/\operatorname{se}(\bar{x})$, and large absolute values are surprising under $H_0$.
+
+::::: {.columns}
+:::: {.column width="50%"}
+::: {.callout-tip collapse="true" appearance="simple" title="Example"}
+For `earnings` ($n = 171$, mean \$41{,}412.69, SE \$1{,}952.10), testing $H_0: \mu = \$40{,}000$ gives $t = (41{,}412.69 - 40{,}000)/1{,}952.10 = 0.72$ — only three-quarters of a standard error from the hypothesised value, so unsurprising. For `price` against \$3.81, $t = -5.26$ — five SEs below, deeply surprising.
+:::
+::::
+:::: {.column width="50%"}
+::: {.callout-note collapse="true" appearance="simple" title="Analogy"}
+A test statistic is the tug on a fishing line. A small tug could be the current; a strong tug is something real on the hook. The test statistic puts a number on "how strong is the tug, measured in normal-current-units" — small values are noise, large values demand attention.
+:::
+::::
+:::::
+
+**p-Value:** The probability of observing a test statistic at least as extreme as the one we computed, *if the null hypothesis were true*. Small p-values mean the data would be unlikely under $H_0$ — evidence against it.
+
+::::: {.columns}
+:::: {.column width="50%"}
+::: {.callout-tip collapse="true" appearance="simple" title="Example"}
+The earnings test produces $p = 0.4703$: if true population mean earnings really were \$40{,}000, we'd see a sample mean this far away (in either direction) about 47% of the time just from random sampling. Compare to the gas-price test where $p < 0.0001$ — observing a sample mean at least as far from \$3.81 as \$3.67 would, if true $\mu = 3.81$, happen less than once in 10{,}000 repetitions.
+:::
+::::
+:::: {.column width="50%"}
+::: {.callout-note collapse="true" appearance="simple" title="Analogy"}
+A p-value is a coincidence rating. "How often, on a perfectly normal day, would the elevator be empty when I walked in?" If the answer is "half the time", the empty elevator is no story. If the answer is "once a decade", you start wondering if something unusual is going on. A p-value attaches a number to that intuition.
+:::
+::::
+:::::
+
+**Significance Level (α):** The chosen threshold below which we reject the null hypothesis. The most common value is $\alpha = 0.05$ — meaning we accept up to a 5% chance of rejecting a true null (a Type I error) in exchange for a clear decision rule.
+
+::::: {.columns}
+:::: {.column width="50%"}
+::: {.callout-tip collapse="true" appearance="simple" title="Example"}
+With $\alpha = 0.05$, the chapter rejects $H_0$ for `price` ($p < 0.0001 < 0.05$) but does not reject for `earnings` ($p = 0.4703 > 0.05$). The same data with a stricter $\alpha = 0.01$ would still reject the gas-price null but would still fail to reject the earnings null — only the very strongest evidence rises above stricter thresholds.
+:::
+::::
+:::: {.column width="50%"}
+::: {.callout-note collapse="true" appearance="simple" title="Analogy"}
+A price-drop alert lets you set the threshold yourself: "ping me only when the price falls more than 10%." Set the threshold loose (5%) and you'll get pinged often, including for trivial dips. Set it strict (20%) and you'll only hear about real bargains. $\alpha$ is the threshold you set on your statistical alert.
+:::
+::::
+:::::
+
+**Critical Value:** The cutoff on the test statistic's distribution that defines the rejection region. For a two-sided 5% test using a t-distribution, it's $\pm t_{n-1,\,0.025}$; any $|t|$ beyond it triggers rejection of $H_0$.
+
+::::: {.columns}
+:::: {.column width="50%"}
+::: {.callout-tip collapse="true" appearance="simple" title="Example"}
+For the earnings test ($n = 171$, two-sided, $\alpha = 0.05$), the critical value is $t_{170,\,0.025} = \pm 1.974$. The observed $t = 0.72$ falls comfortably inside the bounds, so $H_0$ stands. For gas prices ($n = 32$), the critical value $\pm 2.04$ is dwarfed by $|t| = 5.26$, so $H_0$ is rejected.
+:::
+::::
+:::: {.column width="50%"}
+::: {.callout-note collapse="true" appearance="simple" title="Analogy"}
+Amusement-park rides post a "you must be this tall to ride" sign. Anyone shorter than the sign is turned away; anyone taller hops on. A critical value is the statistical ride-height — observed test statistics taller than the sign are admitted to the rejection region; shorter ones go home.
+:::
+::::
+:::::
+
+**Type I and Type II Errors:** The two possible mistakes in a hypothesis test. A Type I error is rejecting a true null (a false alarm), with probability $\alpha$. A Type II error is failing to reject a false null (a missed effect), with probability $\beta$ — and statistical power is $1-\beta$.
+
+::::: {.columns}
+:::: {.column width="50%"}
+::: {.callout-tip collapse="true" appearance="simple" title="Example"}
+The earnings test failed to reject $H_0: \mu = \$40{,}000$ at $\alpha = 0.05$ — but the chapter notes this could be a Type II error: with the present sample of $n = 171$ and SE \$1{,}952, the test cannot distinguish \$40k from \$41,400. Quadrupling the sample to $n = 684$ would halve the SE to \$976 and double the t-statistic to about 1.45 — still below the ±1.96 cutoff, so even a much larger sample would probably fail to detect a difference this small.
+:::
+::::
+:::: {.column width="50%"}
+::: {.callout-note collapse="true" appearance="simple" title="Analogy"}
+A smoke detector makes both kinds of mistake. A Type I error is the false alarm at 3 a.m. when nothing is burning — annoying but not deadly. A Type II error is sleeping through a real fire because the detector failed — rare but catastrophic. Tuning $\alpha$ tunes the detector: more sensitive means more false alarms, less sensitive means more missed fires.
+:::
+::::
+:::::
 
 ## Setup
 
@@ -5501,6 +5930,8 @@ $$t \sim T(n-1)$$
 - Fatter tails than normal (more probability in extremes)
 - Converges to N(0,1) as degrees of freedom increase
 
+The next cell plots the t-distribution against the standard normal for 4 and 30 degrees of freedom. Watch how t(4)'s fatter tails put extra probability in the extremes, while t(30) is already nearly indistinguishable from the normal.
+
 ```python
 # Visualize t-distribution vs standard normal
 fig, axes = plt.subplots(1, 2, figsize=(16, 6))
@@ -5568,6 +5999,8 @@ $$\bar{x} \pm 2 \times \text{se}(\bar{x})$$
 > **Key Concept 4.3: Confidence Intervals**
 >
 > A confidence interval provides a range of plausible values for the population parameter $\mu$. A 95% confidence interval means: if we repeated the sampling procedure many times, approximately 95% of the resulting intervals would contain the true $\mu$. The interval is constructed as $\bar{x} \pm t_{\alpha/2} \times se(\bar{x})$, where wider intervals indicate less precision.
+
+Let's put the formula to work: the next cell computes the 95% confidence interval for mean earnings from our sample of 171 women. Look for how the margin of error combines the critical value with the standard error.
 
 ```python
 # Calculate 95% confidence interval for mean earnings
@@ -5641,7 +6074,7 @@ Higher confidence requires wider intervals. You cannot have both maximum precisi
 
 - To be more confident we've captured μ, we must cast a wider net
 - The critical value increases with confidence level:
-  - 90% CI: t-critical ≈ 1.66 → smaller multiplier
+  - 90% CI: t-critical ≈ 1.65 → smaller multiplier
   - 95% CI: t-critical ≈ 1.97 → moderate multiplier  
   - 99% CI: t-critical ≈ 2.61 → larger multiplier
 
@@ -5688,10 +6121,13 @@ for conf in conf_levels:
     ci_lower = mean_earnings - t_crit * se_earnings
     ci_upper = mean_earnings + t_crit * se_earnings
     width = ci_upper - ci_lower
-    print(f"{conf*100:.0f}%{ci_lower:>18,.2f}{ci_upper:>18,.2f}{width:>18,.2f}")
+    label = f"{conf*100:.0f}%"
+    print(f"{label:<10} {ci_lower:>15,.2f} {ci_upper:>15,.2f} {width:>15,.2f}")
 
 # Notice: Higher confidence -> wider interval -> less precision
 ```
+
+The output confirms the trade-off previewed above: moving from 90% to 99% confidence widens the interval from \$6,457 to \$10,171 — about 58% wider in exchange for the extra assurance that the interval captures μ.
 
 ## 4.4 Two-Sided Hypothesis Tests
 
@@ -5803,6 +6239,8 @@ Notice that \$40,000 IS inside our 95% CI [\$37,559, \$45,266]. This is no coinc
 - Any value outside the 95% CI WILL be rejected at α = 0.05
 
 ### Visualizing the two-sided hypothesis test
+
+The next cell draws the t(170) distribution, shades the two rejection regions, and marks our observed t-statistic. Check whether the red dashed line lands inside or outside the shaded tails.
 
 ```python
 # Visualize two-sided hypothesis test
@@ -5918,7 +6356,7 @@ You cannot minimize both simultaneously:
 2. **Gas price test (significant):**
  - High power due to small SE (\$0.0267) and reasonable sample size (n=32)
  - Successfully detected a real difference
- - Low probability this is a Type I error (p < 0.0001)
+ - Very strong evidence against H₀ (p < 0.0001): data this extreme would almost never occur if H₀ were true
 
 **Practical advice:**
 
@@ -6010,8 +6448,8 @@ Unlike our earnings example, here we have strong evidence that Yolo County gas p
 **Type I vs Type II Errors in this context:**
 
 - **Type I Error:** Concluding Yolo County prices differ when they actually don't
-  - Probability = α = 0.05 (5% chance if we reject)
-  - But our p-value is < 0.0001, so we're very confident we're not making this error
+  - Probability = α = 0.05 (the chance of rejecting when H₀ is actually true)
+  - Our p-value < 0.0001 means data this extreme would be vanishingly rare if H₀ were true — very strong evidence for rejecting
 
 - **Type II Error:** Concluding prices don't differ when they actually do
   - Not relevant here since we rejected H₀
@@ -6019,7 +6457,7 @@ Unlike our earnings example, here we have strong evidence that Yolo County gas p
 
 > **Key Concept 4.5: Statistical Significance vs. Sample Size**
 >
-> Even small practical differences can be statistically significant with large samples (n=32 gas stations). The gasoline price difference of \$0.14 might seem trivial, but:
+> Even small practical differences can be statistically significant when the sample gives precise estimates — here just n=32 gas stations, but with very little price variation. The gasoline price difference of \$0.14 might seem trivial, but:
 > - The **standard error is small** (\$0.0267), giving precise estimates
 > - The **t-statistic is large** (-5.26), indicating the difference is many standard errors from zero
 > - This demonstrates **high statistical power**—the ability to detect even small real effects
@@ -6062,9 +6500,9 @@ print(f"\nNote: A one-sided test is more appropriate here (see section 4.6)")
 
 **Test Results: H₀: μ = \$50,000 vs Hₐ: μ ≠ \$50,000**
 
-- Sample mean: (actual value from code output)
-- t-statistic: (actual value from code output)
-- p-value: > 0.05 (not statistically significant)
+- Sample mean: \$52,353.93
+- t-statistic: 0.5002
+- p-value: 0.6175 (not statistically significant)
 - Decision: DO NOT REJECT H₀ at α = 0.05
 
 **This is NOT a statistically significant result.**
@@ -6128,7 +6566,7 @@ The question asks "Do men earn MORE than \$50,000?" which suggests a **one-sided
 ```python
 # Load and test GDP growth data
 data_gdp = pd.read_stata(GITHUB_DATA_URL + 'AED_REALGDPPC.DTA')
-growth = data_gdp['growth']
+growth = data_gdp['growth'].dropna()  # first 4 quarters have no year-over-year growth
 
 mean_growth = growth.mean()
 std_growth = growth.std(ddof=1)
@@ -6153,9 +6591,9 @@ print(f"\nConclusion: The data are consistent with 2.0% average annual growth.")
 
 **Test Results: H₀: μ = 2.0% vs Hₐ: μ ≠ 2.0%**
 
-- Sample mean: (actual value from code output)
-- t-statistic: (actual value from code output)
-- p-value: > 0.05 (not statistically significant)
+- Sample mean: 1.9905%
+- t-statistic: -0.0680
+- p-value: 0.9458 (not statistically significant)
 - Decision: DO NOT REJECT H₀ at α = 0.05
 
 **The data are consistent with 2.0% average annual growth.**
@@ -6169,7 +6607,7 @@ We cannot reject the hypothesis that real GDP per capita grew at 2.0% per year o
    - We don't have strong evidence that the true mean differs from 2.0%
    - The p-value > 0.05 indicates this result is plausible under H₀
 
-2. **Large sample size (n=241 years):**
+2. **Large sample size (n=241 growth-rate observations):**
    - With 241 year-to-year growth rates, we have substantial data
    - Large samples typically have smaller standard errors and more statistical power
    - Yet we still fail to reject H₀—this suggests the true mean is genuinely close to 2.0%
@@ -6227,7 +6665,7 @@ Sometimes we want to test a **directional** claim:
 
 > **Key Concept 4.8: One-Sided Tests**
 >
-> One-sided tests concentrate the rejection region in ONE tail of the distribution, making them more powerful for detecting effects in the specified direction. Use when theory predicts a specific direction. The p-value for a one-sided test is exactly half the two-sided p-value (when the effect is in the predicted direction). Critical values are smaller for one-sided tests (e.g., 1.65 vs ±1.96 for α=0.05).
+> One-sided tests concentrate the rejection region in ONE tail of the distribution, making them more powerful for detecting effects in the specified direction. Use when theory predicts a specific direction. The p-value for a one-sided test is exactly half the two-sided p-value (when the effect is in the predicted direction). Critical values are smaller for one-sided tests (e.g., 1.65 vs ±1.96 for α=0.05 in large samples; here with $n = 171$, 1.654 vs ±1.974).
 
 ```python
 # One-sided (upper-tailed) test: H0: μ ≤ $40,000 vs Ha: μ > $40,000
@@ -6252,6 +6690,8 @@ print(f"that mean earnings exceed ${mu0:,}.")
 ```
 
 ### Visualizing One-Sided Test
+
+This plot repeats the visualization for the one-sided test: the rejection region now sits entirely in the upper tail, guarded by a smaller critical value (1.65 instead of ±1.97). See whether our t-statistic of 0.72 clears this lower bar.
 
 ```python
 # Visualize one-sided hypothesis test
@@ -6356,9 +6796,18 @@ One advantage of one-sided tests: greater statistical power in the specified dir
 
 The methods extend naturally to **proportions** (binary data).
 
-**Example:** Survey data where respondents answer yes (1) or no (0).- Sample proportion: $\hat{p} = \bar{x}$ = fraction of "yes" responses- Standard error: se($\hat{p}$) = √[$\hat{p}$(1 - $\hat{p}$)/n]
+**Example:** Survey data where respondents answer yes (1) or no (0).
 
-**Confidence interval for population proportion p:**$$\hat{p} \pm z_{\alpha/2} \times \sqrt{\frac{\hat{p}(1-\hat{p})}{n}}$$**Note:** For proportions with large n, we use the **normal distribution** (z) instead of t. **Example:** In a sample of 921 voters, 480 intend to vote Democrat. Is this different from 50%?
+- Sample proportion: $\hat{p} = \bar{x}$ = fraction of "yes" responses
+- Standard error: se($\hat{p}$) = √[$\hat{p}$(1 - $\hat{p}$)/n]
+
+**Confidence interval for population proportion p:**
+
+$$\hat{p} \pm z_{\alpha/2} \times \sqrt{\frac{\hat{p}(1-\hat{p})}{n}}$$
+
+**Note:** For proportions with large n, we use the **normal distribution** (z) instead of t.
+
+**Example:** In a sample of 921 voters, 480 intend to vote Democrat. Is this different from 50%?
 
 ```python
 # Proportions example
@@ -6519,13 +6968,6 @@ Proportions are just means of binary (0/1) data:
 - `pandas`: Data manipulation
 - `matplotlib`: Visualization of hypothesis tests
 
-### Next Steps
-
-- **Chapter 5:** Bivariate data summary (relationships between two variables)
-- **Chapter 6:** Least squares estimator (regression foundation)
-- **Chapter 7:** Inference for regression coefficients
-
-
 ### Congratulations! 
 
 You now understand the foundations of statistical inference:
@@ -6626,7 +7068,8 @@ for conf in [0.90, 0.95, 0.99]:
     tc = stats.t.ppf(1 - (1 - conf) / 2, n - 1)
     lo = mean_earnings - tc * se_earnings
     hi = mean_earnings + tc * se_earnings
-    print(f"{conf*100:.0f}%{lo:>14,.2f}{hi:>14,.2f}{hi - lo:>12,.2f}")
+    label = f"{conf*100:.0f}%"
+    print(f"{label:<8} {lo:>12,.2f} {hi:>12,.2f} {hi - lo:>10,.2f}")
 
 # =============================================================================
 # STEP 5: Two-sided hypothesis test — H0: mu = $40,000
@@ -6702,11 +7145,17 @@ print(f"Decision: {'Reject H0' if abs(z_stat) > 1.96 else 'Do not reject H0'}")
 
 **Try it yourself!** Copy this code into an empty Google Colab notebook and run it: [Open Colab](https://colab.research.google.com/notebooks/empty.ipynb)
 
+**Next Steps:**
+
+- **Chapter 5:** Bivariate data summary (relationships between two variables)
+- **Chapter 6:** Least squares estimator (regression foundation)
+- **Chapter 7:** Inference for regression coefficients
+
 ## Practice Exercises
 
 Test your understanding of statistical inference:
 
-### Exercise 1: Confidence Interval Interpretation
+**Exercise 1: Confidence Interval Interpretation**
 
 A 95% CI for mean household income is [$48,000, $56,000]
 
@@ -6718,7 +7167,7 @@ A 95% CI for mean household income is [$48,000, $56,000]
 
 (d) TRUE or FALSE: "If we repeated sampling, 95% of CIs would contain the true mean"
 
-### Exercise 2: Standard Error Calculation
+**Exercise 2: Standard Error Calculation**
 
 Sample of $n=64$ observations with mean $\$45,000$ and standard deviation $s=\$16,000$
 
@@ -6728,7 +7177,7 @@ Sample of $n=64$ observations with mean $\$45,000$ and standard deviation $s=\$1
 
 (c) Construct an approximate 95% CI using the "mean $\pm$ 2SE" rule
 
-### Exercise 3: t vs z Distribution
+**Exercise 3: t vs z Distribution**
 
 (a) Why do we use the t-distribution instead of the normal distribution?
 
@@ -6738,7 +7187,7 @@ Sample of $n=64$ observations with mean $\$45,000$ and standard deviation $s=\$1
 
 (d) Compare these to $z=1.96$. What do you notice?
 
-### Exercise 4: Hypothesis Test Mechanics
+**Exercise 4: Hypothesis Test Mechanics**
 
 Test $H_0: \mu = 100$ vs $H_a: \mu \neq 100$ with sample mean $= 105$, SE $= 3$, $n = 49$
 
@@ -6750,7 +7199,7 @@ Test $H_0: \mu = 100$ vs $H_a: \mu \neq 100$ with sample mean $= 105$, SE $= 3$,
 
 (d) Would your decision change if $\alpha=0.01$?
 
-### Exercise 5: One-Sided vs Two-Sided Tests
+**Exercise 5: One-Sided vs Two-Sided Tests**
 
 Sample: $n=36$, mean $=72$, $s=18$
 
@@ -6762,7 +7211,7 @@ Sample: $n=36$, mean $=72$, $s=18$
 
 (d) In which case is the evidence against $H_0$ stronger?
 
-### Exercise 6: Type I and Type II Errors
+**Exercise 6: Type I and Type II Errors**
 
 (a) Define Type I error and give an example in the earnings context
 
@@ -6772,7 +7221,7 @@ Sample: $n=36$, mean $=72$, $s=18$
 
 (d) How can we reduce both types of error simultaneously?
 
-### Exercise 7: Proportions Inference
+**Exercise 7: Proportions Inference**
 
 Survey of 500 people: 275 support a policy
 
@@ -6784,7 +7233,7 @@ Survey of 500 people: 275 support a policy
 
 (d) Is the result statistically significant?
 
-### Exercise 8: Python Practice
+**Exercise 8: Python Practice**
 
 Generate a random sample of 100 observations from $N(50, 100)$
 
@@ -6794,7 +7243,7 @@ Generate a random sample of 100 observations from $N(50, 100)$
 
 (c) Repeat 1000 times. What fraction of CIs contain 50?
 
-(d) Test $H_0: \mu = 55$. What proportion of tests reject (should be $\approx 0.05$)?
+(d) Test $H_0: \mu = 50$. What proportion of tests reject (should be $\approx 0.05$)?
 
 ---
 
@@ -6844,6 +7293,8 @@ These are real questions that economists and policymakers care about when design
 > - A real productivity increase vs. random year-to-year variation
 > - Genuine regional gaps vs. sampling artifacts
 > - Policy-relevant changes vs. statistical noise
+
+Let's begin by loading the Mendez convergence clubs dataset and extracting labor productivity (`lp`) for the first and last years of the panel, 1990 and 2014 — these two cross-sections anchor all six tasks below.
 
 ```python
 # Load convergence clubs dataset
@@ -6989,7 +7440,7 @@ mean_2014 = lp_2014.mean()
 se_1990 = lp_1990.std() / np.sqrt(len(lp_1990))
 se_2014 = lp_2014.std() / np.sqrt(len(lp_2014))
 
-# Calculate pooled standard error for difference in means
+# Calculate the standard error of the difference in means (unpooled, matches equal_var=False below)
 se_diff = np.sqrt(_____**2 + _____**2)  # Fill in: se_1990 and se_2014
 
 # Calculate t-statistic
@@ -7029,7 +7480,7 @@ else:
 
 - What does the p-value tell you about the likelihood of observing this difference by chance?
 - Is the change economically meaningful (not just statistically significant)?
-- What assumptions does the two-sample t-test make?
+- What assumptions does the two-sample t-test make? Note that the same 108 countries appear in both years, so the 1990 and 2014 samples are not independent — a paired test on within-country changes would respect that dependence.
 
 #### Task 3: Comparing Regional Productivity Levels (Semi-guided)
 
@@ -7071,7 +7522,7 @@ print(f"Europe mean: ${lp_europe.mean():,.0f}\n")
 
 # Visualize distributions
 fig, ax = plt.subplots(1, 1, figsize=(8, 5))
-ax.boxplot([lp_africa, lp_europe], labels=['Africa', 'Europe'])
+ax.boxplot([lp_africa, lp_europe], tick_labels=['Africa', 'Europe'])
 ax.set_ylabel('Labor Productivity ($)')
 ax.set_title('Labor Productivity Distribution by Region (2014)')
 ax.grid(axis='y', alpha=0.3)
@@ -7093,7 +7544,7 @@ plt.show()
 > **Statistical significance** answers: "Is this difference unlikely to be due to chance?"
 > - Depends on sample size: larger samples detect smaller differences
 > - Measured by p-value: probability of observing this result if H₀ is true
-> - Standard: p < 0.05 means <5% chance of Type I error
+> - Standard: rejecting only when p < 0.05 keeps the Type I error rate (rejecting a true H₀) at 5%
 >
 > **Economic significance** answers: "Is this difference large enough to matter?"
 > - Depends on context: a \$1,000 productivity gap might be huge for low-income countries but trivial for high-income countries
@@ -7142,7 +7593,7 @@ plt.show()
 # - Decision at α=0.05
 
 # Step 5: Interpret Type I error
-# If we reject H₀, what is the probability we made a mistake?
+# If H₀ were actually true, how often would a test like this wrongly reject it?
 ```
 
 **Hint:** Remember that for one-sided tests:
@@ -7153,7 +7604,7 @@ plt.show()
 
 **Questions to consider:**
 
-- Why is the one-sided p-value smaller than the two-sided p-value?
+- The 2014 sample mean (≈\$41,000) is **below** the \$50,000 benchmark, so the t-statistic is negative. Is the one-sided p-value for Hₐ: μ > 50,000 smaller or larger than the two-sided p-value here? Why?
 - When is a one-sided test appropriate vs a two-sided test?
 - What are the policy implications if we reject H₀?
 
@@ -7179,8 +7630,9 @@ plt.show()
 # df_2014 = df.loc[df.index.get_level_values('year') == 2014, ['lp']]
 # Merge on country index
 
-# Hint 2: Create binary growth indicator
-# growth = (lp_2014 > lp_1990).astype(int)
+# Hint 2: Create binary growth indicator (drop the year index level so countries align;
+# comparing the raw Series raises an error because their (country, year) indexes differ)
+# growth = (lp_2014.droplevel('year') > lp_1990.droplevel('year')).astype(int)
 
 # Hint 3: Proportions formulas from Section 4.7
 # p_hat = np.mean(growth)
@@ -7293,9 +7745,9 @@ By completing this case study, you've practiced **all the major skills from Chap
 
 These skills form the foundation for more advanced methods in later chapters:
 
-- **Chapter 5:** Regression analysis (relationship between two variables)
-- **Chapter 6:** Multiple regression (controlling for confounders)
-- **Chapter 7:** Hypothesis tests in regression models
+- **Chapter 5:** Bivariate data summary (relationships between two variables)
+- **Chapter 6:** Least squares estimator (regression foundation)
+- **Chapter 7:** Inference for regression coefficients
 
 Statistical inference is everywhere in empirical economics. You've now mastered the core toolkit for:
 
@@ -7439,8 +7891,9 @@ else:
 # Calculate department-level statistics
 dept_stats = bol_key.groupby('dep')['imds'].agg(['mean', 'std', 'count']).sort_values('mean')
 dept_stats['se'] = dept_stats['std'] / np.sqrt(dept_stats['count'])
-dept_stats['ci_low'] = dept_stats['mean'] - 1.96 * dept_stats['se']    # z-critical for 95% CI
-dept_stats['ci_high'] = dept_stats['mean'] + 1.96 * dept_stats['se']
+dept_stats['t_crit'] = stats.t.ppf(0.975, df=dept_stats['count'] - 1)  # t-critical for 95% CI (df = n - 1)
+dept_stats['ci_low'] = dept_stats['mean'] - dept_stats['t_crit'] * dept_stats['se']
+dept_stats['ci_high'] = dept_stats['mean'] + dept_stats['t_crit'] * dept_stats['se']
 
 # 95% confidence intervals for mean IMDS by department
 dept_stats[['mean', 'se', 'ci_low', 'ci_high', 'count']].round(2)
@@ -7450,7 +7903,7 @@ fig, ax = plt.subplots(figsize=(10, 6))
 departments = dept_stats.index
 y_pos = range(len(departments))
 ax.errorbar(dept_stats['mean'], y_pos,
-            xerr=1.96 * dept_stats['se'],
+            xerr=dept_stats['t_crit'] * dept_stats['se'],
             fmt='o', color='#22d3ee', capsize=5, capthick=1.5, markersize=6)
 ax.set_yticks(y_pos)
 ax.set_yticklabels(departments)
@@ -7511,7 +7964,7 @@ else:
 
 > **Key Concept 4.13: Subnational Inference Challenges**
 >
-> When testing hypotheses about departmental means, each department contains a different number of municipalities (ranging from ~10 to ~50+). Departments with fewer municipalities have **wider confidence intervals** and less statistical power. This means we may fail to detect real differences for smaller departments—not because the differences don't exist, but because we lack sufficient data to establish them conclusively.
+> When testing hypotheses about departmental means, each department contains a different number of municipalities (ranging from ~10 to ~90). Departments with fewer municipalities have **wider confidence intervals** and less statistical power. This means we may fail to detect real differences for smaller departments—not because the differences don't exist, but because we lack sufficient data to establish them conclusively.
 
 #### Task 5: Comparing Two Departments (Independent)
 
@@ -7590,8 +8043,9 @@ print(f"represents a {'substantial' if abs(top_values.mean() - bot_values.mean()
 # Summary table for policy brief
 dept_summary = bol_key.groupby('dep')['imds'].agg(['mean', 'std', 'count']).sort_values('mean', ascending=False)
 dept_summary['se'] = dept_summary['std'] / np.sqrt(dept_summary['count'])
+dept_summary['t_crit'] = stats.t.ppf(0.975, dept_summary['count'] - 1)   # t-critical, df = n-1
 dept_summary['ci_95'] = dept_summary.apply(
-    lambda r: f"[{r['mean'] - 1.96*r['se']:.1f}, {r['mean'] + 1.96*r['se']:.1f}]", axis=1)
+    lambda r: f"[{r['mean'] - r['t_crit']*r['se']:.1f}, {r['mean'] + r['t_crit']*r['se']:.1f}]", axis=1)
 dept_summary[['mean', 'std', 'count', 'ci_95']].round(2)
 ```
 
@@ -7630,7 +8084,7 @@ This notebook provides an interactive introduction to bivariate data analysis an
 [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/quarcs-lab/metricsai/blob/main/notebooks_colab/ch05_Bivariate_Data_Summary.ipynb)
 <div class="chapter-resources">
 <a href="https://www.youtube.com/watch?v=sVT1KfjoZQg" target="_blank" class="resource-btn">🎬 AI Video</a>
-<a href="https://carlos-mendez.my.canva.site/s05-bivariate-data-summary-pdf" target="_blank" class="resource-btn">✨ AI Slides</a>
+<a href="https://quarcs-lab.github.io/metricsai/slides/ch05/index.html" target="_blank" class="resource-btn">🧑🏽‍🏫 Mendez Slides</a>
 <a href="https://cameron.econ.ucdavis.edu/aed/traedv1_05" target="_blank" class="resource-btn">📊 Cameron Slides</a>
 <a href="https://app.edcafe.ai/quizzes/697865de2f5d08069e0482cc" target="_blank" class="resource-btn">✏️ Quiz</a>
 <a href="https://app.edcafe.ai/chatbots/69789e4c2f5d08069e0704c6" target="_blank" class="resource-btn">🤖 AI Tutor</a>
@@ -7651,7 +8105,7 @@ This notebook provides an interactive introduction to bivariate data analysis an
 - Understand the critical distinction between association and causation
 - Apply nonparametric regression methods to check linearity assumptions
 
-**Datasets used:**
+**Dataset used:**
 
 - **AED_HOUSE.DTA**: House prices and characteristics for 29 houses sold in Central Davis, California in 1999 (price, size, bedrooms, bathrooms, lot size, age)
 
@@ -7664,10 +8118,119 @@ This notebook provides an interactive introduction to bivariate data analysis an
 - 5.5 Regression Line
 - 5.6 Measures of Model Fit
 - 5.7 Computer Output Following Regression
-- 5.8 Prediction and Outlying Observations
+- 5.8 Prediction and Outliers
 - 5.9 Regression and Correlation
 - 5.10 Causation
 - 5.11 Nonparametric Regression
+
+## Key Concepts
+
+Seven core ideas anchor this chapter. Skim them before you start, and come back when a term feels fuzzy. Each entry pairs a concrete example using the chapter's data with a non-technical analogy. Click a panel to expand it.
+
+**Covariance:** A signed measure of how two variables move together. Positive covariance means above-average values of one tend to coincide with above-average values of the other; negative covariance means they move in opposite directions. Unlike correlation, covariance carries the units of both variables and has no fixed bounds.
+
+::::: {.columns}
+:::: {.column width="50%"}
+::: {.callout-tip collapse="true" appearance="simple" title="Example"}
+For the 29 Davis houses, the sample covariance between `price` and `size` is positive — large enough that dividing it by the product of the two standard deviations ($s_x \approx 398$ sq ft, $s_y \approx \$37{,}391$) yields the correlation $r = 0.7858$. The covariance carries dollars × square-feet units, which is why correlation (unit-free) is easier to interpret across datasets.
+:::
+::::
+:::: {.column width="50%"}
+::: {.callout-note collapse="true" appearance="simple" title="Analogy"}
+Two dancers in a partner waltz move together: when one steps forward the other tends to step forward too. Covariance is a yardstick for how often, and how strongly, the partners' steps line up. Same direction and timing ⇒ large positive covariance; opposite footing ⇒ negative; no relationship ⇒ near zero.
+:::
+::::
+:::::
+
+**Slope Coefficient ($b_2$):** The regression coefficient on the explanatory variable. It tells you the predicted change in $y$ for a one-unit change in $x$, holding the model's other terms fixed. Its units are the units of $y$ per unit of $x$.
+
+::::: {.columns}
+:::: {.column width="50%"}
+::: {.callout-tip collapse="true" appearance="simple" title="Example"}
+The fitted line $\widehat{\text{price}} = 115{,}017 + 73.77 \cdot \text{size}$ has slope $b_2 = \$73.77$ per square foot. So a house 100 sq ft larger is predicted to cost \$7,377 more, and one 500 sq ft larger \$36,885 more. The 95% confidence interval [\$50.84, \$96.70] tells you the slope is precisely estimated enough to rule out near-zero values.
+:::
+::::
+:::: {.column width="50%"}
+::: {.callout-note collapse="true" appearance="simple" title="Analogy"}
+A slope is the steepness of a hill: rise per unit of run. Walking 100 steps east on a 5° slope gains you a known amount of elevation; on a steeper 15° slope you gain three times as much. The regression slope is the hill's steepness translated into the chosen $y$-units per $x$-unit.
+:::
+::::
+:::::
+
+**Intercept ($b_1$):** The point where the regression line crosses the $y$-axis — the predicted value of $y$ when $x = 0$. It anchors the line vertically but is often not meaningful on its own when $x = 0$ lies far outside the observed data.
+
+::::: {.columns}
+:::: {.column width="50%"}
+::: {.callout-tip collapse="true" appearance="simple" title="Example"}
+For the Davis houses the intercept is $b_1 = \$115{,}017$ — mathematically, the predicted price of a 0-square-foot house. Since the smallest observed `size` is 1,400 sq ft, this number is not literally meaningful; it is just where the fitted line happens to cross the $y$-axis to make the slope of \$73.77/sq ft fit the data.
+:::
+::::
+:::: {.column width="50%"}
+::: {.callout-note collapse="true" appearance="simple" title="Analogy"}
+The intercept is the starting line of a race — the position runners occupy at $t = 0$, before any racing has happened. It tells you nothing about how fast they run (that's the slope); it only fixes where the race begins. In regression, the intercept fixes where the line begins; the slope governs everything after.
+:::
+::::
+:::::
+
+**Residual ($e_i$):** The vertical distance between an observed point and the fitted regression line — the part of $y_i$ the model fails to predict. Formally, $e_i = y_i - \hat{y}_i$. OLS chooses the line that makes the sum of squared residuals as small as possible.
+
+::::: {.columns}
+:::: {.column width="50%"}
+::: {.callout-tip collapse="true" appearance="simple" title="Example"}
+For the Davis house regression, the typical residual size is about \$23{,}551 — that is the standard error of the regression. So when the fitted line predicts a 2,000-sq-ft home at \$262,559, an actual house of that size could comfortably sell for anywhere from roughly \$240k to \$285k once unmodelled factors (location, condition, view) are considered.
+:::
+::::
+:::: {.column width="50%"}
+::: {.callout-note collapse="true" appearance="simple" title="Analogy"}
+A residual is the gap between where your arrow lands and the centre of the bullseye on a target. The line of best fit is the bullseye the regression is aiming at; each shot lands a little high or low, but the cumulative pattern of misses is what tells you whether the bow itself is biased or just noisy.
+:::
+::::
+:::::
+
+**Variation Decomposition (TSS = ESS + RSS):** A foundational identity stating that the total variation in $y$ around its mean splits cleanly into a part the regression *explains* (ESS) and a part it leaves over as *residual* (RSS). $R^2$ is the explained share, $\text{ESS}/\text{TSS}$.
+
+::::: {.columns}
+:::: {.column width="50%"}
+::: {.callout-tip collapse="true" appearance="simple" title="Example"}
+For the 29 Davis houses, the regression on `size` explains 61.7% of the variation in `price`, leaving 38.3% in the residual sum of squares. So out of the total spread in observed prices (a range of \$171{,}000 between cheapest and dearest), nearly two-thirds is captured by size alone, while the remaining third reflects location, condition, and other unmodelled features.
+:::
+::::
+:::: {.column width="50%"}
+::: {.callout-note collapse="true" appearance="simple" title="Analogy"}
+Picture a pie representing all the variation in the outcome. The regression cuts the pie into two slices: the explained slice (what we can attribute to the predictor) and the unexplained slice (what remains). $R^2$ measures the size of the explained slice as a fraction of the whole pie — and the two slices always add up to 100%.
+:::
+::::
+:::::
+
+**Standard Error of the Regression ($s_e$):** The typical size of the residuals — the standard deviation of the prediction errors, in the units of $y$. It quantifies how far, on average, fitted values stray from observed values, after the line has been chosen.
+
+::::: {.columns}
+:::: {.column width="50%"}
+::: {.callout-tip collapse="true" appearance="simple" title="Example"}
+For the Davis house regression, $s_e = \$23{,}551$ — about 9% of the average sale price (\$253{,}910). So even though the model captures the main pattern via $R^2 = 0.62$, individual price predictions should be reported with an error band of roughly $\pm \$23{,}000$, reminding the analyst not to over-trust a single point estimate.
+:::
+::::
+:::: {.column width="50%"}
+::: {.callout-note collapse="true" appearance="simple" title="Analogy"}
+A weather app predicts tomorrow's high at 22 °C — but its track record shows forecasts typically miss by ±2 °C. That ±2 °C is the standard error of the forecast: not which way the error will go, but how big it usually is. The standard error of the regression is the same idea applied to predicted $y$-values.
+:::
+::::
+:::::
+
+**Outlier:** An observation that sits far from the bulk of the data, especially far from the regression line. Outliers can pull the fitted slope toward themselves and inflate the standard error, so they need to be flagged and investigated rather than blindly included or excluded.
+
+::::: {.columns}
+:::: {.column width="50%"}
+::: {.callout-tip collapse="true" appearance="simple" title="Example"}
+The Davis scatterplot of `price` vs. `size` shows no obvious outliers — every point fits the upward-sloping cloud. To see why this matters, imagine inserting a 3,300-sq-ft mansion priced at only \$210{,}000 (perhaps a fixer-upper): one such point would shrink the slope from \$73.77 toward something noticeably smaller, and the typical residual would jump well above \$23,551.
+:::
+::::
+:::: {.column width="50%"}
+::: {.callout-note collapse="true" appearance="simple" title="Analogy"}
+A flock of geese flies in a tight V-formation; one bird lagging far behind is the outlier. It might be injured, lost, or a different species entirely — and either way, judging the flock's average altitude or speed by including the straggler will mislead you. Outliers in regression are the stragglers worth identifying before you publish the average.
+:::
+::::
+:::::
 
 ## Setup
 
@@ -7734,10 +8297,14 @@ print(f"Number of variables: {data_house.shape[1]}")
 print(f"\nVariables: {', '.join(data_house.columns.tolist())}")
 ```
 
+With only 29 observations we can inspect the complete dataset — a rare luxury. As you scan the rows, notice informally whether houses with larger `size` values also tend to have higher `price` values.
+
 ```python
 # Table 5.1: Complete dataset
 data_house
 ```
+
+Before analyzing the two variables jointly, we summarize each one separately. Keep an eye on the means and standard deviations of `price` and `size` — these univariate ingredients reappear later in the correlation and slope formulas.
 
 ```python
 # Table 5.2: Summary statistics
@@ -7791,13 +8358,6 @@ print(f"  Std Dev:   {size.std():,.0f} sq ft")
 
 **Economic context:** These are moderate-sized homes in a California college town (UC Davis), with typical prices for the late 1990s.
 
-**Key observations:**
-
-- House prices range from \$204,000 to \$375,000 (mean: \$253,910)
-- House sizes range from 1,400 to 3,300 square feet (mean: 1,883 sq ft)
-- Both variables show substantial variation, which is good for regression analysis
-- The data appear to be reasonably symmetric (means close to medians)
-
 ## 5.2 Two-Way Tabulation
 
 A **two-way tabulation** (or crosstabulation) shows how observations are distributed across combinations of two categorical variables. For continuous variables like price and size, we first create categorical ranges.
@@ -7839,16 +8399,8 @@ Looking at the table:
 **The pattern reveals:**
 
 - **Positive association**: Most observations cluster in the "small and cheap" or "large and expensive" cells
-- **No counterexamples**: We never see "large and cheap" houses (the bottom-right cell is empty)
+- **No counterexamples**: We never see "large and cheap" houses (the ≥ 2,400 sq ft, < \$250,000 cell is empty)
 - **Imperfect relationship**: Some medium-sized houses are low-priced (6 houses), some are high-priced (7 houses)
-
-**Limitation of tabulation:**
-
-- We lose information by categorizing continuous variables
-- We can't quantify the strength of the relationship
-- We can't make precise predictions
-
-**Next step:** Use the correlation coefficient and regression to measure the relationship more precisely using the full continuous data.
 
 **From Categorical to Continuous:**
 
@@ -7950,7 +8502,7 @@ The scatter plot provides **qualitative** insight (direction, form, outliers), b
 The **correlation coefficient** $r$ is a unit-free measure of linear association between two variables. It ranges from -1 to 1:
 
 - $r = 1$: Perfect positive linear relationship
-- \$0 < r < 1$: Positive linear relationship
+- $0 < r < 1$: Positive linear relationship
 - $r = 0$: No linear relationship
 - $-1 < r < 0$: Negative linear relationship
 - $r = -1$: Perfect negative linear relationship
@@ -8033,7 +8585,7 @@ print(f"  with variation in size.")
 - Chapter 5: Correlation measures how TWO variables move together
 - Both are standardized measures (unit-free)
 
-**Economic interpretation:** The strong correlation confirms what we saw in the scatter plot: house size is a major determinant of house price, but it's not the only factor.
+**Economic interpretation:** The strong correlation confirms what we saw in the scatter plot: house size is a strong predictor of house price, but it's not the only factor.
 
 ### Illustration: Different Correlation Patterns
 
@@ -8081,10 +8633,10 @@ plt.show()
 
 **What to look for in each panel:**
 
-- **Panel A** (r ~ 0.78): Points cluster tightly around an upward slope
-- **Panel B** (r ~ 0.44): More scatter, but still positive relationship
-- **Panel C** (r ~ 0.00): No systematic pattern
-- **Panel D** (r ~ -0.53): Points follow a downward slope
+- **Panel A** (r ~ 0.77): Points cluster tightly around an upward slope
+- **Panel B** (r ~ 0.45): More scatter, but still positive relationship
+- **Panel C** (r ~ -0.06): No systematic pattern
+- **Panel D** (r ~ -0.45): Points follow a downward slope
 
 ## 5.5 Regression Line
 
@@ -8128,6 +8680,8 @@ fit.summary()
 >
 > The method of ordinary least squares (OLS) chooses the regression line to minimize the sum of squared residuals. This yields formulas for the slope (b₂ = Σ(xᵢ - x̄)(yᵢ - ȳ) / Σ(xᵢ - x̄)²) and intercept (b₁ = ȳ - b₂x̄) that can be computed from the data. The slope equals the covariance divided by the variance of x.
 
+The next cell pulls the intercept and slope out of the fitted model and translates each into plain English, with worked examples for houses 100 and 500 square feet larger.
+
 ```python
 # Extract and interpret coefficients
 intercept = fit.coef()['Intercept']
@@ -8164,7 +8718,9 @@ print(f"  {r_squared*100:.2f}% of price variation is explained by size")
 
 - **Interpretation**: Each additional square foot is associated with a \$73.77 increase in house price, on average
 - **Statistical significance**: p-value ≈ 0 (highly significant)
-- **Confidence interval**: [50.84, 96.70] — we're 95% confident the true effect is between \$51 and \$97 per sq ft
+- **Confidence interval**: [50.84, 96.70] — we're 95% confident the true slope is between \$51 and \$97 per sq ft
+
+*Note: These standard errors, p-values, and confidence intervals use the classical (iid) formulas reported by default; formal statistical inference for regression — including robust standard errors — is covered in Chapter 7.*
 
 **2. Practical examples:**
 
@@ -8183,10 +8739,10 @@ print(f"  {r_squared*100:.2f}% of price variation is explained by size")
 
 - Size explains **62% of the variation** in house prices
 - The remaining **38%** is due to other factors:
- - Location (neighborhood quality, schools)
- - Physical characteristics (bathrooms, garage, condition)
- - Market conditions (time of sale)
- - Unique features (view, lot size, upgrades)
+  - Location (neighborhood quality, schools)
+  - Physical characteristics (bathrooms, garage, condition)
+  - Market conditions (time of sale)
+  - Unique features (view, lot size, upgrades)
 
 **Comparison to correlation:**
 
@@ -8197,6 +8753,8 @@ print(f"  {r_squared*100:.2f}% of price variation is explained by size")
 **Economic interpretation:** The strong relationship (R² = 0.62) between size and price makes economic sense. Buyers pay a substantial premium for additional space. However, the imperfect fit reminds us that many factors beyond size affect house values.
 
 ### Visualizing the Fitted Regression Line
+
+Plotting the fitted line on top of the scatter makes the OLS idea concrete: the line passes through the middle of the point cloud, balancing points above and below. The annotation box reports the estimated equation and R².
 
 ```python
 # Scatter plot with regression line
@@ -8238,6 +8796,8 @@ print(f"Sample mean of price:      ${price.mean():,.2f}")
 # These are equal, confirming that OLS generalizes the sample mean.
 ```
 
+Both numbers are \$253,910.34: with no explanatory variable, the best least-squares prediction of price is simply its sample mean. Regression therefore generalizes the univariate summaries of Chapter 2 rather than replacing them.
+
 ## 5.6 Measures of Model Fit
 
 Two key measures assess how well the regression line fits the data:
@@ -8263,6 +8823,8 @@ $$s_e = \sqrt{\frac{1}{n-2} \sum_{i=1}^n (y_i - \hat{y}_i)^2}$$
 - Lower $s_e$ means fitted values are closer to actual values
 - Units: same as y (dollars in our example)
 - Dividing by (n-2) accounts for estimation of two parameters
+
+We've estimated the regression line. Now we assess how well this line fits the data using R-squared (proportion of variation explained) and the standard error of regression (typical prediction error).
 
 ```python
 # Measures of model fit
@@ -8292,9 +8854,7 @@ print(f"  Match: {np.isclose(r_squared, r**2)}")
 >
 > R-squared measures the fraction of variation in y explained by the regression on x. It ranges from 0 (no explanatory power) to 1 (perfect fit). For bivariate regression, R² equals the squared correlation coefficient (R² = r²ₓᵧ). R² = 0.62 means 62% of house price variation is explained by size variation, while 38% is due to other factors.
 
-We've estimated the regression line. Now we assess how well this line fits the data using R-squared (proportion of variation explained) and the standard error of regression (typical prediction error).
-
-**Understanding R² = 0.617 and Standard Error = \$23,162**
+**Understanding R² = 0.617 and Standard Error = \$23,551**
 
 **1. R-squared (coefficient of determination):**
 
@@ -8312,19 +8872,19 @@ We've estimated the regression line. Now we assess how well this line fits the d
 
 - **For cross-sectional data**: Yes, this is quite good!
 - **Context matters**: 
- - Lab experiments: Often R² > 0.9
- - Cross-sectional economics: R² = 0.2-0.6 is typical
- - Time series: R² = 0.7-0.95 is common
+  - Lab experiments: Often R² > 0.9
+  - Cross-sectional economics: R² = 0.2-0.6 is typical
+  - Time series: R² = 0.7-0.95 is common
 
 - **Single predictor**: Size alone explains most variation — impressive!
 
-**2. Standard error: \$23,162**
+**2. Standard error: \$23,551**
 
 - **Meaning**: Typical prediction error (residual size)
 - **Context**: 
- - Average house price: \$253,910
- - Typical error: \$23,162 (about 9% of average)
- - This is reasonably accurate for house price prediction
+  - Average house price: \$253,910
+  - Typical error: \$23,551 (about 9% of average)
+  - This is reasonably accurate for house price prediction
 
 **3. Verification: R² = r²**
 
@@ -8383,6 +8943,8 @@ print(f"\nR² = Explained SS / Total SS = {explained_ss / total_ss:.4f}")
 print(f"R² from model = {fit_sim._r2:.4f}")
 ```
 
+The same decomposition can be shown graphically. The next figure draws the deviations behind Total SS (actual points to the mean, Panel A) and Explained SS (fitted values to the mean, Panel B) as vertical lines.
+
 ```python
 # Visualization of model fit
 fig, axes = plt.subplots(1, 2, figsize=(14, 5))
@@ -8428,7 +8990,7 @@ plt.show()
 
 In applied econometrics, R² values around 0.60 are considered quite strong for cross-sectional data. Our R² = 0.617 tells us:
 
-- **Size is a major determinant**: House size explains most of the price variation
+- **Size is a strong predictor**: House size explains most of the price variation
 - **Other factors matter**: The remaining 38% is due to location, quality, age, amenities, etc.
 - **Single-variable limits**: One predictor can only explain so much in complex real-world data
 
@@ -8444,23 +9006,6 @@ In applied econometrics, R² values around 0.60 are considered quite strong for 
 
 Modern statistical software provides comprehensive regression output. Let's examine each component of the output for our house price regression.
 
-**Understanding Prediction Uncertainty:**
-
-Our prediction ŷ = $262,559 for a 2,000 sq ft house is a **point estimate** — our best single guess. But predictions have uncertainty:
-
-**Sources of uncertainty:**
-
-- **Estimation error**: We don't know the true β₁ and β₂, only estimates b₁ and b₂
-- **Fundamental randomness**: Even houses of identical size sell for different prices
-- **Model limitations**: Our simple model omits many price determinants
-
-**Preview of Chapter 7**: We'll learn to construct **prediction intervals** like:
-
-- "We're 95% confident the price will be between $215,000 and $310,000"
-- This acknowledges uncertainty while still providing useful guidance
-
-For now, remember: the standard error ($23,551) gives a rough sense of typical prediction errors.
-
 ```python
 # Complete regression output
 fit.summary()
@@ -8468,9 +9013,9 @@ fit.summary()
 
 **Guide to reading regression output:**
 
-- **Top section** -- Model Summary: Dep. Variable, No. Observations, R-squared, F-statistic
-- **Middle section** -- Coefficients Table: coef, std err, t, P>|t|, 95% CI
-- **Bottom section** -- Diagnostic Tests: Omnibus, Durbin-Watson, Jarque-Bera, Cond. No.
+- **Top section** -- Model Summary: estimation method (OLS), dependent variable, inference type (iid = classical standard errors), number of observations
+- **Middle section** -- Coefficients Table: Estimate, Std. Error, t value, Pr(>|t|), and the 2.5% / 97.5% confidence-interval bounds
+- **Bottom section** -- Fit statistics: RMSE (the typical size of prediction errors) and R2
 
 ## 5.8 Prediction and Outliers
 
@@ -8511,7 +9056,7 @@ sizes_to_predict = [1500, 1800, 2000, 2500, 3000]
 predictions = pd.DataFrame({'size': sizes_to_predict})
 predictions['predicted_price'] = fit.predict(newdata=predictions)
 
-predictions
+display(predictions)
 
 print(f"\nObserved size range: {size.min():.0f} to {size.max():.0f} sq ft")
 print(f"  1500, 1800, 2000 are in-sample (reliable)")
@@ -8537,10 +9082,27 @@ Using our regression equation:
 
 **2. Prediction accuracy:**
 
-- Standard error: \$23,162
+- Standard error: \$23,551
 - Typical error: about ±\$23,000 around the prediction
 - **Informal prediction interval**: roughly \$239,000 to \$286,000
 - (Chapter 7 will cover formal prediction intervals)
+
+**Understanding Prediction Uncertainty:**
+
+Our prediction ŷ = $262,559 for a 2,000 sq ft house is a **point estimate** — our best single guess. But predictions have uncertainty:
+
+**Sources of uncertainty:**
+
+- **Estimation error**: We don't know the true β₁ and β₂, only estimates b₁ and b₂
+- **Fundamental randomness**: Even houses of identical size sell for different prices
+- **Model limitations**: Our simple model omits many price determinants
+
+**Preview of Chapter 7**: We'll learn to construct **prediction intervals** like:
+
+- "We're 95% confident the price will be between $213,000 and $312,000"
+- This acknowledges uncertainty while still providing useful guidance
+
+For now, remember: the standard error ($23,551) gives a rough sense of typical prediction errors.
 
 **3. Why predictions aren't perfect:**
 
@@ -8578,7 +9140,7 @@ residual = actual price - predicted price
 # Add residuals and standardized residuals to dataset
 data_house['fitted'] = fit.predict()
 data_house['residual'] = fit._u_hat
-data_house['std_resid'] = fit._u_hat / fit._u_hat.std()
+data_house['std_resid'] = fit._u_hat / se  # standardize by s_e = sqrt(RSS/(n-2)) from Section 5.6
 
 # Observations with large residuals (>2 std deviations)
 outliers = data_house[np.abs(data_house['std_resid']) > 2]
@@ -8589,9 +9151,11 @@ if len(outliers) > 0:
 else:
     print("  None found (all residuals within 2 standard deviations)")
 
-# Top 5 largest residuals (in absolute value)
+# Top 5 largest positive residuals
 data_house.nlargest(5, 'residual', keep='all')[['price', 'size', 'fitted', 'residual']]
 ```
+
+**What the output shows:** Exactly one house crosses the |standardized residual| > 2 threshold: a 2,400 sq ft house that sold for \$340,000 — about \$47,900 more than the fitted line predicts (standardized residual ≈ 2.04). With 29 observations, one residual beyond two standard deviations is roughly what chance alone would produce, so this is a mild outlier worth a second look (perhaps a premium location or condition), not a data error that demands removal.
 
 ## 5.9 Regression and Correlation
 
@@ -8653,6 +9217,8 @@ print(f"  b₂ = r × (s_y / s_x) = {r:.4f} × ({s_y:.4f} / {s_x:.4f}) = {b2_fro
 print(f"\nMatch: {np.isclose(slope, b2_from_r)}")
 ```
 
+The two routes agree exactly: multiplying r = 0.7858 by the ratio of standard deviations (s_y/s_x ≈ 37,391/398) reproduces the OLS slope b₂ = 73.77. The regression slope is just the correlation rescaled into units of y per unit of x — which is why the slope, unlike r, changes when we change measurement units.
+
 ## 5.10 Causation
 
 **Critical distinction:** Regression measures **association**, not **causation**.
@@ -8702,7 +9268,7 @@ print(f"  c₂ = {fit_reverse.coef()['price']:.6f}")
 print(f"  Are they equal? {np.isclose(1/fit.coef()['size'], fit_reverse.coef()['price'])}")
 
 print("\nKey insight:")
-print("  • Original slope: $1 increase in size → ${:.2f} increase in price".format(fit.coef()['size']))
+print("  • Original slope: 1 sq ft increase in size → ${:.2f} increase in price".format(fit.coef()['size']))
 print("  • Reverse slope: $1 increase in price → {:.6f} sq ft increase in size".format(fit_reverse.coef()['price']))
 print("  • These answer different questions!")
 
@@ -8765,7 +9331,7 @@ price = 115,017 + 73.77 × size
 **Key observation:**
 
 - If regression = causation, these should be reciprocals
-- 1 / 73.77 = 0.01355 ≠ 0.00837
+- 1 / 73.77 = 0.01356 ≠ 0.00837
 - They're NOT reciprocals! This reveals regression measures association, not causation
 
 **When can we claim causation?**
@@ -8863,7 +9429,7 @@ plt.show()
 
 **Comparing three approaches to fitting the data:**
 
-**1. OLS (Ordinary Least Squares) — BLUE LINE**
+**1. OLS (Ordinary Least Squares) — PURPLE SOLID LINE**
 
 - **Parametric**: Assumes linear relationship
 - **Equation**: ŷ = \$115,017 + \$73.77 × size
@@ -8949,11 +9515,11 @@ plt.show()
 - **R-squared** measures the fraction of variation in y explained by x, ranging from 0 (no fit) to 1 (perfect fit)
 - **R² = (Explained SS) / (Total SS) = 1 - (Residual SS) / (Total SS)**
 - For bivariate regression, **R² = r²ₓᵧ** (squared correlation coefficient)
-- For house prices, **R² = 0.618** means 62% of price variation is explained by size variation
+- For house prices, **R² = 0.617** means 62% of price variation is explained by size variation
 - **Standard error of regression (sₑ)** measures the typical size of residuals in the units of y
 - **Low R² doesn't mean regression is uninformative**—the coefficient can still be statistically significant and economically important
 - R² depends on data aggregation and choice of dependent variable; use it to compare models with the **same dependent variable**
-- Computer regression output provides coefficients, standard errors, t-statistics, p-values, F-statistics, and ANOVA decomposition
+- Computer regression output provides coefficients, standard errors, t-statistics, p-values, and confidence intervals, along with fit measures such as R² and RMSE
 
 ### Prediction, Causation, and Extensions
 
@@ -8997,8 +9563,8 @@ This single code block reproduces the core workflow of Chapter 5. It is self-con
 # --- Libraries ---
 import pandas as pd                                         # data loading and manipulation
 import matplotlib.pyplot as plt                              # creating plots and visualizations
-import pyfixest as pf                                        # fast OLS regression
 # !pip install pyfixest  # uncomment if running in Google Colab
+import pyfixest as pf                                        # fast OLS regression
 from statsmodels.nonparametric.smoothers_lowess import lowess  # LOWESS nonparametric smoothing
 
 # =============================================================================
@@ -9036,7 +9602,7 @@ corr_matrix = data_house[['price', 'size']].corr()
 r = corr_matrix.loc['price', 'size']
 
 print(f"Correlation coefficient: r = {r:.4f}")
-print(f"Strength: {'Strong' if abs(r) > 0.7 else 'Moderate' if abs(r) > 0.4 else 'Weak'}")
+print(f"Strength: {'Strong' if abs(r) > 0.7 else 'Moderate' if abs(r) > 0.3 else 'Weak'}")
 print(f"r² = {r**2:.4f} ({r**2*100:.1f}% of variation shared)")
 
 # =============================================================================
@@ -9106,6 +9672,15 @@ plt.show()
 ```
 
 **Try it yourself!** Copy this code into an empty Google Colab notebook and run it: [Open Colab](https://colab.research.google.com/notebooks/empty.ipynb)
+
+---
+
+**Next Steps:**
+
+- **Chapter 6**: The least squares estimator — the statistical model behind the fitted regression line
+- **Chapter 7**: Statistical inference for bivariate regression (confidence intervals and hypothesis tests for the slope)
+- **Chapter 8**: Case studies applying bivariate regression to real economic data
+- **Chapters 10-12**: Multiple regression with many explanatory variables
 
 ## Practice Exercises
 
@@ -9266,7 +9841,7 @@ This research ([Mendez, 2020](https://github.com/quarcs-lab/mendez2020-convergen
 
 > **Key Concept 5.8: Capital-Productivity Relationship**
 >
-> The regression of labor productivity on capital per worker quantifies the **capital-output elasticity**—how much productivity increases when capital per worker rises by 1%. In cross-country data, this relationship reflects both:
+> The regression of labor productivity on capital per worker quantifies the **capital-output relationship**—how much productivity increases when capital per worker rises by one dollar. (Estimating the *capital-output elasticity*—the percent change in productivity per 1% increase in capital—would require a log-log regression, introduced in Chapter 9.) In cross-country data, this relationship reflects both:
 >
 > 1. **Diminishing returns to capital** (holding technology constant)
 > 2. **Technology differences** across countries (correlated with capital accumulation)
@@ -9296,8 +9871,8 @@ This research ([Mendez, 2020](https://github.com/quarcs-lab/mendez2020-convergen
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-import pyfixest as pf
 # !pip install pyfixest  # uncomment if running in Google Colab
+import pyfixest as pf
 
 # Load convergence clubs dataset
 df = pd.read_csv(
@@ -9345,8 +9920,8 @@ fig, ax = plt.subplots(figsize=(10, 6))
 ax.scatter(plot_data['kl'], plot_data['lp'], alpha=0.5, s=20)
 
 # Add labels and formatting
-ax.set_xlabel('Capital per Worker (thousands, 2011 USD PPP)', fontsize=12)
-ax.set_ylabel('Labor Productivity (thousands, 2011 USD PPP)', fontsize=12)
+ax.set_xlabel('Capital per Worker (2011 USD PPP)', fontsize=12)
+ax.set_ylabel('Labor Productivity (2011 USD PPP)', fontsize=12)
 ax.set_title('Capital per Worker vs. Labor Productivity (108 countries, 1990-2014)', fontsize=14)
 ax.grid(True, alpha=0.3)
 plt.tight_layout()
@@ -9391,7 +9966,7 @@ print(f"\nCorrelation between capital and productivity: r = {r:.4f}")
 
 # Interpretation
 print(f"\nInterpretation:")
-print(f"- Magnitude: {'Strong' if abs(r) > 0.7 else 'Moderate' if abs(r) > 0.4 else 'Weak'}")
+print(f"- Magnitude: {'Strong' if abs(r) > 0.7 else 'Moderate' if abs(r) > 0.3 else 'Weak'}")
 print(f"- Direction: {'Positive' if r > 0 else 'Negative'}")
 print(f"- R² (shared variation): {r**2:.4f} ({r**2*100:.2f}%)")
 ```
@@ -9424,13 +9999,14 @@ print(f"- R² (shared variation): {r**2:.4f} ({r**2*100:.2f}%)")
 
 > **Key Concept 5.9: Interpreting Slope in Economic Context**
 >
-> The regression slope β₁ in `productivity = β₀ + β₁ × capital` measures the **average change in productivity (in thousands of USD) for each additional thousand USD of capital per worker**.
+> The regression slope b₂ in `productivity = b₁ + b₂ × capital` measures the **average change in productivity (in 2011 USD) for each additional dollar of capital per worker**.
 >
 > In cross-country data, this captures both:
+>
 > - **True capital effect** (more machines → higher output)
 > - **Confounding factors** (richer countries have both more capital AND better technology/institutions)
 >
-> To isolate the true capital effect, we need **multiple regression** (Chapters 6-9) to control for human capital, TFP, and other factors.
+> To isolate the true capital effect, we need **multiple regression** (Chapters 10-12) to control for human capital, TFP, and other factors.
 
 #### Task 5: Compare Relationships Across Income Groups (Independent)
 
@@ -9500,37 +10076,30 @@ print(f"- R² (shared variation): {r**2:.4f} ({r**2*100:.2f}%)")
 > Establishing causation requires:
 > - **Controlled experiments** (rarely feasible for countries)
 > - **Natural experiments** (e.g., policy changes, resource discoveries)
-> - **Instrumental variables** (advanced econometric methods, Chapter 14-15)
+> - **Instrumental variables** (advanced econometric methods, Chapter 17)
 >
 > For now, interpret regression slopes as **descriptive associations**, not causal effects.
 
-### What You've Learned from This Case Study
+#### What You've Learned from This Case Study
 
 Through this hands-on exploration of capital and productivity across countries, you've applied all Chapter 5 tools:
 
- **Visualization:** Scatterplots reveal patterns before quantifying relationships
+- **Visualization:** Scatterplots reveal patterns before quantifying relationships
+- **Correlation:** Pearson coefficient quantifies linear association strength
+- **Regression:** OLS slope measures average change in Y per unit change in X
+- **Interpretation:** Translated coefficients into economic meaning (dollars, percentages)
+- **Model fit:** R-squared shows explanatory power (proportion of variation explained)
+- **Comparative analysis:** Group comparisons reveal heterogeneity (relationships vary by income level)
+- **Critical thinking:** Distinguished association from causation; recognized omitted variable bias
 
- **Correlation:** Pearson coefficient quantifies linear association strength
-
- **Regression:** OLS slope measures average change in Y per unit change in X
-
- **Interpretation:** Translated coefficients into economic meaning (dollars, percentages)
-
- **Model fit:** R-squared shows explanatory power (proportion of variation explained)
-
- **Comparative analysis:** Group comparisons reveal heterogeneity (relationships vary by income level)
-
- **Critical thinking:** Distinguished association from causation; recognized omitted variable bias
-
-**Connection to the Research:** The patterns you've discovered—the capital-productivity relationship, differences across income groups, the role of TFP—are the empirical foundations for Mendez (2020)'s convergence clubs analysis. The full research uses advanced methods (nonparametric regression, clustering algorithms) to formally identify clubs, which you'll learn in later chapters.
+**Connection to the Research:** The patterns you've discovered—the capital-productivity relationship, differences across income groups, the role of TFP—are the empirical foundations for Mendez (2020)'s convergence clubs analysis. The full research uses advanced methods (nonparametric regression, clustering algorithms) to formally identify clubs, building on the bivariate foundations you've practiced here.
 
 **Looking ahead:**
 
-- **Chapter 6-7:** Multiple regression to control for human capital, TFP, and other factors
-- **Chapter 10-11:** Panel data methods to exploit time variation within countries
-- **Chapter 15-17:** Advanced methods for causal inference and club detection
+- **Chapters 10-12:** Multiple regression to control for human capital, TFP, and other factors
+- **Chapter 17:** Panel data methods to exploit time variation within countries, along with advanced methods for causal inference
 
-**Congratulations!** You've completed Chapter 5 and applied bivariate analysis to real cross-country growth data. Continue to Chapter 6 to learn how to extend regression analysis to multiple explanatory variables.
+**Congratulations!** You've completed Chapter 5 and applied bivariate analysis to real cross-country growth data. Continue to Chapter 6 to learn about the statistical properties of the least squares estimator.
 
 ### Case Study 2: Nighttime Lights and Development: A Bivariate Exploration
 
@@ -9557,7 +10126,7 @@ In Chapter 1, we introduced the DS4Bolivia project and estimated a simple regres
 **Instructions**:
 
 1. Load the data from the URL below and select the key variables listed above
-2. Use `pd.cut()` to bin the `imds` variable into three equal-frequency groups labeled **Low**, **Medium**, and **High** (terciles)
+2. Use `pd.qcut()` to bin the `imds` variable into three equal-frequency groups labeled **Low**, **Medium**, and **High** (terciles)
 3. Create a two-way frequency table (cross-tabulation) of `imds` terciles against department using `pd.crosstab()`
 4. Examine the table: Which departments have the most municipalities in the *Low* development category?
 
@@ -9577,9 +10146,9 @@ print(f"Departments: {sorted(bol_cs['dep'].unique())}")
 print()
 
 # Bin imds into terciles
-bol_cs['imds_group'] = pd.cut(bol_cs['imds'],
-                               bins=3,
-                               labels=['Low', 'Medium', 'High'])
+bol_cs['imds_group'] = pd.qcut(bol_cs['imds'],
+                                q=3,
+                                labels=['Low', 'Medium', 'High'])
 
 # Two-way frequency table: imds tercile x department
 cross_tab = pd.crosstab(bol_cs['imds_group'], bol_cs['dep'],
@@ -9857,7 +10426,7 @@ plt.show()
 # print(f"  Difference: {abs(fit_ubn._r2 - fit_ntl._r2):.4f}")
 ```
 
-### What You've Learned from This Case Study
+#### What You've Learned from This Case Study
 
 Through this bivariate exploration of satellite data and municipal development in Bolivia, you've applied the full Chapter 5 toolkit:
 
@@ -9870,7 +10439,7 @@ Through this bivariate exploration of satellite data and municipal development i
 
 **Connection to the research**: The DS4Bolivia project extends this bivariate analysis to multivariate machine learning models, using 64-dimensional satellite embeddings alongside nighttime lights to achieve higher predictive accuracy for SDG indicators.
 
-**Looking ahead**: In Chapter 7, we'll apply *statistical inference* to these regressions—testing whether the NTL coefficient is significantly different from zero and constructing confidence intervals for the effect of satellite data on development.
+**Looking ahead**: In Chapter 7, we'll apply *statistical inference* to these regressions—testing whether the NTL coefficient is significantly different from zero and constructing confidence intervals for the association between nighttime lights and development.
 
 **Well done!** You've now explored two real-world datasets—cross-country convergence and Bolivian municipal development—using the complete bivariate analysis toolkit from Chapter 5.
 
@@ -9890,7 +10459,7 @@ This notebook provides an interactive introduction to the statistical properties
 [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/quarcs-lab/metricsai/blob/main/notebooks_colab/ch06_The_Least_Squares_Estimator.ipynb)
 <div class="chapter-resources">
 <a href="https://www.youtube.com/watch?v=hSv0usYmlZc" target="_blank" class="resource-btn">🎬 AI Video</a>
-<a href="https://carlos-mendez.my.canva.site/s06-the-least-squares-estimator-pdf" target="_blank" class="resource-btn">✨ AI Slides</a>
+<a href="https://quarcs-lab.github.io/metricsai/slides/ch06/index.html" target="_blank" class="resource-btn">🧑🏽‍🏫 Mendez Slides</a>
 <a href="https://cameron.econ.ucdavis.edu/aed/traedv1_06" target="_blank" class="resource-btn">📊 Cameron Slides</a>
 <a href="https://app.edcafe.ai/quizzes/697866592f5d08069e048b48" target="_blank" class="resource-btn">✏️ Quiz</a>
 <a href="https://app.edcafe.ai/chatbots/69789eae2f5d08069e070694" target="_blank" class="resource-btn">🤖 AI Tutor</a>
@@ -9899,62 +10468,131 @@ This notebook provides an interactive introduction to the statistical properties
 
 ## Chapter Overview
 
-### Introduction
+Understanding the properties of the Ordinary Least Squares (OLS) estimator is fundamental to econometric inference. While Chapter 5 showed *how* to estimate regression models, this chapter explains *why* OLS works and *when* we can trust its results. We examine the statistical properties that make OLS the standard estimation method in econometrics: unbiasedness, efficiency, and asymptotic normality. A crucial concept is the distinction between the **population regression** (the true relationship we want to learn about) and the **sample regression** (our estimate from limited data). This chapter uses Monte Carlo simulations and real-world examples to demonstrate OLS properties empirically, connecting abstract statistical theory to tangible patterns in data.
 
-Understanding the properties of the Ordinary Least Squares (OLS) estimator is fundamental to econometric inference. While Chapter 5 showed *how* to estimate regression models, this chapter explains *why* OLS works and *when* we can trust its results. We examine the statistical properties that make OLS the standard estimation method in econometrics: unbiasedness, efficiency, and asymptotic normality.
+**What you'll learn:**
 
-A crucial concept is the distinction between the **population regression** (the true relationship we want to learn about) and the **sample regression** (our estimate from limited data). Different samples yield different estimates—this sampling variability is inevitable but quantifiable. By understanding how OLS estimates vary across samples, we can construct confidence intervals and test hypotheses about economic relationships.
-
-This chapter uses Monte Carlo simulations and real-world examples to demonstrate OLS properties empirically, connecting abstract statistical theory to tangible patterns in data.
-
-### What You'll Learn
-
-In this chapter, you will:
-
-- Distinguish between the population regression line (β₁ + β₂x) and the sample regression line (b₁ + b₂x)
-- Understand the conditional mean E[y|x] and the error term u = y - E[y|x]
-- Differentiate between the unobserved error term (u) and the observed residual (e)
+- Distinguish between the population regression line ($\beta_1 + \beta_2 x$) and the sample regression line ($b_1 + b_2 x$)
+- Understand the conditional mean $E[y \mid x]$ and the error term $u = y - E[y \mid x]$
+- Differentiate between the unobserved error term ($u$) and the observed residual ($e$)
 - Apply the four key OLS assumptions: correct model, mean-zero errors, homoskedasticity, and independence
-- Calculate the variance and standard error of the OLS slope coefficient b₂
-- Explain why b₂ is an unbiased estimator of β₂ under assumptions 1-2
-- Compute the standard error of the regression (sₑ) and use it to estimate precision
+- Calculate the variance and standard error of the OLS slope coefficient $b_2$
+- Explain why $b_2$ is an unbiased estimator of $\beta_2$ under assumptions 1–2
+- Compute the standard error of the regression ($s_e$) and use it to estimate precision
 - Understand when OLS estimates are more precise (good fit, many observations, scattered regressors)
-- Apply the Central Limit Theorem to show b₂ is approximately normally distributed for large samples
+- Apply the Central Limit Theorem to show $b_2$ is approximately normally distributed for large samples
 - Recognize that OLS is the Best Linear Unbiased Estimator (BLUE) under standard assumptions
 - Conduct Monte Carlo simulations to demonstrate sampling distributions
 - Interpret sampling variability and its implications for statistical inference
 
-### Dataset Used
+**Datasets used:**
 
-**Primary dataset:**
+- **Convergence Clubs** (Mendez 2020): 108 countries, 1990–2014, with real GDP per capita (GDPpc), labor productivity (lp), and capital per worker (kl)
+- **Generated data**: computer-simulated samples from a known data-generating process ($y = 1 + 2x + u$)
 
-- **Convergence Clubs** (Mendez 2020): 108 countries, 1990-2014
-  - Variables: Real GDP per capita (rgdppc), labor productivity, capital per worker (rk)
-  - Used in Case Study: Sampling variability in productivity-capital regressions
-  - Demonstrates OLS properties with real economic data
+**Chapter outline:**
 
-**Supporting examples:**
+- 6.1 Population and Sample Models
+- 6.2 Examples of Sampling from a Population
+- 6.3 Properties of the Least Squares Estimator
+- 6.4 Estimators of Model Parameters
+- Key Takeaways
+- Practice Exercises
+- Case Studies
 
-- **Generated data**: Computer-simulated samples from known DGP (y = 1 + 2x + u)
-- **1880 U.S. Census**: Finite population sampling demonstration
+## Key Concepts
 
-### Chapter Outline
+Six core ideas anchor this chapter. Skim them before you start, and come back when a term feels fuzzy. Each entry pairs a concrete example using the chapter's data with a non-technical analogy. Click a panel to expand it.
 
-**6.1 Population and Sample Models** - Distinguish between population parameters (β₁, β₂) and sample estimates (b₁, b₂); understand error terms vs. residuals
+**Conditional Mean ($E[Y \mid X]$):** The average value of $Y$ at a fixed value of $X$ — what the chapter calls the population regression line. As $X$ moves, the conditional mean traces out the systematic part of the relationship; everything else is the error term $u$.
 
-**6.2 Examples of Sampling from a Population** - Generated data and census sampling demonstrations showing how estimates vary across samples
+::::: {.columns}
+:::: {.column width="50%"}
+::: {.callout-tip collapse="true" appearance="simple" title="Example"}
+For the chapter's generated DGP $y = 1 + 2x + u$, the conditional mean is $E[y \mid x] = 1 + 2x$ — exactly. So at $x = 3$ the average $y$-value across infinitely many observations is $7.0$, and individual observations scatter around it through the random shock $u \sim N(0, 4)$. The conditional mean is the line; the data are the cloud.
+:::
+::::
+:::: {.column width="50%"}
+::: {.callout-note collapse="true" appearance="simple" title="Analogy"}
+A traffic-forecast app reports the *average* commute time for each hour of the day: 18 min at 6 a.m., 35 min at 8 a.m., 22 min at noon. That average-by-hour curve is the conditional mean. On any given day your trip takes 26 or 38 minutes, but the curve summarises what to expect on average at each clock setting.
+:::
+::::
+:::::
 
-**6.3 Properties of the Least Squares Estimator** - Unbiasedness (E[b₂] = β₂), variance formulas, asymptotic normality, and BLUE property
+**Homoskedasticity:** The OLS assumption that the conditional variance of the error term is the same for every value of $X$, formally $\operatorname{Var}[u \mid x] = \sigma_u^2$. When this fails (heteroskedasticity), OLS is still unbiased but its standard errors are wrong.
 
-**6.4 Estimators of Model Parameters** - Calculating standard errors, understanding degrees of freedom, factors affecting precision
+::::: {.columns}
+:::: {.column width="50%"}
+::: {.callout-tip collapse="true" appearance="simple" title="Example"}
+The chapter's generated DGP fixes $\sigma_u = 2$ at every value of $x$ — homoskedastic by construction. So the vertical scatter of `y` around the line $1 + 2x$ has the same width at $x = 1$ and $x = 6$. In real data, where high-`size` houses might scatter more than low-`size` ones in dollar terms, this assumption is exactly what would break.
+:::
+::::
+:::: {.column width="50%"}
+::: {.callout-note collapse="true" appearance="simple" title="Analogy"}
+A pianist plays a song where every note is meant to be at the same volume. Homoskedasticity is the recording in which all notes do come through equally — soft passages and loud passages alike. Heteroskedasticity is the same recording with one channel fading: the late notes whisper while the early ones blare.
+:::
+::::
+:::::
 
-**Key Takeaways** - Comprehensive chapter summary organized by major themes
+**Independence of Errors:** The OLS assumption that the error for one observation carries no information about the error for any other, formally $\operatorname{Cov}[u_i, u_j] = 0$ for $i \neq j$. Violations are common in time-series data (today's shock predicts tomorrow's) and clustered samples (students in the same school).
 
-**Practice Exercises** - Hands-on problems reinforcing OLS properties, standard errors, and interpretation
+::::: {.columns}
+:::: {.column width="50%"}
+::: {.callout-tip collapse="true" appearance="simple" title="Example"}
+The chapter draws each of the 30 observations in its generated samples by an independent draw $u_i \sim N(0, 4)$, so knowing $u_5 = 1.3$ tells you nothing about $u_6$. That is exactly the independence assumption at work — and it's why the 1{,}000-sample Monte Carlo neatly recovers the textbook standard errors. With clustered errors the same simulation would understate uncertainty.
+:::
+::::
+:::: {.column width="50%"}
+::: {.callout-note collapse="true" appearance="simple" title="Analogy"}
+A casino die has no memory: rolling a six on this throw gives no clue about the next throw. Independent errors behave the same way — each observation's deviation is a fresh, memoryless draw. Time-series data, by contrast, is more like a long card game where the previous hand reshuffles into the next; today's "luck" carries over.
+:::
+::::
+:::::
 
-**Case Studies** - Empirical investigation of sampling variability using convergence clubs data; Monte Carlo with real economic data
+**BLUE — Best Linear Unbiased Estimator:** The Gauss–Markov property stating that, under the four core OLS assumptions, OLS achieves the smallest variance among all *linear* unbiased estimators of the regression coefficients. No other linear-in-$y$ rule that targets the true $\beta$ can do better in terms of sample-to-sample bounce.
 
----
+::::: {.columns}
+:::: {.column width="50%"}
+::: {.callout-tip collapse="true" appearance="simple" title="Example"}
+For the generated DGP $y = 1 + 2x + u$ with $n = 30$, OLS gives a slope estimator with empirical sampling SD ≈ $0.38$ across the chapter's 1{,}000 simulated samples (true slope $\beta_2 = 2$). Any rival linear unbiased rule — using only the first observation, or weighting endpoints — would produce a wider sampling SD than 0.38; OLS is the *tightest* unbiased linear option.
+:::
+::::
+:::: {.column width="50%"}
+::: {.callout-note collapse="true" appearance="simple" title="Analogy"}
+A singing competition is run only between contestants who are already pitch-perfect (unbiased). BLUE picks the contestant with the steadiest voice — the one whose every performance is closest to the same note night after night. Among the on-pitch field, OLS is that steadiest voice.
+:::
+::::
+:::::
+
+**Asymptotic Normality:** A property of OLS coefficients stating that, as the sample size grows, the standardised estimator $(b_2 - \beta_2)/\sigma_{b_2}$ converges in distribution to a standard normal $N(0, 1)$. This is what justifies using $t$-tables and confidence intervals on regression slopes, even when $u$ is not exactly normal.
+
+::::: {.columns}
+:::: {.column width="50%"}
+::: {.callout-tip collapse="true" appearance="simple" title="Example"}
+With $n = 30$ already, the chapter's 1{,}000 simulated slopes form a histogram tightly tracking a normal curve centred on $\beta_2 = 2$ with SD $\approx 0.38$. Even though each `u_i` is normal here, the same shape would emerge from non-normal errors at large $n$ — the CLT acting on the OLS formula as a weighted sum of $y$-values.
+:::
+::::
+:::: {.column width="50%"}
+::: {.callout-note collapse="true" appearance="simple" title="Analogy"}
+A blurry photograph sharpens into clearer focus as the camera collects more light. Asymptotic normality is the same idea: as $n$ grows, the smudged sampling distribution of the OLS coefficient sharpens into the recognizable bell shape, regardless of the original blur's character. Once it's in focus, you can read measurements off it.
+:::
+::::
+:::::
+
+**Standard Error of the Regression ($s_e$):** An estimate of the standard deviation of the error term, computed from the residuals as $s_e = \sqrt{\text{RSS}/(n - 2)}$. It quantifies the typical size of the unmodelled variation in $y$ — how far observations stray from the fitted line, on average.
+
+::::: {.columns}
+:::: {.column width="50%"}
+::: {.callout-tip collapse="true" appearance="simple" title="Example"}
+For the chapter's manual example with $(y, x) = (1, 1), (2, 2), (2, 3), (2, 4), (3, 5)$ and fitted line $\hat{y} = 0.8 + 0.4x$, the $(n - 2) = 3$ degrees of freedom yield a small $s_e$ that feeds directly into $\operatorname{se}(b_2)$. In the generated DGP $y = 1 + 2x + u$ with true $\sigma_u = 2$, the OLS-computed $s_e$ from any single sample of $n = 30$ recovers values clustered around 2.0, since $s_e^2$ is an unbiased estimator of the population error variance $\sigma_u^2 = 4$.
+:::
+::::
+:::: {.column width="50%"}
+::: {.callout-note collapse="true" appearance="simple" title="Analogy"}
+A recipe says "bake until golden, about 28 minutes" — but if you've made it ten times, you know the typical wiggle is about ±3 minutes around 28. That ±3-minute band is the standard error of the recipe; $s_e$ is the same idea, expressed in the units of $y$. Smaller band ⇒ tighter recipe; bigger band ⇒ unpredictable kitchen.
+:::
+::::
+:::::
 
 ## Setup
 
@@ -10050,12 +10688,11 @@ $$e_i = y_i - \hat{y}_i = y_i - (b_1 + b_2 x_i)$$
 
 ## 6.2 Examples of Sampling from a Population
 
-We examine two examples to understand sampling variability:
+We examine a worked example to understand sampling variability, using computer-simulated data drawn from a known model:
 
-1. **Generated data**: Computer-simulated samples from an explicit model $y = 1 + 2x + u$
-2. **Census data**: Samples from the 1880 U.S. Census (a finite population)
+- **Generated data**: Computer-simulated samples from an explicit model $y = 1 + 2x + u$
 
-In both cases:
+In this example:
 
 - We know the true population parameters
 - Different samples yield different estimates
@@ -10078,6 +10715,8 @@ This means:
 - True slope: $\beta_2 = 2$
 - Error standard deviation: $\sigma_u = 2$
 
+The next cell loads this generated dataset from GitHub and displays its summary statistics along with the observations themselves (Table 6.1). Look for the `Eygivenx` column — it is the exact population line $1 + 2x$ — and the `u` column, whose random draws pull each observed `y` away from that line.
+
 ```python
 # 6.2 Examples of sampling from a population
 
@@ -10087,13 +10726,37 @@ data_gen = pd.read_stata(GITHUB_DATA_URL + 'AED_GENERATEDDATA.DTA')
 # Generated data summary
 display(data_gen.describe())
 
-# First 10 observations (Table 6.1)
+# All 5 observations (Table 6.1)
 data_gen.head(10)
 ```
+
+The generated dataset has just 5 observations. `Eygivenx` rises by exactly 2 for each unit increase in `x` — that is the population line $E[y|x] = 1 + 2x$ — while `y = Eygivenx + u` scatters around it: four of the five error draws happen to be negative, so most observed `y` values sit below the population line.
 
 ### Figure 6.2 Panel A: Population Regression Line
 
 The population regression line represents $E[y|x] = 1 + 2x$. Points scatter around this line due to the error term $u$.
+
+```python
+# Figure 6.2 Panel A: the population regression line E[y|x] = 1 + 2x
+# The column `Eygivenx` IS the population line, so regressing it on x recovers
+# the true parameters exactly (perfect fit: R2 = 1, standard errors approx 0).
+fit_pop = pf.feols('Eygivenx ~ x', data=data_gen)
+fit_pop.summary()
+
+# Plot the population line together with the observed y values
+fig, ax = plt.subplots(figsize=(10, 6))
+ax.scatter(data_gen['x'], data_gen['y'], s=80, color='#22d3ee',
+           label='Observed y (population + error u)', zorder=3)
+ax.plot(data_gen['x'], data_gen['Eygivenx'], color='#c084fc', linewidth=2,
+        linestyle='--', label='Population line: E[y|x] = 1 + 2x')
+ax.set_xlabel('x')
+ax.set_ylabel('y')
+ax.set_title('Figure 6.2 Panel A: Population Regression Line')
+ax.legend()
+ax.grid(True, alpha=0.3)
+plt.tight_layout()
+plt.show()
+```
 
 ---
 
@@ -10112,9 +10775,36 @@ This represents the **true** relationship between x and y in the population, bef
 
 **Key concept**: The population regression line shows the **expected value** (average) of y for each value of x. Individual observations deviate from this line due to the random error term u, which has mean zero but individual realizations that are positive or negative.
 
-#### Figure 6.2 Panel B: Sample Regression Line
+### Figure 6.2 Panel B: Sample Regression Line
 
 The sample regression line is our estimate from the observed data. Note that it differs from the population line due to sampling variability.
+
+```python
+# Figure 6.2 Panel B: the sample regression line y_hat = b1 + b2*x
+# Fitting y (which includes the random errors u) on x gives estimates that
+# differ from the true 1 and 2 because we have only n = 5 noisy observations.
+fit_sample = pf.feols('y ~ x', data=data_gen)
+fit_sample.summary()
+
+b1_gen = fit_sample.coef()['Intercept']
+b2_gen = fit_sample.coef()['x']
+
+# Plot the sample regression line against the true population line
+fig, ax = plt.subplots(figsize=(10, 6))
+ax.scatter(data_gen['x'], data_gen['y'], s=80, color='#22d3ee',
+           label='Observed data', zorder=3)
+ax.plot(data_gen['x'], fit_sample.predict(), color='red', linewidth=2,
+        label=f'Sample: y_hat = {b1_gen:.2f} + {b2_gen:.2f}x')
+ax.plot(data_gen['x'], data_gen['Eygivenx'], color='#c084fc', linewidth=2,
+        linestyle='--', label='Population: E[y|x] = 1 + 2x')
+ax.set_xlabel('x')
+ax.set_ylabel('y')
+ax.set_title('Figure 6.2 Panel B: Sample Regression Line')
+ax.legend()
+ax.grid(True, alpha=0.3)
+plt.tight_layout()
+plt.show()
+```
 
 ### Interpreting the Sample Regression Results
 
@@ -10148,47 +10838,15 @@ To illustrate sampling variability, we generate three different samples from the
 
 **Key observation:** Each sample produces a different regression line, but all are centered around the true population line.
 
-### Interpreting the Three Sample Regressions
-
-**What this demonstrates:**
-
-We generated three independent samples from the **same data-generating process** (y = 1 + 2x + u), yet obtained three different regression lines:
-
-| Sample | Intercept | Slope | True Values |
-|--------|-----------|-------|-------------|
-| Sample 1 | 0.82 | 1.81 | β₀ = 1.0, β₁ = 2.0 |
-| Sample 2 | 1.75 | 1.79 | β₀ = 1.0, β₁ = 2.0 |
-| Sample 3 | 2.01 | 1.67 | β₀ = 1.0, β₁ = 2.0 |
-
-**Key observations:**
-
-1. **All estimates differ from the true values**: None of the samples perfectly recovered β₀ = 1.0 or β₁ = 2.0, even though we know these are the true parameters.
-
-2. **Estimates vary across samples**: The intercept ranges from 0.82 to 2.01, and the slope ranges from 1.67 to 2.01. This is **sampling variability** in action.
-
-3. **All estimates are "in the neighborhood"**: While no single estimate equals the true value, they're all reasonably close. None gave us absurd values like β₁ = 10 or β₁ = -5.
-
-**The fundamental statistical question**: 
-
-If we know the true parameter is β₁ = 2.0, why would we ever get estimates like 1.81, 1.79, or 1.67? The answer is **random sampling variation**. Each sample contains different realizations of the error term u, which causes the observations to scatter differently around the population line. OLS finds the best fit to each specific sample, leading to different regression lines.
-
-**Why this matters for econometrics**:
-
-In real-world applications, we have only **one sample** and we **don't know the true parameters**. These simulations show that:
-
-- Our estimate is almost certainly not exactly equal to the true value
-- Different samples would give different estimates
-- We need a way to quantify this uncertainty (standard errors!)
-
-This is why we can't simply report "the slope is 1.81" and claim we've discovered the truth. We must report "the slope is 1.81 with a standard error of X," acknowledging that our estimate contains sampling error.
-
 #### Visualization: Three Different Samples from the Same DGP
 
 Each panel shows:
 
 - Black dots: observed data
 - Red line: sample regression line (different for each sample)
-- Blue dashed line: true population line (same for all)
+- Purple dashed line: true population line (same for all)
+
+We first generate the three samples (n = 30 each, with a fixed seed for reproducibility) and fit an OLS regression to each; the printed intercepts and slopes are the values tabulated above. The following cell then plots all three fits.
 
 ```python
 # Generate three samples from the same data generating process
@@ -10254,6 +10912,40 @@ plt.tight_layout()
 plt.show()
 ```
 
+### Interpreting the Three Sample Regressions
+
+**What this demonstrates:**
+
+We generated three independent samples from the **same data-generating process** (y = 1 + 2x + u), yet obtained three different regression lines:
+
+| Sample | Intercept | Slope | True Values |
+|--------|-----------|-------|-------------|
+| Sample 1 | 0.82 | 1.81 | β₁ = 1.0, β₂ = 2.0 |
+| Sample 2 | 1.75 | 1.79 | β₁ = 1.0, β₂ = 2.0 |
+| Sample 3 | 2.01 | 1.67 | β₁ = 1.0, β₂ = 2.0 |
+
+**Key observations:**
+
+1. **All estimates differ from the true values**: None of the samples perfectly recovered β₁ = 1.0 or β₂ = 2.0, even though we know these are the true parameters.
+
+2. **Estimates vary across samples**: The intercept ranges from 0.82 to 2.01, and the slope ranges from 1.67 to 1.81. This is **sampling variability** in action.
+
+3. **All estimates are "in the neighborhood"**: While no single estimate equals the true value, they're all reasonably close. None gave us absurd values like β₂ = 10 or β₂ = -5.
+
+**The fundamental statistical question**: 
+
+If we know the true parameter is β₂ = 2.0, why would we ever get estimates like 1.81, 1.79, or 1.67? The answer is **random sampling variation**. Each sample contains different realizations of the error term u, which causes the observations to scatter differently around the population line. OLS finds the best fit to each specific sample, leading to different regression lines.
+
+**Why this matters for econometrics**:
+
+In real-world applications, we have only **one sample** and we **don't know the true parameters**. These simulations show that:
+
+- Our estimate is almost certainly not exactly equal to the true value
+- Different samples would give different estimates
+- We need a way to quantify this uncertainty (standard errors!)
+
+This is why we can't simply report "the slope is 1.81" and claim we've discovered the truth. We must report "the slope is 1.81 with a standard error of X," acknowledging that our estimate contains sampling error.
+
 **Key observation:** Each sample produces a different regression line, but all are close to the true population line (purple dashed). This is sampling variability in action.
 
 ## 6.3 Properties of the Least Squares Estimator
@@ -10315,20 +11007,47 @@ To understand the sampling distribution, we simulate 1,000 regressions from the 
 >
 > The four core OLS assumptions are: (1) Correct model specification: y = β₁ + β₂x + u, (2) Mean-zero errors: E[u|x] = 0, (3) Homoskedasticity: Var[u|x] = σ²ᵤ, (4) Independence: errors uncorrelated across observations. Assumptions 1-2 are essential for unbiasedness; assumptions 3-4 affect variance and can be relaxed using robust standard errors.
 
+```python
+# 6.3 Monte Carlo: sampling distribution of the OLS estimator
+# Draw 1,000 samples of n = 30 from the same DGP y = 1 + 2x + u, refit each,
+# and collect the intercept and slope estimates to study their distribution.
+np.random.seed(42)
+n = 30
+beta_1_true, beta_2_true, sigma_u = 1, 2, 2
+n_simulations = 1000
+
+intercept_estimates = []
+slope_estimates = []
+for i in range(n_simulations):
+    x_sim = np.random.normal(3, 1, n)
+    u_sim = np.random.normal(0, sigma_u, n)
+    y_sim = beta_1_true + beta_2_true * x_sim + u_sim
+    m = pf.feols('y ~ x', data=pd.DataFrame({'x': x_sim, 'y': y_sim}))
+    intercept_estimates.append(m.coef()['Intercept'])
+    slope_estimates.append(m.coef()['x'])
+
+intercept_estimates = np.array(intercept_estimates)
+slope_estimates = np.array(slope_estimates)
+
+print(f'Monte Carlo results ({n_simulations} samples, n = {n} each):')
+print(f'  Intercept: true = {beta_1_true}, mean = {intercept_estimates.mean():.4f}, SD = {intercept_estimates.std():.4f}')
+print(f'  Slope:     true = {beta_2_true}, mean = {slope_estimates.mean():.4f}, SD = {slope_estimates.std():.4f}')
+```
+
 ### Interpreting the Monte Carlo Simulation Results
 
 **What 1,000 simulations reveal about OLS properties:**
 
 We simulated 1,000 independent samples (each with n=30 observations) from the same DGP: y = 1 + 2x + u. Here are the results:
 
-**Intercept (β₀):**
+**Intercept (β₁):**
 
 - **True value**: 1.0
 - **Mean of 1,000 estimates**: 0.9960
 - **Standard deviation**: 1.2069
 - **Difference from true value**: -0.004 (only 0.4% error)
 
-**Slope (β₁):**
+**Slope (β₂):**
 
 - **True value**: 2.0
 - **Mean of 1,000 estimates**: 1.9944
@@ -10349,7 +11068,7 @@ We simulated 1,000 independent samples (each with n=30 observations) from the sa
 
 **The big picture**:
 
-This simulation proves mathematically that OLS "works" in a precise sense: if we could repeat our study infinitely many times, the average of all our estimates would equal the true parameter. Of course, in practice we only get **one sample**, so we use standard errors to acknowledge the uncertainty inherent in any single estimate.
+This simulation demonstrates empirically that OLS "works" in a precise sense: if we could repeat our study infinitely many times, the average of all our estimates would equal the true parameter. Of course, in practice we only get **one sample**, so we use standard errors to acknowledge the uncertainty inherent in any single estimate.
 
 **Economic intuition**: Imagine 1,000 different researchers each collecting their own sample of n=30 observations from the same population. Each would report a different regression coefficient. The simulation shows that:
 
@@ -10378,6 +11097,36 @@ The close match confirms:
 1. Unbiasedness (centered on true value)
 2. Approximate normality (CLT works well even with n=30)
 
+```python
+# Two-panel sampling distributions with a fitted normal curve
+fig, axes = plt.subplots(1, 2, figsize=(16, 5))
+
+for ax, estimates, true_val, name in zip(
+        axes,
+        [intercept_estimates, slope_estimates],
+        [beta_1_true, beta_2_true],
+        ['Intercept (b1)', 'Slope (b2)']):
+    ax.hist(estimates, bins=40, density=True, alpha=0.7,
+            color='#22d3ee', edgecolor='white', label='Estimates')
+    # Green vertical line: true parameter value
+    ax.axvline(true_val, color='#22c55e', linewidth=2, linestyle='--',
+               label=f'True value = {true_val}')
+    # Red curve: fitted normal distribution
+    grid = np.linspace(estimates.min(), estimates.max(), 200)
+    ax.plot(grid, stats.norm.pdf(grid, estimates.mean(), estimates.std()),
+            color='red', linewidth=2, label='Normal fit')
+    ax.set_xlabel(f'{name} estimate')
+    ax.set_ylabel('Density')
+    ax.set_title(f'Sampling Distribution of the {name}  (SD = {estimates.std():.2f})')
+    ax.legend(fontsize=9)
+    ax.grid(True, alpha=0.3)
+
+plt.suptitle('Sampling Distributions of OLS Estimators (1,000 samples, n = 30)',
+             fontsize=14, fontweight='bold', y=1.02)
+plt.tight_layout()
+plt.show()
+```
+
 ### Interpreting the Sampling Distribution Histograms
 
 **What these distributions reveal:**
@@ -10386,16 +11135,16 @@ These histograms show the distribution of coefficient estimates from our 1,000 s
 
 **1. Unbiasedness (visual confirmation):**
 
-- **Green vertical line** marks the true parameter value (β₀ = 1.0 for intercept, β₁ = 2.0 for slope)
+- **Green vertical line** marks the true parameter value (β₁ = 1.0 for intercept, β₂ = 2.0 for slope)
 - The histograms are **centered exactly on the true values**
-- This visual centering confirms E[b₀] = β₀ and E[b₁] = β₁
+- This visual centering confirms E[b₁] = β₁ and E[b₂] = β₂
 
 **2. Approximate normality (Central Limit Theorem):**
 
 - **Red curve** shows the fitted normal distribution
 - The histogram bars closely follow this curve
 - Even with just n=30 observations per sample, the sampling distribution is approximately normal
-- This confirms the **Central Limit Theorem** applies to OLS estimators
+- This is consistent with the **Central Limit Theorem**; here the errors are themselves normal, so the estimates are normal by construction — the CLT is what guarantees approximate normality even when the errors are *not* normal
 
 **3. Different precision for different parameters:**
 
@@ -10407,7 +11156,7 @@ These histograms show the distribution of coefficient estimates from our 1,000 s
 
 The approximate normality of the sampling distribution is the foundation for statistical inference:
 
-- **Confidence intervals**: We can construct intervals like b₁ ± 1.96 × SE(b₁) to capture the true parameter 95% of the time
+- **Confidence intervals**: In large samples we can construct intervals like b₁ ± 1.96 × SE(b₁) that capture the true parameter 95% of the time (Chapter 7 refines this for small samples using the t distribution)
 - **Hypothesis tests**: We can use the normal distribution to calculate p-values
 - **Prediction intervals**: We can quantify uncertainty about predictions
 
@@ -10433,7 +11182,7 @@ When you see a regression output reporting "slope = 1.85, SE = 0.35", you should
 
 - The estimate 1.85 is one draw from a sampling distribution
 - The SE = 0.35 tells you the width of that distribution
-- About 95% of the distribution falls within 1.85 ± 2(0.35) = [1.15, 2.55]
+- The interval 1.85 ± 2(0.35) = [1.15, 2.55] is an approximate 95% confidence interval: across repeated samples, about 95% of intervals built this way contain the true slope
 - If this interval excludes zero, the coefficient is statistically significant
 
 ## 6.4 Estimators of Model Parameters
@@ -10474,6 +11223,37 @@ Let's manually compute standard errors for a simple example to understand the fo
 
 - $(y, x)$ = $(1,1), (2,2), (2,3), (2,4), (3,5)$
 - From earlier analysis: $\hat{y} = 0.8 + 0.4x$
+
+```python
+# 6.4 Manual computation of standard errors for the artificial dataset
+manual = pd.DataFrame({'x': [1, 2, 3, 4, 5], 'y': [1, 2, 2, 2, 3]})
+
+# Fit with pyfixest so we can verify the manual numbers against the model
+fit_manual = pf.feols('y ~ x', data=manual)
+
+# Steps 1-2: coefficients, fitted values, residuals, and RSS
+n_obs = len(manual)
+x_bar = manual['x'].mean()
+Sxx   = np.sum((manual['x'] - x_bar) ** 2)
+b1    = fit_manual.coef()['Intercept']
+b2    = fit_manual.coef()['x']
+manual['y_hat']    = b1 + b2 * manual['x']
+manual['residual'] = manual['y'] - manual['y_hat']
+RSS = np.sum(manual['residual'] ** 2)
+display(manual)
+
+# Step 3: standard error of the regression  s_e = sqrt(RSS / (n - 2))
+s_e = np.sqrt(RSS / (n_obs - 2))
+
+# Steps 4-5: standard errors of the slope and intercept
+se_b2 = s_e / np.sqrt(Sxx)
+se_b1 = np.sqrt(s_e ** 2 * np.sum(manual['x'] ** 2) / (n_obs * Sxx))
+
+print(f'Fitted line:  y_hat = {b1:.1f} + {b2:.1f}x')
+print(f'RSS = {RSS:.4f},  s_e = sqrt(RSS/(n-2)) = {s_e:.4f}')
+print(f'Manual se(b2) = {se_b2:.4f}  |  model se(b2) = {fit_manual.se()["x"]:.4f}')
+print(f'Manual se(b1) = {se_b1:.4f}  |  model se(b1) = {fit_manual.se()["Intercept"]:.4f}')
+```
 
 ### Interpreting the Manual Standard Error Calculations
 
@@ -10628,7 +11408,8 @@ From the formula $se(b_2) = \frac{s_e}{\sqrt{\sum_{i=1}^n (x_i - \bar{x})^2}}$, 
 1. **Correct model**: yᵢ = β₁ + β₂xᵢ + uᵢ for all i (linearity)
 2. **Mean-zero errors**: E[uᵢ|xᵢ] = 0 for all i (no correlation between x and u)
 3. **Homoskedasticity**: Var[uᵢ|xᵢ] = σ²ᵤ for all i (constant error variance)
-4. **Independence**: uᵢ and u are independent for all i ≠ j (no autocorrelation)
+4. **Independence**: uᵢ and uⱼ are independent for all i ≠ j (no autocorrelation)
+
 - **Assumptions 1-2 are essential** for unbiasedness and consistency (violations cause bias)
 - **Assumptions 3-4 can be relaxed** using robust standard errors (Chapter 7.7, 12.1)
 - Assumption 2 rules out **omitted variable bias** (no correlation between x and u)
@@ -10657,9 +11438,9 @@ From the formula $se(b_2) = \frac{s_e}{\sqrt{\sum_{i=1}^n (x_i - \bar{x})^2}}$, 
 ### Factors Affecting Precision
 
 - **Better precision** (smaller se(b₂)) occurs when:
- 1. **Model fits well** (s²ₑ is smaller) - less noise around regression line
- 2. **Many observations** (Σ(xᵢ - x̄)² is larger) - more data reduces sampling variability
- 3. **Regressors widely scattered** (Σ(xᵢ - x̄)² is larger) - more variation in x provides more information
+  1. **Model fits well** (s²ₑ is smaller) - less noise around regression line
+  2. **Many observations** (Σ(xᵢ - x̄)² is larger) - more data reduces sampling variability
+  3. **Regressors widely scattered** (Σ(xᵢ - x̄)² is larger) - more variation in x provides more information
 - Precision improves with **√n**, so need **4× observations to halve** standard error
 - **Trade-off**: Can't control regressor scatter in observational data, but can increase sample size
 - **Wide spread in x matters geometrically**: If x values clustered, slope is poorly identified; if scattered, slope is well-identified
@@ -10680,14 +11461,14 @@ From the formula $se(b_2) = \frac{s_e}{\sqrt{\sum_{i=1}^n (x_i - \bar{x})^2}}$, 
 - **"Linear"** means estimator is a linear combination of y values: b₂ = Σwᵢyᵢ
 - **"Best"** means minimum variance among all linear unbiased estimators
 - If additionally u is **normally distributed**: OLS is the **Best Unbiased Estimator (BUE)**
- - Lowest variance among **ALL** unbiased estimators (not just linear ones)
+  - Lowest variance among **ALL** unbiased estimators (not just linear ones)
 - OLS is also **best consistent estimator** in standard settings
 - **Bottom line**: Under assumptions 1-4, OLS is essentially the optimal estimator of β₁ and β₂
 
 ### Monte Carlo Simulation Evidence
 
 - **Monte Carlo simulations** demonstrate OLS properties empirically by generating many samples from a known model
-- Two examples: (1) Generated data from y = 1 + 2x + u with u ~ N(0,4), (2) Samples from 1880 Census (1.06 million males aged 60-70)
+- Generated-data Monte Carlo: samples from y = 1 + 2x + u with u ~ N(0,4) reveal how OLS estimates behave across many repeated samples
 - **Key findings**: (1) Average of many OLS estimates equals true parameter (unbiasedness), (2) Distribution of estimates is approximately normal (CLT), (3) Similar results for intercept and slope
 - **Single sample**: b₁ ≠ β₁ and b₂ ≠ β₂ due to sampling variability
 - **Multiple samples**: Estimates vary across samples but center on true parameters
@@ -10719,7 +11500,7 @@ From the formula $se(b_2) = \frac{s_e}{\sqrt{\sum_{i=1}^n (x_i - \bar{x})^2}}$, 
 - This chapter establishes the **theoretical foundation** for inference (Chapter 7)
 - Knowing that b₂ ~ N(β₂, σ²_b₂) allows us to construct **confidence intervals** and conduct **hypothesis tests**
 - Standard errors are the **bridge** between point estimates and interval estimates
-- Understanding sampling distributions explains why we can make probabilistic statements about parameters
+- Understanding sampling distributions explains why we can make probability statements about how estimates vary around the true parameters
 - The **normal approximation** (CLT) justifies using critical values from the normal or t distribution
 
 ### Software Implementation
@@ -10847,7 +11628,7 @@ plt.show()
 # se(b₂) = sₑ / √[Σ(xᵢ - x̄)²]
 # Smaller when: (1) model fits well, (2) large n, (3) x spread wide
 se_b2       = fit.se()['x']                        # from regression output
-s_e         = np.sqrt(np.mean(fit._u_hat**2) * len(data) / (len(data) - 2))  # standard error of regression
+s_e         = np.sqrt(np.sum(fit.resid()**2) / (len(data) - 2))  # standard error of regression: √[RSS/(n-2)]
 x_variation = np.sum((data['x'] - data['x'].mean())**2)
 
 print(f"\nStandard error anatomy (from the single-sample regression):")
@@ -10876,6 +11657,13 @@ for ns in sample_sizes:
 ```
 
 **Try it yourself!** Copy this code into an empty Google Colab notebook and run it: [Open Colab](https://colab.research.google.com/notebooks/empty.ipynb)
+
+**Next Steps:**
+
+- **Chapter 7**: Statistical inference for bivariate regression — using se(b₂) to construct confidence intervals and test hypotheses
+- **Chapter 8**: Case studies applying bivariate regression to real economic questions
+- **Chapter 9**: Models with natural logarithms and alternative functional forms
+- **Chapters 10-12**: Multiple regression, where the OLS properties from this chapter extend to several regressors
 
 ---
 
@@ -11024,8 +11812,8 @@ For complete solutions and additional practice problems, see the course website.
 
 **The Data:** We use the convergence clubs dataset (Mendez 2020) covering 108 countries from 1990-2014. The cross-section for 2014 provides:
 
-- **Labor productivity** (rgdppc_2014): Real GDP per capita in thousands of 2011 USD
-- **Capital per worker** (rk_2014): Physical capital stock per worker in thousands of 2011 USD
+- **Labor productivity** (`GDPpc`, renamed `productivity` in the code): Real GDP per capita in 2011 USD
+- **Capital per worker** (`kl`, renamed `capital` in the code): Physical capital stock per worker in 2011 USD
 - These variables allow us to estimate production function relationships and explore sampling variability
 
 > **Key Concept 6.8: Sampling Variability in Econometrics**
@@ -11061,6 +11849,8 @@ display(data_2014[['productivity', 'capital']].describe())
 data_2014.head()
 ```
 
+Across the 108 countries, productivity ranges from roughly 600 to 76,000, and capital per worker is widely scattered — its standard deviation (about 158,000) is almost as large as its mean (about 166,000). That wide spread in the regressor is exactly the condition Section 6.3 identified as helping to pin down the slope precisely.
+
 #### Task 1: Estimate the "Population" Regression (Guided)
 
 **Instructions:** We'll treat the full dataset of 108 countries as our "population" and estimate the regression of productivity on capital. This will serve as our benchmark—the "true" relationship we're trying to recover from samples.
@@ -11077,7 +11867,7 @@ data_2014.head()
 ```python
 # Estimate full-sample ("population") regression
 fit_pop = pf.feols('productivity ~ capital', data=data_2014)
-print(fit_pop.summary())
+fit_pop.summary()
 
 # Store population coefficients
 beta_1_pop = fit_pop.coef()['Intercept']
@@ -11129,7 +11919,7 @@ b2_estimates = []
 
 for i in range(n_simulations):
     # Draw random sample
-    sample = data_2014.sample(n=sample_size, replace=False)
+    sample = data_2014.sample(n=sample_size, replace=True)
     
     # Estimate regression
     fit_sample = pf.feols('productivity ~ capital', data=sample)
@@ -11185,7 +11975,7 @@ print(f"Population parameter β₂: {beta_2_pop:.4f}")
 
 > **Key Concept 6.10: Standard Errors and Sample Size**
 >
-> Standard errors decrease with the square root of sample size: se(b₂) = σᵤ / √[n × Var(x)]. This means to halve the standard error, you need **four times** the sample size. This fundamental relationship guides study design—small increases in sample size yield diminishing returns in precision. The implication: going from n=100 to n=400 has the same effect on precision as going from n=25 to n=100.
+> Standard errors decrease with the square root of sample size: se(b₂) ≈ sₑ / √[n × Var(x)]. This means to halve the standard error, you need **four times** the sample size. This fundamental relationship guides study design—small increases in sample size yield diminishing returns in precision. The implication: going from n=100 to n=400 has the same effect on precision as going from n=25 to n=100.
 
 #### Task 6: Compare Sampling Variability Across Country Groups (Independent)
 
@@ -11245,7 +12035,7 @@ This notebook provides an interactive introduction to statistical inference for 
 [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/quarcs-lab/metricsai/blob/main/notebooks_colab/ch07_Statistical_Inference_for_Bivariate_Regression.ipynb)
 <div class="chapter-resources">
 <a href="https://www.youtube.com/watch?v=iMi1Fa-PYLs" target="_blank" class="resource-btn">🎬 AI Video</a>
-<a href="https://carlos-mendez.my.canva.site/s07-statistical-inference-for-bivariate-regression-pdf" target="_blank" class="resource-btn">✨ AI Slides</a>
+<a href="https://quarcs-lab.github.io/metricsai/slides/ch07/index.html" target="_blank" class="resource-btn">🧑🏽‍🏫 Mendez Slides</a>
 <a href="https://cameron.econ.ucdavis.edu/aed/traedv1_07" target="_blank" class="resource-btn">📊 Cameron Slides</a>
 <a href="https://app.edcafe.ai/quizzes/697866e42f5d08069e04934f" target="_blank" class="resource-btn">✏️ Quiz</a>
 <a href="https://app.edcafe.ai/chatbots/69789f042f5d08069e070885" target="_blank" class="resource-btn">🤖 AI Tutor</a>
@@ -11266,7 +12056,7 @@ This chapter extends statistical inference from univariate to bivariate regressi
 - Heteroskedasticity-robust standard errors and their importance
 - Economic vs. statistical significance
 
-**Datasets used:**
+**Dataset used:**
 
 - **AED_HOUSE.DTA**: House prices and characteristics for 29 houses sold in Central Davis, California in 1999 (price, size, bedrooms, bathrooms, lot size, age)
 
@@ -11279,9 +12069,103 @@ This chapter extends statistical inference from univariate to bivariate regressi
 - 7.5 Two-Sided Hypothesis Tests
 - 7.6 One-Sided Directional Hypothesis Tests
 - 7.7 Robust Standard Errors
-- 7.8 Case Studies
 - Key Takeaways
 - Practice Exercises
+- Case Studies
+
+## Key Concepts
+
+Six core ideas anchor this chapter. Skim them before you start, and come back when a term feels fuzzy. Each entry pairs a concrete example using the chapter's data with a non-technical analogy. Click a panel to expand it.
+
+**Null Hypothesis for the Slope ($H_0: \beta_2 = 0$):** The default claim that the explanatory variable has *no* linear effect on the outcome — i.e., the population slope is exactly zero. Rejecting this null is what allows the analyst to say "$x$ matters for $y$".
+
+::::: {.columns}
+:::: {.column width="50%"}
+::: {.callout-tip collapse="true" appearance="simple" title="Example"}
+For the 29 Davis houses, we test $H_0: \beta_2 = 0$ against $H_a: \beta_2 \neq 0$ on the regression of `price` on `size`. The fitted slope is $b_2 = \$73.77$/sq ft with $\operatorname{se}(b_2) = 11.17$ — a slope this far from zero, this precisely estimated, is the evidence that overturns the null.
+:::
+::::
+:::: {.column width="50%"}
+::: {.callout-note collapse="true" appearance="simple" title="Analogy"}
+A courtroom presumes the defendant innocent — the regression presumes the regressor irrelevant. Both are starting points the data must overturn. Until the prosecution piles up enough evidence, the defendant walks free; until the slope's t-statistic is big enough, $\beta_2 = 0$ stands.
+:::
+::::
+:::::
+
+**t-Statistic for the Slope:** The standardised distance between the estimated slope and its null-hypothesised value, in standard-error units: $t = (b_2 - \beta_2^0)/\operatorname{se}(b_2)$. For the common $H_0: \beta_2 = 0$, this simplifies to $t = b_2/\operatorname{se}(b_2)$, and $|t|$ above the critical value triggers rejection.
+
+::::: {.columns}
+:::: {.column width="50%"}
+::: {.callout-tip collapse="true" appearance="simple" title="Example"}
+For the Davis house regression with $b_2 = 73.77$ and $\operatorname{se}(b_2) = 11.17$, the t-statistic on `size` is $t = 73.77 / 11.17 = 6.60$. The slope sits 6.6 standard errors above zero — far beyond the comfortable noise range — so the chapter rejects $H_0: \beta_2 = 0$ at any conventional significance level.
+:::
+::::
+:::: {.column width="50%"}
+::: {.callout-note collapse="true" appearance="simple" title="Analogy"}
+A fitness tracker counts your daily steps but also reports a *signal-to-noise ratio*: how confident it is that you're actually walking versus jiggling at your desk. The t-statistic is exactly that ratio for a slope — how many step-counts (sample slope) the watch saw, scaled by how jumpy its baseline (standard error) tends to be.
+:::
+::::
+:::::
+
+**Standard Error of the Slope Coefficient ($\operatorname{se}(b_2)$):** The estimated standard deviation of the OLS slope estimator across hypothetical resamples. It shrinks with better model fit (small $s_e$), more observations, and wider spread in $x$ — the three knobs an analyst can turn to sharpen inference.
+
+::::: {.columns}
+:::: {.column width="50%"}
+::: {.callout-tip collapse="true" appearance="simple" title="Example"}
+For the Davis houses, $\operatorname{se}(b_2) = 11.17$ — meaning the slope on `size` would jitter by roughly \$11/sq ft from one sample of 29 houses to another. With $n = 29$, $s_e \approx \$23{,}551$, and the spread $\sigma_{\text{size}} \approx 398$ sq ft, the formula $\operatorname{se}(b_2) = s_e / \sqrt{\sum(x_i - \bar{x})^2}$ produces this estimate; quadrupling $n$ would roughly halve it.
+:::
+::::
+:::: {.column width="50%"}
+::: {.callout-note collapse="true" appearance="simple" title="Analogy"}
+An archer measures her group size — the diameter of the cluster of arrows around the bullseye — across many practice rounds. A tight group (small SE) means the next shot will land predictably; a spray pattern (large SE) means the next shot could go anywhere. $\operatorname{se}(b_2)$ is the slope's group size from imagined re-runs of the regression.
+:::
+::::
+:::::
+
+**Critical t-Value ($t_{n-2,\,\alpha/2}$):** The cutoff value on the $t$-distribution beyond which the null hypothesis is rejected. For a two-sided test at $\alpha = 0.05$ with $n-2$ degrees of freedom, observed $|t|$ values above this cutoff land in the rejection region.
+
+::::: {.columns}
+:::: {.column width="50%"}
+::: {.callout-tip collapse="true" appearance="simple" title="Example"}
+For the Davis house regression, $n = 29$ gives $n - 2 = 27$ degrees of freedom. At $\alpha = 0.05$ two-sided, the critical value is $t_{27,\,0.025} = 2.052$. The observed $|t| = 6.60$ is more than three times this cutoff, so the slope's t-statistic falls deep into the rejection region.
+:::
+::::
+:::: {.column width="50%"}
+::: {.callout-note collapse="true" appearance="simple" title="Analogy"}
+A playground swing is fitted with a "max-height" sensor: cross it, and the operator pulls the safety brake. The critical value is that statistical max-height. Test statistics that swing higher than the line trigger the rejection brake; those that stay below are within the safe range.
+:::
+::::
+:::::
+
+**Margin of Error for the Slope:** The half-width of a confidence interval for $\beta_2$ — the quantity $t_{n-2,\,\alpha/2} \cdot \operatorname{se}(b_2)$ added to and subtracted from the point estimate. Bigger margin ⇒ vaguer interval; smaller margin ⇒ sharper claim.
+
+::::: {.columns}
+:::: {.column width="50%"}
+::: {.callout-tip collapse="true" appearance="simple" title="Example"}
+For the Davis house slope, the 95% margin of error is $2.052 \times 11.17 \approx 22.93$ dollars per square foot. So the 95% confidence interval for $\beta_2$ is $73.77 \pm 22.93 = [50.84, 96.70]$ — a range that excludes \$0 but spans a substantial \$46 spread, telling us "size matters", but at a price between \$51 and \$97 per square foot.
+:::
+::::
+:::: {.column width="50%"}
+::: {.callout-note collapse="true" appearance="simple" title="Analogy"}
+A photo print arrives with a paper border around the image. The margin of error is that border — the visual reminder that the photo's exact framing isn't pinned to a single line, but extends a few millimetres on either side. A wide border means a less certain crop; a narrow border means the photo's edge is precisely where you put it.
+:::
+::::
+:::::
+
+**Test of Statistical Significance ($H_0: \beta = 0$):** The standard hypothesis test asking "is this regressor's true coefficient distinguishable from zero, given sampling noise?" Standard regression output reports the t-statistic, the two-sided p-value, and stars ($*$, $**$, $***$) flagging the significance level at which $H_0$ is rejected.
+
+::::: {.columns}
+:::: {.column width="50%"}
+::: {.callout-tip collapse="true" appearance="simple" title="Example"}
+The chapter's basic regression output reports `size` with $b_2 = 73.77$, $\operatorname{se} = 11.17$, $t = 6.60$, $p \approx 0.000$ — every column tells the same story: the test of significance rejects $H_0: \beta_2 = 0$ overwhelmingly. Translated: across the Davis 1999 housing market, the data leave essentially no room for the claim that size has zero effect on price.
+:::
+::::
+:::: {.column width="50%"}
+::: {.callout-note collapse="true" appearance="simple" title="Analogy"}
+A metal detector swept across a beach beeps when its reading rises clearly above the background hum. A test of significance is the same beep applied to a regression coefficient: the t-statistic is the reading, the critical value sets the beep threshold, and the p-value tells you the chance of hearing a beep on an empty patch of sand. A loud, sharp beep means dig.
+:::
+::::
+:::::
 
 ## Setup
 
@@ -11335,7 +12219,7 @@ $$\text{price} = \beta_1 + \beta_2 \times \text{size} + u$$
 
 where:
 
-- $\text{price}$ is the house sale price (in thousands of dollars)
+- $\text{price}$ is the house sale price (in dollars)
 - $\text{size}$ is the house size (in square feet)
 - $\beta_2$ is the population slope (price increase per square foot)
 - $b_2$ is the sample estimate of $\beta_2$
@@ -11345,14 +12229,16 @@ where:
 | Variable | Coefficient | Standard Error | t-statistic | p-value | 95% CI |
 |----------|-------------|----------------|-------------|---------|--------|
 | Size | 73.77 | 11.17 | 6.60 | 0.000 | [50.84, 96.70] |
-| Intercept | 115,017.30 | 21,489.36 | 5.35 | 0.000 | [70,924.76, 159,109.8] |
+| Intercept | 115,017.28 | 21,489.36 | 5.35 | 0.000 | [70,924.76, 159,109.8] |
 
 **Interpretation:**
 
-- Each additional square foot increases house price by approximately \$73.77
+- Each additional square foot is associated with approximately \$73.77 higher house price
 - The standard error (11.17) measures uncertainty in this estimate
 - The t-statistic (6.60) tests whether the effect is statistically significant
 - The 95% confidence interval is [50.84, 96.70]
+
+First, we load the AED house-price dataset and inspect its summary statistics — confirm the sample has 29 houses and that `price` and `size` are on sensible scales (dollars and square feet).
 
 ```python
 # 7.1 Example: House price and size
@@ -11362,6 +12248,8 @@ data_house = pd.read_stata(GITHUB_DATA_URL + 'AED_HOUSE.DTA')
 data_house.describe()
 
 ```
+
+The sample covers 29 houses: the average sale price is about \$253,910 and the average size about 1,883 square feet, with no implausible values in any variable.
 
 ### Basic Regression: Price on Size
 
@@ -11483,11 +12371,11 @@ Think of the regression line as a seesaw balanced at (x̄, ȳ):
 Given:
 
 - Sample size: n = 29
-- Standard error of regression: σ_u ≈ 37,000
-- Standard deviation of size: σ_x ≈ 360
-- Estimated SE(b₂) = 37,000 / (√29 × 360) ≈ 19.1
+- Standard error of regression: s_e ≈ 23,551
+- Standard deviation of size: σ_x ≈ 398
+- Estimated SE(b₂) = 23,551 / (√29 × 398) ≈ 11.0
 
-(Actual SE is 11.17, smaller because the relationship is quite strong)
+(Actual SE is 11.17; the shortcut formula is slightly smaller because it uses √n in place of √(n-1))
 
 **Why standard errors matter:**
 
@@ -11504,7 +12392,9 @@ For our house price example:
 
 - R² = 0.62 (size explains 62% of price variation)
 - This gives relatively small SE
-- If R² were 0.10, SE would be about 2.5 times larger
+- If R² were 0.10, SE would be about 1.5 times larger (SE scales with √(1-R²))
+
+The cell below re-displays the regression output and then extracts the ingredients of the t-statistic for `size` — verify that $t = b_2 / \operatorname{se}(b_2)$ reproduces the value 6.60 shown in the table.
 
 ```python
 # 7.2 The t statistic
@@ -11529,12 +12419,14 @@ print(f"t = b₂ / se(b₂) = {coef_size:.4f} / {se_size:.4f} = {t_stat_size:.4f
 > The **t-distribution** is used for statistical inference when the population variance is unknown (which is always the case in practice). Unlike the standard normal distribution, the t-distribution accounts for the additional uncertainty from estimating the variance.
 >
 > **Key properties:**
+>
 > - Bell-shaped and symmetric (like the normal distribution)
 > - Heavier tails than the normal distribution (more probability in extremes)
 > - Converges to the normal distribution as sample size increases
 > - Characterized by degrees of freedom (df)
 >
 > **Degrees of freedom = n - 2** for bivariate regression:
+>
 > - Start with n observations
 > - Estimate β₁ (intercept): -1 df
 > - Estimate β₂ (slope): -1 df  
@@ -11563,7 +12455,7 @@ $$b_2 \pm 2 \times se(b_2)$$
 **Interpretation:**
 
 - If we repeatedly sampled from the population and constructed 95% CIs, approximately 95% of these intervals would contain the true parameter value $\beta_2$
-- The calculated 95% CI will correctly include $\beta_2$ 95% of the time
+- Any single calculated interval either contains $\beta_2$ or it does not — the 95% refers to the long-run success rate of the interval-construction procedure
 
 **Example calculation for house price:**
 
@@ -11580,10 +12472,12 @@ b_2 \pm t_{27, 0.025} \times se(b_2) &= 73.77 \pm 2.052 \times 11.17 \\
 > $$b_2 \pm t_{n-2, 0.025} \times se(b_2)$$
 >
 > **Common misconceptions:**
+>
 > - WRONG: "There's a 95% probability that β₂ is in this interval"
 > - CORRECT: "If we repeated the sampling process many times, 95% of the constructed intervals would contain β₂"
 >
 > **Practical interpretation:**
+>
 > - The interval represents our uncertainty about the true parameter value
 > - Wider intervals indicate more uncertainty (large SE, small n, or high variability)
 > - Narrower intervals indicate more precision (small SE, large n, or low variability)
@@ -11625,17 +12519,17 @@ The CI width depends on three factors:
 $$\text{Width} = 2 \times t_{n-2, \alpha/2} \times se(b_2)$$
 
 1. **Confidence level (1-α)**: Higher confidence → wider interval
- - 90% CI: Narrower (less confident)
- - 95% CI: Standard choice (balance)
- - 99% CI: Wider (more confident)
+    - 90% CI: Narrower (less confident)
+    - 95% CI: Standard choice (balance)
+    - 99% CI: Wider (more confident)
 
 2. **Sample size (n)**: Larger sample → narrower interval
- - More data reduces uncertainty
- - Critical value t_{n-2, α/2} decreases as n increases
+    - More data reduces uncertainty
+    - Critical value t_{n-2, α/2} decreases as n increases
 
 3. **Variability in data**: More scatter → wider interval
- - se(b₂) increases with unexplained variation
- - Tighter relationship → more precise estimates
+    - se(b₂) increases with unexplained variation
+    - Tighter relationship → more precise estimates
 
 **Practical use:**
 
@@ -11644,6 +12538,8 @@ Confidence intervals are more informative than hypothesis tests because they sho
 - The point estimate (center of interval)
 - The precision of the estimate (width of interval)
 - All null values that would not be rejected (values inside interval)
+
+The cell below extracts the 95% confidence intervals directly from the fitted model — compare the `size` row with the hand calculation above, [50.84, 96.70].
 
 ```python
 # 7.3 Confidence intervals
@@ -11705,8 +12601,8 @@ This substitution introduces additional uncertainty, so we use the t-distributio
 
 **For n = 29 (our house price data):**
 
-- Using normal: 95% CI margin = 1.96 × 11.17 = 21.89
-- Using t(27): 95% CI margin = 2.052 × 11.17 = 22.92
+- Using normal: 95% CI margin = 1.96 × 11.17 ≈ 21.90
+- Using t(27): 95% CI margin = 2.052 × 11.17 ≈ 22.93
 - Difference: 5% wider with t-distribution (more conservative)
 
 **For n = 10 (small sample):**
@@ -11754,9 +12650,7 @@ print(f"Margin of error: {t_crit * se_size:.4f}")
 print(f"95% CI: [${ci_lower:.4f}, ${ci_upper:.4f}]")
 ```
 
-### Example with Artificial Data
-
-To illustrate the concepts more clearly, let's work with a simple artificial dataset.
+The manual calculation matches pyfixest's `confint()` output exactly: the margin of error $2.052 \times 11.17 \approx 22.93$ yields the interval $[50.84, 96.70]$, a spread of roughly \$46 per square foot around the point estimate.
 
 ## 7.4 Tests of Statistical Significance
 
@@ -11789,21 +12683,26 @@ $$t = \frac{b_2}{se(b_2)} \sim T(n-2)$$
 > **Hypothesis testing** is a formal procedure for making decisions about population parameters. The key steps are:
 >
 > **1. State the hypotheses:**
+>
 > - **Null hypothesis (H₀)**: The claim we're testing (usually "no effect")
 > - **Alternative hypothesis (Hₐ)**: What we conclude if we reject H₀
 >
 > **2. Choose significance level (α):**
+>
 > - Common choices: 0.10, 0.05, 0.01
 > - α = probability of Type I error (rejecting H₀ when it's true)
 >
 > **3. Calculate test statistic:**
+>
 > - Standardizes the difference: t = (estimate - null value) / SE
 >
 > **4. Determine p-value:**
+>
 > - Probability of observing our result (or more extreme) if H₀ is true
 > - Smaller p-value = stronger evidence against H₀
 >
 > **5. Make decision:**
+>
 > - Reject H₀ if p-value < α
 > - Fail to reject H₀ if p-value ≥ α (never "accept" H₀)
 >
@@ -11814,16 +12713,19 @@ $$t = \frac{b_2}{se(b_2)} \sim T(n-2)$$
 > **Statistical significance** and **economic significance** are distinct concepts that answer different questions:
 >
 > **Statistical Significance:**
+>
 > - **Question:** Is the effect different from zero?
 > - **Determined by:** t-statistic = b₂ / se(b₂), which depends on sample size, variability, and effect size
 > - **Interpretation:** We can confidently say the effect exists (not due to chance)
 >
 > **Economic Significance:**
+>
 > - **Question:** Is the effect large enough to matter in practice?
 > - **Determined by:** The magnitude of b₂ and the context
 > - **Interpretation:** The effect has real-world importance
 >
 > **Why they can diverge:**
+>
 > 1. **Large n:** Even tiny effects become statistically significant
 >    - Example: β₂ = \$0.01 with n = 10,000 might have p < 0.001 but be economically trivial
 > 2. **Small n:** Large effects may not reach statistical significance  
@@ -11836,12 +12738,14 @@ $$t = \frac{b_2}{se(b_2)} \sim T(n-2)$$
 > The choice between one-sided and two-sided tests depends on your research question:
 >
 > **Two-Sided Test (Most Common):**
+>
 > - H₀: β₂ = β₂* vs. Hₐ: β₂ ≠ β₂*
 > - Detects deviations in either direction
 > - Standard practice in academic research
 > - Rejection region: Both tails of t-distribution
 >
 > **One-Sided Test (Directional):**
+>
 > - Upper: H₀: β₂ ≤ β₂* vs. Hₐ: β₂ > β₂*
 > - Lower: H₀: β₂ ≥ β₂* vs. Hₐ: β₂ < β₂*  
 > - Detects deviations in one specific direction
@@ -11850,11 +12754,16 @@ $$t = \frac{b_2}{se(b_2)} \sim T(n-2)$$
 > **Key relationship:** For the same test statistic, one-sided p-value = (two-sided p-value) / 2 (if sign is correct)
 >
 > **When to use one-sided tests:**
+>
 > - Strong theoretical prediction of direction (before seeing data)
 > - Only care about deviations in one direction
 > - Be cautious: Journals typically require two-sided tests
 >
 > **Important:** If your data contradicts the predicted direction, you cannot reject H₀ with a one-sided test (p-value > 0.5).
+
+### Example with Artificial Data
+
+To illustrate the concepts more clearly, let's work with a simple artificial dataset.
 
 ```python
 # Example with artificial data
@@ -11879,6 +12788,8 @@ print(f"Coefficient: {coef_x:.4f}")
 print(f"Standard Error: {se_x:.4f}")
 print(f"95% CI: [{ci_lower_art:.4f}, {ci_upper_art:.4f}]")
 ```
+
+With only $n = 5$ observations, the degrees of freedom drop to 3 and the critical value jumps to $t_{3,\,0.025} = 3.182$, so the 95% interval $[0.03, 0.77]$ is very wide relative to the slope estimate of 0.40 — a concrete illustration of how small samples inflate the margin of error.
 
 ### Understanding Hypothesis Testing: The Complete Workflow
 
@@ -11929,7 +12840,7 @@ The p-value answers this question: "If the null hypothesis were true, what is th
 
 **Example interpretation:**
 
-- p = 0.000: If β₂ were truly zero, the probability of getting t ≥ 6.60 is less than 0.1%
+- p = 0.000: If β₂ were truly zero, the probability of getting |t| ≥ 6.60 is less than 0.1%
 - This is very unlikely, so we have strong evidence against H₀
 
 **Two approaches to hypothesis testing:**
@@ -11992,7 +12903,7 @@ As sample size increases:
 For the house price example:
 
 - Statistical result: β₂ = 73.77, highly significant (p < 0.001)
-- Economic interpretation: Each sq ft adds \$73.77 to price
+- Economic interpretation: Each additional sq ft is associated with \$73.77 higher price
 - Context matters:
   - For a 100 sq ft difference: \$7,377 difference (substantial!)
   - For a 10 sq ft difference: \$737.70 difference (moderate)
@@ -12141,6 +13052,8 @@ Use two-sided tests unless:
 2. You specified the direction before seeing the data
 3. You only care about deviations in one direction (rare in economics)
 
+Back to the house-price data: the next cell carries out the test of statistical significance for `size`, checking both decision rules — the p-value against $\alpha = 0.05$ and $|t|$ against the critical value 2.052.
+
 ```python
 # 7.4 Tests of statistical significance
 # Null hypothesis: β₂ = 0 (size has no effect on price)
@@ -12161,21 +13074,25 @@ else:
 > **Homoskedasticity assumption** (Assumption 3): Var[u_i | x_i] = σ²_u (constant)
 >
 > **Why heteroskedasticity matters:**
+>
 > - Coefficient estimates (b₂): Still unbiased 
 > - Standard errors: WRONG (biased) 
 > - t-statistics, p-values, CIs: All invalid 
 >
 > **Solution: Heteroskedasticity-robust standard errors**
+>
 > - Valid whether or not heteroskedasticity exists
 > - No need to test for heteroskedasticity first
 > - Modern best practice for cross-sectional data
 >
 > **Practical impact:**
+>
 > - Robust SEs usually larger → more conservative inference
 > - Protects against false positives (Type I errors)
 > - Sometimes smaller → gain power
 >
 > **Types of robust SEs:**
+>
 > - **HC (Heteroskedasticity-Consistent):** Cross-sectional data
 > - **HAC (Heteroskedasticity and Autocorrelation Consistent):** Time series
 > - **Cluster-robust:** Grouped/clustered data
@@ -12330,14 +13247,14 @@ Different formulas for finite-sample adjustment:
 - **HC2**: Leverage-weighted
 - **HC3**: Even more conservative
 
-**Python default:** HC1 (matches Stata's "robust" option)
+**Python (pyfixest):** the default is classical (iid) standard errors — request robust SEs explicitly with `vcov='HC1'`, which matches Stata's "robust" option
 
 **For our house price example:**
 
 | Coefficient | Standard SE | Robust SE | % Change |
 |-------------|-------------|-----------|----------|
 | size | 11.17 | 11.33 | +1.4% |
-| Intercept | 21,489 | 21,825 | +1.6% |
+| Intercept | 21,489 | 20,299 | -5.5% |
 
 - Difference is small (good news!)
 - Suggests heteroskedasticity is not severe
@@ -12417,7 +13334,7 @@ Variable: size
  
 Variable: Intercept
  Standard SE: 21,489 |████████████████████|
- Robust SE: 21,825 |█████████████████████| (+1.6%)
+ Robust SE: 20,299 |███████████████████| (-5.5%)
 ```
 
 **Impact on inference:**
@@ -12428,7 +13345,7 @@ Let's see how the choice affects our conclusions:
 |------|-------------|-----------|------------|
 | t-statistic | 73.77/11.17 = 6.60 | 73.77/11.33 = 6.51 | Both highly significant |
 | p-value | 0.0000 | 0.0000 | Both p < 0.001 |
-| 95% CI | [50.84, 96.70] | [50.33, 97.21] | Nearly identical |
+| 95% CI | [50.84, 96.70] | [50.52, 97.02] | Nearly identical |
 | Reject H₀? | YES | YES | Same conclusion |
 
 **When robust SEs matter most:**
@@ -12467,7 +13384,7 @@ size 73.77 11.17 6.60 11.33 6.51
 
 **Example write-up:**
 
-"We find that each additional square foot increases house price by \$73.77 (robust SE = 11.33, t = 6.51, p < 0.001). The heteroskedasticity-robust standard error is nearly identical to the classical standard error (11.17), suggesting homoskedasticity is approximately satisfied. The effect is highly statistically significant and economically meaningful, with a 95% confidence interval of [\$50.33, \$97.21]."
+"We find that each additional square foot is associated with a \$73.77 higher house price (robust SE = 11.33, t = 6.51, p < 0.001). The heteroskedasticity-robust standard error is nearly identical to the classical standard error (11.17), suggesting homoskedasticity is approximately satisfied. The effect is highly statistically significant and economically meaningful, with a 95% confidence interval of [\$50.52, \$97.02]."
 
 **Common mistakes to avoid:**
 
@@ -12495,6 +13412,8 @@ Think of robust SEs as the "safe" choice:
 - If heteroskedasticity exists: Robust SEs correct the problem (saved you!)
 
 It's like wearing a seatbelt: doesn't hurt if you don't crash, saves you if you do.
+
+As a compact recap, the next cell repeats the $H_0: \beta_2 = 90$ test in three lines, pulling the coefficient and standard error directly from the fitted model object — the t-statistic and p-value match the Section 7.5 results.
 
 ```python
 # Hypothesis test using manual t-statistic (pyfixest)
@@ -12598,6 +13517,8 @@ $$se_{het}(b_2) = \frac{\sqrt{\sum_{i=1}^n e_i^2 (x_i - \bar{x})^2}}{\sum_{i=1}^
 - **HAC robust**: For time series with autocorrelation
 - **Cluster robust**: For clustered data (students in schools, people in villages, etc.)
 
+The cell below re-estimates the same regression with `vcov='HC1'` and collects classical and robust standard errors side by side — for these data the robust SE on `size` (11.33) barely differs from the classical one (11.17).
+
 ```python
 # 7.7 Robust standard errors
 robust_results = pf.feols('price ~ size', data=data_house, vcov='HC1')
@@ -12616,6 +13537,8 @@ comparison_df
 ```
 
 ### Full Regression Output with Robust Standard Errors
+
+The full summary now reports `Inference: HC1`: the coefficients are identical to the classical fit — only the standard errors, t-statistics, and confidence intervals change.
 
 ```python
 # Regression with robust standard errors
@@ -12636,7 +13559,7 @@ ax.scatter(data_house['size'], data_house['price'],
 ax.plot(data_house['size'], model_basic.predict(), color='#c084fc',
         linewidth=2, label='Fitted regression line')
 ax.set_xlabel('Size (square feet)', fontsize=12)
-ax.set_ylabel('Price ($1000s)', fontsize=12)
+ax.set_ylabel('Price (dollars)', fontsize=12)
 ax.set_title('Figure 7.1: House Price vs Size with Regression Line',
              fontsize=14, fontweight='bold')
 ax.legend()
@@ -12718,8 +13641,6 @@ plt.show()
 
 ## Key Takeaways
 
-**Key Takeaways:**
-
 1. **The t-statistic** is fundamental to statistical inference in regression:
    - Formula: $t = \frac{b_2 - \beta_2}{se(b_2)} \sim T(n-2)$
    - Parallels univariate inference: $t = \frac{\bar{x} - \mu}{se(\bar{x})} \sim T(n-1)$
@@ -12757,7 +13678,7 @@ plt.show()
 
 **House Price Example Results:**
 
-- Coefficient: Each additional sq ft increases price by \$73.77
+- Coefficient: Each additional sq ft is associated with \$73.77 higher price
 - 95% CI: [\$50.84, \$96.70]
 - Highly statistically significant (t = 6.60, p < 0.001)
 - Economically meaningful effect
@@ -12765,7 +13686,7 @@ plt.show()
 **Python Tools Used:**
 
 - `pandas`: Data manipulation and summary statistics
-- `statsmodels`: Econometric estimation and hypothesis testing
+- `pyfixest`: Econometric estimation and hypothesis testing
 - `scipy.stats`: Statistical distributions and critical values
 - `matplotlib` & `seaborn`: Visualization
 
@@ -12993,7 +13914,7 @@ You're analyzing the effect of advertising spending (x, in thousands of dollars)
 a) Construct a 95% confidence interval for the slope coefficient.  
 b) Test whether advertising has a statistically significant effect on sales at the 5% level.  
 c) A colleague claims that \$1,000 in advertising spending increases sales by more than \$5 million. Test this claim using a one-sided test at the 5% level.  
-d) Is the effect of advertising economically significant? Consider that the average firm in the sample spends \$10,000 on advertising and has \$5 million in sales revenue.
+d) Is the effect of advertising economically significant? Consider that the average firm in the sample spends \$10,000 on advertising and has \$34.5 million in sales revenue.
 
 ---
 
@@ -13013,8 +13934,8 @@ Economic growth theory suggests that countries with lower initial capital should
 **Dataset:**  
 We'll use the **Convergence Clubs** dataset (Mendez 2020) containing data for 108 countries in 2014:
 
-- **productivity**: Real GDP per capita (thousands of dollars)
-- **capital**: Physical capital per worker (thousands of dollars)
+- **productivity**: Labor productivity — real GDP per worker (dollars)
+- **capital**: Physical capital per worker (dollars)
 
 **Econometric Model:**
 
@@ -13041,22 +13962,27 @@ $$\text{productivity}_i = \beta_1 + \beta_2 \times \text{capital}_i + u_i$$
 > **Convergence theory** predicts that poorer countries should grow faster than richer countries, leading to a narrowing of income gaps over time. Two main types:
 >
 > **Absolute convergence:**
+>
 > - All countries converge to the same income level
 > - Predicts negative relationship between initial income and growth rate
 > - Test: H₀: β (growth on initial income) ≥ 0 vs. Hₐ: β < 0
 >
 > **Conditional convergence:**  
+>
 > - Countries converge to their own steady states
 > - After controlling for determinants (savings, education, institutions)
 > - More empirically supported than absolute convergence
 >
 > **Testing convergence hypotheses:**
+>
 > - Requires careful hypothesis formulation
 > - One-sided tests appropriate (theory predicts direction)
 > - Economic significance matters (how fast is convergence?)
 > - Must account for heteroskedasticity (countries differ in volatility)
 >
 > **Our approach:** We examine the cross-sectional relationship between productivity and capital intensity to understand the fundamentals underlying convergence patterns.
+
+We load the convergence-clubs data, keep the 2014 cross-section, and construct the productivity and capital variables — the summary statistics reveal enormous dispersion across the 108 countries, a first hint that heteroskedasticity may matter later.
 
 ```python
 # Case study: Testing convergence hypotheses
@@ -13076,7 +14002,7 @@ print(f"Sample: {len(data_2014)} countries in 2014")
 data_2014[['productivity', 'capital']].describe()
 ```
 
-### Task 1: Estimate the Productivity-Capital Relationship (Guided)
+#### Task 1: Estimate the Productivity-Capital Relationship (Guided)
 
 **Objective:** Estimate the bivariate regression and interpret the results.
 
@@ -13086,7 +14012,7 @@ Run the code below to estimate the regression and examine the output. Then answe
 a) What is the estimated effect of capital on productivity? Interpret the coefficient.  
 b) Construct a 95% confidence interval for β₂. What does this interval tell you?  
 c) Is the effect statistically significant at the 5% level?  
-d) Is the effect economically significant? (Consider that the average country has capital = 50 and productivity = 25)
+d) Is the effect economically significant? (Consider that the average country has capital per worker of about \$166,000 and productivity of about \$41,000)
 
 ```python
 # Task 1: Basic regression
@@ -13112,7 +14038,7 @@ ci_95 = model_convergence.confint().loc['capital']
 print(f"95% Confidence Interval: [{ci_95.iloc[0]:.4f}, {ci_95.iloc[1]:.4f}]")
 ```
 
-### Task 2: Test Specific Hypotheses (Semi-guided)
+#### Task 2: Test Specific Hypotheses (Semi-guided)
 
 **Objective:** Conduct formal hypothesis tests about the productivity-capital relationship.
 
@@ -13199,6 +14125,7 @@ else:
 > The **p-value** measures the strength of evidence against the null hypothesis. But interpreting p-values requires care:
 >
 > **What p-values tell you:**
+>
 > - p = 0.001: Very strong evidence against H₀ (occurs 0.1% of the time if H₀ true)
 > - p = 0.04: Evidence against H₀ (occurs 4% of the time if H₀ true)
 > - p = 0.15: Weak/no evidence against H₀
@@ -13211,6 +14138,7 @@ else:
 > - **p ≥ 0.10**: Not significant
 >
 > **Critical insights:**
+>
 > 1. **Arbitrary thresholds:** The 0.05 cutoff is convention, not law
 > 2. **p-values ≠ importance:** p < 0.001 doesn't mean "more true" than p = 0.04
 > 3. **Near the threshold:** p = 0.051 and p = 0.049 provide similar evidence
@@ -13219,7 +14147,7 @@ else:
 >
 > **Best practice:** Report exact p-values and confidence intervals rather than just "significant" or "not significant." Let readers judge the evidence.
 
-### Task 3: Heteroskedasticity-Robust Inference (Semi-guided)
+#### Task 3: Heteroskedasticity-Robust Inference (Semi-guided)
 
 **Objective:** Compare standard and robust standard errors for cross-country data.
 
@@ -13267,7 +14195,7 @@ comparison_df = pd.DataFrame({
                   't-statistic (robust)', 'p-value (standard)', 'p-value (robust)'],
     'Value': [beta2, se_beta2, se_beta2_robust, t_stat, t_stat_robust, p_value, p_value_robust]
 })
-comparison_df.to_string(index=False)
+print(comparison_df.to_string(index=False))
 
 # Percent change in SE
 pct_change = ((se_beta2_robust - se_beta2) / se_beta2) * 100
@@ -13288,7 +14216,7 @@ print(f"  Standard CI: [{ci_95.iloc[0]:.4f}, {ci_95.iloc[1]:.4f}]")
 print(f"  Robust CI:   [{ci_95_robust.iloc[0]:.4f}, {ci_95_robust.iloc[1]:.4f}]")
 ```
 
-### Task 4: Heterogeneity Across Income Groups (More Independent)
+#### Task 4: Heterogeneity Across Income Groups (More Independent)
 
 **Objective:** Investigate whether the productivity-capital relationship differs between high-income and developing countries.
 
@@ -13351,7 +14279,7 @@ comparison_groups = pd.DataFrame({
 })
 
 # Regression Results by Income Group
-comparison_groups.to_string(index=False)
+print(comparison_groups.to_string(index=False))
 
 # Test β₂ = 0.5 for each group
 for name, robust_res in [('High-Income', robust_high), ('Developing', robust_dev)]:
@@ -13366,8 +14294,6 @@ for name, robust_res in [('High-Income', robust_high), ('Developing', robust_dev
         print(f"  Conclusion: Reject H₀. β₂ differs significantly from 0.5")
     else:
         print(f"  Conclusion: Fail to reject H₀. Data consistent with β₂ = 0.5")
-
-# Interpretation
 ```
 
 > **Key Concept 7.9: Economic Interpretation of Hypothesis Test Results**
@@ -13377,16 +14303,19 @@ for name, robust_res in [('High-Income', robust_high), ('Developing', robust_dev
 > **Translating statistical results to economic conclusions:**
 >
 > **1. Rejecting H₀: β₂ = 0 (statistical significance)**
+>
 > - Statistical: "Capital has a statistically significant effect on productivity"
 > - Economic: "Countries with more capital per worker tend to have higher productivity, and this pattern is unlikely due to chance alone"
 > - Limitations: Says nothing about causation, magnitude, or policy relevance
 >
 > **2. Rejecting H₀: β₂ = 0.5 (testing theory predictions)**  
+>
 > - Statistical: "The coefficient differs significantly from 0.5"
 > - Economic: "The marginal product of capital differs from theory's prediction, suggesting other factors (technology, institutions) matter"
 > - Implications: May indicate model misspecification or heterogeneity across countries
 >
 > **3. Failing to reject H₀ (no statistical significance)**
+>
 > - Statistical: "Cannot rule out β₂ = 0 (or other null value)"
 > - Economic: Multiple interpretations possible:
 >   - Effect truly absent
@@ -13395,17 +14324,19 @@ for name, robust_res in [('High-Income', robust_high), ('Developing', robust_dev
 > - **Never conclude:** "Proved β₂ = 0" or "No relationship exists"
 >
 > **4. Heterogeneity across groups**
+>
 > - If β₂(high-income) > β₂(developing): Capital complementary with other factors more abundant in rich countries (technology, institutions, human capital)
 > - If β₂(developing) > β₂(high-income): Diminishing returns to capital more pronounced in capital-abundant countries
 >
 > **Best practices for economic interpretation:**
+>
 > 1. Report point estimates, not just significance
 > 2. Use confidence intervals to show uncertainty
 > 3. Assess economic magnitude (not just statistical significance)
 > 4. Consider alternative explanations and limitations
 > 5. Link findings to economic theory and policy implications
 
-### Task 5: Visual Analysis (Independent)
+#### Task 5: Visual Analysis (Independent)
 
 **Objective:** Create visualizations to communicate your statistical inference results effectively.
 
@@ -13443,8 +14374,8 @@ ax1.scatter(data_2014['capital'], data_2014['productivity'],
            alpha=0.5, s=40, color='#22d3ee', label='All countries')
 ax1.plot(data_2014['capital'], model_convergence.predict(), 
         color='red', linewidth=2, label='Regression line')
-ax1.set_xlabel('Capital per Worker ($1000s)')
-ax1.set_ylabel('Labor Productivity ($1000s)')
+ax1.set_xlabel('Capital per Worker (dollars)')
+ax1.set_ylabel('Labor Productivity (dollars)')
 ax1.set_title('Full Sample Regression')
 ax1.legend()
 ax1.grid(True, alpha=0.3)
@@ -13462,23 +14393,28 @@ ax2.plot(high_income_sorted['capital'], robust_high.predict(high_income_sorted),
         color='#4ade80', linewidth=2, linestyle='--', label='High-income fit')
 ax2.plot(developing_sorted['capital'], robust_dev.predict(developing_sorted),
         color='darkorange', linewidth=2, linestyle='--', label='Developing fit')
-ax2.set_xlabel('Capital per Worker ($1000s)')
-ax2.set_ylabel('Labor Productivity ($1000s)')
+ax2.set_xlabel('Capital per Worker (dollars)')
+ax2.set_ylabel('Labor Productivity (dollars)')
 ax2.set_title('By Income Group')
 ax2.legend()
 ax2.grid(True, alpha=0.3)
 
 plt.tight_layout()
 plt.show()
+```
 
+The coefficient plot below compares the full-sample, high-income, and developing-country slope estimates with 95% confidence bars — check whether each interval excludes zero and the theory value 0.5.
+
+```python
 # Figure 2: Coefficient plot with confidence intervals
 fig, ax = plt.subplots(figsize=(10, 6))
 
 groups = ['Full Sample', 'High-Income', 'Developing']
 estimates = [beta2_robust, robust_high.coef()['capital'], robust_dev.coef()['capital']]
 ses = [se_beta2_robust, robust_high.se()['capital'], robust_dev.se()['capital']]
-cis_lower = [e - 1.96*se for e, se in zip(estimates, ses)]
-cis_upper = [e + 1.96*se for e, se in zip(estimates, ses)]
+dfs = [int(m._N) - len(m.coef()) for m in (robust_model, robust_high, robust_dev)]  # df = n - 2 per group
+cis_lower = [e - stats.t.ppf(0.975, d)*se for e, se, d in zip(estimates, ses, dfs)]
+cis_upper = [e + stats.t.ppf(0.975, d)*se for e, se, d in zip(estimates, ses, dfs)]
 
 y_pos = range(len(groups))
 ax.errorbar(estimates, y_pos, 
@@ -13499,7 +14435,7 @@ plt.show()
 # All three estimates are positive and statistically significant
 ```
 
-### Task 6: Write a Research Summary (Independent)
+#### Task 6: Write a Research Summary (Independent)
 
 **Objective:** Communicate your statistical findings in a clear, professional manner.
 
@@ -13522,7 +14458,7 @@ Write a 200-300 word summary of your analysis as if for an economics journal. Yo
 - Professional tone suitable for academic publication
 
 **Example opening:**  
-"Using cross-sectional data for 108 countries in 2014, I investigate the relationship between labor productivity (GDP per capita) and physical capital per worker. The estimated coefficient of 0.XX (robust SE = 0.YY, p < 0.001) indicates that..."
+"Using cross-sectional data for 108 countries in 2014, I investigate the relationship between labor productivity (GDP per worker) and physical capital per worker. The estimated coefficient of 0.XX (robust SE = 0.YY, p < 0.001) indicates that..."
 
 *Write your summary in the markdown cell below.*
 
@@ -13534,7 +14470,7 @@ Write a 200-300 word summary of your analysis as if for an economics journal. Yo
 
 ---
 
-### What You've Learned
+#### What You've Learned
 
 **Congratulations!** You've completed a comprehensive statistical inference analysis. You practiced:
 
@@ -13560,13 +14496,13 @@ Write a 200-300 word summary of your analysis as if for an economics journal. Yo
 **Practical Skills:**
 
 - Using Python for comprehensive econometric analysis
-- Generating robust standard errors with `statsmodels`
+- Generating robust standard errors with `pyfixest`
 - Creating compelling visualizations with `matplotlib`
 - Communicating statistical results to non-technical audiences
 
 **Next Steps:**
 
-- Chapter 8 will extend these methods to multiple regression
+- Chapters 10 and 11 will extend these methods to multiple regression
 - You'll learn how to control for confounding variables
 - And test joint hypotheses about multiple coefficients
 
@@ -13611,7 +14547,7 @@ print(f"Complete cases for regression: {len(reg_data)}")
 reg_data.describe().round(3)
 ```
 
-### Task 1: Estimate and Test Slope (Guided)
+#### Task 1: Estimate and Test Slope (Guided)
 
 **Objective:** Estimate the OLS regression of IMDS on log NTL per capita and test whether the slope is statistically significant.
 
@@ -13620,7 +14556,7 @@ reg_data.describe().round(3)
 1. Estimate the regression `imds ~ ln_NTLpc2017` using OLS
 2. Display the full regression summary
 3. Extract the t-statistic and p-value for the slope coefficient
-4. Test the null hypothesis H₀: β₁ = 0 (no linear relationship)
+4. Test the null hypothesis H₀: β₂ = 0 (no linear relationship)
 5. State your conclusion: Can we reject the null at the 5% significance level?
 
 ```python
@@ -13634,7 +14570,7 @@ model.summary()
 t_stat = model.tstat()['ln_NTLpc2017']
 p_value = model.pvalue()['ln_NTLpc2017']
 
-# Hypothesis test: H₀: β₁ = 0
+# Hypothesis test: H₀: β₂ = 0
 print(f"Slope coefficient: {model.coef()['ln_NTLpc2017']:.4f}")
 print(f"Standard error:    {model.se()['ln_NTLpc2017']:.4f}")
 print(f"t-statistic:       {t_stat:.4f}")
@@ -13642,7 +14578,7 @@ print(f"p-value:           {p_value:.6f}")
 print(f"Conclusion: {'Reject' if p_value < 0.05 else 'Fail to reject'} H₀ at the 5% level.")
 ```
 
-### Task 2: Confidence Interval for Slope (Guided)
+#### Task 2: Confidence Interval for Slope (Guided)
 
 **Objective:** Construct and interpret a 95% confidence interval for the NTL coefficient.
 
@@ -13666,13 +14602,13 @@ print(f"95% CI:          [{ci_lower:.4f}, {ci_upper:.4f}]")
 print(f"Does the CI contain zero? {'Yes' if ci_lower <= 0 <= ci_upper else 'No'}")
 ```
 
-### Task 3: Robust Standard Errors (Semi-guided)
+#### Task 3: Robust Standard Errors (Semi-guided)
 
 **Objective:** Compare default (homoskedastic) standard errors with heteroskedasticity-robust (HC1) standard errors.
 
 **Instructions:**
 
-1. Re-estimate the model with HC1 robust standard errors using `cov_type='HC1'`
+1. Re-estimate the model with HC1 robust standard errors using `vcov='HC1'`
 2. Compare the standard errors, t-statistics, and p-values between the two models
 3. Discuss: Do the robust SEs differ substantially from the default SEs?
 4. Why might robust standard errors matter for municipality-level spatial data?
@@ -13699,37 +14635,37 @@ print(f"SE ratio (robust/default): {model_robust.se()['ln_NTLpc2017'] / model.se
 >
 > Municipality-level data often exhibits **heteroskedasticity**: the variance of development outcomes may differ between urban areas (where IMDS is tightly clustered around high values) and rural areas (where IMDS varies widely). Heteroskedasticity-robust standard errors (HC1) provide valid inference without assuming constant variance. When standard and robust SEs differ substantially, this signals heteroskedasticity in the data.
 
-### Task 4: Two-Sided Hypothesis Test (Semi-guided)
+#### Task 4: Two-Sided Hypothesis Test (Semi-guided)
 
 **Objective:** Test whether the NTL coefficient equals a specific hypothesized value.
 
 **Instructions:**
 
-1. Test H₀: β₁ = 5 (a specific hypothesized effect size)
-2. Calculate the t-statistic manually: t = (β̂₁ − 5) / SE(β̂₁)
+1. Test H₀: β₂ = 5 (a specific hypothesized effect size)
+2. Calculate the t-statistic manually: t = (β̂₂ − 5) / SE(β̂₂)
 3. Compute the two-sided p-value using `scipy.stats.t.sf()`
 4. Can we reject that the true effect equals exactly 5?
 
 **Hint:** Use robust standard errors for this test. The degrees of freedom are `(int(model_robust._N) - len(model_robust.coef()))`.
 
 ```python
-# Task 4: Two-sided hypothesis test for H0: beta_1 = 5
+# Task 4: Two-sided hypothesis test for H0: beta_2 = 5
 from scipy import stats
 
 # Hypothesized value
-beta_0_hyp = 5
+beta_2_hyp = 5
 
 # Calculate t-statistic manually
 beta_hat = model_robust.coef()['ln_NTLpc2017']
 se_robust = model_robust.se()['ln_NTLpc2017']
 df = (int(model_robust._N) - len(model_robust.coef()))
 
-t_manual = (beta_hat - beta_0_hyp) / se_robust
+t_manual = (beta_hat - beta_2_hyp) / se_robust
 p_two_sided = 2 * stats.t.sf(abs(t_manual), df=df)
 
-# Hypothesis test: H₀: β₁ = beta_0_hyp
+# Hypothesis test: H₀: β₂ = beta_2_hyp
 print(f"Estimated slope:   {beta_hat:.4f}")
-print(f"Hypothesized value: {beta_0_hyp}")
+print(f"Hypothesized value: {beta_2_hyp}")
 print(f"Robust SE:          {se_robust:.4f}")
 print(f"t-statistic:        {t_manual:.4f}")
 print(f"Degrees of freedom: {df}")
@@ -13737,13 +14673,13 @@ print(f"Two-sided p-value:  {p_two_sided:.6f}")
 print(f"Conclusion: {'Reject' if p_two_sided < 0.05 else 'Fail to reject'} H₀ at the 5% level.")
 ```
 
-### Task 5: One-Sided Test (Independent)
+#### Task 5: One-Sided Test (Independent)
 
 **Objective:** Test whether the NTL coefficient is positive (NTL has a positive effect on development).
 
 **Instructions:**
 
-1. State the hypotheses: H₀: β₁ ≤ 0 vs H₁: β₁ > 0
+1. State the hypotheses: H₀: β₂ ≤ 0 vs H₁: β₂ > 0
 2. Calculate the one-sided p-value from the t-statistic
 3. Use robust standard errors
 4. Discuss: Is there strong evidence for a positive relationship between nighttime lights and development?
@@ -13751,13 +14687,13 @@ print(f"Conclusion: {'Reject' if p_two_sided < 0.05 else 'Fail to reject'} H₀ 
 **Hint:** For a right-sided test, the one-sided p-value is `stats.t.sf(t_stat, df=df)`.
 
 ```python
-# Task 5: One-sided test — H0: beta_1 <= 0 vs H1: beta_1 > 0
+# Task 5: One-sided test — H0: beta_2 <= 0 vs H1: beta_2 > 0
 
-# t-statistic for H0: beta_1 = 0 using robust SEs
+# t-statistic for H0: beta_2 = 0 using robust SEs
 t_onesided = model_robust.tstat()['ln_NTLpc2017']
 p_onesided = stats.t.sf(t_onesided, df=(int(model_robust._N) - len(model_robust.coef())))
 
-# One-sided test: H₀: β₁ ≤ 0 vs H₁: β₁ > 0
+# One-sided test: H₀: β₂ ≤ 0 vs H₁: β₂ > 0
 print(f"Estimated slope:     {model_robust.coef()['ln_NTLpc2017']:.4f}")
 print(f"Robust SE:           {model_robust.se()['ln_NTLpc2017']:.4f}")
 print(f"t-statistic:         {t_onesided:.4f}")
@@ -13768,9 +14704,9 @@ print(f"There {'is' if p_onesided < 0.05 else 'is not'} strong evidence for a po
 
 > **Key Concept 7.13: Practical Significance in Development**
 >
-> A statistically significant regression coefficient must be evaluated for **practical significance**. In the DS4Bolivia context, the NTL coefficient tells us how much IMDS changes for a 1-unit increase in log NTL per capita. Since IMDS ranges from roughly 20 to 80, an effect of, say, 5 points represents about 8% of the total range—a meaningful but not transformative association. Policy decisions should weigh both statistical confidence and effect magnitude.
+> A statistically significant regression coefficient must be evaluated for **practical significance**. In the DS4Bolivia context, the NTL coefficient tells us how much IMDS changes for a 1-unit increase in log NTL per capita. Since IMDS ranges from roughly 36 to 80, an effect of, say, 5 points represents about 11% of the total range—a meaningful but not transformative association. Policy decisions should weigh both statistical confidence and effect magnitude.
 
-### Task 6: Economic vs Statistical Significance (Independent)
+#### Task 6: Economic vs Statistical Significance (Independent)
 
 **Objective:** Write a 200-300 word discussion evaluating both the statistical and practical significance of the NTL-development relationship.
 
@@ -13806,7 +14742,7 @@ print(f"\nR-squared: {model._r2:.4f}")
 print(f"NTL explains {model._r2 * 100:.1f}% of variation in IMDS across municipalities.")
 ```
 
-### What You've Learned
+#### What You've Learned
 
 Through this case study on statistical inference for the NTL-development relationship in Bolivia, you practiced:
 
@@ -13847,7 +14783,7 @@ This notebook provides an interactive introduction to bivariate regression throu
 [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/quarcs-lab/metricsai/blob/main/notebooks_colab/ch08_Case_Studies_for_Bivariate_Regression.ipynb)
 <div class="chapter-resources">
 <a href="https://www.youtube.com/watch?v=2hVGYcT9YE8" target="_blank" class="resource-btn">🎬 AI Video</a>
-<a href="https://carlos-mendez.my.canva.site/s08-case-studies-for-bivariate-regression-pdf" target="_blank" class="resource-btn">✨ AI Slides</a>
+<a href="https://quarcs-lab.github.io/metricsai/slides/ch08/index.html" target="_blank" class="resource-btn">🧑🏽‍🏫 Mendez Slides</a>
 <a href="https://cameron.econ.ucdavis.edu/aed/traedv1_08" target="_blank" class="resource-btn">📊 Cameron Slides</a>
 <a href="https://app.edcafe.ai/quizzes/697867452f5d08069e049d1f" target="_blank" class="resource-btn">✏️ Quiz</a>
 <a href="https://app.edcafe.ai/chatbots/6978a02d2f5d08069e0711d6" target="_blank" class="resource-btn">🤖 AI Tutor</a>
@@ -13872,7 +14808,7 @@ This chapter demonstrates bivariate regression analysis through four compelling 
 **Datasets used:**
 
 - **AED_HEALTH2009.DTA**: Health outcomes and expenditures for 34 OECD countries (2009)
-- **AED_CAPM.DTA**: Monthly stock returns for Coca-Cola, Target, Walmart (1983-2013)
+- **AED_CAPM.DTA**: Monthly stock returns for Coca-Cola, Target, Walmart (1983-2012)
 - **AED_GDPUNEMPLOY.DTA**: Annual U.S. GDP growth and unemployment (1961-2019)
 
 **Key economic questions:**
@@ -13891,6 +14827,85 @@ This chapter demonstrates bivariate regression analysis through four compelling 
 - Key Takeaways
 - Practice Exercises
 
+
+## Key Concepts
+
+Five core ideas anchor this chapter. Skim them before you start, and come back when a term feels fuzzy. Each entry pairs a concrete example using the chapter's data with a non-technical analogy. Click a panel to expand it.
+
+**Capital Asset Pricing Model (CAPM):** A workhorse finance model that explains an asset's expected excess return as a multiple of the market's expected excess return: $R_A - R_F = \alpha_A + \beta_A (R_M - R_F) + u$. The slope $\beta_A$ measures how much the asset moves with the market — its share of *systematic* risk.
+
+::::: {.columns}
+:::: {.column width="50%"}
+::: {.callout-tip collapse="true" appearance="simple" title="Example"}
+For 354 monthly observations on Coca-Cola from `data_capm` (1983–2012), the CAPM regression of `rko_rf` on `rm_rf` produces $\hat\beta = 0.61$ with $R^2 \approx 0.20$ — the market explains 20% of the variation in Coca-Cola's monthly excess returns, and Coke moves only 61 cents on the market's dollar.
+:::
+::::
+:::: {.column width="50%"}
+::: {.callout-note collapse="true" appearance="simple" title="Analogy"}
+A small boat in a busy harbor rises and falls with the tide. The CAPM is a way of asking *how much* of the boat's bobbing comes from the tide itself — not from what's happening on board (engine surges, passenger weight). $\beta$ is the boat's coupling to the tide; $R^2$ is the share of motion the tide can explain.
+:::
+::::
+:::::
+
+**Excess Return ($R - R_F$):** The return on an asset *above and beyond* the risk-free rate $R_F$ (e.g., a 1-month U.S. Treasury bill). Investors demand this premium for bearing risk; CAPM tries to explain it as compensation for *systematic* risk only.
+
+::::: {.columns}
+:::: {.column width="50%"}
+::: {.callout-tip collapse="true" appearance="simple" title="Example"}
+In `data_capm`, Coca-Cola's average monthly return minus the risk-free Treasury rate gives `rko_rf` — the asset's excess return — averaging slightly above zero. The regressor `rm_rf` does the same for the market. Subtracting the safe alternative is what makes the regression about *risk-adjusted* compensation, not raw price changes.
+:::
+::::
+:::: {.column width="50%"}
+::: {.callout-note collapse="true" appearance="simple" title="Analogy"}
+A retail "deal" is the price discount you get *above* the everyday store price. A 20% sale on a chair worth \$100 is a \$20 excess saving. Excess returns are the same idea applied to investments — only the part that actually beats the safest baseline counts as a "deal" worth taking risk for.
+:::
+::::
+:::::
+
+**Alpha (Jensen's Alpha):** The intercept $\alpha$ in a CAPM regression — the average excess return the asset earned that the market factor *cannot* explain. Pure CAPM theory predicts $\alpha = 0$; a statistically significant non-zero alpha is interpreted as risk-adjusted out- or under-performance.
+
+::::: {.columns}
+:::: {.column width="50%"}
+::: {.callout-tip collapse="true" appearance="simple" title="Example"}
+The fitted Coca-Cola CAPM gives $\hat\alpha \approx 0.0068$ — about $0.68\%$ per month, or roughly $8.2\%$ annualised, in excess of what the market beta predicts. Tested against $H_0: \alpha = 0$, it is statistically significant — a textbook "alpha puzzle" for risk-adjusted out-performance over 1983–2012.
+:::
+::::
+:::: {.column width="50%"}
+::: {.callout-note collapse="true" appearance="simple" title="Analogy"}
+A chef serves a tasting menu where every dish has a published expected flavor. Alpha is the surprise extra spice the chef adds that the menu didn't promise — credit not earned by following the recipe. Statistically significant alpha means the chef's secret seasoning is real, not just a one-night accident.
+:::
+::::
+:::::
+
+**Cross-Sectional Regression:** A regression run on a snapshot of many units observed at *one* moment — countries, firms, households, etc. Variation in $x$ across the units identifies the slope, and standard errors typically need a heteroskedasticity-robust adjustment because units differ in noise level.
+
+::::: {.columns}
+:::: {.column width="50%"}
+::: {.callout-tip collapse="true" appearance="simple" title="Example"}
+The first case study runs a cross-sectional regression of `lifeexp` on `hlthpc` across 34 OECD countries observed in 2009 — one year, 34 units. The fitted slope of $0.00111$ implies each extra \$1{,}000 in per-capita health spending is associated with about $1.1$ extra years of life expectancy, with $t \approx 3.9$.
+:::
+::::
+:::: {.column width="50%"}
+::: {.callout-note collapse="true" appearance="simple" title="Analogy"}
+A photographer lines up 34 students for a class portrait — one frame, one click. Each face shows a different height, hair colour, expression. Cross-sectional regression studies *those* differences across the classmates: how does one trait covary with another in this single frozen frame, with no information about how anyone changed over the year?
+:::
+::::
+:::::
+
+**Time-Series Regression:** A regression run on *one* unit observed at many points in time — annual GDP growth, monthly stock returns, daily prices. Variation in $x$ over time identifies the slope, but errors often persist (autocorrelation), so HAC-style robust standard errors are usually needed for honest inference.
+
+::::: {.columns}
+:::: {.column width="50%"}
+::: {.callout-tip collapse="true" appearance="simple" title="Example"}
+The Okun's Law case study regresses U.S. annual `rgdpgrowth` on `uratechange` over $59$ years (1961–2019). The fitted slope is $-1.59$ — close to Okun's textbook benchmark of $-2.0$ — meaning a 1-percentage-point rise in unemployment is associated with about 1.6 fewer percentage points of GDP growth that same year.
+:::
+::::
+:::: {.column width="50%"}
+::: {.callout-note collapse="true" appearance="simple" title="Analogy"}
+A musician records her own performance of one piece year after year for 59 years. A time-series regression treats those recordings as a sequence and asks how today's tempo relates to today's mood — using the *same artist* across many years rather than many artists in one year. Patterns across the years drive the slope.
+:::
+::::
+:::::
 
 ## Setup
 
@@ -13934,7 +14949,7 @@ plt.rcParams.update({
 print("Setup complete! Ready to explore real-world regression applications.")
 ```
 
-## 8.1: Health Outcomes Across Countries
+## 8.1 Health Outcomes Across Countries
 
 Our first case study examines health outcomes across wealthy OECD nations. We'll investigate whether higher health spending is associated with better health outcomes.
 
@@ -13958,11 +14973,15 @@ Our first case study examines health outcomes across wealthy OECD nations. We'll
 
 ### Load and Explore Health Data
 
+We start by loading the OECD health dataset directly from GitHub and previewing it. Check the wide cross-country ranges in spending (`hlthpc`) and outcomes (`lifeexp`, `infmort`) in the summary below.
+
 ```python
+# 8.1 Health outcomes across countries
+
 # Read in the health data
 data_health = pd.read_stata(GITHUB_DATA_URL + 'AED_HEALTH2009.DTA')
 
-# 8.1 Health outcomes across countries
+# Summary statistics for all variables
 display(data_health.describe())
 
 # First few observations
@@ -13978,7 +14997,7 @@ Let's examine the key variables in our health outcomes study.
 table81_vars = ['hlthpc', 'lifeexp', 'infmort']
 summary_table = data_health[table81_vars].describe().T
 summary_table['range'] = summary_table['max'] - summary_table['min']
-summary_table[['mean', 'std', 'min', 'max', 'range']]
+display(summary_table[['mean', 'std', 'min', 'max', 'range']])
 
 print("\nKey observations:")
 print(f"  - Health spending ranges from ${summary_table.loc['hlthpc', 'min']:.0f} to ${summary_table.loc['hlthpc', 'max']:.0f}")
@@ -13995,7 +15014,7 @@ $$\text{Lifeexp} = \beta_1 + \beta_2 \times \text{Hlthpc} + u$$
 **Interpretation:**
 
 - $\beta_1$: Expected life expectancy when health spending is zero (intercept)
-- $\beta_2$: Change in life expectancy for each additional \$1,000 in health spending
+- $\beta_2$: Change in life expectancy for each additional dollar of health spending (we multiply by 1,000 to report the effect per \$1,000)
 - We expect $\beta_2 > 0$ (higher spending improves outcomes)
 
 ```python
@@ -14019,23 +15038,29 @@ model_lifeexp.summary()
 
 For cross-sectional data with independence across observations, it's standard to use heteroskedasticity-robust standard errors. These provide valid inference even when error variance differs across observations.
 
+```python
+# Life expectancy regression (robust SE)
+model_lifeexp_robust = pf.feols('lifeexp ~ hlthpc', data=data_health, vcov='HC1')
+model_lifeexp_robust.summary()
+```
+
 ### Interpreting the Life Expectancy Results
 
 **Economic Significance:**
 The estimated coefficient of 0.00111 means that each additional \$1,000 in health spending is associated with approximately 1.1 years of additional life expectancy. To put this in perspective:
 
-- The difference between low-spending Chile (\$999/capita) and high-spending Norway (\$5,522/capita) is \$4,523
-- This predicts a life expectancy difference of 5.0 years (4.523 × 1.11)
-- Actual difference: 75.1 years (Chile) vs 79.9 years (Norway) = 4.8 years
+- The difference between low-spending Chile (\$1,210/capita) and high-spending Norway (\$5,348/capita) is \$4,138
+- This predicts a life expectancy difference of 4.6 years (4.138 × 1.11)
+- Actual difference: 75.8 years (Chile) vs 78.7 years (Norway) = 2.9 years
 
 **Statistical Significance:**
-The t-statistic of approximately 5.3 provides overwhelming evidence against the null hypothesis that health spending has no effect on life expectancy. The p-value is well below 0.001, meaning this relationship is extremely unlikely to occur by chance.
+With classical (iid) standard errors the t-statistic is approximately 3.9 (p well below 0.001), strong evidence against the null hypothesis that health spending has no effect on life expectancy. With the heteroskedasticity-robust standard errors recommended above, the evidence weakens (robust t ≈ 2.4, p ≈ 0.02) but the relationship remains statistically significant at the 5% level.
 
 **Important Caveats:**
 
 1. This is correlation, not causation - richer countries may have both higher spending AND other factors that improve health
 2. The relationship may not be linear across all spending levels
-3. The U.S. is a notable outlier - spending \$7,960 per capita but achieving only 76.2 years (below prediction)
+3. The U.S. is a notable outlier - spending \$7,990 per capita but achieving only 76.0 years (below prediction)
 4. Other factors matter: diet, exercise, inequality, healthcare access, environmental quality
 
 > **Key Concept 8.1: Economic vs. Statistical Significance**
@@ -14043,6 +15068,8 @@ The t-statistic of approximately 5.3 provides overwhelming evidence against the 
 > Economic vs. statistical significance in cross-country regressions. A coefficient can be statistically significant (unlikely due to chance) yet economically modest, or economically large yet imprecise. Always interpret both dimensions.
 
 ### Visualization: Life Expectancy vs Health Spending
+
+The scatter plot below shows each country's health spending against male life expectancy, together with the fitted regression line. Look for the upward slope — and for the U.S., which lies well below the line.
 
 ```python
 # Figure 8.1 Panel A - Life Expectancy
@@ -14052,7 +15079,7 @@ ax.scatter(data_health['hlthpc'], data_health['lifeexp'],
            color='#22d3ee', label='Actual')
 ax.plot(data_health['hlthpc'], model_lifeexp.predict(), color='#c084fc',
         linewidth=2, label='Fitted')
-ax.set_xlabel('Health Spending per capita (in $1000s)', fontsize=12)
+ax.set_xlabel('Health Spending per capita (US dollars)', fontsize=12)
 ax.set_ylabel('Life Expectancy (in years)', fontsize=12)
 ax.set_title('Figure 8.1 Panel A: Life Expectancy vs Health Spending',
              fontsize=14, fontweight='bold')
@@ -14082,11 +15109,11 @@ slope_inf     = model_infmort.coef()['hlthpc']
 r2_inf        = model_infmort._r2
 
 print(f"Estimated equation: infmort = {intercept_inf:.2f} + ({slope_inf:.5f}) x hlthpc")
-print(f"Slope: each additional $1,000 in spending is associated with {slope_inf*1000:.2f} fewer infant deaths per 1,000 births")
+print(f"Slope: each additional $1,000 in spending is associated with {-slope_inf*1000:.2f} fewer infant deaths per 1,000 births")
 print(f"R-squared: {r2_inf:.4f} ({r2_inf*100:.1f}% of variation explained)\n")
 
 # Full regression output
-display(model_infmort.summary())
+model_infmort.summary()
 
 # Robust standard errors
 model_infmort_robust = pf.feols('infmort ~ hlthpc', data=data_health, vcov='HC1')
@@ -14098,25 +15125,25 @@ model_infmort_robust.summary()
 ### Interpreting the Infant Mortality Results
 
 **Economic Significance:**
-The estimated coefficient of approximately -0.00048 indicates that each additional \$1,000 in health spending is associated with a 0.48 decrease in infant deaths per 1,000 live births. While this may seem small, it's quite meaningful:
+The estimated coefficient of approximately -0.00069 indicates that each additional \$1,000 in health spending is associated with a 0.69 decrease in infant deaths per 1,000 live births. While this may seem small, it's quite meaningful:
 
-- A country increasing spending from \$2,000 to \$4,000 per capita would expect infant mortality to fall by 0.96 deaths per 1,000 births
-- For a country with 100,000 births per year, this represents 96 fewer infant deaths annually
+- A country increasing spending from \$2,000 to \$4,000 per capita would expect infant mortality to fall by 1.39 deaths per 1,000 births
+- For a country with 100,000 births per year, this represents 139 fewer infant deaths annually
 - The effect is economically significant in terms of human welfare
 
 **Statistical Significance:**
-The negative relationship is highly statistically significant (t ≈ -5.9, p < 0.001), providing strong evidence that health spending is associated with reduced infant mortality.
+With classical (iid) standard errors the negative relationship is statistically significant at the 5% level (t ≈ -2.3, p ≈ 0.03). But with the heteroskedasticity-robust standard errors that Key Concept 8.2 below calls essential, the standard error grows and the relationship is no longer significant at conventional levels (robust t ≈ -1.3, p ≈ 0.19). This is a cautionary example: a result that looks significant under classical assumptions can lose its significance once we allow for heteroskedasticity.
 
 **The U.S. Anomaly:**
 The United States again stands out as a major outlier:
 
-- U.S. infant mortality: 6.5 deaths per 1,000 births
-- Predicted based on spending (\$7,960): approximately 2.8 deaths per 1,000 births
+- U.S. infant mortality: 6.4 deaths per 1,000 births
+- Predicted based on spending (\$7,990): approximately 1.2 deaths per 1,000 births
 - The U.S. has infant mortality rates closer to middle-income countries than to peer wealthy nations
 - This suggests that *how* money is spent matters as much as *how much* is spent
 
 **Model Limitations:**
-The R² suggests health spending explains only about 47% of variation in infant mortality. Other important factors include:
+The R² suggests health spending explains only about 14% of variation in infant mortality. Other important factors include:
 
 - Quality of prenatal care and maternal health programs
 - Income inequality and poverty rates
@@ -14129,6 +15156,8 @@ The R² suggests health spending explains only about 47% of variation in infant 
 
 ### Visualization: Infant Mortality vs Health Spending
 
+The plot below shows infant mortality against health spending, with the fitted line. Look for the downward slope — and note how far the U.S. sits above the line.
+
 ```python
 # Figure 8.1 Panel B - Infant Mortality
 fig, ax = plt.subplots(figsize=(10, 6))
@@ -14137,7 +15166,7 @@ ax.scatter(data_health['hlthpc'], data_health['infmort'],
            color='#22d3ee', label='Actual')
 ax.plot(data_health['hlthpc'], model_infmort.predict(), color='#c084fc',
         linewidth=2, label='Fitted')
-ax.set_xlabel('Health Spending per capita (in $1000s)', fontsize=12)
+ax.set_xlabel('Health Spending per capita (US dollars)', fontsize=12)
 ax.set_ylabel('Infant Mortality per 1,000 births', fontsize=12)
 ax.set_title('Figure 8.1 Panel B: Infant Mortality vs Health Spending',
              fontsize=14, fontweight='bold')
@@ -14151,7 +15180,7 @@ plt.show()
 
 Having examined how health spending affects outcomes, we now investigate what drives health spending itself. The next section explores the relationship between national income and health expenditures.
 
-## 8.2: Health Expenditures Across Countries
+## 8.2 Health Expenditures Across Countries
 
 Now we examine the determinants of health expenditures, focusing on the role of national income.
 
@@ -14166,7 +15195,9 @@ $$\text{Hlthpc} = \beta_1 + \beta_2 \times \text{Gdppc} + u$$
 - **Gdppc**: GDP per capita (US dollars)
 - **Hlthpc**: Health expenditure per capita (US dollars)
 
-**Key observation:** GDP per capita ranges from \$13,807 (Mexico) to \$82,901 (Luxembourg)
+**Key observation:** GDP per capita ranges from \$13,806 (Mexico) to \$82,901 (Luxembourg)
+
+The summary statistics below quantify this variation in both GDP per capita and health spending.
 
 ```python
 # 8.2 Health expenditures across countries
@@ -14179,6 +15210,8 @@ summary_gdp[['mean', 'std', 'min', 'max', 'range']]
 ```
 
 ### Health Expenditure Regression (All Countries)
+
+We regress health spending on GDP per capita, first with default standard errors and then with robust ones. Compare the two summaries — the standard errors change noticeably, a sign of heteroskedasticity.
 
 ```python
 # Health expenditure regression (all countries)
@@ -14193,7 +15226,7 @@ print(f"Estimated equation: hlthpc = {intercept_hlth:,.2f} + {slope_hlth:.4f} x 
 print(f"R-squared: {r2_hlth:.4f} ({r2_hlth*100:.1f}% of variation explained)\n")
 
 # Full regression output
-display(model_hlthpc.summary())
+model_hlthpc.summary()
 
 # Robust standard errors
 model_hlthpc_robust = pf.feols('hlthpc ~ gdppc', data=data_health, vcov='HC1')
@@ -14209,8 +15242,8 @@ The coefficient of approximately 0.09 indicates that each additional \$1,000 in 
 
 **Income Elasticity of Health Spending:**
 
-- At the mean GDP (\$38,000) and mean health spending (\$3,400):
-- Elasticity ≈ (0.09 × 38,000) / 3,400 ≈ 1.0
+- At the mean GDP (\$33,054) and mean health spending (\$3,256):
+- Elasticity ≈ (0.09 × 33,054) / 3,256 ≈ 0.9
 - This suggests health spending rises roughly proportionally with income
 - Health care appears to be a "normal good" (demand increases with income)
 
@@ -14221,12 +15254,13 @@ Notice how robust standard errors differ substantially from default standard err
 - Richer countries show more variation in health spending choices
 - Luxembourg and the USA have enormous influence on the estimates
 - Robust SEs adjust for this pattern and provide more reliable inference
+- Even with robust standard errors, the GDP slope remains statistically significant (robust t ≈ 3.1, p ≈ 0.004), though the evidence is weaker than the default output suggests
 
 **The Outlier Problem:**
 Two countries drive much of the relationship:
 
-1. **Luxembourg** (GDP: \$82,901, Health: \$4,808) - extremely wealthy, high spending
-2. **United States** (GDP: \$45,674, Health: \$7,960) - exceptionally high health spending for its GDP level
+1. **Luxembourg** (GDP: \$82,901, Health: \$4,786) - extremely wealthy, high spending
+2. **United States** (GDP: \$45,192, Health: \$7,990) - exceptionally high health spending for its GDP level
 
 These outliers suggest the relationship may not be stable across all countries.
 
@@ -14236,6 +15270,8 @@ These outliers suggest the relationship may not be stable across all countries.
 
 ### Visualization: Health Spending vs GDP (All Countries)
 
+The scatter plot below shows health spending against GDP per capita for all 34 countries, with the fitted line. Look for the two points that sit far from the rest — the USA and Luxembourg.
+
 ```python
 # Figure 8.2 Panel A - All countries
 fig, ax = plt.subplots(figsize=(10, 6))
@@ -14244,8 +15280,8 @@ ax.scatter(data_health['gdppc'], data_health['hlthpc'],
            color='#22d3ee', label='Actual')
 ax.plot(data_health['gdppc'], model_hlthpc.predict(), color='#c084fc',
         linewidth=2, label='Fitted')
-ax.set_xlabel('GDP per capita (in $1000s)', fontsize=12)
-ax.set_ylabel('Health Spending per capita (in $1000s)', fontsize=12)
+ax.set_xlabel('GDP per capita (US dollars)', fontsize=12)
+ax.set_ylabel('Health Spending per capita (US dollars)', fontsize=12)
 ax.set_title('Figure 8.2 Panel A: Health Spending vs GDP (All Countries)',
              fontsize=14, fontweight='bold')
 ax.legend()
@@ -14282,7 +15318,7 @@ print(f"Estimated equation: hlthpc = {intercept_sub:,.2f} + {slope_sub:.4f} x gd
 print(f"R-squared: {r2_sub:.4f} ({r2_sub*100:.1f}% of variation explained)\n")
 
 # Full regression output
-display(model_hlthpc_subset.summary())
+model_hlthpc_subset.summary()
 
 # Robust standard errors
 model_hlthpc_subset_robust = pf.feols('hlthpc ~ gdppc', data=data_health_subset, vcov='HC1')
@@ -14299,7 +15335,7 @@ The comparison reveals how sensitive regression results can be to outliers:
 
 | Metric | Full Sample | Excluding USA & LUX | Change |
 |--------|-------------|---------------------|--------|
-| Slope | ~0.09 | ~0.12 | +33% |
+| Slope | ~0.09 | ~0.13 | +41% |
 | R² | ~0.60 | ~0.93 | +55% |
 | Interpretation | Weak fit | Excellent fit | Transformed |
 
@@ -14326,6 +15362,8 @@ If you're advising a "typical" OECD country on expected health spending, the sub
 
 ### Visualization: Health Spending vs GDP (Excluding Outliers)
 
+Re-plotting the 32 remaining countries shows how tightly they cluster around the fitted line once the two outliers are excluded.
+
 ```python
 # Figure 8.2 Panel B - Excluding USA and Luxembourg
 fig, ax = plt.subplots(figsize=(10, 6))
@@ -14348,7 +15386,7 @@ plt.show()
 
 Our health economics case studies revealed strong relationships but also highlighted outlier issues. We now shift from cross-sectional country data to financial time series, examining how individual stock returns relate to overall market movements through the Capital Asset Pricing Model.
 
-## 8.3: Capital Asset Pricing Model (CAPM)
+## 8.3 Capital Asset Pricing Model (CAPM)
 
 Our third case study applies regression to financial data using the Capital Asset Pricing Model.
 
@@ -14377,7 +15415,7 @@ $$R_A - R_F = \alpha_A + \beta_A (R_M - R_F) + u$$
 - $\alpha_A$ = excess return ("alpha") after adjusting for risk
   - Pure CAPM theory predicts $\alpha = 0$
 
-**Dataset:** Monthly data from May 1983 to October 2013 (366 observations)
+**Dataset:** Monthly data from May 1983 to October 2012 (354 observations)
 
 - Returns on Coca-Cola (RKO), Target (RTGT), Walmart (RWMT)
 - Market return and risk-free rate
@@ -14397,6 +15435,8 @@ data_capm[['date', 'rm', 'rf', 'rko', 'rm_rf', 'rko_rf']].head()
 
 ### Summary Statistics for CAPM Variables
 
+Before estimating the CAPM, we summarize the monthly return series. Compare the standard deviations: the individual stocks are clearly more volatile than the market.
+
 ```python
 # Table 8.3: CAPM variables summary
 table83_vars = ['rm', 'rf', 'rko', 'rtgt', 'rwmt', 'rm_rf',
@@ -14411,6 +15451,8 @@ print(f"  - Stock returns are much more volatile than market returns")
 ```
 
 ### Visualization: Time Series of Excess Returns
+
+The plot below traces Coca-Cola's and the market's excess returns over the most recent fifth of the sample. Notice how the stock's line swings more widely than the market's.
 
 ```python
 # Figure 8.3 Panel A - Time series plot (last 20% of data for readability)
@@ -14436,6 +15478,8 @@ plt.show()
 
 ### CAPM Regression for Coca-Cola
 
+We now estimate the CAPM regression of Coca-Cola's excess return on the market's excess return. The slope is Coca-Cola's beta — check whether it is above or below 1 in the output.
+
 ```python
 # CAPM regression: Coca-Cola
 model_capm = pf.feols('rko_rf ~ rm_rf', data=data_capm)
@@ -14451,13 +15495,15 @@ print(f"R-squared: {r2_capm:.4f} ({r2_capm*100:.1f}% of return variation explain
 
 # Full regression output
 model_capm.summary()
-alpha_se = model_capm.se()['Intercept']
-beta_se = model_capm.se()['rm_rf']
-alpha_t = model_capm.tstat()[\1Intercept']
-beta_t = model_capm.tstat()[\1rm_rf']
 ```
 
 ### CAPM Results with Robust Standard Errors
+
+```python
+# CAPM regression: Coca-Cola (robust SE)
+model_capm_robust = pf.feols('rko_rf ~ rm_rf', data=data_capm, vcov='HC1')
+model_capm_robust.summary()
+```
 
 ### Interpreting the CAPM Beta for Coca-Cola
 
@@ -14479,19 +15525,19 @@ The estimated beta of 0.61 reveals Coca-Cola's risk profile:
    - Less sensitive to economic cycles than growth stocks
 
 3. **Statistical precision:**
-   - The t-statistic of ~21.5 provides overwhelming evidence that beta ≠ 0
+   - The t-statistic of ~9.4 provides overwhelming evidence that beta ≠ 0
    - Coca-Cola returns clearly co-move with the market
    - The relationship is one of the strongest we've seen in this chapter
 
 **The Alpha "Puzzle":**
 
-The estimated alpha of 0.0039 (0.39% per month, or ~4.7% annually) is statistically significant:
+The estimated alpha of 0.0068 (0.68% per month, or ~8.2% annually) is statistically significant:
 
 - Pure CAPM theory predicts alpha should equal zero (no excess risk-adjusted returns)
 - Yet we reject H₀: α = 0 at conventional significance levels
 - This suggests either:
   - CAPM is misspecified (missing risk factors)
-  - Coca-Cola generated genuine excess returns during 1983-2013
+  - Coca-Cola generated genuine excess returns during 1983-2012
   - Statistical artifact from data mining
 
 **Investment Implications:**
@@ -14505,6 +15551,8 @@ The estimated alpha of 0.0039 (0.39% per month, or ~4.7% annually) is statistica
 > Systematic risk (beta) measures how an asset's returns co-move with the overall market. Beta < 1 indicates a "defensive" stock (less volatile than market), while beta > 1 indicates a "growth" stock (amplifies market movements). Only systematic risk is priced in efficient markets.
 
 ### Visualization: CAPM Scatter Plot
+
+The scatter plot below shows every monthly observation with the fitted CAPM line. Note the wide dispersion around the line — most of Coca-Cola's month-to-month variation is firm-specific rather than market-driven.
 
 ```python
 # Figure 8.3 Panel B - CAPM Scatter Plot
@@ -14536,8 +15584,8 @@ print(f"Beta (slope) = {model_capm.coef()['rm_rf']:.4f}")
 
 2. **Scatter around the line:** The substantial dispersion around the regression line reflects:
    - Idiosyncratic risk (firm-specific factors): management decisions, product launches, competitive pressures
-   - The R² ≈ 0.33 means the market explains only 33% of Coca-Cola's return variation
-   - The remaining 67% is diversifiable risk that disappears in a portfolio
+   - The R² ≈ 0.20 means the market explains only 20% of Coca-Cola's return variation
+   - The remaining 80% is diversifiable risk that disappears in a portfolio
 
 3. **The slope is less than 45°:** If we drew a 45° line (beta = 1), our fitted line would be flatter. This visually confirms beta < 1.
 
@@ -14552,7 +15600,7 @@ print(f"Beta (slope) = {model_capm.coef()['rm_rf']:.4f}")
 **Time Series Considerations:**
 
 - CAPM assumes returns are independent over time (no autocorrelation)
-- With monthly data over 30+ years, we should ideally check for time-varying beta
+- With monthly data spanning nearly 30 years, we should ideally check for time-varying beta
 - Some periods (recessions) may show different beta than others (expansions)
 - More sophisticated models (e.g., conditional CAPM) could account for this
 
@@ -14562,7 +15610,7 @@ print(f"Beta (slope) = {model_capm.coef()['rm_rf']:.4f}")
 
 The CAPM demonstrated how financial returns co-move with market-wide factors. Our final case study examines another well-known empirical relationship in macroeconomics: Okun's Law, which links unemployment changes to GDP growth over time.
 
-## 8.4: Output and Unemployment in the U.S. (Okun's Law)
+## 8.4 Output and Unemployment in the U.S. (Okun's Law)
 
 Our final case study examines a fundamental macroeconomic relationship known as Okun's Law.
 
@@ -14600,6 +15648,8 @@ data_gdp[['year', 'rgdpgrowth', 'uratechange']].head(10)
 
 ### Summary Statistics
 
+We first summarize the two series. GDP growth averages about 3% per year, while the average change in unemployment is close to zero.
+
 ```python
 # Table 8.4: GDP growth and unemployment change summary
 table84_vars = ['rgdpgrowth', 'uratechange']
@@ -14609,10 +15659,12 @@ display(summary_gdp_tbl[['mean', 'std', 'min', 'max']])
 print("\nKey observations:")
 print(f"  - Average GDP growth: {data_gdp['rgdpgrowth'].mean():.2f}%")
 print(f"  - Average unemployment change: {data_gdp['uratechange'].mean():.3f} percentage points")
-print(f"  - Sample period includes major recessions (1982, 2008-2009, 2020)")
+print(f"  - Sample period includes major recessions (1982, 2008-2009)")
 ```
 
 ### Okun's Law Regression
+
+We estimate Okun's Law by regressing real GDP growth on the change in the unemployment rate. Compare the estimated slope in the output with Okun's benchmark of -2.0.
 
 ```python
 # Okun's law regression
@@ -14628,11 +15680,15 @@ print(f"R-squared: {r2_okun:.4f} ({r2_okun*100:.1f}% of variation explained)\n")
 
 # Full regression output
 model_okun.summary()
-slope_se_okun = model_okun.se()['uratechange']
-slope_t_okun = model_okun.tstat()[\1uratechange']
 ```
 
 ### Okun's Law with Robust Standard Errors
+
+```python
+# Okun's law regression (robust SE)
+model_okun_robust = pf.feols('rgdpgrowth ~ uratechange', data=data_gdp, vcov='HC1')
+model_okun_robust.summary()
+```
 
 ### Interpreting Okun's Law Results
 
@@ -14666,9 +15722,9 @@ Several factors could explain the difference:
    - These may have different dynamics than typical recessions
 
 **Testing β = -2.0:**
-The t-statistic of ~3.4 indicates we reject Okun's exact -2.0 at the 5% level. However:
+The t-statistic of ~2.4 indicates we reject Okun's exact -2.0 at the 5% level. However:
 
-- The 95% confidence interval likely includes values near -2.0
+- The 95% confidence interval, roughly [-1.94, -1.24], excludes -2.0 — consistent with the rejection — though its lower bound is not far from -2.0
 - The difference (-1.59 vs -2.0) is economically modest
 - For practical policy purposes, the relationship is "close enough" to Okun's law
 
@@ -14683,6 +15739,8 @@ R² = 0.59 means unemployment changes explain 59% of GDP growth variation:
 > Okun's Law as an empirical regularity. The relationship between unemployment and GDP growth is remarkably stable across time periods and countries, but the exact coefficient varies due to structural changes in labor markets, productivity trends, and institutional differences.
 
 ### Visualization: Okun's Law Scatter Plot
+
+In the scatter plot below, each point is one year of U.S. data and the fitted line traces Okun's Law. Look for the recession years far from the main cluster, where unemployment jumped and growth collapsed.
 
 ```python
 # Figure 8.4 Panel A - Okun's Law Scatter Plot
@@ -14714,8 +15772,8 @@ plt.show()
 2. **Clustering around the origin:** Most observations lie near the center, representing normal economic times with modest changes in both unemployment and GDP. This is typical of stable economic periods.
 
 3. **Outliers reveal recessions:** Points in the upper-left quadrant represent major recessions:
-   - **2009**: Unemployment rose ~4 percentage points, GDP fell ~2.5%
-   - **1982**: Unemployment rose ~2.5 points, GDP fell ~2%
+   - **2009**: Unemployment rose ~3.5 percentage points, GDP fell ~2.5%
+   - **1982**: Unemployment rose ~2.1 points, GDP fell ~1.8%
    - **2020**: (if included) would show extreme values from COVID-19 pandemic
    
 
@@ -14747,6 +15805,8 @@ More advanced time series methods could improve on this simple OLS regression.
 
 ### Visualization: Time Series of Actual vs Predicted GDP Growth
 
+Finally, we plot actual GDP growth alongside the values predicted from unemployment changes alone. Watch how closely the two lines track each other before 2008 — and how they diverge afterward.
+
 ```python
 # Figure 8.4 Panel B - Time Series of Actual vs Predicted GDP Growth
 fig, ax = plt.subplots(figsize=(12, 6))
@@ -14765,7 +15825,7 @@ plt.tight_layout()
 plt.show()
 
 # Major recessions visible: 1982, 1991, 2001, 2008-2009
-# Note: Post-2008 recovery shows actual GDP exceeding predictions.
+# Note: After 2010 actual GDP growth falls below Okun's Law predictions (unemployment fell faster than GDP grew).
 ```
 
 ### Analyzing the Time Series of Actual vs. Predicted GDP Growth
@@ -14773,18 +15833,18 @@ plt.show()
 **What This Graph Reveals:**
 
 1. **Model tracks major recessions well:**
-   - The predicted line (blue dashed) captures the timing and direction of major downturns
+   - The predicted line (dashed) captures the timing and direction of major downturns
    - 1982, 1991, 2001, 2008-2009 recessions are all identified by the model
    - This validates Okun's Law as a useful empirical relationship
 
 2. **Systematic prediction errors in the 2010s:**
-   - After 2009, actual GDP growth (black line) consistently exceeds predicted growth
-   - The "jobless recovery" phenomenon: GDP grew faster than unemployment changes suggested
+   - After 2010, actual GDP growth (cyan line) consistently falls *below* the growth predicted from unemployment changes (9 of the 10 years from 2010 to 2019)
+   - Unemployment fell faster than the modest GDP growth would imply, so Okun's Law over-predicts growth in this period
    - Possible explanations:
-     - Productivity improvements allowed growth without proportional job creation
-     - Labor force participation decline masked true employment picture
-     - Structural changes in labor markets post-financial crisis
-     - Shift toward automation and less labor-intensive growth
+     - Declining labor force participation: the falling unemployment rate overstated the true improvement in the labor market
+     - Weak productivity growth — employment rose but output per worker stagnated
+     - Structural changes in labor markets after the financial crisis
+     - A slower, less capital-intensive recovery than in past cycles
 
 3. **Pre-2008 fit is excellent:**
    - Before the financial crisis, actual and predicted values track each other closely
@@ -14798,9 +15858,9 @@ plt.show()
 
 **Economic Insights:**
 
-- **2008-2009 Crisis:** The model slightly under-predicts the severity of the GDP collapse, suggesting the financial crisis had effects beyond typical unemployment-growth dynamics
+- **2008-2009 Crisis:** The model slightly over-predicts the severity of the 2009 GDP collapse — actual growth (about -2.5%) was marginally better than the -2.6% the unemployment spike implied, so the crisis fits the historical relationship reasonably well
 
-- **Recovery paradox:** The weak predicted recovery (2010-2015) contrasts with actual decent GDP growth. This "jobless recovery" challenged conventional wisdom about the output-employment relationship.
+- **Recovery paradox:** As unemployment fell steadily after 2010, Okun's Law predicted a strong recovery (roughly 4% growth), yet actual GDP growth was more modest (about 2 to 2.5%). Employment recovered faster than output, challenging conventional wisdom about the output-employment relationship.
 
 - **Policy relevance:** Central banks and fiscal authorities use Okun's Law for forecasting, but this graph shows the relationship isn't immutable - structural changes can alter the coefficients over time.
 
@@ -14821,8 +15881,8 @@ This type of time series plot is more informative than just reporting R² becaus
 **Case Study Applications:**
 
 - Health spending and life expectancy: +$1,000 spending → +1.11 years life expectancy
-- Health spending and infant mortality: +$1,000 spending → -0.48 infant deaths per 1,000 births
-- GDP and health spending: +$1,000 GDP → +$90 health expenditures (elasticity ≈ 1.0)
+- Health spending and infant mortality: +$1,000 spending → -0.69 infant deaths per 1,000 births
+- GDP and health spending: +$1,000 GDP → +$90 health expenditures (elasticity ≈ 0.9)
 - CAPM beta for Coca-Cola: 0.61 (defensive stock, less risky than market)
 - Okun's Law: +1 percentage point unemployment → -1.59 percentage points GDP growth
 
@@ -14864,7 +15924,7 @@ This type of time series plot is more informative than just reporting R² becaus
 **Data Types Covered:**
 
 - Cross-sectional: OECD health data (34 countries)
-- Financial time series: Monthly stock returns (1983-2013)
+- Financial time series: Monthly stock returns (1983-2012)
 - Macroeconomic time series: Annual GDP and unemployment (1961-2019)
 - Multi-domain applications: Health, finance, macroeconomics
 
@@ -14928,7 +15988,7 @@ mean_hlth = data_health['hlthpc'].mean()
 elasticity = (slope_gdp * mean_gdp) / mean_hlth
 
 print(f"Health spending on GDP: slope = {slope_gdp:.4f}, R² = {r2_gdp:.4f}")
-print(f"Income elasticity at the mean: {elasticity:.2f} (≈1.0 → normal good)")
+print(f"Income elasticity at the mean: {elasticity:.2f} (near 1 → normal good)")
 
 # =============================================================================
 # STEP 5: Outlier robustness — excluding USA and Luxembourg
@@ -15019,11 +16079,12 @@ plt.show()
 - **Chapter 11:** Statistical inference for multiple regression (F-tests, multicollinearity)
 
 **You have now mastered:**
-✓ Real-world regression applications across economics domains
-✓ Robust inference for heteroskedastic data
-✓ Testing specific economic hypotheses
-✓ Outlier detection and influence assessment
-✓ Economic interpretation of regression coefficients
+
+- ✓ Real-world regression applications across economics domains
+- ✓ Robust inference for heteroskedastic data
+- ✓ Testing specific economic hypotheses
+- ✓ Outlier detection and influence assessment
+- ✓ Economic interpretation of regression coefficients
 
 Congratulations! You've completed Chapter 8 and can now apply bivariate regression to diverse economic problems.
 
@@ -15040,7 +16101,7 @@ Test your understanding of bivariate regression case studies:
 **Exercise 1: Health Outcomes Interpretation**
 
 - (a) If a country increases health spending from $2,500 to $4,000 per capita, what is the predicted change in life expectancy? Show your calculation.
-- (b) The U.S. spends $7,960 per capita but has lower life expectancy than predicted. Suggest three possible explanations beyond the model.
+- (b) The U.S. spends $7,990 per capita but has lower life expectancy than predicted. Suggest three possible explanations beyond the model.
 - (c) Why do we use heteroskedasticity-robust standard errors for cross-country health data?
 
 **Exercise 2: Outlier Impact Assessment**
@@ -15051,7 +16112,7 @@ Test your understanding of bivariate regression case studies:
 
 **Exercise 3: CAPM Beta Interpretation**
 
-- (a) Walmart has beta = 0.45, Target has beta = 1.25. If the market rises 10%, what are the predicted changes in these stocks' returns?
+- (a) Suppose Walmart has beta = 0.45 and Target has beta = 1.25. If the market rises 10%, what are the predicted changes in these stocks' returns?
 - (b) Why might consumer staple stocks (Coca-Cola, Walmart) have low betas?
 - (c) An investor wants high returns and is willing to accept high risk. Should they choose stocks with beta > 1 or beta < 1? Explain.
 
@@ -15115,7 +16176,7 @@ This notebook teaches you how to use natural logarithms in regression analysis t
 [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/quarcs-lab/metricsai/blob/main/notebooks_colab/ch09_Models_with_Natural_Logarithms.ipynb)
 <div class="chapter-resources">
 <a href="https://www.youtube.com/watch?v=rPy6m8_Wg4c" target="_blank" class="resource-btn">🎬 AI Video</a>
-<a href="https://carlos-mendez.my.canva.site/s09-models-with-natural-logarithms-pdf" target="_blank" class="resource-btn">✨ AI Slides</a>
+<a href="https://quarcs-lab.github.io/metricsai/slides/ch09/index.html" target="_blank" class="resource-btn">🧑🏽‍🏫 Mendez Slides</a>
 <a href="https://cameron.econ.ucdavis.edu/aed/traedv1_09" target="_blank" class="resource-btn">📊 Cameron Slides</a>
 <a href="https://app.edcafe.ai/quizzes/697867a22f5d08069e04a411" target="_blank" class="resource-btn">✏️ Quiz</a>
 <a href="https://app.edcafe.ai/chatbots/6978a07f2f5d08069e0713c6" target="_blank" class="resource-btn">🤖 AI Tutor</a>
@@ -15159,6 +16220,85 @@ Economists care about **proportionate changes** more than absolute changes:
 - Key Takeaways
 - Practice Exercises
 - Case Studies
+
+## Key Concepts
+
+Five core ideas anchor this chapter. Skim them before you start, and come back when a term feels fuzzy. Each entry pairs a concrete example using the chapter's data with a non-technical analogy. Click a panel to expand it.
+
+**Natural Logarithm ($\ln$):** The inverse of the exponential function $e^x$, satisfying $\ln(ab) = \ln(a) + \ln(b)$ and $\ln(a^k) = k \ln(a)$. Two properties make it the workhorse of econometrics: small log-differences approximate proportionate changes ($\Delta \ln(x) \approx \Delta x / x$), and exponential time paths become straight lines after a log transformation.
+
+::::: {.columns}
+:::: {.column width="50%"}
+::: {.callout-tip collapse="true" appearance="simple" title="Example"}
+For the 171 women in `data_earnings`, transforming `earnings` to `lnearn` lets the chapter regress $\ln(\text{earnings})$ on `education`. The slope of $0.131$ becomes "13.1% more earnings per extra year of education" — the very same data with a much sharper economic interpretation than dollars per year.
+:::
+::::
+:::: {.column width="50%"}
+::: {.callout-note collapse="true" appearance="simple" title="Analogy"}
+A currency converter takes prices from many countries and reports them in one common unit. The natural log does the same for *change*: it converts multiplicative differences (10× larger) into additive ones ($\ln(10) \approx 2.30$ extra units). Once the data are on a "log scale", percentage moves of any size are directly comparable in the same currency.
+:::
+::::
+:::::
+
+**Linear-Log Model:** A regression of the form $y = \beta_0 + \beta_1 \ln(x) + u$, where $y$ is in its original units but $x$ enters as a logarithm. The slope $\beta_1/100$ is the change in $y$ associated with a 1% increase in $x$, so this model captures *diminishing returns*: each percentage gain in $x$ adds the same dollar amount to $y$.
+
+::::: {.columns}
+:::: {.column width="50%"}
+::: {.callout-tip collapse="true" appearance="simple" title="Example"}
+The linear-log fit of `earnings` on `lneduc` for the 171 working women gives $\beta_1 \approx 54{,}433$, so $\beta_1/100 \approx 544$: a 1% increase in years of education is associated with about \$544 more in annual earnings. This specification has the lowest $R^2$ of the four functional forms ch09 considers, but is useful when economic theory predicts dollar effects from percentage changes.
+:::
+::::
+:::: {.column width="50%"}
+::: {.callout-note collapse="true" appearance="simple" title="Analogy"}
+A staircase whose risers shrink with every step — the first stair lifts you a foot, the next 9 inches, then 6, then 4. The linear-log model is shaped just like that: in dollars, every 1% of extra schooling lifts earnings by the same amount, but because each 1% requires a *larger* absolute jump in years, the upward dollar gain shrinks per added year.
+:::
+::::
+:::::
+
+**Diminishing Returns:** The economic phenomenon in which each additional unit of an input produces a smaller increment in the outcome. Log transformations capture this directly: $\ln(x)$ rises quickly at small $x$ and slowly at large $x$, so $\beta_1 \ln(x)$ in a linear-log model — or a log-log model with $\beta_1 < 1$ — bends the fitted curve into the classic "diminishing-returns" shape.
+
+::::: {.columns}
+:::: {.column width="50%"}
+::: {.callout-tip collapse="true" appearance="simple" title="Example"}
+The earnings–education comparison in ch09 shows it concretely: in the linear model, every extra year of `education` is associated with a constant \$5{,}021 — implausible at the high end. The log-log fit, with elasticity $\approx 1.48$, implies the percentage return to an extra year of schooling ($100 \times 1.48/\text{education}$) falls from roughly 12% at 12 years of education to 8% at 18 years, matching the chapter's intuition that "each extra year of school still helps, but a bit less than the previous year."
+:::
+::::
+:::: {.column width="50%"}
+::: {.callout-note collapse="true" appearance="simple" title="Analogy"}
+The first slice of cake is sublime; the second is good; by the fifth, you are starting to feel ill. The marginal pleasure of each slice is positive but shrinking — diminishing returns to cake. Logarithmic specifications encode this same idea into a regression: more is still better, but each additional unit contributes a little less than the last.
+:::
+::::
+:::::
+
+**Compound Growth Rate:** The constant rate $r$ at which a series multiplies itself each period: $x_t = x_0 (1+r)^t$. Taking natural logs linearises this into $\ln(x_t) \approx \ln(x_0) + r \cdot t$, so an OLS regression of $\ln(x_t)$ on $t$ recovers $r$ as the slope.
+
+::::: {.columns}
+:::: {.column width="50%"}
+::: {.callout-tip collapse="true" appearance="simple" title="Example"}
+For the 93 annual observations on the S&P 500 (`data_sp500`, 1927–2019), the regression of `lnsp500` on `year` gives a slope of $0.065$ — i.e. the S&P 500 has compounded at roughly $6.5\%$ per year over the 1927–2019 period. Every year, on average, the index multiplied itself by $1.065$.
+:::
+::::
+:::: {.column width="50%"}
+::: {.callout-note collapse="true" appearance="simple" title="Analogy"}
+A savings account with monthly interest doesn't add the same dollar amount each month — it adds a fixed *percentage* of whatever is currently in the account. So the balance accelerates: \$1{,}000 grows to \$1{,}050, then \$1{,}102, then \$1{,}158. The compound growth rate is the steady percentage gear that quietly drives this acceleration.
+:::
+::::
+:::::
+
+**Right-Skewed Distribution:** A distribution with a long tail of large values — a few extreme observations sit far above the bulk of the data. Earnings, prices, firm sizes, and city populations are textbook examples; modelling them in levels squashes most of the action into a small range, while taking logs spreads the data out evenly and stabilises variance.
+
+::::: {.columns}
+:::: {.column width="50%"}
+::: {.callout-tip collapse="true" appearance="simple" title="Example"}
+The 171 women in `data_earnings` have a mean of \$41{,}412.69 but a maximum of \$172{,}000 and a minimum of \$1{,}050 — a classic right-skewed picture (skewness $\approx 1.71$ from ch02). After applying the natural log to give `lnearn`, the long upper tail is pulled in, the distribution looks roughly bell-shaped, and OLS on `lnearn` produces tighter, more interpretable inference.
+:::
+::::
+:::: {.column width="50%"}
+::: {.callout-note collapse="true" appearance="simple" title="Analogy"}
+A neighbourhood of houses where most cost \$200k–\$400k but a single waterfront mansion lists at \$15M. On a linear price chart that mansion stretches the axis off the page; on a *log* chart all houses fit comfortably side by side, and one can see relative differences without one outlier dominating the picture.
+:::
+::::
+:::::
 
 ## Setup
 
@@ -15250,7 +16390,7 @@ log_table = pd.DataFrame({
     'ln(x)': ln_values,
     'exp(ln(x))': np.exp(ln_values)
 })
-log_table.to_string(index=False)
+print(log_table.to_string(index=False))
 
 # KEY PROPERTIES DEMONSTRATED
 print(f"1. ln(1) = {np.log(1):.4f}")
@@ -15312,15 +16452,12 @@ $$\text{Elasticity} \approx \frac{\Delta \ln(y)}{\Delta \ln(x)}$$
 
 **This is why we use logarithms in regression!** The slope coefficient directly estimates the semi-elasticity or elasticity.
 
-```python
-# MODEL INTERPRETATIONS
-# 1. Linear: y = β₀ + β₁x → Δy = β₁Δx
-# 2. Log-linear: ln(y) = β₀ + β₁x → %Δy ≈ 100β₁Δx (semi-elasticity)
-# 3. Log-log: ln(y) = β₀ + β₁ln(x) → %Δy ≈ β₁%Δx (elasticity)
-# 4. Linear-log: y = β₀ + β₁ln(x) → Δy ≈ (β₁/100)%Δx
+**The four model interpretations at a glance:**
 
-# KEY TAKEAWAY
-```
+1. **Linear:** y = β₀ + β₁x → Δy = β₁Δx
+2. **Log-linear:** ln(y) = β₀ + β₁x → %Δy ≈ 100β₁Δx (semi-elasticity)
+3. **Log-log:** ln(y) = β₀ + β₁ln(x) → %Δy ≈ β₁%Δx (elasticity)
+4. **Linear-log:** y = β₀ + β₁ln(x) → Δy ≈ (β₁/100)%Δx
 
 > **Key Concept 9.2: Semi-Elasticity vs. Elasticity**
 >
@@ -15330,10 +16467,12 @@ $$\text{Elasticity} \approx \frac{\Delta \ln(y)}{\Delta \ln(x)}$$
 > - **Elasticity** = (Δy/y) / (Δx/x) — proportionate change in y per **proportionate** change in x
 >
 > **In regression models:**
+>
 > - Semi-elasticity ≈ Δln(y)/Δx → estimated by the slope in a **log-linear** model
 > - Elasticity ≈ Δln(y)/Δln(x) → estimated by the slope in a **log-log** model
 >
 > **When to use each:**
+>
 > - **Semi-elasticity:** When x is measured in natural units (years of education, age)
 > - **Elasticity:** When both variables are measured in proportions (price and quantity, GDP and investment)
 
@@ -15360,11 +16499,13 @@ Each model answers a slightly different question and has different economic inte
 data_earnings = pd.read_stata(GITHUB_DATA_URL + 'AED_EARNINGS.DTA')
 
 # DATA SUMMARY: EARNINGS AND EDUCATION
-data_earnings[['earnings', 'education']].describe()
+print(data_earnings[['earnings', 'education']].describe())
 
 print("\nFirst 5 observations:")
 data_earnings[['earnings', 'education']].head()
 ```
+
+The summary statistics show a right-skewed earnings distribution: the mean (about \$41,413) sits well above the median (\$36,000), with a maximum of \$172,000. The next cell creates log-transformed versions of both variables — watch how the log scale pulls in that long upper tail.
 
 ```python
 # Create log-transformed variables
@@ -15432,6 +16573,10 @@ print(f"Note: percentage interpretation scales automatically — applies whether
 model_loglin.summary()
 ```
 
+The headline estimate is meaningful in both senses: economically, each additional year of education is associated with about 13.1% higher earnings; statistically, the coefficient's t-statistic of 9.21 (p < 0.001) makes the association highly significant, so it is very unlikely to reflect sampling variation alone.
+
+*Note on standard errors:* Following AED's convention before Chapter 12, the regression output in this chapter reports classical (iid) standard errors; Section 12.2 introduces heteroskedasticity-robust standard errors, which are preferred in practice.
+
 > **Key Concept 9.3: Interpreting Log-Linear Model Coefficients**
 >
 > In the **log-linear model** ln(y) = β₀ + β₁x, the slope coefficient β₁ is the **semi-elasticity** of y with respect to x:
@@ -15440,7 +16585,7 @@ model_loglin.summary()
 >
 > This is the most common specification in labor economics because a percentage interpretation **scales automatically** — a 13% return to education applies equally whether you earn \$30,000 or \$100,000.
 >
-> **Important:** The exact percentage change for large β₁ is 100 × (e^β₁ - 1), not 100 × β₁. The approximation works well when β₁ < 0.10.
+> **Important:** The exact percentage change for large β₁ is 100 × (e^β₁ - 1), not 100 × β₁. The approximation works well when |β₁| < 0.10. Here the estimate β₁ ≈ 0.131 slightly exceeds that threshold: the exact effect is 100 × (e^0.131 - 1) ≈ 14.0%, a bit above the 13.1% approximation.
 
 ### Model 3: Log-Log Model
 
@@ -15448,7 +16593,7 @@ model_loglin.summary()
 
 **Interpretation:** β₁ = **elasticity** = percentage change in earnings for a 1% change in education
 
-**Note:** A "1% increase in education" is a bit artificial (what does 0.14 more years mean?), but this model captures diminishing returns to education.
+**Note:** A "1% increase in education" is a bit artificial (what does 0.14 more years mean?), but this model lets the percentage return to an additional year of education (100β₁/education) decline as education rises.
 
 ```python
 # Model 3: Log-log
@@ -15509,6 +16654,8 @@ model_linlog.summary()
 
 ### Comparison of All Four Models
 
+The table below collects the slope estimate, its economic interpretation, and R² from all four specifications so you can compare them side by side — look for which model fits best and how differently each slope must be read.
+
 ```python
 # Create comparison table
 # MODEL COMPARISON SUMMARY
@@ -15536,12 +16683,12 @@ comparison_df = pd.DataFrame({
     ]
 })
 
-comparison_df.to_string(index=False)
+print(comparison_df.to_string(index=False))
 
 # WHICH MODEL IS BEST?
-# For this data
-print(f"  - Best fit (highest R²): Log-linear (R² = {model_loglin._r2:.3f})")
-print(f"  Best fit (highest R²): Log-linear (R² = {model_loglin._r2:.3f})")
+# R² is comparable only across models with the same dependent variable
+print(f"  - Among ln(earnings) models: Log-linear fits best (R² = {model_loglin._r2:.3f} vs. Log-log {model_loglog._r2:.3f})")
+print(f"  - Among earnings-level models: Linear fits best (R² = {model_linear._r2:.3f} vs. Linear-log {model_linlog._r2:.3f})")
 ```
 
 > **Key Concept 9.5: Choosing the Right Functional Form**
@@ -15550,12 +16697,14 @@ print(f"  Best fit (highest R²): Log-linear (R² = {model_loglin._r2:.3f})")
 >
 > 1. **Economic theory** — Does the theory predict absolute or percentage effects?
 > 2. **Data properties** — Is the dependent variable right-skewed? Are both variables positive?
-> 3. **Model fit** — Which specification yields the highest R²?
+> 3. **Model fit** — Which specification yields the highest R²? (Compare R² only across models with the same dependent variable.)
 > 4. **Interpretation needs** — Do you need elasticities, semi-elasticities, or dollar amounts?
 >
 > **In practice:** The **log-linear model** is most common in economics because many economic relationships involve percentage changes (returns to education, inflation effects, price responses). When in doubt, start with log-linear.
 
 ### Visualizing All Four Models
+
+The 2×2 grid below plots each specification with its fitted line on the appropriate axes — note how the log transformations straighten the curvature that the linear model misses.
 
 ```python
 # Create 2x2 comparison plot
@@ -15604,7 +16753,7 @@ axes[1, 1].plot(data_earnings['lneduc'], model_linlog.predict(),
                 color='#c084fc', linewidth=2, label=f'R² = {model_linlog._r2:.3f}')
 axes[1, 1].set_xlabel('ln(Education)', fontsize=11)
 axes[1, 1].set_ylabel('Earnings ($)', fontsize=11)
-axes[1, 1].set_title('Model 4: Linear-log\ny = β₀ + β₁ln(x)\nSlope: $545 per 1% change',
+axes[1, 1].set_title('Model 4: Linear-log\ny = β₀ + β₁ln(x)\nSlope: $544 per 1% change',
                      fontsize=12, fontweight='bold')
 axes[1, 1].legend()
 axes[1, 1].grid(True, alpha=0.3)
@@ -15619,7 +16768,7 @@ plt.show()
 **What to look for across the four panels:**
 
 - **Model 1 (linear)**: Straight line fit, but residuals may be heteroskedastic
-- **Model 2 (log-linear)**: Best fit, captures curvature in original data
+- **Model 2 (log-linear)**: Best fit among the ln(earnings) models, captures curvature in original data
 - **Model 3 (log-log)**: Both axes logged, captures elasticity
 - **Model 4 (linear-log)**: Captures diminishing returns to education
 
@@ -15653,13 +16802,15 @@ The slope β₁ directly estimates the growth rate r.
 data_sp500 = pd.read_stata(GITHUB_DATA_URL + 'AED_SP500INDEX.DTA')
 
 # S&P 500 INDEX DATA (1927-2019)
-data_sp500[['year', 'sp500', 'lnsp500']].describe()
+print(data_sp500[['year', 'sp500', 'lnsp500']].describe())
 
 print("\nFirst and last years:")
-data_sp500[['year', 'sp500', 'lnsp500']].head(3)
+print(data_sp500[['year', 'sp500', 'lnsp500']].head(3))
 print("...")
 print(data_sp500[['year', 'sp500', 'lnsp500']].tail(3))
 ```
+
+Now we regress ln(sp500) on year — the slope directly estimates the average annual growth rate of the index, and the Rule of 72 converts it into a doubling time.
 
 ```python
 # Estimate exponential growth model
@@ -15693,12 +16844,14 @@ model_sp500.summary()
 
 ### Visualizing Exponential Growth
 
+The two panels below show the same S&P 500 series twice: as an exponential curve in levels (left) and as a near-straight line after taking logs (right) — visual proof that the log transformation linearizes compound growth.
+
 ```python
 # Create visualization showing exponential vs linear in logs
 fig, axes = plt.subplots(1, 2, figsize=(16, 6))
 
 # Panel A: Exponential growth in levels
-# Apply retransformation bias correction (Duan's smearing estimate)
+# Apply retransformation bias correction (normal-errors adjustment: multiply by exp(MSE/2))
 n = len(data_sp500)
 k = 2  # number of parameters: intercept + slope
 MSE = np.sum(model_sp500._u_hat**2) / (n - k)
@@ -15749,6 +16902,7 @@ plt.show()
 > where r is the **percentage** growth rate. This approximation derives from the logarithmic identity: ln(2) ≈ 0.693, combined with ln(1+r) ≈ r for small r.
 >
 > **Examples:**
+>
 > - S&P 500 at 6.5% growth → doubles every 72/6.5 ≈ 11 years
 > - GDP at 3% growth → doubles every 72/3 = 24 years
 > - Population at 1% growth → doubles every 72/1 = 72 years
@@ -15756,8 +16910,6 @@ plt.show()
 > **Practical value:** The Rule of 72 converts growth rates into an intuitive time horizon without needing a calculator.
 
 ## Key Takeaways
-
-**Key Takeaways:**
 
 1. **Natural logarithms** let us work with **proportionate changes** instead of absolute changes.
    - Key approximation: Δln(x) ≈ Δx/x (proportionate change)
@@ -15774,15 +16926,15 @@ plt.show()
 | **Linear-log** | y = β₀ + β₁ln(x) | Δy/(Δx/x) |
 
 3. **Model selection** depends on economic theory, data properties, and interpretation needs:
-   - R² comparison (higher is better, but not the only criterion)
+   - R² comparison (higher is better, but only comparable across models with the same dependent variable — and not the only criterion)
    - Economic theory should guide functional form choice
    - Log-linear is most common in applied economics (earnings, prices)
 
 4. **Earnings-Education results** illustrate the four specifications:
-   - **Linear:** Each year of education → \$5,021 more earnings
-   - **Log-linear:** Each year of education → 13.1% more earnings (best fit, R² = 0.334)
-   - **Log-log:** 1% more education → 1.48% more earnings (elasticity)
-   - **Linear-log:** 1% more education → \$545 more earnings
+   - **Linear:** Each year of education is associated with \$5,021 more earnings
+   - **Log-linear:** Each year of education is associated with 13.1% more earnings (best fit among ln(y) models, R² = 0.334)
+   - **Log-log:** 1% more education is associated with 1.48% more earnings (elasticity)
+   - **Linear-log:** 1% more education is associated with \$544 more earnings
 
 5. **Exponential growth** becomes **linear in logs:**
    - If x grows exponentially: x_t = x₀(1+r)^t
@@ -15872,7 +17024,7 @@ model_loglin.summary()
 # =============================================================================
 # The comparison shows that model choice affects both R² and interpretation
 models = {
-    'Linear':     ('earnings ~ education',  model_linear,  'education', '${:,.0f} per year'),
+    'Linear':     ('y ~ x',                 model_linear,  'education', '${:,.0f} per year'),
     'Log-linear': ('ln(y) ~ x',            model_loglin,  'education', '{:.1f}% per year'),
     'Log-log':    ('ln(y) ~ ln(x)',         model_loglog,  'lneduc',   '{:.2f}% per 1%'),
     'Linear-log': ('y ~ ln(x)',            model_linlog,  'lneduc',   '${:,.0f} per 1%'),
@@ -15882,13 +17034,15 @@ print(f"{'Model':<12} {'Specification':<16} {'Slope':>10} {'R²':>8}  Interpreta
 print("-" * 75)
 for name, (spec, m, var, fmt) in models.items():
     slope = m.coef()[var]
-    interp = fmt.format(100*slope if 'per year' in fmt and 'Log' in name else slope/100 if 'per 1%' in fmt and name == 'Linear-log' else slope)
+    # Scale the slope to match each model's interpretation
+    scaled = 100*slope if name == 'Log-linear' else slope/100 if name == 'Linear-log' else slope
+    interp = fmt.format(scaled)
     print(f"{name:<12} {spec:<16} {slope:>10.4f} {m._r2:>8.3f}  {interp}")
 
 # =============================================================================
 # STEP 6: Scatter plot with the log-linear fitted line
 # =============================================================================
-# The log-linear model (semi-elasticity) provides the best fit for earnings data
+# The log-linear model (semi-elasticity) fits best among the ln(earnings) models
 fig, ax = plt.subplots(figsize=(10, 6))
 ax.scatter(data_earnings['education'], data_earnings['lnearn'], s=50, alpha=0.7)
 ax.plot(data_earnings['education'], model_loglin.predict(),
@@ -15950,9 +17104,9 @@ plt.show()
 
 > **Common Mistakes to Avoid**
 >
-> - **Misinterpreting log-level coefficients**: A one-unit change in X leads to a (b x 100)% change in Y, not b units
+> - **Misinterpreting log-linear coefficients**: A one-unit change in X leads to approximately a (b x 100)% change in Y, not a change of b units
 > - **Forgetting that log(0) is undefined**: Log transformations require strictly positive values
-> - **Confusing log-log and log-level elasticities**: The interpretation depends on which variables are logged
+> - **Confusing elasticities with semi-elasticities**: The log-log slope is an elasticity (% change in Y per 1% change in X); the log-linear slope is a semi-elasticity (% change in Y per one-unit change in X)
 
 ## Practice Exercises
 
@@ -16025,8 +17179,8 @@ We'll use the **Mendez Convergence Clubs dataset** containing:
 - **country**: Country name (108 countries)
 - **year**: Year of observation (1990-2014)
 - **lp**: Labor productivity (output per worker, in dollars)
-- **rk**: Capital per worker (physical capital stock, in thousands of dollars)
-- **hc**: Human capital index (based on years of schooling and returns to education)
+- **kl**: Capital per worker (physical capital stock, in dollars)
+- **h**: Human capital index (based on years of schooling and returns to education)
 
 ```python
 # Load the Convergence Clubs dataset
@@ -16083,11 +17237,11 @@ data_2014['ln_lp'] = np.log(_____)
 # Summary statistics: levels vs logs
 # LABOR PRODUCTIVITY: LEVELS VS. LOGS
 print("\nIn levels (lp):")
-data_2014['lp'].describe()
+print(data_2014['lp'].describe())
 print(f"\nSkewness: {data_2014['lp'].skew():.3f}")
 
 print("\nIn logarithms (ln_lp):")
-data_2014['ln_lp'].describe()
+print(data_2014['ln_lp'].describe())
 print(f"\nSkewness: {data_2014['_____'].skew():.3f}")
 
 # Ratio of highest to lowest
@@ -16100,11 +17254,12 @@ print(f"\nMax/Min ratio: {data_2014['lp'].max() / data_2014['lp'].min():.1f}x")
 
 **Connection:** Section 9.2 (Semi-Elasticities)
 
-**Your task:** Estimate ln(lp) = β₀ + β₁ × hc and interpret the coefficient as a semi-elasticity.
+**Your task:** Estimate ln(lp) = β₀ + β₁ × h and interpret the coefficient as a semi-elasticity.
 
 a) What is the estimated semi-elasticity of productivity with respect to human capital?
 b) By what percentage does productivity increase for each additional unit of the human capital index?
 c) Is the coefficient statistically significant at the 5% level?
+d) The estimated semi-elasticity here (≈ 1.18) is far larger than the |β₁| < 0.10 range where 100 × β₁ is a good approximation. Compute the exact percentage effect with 100 × (e^β₁ - 1) and compare it to the 100 × β₁ approximation — why do the two diverge so much here?
 
 ```python
 # Task 2: Log-Linear Model for Productivity (Guided)
@@ -16130,7 +17285,7 @@ print(f"\nR² = {model_hc._r2:.3f}")
 
 **Your tasks:**
 
-a) Estimate four models: linear (lp ~ rk), log-linear (ln_lp ~ rk), log-log (ln_lp ~ ln_rk), and linear-log (lp ~ ln_rk)
+a) Estimate four models: linear (lp ~ kl), log-linear (ln_lp ~ kl), log-log (ln_lp ~ ln_kl), and linear-log (lp ~ ln_kl)
 b) Create a comparison table showing the specification, slope coefficient, interpretation, and R² for each model
 c) Which model provides the best fit? Which provides the most economically meaningful interpretation?
 d) Why might the log-log specification be particularly appropriate for the productivity-capital relationship?
@@ -16140,7 +17295,7 @@ d) Why might the log-log specification be particularly appropriate for the produ
 # Create log-transformed variables
 data_2014['ln_kl'] = np.log(data_2014['kl'])
 
-# Estimate four models (fill in the formulas)
+# Estimate the four models
 m1_linear  = pf.feols('lp ~ kl', data=data_2014)
 m2_loglin  = pf.feols('ln_lp ~ kl', data=data_2014)
 m3_loglog  = pf.feols('ln_lp ~ ln_kl', data=data_2014)
@@ -16172,7 +17327,7 @@ m4_linlog  = pf.feols('lp ~ ln_kl', data=data_2014)
 
 **Your tasks:**
 
-a) Estimate the log-log model: ln(lp) = β₀ + β₁ × ln(rk). Report β₁ and R².
+a) Estimate the log-log model: ln(lp) = β₀ + β₁ × ln(kl). Report β₁ and R².
 b) Interpret β₁ as an elasticity. Is there evidence of diminishing returns to capital (β₁ < 1)?
 c) Construct a 95% confidence interval for the elasticity. Does it include 1?
 d) In growth theory, the output elasticity of capital is often assumed to be about 1/3. Test H₀: β₁ = 0.33 against H₁: β₁ ≠ 0.33.
@@ -16185,8 +17340,8 @@ d) In growth theory, the output elasticity of capital is often assumed to be abo
 m3_loglog.summary()
 
 # Elasticity and confidence interval
-elasticity = m3_loglog.coef()['ln_rk']
-ci = m3_loglog.confint().loc['ln_rk']
+elasticity = m3_loglog.coef()['ln_kl']
+ci = m3_loglog.confint().loc['ln_kl']
 print(f"\nElasticity: {elasticity:.4f}")
 print(f"95% CI: [{ci.iloc[0]:.4f}, {ci.iloc[1]:.4f}]")
 
@@ -16246,7 +17401,7 @@ Write a 200-300 word summary analyzing cross-country labor productivity using lo
 >
 > **The bottom line:** Without logarithmic transformations, cross-country analysis would be dominated by a few rich outliers and miss the economic relationships that matter for development policy.
 
-### What You've Learned from This Case Study
+#### What You've Learned from This Case Study
 
 **Congratulations!** You've applied logarithmic model specifications to real cross-country economic data.
 
@@ -16261,7 +17416,7 @@ Write a 200-300 word summary analyzing cross-country labor productivity using lo
 **Economic Insights:**
 
 - Cross-country productivity distributions are highly right-skewed, requiring log transformations
-- Human capital and physical capital both contribute to productivity, but with diminishing returns
+- Human capital and physical capital are both strongly associated with higher productivity; for physical capital the estimated elasticity is below 1, indicating diminishing returns
 - Log-log models connect directly to production function theory in economics
 - Growth rates vary substantially across countries and regions
 
@@ -16286,7 +17441,7 @@ This notebook provides an interactive introduction to multiple regression analys
 [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/quarcs-lab/metricsai/blob/main/notebooks_colab/ch10_Data_Summary_for_Multiple_Regression.ipynb)
 <div class="chapter-resources">
 <a href="https://www.youtube.com/watch?v=9398KshS_JA" target="_blank" class="resource-btn">🎬 AI Video</a>
-<a href="https://carlos-mendez.my.canva.site/s10-data-summary-for-multiple-regression-pdf" target="_blank" class="resource-btn">✨ AI Slides</a>
+<a href="https://quarcs-lab.github.io/metricsai/slides/ch10/index.html" target="_blank" class="resource-btn">🧑🏽‍🏫 Mendez Slides</a>
 <a href="https://cameron.econ.ucdavis.edu/aed/traedv1_10" target="_blank" class="resource-btn">📊 Cameron Slides</a>
 <a href="https://app.edcafe.ai/quizzes/697868212f5d08069e04add5" target="_blank" class="resource-btn">✏️ Quiz</a>
 <a href="https://app.edcafe.ai/chatbots/6978a0fd2f5d08069e0715f8" target="_blank" class="resource-btn">🤖 AI Tutor</a>
@@ -16297,18 +17452,16 @@ This notebook provides an interactive introduction to multiple regression analys
 
 This chapter extends bivariate regression to the more realistic case where we want to predict an outcome using **multiple explanatory variables** simultaneously. Multiple regression allows us to estimate the partial effect of each variable while controlling for others—a crucial feature for empirical economic analysis.
 
-**Learning Objectives:**
+**What you'll learn:**
 
-By the end of this chapter, you will be able to:
-
-1. Extend bivariate regression concepts to multiple regression with several regressors
-2. Interpret pairwise correlations and use them for exploratory data analysis
-3. Understand the ordinary least squares (OLS) method for multiple regression
-4. Interpret partial effects: how one regressor affects $y$ while holding others constant
-5. Distinguish between partial effects and total effects
-6. Evaluate model fit using R-squared and adjusted R-squared
-7. Understand information criteria (AIC, BIC) for model selection
-8. Recognize when regression coefficients cannot be estimated (perfect collinearity)
+- Extend bivariate regression concepts to multiple regression with several regressors
+- Interpret pairwise correlations and use them for exploratory data analysis
+- Understand the ordinary least squares (OLS) method for multiple regression
+- Interpret partial effects: how one regressor affects $y$ while holding others constant
+- Distinguish between partial effects and total effects
+- Evaluate model fit using R-squared and adjusted R-squared
+- Understand information criteria (AIC, BIC) for model selection
+- Recognize when regression coefficients cannot be estimated (perfect collinearity)
 
 **Dataset used:**
 
@@ -16319,11 +17472,11 @@ What is the effect of house size on price **after controlling** for other charac
 
 **Chapter outline:**
 
-- 10.1 Example: House Price and Characteristics
+- 10.1 Example - House Price and Characteristics
 - 10.2 Two-Way Scatterplots
 - 10.3 Correlation Analysis
 - 10.4 Multiple Regression Estimation
-- 10.5 Partial Effects — The FWL Theorem
+- 10.5 Partial Effects - The FWL Theorem
 - 10.6 Model Fit Statistics
 - 10.7 Model Comparison
 - 10.8 Inestimable Models and Multicollinearity
@@ -16331,6 +17484,100 @@ What is the effect of house size on price **after controlling** for other charac
 - Practice Exercises
 - Case Studies
 
+
+## Key Concepts
+
+Six core ideas anchor this chapter. Skim them before you start, and come back when a term feels fuzzy. Each entry pairs a concrete example using the chapter's data with a non-technical analogy. Click a panel to expand it.
+
+**Multiple Regression Model:** A regression with two or more explanatory variables, $\hat{y} = b_1 + b_2 x_2 + b_3 x_3 + \cdots + b_k x_k$. Unlike bivariate regression, each slope $b_j$ is a *partial* coefficient — it isolates the effect of $x_j$ on $y$ while statistically holding the other regressors fixed.
+
+::::: {.columns}
+:::: {.column width="50%"}
+::: {.callout-tip collapse="true" appearance="simple" title="Example"}
+For the 29 Davis houses, the chapter fits $\widehat{\text{price}} = b_1 + b_2 \cdot \text{size} + b_3 \cdot \text{bedrooms} + b_4 \cdot \text{bathrooms} + b_5 \cdot \text{lotsize} + b_6 \cdot \text{age} + b_7 \cdot \text{monthsold}$. The estimated `size` coefficient is \$68.37/sq ft (down from \$73.77 in the bivariate version) — a partial effect that excludes the influence of bedrooms, bathrooms, and the rest.
+:::
+::::
+:::: {.column width="50%"}
+::: {.callout-note collapse="true" appearance="simple" title="Analogy"}
+An orchestra plays a chord: the cello, viola, and violin all sound at once. Bivariate regression listens to one instrument as if it were the whole sound. Multiple regression is a sound engineer's *isolation track* — turning each instrument up against a backdrop of the others, so you hear what that one instrument adds on its own.
+:::
+::::
+:::::
+
+**Pairwise Correlation Matrix:** A square table whose $(i, j)$ entry is the correlation $r_{x_i x_j}$ between two columns of the dataset. It is the standard exploratory tool before fitting multiple regression — strong off-diagonal correlations signal candidate predictors *and* warn of likely multicollinearity.
+
+::::: {.columns}
+:::: {.column width="50%"}
+::: {.callout-tip collapse="true" appearance="simple" title="Example"}
+The chapter's correlation matrix on the Davis houses shows $r(\text{price}, \text{size}) = 0.79$ (the strongest predictor) and $r(\text{price}, \text{bedrooms}) = 0.43$. It also flags $r(\text{size}, \text{bedrooms}) = 0.52$ — a moderate inter-regressor correlation that explains why the bedrooms coefficient drops from \$23{,}667 in the bivariate fit to just \$1{,}553 once size is in the model.
+:::
+::::
+:::: {.column width="50%"}
+::: {.callout-note collapse="true" appearance="simple" title="Analogy"}
+A wedding seating chart records, for every pair of guests, how well they get along. A pairwise correlation matrix is the same idea applied to data columns: for every pair of variables, one number summarising how often they "show up together". Strong pairs sit close; weak pairs go to opposite ends of the room.
+:::
+::::
+:::::
+
+**Control Variable:** A regressor included in the model not because it is the main quantity of interest but to prevent its omission from biasing the focal coefficient. By adding the control, the regression isolates the partial effect of the focal variable while "holding the control fixed".
+
+::::: {.columns}
+:::: {.column width="50%"}
+::: {.callout-tip collapse="true" appearance="simple" title="Example"}
+In the Davis house regression, `bedrooms` looks like a strong predictor of `price` on its own (\$23{,}667 per bedroom). Once `size` is added as a control variable, the bedrooms coefficient collapses to \$1{,}553 — most of the apparent bedrooms effect was really houses with more bedrooms being bigger. `size` here is a textbook control: not the "treatment" of interest but essential for an honest estimate of bedrooms.
+:::
+::::
+:::: {.column width="50%"}
+::: {.callout-note collapse="true" appearance="simple" title="Analogy"}
+A laboratory experiment on plant growth holds *temperature* constant in every sample so the researcher can isolate the effect of fertiliser. Temperature is the lab's control variable — not the thing being studied, but the thing being kept fixed so the rest of the comparison is fair. In regression, control variables play the same role with statistical instead of physical fixing.
+:::
+::::
+:::::
+
+**Confounder:** A variable that influences both the focal regressor and the outcome, creating an indirect channel through which the focal regressor *appears* to affect $y$ even when it does not. Including the confounder as a control variable typically shrinks (or flips) the focal coefficient toward its true partial effect.
+
+::::: {.columns}
+:::: {.column width="50%"}
+::: {.callout-tip collapse="true" appearance="simple" title="Example"}
+For the Davis houses, `size` is a confounder of the bedrooms–price relationship: bigger houses tend to have more bedrooms *and* fetch higher prices. That is why omitting `size` made bedrooms look like a \$23{,}667-per-room driver, while including it brought the partial effect down to \$1{,}553 — most of the original bedrooms coefficient was really `size` showing up in disguise.
+:::
+::::
+:::: {.column width="50%"}
+::: {.callout-note collapse="true" appearance="simple" title="Analogy"}
+Across cities, ice-cream sales and drowning deaths are tightly correlated — but ice cream isn't drowning anyone. Summer is the confounder: it raises both sales and water-park traffic. Failing to control for the season makes ice cream look like a killer; controlling for it reveals the spurious link, just as `size` reveals bedrooms' inflated coefficient.
+:::
+::::
+:::::
+
+**Adjusted $R^2$:** A version of $R^2$ that penalises for the number of regressors: $\bar{R}^2 = 1 - \frac{\text{RSS}/(n-k)}{\text{TSS}/(n-1)}$. Adding a useless variable always raises plain $R^2$ but typically lowers $\bar{R}^2$ — making it the better fit metric when comparing models of different sizes.
+
+::::: {.columns}
+:::: {.column width="50%"}
+::: {.callout-tip collapse="true" appearance="simple" title="Example"}
+For the Davis houses, the simple regression on `size` alone gives $R^2 = 0.617$ and $\bar{R}^2 = 0.603$. The full model with all six regressors raises $R^2$ to $0.651$ — but $\bar{R}^2$ actually *falls* to $0.555$. Plain $R^2$ rewards extra variables; adjusted $R^2$ recognises that the extras barely earned their keep on only $n = 29$ observations.
+:::
+::::
+:::: {.column width="50%"}
+::: {.callout-note collapse="true" appearance="simple" title="Analogy"}
+A football league lets teams sign extra players, but charges a salary-cap penalty for each one. A team with twenty players might score slightly more goals (raw $R^2$ rises), yet still finish the season worse off after paying the penalty (adjusted $R^2$ falls). Adjusted $R^2$ is the league's way of asking, "did those extra signings *really* help?"
+:::
+::::
+:::::
+
+**Perfect Collinearity:** The situation where one regressor is an exact linear combination of others (e.g., `size_twice = 2 × size`). When this happens, the OLS normal equations have no unique solution — software either drops a regressor automatically or returns an error.
+
+::::: {.columns}
+:::: {.column width="50%"}
+::: {.callout-tip collapse="true" appearance="simple" title="Example"}
+The chapter constructs `size_twice = 2 × size` and tries to estimate `price ~ size + size_twice + bedrooms`. Because `size_twice` adds *no* new information beyond `size`, the regression is inestimable: the software silently drops one of the two collinear variables and reports the rest. In contrast, the actual six predictors in the Davis dataset show only moderate VIFs, so all six can be estimated jointly.
+:::
+::::
+:::: {.column width="50%"}
+::: {.callout-note collapse="true" appearance="simple" title="Analogy"}
+Identical twins walk into a tailor's shop wanting matching suits. The tailor has one set of measurements but two customers — there is no way to assign a "different" credit-card to each twin from the dataset alone, because the two are indistinguishable. Perfect collinearity is OLS facing identical twins among its regressors: distinct names, identical information.
+:::
+::::
+:::::
 
 ## Setup
 
@@ -16374,7 +17621,7 @@ plt.rcParams.update({
 print("Setup complete! Ready to analyze house price data.")
 ```
 
-## 10.1: Example - House Price and Characteristics
+## 10.1 Example - House Price and Characteristics
 
 We begin with a real estate dataset from Davis, California. Understanding house prices is a classic economic application because prices reflect both fundamental characteristics (size, bedrooms) and market conditions.
 
@@ -16390,18 +17637,22 @@ We begin with a real estate dataset from Davis, California. Understanding house 
 
 **Economic motivation:** A simple regression of price on bedrooms might find a positive relationship, but is this because bedrooms directly add value, or because houses with more bedrooms tend to be larger? Multiple regression helps us disentangle these effects.
 
+The code below loads the dataset from GitHub and displays the first ten observations together with summary statistics. Check each variable's scale and range — price is in dollars, size in square feet — before we start modeling.
+
 ```python
 # Load house price data
 data_house = pd.read_stata(GITHUB_DATA_URL + 'AED_HOUSE.DTA')
 
 # Display first few observations
 print("First 10 observations:")
-data_house[['price', 'size', 'bedrooms', 'bathrooms', 'lotsize', 'age', 'monthsold']].head(10)
+print(data_house[['price', 'size', 'bedrooms', 'bathrooms', 'lotsize', 'age', 'monthsold']].head(10))
 
 # Display data summary
 print("\nSummary statistics:")
 data_house.describe()
 ```
+
+**Interpreting the summary statistics:** The 29 Davis houses sold for an average of about \$253,910 (ranging from \$204,000 to \$375,000) and average about 1,883 square feet, with 3.8 bedrooms and 2.2 bathrooms; the typical house is about 36 years old. Keep this small sample size in mind — with only 29 observations, coefficients on six regressors will be imprecisely estimated.
 
 ### Bivariate vs. Multiple Regression
 
@@ -16438,9 +17689,9 @@ print(f"Change: ${model_multiple.coef()['bedrooms'] - model_bivariate.coef()['be
 
 > **Key Concept 10.1: Partial Effects vs. Total Effects in Multiple Regression**
 >
-> In bivariate regression, the bedrooms coefficient (\$23,667) captures both the direct effect of bedrooms and the indirect effect through correlation with size. In multiple regression, the bedrooms coefficient drops to \$1,553 — the **partial effect** holding size constant. This dramatic change illustrates why controlling for confounders is essential for isolating individual variable effects.
+> In bivariate regression, the bedrooms coefficient (\$23,667) captures both the direct effect of bedrooms and the indirect effect through correlation with size. In multiple regression, the bedrooms coefficient drops to \$1,553 — the **partial effect** holding size constant — and is no longer statistically significant ($t = 0.20$, $p = 0.85$). This dramatic change illustrates why controlling for confounders is essential for isolating individual variable effects.
 
-## 10.2: Two-Way Scatterplots
+## 10.2 Two-Way Scatterplots
 
 Before running multiple regression, it's useful to visualize pairwise relationships between variables. A **scatterplot matrix** shows all two-way scatterplots simultaneously.
 
@@ -16470,7 +17721,7 @@ print("Notice: Price shows strongest relationship with Size.")
 >
 > Pairwise scatterplot matrices display all two-way relationships simultaneously, revealing linear associations, nonlinearities, clusters, and outliers before formal modeling. They also highlight potential multicollinearity: if two regressors are tightly correlated (e.g., size and bedrooms), their individual effects may be hard to separate in a regression.
 
-## 10.3: Correlation Analysis
+## 10.3 Correlation Analysis
 
 The **correlation coefficient** measures the strength of linear association between two variables, ranging from -1 (perfect negative) to +1 (perfect positive).
 
@@ -16488,7 +17739,7 @@ corr_vars = ['price', 'size', 'bedrooms', 'bathrooms', 'lotsize', 'age', 'months
 corr_matrix = data_house[corr_vars].corr()
 
 print("Correlation Matrix:")
-corr_matrix
+print(corr_matrix.round(3))
 
 # Visualize correlation matrix as heatmap
 fig, ax = plt.subplots(figsize=(10, 8))
@@ -16504,9 +17755,9 @@ print(f"Size-Bedrooms correlation: {corr_matrix.loc['size', 'bedrooms']:.3f}")
 
 > **Key Concept 10.3: Correlation vs. Causation in Multivariate Analysis**
 >
-> High bivariate correlation (e.g., bedrooms-price, $r = 0.43$) may diminish or vanish after controlling for confounders. In our data, bedrooms correlate with price largely because bigger houses have more bedrooms. Multiple regression isolates each variable's partial contribution, revealing that size — not bedrooms — drives most of the price variation.
+> High bivariate correlation (e.g., bedrooms-price, $r = 0.43$) may diminish or vanish after controlling for confounders. In our data, bedrooms correlate with price largely because bigger houses have more bedrooms. Multiple regression isolates each variable's partial contribution, revealing that size — not bedrooms — accounts for most of the price variation.
 
-## 10.4: Multiple Regression Estimation
+## 10.4 Multiple Regression Estimation
 
 Now we estimate the **full multiple regression model** with all available predictors. The regression equation is:
 
@@ -16544,8 +17795,9 @@ Each regression coefficient represents a **partial effect**: the expected change
 
 - Coefficient ≈ \$68.37 per square foot
 - Interpretation: A one square foot increase in house size is associated with a \$68.37 increase in price, holding bedrooms, bathrooms, lot size, age, and month sold constant.
+- Significance: This effect is statistically significant ($t = 4.44$, $p < 0.001$) — size is the only regressor whose 95% confidence interval excludes zero.
 
-The 95% confidence interval tells us the range of plausible values for each coefficient.
+The 95% confidence interval tells us the range of plausible values for each coefficient. Throughout this chapter we report classical (homoskedasticity-assuming) standard errors, as AED does before Chapter 12; Chapter 12 introduces heteroskedasticity-robust standard errors, which are preferred in practice.
 
 ```python
 # Display coefficients with 95% confidence intervals
@@ -16565,11 +17817,13 @@ coef_table
 # Size is the only statistically significant predictor (p < 0.05)
 ```
 
+**Interpreting the table:** Size is the only statistically significant predictor (t = 4.44, p < 0.001), with a 95% confidence interval of roughly \$36 to \$100 per square foot. Every other coefficient has a confidence interval that comfortably includes zero — once size is controlled for, bedrooms, bathrooms, lot size, age, and month sold add little explanatory power in this small sample.
+
 > **Key Concept 10.4: Interpreting Partial Effects in Multiple Regression**
 >
 > Each coefficient $b_j$ measures the expected change in $y$ when $x_j$ increases by one unit, **holding all other regressors constant**. For example, a size coefficient of \$68.37 means each additional square foot is associated with a \$68.37 price increase, controlling for bedrooms, bathrooms, lot size, age, and month sold. Statistical significance is assessed through confidence intervals and $t$-tests.
 
-## 10.5: Partial Effects - The FWL Theorem
+## 10.5 Partial Effects - The FWL Theorem
 
 The **Frisch-Waugh-Lovell (FWL) Theorem** states that the coefficient on any variable in multiple regression equals the coefficient from a bivariate regression of $y$ on the **residualized** version of that variable.
 
@@ -16602,7 +17856,7 @@ print(f"Difference (numerical precision):                 {abs(model_full.coef()
 >
 > The partial effect of $x_j$ in a multiple regression equals the slope from a bivariate regression of $y$ on $\widetilde{x}_j$, where $\widetilde{x}_j$ is the residual from regressing $x_j$ on all other regressors. Intuitively, $\widetilde{x}_j$ captures the variation in $x_j$ that is independent of the other variables — this is exactly what multiple regression uses to estimate partial effects.
 
-## 10.6: Model Fit Statistics
+## 10.6 Model Fit Statistics
 
 Several statistics summarize how well the regression model fits the data:
 
@@ -16611,7 +17865,7 @@ Several statistics summarize how well the regression model fits the data:
 - Fraction of variation in $y$ explained by the regressors
 - Formula: $R^2 = \frac{\text{Explained SS}}{\text{Total SS}} = 1 - \frac{\text{Residual SS}}{\text{Total SS}}$
 - Range: 0 to 1 (higher is better fit)
-- **Problem:** Always increases when adding variables (even irrelevant ones)
+- **Problem:** Never decreases when adding variables (even irrelevant ones)
 
 **Adjusted R-squared ($\bar{R}^2$):**
 
@@ -16625,6 +17879,7 @@ Several statistics summarize how well the regression model fits the data:
 - Typical size of prediction error
 - Formula: $s_e = \sqrt{\frac{1}{n-k}\sum (y_i - \widehat{y}_i)^2}$
 - Same units as $y$ (dollars in our case)
+- Note: the `RMSE` printed in pyfixest summaries divides by $n$ rather than $n-k$, so it is slightly smaller than $s_e$
 
 ```python
 # Calculate and display model fit statistics
@@ -16650,12 +17905,16 @@ print(f"  R² from model:                {model_full._r2:.6f}")
 print(f"  Match: {np.isclose(corr_y_yhat**2, model_full._r2)}")
 ```
 
+**Interpreting the fit statistics:** The six regressors explain about 65% of the variation in price, but the adjusted $R^2$ of 0.555 reveals that much of that gain is a mechanical reward for adding variables. The Root MSE of roughly \$24,936 is the typical prediction error — sizable relative to an average price of about \$253,910. The verification confirms that $R^2$ equals the squared correlation between actual and fitted prices.
+
 ### Information Criteria (AIC and BIC)
 
 **Akaike Information Criterion (AIC)** and **Bayesian Information Criterion (BIC)** are more sophisticated measures that penalize model complexity:
 
 $$\text{AIC} = n \times \ln(\widehat{\sigma}_e^2) + n(1 + \ln 2\pi) + 2k$$
 $$\text{BIC} = n \times \ln(\widehat{\sigma}_e^2) + n(1 + \ln 2\pi) + k \times \ln(n)$$
+
+where $\widehat{\sigma}_e^2 = \text{RSS}/n$ (note the divisor is $n$, not the $n-k$ used for $s_e$).
 
 **Key points:**
 
@@ -16680,9 +17939,9 @@ print(f"BIC (Stata convention):        {bic_stata:.4f}")
 
 > **Key Concept 10.6: Model Selection with Adjusted R-squared vs. Information Criteria**
 >
-> Adjusted $R^2$ penalizes complexity mildly by dividing sums of squares by degrees of freedom. Information criteria (AIC, BIC) impose stronger penalties: BIC = $n \ln(\hat{\sigma}_e^2) + k \ln(n)$. Smaller AIC/BIC values indicate better models. BIC is generally preferred because its penalty grows with sample size, favoring more parsimonious specifications.
+> Adjusted $R^2$ penalizes complexity mildly by dividing sums of squares by degrees of freedom. Information criteria (AIC, BIC) impose stronger penalties: BIC = $n \ln(\hat{\sigma}_e^2) + k \ln(n)$ (omitting a constant that does not affect model comparisons). Smaller AIC/BIC values indicate better models. BIC is generally preferred because its penalty grows with sample size, favoring more parsimonious specifications.
 
-## 10.7: Model Comparison
+## 10.7 Model Comparison
 
 It's often useful to compare multiple model specifications side-by-side. Here we compare:
 
@@ -16701,6 +17960,20 @@ It's often useful to compare multiple model specifications side-by-side. Here we
 # Estimate simple model (size only)
 model_simple = pf.feols('price ~ size', data=data_house)
 
+# Information criteria (Stata convention). pyfixest's Feols has no ._aic/._bic,
+# so compute them from each model's residual sum of squares.
+def stata_ic(model):
+    n_obs = int(model._N)
+    n_par = len(model.coef())
+    rss_m = np.sum(model._u_hat ** 2)
+    const = n_obs * (1 + np.log(2 * np.pi))
+    aic = n_obs * np.log(rss_m / n_obs) + const + 2 * n_par
+    bic = n_obs * np.log(rss_m / n_obs) + const + n_par * np.log(n_obs)
+    return aic, bic
+
+aic_simple, bic_simple = stata_ic(model_simple)
+aic_full, bic_full = stata_ic(model_full)
+
 # Create comparison table
 # MODEL COMPARISON: Simple vs. Full
 
@@ -16708,12 +17981,12 @@ comparison_stats = pd.DataFrame({
     'Model': ['Simple (size only)', 'Full (all variables)'],
     'R²': [model_simple._r2, model_full._r2],
     'Adj R²': [model_simple._adj_r2, model_full._adj_r2],
-    'AIC': [model_simple._aic if hasattr(model_simple, "_aic") else float("nan"), model_full._aic if hasattr(model_full, "_aic") else float("nan")],
-    'BIC': [model_simple._bic if hasattr(model_simple, "_bic") else float("nan"), model_full._bic if hasattr(model_full, "_bic") else float("nan")],
+    'AIC': [aic_simple, aic_full],
+    'BIC': [bic_simple, bic_full],
     'N': [n, n]
 })
 
-comparison_stats.to_string(index=False)
+print(comparison_stats.to_string(index=False))
 
 print(f"R² increases from {model_simple._r2:.3f} to {model_full._r2:.3f}")
 print(f"Adj R² decreases from {model_simple._adj_r2:.3f} to {model_full._adj_r2:.3f}")
@@ -16721,9 +17994,9 @@ print(f"Adj R² decreases from {model_simple._adj_r2:.3f} to {model_full._adj_r2
 
 > **Key Concept 10.7: The Parsimony Principle**
 >
-> Simpler models are preferred unless additional variables meaningfully improve fit. In our house price example, adding five variables beyond size barely increased $R^2$ (0.618 $\to$ 0.651) while adjusted $R^2$ actually fell (0.603 $\to$ 0.555). Check adjusted $R^2$, AIC, and BIC — if they don't improve, the simpler model is preferred.
+> Simpler models are preferred unless additional variables meaningfully improve fit. In our house price example, adding five variables beyond size barely increased $R^2$ (0.617 $\to$ 0.651) while adjusted $R^2$ actually fell (0.603 $\to$ 0.555). Check adjusted $R^2$, AIC, and BIC — if they don't improve, the simpler model is preferred.
 
-## 10.8: Inestimable Models and Multicollinearity
+## 10.8 Inestimable Models and Multicollinearity
 
 **Perfect multicollinearity** occurs when one regressor is an exact linear combination of others. In this case, OLS cannot estimate all coefficients (the model is "inestimable").
 
@@ -16760,6 +18033,8 @@ except Exception as e:
     print(f"Message: {str(e)}")
 ```
 
+**Interpreting the output:** pyfixest warns that `size_twice` was dropped due to multicollinearity — it carries no information beyond `size` itself. Notice that the remaining estimates are identical to the earlier `price ~ bedrooms + size` regression: dropping the redundant regressor restores an estimable model without changing anything else.
+
 ### Variance Inflation Factors (VIF)
 
 Now let's calculate VIF for each variable in our full model to check for multicollinearity problems.
@@ -16768,13 +18043,14 @@ Now let's calculate VIF for each variable in our full model to check for multico
 # Calculate VIF for each variable in the full model
 from statsmodels.stats.outliers_influence import variance_inflation_factor
 
-X = data_house[['size', 'bedrooms', 'bathrooms', 'lotsize', 'age', 'monthsold']]
+X = data_house[['size', 'bedrooms', 'bathrooms', 'lotsize', 'age', 'monthsold']].copy()
+X.insert(0, 'const', 1.0)  # VIF requires the intercept column in the design matrix
 vif_data = pd.DataFrame()
-vif_data["Variable"] = X.columns
-vif_data["VIF"] = [variance_inflation_factor(X.values, i) for i in range(X.shape[1])]
+vif_data["Variable"] = X.columns[1:]
+vif_data["VIF"] = [variance_inflation_factor(X.values, i) for i in range(1, X.shape[1])]
 
 # VARIANCE INFLATION FACTORS (VIF)
-vif_data.to_string(index=False)
+print(vif_data.to_string(index=False))
 
 
 max_vif = vif_data['VIF'].max()
@@ -16801,8 +18077,8 @@ ax.scatter(data_house['price'], model_full.predict(), alpha=0.6, s=50, color='#2
 ax.plot([data_house['price'].min(), data_house['price'].max()],
         [data_house['price'].min(), data_house['price'].max()],
         'r--', linewidth=2, label='Perfect prediction (45° line)')
-ax.set_xlabel('Actual Price ($1000s)', fontsize=12)
-ax.set_ylabel('Predicted Price ($1000s)', fontsize=12)
+ax.set_xlabel('Actual Price ($)', fontsize=12)
+ax.set_ylabel('Predicted Price ($)', fontsize=12)
 ax.set_title('Actual vs Predicted House Prices', fontsize=14, fontweight='bold')
 ax.legend()
 ax.grid(True, alpha=0.3)
@@ -16831,8 +18107,8 @@ A **residual plot** (residuals vs. fitted values) helps diagnose model problems:
 fig, ax = plt.subplots(figsize=(10, 6))
 ax.scatter(model_full.predict(), model_full._u_hat, alpha=0.6, s=50, color='#22d3ee')  # alpha = transparency, s = marker size
 ax.axhline(y=0, color='red', linestyle='--', linewidth=2, label='Zero residual line')
-ax.set_xlabel('Fitted values ($1000s)', fontsize=12)
-ax.set_ylabel('Residuals ($1000s)', fontsize=12)
+ax.set_xlabel('Fitted values ($)', fontsize=12)
+ax.set_ylabel('Residuals ($)', fontsize=12)
 ax.set_title('Residual Plot: Multiple Regression', fontsize=14, fontweight='bold')
 ax.legend()
 ax.grid(True, alpha=0.3)
@@ -16861,7 +18137,7 @@ A **coefficient plot** displays estimated coefficients with their 95% confidence
 fig, ax = plt.subplots(figsize=(10, 8))
 
 # Exclude intercept for better visualization
-params_no_int = model_full.params[1:]
+params_no_int = model_full.coef()[1:]
 ci_no_int = conf_int.iloc[1:, :]
 
 y_pos = np.arange(len(params_no_int))
@@ -16886,7 +18162,7 @@ print("Coefficients whose CI crosses zero are not statistically significant.")
 **What to look for in this coefficient plot:**
 
 - **Zero crossing**: Coefficients whose error bars cross the red dashed line are not statistically significant at 5%
-- **Relative magnitude**: Size has the largest positive effect; other variables cluster near zero
+- **Relative magnitude**: Raw coefficients are not comparable across variables with different units — the size coefficient (\$68 per square foot) sits nearest zero on this scale, while per-unit coefficients like bathrooms look larger; yet size is the only effect estimated precisely enough for its interval to exclude zero
 - **Precision**: Narrow error bars indicate more precisely estimated coefficients
 
 ## Key Takeaways
@@ -16915,7 +18191,7 @@ print("Coefficients whose CI crosses zero are not statistically significant.")
 - $R^2$ measures the fraction of variation in $y$ explained by all regressors (0 to 1)
 - Adjusted $R^2$ penalizes model complexity: can decrease when adding weak regressors
 - Standard error of regression $s_e$ measures typical prediction error in units of $y$
-- Example: Adding 5 regressors increased $R^2$ from 0.618 to 0.651 but decreased $\bar{R}^2$ from 0.603 to 0.555
+- Example: Adding 5 regressors increased $R^2$ from 0.617 to 0.651 but decreased $\bar{R}^2$ from 0.603 to 0.555
 
 **Information Criteria:**
 
@@ -16925,7 +18201,7 @@ print("Coefficients whose CI crosses zero are not statistically significant.")
 
 **Multicollinearity:**
 
-- Perfect collinearity makes some coefficients inestimable (computer shows "omitted")
+- Perfect collinearity makes some coefficients inestimable (the software drops one of the collinear variables, as pyfixest did with `size_twice`)
 - VIF detects multicollinearity: VIF > 10 indicates problematic, VIF > 5 moderate concern
 - High multicollinearity inflates standard errors and makes estimates unstable
 
@@ -17023,12 +18299,20 @@ print(f"Coef from FWL residual regression:  {model_fwl.coef()['resid_size']:.10f
 # Compare simple (size only) vs. full model using fit statistics
 model_simple = pf.feols('price ~ size', data=data_house)
 
+# pyfixest has no ._aic/._bic; compute them (Stata convention) from each model's RSS
+def stata_ic(model):
+    n_obs, n_par = int(model._N), len(model.coef())
+    rss_m = np.sum(model._u_hat ** 2)
+    const = n_obs * (1 + np.log(2 * np.pi))
+    return (n_obs * np.log(rss_m / n_obs) + const + 2 * n_par,
+            n_obs * np.log(rss_m / n_obs) + const + n_par * np.log(n_obs))
+
 comparison = pd.DataFrame({
     'Model': ['Size only', 'Full (all variables)'],
     'R²':     [model_simple._r2,     model_full._r2],
     'Adj R²': [model_simple._adj_r2, model_full._adj_r2],
-    'AIC':    [model_simple._aic if hasattr(model_simple, "_aic") else float("nan"),          model_full._aic if hasattr(model_full, "_aic") else float("nan")],
-    'BIC':    [model_simple._bic if hasattr(model_simple, "_bic") else float("nan"),          model_full._bic if hasattr(model_full, "_bic") else float("nan")],
+    'AIC':    [stata_ic(model_simple)[0], stata_ic(model_full)[0]],
+    'BIC':    [stata_ic(model_simple)[1], stata_ic(model_full)[1]],
 })
 print(comparison.to_string(index=False))
 # Adj R² DECREASES when adding 5 weak predictors — parsimony wins
@@ -17038,10 +18322,11 @@ print(comparison.to_string(index=False))
 # =============================================================================
 # VIF_j = 1 / (1 - R²_j), where R²_j is from regressing x_j on all other x's
 # VIF > 5: moderate concern; VIF > 10: severe multicollinearity
-X = data_house[['size', 'bedrooms', 'bathrooms', 'lotsize', 'age', 'monthsold']]
+X = data_house[['size', 'bedrooms', 'bathrooms', 'lotsize', 'age', 'monthsold']].copy()
+X.insert(0, 'const', 1.0)  # VIF requires the intercept column in the design matrix
 vif_data = pd.DataFrame({
-    'Variable': X.columns,
-    'VIF': [variance_inflation_factor(X.values, i) for i in range(X.shape[1])]
+    'Variable': X.columns[1:],
+    'VIF': [variance_inflation_factor(X.values, i) for i in range(1, X.shape[1])]
 })
 print(vif_data.to_string(index=False))
 
@@ -17078,7 +18363,12 @@ plt.show()
 
 **Python tools used:** `pyfixest` (feols), `statsmodels` (VIF), `seaborn` (pairplot, heatmap), `pandas` (DataFrames), `matplotlib` (coefficient plots, diagnostics)
 
-**Next steps:** Chapter 11 covers **statistical inference** for multiple regression — hypothesis tests, confidence intervals, and overall F-tests for model significance.
+**Next Steps:**
+
+- **Chapter 11**: Statistical inference for multiple regression — hypothesis tests, confidence intervals, and overall F-tests for model significance
+- **Chapter 12**: Further topics in multiple regression — robust standard errors and prediction intervals
+- **Chapter 13**: Case studies applying the multiple regression toolkit to real research questions
+- **Chapters 14-15**: Richer specifications — regression with indicator variables and with transformed variables
 
 Congratulations on completing Chapter 10! You now have the tools to estimate and evaluate multiple regression models, a foundation for the rest of the course.
 
@@ -17152,7 +18442,7 @@ c) What economic reasoning supports the simpler model in this case?
 
 **Exercise 5: Multicollinearity Detection**
 
-A multiple regression of house prices yields the following VIF values:
+Suppose a *hypothetical* house-price regression — one whose predictors overlap far more than the Davis houses used in this chapter (whose correctly centered VIFs are all below 2) — yields the following VIF values:
 
 | Variable | VIF |
 |----------|-----|
@@ -17190,9 +18480,9 @@ In this case study, you will apply multiple regression techniques to investigate
 - **Source:** Mendez (2020), 108 countries, 1990-2014
 - **Key variables:**
   - `lp` — Labor productivity (GDP per worker)
-  - `rk` — Physical capital per worker
-  - `hc` — Human capital index
-  - `rgdppc` — Real GDP per capita
+  - `kl` — Physical capital per worker
+  - `h` — Human capital index
+  - `GDPpc` — Real GDP per capita
   - `region` — Geographic region
 
 **Research question:** How do human capital and physical capital jointly explain cross-country productivity differences?
@@ -17201,7 +18491,7 @@ In this case study, you will apply multiple regression techniques to investigate
 # Load the Mendez convergence clubs dataset
 url = "https://raw.githubusercontent.com/quarcs-lab/mendez2020-convergence-clubs-code-data/master/assets/dat.csv"
 dat = pd.read_csv(url)
-dat_2014 = dat[dat['year'] == 2014].dropna(subset=['lp', 'rk', 'hc']).copy()
+dat_2014 = dat[dat['year'] == 2014].dropna(subset=['lp', 'kl', 'h']).copy()
 print(f"Cross-section sample: {len(dat_2014)} countries (year 2014)")
 dat_2014.head()
 ```
@@ -17213,13 +18503,13 @@ Explore the cross-country productivity dataset.
 ```python
 # Step 1: Create log-transformed variables
 dat_2014['ln_lp'] = np.log(dat_2014['lp'])
-dat_2014['ln_rk'] = np.log(dat_2014['rk'])
+dat_2014['ln_kl'] = np.log(dat_2014['kl'])
 
 # Step 2: Summary statistics for key variables
-print(dat_2014[['lp', 'rk', 'hc', 'ln_lp', 'ln_rk']].describe())
+print(dat_2014[['lp', 'kl', 'h', 'ln_lp', 'ln_kl']].describe())
 
 # Step 3: Create a scatterplot matrix
-sns.pairplot(dat_2014[['ln_lp', 'ln_rk', 'hc']], diag_kind='kde')
+sns.pairplot(dat_2014[['ln_lp', 'ln_kl', 'h']], diag_kind='kde')
 plt.suptitle('Scatterplot Matrix: Productivity Variables', y=1.02)
 plt.show()
 ```
@@ -17235,7 +18525,7 @@ Compute and visualize the correlation matrix.
 
 ```python
 # Step 1: Compute correlation matrix
-corr = dat_2014[['ln_lp', 'ln_rk', 'hc']].corr()
+corr = dat_2014[['ln_lp', 'ln_kl', 'h']].corr()
 print(corr)
 
 # Step 2: Visualize as heatmap
@@ -17247,33 +18537,33 @@ plt.show()
 **Questions:**
 
 - Which predictor is most strongly correlated with $\ln(\text{lp})$?
-- Are $\ln(\text{rk})$ and hc correlated with each other? What implications does this have for multiple regression?
+- Are $\ln(\text{kl})$ and h correlated with each other? What implications does this have for multiple regression?
 
 > **Key Concept 10.9: Functional Form and Cross-Country Comparisons**
 >
-> When comparing countries with vastly different income levels, logarithmic transformations are essential. Using $\ln(\text{lp})$ and $\ln(\text{rk})$ compresses the scale so that both Luxembourg and Malawi can be meaningfully compared. Coefficients on log-transformed variables have elasticity interpretations, while coefficients on level variables (like hc) represent semi-elasticities.
+> When comparing countries with vastly different income levels, logarithmic transformations are essential. Using $\ln(\text{lp})$ and $\ln(\text{kl})$ compresses the scale so that both Luxembourg and Malawi can be meaningfully compared. Coefficients on log-transformed variables have elasticity interpretations, while coefficients on level variables (like h) represent semi-elasticities.
 
 #### Task 3: Multiple Regression Estimation (Semi-guided)
 
 Estimate bivariate and multiple regression models for labor productivity.
 
 ```python
-# Model 1: ln(lp) ~ ln(rk) only
-model1 = pf.feols('ln_lp ~ ln_rk', data=dat_2014)
-print(model1.summary())
+# Model 1: ln(lp) ~ ln(kl) only
+model1 = pf.feols('ln_lp ~ ln_kl', data=dat_2014)
+model1.summary()
 
-# Model 2: ln(lp) ~ hc only
-model2 = pf.feols('ln_lp ~ hc', data=dat_2014)
-print(model2.summary())
+# Model 2: ln(lp) ~ h only
+model2 = pf.feols('ln_lp ~ h', data=dat_2014)
+model2.summary()
 
-# Model 3: ln(lp) ~ ln(rk) + hc (multiple regression)
-model3 = pf.feols('ln_lp ~ ln_rk + hc', data=dat_2014)
-print(model3.summary())
+# Model 3: ln(lp) ~ ln_kl + h (multiple regression)
+model3 = pf.feols('ln_lp ~ ln_kl + h', data=dat_2014)
+model3.summary()
 ```
 
 **Questions:**
 
-- How do the coefficients on $\ln(\text{rk})$ change between Model 1 and Model 3?
+- How do the coefficients on $\ln(\text{kl})$ change between Model 1 and Model 3?
 - Does adding human capital improve the model? Compare $R^2$ and adjusted $R^2$.
 
 #### Task 4: Interpret Partial Effects (Semi-guided)
@@ -17290,8 +18580,8 @@ print(model3.confint())
 
 **Questions:**
 
-- Interpret the coefficient on $\ln(\text{rk})$ in Model 3. What does it mean in economic terms?
-- Interpret the coefficient on hc. How does a one-unit increase in human capital relate to productivity?
+- Interpret the coefficient on $\ln(\text{kl})$ in Model 3. What does it mean in economic terms?
+- Interpret the coefficient on h. How does a one-unit increase in human capital relate to productivity?
 - Are both coefficients statistically significant? How do you know?
 
 #### Task 5: Model Selection (Independent)
@@ -17305,7 +18595,7 @@ Compare models using fit statistics and information criteria.
 3. Does the parsimony principle favor one model over another?
 4. Calculate VIF for Model 3 — is multicollinearity a concern?
 
-*Hint: Use `model._r2`, `model._adj_r2`, `model._aic if hasattr(model, "_aic") else float("nan")`, `model._bic if hasattr(model, "_bic") else float("nan")` and `variance_inflation_factor()` from statsmodels.*
+*Hint: Use `model._r2` and `model._adj_r2` for fit. pyfixest's `Feols` has no `._aic`/`._bic`, so compute them (Stata convention) from the residuals: AIC `= n*np.log(rss/n) + n*(1+np.log(2*np.pi)) + 2*k` and BIC `= ... + k*np.log(n)`, with `rss = np.sum(model._u_hat**2)`, `n = int(model._N)`, `k = len(model.coef())`. Use `variance_inflation_factor()` from statsmodels for VIF.*
 
 #### Task 6: Development Policy Brief (Independent)
 
@@ -17321,9 +18611,9 @@ Write a 200-300 word policy brief summarizing your findings.
 
 > **Key Concept 10.10: Multiple Regression in Development Economics**
 >
-> Cross-country productivity regressions are central to development economics. By controlling for both physical capital ($\ln(\text{rk})$) and human capital (hc), we can assess each factor's **partial contribution** to productivity. This addresses a key policy question: should developing countries invest in machines or education? Multiple regression helps disentangle these effects, though causal claims require careful identification strategies.
+> Cross-country productivity regressions are central to development economics. By controlling for both physical capital ($\ln(\text{kl})$) and human capital (h), we can assess each factor's **partial contribution** to productivity. This addresses a key policy question: should developing countries invest in machines or education? Multiple regression helps disentangle these effects, though causal claims require careful identification strategies.
 
-### What You've Learned
+#### What You've Learned
 
 In this case study, you applied the full multiple regression toolkit to cross-country productivity data:
 
@@ -17377,7 +18667,7 @@ print(f"Dataset shape: {bol_sat.shape[0]} municipalities, {bol_sat.shape[1]} var
 print(f"Departments: {bol['dep'].nunique()} unique departments")
 print(f"Complete cases: {bol_sat.dropna().shape[0]}")
 # FIRST 10 MUNICIPALITIES
-bol_sat.head(10).to_string(index=False)
+print(bol_sat.head(10).to_string(index=False))
 ```
 
 #### Task 1: Explore Variables (Guided)
@@ -17398,7 +18688,7 @@ bol_sat.head(10).to_string(index=False)
 #
 # Step 1: Summary statistics for all numeric variables
 # DESCRIPTIVE STATISTICS: DEVELOPMENT AND SATELLITE PREDICTORS
-bol_sat[['imds', 'ln_NTLpc2017', 'A00', 'A10', 'A20', 'A30', 'A40']].describe().round(3)
+print(bol_sat[['imds', 'ln_NTLpc2017', 'A00', 'A10', 'A20', 'A30', 'A40']].describe().round(3))
 
 # Step 2: Check for missing values
 # MISSING VALUES
@@ -17433,7 +18723,7 @@ corr_vars = ['imds', 'ln_NTLpc2017', 'A00', 'A10', 'A20', 'A30', 'A40']
 corr_sat = bol_sat[corr_vars].dropna().corr()
 
 # CORRELATION MATRIX: DEVELOPMENT AND SATELLITE PREDICTORS
-corr_sat.round(3)
+print(corr_sat.round(3))
 
 # Step 2: Visualize as heatmap
 fig, ax = plt.subplots(figsize=(10, 8))
@@ -17451,7 +18741,7 @@ for var, r in imds_corr.items():
     print(f"  {var:16s}  r = {r:+.3f}")
 ```
 
-> **Key Concept 10.12: High-Dimensional Satellite Features**
+> **Key Concept 10.11: High-Dimensional Satellite Features**
 >
 > Satellite embeddings are **64 abstract features** extracted by deep learning models (convolutional neural networks) from daytime satellite imagery. Unlike handcrafted variables (e.g., NDVI for vegetation), each embedding dimension captures complex visual patterns — road density, building structures, agricultural layouts — learned automatically from the data. These features are not directly interpretable (dimension A00 doesn't have a specific meaning), but they collectively encode rich information about a municipality's physical landscape.
 
@@ -17541,7 +18831,7 @@ print(f"Difference (numerical precision):                {abs(model_full_sat.coe
    - **Model 3**: `imds ~ ln_NTLpc2017 + A00 + A10 + A20 + A30 + A40` (NTL + 5 embeddings)
 
 2. Create a comparison table reporting $R^2$, adjusted $R^2$, AIC, and BIC for each model
-3. Use `model._r2`, `model._adj_r2`, `model._aic if hasattr(model, "_aic") else float("nan")`, `model._bic if hasattr(model, "_bic") else float("nan")`
+3. Compute fit statistics from `model._r2` and `model._adj_r2`; pyfixest has no `._aic`/`._bic`, so compute AIC/BIC from the residuals as `n*np.log(rss/n) + n*(1+np.log(2*np.pi)) + 2*k` and `... + k*np.log(n)` (with `rss = np.sum(model._u_hat**2)`, `n = int(model._N)`, `k = len(model.coef())`)
 4. Which model is "best" by each criterion?
 5. Does the parsimony principle favor fewer or more embedding variables?
 
@@ -17560,8 +18850,12 @@ print(f"Difference (numerical precision):                {abs(model_full_sat.coe
 #     'Model': ['NTL only', 'NTL + 2 embeddings', 'NTL + 5 embeddings'],
 #     'R²': [model_1._r2, model_2._r2, model_3._r2],
 #     'Adj R²': [model_1._adj_r2, model_2._adj_r2, model_3._adj_r2],
-#     'AIC': [model_1._aic if hasattr(model_1, "_aic") else float("nan"), model_2._aic if hasattr(model_2, "_aic") else float("nan"), model_3._aic if hasattr(model_3, "_aic") else float("nan")],
-#     'BIC': [model_1._bic if hasattr(model_1, "_bic") else float("nan"), model_2._bic if hasattr(model_2, "_bic") else float("nan"), model_3._bic if hasattr(model_3, "_bic") else float("nan")],
+#     # pyfixest has no ._aic/._bic; compute them (Stata convention) from each model's RSS:
+#     #   def stata_ic(m):
+#     #       n_m, k_m = int(m._N), len(m.coef()); rss_m = np.sum(m._u_hat**2); c = n_m*(1+np.log(2*np.pi))
+#     #       return (n_m*np.log(rss_m/n_m)+c+2*k_m, n_m*np.log(rss_m/n_m)+c+k_m*np.log(n_m))
+#     'AIC': [stata_ic(model_1)[0], stata_ic(model_2)[0], stata_ic(model_3)[0]],
+#     'BIC': [stata_ic(model_1)[1], stata_ic(model_2)[1], stata_ic(model_3)[1]],
 #     'N': [len(reg_data)] * 3
 # })
 # print(comparison.to_string(index=False))
@@ -17569,7 +18863,7 @@ print(f"Difference (numerical precision):                {abs(model_full_sat.coe
 # Step 3: Interpret — which model is preferred by each criterion?
 ```
 
-> **Key Concept 10.13: Incremental Predictive Power**
+> **Key Concept 10.12: Incremental Predictive Power**
 >
 > When adding predictors to a regression model, $R^2$ can only increase or stay the same — it never decreases. This makes $R^2$ misleading for model comparison when models have different numbers of predictors. **Adjusted $R^2$** penalizes for additional variables, while **AIC** and **BIC** balance fit against complexity. In the satellite prediction context, adding all 64 embeddings would maximize $R^2$ but might overfit; information criteria help identify the most parsimonious model.
 
@@ -17639,7 +18933,7 @@ This notebook provides an interactive introduction to extending inference to mod
 [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/quarcs-lab/metricsai/blob/main/notebooks_colab/ch11_Statistical_Inference_for_Multiple_Regression.ipynb)
 <div class="chapter-resources">
 <a href="https://www.youtube.com/watch?v=yvcSMmluY5Y" target="_blank" class="resource-btn">🎬 AI Video</a>
-<a href="https://carlos-mendez.my.canva.site/s11-statistical-inference-for-multiple-regression-pdf" target="_blank" class="resource-btn">✨ AI Slides</a>
+<a href="https://quarcs-lab.github.io/metricsai/slides/ch11/index.html" target="_blank" class="resource-btn">🧑🏽‍🏫 Mendez Slides</a>
 <a href="https://cameron.econ.ucdavis.edu/aed/traedv1_11" target="_blank" class="resource-btn">📊 Cameron Slides</a>
 <a href="https://app.edcafe.ai/quizzes/697868ad2f5d08069e04b748" target="_blank" class="resource-btn">✏️ Quiz</a>
 <a href="https://app.edcafe.ai/chatbots/6978a1572f5d08069e071814" target="_blank" class="resource-btn">🤖 AI Tutor</a>
@@ -17650,20 +18944,18 @@ This notebook provides an interactive introduction to extending inference to mod
 
 This chapter extends statistical inference to models with multiple regressors. You'll learn to construct confidence intervals, conduct hypothesis tests on individual and groups of parameters, and present regression results professionally.
 
-**Learning Objectives:**
+**What you'll learn:**
 
-By the end of this chapter, you will be able to:
-
-1. Extend statistical inference from bivariate regression to multiple regression with $k$ regressors
-2. Understand the $t$-statistic for individual coefficients following a $T(n-k)$ distribution
-3. Calculate and interpret standard errors for OLS slope coefficients: $se(b_j) = s_e / \sqrt{\sum \widetilde{x}_{ji}^2}$
-4. Construct confidence intervals using $b_j \pm t_{n-k, \alpha/2} \times se(b_j)$
-5. Conduct hypothesis tests on individual parameters to determine statistical significance
-6. Understand and apply F-tests for joint hypotheses involving multiple parameter restrictions
-7. Interpret the F distribution with two degrees of freedom ($v_1$ = restrictions, $v_2 = n-k$)
-8. Perform the test of overall statistical significance using $H_0: \beta_2 = \cdots = \beta_k = 0$
-9. Test whether subsets of regressors are jointly significant using nested model comparisons
-10. Present regression results in standard formats (standard errors, t-statistics, p-values, confidence intervals, asterisks)
+- Extend statistical inference from bivariate regression to multiple regression with $k$ regressors
+- Understand the $t$-statistic for individual coefficients following a $T(n-k)$ distribution
+- Calculate and interpret standard errors for OLS slope coefficients: $se(b_j) = s_e / \sqrt{\sum \widetilde{x}_{ji}^2}$
+- Construct confidence intervals using $b_j \pm t_{n-k, \alpha/2} \times se(b_j)$
+- Conduct hypothesis tests on individual parameters to determine statistical significance
+- Understand and apply F-tests for joint hypotheses involving multiple parameter restrictions
+- Interpret the F distribution with two degrees of freedom ($v_1$ = restrictions, $v_2 = n-k$)
+- Perform the test of overall statistical significance using $H_0: \beta_2 = \cdots = \beta_k = 0$
+- Test whether subsets of regressors are jointly significant using nested model comparisons
+- Present regression results in standard formats (standard errors, t-statistics, p-values, confidence intervals, asterisks)
 
 **Dataset used:**
 
@@ -17688,6 +18980,100 @@ By the end of this chapter, you will be able to:
 - Practice Exercises
 - Case Studies
 
+
+## Key Concepts
+
+Six core ideas anchor this chapter. Skim them before you start, and come back when a term feels fuzzy. Each entry pairs a concrete example using the chapter's data with a non-technical analogy. Click a panel to expand it.
+
+**$t$-Statistic for $b_j$ ($T(n-k)$):** A standardised distance — how many standard errors the estimated coefficient $b_j$ sits from a hypothesised value: $t = (b_j - \beta_j^*)/\operatorname{se}(b_j)$. In multiple regression, this statistic follows a Student-$t$ distribution with $n-k$ degrees of freedom (one fewer per estimated coefficient).
+
+::::: {.columns}
+:::: {.column width="50%"}
+::: {.callout-tip collapse="true" appearance="simple" title="Example"}
+For the Davis house regression with `size`, `bedrooms`, `bathrooms`, `lotsize`, `age`, `monthsold` (so $n = 29$, $k = 7$, $n - k = 22$), the test of $H_0: \beta_{\text{size}} = 0$ gives $t = 68.37 / \operatorname{se} \approx 4.4$, far above the critical value $t_{22,\,0.025} \approx 2.07$. By contrast, $t$-statistics for `bedrooms` and `bathrooms` are below $1$ — well within the noise band of $T(22)$.
+:::
+::::
+:::: {.column width="50%"}
+::: {.callout-note collapse="true" appearance="simple" title="Analogy"}
+A pulse rate of 100 bpm at rest sounds high, but only by reference to the typical resting range of 60–100. The $t$-statistic does the same standardising for a coefficient: it converts "the slope is \$68" into "the slope is 4.4 typical-jitter-units away from zero" — a number whose surprise level is calibrated to the chapter's $T(n-k)$ table.
+:::
+::::
+:::::
+
+**Degrees of Freedom ($n-k$) in Multiple Regression:** The number of observations minus the number of estimated parameters (intercept plus $k-1$ slopes). It governs the spread of the $T$ and $F$ distributions used for inference and reflects how much information the data have left over after fitting the model.
+
+::::: {.columns}
+:::: {.column width="50%"}
+::: {.callout-tip collapse="true" appearance="simple" title="Example"}
+The full Davis model has $n = 29$ houses and $k = 7$ parameters, so $n - k = 22$ degrees of freedom. Critical values from $T(22)$ ($\pm 2.074$ at $\alpha = 0.05$) drive every confidence interval and $t$-test in the chapter. Add another regressor and degrees of freedom drop to 21, slightly inflating critical values and standard errors — a real cost in a sample this small.
+:::
+::::
+:::: {.column width="50%"}
+::: {.callout-note collapse="true" appearance="simple" title="Analogy"}
+A monthly budget of \$2{,}900 sees \$700 of fixed expenses (rent, utilities, transit) before any discretionary spending; \$2{,}200 is what's left to play with. Degrees of freedom are the data's discretionary budget after paying for parameter estimates: the more parameters fitted, the less budget left for measuring uncertainty.
+:::
+::::
+:::::
+
+**Standard Error of $b_j$ in Multiple Regression:** Under classical assumptions, $\operatorname{se}(b_j) = s_e \big/ \sqrt{\sum_{i=1}^n \widetilde{x}_{ji}^2}$, where $\widetilde{x}_{ji}$ is the residual from regressing $x_j$ on all other regressors. So $\operatorname{se}(b_j)$ shrinks when the model fits well *and* when $x_j$ has plenty of variation that *isn't* already explained by the other variables.
+
+::::: {.columns}
+:::: {.column width="50%"}
+::: {.callout-tip collapse="true" appearance="simple" title="Example"}
+For the Davis house regression, $\operatorname{se}(b_{\text{size}}) \approx 15.4$ — small enough that the size coefficient's $t$-statistic exceeds 4. The standard error on `bedrooms`, however, is large *relative to* its coefficient because much of bedrooms' variation is already absorbed by `size` (recall the $r = 0.52$ correlation between them); $\widetilde{x}_{\text{bedrooms}}$ is small, so the denominator shrinks and the SE balloons.
+:::
+::::
+:::: {.column width="50%"}
+::: {.callout-note collapse="true" appearance="simple" title="Analogy"}
+A camera autofocus needs *contrast* across the scene to lock onto an edge. A foggy, uniform wall — even a beautifully lit one — leaves nothing distinct to focus on, and the autofocus motor hunts blurrily back and forth. $\operatorname{se}(b_j)$ is the same idea: when there's no residual contrast in $x_j$ after the other regressors have fit, focus on $\beta_j$ goes hazy.
+:::
+::::
+:::::
+
+**Test of Overall Significance ($H_0: \beta_2 = \cdots = \beta_k = 0$):** The model-wide F-test asking whether *any* slope coefficient is non-zero. It is the omnibus answer to "does this regression collectively explain $y$?" — orthogonal to which individual variables drive it.
+
+::::: {.columns}
+:::: {.column width="50%"}
+::: {.callout-tip collapse="true" appearance="simple" title="Example"}
+For the full Davis model, the overall F-test gives $F(6, 22) = 6.83$ with $p = 0.0003$ and critical value $\approx 2.55$ — a decisive rejection. The model collectively explains house prices, even though only `size` shows individual significance. The omnibus test "votes" yes; the individual $t$-tests then reveal that the credit goes to `size` alone.
+:::
+::::
+:::: {.column width="50%"}
+::: {.callout-note collapse="true" appearance="simple" title="Analogy"}
+An orchestra warm-up: each section tunes individually, then the conductor calls for the whole ensemble to play one chord. The overall F-test is that single chord — does the *combined* sound rise above silence? Some sections may be quietly tuning; what matters first is that the chord audibly exists.
+:::
+::::
+:::::
+
+**Restricted vs. Unrestricted Model:** A pair of models used for joint F-tests. The unrestricted model includes every coefficient of interest; the restricted model imposes the hypothesis being tested (often by zeroing out a subset). The F-statistic compares the residual sums of squares: $F = \frac{(\text{RSS}_R - \text{RSS}_U)/q}{\text{RSS}_U/(n-k)}$, where $q$ is the number of restrictions.
+
+::::: {.columns}
+:::: {.column width="50%"}
+::: {.callout-tip collapse="true" appearance="simple" title="Example"}
+The chapter tests whether `bedrooms`, `bathrooms`, `lotsize`, `age`, `monthsold` add anything beyond `size`. The unrestricted model has all six regressors; the restricted model keeps only `size`. The resulting $F(5, 22) = 0.42$, $p = 0.832$ — well below the critical 2.66 — so the five extras are jointly redundant, even though the chapter cannot identify any single one as definitively zero.
+:::
+::::
+:::: {.column width="50%"}
+::: {.callout-note collapse="true" appearance="simple" title="Analogy"}
+Compare driving on a freeway with no speed limit (unrestricted) vs. with a 65-mph cap (restricted). Measure travel time in both setups. If the cap barely slows anyone down, the rule is doing nothing; if travel time jumps, the rule is binding. The F-test does the same: does *imposing* the restriction noticeably hurt fit?
+:::
+::::
+:::::
+
+**Asterisk Notation in Regression Tables:** A convention for flagging significance levels next to estimates: typically `*` for $p < 0.10$, `**` for $p < 0.05$, `***` for $p < 0.01$. It compresses the $t$-statistic-and-$p$-value information into a glanceable annotation alongside each coefficient.
+
+::::: {.columns}
+:::: {.column width="50%"}
+::: {.callout-tip collapse="true" appearance="simple" title="Example"}
+A polished version of the Davis regression table would show `size` as $68.37^{***}$ (significant at 1%), with all other coefficients (bedrooms, bathrooms, lotsize, age, monthsold) carrying no asterisks at all — readers can scan the column and immediately see that one variable is doing all the work, without having to parse seven separate $p$-values.
+:::
+::::
+:::: {.column width="50%"}
+::: {.callout-note collapse="true" appearance="simple" title="Analogy"}
+Restaurant rating systems use one to three stars to capture "good", "very good", and "exceptional" without forcing the reader to read every review. Asterisks on coefficients work the same way: a glance tells you which entries cleared the 10%, 5%, and 1% thresholds, and whether the table's headline finding rests on solid or shaky ground.
+:::
+::::
+:::::
 
 ## Setup
 
@@ -17748,7 +19134,9 @@ print("\nFirst few observations:")
 data_house[['price', 'size', 'bedrooms', 'bathrooms', 'lotsize', 'age', 'monthsold']].head()
 ```
 
-## 11.1: Properties of the Least Squares Estimator
+With only 29 observations and an average price around \$254,000, this is a small sample — keep that in mind throughout the chapter, since small samples mean larger standard errors and wider confidence intervals.
+
+## 11.1 Properties of the Least Squares Estimator
 
 Before conducting inference, we need to understand the statistical properties of the OLS estimator. Under the classical linear regression assumptions, OLS has desirable properties.
 
@@ -17785,17 +19173,11 @@ where:
 - Large sample size (large $\sum \tilde{x}_{ji}^2$)
 - Variable $x_j$ has high variation after controlling for other regressors
 
-```python
-# 11.1 PROPERTIES OF THE LEAST SQUARES ESTIMATOR
-
-# Under assumptions 1-4, OLS is unbiased, consistent, and BLUE
-```
-
 > **Key Concept 11.1: Classical Assumptions for Statistical Inference**
 >
 > Four assumptions underpin valid inference in multiple regression: (1) linearity in parameters, (2) random sampling, (3) no perfect collinearity among regressors, and (4) zero conditional mean of errors $E[u|X] = 0$. Under these assumptions, OLS is unbiased ($E[b_j] = \beta_j$), consistent, and the Best Linear Unbiased Estimator (BLUE) by the Gauss-Markov theorem.
 
-## 11.2: Estimators of Model Parameters
+## 11.2 Estimators of Model Parameters
 
 Now we estimate the full multiple regression model and examine the parameter estimates, standard errors, and related statistics.
 
@@ -17836,7 +19218,7 @@ model_full.summary()
 
 The regression output reveals several important findings about the house price data:
 
-1. **Size coefficient = \$68.37 (p < 0.001)**: Each additional square foot increases house price by \$68.37 on average, holding all other variables constant. This effect is highly statistically significant (p = 0.0002), meaning we can be very confident this relationship is not due to chance.
+1. **Size coefficient = \$68.37 (p < 0.001)**: Each additional square foot is associated with a \$68.37 higher house price on average, holding all other variables constant. This effect is highly statistically significant (p = 0.0002): if size truly had no effect, an estimate this far from zero would arise from sampling variation only about 2 times in 10,000.
 
 2. **Other variables are not statistically significant**:
    - **Bedrooms coefficient = \$2,685 (p = 0.773)**: Surprisingly, the number of bedrooms doesn't significantly affect price once we control for size. The p-value of 0.773 means we cannot reject the hypothesis that this coefficient is zero.
@@ -17852,6 +19234,8 @@ The regression output reveals several important findings about the house price d
 Size dominates all other house characteristics in determining price in this market. Features like number of bedrooms and bathrooms don't add explanatory power beyond what size already captures. This likely reflects multicollinearity—larger houses naturally tend to have more bedrooms and bathrooms, so once we control for size, these other features provide little additional information.
 
 The large standard errors on most coefficients (relative to the coefficient values) suggest imprecise estimation, common in small samples (n=29) with correlated predictors.
+
+Following AED, this chapter reports classical (homoskedasticity-based) standard errors; Chapter 12 (Section 12.2) introduces heteroskedasticity-robust standard errors, which are preferred in practice and are previewed in Section 11.7 at the end of this chapter.
 
 ### Model Diagnostics
 
@@ -17871,8 +19255,7 @@ print(f"  Root MSE (σ̂): ${np.sqrt(np.sum(model_full._u_hat**2) / (int(model_f
 print(f"  R-squared: {model_full._r2:.4f}")
 print(f"  Adjusted R-squared: {model_full._adj_r2:.4f}")
 
-# Create comprehensive coefficient table
-# Coefficient Table
+# Coefficient table: estimates, SEs, t-statistics, p-values
 coef_table = pd.DataFrame({
     'Coefficient': model_full.coef(),
     'Std. Error': model_full.se(),
@@ -17886,23 +19269,11 @@ coef_table
 >
 > The standard error $se(b_j) = s_e / \sqrt{\sum \widetilde{x}_{ji}^2}$ reveals what makes estimates precise: (1) a well-fitting model (small $s_e$), (2) large sample size, (3) high variation in $x_j$ after controlling for other regressors, and (4) low multicollinearity. When regressors are highly correlated, $\sum \widetilde{x}_{ji}^2$ shrinks and standard errors inflate.
 
-### Economic Interpretation
-
-**Key findings:**
-
-1. **Size coefficient** (≈ \$68.37): Each additional square foot increases house price by approximately \$68, holding other factors constant.
-
-2. **Statistical significance**: Only the size variable appears statistically significant at conventional levels (p < 0.05).
-
-3. **Other variables**: Bedrooms, bathrooms, lot size, age, and month sold show large standard errors relative to their coefficients, suggesting imprecise estimates.
-
-This pattern is common in small samples with correlated regressors (multicollinearity).
-
-## 11.3: Confidence Intervals
+## 11.3 Confidence Intervals
 
 A confidence interval provides a range of plausible values for a population parameter.
 
-**Formula for a \$100(1-\alpha)\%$ confidence interval:**
+**Formula for a $100(1-\alpha)\%$ confidence interval:**
 
 $$\hat{\beta}_j \pm t_{n-k, \alpha/2} \times se(\hat{\beta}_j)$$
 
@@ -17922,24 +19293,6 @@ $$\hat{\beta}_j \pm 2 \times se(\hat{\beta}_j)$$
 
 - Narrower intervals indicate more precise estimates
 - If the interval excludes zero, the coefficient is statistically significant at that level
-
-### Interpreting the Confidence Intervals
-
-**What these confidence intervals tell us:**
-
-Looking at the 95% confidence intervals, we can identify which variables have statistically significant effects:
-
-1. **Size: [\$36.45, \$100.29]** - This interval excludes zero, confirming that size has a statistically significant positive effect on price. We are 95% confident that each additional square foot increases price by between \$36 and \$100.
-
-2. **Intercept: [\$10,321, \$265,262]** - The wide interval reflects high uncertainty about the base price level, but it excludes zero.
-
-3. **All other variables**: The confidence intervals for bedrooms, bathrooms, lotsize, age, and monthsold all **contain zero**, which means these coefficients are not statistically significant at the 5% level.
-
-**Practical Meaning**:
-
-If we repeatedly sampled 29 houses from this market and calculated 95% confidence intervals, approximately 95% of those intervals would contain the true population parameter. For the size coefficient, this means we're quite certain about its effect—even in the worst case (lower bound), an extra square foot adds at least \$36 to the price.
-
-The fact that only the size interval excludes zero provides strong evidence that, in this dataset, size is the only reliable predictor of house prices among the variables we measured.
 
 ```python
 # 11.3 CONFIDENCE INTERVALS
@@ -17977,9 +19330,10 @@ print(f"  95% CI: [${ci_lower:.2f}, ${ci_upper:.2f}]")
 
 ### Comprehensive Table with Confidence Intervals
 
+The table below gathers coefficients, standard errors, t-statistics, p-values, and 95% confidence intervals in one view. Scan the last two columns: only `size` (and the intercept) have intervals that exclude zero.
+
 ```python
-# Create comprehensive coefficient table
-# Comprehensive Coefficient Table with 95% Confidence Intervals
+# Comprehensive coefficient table with 95% confidence intervals
 coef_table_full = pd.DataFrame({
     'Coefficient': model_full.coef(),
     'Std. Error': model_full.se(),
@@ -17993,29 +19347,29 @@ coef_table_full
 
 ```
 
+### Interpreting the Confidence Intervals
+
+**What these confidence intervals tell us:**
+
+Looking at the 95% confidence intervals, we can identify which variables have statistically significant effects:
+
+1. **Size: [\$36.45, \$100.29]** - This interval excludes zero, confirming that size has a statistically significant positive effect on price. We are 95% confident that each additional square foot is associated with a price between \$36 and \$100 higher.
+
+2. **Intercept: [\$10,321, \$265,262]** - The wide interval reflects high uncertainty about the base price level, but it excludes zero.
+
+3. **All other variables**: The confidence intervals for bedrooms, bathrooms, lotsize, age, and monthsold all **contain zero**, which means these coefficients are not statistically significant at the 5% level.
+
+**Practical Meaning**:
+
+If we repeatedly sampled 29 houses from this market and calculated 95% confidence intervals, approximately 95% of those intervals would contain the true population parameter. For the size coefficient, every value in this plausible range is positive—even the interval's lower bound corresponds to an extra square foot adding about \$36 to the price.
+
+The fact that only the size interval excludes zero provides strong evidence that, in this dataset, size is the only reliable predictor of house prices among the variables we measured.
+
 > **Key Concept 11.3: Confidence Intervals in Multiple Regression**
 >
 > A 95% confidence interval $b_j \pm t_{n-k, 0.025} \times se(b_j)$ provides a range of plausible values for $\beta_j$. If the interval excludes zero, the coefficient is statistically significant at 5%. Narrower intervals indicate more precise estimation, which improves with larger samples and lower multicollinearity.
 
-### Interpreting the Hypothesis Test Result
-
-**What this test tells us:**
-
-We tested whether the size coefficient equals 50 (H₀: β_size = 50):
-
-- **t-statistic = 1.19**: This measures how many standard errors our estimate (\$68.37) is away from the hypothesized value (50). The difference is 1.19 standard errors.
-
-- **p-value = 0.245**: This is the probability of observing a coefficient as extreme as \$68.37 (or more extreme) if the true value were actually \$50. A p-value of 0.245 means there's about a 25% chance we'd see this result by random sampling variation alone.
-
-- **Decision**: Since p = 0.245 > 0.05, we **fail to reject** H₀ at the 5% significance level.
-
-**Economic Interpretation**:
-
-The data are consistent with the hypothesis that each square foot adds \$50 to house price. Even though our point estimate is \$68.37, the difference from \$50 is not statistically significant. This doesn't mean β = 50 is correct—it simply means our data don't provide strong enough evidence to rule it out.
-
-This illustrates an important principle: **failing to reject H₀ is NOT the same as proving H₀ is true**. We simply lack sufficient evidence to reject it given our sample size and estimation precision.
-
-## 11.4: Hypothesis Tests on a Single Parameter
+## 11.4 Hypothesis Tests on a Single Parameter
 
 Hypothesis testing allows us to make formal inferences about population parameters.
 
@@ -18063,13 +19417,30 @@ else:
     print(f"  Conclusion: The data are consistent with β_size = {null_value}.")
 ```
 
+### Interpreting the Hypothesis Test Result
+
+**What this test tells us:**
+
+We tested whether the size coefficient equals 50 (H₀: β_size = 50):
+
+- **t-statistic = 1.19**: This measures how many standard errors our estimate (\$68.37) is away from the hypothesized value (50). The difference is 1.19 standard errors.
+
+- **p-value = 0.245**: This is the probability of observing a coefficient as extreme as \$68.37 (or more extreme) if the true value were actually \$50. A p-value of 0.245 means there's about a 25% chance we'd see this result by random sampling variation alone.
+
+- **Decision**: Since p = 0.245 > 0.05, we **fail to reject** H₀ at the 5% significance level.
+
+**Economic Interpretation**:
+
+The data are consistent with the hypothesis that each additional square foot is associated with \$50 more in price. Even though our point estimate is \$68.37, the difference from \$50 is not statistically significant. This doesn't mean β = 50 is correct—it simply means our data don't provide strong enough evidence to rule it out.
+
+This illustrates an important principle: **failing to reject H₀ is NOT the same as proving H₀ is true**. We simply lack sufficient evidence to reject it given our sample size and estimation precision.
+
 ### Test of Statistical Significance (β = 0)
 
 The most common hypothesis test examines whether a coefficient is zero.
 
 ```python
-# Test H₀: β_size = 0 (statistical significance)
-# Test of Statistical Significance: H₀: β_size = 0
+# Test of statistical significance: H₀: β_size = 0
 
 t_stat_zero = coef_size / se_size
 p_value_zero = model_full.pvalue()['size']
@@ -18094,14 +19465,15 @@ else:
 Python's pyfixest package provides convenient methods for hypothesis testing.
 
 ```python
-# Using pyfixest wald_test
-# Hypothesis test using pyfixest wald_test:
-t_test_result = model_full.wald_test(R=np.array([[0, 0, 0, 0, 0, 1, 0]]), q=np.array([null_value]))
+# Hypothesis test using pyfixest wald_test
+t_test_result = model_full.wald_test(R=np.array([[0, 1, 0, 0, 0, 0, 0]]), q=np.array([null_value]))
 print(t_test_result)
 
 ```
 
-## 11.5: Joint Hypothesis Tests
+The built-in Wald test reaches the same conclusion as our manual calculation: we fail to reject $H_0: \beta_{\text{size}} = 50$ at the 5% level. (pyfixest reports a chi-squared version of this test, so the statistic and p-value differ slightly from the manual $t$-test above.)
+
+## 11.5 Joint Hypothesis Tests
 
 Sometimes we want to test multiple restrictions simultaneously. Individual t-tests are insufficient for this purpose.
 
@@ -18114,7 +19486,7 @@ Sometimes we want to test multiple restrictions simultaneously. Individual t-tes
 
 1. All slope coefficients equal zero: $\beta_2 = \beta_3 = \cdots = \beta_k = 0$
 2. Subset of coefficients equal zero: $\beta_3 = \beta_4 = \beta_5 = 0$
-3. Linear restrictions: $\beta_2 = -\beta_3$ and \$2\beta_4 + \beta_6 = 9$
+3. Linear restrictions: $\beta_2 = -\beta_3$ and $2\beta_4 + \beta_6 = 9$
 
 **F-test procedure:**
 
@@ -18127,6 +19499,30 @@ Sometimes we want to test multiple restrictions simultaneously. Individual t-tes
 - Always positive (right-skewed)
 - Depends on two degrees of freedom parameters
 - As $q$ or $n-k$ increases, critical values change
+
+```python
+# 11.5 JOINT HYPOTHESIS TESTS
+
+# Test 1: Overall F-test — H₀: all slope coefficients equal zero (β₂ = ... = βₖ = 0)
+
+f_stat = (model_full._r2 / (k - 1)) / ((1 - model_full._r2) / df)  # overall F-test from R² (formula in Section 11.6)
+dfn = k - 1  # numerator df (excluding intercept)
+dfd = df     # denominator df
+f_pvalue = 1 - stats.f.cdf(f_stat, dfn, dfd)
+f_crit = stats.f.ppf(0.95, dfn, dfd)  # one-sided F-test at 5% significance
+
+print(f"  H₀: All slope coefficients equal zero")
+print(f"  F-statistic: {f_stat:.4f}")
+print(f"  p-value: {f_pvalue:.6e}")
+print(f"  Critical value (α=0.05): {f_crit:.4f}")
+print(f"  Numerator df: {dfn}, Denominator df: {dfd}")
+
+if f_stat > f_crit:
+    print("\nResult: Reject H₀ - At least one coefficient is non-zero")
+    print("  Interpretation: The regressors are jointly statistically significant.")
+else:
+    print("\nResult: Fail to reject H₀")
+```
 
 ### Interpreting the Overall F-test
 
@@ -18150,6 +19546,37 @@ The overall F-test examines whether our model has any explanatory power at all:
 This result tells us that **at least one** of our house characteristics (size, bedrooms, bathrooms, lotsize, age, monthsold) has a real relationship with price. Given that we already know size is significant from individual t-tests, this makes sense.
 
 However, this test doesn't tell us **which** variables matter—just that the model as a whole provides useful information for predicting house prices. The very small p-value (0.0003) gives us high confidence that our model captures real economic relationships, not just random noise.
+
+### Joint Test of Subset of Coefficients
+
+Now test whether variables other than size are jointly significant.
+
+```python
+# Test 2: Joint test — are variables other than size significant?
+# H₀: β_bedrooms = β_bathrooms = β_lotsize = β_age = β_monthsold = 0
+
+# Manual F-test: restricted model (size only) vs unrestricted (full)
+model_restricted_ftest = pf.feols('price ~ size', data=data_house)
+rss_r = np.sum(model_restricted_ftest._u_hat**2)
+rss_u = np.sum(model_full._u_hat**2)
+q = len(model_full.coef()) - len(model_restricted_ftest.coef())  # number of restrictions
+n_k = int(model_full._N) - len(model_full.coef())
+F_subset = ((rss_r - rss_u) / q) / (rss_u / n_k)
+p_value_subset = 1 - stats.f.cdf(F_subset, q, n_k)
+
+print(f"  Joint F-test: F({q}, {n_k}) = {F_subset:.4f}")
+print(f"  p-value: {p_value_subset:.4f}")
+
+print(f"\nInterpretation:")
+print(f"  This tests whether bedrooms, bathrooms, lotsize, age, and monthsold")
+print(f"  can jointly be excluded from the model (keeping only size).")
+
+if p_value_subset < 0.05:
+    print(f"  Result: These variables are jointly significant.")
+else:
+    print(f"  Result: These variables are NOT jointly significant.")
+    print(f"  A simpler model with only size may be preferred.")
+```
 
 ### Interpreting the Joint Test of Subset Variables
 
@@ -18177,122 +19604,11 @@ This is a crucial finding for model selection. Even though we're testing five va
 
 This result demonstrates the power of joint testing: while we might hope that bedrooms or bathrooms would add information, when tested together, they fail to improve the model. This likely reflects the strong correlation between size and these other features—bigger houses tend to have more bedrooms and bathrooms, so these variables don't provide independent information.
 
-### Interpreting the Sum of Squares Decomposition
-
-**What these calculations show:**
-
-The sum of squares decomposition breaks down the total variation in house prices:
-
-- **TSS = \$39,145,826,897** (Total Sum of Squares): Total variation in house prices around their mean
-- **ESS = \$25,466,429,042** (Explained Sum of Squares): Variation explained by our model (65.1%)
-- **RSS = \$13,679,397,855** (Residual Sum of Squares): Variation left unexplained (34.9%)
-
-**Verification**: TSS = ESS + RSS (The identity holds perfectly)
-
-**Understanding the F-statistic:**
-
-The F-statistic compares explained variation per parameter to unexplained variation per degree of freedom:
-
-$$F = \frac{ESS/(k-1)}{RSS/(n-k)} = \frac{25,466,429,042/6}{13,679,397,855/22} = 6.83$$
-
-**Economic Interpretation**:
-
-Our model explains about 65% of the variation in house prices—a respectable amount for real estate data. The remaining 35% reflects unmeasured factors like neighborhood quality, interior condition, proximity to amenities, etc.
-
-The F-statistic of 6.83 tells us that the explained variation (per parameter) is nearly 7 times larger than the unexplained variation (per degree of freedom). This ratio is large enough to conclude the model has genuine explanatory power, not just capturing random noise.
-
-```python
-# 11.5 JOINT HYPOTHESIS TESTS
-
-# Test 1: Joint significance of all slope coefficients
-# H₀: β₁ = β₂ = ... = βₖ = 0
-# Test 1: Overall F-test (all slopes = 0)
-
-f_stat = model_full._f_statistic
-dfn = k - 1  # numerator df (excluding intercept)
-dfd = df     # denominator df
-f_pvalue = 1 - stats.f.cdf(f_stat, dfn, dfd)
-f_crit = stats.f.ppf(0.95, dfn, dfd)  # one-sided F-test at 5% significance
-
-print(f"  H₀: All slope coefficients equal zero")
-print(f"  F-statistic: {f_stat:.4f}")
-print(f"  p-value: {f_pvalue:.6e}")
-print(f"  Critical value (α=0.05): {f_crit:.4f}")
-print(f"  Numerator df: {dfn}, Denominator df: {dfd}")
-
-if f_stat > f_crit:
-    print("\nResult: Reject H₀ - At least one coefficient is non-zero")
-    print("  Interpretation: The regressors are jointly statistically significant.")
-else:
-    print("\nResult: Fail to reject H₀")
-```
-
-### Joint Test of Subset of Coefficients
-
-Now test whether variables other than size are jointly significant.
-
-```python
-# Test 2: Joint test of subset of coefficients
-# H₀: β_bedrooms = β_bathrooms = β_lotsize = β_age = β_monthsold = 0
-# Test 2: Joint test - Are variables other than size significant?
-
-# Manual F-test: restricted model (size only) vs unrestricted (full)
-model_restricted_ftest = pf.feols('price ~ size', data=data_house)
-rss_r = np.sum(model_restricted_ftest._u_hat**2)
-rss_u = np.sum(model_full._u_hat**2)
-q = len(model_full.coef()) - len(model_restricted_ftest.coef())  # number of restrictions
-n_k = int(model_full._N) - len(model_full.coef())
-F_subset = ((rss_r - rss_u) / q) / (rss_u / n_k)
-p_value_subset = 1 - stats.f.cdf(F_subset, q, n_k)
-
-print(f"  Joint F-test: F({q}, {n_k}) = {F_subset:.4f}")
-print(f"  p-value: {p_value_subset:.4f}")
-
-print(f"\nInterpretation:")
-print(f"  This tests whether bedrooms, bathrooms, lotsize, age, and monthsold")
-print(f"  can jointly be excluded from the model (keeping only size).")
-
-if p_value_subset < 0.05:
-    print(f"  Result: These variables are jointly significant.")
-else:
-    print(f"  Result: These variables are NOT jointly significant.")
-    print(f"  A simpler model with only size may be preferred.")
-```
-
 > **Key Concept 11.5: Joint Hypothesis Tests and the F Distribution**
 >
 > Individual $t$-tests cannot test multiple restrictions simultaneously because they ignore correlations between coefficient estimates. The F-test evaluates joint significance using the $F(q, n-k)$ distribution, where $q$ is the number of restrictions. It compares how much worse the restricted model fits relative to the unrestricted model.
 
-### Interpreting the Subset F-test
-
-**What this subset F-test tells us:**
-
-We're comparing two models:
-
-- **Restricted model**: price ~ size (2 parameters)
-- **Unrestricted model**: price ~ size + bedrooms + bathrooms + lotsize + age + monthsold (7 parameters)
-
-**Key numbers:**
-
-- **RSS (restricted) = \$14,975,101,655**: Prediction errors when using only size
-- **RSS (unrestricted) = \$13,679,397,855**: Prediction errors when using all variables
-- **Increase in RSS = \$1,295,703,800**: How much worse the restricted model fits
-
-**Test results:**
-
-- **F-statistic = 0.42**: The increase in RSS is small relative to the baseline error
-- **p-value = 0.832**: 83.2% probability of seeing this result if the restrictions are true
-- **Critical value = 2.66**: Our F-statistic is far below the threshold
-
-**Decision**: **Fail to reject H₀** - The restricted model (only size) is NOT significantly worse.
-
-**Economic Interpretation**:
-
-This is a powerful result for **model selection**. Adding five additional variables (bedrooms, bathrooms, lotsize, age, monthsold) reduces prediction errors by only \$1.3 million out of \$15 million total—a mere 8.7% improvement. This improvement is so small it could easily be due to random chance.
-
-**Practical recommendation**: Use the **simpler model** with only size. It's easier to interpret, requires less data collection, and performs nearly as well as the complex model. This is an application of **Occam's Razor** in econometrics: prefer simpler models when complex ones don't provide meaningful improvement.
-
-## 11.6: F Statistic Under Assumptions 1-4
+## 11.6 F Statistic Under Assumptions 1-4
 
 Under the classical assumptions, the F-statistic has a specific formula based on sums of squares.
 
@@ -18325,8 +19641,7 @@ $$F = \frac{R^2 / (k-1)}{(1-R^2) / (n-k)} \sim F(k-1, n-k)$$
 ```python
 # 11.6 F STATISTIC UNDER ASSUMPTIONS 1-4
 
-# Manual calculation of F-statistic using sums of squares
-# Manual F-statistic calculation
+# Manual F-statistic calculation using sums of squares
 
 # Calculate sum of squares
 y = data_house['price']
@@ -18353,7 +19668,7 @@ print(f"\nF-statistic calculation:")
 print(f"  F = (ESS/{k-1}) / (RSS/{df})")
 print(f"  F = ({ESS:,.2f}/{k-1}) / ({RSS:,.2f}/{df})")
 print(f"  F = {f_stat_manual:.4f}")
-print(f"  From model output: {f_stat:.4f}")
+print(f"  From Section 11.5 calculation: {f_stat:.4f}")
 print(f"  Match: {np.isclose(f_stat_manual, f_stat)}")
 
 # Alternative formula using R²
@@ -18366,6 +19681,30 @@ print(f"  F = {f_stat_rsq:.4f}")
 print(f"  Match: {np.isclose(f_stat_rsq, f_stat)}")
 ```
 
+### Interpreting the Sum of Squares Decomposition
+
+**What these calculations show:**
+
+The sum of squares decomposition breaks down the total variation in house prices:
+
+- **TSS = 39,145,826,897** (Total Sum of Squares): Total variation in house prices around their mean (in squared dollars)
+- **ESS = 25,466,429,042** (Explained Sum of Squares): Variation explained by our model (65.1%)
+- **RSS = 13,679,397,855** (Residual Sum of Squares): Variation left unexplained (34.9%)
+
+**Verification**: TSS = ESS + RSS (The identity holds perfectly)
+
+**Understanding the F-statistic:**
+
+The F-statistic compares explained variation per parameter to unexplained variation per degree of freedom:
+
+$$F = \frac{ESS/(k-1)}{RSS/(n-k)} = \frac{25,466,429,042/6}{13,679,397,855/22} = 6.83$$
+
+**Economic Interpretation**:
+
+Our model explains about 65% of the variation in house prices—a respectable amount for real estate data. The remaining 35% reflects unmeasured factors like neighborhood quality, interior condition, proximity to amenities, etc.
+
+The F-statistic of 6.83 tells us that the explained variation (per parameter) is nearly 7 times larger than the unexplained variation (per degree of freedom). This ratio is large enough to conclude the model has genuine explanatory power, not just capturing random noise.
+
 > **Key Concept 11.6: The F Statistic Under Homoskedasticity**
 >
 > Under assumptions 1-4, the F-statistic can be computed from sums of squares: $F = [(RSS_r - RSS_u)/q] / [RSS_u/(n-k)]$, or equivalently from $R^2$: $F = [(R_u^2 - R_r^2)/q] / [(1-R_u^2)/(n-k)]$. Larger F-values indicate the restrictions are inconsistent with the data.
@@ -18374,43 +19713,8 @@ print(f"  Match: {np.isclose(f_stat_rsq, f_stat)}")
 
 Now we compare the full model (unrestricted) with a simpler model containing only size (restricted).
 
-### Interpreting the Model Comparison
-
-**What this comparison reveals:**
-
-Comparing three nested models helps us understand the incremental value of adding variables:
-
-**Model 1 (Simple): price ~ size**
-
-- **R² = 0.618**, **Adj. R² = 0.603**: Explains 61.8% of price variation
-- **F-stat = 43.58**: Very strong overall significance
-- **Simplest and most parsimonious**
-
-**Model 2 (Intermediate): price ~ size + bedrooms**
-
-- **R² = 0.618**, **Adj. R² = 0.589**: Almost identical R² to Model 1
-- **F-stat = 21.03**: Still significant, but weaker than Model 1
-- **Adding bedrooms barely improves fit**
-
-**Model 3 (Full): price ~ size + bedrooms + bathrooms + lotsize + age + monthsold**
-
-- **R² = 0.651**, **Adj. R² = 0.555**: Highest R², but **lowest adjusted R²**
-- **F-stat = 6.83**: Weakest overall significance (though still significant)
-- **Complexity penalty outweighs small improvement in fit**
-
-**Key insights:**
-
-1. **Adjusted R² is crucial**: While R² increases with more variables (always), adjusted R² accounts for the complexity penalty. Model 1 has the **highest adjusted R²**, indicating the best balance of fit and simplicity.
-
-2. **Diminishing returns**: Adding bedrooms (Model 2) provides essentially no improvement. Adding five more variables (Model 3) only increases R² from 0.618 to 0.651—a marginal gain.
-
-3. **Statistical vs. practical significance**: Model 3 is statistically significant overall (F = 6.83, p < 0.001), but that doesn't mean it's the **best** model. Model 1 is superior on parsimony grounds.
-
-**Recommendation**: **Use Model 1** (size only). It's simpler, has the highest adjusted R², and loses almost nothing in explanatory power compared to more complex alternatives.
-
 ```python
-# Subset F-test using restricted and unrestricted models
-# Subset F-test: Restricted vs Unrestricted Model
+# Subset F-test: restricted vs unrestricted model
 
 # Unrestricted model (already estimated as model_full)
 # Restricted model (only size as regressor)
@@ -18420,71 +19724,7 @@ print("\nRestricted model (only size):")
 model_restricted.summary()
 ```
 
-### Interpreting Coefficient Stability Across Models
-
-**What this table reveals about coefficient estimates:**
-
-Tracking how coefficients change as we add variables helps diagnose **multicollinearity** and understand variable relationships:
-
-**Size coefficient across models:**
-
-- **Model 1**: \$73.77 (SE = \$11.17)
-- **Model 2**: \$73.65 (SE = \$11.50)  
-- **Model 3**: \$68.37 (SE = \$15.39)
-
-**What we observe:**
-
-1. **Relatively stable point estimates**: The size coefficient ranges from \$68-\$74 across models, suggesting the relationship is genuine and robust.
-
-2. **Increasing standard errors**: As we add variables, the SE increases from \$11 to \$15—a 38% increase. This reflects **multicollinearity**: size is correlated with other variables (larger houses have more bedrooms, bathrooms, etc.).
-
-3. **Precision loss**: In Model 1, we can estimate the size effect quite precisely (SE = \$11). Adding correlated variables inflates uncertainty without improving the overall fit much.
-
-**Bedrooms paradox:**
-
-- When added in Model 2, bedrooms show essentially no effect
-- In Model 3, the coefficient is \$2,685 but with a huge SE of \$9,193
-- This means bedrooms add no information beyond what size already provides
-
-**Economic lesson:**
-
-This pattern is common in real estate data: once you control for total square footage, the number of rooms matters little. Two houses of identical size but different room configurations (e.g., one with 3 large bedrooms vs. one with 4 small bedrooms) sell for similar prices. **Size is what buyers care about, not how that space is divided.**
-
 ### Manual F-test Calculation
-
-### Interpreting Robust Standard Errors
-
-**What robust standard errors tell us:**
-
-Heteroskedasticity-robust (HC1) standard errors correct for potential violations of the constant variance assumption. Comparing standard vs. robust errors helps diagnose whether heteroskedasticity is a concern:
-
-**Size coefficient:**
-
-- **Standard SE**: \$15.39 → **Robust SE**: \$15.15
-- **Change**: Slight decrease (1.6%)
-- **Both t-stats highly significant** (p ≈ 0.0002)
-
-**Intercept:**
-
-- **Standard SE**: \$61,465 → **Robust SE**: \$69,273
-- **Change**: Increase of 12.7%
-- **p-value changes**: 0.035 → 0.047 (still significant, but closer to the boundary)
-
-**Other variables:**
-
-- Most show minor changes in SEs
-- All remain statistically insignificant with robust SEs
-- Conclusions unchanged
-
-**What this means:**
-
-1. **Mild heteroskedasticity**: The fact that robust SEs are similar to standard SEs suggests heteroskedasticity is not a major problem in this dataset. If it were severe, we'd see much larger increases in robust SEs.
-
-2. **Conclusions are robust**: The key finding—that size is significant while other variables are not—holds regardless of which SE we use.
-
-3. **Best practice**: For cross-sectional data like housing prices, it's wise to **report robust SEs by default**. They provide valid inference whether or not heteroskedasticity is present, with minimal cost.
-
-4. **Intercept sensitivity**: The intercept shows the largest change, but intercepts are rarely of economic interest. Our substantive conclusions about slope coefficients remain unchanged.
 
 ```python
 # Calculate F-statistic for subset test
@@ -18518,7 +19758,38 @@ else:
     print("  The simpler model (only size) is preferred.")
 ```
 
+### Interpreting the Subset F-test
+
+**What this subset F-test tells us:**
+
+We're comparing two models:
+
+- **Restricted model**: price ~ size (2 parameters)
+- **Unrestricted model**: price ~ size + bedrooms + bathrooms + lotsize + age + monthsold (7 parameters)
+
+**Key numbers:**
+
+- **RSS (restricted) = 14,975,101,655**: Sum of squared prediction errors when using only size
+- **RSS (unrestricted) = 13,679,397,855**: Sum of squared prediction errors when using all variables
+- **Increase in RSS = 1,295,703,800**: How much worse the restricted model fits
+
+**Test results:**
+
+- **F-statistic = 0.42**: The increase in RSS is small relative to the baseline error
+- **p-value = 0.832**: 83.2% probability of seeing this result if the restrictions are true
+- **Critical value = 2.66**: Our F-statistic is far below the threshold
+
+**Decision**: **Fail to reject H₀** - The restricted model (only size) is NOT significantly worse.
+
+**Economic Interpretation**:
+
+This is a powerful result for **model selection**. Adding five additional variables (bedrooms, bathrooms, lotsize, age, monthsold) reduces the residual sum of squares by only about 1.3 billion out of 15.0 billion—a mere 8.7% improvement. This improvement is so small it could easily be due to random chance.
+
+**Practical recommendation**: Use the **simpler model** with only size. It's easier to interpret, requires less data collection, and performs nearly as well as the complex model. This is an application of **Occam's Razor** in econometrics: prefer simpler models when complex ones don't provide meaningful improvement.
+
 ### ANOVA Table Comparison
+
+As a final cross-check, we repeat the restricted-vs-full comparison in compact form — the F-statistic and p-value should match the subset F-test computed above.
 
 ```python
 # Model comparison using manual F-test (replaces anova_lm)
@@ -18541,7 +19812,7 @@ print("\nThis confirms our manual F-test calculation.")
 >
 > To test whether a subset of regressors belongs in the model, compare the restricted model (without those variables) to the unrestricted model (with them) using an F-test. If the F-statistic is small (large $p$-value), the additional regressors don't significantly improve fit and the simpler model is preferred.
 
-## 11.7: Presentation of Regression Results
+## 11.7 Presentation of Regression Results
 
 Professional presentation of regression results is important for communication. Different formats emphasize different aspects.
 
@@ -18567,8 +19838,7 @@ This allows readers to see how coefficient estimates change across specification
 ```python
 # 11.7 PRESENTATION OF REGRESSION RESULTS
 
-# Comparison of multiple models
-# Model Comparison: Three Specifications
+# Model comparison: three specifications
 
 # Model 1: Simple regression
 model1 = pf.feols('price ~ size', data=data_house)
@@ -18585,30 +19855,66 @@ model_names = ['Model 1', 'Model 2', 'Model 3']
 
 comparison_data = []
 for name, model in zip(model_names, models):
+    n_m = int(model._N)
+    k_m = len(model.coef())
+    f_m = (model._r2 / (k_m - 1)) / ((1 - model._r2) / (n_m - k_m))  # overall F from R² formula
     model_stats = {
         'Model': name,
-        'N': int(model._N),
+        'N': n_m,
         'R²': f"{model._r2:.4f}",
         'Adj. R²': f"{model._adj_r2:.4f}",
-        'RMSE': f"{np.sqrt(np.sum(model._u_hat**2) / (int(model._N) - len(model.coef()))):.2f}",
-        'F-stat': f"{model._f_statistic:.4f}",
-        'p-value': f"{1 - stats.f.cdf(model._f_statistic, len(model.coef())-1, int(model._N)-len(model.coef())):.6f}"
+        'RMSE': f"{np.sqrt(np.sum(model._u_hat**2) / (n_m - k_m)):.2f}",
+        'F-stat': f"{f_m:.4f}",
+        'p-value': f"{1 - stats.f.cdf(f_m, k_m - 1, n_m - k_m):.6f}"
     }
     comparison_data.append(model_stats)
 
 comparison_df = pd.DataFrame(comparison_data)
-comparison_df.to_string(index=False)
+print(comparison_df.to_string(index=False))
 
 
 ```
+
+### Interpreting the Model Comparison
+
+**What this comparison reveals:**
+
+Comparing three nested models helps us understand the incremental value of adding variables:
+
+**Model 1 (Simple): price ~ size**
+
+- **R² = 0.617**, **Adj. R² = 0.603**: Explains 61.7% of price variation
+- **F-stat = 43.58**: Very strong overall significance
+- **Simplest and most parsimonious**
+
+**Model 2 (Intermediate): price ~ size + bedrooms**
+
+- **R² = 0.618**, **Adj. R² = 0.589**: Almost identical R² to Model 1
+- **F-stat = 21.03**: Still significant, but weaker than Model 1
+- **Adding bedrooms barely improves fit**
+
+**Model 3 (Full): price ~ size + bedrooms + bathrooms + lotsize + age + monthsold**
+
+- **R² = 0.651**, **Adj. R² = 0.555**: Highest R², but **lowest adjusted R²**
+- **F-stat = 6.83**: Weakest overall significance (though still significant)
+- **Complexity penalty outweighs small improvement in fit**
+
+**Key insights:**
+
+1. **Adjusted R² is crucial**: While R² increases with more variables (always), adjusted R² accounts for the complexity penalty. Model 1 has the **highest adjusted R²**, indicating the best balance of fit and simplicity.
+
+2. **Diminishing returns**: Adding bedrooms (Model 2) provides essentially no improvement. Adding five more variables (Model 3) only increases R² from 0.617 to 0.651—a marginal gain.
+
+3. **Statistical vs. practical significance**: Model 3 is statistically significant overall (F = 6.83, p < 0.001), but that doesn't mean it's the **best** model. Model 1 is superior on parsimony grounds.
+
+**Recommendation**: **Use Model 1** (size only). It's simpler, has the highest adjusted R², and loses almost nothing in explanatory power compared to more complex alternatives.
 
 ### Detailed Coefficient Comparison Across Models
 
 Now let's see how coefficient estimates change as we add variables.
 
 ```python
-# Detailed coefficient comparison
-# Coefficient Comparison Across Models
+# Coefficient comparison across models
 
 # Get all unique parameter names
 all_params = set()
@@ -18629,6 +19935,36 @@ coef_comparison.fillna('-')
 
 # Size coefficient stable; adding variables increases SEs due to multicollinearity
 ```
+
+### Interpreting Coefficient Stability Across Models
+
+**What this table reveals about coefficient estimates:**
+
+Tracking how coefficients change as we add variables helps diagnose **multicollinearity** and understand variable relationships:
+
+**Size coefficient across models:**
+
+- **Model 1**: \$73.77 (SE = \$11.17)
+- **Model 2**: \$72.41 (SE = \$13.30)  
+- **Model 3**: \$68.37 (SE = \$15.39)
+
+**What we observe:**
+
+1. **Relatively stable point estimates**: The size coefficient ranges from \$68-\$74 across models, suggesting the relationship is genuine and robust.
+
+2. **Increasing standard errors**: As we add variables, the SE increases from \$11 to \$15—a 38% increase. This reflects **multicollinearity**: size is correlated with other variables (larger houses have more bedrooms, bathrooms, etc.).
+
+3. **Precision loss**: In Model 1, we can estimate the size effect quite precisely (SE = \$11). Adding correlated variables inflates uncertainty without improving the overall fit much.
+
+**Bedrooms paradox:**
+
+- When added in Model 2, bedrooms show essentially no effect
+- In Model 3, the coefficient is \$2,685 but with a huge SE of \$9,193
+- This means bedrooms add no information beyond what size already provides
+
+**Economic lesson:**
+
+This pattern is common in real estate data: once you control for total square footage, the number of rooms matters little. Two houses of identical size but different room configurations (e.g., one with 3 large bedrooms vs. one with 4 small bedrooms) sell for similar prices. **In this sample, size appears to be what buyers care about, not how that space is divided.**
 
 ### Robust Standard Errors (Heteroskedasticity-Robust)
 
@@ -18668,6 +20004,40 @@ robust_comparison
 
 # Robust SEs recommended for cross-sectional data
 ```
+
+### Interpreting Robust Standard Errors
+
+**What robust standard errors tell us:**
+
+Heteroskedasticity-robust (HC1) standard errors correct for potential violations of the constant variance assumption. Comparing standard vs. robust errors helps diagnose whether heteroskedasticity is a concern:
+
+**Size coefficient:**
+
+- **Standard SE**: \$15.39 → **Robust SE**: \$15.36
+- **Change**: Slight decrease (0.2%)
+- **Both t-stats highly significant** (p ≈ 0.0002)
+
+**Intercept:**
+
+- **Standard SE**: \$61,465 → **Robust SE**: \$65,545
+- **Change**: Increase of 6.6%
+- **p-value changes**: 0.035 → 0.047 (still significant, but closer to the boundary)
+
+**Other variables:**
+
+- Most show minor changes in SEs
+- All remain statistically insignificant with robust SEs
+- Conclusions unchanged
+
+**What this means:**
+
+1. **Mild heteroskedasticity**: The fact that robust SEs are similar to standard SEs suggests heteroskedasticity is not a major problem in this dataset. If it were severe, we'd see much larger increases in robust SEs.
+
+2. **Conclusions are robust**: The key finding—that size is significant while other variables are not—holds regardless of which SE we use.
+
+3. **Best practice**: For cross-sectional data like housing prices, it's wise to **report robust SEs by default**. They provide valid inference whether or not heteroskedasticity is present, with minimal cost.
+
+4. **Intercept sensitivity**: The intercept shows the largest change, but intercepts are rarely of economic interest. Our substantive conclusions about slope coefficients remain unchanged.
 
 > **Key Concept 11.8: Robust Standard Errors and Heteroskedasticity**
 >
@@ -18743,9 +20113,17 @@ ax.set_xlim(0, max(8, f_stat + 1))
 plt.tight_layout()
 plt.show()
 
-print(f"The observed F-statistic ({f_stat:.2f}) exceeds the critical value ({f_crit:.2f}).")
-print("This leads us to reject the null hypothesis of no relationship.")
+if f_stat > f_crit:
+    print(f"The observed F-statistic ({f_stat:.2f}) exceeds the critical value ({f_crit:.2f}), so we reject the null hypothesis of no relationship.")
+else:
+    print(f"The observed F-statistic ({f_stat:.2f}) does not exceed the critical value ({f_crit:.2f}), so we fail to reject the null hypothesis of no relationship.")
 ```
+
+**What to look for in this F-distribution plot:**
+
+- **Observed vs. critical value**: Compare the red dashed line (observed F) with the green dotted line (critical value) — an observed statistic beyond the critical value means we reject $H_0$
+- **Right-skewed shape**: The F-distribution is always positive and right-skewed; its shape depends on both degrees-of-freedom parameters
+- **Shaded region**: The red area marks the 5% of probability beyond the critical value under $H_0$ — the rejection region
 
 ### Visualization: Model Comparison (Actual vs Predicted)
 
@@ -18837,7 +20215,6 @@ import pandas as pd                             # data loading and manipulation
 import matplotlib.pyplot as plt                 # creating plots and visualizations
 import pyfixest as pf                           # fast estimation with robust SEs
 from scipy import stats                         # t and F distributions for inference
-# anova_lm replaced by manual F-test with pyfixest
 
 # =============================================================================
 # STEP 1: Load data directly from a URL
@@ -18853,7 +20230,7 @@ print(data_house[['price', 'size', 'bedrooms', 'bathrooms', 'lotsize', 'age']].d
 # STEP 2: Estimate the full multiple regression model
 # =============================================================================
 # Formula syntax: 'y ~ x1 + x2 + ...' includes an intercept automatically
-# IMPORTANT: .fit() estimates the model — without it, nothing is computed!
+# pf.feols() estimates the model immediately — no separate .fit() call is needed
 model_full = pf.feols('price ~ size + bedrooms + bathrooms + lotsize + age + monthsold', data=data_house)
 
 n = int(model_full._N)
@@ -18909,8 +20286,9 @@ print(f"  Size IS statistically significant at 5% level")
 # STEP 5: Joint F-test — are groups of coefficients jointly significant?
 # =============================================================================
 # Overall F-test: H₀: all slope coefficients = 0
-f_p = 1 - stats.f.cdf(model_full._f_statistic, len(model_full.coef())-1, int(model_full._N)-len(model_full.coef()))
-print(f"\nOverall F-test: F = {model_full._f_statistic:.4f}, p = {f_p:.6e}")
+F_overall = (model_full._r2 / (k - 1)) / ((1 - model_full._r2) / df)  # overall F from R²
+f_p = 1 - stats.f.cdf(F_overall, k - 1, df)
+print(f"\nOverall F-test: F = {F_overall:.4f}, p = {f_p:.6e}")
 print(f"  At least one variable matters → model is jointly significant")
 
 # Subset F-test: are variables other than size jointly significant?
@@ -18976,7 +20354,12 @@ plt.show()
 
 **Try it yourself!** Copy this code into an empty Google Colab notebook and run it: [Open Colab](https://colab.research.google.com/notebooks/empty.ipynb)
 
-**Next steps:** Chapter 12 covers **further inference and model specification** — additional diagnostic tests and extensions to the multiple regression framework.
+**Next Steps:**
+
+- **Chapter 12**: Further topics in multiple regression — prediction intervals, robust inference in depth, and model specification
+- **Chapter 13**: Case studies applying the full multiple regression toolkit to real datasets
+- **Chapter 14**: Regression with indicator (dummy) variables
+- **Chapter 15**: Regression with transformed variables (logs, polynomials, interactions)
 
 Congratulations on completing Chapter 11! You can now conduct rigorous statistical inference for multiple regression models.
 
@@ -19087,8 +20470,8 @@ In this case study, you will apply confidence intervals, hypothesis tests, and F
 - **Source:** Mendez (2020), 108 countries, 1990-2014
 - **Key variables:**
   - `lp` — Labor productivity (GDP per worker)
-  - `rk` — Physical capital per worker
-  - `hc` — Human capital index
+  - `kl` — Physical capital per worker
+  - `h` — Human capital index
   - `region` — Geographic region
 
 **Research question:** Are physical capital and human capital jointly significant in explaining cross-country labor productivity?
@@ -19097,9 +20480,9 @@ In this case study, you will apply confidence intervals, hypothesis tests, and F
 # Load the Mendez convergence clubs dataset
 url = "https://raw.githubusercontent.com/quarcs-lab/mendez2020-convergence-clubs-code-data/master/assets/dat.csv"
 dat = pd.read_csv(url)
-dat_2014 = dat[dat['year'] == 2014].dropna(subset=['lp', 'rk', 'hc']).copy()
+dat_2014 = dat[dat['year'] == 2014].dropna(subset=['lp', 'kl', 'h']).copy()
 dat_2014['ln_lp'] = np.log(dat_2014['lp'])
-dat_2014['ln_rk'] = np.log(dat_2014['rk'])
+dat_2014['ln_kl'] = np.log(dat_2014['kl'])
 print(f"Cross-section sample: {len(dat_2014)} countries (year 2014)")
 dat_2014.head()
 ```
@@ -19109,8 +20492,8 @@ dat_2014.head()
 Estimate the multiple regression model for labor productivity.
 
 ```python
-# Estimate: ln(lp) = beta_0 + beta_1 * ln(rk) + beta_2 * hc + u
-model_prod = pf.feols('ln_lp ~ ln_rk + hc', data=dat_2014)
+# Estimate: ln(lp) = beta_0 + beta_1 * ln(kl) + beta_2 * h + u
+model_prod = pf.feols('ln_lp ~ ln_kl + h', data=dat_2014)
 model_prod.summary()
 ```
 
@@ -19128,18 +20511,18 @@ Compute and interpret 95% confidence intervals for the coefficients.
 print("95% Confidence Intervals:")
 print(model_prod.confint())
 
-# Manual calculation for ln_rk coefficient
-b_rk = model_prod.coef()['ln_rk']
-se_rk = model_prod.se()['ln_rk']
+# Manual calculation for ln_kl coefficient
+b_kl = model_prod.coef()['ln_kl']
+se_kl = model_prod.se()['ln_kl']
 df = (int(model_prod._N) - len(model_prod.coef()))
 t_crit = stats.t.ppf(0.975, df)
-print(f"\nManual CI for ln(rk): [{b_rk - t_crit*se_rk:.4f}, {b_rk + t_crit*se_rk:.4f}]")
+print(f"\nManual CI for ln(kl): [{b_kl - t_crit*se_kl:.4f}, {b_kl + t_crit*se_kl:.4f}]")
 ```
 
 **Questions:**
 
-- Does the CI for $\ln(\text{rk})$ exclude zero? What does this tell you?
-- Does the CI for hc exclude zero? Interpret in economic terms.
+- Does the CI for $\ln(\text{kl})$ exclude zero? What does this tell you?
+- Does the CI for h exclude zero? Interpret in economic terms.
 
 > **Key Concept 11.9: Statistical Significance in Cross-Country Regressions**
 >
@@ -19152,7 +20535,7 @@ Test the statistical significance of each coefficient.
 ```python
 # Test significance of each coefficient
 print("t-statistics and p-values:")
-for var in ['ln_rk', 'hc']:
+for var in ['ln_kl', 'h']:
     t = model_prod.tstat()[var]
     p = model_prod.pvalue()[var]
     sig = '***' if p < 0.01 else '**' if p < 0.05 else '*' if p < 0.10 else ''
@@ -19162,7 +20545,7 @@ for var in ['ln_rk', 'hc']:
 **Questions:**
 
 - Which coefficients are significant at the 1% level? At the 5% level?
-- Interpret the economic meaning: what does significance of $\ln(\text{rk})$ tell us about physical capital?
+- Interpret the economic meaning: what does significance of $\ln(\text{kl})$ tell us about physical capital?
 
 #### Task 4: Joint F-Test (Semi-guided)
 
@@ -19170,8 +20553,11 @@ Test whether physical capital and human capital are jointly significant.
 
 ```python
 # Overall F-test: H0: beta_1 = beta_2 = 0
-print(f"Overall F-statistic: {model_prod._f_statistic:.4f}")
-f_p_prod = 1 - stats.f.cdf(model_prod._f_statistic, len(model_prod.coef())-1, int(model_prod._N)-len(model_prod.coef()))
+k_prod = len(model_prod.coef())
+n_k_prod = int(model_prod._N) - k_prod
+F_prod = (model_prod._r2 / (k_prod - 1)) / ((1 - model_prod._r2) / n_k_prod)
+print(f"Overall F-statistic: {F_prod:.4f}")
+f_p_prod = 1 - stats.f.cdf(F_prod, k_prod - 1, n_k_prod)
 print(f"p-value: {f_p_prod:.6e}")
 
 # Compare to restricted model (intercept only) using manual F-test
@@ -19196,9 +20582,9 @@ Compare nested models to determine the best specification.
 
 **Your tasks:**
 
-1. Estimate three models: (a) $\ln(\text{lp}) \sim \ln(\text{rk})$ only, (b) $\ln(\text{lp}) \sim \text{hc}$ only, (c) both regressors
+1. Estimate three models: (a) $\ln(\text{lp}) \sim \ln(\text{kl})$ only, (b) $\ln(\text{lp}) \sim \text{h}$ only, (c) both regressors
 2. Create a model comparison table with $R^2$, adjusted $R^2$, AIC, BIC
-3. Conduct subset F-tests: does adding hc to the $\ln(\text{rk})$-only model significantly improve fit?
+3. Conduct subset F-tests: does adding h to the $\ln(\text{kl})$-only model significantly improve fit?
 4. Report robust standard errors for the preferred model
 
 *Hint: Use the manual F-test formula (RSS comparison) for nested model tests and `pf.feols(..., vcov='HC1')` for robust SEs.*
@@ -19219,7 +20605,7 @@ Write a 200-300 word policy brief summarizing your inference results.
 >
 > Finding that both physical and human capital are statistically significant predictors of productivity suggests that investments in both areas may boost economic output. However, the magnitudes matter for policy: confidence intervals tell us the plausible range of effects, while F-tests confirm that both factors jointly matter beyond what each contributes alone. Policy decisions should weigh statistical evidence alongside practical considerations like cost-effectiveness and implementation feasibility.
 
-### What You've Learned
+#### What You've Learned
 
 In this case study, you applied the full statistical inference toolkit to cross-country productivity data:
 
@@ -19249,6 +20635,11 @@ In Chapter 10, we estimated a multiple regression of municipal development on ni
 # Load the DS4Bolivia dataset
 url_bol = "https://raw.githubusercontent.com/quarcs-lab/ds4bolivia/master/ds4bolivia_v20250523.csv"
 bol = pd.read_csv(url_bol)
+
+# Load and merge satellite image embeddings
+url_sat = "https://raw.githubusercontent.com/quarcs-lab/ds4bolivia/master/satelliteEmbeddings/satelliteEmbeddings2017.csv"
+sat = pd.read_csv(url_sat)
+bol = bol.merge(sat[['asdf_id', 'A00', 'A10', 'A20', 'A30', 'A40']], on='asdf_id', how='left')
 
 # Select variables and prepare analysis sample
 embed_vars = ['A00', 'A10', 'A20', 'A30', 'A40']
@@ -19430,16 +20821,23 @@ $$H_0: \beta_{A00} = \beta_{A10} = \beta_{A20} = \beta_{A30} = \beta_{A40} = 0$$
 # R[3, 5] = 1  # A30 = 0
 # R[4, 6] = 1  # A40 = 0
 #
-# F = ((rss_r - rss_u) / q) / (rss_u / n_k)
+# # Restricted model: NTL only (drops all five embeddings)
+# model_r = pf.feols('imds ~ ln_NTLpc2017', data=bol_cs)
+# rss_r = np.sum(model_r._u_hat**2)
+# rss_u = np.sum(model_full._u_hat**2)
+# q = 5
+# n_k = int(model_full._N) - len(model_full.coef())
+# F_joint = ((rss_r - rss_u) / q) / (rss_u / n_k)
+# p_joint = 1 - stats.f.cdf(F_joint, q, n_k)
 # print("Joint F-Test: All Embedding Coefficients = 0")
 #
-# print(f"F-statistic: {f_test._f_statistic[0][0]:.4f}")
-# print(f"p-value:     {f_test.pvalue:.6f}")
-# print(f"df:          ({int(f_test.df_num)}, {int(f_test.df_denom)})")
-# print(f"\nConclusion: {'Reject H0' if f_test.pvalue < 0.05 else 'Fail to reject H0'} at 5% level")
+# print(f"F-statistic: {F_joint:.4f}")
+# print(f"p-value:     {p_joint:.6f}")
+# print(f"df:          ({q}, {n_k})")
+# print(f"\nConclusion: {'Reject H0' if p_joint < 0.05 else 'Fail to reject H0'} at 5% level")
 ```
 
-> **Key Concept 11.12: Joint Significance of Satellite Features**
+> **Key Concept 11.11: Joint Significance of Satellite Features**
 >
 > Individual satellite embedding coefficients may appear **statistically insignificant** (p > 0.05) in a multiple regression, yet the group of embeddings may be **jointly significant** (F-test p < 0.05). This paradox arises when embeddings are correlated with each other: the individual t-tests cannot distinguish each embedding's unique contribution, but the F-test captures their collective explanatory power. Joint F-tests are essential when evaluating groups of related predictors.
 
@@ -19457,7 +20855,7 @@ $$F = \frac{(R^2_u - R^2_r) / q}{(1 - R^2_u) / (n - k - 1)}$$
 
 where $q = 5$ (number of restrictions), $n$ = sample size, $k$ = number of regressors in unrestricted model
 
-4. Compare your manual calculation with `model_full.compare_f_test(model_restricted)`
+4. Verify your manual calculation by recomputing the F-statistic with the RSS-based formula from Task 4
 5. Interpret: How much do the embeddings improve the model's explanatory power?
 
 ```python
@@ -19467,7 +20865,7 @@ where $q = 5$ (number of restrictions), $n$ = sample size, $k$ = number of regre
 # 1. Estimate restricted model (NTL only)
 # 2. Compare R-squared values
 # 3. Compute F-statistic manually
-# 4. Verify with compare_f_test()
+# 4. Verify with the RSS-based F-test formula
 
 # Example structure:
 # # Restricted model: NTL only
@@ -19490,9 +20888,12 @@ where $q = 5$ (number of restrictions), $n$ = sample size, $k$ = number of regre
 # F_manual = ((R2_u - R2_r) / q) / ((1 - R2_u) / (n - k - 1))
 # print(f"\nManual F-statistic: {F_manual:.4f}")
 #
-# # Verify with statsmodels
-# f_compare = model_full.compare_f_test(model_restricted)
-# print(f"compare_f_test:     F = {f_compare[0]:.4f}, p = {f_compare[1]:.6f}")
+# # Verify with the RSS-based F-test formula
+# rss_r = np.sum(model_restricted._u_hat**2)
+# rss_u = np.sum(model_full._u_hat**2)
+# F_rss = ((rss_r - rss_u) / q) / (rss_u / (n - k - 1))
+# p_rss = 1 - stats.f.cdf(F_rss, q, (n - k - 1))
+# print(f"RSS-based F-test:   F = {F_rss:.4f}, p = {p_rss:.6f}")
 ```
 
 #### Task 6: Inference Brief (Independent)
@@ -19524,12 +20925,12 @@ Write a 200-300 word inference brief summarizing your statistical findings.
 # print(f"R² (NTL only):          {model_restricted._r2:.4f}")
 # print(f"R² (NTL + embeddings):  {model_full._r2:.4f}")
 # print(f"R² improvement:         {model_full._r2 - model_restricted._r2:.4f}")
-# print(f"\nJoint F-test p-value:   {f_test.pvalue:.6f}")
+# print(f"\nJoint F-test p-value:   {p_joint:.6f}")
 # print(f"Individually significant at 5%: {sig_5}/5 embeddings")
 # print(f"Individually significant at 10%: {sig_10}/5 embeddings")
 ```
 
-> **Key Concept 11.13: Feature Selection in Prediction Models**
+> **Key Concept 11.12: Feature Selection in Prediction Models**
 >
 > When many potential predictors are available (e.g., 64 satellite embedding dimensions), selecting which to include requires balancing **explanatory power** against **model parsimony**. Joint F-tests help determine whether *subsets* of features add genuine predictive value beyond what simpler models provide. In the DS4Bolivia context, testing whether 5 selected embeddings improve upon NTL alone informs practical decisions about data collection and model complexity for SDG monitoring.
 
@@ -19541,7 +20942,7 @@ Through this analysis of satellite features and municipal development in Bolivia
 - **Confidence intervals**: Constructed and visualized 95% CIs for all coefficients using a forest plot
 - **Individual t-tests**: Assessed the statistical significance of each satellite embedding individually
 - **Joint F-tests**: Tested whether all embeddings are jointly significant using restriction matrices
-- **Restricted vs unrestricted comparison**: Computed F-statistics manually and verified with `compare_f_test()`
+- **Restricted vs unrestricted comparison**: Computed F-statistics manually using both the R² and RSS formulas
 - **Inference interpretation**: Distinguished between individual insignificance and joint significance
 
 **Connection to the next chapter**: In Chapter 12, we address robust standard errors and prediction intervals—crucial for making reliable predictions about individual municipalities.
@@ -19566,7 +20967,7 @@ This notebook provides an interactive introduction to advanced topics in regress
 [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/quarcs-lab/metricsai/blob/main/notebooks_colab/ch12_Further_Topics_in_Multiple_Regression.ipynb)
 <div class="chapter-resources">
 <a href="https://www.youtube.com/watch?v=0rM5db2lTPo" target="_blank" class="resource-btn">🎬 AI Video</a>
-<a href="https://carlos-mendez.my.canva.site/s12-further-topics-in-multiple-regression-pdf" target="_blank" class="resource-btn">✨ AI Slides</a>
+<a href="https://quarcs-lab.github.io/metricsai/slides/ch12/index.html" target="_blank" class="resource-btn">🧑🏽‍🏫 Mendez Slides</a>
 <a href="https://cameron.econ.ucdavis.edu/aed/traedv1_12" target="_blank" class="resource-btn">📊 Cameron Slides</a>
 <a href="https://app.edcafe.ai/quizzes/6978693a2f5d08069e04bed3" target="_blank" class="resource-btn">✏️ Quiz</a>
 <a href="https://app.edcafe.ai/chatbots/6978a1a32f5d08069e0719da" target="_blank" class="resource-btn">🤖 AI Tutor</a>
@@ -19577,18 +20978,16 @@ This notebook provides an interactive introduction to advanced topics in regress
 
 This chapter covers advanced topics that extend the multiple regression framework: robust standard errors for different data structures, prediction of outcomes, and deeper understanding of estimation and testing optimality.
 
-**Learning Objectives:**
+**What you'll learn:**
 
-By the end of this chapter, you will be able to:
-
-1. Understand when to use heteroskedastic-robust, cluster-robust, and HAC-robust standard errors
-2. Distinguish between prediction of average outcomes and individual outcomes
-3. Compute prediction intervals for conditional means and forecasts
-4. Understand the impact of nonrepresentative samples on regression estimates
-5. Recognize the difference between unbiased and best (most efficient) estimators
-6. Understand Type I and Type II errors in hypothesis testing
-7. Appreciate the role of bootstrap methods as an alternative to classical inference
-8. Know when OLS with robust SEs is preferred over more efficient estimators like FGLS
+- Understand when to use heteroskedastic-robust, cluster-robust, and HAC-robust standard errors
+- Distinguish between prediction of average outcomes and individual outcomes
+- Compute prediction intervals for conditional means and forecasts
+- Understand the impact of nonrepresentative samples on regression estimates
+- Recognize the difference between unbiased and best (most efficient) estimators
+- Understand Type I and Type II errors in hypothesis testing
+- Appreciate the role of bootstrap methods as an alternative to classical inference
+- Know when OLS with robust SEs is preferred over more efficient estimators like FGLS
 
 **Datasets used:**
 
@@ -19614,6 +21013,100 @@ By the end of this chapter, you will be able to:
 - Practice Exercises
 - Case Studies
 
+
+## Key Concepts
+
+Six core ideas anchor this chapter. Skim them before you start, and come back when a term feels fuzzy. Each entry pairs a concrete example using the chapter's data with a non-technical analogy. Click a panel to expand it.
+
+**Cluster-Robust Standard Error:** A variant of robust standard errors that allows errors to be correlated *within* groups (clusters) but independent *across* them. It is the right correction when the data come in natural clusters — students in classrooms, workers in firms, municipalities in regions — because heteroskedasticity-only SEs (HC1) understate uncertainty in those settings.
+
+::::: {.columns}
+:::: {.column width="50%"}
+::: {.callout-tip collapse="true" appearance="simple" title="Example"}
+The Davis-house regression on `size`, `bedrooms`, `bathrooms`, `lotsize`, `age`, `monthsold` is fit with HC1 robust SEs because the 29 houses are an i.i.d. cross-section. If instead the data were 29 houses spread across a handful of *neighbourhoods*, errors within a neighbourhood would likely be correlated (shared school district, common buyer pool), and a cluster-robust SE keyed on neighbourhood would replace HC1 to keep inference honest.
+:::
+::::
+:::: {.column width="50%"}
+::: {.callout-note collapse="true" appearance="simple" title="Analogy"}
+A school's test scores: students in the same classroom share a teacher, classroom climate, and rumor mill, so their scores aren't truly independent observations of "the population of students". Treating them as independent makes the school sound more confidently above-average than it is. Cluster-robust SEs let each *classroom* count as an effective unit of evidence — closer to the truth.
+:::
+::::
+:::::
+
+**Autocorrelation:** The phenomenon in time-series data of one period's error being correlated with the next period's error: $\operatorname{Corr}(u_t, u_{t-s}) \neq 0$. Positive autocorrelation means good periods (and bad periods) tend to cluster, so consecutive observations carry less independent information than a naive count suggests.
+
+::::: {.columns}
+:::: {.column width="50%"}
+::: {.callout-tip collapse="true" appearance="simple" title="Example"}
+For U.S. real-GDP-per-capita `growth` (`data_gdp`, $T = 241$ observations), the chapter computes a positive lag-1 autocorrelation — fast-growth years are more often followed by fast-growth years than chance would predict. That's why the Newey–West HAC standard error around the mean growth rate is *larger* than the default OLS SE: ignoring this serial dependence would overstate confidence.
+:::
+::::
+:::: {.column width="50%"}
+::: {.callout-note collapse="true" appearance="simple" title="Analogy"}
+A handclap in a long stone hallway echoes for several seconds; sounds you make later overlap with the lingering echo from earlier. Autocorrelation is the data's echo — what happened a moment ago is still ringing, so today's reading isn't an independent observation of "the world", but partly a recording of yesterday's.
+:::
+::::
+:::::
+
+**Confidence Interval for the Conditional Mean ($E[Y \mid X^*]$):** A range covering, at a stated confidence level, the *average* value of $Y$ for a given $X^*$. Its standard error is $s_e \sqrt{1/n + (x^* - \bar{x})^2 / \sum(x_i - \bar{x})^2}$ in the bivariate case — both terms shrink to zero as $n \to \infty$.
+
+::::: {.columns}
+:::: {.column width="50%"}
+::: {.callout-tip collapse="true" appearance="simple" title="Example"}
+For a 2{,}000-sq-ft Davis house, the chapter's regression on `size` predicts an *average* `price` of about \$263k, with a 95% CI roughly $[\$253\mathrm{k}, \$272\mathrm{k}]$. That interval describes the typical sale price across all 2{,}000-sq-ft houses in this market — not what any single house will fetch.
+:::
+::::
+:::: {.column width="50%"}
+::: {.callout-note collapse="true" appearance="simple" title="Analogy"}
+A bakery weighs every loaf and reports an average of 503 g. The CI for the *average* loaf is tight — say 501–505 g — because the bakery has weighed thousands. That number doesn't tell you how heavy *your* loaf is; it tells you what the bakery's process averages to across all customers.
+:::
+::::
+:::::
+
+**Prediction Interval for an Individual Outcome:** A range covering, at a stated confidence level, *the actual value* of $Y$ at a given $X^*$, including both estimation uncertainty and the irreducible noise $u^*$. The "$1 +$" in the formula $s_e \sqrt{1 + 1/n + (x^* - \bar{x})^2 / \sum(x_i - \bar{x})^2}$ never disappears — the floor on individual predictions is roughly $s_e$, no matter how large the sample.
+
+::::: {.columns}
+:::: {.column width="50%"}
+::: {.callout-tip collapse="true" appearance="simple" title="Example"}
+For the same 2{,}000-sq-ft house, the prediction interval for *one specific* sale is roughly $[\$213\mathrm{k}, \$312\mathrm{k}]$ — about five times wider than the CI for the average. With $s_e \approx \$23{,}551$ in the simple regression on `size`, almost all of that width comes from the irreducible "1" term, not from estimation uncertainty in $\hat\beta$.
+:::
+::::
+:::: {.column width="50%"}
+::: {.callout-note collapse="true" appearance="simple" title="Analogy"}
+A casino slot machine has a known long-run payout of 95 cents on the dollar. That's the *conditional mean* — across thousands of pulls, you'll lose about 5%. For *your next pull*, though, you might win \$10 or lose \$1 — pure individual variation that the long-run average doesn't predict. The prediction interval is the range in which one pull will plausibly land.
+:::
+::::
+:::::
+
+**Generalized Least Squares (GLS):** A weighted-OLS estimator that re-weights observations by the inverse of their (assumed-known) error variances, restoring efficiency when the homoskedasticity assumption fails. In practice the variances are estimated from the data, yielding *feasible* GLS (FGLS) — but with risks: a misspecified weighting model can be worse than plain OLS with robust SEs.
+
+::::: {.columns}
+:::: {.column width="50%"}
+::: {.callout-tip collapse="true" appearance="simple" title="Example"}
+On the Davis house data, plain OLS yields the same $\hat\beta$ regardless of error structure — but its *efficiency* is lost under heteroskedasticity. A GLS estimator that down-weights houses with larger fitted-residual variance would, in principle, deliver tighter standard errors than OLS+HC1 — provided the weights are correctly specified. The chapter notes this trade-off and recommends OLS+robust SEs as the safe default.
+:::
+::::
+:::: {.column width="50%"}
+::: {.callout-note collapse="true" appearance="simple" title="Analogy"}
+A tailor making suits doesn't apply the same fabric tension to every customer — a precise pattern weights tighter where measurements are reliable and looser where they are not. GLS is the regression's tailored fit: weighting each observation by its relative reliability so the resulting estimator hugs the truth more snugly than the off-the-rack OLS line does.
+:::
+::::
+:::::
+
+**Statistical Power ($1 - \beta$):** The probability that a test correctly *rejects* the null hypothesis when the alternative is in fact true. Power rises with sample size $n$, with the true effect size, and with the chosen significance level $\alpha$ — and falls with the noise level. A standard target is power $\geq 0.80$ for the smallest effect of practical interest.
+
+::::: {.columns}
+:::: {.column width="50%"}
+::: {.callout-tip collapse="true" appearance="simple" title="Example"}
+The Davis house regression had only $n = 29$ observations to test $H_0: \beta_{\text{bedrooms}} = 0$, and failed to reject ($p = 0.773$). With such a small sample and substantial multicollinearity between `size` and `bedrooms`, the test's power to detect a modest bedrooms effect was very low — the failure to reject is as likely a Type II error (missed effect) as evidence of no effect at all.
+:::
+::::
+:::: {.column width="50%"}
+::: {.callout-note collapse="true" appearance="simple" title="Analogy"}
+A microscope's magnification determines whether a faint cell wall shows up or stays hidden in the smudge. Statistical power is the magnification of a hypothesis test: with low magnification, real effects can sit invisibly under the noise floor; bumping up the sample size is like swapping in a stronger lens — what was always there finally becomes visible.
+:::
+::::
+:::::
 
 ## Setup
 
@@ -19659,7 +21152,7 @@ plt.rcParams.update({
 print("Setup complete! Ready to explore further topics in multiple regression.")
 ```
 
-## 12.1: Example - House Price Prediction
+## 12.1 Example - House Price Prediction
 
 We'll work with two datasets:
 
@@ -19667,17 +21160,21 @@ We'll work with two datasets:
 2. **GDP growth data** for time series HAC inference
 
 ```python
+# 12.1 EXAMPLE - HOUSE PRICE PREDICTION
+
 # Read house data
 data_house = pd.read_stata(GITHUB_DATA_URL + 'AED_HOUSE.DTA')
 
 print("House Data Summary:")
-data_house.describe()
+print(data_house.describe())
 
 print("\nFirst few observations:")
 data_house[['price', 'size', 'bedrooms', 'bathrooms', 'lotsize', 'age', 'monthsold']].head()
 ```
 
-## 12.2: Inference with Robust Standard Errors
+The dataset is a small cross-section: 29 houses sold in Davis, California, in 1999. Keep this in mind throughout the chapter — with only $n = 29$ observations, every standard-error comparison and hypothesis test operates with limited power.
+
+## 12.2 Inference with Robust Standard Errors
 
 In practice, the classical assumptions often fail. The most common violations are:
 
@@ -19725,6 +21222,8 @@ print("\nRegression with Default Standard Errors:")
 model_default.summary()
 ```
 
+Now we re-estimate the identical model with heteroskedastic-robust (HC1) standard errors. The coefficient estimates will not change — watch instead how each standard error, $t$-statistic, and $p$-value shifts relative to the default output above.
+
 ```python
 # Estimate with heteroskedastic-robust standard errors (HC1)
 model_robust = pf.feols('price ~ size + bedrooms + bathrooms + lotsize + age + monthsold', data=data_house, vcov='HC1')
@@ -19739,6 +21238,8 @@ print("\nRegression with Heteroskedastic-Robust Standard Errors (HC1):")
 model_robust.summary()
 ```
 
+For the Davis houses, robust and default standard errors tell the same story: the robust SE for `size` (15.36) is nearly identical to the default (15.39), so the headline conclusion is unchanged — each additional square foot is associated with roughly \$68 more in sale price, highly significant either way (p = 0.0002). The largest adjustments are for `bathrooms` (robust SE about 23% larger) and `lotsize` (robust SE about 26% smaller), but both variables remain far from statistical significance under either method.
+
 > **Key Concept 12.1: Heteroskedastic-Robust Standard Errors**
 >
 > When error variance is not constant across observations, default OLS standard errors are invalid. Heteroskedastic-robust (HC1) SEs correct this problem without changing the coefficient estimates themselves. Only the standard errors, $t$-statistics, and confidence intervals change. For cross-sectional data, reporting HC1 robust SEs is considered best practice.
@@ -19746,6 +21247,18 @@ model_robust.summary()
 ### Comparison: Default vs. Robust Standard Errors
 
 Let's systematically compare the standard errors and see how inference changes.
+
+```python
+# Compare default vs. robust (HC1) standard errors, coefficient by coefficient
+print(f"{'Variable':<14} {'Coef':>12} {'Default SE':>12} {'Robust SE':>12} {'SE Ratio':>10}")
+print("-" * 62)
+for var in model_default.coef().index:
+    coef  = model_default.coef()[var]
+    se_d  = model_default.se()[var]
+    se_r  = model_robust.se()[var]
+    ratio = se_r / se_d                    # ratio > 1 -> default SE was too optimistic
+    print(f"{var:<14} {coef:>12.2f} {se_d:>12.2f} {se_r:>12.2f} {ratio:>10.3f}")
+```
 
 ### Interpreting the Comparison: What Changed?
 
@@ -19768,7 +21281,7 @@ Looking at the SE Ratio column, we can see how robust standard errors differ fro
 **When SE Ratio < 1.0**: Robust SE smaller than default SE
 
 - Unusual but possible
-- Could indicate negative correlation between x² and residuals
+- Could indicate negative correlation between x² and squared residuals
 
 **Practical Implications:**
 
@@ -19807,27 +21320,31 @@ data_gdp = pd.read_stata(GITHUB_DATA_URL + 'AED_REALGDPPC.DTA')
 # HAC Standard Errors for Time Series Data
 
 print("\nGDP Growth Data Summary:")
-data_gdp['growth'].describe()
+print(data_gdp['growth'].describe())
 
 # Mean of growth
 mean_growth = data_gdp['growth'].mean()
 print(f"\nMean growth rate: {mean_growth:.6f}")
 ```
 
+Before adjusting any standard errors, let's measure the serial dependence directly. The next cell computes the autocorrelation of `growth` at lags 0 through 5 — look for a positive lag-1 value, which means one period's growth carries information about the next.
+
 ```python
 # Autocorrelation analysis
 print("\nAutocorrelations at multiple lags:")
-acf_values = acf(data_gdp['growth'], nlags=5, fft=False)
+acf_values = acf(data_gdp['growth'].dropna(), nlags=5, fft=False)
 for i in range(6):
     print(f"  Lag {i}: {acf_values[i]:.6f}")
 
 # Positive lag 1 correlation suggests persistence
 ```
 
+Now we plot the correlogram (Figure 12.1), which displays the autocorrelation at each lag together with 95% confidence bands under the null of no autocorrelation.
+
 ```python
 # Correlogram
 fig, ax = plt.subplots(figsize=(10, 6))
-plot_acf(data_gdp['growth'], lags=10, ax=ax, alpha=0.05)
+plot_acf(data_gdp['growth'].dropna(), lags=10, ax=ax, alpha=0.05)
 ax.set_xlabel('Lag', fontsize=12)
 ax.set_ylabel('Autocorrelation', fontsize=12)
 ax.set_title('Figure 12.1: Correlogram of GDP Growth', fontsize=14, fontweight='bold')
@@ -19848,6 +21365,32 @@ print("Blue shaded area = 95% confidence bands under null of no autocorrelation.
 >
 > In time series data, errors are often autocorrelated — today's shock persists into tomorrow. HAC (heteroskedasticity and autocorrelation consistent) standard errors, also called Newey-West SEs, account for both heteroskedasticity and autocorrelation. The lag length $m$ must be specified; a common rule of thumb is $m = 0.75 \times T^{1/3}$.
 
+Now let's compute the standard error of the mean growth rate three ways: the default SE (which assumes independence), a HAC SE at lag 0 (heteroskedasticity-robust only), and a HAC SE at the rule-of-thumb lag (Newey-West), which also corrects for autocorrelation.
+
+```python
+# HAC (Newey-West) standard errors for the mean growth rate
+from statsmodels.regression.linear_model import OLS as smOLS
+
+growth   = data_gdp['growth'].dropna()      # drop initial missing growth values
+n_gdp    = len(growth)
+lag_rule = int(0.75 * n_gdp**(1/3))         # rule of thumb: m = 0.75 x T^(1/3)
+
+# Default SE assumes no autocorrelation
+se_default = growth.std() / np.sqrt(n_gdp)
+
+# HAC SEs via an intercept-only OLS (the mean model)
+y = growth
+X = np.ones(n_gdp)
+se_hac0 = smOLS(y, X).fit(cov_type='HAC', cov_kwds={'maxlags': 0}).bse.iloc[0]
+se_hac  = smOLS(y, X).fit(cov_type='HAC', cov_kwds={'maxlags': lag_rule}).bse.iloc[0]
+
+print(f"Mean growth rate: {growth.mean():.4f}  (T = {n_gdp})")
+print(f"Default SE (no autocorrelation):   {se_default:.6f}")
+print(f"HAC SE (lag 0, het-robust only):   {se_hac0:.6f}")
+print(f"HAC SE (lag {lag_rule}, Newey-West):         {se_hac:.6f}")
+print(f"Ratio HAC(lag {lag_rule}) / Default: {se_hac / se_default:.3f}")
+```
+
 ### Interpreting HAC Standard Errors
 
 **What the Results Tell Us:**
@@ -19864,7 +21407,7 @@ Comparing the three standard error estimates for the mean growth rate:
  - Often similar to default in time series
  - Still underestimates uncertainty if autocorrelation present
 
-3. **HAC with lag 5** (Newey-West):
+3. **HAC with lag 4** (Newey-West):
  - Accounts for both heteroskedasticity AND autocorrelation
  - **Larger SE** reflects true uncertainty
  - More conservative but valid inference
@@ -19892,7 +21435,7 @@ Autocorrelation creates **information overlap** between observations:
 - Spurious significance (false discoveries)
 - Invalid hypothesis tests
 
-## 12.3: Prediction
+## 12.3 Prediction
 
 Prediction is a core application of regression, but there's a crucial distinction:
 
@@ -20001,6 +21544,47 @@ This figure illustrates the fundamental difference between:
 - **Confidence interval for conditional mean** (narrower, red)
 - **Prediction interval for actual value** (wider, blue)
 
+```python
+# Figure 12.2: confidence interval (conditional mean) vs. prediction interval (individual)
+sizes  = data_house['size'].values
+xbar   = sizes.mean()
+Sxx    = np.sum((sizes - xbar)**2)
+n_h    = len(data_house)
+s_e    = np.sqrt(np.sum(model_simple._u_hat**2) / (n_h - len(model_simple.coef())))
+t_crit = stats.t.ppf(0.975, n_h - len(model_simple.coef()))
+
+grid = pd.DataFrame({'size': np.linspace(sizes.min(), sizes.max(), 100)})
+fit  = model_simple.predict(newdata=grid)
+dist = (grid['size'].values - xbar)**2 / Sxx
+se_cm_grid = s_e * np.sqrt(1/n_h + dist)          # conditional-mean SE
+se_pi_grid = s_e * np.sqrt(1 + 1/n_h + dist)      # individual-forecast SE
+
+fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 5), sharey=True)
+
+# Panel A: confidence interval for the average price (red)
+ax1.scatter(data_house['size'], data_house['price'], s=40, alpha=0.6, color='white')
+ax1.plot(grid['size'], fit, color='red', linewidth=2, label='Fitted line')
+ax1.fill_between(grid['size'], fit - t_crit*se_cm_grid, fit + t_crit*se_cm_grid,
+                 color='red', alpha=0.30, label='95% CI (conditional mean)')
+ax1.set_title('Panel A: Confidence Interval for E[Y|X]')
+ax1.set_xlabel('House Size (sq ft)')
+ax1.set_ylabel('House Price ($)')
+ax1.legend()
+
+# Panel B: prediction interval for one individual house (blue)
+ax2.scatter(data_house['size'], data_house['price'], s=40, alpha=0.6, color='white')
+ax2.plot(grid['size'], fit, color='red', linewidth=2, label='Fitted line')
+ax2.fill_between(grid['size'], fit - t_crit*se_pi_grid, fit + t_crit*se_pi_grid,
+                 color='blue', alpha=0.20, label='95% PI (individual)')
+ax2.set_title('Panel B: Prediction Interval for Y')
+ax2.set_xlabel('House Size (sq ft)')
+ax2.legend()
+
+fig.suptitle('Figure 12.2: Confidence vs. Prediction Intervals', fontweight='bold')
+plt.tight_layout()
+plt.show()
+```
+
 ### Understanding the Numbers: A Concrete Example
 
 **Interpreting the Results for a 2000 sq ft House:**
@@ -20009,27 +21593,27 @@ Looking at our predictions, several patterns emerge:
 
 **1. Point Prediction:**
 
-- Predicted price ≈ \$280,000 (approximately)
+- Predicted price ≈ \$263,000 (approximately)
 - This is our best single guess
 - Same for both conditional mean and actual value
 
 **2. Confidence Interval for E[Y|X=2000]:**
 
-- Relatively narrow (e.g., \$250k - \$310k)
+- Relatively narrow (e.g., \$253k - \$272k)
 - Tells us: "We're 95% confident the **average price** of all 2000 sq ft houses is in this range"
 - Precise because we're estimating a population average
 - Useful for: Understanding market valuations, setting pricing policies
 
 **3. Prediction Interval for Y:**
 
-- Much wider (e.g., \$180k - \$380k)
+- Much wider (e.g., \$213k - \$312k)
 - Tells us: "We're 95% confident **this specific house** will sell in this range"
 - Wide because individual houses vary considerably
 - Useful for: Setting listing ranges, individual appraisals
 
 **The Ratio is Revealing:**
 
-Notice that the PI is approximately **3-4 times wider** than the CI. This ratio tells us:
+Notice that the PI is approximately **5 times wider** than the CI. This ratio tells us:
 
 - Most variation is **between houses** (individual heterogeneity)
 - Relatively little variation is **estimation uncertainty**
@@ -20045,8 +21629,8 @@ Notice that the PI is approximately **3-4 times wider** than the CI. This ratio 
 
 If you're a real estate agent:
 
-- Don't promise a precise price (\$280k)
-- Do provide a realistic range (\$180k - \$380k)
+- Don't promise a precise price (\$263k)
+- Do provide a realistic range (\$213k - \$312k)
 - Explain that individual houses vary, even controlling for size
 - Use the confidence interval to discuss average market values
 
@@ -20076,14 +21660,14 @@ $$se(\hat{y}_f) = \hat{\sigma} \sqrt{1 + \frac{1}{n} + \frac{(x^* - \bar{x})^2}{
 
 In our example:
 
-- $\hat{\sigma}$ (RMSE) ≈ \$90k (this is the irreducible uncertainty)
+- $\hat{\sigma}$ (RMSE) ≈ \$23.6k (this is the irreducible uncertainty)
 - $(1/n)$ term ≈ 0.034 (small with n=29)
 - Distance term varies with prediction point
 
 For predictions near the mean:
 
-- $se(\hat{y}_{cm})$ ≈ \$90k × √0.034 ≈ \$17k (mainly from 1/n)
-- $se(\hat{y}_f)$ ≈ \$90k × √1.034 ≈ \$92k (mainly from the "1")
+- $se(\hat{y}_{cm})$ ≈ \$23.6k × √0.034 ≈ \$4.4k (mainly from 1/n)
+- $se(\hat{y}_f)$ ≈ \$23.6k × √1.034 ≈ \$24k (mainly from the "1")
 
 **The "1 +" term is why:**
 
@@ -20112,9 +21696,46 @@ When presenting predictions:
 
 Let's predict house price for a 2000 square foot house.
 
+```python
+# Prediction at a specific value: a 2000 sq ft house (simple regression on size)
+x_star  = 2000
+pred_cm = model_simple.predict(newdata=pd.DataFrame({'size': [x_star]}))[0]
+
+# Ingredients for the bivariate prediction standard errors
+sizes  = data_house['size'].values
+xbar   = sizes.mean()
+Sxx    = np.sum((sizes - xbar)**2)
+n_h    = len(data_house)
+s_e    = np.sqrt(np.sum(model_simple._u_hat**2) / (n_h - len(model_simple.coef())))
+t_crit = stats.t.ppf(0.975, n_h - len(model_simple.coef()))
+
+se_cm = s_e * np.sqrt(1/n_h + (x_star - xbar)**2 / Sxx)      # conditional-mean SE
+se_pi = s_e * np.sqrt(1 + 1/n_h + (x_star - xbar)**2 / Sxx)  # individual-forecast SE
+
+ci_low, ci_high = pred_cm - t_crit*se_cm, pred_cm + t_crit*se_cm
+pi_low, pi_high = pred_cm - t_crit*se_pi, pred_cm + t_crit*se_pi
+
+print(f"Prediction for a {x_star:,} sq ft house (simple regression on size):")
+print(f"  Point prediction:              ${pred_cm:,.0f}")
+print(f"  95% CI for the average price:  [${ci_low:,.0f}, ${ci_high:,.0f}]")
+print(f"  95% PI for one specific house: [${pi_low:,.0f}, ${pi_high:,.0f}]")
+print(f"  PI width / CI width:           {(pi_high - pi_low) / (ci_high - ci_low):.2f}x")
+```
+
 ### Manual Calculation of Standard Errors
 
 Let's manually calculate the standard errors to understand the formulas.
+
+```python
+# Manual decomposition of the prediction standard errors at x* = 2000
+print("Standard-error ingredients at x* = 2000 sq ft:")
+print(f"  s_e (RMSE):                        ${s_e:,.0f}")
+print(f"  1/n term:                          {1/n_h:.4f}")
+print(f"  distance term (x*-xbar)^2 / Sxx:   {(x_star - xbar)**2 / Sxx:.4f}")
+print(f"  se(y_cm) = s_e * sqrt(1/n + dist)      = ${se_cm:,.0f}")
+print(f"  se(y_f)  = s_e * sqrt(1 + 1/n + dist)  = ${se_pi:,.0f}")
+print(f"\nThe '1 +' term dominates: se(y_f) is about {se_pi/se_cm:.1f}x larger than se(y_cm).")
+```
 
 ### Prediction with Multiple Regression
 
@@ -20156,8 +21777,9 @@ print(f"\n95% PI for Y (approximate):")
 print(f"  [${pi_lower:.2f}, ${pi_upper:.2f}]")
 print(f"  RMSE: ${s_e_multi:.2f}")
 
-print("\nMultiple regression provides more precise predictions.")
-print("But individual predictions still have large uncertainty.")
+print("\nNote: adding regressors does not automatically improve precision —")
+print("here the RMSE is slightly larger than in the simple regression.")
+print("Individual predictions still have large uncertainty.")
 ```
 
 ### Prediction with Robust Standard Errors
@@ -20193,7 +21815,7 @@ print(f"  Note: Coefficients and RMSE are identical; only SEs for inference diff
 >
 > Even with precisely estimated coefficients, predicting an individual outcome is imprecise because the forecast must account for the unobservable error $u^*$. The forecast standard error satisfies $se(\hat{y}_f) \geq s_e$ — it is at least as large as the regression's standard error. This means 95% prediction intervals are at least $\pm 1.96 \times s_e$ wide, regardless of how much data we have.
 
-## 12.4: Nonrepresentative Samples
+## 12.4 Nonrepresentative Samples
 
 **Sample selection** can bias OLS estimates:
 
@@ -20243,7 +21865,7 @@ After B replications:
 **Percentile Method CI:**
 
 - 95% CI = [2.5th percentile, 97.5th percentile] of bootstrap distribution
-- Example: If you have 1000 estimates, use the 25th and 975th largest values
+- Example: If you have 1000 estimates, use the 25th and 975th values after sorting from smallest to largest
 
 **Advantages of Bootstrap:**
 
@@ -20286,9 +21908,14 @@ Often used together: Bootstrap with robust methods!
 5. Check convergence: Results shouldn't change much with different seeds
 
 ```python
-# 12.4 NONREPRESENTATIVE SAMPLES
+# 12.4 NONREPRESENTATIVE SAMPLES — key insight
 
-# Key: sample selection can bias estimates; always verify representativeness
+print("Sample selection and OLS bias:\n")
+print("- Selection on X (a regressor): OLS stays unbiased if X is controlled")
+print("  for; it only costs precision.")
+print("- Selection on Y (the outcome): OLS is biased for population parameters")
+print("  -- use sample weights, a Heckman correction, or a selection model.")
+print("\nAlways verify your sample is representative of the target population.")
 ```
 
 > **Key Concept 12.5: Sample Selection Bias**
@@ -20368,7 +21995,7 @@ Testing k hypotheses at α = 0.05:
 3. **Pre-registration**: Specify primary hypotheses before seeing data
 4. **Replication**: Confirm findings in independent samples
 
-## 12.5: Best Estimation Methods
+## 12.5 Best Estimation Methods
 
 **When are OLS estimators "best"?**
 
@@ -20380,7 +22007,7 @@ Under classical assumptions 1-4, OLS is **BLUE** (Best Linear Unbiased Estimator
 
 - OLS remains unbiased but inefficient
 - **Feasible GLS (FGLS)** or **Weighted Least Squares (WLS)** more efficient
-- Weight observations inversely to error variance: $w_i = 1/\sigma_i$
+- Weight observations inversely to error variance: $w_i = 1/\sigma_i^2$
 
 **2. Autocorrelation**: $Cov[u_t, u_{t-s}] \neq 0$
 
@@ -20421,7 +22048,7 @@ The power function shows how test power varies with the true coefficient value. 
 4. **The 0.80 threshold (green dashed line)**:
  - Standard target: 80% power
  - Means 20% chance of Type II error (β = 0.20)
- - In this example: Need |β| ≈ 30 to achieve 80% power
+ - In this example: Need |β| ≈ 44 to achieve 80% power
 
 **What This Means for Study Design:**
 
@@ -20432,12 +22059,12 @@ Given the parameters (n=30, SE=15, α=0.05):
  - More likely to **miss** the effect than detect it
  - Study is underpowered
 
-- **Medium effects** (|β| ≈ 30):
+- **Medium effects** (|β| ≈ 44):
  - Power ≈ 80%
  - Good chance of detection
  - Standard benchmark for adequate power
 
-- **Large effects** (|β| > 45):
+- **Large effects** (|β| > 56):
  - Power > 95%
  - Almost certain detection
  - Study is well-powered
@@ -20447,7 +22074,7 @@ Given the parameters (n=30, SE=15, α=0.05):
 To detect smaller effects, you need larger samples:
 
 - **Double the sample** (n=60) → Can detect smaller effects with same power
-- Power roughly proportional to √n
+- Minimum detectable effect shrinks in proportion to 1/√n
 - To halve minimum detectable effect, need **4× the sample size**
 
 **The Power-Sample Size Relationship:**
@@ -20456,7 +22083,7 @@ For a given effect size β:
 
 - Power increases with √n
 - To go from 50% to 80% power: Need ≈ 2× the sample
-- To go from 80% to 95% power: Need ≈ 2× the sample again
+- To go from 80% to 95% power: Need ≈ 1.7× the sample again
 
 **Practical Applications:**
 
@@ -20492,40 +22119,37 @@ For a given effect size β:
 This power curve illustrates a fundamental truth:
 
 - **Smaller effects require larger samples to detect**
-- With n=30 and SE=15, we can reliably detect effects of |β| ≥ 30
+- With n=30 and SE=15, we can reliably detect effects of |β| ≥ 44 (where power reaches 80%)
 - For smaller effects, we'd need more data or reduced noise (lower σ)
 
 ```python
-# 12.5 BEST ESTIMATION METHODS
+# 12.5 BEST ESTIMATION METHODS — quick reference
 
-print("\nKey concepts:")
-print("\n1. Gauss-Markov Theorem:")
-# Under assumptions 1-4, OLS is BLUE
-# BLUE = Best Linear Unbiased Estimator
-# 'Best' = minimum variance among linear unbiased estimators
+print("When is OLS 'best'?\n")
 
-print("\n2. When assumptions fail:")
-# Heteroskedasticity → Weighted Least Squares (WLS)
-# Autocorrelation → GLS with AR errors
-# Both → Feasible GLS (FGLS)
+print("1. Gauss-Markov Theorem")
+print("   Under assumptions 1-4, OLS is BLUE: the minimum-variance")
+print("   linear unbiased estimator.\n")
 
-print("\n3. Practical considerations:")
-# Efficiency gains often modest in practice
-# Misspecification of error structure can worsen estimates
-# Most studies use OLS + robust SEs (simpler, more robust)
-# Exception: Panel data methods model error components explicitly
+print("2. When assumptions fail")
+print("   Heteroskedasticity -> Weighted Least Squares (WLS)")
+print("   Autocorrelation     -> GLS with AR errors")
+print("   Both                -> Feasible GLS (FGLS)\n")
 
-print("\n4. Maximum Likelihood:")
-# If error distribution fully specified (e.g., normal)
-# MLE can be more efficient than OLS
-# Under normality, MLE = OLS for linear regression
+print("3. Practical considerations")
+print("   Efficiency gains are often modest, and misspecifying the error")
+print("   structure can hurt, so most applied work uses OLS + robust SEs.\n")
+
+print("4. Maximum Likelihood")
+print("   Under normally distributed errors, MLE coincides with OLS")
+print("   for the linear regression model.")
 ```
 
 > **Key Concept 12.6: Feasible Generalized Least Squares**
 >
 > When error variance is not constant (heteroskedasticity) or errors are correlated (autocorrelation), OLS remains unbiased but is no longer the most efficient estimator. Feasible GLS (FGLS) models the error structure and can achieve lower variance. However, FGLS requires correctly specifying the error structure — in practice, OLS with robust SEs is preferred for its simplicity and robustness to misspecification.
 
-## 12.6: Best Confidence Intervals
+## 12.6 Best Confidence Intervals
 
 **What makes a confidence interval "best"?**
 
@@ -20565,7 +22189,7 @@ A 95% CI is "best" if it:
 >
 > The bootstrap resamples the original data (with replacement) many times to estimate the sampling distribution of a statistic. Bootstrap CIs don't rely on normality or large-sample approximations, making them especially useful with small samples, skewed distributions, or non-standard estimators where analytical formulas aren't available.
 
-## 12.7: Best Tests
+## 12.7 Best Tests
 
 **Type I and Type II errors**:
 
@@ -20615,6 +22239,35 @@ A 95% CI is "best" if it:
 ### Illustration: Power of a Test
 
 Let's visualize how test power depends on the true effect size.
+
+```python
+# Figure 12.3: power curve — how the chance of detecting an effect grows with its size
+alpha   = 0.05
+se_test = 15                              # hypothetical standard error
+n_test  = 30
+t_crit  = stats.t.ppf(1 - alpha / 2, df=n_test - 1)
+
+beta_range = np.linspace(-60, 60, 500)
+power = []
+for beta_true in beta_range:
+    ncp = beta_true / se_test             # non-centrality parameter
+    power_val = 1 - (stats.t.cdf(t_crit - ncp, df=n_test - 1)
+                     - stats.t.cdf(-t_crit - ncp, df=n_test - 1))
+    power.append(power_val)
+
+fig, ax = plt.subplots(figsize=(10, 6))
+ax.plot(beta_range, power, linewidth=2)
+ax.axhline(0.05, color='gray', linestyle='--', alpha=0.5, label='α = 0.05 (Type I)')
+ax.axhline(0.80, color='green', linestyle='--', alpha=0.5, label='Power = 0.80 target')
+ax.axvline(0, color='gray', linestyle='-', alpha=0.3, label='H₀: β = 0')
+ax.set_xlabel('True Coefficient Value (β)')
+ax.set_ylabel('Power = P(Reject H₀)')
+ax.set_title('Figure 12.3: Power Curve — Larger Effects Are Easier to Detect')
+ax.legend()
+ax.grid(True, alpha=0.3)
+plt.tight_layout()
+plt.show()
+```
 
 > **Key Concept 12.8: Type I and Type II Errors**
 >
@@ -20760,13 +22413,14 @@ plt.show()
 url_gdp = "https://raw.githubusercontent.com/quarcs-lab/data-open/master/AED/AED_REALGDPPC.DTA"
 data_gdp = pd.read_stata(url_gdp)
 
-mean_growth = data_gdp['growth'].mean()
-n_gdp       = len(data_gdp)
+growth = data_gdp['growth'].dropna()      # drop initial missing growth values
+mean_growth = growth.mean()
+n_gdp       = len(growth)
 lag_length   = int(0.75 * n_gdp**(1/3))  # rule of thumb: m = 0.75 × T^(1/3)
 
 # Compare default SE vs. HAC SE for the mean
-se_default = data_gdp['growth'].std() / np.sqrt(n_gdp)
-y = data_gdp['growth']
+se_default = growth.std() / np.sqrt(n_gdp)
+y = growth
 X = np.ones(n_gdp)
 # Note: For HAC SEs on the mean (intercept-only model), we use statsmodels
 from statsmodels.regression.linear_model import OLS as smOLS
@@ -20774,12 +22428,12 @@ model_hac = smOLS(y, X).fit(cov_type='HAC', cov_kwds={'maxlags': lag_length})
 
 print(f"\nGDP Growth: mean = {mean_growth:.4f}")
 print(f"Default SE (no autocorrelation): {se_default:.6f}")
-print(f"HAC SE (lag = {lag_length}):            {model_hac.bse[0]:.6f}")
-print(f"Ratio HAC/Default: {model_hac.bse[0] / se_default:.3f}")
+print(f"HAC SE (lag = {lag_length}):            {model_hac.bse.iloc[0]:.6f}")
+print(f"Ratio HAC/Default: {model_hac.bse.iloc[0] / se_default:.3f}")
 
 # Correlogram — visualize autocorrelation structure
 fig, ax = plt.subplots(figsize=(10, 6))
-plot_acf(data_gdp['growth'], lags=10, ax=ax, alpha=0.05)
+plot_acf(growth, lags=10, ax=ax, alpha=0.05)
 ax.set_xlabel('Lag')
 ax.set_ylabel('Autocorrelation')
 ax.set_title('Correlogram of GDP Growth')
@@ -20857,7 +22511,12 @@ plt.show()
 
 **Try it yourself!** Copy this code into an empty Google Colab notebook and run it: [Open Colab](https://colab.research.google.com/notebooks/empty.ipynb)
 
-**Next steps:** Chapter 13 introduces **dummy variables** and **indicator variables** — extending regression to handle qualitative explanatory variables.
+**Next Steps:**
+
+- **Chapter 13**: Case studies that apply the full multiple regression toolkit to real economic questions
+- **Chapter 14**: Regression with indicator (dummy) variables — handling qualitative explanatory variables
+- **Chapter 15**: Regression with transformed variables (logs, quadratics, and interactions)
+- **Chapter 16**: Checking the model and data — diagnostics for specification and influential observations
 
 Congratulations on completing Chapter 12! You now understand advanced inference methods for handling real-world data challenges.
 
@@ -20957,8 +22616,8 @@ In this case study, you will apply robust inference methods to cross-country pro
 - **Source:** Mendez (2020), 108 countries, 1990-2014
 - **Key variables:**
   - `lp` — Labor productivity (GDP per worker)
-  - `rk` — Physical capital per worker
-  - `hc` — Human capital index
+  - `kl` — Physical capital per worker
+  - `h` — Human capital index
   - `region` — Geographic region (for clustering)
 
 **Research question:** Do conclusions about productivity determinants change when using robust standard errors? How precisely can we predict productivity for a specific country?
@@ -20967,9 +22626,9 @@ In this case study, you will apply robust inference methods to cross-country pro
 # Load the Mendez convergence clubs dataset
 url = "https://raw.githubusercontent.com/quarcs-lab/mendez2020-convergence-clubs-code-data/master/assets/dat.csv"
 dat = pd.read_csv(url)
-dat_2014 = dat[dat['year'] == 2014].dropna(subset=['lp', 'rk', 'hc']).copy()
+dat_2014 = dat[dat['year'] == 2014].dropna(subset=['lp', 'kl', 'h']).copy()
 dat_2014['ln_lp'] = np.log(dat_2014['lp'])
-dat_2014['ln_rk'] = np.log(dat_2014['rk'])
+dat_2014['ln_kl'] = np.log(dat_2014['kl'])
 print(f"Cross-section sample: {len(dat_2014)} countries (year 2014)")
 ```
 
@@ -20979,13 +22638,12 @@ Compare default and heteroskedastic-robust standard errors.
 
 ```python
 # Estimate model with default SEs
-model = pf.feols('ln_lp ~ ln_rk + hc', data=dat_2014)
+model = pf.feols('ln_lp ~ ln_kl + h', data=dat_2014)
 print("Default SEs:")
 model.summary()
 
-# Estimate with HC1 robust SEs
-model_robust = # Re-estimate with robust SEs (pyfixest handles this at estimation time)
-# Use pf.feols(..., vcov="HC1") instead of post-hoc robust SEs
+# Estimate with HC1 robust SEs (pyfixest handles this at estimation time)
+model_robust = pf.feols('ln_lp ~ ln_kl + h', data=dat_2014, vcov='HC1')
 print("\nRobust SEs:")
 model_robust.summary()
 ```
@@ -21001,13 +22659,13 @@ Estimate with cluster-robust standard errors grouped by geographic region.
 
 ```python
 # Cluster-robust SEs by region
-model_cluster = pf.feols('ln_lp ~ ln_rk + hc', data=dat_2014, vcov={'CRV1': 'region'})
+model_cluster = pf.feols('ln_lp ~ ln_kl + h', data=dat_2014, vcov={'CRV1': 'region'})
 print("Cluster-Robust SEs (by region):")
 model_cluster.summary()
 
 # Compare all three SE types
 print("\nSE Comparison:")
-for var in ['Intercept', 'ln_rk', 'hc']:
+for var in ['Intercept', 'ln_kl', 'h']:
     print(f"  {var}: Default={model.se()[var]:.4f}, HC1={model_robust.se()[var]:.4f}, Cluster={model_cluster.se()[var]:.4f}")
 ```
 
@@ -21026,12 +22684,12 @@ Predict average productivity for a country with median capital and human capital
 
 ```python
 # Get median values
-median_ln_rk = dat_2014['ln_rk'].median()
-median_hc = dat_2014['hc'].median()
-print(f"Median ln(rk) = {median_ln_rk:.3f}, Median hc = {median_hc:.3f}")
+median_ln_kl = dat_2014['ln_kl'].median()
+median_h = dat_2014['h'].median()
+print(f"Median ln(kl) = {median_ln_kl:.3f}, Median h = {median_h:.3f}")
 
 # Predict conditional mean with CI
-pred_data = pd.DataFrame({'ln_rk': [median_ln_rk], 'hc': [median_hc]})
+pred_data = pd.DataFrame({'ln_kl': [median_ln_kl], 'h': [median_h]})
 pred_value = model.predict(newdata=pred_data)
 print(f"Predicted ln(lp): {pred_value[0]:.3f}")
 ```
@@ -21046,11 +22704,15 @@ print(f"Predicted ln(lp): {pred_value[0]:.3f}")
 Construct a prediction interval for an individual country's productivity.
 
 ```python
-# Get prediction with observation-level interval
-pred_frame = pred.summary_frame(alpha=0.05)
-print("Conditional mean CI vs. Prediction interval:")
-print(f"  Mean CI:       [{pred_frame['mean_ci_lower'].values[0]:.3f}, {pred_frame['mean_ci_upper'].values[0]:.3f}]")
-print(f"  Prediction PI: [{pred_frame['obs_ci_lower'].values[0]:.3f}, {pred_frame['obs_ci_upper'].values[0]:.3f}]")
+# Approximate 95% prediction interval for an individual country
+# (dominant-term approximation: pred +/- t * s_e, following section 12.3)
+s_e    = np.sqrt(np.sum(model._u_hat**2) / (int(model._N) - len(model.coef())))
+t_crit = stats.t.ppf(0.975, int(model._N) - len(model.coef()))
+pi_lower = pred_value[0] - t_crit * s_e
+pi_upper = pred_value[0] + t_crit * s_e
+print(f"Point prediction (conditional mean): {pred_value[0]:.3f}")
+print(f"Approx. 95% PI for an individual country: [{pi_lower:.3f}, {pi_upper:.3f}]")
+print(f"RMSE (s_e): {s_e:.3f} -- the PI can never be narrower than +/- t*s_e")
 ```
 
 **Questions:**
@@ -21064,12 +22726,11 @@ Compare nested models using robust inference.
 
 **Your tasks:**
 
-1. Estimate three models: (a) $\ln(\text{lp}) \sim \ln(\text{rk})$ only, (b) $\ln(\text{lp}) \sim \text{hc}$ only, (c) both regressors
+1. Estimate three models: (a) $\ln(\text{lp}) \sim \ln(\text{kl})$ only, (b) $\ln(\text{lp}) \sim \text{h}$ only, (c) both regressors
 2. For each model, report both default and HC1 robust standard errors
 3. Do the significance conclusions change between default and robust SEs for any model?
 4. Compare prediction interval widths across models — does adding variables improve individual predictions?
 
-*Hint: Use `# Re-estimate with robust SEs (pyfixest handles this at estimation time)
 *Hint: Use `pf.feols(..., vcov='HC1')` for robust SEs and `model.predict(newdata=...)` for predictions.*
 
 #### Task 6: Policy Brief on Inference Robustness (Independent)
@@ -21088,7 +22749,7 @@ Write a 200-300 word policy brief summarizing your findings.
 >
 > Robust standard errors correct for heteroskedasticity and clustering, but they don't address omitted variable bias, reverse causality, or measurement error. A coefficient estimate with a perfectly robust SE is still biased if the model is misspecified. Robust inference ensures valid $p$-values and CIs *conditional on the model being correct* — it's a necessary but not sufficient condition for credible empirical work.
 
-### What You've Learned
+#### What You've Learned
 
 In this case study, you applied advanced inference methods to cross-country productivity data:
 
@@ -21130,7 +22791,7 @@ bol_key = bol[key_vars].copy()
 
 print(f"\nKey variables selected: {len(key_vars)}")
 # FIRST 10 MUNICIPALITIES
-bol_key.head(10).to_string()
+print(bol_key.head(10).to_string())
 
 # Variable descriptions
 # KEY VARIABLE DESCRIPTIONS
@@ -21152,7 +22813,7 @@ for var, desc in descriptions.items():
 **Instructions**:
 
 1. Estimate `imds ~ ln_NTLpc2017 + A00 + A10 + A20 + A30 + A40` with default standard errors
-2. Re-estimate with HC1 robust standard errors (`cov_type='HC1'`)
+2. Re-estimate with HC1 robust standard errors (`vcov='HC1'`)
 3. Compare standard errors side-by-side for each coefficient
 4. Identify which coefficients have substantially different SEs under the two methods
 
@@ -21185,7 +22846,7 @@ for var in model_default.coef().index:
 print(f"\nR-squared: {model_default._r2:.4f}")
 print(f"Adj. R-squared: {model_default._adj_r2:.4f}")
 print(f"\nNote: Coefficients are identical --- only SEs change.")
-print("Ratios > 1 suggest heteroskedasticity inflates default SEs' precision.")
+print("Ratios > 1 mean the default SEs understated uncertainty (overstated precision) for that coefficient.")
 ```
 
 #### Task 2: Cluster-Robust Standard Errors by Department (Guided)
@@ -21194,11 +22855,11 @@ print("Ratios > 1 suggest heteroskedasticity inflates default SEs' precision.")
 
 **Instructions**:
 
-1. Re-estimate using `cov_type='cluster'` with `cov_kwds={'groups': reg_data['dep']}`
+1. Re-estimate using `vcov={'CRV1': 'dep'}` to cluster by department
 2. Compare cluster-robust SEs with default and HC1 SEs
 3. Discuss: Why might municipalities within a department share unobserved characteristics?
 
-**Apply what you learned in section 12.2**: Cluster-robust SEs account for within-group correlation of errors.
+**Apply what you learned in section 12.2**: Cluster-robust SEs account for within-group correlation of errors. *Caution: with only 9 departments, this analysis sits well below the 30+ clusters rule of thumb (see the Common Mistakes box), so cluster-robust p-values here should be interpreted carefully.*
 
 ```python
 # Task 2: Cluster-Robust Standard Errors by Department
@@ -21256,17 +22917,14 @@ print(f"Municipalities per department (avg): {len(reg_data) / n_clusters:.0f}")
 # median_vals = reg_data[pred_vars].median()
 # pred_data = pd.DataFrame([median_vals])
 #
-# pred_value = model_default.predict(newdata=pred_data)
-# pred_frame = pred.summary_frame(alpha=0.05)
-# print(pred_frame)
+# pred_value = model_default.predict(newdata=pred_data)[0]
+# print(f"Predicted IMDS (conditional mean): {pred_value:.2f}")
 #
-# print(f"\nPredicted IMDS: {pred_frame['mean'].values[0]:.2f}")
-# print(f"95% CI for E[IMDS|X]: [{pred_frame['mean_ci_lower'].values[0]:.2f}, "
-#       f"{pred_frame['mean_ci_upper'].values[0]:.2f}]")
-# print(f"\nInterpretation: For a typical municipality with median predictor")
-# print(f"values, we predict average IMDS between "
-#       f"{pred_frame['mean_ci_lower'].values[0]:.1f} and "
-#       f"{pred_frame['mean_ci_upper'].values[0]:.1f}.")
+# # Note: pyfixest returns a point prediction. A full CI for the conditional
+# # mean needs the fitted-value variance x0' V x0, which is beyond this
+# # chapter, so here we report and interpret the point estimate.
+# print(f"For a typical municipality with median predictors, we predict")
+# print(f"an average IMDS of about {pred_value:.1f}.")
 ```
 
 #### Task 4: Prediction Interval for an Individual Municipality (Semi-guided)
@@ -21275,8 +22933,8 @@ print(f"Municipalities per department (avg): {len(reg_data) / n_clusters:.0f}")
 
 **Instructions**:
 
-1. Use `model_default.predict(newdata=...)` at the same median predictor values and compute PI manually
-2. Report the prediction interval using `obs_ci_lower` and `obs_ci_upper`
+1. Use `model_default.predict(newdata=...)` at the same median predictor values
+2. Build an approximate 95% prediction interval as `pred ± t·s_e` using the model's residual standard error (RMSE), following section 12.3
 3. Compare the width of the prediction interval with the confidence interval from Task 3
 4. Explain why the prediction interval is wider
 
@@ -21299,23 +22957,18 @@ print(f"Municipalities per department (avg): {len(reg_data) / n_clusters:.0f}")
 # median_vals = reg_data[pred_vars].median()
 # pred_data = pd.DataFrame([median_vals])
 #
-# pred_value = model_default.predict(newdata=pred_data)
-# pred_frame = pred.summary_frame(alpha=0.05)
+# pred_value = model_default.predict(newdata=pred_data)[0]
+# s_e = np.sqrt(np.sum(model_default._u_hat**2) / (int(model_default._N) - len(model_default.coef())))
+# t_crit = stats.t.ppf(0.975, int(model_default._N) - len(model_default.coef()))
+# pi_lower = pred_value - t_crit * s_e
+# pi_upper = pred_value + t_crit * s_e
 #
-# ci_width = pred_frame['mean_ci_upper'].values[0] - pred_frame['mean_ci_lower'].values[0]
-# pi_width = pred_frame['obs_ci_upper'].values[0] - pred_frame['obs_ci_lower'].values[0]
-#
-#
-# print("CONFIDENCE INTERVAL vs PREDICTION INTERVAL")
-#
-# print(f"Predicted IMDS: {pred_frame['mean'].values[0]:.2f}")
-# print(f"\n95% CI (conditional mean):  [{pred_frame['mean_ci_lower'].values[0]:.2f}, "
-#       f"{pred_frame['mean_ci_upper'].values[0]:.2f}]  width = {ci_width:.2f}")
-# print(f"95% PI (individual):        [{pred_frame['obs_ci_lower'].values[0]:.2f}, "
-#       f"{pred_frame['obs_ci_upper'].values[0]:.2f}]  width = {pi_width:.2f}")
-# print(f"\nPI/CI width ratio: {pi_width / ci_width:.1f}x wider")
-# print(f"\nThe prediction interval is wider because it includes the")
-# print(f"irreducible uncertainty from the individual error term u*.")
+# print("PREDICTION INTERVAL FOR AN INDIVIDUAL MUNICIPALITY")
+# print(f"Predicted IMDS: {pred_value:.2f}")
+# print(f"95% PI (individual): [{pi_lower:.2f}, {pi_upper:.2f}]  width = {pi_upper - pi_lower:.2f}")
+# print(f"RMSE (s_e): {s_e:.2f} -- the PI can never be narrower than +/- t*s_e")
+# print("\nThe prediction interval is wide because it includes the")
+# print("irreducible uncertainty from the individual error term u*.")
 ```
 
 > **Key Concept 12.12: Prediction Uncertainty for SDG Monitoring**
@@ -21449,7 +23102,7 @@ This notebook presents comprehensive case studies applying multiple regression t
 [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/quarcs-lab/metricsai/blob/main/notebooks_colab/ch13_Case_Studies_for_Multiple_Regression.ipynb)
 <div class="chapter-resources">
 <a href="https://www.youtube.com/watch?v=auS4yrgbAQA" target="_blank" class="resource-btn">🎬 AI Video</a>
-<a href="https://carlos-mendez.my.canva.site/s13-case-studies-for-multiple-regression-pdf" target="_blank" class="resource-btn">✨ AI Slides</a>
+<a href="https://quarcs-lab.github.io/metricsai/slides/ch13/index.html" target="_blank" class="resource-btn">🧑🏽‍🏫 Mendez Slides</a>
 <a href="https://cameron.econ.ucdavis.edu/aed/traedv1_13" target="_blank" class="resource-btn">📊 Cameron Slides</a>
 <a href="https://app.edcafe.ai/quizzes/697869f02f5d08069e04c94f" target="_blank" class="resource-btn">✏️ Quiz</a>
 <a href="https://app.edcafe.ai/chatbots/6978a2122f5d08069e071d09" target="_blank" class="resource-btn">🤖 AI Tutor</a>
@@ -21462,45 +23115,122 @@ This chapter presents **nine comprehensive case studies** that apply multiple re
 
 **Design Note:** This chapter uses an integrated case study structure where sections 13.1–13.9 ARE the case studies, each demonstrating different regression techniques and applications.
 
-### What You'll Learn
+**What you'll learn:**
 
-By the end of this chapter, you will be able to:
-
-1. Apply multiple regression to analyze school performance and socioeconomic factors
-2. Use logarithmic transformations to estimate production functions
-3. Understand and test for constant returns to scale
-4. Identify and correct for omitted variables bias
-5. Apply cluster-robust standard errors for grouped data
-6. Understand randomized control trials and difference-in-differences methods
-7. Apply regression discontinuity design to causal questions
-8. Use instrumental variables to estimate causal effects
-9. Navigate the data cleaning and preparation process
-
-### Chapter Outline
-
-- **13.1** School Academic Performance Index
-- **13.2** Cobb-Douglas Production Function
-- **13.3** Phillips Curve and Omitted Variables Bias
-- **13.4** Automobile Fuel Efficiency
-- **13.5** RAND Health Insurance Experiment (RCT)
-- **13.6** Health Care Access (Difference-in-Differences)
-- **13.7** Political Incumbency (Regression Discontinuity)
-- **13.8** Institutions and GDP (Instrumental Variables)
-- **13.9** From Raw Data to Final Data
-- **Key Takeaways** — Chapter review and consolidated lessons
-- **Practice Exercises** — Reinforce your understanding
+- Apply multiple regression to analyze school performance and socioeconomic factors
+- Use logarithmic transformations to estimate production functions
+- Understand and test for constant returns to scale
+- Identify and correct for omitted variables bias
+- Apply cluster-robust standard errors for grouped data
+- Understand randomized control trials and difference-in-differences methods
+- Apply regression discontinuity design to causal questions
+- Use instrumental variables to estimate causal effects
+- Navigate the data cleaning and preparation process
 
 **Datasets used:**
 
 - **AED_API99.DTA**: 807 California high schools, Academic Performance Index (1999) — Case Study 13.1
-- **AED_CobbDouglas.DTA**: 24 years of U.S. manufacturing data (1899–1922) — Case Study 13.2
-- **AED_PhillipsCurve.DTA**: 66 years of U.S. macroeconomic data (1949–2014) — Case Study 13.3
-- **AED_AutoEfficiency.DTA**: 26,995 vehicles, fuel efficiency data (1980–2006) — Case Study 13.4
-- **AED_RandHealthInsurance.DTA**: RAND health insurance experiment (RCT) — Case Study 13.5
-- **AED_SouthAfricaHealth.DTA**: South Africa cross-sectional health data (DiD) — Case Study 13.6
-- **AED_SenateIncumbency.DTA**: U.S. Senate election results (RD) — Case Study 13.7
-- **AED_InstitutionsGDP.DTA**: Cross-country institutions and GDP data (IV) — Case Study 13.8
+- **AED_COBBDOUGLAS.DTA**: 24 years of U.S. manufacturing data (1899–1922) — Case Study 13.2
+- **AED_PHILLIPS.DTA**: 66 years of U.S. macroeconomic data (1949–2014) — Case Study 13.3
+- **AED_AUTOSMPG.DTA**: 26,995 vehicles, fuel efficiency data (1980–2006) — Case Study 13.4
+- **AED_HEALTHINSEXP.DTA**: RAND health insurance experiment (RCT) — Case Study 13.5
+- **AED_HEALTHACCESS.DTA**: South Africa cross-sectional health data (DiD) — Case Study 13.6
+- **AED_INCUMBENCY.DTA**: U.S. Senate election results (RD) — Case Study 13.7
+- **AED_INSTITUTIONS.DTA**: Cross-country institutions and GDP data (IV) — Case Study 13.8
 
+**Chapter outline:**
+
+- 13.1 School Academic Performance Index
+- 13.2 Cobb-Douglas Production Function
+- 13.3 Phillips Curve and Omitted Variables Bias
+- 13.4 Automobile Fuel Efficiency
+- 13.5 RAND Health Insurance Experiment (RCT)
+- 13.6 Health Care Access (Difference-in-Differences)
+- 13.7 Political Incumbency (Regression Discontinuity)
+- 13.8 Institutions and GDP (Instrumental Variables)
+- 13.9 From Raw Data to Final Data
+- Key Takeaways
+- Practice Exercises
+
+
+## Key Concepts
+
+Five core ideas anchor this chapter. Skim them before you start, and come back when a term feels fuzzy. Each entry pairs a concrete example using the chapter's data with a non-technical analogy. Click a panel to expand it.
+
+**Production Function:** A model that maps inputs (capital $K$, labor $L$, sometimes more) to output $Q$. The Cobb–Douglas form $Q = A K^{\beta_2} L^{\beta_3}$ is the chapter's headline example: it is multiplicative in inputs, but linear in their logarithms — which is what makes it estimable with OLS.
+
+::::: {.columns}
+:::: {.column width="50%"}
+::: {.callout-tip collapse="true" appearance="simple" title="Example"}
+For 24 years of U.S. manufacturing data (`data_cobb`, 1899–1922), the chapter fits $\ln Q = \beta_1 + \beta_2 \ln K + \beta_3 \ln L$ and estimates $\hat\beta_2 \approx 0.23$ (capital elasticity) and $\hat\beta_3 \approx 0.81$ (labor elasticity). The two elasticities tell you exactly how much each input contributes — labor here was about three and a half times as important as capital in turning early-century factories' inputs into output.
+:::
+::::
+:::: {.column width="50%"}
+::: {.callout-note collapse="true" appearance="simple" title="Analogy"}
+A bakery's recipe says: a loaf needs flour, water, and time, in fixed proportions. Double the flour but keep water and time fixed and you don't get two loaves — you get a sticky mess. A production function is the regression's recipe: it tells you how much each ingredient (input) actually contributes to the finished output, *given the others*.
+:::
+::::
+:::::
+
+**Constant Returns to Scale (CRS):** The property of a production function in which scaling all inputs by a factor $\lambda$ scales output by exactly the same factor: $f(\lambda K, \lambda L) = \lambda \cdot f(K, L)$. In Cobb–Douglas form, this happens when $\beta_2 + \beta_3 = 1$.
+
+::::: {.columns}
+:::: {.column width="50%"}
+::: {.callout-tip collapse="true" appearance="simple" title="Example"}
+For the Cobb–Douglas fit on `data_cobb`, the sum of input elasticities is $\hat\beta_2 + \hat\beta_3 \approx 0.23 + 0.81 = 1.04$ — close to 1. The chapter's $F$-test of $H_0: \beta_2 + \beta_3 = 1$ yields $p \approx 0.636$, so the data are consistent with constant returns: doubling capital and labor would, on average, double output across early-century U.S. manufacturing.
+:::
+::::
+:::: {.column width="50%"}
+::: {.callout-note collapse="true" appearance="simple" title="Analogy"}
+A photocopier shows constant returns to scale: feed in twice as much paper and twice as much toner, get twice as many copies. Increasing returns would mean you somehow get *more* than double; decreasing returns would mean you get less. The Cobb–Douglas test asks whether the U.S. economy in 1899–1922 was a well-behaved photocopier or some weirder machine.
+:::
+::::
+:::::
+
+**Selection Bias:** Bias arising when the people who *end up* in a sample are not a random slice of the population — typically because they self-select on characteristics that also affect the outcome. Observational comparisons of "treated" vs. "untreated" units are vulnerable; randomised assignment is the standard fix.
+
+::::: {.columns}
+:::: {.column width="50%"}
+::: {.callout-tip collapse="true" appearance="simple" title="Example"}
+The RAND Health Insurance Experiment (`data_health`, 5{,}639 first-year observations) randomly assigned 5{,}809 individuals to plans with cost-sharing of 0%, 25%, 50%, 95% — a feature impossible to obtain from observational data, where sicker or richer people self-select into more generous plans. Random assignment closed off this selection channel and let a simple regression of `spending` on plan dummies estimate the *causal* effect of insurance generosity.
+:::
+::::
+:::: {.column width="50%"}
+::: {.callout-note collapse="true" appearance="simple" title="Analogy"}
+A restaurant's online reviews look great — but only the most ecstatic and most outraged customers ever bother to write. The "average review" badly overstates the variance of the actual diner experience because reviewers select themselves. Selection bias in econometrics works the same way: the people you *observe* don't represent the people you want to know about.
+:::
+::::
+:::::
+
+**Parallel Trends Assumption:** The identifying assumption of difference-in-differences (DiD) — that, in the *absence* of treatment, the treatment and control groups would have followed the same trend over time. The DiD estimator subtracts the control group's change from the treatment group's, and is unbiased *only if* parallel trends hold.
+
+::::: {.columns}
+:::: {.column width="50%"}
+::: {.callout-tip collapse="true" appearance="simple" title="Example"}
+The South-Africa health-clinic study (`data_access`, 1{,}071 children, 1993 vs 1998) compares high-treatment communities to low-treatment ones over a five-year window. The DiD estimate of $\approx 0.52$ standard deviations in `waz` (weight-for-age $z$-score) credits clinic access *only* under parallel trends — i.e., that low-treatment communities show how high-treatment communities would have evolved without the new clinics.
+:::
+::::
+:::: {.column width="50%"}
+::: {.callout-note collapse="true" appearance="simple" title="Analogy"}
+Two runners normally jog the same route at the same pace. One day, one of them straps on weighted shoes and starts to lag behind. Without the weighted shoes, the assumption goes, both runners would still be neck-and-neck. The lag *is* the causal effect of the shoes — but only if you're sure both runners would otherwise have kept matching strides. Parallel trends is exactly that "would otherwise have matched" condition.
+:::
+::::
+:::::
+
+**Counterfactual:** The unobservable outcome a unit *would* have experienced under the alternative treatment status. Every causal effect is a comparison of an observed outcome to a counterfactual; randomised experiments, DiD, RD, and IV are all different recipes for *imputing* the missing counterfactual.
+
+::::: {.columns}
+:::: {.column width="50%"}
+::: {.callout-tip collapse="true" appearance="simple" title="Example"}
+For the U.S. Senate incumbency study (`data_incumb`, 1{,}390 elections 1914–2010), the regression-discontinuity estimate of $\approx 4.8$ percentage points is the gap between a barely-winning candidate's *next-election* vote share and what it *would have been* had they barely lost (the counterfactual). RD makes that counterfactual credible because the two groups — barely won, barely lost — are nearly identical apart from incumbency status.
+:::
+::::
+:::: {.column width="50%"}
+::: {.callout-note collapse="true" appearance="simple" title="Analogy"}
+A counterfactual is the parallel-universe version of an event — what would have happened if the coin had landed the other way. You can never visit that universe directly. The whole craft of causal inference is to find clever observable proxies for it: a randomised "twin" experiment, a near-tied election, a coincidence of geography that gave one village clinics and another none.
+:::
+::::
+:::::
 
 ## Setup
 
@@ -21551,19 +23281,19 @@ print(f"Variables: {list(data_api.columns)}")
 data_api.head()
 ```
 
-### **About the Dataset**
+### About the Dataset
 
 This dataset contains information on **807 California high schools** from 1999. The Academic Performance Index (API) is a score from 200-1000 that measures school performance based on standardized test results.
 
 **Key Variables:**
 
 - `api99`: Academic Performance Index (outcome variable)
-- `edparent`: Average parental education level (1-5 scale)
-- `mealpct`: Percent of students eligible for free/reduced meals (poverty proxy)
-- `elpct`: Percent of English language learners
-- `yrs_teach`: Average teacher experience in years
-- `totcredpc`: Per-pupil total credentials
-- `emrpct`: Percent of emergency credential teachers
+- `edparent`: Average parental education level (average years of schooling, roughly 9.6–16 in this sample)
+- `meals`: Percent of students eligible for free/reduced meals (poverty proxy)
+- `englearn`: Percent of English language learners
+- `yearround`: Indicator for year-round school calendar
+- `credteach`: Percent of fully credentialed teachers
+- `emerteach`: Percent of teachers with emergency credentials
 
 **Economic Question:** What factors determine school performance? Is it resources (teachers, funding) or student demographics (poverty, language, parental education)?
 
@@ -21635,7 +23365,7 @@ plt.show()
 # Correlation matrix
 corr_matrix = data_api[vars_api].corr()
 # Correlation Matrix
-corr_matrix.round(2)
+print(corr_matrix.round(2))
 
 # Heatmap
 plt.figure(figsize=(10, 8))
@@ -21646,31 +23376,31 @@ plt.tight_layout()
 plt.show()
 ```
 
-### **What the Correlation Matrix Reveals**
+### What the Correlation Matrix Reveals
 
 The correlation matrix shows the **linear relationships** between all variables:
 
 **Strong negative correlations** (darker blues):
 
-- `api99` and `mealpct` (-0.90): Schools with more poverty have much lower test scores
-- `api99` and `elpct` (-0.76): More English learners → lower scores
+- `api99` and `meals` (-0.54): Schools with more poverty have lower test scores
+- `api99` and `englearn` (-0.66): More English learners → lower scores
 - These suggest **socioeconomic factors strongly predict performance**
 
 **Positive correlations** (reds):
 
-- `api99` and `edparent` (0.76): Parental education strongly predicts scores
-- Teacher experience and credentials show weaker correlations
+- `api99` and `edparent` (0.91): Parental education strongly predicts scores
+- Teacher credential variables show weaker correlations (`credteach` 0.46, `emerteach` -0.45)
 
 **Multicollinearity concerns:**
 
-- `mealpct` and `edparent` are highly correlated (-0.79)
+- `meals` and `edparent` are substantially correlated (-0.60)
 - This makes it difficult to separate their individual effects
 - Standard errors may be inflated in multiple regression
 
 ```python
 # Multiple regression
 fit_api_mult = pf.feols('api99 ~ edparent + meals + englearn + yearround + credteach + emerteach',
-                         data=data_api)
+                         data=data_api, vcov='HC1')
 # Multiple Regression
 fit_api_mult.summary()
 
@@ -21692,15 +23422,15 @@ print("\n", coef_df)
 
 Estimating returns to scale using log transformations.
 
-### **The Cobb-Douglas Production Function**
+### The Cobb-Douglas Production Function
 
 The **Cobb-Douglas production function** is one of the most famous models in economics. It describes how inputs (capital K and labor L) combine to produce output Q:
 
-$$Q = \alpha K^{\beta_2} L^{\beta_3}$$
+$$Q = A K^{\beta_2} L^{\beta_3}$$
 
 **Parameters:**
 
-- $\alpha$: Total factor productivity (technology level)
+- $A$: Total factor productivity (technology level)
 - $\beta_2$: Output elasticity of capital (% change in Q from 1% change in K)
 - $\beta_3$: Output elasticity of labor (% change in Q from 1% change in L)
 
@@ -21716,7 +23446,7 @@ Taking natural logs of both sides converts the **multiplicative model** into a *
 
 $$\ln(Q) = \beta_1 + \beta_2 \ln(K) + \beta_3 \ln(L) + u$$
 
-where $\beta_1 = \ln(\alpha)$. Now we can use **ordinary least squares (OLS)** regression!
+where $\beta_1 = \ln(A)$. Now we can use **ordinary least squares (OLS)** regression!
 
 **Dataset:** Douglas (1976) used U.S. manufacturing data from **1899-1922** (24 years) to estimate this function.
 
@@ -21763,7 +23493,7 @@ fit_cobb.summary()
 >
 > Taking natural logarithms of the Cobb-Douglas production function $Q = AK^\alpha L^\beta$ transforms it into the linear model $\ln Q = \ln A + \alpha \ln K + \beta \ln L$, suitable for OLS estimation. The resulting coefficients are **elasticities** — directly interpretable as percentage changes.
 
-### **Understanding the Results**
+### Understanding the Results
 
 **Estimated Coefficients:**
 
@@ -21807,16 +23537,16 @@ print(f"Testing constant returns to scale:")
 print(f"H0: beta_capital + beta_labor = 1")
 print(f"Estimated sum: {sum_betas:.3f}")
 
-# Restricted model: ln(Q/L) ~ ln(K/L)
-data_cobb['lnq_per_l'] = data_cobb['lnq'] - data_cobb['lnl']
-data_cobb['lnk_per_l'] = data_cobb['lnk'] - data_cobb['lnl']
-fit_restricted = pf.feols('lnq_per_l ~ lnk_per_l', data=data_cobb)
-
-# F-test
-rss_unr = np.sum(fit_cobb._u_hat**2)
-rss_r = np.sum(fit_restricted._u_hat**2)
-df_resid = fit_cobb._N - len(fit_cobb.coef())
-f_stat = ((rss_r - rss_unr) / 1) / (rss_unr / df_resid)
+# HAC-robust Wald test of the linear restriction beta_lnk + beta_lnl = 1.
+# We reuse fit_cobb's Newey-West (HAC) covariance matrix so the test is
+# consistent with the standard errors used throughout this time series case
+# (a classical restricted-vs-unrestricted F-test would instead assume the
+# iid errors we already argued are inappropriate here).
+R = np.array([0.0, 1.0, 1.0])          # selects beta_lnk + beta_lnl
+b_hat = fit_cobb.coef().values         # coefficient order: [Intercept, lnk, lnl]
+V_hac = fit_cobb._vcov                 # Newey-West (HAC) covariance matrix
+df_resid = fit_cobb._N - len(b_hat)
+f_stat = (R @ b_hat - 1.0)**2 / (R @ V_hac @ R)
 p_value = 1 - stats.f.cdf(f_stat, 1, df_resid)
 
 print(f"F-statistic: {f_stat:.2f}")
@@ -21828,9 +23558,11 @@ print(f"Conclusion: {'Reject' if p_value < 0.05 else 'Fail to reject'} H0 at 5% 
 >
 > Constant returns to scale implies $\alpha + \beta = 1$: doubling all inputs exactly doubles output. The estimated sum of 1.040 is not significantly different from 1 (F-test p = 0.636), consistent with the theoretical prediction for competitive markets. This is a **joint hypothesis test** on the coefficients.
 
+Because the model is estimated in logs, converting fitted values back to output levels requires a retransformation (bias) correction of $e^{\hat\sigma^2/2}$. The plot below overlays these corrected predictions on the actual output series.
+
 ```python
 # Predicted output with bias correction
-se = np.sqrt(np.mean(fit_cobb._u_hat**2))
+se = np.sqrt(np.sum(fit_cobb._u_hat**2) / (fit_cobb._N - len(fit_cobb.coef())))
 bias_correction = np.exp(se**2 / 2)
 data_cobb['q_pred'] = bias_correction * np.exp(fit_cobb.predict())
 
@@ -21848,11 +23580,17 @@ plt.grid(True, alpha=0.3)
 plt.show()
 ```
 
+**What to look for in this plot:**
+
+- **Tracking**: The dashed predicted series follows the actual output closely across all 24 years -- consistent with the model's high $R^2$ (0.957)
+- **Bias correction**: Fitted values are scaled by $e^{\hat\sigma^2/2}$ before comparison, the standard retransformation when the dependent variable is in logs
+- **Fit over time**: Deviations are small and show no systematic trend, suggesting the log-linear Cobb-Douglas form captures the growth path well
+
 ## 13.3 Phillips Curve and Omitted Variables Bias
 
 Demonstrating omitted variables bias through the breakdown of the Phillips curve.
 
-### **The Phillips Curve and Its Breakdown**
+### The Phillips Curve and Its Breakdown
 
 The **Phillips Curve** describes a **negative relationship** between unemployment and inflation:
 
@@ -21897,14 +23635,14 @@ fit_pre = pf.feols('inflgdp ~ urate', data=data_pre1970,
 fit_pre.summary()
 ```
 
-### **Pre-1970: Phillips Curve Works!**
+### Pre-1970: Phillips Curve Works!
 
 **Results:**
 
-- Coefficient on unemployment ≈ **-0.89**
+- Coefficient on unemployment ≈ **-1.03**
 - **Negative** relationship (as theory predicts!)
 - Statistically significant
-- 1% increase in unemployment → 0.89% decrease in inflation
+- 1% increase in unemployment → 1.03% decrease in inflation
 
 The scatter plot shows a clear downward slope. This is the classic Phillips curve that policymakers relied on in the 1950s-60s.
 
@@ -21946,13 +23684,13 @@ fit_post.summary()
 >
 > Pre-1970, higher unemployment was associated with lower inflation (the classic Phillips curve trade-off). Post-1970, this relationship **reversed** — suggesting the simple bivariate model was misspecified. The breakdown motivated the **expectations-augmented Phillips curve**, which includes expected inflation as a regressor.
 
-### **Post-1970: Phillips Curve Breaks Down!**
+### Post-1970: Phillips Curve Breaks Down!
 
 **Results:**
 
 - Coefficient on unemployment ≈ **+0.27**
 - **Positive** relationship (opposite of theory!)
-- The sign reversed!
+- The sign reversed! (With only 45 post-1970 observations, however, the positive slope is **not statistically significant**, $p \approx 0.42$: the point estimate flips sign, but we cannot reject a zero relationship. Likewise, adding expected inflation in the next section leaves the urate coefficient negative but also insignificant, $p \approx 0.12$.)
 
 The scatter plot shows an upward slope - higher unemployment is associated with higher inflation. This is **stagflation**.
 
@@ -21985,6 +23723,8 @@ plt.show()
 - **Direction**: Positive slope -- the relationship has **reversed** compared to pre-1970
 - **Scatter**: Much wider dispersion around the line, reflecting the turbulent 1970s-80s
 - **Implication**: The simple bivariate Phillips curve is misspecified post-1970 (omitted variables bias)
+
+We now add expected inflation (`inflgdp1yr`) to the post-1970 regression. Watch the coefficient on `urate`: if the breakdown was caused by omitting expectations, controlling for them should restore the negative Phillips-curve slope.
 
 ```python
 # Augmented Phillips curve (adding expected inflation)
@@ -22034,9 +23774,9 @@ print("\n✓ Omitted variables bias explains the sign reversal!")
 
 > **Key Concept 13.5: Omitted Variables Bias**
 >
-> When a relevant variable (expected inflation) is omitted from the regression, its effect gets absorbed into the included variable's coefficient. The **OVB formula** shows that the bias equals the omitted variable's coefficient times its correlation with the included regressor. In the Phillips curve, this bias reversed the sign of the unemployment coefficient.
+> When a relevant variable (expected inflation) is omitted from the regression, its effect gets absorbed into the included variable's coefficient. The **OVB formula** shows that the bias equals the omitted variable's coefficient times the slope from regressing the omitted variable on the included regressor. In the Phillips curve, this bias reversed the sign of the unemployment coefficient.
 
-### **Understanding Omitted Variables Bias**
+### Understanding Omitted Variables Bias
 
 The **omitted variables bias formula** tells us how the coefficient in the bivariate (wrong) model relates to the true coefficients:
 
@@ -22051,12 +23791,12 @@ where:
 
 **What we found:**
 
-- $\beta_2 \approx -1.15$ (true negative effect of unemployment)
+- $\beta_2 \approx -0.13$ (true negative effect of unemployment)
 - $\beta_3 \approx +1.15$ (expected inflation has 1-to-1 effect on actual inflation)
 - $\gamma \approx +0.34$ (when unemployment rises, expected inflation also rises in 1970s!)
 
 **Predicted bias:**
-$$E[b_2] = -1.15 + 1.15 \times 0.34 \approx +0.26$$
+$$E[b_2] = -0.13 + 1.15 \times 0.34 \approx +0.26$$
 
 **Actual $b_2$ from bivariate model:** +0.27
 
@@ -22080,7 +23820,7 @@ The Phillips curve didn't "disappear" - it was always conditional on expected in
 
 Large dataset analysis with cluster-robust standard errors.
 
-### **Case Study: Automobile Fuel Efficiency (1980-2006)**
+### Case Study: Automobile Fuel Efficiency (1980-2006)
 
 **The Policy Question**: What determines vehicle fuel efficiency, and why didn't MPG improve more despite technological advances?
 
@@ -22138,7 +23878,7 @@ data_auto[['year', 'mfr', 'mpg', 'curbwt', 'hp', 'torque']].head()
 # Summary statistics
 key_vars = ['mpg', 'curbwt', 'hp', 'torque', 'year']
 # Summary Statistics
-data_auto[key_vars].describe()
+print(data_auto[key_vars].describe())
 
 # Manufacturer distribution
 # TOP 10 MANUFACTURERS BY OBSERVATIONS
@@ -22198,7 +23938,7 @@ print(f"due to common technology, design philosophy, and engineering teams.")
 >
 > When observations are grouped (e.g., vehicles by manufacturer), errors within groups may be correlated. **Cluster-robust standard errors** account for this within-group correlation. Using default SEs when clustering exists **understates uncertainty**, leading to false rejections of the null hypothesis.
 
-### **Interpreting the Results**
+### Interpreting the Results
 
 **Key Findings:**
 
@@ -22207,8 +23947,8 @@ print(f"due to common technology, design philosophy, and engineering teams.")
  - **Largest effect** among all variables
  - Heavier vehicles are substantially less efficient
 
-2. **Horsepower Elasticity**: ≈ -0.30 to -0.35
- - 1% increase in HP → ~0.3% decrease in MPG
+2. **Horsepower Elasticity**: ≈ -0.18
+ - 1% increase in HP → ~0.18% decrease in MPG
  - More powerful engines burn more fuel
 
 3. **Torque Elasticity**: ≈ -0.10 to -0.15
@@ -22235,8 +23975,8 @@ We cluster by manufacturer because:
 - Toyota vehicles share design philosophy
 - Errors within manufacturer are **correlated**
 
-**Number of clusters**: 40+ manufacturers
-**Average per cluster**: ~600 vehicles
+**Number of clusters**: 39 manufacturers
+**Average per cluster**: ~690 vehicles
 
 Clustering increases SEs → more conservative inference
 
@@ -22258,7 +23998,7 @@ Clustering increases SEs → more conservative inference
 
 **Model Quality:**
 
-R² ≈ 0.78 means the model explains 78% of MPG variation
+R² ≈ 0.78 means the model explains 78% of the variation in log MPG
 
 - Excellent fit!
 - Weight, HP, torque are key predictors
@@ -22268,7 +24008,7 @@ R² ≈ 0.78 means the model explains 78% of MPG variation
 
 Randomized control trial for causal inference.
 
-### **Case Study: The RAND Health Insurance Experiment (Randomized Control Trial)**
+### Case Study: The RAND Health Insurance Experiment (Randomized Control Trial)
 
 **The Gold Standard for Causal Inference**: Randomized Control Trials (RCTs)
 
@@ -22309,7 +24049,7 @@ Because assignment is random:
 
 - Treatment and control groups are identical in expectation
 - No confounding variables
-- Any difference in outcomes is caused by insurance
+- Any systematic difference in outcomes is caused by insurance
 - **Selection bias eliminated!**
 
 **Data**: Year 1 data (5,639 observations)
@@ -22341,7 +24081,11 @@ print(f"  - Plan indicators: coins0, coins25, coins50, coins95, coinsmixed, coin
 # MEAN SPENDING BY INSURANCE PLAN
 spending_by_plan = data_health_y1.groupby('plan')['spending'].agg(['mean', 'std', 'count'])
 print(spending_by_plan)
+```
 
+With the randomized plan assignments loaded, we regress medical spending on the plan indicators (free care is the omitted baseline), using standard errors clustered by family.
+
+```python
 # Regression with plan indicators
 fit_rct = pf.feols('spending ~ coins25 + coins50 + coins95 + coinsmixed + coinsindiv',
                 data=data_health_y1, vcov={'CRV1': 'idfamily'})
@@ -22349,7 +24093,11 @@ fit_rct = pf.feols('spending ~ coins25 + coins50 + coins95 + coinsmixed + coinsi
 # RCT REGRESSION: SPENDING ON INSURANCE PLANS
 print("Omitted category: Free Care (coins0)")
 fit_rct.summary()
+```
 
+Finally, we test whether the insurance plans jointly matter with an F-test of $H_0$: all plan coefficients equal zero.
+
+```python
 # F-test for joint significance
 # JOINT F-TEST: DO PLANS MATTER?
 from scipy.stats import f as f_dist
@@ -22376,7 +24124,7 @@ print("✓ Higher cost-sharing → lower spending")
 >
 > In a **randomized control trial (RCT)**, subjects are randomly assigned to treatment and control groups. Random assignment ensures the groups are comparable on both observed and unobserved characteristics, eliminating selection bias and omitted variable concerns. The RAND experiment showed that better insurance coverage increases healthcare utilization.
 
-### **Interpreting the RCT Results**
+### Interpreting the RCT Results
 
 **Key Findings:**
 
@@ -22453,7 +24201,7 @@ The fundamental trade-off remains:
 
 Causal inference using DiD methodology.
 
-### **Case Study: Health Care Access and Child Nutrition (Difference-in-Differences)**
+### Case Study: Health Care Access and Child Nutrition (Difference-in-Differences)
 
 **The Policy Question**: Does building health clinics improve child health outcomes?
 
@@ -22551,13 +24299,13 @@ print(f"\nCluster-robust SEs by community account for within-community correlati
 >
 > **Difference-in-differences (DiD)** compares changes over time between treatment and control groups. The key assumption is **parallel trends**: both groups would have followed the same trajectory absent treatment. DiD removes time-invariant confounders and common time effects, isolating the treatment effect.
 
-### **Interpreting the DiD Results**
+### Interpreting the DiD Results
 
 **Key Findings:**
 
 1. **Treatment Effect**: DiD coefficient ≈ 0.52 standard deviations
  - Clinic access improved child weight-for-age by 0.52 SD
- - **Statistically significant** (p = 0.027 < 0.05)
+ - **Statistically significant** (p = 0.031 < 0.05)
  - Large and meaningful effect size
 
 2. **Verification**: Manual calculation matches regression
@@ -22612,7 +24360,7 @@ These results from rural South Africa likely generalize to other:
 
 Causal inference using RD design.
 
-### **Case Study: The Incumbency Advantage in U.S. Senate Elections**
+### Case Study: The Incumbency Advantage in U.S. Senate Elections
 
 **The Question**: Does being an incumbent senator give you an advantage in the next election?
 
@@ -22677,7 +24425,7 @@ print(f"  - Outcome: vote (vote share in election t+1)")
 print(f"  - win: Indicator for margin > 0")
 
 # Summary statistics
-data_incumb[['vote', 'margin', 'win']].describe()
+print(data_incumb[['vote', 'margin', 'win']].describe())
 
 # Keep only elections with non-missing vote in t+1
 data_rd = data_incumb[data_incumb['vote'].notna()].copy()
@@ -22702,16 +24450,16 @@ print(f"Candidates just above/below threshold are similar in all respects except
 # Visualization note
 # RD PLOT
 print("To visualize discontinuity:")
-# - Bin observations by margin
-# - Plot mean vote in next election vs margin
-# - Should see jump at margin=0
+print(" - Bin observations by margin")
+print(" - Plot mean vote in next election vs margin")
+print(" - Should see jump at margin=0")
 ```
 
 > **Key Concept 13.9: Regression Discontinuity Design**
 >
-> **Regression discontinuity (RD)** exploits sharp cutoffs in treatment assignment. Units just above and below the threshold are nearly identical in all respects except treatment status, creating a **quasi-experiment**. In U.S. Senate elections, barely winning provides an incumbency advantage of approximately 5–7 percentage points.
+> **Regression discontinuity (RD)** exploits sharp cutoffs in treatment assignment. Units just above and below the threshold are nearly identical in all respects except treatment status, creating a **quasi-experiment**. In U.S. Senate elections, barely winning provides an incumbency advantage of approximately 5 percentage points.
 
-### **Interpreting the RD Results**
+### Interpreting the RD Results
 
 **Key Findings:**
 
@@ -22766,7 +24514,7 @@ Possible mechanisms:
 
 Causal inference using IV/2SLS.
 
-### **Case Study: Do Institutions Cause Economic Growth?**
+### Case Study: Do Institutions Cause Economic Growth?
 
 **The Fundamental Question**: Why are some countries rich and others poor?
 
@@ -22823,7 +24571,7 @@ print(f"which persist to affect GDP today, but mortality doesn't")
 print(f"directly affect modern GDP")
 
 # Summary statistics
-data_inst[['logpgp95', 'avexpr', 'logem4']].describe()
+print(data_inst[['logpgp95', 'avexpr', 'logem4']].describe())
 
 # OLS (biased - endogeneity problem)
 fit_ols = pf.feols('logpgp95 ~ avexpr', data=data_inst, vcov='HC1')
@@ -22832,7 +24580,11 @@ fit_ols = pf.feols('logpgp95 ~ avexpr', data=data_inst, vcov='HC1')
 fit_ols.summary()
 print(f"\nOLS coefficient: {fit_ols.coef()['avexpr']:.3f}")
 print("⚠️ This is biased due to endogeneity (omitted variables, reverse causation)")
+```
 
+The OLS estimate is biased because institutions are endogenous. The first stage checks whether the instrument (settler mortality) is strongly related to institutions.
+
+```python
 # First stage
 fit_first = pf.feols('avexpr ~ logem4', data=data_inst, vcov='HC1')
 
@@ -22842,7 +24594,11 @@ first_f = fit_first.tstat()['logem4']**2
 print(f"\nFirst stage F-statistic: {first_f:.2f}")
 print(f"Rule of thumb: F > 10 for strong instrument")
 print(f"Instrument strength: {'Strong ✓' if first_f > 10 else 'Weak ⚠️'}")
+```
 
+With a strong first stage, we estimate the causal effect by 2SLS and compare it against the biased OLS estimate.
+
+```python
 # 2SLS using pyfixest IV syntax
 # TWO-STAGE LEAST SQUARES (2SLS)
 
@@ -22857,7 +24613,8 @@ print(f"OLS coefficient: {fit_ols.coef()['avexpr']:.3f}")
 print(f"IV/2SLS coefficient: {fit_iv.coef()['avexpr']:.3f}")
 print(f"\nDifference: {fit_iv.coef()['avexpr'] - fit_ols.coef()['avexpr']:.3f}")
 print(f"\nIV estimate is larger → OLS has attenuation bias")
-print(f"(measurement error and omitted variables bias OLS toward zero)")
+print(f"(measurement error in institutions quality biases OLS toward zero;")
+print(f" omitted variables and reverse causation would bias OLS upward)")
 
 # CAUSAL INTERPRETATION
 print(f"1-unit improvement in institutions → {fit_iv.coef()['avexpr']:.2f} increase in log GDP")
@@ -22872,7 +24629,7 @@ print(f"  - Exogenous: Mortality in 1700s doesn't directly affect modern GDP")
 >
 > When a regressor is **endogenous** (correlated with the error term), OLS is biased. **Instrumental variables (IV)** use an instrument that is correlated with the endogenous regressor but not directly with the outcome. Two-stage least squares (2SLS) first predicts the endogenous variable, then uses these predictions in the second-stage regression.
 
-### **Interpreting the IV Results**
+### Interpreting the IV Results
 
 **Key Findings:**
 
@@ -22883,15 +24640,13 @@ print(f"  - Exogenous: Mortality in 1700s doesn't directly affect modern GDP")
 
 2. **Why the Difference?**
 
- **Attenuation bias**: OLS is biased toward zero due to:
+ **Attenuation bias**: OLS is biased toward zero by **measurement error** in the institutions-quality measure.
 
- - Measurement error in institutions quality
- - Omitted variables (culture, geography)
- - Reverse causation (rich countries build better institutions)
+ Omitted variables (culture, geography) and reverse causation (rich countries build better institutions) would, if anything, bias OLS **upward** — so the fact that the IV estimate is even larger points to measurement error as the dominant source of bias.
 
 3. **Economic Interpretation**:
  - 1-unit improvement in institutions → 0.94 increase in log GDP
- - Exponentiating: $e^{0.94} \approx 2.56$ → **156% increase in GDP level**
+ - Exponentiating: $e^{0.94} \approx 2.57$ → **157% increase in GDP level**
  - This is a **massive effect**!
 
 4. **Instrument Validity**:
@@ -22923,7 +24678,7 @@ Institutions are not just correlated with prosperity—they **cause** it. Countr
 
 Best practices for data preparation and cleaning.
 
-### **Why Data Wrangling Matters**
+### Why Data Wrangling Matters
 
 Real-world econometric analysis spends **60-80% of time** on data preparation:
 
@@ -23000,7 +24755,7 @@ df_clean.loc[df_clean['age'] < 0, 'age'] = np.nan
 df_clean.loc[df_clean['age'] > 120, 'age'] = np.nan
 
 # Fill missing income with median
-df_clean['income'].fillna(df_clean['income'].median(), inplace=True)
+df_clean['income'] = df_clean['income'].fillna(df_clean['income'].median())
 
 # Standardize gender coding
 df_clean['gender'] = df_clean['gender'].str.upper().str[0]
@@ -23009,9 +24764,9 @@ print("\nCleaned data:")
 print(df_clean)
 
 print("\n✓ Key cleaning steps:")
-# 1. Detect and handle impossible values (age < 0, age > 120)
-# 2. Impute missing values (median for income)
-# 3. Standardize categorical variables (gender)
+print("  1. Detect and handle impossible values (age < 0, age > 120)")
+print("  2. Impute missing values (median for income)")
+print("  3. Standardize categorical variables (gender)")
 ```
 
 ## Key Takeaways
@@ -23045,7 +24800,7 @@ print("\n✓ Key cleaning steps:")
 - **Log-log models and cluster-robust SEs (13.4):** Automobile efficiency gains offset by larger vehicles; clustering by manufacturer accounts for within-group correlation
 - **Randomized control trials (13.5):** RAND experiment shows better insurance increases healthcare spending; random assignment eliminates selection bias
 - **Difference-in-differences (13.6):** South Africa clinic access improved child health; key assumption is parallel trends
-- **Regression discontinuity (13.7):** Political incumbency provides ~5–7% vote share advantage; exploits sharp cutoffs
+- **Regression discontinuity (13.7):** Political incumbency provides ~5% vote share advantage; exploits sharp cutoffs
 - **Instrumental variables (13.8):** Better institutions causally increase GDP; instruments address endogeneity
 
 ### Data Preparation and Practical Workflow (Case Study 13.9)
@@ -23106,14 +24861,12 @@ print(f"Sum α + β = {alpha + beta:.3f}  (≈1 → constant returns to scale)")
 print(f"R² = {fit_cobb._r2:.4f}")
 fit_cobb.summary()
 
-# F-test for constant returns to scale: H0: α + β = 1
-data_cobb['lnq_l'] = data_cobb['lnq'] - data_cobb['lnl']
-data_cobb['lnk_l'] = data_cobb['lnk'] - data_cobb['lnl']
-fit_r = pf.feols('lnq_l ~ lnk_l', data=data_cobb)
-rss_unr = np.sum(fit_cobb._u_hat**2)
-rss_r = np.sum(fit_r._u_hat**2)
-df_res = fit_cobb._N - len(fit_cobb.coef())
-f_stat = ((rss_r - rss_unr) / 1) / (rss_unr / df_res)
+# HAC-robust Wald test for constant returns to scale: H0: α + β = 1
+# (reuses fit_cobb's Newey-West covariance, consistent with the HAC SEs above)
+R = np.array([0.0, 1.0, 1.0])            # selects α + β (lnk + lnl)
+b_hat = fit_cobb.coef().values           # order: [Intercept, lnk, lnl]
+df_res = fit_cobb._N - len(b_hat)
+f_stat = (R @ b_hat - 1.0)**2 / (R @ fit_cobb._vcov @ R)
 p_val  = 1 - stats.f.cdf(f_stat, 1, df_res)
 print(f"CRS test: F = {f_stat:.2f}, p = {p_val:.3f} → {'Fail to reject' if p_val > 0.05 else 'Reject'} CRS")
 
@@ -23337,7 +25090,7 @@ This notebook provides an interactive introduction to regression with indicator 
 [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/quarcs-lab/metricsai/blob/main/notebooks_colab/ch14_Regression_with_Indicator_Variables.ipynb)
 <div class="chapter-resources">
 <a href="https://www.youtube.com/watch?v=Rkx1cY8_BBY" target="_blank" class="resource-btn">🎬 AI Video</a>
-<a href="https://carlos-mendez.my.canva.site/s14-regression-with-indicator-variables-pdf" target="_blank" class="resource-btn">✨ AI Slides</a>
+<a href="https://quarcs-lab.github.io/metricsai/slides/ch14/index.html" target="_blank" class="resource-btn">🧑🏽‍🏫 Mendez Slides</a>
 <a href="https://cameron.econ.ucdavis.edu/aed/traedv1_14" target="_blank" class="resource-btn">📊 Cameron Slides</a>
 <a href="https://app.edcafe.ai/quizzes/69786a6a2f5d08069e04cf09" target="_blank" class="resource-btn">✏️ Quiz</a>
 <a href="https://app.edcafe.ai/chatbots/6978a2782f5d08069e071ecb" target="_blank" class="resource-btn">🤖 AI Tutor</a>
@@ -23348,31 +25101,18 @@ This notebook provides an interactive introduction to regression with indicator 
 
 This chapter focuses on regression analysis when some regressors are indicator variables. Indicator variables are binary (0/1) variables that record whether an observation falls into a particular category.
 
-### What You'll Learn
+**What you'll learn:**
 
-By the end of this chapter, you will be able to:
-
-1. Understand indicator (dummy) variables and their role in regression analysis
-2. Interpret regression coefficients when regressors are categorical variables
-3. Use indicator variables to compare group means and test for differences
-4. Understand the relationship between regression on indicators and t-tests/ANOVA
-5. Incorporate indicator variables alongside continuous regressors to control for categories
-6. Create and interpret interaction terms between indicators and continuous variables
-7. Apply the dummy variable trap rule when using sets of mutually exclusive indicators
-8. Choose appropriate base categories and interpret coefficients relative to the base
-9. Conduct joint F-tests for the significance of sets of indicator variables
-10. Apply indicator variable techniques to real earnings data
-
-### Chapter Outline
-
-- **14.1** Indicator Variables: Single Binary Variable
-- **14.2** Indicator Variable with Additional Regressors
-- **14.3** Interactions with Indicator Variables
-- **14.4** Testing for Structural Change
-- **14.5** Sets of Indicator Variables
-- **Key Takeaways** -- Chapter review and consolidated lessons
-- **Practice Exercises** -- Reinforce your understanding
-- **Case Studies** -- Apply indicator variables to cross-country data
+- Understand indicator (dummy) variables and their role in regression analysis
+- Interpret regression coefficients when regressors are categorical variables
+- Use indicator variables to compare group means and test for differences
+- Understand the relationship between regression on indicators and t-tests/ANOVA
+- Incorporate indicator variables alongside continuous regressors to control for categories
+- Create and interpret interaction terms between indicators and continuous variables
+- Apply the dummy variable trap rule when using sets of mutually exclusive indicators
+- Choose appropriate base categories and interpret coefficients relative to the base
+- Conduct joint F-tests for the significance of sets of indicator variables
+- Apply indicator variable techniques to real earnings data
 
 **Dataset used:**
 
@@ -23385,6 +25125,111 @@ By the end of this chapter, you will be able to:
 - Do earnings differ across types of workers (self-employed, private, government)?
 - Can we test for structural differences between groups?
 
+**Chapter outline:**
+
+- 14.1 Indicator Variables: Single Binary Variable
+- 14.2 Indicator Variable with Additional Regressors
+- 14.3 Interactions with Indicator Variables
+- 14.4 Testing for Structural Change
+- 14.5 Sets of Indicator Variables
+- Key Takeaways
+- Practice Exercises
+- Case Studies
+
+
+## Key Concepts
+
+Six core ideas anchor this chapter. Skim them before you start, and come back when a term feels fuzzy. Each entry pairs a concrete example using the chapter's data with a non-technical analogy. Click a panel to expand it.
+
+**Indicator (Dummy) Variable:** A regressor that takes only two values — usually $1$ when an observation belongs to a category and $0$ when it does not. Adding an indicator to a regression lets the intercept (the predicted $y$) shift cleanly between the two groups, all else equal.
+
+::::: {.columns}
+:::: {.column width="50%"}
+::: {.callout-tip collapse="true" appearance="simple" title="Example"}
+For the 872 workers in `data_earnings`, the variable `gender` is an indicator: $1$ for female, $0$ for male. Regressing `earnings` on `gender` alone yields an intercept of about \$63{,}000 (the male mean) and a coefficient of about $-\$16{,}000$ on `gender` — meaning women earn roughly \$16k less than men, *unconditionally*.
+:::
+::::
+:::: {.column width="50%"}
+::: {.callout-note collapse="true" appearance="simple" title="Analogy"}
+A light switch has only two states: on or off. An indicator variable encodes the same kind of binary choice for an observation — the lamp's brightness in either state is what the regression equation describes; flipping the switch by including the dummy lets the model show *both* readings on the same fitted line.
+:::
+::::
+:::::
+
+**Base (Reference) Category:** The omitted category in a set of mutually exclusive indicators — the group whose mean the intercept represents. Every coefficient on a remaining indicator measures the *difference* in the outcome between that category and the base. Different choices of base do not change model fit, only interpretation.
+
+::::: {.columns}
+:::: {.column width="50%"}
+::: {.callout-tip collapse="true" appearance="simple" title="Example"}
+For worker type (self-employed, private, government), the chapter fits `earnings ~ dself + dgovt + …` — making **private sector** the base category. The intercept then reads as average private-sector earnings; `dself`'s coefficient is the self-employed–private gap, and `dgovt`'s is the government–private gap. Switching the base to self-employed re-labels the comparisons but leaves $R^2 \approx 0.12$ unchanged.
+:::
+::::
+:::: {.column width="50%"}
+::: {.callout-note collapse="true" appearance="simple" title="Analogy"}
+A tape measure starts from a zero mark — every reading is a distance *from* zero. The base category is the regression's zero mark for a categorical variable: every other category's coefficient is "how many units above (or below) the base group". Slide the zero mark to a different point on the tape and the readings change — the actual distances do not.
+:::
+::::
+:::::
+
+**Slope Dummy (Interaction with a Continuous Variable):** The product of an indicator and a continuous regressor, written $d \times x$. Adding such a term lets the *slope* on $x$ — not just the intercept — differ between groups. Without the interaction, group lines are parallel; with it, they can have different gradients.
+
+::::: {.columns}
+:::: {.column width="50%"}
+::: {.callout-tip collapse="true" appearance="simple" title="Example"}
+The chapter constructs `genderbyeduc = gender × education` and adds it to the earnings model. The coefficient on `genderbyeduc` measures whether the *return to a year of schooling* differs by gender — precisely the slope-dummy idea. The chapter's joint F-test on all four gender-related terms (`gender`, `genderbyeduc`, `genderbyage`, `genderbyhours`) decisively rejects $H_0$, confirming that gender enters earnings through both intercept and slopes.
+:::
+::::
+:::: {.column width="50%"}
+::: {.callout-note collapse="true" appearance="simple" title="Analogy"}
+Heating bills depend on hours of furnace use — but the *cost per hour* is higher in winter than summer. A slope dummy would multiply hours-of-use by a winter-indicator to capture exactly that: same equation, different rate per hour. Without it, your bill formula would (wrongly) treat every hour the same year-round.
+:::
+::::
+:::::
+
+**Chow Test:** A formal F-test that compares a *pooled* regression (with one set of coefficients for all observations) to *separate* regressions on each subgroup. Rejecting the null says that pooling is unjustified — at least one slope or intercept differs across groups.
+
+::::: {.columns}
+:::: {.column width="50%"}
+::: {.callout-tip collapse="true" appearance="simple" title="Example"}
+The chapter fits `earnings ~ education + age + hours` separately on the male and female subsamples. Comparing the two female and male coefficient vectors via a Chow F-test directly answers "do men and women have *fundamentally* different earnings equations, or just a constant gap?" — and the chapter's joint F-test on all gender-interactions rejects equality, signalling that the female and male models genuinely diverge.
+:::
+::::
+:::: {.column width="50%"}
+::: {.callout-note collapse="true" appearance="simple" title="Analogy"}
+A retailer wants to know whether one ad campaign works equally well across stores. They test the campaign in *every* store as one big group (pooled), then split stores by region (separate). The Chow Test is the manager's formal verdict: "is this a single national pattern, or do regions need their own playbooks?"
+:::
+::::
+:::::
+
+**Conditional vs. Unconditional Gap:** The unconditional gap is the raw mean difference between two groups; the conditional gap is the difference *after* including controls in the regression. Most empirical work cares about the conditional gap, since it strips out compositional differences.
+
+::::: {.columns}
+:::: {.column width="50%"}
+::: {.callout-tip collapse="true" appearance="simple" title="Example"}
+The unconditional gender earnings gap on `data_earnings` is about $-\$16{,}000$ — what you get from regressing `earnings` on `gender` alone. Adding `education` does **not** shrink this gap; the conditional coefficient (Model 2) is about $-\$18{,}000$, because women in this sample are more educated on average, so holding education fixed *widens* the unexplained gap. Controls can move a coefficient in either direction.
+:::
+::::
+:::: {.column width="50%"}
+::: {.callout-note collapse="true" appearance="simple" title="Analogy"}
+A newspaper headline says: "Coastal city pays \$25k more than inland city — proof of cost-of-living premium!" Then the *adjusted* article comes out: once you control for occupation, education, and seniority, only \$8k of the gap remains. The headline figure is unconditional; the article's figure is conditional. Both are real numbers, but they tell very different stories about *why* the gap exists.
+:::
+::::
+:::::
+
+**Pooled vs. Separate Regression:** Two ways to model two groups. The *pooled* fit uses one regression on all data — possibly with group dummies — and forces every slope to be the same across groups. *Separate* regressions fit one model per group, allowing every coefficient to vary. The Chow test arbitrates between the two.
+
+::::: {.columns}
+:::: {.column width="50%"}
+::: {.callout-tip collapse="true" appearance="simple" title="Example"}
+The chapter fits `earnings ~ education + age + hours` in three flavours: pooled across all 872 workers; pooled with full gender interactions (Model 5); and separately on the female and male subsamples. The separate-regression female slope on `education` differs visibly from the male slope — signalling that pooling without interactions would mask group-specific behaviour.
+:::
+::::
+:::: {.column width="50%"}
+::: {.callout-note collapse="true" appearance="simple" title="Analogy"}
+A pooled regression is the family group photo — everyone in one frame, the camera averages over individual differences. Separate regressions are the *individual* portraits — one of each family member, allowing each face to fill its own frame in its own way. Both have their uses, but if the family members look very different, the group photo can mislead about anyone in particular.
+:::
+::::
+:::::
 
 ## Setup
 
@@ -23473,7 +25318,7 @@ print("\nNote on indicator variables:")
 # dgovt: 1=government, 0=not
 ```
 
-## 14.1: Indicator Variables - Single Binary Variable
+## 14.1 Indicator Variables - Single Binary Variable
 
 An **indicator variable** (also called dummy variable or binary variable) takes only two values:
 
@@ -23577,7 +25422,7 @@ The regression results reveal a **statistically significant gender earnings gap*
 
 **Key Findings:**
 
-1. **Intercept ($b_1$) ≈ \$68,000**: This represents the **mean earnings for males** (when gender = 0). We can verify this matches the actual mean earnings for males in the sample.
+1. **Intercept ($b_1$) ≈ \$63,000**: This represents the **mean earnings for males** (when gender = 0). We can verify this matches the actual mean earnings for males in the sample.
 
 2. **Gender coefficient ($\alpha$) ≈ -\$16,000**: This is the **difference in mean earnings** between females and males. Specifically:
  - Females earn approximately **\$16,000 less** than males on average
@@ -23643,7 +25488,7 @@ print(f"  Note: IDENTICAL to classical t-test with equal variances")
 >
 > Specialized difference-in-means methods (like Welch's t-test) and regression on an indicator give the **same point estimate** but slightly different standard errors. Regression uses $se(\hat{a})$ from the model, while the t-test uses $se(\bar{y}_1 - \bar{y}_0) = \sqrt{s_1^2/n_1 + s_0^2/n_0}$. Both are valid; regression is more flexible when adding control variables.
 
-## 14.2: Indicator Variable with Additional Regressors
+## 14.2 Indicator Variable with Additional Regressors
 
 The raw difference in earnings by gender may be partly explained by other factors (e.g., education, experience, hours worked).
 
@@ -23718,10 +25563,10 @@ Comparing the five models reveals how the estimated gender gap evolves as we add
  - This is the **raw, unconditional** gender earnings gap
  - Ignores all other factors that might explain earnings differences
 
-2. **Model 2 (+ Education)**: Gap shrinks to approximately -\$10,000
- - Adding education as a control **reduces** the gender coefficient by ~\$6,000
- - Interpretation: Part of the raw gap is explained by gender differences in education levels
- - The remaining -\$10,000 is the gap **conditional on** education
+2. **Model 2 (+ Education)**: Gap *widens* to approximately -\$18,000
+ - Adding education as a control **increases** the gender coefficient magnitude by ~\$1,900 (from -\$16,396 to -\$18,258)
+ - Interpretation: Because women in this sample have *more* education on average, holding education fixed makes the unexplained gap **larger**, not smaller (a suppression effect)
+ - The -\$18,000 is the gap **conditional on** education
 
 3. **Model 3 (+ Gender × Education)**:
  - Now gender enters through **two channels**: the main effect AND the interaction
@@ -23732,7 +25577,7 @@ Comparing the five models reveals how the estimated gender gap evolves as we add
 4. **Model 4 (+ Age, Hours)**: Further controls
  - Adding age and hours worked provides more refined estimates
  - These are important determinants of earnings that may differ by gender
- - Gap continues to shrink as we account for more observable differences
+ - Because the interaction stays in the model, the main gender coefficient remains the (large, positive) gap at *zero* education rather than a shrinking overall gap
 
 5. **Model 5 (Full Interactions)**: Most flexible specification
  - Allows gender to affect the **intercept AND slopes** of all variables
@@ -23741,8 +25586,8 @@ Comparing the five models reveals how the estimated gender gap evolves as we add
 
 **Key Insights:**
 
-- The gender gap **decreases** substantially when we control for education, age, and hours worked
-- From -\$16,000 (unconditional) to approximately -\$5,000 to -\$8,000 (conditional)
+- The gender gap does **not** shrink toward zero when we control for education, age, and hours worked
+- Holding education fixed (Model 2) the conditional gap is about -\$18,000; in Models 3-5 gender enters through interactions, so the gap varies with education rather than collapsing to a single small number
 - This suggests **observable characteristics explain part, but not all** of the gap
 - The remaining gap could reflect:
  - Unmeasured factors (experience, occupation, industry)
@@ -23754,7 +25599,7 @@ Comparing the five models reveals how the estimated gender gap evolves as we add
 - With interactions, **individual t-tests can be misleading** due to multicollinearity
 - **Joint F-tests** are essential for testing overall significance of a variable that enters through multiple terms
 
-## 14.3: Interactions with Indicator Variables
+## 14.3 Interactions with Indicator Variables
 
 An **interacted indicator variable** is the product of an indicator variable and another regressor.
 
@@ -23866,7 +25711,7 @@ summary_df.to_string()
 >
 > When an indicator and its interaction with another variable are both included, test their **joint significance** using an F-test rather than individual t-tests. The joint test $H_0: \alpha_1 = 0, \alpha_2 = 0$ evaluates whether the categorical variable matters at all. Individual t-tests can be misleading when the indicator and interaction are correlated.
 
-## 14.4: Testing for Structural Change - Separate Regressions
+## 14.4 Testing for Structural Change - Separate Regressions
 
 An alternative to including interactions is to estimate **separate regressions** for each group.
 
@@ -23927,11 +25772,13 @@ print(f"  - Returns to age: ${fit_female.coef()['age']:,.0f} (F) vs ${fit_male.c
 print(f"  - Returns to hours: ${fit_female.coef()['hours']:,.0f} (F) vs ${fit_male.coef()['hours']:,.0f} (M)")
 ```
 
+Comparing the two subsamples shows that the returns to education and to hours are noticeably larger for men than for women (about \$6,300 vs \$4,200 per year of schooling, and about \$1,600 vs \$700 per weekly hour), while the return to age is similar across genders. This pattern — different *slopes*, not just a constant intercept gap — is exactly what a formal Chow test is designed to detect.
+
 > **Key Concept 14.5: Testing for Structural Change**
 >
 > Running **separate regressions** for each group allows all coefficients to differ simultaneously. The **Chow test** evaluates whether pooling the data (imposing the same coefficients for both groups) is justified. If the F-test rejects the null, the relationship between $y$ and $x$ differs fundamentally across groups -- not just in intercept or one slope, but throughout the model.
 
-## 14.5: Sets of Indicator Variables (Multiple Categories)
+## 14.5 Sets of Indicator Variables (Multiple Categories)
 
 Often we have categorical variables with **more than two categories**.
 
@@ -24019,7 +25866,7 @@ This means one dummy is a **perfect linear combination** of the others plus the 
 
 From the three specifications above:
 
-- **R² is identical** across all specifications (≈ 0.16-0.17)
+- **R² is identical** across all specifications (≈ 0.12)
 - **Joint F-tests** give the same result (testing if worker type matters)
 - Only the individual coefficients change (but they measure different things)
 
@@ -24027,15 +25874,15 @@ From the three specifications above:
 
 If reference = Private sector:
 
-- $d_{self}$ coefficient ≈ -\$5,000: Self-employed earn \$5,000 less than private sector
-- $d_{govt}$ coefficient ≈ +\$2,000: Government workers earn \$2,000 more than private sector
+- $d_{self}$ coefficient ≈ +\$17,000: Self-employed earn about \$17,000 *more* than private sector (self-employed are the highest earners in this sample)
+- $d_{govt}$ coefficient ≈ -\$2,000: Government workers earn about \$2,000 *less* than private sector
 
 If reference = Self-employed:
 
-- $d_{private}$ coefficient ≈ +\$5,000: Private sector earns \$5,000 more than self-employed
-- $d_{govt}$ coefficient ≈ +\$7,000: Government workers earn \$7,000 more than self-employed
+- $d_{private}$ coefficient ≈ -\$17,000: Private sector earns about \$17,000 *less* than self-employed
+- $d_{govt}$ coefficient ≈ -\$19,000: Government workers earn about \$19,000 *less* than self-employed
 
-Notice: The difference between govt and private is the same in both (≈ \$7,000 - \$5,000 = \$2,000)!
+Notice: The government-vs-private gap is the same in both parameterizations (≈ -\$2,000)!
 
 **Practical Advice:**
 
@@ -24139,6 +25986,8 @@ plt.show()
 - **Spread**: Wider boxes and longer whiskers indicate greater earnings variation within a group
 - **Outliers**: Points beyond the whiskers represent unusually high earners
 - **Red diamonds**: Mean markers may differ from medians, indicating skewness in the earnings distribution
+
+Next, we plot earnings against years of education separately for men and women, fitting a regression line to each group. Watch whether the two lines are parallel or have visibly different slopes — non-parallel lines are the visual signature of an interaction effect.
 
 ```python
 # Figure 2: Earnings vs education by gender (with regression lines)
@@ -24459,7 +26308,7 @@ dat = pd.read_csv(url)
 dat2014 = dat[dat['year'] == 2014].copy()
 ```
 
-**Variables:** `lp` (labor productivity), `rk` (physical capital), `hc` (human capital), `region` (world region)
+**Variables:** `lp` (labor productivity), `kl` (physical capital per worker), `h` (human capital), `region` (world region)
 
 ---
 
@@ -24506,7 +26355,7 @@ Add physical capital and human capital as continuous controls. Observe how regio
 
 **Hints:**
 
-- Use `ln_lp ~ C(region) + np.log(rk) + hc` as the formula
+- Use `ln_lp ~ C(region) + np.log(kl) + h` as the formula
 - Compare regional coefficients with and without controls
 - What does it mean when regional gaps shrink after adding controls?
 
@@ -24518,7 +26367,7 @@ Add an interaction between region and human capital to test whether the returns 
 
 **Hints:**
 
-- Use `ln_lp ~ C(region) * hc + np.log(rk)` to include all region-hc interactions
+- Use `ln_lp ~ C(region) * h + np.log(kl)` to include all region-human-capital interactions
 - How do you interpret the interaction coefficients?
 - Do the returns to human capital differ significantly across regions?
 
@@ -24610,7 +26459,7 @@ print(f"Lowest mean IMDS:  {dept_stats['mean'].idxmin()} ({dept_stats['mean'].mi
 
 **Instructions**:
 
-1. Estimate `imds ~ C(dep)` using statsmodels --- `C()` creates dummies automatically
+1. Estimate `imds ~ C(dep)` using pyfixest --- `C()` creates dummies automatically
 2. Print the regression summary
 3. Interpret: Each coefficient is the difference from the **base category** (the omitted department)
 4. What is the base department? How much higher or lower is each department relative to the base?
@@ -24635,7 +26484,7 @@ fit_dep.summary()
 # print(f"Intercept = mean IMDS for the base department: {fit_dep.coef()['Intercept']:.2f}")
 ```
 
-> **Key Concept 14.9: Geographic Indicator Variables**
+> **Key Concept 14.11: Geographic Indicator Variables**
 >
 > Department indicators capture **time-invariant regional characteristics** that affect development: altitude, climate, proximity to borders, historical infrastructure investments, and cultural factors. By including department dummies, we control for these systematic regional differences, allowing us to estimate the NTL-development relationship *within* departments rather than across them. The coefficient on NTL then reflects how NTL variation within a department predicts development variation within that department.
 
@@ -24704,7 +26553,7 @@ fit_dep.summary()
 # print("  Other departments: base slope + interaction coefficient")
 ```
 
-> **Key Concept 14.10: Heterogeneous Satellite Effects**
+> **Key Concept 14.12: Heterogeneous Satellite Effects**
 >
 > Interaction terms between department indicators and NTL allow the **slope of the NTL-development relationship** to differ across regions. This is economically meaningful: in highly urbanized departments (like La Paz or Cochabamba), additional nighttime lights may signal commercial activity, while in rural highland departments (like Potosi), lights primarily reflect basic electrification. A significant interaction indicates that the *economic meaning* of satellite signals varies by geographic context.
 
@@ -24720,7 +26569,7 @@ fit_dep.summary()
 
 **Hints**:
 
-- Use `model.f_test()` or compare restricted vs. unrestricted models
+- Use the fitted model's `wald_test()` method or compare restricted vs. unrestricted models
 - For interaction terms, compare the model with interactions to the model without
 - Report F-statistics and p-values for both tests
 
@@ -24732,16 +26581,22 @@ fit_dep.summary()
 # 2. F-test for joint significance of interaction terms
 # 3. Compare models with and without regional effects
 #
-# Approach: Compare nested models using ANOVA
-# fit_base = pf.feols('imds ~ ln_NTLpc2017', data=bol_key)
+# Approach: fit the models, then use pyfixest's wald_test() (as in Section 14.3)
+#           to jointly test the relevant sets of coefficients.
 # fit_dep_only = pf.feols('imds ~ C(dep) + ln_NTLpc2017', data=bol_key)
 # fit_full = pf.feols('imds ~ C(dep) * ln_NTLpc2017', data=bol_key)
 #
-# print("F-test: Department indicators (comparing base vs dep_only)")
-# print(anova_lm(model_base, model_dep_only))
+# # 1. Joint test of all department indicators
+# dep_terms = [c for c in fit_dep_only.coef().index if c.startswith('C(dep)')]
+# R_dep = np.eye(len(fit_dep_only.coef()))[[list(fit_dep_only.coef().index).index(v) for v in dep_terms]]
+# print("Joint F-test: department indicators")
+# print(fit_dep_only.wald_test(R=R_dep))
 #
-# print("\nF-test: Interaction terms (comparing dep_only vs full)")
-# print(anova_lm(model_dep_only, model_full))
+# # 2. Joint test of all department x NTL interaction terms
+# int_terms = [c for c in fit_full.coef().index if ':' in c]
+# R_int = np.eye(len(fit_full.coef()))[[list(fit_full.coef().index).index(v) for v in int_terms]]
+# print("\nJoint F-test: department x NTL interactions")
+# print(fit_full.wald_test(R=R_int))
 ```
 
 #### Task 6: Regional Disparities Brief (Independent)
@@ -24806,7 +26661,7 @@ This notebook provides an interactive introduction to regression with transforme
 [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/quarcs-lab/metricsai/blob/main/notebooks_colab/ch15_Regression_with_Transformed_Variables.ipynb)
 <div class="chapter-resources">
 <a href="https://www.youtube.com/watch?v=XJv1bfr9BI4" target="_blank" class="resource-btn">🎬 AI Video</a>
-<a href="https://carlos-mendez.my.canva.site/s15-regression-with-transformed-variables-pdf" target="_blank" class="resource-btn">✨ AI Slides</a>
+<a href="https://quarcs-lab.github.io/metricsai/slides/ch15/index.html" target="_blank" class="resource-btn">🧑🏽‍🏫 Mendez Slides</a>
 <a href="https://cameron.econ.ucdavis.edu/aed/traedv1_15" target="_blank" class="resource-btn">📊 Cameron Slides</a>
 <a href="https://app.edcafe.ai/quizzes/69786b142f5d08069e04d9ed" target="_blank" class="resource-btn">✏️ Quiz</a>
 <a href="https://app.edcafe.ai/chatbots/6978a2c92f5d08069e072021" target="_blank" class="resource-btn">🤖 AI Tutor</a>
@@ -24817,31 +26672,16 @@ This notebook provides an interactive introduction to regression with transforme
 
 This chapter focuses on regression models that involve transformed variables. Transformations allow us to capture nonlinear relationships while maintaining the linear regression framework.
 
-### What You'll Learn
+**What you'll learn:**
 
-By the end of this chapter, you will be able to:
-
-1. Understand how variable transformations affect regression interpretation
-2. Compute and interpret marginal effects for nonlinear models
-3. Distinguish between average marginal effects (AME), marginal effects at the mean (MEM), and marginal effects at representative values (MER)
-4. Estimate and interpret quadratic and polynomial regression models
-5. Work with interaction terms and test their joint significance
-6. Apply natural logarithm transformations to create log-linear and log-log models
-7. Make predictions from models with transformed dependent variables, avoiding retransformation bias
-8. Combine multiple types of variable transformations in a single model
-
-### Chapter Outline
-
-- **15.1** Example - Earnings and Education
-- **15.2** Logarithmic Transformations
-- **15.3** Polynomial Regression (Quadratic Models)
-- **15.4** Standardized Variables
-- **15.5** Interaction Terms and Marginal Effects
-- **15.6** Retransformation Bias and Prediction
-- **15.7** Comprehensive Model with Mixed Regressors
-- **Key Takeaways** -- Chapter review and consolidated lessons
-- **Practice Exercises** -- Reinforce your understanding
-- **Case Studies** -- Apply transformations to cross-country data
+- Understand how variable transformations affect regression interpretation
+- Compute and interpret marginal effects for nonlinear models
+- Distinguish between average marginal effects (AME), marginal effects at the mean (MEM), and marginal effects at representative values (MER)
+- Estimate and interpret quadratic and polynomial regression models
+- Work with interaction terms and test their joint significance
+- Apply natural logarithm transformations to create log-linear and log-log models
+- Make predictions from models with transformed dependent variables, avoiding retransformation bias
+- Combine multiple types of variable transformations in a single model
 
 **Dataset used:**
 
@@ -24854,6 +26694,128 @@ By the end of this chapter, you will be able to:
 - How should we interpret coefficients in log-transformed models?
 - How do we make unbiased predictions from log-linear models?
 
+**Chapter outline:**
+
+- 15.1 Example - Earnings and Education
+- 15.2 Logarithmic Transformations
+- 15.3 Polynomial Regression (Quadratic Models)
+- 15.4 Standardized Variables
+- 15.5 Interaction Terms and Marginal Effects
+- 15.6 Retransformation Bias and Prediction
+- 15.7 Comprehensive Model with Mixed Regressors
+- Key Takeaways
+- Practice Exercises
+- Case Studies
+
+
+## Key Concepts
+
+Seven core ideas anchor this chapter. Skim them before you start, and come back when a term feels fuzzy. Each entry pairs a concrete example using the chapter's data with a non-technical analogy. Click a panel to expand it.
+
+**Marginal Effect:** The change in $y$ associated with a one-unit increase in a regressor, holding the other regressors fixed. In a plain linear model the marginal effect is just the slope; once $x$ enters the regression nonlinearly (squared, logged, interacted), the marginal effect varies with the value of $x$.
+
+::::: {.columns}
+:::: {.column width="50%"}
+::: {.callout-tip collapse="true" appearance="simple" title="Example"}
+For the 872 workers in `data_earnings`, the linear model gives a constant marginal effect of `age` of about \$525 per year. The chapter's quadratic fit replaces it with $ME_{\text{age}} = \beta_2 + 2\beta_3 \cdot \text{age}$ — about $+\$1{,}600$ at age 25, $\$0$ at the turning point near age 52, and $-\$450$ at age 60. Same regressor, very different marginal stories.
+:::
+::::
+:::: {.column width="50%"}
+::: {.callout-note collapse="true" appearance="simple" title="Analogy"}
+The grade of a road tells you how much elevation you gain per metre walked *right here*. On a flat stretch the grade is zero; climbing a hill it is positive; rolling downhill it is negative. The marginal effect is the regression's road-grade — the slope you feel taking *one more step* in the regressor.
+:::
+::::
+:::::
+
+**Average Marginal Effect (AME):** Compute the marginal effect for *every* observation in the sample, then average. The AME summarises the typical marginal change across the whole population represented by the data, rather than the change at any one specific point.
+
+::::: {.columns}
+:::: {.column width="50%"}
+::: {.callout-tip collapse="true" appearance="simple" title="Example"}
+For the quadratic earnings-on-age model, $ME_{\text{age}, i} = \beta_2 + 2\beta_3 \cdot \text{age}_i$ is computed for each of the 872 workers and then averaged. The AME for `age` lands between the high-young-worker effect (+\$1{,}600) and the negative-old-worker effect (–\$450), giving a single summary number that respects the full age distribution in the sample.
+:::
+::::
+:::: {.column width="50%"}
+::: {.callout-note collapse="true" appearance="simple" title="Analogy"}
+A symphony tracks the tempo at every bar across an entire performance, then reports the average. That single number is the *average tempo* — not the conductor's tempo at any one moment, but a faithful summary of how fast the orchestra played overall. AME is the regression's average-tempo statistic for a marginal effect that varies through the score.
+:::
+::::
+:::::
+
+**Marginal Effect at the Mean (MEM):** Plug the *sample-mean values* of every regressor into the marginal-effect formula and compute the resulting number. MEM tells you the marginal effect for a "representative average individual", which can differ noticeably from the AME when the marginal-effect curve is highly nonlinear.
+
+::::: {.columns}
+:::: {.column width="50%"}
+::: {.callout-tip collapse="true" appearance="simple" title="Example"}
+With the quadratic earnings-on-age fit, MEM is $\beta_2 + 2\beta_3 \cdot \overline{\text{age}}$ — using the chapter's mean `age` of about 43, giving a marginal effect of about $+\$536$ per year for the "average worker". For a *quadratic* model the marginal effect is linear in age, so here MEM equals the AME exactly; the two diverge only when the marginal-effect curve is itself nonlinear (as in logit or higher-order polynomial models).
+:::
+::::
+:::: {.column width="50%"}
+::: {.callout-note collapse="true" appearance="simple" title="Analogy"}
+A photographer focuses the lens on the median guest at a wedding for a "representative" portrait. The result describes that one focused-on guest sharply — but says nothing about the kid at the corner table or the grandmother at the bar. MEM is the regression's "in-focus average guest": precise about that point, less informative about the spread.
+:::
+::::
+:::::
+
+**Marginal Effect at Representative Values (MER):** Plug *chosen* values of the regressors into the marginal-effect formula — typically a few policy-relevant profiles (a 25-year-old, a 40-year-old, a 55-year-old). MER lets you report several marginal effects, each tailored to a specific scenario.
+
+::::: {.columns}
+:::: {.column width="50%"}
+::: {.callout-tip collapse="true" appearance="simple" title="Example"}
+The chapter's interaction model `earnings ~ age + education + agebyeduc` reports $ME_{\text{education}}$ at three representative ages: $+\$5{,}241$ per education-year at age 25, $+\$5{,}677$ at age 40, and $+\$6{,}112$ at age 55 — only about a 1.2× change across the working life (and the underlying age×education interaction is not statistically significant, $p \approx 0.61$). These three MER values illuminate what AME and MEM each smooth over.
+:::
+::::
+:::: {.column width="50%"}
+::: {.callout-note collapse="true" appearance="simple" title="Analogy"}
+A tailor doesn't make one suit for "the average customer"; they make one suit per customer profile — a tall slim athlete, a short stocky executive, a teenager. Each suit fits its target precisely. MER is the regression's bespoke-suit reporting: instead of one number, a small set of effects, each cut to a profile of interest.
+:::
+::::
+:::::
+
+**Polynomial Regression:** A regression that includes powers of a regressor — $x$, $x^2$, $x^3$, … — to capture curvature while keeping the model linear in coefficients. The quadratic form is the most common; cubic and higher add additional bends but invite over-fitting in small samples.
+
+::::: {.columns}
+:::: {.column width="50%"}
+::: {.callout-tip collapse="true" appearance="simple" title="Example"}
+The chapter fits `earnings ~ age + agesq + education` on `data_earnings`. The linear `age` coefficient is around $+\$3{,}000$ to $+\$5{,}000$ and the quadratic `agesq` coefficient is around $-\$30$ to $-\$50$ — together producing the inverted-U life-cycle pattern with peak earnings near age 50. The joint $F$-test on `age` and `agesq` is highly significant, ruling out the simpler linear-in-age model.
+:::
+::::
+:::: {.column width="50%"}
+::: {.callout-note collapse="true" appearance="simple" title="Analogy"}
+A roller-coaster track climbs, peaks, dips, climbs again — its height isn't a straight line, but it can still be described by a smooth equation that bends in just the right places. Polynomial regression is the regression's roller-coaster: the relationship between $x$ and $y$ rises, peaks, falls — and the coefficients on $x, x^2, \dots$ are the engineering specs of the curve.
+:::
+::::
+:::::
+
+**Standardised Variable ($z$-score within a regression):** Replace each variable by $(x - \bar{x})/s_x$ before fitting. The resulting coefficients tell you the change in $y$ — measured in $y$'s standard deviations — for a one-standard-deviation change in $x$. Standardising puts variables in different units onto a common scale, useful when comparing relative importance.
+
+::::: {.columns}
+:::: {.column width="50%"}
+::: {.callout-tip collapse="true" appearance="simple" title="Example"}
+In the chapter's mixed-regressor earnings model (`earnings ~ gender + age + agesq + education + dself + dgovt + lnhours`), the raw coefficient on `lnhours` (in dollars per log-hour) cannot be compared directly to the coefficient on `education` (in dollars per year). Standardising both produces $\beta^*$ values that *can* be compared: who moves earnings more, by one SD of effort? Age and its squared term come out as the largest standardised effects; among the remaining regressors, education and `lnhours` have the largest standardised coefficients.
+:::
+::::
+:::: {.column width="50%"}
+::: {.callout-note collapse="true" appearance="simple" title="Analogy"}
+A currency converter restates a price in dollars, euros, and yen on a single line so you can compare what each pays you for the same coffee. Standardisation does the same for regressors: it converts dollars-per-year, hours-per-week, and binary flags into a common "standard-deviation" currency, so each coefficient is finally comparable to the others.
+:::
+::::
+:::::
+
+**Smearing Estimator (Duan's):** A nonparametric correction for retransformation bias when the dependent variable is logged. Instead of multiplying $\exp(\widehat{\ln y})$ by a normality-based factor like $\exp(s_e^2/2)$, Duan's method multiplies by the empirical mean $\tfrac{1}{n}\sum \exp(\hat{u}_i)$ — letting the residuals themselves correct the bias.
+
+::::: {.columns}
+:::: {.column width="50%"}
+::: {.callout-tip collapse="true" appearance="simple" title="Example"}
+For the log-linear earnings model on `data_earnings` ($s_e \approx 0.62$), naive retransformation $\exp(\widehat{\ln y})$ gives a sample-mean prediction of about \$46k — well below the actual mean of \$56k. The normality-based factor $\exp(0.62^2/2) \approx 1.21$ recovers about \$55k; Duan's smearing correction averages $\exp(\hat{u}_i)$ across the 872 residuals to produce essentially the same correction without assuming normality.
+:::
+::::
+:::: {.column width="50%"}
+::: {.callout-note collapse="true" appearance="simple" title="Analogy"}
+A cook prepares a recipe and finds the salt always measures slightly low at the end. Rather than use a textbook formula to compute the missing pinch, the smearing approach is to look back at the *actual* leftover residue from past batches and add exactly that average back in. The salt comes out right because the correction is read from real cooking, not theory.
+:::
+::::
+:::::
 
 ## Setup
 
@@ -24895,7 +26857,7 @@ plt.rcParams.update({
 })
 ```
 
-## 15.1: Example - Earnings and Education
+## 15.1 Example - Earnings and Education
 
 We'll work with the EARNINGS_COMPLETE dataset, which contains information on 872 female and male full-time workers aged 25-65 years in 2000.
 
@@ -24929,7 +26891,7 @@ key_vars = ['earnings', 'lnearnings', 'age', 'agesq', 'education', 'agebyeduc',
 data_earnings[key_vars].head(10)
 ```
 
-## 15.2: Logarithmic Transformations
+## 15.2 Logarithmic Transformations
 
 Logarithmic transformations are commonly used in economics because:
 
@@ -24998,7 +26960,7 @@ fit_loglin.summary()
 
 > **Key Concept 15.1: Log Transformations and Coefficient Interpretation**
 >
-> In a **log-linear model** ($\ln y = \beta_1 + \beta_2 x$), the coefficient $\beta_2$ is a semi-elasticity: a 1-unit increase in $x$ is associated with a $100 \times \beta_2$% change in $y$. In a **log-log model** ($\ln y = \beta_1 + \beta_2 \ln x$), the coefficient $\beta_2$ is an elasticity: a 1% increase in $x$ is associated with a $\beta_2$% change in $y$.
+> In a **log-linear model** ($\ln y = \beta_1 + \beta_2 x$), the coefficient $\beta_2$ is a semi-elasticity: a 1-unit increase in $x$ is associated with approximately a $100 \times \beta_2$% change in $y$ (the exact effect is $100(e^{\beta_2}-1)$%, which matters once $|\beta_2| > 0.1$). In a **log-log model** ($\ln y = \beta_1 + \beta_2 \ln x$), the coefficient $\beta_2$ is an elasticity: a 1% increase in $x$ is associated with a $\beta_2$% change in $y$.
 
 ### Interpretation of Log Models
 
@@ -25012,8 +26974,8 @@ The three models reveal fundamentally different ways to think about the relation
 
 **Model 1: Levels (earnings ~ age + education)**
 
-- **Age coefficient** ≈ \$800-\$1,200 per year
- - Interpretation: Each additional year of age increases earnings by approximately **\$1,000**
+- **Age coefficient** ≈ \$525 per year
+ - Interpretation: Each additional year of age increases earnings by approximately **\$525**
  - This is an **absolute change** measured in dollars
  - Assumes **constant** effect regardless of current age or earnings level
 
@@ -25024,12 +26986,12 @@ The three models reveal fundamentally different ways to think about the relation
 
 **Model 2: Log-Linear (ln(earnings) ~ age + education)**
 
-- **Age coefficient** ≈ 0.01 to 0.02
- - Interpretation: Each additional year of age increases earnings by approximately **1-2%**
+- **Age coefficient** ≈ 0.008
+ - Interpretation: Each additional year of age increases earnings by approximately **0.8%**
  - This is a **percentage change** (semi-elasticity)
  - The **dollar impact depends on current earnings**
- - For someone earning \$50,000: 1.5% × \$50,000 = \$750
- - For someone earning \$100,000: 1.5% × \$100,000 = \$1,500
+ - For someone earning \$50,000: 0.8% × \$50,000 = \$400
+ - For someone earning \$100,000: 0.8% × \$100,000 = \$800
 
 - **Education coefficient** ≈ 0.08 to 0.12
  - Interpretation: Each additional year of education increases earnings by approximately **8-12%**
@@ -25039,8 +27001,8 @@ The three models reveal fundamentally different ways to think about the relation
 
 **Model 3: Log-Log (ln(earnings) ~ ln(age) + education)**
 
-- **ln(Age) coefficient** ≈ 0.5 to 1.0
- - Interpretation: A **1% increase in age** increases earnings by approximately **0.5-1.0%**
+- **ln(Age) coefficient** ≈ 0.35
+ - Interpretation: A **1% increase in age** increases earnings by approximately **0.35%**
  - This is an **elasticity** (percentage change in Y for 1% change in X)
  - Elasticity < 1 means **inelastic** relationship (earnings increase slower than age)
  - At age 40: 1% increase = 0.4 years; at age 50: 1% increase = 0.5 years
@@ -25077,7 +27039,7 @@ comparison_table = pd.DataFrame({
     'Adj R-squared': [fit_linear._adj_r2, fit_loglin._adj_r2, fit_loglog._adj_r2]
 })
 
-comparison_table.to_string(index=False)
+print(comparison_table.to_string(index=False))
 
 print("\nNote: R² values are NOT directly comparable across models with different")
 # dependent variables. For log models, R² measures fit to ln(earnings), not earnings.
@@ -25087,7 +27049,7 @@ print("\nNote: R² values are NOT directly comparable across models with differe
 >
 > You cannot directly compare $R^2$ across models with different dependent variables ($y$ vs $\ln y$) because they measure variation on different scales. Instead, compare models using **prediction accuracy** (e.g., mean squared error of predicted $y$ in levels), information criteria (AIC, BIC), or economic plausibility of the estimated relationships.
 
-## 15.3: Polynomial Regression (Quadratic Models)
+## 15.3 Polynomial Regression (Quadratic Models)
 
 Polynomial regression allows for nonlinear relationships while maintaining linearity in parameters.
 
@@ -25132,6 +27094,8 @@ print(f"  education: {fit_quad.coef()['education']:,.2f}")
 # Full regression output (quadratic model)
 fit_quad.summary()
 ```
+
+With the quadratic fit in hand, we extract its economic content: the age at which earnings peak (the turning point) and the marginal effect of age evaluated at several representative ages. Watch how the marginal effect starts large and positive for young workers and turns negative once age passes the turning point.
 
 ```python
 # TURNING POINT AND MARGINAL EFFECTS
@@ -25191,10 +27155,10 @@ From the regression: earnings = $\beta_1 + \beta_2 \cdot age + \beta_3 \cdot age
 
 2. **Marginal Effect of Age** (varies with age):
  - Formula: $ME_{age} = \beta_2 + 2\beta_3 \cdot age$
- - At age 25: ME ≈ +\$3,000 (steep increase)
- - At age 40: ME ≈ +\$1,000 (slower increase)
+ - At age 25: ME ≈ +\$1,600 (steep increase)
+ - At age 40: ME ≈ +\$700 (slower increase)
  - At age 50: ME ≈ \$0 (peak earnings)
- - At age 60: ME ≈ -\$1,000 (earnings decline)
+ - At age 60: ME ≈ -\$450 (earnings decline)
 
 3. **Why the Inverted U-Shape?**
  - **Early career (20s-30s)**: Rapid skill accumulation, promotions → steep earnings growth
@@ -25204,7 +27168,7 @@ From the regression: earnings = $\beta_1 + \beta_2 \cdot age + \beta_3 \cdot age
 
 **Comparing Linear vs. Quadratic:**
 
-- **Linear model**: Assumes constant age effect (+\$1,000/year regardless of age)
+- **Linear model**: Assumes constant age effect (+\$525/year regardless of age)
  - Misses the fact that earnings growth **slows down** and eventually **reverses**
  - Poor fit for older workers
 
@@ -25215,7 +27179,7 @@ From the regression: earnings = $\beta_1 + \beta_2 \cdot age + \beta_3 \cdot age
 
 **Statistical Significance:**
 
-The **joint F-test** for $H_0: \beta_{age} = 0$ AND $\beta_{age^2} = 0$ is **highly significant** (F > 100, p < 0.001):
+The **joint F-test** for $H_0: \beta_{age} = 0$ AND $\beta_{age^2} = 0$ is **highly significant** (F ≈ 19, p < 0.001):
 
 - This confirms age **matters** for earnings
 - The quadratic term is **necessary** (not just linear)
@@ -25303,7 +27267,7 @@ plt.show()
 - **Turning point**: The green dashed line marks the age where additional years stop increasing earnings -- a key policy-relevant quantity
 - **Right panel**: The marginal effect of age decreases steadily; the green/red shading shows where an extra year of age helps vs. hurts earnings
 
-## 15.4: Standardized Variables
+## 15.4 Standardized Variables
 
 Standardized regression coefficients (beta coefficients) allow comparison of the relative importance of regressors measured in different units.
 
@@ -25343,6 +27307,8 @@ print(f"Gender: ${fit_linear_mix.coef()['gender']:,.0f} (negative = women earn l
 # Full regression output
 fit_linear_mix.summary()
 ```
+
+The raw coefficients above are measured in different units (dollars per year, dollars per log-hour, dollars per dummy), so their magnitudes are not directly comparable. Next we rescale each coefficient into standard-deviation units. Look for which variable has the largest absolute standardized coefficient -- that is the strongest predictor on a common scale.
 
 ```python
 # STANDARDIZED COEFFICIENTS
@@ -25415,41 +27381,40 @@ Formula: $\beta^* = \beta \times (SD_x / SD_y)$
 - A 1 SD increase in X leads to $\beta^*$ SD change in Y
 - Now all variables are **comparable** (measured in same units)
 
-**Typical Results from the Analysis:**
+**Results from the Analysis:**
 
 Ranking by absolute standardized coefficients (largest to smallest):
 
-1. **Education** ($\beta^* \approx 0.30$ to \$0.40$):
- - **Strongest predictor** of earnings
- - 1 SD increase in education (≈2.5 years) → 0.35 SD increase in earnings (≈\$15,000)
- - Confirms education is the dominant factor
+1. **Age and Age²** ($\beta^* \approx +0.68$ and $-0.57$):
+ - The **largest standardized coefficients** in this model
+ - Read them together: `age` and `agesq` are the two halves of one quadratic term, so their individual $\beta^*$ values partly offset and overstate age's standalone importance
+ - Age still matters most on a common scale, but through its nonlinear life-cycle shape
 
-2. **Hours worked** ($\beta^* \approx 0.20$ to \$0.30$):
- - **Second most important**
- - 1 SD increase in hours (≈8 hours/week) → 0.25 SD increase in earnings
+2. **Education** ($\beta^* \approx 0.30$):
+ - The **strongest single continuous predictor** once the age/age² pair is set aside
+ - 1 SD increase in education (≈2.9 years) → 0.30 SD increase in earnings
+ - Consistent with human capital theory
+
+3. **Hours worked** ($\beta^* \approx 0.22$):
+ - 1 SD increase in `lnhours` → 0.22 SD increase in earnings
  - Makes sense: more hours → proportionally more pay
 
-3. **Age** ($\beta^* \approx 0.15$ to \$0.20$):
- - **Moderate importance**
- - But remember this is from the linear specification
- - The quadratic model shows age matters more in a nonlinear way
-
-4. **Gender** ($\beta^* \approx -0.15$ to -0.20$):
+4. **Gender** ($\beta^* \approx -0.14$):
  - **Substantial negative effect**
- - Being female → 0.15-0.20 SD decrease in earnings
- - This standardizes the raw gap of ~\$10,000-\$15,000
+ - Being female → about a 0.14 SD decrease in earnings
+ - This standardizes the raw gap of ~\$14,000
 
-5. **Employment type** (dself, dgovt) ($\beta^* \approx 0.05$ to \$0.10$):
+5. **Employment type** (dself, dgovt) ($\beta^* \approx 0.05$ and $0.00$):
  - **Smaller effects**
- - Self-employment or government sector have modest impacts
- - Once we control for education, age, hours
+ - Self-employment carries a modest positive $\beta^*$; the government dummy is essentially zero
+ - Once we control for education, age, and hours
 
 **Key Insights:**
 
-1. **Education dominates**: Strongest predictor, supporting human capital theory
-2. **Hours worked matters**: Direct relationship (more work → more pay)
-3. **Categorical variables** (gender, employment type) also standardizable
-4. **Age**: Important but complex (quadratic, so beta coefficient understates it)
+1. **Age carries the largest standardized coefficients**: but `age` and `agesq` share the variance of one quadratic term, so read their $\beta^*$ values together rather than as independent effects
+2. **Education is the strongest single predictor**: once the age/age² terms are set aside, supporting human capital theory
+3. **Hours worked matters**: direct relationship (more work → more pay)
+4. **Categorical variables** (gender, employment type) are also standardizable
 
 **When to Use Standardized Coefficients:**
 
@@ -25500,7 +27465,7 @@ plt.show()
 - **Direction (color)**: Cyan bars indicate positive effects; red bars indicate negative effects (e.g., gender penalty)
 - **Relative ranking**: Compare education vs. hours vs. age -- the raw coefficients may suggest a different ranking because those variables are measured in different units
 
-## 15.5: Interaction Terms and Marginal Effects
+## 15.5 Interaction Terms and Marginal Effects
 
 Interaction terms allow the marginal effect of one variable to depend on the level of another variable.
 
@@ -25552,7 +27517,7 @@ fit_interact.summary()
 
 #### How Returns to Education Change with Age
 
-The interaction model reveals that the **payoff to education depends on age** - a fascinating finding with important implications.
+The interaction model asks whether the **payoff to education depends on age**. As we will see, in this sample the estimated dependence is small and statistically insignificant -- a useful cautionary example about not over-reading an interaction term.
 
 **Interpreting the Interaction Results:**
 
@@ -25560,8 +27525,8 @@ From: earnings = $\beta_1 + \beta_2 \cdot age + \beta_3 \cdot education + \beta_
 
 **Typical Coefficients:**
 
-- Education ($\beta_3$): Around **-\$10,000 to -\$5,000** (often negative!)
-- Age × Education ($\beta_4$): Around **+\$200 to +\$400** (positive)
+- Education ($\beta_3$): About **+\$4,515** (positive; only marginally significant, p ≈ 0.06)
+- Age × Education ($\beta_4$): About **+\$29** per year (small and statistically insignificant, p ≈ 0.61)
 
 **What This Means:**
 
@@ -25570,42 +27535,38 @@ $$ME_{education} = \beta_3 + \beta_4 \cdot age$$
 
 **At Different Ages:**
 
-- **Age 25**: ME ≈ -\$5,000 + \$300(25) = **+\$2,500** per year of education
-- **Age 40**: ME ≈ -\$5,000 + \$300(40) = **+\$7,000** per year of education
-- **Age 55**: ME ≈ -\$5,000 + \$300(55) = **+\$11,500** per year of education
+- **Age 25**: ME ≈ \$4,515 + \$29(25) = **+\$5,241** per year of education
+- **Age 40**: ME ≈ \$4,515 + \$29(40) = **+\$5,677** per year of education
+- **Age 55**: ME ≈ \$4,515 + \$29(55) = **+\$6,112** per year of education
 
 **Interpretation:**
 
-1. **Returns to education INCREASE with age**
- - Young workers (age 25): +\$2,500 per year of education
- - Older workers (age 55): +\$11,500 per year of education
- - Education payoff is **4-5 times larger** for older workers!
+1. **Returns to education barely change with age in this sample**
+ - Young workers (age 25): +\$5,241 per year of education
+ - Older workers (age 55): +\$6,112 per year of education
+ - The interaction coefficient is small (+\$29/year) and statistically insignificant (t = 0.5, p = 0.61), so there is no reliable evidence that the return to schooling rises with age here.
 
-2. **Why Does This Happen?**
- - **Complementarity**: Education and experience work together
- - More educated workers **learn faster** on the job
- - Education enables access to **career ladders** with steeper wage growth
- - Compound returns: Higher starting point → higher percentage raises
- - Network effects: Educated workers build more valuable professional networks
+2. **Should we read into the small upward slope?**
+ - No -- because the interaction is statistically insignificant (p ≈ 0.61), the slight rise in estimated returns is well within sampling noise
+ - Mechanisms one might invoke for genuinely rising returns -- complementarity between education and experience, steeper career ladders, compounding raises -- are plausible stories, but this sample offers no reliable evidence that they operate here
 
-3. **Alternative Interpretation** (life-cycle earnings):
- - High school graduates: Earnings **flatten** by age 40-50
- - College graduates: Earnings **keep growing** until age 50-55
- - The **gap widens** with age
+3. **What the data do support**:
+ - Education has a large, positive average return (about +\$5,000 to +\$6,000 per year of schooling across the age range)
+ - What the data do *not* support is the stronger claim that this return climbs steeply with age
 
 **Statistical Significance:**
 
 - **Individual coefficients** may have large SEs (multicollinearity between age, education, and their product)
 - **Joint F-test** is crucial: Test $H_0: \beta_{education} = 0$ AND $\beta_{age \times educ} = 0$
-- Result: **Highly significant** (F > 30, p < 0.001)
-- Education matters, but its effect is **age-dependent**
+- Result: **Highly significant** (joint $\chi^2 \approx 86$, p < 0.001)
+- This joint test confirms only that **education matters overall** -- it does *not* establish that education's effect varies with age. The age×education interaction is itself insignificant (t = 0.5, p ≈ 0.61), so there is no reliable evidence of age-dependence here.
 
 **Multicollinearity Warning:**
 
 The correlation matrix shows:
 
-- Corr(age, age×education) ≈ **0.95** (very high!)
-- Corr(education, age×education) ≈ **0.90** (very high!)
+- Corr(age, age×education) ≈ **0.73** (high)
+- Corr(education, age×education) ≈ **0.64** (moderately high)
 
 This explains why:
 
@@ -25615,17 +27576,17 @@ This explains why:
 
 **Policy Implications:**
 
-1. **Higher education pays off more over the career**
- - Short-run costs, long-run gains compound
- - Education is an **investment** with increasing returns
+1. **Education is a strong investment at every stage of the career**
+ - Short-run costs, long-run gains
+ - The average return is large and positive (~\$5,000-\$6,000 per year of schooling)
 
-2. **Older workers benefit most from education**
- - Adult education programs can have large payoffs
- - Retraining valuable even late in career
+2. **Education pays off across the whole career**
+ - Adult education programs and retraining can have large payoffs
+ - The return does not reliably rise or fall with age in this sample
 
 3. **Inequality implications**
- - Education-based wage gap **widens** with age
- - Contributes to lifetime earnings inequality
+ - Education is a persistent source of earnings differences at every age
+ - Whether the education wage gap **widens** with age cannot be established here, since the age×education interaction is insignificant
 
 **Practical Advice for Estimation:**
 
@@ -25681,7 +27642,7 @@ print(f"  Correlation(education, agebyeduc) = {corr_matrix.loc['education', 'age
 print("even though the variables are jointly significant.")
 ```
 
-## 15.6: Retransformation Bias and Prediction
+## 15.6 Retransformation Bias and Prediction
 
 When predicting $y$ from a model with $\ln y$ as the dependent variable, naive retransformation introduces bias.
 
@@ -25763,9 +27724,9 @@ If $u \sim N(0, \sigma^2)$, then $E[\exp(u)] = \exp(\sigma^2/2) > 1$
 
 From the analysis above:
 
-- **Actual mean earnings**: ~\$52,000
-- **Naive retransformation**: ~\$48,000 (underpredicts by ~\$4,000 or **8%**)
-- **Adjusted retransformation**: ~\$52,000 (matches actual mean!)
+- **Actual mean earnings**: ~\$56,000
+- **Naive retransformation**: ~\$46,000 (underpredicts by ~\$10,500 or **19%**)
+- **Adjusted retransformation**: ~\$55,000 (matches actual mean!)
 
 **The Solution:**
 
@@ -25778,9 +27739,9 @@ where $s_e$ = RMSE from the log regression
 
 From log-linear model:
 
-- RMSE ($s_e$) ≈ **0.40** to **0.45**
-- Adjustment factor = $\exp(0.42^2/2) = \exp(0.088) \approx **1.092**
-- Predictions are about **9.2% too low** without adjustment!
+- RMSE ($s_e$) ≈ **0.62**
+- Adjustment factor = $\exp(0.62^2/2) = \exp(0.19) \approx **1.21**
+- Predictions are about **21% too low** without adjustment!
 
 **When Does This Matter Most?**
 
@@ -25886,7 +27847,9 @@ plt.show()
 - **Middle panel (Biased)**: The entire cloud sits below the 45-degree line, confirming systematic underprediction from naive retransformation
 - **Right panel (Adjusted)**: The correction factor shifts predictions upward so they center on the 45-degree line -- the mean prediction now matches the actual mean
 
-## 15.7: Comprehensive Model with Mixed Regressors
+## 15.7 Comprehensive Model with Mixed Regressors
+
+This capstone model brings together every transformation from the chapter -- a dummy (gender), a quadratic (age and agesq), a log dependent variable (lnearnings), a log regressor (lnhours), and a plain level (education) -- in a single specification. As you read the output, interpret each coefficient according to its own transformation type, and check that the education return (~9%) and hours elasticity (~1) line up with the log-model interpretations from the earlier sections.
 
 ```python
 # Comprehensive Model With Mixed Regressor Types
@@ -25942,7 +27905,7 @@ print(f"   Nearly proportional relationship (elasticity ≈ 1)")
 
 ### Logarithmic Transformations
 
-- **Log-linear model** ($\ln y = \beta_1 + \beta_2 x$): coefficient $\beta_2$ is a **semi-elasticity** -- a 1-unit change in $x$ is associated with a $100 \times \beta_2$% change in $y$
+- **Log-linear model** ($\ln y = \beta_1 + \beta_2 x$): coefficient $\beta_2$ is a **semi-elasticity** -- a 1-unit change in $x$ is associated with approximately a $100 \times \beta_2$% change in $y$ (exact effect: $100(e^{\beta_2}-1)$%)
 - **Log-log model** ($\ln y = \beta_1 + \beta_2 \ln x$): coefficient $\beta_2$ is an **elasticity** -- a 1% change in $x$ is associated with a $\beta_2$% change in $y$
 - Marginal effects in levels require back-transformation: $ME_x = \beta_2 \hat{y}$ (log-linear) or $ME_x = \beta_2 \hat{y}/x$ (log-log)
 - Log transformations are especially useful for right-skewed data (earnings, prices, GDP)
@@ -26254,10 +28217,10 @@ url = "https://raw.githubusercontent.com/quarcs-lab/mendez2020-convergence-clubs
 dat = pd.read_csv(url)
 dat2014 = dat[dat['year'] == 2014].copy()
 dat2014['ln_lp'] = np.log(dat2014['lp'])
-dat2014['ln_rk'] = np.log(dat2014['rk'])
+dat2014['ln_kl'] = np.log(dat2014['kl'])
 ```
 
-**Variables:** `lp` (labor productivity), `rk` (physical capital), `hc` (human capital), `region` (world region)
+**Variables:** `lp` (labor productivity), `kl` (capital per worker), `h` (human capital), `region` (world region)
 
 ---
 
@@ -26265,15 +28228,15 @@ dat2014['ln_rk'] = np.log(dat2014['rk'])
 
 Estimate three models of labor productivity on physical capital:
 
-- Levels: `lp ~ rk`
-- Log-linear: `ln_lp ~ rk`
-- Log-log: `ln_lp ~ ln_rk`
+- Levels: `lp ~ kl`
+- Log-linear: `ln_lp ~ kl`
+- Log-log: `ln_lp ~ ln_kl`
 
 ```python
 import pyfixest as pf
-m1 = pf.feols('lp ~ rk', data=dat2014, vcov='HC1')
-m2 = pf.feols('ln_lp ~ rk', data=dat2014, vcov='HC1')
-m3 = pf.feols('ln_lp ~ ln_rk', data=dat2014, vcov='HC1')
+m1 = pf.feols('lp ~ kl', data=dat2014, vcov='HC1')
+m2 = pf.feols('ln_lp ~ kl', data=dat2014, vcov='HC1')
+m3 = pf.feols('ln_lp ~ ln_kl', data=dat2014, vcov='HC1')
 m1.summary(), m2.summary(), m3.summary()
 ```
 
@@ -26286,18 +28249,18 @@ m1.summary(), m2.summary(), m3.summary()
 Test whether the returns to human capital follow a nonlinear (quadratic) pattern.
 
 ```python
-dat2014['hc_sq'] = dat2014['hc'] ** 2
-m4 = pf.feols('ln_lp ~ ln_rk + hc', data=dat2014, vcov='HC1')
-m5 = pf.feols('ln_lp ~ ln_rk + hc + hc_sq', data=dat2014, vcov='HC1')
+dat2014['h_sq'] = dat2014['h'] ** 2
+m4 = pf.feols('ln_lp ~ ln_kl + h', data=dat2014, vcov='HC1')
+m5 = pf.feols('ln_lp ~ ln_kl + h + h_sq', data=dat2014, vcov='HC1')
 m5.summary()
-print(f"Turning point: hc* = {-m5.coef()['hc'] / (2*m5.coef()['hc_sq']):.2f}")
+print(f"Turning point: h* = {-m5.coef()['h'] / (2*m5.coef()['h_sq']):.2f}")
 ```
 
 **Questions:** Is the quadratic term significant? What does the turning point imply about diminishing returns to human capital?
 
 > **Key Concept 15.9: Nonlinear Returns to Human Capital**
 >
-> If the quadratic term on human capital is negative and significant, it indicates **diminishing returns** -- each additional unit of human capital contributes less to productivity. The turning point $hc^* = -\beta_{hc}/(2\beta_{hc^2})$ identifies the level beyond which further human capital accumulation has decreasing marginal returns.
+> If the quadratic term on human capital is negative and significant, it indicates **diminishing returns** -- each additional unit of human capital contributes less to productivity. The turning point $hc^* = -\beta_{hc}/(2\beta_{hc^2})$ identifies the level beyond which further human capital accumulation has *negative* marginal returns -- productivity actually falls; below that point returns are positive but already diminishing.
 
 ---
 
@@ -26319,7 +28282,7 @@ Test whether the returns to human capital differ by region using interaction ter
 
 **Hints:**
 
-- Use `ln_lp ~ ln_rk + hc * C(region)` to include region-hc interactions
+- Use `ln_lp ~ ln_kl + h * C(region)` to include region-hc interactions
 - Conduct a joint F-test for the interaction terms
 - At which values of human capital are regional differences largest?
 
@@ -26612,7 +28575,7 @@ This notebook provides an interactive introduction to regression diagnostics and
 [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/quarcs-lab/metricsai/blob/main/notebooks_colab/ch16_Checking_the_Model_and_Data.ipynb)
 <div class="chapter-resources">
 <a href="https://www.youtube.com/watch?v=3JVkwVXsyr0" target="_blank" class="resource-btn">🎬 AI Video</a>
-<a href="https://carlos-mendez.my.canva.site/s16-checking-the-model-and-data-pdf" target="_blank" class="resource-btn">✨ AI Slides</a>
+<a href="https://quarcs-lab.github.io/metricsai/slides/ch16/index.html" target="_blank" class="resource-btn">🧑🏽‍🏫 Mendez Slides</a>
 <a href="https://cameron.econ.ucdavis.edu/aed/traedv1_16" target="_blank" class="resource-btn">📊 Cameron Slides</a>
 <a href="https://app.edcafe.ai/quizzes/69786b812f5d08069e04e07f" target="_blank" class="resource-btn">✏️ Quiz</a>
 <a href="https://app.edcafe.ai/chatbots/6978a3122f5d08069e07219f" target="_blank" class="resource-btn">🤖 AI Tutor</a>
@@ -26623,19 +28586,17 @@ This notebook provides an interactive introduction to regression diagnostics and
 
 This chapter focuses on checking model assumptions and diagnosing data problems. You'll gain both theoretical understanding and practical skills through hands-on Python examples.
 
-**Learning Objectives:**
+**What you'll learn:**
 
-By the end of this chapter, you will be able to:
-
-1. Identify and diagnose multicollinearity using correlation matrices and VIF
-2. Understand the consequences when each of the four core OLS assumptions fails
-3. Recognize omitted variable bias and specify appropriate control variables
-4. Understand endogeneity and when to use instrumental variables (IV)
-5. Detect and address heteroskedasticity using robust standard errors
-6. Identify autocorrelation in time series data and apply HAC-robust standard errors
-7. Interpret residual diagnostic plots to detect model violations
-8. Identify outliers and influential observations using DFITS and DFBETAS
-9. Apply appropriate diagnostic tests and remedies for common data problems
+- Identify and diagnose multicollinearity using correlation matrices and VIF
+- Understand the consequences when each of the four core OLS assumptions fails
+- Recognize omitted variable bias and specify appropriate control variables
+- Understand endogeneity and when to use instrumental variables (IV)
+- Detect and address heteroskedasticity using robust standard errors
+- Identify autocorrelation in time series data and apply HAC-robust standard errors
+- Interpret residual diagnostic plots to detect model violations
+- Identify outliers and influential observations using DFITS and DFBETAS
+- Apply appropriate diagnostic tests and remedies for common data problems
 
 **Chapter outline:**
 
@@ -26651,8 +28612,102 @@ By the end of this chapter, you will be able to:
 
 **Datasets used:**
 
-- **AED_EARNINGS_COMPLETE.DTA**: 842 full-time workers with earnings, age, education, and experience (2010)
+- **AED_EARNINGS_COMPLETE.DTA**: 872 full-time workers with earnings, age, education, and experience (2010)
 - **AED_DEMOCRACY.DTA**: 131 countries with democracy, growth, and institutional variables (Acemoglu et al. 2008)
+
+## Key Concepts
+
+Six core ideas anchor this chapter. Skim them before you start, and come back when a term feels fuzzy. Each entry pairs a concrete example using the chapter's data with a non-technical analogy. Click a panel to expand it.
+
+**Endogeneity:** A regressor is endogenous when it is correlated with the error term — typically because of an omitted variable, simultaneous causality, or measurement error. Endogeneity violates the zero-conditional-mean assumption ($E[u \mid x] = 0$) and biases OLS coefficients, so neither robust standard errors nor more data can rescue inference.
+
+::::: {.columns}
+:::: {.column width="50%"}
+::: {.callout-tip collapse="true" appearance="simple" title="Example"}
+In the chapter's `data_democracy` study (131 countries), regressing `democracy` on economic `growth` looks straightforward — but `growth` is plausibly endogenous: democracy may itself raise incomes and unobserved institutions drive both, so causality runs both ways. OLS on this pair is biased, and the chapter explicitly flags it as a textbook case where naive interpretation of the coefficient ("growth boosts democracy") confuses correlation with causation.
+:::
+::::
+:::: {.column width="50%"}
+::: {.callout-note collapse="true" appearance="simple" title="Analogy"}
+A blood test that *itself* spikes the patient's adrenaline is a contaminated measurement: the act of testing changes the thing being measured. Endogeneity is the regression's contaminated-test problem — the regressor and the unobserved error are entangled, so the recorded effect is partly the test, partly the contamination, and impossible to separate without a different instrument.
+:::
+::::
+:::::
+
+**Instrumental Variable (IV):** A regressor — call it $z$ — that *(i)* shifts the endogenous variable $x$ but *(ii)* affects the outcome $y$ only *through* $x$. Two-stage least squares uses $z$ to estimate the part of $x$ that is exogenous, recovering an unbiased estimate of $x$'s effect on $y$.
+
+::::: {.columns}
+:::: {.column width="50%"}
+::: {.callout-tip collapse="true" appearance="simple" title="Example"}
+The chapter cites Acemoglu, Johnson, and Robinson (2001), who use settler mortality as an IV for institutional quality across the 131 countries in `data_democracy`-related research. The instrument shifts colonial institutions (relevance) but, the argument goes, does not directly affect modern GDP otherwise (exogeneity). The 2SLS estimate of institutions on `growth` is far larger than the biased OLS estimate, dramatising the size of the endogeneity problem.
+:::
+::::
+:::: {.column width="50%"}
+::: {.callout-note collapse="true" appearance="simple" title="Analogy"}
+A locksmith's universal key opens only the front door of a building, but every visit to *anywhere* in the building must first pass through that door. The IV is that one key: it grants access to the variation you actually need (entry through the front door) while ignoring all the unrelated activity happening upstairs.
+:::
+::::
+:::::
+
+**Leverage:** A measure of how unusual an observation's regressor values are — how far the row's $\mathbf{x}_i$ sits from the centre of the regressor cloud. High-leverage points have an outsized capacity to *move* the fitted line if their $y$ values shift, regardless of whether their actual residual is small or large.
+
+::::: {.columns}
+:::: {.column width="50%"}
+::: {.callout-tip collapse="true" appearance="simple" title="Example"}
+Consider an `earnings` regression on `age + education + experience` in `data_earnings` ($n = 872$). A respondent with `education = 21` (PhD) and `experience = 0` (just graduated) sits at an unusual corner of regressor space — high leverage. Whether or not their earnings are unusual, the OLS line bends *more* in response to this row than to a typical mid-career worker — which is exactly when you want a leverage statistic to flag it.
+:::
+::::
+:::: {.column width="50%"}
+::: {.callout-note collapse="true" appearance="simple" title="Analogy"}
+On a see-saw, a small child sitting on the very end has more pivoting power than a heavier adult sitting near the centre. Leverage in regression is exactly that physics: distance from the centre of the regressor cloud determines how much each observation can tip the fitted line, *independent* of how heavy (residual-size) that observation actually is.
+:::
+::::
+:::::
+
+**Cook's Distance:** A composite influence statistic that combines an observation's leverage and its residual size into one summary number. Large Cook's-D values flag rows whose removal would meaningfully change the fitted coefficients; the standard rule of thumb is to investigate any value above $4/n$.
+
+::::: {.columns}
+:::: {.column width="50%"}
+::: {.callout-tip collapse="true" appearance="simple" title="Example"}
+Computing Cook's distance for the earnings regression on `data_earnings` (872 workers) flags a small handful of outliers — a few very high earners far from the bulk of the sample. The chapter compares OLS coefficients with and without these flagged points: when their removal changes the `education` coefficient by more than a standard error, they are influential, not just unusual.
+:::
+::::
+:::: {.column width="50%"}
+::: {.callout-note collapse="true" appearance="simple" title="Analogy"}
+A restaurant critic walks in unannounced and orders the entire menu. Whether or not they leave a tip, the chef will rearrange the kitchen around their visit because the *combination* of presence and impact is enormous. Cook's distance is the regression's critic-detector: not just "this observation is unusual" or "this observation has a big residual" — the product of both, the genuine influence on the menu.
+:::
+::::
+:::::
+
+**Auxiliary Regression:** A side regression of one regressor on all the others, used to compute diagnostics rather than answer a substantive question. Its $R^2$ feeds directly into the variance inflation factor: $\text{VIF}_j = 1/(1 - R_j^2)$.
+
+::::: {.columns}
+:::: {.column width="50%"}
+::: {.callout-tip collapse="true" appearance="simple" title="Example"}
+For `earnings ~ age + education + agebyeduc` on `data_earnings`, the chapter runs the auxiliary regression `agebyeduc ~ age + education` and finds $R^2 \approx 0.973$. Plugging that into the VIF formula gives $\text{VIF}_{\text{agebyeduc}} = 1/(1 - 0.973) \approx 37$ — severe multicollinearity, which explains why the individual t-statistic on the interaction term is so unreliable.
+:::
+::::
+:::: {.column width="50%"}
+::: {.callout-note collapse="true" appearance="simple" title="Analogy"}
+A theatre understudy steps in to play another character's role for one rehearsal — not because the play needs them, but because the director wants to see how easily their lines could be replaced by everyone else's. The auxiliary regression is that rehearsal: it doesn't appear in the final show, but it tells the director how much of *one* part is already implied by *the others*.
+:::
+::::
+:::::
+
+**Specification Test (RESET):** Ramsey's Regression Equation Specification Error Test adds powers of the fitted values ($\hat{y}^2, \hat{y}^3$) to the original regression and tests whether their coefficients are jointly zero. Rejection signals that the model has misspecified its functional form — typically a missing nonlinear term.
+
+::::: {.columns}
+:::: {.column width="50%"}
+::: {.callout-tip collapse="true" appearance="simple" title="Example"}
+A linear `earnings ~ age + education` model on `data_earnings` (872 workers) fails the RESET test once age enters quadratically — because the chapter's preferred quadratic-in-age specification (with peak earnings near age 50) has nonlinear structure the linear model misses. Rejecting RESET tells the analyst: a more flexible functional form is needed, before concluding anything else.
+:::
+::::
+:::: {.column width="50%"}
+::: {.callout-note collapse="true" appearance="simple" title="Analogy"}
+A factory's quality-control inspector picks finished products at random and *re*-tests them with a tougher protocol than the assembly line. If the products fail the tougher test, the assembly line itself is suspect — not just one bad batch. RESET is the regression's quality-control re-test: it asks whether the fitted equation survives a stricter functional-form challenge.
+:::
+::::
+:::::
 
 ## Setup
 
@@ -26704,7 +28759,7 @@ plt.rcParams.update({
 print("\nSetup complete! Ready to explore model diagnostics.")
 ```
 
-## 16.1: Multicollinearity
+## 16.1 Multicollinearity
 
 Multicollinearity occurs when regressors are highly correlated with each other. While OLS remains unbiased and consistent, individual coefficients may be imprecisely estimated.
 
@@ -26752,6 +28807,8 @@ print(f"R-squared:             {fit_base._r2:.4f}")
 # Full regression output
 fit_base.summary()
 ```
+
+Now we add the age×education interaction term to the same regression. Watch how the standard errors on `age` and `education` balloon relative to the base model above — that inflation is the fingerprint of multicollinearity.
 
 ```python
 # Model with interaction (creates multicollinearity)
@@ -26820,10 +28877,10 @@ The VIF (Variance Inflation Factor) results reveal **severe multicollinearity** 
 
 Typical results when including age × education interaction:
 
-- **agebyeduc** (interaction): VIF ≈ **60-80** (SEVERE!)
+- **agebyeduc** (interaction): VIF ≈ **37** (SEVERE!)
 - **age**: VIF ≈ **15-25** (HIGH)
 - **education**: VIF ≈ **15-25** (HIGH)
-- **Intercept**: VIF ≈ **10-15**
+- **Intercept**: the VIF on the constant term (≈ 411 here) is **not econometrically meaningful** and is conventionally ignored
 
 **Interpreting VIF:**
 
@@ -26844,15 +28901,15 @@ The interaction term is nearly a perfect linear combination:
 
 - age and education are correlated
 - age × education inherits both correlations
-- $R^2_{agebyeduc|age,educ} \approx 0.9875$
-- This means 98.75% of variation in the interaction is **predictable** from age and education alone!
+- $R^2_{agebyeduc|age,educ} \approx 0.973$
+- This means 97.3% of variation in the interaction is **predictable** from age and education alone!
 
 **Consequences:**
 
 1. **Standard errors inflate dramatically**:
  - $SE(\hat{\beta}_j) = \sigma / \sqrt{(1-R_j^2) \cdot \sum(x_j - \bar{x}_j)^2}$
  - When $R_j^2 \approx 1$: denominator → 0, so SE → ∞
- - VIF = 80 means SE is $\sqrt{80} \approx 9$ times larger than with no collinearity!
+ - VIF = 37 means SE is $\sqrt{37} \approx 6$ times larger than with no collinearity!
 
 2. **Individual t-statistics become small**:
  - Even if the true effect is large
@@ -26905,10 +28962,10 @@ The interaction term is nearly a perfect linear combination:
 
 **The Auxiliary Regression:**
 
-The output shows regressing agebyeduc ~ age + education gives **R² ≈ 0.987**:
+The output shows regressing agebyeduc ~ age + education gives **R² ≈ 0.973**:
 
-- This confirms 98.7% of interaction variation is explained by main effects
-- VIF = 1/(1-0.987) = 1/0.013 ≈ 77 
+- This confirms 97.3% of interaction variation is explained by main effects
+- VIF = 1/(1-0.973) = 1/0.027 ≈ 37
 
 **Practical Interpretation for Our Model:**
 
@@ -26938,6 +28995,9 @@ Even with multicollinearity, joint tests can be powerful. Individual coefficient
 ```python
 # Joint hypothesis tests
 
+# The R matrix picks out the coefficient rows we want to test jointly (here age
+# and agebyeduc); wald_test then evaluates H₀ that BOTH equal zero at once.
+
 # Test 1: H₀: age = 0 AND agebyeduc = 0
 print("Test 1: H₀: age = 0 AND agebyeduc = 0")
 print(fit_collinear.wald_test(R=np.eye(len(fit_collinear.coef()))[[list(fit_collinear.coef().index).index(v) for v in ['age', 'agebyeduc']]]))
@@ -26954,7 +29014,7 @@ Joint tests are highly significant even though individual t-tests are weak. This
 >
 > Even when multicollinearity makes individual t-tests unreliable (high VIF, large standard errors), joint F-tests remain powerful. Testing whether a group of collinear variables is jointly significant avoids the imprecision problem because the F-test evaluates the combined contribution. Always use joint tests for groups of correlated regressors rather than relying on individual significance.
 
-## 16.2-16.4: Model Assumptions
+## 16.2-16.4 Model Assumptions
 
 **Classical OLS Assumptions:**
 
@@ -27001,7 +29061,7 @@ print("  Endogeneity → Instrumental variables (IV)")
 >
 > When assumptions 1 or 2 fail (incorrect model or endogeneity), OLS is biased and inconsistent -- a fundamental problem requiring model changes or instrumental variables. When assumptions 3 or 4 fail (heteroskedasticity or autocorrelation), OLS remains unbiased and consistent but standard errors are wrong, invalidating confidence intervals and hypothesis tests. The key distinction: bias requires fixing the model; wrong SEs require only changing the inference method.
 
-## 16.5: Heteroskedastic Errors
+## 16.5 Heteroskedastic Errors
 
 Heteroskedasticity means the error variance depends on $x$: $Var(u_i | x_i) = \sigma_i^2 \neq \sigma^2$
 
@@ -27043,7 +29103,7 @@ se_comparison = pd.DataFrame({
 })
 print(se_comparison)
 
-print("\nNote: Robust SEs are typically 20-40% larger, indicating heteroskedasticity.")
+print("\nNote: Here the robust SEs differ only modestly from the standard SEs (age slightly smaller, education about 13% larger), suggesting mild heteroskedasticity at most.")
 ```
 
 > **Key Concept 16.4: Heteroskedasticity and Robust Standard Errors**
@@ -27054,21 +29114,21 @@ print("\nNote: Robust SEs are typically 20-40% larger, indicating heteroskedasti
 
 ### Why Robust Standard Errors Matter
 
-The comparison between standard and robust SEs reveals **heteroskedasticity** in the earnings data:
+The comparison between standard and robust SEs shows only **modest differences** in the earnings data, suggesting mild heteroskedasticity at most:
 
 **Typical Results:**
 
 | Variable | Standard SE | Robust SE | Ratio (Robust/Standard) |
 |----------|-------------|-----------|------------------------|
-| age | ~\$200 | ~\$250 | **1.25x** |
-| education | ~\$800 | ~\$1,100 | **1.38x** |
+| age | ~\$154 | ~\$151 | **0.98x** |
+| education | ~\$570 | ~\$642 | **1.13x** |
 
 **What This Tells Us:**
 
-1. **Heteroskedasticity is present**:
- - Robust SEs are **20-40% larger** than standard SEs
- - Error variance is **not constant** across observations
- - Violates the classical homoskedasticity assumption
+1. **Mild heteroskedasticity at most**:
+ - Robust SEs here differ only modestly from standard SEs (age slightly smaller, education ~13% larger)
+ - Any departure from constant error variance is small in this sample
+ - Robust SEs remain the safe default regardless
 
 2. **Standard SEs are too small**:
  - Lead to **overstated** t-statistics
@@ -27107,12 +29167,12 @@ In the residual vs. fitted plot:
 
 **With standard SEs:**
 
-- t-statistic for education: 6.25 → p < 0.001
+- t-statistic for education: 10.19 → p < 0.001
 - Conclusion: Highly significant
 
 **With robust SEs:** 
 
-- t-statistic for education: 4.55 → p < 0.001
+- t-statistic for education: 9.06 → p < 0.001
 - Conclusion: Still significant, but less extreme
 
 **The correction:**
@@ -27158,7 +29218,7 @@ In this earnings regression:
 - Robust SEs should be **default** for cross-sectional regressions
 - Report robust SEs in all your empirical work!
 
-## 16.6: Correlated Errors (Autocorrelation)
+## 16.6 Correlated Errors (Autocorrelation)
 
 Autocorrelation occurs in time series when $Cov(u_t, u_s) \neq 0$ for $t \neq s$.
 
@@ -27211,6 +29271,8 @@ ts_data = pd.DataFrame({'y1': y1, 'x': x})
 print(f"\nGenerated {n} observations with AR(1) errors (ρ = 0.8)")
 ```
 
+Now we fit the regression to the simulated series and inspect its residuals. Because we built AR(1) structure into the errors, the residual autocorrelation function (ACF) below should show a strong spike at lag 1 that decays gradually across later lags.
+
 ```python
 # Estimate model and check residual autocorrelation
 # Model: y ~ x (with autocorrelated errors)
@@ -27249,85 +29311,77 @@ plt.show()
 
 ### Autocorrelation: The Time Series Problem
 
-The time series analysis reveals **strong autocorrelation** in interest rate data - a classic problem that invalidates standard inference:
+The simulated AR(1) exercise (ρ = 0.8) reveals **strong autocorrelation** in the error process — a classic problem that invalidates standard inference:
 
 **Autocorrelation Evidence:**
 
-From the residuals of the levels regression:
+From the residuals of the fitted regression `y1 ~ x`:
 
-- **Lag 1 autocorrelation**: ρ₁ ≈ **0.95-0.98** (extremely high!)
-- **Lag 5 autocorrelation**: ρ₅ ≈ **0.85-0.90** (still very high)
-- **Lag 10 autocorrelation**: ρ₁₀ ≈ **0.75-0.85** (persistent)
+- **Lag 1 autocorrelation**: ρ₁ ≈ **0.80** (very high — it matches the ρ = 0.8 we built into the errors)
+- **Lag 5 autocorrelation**: ρ₅ ≈ **0.31** (decaying geometrically, close to $\rho^5 \approx 0.33$)
+- **Lag 10 autocorrelation**: ρ₁₀ ≈ **0.09** (nearly gone by lag 10)
 
 **What This Means:**
 
-1. **Errors are highly correlated over time**:
- - If today's error is +1%, tomorrow's is likely +0.95%
- - Errors **cluster**: positive errors followed by positive, negative by negative
+1. **Errors are correlated over time**:
+ - If this period's error is +1, the next period's is on average +0.8
+ - Errors **cluster**: positive errors tend to follow positive, negative follow negative
  - Violates OLS assumption of **independent errors**
 
-2. **Standard errors drastically understate uncertainty**:
- 
- Typical results:
+2. **Standard errors understate uncertainty**:
 
- - **Default SE**: ~0.002 (too small!)
- - **HAC SE**: ~0.015 (realistic)
- - **Ratio**: HAC is **7-8 times larger!**
+ Because the errors are positively correlated, the usual OLS formula overstates how much independent information the sample contains. Correcting for the AR(1) structure inflates the variance of the estimator by the factor below, so honest (HAC) standard errors would be roughly $\sqrt{9} = 3$ times larger than the default OLS ones.
 
-3. **Why does autocorrelation inflate HAC SEs?**
- 
+3. **Why does autocorrelation inflate the variance?**
+
  With independent errors:
 
  - $Var(\bar{u}) = \sigma^2/n$
  - Information in n observations
- 
- With autocorrelation (ρ = 0.95):
 
- - $Var(\bar{u}) \approx \sigma^2 \cdot \frac{1 + \rho}{1 - \rho} \cdot \frac{1}{n} = \sigma^2 \cdot 39 \cdot \frac{1}{n}$
- - **39 times larger variance!**
- - Effective sample size ≈ n/39
+ With autocorrelation (ρ = 0.8):
+
+ - $Var(\bar{u}) \approx \sigma^2 \cdot \frac{1 + \rho}{1 - \rho} \cdot \frac{1}{n} = \sigma^2 \cdot 9 \cdot \frac{1}{n}$
+ - **9 times larger variance!**
+ - Effective sample size ≈ n/9
 
 **The Correlogram (ACF Plot):**
 
 The ACF plot shows:
 
-- **Very slow decay** of autocorrelations
-- All lags out to 20-24 months significantly positive
-- Classic sign of **non-stationarity** (trending series)
-- Interest rates have **long memory**
+- **Geometric decay** of the autocorrelations across lags
+- The first several lags sit well outside the confidence band
+- Classic signature of an **AR(1) error process**
+- The errors have **persistent, but fading, memory**
 
-**Why Are Interest Rates Autocorrelated?**
+**Why Is the Simulated Series Autocorrelated?**
 
-1. **Monetary policy persistence**:
- - Fed changes rates gradually (smoothing)
- - Same rate maintained for months
+The autocorrelation here is no accident — we built it into the data-generating process:
 
-2. **Economic conditions**:
- - Inflation, growth evolve slowly
- - Interest rates respond to persistent factors
+1. **The error process is AR(1) by construction**:
+ - Errors follow $u_t = 0.8\,u_{t-1} + \varepsilon_t$
+ - Each shock carries 80% of its value into the next period
 
-3. **Market expectations**:
- - Forward-looking behavior
- - Tomorrow's rate close to today's (no arbitrage)
+2. **The regressor is also AR(1)**:
+ - $x_t = 0.8\,x_{t-1} + v_t$, so it too moves slowly
+ - Slow-moving x combined with slow-moving u is exactly what distorts OLS standard errors
 
-4. **Non-stationarity**:
- - Rates **trend** over long periods
- - 1980s: High rates (15%)
- - 2010s: Low rates (near 0%)
- - Mean not constant over time
+3. **Persistence, not trend**:
+ - With $|\rho| < 1$ the series is stationary — it fluctuates around a fixed mean
+ - The memory fades geometrically rather than trending away
 
 **Consequences for Inference:**
 
 **With default SEs:**
 
-- t-statistic: **50-60** (absurdly high!)
-- p-value: < 0.0001
+- t-statistics look **too large** (default SEs are too small)
+- p-values look **too small**
 - False precision!
 
 **With HAC SEs:**
 
-- t-statistic: **5-8** (more realistic)
-- p-value: still < 0.001 (significant, but not absurdly so)
+- Standard errors widen by roughly $\sqrt{9} \approx 3\times$
+- The slope on `x` stays **highly significant** (its true value is 2)
 - Honest uncertainty
 
 **The Solution: HAC (Newey-West) Standard Errors**
@@ -27343,21 +29397,21 @@ where:
 
 **Choosing the Lag Length (L):**
 
-For monthly data with T ≈ 400 observations:
+For the simulated series with T = 10,000 observations:
 
-- Rule of thumb: $L \approx 0.75 \cdot 400^{1/3} \approx 5.4$
-- Conservative: L = 12 (one year)
-- Very conservative: L = 24 (two years)
+- Rule of thumb: $L \approx 0.75 \cdot 10000^{1/3} \approx 16$
+- A larger L captures more of the (geometrically decaying) autocorrelation
+- Too large an L, though, adds noise to the variance estimate
 
 **First Differencing as Alternative:**
 
 Transform: $\Delta y_t = y_t - y_{t-1}$
 
-Results from differenced model:
+Differencing a persistent series:
 
-- Much **lower autocorrelation** (ρ₁ ≈ 0.1-0.3)
-- Removes **trend** (achieves stationarity)
+- Sharply **lowers the residual autocorrelation**
 - Changes interpretation: now modeling **changes**, not levels
+- Is most useful for genuinely non-stationary series; here the errors are stationary ($|\rho| < 1$), so HAC SEs are the natural fix
 
 **Practical Recommendations:**
 
@@ -27372,18 +29426,18 @@ For time series regressions:
 
 **Bottom Line:**
 
-In the interest rate example:
+In this simulated AR(1) example:
 
 - Default SEs give **false confidence**
 - HAC SEs reveal **true uncertainty**
-- Even with correction, 10-year rate **strongly related** to 1-year rate
-- But not as precisely estimated as default SEs suggest!
+- Even after correction, `x` stays **strongly related** to `y` (the true slope is 2)
+- But the effect is **less precisely estimated** than default SEs suggest!
 
-## 16.7: Example - Democracy and Growth
+## 16.7 Example - Democracy and Growth
 
 We analyze the relationship between democracy and economic growth using data from Acemoglu, Johnson, Robinson, and Yared (2008).
 
-**Research question**: Does democracy promote economic growth?
+**Research question**: Does economic growth promote democracy?
 
 **Data**: 131 countries, 1500-2000
 
@@ -27409,6 +29463,8 @@ data_democracy[summary_vars].describe()
 print(f"\nSample size: {len(data_democracy)} countries")
 print(f"Time period: 1500-2000")
 ```
+
+We begin with the simplest specification: regress the 500-year change in democracy on economic growth alone. The scatter plot and fitted line below show the raw association before any controls are added.
 
 ```python
 # Bivariate regression: democracy ~ growth
@@ -27449,6 +29505,8 @@ print(f"  But this may reflect omitted institutional variables...")
 - **Scatter**: Substantial variation around the line -- growth explains only a fraction of democracy differences
 - **Potential confounders**: The positive association may partly reflect omitted institutional variables (religion, colonial history) rather than a direct causal effect
 
+Now we add institutional controls — executive constraints, independence date, and religious composition. If growth was partly standing in for these omitted factors, its coefficient should shrink once they enter the model.
+
 ```python
 # Multiple regression: add institutional controls
 # Multiple Regression with Institutional Controls
@@ -27471,7 +29529,7 @@ print(f"  This suggests omitted variable bias in the bivariate model.")
 
 > **Key Concept 16.6: Omitted Variables Bias in Practice**
 >
-> The democracy-growth example demonstrates omitted variables bias: the growth coefficient falls from 0.131 (bivariate) to 0.047 (with controls), a 64% reduction. Institutional variables (religion, executive constraints) were correlated with both democracy and growth, biasing the bivariate estimate upward. Always ask: "What variables might affect my outcome and correlate with my key regressor?" Include relevant controls to reduce bias.
+> The democracy-growth example demonstrates omitted variables bias: the growth coefficient falls from 0.131 (bivariate) to 0.047 (with controls), a 64% reduction that also turns a highly significant effect (t ≈ 6.7) into one indistinguishable from zero at the 5% level (t ≈ 1.8, p ≈ 0.07). Institutional variables (religion, executive constraints) were correlated with both democracy and growth, biasing the bivariate estimate upward. Always ask: "What variables might affect my outcome and correlate with my key regressor?" Include relevant controls to reduce bias.
 
 ```python
 # Get residuals from multiple regression for diagnostic plots
@@ -27484,7 +29542,7 @@ print(f"Residual mean (should be ~0): {uhat.mean():.6f}")
 print(f"Residual std dev: {uhat.std():.4f}")
 ```
 
-## 16.8: Diagnostics - Residual Plots
+## 16.8 Diagnostics - Residual Plots
 
 Diagnostic plots help detect violations of model assumptions:
 
@@ -27996,8 +30054,6 @@ plt.suptitle('DFBETAS: Influential Observations by Variable',
              fontsize=14, fontweight='bold', y=1.00)
 plt.tight_layout()
 plt.show()
-
-print("\nInterpretation:")
 ```
 
 **What to look for in the DFBETAS plots:**
@@ -28024,7 +30080,7 @@ print("\nInterpretation:")
 - Assumptions 1-2 violations (incorrect model, endogeneity) cause bias and inconsistency -- fundamental problems requiring model changes or IV
 - Assumptions 3-4 violations (heteroskedasticity, autocorrelation) do not bias coefficients but invalidate standard errors
 - Wrong standard errors lead to incorrect t-statistics, confidence intervals, and hypothesis tests
-- Omitted variables bias formula: $\text{Bias} = \beta_3 \times \delta_{23}$, where $\beta_3$ is the omitted variable's effect and $\delta_{23}$ is the correlation
+- Omitted variables bias formula: $\text{Bias} = \beta_3 \times \delta_{23}$, where $\beta_3$ is the omitted variable's effect and $\delta_{23}$ is the slope from an auxiliary regression of the omitted variable on the included regressor
 
 **Heteroskedasticity and Robust Standard Errors:**
 
@@ -28201,7 +30257,12 @@ plt.show()
 
 **Try it yourself!** Copy this code into an empty Google Colab notebook and run it: [Open Colab](https://colab.research.google.com/notebooks/empty.ipynb)
 
-**Next steps:** Chapter 17 extends these ideas to panel data, where you'll learn fixed effects and random effects models that address unobserved heterogeneity across units.
+**Next Steps:**
+
+- Chapter 17 extends these ideas to panel data, where you'll learn fixed effects and random effects models that address unobserved heterogeneity across units.
+- Re-examine regressions from earlier chapters using this chapter's diagnostic workflow: VIF, robust SEs, residual plots, and influence measures.
+- When residual plots or specification tests signal misspecification, experiment with nonlinear terms, interactions, or transformations before drawing conclusions.
+- When endogeneity is suspected, review the instrumental-variables approach and look for a valid instrument.
 
 ---
 
@@ -28286,7 +30347,7 @@ In this case study, you will apply the diagnostic techniques from this chapter t
 
 - **Source:** `https://raw.githubusercontent.com/quarcs-lab/mendez2020-convergence-clubs-code-data/master/assets/dat.csv`
 - **Sample:** 108 countries, 1990-2014
-- **Variables:** `lp` (labor productivity), `rk` (physical capital), `hc` (human capital), `rgdppc` (real GDP per capita), `tfp` (total factor productivity), `region`
+- **Variables:** `lp` (labor productivity), `kl` (capital per worker), `h` (human capital), `GDPpc` (real GDP per capita), `TFP` (total factor productivity), `region`
 
 **Research question:** What econometric issues arise when modeling cross-country productivity, and how do diagnostic tools help detect and address them?
 
@@ -28294,7 +30355,7 @@ In this case study, you will apply the diagnostic techniques from this chapter t
 
 #### Task 1: Detect Multicollinearity (Guided)
 
-Load the dataset and estimate a regression of log labor productivity (`np.log(lp)`) on log physical capital (`np.log(rk)`), human capital (`hc`), and log GDP per capita (`np.log(rgdppc)`), using the year 2014 cross-section.
+Load the dataset and estimate a regression of log labor productivity (`np.log(lp)`) on log capital per worker (`np.log(kl)`), human capital (`h`), and log GDP per capita (`np.log(GDPpc)`), using the year 2014 cross-section.
 
 ```python
 import pandas as pd
@@ -28307,14 +30368,14 @@ url = "https://raw.githubusercontent.com/quarcs-lab/mendez2020-convergence-clubs
 dat = pd.read_csv(url)
 dat2014 = dat[dat['year'] == 2014].copy()
 dat2014['ln_lp'] = np.log(dat2014['lp'])
-dat2014['ln_rk'] = np.log(dat2014['rk'])
-dat2014['ln_rgdppc'] = np.log(dat2014['rgdppc'])
+dat2014['ln_kl'] = np.log(dat2014['kl'])
+dat2014['ln_GDPpc'] = np.log(dat2014['GDPpc'])
 
-# fit = pf.feols('ln_lp ~ ln_rk + hc + ln_rgdppc', data=dat2014, vcov='HC1')
-model.summary()
+fit = pf.feols('ln_lp ~ ln_kl + h + ln_GDPpc', data=dat2014, vcov='HC1')
+fit.summary()
 
 # Calculate VIF
-X = dat2014[['ln_rk', 'hc', 'ln_rgdppc']].dropna()
+X = dat2014[['ln_kl', 'h', 'ln_GDPpc']].dropna()
 X = sm.add_constant(X)
 for i, col in enumerate(X.columns):
     print(f"VIF({col}): {variance_inflation_factor(X.values, i):.2f}")
@@ -28329,8 +30390,8 @@ Interpret the VIF values. Is multicollinearity a concern? Which variables are mo
 Estimate the same model with both default and robust (HC1) standard errors. Create a comparison table.
 
 ```python
-fit_default = pf.feols('ln_lp ~ ln_rk + hc', data=dat2014)
-fit_robust = pf.feols('ln_lp ~ ln_rk + hc', data=dat2014, vcov='HC1')
+fit_default = pf.feols('ln_lp ~ ln_kl + h', data=dat2014)
+fit_robust = pf.feols('ln_lp ~ ln_kl + h', data=dat2014, vcov='HC1')
 
 comparison = pd.DataFrame({
     'Default SE': fit_default.se(),
@@ -28350,7 +30411,7 @@ Create the three diagnostic plots for the productivity model:
 
 1. Actual vs. fitted values with LOWESS smooth
 2. Residuals vs. fitted values with LOWESS smooth
-3. Residuals vs. `ln_rk` (component-plus-residual plot)
+3. Residuals vs. `ln_kl` (component-plus-residual plot)
 
 *Hint:* Use `from statsmodels.nonparametric.smoothers_lowess import lowess` for the LOWESS smooth. Plot residuals from the robust model.
 
@@ -28570,19 +30631,20 @@ bol_cs[['imds', 'ln_NTLpc2017', 'A00', 'A10', 'A20', 'A30', 'A40']].describe().r
 4. Calculate DFBETAS for the key coefficient (`ln_NTLpc2017`)
 5. Discuss: Are the influential municipalities capital cities or special cases?
 
-**Hint**: Use `OLSInfluence(model)` from statsmodels to compute influence measures.
+**Hint**: Build a diagnostics-only statsmodels fit first — `_diag_model = smf.ols(...).fit()` — then pass it to `OLSInfluence(_diag_model)` (OLSInfluence needs a statsmodels result, not a pyfixest one).
 
 ```python
 # Your code here: Influential observation analysis
 #
 # Example structure:
-# fit = pf.feols('imds ~ ln_NTLpc2017 + A00 + A10 + A20 + A30 + A40',
-#             data=bol_cs)
-# infl = OLSInfluence(model)
+# # OLSInfluence needs a statsmodels fit, so build a diagnostics-only model
+# _diag_model = smf.ols('imds ~ ln_NTLpc2017 + A00 + A10 + A20 + A30 + A40',
+#                       data=bol_cs).fit()
+# infl = OLSInfluence(_diag_model)
 #
 # # DFITS
 # dfits_vals = infl.dffits[0]
-# k = len(model.params)
+# k = len(_diag_model.params)
 # n = len(bol_cs)
 # threshold = 2 * np.sqrt(k / n)
 #
@@ -28685,7 +30747,7 @@ This notebook provides an interactive introduction to panel data methods, time s
 [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/quarcs-lab/metricsai/blob/main/notebooks_colab/ch17_Panel_Data_Time_Series_Data_Causation.ipynb)
 <div class="chapter-resources">
 <a href="https://www.youtube.com/watch?v=ZtjIHX6JYyM" target="_blank" class="resource-btn">🎬 AI Video</a>
-<a href="https://carlos-mendez.my.canva.site/s17-panel-data-time-series-data-causation-pdf" target="_blank" class="resource-btn">✨ AI Slides</a>
+<a href="https://quarcs-lab.github.io/metricsai/slides/ch17/index.html" target="_blank" class="resource-btn">🧑🏽‍🏫 Mendez Slides</a>
 <a href="https://cameron.econ.ucdavis.edu/aed/traedv1_17" target="_blank" class="resource-btn">📊 Cameron Slides</a>
 <a href="https://app.edcafe.ai/quizzes/69786c262f5d08069e04e9a8" target="_blank" class="resource-btn">✏️ Quiz</a>
 <a href="https://app.edcafe.ai/chatbots/6978a3772f5d08069e0723a7" target="_blank" class="resource-btn">🤖 AI Tutor</a>
@@ -28696,19 +30758,17 @@ This notebook provides an interactive introduction to panel data methods, time s
 
 This chapter focuses on three important topics that extend basic regression methods: panel data, time series analysis, and causal inference. You'll gain both theoretical understanding and practical skills through hands-on Python examples.
 
-**Learning Objectives:**
+**What you'll learn:**
 
-By the end of this chapter, you will be able to:
-
-1. Apply cluster-robust standard errors for panel data with grouped observations
-2. Understand panel data methods including random effects and fixed effects estimators
-3. Decompose panel data variation into within and between components
-4. Use fixed effects to control for time-invariant unobserved heterogeneity
-5. Interpret results from logit models and calculate marginal effects
-6. Recognize time series issues including autocorrelation and nonstationarity
-7. Apply HAC (Newey-West) standard errors for time series regressions
-8. Understand autoregressive and distributed lag models for dynamic relationships
-9. Use instrumental variables and other methods for causal inference
+- Apply cluster-robust standard errors for panel data with grouped observations
+- Understand panel data methods including random effects and fixed effects estimators
+- Decompose panel data variation into within and between components
+- Use fixed effects to control for time-invariant unobserved heterogeneity
+- Interpret results from logit models and calculate marginal effects
+- Recognize time series issues including autocorrelation and nonstationarity
+- Apply HAC (Newey-West) standard errors for time series regressions
+- Understand autoregressive and distributed lag models for dynamic relationships
+- Use instrumental variables and other methods for causal inference
 
 **Chapter outline:**
 
@@ -28727,6 +30787,100 @@ By the end of this chapter, you will be able to:
 - **AED_NBA.DTA**: NBA team revenue data (29 teams, 10 seasons, 2001-2011)
 - **AED_EARNINGS_COMPLETE.DTA**: 842 full-time workers with earnings, age, and education (2010)
 - **AED_INTERESTRATES.DTA**: U.S. Treasury interest rates, monthly (January 1982 - January 2015)
+
+## Key Concepts
+
+Six core ideas anchor this chapter. Skim them before you start, and come back when a term feels fuzzy. Each entry pairs a concrete example using the chapter's data with a non-technical analogy. Click a panel to expand it.
+
+**Panel Data:** A dataset that follows the same units (people, firms, teams, countries) across multiple time periods, indexed by both $i$ (unit) and $t$ (time). The double indexing lets the analyst separate variation *across* units from variation *within* a unit over time — the foundation for fixed-effects, random-effects, and other panel methods.
+
+::::: {.columns}
+:::: {.column width="50%"}
+::: {.callout-tip collapse="true" appearance="simple" title="Example"}
+The chapter's `data_nba` is a panel: 29 NBA teams observed across 10 seasons (2001–02 to 2010–11), with 286 team-season observations of `revenue`, `wins`, and `playoff` status. The between-team standard deviation of `lnrevenue` is roughly 0.21 (big-market vs. small-market gap), while the within-team SD over time is only about 0.11 — it's the panel's double indexing that lets the chapter quantify each piece separately.
+:::
+::::
+:::: {.column width="50%"}
+::: {.callout-note collapse="true" appearance="simple" title="Analogy"}
+A community survey asks the same hundred residents the same questions every year for a decade. The result isn't one snapshot; it's a film. Each resident's *thread* of answers can be compared with their own past, *and* compared with their neighbours. Panel data is that survey film — the regression methods of this chapter exploit both the cross-sectional comparison and the year-to-year personal change.
+:::
+::::
+:::::
+
+**Within Estimator (Within Transformation):** The fixed-effects machinery that subtracts each unit's *own* time-mean from every variable before fitting OLS. The resulting equation in deviations $(y_{it} - \bar y_i)$ vs. $(x_{it} - \bar x_i)$ algebraically eliminates time-invariant unobservables $\alpha_i$, recovering coefficients identified purely from within-unit changes.
+
+::::: {.columns}
+:::: {.column width="50%"}
+::: {.callout-tip collapse="true" appearance="simple" title="Example"}
+For the NBA panel, the within transformation creates `mdifflnrev = lnrevenue − team_mean(lnrevenue)` and the analogous demeaned `wins` series. Regressing one on the other with cluster-robust SEs by `teamid` gives the within (fixed-effects) coefficient on `wins`. It is smaller than the pooled OLS coefficient because the demeaning has stripped out the persistent market-size gap that confounded the pooled regression.
+:::
+::::
+:::: {.column width="50%"}
+::: {.callout-note collapse="true" appearance="simple" title="Analogy"}
+Sort a family photo album by person — every page shows one family member across many years. Subtract their average expression from every photo and only their year-to-year *change* remains: smiles when they got promoted, frowns during illness. The within transformation is that page-by-person demeaning; what's left is each person's own movement, with their persistent baseline removed.
+:::
+::::
+:::::
+
+**Logit Model:** A regression for binary outcomes ($y \in \{0, 1\}$) that uses the logistic CDF to constrain the predicted probability to the $[0, 1]$ interval: $\Pr[y = 1 \mid x] = 1 / (1 + e^{-x'\beta})$. Coefficients are not direct marginal effects — those have to be computed by differentiating the logistic curve at chosen points.
+
+::::: {.columns}
+:::: {.column width="50%"}
+::: {.callout-tip collapse="true" appearance="simple" title="Example"}
+The chapter constructs a binary `dbigearn` (a high-earner indicator equal to 1 for the roughly 27% of workers earning above \$60,000) on `data_earnings` and fits the logit `dbigearn ~ age + education`. The marginal effect of `education` evaluated at the sample means is similar in magnitude to the OLS linear-probability-model coefficient on `education`, demonstrating that logit and LPM agree on direction and rough magnitude — but logit's predicted probabilities never wander outside $[0, 1]$.
+:::
+::::
+:::: {.column width="50%"}
+::: {.callout-note collapse="true" appearance="simple" title="Analogy"}
+A digital signal is squashed by an op-amp into a clean low-or-high state — never wandering negative or above the rail voltage. The logit is the regression's op-amp: it takes the linear combination $x'\beta$ — which can range over all real numbers — and squeezes it through an S-curve into a clean probability between 0 and 1, exactly the range a binary outcome demands.
+:::
+::::
+:::::
+
+**Autoregressive Model AR($p$):** A time-series model where the current value of $y$ is regressed on its own past values: $y_t = \beta_0 + \beta_1 y_{t-1} + \cdots + \beta_p y_{t-p} + u_t$. AR($p$) captures persistence and momentum — "today depends on yesterday" — and is the workhorse of forecasting and dynamic-effects analysis.
+
+::::: {.columns}
+:::: {.column width="50%"}
+::: {.callout-tip collapse="true" appearance="simple" title="Example"}
+For the chapter's monthly `dgs10` series (changes in 10-year Treasury rate, 1982–2015), the AR(2) part of the ADL(2, 2) model gives a small *positive* coefficient on $\Delta\text{gs10}_{t-1}$ (around $+0.28$): last month's change in the 10-year rate carries partly into this month — positive momentum in *changes*, consistent with the residual autocorrelation of about +0.25.
+:::
+::::
+:::: {.column width="50%"}
+::: {.callout-note collapse="true" appearance="simple" title="Analogy"}
+A long stone hallway echoes your handclap for several seconds. A new clap layers on top of the lingering reverberation from the previous one. AR($p$) is exactly that auditory memory: today's level partly carries the past forward. The coefficients on lags of $y$ encode *how much* of the past still rings in the present.
+:::
+::::
+:::::
+
+**Distributed Lag Model (ADL):** An extension of AR($p$) that adds *current and lagged values of an exogenous regressor* $x$: $y_t = \beta_0 + \sum_{j=1}^{p} \alpha_j y_{t-j} + \sum_{j=0}^{q} \gamma_j x_{t-j} + u_t$. The $\gamma$ coefficients trace out how a one-time change in $x$ ripples through to $y$ over time; the *long-run multiplier* sums them.
+
+::::: {.columns}
+:::: {.column width="50%"}
+::: {.callout-tip collapse="true" appearance="simple" title="Example"}
+The chapter's ADL(2, 2) model regresses `dgs10` on its own two lags plus current and two lags of `dgs1` (Fed-controlled 1-year rate). The contemporary $\gamma_0 \approx 0.74$ says roughly three-quarters same-month pass-through; adding $\gamma_1 \approx -0.26$ and $\gamma_2 \approx 0.05$ gives a two-month cumulative multiplier of about 0.53 — so a bit over half of a 1-year-rate shock has passed through to the 10-year rate within two months.
+:::
+::::
+:::: {.column width="50%"}
+::: {.callout-note collapse="true" appearance="simple" title="Analogy"}
+Marinating chicken: the spice rub doesn't transfer all its flavour at the moment of contact. Some flavour penetrates within minutes, more after an hour, even more overnight. The distributed-lag model is the regression's marinade — past doses of the input keep affecting the output for several periods, and summing the dose-by-dose effects gives the "fully marinated" long-run impact.
+:::
+::::
+:::::
+
+**Hausman Test:** A formal test that compares fixed-effects (FE) and random-effects (RE) estimates of the same panel-regression coefficients. Under the null that $\alpha_i$ is uncorrelated with regressors, RE is consistent and efficient; under the alternative, only FE is consistent. A statistically significant difference between FE and RE coefficients rejects RE.
+
+::::: {.columns}
+:::: {.column width="50%"}
+::: {.callout-tip collapse="true" appearance="simple" title="Example"}
+For the NBA panel, the FE coefficient on `wins` is noticeably smaller than the RE coefficient — because RE pools both within and between variation, while FE strips out the team fixed effects that are correlated with `wins` (big-market teams both win more *and* earn more). A Hausman test on this gap typically rejects RE, confirming that FE is the safer choice when the question is the within-team causal effect of an extra win on revenue.
+:::
+::::
+:::: {.column width="50%"}
+::: {.callout-note collapse="true" appearance="simple" title="Analogy"}
+A courtroom cross-examination puts the same witness through two different lawyers. If both lawyers walk away with consistent versions, you can use the more efficient (faster, cheaper) lawyer's record. If the two versions diverge sharply, only the *more rigorous* lawyer's record can be trusted. Hausman is the panel's cross-examination — when FE and RE diverge, you side with FE.
+:::
+::::
+:::::
 
 ## Setup
 
@@ -28772,7 +30926,7 @@ plt.rcParams.update({
 })
 ```
 
-## 17.2: Panel Data Models
+## 17.2 Panel Data Models
 
 Panel data (also called longitudinal data) combines cross-sectional and time series dimensions. We observe multiple individuals (i = 1, ..., n) over multiple time periods (t = 1, ..., T).
 
@@ -28841,9 +30995,9 @@ The variance decomposition reveals the **fundamental trade-off** in panel data a
 
 Typical findings:
 
-- **Between SD** (across teams): **0.40-0.50** (large!)
-- **Within SD** (over time): **0.15-0.25** (smaller)
-- **Overall SD**: **0.45-0.55**
+- **Between SD** (across teams): **~0.21** (large relative to within!)
+- **Within SD** (over time): **~0.11** (smaller)
+- **Overall SD**: **~0.24**
 
 **What This Means:**
 
@@ -28859,8 +31013,8 @@ Typical findings:
 
 3. **Variance decomposition** (approximately):
  - Total variance ≈ Between variance + Within variance
- - \$0.50^2 \approx 0.45^2 + 0.20^2$
- - \$0.25 \approx 0.20 + 0.04$ 
+ - \$0.24^2 \approx 0.21^2 + 0.11^2$
+ - \$0.056 \approx 0.045 + 0.012$ 
 
 **Implications for Estimation:**
 
@@ -29016,8 +31170,8 @@ The comparison of standard errors reveals **within-team correlation** - a pervas
 
 | Coefficient | Default SE | Robust SE | **Cluster SE** |
 |-------------|-----------|-----------|---------------|
-| wins | 0.0030 | 0.0035 | **0.0065** |
-| **Ratio** | 1.00x | 1.17x | **2.17x** |
+| wins | 0.0011 | 0.0010 | **0.0019** |
+| **Ratio** | 1.00x | 0.97x | **1.81x** |
 
 **What This Tells Us:**
 
@@ -29103,15 +31257,15 @@ Imagine two extreme scenarios:
 
 **With default SEs:**
 
-- wins coefficient: t = 3.00, p < 0.01
+- wins coefficient: t = 6.42, p < 0.001
 - **Conclusion**: Highly significant
 
 **With cluster SEs:**
 
-- wins coefficient: t = 1.38, p = 0.17
-- **Conclusion**: Not significant!
+- wins coefficient: t = 3.54, p = 0.001
+- **Conclusion**: Still significant, but the standard error is ~1.8x larger
 
-**Complete reversal of inference!**
+**Clustering widens the interval without overturning significance here** -- the correct lesson is that ignoring within-team correlation understates uncertainty, not that it manufactures significance.
 
 **Best Practices:**
 
@@ -29141,24 +31295,24 @@ Sometimes need to cluster in **multiple dimensions**:
 - **Season** (common time shocks affect all teams)
 - Example: 2008 financial crisis hit all teams that year
 
-Formula: $SE_{two-way} = SE_{team} + SE_{time} - SE_{pooled}$
+Formula (the *variance* matrices combine, not the SEs themselves): $V_{two-way} = V_{team} + V_{time} - V_{team \times time}$ — the two cluster variances add and the team-by-time cell-level overlap is subtracted; the two-way standard errors are the square roots of the diagonal.
 
 **The NBA Example:**
 
 With cluster SEs:
 
-- wins coefficient: **0.0055** (SE: **0.0040**)
-- t-statistic: **1.38**
-- p-value: **0.17**
+- wins coefficient: **0.0068** (SE: **0.0019**)
+- t-statistic: **3.54**
+- p-value: **0.001**
 
 **Interpretation:**
 
-- Relationship between wins and revenue **not statistically significant**
-- Once we properly account for within-team correlation
-- Previous "significance" was an artifact of ignoring dependence
-- Fixed effects (next section) will address the underlying confounding
+- Relationship between wins and revenue **remains statistically significant** (t ≈ 3.5, p ≈ 0.001)
+- Even after properly accounting for within-team correlation
+- Clustering roughly doubles the standard error but does not overturn the result
+- Fixed effects (next section) will further address the underlying confounding
 
-## 17.3: Fixed Effects Estimation
+## 17.3 Fixed Effects Estimation
 
 Fixed effects (FE) control for time-invariant individual characteristics by including individual-specific intercepts.
 
@@ -29226,13 +31380,13 @@ The comparison between Pooled OLS and Fixed Effects reveals **omitted variable b
 
 | Model | Wins Coefficient | SE (cluster) | R² |
 |-------|-----------------|-------------|-----|
-| **Pooled OLS** | 0.0055 | 0.0040 | **0.15** (overall) |
-| **Fixed Effects** | 0.0025 | 0.0020 | **0.65** (within) |
+| **Pooled OLS** | 0.0068 | 0.0019 | **0.127** (overall) |
+| **Fixed Effects** | 0.0045 | 0.0008 | **0.185** (within) |
 
 **Key Findings:**
 
 1. **Coefficient shrinks substantially**:
- - Pooled: 0.0055 → FE: 0.0025 (drops by **55%**)
+ - Pooled: 0.0068 → FE: 0.0045 (drops by **33%**)
  - This suggests **positive omitted variable bias** in pooled model
  - High-revenue teams (big markets) also tend to win more
  - Pooled confounds **team quality** with **market size**
@@ -29243,8 +31397,8 @@ The comparison between Pooled OLS and Fixed Effects reveals **omitted variable b
  - More **credible causal interpretation**
 
 3. **R² interpretation changes**:
- - Pooled: Overall R² = 0.15 (explains 15% of total variation)
- - FE: Within R² = 0.65 (explains 65% of within-team variation)
+ - Pooled: Overall R² = 0.13 (explains 13% of total variation)
+ - FE: Within R² = 0.19 (explains 19% of within-team variation)
  - Between R² would be even higher (team fixed effects explain most variation)
 
 **Understanding the Fixed Effects Model:**
@@ -29325,7 +31479,7 @@ where:
 
 Fixed effects output typically reports three R²:
 
-1. **Within R²** (0.65): Variation explained **within teams over time**
+1. **Within R²** (0.19): Variation explained **within teams over time**
  - How well model predicts year-to-year changes
  - Most relevant for FE
 
@@ -29337,13 +31491,13 @@ Fixed effects output typically reports three R²:
  - Weighted average of within and between
  - Not directly comparable to pooled R²
 
-**Interpretation of the 0.0025 Coefficient:**
+**Interpretation of the 0.0045 Coefficient:**
 
 **Marginal effect:**
 
-- One additional win → **+0.25%** revenue increase
-- For a team with \$200M revenue: 0.25% × \$200M = **\$500K**
-- Over 10 additional wins: **\$5M** revenue increase
+- One additional win → **+0.45%** revenue increase
+- For a team with \$200M revenue: 0.45% × \$200M = **\$900K**
+- Over 10 additional wins: **\$9M** revenue increase
 
 **Is this economically significant?**
 
@@ -29355,23 +31509,23 @@ Fixed effects output typically reports three R²:
 
 With cluster SEs:
 
-- t-statistic: 0.0025 / 0.0020 ≈ **1.25**
-- p-value ≈ **0.21** (not significant at 5%)
+- t-statistic: 0.0045 / 0.0008 ≈ **5.35**
+- p-value < **0.001** (highly significant)
 
-Surprisingly **not significant**! Why?
+The within-team wins effect is **precisely estimated** and remains significant after clustering by team. Even so, several features of this panel keep the FE estimate modest and would threaten precision in smaller samples:
 
 1. **Small within-variation** (teams don't vary hugely in wins year-to-year)
 2. **Revenue smoothing** (multi-year contracts, season tickets)
-3. **Only 29 teams** (small number of clusters → large SEs)
+3. **Only 29 teams** (small number of clusters)
 4. **Short panel** (10 years → limited within-variation per team)
 
 **Practical Implications:**
 
 - **Pooled OLS**: "High-revenue teams win more" (true, but confounded)
-- **Fixed Effects**: "Winning more games increases revenue" ? (effect exists but imprecisely estimated)
-- Need **longer panel** or **more teams** for precise FE estimates
+- **Fixed Effects**: "Winning more games increases revenue" (a precisely estimated within-team effect, t ≈ 5.3)
+- The FE estimate is significant even with only 29 teams over 10 seasons
 
-## 17.4: Random Effects Estimation
+## 17.4 Random Effects Estimation
 
 Random effects (RE) models individual-specific effects as random draws from a distribution.
 
@@ -29457,12 +31611,12 @@ print(f"  Education: {model_logit.params['education']:.4f}")
 print(f"  Pseudo R-squared: {model_logit.prsquared:.4f}")
 
 # Full logit output
-model_logit.summary()
+print(model_logit.summary())
 
 # Marginal effects
 marginal_effects = model_logit.get_margeff()
 # Marginal Effects (at means)
-marginal_effects.summary()
+print(marginal_effects.summary())
 
 # Linear Probability Model for comparison
 fit_lpm = pf.feols('dbigearn ~ age + education', data=data_earnings, vcov='HC1')
@@ -29473,7 +31627,9 @@ print(f"Education coefficient: {fit_lpm.coef()['education']:.6f} (SE: {fit_lpm.s
 print("\nNote: Logit marginal effects and LPM coefficients are similar in magnitude.")
 ```
 
-## 17.5: Time Series Data
+**Interpreting the logit results:** Both `age` and `education` enter with positive coefficients, so older and more-educated workers are more likely to be high earners. Because logit coefficients are not themselves marginal effects, we convert them: the marginal effect of `education` at the sample means (about 0.05, i.e. roughly a 5-percentage-point rise in the probability of high earnings per extra year of schooling) closely matches the linear-probability-model coefficient. This agreement in sign and magnitude is why the simpler LPM is often a useful first pass -- but only the logit keeps every predicted probability inside $[0, 1]$.
+
+## 17.5 Time Series Data
 
 Time series data consist of observations ordered over time: $y_1, y_2, \ldots, y_T$
 
@@ -29583,7 +31739,9 @@ print(f"  gs1 SE (HAC): {fit_levels_hac.se()['gs1']:.6f}")
 print(f"\n  HAC SE is {fit_levels_hac.se()['gs1'] / fit_levels.se()['gs1']:.2f}x larger!")
 ```
 
-## 17.6: Autocorrelation
+**What the levels regression shows:** The near-perfect fit (R² around 0.95) is exactly the kind of result that should make us suspicious -- both rates trend downward over the sample, so a high R² can reflect shared trends rather than a genuine structural link. The HAC standard error is more than three times the default, confirming that the default SEs badly understate uncertainty once we allow for the strong autocorrelation examined in the next section.
+
+## 17.6 Autocorrelation
 
 Autocorrelation (serial correlation) violates the independence assumption of OLS.
 
@@ -29625,6 +31783,8 @@ print("\nStrong autocorrelation evident (lag 1 = {:.4f})".format(acf_resid[1]))
 > The correlogram (ACF plot) reveals autocorrelation patterns in residuals. Slowly decaying autocorrelations (e.g., $\rho_1 = 0.95$, $\rho_{10} = 0.42$) indicate non-stationarity and persistent shocks. With autocorrelation, default SEs are too small -- HAC (Newey-West) SEs can be 3-8 times larger. Always check residual autocorrelation after estimating time series regressions and use HAC SEs or model the dynamics explicitly.
 
 ### Correlogram Visualization
+
+The correlogram below plots the residual autocorrelations against lag length, with confidence bands that flag which lags are statistically significant -- look for how slowly the bars decay.
 
 ```python
 # Plot correlogram
@@ -29694,8 +31854,8 @@ From: $\Delta gs10_t = \beta_0 + \beta_1 \Delta gs10_{t-1} + \beta_2 \Delta gs10
 
 **Autoregressive terms** (own lags):
 
-- **Lag 1** ($\Delta gs10_{t-1}$): ≈ **-0.15 to -0.25** (negative!)
-- **Lag 2** ($\Delta gs10_{t-2}$): ≈ **-0.05 to -0.10** (negative)
+- **Lag 1** ($\Delta gs10_{t-1}$): ≈ **+0.28** (positive)
+- **Lag 2** ($\Delta gs10_{t-2}$): ≈ **-0.10** (negative)
 
 **Distributed lag terms** (1-year rate):
 
@@ -29713,7 +31873,7 @@ From: $\Delta gs10_t = \beta_0 + \beta_1 \Delta gs10_{t-1} + \beta_2 \Delta gs10
 
 2. **Strong contemporary relationship**:
  - Coefficient ≈ **0.50** on $\Delta gs1_t$
- - When 1-year rate increases 1%, 10-year rate increases **0.50%** same month
+ - When the 1-year rate rises by 1 percentage point, the 10-year rate rises about **0.50 percentage points** the same month
  - **Expectations hypothesis**: Long rates reflect expected future short rates
  - Less than 1-to-1 because 10-year rate is average over many periods
 
@@ -29766,9 +31926,9 @@ This suggests:
 
 | Model | R² | Residual ρ₁ | BIC |
 |-------|-----|------------|-----|
-| Static ($\Delta gs10 \sim \Delta gs1$) | 0.25 | 0.25 | Higher |
-| AR(2) ($\Delta gs10 \sim \Delta gs10_{t-1,t-2}$) | 0.10 | 0.15 | Higher |
-| **ADL(2,2)** | **0.45** | **0.08** | **Lower** |
+| Static ($\Delta gs10 \sim \Delta gs1$) | 0.57 | 0.25 | Higher |
+| AR(2) ($\Delta gs10 \sim \Delta gs10_{t-1,t-2}$) | 0.13 | 0.01 | Higher |
+| **ADL(2,2)** | **0.61** | **0.01** | **Lower** |
 
 ADL(2,2) dominates on all criteria!
 
@@ -29846,6 +32006,8 @@ Could try ADL(3,3), but gains typically minimal
 
 ### Visualization: Changes in Interest Rates
 
+The plots below show the differenced series over time and a scatter of the changes, so we can confirm that first differencing removed the downward trend seen in the levels.
+
 ```python
 # Figure: Changes
 fig, axes = plt.subplots(2, 1, figsize=(12, 8))
@@ -29885,7 +32047,7 @@ plt.show()
 - **Bottom panel**: The positive scatter confirms that short-rate and long-rate changes move together, but the relationship is less than one-to-one (slope < 1)
 - **Volatility clustering**: Notice periods of larger swings (e.g., early 1980s) -- this heteroskedasticity motivates HAC standard errors
 
-## 17.7: Causality and Instrumental Variables
+## 17.7 Causality and Instrumental Variables
 
 Establishing causality is central to econometrics. Correlation does not imply causation!
 
@@ -30130,7 +32292,12 @@ print(f"  Residual ACF(1): {acf_adl[1]:.4f} (near zero → dynamics captured)")
 
 **Try it yourself!** Copy this code into an empty Google Colab notebook and run it: [Open Colab](https://colab.research.google.com/notebooks/empty.ipynb)
 
-**Next steps:** Apply these methods to your own research questions. Panel data methods, time series models, and causal inference strategies are essential tools for any applied econometrician working with observational data.
+**Next Steps:**
+
+- **Advanced panel methods**: Dynamic panel estimators (Arellano-Bond) and correlated random effects
+- **Time series econometrics**: Cointegration, error-correction models, and unit-root testing
+- **Modern causal inference**: Difference-in-differences, regression discontinuity, and credible IV designs
+- **Apply the toolkit**: Bring these methods to your own research questions and observational datasets
 
 ---
 
@@ -30186,7 +32353,7 @@ You estimate a wage equation using panel data on 500 workers over 10 years. The 
 A regression of the 10-year interest rate on the 1-year rate using monthly data yields residuals with:
 
 - Lag 1 autocorrelation: 0.95
-- Lag 5 autocorrelation: 0.75
+- Lag 5 autocorrelation: 0.71
 - Default SE on the 1-year rate coefficient: 0.022
 - HAC SE (24 lags): 0.080
 
@@ -30419,7 +32586,7 @@ print(f"Population variables available: {pop_vars}")
 # print(panel[['ln_NTLpc', 'ln_pop', 'pop']].describe().round(3))
 ```
 
-> **Key Concept 17.10: Satellite Panel Data**
+> **Key Concept 17.11: Satellite Panel Data**
 >
 > Annual nighttime lights observations create **panel datasets** even where traditional economic surveys are unavailable or infrequent. For Bolivia's 339 municipalities over 2012-2020, the NTL panel provides 3,051 municipality-year observations. This temporal dimension allows us to move beyond cross-sectional associations and study *changes within municipalities over time*—a crucial step toward understanding development dynamics rather than just static patterns.
 
@@ -30442,7 +32609,7 @@ print(f"Population variables available: {pop_vars}")
 #
 # fit_pooled = pf.feols('ln_NTLpc ~ ln_pop + year', data=panel_reg, vcov={'CRV1': 'asdf_id'})
 # print("POOLED OLS WITH CLUSTER-ROBUST SEs")
-# print(model_pooled.summary())
+# print(fit_pooled.summary())
 ```
 
 #### Task 3: Fixed Effects (Semi-guided)
@@ -30478,7 +32645,7 @@ print(f"Population variables available: {pop_vars}")
 # print(f"  Fixed Effects ln_pop coef: {fit_fe.coef()['ln_pop']:.4f}")
 ```
 
-> **Key Concept 17.11: Fixed Effects for Spatial Heterogeneity**
+> **Key Concept 17.12: Fixed Effects for Spatial Heterogeneity**
 >
 > Municipality fixed effects absorb all **time-invariant characteristics**: altitude, remoteness, climate, historical infrastructure, cultural factors. After removing these fixed differences, the remaining variation identifies how *changes* in population (or other time-varying factors) relate to *changes* in NTL within the same municipality. This within-municipality analysis is more credible for causal interpretation than cross-sectional regressions, because it eliminates bias from unobserved time-invariant confounders.
 
@@ -30540,7 +32707,7 @@ print(f"Population variables available: {pop_vars}")
 #
 # fit_fd = pf.feols('d_ln_NTLpc ~ d_ln_pop', data=fd_data, vcov={'CRV1': 'asdf_id'})
 # print("FIRST DIFFERENCES ESTIMATION")
-# print(model_fd.summary())
+# print(fit_fd.summary())
 #
 # print(f"\nFD coefficient on ln_pop: {fit_fd.coef()['d_ln_pop']:.4f}")
 ```
