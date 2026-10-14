@@ -1,0 +1,261 @@
+---
+title: "5. 二変量データの要約"
+subtitle: "2つの変数がどのように一緒に動くか — そしてそれが何を語り（何を語らないか）"
+deck-author: "Carlos Mendez"
+deck-author-url: "https://carlos-mendez.org"
+institute: "Nagoya University (GSID)"
+date: today
+date-format: long
+visual-summary: "figures/visual_summary.png"
+format:
+  revealjs:
+    output-file: index.ja.html
+    theme: [default, site-brand.scss]
+    template-partials:
+      - title-slide.html
+    include-after-body: figure-zoom.html
+    center: true
+    slide-number: c/t
+    menu: true
+    chalkboard: true
+    preview-links: auto
+    overview: true
+    progress: true
+    history: true
+    transition: fade
+    width: 1280
+    height: 720
+    fig-align: center
+    auto-stretch: true
+    highlight-style: github
+    link-external-icon: false
+---
+
+# 問い {.divider background-color="#008CB7"}
+
+[第I幕 · 緊張]{.act}
+
+## 大きな家は本当により高く売れるのか — そして*どのくらい*か？
+
+住宅販売のデータセットです。各住宅について、**2つ**の数値 — その**面積**と**価格** — が得られます。
+
+. . .
+
+1軒の家だけを眺めても何も分かりません。*2つの列のあいだの関係*こそが物語であり、それを
+単に感じ取るのではなく、**測定**したいのです。
+
+::: {.notes}
+具体的な問いから始めましょう。ここでは二変量データ、つまり1つの観測につき2つの測定値があります。この章全体
+が、両者の結びつきを1つの数値と1本の線で要約することを扱います。
+:::
+
+## これから進む道
+
+::: {.incremental}
+- 関係を**見る** — 散布図と二元表
+- その強さを**測る** — 相関と共分散
+- それを**モデル化する** — 最小二乗法（OLS、最小二乗法）による回帰直線
+- 当てはまりを**判断する** — $R^2$ と回帰の標準誤差
+- それを正直に**解釈する** — 関連は因果関係ではない
+:::
+
+## 3つの考えが章全体を支える
+
+**関連** — $x$ と $y$ は一緒に動く傾向があるか、またどの方向にか？
+
+**相関** $r$ — **線形**の結びつきの*強さ*を表す、$[-1, 1]$ の範囲にある単位のない1つの数値。
+
+**回帰** — $x$ から $y$ を*予測する*直線 $\hat{y} = b_1 + b_2 x$。
+
+[関係を要約するとは、点の雲を1つの方向、1つの数値、1本の線に変えることです。]{.takeaway .fragment}
+
+::: {.notes}
+これら3つの用語は以降のすべての章で再び現れます。相関は測定し、回帰は予測します。
+:::
+
+# 結びつきを見て、測る {.divider background-color="#7A209F"}
+
+[第II幕 · 調査]{.act}
+
+## まず見ることから：価格は面積とともに上がる — ただし完全ではない
+
+![各点は1軒の家です。右上がりの傾向が関連であり、その周りの散らばりは面積が*説明しない*すべてのものです。](figures/fig_5-3_01.png)
+
+[散布図は二変量データの最初の要約です — どんな数値よりも先に、方向と散らばりを示します。]{.takeaway .fragment}
+
+::: {.notes}
+明らかな正の傾きと、ある面積における縦方向の散らばりを指摘しましょう。他の要因（敷地、
+築年数、立地）も価格を動かします。
+:::
+
+## 散布図を数行で描く
+
+``` {.python code-line-numbers="1-2|4-5|7|8-9|10"}
+import pandas as pd                          # tabular data
+import matplotlib.pyplot as plt               # plotting
+
+url = "https://raw.githubusercontent.com/quarcs-lab/data-open/master/AED/AED_HOUSE.DTA"
+houses = pd.read_stata(url)                  # load the 29 Davis, CA house sales
+
+fig, ax = plt.subplots(figsize=(10, 6))      # create one figure + axes
+ax.scatter(houses["size"], houses["price"],  # x = size, y = price
+           s=80, alpha=0.7, color="#22d3ee") # marker size, transparency, colour
+plt.show()                                   # render the scatter plot
+```
+
+[↗ Colab で試す](https://colab.research.google.com/notebooks/empty.ipynb){.colab-link target="_blank" data-preview-link="false"}
+
+::: {.notes}
+matplotlib は定番の作図ライブラリです。1回の `scatter` 呼び出しで、2つの列が前のスライドの
+画像になります。
+:::
+
+## 相関は強さを測り、共分散は符号しか与えない
+
+:::: {.columns}
+::: {.column width="50%"}
+### 共分散
+- 符号は**方向**を示す
+- $x \times y$ の**単位**を持つ（ドル × 平方フィート）
+- スケールはデータセット間で比較できない
+:::
+::: {.column width="50%"}
+### 相関 $r$
+- **単位がなく**、常に $[-1, 1]$ の範囲
+- $r = s_{xy} / (s_x s_y)$
+- どの変数のペアでも比較できる
+:::
+::::
+
+[共分散は*どちら向きか*を、相関は*どれほど強いか*を語ります — 誰でも読めるスケールで。]{.takeaway .fragment}
+
+## $r$ は*線形*の強さを捉える — そして曲線を見逃すことがある
+
+![同じ考え方で4つの強さ：強い、中程度、なし、負。相関は最初の3つを、点が線にどれだけ密着しているかで順位づけます。](figures/fig_x_01.png)
+
+[$r$ が $\pm 1$ に近いと線に密集していることを意味し、$r \approx 0$ は*線形*の結びつきがないことを意味します — 必ずしも結びつきが全くないわけではありません。]{.takeaway .fragment}
+
+::: {.notes}
+相関がゼロでも、強い非線形の関係（例：U字型）を隠している場合があります。r は直線の
+部分しか見ません。この住宅データでは r = 0.7858 です。
+:::
+
+## 結びつきを測る：pandas での相関と共分散
+
+``` {.python code-line-numbers="1|3-4|6-7|9-10"}
+import pandas as pd                          # tabular data
+
+url = "https://raw.githubusercontent.com/quarcs-lab/data-open/master/AED/AED_HOUSE.DTA"
+houses = pd.read_stata(url)                  # load the 29 Davis, CA house sales
+
+cov = houses[["price", "size"]].cov()        # covariance matrix (carries units: $ × sq ft)
+corr = houses[["price", "size"]].corr()      # correlation matrix (unit-free, in −1…1)
+
+r = corr.loc["price", "size"]                # pull out the single correlation number
+print(f"r = {r:.4f}")                        # → r = 0.7858
+```
+
+[↗ Colab で試す](https://colab.research.google.com/notebooks/empty.ipynb){.colab-link target="_blank" data-preview-link="false"}
+
+::: {.notes}
+`.corr()` と `.cov()` は pandas の DataFrame メソッドです。対角以外のセルが求める数値であり、
+相関は2つの標準偏差で共分散を標準化したものです。
+:::
+
+## 回帰直線は点の雲を予測に変える
+
+$$\hat{y} = b_1 + b_2\, x$$
+
+[$b_1$ は**切片**（$x = 0$ のときの予測される $y$）、$b_2$ は**傾き** — $x$ が1単位増えたときの
+$y$ の予測される変化です。OLS は残差平方和を最小にするように $b_1, b_2$ を選びます。]{.comment}
+
+::: {.notes}
+残差 e_i = y_i − ŷ_i を定義します。OLS は Σ e_i² を最小化します。これは標本平均を一般化したものです。
+切片のみの回帰は ȳ を返します。
+:::
+
+## OLS は点の雲を貫く唯一の最良当てはめ直線を引く
+
+![当てはめた直線：ŷ = 115,017 + 73.77 × size。1平方フィート増えるごとに、約 \$74 高いと予測されます。](figures/fig_x_02.png)
+
+[傾き $b_2 = \$73.77$ /平方フィート、切片 $b_1 = \$115{,}017$ — 100平方フィート大きい家は約 **\$7,377** 高くなると予測されます。]{.takeaway .fragment}
+
+::: {.notes}
+傾きが経済的に意味のある数値です。ここでの切片は範囲外の外挿（0平方フィートの家は
+存在しない）なので、過度に解釈してはいけません。
+:::
+
+## Python で回帰直線を当てはめる
+
+``` {.python code-line-numbers="1|3-4|6-8|10-11"}
+!pip install -q pyfixest                   # install pyfixest in Colab (-q = quiet; not preinstalled)
+
+import pandas as pd                         # pandas → load & handle tabular data
+import pyfixest as pf                        # pyfixest → fast OLS regression + tidy output
+
+# dataset: 29 house sales in Davis, CA (price, size, bedrooms, …)
+url = "https://raw.githubusercontent.com/quarcs-lab/data-open/master/AED/AED_HOUSE.DTA"
+houses = pd.read_stata(url)                 # read the Stata .dta file into a DataFrame
+
+m = pf.feols("price ~ size", data=houses)   # fit OLS: regress price on size
+m.summary()                                 # report intercept b1, slope b2, SEs, R²
+```
+
+[↗ Colab で試す](https://colab.research.google.com/notebooks/empty.ipynb){.colab-link target="_blank" data-preview-link="false"}
+
+::: {.notes}
+自己完結型です — 空の Colab セルに貼り付ければ最初から最後まで実行できます。プロジェクトのオープンデータ
+リポジトリから AED 住宅データを直接読み込み、回帰を当てはめて報告します。pyfixest は
+プロジェクトの推定パッケージです。（スライド自体は実行されません。これは実行可能なワークフローです。）
+:::
+
+## $R^2$ は全変動を説明された分と残った分に分ける
+
+$$R^2 = \frac{\text{explained SS}}{\text{total SS}} = 1 - \frac{\text{residual SS}}{\text{total SS}}$$
+
+![価格の全変動 = 線が説明する分 + 残差に残す分。](figures/fig_x_03.png)
+
+[ここでは $R^2 = 0.617$：面積は価格の変動の約 **62%** を説明し、38% を他のすべてに残します。（また $R^2 = r^2 = 0.7858^2$ です。）]{.takeaway .fragment}
+
+::: {.notes}
+単回帰では R² は常に r² に等しくなります。回帰の標準誤差 s_e は、y の単位（ドル）での
+典型的な残差を測ります。
+:::
+
+## 柔軟な曲線が直線の仮定を検証する
+
+![ノンパラメトリック回帰はデータに形を選ばせます — それが OLS の線をたどるなら、線形性は妥当な要約です。](figures/fig_5-11_01.png)
+
+[まず柔軟な曲線を当てはめましょう。それが直線に密着するなら、単純な線形の要約は信頼できます。]{.takeaway .fragment}
+
+::: {.notes}
+ノンパラメトリック回帰はいかなる関数形も課しません。それを OLS の線と比較することは、線形モデルが
+曲がりを隠していないかを確かめる、素早く正直な検証です。
+:::
+
+# 正しく読み取る {.divider background-color="#C21E72"}
+
+[第III幕 · 解決]{.act}
+
+## 誘惑される誤り — そしてその訂正
+
+[反論。]{.objection}「面積と価格は $r = 0.79$ だから、**より大きい面積がより高い価格を引き起こす**。」
+
+. . .
+
+[応答。]{.rebuttal} **関連は因果関係ではありません。** 交絡因子（立地、敷地面積）、逆の
+因果、選択のいずれもが相関を生み出しえます。線は要約するだけで、原因を特定するわけではありません。
+
+[相関が因果的な読みを得られるのは、代替の説明を排除する設計があるときだけです。]{.takeaway .fragment}
+
+## 持ち帰るべきこと
+
+::: {.incremental}
+- **散布図**は2つの変数の最初の正直な要約です。
+- **相関** $r \in [-1, 1]$ は*線形*の強さを単位なしで測り、**共分散**は符号しか与えません。
+- **OLS** は残差の二乗を最小化して $\hat{y} = b_1 + b_2 x$ を当てはめ、**傾き**が見出しになります。
+- **$R^2$** は説明された変動の割合を報告し、単回帰では $R^2 = r^2$ です。
+- **関連 $\neq$ 因果関係** — 解釈における最後の言葉は常にこれです。
+:::
+
+# 関係を測り、1本の線でモデル化しよう — そして、それを原因と呼びたくなる気持ちをこらえよう。 {.divider background-color="#C21E72"}

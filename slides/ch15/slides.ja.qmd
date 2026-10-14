@@ -1,0 +1,269 @@
+---
+title: "15. 変数変換を用いた回帰"
+subtitle: "対数、二乗項、交互作用 — OLSを保ったまま直線を曲げる"
+deck-author: "Carlos Mendez"
+deck-author-url: "https://carlos-mendez.org"
+institute: "Nagoya University (GSID)"
+date: today
+date-format: long
+visual-summary: "figures/visual_summary.png"
+format:
+  revealjs:
+    output-file: index.ja.html
+    theme: [default, site-brand.scss]
+    template-partials:
+      - title-slide.html
+    include-after-body: figure-zoom.html
+    center: true
+    slide-number: c/t
+    menu: true
+    chalkboard: true
+    preview-links: auto
+    overview: true
+    progress: true
+    history: true
+    transition: fade
+    width: 1280
+    height: 720
+    fig-align: center
+    auto-stretch: true
+    highlight-style: github
+    link-external-icon: false
+---
+
+# 問題 {.divider background-color="#008CB7"}
+
+[第I幕 · 直線はすべてに当てはまるわけではない]{.act}
+
+## 現実の経済的関係は曲がる
+
+収入は年齢とともに直線的に増えるわけではありません。若いうちは急速に上がり、中堅期には横ばいになり、
+退職間際には下がります。単純な `earnings ~ age` の直線は、そのすべてを見逃してしまいます。
+
+. . .
+
+解決策はOLS（最小二乗法）を捨てることではありません。**変数を変換する**こと — 対数、二乗、交互作用 —
+によって、依然として*係数について線形*なモデルで曲線的な物語を描けるのです。
+
+::: {.notes}
+この章全体は一つの考えに基づいています。「線形回帰」とは変数についてではなく、パラメータについて線形であるという意味です。
+それを受け入れれば、OLSの道具箱から出ることなく、対数や多項式が使えるようになります。
+:::
+
+## これから進む道
+
+::: {.incremental}
+- **対数** — level-log、log-linear、log-log、そしてそれぞれが含意する変化率／弾力性
+- **二乗項** — 収入のライフサイクルの逆U字型を捉える
+- **標準化係数** — 異なる単位で測られた説明変数を比較する
+- **交互作用** — 教育の収益率が年齢とともに変わることを許す
+- **限界効果** — AME・MEM・MER — 傾き自体が変化するとき
+- **予測** — 逆変換バイアスを*伴わずに*対数変換を元に戻す
+:::
+
+## 五つの考えがこの章を支える
+
+::: {.incremental}
+- **限界効果** — $x$ が1単位変化したときの $y$ の変化。$x$ が非線形に入ると、それは $x$ *とともに変化します*
+- **AME · MEM · MER** — 効果を平均するか、平均値で評価するか、選んだプロファイルで評価するか
+- **多項式回帰** — $x^2$（次に $x^3$ …）を加えて直線を曲げる。依然として $\beta$ について線形
+- **標準化係数** — $x$ の1標準偏差の変化が $y$ に与える効果を、標準偏差単位で表す — 共通の通貨
+- **smearing推定量** — $\exp(\widehat{\ln y})$ のバイアスに対するDuanの残差ベースの補正
+:::
+
+[一つのデータセット — 872人の労働者 — がすべての変換を貫きます。]{.takeaway .fragment}
+
+## 私たちのデータ：872人の労働者、収入とその要因
+
+`AED_EARNINGS_COMPLETE.DTA` — 25〜65歳のフルタイム労働者872人（2000年）。`earnings`、`age`、
+`education`、労働時間、産業、性別を含みます。
+
+``` {.python code-line-numbers="1-2|4|6-7"}
+import pandas as pd                          # tabular data
+import numpy as np                           # logs, squares, z-scores
+
+url = "https://raw.githubusercontent.com/quarcs-lab/data-open/master/AED/AED_EARNINGS_COMPLETE.DTA"
+data = pd.read_stata(url)                    # 872 full-time workers, aged 25-65, year 2000
+
+data[["earnings", "age", "education"]].describe().round(1)   # scale before you model
+```
+
+[↗ Colab で試す](https://colab.research.google.com/notebooks/empty.ipynb){.colab-link target="_blank" data-preview-link="false"}
+
+::: {.notes}
+pandas/numpy はColabにプリインストールされているので、ここではpip installは不要です。平均収入 ≈ \$56k。下にある対数モデルが
+その右への歪みを和らげます。
+:::
+
+# 直線を曲げる四つの方法 {.divider background-color="#7A209F"}
+
+[第II幕 · 変換]{.act}
+
+## 対数は係数の*意味*を変える
+
+同じ関係の三つの定式化 — そして三つの異なる解釈。
+
+``` {.python code-line-numbers="1|3-4|6|7|8|10"}
+import pyfixest as pf                                 # OLS with R-style formulas
+# (pandas, numpy already loaded; data = AED_EARNINGS_COMPLETE)
+data["lnage"] = np.log(data["age"])                   # log of age, for the log-log model
+# lnearnings already in the data; = np.log(earnings)
+
+levels  = pf.feols("earnings   ~ age   + education", data=data, vcov="HC1")  # $ per unit
+loglin  = pf.feols("lnearnings ~ age   + education", data=data, vcov="HC1")  # % per unit (Mincer)
+loglog  = pf.feols("lnearnings ~ lnage + education", data=data, vcov="HC1")  # elasticity on age
+
+loglin.summary()                                      # the Mincer earnings equation
+```
+
+[↗ Colab で試す](https://colab.research.google.com/notebooks/empty.ipynb){.colab-link target="_blank" data-preview-link="false"}
+
+::: {.notes}
+HC1 = 不均一分散にロバストな標準誤差で、この章の既定値です。pyfixest はColabにプリインストールされていないので、
+完全な自己完結版では先頭に `!pip install -q pyfixest` を加えます（次のツール中心のスライドを参照）。
+:::
+
+## 同じデータ、「年齢」の三つの解釈
+
+::: {.incremental}
+- **Levels（水準）** — $\hat\beta_{\text{age}} \approx \$525$：1年増えるごとに、出発点の収入にかかわらず約 **\$525** 増えます。
+- **Log-linear**（Mincer） — $\hat\beta_{\text{age}} \approx 0.008$：1年あたり約 **+0.8%** — *準弾力性*であり、ドル額は収入に応じてスケールします。
+- **Log-log** — $\hat\beta_{\ln\text{age}} \approx 0.35$：**年齢の1%上昇 → 収入の約0.35%上昇** — *弾力性*（< 1、非弾力的）です。
+- **教育**が主役です：対数モデルで ≈ **0.10** — 有名な **年あたり約10%のMincer収益率**です。
+:::
+
+[log-linearの $\beta$ を変化率とみなすのは**近似**です — 正確な効果は $100(e^{\beta}-1)\%$ であり、$|\beta| > 0.1$ になるとその差が効いてきます。]{.takeaway .fragment}
+
+## 二乗項がライフサイクルの山を捉える
+
+年齢の二乗を加えます。年齢に対する傾きは今や $\beta_2 + 2\beta_3\,\text{age}$ となり、**年齢とともに変化します**。
+
+``` {.python code-line-numbers="1|3-4|6|7|9|10-12"}
+!pip install -q pyfixest                     # pyfixest isn't preinstalled in Colab (-q = quiet)
+import pandas as pd; import numpy as np; import pyfixest as pf
+url = "https://raw.githubusercontent.com/quarcs-lab/data-open/master/AED/AED_EARNINGS_COMPLETE.DTA"
+data = pd.read_stata(url)                     # 872 workers
+
+quad = pf.feols("earnings ~ age + I(age**2) + education", data=data, vcov="HC1")  # age + age^2
+b2, b3 = quad.coef()["age"], quad.coef()["I(age ** 2)"]    # linear & quadratic terms
+
+turning_point = -b2 / (2 * b3)                # age where the slope hits zero (earnings peak)
+print(f"peak earnings at age {turning_point:.0f}")         # ~ 52
+print(f"marginal effect at 25: {b2 + 2*b3*25:,.0f}")       # ~ +$1,600 / yr
+print(f"marginal effect at 60: {b2 + 2*b3*60:,.0f}")       # ~ -$450 / yr
+```
+
+[↗ Colab で試す](https://colab.research.google.com/notebooks/empty.ipynb){.colab-link target="_blank" data-preview-link="false"}
+
+::: {.notes}
+年齢の線形係数 ≈ +\$3,000〜5,000、agesq ≈ −\$30〜−\$50。age と age² に対する同時F検定は非常に
+有意なので、この曲率はノイズではなく本物です。
+:::
+
+## 収入は52歳前後でピークに達し、その後下がる
+
+![年齢に対する当てはめ収入（教育は平均値で固定）：二乗項が復元する逆U字型のライフサイクル・プロファイル。](figures/fig_quadratic.png)
+
+[傾きは **25歳で+\$1,600/年**、**52歳前後で\$0**、**60歳で−\$450/年** — 一つの説明変数、三つの限界的な物語。]{.takeaway .fragment}
+
+## リンゴとオレンジを比べるために標準化する
+
+ドル／年と対数労働時間は、そのままでは比較できません。各変数を標準偏差単位で表し直します。
+
+``` {.python code-line-numbers="1-2|4|6|7-8"}
+# z-score each variable: (x - mean) / sd  → coefficients become "SD of y per SD of x"
+cols = ["earnings", "age", "agesq", "education", "lnhours"]
+z = data[cols].apply(lambda s: (s - s.mean()) / s.std())      # standardized copies
+
+mz = pf.feols("earnings ~ age + agesq + education + lnhours", data=z, vcov="HC1")
+mz.coef().round(3)      # beta* weights — now directly comparable
+# age & age^2 dominate; among the rest, education and lnhours carry the most weight
+```
+
+[↗ Colab で試す](https://colab.research.google.com/notebooks/empty.ipynb){.colab-link target="_blank" data-preview-link="false"}
+
+## 標準化された重みが要因を順位づける
+
+![標準化係数（$\beta^*$）：年齢とその二乗が支配的で、残りの中では教育と対数労働時間が先頭に立ちます。](figures/fig_standardized.png)
+
+[標準化係数は「努力の1標準偏差あたり、どの説明変数が収入を最も動かすか」に答えます — 単位をまたいで比較できます。]{.takeaway .fragment}
+
+## 交互作用は教育の収益率を年齢とともに変化させる
+
+1年の就学は25歳でも55歳でも同じだけ報われるのでしょうか。二つの説明変数を掛け合わせて検定してみましょう。
+
+``` {.python code-line-numbers="1|3|5-6|8|9-10"}
+inter = pf.feols("earnings ~ age * education", data=data, vcov="HC1")   # age, education, age:education
+
+# return to education at a given age = beta_educ + beta_(age:educ) * age
+be, bx = inter.coef()["education"], inter.coef()["age:education"]
+print(f"return at 25: {be + bx*25:,.0f}")     # ~ +$5,241 / education-year
+print(f"return at 55: {be + bx*55:,.0f}")     # ~ +$6,112 / education-year
+
+# is the interaction itself distinguishable from zero?
+inter.wald_test(R=[[0, 0, 0, 1]])             # H0: beta_(age:education) = 0  -> p ~ 0.61
+```
+
+[↗ Colab で試す](https://colab.research.google.com/notebooks/empty.ipynb){.colab-link target="_blank" data-preview-link="false"}
+
+::: {.notes}
+`age * education` は age + education + age:education に展開されます。収益率は25歳の\$5,241から
+55歳の\$6,112へと変化します — わずか約1.2倍で、交互作用は有意ではない（p ≈ 0.61）ため、慎重に読んでください。
+:::
+
+## 対数モデルからの予測：逆変換バイアスに注意
+
+$\exp(\widehat{\ln y})$ は*平均*ではなく*中央値*を予測するため、系統的に過小予測します。Duanの
+**smearing**補正が、残差そのものを使ってこれを修正します。
+
+``` {.python code-line-numbers="1|3|5|7|8-9"}
+logmod = pf.feols("lnearnings ~ age + education", data=data, vcov="HC1")  # s_e ~ 0.62
+
+naive = np.exp(logmod.predict())                        # biased: ~ $46k mean (actual ~ $56k)
+
+smear = np.exp(logmod.resid()).mean()                   # Duan factor = mean(exp(residuals)) ~ 1.21
+corrected = naive * smear                               # smeared prediction
+print(f"naive mean     {naive.mean():,.0f}")            # ~ 46,000
+print(f"corrected mean {corrected.mean():,.0f}")        # ~ 55,000, matches the data
+```
+
+[↗ Colab で試す](https://colab.research.google.com/notebooks/empty.ipynb){.colab-link target="_blank" data-preview-link="false"}
+
+::: {.notes}
+Jensenの不等式：E[exp(u)] > exp(E[u])。正規性に基づく係数 exp(s_e²/2) ≈ exp(0.62²/2) ≈ 1.21 は、
+残差がほぼ正規であれば同じ補正を与えます。Duanのsmearingはそのような仮定を必要としません。
+:::
+
+## 単純なexp()は過小予測し、smearingが平均を回復する
+
+![予測収入 対 実際の収入：単純な $\exp(\widehat{\ln y})$ は低めに位置し、smearing予測は45°線上に乗ります。](figures/fig_prediction.png)
+
+[対数モデルからドル単位の予測を報告する前に、必ずsmearingを適用してください。]{.takeaway .fragment}
+
+# 変換された係数を正しく読む {.divider background-color="#C21E72"}
+
+[第III幕 · 解釈の落とし穴]{.act}
+
+## 三つの落とし穴、三つの修正
+
+[落とし穴。]{.objection} 「log-linearの $\beta = 0.12$ はちょうど+12%を意味し、log-logモデルは $R^2$ が最も高いので最も当てはまりがよい。」
+
+. . .
+
+[修正。]{.rebuttal} その変化率は**近似**です（$100(e^{0.12}-1) \approx 12.7\%$）。そして被説明変数が異なる
+（$y$ 対 $\ln y$）モデルどうしで **$R^2$ を比較することはできません** — 代わりに予測精度や経済的な
+もっともらしさで判断してください。
+
+[変換された係数は、その解釈の良し悪しで価値が決まります — ドル、変化率、弾力性のどれを読んでいるのかを把握しましょう。]{.takeaway .fragment}
+
+## 持ち帰るべきこと
+
+::: {.incremental}
+- **対数**は変化率と弾力性を与えます。%としての読みは近似です — $|\beta|$ が大きいときは $100(e^{\beta}-1)$ を使いましょう。
+- **二乗項**は限界効果を変化させます。**転換点**といくつかの代表的な傾き（MER）を報告しましょう。
+- **標準化**して単位をまたいで説明変数を順位づけ、**交互作用**で一つの効果を別の効果に依存させる — そして**検定**しましょう。
+- 異なる被説明変数の間で **$R^2$ を比較してはいけません**。対数モデルから水準を予測する前に**smearingを適用**しましょう。
+- どの変換もOLSを*係数について線形*に保ちます — 道具箱は何も変わっていません。
+:::
+
+# 手法ではなく変数を変換し、そして係数を本当の姿のまま読み取ろう。 {.divider background-color="#C21E72"}

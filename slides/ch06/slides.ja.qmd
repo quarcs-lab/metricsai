@@ -1,0 +1,232 @@
+---
+title: "6. 最小二乗推定量"
+subtitle: "OLS（最小二乗法）がなぜ機能し、いつ信頼できるのか"
+deck-author: "Carlos Mendez"
+deck-author-url: "https://carlos-mendez.org"
+institute: "Nagoya University (GSID)"
+date: today
+date-format: long
+visual-summary: "figures/visual_summary.png"
+format:
+  revealjs:
+    output-file: index.ja.html
+    theme: [default, site-brand.scss]
+    template-partials:
+      - title-slide.html
+    include-after-body: figure-zoom.html
+    center: true
+    slide-number: c/t
+    menu: true
+    chalkboard: true
+    preview-links: auto
+    overview: true
+    progress: true
+    history: true
+    transition: fade
+    width: 1280
+    height: 720
+    fig-align: center
+    auto-stretch: true
+    highlight-style: github
+    link-external-icon: false
+---
+
+# 問い {.divider background-color="#008CB7"}
+
+[第I幕 · 緊張]{.act}
+
+## 私たちは1本の直線を当てはめます — しかし真実は決して見えない母集団の中にあります
+
+第5章では回帰を当てはめる*方法*を学びました。しかし、私たちの直線 $\hat{y} = b_1 + b_2 x$ は
+1つのノイズを含む標本から得られたものです。その背後には、決して観測できない**母集団の直線** $\beta_1 + \beta_2 x$ が存在します。
+
+. . .
+
+では、間違っているとわかっている推定値をなぜ信頼すべきなのでしょうか。本章はそれに答えます — 計量経済学において
+**OLS** を標準的な推定量にしている統計的性質とともに。
+
+::: {.notes}
+本章全体は、私たちが計算する標本の直線と、私たちが求める母集団の直線とのギャップについてのものです。
+不偏性のような性質は、そのギャップについてどう考えればよいかを教えてくれます。
+:::
+
+## これから向かう先
+
+::: {.incremental}
+- **母集団 vs 標本** — 求めたい直線（$\beta_1+\beta_2x$）vs 得られる直線（$b_1+b_2x$）
+- **標本変動** — なぜ標本ごとに異なる直線が得られるのか
+- **不偏性** — なぜ OLS は*平均的に正しい*のか、モンテカルロで示します
+- **標準誤差** — 1つの推定値の精度をどう測るか
+- **BLUE（最良線形不偏推定量）と正規性** — なぜ OLS が最良の選択で、なぜ $t$ 表が機能するのか
+:::
+
+## 6つの考え方が本章を支えます
+
+::: {.incremental}
+- **条件付き平均 $E[Y\mid X]$** — 母集団の直線。$X$ が与えられたときの $Y$ の体系的部分
+- **誤差 $u$ vs 残差 $e$** — 観測されない撹乱 vs $\hat{y}$ からの観測されるずれ
+- **均一分散** — 誤差の広がり $\operatorname{Var}[u\mid x]=\sigma_u^2$ は $x$ について一定である
+- **$s_e$** — 回帰の標準誤差 $\sqrt{\text{RSS}/(n-2)}$。典型的な残差の大きさ
+- **BLUE** — 4つの仮定のもとで、OLS はあらゆる線形不偏な規則の中で最小の分散をもつ
+- **漸近的正規性** — $n$ が大きくなるにつれて $b_2$ は近似的に正規になるので、$t$ 表が適用できる
+:::
+
+[OLS はすべての標本で間違っています — しかし平均的には正しく、どれだけ間違っているかを正確に述べることができます。]{.takeaway .fragment}
+
+# 母集団 vs 標本 {.divider background-color="#7A209F"}
+
+[第II幕 · 調査]{.act}
+
+## 既知の真実：$y = 1 + 2x + u$ から生成されたデータ
+
+OLS を研究するために、本章では答えが*わかっている* **生成データ** を使います。
+
+$$y = \underbrace{1 + 2x}_{E[y\mid x]} + u, \qquad u \sim N(0,\ \sigma_u^2=4)$$
+
+[真の切片 $\beta_1=1$、真の傾き $\beta_2=2$。列 `Eygivenx` はまさに母集団の直線そのものであり、
+`u` は観測される各 `y` をそこから引き離すランダムな撹乱です。]{.comment}
+
+## ステップ1 — pyfixest で標本の直線を当てはめ、真実と比較する
+
+``` {.python code-line-numbers="1|3-4|6-7|9|10-11"}
+!pip install -q pyfixest                     # install pyfixest in Colab (-q = quiet; not preinstalled)
+
+import pandas as pd                          # tabular data
+import pyfixest as pf                         # pyfixest → OLS, R-style formulas
+
+url = "https://raw.githubusercontent.com/quarcs-lab/data-open/master/AED/AED_GENERATEDDATA.DTA"
+data = pd.read_stata(url)                    # 5 points generated from y = 1 + 2x + u
+
+fit = pf.feols("y ~ x", data=data)           # OLS: regress observed y on x
+fit.coef()                                   # sample estimates b1, b2
+fit.summary()                                # full table: coefs, SEs, t, p, R2
+```
+
+[↗ Colab で試す](https://colab.research.google.com/notebooks/empty.ipynb){.colab-link target="_blank" data-preview-link="false"}
+
+::: {.notes}
+観測された y（Eygivenx ではなく）を当てはめると b1 = 2.81、b2 = 1.05、R2 = 0.769 となり、真の値 1 と 2 からずれます。
+n = 5 で、たまたま誤差が直線を引っ張ったためです。そのギャップこそが要点です。
+:::
+
+## ある1つの標本は外れます：$\hat{y} = 2.81 + 1.05x$ vs 真の $1 + 2x$
+
+![観測された点（シアン）は真の母集団の直線（紫の破線）のまわりに散らばります。それらに当てはめた標本の直線が一致する必要はありません。](figures/fig_pop_line.png)
+
+[$n=5$ しかないため、推定値（$b_2=1.05$）は真実（$\beta_2=2$）から大きく外れます。これはバグではなく、標本変動です。]{.takeaway .fragment}
+
+## 同じ過程、3つの標本、3本の異なる直線
+
+![同一の DGP $y=1+2x+u$ からの3つの独立した標本は、3本の異なる当てはめ直線を生みます — すべて真の母集団の直線の近くにありますが、どれも一致はしていません。](figures/fig_three_samples.png)
+
+[傾きは 1.81、1.79、1.67、切片は 0.82、1.75、2.01 となりました。1つの標本が真実を明らかにすることはありません — それは推定値の分布からの1つの引き出しを与えるだけです。]{.takeaway .fragment}
+
+## ステップ2 — 1,000個の標本をシミュレーションして推定量の振る舞いを見る
+
+``` {.python code-line-numbers="1-2|4-6|8-13|15-16"}
+import numpy as np                           # random draws + arrays
+import pyfixest as pf                         # OLS on each simulated sample
+
+np.random.seed(42)                           # reproducible simulation
+n, n_sims = 30, 1000                         # 1,000 samples of n = 30
+b1_true, b2_true, sigma_u = 1, 2, 2          # the known DGP y = 1 + 2x + u
+
+slopes = []                                  # collect b2 from each sample
+for _ in range(n_sims):
+    x = np.random.normal(3, 1, n)            # draw regressors
+    u = np.random.normal(0, sigma_u, n)      # draw mean-zero errors
+    y = b1_true + b2_true * x + u            # build y from the true model
+    slopes.append(pf.feols("y ~ x", data=pd.DataFrame({"x": x, "y": y})).coef()["x"])
+
+np.mean(slopes)                              # ≈ 2.00  → unbiased
+np.std(slopes)                               # ≈ 0.38  → sampling variability
+```
+
+[↗ Colab で試す](https://colab.research.google.com/notebooks/empty.ipynb){.colab-link target="_blank" data-preview-link="false"}
+
+::: {.notes}
+モンテカルロ = 研究をコンピュータ上で1,000回繰り返すこと。傾きの平均 1.9944、SD 0.3836、
+切片の平均 0.9960、SD 1.2069。個々の標本は真実に当たらなくても、平均は真実に当たります。
+:::
+
+## 平均的には正しい：推定値は真の $\beta_2 = 2$ を中心に集まる
+
+![1,000個の標本にわたって、傾きと切片の推定値は真の値を中心とした釣鐘型の曲線を形成し、正規分布の当てはめを追います。](figures/fig_sampling_dist.png)
+
+[傾きの平均 $=1.994$（真の値 $2$）、SD $=0.38$、切片の平均 $=0.996$（真の値 $1$）。**不偏性**と**漸近的正規性**が直接見てとれます。]{.takeaway .fragment}
+
+## 6.4 — 精度には公式があります：傾きの標準誤差
+
+1つの標本では複数の世界にわたって平均をとることはできません — しかし広がりを*推定*することはできます。
+
+$$s_e=\sqrt{\frac{\text{RSS}}{n-2}}, \qquad se(b_2)=\frac{s_e}{\sqrt{\sum_i (x_i-\bar{x})^2}}$$
+
+[RSS を $n-2$ で割るのは、2つのパラメータ（$b_1,b_2$）を推定しているからです。傾きは
+$s_e$ が小さく（よい当てはまり）、$x$ が広く散らばっているときに精度が高くなります。]{.comment}
+
+## ステップ3 — 標準誤差を手計算し、モデルと照合して検証する
+
+``` {.python code-line-numbers="1-2|4-6|8-11|13-15|17-18"}
+import numpy as np                           # arrays + math
+import pyfixest as pf                         # to check our hand calculation
+
+data = pd.DataFrame({"x": [1, 2, 3, 4, 5],   # artificial 5-point dataset
+                     "y": [1, 2, 2, 2, 3]})
+fit = pf.feols("y ~ x", data=data)           # fitted line: y_hat = 0.8 + 0.4x
+
+b1, b2 = fit.coef()["Intercept"], fit.coef()["x"]
+data["resid"] = data["y"] - (b1 + b2 * data["x"])   # residuals e = y - y_hat
+RSS = np.sum(data["resid"] ** 2)             # residual sum of squares
+Sxx = np.sum((data["x"] - data["x"].mean()) ** 2)   # spread of x
+
+s_e   = np.sqrt(RSS / (len(data) - 2))       # standard error of the regression
+se_b2 = s_e / np.sqrt(Sxx)                   # standard error of the slope
+
+print(se_b2, fit.se()["x"])                  # hand value == model value ✓
+```
+
+[↗ Colab で試す](https://colab.research.google.com/notebooks/empty.ipynb){.colab-link target="_blank" data-preview-link="false"}
+
+::: {.notes}
+標準誤差は魔法ではありません — RSS → s_e → se(b2) は透明な公式から得られ、手計算の数値は
+pyfixest が報告する標準誤差と正確に一致します。これは回帰表の謎を解き明かします。
+:::
+
+## 3つのレバーが精度を制御する
+
+::: {.incremental}
+- **モデルの当てはまり（$s_e$）** — 残差が小さいほど、すべての標準誤差が縮みます。
+- **標本サイズ（$n$）** — $se(b_2)\propto 1/\sqrt{n}$：$n$ を4倍にすると標準誤差は半分になります。
+- **$x$ の広がり** — 広い $\sum(x_i-\bar{x})^2$ は傾きを固定し、$x$ が密集していると傾きは定まりにくくなります。
+:::
+
+[108か国の収束データでは、労働者1人あたりの資本はその平均とほぼ同じ幅で散らばっています — これはまさに傾きを精度よく推定する条件です。]{.takeaway .fragment}
+
+# 正しく読む {.divider background-color="#C21E72"}
+
+[第III幕 · 解決]{.act}
+
+## 「私の推定値は間違っている — だから OLS は失敗した。」そうとは限りません。
+
+[異議。]{.objection} 「私の傾きは 1.05 だが、真実は 2.0 だ。この手法は壊れている。」
+
+. . .
+
+[応答。]{.rebuttal} **1つの間違った推定値は予想されることであり、失敗ではありません。** 4つの
+仮定（正しいモデル、平均ゼロの誤差、均一分散、独立性）のもとで OLS は**不偏**であり —
+*平均的に*正しく — そして **BLUE**、すなわち最も引き締まった線形不偏な規則です。1つの標本は1つの引き出しにすぎません。
+標準誤差が、それがどれだけ外れうるかを教えてくれます。
+
+[「私の推定値はぴったり正しいか？」と問うのではなく、「それはどれだけ精度が高いか？」と問いましょう — それこそが標準誤差が報告するものです。]{.takeaway .fragment}
+
+## 持ち帰るべきこと
+
+::: {.incremental}
+- **母集団の直線** $\beta_1+\beta_2x$ が目標であり、**標本の直線** $b_1+b_2x$ はそれの1つのノイズを含む推定値です。
+- OLS は**不偏**です：$E[b_2]=\beta_2$ — モンテカルロは1,000個の推定値を真実を中心に集めます。
+- **標準誤差**は標本変動を定量化します：$se(b_2)=s_e/\sqrt{\sum(x_i-\bar{x})^2}$。
+- 精度は**よりよい当てはまり、より大きな $n$、より広い $x$ の散らばり**で向上します。
+- 4つの仮定のもとで OLS は **BLUE** であり漸近的に**正規**です — これが $t$ 検定と区間を使う許可証です。
+:::
+
+# 直線を当てはめ、その標準誤差を報告しましょう — 推定値は引き出しであって、真実ではありません。 {.divider background-color="#C21E72"}

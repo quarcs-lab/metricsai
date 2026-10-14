@@ -1,0 +1,1917 @@
+---
+title: "17. Datos de panel, series de tiempo y causalidad"
+subtitle: "Tres fronteras más allá de un solo corte transversal — y la variación que identifica cada pendiente"
+deck-author: "Carlos Mendez"
+deck-author-url: "https://carlos-mendez.org"
+institute: "Nagoya University (GSID)"
+date: today
+date-format: long
+visual-summary: "figures/visual_summary.png"
+format:
+  revealjs:
+    output-file: index.es.html
+    theme: [default, site-brand.scss]
+    css: ch17-extra.css
+    template-partials:
+      - title-slide.html
+    include-after-body: figure-zoom.html
+    center: true
+    slide-number: c/t
+    menu: true
+    chalkboard: true
+    preview-links: auto
+    overview: true
+    progress: true
+    history: true
+    transition: fade
+    width: 1280
+    height: 720
+    fig-align: center
+    auto-stretch: true
+    highlight-style: github
+    link-external-icon: false
+---
+
+# Donde se agota un solo corte transversal {.divider background-color="#008CB7"}
+
+[Acto I · La tensión]{.act}
+
+::: {.notes}
+Este es el capítulo culminante. Los capítulos 1–16 ajustaron regresiones a cortes transversales: una observación por unidad, sin orden. Los datos económicos reales suelen tener más estructura: las mismas unidades observadas repetidamente (paneles), observaciones ordenadas en el tiempo (series de tiempo) y regresores que a su vez son elegidos (endogeneidad). Cada estructura cambia lo que significa una pendiente y cuán incierta es.
+:::
+
+## Una pendiente vale tanto como la variación que hay detrás
+
+Una pendiente de regresión compara observaciones. Con **un solo corte transversal**, la única comparación es *entre* unidades: equipos de mercados grandes frente a equipos de mercados pequeños, países ricos frente a países pobres. Todo lo demás que difiera entre ellos viaja incorporado en la pendiente.
+
+. . .
+
+Este capítulo añade dos nuevas fuentes de variación y una advertencia:
+
+- **Datos de panel**: la misma unidad a lo largo del tiempo, para poder comparar una unidad *consigo misma*
+- **Series de tiempo**: una unidad, muchos periodos, así que debemos respetar el *orden y la memoria*
+- **Causalidad**: ninguna cantidad de estructura ayuda si el regresor está correlacionado con el error
+
+[La pregunta que recorre todo el deck: *qué variación identifica este coeficiente*, ¿y qué error estándar es honesto al respecto?]{.takeaway .fragment}
+
+::: {.notes}
+Enmarca el deck en torno a una sola pregunta. La MCO agrupada usa toda la variación; los efectos fijos usan solo la variación intra-unidad; las primeras diferencias usan solo los cambios periodo a periodo; las regresiones en niveles con series con tendencia pueden estar identificadas por nada más que dos tendencias compartidas. El error estándar tiene que coincidir con la dependencia de los datos: agrupado para paneles, HAC para series de tiempo.
+:::
+
+## Diez paradas — haz clic en cualquiera para saltar {.smaller}
+
+| Parada | Pregunta | Método | Resultado principal |
+|:----|:--------------------------|:------------------|:-------------------------|
+| [17.2](#sec-panel) | ¿Las victorias elevan los ingresos de la NBA? | MCO agrupada, EE agrupados | +0.0068 por victoria; EE ×1.81 al agrupar |
+| [17.3](#sec-fe) | …¿manteniendo fijo el equipo? | Efectos fijos (within) | +0.0045 por victoria (−33%) |
+| [17.4](#sec-re) | ¿EF o EA? | Efectos aleatorios, Hausman | conceptos (no estimados) |
+| [17.4b](#sec-logit) | ¿Quién gana más de \$60k? | Logit vs MPL | +6.2 pp por año de escolaridad |
+| [17.5](#sec-ts) | ¿Las tasas largas siguen a las cortas? | Niveles, EE HAC | $R^2 = 0.95$; EE HAC ×3.65 |
+| [17.6](#sec-ac) | ¿El ajuste es espurio? | Correlograma, diferencias | $\rho$ rezago-1: 0.95 → 0.25 |
+| [17.6b](#sec-dyn) | ¿Qué tan rápido es el traspaso? | ADL(2,2) | 0.74 de inmediato, 0.53 al mes 2 |
+| [17.7](#sec-causal) | ¿Cuándo una pendiente es causal? | VI y la caja de herramientas causal | enlaces a los diseños del Cap 13 |
+| [CS 1](#cs-1) | Capital y productividad, 108 países | Panel EF, EF de dos vías | elasticidad del capital 0.71 → 0.44 |
+| [CS 2](#cs-2) | Luces nocturnas en 339 municipios | EF, efectos de año, PD | pendiente de población +0.34 → −0.82 |
+
+::: {.notes}
+Cada parada sigue el mismo arco: pregunta → repaso del método → código → resultados reales → interpretación → advertencias. Los números de las paradas son enlaces: haz clic en uno para saltar a su divisor. Pulsa M para el menú o O para la vista general en cuadrícula.
+
+Las paradas 17.2–17.6 son los ejemplos trabajados del capítulo. 17.7 es conceptual en el capítulo, así que el deck repasa las ideas y remite al deck del Capítulo 13 para diseños causales trabajados. Los dos estudios de caso son las tareas de fin de capítulo, ejecutadas por completo para estas diapositivas.
+:::
+
+## Tres estructuras de datos, tres nuevos problemas {.smaller}
+
+| Datos | Estructura | Tamaño | Qué sale mal con MCO simple |
+|:---------|:--------|:--------|:--------------------|
+| `AED_NBA.DTA` | equipo × temporada | 29 equipos, 286 obs. | errores correlacionados dentro de un equipo; los rasgos del equipo confunden la pendiente |
+| `AED_EARNINGS_COMPLETE.DTA` | corte transversal, resultado 0/1 | 872 trabajadores | una recta predice "probabilidades" fuera de $[0,1]$ |
+| `AED_INTERESTRATES.DTA` | serie de tiempo mensual | 397 meses | las tendencias fingen una relación; los errores están autocorrelacionados |
+| Mendez (2020) | país × año | 108 × 25 | los rasgos del país confunden la pendiente del capital |
+| DS4Bolivia | municipio × año | 339 × 9 | los rasgos del municipio confunden la pendiente de la población |
+
+[Cada estructura necesita dos correcciones: una para el **coeficiente** (qué variación) y otra para el **error estándar** (qué dependencia).]{.takeaway .fragment}
+
+::: {.notes}
+La lista de datasets del capítulo dice 842 trabajadores; el archivo de datos carga 872 observaciones, y todos los resultados del capítulo usan las 872. El panel de la NBA está desbalanceado: 28 equipos durante 10 temporadas más los Bobcats durante 6, así que 286 equipos-temporada, no 290.
+:::
+
+## Un estimador, cuatro formas de ser honesto sobre la incertidumbre {.smaller}
+
+| Tipo de EE | Sintaxis pyfixest | Permite que los errores sean… | Usado para |
+|:--|:--|:--|:--|
+| Por defecto (iid) | *(ninguna)* | independientes, igual varianza | solo referencia |
+| Robusto a heterocedasticidad | `vcov="HC1"` | independientes, varianza desigual | MPL / logit de ingresos |
+| Robusto por agrupamiento | `vcov={"CRV1": "teamid"}` | correlacionados **dentro** de un cluster, independientes entre clusters | NBA, CS 1, CS 2 |
+| HAC (Newey–West) | `vcov="NW"`, `vcov_kwargs={"time_id": ..., "lag": 24}` | correlacionados entre **periodos** cercanos | tasas de interés |
+
+[El coeficiente nunca cambia con `vcov`; solo lo hacen los EE, $t$, $p$ y los IC. En este deck el EE honesto es 1.8× (NBA), 4× (países) y 3.65× (tasas) el de por defecto.]{.takeaway .fragment}
+
+::: {.notes}
+pf.feols es el único estimador para modelos lineales en este capítulo; el logit usa statsmodels. El argumento vcov cambia solo la inferencia. Los EE robustos por agrupamiento permiten cualquier patrón de correlación entre las observaciones de un equipo (o país, o municipio), así que cubren tanto los efectos persistentes del equipo como la correlación serial dentro de un equipo. Los EE de Newey–West permiten una correlación que se desvanece tras un número elegido de rezagos (24 meses aquí).
+:::
+
+## El hilo conductor: ¿qué variación identifica la pendiente?
+
+::: {.incremental}
+- **MCO agrupada** usa *toda* la variación: entre unidades **y** dentro de las unidades a lo largo del tiempo
+- Variación **entre (between)**: diferencias en los promedios de las unidades (Knicks vs Bucks)
+- Variación **dentro (within)**: las desviaciones de una unidad respecto a su propio promedio (las buenas vs malas temporadas de los Lakers). **Los efectos fijos usan solo esto**
+- **Cambios** ($\Delta y_t$ sobre $\Delta x_t$): movimientos periodo a periodo. **Las primeras diferencias** y las regresiones de series de tiempo en cambios usan solo esto
+- **Niveles de dos series con tendencia**: pueden estar identificados por poco más que dos tendencias compartidas, la clásica regresión *espuria*
+:::
+
+[Cuando un coeficiente cambia al pasar de un tipo de variación a otro, el cambio en sí mismo es evidencia sobre la confusión.]{.takeaway .fragment}
+
+::: {.notes}
+Este es el hilo recurrente del deck. Lo veremos cuatro veces: NBA (0.0068 agrupada → 0.0045 within), países (elasticidad del capital 0.71 → 0.44), municipios bolivianos (pendiente de población +0.34 → −0.82) e tasas de interés (niveles vs cambios). Cada cambio es un diagnóstico de confusión por algo invariante en el tiempo (paneles) o por una tendencia común (series de tiempo).
+:::
+
+## Seis ideas anclan este capítulo
+
+::: {.incremental}
+- **Datos de panel**: observaciones indexadas por unidad $i$ *y* tiempo $t$
+- **Estimador intra-grupos (within)**: resta el propio promedio de cada unidad para borrar sus rasgos fijos $\alpha_i$
+- **Logit**: empuja $x'\beta$ a través de una curva en S para que las probabilidades se queden en $[0,1]$
+- **AR($p$)**: regresa $y_t$ sobre sus propios valores pasados; persistencia e inercia
+- **ADL**: añade $x$ actual y rezagado; las sumas acumuladas de los $\gamma$ trazan el efecto dinámico
+- **Prueba de Hausman**: compara EF y EA; una brecha significativa rechaza el supuesto de EA
+:::
+
+[Cada idea responde a la misma pregunta bajo condiciones más duras: *¿qué está impulsando realmente a $y$?*]{.takeaway .fragment}
+
+::: {.notes}
+Estos son los Conceptos Clave del capítulo. Una advertencia: la prueba de Hausman aparece en los Conceptos Clave y en los Puntos Clave, pero el capítulo nunca estima efectos aleatorios ni corre la prueba. El deck la presenta como un concepto (17.4), no como un resultado.
+:::
+
+# Acto II-a · Datos de panel: las mismas unidades, una y otra vez {.divider background-color="#7A209F"}
+
+[17.2 – 17.4 · MCO agrupada, agrupamiento, efectos fijos, efectos aleatorios, logit]{.act}
+
+::: {.notes}
+Tres diapositivas de método, luego el ejemplo de la NBA de principio a fin: estructura, descomposición de la varianza, MCO agrupada con tres tipos de EE, efectos fijos y la elección EF-vs-EA. El ejemplo del logit (también en 17.4 del capítulo) cierra el acto.
+:::
+
+# 17.2 · ¿Las victorias elevan los ingresos de los equipos de la NBA? {#sec-panel .divider background-color="#7A209F"}
+
+[Estructura de panel · within vs between · MCO agrupada · EE robustos por agrupamiento]{.act}
+
+::: {.notes}
+Sección 17.2: el panel de la NBA. Herramientas: describir un panel, descomponer la variación, MCO agrupada y por qué los EE por defecto están mal cuando el mismo equipo aparece diez veces.
+:::
+
+## La pregunta y el panel {.smaller}
+
+**Datos.** Finanzas de equipos de la NBA, 2001–02 a 2010–11 (`AED_NBA.DTA`): **29 equipos, 286 equipos-temporada**. Los ingresos están en millones de dólares.
+
+| Variable | Significado | Media | Rango |
+|:--|:--|--:|:--|
+| `revenue` | ingresos del equipo, \$ millones | 95.7 | 58.5 – 187.7 |
+| `lnrevenue` | log de los ingresos (resultado) | 4.532 | 4.069 – 5.235 |
+| `wins` | victorias de temporada regular (de 82) | 41.0 | 9 – 67 |
+| `playoff` | 1 si el equipo llegó a playoffs | 0.545 | 0 – 1 |
+| `teamid`, `season` | los dos índices del panel $i$ y $t$ | | 29 equipos × hasta 10 temporadas |
+
+[El panel está **desbalanceado**: 28 equipos aparecen en las 10 temporadas, los Bobcats solo en 6, así que $N = 286$, no $29 \times 10 = 290$.]{.takeaway .fragment}
+
+::: {.notes}
+Pregunta económica: ¿ganar eleva los ingresos de un equipo? Un equipo que gana más vende más entradas, mercancía y partidos de playoffs. Pero los equipos de mercados grandes también tienen más dinero para comprar plantillas ganadoras, así que la asociación podría ir en ambos sentidos.
+
+La discusión de EE agrupados del capítulo dice "29 equipos × 10 años = 290 observaciones independientes"; los datos tienen 286.
+:::
+
+## Tres formas de usar un panel
+
+$$y_{it} = \beta_1 + \beta_2 x_{it} + u_{it}, \qquad i = 1,\dots,n \;(\text{equipos}),\; t = 1,\dots,T \;(\text{temporadas})$$
+
+::: {.incremental}
+- **MCO agrupada**: ignora la estructura de panel en la estimación; corrige los EE **agrupando en $i$**
+- **Efectos fijos (EF)**: dale a cada unidad su propio intercepto, $y_{it} = \alpha_i + \beta_2 x_{it} + \varepsilon_{it}$, y estima $\beta_2$ solo a partir de los cambios **intra-unidad**
+- **Efectos aleatorios (EA)**: trata $\alpha_i$ como una extracción aleatoria, $u_{it} = \alpha_i + \varepsilon_{it}$, supuesta **no correlacionada con $x$**; usa una mezcla ponderada de variación within y between
+:::
+
+[Los tres estimadores difieren en *qué comparación* hacen, no en sofisticación aritmética.]{.takeaway .fragment}
+
+::: {.notes}
+La MCO agrupada trata cada equipo-temporada como una observación separada para el coeficiente, pero debe agrupar para la inferencia. Los EF permiten que el efecto del equipo esté correlacionado con las victorias (los mercados grandes ganan más) porque nunca comparan un equipo con otro. Los EA son más eficientes, pero solo consistentes si el efecto del equipo no está relacionado con el regresor.
+:::
+
+## Código: cargar el panel e inspeccionar su estructura
+
+``` {.python code-line-numbers="1-4|5-6|7-8|9"}
+!pip install -q pyfixest                     # pyfixest is not preinstalled in Colab
+import numpy as np                           # numerical operations
+import pandas as pd                          # tabular data
+import pyfixest as pf                        # OLS / fixed effects with robust and cluster SEs
+url = "https://raw.githubusercontent.com/quarcs-lab/data-open/master/AED/AED_NBA.DTA"
+data_nba = pd.read_stata(url)                # one row per team-season
+print(data_nba.shape)                        # (286, 65): rows, columns
+print(data_nba.groupby("teamid").size().value_counts())   # seasons observed per team
+data_nba[["revenue", "lnrevenue", "wins", "playoff"]].describe().round(3)
+```
+
+[↗ Pruébalo en Colab](https://colab.research.google.com/notebooks/empty.ipynb){.colab-link target="_blank" data-preview-link="false"}
+
+::: {.notes}
+Autocontenido: pégalo en una celda vacía de Colab. La línea value_counts revela el panel desbalanceado: 28 equipos con 10 temporadas, un equipo (los Bobcats, una franquicia de expansión) con 6.
+:::
+
+## Código: separar la variación en between y within
+
+$$\underbrace{y_{it}-\bar y}_{\text{total}} \;=\; \underbrace{\bar y_i-\bar y}_{\text{between}} \;+\; \underbrace{y_{it}-\bar y_i}_{\text{within}}$$
+
+``` {.python code-line-numbers="1-2|3-6|7"}
+# continues from the previous block
+g = data_nba.groupby("teamid")                      # group the rows by team
+for v in ["lnrevenue", "wins"]:
+    overall = data_nba[v].std()                     # SD over all 286 team-seasons
+    between = g[v].mean().std()                     # SD of the 29 team averages
+    within = (data_nba[v] - g[v].transform("mean")).std()   # SD of deviations from own mean
+    print(f"{v:10s} overall {overall:.4f}  between {between:.4f}  within {within:.4f}")
+```
+
+[↗ Pruébalo en Colab](https://colab.research.google.com/notebooks/empty.ipynb){.colab-link target="_blank" data-preview-link="false"}
+
+::: {.notes}
+La descomposición es exacta para sumas de cuadrados. Con desviaciones estándar se cumple de forma aproximada, porque la DE between se calcula sobre 29 medias de equipo y la DE within sobre 286 desviaciones. El capítulo la calcula solo en su bloque de hoja de referencia; es lo primero que hay que correr en cualquier panel.
+:::
+
+## Resultado: los ingresos varían entre equipos, las victorias varían dentro de los equipos {.smaller}
+
+| Variable | DE total | DE between | DE within | Proporción de la varianza |
+|:--|--:|--:|--:|:--|
+| `lnrevenue` | 0.2360 | [0.2127]{.key} | 0.1085 | between ≈ 81% |
+| `wins` | 12.44 | 7.04 | [10.36]{.key} | within ≈ 69% |
+
+[Proporciones: varianza between ÷ varianza total (0.0452 / 0.0557) y varianza within ÷ varianza total (107.3 / 154.7).]{.comment}
+
+::: {.incremental}
+- **Los ingresos son sobre todo un rasgo del equipo**: los Knicks promedian \$162M, los Lakers \$150M; los Bucks \$70M, los Grizzlies \$74M
+- **Las victorias son sobre todo una historia de temporada a temporada**: las victorias de un equipo oscilan más alrededor de su propio promedio que lo que difieren los promedios de los equipos entre sí
+:::
+
+[Los efectos fijos descartan el 81% de la varianza de los ingresos pero conservan el 69% de la varianza de las victorias, así que el estimador within todavía tiene mucho con qué trabajar.]{.takeaway .fragment}
+
+::: {.notes}
+El "~0.21 between, ~0.11 within, ~0.24 overall" del capítulo se confirma exactamente. Lo que el capítulo no muestra es la descomposición de las victorias, y importa: si las victorias tuvieran casi nada de variación within, las estimaciones de EF serían muy imprecisas. Aquí tienen de sobra.
+
+El texto del capítulo usa cifras de ingresos ilustrativas (Lakers "~$300M", Grizzlies "$150M", una brecha de "$200M+"). En esta muestra los Lakers promedian $150.5M y los Grizzlies $73.7M; la mayor brecha entre promedios de equipos (Knicks $162.2M vs Bucks $70.5M) es de unos $92M.
+:::
+
+## Between y within, lado a lado
+
+![Izquierda: un punto por equipo (sus promedios de 10 temporadas). Derecha: cada equipo-temporada como una desviación respecto a su propio promedio de equipo, con la pendiente de efectos fijos.](figures/fig_nba_between_within.png)
+
+[El panel izquierdo mezcla tamaño de mercado con victorias (los Knicks ganan más dinero mientras ganan pocos partidos). El panel derecho compara cada equipo solo consigo mismo.]{.takeaway .fragment}
+
+::: {.notes}
+Izquierda: entre equipos la relación es ruidosa; los Knicks y los Bulls ganan mucho dinero sin ganar mucho, por el tamaño del mercado. Los ingresos promedio del equipo y las victorias promedio del equipo correlacionan solo 0.40. Derecha: tras quitar los promedios de cada equipo, más victorias de lo usual van con más ingresos de lo usual. Esta es exactamente la variación que usan los efectos fijos; la línea amarilla es la pendiente de EF, 0.0045.
+:::
+
+## La imagen agrupada mezcla ambas comparaciones
+
+![Cada punto es un equipo-temporada. La línea de MCO agrupada atraviesa a la vez las diferencias entre equipos y dentro de los equipos.](figures/fig_x_01.png)
+
+[La pendiente agrupada atribuye en parte a las victorias el mérito del tamaño de mercado: los equipos de mercados grandes se sitúan alto en el eje de ingresos sin importar su récord.]{.takeaway .fragment}
+
+::: {.notes}
+Esta es la Figura 17.1 del capítulo. La pendiente positiva es real como descripción, pero agrupa dos comparaciones. El siguiente bloque de código la estima y pregunta cómo calcular su error estándar.
+:::
+
+## Código: MCO agrupada con tres tipos de errores estándar
+
+``` {.python code-line-numbers="1-4|5-6|7"}
+# continues from the previous block
+f_iid = pf.feols("lnrevenue ~ wins", data=data_nba)                 # default (iid) SEs
+f_hc1 = pf.feols("lnrevenue ~ wins", data=data_nba, vcov="HC1")     # heteroskedasticity-robust
+fit_pool = pf.feols("lnrevenue ~ wins", data=data_nba, vcov={"CRV1": "teamid"})  # by team
+for name, f in [("default", f_iid), ("HC1", f_hc1), ("cluster", fit_pool)]:
+    print(name, f.coef()["wins"], f.se()["wins"], f.tstat()["wins"])   # same b, new SE
+fit_pool.summary()                           # full table with cluster-robust SEs
+```
+
+[↗ Pruébalo en Colab](https://colab.research.google.com/notebooks/empty.ipynb){.colab-link target="_blank" data-preview-link="false"}
+
+::: {.notes}
+Tres ajustes del mismo modelo. El valor por defecto de pyfixest para un modelo sin efectos fijos son EE iid. HC1 permite heterocedasticidad entre observaciones. CRV1 con teamid permite cualquier correlación entre las diez observaciones de un equipo.
+:::
+
+## Resultado: la misma pendiente, incertidumbre muy distinta {.smaller}
+
+| Tipo de EE | Coef. de `wins` | EE | $t$ | $p$ | IC 95% | EE ÷ por defecto |
+|:--|--:|--:|--:|--:|:--|--:|
+| Por defecto (iid) | 0.00675 | 0.00105 | 6.42 | <&nbsp;0.001 | [0.00468,&nbsp;0.00882] | 1.00 |
+| HC1 | 0.00675 | 0.00102 | 6.61 | <&nbsp;0.001 | [0.00474,&nbsp;0.00876] | 0.97 |
+| Agrupado por equipo | 0.00675 | [0.00191]{.key} | 3.54 | 0.001 | [0.00284,&nbsp;0.01066] | [1.81]{.key} |
+
+[N = 286 · 29 clusters · $R^2 = 0.127$ (idéntico en las tres filas)]{.comment}
+
+[La heterocedasticidad no es el problema aquí (HC1 ≈ por defecto). La **dependencia intra-equipo** sí lo es: permitirla amplía el EE en un 81% y reduce a la mitad el estadístico $t$.]{.takeaway .fragment}
+
+::: {.notes}
+Reproduce la tabla del capítulo: por defecto 0.0011, robusto 0.0010, agrupado 0.0019, razón 1.81. El capítulo dice en otro lugar que los EE agrupados son "2x o más" y que agrupar "aproximadamente duplica" el EE; en este ejemplo el factor es 1.81. La significancia sobrevive (t = 3.54, p = 0.001), así que agrupar corrige la incertidumbre sin anular el resultado.
+:::
+
+## Por qué agrupar: diez temporadas de un equipo no son diez hechos independientes {.smaller}
+
+$$\widehat{V}_{\text{CR}}(\hat\beta) = (X'X)^{-1}\Big(\textstyle\sum_{g=1}^{G} X_g'\hat u_g \hat u_g' X_g\Big)(X'X)^{-1}$$
+
+::: {.incremental}
+- El término central suma sobre los **clusters** $g$, así que cada par de residuos *dentro* de un equipo puede estar correlacionado; se supone que los residuos de *distintos* equipos son independientes
+- **Dos fuentes** de correlación intra-equipo: un efecto persistente del equipo (el residuo de los Lakers es positivo cada año) y la correlación serial (los buenos años siguen a los buenos años)
+- En el límite de correlación perfecta, 10 temporadas de un equipo cargan la información de 1 observación; la verdad está en medio
+:::
+
+[El agrupamiento debe hacerse al nivel donde se comparten los choques. Con $G = 29$ clusters la referencia $t$ tiene solo $G - 1 = 28$ grados de libertad.]{.takeaway .fragment}
+
+::: {.notes}
+El capítulo escribe la fórmula de agrupamiento con puntos suspensivos en el denominador; la forma sándwich de arriba es la versión completa. Advertencias prácticas del capítulo: con menos de unos 30 clusters, los EE robustos por agrupamiento aún pueden ser demasiado pequeños; el bootstrap cluster salvaje es el refinamiento usual (mencionado, no corrido). El agrupamiento de dos vías (equipo y temporada) permite también choques comunes de temporada; su varianza es V_equipo + V_temporada − V_equipo×temporada.
+:::
+
+## Resultado: la regresión agrupada, leída correctamente {.smaller}
+
+| Variable | Coef. | EE | $t$ | $p$ | IC 95% |
+|:--|--:|--:|--:|--:|:--|
+| Intercepto | 4.25520 | 0.09572 | 44.45 | <&nbsp;0.001 | [4.05912,&nbsp;4.45128] |
+| `wins` | [0.00675]{.key} | 0.00191 | 3.54 | 0.001 | [0.00284,&nbsp;0.01066] |
+
+[N = 286 · EE CRV1 agrupados por `teamid` (29 clusters) · $R^2 = 0.127$]{.comment}
+
+::: {.incremental}
+- **Modelo log-nivel**: una victoria más va con $100 \times 0.00675 \approx 0.68\%$ más de ingresos (una aproximación en puntos logarítmicos)
+- Diez victorias más: $100\,(e^{10 \times 0.00675}-1) = 7.0\%$
+- $R^2 = 0.127$: las victorias describen poco de la dispersión de ingresos, que proviene sobre todo de los rasgos del equipo
+:::
+
+[Esto es una **asociación entre equipos y dentro de ellos**. Los equipos que ganan más también tienden a ser los equipos de mercados ricos, así que la pendiente todavía no es "el efecto de ganar".]{.takeaway .fragment}
+
+::: {.notes}
+Interpretación de un coeficiente log-nivel: 100 × b es el cambio porcentual aproximado en los ingresos por cada victoria adicional. Para cambios mayores usa la transformación exacta 100(e^{Δx·b} − 1). El intercepto (4.26, es decir unos $70M) es el log de los ingresos predicho con cero victorias, una extrapolación fuera de los datos (mínimo 9 victorias).
+:::
+
+# 17.3 · Efectos fijos: compara cada equipo solo consigo mismo {#sec-fe .divider background-color="#7A209F"}
+
+[Transformación within · LSDV · qué absorben los EF · sesgo por variables omitidas]{.act}
+
+::: {.notes}
+Sección 17.3. Los efectos fijos eliminan todo lo que no cambia en un equipo a lo largo de la década: tamaño de mercado, estadio, marca, propiedad, ingreso local (en la medida en que sea estable).
+:::
+
+## El modelo de efectos fijos y la transformación within {.smaller}
+
+$$y_{it} = \alpha_i + \beta\,x_{it} + \varepsilon_{it}$$
+
+Promedia la ecuación de cada equipo sobre sus temporadas y resta:
+
+$$(y_{it}-\bar y_i) = \beta\,(x_{it}-\bar x_i) + (\varepsilon_{it}-\bar\varepsilon_i)$$
+
+::: {.incremental}
+- $\alpha_i$ **desaparece**: cualquier cosa constante dentro de un equipo no puede sesgar $\hat\beta$, aunque esté correlacionada con $x$
+- La misma estimación de dos formas: **LSDV** (una dummy por equipo) o **de-medir** y luego MCO
+- El precio: no se pueden estimar los coeficientes de los regresores **invariantes en el tiempo**, y solo se usa la variación within
+:::
+
+[Los EF cambian el supuesto "sin variables omitidas" por el más débil "sin variables omitidas *que cambien en el tiempo dentro de una unidad*".]{.takeaway .fragment}
+
+::: {.notes}
+Este es el supuesto de identificación clave, a menudo llamado exogeneidad estricta: el error que varía en el tiempo debe estar no correlacionado con el regresor en cada periodo. Los rasgos del equipo que son fijos a lo largo de diez temporadas (tamaño de mercado, estadio, historia) son absorbidos por alpha_i. Cualquier cosa que cambie en el tiempo e impulse tanto las victorias como los ingresos (una nueva estrella, un nuevo estadio, un nuevo contrato de TV) no lo es.
+:::
+
+## Código: efectos fijos, y una comprobación a mano
+
+``` {.python code-line-numbers="1-3|4-5|6-9"}
+# continues from the previous block
+fit_fe = pf.feols("lnrevenue ~ wins | teamid", data=data_nba,
+                  vcov={"CRV1": "teamid"})   # "| teamid" = one intercept per team
+fit_fe.summary()                             # within estimator, cluster SEs by team
+print(fit_fe._r2_within)                     # share of WITHIN-team variation explained
+# check: the same slope from OLS on de-meaned data (the within transformation)
+data_nba["dm_lnrev"] = data_nba["lnrevenue"] - g["lnrevenue"].transform("mean")
+data_nba["dm_wins"] = data_nba["wins"] - g["wins"].transform("mean")
+print(pf.feols("dm_lnrev ~ dm_wins - 1", data=data_nba).coef())   # identical slope
+```
+
+[↗ Pruébalo en Colab](https://colab.research.google.com/notebooks/empty.ipynb){.colab-link target="_blank" data-preview-link="false"}
+
+::: {.notes}
+La barra vertical en la fórmula le dice a pyfixest que absorba los efectos fijos de equipo. Las últimas tres líneas muestran que los EF no son más que MCO sobre datos de-medidos: la pendiente coincide en todos los dígitos. (Los EE de la regresión manual necesitarían una corrección por grados de libertad por las 29 medias estimadas; pyfixest lo maneja.)
+:::
+
+## Resultado: la pendiente intra-equipo es un tercio más pequeña {.smaller}
+
+| Variable | Coef. | EE | $t$ | $p$ | IC 95% |
+|:--|--:|--:|--:|--:|:--|
+| `wins` | [0.00451]{.key} | 0.00084 | 5.35 | <&nbsp;0.001 | [0.00278,&nbsp;0.00623] |
+
+[N = 286 · 29 efectos fijos de equipo · EE CRV1 por `teamid` · $R^2$ within = 0.185 · pendiente MCO de-medida manual: 0.00451]{.comment}
+
+| | MCO agrupada | Efectos fijos |
+|:--|--:|--:|
+| Coeficiente de `wins` | 0.00675 | [0.00451]{.key} |
+| EE agrupado | 0.00191 | 0.00084 |
+| $R^2$ | 0.127 (total) | 0.185 (within) |
+
+[Manteniendo fijo el equipo, la pendiente cae un **33%**, y se estima *con más* precisión: quitar los efectos de equipo eliminó la mayor parte del ruido residual.]{.takeaway .fragment}
+
+::: {.notes}
+Coincide con el capítulo: 0.0045, EE 0.0008, t 5.35, R² within 0.185. Los dos valores de R² no son comparables: uno es total, otro es within. Nota también que agrupar sigue importando dentro de los EF: el EE iid de la pendiente de EF es 0.00059, así que agrupar lo amplía por un factor de 1.42, reflejando la correlación serial que los efectos de equipo no eliminaron.
+:::
+
+## Una pendiente dentro de cada equipo
+
+![MCO agrupada (rojo) frente a interceptos específicos de cada equipo con una pendiente común de efectos fijos, para cuatro equipos.](figures/fig_nba_fe_lines.png)
+
+[Los equipos de mercados grandes (Knicks, Lakers) se sitúan en líneas altas, los de mercados pequeños (Grizzlies, Bucks) en líneas bajas. La línea agrupada es más empinada porque sube *a través* de esas líneas.]{.takeaway .fragment}
+
+::: {.notes}
+Cada línea de color usa el propio intercepto alpha_i de ese equipo y la pendiente común de EF 0.0045. La línea agrupada conecta equipos de bajos ingresos y pocas victorias con equipos de altos ingresos y muchas victorias, y esa comparación entre equipos es de donde viene la pendiente adicional.
+:::
+
+## Por qué cayó la pendiente: sesgo por variables omitidas, con signo
+
+$$\text{plim}\;\hat\beta_{\text{agrupada}} = \beta + \gamma\,\frac{\text{Cov}(\alpha_i, x_{it})}{\text{Var}(x_{it})}$$
+
+::: {.incremental}
+- $\gamma > 0$: el efecto del equipo (mercado, marca) eleva los ingresos
+- $\text{Cov}(\alpha_i, x_{it}) > 0$: los equipos de mercados ricos también ganan algo más (los ingresos promedio del equipo y las victorias correlacionan 0.40)
+- Así que la pendiente agrupada está sesgada **al alza**: 0.00675 vs 0.00451, una brecha de 0.00225
+:::
+
+[La dirección del cambio de agrupada a EF es exactamente lo que predice la fórmula de variables omitidas cuando el rasgo omitido ayuda tanto a $x$ como a $y$.]{.takeaway .fragment}
+
+::: {.notes}
+La misma fórmula que el caso de la curva de Phillips del Capítulo 13: sesgo = (efecto de la variable omitida sobre y) × (pendiente de la variable omitida sobre x). Aquí la variable omitida es el efecto fijo del equipo. Los EF no estiman gamma; eliminan el término por construcción. La correlación de 0.40 es entre las 29 medias de equipo del log de ingresos y las victorias (calculada para estas diapositivas).
+:::
+
+## Lo que vale una victoria más
+
+::: {.incremental}
+- **Por victoria**: $100\,(e^{0.00451}-1) = 0.45\%$ más de ingresos para el mismo equipo
+- A la media muestral de ingresos de **\$95.7M**: alrededor de **\$0.43M por victoria**
+- **Diez victorias más** de lo habitual del equipo: $100\,(e^{10 \times 0.00451}-1) = 4.6\%$, alrededor de **\$4.4M**
+- La pendiente agrupada habría dicho 7.0% (\$6.7M) por diez victorias
+:::
+
+[Ganar paga, pero mucho menos de lo que sugiere el corte transversal. El tamaño de mercado, no la columna de victorias, es de donde provienen la mayoría de las diferencias de ingresos.]{.takeaway .fragment}
+
+::: {.notes}
+El capítulo evalúa el efecto "para un equipo con $200M de ingresos" (0.45% × $200M = $900K). Ningún equipo-temporada en esta muestra alcanza $200M (máximo $187.7M; media $95.7M), así que el deck lo evalúa en la media muestral en su lugar. Todas las conversiones usan la fórmula exponencial exacta.
+:::
+
+## Lo que los efectos fijos pueden y no pueden arreglar
+
+:::: {.columns}
+::: {.column width="50%"}
+**Absorbido (invariante en el tiempo)**
+
+- tamaño de mercado y nivel de ingreso local
+- estadio, historia de la franquicia, marca
+- estilo de propiedad (si es estable)
+:::
+::: {.column width="50%"}
+**No absorbido (variante en el tiempo)**
+
+- llega una estrella, cambia un entrenador, lesiones
+- nuevo estadio o contrato de TV a mitad del panel
+- choques a nivel de liga (paros, recesiones)
+- ingresos → nómina → victorias (causalidad inversa)
+:::
+::::
+
+[Los EF hacen la lectura causal *más plausible*, no garantizada. Un siguiente paso natural son los efectos fijos de temporada, `| teamid + season`, para los choques a nivel de liga.]{.takeaway .fragment}
+
+::: {.notes}
+Dos notas de fidelidad. El capítulo escribe el modelo de EF con un término de temporada (γ·season_t) pero su código estima lnrevenue ~ wins | teamid, sin efectos de temporada; las diapositivas reportan lo que estima el código. El capítulo también ilustra los EF con Golden State en 2015 y los Lakers en 2012 y 2015; esas temporadas están fuera de esta muestra (2001–02 a 2010–11). Los efectos fijos de temporada se sugieren como extensión, no se estiman aquí.
+:::
+
+# 17.4 · ¿Efectos fijos o aleatorios? {#sec-re .divider background-color="#7A209F"}
+
+[Efectos aleatorios · eficiencia vs consistencia · la prueba de Hausman]{.act}
+
+::: {.notes}
+Sección 17.4. El capítulo describe los efectos aleatorios y la prueba de Hausman pero no estima ninguno: su código de 17.4 imprime la comparación agrupada-vs-EF. Por tanto, el deck repasa el método y reporta lo que el código realmente calcula.
+:::
+
+## Efectos aleatorios: un efecto de equipo supuesto no relacionado con las victorias
+
+$$y_{it} = \beta_1 + \beta_2 x_{it} + \underbrace{(\alpha_i + \varepsilon_{it})}_{\text{error compuesto}}, \qquad \alpha_i \sim (0,\sigma_\alpha^2),\;\; \varepsilon_{it} \sim (0,\sigma_\varepsilon^2)$$
+
+::: {.incremental}
+- **Supuesto clave**: $\text{Cov}(\alpha_i, x_{it}) = 0$, es decir, el efecto del equipo no está relacionado con el regresor
+- **Estimación**: MCG factible, que *de-mide parcialmente*: $y_{it} - \theta\,\bar y_i$ con $\theta = 1 - \sqrt{\sigma_\varepsilon^2 / (\sigma_\varepsilon^2 + T\sigma_\alpha^2)}$
+- $\theta = 0$ da MCO agrupada, $\theta = 1$ da EF; los EA quedan **en medio** y usan algo de variación between
+:::
+
+[Los EA compran eficiencia con un supuesto. Si los equipos de mercados grandes también ganan más, el supuesto falla y los EA heredan parte del sesgo agrupado.]{.takeaway .fragment}
+
+::: {.notes}
+La fórmula de cuasi-de-medición es la transformación estándar de EA (MCG) de los libros de texto, añadida aquí como repaso del método; el capítulo solo dice "MCG factible". Con T = 10 temporadas y una gran varianza del efecto de equipo, theta estaría cerca de 1, así que los EA caerían cerca de los EF. Eso es una afirmación sobre la fórmula, no una estimación: los EA no se estiman en el capítulo ni en este deck.
+:::
+
+## Agrupada, EA, EF: qué compara cada uno {.smaller}
+
+| | MCO agrupada | Efectos aleatorios | Efectos fijos |
+|:--|:--|:--|:--|
+| **Variación usada** | between + within, pesos iguales | within + una fracción $(1-\theta)$ de between | solo within |
+| **Supone sobre $\alpha_i$** | no correlacionado con $x$ (e ignorado) | no correlacionado con $x$ | nada; puede correlacionar con $x$ |
+| **¿Consistente si $\alpha_i$ correlaciona con $x$?** | no | no | **sí** |
+| **¿Eficiente si no lo hace?** | no | **sí** | no |
+| **¿Regresores invariantes en el tiempo?** | sí | sí | no |
+| **Estimación NBA** | 0.00675 | *no estimado* | [0.00451]{.key} |
+
+[En paneles observacionales el supuesto de "no correlación" rara vez es creíble, así que los EF son la opción por defecto y los EA necesitan una justificación.]{.takeaway .fragment}
+
+::: {.notes}
+Los EA suelen ser defendibles cuando los efectos de unidad son plausiblemente aleatorios respecto al regresor, por ejemplo cuando el regresor se asigna al azar. En el caso de la NBA, el tamaño de mercado casi seguramente correlaciona con la capacidad de comprar una plantilla ganadora.
+:::
+
+## La prueba de Hausman: ¿sobrevive el supuesto de los EA?
+
+$$H = (\hat\beta_{FE} - \hat\beta_{RE})'\,\big[\widehat V(\hat\beta_{FE}) - \widehat V(\hat\beta_{RE})\big]^{-1}(\hat\beta_{FE} - \hat\beta_{RE}) \;\sim\; \chi^2_k$$
+
+::: {.incremental}
+- $H_0$: $\alpha_i$ no correlacionado con los regresores, así que **ambos** son consistentes y los EA son eficientes: las dos estimaciones deberían estar cerca
+- $H_a$: correlacionado, así que solo los EF son consistentes: las estimaciones divergen
+- Un $H$ grande ($p$ pequeño) rechaza los EA; quédate con los EF
+:::
+
+[El capítulo enuncia la prueba pero nunca la calcula, así que este deck **no** reporta ningún resultado de Hausman para la NBA. Trata cualquier afirmación de que "Hausman rechaza los EA aquí" como no verificada.]{.takeaway .fragment}
+
+::: {.notes}
+El estadístico clásico de Hausman supone que los EA son plenamente eficientes bajo H0, lo cual falla con errores heterocedásticos o agrupados; una alternativa robusta es la prueba de efectos aleatorios correlacionados (Mundlak), añadiendo las medias de equipo de x como regresores. Ambas se mencionan como práctica estándar, no se estiman.
+
+Nota de fidelidad: el ejemplo de los Conceptos Clave del capítulo dice que el coeficiente de EF es "notablemente más pequeño que el coeficiente de EA" y que la prueba de Hausman "típicamente rechaza los EA". Ni los EA ni la prueba se estiman en ninguna parte del capítulo. El Ejercicio Práctico 3 (χ² = 25.4) es hipotético, no este dataset.
+:::
+
+## Código: lo que la celda 17.4 del capítulo realmente calcula
+
+``` {.python code-line-numbers="1|2-5|6"}
+# continues from the previous block (the chapter's 17.4 code)
+comparison_table = pd.DataFrame({
+    "Pooled OLS": [fit_pool.coef()["wins"], fit_pool.se()["wins"], fit_pool._r2, fit_pool._N],
+    "Fixed Effects": [fit_fe.coef()["wins"], fit_fe.se()["wins"], fit_fe._r2_within, fit_fe._N]
+}, index=["Wins Coefficient", "Wins Std Error", "R²", "N"])
+print(comparison_table)                      # R² rows differ in kind: overall vs within
+```
+
+[↗ Pruébalo en Colab](https://colab.research.google.com/notebooks/empty.ipynb){.colab-link target="_blank" data-preview-link="false"}
+
+| | MCO agrupada | Efectos fijos |
+|:--|--:|--:|
+| Coeficiente de victorias | 0.00675 | 0.00451 |
+| Error estándar (cluster) | 0.00191 | 0.00084 |
+| $R^2$ | 0.127 | 0.185 |
+| $N$ | 286 | 286 |
+
+::: {.notes}
+pyfixest se centra en la estimación de efectos fijos y no tiene un estimador de efectos aleatorios; el capítulo lo señala en un comentario de código. En Python, el paquete linearmodels provee RandomEffects y una comparación tipo Hausman; eso está fuera de la caja de herramientas de este capítulo y no se corre aquí.
+:::
+
+# 17.4b · ¿Quién gana más de \$60,000? {#sec-logit .divider background-color="#7A209F"}
+
+[Resultados binarios · modelo de probabilidad lineal · logit · efectos marginales]{.act}
+
+::: {.notes}
+El 17.4 del capítulo también introduce modelos no lineales a través de un logit. Datos distintos: un corte transversal de trabajadores, sin estructura de panel. La lección: cuando y es 0/1, lee el modelo a través de probabilidades predichas y efectos marginales.
+:::
+
+## La pregunta: educación, edad y la probabilidad de un ingreso alto {.smaller}
+
+**Datos.** 872 trabajadores de tiempo completo, 2010 (`AED_EARNINGS_COMPLETE.DTA`). Resultado: `dbigearn` = 1 si los ingresos anuales superan los \$60,000.
+
+| Variable | Significado | Media |
+|:--|:--|--:|
+| `dbigearn` | 1 si los ingresos > \$60,000 (238 trabajadores) | 0.273 |
+| `education` | años de escolaridad (0–20) | 13.85 |
+| `age` | años | 43.3 |
+
+::: {.incremental}
+- **Modelo de probabilidad lineal (MPL)**: $\Pr(y=1\mid x) = x'\beta$; las pendientes son cambios de probabilidad, pero los valores ajustados pueden salir de $[0,1]$
+- **Logit**: $\Pr(y=1\mid x) = \dfrac{e^{x'\beta}}{1+e^{x'\beta}}$; siempre en $(0,1)$, pero $\beta_j$ está en unidades de **log-odds**
+:::
+
+[El efecto marginal del logit $\partial p/\partial x_j = p(1-p)\,\beta_j$ cambia con $p$, así que debes decir *dónde* lo evalúas.]{.takeaway .fragment}
+
+::: {.notes}
+La lista de datasets del capítulo dice 842 trabajadores; el archivo tiene 872 y todos los resultados usan 872. El efecto marginal es mayor en p = 0.5, donde vale β/4, y se encoge hacia cero en las colas.
+:::
+
+## Código: construir el resultado binario y ajustar el logit
+
+``` {.python code-line-numbers="1-4|5-7|8|9-10"}
+!pip install -q pyfixest                      # pyfixest is not preinstalled in Colab
+import pandas as pd                           # tabular data
+import pyfixest as pf                         # OLS for the linear probability model
+from statsmodels.formula.api import logit     # logit with R-style formulas
+url = "https://raw.githubusercontent.com/quarcs-lab/data-open/master/AED/AED_EARNINGS_COMPLETE.DTA"
+data_earnings = pd.read_stata(url)            # 872 full-time workers, 2010
+data_earnings["dbigearn"] = (data_earnings["earnings"] > 60000).astype(int)  # 1 = high earner
+print(data_earnings["dbigearn"].mean())       # share of high earners
+model_logit = logit("dbigearn ~ age + education", data=data_earnings).fit(cov_type="HC1", disp=0)
+print(model_logit.summary())                  # coefficients in log-odds units, robust SEs
+```
+
+[↗ Pruébalo en Colab](https://colab.research.google.com/notebooks/empty.ipynb){.colab-link target="_blank" data-preview-link="false"}
+
+::: {.notes}
+Bloque autocontenido. El logit se ajusta por máxima verosimilitud; cov_type="HC1" pide errores estándar robustos a heterocedasticidad (sándwich), como en el capítulo.
+:::
+
+## Resultado: los coeficientes del logit son log-odds, no probabilidades {.smaller}
+
+| Variable | Coef. | EE | $z$ | $p$ |
+|:--|--:|--:|--:|--:|
+| Intercepto | −8.0651 | 0.6914 | −11.67 | <&nbsp;0.001 |
+| `age` | 0.0385 | 0.0080 | 4.85 | <&nbsp;0.001 |
+| `education` | [0.3742]{.key} | 0.0366 | 10.22 | <&nbsp;0.001 |
+
+[N = 872 · proporción con `dbigearn` = 1: 0.273 · EE HC1 · pseudo-$R^2$ de McFadden = 0.145]{.comment}
+
+::: {.incremental}
+- **El signo y la significancia** se leen como siempre: los trabajadores mayores y más educados tienen más probabilidad de ganar más de \$60k
+- **El tamaño** no: un año más de escolaridad multiplica las **odds** por $e^{0.3742} = 1.45$
+- Para hablar de probabilidades necesitamos **efectos marginales**
+:::
+
+[Un coeficiente logit de 0.37 no son "37 puntos porcentuales". Es un cambio en log-odds.]{.takeaway .fragment}
+
+::: {.notes}
+El pseudo-R² compara la log-verosimilitud con un modelo de solo constante; no es una proporción de varianza y suele ser mucho menor que los valores de R² de MCO. La razón de odds es la lectura exacta más limpia de un coeficiente logit.
+:::
+
+## Código: efectos marginales y el modelo de probabilidad lineal
+
+``` {.python code-line-numbers="1-3|4|5-6|7-8"}
+# continues from the previous block
+ame = model_logit.get_margeff()               # default at="overall": AVERAGE marginal effects
+mem = model_logit.get_margeff(at="mean")      # marginal effects AT THE MEANS of age, education
+print(ame.summary()); print(mem.summary())
+fit_lpm = pf.feols("dbigearn ~ age + education", data=data_earnings, vcov="HC1")
+fit_lpm.summary()                             # slopes are directly probability changes
+p_lpm = fit_lpm.predict()                     # LPM fitted "probabilities"
+print((p_lpm < 0).sum(), p_lpm.min())         # how many fall below zero?
+```
+
+[↗ Pruébalo en Colab](https://colab.research.google.com/notebooks/empty.ipynb){.colab-link target="_blank" data-preview-link="false"}
+
+::: {.notes}
+El capítulo llama a get_margeff() y etiqueta la salida como "Efectos marginales (en las medias)". Pero el valor por defecto de statsmodels es at="overall": promedia el efecto marginal de cada trabajador (el AME). Los efectos marginales en las medias necesitan at="mean". El deck corre ambos.
+:::
+
+## Resultado: tres respuestas a "un año más de escolaridad" {.smaller}
+
+| Efecto sobre $\Pr(\text{ingresos} > \$60\text{k})$ | `education` | EE | `age` | EE |
+|:--|--:|--:|--:|--:|
+| Logit, efecto marginal **promedio** (`get_margeff()`) | [0.0618]{.key} | 0.0047 | 0.0064 | 0.0013 |
+| Logit, efecto marginal **en las medias** (`at="mean"`) | 0.0662 | 0.0062 | 0.0068 | 0.0014 |
+| Modelo de probabilidad lineal (MCO, HC1) | 0.0540 | 0.0050 | 0.0064 | 0.0013 |
+
+[MPL: N = 872 · $R^2 = 0.142$ · IC 95% para `education` [0.0442, 0.0639]]{.comment}
+
+[Un año más de escolaridad eleva la probabilidad de ganar más de \$60k en unos **6.2 puntos porcentuales** en promedio (logit), o 5.4 (MPL). Mismo signo, tamaño similar.]{.takeaway .fragment}
+
+::: {.notes}
+El texto del capítulo dice que el efecto marginal de la educación "en las medias muestrales" es "alrededor de 0.05, es decir, un aumento de aproximadamente 5 puntos porcentuales". En las medias es 0.066; el efecto marginal promedio (lo que realmente imprime el código del capítulo) es 0.062; 0.054 es el coeficiente del MPL. La lección cualitativa se sostiene (logit y MPL coinciden en signo y tamaño aproximado); los números necesitan las etiquetas correctas. La comprobación de la fórmula: p en las medias = 0.229, así que 0.229 × 0.771 × 0.3742 = 0.066.
+:::
+
+## Donde los dos modelos se separan
+
+![Probabilidad predicha por años de educación, edad fijada en su media. Sombreado: "probabilidades" negativas imposibles.](figures/fig_logit_lpm.png)
+
+[En los datos, **30 de 872** valores ajustados del MPL son negativos (mínimo −0.59). Cada predicción del logit se queda entre 0.001 y 0.86.]{.takeaway .fragment}
+
+::: {.notes}
+Las dos curvas coinciden en el medio de los datos (12–16 años de escolaridad): a los 16 años ambas predicen alrededor de 0.39–0.40. Divergen en las colas, donde la línea del MPL sigue avanzando y el logit se aplana. A los 20 años el logit predice 0.75, el MPL 0.61. Las predicciones negativas del MPL provienen de trabajadores con muy poca escolaridad. Los efectos marginales promedio resumen la curva con un solo número; la imagen muestra por qué un solo número oculta variación.
+:::
+
+## Leer el logit con honestidad
+
+::: {.incremental}
+- **Reporta los efectos marginales**, y di cuáles: promedio (AME) o en las medias (MEM). Aquí difieren en 0.004
+- **El MPL es una buena primera aproximación** para efectos promedio cerca del medio de los datos; usa logit (o probit) para predicciones y para las colas
+- **Asociación, no retorno a la escolaridad**: la habilidad, el entorno familiar y la elección de ocupación correlacionan con la educación y con los ingresos
+- El punto de corte es arbitrario: \$60,000 descarta la mayor parte de la información de `earnings`, que las regresiones de log-ingresos de capítulos anteriores usan por completo
+:::
+
+[Un modelo binario cambia la *escala* de la respuesta, no el problema de *identificación*.]{.takeaway .fragment}
+
+::: {.notes}
+Este ejemplo está en el capítulo de panel solo porque el capítulo coloca los modelos no lineales en 17.4. Nada aquí es un panel. Las advertencias de identificación son las mismas que para cualquier regresión de corte transversal de ingresos sobre educación.
+:::
+
+# Acto II-b · Series de tiempo: orden y memoria {.divider background-color="#7A209F"}
+
+[17.5 – 17.6 · estacionariedad, regresión espuria, HAC, autocorrelación, AR y ADL]{.act}
+
+::: {.notes}
+Una unidad (el mercado del Tesoro de EE. UU.), 397 meses. Los problemas del panel se vuelven problemas del tiempo: tendencias compartidas en lugar de rasgos de equipo compartidos, y correlación serial en lugar de correlación intra-cluster.
+:::
+
+# 17.5 · ¿Las tasas largas siguen a las cortas? {#sec-ts .divider background-color="#7A209F"}
+
+[Estacionariedad · regresión espuria · niveles con una tendencia · HAC de Newey–West]{.act}
+
+::: {.notes}
+Sección 17.5: la regresión en niveles de la tasa del Tesoro a 10 años sobre la tasa a 1 año, con una tendencia temporal, bajo errores estándar por defecto y HAC.
+:::
+
+## La pregunta y los datos {.smaller}
+
+**Datos.** Rendimientos mensuales del Tesoro de EE. UU., enero 1982 – enero 2015: **397 meses** (`AED_INTERESTRATES.DTA`).
+
+| Variable | Significado | Media | Rango |
+|:--|:--|--:|:--|
+| `gs10` | tasa del Tesoro a 10 años, % | 6.19 | 1.53 – 14.59 |
+| `gs1` | tasa del Tesoro a 1 año, % | 4.69 | 0.10 – 14.73 |
+| `dgs10` | cambio mensual en `gs10`, puntos porcentuales | −0.03 | −1.43 – 0.78 |
+| `dgs1` | cambio mensual en `gs1`, puntos porcentuales | −0.04 | −1.81 – 0.76 |
+
+[**Pregunta económica**: ¿cuánto de un movimiento en las tasas cortas (que influye la Fed) se traspasa a las tasas largas (que importan para las hipotecas y la inversión)?]{.takeaway .fragment}
+
+::: {.notes}
+La hipótesis de las expectativas dice que las tasas largas reflejan las tasas cortas futuras esperadas, más una prima a plazo. Si es así, los movimientos de la tasa corta deberían traspasarse a las tasas largas, pero menos que uno a uno, porque un movimiento a 1 año cambia solo parte de la trayectoria esperada a 10 años.
+:::
+
+## Tres ideas de series de tiempo que hay que tener presentes
+
+::: {.incremental}
+- **Autocorrelación** en el rezago $k$: $r_k = \dfrac{\sum_{t=k+1}^{T}(y_t-\bar y)(y_{t-k}-\bar y)}{\sum_{t=1}^{T}(y_t-\bar y)^2}$. Hoy se parece a ayer
+- **Estacionariedad**: la media, la varianza y las autocorrelaciones no cambian en el tiempo. Las series con tendencia son **no estacionarias**
+- **Regresión espuria**: regresa una serie con tendencia sobre otra y obtienes un $R^2$ alto y estadísticos $t$ enormes aun sin ningún vínculo estructural
+:::
+
+[Con datos con tendencia, un $R^2$ grande es una advertencia, no una recompensa. Dos curas: **diferenciar** los datos, o mantener los niveles y usar errores estándar **HAC** (y pensar bien).]{.takeaway .fragment}
+
+::: {.notes}
+Muchas series macro se comportan como caminatas aleatorias con deriva; sus niveles vagan y sus cambios son aproximadamente estacionarios. La regresión espuria (Granger y Newbold) es el análogo en series de tiempo de la confusión por un factor común: aquí el factor común es el tiempo mismo.
+:::
+
+## Ambas tasas derivan a la baja del 14% a cerca de cero
+
+![Rendimientos mensuales del Tesoro a 10 años y a 1 año, 1982–2015.](figures/fig_rates_levels.png)
+
+[A lo largo de 33 años ambas tasas caen más de diez puntos. Cualquier regresión de un nivel sobre el otro ajustará en parte esta deriva descendente compartida. En niveles las dos series correlacionan 0.95.]{.takeaway .fragment}
+
+::: {.notes}
+Nota también el periodo tardío: después de 2008 la tasa a 1 año está clavada cerca de cero (el límite inferior de cero) mientras la tasa a 10 años sigue moviéndose. Una única relación lineal a lo largo de 1982–2015 también supone que la relación es estable a través de regímenes monetarios muy distintos.
+:::
+
+## Código: la regresión en niveles, con EE por defecto y HAC
+
+``` {.python code-line-numbers="1-4|5-6|7-10|11"}
+!pip install -q pyfixest                     # pyfixest is not preinstalled in Colab
+import numpy as np                           # numerical operations
+import pandas as pd                          # tabular data
+import pyfixest as pf                        # OLS with default / HAC standard errors
+url = "https://raw.githubusercontent.com/quarcs-lab/data-open/master/AED/AED_INTERESTRATES.DTA"
+data_rates = pd.read_stata(url)              # 397 months, Jan 1982 – Jan 2015
+data_rates["time"] = np.arange(len(data_rates))              # linear time trend 0, 1, 2, ...
+fit_levels = pf.feols("gs10 ~ gs1 + time", data=data_rates)   # default SEs
+fit_levels_hac = pf.feols("gs10 ~ gs1 + time", data=data_rates, vcov="NW",
+                          vcov_kwargs={"time_id": "time", "lag": 24})   # Newey–West, 24 lags
+fit_levels_hac.summary()                     # same coefficients, HAC SEs
+```
+
+[↗ Pruébalo en Colab](https://colab.research.google.com/notebooks/empty.ipynb){.colab-link target="_blank" data-preview-link="false"}
+
+::: {.notes}
+Autocontenido. Incluir una tendencia temporal lineal permite que la regresión absorba una deriva lineal común, pero no tendencias vagantes y no lineales. HAC con 24 rezagos permite que los errores estén correlacionados a lo largo de dos años de datos mensuales.
+:::
+
+## Resultado: un ajuste casi perfecto, y EE que eran 3.6× demasiado pequeños {.smaller}
+
+| Variable | Coef. | EE por defecto | $t$ por defecto | EE HAC | $t$ HAC | HAC ÷ por defecto |
+|:--|--:|--:|--:|--:|--:|--:|
+| Intercepto | 5.8994 | 0.2254 | 26.17 | 0.6640 | 8.89 | 2.95 |
+| `gs1` | [0.5076]{.key} | 0.0221 | 22.92 | 0.0808 | 6.28 | [3.65]{.key} |
+| `time` | −0.0106 | 0.0006 | −16.69 | 0.0018 | −5.79 | 2.88 |
+
+[N = 397 · $R^2 = 0.947$ · HAC: Newey–West, 24 rezagos · IC 95% HAC para `gs1`: [0.3488, 0.6663]]{.comment}
+
+[Manteniendo fija una tendencia lineal, una tasa corta 1 punto más alta va con una tasa larga **0.51 puntos** más alta. El ajuste luce excelente, pero los residuos son muy persistentes, así que los EE por defecto sobreestiman la precisión más de tres veces.]{.takeaway .fragment}
+
+::: {.notes}
+Coincide con el capítulo: R² alrededor de 0.95 y un EE HAC más de tres veces el de por defecto (3.65×). El coeficiente del tiempo dice que la tasa larga derivó a la baja alrededor de 0.011 puntos por mes (unos 0.13 por año) más allá de lo que explica la tasa corta.
+
+El capítulo afirma luego que el coeficiente de "largo plazo" en niveles es "≈ 0.90–0.95". Con la tendencia es 0.51; sin la tendencia (la regresión de la hoja de referencia del capítulo gs10 ~ gs1) es 0.84, con R² 0.909. Ninguno es 0.90–0.95.
+:::
+
+## Cómo funcionan los errores estándar HAC
+
+$$\widehat V_{\text{HAC}} = (X'X)^{-1}\Big[\hat\Omega_0 + \sum_{\ell=1}^{L} w_\ell\,\big(\hat\Omega_\ell + \hat\Omega_\ell'\big)\Big](X'X)^{-1}, \qquad w_\ell = 1 - \frac{\ell}{L+1}$$
+
+::: {.incremental}
+- $\hat\Omega_\ell = \sum_t \hat u_t \hat u_{t-\ell}\, x_t x_{t-\ell}'$: la covarianza de los scores a $\ell$ meses de distancia
+- **Pesos de Bartlett** $w_\ell$ encogen los rezagos lejanos; $L$ lo elige el analista (aquí 24 meses)
+- HAC arregla los **errores estándar**; **no** arregla un **coeficiente** espurio
+:::
+
+[HAC es a las series de tiempo lo que el agrupamiento es a los paneles: el mismo sándwich, una idea distinta de qué errores pueden estar correlacionados.]{.takeaway .fragment}
+
+::: {.notes}
+El estimador de Newey–West es el sándwich robusto por agrupamiento con un centro distinto: en lugar de sumar dentro de clusters, suma productos cruzados de periodos cercanos con pesos decrecientes. Elegir L: reglas de dedo como 0.75·T^(1/3) dan alrededor de 5.5 para T = 397; el capítulo elige 24 (dos años) para ser conservador dada la fuerte persistencia.
+:::
+
+# 17.6 · Autocorrelación: ¿el ajuste en niveles es espurio? {#sec-ac .divider background-color="#7A209F"}
+
+[Correlograma · consecuencias · primera diferenciación]{.act}
+
+::: {.notes}
+Sección 17.6: diagnostica los residuos de la regresión en niveles, luego re-estima en cambios.
+:::
+
+## Autocorrelación: qué rompe y cómo verla
+
+::: {.incremental}
+- **Consecuencias**: los coeficientes de MCO siguen siendo insesgados (si los regresores son exógenos), pero los EE por defecto están mal, usualmente **demasiado pequeños**, y las pruebas $t$ sobre-rechazan
+- **Detectar**: el **correlograma** de los residuos; la prueba LM de Breusch–Godfrey; el estadístico de Durbin–Watson para errores AR(1)
+- **Responder**: EE HAC; modelar la dinámica (AR, ADL); o **primera-diferenciar** las series no estacionarias
+:::
+
+[Un correlograma de decaimiento lento es la huella de un error no estacionario, cercano a una raíz unitaria.]{.takeaway .fragment}
+
+::: {.notes}
+El capítulo importa acorr_breusch_godfrey pero nunca lo corre; el deck se apoya en el correlograma, como hace el código del capítulo. Banda aproximada del 95% para una sola autocorrelación bajo ruido blanco: ±1.96/√T = ±0.098 aquí.
+:::
+
+## Código: autocorrelaciones de los residuos de la regresión en niveles
+
+``` {.python code-line-numbers="1-3|4-5|6-7"}
+# continues from the previous block
+from statsmodels.tsa.stattools import acf             # autocorrelation function
+from statsmodels.graphics.tsaplots import plot_acf    # correlogram plot
+data_rates["uhatgs10"] = fit_levels._u_hat            # residuals of the levels regression
+acf_resid = acf(data_rates["uhatgs10"].dropna(), nlags=10)   # lags 0..10
+for k in range(11): print(k, round(acf_resid[k], 3)) # lag-1 ≈ 0.95
+plot_acf(data_rates["uhatgs10"].dropna(), lags=24, alpha=0.05)  # with a 95% band
+```
+
+[↗ Pruébalo en Colab](https://colab.research.google.com/notebooks/empty.ipynb){.colab-link target="_blank" data-preview-link="false"}
+
+::: {.notes}
+Los residuos de la regresión niveles-más-tendencia son lo que la tendencia no absorbió. Si vagan, la regresión no ha capturado una relación estable.
+:::
+
+## Resultado: los residuos apenas olvidan {.smaller}
+
+:::: {.columns}
+::: {.column width="34%"}
+| Rezago | $r_k$ |
+|:--|--:|
+| 1 | [0.953]{.key} |
+| 2 | 0.888 |
+| 3 | 0.830 |
+| 4 | 0.769 |
+| 5 | 0.709 |
+| 8 | 0.538 |
+| 10 | [0.425]{.key} |
+
+[Banda 95%: ±0.098]{.comment}
+:::
+::: {.column width="66%"}
+![Correlograma de los residuos de la regresión en niveles, rezagos 1–24.](figures/fig_x_03.png){height="400"}
+:::
+::::
+
+[Todavía 0.42 después de diez meses. Errores tan persistentes significan que los 397 meses cargan mucha menos información independiente que 397 observaciones, que es por qué los EE HAC fueron 3.65× más grandes.]{.takeaway .fragment}
+
+::: {.notes}
+Coincide con el capítulo: rezago 1 = 0.95, rezago 10 = 0.42. Cada barra está muy fuera de la banda. Esta es la firma de residuos no estacionarios (o cercanos a una raíz unitaria): la relación en niveles puede ser en parte espuria.
+:::
+
+## Primeras diferencias: compara cambios con cambios
+
+$$\Delta y_t = y_t - y_{t-1}, \qquad \Delta\text{gs10}_t = \beta_1 + \beta_2\,\Delta\text{gs1}_t + u_t$$
+
+::: {.incremental}
+- Diferenciar elimina una tendencia estocástica y cualquier tendencia lineal (se convierte en el intercepto)
+- La pregunta cambia: "cuando las tasas cortas **se mueven** este mes, ¿cuánto **se mueven** las tasas largas?"
+- Costo: se descarta la información de nivel de largo plazo; solo la variación mes a mes identifica $\beta_2$
+:::
+
+[El primo en series de tiempo de los efectos fijos: quita el componente persistente, conserva los cambios.]{.takeaway .fragment}
+
+::: {.notes}
+La analogía es exacta para paneles de dos periodos: las primeras diferencias y los efectos fijos coinciden cuando T = 2. En ambos casos, un componente que no cambia (el mercado de un equipo, el nivel de una serie) se elimina para que no pueda confundir la pendiente.
+:::
+
+## Cambios mensuales: sin tendencia, centrados en cero
+
+![Cambios mensuales en las tasas a 10 años y a 1 año, 1982–2015.](figures/fig_rates_changes.png)
+
+[Los cambios lucen estacionarios: sin deriva, una media constante cerca de cero, pero estallidos de volatilidad (inicios de los 80, 2008), un recordatorio para usar EE robustos.]{.takeaway .fragment}
+
+::: {.notes}
+El agrupamiento de volatilidad es una forma de heterocedasticidad a lo largo del tiempo. El capítulo estima la regresión en cambios con EE por defecto; los EE HAC para la misma regresión son 0.042 en lugar de 0.031 para dgs1 (calculado para estas diapositivas), lo que no cambia nada sustantivo aquí (t = 17 en lugar de 23).
+:::
+
+## Código: la regresión en cambios
+
+``` {.python code-line-numbers="1-3|4-6"}
+# continues from the previous block
+fit_changes = pf.feols("dgs10 ~ dgs1", data=data_rates)   # regression in first differences
+fit_changes.summary()                                    # N = 396 (first month has no change)
+uhat_dgs10 = fit_changes._u_hat                          # residuals in changes
+acf_dgs10_resid = acf(uhat_dgs10[~np.isnan(uhat_dgs10)], nlags=10)
+print(acf_dgs10_resid[1])                                # lag-1 autocorrelation
+```
+
+[↗ Pruébalo en Colab](https://colab.research.google.com/notebooks/empty.ipynb){.colab-link target="_blank" data-preview-link="false"}
+
+::: {.notes}
+El dataset ya contiene dgs10 y dgs1, así que no se necesita diferenciar en el código. El primer mes se pierde porque su cambio no está definido.
+:::
+
+## Resultado: los cambios se traspasan a 0.72, y los residuos se relajan {.smaller}
+
+| Variable | Coef. | EE | $t$ | $p$ | IC 95% |
+|:--|--:|--:|--:|--:|:--|
+| Intercepto | −0.0064 | 0.0091 | −0.71 | 0.480 | [−0.0243,&nbsp;0.0115] |
+| `dgs1` | [0.7198]{.key} | 0.0314 | 22.89 | <&nbsp;0.001 | [0.6580,&nbsp;0.7817] |
+
+[N = 396 · EE por defecto (como en el capítulo) · $R^2 = 0.571$ · autocorrelación de los residuos: rezago 1 = 0.255, rezago 2 = −0.039, rezago 3 = 0.061]{.comment}
+
+| | Niveles + tendencia | Cambios |
+|:--|--:|--:|
+| Pendiente de la tasa a 1 año | 0.508 | [0.720]{.key} |
+| $R^2$ | 0.947 | 0.571 |
+| Autocorrelación residual rezago-1 | 0.953 | [0.255]{.key} |
+
+[Un **cambio** de 1 punto en la tasa corta va con un cambio de 0.72 puntos en la tasa larga el mismo mes. El $R^2$ cae, pero ahora es honesto.]{.takeaway .fragment}
+
+::: {.notes}
+Coincide con el Concepto Clave 17.7 del capítulo: la autocorrelación residual rezago-1 baja de alrededor de 0.95 a alrededor de 0.25, y la pendiente en cambios es 0.72. Queda algo de autocorrelación (0.255 está muy fuera de ±0.098), lo que motiva modelar la dinámica a continuación.
+:::
+
+# 17.6b · ¿Qué tan rápido llegan los movimientos de la tasa corta a las tasas largas? {#sec-dyn .divider background-color="#7A209F"}
+
+[AR($p$) · ADL($p,q$) · multiplicadores de impacto y acumulados]{.act}
+
+::: {.notes}
+Todavía la sección 17.6 en el capítulo (Modelos Autorregresivos). El ADL(2,2) se estima en el bloque de código de los Puntos Clave del capítulo; el deck lo corre como un resultado principal.
+:::
+
+## Modelos dinámicos: deja entrar el pasado en la regresión
+
+$$\text{AR}(p):\quad y_t = \beta_0 + \alpha_1 y_{t-1} + \cdots + \alpha_p y_{t-p} + u_t$$
+
+$$\text{ADL}(p,q):\quad y_t = \beta_0 + \sum_{j=1}^{p}\alpha_j\,y_{t-j} + \sum_{j=0}^{q}\gamma_j\,x_{t-j} + u_t$$
+
+::: {.incremental}
+- $\alpha_j$: **persistencia** (inercia o reversión) en el propio $y$
+- $\gamma_0$: **multiplicador de impacto**, la respuesta del mismo mes a $x$
+- $\gamma_0+\gamma_1+\dots$: multiplicadores **acumulados** de rezago distribuido; el **multiplicador de largo plazo** también tiene en cuenta los términos AR: $\sum_j\gamma_j \,/\, (1-\sum_j \alpha_j)$
+:::
+
+[Aquí $y_t = \Delta\text{gs10}_t$ y $x_t = \Delta\text{gs1}_t$: un ADL(2,2) en **cambios**.]{.takeaway .fragment}
+
+::: {.notes}
+La fórmula del multiplicador de largo plazo es estándar para modelos ADL estables: tras un cambio unitario permanente en x, y se asienta donde y = (Σγ/(1−Σα))·x. Con y y x en cambios, esta es la respuesta de largo plazo del cambio en la tasa larga ante un cambio sostenido en el cambio de la tasa corta. Los estudiantes deberían leer principalmente las sumas de impacto y acumuladas.
+:::
+
+## Código: construir los rezagos y ajustar el ADL(2,2)
+
+``` {.python code-line-numbers="1-4|5-7|8-9|10"}
+# continues from the previous block
+for k in [1, 2]:                                       # lags with .shift(k)
+    data_rates[f"dgs10_lag{k}"] = data_rates["dgs10"].shift(k)
+    data_rates[f"dgs1_lag{k}"] = data_rates["dgs1"].shift(k)
+fit_adl = pf.feols("dgs10 ~ dgs10_lag1 + dgs10_lag2 + dgs1 + dgs1_lag1 + dgs1_lag2",
+                   data=data_rates)                    # ADL(2,2), N = 394
+fit_adl.summary()                                      # default SEs, as in the chapter
+c = fit_adl.coef()                                     # cumulative pass-through:
+print(c["dgs1"], c["dgs1"] + c["dgs1_lag1"], c["dgs1"] + c["dgs1_lag1"] + c["dgs1_lag2"])
+print(acf(pd.Series(fit_adl._u_hat).dropna(), nlags=1)[1])   # residual lag-1 autocorrelation
+```
+
+[↗ Pruébalo en Colab](https://colab.research.google.com/notebooks/empty.ipynb){.colab-link target="_blank" data-preview-link="false"}
+
+::: {.notes}
+Tres meses se pierden por los rezagos (uno por la diferencia, dos por el segundo rezago), dejando 394. El código es el bloque de hoja de referencia de los Puntos Clave del capítulo.
+:::
+
+## Resultado: impacto fuerte, reversión parcial, inercia positiva {.smaller}
+
+| Variable | Coef. | EE | $t$ | $p$ | IC 95% |
+|:--|--:|--:|--:|--:|:--|
+| Intercepto | −0.0067 | 0.0088 | −0.76 | 0.447 | [−0.0239,&nbsp;0.0106] |
+| `dgs10_lag1` | 0.2830 | 0.0508 | 5.57 | <&nbsp;0.001 | [0.1831,&nbsp;0.3828] |
+| `dgs10_lag2` | −0.1021 | 0.0506 | −2.02 | 0.044 | [−0.2015,&nbsp;−0.0027] |
+| `dgs1` | [0.7397]{.key} | 0.0340 | 21.74 | <&nbsp;0.001 | [0.6728,&nbsp;0.8066] |
+| `dgs1_lag1` | −0.2588 | 0.0514 | −5.03 | <&nbsp;0.001 | [−0.3599,&nbsp;−0.1576] |
+| `dgs1_lag2` | 0.0515 | 0.0492 | 1.05 | 0.296 | [−0.0453,&nbsp;0.1482] |
+
+[N = 394 · EE por defecto · $R^2 = 0.611$ · autocorrelación residual rezago-1 0.008]{.comment}
+
+[Mismo mes: **0.74** puntos de traspaso. El mes siguiente una **reversión parcial** (−0.26). El cambio rezagado de la propia tasa larga entra **positivamente** (+0.28): inercia, no reversión a la media.]{.takeaway .fragment}
+
+::: {.notes}
+Estos son los números del Concepto Clave del capítulo (≈ +0.28, γ0 ≈ 0.74, γ1 ≈ −0.26, γ2 ≈ 0.05, multiplicador a dos meses ≈ 0.53). La narrativa más larga del capítulo bajo "Resultados típicos de ADL(2,2)" los contradice: da γ0 ≈ 0.45–0.55, γ1 ≈ +0.15 a +0.25, γ2 ≈ +0.05 a +0.10, un total de ≈ 0.78, R² ≈ 0.40–0.50, y dice que el coeficiente del cambio rezagado es negativo (reversión a la media). Las estimaciones de arriba son lo que dan los datos. Los EE HAC (calculados para estas diapositivas) dejan cada conclusión sin cambios: γ0 t = 14.0, γ1 t = −4.33, γ2 p = 0.26.
+:::
+
+## Traspaso, mes a mes
+
+![Multiplicadores acumulados de rezago distribuido del ADL(2,2).](figures/fig_adl_multipliers.png)
+
+[Alrededor de **0.74** de un cambio de 1 punto en la tasa corta aparece en la tasa larga de inmediato; tras la reversión parcial, **0.53** se ha traspasado en dos meses.]{.takeaway .fragment}
+
+::: {.notes}
+Sumas acumuladas de los coeficientes γ: 0.740, 0.481, 0.532. Incluyendo los términos autorregresivos, el multiplicador de largo plazo es 0.532 / (1 − 0.283 + 0.102) = 0.65 (calculado para estas diapositivas). Todos están muy por debajo de uno a uno, consistente con la hipótesis de las expectativas: un cambio en la tasa a 1 año mueve solo parte de la trayectoria esperada de las tasas cortas a lo largo de diez años.
+:::
+
+## ¿La dinámica absorbió la autocorrelación?
+
+![Autocorrelaciones residuales, rezagos 1–24, para tres especificaciones. Banda sombreada: ±1.96/√T.](figures/fig_acf_compare.png)
+
+[Niveles: 0.95. Cambios estáticos: 0.25. ADL(2,2): **0.01**. Modelar la dinámica deja residuos que lucen como ruido blanco.]{.takeaway .fragment}
+
+::: {.notes}
+De izquierda a derecha, las especificaciones escalan de un ajuste en niveles de aspecto espurio a un modelo dinámico bien especificado. Algunas barras aisladas aún tocan la banda en rezagos largos; con 24 rezagos, se esperan una o dos cruces por azar al nivel del 5%.
+:::
+
+## Código: comparar estático, AR(2) y ADL(2,2) en una sola muestra
+
+``` {.python code-line-numbers="1-4|5-8"}
+# continues from the previous block (computed for these slides)
+samp = data_rates.dropna(subset=["dgs10_lag2", "dgs1_lag2"])    # same 394 months for all
+models = {"static": "dgs10 ~ dgs1", "AR(2)": "dgs10 ~ dgs10_lag1 + dgs10_lag2",
+          "ADL(2,2)": "dgs10 ~ dgs10_lag1 + dgs10_lag2 + dgs1 + dgs1_lag1 + dgs1_lag2"}
+for name, fml in models.items():
+    f = pf.feols(fml, data=samp); n, k = f._N, len(f.coef())
+    bic = n * np.log((f._u_hat ** 2).sum() / n) + k * np.log(n)   # lower is better
+    print(name, round(f._r2, 3), round(acf(pd.Series(f._u_hat), nlags=1)[1], 3), round(bic, 1))
+```
+
+[↗ Pruébalo en Colab](https://colab.research.google.com/notebooks/empty.ipynb){.colab-link target="_blank" data-preview-link="false"}
+
+::: {.notes}
+Calculado para estas diapositivas: los tres modelos se re-ajustan en los mismos 394 meses para que el R², la autocorrelación residual y el BIC sean comparables.
+:::
+
+## Resultado: el ADL gana en todos los criterios
+
+| Modelo | $R^2$ | $\rho$ residual rezago-1 | BIC |
+|:--|--:|--:|--:|
+| Estático: $\Delta$gs10 sobre $\Delta$gs1 | 0.573 | 0.259 | −1346.8 |
+| AR(2): solo rezagos propios | 0.125 | 0.012 | −1057.9 |
+| ADL(2,2) | [0.611]{.key} | [0.008]{.key} | [−1359.7]{.key} |
+
+::: {.notes}
+La tabla de comparación del capítulo (0.57 / 0.25, 0.13 / 0.01, 0.61 / 0.01, con BIC "Más alto/Más bajo") se confirma; los valores de BIC se calculan aquí en una muestra común de 394 meses para que sean comparables. Nota qué compra cada parte: los rezagos propios solos explican poco (R² 0.125) pero blanquean los residuos; la tasa corta explica la mayor parte de la variación; juntos, el ADL gana en todos los criterios. La ganancia de R² del ADL sobre el modelo estático es modesta (0.038).
+:::
+
+## Leer las regresiones de series de tiempo con cuidado
+
+::: {.incremental}
+- **Unidades**: los cambios están en **puntos porcentuales**, no en porcentaje. "Un alza del 1% en la tasa a 1 año" debería leerse "un alza de 1 punto porcentual"
+- **Niveles vs cambios responden preguntas distintas**: co-movimiento de equilibrio vs traspaso mensual
+- **Estabilidad**: un solo conjunto de coeficientes abarca 1982–2015, incluidos los años del límite inferior de cero después de 2008
+- **No causal por defecto**: ambas tasas responden a las mismas noticias (inflación, crecimiento); el ADL describe dinámicas **predictivas** y transmisión, no un experimento controlado
+:::
+
+[Una regresión de series de tiempo es creíble cuando sus residuos son ruido blanco *y* su historia sobrevive una comprobación de estabilidad y choques comunes.]{.takeaway .fragment}
+
+::: {.notes}
+Correcciones aplicadas en las diapositivas: el ejemplo de sobre-reacción del capítulo ("la Fed sube la tasa a 1 año en 1%") usa porcentaje donde quiere decir puntos porcentuales, y sus números (0.60, −0.10, −0.02, asentándose en 0.85) son ilustrativos, no estimaciones. La cointegración y las pruebas de raíz unitaria son las herramientas formales para la pregunta en niveles (nombradas en los Próximos Pasos del capítulo), no usadas aquí.
+:::
+
+# Acto II-c · De la asociación a la causa {.divider background-color="#7A209F"}
+
+[17.7 · endogeneidad · variables instrumentales · la caja de herramientas causal]{.act}
+
+::: {.notes}
+La sección 17.7 es conceptual en el capítulo: fórmulas, una lista de métodos y sentencias print, sin estimación. El deck repasa los conceptos y luego remite al deck del Capítulo 13, donde un RCT, un diferencias en diferencias, una regresión discontinua y un diseño de variables instrumentales se estiman cada uno sobre datos reales.
+:::
+
+# 17.7 · ¿Cuándo una pendiente es causal? {#sec-causal .divider background-color="#7A209F"}
+
+[Solo conceptos · diseños trabajados en el deck del Capítulo 13]{.act}
+
+::: {.notes}
+Puente desde las secciones de panel y series de tiempo: los EF eliminaron los confusores invariantes en el tiempo y la diferenciación eliminó las tendencias, pero ninguno garantiza que la variación restante en x sea tan buena como aleatoria.
+:::
+
+## MCO está sesgada en cuanto $x$ está correlacionada con el error
+
+$$y = \beta_1 + \beta_2 x + u, \qquad \text{MCO es consistente solo si } E[u \mid x] = 0$$
+
+::: {.incremental}
+- **Variables omitidas**: un confusor impulsa tanto a $x$ como a $y$. *NBA*: el tamaño de mercado eleva los ingresos y compra victorias (los EF eliminaron la parte invariante en el tiempo)
+- **Error de medición** en $x$: atenúa la pendiente hacia cero
+- **Simultaneidad / causalidad inversa**: $y$ también mueve a $x$. *NBA*: los ingresos pagan a los jugadores, los jugadores producen victorias
+:::
+
+[Añadir controles solo arregla los confusores que **mides**. Las afirmaciones causales creíbles necesitan una **estrategia de identificación**.]{.takeaway .fragment}
+
+::: {.notes}
+Cada fuente tiene una dirección de sesgo distinta. Las variables omitidas pueden ir en cualquier sentido (el signo de la fórmula del SVO); el error de medición clásico sesga hacia cero; la simultaneidad depende de la retroalimentación. Los efectos fijos abordan solo una forma específica de variable omitida: la invariante en el tiempo.
+:::
+
+## Resultados potenciales: qué significa un efecto causal
+
+$$\text{efecto individual} = Y_{1i} - Y_{0i}, \qquad \text{ATE} = E[Y_{1i} - Y_{0i}]$$
+
+::: {.incremental}
+- $Y_{1i}$: el resultado **si se trata**; $Y_{0i}$: el resultado **si no**. Solo uno se observa alguna vez
+- Una comparación ingenua de tratados y no tratados: $E[Y_1\mid D{=}1] - E[Y_0\mid D{=}0] = \text{ATT} + \underbrace{E[Y_0\mid D{=}1]-E[Y_0\mid D{=}0]}_{\text{sesgo de selección}}$
+- Cada diseño es una forma de hacer cero el término de sesgo de selección, o de eliminarlo
+:::
+
+[Una estimación causal es una afirmación sobre un **contrafactual**. El diseño es el argumento de por qué tu grupo de comparación lo sustituye.]{.takeaway .fragment}
+
+::: {.notes}
+El capítulo define los resultados potenciales y el ATE; la descomposición en ATT más sesgo de selección es el resultado estándar (añadido como repaso del método, y trabajado con datos en el Acto II-b del deck del Capítulo 13).
+:::
+
+## Variables instrumentales: toma prestada variación que es tan buena como aleatoria {.smaller}
+
+Un instrumento $z$ debe satisfacer dos condiciones:
+
+::: {.incremental}
+- **Relevancia**: $\text{Cov}(z, x) \neq 0$. *Comprobable*: el $F$ de primera etapa (regla de dedo $> 10$)
+- **Exogeneidad / exclusión**: $\text{Cov}(z, u) = 0$, así que $z$ afecta a $y$ **solo a través de** $x$. *No comprobable*: hay que argumentarla
+:::
+
+. . .
+
+Con un regresor y un instrumento, sustituye $y = \beta_1 + \beta_2 x + u$ en $\text{Cov}(z, y)$:
+
+$$\text{Cov}(z,y) = \beta_2\,\text{Cov}(z,x) + \underbrace{\text{Cov}(z,u)}_{=\,0} \;\;\Longrightarrow\;\; \hat\beta_{IV} = \frac{\widehat{\text{Cov}}(z,y)}{\widehat{\text{Cov}}(z,x)} = \frac{\text{forma reducida}}{\text{primera etapa}}$$
+
+[La VI es consistente donde MCO no lo es, pero solo para la variación que el instrumento mueve (un efecto *local*), y solo tan buena como el argumento de exclusión.]{.takeaway .fragment}
+
+::: {.notes}
+La derivación muestra exactamente dónde entra cada condición: la exogeneidad mata el término Cov(z,u); la relevancia hace que el denominador no sea cero. Una primera etapa débil (Cov(z,x) pequeña) magnifica cualquier pequeña violación de la exogeneidad. En pyfixest la sintaxis es pf.feols("y ~ 1 | x ~ z", data=...); un ejemplo trabajado con datos está en el deck del Capítulo 13 (caso 13.8).
+:::
+
+## La caja de herramientas causal {.smaller}
+
+| Método | Fuente de variación | Supuesto de identificación | Dónde verlo trabajado |
+|:--|:--|:--|:--|
+| Experimento aleatorizado | asignación aleatoria | aleatorización intacta (sin sesgo de atrición) | [Cap 13.5 · RAND HIE](../ch13/index.html#/case-135){data-preview-link="false"} |
+| Efectos fijos | cambios intra-unidad | sin confusores **variantes en el tiempo** | este deck, [17.3](#sec-fe), [CS 1](#cs-1), [CS 2](#cs-2) |
+| Diferencias en diferencias | grupo × periodo | tendencias paralelas | [Cap 13.6 · Sudáfrica](../ch13/index.html#/case-136){data-preview-link="false"} |
+| Regresión discontinua | un punto de corte en una variable de asignación | continuidad en el corte | [Cap 13.7 · Senado de EE. UU.](../ch13/index.html#/case-137){data-preview-link="false"} |
+| Variables instrumentales | un instrumento | relevancia + exclusión | [Cap 13.8 · instituciones](../ch13/index.html#/case-138){data-preview-link="false"} |
+| Emparejamiento / puntajes de propensión | covariables observadas | selección solo en observables | (nombrado en el capítulo; no trabajado) |
+
+[Cada fila cambia el inverificable "controlé por todo" por un supuesto específico que puedes defender, sondear o atacar.]{.takeaway .fragment}
+
+::: {.notes}
+Los enlaces abren el deck del Capítulo 13 en el caso correspondiente. Los efectos fijos pertenecen a esta tabla: son un diseño, no solo un estimador. Su supuesto (sin confusores variantes en el tiempo) es más débil que "sin confusores" pero sigue siendo un supuesto.
+:::
+
+## Los diseños trabajados: ingenuo vs diseño, del deck del Capítulo 13 {.smaller}
+
+| Caso Cap 13 | Diseño | Comparación ingenua | Estimación basada en diseño |
+|:--|:--|--:|--:|
+| [13.5](../ch13/index.html#/case-135){data-preview-link="false"} | RCT (seguro de salud) | *(aleatorizado: no hace falta versión ingenua)* | plan 95%: [−\$1,108]{.key} vs atención gratuita |
+| [13.6](../ch13/index.html#/case-136){data-preview-link="false"} | DiD (nutrición infantil) | tratados antes vs después: +0.867 | [+0.522]{.key} unidades z |
+| [13.7](../ch13/index.html#/case-137){data-preview-link="false"} | RD (incumbencia en el Senado) | ganadores vs perdedores: +21.7 pp | [+4.8 pp]{.key} |
+| [13.8](../ch13/index.html#/case-138){data-preview-link="false"} | VI (instituciones) | MCO: 0.52 | MC2E: [0.94]{.key} |
+
+[La misma lección que agrupada vs EF en este capítulo: cuando la comparación cambia, el número cambia, a veces por un factor de cuatro.]{.takeaway .fragment}
+
+::: {.notes}
+Números citados del deck verificado del Capítulo 13 (ver su acto de síntesis); nada se re-estima aquí. Combínalos con los propios contrastes de este capítulo: NBA agrupada 0.0068 vs EF 0.0045; elasticidad del capital agrupada 0.71 vs EF 0.44; pendiente de población agrupada +0.34 vs EF −0.82.
+:::
+
+## Recomendaciones prácticas de 17.7
+
+::: {.incremental}
+- Nombra los **confusores** antes de correr cualquier cosa; pregunta cuáles son invariantes en el tiempo
+- **Agrupa** (paneles) o usa **HAC** (series de tiempo): los EE honestos son parte de una afirmación creíble
+- **Reporta varias especificaciones**: agrupada y EF, MCO y VI, niveles y cambios. El *patrón* de los cambios es evidencia
+- **Enuncia el supuesto de identificación** en una oración, y di qué lo violaría
+:::
+
+[Un diseño gana una afirmación causal; un estadístico $t$ significativo no.]{.takeaway .fragment}
+
+::: {.notes}
+Estas son las recomendaciones prácticas del capítulo, con el hilo del deck añadido: la comparación a través de especificaciones no es un ritual de robustez, es el diagnóstico principal.
+:::
+
+# Acto II-d · Dos estudios de caso, cada tarea ejecutada {.divider background-color="#7A209F"}
+
+[Estudio de Caso 1 · productividad entre países · Estudio de Caso 2 · luces nocturnas en Bolivia]{.act}
+
+::: {.notes}
+Los dos estudios de caso de fin de capítulo están escritos como tareas de estudiante: el Estudio de Caso 1 solo da pistas; el Estudio de Caso 2 da código comentado. Para estas diapositivas cada tarea fue codificada dentro de los métodos y pistas del capítulo, ejecutada e interpretada. Los resultados que no aparecen en el capítulo se etiquetan "calculado para estas diapositivas".
+:::
+
+# Estudio de Caso 1 · ¿El capital eleva la productividad, dentro de los países? {#cs-1 .divider background-color="#7A209F"}
+
+[108 países × 25 años · descomposición de varianza · EE agrupados · EF · EF de dos vías · regiones]{.act}
+
+::: {.notes}
+Datos de clubes de convergencia de Mendez (2020). Pregunta de investigación del capítulo: ¿cómo se relacionan el capital físico y humano con la productividad laboral entre países, y controlar por características no observadas de los países cambia las estimaciones?
+:::
+
+## La pregunta y los datos {.smaller}
+
+**Datos.** Panel de clubes de convergencia de Mendez (2020): **108 países × 1990–2014 = 2,700** país-años (balanceado).
+
+| Variable | Significado | Media | Rango |
+|:--|:--|--:|:--|
+| `ln_lp` | log de la productividad laboral (producto por trabajador) | 9.80 | 6.90 – 11.94 |
+| `ln_kl` | log del capital físico por trabajador | 10.76 | 6.59 – 13.22 |
+| `h` | índice de capital humano (basado en escolaridad) | 2.99 | 1.32 – 5.20 |
+| `region` | África 26 · América 22 · Asia 28 · Europa 30 · Oceanía 2 países | | |
+
+$$\ln lp_{it} = \alpha_i + \beta_k \ln kl_{it} + \beta_h\, h_{it} + \varepsilon_{it}$$
+
+[**Corrección.** La lista de variables y el código de la Tarea 1 del capítulo usan `rk` y `hc`, que no existen en este archivo (el código se detiene con un `KeyError`). Las columnas son `kl` y `h`; las diapositivas las usan en todo momento.]{.takeaway .fragment}
+
+::: {.notes}
+Mismo archivo que los estudios de caso de Mendez de capítulos anteriores, donde kl y h se usan correctamente. La lista del capítulo también nombra rgdppc y tfp; las columnas del archivo son GDPpc y TFP. Con logs en ambos lados, beta_k es una elasticidad; h entra en niveles, así que beta_h es una semielasticidad.
+:::
+
+## Tarea 1 · Código: estructura del panel y descomposición de varianza
+
+``` {.python code-line-numbers="1-2|3-6|7|8-11"}
+!pip install -q pyfixest                         # pyfixest is not preinstalled in Colab
+import numpy as np, pandas as pd, pyfixest as pf # numerics, tables, regressions
+base = "https://raw.githubusercontent.com/quarcs-lab/mendez2020-convergence-clubs-code-data/"
+dat = pd.read_csv(base + "master/assets/dat.csv")    # 108 countries × 1990–2014
+dat["ln_lp"] = np.log(dat["lp"])                     # log labor productivity
+dat["ln_kl"] = np.log(dat["kl"])                     # log capital per worker (chapter: "rk")
+print(dat["country"].nunique(), dat["year"].nunique(), len(dat))   # 108 25 2700
+overall_var = dat["ln_lp"].var()                                    # all country-years
+between_var = dat.groupby("country")["ln_lp"].mean().var()          # 108 country means
+within_var = dat.groupby("country")["ln_lp"].apply(lambda x: x - x.mean()).var()
+print(overall_var, between_var, within_var, between_var / overall_var)
+```
+
+[↗ Pruébalo en Colab](https://colab.research.google.com/notebooks/empty.ipynb){.colab-link target="_blank" data-preview-link="false"}
+
+::: {.notes}
+Autocontenido, e idéntico al código de la Tarea 1 del capítulo salvo por el nombre de columna corregido. Varianzas en lugar de DE, como en la tarea del capítulo.
+:::
+
+## Tarea 1 · Resultado: el 95% de la variación es entre países
+
+| | Varianza de `ln_lp` | Proporción |
+|:--|--:|--:|
+| Total (2,700 país-años) | 1.391 | 100% |
+| Between (108 medias de país) | [1.328]{.key} | [95.4%]{.key} |
+| Within (desviaciones del propio promedio) | 0.075 | 5.4% |
+
+[Las proporciones no tienen que sumar exactamente 100%: la varianza between se calcula sobre 108 medias, la varianza within sobre 2,700 desviaciones.]{.comment}
+
+[Las diferencias de productividad son abrumadoramente **brechas permanentes entre países**. La MCO agrupada estará impulsada por ellas; los efectos fijos conservarán solo el 5% que se mueve dentro de los países.]{.takeaway .fragment}
+
+::: {.notes}
+Respuesta a la pregunta de la tarea: el componente between domina mucho más que en la NBA (81%). Implicación: la MCO agrupada y los EF responden preguntas muy distintas. Agrupada: ¿los países ricos en capital son más productivos? EF: cuando un país acumula capital, ¿sube su productividad?
+:::
+
+## Tarea 2 · Código: MCO agrupada con EE por defecto, robustos y agrupados
+
+``` {.python code-line-numbers="1-4|5-6|7-8"}
+# continues from the previous block
+fit_default = pf.feols("ln_lp ~ ln_kl + h", data=dat)                          # iid SEs
+fit_hc1 = pf.feols("ln_lp ~ ln_kl + h", data=dat, vcov="HC1")                  # robust
+fit_cluster = pf.feols("ln_lp ~ ln_kl + h", data=dat, vcov={"CRV1": "country"})  # by country
+print(pd.DataFrame({"default": fit_default.se(), "HC1": fit_hc1.se(),
+                    "cluster": fit_cluster.se()}).round(4))   # same coefficients, three SEs
+print((fit_cluster.se() / fit_default.se()).round(2))         # inflation factor
+fit_cluster.summary()
+```
+
+[↗ Pruébalo en Colab](https://colab.research.google.com/notebooks/empty.ipynb){.colab-link target="_blank" data-preview-link="false"}
+
+::: {.notes}
+El código de la Tarea 2 del capítulo, con ln_kl y h. Se añade HC1 para que la comparación separe la heterocedasticidad de la dependencia intra-país.
+:::
+
+## Tarea 2 · Resultado: agrupar cuadruplica los errores estándar {.smaller}
+
+| Variable | Coef. | EE por defecto | EE HC1 | EE agrupado | Agrupado ÷ por defecto | $t$ (defecto → agrupado) |
+|:--|--:|--:|--:|--:|--:|:--|
+| Intercepto | 1.6949 | 0.0581 | 0.0724 | 0.2716 | 4.67 | 29.15 → 6.24 |
+| `ln_kl` | [0.7136]{.key} | 0.0081 | 0.0089 | 0.0327 | [4.03]{.key} | 87.74 → 21.79 |
+| `h` | 0.1410 | 0.0148 | 0.0150 | 0.0612 | [4.12]{.key} | 9.50 → 2.30 |
+
+[N = 2,700 · 108 clusters de país · $R^2 = 0.908$ · IC 95% agrupado: `ln_kl` [0.6487, 0.7785], `h` [0.0196, 0.2623] ($p = 0.023$)]{.comment}
+
+[25 años de un país valen casi lo que una observación como evidencia sobre su *nivel*: agrupar infla los EE unas **4×**. `h` cae de $t = 9.5$ a un $t = 2.3$ limítrofe.]{.takeaway .fragment}
+
+::: {.notes}
+Respuesta a la pregunta de la tarea: los EE agrupados son unas cuatro veces los de por defecto, mucho más que el 1.8× del panel de la NBA, porque los residuos de los países son extremadamente persistentes (95% de la variación es entre países, y los datos anuales son suaves). La heterocedasticidad sola (HC1) cambia poco.
+:::
+
+## Tarea 3 · Código: efectos fijos de país
+
+``` {.python code-line-numbers="1-3|4-5"}
+# continues from the previous block
+fit_fe = pf.feols("ln_lp ~ ln_kl + h | country", data=dat,
+                  vcov={"CRV1": "country"})          # one intercept per country
+fit_fe.summary()                                     # within-country estimates
+print(pd.DataFrame({"pooled": fit_cluster.coef(), "FE": fit_fe.coef()}))   # side by side
+```
+
+[↗ Pruébalo en Colab](https://colab.research.google.com/notebooks/empty.ipynb){.colab-link target="_blank" data-preview-link="false"}
+
+::: {.notes}
+Exactamente la pista del capítulo: pf.feols('ln_lp ~ ln_kl + h | country'), con EE agrupados por país (calculado para estas diapositivas; el capítulo no muestra la salida).
+:::
+
+## Tarea 3 · Resultado: la elasticidad del capital cae un 39% dentro de los países {.smaller}
+
+| Variable | Coef. | EE | $t$ | $p$ | IC 95% |
+|:--|--:|--:|--:|--:|:--|
+| `ln_kl` | [0.4377]{.key} | 0.0377 | 11.61 | <&nbsp;0.001 | [0.3630,&nbsp;0.5125] |
+| `h` | 0.2226 | 0.0566 | 3.93 | <&nbsp;0.001 | [0.1104,&nbsp;0.3348] |
+
+[N = 2,700 · 108 efectos fijos de país · CRV1 por país · $R^2$ within = 0.670 · calculado para estas diapositivas]{.comment}
+
+::: {.incremental}
+- **`ln_kl`**: agrupada 0.714 → EF **0.438**. Dentro de un país, 1% más de capital por trabajador va con alrededor de 0.44% más de producto por trabajador
+- **`h`**: agrupada 0.141 → EF **0.223**. Una unidad más del índice: $100(e^{0.2226}-1) = 25\%$ más de productividad
+:::
+
+[La pendiente del capital se comporta como el caso de la NBA (se eliminó un confusor positivo). El capital humano se mueve en el **sentido contrario**: los EF no siempre encogen los coeficientes.]{.takeaway .fragment}
+
+::: {.notes}
+Qué coeficientes cambian más, y por qué: la elasticidad del capital cae un 39%, consistente con un sesgo positivo por variables omitidas de rasgos persistentes del país (instituciones, geografía, niveles de tecnología) que elevan tanto el capital por trabajador como la productividad. El coeficiente del capital humano sube, así que los confusores invariantes en el tiempo estaban correlacionados con h en la dirección opuesta respecto a la productividad, dado el capital. El Concepto Clave 17.9 del capítulo dice "el hallazgo típico es que los coeficientes de EF son más pequeños que los de MCO agrupada"; aquí eso se cumple para el capital pero no para el capital humano.
+:::
+
+## Agrupada vs EF vs EF de dos vías de un vistazo
+
+![Coeficientes con IC del 95% (agrupados por país) bajo tres especificaciones.](figures/fig_cs1_coefs.png)
+
+[La elasticidad del capital es estable una vez que están los efectos de país (0.44 → 0.40). La del capital humano no lo es: añadir efectos de año la vuelve **insignificante**.]{.takeaway .fragment}
+
+::: {.notes}
+Lee a través de las especificaciones como sugiere el hilo. ln_kl: 0.714 (agrupada), 0.438 (EF de país), 0.401 (EF de país y año). h: 0.141, 0.223, 0.103 (p = 0.18). El índice de capital humano tiende al alza casi en todas partes, así que una vez que los efectos de año comunes absorben las tendencias globales, queda poca variación within independiente en h.
+:::
+
+## Tarea 4 · Código: tendencias temporales y efectos de año
+
+``` {.python code-line-numbers="1-4|5-6|7-9"}
+# continues from the previous block
+fit_twfe = pf.feols("ln_lp ~ ln_kl + h | country + year", data=dat,
+                    vcov={"CRV1": "country"})       # two-way FE: country AND year
+fit_twfe.summary()
+fit_trend = pf.feols("ln_lp ~ ln_kl + h + year | country", data=dat,
+                     vcov={"CRV1": "country"})      # a common linear trend instead
+fit_trend.summary()
+year_fe = fit_twfe.fixef()                          # estimated year effects (1990 = 0)
+print(year_fe)
+```
+
+[↗ Pruébalo en Colab](https://colab.research.google.com/notebooks/empty.ipynb){.colab-link target="_blank" data-preview-link="false"}
+
+::: {.notes}
+La pista del capítulo: pf.feols('ln_lp ~ ln_kl + h | country + year'). Los efectos fijos de año absorben todo lo común a todos los países en un año dado (ciclos globales, precios de materias primas, la crisis de 2009). Una tendencia lineal es la versión restringida.
+:::
+
+## Tarea 4 · Resultado: los choques comunes importan para el capital humano {.smaller}
+
+| Variable | Coef. | EE | $t$ | $p$ | IC 95% |
+|:--|--:|--:|--:|--:|:--|
+| `ln_kl` | [0.4014]{.key} | 0.0428 | 9.38 | <&nbsp;0.001 | [0.3166,&nbsp;0.4862] |
+| `h` | 0.1028 | 0.0766 | 1.34 | 0.183 | [−0.0491,&nbsp;0.2547] |
+
+[EF de dos vías (país + año) · N = 2,700 · CRV1 por país · $R^2$ within = 0.337 · calculado para estas diapositivas]{.comment}
+
+[Con una tendencia lineal en lugar de efectos de año: `ln_kl` 0.4071, `h` 0.1009 ($p = 0.183$), tendencia +0.0057 por año ($p = 0.034$), es decir, alrededor del **0.57%** anual de crecimiento común de productividad más allá del capital y la escolaridad.]{.comment}
+
+[La elasticidad del capital dentro de los países sobrevive los choques comunes (≈ 0.40). La del capital humano no: su estimación de EF reflejaba en parte la tendencia mundial al alza en la escolaridad.]{.takeaway .fragment}
+
+::: {.notes}
+El R² within cae de 0.670 a 0.337 cuando se añaden los efectos de año porque los efectos de año ahora absorben la tendencia común que el capital y la escolaridad explicaban en parte. El modelo de tendencia y el modelo de efectos de año dan pendientes casi iguales, así que el componente común es aproximadamente lineal.
+:::
+
+## Tarea 4 · Los efectos de año comunes
+
+![Efectos fijos de año estimados del modelo de EF de dos vías, relativos a 1990.](figures/fig_cs1_year_fe.png)
+
+[Tras descontar el capital y la escolaridad, el componente común cae a inicios de los 90, sube de 2000 a 2008, se hunde en **2009** y se recupera.]{.takeaway .fragment}
+
+::: {.notes}
+El valle de los 90 (alrededor de −0.07 en 1994) refleja en parte las economías en transición de la muestra; la caída de 2009 es la crisis financiera global. Para 2014 el efecto común es de alrededor de +0.07 puntos logarítmicos respecto a 1990. Estos son condicionales al capital y al capital humano, así que son una trayectoria residual de "PTF común", no el crecimiento total.
+:::
+
+## Tarea 4 · Código: ¿las regiones crecen a tasas distintas? ¿Hay convergencia?
+
+``` {.python code-line-numbers="1-3|4-8|9-12"}
+# continues from the previous block (computed for these slides)
+dat["t"] = dat["year"] - 1990                                    # years since 1990
+fit_rt = pf.feols("ln_lp ~ ln_kl + h + i(region, t) | country", data=dat, vcov={"CRV1": "country"})
+names = fit_rt.coef().index; rt = [k for k in names if k.startswith("region::")]
+R = np.zeros((len(rt) - 1, len(names)))                           # H0: all trends = Africa's
+for j, k in enumerate(rt[1:]):
+    R[j, names.get_loc(k)], R[j, names.get_loc(rt[0])] = 1, -1
+print(fit_rt.coef()[rt]); print(fit_rt.wald_test(R=R))           # Wald chi2(4)
+first = dat[dat["year"] == 1990].set_index("country")["ln_lp"]   # initial productivity
+last = dat[dat["year"] == 2014].set_index("country")["ln_lp"]
+conv = pd.DataFrame({"ln_lp0": first, "g": 100 * (last - first) / 24}).reset_index()
+pf.feols("g ~ ln_lp0", data=conv, vcov="HC1").summary()          # growth on initial level
+```
+
+[↗ Pruébalo en Colab](https://colab.research.google.com/notebooks/empty.ipynb){.colab-link target="_blank" data-preview-link="false"}
+
+::: {.notes}
+La tarea pide "probar si las tasas de crecimiento de la productividad difieren entre regiones" e "¿hay evidencia de convergencia?". i(region, t) da a cada región su propia tendencia lineal (interacciones región-tiempo, como sugiere la pista), con EF de país. Convergencia: regresa el crecimiento anual promedio 1990–2014 sobre el log de la productividad inicial (una simple regresión entre países; el crecimiento en % por año usa la aproximación por diferencia de logs).
+:::
+
+## Tarea 4 · Resultado: las tendencias regionales difieren; los países más pobres no alcanzaron {.smaller}
+
+:::: {.columns}
+::: {.column width="48%"}
+| Tendencia regional (por año) | Coef. | $p$ |
+|:--|--:|--:|
+| África | 0.0015 | 0.665 |
+| América | 0.0066 | 0.035 |
+| Asia | [0.0135]{.key} | 0.010 |
+| Europa | 0.0126 | 0.001 |
+| Oceanía (2 países) | 0.0067 | <&nbsp;0.001 |
+
+[EF de país + `ln_kl` + `h` · CRV1 · prueba de tendencias iguales: Wald $\chi^2(4) = 11.39$, $p = 0.023$]{.comment}
+:::
+::: {.column width="52%"}
+| Regresión de convergencia | Coef. | EE | $p$ |
+|:--|--:|--:|--:|
+| Intercepto | 4.520 | 1.836 | 0.015 |
+| `ln_lp0` (1990) | [−0.222]{.key} | 0.180 | 0.221 |
+
+[N = 108 · HC1 · $R^2 = 0.018$ · crecimiento en % por año]{.comment}
+:::
+::::
+
+[Más allá del capital y la escolaridad, la productividad tendió al alza alrededor del 1.3% anual en Asia y Europa y apenas nada en África. **No hay convergencia incondicional**: la pendiente sobre la productividad inicial es pequeña e insignificante.]{.takeaway .fragment}
+
+::: {.notes}
+Ambas calculadas para estas diapositivas. Las tendencias regionales son condicionales al capital, al capital humano y a los EF de país, así que son tendencias de "PTF residual" regional. La pendiente de convergencia de −0.22 significa que un país con 1 punto logarítmico menos de productividad en 1990 creció solo 0.22 puntos porcentuales por año más rápido, y esa diferencia no es estadísticamente distinguible de cero. Crecimiento anual promedio por región (crudo, no condicional): Asia 3.25%, Europa 2.67%, América 2.23%, África 1.41%, Oceanía 1.33%.
+:::
+
+## Tarea 4 · Convergencia, en imagen
+
+![Crecimiento anual promedio de la productividad laboral, 1990–2014, frente a su nivel de 1990; 108 países.](figures/fig_cs1_convergence.png)
+
+[Una nube con una pendiente apenas negativa: algunas economías asiáticas pobres se dispararon, muchas economías africanas no. Por esto los datos de Mendez tratan sobre **clubes** de convergencia, no sobre una única convergencia global.]{.takeaway .fragment}
+
+::: {.notes}
+La imagen motiva la convergencia por clubes: grupos de países convergen a estados estacionarios distintos. Probar la existencia de clubes está más allá de este capítulo.
+:::
+
+## Tarea 5 · Código: ¿los retornos al capital difieren por región?
+
+``` {.python code-line-numbers="1-2|3-5|6-8"}
+# continues from the previous block (computed for these slides)
+fit_r1 = pf.feols("ln_lp ~ ln_kl + h + C(region)", data=dat, vcov={"CRV1": "country"})
+fit_r2 = pf.feols("ln_lp ~ ln_kl + h + C(region) + C(region):ln_kl + C(region):h",
+                  data=dat, vcov={"CRV1": "country"})    # region-specific slopes
+fit_r1.summary(); fit_r2.summary()
+inter = [k for k in fit_r2.coef().index if ":" in k]     # the 8 interaction terms
+R = np.array([[1.0 * (k == a) for k in fit_r2.coef().index] for a in inter])
+print(fit_r2.wald_test(R=R))                             # H0: all 8 interactions = 0
+```
+
+[↗ Pruébalo en Colab](https://colab.research.google.com/notebooks/empty.ipynb){.colab-link target="_blank" data-preview-link="false"}
+
+::: {.notes}
+Los tres pasos de la tarea: dummies de región, interacciones región-por-capital y una prueba conjunta. África es la región de referencia (la primera alfabéticamente). Especificaciones agrupadas con EE agrupados por país, ya que la tarea no pide EF aquí.
+:::
+
+## Tarea 5 · Resultado: las pendientes regionales difieren solo débilmente {.smaller}
+
+| Región | Pendiente implícita de `ln_kl` | Pendiente implícita de `h` |
+|:--|--:|--:|
+| África (referencia) | 0.640 | 0.257 |
+| América | 0.671 | 0.293 |
+| Asia | [0.778]{.key} | −0.075 |
+| Europa | 0.679 | 0.048 |
+| Oceanía (2 países) | 0.649 | 0.110 |
+
+[Pendiente implícita = pendiente base + interacción regional · prueba conjunta de las 8 interacciones: Wald $\chi^2(8) = 13.90$, $p = 0.084$ · dummies de región solas: solo Oceanía difiere de África ($p = 0.034$) · calculado para estas diapositivas]{.comment}
+
+[Los retornos al capital lucen similares entre regiones (0.64–0.78), y las interacciones son conjuntamente significativas solo al 10%. Ninguna interacción específica de región es individualmente significativa al 5%.]{.takeaway .fragment}
+
+::: {.notes}
+¿Qué región muestra el mayor retorno al capital humano? América (0.29) y África (0.26), pero las interacciones de h son imprecisas (la interacción de Asia tiene p = 0.13), así que el ranking no es confiable. Estas son asociaciones agrupadas entre países, sujetas a toda la confusión que reveló la Tarea 3.
+:::
+
+## Tarea 6 · El informe de política, en números {.smaller}
+
+| Especificación | `ln_kl` | `h` | Variación usada |
+|:--|--:|--:|:--|
+| MCO agrupada, EE agrupados | 0.714 (0.033) | 0.141 (0.061) | between + within |
+| EF de país | [0.438]{.key} (0.038) | 0.223 (0.057) | dentro del país |
+| EF de país + año | 0.401 (0.043) | 0.103 (0.077) | dentro del país, neto de choques comunes |
+| Pendientes específicas de región (agrupada) | 0.64 – 0.78 | −0.08 – 0.29 | between + within, por región |
+
+::: {.incremental}
+- **Canales**: la acumulación de capital está robustamente asociada con la productividad dentro de los países (elasticidad ≈ 0.4); el vínculo del capital humano es frágil una vez que se eliminan las tendencias comunes
+- **¿Causal?** No establecido: el capital responde a la productividad esperada (causalidad inversa), y quedan políticas y choques variantes en el tiempo
+:::
+
+[Lectura de política: los climas de inversión que elevan el capital por trabajador son el canal mejor respaldado en estos datos, y las estimaciones agrupadas entre países lo sobreestiman en un 40%.]{.takeaway .fragment}
+
+::: {.notes}
+La tarea pide un informe de 200–300 palabras. Esta diapositiva da su base de evidencia. Amenazas a la identificación: causalidad inversa (las economías más productivas atraen inversión), error de medición en los stocks de capital (construidos por inventario perpetuo, que suaviza la variación within) y el índice de capital humano con tendencia suave. El Concepto Clave 17.10 del capítulo añade que la elección del estimador debería seguir a la pregunta; aquí las estimaciones within son las relevantes para "qué sucede cuando un país acumula capital".
+:::
+
+# Estudio de Caso 2 · Luces nocturnas y población en Bolivia {#cs-2 .divider background-color="#7A209F"}
+
+[339 municipios × 2012–2020 · reestructuración · agrupada · EF · efectos de año · primeras diferencias]{.act}
+
+::: {.notes}
+DS4Bolivia: el último estudio de caso de DS4Bolivia del libro. Los datos satelitales de desarrollo de corte transversal se convierten en un panel porque las luces nocturnas y la población están disponibles anualmente para 2012–2020.
+:::
+
+## La pregunta y los datos {.smaller}
+
+**Datos.** DS4Bolivia (`ds4bolivia_v20250523.csv`): **339 municipios**, columnas anuales `ln_NTLpc2012` … `ln_NTLpc2020` y `pop2012` … `pop2020`, almacenadas en formato **ancho** (una fila por municipio).
+
+| Variable | Significado |
+|:--|:--|
+| `ln_NTLpc` | log de las luces nocturnas **per cápita** (resultado) |
+| `ln_pop` | log de la población |
+| `year` | 2012, …, 2020 |
+| `asdf_id`, `mun`, `dep` | id del municipio, nombre, departamento (9 departamentos) |
+
+$$\ln NTLpc_{it} = \alpha_i + \beta\,\ln pop_{it} + \delta_t + \varepsilon_{it}$$
+
+[**Pregunta de investigación**: ¿cómo evoluciona la luminosidad dentro de los municipios a lo largo del tiempo, y cómo se mueve con la población una vez que se eliminan los rasgos locales fijos (altitud, lejanía, clima)?]{.takeaway .fragment}
+
+::: {.notes}
+Punto interpretativo clave para más adelante: el resultado es luces per cápita, ln(NTL) − ln(pop). Así que el coeficiente de ln_pop equivale a (elasticidad de las luces totales respecto a la población) − 1. Un coeficiente de cero significaría que las luces totales crecen uno a uno con la población.
+:::
+
+## Tarea 1 · Código: reestructurar de ancho → largo
+
+``` {.python code-line-numbers="1-4|5-8|9-11"}
+!pip install -q pyfixest                         # pyfixest is not preinstalled in Colab
+import numpy as np, pandas as pd, pyfixest as pf # numerics, tables, regressions
+url_bol = "https://raw.githubusercontent.com/quarcs-lab/ds4bolivia/master/ds4bolivia_v20250523.csv"
+bol = pd.read_csv(url_bol)                       # 339 municipalities, wide format
+years = range(2012, 2021)                        # nine annual observations
+ntl_long = bol[["mun", "dep", "asdf_id"] + [f"ln_NTLpc{y}" for y in years]].melt(
+    id_vars=["mun", "dep", "asdf_id"], var_name="ntl_var", value_name="ln_NTLpc")
+ntl_long["year"] = ntl_long["ntl_var"].str.extract(r"(\d{4})").astype(int)  # "…2015" → 2015
+pop_long = bol[["asdf_id"] + [f"pop{y}" for y in years]].melt(
+    id_vars=["asdf_id"], var_name="pop_var", value_name="pop")
+pop_long["year"] = pop_long["pop_var"].str.extract(r"(\d{4})").astype(int)
+```
+
+[↗ Pruébalo en Colab](https://colab.research.google.com/notebooks/empty.ipynb){.colab-link target="_blank" data-preview-link="false"}
+
+::: {.notes}
+El código comentado de la Tarea 1 del capítulo, descomentado y ejecutado. melt() convierte nueve columnas de NTL en nueve filas por municipio; el año se extrae del nombre de la columna con una expresión regular.
+:::
+
+## Tarea 1 · Código: fusionar en un solo panel y comprobarlo
+
+``` {.python code-line-numbers="1-4|5-6|7-8"}
+# continues from the previous block
+panel = ntl_long.merge(pop_long[["asdf_id", "year", "pop"]], on=["asdf_id", "year"], how="left")
+panel["ln_pop"] = np.log(panel["pop"])                       # log population
+panel = panel.sort_values(["asdf_id", "year"]).reset_index(drop=True)
+print(panel.shape, panel["asdf_id"].nunique())               # rows × columns, municipalities
+print(panel["ln_NTLpc"].isna().sum())                        # missing light values
+panel_reg = panel[["ln_NTLpc", "ln_pop", "year", "mun", "dep", "asdf_id"]].dropna()
+print(len(panel_reg), panel_reg["asdf_id"].nunique())        # estimation sample
+```
+
+[↗ Pruébalo en Colab](https://colab.research.google.com/notebooks/empty.ipynb){.colab-link target="_blank" data-preview-link="false"}
+
+| | Filas | Municipios |
+|:--|--:|--:|
+| Panel completo (339 × 9) | 3,051 | 339 |
+| `ln_NTLpc` faltante | 67 | |
+| Muestra de estimación | [2,984]{.key} | [337]{.key} |
+
+::: {.notes}
+El panel es 339 × 9 = 3,051 como espera la tarea, pero 67 municipio-años no tienen valor de luz, así que la muestra de estimación es 2,984 filas que cubren 337 municipios (dos pierden todos los años). El panel es por tanto desbalanceado; repórtalo.
+:::
+
+## Tarea 6 (primero): los niveles difieren mucho más de lo que se mueven
+
+![Log de las luces nocturnas per cápita para 40 municipios elegidos al azar, con la media de todos los municipios.](figures/fig_cs2_trajectories.png)
+
+| Varianza de… | Total | Between | Within | Proporción between |
+|:--|--:|--:|--:|--:|
+| `ln_NTLpc` | 1.729 | 1.635 | 0.220 | [94.6%]{.key} |
+| `ln_pop` | 1.278 | 1.283 | 0.0055 | ≈ 100% (within 0.4%) |
+
+::: {.notes}
+Adelantada de la Tarea 6 porque enmarca todo lo que sigue (calculado para estas diapositivas). Luces: 95% entre municipios, como los países. Población: esencialmente toda between; la población dentro del municipio apenas se mueve (varianza within 0.0055, alrededor del 0.4% del total). Eso importará para la estimación de EF de la pendiente de población: está identificada a partir de muy poca variación. La proporción between excede ligeramente el 100% para ln_pop porque las varianzas between y within usan denominadores distintos.
+:::
+
+## Tarea 2 · Código: MCO agrupada, EE por defecto vs agrupados
+
+``` {.python code-line-numbers="1-3|4-5"}
+# continues from the previous block
+fit_def = pf.feols("ln_NTLpc ~ ln_pop + year", data=panel_reg)               # default SEs
+fit_pooled = pf.feols("ln_NTLpc ~ ln_pop + year", data=panel_reg, vcov={"CRV1": "asdf_id"})
+print((fit_pooled.se() / fit_def.se()).round(2))      # cluster ÷ default, per coefficient
+fit_pooled.summary()
+```
+
+[↗ Pruébalo en Colab](https://colab.research.google.com/notebooks/empty.ipynb){.colab-link target="_blank" data-preview-link="false"}
+
+::: {.notes}
+El código comentado de la Tarea 2 del capítulo, descomentado: la misma regresión agrupada con EE por defecto y con EE agrupados por municipio.
+:::
+
+## Tarea 2 · Resultado: población y tendencia, agrupada {.smaller}
+
+| Variable | Coef. | EE | $t$ | $p$ | IC 95% |
+|:--|--:|--:|--:|--:|:--|
+| Intercepto | −200.1384 | 12.3774 | −16.17 | <&nbsp;0.001 | [−224.4854,&nbsp;−175.7914] |
+| `ln_pop` | [0.3385]{.key} | 0.0472 | 7.18 | <&nbsp;0.001 | [0.2457,&nbsp;0.4312] |
+| `year` | 0.1044 | 0.0062 | 16.88 | <&nbsp;0.001 | [0.0923,&nbsp;0.1166] |
+
+[N = 2,984 · 337 clusters · $R^2 = 0.130$ · EE agrupado ÷ por defecto: `ln_pop` **2.37**, `year` **0.71**]{.comment}
+
+::: {.notes}
+El código comentado de la Tarea 2 del capítulo. El intercepto es el log de las luces predicho en el año 0 (una extrapolación dos mil años atrás), por lo que es −200; centra el año para hacerlo interpretable. Agrupar amplía el EE de la población 2.37×, pero *estrecha* el EE del año (0.71×). Los EE robustos por agrupamiento estiman la covarianza intra-cluster real de regresor × residuo; cuando esos productos están correlacionados negativamente dentro de los clusters, el EE agrupado es más pequeño que el de por defecto. Los EE agrupados no siempre son más grandes.
+:::
+
+## Tarea 2 · Interpretación: lugares más grandes, más luz por persona
+
+::: {.incremental}
+- **Entre municipios**, 1% más de población va con **0.34%** más de luz *per cápita*
+- En luz total, esa es una elasticidad de $0.34 + 1 = 1.34$: los lugares más grandes son desproporcionadamente más brillantes (pueblos, redes eléctricas, comercio)
+- **Tendencia**: las luces per cápita crecieron alrededor de **0.10 puntos logarítmicos por año** en promedio, manteniendo fija la población
+- $R^2 = 0.13$ bajo: la mayor parte de la variación en las luces per cápita no está relacionada con el tamaño de la población
+:::
+
+[Una comparación entre municipios: las ciudades frente a los municipios rurales difieren en mucho más que la población.]{.takeaway .fragment}
+
+::: {.notes}
+La construcción per cápita importa: regresa ln(NTL/pop) sobre ln(pop), y la pendiente es la elasticidad de las luces totales menos uno. La altitud, la lejanía, el acceso a la red eléctrica y la estructura económica difieren sistemáticamente con el tamaño. Los EF a continuación eliminan la parte invariante en el tiempo de esas diferencias.
+:::
+
+## Tarea 3 · Código: efectos fijos de municipio
+
+``` {.python code-line-numbers="1-3|4"}
+# continues from the previous block
+fit_fe = pf.feols("ln_NTLpc ~ ln_pop + year | asdf_id", data=panel_reg,
+                  vcov={"CRV1": "asdf_id"})          # within-municipality estimator
+fit_fe.summary(); print(fit_pooled.coef()["ln_pop"], fit_fe.coef()["ln_pop"])
+```
+
+[↗ Pruébalo en Colab](https://colab.research.google.com/notebooks/empty.ipynb){.colab-link target="_blank" data-preview-link="false"}
+
+::: {.notes}
+El código comentado de la Tarea 3 del capítulo. La barra vertical absorbe un intercepto por municipio, que es lo mismo que de-medir cada variable por municipio.
+:::
+
+## Tarea 3 · Resultado: la pendiente de población cambia de signo {.smaller}
+
+| Variable | Coef. | EE | $t$ | $p$ | IC 95% |
+|:--|--:|--:|--:|--:|:--|
+| `ln_pop` | [−0.8237]{.key} | 0.2942 | −2.80 | 0.005 | [−1.4023,&nbsp;−0.2450] |
+| `year` | 0.1320 | 0.0066 | 20.04 | <&nbsp;0.001 | [0.1191,&nbsp;0.1450] |
+
+[N = 2,983 (un singleton descartado) · 337 EF de municipio · CRV1 · $R^2$ within = 0.429]{.comment}
+
+[La pendiente de población **cambia de signo**: +0.34 agrupada, **−0.82** dentro de los municipios.]{.takeaway .fragment}
+
+::: {.notes}
+El código comentado de la Tarea 3 del capítulo (pyfixest absorbe los efectos de municipio; equivalente a de-medir). N es 2,983 porque un municipio tiene una sola observación, que no carga variación within y se descarta. El coeficiente del año sube a 0.132 puntos logarítmicos por año (alrededor del 14% anual en luces per cápita).
+:::
+
+## Tarea 3 · Interpretación: qué significa y qué no el cambio de signo
+
+::: {.incremental}
+- **En luz total**: $-0.82 + 1 = 0.18$. Cuando la población de un municipio crece más rápido que su propia tendencia, su luz total crece mucho menos que proporcionalmente, así que la luz **por persona** cae
+- **Los efectos fijos absorben** altitud, lejanía, clima, infraestructura histórica: la "prima de tamaño" de corte transversal era en su mayoría estos rasgos
+- **Pero** la población dentro del municipio varía muy poco (0.4% de su varianza) y se mueve casi linealmente con el tiempo. Con una tendencia de año en el modelo, $\beta$ está identificado a partir de pequeñas **desviaciones de la población respecto a su tendencia**
+:::
+
+[Trata −0.82 como frágil: las cifras de población entre censos suelen ser proyecciones, así que sus desviaciones año a año pueden ser artefactos de suavizado, no migración real.]{.takeaway .fragment}
+
+::: {.notes}
+Dentro de los municipios, el log de la población de-medido y el año de-medido correlacionan 0.59 (calculado para estas diapositivas), así que la tendencia absorbe gran parte de la variación de la población. La advertencia de proyección censal es una preocupación estándar de calidad de datos para las series de población intercensal; la documentación del dataset debería comprobarse antes de leer el coeficiente como comportamental.
+:::
+
+## Tarea 4 · Código: efectos de año en lugar de una tendencia lineal
+
+``` {.python code-line-numbers="1-3|4-6|7"}
+# continues from the previous block
+fit_yfe = pf.feols("ln_NTLpc ~ ln_pop + C(year) | asdf_id", data=panel_reg,
+                   vcov={"CRV1": "asdf_id"})                 # 2012 = reference year
+yk = [k for k in fit_yfe.coef().index if k.startswith("C(year)")]
+R = np.array([[1.0 * (k == a) for k in fit_yfe.coef().index] for a in yk])
+print(fit_yfe.wald_test(R=R))                                # H0: no year effects
+print(fit_yfe.coef()[yk].round(3))                           # path relative to 2012
+```
+
+[↗ Pruébalo en Colab](https://colab.research.google.com/notebooks/empty.ipynb){.colab-link target="_blank" data-preview-link="false"}
+
+::: {.notes}
+La tarea: reemplaza la tendencia lineal con dummies de año, prueba su significancia conjunta y grafícalas. Los EF de municipio se quedan, así que los efectos de año describen la trayectoria within-municipio promedio, manteniendo fija la población. (El código de ejemplo del capítulo grafica las medias anuales crudas; aquí se usa la versión de regresión, y las medias crudas cuentan la misma historia: 13.10 en 2012, 13.91 en 2020.)
+:::
+
+## Tarea 4 · Resultado: las luces saltan en 2017, luego se estabilizan
+
+![Efectos de año (puntos logarítmicos relativos a 2012), con EF de municipio y log de población mantenidos fijos.](figures/fig_cs2_year_effects.png)
+
+[Prueba conjunta de los 8 efectos de año: Wald $\chi^2(8) = 706.3$, $p < 0.001$ · `ln_pop` −0.8173 (EE 0.2957) · $R^2$ within = 0.469 · calculado para estas diapositivas]{.comment}
+
+[No es crecimiento estable: +0.54 para 2016, un **salto de 0.36** a 2017, luego una meseta cerca de +0.95. Pregunta si el producto satelital o su procesamiento cambiaron antes de leer un salto como desarrollo.]{.takeaway .fragment}
+
+::: {.notes}
+Efectos de año: 2013 0.211, 2014 0.252, 2015 0.444, 2016 0.543, 2017 0.904, 2018 0.953, 2019 0.933, 2020 0.974. La tendencia lineal de 0.132 por año de la Tarea 3 promedió sobre esta forma de escalón-más-meseta. Los compuestos anuales de luces nocturnas pueden cambiar con la calibración del sensor y el procesamiento; esto es una advertencia para comprobar la documentación de datos, no una afirmación sobre lo que pasó en 2017. El coeficiente de población no cambia con el cambio de tendencia a dummies.
+:::
+
+## Tarea 5 · Código: primeras diferencias
+
+``` {.python code-line-numbers="1-4|5-7"}
+# continues from the previous block
+panel_reg = panel_reg.sort_values(["asdf_id", "year"])
+panel_reg["d_ln_NTLpc"] = panel_reg.groupby("asdf_id")["ln_NTLpc"].diff()   # vs previous row
+panel_reg["d_ln_pop"] = panel_reg.groupby("asdf_id")["ln_pop"].diff()
+fd_data = panel_reg.dropna(subset=["d_ln_NTLpc", "d_ln_pop"])               # drop first years
+fit_fd = pf.feols("d_ln_NTLpc ~ d_ln_pop", data=fd_data, vcov={"CRV1": "asdf_id"})
+fit_fd.summary()                                                            # change on change
+```
+
+[↗ Pruébalo en Colab](https://colab.research.google.com/notebooks/empty.ipynb){.colab-link target="_blank" data-preview-link="false"}
+
+::: {.notes}
+Ordena por municipio y año, toma las diferencias dentro del municipio, descarta el primer año de cada municipio y regresa cambio sobre cambio con EE agrupados por municipio.
+:::
+
+## Tarea 5 · Resultado: las primeras diferencias apuntan en el mismo sentido, con menos precisión {.smaller}
+
+| Variable | Coef. | EE | $t$ | $p$ | IC 95% |
+|:--|--:|--:|--:|--:|:--|
+| Intercepto | 0.1200 | 0.0059 | 20.29 | <&nbsp;0.001 | [0.1083,&nbsp;0.1316] |
+| `d_ln_pop` | [−0.5205]{.key} | 0.2928 | −1.78 | 0.076 | [−1.0964,&nbsp;0.0554] |
+
+[N = 2,647 · CRV1 por municipio · $R^2 = 0.002$ · el intercepto es el cambio anual promedio (≈ +12.7% anual en luces per cápita)]{.comment}
+
+::: {.notes}
+El código comentado de la Tarea 5 del capítulo. diff() toma el cambio respecto a la fila disponible anterior; cuando falta un año abarca dos años (un pequeño número de casos). El intercepto en una regresión de primeras diferencias juega el papel de la tendencia lineal.
+:::
+
+## Tarea 5 · La pendiente de población a través de cuatro estimadores
+
+![Coeficiente del log de la población, IC del 95% agrupados por municipio, a través de cuatro especificaciones.](figures/fig_cs2_coefs.png)
+
+[Positivo entre municipios, negativo dentro de ellos, y solo limítrofe en primeras diferencias.]{.takeaway .fragment}
+
+::: {.notes}
+Agrupada +0.34; EF con tendencia −0.82; EF con dummies de año −0.82; PD −0.52. Solo la estimación agrupada usa variación entre municipios.
+:::
+
+## Tarea 5 · EF vs PD: la misma idea, pesos distintos
+
+::: {.incremental}
+- Ambos eliminan $\alpha_i$. Los **EF** comparan cada año con el promedio de 9 años del municipio; las **PD** comparan cada año con el anterior
+- Con $T > 2$ difieren cuando los errores están correlacionados serialmente o el momento de los efectos importa: los EF son eficientes con errores serialmente *no correlacionados*, las PD con errores de *caminata aleatoria*
+- Aquí: EF −0.82 ($p = 0.005$), PD −0.52 ($p = 0.076$); mismo signo, IC solapados
+:::
+
+[Ambos apuntan en el mismo sentido, pero las PD no pueden rechazar cero al 5%. La pendiente de población es el eslabón más débil de este estudio de caso.]{.takeaway .fragment}
+
+::: {.notes}
+Elasticidades de luces totales implícitas: agrupada 1.34, EF 0.18, PD 0.48. Cuando los EF y las PD divergen, a menudo señala error de medición (diferenciar amplifica el ruido respecto a la señal) o dinámicas; ambos aplican aquí, dado lo poco que se mueve la población dentro de los municipios.
+:::
+
+## Tarea 6 · Código: la evidencia para el informe del panel
+
+``` {.python code-line-numbers="1-6|7-8"}
+# continues from the previous block (computed for these slides)
+for v in ["ln_NTLpc", "ln_pop"]:
+    overall = panel_reg[v].var()                                       # all rows
+    between = panel_reg.groupby("asdf_id")[v].mean().var()            # municipality means
+    within = panel_reg.groupby("asdf_id")[v].apply(lambda x: x - x.mean()).var()
+    print(v, round(overall, 4), round(between, 4), round(within, 4))
+dep = panel_reg.pivot_table(index="dep", columns="year", values="ln_NTLpc", aggfunc="mean")
+print((dep[2020] - dep[2012]).sort_values().round(2))                 # change by department
+```
+
+[↗ Pruébalo en Colab](https://colab.research.google.com/notebooks/empty.ipynb){.colab-link target="_blank" data-preview-link="false"}
+
+::: {.notes}
+Los extras sugeridos de la tarea: descomposición de varianza (mostrada antes) y crecimiento por departamento. Cambio medio en el log de las luces per cápita, 2012–2020, sobre todos los municipios: +0.81.
+:::
+
+## Tarea 6 · El informe del panel, en números {.smaller}
+
+| Evidencia | Resultado |
+|:--|:--|
+| Variación en `ln_NTLpc` | 95% entre municipios; los cambios within son pequeños pero reales |
+| Pendiente de población agrupada | +0.34 (EE agrupado 0.047): lugares más grandes más brillantes por persona |
+| Pendiente de población EF / PD | **−0.82** ($p = 0.005$) / −0.52 ($p = 0.076$): frágil |
+| Trayectoria temporal (efectos de año) | +0.97 puntos logarítmicos 2012 → 2020, con un salto de 0.36 en 2017 |
+| Por departamento, 2012 → 2020 | Chuquisaca +1.24, Beni +1.20, La Paz +1.04 … Tarija +0.46, **Pando −0.50** |
+
+::: {.incremental}
+- **Ventajas**: cobertura anual y consistente de todos los municipios donde las encuestas son escasas
+- **Límites**: cambios de sensor; un denominador de población proyectado; las luces solo ven la actividad electrificada
+- **Añadir**: covariables variantes en el tiempo (electrificación, carreteras, transferencias)
+:::
+
+[Los paneles satelitales pueden rastrear el cambio municipal a lo largo del tiempo, pero la pendiente within-municipio vale solo tanto como la variación temporal del regresor.]{.takeaway .fragment}
+
+::: {.notes}
+Respuestas a las preguntas del informe: (1) los cambios within-municipio muestran un abrillantamiento amplio, concentrado en 2017; (2) el coeficiente de población de EF invierte el signo agrupado; (3) la tendencia temporal tiene forma de escalón, no lineal; (4) los EF y las PD coinciden en signo, difieren en tamaño y precisión; los supuestos clave son sin confusores variantes en el tiempo (ambos) y la estructura del error (cuál es más eficiente); (5) y (6) como en la diapositiva. Pando es el único departamento cuyas luces per cápita medias cayeron.
+:::
+
+# Leerlo bien {.divider background-color="#C21E72"}
+
+[Acto III · La resolución]{.act}
+
+::: {.notes}
+Síntesis: alinea cada coeficiente por la variación que lo identificó, alinea cada error estándar por la dependencia que permitió, luego vete con una guía de decisión y una lista de verificación.
+:::
+
+## ¿Qué variación identificó cada pendiente? {.smaller}
+
+| Ejemplo | Coeficiente | Toda la variación (agrupada / niveles) | Solo within o cambios | Cambio |
+|:--|:--|--:|--:|:--|
+| Ingresos NBA | `wins` | 0.00675 | EF: [0.00451]{.key} | −33% |
+| Productividad, 108 países | `ln_kl` | 0.714 | EF: [0.438]{.key} | −39% |
+| Productividad, 108 países | `h` | 0.141 | EF: [0.223]{.key} | +58% |
+| Luces nocturnas, 337 municipios | `ln_pop` | +0.338 | EF: [−0.824]{.key}; PD: −0.521 | cambia de signo |
+| Tasas del Tesoro | tasa a 1 año | niveles + tendencia: 0.508 | cambios: [0.720]{.key} | pregunta distinta |
+
+[Ninguna regla dice que la estimación within sea más pequeña. Puede encogerse, crecer o cambiar de signo. Lo constante es la lección: **la comparación define el coeficiente**.]{.takeaway .fragment}
+
+::: {.notes}
+El hilo del deck en una tabla. En los paneles, el paso de agrupada a within elimina los confusores invariantes en el tiempo; la dirección del cambio depende de cómo se relacionen esos confusores con x e y. En las series de tiempo, los niveles y los cambios estiman objetos distintos (un co-movimiento de equilibrio neto de una tendencia lineal frente al traspaso mensual), así que la comparación no es solo sobre sesgo.
+:::
+
+## ¿Qué error estándar fue honesto? {.smaller}
+
+| Ejemplo | EE honesto | Razón respecto al EE por defecto | Qué ignoró el de por defecto |
+|:--|:--|--:|:--|
+| NBA, agrupada | cluster por equipo | [1.81]{.key} | 10 temporadas de un equipo están correlacionadas |
+| NBA, EF | cluster por equipo | 1.42 | correlación serial que queda tras eliminar $\alpha_i$ |
+| Países, agrupada | cluster por país | [4.03]{.key} (`ln_kl`) | 25 años suaves por país |
+| Municipios, agrupada | cluster por municipio | 2.37 (`ln_pop`), 0.71 (`year`) | dependencia within-municipio, cualquier signo |
+| Tasas del Tesoro, niveles | Newey–West, 24 rezagos | [3.65]{.key} | autocorrelación residual de 0.95 |
+
+[Los mismos coeficientes, confianza muy distinta. La inferencia debe permitir la dependencia que los datos realmente tienen, y puede mover el EE en cualquier dirección.]{.takeaway .fragment}
+
+::: {.notes}
+Cada razón se calcula de las mismas regresiones mostradas en el deck. El 0.71 para la tendencia de año municipal es el recordatorio de que agrupar no es un ajuste fijo de "inflar por k": estima la covarianza intra-cluster real.
+:::
+
+## Elegir un estimador: una guía breve
+
+::: {.incremental}
+- **¿Los rasgos de la unidad impulsan tanto a $x$ como a $y$?** Efectos fijos (más efectos de tiempo); agrupa por unidad
+- **¿Los efectos de unidad no están relacionados con $x$?** Efectos aleatorios; comprueba con Hausman o Mundlak
+- **¿Serie de tiempo con tendencia?** Comprueba el correlograma; usa cambios o dinámicas AR/ADL; EE HAC
+- **¿Resultado binario?** MPL para promedios; logit para probabilidades, con efectos marginales
+- **¿Confusores variantes en el tiempo o retroalimentación?** Necesitas un diseño: VI, DiD, RD, RCT
+:::
+
+[Parte de la estructura de los datos y de los confusores probables, luego elige el estimador, luego el error estándar.]{.takeaway .fragment}
+
+::: {.notes}
+Una guía de decisión, no un algoritmo. Muchos artículos aplicados combinan elementos: los EF de dos vías con EE agrupados son la especificación de panel por defecto en gran parte de la economía aplicada, y el DiD son EF de dos vías con un indicador de tratamiento.
+:::
+
+## El error tentador — y la corrección
+
+[Objeción.]{.objection} "Los efectos fijos controlan por la heterogeneidad no observada, así que el coeficiente de EF es causal."
+
+. . .
+
+[Respuesta.]{.rebuttal} Los EF eliminan solo lo que es **constante** dentro de una unidad. En la NBA una nueva estrella eleva las victorias y los ingresos en la misma temporada; en Bolivia la población y las luces co-se-mueven con lo que sea que impulse el crecimiento local. Y los EF descartan la variación between, así que la estimación descansa en la variación within que queda: 69% de la varianza de las victorias, pero solo 0.4% de la varianza de la población municipal.
+
+[Los EF son un diseño con un supuesto (sin confusores variantes en el tiempo) y un costo (menos variación). Comprueba ambos antes de decir "efecto".]{.takeaway .fragment}
+
+::: {.notes}
+Presenta la objeción en su forma más fuerte: los EF sí resuelven una gran clase de problemas de variables omitidas, y el paso de agrupada a EF es a menudo la comprobación de robustez más informativa en un panel. Pero "heterogeneidad no observada" en el sentido de EF significa solo heterogeneidad invariante en el tiempo.
+:::
+
+## Cinco preguntas que hacerle a cualquier coeficiente de panel o serie de tiempo
+
+::: {.incremental}
+1. **¿Qué variación?** ¿Between, within, cambios o dos tendencias compartidas?
+2. **¿Qué unidades?** ¿Puntos logarítmicos, porcentaje, puntos porcentuales, probabilidad, odds?
+3. **¿Qué error estándar?** ¿Agrupado al nivel donde se comparten los choques, o HAC sobre el horizonte correcto?
+4. **¿Qué se mantiene fijo?** ¿Efectos de unidad, efectos de tiempo, una tendencia, valores rezagados?
+5. **¿Qué podría aún mover tanto a $x$ como a $y$?** ¿Confusores variantes en el tiempo, retroalimentación, choques comunes?
+:::
+
+[Los errores de unidades corregidos en este deck: los cambios de tasas en **puntos porcentuales** (no %), los coeficientes del logit como **log-odds** (no probabilidades), y los efectos en puntos logarítmicos convertidos con $e^b - 1$.]{.takeaway .fragment}
+
+::: {.notes}
+Una lista de verificación que los estudiantes pueden aplicar a cualquier salida de este capítulo. Las correcciones listadas son las aplicadas respecto al texto del capítulo: "1%" por un cambio de tasa de un punto porcentual, los efectos marginales etiquetados como promedio frente a en-las-medias, y las conversiones porcentuales exactas para los coeficientes log-nivel.
+:::
+
+## Qué llevarse adelante
+
+::: {.incremental}
+- **Paneles**: descompón la variación; los EF usan solo la parte within; agrupa por unidad
+- **EF vs EA**: los EF sobreviven efectos de unidad correlacionados; los EA los necesitan no correlacionados
+- **Logit**: reporta los efectos marginales, y di AME o MEM
+- **Series de tiempo**: un $R^2$ alto en niveles es una advertencia; comprueba la autocorrelación residual
+- **Dinámicas**: los multiplicadores ADL trazan cómo se acumulan los efectos (0.74 → 0.53)
+- **Causalidad**: los EF y la diferenciación eliminan algunos confusores; los diseños manejan el resto
+:::
+
+::: {.notes}
+Recapitulación de los Puntos Clave del capítulo, actualizada con lo que el deck verificó: el tamaño de las correcciones por agrupamiento y HAC, los cambios de agrupada a EF en tres paneles y las dinámicas ADL corregidas.
+:::
+
+# Estructura, memoria y un diseño creíble: eso es lo que convierte una pendiente en una respuesta. {.divider background-color="#C21E72"}

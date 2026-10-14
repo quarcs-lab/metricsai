@@ -1,0 +1,250 @@
+---
+title: "10. Resumen de datos para regresión múltiple"
+subtitle: "Estimar un efecto mientras se mantienen constantes los demás"
+deck-author: "Carlos Mendez"
+deck-author-url: "https://carlos-mendez.org"
+institute: "Nagoya University (GSID)"
+date: today
+date-format: long
+visual-summary: "figures/visual_summary.png"
+format:
+  revealjs:
+    output-file: index.es.html
+    theme: [default, site-brand.scss]
+    template-partials:
+      - title-slide.html
+    include-after-body: figure-zoom.html
+    center: true
+    slide-number: c/t
+    menu: true
+    chalkboard: true
+    preview-links: auto
+    overview: true
+    progress: true
+    history: true
+    transition: fade
+    width: 1280
+    height: 720
+    fig-align: center
+    auto-stretch: true
+    highlight-style: github
+    link-external-icon: false
+---
+
+# La pregunta {.divider background-color="#008CB7"}
+
+[Acto I · La tensión]{.act}
+
+## Una causa a la vez es una fantasía
+
+Los precios de las casas dependen del tamaño **y** de los dormitorios **y** de la antigüedad **y** del tamaño del lote — todo a la vez.
+
+. . .
+
+Una regresión bivariada del precio sobre los dormitorios por sí solos dice que cada dormitorio vale **\$23,667**.
+Pero las casas más grandes *también* tienen más dormitorios. ¿Cuánto vale realmente el dormitorio, una vez que
+mantenemos fijo el tamaño? La **regresión múltiple** es la herramienta que separa efectos enredados.
+
+::: {.notes}
+La tensión principal: los datos observacionales mezclan muchas causas. La regresión múltiple es cómo
+aislamos el efecto parcial de una variable mientras controlamos por el resto.
+:::
+
+## Hacia dónde vamos
+
+::: {.incremental}
+- **Mira primero** — matriz de diagramas de dispersión y correlaciones antes de cualquier modelo
+- **Estima** una regresión múltiple por MCO con pyfixest
+- **Interpreta** cada pendiente como un *efecto parcial* — manteniendo constantes las demás
+- **Compara** modelos con $R^2$ vs $R^2$ ajustado (y AIC/BIC)
+- **Diagnostica** confusión y colinealidad perfecta
+:::
+
+## Seis ideas anclan este capítulo
+
+::: {.incremental}
+- **Regresión múltiple** — $\hat{y} = b_1 + b_2 x_2 + \cdots + b_k x_k$; cada pendiente es un efecto *parcial*
+- **Matriz de correlación** — cada $r$ por pares de un vistazo, antes de modelar
+- **Variable de control** — añadida para evitar que una variable de confusión sesgue la pendiente de interés
+- **Variable de confusión** — impulsa tanto a $x$ como a $y$, fingiendo una relación si se omite
+- **$R^2$ ajustado** — $R^2$ con una penalización por regresores adicionales
+- **Colinealidad perfecta** — un regresor es una combinación exacta de otros → inestimable
+:::
+
+[Una pendiente de regresión múltiple responde a "todo lo demás igual" — la pregunta que la economía realmente hace.]{.takeaway .fragment}
+
+# De una variable a muchas {.divider background-color="#7A209F"}
+
+[Acto II · La investigación]{.act}
+
+## El coeficiente de los dormitorios es una trampa
+
+29 ventas de casas en Davis, California (1999), con tamaño, dormitorios, baños, tamaño del lote, antigüedad, mes de venta.
+
+$$\widehat{\text{price}} = b_1 + b_2\,\text{size} + b_3\,\text{bedrooms} + \cdots + b_7\,\text{monthsold}$$
+
+[Por sí solo, `bedrooms` parece un impulsor de \$23,667. La sospecha: ese número es en realidad *size*
+apareciendo disfrazado. Para averiguarlo, primero observamos cómo se mueven juntas las variables.]{.comment}
+
+## Paso 1 — ve cada par a la vez con una matriz de diagramas de dispersión
+
+``` {.python code-line-numbers="1-2|4-5|7-9|10"}
+import pandas as pd                          # tabular data
+import seaborn as sns                        # statistical visualization
+
+url = "https://raw.githubusercontent.com/quarcs-lab/data-open/master/AED/AED_HOUSE.DTA"
+data = pd.read_stata(url)                    # 29 Davis, CA house sales
+
+plot_vars = ["price", "size", "bedrooms", "age"]   # columns to cross-plot
+g = sns.pairplot(data[plot_vars],            # every two-way scatter + KDE on the diagonal
+                 diag_kind="kde",
+                 plot_kws={"color": "#1fb2dd"})     # brand cyan markers
+```
+
+[↗ Pruébalo en Colab](https://colab.research.google.com/notebooks/empty.ipynb){.colab-link target="_blank" data-preview-link="false"}
+
+::: {.notes}
+Una matriz de diagramas de dispersión es puro análisis exploratorio de datos — revela asociaciones lineales,
+no linealidades, agrupamientos y valores atípicos antes de cualquier modelado formal.
+:::
+
+## Cada par, en una sola vista
+
+![Cada panel fuera de la diagonal es un diagrama de dispersión de dos variables; la diagonal muestra la distribución de cada variable. El precio sube con el tamaño de la forma más clara.](figures/scatter_matrix.png)
+
+[Mira antes de modelar: la matriz muestra qué predictores se mueven con el precio — y entre sí.]{.takeaway .fragment}
+
+## Paso 2 — cuantifica los vínculos por pares con una matriz de correlación
+
+``` {.python code-line-numbers="1-2|4-5|7-8|10-12"}
+import pandas as pd                          # tabular data
+import seaborn as sns                        # heatmap
+
+url = "https://raw.githubusercontent.com/quarcs-lab/data-open/master/AED/AED_HOUSE.DTA"
+data = pd.read_stata(url)                    # load the 29 house sales
+
+corr_vars = ["price", "size", "bedrooms", "bathrooms", "lotsize", "age"]
+corr = data[corr_vars].corr()               # pandas .corr() → pairwise correlation matrix
+
+sns.heatmap(corr, annot=True, fmt=".2f",     # print each r in its cell
+            cmap="coolwarm", center=0)        # diverging colours around 0
+corr                                          # show the raw matrix too
+```
+
+[↗ Pruébalo en Colab](https://colab.research.google.com/notebooks/empty.ipynb){.colab-link target="_blank" data-preview-link="false"}
+
+## El tamaño es el predictor más fuerte — y se mueve con los dormitorios
+
+![Mapa de calor de correlación de las seis variables. Precio–tamaño es la celda más caliente; tamaño–dormitorios es cálida.](figures/corr_heatmap.png)
+
+[$r(\text{price},\text{size}) = 0.79$ · $r(\text{price},\text{bedrooms}) = 0.43$ · $r(\text{size},\text{bedrooms}) = 0.52$ — el tamaño y los dormitorios se solapan, así que sus efectos serán difíciles de separar.]{.takeaway .fragment}
+
+## Paso 3 — ajusta la regresión múltiple completa con pyfixest
+
+``` {.python code-line-numbers="1|3-4|6-7|9-10|11"}
+!pip install -q pyfixest                     # install pyfixest in Colab (-q = quiet; not preinstalled)
+
+import pandas as pd                          # tabular data
+import pyfixest as pf                         # pyfixest → OLS regression, R-style formulas
+
+url = "https://raw.githubusercontent.com/quarcs-lab/data-open/master/AED/AED_HOUSE.DTA"
+data = pd.read_stata(url)                    # load the 29 Davis, CA house sales
+
+fit = pf.feols("price ~ size + bedrooms + bathrooms + lotsize + age + monthsold",
+               data=data)                    # OLS with six regressors at once
+fit.summary()                                # partial slopes, SEs, t, p, R²
+```
+
+[↗ Pruébalo en Colab](https://colab.research.google.com/notebooks/empty.ipynb){.colab-link target="_blank" data-preview-link="false"}
+
+::: {.notes}
+`feols` toma una fórmula al estilo de R; añadir predictores con `+` es todo lo que se necesita para pasar de
+bivariada a múltiple. Aquí hay EE clásicos (AED cambia a EE robustos en el Capítulo 12).
+:::
+
+## Solo el tamaño supera el umbral — una vez que todo está controlado
+
+![Estimaciones de los coeficientes con intervalos de confianza del 95%. Solo el intervalo de `size` excluye el cero.](figures/coef_plot.png)
+
+[`size` $= \$68.37$/pies², $t = 4.44$, $p < 0.001$ (IC 95% ≈ \$36–\$100). Todos los demás intervalos cruzan el cero.]{.takeaway .fragment}
+
+## Controlar por el tamaño desenmascara al dormitorio
+
+::: {.incremental}
+- **Dormitorios solos:** \$23,667 por dormitorio — impresionante, y engañoso.
+- **Dormitorios + tamaño:** la pendiente de los dormitorios colapsa a **\$1,553**.
+- La mayor parte del "efecto de los dormitorios" era en realidad *tamaño*: las casas más grandes tienen más dormitorios **y** cuestan más.
+- `size` es una **variable de confusión** de libro de texto para los dormitorios — y añadirla como **control** corrige la estimación.
+:::
+
+[Un efecto parcial es el número honesto: lo que añade un dormitorio adicional, *manteniendo fijo el tamaño*.]{.takeaway .fragment}
+
+## El teorema FWL: un efecto parcial *es* una pendiente bivariada sobre residuos
+
+``` {.python code-line-numbers="1-2|4-6|8-10|11"}
+import pandas as pd
+import pyfixest as pf                                 # pyfixest OLS
+
+data = pd.read_stata("https://raw.githubusercontent.com/quarcs-lab/data-open/master/AED/AED_HOUSE.DTA")
+
+# Step 1 — strip out the part of size explained by the other regressors
+others = pf.feols("size ~ bedrooms + bathrooms + lotsize + age + monthsold", data=data)
+data["resid_size"] = others._u_hat                    # residualized size (size "net of" the rest)
+
+# Step 2 — regress price on residualized size alone
+pf.feols("price ~ resid_size", data=data).coef()      # → 68.37, exactly the full-model size slope
+```
+
+[↗ Pruébalo en Colab](https://colab.research.google.com/notebooks/empty.ipynb){.colab-link target="_blank" data-preview-link="false"}
+
+::: {.notes}
+Frisch–Waugh–Lovell: la pendiente de regresión múltiple sobre el tamaño es igual a la pendiente bivariada del precio
+sobre la parte del tamaño que es independiente de los demás regresores. Esa variación residual es
+exactamente lo que usa un efecto parcial.
+:::
+
+## Más variables siempre suben el $R^2$ — no siempre el $R^2$ ajustado
+
+![Precio real vs. predicho para el modelo completo: los puntos siguen la línea de 45°, pero queda dispersión.](figures/actual_vs_pred.png)
+
+[Simple (solo tamaño): $R^2 = 0.617$, $\bar{R}^2 = 0.603$. Completo (seis regresores): $R^2 = 0.651$ pero $\bar{R}^2$ *baja* a $0.555$.]{.takeaway .fragment}
+
+## Elegir entre modelos
+
+::: {.incremental}
+- El $R^2$ simple solo puede **subir** cuando añades regresores — premia el desorden.
+- El **$R^2$ ajustado** divide por los grados de libertad, así que los predictores basura lo empujan hacia **abajo**.
+- **AIC / BIC** penalizan la complejidad aún más; menor es mejor, el BIC favorece la parsimonia.
+- Con $n = 29$ casas, los cinco predictores adicionales apenas valen la pena — el modelo simple es competitivo.
+:::
+
+[Con pocas observaciones, gana la parsimonia: no compres un $\bar{R}^2$ más bajo con variables que no aportan nada.]{.takeaway .fragment}
+
+# Leerlo correctamente {.divider background-color="#C21E72"}
+
+[Acto III · La resolución]{.act}
+
+## Cuando un coeficiente simplemente no puede existir
+
+[Objeción.]{.objection} "Si más predictores ayudan, ¿por qué no añadir `size_twice = 2 × size`?"
+
+. . .
+
+[Respuesta.]{.rebuttal} **Colinealidad perfecta.** `size_twice` no aporta ninguna información nueva, así que MCO
+no tiene solución única — el software descarta en silencio uno del par. Como gemelos idénticos con un solo
+conjunto de mediciones: nombres distintos, datos idénticos. Vigílalo siempre que un regresor sea una combinación exacta
+de otros.
+
+[La correlación entre regresores es normal; una dependencia lineal *exacta* es fatal para la estimación.]{.takeaway .fragment}
+
+## Qué llevarse de aquí
+
+::: {.incremental}
+- Cada pendiente de regresión múltiple es un **efecto parcial** — el cambio en $y$ por unidad de $x_j$, manteniendo las demás fijas.
+- **Mira antes de modelar:** matriz de diagramas de dispersión (`sns.pairplot`) + matriz de correlación (`.corr()`).
+- Omitir una **variable de confusión** sesga la pendiente de interés; añadirla como **control** lo corrige (\$23,667 → \$1,553).
+- Compara especificaciones con **$R^2$ ajustado**, AIC y BIC — no con el $R^2$ simple.
+- La **colinealidad perfecta** hace inestimable un modelo; la correlación moderada solo amplía los errores estándar.
+:::
+
+# Mantén las demás constantes — entonces la pendiente dice la verdad. {.divider background-color="#C21E72"}

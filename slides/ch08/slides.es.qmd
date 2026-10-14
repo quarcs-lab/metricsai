@@ -1,0 +1,1128 @@
+---
+title: "8. Estudios de caso para regresión bivariada"
+subtitle: "Una misma herramienta de regresión en salud, finanzas y macro"
+deck-author: "Carlos Mendez"
+deck-author-url: "https://carlos-mendez.org"
+institute: "Nagoya University (GSID)"
+date: today
+date-format: long
+visual-summary: "figures/visual_summary.png"
+format:
+  revealjs:
+    output-file: index.es.html
+    theme: [default, site-brand.scss]
+    css: ch08-extra.css
+    template-partials:
+      - title-slide.html
+    include-after-body: figure-zoom.html
+    center: true
+    slide-number: c/t
+    menu: true
+    chalkboard: true
+    preview-links: auto
+    overview: true
+    progress: true
+    history: true
+    transition: fade
+    width: 1280
+    height: 720
+    fig-align: center
+    auto-stretch: true
+    highlight-style: github
+    link-external-icon: false
+---
+
+# Una herramienta, cuatro mundos {.divider background-color="#008CB7"}
+
+[Acto I · La tensión]{.act}
+
+::: {.notes}
+Este capítulo pone las aplicaciones primero: las secciones 8.1–8.4 son cuatro estudios de caso reales, todos estimados con la misma regresión bivariada por MCO de los Capítulos 5–7. Lo que cambia de un caso a otro son los datos (un corte transversal de países, una serie financiera mensual, una serie macro anual), las unidades de la pendiente, la hipótesis que vale la pena probar y la forma en que unas pocas observaciones o la estructura del error pueden cambiar el veredicto.
+:::
+
+## La misma línea responde preguntas enormemente distintas
+
+Un economista de la salud, un gestor de carteras y un macroeconomista parecen trabajar en mundos separados. Y sin embargo, cada uno recurre al **mismo** instrumento:
+
+$$y_i = \beta_1 + \beta_2\, x_i + u_i$$
+
+. . .
+
+La parte difícil no es *correr* la regresión. Es leer la pendiente con honestidad: en las **unidades** correctas, con los **errores estándar** correctos, frente a la **hipótesis** correcta, y con un ojo puesto en las pocas observaciones que pueden determinarla.
+
+[Un estimador, cuatro expedientes. En cada uno preguntamos qué *significa* la pendiente, qué tan *seguros* estamos y qué podría hacerla *engañosa*.]{.takeaway .fragment}
+
+::: {.notes}
+Plantea la presentación como cuatro expedientes. Cada uno sigue el mismo arco: pregunta → datos → método → código → salida → interpretación → advertencias. El hilo recurrente es una verificación en tres partes sobre cada pendiente: (1) unidades, qué significa una unidad de x y de y; (2) incertidumbre, errores estándar clásicos frente a robustos a heterocedasticidad; (3) influencia e interpretación, qué observaciones la determinan y si es causal.
+:::
+
+## Cuatro expedientes — haz clic en cualquier caso para ir a él {.smaller}
+
+| Caso | Pregunta | Datos | Resultado principal |
+|:----|:-------------------------|:----------------|:--------------------------|
+| [8.1](#case-81) | ¿El gasto en salud compra vidas más largas? | 34 países de la OCDE, 2009 | +1.11 años por \$1,000; la pendiente de mortalidad infantil pierde significancia con EE robustos |
+| [8.2](#case-82) | ¿Cómo aumenta el gasto en salud con el ingreso? | 34 países de la OCDE, 2009 | +\$90 por \$1,000 de PIB; $R^2$ 0.60 → 0.93 sin EE. UU. y Luxemburgo |
+| [8.3](#case-83) | ¿Qué tan riesgosa es la acción de Coca-Cola? | 354 meses, 1983–2012 | $\beta = 0.61$, significativamente por debajo de 1 |
+| [8.4](#case-84) | ¿Se cumple la Ley de Okun para EE. UU.? | 59 años, 1961–2019 | pendiente −1.59; el valor de referencia −2 se rechaza al 5% |
+
+::: {.notes}
+Los números de caso son enlaces: haz clic en uno para saltar al divisor de ese caso. Pulsa M para el menú (todos los títulos de las diapositivas están listados) u O para la cuadrícula panorámica. Los casos 8.1 y 8.2 comparten un mismo conjunto de datos (salud OCDE, 2009) pero hacen preguntas opuestas: 8.1 trata el gasto en salud como el regresor, 8.2 lo trata como el resultado.
+:::
+
+## Tres tipos de datos, un estimador {.smaller}
+
+| | Corte transversal | Serie de tiempo financiera | Serie de tiempo macro |
+|:--|:--|:--|:--|
+| **Casos** | 8.1, 8.2 | 8.3 | 8.4 |
+| **Unidad de observación** | un país en 2009 | un mes | un año |
+| **N** | 34 (32 sin EE. UU., LUX) | 354 | 59 |
+| **Resultado $y$** | esperanza de vida, mortalidad infantil, gasto en salud | rendimiento en exceso de Coca-Cola | crecimiento del PIB real |
+| **Regresor $x$** | gasto en salud, PIB per cápita | rendimiento en exceso del mercado | cambio en la tasa de desempleo |
+| **Preocupación típica** | heterocedasticidad, países influyentes | colas gruesas, riesgo variable en el tiempo | autocorrelación, quiebres estructurales |
+| **EE en el capítulo** | clásicos y HC1 | clásicos y HC1 | clásicos y HC1 |
+
+[El estimador nunca cambia (`pf.feols`). Lo que cambia es qué puede salir mal, así que las verificaciones que corremos deben cambiar con los datos.]{.takeaway .fragment}
+
+::: {.notes}
+Cortes transversales: muchas unidades observadas una vez; la preocupación habitual es que la varianza del error difiera entre unidades (heterocedasticidad) y que unas pocas unidades inusuales dominen. Series de tiempo: una unidad a lo largo de muchos periodos; los errores suelen estar correlacionados en el tiempo (autocorrelación), y la propia relación puede desplazarse (quiebres estructurales). El capítulo reporta errores estándar clásicos y HC1 en los cuatro casos. HC1 maneja solo la heterocedasticidad; para series de tiempo con errores autocorrelacionados, los errores estándar HAC (Newey–West) son la corrección estándar — aparecen en el Capítulo 13 y el Capítulo 17.
+:::
+
+## Repaso del método: la caja de herramientas de la regresión bivariada {.smaller}
+
+:::: {.columns}
+::: {.column width="50%"}
+**Estimar**
+
+- Pendiente: $\hat\beta_2 = \dfrac{\sum (x_i-\bar x)(y_i-\bar y)}{\sum (x_i-\bar x)^2}$
+- Intercepto: $\hat\beta_1 = \bar y - \hat\beta_2\,\bar x$
+- Ajuste: $R^2 = r_{xy}^2$, la proporción de la varianza de $y$ explicada por $x$
+:::
+::: {.column width="50%"}
+**Inferir**
+
+- Probar $H_0\!: \beta_2 = \beta_2^*$ con $t = \dfrac{\hat\beta_2 - \beta_2^*}{\text{se}(\hat\beta_2)} \sim t(n-2)$
+- IC del 95%: $\hat\beta_2 \pm t_{0.025,\,n-2}\times \text{se}(\hat\beta_2)$
+- $\beta_2^* = 0$ es solo el valor por defecto: el $-2$ de Okun y el $\beta = 1$ del CAPM son hipótesis nulas más interesantes
+:::
+::::
+
+[Cada resultado de esta presentación es una de estas fórmulas aplicada a datos reales. La única pieza móvil es qué error estándar entra en el denominador.]{.takeaway .fragment}
+
+::: {.notes}
+Repaso rápido de los Capítulos 5–7. En una regresión bivariada R² es igual a la correlación al cuadrado, así que el signo de r y la pendiente siempre coinciden. El estadístico t para cualquier valor hipotético β* usa el mismo error estándar; el capítulo prueba β = 0 en todas partes e, implícitamente, β = −2 para la Ley de Okun. Agregaremos la prueba del CAPM β = 1 porque "¿es esta acción tan riesgosa como el mercado?" es la pregunta económicamente interesante.
+:::
+
+## Repaso del método: errores estándar clásicos frente a robustos {.smaller}
+
+$$\text{Clásico: } \widehat{\text{Var}}(\hat\beta_2) = \frac{s^2}{\sum (x_i-\bar x)^2}
+\qquad
+\text{HC1: } \widehat{\text{Var}}(\hat\beta_2) = \frac{n}{n-2}\,\frac{\sum (x_i-\bar x)^2\,\hat u_i^2}{\left[\sum (x_i-\bar x)^2\right]^2}$$
+
+::: {.incremental}
+- Los EE clásicos suponen que todo error tiene la **misma varianza** $\sigma^2$ (homocedasticidad)
+- HC1 deja que cada observación cargue su propio $\hat u_i^2$, ponderado por qué tan lejos está su $x_i$ de $\bar x$
+- Así, HC1 es **mayor** cuando los residuos grandes están en valores extremos de $x$, y puede ser *menor* cuando están cerca del centro
+- El coeficiente es idéntico; solo cambian el EE, el $t$, el $p$ y el IC
+:::
+
+[En pyfixest esto es un solo argumento: `vcov="HC1"`. Reportaremos ambos en cada caso y observaremos dónde difieren.]{.takeaway .fragment}
+
+::: {.notes}
+Esta fórmula explica cada comparación de EE de la presentación. En 8.1 EE. UU. tiene a la vez el gasto más extremo (alto apalancamiento, gran (x − x̄)²) y el residuo más grande, así que HC1 es 1.6–1.7× el EE clásico. En 8.2 EE. UU. y Luxemburgo están ambos lejos del PIB medio con residuos enormes, así que HC1 es 2.3×. En 8.4 los residuos más grandes no están en cambios extremos del desempleo, así que HC1 es ligeramente menor que el EE clásico. HC1 = HC0 × n/(n−k), una corrección de muestra pequeña; es el valor por defecto "robust" de Stata.
+:::
+
+## El hilo recurrente: lee cada pendiente en sus unidades {.smaller}
+
+| Caso | $y$ medida en… | $x$ medida en… | Así, una unidad de $x$ es… |
+|:--|:--|:--|:--|
+| 8.1 | años; muertes por 1,000 nacimientos | dólares de EE. UU. por persona | \$1 — diminuto, así que reescalamos a \$1,000 |
+| 8.2 | dólares de EE. UU. por persona | dólares de EE. UU. por persona | \$1 de PIB → centavos de gasto en salud |
+| 8.3 | rendimiento mensual en exceso (decimal) | rendimiento mensual en exceso (decimal) | las mismas unidades, así que $\beta$ no tiene unidades |
+| 8.4 | % de crecimiento del PIB real | cambio en puntos porcentuales del desempleo | 1 punto porcentual |
+
+[Una pendiente de 0.0011 puede ser grande y una pendiente de 0.61 puede ser pequeña. Traduce antes de juzgar.]{.takeaway .fragment}
+
+::: {.notes}
+Esta es la primera de las tres verificaciones que aplicamos a cada caso. 8.1: el coeficiente 0.00111 es años por dólar, que parece insignificante hasta reescalarlo a 1.11 años por $1,000. 8.2: dólares sobre dólares da una propensión marginal (9 centavos por dólar) y, vía las medias, una elasticidad. 8.3: ambos lados son rendimientos, así que beta es un número puro. 8.4: crecimiento porcentual sobre un cambio en puntos porcentuales; confundir "porcentaje" y "punto porcentual" es el error más común al leer la Ley de Okun.
+:::
+
+## Cinco ideas anclan este capítulo
+
+::: {.incremental}
+- **Significancia económica vs estadística**: una pendiente puede ser precisa pero pequeña, o grande pero ruidosa; reporta ambas
+- **Errores estándar robustos (HC1)**: inferencia válida cuando la varianza del error difiere entre observaciones
+- **Observaciones influyentes**: dos de 34 países pueden mover una pendiente un 41% y el $R^2$ de 0.60 a 0.93
+- **Riesgo sistemático ($\beta$)**: cuánto se mueve un activo con el mercado; el $R^2$ divide el riesgo en sistemático e idiosincrático
+- **Quiebres estructurales**: una relación estimada a lo largo de 59 años puede derivar; graficar lo real frente a lo predicho en el tiempo lo revela
+:::
+
+[Cada idea es la lección de un caso. El Acto III las pone lado a lado.]{.takeaway .fragment}
+
+::: {.notes}
+Estas se corresponden con los Conceptos Clave 8.1–8.8 del capítulo: significancia económica vs estadística (8.1), EE robustos (8.2), elasticidad ingreso (8.3), valores atípicos e influencia (8.4), beta (8.5), R² en el CAPM (8.6), Ley de Okun (8.7), quiebres estructurales (8.8).
+:::
+
+# Acto II · Cuatro expedientes {.divider background-color="#7A209F"}
+
+[Corte transversal · finanzas · macro]{.act}
+
+::: {.notes}
+Cuatro casos, cada uno con sus propios datos, código, salida, interpretación y advertencias. El primer bloque de código de cada caso es autocontenido: pégalo en un cuaderno Colab vacío y corre. Los bloques posteriores del mismo caso dicen "continúa del bloque anterior".
+:::
+
+# Caso 8.1 · ¿El gasto en salud compra vidas más largas? {#case-81 .divider background-color="#7A209F"}
+
+[Corte transversal · 34 países de la OCDE · errores estándar clásicos frente a HC1]{.act}
+
+::: {.notes}
+Caso 8.1: dos regresiones sobre el mismo regresor, el gasto en salud per cápita. Resultado 1: esperanza de vida masculina. Resultado 2: mortalidad infantil. Herramientas: interpretar una pendiente en unidades reescaladas, comparar EE clásicos y robustos, y leer un residuo grande.
+:::
+
+## La pregunta: ¿los países que gastan más en salud viven más? {.smaller}
+
+**Datos.** 34 países de la OCDE en 2009 (`AED_HEALTH2009.DTA`), una fila por país.
+
+| Variable | Significado | Unidades |
+|:--|:--|:--|
+| `hlthpc` | gasto en salud per cápita | dólares de EE. UU. |
+| `lifeexp` | esperanza de vida **masculina** al nacer | años |
+| `infmort` | mortalidad infantil | muertes por 1,000 nacidos vivos |
+| `gdppc` | PIB per cápita (usado en 8.2) | dólares de EE. UU. |
+| `code` | código de país de tres letras | p. ej. `USA`, `LUX` |
+
+$$\text{lifeexp}_i = \beta_1 + \beta_2\,\text{hlthpc}_i + u_i \qquad \text{infmort}_i = \beta_1 + \beta_2\,\text{hlthpc}_i + u_i$$
+
+[Esperamos $\beta_2 > 0$ para la esperanza de vida y $\beta_2 < 0$ para la mortalidad infantil. El gasto lo eligen los países, no se asigna, así que espera **asociaciones**.]{.takeaway .fragment}
+
+::: {.notes}
+Preguntas de investigación del capítulo: (1) ¿Un mayor gasto en salud se asocia con una esperanza de vida más larga? (2) ¿Con menor mortalidad infantil? (3) ¿Cómo se compara EE. UU. con las predicciones? Nota que la variable de esperanza de vida es la esperanza de vida masculina (la etiqueta del conjunto de datos lo indica); la esperanza de vida femenina es varios años mayor en todos los países de la OCDE. Los códigos de este conjunto de datos no son códigos ISO (Japón es JAP, Suiza SWI), lo que importa si los fusionas con otros datos.
+:::
+
+## Los datos: el gasto varía casi nueve veces en la OCDE {.smaller}
+
+| Variable | Media | Desv. est. | Mín | Máx |
+|:--|--:|--:|--:|--:|
+| `hlthpc` (US\$) | 3,255.6 | 1,493.7 | 923 (México) | [7,990 (EE. UU.)]{.key} |
+| `lifeexp` (años) | 76.70 | 2.94 | 69.8 (Estonia) | 79.9 (Suiza) |
+| `infmort` (por 1,000) | 4.45 | 2.72 | 1.8 (Islandia) | 14.7 (México) |
+
+[N = 34 · OCDE, 2009 · Tabla 8.1 del capítulo]{.comment}
+
+[EE. UU. gasta \$2,642 más por persona que el país que le sigue, Noruega. Eso por sí solo lo convierte en candidato a observación influyente.]{.takeaway .fragment}
+
+::: {.notes}
+El gasto va de $923 (México) a $7,990 (EE. UU.), un rango de $7,067. Noruega es segundo con $5,348, así que EE. UU. está $2,642 por encima del país siguiente y $4,734 por encima de la media. La esperanza de vida va de 69.8 a 79.9 años; la mortalidad infantil de 1.8 a 14.7. Ten presente a EE. UU.: en una regresión bivariada, una observación lejos de la media de x tiene alto apalancamiento, así que su residuo ejerce una gran tracción sobre la pendiente y sobre el EE robusto.
+:::
+
+## Código: cargar los datos y resumirlos
+
+``` {.python code-line-numbers="1-3|4-5|6-8"}
+!pip install -q pyfixest                      # pyfixest is not preinstalled in Colab
+import pandas as pd                           # tabular data
+import pyfixest as pf                         # OLS with R-style formulas and robust SEs
+url = "https://raw.githubusercontent.com/quarcs-lab/data-open/master/AED/AED_HEALTH2009.DTA"
+data_health = pd.read_stata(url)              # 34 OECD countries in 2009, one row each
+table81 = data_health[["hlthpc", "lifeexp", "infmort"]].describe().T   # one row per variable
+table81["range"] = table81["max"] - table81["min"]                      # max minus min
+print(table81[["mean", "std", "min", "max", "range"]].round(2))         # Table 8.1
+```
+
+[↗ Pruébalo en Colab](https://colab.research.google.com/notebooks/empty.ipynb){.colab-link target="_blank" data-preview-link="false"}
+
+::: {.notes}
+Autocontenido: pégalo en una celda vacía de Colab. pd.read_stata lee el archivo Stata directamente desde GitHub. describe().T pone una variable por fila, lo que es más fácil de leer con tres variables.
+:::
+
+## Código: esperanza de vida sobre gasto en salud, dos tipos de EE
+
+``` {.python code-line-numbers="1-3|4-5|6-7"}
+# continues from the previous block
+model_lifeexp = pf.feols("lifeexp ~ hlthpc", data=data_health)                     # classical SEs
+model_lifeexp_robust = pf.feols("lifeexp ~ hlthpc", data=data_health, vcov="HC1")  # robust SEs
+model_lifeexp.summary()                           # coefficients with classical (iid) SEs
+model_lifeexp_robust.summary()                    # same coefficients, HC1 SEs, t, p, CI
+slope_life = model_lifeexp.coef()["hlthpc"]       # years of life per extra US dollar
+print(f"per $1,000: {slope_life*1000:.2f} years; R2 = {model_lifeexp._r2:.3f}")
+```
+
+[↗ Pruébalo en Colab](https://colab.research.google.com/notebooks/empty.ipynb){.colab-link target="_blank" data-preview-link="false"}
+
+[Ajustar dos veces no cuesta nada: `vcov` cambia los errores estándar, nunca la línea.]{.takeaway .fragment}
+
+::: {.notes}
+pf.feols sin un argumento vcov usa errores estándar clásicos ("iid"); vcov="HC1" cambia a los robustos a heterocedasticidad. El capítulo reporta ambos. Multiplicar la pendiente por 1,000 convierte "años por dólar" en "años por $1,000", la unidad que el capítulo usa para la interpretación.
+:::
+
+## Salida: +1.11 años por \$1,000, pero el EE robusto es 1.6× mayor {.smaller}
+
+| Variable | Coef. | EE (iid) | $t$ | $p$ | EE (HC1) | $t$ | $p$ |
+|:--|--:|--:|--:|--:|--:|--:|--:|
+| `Intercept` | 73.084 | 1.024 | 71.36 | <&nbsp;0.001 | 1.565 | 46.70 | <&nbsp;0.001 |
+| `hlthpc` | [0.001112]{.key} | 0.000287 | 3.88 | <&nbsp;0.001 | 0.000464 | 2.40 | 0.023 |
+
+[N = 34 · $R^2 = 0.320$ · IC del 95% para la pendiente: [0.000528,&nbsp;0.001696] (iid), [0.000167,&nbsp;0.002056] (HC1)]{.comment}
+
+::: {.incremental}
+- **Unidades:** 0.001112 años por dólar = **1.11 años por \$1,000** de gasto por persona
+- **IC robusto del 95% por \$1,000:** de 0.17 a 2.06 años, positivo pero amplio
+- **Intercepto 73.1:** esperanza de vida predicha con gasto cero, muy por debajo del gasto más bajo observado (\$923), así que no tiene sentido por sí solo
+:::
+
+[Significativo de cualquier forma ($p$ = 0.023 con HC1), pero el intervalo robusto es 1.6× más amplio. El gasto en salud explica el 32% de la variación entre países.]{.takeaway .fragment}
+
+::: {.notes}
+t clásico = 3.88 (p < 0.001); t robusto = 2.40 (p = 0.023), coincidiendo con el "t clásico ≈ 3.9, t robusto ≈ 2.4" del capítulo. El EE HC1 es 1.62 veces el clásico. R² = 0.320: cerca de un tercio de la variación en la esperanza de vida masculina entre estos 34 países se alinea con el gasto. Recuerda las unidades: el IC por $1,000 es el IC HC1 multiplicado por 1,000.
+:::
+
+## Leyendo la pendiente: ¿la línea predice brechas reales?
+
+::: {.incremental}
+- Chile gasta \$1,210 por persona; Noruega gasta \$5,348, una brecha de **\$4,138**
+- La pendiente predice una brecha de esperanza de vida de $4.138 \times 1.11 \approx$ **4.6 años**
+- La brecha real es 78.7 − 75.8 = **2.9 años**
+- La línea es una relación *promedio* entre 34 países; cualquier par individual puede estar lejos de ella
+:::
+
+[Una pendiente resume la nube, no cada par dentro de ella. Un error de predicción típico es de unos 2.4 años (el RECM en la salida).]{.takeaway .fragment}
+
+::: {.notes}
+La propia ilustración del capítulo. La línea ajustada sobreestima la brecha Chile–Noruega en 1.7 años. pyfixest reporta RMSE = 2.39 años (divide la suma de cuadrados residuales por n); el error estándar de la regresión, que divide por n − 2, es 2.46 años. De cualquier forma, errores de este tamaño son típicos. Un buen hábito: siempre que uses una pendiente para predecir una comparación específica, cita el RECM junto a ella.
+:::
+
+## EE. UU. vive 6 años menos de lo que predice su gasto
+
+![Esperanza de vida masculina frente al gasto en salud, con la línea de MCO. EE. UU. se ubica muy por debajo de la línea en el extremo derecho.](figures/fig_life_us.png)
+
+[Con \$7,990 la línea predice 82.0 años; EE. UU. registra 76.0. Su residuo de −6.0 años es el mayor de los 34 países.]{.takeaway .fragment}
+
+::: {.notes}
+Valor predicho para EE. UU.: 73.084 + 0.001112 × 7,990 = 82.0 años, que está por encima de todos los países de la muestra (los 79.9 de Suiza son el máximo observado). Real: 76.0. Residuo −5.97. Los siguientes residuos negativos más grandes son Estonia (−4.8) y Hungría (−4.8). Las explicaciones del capítulo — cómo se gasta el dinero, los precios, el acceso, la desigualdad, el estilo de vida — están todas fuera del modelo, que es exactamente por qué el residuo es grande.
+:::
+
+## Por qué el EE robusto es mayor: residuos grandes en gastos extremos {.smaller}
+
+![Residuos frente al gasto en salud. Los residuos más grandes están en los gastos más bajos (México, Turquía) y más altos (EE. UU.).](figures/fig_health_resid.png){height="360"}
+
+[HC1 pondera cada residuo al cuadrado por $(x_i-\bar x)^2$. EE. UU. es a la vez el que más gasta de forma extrema y el país con peor ajuste, así que infla el EE robusto.]{.takeaway .fragment}
+
+::: {.notes}
+Conecta de vuelta con la fórmula HC1. El gasto de EE. UU. está $4,734 por encima de la media; México y Turquía están unos $2,300 por debajo. Esos tres tienen residuos grandes, así que HC1 atribuye mucha incertidumbre a la pendiente. El Concepto Clave 8.2 del capítulo dice "los países más ricos muestran más variación en el gasto en salud"; más precisamente, el problema es que la varianza del *error* no es constante entre los niveles de *x*: la dispersión de los residuos no es la misma en todos los niveles de gasto, y los residuos más grandes están en puntos de alto apalancamiento.
+:::
+
+## Código: mortalidad infantil sobre gasto en salud
+
+``` {.python code-line-numbers="1-3|4-5|6-7"}
+# continues from the previous block
+model_infmort = pf.feols("infmort ~ hlthpc", data=data_health)                     # classical SEs
+model_infmort_robust = pf.feols("infmort ~ hlthpc", data=data_health, vcov="HC1")  # robust SEs
+model_infmort.summary()                           # slope, classical SE, t, p
+model_infmort_robust.summary()                    # same slope, HC1 SE, t, p
+slope_inf = model_infmort.coef()["hlthpc"]        # infant deaths per 1,000 births per extra dollar
+print(f"per $1,000: {slope_inf*1000:.2f}; from $2,000 to $4,000: {slope_inf*2000:.2f}")
+```
+
+[↗ Pruébalo en Colab](https://colab.research.google.com/notebooks/empty.ipynb){.colab-link target="_blank" data-preview-link="false"}
+
+::: {.notes}
+Mismo regresor, un nuevo resultado. La última línea reproduce la ilustración del capítulo: pasar de $2,000 a $4,000 per cápita es un cambio de $2,000, así que el cambio predicho en la mortalidad infantil es la pendiente por 2,000.
+:::
+
+## Salida: el veredicto se voltea con errores estándar robustos {.smaller}
+
+| Variable | Coef. | EE (iid) | $t$ | $p$ | EE (HC1) | $t$ | $p$ |
+|:--|--:|--:|--:|--:|--:|--:|--:|
+| `Intercept` | 6.702 | 1.064 | 6.30 | <&nbsp;0.001 | 1.877 | 3.57 | 0.001 |
+| `hlthpc` | −0.000693 | 0.000298 | −2.33 | [0.027]{.key} | 0.000515 | −1.35 | [0.188]{.key} |
+
+[N = 34 · $R^2 = 0.145$ · IC del 95% para la pendiente: [−0.001299,&nbsp;−0.000086] (iid), [−0.001741,&nbsp;0.000356] (HC1)]{.comment}
+
+::: {.incremental}
+- **Unidades:** −0.69 muertes infantiles por 1,000 nacimientos por cada \$1,000 adicionales por persona
+- **EE clásicos:** significativo al 5% ($t = -2.33$)
+- **HC1:** el EE es 1.7× mayor, $t = -1.35$, $p = 0.19$, y el IC incluye el cero
+:::
+
+[Misma pendiente, veredictos opuestos. Con EE robustos, los datos no pueden descartar una asociación de cero.]{.takeaway .fragment}
+
+::: {.notes}
+Este es el ejemplo de advertencia del capítulo. La inferencia clásica dice que la asociación negativa es significativa (p = 0.027); la inferencia robusta dice que no lo es (p = 0.188). Como el corte transversal es heterocedástico — y está dominado por unos pocos países de alto apalancamiento — el resultado robusto es el que se debe reportar. El IC robusto del 95% por $1,000 va de −1.74 a +0.36 muertes por 1,000 nacimientos.
+:::
+
+## EE. UU. otra vez: 6.4 muertes infantiles donde la línea predice 1.2
+
+![Mortalidad infantil frente al gasto en salud. La predicción de la línea para EE. UU. cae por debajo de la tasa más baja observada en cualquier parte de la muestra.](figures/fig_inf_us.png)
+
+[La predicción para EE. UU. (1.2) es menor que la que cualquier país alcanza en realidad (Islandia, 1.8). Una línea recta extrapolada hasta \$7,990 promete lo imposible.]{.takeaway .fragment}
+
+::: {.notes}
+Predicho: 6.702 − 0.000693 × 7,990 = 1.17. Real: 6.4. Residuo +5.2, el tercero más grande después de México (+8.6) y Turquía (+7.1). Dos lecciones. Primera, EE. UU. está de nuevo muy lejos de la línea. Segunda, la extrapolación lineal al borde de los datos da una predicción fuera del rango de todo lo observado — señal de que la relación probablemente no es lineal en todo el rango de gasto (los rendimientos decrecientes la aplanarían).
+:::
+
+## Interpretando la pendiente de mortalidad infantil: magnitud vs evidencia
+
+::: {.incremental}
+- **Magnitud económica** (el ejemplo del capítulo): pasar de \$2,000 a \$4,000 por persona predice 1.39 muertes menos por 1,000 nacimientos, es decir, unas 139 muertes infantiles menos al año en un país con 100,000 nacimientos
+- **Evidencia estadística:** con EE robustos no podemos distinguir esa pendiente de cero ($p = 0.19$)
+- **Ajuste:** el gasto explica solo el 14.5% de la variación; las altas tasas de México y Turquía dominan la nube
+:::
+
+[Económicamente grande si es cierto, estadísticamente débil en esta muestra. Reporta ambas, y no dejes que un número grande sustituya a la evidencia.]{.takeaway .fragment}
+
+::: {.notes}
+Este es el Concepto Clave 8.1 en acción: la significancia económica y la estadística son preguntas separadas. La ilustración de las 139 muertes es aritmética sobre la estimación puntual (1.39 por 1,000 × 100,000 nacimientos / 1,000); hereda toda la incertidumbre de la pendiente. Un IC robusto del 95% de −1.74 a +0.36 por $1,000 es consistente con una reducción considerable y con ninguna en absoluto.
+:::
+
+## Verificación de robustez: las mismas regresiones sin EE. UU. {.smaller}
+
+| Resultado | Muestra | Pendiente por \$1,000 | HC1 $t$ | $p$ | $R^2$ |
+|:--|:--|--:|--:|--:|--:|
+| Esperanza de vida | los 34 | 1.11 | 2.40 | 0.023 | 0.320 |
+| Esperanza de vida | sin EE. UU. (33) | [1.69]{.key} | 5.60 | <&nbsp;0.001 | 0.507 |
+| Mortalidad infantil | los 34 | −0.69 | −1.35 | 0.188 | 0.145 |
+| Mortalidad infantil | sin EE. UU. (33) | [−1.20]{.key} | −2.46 | 0.019 | 0.302 |
+
+[No está en el capítulo: el mismo modelo `pf.feols` con `vcov="HC1"` sobre 33 países, reflejando la propia verificación de valores atípicos del capítulo en 8.2.]{.comment}
+
+[Un país aplana ambas pendientes y oculta la asociación de la mortalidad infantil. Quitarlo no es automáticamente correcto, pero debes saber que importa.]{.takeaway .fragment}
+
+::: {.notes}
+Esto aplica la verificación de robustez de 8.2 del capítulo (excluir países influyentes, reajustar) a las regresiones de 8.1. Sin EE. UU., la pendiente de esperanza de vida sube a la mitad (1.11 → 1.69 años por $1,000) y su R² de 0.32 a 0.51; la pendiente de mortalidad infantil crece cerca de 70% (−0.69 → −1.20) y se vuelve significativa incluso con EE robustos (p = 0.019). Nota también: sin EE. UU. los EE robusto y clásico para la pendiente de esperanza de vida son casi iguales (0.000301 vs 0.000299), confirmando que EE. UU. era lo que inflaba el EE robusto. Si quitar a EE. UU. es una pregunta sustantiva: es un país real, no un error de datos. Lo honesto es reportar ambos.
+:::
+
+## Código: la predicción de EE. UU. y la verificación de quitar uno
+
+``` {.python code-line-numbers="1-4|5-7|8-12"}
+# continues from the previous block
+resid = data_health["lifeexp"] - model_lifeexp.predict()       # actual minus fitted, by country
+print(data_health.assign(resid=resid)
+      .nsmallest(3, "resid")[["code", "lifeexp", "resid"]])     # USA has the largest shortfall
+us = data_health[data_health["code"] == "USA"]                   # the United States row
+print(model_lifeexp.predict(newdata=us),                         # life expectancy at $7,990
+      model_infmort.predict(newdata=us))                         # infant mortality at $7,990
+no_us = data_health[data_health["code"] != "USA"]                # not in the chapter: 33 countries
+for y in ["lifeexp", "infmort"]:                                 # same model for both outcomes
+    fit = pf.feols(f"{y} ~ hlthpc", data=no_us, vcov="HC1")      # robust SEs, as before
+    print(y, round(fit.coef()["hlthpc"] * 1000, 2),              # slope per $1,000
+          round(fit.tstat()["hlthpc"], 2), round(fit._r2, 3))    # robust t and R²
+```
+
+[↗ Pruébalo en Colab](https://colab.research.google.com/notebooks/empty.ipynb){.colab-link target="_blank" data-preview-link="false"}
+
+::: {.notes}
+La primera mitad reproduce las comparaciones de EE. UU. del capítulo (predicho vs real). La segunda mitad es la verificación de quitar uno mostrada en la diapositiva anterior. predict(newdata=...) evalúa la línea ajustada en nuevos valores de x.
+:::
+
+## Por qué 8.1 es una asociación, no el efecto del gasto
+
+:::: {.columns}
+::: {.column width="50%"}
+### Lo que la regresión capta
+- cómo la esperanza de vida y la mortalidad infantil se alinean con el gasto entre 34 países en un año
+:::
+::: {.column width="50%"}
+### Lo que no puede separar
+- **ingreso**: los países ricos gastan más *y* tienen mejor nutrición, vivienda y educación
+- **cómo** se gasta el dinero: precios, cobertura de seguros, costos administrativos
+- estilo de vida, desigualdad, medio ambiente, causalidad inversa (las poblaciones más enfermas pueden gastar más)
+:::
+::::
+
+[1.11 años por \$1,000 es una asociación entre países. No es lo que un país ganaría al aumentar su presupuesto de salud en \$1,000.]{.takeaway .fragment}
+
+::: {.notes}
+Advertencias estándar, enunciadas en el capítulo: correlación, no causalidad; la relación puede no ser lineal; EE. UU. es un valor atípico; otros factores importan. Agrega dos más: (1) solo se usa la esperanza de vida masculina; (2) 34 países es una muestra pequeña, por eso un solo país puede cambiar la inferencia. El Caso 8.2 mostrará que el propio gasto se explica en gran parte por el PIB, que es el factor de confusión que más amenaza una lectura causal de 8.1.
+:::
+
+# Caso 8.2 · ¿Cómo aumenta el gasto en salud con el ingreso? {#case-82 .divider background-color="#7A209F"}
+
+[Corte transversal · elasticidad ingreso · observaciones influyentes]{.act}
+
+::: {.notes}
+El Caso 8.2 invierte el papel del gasto en salud: ahora es el resultado, y el PIB per cápita es el regresor. Herramientas: una propensión marginal en unidades de dólares, una elasticidad evaluada en las medias, EE clásicos frente a robustos, y una verificación de robustez que quita dos países influyentes.
+:::
+
+## La pregunta: ¿la atención médica es una necesidad, un lujo, o algo intermedio? {.smaller}
+
+$$\text{hlthpc}_i = \beta_1 + \beta_2\,\text{gdppc}_i + u_i$$
+
+| Variable | Media | Desv. est. | Mín | Máx |
+|:--|--:|--:|--:|--:|
+| `gdppc` (US\$) | 33,054.0 | 12,916.8 | 13,806 (México) | [82,901 (Luxemburgo)]{.key} |
+| `hlthpc` (US\$) | 3,255.6 | 1,493.7 | 923 (México) | [7,990 (EE. UU.)]{.key} |
+
+[N = 34 · OCDE, 2009 · Tabla 8.2 del capítulo]{.comment}
+
+[Ambas variables están en dólares por persona, así que la pendiente es una **propensión marginal**: cuántos centavos de gasto en salud acompañan a un dólar más de PIB.]{.takeaway .fragment}
+
+::: {.notes}
+Los mismos 34 países que en 8.1. El PIB per cápita de Luxemburgo está 3.9 desviaciones estándar por encima de la media; el gasto en salud de EE. UU. está 3.2 desviaciones estándar por encima de la media. Un país es extremo en x, el otro en y — ten presente esa distinción para la verificación de robustez.
+:::
+
+## Código: gasto en salud sobre PIB, EE clásicos y robustos
+
+``` {.python code-line-numbers="1-4|5-6|7-9|10-12"}
+!pip install -q pyfixest                      # pyfixest is not preinstalled in Colab
+import pandas as pd                           # tabular data
+import pyfixest as pf                         # OLS with robust SEs
+url = "https://raw.githubusercontent.com/quarcs-lab/data-open/master/AED/AED_HEALTH2009.DTA"
+data_health = pd.read_stata(url)              # 34 OECD countries in 2009
+print(data_health[["gdppc", "hlthpc"]].describe().T.round(1))   # Table 8.2
+model_hlthpc = pf.feols("hlthpc ~ gdppc", data=data_health)                     # classical SEs
+model_hlthpc_robust = pf.feols("hlthpc ~ gdppc", data=data_health, vcov="HC1")  # robust SEs
+model_hlthpc_robust.summary()                 # same slope, HC1 inference
+slope = model_hlthpc.coef()["gdppc"]          # dollars of health spending per dollar of GDP
+x_bar, y_bar = data_health["gdppc"].mean(), data_health["hlthpc"].mean()   # sample means
+print("elasticity at the means:", slope * x_bar / y_bar)                  # slope × x̄ / ȳ
+```
+
+[↗ Pruébalo en Colab](https://colab.research.google.com/notebooks/empty.ipynb){.colab-link target="_blank" data-preview-link="false"}
+
+::: {.notes}
+Autocontenido. La última línea calcula la elasticidad ingreso en las medias muestrales, exactamente como lo hace el capítulo en su interpretación: pendiente × media(x) / media(y).
+:::
+
+## Salida: \$90 por \$1,000 de PIB, con un EE robusto 2.3× mayor {.smaller}
+
+| Variable | Coef. | EE (iid) | $t$ | $p$ | EE (HC1) | $t$ | $p$ |
+|:--|--:|--:|--:|--:|--:|--:|--:|
+| `Intercept` | 284.9 | 455.6 | 0.63 | 0.536 | 862.4 | 0.33 | 0.743 |
+| `gdppc` | [0.0899]{.key} | 0.0129 | 6.99 | <&nbsp;0.001 | 0.0292 | 3.08 | 0.004 |
+
+[N = 34 · $R^2 = 0.604$ · IC del 95% para la pendiente: [0.0637,&nbsp;0.1161] (iid), [0.0304,&nbsp;0.1494] (HC1)]{.comment}
+
+::: {.incremental}
+- **Unidades:** cada \$1,000 adicionales de PIB por persona acompañan a **\$90 más** de gasto en salud por persona, unos 9 centavos por dólar
+- **Inferencia robusta:** el $t$ baja de 6.99 a 3.08, aún significativo ($p = 0.004$), pero el IC robusto va de \$30 a \$149 por \$1,000
+- **Ajuste:** el PIB per cápita da cuenta del 60% de la variación del gasto en salud entre países
+:::
+
+[La pendiente positiva sobrevive a los EE robustos, pero la salida clásica sobreestima la precisión en más de la mitad.]{.takeaway .fragment}
+
+::: {.notes}
+El EE HC1 (0.0292) es 2.27 veces el EE clásico (0.0129), la mayor brecha del capítulo. La razón es de nuevo la fórmula HC1: EE. UU. y Luxemburgo están lejos del PIB medio y tienen los dos residuos más grandes (+$3,643 y −$2,950), así que dominan la varianza robusta. La afirmación del capítulo "t robusto ≈ 3.1, p ≈ 0.004" coincide.
+:::
+
+## Repaso del método: de una pendiente en dólares a una elasticidad ingreso {.smaller}
+
+$$\eta = \frac{\partial\, \text{hlthpc}}{\partial\, \text{gdppc}}\cdot\frac{\overline{\text{gdppc}}}{\overline{\text{hlthpc}}} = 0.0899 \times \frac{33{,}054}{3{,}256} \approx 0.91$$
+
+::: {.incremental}
+- En las medias muestrales, un PIB per cápita 1% mayor acompaña a un gasto en salud aproximadamente **0.91% mayor**
+- **Bien normal** significa $\eta > 0$: el gasto aumenta con el ingreso. Cualquier pendiente positiva ya lo dice
+- **Necesidad** ($0 < \eta < 1$) vs **lujo** ($\eta > 1$): el gasto aumenta menos, o más, que proporcionalmente
+- En un modelo lineal la elasticidad **cambia a lo largo de la línea**; en las medias es un punto de evaluación
+:::
+
+[$\eta \approx 0.91$ dice que el gasto en salud aumenta aproximadamente en proporción al ingreso en esta muestra, cerca del límite entre necesidad y lujo.]{.takeaway .fragment}
+
+::: {.notes}
+Corrección al capítulo: el Concepto Clave 8.3 del capítulo dice "una elasticidad cercana a 1.0 sugiere que la atención médica es un 'bien normal'". Un bien normal solo requiere η > 0; η cerca de 1 significa elasticidad unitaria (una participación de presupuesto constante). Como el modelo lineal tiene un intercepto distinto de cero, la elasticidad varía con el punto de evaluación; un modelo log-log (Capítulo 9) estimaría una elasticidad constante directamente. Y como muestran las siguientes diapositivas, el mismo cálculo sobre el subconjunto de 32 países da η ≈ 1.29, es decir, del lado del lujo.
+:::
+
+## Código: quitar a EE. UU. y Luxemburgo, luego cada uno por separado
+
+``` {.python code-line-numbers="1-3|4-6|7-10|11-14"}
+# continues from the previous block
+data_health_subset = data_health[(data_health["code"] != "LUX") &
+                                 (data_health["code"] != "USA")]    # 32 countries
+model_hlthpc_subset = pf.feols("hlthpc ~ gdppc", data=data_health_subset)        # classical SEs
+model_hlthpc_subset_robust = pf.feols("hlthpc ~ gdppc", data=data_health_subset,
+                                      vcov="HC1")                     # robust SEs
+model_hlthpc_subset_robust.summary()                                  # slope, HC1 SE, R²
+sub = data_health_subset                                              # shorter name
+b_sub = model_hlthpc_subset.coef()["gdppc"]                           # subset slope
+print("elasticity:", b_sub * sub["gdppc"].mean() / sub["hlthpc"].mean())   # at subset means
+for code in ["USA", "LUX"]:                                           # not in chapter: drop one
+    fit = pf.feols("hlthpc ~ gdppc", data=data_health[data_health["code"] != code], vcov="HC1")
+    print("without", code, round(fit.coef()["gdppc"], 4),
+          round(fit.tstat()["gdppc"], 2), round(fit._r2, 3))          # slope, robust t, R²
+```
+
+[↗ Pruébalo en Colab](https://colab.research.google.com/notebooks/empty.ipynb){.colab-link target="_blank" data-preview-link="false"}
+
+::: {.notes}
+La primera parte es la verificación de robustez del capítulo (excluir ambos países). El bucle del final es una extensión simple, etiquetada como no presente en el capítulo: quitar cada país por separado muestra cuál hace qué.
+:::
+
+## Salida: sin dos países la pendiente sube 41% y el $R^2$ llega a 0.93 {.smaller}
+
+| Variable | Coef. | EE (iid) | $t$ | $p$ | EE (HC1) | $t$ | $p$ |
+|:--|--:|--:|--:|--:|--:|--:|--:|
+| `Intercept` | −883.3 | 208.9 | −4.23 | <&nbsp;0.001 | 213.4 | −4.14 | <&nbsp;0.001 |
+| `gdppc` | [0.1267]{.key} | 0.0064 | 19.69 | <&nbsp;0.001 | 0.0076 | 16.65 | <&nbsp;0.001 |
+
+[N = 32 (EE. UU. y Luxemburgo excluidos) · $R^2 = 0.928$ · IC del 95% para la pendiente: [0.1136,&nbsp;0.1399] (iid), [0.1112,&nbsp;0.1423] (HC1)]{.comment}
+
+::: {.incremental}
+- Pendiente: \$90 → **\$127** por \$1,000 de PIB (+41%)
+- $R^2$: 0.604 → **0.928**; el EE robusto es ahora solo 1.2× el EE clásico
+- Elasticidad en las medias del subconjunto: $0.1267 \times 31{,}117 / 3{,}060 \approx$ **1.29**
+:::
+
+[Quita dos países y la pendiente, el ajuste, la brecha del EE *y* la historia económica (necesidad → lujo) cambian todas.]{.takeaway .fragment}
+
+::: {.notes}
+El capítulo reporta los cambios en la pendiente (≈0.13) y en el R² (≈0.93). Nota el efecto secundario que no menciona: con un intercepto negativo, la elasticidad en las medias sube por encima de 1, así que la conclusión "la atención médica no es ni un lujo ni una necesidad" no es robusta a la misma verificación de valores atípicos que el propio capítulo realiza. La tabla de comparación del capítulo redondea el R² a 0.60 y 0.93 y reporta "+55%"; a partir de los valores exactos el aumento es 53.6%.
+:::
+
+## Dos líneas, dos historias
+
+![Gasto en salud frente al PIB per cápita. Morado: MCO sobre los 34 países. Amarillo discontinuo: MCO sobre los 32 países sin EE. UU. y Luxemburgo.](figures/fig_hgdp_two_lines.png)
+
+[EE. UU. se ubica muy *por encima* de cualquier línea; Luxemburgo se ubica muy a la *derecha* y por debajo. Juntos inclinan la línea de la muestra completa y aflojan el ajuste.]{.takeaway .fragment}
+
+::: {.notes}
+Lee la imagen antes que los números. Sin los dos puntos rosados, los 32 países se ubican cerca de una línea empinada. Con ellos, MCO transige: Luxemburgo (PIB extremo, gasto modesto) tira del extremo derecho de la línea hacia abajo; EE. UU. (gasto muy alto para su PIB) se ubica tan por encima de la línea que agrega un residuo al cuadrado enorme. Nota: la propia Figura 8.2 Panel B del capítulo etiqueta sus ejes "en miles de $", pero los valores graficados están en dólares; esta figura usa las unidades correctas.
+:::
+
+## Anatomía de la influencia: quita cada país por su cuenta {.smaller}
+
+| Muestra | N | Pendiente | HC1 $t$ | $R^2$ | Qué cambia |
+|:--|--:|--:|--:|--:|:--|
+| Todos los países | 34 | 0.0899 | 3.08 | 0.604 | — |
+| Sin EE. UU. | 33 | 0.0814 | 3.37 | [0.701]{.key} | el ajuste mejora, la pendiente apenas se mueve |
+| Sin Luxemburgo | 33 | [0.1413]{.key} | 8.33 | 0.826 | la pendiente salta un 57% |
+| Sin ambos | 32 | 0.1267 | 16.65 | 0.928 | ambos efectos |
+
+[No está en el capítulo: la misma regresión HC1 sobre cada submuestra.]{.comment}
+
+[EE. UU. es un **valor atípico** en $y$: un residuo enorme que sobre todo agrega ruido. Luxemburgo es un punto de **alto apalancamiento** en $x$ que arrastra la pendiente hacia abajo.]{.takeaway .fragment}
+
+::: {.notes}
+Esto descompone la única verificación de robustez del capítulo. EE. UU. tiene un PIB cercano a la parte media-alta de la muestra ($45,192) pero un gasto $3,643 por encima de la línea, así que quitarlo sobre todo sube el R² (0.60 → 0.70); su efecto sobre la pendiente es pequeño (0.090 → 0.081). El PIB de Luxemburgo ($82,901) está muy por encima de todos los demás países, así que tiene alto apalancamiento; su gasto está $2,950 por debajo de la línea, y quitarlo sube la pendiente de 0.090 a 0.141. La distinción entre valores atípicos (y inusual dado x) y apalancamiento (x inusual) es la idea clave detrás de los diagnósticos de influencia.
+:::
+
+## Leyendo la verificación de robustez correctamente
+
+::: {.incremental}
+- $R^2 = 0.60$ **no** es un "ajuste débil" para un corte transversal de 34 países; el PIB explica la mayor parte de la variación
+- Quitar los dos puntos con peor ajuste **mecánicamente** sube el $R^2$: eliminaste los residuos más grandes
+- La línea del subconjunto describe "los otros 32 países", no una relación "verdadera" que los valores atípicos estuvieran ocultando
+- Razones legítimas para excluir: un error de datos, o una unidad de una población distinta (un pequeño centro financiero cuyo PIB cuenta la producción de trabajadores transfronterizos)
+- El reporte honesto muestra **ambos** ajustes y dice por qué difieren
+:::
+
+[Las verificaciones de valores atípicos sirven para *entender* una pendiente, no para elegir la muestra que da el $R^2$ más bonito.]{.takeaway .fragment}
+
+::: {.notes}
+Correcciones respecto a la tabla de comparación y el texto del capítulo: el capítulo etiqueta el R² de muestra completa de 0.60 como "ajuste débil" y el del subconjunto como "ajuste excelente", y llama a la relación del subconjunto la "verdadera". Seleccionar una muestra después de ver los residuos sesga el R² al alza por construcción. El PIB per cápita de Luxemburgo está inflado por trabajadores transfronterizos que producen allí pero viven (y usan la atención médica) en otro lugar — una razón sustantiva para tratarlo de forma distinta. El alto gasto de EE. UU. es un rasgo real de su sistema de salud, no un error de medición, así que excluirlo cambia la pregunta que se responde.
+:::
+
+## Advertencias para 8.2
+
+::: {.incremental}
+- **Asociación, no causalidad**: el PIB y el gasto en salud ambos reflejan instituciones, demografía y precios
+- **Un año (2009)**: un año de recesión; el PIB cayó más que los presupuestos de salud en muchos países
+- **Forma funcional**: una línea recta en dólares impone una elasticidad variable; los logaritmos (Capítulo 9) son la alternativa estándar
+- **N pequeño**: con 34 observaciones, dos países mueven cada estadística, como acabamos de ver
+:::
+
+[El gasto en salud aumenta con el ingreso, a grosso modo 9–13 centavos por dólar dependiendo de dos países. Todo lo más fino que eso necesita más datos o más estructura.]{.takeaway .fragment}
+
+::: {.notes}
+El rango "9–13 centavos por dólar" reporta ambas estimaciones en lugar de elegir una. Una especificación log-log, donde la pendiente es la elasticidad directamente, es el siguiente paso natural y es exactamente lo que introduce el Capítulo 9.
+:::
+
+# Caso 8.3 · ¿Qué tan riesgosa es la acción de Coca-Cola? {#case-83 .divider background-color="#7A209F"}
+
+[Serie de tiempo financiera · beta del CAPM · probar $\beta = 1$ y $\alpha = 0$]{.act}
+
+::: {.notes}
+Caso 8.3: el Modelo de Valoración de Activos de Capital (CAPM). Herramientas: una regresión derivada de la teoría económica, una pendiente con un valor de referencia claro (β = 1), un intercepto con una predicción teórica (α = 0), y el R² leído como una descomposición del riesgo.
+:::
+
+## La teoría: solo el riesgo de mercado gana una prima
+
+$$\underbrace{R_A - R_F}_{\text{rendimiento en exceso del activo}} = \alpha_A + \beta_A\,\underbrace{(R_M - R_F)}_{\text{rendimiento en exceso del mercado}} + u$$
+
+::: {.incremental}
+- $\beta_A$ = **riesgo sistemático**: cuánto se mueve el activo con el mercado. El mercado mismo tiene $\beta = 1$
+- $\beta > 1$: **agresivo**, amplifica los vaivenes del mercado; $\beta < 1$: **defensivo**, los amortigua
+- $\alpha_A$ = rendimiento más allá de lo que justifica $\beta$. El CAPM predice **$\alpha = 0$**
+- $u$ = choques específicos de la empresa (**idiosincráticos**), que la diversificación elimina
+:::
+
+[El CAPM nos entrega dos hipótesis más interesantes que "la pendiente es cero": $\beta = 1$ y $\alpha = 0$.]{.takeaway .fragment}
+
+::: {.notes}
+Corrección: el capítulo etiqueta β > 1 como una "acción de crecimiento" y β < 1 como una "acción de valor". Crecimiento y valor son una clasificación distinta, basada en ratios de valoración como el valor en libros frente al de mercado; una acción de crecimiento puede tener un beta bajo y una de valor un beta alto. Las etiquetas estándar de beta son agresiva (β > 1) y defensiva (β < 1). La regresión empírica del CAPM se llama el "modelo de mercado" o la "línea característica" en finanzas.
+:::
+
+## Los datos: 354 meses de rendimientos en exceso, mayo 1983 – octubre 2012 {.smaller}
+
+| Variable (mensual) | Significado | Media | Desv. est. |
+|:--|:--|--:|--:|
+| `rm_rf` | rendimiento en exceso del mercado, $R_M - R_F$ | 0.555% | 4.556% |
+| `rko_rf` | rendimiento en exceso de Coca-Cola, $R_A - R_F$ | 1.018% | [6.160%]{.key} |
+| `rf` | tasa de letras del Tesoro a un mes | 0.350% | 0.221% |
+
+[N = 354 · los rendimientos se almacenan como decimales (0.05 = 5%) · el archivo también contiene Target (`rtgt_rf`) y Walmart (`rwmt_rf`)]{.comment}
+
+[Coca-Cola es *más* volátil que el mercado (6.2% vs 4.6% al mes), y sin embargo hallaremos que es *menos* riesgosa en el sentido del CAPM.]{.takeaway .fragment}
+
+::: {.notes}
+Las variables están en decimales, así que la pendiente de la regresión no tiene unidades y el intercepto está en rendimiento decimal por mes. El peor mes del mercado en la muestra es octubre de 1987 (−23.1% de rendimiento en exceso; Coca-Cola −15.3%). La aparente paradoja de esta diapositiva la resuelve el CAPM: la volatilidad total incluye el riesgo idiosincrático, que se diversifica; beta mide solo la parte que se mueve junto con el mercado.
+:::
+
+## Coca-Cola y el mercado se mueven juntos, pero no uno a uno
+
+![Rendimientos mensuales en exceso, diciembre 2006 – octubre 2012 (el último 20% de la muestra, como en la Figura 8.3 Panel A del capítulo).](figures/fig_capm_ts.png)
+
+[Las dos líneas comparten los grandes vaivenes (2008–09), pero Coca-Cola también se mueve por sus propias noticias. La regresión mide cuánto de cada cosa.]{.takeaway .fragment}
+
+::: {.notes}
+Esto reproduce la Figura 8.3 Panel A del capítulo (el último quinto de la muestra, para legibilidad). Nota los meses de la crisis financiera: el mercado cayó fuertemente a finales de 2008 y Coca-Cola cayó con él, pero menos en la mayoría de los meses. La observación del capítulo de que "los rendimientos de las acciones individuales fluctúan más que el mercado en conjunto" es cierta para la volatilidad total; la pregunta sobre beta es acerca del co-movimiento.
+:::
+
+## Código: estimar el CAPM para Coca-Cola
+
+``` {.python code-line-numbers="1-4|5-7|8-10"}
+!pip install -q pyfixest                      # pyfixest is not preinstalled in Colab
+import pandas as pd                           # tabular data
+import pyfixest as pf                         # OLS with robust SEs
+from scipy import stats                       # t distribution for custom tests
+url = "https://raw.githubusercontent.com/quarcs-lab/data-open/master/AED/AED_CAPM.DTA"
+data_capm = pd.read_stata(url)                # 354 monthly returns, May 1983 – Oct 2012
+print(data_capm[["rm_rf", "rko_rf", "rf"]].describe().T.round(4))   # Table 8.3 (excerpt)
+model_capm = pf.feols("rko_rf ~ rm_rf", data=data_capm)                     # classical SEs
+model_capm_robust = pf.feols("rko_rf ~ rm_rf", data=data_capm, vcov="HC1")  # robust SEs
+model_capm_robust.summary()                   # alpha (Intercept), beta (rm_rf), R²
+```
+
+[↗ Pruébalo en Colab](https://colab.research.google.com/notebooks/empty.ipynb){.colab-link target="_blank" data-preview-link="false"}
+
+::: {.notes}
+Autocontenido. La fórmula se lee "rendimiento en exceso de Coca-Cola sobre rendimiento en exceso del mercado": el intercepto es alfa y la pendiente es beta. scipy.stats se importa aquí para las pruebas de hipótesis personalizadas dos diapositivas adelante.
+:::
+
+## Salida: $\hat\beta = 0.61$, y un $\hat\alpha$ positivo {.smaller}
+
+| Variable | Coef. | EE (iid) | $t$ | $p$ | EE (HC1) | $t$ | $p$ |
+|:--|--:|--:|--:|--:|--:|--:|--:|
+| `Intercept` ($\alpha$) | 0.00681 | 0.00295 | 2.31 | 0.022 | 0.00290 | 2.35 | 0.019 |
+| `rm_rf` ($\beta$) | [0.6063]{.key} | 0.0644 | 9.41 | <&nbsp;0.001 | 0.0770 | 7.88 | <&nbsp;0.001 |
+
+[N = 354 · $R^2 = 0.201$ · IC del 95% para $\beta$: [0.4796,&nbsp;0.7330] (iid), [0.4549,&nbsp;0.7577] (HC1)]{.comment}
+
+::: {.incremental}
+- **Beta 0.61:** un mes en que el rendimiento en exceso del mercado es 1 punto porcentual mayor acompaña a un rendimiento en exceso de Coca-Cola unos 0.61 puntos mayor
+- **Alfa 0.0068:** alrededor de 0.68% al mes que la exposición al mercado no explica
+- El EE robusto para $\beta$ es 1.2× el EE clásico; ambos rechazan $\beta = 0$ de manera abrumadora
+:::
+
+[Coca-Cola se mueve junto con el mercado a unos 61 centavos por cada dólar del mercado. Ambos IC se ubican por completo por debajo de 1.]{.takeaway .fragment}
+
+::: {.notes}
+El capítulo reporta beta 0.61 con t ≈ 9.4 (clásico), y alfa 0.0068. Con EE robustos, t = 7.88 para beta y 2.35 para alfa. Probar β = 0 no es muy interesante aquí — toda acción se mueve con el mercado en cierta medida. La prueba interesante es β = 1, que viene a continuación.
+:::
+
+## Leyendo beta: tres formas equivalentes
+
+::: {.incremental}
+- **Escenario:** rendimiento en exceso del mercado +10% → rendimiento en exceso de Coca-Cola predicho $0.0068 + 0.606 \times 0.10 \approx$ **+6.7%**; mercado −10% → **−5.4%**
+- **Correlación × volatilidad relativa:** $\hat\beta = r_{xy}\,\dfrac{s_y}{s_x} = 0.448 \times 1.352 = 0.606$
+- **División del riesgo:** $R^2 = 0.201$, así que el mercado da cuenta del 20% de la varianza del rendimiento en exceso de Coca-Cola; el 80% es idiosincrático
+:::
+
+[Coca-Cola es más volátil que el mercado, pero la mayor parte de esa volatilidad es propia. La parte que se mueve con el mercado es solo un 61% tan grande como la del mercado.]{.takeaway .fragment}
+
+::: {.notes}
+La descomposición β = r × (s_y / s_x) resuelve la paradoja de la diapositiva de datos: la DE de Coca-Cola es 1.35× la del mercado, pero su correlación con el mercado es solo 0.45, así que beta es 0.61. La afirmación del capítulo "cuando el mercado sube 10%, Coca-Cola típicamente sube solo 6.1%" omite alfa y se refiere a rendimientos en exceso; incluyendo el intercepto, las predicciones son +6.7% y −5.4%. El R² en una regresión del CAPM es la proporción de riesgo sistemático en el riesgo total (Concepto Clave 8.6).
+:::
+
+## Código: probar $\beta = 1$ y anualizar alfa
+
+``` {.python code-line-numbers="1-3|4-6|7-9"}
+# continues from the previous block
+b = model_capm_robust.coef()["rm_rf"]             # estimated beta
+se = model_capm_robust.se()["rm_rf"]              # robust standard error of beta
+t_beta1 = (b - 1) / se                            # H0: beta = 1 (as risky as the market)
+df = model_capm._N - 2                            # degrees of freedom, n − 2
+print("t =", t_beta1, " p =", 2 * stats.t.sf(abs(t_beta1), df))   # two-sided p-value
+alpha = model_capm.coef()["Intercept"]            # monthly alpha, in decimals
+print("alpha x 12 =", 12 * alpha)                 # simple annualization (the chapter's 8.2%)
+print("compounded =", (1 + alpha) ** 12 - 1)      # compounding twelve monthly returns
+```
+
+[↗ Pruébalo en Colab](https://colab.research.google.com/notebooks/empty.ipynb){.colab-link target="_blank" data-preview-link="false"}
+
+::: {.notes}
+La prueba t para cualquier valor hipotético, como en la diapositiva de repaso del método: resta el valor nulo, divide por el EE, compara con t(n − 2). El capítulo prueba hipótesis "más allá de β = 0" para la Ley de Okun; esta es la misma idea aplicada al valor de referencia del CAPM β = 1.
+:::
+
+## Salida: beta está significativamente por debajo de 1; alfa es cerca de 8% al año {.smaller}
+
+| Hipótesis | Estimación | Tipo de EE | $t$ | $p$ | Veredicto al 5% |
+|:--|--:|:--|--:|--:|:--|
+| $H_0: \beta = 1$ | 0.6063 | clásico | −6.11 | <&nbsp;0.001 | rechazar |
+| $H_0: \beta = 1$ | 0.6063 | HC1 | [−5.11]{.key} | <&nbsp;0.001 | rechazar: defensiva |
+| $H_0: \alpha = 0$ | 0.00681 | clásico | 2.31 | 0.022 | rechazar |
+| $H_0: \alpha = 0$ | 0.00681 | HC1 | [2.35]{.key} | 0.019 | rechazar |
+
+[Alfa anualizada: 12 × 0.68% ≈ 8.2% (simple) u 8.5% (compuesta)]{.comment}
+
+[Los datos dicen claramente que Coca-Cola es una acción **defensiva**. También dicen que ganó más de lo que su beta justificaba, lo que el CAPM dice que no debería ocurrir.]{.takeaway .fragment}
+
+::: {.notes}
+β = 1 se rechaza de forma decisiva con cualquier EE (t robusto = −5.11). α = 0 se rechaza al 5% pero no al 1% (p ≈ 0.02). El "8.2% anual" del capítulo es la anualización simple ×12; la capitalización da 8.5%. De cualquier forma es económicamente grande, por eso el capítulo lo llama el "enigma del alfa".
+:::
+
+## El 80% del riesgo mes a mes de Coca-Cola es propio
+
+![Rendimiento en exceso de Coca-Cola frente al del mercado, 354 meses. Morado: línea de MCO (β = 0.61). Amarillo discontinuo: cómo se verían β = 1 y α = 0.](figures/fig_capm_scatter.png)
+
+[La línea ajustada es más plana que la referencia β = 1 y cruza el cero ligeramente por encima del origen. La amplia dispersión vertical es el riesgo idiosincrático, cerca del 80% de la varianza.]{.takeaway .fragment}
+
+::: {.notes}
+La dispersión vertical alrededor de la línea es el componente específico de la empresa (noticias de productos, sorpresas de ganancias, cambios de dirección). La dispersión horizontal es la variación propia del mercado. Una cartera de muchas acciones promedia la dispersión vertical pero no la pendiente — por eso, en el CAPM, solo beta tiene precio. El crac de octubre de 1987 es el punto más a la izquierda: el rendimiento en exceso del mercado fue −23.1% y el de Coca-Cola −15.3%, aproximadamente lo que predice la línea.
+:::
+
+## ¿Por qué es positiva alfa? Tres lecturas
+
+::: {.incremental}
+- **El modelo está incompleto**: faltan otros factores de riesgo con precio (tamaño, valor, momentum), así que "alfa" es la compensación por riesgos que el CAPM ignora
+- **Desempeño genuinamente superior**: Coca-Cola superó su valor de referencia ajustado por riesgo entre 1983 y 2012
+- **Selección a posteriori**: Coca-Cola es famosa *porque* le fue bien. Estudiar a un ganador conocido durante su periodo ganador garantiza un alfa positivo
+:::
+
+[Un alfa significativo en una sola acción escogida a mano es evidencia débil contra el CAPM. Las pruebas del CAPM usan muchos activos a la vez.]{.takeaway .fragment}
+
+::: {.notes}
+Estas son las tres interpretaciones del capítulo, afiladas. La tercera merece énfasis: si buscas en muchas acciones y reportas la de mayor alfa, un valor p de 0.02 no es nada notable. Las pruebas formales del CAPM usan carteras o muchos activos en conjunto (p. ej. la prueba de Gibbons–Ross–Shanken); las variables smb y hml del conjunto de datos son los factores de tamaño y valor de Fama–French que un modelo multifactorial agregaría (Capítulo 10 y posteriores).
+:::
+
+## Código: la misma regresión para otras acciones y otros periodos
+
+``` {.python code-line-numbers="1-4|5-8"}
+# continues from the previous block — not in the chapter: simple comparisons, same estimator
+for y in ["rko_rf", "rwmt_rf", "rtgt_rf"]:                    # Coca-Cola, Walmart, Target
+    fit = pf.feols(f"{y} ~ rm_rf", data=data_capm, vcov="HC1")    # CAPM for each stock
+    print(y, fit.coef().round(4).to_dict(), round(fit._r2, 3))    # alpha, beta, R²
+half = len(data_capm) // 2                                    # split the 354 months in two
+for name, part in [("1983–1998", data_capm.iloc[:half]), ("1998–2012", data_capm.iloc[half:])]:
+    fit = pf.feols("rko_rf ~ rm_rf", data=part, vcov="HC1")       # Coca-Cola, each half
+    print(name, fit.coef().round(4).to_dict(), fit.pvalue().round(3).to_dict())
+```
+
+[↗ Pruébalo en Colab](https://colab.research.google.com/notebooks/empty.ipynb){.colab-link target="_blank" data-preview-link="false"}
+
+::: {.notes}
+Dos contrastes simples usando los propios datos y estimador del capítulo. El primero corre el CAPM para las otras dos acciones del archivo (el Ejercicio 3 del capítulo usa betas hipotéticos para ellas). El segundo divide la muestra en dos mitades de 177 meses cada una para verificar la advertencia del capítulo de que beta puede variar en el tiempo.
+:::
+
+## Salida: los betas difieren entre acciones y derivan con el tiempo {.smaller}
+
+| Regresión (EE HC1) | Meses | $\hat\alpha$ | $p(\alpha)$ | $\hat\beta$ | EE($\beta$) | $R^2$ |
+|:--|--:|--:|--:|--:|--:|--:|
+| Coca-Cola, muestra completa | 354 | 0.0068 | 0.019 | [0.606]{.key} | 0.077 | 0.201 |
+| Walmart, muestra completa | 354 | 0.0080 | 0.017 | 0.748 | 0.091 | 0.236 |
+| Target, muestra completa | 354 | 0.0044 | 0.240 | [1.067]{.key} | 0.116 | 0.333 |
+| Coca-Cola, 1983–1998 | 177 | 0.0112 | 0.002 | 0.844 | 0.095 | 0.344 |
+| Coca-Cola, 1998–2012 | 177 | 0.0011 | 0.800 | [0.437]{.key} | 0.113 | 0.117 |
+
+[No está en el capítulo: la misma regresión CAPM HC1 sobre otras columnas de `AED_CAPM.DTA` y sobre dos mitades de la muestra (mayo 1983 – enero 1998, febrero 1998 – octubre 2012).]{.comment}
+
+[Target es casi tan riesgosa como el mercado; las dos de consumo básico son defensivas. El beta de Coca-Cola se redujo a la mitad con el tiempo, y su alfa vino de la primera mitad.]{.takeaway .fragment}
+
+::: {.notes}
+Tres lecciones. (1) Beta es específico de la acción: las de consumo básico (Coca-Cola, Walmart) están por debajo de 1, la minorista de descuento Target está cerca de 1 (su IC incluye el 1). (2) Beta no es constante: 0.84 en 1983–1998 vs 0.44 en 1998–2012, lo que apoya la advertencia del capítulo sobre el beta variable en el tiempo. (3) El enigma del alfa se concentra en el primer periodo — consistente con la lectura de "selección a posteriori", ya que la famosa racha de Coca-Cola fue en los años 80 y 90.
+:::
+
+## Advertencias para 8.3 {.smaller}
+
+::: {.incremental}
+- **Errores estándar**: para rendimientos mensuales HC1 es razonable: los residuos muestran casi nada de autocorrelación (correlación de rezago 1 de −0.04)
+- El CAPM en sí no supone que los rendimientos sean independientes en el tiempo; los **errores estándar clásicos de MCO** sí. Eso es una afirmación sobre la inferencia, no sobre el modelo
+- **Beta variable en el tiempo**: un solo beta para 30 años promedia periodos muy distintos (0.84 vs 0.44)
+- **Colas gruesas**: los meses de crac como octubre de 1987 cargan mucho peso en un ajuste por mínimos cuadrados
+- **Proxy del mercado**: un índice ponderado por valor sustituye a "la cartera de mercado" a la que se refiere la teoría
+:::
+
+[$\hat\beta = 0.61$ es una sensibilidad **promedio** bien medida a lo largo de 1983–2012. Úsala para describir el pasado, no como una constante de la naturaleza.]{.takeaway .fragment}
+
+::: {.notes}
+Corrección a las "Consideraciones de Series de Tiempo" del capítulo: el capítulo dice "el CAPM supone que los rendimientos son independientes en el tiempo". El CAPM es un modelo de equilibrio de un periodo; la independencia en el tiempo es un supuesto detrás de los errores estándar clásicos de MCO. Aquí la autocorrelación de rezago 1 de los residuos es −0.04, así que los EE robustos a autocorrelación (HAC) apenas cambiarían la inferencia. Los betas móviles o por submuestras (como en la diapositiva anterior) son la forma más simple de verificar la estabilidad.
+:::
+
+# Caso 8.4 · ¿Se cumple la Ley de Okun para EE. UU.? {#case-84 .divider background-color="#7A209F"}
+
+[Serie de tiempo macro · probar $\beta_2 = -2$ · quiebres estructurales]{.act}
+
+::: {.notes}
+Caso 8.4: la Ley de Okun con datos anuales de EE. UU. Herramientas: interpretar la pendiente y el intercepto en puntos porcentuales, probar una hipótesis nula distinta de cero, y usar un gráfico de valores reales frente a predichos en el tiempo para detectar una ruptura de la relación.
+:::
+
+## La pregunta: ¿cuánto crecimiento perdemos cuando sube el desempleo? {.smaller}
+
+$$\text{rgdpgrowth}_t = \beta_1 + \beta_2\,\text{uratechange}_t + u_t$$
+
+| Variable | Significado | Media | Desv. est. | Mín | Máx |
+|:--|:--|--:|--:|--:|--:|
+| `rgdpgrowth` | crecimiento del PIB real (%) | 3.06 | 2.04 | −2.54 (2009) | 7.24 (1984) |
+| `uratechange` | cambio en la tasa de desempleo (pp) | −0.03 | 0.99 | −2.14 (1984) | [3.53 (2009)]{.key} |
+
+[N = 59 · datos anuales de EE. UU., 1961–2019 · Tabla 8.4 del capítulo]{.comment}
+
+[El valor de referencia es **$\beta_2 = -2$**: cada punto porcentual adicional de desempleo acompaña a unos 2 puntos porcentuales menos de crecimiento.]{.takeaway .fragment}
+
+::: {.notes}
+Variables: el crecimiento es un cambio porcentual; el regresor es un cambio en una tasa, medido en puntos porcentuales (pp). El valor de referencia −2 es la regla empírica moderna. Las propias estimaciones de Arthur Okun de 1962 implicaban una proporción mayor, más cercana a 3 (escribió que cada punto adicional de desempleo por encima del 4% se asociaba con un déficit de producción de alrededor del 3%); el capítulo llama a −2 la cifra "original de Okun", lo que no es preciso. La etiqueta del conjunto de datos describe la tasa de desempleo como la tasa civil para edades 15–64; el texto del capítulo dice "16 y más". Ninguna cambia el análisis, pero cita la fuente correctamente.
+:::
+
+## Código: estimar la Ley de Okun con EE clásicos y robustos
+
+``` {.python code-line-numbers="1-3|4-6|7-9"}
+!pip install -q pyfixest                      # pyfixest is not preinstalled in Colab
+import pandas as pd                           # tabular data
+import pyfixest as pf                         # OLS with robust SEs
+url = "https://raw.githubusercontent.com/quarcs-lab/data-open/master/AED/AED_GDPUNEMPLOY.DTA"
+data_gdp = pd.read_stata(url)                 # annual U.S. data, 1961–2019
+print(data_gdp[["rgdpgrowth", "uratechange"]].describe().T.round(2))   # Table 8.4
+model_okun = pf.feols("rgdpgrowth ~ uratechange", data=data_gdp)                     # classical
+model_okun_robust = pf.feols("rgdpgrowth ~ uratechange", data=data_gdp, vcov="HC1")  # robust
+model_okun_robust.summary()                   # intercept, slope, HC1 SE, R²
+```
+
+[↗ Pruébalo en Colab](https://colab.research.google.com/notebooks/empty.ipynb){.colab-link target="_blank" data-preview-link="false"}
+
+::: {.notes}
+Autocontenido. Como en los otros casos, el capítulo ajusta el modelo con EE clásicos y luego con HC1. Discutiremos en la diapositiva de advertencias por qué ninguno es la elección de libro de texto para una serie de tiempo.
+:::
+
+## Salida: pendiente −1.59, y $R^2 = 0.59$ {.smaller}
+
+| Variable | Coef. | EE (iid) | $t$ | $p$ | EE (HC1) | $t$ | $p$ |
+|:--|--:|--:|--:|--:|--:|--:|--:|
+| `Intercept` | 3.008 | 0.171 | 17.59 | <&nbsp;0.001 | 0.170 | 17.69 | <&nbsp;0.001 |
+| `uratechange` | [−1.589]{.key} | 0.175 | −9.09 | <&nbsp;0.001 | 0.163 | −9.75 | <&nbsp;0.001 |
+
+[N = 59 · $R^2 = 0.592$ · IC del 95% para la pendiente: [−1.939,&nbsp;−1.239] (iid), [−1.915,&nbsp;−1.263] (HC1)]{.comment}
+
+::: {.incremental}
+- **Pendiente:** un año en que el desempleo sube 1 punto porcentual tiene un crecimiento unos **1.59 puntos porcentuales menor**
+- **Intercepto 3.0:** crecimiento predicho en un año en que el desempleo no cambia, aproximadamente el crecimiento tendencial de la economía
+- **El EE HC1 es ligeramente menor** que el EE clásico (0.93×): lo robusto no siempre es mayor
+:::
+
+[Una asociación fuerte y estrecha: los cambios del desempleo por sí solos dan cuenta del 59% de la variación año a año del crecimiento.]{.takeaway .fragment}
+
+::: {.notes}
+A diferencia de los cortes transversales, aquí el EE HC1 es un poco menor que el clásico: los residuos más grandes no están concentrados en valores extremos del regresor, así que la fórmula HC1 les da menos peso. Ambos rechazan β₂ = 0 de manera abrumadora; la prueba económicamente interesante es contra −2. La correlación entre las dos series es −0.77.
+:::
+
+## Leyendo los coeficientes en puntos porcentuales
+
+::: {.incremental}
+- **Desempleo 5% → 6%** (+1 pp): el crecimiento predicho cae de 3.0% a $3.008 - 1.589 \approx$ **1.4%**
+- **Punto de equilibrio:** se predice que el desempleo se mantiene estable solo cuando el crecimiento es de alrededor de **3.0%**
+- **Crecimiento cero** acompaña a un aumento predicho del desempleo de $3.008 / 1.589 \approx$ **1.9 pp**
+- Porcentaje vs punto porcentual: el crecimiento es un cambio *porcentual*; el regresor es un cambio en una *tasa*, así que su unidad es el *punto porcentual*
+:::
+
+[La Ley de Okun es una afirmación sobre puntos porcentuales. "El desempleo sube 1%" significaría de 5% a 5.05%, una afirmación completamente distinta.]{.takeaway .fragment}
+
+::: {.notes}
+El ejemplo del capítulo: "Si el desempleo sube de 5% a 6% (+1 punto), el crecimiento del PIB cae de 3% a 1.41%." El 3% es el intercepto (crecimiento con desempleo sin cambios), y 3.008 − 1.589 = 1.42 a partir de los valores exactos. La lectura del punto de equilibrio del intercepto es la interpretación macro clásica: la economía necesita crecer a aproximadamente su tasa tendencial solo para mantener el desempleo constante.
+:::
+
+## Código: probar el valor de referencia −2 e inspeccionar los residuos
+
+``` {.python code-line-numbers="1-5|6-7|8-11"}
+# continues from the previous block
+from scipy import stats                                   # t distribution
+b = model_okun.coef()["uratechange"]                      # slope estimate
+se = model_okun.se()["uratechange"]                       # classical SE, as in the chapter
+t_okun = (b - (-2.0)) / se                                # H0: beta2 = -2
+print("t =", t_okun, " p =", 2 * stats.t.sf(abs(t_okun), model_okun._N - 2))
+pred = model_okun.predict()                               # fitted growth, year by year
+resid = data_gdp["rgdpgrowth"] - pred                     # actual minus predicted
+late = (data_gdp["year"] >= 2010).values                  # the 2010s
+print("2010s below prediction:", (resid[late] < 0).sum(), "of", late.sum())
+print("mean actual vs predicted:", data_gdp["rgdpgrowth"][late].mean(), pred[late].mean())
+```
+
+[↗ Pruébalo en Colab](https://colab.research.google.com/notebooks/empty.ipynb){.colab-link target="_blank" data-preview-link="false"}
+
+::: {.notes}
+La prueba resta el valor hipotético −2 de la estimación y divide por su EE. Las líneas de residuos reproducen las afirmaciones del capítulo sobre los años 2010 (crecimiento real por debajo del predicho en 9 de 10 años; predicho alrededor de 4% vs real 2–2.5%). Cambia model_okun por model_okun_robust en la línea 3 para obtener la versión HC1 de la prueba.
+:::
+
+## Salida: −2 se rechaza al 5%, aunque la estimación no está lejos de él {.smaller}
+
+| Prueba de $H_0: \beta_2 = -2$ | Estimación | EE | $t$ | $p$ | IC del 95% |
+|:--|--:|--:|--:|--:|:--|
+| EE clásicos | −1.589 | 0.175 | [2.35]{.key} | 0.022 | [−1.939,&nbsp;−1.239] |
+| EE HC1 | −1.589 | 0.163 | [2.52]{.key} | 0.014 | [−1.915,&nbsp;−1.263] |
+
+::: {.incremental}
+- Ambos IC **excluyen −2**, pero por poco: −2 está 0.06–0.09 por debajo de sus extremos inferiores
+- Al nivel del 1% **no** rechazaríamos −2 ($p > 0.01$ en ambos casos)
+- Económicamente, −1.59 vs −2 es una diferencia de 0.4 puntos de crecimiento por punto de desempleo
+:::
+
+[Estadísticamente distinto de −2 al 5%, económicamente cercano. La relación en EE. UU. en 1961–2019 es algo más débil que la regla empírica.]{.takeaway .fragment}
+
+::: {.notes}
+El capítulo reporta t ≈ 2.4 y el IC [−1.94, −1.24], ambos a partir de los EE clásicos. Con HC1 la conclusión es la misma. Un buen ejemplo de separar la significancia estadística de la económica: un responsable de políticas que use −2 en lugar de −1.59 juzgaría mal un aumento de 1 punto del desempleo por 0.4 puntos de crecimiento.
+:::
+
+## Cada año de crecimiento negativo tuvo desempleo en aumento
+
+![Crecimiento del PIB frente al cambio en el desempleo, un punto por año. Morado: línea de MCO (−1.59). Amarillo discontinuo: una línea con pendiente −2 trazada a través de las medias muestrales.](figures/fig_okun_scatter.png)
+
+[Las recesiones se ubican en la **esquina inferior derecha**: desempleo arriba, crecimiento abajo. Los 7 años con crecimiento negativo (1974, 1975, 1980, 1982, 1991, 2008, 2009) tuvieron el desempleo en aumento.]{.takeaway .fragment}
+
+::: {.notes}
+Corrección: el capítulo dice que los años de recesión aparecen "en el cuadrante superior izquierdo". Con el cambio en el desempleo en el eje horizontal y el crecimiento en el eje vertical, las recesiones (Δu > 0, crecimiento < 0) están en la esquina inferior derecha. 2009 es el punto extremo (desempleo +3.5 pp, crecimiento −2.5%), y se ubica casi exactamente sobre la línea de MCO (predicho −2.6%). 1975 está muy por encima de la línea: el desempleo subió 2.9 pp pero el crecimiento fue solo ligeramente negativo.
+:::
+
+## Real frente a predicho: la línea funciona hasta los años 2010
+
+![Crecimiento real del PIB real y el crecimiento predicho a partir de los cambios del desempleo, 1961–2019. Sombreado: la brecha en 2010–2019.](figures/fig_okun_ts.png)
+
+[De 2010 a 2019 el crecimiento real cayó **por debajo** de la predicción en 9 de 10 años, por 1.6 puntos en promedio (2.3% real vs 3.9% predicho).]{.takeaway .fragment}
+
+::: {.notes}
+Esta es la Figura 8.4 Panel B del capítulo con la brecha de los años 2010 sombreada. A medida que el desempleo caía de forma sostenida después de 2010, la regresión predecía un crecimiento de alrededor de 4%; el crecimiento real fue de 2–2.5%. Explicaciones candidatas (del capítulo): caída de la participación en la fuerza laboral, así que el menor desempleo exageraba la mejora del mercado laboral; débil crecimiento de la productividad; cambios estructurales tras la crisis financiera. Un gráfico así revela lo que el R² por sí solo no puede: si los errores son aleatorios o sistemáticos.
+:::
+
+## ¿Fue "excelente" el ajuste antes de 2008? {.smaller}
+
+| Periodo | Años | Raíz del error cuadrático medio | Residuo medio |
+|:--|--:|--:|--:|
+| 1961–2007 | 47 | 1.16 | +0.37 |
+| 2008–2019 | 12 | [1.70]{.key} | — |
+| 2010–2019 | 10 | — | [−1.62]{.key} |
+
+[Calculado a partir del modelo ajustado del capítulo; sin reestimación.]{.comment}
+
+::: {.incremental}
+- Antes de 2008 el error típico era aún de alrededor de 1.2 puntos de crecimiento, p. ej. 1974: −0.5% real vs +1.9% predicho
+- Después de 2008 los errores son mayores **y** de un solo signo, la firma de un desplazamiento en la relación
+:::
+
+[La relación era buena, no excelente, antes de 2008, y se rompió de forma sistemática después. Una sola línea para 59 años oculta eso.]{.takeaway .fragment}
+
+::: {.notes}
+El capítulo dice "el ajuste pre-2008 es excelente" y "la Ley de Okun se cumplió notablemente bien en 1961–2007". El RECM de 1.16 puntos de crecimiento es bueno para datos macro anuales pero no excelente, y los residuos pre-2008 promedian +0.37 porque los años 2010 tiran de la línea. Una racha de residuos de un solo signo es la pista visual de un quiebre estructural; las pruebas formales (p. ej. una prueba de Chow) y las regresiones por subperiodos son el siguiente paso y son el tema del Ejercicio 6 del capítulo.
+:::
+
+## Advertencias para 8.4: las series de tiempo necesitan inferencia de series de tiempo
+
+::: {.incremental}
+- **Autocorrelación:** la correlación de rezago 1 de los residuos es **0.47**; los años buenos y malos vienen en rachas
+- HC1 corrige la heterocedasticidad pero **no** la autocorrelación; la corrección de libro de texto son los EE **HAC (Newey–West)**, usados en los Capítulos 13 y 17
+- **Quiebre estructural:** una sola pendiente para 1961–2019 promedia al menos dos regímenes
+- **No causal:** tanto el crecimiento como el desempleo responden a los mismos choques de demanda y oferta; la Ley de Okun es una regularidad, no una palanca
+:::
+
+[Con errores autocorrelacionados, tanto los EE clásicos como los HC1 probablemente son demasiado pequeños, así que el rechazo de −2 al 5% es menos seguro de lo que parece.]{.takeaway .fragment}
+
+::: {.notes}
+La "Nota de Calidad de Datos" del capítulo menciona la correlación serial, los quiebres estructurales y la heterocedasticidad pero reporta solo EE clásicos y HC1. La autocorrelación de los residuos de 0.47 se calcula a partir del modelo ajustado del capítulo. Con autocorrelación positiva tanto en los residuos como en el regresor, los EE convencionales típicamente subestiman la incertidumbre. Una nota aparte sobre la dirección de la regresión: Okun originalmente regresó el cambio del desempleo sobre el crecimiento de la producción; invertir la regresión no da la pendiente recíproca a menos que R² = 1, así que el tamaño del "coeficiente de Okun" depende en parte de qué variable se pone a la izquierda.
+:::
+
+# Leerlo bien {.divider background-color="#C21E72"}
+
+[Acto III · La resolución]{.act}
+
+::: {.notes}
+El Acto III pone los cuatro casos lado a lado y extrae las lecciones generales: unidades, inferencia robusta, observaciones influyentes, hipótesis más allá de cero, y qué puede y qué no puede afirmar una pendiente bivariada.
+:::
+
+## Cuatro casos, lado a lado {.smaller}
+
+| Caso | Pendiente, en sus unidades | $R^2$ | Razón de EE, HC1 / clásico | ¿HC1 cambia el veredicto? | Amenaza principal |
+|:--|:--|--:|--:|:--|:--|
+| 8.1 esperanza de vida | +1.11 años por \$1,000 | 0.32 | 1.62 | no ($p$ 0.023) | EE. UU.; confusión por ingreso |
+| 8.1 mortalidad infantil | −0.69 muertes por 1,000 por \$1,000 | 0.14 | 1.73 | [**sí**: $p$ 0.027 → 0.188]{.key} | EE. UU., México, Turquía |
+| 8.2 gasto en salud | +\$90 por \$1,000 de PIB | 0.60 | 2.27 | no ($p$ 0.004) | EE. UU., Luxemburgo |
+| 8.3 CAPM | $\beta = 0.61$ (sin unidades) | 0.20 | 1.19 | no | beta variable en el tiempo |
+| 8.4 Okun | −1.59 pp por pp | 0.59 | 0.93 | no | autocorrelación, quiebre |
+
+[Los EE robustos importan más en cortes transversales pequeños con países de alto apalancamiento, y menos en la serie de tiempo larga.]{.takeaway .fragment}
+
+::: {.notes}
+La columna de la razón de EE es el hilo recurrente. Es mayor (2.27) donde dos países extremos cargan residuos enormes, y por debajo de 1 para la Ley de Okun. La tabla también muestra el hilo de las unidades: no hay dos pendientes medidas en las mismas unidades, y solo la pendiente del CAPM no tiene unidades. El R² va de 0.14 a 0.60, y en ningún caso un R² alto o bajo por sí solo dice si la pendiente es creíble.
+:::
+
+## Probar la hipótesis que importa, no solo $\beta = 0$ {.smaller}
+
+| Caso | Hipótesis nula | Por qué importa | $t$ robusto | Veredicto al 5% |
+|:--|:--|:--|--:|:--|
+| 8.1–8.2 | $\beta_2 = 0$ | ¿hay alguna asociación? | 2.40, −1.35, 3.08 | rechazar, **no** rechazar, rechazar |
+| 8.3 | $\beta = 1$ | ¿la acción es tan riesgosa como el mercado? | −5.11 | rechazar: defensiva |
+| 8.3 | $\alpha = 0$ | ¿el CAPM pone precio a esta acción? | 2.35 | rechazar (pero ver selección) |
+| 8.4 | $\beta_2 = -2$ | ¿se cumple la regla empírica? | 2.52 | rechazar, por poco |
+
+[La teoría provee la hipótesis nula interesante. El estadístico $t$ es la misma fórmula con un número distinto restado.]{.takeaway .fragment}
+
+::: {.notes}
+Todos los estadísticos t aquí usan EE HC1. Las pruebas β = 0 son los valores por defecto que reporta el software; las pruebas del CAPM y de Okun son donde la teoría económica da un valor de referencia específico. Cada prueba hereda todas las advertencias de su EE: en 8.4 aplica la preocupación por HAC, y en 8.3 la prueba de alfa está socavada por cómo se eligió la acción.
+:::
+
+## Un país, dos estudios de caso: qué le hace EE. UU. a las pendientes {.smaller}
+
+| Regresión | Todos los países | Sin EE. UU. | Cambio |
+|:--|--:|--:|:--|
+| Esperanza de vida sobre gasto, por \$1,000 | 1.11 | 1.69 | pendiente +52%, $R^2$ 0.32 → 0.51 |
+| Mortalidad infantil sobre gasto, por \$1,000 | −0.69 | −1.20 | se vuelve significativa con HC1 ($p$ 0.019) |
+| Gasto en salud sobre PIB, por \$1,000 | \$89.9 | \$81.4 | $R^2$ 0.60 → 0.70 |
+
+[EE. UU. es el que más gasta y obtiene menos de lo que predice la línea. Si pertenece a la muestra es una pregunta sobre la población que quieres describir.]{.takeaway .fragment}
+
+::: {.notes}
+Reúne las verificaciones de quitar uno de 8.1 y 8.2 (no en el capítulo; mismo estimador, EE HC1). En 8.1 EE. UU. es el valor de x más extremo, así que tiene alto apalancamiento y aplana ambas pendientes. En 8.2 es extremo en y con un x moderado, así que sobre todo baja el R². El mismo país juega un papel estadístico distinto dependiendo de cuál variable sea el regresor.
+:::
+
+## El error tentador — y la corrección
+
+[Objeción.]{.rebuttal} "EE. UU. y Luxemburgo son valores atípicos. Quítalos y aparece la relación *verdadera*: $R^2 = 0.93$."
+
+. . .
+
+[Respuesta.]{.rebuttal} Eliminar los dos residuos más grandes sube el $R^2$ por construcción. La línea de 32 países describe a los otros 32 países; no es más verdadera, responde una pregunta más estrecha. EE. UU. es un sistema de salud real, y su distancia de la línea es el hecho más relevante para las políticas en el conjunto de datos.
+
+[Usa las verificaciones de valores atípicos para aprender **qué** observaciones determinan un resultado y **por qué**, luego reporta cada versión que examinaste.]{.takeaway .fragment}
+
+::: {.notes}
+El propio capítulo se desliza hacia la objeción ("La relación 'verdadera' es más fuerte"; "ajuste débil" vs "ajuste excelente"). La respuesta: la exclusión es defendible para errores de datos o unidades de una población distinta (los trabajadores transfronterizos de Luxemburgo son un argumento sustantivo), no porque un punto ajuste mal. Un hábito robusto es reportar el resultado de muestra completa, el de submuestra, y la razón de cualquier diferencia.
+:::
+
+## Cinco preguntas que hacerle a cualquier pendiente bivariada
+
+::: {.incremental}
+1. **Unidades:** ¿qué significa una unidad de $x$ y de $y$, y qué tan grande es la pendiente en una unidad significativa?
+2. **Incertidumbre:** ¿clásicos o robustos? ¿Cambia el veredicto? Para series de tiempo, ¿se necesita HAC?
+3. **Influencia:** ¿qué observaciones están lejos de $\bar x$ o lejos de la línea, y qué pasa sin ellas?
+4. **Hipótesis:** ¿es $\beta = 0$ la hipótesis nula interesante, o la teoría provee una mejor, como $\beta = 1$ o $\beta = -2$?
+5. **Interpretación:** ¿es esto una asociación, o algo en el diseño justifica una lectura causal?
+:::
+
+[Cada caso de este capítulo falló al menos una pregunta en la primera pasada. Hacer las cinco es el oficio.]{.takeaway .fragment}
+
+::: {.notes}
+Una lista de verificación que los estudiantes pueden llevar a cada capítulo posterior. En 8.1 la pregunta 2 cambia el veredicto de la mortalidad infantil; en 8.2 la pregunta 3 cambia la pendiente y la historia de la elasticidad; en 8.3 la pregunta 4 da el resultado de acción defensiva; en 8.4 las preguntas 2 y 3 (autocorrelación, quiebre estructural) matizan el rechazo de −2. La pregunta 5 aplica a los cuatro: ninguno es una estimación causal.
+:::
+
+## Qué llevarse
+
+::: {.incremental}
+- Un solo estimador, `pf.feols`, ajusta datos de corte transversal, financieros y macro por igual
+- Agrega `vcov="HC1"` para cortes transversales; para series de tiempo, mira adelante a los errores estándar HAC
+- Traduce cada pendiente a unidades significativas antes de juzgar su tamaño
+- Encuentra las observaciones influyentes, reajusta sin ellas, y reporta ambos
+- Prueba la hipótesis que la teoría te da, y mantén separadas la significancia económica y la estadística
+:::
+
+[Siguiente: el Capítulo 9 pone las variables en logaritmos, así que las pendientes se vuelven elasticidades y efectos porcentuales directamente.]{.takeaway .fragment}
+
+::: {.notes}
+Puente al Capítulo 9: la discusión de la elasticidad de 8.2 mostró los límites de un modelo lineal de dólar sobre dólar; las especificaciones logarítmicas estiman elasticidades directamente. Los Capítulos 10–12 agregan más regresores, que es la respuesta de la regresión a las preocupaciones de confusión planteadas en cada caso aquí, y el Capítulo 13 vuelve a los diseños que apoyan afirmaciones causales.
+:::
+
+# Ajusta la línea en cualquier dominio — luego lee la pendiente en sus unidades, con errores estándar honestos y un ojo puesto en la influencia. {.divider background-color="#C21E72"}
+
+::: {.notes}
+Línea de cierre. Cuatro expedientes, un estimador: el trabajo está en la lectura. Unidades (8.1, 8.2), errores estándar honestos (el giro de la mortalidad infantil de 8.1, la autocorrelación de 8.4), influencia (EE. UU. y Luxemburgo), e hipótesis que la teoría provee (β = 1, α = 0, β = −2). Ninguna de las cuatro pendientes es causal; el Capítulo 13 vuelve a los diseños que pueden dar ese paso.
+:::

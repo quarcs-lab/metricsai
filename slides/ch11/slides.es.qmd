@@ -1,0 +1,258 @@
+---
+title: "11. Inferencia estadística para regresión múltiple"
+subtitle: "De muchos coeficientes a cuáles importan de verdad"
+deck-author: "Carlos Mendez"
+deck-author-url: "https://carlos-mendez.org"
+institute: "Nagoya University (GSID)"
+date: today
+date-format: long
+visual-summary: "figures/visual_summary.png"
+format:
+  revealjs:
+    output-file: index.es.html
+    theme: [default, site-brand.scss]
+    template-partials:
+      - title-slide.html
+    include-after-body: figure-zoom.html
+    center: true
+    slide-number: c/t
+    menu: true
+    chalkboard: true
+    preview-links: auto
+    overview: true
+    progress: true
+    history: true
+    transition: fade
+    width: 1280
+    height: 720
+    fig-align: center
+    auto-stretch: true
+    highlight-style: github
+    link-external-icon: false
+---
+
+# La pregunta {.divider background-color="#008CB7"}
+
+[Acto I · La tensión]{.act}
+
+## Seis variables compiten por explicar los precios de las casas
+
+Hacemos una regresión del precio de 29 casas de Davis, CA sobre **tamaño, dormitorios, baños, tamaño del lote, antigüedad y meses en el mercado**.
+
+$$\text{price} = \beta_1 + \beta_2\,\text{size} + \beta_3\,\text{bedrooms} + \cdots + \beta_7\,\text{monthsold} + u$$
+
+. . .
+
+Todos los coeficientes vuelven distintos de cero. Pero una estimación puntual no es evidencia — **¿cuáles de estos efectos podrían ser solo ruido de muestreo?** La inferencia es cómo distinguimos la señal de la suerte.
+
+::: {.notes}
+El mismo conjunto de datos de casas del Capítulo 10, ahora con inferencia completa. Todo el capítulo trata de separar los efectos reales del ruido en una muestra pequeña de 29 casas.
+:::
+
+## Hacia dónde vamos
+
+::: {.incremental}
+- **Estimar** el modelo completo y leer sus coeficientes, EE y estadísticos $t$
+- **Cuantificar la precisión** — por qué $se(b_j)$ se reduce con el ajuste y la variación, y se infla con la multicolinealidad
+- **Construir intervalos de confianza** $b_j \pm t_{n-k,\,0.025}\,se(b_j)$ para cada efecto
+- **Probar un coeficiente** a la vez con una prueba $t$, y **grupos de coeficientes** con una prueba $F$
+- **Presentar resultados** de forma profesional — EE robustos, estrellas de significancia, parsimonia
+:::
+
+## Seis ideas anclan este capítulo
+
+::: {.incremental}
+- **Estadístico $t$ para $b_j$** — distancia estandarizada respecto a un valor hipotético, distribuida $T(n-k)$
+- **Grados de libertad $n-k$** — el "presupuesto" de datos que queda tras estimar $k$ parámetros (aquí $29-7=22$)
+- **Error estándar $se(b_j)$** — se reduce con un buen ajuste y variación única; se dispara con la multicolinealidad
+- **Prueba $F$ global** — ¿explica el modelo colectivamente a $y$? ($H_0:\beta_2=\cdots=\beta_k=0$)
+- **Restringido vs. no restringido** — comparar $\text{RSS}$ para probar un *grupo* de variables en conjunto
+- **Estrellas de significancia** — `*` `**` `***` señalan los umbrales del 10%, 5% y 1% de un vistazo
+:::
+
+[Cada parámetro extra cuesta un grado de libertad — en una muestra de 29, ese costo es real.]{.takeaway .fragment}
+
+# De las estimaciones a la evidencia {.divider background-color="#7A209F"}
+
+[Acto II · La investigación]{.act}
+
+## Ajusta el modelo completo — el tamaño domina, el resto calla
+
+``` {.python code-line-numbers="1|3-4|6|8-9|11"}
+!pip install -q pyfixest                     # pyfixest isn't preinstalled in Colab (-q = quiet)
+
+import pandas as pd                          # tabular data
+import pyfixest as pf                         # OLS with R-style formulas
+
+url = "https://raw.githubusercontent.com/quarcs-lab/data-open/master/AED/AED_HOUSE.DTA"
+data = pd.read_stata(url)                    # 29 Davis, CA house sales (1999)
+
+fit = pf.feols("price ~ size + bedrooms + bathrooms + lotsize + age + monthsold",
+               data=data)                    # multiple regression, intercept auto-added
+
+fit.summary()                                # coefficients, SEs, t, p for all 7 parameters
+```
+
+[↗ Pruébalo en Colab](https://colab.research.google.com/notebooks/empty.ipynb){.colab-link target="_blank" data-preview-link="false"}
+
+::: {.notes}
+size = $68.37/pies² (p = 0.0002); bedrooms, bathrooms, lotsize, age, monthsold todos no significativos. R² = 0.651, n = 29, k = 7, gl = 22.
+:::
+
+## Solo `size` supera el umbral — a $\$68.37$ por pie cuadrado
+
+::: {.incremental}
+- **size**: $\$68.37$/pies², $t = 4.44$, $p = 0.0002$ — altamente significativo, manteniendo todo lo demás constante
+- **bedrooms** $\$2{,}685$ ($p=0.77$), **bathrooms** $\$6{,}833$ ($p=0.67$), **age** $-\$833$ ($p=0.26$) — ninguno significativo
+- **$R^2 = 0.651$** — el modelo explica el 65% de la variación del precio, pero el **$R^2$ ajustado $= 0.555$**
+:::
+
+[Distinto de cero no es lo mismo que significativo: cinco de seis pendientes podrían plausiblemente ser cero.]{.takeaway .fragment}
+
+## La precisión tiene una fórmula — y la multicolinealidad es su enemiga
+
+$$se(b_j) = \frac{s_e}{\sqrt{\sum_i \widetilde{x}_{ji}^2}}, \qquad \widetilde{x}_{ji} = x_j \text{ residualizado sobre todos los demás regresores}$$
+
+[$se(b_j)$ se reduce cuando el modelo ajusta bien ($s_e$ pequeño) y cuando $x_j$ aporta variación que los *otros* regresores no tienen. Como las casas más grandes tienen más dormitorios, poco de `bedrooms` sobrevive a la residualización — así que su EE se dispara.]{.comment}
+
+[Con $n=29$ y predictores correlacionados, las estimaciones son imprecisas por construcción — los datos se estiran al máximo.]{.takeaway .fragment}
+
+## Un intervalo de confianza es el rango plausible de cada efecto
+
+``` {.python code-line-numbers="1|3-4|6|8|10-11"}
+import pandas as pd                          # tabular data
+import pyfixest as pf                         # estimation
+from scipy import stats                       # t critical value
+
+url = "https://raw.githubusercontent.com/quarcs-lab/data-open/master/AED/AED_HOUSE.DTA"
+data = pd.read_stata(url)                    # load the 29 houses
+
+fit = pf.feols("price ~ size + bedrooms + bathrooms + lotsize + age + monthsold", data=data)
+
+fit.confint()                                # 95% CI: b_j ± t(n-k, 0.025) · se(b_j)
+t_crit = stats.t.ppf(0.975, df=29 - 7)       # critical value from T(22) ≈ 2.074
+```
+
+[↗ Pruébalo en Colab](https://colab.research.google.com/notebooks/empty.ipynb){.colab-link target="_blank" data-preview-link="false"}
+
+## Solo el intervalo de `size` no incluye el cero
+
+![Cada barra es un intervalo de confianza del 95%. `size` queda completamente por encima de cero; todos los demás intervalos lo cruzan.](figures/ci_coefficients.png)
+
+[`size`: $[\$36.45,\ \$100.29]$ — incluso el extremo inferior suma $\$36$/pies². Un intervalo que excluye el cero *es* significancia al 5%.]{.takeaway .fragment}
+
+## Una prueba $t$ pregunta si un coeficiente es igual a un valor
+
+``` {.python code-line-numbers="1|3|5|7-8|10"}
+import numpy as np                           # arrays
+# from the fitted model: b_size = 68.37, se_size = 15.39, df = 22
+
+fit = pf.feols("price ~ size + bedrooms + bathrooms + lotsize + age + monthsold", data=data)
+
+b, se = fit.coef()["size"], fit.se()["size"] # estimate and its standard error
+
+t = (b - 50) / se                            # H0: beta_size = 50  →  t = (68.37 - 50)/15.39
+p = 2 * (1 - stats.t.cdf(abs(t), df=29 - 7)) # two-sided p-value from T(22)
+
+print(f"t = {t:.2f},  p = {p:.3f}")          # t = 1.19, p = 0.245 → fail to reject
+```
+
+[↗ Pruébalo en Colab](https://colab.research.google.com/notebooks/empty.ipynb){.colab-link target="_blank" data-preview-link="false"}
+
+::: {.notes}
+Probar beta=50 da t=1.19, p=0.245: los datos son consistentes con $50/pies² aunque la estimación puntual sea $68.37. No rechazar ≠ aceptar. Para beta=0, t = 68.37/15.39 = 4.44, p = 0.0002.
+:::
+
+## Una sola prueba $t$ no puede juzgar varias variables a la vez
+
+Probar bedrooms, bathrooms, lotsize, age, monthsold **una por una** ignora que están correlacionadas — e infla la probabilidad de un falso "significativo".
+
+. . .
+
+En cambio, compara dos modelos por su suma de cuadrados residuales:
+
+$$F = \frac{(\text{RSS}_R - \text{RSS}_U)/q}{\text{RSS}_U/(n-k)} \sim F(q,\, n-k)$$
+
+[El modelo **restringido** elimina las variables; el **no restringido** las conserva. ¿Eliminarlas perjudica el ajuste?]{.comment}
+
+## La prueba $F$ juzga un grupo de variables en conjunto
+
+``` {.python code-line-numbers="1|3-4|6|8-10|12"}
+import numpy as np                           # arrays
+from scipy import stats                       # F distribution
+
+full = pf.feols("price ~ size + bedrooms + bathrooms + lotsize + age + monthsold", data=data)
+size_only = pf.feols("price ~ size", data=data)   # restricted: drop the other 5
+
+rss_u, rss_r = np.sum(full._u_hat**2), np.sum(size_only._u_hat**2)
+q, n_k = 5, 29 - 7                           # 5 restrictions, 22 residual df
+F = ((rss_r - rss_u) / q) / (rss_u / n_k)    # joint F-statistic
+p = 1 - stats.f.cdf(F, q, n_k)               # upper-tail p-value
+
+print(f"F({q},{n_k}) = {F:.2f},  p = {p:.3f}")   # F = 0.42, p = 0.832
+```
+
+[↗ Pruébalo en Colab](https://colab.research.google.com/notebooks/empty.ipynb){.colab-link target="_blank" data-preview-link="false"}
+
+## Dos pruebas $F$, dos veredictos
+
+![La distribución $F(q,\,n-k)$ es sesgada a la derecha y positiva; rechazamos en la cola derecha lejana.](figures/f_distribution.png)
+
+::: {.incremental}
+- **Global**: $F(6,22) = 6.83$, $p = 0.0003$ — el modelo *colectivamente* explica el precio. **Rechazar.**
+- **Las cinco adicionales**: $F(5,22) = 0.42$, $p = 0.832$ — conjuntamente redundantes más allá de `size`. **No rechazar.**
+:::
+
+[El modelo funciona — pero todo su trabajo lo hace `size` por sí sola.]{.takeaway .fragment}
+
+# Leerlo bien {.divider background-color="#C21E72"}
+
+[Acto III · La resolución]{.act}
+
+## Reporta EE robustos y deja que las estrellas lleven la señal
+
+``` {.python code-line-numbers="1|3|5|7"}
+# vcov="HC1" → heteroskedasticity-robust standard errors (White's correction)
+
+robust = pf.feols("price ~ size + bedrooms + bathrooms + lotsize + age + monthsold",
+                  data=data, vcov="HC1")     # coefficients unchanged; SEs recomputed
+
+robust.summary()                             # size: 68.37*** (p ≈ 0.0002) still dominates
+```
+
+[↗ Pruébalo en Colab](https://colab.research.google.com/notebooks/empty.ipynb){.colab-link target="_blank" data-preview-link="false"}
+
+[Reporta `size` como $68.37^{***}$ y el resto sin estrellas — el lector ve de un vistazo dónde vive la evidencia. Los EE robustos aquí casi no cambian ($\$15.39 \to \$15.36$): heterocedasticidad leve.]{.takeaway .fragment}
+
+## Lo más simple gana: la parsimonia vence a un modelo abarrotado
+
+![Precio real vs. predicho. El modelo solo con size sigue al modelo completo casi exactamente.](figures/model_comparison.png)
+
+::: {.incremental}
+- Solo size: $R^2 = 0.617$, **$R^2$ ajustado $= 0.603$** — el $R^2$ ajustado *más alto*
+- Modelo completo: $R^2 = 0.651$ pero $R^2$ ajustado $= 0.555$ — seis parámetros extra, pérdida neta
+:::
+
+[El $R^2$ siempre sube con más variables; el $R^2$ ajustado cobra por la complejidad. Prefiere el modelo que se gana sus parámetros.]{.takeaway .fragment}
+
+## Mantén dos advertencias a la vista
+
+[Objeción.]{.objection} "Las cinco variables son no significativas — así que los dormitorios y los baños no afectan el precio."
+
+. . .
+
+[Respuesta.]{.rebuttal} **No rechazar no es aceptar.** Con $n = 29$ y predictores que se mueven juntos, los datos simplemente no pueden resolver esos efectos — no que sean cero. Una muestra más grande y menos colineal sí podría.
+
+[La inferencia cuantifica lo que *esta* muestra puede sustentar; los datos pequeños y correlacionados sustentan menos de lo que parecen.]{.takeaway .fragment}
+
+## Qué llevarte
+
+::: {.incremental}
+- El estadístico $t = b_j/se(b_j)$ sigue $T(n-k)$; un IC que excluye el cero significa significancia a ese nivel.
+- $se(b_j)$ cae con el ajuste y la variación única, y **sube con la multicolinealidad** — el impuesto de la muestra pequeña.
+- Usa una **prueba $F$** para *grupos* de coeficientes: global ($H_0:$ todas las pendientes $=0$) y de subconjunto (restringido vs. no restringido).
+- Reporta **EE robustos (HC1)** por defecto para datos de corte transversal, con estrellas de significancia.
+- Juzga los modelos por el **$R^2$ ajustado y la parsimonia**, no por el $R^2$ bruto — aquí, `size` por sí sola basta.
+:::
+
+# Estima los efectos, luego pregunta cuáles puede defender realmente la data. {.divider background-color="#C21E72"}

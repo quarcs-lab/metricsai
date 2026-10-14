@@ -1,0 +1,223 @@
+---
+title: "3. La media muestral"
+subtitle: "Por qué una media muestral es una extracción aleatoria — y cómo se comporta su distribución"
+deck-author: "Carlos Mendez"
+deck-author-url: "https://carlos-mendez.org"
+institute: "Nagoya University (GSID)"
+date: today
+date-format: long
+visual-summary: "figures/visual_summary.png"
+format:
+  revealjs:
+    output-file: index.es.html
+    theme: [default, site-brand.scss]
+    template-partials:
+      - title-slide.html
+    include-after-body: figure-zoom.html
+    center: true
+    slide-number: c/t
+    menu: true
+    chalkboard: true
+    preview-links: auto
+    overview: true
+    progress: true
+    history: true
+    transition: fade
+    width: 1280
+    height: 720
+    fig-align: center
+    auto-stretch: true
+    highlight-style: github
+    link-external-icon: false
+---
+
+# La pregunta {.divider background-color="#008CB7"}
+
+[Acto I · La tensión]{.act}
+
+## Una media muestral es solo una extracción
+
+Encuestas a 30 personas y obtienes un ingreso promedio de \$52,000. Otra persona encuesta a 30 distintas y
+obtiene \$48,000. ¿Quién tiene razón?
+
+. . .
+
+Ambos. Cada $\bar{x}$ es **una realización de una variable aleatoria** $\bar{X}$ que cambia de muestra a
+muestra. Este capítulo pregunta: ¿cómo luce la *distribución* de $\bar{X}$ — y cómo la usamos?
+
+::: {.notes}
+El salto del Capítulo 2 (describir los datos que tienes) a la inferencia (lo que los datos dicen sobre el mundo)
+pasa por esta idea: el estadístico que calculas es él mismo aleatorio.
+:::
+
+## Hacia dónde vamos
+
+::: {.incremental}
+- **$\bar{X}$ es una variable aleatoria** — no un número fijo
+- Su **media y varianza**: $E[\bar{X}] = \mu$ y $\operatorname{Var}[\bar{X}] = \sigma^2/n$
+- Su **distribución muestral** — vista a través de un experimento de lanzamientos de moneda
+- El **teorema del límite central**: $\bar{X}$ es aproximadamente normal, incluso con datos sesgados
+- El **error estándar** $se(\bar{X}) = s/\sqrt{n}$ — y por qué un $n$ mayor da estimaciones más precisas
+:::
+
+## Seis ideas anclan este capítulo
+
+::: {.incremental}
+- **Parámetro vs. estadístico** — $\mu$ es fijo y desconocido; $\bar{x}$ se calcula y varía
+- **Estimador** — una regla ($\bar{X} = \tfrac{1}{n}\sum X_i$); una *estimación* es un número que esa regla devuelve
+- **Insesgamiento** — $E[\bar{X}] = \mu$: sin sobre- o subestimación sistemática
+- **Eficiencia** — entre los estimadores insesgados, $\bar{X}$ tiene el menor rebote
+- **Consistencia** — $\operatorname{Var}[\bar{X}] = \sigma^2/n \to 0$, así que $\bar{X} \to \mu$ a medida que $n$ crece
+- **Ley de los grandes números** — la garantía formal detrás de esa convergencia
+:::
+
+[El número que calculas es aleatorio; su distribución es la base de la inferencia.]{.takeaway .fragment}
+
+# De una muestra a una distribución {.divider background-color="#7A209F"}
+
+[Acto II · La investigación]{.act}
+
+## El experimento: 400 muestras de 30 lanzamientos de moneda
+
+Una moneda justa tiene $\mu = 0.5$ y $\sigma^2 = 0.25$. Lánzala 30 veces, registra la fracción de caras —
+esa es una $\bar{x}$. Hazlo **400 veces** y podrás ver emerger la distribución muestral.
+
+$$\bar{X} = \frac{1}{n}\sum_{i=1}^{n} X_i, \qquad E[\bar{X}] = \mu, \qquad \operatorname{Var}[\bar{X}] = \frac{\sigma^2}{n}$$
+
+[El libro ya calculó las 400 medias por nosotros — primero carguémoslas y resumámoslas.]{.comment}
+
+## Paso 1 — carga y resume las 400 medias muestrales con pandas
+
+``` {.python code-line-numbers="1-2|4-5|6|8-9|11-12"}
+import pandas as pd                          # pandas → load & handle tabular data
+import numpy as np                           # numpy → sqrt and array math
+
+url = "https://raw.githubusercontent.com/quarcs-lab/data-open/master/AED/AED_COINTOSSMEANS.DTA"
+data = pd.read_stata(url)                    # 400 sample means, each from n = 30 tosses
+xbar = data["xbar"]                          # the column of 400 sample means
+
+print(xbar.mean())                           # empirical E[X̄]  → 0.5004
+print(xbar.std())                            # empirical SD     → 0.0887
+
+print(np.sqrt(0.25 / 30))                    # theoretical σ/√n → 0.0913
+data.describe().round(4)                      # full summary of the 400 means
+```
+
+[↗ Pruébalo en Colab](https://colab.research.google.com/notebooks/empty.ipynb){.colab-link target="_blank" data-preview-link="false"}
+
+::: {.notes}
+Media empírica 0.5004 ≈ μ = 0.5 (insesgada); DE empírica 0.0887 ≈ σ/√n teórico = 0.0913. Los datos
+confirman la fórmula antes de que probemos nada.
+:::
+
+## Las 400 medias se acumulan en una campana en torno a 0.5
+
+![Cada barra cuenta con qué frecuencia una media muestral cayó en ese rango; la curva es la $N(\mu,\,\sigma^2/n)$ teórica.](figures/fig_x_02.png)
+
+[El histograma de medias muestrales *es* la distribución muestral — centrada en $\mu$, con dispersión $\sigma/\sqrt{n}$.]{.takeaway .fragment}
+
+## La precisión es una fórmula: $se(\bar{X}) = \sigma/\sqrt{n}$
+
+Las muestras más grandes no desplazan el centro — **reducen la dispersión**. El detalle: se reduce con
+$\sqrt{n}$, no con $n$.
+
+| $n$ | $\sigma/\sqrt{n}$ |
+|---|---|
+| 10 | 0.158 |
+| 30 | 0.091 |
+| 100 | 0.050 |
+| 400 | 0.025 |
+| 1000 | 0.016 |
+
+[Para **reducir a la mitad** el error estándar debes **cuadruplicar** el tamaño de muestra — la precisión es cara.]{.takeaway .fragment}
+
+## Paso 2 — reproduce la distribución con una simulación de Monte Carlo
+
+``` {.python code-line-numbers="1|3|4|5-7|9-10"}
+import numpy as np                           # numpy → random draws + arrays
+
+np.random.seed(10101)                        # fix the seed → reproducible result
+means = np.zeros(400)                        # container for 400 sample means
+for i in range(400):                         # repeat the experiment 400 times
+    sample = np.random.binomial(1, 0.5, 30)  # 30 fair coin tosses (each 0 or 1)
+    means[i] = sample.mean()                 # store this sample's mean X̄
+
+print(means.mean())                          # ≈ 0.50   → unbiased
+print(means.std())                           # ≈ 0.091  → matches σ/√n
+```
+
+[↗ Pruébalo en Colab](https://colab.research.google.com/notebooks/empty.ipynb){.colab-link target="_blank" data-preview-link="false"}
+
+::: {.notes}
+La simulación es el microscopio del econometrista: cuando una fórmula es difícil de confiar, genera los datos
+tú mismo y compruébala. Aquí reproduce E[X̄] = μ y DE = σ/√n casi exactamente.
+:::
+
+## El teorema del límite central: datos sesgados, media normal
+
+Las edades del censo de EE. UU. de 1880 están **fuertemente sesgadas a la derecha** ($\mu = 24.13$, $\sigma = 18.61$). Aun así, las medias de
+100 muestras de $n = 25$ trazan una campana familiar.
+
+![100 medias muestrales de edades del censo de 1880 — una curva de campana que surge de una población sesgada.](figures/fig_x_03.png)
+
+[El TLC: promedia suficientes extracciones y $\bar{X}$ se vuelve normal — *sea cual sea* la forma de la población.]{.takeaway .fragment}
+
+## Paso 3 — visualiza una distribución muestral con su normal teórica
+
+``` {.python code-line-numbers="1-3|5-6|8|9-11|12-13|14"}
+import numpy as np, pandas as pd             # arrays + data
+import matplotlib.pyplot as plt               # plotting
+from scipy.stats import norm                  # scipy → the normal pdf for the overlay
+
+url = "https://raw.githubusercontent.com/quarcs-lab/data-open/master/AED/AED_COINTOSSMEANS.DTA"
+xbar = pd.read_stata(url)["xbar"]            # the 400 coin-toss sample means
+
+fig, ax = plt.subplots(figsize=(10, 6))      # one figure + axes
+ax.hist(xbar, bins=20, density=True,         # empirical sampling distribution
+        color="#008CB7", alpha=0.75)         # (density so it compares to a pdf)
+grid = np.linspace(xbar.min(), xbar.max(), 200)
+ax.plot(grid, norm.pdf(grid, 0.5, np.sqrt(0.25 / 30)),  # theoretical N(μ, σ²/n)
+        color="#C21E72", lw=3)               # DataPink curve on top
+plt.show()                                   # render histogram + normal overlay
+```
+
+[↗ Pruébalo en Colab](https://colab.research.google.com/notebooks/empty.ipynb){.colab-link target="_blank" data-preview-link="false"}
+
+## Tres señas de un buen estimador — y $\bar{X}$ se gana las tres
+
+::: {.incremental}
+- **Insesgado** — a lo largo de 400 muestras de moneda las medias promedian **0.5004** frente al verdadero $\mu = 0.5$.
+- **Eficiente** — su DE **0.0887** se sitúa justo en el piso teórico $\sigma/\sqrt{n} = 0.0913$; ninguna regla insesgada rival rebota menos.
+- **Consistente** — $\operatorname{Var}[\bar{X}] = \sigma^2/n \to 0$: para las edades del censo la DE de $\bar{X}$ cae de 3.72 en $n=25$ a 0.26 en $n=5{,}000$.
+:::
+
+[Insesgado, eficiente, consistente — por eso la media muestral es el estimador de referencia.]{.takeaway .fragment}
+
+# Leerlo bien {.divider background-color="#C21E72"}
+
+[Acto III · La resolución]{.act}
+
+## El detalle — la muestra debe ser representativa
+
+[Objeción.]{.objection} "Más datos siempre me acercan a la verdad."
+
+. . .
+
+[Respuesta.]{.rebuttal} Solo bajo **muestreo aleatorio simple**. Sobremuestrea un grupo — digamos 70% mujeres cuando
+la población es 50/50 — y la media simple queda **sesgada**, sin importar cuán grande sea $n$. La solución es una
+**media ponderada** con ponderaciones inversas a la probabilidad $w_i = 1/\pi_i$, que restaura el verdadero promedio
+poblacional.
+
+[La consistencia supone una muestra representativa; un diseño sesgado converge al número equivocado.]{.takeaway .fragment}
+
+## Qué llevar adelante
+
+::: {.incremental}
+- Una media muestral $\bar{x}$ es **una extracción** de la variable aleatoria $\bar{X}$.
+- $E[\bar{X}] = \mu$ (insesgada) y $\operatorname{Var}[\bar{X}] = \sigma^2/n$ (la precisión crece con $n$).
+- El **error estándar** $se(\bar{X}) = s/\sqrt{n}$ — reducirlo a la mitad cuesta 4× los datos.
+- El **TLC** hace que $\bar{X}$ sea aproximadamente normal incluso cuando la población no lo es.
+- Todo ello supone una muestra representativa; de lo contrario, **pondera** para corregir el diseño.
+:::
+
+# Calcula la media — y luego recuerda que es una extracción de una distribución. {.divider background-color="#C21E72"}

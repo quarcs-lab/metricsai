@@ -1,0 +1,1851 @@
+---
+title: "4. Inferencia estadística para la media"
+subtitle: "De una muestra a toda la población, con incertidumbre cuantificada"
+deck-author: "Carlos Mendez"
+deck-author-url: "https://carlos-mendez.org"
+institute: "Nagoya University (GSID)"
+date: today
+date-format: long
+visual-summary: "figures/visual_summary.png"
+format:
+  revealjs:
+    output-file: index.es.html
+    theme: [default, site-brand.scss]
+    css: ch04-extra.css
+    template-partials:
+      - title-slide.html
+    include-after-body: figure-zoom.html
+    center: true
+    slide-number: c/t
+    menu: true
+    chalkboard: true
+    preview-links: auto
+    overview: true
+    progress: true
+    history: true
+    transition: fade
+    width: 1280
+    height: 720
+    fig-align: center
+    auto-stretch: true
+    highlight-style: github
+    link-external-icon: false
+---
+
+# Una muestra, toda una población {.divider background-color="#008CB7"}
+
+[Acto I · La tensión]{.act}
+
+::: {.notes}
+Este es el capítulo sobre el que descansan todos los capítulos posteriores. Cada tabla de regresión del libro reporta un error estándar, un estadístico t, un valor p y un intervalo de confianza, y los cuatro se presentan aquí para el estimador más simple posible: la media muestral. Si los estudiantes dominan la lógica para una media, los capítulos de regresión solo cambian el estimador, no el razonamiento.
+:::
+
+## Medimos una muestra, pero lo que nos importa es la población
+
+Encuestamos a **171** mujeres de 30 años que trabajan a tiempo completo y encontramos ingresos medios de **\$41,413**. No nos importan estas 171 personas en sí. Nos importan *todas* las mujeres de 30 años que trabajan a tiempo completo en EE. UU. en 2010.
+
+. . .
+
+La media muestral $\bar{x}$ es nuestra mejor conjetura de la media poblacional $\mu$, pero es solo una extracción: otra muestra de 171 daría un número diferente. La **inferencia estadística** convierte ese número único en una afirmación con incertidumbre cuantificada, ya sea un **rango** (un intervalo de confianza) o un **veredicto sobre una afirmación** (una prueba de hipótesis).
+
+[Todo el capítulo responde una pregunta: ¿qué tan lejos de $\mu$ podría estar $\bar{x}$ de forma plausible?]{.takeaway .fragment}
+
+::: {.notes}
+La inferencia es el puente de la muestra que tenemos a la población que queremos describir. Insiste en que la media poblacional es un número fijo y desconocido; lo que es aleatorio es la muestra, y por tanto la media muestral y cada intervalo construido a partir de ella.
+:::
+
+## Once paradas — haz clic en cualquier fila para saltar a ella {.smaller}
+
+| Parada | Pregunta | Herramienta | Resultado principal |
+|:----|:-------------------------|:-----------------|:--------------------------|
+| [4.1](#s41) | ¿Qué tan precisa es una media muestral? | error estándar $s/\sqrt{n}$ | \$41,413, EE \$1,952 |
+| [4.2](#s42) | ¿Con qué regla medimos? | distribución $t$ | $t_{170,\,0.025} = 1.974$ |
+| [4.3](#s43) | ¿Qué valores de $\mu$ son plausibles? | intervalo de confianza | IC 95% [\$37,559, \$45,266] |
+| [4.4](#s44) | ¿Es creíble $\mu = \$40{,}000$? | prueba $t$ bilateral, potencia | $t = 0.72$, $p = 0.470$ |
+| [4.5](#s45) | Gasolina, ingresos masculinos, crecimiento del PIB | tres pruebas | solo la gasolina rechaza ($t = -5.26$) |
+| [4.6](#s46) | ¿$\mu$ *supera* \$40,000? | prueba unilateral | $p = 0.235$ |
+| [4.7](#s47) | ¿Está empatada la carrera? | proporciones, prueba $z$ | 52.1%, $p = 0.199$ |
+| [EC 1](#cs1) | ¿Ha cambiado la productividad mundial? | IC, pruebas de Welch y pareada | pareada $t = 10.90$ |
+| [EC 2](#cs2) | ¿Es equitativo el desarrollo de Bolivia? | IC, pruebas de una y dos muestras | Tarija − Pando = 14.7 puntos |
+| [Síntesis](#synth) | ¿Qué dijeron todas las pruebas? | una regla, una lista de verificación | — |
+
+::: {.notes}
+Las secciones 4.1–4.7 siguen el capítulo. Los dos estudios de caso ejecutan cada una de sus seis tareas con salida real; los resultados que el capítulo no imprime se etiquetan como "calculado para estas diapositivas". Pulsa M para el menú u O para la vista general; las etiquetas de parada son enlaces.
+:::
+
+## Una fórmula lleva todo el capítulo
+
+$$t \;=\; \frac{\text{estimación} \;-\; \text{valor hipotetizado}}{\text{error estándar}} \qquad\qquad \text{IC} \;=\; \text{estimación} \;\pm\; \text{valor crítico} \times \text{error estándar}$$
+
+::: {.incremental}
+- La **estimación** aquí es $\bar{x}$ (o $\hat{p}$ para una proporción); en el Capítulo 7 se convierte en una pendiente de regresión $b_2$
+- El **error estándar** mide cuánto variaría la estimación entre muestras repetidas
+- El **valor crítico** proviene de la distribución $t$ (o de la normal para proporciones)
+:::
+
+[Aprende este par de fórmulas una vez y podrás leer cada tabla de inferencia del libro.]{.takeaway .fragment}
+
+::: {.notes}
+Idea clave 9 del capítulo: los métodos se generalizan a otros parámetros. Señala explícitamente hacia adelante: en el Capítulo 7 el mismo t = (b − β*)/se(b) y b ± t × se(b) aparecen en cada salida de regresión.
+:::
+
+## Siete ideas anclan este capítulo
+
+::: {.incremental}
+- **$H_0$ vs $H_a$**: la afirmación por defecto que probamos, y la alternativa que aceptamos si cae
+- **Estadístico de prueba $t$**: a cuántos errores estándar se sitúa la estimación del valor en $H_0$
+- **Valor $p$**: la probabilidad de datos al menos tan extremos *si $H_0$ fuera verdadera*
+- **Nivel de significancia $\alpha$**: la tasa de falsa alarma que aceptamos, usualmente $0.05$
+- **Valor crítico**: el corte en $t$ que delimita la región de rechazo
+- **Error de Tipo I / Tipo II**: una falsa alarma vs un efecto no detectado; **potencia** $= 1-\beta$
+- **Intervalo de confianza**: el rango de valores de $\mu$ que una prueba bilateral no rechazaría
+:::
+
+[Una prueba nunca *demuestra* $H_0$. Solo pregunta si los datos pueden rechazarla.]{.takeaway .fragment}
+
+::: {.notes}
+Estos son los Conceptos clave del capítulo. Dedica tiempo a la definición del valor p: es una probabilidad sobre los datos calculada bajo H0, nunca la probabilidad de que H0 sea verdadera.
+:::
+
+## Un hilo conductor en cada diapositiva: tres preguntas para cualquier prueba
+
+| Pregunta | Respondida por | Falla cuando… |
+|:--|:--|:--|
+| **¿Es real?** | $t$, valor $p$, IC | la brecha es pequeña en relación con el EE |
+| **¿Importa?** | el tamaño de la brecha, en unidades que le importan a la gente | una estimación precisa de una brecha trivial |
+| **¿Podríamos siquiera detectarlo?** | la potencia, el ancho del IC | una brecha real oculta por un EE grande |
+
+[Cada ejemplo de este deck recibe las tres preguntas. La significancia estadística responde solo a la primera.]{.takeaway .fragment}
+
+::: {.notes}
+Este es el hilo recurrente del deck. Los precios de la gasolina (4.5) son reales e importan; los ingresos femeninos vs \$40,000 (4.4) podrían importar pero no pudimos detectarlo; la media del IMDS de Bolivia vs 50 (EC2) es real pero apenas importa. La diapositiva de síntesis al final pone cada prueba en una sola regla.
+:::
+
+# Acto II · De una muestra a la población {.divider background-color="#7A209F"}
+
+[Secciones 4.1–4.7 · estimación, intervalo, prueba]{.act}
+
+::: {.notes}
+Siete secciones, cada una con el mismo arco: pregunta → método → código → salida → interpretación → advertencias. La muestra de ingresos femeninos lleva las secciones 4.1–4.4 y 4.6; la sección 4.5 añade tres conjuntos de datos nuevos; 4.7 cambia a datos de sí/no.
+:::
+
+# Sección 4.1 · ¿Qué tan precisa es una media muestral? {#s41 .divider background-color="#7A209F"}
+
+[Media muestral · desviación estándar · error estándar]{.act}
+
+::: {.notes}
+Sección 4.1: el ejemplo motivador. Herramientas: la media muestral, la desviación estándar muestral y el error estándar.
+:::
+
+## La pregunta: ¿cuánto ganan las mujeres de 30 años? {.smaller}
+
+**Datos.** `AED_EARNINGS.DTA`: 171 mujeres de 30 años que trabajan a tiempo completo en EE. UU. en 2010, ingresos anuales en dólares.
+
+| Símbolo | Nombre | Mide |
+|:--|:--|:--|
+| $\bar{x}$ | media muestral | nuestra estimación puntual de la media poblacional $\mu$ |
+| $s$ | desviación estándar muestral | cuánto varían los ingresos **individuales** |
+| $\text{se}(\bar{x}) = s/\sqrt{n}$ | error estándar | cuánto variaría la **media muestral** entre muestras |
+
+[Dos dispersiones diferentes: $s$ describe a las personas; el error estándar describe nuestra estimación.]{.takeaway .fragment}
+
+::: {.notes}
+Los datos son una muestra de una población mucho mayor. El Concepto clave 4.1 del capítulo: el error estándar mide la precisión de x̄ como estimación de μ. Los estudiantes confunden regularmente s y se; vale la pena detenerse en esta tabla.
+:::
+
+## Los ingresos están sesgados a la derecha: unos pocos grandes ganadores jalan la media hacia arriba
+
+![Ingresos de las 171 mujeres. La media (\$41,413) se sitúa por encima de la mediana (\$36,000).](figures/fig_earn_hist.png)
+
+[El 64% de las mujeres gana menos que la media. La inferencia aquí es sobre la **media**, que no es la ganadora típica.]{.takeaway .fragment}
+
+::: {.notes}
+Figura calculada para estas diapositivas a partir de los datos del capítulo. Los ingresos van de $1,050 a $172,000; asimetría 1.71. Con n = 171 el teorema del límite central hace que la distribución muestral de la media sea cercana a la normal aunque los ingresos estén sesgados, de modo que la inferencia basada en t sigue siendo razonable. Con muestras muy pequeñas de una población sesgada no lo sería.
+:::
+
+## Código: cargar los datos y calcular el error estándar
+
+``` {.python code-line-numbers="1-3|4-6|7-10|11-14"}
+import numpy as np                          # square roots
+import pandas as pd                         # tabular data
+from scipy import stats                     # t and normal distributions (used later)
+url = "https://raw.githubusercontent.com/quarcs-lab/data-open/master/AED/AED_EARNINGS.DTA"
+data_earnings = pd.read_stata(url)          # 171 women aged 30, full-time, 2010
+earnings = data_earnings["earnings"]        # annual earnings in dollars
+n = len(earnings)                           # sample size
+mean_earnings = earnings.mean()             # sample mean x-bar
+std_earnings = earnings.std(ddof=1)         # sample std dev s (divides by n - 1)
+se_earnings = std_earnings / np.sqrt(n)     # standard error = s / sqrt(n)
+print(f"n = {n}")                           # 171
+print(f"Mean: ${mean_earnings:,.2f}")       # point estimate of mu
+print(f"Std dev: ${std_earnings:,.2f}")     # spread across women
+print(f"Std error: ${se_earnings:,.2f}")    # spread of x-bar across samples
+```
+
+[↗ Pruébalo en Colab](https://colab.research.google.com/notebooks/empty.ipynb){.colab-link target="_blank" data-preview-link="false"}
+
+::: {.notes}
+Autónomo: pégalo en una celda vacía de Colab. ddof=1 da la desviación estándar muestral, dividiendo por n − 1 en lugar de n. Todo en las secciones 4.2–4.4 y 4.6 reutiliza estos cuatro números.
+:::
+
+## Salida: una estimación precisa de una muestra ruidosa {.smaller}
+
+:::: {.columns}
+::: {.column width="48%"}
+| Estadístico | Valor |
+|:--|--:|
+| $n$ | 171 |
+| Media $\bar{x}$ | \$41,412.69 |
+| Mediana | \$36,000.00 |
+| Desv. estándar $s$ | \$25,527.05 |
+| Error estándar $s/\sqrt{n}$ | [\$1,952.10]{.key} |
+
+[$\text{se} = 25{,}527.05/\sqrt{171} = 1{,}952.10$]{.comment}
+:::
+::: {.column width="52%"}
+**Cómo escala el EE con $n$** (mismo $s$):
+
+| Tamaño de muestra | EE |
+|:--|--:|
+| $n = 43$ (¼ de observaciones) | \$3,893 |
+| $n = 171$ (la nuestra) | \$1,952 |
+| $n = 684$ (4× más) | \$976 |
+:::
+::::
+
+[Los ingresos individuales varían en unos \$25,500, pero el *promedio* de 171 de ellos varía en solo unos \$1,950.]{.takeaway .fragment}
+
+::: {.notes}
+El EE es 13 veces menor que s porque √171 ≈ 13.1. El capítulo dice que el EE "se duplicaría a $3,904" con 43 mujeres: 3,904 es exactamente 2 × 1,952; con n = 43 exactamente es 3,893 (43 es algo más que 171/4). En cualquier caso, cuartear la muestra duplica el EE y cuadruplicarla lo reduce a la mitad.
+:::
+
+## Leyendo el error estándar
+
+::: {.incremental}
+- **Significado de muestreo repetido**: si extrajéramos muchas muestras de 171 mujeres, sus medias típicamente diferirían de $\mu$ en unos \$1,950
+- **Precisión relativa a la media**: \$1,952 es menos del 5% de \$41,413, así que la estimación es razonablemente precisa
+- **Ley de la raíz cuadrada**: la precisión crece con $\sqrt{n}$, así que reducir el EE a la mitad cuesta **cuatro veces** los datos
+:::
+
+[Concepto clave 4.1: el error estándar es el único número detrás de cada intervalo y prueba que sigue.]{.takeaway .fragment}
+
+::: {.notes}
+La ley de la raíz cuadrada es por qué las encuestas se vuelven caras: pasar de ±$3,900 a ±$1,950 necesita 4× la muestra, y a ±$975 necesita 16×.
+:::
+
+## Qué supone el error estándar
+
+:::: {.columns}
+::: {.column width="50%"}
+### Requiere
+- una **muestra aleatoria**: cada mujer es una extracción independiente de la población
+- la fórmula $s/\sqrt{n}$ se construye sobre la **independencia**
+:::
+::: {.column width="50%"}
+### No capta
+- **error ajeno al muestreo**: ingresos mal reportados, no respuesta
+- **dependencia**: datos agrupados o de series de tiempo necesitan otros EE (Caps. 7, 12, 17)
+:::
+::::
+
+[El EE mide solo el ruido de muestreo, y solo bajo independencia. El crecimiento del PIB en 4.5 mostrará qué pasa cuando falla la independencia.]{.takeaway .fragment}
+
+::: {.notes}
+Advertencia estándar. La fórmula se deriva para extracciones independientes. Datos de encuesta con agrupamientos, o series de tiempo donde este trimestre se parece al anterior, la violan, y la fórmula s/√n entonces subestima la incertidumbre real.
+:::
+
+# Sección 4.2 · ¿Por qué una regla $t$, no una normal? {#s42 .divider background-color="#7A209F"}
+
+[Estadístico $t$ · grados de libertad · colas gruesas]{.act}
+
+::: {.notes}
+Sección 4.2: el estadístico t y la distribución t. Herramientas: estandarizar la media muestral, grados de libertad, valores críticos.
+:::
+
+## El estadístico $t$ estandariza la media muestral
+
+$$t = \frac{\bar{x} - \mu}{\text{se}(\bar{x})} = \frac{\bar{x} - \mu}{s/\sqrt{n}} \;\sim\; T(n-1)$$
+
+::: {.incremental}
+- Si conociéramos $\sigma$, $(\bar{x}-\mu)/(\sigma/\sqrt{n})$ sería normal estándar
+- **Estimamos** $\sigma$ mediante $s$, y esa incertidumbre extra engrosa las colas: la distribución $t$ con $n-1$ grados de libertad
+- Exacta cuando la población es normal; de lo contrario, una buena aproximación para $n$ moderado (teorema del límite central)
+:::
+
+[Colas más gruesas significan valores críticos más grandes: el precio de no conocer $\sigma$.]{.takeaway .fragment}
+
+::: {.notes}
+Concepto clave 4.2. Los grados de libertad son n − 1 porque se usa un grado de libertad para estimar la media antes de calcular s.
+:::
+
+## La distribución $t$ se aproxima a la normal a medida que $n$ crece
+
+![Panel A: $t(4)$ tiene colas mucho más gruesas que la normal estándar. Panel B: $t(30)$ ya está cerca de ella.](figures/fig_4-2_01.png)
+
+[Con 4 grados de libertad, los valores más allá de ±2 son más del doble de probables que bajo la normal.]{.takeaway .fragment}
+
+::: {.notes}
+Figura 4.1 del capítulo. Números calculados para estas diapositivas: P(|T| > 2) es 11.6% para t(4), 5.5% para t(30) y 4.6% para la normal estándar.
+:::
+
+## Código: valores críticos para distintos grados de libertad
+
+``` {.python code-line-numbers="1|2-4|5-6"}
+from scipy import stats                     # t and normal distributions
+for df in [4, 9, 30, 99, 170]:              # degrees of freedom = n - 1
+    t_crit = stats.t.ppf(0.975, df)         # 97.5th percentile: two-sided 5% cutoff
+    print(f"df = {df:>3}: t critical = {t_crit:.3f}")
+z_crit = stats.norm.ppf(0.975)              # the normal's cutoff, for comparison
+print(f"normal:   z critical = {z_crit:.3f}")   # 1.960
+```
+
+[↗ Pruébalo en Colab](https://colab.research.google.com/notebooks/empty.ipynb){.colab-link target="_blank" data-preview-link="false"}
+
+[Calculado para estas diapositivas; el Ejercicio 3 del capítulo pide los casos $n = 10$ y $n = 100$.]{.comment}
+
+::: {.notes}
+Autónomo. ppf es la CDF inversa (función de punto porcentual): devuelve el corte con una probabilidad dada por debajo. 0.975 deja 2.5% en la cola superior, que es el valor crítico bilateral del 5%.
+:::
+
+## Salida: para $n = 171$ el corte $t$ es casi el de la normal
+
+| Grados de libertad | Tamaño de muestra $n$ | Valor crítico bilateral 5% |
+|:--|--:|--:|
+| 4 | 5 | 2.776 |
+| 9 | 10 | 2.262 |
+| 30 | 31 | 2.042 |
+| 99 | 100 | 1.984 |
+| 170 | 171 | [1.974]{.key} |
+| normal ($\infty$) | — | 1.960 |
+
+[Para nuestra muestra el valor crítico $t$ de 1.974 está dentro del 1% de 1.96, por eso funciona la regla empírica de "estimación ± 2 EE".]{.takeaway .fragment}
+
+::: {.notes}
+La regla empírica del capítulo: para n > 30, t(n−1, 0.025) ≈ 2. La corrección importa solo para muestras pequeñas: con 10 observaciones el corte es 2.26, así que usar 1.96 daría intervalos demasiado estrechos.
+:::
+
+# Sección 4.3 · ¿Qué valores de $\mu$ son plausibles? {#s43 .divider background-color="#7A209F"}
+
+[Intervalos de confianza · margen de error · el compromiso confianza–precisión]{.act}
+
+::: {.notes}
+Sección 4.3: intervalos de confianza. Herramientas: la fórmula del IC, la interpretación correcta de muestreo repetido, y el compromiso entre confianza y ancho.
+:::
+
+## Un intervalo de confianza es estimación ± margen de error
+
+$$\bar{x} \;\pm\; t_{n-1,\,\alpha/2} \times \text{se}(\bar{x})$$
+
+::: {.incremental}
+- $t_{n-1,\,\alpha/2}$: el valor crítico; para 95% de confianza, $\alpha = 0.05$ y dejamos 2.5% en cada cola
+- **Margen de error** $= t_{n-1,\,\alpha/2} \times \text{se}(\bar{x})$
+- **Significado**: si repitiéramos el muestreo muchas veces, cerca del 95% de los intervalos construidos así contendrían $\mu$
+:::
+
+[El intervalo es aleatorio; $\mu$ es fija. El 95% describe el *método*, no este intervalo en particular.]{.takeaway .fragment}
+
+::: {.notes}
+Concepto clave 4.3. La frase "tenemos un 95% de confianza" es una forma abreviada de la propiedad de muestreo repetido. Regla empírica para n > 30: x̄ ± 2 × se.
+:::
+
+## Código: el intervalo de confianza del 95% para los ingresos medios
+
+``` {.python code-line-numbers="1-5|6-8|9-11|12-13"}
+import numpy as np                          # square roots
+import pandas as pd                         # tabular data
+from scipy import stats                     # t distribution
+url = "https://raw.githubusercontent.com/quarcs-lab/data-open/master/AED/AED_EARNINGS.DTA"
+earnings = pd.read_stata(url)["earnings"]   # 171 women, annual earnings
+n = len(earnings)                           # sample size
+mean_earnings = earnings.mean()             # x-bar
+se_earnings = earnings.std(ddof=1) / np.sqrt(n)    # s / sqrt(n)
+conf_level = 0.95                           # confidence level
+alpha = 1 - conf_level                      # 0.05
+t_crit = stats.t.ppf(1 - alpha/2, n - 1)    # critical value t(170, 0.025)
+margin_of_error = t_crit * se_earnings      # half-width of the interval
+print(mean_earnings - margin_of_error, mean_earnings + margin_of_error)  # the CI
+```
+
+[↗ Pruébalo en Colab](https://colab.research.google.com/notebooks/empty.ipynb){.colab-link target="_blank" data-preview-link="false"}
+
+::: {.notes}
+Autónomo. El código del capítulo es idéntico, salvo que reutiliza las variables de la sección 4.1.
+:::
+
+## Salida: de \$37,559 a \$45,266 {.smaller}
+
+| Componente | Valor |
+|:--|--:|
+| Media muestral $\bar{x}$ | \$41,412.69 |
+| Error estándar | \$1,952.10 |
+| Valor crítico $t_{170,\,0.025}$ | 1.9740 |
+| Margen de error $1.9740 \times 1{,}952.10$ | \$3,853.48 |
+| **Intervalo de confianza del 95%** | [[\$37,559.21,&nbsp;\$45,266.17]]{.key} |
+
+[Ancho \$7,707 · calculado con la distribución $t(170)$]{.comment}
+
+[Los datos son consistentes con cualquier media poblacional entre unos \$37,600 y \$45,300.]{.takeaway .fragment}
+
+::: {.notes}
+El intervalo excluye $36,000 y $46,000, así que esos valores son implausibles para μ, mientras que $40,000 cae cómodamente dentro. Ese último hecho reaparecerá como resultado de la prueba de hipótesis en la sección 4.4.
+:::
+
+## Leer el intervalo correctamente
+
+:::: {.columns}
+::: {.column width="50%"}
+### Correcto
+- El 95% de los intervalos construidos así, a lo largo de muestras repetidas, contienen $\mu$
+- "Tenemos un 95% de confianza en que $\mu$ está entre \$37,559 y \$45,266", como forma abreviada de lo anterior
+- El intervalo refleja solo la incertidumbre de **muestreo**
+:::
+::: {.column width="50%"}
+### Incorrecto
+- "Hay un 95% de probabilidad de que $\mu$ esté en **este** intervalo"
+- "El 95% de las mujeres gana entre \$37,559 y \$45,266"
+- "El intervalo contiene el 95% de los datos"
+:::
+::::
+
+[El intervalo es sobre la **media**. Los ingresos individuales van de \$1,050 a \$172,000.]{.takeaway .fragment}
+
+::: {.notes}
+La segunda lectura incorrecta es la más común en el trabajo de los estudiantes. Contrasta el ancho del IC (~$7,700) con la desviación estándar de los ingresos individuales (~$25,500).
+:::
+
+## Simulación: 39 de 40 intervalos atrapan la media
+
+![Cada línea es el IC del 95% de una muestra simulada de 171, remuestreada de los 171 ingresos como si fueran la población. El intervalo rosa falla.](figures/fig_ci_coverage.png)
+
+[Cada intervalo contiene $\mu$ o no. El 95% es la tasa de acierto a largo plazo del procedimiento.]{.takeaway .fragment}
+
+::: {.notes}
+Simulación hecha para estas diapositivas (semilla 42), en el espíritu del Ejercicio 8 del capítulo. Tratamos los 171 ingresos observados como la población (así su media $41,413 es la "verdadera" μ) y extraemos 40 muestras de 171 con reemplazo. Con 40 intervalos esperamos unos 2 fallos; obtuvimos 1. Aunque los ingresos están sesgados, el intervalo t funciona bien en n = 171.
+:::
+
+## Código: los mismos datos al 90%, 95% y 99% de confianza
+
+``` {.python code-line-numbers="1|2-4|5-8|9"}
+# continues from the previous block (n, mean_earnings, se_earnings defined)
+for conf in [0.90, 0.95, 0.99]:              # three confidence levels
+    alpha = 1 - conf                        # tail probability, split in two
+    t_crit = stats.t.ppf(1 - alpha/2, n - 1)    # larger for higher confidence
+    ci_lower = mean_earnings - t_crit * se_earnings   # lower bound
+    ci_upper = mean_earnings + t_crit * se_earnings   # upper bound
+    width = ci_upper - ci_lower             # full width of the interval
+    label = f"{conf*100:.0f}%"              # "90%", "95%", "99%"
+    print(f"{label:<5} t={t_crit:.3f} [{ci_lower:,.2f}, {ci_upper:,.2f}] width {width:,.2f}")
+```
+
+[↗ Pruébalo en Colab](https://colab.research.google.com/notebooks/empty.ipynb){.colab-link target="_blank" data-preview-link="false"}
+
+::: {.notes}
+Solo el valor crítico cambia entre las tres líneas; la estimación y su error estándar son los mismos.
+:::
+
+## Salida: más confianza cuesta ancho {.smaller}
+
+| Nivel | Valor crítico | Inferior | Superior | Ancho |
+|:--|--:|--:|--:|--:|
+| 90% | 1.654 | \$38,184.17 | \$44,641.21 | \$6,457.03 |
+| 95% | 1.974 | \$37,559.21 | \$45,266.17 | \$7,706.97 |
+| 99% | 2.605 | \$36,327.35 | \$46,498.03 | [\$10,170.68]{.key} |
+
+![](figures/fig_ci_levels.png){height="270"}
+
+[Pasar del 90% al 99% de confianza hace el intervalo 58% más ancho. Solo una muestra mayor compra a la vez confianza y precisión.]{.takeaway .fragment}
+
+::: {.notes}
+Razón de anchos 10,170.68 / 6,457.03 = 1.575. Con n = 684 (4× mayor) cada intervalo sería aproximadamente la mitad de ancho. El 95% es la convención en economía; el 99% se usa cuando una afirmación falsa sería costosa, y el 90% para trabajo exploratorio.
+:::
+
+# Sección 4.4 · ¿Es creíble $\mu = \$40{,}000$? {#s44 .divider background-color="#7A209F"}
+
+[Prueba bilateral · valor $p$ · valor crítico · errores de Tipo I y II · potencia]{.act}
+
+::: {.notes}
+Sección 4.4: la prueba de hipótesis bilateral. Herramientas: H0 y Ha, el estadístico de prueba, las dos reglas de decisión equivalentes, la dualidad con el intervalo de confianza, los dos tipos de error, y la potencia.
+:::
+
+## Una prueba de hipótesis pregunta si una afirmación sobrevive a los datos
+
+$$H_0: \mu = \mu_0 \quad \text{vs} \quad H_a: \mu \neq \mu_0 \qquad\qquad t = \frac{\bar{x} - \mu_0}{\text{se}(\bar{x})} \sim T(n-1) \text{ si } H_0 \text{ es verdadera}$$
+
+::: {.incremental}
+- **Regla del valor $p$**: $p = 2 \times \Pr[T_{n-1} \geq |t|]$; rechaza $H_0$ si $p < \alpha$
+- **Regla del valor crítico**: rechaza $H_0$ si $|t| > t_{n-1,\,\alpha/2}$
+- Las dos reglas **siempre coinciden**, y ambas coinciden con el IC: rechaza exactamente cuando $\mu_0$ cae fuera del intervalo del $100(1-\alpha)\%$
+:::
+
+[La prueba mide la brecha entre la estimación y la afirmación en **errores estándar**, y luego pregunta qué tan inusual sería esa brecha si la afirmación fuera verdadera.]{.takeaway .fragment}
+
+::: {.notes}
+Concepto clave 4.4. El ejemplo: H0: μ = $40,000 contra Ha: μ ≠ $40,000 con α = 0.05.
+:::
+
+## Código: probar $H_0: \mu = \$40{,}000$
+
+``` {.python code-line-numbers="1-6|7|8|9|10|11-13"}
+import numpy as np                          # square roots
+import pandas as pd                         # tabular data
+from scipy import stats                     # t distribution
+url = "https://raw.githubusercontent.com/quarcs-lab/data-open/master/AED/AED_EARNINGS.DTA"
+earnings = pd.read_stata(url)["earnings"]   # 171 women, annual earnings
+n, mean_earnings = len(earnings), earnings.mean()          # n and x-bar
+se_earnings = earnings.std(ddof=1) / np.sqrt(n)            # standard error
+mu0 = 40000                                 # hypothesized value under H0
+t_stat = (mean_earnings - mu0) / se_earnings               # distance in SEs
+p_value = 2 * (1 - stats.t.cdf(abs(t_stat), n - 1))        # two-sided p-value
+t_crit_95 = stats.t.ppf(0.975, n - 1)       # critical value for alpha = 0.05
+print(f"t = {t_stat:.4f}, p = {p_value:.4f}, critical = ±{t_crit_95:.4f}")
+print("Reject H0" if p_value < 0.05 else "Do not reject H0")   # the decision
+```
+
+[↗ Pruébalo en Colab](https://colab.research.google.com/notebooks/empty.ipynb){.colab-link target="_blank" data-preview-link="false"}
+
+::: {.notes}
+Autónomo. stats.t.cdf(|t|, n − 1) es la probabilidad por debajo de |t|; uno menos esto es el área de la cola superior, duplicada para una prueba bilateral.
+:::
+
+## Salida: no rechazamos $H_0$ {.smaller}
+
+:::: {.columns}
+::: {.column width="46%"}
+| | Valor |
+|:--|--:|
+| $\bar{x} - \mu_0$ | \$1,412.69 |
+| Error estándar | \$1,952.10 |
+| Estadístico $t$ | [0.7237]{.key} |
+| Valor $p$ (bilateral) | 0.4703 |
+| Valor crítico | ±1.9740 |
+| Decisión con $\alpha = 0.05$ | no rechazar |
+
+[$\$40{,}000$ cae dentro del IC del 95% [\$37,559, \$45,266]]{.comment}
+:::
+::: {.column width="54%"}
+![](figures/fig_x_01.png)
+:::
+::::
+
+[La media muestral está a menos de un error estándar de \$40,000, una cantidad ordinaria de ruido de muestreo.]{.takeaway .fragment}
+
+::: {.notes}
+Ambas reglas coinciden: p = 0.4703 > 0.05, y |t| = 0.72 < 1.974. Si μ realmente fuera $40,000, una media muestral al menos así de lejos de ella (en cualquier dirección) ocurriría cerca del 47% de las veces.
+:::
+
+## Qué significa y qué no significa "no rechazar"
+
+::: {.incremental}
+- **Significa**: los datos son *consistentes* con $\mu = \$40{,}000$
+- **No significa** $\mu = \$40{,}000$: \$41,000, \$43,000 o \$45,000 también son consistentes; el IC los lista todos
+- **El valor $p$ no es** $\Pr[H_0 \text{ verdadera}]$: es la probabilidad de una brecha al menos así de grande *si* $H_0$ fuera verdadera
+- El resultado podría ser un **error de Tipo II**: una diferencia real que esta muestra es demasiado pequeña para detectar
+:::
+
+[Concepto clave 4.6: "no rechazar" no es "aceptar". Reporta el intervalo de confianza, que indica qué tan grande es la diferencia que los datos aún permiten.]{.takeaway .fragment}
+
+::: {.notes}
+La ausencia de evidencia no es evidencia de ausencia. El intervalo permite una media poblacional hasta $5,266 por encima de $40,000.
+:::
+
+## Dos formas de equivocarse {.smaller}
+
+| | $H_0$ verdadera en la realidad | $H_0$ falsa en la realidad |
+|:--|:--|:--|
+| **Rechazar $H_0$** | **Error de Tipo I** (falsa alarma), probabilidad $\alpha$ | correcto: **potencia** $= 1-\beta$ |
+| **No rechazar $H_0$** | correcto, probabilidad $1-\alpha$ | **Error de Tipo II** (efecto no detectado), probabilidad $\beta$ |
+
+::: {.incremental}
+- Nosotros **elegimos** $\alpha$ (p. ej. 0.05); $\beta$ depende de $n$, de la brecha verdadera y de $\alpha$
+- Bajar $\alpha$ a 0.01 reduce las falsas alarmas pero **aumenta** $\beta$; subirlo a 0.10 hace lo contrario
+- Solo una **muestra mayor** (o un efecto verdadero mayor) reduce ambos a la vez
+:::
+
+[En la prueba de ingresos no rechazamos, así que el único error que podríamos haber cometido es un error de Tipo II.]{.takeaway .fragment}
+
+::: {.notes}
+Elige α según el costo de cada error. Los ensayos médicos, donde una afirmación falsa es muy costosa, usan α = 0.01; el trabajo exploratorio a veces usa 0.10. El objetivo habitual de potencia es 80% (β = 0.20).
+:::
+
+## Código: ¿qué tan probable era que esta prueba detectara una brecha real?
+
+``` {.python code-line-numbers="1|2-3|4-7|8"}
+# continues from the previous block (earnings, mu0 defined) — computed for these slides
+s = earnings.std(ddof=1)                    # sample std dev, treated as known
+for n_size in [171, 684]:                   # our sample, and 4x larger
+    se = s / np.sqrt(n_size)                # standard error at this n
+    df, c = n_size - 1, stats.t.ppf(0.975, n_size - 1)   # df and 5% critical value
+    nc = (41412.69 - mu0) / se              # gap in SEs if the true mean were $41,412.69
+    power = stats.nct.sf(c, df, nc) + stats.nct.cdf(-c, df, nc)   # P(|T| > c)
+    print(f"n = {n_size}: power = {power:.3f}")   # probability of rejecting H0
+```
+
+[↗ Pruébalo en Colab](https://colab.research.google.com/notebooks/empty.ipynb){.colab-link target="_blank" data-preview-link="false"}
+
+::: {.notes}
+La potencia no se calcula en el capítulo, que la discute con palabras; este cálculo se añade para las diapositivas. Si la media verdadera fuera $41,412.69, el estadístico de prueba seguiría una distribución t no central con no centralidad (μ − μ0)/se. La potencia es la probabilidad de que |T| supere el valor crítico. stats.nct es la t no central de scipy.
+:::
+
+## Salida: la prueba tenía poca chance de detectar una brecha de \$1,400 {.smaller}
+
+:::: {.columns}
+::: {.column width="40%"}
+| Media verdadera | $n = 171$ | $n = 684$ |
+|:--|--:|--:|
+| \$41,413 | [0.11]{.key} | 0.30 |
+| \$45,000 | 0.72 | 1.00 |
+
+[Potencia de la prueba bilateral del 5% de $\mu = \$40{,}000$]{.comment}
+
+**Brecha más pequeña detectada con 80% de potencia:**
+
+- \$5,500 con $n = 171$
+- \$2,738 con $n = 684$
+:::
+::: {.column width="60%"}
+![](figures/fig_power.png)
+:::
+::::
+
+[Aunque \$41,413 fuera la verdad, la prueba rechazaría solo el 11% de las veces. No rechazar aquí dice más sobre el tamaño de muestra que sobre $\mu$.]{.takeaway .fragment}
+
+::: {.notes}
+Calculado para estas diapositivas. El propio razonamiento del capítulo (glosario de Conceptos clave): cuadruplicar la muestra duplicaría t a cerca de 1.45, todavía por debajo de 1.96. La curva de potencia lo precisa: con 684 mujeres la potencia en μ = $41,413 es todavía solo 0.30. En n = 684, μ = $45,000 la potencia es 0.9992, mostrada como 1.00. La potencia es igual a α = 0.05 exactamente en μ = μ0.
+:::
+
+# Sección 4.5 · Tres pruebas sobre preguntas reales {#s45 .divider background-color="#7A209F"}
+
+[Precios de gasolina · ingresos masculinos · crecimiento del PIB]{.act}
+
+::: {.notes}
+La sección 4.5 aplica la misma prueba bilateral a tres conjuntos de datos nuevos, y da tres respuestas muy distintas. Cada uno es una oportunidad de hacer las tres preguntas del hilo: ¿es real, importa, podríamos detectarlo?
+:::
+
+## La misma prueba, tres conjuntos de datos, tres lecciones distintas {.smaller}
+
+| Ejemplo | Datos | $H_0$ | $t$ | $p$ | Decisión | Lección |
+|:--|:--|:--|--:|--:|:--|:--|
+| Precios de gasolina | 32 estaciones, condado de Yolo | $\mu = \$3.81$ | [−5.26]{.key} | <&nbsp;0.0001 | rechazar | una brecha pequeña puede ser muy precisa |
+| Ingresos masculinos | 191 hombres de 30 años | $\mu = \$50{,}000$ | 0.50 | 0.617 | no rechazar | colas pesadas, media imprecisa |
+| Crecimiento del PIB | 241 trimestres, EE. UU. | $\mu = 2.0\%$ | −0.07 | 0.946 | no rechazar | datos dependientes, EE demasiado pequeño |
+
+[Una receta, tres veredictos. La interpretación siempre depende de los datos detrás de los números.]{.takeaway .fragment}
+
+::: {.notes}
+Concepto clave 4.7: el patrón de prueba es el mismo entre aplicaciones; el significado viene del contexto. Las siguientes diapositivas llevan cada ejemplo por su propio arco.
+:::
+
+## Precios de gasolina: ¿son diferentes los precios del condado de Yolo del estatal?
+
+**Pregunta.** ¿Es el precio medio en las estaciones de gasolina del condado de Yolo diferente del promedio de California de \$3.81 por galón?
+
+**Datos.** `AED_GASPRICE.DTA`: 32 estaciones en tres ciudades (West Sacramento 15, Davis 10, Woodland 7).
+
+$$H_0: \mu = 3.81 \qquad H_a: \mu \neq 3.81 \qquad t \text{ con } 31 \text{ grados de libertad}$$
+
+[Una pregunta bilateral: los precios podrían ser mayores o menores que el promedio estatal.]{.takeaway .fragment}
+
+::: {.notes}
+El capítulo plantea esto como el ejemplo clásico de significancia estadística vs práctica. El valor crítico con 31 grados de libertad es 2.04, un poco por encima de 1.96 porque la muestra es pequeña.
+:::
+
+## Código: probar la afirmación sobre el precio de la gasolina
+
+``` {.python code-line-numbers="1-5|6-9|10-12|13"}
+import numpy as np                          # square roots
+import pandas as pd                         # tabular data
+from scipy import stats                     # t distribution
+url = "https://raw.githubusercontent.com/quarcs-lab/data-open/master/AED/AED_GASPRICE.DTA"
+price = pd.read_stata(url)["price"]         # price per gallon at 32 stations
+mean_price = price.mean()                   # sample mean
+std_price = price.std(ddof=1)               # sample std dev
+n_price = len(price)                        # 32 stations
+se_price = std_price / np.sqrt(n_price)     # standard error
+mu0_price = 3.81                            # California state average
+t_stat_price = (mean_price - mu0_price) / se_price               # distance in SEs
+p_value_price = 2 * (1 - stats.t.cdf(abs(t_stat_price), n_price - 1))   # two-sided p
+print(f"mean {mean_price:.4f}, se {se_price:.4f}, t {t_stat_price:.4f}, p {p_value_price:.6f}")
+```
+
+[↗ Pruébalo en Colab](https://colab.research.google.com/notebooks/empty.ipynb){.colab-link target="_blank" data-preview-link="false"}
+
+::: {.notes}
+Autónomo; el código del capítulo.
+:::
+
+## Salida: una brecha de 14 centavos, de más de cinco errores estándar de ancho {.smaller}
+
+:::: {.columns}
+::: {.column width="40%"}
+| | Valor |
+|:--|--:|
+| $n$ | 32 |
+| Media | \$3.6697 |
+| Desv. est. | \$0.1510 |
+| Error estándar | \$0.0267 |
+| $t$ | [−5.2577]{.key} |
+| $p$ (bilateral) | 0.00001 |
+| IC 95% | [\$3.615,&nbsp;\$3.724] |
+:::
+::: {.column width="60%"}
+![](figures/fig_gas.png)
+:::
+::::
+
+[Rechazar $H_0$: los precios del condado de Yolo son más bajos que el promedio estatal, y \$3.81 queda muy fuera del IC del 95%.]{.takeaway .fragment}
+
+::: {.notes}
+p = 0.0000103, que el capítulo imprime como 0.0000 y describe como < 0.0001. El IC del 95% (calculado para estas diapositivas, con t(31) = 2.04) va de $3.615 a $3.724. La figura muestra cada estación; la banda blanca es el IC para la media, no para los precios individuales.
+:::
+
+## ¿Es real, e importa?
+
+::: {.incremental}
+- **¿Real?** Sí: $t = -5.26$. Los precios apenas varían entre estaciones (DE 15¢), así que el EE está por debajo de 3¢ y una brecha de 14 centavos es fácil de detectar
+- **¿Importa?** 14¢ × 15 galones = **\$2.10 por tanque**; con 52 llenados al año, unos **\$109 al año**: significativo para un hogar
+- **¿Podríamos detectarlo?** Sí, fácilmente: alta potencia por un EE pequeño, incluso con solo 32 estaciones
+:::
+
+[Concepto clave 4.5: una pequeña diferencia puede ser altamente significativa cuando se mide con precisión. La significancia es sobre la brecha relativa a su EE, no sobre su tamaño.]{.takeaway .fragment}
+
+::: {.notes}
+La aritmética de significancia práctica del capítulo usa la brecha redondeada de 14¢: 0.14 × 15 = $2.10; × 52 = $109.20. Con la brecha sin redondear de 14.03¢ la cifra anual es $109.44.
+:::
+
+## Advertencias sobre la prueba del precio de la gasolina
+
+::: {.incremental}
+- **Muestreo**: 32 estaciones en tres ciudades, no una muestra aleatoria de todas las estaciones del condado; West Sacramento sola es casi la mitad de la muestra
+- **Momento**: una sola instantánea; el promedio estatal debe referirse al mismo período para que la comparación sea justa
+- **El valor de referencia es a su vez una estimación**: \$3.81 se trata como una constante conocida
+- La prueba dice que los precios de Yolo son más bajos **en promedio**; una estación vende a \$4.09
+:::
+
+[Un valor $p$ de 0.00001 resuelve solo la cuestión del ruido de muestreo. No puede arreglar una muestra no aleatoria ni un valor de referencia desajustado.]{.takeaway .fragment}
+
+::: {.notes}
+Advertencias estándar. Los conteos de ciudades vienen de la variable de ciudad de los datos. Si los precios se recopilaron en un día y el promedio estatal se refiere a una media mensual, parte de la brecha podría reflejar el momento más que la ubicación.
+:::
+
+## Ingresos masculinos: ¿los hombres de 30 años ganan más de \$50,000?
+
+**Datos.** `AED_EARNINGSMALE.DTA`: 191 hombres de 30 años que trabajan a tiempo completo, 2010.
+
+**La prueba del capítulo** es bilateral:
+
+$$H_0: \mu = 50{,}000 \qquad H_a: \mu \neq 50{,}000$$
+
+[La pregunta es **direccional** ("más de"), así que su forma natural es unilateral; el capítulo lo difiere a la sección 4.6. Estas diapositivas reportan ambas.]{.takeaway .fragment}
+
+::: {.notes}
+El capítulo calcula aquí la prueba bilateral y señala que una prueba unilateral es más apropiada. La sección 4.6 luego ejecuta su ejemplo unilateral con los datos de ingresos femeninos en su lugar, así que el valor p unilateral para hombres se calcula para estas diapositivas.
+:::
+
+## Código: probar la afirmación sobre los ingresos masculinos
+
+``` {.python code-line-numbers="1-5|6-9|10-13|14-15"}
+import numpy as np                          # square roots
+import pandas as pd                         # tabular data
+from scipy import stats                     # t distribution
+url = "https://raw.githubusercontent.com/quarcs-lab/data-open/master/AED/AED_EARNINGSMALE.DTA"
+earnings_male = pd.read_stata(url)["earnings"]   # 191 men, annual earnings
+mean_male = earnings_male.mean()            # sample mean
+std_male = earnings_male.std(ddof=1)        # sample std dev
+n_male = len(earnings_male)                 # 191
+se_male = std_male / np.sqrt(n_male)        # standard error
+mu0_male = 50000                            # hypothesized value
+t_stat_male = (mean_male - mu0_male) / se_male                      # distance in SEs
+p_value_male = 2 * (1 - stats.t.cdf(abs(t_stat_male), n_male - 1)) # two-sided p
+p_upper_male = 1 - stats.t.cdf(t_stat_male, n_male - 1)             # one-sided (Ha: mu > 50,000)
+print(f"mean {mean_male:,.2f}, se {se_male:,.2f}, t {t_stat_male:.4f}")   # estimate and t
+print(f"two-sided p {p_value_male:.4f}, one-sided p {p_upper_male:.4f}")   # both p-values
+```
+
+[↗ Pruébalo en Colab](https://colab.research.google.com/notebooks/empty.ipynb){.colab-link target="_blank" data-preview-link="false"}
+
+::: {.notes}
+Autónomo. La última línea calculada (p_upper_male) se añade para estas diapositivas; el resto es el código del capítulo.
+:::
+
+## Salida: una brecha de \$2,354 enterrada en un error estándar de \$4,706 {.smaller}
+
+:::: {.columns}
+::: {.column width="40%"}
+| | Valor |
+|:--|--:|
+| $n$ | 191 |
+| Media | \$52,353.93 |
+| Mediana | \$38,000 |
+| Desv. est. | \$65,034.74 |
+| Error estándar | \$4,705.75 |
+| $t$ | [0.5002]{.key} |
+| $p$ (bilateral) | 0.6175 |
+| $p$ (unilateral, $H_a: \mu > 50{,}000$) | 0.3087 |
+| IC 95% | [\$43,072,&nbsp;\$61,636] |
+:::
+::: {.column width="60%"}
+![](figures/fig_male_hist.png)
+:::
+::::
+
+[No rechazar en ninguno de los dos casos. Si los ingresos medios de los hombres superan \$50,000 queda sin resolver; el IC va de \$43,100 a \$61,600.]{.takeaway .fragment}
+
+::: {.notes}
+El p unilateral y el IC del 95% se calculan para estas diapositivas. El valor p unilateral es la mitad del bilateral, porque t es positivo (en la dirección de Ha).
+:::
+
+## Por qué la prueba de ingresos masculinos tiene tan poca potencia
+
+::: {.incremental}
+- **Colas pesadas**: tres hombres están registrados en \$498,000, el tope de los datos, y uno en \$1; la DE (\$65,035) es 2.5× la de las mujeres
+- La media (\$52,354) se sitúa muy por encima de la mediana (\$38,000); sin los tres hombres topados sería \$45,243
+- Una DE grande significa un EE grande, así que una brecha de \$2,354 es solo medio error estándar
+:::
+
+[No rechazar aquí es sobre todo una afirmación sobre el ruido. Una media impulsada por tres personas es un objetivo frágil para la inferencia.]{.takeaway .fragment}
+
+::: {.notes}
+El capítulo enumera tres posibles razones para no rechazar: H0 verdadera, potencia insuficiente, alta variabilidad. Los datos apuntan fuertemente a la tercera. La media excluyendo las tres observaciones topadas es una simple verificación descriptiva calculada para estas diapositivas, no un estimador recomendado; con el tope, la media verdadera es, en todo caso, mayor que la media muestral. Las medianas y otros resúmenes robustos vienen más adelante en el libro.
+:::
+
+## Crecimiento del PIB: ¿el crecimiento de EE. UU. ha promediado 2% al año?
+
+**Datos.** `AED_REALGDPPC.DTA`: PIB real per cápita de EE. UU., **trimestral**, 1959Q1–2020Q1. La variable `growth` es la tasa de crecimiento **interanual**, así que empieza en 1960Q1: **241 observaciones trimestrales**.
+
+$$H_0: \mu = 2.0 \qquad H_a: \mu \neq 2.0 \quad (\text{por ciento al año})$$
+
+[Observa qué son las 241 observaciones: tasas de crecimiento solapadas de cuatro trimestres, no 241 años separados.]{.takeaway .fragment}
+
+::: {.notes}
+Verificado a partir de los datos: growth es igual a 100 × (realgdppc_t / realgdppc_(t−4) − 1). Cada observación comparte tres de sus cuatro trimestres con la anterior, así que observaciones consecutivas están fuertemente correlacionadas. El capítulo las describe como "241 tasas de crecimiento de año a año", lo que sugiere 241 años independientes; los datos cubren unos 60 años.
+:::
+
+## Código: probar el valor de referencia del 2%
+
+``` {.python code-line-numbers="1-5|6-9|10-12|13-14"}
+import numpy as np                          # square roots
+import pandas as pd                         # tabular data
+from scipy import stats                     # t distribution
+url = "https://raw.githubusercontent.com/quarcs-lab/data-open/master/AED/AED_REALGDPPC.DTA"
+growth = pd.read_stata(url)["growth"].dropna()   # first 4 quarters have no YoY growth
+mean_growth = growth.mean()                 # average growth, % per year
+std_growth = growth.std(ddof=1)             # sample std dev
+n_growth = len(growth)                      # 241 quarters
+se_growth = std_growth / np.sqrt(n_growth)  # SE, assuming independent observations
+mu0_growth = 2.0                            # benchmark under H0
+t_stat_growth = (mean_growth - mu0_growth) / se_growth                    # distance in SEs
+p_value_growth = 2 * (1 - stats.t.cdf(abs(t_stat_growth), n_growth - 1))  # two-sided p
+print(f"mean {mean_growth:.4f}, se {se_growth:.4f}, t {t_stat_growth:.4f}, p {p_value_growth:.4f}")
+print(f"lag-1 autocorrelation {growth.autocorr(1):.2f}")   # neighbouring quarters move together
+```
+
+[↗ Pruébalo en Colab](https://colab.research.google.com/notebooks/empty.ipynb){.colab-link target="_blank" data-preview-link="false"}
+
+::: {.notes}
+Autónomo; el código del capítulo, más growth.autocorr(1), la correlación entre el valor de cada trimestre y el del trimestre anterior, añadida para estas diapositivas.
+:::
+
+## Salida: la media es 1.99%, pero las observaciones no son independientes {.smaller}
+
+:::: {.columns}
+::: {.column width="40%"}
+| | Valor |
+|:--|--:|
+| $n$ (trimestres) | 241 |
+| Media | 1.9905% |
+| Desv. est. | 2.1781 |
+| Error estándar (i.i.d.) | 0.1403 |
+| $t$ | [−0.0680]{.key} |
+| $p$ (bilateral) | 0.9458 |
+| IC 95% (i.i.d.) | [1.71%,&nbsp;2.27%] |
+| Autocorrelación de rezago 1 | 0.87 |
+:::
+::: {.column width="60%"}
+![](figures/fig_gdp_ts.png)
+:::
+::::
+
+[No rechazar 2%. Pero con una correlación de rezago 1 de 0.87, el error estándar i.i.d. subestima la incertidumbre real.]{.takeaway .fragment}
+
+::: {.notes}
+El IC y la autocorrelación se calculan para estas diapositivas. La figura muestra largas oscilaciones (recesiones en 1974–75, 1980–82, 2008–09), no extracciones independientes alrededor de una media. Una regla empírica aproximada para una serie AR(1) da una muestra "efectiva" de n(1 − ρ)/(1 + ρ) ≈ 17 observaciones independientes en lugar de 241; el error estándar correcto (HAC, Capítulos 12 y 17) sería varias veces mayor que 0.14.
+:::
+
+## No rechazar no "valida" el valor de referencia del 2%
+
+::: {.incremental}
+- **¿Real?** No hay evidencia de una diferencia del 2%, así que el resultado es "consistente con 2%", no "2% confirmado"
+- **¿Podríamos detectarlo?** Menos de lo que sugiere la salida: el EE de 0.14 supone 241 observaciones independientes, pero los trimestres vecinos se solapan
+- **¿Importa?** Sí: 1.5% versus 2.5% de crecimiento se compone en niveles de vida muy diferentes a lo largo de 60 años
+:::
+
+[El Concepto clave 4.6 también aplica aquí: los datos no logran rechazar 2%, pero eso no muestra que la tasa de largo plazo *sea* 2%. Con datos dependientes, reporta un intervalo más ancho.]{.takeaway .fragment}
+
+::: {.notes}
+El capítulo concluye que los datos "validan" el valor de referencia y que "con 241 observaciones podemos tener confianza en que la media está cerca de 2.0%". Ambas afirmaciones exceden lo justificable: no rechazar nunca confirma H0, y las 241 observaciones llevan mucha menos información que 241 extracciones independientes. El capítulo sí señala el problema de series de tiempo y apunta al Capítulo 17; estas diapositivas ponen esa advertencia al frente.
+:::
+
+# Sección 4.6 · ¿$\mu$ *supera* \$40,000? {#s46 .divider background-color="#7A209F"}
+
+[Pruebas unilaterales (direccionales) · colas superior e inferior]{.act}
+
+::: {.notes}
+Sección 4.6: pruebas unilaterales. Herramientas: hipótesis de cola superior e inferior, valores p y valores críticos de una cola, y cuándo una prueba unilateral es legítima.
+:::
+
+## Una afirmación direccional pone toda la región de rechazo en una cola {.smaller}
+
+| Prueba | $H_0$ | $H_a$ | valor $p$ | Rechazar si |
+|:--|:--|:--|:--|:--|
+| Cola superior | $\mu \leq \mu^*$ | $\mu > \mu^*$ | $\Pr[T_{n-1} \geq t]$ | $t > t_{n-1,\,\alpha}$ |
+| Cola inferior | $\mu \geq \mu^*$ | $\mu < \mu^*$ | $\Pr[T_{n-1} \leq t]$ | $t < -t_{n-1,\,\alpha}$ |
+| Bilateral | $\mu = \mu^*$ | $\mu \neq \mu^*$ | $2\Pr[T_{n-1} \geq \lvert t \rvert]$ | $\lvert t \rvert > t_{n-1,\,\alpha/2}$ |
+
+::: {.incremental}
+- La afirmación que queremos establecer va en $H_a$
+- Todo $\alpha$ se sitúa en una cola, así que el valor crítico es menor: **1.654** en lugar de **1.974** para $n = 171$
+- Si $t$ tiene el signo que $H_a$ predice, el $p$ unilateral es la **mitad** del $p$ bilateral; si no, está **por encima de 0.5**
+:::
+
+[Las pruebas unilaterales son más potentes en la dirección elegida y ciegas en la otra.]{.takeaway .fragment}
+
+::: {.notes}
+Concepto clave 4.8. La regla de "la mitad del valor p bilateral" se cumple solo cuando la estimación cae del lado que Ha predice. El Estudio de caso 1, Tarea 4 muestra el caso opuesto.
+:::
+
+## Código: prueba de cola superior de $H_a: \mu > \$40{,}000$
+
+``` {.python code-line-numbers="1-6|7|8|9|10|11"}
+import numpy as np                          # square roots
+import pandas as pd                         # tabular data
+from scipy import stats                     # t distribution
+url = "https://raw.githubusercontent.com/quarcs-lab/data-open/master/AED/AED_EARNINGS.DTA"
+earnings = pd.read_stata(url)["earnings"]   # 171 women, annual earnings
+n, se_earnings = len(earnings), earnings.std(ddof=1) / np.sqrt(len(earnings))   # n and SE
+mu0 = 40000                                 # H0: mu <= 40,000
+t_stat = (earnings.mean() - mu0) / se_earnings     # same t as the two-sided test
+p_value_upper = 1 - stats.t.cdf(t_stat, n - 1)     # upper-tail area only
+t_crit_upper = stats.t.ppf(0.95, n - 1)     # all 5% in the upper tail
+print(f"t = {t_stat:.4f}, one-sided p = {p_value_upper:.4f}, critical = {t_crit_upper:.4f}")
+```
+
+[↗ Pruébalo en Colab](https://colab.research.google.com/notebooks/empty.ipynb){.colab-link target="_blank" data-preview-link="false"}
+
+::: {.notes}
+Autónomo. Nota 0.95 en lugar de 0.975 en el valor crítico: no se divide α entre dos colas.
+:::
+
+## Salida: aún sin rechazo, incluso con la vara más baja {.smaller}
+
+:::: {.columns}
+::: {.column width="46%"}
+| | Unilateral | Bilateral |
+|:--|--:|--:|
+| Estadístico $t$ | 0.7237 | 0.7237 |
+| Valor $p$ | [0.2351]{.key} | 0.4703 |
+| Valor crítico | 1.6539 | ±1.9740 |
+| Decisión | no rechazar | no rechazar |
+
+[$0.2351 = 0.4703 / 2$, porque $t > 0$ apunta en la dirección que $H_a$ predice]{.comment}
+:::
+::: {.column width="54%"}
+![](figures/fig_x_02.png)
+:::
+::::
+
+[No podemos concluir que los ingresos medios superen \$40,000. La brecha es pequeña en relación con su EE, cualquiera que sea la prueba que usemos.]{.takeaway .fragment}
+
+::: {.notes}
+La figura es la visualización unilateral del capítulo: la cola superior sombreada contiene todo el 5%, cortada en 1.654. El t observado = 0.72 queda muy por debajo.
+:::
+
+## ¿Cuándo es legítima una prueba unilateral?
+
+:::: {.columns}
+::: {.column width="50%"}
+### Úsala cuando
+- la teoría o la política fijan la dirección **antes** de ver los datos
+- solo una dirección cambiaría una decisión (un fármaco *mejor* que el placebo; una política que *eleve* el ingreso)
+:::
+::: {.column width="50%"}
+### Evítala cuando
+- cualquier dirección sería interesante
+- el campo reporta pruebas bilaterales (la economía usualmente lo hace)
+- cambias **después** de ver un $p = 0.08$ bilateral para obtener un $p = 0.04$ unilateral: eso es $p$-hacking
+:::
+::::
+
+[Decide la dirección antes de mirar los datos. Una prueba unilateral elegida después tiene una tasa real de falsa alarma del 10%, no del 5%.]{.takeaway .fragment}
+
+::: {.notes}
+Si un investigador elige la cola después de ver hacia dónde apunta la estimación, efectivamente ejecuta una prueba bilateral al nivel del 10% mientras reporta 5%. Por eso la elección debe ser preespecificada.
+:::
+
+# Sección 4.7 · ¿Está empatada la carrera? {#s47 .divider background-color="#7A209F"}
+
+[Proporciones · datos binarios · la prueba $z$]{.act}
+
+::: {.notes}
+Sección 4.7: proporciones. Herramientas: la proporción muestral como media de datos 0/1, su error estándar, el IC basado en la normal y la prueba z.
+:::
+
+## Una proporción es simplemente la media de datos 0/1
+
+$$\hat{p} = \bar{x} = \frac{\#\text{sí}}{n} \qquad \text{se}(\hat{p}) = \sqrt{\frac{\hat{p}(1-\hat{p})}{n}} \qquad \text{IC: } \hat{p} \pm z_{\alpha/2}\,\text{se}(\hat{p})$$
+
+::: {.incremental}
+- Codifica cada votante 1 (demócrata) o 0 (no): $\hat{p}$ es la media muestral y la varianza es $\hat{p}(1-\hat{p})$
+- Con $n$ grande (regla empírica: $n\hat{p} \geq 10$ y $n(1-\hat{p}) \geq 10$) usa el valor crítico **normal**, 1.96
+- Para probar $H_0: p = p_0$, usa el EE **implicado por $H_0$**: $z = (\hat{p} - p_0)/\sqrt{p_0(1-p_0)/n}$
+:::
+
+[Todo lo aprendido sobre medias se traslada; solo cambia la fórmula del EE.]{.takeaway .fragment}
+
+::: {.notes}
+Concepto clave 4.9. Aparecen dos EE diferentes: el IC usa p̂(1 − p̂)/n, la prueba usa p0(1 − p0)/n porque bajo H0 conocemos la varianza. Con p̂ = 0.521 y p0 = 0.5 son casi idénticos (0.01646 vs 0.01648).
+:::
+
+## Código: 480 de 921 votantes piensan votar demócrata
+
+``` {.python code-line-numbers="1-2|3-6|7-9|10-16"}
+import numpy as np                          # square roots
+from scipy import stats                     # normal distribution
+n_total = 921                               # voters polled
+n_success = 480                             # intend to vote Democrat
+p_hat = n_success / n_total                 # sample proportion
+se_prop = np.sqrt(p_hat * (1 - p_hat) / n_total)   # SE at p-hat (for the CI)
+z_crit = 1.96                               # normal critical value, 95%
+ci_lower_prop = p_hat - z_crit * se_prop    # lower bound
+ci_upper_prop = p_hat + z_crit * se_prop    # upper bound
+p0 = 0.50                                   # H0: tied race
+se_under_h0 = np.sqrt(p0 * (1 - p0) / n_total)     # SE implied by H0
+z_stat = (p_hat - p0) / se_under_h0         # z statistic
+p_value_prop = 2 * (1 - stats.norm.cdf(abs(z_stat)))   # two-sided p (normal)
+print(f"p_hat {p_hat:.4f}, se {se_prop:.4f}")   # estimate and its SE
+print(f"95% CI [{ci_lower_prop:.4f}, {ci_upper_prop:.4f}]")   # interval
+print(f"z {z_stat:.4f}, p {p_value_prop:.4f}")   # test of a tied race
+```
+
+[↗ Pruébalo en Colab](https://colab.research.google.com/notebooks/empty.ipynb){.colab-link target="_blank" data-preview-link="false"}
+
+::: {.notes}
+Autónomo; el código del capítulo. Sin archivo de datos: la encuesta se da como dos conteos.
+:::
+
+## Salida: 52.1%, pero no se puede descartar un empate {.smaller}
+
+:::: {.columns}
+::: {.column width="40%"}
+| | Valor |
+|:--|--:|
+| $\hat{p}$ | 0.5212 |
+| EE | 0.0165 |
+| IC 95% | [0.4889,&nbsp;0.5534] |
+| Margen de error | ±3.2 pp |
+| $z$ (vs 0.50) | 1.2851 |
+| Valor $p$ | [0.1988]{.key} |
+
+[$n\hat{p} = 480$, $n(1-\hat{p}) = 441$: ambos muy por encima de 10]{.comment}
+:::
+::: {.column width="60%"}
+![](figures/fig_prop.png)
+:::
+::::
+
+[No rechazar un empate: el IC [48.9%, 55.3%] contiene 50%. La ventaja es de 2.1 puntos porcentuales con un margen de ±3.2 puntos.]{.takeaway .fragment}
+
+::: {.notes}
+z = 1.29: la proporción muestral está 1.29 errores estándar por encima del 50%. Cerca de un 20% de probabilidad de una brecha al menos así de grande si la carrera estuviera realmente empatada. La barra inferior en la figura es el hipotético del capítulo, discutido en la siguiente diapositiva.
+:::
+
+## La misma proporción, una encuesta más grande: ¿cuándo se vuelve significativo el 52%?
+
+::: {.incremental}
+- El hipotético del capítulo: la **misma** proporción, 52%, de **2,500** votantes
+- El EE cae a 0.010; IC 95% [50.0%, 54.0%]; $z = 2.00$, $p = 0.045$: **significativo al 5%, apenas**
+- Con el $\hat{p} = 0.5212$ exacto en lugar de 0.52: $z = 2.12$, $p = 0.034$
+:::
+
+[Nada sobre los votantes cambió, solo el tamaño de muestra. La significancia estadística tiene tanto que ver con $n$ como con el efecto.]{.takeaway .fragment}
+
+::: {.notes}
+Los números del capítulo usan p̂ redondeado a 0.52; la versión con p̂ exacto se calcula para estas diapositivas. En cualquier caso el límite inferior del IC queda apenas por encima del 50% (50.04% con p̂ = 0.52), así que "significativo" aquí es una decisión al filo. Lado práctico: una ventaja de 2 puntos importa mucho en una elección, así que este es un caso donde el efecto puede importar aunque todavía no podamos detectarlo.
+:::
+
+## Advertencias sobre las encuestas
+
+::: {.incremental}
+- El EE cubre solo el **error de muestreo**; la no respuesta y las personas que cambian de opinión no están en él
+- "Pensar votar" no es "votar": la población de votantes difiere de la población encuestada
+- La aproximación normal necesita $n\hat{p}$ y $n(1-\hat{p})$ ambos grandes; para eventos raros usa métodos exactos
+:::
+
+[El margen de error reportado (±3.2 puntos) es un piso para la incertidumbre real, no un techo.]{.takeaway .fragment}
+
+::: {.notes}
+Advertencias estándar para proporciones de encuestas. La misma lógica aplica a tasas de empleo, índices de aprobación o cuotas de mercado.
+:::
+
+# Estudio de caso 1 · ¿Ha cambiado la productividad laboral mundial? {#cs1 .divider background-color="#7A209F"}
+
+[Datos de clubes de convergencia de Mendez · 108 países · 1990 y 2014 · seis tareas]{.act}
+
+::: {.notes}
+El Estudio de caso 1 aplica cada herramienta del capítulo a la productividad entre países. El capítulo da las tareas como plantillas para rellenar y esquemas sin salida; cada tarea se ejecuta aquí, con los espacios rellenados, y se reporta su salida. Los resultados no impresos en el capítulo son, por tanto, todos "calculado para estas diapositivas".
+:::
+
+## La pregunta: crecimiento de la productividad y brechas entre países {.smaller}
+
+**Datos.** Panel de clubes de convergencia de Mendez (2020): **108 países × 25 años (1990–2014) = 2,700 observaciones**. Usamos la productividad laboral `lp` (producto por trabajador, en dólares) para 1990 y 2014, y `region`.
+
+| Tarea | Pregunta | Herramienta (sección) |
+|:--|:--|:--|
+| 1 | ¿Rango de la productividad media en 2014? | IC, 95% vs 99% (4.3) |
+| 2 | ¿Cambió la productividad media, 1990 → 2014? | pruebas $t$ de dos muestras y pareada (4.4) |
+| 3 | ¿Está África por debajo de Europa? | prueba de dos muestras, IC para una diferencia |
+| 4 | ¿La media de 2014 supera \$50,000? | prueba unilateral (4.6) |
+| 5 | ¿Creció más de la mitad de los países? | proporciones (4.7) |
+| 6 | ¿Qué regiones difieren? | muchas pruebas, prueba múltiple |
+
+[Seis tareas, un conjunto de datos: todo el instrumental del capítulo sobre una pregunta de desarrollo.]{.takeaway .fragment}
+
+::: {.notes}
+Contexto económico: la hipótesis de convergencia dice que los países más pobres deberían crecer más rápido que los más ricos. Las tareas prueban niveles y cambios de la productividad media; no prueban directamente la convergencia, que necesita regresiones de crecimiento sobre nivel inicial (capítulos posteriores).
+:::
+
+## Código: cargar el panel y extraer los dos cortes transversales
+
+``` {.python code-line-numbers="1-4|5-7|8-9|10-12"}
+import numpy as np                          # square roots
+import pandas as pd                         # tabular data
+from scipy import stats                     # t and normal distributions
+import matplotlib.pyplot as plt             # plots
+url = ("https://raw.githubusercontent.com/quarcs-lab/"            # Mendez (2020) repository
+       "mendez2020-convergence-clubs-code-data/master/assets/dat.csv")
+df = pd.read_csv(url).set_index(["country", "year"])     # panel indexed by country-year
+lp_1990 = df.loc[df.index.get_level_values("year") == 1990, "lp"]   # productivity, 1990
+lp_2014 = df.loc[df.index.get_level_values("year") == 2014, "lp"]   # productivity, 2014
+print(f"Observations: {len(df):,}; countries: {df.index.get_level_values('country').nunique()}")
+print(f"1990: n={len(lp_1990)}, mean={lp_1990.mean():,.0f}, std={lp_1990.std():,.0f}")
+print(f"2014: n={len(lp_2014)}, mean={lp_2014.mean():,.0f}, std={lp_2014.std():,.0f}")
+```
+
+[↗ Pruébalo en Colab](https://colab.research.google.com/notebooks/empty.ipynb){.colab-link target="_blank" data-preview-link="false"}
+
+::: {.notes}
+Autónomo; la celda de carga del capítulo. Cada bloque posterior de este estudio de caso continúa desde aquí. pandas .std() usa ddof=1 por defecto, es decir, la desviación estándar muestral.
+:::
+
+## Salida: la media subió, y la dispersión también {.smaller}
+
+:::: {.columns}
+::: {.column width="40%"}
+| | 1990 | 2014 |
+|:--|--:|--:|
+| Países | 108 | 108 |
+| Media | \$23,224 | [\$40,977]{.key} |
+| Mediana | \$16,985 | \$32,781 |
+| Desv. est. | \$20,089 | \$33,853 |
+| Error estándar | \$1,933 | \$3,258 |
+:::
+::: {.column width="60%"}
+![](figures/fig_cs1_hist.png)
+:::
+::::
+
+[La productividad media subió 76% y la desviación estándar entre países subió 69%. Ambas distribuciones están sesgadas a la derecha.]{.takeaway .fragment}
+
+::: {.notes}
+Calculado para estas diapositivas a partir de la celda de carga del capítulo. Una DE creciente de niveles no es por sí misma evidencia a favor o en contra de la convergencia, que suele estudiarse en logs (una brecha porcentual constante significa una brecha en dólares creciente). Mantén las dos preguntas separadas: estas tareas son sobre medias.
+:::
+
+## Código de la Tarea 1: IC del 95% y 99% para 2014 (plantilla rellenada)
+
+``` {.python code-line-numbers="1|2-5|6-8|9-11|12-14"}
+# continues from the previous block
+n_2014 = len(lp_2014)                       # 108 countries
+mean_2014 = lp_2014.mean()                  # blank 1: sample mean
+std_2014 = lp_2014.std()                    # blank 2: sample std dev
+se_2014 = std_2014 / np.sqrt(n_2014)        # standard error
+t_crit_95 = stats.t.ppf(1 - 0.05/2, df=n_2014 - 1)   # blank 3: df = n - 1
+me_95 = t_crit_95 * se_2014                 # 95% margin of error
+ci_95 = (mean_2014 - me_95, mean_2014 + me_95)       # blanks 4-5: the bounds
+t_crit_99 = stats.t.ppf(1 - 0.01/2, df=n_2014 - 1)   # 99% critical value
+me_99 = t_crit_99 * se_2014                 # 99% margin of error: wider
+ci_99 = (mean_2014 - me_99, mean_2014 + me_99)       # 99% bounds
+se_1990 = lp_1990.std() / np.sqrt(len(lp_1990))      # 1990 for comparison
+me_1990 = stats.t.ppf(0.975, df=len(lp_1990) - 1) * se_1990   # 1990 margin
+print(ci_95, ci_99, 2 * me_95, 2 * me_1990)          # bounds and widths
+```
+
+[↗ Pruébalo en Colab](https://colab.research.google.com/notebooks/empty.ipynb){.colab-link target="_blank" data-preview-link="false"}
+
+::: {.notes}
+La plantilla de la Tarea 1 del capítulo con sus seis espacios rellenados: media, std, df = n − 1, los dos límites, y "más ancho". La respuesta al último espacio: el IC del 99% es más ancho que el IC del 95%.
+:::
+
+## Salida de la Tarea 1: el intervalo de 2014 es ancho, y más ancho que el de 1990 {.smaller}
+
+| | Media | IC 95% | ancho 95% | IC 99% | ancho 99% |
+|:--|--:|:--|--:|:--|--:|
+| 2014 | \$40,977 | [[\$34,519,&nbsp;\$47,435]]{.key} | \$12,915 | [\$32,434,&nbsp;\$49,520] | \$17,086 |
+| 1990 | \$23,224 | [\$19,392,&nbsp;\$27,056] | \$7,664 | [\$18,154,&nbsp;\$28,293] | \$10,139 |
+
+[$t_{107,\,0.025} = 1.982$, $t_{107,\,0.005} = 2.623$; $n = 108$ en ambos años · calculado para estas diapositivas]{.comment}
+
+::: {.incremental}
+- El IC del 99% es **más ancho** (el último espacio de la plantilla): más confianza cuesta ancho
+- El intervalo de 2014 es **69% más ancho** que el de 1990 porque los países se volvieron más dispersos, con el mismo $n$
+- Los dos IC del 95% no se solapan: una primera pista de que la media cambió
+:::
+
+[La precisión depende de la dispersión además del tamaño de muestra: los mismos 108 países, una media mucho menos precisa.]{.takeaway .fragment}
+
+::: {.notes}
+Razón de anchos 12,915/7,664 = 1.685, igual a la razón de desviaciones estándar (33,853/20,089) porque n es el mismo. Intervalos que no se solapan implican una diferencia significativa, pero intervalos que sí se solapan no implicarían lo contrario; la Tarea 2 ejecuta la prueba apropiada.
+:::
+
+## Código de la Tarea 2: ¿cambió la productividad media? Dos pruebas
+
+``` {.python code-line-numbers="1|2-4|5-7|8-9|10-13"}
+# continues from the previous block
+se_1990, se_2014 = lp_1990.std() / np.sqrt(108), lp_2014.std() / np.sqrt(108)   # each SE
+se_diff = np.sqrt(se_1990**2 + se_2014**2)  # blanks 1-2: SE of the difference
+t_stat = (lp_2014.mean() - lp_1990.mean()) / se_diff   # blanks 3-4: Welch t
+t_scipy, p_scipy = stats.ttest_ind(lp_2014, lp_1990, equal_var=False)   # blanks 5-6
+print(f"Welch: diff {lp_2014.mean() - lp_1990.mean():,.0f}, se {se_diff:,.0f}")
+print(f"       t {t_scipy:.3f}, p {p_scipy:.2e}")              # blank 7: Reject
+# computed for these slides: the same 108 countries appear in both years
+x14, x90 = lp_2014.droplevel("year"), lp_1990.droplevel("year")   # align by country
+t_pair, p_pair = stats.ttest_rel(x14, x90)  # paired test = one-sample t on the changes
+change = x14 - x90                          # within-country change
+print(f"Paired: mean change {change.mean():,.0f}, se {change.std() / np.sqrt(108):,.0f}")
+print(f"        t {t_pair:.3f}, p {p_pair:.2e}")   # paired test result
+```
+
+[↗ Pruébalo en Colab](https://colab.research.google.com/notebooks/empty.ipynb){.colab-link target="_blank" data-preview-link="false"}
+
+::: {.notes}
+La primera parte es la plantilla de la Tarea 2 del capítulo, rellenada (prueba de varianza desigual de Welch). La propia pregunta de discusión del capítulo señala que las muestras de 1990 y 2014 contienen los mismos países y sugiere una prueba pareada; la prueba pareada se calcula para estas diapositivas. droplevel("year") elimina el año del índice para que las dos Series se alineen por país.
+:::
+
+## Salida de la Tarea 2: mismo veredicto, pero la prueba pareada es mucho más nítida {.smaller}
+
+| | Welch (muestras independientes) | Pareada (mismos países) |
+|:--|--:|--:|
+| Cambio medio, 1990 → 2014 | \$17,753 | \$17,753 |
+| EE del cambio | \$3,788 | [\$1,628]{.key} |
+| $t$ | 4.687 | [10.904]{.key} |
+| Grados de libertad | 174.0 | 107 |
+| Valor $p$ | 0.000006 | <&nbsp;10⁻¹⁸ |
+| IC 95% para el cambio | [\$10,277,&nbsp;\$25,229] | [\$14,526,&nbsp;\$20,981] |
+
+[Resultados pareados calculados para estas diapositivas · Welch es la plantilla del capítulo]{.comment}
+
+[Rechazar $H_0$ de ambas maneras: la productividad media subió unos \$17,800 (+76%). El emparejamiento reduce el EE en 57%.]{.takeaway .fragment}
+
+::: {.notes}
+La prueba de Welch trata los dos años como muestras independientes, así que su EE incluye las enormes diferencias entre países ricos y pobres. La prueba pareada mira solo los cambios dentro de cada país. La estimación puntual es idéntica; solo difieren el error estándar, y por tanto t, p y el IC.
+:::
+
+## Por qué ayuda el emparejamiento: cada país se compara consigo mismo
+
+![Cada punto es un país: productividad de 1990 (x) contra 2014 (y). Los puntos por encima de la línea discontinua de 45° crecieron.](figures/fig_cs1_paired.png){height="430"}
+
+[Los dos años están correlacionados 0.93: los países ricos siguieron siendo ricos. Diferenciar elimina ese nivel compartido, dejando solo el cambio.]{.takeaway .fragment}
+
+::: {.notes}
+La DE de los cambios dentro de cada país ($16,920) es menor que la DE de cualquiera de los dos años ($20,089 y $33,853) porque los dos años están tan altamente correlacionados. Por eso el EE pareado es menos de la mitad del EE de Welch. Económicamente: el producto por trabajador del país promedio subió unos $17,800. Correlación calculada para estas diapositivas.
+:::
+
+## Código de la Tarea 3: África versus Europa en 2014
+
+``` {.python code-line-numbers="1|2-4|5|6-9|10-12"}
+# continues from the previous block
+df_2014 = df.loc[df.index.get_level_values("year") == 2014]       # 2014 cross-section
+lp_africa = df_2014.loc[df_2014["region"] == "Africa", "lp"]      # 26 countries
+lp_europe = df_2014.loc[df_2014["region"] == "Europe", "lp"]      # 30 countries
+t_stat, p_val = stats.ttest_ind(lp_africa, lp_europe, equal_var=False)   # Welch test
+v_a, v_e = lp_africa.var() / len(lp_africa), lp_europe.var() / len(lp_europe)   # s^2/n
+diff = lp_africa.mean() - lp_europe.mean()  # difference in means
+se_diff = np.sqrt(v_a + v_e)                # SE of the difference
+df_w = (v_a + v_e)**2 / (v_a**2 / (len(lp_africa) - 1) + v_e**2 / (len(lp_europe) - 1))  # Welch df
+t_c = stats.t.ppf(0.975, df_w)              # critical value at the Welch df
+print(f"diff {diff:,.0f}, t {t_stat:.2f}, p {p_val:.1e}")              # gap and test
+print(f"95% CI [{diff - t_c*se_diff:,.0f}, {diff + t_c*se_diff:,.0f}]")   # CI for the gap
+```
+
+[↗ Pruébalo en Colab](https://colab.research.google.com/notebooks/empty.ipynb){.colab-link target="_blank" data-preview-link="false"}
+
+::: {.notes}
+La estructura de la Tarea 3 del capítulo con "YOUR CODE HERE" completada. Se usa Welch (equal_var=False), consistente con la Tarea 2, porque la DE de Europa es el doble de la de África. La versión de varianza agrupada da t = −11.02; la conclusión es la misma.
+:::
+
+## Salida de la Tarea 3: una brecha de \$61,000, estimada con precisión {.smaller}
+
+:::: {.columns}
+::: {.column width="46%"}
+| | África | Europa |
+|:--|--:|--:|
+| $n$ | 26 | 30 |
+| Media | \$11,211 | \$72,572 |
+| Mediana | \$5,722 | \$66,862 |
+| Desv. est. | \$12,261 | \$25,966 |
+
+| África − Europa | Valor |
+|:--|--:|
+| Diferencia | [−\$61,361]{.key} |
+| EE (Welch, df 42.6) | \$5,316 |
+| $t$ | −11.54 |
+| IC 95% | [−\$72,084,&nbsp;−\$50,638] |
+:::
+::: {.column width="54%"}
+![](figures/fig_cs1_box.png)
+:::
+::::
+
+[Rechazar la igualdad de medias ($p < 10^{-13}$). El trabajador europeo promedio produce 6.5 veces más que el trabajador africano promedio.]{.takeaway .fragment}
+
+::: {.notes}
+Calculado para estas diapositivas. ¿Es real? Abrumadoramente. ¿Importa? Enormemente: la brecha es mayor que la media de África o del mundo. ¿Podríamos detectarlo? Fácilmente: con un EE de $5,316 y un valor crítico de 2.02, cualquier brecha más allá de unos $10,700 ya sería significativa. Advertencia: la distribución de África es muy sesgada (mediana $5,722 vs media $11,211), con unos pocos valores atípicos por encima de $30,000; la media no es el país africano típico.
+:::
+
+## Código de la Tarea 4: ¿la media de 2014 supera \$50,000?
+
+``` {.python code-line-numbers="1|2-3|4|5|6-7"}
+# continues from the previous block
+res_greater = stats.ttest_1samp(lp_2014, popmean=50000, alternative="greater")   # Ha: mu > 50,000
+res_two = stats.ttest_1samp(lp_2014, popmean=50000, alternative="two-sided")     # Ha: mu != 50,000
+res_less = stats.ttest_1samp(lp_2014, popmean=50000, alternative="less")         # for contrast only
+print(f"mean {lp_2014.mean():,.0f}, t {res_greater.statistic:.3f}")              # t is negative
+print(f"p (greater) {res_greater.pvalue:.4f}, p (two-sided) {res_two.pvalue:.4f}")  # chapter's
+print(f"p (less) {res_less.pvalue:.4f}")    # never switch to this after seeing t
+```
+
+[↗ Pruébalo en Colab](https://colab.research.google.com/notebooks/empty.ipynb){.colab-link target="_blank" data-preview-link="false"}
+
+::: {.notes}
+El esquema de la Tarea 4 del capítulo, escrito en detalle. ttest_1samp de scipy toma un argumento alternative: "greater", "less" o "two-sided". La línea "less" se añade solo para hacer la observación sobre p-hacking en la siguiente diapositiva.
+:::
+
+## Salida de la Tarea 4: cuando la estimación apunta en sentido equivocado {.smaller}
+
+| $H_a$ | $t$ | valor $p$ | Decisión al 5% |
+|:--|--:|--:|:--|
+| $\mu > 50{,}000$ (la afirmación del capítulo) | −2.770 | [0.9967]{.key} | no rechazar |
+| $\mu \neq 50{,}000$ | −2.770 | 0.0066 | rechazar |
+| $\mu < 50{,}000$ (no preespecificada) | −2.770 | 0.0033 | — |
+
+[Media muestral \$40,977 · valor crítico unilateral 1.659 · calculado para estas diapositivas]{.comment}
+
+::: {.incremental}
+- La media está **por debajo** de \$50,000, así que $t < 0$ y el $p$ de cola superior es $1 - 0.0066/2 = 0.9967$, no la mitad del $p$ bilateral
+- **No podemos** concluir que la productividad supere el valor de referencia; la prueba bilateral dice que difiere, por el lado bajo
+- Cambiar a $H_a: \mu < 50{,}000$ tras ver el signo sería $p$-hacking
+:::
+
+[Un valor $p$ unilateral por encima de 0.5 significa que los datos apuntan *en contra* de la dirección que esperabas.]{.takeaway .fragment}
+
+::: {.notes}
+Esto responde la pregunta de discusión del capítulo: aquí el valor p unilateral es mayor que el bilateral porque la estimación cae del lado opuesto a Ha. Error de Tipo I en este contexto: si la media verdadera fuera igual o menor que $50,000, una prueba al 5% la declararía erróneamente por encima del valor de referencia como máximo el 5% de las veces.
+:::
+
+## Código de la Tarea 5: ¿qué proporción de países creció?
+
+``` {.python code-line-numbers="1|2-3|4-6|7-8|9-10"}
+# continues from the previous block
+growth = (lp_2014.droplevel("year") > lp_1990.droplevel("year")).astype(int)   # 1 if lp rose
+n = len(growth)                             # 108 countries
+p_hat = growth.mean()                       # share of growth winners
+se_p = np.sqrt(p_hat * (1 - p_hat) / n)     # SE at p-hat (for the CI)
+ci = (p_hat - 1.96 * se_p, p_hat + 1.96 * se_p)       # 95% normal CI
+z = (p_hat - 0.5) / np.sqrt(0.5 * 0.5 / n)  # z test of H0: p = 0.5
+p_val = 2 * stats.norm.sf(abs(z))           # two-sided p-value
+print(f"{growth.sum()} of {n}: p_hat {p_hat:.3f}, CI [{ci[0]:.3f}, {ci[1]:.3f}]")   # share
+print(f"z {z:.2f}, p {p_val:.1e}")          # test of H0: p = 0.5
+```
+
+[↗ Pruébalo en Colab](https://colab.research.google.com/notebooks/empty.ipynb){.colab-link target="_blank" data-preview-link="false"}
+
+::: {.notes}
+Construido a partir de las cuatro pistas del capítulo. El paso droplevel es el que advierte la pista del capítulo: comparar las Series crudas falla porque sus índices (country, year) difieren.
+:::
+
+## Salida de la Tarea 5: nueve de cada diez países crecieron {.smaller}
+
+| | Valor |
+|:--|--:|
+| Países con mayor productividad en 2014 | 97 de 108 |
+| $\hat{p}$ | [0.898]{.key} |
+| IC 95% | [0.841,&nbsp;0.955] |
+| $z$ (vs 0.5) | 8.28 |
+| Valor $p$ | <&nbsp;10⁻¹⁵ |
+
+[Calculado para estas diapositivas · $n(1-\hat{p}) = 11$, justo por encima del 10 de la regla empírica]{.comment}
+
+**Los 11 países donde cayó la productividad:** Camerún, República Centroafricana, República Democrática del Congo, Haití, Honduras, República Kirguisa, Nicaragua, Níger, Sierra Leona, Tayikistán, Togo.
+
+[Mucho más de la mitad de los países crecieron, pero los 11 que cayeron estaban en la mitad más pobre en 1990: el crecimiento no fue compartido por todos.]{.takeaway .fragment}
+
+::: {.notes}
+Los que cayeron se concentran en el África subsahariana, Centroamérica y Asia Central; en 1990 los 11 estaban en la mitad más pobre (6 de ellos en el cuartil más pobre), calculado para estas diapositivas. Con solo 11 "fracasos" la aproximación normal es marginal; la conclusión está lejos del corte de todos modos. Advertencia: los 108 países no son una muestra aleatoria de una población mayor, así que la "inferencia" aquí es sobre una hipotética superpoblación de países que podrían haber ocurrido.
+:::
+
+## Código de la Tarea 6: cada región, cada par
+
+``` {.python code-line-numbers="1-2|3-6|7-10|11-13"}
+# continues from the previous block (df_2014 from Task 3)
+import itertools                            # all pairs of regions
+by_region = df_2014.groupby("region")["lp"]                         # 5 regions
+stats_r = by_region.agg(["count", "mean", "std"])                   # n, mean, s
+stats_r["se"] = stats_r["std"] / np.sqrt(stats_r["count"])          # SE of each mean
+stats_r["tc"] = stats.t.ppf(0.975, stats_r["count"] - 1)            # t critical, df = n - 1
+for a, b in itertools.combinations(sorted(stats_r.index), 2):        # 10 pairs
+    xa = df_2014.loc[df_2014["region"] == a, "lp"]                  # region a
+    xb = df_2014.loc[df_2014["region"] == b, "lp"]                  # region b
+    print(a, b, stats.ttest_ind(xa, xb, equal_var=False))           # Welch test
+stats_r["lo"] = stats_r["mean"] - stats_r["tc"] * stats_r["se"]    # lower 95% bound
+stats_r["hi"] = stats_r["mean"] + stats_r["tc"] * stats_r["se"]    # upper 95% bound
+print(stats_r.round(0))                     # the CI table
+```
+
+[↗ Pruébalo en Colab](https://colab.research.google.com/notebooks/empty.ipynb){.colab-link target="_blank" data-preview-link="false"}
+
+::: {.notes}
+El enfoque sugerido en la Tarea 6 del capítulo, implementado con un bucle sobre itertools.combinations. Con 5 regiones hay 10 pares.
+:::
+
+## Salida de la Tarea 6: medias regionales y sus IC {.smaller}
+
+| Región | $n$ | Media | Error estándar | IC 95% |
+|:------|---:|------:|------:|:--------------------|
+| África | 26 | \$11,211 | \$2,405 | [\$6,259,&nbsp;\$16,164] |
+| Américas | 22 | \$32,836 | \$5,167 | [\$22,092,&nbsp;\$43,581] |
+| Asia | 28 | \$38,725 | \$6,282 | [\$25,836,&nbsp;\$51,615] |
+| Europa | 30 | \$72,572 | \$4,741 | [\$62,876,&nbsp;\$82,268] |
+| Oceanía | [2]{.key} | \$75,067 | \$10,980 | [−\$64,444,&nbsp;\$214,577] |
+
+[Oceanía = Australia y Nueva Zelanda; con 1 grado de libertad, $t_{1,\,0.025} = 12.7$ · calculado para estas diapositivas]{.comment}
+
+[Cuatro regiones se estiman con precisión útil; Oceanía, con dos países, no.]{.takeaway .fragment}
+
+::: {.notes}
+El texto de la tarea del capítulo menciona África, Europa, Asia y las Américas; los datos también contienen Oceanía con solo dos países. Un intervalo t con 1 grado de libertad usa un valor crítico de 12.7, por eso explota.
+:::
+
+## IC regionales de un vistazo: el intervalo de Oceanía es inútil
+
+![Productividad laboral media por región en 2014 con IC del 95% (el gráfico de barras de error que pide la Tarea 6 del capítulo).](figures/fig_cs1_regions.png){height="430"}
+
+[Con dos países, el intervalo de Oceanía incluso incluye productividad negativa. Su media no se "conoce" en ningún sentido útil.]{.takeaway .fragment}
+
+::: {.notes}
+Figura calculada para estas diapositivas. El intervalo de Europa no se solapa con los de África, las Américas o Asia; las Américas y Asia se solapan mucho, lo que concuerda con las pruebas por pares de la siguiente diapositiva.
+:::
+
+## Salida de la Tarea 6: diez pruebas y el problema de la prueba múltiple {.smaller}
+
+| Par | Diferencia | $t$ | $p$ | ¿5%? | ¿Bonferroni (0.005)? |
+|:--|--:|--:|--:|:-:|:-:|
+| África − Europa | −\$61,361 | −11.54 | <&nbsp;0.0001 | ✓ | ✓ |
+| Américas − Europa | −\$39,736 | −5.67 | <&nbsp;0.0001 | ✓ | ✓ |
+| Asia − Europa | −\$33,847 | −4.30 | 0.0001 | ✓ | ✓ |
+| África − Asia | −\$27,514 | −4.09 | 0.0002 | ✓ | ✓ |
+| África − Américas | −\$21,625 | −3.79 | 0.0007 | ✓ | ✓ |
+| Américas − Asia | −\$5,889 | −0.72 | 0.473 | | |
+| África − Oceanía | −\$63,856 | −5.68 | 0.095 | | |
+| Américas − Oceanía | −\$42,230 | −3.48 | 0.110 | | |
+| Asia − Oceanía | −\$36,341 | −2.87 | 0.119 | | |
+| Europa − Oceanía | −\$2,495 | −0.21 | 0.861 | | |
+
+[Pruebas de Welch · calculado para estas diapositivas]{.comment}
+
+[Con 10 pruebas al 5%, la probabilidad de al menos una falsa alarma llega hasta el 40%. Aquí los mismos 5 pares sobreviven al corte de Bonferroni de 0.005.]{.takeaway .fragment}
+
+::: {.notes}
+Tasa de error por familia para 10 pruebas independientes: 1 − 0.95^10 = 0.401. Bonferroni divide α por el número de pruebas: 0.05/10 = 0.005. Todo par que involucre a Oceanía es no significativo a pesar de brechas de hasta $64,000, porque dos observaciones dan casi nada de información: una diferencia grande, posiblemente importante, que simplemente no podemos detectar. Esa es la pregunta "¿podríamos detectarlo?" otra vez.
+:::
+
+## Estudio de caso 1: qué suman las seis tareas
+
+::: {.incremental}
+- **Cambio en el tiempo**: la productividad media subió unos \$17,800 (+76%); la prueba pareada lo hace inconfundible ($t = 10.9$)
+- **Brechas regionales**: Europa va muy adelante; África, las Américas y Asia están significativamente detrás de ella; Américas vs Asia no se pueden distinguir
+- **Amplitud**: 97 de 108 países crecieron; los 11 que no lo hicieron estaban en la mitad más pobre en 1990
+- **Lecciones de método**: empareja cuando las unidades se repiten; las pruebas unilaterales pueden apuntar en sentido equivocado; muchas pruebas inflan las falsas alarmas; los grupos diminutos dan intervalos inútiles
+:::
+
+[La prueba correcta depende de cómo se generaron los datos: los mismos países dos veces no son dos muestras independientes.]{.takeaway .fragment}
+
+::: {.notes}
+Sobre la convergencia: estas tareas muestran brechas de nivel grandes y persistentes, y que los países que retrocedieron empezaron todos en la mitad más pobre. Una prueba de convergencia apropiada (¿la productividad inicial predice el crecimiento?) necesita regresión, del Capítulo 5 en adelante.
+:::
+
+# Estudio de caso 2 · ¿Es equitativo el desarrollo de Bolivia entre departamentos? {#cs2 .divider background-color="#7A209F"}
+
+[DS4Bolivia · 333 municipios · 9 departamentos · seis tareas]{.act}
+
+::: {.notes}
+El Estudio de caso 2 lleva las herramientas del capítulo al desarrollo subnacional en Bolivia. Las celdas de código del capítulo para las Tareas 1–6 se ejecutan aquí y se reportan sus salidas; la d de Cohen y la variante de Welch en la Tarea 5 se calculan para estas diapositivas.
+:::
+
+## La pregunta: ¿difiere el desarrollo municipal entre los departamentos de Bolivia? {.smaller}
+
+**Datos.** DS4Bolivia (`ds4bolivia_v20250523.csv`): 339 municipios; **333** tienen datos completos en las cinco variables usadas. Resultado: el **Índice Municipal de Desarrollo Sostenible (IMDS)**, 0–100.
+
+| Tarea | Pregunta | Herramienta |
+|:--|:--|:--|
+| 1 | ¿Media nacional del IMDS? | IC 95% |
+| 2 | ¿Está el municipio promedio en el punto medio, 50? | prueba de una muestra bilateral |
+| 3 | ¿Qué departamentos difieren? | IC por departamento, gráfico de bosque |
+| 4 | ¿Está La Paz por encima de la media nacional? | prueba unilateral |
+| 5 | ¿Qué tan grande es la brecha entre el departamento más alto y el más bajo? | prueba de dos muestras |
+| 6 | ¿Qué debería decir una nota de política? | tabla resumen |
+
+[El mismo instrumental, nueva pregunta: significancia estadística versus relevancia de política.]{.takeaway .fragment}
+
+::: {.notes}
+El texto del capítulo dice que el conjunto de datos cubre 339 municipios, lo cual es correcto para el archivo; la muestra de análisis tras dropna() sobre mun, dep, imds, ln_NTLpc2017 y pop2017 tiene 333. Los tamaños de departamento van de 11 (Tarija) a 87 (La Paz).
+:::
+
+## Código: cargar los datos y resumir el IMDS
+
+``` {.python code-line-numbers="1-4|5-6|7-8|9-10"}
+import numpy as np                          # square roots
+import pandas as pd                         # tabular data
+from scipy import stats                     # t distribution
+import matplotlib.pyplot as plt             # forest plot
+url_bol = "https://raw.githubusercontent.com/quarcs-lab/ds4bolivia/master/ds4bolivia_v20250523.csv"
+bol = pd.read_csv(url_bol)                  # 339 municipalities, 350+ columns
+key_vars = ["mun", "dep", "imds", "ln_NTLpc2017", "pop2017"]   # variables used here
+bol_key = bol[key_vars].dropna().copy()     # complete cases: 333 municipalities
+print(bol_key["imds"].describe().round(2))  # IMDS summary statistics
+print(bol_key["dep"].value_counts().sort_index())   # municipalities per department
+```
+
+[↗ Pruébalo en Colab](https://colab.research.google.com/notebooks/empty.ipynb){.colab-link target="_blank" data-preview-link="false"}
+
+::: {.notes}
+Autónomo; la celda de carga del capítulo. Todos los bloques posteriores de este estudio de caso continúan desde ella.
+:::
+
+## Salida: el IMDS se centra justo por encima de 50 {.smaller}
+
+:::: {.columns}
+::: {.column width="40%"}
+| IMDS | Valor |
+|:--|--:|
+| Municipios | 333 |
+| Media | 51.16 |
+| Desv. est. | 6.76 |
+| Mín | 35.70 |
+| Mediana | 50.80 |
+| Máx | 80.20 |
+
+| Departamento | $n$ | Departamento | $n$ |
+|:--|--:|:--|--:|
+| La Paz | 87 | Chuquisaca | 29 |
+| Santa Cruz | 55 | Beni | 18 |
+| Cochabamba | 47 | Pando | 13 |
+| Potosí | 38 | Tarija | 11 |
+| Oruro | 35 | | |
+:::
+::: {.column width="60%"}
+![](figures/fig_cs2_hist.png)
+:::
+::::
+
+[El 72% de los municipios puntúa entre 45 y 58. Los tamaños de departamento varían ocho veces, así que la precisión a nivel departamental también variará.]{.takeaway .fragment}
+
+::: {.notes}
+Cuartiles: 47.1 y 55.0 (de la salida de describe()). La puntuación más alta, 80.2, pertenece al municipio de La Paz (la ciudad); los siguientes son Cochabamba (73.7) y Tarija (70.6). Proporción entre 45 y 58 calculada para estas diapositivas.
+:::
+
+## Código de las Tareas 1–2: IC nacional y la prueba del punto medio
+
+``` {.python code-line-numbers="1|2-4|5|6|7-8"}
+# continues from the previous block
+n = len(bol_key["imds"])                    # 333 municipalities
+x_bar = bol_key["imds"].mean()              # national mean IMDS
+se = bol_key["imds"].std() / np.sqrt(n)     # standard error
+ci_low, ci_high = stats.t.interval(0.95, df=n - 1, loc=x_bar, scale=se)   # Task 1: 95% CI
+t_stat, p_value = stats.ttest_1samp(bol_key["imds"], popmean=50)          # Task 2: H0: mu = 50
+print(f"mean {x_bar:.4f}, se {se:.4f}, CI [{ci_low:.4f}, {ci_high:.4f}]")
+print(f"t {t_stat:.4f}, p {p_value:.6f}")   # reject H0 if p < 0.05
+```
+
+[↗ Pruébalo en Colab](https://colab.research.google.com/notebooks/empty.ipynb){.colab-link target="_blank" data-preview-link="false"}
+
+::: {.notes}
+Las celdas de la Tarea 1 y la Tarea 2 del capítulo combinadas. stats.t.interval construye x̄ ± t × se directamente; ttest_1samp calcula el mismo estadístico t que la sección 4.4.
+:::
+
+## Salida de las Tareas 1–2: significativamente por encima de 50, por aproximadamente un punto {.smaller}
+
+| Tarea | Resultado |
+|:--|:--|
+| 1 · Media del IMDS | 51.1580 (EE 0.3704) |
+| 1 · IC 95% | [50.43,&nbsp;51.89] |
+| 2 · $H_0: \mu = 50$ | $t$ = [3.1258]{.key}, $p$ = 0.0019 → rechazar |
+| 2 · Brecha respecto a 50 | 1.16 puntos en una escala de 0–100 |
+
+::: {.incremental}
+- **¿Real?** Sí: 50 cae fuera del IC del 95%, $t = 3.13$
+- **¿Importa?** Apenas: el municipio promedio está 1.2 puntos por encima del punto medio
+- **¿Podríamos detectarlo?** Fácilmente: 333 municipios dan un EE de 0.37, así que incluso una brecha de un punto destaca
+:::
+
+[Concepto clave 4.12 en acción: una muestra grande hace que una brecha pequeña, irrelevante para la política, sea estadísticamente significativa.]{.takeaway .fragment}
+
+::: {.notes}
+La interpretación del capítulo: tenemos un 95% de confianza en que la verdadera media del índice de desarrollo municipal se sitúa entre 50.43 y 51.89. Advertencia: los 333 municipios son esencialmente toda la población de municipios bolivianos, no una muestra aleatoria; la "población" aquí es una conceptual (el proceso que genera los resultados municipales). Además, 50 es un punto medio de la escala, no una meta de política, así que rechazarlo tiene un significado limitado.
+:::
+
+## Código de la Tarea 3: un IC para cada departamento
+
+``` {.python code-line-numbers="1|2-3|4-5|6-7|8"}
+# continues from the previous block
+dept_stats = (bol_key.groupby("dep")["imds"]                  # one row per department
+              .agg(["mean", "std", "count"]).sort_values("mean"))   # mean, s, n
+dept_stats["se"] = dept_stats["std"] / np.sqrt(dept_stats["count"])          # SE per department
+dept_stats["t_crit"] = stats.t.ppf(0.975, df=dept_stats["count"] - 1)        # df = n - 1 each
+dept_stats["ci_low"] = dept_stats["mean"] - dept_stats["t_crit"] * dept_stats["se"]    # lower
+dept_stats["ci_high"] = dept_stats["mean"] + dept_stats["t_crit"] * dept_stats["se"]   # upper
+print(dept_stats[["mean", "se", "ci_low", "ci_high", "count"]].round(2))     # the table
+```
+
+[↗ Pruébalo en Colab](https://colab.research.google.com/notebooks/empty.ipynb){.colab-link target="_blank" data-preview-link="false"}
+
+::: {.notes}
+La celda de la Tarea 3 del capítulo (su código de gráfico de bosque se muestra como figura en la siguiente diapositiva). Cada departamento recibe su propio valor crítico porque los grados de libertad difieren: t(10) = 2.23 para Tarija, t(86) = 1.99 para La Paz.
+:::
+
+## Salida de la Tarea 3: dos departamentos por encima, tres por debajo de la media nacional {.smaller}
+
+:::: {.columns}
+::: {.column width="45%"}
+| Departamento | $n$ | Media | IC 95% |
+|:--|--:|--:|:--|
+| Tarija | 11 | [60.60]{.key} | [56.91,&nbsp;64.29] |
+| Santa Cruz | 55 | 54.31 | [53.01,&nbsp;55.62] |
+| Cochabamba | 47 | 52.50 | [50.01,&nbsp;55.00] |
+| La Paz | 87 | 50.98 | [49.83,&nbsp;52.12] |
+| Beni | 18 | 50.79 | [48.59,&nbsp;52.98] |
+| Oruro | 35 | 50.68 | [48.96,&nbsp;52.41] |
+| Chuquisaca | 29 | 47.80 | [45.28,&nbsp;50.31] |
+| Potosí | 38 | 47.57 | [45.05,&nbsp;50.09] |
+| Pando | 13 | [45.92]{.key} | [42.39,&nbsp;49.46] |
+:::
+::: {.column width="55%"}
+![](figures/fig_cs2_forest.png)
+:::
+::::
+
+[Tarija y Santa Cruz se sitúan claramente por encima de la media nacional de 51.16; Chuquisaca, Potosí y Pando se sitúan claramente por debajo de ella.]{.takeaway .fragment}
+
+::: {.notes}
+Leer un gráfico de bosque: intervalos que no se solapan implican una diferencia significativa, pero intervalos que sí se solapan NO implican que no haya diferencia (dos IC del 95% pueden solaparse un poco mientras la prueba de dos muestras aún rechaza). Usa el gráfico de bosque para detectar candidatos, luego prueba la comparación que te importa. Los departamentos pequeños (Tarija 11, Pando 13) tienen los intervalos más anchos: Concepto clave 4.13.
+:::
+
+## Código de la Tarea 4: ¿está La Paz por encima de la media nacional?
+
+``` {.python code-line-numbers="1|2-3|4|5|6"}
+# continues from the previous block
+la_paz = bol_key[bol_key["dep"] == "La Paz"]["imds"]   # 87 municipalities
+national_mean = bol_key["imds"].mean()      # 51.16, treated as a fixed benchmark
+t_stat_lp, p_two = stats.ttest_1samp(la_paz, popmean=national_mean)   # two-sided first
+p_one = p_two / 2 if t_stat_lp > 0 else 1 - p_two / 2   # one-sided, Ha: mu_LP > national
+print(f"La Paz mean {la_paz.mean():.4f}, t {t_stat_lp:.4f}, one-sided p {p_one:.4f}")
+```
+
+[↗ Pruébalo en Colab](https://colab.research.google.com/notebooks/empty.ipynb){.colab-link target="_blank" data-preview-link="false"}
+
+::: {.notes}
+La celda de la Tarea 4 del capítulo. La línea que calcula p_one implementa la verificación de dirección de la sección 4.6: dividir a la mitad el p bilateral solo cuando t apunta en la dirección que Ha predice.
+:::
+
+## Salida de la Tarea 4: el departamento de la capital no está por encima del promedio {.smaller}
+
+| | Valor |
+|:--|--:|
+| Municipios de La Paz | 87 |
+| Media del IMDS de La Paz | 50.98 |
+| Media nacional (referencia) | 51.16 |
+| $t$ | −0.312 |
+| $p$ unilateral ($H_a$: por encima) | [0.622]{.key} |
+| $p$ bilateral | 0.756 |
+
+::: {.incremental}
+- La media de La Paz está ligeramente **por debajo** de la media nacional, así que el $p$ unilateral supera 0.5: no hay evidencia de que La Paz esté más desarrollada
+- **Advertencia**: la referencia incluye a La Paz misma (87 de 333 municipios, 26%) y se trata como una constante conocida; una comparación de dos muestras de La Paz versus el resto sería más limpia
+:::
+
+[Albergar la sede del gobierno no hace que los *municipios* del departamento estén más desarrollados en promedio.]{.takeaway .fragment}
+
+::: {.notes}
+La mayoría de los 87 municipios de La Paz son rurales; las ciudades de La Paz y El Alto cuentan como solo dos de ellos. Una media departamental pondera cada municipio por igual, independientemente de la población, así que describe al municipio típico, no a la persona típica.
+:::
+
+## Código de la Tarea 5: el departamento más alto versus el más bajo
+
+``` {.python code-line-numbers="1|2-4|5-6|7|8-13"}
+# continues from the previous block
+dept_means = bol_key.groupby("dep")["imds"].mean()   # mean IMDS by department
+top_dept, bot_dept = dept_means.idxmax(), dept_means.idxmin()   # Tarija and Pando
+top_values = bol_key[bol_key["dep"] == top_dept]["imds"]         # 11 municipalities
+bot_values = bol_key[bol_key["dep"] == bot_dept]["imds"]         # 13 municipalities
+t_stat_2s, p_value_2s = stats.ttest_ind(top_values, bot_values)  # pooled-variance test (chapter)
+t_w, p_w = stats.ttest_ind(top_values, bot_values, equal_var=False)   # Welch, for comparison
+n1, n2 = len(top_values), len(bot_values)   # group sizes
+pooled_var = ((n1 - 1) * top_values.var() + (n2 - 1) * bot_values.var()) / (n1 + n2 - 2)
+sp = np.sqrt(pooled_var)                    # pooled standard deviation
+gap = top_values.mean() - bot_values.mean() # the development gap
+print(f"gap {gap:.2f}, t {t_stat_2s:.3f}, p {p_value_2s:.1e}")   # chapter's test
+print(f"Welch t {t_w:.3f}, p {p_w:.1e}, Cohen's d {gap / sp:.2f}")   # added checks
+```
+
+[↗ Pruébalo en Colab](https://colab.research.google.com/notebooks/empty.ipynb){.colab-link target="_blank" data-preview-link="false"}
+
+::: {.notes}
+La celda de la Tarea 5 del capítulo usa stats.ttest_ind con su equal_var=True por defecto (varianza agrupada). La versión de Welch y la d de Cohen (la brecha en unidades de DE agrupada, sugerida en la celda de la Tarea 6 del capítulo) se calculan para estas diapositivas.
+:::
+
+## Salida de la Tarea 5: una brecha de 14.7 puntos entre Tarija y Pando {.smaller}
+
+| | Tarija (más alto) | Pando (más bajo) |
+|:--|--:|--:|
+| Municipios | 11 | 13 |
+| Media del IMDS | 60.60 | 45.92 |
+| Desv. est. | 5.50 | 5.85 |
+
+| Comparación | Valor |
+|:--|--:|
+| Brecha | [14.68 puntos]{.key} |
+| $t$ (agrupada) / $p$ | 6.292 / 0.0000025 |
+| $t$ (Welch) / $p$ | 6.326 / 0.0000024 |
+| $d$ de Cohen | 2.58 DE |
+
+[Welch y la $d$ de Cohen calculadas para estas diapositivas]{.comment}
+
+[Real y grande: la brecha es de unas 2.6 desviaciones estándar dentro del departamento, más del doble de la DE nacional del IMDS.]{.takeaway .fragment}
+
+::: {.notes}
+El código del capítulo etiqueta las brechas por encima de 10 puntos como "sustanciales": una regla empírica, no un criterio estadístico. Advertencia: los dos departamentos fueron elegidos *porque* son los extremos entre 9 departamentos (36 pares posibles). Elegir la mayor brecha después de mirar infla su significancia; aquí la brecha es tan grande que la conclusión sobrevive a cualquier corrección razonable, pero el hábito importa.
+:::
+
+## Tarea 6: qué debería decir la nota de política
+
+::: {.incremental}
+- **Las diferencias son reales**: Tarija (60.6) y Santa Cruz (54.3) lideran; Pando (45.9), Potosí (47.6) y Chuquisaca (47.8) rezagan, con IC que excluyen la media nacional de 51.2
+- **Algunas no son relevantes para la política**: la media nacional está significativamente por encima de 50, pero solo por 1.2 puntos
+- **La precisión es desigual**: Tarija y Pando se apoyan en 11 y 13 municipios; sus IC son de unos 7 puntos de ancho
+- **Límites**: los municipios no son personas (sin ponderaciones poblacionales); los 333 son casi todo el país; el IMDS es un índice compuesto; 36 pares posibles de departamentos invitan a las falsas alarmas
+:::
+
+[Una buena nota reporta la brecha, su IC y su significado de política, y dice qué no puede decirnos la prueba.]{.takeaway .fragment}
+
+::: {.notes}
+La Tarea 6 del capítulo pide una nota de 200–300 palabras; su celda de código construye la tabla resumen de departamentos mostrada en la diapositiva de la Tarea 3. El IC de Tarija es de 7.4 puntos de ancho y el de Pando de 7.1. Los Conceptos clave 4.12 y 4.13 aplican ambos.
+:::
+
+# Leerlo correctamente {#synth .divider background-color="#C21E72"}
+
+[Acto III · La resolución]{.act}
+
+::: {.notes}
+Síntesis: poner cada prueba en una sola regla, revisitar el hilo (¿real? ¿importa? ¿podríamos detectarlo?), elegir la prueba correcta, y salir con una lista de verificación.
+:::
+
+## Cada prueba del deck en una sola regla
+
+![Estadísticos de prueba de las secciones 4.4–4.7 y de ambos estudios de caso. Dentro de la banda sombreada, $\lvert t \rvert < 1.96$: sin rechazo al 5%.](figures/fig_tests_ruler.png)
+
+[La misma banda de ±1.96 decide cada veredicto. Lo que cambia es lo que significa la brecha.]{.takeaway .fragment}
+
+::: {.notes}
+Todos los números provienen de las diapositivas anteriores. Nota las dos barras del Estudio de caso 1, Tarea 2: el mismo cambio medio da t = 4.69 cuando los dos años se tratan erróneamente como muestras independientes y t = 10.90 cuando se emparejan correctamente.
+:::
+
+## El hilo, caso por caso: ¿real? ¿importa? ¿podríamos detectarlo? {.smaller}
+
+| Prueba | ¿Real? | ¿Importa? | ¿Podríamos detectarlo? |
+|:--|:--|:--|:--|
+| Gasolina vs \$3.81 | sí, $t = -5.26$ | sí, ≈ \$109/año | sí: EE diminuto |
+| Ingresos femeninos vs \$40k | no, $t = 0.72$ | posiblemente | **no**: potencia 0.11 en \$41,413 |
+| Ingresos masculinos vs \$50k | no, $t = 0.50$ | posiblemente | **no**: EE \$4,706 por colas pesadas |
+| Crecimiento del PIB vs 2% | no, $t = -0.07$ | sí, 1 pp se compone | **menos de lo que parece**: autocorrelación 0.87 |
+| Encuesta vs 50% | no, $z = 1.29$ | sí, las elecciones son reñidas | no en $n = 921$; apenas en 2,500 |
+| EC1 2014 vs 1990 | sí, pareada $t = 10.9$ | sí, +\$17,753 | sí, una vez emparejada |
+| EC2 IMDS vs 50 | sí, $t = 3.13$ | [apenas: 1.2 puntos]{.key} | sí: $n = 333$ |
+| EC2 Tarija vs Pando | sí, $t = 6.29$ | sí, 14.7 puntos | sí, a pesar de $n$ = 11, 13 |
+
+[La significancia responde solo a la primera columna. Una respuesta completa rellena las tres.]{.takeaway .fragment}
+
+::: {.notes}
+El hilo recurrente del deck en una tabla. Nota las dos filas "no" en la tercera columna: cuando no podemos detectarlo, un no-rechazo es poco informativo, y el intervalo de confianza es el resumen honesto.
+:::
+
+## Elegir la prueba correcta {.smaller}
+
+| Situación | Prueba | Python | Ejemplo |
+|:--|:--|:--|:--|
+| Una media vs un valor | $t$ de una muestra | `stats.ttest_1samp` | ingresos vs \$40,000 |
+| Afirmación direccional, fijada por anticipado | $t$ unilateral | `alternative="greater"` | La Paz vs media nacional |
+| Dos grupos independientes | $t$ de dos muestras de Welch | `stats.ttest_ind(…, equal_var=False)` | África vs Europa |
+| Mismas unidades medidas dos veces | $t$ pareada | `stats.ttest_rel` | 1990 vs 2014, mismos países |
+| Resultado sí/no | $z$ de proporción | `stats.norm` | votantes, países que crecieron |
+| Muchas comparaciones | ajustar $\alpha$ | Bonferroni $\alpha/k$ | 10 pares regionales |
+| Dependiente en el tiempo | EE HAC (Caps. 12, 17) | — | crecimiento del PIB |
+
+[Ajusta la prueba a cómo se generaron los datos: la independencia, el emparejamiento, la dirección y el número de pruebas importan todos.]{.takeaway .fragment}
+
+::: {.notes}
+La versión de Welch es un valor por defecto seguro para dos grupos; la versión agrupada supone varianzas iguales. La última fila es un apuntador: la prueba del PIB del capítulo supone una independencia que los datos no tienen.
+:::
+
+## Los errores tentadores — y las correcciones
+
+[Objeción.]{.objection} "$p < 0.05$, así que el efecto es real e importante; $p > 0.05$, así que no hay efecto."
+
+. . .
+
+[Respuesta.]{.rebuttal} La media del IMDS de Bolivia difiere "significativamente" de 50 por 1.2 puntos: real pero poco importante. Los ingresos femeninos no estaban significativamente por encima de \$40,000, pero la prueba tenía un 11% de probabilidad de detectar una brecha de \$1,400: sin rechazo, pero tampoco evidencia de ausencia de efecto.
+
+[Reporta primero la estimación y su intervalo de confianza; el valor $p$ es una nota al pie de ellos.]{.takeaway .fragment}
+
+::: {.notes}
+Los "Errores comunes a evitar" del capítulo: un valor p no es la probabilidad de que H0 sea verdadera; la significancia estadística no es importancia práctica; una prueba unilateral necesita justificación previa.
+:::
+
+## Cinco preguntas que hacer a cualquier prueba
+
+::: {.incremental}
+1. **¿Qué es exactamente $H_0$**, y está la afirmación de interés en $H_a$? ¿Se fijó la dirección por anticipado?
+2. **¿Son independientes las observaciones?** Las unidades repetidas piden emparejamiento; las series de tiempo y los agrupamientos necesitan otros EE
+3. **¿Qué tan grande es la brecha**, en unidades que importen (dólares, puntos, puntos porcentuales)?
+4. **¿Qué tan ancho es el IC**, y cuál es la potencia? ¿Podría la prueba haber detectado una brecha que importe?
+5. **¿Cuántas pruebas se corrieron?** Diez pruebas al 5% elevan la probabilidad de una falsa alarma a cerca del 40%
+:::
+
+[Estas cinco preguntas convierten un valor $p$ de un veredicto en evidencia.]{.takeaway .fragment}
+
+::: {.notes}
+Una lista de verificación que los estudiantes pueden aplicar a cada tabla de inferencia del resto del libro. Las preguntas 2 y 4 son las que más necesitaron los propios ejemplos del PIB y de los ingresos del capítulo.
+:::
+
+## Qué llevarse para adelante
+
+::: {.incremental}
+- El **error estándar** $s/\sqrt{n}$ impulsa cada intervalo y prueba, y se reduce solo con $\sqrt{n}$
+- Usa la **distribución $t$** cuando $\sigma$ se estima; para $n \approx 100$ está cerca de la normal
+- Un **IC del 95%** es el conjunto de valores que una prueba bilateral al 5% no rechazaría; léelo como una afirmación de muestreo repetido
+- $t = (\text{estimación} - \text{valor hipotetizado})/\text{EE}$: la receta de cada prueba en los Capítulos 7–17
+- **No rechazar ≠ aceptar**: verifica la potencia y el IC antes de concluir "sin efecto"
+- **¿Real, importa, podríamos detectarlo?** Haz las tres preguntas a cada resultado
+:::
+
+::: {.notes}
+Repaso de las Ideas clave del capítulo, actualizado con lo que verificó el deck: potencia, emparejamiento, prueba múltiple y dependencia.
+:::
+
+# Estima la media, acótala con un IC, luego prueba la afirmación que te importa, y pregúntate si importa. {.divider background-color="#C21E72"}

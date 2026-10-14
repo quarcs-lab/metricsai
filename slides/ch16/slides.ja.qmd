@@ -1,0 +1,268 @@
+---
+title: "16. モデルとデータの検証"
+subtitle: "OLSの仮定が崩れるとき — どう検出し、何をするか"
+deck-author: "Carlos Mendez"
+deck-author-url: "https://carlos-mendez.org"
+institute: "Nagoya University (GSID)"
+date: today
+date-format: long
+visual-summary: "figures/visual_summary.png"
+format:
+  revealjs:
+    output-file: index.ja.html
+    theme: [default, site-brand.scss]
+    template-partials:
+      - title-slide.html
+    include-after-body: figure-zoom.html
+    center: true
+    slide-number: c/t
+    menu: true
+    chalkboard: true
+    preview-links: auto
+    overview: true
+    progress: true
+    history: true
+    transition: fade
+    width: 1280
+    height: 720
+    fig-align: center
+    auto-stretch: true
+    highlight-style: github
+    link-external-icon: false
+---
+
+# モデルはそれでも嘘をつきうる {.divider background-color="#008CB7"}
+
+[第I幕 · 緊張]{.act}
+
+## OLS（最小二乗法）は仮定が壊れていても必ず答えを出力する
+
+回帰表が実行を拒むことはありません。モデルが健全かどうかにかかわらず、係数、標準誤差、
+t統計量を返してきます。
+
+. . .
+
+ですから、本当のスキルはモデルを*当てはめる*ことではなく、後からそれを**問いただす**ことです。本章は
+チェックリストです。単一の数値を信頼する**前に**、多重共線性、不均一分散、自己相関、欠落変数、
+影響点を診断します。
+
+::: {.notes}
+これまでの章はすべてOLSの出力を信頼してきました。本章では、その信頼が正当だったかを判断する診断手法を
+学びます。テーマは、推定は簡単であり、誠実な推測こそが難しい部分だということです。
+:::
+
+## これから進む道筋
+
+::: {.incremental}
+- **多重共線性** — 説明変数が重なり合うとき、そして**VIF**がそれをどう示すか
+- **どの違反が係数をバイアスさせ**、どれが**標準誤差**だけを壊すか
+- **不均一分散** → ロバスト標準誤差 (HC1)
+- **自己相関** → 残差の**ACF（自己相関関数）**とHAC標準誤差
+- **欠落変数** → コントロールが入ると縮んでいくのが見えるバイアス
+- **残差プロットと影響点** — 残された診断の読み方
+:::
+
+## 本章を支える6つのアイデア
+
+::: {.incremental}
+- **内生性** — 誤差と相関する説明変数（$E[u \mid x] \neq 0$）→ OLSは**バイアスを持つ**。いかなるSEの修正も役に立ちません
+- **操作変数（IV）** — $x$を動かすが$y$には$x$を*通してのみ*触れる$z$ — 因果推定を救います
+- **てこ比（レバレッジ）** — ある行の$\mathbf{x}_i$が説明変数の雲からどれだけ離れているか。直線を傾ける力です
+- **Cook距離** — てこ比$\times$残差を一つの数値に。$4/n$を超える値を調べましょう
+- **補助回帰** — ある$x_j$を他の変数に回帰する。その$R^2$が$\text{VIF}_j = 1/(1-R_j^2)$に入ります
+- **特定化検定（RESET）** — $\hat{y}^2, \hat{y}^3$を加え、欠けている非線形項を示します
+:::
+
+[どの診断も通らないモデルは、結果ではなく仮説にすぎません。]{.takeaway .fragment}
+
+# 問題を診断する {.divider background-color="#7A209F"}
+
+[第II幕 · 調査]{.act}
+
+## 多重共線性は標準誤差を膨張させる — VIFがその大きさを測る
+
+収入モデルに`age × education`の交互作用を加えると、`age`と`education`の標準誤差が
+膨れ上がります。**分散拡大要因**がそれを定量化します。$\text{VIF}_j = 1/(1 - R_j^2)$。
+
+``` {.python code-line-numbers="1|2-5|6-7|8-9|10-12"}
+!pip install -q pyfixest                     # pyfixest not preinstalled in Colab (-q = quiet)
+import pandas as pd                           # tabular data
+import pyfixest as pf                          # OLS, R-style formulas, robust SEs
+from statsmodels.stats.outliers_influence import variance_inflation_factor  # VIF
+import statsmodels.api as sm                   # adds the intercept column VIF needs
+url = "https://raw.githubusercontent.com/quarcs-lab/data-open/master/AED/AED_EARNINGS_COMPLETE.DTA"
+earn = pd.read_stata(url)                      # 872 full-time workers: earnings, age, education
+base = pf.feols("earnings ~ age + education", data=earn, vcov="HC1")             # tidy SEs
+full = pf.feols("earnings ~ age + education + agebyeduc", data=earn, vcov="HC1") # SEs balloon
+X = sm.add_constant(earn[["age", "education", "agebyeduc"]])  # design matrix + intercept
+for i, name in enumerate(X.columns):                         # VIF for each regressor
+    print(name, round(variance_inflation_factor(X.values, i), 1))  # agebyeduc ≈ 37 → severe
+```
+
+[↗ Colab で試す](https://colab.research.google.com/notebooks/empty.ipynb){.colab-link target="_blank" data-preview-link="false"}
+
+::: {.notes}
+補助回帰 agebyeduc ~ age + education は R² ≈ 0.973 を返すので、VIF ≈ 1/(1−0.973) ≈ 37 になります。
+OLSは不偏のままで、損害はもっぱら精度に及びます。
+:::
+
+## 交互作用はその構成要素のほぼ完全な組み合わせである
+
+![`age`、`education`、およびその交互作用の相関行列 — +1に近い値が多重共線性の指紋です。](figures/fig_16-1_01.png)
+
+[多重共線性はバイアスではなく*精度*の問題です。予測値と同時$F$検定は有効なままです。]{.takeaway .fragment}
+
+## すべての違反が同じではない — バイアスを生むものと、誤解させるだけのもの
+
+::: {.incremental}
+- **内生性 / 誤ったモデル**（仮定1–2）→ 係数は**バイアスを持ち、一致性もない**。モデルの変更かIVが必要であり、ロバストSEでは救えません。
+- **不均一分散 / 自己相関**（仮定3–4）→ 係数は**依然として不偏**ですが、標準誤差が誤っているため、すべての$t$、IC、$p$値が誤りになります。
+:::
+
+[まず問いましょう。*バイアスがあるのは私の推定値か、それとも不確実性だけか？* 対処法はまったく異なります。]{.takeaway .fragment}
+
+## 不均一分散は傾きには手をつけずSEを壊す — HC1を使う
+
+$\text{Var}[u_i \mid \mathbf{x}_i]$が$x$とともに変化するとき、既定のSEは誤り（通常は小さすぎる）になります。
+ロバスト（White / HC1）SEは係数には手をつけず、標準誤差だけを修正します。
+
+``` {.python code-line-numbers="1|2-3|4-5|6|7|8-9"}
+!pip install -q pyfixest                     # pyfixest not preinstalled in Colab
+import pandas as pd                           # tabular data
+import pyfixest as pf                          # OLS + robust variance-covariance
+url = "https://raw.githubusercontent.com/quarcs-lab/data-open/master/AED/AED_EARNINGS_COMPLETE.DTA"
+earn = pd.read_stata(url)                      # 872 workers
+classic = pf.feols("earnings ~ age + education", data=earn)              # default (homoskedastic) SEs
+robust  = pf.feols("earnings ~ age + education", data=earn, vcov="HC1")  # White / HC1 robust SEs
+print(classic.se())                            # coefficients are identical...
+print(robust.se())                             # ...only the SEs change (education SE ~13% larger here)
+```
+
+[↗ Colab で試す](https://colab.research.google.com/notebooks/empty.ipynb){.colab-link target="_blank" data-preview-link="false"}
+
+[横断面データでは既定でロバストSEを使いましょう — 不均一分散があってもなくても有効です。]{.takeaway .fragment}
+
+## 時系列では誤差が持続する — 残差のACFがそれを明らかにする
+
+AR(1)誤差 $u_t = \rho u_{t-1} + \varepsilon_t$（$\rho = 0.8$）は既定のSEを大幅に小さくしすぎます。
+残差の自己相関関数が検出器になります。
+
+``` {.python code-line-numbers="1|2-4|5-6|7-8|9-10|11|12"}
+!pip install -q pyfixest                     # pyfixest not preinstalled in Colab
+import numpy as np, pandas as pd              # arrays + tabular data
+import pyfixest as pf                          # OLS to get residuals
+from statsmodels.tsa.stattools import acf      # autocorrelation function
+np.random.seed(10101)                          # reproducible draw
+n = 10000; e = np.random.normal(0, 1, n)       # i.i.d. shocks
+u = np.zeros(n)                                # container for AR(1) errors
+for t in range(1, n): u[t] = 0.8*u[t-1] + e[t] # ρ = 0.8 persistence → errors remember the past
+x = np.random.normal(0, 1, n)                  # a regressor
+df = pd.DataFrame({"y": 1 + 2*x + u, "x": x})  # y built with the autocorrelated error
+resid = pf.feols("y ~ x", data=df)._u_hat      # fit OLS, pull the residuals
+print(acf(resid, nlags=5, fft=False).round(3)) # large lag-1 value that decays slowly
+```
+
+[↗ Colab で試す](https://colab.research.google.com/notebooks/empty.ipynb){.colab-link target="_blank" data-preview-link="false"}
+
+::: {.notes}
+信頼帯を超える有意なバーは自己相関を示します。対処法はHAC（Newey–West）標準誤差で、
+不均一分散と自己相関を同時に補正します。
+:::
+
+## ゆっくり減衰するACFは自己相関のある誤差の特徴である
+
+![残差の自己相関関数：信頼帯を大きく外れたラグ1の大きなスパイクが、以降のラグにかけて徐々に減衰していく。](figures/fig_16-6_01.png)
+
+[自己相関は傾きをバイアスさせず、精度を偽装します。HAC（Newey–West）SEが誠実な推測を取り戻します。]{.takeaway .fragment}
+
+## 交絡因子を省くと傾きがバイアスを持つ — そして縮んでいくのが見える
+
+経済成長は民主主義を生み出すのか？ 民主主義の500年間の変化を成長だけに回帰し、次に
+制度的なコントロール（行政権への制約、独立年、宗教）を加えます。もし成長が制度の
+代理になっていたなら、その係数は崩れるはずです。
+
+``` {.python code-line-numbers="1|2-3|4-5|6|7-8|9"}
+!pip install -q pyfixest                     # pyfixest not preinstalled in Colab
+import pandas as pd                           # tabular data
+import pyfixest as pf                          # OLS, R-style formulas
+url = "https://raw.githubusercontent.com/quarcs-lab/data-open/master/AED/AED_DEMOCRACY.DTA"
+dem = pd.read_stata(url)                       # 131 countries, 1500–2000
+bi = pf.feols("democracy ~ growth", data=dem, vcov="HC1")                                   # bivariate
+mr = pf.feols("democracy ~ growth + constraint + indcent + catholic + muslim + protestant", # + controls
+              data=dem, vcov="HC1")
+print(bi.coef()["growth"], mr.coef()["growth"])  # 0.131 → 0.047: the effect collapses
+```
+
+[↗ Colab で試す](https://colab.research.google.com/notebooks/empty.ipynb){.colab-link target="_blank" data-preview-link="false"}
+
+## 生の成長–民主主義の直線は欠落変数の物語を隠している
+
+![二変量の当てはめ：明確な正の傾き — しかしその多くは成長ではなく制度によるものです。](figures/fig_16-7_01.png)
+
+[成長の係数はコントロールが入ると**0.131 → 0.047**（64%の低下）へ落ち、$t \approx 6.7 \to 1.8$：「有意」だった効果がゼロと見分けがつかなくなります。]{.takeaway .fragment}
+
+## 仮定が成り立つとき、残差はノイズのように見える — だからプロットする
+
+モデルを当てはめ、それから見ます。残差対当てはめ値のプロットは不均一分散（扇形）と
+非線形性（曲線）を暴き出します。**DFITS**は、取り除くと当てはめを動かす観測値を示します。
+
+``` {.python code-line-numbers="1|2-5|6-7|8|9-10|11-12|13-14"}
+!pip install -q pyfixest                     # pyfixest not preinstalled in Colab
+import pandas as pd, numpy as np, matplotlib.pyplot as plt  # data + plotting
+import pyfixest as pf                                        # OLS fit
+import statsmodels.formula.api as smf                        # refit for influence stats
+from statsmodels.stats.outliers_influence import OLSInfluence  # DFITS / DFBETAS
+url = "https://raw.githubusercontent.com/quarcs-lab/data-open/master/AED/AED_DEMOCRACY.DTA"
+dem = pd.read_stata(url)
+fit = pf.feols("democracy ~ growth + constraint + indcent", data=dem)  # the model to diagnose
+plt.scatter(fit.predict(), fit._u_hat, alpha=0.5)            # residual vs fitted: look for a fan / curve
+plt.axhline(0, ls="--")                                      # reference line at zero
+m = smf.ols("democracy ~ growth + constraint + indcent", data=dem).fit()  # OLSInfluence needs a statsmodels fit
+dfits = OLSInfluence(m).dffits[0]                            # DFITS for every observation
+k, n = 4, len(dem); thresh = 2*np.sqrt(k/n)                  # rule of thumb: flag |DFITS| > 2√(k/n)
+print(int((np.abs(dfits) > thresh).sum()), "influential points")  # count the flagged rows
+```
+
+[↗ Colab で試す](https://colab.research.google.com/notebooks/empty.ipynb){.colab-link target="_blank" data-preview-link="false"}
+
+## 残差対当てはめ値：ランダムな散らばりこそが「健全」に見える姿である
+
+![残差がゼロを中心に据わり、扇形も曲線もない — モデルを信頼する前に見たい姿です。](figures/fig_x_01.png)
+
+[ここにパターン（扇形、曲線、ドリフト）があれば、仮定の違反を意味します — 失敗した回帰ではなく、練り直すべきモデルです。]{.takeaway .fragment}
+
+## DFITSは当てはめを曲げる観測値を示す
+
+![観測値ごとのDFITS：$\pm 2\sqrt{k/n}$の帯を超える点は、当てはめ値に過大な影響を及ぼします。](figures/fig_x_03.png)
+
+[影響点は調べましょう — 反射的に削除してはいけません。それらを取り除いても結論が生き残るかを問いましょう。]{.takeaway .fragment}
+
+# 診断を正しく読む {.divider background-color="#C21E72"}
+
+[第III幕 · 解決]{.act}
+
+## 魅力的な近道 — そしてそれが失敗する理由
+
+[反論。]{.objection}「私の成長係数は有意で、ロバストSEもほとんど動かなかった — だから
+効果は本物だ。」
+
+. . .
+
+[応答。]{.rebuttal} ロバストSEが修正するのは*不均一分散*であって、**内生性**ではありません。民主主義–成長の
+傾きは欠落した制度によってバイアスを受けており、いかなる標準誤差の補正もバイアスには触れません — それができるのは
+コントロールか操作変数だけです。きれいな残差プロットと小さなSEであっても、根本的にバイアスのある
+推定値の上に乗っていることがあります。
+
+[*バイアス*の診断（SVO、内生性）と*精度*の診断（HC1、HAC）は別々のチェックリストです。両方を実行しましょう。]{.takeaway .fragment}
+
+## 持ち帰るべきこと
+
+::: {.incremental}
+- **VIF > 10** は深刻な多重共線性を示します — 精度の問題であり、OLSは不偏のままです。
+- 仮定**1–2**（モデル、内生性）→ **バイアス**。仮定**3–4**（不均一分散、自己相関）→ **誤ったSE**。
+- 横断面には既定で**HC1ロバスト**SE、時系列には**HAC（Newey–West）**を使いましょう。
+- **欠落変数**は傾きをバイアスさせます — コントロールを入れると民主主義–成長の効果が0.131 → 0.047へ落ちるのを観察しましょう。
+- **残差をプロット**し、**DFITS / DFBETAS**を確認しましょう。影響点は調べ、ただ落とすことはしないでください。
+:::
+
+# 推定は簡単だ。推定値への信頼を勝ち取ることこそ、本当の仕事である。 {.divider background-color="#C21E72"}

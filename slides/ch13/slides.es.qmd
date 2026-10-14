@@ -1,0 +1,1908 @@
+---
+title: "13. Estudios de caso para regresión múltiple"
+subtitle: "Nueve preguntas reales — de funciones de producción a inferencia causal"
+deck-author: "Carlos Mendez"
+deck-author-url: "https://carlos-mendez.org"
+institute: "Nagoya University (GSID)"
+date: today
+date-format: long
+visual-summary: "figures/visual_summary.png"
+format:
+  revealjs:
+    output-file: index.es.html
+    theme: [default, site-brand.scss]
+    css: ch13-extra.css
+    template-partials:
+      - title-slide.html
+    include-after-body: figure-zoom.html
+    center: true
+    slide-number: c/t
+    menu: true
+    chalkboard: true
+    preview-links: auto
+    overview: true
+    progress: true
+    history: true
+    transition: fade
+    width: 1280
+    height: 720
+    fig-align: center
+    auto-stretch: true
+    highlight-style: github
+    link-external-icon: false
+---
+
+# Nueve preguntas, una sola caja de herramientas {.divider background-color="#008CB7"}
+
+[Acto I · La tensión]{.act}
+
+::: {.notes}
+Bienvenido al capítulo que une todo el libro. Cada estudio de caso usa el mismo estimador (MCO, y en 13.8 su primo VI) sobre un conjunto de datos reales distinto. Lo que cambia de caso a caso es la pregunta, la estructura de los datos, los errores estándar y —sobre todo— la fuente de variación que nos permite interpretar una pendiente.
+:::
+
+## La regresión describe — pero ¿puede explicar *por qué*?
+
+A estas alturas sabemos ajustar una recta, añadir controles y leer una pendiente. Pero una pendiente es una **asociación**: las escuelas con padres más educados obtienen mejores puntajes; los países con derechos de propiedad más fuertes son más ricos. ¿El regresor *causa* el resultado?
+
+. . .
+
+Este capítulo recorre **nueve estudios de caso** con datos reales. Los primeros cuatro llevan la regresión observacional tan lejos como se puede. Los últimos cuatro incorporan un **diseño de investigación** (un ECA, diferencias en diferencias, una regresión discontinua o una variable instrumental) que convierte una pendiente en una afirmación **causal**.
+
+[La pregunta que atraviesa cada caso es la misma: *¿de dónde viene la variación del regresor?*]{.takeaway .fragment}
+
+::: {.notes}
+Enmarca el deck como un ascenso: describir → especificar → diagnosticar sesgo → diseñar para la causalidad. Cada caso es autocontenido, con sus propios datos, código, salida e interpretación, así que puedes enseñar cualquier caso por separado. Usa la agenda de la siguiente diapositiva para saltar.
+:::
+
+## Nueve expedientes — haz clic en cualquier caso para saltar a él {.smaller}
+
+| Caso | Pregunta | Método | Resultado titular |
+|:----|:-------------------------|:-----------------|:--------------------------|
+| [13.1](#case-131) | ¿Qué impulsa los puntajes escolares? | Regresión múltiple | +73.9 puntos API por año de educación de los padres |
+| [13.2](#case-132) | ¿Rendimientos constantes a escala? | Cobb–Douglas, EE HAC | las elasticidades suman 1.04 (p = 0.636) |
+| [13.3](#case-133) | ¿Por qué se rompió la curva de Phillips? | Sesgo por variables omitidas | +0.265 = −0.128 + 1.146 × 0.343 |
+| [13.4](#case-134) | ¿Qué determina el consumo de combustible? | Log-log, EE agrupados | elasticidad del peso −0.56 |
+| [13.5](#case-135) | ¿El copago reduce el gasto? | ECA | plan 95%: −\$1,108 vs atención gratuita |
+| [13.6](#case-136) | ¿La atención gratuita ayudó a la nutrición infantil? | Diferencias en diferencias | +0.52 unidades z de peso-para-edad |
+| [13.7](#case-137) | ¿Tener el escaño ayuda a un partido? | Regresión discontinua | +4.8 puntos porcentuales |
+| [13.8](#case-138) | ¿Las instituciones causan prosperidad? | Variables instrumentales | VI 0.94 vs MCO 0.52 |
+| [13.9](#case-139) | ¿Cómo se vuelven finales los datos crudos? | Leer, combinar, limpiar | — |
+
+::: {.notes}
+Los casos 13.1–13.4 son observacionales; 13.5–13.8 son diseños para la causalidad; 13.9 es el flujo de trabajo que sostiene a todos.
+
+Los números de caso son enlaces: haz clic en uno para saltar directamente al divisor de ese caso. Presiona M para el menú (todos los títulos de diapositiva aparecen listados) u O para la cuadrícula de resumen. Cada caso sigue el mismo arco: pregunta → datos → método → código → salida → interpretación → advertencias.
+:::
+
+## El ascenso: de la descripción a la causalidad
+
+::: {.incremental}
+- **Describir** (13.1, 13.4): asociaciones condicionales, con controles y EE honestos
+- **Imponer estructura** (13.2): una forma funcional basada en teoría vuelve los coeficientes interpretables como elasticidades y entrega una restricción contrastable
+- **Diagnosticar sesgo** (13.3): la fórmula de variables omitidas nos dice *cuánto* distorsiona una pendiente un regresor faltante
+- **Diseñar para la causalidad** (13.5–13.8): un ECA, DiD, RD o VI construye un **contrafactual creíble**
+:::
+
+[Los controles solo pueden cerrar los factores de confusión que *medimos*. Un diseño cierra los que no.]{.takeaway .fragment}
+
+::: {.notes}
+La idea de la escalera: cada peldaño añade un supuesto más fácil de defender. La descripción no hace ninguna afirmación causal. La estructura añade teoría. La fórmula del SVO nos dice la dirección y el tamaño del sesgo. Los diseños reemplazan "controlé por todo" (no verificable) por un supuesto de identificación específico y defendible: asignación aleatoria, tendencias paralelas, continuidad en un umbral o una restricción de exclusión.
+:::
+
+## Un estimador, tres formas de ser honesto sobre la incertidumbre {.smaller}
+
+| Tipo de EE | Sintaxis pyfixest | Úsalo cuando los errores sean… | Casos |
+|:--|:--|:--|:--|
+| Robusto a heterocedasticidad | `vcov="HC1"` | independientes, con varianza desigual (cortes transversales) | 13.1, 13.7, 13.8 |
+| HAC (Newey–West) | `vcov="NW"` + `time_id`, `lag` | autocorrelacionados en el tiempo (series de tiempo) | 13.2, 13.3 |
+| Robusto por conglomerados | `vcov={"CRV1": "group"}` | correlacionados dentro de los grupos | 13.4 (fabricante), 13.5 (familia), 13.6 (comunidad) |
+
+[El coeficiente es idéntico bajo los tres. Solo cambian los errores estándar y, por lo tanto, los estadísticos $t$, los valores $p$ y los intervalos de confianza.]{.comment}
+
+[Haz coincidir el error estándar con la forma en que se generaron los datos. En 13.4, el agrupamiento hace los EE 6–9× más grandes que HC1.]{.takeaway .fragment}
+
+::: {.notes}
+El capítulo usa una sola función de estimación, pf.feols, en todo momento. El argumento vcov solo cambia la inferencia. HC1 maneja la heterocedasticidad entre observaciones independientes. Newey–West (HAC) también permite correlación entre periodos de tiempo cercanos — el capítulo usa 3 rezagos para la serie Cobb–Douglas de 24 años y 5 rezagos para la serie de Phillips posterior a 1970 de 45 años. CRV1 permite correlación arbitraria dentro de cada conglomerado (fabricante, familia, comunidad). Veremos en 13.4 que esta elección no es cosmética.
+:::
+
+## Cinco ideas anclan este capítulo
+
+::: {.incremental}
+- **Función de producción**: insumos $\to$ producto. Cobb–Douglas $Q = AK^{\beta_2}L^{\beta_3}$ es lineal en logaritmos
+- **Rendimientos constantes a escala**: duplicar cada insumo duplica el producto, es decir $\beta_2 + \beta_3 = 1$
+- **Sesgo de selección**: las unidades tratadas y no tratadas difieren *antes* del tratamiento; la asignación aleatoria elimina la diferencia
+- **Tendencias paralelas**: el supuesto de DiD de que, sin tratamiento, ambos grupos se habrían movido juntos
+- **Contrafactual**: el "qué habría pasado" no observado; cada diseño lo imputa de forma distinta
+:::
+
+[Una estimación causal creíble no es una mejor regresión. Es una mejor *fuente de variación*.]{.takeaway .fragment}
+
+::: {.notes}
+Estos son los Conceptos Clave del capítulo. Función de producción y RCE anclan 13.2; el sesgo de selección ancla 13.5; las tendencias paralelas anclan 13.6; la idea del contrafactual une 13.5–13.8.
+:::
+
+# Acto II-a · Regresión observacional, llevada al límite {.divider background-color="#7A209F"}
+
+[Casos 13.1–13.4 · describir, estructurar, diagnosticar]{.act}
+
+::: {.notes}
+Cuatro casos con datos observacionales. Ninguno afirma causalidad en el sentido estricto; cada uno enseña una herramienta: controles y multicolinealidad (13.1), logaritmos y la prueba de una restricción (13.2), la fórmula del SVO (13.3) y el agrupamiento (13.4).
+:::
+
+# Caso 13.1 · ¿Qué impulsa el desempeño escolar? {#case-131 .divider background-color="#7A209F"}
+
+[Regresión múltiple · corte transversal · errores estándar HC1]{.act}
+
+::: {.notes}
+Caso 13.1: el Índice de Desempeño Académico de California. Herramientas: regresión bivariada vs múltiple, matriz de correlación, multicolinealidad, lectura de efectos parciales.
+:::
+
+## La pregunta: ¿entorno familiar o recursos escolares? {.smaller}
+
+**Datos.** 807 escuelas secundarias de California, 1999 (`AED_API99.DTA`). El **Índice de Desempeño Académico (API)** va de 200 a 1000; la meta estatal es 800.
+
+| Variable | Significado |
+|:--|:--|
+| `api99` | Índice de Desempeño Académico, 1999 (resultado) |
+| `edparent` | educación promedio de los padres, en años |
+| `meals` | % de estudiantes en el programa de almuerzo gratuito / a precio reducido (proxy de pobreza) |
+| `englearn` | % de aprendices de inglés |
+| `yearround` | 1 si la escuela opera un calendario anual de múltiples turnos |
+| `credteach`, `emerteach` | % de docentes con credenciales completas / de emergencia |
+
+[Cada regresor es el resultado de decisiones de familias, distritos o docentes, así que espera **asociaciones**, no efectos causales.]{.takeaway .fragment}
+
+::: {.notes}
+Pregunta económica: ¿qué determina el desempeño escolar, los recursos (docentes) o la demografía (educación de los padres, pobreza, idioma)? Aquí nada se asigna al azar. Las familias eligen dónde vivir, los docentes se distribuyen entre escuelas, los distritos escogen calendarios. Tenlo en mente para la interpretación.
+:::
+
+## La mayoría de las escuelas queda muy por debajo de la meta de 800
+
+![Distribución de los puntajes API de 1999 en 807 escuelas secundarias. Rojo: media (620.9); verde: la meta estatal de 800.](figures/fig_api_hist.png)
+
+[La escuela promedio obtiene alrededor de 621, y solo el 4.8% de las escuelas llega a 800, así que el resultado varía lo suficiente como para explicarlo.]{.takeaway .fragment}
+
+::: {.notes}
+Aproximadamente simétrica, ligeramente sesgada a la izquierda. Los puntajes van desde menos de 400 hasta más de 900. Media 620.9. Solo el 4.8% de las escuelas tiene API ≥ 800 (calculado a partir de los mismos datos). Mucha variación por explicar.
+:::
+
+## Código: carga los datos y ajusta la regresión bivariada
+
+``` {.python code-line-numbers="1-3|4-6|7-8|9-10"}
+!pip install -q pyfixest                    # pyfixest is not preinstalled in Colab
+import pandas as pd                         # tabular data
+import pyfixest as pf                       # OLS / IV with R-style formulas
+# 807 California high schools, 1999
+url = "https://raw.githubusercontent.com/quarcs-lab/data-open/master/AED/AED_API99.DTA"
+data_api = pd.read_stata(url)               # read the Stata file into a DataFrame
+vars_api = ["api99", "edparent", "meals", "englearn", "yearround", "credteach", "emerteach"]
+data_api[vars_api].describe()               # summary statistics for the 7 variables
+fit_api_biv = pf.feols("api99 ~ edparent", data=data_api, vcov="HC1")  # bivariate OLS
+fit_api_biv.summary()                       # intercept, slope, robust SE, R²
+```
+
+[↗ Pruébalo en Colab](https://colab.research.google.com/notebooks/empty.ipynb){.colab-link target="_blank" data-preview-link="false"}
+
+::: {.notes}
+Autocontenido: pégalo en una celda vacía de Colab. vcov="HC1" solicita errores estándar robustos a heterocedasticidad, apropiados para un corte transversal de escuelas independientes.
+:::
+
+## Salida: un solo predictor explica el 83.5% de la variación {.smaller}
+
+:::: {.columns}
+::: {.column width="46%"}
+| | Coef. | EE | $t$ |
+|:--|--:|--:|--:|
+| Intercepto | −400.314 | 15.993 | −25.03 |
+| `edparent` | [79.529]{.key} | 1.219 | 65.25 |
+
+[N = 807 · EE HC1 · $R^2 = 0.835$ · IC 95% de la pendiente: [77.14, 81.92]]{.comment}
+
+Cada año adicional de educación promedio de los padres se asocia con **79.5 puntos API más**.
+:::
+::: {.column width="54%"}
+![API vs educación de los padres, con la recta MCO.](figures/fig_api_scatter.png)
+:::
+::::
+
+[Una pendiente enorme y precisa, pero `edparent` también representa ingreso, idioma y vecindario. A continuación, añadimos controles.]{.takeaway .fragment}
+
+::: {.notes}
+Ecuación estimada: API = −400.3 + 79.5 × edparent. R² = 0.835, inusualmente alto para un corte transversal. El intercepto es una extrapolación (cero años de educación queda fuera de los datos, que van de 9.6 a 16 años) y no tiene significado por sí solo. La pendiente bivariada agrupa todo lo correlacionado con la educación de los padres.
+:::
+
+## Código: ¿están los regresores correlacionados entre sí?
+
+``` {.python code-line-numbers="1-3|4-5|6-7"}
+# continues from the previous block (data_api, vars_api already defined)
+import seaborn as sns                       # statistical plotting (heatmap)
+import matplotlib.pyplot as plt             # figure handling
+corr_matrix = data_api[vars_api].corr()     # pairwise Pearson correlations
+print(corr_matrix.round(2))                 # numeric matrix, 2 decimals
+sns.heatmap(corr_matrix, annot=True, fmt=".2f", cmap="coolwarm", center=0)  # coloured matrix
+plt.show()                                  # display the heatmap
+```
+
+[↗ Pruébalo en Colab](https://colab.research.google.com/notebooks/empty.ipynb){.colab-link target="_blank" data-preview-link="false"}
+
+[Antes de añadir controles, revisa qué tan fuerte se mueven juntos. Eso decide con qué precisión pueden estimarse sus efectos separados.]{.takeaway .fragment}
+
+::: {.notes}
+Una matriz de correlación es el diagnóstico de multicolinealidad más rápido. Los regresores fuertemente correlacionados portan información superpuesta, así que a MCO le queda poca variación independiente para distinguir sus efectos.
+:::
+
+## Salida: los regresores están fuertemente correlacionados {.smaller}
+
+:::: {.columns}
+::: {.column width="52%"}
+![Matriz de correlación del API y sus seis determinantes candidatos.](figures/fig_corr_matrix.png){height="440"}
+:::
+::: {.column width="48%"}
+| Par | $r$ |
+|:--|--:|
+| `api99`–`edparent` | [0.91]{.key} |
+| `api99`–`englearn` | −0.66 |
+| `api99`–`meals` | −0.54 |
+| `edparent`–`englearn` | −0.71 |
+| `edparent`–`meals` | −0.60 |
+| `credteach`–`emerteach` | −0.82 |
+:::
+::::
+
+[La educación de los padres, la pobreza y los aprendices de inglés describen en gran medida las *mismas* escuelas, así que separar sus efectos será difícil.]{.takeaway .fragment}
+
+::: {.notes}
+Correlaciones negativas fuertes del API con meals (−0.54) y englearn (−0.66); positiva fuerte con edparent (0.91). Entre regresores: edparent–englearn −0.71, edparent–meals −0.60, y las dos variables de credencial docente −0.82, que son casi imágenes espejo. Espera errores estándar inflados en cualquiera de estas variables superpuestas que porte menos información única.
+:::
+
+## Código: la regresión múltiple
+
+``` {.python code-line-numbers="1-3|4-10"}
+# continues from the previous block
+fit_api_mult = pf.feols("api99 ~ edparent + meals + englearn + yearround + credteach + emerteach",
+                        data=data_api, vcov="HC1")   # six regressors, robust SEs
+fit_api_mult.summary()                               # full coefficient table
+coef_df = pd.DataFrame({                             # compact table of results
+    "Coefficient": fit_api_mult.coef(),              # point estimates
+    "Std Error": fit_api_mult.se(),                  # HC1 standard errors
+    "t-stat": fit_api_mult.tstat(),                  # coefficient / SE
+    "p-value": fit_api_mult.pvalue()                 # two-sided p-values
+}).round(3)
+print(coef_df)
+```
+
+[↗ Pruébalo en Colab](https://colab.research.google.com/notebooks/empty.ipynb){.colab-link target="_blank" data-preview-link="false"}
+
+::: {.notes}
+Mismos datos, seis regresores. Cada coeficiente es ahora un efecto parcial: la asociación con el API manteniendo fijos los otros cinco regresores.
+:::
+
+## Salida: la educación de los padres sobrevive a cada control {.smaller}
+
+| Variable | Coef. | EE | $t$ | $p$ | IC 95% |
+|:--|--:|--:|--:|--:|:--|
+| Intercepto | −345.328 | 44.027 | −7.84 | <&nbsp;0.001 | [−431.75,&nbsp;−258.91] |
+| `edparent` | [73.942]{.key} | 1.835 | 40.29 | <&nbsp;0.001 | [70.34,&nbsp;77.54] |
+| `meals` | 0.079 | 0.092 | 0.86 | 0.390 | [−0.10,&nbsp;0.26] |
+| `englearn` | −0.358 | 0.177 | −2.02 | 0.044 | [−0.71,&nbsp;−0.01] |
+| `yearround` | 25.956 | 10.752 | 2.41 | 0.016 | [4.85,&nbsp;47.06] |
+| `credteach` | 0.387 | 0.349 | 1.11 | 0.268 | [−0.30,&nbsp;1.07] |
+| `emerteach` | −1.470 | 0.358 | −4.11 | <&nbsp;0.001 | [−2.17,&nbsp;−0.77] |
+
+[N = 807 · EE HC1 · $R^2 = 0.853$ (vs 0.835 solo con `edparent`)]{.comment}
+
+[Con cinco controles, la pendiente de educación de los padres cae solo de 79.5 a 73.9, y los controles añaden apenas 1.8 puntos de $R^2$.]{.takeaway .fragment}
+
+::: {.notes}
+Concepto Clave 13.1: el coeficiente de educación de los padres se mantiene en torno a 74 puntos incluso después de controlar por almuerzos, aprendices de inglés, calendarios anuales y credenciales docentes. El salto en R² es pequeño porque edparent ya captura la mayor parte de lo que miden las demás variables.
+:::
+
+## Leyendo los coeficientes (1): qué significa "manteniendo constante"
+
+::: {.incremental}
+- **`edparent` 73.9**: comparando escuelas con la *misma* pobreza, idioma, calendario y mezcla de credenciales, un año más de educación de los padres va con 73.9 puntos API más
+- **`meals` 0.08 ($p = 0.39$)**: por sí sola, la pobreza correlaciona $-0.54$ con el API, pero una vez que se mantiene fija la educación de los padres no añade información predictiva **separada**
+- Eso **no** significa que la pobreza sea irrelevante: se superpone fuertemente con `edparent` ($r = -0.60$), así que los datos no pueden separar las dos
+:::
+
+[Un efecto parcial responde "comparado con escuelas por lo demás similares…", y la respuesta depende de qué variables mantenemos fijas.]{.takeaway .fragment}
+
+::: {.notes}
+Interpreta cada coeficiente como una comparación entre escuelas iguales en todos los demás regresores. Un coeficiente no significativo en una variable altamente colineal (meals) dice "ninguna asociación separada detectable dadas las otras", no "efecto cero".
+:::
+
+## Leyendo los coeficientes (2): colinealidad y cambios de signo
+
+::: {.incremental}
+- **`emerteach` −1.47 por punto porcentual**: más docentes con credencial de emergencia, puntajes más bajos ($p < 0.001$)
+- Su imagen espejo **`credteach`** es no significativa ($p = 0.27$): las dos están correlacionadas $-0.82$, así que compiten por la misma variación
+- **`yearround` +26.0** ($p = 0.016$): las escuelas de calendario anual puntúan 26 puntos *más* condicionando en el resto, aunque la correlación simple es negativa ($-0.19$)
+:::
+
+[Los regresores colineales se reparten el crédito de forma impredecible, y condicionar puede invertir un signo, lo que anticipa la lección de variables omitidas de 13.3.]{.takeaway .fragment}
+
+::: {.notes}
+credteach y emerteach casi se reflejan entre sí (totalmente acreditados vs credenciales de emergencia), así que el que entre con más variación única absorbe el efecto. El cambio de signo de yearround es un pequeño anticipo de 13.3: en qué condicionas cambia la pendiente.
+:::
+
+## Por qué estas son asociaciones, no efectos causales
+
+:::: {.columns}
+::: {.column width="50%"}
+### Lo que la regresión mantiene fijo
+- las seis características medidas
+- nada más
+:::
+::: {.column width="50%"}
+### Lo que no puede mantener fijo
+- ingreso familiar, recursos del hogar, tutorías privadas
+- qué familias *eligen* qué distritos
+- cómo los docentes *se distribuyen* hacia escuelas más fáciles
+:::
+::::
+
+[`edparent` es un proxy de todo un paquete de ventajas, así que 73.9 es una asociación condicional, no "el efecto de mandar a los padres de vuelta a la escuela".]{.takeaway .fragment}
+
+::: {.notes}
+Advertencia estándar para la regresión observacional: las variables omitidas correlacionadas tanto con edparent como con el API (ingreso, riqueza, vecindario) cargan sobre el coeficiente de edparent. La selección de familias hacia distritos y de docentes hacia escuelas también rompe cualquier lectura causal. El capítulo señala el índice de "escuelas similares" de California, que usa exactamente este tipo de regresión para comparar escuelas con pares comparables: un uso descriptivo para el que las asociaciones condicionales están bien.
+:::
+
+# Caso 13.2 · ¿Duplicar los insumos duplica el producto? {#case-132 .divider background-color="#7A209F"}
+
+[Función de producción Cobb–Douglas · modelo log-log · errores estándar HAC]{.act}
+
+::: {.notes}
+Caso 13.2: los datos de manufactura de EE. UU. de Douglas, 1899–1922. Herramientas: transformación logarítmica, elasticidades, prueba de una restricción lineal, retransformación de predicciones logarítmicas, errores estándar HAC para series de tiempo.
+:::
+
+## La pregunta: rendimientos a escala en la manufactura de EE. UU. {.smaller}
+
+La función de producción **Cobb–Douglas** mapea capital $K$ y trabajo $L$ en producto $Q$:
+
+$$Q = A\,K^{\beta_2}\,L^{\beta_3}$$
+
+| Si $\beta_2 + \beta_3$ es… | Rendimientos a escala | Duplicar ambos insumos… |
+|:--|:--|:--|
+| $= 1$ | constantes | duplica el producto |
+| $> 1$ | crecientes | más que duplica el producto |
+| $< 1$ | decrecientes | menos que duplica el producto |
+
+[Los rendimientos a escala se reducen a un *solo número*, $\beta_2 + \beta_3$, que podemos estimar y contrastar.]{.takeaway .fragment}
+
+::: {.notes}
+A es la productividad total de los factores (el nivel tecnológico). β₂ y β₃ son las elasticidades del producto respecto al capital y al trabajo. Escalar ambos insumos por λ multiplica el producto por λ^(β₂+β₃), por eso la suma decide los rendimientos a escala. La teoría de mercados competitivos suele predecir rendimientos constantes.
+:::
+
+## Tomar logaritmos convierte un modelo multiplicativo en una regresión lineal
+
+$$\ln Q = \underbrace{\ln A}_{\beta_1} + \beta_2 \ln K + \beta_3 \ln L + u$$
+
+[El modelo ahora es lineal en sus parámetros, así que aplica MCO. Cada pendiente es una **elasticidad**: $\beta_2 = \partial \ln Q / \partial \ln K$, el cambio porcentual del producto por un cambio del 1% en el capital, manteniendo fijo el trabajo.]{.comment}
+
+[Los logaritmos cumplen dos funciones aquí: hacen el modelo estimable por MCO y vuelven los coeficientes elasticidades sin unidades.]{.takeaway .fragment}
+
+::: {.notes}
+Concepto Clave 13.2. Como ambos lados están en logaritmos, un coeficiente mide una respuesta proporcional. Estrictamente, "un cambio del 1% en K cambia Q en β₂%" es una afirmación marginal (de cálculo); para cambios finitos es una aproximación excelente para cambios pequeños.
+:::
+
+## Los datos: 24 años de producto, capital y trabajo (1899 = 100) {.smaller}
+
+:::: {.columns}
+::: {.column width="50%"}
+| Índice en 1922 | Valor | Crecimiento desde 1899 |
+|:--|--:|--:|
+| Producto $Q$ | 240 | 2.4× |
+| Capital $K$ | 431 | [4.3×]{.key} |
+| Trabajo $L$ | 161 | 1.6× |
+:::
+::: {.column width="50%"}
+**¿Por qué errores estándar HAC?**
+
+- **Serie de tiempo**: auges, recesiones y shocks tecnológicos persisten, así que los errores están **autocorrelacionados**
+- La volatilidad difiere entre periodos (p. ej. la Primera Guerra Mundial), así que los errores son **heterocedásticos**
+- Los EE de Newey–West (HAC) permiten ambos; el capítulo usa **3 rezagos**
+:::
+::::
+
+[El capital creció mucho más rápido que el producto o el trabajo. Cómo reparte la regresión el crecimiento del producto entre los dos insumos es la pregunta de la elasticidad.]{.takeaway .fragment}
+
+::: {.notes}
+Datos de Douglas (1976); todas las series son índices con 1899 = 100. Los EE de MCO por defecto suponen errores no correlacionados y homocedásticos, lo que es incorrecto aquí. HC1 corrige la heterocedasticidad pero ignora la autocorrelación. Los EE HAC (consistentes ante heterocedasticidad y autocorrelación) corrigen ambos. Con solo 24 observaciones, incluso los EE HAC son en sí mismos imprecisos.
+:::
+
+## Código: transforma a logaritmos y estima con EE de Newey–West
+
+``` {.python code-line-numbers="1-4|5-7|8-10|11-13"}
+!pip install -q pyfixest                    # pyfixest is not preinstalled in Colab
+import numpy as np                          # np.log for the transform
+import pandas as pd                         # tabular data
+import pyfixest as pf                       # OLS with R-style formulas
+url = "https://raw.githubusercontent.com/quarcs-lab/data-open/master/AED/AED_COBBDOUGLAS.DTA"
+data_cobb = pd.read_stata(url)              # 24 years of U.S. manufacturing, 1899–1922
+data_cobb["lnq"] = np.log(data_cobb["q"])   # log output
+data_cobb["lnk"] = np.log(data_cobb["k"])   # log capital
+data_cobb["lnl"] = np.log(data_cobb["l"])   # log labor
+data_cobb["_time"] = range(len(data_cobb))  # time index required by Newey–West
+fit_cobb = pf.feols("lnq ~ lnk + lnl", data=data_cobb,
+                    vcov="NW", vcov_kwargs={"time_id": "_time", "lag": 3})  # HAC SEs, 3 lags
+fit_cobb.summary()                          # elasticities, HAC SEs, R²
+```
+
+[↗ Pruébalo en Colab](https://colab.research.google.com/notebooks/empty.ipynb){.colab-link target="_blank" data-preview-link="false"}
+
+::: {.notes}
+Autocontenido. Nota vcov="NW" con un índice de tiempo y lag = 3. Esta es la especificación del capítulo; los EE de MCO simples ignorarían la autocorrelación en esta serie de tiempo.
+:::
+
+## Salida: la elasticidad del trabajo es cerca de 3.5× la del capital {.smaller}
+
+| Variable | Coef. | EE HAC | $t$ | $p$ | IC 95% |
+|:--|--:|--:|--:|--:|:--|
+| Intercepto | −0.177 | 0.398 | −0.45 | 0.660 | [−1.000,&nbsp;0.646] |
+| `lnk` (capital) | [0.233]{.key} | 0.063 | 3.72 | 0.001 | [0.103,&nbsp;0.363] |
+| `lnl` (trabajo) | [0.807]{.key} | 0.135 | 6.00 | <&nbsp;0.001 | [0.529,&nbsp;1.086] |
+
+[N = 24 · EE de Newey–West, 3 rezagos · $R^2 = 0.957$]{.comment}
+
+::: {.incremental}
+- Manteniendo fijo el trabajo, un aumento del 1% en el capital se asocia con **≈ 0.23%** más producto
+- Manteniendo fijo el capital, un aumento del 1% en el trabajo se asocia con **≈ 0.81%** más producto
+:::
+
+[La manufactura de principios del siglo XX estaba impulsada por el trabajo: la elasticidad del trabajo (0.81) es cerca de 3.5 veces la elasticidad del capital (0.23).]{.takeaway .fragment}
+
+::: {.notes}
+Ecuación estimada: ln Q = −0.177 + 0.233 ln K + 0.807 ln L. El "≈" importa: las elasticidades describen cambios proporcionales pequeños; para un cambio grande, calcula (1+Δ)^β − 1 en su lugar. Razón trabajo/capital de las elasticidades: 0.807 / 0.233 ≈ 3.46. El R² muy alto refleja en parte que las tres series tienden al alza juntas (ver la diapositiva de advertencias).
+:::
+
+## Código: prueba rendimientos constantes con la matriz de covarianza HAC
+
+``` {.python code-line-numbers="1-2|3-6|7-9"}
+# continues from the previous block
+from scipy import stats                     # F distribution for the p-value
+R = np.array([0.0, 1.0, 1.0])               # restriction vector: picks out β_K + β_L
+b_hat = fit_cobb.coef().values              # coefficients [Intercept, lnk, lnl]
+V_hac = fit_cobb._vcov                      # Newey–West (HAC) covariance matrix
+df_resid = fit_cobb._N - len(b_hat)         # residual degrees of freedom: 24 − 3 = 21
+f_stat = (R @ b_hat - 1.0)**2 / (R @ V_hac @ R)   # Wald statistic for H0: β_K + β_L = 1
+p_value = 1 - stats.f.cdf(f_stat, 1, df_resid)    # p-value from F(1, 21)
+print(R @ b_hat, f_stat, p_value)           # estimated sum, F, p
+```
+
+[↗ Pruébalo en Colab](https://colab.research.google.com/notebooks/empty.ipynb){.colab-link target="_blank" data-preview-link="false"}
+
+[La prueba reutiliza la matriz de covarianza HAC, así que la inferencia coincide con los errores estándar HAC de la diapositiva anterior.]{.takeaway .fragment}
+
+::: {.notes}
+Concepto Clave 13.3: una prueba de una restricción lineal sobre dos coeficientes. Una prueba F clásica de restringido vs no restringido supondría errores iid, lo que ya hemos argumentado en contra; la forma de Wald con V_HAC es robusta. R·b̂ es la suma estimada; R·V·Rᵀ es su varianza.
+:::
+
+## Salida: los datos son consistentes con rendimientos constantes a escala {.smaller}
+
+:::: {.columns}
+::: {.column width="45%"}
+| Cantidad | Valor |
+|:--|--:|
+| $\hat\beta_K + \hat\beta_L$ | [1.040]{.key} |
+| EE HAC de la suma | 0.084 |
+| $F(1, 21)$ | 0.23 |
+| valor $p$ | [0.636]{.key} |
+| IC 95% de la suma | [0.87,&nbsp;1.21] |
+:::
+::: {.column width="55%"}
+- $H_0: \beta_K + \beta_L = 1$ **no se rechaza** a ningún nivel convencional
+- Pero el intervalo del 95% abarca de **0.87 a 1.21**: rendimientos levemente decrecientes *o* crecientes también se ajustan a los datos
+- "No rechazar" no es "probar". Con 24 años, la prueba tiene potencia limitada
+:::
+::::
+
+[La estimación (1.04) está cerca de 1 y es estadísticamente indistinguible de él, lo que respalda los rendimientos constantes sin probarlos.]{.takeaway .fragment}
+
+::: {.notes}
+El capítulo reporta F = 0.23 y p = 0.636. El IC 95% usa el mismo EE HAC (0.084) y t(21) = 2.08: 1.040 ± 2.08 × 0.084 ≈ [0.87, 1.21]. Este intervalo es aritmética derivada de la salida del capítulo, no una nueva estimación. Presenta el resultado con honestidad: la evidencia es consistente con RCE, y también consistente con desviaciones modestas de ellos.
+:::
+
+## El modelo ajustado sigue el producto a lo largo de 24 años
+
+![Producto real vs predicho, 1899–1922. Las predicciones son $e^{\widehat{\ln Q}}$ multiplicadas por el factor de retransformación $e^{\hat\sigma^2/2}$.](figures/fig_x_04.png)
+
+[Para predecir *niveles* a partir de un modelo logarítmico, exponencia **y** reescala por $e^{\hat\sigma^2/2}$; aquí $\hat\sigma = 0.058$, así que la corrección es minúscula (×1.0017).]{.takeaway .fragment}
+
+::: {.notes}
+Código (en el capítulo): se = sqrt(Σû² / (N − k)); q_pred = exp(se²/2) · exp(ln Q ajustado). Como E[e^u] = e^(σ²/2) > 1 para errores normales, simplemente exponenciar los logaritmos ajustados subestima el nivel medio. Aquí σ̂ = 0.058, así que el factor es 1.0017. La serie predicha sigue de cerca al producto real, con los mayores errores en las oscilaciones de 1920–22.
+:::
+
+## Advertencias: por qué 24 observaciones con tendencia piden humildad
+
+::: {.incremental}
+- **Series con tendencia**: $Q$, $K$ y $L$ suben todos en el tiempo, así que parte del $R^2 = 0.957$ es una tendencia compartida, no una relación de producción (la preocupación por la regresión espuria)
+- **Tecnología mantenida constante**: $A$ es una sola constante; el progreso técnico omitido que creció con el capital cargaría sobre $\hat\beta_K$
+- **Muestra pequeña**: 24 puntos, y los EE HAC son en sí mismos ruidosos con tan pocos años
+- **Agregación**: un sector manufacturero "representativo" sustituye a muchas industrias
+:::
+
+[La prueba de RCE es informativa, pero trata las elasticidades separadas como frágiles.]{.takeaway .fragment}
+
+::: {.notes}
+Estas son advertencias estándar para una función de producción agregada de series de tiempo, no resultados que el capítulo calcule. El problema de la regresión espuria (regresar una serie con tendencia sobre otra) se cubre en los capítulos de series de tiempo. Una extensión natural añadiría una tendencia temporal como proxy del cambio técnico; este deck no la estima.
+:::
+
+# Caso 13.3 · ¿Por qué se rompió la curva de Phillips? {#case-133 .divider background-color="#7A209F"}
+
+[Sesgo por variables omitidas · serie de tiempo · errores estándar HAC]{.act}
+
+::: {.notes}
+Caso 13.3: el caso *diagnóstico* más importante del capítulo. Las mismas dos variables dan pendientes opuestas en dos periodos; la fórmula del sesgo por variables omitidas explica exactamente por qué.
+:::
+
+## La pregunta: ¿hay un trade-off estable entre desempleo e inflación?
+
+::: {.incremental}
+- **Phillips (1958)**: menor desempleo iba con mayor inflación salarial, así que los responsables de política veían un *menú*: elegir un punto de la curva
+- **Estanflación de los 70**: alto desempleo *y* alta inflación juntos, y el menú se vino abajo
+- **Friedman–Phelps**: la curva se desplaza con la **inflación esperada**; deja fuera las expectativas y la curva está mal especificada
+:::
+
+$$\text{Inflation}_t = \beta_1 + \beta_2\,\text{Urate}_t + \beta_3\,\text{ExpInflation}_t + u_t$$
+
+[Si la inflación esperada pertenece al modelo, omitirla no es inofensivo. Puede distorsionar, incluso invertir, la pendiente del desempleo.]{.takeaway .fragment}
+
+::: {.notes}
+Datos: AED_PHILLIPS.DTA, EE. UU. 1949–2014 (66 años). inflgdp = inflación anual del deflactor del PIB (%); urate = tasa de desempleo civil (%); inflgdp1yr = inflación esperada a un año de la Survey of Professional Forecasters. En este conjunto de datos la serie de expectativas solo está disponible desde 1970 en adelante, así que el modelo ampliado solo puede estimarse post-1970.
+:::
+
+## Código: la curva de Phillips anterior a 1970
+
+``` {.python code-line-numbers="1-3|4-5|6-9|10"}
+!pip install -q pyfixest                    # pyfixest is not preinstalled in Colab
+import pandas as pd                         # tabular data
+import pyfixest as pf                       # OLS with R-style formulas
+url = "https://raw.githubusercontent.com/quarcs-lab/data-open/master/AED/AED_PHILLIPS.DTA"
+data_phillips = pd.read_stata(url)          # U.S. annual data, 1949–2014
+data_pre1970 = data_phillips[data_phillips["year"] < 1970].copy()   # 1949–1969
+data_pre1970["_time"] = range(len(data_pre1970))                    # time index for HAC
+fit_pre = pf.feols("inflgdp ~ urate", data=data_pre1970,
+                   vcov="NW", vcov_kwargs={"time_id": "_time", "lag": 3})  # HAC, 3 lags
+fit_pre.summary()                           # slope on unemployment
+```
+
+[↗ Pruébalo en Colab](https://colab.research.google.com/notebooks/empty.ipynb){.colab-link target="_blank" data-preview-link="false"}
+
+::: {.notes}
+Autocontenido. 21 observaciones anuales, 1949–1969, EE de Newey–West con 3 rezagos.
+:::
+
+## Salida: antes de 1970, el trade-off existe {.smaller}
+
+:::: {.columns}
+::: {.column width="46%"}
+| | Coef. | EE HAC | $p$ |
+|:--|--:|--:|--:|
+| Intercepto | 7.106 | 1.581 | <&nbsp;0.001 |
+| `urate` | [−1.030]{.key} | 0.325 | 0.005 |
+
+[N = 21 (1949–1969) · NW, 3 rezagos · $R^2 = 0.454$]{.comment}
+
+Un **punto porcentual** más de desempleo se asocia con aproximadamente **1.03 puntos porcentuales** menos de inflación.
+:::
+::: {.column width="54%"}
+![1949–1969: inflación vs desempleo, con la recta MCO.](figures/fig_phillips_pre.png)
+:::
+::::
+
+[La clásica curva de Phillips con pendiente negativa: negativa y estadísticamente significativa ($p = 0.005$).]{.takeaway .fragment}
+
+::: {.notes}
+Ambas variables están medidas en por ciento, así que la pendiente está en puntos porcentuales por punto porcentual, no "1%" en el sentido proporcional. La explicación del capítulo de por qué la curva simple funcionó entonces: la inflación esperada era baja y estable en los años 50–60, así que omitirla hizo poco daño. (Este conjunto de datos no puede verificarlo directamente, porque la serie de expectativas de la SPF empieza en 1970.)
+:::
+
+## Código: la misma regresión después de 1970
+
+``` {.python code-line-numbers="1-3|4-6"}
+# continues from the previous block
+data_post1970 = data_phillips[data_phillips["year"] >= 1970].copy()  # 1970–2014
+data_post1970["_time"] = range(len(data_post1970))                   # time index for HAC
+fit_post = pf.feols("inflgdp ~ urate", data=data_post1970,
+                    vcov="NW", vcov_kwargs={"time_id": "_time", "lag": 5})  # HAC, 5 lags
+fit_post.summary()                          # has the slope survived?
+```
+
+[↗ Pruébalo en Colab](https://colab.research.google.com/notebooks/empty.ipynb){.colab-link target="_blank" data-preview-link="false"}
+
+[La especificación es idéntica. Solo cambia el periodo y, con él, la longitud del rezago para la serie más larga.]{.takeaway .fragment}
+
+::: {.notes}
+45 observaciones anuales, 1970–2014; el capítulo usa 5 rezagos de Newey–West para la serie más larga.
+:::
+
+## Salida: después de 1970, la pendiente invierte el signo {.smaller}
+
+:::: {.columns}
+::: {.column width="46%"}
+| | Coef. | EE HAC | $p$ |
+|:--|--:|--:|--:|
+| Intercepto | 1.928 | 1.868 | 0.308 |
+| `urate` | [+0.265]{.key} | 0.326 | 0.420 |
+
+[N = 45 (1970–2014) · NW, 5 rezagos · $R^2 = 0.028$]{.comment}
+
+La estimación puntual es ahora **positiva**, pero **no es significativa** ($p = 0.42$), y el $R^2$ se desploma de 0.45 a 0.03.
+:::
+::: {.column width="54%"}
+![1970–2014: la recta ajustada ahora tiene pendiente ascendente, con mucha más dispersión.](figures/fig_phillips_post.png)
+:::
+::::
+
+[Las mismas dos variables, signo opuesto. O bien la economía cambió, o bien al modelo bivariado siempre le faltó algo.]{.takeaway .fragment}
+
+::: {.notes}
+Concepto Clave 13.4. Sé preciso: la pendiente invierte el signo, pero no podemos rechazar una relación nula (IC 95% de −0.39 a +0.92). La estanflación aparece como puntos con alto desempleo y alta inflación. La respuesta de Friedman–Phelps: la pieza faltante es la inflación esperada.
+:::
+
+## La fórmula del SVO: qué le hace un regresor omitido a una pendiente
+
+$$\underbrace{y = \beta_1 + \beta_2 x + \beta_3 z + u}_{\text{long (true) model}} \qquad \underbrace{z = \gamma_1 + \gamma\,x + v}_{\text{auxiliary regression}}$$
+
+. . .
+
+Sustituye $z$ en el modelo largo y regresa $y$ sobre $x$ solo:
+
+$$E[b_2] = \beta_2 + \underbrace{\beta_3\,\gamma}_{\text{omitted variables bias}}$$
+
+[El sesgo es (efecto del $z$ omitido sobre $y$) × (cómo se mueve $z$ con el $x$ incluido). Se anula solo si $\beta_3 = 0$ **o** $\gamma = 0$.]{.takeaway .fragment}
+
+::: {.notes}
+Concepto Clave 13.5. Dirección del sesgo: sign(β₃) × sign(γ). Si z aumenta y (β₃ > 0) y sube con x (γ > 0), la pendiente corta está sesgada al alza, y suficiente sesgo al alza puede volver positiva una pendiente verdadera negativa. Con MCO sobre la misma muestra, la versión en muestra b₂(corta) = β̂₂ + β̂₃·γ̂ se cumple exactamente, no solo en esperanza.
+:::
+
+## Código: añade la inflación esperada, luego corre la regresión auxiliar
+
+``` {.python code-line-numbers="1-4|5-6|7-9|10"}
+# continues from the previous block
+data_exp = data_post1970.dropna(subset=["inflgdp1yr"]).copy()  # rows with expected inflation
+data_exp["_time"] = range(len(data_exp))                       # time index for HAC
+fit_augmented = pf.feols("inflgdp ~ urate + inflgdp1yr", data=data_exp,
+                         vcov="NW", vcov_kwargs={"time_id": "_time", "lag": 5})  # long model
+fit_aux = pf.feols("inflgdp1yr ~ urate", data=data_exp)        # auxiliary: z on x
+beta2 = fit_augmented.coef()["urate"]       # true slope on unemployment
+beta3 = fit_augmented.coef()["inflgdp1yr"]  # effect of expected inflation
+gamma = fit_aux.coef()["urate"]             # how expectations co-move with unemployment
+print(beta2 + beta3 * gamma, fit_post.coef()["urate"])  # predicted vs actual short slope
+```
+
+[↗ Pruébalo en Colab](https://colab.research.google.com/notebooks/empty.ipynb){.colab-link target="_blank" data-preview-link="false"}
+
+::: {.notes}
+inflgdp1yr es la inflación esperada a un año de la Survey of Professional Forecasters. Está disponible para los 45 años posteriores a 1970, así que las regresiones larga, corta y auxiliar usan la misma muestra, que es lo que hace exacta la descomposición.
+:::
+
+## Salida: controla por expectativas y la pendiente negativa regresa {.smaller}
+
+| Variable (modelo largo) | Coef. | EE HAC | $t$ | $p$ | IC 95% |
+|:----------------------|------:|------:|----:|----:|:-------------|
+| Intercepto | 0.270 | 0.634 | 0.43 | 0.672 | [−1.01,&nbsp;1.55] |
+| `urate` ($\hat\beta_2$) | [−0.128]{.key} | 0.081 | −1.58 | 0.122 | [−0.29,&nbsp;0.04] |
+| `inflgdp1yr` ($\hat\beta_3$) | [1.146]{.key} | 0.085 | 13.48 | <&nbsp;0.001 | [0.97,&nbsp;1.32] |
+
+[N = 45 · NW, 5 rezagos · $R^2 = 0.881$ · Regresión auxiliar: $\hat\gamma = 0.343$ (EE 0.195, $p = 0.086$, EE por defecto)]{.comment}
+
+[La inflación esperada hace casi todo el trabajo ($R^2$ salta de 0.03 a 0.88), y la pendiente del desempleo vuelve a ser negativa.]{.takeaway .fragment}
+
+::: {.notes}
+β̂₃ ≈ 1.15: la inflación real se mueve casi uno a uno con la inflación esperada (el "coeficiente ≈ 1" del capítulo; no hemos contrastado formalmente β₃ = 1). β̂₂ = −0.128 tiene el signo de la curva de Phillips pero no es significativo al 5% (p = 0.12), así que el trade-off se restaura en signo, no firmemente establecido. γ̂ = 0.343: los años con mayor desempleo también tenían mayor inflación esperada.
+:::
+
+## La aritmética del SVO explica exactamente la inversión de signo {.smaller}
+
+$$b_2^{\text{short}} = \hat\beta_2 + \hat\beta_3\,\hat\gamma = -0.128 + 1.146 \times 0.343 = +0.265$$
+
+| Pieza | Valor | Significado |
+|:--|--:|:--|
+| $\hat\beta_2$ | −0.128 | pendiente del desempleo, manteniendo fijas las expectativas |
+| $\hat\beta_3\hat\gamma$ | [+0.393]{.key} | sesgo por omitir la inflación esperada |
+| $b_2^{\text{short}}$ | +0.265 | la pendiente bivariada post-1970: una coincidencia exacta |
+
+[La pendiente bivariada le dio al desempleo el crédito del efecto de la inflación esperada. El sesgo (+0.39) fue suficiente para invertir el signo.]{.takeaway .fragment}
+
+::: {.notes}
+El capítulo lo llama una "coincidencia perfecta". Es perfecta por construcción: para MCO sobre una muestra común la descomposición es una identidad algebraica. Su valor está en *atribuir* la pendiente corta: −0.128 de trade-off genuino más +0.393 de sesgo por variable omitida. Historia económica: los shocks de oferta de los 70 (petróleo) elevaron el desempleo y las expectativas de inflación juntos, así que γ > 0; y las expectativas empujan la inflación al alza (β₃ > 0); así que el sesgo es positivo.
+:::
+
+## Advertencias: el trade-off se restaura en signo, no se prueba
+
+::: {.incremental}
+- **Imprecisión**: la pendiente ampliada ($-0.128$, $p = 0.12$) y $\hat\gamma$ ($p = 0.086$) no son significativas al 5%
+- **Medición**: la inflación esperada es una *encuesta de pronosticadores*, un proxy de lo que fijadores de salarios y precios realmente esperaban
+- **Simultaneidad**: inflación y desempleo son ambos resultados de los mismos shocks y políticas, así que esta no es una ecuación estructural causal
+- **Otras variables omitidas**: los shocks de oferta y los regímenes de política aún pueden sesgar el modelo largo
+:::
+
+[La fórmula del SVO es un diagnóstico: nos dice la dirección y el tamaño del sesgo de una variable omitida *nombrada*. No puede descartar las variables omitidas que no hemos nombrado.]{.takeaway .fragment}
+
+::: {.notes}
+El propio capítulo señala que la pendiente post-1970 (p ≈ 0.42) y el coeficiente ampliado de urate (p ≈ 0.12) no son significativos. La lección más amplia para el debate de política: una vez que las expectativas se ajustan, hay poco trade-off de largo plazo que explotar, por eso los bancos centrales se centran en anclar las expectativas.
+:::
+
+# Caso 13.4 · ¿Qué determina el consumo de combustible? {#case-134 .divider background-color="#7A209F"}
+
+[Modelo log-log · 26,995 vehículos · errores estándar robustos por conglomerados]{.act}
+
+::: {.notes}
+Caso 13.4: un gran corte transversal de vehículos. Herramientas: elasticidades de un modelo log-log, y por qué los datos agrupados necesitan errores estándar robustos por conglomerados.
+:::
+
+## La pregunta: ¿por qué no mejoró más el consumo de combustible? {.smaller}
+
+:::: {.columns}
+::: {.column width="55%"}
+**Datos.** 26,995 modelos de vehículos vendidos en EE. UU., 1980–2006, de **39 fabricantes** (`AED_AUTOSMPG.DTA`). Los logaritmos vienen precalculados en los datos.
+
+- `mpg`: millas por galón (8.7 a 76.4)
+- `curbwt`: peso en libras (1,450 a 6,700)
+- `hp`, `torque`: potencia del motor y fuerza de tracción
+- `year`: año del modelo (una tendencia tecnológica)
+- `mfr`: fabricante (la variable de agrupamiento)
+:::
+::: {.column width="45%"}
+| Principales fabricantes | Modelos |
+|:--|--:|
+| GMC | [7,979]{.key} |
+| Chrysler | 4,172 |
+| Ford | 3,709 |
+| Toyota | 1,554 |
+| Nissan | 1,079 |
+| Volkswagen | 831 |
+| Honda | 743 |
+:::
+::::
+
+[Los motores siguieron mejorando, ¿así que a dónde fueron las ganancias de eficiencia? Este caso vincula el consumo de combustible con los atributos del vehículo.]{.takeaway .fragment}
+
+::: {.notes}
+Contexto de política: demanda de eficiencia tras el shock petrolero, estándares de consumo CAFE, el auge de los SUV y camionetas, y una tecnología de motores en mejora constante. Las observaciones son registros a nivel de modelo, no ponderados por ventas. El panel es muy desbalanceado entre fabricantes: GMC solo tiene 7,979 filas (cerca del 30%), y el promedio es cerca de 692 por fabricante.
+:::
+
+## Después de 1985, las ganancias fueron a potencia, no a rendimiento
+
+![Promedio no ponderado sobre los modelos en los datos, indexado a 1980 = 100. El MPG promedio subió cerca de 32% para 1985, luego se mantuvo casi plano mientras la potencia casi se duplicó.](figures/fig_autos_trend.png)
+
+[De 1985 a 2006, la potencia promedio trepó de forma sostenida mientras el MPG promedio apenas se movió.]{.takeaway .fragment}
+
+::: {.notes}
+Figura solo para las diapositivas, construida a partir de los mismos datos (medias simples por año de modelo). 1980 → 2006: mpg 19.4 → 25.2 (índice 129.5), hp 126.5 → 242.3 (índice 191.5), peso 3,517 → 3,894 lb (índice 110.7). Estos no son promedios de flota ponderados por ventas, así que léelos como los atributos de los modelos en oferta.
+:::
+
+## ¿Por qué agrupar por fabricante?
+
+Los vehículos del mismo fabricante comparten plataformas de motor, equipos de ingeniería, filosofía de diseño y prácticas de prueba. Así que sus errores de regresión están **correlacionados dentro del fabricante**.
+
+. . .
+
+:::: {.columns}
+::: {.column width="50%"}
+### Los EE por defecto / HC1 suponen
+- 26,995 piezas de información **independientes**
+- EE demasiado pequeños, estadísticos $t$ demasiado grandes
+:::
+::: {.column width="50%"}
+### Los EE robustos por conglomerados (CRV1) permiten
+- cualquier correlación **dentro** de cada uno de los 39 fabricantes
+- independencia solo **entre** fabricantes
+:::
+::::
+
+[Con errores correlacionados, el tamaño efectivo de muestra está más cerca del número de conglomerados que del número de filas.]{.takeaway .fragment}
+
+::: {.notes}
+Concepto Clave 13.6. Ignorar la correlación dentro del conglomerado subestima la incertidumbre y lleva a falsos rechazos. CRV1 es el estimador robusto por conglomerados estándar de pyfixest con una corrección de muestra pequeña.
+:::
+
+## Código: regresión log-log con EE agrupados por fabricante
+
+``` {.python code-line-numbers="1-3|4-6|7-9|10-11"}
+!pip install -q pyfixest                    # pyfixest is not preinstalled in Colab
+import pandas as pd                         # tabular data
+import pyfixest as pf                       # OLS with R-style formulas
+url = "https://raw.githubusercontent.com/quarcs-lab/data-open/master/AED/AED_AUTOSMPG.DTA"
+data_auto = pd.read_stata(url)              # 26,995 vehicles, 1980–2006 (logs pre-computed)
+print(data_auto[["mpg", "curbwt", "hp", "torque", "year"]].describe())  # summary statistics
+print(data_auto["mfr"].value_counts().head(10))                       # observations per maker
+# log MPG on log HP, log weight, log torque and a linear year trend
+fit_auto = pf.feols("lmpg ~ lhp + lcurbwt + ltorque + year", data=data_auto,
+                    vcov={"CRV1": "mfr"})   # cluster-robust SEs by manufacturer
+fit_auto.summary()                          # elasticities + clustered SEs
+print(data_auto["mfr"].nunique())           # number of clusters: 39
+```
+
+[↗ Pruébalo en Colab](https://colab.research.google.com/notebooks/empty.ipynb){.colab-link target="_blank" data-preview-link="false"}
+
+::: {.notes}
+Autocontenido. El conjunto de datos ya contiene lmpg, lhp, lcurbwt y ltorque. El año entra en niveles, así que su coeficiente es un cambio proporcional en MPG por año de modelo, manteniendo fijos el motor y el peso.
+:::
+
+## Salida: el peso es el determinante dominante del consumo {.smaller}
+
+| Variable | Coef. | EE CRV1 | $t$ | $p$ | IC 95% |
+|:--|--:|--:|--:|--:|:--|
+| Intercepto | −20.843 | 1.988 | −10.48 | <&nbsp;0.001 | [−24.87,&nbsp;−16.82] |
+| `lhp` | −0.181 | 0.065 | −2.79 | 0.008 | [−0.31,&nbsp;−0.05] |
+| `lcurbwt` | [−0.562]{.key} | 0.057 | −9.94 | <&nbsp;0.001 | [−0.68,&nbsp;−0.45] |
+| `ltorque` | −0.141 | 0.064 | −2.21 | 0.033 | [−0.27,&nbsp;−0.01] |
+| `year` | [0.0152]{.key} | 0.0011 | 13.84 | <&nbsp;0.001 | [0.013,&nbsp;0.017] |
+
+[N = 26,995 · EE agrupados por fabricante (39 conglomerados) · $R^2 = 0.777$]{.comment}
+
+[El peso porta la mayor elasticidad, y la tendencia del año muestra un progreso técnico sostenido a atributos fijos.]{.takeaway .fragment}
+
+::: {.notes}
+El modelo explica el 78% de la variación en log MPG; el resto refleja aerodinámica, transmisiones, tipo de combustible, etc. Nota que el IC usa el EE robusto por conglomerados con G − 1 = 38 grados de libertad.
+:::
+
+## Leyendo las elasticidades: la tecnología se "gastó" en peso y potencia
+
+::: {.incremental}
+- **Peso −0.56**: un vehículo 1% más pesado obtiene **≈ 0.56% menos MPG**, manteniendo fijos potencia, torque y año (el mayor efecto)
+- **Potencia −0.18** y **torque −0.14**: ≈ 0.18% y ≈ 0.14% menos MPG por cada aumento del 1%
+- **Año +0.0152**: a peso, potencia y torque *fijos*, el MPG sube cerca de **1.5% por año de modelo** ($100 \times (e^{0.0152}-1) = 1.53\%$)
+- **La paradoja resuelta**: la tendencia tecnológica siguió elevando el MPG a atributos dados, mientras que el aumento de la potencia y el peso lo jalaban de vuelta hacia abajo
+:::
+
+[Los ingenieros hicieron los motores más eficientes cada año, y los compradores se llevaron las ganancias como autos más potentes (y algo más pesados).]{.takeaway .fragment}
+
+::: {.notes}
+Todas las afirmaciones de elasticidad son aproximaciones para cambios pequeños (modelo log-log). El coeficiente del año es una semielasticidad: 100 × 0.0152 ≈ 1.52% es la aproximación; el cambio proporcional exacto es 1.53%. Relevancia de política del capítulo: el peso importa muchísimo para el cumplimiento de CAFE; los materiales más ligeros y los motores turboalimentados más pequeños son respuestas posteriores (después de que terminan los datos).
+:::
+
+## El agrupamiento hace los errores estándar 6–9× más grandes {.smaller}
+
+| Variable | EE HC1 (ignora conglomerados) | EE CRV1 (por fabricante) | Razón |
+|:--|--:|--:|--:|
+| `lhp` | 0.0071 | 0.0651 | 9.1× |
+| `lcurbwt` | 0.0080 | 0.0566 | [7.0×]{.key} |
+| `ltorque` | 0.0076 | 0.0640 | 8.4× |
+| `year` | 0.00017 | 0.0011 | 6.4× |
+
+[Mismos coeficientes; solo cambia `vcov`. Comparación HC1: `pf.feols("lmpg ~ lhp + lcurbwt + ltorque + year", data=data_auto, vcov="HC1")`]{.comment}
+
+[Si ignoráramos el agrupamiento, cada estadístico $t$ estaría inflado 6–9×. El efecto del torque ($t = 2.21$ agrupado) se vería como $t \approx 18.6$.]{.takeaway .fragment}
+
+::: {.notes}
+Esta comparación se calcula para las diapositivas (mismo modelo, mismos datos, solo cambia el vcov) para cuantificar la afirmación del capítulo de que el agrupamiento aumenta los EE. Los errores dentro de un fabricante están fuertemente correlacionados, así que las 26,995 filas contienen mucha menos información independiente de lo que sugiere su número. t HC1 para ltorque: −0.1415 / 0.0076 ≈ −18.6.
+:::
+
+## Advertencias: una asociación de ingeniería, no un efecto causal
+
+::: {.incremental}
+- **Decisiones conjuntas**: peso, potencia y torque los eligen juntos los diseñadores, así que "un auto 1% más pesado, todo lo demás igual" es una comparación entre modelos, no un experimento
+- **Conglomerados pocos y desbalanceados**: 39 fabricantes, y GMC solo es cerca del 30% de las filas. La inferencia robusta por conglomerados funciona mejor con muchos conglomerados de tamaño similar
+- **No ponderado por ventas**: cada modelo cuenta igual, sin importar cuántas unidades se vendieron
+- **Medidas de motor superpuestas**: potencia y torque capturan rasgos de motor relacionados, lo que difumina sus efectos separados
+:::
+
+[Dentro de estos límites, la gran elasticidad del peso y la tendencia del año son robustas, y cuentan una historia coherente.]{.takeaway .fragment}
+
+::: {.notes}
+Advertencias estándar. Con conglomerados pocos o muy desiguales, los EE CRV1 aún pueden ser demasiado pequeños; el bootstrap wild-cluster es el remedio usual (no cubierto aquí). Los Puntos Clave del capítulo listan 13.4 bajo "Métodos Causales Avanzados", pero esta es una regresión observacional y descriptiva: un caso de herramienta (agrupamiento), no un diseño para la causalidad.
+:::
+
+# Acto II-b · Cuatro diseños que identifican la causalidad {.divider background-color="#7A209F"}
+
+[Casos 13.5–13.8 · ECA · DiD · RD · VI]{.act}
+
+::: {.notes}
+De aquí en adelante, cada caso hace una pregunta causal, y cada uno la responde con un diseño que provee un contrafactual creíble. El estimador sigue siendo MCO (o MC2E); lo que cambia es por qué creemos en la pendiente.
+:::
+
+## Por qué una comparación cruda no es un efecto causal
+
+$$\underbrace{E[Y \mid D{=}1] - E[Y \mid D{=}0]}_{\text{observed difference}} = \underbrace{E[Y_1 - Y_0 \mid D{=}1]}_{\text{effect on the treated (ATT)}} + \underbrace{E[Y_0 \mid D{=}1] - E[Y_0 \mid D{=}0]}_{\text{selection bias}}$$
+
+[$Y_1$, $Y_0$: resultados potenciales con y sin tratamiento. Solo observamos uno de ellos por unidad. El otro es el **contrafactual**.]{.comment}
+
+[Cada diseño en este acto es una estrategia para llevar el término de **sesgo de selección** a cero.]{.takeaway .fragment}
+
+::: {.notes}
+El sesgo de selección es la diferencia que los tratados y no tratados mostrarían incluso sin tratamiento. En datos observacionales es en general distinta de cero: quienes compran seguros generosos esperan necesitar atención; los partidos que ganaron ya eran fuertes; los países ricos pueden costear buenas instituciones. Esta es la forma de resultados potenciales de decir "confusión".
+:::
+
+## Cuatro maneras de construir el contrafactual {.smaller}
+
+| Diseño | De dónde viene el contrafactual | Caso |
+|:--|:--|:--|
+| **ECA** | un grupo de control asignado al azar | 13.5 seguro de salud RAND |
+| **Diferencias en diferencias** | el *cambio* del grupo de control en el tiempo | 13.6 clínicas sudafricanas |
+| **Regresión discontinua** | unidades justo al otro lado de un umbral | 13.7 elecciones al Senado |
+| **Variables instrumentales** | variación en el tratamiento impulsada solo por un instrumento | 13.8 instituciones coloniales |
+
+[Cada diseño cambia el no verificable "controlé por todo" por un supuesto específico sobre el que puedes discutir.]{.takeaway .fragment}
+
+::: {.notes}
+Ten esta tabla en mente; la síntesis al final del deck añade el supuesto de identificación, el estimando y la principal amenaza para cada uno.
+:::
+
+# Caso 13.5 · ¿El copago reduce el gasto médico? {#case-135 .divider background-color="#7A209F"}
+
+[Ensayo controlado aleatorizado · RAND Health Insurance Experiment · EE agrupados por familia]{.act}
+
+::: {.notes}
+Caso 13.5: el estándar de oro. Herramientas: regresión sobre variables ficticias de tratamiento, una prueba F conjunta con covarianza robusta por conglomerados, y la lógica de la asignación aleatoria.
+:::
+
+## La pregunta: ¿atención más barata significa más atención?
+
+**Riesgo moral**: si el seguro abarata la atención en el punto de uso, ¿la gente usa más? Esa pregunta impulsa cada debate sobre deducibles y copagos.
+
+. . .
+
+**Por qué fallan los datos observacionales.** La gente *elige* su seguro:
+
+- quienes esperan enfermarse compran planes más generosos
+- ingreso, educación y salud afectan tanto la elección del plan como el gasto
+
+[En datos observacionales, "plan generoso → mayor gasto" mezcla el efecto del plan con **quién lo eligió**.]{.takeaway .fragment}
+
+::: {.notes}
+Causación inversa también: el estado de salud afecta la elección del seguro. Comparar el gasto entre planes autoseleccionados estima por lo tanto el efecto más el sesgo de selección, sin forma de separarlos.
+:::
+
+## El diseño: asignación aleatoria a los planes de seguro
+
+:::: {.columns}
+::: {.column width="52%"}
+**RAND Health Insurance Experiment (1974–1982)**
+
+- familias **asignadas al azar** a planes
+- coaseguro (la parte de la cuenta que pagas): **0% (atención gratuita)**, 25%, mixto 25/50%, 50%, 95%, o un deducible individual
+- seguidas durante 3–5 años
+:::
+::: {.column width="48%"}
+**Por qué funciona**
+
+- la asignación es independiente de salud, ingreso y preferencias
+- así que los grupos son idénticos **en esperanza**
+- sesgo de selección $= 0$ **en esperanza**, así que la diferencia de medias estima el **efecto causal** de cada plan vs atención gratuita
+:::
+::::
+
+[La aleatorización no iguala los grupos exactamente. Hace que cada diferencia *antes del tratamiento* sea puro azar, lo que los errores estándar ya tienen en cuenta.]{.takeaway .fragment}
+
+::: {.notes}
+Concepto Clave 13.7. Estimando: el efecto promedio, entre los participantes del experimento, de ser asignado al plan j en lugar de atención gratuita. Como se asignaron familias (no individuos), los resultados de miembros de la misma familia están correlacionados, de ahí los EE agrupados por familia.
+:::
+
+## Los datos: año 1 del experimento {.smaller}
+
+| | Valor |
+|:--|--:|
+| Observaciones persona-año, todos los años | 20,203 |
+| Observaciones usadas (solo año 1) | [5,639]{.key} |
+| Familias (conglomerados) en el año 1 | 1,930 |
+| Gasto anual mediano (\$ de 2011) | \$479 |
+| Mayor gasto anual | \$175,831 |
+
+[Resultado `spending` = gasto médico hospitalario + ambulatorio en dólares de 2011. Variables ficticias de plan: `coins25`, `coinsmixed`, `coins50`, `coins95`, `coinsindiv`; la atención gratuita es la referencia omitida.]{.comment}
+
+[El gasto está extremadamente sesgado (mediana \$479, máximo \$175,831), así que las medias de grupo serán ruidosas.]{.takeaway .fragment}
+
+::: {.notes}
+El capítulo sigue al libro de texto y usa solo el año 1. La cola derecha pesada (unas pocas hospitalizaciones muy caras) es la razón por la que algunas medias de plan son imprecisas, especialmente en los grupos más pequeños.
+:::
+
+## Código: carga el experimento y compara el gasto medio por plan
+
+``` {.python code-line-numbers="1-3|4-6|7-8"}
+!pip install -q pyfixest                    # pyfixest is not preinstalled in Colab
+import pandas as pd                         # tabular data
+import pyfixest as pf                       # OLS with R-style formulas
+url = "https://raw.githubusercontent.com/quarcs-lab/data-open/master/AED/AED_HEALTHINSEXP.DTA"
+data_health = pd.read_stata(url)            # RAND HIE, all years (20,203 person-years)
+data_health_y1 = data_health[data_health["year"] == 1]   # first year only: 5,639 obs
+spending_by_plan = data_health_y1.groupby("plan")["spending"].agg(["mean", "std", "count"])
+print(spending_by_plan)                     # mean, SD and size of each randomized group
+```
+
+[↗ Pruébalo en Colab](https://colab.research.google.com/notebooks/empty.ipynb){.colab-link target="_blank" data-preview-link="false"}
+
+[Con asignación aleatoria, esta simple tabla de medias de grupo ya es una comparación causal.]{.takeaway .fragment}
+
+::: {.notes}
+Autocontenido. groupby("plan") da una fila por brazo aleatorizado. Nota las desviaciones estándar: el plan del 50% tiene DE ≈ $11,644, cerca de tres veces las de sus vecinos, por unos pocos grandes gastadores.
+:::
+
+## Salida: la atención gratuita tiene el mayor gasto
+
+![Gasto medio del año 1 por plan asignado al azar (\$ de 2011), con tamaños de grupo.](figures/fig_rct_means.png)
+
+[Cada plan de copago gasta menos que la atención gratuita, y el plan del 95% gasta cerca de la mitad.]{.takeaway .fragment}
+
+::: {.notes}
+Figura solo para las diapositivas a partir de las medias de grupo del capítulo: atención gratuita $2,154 (n = 1,873); 25% $1,397 (639); mixto $1,702 (480); 50% $1,786 (374); deducible individual $1,607 (1,216); 95% $1,046 (1,057). El orden no es perfectamente monótono en la tasa de coaseguro (50% > 25%): las siguientes diapositivas muestran que el grupo del 50% es demasiado ruidoso para ordenarlo.
+:::
+
+## Código: la regresión del ECA con EE agrupados por familia
+
+``` {.python code-line-numbers="1-3|4"}
+# continues from the previous block
+# spending on plan dummies; free care (coins0) is the omitted baseline
+fit_rct = pf.feols("spending ~ coins25 + coins50 + coins95 + coinsmixed + coinsindiv",
+                   data=data_health_y1, vcov={"CRV1": "idfamily"})  # cluster by family
+fit_rct.summary()                           # each coefficient = plan mean − free-care mean
+```
+
+[↗ Pruébalo en Colab](https://colab.research.google.com/notebooks/empty.ipynb){.colab-link target="_blank" data-preview-link="false"}
+
+[Una regresión sobre un conjunto completo de variables ficticias de grupo reproduce exactamente las medias de grupo: intercepto = media de referencia, pendientes = diferencias respecto a ella.]{.takeaway .fragment}
+
+::: {.notes}
+Verificación: intercepto 2,153.57 = media de atención gratuita; 2,153.57 − 1,107.75 = 1,045.82 = media del plan del 95%. La regresión añade errores estándar agrupados y un marco para pruebas conjuntas.
+:::
+
+## Salida: la mayoría de los planes de copago reducen el gasto significativamente {.smaller}
+
+| Variable | Coef. (\$) | EE CRV1 | $t$ | $p$ | IC 95% | % de la referencia |
+|:--|--:|--:|--:|--:|:--|--:|
+| Intercepto (atención gratuita) | 2,153.57 | 118.31 | 18.20 | <&nbsp;0.001 | [1,921.5,&nbsp;2,385.6] | — |
+| `coins25` | −756.91 | 190.04 | −3.98 | <&nbsp;0.001 | [−1,129.6,&nbsp;−384.2] | −35% |
+| `coins50` | −367.72 | 618.04 | −0.59 | [0.552]{.key} | [−1,579.8,&nbsp;844.4] | −17% |
+| `coins95` | [−1,107.75]{.key} | 150.37 | −7.37 | <&nbsp;0.001 | [−1,402.6,&nbsp;−812.9] | −51% |
+| `coinsmixed` | −451.70 | 239.42 | −1.89 | 0.059 | [−921.3,&nbsp;17.9] | −21% |
+| `coinsindiv` | −546.50 | 162.15 | −3.37 | <&nbsp;0.001 | [−864.5,&nbsp;−228.5] | −25% |
+
+[Planes: `coins25` 25% · `coins50` 50% · `coins95` 95% · `coinsmixed` 25/50% · `coinsindiv` deducible individual · N = 5,639 · EE agrupados por familia (1,930) · $R^2 = 0.007$]{.comment}
+
+[Tres planes están claramente por debajo de la atención gratuita. El plan del 50% **no** es significativamente distinto ($p = 0.55$): su IC va de $-\$1{,}580$ a $+\$844$.]{.takeaway .fragment}
+
+::: {.notes}
+Columna de porcentaje = coeficiente / media de atención gratuita. El EE enorme del plan del 50% (618 vs 150–240 para los demás) viene de su tamaño pequeño (374) y de valores atípicos extremos (DE ≈ $11,644). El mixto 25/50% está en el límite (p = 0.059). Reporta las estimaciones imprecisas con honestidad en vez de decir "todos los planes reducen el gasto".
+:::
+
+## Código + salida: ¿importan los planes conjuntamente?
+
+``` {.python code-line-numbers="1-4|5-8|9-10"}
+# continues from the previous block
+import numpy as np                          # matrix algebra
+from scipy.stats import f as f_dist         # F distribution
+coef_names = ["coins25", "coins50", "coins95", "coinsmixed", "coinsindiv"]
+coefs = np.array([fit_rct.coef()[c] for c in coef_names])        # the 5 plan effects
+idx = [list(fit_rct.coef().index).index(c) for c in coef_names]  # their positions
+V_sub = fit_rct._vcov[np.ix_(idx, idx)]     # clustered covariance of the 5 effects
+f_val = coefs @ np.linalg.inv(V_sub) @ coefs / len(coef_names)   # Wald F statistic
+p_val = 1 - f_dist.cdf(f_val, len(coef_names), fit_rct._N - len(fit_rct.coef()))
+print(f_val, p_val)                         # H0: all five plan effects = 0
+```
+
+[↗ Pruébalo en Colab](https://colab.research.google.com/notebooks/empty.ipynb){.colab-link target="_blank" data-preview-link="false"}
+
+[Resultado: $F = 11.39$, $p < 0.001$. Rechazamos que la generosidad del seguro sea irrelevante: **el diseño del plan cambia causalmente el gasto**.]{.takeaway .fragment}
+
+::: {.notes}
+H0: los cinco coeficientes de plan son cero (ningún plan difiere de la atención gratuita). F(5, 5,633) = 11.39, p ≈ 6 × 10⁻¹¹. El estadístico de Wald usa la matriz de covarianza robusta por conglomerados, así que la prueba conjunta es consistente con los EE agrupados.
+:::
+
+## Interpretación: el riesgo moral es real, y moderado
+
+::: {.incremental}
+- **Lectura causal**: como los planes se aleatorizaron, los −\$1,108 del plan del 95% son el *efecto* de enfrentar un coaseguro del 95% en lugar de atención gratuita, cerca de **51% menos** de gasto en el año 1
+- **Magnitud**: el copago reduce el gasto en aproximadamente un cuarto a la mitad, según el plan; eso es significativo pero no dramático
+- **$R^2 = 0.007$ es irrelevante para la causalidad**: los shocks de salud individuales impulsan la mayor parte de la variación del gasto. Un $R^2$ bajo significa que predecimos mal a los individuos, no que el efecto esté sesgado
+- **Política**: la atención gratuita eleva el uso; el copago baja los costos pero también puede recortar atención *necesaria*
+:::
+
+[Un ECA convierte una diferencia de medias en un efecto causal. La precisión, no el sesgo, es el problema restante.]{.takeaway .fragment}
+
+::: {.notes}
+El capítulo dice que el R² bajo "es en realidad bueno". La afirmación más precisa es que el R² es irrelevante para identificar un efecto causal: la aleatorización garantiza la insesgadez sin importar el R²; un R² bajo solo implica que el resultado tiene mucha otra variación. Los resultados de RAND moldearon el diseño del seguro de salud de EE. UU. (copagos de Medicare/Medicaid, luego debates de la ACA).
+:::
+
+## Amenazas a un ECA: qué puede salir mal todavía
+
+::: {.incremental}
+- **Deserción**: si las familias a las que no les gusta su plan abandonan (más probable bajo copagos altos), los grupos restantes ya no son comparables
+- **Incumplimiento y rechazo** en la inscripción pueden deshacer el equilibrio que creó la aleatorización
+- **Verificación de equilibrio (no hecha en el capítulo)**: comparar edad, ingreso y salud basales entre planes; deberían diferir solo por azar
+- **Validez externa**: seis sitios de EE. UU. en los años 70; la atención médica ha cambiado desde entonces
+- **Ética y costo**: aleatorizar seguros rara vez es posible, por eso existen los siguientes tres diseños
+:::
+
+[La aleatorización identifica el efecto *para las personas del experimento*. Su credibilidad depende entonces de mantener intactos los grupos aleatorizados.]{.takeaway .fragment}
+
+::: {.notes}
+Advertencias estándar de un ECA. Aron-Dine, Einav y Finkelstein (2013, Journal of Economic Perspectives) revisan el experimento RAND y discuten la deserción y el rechazo diferenciales entre planes. El conjunto de datos incluye covariables basales (edad, famincome, educ, estado de salud), así que una tabla de equilibrio es un ejercicio fácil.
+:::
+
+# Caso 13.6 · ¿La atención gratuita mejoró la nutrición infantil? {#case-136 .divider background-color="#7A209F"}
+
+[Diferencias en diferencias · Sudáfrica, 1993 vs 1998 · EE agrupados por comunidad]{.act}
+
+::: {.notes}
+Caso 13.6: sin aleatorización, pero una comparación antes/después entre comunidades más y menos expuestas. Herramientas: la tabla DiD de 2×2, la regresión con interacción, y el supuesto de tendencias paralelas.
+:::
+
+## La pregunta: ¿la reforma de salud de 1994 mejoró la nutrición infantil?
+
+- **La política (1994)**: la Sudáfrica posapartheid hizo **gratuita la atención primaria pública para niños pequeños y mujeres embarazadas** (estudiada por Tanaka 2014)
+- **Quién podía beneficiarse**: la atención gratuita ayuda solo si hay una clínica al alcance
+- **Grupo de tratamiento**: niños en comunidades que **tenían una clínica en 1993** (`hightreat = 1`); grupo de comparación: niños en comunidades sin una
+- **Resultado**: `waz`, el **puntaje $z$ de peso-para-edad**, una medida estándar de nutrición infantil
+
+[La exposición a la reforma dependía de dónde vivía un niño, lo que da un grupo de tratamiento y comparación natural.]{.takeaway .fragment}
+
+::: {.notes}
+Datos: AED_HEALTHACCESS.DTA, 1,071 niños de 0–4 años en la zona rural de KwaZulu-Natal, encuestados en 1993 (antes) y 1998 (después), 54 comunidades; fuente Tanaka (2014, AEJ: Economic Policy). El conjunto de datos etiqueta hightreat como "= 1 si la comunidad tiene clínica en 1993". (El capítulo lo narra como "comunidades que recibieron muchas clínicas nuevas"; las diapositivas siguen la etiqueta del conjunto de datos y el artículo fuente: la intensidad del tratamiento es el acceso preexistente a clínicas de la atención recién gratuita.) Nota que los niños de 1993 y 1998 son niños distintos (dos cohortes de 0–4 años), no los mismos niños seguidos en el tiempo.
+:::
+
+## El diseño: elimina por diferencias tanto la brecha de nivel como la tendencia común
+
+| Grupo | 1993 (antes) | 1998 (después) | Cambio |
+|:--|:-:|:-:|:-:|
+| Tratamiento alto (clínica) | $\bar Y_{T,0}$ | $\bar Y_{T,1}$ | $\Delta_T$ |
+| Tratamiento bajo (sin clínica) | $\bar Y_{C,0}$ | $\bar Y_{C,1}$ | $\Delta_C$ |
+
+$$\text{DiD} = (\bar Y_{T,1} - \bar Y_{T,0}) - (\bar Y_{C,1} - \bar Y_{C,0}) = \Delta_T - \Delta_C$$
+
+[La primera diferencia elimina las brechas permanentes entre comunidades. La segunda elimina los cambios comunes a todos (tendencias nacionales, la economía).]{.takeaway .fragment}
+
+::: {.notes}
+Concepto Clave 13.8. Supuesto de identificación, **tendencias paralelas**: sin la reforma, la media de waz de las comunidades tratadas habría cambiado en la misma cantidad que la de las comunidades de comparación (Δ_C). Estimando: el efecto promedio sobre los tratados (ATT), es decir, los niños en comunidades con acceso a clínica.
+:::
+
+## Código: la tabla 2×2 de medias y el DiD a mano
+
+``` {.python code-line-numbers="1-3|4-6|7-11|12"}
+!pip install -q pyfixest                    # pyfixest is not preinstalled in Colab
+import pandas as pd                         # tabular data
+import pyfixest as pf                       # OLS with R-style formulas
+url = "https://raw.githubusercontent.com/quarcs-lab/data-open/master/AED/AED_HEALTHACCESS.DTA"
+data_access = pd.read_stata(url)            # 1,071 children aged 0–4; 1993 and 1998
+print(data_access.groupby(["hightreat", "post"])["waz"].agg(["mean", "count"]))  # 2×2 means
+m = data_access.groupby(["hightreat", "post"])["waz"].mean()  # the four cell means
+pre_control, post_control = m[(0, 0)], m[(0, 1)]   # no clinic: 1993, 1998
+pre_treat, post_treat = m[(1, 0)], m[(1, 1)]       # clinic: 1993, 1998
+did_estimate = (post_treat - pre_treat) - (post_control - pre_control)
+print(post_control - pre_control, post_treat - pre_treat, did_estimate)  # ΔC, ΔT, DiD
+```
+
+[↗ Pruébalo en Colab](https://colab.research.google.com/notebooks/empty.ipynb){.colab-link target="_blank" data-preview-link="false"}
+
+::: {.notes}
+Autocontenido y equivalente al código del capítulo (que calcula cada media de celda con un filtro booleano). hightreat y post son indicadores 0/1; postXhigh = post × hightreat también está en los datos.
+:::
+
+## Salida: el grupo tratado mejoró 0.52 más {.smaller}
+
+| `waz` medio (n) | 1993 (antes) | 1998 (después) | Cambio |
+|:--|:-:|:-:|:-:|
+| Tratamiento bajo (sin clínica) | −0.414 (325) | −0.069 (288) | +0.345 |
+| Tratamiento alto (clínica) | −0.545 (246) | 0.321 (212) | +0.867 |
+| **Diferencia (alto − bajo)** | −0.131 | +0.391 | [+0.522]{.key} |
+
+[DiD $= 0.867 - 0.345 = 0.522$. El mismo número aparece como la diferencia de las dos *columnas*: $0.391 - (-0.131) = 0.522$.]{.comment}
+
+[Los niños en comunidades con clínica empezaron ligeramente *atrás*, terminaron claramente adelante, y ganaron 0.52 más que el grupo de comparación.]{.takeaway .fragment}
+
+::: {.notes}
+Ambos grupos mejoraron (la nutrición infantil estaba mejorando en todas partes). El +0.345 del grupo de comparación es nuestra estimación de lo que le habría pasado al grupo tratado sin la reforma. Restándolo quedan 0.522.
+:::
+
+## Ingenuo vs diseño: dos atajos, dos sesgos distintos {.smaller}
+
+| Comparación | Estimación | Qué hace mal |
+|:--|--:|:--|
+| Brecha solo del después (1998: alto − bajo) | 0.391 | ignora que los niños tratados empezaron 0.131 **más bajo**, así que está sesgado **a la baja** |
+| Antes–después, solo tratados | 0.867 | acredita a la reforma la mejora **común** (+0.345), así que está sesgado **al alza** |
+| **Diferencias en diferencias** | [0.522]{.key} | elimina tanto la brecha basal como la tendencia común |
+
+[Cada diferencia simple está contaminada por un factor de confusión. Usar ambas diferencias elimina ambos.]{.takeaway .fragment}
+
+::: {.notes}
+Ambos números ingenuos salen directamente de la tabla 2×2 (sin nueva estimación). La estimación antes–después (0.867) es 66% mayor que el DiD; la brecha solo del después (0.391) es 25% menor. Este es el hilo "MCO vs diseño": las comparaciones ingenuas son lo que reportarías sin un diseño.
+:::
+
+## Código: DiD como una regresión con un término de interacción
+
+``` {.python code-line-numbers="1-3|4-5"}
+# continues from the previous block
+# waz on group, period and their interaction (postXhigh = post × hightreat)
+fit_did = pf.feols("waz ~ hightreat + post + postXhigh", data=data_access,
+                   vcov={"CRV1": "idcommunity"})   # cluster by community (54 clusters)
+fit_did.summary()                           # postXhigh = the DiD estimate
+print(fit_did.coef()["postXhigh"], did_estimate)   # identical: 0.522 and 0.522
+```
+
+[↗ Pruébalo en Colab](https://colab.research.google.com/notebooks/empty.ipynb){.colab-link target="_blank" data-preview-link="false"}
+
+[La regresión da el mismo 0.522, más un error estándar que tiene en cuenta la correlación dentro de las comunidades.]{.takeaway .fragment}
+
+::: {.notes}
+El tratamiento varía a nivel de comunidad, y los niños de la misma comunidad comparten shocks no observados, así que agrupamos por comunidad. La forma de regresión también se extiende naturalmente a covariables y más periodos.
+:::
+
+## Salida: cada coeficiente es una celda de la tabla 2×2 {.smaller}
+
+| Variable | Coef. | EE CRV1 | $t$ | $p$ | IC 95% | = en la tabla 2×2 |
+|:--|--:|--:|--:|--:|:--|:--|
+| Intercepto | −0.414 | 0.115 | −3.60 | 0.001 | [−0.645,&nbsp;−0.183] | control, 1993 |
+| `hightreat` | −0.131 | 0.197 | −0.67 | 0.508 | [−0.526,&nbsp;0.264] | brecha basal |
+| `post` | 0.345 | 0.137 | 2.52 | 0.015 | [0.070,&nbsp;0.620] | tendencia común ($\Delta_C$) |
+| `postXhigh` | [0.522]{.key} | 0.235 | 2.22 | [0.031]{.key} | [0.050,&nbsp;0.994] | **DiD** |
+
+[N = 1,071 · EE agrupados por comunidad (54 conglomerados) · $R^2 = 0.040$]{.comment}
+
+[La brecha basal es pequeña y no significativa ($p = 0.51$), y el efecto DiD es significativo al 5% ($p = 0.031$), aunque su IC es amplio.]{.takeaway .fragment}
+
+::: {.notes}
+Guía de lectura: intercepto = media pre del grupo de control; hightreat = tratado − control en 1993; post = cambio del control 1993→1998; postXhigh = cambio adicional para los tratados. La brecha basal no significativa es tranquilizadora (los grupos se veían similares antes de la reforma) pero no es una prueba de tendencias paralelas.
+:::
+
+## El contrafactual: dónde habría estado el grupo tratado
+
+![Media de waz por grupo y año. Discontinua: la trayectoria contrafactual del grupo tratado bajo tendencias paralelas (−0.545 + 0.345 = −0.200).](figures/fig_did_2x2.png)
+
+[El efecto es la brecha vertical entre lo que pasó (0.321) y el contrafactual de tendencia paralela (−0.200), que es 0.522.]{.takeaway .fragment}
+
+::: {.notes}
+Figura solo para las diapositivas, construida a partir de las cuatro medias de celda. La línea discontinua es el supuesto hecho visible: toma prestada la pendiente del grupo de comparación. Si las comunidades tratadas ya estaban en una trayectoria más empinada, la línea discontinua está mal y la estimación también.
+:::
+
+## Interpretación: un efecto grande, medido con imprecisión
+
+::: {.incremental}
+- **Unidades**: `waz` se mide en DE de un *estándar de crecimiento de referencia*, así que el efecto es **+0.52 unidades $z$**. En esta muestra `waz` tiene DE 1.59, así que eso es cerca de **0.33 DE muestrales**
+- **Significancia**: $p = 0.031$, así que rechazamos "sin efecto" al 5%
+- **Precisión**: el IC 95% es **[0.05, 0.99]**; los datos admiten cualquier cosa desde un efecto insignificante hasta uno muy grande
+- **Afirmación causal**: el efecto de la reforma sobre los niños en comunidades con clínica, **si se sostienen las tendencias paralelas**
+:::
+
+[El DiD da una *dirección* creíble y una magnitud plausible. Con 54 comunidades, la precisión es modesta.]{.takeaway .fragment}
+
+::: {.notes}
+El capítulo dice 0.52 "DE", pero los puntajes z están estandarizados contra una población de referencia, no esta muestra; respecto a la dispersión de esta muestra (DE 1.59) el efecto es cerca de un tercio de una DE, aún sustancial. Las traducciones del capítulo (p. ej. "del percentil 25 al 45", "6–12 meses de crecimiento") suponen una distribución de DE unitaria y no se calculan a partir de los datos, así que no se repiten aquí. El R² bajo (0.04) es irrelevante para la identificación.
+:::
+
+## Amenazas: las tendencias paralelas no pueden probarse con dos periodos
+
+::: {.incremental}
+- **No comprobable aquí**: con un solo periodo previo no podemos verificar si los grupos tenían la misma tendencia *antes* de 1994 (más periodos previos permiten una verificación de estudio de eventos)
+- **Lugares distintos**: las comunidades con clínicas pueden diferir (caminos, agua, ingreso) y podrían haber mejorado más rápido de todos modos
+- **Cambios concurrentes**: otros programas posteriores a 1994 que favorecieron a las comunidades con clínica se contarían como efecto de la reforma
+- **Composición cambiante**: se miden niños distintos en 1993 y 1998; si cambia quién vive en las comunidades tratadas, también cambia la media
+- **Inferencia**: 54 conglomerados, así que los EE CRV1 son razonables pero no exactos
+:::
+
+[Cada estimación DiD descansa sobre la línea discontinua. Defiéndela con conocimiento institucional, tendencias previas y pruebas placebo.]{.takeaway .fragment}
+
+::: {.notes}
+Amenazas estándar del DiD. El estudio fuente (Tanaka 2014) reporta ejercicios de falsación: ninguna tendencia preexistente antes de la reforma, y ningún efecto entre niños que no eran elegibles. Estos no se corren en el capítulo. La lista de evidencia-de-validez del capítulo ("ubicación basada en la necesidad", "sin otros programas") se afirma en vez de mostrarse en los datos.
+:::
+
+# Caso 13.7 · ¿Los partidos ganan por tener un escaño en el Senado? {#case-137 .divider background-color="#7A209F"}
+
+[Regresión discontinua · elecciones al Senado de EE. UU., 1914–2010 · errores estándar HC1]{.act}
+
+::: {.notes}
+Caso 13.7: un umbral nítido (el 50% del voto decide quién gana) crea variación casi aleatoria en la titularidad para elecciones reñidas. Herramientas: variable de asignación, umbral, la regresión RD, y la localidad de la estimación.
+:::
+
+## La pregunta: ¿existe una ventaja de titularidad?
+
+Los partidos que tienen un escaño tienden a ganarlo de nuevo. Pero ¿eso es porque **tener el escaño ayuda**, o porque **los partidos que ganaron eran más fuertes de entrada**?
+
+. . .
+
+**Los datos** (`AED_INCUMBENCY.DTA`): 1,390 elecciones al Senado de EE. UU., 1914–2010
+
+- `margin`: **margen de victoria demócrata** en la elección $t$ (puntos porcentuales, −100 a +100)
+- `win` $= 1$ si `margin` $> 0$ (el demócrata ganó el escaño)
+- `vote`: **participación del voto demócrata en la *siguiente* elección** para ese escaño, $t+1$ (1,297 no faltantes)
+
+[La unidad es el escaño del *partido*, así que este caso mide la ventaja de titularidad del **partido**: la ganancia para el partido demócrata de haber ganado el escaño la vez anterior.]{.takeaway .fragment}
+
+::: {.notes}
+El capítulo plantea la pregunta como la ventaja de titularidad de un candidato. Las etiquetas del conjunto de datos muestran que el resultado es la participación del voto del partido demócrata en la siguiente elección, y la variable de asignación es el margen demócrata en la elección t, así que el estimando es el efecto de titularidad a nivel de partido (como en el estudio de la Cámara de Lee 2008). El candidato puede o no volver a postularse.
+:::
+
+## El diseño: compara elecciones que apenas se ganaron con las que apenas se perdieron
+
+:::: {.columns}
+::: {.column width="50%"}
+- **Variable de asignación**: `margin`
+- **Umbral**: `margin` $= 0$
+- **Tratamiento**: ganar, que se activa de forma *nítida* en el umbral
+- **Supuesto clave, continuidad**: sin el tratamiento, los resultados promedio variarían *suavemente* a través del umbral
+:::
+::: {.column width="50%"}
+$$\text{vote}_{t+1} = \beta_1 + \beta_2\,\text{win}_t + \beta_3\,\text{margin}_t + u$$
+
+[$\beta_2$ es el **salto** en el resultado en margin $= 0$, después de controlar por el efecto suave del margen.]{.comment}
+:::
+::::
+
+[A un pelo del 50%, quién gana es casi un volado, así que ganadores y perdedores son comparables *excepto* por ganar.]{.takeaway .fragment}
+
+::: {.notes}
+Concepto Clave 13.9. Estimando: el efecto de ganar *en el umbral*, es decir, para elecciones reñidas. Es local por construcción. La especificación del capítulo impone una pendiente común a ambos lados del umbral y usa todas las elecciones, cualquiera que sea su margen.
+:::
+
+## Ingenuo vs diseño: comparar a todos los ganadores con todos los perdedores está muy sesgado {.smaller}
+
+| Comparación | Participación del voto demócrata en la siguiente elección | Brecha |
+|:--|:-:|--:|
+| Escaños que los demócratas **ganaron** (702) | 62.6% | |
+| Escaños que los demócratas **perdieron** (595) | 40.9% | |
+| **Diferencia ingenua** | | [21.7 pp]{.key} |
+| **Estimación RD en el umbral** (siguientes diapositivas) | | 4.8 pp |
+
+[La mayor parte de la brecha cruda de 21.7 puntos es **selección**: los estados donde los demócratas ganan cómodamente seguirán votando demócrata, con titular o sin él.]{.takeaway .fragment}
+
+::: {.notes}
+Brecha ingenua = diferencia simple en la media de `vote` entre elecciones con win = 1 y win = 0 (las mismas 1,297 observaciones; calculada para las diapositivas). La estimación RD es menos de un cuarto de ella. Este es el sesgo de selección que el diseño elimina.
+:::
+
+## Código: la regresión RD
+
+``` {.python code-line-numbers="1-3|4-6|7-8|9-11"}
+!pip install -q pyfixest                    # pyfixest is not preinstalled in Colab
+import pandas as pd                         # tabular data
+import pyfixest as pf                       # OLS with R-style formulas
+url = "https://raw.githubusercontent.com/quarcs-lab/data-open/master/AED/AED_INCUMBENCY.DTA"
+data_incumb = pd.read_stata(url)            # 1,390 Senate elections, 1914–2010
+print(data_incumb[["vote", "margin", "win"]].describe())   # running variable and outcome
+data_rd = data_incumb[data_incumb["vote"].notna()].copy()  # keep races with a t+1 outcome
+naive = data_rd.groupby("win")["vote"].mean()               # naive: winners vs losers
+fit_rd = pf.feols("vote ~ win + margin", data=data_rd, vcov="HC1")  # jump + linear margin
+fit_rd.summary()                            # win coefficient = discontinuity at 0
+print(fit_rd.confint().loc["win"])          # 95% CI for the jump
+```
+
+[↗ Pruébalo en Colab](https://colab.research.google.com/notebooks/empty.ipynb){.colab-link target="_blank" data-preview-link="false"}
+
+::: {.notes}
+Autocontenido. La línea 8 añade la comparación ingenua usada en la diapositiva anterior; el resto es el código del capítulo. 93 elecciones no tienen resultado en la siguiente elección y se descartan (1,390 → 1,297).
+:::
+
+## Salida: ganar por poco añade cerca de 4.8 puntos porcentuales la próxima vez {.smaller}
+
+| Variable | Coef. | EE HC1 | $t$ | $p$ | IC 95% |
+|:--|--:|--:|--:|--:|:--|
+| Intercepto | 47.331 | 0.526 | 89.95 | <&nbsp;0.001 | [46.30,&nbsp;48.36] |
+| `win` | [4.785]{.key} | 0.860 | 5.56 | <&nbsp;0.001 | [3.10,&nbsp;6.47] |
+| `margin` | 0.348 | 0.017 | 20.42 | <&nbsp;0.001 | [0.315,&nbsp;0.381] |
+
+[N = 1,297 · EE HC1 · $R^2 = 0.578$]{.comment}
+
+::: {.incremental}
+- **Perdió por poco** (margin $\to 0^-$): participación demócrata predicha la próxima vez **47.3%**
+- **Ganó por poco** (margin $\to 0^+$): 47.3 + 4.8 = **52.1%**
+- Cada punto extra de margen hoy: **+0.35 puntos** la próxima vez (en ambos lados, por supuesto)
+:::
+
+[El salto en el umbral es de 4.8 **puntos porcentuales**, no 4.8%, y está estimado con precisión.]{.takeaway .fragment}
+
+::: {.notes}
+El resultado es una participación del voto en por ciento, así que el efecto está en puntos porcentuales. "4.8%" (el fraseo del capítulo en algunos lugares) significaría un aumento proporcional del 4.8%, que es una afirmación distinta y errónea. IC 95%: 3.1 a 6.5 pp.
+:::
+
+## La discontinuidad, visualizada
+
+![Medias binadas de la participación del voto demócrata en la siguiente elección por margen actual (bins de 5 puntos). Morado: el modelo ajustado del capítulo, una pendiente, con un salto en 0.](figures/fig_rd_binned.png)
+
+[Los bins saltan en cero: las elecciones apenas ganadas se sitúan visiblemente por encima de las apenas perdidas.]{.takeaway .fragment}
+
+::: {.notes}
+Figura solo para las diapositivas; el capítulo describe este gráfico pero muestra solo arte ASCII. El tamaño del bin escala con el número de elecciones; la mayoría de las elecciones están dentro de ±25 puntos. La única recta con pendiente común ajusta bien el centro pero falla en los extremos (p. ej. elecciones sin oposición en ±100), lo que motiva la discusión de robustez.
+:::
+
+## Interpretación: un efecto causal local, a nivel de partido
+
+::: {.incremental}
+- **Causal** porque cerca de margin $= 0$, ganar es casi aleatorio: los partidos que ganan por poco y los que pierden por poco enfrentan estados, candidatos y condiciones similares
+- **Local**: aplica a **elecciones reñidas**, no a arrasadoras; la ventaja en escaños seguros no está identificada
+- **A nivel de partido**: la ventaja de retención del escaño del partido demócrata, sin importar si el mismo senador vuelve a postularse
+- **Mecanismos** (no separados aquí): reconocimiento del nombre, recaudación de fondos, acceso a medios, servicio a los electores
+:::
+
+[La RD cambia amplitud por credibilidad: un efecto muy creíble, para un conjunto estrecho de elecciones.]{.takeaway .fragment}
+
+::: {.notes}
+El sesgo de selección se elimina solo en el umbral; lejos de él, ganadores y perdedores difieren sistemáticamente (como muestra el 21.7 ingenuo). La discusión de política del capítulo (límites de mandato, financiamiento de campañas) va más allá de lo que la estimación misma identifica.
+:::
+
+## Amenazas: la estimación se apoya en un ajuste lineal global {.smaller}
+
+::: {.incremental}
+- **Global, no local**: el capítulo ajusta una sola recta sobre márgenes de −100 a +100, incluyendo **45 elecciones sin oposición** en ±100. Solo **451** de 1,297 elecciones están dentro de ±10 puntos
+- **Pendiente común**: forzar la misma pendiente a ambos lados puede sesgar el salto si la relación verdadera se curva cerca de 0
+- **Práctica estándar**: regresión lineal local dentro de un ancho de banda alrededor de 0, con pendientes separadas a cada lado y un ancho de banda basado en los datos (p. ej. `rdrobust`), más verificaciones de sensibilidad
+- **Manipulación**: si los partidos pudieran manipular resultados muy reñidos, los que ganan por poco diferirían sistemáticamente. Verifica la densidad de `margin` y el equilibrio de covariables en 0
+:::
+
+[El diseño es creíble. Cuánto confiar en el 4.8 específico depende de la forma funcional, así que una verificación de robustez local es el siguiente paso.]{.takeaway .fragment}
+
+::: {.notes}
+Estas son prácticas RD estándar, descritas, no estimadas, en este deck. El capítulo lista la RD como "robusta a la especificación del modelo"; en la práctica las estimaciones RD pueden ser sensibles al orden del polinomio y al ancho de banda, por eso el enfoque lineal local con ancho de banda seleccionado (Calonico, Cattaneo y Titiunik) es ahora estándar. La prueba de densidad de McCrary verifica la manipulación en el umbral.
+:::
+
+# Caso 13.8 · ¿Las instituciones causan prosperidad? {#case-138 .divider background-color="#7A209F"}
+
+[Variables instrumentales · mínimos cuadrados en dos etapas · 64 excolonias]{.act}
+
+::: {.notes}
+Caso 13.8: Acemoglu, Johnson y Robinson (2001). Herramientas: endogeneidad, relevancia y exclusión del instrumento, la primera etapa, MC2E en pyfixest, la forma reducida, e interpretación de resultados logarítmicos.
+:::
+
+## La pregunta: ¿por qué algunos países son ricos y otros pobres?
+
+Regresa el PIB sobre la calidad de las instituciones y obtienes una pendiente positiva fuerte. Pero las instituciones son **endógenas**:
+
+| Fuente de endogeneidad | Dirección probable del sesgo de MCO |
+|:--|:--|
+| **Causación inversa**: los países ricos pueden costear mejores instituciones | al alza |
+| **Variables omitidas**: geografía, cultura, historia afectan a ambas | probablemente al alza |
+| **Error de medición**: "instituciones" es difícil de medir | hacia cero (atenuación) |
+
+[MCO mezcla las tres, y los sesgos tiran en direcciones opuestas, así que ni siquiera podemos signar el sesgo neto.]{.takeaway .fragment}
+
+::: {.notes}
+El error de medición en el regresor sesga MCO hacia cero (atenuación); la causación inversa y los factores omitidos correlacionados positivamente lo sesgan típicamente al alza. Así que la estimación de MCO podría ser demasiado grande o demasiado pequeña, que es exactamente cuando se necesita un instrumento.
+:::
+
+## El diseño: la mortalidad de los colonos como instrumento
+
+**El argumento histórico (AJR 2001):**
+
+Mortalidad de los colonos (1600s–1800s) $\to$ tipo de instituciones coloniales $\to$ instituciones hoy $\to$ PIB hoy
+
+::: {.incremental}
+- Alta mortalidad: los europeos no se asentaron, y construyeron instituciones **extractivas**
+- Baja mortalidad: los europeos se asentaron, y construyeron instituciones que **protegen la propiedad**
+- **Relevancia**: la mortalidad debe predecir las instituciones, lo que la **primera etapa** verifica
+- **Exclusión**: la mortalidad debe afectar el PIB de hoy **solo a través de** las instituciones. Esto no puede probarse
+:::
+
+[Un instrumento es válido solo si mueve el tratamiento *y* no tiene otro camino hacia el resultado. La segunda condición descansa en el argumento, no en los datos.]{.takeaway .fragment}
+
+::: {.notes}
+Concepto Clave 13.10. Variables: logpgp95 = log del PIB per cápita PPA, 1995; avexpr = protección promedio contra el riesgo de expropiación (índice 0–10 de calidad institucional); logem4 = log de la mortalidad de los colonos. Estimando: con efectos heterogéneos, VI identifica un efecto promedio local para la variación en instituciones impulsada por la mortalidad de los colonos; con un efecto constante, es el efecto causal.
+:::
+
+## Código: empieza con el punto de referencia (sesgado) de MCO
+
+``` {.python code-line-numbers="1-3|4-6|7-8"}
+!pip install -q pyfixest                    # pyfixest is not preinstalled in Colab
+import pandas as pd                         # tabular data
+import pyfixest as pf                       # OLS and IV with R-style formulas
+url = "https://raw.githubusercontent.com/quarcs-lab/data-open/master/AED/AED_INSTITUTIONS.DTA"
+data_inst = pd.read_stata(url)              # 64 former colonies (Acemoglu–Johnson–Robinson)
+print(data_inst[["logpgp95", "avexpr", "logem4"]].describe())  # outcome, regressor, instrument
+fit_ols = pf.feols("logpgp95 ~ avexpr", data=data_inst, vcov="HC1")  # OLS: endogenous
+fit_ols.summary()                           # benchmark slope
+```
+
+[↗ Pruébalo en Colab](https://colab.research.google.com/notebooks/empty.ipynb){.colab-link target="_blank" data-preview-link="false"}
+
+::: {.notes}
+Autocontenido. Muestra: 64 países; avexpr va de 3.5 a 10 (media 6.5, DE 1.47); logpgp95 de 6.1 a 10.2.
+:::
+
+## Salida: MCO encuentra una asociación fuerte {.smaller}
+
+| Variable | Coef. | EE HC1 | $t$ | $p$ | IC 95% |
+|:--|--:|--:|--:|--:|:--|
+| Intercepto | 4.660 | 0.320 | 14.56 | <&nbsp;0.001 | [4.02,&nbsp;5.30] |
+| `avexpr` | [0.522]{.key} | 0.050 | 10.46 | <&nbsp;0.001 | [0.422,&nbsp;0.622] |
+
+[N = 64 · EE HC1 · $R^2 = 0.540$]{.comment}
+
+Un punto más en el índice de protección contra la expropiación de 0–10 va con **0.52 puntos log** más de PIB per cápita: $e^{0.522} - 1 \approx$ **69% más alto**.
+
+[Una *asociación* grande y precisa, pero hereda cada problema de endogeneidad de la diapositiva anterior.]{.takeaway .fragment}
+
+::: {.notes}
+Con un resultado logarítmico, un coeficiente b significa 100·(e^b − 1)% para un cambio de una unidad en el regresor. Para 0.522 eso es 68.6%; el atajo del "52%" solo es válido para b pequeño.
+:::
+
+## Código: la primera etapa, verificando la relevancia
+
+``` {.python code-line-numbers="1-2|3-5"}
+# continues from the previous block
+fit_first = pf.feols("avexpr ~ logem4", data=data_inst, vcov="HC1")  # institutions on instrument
+fit_first.summary()                         # does settler mortality predict institutions?
+first_f = fit_first.tstat()["logem4"] ** 2  # one instrument: first-stage F = t²
+print(first_f)                              # rule of thumb: F > 10 → not weak
+```
+
+[↗ Pruébalo en Colab](https://colab.research.google.com/notebooks/empty.ipynb){.colab-link target="_blank" data-preview-link="false"}
+
+[Con un solo instrumento, el estadístico $F$ de la primera etapa es simplemente el estadístico $t$ al cuadrado del instrumento.]{.takeaway .fragment}
+
+::: {.notes}
+La relevancia es la condición de VI que sí es comprobable. Una primera etapa débil hace que MC2E se sesgue hacia MCO y que sus EE usuales no sean confiables.
+:::
+
+## Salida: la mortalidad de los colonos predice fuertemente las instituciones {.smaller}
+
+:::: {.columns}
+::: {.column width="40%"}
+| | Coef. | EE HC1 |
+|:--|--:|--:|
+| Intercepto | 9.341 | 0.704 |
+| `logem4` | [−0.607]{.key} | 0.150 |
+
+[N = 64 · $R^2 = 0.270$ · $t = -4.04$]{.comment}
+
+$F$ de primera etapa $= (-4.04)^2 =$ [16.32]{.key} $> 10$
+:::
+::: {.column width="60%"}
+![Izquierda: primera etapa. Derecha: forma reducida (PIB sobre el instrumento).](figures/fig_iv_fs_rf.png)
+:::
+::::
+
+[Los lugares más letales para los colonos tienen una protección de los derechos de propiedad más débil hoy. El instrumento es **relevante** y pasa la regla general de $F > 10$.]{.takeaway .fragment}
+
+::: {.notes}
+Un aumento de una unidad en el log de la mortalidad de los colonos (mortalidad cerca de 2.7 veces mayor) va con 0.61 puntos menos de protección contra la expropiación. El panel derecho (forma reducida) se usa dos diapositivas adelante.
+:::
+
+## Código: mínimos cuadrados en dos etapas en una línea
+
+``` {.python code-line-numbers="1-3|4-7"}
+# continues from the previous block
+# formula syntax: outcome ~ exogenous regressors | endogenous ~ instrument
+fit_iv = pf.feols("logpgp95 ~ 1 | avexpr ~ logem4", data=data_inst, vcov="HC1")  # 2SLS
+fit_iv.summary()                            # causal slope under the IV assumptions
+print(fit_ols.coef()["avexpr"], fit_iv.coef()["avexpr"])   # OLS vs IV
+import numpy as np                          # for np.exp
+print(np.exp(fit_iv.coef()["avexpr"]))      # multiplicative effect on GDP: e^b
+```
+
+[↗ Pruébalo en Colab](https://colab.research.google.com/notebooks/empty.ipynb){.colab-link target="_blank" data-preview-link="false"}
+
+[El `|` separa la parte exógena (`1`, solo el intercepto) del regresor endógeno y su instrumento.]{.takeaway .fragment}
+
+::: {.notes}
+pyfixest corre ambas etapas internamente y, lo importante, calcula errores estándar correctos de MC2E. Correr las dos etapas a mano con MCO da el coeficiente correcto pero EE incorrectos.
+:::
+
+## Salida: la estimación VI es 1.8× la estimación de MCO {.smaller}
+
+| Variable | Coef. | EE HC1 | $t$ | $p$ | IC 95% |
+|:----------------------|------:|------:|----:|----:|:-------------|
+| Intercepto | 1.910 | 1.193 | 1.60 | 0.114 | [−0.47,&nbsp;4.29] |
+| `avexpr` (instrumentada) | [0.944]{.key} | 0.179 | 5.28 | <&nbsp;0.001 | [0.587,&nbsp;1.302] |
+
+[N = 64 · MC2E, instrumento `logem4` · EE HC1]{.comment}
+
+[Un punto más de calidad institucional *causa* 0.94 puntos log más de PIB per cápita, si el instrumento es válido.]{.takeaway .fragment}
+
+::: {.notes}
+Coeficiente VI 0.944 vs MCO 0.522 (razón 1.81, así que VI es cerca de 80% mayor). Nota que el EE es 3.6× mayor que el de MCO (0.179 vs 0.050): VI usa solo la parte de la variación en instituciones impulsada por la mortalidad de los colonos, así que es menos preciso.
+:::
+
+## VI = forma reducida ÷ primera etapa
+
+$$\hat\beta_{IV} = \frac{\text{effect of } Z \text{ on } Y}{\text{effect of } Z \text{ on } X} = \frac{-0.573}{-0.607} = 0.944$$
+
+![](figures/fig_iv_fs_rf.png){width="78%"}
+
+[Forma reducida: $-0.573$ es la pendiente del log del PIB sobre el log de la mortalidad de los colonos (MCO bivariado, los mismos 64 países).]{.comment}
+
+[VI reescala el efecto total del instrumento sobre el PIB por su efecto sobre las instituciones. Todo el poder de identificación viene de la mortalidad de los colonos.]{.takeaway .fragment}
+
+::: {.notes}
+Con un instrumento y ningún otro regresor, MC2E es igual a la razón de la pendiente de la forma reducida entre la pendiente de la primera etapa (mínimos cuadrados indirectos). La regresión de forma reducida (logpgp95 sobre logem4) se calcula para las diapositivas; la razón reproduce exactamente el 0.944 del capítulo. Si la restricción de exclusión falla, de modo que la mortalidad afecta el PIB por algún otro canal, el numerador incluye ese canal y la estimación VI está sesgada.
+:::
+
+## MCO vs VI: misma pregunta, distinta fuente de variación {.smaller}
+
+| | MCO | MC2E (VI) |
+|:--|--:|--:|
+| Coeficiente de `avexpr` | 0.522 | [0.944]{.key} |
+| Error estándar (HC1) | 0.050 | 0.179 |
+| IC 95% | [0.42,&nbsp;0.62] | [0.59,&nbsp;1.30] |
+| Efecto en PIB de +1 punto del índice, $100(e^{b}-1)$ | +69% | [+157%]{.key} |
+| Efecto en PIB de +1 DE de `avexpr` (1.47 puntos) | ×2.2 | ×4.0 |
+| Variación usada | toda la variación en instituciones | solo la parte impulsada por la mortalidad de los colonos |
+
+[La estimación VI es mayor **y** menos precisa. Bajo los supuestos de VI, MCO *subestimó* el efecto de las instituciones.]{.takeaway .fragment}
+
+::: {.notes}
+Conversiones exactas: e^0.944 = 2.57, así que +157% (el "2.57×" del capítulo); e^0.522 = 1.69, así que +69%. Cálculos de una DE: 0.944 × 1.47 = 1.39 puntos log → e^1.39 ≈ 4.0; 0.522 × 1.47 = 0.77 → ≈ 2.2. La lectura estilo "≈ 0.94%" sería errónea: el resultado está en logaritmos y el regresor en puntos de índice.
+:::
+
+## ¿Por qué VI es mayor que MCO?
+
+::: {.incremental}
+- **La explicación del capítulo, atenuación**: el error de medición en `avexpr` sesga MCO hacia cero; VI, usando una variable no relacionada con ese error, lo corrige
+- La causación inversa y las variables omitidas empujarían MCO **al alza**, así que una estimación VI *mayor* es consistente con que el error de medición domine
+- **Pero otras lecturas también encajan**: con efectos heterogéneos, VI estima un efecto *local* para los países cuyas instituciones fueron moldeadas por la mortalidad de los colonos, que no tiene por qué igualar el efecto promedio
+- Y si la restricción de exclusión falla (p. ej. el entorno de enfermedades afecta el PIB directamente), la estimación VI misma está sesgada
+:::
+
+[MCO < VI es *consistente con* el sesgo de atenuación. No lo prueba.]{.takeaway .fragment}
+
+::: {.notes}
+El capítulo dice que VI > MCO apunta al error de medición como el sesgo dominante. Es una lectura razonable, y AJR (2001) hacen el mismo argumento, pero es una de varias explicaciones, y los estudiantes deben sostenerla con la incertidumbre apropiada.
+:::
+
+## Amenazas: todo descansa sobre la restricción de exclusión
+
+::: {.incremental}
+- **Exclusión**: la mortalidad de los colonos refleja el **entorno de enfermedades** y la **geografía**, que pueden afectar el PIB directamente, no solo a través de las instituciones
+- **Otros canales**: los colonos trajeron capital humano, idioma y origen legal, no solo instituciones
+- **Crítica a los datos**: la serie de mortalidad de los colonos ha sido cuestionada (p. ej. Albouy 2012), y las reestimaciones con datos revisados son más débiles
+- **Margen de instrumento débil**: $F = 16.3$ pasa la regla $F > 10$, pero trabajos recientes argumentan que las pruebas $t$ estándar necesitan una primera etapa mucho más fuerte
+- **Muestra pequeña**: 64 países, así que unas pocas observaciones influyentes importan
+:::
+
+[VI es tan bueno como su historia. La mortalidad de los colonos es un instrumento famoso e influyente, y muy debatido.]{.takeaway .fragment}
+
+::: {.notes}
+Advertencias estándar de VI y el principal debate publicado: Glaeser et al. (2004) argumentan que los colonos trajeron capital humano; Albouy (2012, AER) cuestiona los datos de mortalidad. Lee, McCrary, Moreira y Porter (2022, AER) muestran que las pruebas t válidas al 5% necesitan un F de primera etapa por encima de cerca de 104 bajo el valor crítico convencional. La advertencia propia del capítulo: los resultados aplican a excolonias, y el cambio institucional es lento.
+:::
+
+# Caso 13.9 · De los datos crudos a los datos finales {#case-139 .divider background-color="#7A209F"}
+
+[Leer · combinar · limpiar · el trabajo detrás de cada regresión]{.act}
+
+::: {.notes}
+El caso 13.9 no es un caso de estimación: es el flujo de trabajo que sostiene a todos los demás. Sección corta: por qué importa, luego los dos ejemplos trabajados del capítulo (combinar, limpiar).
+:::
+
+## La mayor parte de un proyecto empírico ocurre antes de la primera regresión {.smaller}
+
+:::: {.columns}
+::: {.column width="50%"}
+### Desafíos comunes
+- **Valores faltantes**: ¿descartar, imputar o modelar?
+- **Valores atípicos**: ¿extremos reales o errores de tipeo?
+- **Unidades**: monedas, inflación, escalas
+- **Frecuencias**: mensual vs trimestral
+- **Codificación**: `"M"`, `"m"`, `"Male"`
+:::
+::: {.column width="50%"}
+### Mejores prácticas
+- **Nunca sobrescribas los datos crudos**
+- **Programa cada paso** (sin ediciones manuales en hojas de cálculo)
+- **Valida**: estadísticas de resumen antes y después
+- **Reporta** cuántas filas se descartaron y por qué
+- **Documenta** cada decisión
+:::
+::::
+
+[La preparación de datos suele tomar el 60–80% del tiempo de un proyecto, y cada decisión puede mover el coeficiente final.]{.takeaway .fragment}
+
+::: {.notes}
+La cifra del capítulo del 60–80% del tiempo en preparación de datos es una regla general común. El punto para los estudiantes: las decisiones de manipulación son decisiones de modelado y deben reportarse.
+:::
+
+## Cada caso de este capítulo manipuló primero sus datos {.smaller}
+
+| Caso | Paso de manipulación | Por qué importa |
+|:--|:--|:--|
+| 13.2 Cobb–Douglas | `np.log()` de $Q$, $K$, $L$; un índice de tiempo | los logaritmos lo hacen lineal; HAC necesita orden temporal |
+| 13.3 Phillips | dividir en 1970; `dropna(subset=["inflgdp1yr"])` | los modelos largo y corto deben compartir muestra |
+| 13.4 Autos | logaritmos precalculados (`lmpg`, `lcurbwt`, …) | elasticidades sin transformaciones manuales |
+| 13.5 RAND | conservar `year == 1` | una observación por persona |
+| 13.7 Titularidad | descartar `vote` faltante (1,390 → 1,297) | sin resultado, sin observación |
+
+[Cada línea cambió la muestra de estimación o el significado de un coeficiente, por eso pertenece al informe.]{.takeaway .fragment}
+
+::: {.notes}
+Reúne los pequeños pasos de datos de los casos anteriores. En 13.3, por ejemplo, la descomposición exacta del SVO solo se cumple porque las regresiones corta y larga usan los mismos 45 años.
+:::
+
+## Código: leyendo formatos y combinando tablas
+
+``` {.python code-line-numbers="1-4|5-7|8-9"}
+import pandas as pd                         # tabular data
+# data = pd.read_stata("file.dta")          # Stata files
+# data = pd.read_csv("file.csv")            # comma-separated text
+# data = pd.read_excel("file.xlsx")         # Excel workbooks
+df1 = pd.DataFrame({"id": [1, 2, 3], "value_a": [10, 20, 30]})     # table A
+df2 = pd.DataFrame({"id": [1, 2, 4], "value_b": [100, 200, 400]})  # table B
+print(df1); print(df2)                      # ids 3 and 4 appear in only one table
+merged = pd.merge(df1, df2, on="id", how="inner")   # keep ids present in BOTH
+print(merged)                               # the inner join result
+```
+
+[↗ Pruébalo en Colab](https://colab.research.google.com/notebooks/empty.ipynb){.colab-link target="_blank" data-preview-link="false"}
+
+::: {.notes}
+Las líneas de lectura están comentadas en el capítulo (son plantillas, no archivos reales). Tipos de combinación: how="inner" conserva solo las coincidencias; "left" conserva todo df1; "outer" conserva todo, rellenando huecos con NaN.
+:::
+
+## Salida: un inner join descarta en silencio las filas que no coinciden
+
+:::: {.columns}
+::: {.column width="30%"}
+| `id` | `value_a` |
+|--:|--:|
+| 1 | 10 |
+| 2 | 20 |
+| [3]{.key} | 30 |
+
+[df1]{.comment}
+:::
+::: {.column width="30%"}
+| `id` | `value_b` |
+|--:|--:|
+| 1 | 100 |
+| 2 | 200 |
+| [4]{.key} | 400 |
+
+[df2]{.comment}
+:::
+::: {.column width="40%"}
+| `id` | `value_a` | `value_b` |
+|--:|--:|--:|
+| 1 | 10 | 100 |
+| 2 | 20 | 200 |
+
+[merged (inner join): los ids 3 y 4 desaparecieron]{.comment}
+:::
+::::
+
+[Siempre cuenta las filas antes y después de una combinación. Las observaciones perdidas son evidencia perdida, y pueden ser una fuente de selección.]{.takeaway .fragment}
+
+::: {.notes}
+Tres filas de entrada, tres filas de entrada, dos filas de salida. Si las filas que no coinciden son sistemáticamente distintas (p. ej. empresas pequeñas ausentes de una fuente), la combinación misma cambia la población que analizas.
+:::
+
+## Código: limpiando valores imposibles, huecos y códigos inconsistentes
+
+``` {.python code-line-numbers="1-6|7-9|10|11"}
+import numpy as np                          # np.nan marks missing values
+import pandas as pd                         # tabular data
+df_dirty = pd.DataFrame({"age": [25, 30, -5, 200, 35],             # two impossible ages
+                         "income": [50000, 60000, None, 75000, 80000],  # one missing
+                         "gender": ["M", "F", "m", "Female", "M"]})     # inconsistent codes
+df_clean = df_dirty.copy()                  # never overwrite the raw data
+df_clean.loc[df_clean["age"] < 0, "age"] = np.nan     # impossible: negative age → missing
+df_clean.loc[df_clean["age"] > 120, "age"] = np.nan   # impossible: age above 120 → missing
+df_clean["income"] = df_clean["income"].fillna(df_clean["income"].median())  # median impute
+df_clean["gender"] = df_clean["gender"].str.upper().str[0]   # "m"/"Female" → "M"/"F"
+print(df_dirty); print(df_clean)            # before and after
+```
+
+[↗ Pruébalo en Colab](https://colab.research.google.com/notebooks/empty.ipynb){.colab-link target="_blank" data-preview-link="false"}
+
+::: {.notes}
+El ejemplo de limpieza del capítulo: detectar valores imposibles, imputar un valor faltante, estandarizar una variable categórica. Cada paso está programado y es reversible porque se conserva el marco crudo.
+:::
+
+## Salida: antes y después de limpiar
+
+:::: {.columns}
+::: {.column width="50%"}
+| `age` | `income` | `gender` |
+|--:|--:|:-:|
+| 25 | 50,000 | M |
+| 30 | 60,000 | F |
+| [−5]{.key} | [NaN]{.key} | [m]{.key} |
+| [200]{.key} | 75,000 | [Female]{.key} |
+| 35 | 80,000 | M |
+
+[crudo]{.comment}
+:::
+::: {.column width="50%"}
+| `age` | `income` | `gender` |
+|--:|--:|:-:|
+| 25 | 50,000 | M |
+| 30 | 60,000 | F |
+| NaN | 67,500 | M |
+| NaN | 75,000 | F |
+| 35 | 80,000 | M |
+
+[limpio]{.comment}
+:::
+::::
+
+[La imputación rellena el hueco con 67,500 (la mediana de los cuatro ingresos observados), pero inventa certeza. Marca los valores imputados y reporta cuántos hay.]{.takeaway .fragment}
+
+::: {.notes}
+Mediana de 50,000, 60,000, 75,000, 80,000 = 67,500. La imputación por mediana reduce la varianza del ingreso y puede sesgar las relaciones con otras variables; un indicador de valor faltante, o la imputación múltiple, es más honesto. Poner las edades imposibles en NaN (en vez de adivinar) es la elección conservadora.
+:::
+
+# Leyéndolo bien {.divider background-color="#C21E72"}
+
+[Acto III · La resolución]{.act}
+
+::: {.notes}
+Síntesis: comparar los cuatro diseños, decidir cuál se ajusta a una pregunta, revisar los números ingenuo-vs-diseño, y salir con una lista de verificación para interpretar cualquier coeficiente.
+:::
+
+## Cuatro diseños, lado a lado {.smaller}
+
+| | ECA (13.5) | DiD (13.6) | RD (13.7) | VI (13.8) |
+|:--|:--|:--|:--|:--|
+| **Fuente de variación** | asignación aleatoria | grupo × periodo | un umbral nítido | un instrumento |
+| **Supuesto de identificación** | aleatorización intacta | tendencias paralelas | continuidad en el umbral | relevancia + exclusión |
+| **Estimando** | efecto promedio en el experimento | efecto sobre los tratados (ATT) | efecto en el umbral (local) | efecto promedio local (LATE) |
+| **Amenaza principal** | deserción, incumplimiento | tendencias previas, otros shocks | manipulación, forma funcional | exclusión inválida, instrumento débil |
+| **¿Comprobable?** | equilibrio de covariables | tendencias previas (más periodos) | densidad, equilibrio en 0 | solo relevancia ($F$) |
+| **Estimación del capítulo** | [−\$1,108]{.key} (plan 95%) | [+0.52]{.key} unidades z | [+4.8 pp]{.key} | [0.94]{.key} puntos log |
+
+[Cada diseño compra credibilidad con un supuesto. Sabe cuál supuesto compraste, y para quién se sostiene la estimación.]{.takeaway .fragment}
+
+::: {.notes}
+La fila del estimando importa tanto como la estimación: cada diseño responde una pregunta ligeramente distinta. La RD es local a elecciones reñidas; VI es local a la variación impulsada por el instrumento; el DiD es para el grupo tratado; el ECA es para los participantes del experimento.
+:::
+
+## ¿Qué diseño se ajusta a tu pregunta?
+
+::: {.incremental}
+- **¿Puedes aleatorizar** el tratamiento? Corre un **ECA**
+- ¿El tratamiento se activa en un **umbral conocido** de un puntaje, margen o fecha? Usa **RD**
+- ¿Observas grupos tratados y no tratados **antes y después** del tratamiento? Usa **DiD**, y defiende las tendencias paralelas
+- ¿Hay una variable que desplaza el tratamiento pero afecta el resultado **solo a través de él**? Usa **VI**, y defiende la exclusión
+- **¿Ninguna de estas?** Entonces una regresión con controles da una *asociación condicional*; usa la fórmula del SVO para signar el sesgo probable
+:::
+
+[Parte de la fuente de variación, no del estimador. El estimador casi siempre es MCO o MC2E.]{.takeaway .fragment}
+
+::: {.notes}
+Una guía de decisión, no un algoritmo estricto: muchos estudios reales combinan diseños (p. ej. DiD con un umbral estilo RD, o VI dentro de un ECA con cumplimiento imperfecto).
+:::
+
+## Ingenuo vs diseño: qué tan lejos estaban los números {.smaller}
+
+| Caso | Comparación ingenua | Ingenuo | Diseño | Basado en diseño |
+|:--|:--|--:|:--|--:|
+| 13.3 | pendiente bivariada, 1970–2014 | +0.265 | añadir inflación esperada | [−0.128]{.key} |
+| 13.6 | tratados, antes vs después | +0.867 | DiD | [+0.522]{.key} |
+| 13.6 | tratados vs control, solo 1998 | +0.391 | DiD | [+0.522]{.key} |
+| 13.7 | todos los ganadores vs todos los perdedores | +21.7 pp | RD en el umbral | [+4.8 pp]{.key} |
+| 13.8 | MCO | 0.522 | MC2E | [0.944]{.key} |
+
+[Los números ingenuos no estaban ligeramente desviados: el signo equivocado (13.3), 66% demasiado grande o 25% demasiado pequeño (13.6), 4.5× demasiado grande (13.7), 45% por debajo de la estimación VI (13.8).]{.takeaway .fragment}
+
+::: {.notes}
+13.3 no es un diseño causal sino un diagnóstico de variable omitida; se incluye porque muestra el mismo patrón. El ECA no tiene contraparte ingenua en los datos (todos fueron aleatorizados), que es exactamente el punto: la aleatorización elimina la necesidad de una. El sesgo va en ambas direcciones entre casos, así que ninguna "regla" dice que las estimaciones ingenuas son demasiado grandes.
+:::
+
+## El error tentador — y la corrección
+
+[Objeción.]{.objection} "Simplemente añade suficientes controles y cualquier regresión se vuelve causal."
+
+. . .
+
+[Respuesta.]{.rebuttal} Los controles cierran solo los factores de confusión que puedes **medir**. En 13.1, cinco controles dejaron la pendiente de educación de los padres casi sin cambios, y eso no es evidencia de que sea causal. En 13.7, comparar ganadores con perdedores da 21.7 puntos; el umbral da 4.8.
+
+[La identificación viene del *diseño*, no del conjunto de datos. Pregunta "¿de dónde viene la variación?" antes de preguntar "¿cuál es el coeficiente?"]{.takeaway .fragment}
+
+::: {.notes}
+Fortalece la objeción: los controles sí ayudan, y la fórmula del SVO muestra cómo. Pero la estabilidad de un coeficiente cuando se añaden controles no es prueba de causalidad, porque las variables que más importan suelen ser las que no observas.
+:::
+
+## Cinco preguntas para hacerle a cualquier coeficiente
+
+::: {.incremental}
+1. **Unidades**: ¿niveles, logaritmos o ambos? ¿Una elasticidad, una semielasticidad ($100(e^b-1)\%$), puntos porcentuales, o unidades $z$?
+2. **¿Condicional a qué?** ¿Qué variables se mantienen fijas, y cuáles no?
+3. **¿Qué error estándar?** HC1, HAC o agrupado: ¿coincide con la forma en que se generaron los datos?
+4. **¿De dónde viene la variación?** ¿Autoselección, aleatorización, un quiebre de tendencia, un umbral, un instrumento?
+5. **¿Para quién?** ¿Todos (ATE), los tratados (ATT), elecciones reñidas (local), o los que cumplen con el instrumento (LATE)?
+:::
+
+[Las lecturas erróneas más comunes vienen de saltarse la pregunta 1: "4.8%" en vez de 4.8 puntos porcentuales, "0.52 DE" sin decir *cuál* DE, o "1%" para un cambio de puntos porcentuales.]{.takeaway .fragment}
+
+::: {.notes}
+Una lista de verificación que los estudiantes pueden aplicar a cualquier salida de regresión. Los errores de unidad corregidos en este deck: efecto RD en puntos porcentuales (no %), efecto DiD en unidades z de la población de referencia (no DE muestrales), pendiente de Phillips en puntos porcentuales de inflación por punto porcentual de desempleo, y efectos de resultado logarítmico convertidos con e^b − 1.
+:::
+
+## Qué llevarse
+
+::: {.incremental}
+- **Un estimador, nueve preguntas**: `pf.feols` desde los puntajes escolares hasta la riqueza de las naciones
+- Los **logaritmos** dan elasticidades; la suma de las elasticidades de Cobb–Douglas prueba los rendimientos a escala
+- Una **variable omitida** puede invertir un signo, y $E[b_2]=\beta_2+\beta_3\gamma$ dice exactamente en cuánto
+- **Haz coincidir el error estándar con los datos**: `HC1`, `NW` para series de tiempo, `CRV1` para grupos; en 13.4 el agrupamiento cambió los EE 6–9×
+- **ECA / DiD / RD / VI** imputan cada uno el contrafactual de forma distinta, y cada uno descansa sobre un supuesto que debes defender
+- **La manipulación es modelado**: cada restricción de muestra pertenece al informe
+:::
+
+::: {.notes}
+Repaso de los Puntos Clave del capítulo, actualizado con lo que el deck verificó: descomposición exacta del SVO, el tamaño de la corrección por agrupamiento, las brechas ingenuo-vs-diseño, y las convenciones de unidades.
+:::
+
+# Nueve expedientes, una sola lección: una pendiente causal se gana por diseño, no por añadir controles. {.divider background-color="#C21E72"}

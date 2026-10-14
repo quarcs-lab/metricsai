@@ -1,0 +1,278 @@
+---
+title: "12. 重回帰の追加トピック"
+subtitle: "ロバスト標準誤差、予測、そして検定の限界"
+deck-author: "Carlos Mendez"
+deck-author-url: "https://carlos-mendez.org"
+institute: "Nagoya University (GSID)"
+date: today
+date-format: long
+visual-summary: "figures/visual_summary.png"
+format:
+  revealjs:
+    output-file: index.ja.html
+    theme: [default, site-brand.scss]
+    template-partials:
+      - title-slide.html
+    include-after-body: figure-zoom.html
+    center: true
+    slide-number: c/t
+    menu: true
+    chalkboard: true
+    preview-links: auto
+    overview: true
+    progress: true
+    history: true
+    transition: fade
+    width: 1280
+    height: 720
+    fig-align: center
+    auto-stretch: true
+    highlight-style: github
+    link-external-icon: false
+---
+
+# 標準的な仮定が崩れるとき {.divider background-color="#008CB7"}
+
+[第I幕 · 緊張]{.act}
+
+## OLS（最小二乗法）は正しい直線を与える — しかし確信度については嘘をつくことがある
+
+古典的な標準誤差の公式は、誤差が独立で等しく散らばっていると仮定します。現実のデータが
+そのとおりに協力することはめったにありません。横断面データは**不均一分散**であり、
+グループ化されたデータは**クラスター化**されており、時系列データには**自己相関**があります。
+
+. . .
+
+これら三つのいずれの場合でも、OLSの係数は**不偏**のままです — 直線は依然として正しいのです。
+崩れるのは**標準誤差**です。それに基づいて構築される$t$統計量、$p$値、区間が信頼できなくなります。
+本章ではまず不確実性を修復し、その後、回帰が何を予測でき、何を予測できないのかを問います。
+
+::: {.notes}
+本章全体を貫く中心的なメンタルモデル：係数は変わらず、推測は修復される。
+第II幕のすべては異なる修復であり、第III幕はいかなる修復でも取り除けない限界についてです。
+:::
+
+## これから進む道
+
+::: {.incremental}
+- **標準誤差を修復する** — 不均一分散にロバスト（HC1）、クラスターにロバスト、HAC（Newey–West）
+- **誠実に予測する** — 平均的な結果 対 一つの個別の結果
+- **下限を知る** — 標本サイズに関わらず個別予測が広いままである理由
+- **標本に注意する** — $Y$に基づく選択はバイアスを生み、$X$に基づく選択は精度を損なうだけ
+- **推定量と検定を評価する** — BLUE（最良線形不偏推定量）、ブートストラップ、検定の検出力
+:::
+
+## 六つのアイデアが本章を支える
+
+::: {.incremental}
+- **ロバスト標準誤差** — 不均一分散にはHC1。係数は変わらず、標準誤差だけが動く
+- **クラスターロバスト標準誤差** — 誤差はグループ*内*で相関し、グループ間では独立
+- **自己相関** — ある期間の誤差が次の期間に反響する。**HAC**標準誤差で修正する
+- **$E[Y\mid X^*]$の信頼区間** — *平均的な*結果。$n\to\infty$のときゼロへ縮小する
+- **予測区間** — 一つの*個別の*結果。「$1+$」の下限は決して消えない
+- **検出力 $=1-\beta$** — 真の効果が実際に検出される確率
+:::
+
+[係数はそのまま残る。本章は、それらの*周り*の数値をどう信頼するかについてです。]{.takeaway .fragment}
+
+# 標準誤差を修復する {.divider background-color="#7A209F"}
+
+[第II幕 · 調査]{.act}
+
+## 三つの違反、三つの修正 — 係数は決して変わらない
+
+::: {.incremental}
+- **不均一分散**（誤差分散が変動する） — 横断面データで一般的 → **HC1**ロバスト標準誤差
+- **クラスター化された誤差**（グループ内で相関する） — パネル、階層構造 → **クラスターロバスト**標準誤差
+- **自己相関**（誤差が時間的に相関する） — 時系列 → **HAC（Newey–West）**標準誤差
+:::
+
+[OLSの点推定値は三つのいずれの場合でも不偏です。補正が必要なのは標準誤差だけです。]{.takeaway .fragment}
+
+## ロバスト標準誤差はキーワード一つ：`vcov="HC1"`
+
+``` {.python code-line-numbers="1|3-4|6-7|9-10|12"}
+!pip install -q pyfixest                     # pyfixest isn't preinstalled in Colab (-q = quiet)
+
+import pandas as pd                          # tabular data
+import pyfixest as pf                         # pyfixest → OLS with robust SEs, R-style formulas
+
+url = "https://raw.githubusercontent.com/quarcs-lab/data-open/master/AED/AED_HOUSE.DTA"
+data = pd.read_stata(url)                    # 29 Davis, CA house sales (1999)
+
+f = "price ~ size + bedrooms + bathrooms + lotsize + age + monthsold"
+default = pf.feols(f, data=data)             # classical SEs (assume homoskedasticity)
+
+robust = pf.feols(f, data=data, vcov="HC1")  # SAME coefficients, heteroskedastic-robust SEs
+```
+
+[↗ Colab で試す](https://colab.research.google.com/notebooks/empty.ipynb){.colab-link target="_blank" data-preview-link="false"}
+
+::: {.notes}
+`vcov="HC1"`が変更のすべてです。点推定値はデフォルトの当てはめとバイト単位で同一であり、
+`.se()`、`.tstat()`、`.pvalue()`、`.confint()`だけが異なります。
+:::
+
+## これらの住宅では、ロバスト標準誤差は同じ結論を語る
+
+1平方フィート増えるごとに販売価格はおよそ**\$68**の価値があり、どちらの方法でも強く
+有意です。`size`のロバスト標準誤差は**15.36**で、デフォルトの**15.39**と同程度です（$p = 0.0002$）。
+
+. . .
+
+最大の調整は`bathrooms`（ロバスト標準誤差が約23%大きい）と`lotsize`（約26%
+小さい）ですが、どちらの方法でも両者とも有意から遠いままです。
+
+[経験則：ロバスト標準誤差が約30%以上動くなら、不均一分散は本物です — ロバストな方を報告しましょう。]{.takeaway .fragment}
+
+## 時系列は反響を伴う — コレログラムがそれを示す
+
+![米国の実質一人当たりGDP成長率のコレログラム（T = 241）。陰影のついた帯の外側の棒は統計的に有意である。ラグ1の正の値は、高成長の年が集中することを意味する。](figures/fig_correlogram.png)
+
+[正の自己相関は、連続した観測値が独立でないことを意味します — したがって、標本数が示唆するよりも*少ない*情報しかありません。]{.takeaway .fragment}
+
+## HAC（Newey–West）標準誤差はその反響を考慮する
+
+``` {.python code-line-numbers="1-2|4-5|7|9|11-12|14"}
+import numpy as np                           # numerics
+from statsmodels.regression.linear_model import OLS as smOLS  # for HAC covariance
+
+url = "https://raw.githubusercontent.com/quarcs-lab/data-open/master/AED/AED_REALGDPPC.DTA"
+growth = pd.read_stata(url)["growth"].dropna()   # real GDP-per-capita growth series
+
+n = len(growth); m = int(0.75 * n**(1/3))    # Newey–West lag rule m ≈ 0.75·T^(1/3) → 4
+
+se_default = growth.std() / np.sqrt(n)        # assumes independence (too small here)
+
+fit = smOLS(growth, np.ones(n)).fit(         # intercept-only model = the mean growth rate
+          cov_type="HAC", cov_kwds={"maxlags": m})  # HAC-corrected covariance
+
+print(se_default, fit.bse.iloc[0])           # HAC SE is LARGER — honest about serial dependence
+```
+
+[↗ Colab で試す](https://colab.research.google.com/notebooks/empty.ipynb){.colab-link target="_blank" data-preview-link="false"}
+
+::: {.notes}
+平均成長率は切片のみのOLSとして当てはめ、HACがきれいに適用されるようにしています。HAC標準誤差がデフォルトを上回るのは、
+まさに正のラグ1自己相関によって実効的に独立な観測値が少なくなるためです。
+:::
+
+## 予測は二つに分かれる：平均 対 個別
+
+同じ当てはめた直線が、まったく異なる精度で、二つの異なる問いに答えます。
+
+$$\underbrace{E[Y\mid X^*]}_{\text{平均的な結果}} \qquad\text{vs.}\qquad \underbrace{Y\mid X^* = E[Y\mid X^*] + u^*}_{\text{一つの個別の結果}}$$
+
+[個別の結果は、余分で還元不可能な項$u^*$を伴います — 平方根の下にある「$1+$」であり、無限のデータがあっても**決して**縮小しません。]{.takeaway .fragment}
+
+## 価格を予測する — そして両方の区間を
+
+``` {.python code-line-numbers="1|3|5-6|8-9|11-13|15"}
+from scipy import stats                      # t-distribution for interval widths
+
+fit = pf.feols("price ~ size", data=data)    # simple regression on size
+
+x = data["size"].values; xbar = x.mean()     # ingredients for the SE formulas
+Sxx = ((x - xbar)**2).sum(); n = len(data)
+
+s_e = np.sqrt((fit._u_hat**2).sum() / (n - 2))   # RMSE — the irreducible noise floor s_e
+pred = fit.predict(newdata=pd.DataFrame({"size": [2000]}))[0]  # point prediction at 2000 sq ft
+
+t = stats.t.ppf(0.975, n - 2)                # 95% critical value, df = n − 2
+se_cm = s_e * np.sqrt(1/n + (2000 - xbar)**2 / Sxx)        # conditional-MEAN SE
+se_pi = s_e * np.sqrt(1 + 1/n + (2000 - xbar)**2 / Sxx)    # INDIVIDUAL SE (note the leading 1)
+
+print(pred, t*se_cm, t*se_pi)                # point, CI half-width, PI half-width
+```
+
+[↗ Colab で試す](https://colab.research.google.com/notebooks/empty.ipynb){.colab-link target="_blank" data-preview-link="false"}
+
+::: {.notes}
+点予測は両方とも同じ（~$263k）です。se_cmとse_piの唯一の違いは先頭の「1」であり、
+これはVar(u*)です。この一つの項こそが、二つの区間が約5倍異なる理由です。
+:::
+
+## 予測区間は約5倍広い — そしてそのままである
+
+![パネルA：*平均的な*2{,}000平方フィートの価格に対する狭い95%信頼区間。パネルB：*一軒の*住宅に対するはるかに広い95%予測区間。漏斗はデータの中心から離れるほど広がる。](figures/fig_ci_vs_pi.png)
+
+[2{,}000平方フィートの住宅の場合：点 ≈ \$263k · 信頼区間 ≈ [\$253k, \$272k] · 予測区間 ≈ [\$213k, \$312k]。データが増えると信頼区間は狭まるが、予測区間にはほとんど影響しない。]{.takeaway .fragment}
+
+## 偏った標本は直線そのものを壊すことがある
+
+::: {.incremental}
+- **$X$に基づく選択**（例：大きな住宅を過剰抽出する） — $X$がモデルに含まれていれば、OLSは**不偏**のまま。精度を失うだけです。
+- **$Y$に基づく選択**（例：調査が高所得者を除外する） — OLSは母集団に対して**バイアスがかかる**。標本ウェイト、Heckman補正、または選択モデルが必要です。
+:::
+
+[いかなるロバスト標準誤差も悪い標本を修復できません。その標本が、あなたの関心のある母集団を代表しているかを常に問いましょう。]{.takeaway .fragment}
+
+# 最良の推定量、そして検定の限界 {.divider background-color="#C21E72"}
+
+[第III幕 · 解決]{.act}
+
+## OLSは「最良」 — その仮定が崩れるまで
+
+古典的な仮定の下では、OLSはGauss–Markov定理により**BLUE（最良線形不偏推定量）**です。
+均一分散または独立性が崩れると、OLSは不偏のままですが、もはや最も有効ではありません —
+**実行可能GLS（FGLS）**の方がより精密になり得ます。
+
+. . .
+
+実務では、ほとんどの応用研究は**OLSとロバスト標準誤差**を用い続けます。効率の損失は小さく、
+定式化を誤ったGLSの重み付けモデルは、益よりも害をもたらすことがあるからです。
+
+[デフォルトはOLS + ロバスト標準誤差。FGLSに頼るのは、誤差分散のモデルを信頼できるときだけにしましょう。]{.takeaway .fragment}
+
+## ブートストラップ：データ自身に分布を描かせる
+
+正規近似を信頼する代わりに、**復元抽出でデータを再標本化**し、約1,000回それぞれ
+再推定し、得られた係数の2.5パーセンタイルと97.5パーセンタイルを95%信頼区間として
+読み取ります。
+
+[ブートストラップは正規性を仮定せず、扱いにくい統計量にも使えます — この$n = 29$軒の住宅のような小標本に理想的です。]{.takeaway .fragment}
+
+## すべての検定は二つの誤り方の間でトレードオフする
+
+| 判断 | $H_0$が真 | $H_0$が偽 |
+|---|---|---|
+| $H_0$を棄却する | **第一種の過誤**（$\alpha$） | 正しい — **検出力** |
+| 棄却しない | 正しい | **第二種の過誤**（$\beta$） |
+
+$\alpha$を厳しくすると偽陽性は減りますが、$\beta$は上がります — 検出される真の効果が減ります。
+**検出力 $= 1-\beta$**は、真の効果を捉える確率です。
+
+[$n=29$だけでは、bedroomsの検定は棄却できませんでした（$p=0.773$） — おそらく第二種の見逃しであり、「効果なし」の証明ではありません。]{.takeaway .fragment}
+
+## 検出力は効果量とともに上がる — そして標本とともに
+
+![$n=30$、標準誤差 $=15$、$\alpha=0.05$における検出力曲線。検出力は$\beta=0$で$\alpha$に等しく、真の効果が大きくなるにつれて1へ上昇する。](figures/fig_power.png)
+
+``` {.python code-line-numbers="1|3-5|7-10|12"}
+from scipy import stats; import numpy as np  # distributions + numerics
+
+alpha, se, n = 0.05, 15, 30                  # significance, hypothetical SE, sample size
+tcrit = stats.t.ppf(1 - alpha/2, df=n - 1)   # two-sided critical value
+betas = np.linspace(-60, 60, 500)            # grid of true effect sizes to evaluate
+
+ncp = betas / se                             # non-centrality: effect in SE units
+power = 1 - (stats.t.cdf(tcrit - ncp, n - 1) # P(reject | true β) under the alternative
+             - stats.t.cdf(-tcrit - ncp, n - 1))
+
+# here power reaches the 0.80 target only around |β| ≈ 44 — small effects need a bigger n
+print(betas[np.argmax(power >= 0.80)])
+```
+
+[↗ Colab で試す](https://colab.research.google.com/notebooks/empty.ipynb){.colab-link target="_blank" data-preview-link="false"}
+
+## 次に持ち越すこと
+
+::: {.incremental}
+- OLSの係数は不均一分散、クラスタリング、自己相関を乗り越えます — 修復が必要なのは**標準誤差**です：HC1 / クラスター / HAC。
+- 修正は安価です：`vcov=`キーワード一つ、あるいは時系列の平均に対する切片のみのHACの当てはめです。
+- **平均**を予測するのは精密ですが、**個別**を予測するのはそうではありません — 「$1+$」の下限は永遠に$\approx s_e$です。
+- $Y$に基づく選択は**バイアスを生み**、$X$に基づく選択は精度を損なうだけです — ロバスト標準誤差は悪い標本を救えません。
+- OLS + ロバスト標準誤差は安全なデフォルトであり、**ブートストラップ**は正規性を回避し、**検出力**は帰無結果の意味を決めます。
+:::
+
+# 直線を信頼し、不確実性を修復する — そして標本が語れないことを尊重しよう。 {.divider background-color="#C21E72"}

@@ -1,0 +1,1545 @@
+---
+title: "7. Inferencia estadística para regresión bivariada"
+subtitle: "¿Es real la pendiente? Errores estándar, estadísticos t, intervalos de confianza y pruebas"
+deck-author: "Carlos Mendez"
+deck-author-url: "https://carlos-mendez.org"
+institute: "Nagoya University (GSID)"
+date: today
+date-format: long
+visual-summary: "figures/visual_summary.png"
+format:
+  revealjs:
+    output-file: index.es.html
+    theme: [default, site-brand.scss]
+    css: ch07-extra.css
+    template-partials:
+      - title-slide.html
+    include-after-body: figure-zoom.html
+    center: true
+    slide-number: c/t
+    menu: true
+    chalkboard: true
+    preview-links: auto
+    overview: true
+    progress: true
+    history: true
+    transition: fade
+    width: 1280
+    height: 720
+    fig-align: center
+    auto-stretch: true
+    highlight-style: github
+    link-external-icon: false
+---
+
+# Una muestra, una pendiente: ¿cuánto deberíamos confiar en ella? {.divider background-color="#008CB7"}
+
+[Acto I · La tensión]{.act}
+
+::: {.notes}
+Este capítulo convierte una pendiente de regresión en una afirmación sobre la población. El Capítulo 6 nos dio la estimación puntual; el Capítulo 7 nos dice qué tan precisa es, qué valores de la pendiente verdadera descartan los datos y cómo poner a prueba afirmaciones sobre ella. Luego el mismo conjunto de herramientas se aplica a dos estudios de caso reales: 108 países y 333 municipios bolivianos.
+:::
+
+## Una estimación de la pendiente nunca es toda la historia
+
+El Capítulo 6 nos dio un número: en 29 casas vendidas en Davis, California, cada pie cuadrado adicional va de la mano con **\$73.77** más en el precio. Una muestra distinta de 29 casas daría un número distinto.
+
+. . .
+
+Así que la verdadera pregunta no es *"¿cuál es la pendiente?"* sino **"¿cuánto deberíamos confiar en ella?"** La inferencia convierte una estimación en un **rango** (un intervalo de confianza) y un **veredicto** (una prueba de hipótesis).
+
+[Cada resultado de esta presentación responde tres preguntas: *¿Es precisa? ¿Es real? ¿Importa?* Y una cuarta por debajo: *¿es honesto el error estándar?*]{.takeaway .fragment}
+
+::: {.notes}
+La estimación b2 = 73.77 es una extracción de una distribución muestral. La inferencia describe esa distribución usando solo la única muestra que tenemos. Las cuatro preguntas son el hilo recurrente de la presentación: precisión (EE e IC), significancia estadística (pruebas), significancia económica (magnitud en contexto) e incertidumbre honesta (EE clásicos vs robustos a heterocedasticidad). Regresan como tarjeta de puntuación al final de cada parte y en la síntesis.
+:::
+
+## Hacia dónde vamos: haz clic en cualquier parte para saltar a ella {.smaller}
+
+| Parte | Pregunta | Herramienta | Resultado destacado |
+|:-----|:--------------------------|:----------------|:--------------------------|
+| [7.1](#sec-71) | ¿Las casas más grandes se venden por más? | MCO, 29 casas | $b_2 = 73.77$ \$/pies² |
+| [7.2](#sec-72) | ¿Qué tan lejos de cero está la pendiente, en unidades de ruido? | estadístico $t$ | $t = 6.60$ |
+| [7.3](#sec-73) | ¿Qué pendientes no pueden descartar los datos? | Intervalo de confianza | [50.84, 96.70] |
+| [7.4](#sec-74) | ¿Importa el tamaño en absoluto? | Prueba de $\beta_2 = 0$ | rechazar, $p < 0.001$ |
+| [7.5](#sec-75) | ¿Es la pendiente de \$90 por pie cuadrado? | Prueba de dos colas | no rechazar, $p = 0.158$ |
+| [7.6](#sec-76) | ¿Es *menor* que \$90? | Prueba de una cola | no rechazar al 5%, $p = 0.079$ |
+| [7.7](#sec-77) | ¿Son honestos los errores estándar? | EE robustos HC1 | 11.17 → 11.33 |
+| [Caso 1](#cs-1) | Capital y productividad, 108 países | Todo lo anterior | EE robusto 48% mayor |
+| [Caso 2](#cs-2) | Luces nocturnas y desarrollo, Bolivia | Todo lo anterior | pendiente 3.37, EE robusto 18% mayor |
+| [Síntesis](#synthesis) | ¿Qué se traslada a toda regresión? | Tarjeta de puntuación | — |
+
+::: {.notes}
+Las etiquetas de las partes son enlaces: haz clic en una para saltar a su divisor. Presiona M para el menú (todos los títulos de diapositivas) u O para la cuadrícula de resumen. Las secciones 7.1–7.7 usan todas las mismas 29 casas, así que cada paso agrega una herramienta a la misma regresión. Los dos estudios de caso luego aplican cada herramienta a datos nuevos, tarea por tarea, con el propio código del capítulo y la salida real.
+:::
+
+## El modelo poblacional detrás de cada prueba
+
+$$y_i = \beta_1 + \beta_2 x_i + u_i \qquad\text{estimado por}\qquad \hat y_i = b_1 + b_2 x_i$$
+
+::: {.incremental}
+1. **Linealidad**: el modelo poblacional es $y = \beta_1 + \beta_2 x + u$
+2. **Media condicional cero**: $E[u_i \mid x_i] = 0$
+3. **Varianza constante (homocedasticidad)**: $\operatorname{Var}[u_i \mid x_i] = \sigma_u^2$
+4. **Independencia**: $u_i$ es independiente de $u_j$ para $i \neq j$
+:::
+
+[Los supuestos 1–2 hacen que $b_2$ sea insesgado. Los supuestos 3–4 son lo que necesita el error estándar *clásico*; los EE robustos (7.7) descartan el supuesto 3.]{.takeaway .fragment}
+
+::: {.notes}
+Estos son los supuestos 1–4 del capítulo. Ayuda ordenarlos por lo que aportan: 1 y 2 son sobre el coeficiente (insesgadez); 3 y 4 son sobre su error estándar. Si falla 3 (heterocedasticidad), el coeficiente sigue estando bien pero el EE clásico es incorrecto; los EE robustos a heterocedasticidad lo arreglan. Si falla 4 (datos agrupados o de serie de tiempo), necesitamos EE de clúster o HAC, que usan capítulos posteriores. Si falla 2, ningún error estándar puede salvar la estimación: eso es un problema de diseño de investigación, no de inferencia.
+:::
+
+## Seis ideas anclan este capítulo
+
+::: {.incremental}
+- **Hipótesis nula** $H_0: \beta_2 = 0$: la afirmación por defecto de que $x$ no tiene efecto lineal sobre $y$
+- **Error estándar** $\operatorname{se}(b_2)$: cuánto variaría la pendiente de una muestra a otra
+- **Estadístico $t$** $t = (b_2 - \beta_2^{*})/\operatorname{se}(b_2)$: distancia al valor nulo en unidades de EE
+- **Valor crítico** $t_{n-2,\,\alpha/2}$: el umbral que dispara el rechazo
+- **Margen de error** $t_{n-2,\,\alpha/2}\times\operatorname{se}(b_2)$: la semiamplitud del intervalo de confianza
+- **Prueba de significancia**: ¿se distingue el coeficiente de cero, dado el ruido muestral?
+:::
+
+[La significancia estadística no es significancia económica. Mantén ambas a la vista desde la primera diapositiva hasta la última.]{.takeaway .fragment}
+
+::: {.notes}
+Estos son los seis Conceptos Clave del capítulo. Cada diapositiva posterior se construye con tres números: la estimación b2, su error estándar y los grados de libertad n − 2. El valor crítico y el margen de error se derivan de ellos, y también lo hacen el estadístico t, el valor p y el intervalo.
+:::
+
+# Acto II-a · Una regresión, siete herramientas {.divider background-color="#7A209F"}
+
+[Secciones 7.1–7.7 · 29 casas en Davis, California]{.act}
+
+::: {.notes}
+Las secciones 7.1 a 7.7 trabajan todas con la misma regresión del precio de la casa sobre el tamaño de la casa. Cada sección agrega una herramienta de inferencia: el estadístico t, el intervalo de confianza, la prueba de significancia, pruebas de un valor específico, pruebas de una cola y errores estándar robustos.
+:::
+
+# 7.1 · ¿Las casas más grandes se venden por más? {#sec-71 .divider background-color="#7A209F"}
+
+[El ejemplo · MCO sobre 29 ventas de casas]{.act}
+
+::: {.notes}
+Sección 7.1: el ejemplo motivador y la salida completa de la regresión. Cada número que probamos después está en esta única tabla.
+:::
+
+## Los datos: 29 casas vendidas en Central Davis en 1999 {.smaller}
+
+**Datos.** `AED_HOUSE.DTA`: precio de venta y características de 29 casas vendidas en Central Davis, California, en 1999.
+
+| Variable | Significado | Media | DE | Mín | Máx |
+|:--|:--|--:|--:|--:|--:|
+| `price` | precio de venta, dólares | 253,910 | 37,391 | 204,000 | 375,000 |
+| `size` | tamaño de la casa, pies cuadrados | 1,883 | 398 | 1,400 | 3,300 |
+
+[Las demás columnas (`bedrooms`, `bathrooms`, `lotsize`, `age`, `monthsold`, `list`) esperan a la regresión múltiple en los Capítulos 10–11.]{.comment}
+
+$$\text{price}_i = \beta_1 + \beta_2\,\text{size}_i + u_i$$
+
+[$\beta_2$ es la pendiente poblacional: la diferencia de precio esperada entre casas que difieren en un pie cuadrado.]{.takeaway .fragment}
+
+::: {.notes}
+29 observaciones es una muestra pequeña, que es exactamente por qué este capítulo insiste en la distribución t y no en la normal. El precio promedio es de unos 253,910 dólares y el tamaño promedio de unos 1,883 pies cuadrados. El tamaño va de 1,400 a 3,300 pies cuadrados, y la casa de 3,300 pies cuadrados está lejos de las demás, así que pesa mucho en la pendiente. La pendiente es una asociación entre casas, no el precio que obtendría un constructor al añadir un pie cuadrado a una casa dada.
+:::
+
+## Código: cargar los datos y ajustar la regresión
+
+``` {.python code-line-numbers="1-4|5-7|8-9"}
+!pip install -q pyfixest                     # pyfixest is not preinstalled in Colab
+import pandas as pd                          # tabular data
+import pyfixest as pf                        # OLS with R-style formulas
+from scipy import stats                      # t-distribution: critical values, p-values
+url = "https://raw.githubusercontent.com/quarcs-lab/data-open/master/AED/AED_HOUSE.DTA"
+data_house = pd.read_stata(url)              # 29 house sales, Davis CA, 1999
+print(data_house[["price", "size"]].describe())  # mean, SD, min, max of the two variables
+model_basic = pf.feols("price ~ size", data=data_house)  # OLS, classical (iid) SEs
+model_basic.summary()                        # coefficients, SEs, t, p, 95% CIs, R²
+```
+
+[↗ Pruébalo en Colab](https://colab.research.google.com/notebooks/empty.ipynb){.colab-link target="_blank" data-preview-link="false"}
+
+::: {.notes}
+Autónomo: pégalo en una celda vacía de Colab. Sin un argumento vcov, pyfixest reporta errores estándar clásicos que suponen homocedasticidad, exactamente como la Tabla 7.1 del capítulo. Cambiamos a EE robustos en la Sección 7.7.
+:::
+
+## Salida: \$73.77 por pie cuadrado, 6.6 errores estándar desde cero {.smaller}
+
+| Variable | Coef. | EE | $t$ | $p$ | IC 95% |
+|:--|--:|--:|--:|--:|:--|
+| Intercepto | 115,017.283 | 21,489.360 | 5.35 | <&nbsp;0.001 | [70,924.76,&nbsp;159,109.81] |
+| `size` | [73.771]{.key} | 11.175 | 6.60 | <&nbsp;0.001 | [50.84,&nbsp;96.70] |
+
+[N = 29 · EE clásicos (iid) · $R^2 = 0.617$ · grados de libertad $n - 2 = 27$]{.comment}
+
+::: {.incremental}
+- **Coeficiente**: cada pie cuadrado adicional va de la mano con \$73.77 más en el precio, en promedio
+- **EE 11.175**: la pendiente se movería típicamente en unos \$11 de una muestra de 29 casas a otra
+- **$t$ = 6.60** y **IC [50.84, 96.70]**: cero queda muy fuera del rango de pendientes plausibles
+:::
+
+[Una sola tabla ya responde las preguntas del capítulo. El resto de 7.1–7.7 explica de dónde viene cada columna y cómo leerla.]{.takeaway .fragment}
+
+::: {.notes}
+Ecuación estimada: price = 115,017 + 73.77 × size. R² = 0.617: el tamaño por sí solo explica alrededor del 62% de la variación en el precio. El intercepto es el precio predicho de una casa de cero pies cuadrados, una extrapolación muy fuera de los datos (la casa más pequeña tiene 1,400 pies cuadrados), así que no tiene significado económico; solo ancla la recta. El valor p para size es 4.4 × 10⁻⁷, impreso como 0.000 por la mayoría del software.
+:::
+
+## La recta ajusta, pero las casas se dispersan a su alrededor
+
+![Cada punto es una casa; la recta es el ajuste MCO. Las brechas verticales son los residuos, y su tamaño impulsa el error estándar.](figures/fig_scatter.png){height="400"}
+
+[La inferencia cuantifica la dispersión: cuanto mayores son las brechas verticales, con menos precisión queda fijada la pendiente.]{.takeaway .fragment}
+
+::: {.notes}
+Dirección: positiva. Forma: aproximadamente lineal. Dispersión: los residuos van de unos −45,400 a +47,900 dólares. Nota la casa grande de 3,300 pies cuadrados: los puntos lejos de la media de x tienen alto apalancamiento y jalan la recta hacia ellos. Con solo 29 casas, un solo punto así importa tanto para la pendiente como para su error estándar.
+:::
+
+# 7.2 · El estadístico t: señal sobre ruido {#sec-72 .divider background-color="#7A209F"}
+
+[Error estándar de la pendiente · la distribución $T(n-2)$]{.act}
+
+::: {.notes}
+Sección 7.2: el error estándar de la pendiente, qué lo hace grande o pequeño, y el estadístico t que estandariza la estimación.
+:::
+
+## La pendiente es una variable aleatoria
+
+::: {.incremental}
+- **Población**: $E[y \mid x] = \beta_1 + \beta_2 x$, con $\beta_2$ desconocido
+- **Muestra**: MCO da $b_2 = 73.77$, una extracción de la **distribución muestral** de $b_2$
+- Bajo los supuestos 1–4: $\;E[b_2] = \beta_2$ y $\operatorname{Var}[b_2] = \dfrac{\sigma_u^2}{\sum_{i=1}^{n}(x_i - \bar x)^2}$
+- Nunca conocemos $\sigma_u^2$, así que lo reemplazamos con $s_e^2 = \dfrac{1}{n-2}\sum_{i=1}^{n}(y_i - \hat y_i)^2$
+:::
+
+$$\operatorname{se}(b_2) = \frac{s_e}{\sqrt{\sum_{i=1}^{n}(x_i - \bar x)^2}}$$
+
+[La desviación estándar describe la dispersión de los *datos*; el error estándar describe la dispersión de la *estimación* entre muestras.]{.takeaway .fragment}
+
+::: {.notes}
+La distinción clave: la DE es una propiedad de las observaciones, el EE es una propiedad del estimador. La fórmula de la varianza es la clásica, válida bajo homocedasticidad e independencia. Dividimos entre n − 2 porque se estimaron dos parámetros (intercepto y pendiente) a partir de los mismos datos, lo que consume dos grados de libertad.
+:::
+
+## Tres perillas fijan el error estándar
+
+$$\operatorname{se}(b_2) = \frac{s_e}{\sqrt{\sum (x_i - \bar x)^2}} \approx \frac{s_e}{\sqrt{n}\;s_x}$$
+
+| Perilla | Súbela | Efecto sobre $\operatorname{se}(b_2)$ |
+|:--|:--|:--|
+| Dispersión de residuos $s_e$ | peor ajuste, más ruido | **mayor** |
+| Tamaño de muestra $n$ | más casas | **menor**, a tasa $1/\sqrt n$: cuadruplica $n$ para reducir a la mitad el EE |
+| Dispersión de $x$, $s_x$ | rango más amplio de tamaños | **menor**: valores extremos de $x$ fijan la pendiente |
+
+[Una pendiente precisa necesita un ajuste ceñido, muchas observaciones y una amplia dispersión en $x$. Las tres son decisiones de diseño, no suerte.]{.takeaway .fragment}
+
+::: {.notes}
+La intuición del subibaja del capítulo: la recta gira alrededor del punto de las medias. Si los valores de x están muy dispersos, un pequeño cambio en la pendiente hace una gran diferencia en los extremos, así que los datos fijan la pendiente. Si los valores de x están agrupados, muchas pendientes ajustan casi igual de bien. La aproximación con √n·s_x es el atajo del capítulo; el denominador exacto es √(n−1)·s_x cuando s_x usa n − 1.
+:::
+
+## Código: construir el error estándar a mano
+
+``` {.python code-line-numbers="1-6|7-10|11-14"}
+!pip install -q pyfixest                     # pyfixest is not preinstalled in Colab
+import numpy as np                           # square roots and sums
+import pandas as pd                          # tabular data
+import pyfixest as pf                        # OLS with R-style formulas
+url = "https://raw.githubusercontent.com/quarcs-lab/data-open/master/AED/AED_HOUSE.DTA"
+data_house = pd.read_stata(url); model_basic = pf.feols("price ~ size", data=data_house)
+n = len(data_house)                          # 29 houses
+e = model_basic.resid()                      # residuals y - y_hat
+s_e = np.sqrt((e**2).sum() / (n - 2))        # standard error of the regression
+x = data_house["size"]                       # the regressor
+sxx = ((x - x.mean())**2).sum()              # total variation in x
+se_formula = s_e / np.sqrt(sxx)              # classical se(b2), exact
+se_shortcut = s_e / (np.sqrt(n) * x.std())   # chapter's shortcut with sqrt(n)
+print(s_e, np.sqrt(sxx), se_formula, se_shortcut, model_basic.se()["size"])
+```
+
+[↗ Pruébalo en Colab](https://colab.research.google.com/notebooks/empty.ipynb){.colab-link target="_blank" data-preview-link="false"}
+
+::: {.notes}
+Autónomo. resid() devuelve los residuos de MCO. La fórmula exacta reproduce el error estándar de pyfixest hasta el último decimal; el atajo es ligeramente menor porque usa √n donde la expresión exacta implica √(n − 1).
+:::
+
+## Salida: la fórmula reproduce la tabla exactamente {.smaller}
+
+| Ingrediente | Valor |
+|:--|--:|
+| $s_e$, error estándar de la regresión | 23,550.66 |
+| $\sqrt{\sum (x_i - \bar x)^2}$ | 2,107.46 |
+| $s_x$, DE del tamaño | 398.27 |
+| $\operatorname{se}(b_2) = s_e / \sqrt{\sum (x_i - \bar x)^2}$ | [11.175]{.key} |
+| Atajo $s_e / (\sqrt{n}\, s_x)$ | 10.98 |
+| pyfixest `se()["size"]` | 11.175 |
+
+[$23{,}550.66 / 2{,}107.46 = 11.175$: nada en la tabla de regresión es una caja negra.]{.takeaway .fragment}
+
+::: {.notes}
+La casa típica está a unos 23,551 dólares de la recta ajustada. Dividir entre la raíz cuadrada de la variación total en el tamaño da el error estándar de 11.175 dólares por pie cuadrado. El atajo da 10.98 porque √29 × 398.27 es un poco mayor que √28 × 398.27 = √Σ(x − x̄)². La afirmación del capítulo de que con R² = 0.10 en lugar de 0.62 el EE sería unas 1.5 veces mayor se verifica: √(0.90/0.383) = 1.53, manteniendo fija la varianza del precio.
+:::
+
+## El estadístico $t$ estandariza la estimación
+
+$$t = \frac{b_2 - \beta_2^{*}}{\operatorname{se}(b_2)} \;\sim\; T(n-2) \quad\text{bajo } H_0: \beta_2 = \beta_2^{*}$$
+
+::: {.incremental}
+- Si conociéramos $\sigma_u$, el cociente sería normal estándar, $N(0,1)$
+- Estimar $\sigma_u$ con $s_e$ agrega incertidumbre adicional, así que el cociente sigue una $t$ de Student con $n - 2$ **grados de libertad**
+- Para $H_0: \beta_2 = 0$: $\;t = \dfrac{73.77}{11.17} = 6.60$
+:::
+
+[$t = 6.60$ significa que la pendiente está 6.6 de sus propios errores estándar por encima de cero.]{.takeaway .fragment}
+
+::: {.notes}
+Grados de libertad: 29 observaciones menos 2 parámetros estimados = 27. Esta es la contraparte bivariada del estadístico t univariado del Capítulo 4, (x̄ − μ)/se(x̄) ~ T(n − 1). La única diferencia es que se estima un parámetro más, así que se consume un grado de libertad más.
+:::
+
+## Código: extraer los ingredientes de $t$
+
+``` {.python code-line-numbers="1|2-5|6-7"}
+# continues from the previous block (model_basic already fitted)
+coef_size = model_basic.coef()["size"]       # b2
+se_size = model_basic.se()["size"]           # se(b2)
+t_stat_size = model_basic.tstat()["size"]    # t for H0: beta2 = 0
+p_value_size = model_basic.pvalue()["size"]  # two-sided p-value
+print(f"t = b2 / se(b2) = {coef_size:.4f} / {se_size:.4f} = {t_stat_size:.4f}")
+print(f"p-value: {p_value_size:.6f}")        # prints 0.000000 at 6 decimals
+```
+
+[↗ Pruébalo en Colab](https://colab.research.google.com/notebooks/empty.ipynb){.colab-link target="_blank" data-preview-link="false"}
+
+[Salida: $t = 73.7710 / 11.1749 = 6.6015$; $p = 4.4 \times 10^{-7}$, que se imprime como 0.000000.]{.takeaway .fragment}
+
+::: {.notes}
+coef(), se(), tstat() y pvalue() devuelven cada uno una Serie de pandas indexada por nombre de variable. El valor p es tan pequeño que seis decimales solo muestran ceros; no es literalmente cero, así que escribe p < 0.001 y no p = 0.000.
+:::
+
+## Tarjeta de puntuación después de 7.2
+
+| Pregunta | Respuesta para la pendiente de las casas |
+|:--|:--|
+| ¿Es precisa? | $\operatorname{se}(b_2) = 11.17$: cerca del 15% de la estimación |
+| ¿Es real? | $t = 6.60$, mucho más allá de cualquier umbral convencional |
+| ¿Importa? | por juzgarse en 7.4 |
+| ¿Es honesto el EE? | EE clásico hasta ahora; verificado en 7.7 |
+
+[La precisión es relativa: un EE de 11 es pequeño junto a una pendiente de 74, y sería enorme junto a una pendiente de 5.]{.takeaway .fragment}
+
+::: {.notes}
+La tarjeta de puntuación es el hilo recurrente de la presentación. Se va llenando a medida que avanzamos: para 7.7 cada fila estará respondida para la pendiente de las casas, y los dos estudios de caso obtienen sus propias tarjetas. El cociente del EE a la estimación, 11.17/73.77 = 0.15, es el inverso del estadístico t.
+:::
+
+# 7.3 · Intervalos de confianza: las pendientes que los datos no pueden descartar {#sec-73 .divider background-color="#7A209F"}
+
+[Estimación ± valor crítico × error estándar]{.act}
+
+::: {.notes}
+Sección 7.3: construir, calcular e interpretar correctamente un intervalo de confianza para la pendiente, y por qué la distribución t y no la normal.
+:::
+
+## Un intervalo de confianza es estimación ± margen de error
+
+$$b_2 \;\pm\; t_{n-2,\,\alpha/2}\times\operatorname{se}(b_2)$$
+
+$$73.77 \;\pm\; 2.052 \times 11.17 \;=\; 73.77 \pm 22.93 \;=\; [50.84,\ 96.70]$$
+
+::: {.incremental}
+- $t_{27,\,0.025} = 2.052$: el valor que deja 2.5% en cada cola de $T(27)$
+- **Margen de error** 22.93: la semiamplitud del intervalo
+- Aproximación rápida: $b_2 \pm 2\times\operatorname{se}(b_2)$
+:::
+
+[El intervalo abarca \$46 por pie cuadrado: el tamaño claramente importa, pero su precio queda fijado solo a "algún punto entre \$51 y \$97".]{.takeaway .fragment}
+
+::: {.notes}
+La receta general del Capítulo 4 se traslada: estimación ± valor crítico × error estándar. Con 27 grados de libertad el valor crítico al 95% es 2.052 en lugar de 1.96. La amplitud, 2 × 22.93 = 45.86 dólares, es el resumen honesto de cuánto pueden decirnos 29 casas.
+:::
+
+## Código: el intervalo desde pyfixest y a mano
+
+``` {.python code-line-numbers="1-5|6|7-11|12"}
+!pip install -q pyfixest                     # pyfixest is not preinstalled in Colab
+import pandas as pd, pyfixest as pf          # data and OLS
+from scipy import stats                      # Student's t quantiles
+url = "https://raw.githubusercontent.com/quarcs-lab/data-open/master/AED/AED_HOUSE.DTA"
+data_house = pd.read_stata(url); model_basic = pf.feols("price ~ size", data=data_house)
+print(model_basic.confint())                 # 95% CIs for intercept and slope
+df = len(data_house) - 2                     # 27 degrees of freedom
+t_crit = stats.t.ppf(0.975, df)              # 2.5% in the upper tail
+b2, se2 = model_basic.coef()["size"], model_basic.se()["size"]
+ci_lower, ci_upper = b2 - t_crit * se2, b2 + t_crit * se2   # estimate ± margin
+print(t_crit, t_crit * se2, ci_lower, ci_upper)
+z_lo, z_hi = b2 - 1.96 * se2, b2 + 1.96 * se2  # normal-based interval, for comparison
+```
+
+[↗ Pruébalo en Colab](https://colab.research.google.com/notebooks/empty.ipynb){.colab-link target="_blank" data-preview-link="false"}
+
+::: {.notes}
+Autónomo. stats.t.ppf(0.975, 27) es el percentil 97.5 de T(27). La última línea no está en el capítulo: calcula el intervalo que obtendríamos usando incorrectamente el valor crítico normal, para mostrar la diferencia en la siguiente diapositiva.
+:::
+
+## Salida: el intervalo manual coincide con `confint()` exactamente {.smaller}
+
+| Cantidad | Basado en $t(27)$ | Basado en la normal (para comparar) |
+|:--|--:|--:|
+| Valor crítico | 2.052 | 1.960 |
+| Margen de error | 22.93 | 21.90 |
+| IC 95% para $\beta_2$ | [[50.84,&nbsp;96.70]]{.key} | [51.87,&nbsp;95.67] |
+
+[`confint()` devuelve [50.84, 96.70] para `size` y [70,924.76, 159,109.81] para el intercepto · columna normal calculada para estas diapositivas]{.comment}
+
+[Con 27 grados de libertad, el intervalo correcto es 4.7% más ancho que el normal: una penalización pequeña pero real por estimar $\sigma_u$.]{.takeaway .fragment}
+
+::: {.notes}
+2.052/1.960 = 1.047, así que el margen basado en t es 4.7% más ancho (el capítulo lo redondea a 5%). El software siempre usa la distribución t; la columna normal solo está ahí para mostrar qué está en juego. En muestras grandes las dos columnas convergen.
+:::
+
+## Las muestras pequeñas necesitan colas más pesadas {.smaller}
+
+:::: {.columns}
+::: {.column width="58%"}
+![Normal estándar vs $T(27)$ y $T(3)$, con sus valores críticos de dos colas al 5%.](figures/fig_t_vs_normal.png)
+:::
+::: {.column width="42%"}
+| $n$ | gl | $t_{\text{gl},\,0.025}$ | vs 1.960 |
+|:--|--:|--:|--:|
+| 5 | 3 | 3.182 | +62% |
+| 10 | 8 | 2.306 | +18% |
+| 29 | 27 | [2.052]{.key} | +5% |
+| 30 | 28 | 2.048 | +5% |
+| 100 | 98 | 1.984 | +1% |
+| $\infty$ | — | 1.960 | 0% |
+:::
+::::
+
+[Menos grados de libertad significan colas más pesadas, valores críticos mayores e intervalos más anchos. Por encima de unas 100 observaciones la diferencia es insignificante.]{.takeaway .fragment}
+
+::: {.notes}
+La distribución t es simétrica y acampanada como la normal, con varianza gl/(gl − 2) > 1, así que hay más probabilidad en las colas. A medida que crecen los gl converge a la normal. Regla del capítulo: usa siempre t, porque el software lo hace y es correcto para cualquier n; importa más por debajo de unas 30 observaciones. La tabla del capítulo lista n = 30 con 2.048 (+4%); calculado exactamente, 2.048/1.960 = 1.045, así que la diapositiva lo redondea a +5%.
+:::
+
+## El nivel de confianza intercambia certeza por amplitud
+
+![La misma pendiente con intervalos del 90%, 95% y 99%. Cero queda fuera de los tres; 90 queda dentro de los tres.](figures/fig_ci_levels.png)
+
+[90%: [54.74, 92.81] · 95%: [50.84, 96.70] · 99%: [42.81, 104.73]. Pedir más confianza compra un rango más ancho y menos informativo.]{.takeaway .fragment}
+
+::: {.notes}
+Valores críticos: 1.703 para 90%, 2.052 para 95%, 2.771 para 99%, todos con 27 gl. Los intervalos del 90% y 99% están calculados para estas diapositivas a partir de la misma estimación y EE. Nota que \$90 por pie cuadrado está dentro de cada intervalo, lo que anticipa la prueba de la Sección 7.5. Nota también que el extremo superior del intervalo del 90%, 92.81, está cerca de 90, lo que anticipa la prueba de una cola en 7.6.
+:::
+
+## Qué significa y qué no significa "95% de confianza"
+
+::: {.incremental}
+- **Incorrecto**: "hay una probabilidad del 95% de que $\beta_2$ esté entre 50.84 y 96.70"
+- **Correcto**: si extrajéramos muchas muestras y construyéramos un intervalo a partir de cada una, cerca del **95% de esos intervalos** contendría a $\beta_2$
+- $\beta_2$ es un número fijo; el **intervalo** es lo que varía de muestra a muestra
+- Nuestro intervalo [50.84, 96.70] contiene a $\beta_2$ o no lo contiene; el 95% describe la tasa de éxito a largo plazo del procedimiento
+:::
+
+[La amplitud depende de tres cosas: el nivel de confianza, el tamaño de muestra (a través del EE y del valor crítico) y el ruido residual.]{.takeaway .fragment}
+
+::: {.notes}
+Este es el Concepto Clave 7.2 del capítulo. La interpretación frecuentista es sutil, y la versión incorrecta es muy común, incluso en trabajos publicados. Una forma útil de decirlo en palabras: "el procedimiento que produjo este intervalo captura la pendiente verdadera el 95% de las veces". La siguiente diapositiva hace visible la idea con una simulación.
+:::
+
+## 100 muestras, 100 intervalos: cerca de 95 cubren la verdad
+
+![Ilustración simulada, no datos del capítulo: 100 muestras de 29 casas extraídas de una población cuya pendiente verdadera es 73.77, cada una con su intervalo del 95%.](figures/fig_ci_coverage.png){height="400"}
+
+[En esta simulación, 97 de 100 intervalos contienen la pendiente verdadera y 3 la fallan. El 95% es una propiedad del *procedimiento*.]{.takeaway .fragment}
+
+::: {.notes}
+Construido para estas diapositivas. La simulación mantiene los 29 tamaños de las casas, fija el intercepto y la pendiente verdaderos iguales a las estimaciones del capítulo, extrae errores normales con DE igual a s_e = 23,551, reestima la regresión 100 veces y construye un intervalo del 95% basado en t cada vez. 97 cubren la verdad; con otra semilla obtendrías un número cercano a 95. En la vida real vemos solo una de estas rectas y nunca sabemos si es uno de los fallos.
+:::
+
+## Con cinco observaciones, el intervalo se dispara {.smaller}
+
+``` {.python code-line-numbers="1-3|4-5|6-8"}
+# continues from the previous block (pd, pf, stats already imported)
+df_artificial = pd.DataFrame({"x": [1, 2, 3, 4, 5],    # the chapter's artificial data
+                              "y": [1, 2, 2, 2, 3]})
+model_artificial = pf.feols("y ~ x", data=df_artificial)   # OLS on 5 points
+coef_x, se_x = model_artificial.coef()["x"], model_artificial.se()["x"]
+t_crit_art = stats.t.ppf(0.975, 5 - 2)                 # only 3 degrees of freedom
+print(coef_x, se_x, t_crit_art)                        # slope, SE, critical value
+print(coef_x - t_crit_art * se_x, coef_x + t_crit_art * se_x)  # 95% CI
+```
+
+[↗ Pruébalo en Colab](https://colab.research.google.com/notebooks/empty.ipynb){.colab-link target="_blank" data-preview-link="false"}
+
+| $b_2$ | EE | $t$ | $t_{3,\,0.025}$ | IC 95% |
+|--:|--:|--:|--:|:--|
+| 0.400 | 0.115 | 3.46 | 3.182 | [[0.03,&nbsp;0.77]]{.key} |
+
+[Incluso con $t = 3.46$, el intervalo va de casi cero a casi el doble de la estimación: con 3 grados de libertad el valor crítico es 3.182, no 1.96.]{.takeaway .fragment}
+
+::: {.notes}
+El ejemplo artificial del capítulo. La pendiente 0.40 es significativa al 5% (p = 0.041) pero por poco: el extremo inferior del intervalo es 0.03. Compara con los datos de las casas, donde el valor crítico es 2.052. Las muestras pequeñas se penalizan doblemente: un error estándar mayor y un valor crítico mayor.
+:::
+
+# 7.4 · ¿Es la pendiente distinta de cero? {#sec-74 .divider background-color="#7A209F"}
+
+[Pruebas de significancia estadística · $p$-valores · significancia económica]{.act}
+
+::: {.notes}
+Sección 7.4: la prueba de significancia estadística, el valor p y las reglas del valor crítico, y la diferencia crucial entre significancia estadística y económica.
+:::
+
+## La prueba de significancia estadística
+
+$$H_0: \beta_2 = 0 \qquad\text{vs.}\qquad H_a: \beta_2 \neq 0, \qquad t = \frac{b_2}{\operatorname{se}(b_2)} \sim T(n-2) \text{ bajo } H_0$$
+
+::: {.incremental}
+- **Regla del $p$-valor**: rechazar $H_0$ al nivel $\alpha$ si $p = \Pr\big[\,|T_{n-2}| > |t|\,\big] < \alpha$
+- **Regla del valor crítico**: rechazar $H_0$ si $|t| > t_{n-2,\,\alpha/2}$
+- Las dos reglas siempre coinciden; $\alpha$ es la probabilidad de un **error Tipo I** (rechazar un $H_0$ verdadero)
+- Nunca "aceptar" $H_0$: o lo rechazamos o **no lo rechazamos**
+:::
+
+[Un regresor "importa" estadísticamente cuando su coeficiente está demasiado lejos de cero para culpar al ruido muestral.]{.takeaway .fragment}
+
+::: {.notes}
+El flujo de cinco pasos del Concepto Clave 7.3: plantear H0 y Ha, elegir α (usualmente 0.05), calcular el estadístico de prueba, hallar el valor p, decidir, y luego traducir la decisión a lenguaje llano. La nula es la afirmación que intentamos derribar; la carga de la prueba recae en los datos.
+:::
+
+## Código: correr la prueba de ambas maneras
+
+``` {.python code-line-numbers="1-4|5-6|7-9"}
+!pip install -q pyfixest                     # pyfixest is not preinstalled in Colab
+import pandas as pd, pyfixest as pf; from scipy import stats
+url = "https://raw.githubusercontent.com/quarcs-lab/data-open/master/AED/AED_HOUSE.DTA"
+data_house = pd.read_stata(url); model_basic = pf.feols("price ~ size", data=data_house)
+t_stat_size = model_basic.tstat()["size"]    # b2 / se(b2)
+p_value_size = model_basic.pvalue()["size"]  # Pr[|T27| > |t|]
+t_crit = stats.t.ppf(0.975, len(data_house) - 2)       # 5% two-sided cutoff
+print(t_stat_size, p_value_size, t_crit)
+print("Reject H0" if p_value_size < 0.05 else "Fail to reject H0")
+```
+
+[↗ Pruébalo en Colab](https://colab.research.google.com/notebooks/empty.ipynb){.colab-link target="_blank" data-preview-link="false"}
+
+::: {.notes}
+Autónomo. El enfoque del valor p compara p con α; el enfoque del valor crítico compara |t| con 2.052. Ambos conducen a la misma decisión porque son la misma comparación expresada en dos escalas.
+:::
+
+## Salida: el tamaño es significativo a cualquier nivel convencional {.smaller}
+
+| $H_0$ | $t$ | $p$ (dos colas) | Valor crítico, 5% | Decisión |
+|:--|--:|--:|--:|:--|
+| $\beta_2 = 0$ | 6.60 | [$4.4\times 10^{-7}$]{.key} | ±2.052 | rechazar |
+
+::: {.incremental}
+- $|t| = 6.60 > 2.052$, y $p < 0.001$: rechazar al 5%, 1% y mucho más allá
+- **Leer el $p$-valor**: *si* $\beta_2$ fuera realmente 0, un $|t|$ tan grande ocurriría en menos de 1 de cada millón de muestras
+- **No** es la probabilidad de que $H_0$ sea verdadera, y no mide qué tan grande es el efecto
+:::
+
+[Conclusión en palabras: en Davis en 1999, las casas más grandes se vendieron por más, y la asociación es demasiado fuerte para ser una casualidad de esta muestra.]{.takeaway .fragment}
+
+::: {.notes}
+p = 4.4 × 10⁻⁷, así que la probabilidad es de unos 0.44 en un millón bajo la nula. El software que imprime 0.000 está redondeando. La tabla de valores p del capítulo etiqueta 0.01 < p ≤ 0.05 como "significativo" y 0.05 < p ≤ 0.10 como "marginalmente significativo"; estas son convenciones, no leyes, y p = 0.049 y p = 0.051 cargan esencialmente la misma evidencia (Concepto Clave 7.8).
+:::
+
+## Estadísticamente significativo no significa importante
+
+:::: {.columns}
+::: {.column width="50%"}
+**Significancia estadística**
+
+- ¿Se distingue el efecto de cero?
+- Impulsada por $t = b_2/\operatorname{se}(b_2)$, es decir, por $n$, el ruido y la dispersión en $x$
+- Con un $n$ enorme, incluso un efecto trivial es "significativo"
+:::
+::: {.column width="50%"}
+**Significancia económica**
+
+- ¿Es el efecto lo bastante grande para importar?
+- Impulsada por la **magnitud** de $b_2$, en contexto
+- Necesita conocimiento del dominio, no una tabla de valores críticos
+:::
+::::
+
+[Reporta la magnitud y su intervalo de confianza, no solo los asteriscos. El intervalo responde ambas preguntas a la vez.]{.takeaway .fragment}
+
+::: {.notes}
+Concepto Clave 7.4. Dos modos de falla: un efecto estimado con precisión pero diminuto (estadísticamente significativo, económicamente trivial), y un efecto grande pero impreciso (económicamente importante, estadísticamente no significativo). El ejemplo de capacitación laboral del capítulo: una ganancia salarial de 50 centavos por hora (p = 0.001) son unos 1,000 dólares al año a 2,000 horas, lo que vale la pena si el programa cuesta 500 dólares y no si cuesta 10,000.
+:::
+
+## ¿Es \$73.77 por pie cuadrado económicamente grande? {.smaller}
+
+| Comparación | Diferencia de precio implicada | Usando el IC 95% |
+|:--|--:|:--|
+| 10 pies cuadrados adicionales | \$738 | — |
+| 100 pies cuadrados adicionales | [\$7,377]{.key} | [\$5,084,&nbsp;\$9,670] |
+| Una DE de tamaño (398 pies²) | \$29,381 | 11.6% del precio medio |
+
+[Filas de 100 pies²: capítulo · filas de IC y una DE calculadas para estas diapositivas a partir de $b_2$ y su intervalo]{.comment}
+
+[Incluso el extremo *inferior* del intervalo, unos \$5,100 por 100 pies cuadrados, es una suma significativa en una casa de \$254,000: el efecto es tanto estadística como económicamente significativo.]{.takeaway .fragment}
+
+::: {.notes}
+El capítulo calcula 7,377 dólares para 100 pies cuadrados y unos 738 dólares para 10 pies cuadrados. Multiplicar el IC por 100 da el rango 5,084 a 9,670. Una diferencia de una DE en el tamaño (398 pies cuadrados) va de la mano con 29,381 dólares, cerca del 11.6% del precio medio de 253,910 dólares. La significancia económica es un juicio; estas comparaciones le dan algo concreto con qué trabajar. Recuerda que esto es una asociación entre casas, no el valor de agregar un cuarto.
+:::
+
+# 7.5 · ¿Es la pendiente de \$90 por pie cuadrado? {#sec-75 .divider background-color="#7A209F"}
+
+[Pruebas de dos colas de un valor específico · la dualidad IC–prueba]{.act}
+
+::: {.notes}
+Sección 7.5: probar si la pendiente es igual a un valor específico distinto de cero, y por qué eso es lo mismo que preguntar si el valor está dentro del intervalo de confianza.
+:::
+
+## Probar un valor específico: la misma receta, nueva nula
+
+$$H_0: \beta_2 = 90 \qquad\text{vs.}\qquad H_a: \beta_2 \neq 90$$
+
+$$t = \frac{b_2 - 90}{\operatorname{se}(b_2)} = \frac{73.77 - 90}{11.17} = -1.452$$
+
+::: {.incremental}
+- $p$ de dos colas $= \Pr\big[\,|T_{27}| > 1.452\,\big]$
+- Rechazar al 5% solo si $|t| > 2.052$
+- ¿De dónde podría venir 90? Una regla general de agentes inmobiliarios, un punto de referencia de costo de construcción, un estudio previo
+:::
+
+[Solo cambia el numerador: la prueba pregunta cuántos errores estándar está la estimación del valor *afirmado*.]{.takeaway .fragment}
+
+::: {.notes}
+La prueba de significancia es el caso especial β2* = 0. Cualquier punto de referencia económicamente interesante puede probarse de la misma manera. El signo de t te dice de qué lado de la afirmación cae la estimación: aquí la estimación está 16.23 dólares por debajo de 90.
+:::
+
+## Código: probar $H_0: \beta_2 = 90$
+
+``` {.python code-line-numbers="1-4|5-8|9-10"}
+!pip install -q pyfixest                     # pyfixest is not preinstalled in Colab
+import pandas as pd, pyfixest as pf; from scipy import stats
+url = "https://raw.githubusercontent.com/quarcs-lab/data-open/master/AED/AED_HOUSE.DTA"
+data_house = pd.read_stata(url); model_basic = pf.feols("price ~ size", data=data_house)
+null_value, df = 90, len(data_house) - 2     # claimed slope; 27 degrees of freedom
+coef_size, se_size = model_basic.coef()["size"], model_basic.se()["size"]
+t_stat_90 = (coef_size - null_value) / se_size              # distance from 90 in SEs
+p_value_90 = 2 * (1 - stats.t.cdf(abs(t_stat_90), df))      # two-sided p-value
+print(t_stat_90, p_value_90, stats.t.ppf(0.975, df))        # t, p, critical value
+print(model_basic.confint().loc["size"])                    # is 90 inside the CI?
+```
+
+[↗ Pruébalo en Colab](https://colab.research.google.com/notebooks/empty.ipynb){.colab-link target="_blank" data-preview-link="false"}
+
+::: {.notes}
+Autónomo. stats.t.cdf da la probabilidad por debajo de |t|; uno menos eso, duplicado, es el área de cola de dos colas. La última línea imprime el intervalo para que la dualidad pueda verificarse a ojo.
+:::
+
+## Salida: \$90 por pie cuadrado es consistente con los datos {.smaller}
+
+:::: {.columns}
+::: {.column width="40%"}
+| | Valor |
+|:--|--:|
+| $t$ | −1.452 |
+| $p$ (dos colas) | [0.158]{.key} |
+| Valor crítico | ±2.052 |
+| IC 95% | [50.84,&nbsp;96.70] |
+| Decisión al 5% | no rechazar |
+:::
+::: {.column width="60%"}
+![Izquierda: $t = 6.60$ cae en lo profundo de la región de rechazo. Derecha: $t = -1.45$ no; el área rayada es el $p$-valor.](figures/fig_tests_two_sided.png)
+:::
+::::
+
+[$p = 0.158 > 0.05$ y 90 está dentro de [50.84, 96.70]: dos maneras de decir lo mismo.]{.takeaway .fragment}
+
+::: {.notes}
+Si la pendiente verdadera fuera 90, una estimación al menos a 16.23 dólares de 90 (en cualquier dirección) ocurriría en cerca del 16% de las muestras, lo que no es inusual. La figura pone las dos pruebas lado a lado sobre la misma densidad T(27): la prueba de cero rechaza abrumadoramente, la prueba de 90 no.
+:::
+
+## Un intervalo de confianza es una familia de pruebas
+
+::: {.incremental}
+- Rechazar $H_0: \beta_2 = \beta_2^{*}$ al 5% **exactamente cuando** $\beta_2^{*}$ está **fuera** del IC 95%
+- 0 está fuera de [50.84, 96.70] → rechazar; 90 está dentro → no rechazar
+- Pero 60, 75 y 95 también están dentro: los datos son consistentes con **todos** ellos
+- "No rechazar $\beta_2 = 90$" **no** significa "$\beta_2 = 90$"
+:::
+
+[No rechazar es una afirmación sobre la potencia de los datos, no una prueba de la nula. Reporta el intervalo y todos los valores plausibles son visibles a la vez.]{.takeaway .fragment}
+
+::: {.notes}
+Idea clave 4 del capítulo. La dualidad hace a los intervalos de confianza más informativos que una sola prueba: un intervalo responde cada prueba de dos colas a la vez. Un error común es leer "no rechazar" como "aceptar": con 29 casas los datos no pueden distinguir 90 de 60. Concepto Clave 7.9: nunca concluir "se probó β2 = 90".
+:::
+
+# 7.6 · ¿Es la pendiente *menor* que \$90? {#sec-76 .divider background-color="#7A209F"}
+
+[Pruebas direccionales de una cola]{.act}
+
+::: {.notes}
+Sección 7.6: hipótesis direccionales, donde la región de rechazo se ubica en una sola cola, y las condiciones bajo las cuales el valor p de dos colas puede dividirse a la mitad.
+:::
+
+## Las pruebas de una cola ponen la afirmación en la alternativa
+
+| Prueba | $H_0$ | $H_a$ (la afirmación) | Rechazar cuando | $p$-valor |
+|:--|:--|:--|:--|:--|
+| Cola superior | $\beta_2 \le \beta_2^{*}$ | $\beta_2 > \beta_2^{*}$ | $t > t_{n-2,\,\alpha}$ | $\Pr[T_{n-2} > t]$ |
+| Cola inferior | $\beta_2 \ge \beta_2^{*}$ | $\beta_2 < \beta_2^{*}$ | $t < -t_{n-2,\,\alpha}$ | $\Pr[T_{n-2} < t]$ |
+
+::: {.incremental}
+- La afirmación que quieres **demostrar** va en $H_a$, así que los datos deben probarla
+- Todo el 5% se ubica en una cola: $t_{27,\,0.05} = 1.703$ en lugar de 2.052
+- Elige la dirección **antes** de ver los datos, a partir de la teoría
+:::
+
+[Una prueba de una cola tiene más potencia en la dirección predicha, y ninguna en absoluto en la otra.]{.takeaway .fragment}
+
+::: {.notes}
+Concepto Clave 7.5. Las pruebas de una cola son apropiadas cuando la teoría predice la dirección y solo te importan las desviaciones en esa dirección. Las revistas usualmente esperan pruebas de dos colas, en parte porque elegir la dirección después de mirar la estimación es una forma de pesca de datos.
+:::
+
+## Código: ambas pruebas de una cola de 90
+
+``` {.python code-line-numbers="1-6|7-8|9-10"}
+!pip install -q pyfixest                     # pyfixest is not preinstalled in Colab
+import pandas as pd, pyfixest as pf; from scipy import stats
+url = "https://raw.githubusercontent.com/quarcs-lab/data-open/master/AED/AED_HOUSE.DTA"
+data_house = pd.read_stata(url); model_basic = pf.feols("price ~ size", data=data_house)
+df = len(data_house) - 2                     # 27 degrees of freedom
+t_stat_90 = (model_basic.coef()["size"] - 90) / model_basic.se()["size"]
+p_value_upper = 1 - stats.t.cdf(t_stat_90, df)   # Ha: beta2 > 90 (right tail)
+p_value_lower = stats.t.cdf(t_stat_90, df)       # Ha: beta2 < 90 (left tail)
+t_crit_one = stats.t.ppf(0.95, df)               # one-sided 5% critical value
+print(t_stat_90, p_value_upper, p_value_lower, t_crit_one)
+```
+
+[↗ Pruébalo en Colab](https://colab.research.google.com/notebooks/empty.ipynb){.colab-link target="_blank" data-preview-link="false"}
+
+::: {.notes}
+Autónomo. El mismo estadístico t que la prueba de dos colas; solo cambia el área de cola. La celda del capítulo corre ambas direcciones para mostrar la asimetría.
+:::
+
+## Salida: la dirección de la afirmación decide todo {.smaller}
+
+:::: {.columns}
+::: {.column width="38%"}
+| | Cola inferior | Cola superior |
+|:--|--:|--:|
+| $H_a$ | $\beta_2 < 90$ | $\beta_2 > 90$ |
+| $t$ | −1.452 | −1.452 |
+| $p$ | [0.079]{.key} | 0.921 |
+| Umbral, 5% | −1.703 | +1.703 |
+| Decisión | no rechazar | no rechazar |
+:::
+::: {.column width="62%"}
+![Izquierda: la afirmación $\beta_2 < 90$; la estimación se inclina hacia ella pero no lo suficiente. Derecha: la afirmación $\beta_2 > 90$; la estimación apunta en la otra dirección.](figures/fig_tests_one_sided.png)
+:::
+::::
+
+[La evidencia de que la pendiente está por debajo de \$90 es sugestiva ($p = 0.079$): no suficiente al 5%, suficiente al 10%. La evidencia de que está *por encima* de \$90 es nula ($p = 0.921$).]{.takeaway .fragment}
+
+::: {.notes}
+El valor p de cola inferior 0.079 es la mitad del 0.158 de dos colas, porque la estimación (73.77) cae del lado de la afirmación (por debajo de 90). El valor p de cola superior es 1 − 0.079 = 0.921, por encima de 0.5, porque la estimación cae del lado equivocado de la afirmación. Dividir a la mitad el valor p de dos colas es válido solo en la primera situación.
+:::
+
+## Divide el $p$-valor a la mitad solo cuando la estimación apunta en tu dirección
+
+::: {.incremental}
+- El software reporta valores $p$ de **dos colas** para $H_0: \beta_2 = 0$
+- Prueba de significancia de una cola: si $b_2$ tiene el **signo predicho**, $p$ de una cola = $p$ de dos colas / 2
+- Si $b_2$ tiene el **signo equivocado**, $p$ de una cola $> 0.5$: el rechazo es imposible
+- Ejemplo de las casas: $H_a: \beta_2 > 0$ da $p = 2.2\times 10^{-7}$, la mitad de $4.4\times 10^{-7}$
+:::
+
+[Una versión anterior de esta presentación dividió a la mitad el valor $p$ para $H_a: \beta_2 > 90$. Eso es incorrecto: con $b_2 = 73.77 < 90$ el $p$ de una cola correcto es 0.921.]{.takeaway .fragment}
+
+::: {.notes}
+La regla de dividir a la mitad tiene una condición adjunta, y dejarla caer es un desliz común. El capítulo la plantea correctamente ("si el signo es correcto") y su código calcula ambas colas. Consejo práctico: decide la dirección a partir de la teoría antes de estimar, y en caso de duda reporta la prueba de dos colas.
+:::
+
+# 7.7 · ¿Son honestos los errores estándar? {#sec-77 .divider background-color="#7A209F"}
+
+[Heterocedasticidad · errores estándar robustos HC1 · diagnósticos de residuos]{.act}
+
+::: {.notes}
+Sección 7.7: qué le pasa a la inferencia cuando la varianza del error no es constante, y cómo los errores estándar robustos a heterocedasticidad lo arreglan.
+:::
+
+## La heterocedasticidad rompe el error estándar clásico
+
+**El supuesto 3** dice que $\operatorname{Var}[u_i \mid x_i] = \sigma_u^2$ para cada observación. **Heterocedasticidad**: $\operatorname{Var}[u_i \mid x_i] = \sigma_i^2$ varía con $i$.
+
+| Qué | Bajo heterocedasticidad |
+|:--|:--|
+| Coeficiente $b_2$ | sigue siendo **insesgado** y consistente |
+| $\operatorname{se}(b_2)$ clásico | **incorrecto**, demasiado pequeño o demasiado grande |
+| $t$, $p$, intervalos de confianza | **inválidos** (tamaño incorrecto, cobertura incorrecta) |
+
+[La solución deja la estimación en paz y repara la incertidumbre: un error estándar robusto a heterocedasticidad.]{.takeaway .fragment}
+
+::: {.notes}
+La heterocedasticidad es común en cortes transversales: el gasto varía más entre los hogares ricos, las ventas varían más entre las empresas grandes, los precios de las casas varían más entre las casas grandes. La dirección del sesgo en el EE clásico depende del patrón, así que no podemos predecirlo sin conocer la forma. Los EE robustos son válidos haya o no heterocedasticidad.
+:::
+
+## Clásico vs robusto: una fórmula, un cambio {.smaller}
+
+$$\operatorname{se}(b_2) = \frac{s_e}{\sqrt{\sum (x_i - \bar x)^2}} \qquad\qquad \operatorname{se}_{\text{HC0}}(b_2) = \frac{\sqrt{\sum e_i^2\,(x_i - \bar x)^2}}{\sum (x_i - \bar x)^2}$$
+
+::: {.incremental}
+- Clásico: una sola varianza residual **agrupada** $s_e^2$ para cada observación
+- Robusto (White / Huber–White): cada residuo al cuadrado $e_i^2$ se pondera por el apalancamiento $(x_i - \bar x)^2$ de esa observación
+- **HC1** = HC0 × $\sqrt{n/(n-k)}$, una corrección por grados de libertad; con $n = 29$, $k = 2$ el factor es 1.036
+- Variantes: HC2 (ponderada por apalancamiento), HC3 (más conservadora); HAC para series de tiempo, robusta por clúster para datos agrupados
+:::
+
+[El capítulo imprime la fórmula HC0 (10.93 para la pendiente de las casas), pero su código y tablas usan HC1 (`vcov="HC1"`, 11.33), que coincide con el `robust` de Stata.]{.takeaway .fragment}
+
+::: {.notes}
+Los residuos grandes en valores extremos de x son exactamente lo que la fórmula clásica se pierde. HC1 multiplica la varianza HC0 por n/(n − k); para los datos de las casas, HC0 = 10.932 y HC1 = 10.932 × √(29/27) = 11.330. Esta presentación etiqueta la fórmula como HC0 y reporta números HC1, para que los dos no se confundan.
+:::
+
+## Código: reestimar con errores estándar robustos HC1
+
+``` {.python code-line-numbers="1-5|6|7-14"}
+!pip install -q pyfixest                     # pyfixest is not preinstalled in Colab
+import pandas as pd, pyfixest as pf          # data and OLS
+url = "https://raw.githubusercontent.com/quarcs-lab/data-open/master/AED/AED_HOUSE.DTA"
+data_house = pd.read_stata(url)
+model_basic = pf.feols("price ~ size", data=data_house)              # classical SEs
+robust_results = pf.feols("price ~ size", data=data_house, vcov="HC1")  # robust SEs
+comparison_df = pd.DataFrame({
+    "Coefficient": model_basic.coef(),            # identical in both fits
+    "Std. Error": model_basic.se(),               # classical
+    "Robust SE": robust_results.se(),             # HC1
+    "t-stat (standard)": model_basic.tstat(),
+    "t-stat (robust)": robust_results.tstat(),
+})
+print(comparison_df); robust_results.summary()   # full table reports "Inference: HC1"
+```
+
+[↗ Pruébalo en Colab](https://colab.research.google.com/notebooks/empty.ipynb){.colab-link target="_blank" data-preview-link="false"}
+
+::: {.notes}
+Autónomo. El valor por defecto de pyfixest son errores estándar clásicos (iid); vcov="HC1" solicita los robustos a heterocedasticidad. Los coeficientes se calculan exactamente como antes; solo cambia la estimación de la varianza.
+:::
+
+## Salida: el EE de la pendiente apenas se mueve {.smaller}
+
+| Variable | Coef. | EE clásico | EE robusto | Cambio | $t$ robusto | IC 95% robusto |
+|:--|--:|--:|--:|--:|--:|:--|
+| Intercepto | 115,017.3 | 21,489.4 | 20,298.7 | −5.5% | 5.67 | [73,368,&nbsp;156,667] |
+| `size` | 73.771 | 11.175 | [11.330]{.key} | +1.4% | 6.51 | [50.52,&nbsp;97.02] |
+
+[N = 29 · EE HC1 · $p$ robusto $< 0.001$ para ambos coeficientes · $R^2 = 0.617$ (sin cambios)]{.comment}
+
+![El mismo coeficiente, dos errores estándar: los intervalos del 95% casi coinciden, y ambos contienen 90.](figures/fig_house_se_compare.png){height="250"}
+
+[La inferencia robusta llega a los mismos veredictos: el tamaño es significativo ($t = 6.51$), y \$90 sigue sin rechazarse (robusto $t = -1.43$, $p = 0.163$).]{.takeaway .fragment}
+
+::: {.notes}
+El EE robusto es 1.4% mayor para la pendiente y 5.5% menor para el intercepto: los EE robustos suelen ser mayores, pero no siempre. La prueba robusta de 90 (calculada para estas diapositivas) da t = −1.432 y p = 0.163, frente a −1.452 y 0.158 con EE clásicos. Con un cambio tan pequeño, la heterocedasticidad no está distorsionando la inferencia aquí. Regla general del capítulo: diferencias bajo 10% sugieren poca heterocedasticidad; diferencias sobre 20% exigen EE robustos.
+:::
+
+## Chequeo de residuos: sin embudo fuerte, pero solo 29 puntos
+
+:::: {.columns}
+::: {.column width="60%"}
+![Residuos contra valores ajustados (Figura 7.3 del capítulo).](figures/fig_resid.png){height="380"}
+:::
+::: {.column width="40%"}
+| Valor ajustado | Casas | DE de residuos |
+|:--|--:|--:|
+| en o por debajo de la mediana | 16 | \$19,258 |
+| por encima de la mediana | 13 | \$27,670 |
+
+[División calculada para estas diapositivas; los empates en la mediana hacen que las mitades sean desiguales.]{.comment}
+:::
+::::
+
+[La dispersión es algo mayor para las casas caras, pero no hay un embudo claro, y el EE robusto coincide con el clásico. Con 29 puntos, el ojo no puede zanjar la cuestión; el EE robusto sí.]{.takeaway .fragment}
+
+::: {.notes}
+Una versión anterior de esta presentación llamó a los residuos "sin patrón". Una lectura más cuidadosa: los residuos se dispersan alrededor de cero sin tendencia, la dispersión es un poco más amplia en valores ajustados altos (DE 27,670 vs 19,258), y una casa grande de 3,300 pies cuadrados queda muy a la derecha. Esa es exactamente la situación donde un EE robusto es un seguro barato: si el patrón importara, los EE robusto y clásico divergirían, y no lo hacen.
+:::
+
+## Buena práctica: decide el EE antes de mirar los resultados
+
+::: {.incremental}
+- **Corte transversal**: robusto a heterocedasticidad (`vcov="HC1"`) por defecto
+- **Serie de tiempo**: EE HAC (Newey–West); **datos agrupados**: EE robustos por clúster
+- **No** pruebes previamente la heterocedasticidad y luego elijas; simplemente usa EE robustos
+- Nunca cambies entre EE clásicos y robustos para obtener significancia: eso es p-hacking
+- Si los EE robustos son **mucho** mayores que los clásicos, investiga el modelo, no solo el EE
+:::
+
+[Los EE robustos son un seguro gratis: cuando los errores son homocedásticos coinciden con los EE clásicos; cuando no lo son, mantienen honesta la inferencia.]{.takeaway .fragment}
+
+::: {.notes}
+De la guía práctica del capítulo. Una gran brecha entre EE robustos y clásicos es un síntoma: puede señalar una forma funcional mal especificada (por ejemplo, una relación que debería estimarse en logaritmos), no solo varianzas desiguales. Veremos una brecha del 48% en el Estudio de Caso 1.
+:::
+
+## Tarjeta de puntuación: la pendiente de las casas tras 7.1–7.7 {.smaller}
+
+| Pregunta | Respuesta |
+|:--|:--|
+| ¿Es precisa? | EE 11.17 (clásico), 11.33 (robusto); IC 95% de unos \$46 de ancho |
+| ¿Es real? | $t = 6.60$ (robusto 6.51), $p < 0.001$: rechazar $\beta_2 = 0$ |
+| ¿Qué valores son plausibles? | [50.84, 96.70]: \$90 no rechazado a dos colas ($p = 0.158$) ni a una cola al 5% ($p = 0.079$) |
+| ¿Importa? | \$7,377 por 100 pies²; incluso el extremo inferior del IC (\$5,084) es considerable |
+| ¿Es honesto el EE? | EE robusto dentro del 1.4% del clásico; los residuos no muestran un embudo fuerte |
+
+[Una respuesta completa reporta las cinco filas, no solo los asteriscos: magnitud, precisión, pruebas, rango plausible y el EE usado.]{.takeaway .fragment}
+
+::: {.notes}
+Este es el reporte de modelo que recomienda el capítulo: "cada pie cuadrado adicional está asociado con un precio 73.77 dólares mayor (EE robusto = 11.33, t = 6.51, p < 0.001); los EE robusto y clásico son casi idénticos; el IC 95% es [50.52, 97.02]." A continuación, las mismas cinco filas para dos estudios de caso reales.
+:::
+
+# Acto II-b · Dos estudios de caso, cada tarea {.divider background-color="#7A209F"}
+
+[El conjunto completo de herramientas sobre datos nuevos: 108 países · 333 municipios]{.act}
+
+::: {.notes}
+El capítulo cierra con dos estudios de caso, cada uno con seis tareas. Cada tarea se corre aquí con el código del capítulo (completado donde el capítulo solo da pistas), con la salida real y su interpretación. Los resultados que no aparecen en el capítulo se etiquetan como "calculado para estas diapositivas".
+:::
+
+# Estudio de Caso 1 · Capital y productividad laboral en 108 países {#cs-1 .divider background-color="#7A209F"}
+
+[Datos de Convergence Clubs (Mendez 2020) · corte transversal de 2014 · Tareas 1–6]{.act}
+
+::: {.notes}
+El Estudio de Caso 1 usa el conjunto de datos Convergence Clubs: 108 países, con productividad laboral (PIB por trabajador) y capital físico por trabajador para 2014.
+:::
+
+## La pregunta: ¿qué tan estrechamente está ligada la productividad al capital?
+
+**Pregunta de investigación.** En 2014, ¿cuánto mayor es el producto por trabajador en los países con más capital por trabajador, y con qué precisión podemos decirlo?
+
+$$\text{productivity}_i = \beta_1 + \beta_2\,\text{capital}_i + u_i$$
+
+::: {.incremental}
+- `productivity` = `lp`, PIB real por trabajador (dólares); `capital` = `kl`, capital físico por trabajador (dólares)
+- 108 países: Europa 30, Asia 28, África 26, Américas 22, Oceanía 2
+- El capítulo enmarca esto como trasfondo de la **convergencia**; en rigor, un corte transversal de *niveles* no prueba la convergencia, que trata de *tasas de crecimiento* (Concepto Clave 7.7)
+:::
+
+[Lo que podemos probar aquí es la fuerza y precisión de una asociación entre países, con las herramientas de 7.1–7.7.]{.takeaway .fragment}
+
+::: {.notes}
+El Concepto Clave 7.7 define la convergencia absoluta como una relación negativa entre el ingreso inicial y el crecimiento posterior. Esta regresión no tiene tasas de crecimiento en ella: relaciona niveles de productividad con niveles de capital en un año. Es un ejercicio útil de inferencia, y es el bloque de construcción de la contabilidad del crecimiento, pero no es una prueba de convergencia. Las diapositivas mantienen esa distinción explícita.
+:::
+
+## Código: cargar el corte transversal de 2014
+
+``` {.python code-line-numbers="1-4|5-6|7-10|11"}
+!pip install -q pyfixest                     # pyfixest is not preinstalled in Colab
+import pandas as pd, pyfixest as pf          # data and OLS
+from scipy import stats                      # t-distribution for manual tests
+url_cc = "https://raw.githubusercontent.com/quarcs-lab/mendez2020-convergence-clubs-code-data/master/assets/dat.csv"
+data_convergence = pd.read_csv(url_cc)       # 108 countries x 25 years (1990-2014)
+data_2014 = data_convergence[data_convergence["year"] == 2014].copy()  # one cross-section
+data_2014["productivity"] = data_2014["lp"]  # labor productivity: GDP per worker
+data_2014["capital"] = data_2014["kl"]       # physical capital per worker
+print(f"Sample: {len(data_2014)} countries in 2014")
+print(data_2014["region"].value_counts())    # regional composition
+data_2014[["productivity", "capital"]].describe()   # summary statistics
+```
+
+[↗ Pruébalo en Colab](https://colab.research.google.com/notebooks/empty.ipynb){.colab-link target="_blank" data-preview-link="false"}
+
+::: {.notes}
+Autónomo: el primer bloque del Estudio de Caso 1. El conjunto de datos es un panel largo (país × año); filtrar por year == 2014 da una observación por país. La línea del conteo de regiones se agrega para estas diapositivas.
+:::
+
+## Salida: enorme dispersión entre países {.smaller}
+
+| Variable | Media | DE | Mín | Mediana | Máx |
+|:--|--:|--:|--:|--:|--:|
+| `productivity` (\$ por trabajador) | 40,977 | 33,853 | 1,371 | 32,781 | 142,220 |
+| `capital` (\$ por trabajador) | 165,854 | 158,299 | 2,482 | 108,046 | 552,395 |
+
+[N = 108 países, 2014]{.comment}
+
+[El producto por trabajador varía unas 100 veces y el capital por trabajador unas 200 veces: mucha variación en $x$, lo que hace precisa la pendiente, y una pista de que la varianza del error podría no ser constante.]{.takeaway .fragment}
+
+::: {.notes}
+El país promedio tiene unos 166,000 dólares de capital y 41,000 dólares de producto por trabajador, como dice el capítulo. Las medias exceden a las medianas en ambas variables: las distribuciones están sesgadas a la derecha, con una larga cola de países ricos e intensivos en capital. Cuando la escala del resultado varía tanto, la dispersión de los errores usualmente también varía.
+:::
+
+## Código de la Tarea 1: estimar la relación
+
+``` {.python code-line-numbers="1-2|3-6|7-8"}
+# continues from the previous block (data_2014 already built)
+model_convergence = pf.feols("productivity ~ capital", data=data_2014)  # classical SEs
+beta2 = model_convergence.coef()["capital"]       # slope
+se_beta2 = model_convergence.se()["capital"]      # classical SE
+t_stat = model_convergence.tstat()["capital"]     # t for H0: beta2 = 0
+p_value = model_convergence.pvalue()["capital"]   # two-sided p-value
+ci_95 = model_convergence.confint().loc["capital"]  # 95% CI
+model_convergence.summary()                       # full table
+```
+
+[↗ Pruébalo en Colab](https://colab.research.google.com/notebooks/empty.ipynb){.colab-link target="_blank" data-preview-link="false"}
+
+::: {.notes}
+Tarea 1 (guiada) en el capítulo: estimar, interpretar el coeficiente, construir el IC 95%, probar la significancia y juzgar la significancia económica. El código del capítulo usa EE clásicos aquí y cambia a EE robustos en la Tarea 3, reflejando las Secciones 7.1–7.7.
+:::
+
+## Salida de la Tarea 1: 20 centavos de producto por dólar de capital {.smaller}
+
+| Variable | Coef. | EE | $t$ | $p$ | IC 95% |
+|:--|--:|--:|--:|--:|:--|
+| Intercepto | 7,894.468 | 1,713.521 | 4.61 | <&nbsp;0.001 | [4,497.25,&nbsp;11,291.69] |
+| `capital` | [0.1995]{.key} | 0.0075 | 26.63 | <&nbsp;0.001 | [0.1846,&nbsp;0.2143] |
+
+[N = 108 · EE clásicos (iid) · $R^2 = 0.870$ · gl = 106]{.comment}
+
+::: {.incremental}
+- **(a) Coeficiente**: un país con \$1,000 más de capital por trabajador tiene, en promedio, unos \$199 más de producto por trabajador
+- **(b) IC**: la pendiente queda fijada a 0.185–0.214, un rango estrecho
+- **(c) Significancia**: $t = 26.63$, así que $p$ es esencialmente cero: rechazar $\beta_2 = 0$
+:::
+
+[(d) Económicamente grande: una diferencia de una DE en el capital (\$158,299) va de la mano con \$31,576 más de producto por trabajador, 77% de la media.]{.takeaway .fragment}
+
+::: {.notes}
+R² = 0.87: el capital por trabajador por sí solo explica el 87% de la variación entre países en el producto por trabajador. La comparación de una DE se calcula para estas diapositivas (0.1995 × 158,299 = 31,576; dividido entre la productividad media de 40,977 = 77%). Como referencia, el cociente del producto promedio al capital promedio es 0.247, un poco por encima de la pendiente. Todo aquí es una asociación: los países con más capital también tienen más capital humano, mejor tecnología e instituciones más fuertes.
+:::
+
+## Código de la Tarea 2: probar tres hipótesis sobre la pendiente
+
+``` {.python code-line-numbers="1-2|3-5|6-9"}
+# continues from the previous block (beta2, se_beta2, t_stat, p_value defined)
+df_c = int(model_convergence._N) - len(model_convergence.coef())  # 108 - 2 = 106
+t_test_05 = (beta2 - 0.5) / se_beta2                               # (b) H0: beta2 = 0.5
+p_value_05 = 2 * (1 - stats.t.cdf(abs(t_test_05), df=df_c))        # two-sided
+null_value_c = 0.30                                                 # (c) pessimist's bound
+t_test_pessimist = (beta2 - null_value_c) / se_beta2                # distance from 0.30
+p_value_pessimist_lower = stats.t.cdf(t_test_pessimist, df=df_c)    # Ha: beta2 < 0.30
+print(t_stat, p_value, t_test_05, p_value_05)                       # (a) and (b)
+print(t_test_pessimist, p_value_pessimist_lower)                    # (c)
+```
+
+[↗ Pruébalo en Colab](https://colab.research.google.com/notebooks/empty.ipynb){.colab-link target="_blank" data-preview-link="false"}
+
+::: {.notes}
+Tarea 2 (semiguiada): (a) significancia, (b) una prueba de dos colas del punto de referencia del capítulo de 0.5, y (c) una prueba de una cola de la afirmación de un pesimista de que el capital contribuye con menos de 0.30. La afirmación del pesimista va en la alternativa, así que la cola inferior es la correcta.
+:::
+
+## Salida de la Tarea 2: los datos rechazan 0.5 y respaldan al pesimista {.smaller}
+
+| Hipótesis | $t$ | $p$ | Decisión al 5% |
+|:--|--:|--:|:--|
+| (a) $H_0: \beta_2 = 0$ vs $\beta_2 \neq 0$ | 26.63 | <&nbsp;0.001 | rechazar: el capital importa |
+| (b) $H_0: \beta_2 = 0.5$ vs $\beta_2 \neq 0.5$ | −40.12 | <&nbsp;0.001 | rechazar: la pendiente está muy por debajo de 0.5 |
+| (c) $H_0: \beta_2 \ge 0.30$ vs $H_a: \beta_2 < 0.30$ | −13.42 | [$6.7\times 10^{-25}$]{.key} | rechazar $H_0$: evidencia **a favor** de $\beta_2 < 0.30$ |
+
+[gl = 106 · EE clásicos, como en la Tarea 2 del capítulo]{.comment}
+
+[La afirmación del pesimista no se rechaza; se *respalda*. Rechazar $H_0: \beta_2 \ge 0.30$ es cómo una prueba de una cola confirma una afirmación colocada en $H_a$.]{.takeaway .fragment}
+
+::: {.notes}
+El enunciado del capítulo pregunta "¿rechazas la afirmación del pesimista?". Como la afirmación está en la alternativa, la respuesta es no: la prueba rechaza la nula a favor de la afirmación, y el código del capítulo imprime "Evidence supports β2 < 0.30". Sobre el punto de referencia 0.5: una pendiente entre países no es un producto marginal del capital en el sentido de función de producción, porque mezcla el capital con todo lo que se mueve con él (tecnología, educación, instituciones), así que rechazar 0.5 dice que la asociación es más débil que ese punto de referencia, no que la teoría esté equivocada.
+:::
+
+## Código de la Tarea 3: errores estándar robustos
+
+``` {.python code-line-numbers="1-2|3-5|6-8"}
+# continues from the previous block (classical fit and tests done)
+robust_model = pf.feols("productivity ~ capital", data=data_2014, vcov="HC1")
+se_beta2_robust = robust_model.se()["capital"]          # HC1 SE
+t_stat_robust = robust_model.tstat()["capital"]         # robust t
+pct_change = 100 * (se_beta2_robust - se_beta2) / se_beta2   # % change in SE
+ci_95_robust = robust_model.confint().loc["capital"]    # robust 95% CI
+print(se_beta2, se_beta2_robust, pct_change, t_stat, t_stat_robust)
+print(ci_95.values, ci_95_robust.values)                # classical vs robust CI
+```
+
+[↗ Pruébalo en Colab](https://colab.research.google.com/notebooks/empty.ipynb){.colab-link target="_blank" data-preview-link="false"}
+
+::: {.notes}
+Tarea 3 (semiguiada): comparar EE clásicos y HC1, reprobar la significancia y comparar los intervalos. El código del capítulo marca cualquier diferencia por encima del 10% como evidencia de heterocedasticidad.
+:::
+
+## Salida de la Tarea 3: el EE robusto es 48% mayor {.smaller}
+
+| Variable | Coef. | EE clásico | EE robusto | Cambio | $t$ robusto | IC 95% robusto |
+|:--|--:|--:|--:|--:|--:|:--|
+| Intercepto | 7,894.468 | 1,713.521 | 1,356.336 | −20.8% | 5.82 | [5,205.40,&nbsp;10,583.54] |
+| `capital` | 0.1995 | 0.0075 | [0.0111]{.key} | +48.4% | 17.94 | [0.1774,&nbsp;0.2215] |
+
+[N = 108 · EE HC1 · $p$ robusto $< 0.001$ para ambos · IC clásico para la pendiente: [0.1846, 0.2143]]{.comment}
+
+::: {.incremental}
+- El EE de la pendiente crece a la mitad: $t$ cae de 26.63 a 17.94, y el intervalo se ensancha 48%
+- El veredicto sobre $\beta_2 = 0$ no cambia, pero la **precisión** que afirmamos en la Tarea 1 estaba sobrestimada
+- Repruebas robustas (calculadas para estas diapositivas): $\beta_2 = 0.5$ da $t = -27.03$; $\beta_2 = 0.30$ da $t = -9.04$; mismas decisiones
+:::
+
+[Una brecha del 48% es una señal fuerte de heterocedasticidad. Reporta el EE robusto; el clásico afirma una precisión que los datos no tienen.]{.takeaway .fragment}
+
+::: {.notes}
+Siguiendo la regla del capítulo (diferencia por encima del 20%: debes usar EE robustos). Aquí el EE clásico es demasiado pequeño para la pendiente y demasiado grande para el intercepto, ilustrando que la dirección del sesgo depende del patrón de heterocedasticidad. Con t cerca de 18, ninguna conclusión se voltea, pero en un caso límite una subestimación del 48% convertiría un resultado no significativo en uno "significativo".
+:::
+
+## De dónde viene la heterocedasticidad
+
+![Residuos de la regresión de muestra completa contra el producto ajustado por trabajador (Tarea 5c, calculado para estas diapositivas).](figures/fig_cs1_resid.png){height="380"}
+
+[Los residuos se abren en abanico: la DE de los residuos es \$6,822 para la mitad inferior de los valores ajustados y \$15,795 para la mitad superior. Los países pobres también se agrupan por debajo de la recta, señal de que la recta se pierde algo de curvatura.]{.takeaway .fragment}
+
+::: {.notes}
+Este es el gráfico de residuos que pide la Tarea 5(c); el código del capítulo no lo dibuja, así que se calcula aquí. Dos patrones: un embudo claro (la dispersión más que se duplica de valores ajustados bajos a altos), y una serie de residuos negativos entre los países más pobres, lo que sugiere que la relación no es lineal en niveles. Ambas son razones por las que el EE clásico no es confiable; la segunda también sugiere una especificación logarítmica, que usan capítulos posteriores.
+:::
+
+## Código de la Tarea 4: ¿difiere la pendiente por grupo de ingreso?
+
+``` {.python code-line-numbers="1-4|5-6|7-10"}
+# continues from the previous block
+threshold = data_2014["productivity"].median()             # the chapter's split
+high_income = data_2014[data_2014["productivity"] > threshold].copy()
+developing = data_2014[data_2014["productivity"] <= threshold].copy()
+robust_high = pf.feols("productivity ~ capital", data=high_income, vcov="HC1")
+robust_dev = pf.feols("productivity ~ capital", data=developing, vcov="HC1")
+for name, res in [("High-income", robust_high), ("Developing", robust_dev)]:
+    b, se = res.coef()["capital"], res.se()["capital"]
+    t_05 = (b - 0.5) / se; dfx = int(res._N) - len(res.coef())   # test beta2 = 0.5
+    print(name, int(res._N), b, se, res.tstat()["capital"], t_05, 2 * stats.t.sf(abs(t_05), dfx))
+```
+
+[↗ Pruébalo en Colab](https://colab.research.google.com/notebooks/empty.ipynb){.colab-link target="_blank" data-preview-link="false"}
+
+::: {.notes}
+Tarea 4 (más independiente): dividir la muestra en la mediana de la productividad, estimar la regresión en cada mitad con EE robustos, probar β2 = 0.5 en cada grupo. Este es el propio código del capítulo. Observa la primera línea: la división es sobre el resultado, lo que importa para la interpretación (dos diapositivas adelante).
+:::
+
+## Salida de la Tarea 4: una pendiente más plana entre los países de alta productividad {.smaller}
+
+| Grupo | N | Pendiente | EE robusto | $t$ | IC 95% | $t$ para $\beta_2 = 0.5$ | $R^2$ |
+|:--|--:|--:|--:|--:|:--|--:|--:|
+| Alta productividad | 54 | [0.1541]{.key} | 0.0172 | 8.97 | [0.1196,&nbsp;0.1886] | −20.13 | 0.680 |
+| Baja productividad | 54 | [0.2059]{.key} | 0.0209 | 9.84 | [0.1639,&nbsp;0.2479] | −14.06 | 0.722 |
+| Muestra completa | 108 | 0.1995 | 0.0111 | 17.94 | [0.1774,&nbsp;0.2215] | −27.03 | 0.870 |
+
+[EE HC1 · división en la mediana de la productividad, \$32,781 · gl = 52 en cada mitad · todos los $p < 0.001$]{.comment}
+
+[Ambas pendientes son significativas y ambas están muy por debajo de 0.5. Tomado al pie de la letra, el capital va de la mano con menos producto adicional en los países más ricos, consistente con rendimientos decrecientes.]{.takeaway .fragment}
+
+::: {.notes}
+La tabla del capítulo. Ambas pendientes de grupo rechazan cero y rechazan 0.5. Los dos intervalos se solapan solo ligeramente (0.164 a 0.189). El capítulo ofrece dos lecturas en el Concepto Clave 7.9: complementariedad (pendiente más alta en los países ricos) o rendimientos decrecientes (pendiente más alta en los países en desarrollo); los datos apuntan a la segunda. Pero la siguiente diapositiva muestra que la forma en que se dividió la muestra sesga esta comparación.
+:::
+
+## Advertencia: dividir por el resultado distorsiona las pendientes {.smaller}
+
+:::: {.columns}
+::: {.column width="56%"}
+![Pendientes de grupo con IC 95% HC1. Las filas marcadas * dividen la muestra por el capital en lugar de la productividad.](figures/fig_cs1_coef.png)
+:::
+::: {.column width="44%"}
+| División por capital* | Pendiente | EE robusto |
+|:--|--:|--:|
+| Capital alto (54) | 0.1720 | 0.0190 |
+| Capital bajo (54) | [0.3026]{.key} | 0.0305 |
+
+[* calculado para estas diapositivas · división en la mediana del capital, \$108,046]{.comment}
+:::
+::::
+
+[Seleccionar por $y$ trunca el resultado dentro de cada grupo y aplana ambas pendientes. Dividir por $x$ lo evita, y la pendiente de capital bajo resulta unas 47% más empinada que el 0.206 del capítulo.]{.takeaway .fragment}
+
+::: {.notes}
+Por qué: dentro del grupo "alta productividad", todo país tiene y por encima de 32,781 por construcción, así que los países con capital alto pero producto desafortunadamente bajo quedan excluidos; lo mismo pasa a la inversa en el otro grupo. Esa truncación empuja ambas pendientes hacia cero. Dividir por el regresor no trunca el resultado, así que es la forma estándar de comparar pendientes entre grupos. Mismo estimador, mismos EE, solo cambia la variable de división. La lectura de rendimientos decrecientes sobrevive (0.303 vs 0.172), y la brecha es mayor. Sigue siendo una asociación, no un producto marginal causal.
+:::
+
+## Tarea 5: una imagen de todo el análisis
+
+![Productividad contra capital por trabajador, coloreada por la división en la mediana de la productividad del capítulo, con la recta MCO de muestra completa.](figures/fig_cs1_scatter.png){height="370"}
+
+[La imagen muestra todo lo que dijeron las tablas: una fuerte pendiente positiva, una dispersión que se ensancha (heterocedasticidad) y una división que rebana la nube horizontalmente, a lo largo de $y$.]{.takeaway .fragment}
+
+::: {.notes}
+La Tarea 5 pide (a) un diagrama de dispersión con grupos y la recta de regresión, (b) un gráfico de coeficientes y (c) un gráfico de residuos. Los tres están en las últimas cuatro diapositivas: este diagrama de dispersión, el gráfico de coeficientes y el gráfico de residuos. Observa cómo la recta punteada de la mediana corta la nube horizontalmente: ese es el problema de selección sobre el resultado hecho visible.
+:::
+
+## Código de la Tarea 5: el gráfico de diagnóstico que el capítulo deja abierto
+
+``` {.python code-line-numbers="1-3|4-7|8-10"}
+# continues from the previous block (model_convergence already fitted)
+import matplotlib.pyplot as plt              # plotting
+import numpy as np                           # array handling
+fitted = model_convergence.predict()         # fitted productivity
+resid = model_convergence.resid()            # residuals
+plt.scatter(fitted, resid, alpha=0.7)        # residuals vs fitted (Task 5c)
+plt.axhline(0, color="red", linestyle="--"); plt.xlabel("Fitted"); plt.ylabel("Residual"); plt.show()
+low = fitted <= np.median(fitted)            # split by fitted value, not by y
+print(np.std(resid[low], ddof=1), np.std(resid[~low], ddof=1))   # residual SD by half
+```
+
+[↗ Pruébalo en Colab](https://colab.research.google.com/notebooks/empty.ipynb){.colab-link target="_blank" data-preview-link="false"}
+
+[Salida: DE de residuos \$6,822 (mitad inferior de los valores ajustados) vs \$15,795 (mitad superior), los números detrás de la forma de abanico mostrada bajo la Tarea 3.]{.takeaway .fragment}
+
+::: {.notes}
+La Tarea 5(c) del capítulo no tiene código; este bloque lo completa solo con los métodos del capítulo (un gráfico de residuos, más una comparación de DE de dos grupos). El propio código de la Tarea 5 del capítulo dibuja los dos paneles de dispersión y el gráfico de coeficientes; esos gráficos se reproducen como las figuras de las diapositivas.
+:::
+
+## Tarea 6: el resumen de investigación, con los números reales {.smaller}
+
+> Usando un corte transversal de 2014 de 108 países, estimo la asociación entre el producto por trabajador y el capital físico por trabajador. Cada \$1,000 adicional de capital por trabajador está asociado con **\$199** más de producto por trabajador (EE robusto HC1 = 0.011, $t = 17.9$, $p < 0.001$; IC 95% [0.177, 0.222]); el capital explica el 87% de la variación entre países. El EE robusto es 48% mayor que el clásico, y los residuos se abren en abanico con la productividad ajustada, así que solo se reporta inferencia robusta. La pendiente está muy por debajo del punto de referencia de 0.5 ($t = -27.0$). Dividiendo la muestra por el capital por trabajador, la pendiente es 0.30 entre los países pobres en capital y 0.17 entre los ricos en capital, consistente con rendimientos decrecientes. Estas son asociaciones: el capital se mueve con la tecnología, el capital humano y las instituciones, y una regresión de niveles no prueba la convergencia.
+
+[Un buen resumen reporta magnitud, precisión robusta, las pruebas que importan y los límites del diseño, en ese orden.]{.takeaway .fragment}
+
+::: {.notes}
+La Tarea 6 pide un resumen de 200–300 palabras que cubra la pregunta, los datos y los métodos, los hallazgos, la inferencia, la interpretación económica y las limitaciones. Esta versión usa solo números verificados para estas diapositivas; las pendientes de la división por capital se etiquetan como calculadas para las diapositivas en la presentación. Los estudiantes deberían escribir el suyo propio; este es un modelo de la estructura.
+:::
+
+## Tarjeta de puntuación: Estudio de Caso 1
+
+| Pregunta | Respuesta |
+|:--|:--|
+| ¿Es precisa? | EE robusto 0.0111; IC [0.177, 0.222] |
+| ¿Es real? | $t = 17.94$ robusto: rechazar $\beta_2 = 0$ |
+| ¿Qué valores son plausibles? | no 0.5 ($t = -27.0$); por debajo de 0.30 ($p < 0.001$, una cola) |
+| ¿Importa? | una DE de capital ↔ \$31,576 de producto por trabajador (77% de la media) |
+| ¿Es honesto el EE? | **no** con EE clásicos: el EE robusto es 48% mayor; los residuos se abren en abanico |
+
+[Mismo conjunto de herramientas que las casas, lección opuesta en la cuarta fila: aquí el EE robusto no es opcional.]{.takeaway .fragment}
+
+::: {.notes}
+Contraste con la tarjeta de puntuación de las casas: allí, los EE clásico y robusto coincidían dentro del 1.4%; aquí difieren en 48%. En ambos casos el coeficiente es idéntico bajo cualquier elección de EE; lo que cambia es cuánto podemos afirmar que sabemos.
+:::
+
+# Estudio de Caso 2 · ¿Las luces nocturnas siguen el desarrollo en Bolivia? {#cs-2 .divider background-color="#7A209F"}
+
+[DS4Bolivia · 339 municipios · Tareas 1–6]{.act}
+
+::: {.notes}
+El Estudio de Caso 2 regresa al proyecto DS4Bolivia del Capítulo 1: ¿pueden las luces nocturnas satelitales decirnos qué tan desarrollado está un municipio? El Capítulo 7 pregunta si esa asociación es estadísticamente significativa y con qué precisión se estima.
+:::
+
+## La pregunta: ¿es real la asociación luz–desarrollo, y qué tan grande?
+
+**Pregunta de investigación.** En los municipios de Bolivia, ¿es estadísticamente significativa la asociación entre las luces nocturnas y el desarrollo, y con qué precisión podemos estimarla?
+
+$$\text{imds}_i = \beta_1 + \beta_2\,\ln(\text{NTL per capita})_i + u_i$$
+
+::: {.incremental}
+- `imds`: Índice Municipal de Desarrollo Sostenible, 0–100
+- `ln_NTLpc2017`: log de las luces nocturnas per cápita, 2017
+- 339 municipios en 9 departamentos; 333 tienen ambas variables
+:::
+
+[Como $x$ está en logaritmos, $\beta_2$ es el cambio en puntos del IMDS cuando las luces per cápita se multiplican por $e \approx 2.72$; duplicar las luces agrega $\beta_2 \ln 2 \approx 0.69\,\beta_2$ puntos.]{.takeaway .fragment}
+
+::: {.notes}
+Un modelo nivel-log: el resultado está en puntos de índice, el regresor en logaritmos. Un aumento de una unidad en el log de NTL significa que las luces per cápita son 2.72 veces más altas, un aumento del 172%, como nota la Tarea 6 del capítulo. Duplicar las luces es un aumento de 0.693 en el log. Seis municipios carecen de la variable de luces y quedan fuera de la regresión.
+:::
+
+## Código: cargar los datos de DS4Bolivia
+
+``` {.python code-line-numbers="1-4|5-7|8-10"}
+!pip install -q pyfixest                     # pyfixest is not preinstalled in Colab
+import pandas as pd, pyfixest as pf          # data and OLS
+from scipy import stats                      # t-distribution for manual tests
+url_bol = "https://raw.githubusercontent.com/quarcs-lab/ds4bolivia/master/ds4bolivia_v20250523.csv"
+bol = pd.read_csv(url_bol)                   # 339 municipalities, 351 columns
+bol_key = bol[["mun", "dep", "imds", "ln_NTLpc2017"]].copy()   # keep what we need
+reg_data = bol_key[["imds", "ln_NTLpc2017"]].dropna()          # complete cases only
+print(f"Total municipalities: {len(bol_key)}")
+print(f"Complete cases for regression: {len(reg_data)}")
+reg_data.describe().round(3)                 # summary statistics
+```
+
+[↗ Pruébalo en Colab](https://colab.research.google.com/notebooks/empty.ipynb){.colab-link target="_blank" data-preview-link="false"}
+
+::: {.notes}
+Autónomo: el primer bloque del Estudio de Caso 2. dropna() mantiene los 333 municipios con ambas variables. Siempre reporta cuántas observaciones pierde una regresión por datos faltantes.
+:::
+
+## Salida: 333 municipios, una amplia dispersión del desarrollo {.smaller}
+
+| Variable | Media | DE | Mín | Máx |
+|:--|--:|--:|--:|--:|
+| `imds` (0–100) | 51.16 | 6.76 | 35.70 | 80.20 |
+| `ln_NTLpc2017` | 13.88 | 1.18 | 9.06 | 17.06 |
+
+[N = 333 casos completos de 339 municipios]{.comment}
+
+[El IMDS abarca 44.5 puntos; el log de las luces abarca 8 unidades, lo que significa que las luces per cápita difieren por un factor de unos 3,000 entre el municipio más tenue y el más brillante.]{.takeaway .fragment}
+
+::: {.notes}
+exp(17.06 − 9.06) = exp(8.0) ≈ 2,980. El rango del IMDS, 35.7 a 80.2, es la vara de medir que usa el capítulo para la significancia económica en la Tarea 6. Nota que los municipios más tenues en términos de log de luces no son todos los menos desarrollados: la relación es ruidosa.
+:::
+
+## Código de la Tarea 1: estimar y probar la pendiente
+
+``` {.python code-line-numbers="1-3|4-5|6-8"}
+# continues from the previous block (reg_data already built)
+model = pf.feols("imds ~ ln_NTLpc2017", data=reg_data)   # classical SEs
+model.summary()                                          # full table
+t_stat = model.tstat()["ln_NTLpc2017"]                   # t for H0: beta2 = 0
+p_value = model.pvalue()["ln_NTLpc2017"]                 # two-sided p-value
+print(model.coef()["ln_NTLpc2017"], model.se()["ln_NTLpc2017"], t_stat, p_value)
+print("Reject H0" if p_value < 0.05 else "Fail to reject H0")
+print(model._r2)                                         # R-squared
+```
+
+[↗ Pruébalo en Colab](https://colab.research.google.com/notebooks/empty.ipynb){.colab-link target="_blank" data-preview-link="false"}
+
+::: {.notes}
+Tarea 1 (guiada): MCO del IMDS sobre el log de las luces, extraer t y p, probar H0: β2 = 0 al 5%.
+:::
+
+## Salida de la Tarea 1: 3.4 puntos del IMDS por unidad log de luz {.smaller}
+
+:::: {.columns}
+::: {.column width="50%"}
+| Variable | Coef. | EE | $t$ | $p$ |
+|:--|--:|--:|--:|--:|
+| Intercepto | 4.377 | 3.544 | 1.24 | 0.218 |
+| `ln_NTLpc2017` | [3.370]{.key} | 0.254 | 13.25 | <&nbsp;0.001 |
+
+[N = 333 · EE clásicos · $R^2 = 0.347$]{.comment}
+
+Rechazar $H_0: \beta_2 = 0$: $t = 13.25$.
+:::
+::: {.column width="50%"}
+![IMDS contra el log de las luces per cápita, con la recta MCO.](figures/fig_cs2_scatter.png)
+:::
+::::
+
+[Los municipios más brillantes están mensurablemente más desarrollados, pero las luces explican solo el 35% de la variación en el IMDS.]{.takeaway .fragment}
+
+::: {.notes}
+La pendiente está a 13 errores estándar de cero. El intercepto es el IMDS predicho con log de luces = 0, muy fuera de los datos (mínimo 9.06), y no es interpretable; su insignificancia es irrelevante. R² = 0.347 deja el 65% de la variación a otros factores, que es por lo que el capítulo después agrega embeddings satelitales en la regresión múltiple.
+:::
+
+## Tarea 2: un intervalo de confianza del 95% para la pendiente {.smaller}
+
+``` {.python code-line-numbers="1-2|3-5"}
+# continues from the previous block (model already fitted)
+ci = model.confint()                                     # 95% CIs, classical SEs
+ci_lower = ci.loc["ln_NTLpc2017"].iloc[0]                # lower bound
+ci_upper = ci.loc["ln_NTLpc2017"].iloc[1]                # upper bound
+print(ci_lower, ci_upper, ci_lower <= 0 <= ci_upper)     # does it contain zero?
+```
+
+[↗ Pruébalo en Colab](https://colab.research.google.com/notebooks/empty.ipynb){.colab-link target="_blank" data-preview-link="false"}
+
+| Estimación puntual | IC 95% | ¿Contiene 0? |
+|--:|:--|:--|
+| 3.370 | [[2.87,&nbsp;3.87]]{.key} | no |
+
+[Lectura correcta: los intervalos construidos de esta manera capturan la pendiente verdadera el 95% de las veces, y este va de 2.87 a 3.87 puntos del IMDS por unidad log de luz. Cero queda muy fuera de él.]{.takeaway .fragment}
+
+::: {.notes}
+Tarea 2 (guiada). El enunciado del capítulo sugiere "tenemos 95% de confianza en que…", una abreviatura común; la lectura precisa es sobre el procedimiento (Sección 7.3). El intervalo es estrecho en relación con la estimación porque n = 333 y el log de las luces varía mucho.
+:::
+
+## Código de la Tarea 3: errores estándar robustos
+
+``` {.python code-line-numbers="1-2|3-5|6-7"}
+# continues from the previous block
+model_robust = pf.feols("imds ~ ln_NTLpc2017", data=reg_data, vcov="HC1")   # HC1 SEs
+se_d, se_r = model.se()["ln_NTLpc2017"], model_robust.se()["ln_NTLpc2017"]
+print(se_d, se_r, se_r / se_d)                           # SE ratio robust / default
+print(model.tstat()["ln_NTLpc2017"], model_robust.tstat()["ln_NTLpc2017"])
+print(model_robust.confint().loc["ln_NTLpc2017"])        # robust 95% CI
+print(model_robust.se()["Intercept"], model_robust.pvalue()["Intercept"])
+```
+
+[↗ Pruébalo en Colab](https://colab.research.google.com/notebooks/empty.ipynb){.colab-link target="_blank" data-preview-link="false"}
+
+::: {.notes}
+Tarea 3 (semiguiada): comparar los errores estándar por defecto y HC1, y discutir por qué los EE robustos importan para datos a nivel de municipio. El capítulo imprime el cociente de EE; el IC robusto y la línea del intercepto se agregan para estas diapositivas.
+:::
+
+## Salida de la Tarea 3: el EE robusto es 18% mayor {.smaller}
+
+| Variable | Coef. | EE por defecto | EE robusto | Cociente | $t$ robusto | IC 95% robusto |
+|:--|--:|--:|--:|--:|--:|:--|
+| Intercepto | 4.377 | 3.544 | 4.135 | 1.167 | 1.06 | [−3.76,&nbsp;12.51] |
+| `ln_NTLpc2017` | 3.370 | 0.254 | [0.299]{.key} | 1.175 | 11.27 | [2.78,&nbsp;3.96] |
+
+[N = 333 · EE HC1 · $p$ robusto $< 0.001$ para la pendiente, 0.291 para el intercepto]{.comment}
+
+![Residuos contra el IMDS ajustado (calculado para estas diapositivas).](figures/fig_cs2_resid.png){height="250"}
+
+[Heterocedasticidad moderada: el EE de la pendiente sube 17.5% y $t$ cae de 13.25 a 11.27. Toda conclusión sobrevive; usa los números robustos de aquí en adelante.]{.takeaway .fragment}
+
+::: {.notes}
+Siguiendo los umbrales del capítulo, una diferencia del 17.5% se ubica entre "pequeña" (por debajo del 10%) y "debes usar robustos" (por encima del 20%); la buena práctica del capítulo es reportar EE robustos de todos modos. El gráfico de residuos muestra una dispersión ligeramente más amplia por encima del valor ajustado de la mediana (DE de residuos 5.9 vs 5.0). Una advertencia estándar no cubierta en el Capítulo 7: los municipios del mismo departamento pueden compartir choques (correlación espacial), que HC1 no aborda; los EE robustos por clúster, introducidos después en el libro, lo harían.
+:::
+
+## Tarea 4: ¿es la pendiente exactamente 5? {.smaller}
+
+``` {.python code-line-numbers="1-4|5-7"}
+# continues from the previous block (model_robust already fitted)
+beta_hat = model_robust.coef()["ln_NTLpc2017"]           # 3.370
+se_robust = model_robust.se()["ln_NTLpc2017"]            # robust SE
+df = int(model_robust._N) - len(model_robust.coef())     # 333 - 2 = 331
+t_manual = (beta_hat - 5) / se_robust                    # H0: beta2 = 5
+p_two_sided = 2 * stats.t.sf(abs(t_manual), df=df)       # two-sided p-value
+print(t_manual, df, p_two_sided)
+```
+
+[↗ Pruébalo en Colab](https://colab.research.google.com/notebooks/empty.ipynb){.colab-link target="_blank" data-preview-link="false"}
+
+| $H_0$ | $t$ | gl | $p$ | Decisión |
+|:--|--:|--:|--:|:--|
+| $\beta_2 = 5$ | −5.45 | 331 | [$9.8\times 10^{-8}$]{.key} | rechazar |
+
+[Una pendiente de 5 queda descartada: está muy por encima del intervalo robusto [2.78, 3.96]. La prueba y el intervalo cuentan la misma historia.]{.takeaway .fragment}
+
+::: {.notes}
+Tarea 4 (semiguiada), usando EE robustos como instruye el capítulo. stats.t.sf es la función de supervivencia, 1 − cdf, así que 2 × sf(|t|) es el valor p de dos colas. Con EE clásicos (calculado para estas diapositivas) la prueba da t = −6.41, un rechazo aún más fuerte. La dualidad IC–prueba de 7.5 aplica también con EE robustos: 5 está fuera del intervalo robusto, así que se rechaza al 5%.
+:::
+
+## Tarea 5: ¿es positiva la asociación? {.smaller}
+
+``` {.python code-line-numbers="1-3|4"}
+# continues from the previous block
+t_onesided = model_robust.tstat()["ln_NTLpc2017"]        # robust t for H0: beta2 = 0
+p_onesided = stats.t.sf(t_onesided, df=df)               # right tail: Ha beta2 > 0
+print(t_onesided, p_onesided)
+```
+
+[↗ Pruébalo en Colab](https://colab.research.google.com/notebooks/empty.ipynb){.colab-link target="_blank" data-preview-link="false"}
+
+| $H_0$ | $H_a$ | $t$ robusto | $p$ de una cola | Decisión |
+|:--|:--|--:|--:|:--|
+| $\beta_2 \le 0$ | $\beta_2 > 0$ | 11.27 | [$1.8\times 10^{-25}$]{.key} | rechazar |
+
+[Evidencia abrumadora de una *asociación positiva*. Una prueba de una cola es legítima aquí porque la dirección se planteó antes de estimar, y la estimación apunta en esa dirección.]{.takeaway .fragment}
+
+::: {.notes}
+Tarea 5 (independiente). El valor p de una cola es la mitad del de dos colas porque la estimación tiene el signo predicho (Sección 7.6). "Evidencia fuerte de una relación positiva" es una afirmación sobre la asociación: la Tarea 6 del capítulo pide a los estudiantes discutir si la significancia prueba la causalidad, y no lo hace.
+:::
+
+## Código de la Tarea 6: poner la magnitud en contexto
+
+``` {.python code-line-numbers="1-4|5-8|9-10"}
+# continues from the previous block
+imds_range = reg_data["imds"].max() - reg_data["imds"].min()   # 44.5 points
+imds_std = reg_data["imds"].std()                               # 6.76 points
+beta = model_robust.coef()["ln_NTLpc2017"]                      # 3.370
+print(beta, 100 * beta / imds_range, 100 * beta / imds_std)     # per log unit
+print(beta * 0.693, 100 * beta * 0.693 / imds_range)            # doubling lights
+ci_r = model_robust.confint().loc["ln_NTLpc2017"]               # robust CI
+print(ci_r.iloc[0] * 0.693, ci_r.iloc[1] * 0.693)               # CI for doubling
+sd_x = reg_data["ln_NTLpc2017"].std()                           # 1.18 log units
+print(beta * sd_x, beta * sd_x / imds_std, model._r2)           # one-SD contrast, R²
+```
+
+[↗ Pruébalo en Colab](https://colab.research.google.com/notebooks/empty.ipynb){.colab-link target="_blank" data-preview-link="false"}
+
+::: {.notes}
+La Tarea 6 (independiente) pide una discusión de la significancia estadística vs práctica. El código del capítulo calcula el rango, la DE y el efecto de duplicación; el IC para el efecto de duplicación y el contraste de una DE se agregan para estas diapositivas.
+:::
+
+## Salida de la Tarea 6: significativo sin duda, modesto en tamaño {.smaller}
+
+| Comparación | Cambio en IMDS | Relativo a |
+|:--|--:|:--|
+| +1 unidad log de luces (×2.72) | 3.37 | 7.6% del rango del IMDS; 50% de su DE |
+| Duplicar las luces (+0.693) | [2.34]{.key} | 5.2% del rango · IC robusto [1.93,&nbsp;2.74] |
+| +1 DE de log de luces (1.18) | 3.98 | 0.59 DE del IMDS |
+
+[Rango = 44.5 puntos, DE = 6.76 · IC para la duplicación y fila de una DE calculados para estas diapositivas · $R^2 = 0.347$]{.comment}
+
+::: {.incremental}
+- **Significativo al 1%, 5% y 10%**: $p$ robusto $< 0.001$
+- **En la práctica**: duplicar las luces de un municipio va de la mano con unos 2.3 puntos más del IMDS, un paso modesto en una escala de 0–100
+- **No causal**: la urbanización, la electrificación, las carreteras y el acceso a mercados impulsan tanto las luces como el desarrollo
+:::
+
+[La significancia estadística aquí está fuera de toda duda; la significancia económica es moderada; la causalidad no está establecida. Tres preguntas diferentes, tres respuestas diferentes.]{.takeaway .fragment}
+
+::: {.notes}
+El Concepto Clave 7.13 usa un efecto hipotético de 5 puntos (11% del rango); la estimación real es 3.37, o 7.6% del rango. Duplicar las luces es un cambio grande, pero predice solo unos 2.3 puntos. Lectura de política: un programa que "duplique las luces" no transformaría por sí solo el desarrollo; las luces son un proxy de la actividad económica, no una palanca. Las variables omitidas son la principal amenaza a cualquier lectura causal.
+:::
+
+## Tarjeta de puntuación: Estudio de Caso 2
+
+| Pregunta | Respuesta |
+|:--|:--|
+| ¿Es precisa? | EE robusto 0.299; IC [2.78, 3.96] |
+| ¿Es real? | $t = 11.27$ robusto: rechazar $\beta_2 = 0$; positiva a una cola, $p < 0.001$ |
+| ¿Qué valores son plausibles? | no 5 ($t = -5.45$) |
+| ¿Importa? | duplicar las luces ↔ +2.3 puntos del IMDS (5.2% del rango): moderado |
+| ¿Es honesto el EE? | EE robusto 17.5% mayor: repórtalo; la correlación a nivel de departamento aún no se aborda |
+
+[Las mismas cinco filas, un tercer patrón: precisa y real, pero modesta, y el EE todavía tiene una advertencia (correlación espacial) que HC1 no puede arreglar.]{.takeaway .fragment}
+
+::: {.notes}
+A través de los tres conjuntos de datos el coeficiente nunca cambia con la elección del EE, pero la incertidumbre honesta sí: +1.4% para las casas, +48% para los países, +17.5% para los municipios. La siguiente parte los compara lado a lado.
+:::
+
+# Leyéndolo bien {#synthesis .divider background-color="#C21E72"}
+
+[Acto III · Síntesis]{.act}
+
+::: {.notes}
+El Acto III junta los tres conjuntos de datos, confronta las lecturas erróneas más comunes y enumera qué llevar adelante hacia la regresión múltiple.
+:::
+
+## Tres conjuntos de datos, un conjunto de herramientas {.smaller}
+
+| | Casas (7.1–7.7) | Países (Caso 1) | Municipios (Caso 2) |
+|:--|--:|--:|--:|
+| N | 29 | 108 | 333 |
+| Pendiente $b_2$ | 73.771 | 0.1995 | 3.370 |
+| EE clásico | 11.175 | 0.0075 | 0.254 |
+| EE robusto (HC1) | 11.330 | 0.0111 | 0.299 |
+| Robusto / clásico | [1.014]{.key} | [1.484]{.key} | [1.175]{.key} |
+| $t$ robusto | 6.51 | 17.94 | 11.27 |
+| IC 95% robusto | [50.52,&nbsp;97.02] | [0.1774,&nbsp;0.2215] | [2.78,&nbsp;3.96] |
+| $R^2$ | 0.617 | 0.870 | 0.347 |
+
+[Cada pendiente es altamente significativa, pero la corrección del EE va del 1% al 48%. Si la heterocedasticidad importa es una cuestión empírica, así que el EE robusto debería ser el valor por defecto.]{.takeaway .fragment}
+
+::: {.notes}
+El R² más alto (países) viene con el mayor problema de heterocedasticidad, lo que muestra que el ajuste y la incertidumbre honesta son cuestiones separadas. La muestra más pequeña (casas) tiene la menor heterocedasticidad. Ninguno de los veredictos sobre β2 = 0 cambia, pero en los tres el EE clásico habría declarado mal la precisión por entre 1% y 48%.
+:::
+
+## Siete lecturas erróneas que evitar
+
+::: {.incremental}
+1. "95% de probabilidad de que $\beta_2$ esté en el intervalo": no, el 95% de los *intervalos* cubren a $\beta_2$
+2. "$p < 0.001$, así que el efecto es grande": $p$ mide la evidencia contra $H_0$, no el tamaño
+3. "No rechazamos, así que $\beta_2 = 90$": los datos también son consistentes con 60 y 95
+4. "Divide a la mitad el $p$-valor para cualquier prueba de una cola": solo cuando la estimación apunta hacia $H_a$
+5. "EE robustos solo cuando una prueba encuentra heterocedasticidad": úsalos por defecto
+6. "Divide la muestra por el resultado para comparar pendientes": eso trunca $y$ y sesga ambas pendientes
+7. "Significativo, así que causal": cada pendiente de esta presentación es una asociación
+:::
+
+[Cada una es una trampa real, y cada una tiene una diapositiva en esta presentación que muestra la lectura correcta con los propios números del capítulo.]{.takeaway .fragment}
+
+::: {.notes}
+1: Sección 7.3 y la simulación de cobertura. 2: Sección 7.4 y la Tarea 6 del Caso 2. 3: Sección 7.5. 4: Sección 7.6; la versión anterior de esta presentación dividió a la mitad el valor p para la cola equivocada. 5: Sección 7.7. 6: Estudio de Caso 1, Tarea 4. 7: los tres ejemplos, especialmente el caso de las luces nocturnas.
+:::
+
+## El atajo tentador, y la corrección
+
+[Objeción.]{.objection} "$t = 17.9$, $p < 0.001$, $R^2 = 0.87$: el capital claramente impulsa la productividad, y conocemos el efecto hasta el tercer decimal."
+
+. . .
+
+[Respuesta.]{.rebuttal} El EE clásico sobrestimó la precisión en 48%, los residuos se abren en abanico y se curvan, la división de la muestra sesgó las pendientes de grupo, y nada en un corte transversal de niveles identifica un efecto causal. **La significancia te dice que la asociación no es ruido. No te dice qué tan grande es, qué tan precisa es realmente, o por qué existe.**
+
+[Lee cada tabla de regresión con cuatro preguntas: qué tan grande, qué tan precisa (con un EE honesto), qué tan plausibles son las alternativas, y qué la haría causal.]{.takeaway .fragment}
+
+::: {.notes}
+Fortalece la objeción: la asociación realmente es fuerte y robusta a la elección del EE. Pero cada adjetivo de la objeción se excede: "impulsa" es causal, "conocer hasta el tercer decimal" ignora la subestimación del 48% de la incertidumbre. Los Capítulos 10–13 agregan controles, y el Capítulo 13 agrega diseños de investigación, precisamente porque la significancia no puede responder el "por qué".
+:::
+
+## Qué llevar adelante
+
+::: {.incremental}
+- $t = (b_2 - \beta_2^{*})/\operatorname{se}(b_2) \sim T(n-2)$: cada prueba es "estimación menos afirmación, en unidades de EE"
+- Un IC 95% es $b_2 \pm t_{n-2,\,0.025}\,\operatorname{se}(b_2)$ y contiene todo valor que una prueba de dos colas al 5% no rechaza
+- $\operatorname{se}(b_2)$ se reduce con un ajuste más ceñido, más datos ($1/\sqrt n$) y más dispersión en $x$
+- Pruebas de una cola: la afirmación va en $H_a$, la dirección se fija de antemano, dividir a la mitad necesita el signo correcto
+- Cortes transversales: `vcov="HC1"` por defecto; mira los residuos; una gran brecha señala un problema del modelo
+- Siempre reporta magnitud **y** precisión; la significancia no es importancia, y la asociación no es causalidad
+:::
+
+::: {.notes}
+Las ideas clave del capítulo, afiladas por lo que verificó la presentación: la distinción HC0 vs HC1, las condiciones para dividir a la mitad un valor p, el rango 1%–48% de correcciones robustas entre conjuntos de datos, y la advertencia de selección sobre el resultado. A continuación: regresión múltiple (Capítulos 10–11), donde el mismo estadístico t e intervalo de confianza aplican a cada coeficiente, y las pruebas conjuntas los extienden a varios coeficientes a la vez.
+:::
+
+# Estima, luego mide tu duda honestamente: un rango y una prueba, no solo un número. {.divider background-color="#C21E72"}

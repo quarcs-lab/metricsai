@@ -1,0 +1,225 @@
+---
+title: "9. Modelos con logaritmos naturales"
+subtitle: "Leer regresiones en porcentajes, elasticidades y tasas de crecimiento"
+deck-author: "Carlos Mendez"
+deck-author-url: "https://carlos-mendez.org"
+institute: "Nagoya University (GSID)"
+date: today
+date-format: long
+visual-summary: "figures/visual_summary.png"
+format:
+  revealjs:
+    output-file: index.es.html
+    theme: [default, site-brand.scss]
+    template-partials:
+      - title-slide.html
+    include-after-body: figure-zoom.html
+    center: true
+    slide-number: c/t
+    menu: true
+    chalkboard: true
+    preview-links: auto
+    overview: true
+    progress: true
+    history: true
+    transition: fade
+    width: 1280
+    height: 720
+    fig-align: center
+    auto-stretch: true
+    highlight-style: github
+    link-external-icon: false
+---
+
+# ¿Por qué porcentajes y no dólares? {.divider background-color="#008CB7"}
+
+[Acto I · La tensión]{.act}
+
+## A los economistas les importa el cambio *proporcional*
+
+Un aumento de \$10,000 significa cosas muy distintas con un salario de \$30,000 que con uno de \$300,000.
+
+. . .
+
+Por eso el número que normalmente queremos es un **porcentaje**, no una cantidad en dólares — un retorno a la educación, una
+elasticidad precio, una tasa de crecimiento. El logaritmo natural es la única transformación que convierte la pendiente de una
+regresión directamente en ese porcentaje.
+
+::: {.notes}
+La teoría económica trata de forma abrumadora sobre respuestas proporcionales: elasticidades de demanda, retornos
+porcentuales, tasas de crecimiento. Los logaritmos permiten que MCO hable ese lenguaje sin cambiar el estimador.
+:::
+
+## Hacia dónde vamos
+
+::: {.incremental}
+- **Una propiedad** de $\ln$ que lo convierte en el caballo de batalla de la econometría
+- **Semielasticidad vs elasticidad** — las dos maneras en que $y$ puede responder a $x$
+- **Cuatro formas funcionales** (nivel, log-lineal, log-log, lineal-log) y cómo se lee cada pendiente
+- **Ingresos y educación** — los mismos datos, cuatro interpretaciones, con `pyfixest`
+- **Crecimiento exponencial** — los logaritmos lo linealizan, y la Regla del 72 lee el tiempo de duplicación
+:::
+
+## Cinco ideas anclan este capítulo
+
+::: {.incremental}
+- **Logaritmo natural $\ln$** — inverso de $e^x$; convierte diferencias *multiplicativas* en *aditivas*
+- **Aproximación clave** — $\Delta \ln(x) \approx \Delta x / x$, así que $100 \times \Delta\ln(x) \approx \%\Delta x$
+- **Semielasticidad** — $\%\Delta y$ por un cambio de **una unidad** en $x$ (pendiente log-lineal)
+- **Elasticidad** — $\%\Delta y$ por un cambio de **1%** en $x$ (pendiente log-log), sin unidades
+- **Crecimiento compuesto** — $x_t = x_0(1+r)^t$ es una línea recta una vez que lo logaritmas
+:::
+
+[Los logaritmos permiten leer la pendiente de una sola regresión como un porcentaje — ese es todo el punto.]{.takeaway .fragment}
+
+# De los logaritmos a las elasticidades {.divider background-color="#7A209F"}
+
+[Acto II · La investigación]{.act}
+
+## La única propiedad del logaritmo que importa: $\Delta \ln(x) \approx \Delta x / x$
+
+Para cambios *pequeños*, el cambio en $\ln(x)$ *es* el cambio proporcional en $x$ — multiplica por 100 para obtener un porcentaje.
+
+``` {.python code-line-numbers="1|3-4|6-9"}
+import numpy as np                           # numpy → logs, exponentials, arrays
+
+x0, x1 = 40, 40.4                            # x rises from 40 to 40.4 (a 1% increase)
+
+exact  = (x1 - x0) / x0                      # exact proportionate change = 0.010000
+approx = np.log(x1) - np.log(x0)             # log approximation Δln(x)   = 0.009950
+print(f"exact proportionate change: {exact:.6f}  ({exact*100:.2f}%)")
+print(f"log approximation Δln(x):   {approx:.6f}  ({approx*100:.2f}%)")
+print(f"difference: {abs(exact-approx):.6f}")   # tiny — the approximation is excellent for small moves
+```
+
+[↗ Pruébalo en Colab](https://colab.research.google.com/notebooks/empty.ipynb){.colab-link target="_blank" data-preview-link="false"}
+
+::: {.notes}
+numpy (preinstalado en Colab) es todo lo que necesitamos aquí. La brecha entre 1.0000% y 0.9950% es el
+error de aproximación — insignificante por debajo de ~10%, que es exactamente por lo que los logaritmos son tan convenientes.
+:::
+
+## Dos respuestas: semielasticidad vs elasticidad
+
+::: {.incremental}
+- **Semielasticidad** $= \dfrac{\Delta y / y}{\Delta x}$ — un movimiento de **una unidad** en $x$ (p. ej. un año más de escuela) → un movimiento porcentual en $y$. Estimada por una pendiente **log-lineal**.
+- **Elasticidad** $= \dfrac{\Delta y / y}{\Delta x / x}$ — un movimiento de **1%** en $x$ → un movimiento porcentual en $y$. Sin unidades. Estimada por una pendiente **log-log**.
+:::
+
+| Forma | Modelo | La pendiente $\beta_1$ se lee como |
+|---|---|---|
+| Lineal | $y = \beta_0 + \beta_1 x$ | $\Delta y$ en unidades por unidad de $x$ |
+| Log-lineal | $\ln y = \beta_0 + \beta_1 x$ | $100\beta_1 \approx \%\Delta y$ por unidad de $x$ |
+| Log-log | $\ln y = \beta_0 + \beta_1 \ln x$ | $\beta_1 = $ elasticidad (% por %) |
+| Lineal-log | $y = \beta_0 + \beta_1 \ln x$ | $\beta_1/100 = \Delta y$ por 1% de $x$ |
+
+## Nuestra pregunta: ¿cómo varían los ingresos con la educación?
+
+171 trabajadores a tiempo completo de 30 años (2010). Los ingresos están **sesgados a la derecha** (media \$41,413, mediana \$36,000, máx \$172,000),
+así que la escala logarítmica recoge la cola larga. Tomamos logaritmos y ajustamos las cuatro formas con `pyfixest`.
+
+``` {.python code-line-numbers="1|3-5|7-9|11-15|17-18"}
+!pip install -q pyfixest                     # pyfixest is NOT preinstalled in Colab (-q = quiet)
+
+import pandas as pd                          # tabular data
+import numpy as np                           # np.log for the transforms
+import pyfixest as pf                        # OLS with R-style formulas
+
+url = "https://raw.githubusercontent.com/quarcs-lab/data-open/master/AED/AED_EARNINGS.DTA"
+data = pd.read_stata(url)                    # 171 workers: earnings, education
+data["lnearn"] = np.log(data["earnings"])    # log of the outcome
+data["lneduc"] = np.log(data["education"])   # log of the regressor
+
+m_lin    = pf.feols("earnings ~ education", data=data)   # 1. linear:      $ per year
+m_loglin = pf.feols("lnearn ~ education",   data=data)   # 2. log-linear:  semi-elasticity
+m_loglog = pf.feols("lnearn ~ lneduc",      data=data)   # 3. log-log:     elasticity
+m_linlog = pf.feols("earnings ~ lneduc",    data=data)   # 4. linear-log:  $ per 1%
+
+print(100 * m_loglin.coef()["education"])    # 13.1 → ~13.1% more earnings per extra year
+m_loglin.summary()                           # β0, β1, SE, t, p, R²
+```
+
+[↗ Pruébalo en Colab](https://colab.research.google.com/notebooks/empty.ipynb){.colab-link target="_blank" data-preview-link="false"}
+
+::: {.notes}
+El modelo log-lineal es el predeterminado en economía laboral: el retorno del 13.1% escala automáticamente — se lee
+igual sea que un trabajador gane \$30k o \$100k. t = 9.21, p < 0.001, R² = 0.334.
+:::
+
+## Los mismos datos, cuatro líneas ajustadas — cuatro preguntas distintas
+
+![Cada panel ajusta una especificación. Las transformaciones logarítmicas enderezan la curvatura que el modelo lineal pasa por alto.](figures/fig_four_models.png)
+
+[El log-lineal ajusta mejor entre los modelos de $\ln$(ingresos) (R² = 0.334); logaritmar solo $x$ dobla la línea hacia rendimientos decrecientes.]{.takeaway .fragment}
+
+## Leyendo las cuatro pendientes
+
+::: {.incremental}
+- **Lineal:** \$5,021 más de ingresos por año adicional — una cantidad fija en dólares (inverosímil en el extremo superior).
+- **Log-lineal:** alrededor de **13.1% más** de ingresos por año adicional — la semielasticidad, y la elección habitual.
+- **Log-log:** elasticidad **1.48** — un aumento de 1% en educación se asocia con ~1.48% más de ingresos.
+- **Lineal-log:** alrededor de **\$544 más** de ingresos por cada 1% de educación — dólares a partir de un movimiento porcentual.
+:::
+
+[Compara $R^2$ solo entre modelos con la **misma** variable dependiente — no entre resultados en nivel y en logaritmo.]{.takeaway .fragment}
+
+## El crecimiento exponencial se vuelve una línea recta en logaritmos
+
+$x_t = x_0(1+r)^t$ se curva hacia arriba en niveles, pero $\ln(x_t) \approx \ln(x_0) + r\,t$ es lineal — así que regresar
+$\ln x$ sobre el tiempo recupera la tasa de crecimiento $r$ como la pendiente.
+
+``` {.python code-line-numbers="1|3-4|6-7|9|10-12"}
+!pip install -q pyfixest                     # self-contained cell: install pyfixest (quiet)
+
+import pandas as pd                          # tabular data
+import pyfixest as pf                        # OLS with R-style formulas
+
+url = "https://raw.githubusercontent.com/quarcs-lab/data-open/master/AED/AED_SP500INDEX.DTA"
+data = pd.read_stata(url)                    # S&P 500 index, 1927–2019 (lnsp500 precomputed)
+
+fit = pf.feols("lnsp500 ~ year", data=data)  # slope = average annual growth rate r
+r = fit.coef()["year"]                       # ≈ 0.065
+print(f"growth rate: {100*r:.2f}% per year") # ≈ 6.5% per year
+print(f"Rule of 72: doubles every {72/(100*r):.0f} years")  # ≈ 11 years
+```
+
+[↗ Pruébalo en Colab](https://colab.research.google.com/notebooks/empty.ipynb){.colab-link target="_blank" data-preview-link="false"}
+
+::: {.notes}
+lnsp500 ya está en el conjunto de datos. La Regla del 72 proviene de ln(2) ≈ 0.693 y ln(1+r) ≈ r: divide 72
+entre la tasa porcentual para obtener un tiempo de duplicación inmediato.
+:::
+
+## Los logaritmos convierten una curva en una pendiente que puedes leer
+
+![La misma serie del S&P 500: una curva exponencial en niveles (izquierda), una línea casi recta en logaritmos (derecha).](figures/fig_exp_growth.png)
+
+[Un crecimiento de **6.5% por año** entre 1927–2019 → el índice se duplica aproximadamente cada **11 años** (Regla del 72).]{.takeaway .fragment}
+
+# Leerlo bien {.divider background-color="#C21E72"}
+
+[Acto III · La resolución]{.act}
+
+## La aproximación tiene límites — y los logaritmos tienen un dominio
+
+[Objeción.]{.objection} "La pendiente log-lineal es 0.131, así que el retorno de un año de educación es exactamente 13.1%."
+
+. . .
+
+[Respuesta.]{.rebuttal} $100\beta_1$ es una **aproximación** que se cumple para coeficientes pequeños. Con $\beta_1 = 0.131$
+el efecto *exacto* es $100\,(e^{0.131}-1) \approx 14.0\%$ — cercano, pero no idéntico. Y $\ln$ no está definido en
+cero o en valores negativos, así que los logaritmos solo aplican a variables estrictamente positivas.
+
+[Reporta el valor exacto $100(e^{\beta_1}-1)$ una vez que $|\beta_1|$ supera alrededor de 0.10; nunca logaritmes una variable que pueda ser cero.]{.takeaway .fragment}
+
+## Qué llevarse
+
+::: {.incremental}
+- $\Delta\ln(x) \approx \Delta x/x$: un cambio en logaritmo **es** un cambio proporcional (para movimientos pequeños).
+- **Log-lineal** → semielasticidad ($100\beta_1 \approx \%\Delta y$ por unidad); **log-log** → elasticidad (% por %).
+- Elige la forma a partir de **teoría económica + datos + interpretación** — el log-lineal es el predeterminado común.
+- **El crecimiento exponencial es lineal en logaritmos**: regresa $\ln x$ sobre el tiempo; la pendiente es la tasa de crecimiento.
+- Trata los efectos porcentuales finitos como **aproximaciones** ($100(e^{\beta_1}-1)$ es exacto); los logaritmos necesitan datos positivos.
+:::
+
+# Ajusta en logaritmos, lee en porcentajes — luego verifica que la aproximación se sostiene. {.divider background-color="#C21E72"}

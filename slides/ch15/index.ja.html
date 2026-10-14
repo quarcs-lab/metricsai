@@ -1,0 +1,1008 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<script src="slides.ja_files/libs/clipboard/clipboard.min.js"></script>
+<script src="slides.ja_files/libs/quarto-html/tabby.min.js"></script>
+<script src="slides.ja_files/libs/quarto-html/popper.min.js"></script>
+<script src="slides.ja_files/libs/quarto-html/tippy.umd.min.js"></script>
+<link href="slides.ja_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="slides.ja_files/libs/quarto-html/light-border.css" rel="stylesheet">
+<link href="slides.ja_files/libs/quarto-html/quarto-syntax-highlighting-dark-23bbe8b5e4efc1e257f6d59dce478b08.css" rel="stylesheet" id="quarto-text-highlighting-styles"><meta charset="utf-8">
+  <meta name="generator" content="quarto-1.9.37">
+
+  <meta name="dcterms.date" content="2026-10-14">
+  <title>15. 変数変換を用いた回帰</title>
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
+  <link rel="stylesheet" href="slides.ja_files/libs/revealjs/dist/reset.css">
+  <link rel="stylesheet" href="slides.ja_files/libs/revealjs/dist/reveal.css">
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    ul.task-list{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+      vertical-align: middle;
+    }
+    /* CSS for syntax highlighting */
+    html { -webkit-text-size-adjust: 100%; }
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+      }
+    pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+    div.sourceCode
+      { color: #e1e4e8; background-color: #24292e; }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span { color: #e1e4e8; } /* Normal */
+    code span.al { color: #ff5555; font-weight: bold; } /* Alert */
+    code span.an { color: #6a737d; } /* Annotation */
+    code span.at { color: #f97583; } /* Attribute */
+    code span.bn { color: #79b8ff; } /* BaseN */
+    code span.bu { color: #f97583; } /* BuiltIn */
+    code span.cf { color: #f97583; } /* ControlFlow */
+    code span.ch { color: #9ecbff; } /* Char */
+    code span.cn { color: #79b8ff; } /* Constant */
+    code span.co { color: #6a737d; } /* Comment */
+    code span.cv { color: #6a737d; } /* CommentVar */
+    code span.do { color: #6a737d; } /* Documentation */
+    code span.dt { color: #f97583; } /* DataType */
+    code span.dv { color: #79b8ff; } /* DecVal */
+    code span.er { color: #ff5555; text-decoration: underline; } /* Error */
+    code span.ex { color: #f97583; font-weight: bold; } /* Extension */
+    code span.fl { color: #79b8ff; } /* Float */
+    code span.fu { color: #b392f0; } /* Function */
+    code span.im { color: #9ecbff; } /* Import */
+    code span.in { color: #6a737d; } /* Information */
+    code span.kw { color: #f97583; } /* Keyword */
+    code span.op { color: #e1e4e8; } /* Operator */
+    code span.ot { color: #b392f0; } /* Other */
+    code span.pp { color: #f97583; } /* Preprocessor */
+    code span.re { color: #6a737d; } /* RegionMarker */
+    code span.sc { color: #79b8ff; } /* SpecialChar */
+    code span.ss { color: #9ecbff; } /* SpecialString */
+    code span.st { color: #9ecbff; } /* String */
+    code span.va { color: #ffab70; } /* Variable */
+    code span.vs { color: #9ecbff; } /* VerbatimString */
+    code span.wa { color: #ff5555; } /* Warning */
+  </style>
+  <link rel="stylesheet" href="slides.ja_files/libs/revealjs/dist/theme/quarto-994ff1788cd86c8e339430767939222d.css">
+  <link href="slides.ja_files/libs/revealjs/plugin/quarto-line-highlight/line-highlight.css" rel="stylesheet">
+  <link href="slides.ja_files/libs/revealjs/plugin/reveal-menu/menu.css" rel="stylesheet">
+  <link href="slides.ja_files/libs/revealjs/plugin/reveal-menu/quarto-menu.css" rel="stylesheet">
+  <link href="slides.ja_files/libs/revealjs/plugin/reveal-chalkboard/font-awesome/css/all.css" rel="stylesheet">
+  <link href="slides.ja_files/libs/revealjs/plugin/reveal-chalkboard/style.css" rel="stylesheet">
+  <link href="slides.ja_files/libs/revealjs/plugin/quarto-support/footer.css" rel="stylesheet">
+  <style type="text/css">
+    .reveal div.sourceCode {
+      margin: 0;
+      overflow: auto;
+    }
+    .reveal div.hanging-indent {
+      margin-left: 1em;
+      text-indent: -1em;
+    }
+    .reveal .slide:not(.center) {
+      height: 100%;
+    }
+    .reveal .slide.scrollable {
+      overflow-y: auto;
+    }
+    .reveal .footnotes {
+      height: 100%;
+      overflow-y: auto;
+    }
+    .reveal .slide .absolute {
+      position: absolute;
+      display: block;
+    }
+    .reveal .footnotes ol {
+      counter-reset: ol;
+      list-style-type: none; 
+      margin-left: 0;
+    }
+    .reveal .footnotes ol li:before {
+      counter-increment: ol;
+      content: counter(ol) ". "; 
+    }
+    .reveal .footnotes ol li > p:first-child {
+      display: inline-block;
+    }
+    .reveal .slide ul,
+    .reveal .slide ol {
+      margin-bottom: 0.5em;
+    }
+    .reveal .slide ul li,
+    .reveal .slide ol li {
+      margin-top: 0.4em;
+      margin-bottom: 0.2em;
+    }
+    .reveal .slide ul[role="tablist"] li {
+      margin-bottom: 0;
+    }
+    .reveal .slide ul li > *:first-child,
+    .reveal .slide ol li > *:first-child {
+      margin-block-start: 0;
+    }
+    .reveal .slide ul li > *:last-child,
+    .reveal .slide ol li > *:last-child {
+      margin-block-end: 0;
+    }
+    .reveal .slide .columns:nth-child(3) {
+      margin-block-start: 0.8em;
+    }
+    .reveal blockquote {
+      box-shadow: none;
+    }
+    .reveal .tippy-content>* {
+      margin-top: 0.2em;
+      margin-bottom: 0.7em;
+    }
+    .reveal .tippy-content>*:last-child {
+      margin-bottom: 0.2em;
+    }
+    .reveal .slide > img.stretch.quarto-figure-center,
+    .reveal .slide > img.r-stretch.quarto-figure-center {
+      display: block;
+      margin-left: auto;
+      margin-right: auto; 
+    }
+    .reveal .slide > img.stretch.quarto-figure-left,
+    .reveal .slide > img.r-stretch.quarto-figure-left  {
+      display: block;
+      margin-left: 0;
+      margin-right: auto; 
+    }
+    .reveal .slide > img.stretch.quarto-figure-right,
+    .reveal .slide > img.r-stretch.quarto-figure-right  {
+      display: block;
+      margin-left: auto;
+      margin-right: 0; 
+    }
+  </style>
+</head>
+<body class="quarto-dark">
+  <div class="reveal">
+    <div class="slides">
+
+<!-- Title slide = the chapter visual summary, full-bleed, nothing else. The image is
+     painted as the slide background (data-background-image) so it fills the entire slide;
+     `size=contain` shows the WHOLE summary with no cropping (the summaries are 16:9, matching
+     the 1280×720 canvas, so it fills edge-to-edge). No title/subtitle/byline text is rendered. -->
+<section id="title-slide" class="quarto-title-block title-visual-summary center" data-background-image="figures/visual_summary.png" data-background-size="contain" data-background-color="#0f1117">
+</section>
+
+<section>
+<section id="問題" class="title-slide slide level1 divider center" data-background-color="#008CB7">
+<h1>問題</h1>
+<p><span class="act">第I幕 · 直線はすべてに当てはまるわけではない</span></p>
+</section>
+<section id="現実の経済的関係は曲がる" class="slide level2 center">
+<h2>現実の経済的関係は曲がる</h2>
+<p>収入は年齢とともに直線的に増えるわけではありません。若いうちは急速に上がり、中堅期には横ばいになり、 退職間際には下がります。単純な <code>earnings ~ age</code> の直線は、そのすべてを見逃してしまいます。</p>
+<div class="fragment">
+<p>解決策はOLS（最小二乗法）を捨てることではありません。<strong>変数を変換する</strong>こと — 対数、二乗、交互作用 — によって、依然として<em>係数について線形</em>なモデルで曲線的な物語を描けるのです。</p>
+<aside class="notes">
+<p>この章全体は一つの考えに基づいています。「線形回帰」とは変数についてではなく、パラメータについて線形であるという意味です。 それを受け入れれば、OLSの道具箱から出ることなく、対数や多項式が使えるようになります。</p>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+</div>
+</section>
+<section id="これから進む道" class="slide level2 center">
+<h2>これから進む道</h2>
+<ul>
+<li class="fragment"><strong>対数</strong> — level-log、log-linear、log-log、そしてそれぞれが含意する変化率／弾力性</li>
+<li class="fragment"><strong>二乗項</strong> — 収入のライフサイクルの逆U字型を捉える</li>
+<li class="fragment"><strong>標準化係数</strong> — 異なる単位で測られた説明変数を比較する</li>
+<li class="fragment"><strong>交互作用</strong> — 教育の収益率が年齢とともに変わることを許す</li>
+<li class="fragment"><strong>限界効果</strong> — AME・MEM・MER — 傾き自体が変化するとき</li>
+<li class="fragment"><strong>予測</strong> — 逆変換バイアスを<em>伴わずに</em>対数変換を元に戻す</li>
+</ul>
+</section>
+<section id="五つの考えがこの章を支える" class="slide level2 center">
+<h2>五つの考えがこの章を支える</h2>
+<ul>
+<li class="fragment"><strong>限界効果</strong> — <span class="math inline">\(x\)</span> が1単位変化したときの <span class="math inline">\(y\)</span> の変化。<span class="math inline">\(x\)</span> が非線形に入ると、それは <span class="math inline">\(x\)</span> <em>とともに変化します</em></li>
+<li class="fragment"><strong>AME · MEM · MER</strong> — 効果を平均するか、平均値で評価するか、選んだプロファイルで評価するか</li>
+<li class="fragment"><strong>多項式回帰</strong> — <span class="math inline">\(x^2\)</span>（次に <span class="math inline">\(x^3\)</span> …）を加えて直線を曲げる。依然として <span class="math inline">\(\beta\)</span> について線形</li>
+<li class="fragment"><strong>標準化係数</strong> — <span class="math inline">\(x\)</span> の1標準偏差の変化が <span class="math inline">\(y\)</span> に与える効果を、標準偏差単位で表す — 共通の通貨</li>
+<li class="fragment"><strong>smearing推定量</strong> — <span class="math inline">\(\exp(\widehat{\ln y})\)</span> のバイアスに対するDuanの残差ベースの補正</li>
+</ul>
+<p><span class="takeaway fragment">一つのデータセット — 872人の労働者 — がすべての変換を貫きます。</span></p>
+</section>
+<section id="私たちのデータ872人の労働者収入とその要因" class="slide level2 center">
+<h2>私たちのデータ：872人の労働者、収入とその要因</h2>
+<p><code>AED_EARNINGS_COMPLETE.DTA</code> — 25〜65歳のフルタイム労働者872人（2000年）。<code>earnings</code>、<code>age</code>、 <code>education</code>、労働時間、産業、性別を含みます。</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1" data-code-line-numbers="1-2|4|6-7"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href=""></a><span class="im">import</span> pandas <span class="im">as</span> pd                          <span class="co"># tabular data</span></span>
+<span id="cb1-2"><a href=""></a><span class="im">import</span> numpy <span class="im">as</span> np                           <span class="co"># logs, squares, z-scores</span></span>
+<span id="cb1-3"><a href=""></a></span>
+<span id="cb1-4"><a href=""></a>url <span class="op">=</span> <span class="st">"https://raw.githubusercontent.com/quarcs-lab/data-open/master/AED/AED_EARNINGS_COMPLETE.DTA"</span></span>
+<span id="cb1-5"><a href=""></a>data <span class="op">=</span> pd.read_stata(url)                    <span class="co"># 872 full-time workers, aged 25-65, year 2000</span></span>
+<span id="cb1-6"><a href=""></a></span>
+<span id="cb1-7"><a href=""></a>data[[<span class="st">"earnings"</span>, <span class="st">"age"</span>, <span class="st">"education"</span>]].describe().<span class="bu">round</span>(<span class="dv">1</span>)   <span class="co"># scale before you model</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><a href="https://colab.research.google.com/notebooks/empty.ipynb" class="colab-link" target="_blank" data-preview-link="false">↗ Colab で試す</a></p>
+<aside class="notes">
+<p>pandas/numpy はColabにプリインストールされているので、ここではpip installは不要です。平均収入 ≈ $56k。下にある対数モデルが その右への歪みを和らげます。</p>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+</section></section>
+<section>
+<section id="直線を曲げる四つの方法" class="title-slide slide level1 divider center" data-background-color="#7A209F">
+<h1>直線を曲げる四つの方法</h1>
+<p><span class="act">第II幕 · 変換</span></p>
+</section>
+<section id="対数は係数の意味を変える" class="slide level2 center">
+<h2>対数は係数の<em>意味</em>を変える</h2>
+<p>同じ関係の三つの定式化 — そして三つの異なる解釈。</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2" data-code-line-numbers="1|3-4|6|7|8|10"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href=""></a><span class="im">import</span> pyfixest <span class="im">as</span> pf                                 <span class="co"># OLS with R-style formulas</span></span>
+<span id="cb2-2"><a href=""></a><span class="co"># (pandas, numpy already loaded; data = AED_EARNINGS_COMPLETE)</span></span>
+<span id="cb2-3"><a href=""></a>data[<span class="st">"lnage"</span>] <span class="op">=</span> np.log(data[<span class="st">"age"</span>])                   <span class="co"># log of age, for the log-log model</span></span>
+<span id="cb2-4"><a href=""></a><span class="co"># lnearnings already in the data; = np.log(earnings)</span></span>
+<span id="cb2-5"><a href=""></a></span>
+<span id="cb2-6"><a href=""></a>levels  <span class="op">=</span> pf.feols(<span class="st">"earnings   ~ age   + education"</span>, data<span class="op">=</span>data, vcov<span class="op">=</span><span class="st">"HC1"</span>)  <span class="co"># $ per unit</span></span>
+<span id="cb2-7"><a href=""></a>loglin  <span class="op">=</span> pf.feols(<span class="st">"lnearnings ~ age   + education"</span>, data<span class="op">=</span>data, vcov<span class="op">=</span><span class="st">"HC1"</span>)  <span class="co"># % per unit (Mincer)</span></span>
+<span id="cb2-8"><a href=""></a>loglog  <span class="op">=</span> pf.feols(<span class="st">"lnearnings ~ lnage + education"</span>, data<span class="op">=</span>data, vcov<span class="op">=</span><span class="st">"HC1"</span>)  <span class="co"># elasticity on age</span></span>
+<span id="cb2-9"><a href=""></a></span>
+<span id="cb2-10"><a href=""></a>loglin.summary()                                      <span class="co"># the Mincer earnings equation</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><a href="https://colab.research.google.com/notebooks/empty.ipynb" class="colab-link" target="_blank" data-preview-link="false">↗ Colab で試す</a></p>
+<aside class="notes">
+<p>HC1 = 不均一分散にロバストな標準誤差で、この章の既定値です。pyfixest はColabにプリインストールされていないので、 完全な自己完結版では先頭に <code>!pip install -q pyfixest</code> を加えます（次のツール中心のスライドを参照）。</p>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+</section>
+<section id="同じデータ年齢の三つの解釈" class="slide level2 center">
+<h2>同じデータ、「年齢」の三つの解釈</h2>
+<ul>
+<li class="fragment"><strong>Levels（水準）</strong> — <span class="math inline">\(\hat\beta_{\text{age}} \approx \$525\)</span>：1年増えるごとに、出発点の収入にかかわらず約 <strong>$525</strong> 増えます。</li>
+<li class="fragment"><strong>Log-linear</strong>（Mincer） — <span class="math inline">\(\hat\beta_{\text{age}} \approx 0.008\)</span>：1年あたり約 <strong>+0.8%</strong> — <em>準弾力性</em>であり、ドル額は収入に応じてスケールします。</li>
+<li class="fragment"><strong>Log-log</strong> — <span class="math inline">\(\hat\beta_{\ln\text{age}} \approx 0.35\)</span>：<strong>年齢の1%上昇 → 収入の約0.35%上昇</strong> — <em>弾力性</em>（&lt; 1、非弾力的）です。</li>
+<li class="fragment"><strong>教育</strong>が主役です：対数モデルで ≈ <strong>0.10</strong> — 有名な <strong>年あたり約10%のMincer収益率</strong>です。</li>
+</ul>
+<p><span class="takeaway fragment">log-linearの <span class="math inline">\(\beta\)</span> を変化率とみなすのは<strong>近似</strong>です — 正確な効果は <span class="math inline">\(100(e^{\beta}-1)\%\)</span> であり、<span class="math inline">\(|\beta| &gt; 0.1\)</span> になるとその差が効いてきます。</span></p>
+</section>
+<section id="二乗項がライフサイクルの山を捉える" class="slide level2 center">
+<h2>二乗項がライフサイクルの山を捉える</h2>
+<p>年齢の二乗を加えます。年齢に対する傾きは今や <span class="math inline">\(\beta_2 + 2\beta_3\,\text{age}\)</span> となり、<strong>年齢とともに変化します</strong>。</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3" data-code-line-numbers="1|3-4|6|7|9|10-12"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href=""></a><span class="op">!</span>pip install <span class="op">-</span>q pyfixest                     <span class="co"># pyfixest isn't preinstalled in Colab (-q = quiet)</span></span>
+<span id="cb3-2"><a href=""></a><span class="im">import</span> pandas <span class="im">as</span> pd<span class="op">;</span> <span class="im">import</span> numpy <span class="im">as</span> np<span class="op">;</span> <span class="im">import</span> pyfixest <span class="im">as</span> pf</span>
+<span id="cb3-3"><a href=""></a>url <span class="op">=</span> <span class="st">"https://raw.githubusercontent.com/quarcs-lab/data-open/master/AED/AED_EARNINGS_COMPLETE.DTA"</span></span>
+<span id="cb3-4"><a href=""></a>data <span class="op">=</span> pd.read_stata(url)                     <span class="co"># 872 workers</span></span>
+<span id="cb3-5"><a href=""></a></span>
+<span id="cb3-6"><a href=""></a>quad <span class="op">=</span> pf.feols(<span class="st">"earnings ~ age + I(age**2) + education"</span>, data<span class="op">=</span>data, vcov<span class="op">=</span><span class="st">"HC1"</span>)  <span class="co"># age + age^2</span></span>
+<span id="cb3-7"><a href=""></a>b2, b3 <span class="op">=</span> quad.coef()[<span class="st">"age"</span>], quad.coef()[<span class="st">"I(age ** 2)"</span>]    <span class="co"># linear &amp; quadratic terms</span></span>
+<span id="cb3-8"><a href=""></a></span>
+<span id="cb3-9"><a href=""></a>turning_point <span class="op">=</span> <span class="op">-</span>b2 <span class="op">/</span> (<span class="dv">2</span> <span class="op">*</span> b3)                <span class="co"># age where the slope hits zero (earnings peak)</span></span>
+<span id="cb3-10"><a href=""></a><span class="bu">print</span>(<span class="ss">f"peak earnings at age </span><span class="sc">{</span>turning_point<span class="sc">:.0f}</span><span class="ss">"</span>)         <span class="co"># ~ 52</span></span>
+<span id="cb3-11"><a href=""></a><span class="bu">print</span>(<span class="ss">f"marginal effect at 25: </span><span class="sc">{</span>b2 <span class="op">+</span> <span class="dv">2</span><span class="op">*</span>b3<span class="op">*</span><span class="dv">25</span><span class="sc">:,.0f}</span><span class="ss">"</span>)       <span class="co"># ~ +$1,600 / yr</span></span>
+<span id="cb3-12"><a href=""></a><span class="bu">print</span>(<span class="ss">f"marginal effect at 60: </span><span class="sc">{</span>b2 <span class="op">+</span> <span class="dv">2</span><span class="op">*</span>b3<span class="op">*</span><span class="dv">60</span><span class="sc">:,.0f}</span><span class="ss">"</span>)       <span class="co"># ~ -$450 / yr</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><a href="https://colab.research.google.com/notebooks/empty.ipynb" class="colab-link" target="_blank" data-preview-link="false">↗ Colab で試す</a></p>
+<aside class="notes">
+<p>年齢の線形係数 ≈ +$3,000〜5,000、agesq ≈ −$30〜−$50。age と age² に対する同時F検定は非常に 有意なので、この曲率はノイズではなく本物です。</p>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+</section>
+<section id="収入は52歳前後でピークに達しその後下がる" class="slide level2 center">
+<h2>収入は52歳前後でピークに達し、その後下がる</h2>
+
+<img data-src="figures/fig_quadratic.png" class="r-stretch quarto-figure-center"><p class="caption">年齢に対する当てはめ収入（教育は平均値で固定）：二乗項が復元する逆U字型のライフサイクル・プロファイル。</p><p><span class="takeaway fragment">傾きは <strong>25歳で+$1,600/年</strong>、<strong>52歳前後で$0</strong>、<strong>60歳で−$450/年</strong> — 一つの説明変数、三つの限界的な物語。</span></p>
+</section>
+<section id="リンゴとオレンジを比べるために標準化する" class="slide level2 center">
+<h2>リンゴとオレンジを比べるために標準化する</h2>
+<p>ドル／年と対数労働時間は、そのままでは比較できません。各変数を標準偏差単位で表し直します。</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4" data-code-line-numbers="1-2|4|6|7-8"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href=""></a><span class="co"># z-score each variable: (x - mean) / sd  → coefficients become "SD of y per SD of x"</span></span>
+<span id="cb4-2"><a href=""></a>cols <span class="op">=</span> [<span class="st">"earnings"</span>, <span class="st">"age"</span>, <span class="st">"agesq"</span>, <span class="st">"education"</span>, <span class="st">"lnhours"</span>]</span>
+<span id="cb4-3"><a href=""></a>z <span class="op">=</span> data[cols].<span class="bu">apply</span>(<span class="kw">lambda</span> s: (s <span class="op">-</span> s.mean()) <span class="op">/</span> s.std())      <span class="co"># standardized copies</span></span>
+<span id="cb4-4"><a href=""></a></span>
+<span id="cb4-5"><a href=""></a>mz <span class="op">=</span> pf.feols(<span class="st">"earnings ~ age + agesq + education + lnhours"</span>, data<span class="op">=</span>z, vcov<span class="op">=</span><span class="st">"HC1"</span>)</span>
+<span id="cb4-6"><a href=""></a>mz.coef().<span class="bu">round</span>(<span class="dv">3</span>)      <span class="co"># beta* weights — now directly comparable</span></span>
+<span id="cb4-7"><a href=""></a><span class="co"># age &amp; age^2 dominate; among the rest, education and lnhours carry the most weight</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><a href="https://colab.research.google.com/notebooks/empty.ipynb" class="colab-link" target="_blank" data-preview-link="false">↗ Colab で試す</a></p>
+</section>
+<section id="標準化された重みが要因を順位づける" class="slide level2 center">
+<h2>標準化された重みが要因を順位づける</h2>
+
+<img data-src="figures/fig_standardized.png" class="r-stretch quarto-figure-center"><p class="caption">標準化係数（<span class="math inline">\(\beta^*\)</span>）：年齢とその二乗が支配的で、残りの中では教育と対数労働時間が先頭に立ちます。</p><p><span class="takeaway fragment">標準化係数は「努力の1標準偏差あたり、どの説明変数が収入を最も動かすか」に答えます — 単位をまたいで比較できます。</span></p>
+</section>
+<section id="交互作用は教育の収益率を年齢とともに変化させる" class="slide level2 center">
+<h2>交互作用は教育の収益率を年齢とともに変化させる</h2>
+<p>1年の就学は25歳でも55歳でも同じだけ報われるのでしょうか。二つの説明変数を掛け合わせて検定してみましょう。</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5" data-code-line-numbers="1|3|5-6|8|9-10"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href=""></a>inter <span class="op">=</span> pf.feols(<span class="st">"earnings ~ age * education"</span>, data<span class="op">=</span>data, vcov<span class="op">=</span><span class="st">"HC1"</span>)   <span class="co"># age, education, age:education</span></span>
+<span id="cb5-2"><a href=""></a></span>
+<span id="cb5-3"><a href=""></a><span class="co"># return to education at a given age = beta_educ + beta_(age:educ) * age</span></span>
+<span id="cb5-4"><a href=""></a>be, bx <span class="op">=</span> inter.coef()[<span class="st">"education"</span>], inter.coef()[<span class="st">"age:education"</span>]</span>
+<span id="cb5-5"><a href=""></a><span class="bu">print</span>(<span class="ss">f"return at 25: </span><span class="sc">{</span>be <span class="op">+</span> bx<span class="op">*</span><span class="dv">25</span><span class="sc">:,.0f}</span><span class="ss">"</span>)     <span class="co"># ~ +$5,241 / education-year</span></span>
+<span id="cb5-6"><a href=""></a><span class="bu">print</span>(<span class="ss">f"return at 55: </span><span class="sc">{</span>be <span class="op">+</span> bx<span class="op">*</span><span class="dv">55</span><span class="sc">:,.0f}</span><span class="ss">"</span>)     <span class="co"># ~ +$6,112 / education-year</span></span>
+<span id="cb5-7"><a href=""></a></span>
+<span id="cb5-8"><a href=""></a><span class="co"># is the interaction itself distinguishable from zero?</span></span>
+<span id="cb5-9"><a href=""></a>inter.wald_test(R<span class="op">=</span>[[<span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">1</span>]])             <span class="co"># H0: beta_(age:education) = 0  -&gt; p ~ 0.61</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><a href="https://colab.research.google.com/notebooks/empty.ipynb" class="colab-link" target="_blank" data-preview-link="false">↗ Colab で試す</a></p>
+<aside class="notes">
+<p><code>age * education</code> は age + education + age:education に展開されます。収益率は25歳の$5,241から 55歳の$6,112へと変化します — わずか約1.2倍で、交互作用は有意ではない（p ≈ 0.61）ため、慎重に読んでください。</p>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+</section>
+<section id="対数モデルからの予測逆変換バイアスに注意" class="slide level2 center">
+<h2>対数モデルからの予測：逆変換バイアスに注意</h2>
+<p><span class="math inline">\(\exp(\widehat{\ln y})\)</span> は<em>平均</em>ではなく<em>中央値</em>を予測するため、系統的に過小予測します。Duanの <strong>smearing</strong>補正が、残差そのものを使ってこれを修正します。</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6" data-code-line-numbers="1|3|5|7|8-9"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href=""></a>logmod <span class="op">=</span> pf.feols(<span class="st">"lnearnings ~ age + education"</span>, data<span class="op">=</span>data, vcov<span class="op">=</span><span class="st">"HC1"</span>)  <span class="co"># s_e ~ 0.62</span></span>
+<span id="cb6-2"><a href=""></a></span>
+<span id="cb6-3"><a href=""></a>naive <span class="op">=</span> np.exp(logmod.predict())                        <span class="co"># biased: ~ $46k mean (actual ~ $56k)</span></span>
+<span id="cb6-4"><a href=""></a></span>
+<span id="cb6-5"><a href=""></a>smear <span class="op">=</span> np.exp(logmod.resid()).mean()                   <span class="co"># Duan factor = mean(exp(residuals)) ~ 1.21</span></span>
+<span id="cb6-6"><a href=""></a>corrected <span class="op">=</span> naive <span class="op">*</span> smear                               <span class="co"># smeared prediction</span></span>
+<span id="cb6-7"><a href=""></a><span class="bu">print</span>(<span class="ss">f"naive mean     </span><span class="sc">{</span>naive<span class="sc">.</span>mean()<span class="sc">:,.0f}</span><span class="ss">"</span>)            <span class="co"># ~ 46,000</span></span>
+<span id="cb6-8"><a href=""></a><span class="bu">print</span>(<span class="ss">f"corrected mean </span><span class="sc">{</span>corrected<span class="sc">.</span>mean()<span class="sc">:,.0f}</span><span class="ss">"</span>)        <span class="co"># ~ 55,000, matches the data</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><a href="https://colab.research.google.com/notebooks/empty.ipynb" class="colab-link" target="_blank" data-preview-link="false">↗ Colab で試す</a></p>
+<aside class="notes">
+<p>Jensenの不等式：E[exp(u)] &gt; exp(E[u])。正規性に基づく係数 exp(s_e²/2) ≈ exp(0.62²/2) ≈ 1.21 は、 残差がほぼ正規であれば同じ補正を与えます。Duanのsmearingはそのような仮定を必要としません。</p>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+</section>
+<section id="単純なexpは過小予測しsmearingが平均を回復する" class="slide level2 center">
+<h2>単純なexp()は過小予測し、smearingが平均を回復する</h2>
+
+<img data-src="figures/fig_prediction.png" class="r-stretch quarto-figure-center"><p class="caption">予測収入 対 実際の収入：単純な <span class="math inline">\(\exp(\widehat{\ln y})\)</span> は低めに位置し、smearing予測は45°線上に乗ります。</p><p><span class="takeaway fragment">対数モデルからドル単位の予測を報告する前に、必ずsmearingを適用してください。</span></p>
+</section></section>
+<section>
+<section id="変換された係数を正しく読む" class="title-slide slide level1 divider center" data-background-color="#C21E72">
+<h1>変換された係数を正しく読む</h1>
+<p><span class="act">第III幕 · 解釈の落とし穴</span></p>
+</section>
+<section id="三つの落とし穴三つの修正" class="slide level2 center">
+<h2>三つの落とし穴、三つの修正</h2>
+<p><span class="objection">落とし穴。</span> 「log-linearの <span class="math inline">\(\beta = 0.12\)</span> はちょうど+12%を意味し、log-logモデルは <span class="math inline">\(R^2\)</span> が最も高いので最も当てはまりがよい。」</p>
+<div class="fragment">
+<p><span class="rebuttal">修正。</span> その変化率は<strong>近似</strong>です（<span class="math inline">\(100(e^{0.12}-1) \approx 12.7\%\)</span>）。そして被説明変数が異なる （<span class="math inline">\(y\)</span> 対 <span class="math inline">\(\ln y\)</span>）モデルどうしで <strong><span class="math inline">\(R^2\)</span> を比較することはできません</strong> — 代わりに予測精度や経済的な もっともらしさで判断してください。</p>
+<p><span class="takeaway fragment">変換された係数は、その解釈の良し悪しで価値が決まります — ドル、変化率、弾力性のどれを読んでいるのかを把握しましょう。</span></p>
+</div>
+</section>
+<section id="持ち帰るべきこと" class="slide level2 center">
+<h2>持ち帰るべきこと</h2>
+<ul>
+<li class="fragment"><strong>対数</strong>は変化率と弾力性を与えます。%としての読みは近似です — <span class="math inline">\(|\beta|\)</span> が大きいときは <span class="math inline">\(100(e^{\beta}-1)\)</span> を使いましょう。</li>
+<li class="fragment"><strong>二乗項</strong>は限界効果を変化させます。<strong>転換点</strong>といくつかの代表的な傾き（MER）を報告しましょう。</li>
+<li class="fragment"><strong>標準化</strong>して単位をまたいで説明変数を順位づけ、<strong>交互作用</strong>で一つの効果を別の効果に依存させる — そして<strong>検定</strong>しましょう。</li>
+<li class="fragment">異なる被説明変数の間で <strong><span class="math inline">\(R^2\)</span> を比較してはいけません</strong>。対数モデルから水準を予測する前に<strong>smearingを適用</strong>しましょう。</li>
+<li class="fragment">どの変換もOLSを<em>係数について線形</em>に保ちます — 道具箱は何も変わっていません。</li>
+</ul>
+</section></section>
+<section id="手法ではなく変数を変換しそして係数を本当の姿のまま読み取ろう" class="title-slide slide level1 divider center" data-background-color="#C21E72">
+<h1>手法ではなく変数を変換し、そして係数を本当の姿のまま読み取ろう。</h1>
+
+</section>
+    </div>
+  <div class="quarto-auto-generated-content" style="display: none;">
+<div class="footer footer-default">
+
+</div>
+</div></div>
+
+  <script>window.backupDefine = window.define; window.define = undefined;</script>
+  <script src="slides.ja_files/libs/revealjs/dist/reveal.js"></script>
+  <!-- reveal.js plugins -->
+  <script src="slides.ja_files/libs/revealjs/plugin/quarto-line-highlight/line-highlight.js"></script>
+  <script src="slides.ja_files/libs/revealjs/plugin/pdf-export/pdfexport.js"></script>
+  <script src="slides.ja_files/libs/revealjs/plugin/reveal-menu/menu.js"></script>
+  <script src="slides.ja_files/libs/revealjs/plugin/reveal-menu/quarto-menu.js"></script>
+  <script src="slides.ja_files/libs/revealjs/plugin/reveal-chalkboard/plugin.js"></script>
+  <script src="slides.ja_files/libs/revealjs/plugin/quarto-support/support.js"></script>
+  
+
+  <script src="slides.ja_files/libs/revealjs/plugin/notes/notes.js"></script>
+  <script src="slides.ja_files/libs/revealjs/plugin/search/search.js"></script>
+  <script src="slides.ja_files/libs/revealjs/plugin/zoom/zoom.js"></script>
+  <script src="slides.ja_files/libs/revealjs/plugin/math/math.js"></script>
+  <script>window.define = window.backupDefine; window.backupDefine = undefined;</script>
+
+  <script>
+
+      // Full list of configuration options available at:
+      // https://revealjs.com/config/
+      Reveal.initialize({
+'controlsAuto': true,
+'previewLinksAuto': true,
+'pdfSeparateFragments': false,
+'autoAnimateEasing': "ease",
+'autoAnimateDuration': 1,
+'autoAnimateUnmatched': true,
+'jumpToSlide': true,
+'menu': {"side":"left","useTextContentForMissingTitles":true,"markers":false,"loadIcons":false,"custom":[{"title":"Tools","icon":"<i class=\"fas fa-gear\"></i>","content":"<ul class=\"slide-menu-items\">\n<li class=\"slide-tool-item active\" data-item=\"0\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.fullscreen(event)\"><kbd>f</kbd> Fullscreen</a></li>\n<li class=\"slide-tool-item\" data-item=\"1\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.speakerMode(event)\"><kbd>s</kbd> Speaker View</a></li>\n<li class=\"slide-tool-item\" data-item=\"2\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.overview(event)\"><kbd>o</kbd> Slide Overview</a></li>\n<li class=\"slide-tool-item\" data-item=\"3\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.togglePdfExport(event)\"><kbd>e</kbd> PDF Export Mode</a></li>\n<li class=\"slide-tool-item\" data-item=\"4\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.toggleScrollView(event)\"><kbd>r</kbd> Scroll View Mode</a></li>\n<li class=\"slide-tool-item\" data-item=\"5\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.toggleChalkboard(event)\"><kbd>b</kbd> Toggle Chalkboard</a></li>\n<li class=\"slide-tool-item\" data-item=\"6\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.toggleNotesCanvas(event)\"><kbd>c</kbd> Toggle Notes Canvas</a></li>\n<li class=\"slide-tool-item\" data-item=\"7\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.downloadDrawings(event)\"><kbd>d</kbd> Download Drawings</a></li>\n<li class=\"slide-tool-item\" data-item=\"8\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.keyboardHelp(event)\"><kbd>?</kbd> Keyboard Help</a></li>\n</ul>"}],"openButton":true},
+'chalkboard': {"buttons":true},
+'smaller': false,
+ 
+        // Display controls in the bottom right corner
+        controls: false,
+
+        // Help the user learn the controls by providing hints, for example by
+        // bouncing the down arrow when they first encounter a vertical slide
+        controlsTutorial: false,
+
+        // Determines where controls appear, "edges" or "bottom-right"
+        controlsLayout: 'edges',
+
+        // Visibility rule for backwards navigation arrows; "faded", "hidden"
+        // or "visible"
+        controlsBackArrows: 'faded',
+
+        // Display a presentation progress bar
+        progress: true,
+
+        // Display the page number of the current slide
+        slideNumber: 'c/t',
+
+        // 'all', 'print', or 'speaker'
+        showSlideNumber: 'all',
+
+        // Add the current slide number to the URL hash so that reloading the
+        // page/copying the URL will return you to the same slide
+        hash: true,
+
+        // Start with 1 for the hash rather than 0
+        hashOneBasedIndex: false,
+
+        // Flags if we should monitor the hash and change slides accordingly
+        respondToHashChanges: true,
+
+        // Push each slide change to the browser history
+        history: true,
+
+        // Enable keyboard shortcuts for navigation
+        keyboard: true,
+
+        // Enable the slide overview mode
+        overview: true,
+
+        // Disables the default reveal.js slide layout (scaling and centering)
+        // so that you can use custom CSS layout
+        disableLayout: false,
+
+        // Vertical centering of slides
+        center: true,
+
+        // Enables touch navigation on devices with touch input
+        touch: true,
+
+        // Loop the presentation
+        loop: false,
+
+        // Change the presentation direction to be RTL
+        rtl: false,
+
+        // see https://revealjs.com/vertical-slides/#navigation-mode
+        navigationMode: 'linear',
+
+        // Randomizes the order of slides each time the presentation loads
+        shuffle: false,
+
+        // Turns fragments on and off globally
+        fragments: true,
+
+        // Flags whether to include the current fragment in the URL,
+        // so that reloading brings you to the same fragment position
+        fragmentInURL: false,
+
+        // Flags if the presentation is running in an embedded mode,
+        // i.e. contained within a limited portion of the screen
+        embedded: false,
+
+        // Flags if we should show a help overlay when the questionmark
+        // key is pressed
+        help: true,
+
+        // Flags if it should be possible to pause the presentation (blackout)
+        pause: true,
+
+        // Flags if speaker notes should be visible to all viewers
+        showNotes: false,
+
+        // Global override for autoplaying embedded media (null/true/false)
+        autoPlayMedia: null,
+
+        // Global override for preloading lazy-loaded iframes (null/true/false)
+        preloadIframes: null,
+
+        // Number of milliseconds between automatically proceeding to the
+        // next slide, disabled when set to 0, this value can be overwritten
+        // by using a data-autoslide attribute on your slides
+        autoSlide: 0,
+
+        // Stop auto-sliding after user input
+        autoSlideStoppable: true,
+
+        // Use this method for navigation when auto-sliding
+        autoSlideMethod: null,
+
+        // Specify the average time in seconds that you think you will spend
+        // presenting each slide. This is used to show a pacing timer in the
+        // speaker view
+        defaultTiming: null,
+
+        // Enable slide navigation via mouse wheel
+        mouseWheel: false,
+
+        // The display mode that will be used to show slides
+        display: 'block',
+
+        // Hide cursor if inactive
+        hideInactiveCursor: true,
+
+        // Time before the cursor is hidden (in ms)
+        hideCursorTime: 5000,
+
+        // Opens links in an iframe preview overlay
+        previewLinks: false,
+
+        // Transition style (none/fade/slide/convex/concave/zoom)
+        transition: 'fade',
+
+        // Transition speed (default/fast/slow)
+        transitionSpeed: 'default',
+
+        // Transition style for full page slide backgrounds
+        // (none/fade/slide/convex/concave/zoom)
+        backgroundTransition: 'none',
+
+        // Number of slides away from the current that are visible
+        viewDistance: 3,
+
+        // Number of slides away from the current that are visible on mobile
+        // devices. It is advisable to set this to a lower number than
+        // viewDistance in order to save resources.
+        mobileViewDistance: 2,
+
+        // The "normal" size of the presentation, aspect ratio will be preserved
+        // when the presentation is scaled to fit different resolutions. Can be
+        // specified using percentage units.
+        width: 1280,
+
+        height: 720,
+
+        // Factor of the display size that should remain empty around the content
+        margin: 0.1,
+
+        math: {
+          mathjax: 'https://cdn.jsdelivr.net/npm/mathjax@2.7.9/MathJax.js',
+          config: 'TeX-AMS_HTML-full',
+          tex2jax: {
+            inlineMath: [['\\(','\\)']],
+            displayMath: [['\\[','\\]']],
+            balanceBraces: true,
+            processEscapes: false,
+            processRefs: true,
+            processEnvironments: true,
+            preview: 'TeX',
+            skipTags: ['script','noscript','style','textarea','pre','code'],
+            ignoreClass: 'tex2jax_ignore',
+            processClass: 'tex2jax_process'
+          },
+        },
+
+        // reveal.js plugins
+        plugins: [QuartoLineHighlight, PdfExport, RevealMenu, RevealChalkboard, QuartoSupport,
+
+          RevealMath,
+          RevealNotes,
+          RevealSearch,
+          RevealZoom
+        ]
+      });
+    </script>
+    <!-- figure-zoom.html — click-to-zoom lightbox for deck figures (self-contained, no CDN).
+         Injected via the slides.qmd front matter `include-after-body: figure-zoom.html`.
+         Clicking any figure <img> on a slide opens a full-screen overlay with zoom controls
+         (+ / − / reset / fullscreen), scroll-to-zoom-at-cursor, drag-to-pan, and Esc to close.
+         Copied verbatim into each deck by the write-slides skill. -->
+    <style>
+      .reveal .slides img.fig-zoomable { cursor: zoom-in; }
+      #figZoomOverlay {
+        position: fixed; inset: 0; z-index: 10000;
+        background: rgba(8, 10, 16, 0.96);
+        display: none; align-items: center; justify-content: center; overflow: hidden;
+      }
+      #figZoomOverlay.open { display: flex; }
+      #figZoomImg {
+        max-width: 94vw; max-height: 92vh;
+        transform-origin: center center;
+        transition: transform 0.08s ease-out;
+        user-select: none; -webkit-user-drag: none;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6); border-radius: 4px;
+      }
+      #figZoomImg.dragging { transition: none; }
+      #figZoomHint {
+        position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
+        color: #9aa6bd; font: 500 13px/1 -apple-system, "Segoe UI", sans-serif;
+        letter-spacing: 0.02em; z-index: 10001; pointer-events: none;
+      }
+      #figZoomControls {
+        position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+        display: flex; gap: 8px; z-index: 10001;
+      }
+      #figZoomOverlay button {
+        font: 600 18px/1 -apple-system, "Segoe UI", sans-serif;
+        color: #e6e9ef; background: rgba(0, 140, 183, 0.20);
+        border: 1px solid rgba(0, 140, 183, 0.65); border-radius: 8px;
+        width: 46px; height: 42px; cursor: pointer; transition: background 0.15s ease;
+      }
+      #figZoomOverlay button:hover { background: rgba(0, 140, 183, 0.40); color: #fff; }
+      #figZoomClose { position: fixed; top: 18px; right: 22px; width: 46px; height: 46px; z-index: 10001; }
+    </style>
+    <script>
+    (function () {
+      function init() {
+        if (document.getElementById("figZoomOverlay")) return;
+        var overlay = document.createElement("div");
+        overlay.id = "figZoomOverlay";
+        overlay.innerHTML =
+          '<img id="figZoomImg" alt="zoomed figure">' +
+          '<div id="figZoomHint">scroll or + / − to zoom · drag to pan · Esc to close</div>' +
+          '<button id="figZoomClose" title="Close (Esc)" aria-label="Close">×</button>' +
+          '<div id="figZoomControls">' +
+            '<button data-act="out" title="Zoom out (−)" aria-label="Zoom out">−</button>' +
+            '<button data-act="reset" title="Reset (0)" aria-label="Reset">↺</button>' +
+            '<button data-act="in" title="Zoom in (+)" aria-label="Zoom in">+</button>' +
+            '<button data-act="full" title="Full screen" aria-label="Full screen">⛶</button>' +
+          '</div>';
+        document.body.appendChild(overlay);
+
+        var img = overlay.querySelector("#figZoomImg");
+        var scale = 1, tx = 0, ty = 0, drag = false, sx = 0, sy = 0;
+
+        function apply() {
+          img.style.transform = "translate(" + tx + "px," + ty + "px) scale(" + scale + ")";
+          img.style.cursor = scale > 1 ? "grab" : "default";
+        }
+        function reset() { scale = 1; tx = 0; ty = 0; apply(); }
+        function open(src) { img.src = src; reset(); overlay.classList.add("open"); }
+        function close() {
+          overlay.classList.remove("open");
+          if (document.fullscreenElement) { document.exitFullscreen().catch(function () {}); }
+        }
+        function zoom(f) {
+          scale = Math.min(8, Math.max(1, scale * f));
+          if (scale === 1) { tx = 0; ty = 0; }
+          apply();
+        }
+
+        // Body figures are <img> elements on slides.
+        document.querySelectorAll(".reveal .slides img").forEach(function (el) {
+          if (el.closest("#figZoomOverlay")) return;
+          el.classList.add("fig-zoomable");
+          el.addEventListener("click", function (e) {
+            e.preventDefault(); e.stopPropagation();
+            open(el.currentSrc || el.src);
+          });
+        });
+
+        // The TITLE slide's visual summary is a full-bleed slide BACKGROUND (data-background-image),
+        // not an <img> and painted in a separate layer behind an (empty) section. Rather than hunt for
+        // the right element, capture clicks on the whole deck: if the CURRENT slide has a background
+        // image, a click anywhere on it (except controls/links) zooms that image.
+        var revealEl = document.querySelector(".reveal");
+        if (revealEl) {
+          revealEl.style.cursor = revealEl.style.cursor; // no-op; cursor set per-slide below
+          revealEl.addEventListener("click", function (e) {
+            if (overlay.classList.contains("open")) return;
+            if (e.target.closest("#figZoomOverlay")) return;
+            if (e.target.closest("a, button, .controls, .slide-menu, .slide-menu-button, .progress")) return;
+            var cur = (window.Reveal && Reveal.getCurrentSlide) ? Reveal.getCurrentSlide() : null;
+            var url = cur && cur.getAttribute("data-background-image");
+            if (!url) return;
+            e.preventDefault(); e.stopPropagation(); open(url);
+          }, true);
+          // zoom-in cursor while on a background-image slide
+          function setBgCursor() {
+            var cur = (window.Reveal && Reveal.getCurrentSlide) ? Reveal.getCurrentSlide() : null;
+            revealEl.style.cursor = (cur && cur.getAttribute("data-background-image")) ? "zoom-in" : "";
+          }
+          if (window.Reveal && Reveal.on) { Reveal.on("ready", setBgCursor); Reveal.on("slidechanged", setBgCursor); }
+          window.addEventListener("load", function () { setTimeout(setBgCursor, 300); });
+          setTimeout(setBgCursor, 900);
+        }
+
+        overlay.addEventListener("click", function (e) { if (e.target === overlay) close(); });
+        overlay.querySelector("#figZoomClose").addEventListener("click", close);
+        overlay.querySelector("#figZoomControls").addEventListener("click", function (e) {
+          var b = e.target.closest("button"); if (!b) return; e.stopPropagation();
+          var a = b.getAttribute("data-act");
+          if (a === "in") zoom(1.3);
+          else if (a === "out") zoom(1 / 1.3);
+          else if (a === "reset") reset();
+          else if (a === "full") {
+            if (!document.fullscreenElement) { if (overlay.requestFullscreen) overlay.requestFullscreen().catch(function () {}); }
+            else if (document.exitFullscreen) document.exitFullscreen();
+          }
+        });
+
+        overlay.addEventListener("wheel", function (e) {
+          if (!overlay.classList.contains("open")) return;
+          e.preventDefault();
+          var rect = img.getBoundingClientRect();
+          var cx = e.clientX - (rect.left + rect.width / 2);
+          var cy = e.clientY - (rect.top + rect.height / 2);
+          var f = e.deltaY < 0 ? 1.15 : 1 / 1.15;
+          var ns = Math.min(8, Math.max(1, scale * f));
+          var k = ns / scale;
+          tx = (tx - cx) * k + cx; ty = (ty - cy) * k + cy; scale = ns;
+          if (scale === 1) { tx = 0; ty = 0; }
+          apply();
+        }, { passive: false });
+
+        img.addEventListener("mousedown", function (e) {
+          if (scale <= 1) return;
+          drag = true; img.classList.add("dragging"); sx = e.clientX - tx; sy = e.clientY - ty; e.preventDefault();
+        });
+        window.addEventListener("mousemove", function (e) { if (!drag) return; tx = e.clientX - sx; ty = e.clientY - sy; apply(); });
+        window.addEventListener("mouseup", function () { drag = false; img.classList.remove("dragging"); });
+
+        // Capture keys while open so reveal.js doesn't navigate underneath.
+        document.addEventListener("keydown", function (e) {
+          if (!overlay.classList.contains("open")) return;
+          if (e.key === "Escape") close();
+          else if (e.key === "+" || e.key === "=") zoom(1.3);
+          else if (e.key === "-" || e.key === "_") zoom(1 / 1.3);
+          else if (e.key === "0") reset();
+          else if (["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", " "].indexOf(e.key) === -1) return;
+          e.preventDefault(); e.stopPropagation();
+        }, true);
+      }
+      if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init);
+      else init();
+    })();
+    </script>
+    <script id="quarto-html-after-body" type="application/javascript">
+      window.document.addEventListener("DOMContentLoaded", function (event) {
+        const tabsets =  window.document.querySelectorAll(".panel-tabset-tabby")
+        tabsets.forEach(function(tabset) {
+          const tabby = new Tabby('#' + tabset.id);
+        });
+        const isCodeAnnotation = (el) => {
+          for (const clz of el.classList) {
+            if (clz.startsWith('code-annotation-')) {                     
+              return true;
+            }
+          }
+          return false;
+        }
+        const onCopySuccess = function(e) {
+          // button target
+          const button = e.trigger;
+          // don't keep focus
+          button.blur();
+          // flash "checked"
+          button.classList.add('code-copy-button-checked');
+          var currentTitle = button.getAttribute("title");
+          button.setAttribute("title", "Copied!");
+          let tooltip;
+          if (window.bootstrap) {
+            button.setAttribute("data-bs-toggle", "tooltip");
+            button.setAttribute("data-bs-placement", "left");
+            button.setAttribute("data-bs-title", "Copied!");
+            tooltip = new bootstrap.Tooltip(button, 
+              { trigger: "manual", 
+                customClass: "code-copy-button-tooltip",
+                offset: [0, -8]});
+            tooltip.show();    
+          }
+          setTimeout(function() {
+            if (tooltip) {
+              tooltip.hide();
+              button.removeAttribute("data-bs-title");
+              button.removeAttribute("data-bs-toggle");
+              button.removeAttribute("data-bs-placement");
+            }
+            button.setAttribute("title", currentTitle);
+            button.classList.remove('code-copy-button-checked');
+          }, 1000);
+          // clear code selection
+          e.clearSelection();
+        }
+        const getTextToCopy = function(trigger) {
+          const outerScaffold = trigger.parentElement.cloneNode(true);
+          const codeEl = outerScaffold.querySelector('code');
+          for (const childEl of codeEl.children) {
+            if (isCodeAnnotation(childEl)) {
+              childEl.remove();
+            }
+          }
+          return codeEl.innerText;
+        }
+        const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+          text: getTextToCopy
+        });
+        clipboard.on('success', onCopySuccess);
+        if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+          const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+            text: getTextToCopy,
+            container: window.document.getElementById('quarto-embedded-source-code-modal')
+          });
+          clipboardModal.on('success', onCopySuccess);
+        }
+          var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+          var mailtoRegex = new RegExp(/^mailto:/);
+            var filterRegex = new RegExp('/' + window.location.host + '/');
+          var isInternal = (href) => {
+              return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+          }
+          // Inspect non-navigation links and adorn them if external
+         var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+          for (var i=0; i<links.length; i++) {
+            const link = links[i];
+            if (!isInternal(link.href)) {
+              // undo the damage that might have been done by quarto-nav.js in the case of
+              // links that we want to consider external
+              if (link.dataset.originalHref !== undefined) {
+                link.href = link.dataset.originalHref;
+              }
+            }
+          }
+        function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+          const config = {
+            allowHTML: true,
+            maxWidth: 500,
+            delay: 100,
+            arrow: false,
+            appendTo: function(el) {
+                return el.closest('section.slide') || el.parentElement;
+            },
+            interactive: true,
+            interactiveBorder: 10,
+            theme: 'light-border',
+            placement: 'bottom-start',
+          };
+          if (contentFn) {
+            config.content = contentFn;
+          }
+          if (onTriggerFn) {
+            config.onTrigger = onTriggerFn;
+          }
+          if (onUntriggerFn) {
+            config.onUntrigger = onUntriggerFn;
+          }
+            config['offset'] = [0,0];
+            config['maxWidth'] = 700;
+          window.tippy(el, config); 
+        }
+        const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+        for (var i=0; i<noterefs.length; i++) {
+          const ref = noterefs[i];
+          tippyHover(ref, function() {
+            // use id or data attribute instead here
+            let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+            try { href = new URL(href).hash; } catch {}
+            const id = href.replace(/^#\/?/, "");
+            const note = window.document.getElementById(id);
+            if (note) {
+              return note.innerHTML;
+            } else {
+              return "";
+            }
+          });
+        }
+        const findCites = (el) => {
+          const parentEl = el.parentElement;
+          if (parentEl) {
+            const cites = parentEl.dataset.cites;
+            if (cites) {
+              return {
+                el,
+                cites: cites.split(' ')
+              };
+            } else {
+              return findCites(el.parentElement)
+            }
+          } else {
+            return undefined;
+          }
+        };
+        var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+        for (var i=0; i<bibliorefs.length; i++) {
+          const ref = bibliorefs[i];
+          const citeInfo = findCites(ref);
+          if (citeInfo) {
+            tippyHover(citeInfo.el, function() {
+              var popup = window.document.createElement('div');
+              citeInfo.cites.forEach(function(cite) {
+                var citeDiv = window.document.createElement('div');
+                citeDiv.classList.add('hanging-indent');
+                citeDiv.classList.add('csl-entry');
+                var biblioDiv = window.document.getElementById('ref-' + cite);
+                if (biblioDiv) {
+                  citeDiv.innerHTML = biblioDiv.innerHTML;
+                }
+                popup.appendChild(citeDiv);
+              });
+              return popup.innerHTML;
+            });
+          }
+        }
+      });
+      </script>
+    
+
+</body></html>
