@@ -91,6 +91,10 @@
         }
     </script>
     <style>
+        /* Language picker: highlight the currently-active language option */
+        .lang-opt { transition: background-color .15s, color .15s, border-color .15s; }
+        .lang-opt.is-active,
+        .lang-opt.is-active:hover { background-color: #007098; color: #fff; border-color: #007098; }
         .glass-panel {
             background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(10px);
@@ -383,10 +387,13 @@
                     <button onclick="toggleDarkMode()" class="text-slate-600 dark:text-slate-300 hover:text-brand-600 dark:hover:text-brand-400 transition-colors" title="Toggle dark mode" id="darkModeToggle">
                         <i class="fa-solid fa-moon text-lg" id="darkModeIcon"></i>
                     </button>
-                    <button onclick="toggleLanguage()" class="text-slate-600 dark:text-slate-300 hover:text-brand-600 dark:hover:text-brand-400 transition-colors flex items-center gap-1" title="Switch language / Cambiar idioma" id="languageToggle">
-                        <i class="fa-solid fa-language text-lg"></i>
-                        <span class="text-xs font-semibold" id="languageLabel" data-lang-label>EN</span>
-                    </button>
+                    <!-- Language picker: all options visible, active one highlighted -->
+                    <div role="group" aria-label="Select language / Seleccionar idioma / 言語を選択" title="Language / Idioma / 言語" class="hidden sm:flex items-center gap-0.5 rounded-lg bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-600 p-0.5">
+                        <i class="fa-solid fa-globe text-slate-400 dark:text-slate-500 text-sm pl-1.5 pr-0.5" aria-hidden="true"></i>
+                        <button type="button" onclick="applyLanguage('en')" data-lang="en" title="English" aria-label="English" class="lang-opt px-2 py-1 rounded-md text-xs font-semibold text-slate-500 dark:text-slate-400 hover:bg-white dark:hover:bg-slate-700 hover:text-brand-600 dark:hover:text-brand-400">EN</button>
+                        <button type="button" onclick="applyLanguage('es')" data-lang="es" title="Español" aria-label="Español" class="lang-opt px-2 py-1 rounded-md text-xs font-semibold text-slate-500 dark:text-slate-400 hover:bg-white dark:hover:bg-slate-700 hover:text-brand-600 dark:hover:text-brand-400">ES</button>
+                        <button type="button" onclick="applyLanguage('ja')" data-lang="ja" title="日本語" aria-label="日本語" class="lang-opt px-2 py-1 rounded-md text-xs font-semibold text-slate-500 dark:text-slate-400 hover:bg-white dark:hover:bg-slate-700 hover:text-brand-600 dark:hover:text-brand-400">日本語</button>
+                    </div>
                     <button onclick="toggleMobileMenu()" aria-label="Open navigation menu" aria-expanded="false" aria-controls="mobileMenu" class="2xl:hidden text-slate-600 dark:text-slate-300 hover:text-brand-600" id="mobileMenuButton">
                         <i class="fa-solid fa-bars text-2xl" id="hamburgerIcon"></i>
                         <i class="fa-solid fa-times text-2xl hidden" id="closeIcon"></i>
@@ -445,13 +452,17 @@
                 </a>
             </div>
 
-            <!-- Language toggle in mobile menu -->
+            <!-- Language picker in mobile menu: full names, active one highlighted -->
             <div class="pt-3">
-                <button onclick="toggleLanguage()" class="w-full flex items-center justify-center gap-2 py-2 rounded-lg bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 font-medium transition-colors">
-                    <i class="fa-solid fa-language text-lg"></i>
-                    <span data-i18n="nav.language.label">Language</span>:
-                    <span id="languageLabelMobile" class="font-semibold" data-lang-label>EN</span>
-                </button>
+                <div class="flex items-center gap-2 mb-2 text-slate-500 dark:text-slate-400 text-sm font-medium">
+                    <i class="fa-solid fa-globe"></i>
+                    <span data-i18n="nav.language.label">Language</span>
+                </div>
+                <div role="group" aria-label="Select language / Seleccionar idioma / 言語を選択" class="grid grid-cols-3 gap-2">
+                    <button type="button" onclick="applyLanguage('en')" data-lang="en" aria-label="English" class="lang-opt py-2 rounded-lg border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 font-semibold text-sm hover:bg-white dark:hover:bg-slate-700">English</button>
+                    <button type="button" onclick="applyLanguage('es')" data-lang="es" aria-label="Español" class="lang-opt py-2 rounded-lg border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 font-semibold text-sm hover:bg-white dark:hover:bg-slate-700">Español</button>
+                    <button type="button" onclick="applyLanguage('ja')" data-lang="ja" aria-label="日本語" class="lang-opt py-2 rounded-lg border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 font-semibold text-sm hover:bg-white dark:hover:bg-slate-700">日本語</button>
+                </div>
             </div>
         </div>
     </div>
@@ -2072,6 +2083,16 @@
         window.__rerender_resourceFilters = function () {
             if (typeof renderFilterPills === 'function' && document.getElementById('resourceFilters')) {
                 renderFilterPills();
+            }
+        };
+        // Highlight the active language in every language picker (desktop + mobile).
+        window.__rerender_langButtons = function () {
+            var lang = window.__lang || 'en';
+            var btns = document.querySelectorAll('.lang-opt');
+            for (var i = 0; i < btns.length; i++) {
+                var active = btns[i].getAttribute('data-lang') === lang;
+                btns[i].classList.toggle('is-active', active);
+                btns[i].setAttribute('aria-pressed', active ? 'true' : 'false');
             }
         };
         // Point each "Mendez Slides" link at the deck matching the active language.
