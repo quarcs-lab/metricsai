@@ -29,7 +29,7 @@ This notebook provides an interactive introduction to regression analysis using 
 <a href="https://www.youtube.com/watch?v=RyE01v-zliM" target="_blank" class="resource-btn">🎬 AI Video</a>
 <a href="https://carlos-mendez.my.canva.site/s01-analysis-of-economics-data-pdf" target="_blank" class="resource-btn">✨ AI Slides</a>
 <a href="https://quarcs-lab.github.io/metricsai/slides/ch01/cameron_slides_ch01.pdf" target="_blank" class="resource-btn">📊 Cameron Slides</a>
-<a href="https://app.edcafe.ai/quizzes/69715fdb60956f50e60276b9" target="_blank" class="resource-btn">✏️ Quiz</a>
+<a href="https://quarcs-lab.github.io/metricsai/quizzes/ch01.html" target="_blank" class="resource-btn">✏️ Quiz</a>
 <a href="https://gemini.google.com/gem/1mvbUPJb9CZ1SEWlxui86i25-HINaUH1c?usp=sharing" target="_blank" class="resource-btn">🤖 AI Tutor</a>
 </div>
 

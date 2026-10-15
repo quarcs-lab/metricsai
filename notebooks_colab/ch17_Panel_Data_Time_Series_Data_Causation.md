@@ -27,7 +27,7 @@ This notebook provides an interactive introduction to panel data methods, time s
 <a href="https://www.youtube.com/watch?v=ZtjIHX6JYyM" target="_blank" class="resource-btn">🎬 AI Video</a>
 <a href="https://carlos-mendez.my.canva.site/s17-panel-data-time-series-data-causation-pdf" target="_blank" class="resource-btn">✨ AI Slides</a>
 <a href="https://quarcs-lab.github.io/metricsai/slides/ch17/cameron_slides_ch17.pdf" target="_blank" class="resource-btn">📊 Cameron Slides</a>
-<a href="https://app.edcafe.ai/quizzes/69786c262f5d08069e04e9a8" target="_blank" class="resource-btn">✏️ Quiz</a>
+<a href="https://quarcs-lab.github.io/metricsai/quizzes/ch17.html" target="_blank" class="resource-btn">✏️ Quiz</a>
 <a href="https://gemini.google.com/gem/1mvbUPJb9CZ1SEWlxui86i25-HINaUH1c?usp=sharing" target="_blank" class="resource-btn">🤖 AI Tutor</a>
 </div>
 

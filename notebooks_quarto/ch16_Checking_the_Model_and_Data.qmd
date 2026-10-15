@@ -19,7 +19,7 @@ This notebook provides an interactive introduction to regression diagnostics and
 <a href="https://www.youtube.com/watch?v=3JVkwVXsyr0" target="_blank" class="resource-btn">🎬 AI Video</a>
 <a href="https://quarcs-lab.github.io/metricsai/slides/ch16/index.html" target="_blank" class="resource-btn">🧑🏽‍🏫 Mendez Slides</a>
 <a href="https://quarcs-lab.github.io/metricsai/slides/ch16/cameron_slides_ch16.pdf" target="_blank" class="resource-btn">📊 Cameron Slides</a>
-<a href="https://app.edcafe.ai/quizzes/69786b812f5d08069e04e07f" target="_blank" class="resource-btn">✏️ Quiz</a>
+<a href="https://quarcs-lab.github.io/metricsai/quizzes/ch16.html" target="_blank" class="resource-btn">✏️ Quiz</a>
 <a href="https://gemini.google.com/gem/1mvbUPJb9CZ1SEWlxui86i25-HINaUH1c?usp=sharing" target="_blank" class="resource-btn">🤖 AI Tutor</a>
 </div>
 

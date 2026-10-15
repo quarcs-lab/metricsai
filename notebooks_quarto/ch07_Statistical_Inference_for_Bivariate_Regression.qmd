@@ -19,7 +19,7 @@ This notebook provides an interactive introduction to statistical inference for 
 <a href="https://www.youtube.com/watch?v=iMi1Fa-PYLs" target="_blank" class="resource-btn">🎬 AI Video</a>
 <a href="https://quarcs-lab.github.io/metricsai/slides/ch07/index.html" target="_blank" class="resource-btn">🧑🏽‍🏫 Mendez Slides</a>
 <a href="https://quarcs-lab.github.io/metricsai/slides/ch07/cameron_slides_ch07.pdf" target="_blank" class="resource-btn">📊 Cameron Slides</a>
-<a href="https://app.edcafe.ai/quizzes/697866e42f5d08069e04934f" target="_blank" class="resource-btn">✏️ Quiz</a>
+<a href="https://quarcs-lab.github.io/metricsai/quizzes/ch07.html" target="_blank" class="resource-btn">✏️ Quiz</a>
 <a href="https://gemini.google.com/gem/1mvbUPJb9CZ1SEWlxui86i25-HINaUH1c?usp=sharing" target="_blank" class="resource-btn">🤖 AI Tutor</a>
 </div>
 

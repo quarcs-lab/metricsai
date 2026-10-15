@@ -19,7 +19,7 @@ This notebook teaches you how to use natural logarithms in regression analysis t
 <a href="https://www.youtube.com/watch?v=rPy6m8_Wg4c" target="_blank" class="resource-btn">🎬 AI Video</a>
 <a href="https://quarcs-lab.github.io/metricsai/slides/ch09/index.html" target="_blank" class="resource-btn">🧑🏽‍🏫 Mendez Slides</a>
 <a href="https://quarcs-lab.github.io/metricsai/slides/ch09/cameron_slides_ch09.pdf" target="_blank" class="resource-btn">📊 Cameron Slides</a>
-<a href="https://app.edcafe.ai/quizzes/697867a22f5d08069e04a411" target="_blank" class="resource-btn">✏️ Quiz</a>
+<a href="https://quarcs-lab.github.io/metricsai/quizzes/ch09.html" target="_blank" class="resource-btn">✏️ Quiz</a>
 <a href="https://gemini.google.com/gem/1mvbUPJb9CZ1SEWlxui86i25-HINaUH1c?usp=sharing" target="_blank" class="resource-btn">🤖 AI Tutor</a>
 </div>
 

@@ -320,7 +320,7 @@ This notebook provides an interactive introduction to regression analysis using 
 <a href="https://www.youtube.com/watch?v=RyE01v-zliM" target="_blank" class="resource-btn">🎬 AI Video</a>
 <a href="https://quarcs-lab.github.io/metricsai/slides/ch01/index.html" target="_blank" class="resource-btn">🧑🏽‍🏫 Mendez Slides</a>
 <a href="https://quarcs-lab.github.io/metricsai/slides/ch01/cameron_slides_ch01.pdf" target="_blank" class="resource-btn">📊 Cameron Slides</a>
-<a href="https://app.edcafe.ai/quizzes/69715fdb60956f50e60276b9" target="_blank" class="resource-btn">✏️ Quiz</a>
+<a href="https://quarcs-lab.github.io/metricsai/quizzes/ch01.html" target="_blank" class="resource-btn">✏️ Quiz</a>
 <a href="https://gemini.google.com/gem/1mvbUPJb9CZ1SEWlxui86i25-HINaUH1c?usp=sharing" target="_blank" class="resource-btn">🤖 AI Tutor</a>
 </div>
 
@@ -1647,7 +1647,7 @@ This notebook provides an interactive introduction to univariate data analysis u
 <a href="https://www.youtube.com/watch?v=qegfQaM9UGE" target="_blank" class="resource-btn">🎬 AI Video</a>
 <a href="https://quarcs-lab.github.io/metricsai/slides/ch02/index.html" target="_blank" class="resource-btn">🧑🏽‍🏫 Mendez Slides</a>
 <a href="https://quarcs-lab.github.io/metricsai/slides/ch02/cameron_slides_ch02.pdf" target="_blank" class="resource-btn">📊 Cameron Slides</a>
-<a href="https://app.edcafe.ai/quizzes/6978644a2f5d08069e046930" target="_blank" class="resource-btn">✏️ Quiz</a>
+<a href="https://quarcs-lab.github.io/metricsai/quizzes/ch02.html" target="_blank" class="resource-btn">✏️ Quiz</a>
 <a href="https://gemini.google.com/gem/1mvbUPJb9CZ1SEWlxui86i25-HINaUH1c?usp=sharing" target="_blank" class="resource-btn">🤖 AI Tutor</a>
 </div>
 
@@ -4040,7 +4040,7 @@ This notebook provides an interactive introduction to one of the most important 
 <a href="https://www.youtube.com/watch?v=pnv9ff_3hrI" target="_blank" class="resource-btn">🎬 AI Video</a>
 <a href="https://quarcs-lab.github.io/metricsai/slides/ch03/index.html" target="_blank" class="resource-btn">🧑🏽‍🏫 Mendez Slides</a>
 <a href="https://quarcs-lab.github.io/metricsai/slides/ch03/cameron_slides_ch03.pdf" target="_blank" class="resource-btn">📊 Cameron Slides</a>
-<a href="https://app.edcafe.ai/quizzes/697864e12f5d08069e0471b5" target="_blank" class="resource-btn">✏️ Quiz</a>
+<a href="https://quarcs-lab.github.io/metricsai/quizzes/ch03.html" target="_blank" class="resource-btn">✏️ Quiz</a>
 <a href="https://gemini.google.com/gem/1mvbUPJb9CZ1SEWlxui86i25-HINaUH1c?usp=sharing" target="_blank" class="resource-btn">🤖 AI Tutor</a>
 </div>
 
@@ -5645,7 +5645,7 @@ This notebook provides an interactive introduction to statistical inference, tea
 <a href="https://www.youtube.com/watch?v=8wn00FpUz38" target="_blank" class="resource-btn">🎬 AI Video</a>
 <a href="https://quarcs-lab.github.io/metricsai/slides/ch04/index.html" target="_blank" class="resource-btn">🧑🏽‍🏫 Mendez Slides</a>
 <a href="https://quarcs-lab.github.io/metricsai/slides/ch04/cameron_slides_ch04.pdf" target="_blank" class="resource-btn">📊 Cameron Slides</a>
-<a href="https://app.edcafe.ai/quizzes/6978656c2f5d08069e0479cb" target="_blank" class="resource-btn">✏️ Quiz</a>
+<a href="https://quarcs-lab.github.io/metricsai/quizzes/ch04.html" target="_blank" class="resource-btn">✏️ Quiz</a>
 <a href="https://gemini.google.com/gem/1mvbUPJb9CZ1SEWlxui86i25-HINaUH1c?usp=sharing" target="_blank" class="resource-btn">🤖 AI Tutor</a>
 </div>
 
@@ -8086,7 +8086,7 @@ This notebook provides an interactive introduction to bivariate data analysis an
 <a href="https://www.youtube.com/watch?v=sVT1KfjoZQg" target="_blank" class="resource-btn">🎬 AI Video</a>
 <a href="https://quarcs-lab.github.io/metricsai/slides/ch05/index.html" target="_blank" class="resource-btn">🧑🏽‍🏫 Mendez Slides</a>
 <a href="https://quarcs-lab.github.io/metricsai/slides/ch05/cameron_slides_ch05.pdf" target="_blank" class="resource-btn">📊 Cameron Slides</a>
-<a href="https://app.edcafe.ai/quizzes/697865de2f5d08069e0482cc" target="_blank" class="resource-btn">✏️ Quiz</a>
+<a href="https://quarcs-lab.github.io/metricsai/quizzes/ch05.html" target="_blank" class="resource-btn">✏️ Quiz</a>
 <a href="https://gemini.google.com/gem/1mvbUPJb9CZ1SEWlxui86i25-HINaUH1c?usp=sharing" target="_blank" class="resource-btn">🤖 AI Tutor</a>
 </div>
 
@@ -10461,7 +10461,7 @@ This notebook provides an interactive introduction to the statistical properties
 <a href="https://www.youtube.com/watch?v=hSv0usYmlZc" target="_blank" class="resource-btn">🎬 AI Video</a>
 <a href="https://quarcs-lab.github.io/metricsai/slides/ch06/index.html" target="_blank" class="resource-btn">🧑🏽‍🏫 Mendez Slides</a>
 <a href="https://quarcs-lab.github.io/metricsai/slides/ch06/cameron_slides_ch06.pdf" target="_blank" class="resource-btn">📊 Cameron Slides</a>
-<a href="https://app.edcafe.ai/quizzes/697866592f5d08069e048b48" target="_blank" class="resource-btn">✏️ Quiz</a>
+<a href="https://quarcs-lab.github.io/metricsai/quizzes/ch06.html" target="_blank" class="resource-btn">✏️ Quiz</a>
 <a href="https://gemini.google.com/gem/1mvbUPJb9CZ1SEWlxui86i25-HINaUH1c?usp=sharing" target="_blank" class="resource-btn">🤖 AI Tutor</a>
 </div>
 
@@ -12037,7 +12037,7 @@ This notebook provides an interactive introduction to statistical inference for 
 <a href="https://www.youtube.com/watch?v=iMi1Fa-PYLs" target="_blank" class="resource-btn">🎬 AI Video</a>
 <a href="https://quarcs-lab.github.io/metricsai/slides/ch07/index.html" target="_blank" class="resource-btn">🧑🏽‍🏫 Mendez Slides</a>
 <a href="https://quarcs-lab.github.io/metricsai/slides/ch07/cameron_slides_ch07.pdf" target="_blank" class="resource-btn">📊 Cameron Slides</a>
-<a href="https://app.edcafe.ai/quizzes/697866e42f5d08069e04934f" target="_blank" class="resource-btn">✏️ Quiz</a>
+<a href="https://quarcs-lab.github.io/metricsai/quizzes/ch07.html" target="_blank" class="resource-btn">✏️ Quiz</a>
 <a href="https://gemini.google.com/gem/1mvbUPJb9CZ1SEWlxui86i25-HINaUH1c?usp=sharing" target="_blank" class="resource-btn">🤖 AI Tutor</a>
 </div>
 
@@ -14785,7 +14785,7 @@ This notebook provides an interactive introduction to bivariate regression throu
 <a href="https://www.youtube.com/watch?v=2hVGYcT9YE8" target="_blank" class="resource-btn">🎬 AI Video</a>
 <a href="https://quarcs-lab.github.io/metricsai/slides/ch08/index.html" target="_blank" class="resource-btn">🧑🏽‍🏫 Mendez Slides</a>
 <a href="https://quarcs-lab.github.io/metricsai/slides/ch08/cameron_slides_ch08.pdf" target="_blank" class="resource-btn">📊 Cameron Slides</a>
-<a href="https://app.edcafe.ai/quizzes/697867452f5d08069e049d1f" target="_blank" class="resource-btn">✏️ Quiz</a>
+<a href="https://quarcs-lab.github.io/metricsai/quizzes/ch08.html" target="_blank" class="resource-btn">✏️ Quiz</a>
 <a href="https://gemini.google.com/gem/1mvbUPJb9CZ1SEWlxui86i25-HINaUH1c?usp=sharing" target="_blank" class="resource-btn">🤖 AI Tutor</a>
 </div>
 
@@ -16178,7 +16178,7 @@ This notebook teaches you how to use natural logarithms in regression analysis t
 <a href="https://www.youtube.com/watch?v=rPy6m8_Wg4c" target="_blank" class="resource-btn">🎬 AI Video</a>
 <a href="https://quarcs-lab.github.io/metricsai/slides/ch09/index.html" target="_blank" class="resource-btn">🧑🏽‍🏫 Mendez Slides</a>
 <a href="https://quarcs-lab.github.io/metricsai/slides/ch09/cameron_slides_ch09.pdf" target="_blank" class="resource-btn">📊 Cameron Slides</a>
-<a href="https://app.edcafe.ai/quizzes/697867a22f5d08069e04a411" target="_blank" class="resource-btn">✏️ Quiz</a>
+<a href="https://quarcs-lab.github.io/metricsai/quizzes/ch09.html" target="_blank" class="resource-btn">✏️ Quiz</a>
 <a href="https://gemini.google.com/gem/1mvbUPJb9CZ1SEWlxui86i25-HINaUH1c?usp=sharing" target="_blank" class="resource-btn">🤖 AI Tutor</a>
 </div>
 
@@ -17443,7 +17443,7 @@ This notebook provides an interactive introduction to multiple regression analys
 <a href="https://www.youtube.com/watch?v=9398KshS_JA" target="_blank" class="resource-btn">🎬 AI Video</a>
 <a href="https://quarcs-lab.github.io/metricsai/slides/ch10/index.html" target="_blank" class="resource-btn">🧑🏽‍🏫 Mendez Slides</a>
 <a href="https://quarcs-lab.github.io/metricsai/slides/ch10/cameron_slides_ch10.pdf" target="_blank" class="resource-btn">📊 Cameron Slides</a>
-<a href="https://app.edcafe.ai/quizzes/697868212f5d08069e04add5" target="_blank" class="resource-btn">✏️ Quiz</a>
+<a href="https://quarcs-lab.github.io/metricsai/quizzes/ch10.html" target="_blank" class="resource-btn">✏️ Quiz</a>
 <a href="https://gemini.google.com/gem/1mvbUPJb9CZ1SEWlxui86i25-HINaUH1c?usp=sharing" target="_blank" class="resource-btn">🤖 AI Tutor</a>
 </div>
 
@@ -18935,7 +18935,7 @@ This notebook provides an interactive introduction to extending inference to mod
 <a href="https://www.youtube.com/watch?v=yvcSMmluY5Y" target="_blank" class="resource-btn">🎬 AI Video</a>
 <a href="https://quarcs-lab.github.io/metricsai/slides/ch11/index.html" target="_blank" class="resource-btn">🧑🏽‍🏫 Mendez Slides</a>
 <a href="https://quarcs-lab.github.io/metricsai/slides/ch11/cameron_slides_ch11.pdf" target="_blank" class="resource-btn">📊 Cameron Slides</a>
-<a href="https://app.edcafe.ai/quizzes/697868ad2f5d08069e04b748" target="_blank" class="resource-btn">✏️ Quiz</a>
+<a href="https://quarcs-lab.github.io/metricsai/quizzes/ch11.html" target="_blank" class="resource-btn">✏️ Quiz</a>
 <a href="https://gemini.google.com/gem/1mvbUPJb9CZ1SEWlxui86i25-HINaUH1c?usp=sharing" target="_blank" class="resource-btn">🤖 AI Tutor</a>
 </div>
 
@@ -20969,7 +20969,7 @@ This notebook provides an interactive introduction to advanced topics in regress
 <a href="https://www.youtube.com/watch?v=0rM5db2lTPo" target="_blank" class="resource-btn">🎬 AI Video</a>
 <a href="https://quarcs-lab.github.io/metricsai/slides/ch12/index.html" target="_blank" class="resource-btn">🧑🏽‍🏫 Mendez Slides</a>
 <a href="https://quarcs-lab.github.io/metricsai/slides/ch12/cameron_slides_ch12.pdf" target="_blank" class="resource-btn">📊 Cameron Slides</a>
-<a href="https://app.edcafe.ai/quizzes/6978693a2f5d08069e04bed3" target="_blank" class="resource-btn">✏️ Quiz</a>
+<a href="https://quarcs-lab.github.io/metricsai/quizzes/ch12.html" target="_blank" class="resource-btn">✏️ Quiz</a>
 <a href="https://gemini.google.com/gem/1mvbUPJb9CZ1SEWlxui86i25-HINaUH1c?usp=sharing" target="_blank" class="resource-btn">🤖 AI Tutor</a>
 </div>
 
@@ -23104,7 +23104,7 @@ This notebook presents comprehensive case studies applying multiple regression t
 <a href="https://www.youtube.com/watch?v=auS4yrgbAQA" target="_blank" class="resource-btn">🎬 AI Video</a>
 <a href="https://quarcs-lab.github.io/metricsai/slides/ch13/index.html" target="_blank" class="resource-btn">🧑🏽‍🏫 Mendez Slides</a>
 <a href="https://quarcs-lab.github.io/metricsai/slides/ch13/cameron_slides_ch13.pdf" target="_blank" class="resource-btn">📊 Cameron Slides</a>
-<a href="https://app.edcafe.ai/quizzes/697869f02f5d08069e04c94f" target="_blank" class="resource-btn">✏️ Quiz</a>
+<a href="https://quarcs-lab.github.io/metricsai/quizzes/ch13.html" target="_blank" class="resource-btn">✏️ Quiz</a>
 <a href="https://gemini.google.com/gem/1mvbUPJb9CZ1SEWlxui86i25-HINaUH1c?usp=sharing" target="_blank" class="resource-btn">🤖 AI Tutor</a>
 </div>
 
@@ -25092,7 +25092,7 @@ This notebook provides an interactive introduction to regression with indicator 
 <a href="https://www.youtube.com/watch?v=Rkx1cY8_BBY" target="_blank" class="resource-btn">🎬 AI Video</a>
 <a href="https://quarcs-lab.github.io/metricsai/slides/ch14/index.html" target="_blank" class="resource-btn">🧑🏽‍🏫 Mendez Slides</a>
 <a href="https://quarcs-lab.github.io/metricsai/slides/ch14/cameron_slides_ch14.pdf" target="_blank" class="resource-btn">📊 Cameron Slides</a>
-<a href="https://app.edcafe.ai/quizzes/69786a6a2f5d08069e04cf09" target="_blank" class="resource-btn">✏️ Quiz</a>
+<a href="https://quarcs-lab.github.io/metricsai/quizzes/ch14.html" target="_blank" class="resource-btn">✏️ Quiz</a>
 <a href="https://gemini.google.com/gem/1mvbUPJb9CZ1SEWlxui86i25-HINaUH1c?usp=sharing" target="_blank" class="resource-btn">🤖 AI Tutor</a>
 </div>
 
@@ -26663,7 +26663,7 @@ This notebook provides an interactive introduction to regression with transforme
 <a href="https://www.youtube.com/watch?v=XJv1bfr9BI4" target="_blank" class="resource-btn">🎬 AI Video</a>
 <a href="https://quarcs-lab.github.io/metricsai/slides/ch15/index.html" target="_blank" class="resource-btn">🧑🏽‍🏫 Mendez Slides</a>
 <a href="https://quarcs-lab.github.io/metricsai/slides/ch15/cameron_slides_ch15.pdf" target="_blank" class="resource-btn">📊 Cameron Slides</a>
-<a href="https://app.edcafe.ai/quizzes/69786b142f5d08069e04d9ed" target="_blank" class="resource-btn">✏️ Quiz</a>
+<a href="https://quarcs-lab.github.io/metricsai/quizzes/ch15.html" target="_blank" class="resource-btn">✏️ Quiz</a>
 <a href="https://gemini.google.com/gem/1mvbUPJb9CZ1SEWlxui86i25-HINaUH1c?usp=sharing" target="_blank" class="resource-btn">🤖 AI Tutor</a>
 </div>
 
@@ -28577,7 +28577,7 @@ This notebook provides an interactive introduction to regression diagnostics and
 <a href="https://www.youtube.com/watch?v=3JVkwVXsyr0" target="_blank" class="resource-btn">🎬 AI Video</a>
 <a href="https://quarcs-lab.github.io/metricsai/slides/ch16/index.html" target="_blank" class="resource-btn">🧑🏽‍🏫 Mendez Slides</a>
 <a href="https://quarcs-lab.github.io/metricsai/slides/ch16/cameron_slides_ch16.pdf" target="_blank" class="resource-btn">📊 Cameron Slides</a>
-<a href="https://app.edcafe.ai/quizzes/69786b812f5d08069e04e07f" target="_blank" class="resource-btn">✏️ Quiz</a>
+<a href="https://quarcs-lab.github.io/metricsai/quizzes/ch16.html" target="_blank" class="resource-btn">✏️ Quiz</a>
 <a href="https://gemini.google.com/gem/1mvbUPJb9CZ1SEWlxui86i25-HINaUH1c?usp=sharing" target="_blank" class="resource-btn">🤖 AI Tutor</a>
 </div>
 
@@ -30749,7 +30749,7 @@ This notebook provides an interactive introduction to panel data methods, time s
 <a href="https://www.youtube.com/watch?v=ZtjIHX6JYyM" target="_blank" class="resource-btn">🎬 AI Video</a>
 <a href="https://quarcs-lab.github.io/metricsai/slides/ch17/index.html" target="_blank" class="resource-btn">🧑🏽‍🏫 Mendez Slides</a>
 <a href="https://quarcs-lab.github.io/metricsai/slides/ch17/cameron_slides_ch17.pdf" target="_blank" class="resource-btn">📊 Cameron Slides</a>
-<a href="https://app.edcafe.ai/quizzes/69786c262f5d08069e04e9a8" target="_blank" class="resource-btn">✏️ Quiz</a>
+<a href="https://quarcs-lab.github.io/metricsai/quizzes/ch17.html" target="_blank" class="resource-btn">✏️ Quiz</a>
 <a href="https://gemini.google.com/gem/1mvbUPJb9CZ1SEWlxui86i25-HINaUH1c?usp=sharing" target="_blank" class="resource-btn">🤖 AI Tutor</a>
 </div>
 
