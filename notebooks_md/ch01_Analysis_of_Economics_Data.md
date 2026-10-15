@@ -140,7 +140,7 @@ Like a weather forecast that captures roughly 62% of what actually happens. A hi
 ::::: {.columns}
 :::: {.column width="50%"}
 ::: {.callout-tip collapse="true" appearance="simple" title="Example"}
-The slope says larger houses sell for more — but bolting an extra 100 sqft onto your house won't necessarily add \$7,400 of value. Bigger houses also tend to be newer, in better neighborhoods, and more carefully renovated. Size is correlated with quality, and the regression credits size for quality's effect too.
+The slope says larger houses sell for more — but bolting an extra 100 sqft onto your house won't necessarily add \$7,400 of value. Bigger houses may also sit in better neighborhoods and be more carefully renovated. Size can be correlated with quality, and the regression credits size for quality's effect too.
 :::
 ::::
 :::: {.column width="50%"}

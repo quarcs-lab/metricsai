@@ -698,7 +698,7 @@ $$t = \frac{b_2}{se(b_2)} \sim T(n-2)$$
 >
 > - **Question:** Is the effect different from zero?
 > - **Determined by:** t-statistic = b₂ / se(b₂), which depends on sample size, variability, and effect size
-> - **Interpretation:** We can confidently say the effect exists (not due to chance)
+> - **Interpretation:** The estimate is unlikely to be this far from zero by sampling chance alone if β₂ = 0 (strong evidence against H₀, not proof that the effect exists)
 >
 > **Economic Significance:**
 >
@@ -850,7 +850,7 @@ A crucial distinction that is often confused:
 - Answers: "Is the effect different from zero?"
 - Depends on: Sample size, variability, effect size
 - Formula: t = b₂ / se(b₂)
-- Interpretation: We can confidently say the effect exists
+- Interpretation: The data provide strong evidence against β₂ = 0 (an estimate this large would be unlikely by chance alone if β₂ were zero)
 
 **Economic Significance**
 
@@ -919,7 +919,7 @@ Suppose we study the effect of an expensive job training program on wages:
   - If program costs \$10,000, not worth it
   - If program costs \$500, might be worth it
 
-**Bottom line:** Statistical significance tells you the effect exists. Economic significance tells you whether you should care.
+**Bottom line:** Statistical significance tells you the data are hard to reconcile with a zero effect. Economic significance tells you whether you should care.
 
 ### Understanding Two-Sided vs One-Sided Tests
 
@@ -1011,13 +1011,13 @@ For the same test statistic t:
 
 - H₀: β₂ = 0 vs Hₐ: β₂ ≠ 0
 - t = 6.60, p-value = 0.000 (two-sided)
-- Conclusion: Reject H₀, size affects price
+- Conclusion: Reject H₀, size is associated with price
 
 **Question 2: Does size increase price? (One-sided)**
 
 - H₀: β₂ ≤ 0 vs Hₐ: β₂ > 0
 - t = 6.60, p-value = 0.000 / 2 = 0.000 (one-sided)
-- Conclusion: Reject H₀, size increases price
+- Conclusion: Reject H₀, size is positively associated with price
 
 **Question 3: Does size increase price by less than \$90/sq ft? (One-sided)**
 
@@ -1063,7 +1063,7 @@ else:
 >
 > **Solution: Heteroskedasticity-robust standard errors**
 >
-> - Valid whether or not heteroskedasticity exists
+> - Valid whether or not heteroskedasticity exists (in large samples; with small samples such as our n = 29 houses, robust SEs are only approximately valid)
 > - No need to test for heteroskedasticity first
 > - Modern best practice for cross-sectional data
 >
@@ -1277,7 +1277,7 @@ When you compute both standard and robust SEs, you're essentially running two di
 **Robust SEs (Heteroskedasticity-Consistent):**
 
 - Assumes: Heteroskedasticity allowed (no constant variance assumption)
-- Valid: Whether or not heteroskedasticity exists
+- Valid: Whether or not heteroskedasticity exists (a large-sample result; only approximate in small samples like n = 29)
 - Interpretation: "Here's the uncertainty, accounting for possible non-constant variance"
 
 **What do differences tell us?**
@@ -1286,7 +1286,7 @@ When you compute both standard and robust SEs, you're essentially running two di
 
 - Example: Our house price data (11.33 vs 11.17)
 - Interpretation: Little evidence of heteroskedasticity
-- Implication: Assumption 3 approximately holds
+- Implication: The data are consistent with Assumption 3 (this does not prove homoskedasticity holds)
 - Decision: Still report robust SEs (good practice)
 
 **Case 2: Robust SE > Standard SE (difference > 20%)**
@@ -1366,7 +1366,7 @@ size 73.77 11.17 6.60 11.33 6.51
 
 **Example write-up:**
 
-"We find that each additional square foot is associated with a \$73.77 higher house price (robust SE = 11.33, t = 6.51, p < 0.001). The heteroskedasticity-robust standard error is nearly identical to the classical standard error (11.17), suggesting homoskedasticity is approximately satisfied. The effect is highly statistically significant and economically meaningful, with a 95% confidence interval of [\$50.52, \$97.02]."
+"We find that each additional square foot is associated with a \$73.77 higher house price (robust SE = 11.33, t = 6.51, p < 0.001). The heteroskedasticity-robust standard error is nearly identical to the classical standard error (11.17), so the conclusions do not depend on assuming homoskedasticity. The effect is highly statistically significant and economically meaningful, with a 95% confidence interval of [\$50.52, \$97.02]."
 
 **Common mistakes to avoid:**
 
@@ -1480,7 +1480,7 @@ Default standard errors make assumptions 1-4. Robust standard errors relax some 
 
 - Heteroskedasticity is common in cross-sectional data
 - Default SEs are incorrect when heteroskedasticity is present
-- Robust SEs are valid whether or not heteroskedasticity exists
+- Robust SEs are valid whether or not heteroskedasticity exists (in large samples)
 - **Modern practice**: Always report robust SEs for cross-sectional data
 
 **Heteroskedastic-robust SE formula:**
@@ -1813,14 +1813,14 @@ plt.show()
 > **Common Mistakes to Avoid**
 >
 > - **Using standard errors when heteroskedasticity is present**: Always check robust standard errors
-> - **Confusing confidence intervals for prediction intervals**: CIs are for the mean response, not individual observations
+> - **Confusing confidence intervals for prediction intervals**: the CIs in this chapter are for the population slope β₂, not for the outcome of an individual observation
 > - **Forgetting to check model assumptions before interpreting p-values**
 
 ## Practice Exercises
 
 **Exercise 1: Understanding Standard Errors**
 
-Suppose you estimate a regression of wages on education using data from 100 workers. The estimated slope is b₂ = 5.2 (each additional year of education increases wages by \$5.20/hour) with standard error se(b₂) = 1.8.
+Suppose you estimate a regression of wages on education using data from 100 workers. The estimated slope is b₂ = 5.2 (each additional year of education is associated with \$5.20/hour higher wages) with standard error se(b₂) = 1.8.
 
 a) Calculate the 95% confidence interval for β₂ (use t-critical value ≈ 2.0).  
 b) Interpret the confidence interval in plain language.  
@@ -1836,7 +1836,7 @@ c) Would you reject H₀ at the 1% level? Explain.
 
 **Exercise 3: Two-Sided Tests**
 
-A researcher claims that each year of education increases wages by exactly \$6.00/hour. Using the regression from Exercise 1:
+A researcher claims that each year of education is associated with exactly \$6.00/hour higher wages. Using the regression from Exercise 1:
 
 a) State the null and alternative hypotheses to test this claim.  
 b) Calculate the test statistic.  
@@ -1845,7 +1845,7 @@ d) Is the claim consistent with the 95% confidence interval from Exercise 1?
 
 **Exercise 4: One-Sided Tests**
 
-A policy analyst claims that education increases wages by less than \$3.00/hour. Using the regression from Exercise 1:
+A policy analyst claims that each year of education is associated with less than \$3.00/hour higher wages. Using the regression from Exercise 1:
 
 a) State the appropriate one-sided hypotheses (Hint: The claim becomes Hₐ).  
 b) Calculate the test statistic.  

@@ -58,7 +58,7 @@ This chapter extends statistical inference to models with multiple regressors. Y
 - 11.3 Confidence Intervals
 - 11.4 Hypothesis Tests on a Single Parameter
 - 11.5 Joint Hypothesis Tests
-- 11.6 F Statistic Under Assumptions 1-4
+- 11.6 F Statistic Under Homoskedasticity
 - 11.7 Presentation of Regression Results
 - Key Takeaways
 - Practice Exercises
@@ -241,7 +241,7 @@ Before conducting inference, we need to understand the statistical properties of
 
 - **Unbiased**: $E[\hat{\beta}_j] = \beta_j$ (centered on true value)
 - **Consistent**: $\hat{\beta}_j \rightarrow \beta_j$ as $n \rightarrow \infty$
-- **Efficient (BLUE)**: Best Linear Unbiased Estimator (Gauss-Markov Theorem)
+- **Efficient (BLUE)**: Best Linear Unbiased Estimator (Gauss-Markov Theorem), *if the errors are also homoskedastic and uncorrelated*
   - Has minimum variance among all linear unbiased estimators
 
 **Standard error of coefficient $\hat{\beta}_j$:**
@@ -261,7 +261,7 @@ where:
 
 > **Key Concept 11.1: Classical Assumptions for Statistical Inference**
 >
-> Four assumptions underpin valid inference in multiple regression: (1) linearity in parameters, (2) random sampling, (3) no perfect collinearity among regressors, and (4) zero conditional mean of errors $E[u|X] = 0$. Under these assumptions, OLS is unbiased ($E[b_j] = \beta_j$), consistent, and the Best Linear Unbiased Estimator (BLUE) by the Gauss-Markov theorem.
+> Four assumptions underpin valid inference in multiple regression: (1) linearity in parameters, (2) random sampling, (3) no perfect collinearity among regressors, and (4) zero conditional mean of errors $E[u|X] = 0$. Under these assumptions, OLS is unbiased ($E[b_j] = \beta_j$) and consistent; if the errors are also homoskedastic and uncorrelated, it is the Best Linear Unbiased Estimator (BLUE) by the Gauss-Markov theorem.
 
 ## 11.2 Estimators of Model Parameters
 
@@ -276,7 +276,7 @@ $$\text{price} = \beta_1 + \beta_2 \times \text{size} + \beta_3 \times \text{bed
 - **Coefficients** ($\hat{\beta}_j$): Point estimates of partial effects
 - **Standard errors** ($se(\hat{\beta}_j)$): Measure of estimation uncertainty
 - **t-statistics**: Coefficient divided by standard error
-- **p-values**: Probability of observing such extreme values under $H_0: \beta_j = 0$
+- **p-values**: Probability of a t-statistic at least as extreme as the one observed under $H_0: \beta_j = 0$
 - **Root MSE** ($s_e$): Standard deviation of residuals, measures typical prediction error
 
 ```{python}
@@ -309,7 +309,7 @@ The regression output reveals several important findings about the house price d
 2. **Other variables are not statistically significant**:
    - **Bedrooms coefficient = \$2,685 (p = 0.773)**: Surprisingly, the number of bedrooms doesn't significantly affect price once we control for size. The p-value of 0.773 means we cannot reject the hypothesis that this coefficient is zero.
    - **Bathrooms coefficient = \$6,833 (p = 0.668)**: Similarly, bathrooms show no significant effect.
-   - **Age coefficient = -\$833 (p = 0.259)**: Older homes tend to sell for less, but this effect is not statistically significant.
+   - **Age coefficient = -\$833 (p = 0.259)**: The negative point estimate suggests older homes sell for slightly less, holding the other features constant, but this effect is not statistically significant (and age is barely correlated with price on its own, r = −0.07).
 
 3. **Model fit: R² = 0.651**: The model explains 65.1% of the variation in house prices, which is quite good for cross-sectional real estate data.
 
@@ -511,7 +511,7 @@ We tested whether the size coefficient equals 50 (H₀: β_size = 50):
 
 - **t-statistic = 1.19**: This measures how many standard errors our estimate (\$68.37) is away from the hypothesized value (50). The difference is 1.19 standard errors.
 
-- **p-value = 0.245**: This is the probability of observing a coefficient as extreme as \$68.37 (or more extreme) if the true value were actually \$50. A p-value of 0.245 means there's about a 25% chance we'd see this result by random sampling variation alone.
+- **p-value = 0.245**: This is the probability of observing a coefficient as extreme as \$68.37 (or more extreme) if the true value were actually \$50. A p-value of 0.245 means there's about a 25% chance we'd see an estimate at least this far from \$50 by random sampling variation alone.
 
 - **Decision**: Since p = 0.245 > 0.05, we **fail to reject** H₀ at the 5% significance level.
 
@@ -622,7 +622,7 @@ The overall F-test examines whether our model has any explanatory power at all:
 **Results:**
 
 - **F-statistic = 6.83**: This compares the explained variation to unexplained variation
-- **p-value = 0.0003**: Extremely small probability of observing such a large F-statistic if all coefficients were truly zero
+- **p-value = 0.0003**: Extremely small probability of observing an F-statistic at least this large if all coefficients were truly zero
 - **Critical value = 2.55**: Our F-statistic (6.83) far exceeds this threshold
 
 **Decision**: **Reject H₀** - The model is highly statistically significant.
@@ -688,15 +688,15 @@ This is a crucial finding for model selection. Even though we're testing five va
 - The additional variables (bedrooms, bathrooms, etc.) don't improve our ability to predict house prices
 - Keeping these variables makes the model more complex without meaningful benefit
 
-This result demonstrates the power of joint testing: while we might hope that bedrooms or bathrooms would add information, when tested together, they fail to improve the model. This likely reflects the strong correlation between size and these other features—bigger houses tend to have more bedrooms and bathrooms, so these variables don't provide independent information.
+This result demonstrates the power of joint testing: while we might hope that bedrooms or bathrooms would add information, when tested together, they fail to improve the model. This partly reflects the correlation between size and these other features—moderate for bedrooms (r = 0.52) and weaker for bathrooms (r = 0.32): bigger houses tend to have more bedrooms and bathrooms, so these variables provide little independent information.
 
 > **Key Concept 11.5: Joint Hypothesis Tests and the F Distribution**
 >
 > Individual $t$-tests cannot test multiple restrictions simultaneously because they ignore correlations between coefficient estimates. The F-test evaluates joint significance using the $F(q, n-k)$ distribution, where $q$ is the number of restrictions. It compares how much worse the restricted model fits relative to the unrestricted model.
 
-## 11.6 F Statistic Under Assumptions 1-4
+## 11.6 F Statistic Under Homoskedasticity
 
-Under the classical assumptions, the F-statistic has a specific formula based on sums of squares.
+Under the classical assumptions plus homoskedastic, uncorrelated errors, the F-statistic has a specific formula based on sums of squares.
 
 **Sum of Squares Decomposition:**
 
@@ -725,7 +725,7 @@ where:
 $$F = \frac{R^2 / (k-1)}{(1-R^2) / (n-k)} \sim F(k-1, n-k)$$
 
 ```{python}
-# 11.6 F STATISTIC UNDER ASSUMPTIONS 1-4
+# 11.6 F STATISTIC UNDER HOMOSKEDASTICITY
 
 # Manual F-statistic calculation using sums of squares
 
@@ -793,7 +793,7 @@ The F-statistic of 6.83 tells us that the explained variation (per parameter) is
 
 > **Key Concept 11.6: The F Statistic Under Homoskedasticity**
 >
-> Under assumptions 1-4, the F-statistic can be computed from sums of squares: $F = [(RSS_r - RSS_u)/q] / [RSS_u/(n-k)]$, or equivalently from $R^2$: $F = [(R_u^2 - R_r^2)/q] / [(1-R_u^2)/(n-k)]$. Larger F-values indicate the restrictions are inconsistent with the data.
+> Under assumptions 1-4 plus homoskedastic, uncorrelated errors, the F-statistic can be computed from sums of squares: $F = [(RSS_r - RSS_u)/q] / [RSS_u/(n-k)]$, or equivalently from $R^2$: $F = [(R_u^2 - R_r^2)/q] / [(1-R_u^2)/(n-k)]$. Larger F-values indicate the restrictions are inconsistent with the data.
 
 ### Subset F-test: Restricted vs Unrestricted Model
 
@@ -862,7 +862,7 @@ We're comparing two models:
 **Test results:**
 
 - **F-statistic = 0.42**: The increase in RSS is small relative to the baseline error
-- **p-value = 0.832**: 83.2% probability of seeing this result if the restrictions are true
+- **p-value = 0.832**: 83.2% probability of seeing an F-statistic at least this large if the restrictions are true
 - **Critical value = 2.66**: Our F-statistic is far below the threshold
 
 **Decision**: **Fail to reject H₀** - The restricted model (only size) is NOT significantly worse.
@@ -1038,7 +1038,7 @@ Tracking how coefficients change as we add variables helps diagnose **multicolli
 
 1. **Relatively stable point estimates**: The size coefficient ranges from \$68-\$74 across models, suggesting the relationship is genuine and robust.
 
-2. **Increasing standard errors**: As we add variables, the SE increases from \$11 to \$15—a 38% increase. This reflects **multicollinearity**: size is correlated with other variables (larger houses have more bedrooms, bathrooms, etc.).
+2. **Increasing standard errors**: As we add variables, the SE increases from \$11 to \$15—a 38% increase. This reflects **multicollinearity**: size is correlated with other variables (moderately with bedrooms, r = 0.52, and more weakly with bathrooms, r = 0.32).
 
 3. **Precision loss**: In Model 1, we can estimate the size effect quite precisely (SE = \$11). Adding correlated variables inflates uncertainty without improving the overall fit much.
 
@@ -1059,14 +1059,14 @@ Classical OLS assumes constant error variance (homoskedasticity). When this fail
 **Heteroskedasticity-robust standard errors** (HC1, White's correction):
 
 - Valid inference even when error variance is not constant
-- Typically larger than classical standard errors
+- Can be larger or smaller than classical standard errors (here 3 of the 7 are smaller)
 - Recommended for cross-sectional data
 
 **Effect on inference:**
 
 - Coefficient estimates unchanged
-- Standard errors may increase
-- t-statistics may decrease
+- Standard errors may increase or decrease
+- t-statistics may decrease or increase
 - Some "significant" variables may become insignificant
 
 ```{python}
@@ -1111,19 +1111,19 @@ Heteroskedasticity-robust (HC1) standard errors correct for potential violations
 
 **Other variables:**
 
-- Most show minor changes in SEs
+- SE changes range from a 26% decrease (lot size) to a 23% increase (bathrooms); bedrooms falls 10%, age and month sold rise 6%
 - All remain statistically insignificant with robust SEs
 - Conclusions unchanged
 
 **What this means:**
 
-1. **Mild heteroskedasticity**: The fact that robust SEs are similar to standard SEs suggests heteroskedasticity is not a major problem in this dataset. If it were severe, we'd see much larger increases in robust SEs.
+1. **Mild heteroskedasticity**: Robust SEs move in both directions, by at most about a quarter, and change no conclusion, which suggests heteroskedasticity is not a major problem in this dataset (though with only 29 houses this check is rough). If it were severe, we'd see much larger increases in robust SEs.
 
 2. **Conclusions are robust**: The key finding—that size is significant while other variables are not—holds regardless of which SE we use.
 
 3. **Best practice**: For cross-sectional data like housing prices, it's wise to **report robust SEs by default**. They provide valid inference whether or not heteroskedasticity is present, with minimal cost.
 
-4. **Intercept sensitivity**: The intercept shows the largest change, but intercepts are rarely of economic interest. Our substantive conclusions about slope coefficients remain unchanged.
+4. **Intercept sensitivity**: The intercept is the only coefficient whose p-value moves noticeably toward the 5% boundary (0.035 → 0.047), but intercepts are rarely of economic interest. Our substantive conclusions about slope coefficients remain unchanged.
 
 > **Key Concept 11.8: Robust Standard Errors and Heteroskedasticity**
 >
@@ -1250,7 +1250,7 @@ print("The simplest model (Model 1) may be preferred for parsimony.")
 
 **Classical Assumptions and OLS Properties:**
 
-- Under assumptions 1-4 (linearity, random sampling, no perfect collinearity, zero conditional mean), OLS is unbiased, consistent, and efficient (BLUE)
+- Under assumptions 1-4 (linearity, random sampling, no perfect collinearity, zero conditional mean), OLS is unbiased and consistent; if the errors are also homoskedastic and uncorrelated, it is efficient (BLUE)
 - The standard error $se(b_j) = s_e / \sqrt{\sum \widetilde{x}_{ji}^2}$ decreases with larger samples, more variation in $x_j$, and lower multicollinearity
 - The $t$-statistic $t = b_j / se(b_j)$ follows a $T(n-k)$ distribution
 

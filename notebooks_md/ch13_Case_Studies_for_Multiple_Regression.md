@@ -107,7 +107,7 @@ A photocopier shows constant returns to scale: feed in twice as much paper and t
 ::::: {.columns}
 :::: {.column width="50%"}
 ::: {.callout-tip collapse="true" appearance="simple" title="Example"}
-The RAND Health Insurance Experiment (`data_health`, 5{,}639 first-year observations) randomly assigned 5{,}809 individuals to plans with cost-sharing of 0%, 25%, 50%, 95% — a feature impossible to obtain from observational data, where sicker or richer people self-select into more generous plans. Random assignment closed off this selection channel and let a simple regression of `spending` on plan dummies estimate the *causal* effect of insurance generosity.
+The RAND Health Insurance Experiment (`data_health`, 5{,}639 first-year observations) randomly assigned 5{,}915 individuals to plans with cost-sharing of 0%, 25%, 50%, 95% — a feature impossible to obtain from observational data, where sicker or richer people self-select into more generous plans. Random assignment closed off this selection channel and let a simple regression of `spending` on plan dummies estimate the *causal* effect of insurance generosity.
 :::
 ::::
 :::: {.column width="50%"}
@@ -235,7 +235,7 @@ plt.show()
 
 **What to look for in this histogram:**
 
-- **Shape**: Roughly symmetric, slightly left-skewed -- most schools cluster around the middle of the API range
+- **Shape**: Roughly symmetric (skewness ≈ 0.12, very slightly right-skewed) -- most schools cluster around the middle of the API range
 - **Spread**: Scores range widely from below 400 to above 900, indicating large performance differences across schools
 - **Benchmarks**: The red dashed line (mean) and green dashed line (target of 800) show that most schools fall short of the state target
 
@@ -557,13 +557,13 @@ fit_pre.summary()
 - Coefficient on unemployment ≈ **-1.03**
 - **Negative** relationship (as theory predicts!)
 - Statistically significant
-- 1% increase in unemployment → 1.03% decrease in inflation
+- 1 percentage point increase in unemployment → 1.03 percentage point decrease in inflation
 
 The scatter plot shows a clear downward slope. This is the classic Phillips curve that policymakers relied on in the 1950s-60s.
 
 **Why did it work?**
 
-In the 1950s-60s, expected inflation was **stable and low** (around 2-3%). Since it didn't vary much, omitting it from the regression didn't cause serious bias.
+In the 1950s-60s, actual inflation was **low** (averaging about 2.3%), and expected inflation is widely believed to have been **stable**. Our data contain no expected-inflation measure before 1970, so we cannot check this directly — but if expectations did not vary much, omitting them from the regression would not cause serious bias.
 
 ```python
 # Plot pre-1970
@@ -879,7 +879,7 @@ print(f"due to common technology, design philosophy, and engineering teams.")
 Despite technological improvements:
 
 - Vehicles got **heavier** (better safety, more features)
-- Average MPG didn't improve much from 1980-2005
+- Average MPG rose from 19.4 in 1980 to about 25.6 by 1985, then stayed essentially flat for two decades (25.5 in 2005)
 - Efficiency gains were "spent" on weight/power instead of MPG
 
 **Why Cluster-Robust Standard Errors?**
@@ -949,7 +949,7 @@ Observational studies are biased because:
 
 **The RAND Health Insurance Experiment (1974-1982):**
 
-- Randomly assigned 5,809 individuals to different insurance plans
+- Randomly assigned 5,915 individuals to different insurance plans
 - Plans varied in cost-sharing: 0%, 25%, 50%, 95%, individual deductible
 - Followed families for 3-5 years
 - Measured healthcare utilization and spending
@@ -1032,12 +1032,12 @@ print(f"Conclusion: {'Reject H0' if p_val < 0.05 else 'Fail to reject H0'} at 5%
 print("✓ Randomized Control Trial enables causal inference")
 print("✓ Random assignment eliminates selection bias")
 print("✓ Free care → highest spending (omitted baseline)")
-print("✓ Higher cost-sharing → lower spending")
+print("✓ Every cost-sharing plan → lower spending than free care (lowest under 95%)")
 ```
 
 > **Key Concept 13.7: Randomized Control Trials as the Gold Standard**
 >
-> In a **randomized control trial (RCT)**, subjects are randomly assigned to treatment and control groups. Random assignment ensures the groups are comparable on both observed and unobserved characteristics, eliminating selection bias and omitted variable concerns. The RAND experiment showed that better insurance coverage increases healthcare utilization.
+> In a **randomized control trial (RCT)**, subjects are randomly assigned to treatment and control groups. Random assignment ensures the groups are comparable, in expectation, on both observed and unobserved characteristics, eliminating selection bias and omitted variable concerns. The RAND experiment showed that better insurance coverage increases healthcare utilization.
 
 ### Interpreting the RCT Results
 
@@ -1055,7 +1055,7 @@ print("✓ Higher cost-sharing → lower spending")
 
  Cost-sharing plans (25%, 50%, 95%): Lower spending
 
- - Higher cost-sharing → less utilization
+ - Cost-sharing → less utilization than free care (the 95% plan spends least, though the pattern is not strictly monotonic: the 50% plan spends more than the 25% plan)
  - This is **moral hazard**: insurance affects behavior
 
 3. **Why This is Causal**:
@@ -1063,7 +1063,7 @@ print("✓ Higher cost-sharing → lower spending")
  **Randomization**: Families randomly assigned to plans
 
  - No selection bias (unlike observational studies)
- - Treated and control groups are balanced on all characteristics
+ - Treated and control groups are balanced in expectation on all characteristics (observed and unobserved)
 
  **Experimental control**: RAND ensured compliance
 
@@ -1298,7 +1298,7 @@ At the threshold (vote margin ≈ 0):
 **The Design:**
 
 ```
-Running variable: margin (vote share in election t - 50%)
+Running variable: margin (Democratic margin of victory in election t, in percentage points)
 Threshold: margin = 0
 Treatment: win = 1 if margin > 0
 
@@ -1357,7 +1357,7 @@ print(f"RD estimate (win coefficient): {fit_rd.coef()['win']:.3f}")
 ci = fit_rd.confint()
 print(f"95% CI: [{ci.loc['win', '2.5%']:.3f}, {ci.loc['win', '97.5%']:.3f}]")
 print(f"\nInterpretation:")
-print(f"Barely winning vs barely losing increases vote share in next election by {fit_rd.coef()['win']:.1f}%")
+print(f"Barely winning vs barely losing increases vote share in next election by {fit_rd.coef()['win']:.1f} percentage points")
 print(f"This is the causal effect of incumbency")
 print(f"\nWhy causal? At the threshold (margin≈0), winning is quasi-random")
 print(f"Candidates just above/below threshold are similar in all respects except incumbency status")
@@ -1379,7 +1379,7 @@ print(" - Should see jump at margin=0")
 **Key Findings:**
 
 1. **Incumbency Advantage**: ≈ 4.8 percentage points
- - Barely winning vs barely losing increases vote share by ~4.8% in next election
+ - Barely winning vs barely losing increases vote share by ~4.8 percentage points in next election
  - This is **highly statistically significant** (p < 0.001)
  - Robust across different specifications
 
@@ -1715,7 +1715,7 @@ print("  3. Standardize categorical variables (gender)")
 - **Log-log models and cluster-robust SEs (13.4):** Automobile efficiency gains offset by larger vehicles; clustering by manufacturer accounts for within-group correlation
 - **Randomized control trials (13.5):** RAND experiment shows better insurance increases healthcare spending; random assignment eliminates selection bias
 - **Difference-in-differences (13.6):** South Africa clinic access improved child health; key assumption is parallel trends
-- **Regression discontinuity (13.7):** Political incumbency provides ~5% vote share advantage; exploits sharp cutoffs
+- **Regression discontinuity (13.7):** Political incumbency provides ~5 percentage point vote share advantage; exploits sharp cutoffs
 - **Instrumental variables (13.8):** Better institutions causally increase GDP; instruments address endogeneity
 
 ### Data Preparation and Practical Workflow (Case Study 13.9)

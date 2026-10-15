@@ -42,7 +42,7 @@ This chapter covers advanced topics that extend the multiple regression framewor
 **Datasets used:**
 
 - **AED_HOUSE.DTA**: 29 houses sold in Davis, California (1999) — for robust SEs and prediction
-- **AED_REALGDPPC.DTA**: Real GDP per capita growth (241 observations) — for HAC standard errors
+- **AED_REALGDPPC.DTA**: Real GDP per capita growth (241 quarterly observations of annual growth, 1960 Q1–2020 Q1) — for HAC standard errors
 
 **Key economic questions:**
 
@@ -88,7 +88,7 @@ A school's test scores: students in the same classroom share a teacher, classroo
 ::::: {.columns}
 :::: {.column width="50%"}
 ::: {.callout-tip collapse="true" appearance="simple" title="Example"}
-For U.S. real-GDP-per-capita `growth` (`data_gdp`, $T = 241$ observations), the chapter computes a positive lag-1 autocorrelation — fast-growth years are more often followed by fast-growth years than chance would predict. That's why the Newey–West HAC standard error around the mean growth rate is *larger* than the default OLS SE: ignoring this serial dependence would overstate confidence.
+For U.S. real-GDP-per-capita `growth` (`data_gdp`, $T = 241$ observations), the chapter computes a positive lag-1 autocorrelation — fast-growth quarters are more often followed by fast-growth quarters than chance would predict (each value is a year-over-year growth rate, so consecutive observations overlap by three quarters). That's why the Newey–West HAC standard error around the mean growth rate is *larger* than the default OLS SE: ignoring this serial dependence would overstate confidence.
 :::
 ::::
 :::: {.column width="50%"}
@@ -148,7 +148,7 @@ A tailor making suits doesn't apply the same fabric tension to every customer �
 ::::: {.columns}
 :::: {.column width="50%"}
 ::: {.callout-tip collapse="true" appearance="simple" title="Example"}
-The Davis house regression had only $n = 29$ observations to test $H_0: \beta_{\text{bedrooms}} = 0$, and failed to reject ($p = 0.773$). With such a small sample and substantial multicollinearity between `size` and `bedrooms`, the test's power to detect a modest bedrooms effect was very low — the failure to reject is as likely a Type II error (missed effect) as evidence of no effect at all.
+The Davis house regression had only $n = 29$ observations to test $H_0: \beta_{\text{bedrooms}} = 0$, and failed to reject ($p = 0.773$). With such a small sample and a moderate correlation between `size` and `bedrooms` ($r \approx 0.52$), the test's power to detect a modest bedrooms effect was very low — the failure to reject is as likely a Type II error (missed effect) as evidence of no effect at all.
 :::
 ::::
 :::: {.column width="50%"}
@@ -1098,7 +1098,7 @@ The power function shows how test power varies with the true coefficient value. 
 4. **The 0.80 threshold (green dashed line)**:
  - Standard target: 80% power
  - Means 20% chance of Type II error (β = 0.20)
- - In this example: Need |β| ≈ 44 to achieve 80% power
+ - In this example: Need |β| ≈ 43.5 to achieve 80% power
 
 **What This Means for Study Design:**
 
@@ -1109,12 +1109,12 @@ Given the parameters (n=30, SE=15, α=0.05):
  - More likely to **miss** the effect than detect it
  - Study is underpowered
 
-- **Medium effects** (|β| ≈ 44):
+- **Medium effects** (|β| ≈ 43.5):
  - Power ≈ 80%
  - Good chance of detection
  - Standard benchmark for adequate power
 
-- **Large effects** (|β| > 56):
+- **Large effects** (|β| > 56.2):
  - Power > 95%
  - Almost certain detection
  - Study is well-powered
@@ -1169,7 +1169,7 @@ For a given effect size β:
 This power curve illustrates a fundamental truth:
 
 - **Smaller effects require larger samples to detect**
-- With n=30 and SE=15, we can reliably detect effects of |β| ≥ 44 (where power reaches 80%)
+- With n=30 and SE=15, we can reliably detect effects of |β| ≥ 43.5 (where power reaches 80%)
 - For smaller effects, we'd need more data or reduced noise (lower σ)
 
 ```python
@@ -1231,7 +1231,7 @@ A 95% CI is "best" if it:
 
 **When assumptions fail**:
 
-- Use robust SEs → wider but valid intervals
+- Use robust SEs → valid intervals (often wider, but not always: for the Davis houses, three of the six slopes get smaller robust SEs)
 - Bootstrap → more accurate coverage in small samples
 - Asymptotic approximations may be poor in small samples
 

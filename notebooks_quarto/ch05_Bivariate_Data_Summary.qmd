@@ -286,7 +286,7 @@ print(f"  Std Dev:   {size.std():,.0f} sq ft")
 
 **Key insights:**
 
-- Both distributions are fairly symmetric (means close to medians)
+- Both distributions are right-skewed (means above medians, with a long upper tail of large, expensive houses; skewness is above 1.5 for both)
 - Substantial variation in both price and size (good for regression!)
 - The price coefficient of variation (CV = 0.15) and size CV (0.21) show moderate variability
 - **Moving from univariate to bivariate**: In Chapter 2, we looked at single variables. Now we ask: *how do these two variables move together?*
@@ -950,7 +950,7 @@ fit.summary()
 
 - **Top section** -- Model Summary: estimation method (OLS), dependent variable, inference type (iid = classical standard errors), number of observations
 - **Middle section** -- Coefficients Table: Estimate, Std. Error, t value, Pr(>|t|), and the 2.5% / 97.5% confidence-interval bounds
-- **Bottom section** -- Fit statistics: RMSE (the typical size of prediction errors) and R2
+- **Bottom section** -- Fit statistics: RMSE and R2. Note that RMSE = $\sqrt{\text{RSS}/n}$ = \$22,724 divides by n, so it is slightly smaller than the standard error of the regression $s_e$ = \$23,551 (Section 5.6), which divides by n − 2
 
 ## 5.8 Prediction and Outliers
 
@@ -1004,8 +1004,10 @@ print(f"  3000 is at the edge; 3500+ would be extrapolation (less reliable)")
 
 Using our regression equation:
 ```
-ŷ = \$115,017 + \$73.77 × 2,000 = \$262,559
+ŷ = \$115,017 + \$73.77 × 2,000 = \$262,557
 ```
+
+The reported \$262,559 uses the unrounded coefficients (115,017.28 and 73.7710), as in the code output; plugging in the rounded equation gives \$262,557. Predictions in this chapter (including the exercises) use the unrounded coefficients.
 
 **How reliable is this prediction?**
 
@@ -1165,8 +1167,8 @@ Our regression shows that larger houses are associated with higher prices. But w
 **Why not?**
 
 - **Omitted variables:** Many factors affect price (location, quality, age, condition)
-- **Reverse causality:** Could price influence size? (e.g., builders construct larger houses in expensive areas)
-- **Confounding:** A third variable (e.g., neighborhood quality) may influence both size and price
+- **Reverse causality:** Could price influence size? (e.g., where home values are high, owners have a stronger incentive to add rooms or extensions)
+- **Confounding:** A third variable (e.g., neighborhood quality) may influence both size and price (builders construct larger houses in expensive areas)
 
 **Demonstrating non-symmetry: Reverse regression**
 
@@ -1236,7 +1238,7 @@ price = 115,017 + 73.77 × size
 
 - Many factors affect BOTH size and price:
   - **Neighborhood quality**: Rich neighborhoods have larger, more expensive houses
-  - **Lot size**: Bigger lots allow bigger houses AND command higher prices
+  - **Lot size**: Bigger lots allow bigger houses AND command higher prices (though in this sample lot size is only weakly correlated with size, r = 0.11, and with price, r = 0.15)
   - **Build quality**: High-quality construction → larger AND more expensive
 - The \$73.77 coefficient captures both direct effects of size AND correlated factors
 
@@ -1244,7 +1246,8 @@ price = 115,017 + 73.77 × size
 
 - Our model: size → price
 - Alternative: price → size? 
-  - In expensive areas, builders construct larger houses because buyers can afford them
+  - Where home values are high, owners have a stronger incentive to add rooms or extensions, so price can feed back into size
+  - (Builders constructing larger houses in expensive areas is confounding by location — see point 1 — not reverse causality)
   - The causal arrow may run both ways
 
 **3. Measurement of different concepts**
@@ -1265,9 +1268,9 @@ price = 115,017 + 73.77 × size
 
 **Key observation:**
 
-- If regression = causation, these should be reciprocals
-- 1 / 73.77 = 0.01356 ≠ 0.00837
-- They're NOT reciprocals! This reveals regression measures association, not causation
+- The two slopes are NOT reciprocals: 1 / 73.77 = 0.01356 ≠ 0.00837
+- In fact, their product equals r²: 73.77 × 0.00837 = 0.617 = R². They would be reciprocals only if the fit were perfect (r = ±1)
+- This is a property of least squares (each regression minimizes errors in its own dependent variable), not a test of causation: the two slopes differ whether or not size causes price
 
 **When can we claim causation?**
 
@@ -1360,7 +1363,7 @@ plt.show()
 - **OLS** (purple solid): Assumes a linear relationship
 - **LOWESS** (red dashed): Flexible, data-driven curve
 - **Kernel smoothing** (green dotted): Another flexible method
-- For this data, all three methods are similar, suggesting that the linear model is a reasonable approximation.
+- For this data, LOWESS stays close to the OLS line; the kernel curve is wigglier and departs from OLS by up to about \$31,000 at the largest house size, where data are sparse. Neither shows systematic curvature, suggesting that the linear model is a reasonable approximation.
 
 **Comparing three approaches to fitting the data:**
 
@@ -1387,16 +1390,16 @@ plt.show()
 
 **What does this comparison tell us?**
 
-**Key observation: All three lines are very similar!**
+**Key observation: No systematic curvature**
 
-- LOWESS and kernel smoothing follow OLS closely
-- No obvious systematic curvature
-- The relationship appears genuinely linear
+- LOWESS follows OLS closely (within about \$14,000)
+- Kernel smoothing is noisier, departing from OLS by up to about \$31,000 at the largest house size, where few houses are observed
+- The relationship appears approximately linear over the observed range
 
-**This validates our linear model:**
+**This supports our linear model:**
 
 - If nonparametric methods showed strong curvature, we'd question the linear assumption
-- Since they align with OLS, the linear model is appropriate
+- Since they show no systematic departure from OLS, the linear model is a reasonable approximation
 - We can confidently use the simpler parametric approach
 
 **When would nonparametric methods differ?**
@@ -1420,7 +1423,7 @@ plt.show()
 - **Flexible prediction**: When functional form is unknown
 - **Complex relationships**: When theory doesn't suggest specific form
 
-**Bottom line:** Nonparametric methods confirm that our linear regression is appropriate for this dataset. The relationship between house price and size is genuinely linear, not curved.
+**Bottom line:** Nonparametric methods support using linear regression for this dataset. With only 29 houses, we see no evidence of systematic curvature in the relationship between house price and size.
 
 ## Key Takeaways
 
@@ -1428,11 +1431,11 @@ plt.show()
 
 - **Two-way tabulations**, scatterplots, and correlation are essential first steps in bivariate analysis
 - **Scatterplots** provide visual evidence of relationships and help identify direction, strength, form, and outliers
-- Two-way tabulations with **expected frequencies** enable chi-squared tests of independence for categorical data
+- Two-way tabulations show the joint distribution of two categorical variables; comparing them with **expected frequencies** under independence is the basis of the chi-squared test of independence (not covered in this chapter)
 - The **correlation coefficient (r)** is a scale-free measure of linear association ranging from -1 to +1
 - **Covariance** measures the direction of association but depends on the units of measurement
 - For house price and size, **r = 0.786** indicates strong positive linear association
-- **Autocorrelation** extends correlation to time series, measuring how a variable relates to its own past values
+- Looking ahead, **autocorrelation** (Chapter 17) extends correlation to time series, measuring how a variable relates to its own past values
 
 ### Regression Analysis and Interpretation
 
@@ -1461,7 +1464,7 @@ plt.show()
 - **Predictions** use ŷ = b₁ + b₂x* to forecast y for a given x*
 - **In-sample predictions** use observed x values (fitted values); **out-of-sample predictions** use new x values
 - **Extrapolation** beyond the sample range of x can be unreliable
-- **Outliers** can strongly influence regression estimates, especially if far from both x̄ and ȳ
+- **Outliers** can strongly influence regression estimates, especially if their x value is far from x̄ (high leverage)
 - **Association does not imply causation**—regression measures correlation, not causal effects
 - **Confounding variables**, reverse causality, or selection bias can create associations without causation
 - Establishing **causation** requires experimental design, natural experiments, or advanced econometric techniques (Chapter 17)
@@ -1575,20 +1578,21 @@ plt.show()
 # =============================================================================
 # STEP 7: Reverse regression — association is NOT causation
 # =============================================================================
-# If regression = causation, the reverse slope would be 1/slope. It is not.
+# The reverse slope is not 1/slope: the product of the two slopes equals r²,
+# so they are reciprocals only when the fit is perfect (r = ±1).
 fit_reverse = pf.feols('size ~ price', data=data_house)
 
 print(f"price ~ size  slope: {slope:.4f}")
 print(f"size ~ price  slope: {fit_reverse.coef()['price']:.6f}")
 print(f"1 / original slope:  {1/slope:.6f}")
 print(f"Reciprocals match?   {1/slope:.6f} ≠ {fit_reverse.coef()['price']:.6f}")
-print("→ Regression is asymmetric: association, not causation!")
+print("→ Regression is asymmetric: each line minimizes errors in its own y variable")
 
 # =============================================================================
 # STEP 8: Nonparametric regression — check the linearity assumption
 # =============================================================================
 # LOWESS fits weighted local regressions; if the curve tracks the OLS line,
-# the linear assumption is validated for this dataset
+# the linear model is a reasonable approximation for this dataset
 lowess_result = lowess(data_house['price'], data_house['size'], frac=0.6)
 
 fig, ax = plt.subplots(figsize=(10, 6))

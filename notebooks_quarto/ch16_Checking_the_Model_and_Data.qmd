@@ -54,7 +54,7 @@ This chapter focuses on checking model assumptions and diagnosing data problems.
 
 **Datasets used:**
 
-- **AED_EARNINGS_COMPLETE.DTA**: 872 full-time workers with earnings, age, education, and experience (2010)
+- **AED_EARNINGS_COMPLETE.DTA**: 872 full-time workers with earnings, age, education, and related demographic and job variables (2010)
 - **AED_DEMOCRACY.DTA**: 131 countries with democracy, growth, and institutional variables (Acemoglu et al. 2008)
 
 ## Key Concepts
@@ -81,7 +81,7 @@ A blood test that *itself* spikes the patient's adrenaline is a contaminated mea
 ::::: {.columns}
 :::: {.column width="50%"}
 ::: {.callout-tip collapse="true" appearance="simple" title="Example"}
-The chapter cites Acemoglu, Johnson, and Robinson (2001), who use settler mortality as an IV for institutional quality across the 131 countries in `data_democracy`-related research. The instrument shifts colonial institutions (relevance) but, the argument goes, does not directly affect modern GDP otherwise (exogeneity). The 2SLS estimate of institutions on `growth` is far larger than the biased OLS estimate, dramatising the size of the endogeneity problem.
+A classic application, related to the chapter's `data_democracy` example, is Acemoglu, Johnson, and Robinson (2001), who use settler mortality as an IV for institutional quality across former colonies. The instrument shifts colonial institutions (relevance) but, the argument goes, does not directly affect modern GDP otherwise (exogeneity). In that study the IV estimate of the effect of institutions on income is larger than the OLS estimate. This chapter introduces IV only conceptually; two-stage least squares estimation itself is not carried out here.
 :::
 ::::
 :::: {.column width="50%"}
@@ -96,7 +96,7 @@ A locksmith's universal key opens only the front door of a building, but every v
 ::::: {.columns}
 :::: {.column width="50%"}
 ::: {.callout-tip collapse="true" appearance="simple" title="Example"}
-Consider an `earnings` regression on `age + education + experience` in `data_earnings` ($n = 872$). A respondent with `education = 21` (PhD) and `experience = 0` (just graduated) sits at an unusual corner of regressor space — high leverage. Whether or not their earnings are unusual, the OLS line bends *more* in response to this row than to a typical mid-career worker — which is exactly when you want a leverage statistic to flag it.
+Consider an `earnings` regression on `age + education` in `data_earnings` ($n = 872$). A respondent with `education = 0` (no schooling, far below the sample mean of about 14 years) sits at an unusual corner of regressor space — high leverage (about 0.03, roughly nine times the average leverage). Whether or not their earnings are unusual, the OLS line bends *more* in response to this row than to a typical mid-career worker — which is exactly when you want a leverage statistic to flag it.
 :::
 ::::
 :::: {.column width="50%"}
@@ -111,7 +111,7 @@ On a see-saw, a small child sitting on the very end has more pivoting power than
 ::::: {.columns}
 :::: {.column width="50%"}
 ::: {.callout-tip collapse="true" appearance="simple" title="Example"}
-Computing Cook's distance for the earnings regression on `data_earnings` (872 workers) flags a small handful of outliers — a few very high earners far from the bulk of the sample. The chapter compares OLS coefficients with and without these flagged points: when their removal changes the `education` coefficient by more than a standard error, they are influential, not just unusual.
+Computing Cook's distance for the `earnings ~ age + education` regression on `data_earnings` (872 workers) flags 33 observations above $4/n$ — mostly very high earners far from the bulk of the sample. The chapter's own influence analysis uses DFITS and DFBETAS (Section 16.8), but the same logic applies here: compare OLS coefficients with and without the flagged points. When their removal changes the `education` coefficient by more than a standard error (here it falls from about \$5,811 to \$5,161, more than its standard error of about \$570), they are influential, not just unusual.
 :::
 ::::
 :::: {.column width="50%"}
@@ -480,17 +480,15 @@ Joint tests are highly significant even though individual t-tests are weak. This
 ```{python}
 # 16.2-16.4: Model Assumptions
 
-# \nClassical OLS assumptions:
-# 1. Linear in parameters: E[y|x] = x'β
-# 2. Random sample from population
-# 3. No perfect collinearity
-# 4. Zero conditional mean: E[u|x] = 0
-# 5. Homoskedasticity: Var(u|x) = σ²
-# 6. No autocorrelation: Cov(u_i, u_j) = 0
+# \nClassical OLS assumptions (numbered as in the text above):
+# 1. Linearity: y = x'β + u
+# 2. Zero conditional mean: E[u|x] = 0
+# 3. Homoskedasticity: Var(u|x) = σ²
+# 4. No autocorrelation: Cov(u_i, u_j) = 0
 
 # \nConsequences of violations:
-# Assumptions 1-4 violated → OLS biased and inconsistent
-# Assumptions 5-6 violated → OLS unbiased but inefficient
+# Assumptions 1-2 violated → OLS biased and inconsistent
+# Assumptions 3-4 violated → OLS unbiased but inefficient
 # → Standard errors incorrect
 print("                            → Invalid inference (t-tests, CIs)")
 
@@ -547,7 +545,7 @@ se_comparison = pd.DataFrame({
 })
 print(se_comparison)
 
-print("\nNote: Here the robust SEs differ only modestly from the standard SEs (age slightly smaller, education about 13% larger), suggesting mild heteroskedasticity at most.")
+print("\nNote: Here the robust SEs differ only modestly from the standard SEs (age slightly smaller, education about 12% larger), suggesting mild heteroskedasticity at most.")
 ```
 
 > **Key Concept 16.4: Heteroskedasticity and Robust Standard Errors**
@@ -565,16 +563,16 @@ The comparison between standard and robust SEs shows only **modest differences**
 | Variable | Standard SE | Robust SE | Ratio (Robust/Standard) |
 |----------|-------------|-----------|------------------------|
 | age | ~\$154 | ~\$151 | **0.98x** |
-| education | ~\$570 | ~\$642 | **1.13x** |
+| education | ~\$570 | ~\$642 | **1.12x** |
 
 **What This Tells Us:**
 
 1. **Mild heteroskedasticity at most**:
- - Robust SEs here differ only modestly from standard SEs (age slightly smaller, education ~13% larger)
+ - Robust SEs here differ only modestly from standard SEs (age slightly smaller, education ~12% larger)
  - Any departure from constant error variance is small in this sample
  - Robust SEs remain the safe default regardless
 
-2. **Standard SEs are too small**:
+2. **Where standard SEs are too small** (as for education here), they:
  - Lead to **overstated** t-statistics
  - **False confidence** in precision
  - **Overrejection** of null hypotheses (Type I error)
@@ -586,7 +584,7 @@ The comparison between standard and robust SEs shows only **modest differences**
 
 **Why Heteroskedasticity in Earnings Data?**
 
-Earnings data typically exhibit heteroskedasticity because:
+Earnings data often exhibit heteroskedasticity (in this sample only mildly) because:
 
 1. **Scale effects**: High earners have more variable earnings
  - CEO: \$1M ± \$500K (50% CV)
@@ -745,7 +743,7 @@ plt.show()
 
 - **Bars extending beyond the confidence band** (shaded region) indicate statistically significant autocorrelation at that lag
 - **Slowly decaying bars** suggest non-stationarity or strong persistence in the errors
-- **A single significant spike at lag 1** suggests an AR(1) process; multiple significant lags suggest higher-order autocorrelation
+- **Bars that decay geometrically across lags** (as here) suggest an AR(1) process; **a single significant spike at lag 1** that cuts off sharply afterwards suggests an MA(1) process
 
 > **Key Concept 16.5: Autocorrelation and HAC Standard Errors**
 >
@@ -774,7 +772,7 @@ From the residuals of the fitted regression `y1 ~ x`:
 
 2. **Standard errors understate uncertainty**:
 
- Because the errors are positively correlated, the usual OLS formula overstates how much independent information the sample contains. Correcting for the AR(1) structure inflates the variance of the estimator by the factor below, so honest (HAC) standard errors would be roughly $\sqrt{9} = 3$ times larger than the default OLS ones.
+ Because the errors are positively correlated, the usual OLS formula overstates how much independent information the sample contains. For the mean of the errors, the AR(1) structure inflates the variance by the factor below (about 9). For the regression slope the inflation also depends on how persistent $x$ is; in this simulation the HAC standard error on `x` (with $L = 16$ lags) is about 1.95 times larger than the default OLS one.
 
 3. **Why does autocorrelation inflate the variance?**
 
@@ -824,7 +822,7 @@ The autocorrelation here is no accident — we built it into the data-generating
 
 **With HAC SEs:**
 
-- Standard errors widen by roughly $\sqrt{9} \approx 3\times$
+- Standard errors widen by about $1.95\times$ (HAC with $L = 16$ lags)
 - The slope on `x` stays **highly significant** (its true value is 2)
 - Honest uncertainty
 
@@ -1016,7 +1014,7 @@ The diagnostic plots help us **visually detect** violations of regression assump
 
 - Most points **reasonably close** to 45° line
 - LOWESS smooth **roughly linear**, close to 45°
-- Some **scatter** (R² ≈ 0.20-0.30, so significant unexplained variation)
+- Some **scatter** (R² ≈ 0.45, so substantial unexplained variation)
 - **No obvious systematic bias** (LOWESS not curved)
 
 **Interpretation:**
@@ -1112,7 +1110,7 @@ For democracy-growth model:
 - No glaring violations of assumptions
 - Some outliers worth investigating (next section)
 - Model appears **adequately specified**
-- But low R² suggests many **omitted variables**
+- But a moderate R² (≈ 0.45) leaves room for **omitted variables**
 
 ### Diagnostic Plots for Individual Regressor (Growth)
 
@@ -1339,7 +1337,7 @@ Threshold: $|DFITS_i| > 2\sqrt{k/n}$
 
 For democracy-growth model (k ≈ 7, n = 131):
 
-- Threshold ≈ \$2\sqrt{7/131} = 2 \times 0.231 \approx **0.46**
+- Threshold ≈ $2\sqrt{7/131} = 2 \times 0.231 \approx$ **0.46**
 
 **Typical Results:**
 
@@ -1730,7 +1728,7 @@ You estimate $y_i = \beta_1 + \beta_2 x_{2i} + \beta_3 x_{3i} + u_i$ by OLS.
 
 **Exercise 2: VIF Interpretation**
 
-A regression of earnings on age, education, and experience yields VIF values of 22.0 (age), 17.3 (education), and 36.9 (experience).
+A regression of earnings on age, education, and their interaction (agebyeduc) yields VIF values of 22.0 (age), 17.3 (education), and 36.9 (agebyeduc).
 
 (a) Which variable has the most severe multicollinearity problem? Explain.
 
@@ -1754,7 +1752,7 @@ You estimate a regression and obtain the following SE comparison:
 
 | Variable | Standard SE | Robust SE | Ratio |
 |----------|-------------|-----------|-------|
-| Education | 570 | 642 | 1.13 |
+| Education | 570 | 642 | 1.12 |
 | Age | 154 | 151 | 0.98 |
 
 (a) Is there evidence of heteroskedasticity? Which variable's inference is most affected?

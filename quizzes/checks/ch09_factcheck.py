@@ -51,7 +51,7 @@ def pct_exact(dln: float) -> float:
 # ---------------------------------------------------------------- 1. FACTS
 d = load("AED_EARNINGS.DTA")
 d["lnearn"] = np.log(d["earnings"])
-d["lneduc"] = np.log(d["education"])
+d["lneduc"] = np.log(d["education"].astype(float))  # float64 (the chapter now casts too)
 m1 = pf.feols("earnings ~ education", data=d)
 m2 = pf.feols("lnearn ~ education", data=d)
 m3 = pf.feols("lnearn ~ lneduc", data=d)
@@ -105,7 +105,7 @@ check("E10: se = 0.0143, t = 9.21, p < 0.001",
       f"{m2.se()['education']:.4f}" == "0.0143" and f2(m2.tstat()["education"]) == "9.21" and m2.pvalue()["education"] < 0.001)
 check("E10 distractor/expl: 9.21 ~ 92%; 0.1314/0.0143 = 9.19 ~ 9.21 (rounded se); R2 = 0.334",
       round(9.21 * 10) == 92 and abs(0.1314 / 0.0143 - 9.21) < 0.05 and f"{r2['loglin']:.3f}" == "0.334")
-check("E11: log-log a = 6.545, b = 1.478 (~1.48); 148", (f"{a3:.3f}", f"{b3:.3f}", f2(b3), round(100 * b3)) == ("6.545", "1.478", "1.48", 148))
+check("E11: log-log a = 6.543, b = 1.478 (~1.48); 148", (f"{a3:.3f}", f"{b3:.3f}", f2(b3), round(100 * b3)) == ("6.543", "1.478", "1.48", 148))
 check("E12: max education 20; 1% of 20 = 0.2; 10% = 2; mean education 14.4, 1% = 0.14",
       d.education.max() == 20 and f1(0.01 * 20) == "0.2" and f1(0.1 * 20) == "2.0"
       and f1(d.education.mean()) == "14.4" and f2(0.01 * d.education.mean()) == "0.14")
@@ -120,23 +120,23 @@ m3m = pf.feols("lnearn ~ lm64", data=d64)
 check("E14: education in months leaves the log-log slope unchanged and shifts the intercept by -b ln(12) (float64)",
       math.isclose(m3m.coef()["lm64"], m3y.coef()["le64"], rel_tol=1e-9)
       and math.isclose(m3m.coef()["Intercept"], m3y.coef()["Intercept"] - m3y.coef()["le64"] * math.log(12), rel_tol=1e-9))
-# Precision note: the chapter's np.log(education) runs on an int8 column and returns float16, so its
-# log-log and linear-log numbers carry float16 rounding. The bank quotes the chapter's printed values
-# (b = 1.478, a = 6.545; 54,433 and -102,718); with float64 logs they are 1.478, 6.543; 54,452, -102,767.
+# Precision note: np.log on the raw int8 education column returns float16 (the chapter used to do this and
+# printed 54,433 / -102,718 / 6.545). The chapter now casts to float first; the bank uses the float64
+# values 1.478, 6.543; 54,452, -102,767.
 m4y = pf.feols("earnings ~ le64", data=d64)
 print(f"FACTS float64 logs: log-log a={m3y.coef()['Intercept']:.4f} b={m3y.coef()['le64']:.5f} R2={m3y._r2:.4f}; "
       f"linear-log a={m4y.coef()['Intercept']:.2f} b={m4y.coef()['le64']:.2f} R2={m4y._r2:.4f}")
 check("precision note: chapter ln(education) is float16; float64 log-log slope still rounds to 1.478 and R2 to 0.286",
       np.log(d.education).dtype == np.float16 and f"{m3y.coef()['le64']:.3f}" == "1.478" and f"{m3y._r2:.3f}" == "0.286")
-check("E15: linear-log a = -102,718, b = 54,433; /100 = 544; /10 = 5,443; /10,000 = 5.44",
-      (round(a4), round(b4), round(54433 / 100), round(54433 / 10), f2(54433 / 10000)) == (-102718, 54433, 544, 5443, "5.44"))
+check("E15: linear-log a = -102,767, b = 54,452; /100 = 545; /10 = 5,445; /10,000 = 5.45",
+      (round(a4), round(b4), round(b4 / 100), round(b4 / 10), f2(b4 / 10000)) == (-102767, 54452, 545, 5445, "5.45"))
 check("E16 distractor / E17: linear a = -31,056, b = 5,021", (round(a1), round(b1)) == (-31056, 5021))
 check("E16: linear-log dollar gain of one more year falls with education (exact model)",
       all(b4 * (math.log(e + 1) - math.log(e)) > b4 * (math.log(e + 2) - math.log(e + 1)) for e in range(3, 20)))
 check("E17: 5,021 x 6 = 30,126; pred(18) = 59,322; 18 x 5,021 = 90,378",
       (5021 * 6, -31056 + 5021 * 18, 5021 * 18) == (30126, 59322, 90378))
 check("E18: R2 = 0.289, 0.334, 0.286, 0.231",
-      tuple(f"{r2[k]:.3f}" for k in ("lin", "loglin", "loglog", "linlog")) == ("0.289", "0.334", "0.286", "0.231"))
+      tuple(f"{r2[k]:.3f}" for k in ("lin", "loglin", "loglog", "linlog")) == ("0.289", "0.334", "0.286", "0.230"))
 check("E18 expl: log-linear > log-log; linear > linear-log", r2["loglin"] > r2["loglog"] and r2["lin"] > r2["linlog"])
 check("E19: mean 41,413 > median 36,000; min 1,050 > 0; linear t = 8.30",
       round(d.earnings.mean()) == 41413 and d.earnings.median() == 36000 and d.earnings.min() == 1050
@@ -158,7 +158,7 @@ check("E09 (rev): $30,000 and $60,000 lie within the log-linear predicted range;
 print(f"FACTS log-linear predicted earnings range: {pred_ll.min():.0f} to {pred_ll.max():.0f}")
 check("E16 feedback: ln13 - ln12 = 0.080; ln19 - ln18 = 0.054",
       (f"{math.log(13) - math.log(12):.3f}", f"{math.log(19) - math.log(18):.3f}") == ("0.080", "0.054"))
-check("E18 C (rev): log-log 0.286 > linear-log 0.231 (different dependent variables)", r2["loglog"] > r2["linlog"])
+check("E18 C (rev): log-log 0.286 > linear-log 0.230 (different dependent variables)", r2["loglog"] > r2["linlog"])
 check("E07 (rev): AED_EARNINGS is all women (gender 0; AED_EARNINGSMALE is gender 1)",
       set(d.gender.unique()) == {0} and set(load("AED_EARNINGSMALE.DTA").gender.unique()) == {1})
 

@@ -370,7 +370,7 @@ print(f"Empirical std:  {xbar.std():.4f} vs Theoretical: {np.sqrt(0.25/30):.4f}"
 
 **2. Standard deviation of sample means = 0.0863 (vs. theoretical = 0.0913)**
 
-- The theoretical standard error is σ/√n = 0.5/√30 = 0.0913
+- The theoretical standard deviation of X̄ is σ/√n = 0.5/√30 = 0.0913
 - Our empirical SD (0.0863) is very close to this prediction
 - This confirms the variance formula: Var(X̄) = σ²/n works in practice
 
@@ -625,7 +625,7 @@ print(f"Empirical std:  {age_means.std():.2f} vs Theoretical: {18.61/np.sqrt(25)
 
 - Theoretical: σ/√n = 18.61/√25 = 3.72 years
 - Empirical: 3.76 years
-- Excellent agreement between theory and data (within 1%)
+- Excellent agreement between theory and data (about 1% apart)
 
 **3. Range of sample means: 14.6 to 33.4 years**
 
@@ -832,8 +832,8 @@ print(f"sigma(X-bar) = sigma/sqrt(n): {np.sqrt(0.25/30):.4f}")
 **3. Range of simulated means: 0.2667 to 0.7667**
 
 - Matches the theoretical range well
-- About 95% of values fall within μ ± 2σ(X̄) = 0.5 ± 0.183
-- This is exactly what we'd expect from a normal distribution
+- About 97% of values (389 of 400) fall within μ ± 2σ(X̄) = 0.5 ± 0.183
+- This is close to the roughly 95% we'd expect from a normal distribution
 
 **4. Why simulation matters:**
 
@@ -1011,7 +1011,7 @@ print(f"Weighted bias:   ${weighted_mean - true_pop_mean:,.0f}")
 - Standard error: se($\bar{X}$) = $s/\sqrt{n}$ where $s$ is sample standard deviation
 - "Standard error" means "estimated standard deviation" (applies to any estimator, not just $\bar{X}$)
 - Measures precision of $\bar{x}$ as an estimate of $\mu$—smaller is better
-- Example: Coin toss with n=30 gives se ≈ 0.091; Census with n=25 gives se ≈ 3.72 years
+- Example: Coin toss with n=30 gives se ≈ 0.091 (vs. σ/√n = 0.0913); for Census ages with n=25, σ/√n ≈ 3.72 years
 - Used to construct confidence intervals and conduct hypothesis tests (Chapter 4)
 
 **Desirable Estimator Properties:**
@@ -1033,7 +1033,7 @@ print(f"Weighted bias:   ${weighted_mean - true_pop_mean:,.0f}")
   - Mean of sample means: 23.78 vs. theoretical 24.13
   - SD of sample means: 3.76 vs. theoretical 3.72
   - Normal distribution despite highly non-normal population
-- Computer simulation replicates theoretical results perfectly
+- Computer simulation closely replicates theoretical results (SD of simulated means 0.0887 vs. theoretical 0.0913)
 
 **Economic Applications:**
 
@@ -1145,18 +1145,19 @@ plt.tight_layout()
 plt.show()
 
 # =============================================================================
-# STEP 4: Standard error — how sample size affects precision
+# STEP 4: Precision — how sample size affects the SD of the sample mean
 # =============================================================================
-# SE = σ/√n: to halve the SE, you must quadruple the sample size
+# sd(X̄) = σ/√n: to halve it, you must quadruple the sample size
+# (the standard error s/√n estimates this when σ is unknown)
 sigma = 0.5  # coin toss population std dev
 
-print(f"\nStandard error vs sample size (σ = {sigma}):")
-print(f"{'n':<10} {'SE = σ/√n':<15} {'Var(X̄) = σ²/n':<15}")
+print(f"\nStd. dev. of X̄ vs sample size (σ = {sigma}):")
+print(f"{'n':<10} {'sd(X̄) = σ/√n':<15} {'Var(X̄) = σ²/n':<15}")
 print("-" * 40)
 for n in [10, 30, 100, 400, 1000]:
-    se = sigma / np.sqrt(n)
+    sd_xbar = sigma / np.sqrt(n)
     var_xbar = sigma**2 / n
-    print(f"{n:<10} {se:<15.4f} {var_xbar:<15.6f}")
+    print(f"{n:<10} {sd_xbar:<15.4f} {var_xbar:<15.6f}")
 
 # =============================================================================
 # STEP 5: Monte Carlo simulation — verify the theory computationally
@@ -1246,7 +1247,7 @@ Test your understanding of the sample mean and sampling distributions:
 - Consider random samples of size $n = 25$ from a random variable $X$ with mean $\mu = 100$ and variance $\sigma^2 = 400$
 - (a) What is the mean of the sample mean $\bar{X}$?
 - (b) What is the variance of the sample mean $\bar{X}$?
-- (c) What is the standard deviation (standard error) of the sample mean?
+- (c) What is the standard deviation of the sample mean?
 
 **Exercise 3:** Central Limit Theorem application
 
@@ -1328,7 +1329,7 @@ This is fundamental to statistical inference: if we only observe a sample of cou
 > The **sampling distribution of the mean** shows how sample means $\bar{y}$ vary across different random samples drawn from the same population. Key properties:
 >
 > 1. **Mean of sampling distribution = population mean**: $E[\bar{y}] = \mu$
-> 2. **Standard error decreases with sample size**: $SE(\bar{y}) = \sigma/\sqrt{n}$ (estimated in practice by $s/\sqrt{n}$, since $\sigma$ is unknown)
+> 2. **Precision increases with sample size**: the standard deviation of $\bar{y}$ is $\sigma/\sqrt{n}$ (estimated in practice by the standard error $SE(\bar{y}) = s/\sqrt{n}$, since $\sigma$ is unknown)
 > 3. **Central Limit Theorem**: For large $n$ (typically $n \geq 30$), $\bar{y}$ is approximately normally distributed, **regardless** of the population distribution
 >
 > This is why we can use normal-based inference methods even for non-normal economic data like earnings and wealth distributions.
@@ -1451,7 +1452,7 @@ print(f"Difference: ${sample_mean - df_2014.mean():.2f}")
 **Hint:** The CLT predicts that sample means should be normally distributed with:
 
 - Mean = $\mu$ (population mean)
-- Standard error = $\sigma/\sqrt{n}$ (population std / sqrt(sample size))
+- Standard deviation = $\sigma/\sqrt{n}$ (population std / sqrt(sample size))
 
 **Example structure:**
 
@@ -1482,21 +1483,21 @@ plt.show()
 # Compare empirical vs theoretical
 print(f"Population mean (μ): ${df_2014.mean():.2f}")
 print(f"Mean of sample means: ${sample_means.mean():.2f}")
-print(f"Theoretical SE (σ/√n): ${df_2014.std()/np.sqrt(n):.2f}")
-print(f"Empirical SE (std of sample means): ${sample_means.std():.2f}")
+print(f"Theoretical SD of x̄ (σ/√n): ${df_2014.std()/np.sqrt(n):.2f}")
+print(f"Empirical SD (std of sample means): ${sample_means.std():.2f}")
 ```
 
 **Questions:**
 
 - Does the distribution of sample means look approximately normal (even though the population distribution was skewed)?
 - How close is the mean of sample means to the population mean?
-- How close is the empirical standard error to the theoretical prediction?
+- How close is the empirical standard deviation of the sample means to the theoretical prediction?
 
 ---
 
 > **Key Concept 3.11: Standard Error and Precision**
 >
-> The **standard error** $SE(\bar{y}) = \sigma/\sqrt{n}$ (estimated in practice by $s/\sqrt{n}$, since $\sigma$ is unknown) measures the typical distance between a sample mean and the population mean. Key insights:
+> The **standard error** $SE(\bar{y}) = s/\sqrt{n}$ estimates $\sigma/\sqrt{n}$, the standard deviation of the sample mean ($\sigma$ is unknown in practice); it measures the typical distance between a sample mean and the population mean. Key insights:
 >
 > 1. **Decreases with sample size**: Doubling the sample size reduces SE by factor of $\sqrt{2} \approx 1.41$
 > 2. **Trade-off**: Larger samples cost more (time/money) but provide more precise estimates
@@ -1588,7 +1589,7 @@ Through this hands-on exploration of sampling distributions using cross-country 
 - **Sampling variability**: Observed how sample means vary across different samples
 - **Sampling distribution**: Simulated and visualized the distribution of sample means
 - **Central Limit Theorem**: Verified that sample means are approximately normal even for skewed populations
-- **Standard error**: Quantified precision and understood how it decreases with sample size ($\sigma/\sqrt{n}$)
+- **Standard error**: Quantified precision and understood how it decreases with sample size ($s/\sqrt{n}$, which estimates $\sigma/\sqrt{n}$)
 - **Effect of sample size**: Compared sampling distributions for different $n$ values
 - **Subpopulation analysis**: Explored differences across country groups
 

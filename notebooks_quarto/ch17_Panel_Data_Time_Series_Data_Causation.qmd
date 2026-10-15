@@ -55,7 +55,7 @@ This chapter focuses on three important topics that extend basic regression meth
 **Datasets used:**
 
 - **AED_NBA.DTA**: NBA team revenue data (29 teams, 10 seasons, 2001-2011)
-- **AED_EARNINGS_COMPLETE.DTA**: 842 full-time workers with earnings, age, and education (2010)
+- **AED_EARNINGS_COMPLETE.DTA**: 872 full-time workers with earnings, age, and education (2010)
 - **AED_INTERESTRATES.DTA**: U.S. Treasury interest rates, monthly (January 1982 - January 2015)
 
 ## Key Concepts
@@ -97,7 +97,7 @@ Sort a family photo album by person — every page shows one family member acros
 ::::: {.columns}
 :::: {.column width="50%"}
 ::: {.callout-tip collapse="true" appearance="simple" title="Example"}
-The chapter constructs a binary `dbigearn` (a high-earner indicator equal to 1 for the roughly 27% of workers earning above \$60,000) on `data_earnings` and fits the logit `dbigearn ~ age + education`. The marginal effect of `education` evaluated at the sample means is similar in magnitude to the OLS linear-probability-model coefficient on `education`, demonstrating that logit and LPM agree on direction and rough magnitude — but logit's predicted probabilities never wander outside $[0, 1]$.
+The chapter constructs a binary `dbigearn` (a high-earner indicator equal to 1 for the roughly 27% of workers earning above \$60,000) on `data_earnings` and fits the logit `dbigearn ~ age + education`. The average marginal effect of `education` (about 0.06; about 0.07 when evaluated at the sample means) is similar in magnitude to the OLS linear-probability-model coefficient on `education` (about 0.05), demonstrating that logit and LPM agree on direction and rough magnitude — but logit's predicted probabilities never wander outside $[0, 1]$.
 :::
 ::::
 :::: {.column width="50%"}
@@ -142,7 +142,7 @@ Marinating chicken: the spice rub doesn't transfer all its flavour at the moment
 ::::: {.columns}
 :::: {.column width="50%"}
 ::: {.callout-tip collapse="true" appearance="simple" title="Example"}
-For the NBA panel, the FE coefficient on `wins` is noticeably smaller than the RE coefficient — because RE pools both within and between variation, while FE strips out the team fixed effects that are correlated with `wins` (big-market teams both win more *and* earn more). A Hausman test on this gap typically rejects RE, confirming that FE is the safer choice when the question is the within-team causal effect of an extra win on revenue.
+For the NBA panel, both FE (0.0045) and RE (about 0.0046 if you also fit RE, e.g. with `linearmodels`; the chapter does not run it) give a much smaller `wins` coefficient than pooled OLS (0.0068). Because the team effects are large relative to the idiosyncratic noise, RE puts almost all its weight on within variation, so the two estimates nearly coincide and a Hausman test does not reject RE at the 5% level ($\chi^2 \approx 2.8$, $p \approx 0.10$). Here FE and RE tell the same story; FE remains the safer default for the within-team effect of an extra win because it does not need the RE assumption.
 :::
 ::::
 :::: {.column width="50%"}
@@ -309,7 +309,7 @@ Typical findings:
 
 - Uses **weighted average** of between and within variation
 - Efficient if team effects uncorrelated with wins (strong assumption!)
-- Usually between pooled and FE estimates
+- Usually between pooled and FE estimates (here RE ≈ 0.0046, very close to FE's 0.0045)
 
 **Economic Interpretation:**
 
@@ -317,7 +317,7 @@ Why is between variation larger?
 
 1. **Market size**: 
  - LA Lakers (huge market) vs. Memphis Grizzlies (small market)
- - Revenue gap: \$200M+ (permanent)
+ - Revenue gap: about \$77M per season on average (Lakers ≈ \$150M vs. Grizzlies ≈ \$74M), persistent
  - This is **structural**, not related to annual wins
 
 2. **Historical success**: 
@@ -341,15 +341,15 @@ What creates year-to-year changes?
 
 **Example:**
 
-Golden State Warriors 2010 vs. 2015:
+Memphis Grizzlies 2003-04 vs. 2004-05:
 
-- **2010**: 26 wins, \$120M revenue
-- **2015**: 67 wins, championship, \$310M revenue
-- **Within-team change**: Huge! (but this is exceptional)
+- **2003-04**: 28 wins, \$68M revenue
+- **2004-05**: 50 wins, \$86M revenue
+- **Within-team change**: Huge! (+22 wins, about +27% revenue -- but this is exceptional)
 
 Most teams show **much smaller** year-to-year swings:
 
-- **Typical**: ±5-10 wins, ±10-20% revenue
+- **Typical**: ±3-12 wins, ±2-7% revenue
 
 **Key Insight for Fixed Effects:**
 
@@ -430,7 +430,7 @@ print(f"Ratio:            {fit_pool.se()['wins'] / fit_pool_default.se()['wins']
 
 > **Key Concept 17.2: Cluster-Robust Standard Errors for Panel Data**
 >
-> Observations within the same individual (team, firm, country) are correlated over time, violating the independence assumption. Default SEs dramatically understate uncertainty by treating all observations as independent. Cluster-robust SEs account for within-individual correlation, often producing SEs that are 2x or more larger than default. Always cluster by individual in panel data; with few clusters ($G < 30$), consider wild bootstrap refinements.
+> Observations within the same individual (team, firm, country) are correlated over time, violating the independence assumption. Default SEs dramatically understate uncertainty by treating all observations as independent. Cluster-robust SEs account for within-individual correlation, often producing SEs substantially larger than default (about 1.8 times larger in the NBA example). Always cluster by individual in panel data; with few clusters ($G < 30$), consider wild bootstrap refinements.
 
 ---
 
@@ -447,7 +447,7 @@ The comparison of standard errors reveals **within-team correlation** - a pervas
 
 **What This Tells Us:**
 
-1. **Cluster SEs are much larger** (2x or more):
+1. **Cluster SEs are much larger** (about 1.8x here):
  - Default and robust SEs **understate** uncertainty
  - Observations for the **same team are correlated** over time
  - Standard errors must account for **within-cluster dependence**
@@ -467,7 +467,7 @@ The comparison of standard errors reveals **within-team correlation** - a pervas
  - Errors: $u_{it}$ correlated with $u_{it-1}, u_{it-2}, \ldots$
 
 3. **Information content:**
- - With independence: 29 teams × 10 years = **290 independent observations**
+ - With independence: 286 team-seasons (29 teams, up to 10 seasons; unbalanced) = **286 independent observations**
  - With clustering: Effectively like **29 independent teams** (much less info!)
  - Cluster SEs adjust for this **reduced effective sample size**
 
@@ -476,7 +476,7 @@ The comparison of standard errors reveals **within-team correlation** - a pervas
 **Default SE formula:**
 $$SE = \sqrt{\frac{\sigma^2}{\sum(x_i - \bar{x})^2}}$$
 
-Assumes all 290 observations independent.
+Assumes all 286 observations independent.
 
 **Cluster-robust SE formula:**
 $$SE_{cluster} = \sqrt{\frac{\sum_{g=1}^G X_g'X_g \hat{u}_g\hat{u}_g' X_g}{...}}$$
@@ -581,7 +581,7 @@ With cluster SEs:
 
 - Relationship between wins and revenue **remains statistically significant** (t ≈ 3.5, p ≈ 0.001)
 - Even after properly accounting for within-team correlation
-- Clustering roughly doubles the standard error but does not overturn the result
+- Clustering raises the standard error by about 80% but does not overturn the result
 - Fixed effects (next section) will further address the underlying confounding
 
 ## 17.3 Fixed Effects Estimation
@@ -676,13 +676,14 @@ The comparison between Pooled OLS and Fixed Effects reveals **omitted variable b
 **Understanding the Fixed Effects Model:**
 
 **Model:**
-$$\text{lnrevenue}_{it} = \alpha_i + \beta \cdot \text{wins}_{it} + \gamma \cdot \text{season}_t + u_{it}$$
+$$\text{lnrevenue}_{it} = \alpha_i + \beta \cdot \text{wins}_{it} + u_{it}$$
 
 where:
 
 - $\alpha_i$ = **team-specific intercept** (fixed effect)
 - Captures: Market size, arena quality, brand value, history, etc.
 - $\beta$ = **within-team effect** of wins on revenue
+- No season effects are included (matching the code `lnrevenue ~ wins | teamid`); adding them, e.g. `| teamid + season`, is a natural extension
 
 **Estimation (de-meaning):**
 
@@ -727,22 +728,22 @@ where:
 
 **Lakers** (big market):
 
-- Average wins: 55/season
-- Average revenue: \$300M
+- Average wins: 52/season
+- Average revenue: \$150M
 - High revenue because: 50% market size, 50% wins
 
 **Grizzlies** (small market):
 
-- Average wins: 45/season
-- Average revenue: \$150M
+- Average wins: 33/season
+- Average revenue: \$74M
 - Low revenue because: 50% market size, 50% wins
 
 **Pooled OLS** compares Lakers to Grizzlies:
 
-- Attributes all \$150M difference to 10-win difference
+- Attributes all of the ≈ \$77M difference to the ≈ 19-win difference
 - Overstates wins effect!
 
-**Fixed Effects** compares Lakers 2015 (67 wins) to Lakers 2012 (41 wins):
+**Fixed Effects** compares Lakers 2009-10 (65 wins) to Lakers 2005-06 (34 wins):
 
 - Market size constant (LA both years)
 - Isolates **wins effect** from **market effect**
@@ -768,8 +769,8 @@ Fixed effects output typically reports three R²:
 **Marginal effect:**
 
 - One additional win → **+0.45%** revenue increase
-- For a team with \$200M revenue: 0.45% × \$200M = **\$900K**
-- Over 10 additional wins: **\$9M** revenue increase
+- For a team with \$100M revenue (close to the sample mean of about \$96M): 0.45% × \$100M = **\$450K**
+- Over 10 additional wins: roughly **\$4.5M** revenue increase
 
 **Is this economically significant?**
 
@@ -786,7 +787,7 @@ With cluster SEs:
 
 The within-team wins effect is **precisely estimated** and remains significant after clustering by team. Even so, several features of this panel keep the FE estimate modest and would threaten precision in smaller samples:
 
-1. **Small within-variation** (teams don't vary hugely in wins year-to-year)
+1. **Small within-variation in revenue** (within SD of log revenue ≈ 0.11 vs. 0.21 between), even though wins actually vary more within teams (SD ≈ 10.4 wins) than between team averages (SD ≈ 7.0)
 2. **Revenue smoothing** (multi-year contracts, season tickets)
 3. **Only 29 teams** (small number of clusters)
 4. **Short panel** (10 years → limited within-variation per team)
@@ -887,7 +888,7 @@ print(model_logit.summary())
 
 # Marginal effects
 marginal_effects = model_logit.get_margeff()
-# Marginal Effects (at means)
+# Average marginal effects (statsmodels default: at='overall')
 print(marginal_effects.summary())
 
 # Linear Probability Model for comparison
@@ -899,7 +900,7 @@ print(f"Education coefficient: {fit_lpm.coef()['education']:.6f} (SE: {fit_lpm.s
 print("\nNote: Logit marginal effects and LPM coefficients are similar in magnitude.")
 ```
 
-**Interpreting the logit results:** Both `age` and `education` enter with positive coefficients, so older and more-educated workers are more likely to be high earners. Because logit coefficients are not themselves marginal effects, we convert them: the marginal effect of `education` at the sample means (about 0.05, i.e. roughly a 5-percentage-point rise in the probability of high earnings per extra year of schooling) closely matches the linear-probability-model coefficient. This agreement in sign and magnitude is why the simpler LPM is often a useful first pass -- but only the logit keeps every predicted probability inside $[0, 1]$.
+**Interpreting the logit results:** Both `age` and `education` enter with positive coefficients, so older and more-educated workers are more likely to be high earners. Because logit coefficients are not themselves marginal effects, we convert them: the average marginal effect of `education` printed above (about 0.06, i.e. roughly a 6-percentage-point rise in the probability of high earnings per extra year of schooling; about 0.07 if evaluated at the sample means) is close to the linear-probability-model coefficient (about 0.05). This agreement in sign and magnitude is why the simpler LPM is often a useful first pass -- but only the logit keeps every predicted probability inside $[0, 1]$.
 
 ## 17.5 Time Series Data
 
@@ -1118,7 +1119,7 @@ $$y_t = \beta_1 + \sum_{j=1}^p \alpha_j y_{t-j} + \sum_{j=0}^q \gamma_j x_{t-j} 
 
 #### Autoregressive Models: Interest Rates Have Memory
 
-The ADL model results reveal how interest rates evolve over time with **strong persistence**:
+The ADL model results reveal how changes in interest rates evolve over time:
 
 **Typical ADL(2,2) Results:**
 
@@ -1131,33 +1132,33 @@ From: $\Delta gs10_t = \beta_0 + \beta_1 \Delta gs10_{t-1} + \beta_2 \Delta gs10
 
 **Distributed lag terms** (1-year rate):
 
-- **Contemporary** ($\Delta gs1_t$): ≈ **+0.45 to +0.55** (strong positive!)
-- **Lag 1** ($\Delta gs1_{t-1}$): ≈ **+0.15 to +0.25**
-- **Lag 2** ($\Delta gs1_{t-2}$): ≈ **+0.05 to +0.10**
+- **Contemporary** ($\Delta gs1_t$): ≈ **+0.74** (strong positive!)
+- **Lag 1** ($\Delta gs1_{t-1}$): ≈ **-0.26** (negative)
+- **Lag 2** ($\Delta gs1_{t-2}$): ≈ **+0.05**
 
 **Interpretation:**
 
-1. **Negative autocorrelation in changes**:
- - Coefficient on $\Delta gs10_{t-1}$ is **negative**
- - If 10-year rate increased last month, it tends to **partially reverse** this month
- - This is **mean reversion** in changes
- - **Not** mean reversion in levels (levels are highly persistent)
+1. **Positive autocorrelation in changes (momentum)**:
+ - Coefficient on $\Delta gs10_{t-1}$ is **positive** (≈ +0.28)
+ - If the 10-year rate increased last month, it tends to rise a little **further** this month
+ - This is **momentum** in changes, partly offset by the small negative second lag (≈ -0.10)
+ - It describes **changes**, not levels (levels are highly persistent)
 
 2. **Strong contemporary relationship**:
- - Coefficient ≈ **0.50** on $\Delta gs1_t$
- - When the 1-year rate rises by 1 percentage point, the 10-year rate rises about **0.50 percentage points** the same month
+ - Coefficient ≈ **0.74** on $\Delta gs1_t$
+ - When the 1-year rate rises by 1 percentage point, the 10-year rate rises about **0.74 percentage points** the same month
  - **Expectations hypothesis**: Long rates reflect expected future short rates
  - Less than 1-to-1 because 10-year rate is average over many periods
 
 3. **Distributed lag structure**:
- - Effects of 1-year rate changes **persist** over multiple months
- - Total effect: 0.50 + 0.20 + 0.08 ≈ **0.78**
- - Almost 80% of 1-year rate change eventually passes through to 10-year rate
+ - Part of the same-month response is **reversed** the next month ($\gamma_1$ ≈ -0.26)
+ - Sum of the distributed-lag coefficients: 0.74 - 0.26 + 0.05 ≈ **0.53**
+ - So about half of a 1-year rate change has passed through to the 10-year rate after two months
 
-4. **R² increases substantially**:
- - Simple model (no lags): R² ≈ 0.20
- - ADL(2,2): R² ≈ **0.40-0.50**
- - **Dynamics matter!** Past values have strong predictive power
+4. **R² increases modestly**:
+ - Simple model (no lags): R² ≈ 0.57
+ - ADL(2,2): R² ≈ **0.61**
+ - **Dynamics matter**, though most of the fit comes from the same-month change in the 1-year rate
 
 **Why ADL Models Are Important:**
 
@@ -1184,8 +1185,8 @@ From: $\Delta gs10_t = \beta_0 + \beta_1 \Delta gs10_{t-1} + \beta_2 \Delta gs10
 
 After fitting ADL(2,2):
 
-- **Lag 1 autocorrelation**: ρ₁ ≈ **0.05-0.10** (much lower!)
-- Compare to levels regression: ρ₁ ≈ 0.95
+- **Lag 1 autocorrelation**: ρ₁ ≈ **0.01** (much lower!)
+- Compare to the static changes regression: ρ₁ ≈ 0.25, and the levels regression: ρ₁ ≈ 0.95
 - **Model captures most autocorrelation** 
 
 This suggests:
@@ -1208,48 +1209,50 @@ ADL(2,2) dominates on all criteria!
 
 **Short-run effect** (impact multiplier):
 
-- Immediate response to $\Delta gs1_t$: **γ₀ ≈ 0.50**
-- Half of shock passes through contemporaneously
+- Immediate response to $\Delta gs1_t$: **γ₀ ≈ 0.74**
+- About three-quarters of the shock passes through contemporaneously
 
 **Medium-run effect** (interim multipliers):
 
-- After 1 month: γ₀ + γ₁ ≈ **0.70**
-- After 2 months: γ₀ + γ₁ + γ₂ ≈ **0.78**
+- After 1 month: γ₀ + γ₁ ≈ **0.48**
+- After 2 months: γ₀ + γ₁ + γ₂ ≈ **0.53**
 
 **Long-run effect** (total multiplier):
 
-- In levels regression: coefficient ≈ **0.90-0.95**
-- This is the **long-run equilibrium** relationship
-- ADL estimates **dynamics of adjustment** to this equilibrium
+- Including the feedback through the own lags: $(\gamma_0 + \gamma_1 + \gamma_2)/(1 - \beta_1 - \beta_2) \approx 0.53/0.82 \approx$ **0.65**
+- This is the implied **long-run** pass-through of a permanent 1-point rise in the 1-year rate
+- (The levels regression with a time trend gives a gs1 coefficient of about 0.51, but it suffers from the trending-data problems above, so it is not a reliable benchmark)
+- ADL estimates the **dynamics of adjustment** to the long run
 
-**Why Negative Own-Lag Coefficients?**
+**Momentum in Changes, Partial Reversal of the Impact Response**
 
-At first, this seems counterintuitive:
+Two different lags pull in opposite directions:
 
 - Interest rates are **persistent** in levels
-- But **changes** show **mean reversion**
+- **Changes** in the 10-year rate show mild **momentum** (own lag 1 ≈ +0.28)
+- But the same-month response to the 1-year rate is **partly reversed** next month ($\gamma_1$ ≈ -0.26)
 
 **Explanation:**
 
 - **Levels** are I(1): Random walk with drift
-- **Changes** are I(0): Stationary, but with negative serial correlation
-- **Overshooting**: Markets overreact to news, then partially correct
+- **Changes** are I(0): Stationary, with mild positive first-order serial correlation
+- **Partial correction**: The 10-year rate responds strongly on impact, then gives back a little as the lagged 1-year rate term kicks in
 
-**Example:**
+**Example** (tracing the full ADL(2,2), including the own lags):
 
-Month 1: Fed unexpectedly raises 1-year rate by 1%
+Month 1: The 1-year rate rises by 1 percentage point (and stays higher)
 
-- 10-year rate increases by 0.60% (overshoots equilibrium)
+- 10-year rate increases by about 0.74 percentage points
 
-Month 2: Market reassesses
+Month 2: Momentum (+0.28 × 0.74 ≈ +0.21) is outweighed by the lagged 1-year term (-0.26)
 
-- 10-year rate decreases by 0.10% (partial reversal)
+- 10-year rate decreases by about 0.05 percentage points (partial reversal)
 
 Month 3: Further adjustment
 
-- 10-year rate changes by -0.02% (approaching equilibrium)
+- 10-year rate decreases by about 0.04 percentage points (approaching the long run)
 
-Long run: 10-year rate settles at +0.85% (new equilibrium)
+Long run: 10-year rate settles about 0.65 percentage points higher
 
 **Practical Value:**
 
@@ -1508,6 +1511,7 @@ print(f"  FE is smaller → pooled OLS had positive omitted variable bias")
 # First differencing removes trends and restores valid inference.
 url_rates = "https://raw.githubusercontent.com/quarcs-lab/data-open/master/AED/AED_INTERESTRATES.DTA"
 data_rates = pd.read_stata(url_rates)
+data_rates['time'] = np.arange(len(data_rates))  # time index for HAC SEs
 
 # Regression in levels (potentially spurious)
 fit_levels = pf.feols('gs10 ~ gs1', data=data_rates)
@@ -1555,7 +1559,7 @@ print(f"\nADL(2,2) Model:")
 print(f"  Impact multiplier (dgs1):       {fit_adl.coef()['dgs1']:.4f}")
 print(f"  1-month cumulative:             {fit_adl.coef()['dgs1'] + fit_adl.coef()['dgs1_lag1']:.4f}")
 print(f"  2-month cumulative:             {fit_adl.coef()['dgs1'] + fit_adl.coef()['dgs1_lag1'] + fit_adl.coef()['dgs1_lag2']:.4f}")
-print(f"  R²: {fit_adl._r2:.4f} (much higher than static model)")
+print(f"  R²: {fit_adl._r2:.4f} (higher than the static model's R²)")
 
 # Check residual autocorrelation — should be near zero if well-specified
 acf_adl = acf(pd.Series(fit_adl._u_hat).dropna(), nlags=5)
@@ -1665,7 +1669,7 @@ In this case study, you will apply panel data methods from this chapter to analy
 
 - **Source:** `https://raw.githubusercontent.com/quarcs-lab/mendez2020-convergence-clubs-code-data/master/assets/dat.csv`
 - **Sample:** 108 countries, 1990-2014 (panel structure: country $\times$ year)
-- **Variables:** `lp` (labor productivity), `rk` (physical capital), `hc` (human capital), `rgdppc` (real GDP per capita), `tfp` (total factor productivity), `region`, `country`
+- **Variables:** `lp` (labor productivity), `kl` (physical capital per worker), `h` (human capital index), `GDPpc` (real GDP per capita), `TFP` (total factor productivity), `region`, `country`
 
 **Research question:** How do physical and human capital affect labor productivity across countries, and does controlling for unobserved country characteristics change the estimates?
 
@@ -1682,7 +1686,7 @@ import numpy as np
 url = "https://raw.githubusercontent.com/quarcs-lab/mendez2020-convergence-clubs-code-data/master/assets/dat.csv"
 dat = pd.read_csv(url)
 dat['ln_lp'] = np.log(dat['lp'])
-dat['ln_rk'] = np.log(dat['rk'])
+dat['ln_kl'] = np.log(dat['kl'])
 
 # Panel structure
 print(f"Countries: {dat['country'].nunique()}")
@@ -1709,8 +1713,8 @@ Estimate a pooled OLS regression of log productivity on log physical capital and
 ```python
 import pyfixest as pf
 
-fit_default = pf.feols('ln_lp ~ ln_rk + hc', data=dat)
-fit_cluster = pf.feols('ln_lp ~ ln_rk + hc', data=dat, vcov={'CRV1': 'country'})
+fit_default = pf.feols('ln_lp ~ ln_kl + h', data=dat)
+fit_cluster = pf.feols('ln_lp ~ ln_kl + h', data=dat, vcov={'CRV1': 'country'})
 
 print("Default SE:", fit_default.se().round(4).to_dict())
 print("Cluster SE:", fit_cluster.se().round(4).to_dict())
@@ -1725,7 +1729,7 @@ How much larger are cluster SEs? What does this tell you about within-country co
 
 Estimate a fixed effects model controlling for country-specific characteristics. Compare the FE coefficients with the pooled OLS coefficients.
 
-*Hint:* Use `pf.feols('ln_lp ~ ln_rk + hc | country', data=dat)` for fixed effects, or use the within transformation manually by de-meaning the variables by country.
+*Hint:* Use `pf.feols('ln_lp ~ ln_kl + h | country', data=dat)` for fixed effects, or use the within transformation manually by de-meaning the variables by country.
 
 Which coefficients change most? What unobserved country characteristics might be driving the difference?
 
@@ -1735,7 +1739,7 @@ Which coefficients change most? What unobserved country characteristics might be
 
 Add a time trend or year fixed effects to the panel model. Test whether productivity growth rates differ across regions.
 
-*Hint:* Use `pf.feols('ln_lp ~ ln_rk + hc | country + year', data=dat)` for two-way fixed effects, or create region-year interaction terms.
+*Hint:* Use `pf.feols('ln_lp ~ ln_kl + h | country + year', data=dat)` for two-way fixed effects, or create region-year interaction terms.
 
 Is there evidence of convergence (faster growth in initially poorer countries)?
 

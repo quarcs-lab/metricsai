@@ -146,7 +146,7 @@ check("E09: ME(40) = 732; 3105 - 29.66x40 = 1,919; -2x29.66x40 = -2,373",
       and round(-2 * 29.66 * 40) == -2373)
 check("E09 expl / E10 expl: ME(25) = 1,622; ME(60) = -454", round(me_q(25)) == 1622 and round(me_q(60)) == -454)
 check("E12: AME = MEM = 536", math.isclose(me_q(d.age).mean(), me_q(d.age.mean()), rel_tol=1e-9) and round(me_q(d.age.mean())) == 536)
-check("E14: t(age) 2.86, t(agesq) -2.38; corr 0.99; F 18.6, p < 0.001",
+check("E14: t(age) 2.86, t(agesq) -2.38; corr 0.99; Wald chi2 18.6, p < 0.001",
       (f(q.tstat()["age"], 2), f(q.tstat()["agesq"], 2), f(d.age.corr(d.agesq), 2), f(F_q["statistic"], 1))
       == ("2.86", "-2.38", "0.99", "18.6") and F_q["pvalue"] < 0.001)
 check("E15: mix educ 5,399; s_educ 2.884; s_y 51,516; beta* 0.30",

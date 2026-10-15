@@ -734,7 +734,7 @@ function googleTranslateElementInit() {
 </div>
 </div>
 </div>
-<p><strong>Adjusted <span class="math inline">\(R^2\)</span>:</strong> A version of <span class="math inline">\(R^2\)</span> that penalises for the number of regressors: <span class="math inline">\(\bar{R}^2 = 1 - \frac{\text{RSS}/(n-k)}{\text{TSS}/(n-1)}\)</span>. Adding a useless variable always raises plain <span class="math inline">\(R^2\)</span> but typically lowers <span class="math inline">\(\bar{R}^2\)</span> — making it the better fit metric when comparing models of different sizes.</p>
+<p><strong>Adjusted <span class="math inline">\(R^2\)</span>:</strong> A version of <span class="math inline">\(R^2\)</span> that penalises for the number of regressors: <span class="math inline">\(\bar{R}^2 = 1 - \frac{\text{RSS}/(n-k)}{\text{TSS}/(n-1)}\)</span>. Adding a useless variable never decreases plain <span class="math inline">\(R^2\)</span> but typically lowers <span class="math inline">\(\bar{R}^2\)</span> — making it the better fit metric when comparing models of different sizes.</p>
 <div class="columns">
 <div class="column" style="width:50%;">
 <div class="callout callout-style-simple callout-tip callout-titled" title="Example">
@@ -787,7 +787,7 @@ function googleTranslateElementInit() {
 </div>
 <div id="callout-11" class="callout-11-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<p>The chapter constructs <code>size_twice = 2 × size</code> and tries to estimate <code>price ~ size + size_twice + bedrooms</code>. Because <code>size_twice</code> adds <em>no</em> new information beyond <code>size</code>, the regression is inestimable: the software silently drops one of the two collinear variables and reports the rest. In contrast, the actual six predictors in the Davis dataset show only moderate VIFs, so all six can be estimated jointly.</p>
+<p>The chapter constructs <code>size_twice = 2 × size</code> and tries to estimate <code>price ~ size + size_twice + bedrooms</code>. Because <code>size_twice</code> adds <em>no</em> new information beyond <code>size</code>, the regression is inestimable: the software drops one of the two collinear variables (pyfixest prints a warning naming it) and reports the rest. In contrast, the actual six predictors in the Davis dataset show only moderate VIFs, so all six can be estimated jointly.</p>
 </div>
 </div>
 </div>
@@ -814,7 +814,7 @@ function googleTranslateElementInit() {
 <section id="setup" class="level2">
 <h2 class="anchored" data-anchor-id="setup">Setup</h2>
 <p>First, we import the necessary Python packages and configure the environment for reproducibility. All data will stream directly from GitHub.</p>
-<div id="9e516930" class="cell" data-execution_count="1">
+<div id="55c289e9" class="cell" data-execution_count="1">
 <details class="code-fold">
 <summary>Setup: Import libraries and configure environment</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># --- Libraries ---</span></span>
@@ -873,7 +873,7 @@ function googleTranslateElementInit() {
 </ul>
 <p><strong>Economic motivation:</strong> A simple regression of price on bedrooms might find a positive relationship, but is this because bedrooms directly add value, or because houses with more bedrooms tend to be larger? Multiple regression helps us disentangle these effects.</p>
 <p>The code below loads the dataset from GitHub and displays the first ten observations together with summary statistics. Check each variable’s scale and range — price is in dollars, size in square feet — before we start modeling.</p>
-<div id="87af9655" class="cell" data-execution_count="2">
+<div id="0ac735d0" class="cell" data-execution_count="2">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Load house price data</span></span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>data_house <span class="op">=</span> pd.read_stata(GITHUB_DATA_URL <span class="op">+</span> <span class="st">'AED_HOUSE.DTA'</span>)</span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -1018,7 +1018,7 @@ Summary statistics:</code></pre>
 <h3 class="anchored" data-anchor-id="bivariate-vs.-multiple-regression">Bivariate vs.&nbsp;Multiple Regression</h3>
 <p>Let’s compare a simple regression (price on bedrooms only) with a multiple regression (price on bedrooms AND size). This illustrates how controlling for other variables changes coefficient estimates.</p>
 <p><strong>Key insight:</strong> In the bivariate regression, the bedrooms coefficient captures both the direct effect of bedrooms and the indirect effect through correlation with size. In multiple regression, we isolate the <strong>partial effect</strong> of bedrooms holding size constant.</p>
-<div id="28defc2a" class="cell" data-execution_count="3">
+<div id="271f52c4" class="cell" data-execution_count="3">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Bivariate regression: price ~ bedrooms</span></span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>model_bivariate <span class="op">=</span> pf.feols(<span class="st">'price ~ bedrooms'</span>, data<span class="op">=</span>data_house)</span>
 <span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -1081,7 +1081,7 @@ Change: $-22,113.84</code></pre>
 </div>
 <blockquote class="blockquote">
 <p><strong>Key Concept 10.1: Partial Effects vs.&nbsp;Total Effects in Multiple Regression</strong></p>
-<p>In bivariate regression, the bedrooms coefficient ($23,667) captures both the direct effect of bedrooms and the indirect effect through correlation with size. In multiple regression, the bedrooms coefficient drops to $1,553 — the <strong>partial effect</strong> holding size constant — and is no longer statistically significant (<span class="math inline">\(t = 0.20\)</span>, <span class="math inline">\(p = 0.85\)</span>). This dramatic change illustrates why controlling for confounders is essential for isolating individual variable effects.</p>
+<p>In bivariate regression, the bedrooms coefficient ($23,667) captures both the direct effect of bedrooms and the indirect effect through correlation with size. In multiple regression, the bedrooms coefficient drops to $1,553 — the <strong>partial effect</strong> holding size constant — and is no longer statistically significant (<span class="math inline">\(t = 0.20\)</span>, <span class="math inline">\(p = 0.84\)</span>). This dramatic change illustrates why controlling for confounders is essential for isolating individual variable effects.</p>
 </blockquote>
 </section>
 </section>
@@ -1095,7 +1095,7 @@ Change: $-22,113.84</code></pre>
 <li>Outliers or non-linear patterns</li>
 </ul>
 <p>The diagonal shows the distribution of each variable using kernel density estimates (KDE).</p>
-<div id="c9144ef3" class="cell" data-execution_count="4">
+<div id="7c28f782" class="cell" data-execution_count="4">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Create scatterplot matrix</span></span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>plot_vars <span class="op">=</span> [<span class="st">'price'</span>, <span class="st">'size'</span>, <span class="st">'bedrooms'</span>, <span class="st">'age'</span>]</span>
 <span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>g <span class="op">=</span> sns.pairplot(data_house[plot_vars], diag_kind<span class="op">=</span><span class="st">'kde'</span>,</span>
@@ -1121,7 +1121,7 @@ Notice: Price shows strongest relationship with Size.</code></pre>
 </div>
 <blockquote class="blockquote">
 <p><strong>Key Concept 10.2: Exploratory Data Analysis with Scatterplot Matrices</strong></p>
-<p>Pairwise scatterplot matrices display all two-way relationships simultaneously, revealing linear associations, nonlinearities, clusters, and outliers before formal modeling. They also highlight potential multicollinearity: if two regressors are tightly correlated (e.g., size and bedrooms), their individual effects may be hard to separate in a regression.</p>
+<p>Pairwise scatterplot matrices display all two-way relationships simultaneously, revealing linear associations, nonlinearities, clusters, and outliers before formal modeling. They also highlight potential multicollinearity: if two regressors are correlated (e.g., size and bedrooms, with a moderate <span class="math inline">\(r = 0.52\)</span>), their individual effects may be hard to separate in a regression.</p>
 </blockquote>
 </section>
 <section id="correlation-analysis" class="level2">
@@ -1134,7 +1134,7 @@ Notice: Price shows strongest relationship with Size.</code></pre>
 <li>Correlation ≠ causation (merely shows association)</li>
 </ul>
 <p>A correlation heatmap provides visual representation with color intensity showing strength of correlation.</p>
-<div id="38810ac9" class="cell" data-execution_count="5">
+<div id="ae0685fc" class="cell" data-execution_count="5">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Calculate correlation matrix</span></span>
 <span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>corr_vars <span class="op">=</span> [<span class="st">'price'</span>, <span class="st">'size'</span>, <span class="st">'bedrooms'</span>, <span class="st">'bathrooms'</span>, <span class="st">'lotsize'</span>, <span class="st">'age'</span>, <span class="st">'monthsold'</span>]</span>
 <span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>corr_matrix <span class="op">=</span> data_house[corr_vars].corr()</span>
@@ -1187,7 +1187,7 @@ Size-Bedrooms correlation: 0.518</code></pre>
 <p><strong>Ordinary Least Squares (OLS)</strong> chooses coefficients <span class="math inline">\(b_1, ..., b_7\)</span> to minimize the sum of squared residuals:</p>
 <p><span class="math display">\[\min \sum_{i=1}^{n} (y_i - \widehat{y}_i)^2\]</span></p>
 <p>where <span class="math inline">\(y_i\)</span> is the actual price and <span class="math inline">\(\widehat{y}_i\)</span> is the predicted price.</p>
-<div id="8a25286c" class="cell" data-execution_count="6">
+<div id="b287eb70" class="cell" data-execution_count="6">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Estimate full multiple regression model</span></span>
 <span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>model_full <span class="op">=</span> pf.feols(<span class="st">'price ~ size + bedrooms + bathrooms + lotsize + age + monthsold'</span>, data<span class="op">=</span>data_house)</span>
 <span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -1239,7 +1239,7 @@ RMSE: 21718.733 R2: 0.651 </code></pre>
 <li>Significance: This effect is statistically significant (<span class="math inline">\(t = 4.44\)</span>, <span class="math inline">\(p &lt; 0.001\)</span>) — size is the only regressor whose 95% confidence interval excludes zero.</li>
 </ul>
 <p>The 95% confidence interval tells us the range of plausible values for each coefficient. Throughout this chapter we report classical (homoskedasticity-assuming) standard errors, as AED does before Chapter 12; Chapter 12 introduces heteroskedasticity-robust standard errors, which are preferred in practice.</p>
-<div id="65e1f1f1" class="cell" data-execution_count="7">
+<div id="4f056e31" class="cell" data-execution_count="7">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Display coefficients with 95% confidence intervals</span></span>
 <span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>conf_int <span class="op">=</span> model_full.confint()</span>
 <span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>coef_table <span class="op">=</span> pd.DataFrame({</span>
@@ -1361,7 +1361,7 @@ RMSE: 21718.733 R2: 0.651 </code></pre>
 <li>The coefficient will exactly match the <code>size</code> coefficient from the full multiple regression</li>
 </ol>
 <p><strong>Intuition:</strong> The residual <span class="math inline">\(\widetilde{\text{size}}\)</span> represents the variation in size that is <strong>not explained</strong> by other variables. This is why multiple regression isolates partial effects.</p>
-<div id="637fefa0" class="cell" data-execution_count="8">
+<div id="d7ae7ea2" class="cell" data-execution_count="8">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Step 1: Regress size on all other variables</span></span>
 <span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>model_size_on_others <span class="op">=</span> pf.feols(<span class="st">'size ~ bedrooms + bathrooms + lotsize + age + monthsold'</span>, data<span class="op">=</span>data_house)</span>
 <span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>resid_size <span class="op">=</span> model_size_on_others._u_hat</span>
@@ -1410,7 +1410,7 @@ Difference (numerical precision):                 0.000000000000512</code></pre>
 <li>Same units as <span class="math inline">\(y\)</span> (dollars in our case)</li>
 <li>Note: the <code>RMSE</code> printed in pyfixest summaries divides by <span class="math inline">\(n\)</span> rather than <span class="math inline">\(n-k\)</span>, so it is slightly smaller than <span class="math inline">\(s_e\)</span></li>
 </ul>
-<div id="4c3b6585" class="cell" data-execution_count="9">
+<div id="4ec478e7" class="cell" data-execution_count="9">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Calculate and display model fit statistics</span></span>
 <span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>n <span class="op">=</span> <span class="bu">len</span>(data_house)</span>
 <span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>k <span class="op">=</span> <span class="bu">len</span>(model_full.coef())  <span class="co"># includes intercept</span></span>
@@ -1461,7 +1461,7 @@ Verification: R² = [Corr(y, ŷ)]²
 <li>Useful for comparing non-nested models</li>
 <li>Different software packages may use different conventions (scaling by <span class="math inline">\(n\)</span>)</li>
 </ul>
-<div id="f4ed13b6" class="cell" data-execution_count="10">
+<div id="d7df8131" class="cell" data-execution_count="10">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Calculate information criteria</span></span>
 <span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a><span class="co"># INFORMATION CRITERIA</span></span>
 <span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -1497,7 +1497,7 @@ BIC (Stata convention):        685.0535</code></pre>
 <li>How do coefficient estimates change?</li>
 </ul>
 <p><strong>Economic interpretation:</strong> If adding 5 more variables only modestly improves fit, the simple model may be preferred (parsimony principle).</p>
-<div id="912c8577" class="cell" data-execution_count="11">
+<div id="687c377b" class="cell" data-execution_count="11">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb22"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Estimate simple model (size only)</span></span>
 <span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>model_simple <span class="op">=</span> pf.feols(<span class="st">'price ~ size'</span>, data<span class="op">=</span>data_house)</span>
 <span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -1560,7 +1560,7 @@ Adj R² decreases from 0.603 to 0.555</code></pre>
 <li>Unstable coefficients (small data changes → big estimate changes)</li>
 <li>Difficulty interpreting individual effects</li>
 </ul>
-<div id="645292e6" class="cell" data-execution_count="12">
+<div id="6afcda27" class="cell" data-execution_count="12">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb24"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Demonstrate perfect multicollinearity</span></span>
 <span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a><span class="co"># DEMONSTRATION: Perfect Multicollinearity</span></span>
 <span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -1603,7 +1603,7 @@ RMSE: 22706.95 R2: 0.618 </code></pre>
 <section id="variance-inflation-factors-vif" class="level3">
 <h3 class="anchored" data-anchor-id="variance-inflation-factors-vif">Variance Inflation Factors (VIF)</h3>
 <p>Now let’s calculate VIF for each variable in our full model to check for multicollinearity problems.</p>
-<div id="461e4e45" class="cell" data-execution_count="13">
+<div id="af73054c" class="cell" data-execution_count="13">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb26"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Calculate VIF for each variable in the full model</span></span>
 <span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> statsmodels.stats.outliers_influence <span class="im">import</span> variance_inflation_factor</span>
 <span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -1644,7 +1644,7 @@ Good: Maximum VIF = 1.73 - no serious multicollinearity detected.</code></pre>
 <section id="visualization-actual-vs.-predicted-values" class="level3">
 <h3 class="anchored" data-anchor-id="visualization-actual-vs.-predicted-values">Visualization: Actual vs.&nbsp;Predicted Values</h3>
 <p>A plot of actual vs.&nbsp;predicted values helps visualize model fit. Points close to the 45-degree line indicate accurate predictions.</p>
-<div id="d37f2bc3" class="cell" data-execution_count="14">
+<div id="275f1050" class="cell" data-execution_count="14">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb28"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Create actual vs predicted plot</span></span>
 <span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="dv">10</span>, <span class="dv">6</span>))</span>
 <span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a>ax.scatter(data_house[<span class="st">'price'</span>], model_full.predict(), alpha<span class="op">=</span><span class="fl">0.6</span>, s<span class="op">=</span><span class="dv">50</span>, color<span class="op">=</span><span class="st">'#22d3ee'</span>)  <span class="co"># alpha = transparency, s = marker size</span></span>
@@ -1686,7 +1686,7 @@ Good: Maximum VIF = 1.73 - no serious multicollinearity detected.</code></pre>
 <li><strong>Patterns (curves, funnels):</strong> Bad (model misspecification or heteroskedasticity)</li>
 <li><strong>Outliers:</strong> Investigate unusual observations</li>
 </ul>
-<div id="a6431806" class="cell" data-execution_count="15">
+<div id="bbe05eda" class="cell" data-execution_count="15">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb30"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Create residual plot</span></span>
 <span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="dv">10</span>, <span class="dv">6</span>))</span>
 <span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a>ax.scatter(model_full.predict(), model_full._u_hat, alpha<span class="op">=</span><span class="fl">0.6</span>, s<span class="op">=</span><span class="dv">50</span>, color<span class="op">=</span><span class="st">'#22d3ee'</span>)  <span class="co"># alpha = transparency, s = marker size</span></span>
@@ -1726,7 +1726,7 @@ Good: Maximum VIF = 1.73 - no serious multicollinearity detected.</code></pre>
 <li>Relative magnitude of effects</li>
 <li>Precision of estimates (narrow vs.&nbsp;wide CIs)</li>
 </ul>
-<div id="73cd52d1" class="cell" data-execution_count="16">
+<div id="e51647a7" class="cell" data-execution_count="16">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb32"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Create coefficient plot with confidence intervals</span></span>
 <span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="dv">10</span>, <span class="dv">8</span>))</span>
 <span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -1800,7 +1800,7 @@ Good: Maximum VIF = 1.73 - no serious multicollinearity detected.</code></pre>
 </ul>
 <p><strong>Information Criteria:</strong></p>
 <ul>
-<li>AIC, BIC, and HQIC penalize larger models more heavily than adjusted <span class="math inline">\(R^2\)</span></li>
+<li>AIC and BIC penalize larger models more heavily than adjusted <span class="math inline">\(R^2\)</span></li>
 <li>Smaller values indicate better models</li>
 <li>BIC is generally preferred (stronger complexity penalty than AIC)</li>
 </ul>
@@ -2083,7 +2083,7 @@ Good: Maximum VIF = 1.73 - no serious multicollinearity detected.</code></pre>
 </ul></li>
 </ul>
 <p><strong>Research question:</strong> How do human capital and physical capital jointly explain cross-country productivity differences?</p>
-<div id="95086dbd" class="cell" data-execution_count="17">
+<div id="a2e60b1a" class="cell" data-execution_count="17">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb35"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Load the Mendez convergence clubs dataset</span></span>
 <span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a>url <span class="op">=</span> <span class="st">"https://raw.githubusercontent.com/quarcs-lab/mendez2020-convergence-clubs-code-data/master/assets/dat.csv"</span></span>
 <span id="cb35-3"><a href="#cb35-3" aria-hidden="true" tabindex="-1"></a>dat <span class="op">=</span> pd.read_csv(url)</span>
@@ -2386,7 +2386,7 @@ Good: Maximum VIF = 1.73 - no serious multicollinearity detected.</code></pre>
 <section id="load-the-ds4bolivia-data" class="level4">
 <h4 class="anchored" data-anchor-id="load-the-ds4bolivia-data">Load the DS4Bolivia Data</h4>
 <p>Let’s load the DS4Bolivia dataset and select the variables needed for our multiple regression analysis. We focus on the development index, nighttime lights, and five selected satellite embedding dimensions.</p>
-<div id="6c3aa8f2" class="cell" data-execution_count="18">
+<div id="cdfb0a32" class="cell" data-execution_count="18">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb41"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Load the DS4Bolivia dataset</span></span>
 <span id="cb41-2"><a href="#cb41-2" aria-hidden="true" tabindex="-1"></a>url_bol <span class="op">=</span> <span class="st">"https://raw.githubusercontent.com/quarcs-lab/ds4bolivia/master/ds4bolivia_v20250523.csv"</span></span>
 <span id="cb41-3"><a href="#cb41-3" aria-hidden="true" tabindex="-1"></a>bol <span class="op">=</span> pd.read_csv(url_bol)</span>
@@ -2435,7 +2435,7 @@ Villa de Sacaca     Potosí 42.200001     12.586779 -0.145689 0.140690 0.134057 
 <li>Consider: What are satellite embeddings? How do they differ from NTL?</li>
 </ol>
 <p><strong>Key insight</strong>: Unlike NTL (which has a clear physical interpretation — light intensity), embedding dimensions are <strong>abstract features</strong> extracted by neural networks. Dimension <code>A00</code> doesn’t mean “vegetation” or “roads” — it captures a learned combination of visual patterns.</p>
-<div id="29ffcb12" class="cell" data-execution_count="19">
+<div id="d82fecf2" class="cell" data-execution_count="19">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb43"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Your code here: Explore the satellite predictor variables</span></span>
 <span id="cb43-2"><a href="#cb43-2" aria-hidden="true" tabindex="-1"></a><span class="co">#</span></span>
 <span id="cb43-3"><a href="#cb43-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Step 1: Summary statistics for all numeric variables</span></span>
@@ -2493,7 +2493,7 @@ dtype: int64
 <li>Do the embeddings correlate with NTL, or do they capture different information?</li>
 </ol>
 <p><strong>Apply what you learned in section 10.3</strong>: Use <code>seaborn.heatmap()</code> with annotated correlation values.</p>
-<div id="be1072e3" class="cell" data-execution_count="20">
+<div id="ad5dd394" class="cell" data-execution_count="20">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb45"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Your code here: Correlation analysis of satellite predictors</span></span>
 <span id="cb45-2"><a href="#cb45-2" aria-hidden="true" tabindex="-1"></a><span class="co">#</span></span>
 <span id="cb45-3"><a href="#cb45-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Step 1: Compute correlation matrix</span></span>
@@ -2560,7 +2560,7 @@ A40          -0.077         0.098 -0.690  0.715  0.743  0.086  1.000</code></pre
 <li>Which embedding coefficients are statistically significant?</li>
 </ol>
 <p><strong>Apply what you learned in section 10.4</strong>: Use <code>pf.feols()</code> from pyfixest and interpret partial effects.</p>
-<div id="3dd88f96" class="cell" data-execution_count="21">
+<div id="03f61763" class="cell" data-execution_count="21">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb48"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb48-1"><a href="#cb48-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Your code here: Multiple regression with satellite predictors</span></span>
 <span id="cb48-2"><a href="#cb48-2" aria-hidden="true" tabindex="-1"></a><span class="co">#</span></span>
 <span id="cb48-3"><a href="#cb48-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Step 1: Prepare data (drop missing values)</span></span>
@@ -2634,7 +2634,7 @@ Improvement:        ΔR² = 0.0851</code></pre>
 <li>Verify that the coefficient matches the NTL coefficient from the full multiple regression</li>
 </ol>
 <p><strong>Apply what you learned in section 10.5</strong>: This demonstrates that the partial effect of NTL is computed from the variation in NTL that is <em>independent</em> of the satellite embeddings.</p>
-<div id="da6ef324" class="cell" data-execution_count="22">
+<div id="216c7642" class="cell" data-execution_count="22">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb50"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb50-1"><a href="#cb50-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Your code here: FWL theorem demonstration</span></span>
 <span id="cb50-2"><a href="#cb50-2" aria-hidden="true" tabindex="-1"></a><span class="co">#</span></span>
 <span id="cb50-3"><a href="#cb50-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Step 1: Regress imds on embeddings only, save residuals e_y</span></span>
@@ -2679,7 +2679,7 @@ Difference (numerical precision):                0.000000000000190</code></pre>
 <li>Does the parsimony principle favor fewer or more embedding variables?</li>
 </ol>
 <p><em>Hint: Use <code>pd.DataFrame()</code> to create a clean comparison table.</em></p>
-<div id="0386dd18" class="cell" data-execution_count="23">
+<div id="a36b5d15" class="cell" data-execution_count="23">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb52"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb52-1"><a href="#cb52-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Your code here: Model comparison</span></span>
 <span id="cb52-2"><a href="#cb52-2" aria-hidden="true" tabindex="-1"></a><span class="co">#</span></span>
 <span id="cb52-3"><a href="#cb52-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Step 1: Estimate three models</span></span>
@@ -2721,7 +2721,7 @@ Difference (numerical precision):                0.000000000000190</code></pre>
 <li><strong>Limitations</strong>: What can satellite data <em>not</em> capture about development? What are the risks of relying on abstract embedding features for policy decisions?</li>
 </ol>
 <p><strong>Connection to Research</strong>: The DS4Bolivia project uses all 64 embedding dimensions plus machine learning methods (Random Forest, XGBoost) to predict SDG indicators, achieving meaningful predictive accuracy. Your multiple regression analysis provides a transparent, interpretable baseline for comparison.</p>
-<div id="331874cd" class="cell" data-execution_count="24">
+<div id="7ddf3a6f" class="cell" data-execution_count="24">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb53"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb53-1"><a href="#cb53-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Your code here: Additional analysis for the policy brief</span></span>
 <span id="cb53-2"><a href="#cb53-2" aria-hidden="true" tabindex="-1"></a><span class="co">#</span></span>
 <span id="cb53-3"><a href="#cb53-3" aria-hidden="true" tabindex="-1"></a><span class="co"># You might want to:</span></span>
@@ -3372,7 +3372,7 @@ Difference (numerical precision):                0.000000000000190</code></pre>
 <span id="cb54-125"><a href="#cb54-125" aria-hidden="true" tabindex="-1"></a>::::</span>
 <span id="cb54-126"><a href="#cb54-126" aria-hidden="true" tabindex="-1"></a>:::::</span>
 <span id="cb54-127"><a href="#cb54-127" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb54-128"><a href="#cb54-128" aria-hidden="true" tabindex="-1"></a>**Adjusted $R^2$:** A version of $R^2$ that penalises for the number of regressors: $\bar{R}^2 = 1 - \frac{\text{RSS}/(n-k)}{\text{TSS}/(n-1)}$. Adding a useless variable always raises plain $R^2$ but typically lowers $\bar{R}^2$ — making it the better fit metric when comparing models of different sizes.</span>
+<span id="cb54-128"><a href="#cb54-128" aria-hidden="true" tabindex="-1"></a>**Adjusted $R^2$:** A version of $R^2$ that penalises for the number of regressors: $\bar{R}^2 = 1 - \frac{\text{RSS}/(n-k)}{\text{TSS}/(n-1)}$. Adding a useless variable never decreases plain $R^2$ but typically lowers $\bar{R}^2$ — making it the better fit metric when comparing models of different sizes.</span>
 <span id="cb54-129"><a href="#cb54-129" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb54-130"><a href="#cb54-130" aria-hidden="true" tabindex="-1"></a>::::: {.columns}</span>
 <span id="cb54-131"><a href="#cb54-131" aria-hidden="true" tabindex="-1"></a>:::: {.column width="50%"}</span>
@@ -3392,7 +3392,7 @@ Difference (numerical precision):                0.000000000000190</code></pre>
 <span id="cb54-145"><a href="#cb54-145" aria-hidden="true" tabindex="-1"></a>::::: {.columns}</span>
 <span id="cb54-146"><a href="#cb54-146" aria-hidden="true" tabindex="-1"></a>:::: {.column width="50%"}</span>
 <span id="cb54-147"><a href="#cb54-147" aria-hidden="true" tabindex="-1"></a>::: {.callout-tip collapse="true" appearance="simple" title="Example"}</span>
-<span id="cb54-148"><a href="#cb54-148" aria-hidden="true" tabindex="-1"></a>The chapter constructs <span class="in">`size_twice = 2 × size`</span> and tries to estimate <span class="in">`price ~ size + size_twice + bedrooms`</span>. Because <span class="in">`size_twice`</span> adds *no* new information beyond <span class="in">`size`</span>, the regression is inestimable: the software silently drops one of the two collinear variables and reports the rest. In contrast, the actual six predictors in the Davis dataset show only moderate VIFs, so all six can be estimated jointly.</span>
+<span id="cb54-148"><a href="#cb54-148" aria-hidden="true" tabindex="-1"></a>The chapter constructs <span class="in">`size_twice = 2 × size`</span> and tries to estimate <span class="in">`price ~ size + size_twice + bedrooms`</span>. Because <span class="in">`size_twice`</span> adds *no* new information beyond <span class="in">`size`</span>, the regression is inestimable: the software drops one of the two collinear variables (pyfixest prints a warning naming it) and reports the rest. In contrast, the actual six predictors in the Davis dataset show only moderate VIFs, so all six can be estimated jointly.</span>
 <span id="cb54-149"><a href="#cb54-149" aria-hidden="true" tabindex="-1"></a>:::</span>
 <span id="cb54-150"><a href="#cb54-150" aria-hidden="true" tabindex="-1"></a>::::</span>
 <span id="cb54-151"><a href="#cb54-151" aria-hidden="true" tabindex="-1"></a>:::: {.column width="50%"}</span>
@@ -3514,7 +3514,7 @@ Difference (numerical precision):                0.000000000000190</code></pre>
 <span id="cb54-273"><a href="#cb54-273" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb54-274"><a href="#cb54-274" aria-hidden="true" tabindex="-1"></a><span class="at">&gt; **Key Concept 10.1: Partial Effects vs. Total Effects in Multiple Regression**</span></span>
 <span id="cb54-275"><a href="#cb54-275" aria-hidden="true" tabindex="-1"></a><span class="at">&gt;</span></span>
-<span id="cb54-276"><a href="#cb54-276" aria-hidden="true" tabindex="-1"></a><span class="at">&gt; In bivariate regression, the bedrooms coefficient (\$23,667) captures both the direct effect of bedrooms and the indirect effect through correlation with size. In multiple regression, the bedrooms coefficient drops to \$1,553 — the **partial effect** holding size constant — and is no longer statistically significant ($t = 0.20$, $p = 0.85$). This dramatic change illustrates why controlling for confounders is essential for isolating individual variable effects.</span></span>
+<span id="cb54-276"><a href="#cb54-276" aria-hidden="true" tabindex="-1"></a><span class="at">&gt; In bivariate regression, the bedrooms coefficient (\$23,667) captures both the direct effect of bedrooms and the indirect effect through correlation with size. In multiple regression, the bedrooms coefficient drops to \$1,553 — the **partial effect** holding size constant — and is no longer statistically significant ($t = 0.20$, $p = 0.84$). This dramatic change illustrates why controlling for confounders is essential for isolating individual variable effects.</span></span>
 <span id="cb54-277"><a href="#cb54-277" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb54-278"><a href="#cb54-278" aria-hidden="true" tabindex="-1"></a><span class="fu">## 10.2 Two-Way Scatterplots</span></span>
 <span id="cb54-279"><a href="#cb54-279" aria-hidden="true" tabindex="-1"></a></span>
@@ -3544,7 +3544,7 @@ Difference (numerical precision):                0.000000000000190</code></pre>
 <span id="cb54-305"><a href="#cb54-305" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb54-306"><a href="#cb54-306" aria-hidden="true" tabindex="-1"></a><span class="at">&gt; **Key Concept 10.2: Exploratory Data Analysis with Scatterplot Matrices**</span></span>
 <span id="cb54-307"><a href="#cb54-307" aria-hidden="true" tabindex="-1"></a><span class="at">&gt;</span></span>
-<span id="cb54-308"><a href="#cb54-308" aria-hidden="true" tabindex="-1"></a><span class="at">&gt; Pairwise scatterplot matrices display all two-way relationships simultaneously, revealing linear associations, nonlinearities, clusters, and outliers before formal modeling. They also highlight potential multicollinearity: if two regressors are tightly correlated (e.g., size and bedrooms), their individual effects may be hard to separate in a regression.</span></span>
+<span id="cb54-308"><a href="#cb54-308" aria-hidden="true" tabindex="-1"></a><span class="at">&gt; Pairwise scatterplot matrices display all two-way relationships simultaneously, revealing linear associations, nonlinearities, clusters, and outliers before formal modeling. They also highlight potential multicollinearity: if two regressors are correlated (e.g., size and bedrooms, with a moderate $r = 0.52$), their individual effects may be hard to separate in a regression.</span></span>
 <span id="cb54-309"><a href="#cb54-309" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb54-310"><a href="#cb54-310" aria-hidden="true" tabindex="-1"></a><span class="fu">## 10.3 Correlation Analysis</span></span>
 <span id="cb54-311"><a href="#cb54-311" aria-hidden="true" tabindex="-1"></a></span>
@@ -4020,7 +4020,7 @@ Difference (numerical precision):                0.000000000000190</code></pre>
 <span id="cb54-805"><a href="#cb54-805" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb54-806"><a href="#cb54-806" aria-hidden="true" tabindex="-1"></a>**Information Criteria:**</span>
 <span id="cb54-807"><a href="#cb54-807" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb54-808"><a href="#cb54-808" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>AIC, BIC, and HQIC penalize larger models more heavily than adjusted $R^2$</span>
+<span id="cb54-808"><a href="#cb54-808" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>AIC and BIC penalize larger models more heavily than adjusted $R^2$</span>
 <span id="cb54-809"><a href="#cb54-809" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Smaller values indicate better models</span>
 <span id="cb54-810"><a href="#cb54-810" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>BIC is generally preferred (stronger complexity penalty than AIC)</span>
 <span id="cb54-811"><a href="#cb54-811" aria-hidden="true" tabindex="-1"></a></span>

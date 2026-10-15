@@ -118,7 +118,7 @@ Heating bills depend on hours of furnace use — but the *cost per hour* is high
 ::::: {.columns}
 :::: {.column width="50%"}
 ::: {.callout-tip collapse="true" appearance="simple" title="Example"}
-The chapter fits `earnings ~ education + age + hours` separately on the male and female subsamples. Comparing the two female and male coefficient vectors via a Chow F-test directly answers "do men and women have *fundamentally* different earnings equations, or just a constant gap?" — and the chapter's joint F-test on all gender-interactions rejects equality, signalling that the female and male models genuinely diverge.
+The chapter fits `earnings ~ education + age + hours` separately on the male and female subsamples. A Chow test comparing the female and male coefficient vectors answers "do men and women have *fundamentally* different earnings equations, or just a constant gap?" The chapter does not run it as a separate step: the joint test on all four gender terms in the fully interacted Model 5 tests exactly the same restrictions (a heteroskedasticity-robust Chow test), and it rejects equality, signalling that the female and male models genuinely diverge.
 :::
 ::::
 :::: {.column width="50%"}
@@ -567,11 +567,11 @@ $$\text{earnings} = \begin{cases}
 
 **Key Coefficients:**
 
-1. **Gender × Education Interaction** (typically negative, around -\$1,000 to -\$2,000):
- - **Interpretation**: The return to one additional year of education is approximately **\$1,000-\$2,000 lower for women** than for men
- - Example: If $\beta_{education} = 6,000$ and $\beta_{gender \times educ} = -1,500$:
- - Males: Each year of education → +\$6,000 in earnings
- - Females: Each year of education → +\$4,500 in earnings
+1. **Gender × Education Interaction** (negative in Models 3-5, from about -\$2,100 to -\$2,800):
+ - **Interpretation**: The return to one additional year of education is approximately **\$2,100-\$2,800 lower for women** than for men
+ - Example (Model 5): $\beta_{education} \approx 6,300$ and $\beta_{gender \times educ} \approx -2,100$:
+ - Males: Each year of education → about +\$6,300 in earnings
+ - Females: Each year of education → about +\$4,200 in earnings
  - This suggests **women get lower financial returns** from education investments
 
 2. **Gender × Age and Gender × Hours**:
@@ -597,7 +597,7 @@ Notice we **cannot include all indicators plus an intercept**. In the worker typ
 
 The joint F-tests show that:
 
-- All gender effects together are **highly statistically significant** (F ≈ 20-40, p < 0.001)
+- All gender effects together are **highly statistically significant** (the printed Wald statistic is $\chi^2 \approx 32.6$ with 4 restrictions, equivalent to $F \approx 8.1$; p < 0.001)
 - Even though individual coefficients may have large standard errors (multicollinearity)
 - Gender matters for **both level and slope** of earnings relationships
 
@@ -701,7 +701,7 @@ print(f"  - Returns to age: ${fit_female.coef()['age']:,.0f} (F) vs ${fit_male.c
 print(f"  - Returns to hours: ${fit_female.coef()['hours']:,.0f} (F) vs ${fit_male.coef()['hours']:,.0f} (M)")
 ```
 
-Comparing the two subsamples shows that the returns to education and to hours are noticeably larger for men than for women (about \$6,300 vs \$4,200 per year of schooling, and about \$1,600 vs \$700 per weekly hour), while the return to age is similar across genders. This pattern — different *slopes*, not just a constant intercept gap — is exactly what a formal Chow test is designed to detect.
+Comparing the two subsamples shows that the returns to education and to hours are noticeably larger for men than for women (about \$6,300 vs \$4,200 per year of schooling, and about \$1,600 vs \$700 per weekly hour), while the return to age is similar across genders. This pattern — different *slopes*, not just a constant intercept gap — is exactly what a formal Chow test is designed to detect. We do not compute a separate Chow statistic here: the fully interacted Model 5 in Section 14.3 reproduces these separate regressions in a single equation, so its joint test on the four gender terms (Wald $\chi^2 \approx 32.6$ with 4 restrictions, i.e., $F \approx 8.1$, $p < 0.001$) is the robust version of the Chow test, and it rejects pooling.
 
 > **Key Concept 14.5: Testing for Structural Change**
 >
@@ -730,7 +730,7 @@ The coefficient of an included indicator measures the difference relative to the
 ### Three Equivalent Approaches
 
 1. **Include intercept, drop one indicator** (most common)
-2. **Drop intercept, include all indicators** (coefficients = group means)
+2. **Drop intercept, include all indicators** (coefficients = group means when there are no other regressors)
 3. **Change which indicator is dropped** (changes interpretation, not fit)
 
 ```{python}
@@ -777,12 +777,12 @@ This means one dummy is a **perfect linear combination** of the others plus the 
 **Three Equivalent Solutions:**
 
 1. **Include intercept, drop one dummy** (Standard approach)
- - Intercept = mean for the omitted (reference) category
+ - Intercept = mean for the omitted (reference) category (only without other regressors; with controls such as education and age, it is the reference group's intercept)
  - Each coefficient = difference from reference category
  - Most common and easiest to interpret
 
 2. **Drop intercept, include all dummies** (No-constant model)
- - Each coefficient = mean for that category
+ - Each coefficient = mean for that category (only without other regressors; with controls, it is that category's intercept)
  - No reference category needed
  - Useful when you want group means directly
 
@@ -796,7 +796,7 @@ This means one dummy is a **perfect linear combination** of the others plus the 
 From the three specifications above:
 
 - **R² is identical** across all specifications (≈ 0.12)
-- **Joint F-tests** give the same result (testing if worker type matters)
+- A **joint F-test** of whether worker type matters (not computed above) would give the same result in every specification, because the fit is identical
 - Only the individual coefficients change (but they measure different things)
 
 **Example Interpretation:**
@@ -969,7 +969,7 @@ plt.show()
 - The slope $a$ equals the **difference in means**: $a = \bar{y}_1 - \bar{y}_0$
 - Regression on an indicator is mathematically equivalent to a two-sample difference-in-means test
 - Regression and specialized t-tests give the same estimate but slightly different standard errors
-- Example: Women earn \$16,396 less than men on average ($t = -4.71$, highly significant)
+- Example: Women earn \$16,396 less than men on average ($t = -5.10$ with robust standard errors, highly significant)
 
 ### Indicators with Controls and Interaction Terms
 

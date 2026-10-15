@@ -125,7 +125,7 @@ Across cities, ice-cream sales and drowning deaths are tightly correlated — bu
 ::::
 :::::
 
-**Adjusted $R^2$:** A version of $R^2$ that penalises for the number of regressors: $\bar{R}^2 = 1 - \frac{\text{RSS}/(n-k)}{\text{TSS}/(n-1)}$. Adding a useless variable always raises plain $R^2$ but typically lowers $\bar{R}^2$ — making it the better fit metric when comparing models of different sizes.
+**Adjusted $R^2$:** A version of $R^2$ that penalises for the number of regressors: $\bar{R}^2 = 1 - \frac{\text{RSS}/(n-k)}{\text{TSS}/(n-1)}$. Adding a useless variable never decreases plain $R^2$ but typically lowers $\bar{R}^2$ — making it the better fit metric when comparing models of different sizes.
 
 ::::: {.columns}
 :::: {.column width="50%"}
@@ -145,7 +145,7 @@ A football league lets teams sign extra players, but charges a salary-cap penalt
 ::::: {.columns}
 :::: {.column width="50%"}
 ::: {.callout-tip collapse="true" appearance="simple" title="Example"}
-The chapter constructs `size_twice = 2 × size` and tries to estimate `price ~ size + size_twice + bedrooms`. Because `size_twice` adds *no* new information beyond `size`, the regression is inestimable: the software silently drops one of the two collinear variables and reports the rest. In contrast, the actual six predictors in the Davis dataset show only moderate VIFs, so all six can be estimated jointly.
+The chapter constructs `size_twice = 2 × size` and tries to estimate `price ~ size + size_twice + bedrooms`. Because `size_twice` adds *no* new information beyond `size`, the regression is inestimable: the software drops one of the two collinear variables (pyfixest prints a warning naming it) and reports the rest. In contrast, the actual six predictors in the Davis dataset show only moderate VIFs, so all six can be estimated jointly.
 :::
 ::::
 :::: {.column width="50%"}
@@ -265,7 +265,7 @@ print(f"Change: ${model_multiple.coef()['bedrooms'] - model_bivariate.coef()['be
 
 > **Key Concept 10.1: Partial Effects vs. Total Effects in Multiple Regression**
 >
-> In bivariate regression, the bedrooms coefficient (\$23,667) captures both the direct effect of bedrooms and the indirect effect through correlation with size. In multiple regression, the bedrooms coefficient drops to \$1,553 — the **partial effect** holding size constant — and is no longer statistically significant ($t = 0.20$, $p = 0.85$). This dramatic change illustrates why controlling for confounders is essential for isolating individual variable effects.
+> In bivariate regression, the bedrooms coefficient (\$23,667) captures both the direct effect of bedrooms and the indirect effect through correlation with size. In multiple regression, the bedrooms coefficient drops to \$1,553 — the **partial effect** holding size constant — and is no longer statistically significant ($t = 0.20$, $p = 0.84$). This dramatic change illustrates why controlling for confounders is essential for isolating individual variable effects.
 
 ## 10.2 Two-Way Scatterplots
 
@@ -295,7 +295,7 @@ print("Notice: Price shows strongest relationship with Size.")
 
 > **Key Concept 10.2: Exploratory Data Analysis with Scatterplot Matrices**
 >
-> Pairwise scatterplot matrices display all two-way relationships simultaneously, revealing linear associations, nonlinearities, clusters, and outliers before formal modeling. They also highlight potential multicollinearity: if two regressors are tightly correlated (e.g., size and bedrooms), their individual effects may be hard to separate in a regression.
+> Pairwise scatterplot matrices display all two-way relationships simultaneously, revealing linear associations, nonlinearities, clusters, and outliers before formal modeling. They also highlight potential multicollinearity: if two regressors are correlated (e.g., size and bedrooms, with a moderate $r = 0.52$), their individual effects may be hard to separate in a regression.
 
 ## 10.3 Correlation Analysis
 
@@ -771,7 +771,7 @@ print("Coefficients whose CI crosses zero are not statistically significant.")
 
 **Information Criteria:**
 
-- AIC, BIC, and HQIC penalize larger models more heavily than adjusted $R^2$
+- AIC and BIC penalize larger models more heavily than adjusted $R^2$
 - Smaller values indicate better models
 - BIC is generally preferred (stronger complexity penalty than AIC)
 

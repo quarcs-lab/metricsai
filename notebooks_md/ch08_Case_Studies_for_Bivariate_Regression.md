@@ -386,7 +386,7 @@ The R² suggests health spending explains only about 14% of variation in infant 
 
 > **Key Concept 8.2: Robust Standard Errors**
 >
-> Heteroskedasticity-robust standard errors adjust for non-constant error variance across observations. Cross-sectional data often exhibits heteroskedasticity (e.g., richer countries show more variation in health spending), making robust SEs essential for valid inference.
+> Heteroskedasticity-robust standard errors adjust for non-constant error variance across observations. Cross-sectional data often exhibits heteroskedasticity (e.g., in the infant mortality regression above, the scatter around the fitted line is wider among low-spending countries than among high-spending ones), making robust SEs essential for valid inference.
 
 ### Visualization: Infant Mortality vs Health Spending
 
@@ -493,7 +493,7 @@ Notice how robust standard errors differ substantially from default standard err
 **The Outlier Problem:**
 Two countries drive much of the relationship:
 
-1. **Luxembourg** (GDP: \$82,901, Health: \$4,786) - extremely wealthy, high spending
+1. **Luxembourg** (GDP: \$82,901, Health: \$4,786) - extremely wealthy, but spends about \$2,950 less than the fitted line predicts for its GDP
 2. **United States** (GDP: \$45,192, Health: \$7,990) - exceptionally high health spending for its GDP level
 
 These outliers suggest the relationship may not be stable across all countries.
@@ -523,7 +523,7 @@ ax.grid(True, alpha=0.3)
 plt.tight_layout()
 plt.show()
 
-# The U.S. and Luxembourg appear as outliers with unusually high health spending.
+# The U.S. (far above the line) and Luxembourg (far below it) appear as outliers.
 ```
 
 ### Robustness Check: Excluding USA and Luxembourg
@@ -570,7 +570,7 @@ The comparison reveals how sensitive regression results can be to outliers:
 | Metric | Full Sample | Excluding USA & LUX | Change |
 |--------|-------------|---------------------|--------|
 | Slope | ~0.09 | ~0.13 | +41% |
-| R² | ~0.60 | ~0.93 | +55% |
+| R² | ~0.60 | ~0.93 | +54% |
 | Interpretation | Weak fit | Excellent fit | Transformed |
 
 **What This Tells Us:**
@@ -643,8 +643,8 @@ $$R_A - R_F = \alpha_A + \beta_A (R_M - R_F) + u$$
 **Interpretation:**
 
 - $\beta_A$ = systematic risk (average across market is 1.0)
-  - $\beta > 1$: Stock is riskier than market (growth stock)
-  - $\beta < 1$: Stock is less risky (value stock)
+  - $\beta > 1$: Stock has more systematic risk than the market (growth stock)
+  - $\beta < 1$: Stock has less systematic risk (value stock)
   - $\beta \approx 0$: Stock moves independently of market
 - $\alpha_A$ = excess return ("alpha") after adjusting for risk
   - Pure CAPM theory predicts $\alpha = 0$
@@ -753,7 +753,7 @@ The estimated beta of 0.61 reveals Coca-Cola's risk profile:
 
 2. **Why is Coca-Cola low-beta?**
    - Stable demand for consumer staples (people drink Coke in good times and bad)
-   - Strong brand loyalty reduces volatility
+   - Strong brand loyalty reduces sensitivity to market swings
    - Diversified global operations
    - Predictable cash flows
    - Less sensitive to economic cycles than growth stocks
@@ -776,13 +776,13 @@ The estimated alpha of 0.0068 (0.68% per month, or ~8.2% annually) is statistica
 
 **Investment Implications:**
 
-- Coca-Cola is suitable for conservative portfolios seeking market exposure with lower volatility
+- Coca-Cola is suitable for conservative portfolios seeking market exposure with lower market sensitivity
 - The low beta means lower expected returns in bull markets, but better downside protection in bear markets
 - Institutional investors often use low-beta stocks to reduce portfolio risk while maintaining equity exposure
 
 > **Key Concept 8.5: Systematic Risk and Beta**
 >
-> Systematic risk (beta) measures how an asset's returns co-move with the overall market. Beta < 1 indicates a "defensive" stock (less volatile than market), while beta > 1 indicates a "growth" stock (amplifies market movements). Only systematic risk is priced in efficient markets.
+> Systematic risk (beta) measures how an asset's returns co-move with the overall market. Beta < 1 indicates a "defensive" stock (moves less than one-for-one with the market), while beta > 1 indicates a "growth" stock (amplifies market movements). Beta is not total volatility: Coca-Cola's returns have a larger standard deviation than the market's, yet its beta is below 1. Only systematic risk is priced in efficient markets.
 
 ### Visualization: CAPM Scatter Plot
 
@@ -1005,7 +1005,7 @@ plt.show()
 
 2. **Clustering around the origin:** Most observations lie near the center, representing normal economic times with modest changes in both unemployment and GDP. This is typical of stable economic periods.
 
-3. **Outliers reveal recessions:** Points in the upper-left quadrant represent major recessions:
+3. **Outliers reveal recessions:** Points in the lower-right quadrant represent major recessions:
    - **2009**: Unemployment rose ~3.5 percentage points, GDP fell ~2.5%
    - **1982**: Unemployment rose ~2.1 points, GDP fell ~1.8%
    - **2020**: (if included) would show extreme values from COVID-19 pandemic
@@ -1117,7 +1117,7 @@ This type of time series plot is more informative than just reporting R² becaus
 - Health spending and life expectancy: +$1,000 spending → +1.11 years life expectancy
 - Health spending and infant mortality: +$1,000 spending → -0.69 infant deaths per 1,000 births
 - GDP and health spending: +$1,000 GDP → +$90 health expenditures (elasticity ≈ 0.9)
-- CAPM beta for Coca-Cola: 0.61 (defensive stock, less risky than market)
+- CAPM beta for Coca-Cola: 0.61 (defensive stock, less systematic risk than market)
 - Okun's Law: +1 percentage point unemployment → -1.59 percentage points GDP growth
 
 **Statistical Methods Applied:**
@@ -1132,7 +1132,7 @@ This type of time series plot is more informative than just reporting R² becaus
 **Key Economic Insights:**
 
 - U.S. health outcomes worse than predicted by spending levels
-- USA and Luxembourg are outliers with exceptionally high health spending
+- USA and Luxembourg are outliers: the USA spends far more than its GDP predicts, Luxembourg far less
 - Excluding outliers transforms health-GDP relationship (R² 0.60 → 0.93)
 - Coca-Cola's low beta reflects stable consumer demand across business cycles
 - Okun's Law coefficient (-1.59) close to original -2.0 but statistically different
