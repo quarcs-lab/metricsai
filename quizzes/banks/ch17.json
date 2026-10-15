@@ -1,0 +1,775 @@
+{
+  "meta": {
+    "chapter": "17",
+    "chapter_title": "Panel Data, Time Series Data, Causation",
+    "book_title": "metricsAI: An Introduction to Econometrics with Python and AI in the Cloud",
+    "minutes": 45,
+    "pass_pct": 80,
+    "n_items": 30
+  },
+  "practice": [
+    {
+      "id": "P01",
+      "type": "single",
+      "concept": "Panel data structure (Section 17.2)",
+      "stem": "Which of these data sets is panel data in the sense of Section 17.2?",
+      "options": [
+        {"text": "A survey of 2,000 households in 2018 and a new random sample of 2,000 different households in 2022.", "correct": false, "feedback": "New households are drawn each time, so no household is followed over time. This is a pair of cross-sections, not a panel."},
+        {"text": "Daily closing values of one stock index over 15 years.", "correct": false, "feedback": "One unit observed over many periods is a single time series; a panel needs several units observed over time."},
+        {"text": "Annual sales of the same 300 firms, recorded every year from 2010 to 2019.", "correct": true, "feedback": "Correct. The same units (firms, i) are observed in several periods (years, t)."},
+        {"text": "Test scores of 5,000 students in 120 schools, each student tested once.", "correct": false, "feedback": "Students are grouped in schools, but each is observed only once, so there is no time dimension."}
+      ],
+      "explanation": "Section 17.2: panel (longitudinal) data follow the same units i = 1, …, n over several periods t = 1, …, T, so the data vary both across units and over time."
+    },
+    {
+      "id": "P02",
+      "type": "multi",
+      "concept": "Within and between variation (Section 17.2, Key Concept 17.1)",
+      "stem": "Suppose that in a panel of 60 firms over 8 years, log revenue has an overall standard deviation of 0.50, a between (across-firm) standard deviation of 0.30, and a within (over-time) standard deviation of 0.40. Which statements are correct? (Select all that apply.)",
+      "options": [
+        {"text": "Year-to-year movements around each firm's own average are larger than the differences between the firms' averages.", "correct": true, "feedback": "Correct: the within SD (0.40) exceeds the between SD (0.30)."},
+        {"text": "The numbers must contain an error, because 0.30 + 0.40 does not equal 0.50.", "correct": false, "feedback": "The decomposition adds variances, not standard deviations, so the SDs are not expected to sum to 0.50."},
+        {"text": "The squared standard deviations add up: 0.30² + 0.40² = 0.50².", "correct": true, "feedback": "Correct: 0.09 + 0.16 = 0.25 = 0.50², so total variance = between variance + within variance here."},
+        {"text": "Persistent firm characteristics account for most of the variation in log revenue.", "correct": false, "feedback": "Persistent characteristics show up in the between part, which is the smaller one here (0.30 versus 0.40)."}
+      ],
+      "explanation": "Key Concept 17.1: total variation splits into between (differences in unit averages) and within (deviations from each unit's own average). The pieces add in variances (approximately in general): 0.30² + 0.40² = 0.50². Here within variation dominates, unlike the chapter's NBA revenue."
+    },
+    {
+      "id": "P03",
+      "type": "single",
+      "concept": "Within and between variation (Section 17.2, Key Concept 17.1)",
+      "stem": "Suppose a panel of 40 countries over 20 years includes a regulation index whose between-country standard deviation is 5.0 but whose within-country standard deviation is only 0.4. What does this imply for a fixed-effects estimate of the index's coefficient?",
+      "options": [
+        {"text": "It is likely to be imprecise, because fixed effects relies only on the small changes within each country.", "correct": true, "feedback": "Correct. Fixed effects removes each country's average, so only the within variation (SD 0.4) is left to identify the coefficient."},
+        {"text": "It will be very precise, because the index differs a great deal across countries.", "correct": false, "feedback": "The large differences across countries are exactly what the within transformation removes."},
+        {"text": "It will equal the pooled OLS estimate, because the within standard deviation is not zero.", "correct": false, "feedback": "Pooled OLS uses both between and within variation, so the two estimates generally differ."},
+        {"text": "It cannot be computed at all, because the between SD is larger than the within SD.", "correct": false, "feedback": "Fixed effects fails only when a regressor never changes within units; a within SD of 0.4 is small but not zero."}
+      ],
+      "explanation": "Key Concept 17.1 and Section 17.3: fixed effects uses only within variation. A regressor that rarely changes over time gives fixed effects little to work with, so its coefficient is estimated imprecisely."
+    },
+    {
+      "id": "P04",
+      "type": "single",
+      "concept": "Cluster-robust standard errors (Section 17.2, Key Concept 17.2)",
+      "stem": "Suppose a regression of test scores on class size uses 100 schools observed for 3 years (300 observations), and the errors are strongly correlated within each school. The effective number of independent observations is closest to which value?",
+      "options": [
+        {"text": "100, the number of schools (clusters)", "correct": true, "feedback": "Correct. With strong correlation within schools, each school adds roughly one independent piece of information, so the effective sample is close to the 100 clusters."},
+        {"text": "300, the number of school-year observations", "correct": false, "feedback": "Counting every school-year as independent is what default SEs assume; correlation within schools means the 300 observations carry less information."},
+        {"text": "3, the number of years", "correct": false, "feedback": "The errors are correlated within schools, not within years, so the schools are the roughly independent units."},
+        {"text": "33, about 100 ÷ 3", "correct": false, "feedback": "Dividing the clusters by the number of years has no basis; with strong within-school correlation, each school counts about once."}
+      ],
+      "explanation": "Practice Exercise 2(c) and Key Concept 17.2: when observations are strongly correlated within clusters, the effective number of independent observations approaches the number of clusters (G = 100 schools), not N = 300. That is why default SEs understate uncertainty."
+    },
+    {
+      "id": "P05",
+      "type": "single",
+      "concept": "Cluster-robust standard errors (Section 17.2, Key Concept 17.2)",
+      "stem": "In the class-size study of the previous item, the coefficient on class size has a default standard error of 0.15 (t = 3.33) and a cluster-robust standard error, clustered by school, of 0.45 (t = 1.11). Using a 5% critical value of about 2, which conclusion is correct?",
+      "options": [
+        {"text": "Class size is significant either way, because clustering leaves the coefficient on class size unchanged.", "correct": false, "feedback": "The coefficient is unchanged, but significance depends on t, which falls to 1.11 with the cluster-robust SE."},
+        {"text": "Class size is significant with default SEs but not with the more appropriate cluster-robust SEs.", "correct": true, "feedback": "Correct: |t| = 3.33 > 2 with default SEs, but |t| = 1.11 &lt; 2 with cluster-robust SEs, and the clustered result is the one to report."},
+        {"text": "Class size is not significant either way, because 3.33 is below the 5% critical value.", "correct": false, "feedback": "3.33 is above the critical value of about 2, so the default-SE result is significant."},
+        {"text": "The default SEs should be reported, because they give the larger t-statistic.", "correct": false, "feedback": "A larger t is not a reason to choose an SE. With errors correlated within schools, default SEs are too small."}
+      ],
+      "explanation": "Practice Exercise 2: with cluster-robust SEs, t = 0.50/0.45 = 1.11, so the apparent effect is no longer significant. Ignoring within-school correlation would have produced a false claim of significance."
+    },
+    {
+      "id": "P06",
+      "type": "tf",
+      "concept": "Cluster-robust standard errors (Section 17.2, Key Concept 17.2)",
+      "stem": "Suppose standard errors are clustered by both team and season (two-way clustering). Then the two-way standard error equals the team-clustered standard error plus the season-clustered standard error minus the standard error clustered by team-season cell.",
+      "options": [
+        {"text": "True", "correct": false, "feedback": "Section 17.2 stresses that the variance matrices combine, not the standard errors themselves."},
+        {"text": "False", "correct": true, "feedback": "Correct. The variances combine: V = V<sub>team</sub> + V<sub>time</sub> − V<sub>team×time</sub>; the two-way SE is the square root of the relevant diagonal element."}
+      ],
+      "explanation": "Section 17.2 (two-way clustering): V<sub>two-way</sub> = V<sub>team</sub> + V<sub>time</sub> − V<sub>team×time</sub>. Standard errors are square roots of variances, so they do not add and subtract this way."
+    },
+    {
+      "id": "P07",
+      "type": "single",
+      "concept": "Fixed effects estimation (Section 17.3, Key Concept 17.3)",
+      "stem": "Suppose a fixed-effects regression of log sales on advertising spending (in thousands of dollars) for 200 firms over 6 years, with firm effects, gives an advertising coefficient of 0.0020. Which interpretation is correct?",
+      "options": [
+        {"text": "A firm that spends $1,000 more on advertising than another firm has sales about 0.20% higher.", "correct": false, "feedback": "This compares different firms (between variation). With firm effects, the coefficient describes changes within the same firm."},
+        {"text": "When a firm raises its own advertising by $1,000, its sales are about 0.20% higher, other things equal.", "correct": true, "feedback": "Correct. In a log-level model, 100 × 0.0020 = 0.20% (approximately), and fixed effects compares each firm with itself."},
+        {"text": "When a firm raises its own advertising by $1,000, its sales rise by about $2.", "correct": false, "feedback": "The outcome is log sales, so the coefficient is a proportional change, not a change in dollars."},
+        {"text": "When a firm raises its own advertising by 1%, its sales rise by about 0.0020%.", "correct": false, "feedback": "Advertising enters in levels (thousands of dollars), not in logs, so this is not an elasticity."}
+      ],
+      "explanation": "Key Concept 17.3: fixed effects identifies the coefficient from within-firm changes. With a log outcome, a coefficient of 0.0020 means about a 0.20% change in sales per extra $1,000 of advertising for the same firm."
+    },
+    {
+      "id": "P08",
+      "type": "single",
+      "concept": "Fixed effects estimation (Section 17.3, Key Concept 17.3)",
+      "stem": "Suppose that in a worker panel, pooled OLS of log wage on job training gives a coefficient of 0.02, while fixed effects with worker effects gives 0.06. What does the change suggest?",
+      "options": [
+        {"text": "The fixed-effects estimate is unreliable, because it differs from the pooled estimate.", "correct": false, "feedback": "A gap between the two estimates is the signature of omitted time-invariant traits, which fixed effects controls for."},
+        {"text": "Training must lower wages, because the pooled estimate is the smaller one.", "correct": false, "feedback": "Both estimates are positive; the comparison is about bias, not about the sign of the effect."},
+        {"text": "The pooled estimate is more credible, because it uses both between and within variation.", "correct": false, "feedback": "Using more variation is not an advantage when the between variation is confounded by persistent worker traits."},
+        {"text": "Workers with persistently low earning potential were more likely to take training, which biased the pooled estimate downward.", "correct": true, "feedback": "Correct. A time-invariant trait that lowers wages and is positively related to training creates negative omitted variable bias in pooled OLS; fixed effects removes it."}
+      ],
+      "explanation": "Section 17.3: when an omitted time-invariant trait is related to the regressor, pooled OLS is biased. Here the fixed-effects estimate is larger, so the pooled estimate was biased downward."
+    },
+    {
+      "id": "P09",
+      "type": "multi",
+      "concept": "Fixed effects estimation (Section 17.3, Key Concept 17.3)",
+      "stem": "Suppose a fixed-effects regression of log output on capital for 500 manufacturing firms, 2012–2019, includes firm effects. Which factors are absorbed by the firm fixed effects? (Select all that apply.)",
+      "options": [
+        {"text": "The industry of a firm that never switches industries", "correct": true, "feedback": "Correct: a characteristic that is constant over time for a firm is part of its fixed effect."},
+        {"text": "The city of a firm's headquarters, which never moves", "correct": true, "feedback": "Correct: a location that never changes is time-invariant and is absorbed."},
+        {"text": "A new CEO hired by some of the firms in 2016", "correct": false, "feedback": "A CEO change varies over time within a firm, so the firm effect does not capture it."},
+        {"text": "A management culture that stays the same throughout the eight years", "correct": true, "feedback": "Correct: even though it is unobserved, a constant culture is part of the firm's fixed effect."},
+        {"text": "A tariff that changes each firm's input prices differently from year to year", "correct": false, "feedback": "This varies over time within firms, so it is not captured by the firm fixed effect."}
+      ],
+      "explanation": "Key Concept 17.3: firm fixed effects absorb every time-invariant firm characteristic, observed or not. Factors that change over time within a firm are not controlled for."
+    },
+    {
+      "id": "P10",
+      "type": "tf",
+      "concept": "Fixed effects estimation (Section 17.3, Key Concept 17.3)",
+      "stem": "Including a separate dummy variable for each firm (LSDV) and subtracting each firm's average from every variable (the within estimator) are two ways to compute the same fixed-effects slope estimates.",
+      "options": [
+        {"text": "True", "correct": true, "feedback": "Correct. Section 17.3 lists LSDV and the within estimator as two implementations of fixed effects; they give the same slopes."},
+        {"text": "False", "correct": false, "feedback": "Section 17.3 lists both as implementations of the same fixed-effects estimator."}
+      ],
+      "explanation": "Section 17.3: fixed effects can be computed with a dummy for each individual (LSDV) or by de-meaning each variable by its individual mean; both remove the individual effects αᵢ and give the same slope estimates."
+    },
+    {
+      "id": "P11",
+      "type": "single",
+      "concept": "Fixed effects estimation (Section 17.3, Key Concept 17.3)",
+      "stem": "Suppose a fixed-effects regression of firm log revenue reports a within R² of 0.30, and the same model estimated with a dummy for every firm (LSDV) reports R² = 0.92. Which statement is correct?",
+      "options": [
+        {"text": "The regressors explain 92% of the variation in log revenue.", "correct": false, "feedback": "Most of the 0.92 comes from the firm dummies, which capture differences between firms' averages."},
+        {"text": "The model is poor, because the regressors explain only 30% of the total variation in log revenue across firms and years.", "correct": false, "feedback": "The within R² refers to variation around each firm's own average, not to total variation."},
+        {"text": "The regressors explain 30% of the within-firm variation; the firm effects account for most of the 0.92.", "correct": true, "feedback": "Correct. The within R² measures how well the regressors explain within-firm changes; the LSDV R² also credits the firm dummies."},
+        {"text": "The 0.92 shows that the model is unbiased, while the 0.30 shows it is biased.", "correct": false, "feedback": "R² measures fit, not bias."}
+      ],
+      "explanation": "Section 17.3: fixed-effects output reports a within R² (fit to deviations from each unit's mean), which is the relevant one for fixed effects. An R² that includes the unit dummies is inflated by the between differences they absorb."
+    },
+    {
+      "id": "P12",
+      "type": "single",
+      "concept": "Random effects and the Hausman test (Section 17.4, Key Concept 17.4)",
+      "stem": "Which assumption does random effects make that fixed effects does not?",
+      "options": [
+        {"text": "The regressors do not change over time.", "correct": false, "feedback": "Neither estimator requires this; fixed effects actually needs regressors that do change over time."},
+        {"text": "The individual effects αᵢ are all equal to zero.", "correct": false, "feedback": "That is the pooled OLS model. Random effects allows αᵢ, treating it as a random draw."},
+        {"text": "The individual effects αᵢ are uncorrelated with the regressors.", "correct": true, "feedback": "Correct. Random effects requires this; fixed effects allows any correlation between αᵢ and the regressors."},
+        {"text": "The errors of the same individual are uncorrelated over time.", "correct": false, "feedback": "Random effects explicitly allows correlation within an individual through the shared αᵢ."}
+      ],
+      "explanation": "Key Concept 17.4: random effects treats αᵢ as a random draw uncorrelated with the regressors; fixed effects lets αᵢ be correlated with them."
+    },
+    {
+      "id": "P13",
+      "type": "single",
+      "concept": "Random effects and the Hausman test (Section 17.4, Key Concept 17.4)",
+      "stem": "Suppose a Hausman test in a wage panel of 500 workers over 10 years gives χ² = 25.4 with 3 degrees of freedom (p &lt; 0.001). What should you conclude?",
+      "options": [
+        {"text": "Fail to reject, and use random effects because it is more efficient.", "correct": false, "feedback": "With p &lt; 0.001 the null is rejected, not retained."},
+        {"text": "Reject the null that the individual effects are uncorrelated with the regressors, and use fixed effects.", "correct": true, "feedback": "Correct. A significant gap between the FE and RE estimates means RE is inconsistent; FE remains consistent."},
+        {"text": "Reject the null, and use random effects because it uses both within and between variation.", "correct": false, "feedback": "Rejection means the RE assumption fails, so RE is inconsistent however much variation it uses."},
+        {"text": "Use pooled OLS, because the test shows that neither fixed nor random effects is consistent.", "correct": false, "feedback": "Fixed effects is consistent under both the null and the alternative; pooled OLS is biased when αᵢ is correlated with the regressors."}
+      ],
+      "explanation": "Practice Exercise 3 and Key Concept 17.4: H₀: αᵢ uncorrelated with the regressors (RE consistent and efficient); Hₐ: correlated (only FE consistent). A small p-value rejects H₀, so fixed effects is preferred. Unobserved ability is a typical reason in wage equations."
+    },
+    {
+      "id": "P14",
+      "type": "tf",
+      "concept": "Random effects and the Hausman test (Section 17.4, Key Concept 17.4)",
+      "stem": "The Hausman test compares fixed-effects and random-effects estimates of the same coefficients, and a large, statistically significant difference between them points to fixed effects.",
+      "options": [
+        {"text": "True", "correct": true, "feedback": "Correct. A significant difference indicates that the random-effects assumption fails, so fixed effects is preferred."},
+        {"text": "False", "correct": false, "feedback": "Revisit what the Hausman test compares and how a significant result is read (Key Concept 17.4)."}
+      ],
+      "explanation": "Key Concept 17.4: under H₀ both estimators are consistent and should be close; a significant difference indicates that αᵢ is correlated with the regressors, so random effects is inconsistent and fixed effects should be used."
+    },
+    {
+      "id": "P15",
+      "type": "single",
+      "concept": "Logit model and marginal effects (Section 17.4)",
+      "stem": "Suppose a logit model of home ownership gives a coefficient of 0.50 on income (in tens of thousands of dollars), and a household's predicted probability of owning is 0.40. What is the marginal effect of income on the probability for this household?",
+      "options": [
+        {"text": "About 0.50", "correct": false, "feedback": "0.50 is the logit coefficient. In a logit, the coefficient is not the change in probability."},
+        {"text": "About 0.30", "correct": false, "feedback": "This is (1 − p̂) × β = 0.60 × 0.50; the marginal effect also multiplies by p̂."},
+        {"text": "About 0.24", "correct": false, "feedback": "This is p̂(1 − p̂) = 0.40 × 0.60 without the coefficient."},
+        {"text": "About 0.12", "correct": true, "feedback": "Correct: p̂(1 − p̂)β = 0.40 × 0.60 × 0.50 = 0.12, so about 12 percentage points per $10,000 of income."}
+      ],
+      "explanation": "Section 17.4: in a logit, ME = p̂(1 − p̂)β. Here 0.40 × 0.60 × 0.50 = 0.12."
+    },
+    {
+      "id": "P16",
+      "type": "single",
+      "concept": "Logit model and marginal effects (Section 17.4)",
+      "stem": "Suppose a linear probability model (OLS on a 0/1 outcome) of loan approval predicts a probability of 1.15 for an applicant with a very high income. What does this show?",
+      "options": [
+        {"text": "The applicant is certain to be approved, with room to spare.", "correct": false, "feedback": "A probability cannot exceed 1; the value signals a limitation of the model, not extra certainty."},
+        {"text": "The model contains a coding error, because OLS cannot produce such values.", "correct": false, "feedback": "OLS fits a straight line, which can produce such values without any error."},
+        {"text": "A straight-line model can predict outside [0, 1]; a logit keeps its predictions inside that range.", "correct": true, "feedback": "Correct. OLS on a 0/1 outcome has no bounds, whereas the logit's predictions are always probabilities."},
+        {"text": "A logit model with the same regressors would predict 1.15 as well, since both models use the same x′β.", "correct": false, "feedback": "A logit always returns a probability, so no applicant can get a prediction of 1.15."}
+      ],
+      "explanation": "Section 17.4: OLS on a 0/1 outcome is unbounded, so a value such as 1.15 is possible from a linear probability model but not from a logit."
+    },
+    {
+      "id": "P17",
+      "type": "tf",
+      "concept": "Logit model and marginal effects (Section 17.4)",
+      "stem": "In a logit model, the marginal effect of a regressor on the probability is largest for observations whose predicted probability is near 0.5.",
+      "options": [
+        {"text": "True", "correct": true, "feedback": "Correct. ME = p̂(1 − p̂)β, and p̂(1 − p̂) is largest (0.25) at p̂ = 0.5."},
+        {"text": "False", "correct": false, "feedback": "Revisit how the marginal effect depends on the predicted probability (Section 17.4)."}
+      ],
+      "explanation": "Section 17.4: ME = p̂(1 − p̂)β. The factor p̂(1 − p̂) peaks at p̂ = 0.5, so the S-curve is steepest there and flattens toward 0 and 1."
+    },
+    {
+      "id": "P18",
+      "type": "single",
+      "concept": "Time series data and stationarity (Section 17.5, Key Concept 17.5)",
+      "stem": "Suppose a regression of a country's GDP on its number of mobile phone subscriptions over 30 years gives R² = 0.97 and a highly significant slope. What is the best way to check whether the relationship is real?",
+      "options": [
+        {"text": "Regress the year-to-year change in GDP on the change in subscriptions.", "correct": true, "feedback": "Correct. Differencing removes the common upward trends, so the regression asks whether changes in the two series move together."},
+        {"text": "Add more years so that the R² rises even closer to 1.", "correct": false, "feedback": "More years of two trending series only reinforce the shared trend; a higher R² is not evidence of a real relationship."},
+        {"text": "Switch to a logit model, because the slope is too large for a linear model.", "correct": false, "feedback": "A logit is for 0/1 outcomes. The problem here is that both series trend, not the size of the slope."},
+        {"text": "Keep the levels regression, because a significant slope rules out a spurious result.", "correct": false, "feedback": "Two trending series can give a significant slope even when they are unrelated; significance does not rule out a spurious regression."}
+      ],
+      "explanation": "Key Concept 17.5 and Practice Exercise 5: GDP and phone subscriptions both trend upward, so the levels regression may be spurious. First differencing (or detrending, or a cointegration analysis) checks whether the relationship holds beyond the shared trends."
+    },
+    {
+      "id": "P19",
+      "type": "multi",
+      "concept": "Time series data and stationarity (Section 17.5, Key Concept 17.5)",
+      "stem": "Which of these series are likely to be non-stationary in the sense of Key Concept 17.5? (Select all that apply.)",
+      "options": [
+        {"text": "Monthly changes in an exchange rate that fluctuate around zero with a stable spread", "correct": false, "feedback": "A series that moves around a constant mean with stable variance looks stationary."},
+        {"text": "A country's real GDP per capita from 1960 to 2020", "correct": true, "feedback": "Correct: GDP per capita trends upward, so its mean changes over time."},
+        {"text": "The consumer price index from 1980 to 2020", "correct": true, "feedback": "Correct: the price level keeps rising, so it is trending and non-stationary."},
+        {"text": "The results of rolling a fair die once a day for a year", "correct": false, "feedback": "Independent draws from the same distribution have a constant mean and variance: a stationary series."}
+      ],
+      "explanation": "Key Concept 17.5: a stationary series has constant mean, variance, and autocorrelation over time. Trending levels (GDP per capita, prices) are typical non-stationary series; their changes are often closer to stationary."
+    },
+    {
+      "id": "P20",
+      "type": "single",
+      "concept": "Autocorrelation and the correlogram (Section 17.6, Key Concept 17.6)",
+      "stem": "Suppose the residuals of a time-series regression have a lag-1 autocorrelation of 0.30 and autocorrelations between −0.06 and 0.06 at lags 2 through 10. What does this pattern suggest?",
+      "options": [
+        {"text": "Severe persistence, like the slowly decaying pattern of a non-stationary series", "correct": false, "feedback": "Slow decay would keep the autocorrelations high for many lags; here they vanish after lag 1."},
+        {"text": "No autocorrelation at all, since most of the lags are close to zero", "correct": false, "feedback": "A lag-1 value of 0.30 is meaningful serial correlation, even though higher lags are near zero."},
+        {"text": "A 30% chance that each residual equals the previous one", "correct": false, "feedback": "An autocorrelation is a correlation coefficient, not a probability."},
+        {"text": "Mild first-order autocorrelation that dies out quickly after one lag", "correct": true, "feedback": "Correct. Only the first lag is noticeably different from zero."}
+      ],
+      "explanation": "Section 17.6: the correlogram shows how residual autocorrelation behaves across lags. A modest first lag that drops to near zero indicates short-lived dependence, unlike the slow decay that signals non-stationarity."
+    },
+    {
+      "id": "P21",
+      "type": "single",
+      "concept": "HAC (Newey–West) standard errors (Sections 17.5 and 17.6, Key Concept 17.6)",
+      "stem": "Suppose a time-series regression gives a slope of 0.40, with a default standard error of 0.05 and a HAC (Newey–West) standard error of 0.20. What is the t-statistic based on the HAC standard error?",
+      "options": [
+        {"text": "8.0", "correct": false, "feedback": "This uses the default SE (0.40/0.05). The HAC t-statistic uses the HAC SE."},
+        {"text": "2.0", "correct": true, "feedback": "Correct: t = 0.40/0.20 = 2.0."},
+        {"text": "0.5", "correct": false, "feedback": "This divides the SE by the coefficient. t = coefficient ÷ SE."},
+        {"text": "4.0", "correct": false, "feedback": "This is the ratio of the two SEs (0.20/0.05), not a t-statistic."}
+      ],
+      "explanation": "Section 17.5: HAC SEs replace default SEs when errors are autocorrelated. The coefficient is unchanged; t = 0.40/0.20 = 2.0, a quarter of the default t of 8.0."
+    },
+    {
+      "id": "P22",
+      "type": "tf",
+      "concept": "HAC (Newey–West) standard errors (Sections 17.5 and 17.6, Key Concept 17.6)",
+      "stem": "HAC (Newey–West) standard errors correct only for heteroskedasticity, so they are not suitable when the errors are autocorrelated.",
+      "options": [
+        {"text": "True", "correct": false, "feedback": "HAC stands for heteroskedasticity- and autocorrelation-consistent (Section 17.5)."},
+        {"text": "False", "correct": true, "feedback": "Correct. HAC SEs are designed for both heteroskedasticity and autocorrelation, which is why they suit time series."}
+      ],
+      "explanation": "Section 17.5: HAC (Newey–West) standard errors are heteroskedasticity- and autocorrelation-consistent, giving valid inference when time-series errors are serially correlated."
+    },
+    {
+      "id": "P23",
+      "type": "single",
+      "concept": "First differencing (Section 17.6, Key Concept 17.7)",
+      "stem": "Suppose a quarterly regression in first differences gives Δunemployment = 0.05 − 0.40 × ΔGDPgrowth, with both variables in percentage points. Which interpretation of −0.40 is correct?",
+      "options": [
+        {"text": "When GDP growth rises by 1 percentage point between quarters, the unemployment rate tends to fall by 0.40 points.", "correct": true, "feedback": "Correct. In a regression in changes, the slope links a change in x to the change in y in the same period."},
+        {"text": "A country whose GDP growth rate is 1 percentage point higher than another's has an unemployment rate 0.40 points lower.", "correct": false, "feedback": "This is a levels comparison. The regression is in changes, so it links changes over time."},
+        {"text": "When GDP growth rises by 1 percentage point, unemployment falls by 0.40%, a relative change.", "correct": false, "feedback": "Both variables are in percentage points, so the slope is in percentage points, not percent."},
+        {"text": "The unemployment rate falls by 0.40 percentage points every quarter.", "correct": false, "feedback": "That would be a trend. The slope multiplies the change in GDP growth."}
+      ],
+      "explanation": "Key Concept 17.7: after first differencing, the coefficient describes how a change in x is associated with a change in y. With both in percentage points, −0.40 means a 0.40-point change in unemployment per 1-point change in growth."
+    },
+    {
+      "id": "P24",
+      "type": "multi",
+      "concept": "First differencing (Section 17.6, Key Concept 17.7)",
+      "stem": "Suppose that regressing one trending series on another gives R² = 0.97 in levels but R² = 0.15 after first differencing both series. Which statements are correct? (Select all that apply.)",
+      "options": [
+        {"text": "The lower R² does not by itself make the differenced regression the worse model.", "correct": true, "feedback": "Correct: the levels R² may be inflated by shared trends, so the two R² values are not a fair comparison."},
+        {"text": "The levels regression should be preferred, because it explains more of the variation.", "correct": false, "feedback": "A high R² from two trending series can be spurious, so it is not a reason to prefer the levels model."},
+        {"text": "The differenced regression asks how changes in y relate to changes in x.", "correct": true, "feedback": "Correct: differencing changes the question from levels to changes."},
+        {"text": "Differencing removes a common linear trend from both series.", "correct": true, "feedback": "Correct: a linear trend becomes a constant after differencing."},
+        {"text": "First differencing guarantees that the residuals have no autocorrelation.", "correct": false, "feedback": "Differencing often reduces autocorrelation, but some can remain; the residuals should still be checked."}
+      ],
+      "explanation": "Key Concept 17.7: first differencing removes trends and changes the interpretation to changes. A lower R² after differencing is expected and more honest; residual autocorrelation is usually reduced, not necessarily removed."
+    },
+    {
+      "id": "P25",
+      "type": "single",
+      "concept": "Autoregressive and distributed lag models (Section 17.6)",
+      "stem": "Suppose an ADL model of monthly changes in a mortgage rate on changes in the policy rate gives γ₀ = 0.40, γ₁ = 0.25, and γ₂ = −0.10 on the current, one-month-lagged, and two-month-lagged policy-rate changes. What is the cumulative effect after two months of a 1-percentage-point rise in the policy rate?",
+      "options": [
+        {"text": "0.40", "correct": false, "feedback": "0.40 is the impact (same-month) effect only."},
+        {"text": "0.65", "correct": false, "feedback": "0.65 = γ₀ + γ₁ is the cumulative effect after one month; it leaves out γ₂."},
+        {"text": "0.55", "correct": true, "feedback": "Correct: 0.40 + 0.25 − 0.10 = 0.55."},
+        {"text": "0.18", "correct": false, "feedback": "This averages the three coefficients; the cumulative effect sums them."}
+      ],
+      "explanation": "Section 17.6: in a distributed lag model, the impact multiplier is γ₀ and the cumulative (interim) multipliers add the lag coefficients: 0.40, then 0.65, then 0.55 after two months."
+    },
+    {
+      "id": "P26",
+      "type": "single",
+      "concept": "Autoregressive and distributed lag models (Section 17.6)",
+      "stem": "Suppose an AR(1) model for monthly changes in the inflation rate gives Δπₜ = 0.01 − 0.30 Δπₜ₋₁. What does the coefficient −0.30 suggest?",
+      "options": [
+        {"text": "Inflation falls by 0.30 percentage points every month.", "correct": false, "feedback": "The coefficient multiplies last month's change; it is not a constant monthly decline."},
+        {"text": "30% of the level of inflation carries over to the next month.", "correct": false, "feedback": "The model is in changes, not levels, so it describes how changes follow changes."},
+        {"text": "Changes in inflation have momentum: a rise tends to be followed by another rise.", "correct": false, "feedback": "Revisit what the sign of the lagged-change coefficient means (Section 17.6)."},
+        {"text": "A rise in inflation in one month tends to be partly reversed in the next month.", "correct": true, "feedback": "Correct. A negative coefficient on the lagged change means changes tend to switch direction, a form of mean reversion in changes."}
+      ],
+      "explanation": "Section 17.6: in an AR model, the coefficient on the lagged dependent variable links this month's change to last month's; a negative value means changes tend to be partly reversed."
+    },
+    {
+      "id": "P27",
+      "type": "single",
+      "concept": "Instrumental variables (Section 17.7, Key Concept 17.8)",
+      "stem": "Suppose a candidate instrument z has a correlation of only 0.01 with the endogenous regressor x. Which IV condition is in doubt?",
+      "options": [
+        {"text": "Exogeneity, because z is too weakly related to x", "correct": false, "feedback": "Exogeneity concerns the link between z and the error u, not between z and x."},
+        {"text": "Neither, because a weak link to x is what makes z a good instrument", "correct": false, "feedback": "An instrument must move x; one that barely does gives almost no information about the effect."},
+        {"text": "Exogeneity, because z must be strongly correlated with the error u", "correct": false, "feedback": "Exogeneity requires z to be uncorrelated with u."},
+        {"text": "Relevance, because z is barely related to the endogenous regressor", "correct": true, "feedback": "Correct. Relevance requires Corr(z, x) ≠ 0, and 0.01 is essentially zero."}
+      ],
+      "explanation": "Key Concept 17.8: a valid instrument must be relevant (Corr(z, x) ≠ 0) and exogenous (Corr(z, u) = 0). A near-zero correlation with x signals a weak, nearly irrelevant instrument."
+    },
+    {
+      "id": "P28",
+      "type": "single",
+      "concept": "Instrumental variables (Section 17.7, Key Concept 17.8)",
+      "stem": "Suppose that in a sample, Cov(z, y) = 2.0, Cov(z, x) = 0.5, Cov(x, y) = 1.5, and Var(x) = 1.0. What is the IV estimate of the slope of y on x, using z as the instrument?",
+      "options": [
+        {"text": "4.0", "correct": true, "feedback": "Correct: β̂<sub>IV</sub> = Cov(z, y)/Cov(z, x) = 2.0/0.5 = 4.0."},
+        {"text": "1.5", "correct": false, "feedback": "This is the OLS slope, Cov(x, y)/Var(x), which the instrument is meant to replace."},
+        {"text": "0.25", "correct": false, "feedback": "This inverts the IV ratio; the covariance with y goes in the numerator."},
+        {"text": "2.5", "correct": false, "feedback": "This adds the two covariances; the IV estimator divides them."}
+      ],
+      "explanation": "Key Concept 17.8: β̂<sub>IV</sub> = Cov(z, y)/Cov(z, x) = 2.0/0.5 = 4.0, compared with the OLS slope of 1.5."
+    },
+    {
+      "id": "P29",
+      "type": "multi",
+      "concept": "Causal inference methods (Section 17.7)",
+      "stem": "Which pairings of research setting and causal method fit the chapter's toolkit? (Select all that apply.)",
+      "options": [
+        {"text": "Wages of workers observed for many years, where unchanging unobserved ability affects both training and wages: regression discontinuity", "correct": false, "feedback": "The threat is a time-invariant unobserved trait in panel data, which fixed effects controls for; there is no threshold rule here."},
+        {"text": "A fertilizer subsidy given to villages chosen by coin flip: randomized controlled trial", "correct": true, "feedback": "Correct: random assignment makes treatment unrelated to potential outcomes."},
+        {"text": "Scholarships awarded to students who score at least 80 on an entrance test: regression discontinuity", "correct": true, "feedback": "Correct: a threshold rule for treatment is the setting for regression discontinuity."},
+        {"text": "A tax credit introduced in some provinces but not others in 2015: difference-in-differences", "correct": true, "feedback": "Correct: compare the change in treated provinces with the change in untreated ones, before and after 2015."}
+      ],
+      "explanation": "Section 17.7: RCTs use random assignment, regression discontinuity exploits a threshold rule, difference-in-differences compares treated and control groups before and after a change, and fixed effects controls for time-invariant unobservables."
+    },
+    {
+      "id": "P30",
+      "type": "tf",
+      "concept": "Causal inference methods (Section 17.7)",
+      "stem": "Adding more control variables until R² is high is enough to turn an observational regression into a credible causal estimate.",
+      "options": [
+        {"text": "True", "correct": false, "feedback": "The chapter's key insight points the other way (Section 17.7)."},
+        {"text": "False", "correct": true, "feedback": "Correct. Causal claims need a credible identification strategy (random assignment, a valid instrument, fixed effects, DiD, RD), not just more controls or a high R²."}
+      ],
+      "explanation": "Section 17.7: “Need credible identification strategy, not just controls!” Unobserved confounders, reverse causation, and selection can remain no matter how many controls are added."
+    }
+  ],
+  "exam": [
+    {
+      "id": "E01",
+      "type": "single",
+      "concept": "Panel data structure (Section 17.2)",
+      "stem": "The chapter's NBA data set contains 286 observations of log revenue and wins, covering the 2001–02 to 2010–11 seasons. What feature makes it panel data rather than a cross-section or a single time series?",
+      "options": [
+        {"text": "Each observation is a different team, observed in a single season.", "correct": false, "feedback": "Revisit how the NBA observations are indexed by team and season (Section 17.2)."},
+        {"text": "The same 29 teams are each observed in several seasons, so the data vary across teams and over time.", "correct": true, "feedback": "Correct. Each team i appears in several seasons t, the double indexing that defines panel data."},
+        {"text": "It follows one team's revenue over 286 consecutive games.", "correct": false, "feedback": "Revisit how the NBA observations are indexed by team and season (Section 17.2)."},
+        {"text": "A new random sample of teams is drawn in each season, so the teams differ from season to season.", "correct": false, "feedback": "Revisit how the NBA observations are indexed by team and season (Section 17.2)."}
+      ],
+      "explanation": "Section 17.2: panel data follow the same units (teams, i) over several periods (seasons, t). Twenty-eight teams appear in all 10 seasons and one in 6, giving 286 observations."
+    },
+    {
+      "id": "E02",
+      "type": "multi",
+      "concept": "Within and between variation (Section 17.2, Key Concept 17.1)",
+      "stem": "For log revenue in the NBA panel, the overall standard deviation is 0.24, the between-team standard deviation is 0.21, and the within-team standard deviation is 0.11. Which conclusions are supported? (Select all that apply.)",
+      "options": [
+        {"text": "Most of the variation in log revenue comes from year-to-year changes within teams.", "correct": false, "feedback": "Revisit which component is larger and what each one measures (Key Concept 17.1)."},
+        {"text": "Teams differ more in their average revenue than a typical team's revenue varies around its own average.", "correct": true, "feedback": "Correct: the between SD (0.21) is about twice the within SD (0.11)."},
+        {"text": "The large between SD shows that winning causes the revenue gap between big- and small-market teams.", "correct": false, "feedback": "Revisit what a variance decomposition can and cannot tell us (Section 17.2)."},
+        {"text": "A team's log revenue typically deviates from its own average by about 0.11, roughly 11%.", "correct": true, "feedback": "Correct: the within SD measures typical deviations from each team's own mean; 0.11 in logs is roughly 11%."},
+        {"text": "The squares of the between and within SDs add up to roughly the square of the overall SD.", "correct": true, "feedback": "Correct: 0.21² + 0.11² ≈ 0.056, close to 0.24² ≈ 0.058."}
+      ],
+      "explanation": "Key Concept 17.1: total variation ≈ between + within (in variances): 0.21² + 0.11² ≈ 0.24². In the NBA panel, persistent team differences (market size, brand) dominate, while within-team changes are smaller."
+    },
+    {
+      "id": "E03",
+      "type": "single",
+      "concept": "Within and between variation (Section 17.2, Key Concept 17.1)",
+      "stem": "In the NBA panel, the number of wins has a between-team standard deviation of 7.0 and a within-team standard deviation of 10.4. What does this imply for the fixed-effects estimate of the wins coefficient?",
+      "options": [
+        {"text": "It is less reliable than pooled OLS, because fixed effects discards the larger part of the variation in wins.", "correct": false, "feedback": "Revisit which variation fixed effects uses and how much of it wins provide (Key Concept 17.1, Section 17.3)."},
+        {"text": "It is identified from the 7.0 between-team variation, the differences in teams' average wins.", "correct": false, "feedback": "Revisit which variation fixed effects uses and how much of it wins provide (Key Concept 17.1, Section 17.3)."},
+        {"text": "It will match the pooled OLS estimate, because the two kinds of variation are similar in size.", "correct": false, "feedback": "Revisit how pooled OLS and fixed effects differ in the variation they use (Key Concept 17.1)."},
+        {"text": "It has plenty of variation to work with, because wins vary more within teams over time than between teams' averages.", "correct": true, "feedback": "Correct. Fixed effects keeps only the within variation, and for wins that part (SD 10.4) is the larger one."}
+      ],
+      "explanation": "Key Concept 17.1: fixed effects uses only within variation. Unlike revenue, wins swing a lot from season to season within a team (SD 10.4 versus 7.0 between teams), so the within estimator has substantial variation to exploit."
+    },
+    {
+      "id": "E04",
+      "type": "single",
+      "concept": "Cluster-robust standard errors (Section 17.2, Key Concept 17.2)",
+      "stem": "For the pooled regression of log revenue on wins, the standard error on wins is 0.0011 with default SEs, 0.0010 with heteroskedastic-robust (HC1) SEs, and 0.0019 with cluster-robust SEs clustered by team. What best explains the larger cluster-robust SE?",
+      "options": [
+        {"text": "Unobserved team factors persist from season to season, so each team's errors are correlated over time.", "correct": true, "feedback": "Correct. Cluster-robust SEs allow correlation within each team; default and HC1 SEs treat the 286 observations as independent."},
+        {"text": "Clustering changes the estimated wins coefficient, and the new coefficient is less precise.", "correct": false, "feedback": "Revisit which parts of the output change when standard errors are clustered (Key Concept 17.2)."},
+        {"text": "Revenue is heteroskedastic across teams, and the HC1 comparison shows that only clustering corrects for this.", "correct": false, "feedback": "Revisit what the HC1 standard error corrects for and what clustering adds (Section 17.2)."},
+        {"text": "Clustering treats the 286 team-seasons as independent, which inflates the standard error.", "correct": false, "feedback": "Revisit the independence assumption behind each kind of standard error (Key Concept 17.2)."}
+      ],
+      "explanation": "Key Concept 17.2: observations on the same team are correlated over time (persistent team effects, serial correlation). The HC1 SE is close to the default, so heteroskedasticity is not the issue; the 1.8× larger cluster SE reflects within-team correlation."
+    },
+    {
+      "id": "E05",
+      "type": "single",
+      "concept": "Cluster-robust standard errors (Section 17.2, Key Concept 17.2)",
+      "stem": "For the pooled regression of log revenue on wins, the t-statistic on wins is 6.42 with default standard errors and 3.54 with cluster-robust standard errors (29 clusters). Using a 5% critical value of about 2, which conclusion is correct?",
+      "options": [
+        {"text": "Wins remain significant at 5%, though the evidence is weaker than default SEs suggest.", "correct": true, "feedback": "Correct. |t| = 3.54 exceeds about 2, so clustering widens the interval without overturning significance."},
+        {"text": "Wins are no longer significant at 5%, because the cluster-robust t-statistic is much smaller than the default one.", "correct": false, "feedback": "Revisit how a t-statistic leads to a decision at the 5% level (Section 17.2)."},
+        {"text": "The default standard errors should be reported, because they give the larger t-statistic.", "correct": false, "feedback": "Revisit which standard errors are valid for panel data (Key Concept 17.2)."},
+        {"text": "Clustering raised the coefficient on wins, which is why the t-statistic changed.", "correct": false, "feedback": "Revisit which parts of the output change when standard errors are clustered (Key Concept 17.2)."}
+      ],
+      "explanation": "Section 17.2: with cluster-robust SEs, t = 3.54 and p = 0.001, so wins remain significant. The lesson is that ignoring within-team correlation overstates precision, not that clustering creates or destroys significance in this case."
+    },
+    {
+      "id": "E06",
+      "type": "tf",
+      "concept": "Cluster-robust standard errors (Section 17.2, Key Concept 17.2)",
+      "stem": "Because the NBA panel has 29 teams, the chapter's caution about having too few clusters for standard cluster-robust standard errors does not apply to it.",
+      "options": [
+        {"text": "True", "correct": false, "feedback": "Revisit the chapter's caution about the number of clusters (Key Concept 17.2)."},
+        {"text": "False", "correct": true, "feedback": "Correct. Key Concept 17.2 warns that with fewer than about 30 clusters, standard cluster-robust SEs can be unreliable; 29 teams falls in that range."}
+      ],
+      "explanation": "Key Concept 17.2: with few clusters (G &lt; 30), consider wild bootstrap refinements. The NBA panel has G = 29 teams."
+    },
+    {
+      "id": "E07",
+      "type": "single",
+      "concept": "Fixed effects estimation (Section 17.3, Key Concept 17.3)",
+      "stem": "The chapter's fixed-effects regression of log revenue on wins (revenue in millions of dollars), with team effects, gives a wins coefficient of 0.0045. Which interpretation is correct?",
+      "options": [
+        {"text": "A team that averages one more win per season than another team has about 0.45% higher revenue.", "correct": false, "feedback": "Revisit what a fixed-effects coefficient compares and how a log outcome is read (Section 17.3)."},
+        {"text": "One more win for a given team is associated with about 4.5% higher revenue.", "correct": false, "feedback": "Revisit what a fixed-effects coefficient compares and how a log outcome is read (Section 17.3)."},
+        {"text": "One more win for a given team is associated with about 0.45% higher revenue.", "correct": true, "feedback": "Correct. With a log outcome, 100 × 0.0045 = 0.45% (approximately), and fixed effects compares each team with itself over time."},
+        {"text": "One more win for a given team is associated with about $4,500 more revenue.", "correct": false, "feedback": "Revisit what a fixed-effects coefficient compares and how a log outcome is read (Section 17.3)."}
+      ],
+      "explanation": "Section 17.3: the FE coefficient is a within-team effect. With log revenue, 0.0045 means one more win raises a team's revenue by about 0.45%, holding its time-invariant traits fixed."
+    },
+    {
+      "id": "E08",
+      "type": "single",
+      "concept": "Fixed effects estimation (Section 17.3, Key Concept 17.3)",
+      "stem": "With log revenue as the outcome, pooled OLS gives a wins coefficient of 0.0068, while fixed effects with team effects gives 0.0045. What does this drop most likely indicate?",
+      "options": [
+        {"text": "Fixed effects understates the wins effect, because it discards the differences between teams.", "correct": false, "feedback": "Revisit why pooled OLS and fixed effects can differ when persistent traits are omitted (Section 17.3)."},
+        {"text": "Persistent team traits were negatively related to wins, which biased pooled OLS downward.", "correct": false, "feedback": "Revisit how the sign of omitted variable bias follows from the two estimates (Section 17.3)."},
+        {"text": "Persistent team traits related to both wins and revenue biased pooled OLS upward.", "correct": true, "feedback": "Correct. Removing the team effects lowers the estimate by about a third, the sign of positive omitted variable bias in pooled OLS."},
+        {"text": "Pooled OLS used the wrong standard errors, which shifted its coefficient by about 33%.", "correct": false, "feedback": "Revisit which parts of the output depend on the choice of standard errors (Key Concept 17.2)."}
+      ],
+      "explanation": "Key Concept 17.3: the coefficient drops from 0.0068 to 0.0045 (about 33%). Persistent team traits that raise revenue are positively related to wins, so pooled OLS was biased upward; fixed effects removes them."
+    },
+    {
+      "id": "E09",
+      "type": "multi",
+      "concept": "Fixed effects estimation (Section 17.3, Key Concept 17.3)",
+      "stem": "In the NBA fixed-effects regression of log revenue on wins, which of these factors are absorbed by the team fixed effects? (Select all that apply.)",
+      "options": [
+        {"text": "A star player who joins a team midway through the decade", "correct": false, "feedback": "Revisit which kinds of factors a team fixed effect can absorb (Key Concept 17.3)."},
+        {"text": "Whether the team plays in a large or small market", "correct": true, "feedback": "Correct: a characteristic that is constant over the ten seasons is part of the team's fixed effect."},
+        {"text": "The franchise's long-standing history and brand", "correct": true, "feedback": "Correct: a persistent, time-invariant trait is absorbed by the team effect."},
+        {"text": "An injury that sidelines a team's best player for one season", "correct": false, "feedback": "Revisit which kinds of factors a team fixed effect can absorb (Key Concept 17.3)."},
+        {"text": "A new owner who buys the team midway through the decade", "correct": false, "feedback": "Revisit which kinds of factors a team fixed effect can absorb (Key Concept 17.3)."}
+      ],
+      "explanation": "Key Concept 17.3: team fixed effects capture everything constant for a team over the sample (market size, history, brand). Factors that change within a team over time (star arrivals, injuries, ownership changes) are not controlled for."
+    },
+    {
+      "id": "E10",
+      "type": "tf",
+      "concept": "Fixed effects estimation (Section 17.3, Key Concept 17.3)",
+      "stem": "In the NBA fixed-effects regression, adding a variable that never changes for a team over the ten seasons, such as the year the franchise was founded, would let us estimate how founding year affects revenue.",
+      "options": [
+        {"text": "True", "correct": false, "feedback": "Revisit what the within transformation does to a variable that is constant for each team (Section 17.3)."},
+        {"text": "False", "correct": true, "feedback": "Correct. De-meaning by team turns a time-invariant variable into all zeros, so its coefficient cannot be estimated; its effect is absorbed into αᵢ."}
+      ],
+      "explanation": "Section 17.3: fixed effects cannot estimate coefficients on time-invariant variables, because subtracting each team's mean removes them entirely. Their influence is part of the team effect αᵢ."
+    },
+    {
+      "id": "E11",
+      "type": "single",
+      "concept": "Fixed effects estimation (Section 17.3, Key Concept 17.3)",
+      "stem": "The NBA fixed-effects regression reports a within R² of 0.185, while pooled OLS has an R² of 0.127. Which statement is correct?",
+      "options": [
+        {"text": "Fixed effects fits better, because its R² of 0.185 is higher than the pooled R² of 0.127.", "correct": false, "feedback": "Revisit what each R² measures in panel regressions (Section 17.3)."},
+        {"text": "They measure fit to different variation (within teams versus total), so they are not comparable.", "correct": true, "feedback": "Correct. The within R² measures fit to deviations from each team's average; the pooled R² measures fit to total variation."},
+        {"text": "The higher within R² proves that fixed effects removes the omitted variable bias in pooled OLS.", "correct": false, "feedback": "Revisit what R² does and does not tell us about bias (Section 17.3)."},
+        {"text": "Wins explain 18.5% of the total variation in log revenue across all 286 team-season observations.", "correct": false, "feedback": "Revisit what the within R² measures (Section 17.3)."}
+      ],
+      "explanation": "Section 17.3: fixed-effects output reports a within R² (0.185 here): the share of within-team variation explained. It answers a different question from the pooled R² (0.127, share of total variation), and neither R² measures bias."
+    },
+    {
+      "id": "E12",
+      "type": "single",
+      "concept": "Random effects and the Hausman test (Section 17.4, Key Concept 17.4)",
+      "stem": "Suppose the NBA revenue regression is estimated by random effects, as described in Section 17.4. How does that model treat each team's individual effect αᵢ?",
+      "options": [
+        {"text": "As a separate intercept for each team, estimated with one dummy variable per team", "correct": false, "feedback": "Revisit how the random-effects model treats αᵢ and how it is estimated (Section 17.4)."},
+        {"text": "As zero for every team, exactly as in pooled OLS with no team effects", "correct": false, "feedback": "Revisit how the random-effects model treats αᵢ and how it is estimated (Section 17.4)."},
+        {"text": "As a shock common to all teams in a given season, such as a lockout", "correct": false, "feedback": "Revisit how the random-effects model treats αᵢ and how it is estimated (Section 17.4)."},
+        {"text": "As a random component of the error term, estimated by feasible GLS", "correct": true, "feedback": "Correct. αᵢ is a random individual-specific component of the composite error αᵢ + εᵢₜ."}
+      ],
+      "explanation": "Section 17.4: random effects models αᵢ ~ (0, σ²<sub>α</sub>) as part of the error and estimates the model by feasible GLS. Fixed effects instead treats αᵢ as a separate intercept for each individual."
+    },
+    {
+      "id": "E13",
+      "type": "single",
+      "concept": "Random effects and the Hausman test (Section 17.4, Key Concept 17.4)",
+      "stem": "Suppose a Hausman test comparing fixed- and random-effects estimates in a panel of 300 households (consumption on income) gives p = 0.41. Which conclusion follows?",
+      "options": [
+        {"text": "Reject the null hypothesis; the household effects are correlated with income.", "correct": false, "feedback": "Revisit how the Hausman test's p-value is read (Key Concept 17.4)."},
+        {"text": "The test shows that the households have no individual effects, so pooled OLS is appropriate.", "correct": false, "feedback": "Revisit which hypothesis the Hausman test examines (Section 17.4)."},
+        {"text": "The random-effects estimates are shown to be biased, so fixed effects must be used.", "correct": false, "feedback": "Revisit how the Hausman test's p-value is read (Key Concept 17.4)."},
+        {"text": "There is no evidence against the null that the household effects are uncorrelated with income.", "correct": true, "feedback": "Correct. With p = 0.41, the FE and RE estimates do not differ significantly, so the random-effects assumption is not rejected."}
+      ],
+      "explanation": "Key Concept 17.4: H₀: αᵢ uncorrelated with the regressors. A large p-value means the FE and RE estimates are statistically similar, so RE (consistent and more efficient under H₀) can be used."
+    },
+    {
+      "id": "E14",
+      "type": "tf",
+      "concept": "Random effects and the Hausman test (Section 17.4, Key Concept 17.4)",
+      "stem": "When the individual effects are uncorrelated with the regressors, fixed and random effects are both consistent, but random effects is more efficient.",
+      "options": [
+        {"text": "True", "correct": true, "feedback": "Correct. Under this assumption RE uses both within and between variation and gains precision, while FE stays consistent but uses within variation only."},
+        {"text": "False", "correct": false, "feedback": "Revisit how fixed and random effects compare when the random-effects assumption holds (Key Concept 17.4)."}
+      ],
+      "explanation": "Key Concept 17.4: FE is consistent whether or not αᵢ is correlated with the regressors; RE is consistent and more efficient only when it is not."
+    },
+    {
+      "id": "E15",
+      "type": "single",
+      "concept": "Logit model and marginal effects (Section 17.4)",
+      "stem": "In the chapter's logit model of high earnings (above $60,000) for 872 workers, the coefficient on education is 0.374, and the predicted probability at the sample means is 0.23. What is the marginal effect of one more year of education on the probability of high earnings at the sample means?",
+      "options": [
+        {"text": "About 0.066 (6.6 percentage points)", "correct": true, "feedback": "Correct: p̂(1 − p̂)β = 0.23 × 0.77 × 0.374 ≈ 0.066."},
+        {"text": "About 0.374 (37.4 percentage points)", "correct": false, "feedback": "Revisit how the chapter turns a logit coefficient into a marginal effect (Section 17.4)."},
+        {"text": "About 0.086 (8.6 percentage points)", "correct": false, "feedback": "Revisit how the chapter turns a logit coefficient into a marginal effect (Section 17.4)."},
+        {"text": "About 0.177 (17.7 percentage points)", "correct": false, "feedback": "Revisit how the chapter turns a logit coefficient into a marginal effect (Section 17.4)."}
+      ],
+      "explanation": "Section 17.4: ME = p̂(1 − p̂)β = 0.23 × 0.77 × 0.374 ≈ 0.066 at the sample means. (The average marginal effect the chapter's code prints is 0.062, and the LPM coefficient is 0.054: similar magnitudes.)"
+    },
+    {
+      "id": "E16",
+      "type": "single",
+      "concept": "Logit model and marginal effects (Section 17.4)",
+      "stem": "For the 872 workers, the linear probability model's predicted probabilities of high earnings range from −0.59 to 0.73, while the logit's range from 0.001 to 0.86. What explains this difference?",
+      "options": [
+        {"text": "The linear probability model gives age and education coefficients with the wrong sign, which pushes predictions down.", "correct": false, "feedback": "Revisit how the two models turn the regressors into a predicted probability (Section 17.4)."},
+        {"text": "The logit's probability is a logistic function of x′β, which never leaves (0, 1); the linear model has no bounds.", "correct": true, "feedback": "Correct. The logistic function maps any x′β into (0, 1); a straight line has no such limits."},
+        {"text": "Some workers in the sample have negative earnings, which the linear model predicts correctly.", "correct": false, "feedback": "Revisit what a predicted probability from a binary-outcome model represents (Section 17.4)."},
+        {"text": "The logit drops the workers with very little education, so it never predicts values near 0.", "correct": false, "feedback": "Revisit how the two models turn the regressors into a predicted probability (Section 17.4)."}
+      ],
+      "explanation": "Section 17.4: only the logit keeps every predicted probability inside [0, 1]; the linear probability model can predict impossible values such as −0.59 for workers with little education."
+    },
+    {
+      "id": "E17",
+      "type": "tf",
+      "concept": "Logit model and marginal effects (Section 17.4)",
+      "stem": "In the chapter's logit model, the positive coefficient on age (0.0385) means the predicted probability of high earnings rises with age, holding education fixed.",
+      "options": [
+        {"text": "True", "correct": true, "feedback": "Correct. A logit coefficient's sign gives the direction of the effect on the probability, even though its size is not the marginal effect."},
+        {"text": "False", "correct": false, "feedback": "Revisit what the sign of a logit coefficient tells us (Section 17.4)."}
+      ],
+      "explanation": "Section 17.4: Pr(y = 1) = exp(x′β)/(1 + exp(x′β)) increases in x′β, so a positive coefficient means a higher probability. Both age and education enter positively."
+    },
+    {
+      "id": "E18",
+      "type": "single",
+      "concept": "Time series data and stationarity (Section 17.5, Key Concept 17.5)",
+      "stem": "The chapter regresses the 10-year Treasury rate on the 1-year rate and a linear time trend, using monthly data from January 1982 to January 2015, and gets R² = 0.947. Why should this high R² make us cautious?",
+      "options": [
+        {"text": "An R² this high leaves too little residual variation to estimate any standard errors.", "correct": false, "feedback": "Revisit what a very high R² with time-series data can signal (Key Concept 17.5)."},
+        {"text": "A high R² shows that both rates are stationary, so further checks are unnecessary.", "correct": false, "feedback": "Revisit the definition of stationarity and how it relates to fit (Key Concept 17.5)."},
+        {"text": "Both rates drift downward over the sample, so shared trends can produce a high R².", "correct": true, "feedback": "Correct. Both rates fell from above 14% in 1982 to below 2% by 2015; shared trends can produce a spuriously high R²."},
+        {"text": "The R² is inflated because interest rates are measured in percent rather than as decimals.", "correct": false, "feedback": "Revisit whether R² depends on the units of measurement (Key Concept 17.5)."}
+      ],
+      "explanation": "Key Concept 17.5: non-stationary, trending series can produce a high R² and significant coefficients even without a genuine relationship. The near-perfect fit in levels is a warning sign, not evidence of a strong link."
+    },
+    {
+      "id": "E19",
+      "type": "multi",
+      "concept": "Time series data and stationarity (Section 17.5, Key Concept 17.5)",
+      "stem": "According to Key Concept 17.5, a time series is stationary when which of these stay constant over time? (Select all that apply.)",
+      "options": [
+        {"text": "Its mean", "correct": true, "feedback": "Correct: a stationary series fluctuates around a constant mean."},
+        {"text": "Its variance", "correct": true, "feedback": "Correct: the spread of a stationary series does not change over time."},
+        {"text": "Its growth rate", "correct": false, "feedback": "Revisit the definition of stationarity (Key Concept 17.5)."},
+        {"text": "Its autocorrelations", "correct": true, "feedback": "Correct: the correlation between values k periods apart does not depend on when they occur."}
+      ],
+      "explanation": "Key Concept 17.5: a stationary series has a constant mean, variance, and autocorrelation over time; its values still fluctuate from period to period."
+    },
+    {
+      "id": "E20",
+      "type": "single",
+      "concept": "Autocorrelation and the correlogram (Section 17.6, Key Concept 17.6)",
+      "stem": "Residuals from the chapter's levels regression of the 10-year rate have autocorrelations of 0.95 at lag 1, 0.71 at lag 5, and 0.42 at lag 10. What does this slow decay indicate?",
+      "options": [
+        {"text": "Shocks are highly persistent, so residuals in nearby months are far from independent.", "correct": true, "feedback": "Correct. Autocorrelations that stay high for many lags signal strong persistence, so the residuals are far from independent."},
+        {"text": "About 95% of the residuals are positive.", "correct": false, "feedback": "Revisit what an autocorrelation coefficient measures (Section 17.5)."},
+        {"text": "The residuals are stationary, because the autocorrelations fall steadily toward zero.", "correct": false, "feedback": "Revisit what a slowly decaying correlogram signals (Key Concept 17.6)."},
+        {"text": "The residuals tend to alternate in sign from one month to the next, a sign of overcorrection.", "correct": false, "feedback": "Revisit what the sign of an autocorrelation tells us (Section 17.6)."}
+      ],
+      "explanation": "Key Concept 17.6: slowly decaying autocorrelations (ρ₁ = 0.95, ρ₁₀ = 0.42) indicate non-stationarity and persistent shocks. Default SEs are then too small, so HAC SEs or a dynamic model are needed."
+    },
+    {
+      "id": "E21",
+      "type": "single",
+      "concept": "HAC (Newey–West) standard errors (Sections 17.5 and 17.6, Key Concept 17.6)",
+      "stem": "In the levels regression, the coefficient on the 1-year rate is 0.508, with a default standard error of 0.0221 and a HAC (Newey–West, 24 lags) standard error of 0.0808. What is the t-statistic based on the HAC standard error?",
+      "options": [
+        {"text": "About 23", "correct": false, "feedback": "Revisit how a t-statistic is formed from a coefficient and the appropriate standard error (Section 17.5)."},
+        {"text": "About 0.16", "correct": false, "feedback": "Revisit how a t-statistic is formed from a coefficient and the appropriate standard error (Section 17.5)."},
+        {"text": "About 0.51", "correct": false, "feedback": "Revisit how a t-statistic is formed from a coefficient and the appropriate standard error (Section 17.5)."},
+        {"text": "About 6.3", "correct": true, "feedback": "Correct: t = 0.508/0.0808 ≈ 6.3."}
+      ],
+      "explanation": "Section 17.5: the HAC SE replaces the default SE; the coefficient is unchanged. t = 0.508/0.0808 ≈ 6.3, versus about 23 with the default SE, whose value is too small with autocorrelated errors."
+    },
+    {
+      "id": "E22",
+      "type": "tf",
+      "concept": "Autocorrelation and the correlogram (Section 17.6, Key Concept 17.6)",
+      "stem": "Strong positive autocorrelation in the errors makes the OLS coefficient on the 1-year rate biased, and HAC standard errors are needed to correct that coefficient.",
+      "options": [
+        {"text": "True", "correct": false, "feedback": "Revisit the consequences of autocorrelation for OLS (Section 17.6)."},
+        {"text": "False", "correct": true, "feedback": "Correct. With autocorrelation, OLS remains unbiased and consistent; the problem is the standard errors, which HAC corrects without changing the coefficient."}
+      ],
+      "explanation": "Section 17.6: under autocorrelation, OLS stays unbiased and consistent, but default standard errors are wrong (typically too small) and tests are invalid. HAC SEs fix the inference; the coefficient is the same."
+    },
+    {
+      "id": "E23",
+      "type": "single",
+      "concept": "First differencing (Section 17.6, Key Concept 17.7)",
+      "stem": "In the chapter's regression in changes, Δgs10 on Δgs1 (monthly changes in the 10-year and 1-year rates, in percentage points), the slope is 0.72. Which interpretation is correct?",
+      "options": [
+        {"text": "Months in which the 1-year rate is 1 percentage point higher have a 10-year rate that is 0.72 points higher.", "correct": false, "feedback": "Revisit how a slope is read in a regression in first differences, including its units (Key Concept 17.7)."},
+        {"text": "A 1-point rise in the 1-year rate in a month goes with a 0.72-point rise in the 10-year rate that month.", "correct": true, "feedback": "Correct. The regression links month-to-month changes, both in percentage points."},
+        {"text": "A 1% rise in the 1-year rate is associated with a 0.72% rise in the 10-year rate.", "correct": false, "feedback": "Revisit how a slope is read in a regression in first differences, including its units (Key Concept 17.7)."},
+        {"text": "The 10-year rate rises by 0.72 percentage points every month.", "correct": false, "feedback": "Revisit how a slope is read in a regression in first differences, including its units (Key Concept 17.7)."}
+      ],
+      "explanation": "Key Concept 17.7: after differencing, the coefficient interpretation changes from levels to changes: a 1-percentage-point change in the 1-year rate is associated with a 0.72-percentage-point change in the 10-year rate."
+    },
+    {
+      "id": "E24",
+      "type": "multi",
+      "concept": "First differencing (Section 17.6, Key Concept 17.7)",
+      "stem": "After first differencing, the chapter's interest-rate regression has R² = 0.571 (down from 0.947 in levels) and a residual lag-1 autocorrelation of 0.25 (down from 0.95). Which conclusions are supported? (Select all that apply.)",
+      "options": [
+        {"text": "Differencing greatly reduced, but did not eliminate, the residual autocorrelation.", "correct": true, "feedback": "Correct: 0.25 is far below 0.95 but still clearly above zero."},
+        {"text": "The drop in R² from 0.947 to 0.571 shows that the levels regression is the better model of the 10-year rate.", "correct": false, "feedback": "Revisit how to compare fit across regressions in levels and in changes (Key Concept 17.7)."},
+        {"text": "Because some residual autocorrelation remains, differencing failed, and the levels regression with default standard errors should be used instead.", "correct": false, "feedback": "Revisit what the remaining residual autocorrelation implies (Section 17.6)."},
+        {"text": "The lower R² is expected, because monthly changes are harder to predict than the slowly moving level of the rate.", "correct": true, "feedback": "Correct: a regression in changes asks a harder question than one in levels, so a lower R² does not by itself mean a worse model; the chapter's code summary calls it “lower but honest”."}
+      ],
+      "explanation": "Key Concept 17.7 and the Key Takeaways code: differencing lowered residual autocorrelation from about 0.95 to 0.25; the lower R² is honest rather than worse. Some autocorrelation remains, which the ADL model then addresses."
+    },
+    {
+      "id": "E25",
+      "type": "single",
+      "concept": "Autoregressive and distributed lag models (Section 17.6)",
+      "stem": "The chapter's ADL(2, 2) model for monthly changes in the 10-year rate gives coefficients γ₀ = 0.74, γ₁ = −0.26, and γ₂ = 0.05 on the current, one-month-lagged, and two-month-lagged changes in the 1-year rate. What is the cumulative effect after two months of a 1-percentage-point rise in the 1-year rate?",
+      "options": [
+        {"text": "About 0.74", "correct": false, "feedback": "Revisit how the interim multipliers of a distributed lag model are built (Section 17.6)."},
+        {"text": "About 0.53", "correct": true, "feedback": "Correct: 0.74 − 0.26 + 0.05 = 0.53."},
+        {"text": "About 1.05", "correct": false, "feedback": "Revisit how the interim multipliers of a distributed lag model are built (Section 17.6)."},
+        {"text": "About 0.48", "correct": false, "feedback": "Revisit how the interim multipliers of a distributed lag model are built (Section 17.6)."}
+      ],
+      "explanation": "Section 17.6: the impact multiplier is γ₀ = 0.74; the cumulative effect after one month is 0.74 − 0.26 = 0.48 and after two months 0.48 + 0.05 = 0.53, so about half of the shock has passed through."
+    },
+    {
+      "id": "E26",
+      "type": "single",
+      "concept": "Autoregressive and distributed lag models (Section 17.6)",
+      "stem": "In the same ADL(2, 2) model, the coefficient on Δgs10ₜ₋₁ (last month's change in the 10-year rate) is +0.28. What does this coefficient suggest, other things equal?",
+      "options": [
+        {"text": "A rise in the 10-year rate last month tends to be partly reversed this month.", "correct": false, "feedback": "Revisit what the sign of a coefficient on a lagged change tells us (Section 17.6)."},
+        {"text": "28% of the level of the 10-year rate carries over from one month to the next.", "correct": false, "feedback": "Revisit whether this model describes levels or changes (Section 17.6)."},
+        {"text": "A rise in the 10-year rate last month tends to be followed by a further, smaller rise this month.", "correct": true, "feedback": "Correct. A positive coefficient on the lagged change means some momentum in changes: about 0.28 of last month's change carries into this month."},
+        {"text": "A 1-point rise in the 1-year rate last month raises the 10-year rate by 0.28 points this month.", "correct": false, "feedback": "Revisit which variable each ADL coefficient multiplies (Section 17.6)."}
+      ],
+      "explanation": "Section 17.6: in an AR or ADL model, the coefficient on the lagged dependent variable describes persistence. Here it is +0.28, so changes show positive momentum (the Key Concepts example notes the same, alongside residual autocorrelation of about 0.25 in the static model)."
+    },
+    {
+      "id": "E27",
+      "type": "single",
+      "concept": "Instrumental variables (Section 17.7, Key Concept 17.8)",
+      "stem": "Section 17.7 lists two conditions for a valid instrument z: relevance and exogeneity. Which statement about checking them is correct?",
+      "options": [
+        {"text": "Relevance can be checked with the data, but exogeneity cannot be tested and must be argued.", "correct": true, "feedback": "Correct. Corr(z, x) is observable, but Corr(z, u) involves the unobserved error."},
+        {"text": "Exogeneity can be checked with the data, but relevance cannot be tested and must be argued.", "correct": false, "feedback": "Revisit what each condition involves and which quantities are observable (Section 17.7)."},
+        {"text": "Both can be checked by regressing y on z and testing the coefficient on z.", "correct": false, "feedback": "Revisit what each condition involves and which quantities are observable (Section 17.7)."},
+        {"text": "Neither can be assessed with data, so both must be argued.", "correct": false, "feedback": "Revisit what each condition involves and which quantities are observable (Section 17.7)."}
+      ],
+      "explanation": "Section 17.7: relevance, Corr(z, x) ≠ 0, can be tested; exogeneity, Corr(z, u) = 0, cannot, because u is unobserved, so it must be argued from economic reasoning."
+    },
+    {
+      "id": "E28",
+      "type": "single",
+      "concept": "Instrumental variables (Section 17.7, Key Concept 17.8)",
+      "stem": "Suppose that in a sample, Cov(z, y) = 0.6, Cov(z, x) = 1.5, Cov(x, y) = 1.0, and Var(x) = 2.0. What is the IV estimate of the slope of y on x, using z as the instrument?",
+      "options": [
+        {"text": "0.5", "correct": false, "feedback": "Revisit the formula for the IV estimator (Key Concept 17.8)."},
+        {"text": "2.5", "correct": false, "feedback": "Revisit the formula for the IV estimator (Key Concept 17.8)."},
+        {"text": "0.9", "correct": false, "feedback": "Revisit the formula for the IV estimator (Key Concept 17.8)."},
+        {"text": "0.4", "correct": true, "feedback": "Correct: β̂<sub>IV</sub> = Cov(z, y)/Cov(z, x) = 0.6/1.5 = 0.4."}
+      ],
+      "explanation": "Key Concept 17.8: β̂<sub>IV</sub> = Cov(z, y)/Cov(z, x) = 0.6/1.5 = 0.4. The OLS slope Cov(x, y)/Var(x) = 0.5 would be biased if x is endogenous."
+    },
+    {
+      "id": "E29",
+      "type": "multi",
+      "concept": "Causal inference methods (Section 17.7)",
+      "stem": "Building on Practice Exercise 6, which pairings of setting and method fit the chapter's toolkit? (Select all that apply.)",
+      "options": [
+        {"text": "Effect of a minimum-wage increase on employment, with states adopting it at different times: difference-in-differences", "correct": true, "feedback": "Correct: compare employment changes in adopting states with changes in states that have not (yet) adopted."},
+        {"text": "Effect of hospital size on patient recovery, where sicker patients choose larger hospitals: regression discontinuity", "correct": false, "feedback": "Revisit which setting each causal method requires (Section 17.7)."},
+        {"text": "Effect of class size on achievement, where a class is split once enrollment crosses a cutoff: regression discontinuity", "correct": true, "feedback": "Correct: a threshold rule for treatment is the setting for regression discontinuity."},
+        {"text": "Effect of police spending on crime across cities, using a variable that shifts spending but does not affect crime directly: instrumental variables", "correct": true, "feedback": "Correct: an instrument addresses the simultaneity between crime and police spending."},
+        {"text": "Effect of a job-training program, with applicants assigned to training by lottery: randomized controlled trial", "correct": true, "feedback": "Correct: random assignment makes training unrelated to potential outcomes."}
+      ],
+      "explanation": "Section 17.7: DiD compares treated and control groups before and after a change; RD exploits a threshold rule; IV uses an instrument that shifts x but not y directly (here to address reverse causation); RCTs randomize treatment."
+    },
+    {
+      "id": "E30",
+      "type": "tf",
+      "concept": "Causal inference methods (Section 17.7)",
+      "stem": "If a key regressor is measured with error, OLS can be biased even in a very large sample, and the chapter counts this as one source of endogeneity.",
+      "options": [
+        {"text": "True", "correct": true, "feedback": "Correct. Section 17.7 lists omitted variables, measurement error, and simultaneity as sources of endogeneity."},
+        {"text": "False", "correct": false, "feedback": "Revisit the sources of endogeneity listed in Section 17.7."}
+      ],
+      "explanation": "Section 17.7 and Key Concept 17.8: endogeneity (a regressor correlated with the error) arises from omitted variables, measurement error, and simultaneity; it biases OLS regardless of sample size, which motivates IV and other causal designs."
+    }
+  ]
+}

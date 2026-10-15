@@ -371,6 +371,16 @@ def cue_hints(bank: dict) -> list[str]:
             for pid, pw in p_texts:
                 if len(ew & pw) / len(ew) >= 0.85:
                     hints.append(f"exam {it['id']} key is nearly restated in practice {pid} feedback/explanation")
+    # 5. Plain-text subscripts render with a literal underscore (ch15: s_e, β_age); use <sub> or KaTeX
+    for set_name in SETS:
+        for it in bank[set_name]:
+            texts = [it["stem"], it.get("explanation", ""), it.get("concept", "")]
+            texts += [t for o in it["options"] for t in (o["text"], o["feedback"])]
+            for t in texts:
+                t = re.sub(r"<code>.*?</code>|\\\(.*?\\\)|\\\[.*?\\\]", "", t)
+                for tok in re.findall(r"[^\s(]*[^\W\d_]_[^\s,.;:)]+", t):
+                    if not re.fullmatch(r"[A-Z0-9_]+", tok.strip("()")):
+                        hints.append(f"{set_name} {it['id']}: raw underscore in visible text ({tok}); use <sub> or KaTeX")
     return list(dict.fromkeys(hints))
 
 

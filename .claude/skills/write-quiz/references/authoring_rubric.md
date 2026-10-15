@@ -152,6 +152,16 @@ position, feedback leaks, or cross-references between items.
   stem; otherwise choose another key and report the prose (ch08: Luxembourg's spending).
 - **AED columns are often int8/int16:** cast with `.astype(float)` before arithmetic or logs
   (overflow; `np.log` returns float16). Note where the chapter's printed values carry this error.
+- **"If true" framing:** a multi asking which situations *would* cause a problem must say
+  "if true", or options get judged against the data (ch16 E10). Check every "x explains about
+  N%" distractor against the actual R² (ch16 E15 was true in the data).
+- **Inconsistent chapter numbers** (glossary vs. section prose, ch17 ADL): quote only values
+  recomputed from code that runs, and report the mismatch. Check panel balance before quoting
+  n × T (ch17: 286, not 290). When a printed p-value would decide an item, give a critical
+  value instead (ch17 E05).
+- **Software defaults:** statsmodels `get_margeff()` returns *average* marginal effects unless
+  `at="mean"`; check what pyfixest `wald_test` reports (F vs. Wald χ²) before quoting it, and
+  prefer computing F yourself. Label the SE type (default/HC1) of every p-value in the fact-check.
 - **Constants the data can't verify** (e.g., ch03's census μ and σ, given by the chapter) go in
   a labeled block of the fact-check, not among the data checks.
 - **Chapter prose can be conceptually wrong too.** ch02 line 934 says z-scores "can
@@ -180,7 +190,17 @@ position, feedback leaks, or cross-references between items.
   exam item tests (ch04: "|t| above the critical value means reject" answered the next item;
   ch07: "3 degrees of freedom with n = 5" taught n − 2 for the df item).
 - **Practice feedback and explanations** must not state an exam item's answer, even in a
-  different scenario (ch03 P11/P24, ch06 P10/P26, ch07 P03).
+  different scenario (ch03 P11/P24, ch06 P10/P26, ch07 P03). The line: practice *may* teach
+  the general rule an exam item applies; it must not contain the specific proposition an exam
+  option or T/F statement tests, or reuse an exam item's distractors in the same roles
+  (ch16 P08/P09/P25, ch14 P30 → E30).
+- **One rule, one exam item:** when several Key Concepts teach the same rule (joint F-tests,
+  "linear in parameters", R² comparability, problem → remedy pairings), assign it to one exam
+  item in the blueprint and test other angles elsewhere (ch15, ch16 E30).
+- **Method-matching items** are trivial when other exam stems walk through the same design
+  (ch13: DiD after four DiD items). Pick a design no other stem describes.
+- **Words imply answers:** "peak" implies an inverted U (ch15 E08 → E07); "dropped" implies
+  the restricted model. Read every stem against its neighbors.
 - **Stems leak too:** an exam stem that states a fact (e.g., "mean ± 1 SD contains 75%")
   can rule out options in another exam item. Read every exam stem against every other
   exam item.
