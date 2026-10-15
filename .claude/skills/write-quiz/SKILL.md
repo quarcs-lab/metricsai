@@ -143,7 +143,9 @@ python3 quizzes/checks/chNN_factcheck.py        # must exit 0; every quoted numb
 ```
 
 Fix all errors. Resolve every `WARN` cue warning (or, if a warning is a deliberate,
-justified exception, note why in the log). Eyeball the fact-check's "numbers quoted in the
+justified exception, note why in the log). Read every `HINT` line (leak heuristics:
+one-step-correction feedback, computed key values printed in other exam items, practice
+keys worded like exam keys) and fix it or note why it is a false positive. Eyeball the fact-check's "numbers quoted in the
 bank" list: each must trace to a check or be self-evident (years, item counts).
 
 ## Phase 6 — Adversarial review, round 1

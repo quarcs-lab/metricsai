@@ -167,7 +167,8 @@ with sync_playwright() as p:
 
     # ---------- Practice ----------
     practice = bank["practice"]
-    p_multi = next(i for i, it in enumerate(practice) if it["type"] == "multi")
+    # first multi after item 0 (item 0 is checked, hence locked, before the multi screenshot)
+    p_multi = next(i for i, it in enumerate(practice) if it["type"] == "multi" and i > 0)
     for scheme in ("light", "dark"):
         for w in (1280, 375):
             ctx, page = new_page(browser, w, scheme)

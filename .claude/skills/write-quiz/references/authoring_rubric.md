@@ -75,6 +75,9 @@ position, feedback leaks, or cross-references between items.
   the ch02 IQR item); otherwise wrong-option feedback on the twin gives the key away.
 - **Hypothetical scenarios start with "Suppose"** so students never mistake invented
   numbers for the chapter's data.
+- **No distractor may contradict the item's own stem** ("the coin must be unfair" when the
+  stem says "a fair coin"; "ages were normal" when the stem says "far from normal"). Such
+  options are free eliminations (ch03 E04, E19).
 
 ## 5. Cue control (the validator warns on most of these — fix, don't ignore)
 
@@ -88,6 +91,10 @@ position, feedback leaks, or cross-references between items.
   four items was a permutation of A–D, so no letter ever repeated and students could rule
   out the previous letter). About 1 in 4 consecutive single items should share a key letter,
   with no run of 3+. Plan the sequence, then check with the validator.
+- **Hedges in T/F:** if every True statement is hedged ("most likely", "about") and every
+  False one is absolute ("any", "always"), the wording predicts the answer. Mix them, and
+  plan T/F flips together: flipping one item to fix a cue can force a second flip to keep
+  the split (ch03 E03 → E17).
 - **Length:** the key must not be systematically the longest. Trim the key or lengthen
   distractors so lengths overlap.
 - **Hedges and absolutes:** don't put "about / tends / may" only on the key and
@@ -96,8 +103,13 @@ position, feedback leaks, or cross-references between items.
   punctuation.
 - **Echo:** the key must not repeat the stem's wording while distractors don't.
 - **Concept labels** (`concept`, shown to failing students) are neutral topic names with a
-  section reference, never the answer. Good: "Making predictions with the fitted line
+  section reference, never the answer, and never the property under test (ch03 "Efficiency",
+  ch06 "Monte Carlo simulation and unbiasedness", "Asymptotic normality"). Good: "Making predictions with the fitted line
   (Section 1.9)". Bad: "Extrapolation is unreliable (Section 1.9)".
+
+- **Validator HINT lines** (`build_quiz.py`, "leak hints") flag likely one-step-correction
+  feedback, a computed key value printed in another exam item, and practice keys worded like
+  exam keys. They are heuristics: read every one, fix it or note why it is a false positive.
 
 ## 6. Numbers and data claims
 
@@ -115,6 +127,14 @@ position, feedback leaks, or cross-references between items.
 - **Check the data's coverage before describing it** (first/last dates, number of
   observations per period): AED_REALGDPPC ends in 2020 Q1, although the chapter says
   "1959 to 2020". Say "early 2020", not "end of 2020".
+- **Rounded products:** when an item shows "a × b ≈ c" with rounded a and b, c must equal the
+  product of the *shown* factors (ch07: the chapter's 2.052 × 11.17 ≈ 22.93 is really 22.92),
+  or write the factor symbolically ("× se(b₂)").
+- **Simulation chapters:** reproduce the chapter's seeds and draw order exactly in the
+  fact-check; chapters print `np.std` (ddof = 0) for simulated SDs while pandas `.std()` uses
+  ddof = 1. Phrase what-if values ("with n = 120…") as "closest to" so the key holds for any seed.
+- **Constants the data can't verify** (e.g., ch03's census μ and σ, given by the chapter) go in
+  a labeled block of the fact-check, not among the data checks.
 - **Chapter prose can be conceptually wrong too.** ch02 line 934 says z-scores "can
   normalize skewed distributions", but standardizing never changes a distribution's shape.
   Never build an item whose key contradicts a chapter sentence without making the item
@@ -130,6 +150,15 @@ position, feedback leaks, or cross-references between items.
   with the same answer, the same distractor set in the same roles, or explanations that
   name an exam item's answer. Mirror rather than clone (ch02: practice uses a
   *left*-skewed exam-score example where the exam uses right-skewed earnings).
+- **Computed values leak:** a number an item asks students to compute must not be printed in
+  any other exam stem or option (ch07: se = 11.17 appeared in three stems, so the SE item was
+  free). Watch derivable formulas too: ch03 printed σ = 18.61, SD(X̄) = 3.72, and n = 25 in
+  different stems, so σ/√n could be recovered without knowing it.
+- **Options teach rules:** an option or a true T/F statement must not state a rule that another
+  exam item tests (ch04: "|t| above the critical value means reject" answered the next item;
+  ch07: "3 degrees of freedom with n = 5" taught n − 2 for the df item).
+- **Practice feedback and explanations** must not state an exam item's answer, even in a
+  different scenario (ch03 P11/P24, ch06 P10/P26, ch07 P03).
 - **Stems leak too:** an exam stem that states a fact (e.g., "mean ± 1 SD contains 75%")
   can rule out options in another exam item. Read every exam stem against every other
   exam item.
@@ -146,6 +175,12 @@ Every option has its own `feedback`; every item has an `explanation` ("Key idea"
     ("you divided instead of multiplying", "you forgot the intercept"), or negate a sibling
     option;
   - TF items are exempt (the leak is accepted), but still prefer "revisit Section X".
+  - **Fully crossed items** (two dimensions × two values): give every wrong option the *same*
+    neutral feedback. Distinct feedback says which half is wrong and points to the key
+    (ch06 E04, E10).
+  - Reviewer-caught one-step corrections to avoid: "Check the value on which the interval is
+    centered", "Check which tail a lower-tailed test uses", "Check the size of the difference",
+    "Check which standard deviation belongs in the denominator", "Check the last step".
   - Good: "Check how the t value is formed from the coefficient and its standard error
     (Section 1.7)." Bad: "This ratio is upside down."
 - **Explanation (Key idea):** 1–3 sentences, cites the Key Concept or section, may state
@@ -171,5 +206,6 @@ Use the chapter's terminology and keep definitions precise:
   (display); in JSON, backslashes are doubled: `"\\( \\hat{\\beta}_1 \\)"`.
 - Allowed inline HTML: `<b> <i> <sub> <sup> <br> <code>`. A literal less-than sign is
   `&lt;` (e.g., `p &lt; 0.001`).
-- Plain Unicode is fine for simple symbols (R², β₁, ×, −, ≈, ÷).
+- Plain Unicode is fine for simple symbols (R², β₁, ×, −, ≈, ÷). Within one item, write a
+  symbol either in KaTeX or in Unicode, not both (mixed fonts in ch06 E18).
 - Never put `<script` anywhere (the validator rejects it).

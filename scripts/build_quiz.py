@@ -244,7 +244,7 @@ def cue_warnings(bank: dict) -> list[str]:
             longest_run = max(len(list(g)) for _, g in groupby(seq))
             if repeats == 0:
                 warns.append(f"{set_name}: single keys never repeat back to back ({''.join(LETTERS[k] for k in seq)}); let some consecutive items share a letter")
-            if longest_run >= 4:
+            if longest_run >= 3:
                 warns.append(f"{set_name}: {longest_run} consecutive single items share the same key letter ({''.join(LETTERS[k] for k in seq)})")
 
         # Correct option is clearly the longest (>= 15% and >= 8 characters longer than any distractor)
@@ -291,6 +291,61 @@ def cue_warnings(bank: dict) -> list[str]:
     return warns
 
 
+CORRECTION_RE = re.compile(
+    r"\b(forgot|forgetting|you (?:divided|multiplied|used|swapped|subtracted|added|reversed)|square root|upside down|"
+    r"the other way around|check (?:which|whether|the sign|the last step|the order)|direction is wrong)\b", re.I)
+LEAK_NUM_RE = re.compile(r"\d[\d,]*\.\d+|\d{1,3}(?:,\d{3})+|\d{3,}")
+STOPWORDS = {"the", "a", "an", "of", "is", "are", "to", "in", "and", "or", "that", "it", "its", "be", "by", "for", "on",
+             "with", "as", "this", "not", "so", "at", "from", "than", "which", "would", "can", "has", "have"}
+
+
+def cue_hints(bank: dict) -> list[str]:
+    """Heuristic leak detectors (ch03-ch07 reviews). Not counted as warnings: read each one and fix it or
+    justify it in the log. False positives are expected (e.g., a scenario number shared by several items)."""
+    hints: list[str] = []
+    for set_name in SETS:
+        singles = [it for it in bank[set_name] if it["type"] == "single"]
+        strict = []
+        for it in singles:
+            lens = [len(plain(o["text"])) for o in it["options"]]
+            k = [o["correct"] for o in it["options"]].index(True)
+            if lens[k] > max(l for i, l in enumerate(lens) if i != k):
+                strict.append(it["id"])
+        if singles and len(strict) / len(singles) > 0.40:
+            hints.append(f"{set_name}: key is strictly the longest option in {len(strict)}/{len(singles)} single items ({', '.join(strict)})")
+
+    exam = [it for it in bank["exam"] if it["type"] != "tf"]
+    # 1. Exam wrong-option feedback that reads like a one-step correction (shown without the key below 80%)
+    for it in exam:
+        for o_idx, o in enumerate(it["options"]):
+            m = CORRECTION_RE.search(plain(o["feedback"]))
+            if not o["correct"] and m:
+                hints.append(f"exam {it['id']} option {LETTERS[o_idx]}: feedback may be a one-step correction (\"{m.group(0)}\")")
+    # 2. A number computed in one exam key (absent from its own stem) printed in another exam item's stem/options
+    visible = {it["id"]: plain(it["stem"]) + " " + " ".join(plain(o["text"]) for o in it["options"]) for it in bank["exam"]}
+    for it in exam:
+        own = plain(it["stem"])
+        nums = {n for o in it["options"] if o["correct"] for n in LEAK_NUM_RE.findall(plain(o["text"]))}
+        for num in sorted(n for n in nums if n not in own):
+            pat = r"(?<![\d.,])" + re.escape(num) + r"(?![\d]|[.,]\d)"
+            others = [j for j, txt in visible.items() if j != it["id"] and re.search(pat, txt)]
+            if others:
+                hints.append(f"exam {it['id']}: computed key value {num} is printed in {', '.join(others)}")
+    # 3. Practice key worded like an exam key (pre-teaches the exam answer)
+    def words(t: str) -> set[str]:
+        return set(re.findall(r"[a-z0-9]+", plain(t).lower())) - STOPWORDS
+    p_keys = [(it["id"], words(o["text"])) for it in bank["practice"] if it["type"] != "tf" for o in it["options"] if o["correct"]]
+    for it in exam:
+        for o in it["options"]:
+            ew = words(o["text"])
+            if not o["correct"] or len(ew) < 5:
+                continue
+            for pid, pw in p_keys:
+                if len(pw) >= 5 and len(ew & pw) / len(ew | pw) >= 0.5:
+                    hints.append(f"exam {it['id']} key is worded like practice {pid} key (mirror, don't clone)")
+    return list(dict.fromkeys(hints))
+
+
 def chapter_number(chapter: str) -> str:
     stripped = str(chapter).lstrip("0")
     return stripped or "0"
@@ -329,6 +384,10 @@ def main() -> int:
     for w in warns:
         print(f"  WARN {w}")
     print(f"  cue warnings: {len(warns)}")
+    hints = cue_hints(bank)
+    for h in hints:
+        print(f"  HINT {h}")
+    print(f"  leak hints: {len(hints)} (review each; not blocking)")
     if args.check:
         return 0
 

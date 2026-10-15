@@ -1,0 +1,775 @@
+{
+  "meta": {
+    "chapter": "06",
+    "chapter_title": "The Least Squares Estimator",
+    "book_title": "metricsAI: An Introduction to Econometrics with Python and AI in the Cloud",
+    "minutes": 45,
+    "pass_pct": 80,
+    "n_items": 30
+  },
+  "practice": [
+    {
+      "id": "P01",
+      "type": "single",
+      "concept": "Conditional mean (Section 6.1, Key Concepts)",
+      "stem": "Suppose y = 3 + 5x + u with E[u | x] = 0. What is the conditional mean E[y | x = 2]?",
+      "options": [
+        {"text": "10", "correct": false, "feedback": "This is 5 × 2 only. The conditional mean also includes the intercept, 3."},
+        {"text": "8", "correct": false, "feedback": "This is 3 + 5, which ignores the value x = 2. Multiply the slope by x first."},
+        {"text": "13", "correct": true, "feedback": "Correct: E[y | x = 2] = 3 + 5 × 2 = 13, because the error averages to zero at every x."},
+        {"text": "5", "correct": false, "feedback": "5 is the slope, the change in E[y | x] per unit of x, not the conditional mean at x = 2."}
+      ],
+      "explanation": "Because E[u | x] = 0, the conditional mean is the population line: E[y | x] = 3 + 5x, so E[y | x = 2] = 13. Individual y values scatter around 13 through u."
+    },
+    {
+      "id": "P02",
+      "type": "multi",
+      "concept": "Population and sample regression (Section 6.1, Key Concept 6.1)",
+      "stem": "Suppose the population model for weekly earnings is E[earnings | hours] = β₁ + β₂ × hours, and a survey of 200 workers gives the fitted line ŷ = 50 + 18 × hours. Which statements are correct? (Select all that apply.)",
+      "options": [
+        {"text": "The number 18 is an estimate b₂ of the unknown population slope β₂.", "correct": true, "feedback": "Correct: 18 comes from this sample, so it is the estimate b₂, not the population parameter itself."},
+        {"text": "β₂ equals 18, because OLS recovers the population slope exactly.", "correct": false, "feedback": "OLS gives an estimate. A different sample would give a different b₂, while β₂ stays the same."},
+        {"text": "A second survey of 200 different workers would give exactly the same fitted line.", "correct": false, "feedback": "Different samples contain different workers and different errors, so they give different estimates (sampling variability)."},
+        {"text": "β₁ and β₂ are fixed numbers that do not change from sample to sample.", "correct": true, "feedback": "Correct: population parameters are fixed (and unknown); only the estimates b₁ and b₂ change across samples."}
+      ],
+      "explanation": "Key Concept 6.1: the population line β₁ + β₂x has fixed, unknown parameters; the sample line b₁ + b₂x is computed from data and changes from sample to sample."
+    },
+    {
+      "id": "P03",
+      "type": "tf",
+      "concept": "Error term and residual (Section 6.1, Key Concept 6.2)",
+      "stem": "The residual e can be computed from the data, while the error u cannot, because u is measured from the unknown population line.",
+      "options": [
+        {"text": "True", "correct": true, "feedback": "Correct. The residual uses the estimated line b₁ + b₂x, which we can compute; the error uses β₁ + β₂x, which we never observe."},
+        {"text": "False", "correct": false, "feedback": "Revisit Key Concept 6.2: which line is each deviation measured from, and is that line known?"}
+      ],
+      "explanation": "Key Concept 6.2: u = y − E[y | x] is unobservable because β₁ and β₂ are unknown; e = y − ŷ is observable. We use residuals to learn about errors."
+    },
+    {
+      "id": "P04",
+      "type": "single",
+      "concept": "Error term and residual (Section 6.1, Key Concept 6.2)",
+      "stem": "Suppose the population model is y = 8 + 4x + u and the sample regression line is ŷ = 7 + 4.5x. For the observation (x, y) = (4, 25), what is the residual e?",
+      "options": [
+        {"text": "0", "correct": true, "feedback": "Correct: ŷ = 7 + 4.5 × 4 = 25, so e = 25 − 25 = 0. This observation sits exactly on the sample line."},
+        {"text": "1", "correct": false, "feedback": "1 is the error u = 25 − (8 + 4 × 4) = 25 − 24, measured from the population line. The residual is measured from the sample line."},
+        {"text": "−1", "correct": false, "feedback": "This is the error with the subtraction reversed. The residual uses the sample line: e = y − ŷ."},
+        {"text": "25", "correct": false, "feedback": "25 is the fitted value ŷ (and also the observed y). The residual is the difference between them."}
+      ],
+      "explanation": "Residual e = y − ŷ, measured from the sample line: 25 − (7 + 4.5 × 4) = 0. The error u = y − E[y | x] = 25 − 24 = 1 is measured from the population line. They differ because b₁ and b₂ differ from β₁ and β₂."
+    },
+    {
+      "id": "P05",
+      "type": "single",
+      "concept": "Population parameters and sample estimates (Section 6.2)",
+      "stem": "Suppose the true model is y = 3 + 5x + u, and one sample yields ŷ = 2 + 6x. What is the best conclusion?",
+      "options": [
+        {"text": "This is ordinary sampling variability; another sample would give different estimates.", "correct": true, "feedback": "Correct. Any single sample gives estimates that differ from the true values; this says nothing about OLS failing."},
+        {"text": "OLS failed, because the estimate b₂ = 6 differs from the true β₂ = 5.", "correct": false, "feedback": "A single estimate is almost never exactly equal to the parameter. That alone is not a failure of OLS."},
+        {"text": "The true slope must really be 6, because that is what the data show.", "correct": false, "feedback": "The true slope is fixed at 5 in this model; 6 is one sample's estimate of it."},
+        {"text": "OLS is biased upward, because this sample's estimate exceeds the true slope.", "correct": false, "feedback": "Bias concerns the average over many samples, not one sample. One estimate above 5 is consistent with unbiasedness."}
+      ],
+      "explanation": "Key Concept 6.1: different samples yield different estimates. Unbiasedness says the average of b₂ over many samples equals β₂; it does not promise b₂ = β₂ in any one sample."
+    },
+    {
+      "id": "P06",
+      "type": "single",
+      "concept": "Population parameters and sample estimates (Section 6.2)",
+      "stem": "Suppose three research teams each draw a random sample of 100 households from the same city and regress spending on income. Their slopes are 0.62, 0.71, and 0.66. What can they conclude about the population slope β₂?",
+      "options": [
+        {"text": "β₂ equals 0.66, the middle of the three estimates.", "correct": false, "feedback": "0.66 is just one more estimate; nothing makes the middle value equal to the parameter."},
+        {"text": "β₂ must lie between 0.62 and 0.71.", "correct": false, "feedback": "Three estimates do not bound the parameter; all three could lie on the same side of β₂."},
+        {"text": "β₂ is one fixed number; none of the estimates has to equal it.", "correct": true, "feedback": "Correct. All three teams estimate the same β₂, and each estimate differs from it through sampling variability."},
+        {"text": "β₂ is different for each team, since each team surveyed different households.", "correct": false, "feedback": "The population, and hence β₂, is the same for all three teams; only the samples differ."}
+      ],
+      "explanation": "Section 6.2: samples from the same population give different estimates of one fixed parameter. No single estimate, nor their range, pins down β₂; standard errors quantify how far an estimate is likely to be from it."
+    },
+    {
+      "id": "P07",
+      "type": "multi",
+      "concept": "Population parameters and sample estimates (Section 6.2)",
+      "stem": "In a simulation like the chapter's, many samples are drawn from y = 1 + 2x + u. Which quantities change from one sample to the next? (Select all that apply.)",
+      "options": [
+        {"text": "The true slope β₂ = 2", "correct": false, "feedback": "β₂ is part of the data-generating process, which is the same for every sample."},
+        {"text": "The estimated slope b₂", "correct": true, "feedback": "Correct: b₂ is computed from each sample, so it varies."},
+        {"text": "The error standard deviation σᵤ", "correct": false, "feedback": "σᵤ = 2 is fixed by the data-generating process; each sample draws new errors, but from the same distribution."},
+        {"text": "The residuals e", "correct": true, "feedback": "Correct: residuals depend on the sample's data and its fitted line, so they change."},
+        {"text": "The estimated intercept b₁", "correct": true, "feedback": "Correct: like b₂, b₁ is computed from the sample."}
+      ],
+      "explanation": "Parameters (β₁, β₂, σᵤ) describe the population and stay fixed; anything computed from a sample (b₁, b₂, residuals, sₑ) varies from sample to sample."
+    },
+    {
+      "id": "P08",
+      "type": "single",
+      "concept": "OLS assumptions (Section 6.3, Key Concept 6.3)",
+      "stem": "Suppose monthly sales data have errors such that a positive shock this month tends to be followed by a positive shock next month. Which OLS assumption is violated?",
+      "options": [
+        {"text": "Correct model (linearity)", "correct": false, "feedback": "Nothing here says the relationship is curved; the issue is how the errors relate over time."},
+        {"text": "Independence of the errors", "correct": true, "feedback": "Correct. Errors that carry over from month to month are correlated (autocorrelation), violating assumption 4."},
+        {"text": "Mean-zero errors", "correct": false, "feedback": "The errors could still average to zero at every x; the problem is that they are related to each other."},
+        {"text": "Homoskedasticity", "correct": false, "feedback": "Homoskedasticity concerns the size of the error variance, not whether errors are related across observations."}
+      ],
+      "explanation": "Key Concept 6.3: assumption 4 requires errors to be independent across observations. In time series, a shock that persists into the next period violates it (autocorrelation)."
+    },
+    {
+      "id": "P09",
+      "type": "multi",
+      "concept": "OLS assumptions (Section 6.3, Key Concept 6.3)",
+      "stem": "Which of these situations violate at least one of the four OLS assumptions? (Select all that apply.)",
+      "options": [
+        {"text": "The true relationship is y = β₁ + β₂x² + u, but the model fitted is y = β₁ + β₂x + u.", "correct": true, "feedback": "Correct: the model is misspecified, violating assumption 1 (correct model)."},
+        {"text": "An important variable z that is correlated with x is omitted, so E[u | x] ≠ 0.", "correct": true, "feedback": "Correct: this violates assumption 2 (mean-zero errors), the source of omitted variable bias."},
+        {"text": "The errors are independent draws from a normal distribution with mean 0 and variance 4.", "correct": false, "feedback": "This is exactly the chapter's generated data-generating process, which satisfies all four assumptions."},
+        {"text": "In time-series data, the errors follow uₜ = 0.7uₜ₋₁ + εₜ.", "correct": true, "feedback": "Correct: today's error depends on yesterday's, violating assumption 4 (independence)."},
+        {"text": "The error variance is larger for women than for men in an earnings regression.", "correct": true, "feedback": "Correct: the variance differs across observations, violating assumption 3 (homoskedasticity)."}
+      ],
+      "explanation": "Key Concept 6.3: (1) correct model, (2) E[u | x] = 0, (3) constant variance, (4) independent errors. Nonlinearity, omitted variables, unequal variances, and autocorrelation each break one of them."
+    },
+    {
+      "id": "P10",
+      "type": "single",
+      "concept": "OLS assumptions (Section 6.3, Key Concept 6.3)",
+      "stem": "Suppose the true relationship between y and x is curved, but a researcher fits a straight line, so assumption 1 (correct model) fails. Which consequence does Chapter 6 describe?",
+      "options": [
+        {"text": "The estimates are still unbiased, because OLS always finds the best-fitting line.", "correct": false, "feedback": "OLS finds the best straight line in every sample, but when the model is wrong that line does not center on the true relationship."},
+        {"text": "Robust standard errors fully fix the problem.", "correct": false, "feedback": "Robust standard errors change only the standard errors; they cannot repair a misspecified model."},
+        {"text": "Nothing changes, as long as the sample is large.", "correct": false, "feedback": "A wrong model does not become right as n grows."},
+        {"text": "The estimates are biased, and a larger sample does not remove the bias.", "correct": true, "feedback": "Correct. Assumption 1 is essential: with a misspecified model, OLS is biased and inconsistent."}
+      ],
+      "explanation": "Key Takeaways and Common Mistakes to Avoid: assumptions 1–2 are essential for unbiasedness and consistency; a straight-line fit to a nonlinear relationship gives biased estimates, and more data do not fix it."
+    },
+    {
+      "id": "P11",
+      "type": "tf",
+      "concept": "OLS assumptions (Section 6.3, Key Concept 6.3)",
+      "stem": "The homoskedasticity assumption requires the errors to be normally distributed.",
+      "options": [
+        {"text": "True", "correct": false, "feedback": "Homoskedasticity is about the variance of the errors, not their distribution's shape. Revisit Key Concept 6.3."},
+        {"text": "False", "correct": true, "feedback": "Correct. Homoskedasticity means Var[u | x] is the same at every x; it says nothing about normality."}
+      ],
+      "explanation": "Key Concept 6.3: homoskedasticity (\"same scattering\") means constant error variance, Var[u | x] = σᵤ². Normality is a separate assumption about the shape of the error distribution."
+    },
+    {
+      "id": "P12",
+      "type": "single",
+      "concept": "OLS assumptions (Section 6.3, Key Concept 6.3)",
+      "stem": "Which property of OLS requires only assumptions 1 and 2 (correct model and mean-zero errors)?",
+      "options": [
+        {"text": "That sₑ² is an unbiased estimate of σᵤ²", "correct": false, "feedback": "sₑ² estimates a single error variance σᵤ², which exists only if the variance is constant (assumption 3)."},
+        {"text": "Being the Best Linear Unbiased Estimator", "correct": false, "feedback": "The Gauss–Markov (BLUE) result needs all four assumptions."},
+        {"text": "Unbiasedness, E[b₂] = β₂", "correct": true, "feedback": "Correct. Section 6.3 shows that unbiasedness needs only assumptions 1–2."},
+        {"text": "Valid default standard errors and confidence intervals", "correct": false, "feedback": "Default standard errors rely on assumptions 3–4 as well."}
+      ],
+      "explanation": "Section 6.3: under assumptions 1–2 alone, E[b₂] = β₂; the other listed properties also rely on assumptions 3–4."
+    },
+    {
+      "id": "P13",
+      "type": "tf",
+      "concept": "Unbiasedness (Section 6.3, Key Concept 6.4)",
+      "stem": "An unbiased estimator gives the true parameter value in every sample.",
+      "options": [
+        {"text": "True", "correct": false, "feedback": "Unbiasedness is a statement about the average over many samples. Revisit Key Concept 6.4."},
+        {"text": "False", "correct": true, "feedback": "Correct. Unbiasedness means E[b₂] = β₂: estimates vary from sample to sample, but they center on the true value."}
+      ],
+      "explanation": "Key Concept 6.4: unbiased means correct on average across repeated samples. Any single estimate typically misses; the standard error measures by how much."
+    },
+    {
+      "id": "P14",
+      "type": "single",
+      "concept": "Monte Carlo simulation (Section 6.3, Key Concept 6.4)",
+      "stem": "Suppose a Monte Carlo study draws 2,000 samples from y = 2 + 3x + u. The slope estimates have a mean of 3.004 and a standard deviation of 0.40. What does the mean suggest?",
+      "options": [
+        {"text": "OLS is biased, because 3.004 is not exactly 3.", "correct": false, "feedback": "With a finite number of simulations, the average will not be exactly 3; a difference of 0.004 is tiny compared with the spread of 0.40."},
+        {"text": "Each individual estimate lies within about 0.004 of the true slope of 3.", "correct": false, "feedback": "The mean describes the center of the estimates, not each one; the SD of 0.40 shows individual estimates vary a lot."},
+        {"text": "The estimates center on 3, consistent with unbiasedness.", "correct": true, "feedback": "Correct. An average this close to 3 is what unbiasedness predicts."},
+        {"text": "The bias of OLS equals the standard deviation of the estimates, 0.40.", "correct": false, "feedback": "The SD measures spread around the center (precision), not bias."}
+      ],
+      "explanation": "Key Concept 6.4: Monte Carlo shows unbiasedness when the mean of many estimates is close to the true parameter. The standard deviation measures sampling variability, a different property."
+    },
+    {
+      "id": "P15",
+      "type": "single",
+      "concept": "Monte Carlo simulation (Section 6.3, Key Concept 6.4)",
+      "stem": "Suppose the sampling distribution of b₂ is approximately normal with mean 0.5 and standard deviation 0.1. Using the ±2 standard deviation rule, about 95% of estimates fall in which range?",
+      "options": [
+        {"text": "0.3 to 0.7", "correct": true, "feedback": "Correct: 0.5 ± 2 × 0.1 = 0.3 to 0.7."},
+        {"text": "0.4 to 0.6", "correct": false, "feedback": "This is ±1 standard deviation, which covers about 68% of a normal distribution."},
+        {"text": "0.2 to 0.8", "correct": false, "feedback": "This is ±3 standard deviations, which covers almost all (about 99.7%) estimates."},
+        {"text": "0.5 to 0.7", "correct": false, "feedback": "This goes only from the mean up to +2 SD. The band runs 2 SD on both sides of the mean."}
+      ],
+      "explanation": "For an approximately normal sampling distribution, about 95% of estimates fall within ±2 standard deviations of the mean: 0.5 ± 0.2."
+    },
+    {
+      "id": "P16",
+      "type": "single",
+      "concept": "Monte Carlo simulation (Section 6.3, Key Concept 6.4)",
+      "stem": "A student reruns a Monte Carlo study with 5,000 simulated samples instead of 500, keeping n = 50 observations per sample. What should happen to the average of the slope estimates?",
+      "options": [
+        {"text": "It moves further from the true slope, because more samples add more noise.", "correct": false, "feedback": "More simulations average out noise across samples; they do not add bias."},
+        {"text": "It settles closer to the true slope.", "correct": true, "feedback": "Correct. With more simulations, the average of the estimates is a more accurate picture of where the sampling distribution centers."},
+        {"text": "It moves toward zero, because estimates cancel out across samples.", "correct": false, "feedback": "Estimates above and below the true slope cancel around the true slope, not around zero."},
+        {"text": "It equals the true slope exactly in every rerun.", "correct": false, "feedback": "With any finite number of simulations, the average still differs slightly from the true value."}
+      ],
+      "explanation": "Section 6.3: more simulations bring the average of the estimates closer to the true parameter."
+    },
+    {
+      "id": "P17",
+      "type": "multi",
+      "concept": "Monte Carlo simulation (Section 6.3, Key Concept 6.4)",
+      "stem": "What can a Monte Carlo simulation, as used in Chapter 6, do? (Select all that apply.)",
+      "options": [
+        {"text": "Estimate β₂ in a real dataset where the true value is unknown", "correct": false, "feedback": "A simulation generates artificial data from a model you specify; it does not reveal the parameters behind real data."},
+        {"text": "Check whether an estimator centers on a parameter value the researcher chose", "correct": true, "feedback": "Correct: because you set the true values, you can compare the average estimate with them."},
+        {"text": "Show the shape and spread of an estimator's sampling distribution", "correct": true, "feedback": "Correct: a histogram of many estimates displays the sampling distribution."},
+        {"text": "Prove that OLS is unbiased in every real dataset, whatever the assumptions", "correct": false, "feedback": "A simulation illustrates properties under the assumptions built into the DGP; it says nothing about data that violate them."}
+      ],
+      "explanation": "Key Concept 6.4: Monte Carlo simulation draws many samples from a known model to show, empirically, how an estimator behaves: where it centers (unbiasedness) and how it is distributed."
+    },
+    {
+      "id": "P18",
+      "type": "single",
+      "concept": "Variance and standard error of b₂ (Sections 6.3 and 6.4, Key Concept 6.6)",
+      "stem": "The standard deviation of b₂ is \\( \\sigma_{b_2} = \\sigma_u / \\sqrt{\\sum (x_i - \\bar{x})^2} \\). Why does regression output report se(b₂) instead?",
+      "options": [
+        {"text": "Because \\( \\sigma_{b_2} \\) is always larger than se(b₂).", "correct": false, "feedback": "Neither is always larger; se(b₂) is an estimate of \\( \\sigma_{b_2} \\) and can fall on either side of it."},
+        {"text": "Because se(b₂), unlike \\( \\sigma_{b_2} \\), does not depend on the x values.", "correct": false, "feedback": "Both expressions divide by the spread of x, Σ(xᵢ − x̄)²."},
+        {"text": "Because \\( \\sigma_{b_2} \\) applies only to time-series data, not to cross-sections.", "correct": false, "feedback": "The formula applies to any data satisfying assumptions 1–4."},
+        {"text": "Because \\( \\sigma_{b_2} \\) depends on σᵤ, which is unknown in practice.", "correct": true, "feedback": "Correct. se(b₂) replaces the unknown σᵤ with its estimate sₑ."}
+      ],
+      "explanation": "Section 6.3: \\( \\sigma_{b_2} \\) depends on the unknown error standard deviation σᵤ. Replacing σᵤ with sₑ gives the standard error se(b₂) = sₑ / √Σ(xᵢ − x̄)², which can be computed from one sample."
+    },
+    {
+      "id": "P19",
+      "type": "single",
+      "concept": "Standard error of the regression (Section 6.4, Key Concept 6.5)",
+      "stem": "A regression with n = 30 observations has a residual sum of squares of 112. What is the standard error of the regression, sₑ?",
+      "options": [
+        {"text": "1.93", "correct": false, "feedback": "This divides by n = 30. Revisit Key Concept 6.5 on the degrees of freedom."},
+        {"text": "4.00", "correct": false, "feedback": "4.00 is sₑ², the estimated error variance. Take its square root."},
+        {"text": "1.97", "correct": false, "feedback": "This divides by n − 1 = 29, as for a sample variance. A regression estimates two coefficients."},
+        {"text": "2.00", "correct": true, "feedback": "Correct: sₑ = √[112 / (30 − 2)] = √4 = 2."}
+      ],
+      "explanation": "Key Concept 6.5: sₑ = √[RSS / (n − 2)] = √(112 / 28) = 2. The divisor is n − 2 because two coefficients were estimated."
+    },
+    {
+      "id": "P20",
+      "type": "single",
+      "concept": "Standard error of the regression (Section 6.4, Key Concept 6.5)",
+      "stem": "Why does the estimate of the error variance divide the residual sum of squares by n − 2 rather than by n?",
+      "options": [
+        {"text": "Two observations are lost when the residuals are computed.", "correct": false, "feedback": "Every observation keeps its residual; the adjustment is about what was estimated from the data."},
+        {"text": "Two coefficients, b₁ and b₂, were estimated from the same data.", "correct": true, "feedback": "Correct. Each estimated coefficient uses up one degree of freedom, and the n − 2 divisor makes sₑ² unbiased for σᵤ²."},
+        {"text": "The first and last observations carry no information about the errors.", "correct": false, "feedback": "No observation is set aside; the correction reflects the two estimated coefficients."},
+        {"text": "There are two variables in the regression, x and y.", "correct": false, "feedback": "The count is of estimated parameters (intercept and slope), not of variables."}
+      ],
+      "explanation": "Key Concept 6.5: degrees of freedom = sample size minus number of estimated parameters. With b₁ and b₂ estimated, n − 2 remain, and dividing by n − 2 makes sₑ² an unbiased estimator of σᵤ²."
+    },
+    {
+      "id": "P21",
+      "type": "single",
+      "concept": "Variance and standard error of b₂ (Sections 6.3 and 6.4, Key Concept 6.6)",
+      "stem": "A regression has sₑ = 2 and Σ(xᵢ − x̄)² = 50 with n = 30. What is se(b₂)?",
+      "options": [
+        {"text": "0.28", "correct": true, "feedback": "Correct: se(b₂) = 2 / √50 ≈ 0.283."},
+        {"text": "0.04", "correct": false, "feedback": "This divides by 50 itself. The formula uses the square root of Σ(xᵢ − x̄)²."},
+        {"text": "14.1", "correct": false, "feedback": "This multiplies by √50. A wider spread in x makes the standard error smaller, so the spread belongs in the denominator."},
+        {"text": "0.37", "correct": false, "feedback": "This divides by √n = √30. The formula uses the spread of x, Σ(xᵢ − x̄)², not n alone."}
+      ],
+      "explanation": "Key Concept 6.6: se(b₂) = sₑ / √Σ(xᵢ − x̄)² = 2 / √50 ≈ 0.28. A spread four times larger (200) would halve it."
+    },
+    {
+      "id": "P22",
+      "type": "multi",
+      "concept": "Precision of the slope estimate (Section 6.4, Key Concept 6.6)",
+      "stem": "Suppose an agronomist regresses crop yield (y) on fertilizer per hectare (x). Which design choices would give a more precise slope estimate? (Select all that apply.)",
+      "options": [
+        {"text": "Applying amounts from 0 to 200 kg instead of 90 to 110 kg", "correct": true, "feedback": "Correct: a wider spread of x raises Σ(xᵢ − x̄)², the denominator of se(b₂)."},
+        {"text": "Choosing plots with a higher average amount, but the same spread", "correct": false, "feedback": "se(b₂) depends on how spread out x is around its mean, not on where the mean lies."},
+        {"text": "Using 400 plots instead of 100, chosen the same way", "correct": true, "feedback": "Correct: more observations add to Σ(xᵢ − x̄)², lowering se(b₂)."},
+        {"text": "Mixing plots of very different soil quality, so yields scatter more around the line", "correct": false, "feedback": "More scatter around the line raises sₑ, the numerator of se(b₂), making the slope less precise."}
+      ],
+      "explanation": "Key Concept 6.6: se(b₂) = sₑ / √Σ(xᵢ − x̄)². A wider range of x and more observations enlarge the denominator; extra scatter around the line enlarges the numerator."
+    },
+    {
+      "id": "P23",
+      "type": "single",
+      "concept": "Precision of the slope estimate (Section 6.4, Key Concept 6.6)",
+      "stem": "Suppose se(b₂) = 0.6 with n = 100. Keeping the same design, roughly how many observations are needed to cut se(b₂) to 0.3?",
+      "options": [
+        {"text": "200", "correct": false, "feedback": "Doubling n cuts the standard error only by a factor of √2 (about 30%), not by half."},
+        {"text": "50", "correct": false, "feedback": "Fewer observations make the standard error larger, not smaller."},
+        {"text": "400", "correct": true, "feedback": "Correct: precision improves with √n, so halving the standard error takes 4 × 100 = 400 observations."},
+        {"text": "10,000", "correct": false, "feedback": "This squares n. The standard error falls with √n, so halving it needs four times the observations."}
+      ],
+      "explanation": "Key Takeaways: precision improves with √n, so you need four times as many observations to halve the standard error: 100 × 4 = 400."
+    },
+    {
+      "id": "P24",
+      "type": "tf",
+      "concept": "Precision of the slope estimate (Section 6.4, Key Concept 6.6)",
+      "stem": "Doubling the sample size, with the same design, cuts the standard error of b₂ by roughly 30%, not by half.",
+      "options": [
+        {"text": "True", "correct": true, "feedback": "Correct. The standard error falls with √n: doubling n multiplies it by 1/√2 ≈ 0.71, a cut of about 30%."},
+        {"text": "False", "correct": false, "feedback": "Revisit how the standard error scales with the sample size (Key Takeaways: Factors Affecting Precision)."}
+      ],
+      "explanation": "Standard errors shrink with √n. Doubling n multiplies se(b₂) by 1/√2 ≈ 0.71, about 30% smaller, not half."
+    },
+    {
+      "id": "P25",
+      "type": "single",
+      "concept": "Precision of the intercept (Section 6.4)",
+      "stem": "Suppose schooling (x) ranges from 10 to 20 in a wage regression. A researcher re-runs it using x − 15 as the regressor. What happens to the standard error of the intercept?",
+      "options": [
+        {"text": "It stays the same, because the data are unchanged.", "correct": false, "feedback": "The data are the same, but the intercept now refers to a different point, x − 15 = 0, that is, x = 15."},
+        {"text": "It falls, because x = 0 now lies in the middle of the data.", "correct": true, "feedback": "Correct. The intercept is now the line's height at schooling 15, inside the data, so no extrapolation is needed."},
+        {"text": "It rises, because some x values become negative.", "correct": false, "feedback": "Negative values are harmless; what matters is how far x = 0 is from the data, and Σxᵢ² is now smaller."},
+        {"text": "It falls, because the slope estimate also becomes smaller.", "correct": false, "feedback": "Shifting x by a constant leaves the slope and its standard error unchanged."}
+      ],
+      "explanation": "Section 6.4: se(b₁) grows with Σxᵢ², reflecting extrapolation to x = 0. Centering x at 15 puts x = 0 in the middle of the data, so the intercept becomes much more precise; the slope is unchanged."
+    },
+    {
+      "id": "P26",
+      "type": "single",
+      "concept": "Sampling distribution of b₂ in large samples (Section 6.3)",
+      "stem": "Why does the approximate normality of b₂ matter for empirical work?",
+      "options": [
+        {"text": "It guarantees that b₂ equals β₂ exactly once the sample is large enough.", "correct": false, "feedback": "Normality describes the shape of the sampling distribution; estimates still vary around β₂."},
+        {"text": "It lets us build confidence intervals and tests with normal critical values.", "correct": true, "feedback": "Correct. Knowing the sampling distribution's shape is what makes probability statements about b₂ possible."},
+        {"text": "It shows that the dependent variable y is itself normally distributed.", "correct": false, "feedback": "The result is about the estimator b₂, not about the distribution of y."},
+        {"text": "It shows that the sample size must be at least 1,000.", "correct": false, "feedback": "No cutoff is set in Chapter 6; the normal approximation simply improves as n grows."}
+      ],
+      "explanation": "Section 6.3: because b₂ is approximately normal (by the CLT), intervals such as b₂ ± 2 × se(b₂) and hypothesis tests can be based on the normal (or, in Chapter 7, the t) distribution."
+    },
+    {
+      "id": "P27",
+      "type": "tf",
+      "concept": "Sampling distribution of b₂ in large samples (Section 6.3)",
+      "stem": "The Central Limit Theorem implies that the individual values of y become normally distributed as the sample size grows.",
+      "options": [
+        {"text": "True", "correct": false, "feedback": "The theorem is about the distribution of an estimator computed from the sample. Revisit Section 6.3."},
+        {"text": "False", "correct": true, "feedback": "Correct. The CLT concerns the sampling distribution of b₂ (a weighted sum of the y values), not the distribution of individual observations."}
+      ],
+      "explanation": "Section 6.3: by the CLT, (b₂ − β₂) / \\( \\sigma_{b_2} \\) approaches a standard normal as n grows. The individual observations keep whatever distribution they have."
+    },
+    {
+      "id": "P28",
+      "type": "single",
+      "concept": "Gauss–Markov Theorem and BLUE (Section 6.3, Key Concept 6.7)",
+      "stem": "In \"Best Linear Unbiased Estimator,\" what does the word \"linear\" refer to?",
+      "options": [
+        {"text": "The fitted regression line is a straight line.", "correct": false, "feedback": "\"Linear\" in BLUE describes how the estimator is computed from the data, not the shape of the fitted line."},
+        {"text": "The x values must increase in equal steps.", "correct": false, "feedback": "BLUE puts no condition on the spacing of x."},
+        {"text": "The variance of the estimator grows linearly with n.", "correct": false, "feedback": "The variance of b₂ shrinks as n grows; \"linear\" refers to the estimator's formula."},
+        {"text": "The estimator is a weighted sum of the y values.", "correct": true, "feedback": "Correct: b₂ = Σwᵢyᵢ, a linear combination of the y values."}
+      ],
+      "explanation": "Key Takeaways: \"linear\" means the estimator is a linear combination of the y values, b₂ = Σwᵢyᵢ; it says nothing about the shape of the fitted line."
+    },
+    {
+      "id": "P29",
+      "type": "tf",
+      "concept": "Gauss–Markov Theorem and BLUE (Section 6.3, Key Concept 6.7)",
+      "stem": "OLS can be the Best Linear Unbiased Estimator even when the errors are not normally distributed.",
+      "options": [
+        {"text": "True", "correct": true, "feedback": "Correct. The Gauss–Markov Theorem uses assumptions 1–4, and none of them requires normal errors."},
+        {"text": "False", "correct": false, "feedback": "Revisit Key Concept 6.7: which assumptions does the Gauss–Markov Theorem use?"}
+      ],
+      "explanation": "Key Concept 6.7: the theorem uses assumptions 1–4, none of which requires normal errors."
+    },
+    {
+      "id": "P30",
+      "type": "single",
+      "concept": "Interpreting a standard error (Section 6.3, Key Takeaways)",
+      "stem": "Suppose a regression gives b₂ = 15 with se(b₂) = 4. Using the ±2 standard error rule, what is an approximate 95% confidence interval for β₂?",
+      "options": [
+        {"text": "7 to 23", "correct": true, "feedback": "Correct: 15 ± 2 × 4 = 7 to 23."},
+        {"text": "11 to 19", "correct": false, "feedback": "This is ±1 standard error, which gives roughly a 68% interval."},
+        {"text": "13 to 17", "correct": false, "feedback": "This adds and subtracts 2 without multiplying by the standard error."},
+        {"text": "3 to 27", "correct": false, "feedback": "This is ±3 standard errors, wider than a 95% interval."}
+      ],
+      "explanation": "An approximate 95% confidence interval is b₂ ± 2 × se(b₂) = 15 ± 8 = 7 to 23. Across repeated samples, about 95% of intervals built this way contain β₂."
+    }
+  ],
+  "exam": [
+    {
+      "id": "E01",
+      "type": "single",
+      "concept": "Conditional mean (Section 6.1, Key Concepts)",
+      "stem": "The chapter's generated data follow y = 1 + 2x + u with E[u | x] = 0. In the sample of five observations, the observation with x = 3 has y = 4.49, and the sample mean of y is 5.97. What is the conditional mean E[y | x = 3]?",
+      "options": [
+        {"text": "4.49", "correct": false, "feedback": "Revisit what the conditional mean averages over, and whether a single observation can equal it (Section 6.1)."},
+        {"text": "7.00", "correct": true, "feedback": "Correct: E[y | x = 3] = 1 + 2 × 3 = 7. The observed 4.49 lies below it because its error draw is negative."},
+        {"text": "5.97", "correct": false, "feedback": "This is a statistic computed from the sample. Revisit how the conditional mean is defined in the population model (Section 6.1)."},
+        {"text": "6.00", "correct": false, "feedback": "Revisit how the conditional mean is computed from the population model (Section 6.1)."}
+      ],
+      "explanation": "Because E[u | x] = 0, E[y | x] = 1 + 2x, so E[y | x = 3] = 7. The observation at x = 3 (y = 4.49) has an error of about −2.51, and the sample mean of y (5.97) is a sample statistic, not the population conditional mean."
+    },
+    {
+      "id": "E02",
+      "type": "multi",
+      "concept": "Population and sample regression (Section 6.1, Key Concept 6.1)",
+      "stem": "In the chapter's generated-data example, the population line is E[y | x] = 1 + 2x and the sample regression from five observations is ŷ = 2.81 + 1.05x. Which statements are correct? (Select all that apply.)",
+      "options": [
+        {"text": "The numbers 1 and 2 were computed by fitting a line to the five observations.", "correct": false, "feedback": "Revisit Section 6.1 on which numbers describe the population and which are computed from a sample."},
+        {"text": "The numbers 2.81 and 1.05 are estimates that would change if a new sample were drawn.", "correct": true, "feedback": "Correct: b₁ = 2.81 and b₂ = 1.05 are computed from this sample and vary across samples."},
+        {"text": "In real-world data, the counterparts of 1 and 2 are unknown and must be estimated.", "correct": true, "feedback": "Correct: here the parameters are known only because the data were generated by computer."},
+        {"text": "The sample line ŷ = 2.81 + 1.05x is the true relationship, because it was fitted to the data.", "correct": false, "feedback": "Revisit Key Concept 6.1 on what a sample regression line estimates."},
+        {"text": "The population line gives the average value of y at each value of x.", "correct": true, "feedback": "Correct: the population line is the conditional mean E[y | x]."}
+      ],
+      "explanation": "Key Concept 6.1: β₁ = 1 and β₂ = 2 are fixed population parameters, and 1 + 2x is the conditional mean of y. The sample estimates 2.81 and 1.05 come from one sample of five observations and would change with a new sample."
+    },
+    {
+      "id": "E03",
+      "type": "tf",
+      "concept": "Error term and residual (Section 6.1, Key Concept 6.2)",
+      "stem": "In a real-world regression, the error u for each observation can be computed by subtracting the fitted value ŷ from the observed y.",
+      "options": [
+        {"text": "True", "correct": false, "feedback": "y − ŷ is the residual, measured from the estimated line. Revisit Key Concept 6.2."},
+        {"text": "False", "correct": true, "feedback": "Correct. y − ŷ gives the residual e. The error u is measured from the unknown population line, so it cannot be computed."}
+      ],
+      "explanation": "Key Concept 6.2: the residual e = y − ŷ is observable; the error u = y − E[y | x] is not, because β₁ and β₂ are unknown. We use residuals to learn about errors."
+    },
+    {
+      "id": "E04",
+      "type": "single",
+      "concept": "Error term and residual (Section 6.1, Key Concept 6.2)",
+      "stem": "In the generated data, one observation has x = 4 and y = 7.37. The population line is E[y | x] = 1 + 2x and the sample regression line is ŷ = 2.81 + 1.05x. What is the error u for this observation?",
+      "options": [
+        {"text": "0.36", "correct": false, "feedback": "Revisit Key Concept 6.2: which line is u measured from, and in which order is the subtraction done?"},
+        {"text": "1.63", "correct": false, "feedback": "Revisit Key Concept 6.2: which line is u measured from, and in which order is the subtraction done?"},
+        {"text": "−0.36", "correct": false, "feedback": "Revisit Key Concept 6.2: which line is u measured from, and in which order is the subtraction done?"},
+        {"text": "−1.63", "correct": true, "feedback": "Correct: u = y − E[y | x] = 7.37 − (1 + 2 × 4) = 7.37 − 9 = −1.63."}
+      ],
+      "explanation": "The error uses the population line: u = 7.37 − 9 = −1.63. The residual uses the sample line: e = 7.37 − (2.81 + 1.05 × 4) ≈ 0.36. They differ because b₁ and b₂ differ from β₁ and β₂; in real data only the residual can be computed."
+    },
+    {
+      "id": "E05",
+      "type": "single",
+      "concept": "Population parameters and sample estimates (Section 6.2)",
+      "stem": "With the five generated observations, the sample slope is b₂ = 1.05, although the true slope is β₂ = 2. What is the best explanation for the gap?",
+      "options": [
+        {"text": "The population slope for these five particular observations is 1.05, not 2.", "correct": false, "feedback": "Revisit the difference between a population parameter and a sample estimate (Key Concept 6.1)."},
+        {"text": "OLS failed to find the best-fitting line through these five points.", "correct": false, "feedback": "Revisit Section 6.2 on what OLS does with each sample it is given."},
+        {"text": "The five observations must contain a recording error in y.", "correct": false, "feedback": "Nothing in the generated data suggests a recording problem. Revisit why sample estimates differ from parameters (Section 6.2)."},
+        {"text": "The five error draws pulled the fitted line away from the population line.", "correct": true, "feedback": "Correct. With only five observations, the particular errors drawn (four of them negative) shift the fitted line a lot."}
+      ],
+      "explanation": "Section 6.2: the gap between b₂ = 1.05 and β₂ = 2 is sampling variability. The fitted line is the best fit to these noisy observations; a different sample would give a different estimate."
+    },
+    {
+      "id": "E06",
+      "type": "single",
+      "concept": "Population parameters and sample estimates (Section 6.2)",
+      "stem": "Three samples of n = 30, drawn from the same data-generating process y = 1 + 2x + u, give slopes of 1.81, 1.79, and 1.67. Why do the three slopes differ?",
+      "options": [
+        {"text": "Each sample contains different draws of x and of the error u.", "correct": true, "feedback": "Correct. Different observations and different error draws give different fitted lines, even though the population line is the same."},
+        {"text": "The population slope β₂ changed from one sample to the next.", "correct": false, "feedback": "Revisit what the three samples have in common (Section 6.2)."},
+        {"text": "OLS was computed incorrectly in at least two of the three samples.", "correct": false, "feedback": "Revisit Section 6.2 on why correctly computed estimates still differ across samples."},
+        {"text": "Samples of 30 are too small for OLS to give valid estimates.", "correct": false, "feedback": "Revisit what the chapter concludes about estimates from samples of this size (Sections 6.2 and 6.3)."}
+      ],
+      "explanation": "Section 6.2: all three samples come from y = 1 + 2x + u, so β₂ = 2 throughout. Each sample has its own x values and error draws, so each gives a different estimate: sampling variability."
+    },
+    {
+      "id": "E07",
+      "type": "multi",
+      "concept": "Population parameters and sample estimates (Section 6.2)",
+      "stem": "In the chapter's simulations the true parameters are known. Which statements describe a typical real-world regression study instead? (Select all that apply.)",
+      "options": [
+        {"text": "The researcher has a single sample to work with.", "correct": true, "feedback": "Correct: unlike a simulation, we cannot redraw the sample at will."},
+        {"text": "The true slope β₂ is unknown.", "correct": true, "feedback": "Correct: the data-generating process is not known in practice."},
+        {"text": "Collecting a second sample would reproduce the same estimate b₂.", "correct": false, "feedback": "Revisit Section 6.2 on what happens when a new sample is drawn."},
+        {"text": "The single estimate b₂ differs from β₂ by an unknown amount.", "correct": true, "feedback": "Correct: sampling variability means one estimate almost never equals the parameter, and with β₂ unknown the gap cannot be measured."}
+      ],
+      "explanation": "Section 6.2 (Why this matters): in practice we have one sample and unknown parameters, and our estimate almost certainly differs from the truth. Standard errors quantify how much it is likely to differ."
+    },
+    {
+      "id": "E08",
+      "type": "single",
+      "concept": "OLS assumptions (Section 6.3, Key Concept 6.3)",
+      "stem": "In the chapter's data-generating process, the error standard deviation is σᵤ = 2 at every value of x. Which OLS assumption does this feature guarantee?",
+      "options": [
+        {"text": "Correct model (linearity)", "correct": false, "feedback": "Revisit Key Concept 6.3: which assumption is about the error's spread at different values of x?"},
+        {"text": "Mean-zero errors", "correct": false, "feedback": "Revisit Key Concept 6.3: the feature in the stem is about the size of the errors' spread, not their average."},
+        {"text": "Homoskedasticity", "correct": true, "feedback": "Correct. A constant error variance, Var[u | x] = σᵤ² = 4 at every x, is homoskedasticity."},
+        {"text": "Independence of the errors", "correct": false, "feedback": "Revisit Key Concept 6.3: this assumption concerns how the errors of different observations relate to each other."}
+      ],
+      "explanation": "Key Concept 6.3: assumption 3 (homoskedasticity) is Var[u | x] = σᵤ², the same at every x. The generated data satisfy it by construction with σᵤ² = 4."
+    },
+    {
+      "id": "E09",
+      "type": "multi",
+      "concept": "OLS assumptions (Section 6.3, Key Concept 6.3)",
+      "stem": "Which of these situations break at least one of the four OLS assumptions listed in Key Concept 6.3? (Select all that apply.)",
+      "options": [
+        {"text": "The x values are random draws rather than numbers fixed in advance by the researcher.", "correct": false, "feedback": "Revisit Key Concept 6.3 and check this description against each of the four assumptions."},
+        {"text": "The x values are spread widely, from 1 to 20.", "correct": false, "feedback": "Revisit Key Concept 6.3: which assumption, if any, restricts the range of x?"},
+        {"text": "In a house-price regression, errors are larger for big houses.", "correct": true, "feedback": "Correct: the error variance changes with size, violating homoskedasticity (assumption 3)."},
+        {"text": "Test-score errors are correlated among students in the same school.", "correct": true, "feedback": "Correct: correlated errors violate independence (assumption 4)."}
+      ],
+      "explanation": "Key Concept 6.3: an error spread that changes with x violates assumption 3, and errors correlated within clusters violate assumption 4. Random x values (as in the chapter's own simulations) and widely spread x values violate none of the four assumptions."
+    },
+    {
+      "id": "E10",
+      "type": "single",
+      "concept": "OLS assumptions (Section 6.3, Key Concept 6.3)",
+      "stem": "Suppose the errors in a regression are heteroskedastic, while assumptions 1 and 2 hold. According to Chapter 6, which consequence follows?",
+      "options": [
+        {"text": "b₂ is biased, but its usual standard errors remain valid.", "correct": false, "feedback": "Revisit Key Concept 6.3: which properties of b₂ rest on assumptions 1–2, and which also need assumptions 3–4?"},
+        {"text": "b₂ is biased, and its usual standard errors are also unreliable.", "correct": false, "feedback": "Revisit Key Concept 6.3: which properties of b₂ rest on assumptions 1–2, and which also need assumptions 3–4?"},
+        {"text": "b₂ is unbiased, but its usual standard errors are unreliable.", "correct": true, "feedback": "Correct. Unbiasedness needs only assumptions 1–2; the usual variance formula needs assumption 3, so robust standard errors are used instead."},
+        {"text": "b₂ is unbiased, and its usual standard errors remain valid.", "correct": false, "feedback": "Revisit Key Concept 6.3: which properties of b₂ rest on assumptions 1–2, and which also need assumptions 3–4?"}
+      ],
+      "explanation": "Key Concept 6.3: assumptions 1–2 are essential for unbiasedness; assumptions 3–4 affect the variance. With heteroskedasticity, b₂ stays unbiased, but the default standard errors are wrong; robust standard errors fix this (Chapters 7 and 12)."
+    },
+    {
+      "id": "E11",
+      "type": "tf",
+      "concept": "OLS assumptions (Section 6.3, Key Concept 6.3)",
+      "stem": "If an omitted variable that is correlated with x ends up in the error term, OLS still estimates β₂ without bias.",
+      "options": [
+        {"text": "True", "correct": false, "feedback": "An omitted variable correlated with x makes E[u | x] ≠ 0. Revisit assumption 2 in Key Concept 6.3."},
+        {"text": "False", "correct": true, "feedback": "Correct. The omitted variable makes the error correlated with x, so E[u | x] ≠ 0 and assumption 2 fails: OLS is biased (omitted variable bias)."}
+      ],
+      "explanation": "Key Takeaways: assumption 2 rules out omitted variable bias. When a relevant variable correlated with x sits in u, E[u | x] ≠ 0 and b₂ is biased and inconsistent."
+    },
+    {
+      "id": "E12",
+      "type": "single",
+      "concept": "OLS assumptions (Section 6.3, Key Concept 6.3)",
+      "stem": "Which result in Section 6.3 requires assumptions 3 and 4 in addition to assumptions 1 and 2?",
+      "options": [
+        {"text": "Unbiasedness of b₂, E[b₂] = β₂", "correct": false, "feedback": "Revisit the two lists in Section 6.3: properties under assumptions 1–2 and properties under assumptions 1–4."},
+        {"text": "The formula for the variance of b₂", "correct": true, "feedback": "Correct. The variance formula Var[b₂] = σᵤ² / Σ(xᵢ − x̄)² relies on homoskedastic, independent errors."},
+        {"text": "The fact that b₂ varies from one sample to another", "correct": false, "feedback": "Revisit Section 6.2: does sampling variability depend on any particular assumption?"},
+        {"text": "The computation of b₂ by least squares", "correct": false, "feedback": "Revisit what the assumptions are needed for: computing an estimate, or describing its statistical properties (Section 6.3)?"}
+      ],
+      "explanation": "Section 6.3: unbiasedness needs assumptions 1–2; the variance formula (and hence the usual standard errors and the BLUE property) needs assumptions 1–4. b₂ can always be computed, and it always varies across samples."
+    },
+    {
+      "id": "E13",
+      "type": "tf",
+      "concept": "Finite-sample and large-sample properties (Section 6.3, Key Takeaways)",
+      "stem": "Unbiasedness of the OLS slope is a property that holds for any sample size, not only as the sample size grows toward infinity.",
+      "options": [
+        {"text": "True", "correct": true, "feedback": "Correct. Unbiasedness is a finite-sample property; the large-sample property is consistency."},
+        {"text": "False", "correct": false, "feedback": "Revisit the Key Takeaways on unbiasedness and consistency: which one is a finite-sample property?"}
+      ],
+      "explanation": "Key Takeaways: unbiasedness (E[b₂] = β₂) is a finite-sample property that holds for any n. Consistency, b₂ converging to β₂ as n → ∞, is the asymptotic property."
+    },
+    {
+      "id": "E14",
+      "type": "single",
+      "concept": "Monte Carlo simulation (Section 6.3, Key Concept 6.4)",
+      "stem": "In the chapter's Monte Carlo study (1,000 samples of n = 30 from y = 1 + 2x + u), the 1,000 slope estimates have a mean of 1.9944. What does this result illustrate?",
+      "options": [
+        {"text": "Unbiasedness: across many samples, the estimates center on the true slope of 2.", "correct": true, "feedback": "Correct. The average of many estimates is essentially the true value, as E[b₂] = β₂ predicts."},
+        {"text": "Precision: the estimates have a standard deviation of only about 0.006.", "correct": false, "feedback": "Revisit what the mean of the estimates measures and what their spread measures (Section 6.3)."},
+        {"text": "Consistency: the average is close to 2 because each sample has 30 observations.", "correct": false, "feedback": "Revisit the Key Takeaways (Unbiasedness and Consistency) on what each property describes."},
+        {"text": "Efficiency: no other estimator could produce an average closer to 2.", "correct": false, "feedback": "Revisit which property a simulation average speaks to, and which property compares estimators' variances (Key Concepts 6.4 and 6.7)."}
+      ],
+      "explanation": "Key Concept 6.4: the mean of the 1,000 slope estimates (1.9944) is within 0.006 of β₂ = 2, which illustrates unbiasedness. Individual estimates vary much more (SD about 0.38)."
+    },
+    {
+      "id": "E15",
+      "type": "single",
+      "concept": "Monte Carlo simulation (Section 6.3, Key Concept 6.4)",
+      "stem": "In the same Monte Carlo study, the slope estimates have a mean of about 2.0 and a standard deviation of 0.38. Using the chapter's ±2 standard deviation rule, about 95% of the estimates fall in which range?",
+      "options": [
+        {"text": "1.62 to 2.38", "correct": false, "feedback": "Check how many standard deviations on each side of 2 this band spans."},
+        {"text": "1.24 to 2.76", "correct": true, "feedback": "Correct: 2 ± 2 × 0.38 = 1.24 to 2.76. In the simulation, 95.7% of the 1,000 slopes fall in this band."},
+        {"text": "0.86 to 3.14", "correct": false, "feedback": "Check how many standard deviations on each side of 2 this band spans."},
+        {"text": "1.86 to 2.14", "correct": false, "feedback": "Revisit what the standard deviation of 0.38 describes (Section 6.3)."}
+      ],
+      "explanation": "With a standard deviation of 0.38, about 95% of estimates fall within 2 ± 0.76, that is 1.24 to 2.76. In the chapter's simulation, 957 of the 1,000 slopes (95.7%) do."
+    },
+    {
+      "id": "E16",
+      "type": "single",
+      "concept": "Monte Carlo simulation (Section 6.3, Key Concept 6.4)",
+      "stem": "Suppose the chapter's Monte Carlo study were rerun with 10,000 simulated samples instead of 1,000, still with n = 30 observations per sample. What would happen to the standard deviation of the slope estimates (0.38)?",
+      "options": [
+        {"text": "It would fall to about 0.12.", "correct": false, "feedback": "Revisit what the standard deviation of the estimates depends on, and what changed here (Section 6.3)."},
+        {"text": "It would fall close to zero.", "correct": false, "feedback": "Revisit what the standard deviation of the estimates depends on, and what changed here (Section 6.3)."},
+        {"text": "It would rise above 0.38.", "correct": false, "feedback": "Revisit what the standard deviation of the estimates measures (Section 6.3)."},
+        {"text": "It would stay close to 0.38.", "correct": true, "feedback": "Correct. The spread of the estimates depends on n within each sample (still 30); more simulations only describe that spread more accurately."}
+      ],
+      "explanation": "Section 6.3: running more simulations moves the average of the estimates closer to the true value, but the standard deviation stays about the same because it depends on the sample size within each simulation, not on the number of simulations."
+    },
+    {
+      "id": "E17",
+      "type": "multi",
+      "concept": "Monte Carlo simulation (Section 6.3, Key Concept 6.4)",
+      "stem": "Which conclusions does the chapter's Monte Carlo study (1,000 samples of n = 30) support? (Select all that apply.)",
+      "options": [
+        {"text": "The histogram of the slope estimates is approximately bell-shaped.", "correct": true, "feedback": "Correct: the histogram closely follows the fitted normal curve."},
+        {"text": "Every one of the 1,000 slope estimates is within 0.5 of the true value.", "correct": false, "feedback": "Revisit what the histogram shows about the spread of individual estimates (Section 6.3)."},
+        {"text": "The simulation shows that OLS is unbiased in any real-world dataset.", "correct": false, "feedback": "Revisit what a simulation can and cannot tell you about data generated under other conditions (Key Concept 6.4)."},
+        {"text": "Individual slope estimates often miss 2 by more than 0.2.", "correct": true, "feedback": "Correct: about 61% of the slopes lie more than 0.2 from 2; the SD is about 0.38."},
+        {"text": "The wide spread of the estimates suggests that OLS tends to be biased in samples of 30.", "correct": false, "feedback": "Revisit the difference between bias and sampling variability (Key Concept 6.4)."}
+      ],
+      "explanation": "Key Concept 6.4: the simulation shows estimates centered on the true value (unbiasedness), spread out around it (sampling variability), and approximately normal. The slopes range from about 0.78 to 3.25, and the results hold for this DGP, which satisfies the assumptions."
+    },
+    {
+      "id": "E18",
+      "type": "single",
+      "concept": "Variance and standard error of b₂ (Sections 6.3 and 6.4, Key Concept 6.6)",
+      "stem": "What is the difference between the standard deviation of b₂, \\( \\sigma_{b_2} \\), and the standard error se(b₂)?",
+      "options": [
+        {"text": "\\( \\sigma_{b_2} \\) uses the unknown error SD σᵤ; se(b₂) uses a sample estimate of σᵤ.", "correct": true, "feedback": "Correct. That is why se(b₂) can be computed from a single sample, while \\( \\sigma_{b_2} \\) cannot."},
+        {"text": "\\( \\sigma_{b_2} \\) is computed from the sample residuals; se(b₂) uses the true error SD σᵤ.", "correct": false, "feedback": "Revisit Section 6.3 and the Key Takeaways (Variance and Standard Errors) on how each quantity is defined."},
+        {"text": "They are identical: \"standard error\" is simply another name for \\( \\sigma_{b_2} \\).", "correct": false, "feedback": "Revisit the Key Takeaways (Variance and Standard Errors): what is known, and what must be estimated?"},
+        {"text": "\\( \\sigma_{b_2} \\) measures the spread of y, while se(b₂) measures the spread of x.", "correct": false, "feedback": "Revisit Section 6.3: both describe how b₂ varies across samples."}
+      ],
+      "explanation": "Section 6.3: \\( \\sigma_{b_2} = \\sigma_u / \\sqrt{\\sum (x_i - \\bar{x})^2} \\) depends on the unknown σᵤ. The standard error se(b₂) replaces σᵤ with sₑ, so it is an estimate of \\( \\sigma_{b_2} \\)."
+    },
+    {
+      "id": "E19",
+      "type": "single",
+      "concept": "Standard error of the regression (Section 6.4, Key Concept 6.5)",
+      "stem": "For the chapter's artificial data (n = 5), the fitted line ŷ = 0.8 + 0.4x leaves a residual sum of squares of 0.4. What is the standard error of the regression, sₑ?",
+      "options": [
+        {"text": "0.37", "correct": true, "feedback": "Correct: sₑ = √[0.4 / (5 − 2)] = √0.133 ≈ 0.37."},
+        {"text": "0.28", "correct": false, "feedback": "Revisit the degrees of freedom used to estimate the error variance (Key Concept 6.5)."},
+        {"text": "0.13", "correct": false, "feedback": "Revisit the definition of sₑ in Section 6.4 and carry it through every step."},
+        {"text": "0.32", "correct": false, "feedback": "Revisit the degrees of freedom used to estimate the error variance (Key Concept 6.5)."}
+      ],
+      "explanation": "Key Concept 6.5: sₑ = √[RSS / (n − 2)] = √(0.4 / 3) ≈ 0.365. Dividing by n − 2 reflects the two estimated coefficients."
+    },
+    {
+      "id": "E20",
+      "type": "single",
+      "concept": "Standard error of the regression (Section 6.4, Key Concept 6.5)",
+      "stem": "For the five generated observations, the standard error of the regression is sₑ = 1.05. Which interpretation is correct?",
+      "options": [
+        {"text": "The slope estimate typically misses the true slope by about 1.05.", "correct": false, "feedback": "Revisit Section 6.4: does sₑ describe the estimated coefficients or the observations?"},
+        {"text": "The true standard deviation of the errors, σᵤ, is 1.05.", "correct": false, "feedback": "Revisit the data-generating process in Section 6.2: what is σᵤ there, and what does sₑ do with it?"},
+        {"text": "Observations typically lie about 1.05 units from the fitted line.", "correct": true, "feedback": "Correct. sₑ is the typical size of the residuals, in units of y."},
+        {"text": "The residuals average 1.05, so the fitted line sits too low.", "correct": false, "feedback": "Revisit how residuals above and below the fitted line combine (Section 6.4)."}
+      ],
+      "explanation": "Section 6.4: sₑ estimates the standard deviation of the error term and measures the typical size of the residuals. Here sₑ = 1.05, while the true σᵤ = 2: sₑ is itself a sample estimate."
+    },
+    {
+      "id": "E21",
+      "type": "single",
+      "concept": "Variance and standard error of b₂ (Sections 6.3 and 6.4, Key Concept 6.6)",
+      "stem": "For the five generated observations, sₑ = 1.05 and Σ(xᵢ − x̄)² = 10. What is the standard error of the slope, se(b₂)?",
+      "options": [
+        {"text": "0.11", "correct": false, "feedback": "Revisit the formula for se(b₂) in Key Concept 6.6 and how each term enters it."},
+        {"text": "0.33", "correct": true, "feedback": "Correct: se(b₂) = 1.05 / √10 ≈ 0.33, matching the regression output."},
+        {"text": "3.32", "correct": false, "feedback": "Revisit the formula for se(b₂) in Key Concept 6.6 and how each term enters it."},
+        {"text": "0.47", "correct": false, "feedback": "Revisit Key Concept 6.6: which measure of the x values appears in the formula?"}
+      ],
+      "explanation": "Key Concept 6.6: se(b₂) = sₑ / √Σ(xᵢ − x̄)² = 1.05 / √10 ≈ 0.33."
+    },
+    {
+      "id": "E22",
+      "type": "multi",
+      "concept": "Precision of the slope estimate (Section 6.4, Key Concept 6.6)",
+      "stem": "Holding everything else fixed, which changes would make se(b₂) smaller? (Select all that apply.)",
+      "options": [
+        {"text": "Collecting more observations from the same population", "correct": true, "feedback": "Correct: more observations increase Σ(xᵢ − x̄)², lowering se(b₂)."},
+        {"text": "Dropping the observations whose x values lie far from x̄", "correct": false, "feedback": "Revisit Key Concept 6.6: what happens to the denominator of se(b₂)?"},
+        {"text": "A model that fits better, with smaller residuals", "correct": true, "feedback": "Correct: a smaller sₑ lowers se(b₂)."},
+        {"text": "Measuring y with less measurement error", "correct": true, "feedback": "Correct: less noise in y means smaller errors and a smaller sₑ."},
+        {"text": "A larger true slope β₂", "correct": false, "feedback": "Revisit Key Concept 6.6: does the size of the slope itself appear in se(b₂)?"}
+      ],
+      "explanation": "Key Concept 6.6: se(b₂) = sₑ / √Σ(xᵢ − x̄)². It falls with a better fit (smaller sₑ, for example less noise in y) and with more, and more widely spread, x values. The size of β₂ plays no role."
+    },
+    {
+      "id": "E23",
+      "type": "single",
+      "concept": "Precision of the slope estimate (Section 6.4, Key Concept 6.6)",
+      "stem": "In the chapter's Monte Carlo study with n = 30 per sample, the slope estimates have a standard deviation of 0.38. If each simulated sample had n = 120 observations instead (same DGP), the standard deviation would be closest to which value?",
+      "options": [
+        {"text": "0.10", "correct": false, "feedback": "Revisit how precision scales with the sample size (Key Takeaways: Factors Affecting Precision)."},
+        {"text": "0.19", "correct": true, "feedback": "Correct: four times as many observations halve the standard deviation, 0.38 / 2 = 0.19."},
+        {"text": "0.38", "correct": false, "feedback": "Revisit what the standard deviation of the estimates depends on (Section 6.3)."},
+        {"text": "0.76", "correct": false, "feedback": "Revisit whether more observations make estimates more or less precise (Key Concept 6.6)."}
+      ],
+      "explanation": "Key Takeaways: precision improves with √n, so quadrupling n (30 → 120) halves the spread: 0.38 / 2 ≈ 0.19. A simulation with n = 120 gives a standard deviation of about 0.18–0.19."
+    },
+    {
+      "id": "E24",
+      "type": "tf",
+      "concept": "Precision of the slope estimate (Section 6.4, Key Concept 6.6)",
+      "stem": "Suppose two studies have the same number of observations and the same sₑ, but the x values in study A are much more spread out than in study B. Then study B's slope estimate has the smaller standard error.",
+      "options": [
+        {"text": "True", "correct": false, "feedback": "Revisit Key Concept 6.6: how does the spread of x enter se(b₂)?"},
+        {"text": "False", "correct": true, "feedback": "Correct. A larger Σ(xᵢ − x̄)² in the denominator of se(b₂) gives study A, not study B, the more precise slope."}
+      ],
+      "explanation": "Key Concept 6.6: se(b₂) = sₑ / √Σ(xᵢ − x̄)². With the same sₑ and n, wider-spread x values make the denominator larger and the standard error smaller."
+    },
+    {
+      "id": "E25",
+      "type": "single",
+      "concept": "Precision of the intercept (Section 6.4)",
+      "stem": "In the chapter's Monte Carlo study, x is drawn around a mean of 3, and the intercept estimates have a standard deviation of 1.21 versus 0.38 for the slope. Which explanation fits Section 6.4?",
+      "options": [
+        {"text": "The intercept is biased, and the bias inflates its spread.", "correct": false, "feedback": "Revisit the simulation's results for the average of the intercept estimates (Section 6.3)."},
+        {"text": "The true intercept (1) is smaller than the true slope (2).", "correct": false, "feedback": "Revisit Section 6.4: does the formula for se(b₁) depend on the size of the true parameter?"},
+        {"text": "The intercept is estimated from fewer observations than the slope.", "correct": false, "feedback": "Revisit Section 6.4: which observations are used to estimate each coefficient?"},
+        {"text": "The intercept is a prediction at x = 0, far from the data.", "correct": true, "feedback": "Correct. With x centered around 3, estimating the line's height at x = 0 means extrapolating, which is imprecise."}
+      ],
+      "explanation": "Section 6.4: se(b₁) grows with Σxᵢ², so when the x values are far from zero, the intercept is estimated imprecisely. It reflects extrapolation uncertainty about y at x = 0."
+    },
+    {
+      "id": "E26",
+      "type": "single",
+      "concept": "Sampling distribution of b₂ in large samples (Section 6.3)",
+      "stem": "Suppose the errors were drawn from a skewed distribution with mean zero instead of a normal one, with assumptions 1–4 still holding. For a large sample size, what would the sampling distribution of b₂ look like?",
+      "options": [
+        {"text": "Skewed in the same direction as the errors", "correct": false, "feedback": "Revisit what the Central Limit Theorem says about estimators that are weighted sums of many observations (Section 6.3)."},
+        {"text": "Centered away from β₂, because of the skewed errors", "correct": false, "feedback": "Revisit which assumptions unbiasedness requires (Section 6.3)."},
+        {"text": "Approximately normal and centered on β₂", "correct": true, "feedback": "Correct. b₂ is unbiased under assumptions 1–2, and the CLT makes it approximately normal in large samples even when the errors are not."},
+        {"text": "Approximately uniform between the smallest and largest estimates", "correct": false, "feedback": "Revisit what the Central Limit Theorem says about the shape of the sampling distribution (Section 6.3)."}
+      ],
+      "explanation": "Section 6.3: by the Central Limit Theorem, (b₂ − β₂) / \\( \\sigma_{b_2} \\) approaches a standard normal as n grows, even with non-normal errors. In the chapter's simulation the errors are normal, so the estimates are normal by construction."
+    },
+    {
+      "id": "E27",
+      "type": "tf",
+      "concept": "Sampling distribution of b₂ in large samples (Section 6.3)",
+      "stem": "Under assumptions 1–4, the standardized statistic \\( Z = (b_2 - \\beta_2)/\\sigma_{b_2} \\) has mean 0 and variance 1.",
+      "options": [
+        {"text": "True", "correct": true, "feedback": "Correct. Subtracting the mean β₂ and dividing by the standard deviation \\( \\sigma_{b_2} \\) gives mean 0 and variance 1 by construction."},
+        {"text": "False", "correct": false, "feedback": "Revisit the Summary of OLS Properties in Section 6.4: what do the subtraction and the division do?"}
+      ],
+      "explanation": "Summary of OLS Properties: because b₂ is unbiased with standard deviation \\( \\sigma_{b_2} \\), Z = (b₂ − β₂) / \\( \\sigma_{b_2} \\) has mean 0 and variance 1 by construction. The CLT adds that Z is approximately N(0, 1) in large samples."
+    },
+    {
+      "id": "E28",
+      "type": "single",
+      "concept": "Gauss–Markov Theorem and BLUE (Section 6.3, Key Concept 6.7)",
+      "stem": "Under assumptions 1–4, the Gauss–Markov Theorem says that OLS is BLUE. What does \"best\" mean here?",
+      "options": [
+        {"text": "It produces a higher R² than any other way of fitting the line.", "correct": false, "feedback": "Revisit Key Concept 6.7: \"best\" compares estimators by a property of their sampling distributions."},
+        {"text": "It is the only estimator of β₂ that is unbiased.", "correct": false, "feedback": "Revisit Key Concept 6.7: among which estimators is OLS compared?"},
+        {"text": "It has the smallest variance among linear unbiased estimators.", "correct": true, "feedback": "Correct. Among all linear unbiased estimators, OLS varies the least from sample to sample."},
+        {"text": "Its estimates equal the true parameters in every sample.", "correct": false, "feedback": "Revisit Section 6.2 on sampling variability: no estimator achieves this."}
+      ],
+      "explanation": "Key Concept 6.7: \"best\" means minimum variance. Under assumptions 1–4, OLS has the smallest variance among all linear unbiased estimators (Gauss–Markov)."
+    },
+    {
+      "id": "E29",
+      "type": "tf",
+      "concept": "Gauss–Markov Theorem and BLUE (Section 6.3, Key Concept 6.7)",
+      "stem": "Adding normally distributed errors to assumptions 1–4 strengthens the Gauss–Markov result: OLS then becomes the Best Unbiased Estimator, not only the Best Linear Unbiased Estimator.",
+      "options": [
+        {"text": "True", "correct": true, "feedback": "Correct. With normal errors, OLS is the Best Unbiased Estimator (BUE)."},
+        {"text": "False", "correct": false, "feedback": "Revisit Key Concept 6.7 on what normally distributed errors add to the Gauss–Markov result."}
+      ],
+      "explanation": "Key Concept 6.7: under assumptions 1–4 OLS is BLUE; if the errors are also normal, it is the Best Unbiased Estimator, with the lowest variance among all unbiased estimators."
+    },
+    {
+      "id": "E30",
+      "type": "single",
+      "concept": "Interpreting a standard error (Section 6.3, Key Takeaways)",
+      "stem": "A regression reports a slope of 1.85 with a standard error of 0.35, the example used in Section 6.3. How should the 0.35 be interpreted?",
+      "options": [
+        {"text": "It estimates how much b₂ typically varies around β₂ across repeated samples.", "correct": true, "feedback": "Correct. The standard error estimates the standard deviation of the sampling distribution of b₂."},
+        {"text": "There is a 35% chance that the true slope differs from the estimate of 1.85.", "correct": false, "feedback": "Revisit what a standard error measures (Key Takeaways: Statistical Concepts and Tools); it is not a probability."},
+        {"text": "About 35% of the variation in y is left unexplained by the regression on x.", "correct": false, "feedback": "Revisit what a standard error measures; the share of variation explained is a different statistic."},
+        {"text": "The true slope certainly lies between 1.50 and 2.20, that is, 1.85 ± 0.35.", "correct": false, "feedback": "Revisit what a standard error can and cannot guarantee about the true slope (Section 6.3)."}
+      ],
+      "explanation": "Key Takeaways: the standard error is the estimated standard deviation of the sampling distribution. Here 1.85 is one draw from a distribution whose spread is estimated at 0.35; about ±2 standard errors gives an approximate 95% confidence interval."
+    }
+  ]
+}
