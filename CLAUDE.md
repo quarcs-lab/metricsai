@@ -80,6 +80,8 @@ When I correct you, or you catch yourself making a mistake: before continuing，
 - Check generated illustrations for unrequested mathematical claims, and label finite log-model percentage changes as approximations.
 - Check the staged diff, including newly added files, before reporting that whitespace validation passed.
 - Round reported statistics from exact values, never from already-rounded printed output (double rounding turned t = 5.9953 into "5.99" instead of 6.00).
+- Verify quiz claims about a dataset (e.g., which variables move together) against the data, not the chapter prose ("bigger houses tend to be newer" is false in AED_HOUSE: r = 0.08).
+- In key-hidden exam feedback, point to the concept or section to revisit; never state the correction, quote the key, or negate a sibling option.
 
 ## Key Commands
 
