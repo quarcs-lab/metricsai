@@ -26,7 +26,7 @@ This notebook provides an interactive introduction to bivariate data analysis an
 <div class="chapter-resources">
 <a href="https://www.youtube.com/watch?v=sVT1KfjoZQg" target="_blank" class="resource-btn">🎬 AI Video</a>
 <a href="https://carlos-mendez.my.canva.site/s05-bivariate-data-summary-pdf" target="_blank" class="resource-btn">✨ AI Slides</a>
-<a href="https://cameron.econ.ucdavis.edu/aed/traedv1_05" target="_blank" class="resource-btn">📊 Cameron Slides</a>
+<a href="https://quarcs-lab.github.io/metricsai/slides/ch05/cameron_slides_ch05.pdf" target="_blank" class="resource-btn">📊 Cameron Slides</a>
 <a href="https://app.edcafe.ai/quizzes/697865de2f5d08069e0482cc" target="_blank" class="resource-btn">✏️ Quiz</a>
 <a href="https://gemini.google.com/gem/1mvbUPJb9CZ1SEWlxui86i25-HINaUH1c?usp=sharing" target="_blank" class="resource-btn">🤖 AI Tutor</a>
 </div>

@@ -26,7 +26,7 @@ This notebook provides an interactive introduction to extending inference to mod
 <div class="chapter-resources">
 <a href="https://www.youtube.com/watch?v=yvcSMmluY5Y" target="_blank" class="resource-btn">🎬 AI Video</a>
 <a href="https://carlos-mendez.my.canva.site/s11-statistical-inference-for-multiple-regression-pdf" target="_blank" class="resource-btn">✨ AI Slides</a>
-<a href="https://cameron.econ.ucdavis.edu/aed/traedv1_11" target="_blank" class="resource-btn">📊 Cameron Slides</a>
+<a href="https://quarcs-lab.github.io/metricsai/slides/ch11/cameron_slides_ch11.pdf" target="_blank" class="resource-btn">📊 Cameron Slides</a>
 <a href="https://app.edcafe.ai/quizzes/697868ad2f5d08069e04b748" target="_blank" class="resource-btn">✏️ Quiz</a>
 <a href="https://gemini.google.com/gem/1mvbUPJb9CZ1SEWlxui86i25-HINaUH1c?usp=sharing" target="_blank" class="resource-btn">🤖 AI Tutor</a>
 </div>

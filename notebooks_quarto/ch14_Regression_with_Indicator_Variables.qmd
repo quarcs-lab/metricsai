@@ -18,7 +18,7 @@ This notebook provides an interactive introduction to regression with indicator 
 <div class="chapter-resources">
 <a href="https://www.youtube.com/watch?v=Rkx1cY8_BBY" target="_blank" class="resource-btn">🎬 AI Video</a>
 <a href="https://quarcs-lab.github.io/metricsai/slides/ch14/index.html" target="_blank" class="resource-btn">🧑🏽‍🏫 Mendez Slides</a>
-<a href="https://cameron.econ.ucdavis.edu/aed/traedv1_14" target="_blank" class="resource-btn">📊 Cameron Slides</a>
+<a href="https://quarcs-lab.github.io/metricsai/slides/ch14/cameron_slides_ch14.pdf" target="_blank" class="resource-btn">📊 Cameron Slides</a>
 <a href="https://app.edcafe.ai/quizzes/69786a6a2f5d08069e04cf09" target="_blank" class="resource-btn">✏️ Quiz</a>
 <a href="https://gemini.google.com/gem/1mvbUPJb9CZ1SEWlxui86i25-HINaUH1c?usp=sharing" target="_blank" class="resource-btn">🤖 AI Tutor</a>
 </div>
