@@ -1,12 +1,14 @@
 """Validate a chapter quiz bank and build the self-contained quiz page.
 
 Reads quizzes/banks/chNN.json, checks it against the bank schema, prints a
-summary (type mix, answer-position balance), and writes quizzes/chNN.html by
-inlining the bank (base64) into quizzes/_template.html.
+summary (type mix, answer-position balance) plus cue warnings (patterns that
+let test-wise students guess), and writes quizzes/chNN.html by inlining the
+bank (base64) into quizzes/_template.html.
 
 Usage:
     python3 scripts/build_quiz.py ch01
     python3 scripts/build_quiz.py ch01 --bank path/to/bank.json --out path/to/out.html
+    python3 scripts/build_quiz.py ch01 --check     # validate + warnings only, no HTML written
 """
 
 from __future__ import annotations
@@ -14,6 +16,7 @@ from __future__ import annotations
 import argparse
 import base64
 import json
+import math
 import re
 import sys
 from collections import Counter
@@ -27,6 +30,50 @@ META_KEYS = ("chapter", "chapter_title", "book_title", "minutes", "pass_pct", "n
 SETS = ("practice", "exam")
 TYPES = ("single", "multi", "tf")
 LETTERS = "ABCDEFGH"
+
+# Book-wide quiz policy (see .claude/skills/write-quiz/SKILL.md)
+MIN_ITEMS, MAX_ITEMS = 20, 40
+PASS_PCT = 80
+MIN_PER_ITEM = 1.5
+
+
+def expected_minutes(n_items: int) -> int:
+    """1.5 minutes per question, rounded up to a multiple of 5."""
+    return int(math.ceil(n_items * MIN_PER_ITEM / 5.0) * 5)
+
+
+def plain(text: str) -> str:
+    """Visible text without tags or math markup (for length comparisons)."""
+    text = re.sub(r"<[^>]+>", "", text)
+    text = re.sub(r"\\\(|\\\)|\\\[|\\\]", "", text)
+    return re.sub(r"\s+", " ", text).strip()
+
+
+def string_fields(item: dict):
+    """Yield (label, text) for every authored string in an item."""
+    for field in ("concept", "stem", "explanation"):
+        if isinstance(item.get(field), str):
+            yield field, item[field]
+    for o_idx, opt in enumerate(item.get("options") or []):
+        if isinstance(opt, dict):
+            label = LETTERS[o_idx] if o_idx < len(LETTERS) else str(o_idx)
+            for field in ("text", "feedback"):
+                if isinstance(opt.get(field), str):
+                    yield f"option {label} {field}", opt[field]
+
+
+def markup_errors(where: str, label: str, text: str) -> list[str]:
+    """Math delimiters must balance; '$' is currency only; a bare '<' must be '&lt;'."""
+    errs = []
+    if text.count("\\(") != text.count("\\)"):
+        errs.append(f"{where} {label}: unbalanced \\( … \\) math delimiters")
+    if text.count("\\[") != text.count("\\]"):
+        errs.append(f"{where} {label}: unbalanced \\[ … \\] math delimiters")
+    if re.search(r"\$(?![\d])", text):
+        errs.append(f"{where} {label}: '$' not followed by a digit — '$' is for currency only; write math as \\( … \\)")
+    if re.search(r"<(?![a-zA-Z/!])", text):
+        errs.append(f"{where} {label}: bare '<' — write '&lt;'")
+    return errs
 
 
 def norm(text: str) -> str:
@@ -55,6 +102,13 @@ def validate(bank: dict) -> list[str]:
     for key in ("minutes", "pass_pct"):
         if key in meta and not (isinstance(meta[key], (int, float)) and meta[key] > 0):
             errors.append(f"meta.{key} must be a positive number")
+    if n_items is not None:
+        if not (MIN_ITEMS <= n_items <= MAX_ITEMS and n_items % 5 == 0):
+            errors.append(f"meta.n_items must be a multiple of 5 in [{MIN_ITEMS}, {MAX_ITEMS}], got {n_items}")
+        if meta.get("minutes") != expected_minutes(n_items):
+            errors.append(f"meta.minutes must be {expected_minutes(n_items)} for {n_items} items (1.5 min each, rounded up to 5), got {meta.get('minutes')}")
+    if meta.get("pass_pct") != PASS_PCT:
+        errors.append(f"meta.pass_pct must be {PASS_PCT}, got {meta.get('pass_pct')}")
 
     if "<script" in json.dumps(bank, ensure_ascii=False).lower():
         errors.append("bank: contains '<script' (not allowed)")
@@ -87,6 +141,8 @@ def validate(bank: dict) -> list[str]:
             for field in ("concept", "stem", "explanation"):
                 if not nonempty(item.get(field)):
                     errors.append(f"{where}: missing or empty '{field}'")
+            for label, text in string_fields(item):
+                errors.extend(markup_errors(where, label, text))
 
             stem = item.get("stem")
             if nonempty(stem):
@@ -156,6 +212,70 @@ def summarize(bank: dict) -> None:
         print(f"  {'':<8} single correct positions -> {pos_str or '-'} | tf answers -> {tf_str}")
 
 
+def cue_warnings(bank: dict) -> list[str]:
+    """Patterns that let a test-wise student score without the concept (lessons from ch01 reviews)."""
+    warns: list[str] = []
+    for set_name in SETS:
+        items = bank[set_name]
+        singles = [it for it in items if it["type"] == "single"]
+        multis = [it for it in items if it["type"] == "multi"]
+        tfs = [it for it in items if it["type"] == "tf"]
+        n = len(items)
+
+        # Type mix (ch01: ~63% single, ~17% multi, ~20% tf)
+        for label, group, lo, hi in (("single", singles, .50, .75), ("multi", multis, .10, .25), ("tf", tfs, .12, .28)):
+            share = len(group) / n if n else 0
+            if not lo <= share <= hi:
+                warns.append(f"{set_name}: {label} share {share:.0%} outside {lo:.0%}-{hi:.0%}")
+
+        # Single-answer key position balance (4-option items)
+        pos = Counter(LETTERS[[o["correct"] for o in it["options"]].index(True)] for it in singles if len(it["options"]) == 4)
+        if pos:
+            counts = [pos.get(k, 0) for k in "ABCD"]
+            if max(counts) - min(counts) > 2:
+                warns.append(f"{set_name}: single key positions unbalanced {dict(zip('ABCD', counts))}")
+
+        # Correct option is clearly the longest (>= 15% and >= 8 characters longer than any distractor)
+        longest = []
+        for it in singles:
+            lens = [len(plain(o["text"])) for o in it["options"]]
+            k = [o["correct"] for o in it["options"]].index(True)
+            rival = max(l for i, l in enumerate(lens) if i != k)
+            if lens[k] >= 1.15 * rival and lens[k] - rival >= 8:
+                longest.append(it["id"])
+        if singles and len(longest) / len(singles) > 0.25:
+            warns.append(f"{set_name}: key is clearly the longest option in {len(longest)}/{len(singles)} single items ({', '.join(longest)})")
+
+        # Multi-select patterns
+        if len(multis) >= 2:
+            keys = [tuple(i for i, o in enumerate(it["options"]) if o["correct"]) for it in multis]
+            alternating = [k for k in keys if all(i % 2 == 0 for i in k) or all(i % 2 == 1 for i in k)]
+            if len(alternating) == len(keys):
+                warns.append(f"{set_name}: every multi key uses only odd or only even positions {['/'.join(LETTERS[i] for i in k) for k in keys]}")
+            if len(multis) >= 3 and len({len(k) for k in keys}) == 1:
+                warns.append(f"{set_name}: every multi item has exactly {len(keys[0])} correct options")
+
+        # True/False balance
+        tf_true = sum(1 for it in tfs if it["options"][0]["correct"])
+        if abs(tf_true - (len(tfs) - tf_true)) > 1:
+            warns.append(f"{set_name}: true/false answers unbalanced (True {tf_true}, False {len(tfs) - tf_true})")
+
+        # Exam: wrong-option feedback quoting a correct option verbatim (shown below 80% where the key is hidden)
+        if set_name == "exam":
+            for it in items:
+                if it["type"] == "tf":
+                    continue
+                keys_txt = [plain(o["text"]).lower().rstrip(".") for o in it["options"] if o["correct"]]
+                for o_idx, o in enumerate(it["options"]):
+                    if o["correct"]:
+                        continue
+                    fb = plain(o["feedback"]).lower()
+                    for kt in keys_txt:
+                        if len(kt) >= 12 and kt in fb:
+                            warns.append(f"exam {it['id']} option {LETTERS[o_idx]}: feedback quotes the correct option text")
+    return warns
+
+
 def chapter_number(chapter: str) -> str:
     stripped = str(chapter).lstrip("0")
     return stripped or "0"
@@ -166,6 +286,7 @@ def main() -> int:
     parser.add_argument("chapter", help="chapter id, e.g. ch01")
     parser.add_argument("--bank", type=Path, help="bank JSON (default quizzes/banks/<chapter>.json)")
     parser.add_argument("--out", type=Path, help="output HTML (default quizzes/<chapter>.html)")
+    parser.add_argument("--check", action="store_true", help="validate and print warnings only; do not write HTML")
     args = parser.parse_args()
 
     chapter = args.chapter.lower()
@@ -189,6 +310,12 @@ def main() -> int:
 
     print(f"Bank OK: {bank_path}")
     summarize(bank)
+    warns = cue_warnings(bank)
+    for w in warns:
+        print(f"  WARN {w}")
+    print(f"  cue warnings: {len(warns)}")
+    if args.check:
+        return 0
 
     payload = json.dumps(bank, ensure_ascii=False, separators=(",", ":"))
     bank_b64 = base64.b64encode(payload.encode("utf-8")).decode("ascii")

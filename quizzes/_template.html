@@ -9,6 +9,10 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Playfair+Display:ital,wght@0,600;1,600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha384-iw3OoTErCYJJB9mCa8LNS2hbsQ7M3C0EpIsO/H5+EGAkPGc6rk+V8i04oW/K5xq0" crossorigin="anonymous" referrerpolicy="no-referrer">
 <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js" integrity="sha384-sPwMflxqfAN+Q5mvlkLmHiX3PORGbZSXHiSGPTXT9VHCD/AB+b+r+vJWsqprv+7k" crossorigin="anonymous" defer></script>
+<!-- KaTeX: math in stems/options/feedback uses \( … \) and \[ … \] only ($ is reserved for currency). -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css" integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV" crossorigin="anonymous" referrerpolicy="no-referrer">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.js" integrity="sha384-XjKyOOlGwcjNTAIQHIpgOno0Hl1YQqzUOEleOLALmuqehneUG+vnGctmUb0ZY0l8" crossorigin="anonymous" referrerpolicy="no-referrer" defer></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/contrib/auto-render.min.js" integrity="sha384-+VBxd3r6XgURycqtZ117nYw44OOcIax56Z4dCRWbxyPt0Koah1uHoK0o4+/RRE05" crossorigin="anonymous" referrerpolicy="no-referrer" defer></script>
 <script>
 /* Apply the site-wide theme before first paint (same localStorage key as the web apps). */
 (function () {
@@ -328,6 +332,10 @@ html[data-theme="dark"] .toast { background: #e2e8f0; color: #0b1021; }
 .toast.show { opacity: 1; transform: translate(-50%, 0); }
 .toast.warn i { color: #fbbf24; }
 html[data-theme="dark"] .toast.warn i { color: #a14a00; }
+
+/* ===== Math (KaTeX) ===== */
+.katex { font-size: 1.06em; }
+.katex-display { margin: .55em 0; overflow-x: auto; overflow-y: hidden; padding: 2px 0; }
 
 /* ===== Certificate (shared by preview and print; sized in container units) ===== */
 .cert { width: 100%; aspect-ratio: 10.2 / 7.7; color: #0b1021; font-family: 'Inter', system-ui, sans-serif; }
@@ -701,6 +709,16 @@ html[data-theme="dark"] .toast.warn i { color: #a14a00; }
     setTimeout(() => { el.textContent = msg; }, 30);
   }
 
+  /* ---------- Math (KaTeX auto-render; deferred scripts may still be loading) ---------- */
+  const MATH_DELIMS = [{ left: "\\(", right: "\\)", display: false }, { left: "\\[", right: "\\]", display: true }];
+  function typeset(...els) {
+    if (!window.renderMathInElement) {
+      if (document.readyState !== "complete") window.addEventListener("load", () => typeset(...els), { once: true });
+      return; // offline: raw \( … \) stays visible rather than breaking the quiz
+    }
+    els.forEach((el) => { if (el) window.renderMathInElement(el, { delimiters: MATH_DELIMS, throwOnError: false }); });
+  }
+
   /* ---------- Modal ---------- */
   let modalConfirm = null;
   let modalReturnFocus = null;
@@ -926,6 +944,7 @@ html[data-theme="dark"] .toast.warn i { color: #a14a00; }
     $("flag").setAttribute("aria-pressed", String(flagged));
     $("flag").querySelector("i").className = (flagged ? "fa-solid" : "fa-regular") + " fa-flag";
     $("flag-label").textContent = flagged ? "Flagged" : "Flag for review";
+    typeset($("q-stem"), opts, fb);
     renderNavigator();
     updateBar();
   }
@@ -1231,6 +1250,7 @@ html[data-theme="dark"] .toast.warn i { color: #a14a00; }
       return reviewItemHTML(item, i, status, full || status === "correct");
     }).join("");
     $("review").innerHTML = html || '<div class="card r-item"><p class="r-msg" style="margin:0">Nothing missed — every answer was correct. 🎉</p></div>';
+    typeset($("review"));
   }
   $("filter-all").addEventListener("click", () => { state.reviewFilter = "all"; renderReview(); });
   $("filter-missed").addEventListener("click", () => { state.reviewFilter = "missed"; renderReview(); });

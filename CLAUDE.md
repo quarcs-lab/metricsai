@@ -51,6 +51,7 @@ metricsai/
 ├── web-apps/           # Interactive HTML dashboards (one folder per chapter)
 │   └── _shared/        # Shared i18n runtime, 23 string tables (EN/ES/JA), canonical glossary
 ├── slides/             # Quarto reveal.js chapter decks (one folder per chapter: slides/chNN/)
+├── quizzes/            # Chapter quizzes: banks/chNN.json (source) → chNN.html; checks/ fact-checks; _template.html engine
 ├── book/               # Quarto HTML book (symlinks to notebooks_quarto/ and images/)
 ├── tutors/             # 9 AI tutor instruction files (customized Google Gemini Gems)
 ├── images/             # Cover images + chapter visual summaries
@@ -59,7 +60,7 @@ metricsai/
 ├── legacy/             # Archived files (R, Stata, Python originals)
 ├── .venv/              # Python virtual environment (gitignored)
 ├── .claude/rules/      # Detailed workflow docs (PDF, Quarto)
-├── .claude/skills/     # 9 skills (see Architecture section)
+├── .claude/skills/     # 10 skills (see Architecture section)
 ├── index.html          # Project website (standalone)
 ├── requirements.txt    # Python dependencies
 └── README.md           # Project documentation
@@ -136,6 +137,19 @@ python3 scripts/generate_pdf_playwright.py --all
 /write-slides ch05            # autonomous: reads the chapter, exports figures, builds + renders slides/ch05/
 ```
 
+**Generate a chapter quiz (Practice + Exam, certificate at 80%):**
+
+```bash
+/write-quiz ch05             # autonomous: sizes, writes, fact-checks, double-reviews, builds + tests quizzes/ch05.html
+```
+
+**Validate + rebuild a chapter quiz after editing its bank:**
+
+```bash
+python3 scripts/build_quiz.py ch05            # validate quizzes/banks/ch05.json, print cue warnings, write quizzes/ch05.html
+python3 quizzes/checks/ch05_factcheck.py     # re-verify every number in the bank against the data
+```
+
 **Export a chapter's figures for a slide deck (used by /write-slides):**
 
 ```bash
@@ -192,7 +206,8 @@ python3 scripts/smoke_i18n.py
 - **Markdown export:** `notebooks_md/` contains `.md` versions of all chapters (auto-synced)
 - **Auto-sync hook:** Editing any `.qmd` file automatically updates `.ipynb` (Colab), `.md` (Markdown), and `.html` (book) via `scripts/sync_chapter.sh`
 - **PDF pipeline:** `quarto render` → `scripts/inject_print_css.py` → `scripts/generate_pdf_playwright.py`
-- **Skills:** `chapter-standard` (template compliance), `compile-book` (PDF compilation), `proofread` (content review), `improve-readability` (notebook readability), `improve-webapp-readability` (web app pedagogy), `web-app` (interactive dashboards), `create-chapter-code-summary` (Python code cheat sheets), `add-key-concepts-section` (pedagogical glossary section), `write-slides` (Quarto reveal.js chapter decks → `slides/chNN/`)
+- **Skills:** `chapter-standard` (template compliance), `compile-book` (PDF compilation), `proofread` (content review), `improve-readability` (notebook readability), `improve-webapp-readability` (web app pedagogy), `web-app` (interactive dashboards), `create-chapter-code-summary` (Python code cheat sheets), `add-key-concepts-section` (pedagogical glossary section), `write-slides` (Quarto reveal.js chapter decks → `slides/chNN/`), `write-quiz` (Practice + Exam chapter quizzes → `quizzes/chNN.html`)
 - **Web apps:** Single-file Plotly.js dashboards in `web-apps/chNN/dashboard.html`, built by `web-apps/chNN/build.py` from `web-apps/chNN/template.html`
+- **Quizzes:** Single-file quiz pages `quizzes/chNN.html`, built by `scripts/build_quiz.py` from `quizzes/_template.html` + `quizzes/banks/chNN.json` (edit the bank, never the built page). Fact-checks in `quizzes/checks/`. English only; not linked from the site until reviewed.
 - **Shared i18n runtime:** All 19 web pages (`index.html`, `tutors.html`, `web-apps/ch01`–`ch17/dashboard.html`) load the runtime + per-page string tables from `web-apps/_shared/`. Languages: EN + ES + JA. Adding a 4th language is a pure data task across `_shared/strings/*.js` — zero HTML touched. Validators: `scripts/i18n_check.py` (parity gate) + `scripts/smoke_i18n.py` (Playwright regression).
 - **Detailed workflow docs:** `.claude/rules/pdf-generation.md` and `.claude/rules/quarto-book.md`
