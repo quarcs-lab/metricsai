@@ -28,7 +28,7 @@ This notebook provides an interactive introduction to the statistical properties
 <a href="https://carlos-mendez.my.canva.site/s06-the-least-squares-estimator-pdf" target="_blank" class="resource-btn">✨ AI Slides</a>
 <a href="https://cameron.econ.ucdavis.edu/aed/traedv1_06" target="_blank" class="resource-btn">📊 Cameron Slides</a>
 <a href="https://app.edcafe.ai/quizzes/697866592f5d08069e048b48" target="_blank" class="resource-btn">✏️ Quiz</a>
-<a href="https://app.edcafe.ai/chatbots/69789eae2f5d08069e070694" target="_blank" class="resource-btn">🤖 AI Tutor</a>
+<a href="https://gemini.google.com/gem/1mvbUPJb9CZ1SEWlxui86i25-HINaUH1c?usp=sharing" target="_blank" class="resource-btn">🤖 AI Tutor</a>
 </div>
 
 +++

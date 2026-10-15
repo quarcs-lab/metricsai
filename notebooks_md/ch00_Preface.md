@@ -111,9 +111,9 @@ Your notebooks are always up-to-date with the latest software dependencies, as G
 
 ### Pillar 3: AI-Powered Learning
 
-#### Leveraging Google's NotebookLM and AI Tools
+#### Leveraging Google's Gemini Notebook and AI Tools
 
-The third pillar of our approach harnesses the power of artificial intelligence to enhance learning. We've developed AI-enhanced study materials for all 17 chapters, leveraging cutting-edge tools like Google's NotebookLM and Gemini Pro to create multiple learning modalities that accommodate diverse learning preferences.
+The third pillar of our approach harnesses the power of artificial intelligence to enhance learning. We've developed AI-enhanced study materials for all 17 chapters, leveraging cutting-edge tools like Google's Gemini Notebook and Gemini Pro to create multiple learning modalities that accommodate diverse learning preferences.
 
 These AI tools provide interactive learning assistance, offering explanations, answering questions, and helping you develop deeper understanding of complex concepts. The materials support multiple modalities—visual, auditory, textual, and interactive—ensuring that regardless of your preferred learning style, you'll find resources that resonate with you.
 
@@ -133,7 +133,7 @@ They also work well as quick reviews. After completing a chapter, the video serv
 
 #### Interactive AI Slides and Presentations
 
-For each chapter, we've generated presentation materials using NotebookLM that complement the traditional slides created by Professor Cameron. These AI-generated slides are designed for self-paced learning, with clear explanations, progressive concept building, and visual aids that clarify complex ideas.
+For each chapter, we've generated presentation materials using Gemini Notebook that complement the traditional slides created by Professor Cameron. These AI-generated slides are designed for self-paced learning, with clear explanations, progressive concept building, and visual aids that clarify complex ideas.
 
 The slides are presentation-ready, making them useful not just for individual study but also for group discussions, study sessions, or classroom presentations. They provide an alternative way to engage with the material, breaking down complex topics into digestible chunks that can be reviewed at your own pace.
 
@@ -147,7 +147,7 @@ These audio resources offer an alternative learning modality that complements th
 
 #### Quiz and AI Tutor Integration
 
-Assessment and feedback are critical components of effective learning. Each chapter includes interactive quizzes powered by EdCafe and NotebookLM that test your understanding of key concepts. These aren't just multiple-choice questions—they're interactive self-assessment tools that provide immediate feedback and personalized learning assistance based on your responses.
+Assessment and feedback are critical components of effective learning. Each chapter includes interactive quizzes powered by EdCafe and Gemini Notebook that test your understanding of key concepts. These aren't just multiple-choice questions—they're interactive self-assessment tools that provide immediate feedback and personalized learning assistance based on your responses.
 
 When you struggle with a concept, the AI tutor is available to provide code explanations, clarify theoretical points, and guide you toward understanding. This immediate, personalized support ensures you don't get stuck—help is always available when you need it. The AI tutor can explain why a particular approach works, suggest alternative methods, and help debug code when things don't work as expected.
 
@@ -155,7 +155,7 @@ When you struggle with a concept, the AI tutor is available to provide code expl
 
 While AI tools provide powerful learning support, it's crucial to understand their proper role in your education. AI serves as an enhancement, not a replacement for critical thinking and genuine understanding. The foundation of your learning remains Cameron's authoritative textbook and the verified Python code in the notebooks—AI tools supplement this foundation, they don't replace it.
 
-It's important to cross-reference AI-generated content with authoritative sources. While tools like NotebookLM and Gemini Pro are sophisticated, they can occasionally make mistakes or oversimplify complex concepts. You bear responsibility for verifying information and developing true understanding rather than simply accepting AI-generated explanations at face value.
+It's important to cross-reference AI-generated content with authoritative sources. While tools like Gemini Notebook and Gemini Pro are sophisticated, they can occasionally make mistakes or oversimplify complex concepts. You bear responsibility for verifying information and developing true understanding rather than simply accepting AI-generated explanations at face value.
 
 All Python code in the notebooks has been carefully verified and tested for accuracy. When AI tools provide code explanations or suggestions, compare them against the tested code in the notebooks to ensure accuracy. The goal is to use AI tools to develop multiple learning pathways and deeper understanding—transparency about these tools' capabilities and limitations is essential to using them effectively.
 
@@ -213,7 +213,7 @@ To get the most out of each chapter, we recommend a multi-stage approach that co
 
 **Take the quiz** to test your understanding. The EdCafe quizzes provide immediate feedback on whether you've truly grasped the key concepts. Don't skip this step—self-assessment is crucial for identifying gaps in understanding before moving forward.
 
-**Consult the AI tutor** whenever you need help. Whether you're stuck on a coding problem, confused about a statistical concept, or want a deeper explanation of a particular point, the NotebookLM and EdCafe AI tutors are available to provide personalized assistance.
+**Consult the AI tutor** whenever you need help. Whether you're stuck on a coding problem, confused about a statistical concept, or want a deeper explanation of a particular point, the Gemini Notebook and EdCafe AI tutors are available to provide personalized assistance.
 
 ## Acknowledgments
 
@@ -231,7 +231,7 @@ This project relies heavily on cutting-edge technology platforms that have made 
 
 **Google Colab** provides the cloud computing infrastructure that makes zero-installation learning a reality. By offering free access to powerful computing resources and maintaining up-to-date Python environments, Colab has democratized access to data science education in ways that would have been unimaginable just a few years ago.
 
-**Google's NotebookLM** powers the AI learning tools—podcasts, slides, and tutoring—that provide personalized learning support. This sophisticated AI technology transforms static educational content into interactive learning experiences tailored to individual needs and learning styles.
+**Google's Gemini Notebook** powers the AI learning tools—podcasts, slides, and tutoring—that provide personalized learning support. This sophisticated AI technology transforms static educational content into interactive learning experiences tailored to individual needs and learning styles.
 
 **Google's Gemini Pro** generates the visual summaries that help consolidate understanding and provide alternative perspectives on chapter content. The ability to automatically create meaningful visualizations of complex concepts represents a significant advance in educational technology.
 

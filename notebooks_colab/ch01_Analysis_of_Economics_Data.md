@@ -30,7 +30,7 @@ This notebook provides an interactive introduction to regression analysis using 
 <a href="https://carlos-mendez.my.canva.site/s01-analysis-of-economics-data-pdf" target="_blank" class="resource-btn">✨ AI Slides</a>
 <a href="https://cameron.econ.ucdavis.edu/aed/traedv1_01" target="_blank" class="resource-btn">📊 Cameron Slides</a>
 <a href="https://app.edcafe.ai/quizzes/69715fdb60956f50e60276b9" target="_blank" class="resource-btn">✏️ Quiz</a>
-<a href="https://app.edcafe.ai/chatbots/6971625960956f50e6028155" target="_blank" class="resource-btn">🤖 AI Tutor</a>
+<a href="https://gemini.google.com/gem/1mvbUPJb9CZ1SEWlxui86i25-HINaUH1c?usp=sharing" target="_blank" class="resource-btn">🤖 AI Tutor</a>
 </div>
 
 +++ {"id": "Klx9DpDoTpls"}

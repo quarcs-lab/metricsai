@@ -20,7 +20,7 @@ This notebook provides an interactive introduction to bivariate regression throu
 <a href="https://quarcs-lab.github.io/metricsai/slides/ch08/index.html" target="_blank" class="resource-btn">🧑🏽‍🏫 Mendez Slides</a>
 <a href="https://cameron.econ.ucdavis.edu/aed/traedv1_08" target="_blank" class="resource-btn">📊 Cameron Slides</a>
 <a href="https://app.edcafe.ai/quizzes/697867452f5d08069e049d1f" target="_blank" class="resource-btn">✏️ Quiz</a>
-<a href="https://app.edcafe.ai/chatbots/6978a02d2f5d08069e0711d6" target="_blank" class="resource-btn">🤖 AI Tutor</a>
+<a href="https://gemini.google.com/gem/1mvbUPJb9CZ1SEWlxui86i25-HINaUH1c?usp=sharing" target="_blank" class="resource-btn">🤖 AI Tutor</a>
 </div>
 
 

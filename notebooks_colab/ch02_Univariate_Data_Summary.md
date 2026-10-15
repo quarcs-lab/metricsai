@@ -28,7 +28,7 @@ This notebook provides an interactive introduction to univariate data analysis u
 <a href="https://carlos-mendez.my.canva.site/s02-univariate-data-summary-pdf" target="_blank" class="resource-btn">✨ AI Slides</a>
 <a href="https://cameron.econ.ucdavis.edu/aed/traedv1_02" target="_blank" class="resource-btn">📊 Cameron Slides</a>
 <a href="https://app.edcafe.ai/quizzes/6978644a2f5d08069e046930" target="_blank" class="resource-btn">✏️ Quiz</a>
-<a href="https://app.edcafe.ai/chatbots/69789c1e2f5d08069e06f856" target="_blank" class="resource-btn">🤖 AI Tutor</a>
+<a href="https://gemini.google.com/gem/1mvbUPJb9CZ1SEWlxui86i25-HINaUH1c?usp=sharing" target="_blank" class="resource-btn">🤖 AI Tutor</a>
 </div>
 
 +++

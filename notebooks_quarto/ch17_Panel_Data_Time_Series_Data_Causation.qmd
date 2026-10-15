@@ -20,7 +20,7 @@ This notebook provides an interactive introduction to panel data methods, time s
 <a href="https://quarcs-lab.github.io/metricsai/slides/ch17/index.html" target="_blank" class="resource-btn">🧑🏽‍🏫 Mendez Slides</a>
 <a href="https://cameron.econ.ucdavis.edu/aed/traedv1_17" target="_blank" class="resource-btn">📊 Cameron Slides</a>
 <a href="https://app.edcafe.ai/quizzes/69786c262f5d08069e04e9a8" target="_blank" class="resource-btn">✏️ Quiz</a>
-<a href="https://app.edcafe.ai/chatbots/6978a3772f5d08069e0723a7" target="_blank" class="resource-btn">🤖 AI Tutor</a>
+<a href="https://gemini.google.com/gem/1mvbUPJb9CZ1SEWlxui86i25-HINaUH1c?usp=sharing" target="_blank" class="resource-btn">🤖 AI Tutor</a>
 </div>
 
 

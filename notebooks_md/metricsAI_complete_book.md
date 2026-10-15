@@ -156,9 +156,9 @@ Your notebooks are always up-to-date with the latest software dependencies, as G
 
 ### Pillar 3: AI-Powered Learning
 
-#### Leveraging Google's NotebookLM and AI Tools
+#### Leveraging Google's Gemini Notebook and AI Tools
 
-The third pillar of our approach harnesses the power of artificial intelligence to enhance learning. We've developed AI-enhanced study materials for all 17 chapters, leveraging cutting-edge tools like Google's NotebookLM and Gemini Pro to create multiple learning modalities that accommodate diverse learning preferences.
+The third pillar of our approach harnesses the power of artificial intelligence to enhance learning. We've developed AI-enhanced study materials for all 17 chapters, leveraging cutting-edge tools like Google's Gemini Notebook and Gemini Pro to create multiple learning modalities that accommodate diverse learning preferences.
 
 These AI tools provide interactive learning assistance, offering explanations, answering questions, and helping you develop deeper understanding of complex concepts. The materials support multiple modalities—visual, auditory, textual, and interactive—ensuring that regardless of your preferred learning style, you'll find resources that resonate with you.
 
@@ -178,7 +178,7 @@ They also work well as quick reviews. After completing a chapter, the video serv
 
 #### Interactive AI Slides and Presentations
 
-For each chapter, we've generated presentation materials using NotebookLM that complement the traditional slides created by Professor Cameron. These AI-generated slides are designed for self-paced learning, with clear explanations, progressive concept building, and visual aids that clarify complex ideas.
+For each chapter, we've generated presentation materials using Gemini Notebook that complement the traditional slides created by Professor Cameron. These AI-generated slides are designed for self-paced learning, with clear explanations, progressive concept building, and visual aids that clarify complex ideas.
 
 The slides are presentation-ready, making them useful not just for individual study but also for group discussions, study sessions, or classroom presentations. They provide an alternative way to engage with the material, breaking down complex topics into digestible chunks that can be reviewed at your own pace.
 
@@ -192,7 +192,7 @@ These audio resources offer an alternative learning modality that complements th
 
 #### Quiz and AI Tutor Integration
 
-Assessment and feedback are critical components of effective learning. Each chapter includes interactive quizzes powered by EdCafe and NotebookLM that test your understanding of key concepts. These aren't just multiple-choice questions—they're interactive self-assessment tools that provide immediate feedback and personalized learning assistance based on your responses.
+Assessment and feedback are critical components of effective learning. Each chapter includes interactive quizzes powered by EdCafe and Gemini Notebook that test your understanding of key concepts. These aren't just multiple-choice questions—they're interactive self-assessment tools that provide immediate feedback and personalized learning assistance based on your responses.
 
 When you struggle with a concept, the AI tutor is available to provide code explanations, clarify theoretical points, and guide you toward understanding. This immediate, personalized support ensures you don't get stuck—help is always available when you need it. The AI tutor can explain why a particular approach works, suggest alternative methods, and help debug code when things don't work as expected.
 
@@ -200,7 +200,7 @@ When you struggle with a concept, the AI tutor is available to provide code expl
 
 While AI tools provide powerful learning support, it's crucial to understand their proper role in your education. AI serves as an enhancement, not a replacement for critical thinking and genuine understanding. The foundation of your learning remains Cameron's authoritative textbook and the verified Python code in the notebooks—AI tools supplement this foundation, they don't replace it.
 
-It's important to cross-reference AI-generated content with authoritative sources. While tools like NotebookLM and Gemini Pro are sophisticated, they can occasionally make mistakes or oversimplify complex concepts. You bear responsibility for verifying information and developing true understanding rather than simply accepting AI-generated explanations at face value.
+It's important to cross-reference AI-generated content with authoritative sources. While tools like Gemini Notebook and Gemini Pro are sophisticated, they can occasionally make mistakes or oversimplify complex concepts. You bear responsibility for verifying information and developing true understanding rather than simply accepting AI-generated explanations at face value.
 
 All Python code in the notebooks has been carefully verified and tested for accuracy. When AI tools provide code explanations or suggestions, compare them against the tested code in the notebooks to ensure accuracy. The goal is to use AI tools to develop multiple learning pathways and deeper understanding—transparency about these tools' capabilities and limitations is essential to using them effectively.
 
@@ -258,7 +258,7 @@ To get the most out of each chapter, we recommend a multi-stage approach that co
 
 **Take the quiz** to test your understanding. The EdCafe quizzes provide immediate feedback on whether you've truly grasped the key concepts. Don't skip this step—self-assessment is crucial for identifying gaps in understanding before moving forward.
 
-**Consult the AI tutor** whenever you need help. Whether you're stuck on a coding problem, confused about a statistical concept, or want a deeper explanation of a particular point, the NotebookLM and EdCafe AI tutors are available to provide personalized assistance.
+**Consult the AI tutor** whenever you need help. Whether you're stuck on a coding problem, confused about a statistical concept, or want a deeper explanation of a particular point, the Gemini Notebook and EdCafe AI tutors are available to provide personalized assistance.
 
 ## Acknowledgments
 
@@ -276,7 +276,7 @@ This project relies heavily on cutting-edge technology platforms that have made 
 
 **Google Colab** provides the cloud computing infrastructure that makes zero-installation learning a reality. By offering free access to powerful computing resources and maintaining up-to-date Python environments, Colab has democratized access to data science education in ways that would have been unimaginable just a few years ago.
 
-**Google's NotebookLM** powers the AI learning tools—podcasts, slides, and tutoring—that provide personalized learning support. This sophisticated AI technology transforms static educational content into interactive learning experiences tailored to individual needs and learning styles.
+**Google's Gemini Notebook** powers the AI learning tools—podcasts, slides, and tutoring—that provide personalized learning support. This sophisticated AI technology transforms static educational content into interactive learning experiences tailored to individual needs and learning styles.
 
 **Google's Gemini Pro** generates the visual summaries that help consolidate understanding and provide alternative perspectives on chapter content. The ability to automatically create meaningful visualizations of complex concepts represents a significant advance in educational technology.
 
@@ -321,7 +321,7 @@ This notebook provides an interactive introduction to regression analysis using 
 <a href="https://quarcs-lab.github.io/metricsai/slides/ch01/index.html" target="_blank" class="resource-btn">🧑🏽‍🏫 Mendez Slides</a>
 <a href="https://cameron.econ.ucdavis.edu/aed/traedv1_01" target="_blank" class="resource-btn">📊 Cameron Slides</a>
 <a href="https://app.edcafe.ai/quizzes/69715fdb60956f50e60276b9" target="_blank" class="resource-btn">✏️ Quiz</a>
-<a href="https://app.edcafe.ai/chatbots/6971625960956f50e6028155" target="_blank" class="resource-btn">🤖 AI Tutor</a>
+<a href="https://gemini.google.com/gem/1mvbUPJb9CZ1SEWlxui86i25-HINaUH1c?usp=sharing" target="_blank" class="resource-btn">🤖 AI Tutor</a>
 </div>
 
 
@@ -1648,7 +1648,7 @@ This notebook provides an interactive introduction to univariate data analysis u
 <a href="https://quarcs-lab.github.io/metricsai/slides/ch02/index.html" target="_blank" class="resource-btn">🧑🏽‍🏫 Mendez Slides</a>
 <a href="https://cameron.econ.ucdavis.edu/aed/traedv1_02" target="_blank" class="resource-btn">📊 Cameron Slides</a>
 <a href="https://app.edcafe.ai/quizzes/6978644a2f5d08069e046930" target="_blank" class="resource-btn">✏️ Quiz</a>
-<a href="https://app.edcafe.ai/chatbots/69789c1e2f5d08069e06f856" target="_blank" class="resource-btn">🤖 AI Tutor</a>
+<a href="https://gemini.google.com/gem/1mvbUPJb9CZ1SEWlxui86i25-HINaUH1c?usp=sharing" target="_blank" class="resource-btn">🤖 AI Tutor</a>
 </div>
 
 
@@ -4041,7 +4041,7 @@ This notebook provides an interactive introduction to one of the most important 
 <a href="https://quarcs-lab.github.io/metricsai/slides/ch03/index.html" target="_blank" class="resource-btn">🧑🏽‍🏫 Mendez Slides</a>
 <a href="https://cameron.econ.ucdavis.edu/aed/traedv1_03" target="_blank" class="resource-btn">📊 Cameron Slides</a>
 <a href="https://app.edcafe.ai/quizzes/697864e12f5d08069e0471b5" target="_blank" class="resource-btn">✏️ Quiz</a>
-<a href="https://app.edcafe.ai/chatbots/69789d252f5d08069e06fdad" target="_blank" class="resource-btn">🤖 AI Tutor</a>
+<a href="https://gemini.google.com/gem/1mvbUPJb9CZ1SEWlxui86i25-HINaUH1c?usp=sharing" target="_blank" class="resource-btn">🤖 AI Tutor</a>
 </div>
 
 
@@ -5646,7 +5646,7 @@ This notebook provides an interactive introduction to statistical inference, tea
 <a href="https://quarcs-lab.github.io/metricsai/slides/ch04/index.html" target="_blank" class="resource-btn">🧑🏽‍🏫 Mendez Slides</a>
 <a href="https://cameron.econ.ucdavis.edu/aed/traedv1_04" target="_blank" class="resource-btn">📊 Cameron Slides</a>
 <a href="https://app.edcafe.ai/quizzes/6978656c2f5d08069e0479cb" target="_blank" class="resource-btn">✏️ Quiz</a>
-<a href="https://app.edcafe.ai/chatbots/69789d9f2f5d08069e06ffa5" target="_blank" class="resource-btn">🤖 AI Tutor</a>
+<a href="https://gemini.google.com/gem/1mvbUPJb9CZ1SEWlxui86i25-HINaUH1c?usp=sharing" target="_blank" class="resource-btn">🤖 AI Tutor</a>
 </div>
 
 
@@ -8087,7 +8087,7 @@ This notebook provides an interactive introduction to bivariate data analysis an
 <a href="https://quarcs-lab.github.io/metricsai/slides/ch05/index.html" target="_blank" class="resource-btn">🧑🏽‍🏫 Mendez Slides</a>
 <a href="https://cameron.econ.ucdavis.edu/aed/traedv1_05" target="_blank" class="resource-btn">📊 Cameron Slides</a>
 <a href="https://app.edcafe.ai/quizzes/697865de2f5d08069e0482cc" target="_blank" class="resource-btn">✏️ Quiz</a>
-<a href="https://app.edcafe.ai/chatbots/69789e4c2f5d08069e0704c6" target="_blank" class="resource-btn">🤖 AI Tutor</a>
+<a href="https://gemini.google.com/gem/1mvbUPJb9CZ1SEWlxui86i25-HINaUH1c?usp=sharing" target="_blank" class="resource-btn">🤖 AI Tutor</a>
 </div>
 
 
@@ -10462,7 +10462,7 @@ This notebook provides an interactive introduction to the statistical properties
 <a href="https://quarcs-lab.github.io/metricsai/slides/ch06/index.html" target="_blank" class="resource-btn">🧑🏽‍🏫 Mendez Slides</a>
 <a href="https://cameron.econ.ucdavis.edu/aed/traedv1_06" target="_blank" class="resource-btn">📊 Cameron Slides</a>
 <a href="https://app.edcafe.ai/quizzes/697866592f5d08069e048b48" target="_blank" class="resource-btn">✏️ Quiz</a>
-<a href="https://app.edcafe.ai/chatbots/69789eae2f5d08069e070694" target="_blank" class="resource-btn">🤖 AI Tutor</a>
+<a href="https://gemini.google.com/gem/1mvbUPJb9CZ1SEWlxui86i25-HINaUH1c?usp=sharing" target="_blank" class="resource-btn">🤖 AI Tutor</a>
 </div>
 
 
@@ -12038,7 +12038,7 @@ This notebook provides an interactive introduction to statistical inference for 
 <a href="https://quarcs-lab.github.io/metricsai/slides/ch07/index.html" target="_blank" class="resource-btn">🧑🏽‍🏫 Mendez Slides</a>
 <a href="https://cameron.econ.ucdavis.edu/aed/traedv1_07" target="_blank" class="resource-btn">📊 Cameron Slides</a>
 <a href="https://app.edcafe.ai/quizzes/697866e42f5d08069e04934f" target="_blank" class="resource-btn">✏️ Quiz</a>
-<a href="https://app.edcafe.ai/chatbots/69789f042f5d08069e070885" target="_blank" class="resource-btn">🤖 AI Tutor</a>
+<a href="https://gemini.google.com/gem/1mvbUPJb9CZ1SEWlxui86i25-HINaUH1c?usp=sharing" target="_blank" class="resource-btn">🤖 AI Tutor</a>
 </div>
 
 
@@ -14786,7 +14786,7 @@ This notebook provides an interactive introduction to bivariate regression throu
 <a href="https://quarcs-lab.github.io/metricsai/slides/ch08/index.html" target="_blank" class="resource-btn">🧑🏽‍🏫 Mendez Slides</a>
 <a href="https://cameron.econ.ucdavis.edu/aed/traedv1_08" target="_blank" class="resource-btn">📊 Cameron Slides</a>
 <a href="https://app.edcafe.ai/quizzes/697867452f5d08069e049d1f" target="_blank" class="resource-btn">✏️ Quiz</a>
-<a href="https://app.edcafe.ai/chatbots/6978a02d2f5d08069e0711d6" target="_blank" class="resource-btn">🤖 AI Tutor</a>
+<a href="https://gemini.google.com/gem/1mvbUPJb9CZ1SEWlxui86i25-HINaUH1c?usp=sharing" target="_blank" class="resource-btn">🤖 AI Tutor</a>
 </div>
 
 
@@ -16179,7 +16179,7 @@ This notebook teaches you how to use natural logarithms in regression analysis t
 <a href="https://quarcs-lab.github.io/metricsai/slides/ch09/index.html" target="_blank" class="resource-btn">🧑🏽‍🏫 Mendez Slides</a>
 <a href="https://cameron.econ.ucdavis.edu/aed/traedv1_09" target="_blank" class="resource-btn">📊 Cameron Slides</a>
 <a href="https://app.edcafe.ai/quizzes/697867a22f5d08069e04a411" target="_blank" class="resource-btn">✏️ Quiz</a>
-<a href="https://app.edcafe.ai/chatbots/6978a07f2f5d08069e0713c6" target="_blank" class="resource-btn">🤖 AI Tutor</a>
+<a href="https://gemini.google.com/gem/1mvbUPJb9CZ1SEWlxui86i25-HINaUH1c?usp=sharing" target="_blank" class="resource-btn">🤖 AI Tutor</a>
 </div>
 
 
@@ -17444,7 +17444,7 @@ This notebook provides an interactive introduction to multiple regression analys
 <a href="https://quarcs-lab.github.io/metricsai/slides/ch10/index.html" target="_blank" class="resource-btn">🧑🏽‍🏫 Mendez Slides</a>
 <a href="https://cameron.econ.ucdavis.edu/aed/traedv1_10" target="_blank" class="resource-btn">📊 Cameron Slides</a>
 <a href="https://app.edcafe.ai/quizzes/697868212f5d08069e04add5" target="_blank" class="resource-btn">✏️ Quiz</a>
-<a href="https://app.edcafe.ai/chatbots/6978a0fd2f5d08069e0715f8" target="_blank" class="resource-btn">🤖 AI Tutor</a>
+<a href="https://gemini.google.com/gem/1mvbUPJb9CZ1SEWlxui86i25-HINaUH1c?usp=sharing" target="_blank" class="resource-btn">🤖 AI Tutor</a>
 </div>
 
 
@@ -18936,7 +18936,7 @@ This notebook provides an interactive introduction to extending inference to mod
 <a href="https://quarcs-lab.github.io/metricsai/slides/ch11/index.html" target="_blank" class="resource-btn">🧑🏽‍🏫 Mendez Slides</a>
 <a href="https://cameron.econ.ucdavis.edu/aed/traedv1_11" target="_blank" class="resource-btn">📊 Cameron Slides</a>
 <a href="https://app.edcafe.ai/quizzes/697868ad2f5d08069e04b748" target="_blank" class="resource-btn">✏️ Quiz</a>
-<a href="https://app.edcafe.ai/chatbots/6978a1572f5d08069e071814" target="_blank" class="resource-btn">🤖 AI Tutor</a>
+<a href="https://gemini.google.com/gem/1mvbUPJb9CZ1SEWlxui86i25-HINaUH1c?usp=sharing" target="_blank" class="resource-btn">🤖 AI Tutor</a>
 </div>
 
 
@@ -20970,7 +20970,7 @@ This notebook provides an interactive introduction to advanced topics in regress
 <a href="https://quarcs-lab.github.io/metricsai/slides/ch12/index.html" target="_blank" class="resource-btn">🧑🏽‍🏫 Mendez Slides</a>
 <a href="https://cameron.econ.ucdavis.edu/aed/traedv1_12" target="_blank" class="resource-btn">📊 Cameron Slides</a>
 <a href="https://app.edcafe.ai/quizzes/6978693a2f5d08069e04bed3" target="_blank" class="resource-btn">✏️ Quiz</a>
-<a href="https://app.edcafe.ai/chatbots/6978a1a32f5d08069e0719da" target="_blank" class="resource-btn">🤖 AI Tutor</a>
+<a href="https://gemini.google.com/gem/1mvbUPJb9CZ1SEWlxui86i25-HINaUH1c?usp=sharing" target="_blank" class="resource-btn">🤖 AI Tutor</a>
 </div>
 
 
@@ -23105,7 +23105,7 @@ This notebook presents comprehensive case studies applying multiple regression t
 <a href="https://quarcs-lab.github.io/metricsai/slides/ch13/index.html" target="_blank" class="resource-btn">🧑🏽‍🏫 Mendez Slides</a>
 <a href="https://cameron.econ.ucdavis.edu/aed/traedv1_13" target="_blank" class="resource-btn">📊 Cameron Slides</a>
 <a href="https://app.edcafe.ai/quizzes/697869f02f5d08069e04c94f" target="_blank" class="resource-btn">✏️ Quiz</a>
-<a href="https://app.edcafe.ai/chatbots/6978a2122f5d08069e071d09" target="_blank" class="resource-btn">🤖 AI Tutor</a>
+<a href="https://gemini.google.com/gem/1mvbUPJb9CZ1SEWlxui86i25-HINaUH1c?usp=sharing" target="_blank" class="resource-btn">🤖 AI Tutor</a>
 </div>
 
 
@@ -25093,7 +25093,7 @@ This notebook provides an interactive introduction to regression with indicator 
 <a href="https://quarcs-lab.github.io/metricsai/slides/ch14/index.html" target="_blank" class="resource-btn">🧑🏽‍🏫 Mendez Slides</a>
 <a href="https://cameron.econ.ucdavis.edu/aed/traedv1_14" target="_blank" class="resource-btn">📊 Cameron Slides</a>
 <a href="https://app.edcafe.ai/quizzes/69786a6a2f5d08069e04cf09" target="_blank" class="resource-btn">✏️ Quiz</a>
-<a href="https://app.edcafe.ai/chatbots/6978a2782f5d08069e071ecb" target="_blank" class="resource-btn">🤖 AI Tutor</a>
+<a href="https://gemini.google.com/gem/1mvbUPJb9CZ1SEWlxui86i25-HINaUH1c?usp=sharing" target="_blank" class="resource-btn">🤖 AI Tutor</a>
 </div>
 
 
@@ -26664,7 +26664,7 @@ This notebook provides an interactive introduction to regression with transforme
 <a href="https://quarcs-lab.github.io/metricsai/slides/ch15/index.html" target="_blank" class="resource-btn">🧑🏽‍🏫 Mendez Slides</a>
 <a href="https://cameron.econ.ucdavis.edu/aed/traedv1_15" target="_blank" class="resource-btn">📊 Cameron Slides</a>
 <a href="https://app.edcafe.ai/quizzes/69786b142f5d08069e04d9ed" target="_blank" class="resource-btn">✏️ Quiz</a>
-<a href="https://app.edcafe.ai/chatbots/6978a2c92f5d08069e072021" target="_blank" class="resource-btn">🤖 AI Tutor</a>
+<a href="https://gemini.google.com/gem/1mvbUPJb9CZ1SEWlxui86i25-HINaUH1c?usp=sharing" target="_blank" class="resource-btn">🤖 AI Tutor</a>
 </div>
 
 
@@ -28578,7 +28578,7 @@ This notebook provides an interactive introduction to regression diagnostics and
 <a href="https://quarcs-lab.github.io/metricsai/slides/ch16/index.html" target="_blank" class="resource-btn">🧑🏽‍🏫 Mendez Slides</a>
 <a href="https://cameron.econ.ucdavis.edu/aed/traedv1_16" target="_blank" class="resource-btn">📊 Cameron Slides</a>
 <a href="https://app.edcafe.ai/quizzes/69786b812f5d08069e04e07f" target="_blank" class="resource-btn">✏️ Quiz</a>
-<a href="https://app.edcafe.ai/chatbots/6978a3122f5d08069e07219f" target="_blank" class="resource-btn">🤖 AI Tutor</a>
+<a href="https://gemini.google.com/gem/1mvbUPJb9CZ1SEWlxui86i25-HINaUH1c?usp=sharing" target="_blank" class="resource-btn">🤖 AI Tutor</a>
 </div>
 
 
@@ -30750,7 +30750,7 @@ This notebook provides an interactive introduction to panel data methods, time s
 <a href="https://quarcs-lab.github.io/metricsai/slides/ch17/index.html" target="_blank" class="resource-btn">🧑🏽‍🏫 Mendez Slides</a>
 <a href="https://cameron.econ.ucdavis.edu/aed/traedv1_17" target="_blank" class="resource-btn">📊 Cameron Slides</a>
 <a href="https://app.edcafe.ai/quizzes/69786c262f5d08069e04e9a8" target="_blank" class="resource-btn">✏️ Quiz</a>
-<a href="https://app.edcafe.ai/chatbots/6978a3772f5d08069e0723a7" target="_blank" class="resource-btn">🤖 AI Tutor</a>
+<a href="https://gemini.google.com/gem/1mvbUPJb9CZ1SEWlxui86i25-HINaUH1c?usp=sharing" target="_blank" class="resource-btn">🤖 AI Tutor</a>
 </div>
 
 
