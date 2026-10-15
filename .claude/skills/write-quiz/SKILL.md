@@ -115,8 +115,10 @@ Rules (details in the rubric §2, §5, §7):
 - Every "What you'll learn" bullet assessed at least once per set; order follows the chapter.
 - Practice and Exam parallel by topic and type; Exam grounded in the chapter's own results,
   Practice in parallel scenarios.
-- Plan key positions up front: single-answer keys balanced A–D; T/F split ~50/50; multi
-  keys with varied patterns (not all odd/even positions) and varied numbers of correct options.
+- Plan key positions up front: single-answer keys balanced A–D but **not** cycled in blocks
+  (about 1 in 4 consecutive single items share a letter, no run of 3+); T/F split ~50/50;
+  multi keys with varied patterns (not all odd/even positions) and varied numbers of
+  correct options.
 
 ## Phase 4 — Write the bank
 

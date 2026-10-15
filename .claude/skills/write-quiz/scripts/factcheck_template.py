@@ -9,8 +9,13 @@ Copy to quizzes/checks/CHAPTER_factcheck.py, set CHAPTER, then fill the three bl
   2. CHECKS  one assert per number quoted in the bank, in the same rounding the bank uses.
              Include arithmetic used in options (predictions, differences, distractor values).
   3. CLAIMS  one assert per statement about how variables relate in the data
-             (signs, correlations, orderings, ranges). Chapter prose is not evidence:
-             ch01's "bigger houses tend to be newer" is false in AED_HOUSE (r = 0.08).
+             (signs, correlations, orderings, ranges, first/last dates). Chapter prose is
+             not evidence: ch01's "bigger houses tend to be newer" is false in AED_HOUSE
+             (r = 0.08), and AED_REALGDPPC ends in 2020 Q1, not at the end of 2020.
+
+Pitfalls: Python's round() rounds halves to even (round(62.5) == 62), so compare exact
+values or f-strings for .5 cases; some AED date columns (e.g. "month") hold timestamps,
+not integers.
 
 Run:  python3 quizzes/checks/CHAPTER_factcheck.py      (exit 1 on any failure)
 """

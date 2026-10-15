@@ -83,6 +83,8 @@ When I correct you, or you catch yourself making a mistake: before continuing，
 - Round reported statistics from exact values, never from already-rounded printed output (double rounding turned t = 5.9953 into "5.99" instead of 6.00).
 - Verify quiz claims about a dataset (e.g., which variables move together) against the data, not the chapter prose ("bigger houses tend to be newer" is false in AED_HOUSE: r = 0.08).
 - In key-hidden exam feedback, point to the concept or section to revisit; never state the correction, quote the key, or negate a sibling option.
+- Never cycle quiz answer keys through A–D in fixed blocks; balance letters but let about 1 in 4 consecutive keys repeat.
+- Check a dataset's actual coverage (first/last date, observations per period) before describing its range (AED_REALGDPPC ends in 2020 Q1, not "end of 2020").
 
 ## Key Commands
 

@@ -64,13 +64,30 @@ position, feedback leaks, or cross-references between items.
   not be defensible: check it against the data (§6), against the reverse case (e.g., R² of
   y on x equals R² of x on y in simple regression), and against strong-student readings.
 - **No logical-negation pairs** (option B = "not option E"): feedback on one gives away
-  the other.
+  the other. The same applies to two-way splits with no third choice ("left-skewed" vs.
+  "right-skewed" with no "symmetric" option; "lighter tails" vs. "heavier tails"): add a
+  third, independent alternative.
+- **Numeric distractors trace to a named misconception** (forgot the intercept, divided by
+  the mean instead of the SD, part-to-rest instead of part-to-whole, used the median, one
+  category instead of the group…). No number that no plausible error produces.
+- **No complement of the key** (26% when the key is 74%) and **no second option with the
+  key's number** unless the item is fully crossed (two values × two interpretations, as in
+  the ch02 IQR item); otherwise wrong-option feedback on the twin gives the key away.
+- **Hypothetical scenarios start with "Suppose"** so students never mistake invented
+  numbers for the chapter's data.
 
 ## 5. Cue control (the validator warns on most of these — fix, don't ignore)
 
 - **Key positions:** single-answer keys spread evenly across A–D; T/F answers split
   ~50/50; multi keys vary in pattern (never all odd/even positions, never always "A, C")
   and in the number of correct options.
+- **Multi option counts:** vary the number of *wrong* options too. If every 4-option item
+  has 2 keys and every 5-option item has 3 (always two distractors, as in the first drafts of
+  ch01 and ch02), the option count tells students how many boxes to tick.
+- **Key sequence:** do **not** rotate keys through A–D in blocks (ch02 round 1: every run of
+  four items was a permutation of A–D, so no letter ever repeated and students could rule
+  out the previous letter). About 1 in 4 consecutive single items should share a key letter,
+  with no run of 3+. Plan the sequence, then check with the validator.
 - **Length:** the key must not be systematically the longest. Trim the key or lengthen
   distractors so lengths overlap.
 - **Hedges and absolutes:** don't put "about / tends / may" only on the key and
@@ -95,6 +112,13 @@ position, feedback leaks, or cross-references between items.
 - Beware "arbitrary" distractors that are not arbitrary in the data (AED_HOUSE rows are
   sorted by price, so "row order" correlates 0.88 with price). Use truly random things
   ("a random number assigned by a computer").
+- **Check the data's coverage before describing it** (first/last dates, number of
+  observations per period): AED_REALGDPPC ends in 2020 Q1, although the chapter says
+  "1959 to 2020". Say "early 2020", not "end of 2020".
+- **Chapter prose can be conceptually wrong too.** ch02 line 934 says z-scores "can
+  normalize skewed distributions", but standardizing never changes a distribution's shape.
+  Never build an item whose key contradicts a chapter sentence without making the item
+  unambiguous on its own terms, and report the sentence as a contradiction.
 
 ## 7. Independence
 
@@ -104,7 +128,11 @@ position, feedback leaks, or cross-references between items.
   Students navigate freely between exam items.
 - **Practice → Exam:** practice may teach the same concept, but never the same scenario
   with the same answer, the same distractor set in the same roles, or explanations that
-  name an exam item's answer.
+  name an exam item's answer. Mirror rather than clone (ch02: practice uses a
+  *left*-skewed exam-score example where the exam uses right-skewed earnings).
+- **Stems leak too:** an exam stem that states a fact (e.g., "mean ± 1 SD contains 75%")
+  can rule out options in another exam item. Read every exam stem against every other
+  exam item.
 
 ## 8. Feedback and explanations
 

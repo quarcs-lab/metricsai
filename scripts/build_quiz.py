@@ -20,6 +20,7 @@ import math
 import re
 import sys
 from collections import Counter
+from itertools import groupby
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -235,6 +236,17 @@ def cue_warnings(bank: dict) -> list[str]:
             if max(counts) - min(counts) > 2:
                 warns.append(f"{set_name}: single key positions unbalanced {dict(zip('ABCD', counts))}")
 
+        # Key sequence: cycling through A-D (no letter ever repeats back to back) lets students rule out
+        # the previous letter; long runs of one letter are a cue too. ~1 in 4 transitions should repeat.
+        seq = [[o["correct"] for o in it["options"]].index(True) for it in singles]
+        if len(seq) >= 10:
+            repeats = sum(1 for a, c in zip(seq, seq[1:]) if a == c)
+            longest_run = max(len(list(g)) for _, g in groupby(seq))
+            if repeats == 0:
+                warns.append(f"{set_name}: single keys never repeat back to back ({''.join(LETTERS[k] for k in seq)}); let some consecutive items share a letter")
+            if longest_run >= 4:
+                warns.append(f"{set_name}: {longest_run} consecutive single items share the same key letter ({''.join(LETTERS[k] for k in seq)})")
+
         # Correct option is clearly the longest (>= 15% and >= 8 characters longer than any distractor)
         longest = []
         for it in singles:
@@ -254,6 +266,9 @@ def cue_warnings(bank: dict) -> list[str]:
                 warns.append(f"{set_name}: every multi key uses only odd or only even positions {['/'.join(LETTERS[i] for i in k) for k in keys]}")
             if len(multis) >= 3 and len({len(k) for k in keys}) == 1:
                 warns.append(f"{set_name}: every multi item has exactly {len(keys[0])} correct options")
+            wrong_counts = {len(it["options"]) - len(k) for it, k in zip(multis, keys)}
+            if len(multis) >= 3 and len(wrong_counts) == 1:
+                warns.append(f"{set_name}: every multi item has exactly {wrong_counts.pop()} wrong options, so the option count gives away how many to tick")
 
         # True/False balance
         tf_true = sum(1 for it in tfs if it["options"][0]["correct"])
