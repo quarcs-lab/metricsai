@@ -168,8 +168,9 @@ def load_interest_rates() -> dict:
     df_ch["dgs10_L2"] = df_ch["dgs10"].shift(2)
     df_ch["dgs1_L1"] = df_ch["dgs1"].shift(1)
     df_ch["dgs1_L2"] = df_ch["dgs1"].shift(2)
-    df_adl = df_ch.dropna().copy()
     adl_vars = ["dgs10_L1", "dgs10_L2", "dgs1", "dgs1_L1", "dgs1_L2"]
+    # Drop only rows missing a model variable (other columns have unrelated NaNs)
+    df_adl = df_ch.dropna(subset=["dgs10"] + adl_vars).copy()
     X_adl = sm.add_constant(df_adl[adl_vars])
     adl = sm.OLS(df_adl["dgs10"], X_adl).fit()
     resid_acf_adl = acf(adl.resid, nlags=24)

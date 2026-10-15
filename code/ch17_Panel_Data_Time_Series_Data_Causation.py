@@ -116,7 +116,7 @@ print(f"\nADL(2,2) Model:")
 print(f"  Impact multiplier (dgs1):       {fit_adl.coef()['dgs1']:.4f}")
 print(f"  1-month cumulative:             {fit_adl.coef()['dgs1'] + fit_adl.coef()['dgs1_lag1']:.4f}")
 print(f"  2-month cumulative:             {fit_adl.coef()['dgs1'] + fit_adl.coef()['dgs1_lag1'] + fit_adl.coef()['dgs1_lag2']:.4f}")
-print(f"  R²: {fit_adl._r2:.4f} (much higher than static model)")
+print(f"  R²: {fit_adl._r2:.4f} (higher than the static model's R²)")
 
 # Check residual autocorrelation — should be near zero if well-specified
 acf_adl = acf(pd.Series(fit_adl._u_hat).dropna(), nlags=5)

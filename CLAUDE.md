@@ -86,6 +86,7 @@ When I correct you, or you catch yourself making a mistake: before continuing，
 - Never cycle quiz answer keys through A–D in fixed blocks; balance letters but let about 1 in 4 consecutive keys repeat.
 - Check a dataset's actual coverage (first/last date, observations per period) before describing its range (AED_REALGDPPC ends in 2020 Q1, not "end of 2020").
 - In quiz items, a number students must compute must not appear in any other exam stem or option, and fully crossed items get identical neutral wrong-option feedback.
+- When correcting a chapter claim, grep and fix the same claim in its slides (EN/ES/JA), web-app template + string tables, code summary, and quiz bank, then rebuild each.
 
 ## Key Commands
 

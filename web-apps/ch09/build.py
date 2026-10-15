@@ -1,6 +1,6 @@
 """Build the Chapter 09 interactive dashboard.
 
-Reads AED_EARNINGS.DTA (171 workers, earnings~education), AED_SP500INDEX.DTA
+Reads AED_EARNINGS.DTA (171 women workers aged 30, earnings~education), AED_SP500INDEX.DTA
 (S&P 500 1927-2019), and the Mendez 2020 convergence-clubs dataset, pre-computes
 OLS for four model specifications (lin-lin, log-lin, log-log, lin-log) and
 exponential growth regressions, and injects a compact JSON blob into
@@ -67,7 +67,7 @@ def load_earnings() -> dict:
     earnings = df["earnings"].values
     education = df["education"].values
     ln_earnings = np.log(earnings)
-    ln_education = np.log(education)
+    ln_education = np.log(education.astype(float))  # int8 -> float first (np.log on int8 returns float16)
 
     # Four model specifications
     m1_linlin = ols_fit(education, earnings)

@@ -80,7 +80,7 @@ print(f"  Fail to reject at 5% (p = {p_lower:.3f} > 0.05)")
 print(f"  Would reject at 10% (p = {p_lower:.3f} < 0.10)")
 
 # =============================================================================
-# STEP 6: Robust standard errors — valid with or without heteroskedasticity
+# STEP 6: Robust standard errors — valid with or without heteroskedasticity (in large samples)
 # =============================================================================
 # HC1 robust SEs protect against non-constant variance in the errors
 fit_robust = pf.feols('price ~ size', data=data_house, vcov='HC1')

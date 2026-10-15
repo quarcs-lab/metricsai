@@ -111,7 +111,7 @@ print(f"difference: {abs(exact-approx):.6f}")   # tiny — the approximation is 
 
 ## 私たちの問い：所得は教育とともにどう変化するのか？
 
-30歳のフルタイム労働者171人（2010年）。所得は**右に歪んでいる**（平均\$41,413、中央値\$36,000、最大\$172,000）ため、対数スケールが長い裾を引き寄せます。対数をとり、`pyfixest`で四つの形すべてを当てはめます。
+30歳のフルタイム女性労働者171人（2010年）。所得は**右に歪んでいる**（平均\$41,413、中央値\$36,000、最大\$172,000）ため、対数スケールが長い裾を引き寄せます。対数をとり、`pyfixest`で四つの形すべてを当てはめます。
 
 ``` {.python code-line-numbers="1|3-5|7-9|11-15|17-18"}
 !pip install -q pyfixest                     # pyfixest is NOT preinstalled in Colab (-q = quiet)
@@ -121,9 +121,9 @@ import numpy as np                           # np.log for the transforms
 import pyfixest as pf                        # OLS with R-style formulas
 
 url = "https://raw.githubusercontent.com/quarcs-lab/data-open/master/AED/AED_EARNINGS.DTA"
-data = pd.read_stata(url)                    # 171 workers: earnings, education
+data = pd.read_stata(url)                    # 171 women aged 30: earnings, education
 data["lnearn"] = np.log(data["earnings"])    # log of the outcome
-data["lneduc"] = np.log(data["education"])   # log of the regressor
+data["lneduc"] = np.log(data["education"].astype(float))   # log of the regressor (int8 → float first)
 
 m_lin    = pf.feols("earnings ~ education", data=data)   # 1. linear:      $ per year
 m_loglin = pf.feols("lnearn ~ education",   data=data)   # 2. log-linear:  semi-elasticity
@@ -152,27 +152,29 @@ log-linearモデルは労働経済学の標準です。13.1%の収益率は自�
 - **Linear：** 1年あたり所得が\$5,021増える — 固定のドル金額（上位層では現実的でない）。
 - **Log-linear：** 1年あたり所得が約**13.1%増える** — 準弾力性であり、通常の選択です。
 - **Log-log：** 弾力性**1.48** — 教育が1%上昇すると所得が約1.48%高くなることと関連します。
-- **Linear-log：** 教育の1%あたり所得が約**\$544増える** — 変化率からドルを得ます。
+- **Linear-log：** 教育の1%あたり所得が約**\$545増える** — 変化率からドルを得ます。
 :::
 
 [$R^2$は**同じ**被説明変数を持つモデル間でのみ比較してください — levelとlogの結果の間では比較しないでください。]{.takeaway .fragment}
 
 ## 指数成長は対数をとると直線になります
 
-$x_t = x_0(1+r)^t$ はlevelでは上向きに曲がりますが、$\ln(x_t) \approx \ln(x_0) + r\,t$ は線形です — したがって$\ln x$を時間に回帰すると、成長率$r$が傾きとして得られます。
+$x_t = x_0(1+r)^t$ はlevelでは上向きに曲がりますが、$\ln(x_t) = \ln(x_0) + \ln(1+r)\,t \approx \ln(x_0) + r\,t$ は線形です — したがって$\ln x$を時間に回帰した傾きは$\ln(1+r) \approx r$を推定します。正確な成長率は$e^{\text{傾き}} - 1$です。
 
-``` {.python code-line-numbers="1|3-4|6-7|9|10-12"}
+``` {.python code-line-numbers="1|3-5|7-8|10|11-14"}
 !pip install -q pyfixest                     # self-contained cell: install pyfixest (quiet)
 
 import pandas as pd                          # tabular data
+import numpy as np                           # np.exp for the exact growth rate
 import pyfixest as pf                        # OLS with R-style formulas
 
 url = "https://raw.githubusercontent.com/quarcs-lab/data-open/master/AED/AED_SP500INDEX.DTA"
 data = pd.read_stata(url)                    # S&P 500 index, 1927–2019 (lnsp500 precomputed)
 
-fit = pf.feols("lnsp500 ~ year", data=data)  # slope = average annual growth rate r
-r = fit.coef()["year"]                       # ≈ 0.065
-print(f"growth rate: {100*r:.2f}% per year") # ≈ 6.5% per year
+fit = pf.feols("lnsp500 ~ year", data=data)  # slope = ln(1+r) ≈ growth rate r
+r = fit.coef()["year"]                       # ≈ 0.0653
+print(f"log slope: {100*r:.2f}% per year")   # ≈ 6.53% (log approximation)
+print(f"exact growth: {100*(np.exp(r)-1):.2f}% per year")   # ≈ 6.75% per year
 print(f"Rule of 72: doubles every {72/(100*r):.0f} years")  # ≈ 11 years
 ```
 
@@ -186,7 +188,7 @@ lnsp500はすでにデータセットに含まれています。72の法則は l
 
 ![同じS&P 500の系列：levelでの指数曲線（左）、logでのほぼ直線（右）。](figures/fig_exp_growth.png)
 
-[1927–2019年にかけて**年6.5%**の成長 → 指数は約**11年**ごとに倍増します（72の法則）。]{.takeaway .fragment}
+[対数の傾き**0.065** → 1927–2019年にかけて正確には約**年6.75%**の成長 → 指数は約**11年**ごとに倍増します（72の法則）。]{.takeaway .fragment}
 
 # 正しく読む {.divider background-color="#C21E72"}
 
@@ -208,7 +210,7 @@ lnsp500はすでにデータセットに含まれています。72の法則は l
 - $\Delta\ln(x) \approx \Delta x/x$：対数の変化は（小さな変化については）比例的な変化**そのもの**です。
 - **Log-linear** → 準弾力性（1単位あたり $100\beta_1 \approx \%\Delta y$）；**log-log** → 弾力性（%あたり%）。
 - 形は**経済理論＋データ＋解釈**から選びます — log-linearが一般的な標準です。
-- **指数成長は対数で線形になります**：$\ln x$を時間に回帰すると、傾きが成長率になります。
+- **指数成長は対数で線形になります**：$\ln x$を時間に回帰すると、傾きは$\ln(1+r) \approx r$を推定します（正確には$e^{\text{傾き}} - 1$）。
 - 有限の変化率の効果は**近似**として扱ってください（$100(e^{\beta_1}-1)$が正確です）。対数には正のデータが必要です。
 :::
 

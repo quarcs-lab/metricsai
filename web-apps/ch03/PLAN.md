@@ -16,7 +16,7 @@ Chapter 3 introduces the sampling distribution of the sample mean through coin-t
 
 | Widget | Key Concept(s) | Target interaction | Learning objective |
 |---|---|---|---|
-| 1. Sampling Distribution & SE | 3.2, 3.3, 3.4 | Toggle: coin/census; Normal overlay; SE bands (off/±1/±2) | X̄ is a random variable; its distribution centers on μ with spread σ/√n |
+| 1. Sampling Distribution & SE | 3.2, 3.3, 3.4 | Toggle: coin/census; Normal overlay; σ/√n bands (off/±1/±2) | X̄ is a random variable; its distribution centers on μ with spread σ/√n |
 | 2. Sample Size Effect | 3.3, 3.4 | Slider: n (5–500); Resimulate button | Quadruple n to halve SE; diminishing returns to larger samples |
 | 3. Central Limit Theorem | 3.5, 3.6 | Dropdown: 5 population shapes; Slider: n (2–100) | CLT works regardless of population shape; sample means → Normal |
 | 4. Estimator Properties | 3.7 | Toggle: Mean/Median/Trimmed; Sliders: n, contamination | Mean is most efficient for clean data; Median is robust to outliers |
@@ -33,10 +33,10 @@ Chapter 3 introduces the sampling distribution of the sample mean through coin-t
 - [x] Build runs clean (61.4 KB)
 - [x] Mean of 400 coin means = 0.4994 (matches chapter)
 - [x] SD of 400 coin means = 0.0863 (matches chapter)
-- [x] Theoretical SE = 0.5/√30 = 0.0913 (matches chapter)
+- [x] Theoretical sd(X̄) = 0.5/√30 = 0.0913 (matches chapter)
 - [x] Mean of 100 census means = 23.78 (matches chapter)
 - [x] SD of 100 census means = 3.76 (matches chapter)
-- [x] Theoretical SE = 18.61/√25 = 3.72 (matches chapter)
+- [x] Theoretical sd(X̄) = 18.61/√25 = 3.72 (matches chapter)
 - [x] verify_app.py: all checks passed, 5 widgets, 5 rerender hooks
 - [x] JS passes node --check
 

@@ -6,10 +6,10 @@
 <script src="slides_files/libs/quarto-html/tippy.umd.min.js"></script>
 <link href="slides_files/libs/quarto-html/tippy.css" rel="stylesheet">
 <link href="slides_files/libs/quarto-html/light-border.css" rel="stylesheet">
-<link href="slides_files/libs/quarto-html/quarto-syntax-highlighting-dark-23bbe8b5e4efc1e257f6d59dce478b08.css" rel="stylesheet" id="quarto-text-highlighting-styles"><meta charset="utf-8">
-  <meta name="generator" content="quarto-1.9.37">
+<link href="slides_files/libs/quarto-html/quarto-syntax-highlighting-dark-f1aadacce99040138bbb613f9330654f.css" rel="stylesheet" id="quarto-text-highlighting-styles"><meta charset="utf-8">
+  <meta name="generator" content="quarto-1.8.27">
 
-  <meta name="dcterms.date" content="2026-10-12">
+  <meta name="dcterms.date" content="2026-10-15">
   <title>9. Models with Natural Logarithms</title>
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -17,9 +17,6 @@
   <link rel="stylesheet" href="slides_files/libs/revealjs/dist/reset.css">
   <link rel="stylesheet" href="slides_files/libs/revealjs/dist/reveal.css">
   <style>
-    /* Default styles provided by pandoc.
-    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
-    */
     code{white-space: pre-wrap;}
     span.smallcaps{font-variant: small-caps;}
     div.columns{display: flex; gap: min(4vw, 1.5em);}
@@ -98,7 +95,7 @@
     code span.vs { color: #9ecbff; } /* VerbatimString */
     code span.wa { color: #ff5555; } /* Warning */
   </style>
-  <link rel="stylesheet" href="slides_files/libs/revealjs/dist/theme/quarto-994ff1788cd86c8e339430767939222d.css">
+  <link rel="stylesheet" href="slides_files/libs/revealjs/dist/theme/quarto-f1f62f3736b4b04a71cdcfbec6126da1.css">
   <link href="slides_files/libs/revealjs/plugin/quarto-line-highlight/line-highlight.css" rel="stylesheet">
   <link href="slides_files/libs/revealjs/plugin/reveal-menu/menu.css" rel="stylesheet">
   <link href="slides_files/libs/revealjs/plugin/reveal-menu/quarto-menu.css" rel="stylesheet">
@@ -327,7 +324,7 @@
 </section>
 <section id="our-question-how-do-earnings-vary-with-education" class="slide level2 center">
 <h2>Our question: how do earnings vary with education?</h2>
-<p>171 full-time workers aged 30 (2010). Earnings are <strong>right-skewed</strong> (mean $41,413, median $36,000, max $172,000), so the log scale pulls in the long tail. We take logs and fit all four forms with <code>pyfixest</code>.</p>
+<p>171 full-time women workers aged 30 (2010). Earnings are <strong>right-skewed</strong> (mean $41,413, median $36,000, max $172,000), so the log scale pulls in the long tail. We take logs and fit all four forms with <code>pyfixest</code>.</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2" data-code-line-numbers="1|3-5|7-9|11-15|17-18"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href=""></a><span class="op">!</span>pip install <span class="op">-</span>q pyfixest                     <span class="co"># pyfixest is NOT preinstalled in Colab (-q = quiet)</span></span>
 <span id="cb2-2"><a href=""></a></span>
 <span id="cb2-3"><a href=""></a><span class="im">import</span> pandas <span class="im">as</span> pd                          <span class="co"># tabular data</span></span>
@@ -335,9 +332,9 @@
 <span id="cb2-5"><a href=""></a><span class="im">import</span> pyfixest <span class="im">as</span> pf                        <span class="co"># OLS with R-style formulas</span></span>
 <span id="cb2-6"><a href=""></a></span>
 <span id="cb2-7"><a href=""></a>url <span class="op">=</span> <span class="st">"https://raw.githubusercontent.com/quarcs-lab/data-open/master/AED/AED_EARNINGS.DTA"</span></span>
-<span id="cb2-8"><a href=""></a>data <span class="op">=</span> pd.read_stata(url)                    <span class="co"># 171 workers: earnings, education</span></span>
+<span id="cb2-8"><a href=""></a>data <span class="op">=</span> pd.read_stata(url)                    <span class="co"># 171 women aged 30: earnings, education</span></span>
 <span id="cb2-9"><a href=""></a>data[<span class="st">"lnearn"</span>] <span class="op">=</span> np.log(data[<span class="st">"earnings"</span>])    <span class="co"># log of the outcome</span></span>
-<span id="cb2-10"><a href=""></a>data[<span class="st">"lneduc"</span>] <span class="op">=</span> np.log(data[<span class="st">"education"</span>])   <span class="co"># log of the regressor</span></span>
+<span id="cb2-10"><a href=""></a>data[<span class="st">"lneduc"</span>] <span class="op">=</span> np.log(data[<span class="st">"education"</span>].astype(<span class="bu">float</span>))   <span class="co"># log of the regressor (int8 → float first)</span></span>
 <span id="cb2-11"><a href=""></a></span>
 <span id="cb2-12"><a href=""></a>m_lin    <span class="op">=</span> pf.feols(<span class="st">"earnings ~ education"</span>, data<span class="op">=</span>data)   <span class="co"># 1. linear:      $ per year</span></span>
 <span id="cb2-13"><a href=""></a>m_loglin <span class="op">=</span> pf.feols(<span class="st">"lnearn ~ education"</span>,   data<span class="op">=</span>data)   <span class="co"># 2. log-linear:  semi-elasticity</span></span>
@@ -372,25 +369,27 @@
 <li class="fragment"><strong>Linear:</strong> $5,021 more earnings per extra year — a fixed dollar amount (implausible at the top end).</li>
 <li class="fragment"><strong>Log-linear:</strong> about <strong>13.1% more</strong> earnings per extra year — the semi-elasticity, and the usual choice.</li>
 <li class="fragment"><strong>Log-log:</strong> elasticity <strong>1.48</strong> — a 1% rise in education is associated with ~1.48% higher earnings.</li>
-<li class="fragment"><strong>Linear-log:</strong> about <strong>$544 more</strong> earnings per 1% of education — dollars from a percentage move.</li>
+<li class="fragment"><strong>Linear-log:</strong> about <strong>$545 more</strong> earnings per 1% of education — dollars from a percentage move.</li>
 </ul>
 <p><span class="takeaway fragment">Compare <span class="math inline">\(R^2\)</span> only across models with the <strong>same</strong> dependent variable — not across level and log outcomes.</span></p>
 </section>
 <section id="exponential-growth-becomes-a-straight-line-in-logs" class="slide level2 center">
 <h2>Exponential growth becomes a straight line in logs</h2>
-<p><span class="math inline">\(x_t = x_0(1+r)^t\)</span> curves upward in levels, but <span class="math inline">\(\ln(x_t) \approx \ln(x_0) + r\,t\)</span> is linear — so regressing <span class="math inline">\(\ln x\)</span> on time recovers the growth rate <span class="math inline">\(r\)</span> as the slope.</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3" data-code-line-numbers="1|3-4|6-7|9|10-12"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href=""></a><span class="op">!</span>pip install <span class="op">-</span>q pyfixest                     <span class="co"># self-contained cell: install pyfixest (quiet)</span></span>
+<p><span class="math inline">\(x_t = x_0(1+r)^t\)</span> curves upward in levels, but <span class="math inline">\(\ln(x_t) = \ln(x_0) + \ln(1+r)\,t \approx \ln(x_0) + r\,t\)</span> is linear — so the slope of <span class="math inline">\(\ln x\)</span> on time estimates <span class="math inline">\(\ln(1+r) \approx r\)</span>; the exact rate is <span class="math inline">\(e^{\text{slope}} - 1\)</span>.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3" data-code-line-numbers="1|3-5|7-8|10|11-14"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href=""></a><span class="op">!</span>pip install <span class="op">-</span>q pyfixest                     <span class="co"># self-contained cell: install pyfixest (quiet)</span></span>
 <span id="cb3-2"><a href=""></a></span>
 <span id="cb3-3"><a href=""></a><span class="im">import</span> pandas <span class="im">as</span> pd                          <span class="co"># tabular data</span></span>
-<span id="cb3-4"><a href=""></a><span class="im">import</span> pyfixest <span class="im">as</span> pf                        <span class="co"># OLS with R-style formulas</span></span>
-<span id="cb3-5"><a href=""></a></span>
-<span id="cb3-6"><a href=""></a>url <span class="op">=</span> <span class="st">"https://raw.githubusercontent.com/quarcs-lab/data-open/master/AED/AED_SP500INDEX.DTA"</span></span>
-<span id="cb3-7"><a href=""></a>data <span class="op">=</span> pd.read_stata(url)                    <span class="co"># S&amp;P 500 index, 1927–2019 (lnsp500 precomputed)</span></span>
-<span id="cb3-8"><a href=""></a></span>
-<span id="cb3-9"><a href=""></a>fit <span class="op">=</span> pf.feols(<span class="st">"lnsp500 ~ year"</span>, data<span class="op">=</span>data)  <span class="co"># slope = average annual growth rate r</span></span>
-<span id="cb3-10"><a href=""></a>r <span class="op">=</span> fit.coef()[<span class="st">"year"</span>]                       <span class="co"># ≈ 0.065</span></span>
-<span id="cb3-11"><a href=""></a><span class="bu">print</span>(<span class="ss">f"growth rate: </span><span class="sc">{</span><span class="dv">100</span><span class="op">*</span>r<span class="sc">:.2f}</span><span class="ss">% per year"</span>) <span class="co"># ≈ 6.5% per year</span></span>
-<span id="cb3-12"><a href=""></a><span class="bu">print</span>(<span class="ss">f"Rule of 72: doubles every </span><span class="sc">{</span><span class="dv">72</span><span class="op">/</span>(<span class="dv">100</span><span class="op">*</span>r)<span class="sc">:.0f}</span><span class="ss"> years"</span>)  <span class="co"># ≈ 11 years</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb3-4"><a href=""></a><span class="im">import</span> numpy <span class="im">as</span> np                           <span class="co"># np.exp for the exact growth rate</span></span>
+<span id="cb3-5"><a href=""></a><span class="im">import</span> pyfixest <span class="im">as</span> pf                        <span class="co"># OLS with R-style formulas</span></span>
+<span id="cb3-6"><a href=""></a></span>
+<span id="cb3-7"><a href=""></a>url <span class="op">=</span> <span class="st">"https://raw.githubusercontent.com/quarcs-lab/data-open/master/AED/AED_SP500INDEX.DTA"</span></span>
+<span id="cb3-8"><a href=""></a>data <span class="op">=</span> pd.read_stata(url)                    <span class="co"># S&amp;P 500 index, 1927–2019 (lnsp500 precomputed)</span></span>
+<span id="cb3-9"><a href=""></a></span>
+<span id="cb3-10"><a href=""></a>fit <span class="op">=</span> pf.feols(<span class="st">"lnsp500 ~ year"</span>, data<span class="op">=</span>data)  <span class="co"># slope = ln(1+r) ≈ growth rate r</span></span>
+<span id="cb3-11"><a href=""></a>r <span class="op">=</span> fit.coef()[<span class="st">"year"</span>]                       <span class="co"># ≈ 0.0653</span></span>
+<span id="cb3-12"><a href=""></a><span class="bu">print</span>(<span class="ss">f"log slope: </span><span class="sc">{</span><span class="dv">100</span><span class="op">*</span>r<span class="sc">:.2f}</span><span class="ss">% per year"</span>)   <span class="co"># ≈ 6.53% (log approximation)</span></span>
+<span id="cb3-13"><a href=""></a><span class="bu">print</span>(<span class="ss">f"exact growth: </span><span class="sc">{</span><span class="dv">100</span><span class="op">*</span>(np.exp(r)<span class="op">-</span><span class="dv">1</span>)<span class="sc">:.2f}</span><span class="ss">% per year"</span>)   <span class="co"># ≈ 6.75% per year</span></span>
+<span id="cb3-14"><a href=""></a><span class="bu">print</span>(<span class="ss">f"Rule of 72: doubles every </span><span class="sc">{</span><span class="dv">72</span><span class="op">/</span>(<span class="dv">100</span><span class="op">*</span>r)<span class="sc">:.0f}</span><span class="ss"> years"</span>)  <span class="co"># ≈ 11 years</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p><a href="https://colab.research.google.com/notebooks/empty.ipynb" class="colab-link" target="_blank" data-preview-link="false">↗ Try it in Colab</a></p>
 <aside class="notes">
 <p>lnsp500 is already in the dataset. The Rule of 72 comes from ln(2) ≈ 0.693 and ln(1+r) ≈ r: divide 72 by the percentage rate for an instant doubling time.</p>
@@ -409,7 +408,7 @@
 <section id="logs-turn-a-curve-into-a-slope-you-can-read" class="slide level2 center">
 <h2>Logs turn a curve into a slope you can read</h2>
 
-<img data-src="figures/fig_exp_growth.png" class="r-stretch quarto-figure-center"><p class="caption">The same S&amp;P 500 series: an exponential curve in levels (left), a near-straight line in logs (right).</p><p><span class="takeaway fragment">Growth of <strong>6.5% per year</strong> over 1927–2019 → the index doubles about every <strong>11 years</strong> (Rule of 72).</span></p>
+<img data-src="figures/fig_exp_growth.png" class="r-stretch quarto-figure-center"><p class="caption">The same S&amp;P 500 series: an exponential curve in levels (left), a near-straight line in logs (right).</p><p><span class="takeaway fragment">Log slope <strong>0.065</strong> → exact growth of about <strong>6.75% per year</strong> over 1927–2019 → the index doubles about every <strong>11 years</strong> (Rule of 72).</span></p>
 </section></section>
 <section>
 <section id="reading-it-right" class="title-slide slide level1 divider center" data-background-color="#C21E72">
@@ -430,7 +429,7 @@
 <li class="fragment"><span class="math inline">\(\Delta\ln(x) \approx \Delta x/x\)</span>: a log change <strong>is</strong> a proportionate change (for small moves).</li>
 <li class="fragment"><strong>Log-linear</strong> → semi-elasticity (<span class="math inline">\(100\beta_1 \approx \%\Delta y\)</span> per unit); <strong>log-log</strong> → elasticity (% per %).</li>
 <li class="fragment">Choose the form from <strong>economic theory + data + interpretation</strong> — log-linear is the common default.</li>
-<li class="fragment"><strong>Exponential growth is linear in logs</strong>: regress <span class="math inline">\(\ln x\)</span> on time; the slope is the growth rate.</li>
+<li class="fragment"><strong>Exponential growth is linear in logs</strong>: regress <span class="math inline">\(\ln x\)</span> on time; the slope estimates <span class="math inline">\(\ln(1+r) \approx r\)</span> (exact: <span class="math inline">\(e^{\text{slope}} - 1\)</span>).</li>
 <li class="fragment">Treat finite percentage effects as <strong>approximations</strong> (<span class="math inline">\(100(e^{\beta_1}-1)\)</span> is exact); logs need positive data.</li>
 </ul>
 </section></section>

@@ -20,7 +20,7 @@ Chapter 11 extends single-variable inference to multiple regression: confidence 
 | 2. t-Test | 11.4 | H₀ slider for size coefficient | t-distribution with rejection regions; p-value as tail area |
 | 3. Multicollinearity | 11.2 | Model 1/2/3 toggle | SE inflation when adding correlated variables |
 | 4. Joint F-Test | 11.5, 11.6 | Overall vs subset F-test toggle | Overall model significant but extra vars jointly insignificant |
-| 5. Model Comparison | 11.7 | 3-model coefficient table | R² always rises; Adj R² penalizes complexity |
+| 5. Model Comparison | 11.7 | 3-model coefficient table | R² never falls; Adj R² penalizes complexity |
 | 6. Robust SEs | 11.8 | Standard vs HC1 toggle | Robustness check; do conclusions change? |
 
 ## Verification

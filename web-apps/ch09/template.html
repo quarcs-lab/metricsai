@@ -524,8 +524,8 @@ footer.page a:hover { text-decoration: underline; }
     <div class="try-title" data-i18n="common.tryTitle">Try this</div>
     <ol data-i18n="widget.fourmodels.try">
       <li><strong>Start with Linear.</strong> The raw scatter is skewed by a handful of high-earning observations. <em>Dollar-per-year interpretation, but the outliers pull the line and heteroskedasticity is obvious.</em></li>
-      <li><strong>Switch to Log-Linear.</strong> Logging earnings compresses the y-axis; R² climbs to ≈ 0.334 and the slope becomes a percentage return on education. <em>Each extra year of schooling is associated with a ~13% higher wage — the classic Mincer result.</em></li>
-      <li><strong>Compare Log-Log and Linear-Log.</strong> Log-Log yields an elasticity ≈ 1.48; Linear-Log has the worst R². <em>Of the four, Log-Linear best matches both the data shape and the economic theory of percentage returns.</em></li>
+      <li><strong>Switch to Log-Linear.</strong> Logging earnings compresses the y-axis; R² ≈ 0.334 (not comparable with Linear's, since y changed) and the slope becomes a percentage return on education. <em>Each extra year of schooling is associated with a ~13% higher wage — the classic Mincer result.</em></li>
+      <li><strong>Compare Log-Log and Linear-Log.</strong> Log-Log yields an elasticity ≈ 1.48; Linear-Log fits worse than Linear (R² 0.230 vs 0.289), the other model with earnings in levels — compare R² only across models with the same y. <em>Of the four, Log-Linear best matches both the data shape and the economic theory of percentage returns.</em></li>
     </ol>
   </div>
 
@@ -656,7 +656,7 @@ footer.page a:hover { text-decoration: underline; }
   <p class="motivation" data-i18n="widget.expgrowth.motivation">The S&amp;P 500 looks like a rocket in levels — <em>and a straight line in logs</em>. That single trick turns a century of compound growth into a regression slope.</p>
 
   <div class="key-concept" data-i18n="widget.expgrowth.kc">
-    <span class="kc-title">Exponential growth x<sub>t</sub> = x₀(1+r)<sup>t</sup> becomes linear in logs: ln(x<sub>t</sub>) ≈ ln(x₀) + r × t.</span> The OLS slope on logged data <strong>directly estimates the annual growth rate</strong> r (KC 9.6). A back-of-envelope companion: the <strong>Rule of 72</strong> — doubling time ≈ 72 / r, where r is in percent (KC 9.7). S&amp;P 500 grew at ~6.5%/year (1927–2019), doubling roughly every 11 years.
+    <span class="kc-title">Exponential growth x<sub>t</sub> = x₀(1+r)<sup>t</sup> becomes linear in logs: ln(x<sub>t</sub>) ≈ ln(x₀) + r × t.</span> The OLS slope on logged data <strong>estimates ln(1+r), approximately the annual growth rate</strong> r (KC 9.6); the exact rate is e<sup>slope</sup> − 1. A back-of-envelope companion: the <strong>Rule of 72</strong> — doubling time ≈ 72 / r, where r is in percent (KC 9.7). S&amp;P 500: log slope 0.065, an exact growth rate of ~6.75%/year (1927–2019), doubling roughly every 11 years.
   </div>
 
   <div class="widget-howto">
@@ -683,7 +683,7 @@ footer.page a:hover { text-decoration: underline; }
     </div>
   </div>
   <div class="stats-grid">
-    <div class="stat"><div class="label" data-i18n="widget.expgrowth.stat.grate">Est. growth rate</div><div class="value" id="expgrowth-grate">—</div></div>
+    <div class="stat"><div class="label" data-i18n="widget.expgrowth.stat.grate">Log slope (≈ growth)</div><div class="value" id="expgrowth-grate">—</div></div>
     <div class="stat pop"><div class="label" data-i18n="widget.expgrowth.stat.r2">R² (log model)</div><div class="value" id="expgrowth-r2">—</div></div>
     <div class="stat err"><div class="label" data-i18n="widget.expgrowth.stat.double">Rule of 72 doubling</div><div class="value" id="expgrowth-double">—</div></div>
     <div class="stat"><div class="label" data-i18n="widget.expgrowth.stat.cdouble">Custom doubling</div><div class="value" id="expgrowth-cdouble">—</div></div>
@@ -701,7 +701,7 @@ footer.page a:hover { text-decoration: underline; }
     </ol>
   </div>
 
-  <p class="takeaway" data-i18n="widget.expgrowth.takeaway"><strong>Take-away:</strong> Log-scale turns compound growth into a straight line — and the slope you estimate on logged data is simply the average growth rate. <a href="../../book/_book/notebooks_quarto/ch09_Models_with_Natural_Logarithms.html#further-uses-exponential-growth" target="_blank" rel="noopener">Read §9.4 in the chapter →</a></p>
+  <p class="takeaway" data-i18n="widget.expgrowth.takeaway"><strong>Take-away:</strong> Log-scale turns compound growth into a straight line — and the slope you estimate on logged data approximates the average growth rate (exact: e<sup>slope</sup> − 1). <a href="../../book/_book/notebooks_quarto/ch09_Models_with_Natural_Logarithms.html#further-uses-exponential-growth" target="_blank" rel="noopener">Read §9.4 in the chapter →</a></p>
 </section>
 
 <!-- ==================== WIDGET 6: Model Comparison Grid ==================== -->
@@ -874,7 +874,7 @@ print(f"  Log approximation Δln(x):   {approx:.6f} ({approx*100:.2f}%)")
 # =============================================================================
 # Create log-transformed variables for the regression models
 data_earnings['lnearn'] = np.log(data_earnings['earnings'])
-data_earnings['lneduc'] = np.log(data_earnings['education'])
+data_earnings['lneduc'] = np.log(data_earnings['education'].astype(float))
 
 print(data_earnings[['earnings', 'lnearn', 'education', 'lneduc']].describe().round(2))
 
@@ -941,14 +941,14 @@ plt.show()
 # STEP 7: Exponential growth — S&amp;P 500 and the Rule of 72
 # =============================================================================
 # Exponential growth in levels becomes linear in logs:
-# ln(x_t) ≈ ln(x₀) + r × t, where slope r = annual growth rate
+# ln(x_t) ≈ ln(x₀) + r × t, where slope = ln(1+r) ≈ r (exact r = e^slope − 1)
 url_sp500 = "https://raw.githubusercontent.com/quarcs-lab/data-open/master/AED/AED_SP500INDEX.DTA"
 data_sp500 = pd.read_stata(url_sp500)
 
 fit_sp500 = pf.feols('lnsp500 ~ year', data=data_sp500)
 growth_rate = fit_sp500.coef()['year']
 
-print(f"S&amp;P 500 estimated growth rate: {100*growth_rate:.2f}% per year")
+print(f"S&amp;P 500 log slope: {100*growth_rate:.2f}% per year; exact growth rate: {100*(np.exp(growth_rate)-1):.2f}%")
 print(f"Rule of 72: doubles every {72/(100*growth_rate):.1f} years")
 print(f"R-squared: {fit_sp500._r2:.4f}")
 
@@ -1074,13 +1074,13 @@ twoway (scatter lnearn education, msize(small) mcolor(gs10))           ///
 * STEP 7: Exponential growth — S&amp;P 500 and the Rule of 72
 * =============================================================================
 * Exponential growth in levels becomes linear in logs:
-* ln(x_t) ≈ ln(x₀) + r × t, where slope r = annual growth rate
+* ln(x_t) ≈ ln(x₀) + r × t, where slope = ln(1+r) ≈ r (exact r = e^slope − 1)
 use "https://raw.githubusercontent.com/quarcs-lab/data-open/master/AED/AED_SP500INDEX.DTA", clear
 
 regress lnsp500 year
 local growth = _b[year]
 
-display "S&amp;P 500 estimated growth rate: " %5.2f 100*`growth' "% per year"
+display "S&amp;P 500 log slope: " %5.2f 100*`growth' "% per year; exact growth rate: " %5.2f 100*(exp(`growth')-1) "%"
 display "Rule of 72: doubles every " %3.1f 72/(100*`growth') " years"
 display "R-squared: " %6.4f e(r2)
 
@@ -1203,7 +1203,7 @@ data_sp500 &lt;- read_dta(url_sp500)
 model_sp500 &lt;- feols(lnsp500 ~ year, data = data_sp500)
 growth_rate &lt;- coef(model_sp500)["year"]
 
-cat("\nS&amp;P 500 estimated growth rate:", round(100 * growth_rate, 2), "% per year\n")
+cat("\nS&amp;P 500 log slope:", round(100 * growth_rate, 2), "% per year; exact growth rate:", round(100 * (exp(growth_rate) - 1), 2), "%\n")
 cat("Rule of 72: doubles every", round(72 / (100 * growth_rate), 1), "years\n")
 
 library(patchwork)
@@ -1233,7 +1233,7 @@ p1 + p2</code></pre>
 
 <footer class="page">
   <p data-i18n="footer.text">Part of <a href="https://quarcs-lab.github.io/metricsai/book/_book/index.html"><strong>metricsAI</strong></a> · Chapter 09: Models with Natural Logarithms · by Carlos Mendez · <a href="https://github.com/quarcs-lab/metricsai">GitHub</a></p>
-  <p data-i18n="footer.data">Data: AED_EARNINGS.DTA (171 workers), AED_SP500INDEX.DTA (1927-2019), Mendez (2020) convergence clubs (108 countries).</p>
+  <p data-i18n="footer.data">Data: AED_EARNINGS.DTA (171 women workers), AED_SP500INDEX.DTA (1927-2019), Mendez (2020) convergence clubs (108 countries).</p>
   <a class="scroll-top" href="#top" data-i18n="footer.scrolltop">↑ Back to top</a>
 </footer>
 

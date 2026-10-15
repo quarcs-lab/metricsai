@@ -75,18 +75,19 @@ plt.tight_layout()
 plt.show()
 
 # =============================================================================
-# STEP 4: Standard error — how sample size affects precision
+# STEP 4: Precision — how sample size affects the SD of the sample mean
 # =============================================================================
-# SE = σ/√n: to halve the SE, you must quadruple the sample size
+# sd(X̄) = σ/√n: to halve it, you must quadruple the sample size
+# (the standard error s/√n estimates this when σ is unknown)
 sigma = 0.5  # coin toss population std dev
 
-print(f"\nStandard error vs sample size (σ = {sigma}):")
-print(f"{'n':<10} {'SE = σ/√n':<15} {'Var(X̄) = σ²/n':<15}")
+print(f"\nStd. dev. of X̄ vs sample size (σ = {sigma}):")
+print(f"{'n':<10} {'sd(X̄) = σ/√n':<15} {'Var(X̄) = σ²/n':<15}")
 print("-" * 40)
 for n in [10, 30, 100, 400, 1000]:
-    se = sigma / np.sqrt(n)
+    sd_xbar = sigma / np.sqrt(n)
     var_xbar = sigma**2 / n
-    print(f"{n:<10} {se:<15.4f} {var_xbar:<15.6f}")
+    print(f"{n:<10} {sd_xbar:<15.4f} {var_xbar:<15.6f}")
 
 # =============================================================================
 # STEP 5: Monte Carlo simulation — verify the theory computationally

@@ -42,7 +42,8 @@ def load_gdp() -> dict:
         ["1990-07-01", "1991-03-01"],
         ["2001-03-01", "2001-11-01"],
         ["2007-12-01", "2009-06-01"],
-        ["2020-02-01", "2020-04-01"],
+        # The 2020 recession (NBER: Feb–Apr 2020) is omitted: the series ends in
+        # 2020 Q1 (plotted at 2020-01-01), so its shading would fall beyond the data.
     ]
     return {
         "dates": iso_dates(df["daten"]),

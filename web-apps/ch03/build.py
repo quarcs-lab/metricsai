@@ -107,11 +107,11 @@ def main() -> None:
     print(f"[ok] wrote {OUT_FILE.relative_to(ROOT)} ({size_kb:.1f} KB)")
     print(
         f"[check] coin xbar: n={cs['n']} mean={cs['mean']:.4f} "
-        f"std={cs['std']:.4f} (theoretical SE={0.5 / 30**0.5:.4f})"
+        f"std={cs['std']:.4f} (theoretical sd(xbar)={0.5 / 30**0.5:.4f})"
     )
     print(
         f"[check] census mean: n={ce['n']} mean={ce['mean']:.2f} "
-        f"std={ce['std']:.2f} (theoretical SE={18.61 / 25**0.5:.2f})"
+        f"std={ce['std']:.2f} (theoretical sd(xbar)={18.61 / 25**0.5:.2f})"
     )
 
 

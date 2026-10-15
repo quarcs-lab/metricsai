@@ -35,7 +35,7 @@ print(f"  Log approximation Δln(x):   {approx:.6f} ({approx*100:.2f}%)")
 # =============================================================================
 # Create log-transformed variables for the regression models
 data_earnings['lnearn'] = np.log(data_earnings['earnings'])
-data_earnings['lneduc'] = np.log(data_earnings['education'])
+data_earnings['lneduc'] = np.log(data_earnings['education'].astype(float))
 
 print(data_earnings[['earnings', 'lnearn', 'education', 'lneduc']].describe().round(2))
 
@@ -102,14 +102,14 @@ plt.show()
 # STEP 7: Exponential growth — S&P 500 and the Rule of 72
 # =============================================================================
 # Exponential growth in levels becomes linear in logs:
-# ln(x_t) ≈ ln(x₀) + r × t, where slope r = annual growth rate
+# ln(x_t) ≈ ln(x₀) + r × t, where slope = ln(1+r) ≈ r (exact r = e^slope − 1)
 url_sp500 = "https://raw.githubusercontent.com/quarcs-lab/data-open/master/AED/AED_SP500INDEX.DTA"
 data_sp500 = pd.read_stata(url_sp500)
 
 fit_sp500 = pf.feols('lnsp500 ~ year', data=data_sp500)
 growth_rate = fit_sp500.coef()['year']
 
-print(f"S&P 500 estimated growth rate: {100*growth_rate:.2f}% per year")
+print(f"S&P 500 log slope: {100*growth_rate:.2f}% per year; exact growth rate: {100*(np.exp(growth_rate)-1):.2f}%")
 print(f"Rule of 72: doubles every {72/(100*growth_rate):.1f} years")
 print(f"R-squared: {fit_sp500._r2:.4f}")
 

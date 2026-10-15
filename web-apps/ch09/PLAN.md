@@ -26,7 +26,7 @@ This app teaches logarithmic transformations in regression through interactive v
 
 ## Data
 
-- **AED_EARNINGS.DTA**: 171 full-time workers aged 30 (2010), earnings and education
+- **AED_EARNINGS.DTA**: 171 full-time women workers aged 30 (2010), earnings and education
 - **AED_SP500INDEX.DTA**: S&P 500 index, annual 1927-2019 (93 years)
 - **mendez2020_convergence.csv**: 108 countries, 2014 cross-section (lp, kl, h)
 
@@ -37,7 +37,7 @@ None — all 9 Key Concepts (9.1–9.9) are addressed by at least one widget.
 ## Verification
 
 - [x] Build runs clean (72.0 KB, within 200 KB budget)
-- [x] Stats match chapter (lin-lin b2=5021, log-lin b2=0.1314, log-log b2=1.48, S&P growth=6.5%)
+- [x] Stats match chapter (lin-lin b2=5021, log-lin b2=0.1314, log-log b2=1.48, S&P log slope=0.065, exact growth≈6.75%)
 - [x] All controls keyboard operable (sliders + toggle groups)
 - [x] Hash state roundtrips (REG object covers all 7 widgets)
 - [x] Theme toggle re-renders charts (via __rerender_ hooks)

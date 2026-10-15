@@ -82,20 +82,21 @@ plt.show()
 # =============================================================================
 # STEP 7: Reverse regression — association is NOT causation
 # =============================================================================
-# If regression = causation, the reverse slope would be 1/slope. It is not.
+# The reverse slope is not 1/slope: the product of the two slopes equals r²,
+# so they are reciprocals only when the fit is perfect (r = ±1).
 fit_reverse = pf.feols('size ~ price', data=data_house)
 
 print(f"price ~ size  slope: {slope:.4f}")
 print(f"size ~ price  slope: {fit_reverse.coef()['price']:.6f}")
 print(f"1 / original slope:  {1/slope:.6f}")
 print(f"Reciprocals match?   {1/slope:.6f} ≠ {fit_reverse.coef()['price']:.6f}")
-print("→ Regression is asymmetric: association, not causation!")
+print("→ Regression is asymmetric: each line minimizes errors in its own y variable")
 
 # =============================================================================
 # STEP 8: Nonparametric regression — check the linearity assumption
 # =============================================================================
 # LOWESS fits weighted local regressions; if the curve tracks the OLS line,
-# the linear assumption is validated for this dataset
+# the linear model is a reasonable approximation for this dataset
 lowess_result = lowess(data_house['price'], data_house['size'], frac=0.6)
 
 fig, ax = plt.subplots(figsize=(10, 6))

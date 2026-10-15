@@ -115,7 +115,7 @@ approximation error — negligible under ~10%, which is exactly why logs are so 
 
 ## Our question: how do earnings vary with education?
 
-171 full-time workers aged 30 (2010). Earnings are **right-skewed** (mean \$41,413, median \$36,000, max \$172,000),
+171 full-time women workers aged 30 (2010). Earnings are **right-skewed** (mean \$41,413, median \$36,000, max \$172,000),
 so the log scale pulls in the long tail. We take logs and fit all four forms with `pyfixest`.
 
 ``` {.python code-line-numbers="1|3-5|7-9|11-15|17-18"}
@@ -126,9 +126,9 @@ import numpy as np                           # np.log for the transforms
 import pyfixest as pf                        # OLS with R-style formulas
 
 url = "https://raw.githubusercontent.com/quarcs-lab/data-open/master/AED/AED_EARNINGS.DTA"
-data = pd.read_stata(url)                    # 171 workers: earnings, education
+data = pd.read_stata(url)                    # 171 women aged 30: earnings, education
 data["lnearn"] = np.log(data["earnings"])    # log of the outcome
-data["lneduc"] = np.log(data["education"])   # log of the regressor
+data["lneduc"] = np.log(data["education"].astype(float))   # log of the regressor (int8 → float first)
 
 m_lin    = pf.feols("earnings ~ education", data=data)   # 1. linear:      $ per year
 m_loglin = pf.feols("lnearn ~ education",   data=data)   # 2. log-linear:  semi-elasticity
@@ -158,28 +158,30 @@ the same whether a worker earns \$30k or \$100k. t = 9.21, p < 0.001, R² = 0.33
 - **Linear:** \$5,021 more earnings per extra year — a fixed dollar amount (implausible at the top end).
 - **Log-linear:** about **13.1% more** earnings per extra year — the semi-elasticity, and the usual choice.
 - **Log-log:** elasticity **1.48** — a 1% rise in education is associated with ~1.48% higher earnings.
-- **Linear-log:** about **\$544 more** earnings per 1% of education — dollars from a percentage move.
+- **Linear-log:** about **\$545 more** earnings per 1% of education — dollars from a percentage move.
 :::
 
 [Compare $R^2$ only across models with the **same** dependent variable — not across level and log outcomes.]{.takeaway .fragment}
 
 ## Exponential growth becomes a straight line in logs
 
-$x_t = x_0(1+r)^t$ curves upward in levels, but $\ln(x_t) \approx \ln(x_0) + r\,t$ is linear — so regressing
-$\ln x$ on time recovers the growth rate $r$ as the slope.
+$x_t = x_0(1+r)^t$ curves upward in levels, but $\ln(x_t) = \ln(x_0) + \ln(1+r)\,t \approx \ln(x_0) + r\,t$ is linear — so the slope of
+$\ln x$ on time estimates $\ln(1+r) \approx r$; the exact rate is $e^{\text{slope}} - 1$.
 
-``` {.python code-line-numbers="1|3-4|6-7|9|10-12"}
+``` {.python code-line-numbers="1|3-5|7-8|10|11-14"}
 !pip install -q pyfixest                     # self-contained cell: install pyfixest (quiet)
 
 import pandas as pd                          # tabular data
+import numpy as np                           # np.exp for the exact growth rate
 import pyfixest as pf                        # OLS with R-style formulas
 
 url = "https://raw.githubusercontent.com/quarcs-lab/data-open/master/AED/AED_SP500INDEX.DTA"
 data = pd.read_stata(url)                    # S&P 500 index, 1927–2019 (lnsp500 precomputed)
 
-fit = pf.feols("lnsp500 ~ year", data=data)  # slope = average annual growth rate r
-r = fit.coef()["year"]                       # ≈ 0.065
-print(f"growth rate: {100*r:.2f}% per year") # ≈ 6.5% per year
+fit = pf.feols("lnsp500 ~ year", data=data)  # slope = ln(1+r) ≈ growth rate r
+r = fit.coef()["year"]                       # ≈ 0.0653
+print(f"log slope: {100*r:.2f}% per year")   # ≈ 6.53% (log approximation)
+print(f"exact growth: {100*(np.exp(r)-1):.2f}% per year")   # ≈ 6.75% per year
 print(f"Rule of 72: doubles every {72/(100*r):.0f} years")  # ≈ 11 years
 ```
 
@@ -194,7 +196,7 @@ by the percentage rate for an instant doubling time.
 
 ![The same S&P 500 series: an exponential curve in levels (left), a near-straight line in logs (right).](figures/fig_exp_growth.png)
 
-[Growth of **6.5% per year** over 1927–2019 → the index doubles about every **11 years** (Rule of 72).]{.takeaway .fragment}
+[Log slope **0.065** → exact growth of about **6.75% per year** over 1927–2019 → the index doubles about every **11 years** (Rule of 72).]{.takeaway .fragment}
 
 # Reading it right {.divider background-color="#C21E72"}
 
@@ -218,7 +220,7 @@ zero or negative values, so logs only apply to strictly positive variables.
 - $\Delta\ln(x) \approx \Delta x/x$: a log change **is** a proportionate change (for small moves).
 - **Log-linear** → semi-elasticity ($100\beta_1 \approx \%\Delta y$ per unit); **log-log** → elasticity (% per %).
 - Choose the form from **economic theory + data + interpretation** — log-linear is the common default.
-- **Exponential growth is linear in logs**: regress $\ln x$ on time; the slope is the growth rate.
+- **Exponential growth is linear in logs**: regress $\ln x$ on time; the slope estimates $\ln(1+r) \approx r$ (exact: $e^{\text{slope}} - 1$).
 - Treat finite percentage effects as **approximations** ($100(e^{\beta_1}-1)$ is exact); logs need positive data.
 :::
 

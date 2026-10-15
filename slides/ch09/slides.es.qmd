@@ -115,7 +115,7 @@ error de aproximación — insignificante por debajo de ~10%, que es exactamente
 
 ## Nuestra pregunta: ¿cómo varían los ingresos con la educación?
 
-171 trabajadores a tiempo completo de 30 años (2010). Los ingresos están **sesgados a la derecha** (media \$41,413, mediana \$36,000, máx \$172,000),
+171 trabajadoras a tiempo completo de 30 años (2010). Los ingresos están **sesgados a la derecha** (media \$41,413, mediana \$36,000, máx \$172,000),
 así que la escala logarítmica recoge la cola larga. Tomamos logaritmos y ajustamos las cuatro formas con `pyfixest`.
 
 ``` {.python code-line-numbers="1|3-5|7-9|11-15|17-18"}
@@ -126,9 +126,9 @@ import numpy as np                           # np.log for the transforms
 import pyfixest as pf                        # OLS with R-style formulas
 
 url = "https://raw.githubusercontent.com/quarcs-lab/data-open/master/AED/AED_EARNINGS.DTA"
-data = pd.read_stata(url)                    # 171 workers: earnings, education
+data = pd.read_stata(url)                    # 171 women aged 30: earnings, education
 data["lnearn"] = np.log(data["earnings"])    # log of the outcome
-data["lneduc"] = np.log(data["education"])   # log of the regressor
+data["lneduc"] = np.log(data["education"].astype(float))   # log of the regressor (int8 → float first)
 
 m_lin    = pf.feols("earnings ~ education", data=data)   # 1. linear:      $ per year
 m_loglin = pf.feols("lnearn ~ education",   data=data)   # 2. log-linear:  semi-elasticity
@@ -158,28 +158,30 @@ igual sea que un trabajador gane \$30k o \$100k. t = 9.21, p < 0.001, R² = 0.33
 - **Lineal:** \$5,021 más de ingresos por año adicional — una cantidad fija en dólares (inverosímil en el extremo superior).
 - **Log-lineal:** alrededor de **13.1% más** de ingresos por año adicional — la semielasticidad, y la elección habitual.
 - **Log-log:** elasticidad **1.48** — un aumento de 1% en educación se asocia con ~1.48% más de ingresos.
-- **Lineal-log:** alrededor de **\$544 más** de ingresos por cada 1% de educación — dólares a partir de un movimiento porcentual.
+- **Lineal-log:** alrededor de **\$545 más** de ingresos por cada 1% de educación — dólares a partir de un movimiento porcentual.
 :::
 
 [Compara $R^2$ solo entre modelos con la **misma** variable dependiente — no entre resultados en nivel y en logaritmo.]{.takeaway .fragment}
 
 ## El crecimiento exponencial se vuelve una línea recta en logaritmos
 
-$x_t = x_0(1+r)^t$ se curva hacia arriba en niveles, pero $\ln(x_t) \approx \ln(x_0) + r\,t$ es lineal — así que regresar
-$\ln x$ sobre el tiempo recupera la tasa de crecimiento $r$ como la pendiente.
+$x_t = x_0(1+r)^t$ se curva hacia arriba en niveles, pero $\ln(x_t) = \ln(x_0) + \ln(1+r)\,t \approx \ln(x_0) + r\,t$ es lineal — así que la pendiente de
+$\ln x$ sobre el tiempo estima $\ln(1+r) \approx r$; la tasa exacta es $e^{\text{pendiente}} - 1$.
 
-``` {.python code-line-numbers="1|3-4|6-7|9|10-12"}
+``` {.python code-line-numbers="1|3-5|7-8|10|11-14"}
 !pip install -q pyfixest                     # self-contained cell: install pyfixest (quiet)
 
 import pandas as pd                          # tabular data
+import numpy as np                           # np.exp for the exact growth rate
 import pyfixest as pf                        # OLS with R-style formulas
 
 url = "https://raw.githubusercontent.com/quarcs-lab/data-open/master/AED/AED_SP500INDEX.DTA"
 data = pd.read_stata(url)                    # S&P 500 index, 1927–2019 (lnsp500 precomputed)
 
-fit = pf.feols("lnsp500 ~ year", data=data)  # slope = average annual growth rate r
-r = fit.coef()["year"]                       # ≈ 0.065
-print(f"growth rate: {100*r:.2f}% per year") # ≈ 6.5% per year
+fit = pf.feols("lnsp500 ~ year", data=data)  # slope = ln(1+r) ≈ growth rate r
+r = fit.coef()["year"]                       # ≈ 0.0653
+print(f"log slope: {100*r:.2f}% per year")   # ≈ 6.53% (log approximation)
+print(f"exact growth: {100*(np.exp(r)-1):.2f}% per year")   # ≈ 6.75% per year
 print(f"Rule of 72: doubles every {72/(100*r):.0f} years")  # ≈ 11 years
 ```
 
@@ -194,7 +196,7 @@ entre la tasa porcentual para obtener un tiempo de duplicación inmediato.
 
 ![La misma serie del S&P 500: una curva exponencial en niveles (izquierda), una línea casi recta en logaritmos (derecha).](figures/fig_exp_growth.png)
 
-[Un crecimiento de **6.5% por año** entre 1927–2019 → el índice se duplica aproximadamente cada **11 años** (Regla del 72).]{.takeaway .fragment}
+[Pendiente logarítmica **0.065** → un crecimiento exacto de alrededor de **6.75% por año** entre 1927–2019 → el índice se duplica aproximadamente cada **11 años** (Regla del 72).]{.takeaway .fragment}
 
 # Leerlo bien {.divider background-color="#C21E72"}
 
@@ -218,7 +220,7 @@ cero o en valores negativos, así que los logaritmos solo aplican a variables es
 - $\Delta\ln(x) \approx \Delta x/x$: un cambio en logaritmo **es** un cambio proporcional (para movimientos pequeños).
 - **Log-lineal** → semielasticidad ($100\beta_1 \approx \%\Delta y$ por unidad); **log-log** → elasticidad (% por %).
 - Elige la forma a partir de **teoría económica + datos + interpretación** — el log-lineal es el predeterminado común.
-- **El crecimiento exponencial es lineal en logaritmos**: regresa $\ln x$ sobre el tiempo; la pendiente es la tasa de crecimiento.
+- **El crecimiento exponencial es lineal en logaritmos**: regresa $\ln x$ sobre el tiempo; la pendiente estima $\ln(1+r) \approx r$ (exacta: $e^{\text{pendiente}} - 1$).
 - Trata los efectos porcentuales finitos como **aproximaciones** ($100(e^{\beta_1}-1)$ es exacto); los logaritmos necesitan datos positivos.
 :::
 

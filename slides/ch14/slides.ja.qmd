@@ -86,7 +86,7 @@ data = pd.read_stata(url)                    # 872 full-time workers (gender: 1=
 
 fit = pf.feols("earnings ~ gender", data=data, vcov="HC1")   # HC1 robust SEs
 fit.summary()
-# Intercept ≈ 63,000 = MALE mean · gender coef ≈ −16,396 = female−male gap (t ≈ −4.7)
+# Intercept ≈ 63,000 = MALE mean · gender coef ≈ −16,396 = female−male gap (robust t ≈ −5.1)
 ```
 
 [↗ Colab で試す](https://colab.research.google.com/notebooks/empty.ipynb){.colab-link target="_blank" data-preview-link="false"}
@@ -117,19 +117,20 @@ print(m3.coef()["genderbyeduc"])             # return to schooling differs by ge
 
 ## 14.4 — 別々の回帰 + Chow検定
 
-``` {.python code-line-numbers="1|3-4|6-7|9"}
+``` {.python code-line-numbers="1|3-4|6-7|9-10"}
 # Fit the SAME model on each subsample — every coefficient free to differ
 f = pf.feols("earnings ~ education + age + hours", data=data.query("gender==1"))
 m = pf.feols("earnings ~ education + age + hours", data=data.query("gender==0"))
 
 print(f.coef()["education"], m.coef()["education"])   # ≈ 4,200 (F) vs 6,300 (M)
 print(f.coef()["hours"],     m.coef()["hours"])       # ≈   700 (F) vs 1,600 (M)
-# A Chow F-test of H0: β_F = β_M pools the two; here it REJECTS → separate models
+# Chow test of H0: β_F = β_M = robust joint test on all 4 gender terms of the fully
+# interacted model: Wald χ² ≈ 32.6 (4 restr.), F ≈ 8.1, p < 0.001 → REJECTS pooling
 ```
 
 [↗ Colab で試す](https://colab.research.google.com/notebooks/empty.ipynb){.colab-link target="_blank" data-preview-link="false"}
 
-[教育年数*と*労働時間の両方で傾きが異なります — 単なる一定の格差ではありません。Chow検定は「男性と女性に別々の式が必要か？」を形式的に問います。ここでは：必要です。]{.takeaway .fragment}
+[教育年数*と*労働時間の両方で傾きが異なります — 単なる一定の格差ではありません。Chow検定は「男性と女性に別々の式が必要か？」を形式的に問います。そのロバスト版であるすべての交互作用を含むモデルにおける4つの性別関連の項の同時検定（$F\approx8.1$、$p<0.001$）の答えは：必要です。]{.takeaway .fragment}
 
 ## 14.5 — 多数のカテゴリ：ダミー変数の罠に注意
 
@@ -172,7 +173,7 @@ print(f_oneway(*[g.earnings for _, g in data.groupby("typeworker")]))
 
 . . .
 
-[応答。]{.rebuttal} カテゴリが**水準 + 交互作用**として入るとき、それらの項は相関しています — 個々の $t$ 検定は誤った判断を導きます。すべての性別関連の項について**同時 $F$ 検定**を使いましょう（ここでは $F\approx20$–$40$、$p<0.001$）。そして格差は**記述的**なものであり、差別の証明ではないことを忘れないでください。
+[応答。]{.rebuttal} カテゴリが**水準 + 交互作用**として入るとき、それらの項は相関しています — 個々の $t$ 検定は誤った判断を導きます。すべての性別関連の項について**同時 $F$ 検定**を使いましょう（ここではWald $\chi^2\approx32.6$（制約は4個）、すなわち $F\approx8.1$、$p<0.001$）。そして格差は**記述的**なものであり、差別の証明ではないことを忘れないでください。
 
 [カテゴリの効果は*同時に*検定しましょう。因果的な解釈を正当化する設計が得られるまでは、格差は関連として解釈します。]{.takeaway .fragment}
 

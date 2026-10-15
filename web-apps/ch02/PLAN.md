@@ -26,12 +26,12 @@ Design decisions confirmed with the user:
 | Source file | Used for widget | Fields kept |
 |---|---|---|
 | `data/AED_EARNINGS.DTA` | Summary stats, histogram/KDE, log transform, z-score | `earnings` (n=171) |
-| `data/AED_REALGDPPC.DTA` | Time-series line chart with recession shading | `daten`, `realgdppc` (quarterly 1959–2020) |
+| `data/AED_REALGDPPC.DTA` | Time-series line chart with recession shading | `daten`, `realgdppc` (quarterly 1959 Q1–2020 Q1) |
 | `data/AED_HEALTHCATEGORIES.DTA` | Bar/pie toggle | `category`, `expenditures` (13 rows) |
 | `data/AED_FISHING.DTA` | Categorical frequency table | `mode` counts (4 categories) |
 | `data/AED_MONTHLYHOMESALES.DTA` | Moving-average / seasonal-adjustment explorer | `daten`, `exsales`, `exsales_ma11`, `exsales_sa` |
 
-All five `.DTA` files already exist locally (confirmed in repo), so no network fetches at build time. Recession quarters for the GDP chart (1973-Q4 to 1975-Q1, 1980-Q1 to 1980-Q3, 1981-Q3 to 1982-Q4, 1990-Q3 to 1991-Q1, 2001-Q1 to 2001-Q4, 2007-Q4 to 2009-Q2, 2020-Q1 to 2020-Q2) will be hard-coded in the build script.
+All five `.DTA` files already exist locally (confirmed in repo), so no network fetches at build time. Recession quarters for the GDP chart (1973-Q4 to 1975-Q1, 1980-Q1 to 1980-Q3, 1981-Q3 to 1982-Q4, 1990-Q3 to 1991-Q1, 2001-Q1 to 2001-Q4, 2007-Q4 to 2009-Q2) will be hard-coded in the build script. The 2020 recession is not shaded because the series ends in 2020 Q1.
 
 ## Interactive widgets (mapped to chapter sections)
 
@@ -134,7 +134,7 @@ Three short paragraphs: what the directory is, how to regenerate `web-apps/ch02/
    - Outlier slider moves the mean but not the median on earnings.
    - Bin-width slider at 1k shows spikes; at 15k shows one blob; KDE overlay is smooth.
    - IQR-multiplier at 1.5 flags the expected high earners; at 3.0 flags fewer.
-   - GDP recession toggle shades 1973, 1980, 1981, 1990, 2001, 2008, 2020.
+   - GDP recession toggle shades 1973, 1980, 1981, 1990, 2001, 2008 (no 2020 band; the data end in 2020 Q1).
    - Bar↔pie toggle swaps the health/fishing chart type.
    - Log-transform shows raw skewness ≈ 1.71 and log skewness ≈ −0.91 (numbers from chapter).
    - Z-score slider at $36,000 (median earnings) yields z ≈ −0.21.

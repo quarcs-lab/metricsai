@@ -934,7 +934,7 @@ footer.page a:hover { text-decoration: underline; }
     </ol>
   </div>
 
-  <p class="takeaway" data-i18n="widget.asym.takeaway"><strong>Take-away:</strong> the asymmetry of the two slopes is the numerical fingerprint of association, not causation. <a href="../../book/_book/notebooks_quarto/ch05_Bivariate_Data_Summary.html#causation" target="_blank" rel="noopener">Read §5.10 in the chapter →</a></p>
+  <p class="takeaway" data-i18n="widget.asym.takeaway"><strong>Take-away:</strong> the two slopes differ because each regression minimizes errors in its own <em>y</em> variable — a property of least squares, not evidence about causation. Causal claims need a research design. <a href="../../book/_book/notebooks_quarto/ch05_Bivariate_Data_Summary.html#causation" target="_blank" rel="noopener">Read §5.10 in the chapter →</a></p>
 </section>
 
 <!-- ===================== 7. PARAMETRIC vs NONPARAMETRIC ===================== -->
@@ -949,7 +949,7 @@ footer.page a:hover { text-decoration: underline; }
   <p class="motivation" data-i18n="widget.nonpar.motivation">Is the price–size relationship really a straight line? The only way to know is to <em>let the data try a curve</em> and see whether it picks one.</p>
 
   <div class="key-concept" data-i18n="widget.nonpar.kc">
-    <span class="kc-title">Parametric regression assumes a specific functional form; nonparametric regression lets the shape emerge from the data.</span> <strong>LOWESS</strong> fits many small weighted regressions at each point, stitching them into a smooth curve whose flexibility is set by a <strong>bandwidth</strong> (the fraction of nearby points used at each location). <strong>Kernel smoothing</strong> is a weighted moving average that does the same job from a different angle. When the flexible curve agrees with the straight OLS line, the linearity assumption is validated.
+    <span class="kc-title">Parametric regression assumes a specific functional form; nonparametric regression lets the shape emerge from the data.</span> <strong>LOWESS</strong> fits many small weighted regressions at each point, stitching them into a smooth curve whose flexibility is set by a <strong>bandwidth</strong> (the fraction of nearby points used at each location). <strong>Kernel smoothing</strong> is a weighted moving average that does the same job from a different angle. When the flexible curve shows no systematic departure from the straight OLS line, the linear model is a reasonable approximation.
   </div>
 
   <div class="widget-howto">
@@ -994,14 +994,14 @@ footer.page a:hover { text-decoration: underline; }
   <div class="try-this">
     <div class="try-title" data-i18n="common.tryTitle">Try this</div>
     <ol data-i18n="widget.nonpar.try">
-      <li><strong>Keep OLS and LOWESS on (frac = 0.65).</strong> The two curves trace nearly the same path. <em>The linear assumption holds for this sample.</em></li>
+      <li><strong>Keep OLS and LOWESS on (frac = 0.65).</strong> The two curves trace nearly the same path. <em>No sign of systematic curvature in this sample.</em></li>
       <li><strong>Drag bandwidth down to 0.30.</strong> LOWESS becomes wiggly, chasing individual points. <em>With n = 29, a small bandwidth overfits noise.</em></li>
       <li><strong>Push bandwidth up to 1.00.</strong> LOWESS flattens into something almost identical to OLS. <em>When a flexible method converges to the rigid one, parsimony wins.</em></li>
-      <li><strong>Turn on kernel smoothing.</strong> A different nonparametric estimator — same verdict. <em>The price–size relationship is genuinely linear, not a hidden curve.</em></li>
+      <li><strong>Turn on kernel smoothing.</strong> A different nonparametric estimator, here with a wide bandwidth, so it averages over many houses and comes out flatter than OLS — up to about $53,000 below the line at the largest sizes, where only a few houses are observed. <em>That gap reflects heavy smoothing and sparse data, not a clear bend: LOWESS shows no systematic curvature, so the relationship looks approximately linear over the observed range.</em></li>
     </ol>
   </div>
 
-  <p class="takeaway" data-i18n="widget.nonpar.takeaway"><strong>Take-away:</strong> nonparametric curves are a sanity check — when they echo the OLS line, the straight-line model is trustworthy. <a href="../../book/_book/notebooks_quarto/ch05_Bivariate_Data_Summary.html#nonparametric-regression" target="_blank" rel="noopener">Read §5.11 in the chapter →</a></p>
+  <p class="takeaway" data-i18n="widget.nonpar.takeaway"><strong>Take-away:</strong> nonparametric curves are a sanity check — when they show no systematic departure from the OLS line, the straight-line model is a reasonable approximation. <a href="../../book/_book/notebooks_quarto/ch05_Bivariate_Data_Summary.html#nonparametric-regression" target="_blank" rel="noopener">Read §5.11 in the chapter →</a></p>
 </section>
 
 <section class="howto-card code-summary" id="code" aria-label="Code summary">
@@ -1100,20 +1100,21 @@ plt.show()
 # =============================================================================
 # STEP 7: Reverse regression — association is NOT causation
 # =============================================================================
-# If regression = causation, the reverse slope would be 1/slope. It is not.
+# The reverse slope is not 1/slope: the product of the two slopes equals r²,
+# so they are reciprocals only when the fit is perfect (r = ±1).
 reverse_fit = pf.feols('size ~ price', data=data_house)
 
 print(f"price ~ size  slope: {slope:.4f}")
 print(f"size ~ price  slope: {reverse_fit.coef()['price']:.6f}")
 print(f"1 / original slope:  {1/slope:.6f}")
 print(f"Reciprocals match?   {1/slope:.6f} ≠ {reverse_fit.coef()['price']:.6f}")
-print("→ Regression is asymmetric: association, not causation!")
+print("→ Regression is asymmetric: each line minimizes errors in its own y variable")
 
 # =============================================================================
 # STEP 8: Nonparametric regression — check the linearity assumption
 # =============================================================================
 # LOWESS fits weighted local regressions; if the curve tracks the OLS line,
-# the linear assumption is validated for this dataset
+# the linear model is a reasonable approximation for this dataset
 lowess_result = lowess(data_house['price'], data_house['size'], frac=0.6)
 
 fig, ax = plt.subplots(figsize=(10, 6))
@@ -1205,7 +1206,8 @@ twoway (scatter price size, mcolor(%60))                                     ///
 * =============================================================================
 * STEP 7: Reverse regression — association is NOT causation
 * =============================================================================
-* If regression = causation, the reverse slope would be 1/slope. It is not.
+* The reverse slope is not 1/slope: the product of the two slopes equals r²,
+* so they are reciprocals only when the fit is perfect (r = ±1).
 // Store the original slope for comparison
 scalar orig_slope = _b[size]
 
@@ -1213,13 +1215,13 @@ regress size price
 display "price ~ size  slope: " orig_slope
 display "size ~ price  slope: " _b[price]
 display "1 / original slope:  " 1 / orig_slope
-display "Reciprocals match?   No — regression is asymmetric!"
+display "Reciprocals match?   No — each line minimizes errors in its own y variable"
 
 * =============================================================================
 * STEP 8: Nonparametric regression — check the linearity assumption
 * =============================================================================
 * lowess fits weighted local regressions; if the curve tracks the OLS line,
-* the linear assumption is validated for this dataset
+* the linear model is a reasonable approximation for this dataset
 
 // Re-estimate OLS for the combined plot
 regress price size
@@ -1312,19 +1314,20 @@ ggplot(data_house, aes(x = size, y = price)) +
 # =============================================================================
 # STEP 7: Reverse regression &mdash; association is NOT causation
 # =============================================================================
-# If regression = causation, the reverse slope would be 1/slope. It is not.
+# The reverse slope is not 1/slope: the product of the two slopes equals r²,
+# so they are reciprocals only when the fit is perfect (r = ±1).
 reverse_model &lt;- feols(size ~ price, data = data_house)
 
 cat("price ~ size  slope:", round(slope, 4), "\n")
 cat("size ~ price  slope:", round(coef(reverse_model)["price"], 6), "\n")
 cat("1 / original slope: ", round(1/slope, 6), "\n")
-cat("Reciprocals match?   No &mdash; regression is asymmetric!\n")
+cat("Reciprocals match?   No &mdash; each line minimizes errors in its own y variable\n")
 
 # =============================================================================
 # STEP 8: Nonparametric regression &mdash; check the linearity assumption
 # =============================================================================
 # LOESS fits weighted local regressions; if the curve tracks the OLS line,
-# the linear assumption is validated for this dataset
+# the linear model is a reasonable approximation for this dataset
 ggplot(data_house, aes(x = size, y = price)) +
   geom_point(color = "steelblue", size = 3, alpha = 0.6) +
   geom_smooth(method = "lm", formula = y ~ x, color = "red",
