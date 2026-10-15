@@ -75,6 +75,12 @@ position, feedback leaks, or cross-references between items.
   the ch02 IQR item); otherwise wrong-option feedback on the twin gives the key away.
 - **Hypothetical scenarios start with "Suppose"** so students never mistake invented
   numbers for the chapter's data.
+- **Strengthening a stem can kill a distractor:** adding "a large effect" made "too small to
+  matter" a free elimination (ch08 E05). Re-read every option after editing a stem.
+- **Exact-vs-approximate items need a near distractor** (e.g., 2 × the one-year exact value),
+  not only far-off scaling errors (ch09 E08).
+- **Ordinal words can be read two ways:** "the 5th and 95th" reads as percentiles; write
+  "positions 50 and 950" (ch12 E21).
 - **No distractor may contradict the item's own stem** ("the coin must be unfair" when the
   stem says "a fair coin"; "ages were normal" when the stem says "far from normal"). Such
   options are free eliminations (ch03 E04, E19).
@@ -95,6 +101,10 @@ position, feedback leaks, or cross-references between items.
   False one is absolute ("any", "always"), the wording predicts the answer. Mix them, and
   plan T/F flips together: flipping one item to fix a cue can force a second flip to keep
   the split (ch03 E03 → E17).
+- **Length, both ways:** aim for the key being the longest option in roughly 20–40% of
+  wordy items. Padding distractors until the key is *never* longest is a cue too
+  ("avoid the longest" worked in ch12's first revision). In multis, the correct options must
+  not all be longer than the wrong ones, and 4-option multis must not all have exactly 2 keys.
 - **Length:** the key must not be systematically the longest. Trim the key or lengthen
   distractors so lengths overlap.
 - **Hedges and absolutes:** don't put "about / tends / may" only on the key and
@@ -133,6 +143,15 @@ position, feedback leaks, or cross-references between items.
 - **Simulation chapters:** reproduce the chapter's seeds and draw order exactly in the
   fact-check; chapters print `np.std` (ddof = 0) for simulated SDs while pandas `.std()` uses
   ddof = 1. Phrase what-if values ("with n = 120…") as "closest to" so the key holds for any seed.
+- **Coincidental collisions leak too:** a key value that equals another exam item's printed
+  statistic (2.4 vs. t ≈ 2.4) is a leak even if the meanings differ; rescale the scenario (ch08).
+- **Predictions stay inside the model's fitted range** (ch09: $100,000 was beyond the log model's
+  maximum prediction). Hypothetical scenarios must be internally consistent: check R² vs.
+  adjusted R², intervals, and p-values in the fact-check (ch11 P32 was impossible).
+- **A key that contradicts chapter prose** (even when the data back it) must be checkable from the
+  stem; otherwise choose another key and report the prose (ch08: Luxembourg's spending).
+- **AED columns are often int8/int16:** cast with `.astype(float)` before arithmetic or logs
+  (overflow; `np.log` returns float16). Note where the chapter's printed values carry this error.
 - **Constants the data can't verify** (e.g., ch03's census μ and σ, given by the chapter) go in
   a labeled block of the fact-check, not among the data checks.
 - **Chapter prose can be conceptually wrong too.** ch02 line 934 says z-scores "can
@@ -154,6 +173,9 @@ position, feedback leaks, or cross-references between items.
   any other exam stem or option (ch07: se = 11.17 appeared in three stems, so the SE item was
   free). Watch derivable formulas too: ch03 printed σ = 18.61, SD(X̄) = 3.72, and n = 25 in
   different stems, so σ/√n could be recovered without knowing it.
+- **Printed results decide other items:** a confidence interval or p-value printed in one exam
+  stem settles any test of that coefficient elsewhere (ch11: a printed p = 0.83 ruled out
+  F > 1 options; a printed CI ruled out large t values). Choose distractors on both sides.
 - **Options teach rules:** an option or a true T/F statement must not state a rule that another
   exam item tests (ch04: "|t| above the critical value means reject" answered the next item;
   ch07: "3 degrees of freedom with n = 5" taught n − 2 for the df item).
@@ -175,7 +197,8 @@ Every option has its own `feedback`; every item has an `explanation` ("Key idea"
     ("you divided instead of multiplying", "you forgot the intercept"), or negate a sibling
     option;
   - TF items are exempt (the leak is accepted), but still prefer "revisit Section X".
-  - **Fully crossed items** (two dimensions × two values): give every wrong option the *same*
+  - **Fully crossed items** (two dimensions × two values, including scale × units, as in
+    log-model interpretations, ch09): give every wrong option the *same*
     neutral feedback. Distinct feedback says which half is wrong and points to the key
     (ch06 E04, E10).
   - Reviewer-caught one-step corrections to avoid: "Check the value on which the interval is

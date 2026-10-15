@@ -313,6 +313,19 @@ def cue_hints(bank: dict) -> list[str]:
                 strict.append(it["id"])
         if singles and len(strict) / len(singles) > 0.40:
             hints.append(f"{set_name}: key is strictly the longest option in {len(strict)}/{len(singles)} single items ({', '.join(strict)})")
+        # Reverse cue (ch12): distractors padded until "never pick the longest" works
+        wordy = [it for it in singles if max(len(plain(o["text"])) for o in it["options"]) >= 40]
+        if len(wordy) >= 8 and sum(it["id"] in strict for it in wordy) / len(wordy) < 0.10:
+            hints.append(f"{set_name}: key is almost never the longest option in wordy single items "
+                         f"({sum(it['id'] in strict for it in wordy)}/{len(wordy)}); 'avoid the longest' would work")
+        # Multi: every correct option longer than every wrong option
+        for it in bank[set_name]:
+            if it["type"] != "multi":
+                continue
+            ks = [len(plain(o["text"])) for o in it["options"] if o["correct"]]
+            ws = [len(plain(o["text"])) for o in it["options"] if not o["correct"]]
+            if ws and min(ks) > max(ws):
+                hints.append(f"{set_name} {it['id']}: every correct option is longer than every wrong option")
 
     exam = [it for it in bank["exam"] if it["type"] != "tf"]
     # 1. Exam wrong-option feedback that reads like a one-step correction (shown without the key below 80%)
@@ -326,7 +339,11 @@ def cue_hints(bank: dict) -> list[str]:
     for it in exam:
         own = plain(it["stem"])
         nums = {n for o in it["options"] if o["correct"] for n in LEAK_NUM_RE.findall(plain(o["text"]))}
-        for num in sorted(n for n in nums if n not in own):
+        opt_txt = [plain(o["text"]) for o in it["options"]]
+        # skip numbers given in the stem, years, and unit-like numbers shared by several of the item's options
+        nums = {n for n in nums if n not in own and not re.fullmatch(r"(19|20)\d\d", n)
+                and sum(n in t for t in opt_txt) < 2}
+        for num in sorted(nums):
             pat = r"(?<![\d.,])" + re.escape(num) + r"(?![\d]|[.,]\d)"
             others = [j for j, txt in visible.items() if j != it["id"] and re.search(pat, txt)]
             if others:
@@ -343,6 +360,17 @@ def cue_hints(bank: dict) -> list[str]:
             for pid, pw in p_keys:
                 if len(pw) >= 5 and len(ew & pw) / len(ew | pw) >= 0.5:
                     hints.append(f"exam {it['id']} key is worded like practice {pid} key (mirror, don't clone)")
+    # 4. Practice explanation or feedback that restates an exam key (ch08 P19 -> E19, ch10 P09 -> E09)
+    p_texts = [(it["id"], words(it.get("explanation", "")) | set().union(*(words(o["feedback"]) for o in it["options"])))
+               for it in bank["practice"]]
+    for it in exam:
+        for o in it["options"]:
+            ew = words(o["text"])
+            if not o["correct"] or len(ew) < 7:
+                continue
+            for pid, pw in p_texts:
+                if len(ew & pw) / len(ew) >= 0.85:
+                    hints.append(f"exam {it['id']} key is nearly restated in practice {pid} feedback/explanation")
     return list(dict.fromkeys(hints))
 
 

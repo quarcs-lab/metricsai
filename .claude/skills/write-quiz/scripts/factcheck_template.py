@@ -15,7 +15,9 @@ Copy to quizzes/checks/CHAPTER_factcheck.py, set CHAPTER, then fill the three bl
 
 Pitfalls: Python's round() rounds halves to even (round(62.5) == 62), so compare exact
 values or f-strings for .5 cases; some AED date columns (e.g. "month") hold timestamps,
-not integers.
+not integers; integer columns are often int8/int16 (cast with .astype(float) before arithmetic
+or np.log). Give every distractor's arithmetic its own check, and check that hypothetical numbers
+are internally consistent (R² vs. adjusted R², intervals from the shown rounded inputs).
 
 Run:  python3 quizzes/checks/CHAPTER_factcheck.py      (exit 1 on any failure)
 """

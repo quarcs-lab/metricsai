@@ -1,0 +1,777 @@
+{
+  "meta": {
+    "chapter": "12",
+    "chapter_title": "Further Topics in Multiple Regression",
+    "book_title": "metricsAI: An Introduction to Econometrics with Python and AI in the Cloud",
+    "minutes": 45,
+    "pass_pct": 80,
+    "n_items": 30
+  },
+  "practice": [
+    {
+      "id": "P01",
+      "type": "single",
+      "concept": "Heteroskedastic-robust standard errors (Section 12.2, Key Concept 12.1)",
+      "stem": "Suppose a regression of hourly wages on years of education for 1,000 workers is re-estimated with heteroskedastic-robust (HC1) standard errors instead of default ones. What happens to the results?",
+      "options": [
+        {"text": "The education coefficient changes, because HC1 drops the workers with the largest residuals.", "correct": false, "feedback": "HC1 keeps every observation; the OLS coefficient is the same under both kinds of standard errors."},
+        {"text": "The R² rises, because the robust model accounts for more of the variation in wages.", "correct": false, "feedback": "R² depends only on the fitted values and residuals, and HC1 leaves both untouched."},
+        {"text": "The coefficient is unchanged, while its standard error, t-statistic, and confidence interval may change.", "correct": true, "feedback": "Correct. Everything built from the standard error can move, but the coefficient estimate cannot."},
+        {"text": "Nothing changes, because robust standard errors matter only for time-series data.", "correct": false, "feedback": "HC1 standard errors are designed for cross-sectional data with heteroskedasticity; HAC standard errors are the time-series tool."}
+      ],
+      "explanation": "Key Concept 12.1: HC1 standard errors allow for nonconstant error variance. The OLS coefficients stay the same; standard errors, t-statistics, p-values, and confidence intervals can change."
+    },
+    {
+      "id": "P02",
+      "type": "single",
+      "concept": "Comparing default and robust inference (Section 12.2, Practice Exercise 5)",
+      "stem": "Suppose a regression gives a coefficient of 5.0 on x₂ (default SE 2.0, robust SE 3.5) and a coefficient of 7.0 on x₃ (default SE 2.0, robust SE 1.8). Using a critical value of about 1.96, which conclusion is correct?",
+      "options": [
+        {"text": "x₂ is significant at 5% with default SEs but not with robust SEs; x₃ is significant with both.", "correct": true, "feedback": "Correct. For x₂, t falls from 5.0/2.0 = 2.50 to 5.0/3.5 = 1.43; for x₃, t rises from 3.50 to 7.0/1.8 = 3.89."},
+        {"text": "Both coefficients lose significance with robust SEs, because robust SEs are always larger than default ones.", "correct": false, "feedback": "Robust SEs are not always larger: for x₃ the robust SE (1.8) is below the default (2.0), so its t rises to 3.89."},
+        {"text": "Neither conclusion changes, because robust SEs leave the t-statistics as they are.", "correct": false, "feedback": "t = coefficient ÷ SE, so a new SE gives a new t: for x₂ it falls from 2.50 to 1.43, below 1.96."},
+        {"text": "x₂ stays significant with robust SEs, because its coefficient is still 5.0.", "correct": false, "feedback": "The coefficient is unchanged, but significance depends on t = 5.0/3.5 = 1.43, which is below 1.96."}
+      ],
+      "explanation": "Practice Exercise 5: default t-statistics are 2.50 (x₂) and 3.50 (x₃); robust ones are 1.43 and 3.89. A robust SE well above the default (x₂) suggests heteroskedasticity that the default SE ignored, and it can overturn a conclusion."
+    },
+    {
+      "id": "P03",
+      "type": "tf",
+      "concept": "Comparing default and robust inference (Section 12.2)",
+      "stem": "Suppose a regression of test scores on class size gives a coefficient of −0.90, with a default SE of 0.40 and a robust SE of 0.52. Using a critical value of about 1.96, switching to robust SEs changes the conclusion of a two-sided 5% test of no effect.",
+      "options": [
+        {"text": "True", "correct": true, "feedback": "Correct. t moves from −0.90/0.40 = −2.25 (significant) to −0.90/0.52 = −1.73 (not significant)."},
+        {"text": "False", "correct": false, "feedback": "Compute t = coefficient ÷ SE under each method and compare |t| with 1.96 (Section 12.2)."}
+      ],
+      "explanation": "Section 12.2: the coefficient is the same, but |t| falls from 2.25 to 1.73 with the larger robust SE, so the effect is no longer significant at 5%."
+    },
+    {
+      "id": "P04",
+      "type": "multi",
+      "concept": "Choosing the type of standard errors (Section 12.2, Practice Exercise 1)",
+      "stem": "Which pairings of data and standard errors follow the chapter's guidance? (Select all that apply.)",
+      "options": [
+        {"text": "Sales of 300 independently sampled firms, with error variance that grows with firm size: heteroskedastic-robust (HC1) SEs", "correct": true, "feedback": "Correct: an independent cross-section with nonconstant variance calls for HC1."},
+        {"text": "Daily stock returns over 10 years, with shocks that persist from day to day: HC1 SEs", "correct": false, "feedback": "Persistent shocks mean autocorrelated errors, and HC1 handles heteroskedasticity only. Time series call for HAC (Newey–West) SEs."},
+        {"text": "Student outcomes in 50 schools over 10 years, correlated within each school: cluster-robust SEs by school", "correct": true, "feedback": "Correct: errors correlated within groups call for cluster-robust SEs, with the school as the cluster."},
+        {"text": "Recovery times of 600 patients in 30 hospitals, with errors correlated within each hospital: HAC SEs with 4 lags", "correct": false, "feedback": "HAC SEs handle correlation over time, not within groups. Correlation within hospitals calls for cluster-robust SEs."},
+        {"text": "A randomized experiment with 200 independent observations and constant error variance: default SEs", "correct": true, "feedback": "Correct: with independent observations and constant variance, the classical assumptions hold and default SEs are valid."}
+      ],
+      "explanation": "Section 12.2: heteroskedasticity → HC1; errors correlated within groups → cluster-robust; autocorrelation over time → HAC (Newey–West). When the classical assumptions hold, default SEs are valid."
+    },
+    {
+      "id": "P05",
+      "type": "single",
+      "concept": "Cluster-robust standard errors (Section 12.2, Key Takeaways)",
+      "stem": "Suppose a study of 6,000 students in 50 schools estimates a regression with 4 coefficients and clusters the standard errors by school. Following the chapter's Key Takeaways, how many degrees of freedom should the critical value use?",
+      "options": [
+        {"text": "49", "correct": true, "feedback": "Correct: with cluster-robust SEs the degrees of freedom are G − 1 = 50 − 1 = 49, where G is the number of clusters."},
+        {"text": "5,996", "correct": false, "feedback": "This is N − k, the default count. With clustered errors, the count is based on the number of clusters, not the number of students."},
+        {"text": "5,950", "correct": false, "feedback": "This is N − G (6,000 − 50). The count is based on the clusters themselves, not on the students."},
+        {"text": "50", "correct": false, "feedback": "50 is the number of clusters G; the rule subtracts one from it."}
+      ],
+      "explanation": "Key Takeaways: with grouped observations, use cluster-robust SEs with G − 1 degrees of freedom (not N − k): 50 − 1 = 49 here. The chapter also warns that cluster-robust SEs need enough clusters (rule of thumb: 30 or more)."
+    },
+    {
+      "id": "P06",
+      "type": "single",
+      "concept": "Autocorrelation (Section 12.2, Key Concept 12.2)",
+      "stem": "Suppose monthly changes in a country's inflation rate have a lag-1 autocorrelation of −0.4. What does this mean?",
+      "options": [
+        {"text": "Inflation falls by about 0.4 percentage points each month on average.", "correct": false, "feedback": "That describes a trend. Autocorrelation is a correlation between a series and its own past values, not an average change."},
+        {"text": "About 40% of months have below-average changes in inflation.", "correct": false, "feedback": "Autocorrelation is a correlation coefficient, not a share of observations."},
+        {"text": "There is no serial dependence at all, because only positive autocorrelation counts as dependence.", "correct": false, "feedback": "A negative autocorrelation is serial dependence too: consecutive values are related, just in opposite directions."},
+        {"text": "Months with an above-average change tend to be followed by months with a below-average change.", "correct": true, "feedback": "Correct. A negative lag-1 autocorrelation means consecutive values tend to fall on opposite sides of the mean."}
+      ],
+      "explanation": "Section 12.2: ρ₁ = Corr(yₜ, yₜ₋₁). A negative value means reversals around the mean. Any nonzero autocorrelation means the observations are not independent over time."
+    },
+    {
+      "id": "P07",
+      "type": "single",
+      "concept": "HAC standard errors: lag length (Section 12.2, Key Concept 12.2)",
+      "stem": "Suppose a time series has T = 125 observations. What maximum lag m does the chapter's rule of thumb m = 0.75 × T<sup>1/3</sup> give?",
+      "options": [
+        {"text": "About 93.75", "correct": false, "feedback": "This multiplies 0.75 by T itself. The rule uses the cube root of T, which grows very slowly."},
+        {"text": "About 3.75", "correct": true, "feedback": "Correct: the cube root of 125 is 5, and 0.75 × 5 = 3.75, so about 3 or 4 lags."},
+        {"text": "About 31.25", "correct": false, "feedback": "This divides T by 3 (0.75 × 125/3) instead of taking the cube root."},
+        {"text": "About 6.67", "correct": false, "feedback": "This divides the cube root by 0.75 (5/0.75) instead of multiplying by 0.75."}
+      ],
+      "explanation": "Key Concept 12.2: m = 0.75 × T<sup>1/3</sup>. With T = 125 the cube root is 5, so m = 3.75; the chapter's code keeps the integer part."
+    },
+    {
+      "id": "P08",
+      "type": "single",
+      "concept": "HAC standard errors for time series (Section 12.2, Key Concept 12.2)",
+      "stem": "Suppose the mean monthly inflation rate over 20 years is 0.25 percent, with a default standard error of 0.02 and a HAC (Newey–West) standard error of 0.05. Using a critical value of about 1.96, what is the approximate 95% confidence interval for mean inflation that allows for autocorrelation?",
+      "options": [
+        {"text": "[0.21, 0.29]", "correct": false, "feedback": "This uses the default SE (0.25 ± 1.96 × 0.02), which treats the months as independent."},
+        {"text": "[0.20, 0.30]", "correct": false, "feedback": "This adds and subtracts the HAC SE once; the margin of error is the critical value times the SE."},
+        {"text": "[0.15, 0.35]", "correct": true, "feedback": "Correct: 0.25 ± 1.96 × 0.05 = 0.25 ± 0.098."},
+        {"text": "[0.11, 0.39]", "correct": false, "feedback": "This adds the two SEs (0.02 + 0.05) before multiplying. The HAC SE replaces the default SE; they are alternatives."}
+      ],
+      "explanation": "Key Concept 12.2: with autocorrelated data, use the HAC SE: 0.25 ± 1.96 × 0.05 ≈ [0.15, 0.35], 2.5 times as wide as the interval based on the default SE."
+    },
+    {
+      "id": "P09",
+      "type": "tf",
+      "concept": "HAC standard errors: lag length (Section 12.2, Key Concept 12.2)",
+      "stem": "Using more lags than the rule of thumb m = 0.75 × T<sup>1/3</sup> makes HAC standard errors invalid, so the lag length should never exceed the rule-of-thumb value.",
+      "options": [
+        {"text": "True", "correct": false, "feedback": "The chapter's practical guidance on lag length points the other way (Section 12.2)."},
+        {"text": "False", "correct": true, "feedback": "Correct. The rule of thumb is a starting point; the chapter advises erring on the side of more lags (inference remains valid) and checking sensitivity to the choice."}
+      ],
+      "explanation": "Section 12.2, practical guidance: start from m ≈ 0.75 × T<sup>1/3</sup>, err on the side of more lags, and check how sensitive the standard errors are to the lag length."
+    },
+    {
+      "id": "P10",
+      "type": "single",
+      "concept": "Point predictions (Section 12.3, Practice Exercise 2)",
+      "stem": "Suppose a fitted model is ŷ = 10 + 2x₂ + 3x₃. What is the prediction when x₂ = 5 and x₃ = 3?",
+      "options": [
+        {"text": "19", "correct": false, "feedback": "This leaves out the intercept, 10. The prediction evaluates the whole fitted equation."},
+        {"text": "31", "correct": false, "feedback": "This puts x₂ = 3 and x₃ = 5 into the wrong slots: 10 + 2 × 3 + 3 × 5. Each coefficient multiplies its own variable."},
+        {"text": "15", "correct": false, "feedback": "This adds the coefficients (10 + 2 + 3) without multiplying them by the values of x₂ and x₃."},
+        {"text": "29", "correct": true, "feedback": "Correct: 10 + 2 × 5 + 3 × 3 = 10 + 10 + 9 = 29."}
+      ],
+      "explanation": "Section 12.3: plug x* into the fitted equation: ŷ = b₁ + b₂x₂* + b₃x₃* = 10 + 10 + 9 = 29."
+    },
+    {
+      "id": "P11",
+      "type": "single",
+      "concept": "Standard error of an individual forecast (Section 12.3, Practice Exercise 4)",
+      "stem": "Continuing the model ŷ = 10 + 2x₂ + 3x₃ with sₑ = 2.0, suppose the standard error of the predicted conditional mean at x₂ = 5, x₃ = 3 is se(ŷ<sub>cm</sub>) = 0.8. What is the standard error of the forecast for one individual outcome, se(ŷ<sub>f</sub>)?",
+      "options": [
+        {"text": "2.80", "correct": false, "feedback": "This adds the two standard errors. Variances add, so the forecast SE is √(0.8² + 2.0²)."},
+        {"text": "2.15", "correct": true, "feedback": "Correct: √(0.8² + 2.0²) = √(0.64 + 4) = √4.64 ≈ 2.15."},
+        {"text": "0.80", "correct": false, "feedback": "0.80 is the SE of the conditional mean. One outcome also contains its own error u*, whose SD is about sₑ = 2.0."},
+        {"text": "4.64", "correct": false, "feedback": "4.64 is the forecast variance; the SE is its square root, about 2.15."}
+      ],
+      "explanation": "Key Concept 12.3: Var(ŷ<sub>f</sub>) = Var(ŷ<sub>cm</sub>) + σ², so se(ŷ<sub>f</sub>) = √(0.8² + 2.0²) ≈ 2.15, just above sₑ."
+    },
+    {
+      "id": "P12",
+      "type": "multi",
+      "concept": "Conditional mean vs. individual outcome (Section 12.3, Key Concept 12.3)",
+      "stem": "Suppose a regression of hourly wages on years of education has been estimated. For which questions is a 95% prediction interval for an individual outcome, rather than a confidence interval for the conditional mean, the right tool? (Select all that apply.)",
+      "options": [
+        {"text": "A graduate with 16 years of education wants a range for the wage she herself is likely to earn.", "correct": true, "feedback": "Correct: one person's wage includes her own unpredictable error u*, so it needs a prediction interval."},
+        {"text": "A ministry wants to know the average wage of all workers with 16 years of education.", "correct": false, "feedback": "An average over all such workers is the conditional mean E[y | x*], which calls for a confidence interval."},
+        {"text": "A hiring manager wants a range for the wage one new hire with 14 years of schooling will earn.", "correct": true, "feedback": "Correct: one hire's wage includes his or her own unpredictable error u*."},
+        {"text": "A bank wants a range for the wage of one loan applicant with 12 years of schooling.", "correct": true, "feedback": "Correct: a single applicant is an individual outcome, so the interval must include the variation of individual wages."}
+      ],
+      "explanation": "Key Concept 12.3: questions about averages use the confidence interval for E[y | x*]; questions about one individual (her own wage, one new hire, one applicant) use the wider prediction interval, which adds Var(u*)."
+    },
+    {
+      "id": "P13",
+      "type": "multi",
+      "concept": "Prediction precision and sample size (Section 12.3, Key Concept 12.4)",
+      "stem": "Suppose the wage regression is re-estimated with 20,000 workers instead of 200, with the same spread of education and sₑ staying near 2.0 dollars. Which statements about predictions at 16 years of education are correct? (Select all that apply.)",
+      "options": [
+        {"text": "The 95% prediction interval for one worker's wage would shrink to less than ±1 dollar.", "correct": false, "feedback": "The forecast SE never falls below sₑ ≈ 2.0, so the 95% prediction interval stays at least about ±1.96 × 2.0 ≈ ±3.92 dollars."},
+        {"text": "The confidence interval for the average wage at 16 years would become much narrower.", "correct": true, "feedback": "Correct: both terms in the conditional-mean SE shrink as n grows."},
+        {"text": "The forecast standard error for one worker would stay close to 2.0.", "correct": true, "feedback": "Correct: the “1 +” term (the worker's own error) does not shrink with n, so se(ŷ<sub>f</sub>) stays near sₑ."},
+        {"text": "The standard error of the predicted average wage would fall to roughly one-tenth of its old value.", "correct": true, "feedback": "Correct: with 100 times the data and the same spread of education, the conditional-mean SE falls by about √100 = 10."}
+      ],
+      "explanation": "Key Concept 12.4: se(ŷ<sub>cm</sub>) shrinks toward zero as n grows, roughly in proportion to 1/√n, but se(ŷ<sub>f</sub>) ≥ sₑ always, because no amount of data predicts an individual's own error u*."
+    },
+    {
+      "id": "P14",
+      "type": "single",
+      "concept": "Precision of conditional-mean predictions (Section 12.3)",
+      "stem": "Suppose years of education in a wage sample range from 8 to 20, with a mean of 13. At which education level is the confidence interval for the average wage widest?",
+      "options": [
+        {"text": "13 years", "correct": false, "feedback": "At the mean, the distance term (x* − x̄)² is zero, so it adds nothing to the width there."},
+        {"text": "20 years", "correct": true, "feedback": "Correct: 20 is the farthest of these values from the mean of 13, so the distance term (x* − x̄)² is largest."},
+        {"text": "10 years", "correct": false, "feedback": "10 is 3 years from the mean, while 20 is 7 years away, so 20 has the larger distance term."},
+        {"text": "The width is the same at every education level", "correct": false, "feedback": "The conditional-mean SE includes (x* − x̄)²/Σ(xᵢ − x̄)², so it changes with x*."}
+      ],
+      "explanation": "Section 12.3: se(ŷ<sub>cm</sub>) = sₑ√(1/n + (x* − x̄)²/Σ(xᵢ − x̄)²) grows with the distance between x* and x̄, which is why extrapolation is risky."
+    },
+    {
+      "id": "P15",
+      "type": "tf",
+      "concept": "Prediction with multiple regression (Section 12.3)",
+      "stem": "Suppose adding three regressors to a wage regression lowers the residual standard error sₑ from 2.0 to 1.5 dollars. Then, for a typical worker, the 95% prediction interval for an individual wage becomes narrower.",
+      "options": [
+        {"text": "True", "correct": true, "feedback": "Correct. Individual prediction intervals are roughly ±2 × sₑ wide, so a smaller sₑ gives a narrower interval."},
+        {"text": "False", "correct": false, "feedback": "Revisit what drives the width of an individual prediction interval (Key Concept 12.4)."}
+      ],
+      "explanation": "Key Concept 12.4: se(ŷ<sub>f</sub>) ≥ sₑ, and for typical values of the regressors se(ŷ<sub>f</sub>) ≈ sₑ, so the 95% interval is about ±1.96 × sₑ. Lowering sₑ from 2.0 to 1.5 narrows it."
+    },
+    {
+      "id": "P16",
+      "type": "single",
+      "concept": "Prediction intervals (Section 12.3, Practice Exercise 4)",
+      "stem": "Continuing the example, the prediction at x₂ = 5, x₃ = 3 is 29, with se(ŷ<sub>cm</sub>) = 0.8 and se(ŷ<sub>f</sub>) = 2.15. Using a critical value of about 1.96, what is the approximate 95% prediction interval for one individual outcome?",
+      "options": [
+        {"text": "[24.79, 33.21]", "correct": true, "feedback": "Correct: 29 ± 1.96 × 2.15 = 29 ± 4.21."},
+        {"text": "[27.43, 30.57]", "correct": false, "feedback": "This uses se(ŷ<sub>cm</sub>) = 0.8, which gives the confidence interval for the conditional mean, not a range for one outcome."},
+        {"text": "[26.85, 31.15]", "correct": false, "feedback": "This adds and subtracts 2.15 once; the margin is the critical value times the forecast SE."},
+        {"text": "[23.51, 34.49]", "correct": false, "feedback": "This uses 0.8 + 2.0 = 2.80 as the SE. The forecast SE combines the two through their variances, giving 2.15."}
+      ],
+      "explanation": "Practice Exercise 4: PI = ŷ ± 1.96 × se(ŷ<sub>f</sub>) = 29 ± 4.21 = [24.79, 33.21], far wider than the confidence interval for the conditional mean, [27.43, 30.57]."
+    },
+    {
+      "id": "P17",
+      "type": "single",
+      "concept": "Nonrepresentative samples (Section 12.4, Key Concept 12.5)",
+      "stem": "Suppose a study of how class size affects test scores samples only schools whose average test score is above the national median. What does Section 12.4 imply for the OLS estimate of the class-size effect in the population of all schools?",
+      "options": [
+        {"text": "It is unbiased but less precise, because the sample is smaller than a full census.", "correct": false, "feedback": "That is the consequence of selection on a regressor. Here schools were selected by their test scores, the dependent variable."},
+        {"text": "It is unbiased as long as class size is included as a regressor.", "correct": false, "feedback": "Controlling for the selection variable works when selection is on a regressor. Here the selection variable is the outcome itself."},
+        {"text": "It is biased only if fewer than 30 schools remain in the sample.", "correct": false, "feedback": "Sample size affects precision, not whether selecting on the outcome causes bias."},
+        {"text": "It is likely biased, because the sample was selected on the outcome.", "correct": true, "feedback": "Correct. Keeping only high scores cuts off part of the outcome distribution, which distorts the estimated relationship."}
+      ],
+      "explanation": "Key Concept 12.5: selection on the dependent variable biases OLS for population parameters; remedies include sample weights, a Heckman correction, or other selection models."
+    },
+    {
+      "id": "P18",
+      "type": "tf",
+      "concept": "Nonrepresentative samples (Section 12.4)",
+      "stem": "If a sample is not representative of the population, a researcher can usually remove the resulting selection bias by collecting a larger sample in the same way.",
+      "options": [
+        {"text": "True", "correct": false, "feedback": "A larger sample collected the same way repeats the same selection pattern (Section 12.4)."},
+        {"text": "False", "correct": true, "feedback": "Correct. More data gathered the same way reproduces the same bias; sample size reduces sampling error, not selection bias."}
+      ],
+      "explanation": "Section 12.4: larger samples reduce sampling error, not selection bias. Always check whether the sample represents the target population."
+    },
+    {
+      "id": "P19",
+      "type": "single",
+      "concept": "Survey weights (Section 12.4)",
+      "stem": "Suppose a business survey samples large firms with probability 0.5 and small firms with probability 0.05. Using the chapter's weight formula wᵢ = 1/P(selected), what weight does each sampled small firm receive?",
+      "options": [
+        {"text": "0.05", "correct": false, "feedback": "0.05 is the selection probability itself; the weight is its reciprocal."},
+        {"text": "2", "correct": false, "feedback": "2 = 1/0.5 is the weight of a large firm."},
+        {"text": "20", "correct": true, "feedback": "Correct: 1/0.05 = 20, so each sampled small firm stands for about 20 small firms."},
+        {"text": "1.05", "correct": false, "feedback": "1.05 ≈ 1/0.95 uses the probability of not being selected; the formula uses the probability of being selected."}
+      ],
+      "explanation": "Section 12.4: wᵢ = 1/P(selected). Small firms were sampled at 5%, so each represents 1/0.05 = 20 firms; under-sampled groups get larger weights in weighted least squares."
+    },
+    {
+      "id": "P20",
+      "type": "single",
+      "concept": "Bootstrap procedure (Section 12.4, Key Concept 12.7)",
+      "stem": "Why does the bootstrap draw its resamples <i>with</i> replacement from the original sample of n observations?",
+      "options": [
+        {"text": "So that each resample of size n differs from the original sample, mimicking a new random sample.", "correct": true, "feedback": "Correct. Without replacement, every resample of size n would just reorder the same observations and give the same estimate."},
+        {"text": "So that the resampled data become normally distributed, as classical formulas require.", "correct": false, "feedback": "Resampling does not change the shape of the data; the bootstrap's appeal is that it does not need normality."},
+        {"text": "So that each resample can contain more than n observations, adding information.", "correct": false, "feedback": "Each resample has exactly n observations; replacement only lets some repeat while others drop out."},
+        {"text": "So that outliers are removed from every resample.", "correct": false, "feedback": "Outliers can appear in a resample, even several times; resampling with replacement does not remove them."}
+      ],
+      "explanation": "Key Concept 12.7: the bootstrap resamples the data with replacement many times, re-estimates the statistic each time, and uses the spread of those estimates as its sampling distribution."
+    },
+    {
+      "id": "P21",
+      "type": "single",
+      "concept": "Bootstrap percentile intervals (Section 12.4)",
+      "stem": "Suppose B = 4,000 bootstrap estimates of a slope are sorted from smallest to largest. Which sorted values give the 95% percentile-method confidence interval?",
+      "options": [
+        {"text": "The 100th and 3,900th", "correct": true, "feedback": "Correct: 2.5% of 4,000 is 100 and 97.5% of 4,000 is 3,900."},
+        {"text": "The 25th and 975th", "correct": false, "feedback": "Those are the cutoffs for B = 1,000. With 4,000 estimates, 2.5% is the 100th value."},
+        {"text": "The 2.5th and 97.5th", "correct": false, "feedback": "2.5 and 97.5 are percentiles, not positions; convert them into positions out of 4,000."},
+        {"text": "The 400th and 3,600th", "correct": false, "feedback": "These cut 10% from each tail, which gives an 80% interval."}
+      ],
+      "explanation": "Section 12.4: the 95% percentile interval is [2.5th percentile, 97.5th percentile] of the bootstrap estimates: positions 0.025 × 4,000 = 100 and 0.975 × 4,000 = 3,900."
+    },
+    {
+      "id": "P22",
+      "type": "single",
+      "concept": "Best estimation methods (Section 12.5, Key Concept 12.6)",
+      "stem": "Under the classical assumptions 1–4, the Gauss–Markov theorem says OLS is BLUE. What does “best” mean here?",
+      "options": [
+        {"text": "OLS has the smallest bias of any estimator, linear or not.", "correct": false, "feedback": "OLS is unbiased under these assumptions, but “best” refers to variance, and the comparison is among linear unbiased estimators."},
+        {"text": "OLS has the smallest variance among all linear unbiased estimators.", "correct": true, "feedback": "Correct. BLUE = Best Linear Unbiased Estimator: no other linear unbiased estimator is more precise."},
+        {"text": "OLS gives the estimate closest to the true value in every sample.", "correct": false, "feedback": "No estimator can guarantee that in every sample; “best” is about the spread of estimates across samples."},
+        {"text": "OLS gives the fitted model with the highest R² for any data set it is applied to.", "correct": false, "feedback": "R² measures fit within a sample; the Gauss–Markov theorem compares the sampling variance of estimators."}
+      ],
+      "explanation": "Section 12.5: under assumptions 1–4, OLS is the minimum-variance linear unbiased estimator (Gauss–Markov)."
+    },
+    {
+      "id": "P23",
+      "type": "tf",
+      "concept": "Feasible GLS (Section 12.5, Key Concept 12.6)",
+      "stem": "With autocorrelated errors in a time-series regression, a correctly specified FGLS estimator that models the errors as uₜ = ρuₜ₋₁ + εₜ is more efficient than OLS.",
+      "options": [
+        {"text": "True", "correct": true, "feedback": "Correct. A correctly specified error model lets FGLS use the information in the correlation, which lowers the variance of the estimates."},
+        {"text": "False", "correct": false, "feedback": "Revisit what Section 12.5 says FGLS with AR errors can offer when errors are autocorrelated."}
+      ],
+      "explanation": "Section 12.5: FGLS with AR errors models uₜ = ρuₜ₋₁ + εₜ and, if that error model is correct, estimates the coefficients with lower variance than OLS."
+    },
+    {
+      "id": "P24",
+      "type": "single",
+      "concept": "Best confidence intervals (Section 12.6)",
+      "stem": "Suppose method A produces nominal 95% intervals that contain the true slope in only 88% of repeated samples, while method B's 95% intervals contain it in 95% of samples but are wider on average. By the criteria of Section 12.6, which is better?",
+      "options": [
+        {"text": "Method A, because narrower intervals are always more informative.", "correct": false, "feedback": "Narrowness counts only among intervals that really achieve 95% coverage, and method A does not."},
+        {"text": "Method A, because 88% coverage is close enough to 95%.", "correct": false, "feedback": "An interval labeled 95% that covers only 88% of the time overstates our confidence."},
+        {"text": "Neither, because the best interval contains the true value in 100% of samples.", "correct": false, "feedback": "A 95% interval is meant to cover 95% of the time; insisting on 100% would make intervals uninformatively wide."},
+        {"text": "Method B, because correct coverage comes before narrow width.", "correct": true, "feedback": "Correct. Method A's intervals are not really 95% intervals; correct coverage is the first requirement."}
+      ],
+      "explanation": "Section 12.6: the first requirement of a best 95% interval is correct coverage, containing the true parameter in 95% of samples. Method A fails it."
+    },
+    {
+      "id": "P25",
+      "type": "single",
+      "concept": "Type I and Type II errors (Section 12.7, Key Concept 12.8)",
+      "stem": "Suppose a drug trial rejects H₀: “the drug has no effect,” but in truth the drug has no effect. What has happened?",
+      "options": [
+        {"text": "A Type II error", "correct": false, "feedback": "A Type II error is failing to reject a false H₀. Here a true H₀ was rejected."},
+        {"text": "No error, since the test was significant", "correct": false, "feedback": "Significance does not guarantee a correct decision: H₀ was true, so rejecting it was a mistake."},
+        {"text": "A Type I error", "correct": true, "feedback": "Correct. Rejecting a true null hypothesis is a Type I error (a false positive)."},
+        {"text": "A loss of power", "correct": false, "feedback": "Power concerns rejecting a false H₀. Here H₀ was true."}
+      ],
+      "explanation": "Key Concept 12.8: rejecting a true H₀ is a Type I error (a false positive); its probability is the significance level α."
+    },
+    {
+      "id": "P26",
+      "type": "multi",
+      "concept": "Statistical power (Section 12.7, Key Concept 12.8)",
+      "stem": "Which statements about the power of a test are correct? (Select all that apply.)",
+      "options": [
+        {"text": "Power is the probability of rejecting H₀ when H₀ is true.", "correct": false, "feedback": "That is the Type I error probability α. Power is the probability of rejecting H₀ when it is false."},
+        {"text": "Power equals 1 minus the probability of a Type II error.", "correct": true, "feedback": "Correct: power = 1 − P(Type II)."},
+        {"text": "If the true coefficient equals the value in H₀, the probability of rejecting equals α.", "correct": true, "feedback": "Correct: at the null value, the power curve sits at α."},
+        {"text": "Lowering α from 0.10 to 0.05 raises power.", "correct": false, "feedback": "A stricter test rejects less often, so power falls: that is the Type I/Type II trade-off."},
+        {"text": "Larger true effects are easier to detect.", "correct": true, "feedback": "Correct: power rises as the true coefficient moves away from the null value."}
+      ],
+      "explanation": "Key Concept 12.8 and Figure 12.3: power = 1 − P(Type II). It equals α at the null value and rises toward 1 as the true effect grows; a stricter α lowers it."
+    },
+    {
+      "id": "P27",
+      "type": "single",
+      "concept": "The power curve (Section 12.7, Figure 12.3)",
+      "stem": "Suppose a test has power 0.60 when the true coefficient is 20. If the true coefficient really is 20, what is the probability that the test makes a Type II error?",
+      "options": [
+        {"text": "0.60", "correct": false, "feedback": "0.60 is the power, the probability of correctly rejecting H₀."},
+        {"text": "0.05", "correct": false, "feedback": "0.05 is a typical significance level α, the Type I error probability when H₀ is true."},
+        {"text": "0.40", "correct": true, "feedback": "Correct: P(Type II) = 1 − power = 1 − 0.60 = 0.40."},
+        {"text": "0.95", "correct": false, "feedback": "0.95 is 1 − α, the probability of not rejecting a true H₀."}
+      ],
+      "explanation": "Key Concept 12.8: power = 1 − P(Type II), so P(Type II) = 1 − 0.60 = 0.40."
+    },
+    {
+      "id": "P28",
+      "type": "single",
+      "concept": "Multiple testing: the Bonferroni correction (Section 12.7)",
+      "stem": "Suppose a researcher tests 10 hypotheses and wants the chance of any false positive across all of them to stay near 0.05. Using the Bonferroni correction, what significance level should each test use?",
+      "options": [
+        {"text": "0.05", "correct": false, "feedback": "Testing each hypothesis at 0.05 lets false positives accumulate across the 10 tests; the correction lowers the per-test level."},
+        {"text": "0.005", "correct": true, "feedback": "Correct: Bonferroni uses α/k = 0.05/10 = 0.005 for each test."},
+        {"text": "0.5", "correct": false, "feedback": "This multiplies α by the number of tests; Bonferroni divides it."},
+        {"text": "0.01", "correct": false, "feedback": "0.01 is a common significance level, but Bonferroni sets the per-test level to α/k."}
+      ],
+      "explanation": "Section 12.7: Bonferroni tests each of k hypotheses at α/k, here 0.05/10 = 0.005; the chapter calls it conservative."
+    },
+    {
+      "id": "P29",
+      "type": "tf",
+      "concept": "Power and sample size (Section 12.7)",
+      "stem": "Doubling the sample size doubles the power of a test.",
+      "options": [
+        {"text": "True", "correct": false, "feedback": "Revisit how power depends on sample size, and remember that power is a probability (Section 12.7)."},
+        {"text": "False", "correct": true, "feedback": "Correct. Power rises with n, but not in proportion: it is a probability, capped at 1, and the gain depends on the effect size."}
+      ],
+      "explanation": "Section 12.7: larger samples raise power by shrinking standard errors, but power is a probability between α and 1, so it cannot simply double (a test with power 0.60 could never reach 1.20)."
+    },
+    {
+      "id": "P30",
+      "type": "multi",
+      "concept": "Interpreting nonsignificant results (Section 12.7)",
+      "stem": "Suppose a study of 40 schools finds that a tutoring program raised test scores by 5 points, with p = 0.45 and a 95% confidence interval from −8 to +18 points. Which conclusions are justified? (Select all that apply.)",
+      "options": [
+        {"text": "The program's true effect must be 5 points, the point estimate.", "correct": false, "feedback": "5 is only the estimate; the interval shows that true effects from −8 to +18 points are all plausible."},
+        {"text": "The data are consistent both with no effect and with a sizable positive effect.", "correct": true, "feedback": "Correct: the interval runs from −8 to +18, so 0 and effects like +15 are both plausible."},
+        {"text": "A one-sided test would have made the effect significant at the 10% level.", "correct": false, "feedback": "With the estimate on the predicted side, the one-sided p-value is 0.45/2 = 0.225, still above 0.10."},
+        {"text": "A larger study would be needed to detect a modest effect reliably.", "correct": true, "feedback": "Correct: the wide interval signals low power; a bigger sample shrinks the SE and raises power."},
+        {"text": "The program must have a negative effect, because the interval includes negative values.", "correct": false, "feedback": "Including negative values means negative effects cannot be ruled out, not that the effect is negative."}
+      ],
+      "explanation": "Section 12.7: a nonsignificant result from a low-powered study is inconclusive, not evidence of no effect. The interval [−8, +18] is too wide to tell no effect from a meaningful one."
+    }
+  ],
+  "exam": [
+    {
+      "id": "E01",
+      "type": "single",
+      "concept": "Heteroskedastic-robust standard errors (Section 12.2, Key Concept 12.1)",
+      "stem": "The chapter re-estimates the Davis regression of price on size, bedrooms, bathrooms, lot size, age, and month sold with heteroskedastic-robust (HC1) standard errors. The size coefficient is 68.37 under both methods. Why does it not change?",
+      "options": [
+        {"text": "Heteroskedasticity is absent from the Davis data, so HC1 has nothing to correct.", "correct": false, "feedback": "Revisit what HC1 is designed to change and what the Davis comparison shows (Key Concept 12.1)."},
+        {"text": "HC1 changes how the estimates' variance is computed, not the coefficients.", "correct": true, "feedback": "Correct. The OLS coefficients are the same; only standard errors, t-statistics, p-values, and confidence intervals can change."},
+        {"text": "HC1 re-weights the houses, but the weights happen to cancel out for size.", "correct": false, "feedback": "Revisit the difference between robust standard errors and re-weighting estimators (Sections 12.2 and 12.5)."},
+        {"text": "Robust methods adjust only the coefficients that are not significant.", "correct": false, "feedback": "Revisit which parts of the regression output HC1 affects (Key Concept 12.1)."}
+      ],
+      "explanation": "Key Concept 12.1: HC1 standard errors correct for nonconstant error variance without changing the coefficient estimates; only standard errors, t-statistics, p-values, and confidence intervals change."
+    },
+    {
+      "id": "E02",
+      "type": "single",
+      "concept": "Comparing default and robust standard errors (Section 12.2)",
+      "stem": "In the Davis regression, the ratio of the HC1 standard error to the default standard error is 0.998 for size, 1.227 for bathrooms, and 0.737 for lot size. Which conclusion is best supported?",
+      "options": [
+        {"text": "The default standard errors understated the uncertainty of every coefficient.", "correct": false, "feedback": "Compare this claim with each of the three ratios (Section 12.2)."},
+        {"text": "A ratio below 1 is impossible, so the lot-size result signals a computing error.", "correct": false, "feedback": "Revisit the chapter's discussion of the different values the SE ratio can take (Section 12.2)."},
+        {"text": "Under HC1, the size coefficient moves by about 0.2% from its default value.", "correct": false, "feedback": "Revisit which quantities the ratio compares (Section 12.2)."},
+        {"text": "Of the three, only bathrooms had its uncertainty understated by the default SE.", "correct": true, "feedback": "Correct. Only bathrooms has a ratio above 1 (1.227): its robust SE is about 23% larger, so the default SE was too optimistic."}
+      ],
+      "explanation": "Section 12.2: a ratio above 1 means the default SE understated uncertainty (bathrooms, +23%); a ratio near 1 means little change (size); a ratio below 1 is unusual but possible (lot size, −26%)."
+    },
+    {
+      "id": "E03",
+      "type": "tf",
+      "concept": "Comparing default and robust standard errors (Section 12.2)",
+      "stem": "In the Davis regression with six regressors, switching from default to HC1 standard errors changes which regressors are statistically significant at the 5% level.",
+      "options": [
+        {"text": "True", "correct": false, "feedback": "Revisit the chapter's comparison of the default and robust results for the six regressors (Section 12.2)."},
+        {"text": "False", "correct": true, "feedback": "Correct. Only size is significant under either method (p = 0.0002); the other five regressors stay far from significance."}
+      ],
+      "explanation": "Section 12.2: robust and default standard errors tell the same story for the Davis houses: size is highly significant both ways, and bedrooms, bathrooms, lot size, age, and month sold are insignificant both ways."
+    },
+    {
+      "id": "E04",
+      "type": "multi",
+      "concept": "Choosing the type of standard errors (Section 12.2)",
+      "stem": "Which of these research designs are matched with the standard errors that the chapter recommends? (Select all that apply.)",
+      "options": [
+        {"text": "Test scores of 2,000 students in 80 classrooms, with errors correlated within classrooms: HC1 standard errors", "correct": false, "feedback": "Revisit what HC1 standard errors do and do not correct for (Section 12.2)."},
+        {"text": "Quarterly inflation over 30 years, with shocks that persist: HAC (Newey–West) standard errors", "correct": true, "feedback": "Correct: persistent shocks mean autocorrelated errors, which HAC standard errors handle."},
+        {"text": "Wages of 900 workers in 40 firms, with errors correlated within firms: default standard errors, since 900 workers is a large sample", "correct": false, "feedback": "Revisit what a large sample does and does not fix when errors are correlated within groups (Section 12.2)."},
+        {"text": "A cross-section of 500 independently sampled households whose error variance rises with income: HC1 standard errors", "correct": true, "feedback": "Correct: an independent cross-section with heteroskedastic errors calls for HC1."},
+        {"text": "Monthly unemployment over 20 years, with autocorrelated errors: cluster-robust standard errors with each month as its own cluster", "correct": false, "feedback": "Revisit how cluster-robust standard errors handle correlation (Section 12.2)."}
+      ],
+      "explanation": "Section 12.2: heteroskedasticity in a cross-section → HC1; errors correlated within groups (classrooms, firms) → cluster-robust; autocorrelation over time → HAC. Clusters of one month each cannot capture correlation across months."
+    },
+    {
+      "id": "E05",
+      "type": "single",
+      "concept": "Cluster-robust standard errors (Section 12.2, Key Takeaways)",
+      "stem": "Suppose a wage regression with k = 5 coefficients uses 2,400 workers from 24 firms and clusters the standard errors by firm. Following the chapter's Key Takeaways, how many degrees of freedom should the critical value use?",
+      "options": [
+        {"text": "2,395", "correct": false, "feedback": "Revisit the degrees-of-freedom rule for cluster-robust standard errors (Section 12.2, Key Takeaways)."},
+        {"text": "2,399", "correct": false, "feedback": "Revisit the degrees-of-freedom rule for cluster-robust standard errors (Section 12.2, Key Takeaways)."},
+        {"text": "19", "correct": false, "feedback": "Revisit the degrees-of-freedom rule for cluster-robust standard errors (Section 12.2, Key Takeaways)."},
+        {"text": "23", "correct": true, "feedback": "Correct: G − 1 = 24 − 1 = 23, because the 24 firms, not the 2,400 workers, are the independent units."}
+      ],
+      "explanation": "Key Takeaways: with grouped observations, use cluster-robust standard errors with G − 1 degrees of freedom, not N − k. With 24 firms, df = 23; the chapter also warns that fewer than about 30 clusters makes cluster-robust inference less reliable."
+    },
+    {
+      "id": "E06",
+      "type": "single",
+      "concept": "Autocorrelation (Section 12.2, Key Concept 12.2)",
+      "stem": "The chapter's U.S. growth series (241 quarterly observations of the year-over-year growth rate of real GDP per capita, 1960 Q1 to 2020 Q1) has a lag-1 autocorrelation of 0.866. What does this mean?",
+      "options": [
+        {"text": "Each quarter's growth is strongly positively correlated with the previous quarter's.", "correct": true, "feedback": "Correct. High-growth quarters tend to follow high-growth quarters, and low-growth quarters tend to follow low-growth quarters."},
+        {"text": "About 86.6% of each quarter's growth is caused by the previous quarter's growth.", "correct": false, "feedback": "Revisit what an autocorrelation coefficient measures (Section 12.2)."},
+        {"text": "Growth rises by about 0.866 percentage points from one quarter to the next.", "correct": false, "feedback": "Revisit the definition of the autocorrelation function ρₛ (Section 12.2)."},
+        {"text": "About 86.6% of the quarters have growth above the sample mean.", "correct": false, "feedback": "Revisit what an autocorrelation coefficient measures (Section 12.2)."}
+      ],
+      "explanation": "Section 12.2: ρ₁ = Corr(yₜ, yₜ₋₁) = 0.866 signals strong persistence (partly mechanical, since each value is growth over the previous four quarters, so neighbors share three quarters). Consecutive observations therefore carry overlapping information."
+    },
+    {
+      "id": "E07",
+      "type": "single",
+      "concept": "HAC standard errors: lag length (Section 12.2, Key Concept 12.2)",
+      "stem": "For the growth series with T = 241 observations, what lag length m does the chapter's rule of thumb give before the code keeps only its integer part?",
+      "options": [
+        {"text": "About 181", "correct": false, "feedback": "Revisit the rule of thumb for the HAC lag length (Key Concept 12.2)."},
+        {"text": "About 11.6", "correct": false, "feedback": "Revisit the rule of thumb for the HAC lag length (Key Concept 12.2)."},
+        {"text": "About 4.7", "correct": true, "feedback": "Correct: 0.75 × 241<sup>1/3</sup> = 0.75 × 6.22 ≈ 4.7, so the chapter uses m = 4."},
+        {"text": "About 6.2", "correct": false, "feedback": "Revisit the rule of thumb for the HAC lag length (Key Concept 12.2)."}
+      ],
+      "explanation": "Key Concept 12.2: m = 0.75 × T<sup>1/3</sup>. The cube root of 241 is about 6.22, so m ≈ 4.7, and the chapter's HAC standard error uses 4 lags."
+    },
+    {
+      "id": "E08",
+      "type": "single",
+      "concept": "HAC standard errors for time series (Section 12.2, Key Concept 12.2)",
+      "stem": "The growth series has a mean of 1.99 percent and a standard deviation of 2.18. The default standard error of the mean is 0.140, and the Newey–West HAC standard error is 0.264. Using a critical value of about 1.96, what is the approximate 95% confidence interval for mean growth that allows for autocorrelation?",
+      "options": [
+        {"text": "[1.72, 2.26]", "correct": false, "feedback": "Revisit how the chapter builds an interval for the mean of an autocorrelated series (Section 12.2, Key Concept 12.2)."},
+        {"text": "[1.47, 2.51]", "correct": true, "feedback": "Correct: 1.99 ± 1.96 × 0.264 = 1.99 ± 0.52."},
+        {"text": "[1.73, 2.25]", "correct": false, "feedback": "Revisit how the chapter builds an interval for the mean of an autocorrelated series (Section 12.2, Key Concept 12.2)."},
+        {"text": "[−2.28, 6.26]", "correct": false, "feedback": "Revisit how the chapter builds an interval for the mean of an autocorrelated series (Section 12.2, Key Concept 12.2)."}
+      ],
+      "explanation": "Key Concept 12.2: with autocorrelated data, the HAC standard error is the right one. It is about 1.9 times the default (0.264 vs. 0.140), so the interval [1.47, 2.51] is about 1.9 times as wide as the default-based one."
+    },
+    {
+      "id": "E09",
+      "type": "tf",
+      "concept": "HAC standard errors for time series (Section 12.2, Key Concept 12.2)",
+      "stem": "A HAC standard error computed with a maximum lag of 0 corrects for heteroskedasticity but not for autocorrelation.",
+      "options": [
+        {"text": "True", "correct": true, "feedback": "Correct. With no lags, the HAC formula reduces to a heteroskedasticity-robust standard error."},
+        {"text": "False", "correct": false, "feedback": "Revisit the three standard errors the chapter compares for the mean growth rate (Section 12.2)."}
+      ],
+      "explanation": "Section 12.2: HAC with lag 0 is heteroskedasticity-robust only, which is why it is almost equal to the default standard error for the growth series (0.1400 vs. 0.1403); the Newey–West version with the rule-of-thumb lag also accounts for autocorrelation (0.2645)."
+    },
+    {
+      "id": "E10",
+      "type": "single",
+      "concept": "Point predictions (Section 12.3)",
+      "stem": "For a 2,000-sq-ft house, the regression of price on size gives a point prediction of $262,559. Which statement about this number is correct?",
+      "options": [
+        {"text": "It predicts the average price of such houses; one house's prediction adds the typical error sₑ ≈ $23,551.", "correct": false, "feedback": "Revisit the two prediction targets that Section 12.3 distinguishes."},
+        {"text": "It predicts one house's price; the average price of such houses is the sample mean price, $253,910.", "correct": false, "feedback": "Revisit the two prediction targets that Section 12.3 distinguishes."},
+        {"text": "It is the best point prediction both for the average price of such houses and for one such house.", "correct": true, "feedback": "Correct. The point prediction is the same for E[y | x*] and for y | x*; what differs is its uncertainty."},
+        {"text": "It is a valid prediction only for houses that belong to the sample of 29.", "correct": false, "feedback": "Revisit the two prediction targets that Section 12.3 distinguishes."}
+      ],
+      "explanation": "Section 12.3: E[y | x*] and y | x* share the point prediction b₁ + b₂x* ($262,559 here). The individual outcome adds u*, whose expected value is zero: it widens the interval but does not move its center."
+    },
+    {
+      "id": "E11",
+      "type": "single",
+      "concept": "Standard error of an individual forecast (Section 12.3, Key Concept 12.4)",
+      "stem": "At x* = 2,000 sq ft, the chapter's ingredients are sₑ = $23,551, 1/n = 0.0345, and a distance term of 0.0031. What is the standard error of the forecast for one 2,000-sq-ft house, se(ŷ<sub>f</sub>)?",
+      "options": [
+        {"text": "About $23,990", "correct": true, "feedback": "Correct: 23,551 × √(1 + 0.0345 + 0.0031) = 23,551 × √1.0376 ≈ $23,990 (the chapter's unrounded value is $23,989)."},
+        {"text": "About $4,567", "correct": false, "feedback": "Revisit the formula for the standard error of an individual forecast (Section 12.3)."},
+        {"text": "About $24,437", "correct": false, "feedback": "Revisit the formula for the standard error of an individual forecast (Section 12.3)."},
+        {"text": "About $23,551", "correct": false, "feedback": "Revisit the formula for the standard error of an individual forecast (Section 12.3)."}
+      ],
+      "explanation": "Section 12.3: se(ŷ<sub>f</sub>) = sₑ√(1 + 1/n + distance term). The “1 +” for the house's own error dominates, so se(ŷ<sub>f</sub>) is only slightly above sₑ and about 5.3 times the conditional-mean standard error ($4,565)."
+    },
+    {
+      "id": "E12",
+      "type": "multi",
+      "concept": "Conditional mean vs. individual outcome (Section 12.3, Key Concept 12.3)",
+      "stem": "Using the Davis regression of price on size, for which questions is a 95% prediction interval for an individual outcome, rather than a confidence interval for the conditional mean, the right tool? (Select all that apply.)",
+      "options": [
+        {"text": "What is the average sale price of all 2,000-sq-ft houses in this market?", "correct": false, "feedback": "Revisit the distinction between E[y | x*] and y | x* (Key Concept 12.3)."},
+        {"text": "What range of prices should the owner of one particular 2,000-sq-ft house expect?", "correct": true, "feedback": "Correct: one sale includes its own unpredictable error u*."},
+        {"text": "Is the $350,000 sale price of one newly sold 2,400-sq-ft house unusually high for its size?", "correct": true, "feedback": "Correct: judging one house's price against the model requires the range of individual outcomes."},
+        {"text": "How much higher is the average price of 2,400-sq-ft houses than that of 2,000-sq-ft houses?", "correct": false, "feedback": "Revisit the distinction between E[y | x*] and y | x* (Key Concept 12.3)."},
+        {"text": "An appraiser wants a range within which the next 2,600-sq-ft house sold in this market will fall.", "correct": true, "feedback": "Correct: one future sale includes its own unpredictable error u*."}
+      ],
+      "explanation": "Key Concept 12.3: averages, and differences in averages (which come from the slope), call for confidence intervals; single houses call for prediction intervals, which add Var(u*)."
+    },
+    {
+      "id": "E13",
+      "type": "multi",
+      "concept": "Prediction precision and sample size (Section 12.3, Key Concept 12.4)",
+      "stem": "Suppose the regression of price on size were re-estimated with a much larger random sample of houses from the same market, with sₑ staying near $23,551. Which statements about predictions at 2,000 sq ft are correct? (Select all that apply.)",
+      "options": [
+        {"text": "The standard error of the predicted average price would shrink toward zero.", "correct": true, "feedback": "Correct: both terms of se(ŷ<sub>cm</sub>) fall as n grows."},
+        {"text": "The 95% prediction interval for one house would shrink toward a single point.", "correct": false, "feedback": "Revisit Key Concept 12.4."},
+        {"text": "The part of the forecast standard error that reflects the house's own error would shrink toward zero.", "correct": false, "feedback": "Revisit the terms of the forecast standard error and how each one depends on n (Section 12.3)."},
+        {"text": "The predicted average price at 2,000 sq ft would typically lie closer to its population value.", "correct": true, "feedback": "Correct: more data means less estimation error in b₁ and b₂, and so in the prediction."},
+        {"text": "Predicting one house's price would remain much less precise than predicting the average price.", "correct": true, "feedback": "Correct: the house's own error u* does not shrink with more data."}
+      ],
+      "explanation": "Key Concept 12.4: estimation error (in b₁, b₂, and so in se(ŷ<sub>cm</sub>)) vanishes as n grows, but se(ŷ<sub>f</sub>) ≥ sₑ always: the “1 +” term for u* never disappears."
+    },
+    {
+      "id": "E14",
+      "type": "single",
+      "concept": "Precision of conditional-mean predictions (Section 12.3)",
+      "stem": "In the Davis data, house sizes range from 1,400 to 3,300 sq ft, with a mean of about 1,883 sq ft. At which size is the 95% confidence interval for the average price narrowest?",
+      "options": [
+        {"text": "About 1,883 sq ft", "correct": true, "feedback": "Correct: at x̄ the distance term (x* − x̄)² is zero, leaving only the 1/n term."},
+        {"text": "1,400 sq ft, the smallest size in the sample", "correct": false, "feedback": "Revisit the terms in the standard error of the conditional mean (Section 12.3)."},
+        {"text": "3,300 sq ft, the largest size in the sample", "correct": false, "feedback": "Revisit the terms in the standard error of the conditional mean (Section 12.3)."},
+        {"text": "The width is the same at every size", "correct": false, "feedback": "Revisit the terms in the standard error of the conditional mean (Section 12.3)."}
+      ],
+      "explanation": "Section 12.3: se(ŷ<sub>cm</sub>) = sₑ√(1/n + (x* − x̄)²/Σ(xᵢ − x̄)²) is smallest at x* = x̄ ≈ 1,883 and grows toward the edges of the data, which is why extrapolation is risky."
+    },
+    {
+      "id": "E15",
+      "type": "tf",
+      "concept": "Prediction with multiple regression (Section 12.3)",
+      "stem": "The chapter's six-regressor model has a residual standard error of about $24,936, versus $23,551 for the regression on size alone. So, for a house with average characteristics, the six-regressor model gives a wider 95% prediction interval for its price.",
+      "options": [
+        {"text": "True", "correct": true, "feedback": "Correct. Adding regressors does not automatically improve precision: here sₑ is larger, so individual prediction intervals are wider."},
+        {"text": "False", "correct": false, "feedback": "Revisit what drives the width of an individual prediction interval (Key Concept 12.4)."}
+      ],
+      "explanation": "Section 12.3: individual prediction intervals are roughly ±t × sₑ wide. The six-regressor model has the larger sₑ ($24,936 vs. $23,551) and fewer degrees of freedom (22 vs. 27), so its intervals are wider."
+    },
+    {
+      "id": "E16",
+      "type": "single",
+      "concept": "Prediction intervals (Section 12.3)",
+      "stem": "For a house with 2,000 sq ft, 4 bedrooms, 2 bathrooms, lot size 2, age 40, and sold in month 6, the six-regressor model predicts $257,691. The chapter approximates the 95% prediction interval as ŷ ± t × sₑ, with t = 2.074 and sₑ = $24,936. What is that interval, approximately?",
+      "options": [
+        {"text": "[$232,800, $282,600]", "correct": false, "feedback": "Revisit how the chapter builds its approximate prediction interval from ŷ, t, and sₑ (Section 12.3)."},
+        {"text": "[$154,300, $361,100]", "correct": false, "feedback": "Revisit how the chapter builds its approximate prediction interval from ŷ, t, and sₑ (Section 12.3)."},
+        {"text": "[$248,100, $267,300]", "correct": false, "feedback": "Revisit how the chapter builds its approximate prediction interval from ŷ, t, and sₑ (Section 12.3)."},
+        {"text": "[$206,000, $309,400]", "correct": true, "feedback": "Correct: 2.074 × 24,936 ≈ 51,717, so the interval is about 257,691 ± 51,717."}
+      ],
+      "explanation": "Section 12.3: the chapter's approximation uses sₑ as the forecast standard error: 257,691 ± 2.074 × 24,936 ≈ [$206,000, $309,400]. Because it leaves out the estimation term, the exact interval is slightly wider."
+    },
+    {
+      "id": "E17",
+      "type": "single",
+      "concept": "Nonrepresentative samples (Section 12.4, Key Concept 12.5)",
+      "stem": "A researcher wants the population regression of annual earnings on years of education. Which sampling scheme is most likely to bias the OLS estimates?",
+      "options": [
+        {"text": "Sampling only workers who hold a college degree", "correct": false, "feedback": "Revisit Key Concept 12.5 on sample selection."},
+        {"text": "Sampling only workers who earn less than $40,000 a year", "correct": true, "feedback": "Correct: this selects on the dependent variable, which biases OLS for the population."},
+        {"text": "Oversampling workers with many years of education", "correct": false, "feedback": "Revisit Key Concept 12.5 on sample selection."},
+        {"text": "Drawing a random sample that is smaller than planned", "correct": false, "feedback": "Revisit Key Concept 12.5 on sample selection."}
+      ],
+      "explanation": "Key Concept 12.5: selecting on Y (earnings below $40,000) cuts off part of the outcome distribution and biases OLS; selecting on the regressor (degree holders, oversampling the highly educated) mainly costs precision; a smaller random sample only reduces precision."
+    },
+    {
+      "id": "E18",
+      "type": "tf",
+      "concept": "Survey weights (Section 12.4)",
+      "stem": "Survey weights can correct for a nonrepresentative sample even when the probabilities with which units were selected are unknown.",
+      "options": [
+        {"text": "True", "correct": false, "feedback": "Revisit what survey weights are built from (Section 12.4)."},
+        {"text": "False", "correct": true, "feedback": "Correct. Weights adjust for known selection; when the selection probabilities are unknown, the selection problem remains."}
+      ],
+      "explanation": "Section 12.4 and Key Takeaways: survey weights can adjust for known selection, but unknown selection remains problematic."
+    },
+    {
+      "id": "E19",
+      "type": "single",
+      "concept": "Survey weights (Section 12.4)",
+      "stem": "Suppose a household survey samples rural households with probability 0.02 and urban households with probability 0.10. Using the chapter's formula for survey weights, what weight does each sampled rural household receive?",
+      "options": [
+        {"text": "0.02", "correct": false, "feedback": "Revisit the chapter's formula for survey weights (Section 12.4)."},
+        {"text": "0.98", "correct": false, "feedback": "Revisit the chapter's formula for survey weights (Section 12.4)."},
+        {"text": "50", "correct": true, "feedback": "Correct: wᵢ = 1/P(selected) = 1/0.02 = 50."},
+        {"text": "10", "correct": false, "feedback": "Revisit the chapter's formula for survey weights (Section 12.4)."}
+      ],
+      "explanation": "Section 12.4: wᵢ = 1/P(selected). Rural households were sampled at 2%, so each stands for 50 households; urban households (10%) get weight 10. Weighted least squares with these weights offsets the oversampling of urban households."
+    },
+    {
+      "id": "E20",
+      "type": "single",
+      "concept": "Bootstrap confidence intervals (Section 12.4, Key Concept 12.7)",
+      "stem": "In which situation does the chapter's discussion make a bootstrap confidence interval most attractive?",
+      "options": [
+        {"text": "A sample of 5,000 observations, estimating the mean of a roughly normal variable", "correct": false, "feedback": "Revisit when the chapter recommends the bootstrap, and its limitations (Section 12.4, Key Concept 12.7)."},
+        {"text": "A quarterly time series, resampling the individual quarters independently", "correct": false, "feedback": "Revisit when the chapter recommends the bootstrap, and its limitations (Section 12.4, Key Concept 12.7)."},
+        {"text": "A sample of 25 firms, estimating a median with no simple standard-error formula", "correct": true, "feedback": "Correct: small samples and statistics without simple formulas, such as medians, are where the bootstrap helps most."},
+        {"text": "A sample of 8 observations, where resampling is at its most reliable", "correct": false, "feedback": "Revisit when the chapter recommends the bootstrap, and its limitations (Section 12.4, Key Concept 12.7)."}
+      ],
+      "explanation": "Section 12.4 and Key Concept 12.7: the bootstrap is most useful with small samples, skewed data, or statistics without analytical standard-error formulas. Time series need block resampling, and very small samples (n &lt; 10) can make the bootstrap fail."
+    },
+    {
+      "id": "E21",
+      "type": "single",
+      "concept": "Bootstrap percentile intervals (Section 12.4)",
+      "stem": "The chapter's bootstrap of the Davis size slope uses B = 1,000 replications. After sorting the 1,000 estimates from smallest to largest, which positions in the sorted list give a 90% percentile-method confidence interval?",
+      "options": [
+        {"text": "Positions 25 and 975", "correct": false, "feedback": "Revisit how the percentile method turns a confidence level into positions among the sorted estimates (Section 12.4)."},
+        {"text": "Positions 100 and 900", "correct": false, "feedback": "Revisit how the percentile method turns a confidence level into positions among the sorted estimates (Section 12.4)."},
+        {"text": "Positions 5 and 95", "correct": false, "feedback": "Revisit how the percentile method turns a confidence level into positions among the sorted estimates (Section 12.4)."},
+        {"text": "Positions 50 and 950", "correct": true, "feedback": "Correct: a 90% interval cuts 5% from each tail: 0.05 × 1,000 = 50 and 0.95 × 1,000 = 950."}
+      ],
+      "explanation": "Section 12.4: the percentile interval takes the α/2 and 1 − α/2 percentiles of the bootstrap estimates. For 90% with B = 1,000, those are the 50th and 950th sorted values (the chapter's 95% example uses the 25th and 975th)."
+    },
+    {
+      "id": "E22",
+      "type": "single",
+      "concept": "Best estimation methods (Section 12.5, Key Concept 12.6)",
+      "stem": "Suppose the errors in the Davis regression are heteroskedastic. According to Section 12.5, what does this imply for the OLS coefficient estimates?",
+      "options": [
+        {"text": "They remain unbiased, but OLS is no longer the most efficient estimator.", "correct": true, "feedback": "Correct. Gauss–Markov needs constant error variance for OLS to be best; without it, OLS is unbiased but inefficient."},
+        {"text": "They become biased, so FGLS is needed to obtain unbiased estimates.", "correct": false, "feedback": "Revisit what the Gauss–Markov theorem requires and what happens to OLS when an assumption fails (Section 12.5)."},
+        {"text": "They remain BLUE, because Gauss–Markov requires only random sampling.", "correct": false, "feedback": "Revisit what the Gauss–Markov theorem requires and what happens to OLS when an assumption fails (Section 12.5)."},
+        {"text": "They become efficient again once HC1 standard errors are reported.", "correct": false, "feedback": "Revisit what the Gauss–Markov theorem requires and what happens to OLS when an assumption fails (Section 12.5)."}
+      ],
+      "explanation": "Section 12.5 and Key Concept 12.6: under heteroskedasticity, OLS stays unbiased but loses its “best” status, and FGLS or WLS can be more efficient. Robust standard errors fix inference, not efficiency."
+    },
+    {
+      "id": "E23",
+      "type": "tf",
+      "concept": "Feasible GLS and OLS with robust standard errors (Section 12.5, Key Concept 12.6)",
+      "stem": "Most applied work uses OLS with robust standard errors instead of FGLS mainly because FGLS gives biased coefficient estimates under heteroskedasticity.",
+      "options": [
+        {"text": "True", "correct": false, "feedback": "Revisit the reasons Key Concept 12.6 gives for the usual choice in applied work."},
+        {"text": "False", "correct": true, "feedback": "Correct. The chapter's reasons are simplicity and robustness: FGLS needs a correctly specified error structure, and misspecifying it can make things worse."}
+      ],
+      "explanation": "Key Concept 12.6: FGLS can be more efficient than OLS, but only if the error structure is modeled correctly; OLS with robust standard errors is preferred for its simplicity and robustness to misspecification."
+    },
+    {
+      "id": "E24",
+      "type": "single",
+      "concept": "Best confidence intervals (Section 12.6)",
+      "stem": "Suppose two unbiased estimators of the same slope both give 95% confidence intervals with correct coverage, and estimator 1 has the smaller standard error. According to Section 12.6, which yields the best confidence interval?",
+      "options": [
+        {"text": "Estimator 2, because a wider interval is the more cautious choice.", "correct": false, "feedback": "Revisit the two criteria for a best confidence interval (Section 12.6)."},
+        {"text": "Estimator 1, because with correct coverage the shorter interval is better.", "correct": true, "feedback": "Correct. Among intervals with correct coverage, the best has minimum width, which comes from the more efficient estimator."},
+        {"text": "Neither, because only bootstrap intervals can be called best.", "correct": false, "feedback": "Revisit the two criteria for a best confidence interval (Section 12.6)."},
+        {"text": "Both equally, because coverage is the only criterion for a best interval.", "correct": false, "feedback": "Revisit the two criteria for a best confidence interval (Section 12.6)."}
+      ],
+      "explanation": "Section 12.6: a best 95% interval has correct coverage and, among such intervals, minimum width. Width is driven by the standard error, so the shortest interval comes from the most efficient estimator."
+    },
+    {
+      "id": "E25",
+      "type": "single",
+      "concept": "Type I and Type II errors (Section 12.7, Key Concept 12.8)",
+      "stem": "In the Davis regression, the test of H₀: β<sub>age</sub> = 0 gives p = 0.259, so H₀ is not rejected at the 5% level. Suppose that, in truth, age does affect price when the other regressors are held fixed. What has happened?",
+      "options": [
+        {"text": "A Type I error (a false positive)", "correct": false, "feedback": "Revisit the definitions of the two kinds of testing errors (Key Concept 12.8)."},
+        {"text": "A Type II error (a false negative)", "correct": true, "feedback": "Correct: failing to reject a false H₀ is a Type II error, a missed effect."},
+        {"text": "No error, because the test followed the 5% decision rule correctly", "correct": false, "feedback": "Revisit the definitions of the two kinds of testing errors (Key Concept 12.8)."},
+        {"text": "A multiple-testing error, because six coefficients were tested", "correct": false, "feedback": "Revisit the definitions of the two kinds of testing errors (Key Concept 12.8)."}
+      ],
+      "explanation": "Key Concept 12.8: a Type II error is failing to reject a false H₀. With only n = 29 houses, the test has little power to detect a modest age effect."
+    },
+    {
+      "id": "E26",
+      "type": "multi",
+      "concept": "Statistical power (Section 12.7, Key Concept 12.8)",
+      "stem": "Which changes would raise the power of a test of H₀: β = 0, other things equal? (Select all that apply.)",
+      "options": [
+        {"text": "Collecting a larger sample", "correct": true, "feedback": "Correct: more data shrinks the standard error."},
+        {"text": "Raising the significance level from 0.01 to 0.05", "correct": true, "feedback": "Correct: a looser test rejects more often, at the cost of more Type I errors."},
+        {"text": "A true value of β closer to zero", "correct": false, "feedback": "Revisit the factors that affect power (Section 12.7)."},
+        {"text": "More variation in the regressor x", "correct": true, "feedback": "Correct: more spread in x lowers the standard error of the slope."},
+        {"text": "Less noise in the error term (a smaller σ)", "correct": true, "feedback": "Correct: less noise shrinks the standard error."}
+      ],
+      "explanation": "Section 12.7: power rises with the sample size, the size of the true effect, the significance level α, the variation in the regressors, and lower noise."
+    },
+    {
+      "id": "E27",
+      "type": "single",
+      "concept": "The power curve (Section 12.7, Figure 12.3)",
+      "stem": "In the chapter's power curve (standard error 15, n = 30, two-sided 5% test of H₀: β = 0), the power is about 0.81 when the true coefficient is 44. What does this mean?",
+      "options": [
+        {"text": "If β = 0, the test would wrongly reject H₀ in about 81% of samples.", "correct": false, "feedback": "Revisit what the power curve plots and what power measures (Section 12.7)."},
+        {"text": "About 81% of the significant results from this test are false positives.", "correct": false, "feedback": "Revisit what the power curve plots and what power measures (Section 12.7)."},
+        {"text": "If β = 44, the estimate falls within 15 of 44 in about 81% of samples.", "correct": false, "feedback": "Revisit what the power curve plots and what power measures (Section 12.7)."},
+        {"text": "If β = 44, the test would fail to reject H₀ in about 19% of samples.", "correct": true, "feedback": "Correct: power 0.81 leaves a 19% chance of a Type II error when β = 44."}
+      ],
+      "explanation": "Section 12.7 and Figure 12.3: power = P(reject H₀) at a given true β. At β = 44 it is about 0.81, so P(Type II) ≈ 0.19; at β = 0 it equals α = 0.05."
+    },
+    {
+      "id": "E28",
+      "type": "single",
+      "concept": "Multiple testing (Section 12.7)",
+      "stem": "Suppose a researcher tests 60 coefficients, each at the 5% level, and all 60 null hypotheses are true. How many false positives should she expect?",
+      "options": [
+        {"text": "0", "correct": false, "feedback": "Revisit the chapter's discussion of the multiple testing problem (Section 12.7)."},
+        {"text": "0.05", "correct": false, "feedback": "Revisit the chapter's discussion of the multiple testing problem (Section 12.7)."},
+        {"text": "3", "correct": true, "feedback": "Correct: 0.05 × 60 = 3 expected false positives."},
+        {"text": "57", "correct": false, "feedback": "Revisit the chapter's discussion of the multiple testing problem (Section 12.7)."}
+      ],
+      "explanation": "Section 12.7: with k tests at level α and all nulls true, the expected number of false positives is α × k (the chapter: 20 tests → 1). Bonferroni (α/k) or FDR control limits this."
+    },
+    {
+      "id": "E29",
+      "type": "tf",
+      "concept": "Power and sample size (Section 12.7)",
+      "stem": "To halve the smallest effect a study can detect with 80% power (at the same significance level and noise), the study needs about four times as many observations.",
+      "options": [
+        {"text": "True", "correct": true, "feedback": "Correct. The minimum detectable effect shrinks in proportion to 1/√n, so halving it takes about four times the sample."},
+        {"text": "False", "correct": false, "feedback": "Revisit how the minimum detectable effect depends on n (Section 12.7)."}
+      ],
+      "explanation": "Section 12.7: the minimum detectable effect is proportional to the standard error, which shrinks with 1/√n; quadrupling n halves it."
+    },
+    {
+      "id": "E30",
+      "type": "multi",
+      "concept": "Interpreting nonsignificant results (Section 12.7)",
+      "stem": "In the Davis regression with n = 29, the bedrooms coefficient has p = 0.773. Which conclusions are justified? (Select all that apply.)",
+      "options": [
+        {"text": "At the 5% level, the data give no significant evidence that bedrooms affect price, other regressors held fixed.", "correct": true, "feedback": "Correct: p = 0.773 is far above 0.05."},
+        {"text": "The test proves that adding a bedroom, holding the other regressors fixed, has no effect on price.", "correct": false, "feedback": "Revisit what a large p-value does and does not tell you (Section 12.7)."},
+        {"text": "Given these data, there is a 77.3% probability that bedrooms have no effect on price, other regressors held fixed.", "correct": false, "feedback": "Revisit what a large p-value does and does not tell you (Section 12.7)."},
+        {"text": "With only 29 houses and bedrooms correlated with size, a modest bedrooms effect could easily go undetected.", "correct": true, "feedback": "Correct: a small sample and correlated regressors give the test little power."}
+      ],
+      "explanation": "Section 12.7: failing to reject is not proof of no effect, and a p-value is not the probability that H₀ is true. With n = 29 and bedrooms correlated with size (r = 0.52), power is low, so the result is inconclusive."
+    }
+  ]
+}
