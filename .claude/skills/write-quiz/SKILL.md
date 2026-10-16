@@ -235,7 +235,7 @@ End. Do not commit. Do not modify anything else.
 - [`scripts/format_bank.py`](scripts/format_bank.py) — house layout + sequential ids
 - [`scripts/test_quiz.py`](scripts/test_quiz.py) — Playwright end-to-end tests + screenshots/PDFs
 - `scripts/build_quiz.py` (project) — validator, cue warnings, builder (`--check` to validate only)
-- `quizzes/_template.html` (project) — the quiz engine (KaTeX, certificate, report)
+- `quizzes/_template.html` (project) — the quiz engine (KaTeX, certificate, report, Google Translate globe button). Text the engine renders after load must call `retranslate()` (Google ignores later DOM updates otherwise); anything that must stay English (math, names, certificate) gets `class="notranslate" translate="no"`.
 
 ## Acceptance tests
 
